@@ -1,0 +1,6 @@
+[submodule "rocket-chip"]
+	path = rocket-chip
+	url = git@github.com:ucb-bar/rocket-chip.git
+[submodule "testchipip"]
+	path = testchipip
+	url = git@github.com:ucb-bar/testchipip.git

@@ -1,0 +1,40 @@
+lib_dir=$(base_dir)/lib
+
+ROCKETCHIP_DIR=$(base_dir)/rocket-chip
+EXTRA_PACKAGES=testchipip
+
+rocketchip_stamp=$(base_dir)/lib/rocketchip.stamp
+SBT ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
+extra_stamps = $(addprefix $(lib_dir)/,$(addsuffix .stamp,$(EXTRA_PACKAGES)))
+
+lookup_scala_srcs = $(shell find $(1)/ -iname "*.scala" 2> /dev/null)
+
+libs: $(rocketchip_stamp) $(extra_stamps)
+
+$(rocketchip_stamp): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR))
+	cd $(ROCKETCHIP_DIR) && $(SBT) pack
+	mkdir -p $(lib_dir)
+	cp $(ROCKETCHIP_DIR)/target/pack/lib/*.jar $(lib_dir)
+	touch $(rocketchip_stamp)
+
+-include $(base_dir)/Makefrag.pkgs
+
+$(base_dir)/Makefrag.pkgs: $(base_dir)/generate-pkg-mk.sh
+	bash $(base_dir)/generate-pkg-mk.sh $(EXTRA_PACKAGES) > $@
+
+FIRRTL_JAR ?= $(ROCKETCHIP_DIR)/firrtl/utils/bin/firrtl.jar
+FIRRTL ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -cp $(FIRRTL_JAR) firrtl.Driver
+
+$(FIRRTL_JAR): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR)/firrtl/src/main/scala)
+	$(MAKE) -C $(ROCKETCHIP_DIR)/firrtl SBT="$(SBT)" root_dir=$(ROCKETCHIP_DIR)/firrtl build-scala
+
+build_dir=$(sim_dir)/generated-src
+
+CHISEL_ARGS ?=
+
+$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).fir: $(rocketchip_stamp) $(extra_stamps) $(call lookup_scala_srcs,$(base_dir)/src/main/scala)
+	mkdir -p $(build_dir)
+	cd $(base_dir) && $(SBT) "run-main $(PROJECT).Generator $(CHISEL_ARGS) $(build_dir) $(PROJECT) $(MODEL) $(CFG_PROJECT) $(CONFIG)"
+
+$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).v: $(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).fir $(FIRRTL_JAR)
+	$(FIRRTL) -i $< -o $@ -X verilog
