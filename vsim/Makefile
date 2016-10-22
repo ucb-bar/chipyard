@@ -53,3 +53,8 @@ $(simv): $(sim_vsrcs) $(sim_csrcs)
 $(simv_debug) : $(sim_vsrcs) $(sim_csrcs)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	+define+DEBUG -debug_pp
+
+clean:
+	rm -rf csrc simv-* ucli.key vc_hdrs.h
+
+.PHONY: clean
