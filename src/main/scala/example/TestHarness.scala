@@ -5,9 +5,7 @@ import diplomacy.LazyModule
 import rocketchip._
 import testchipip._
 import chisel3._
-import cde.{Parameters, Field}
-
-case object BuildExampleTop extends Field[Parameters => ExampleTop]
+import cde.Parameters
 
 class TestHarness(implicit val p: Parameters) extends Module {
   val io = new Bundle {
@@ -16,7 +14,7 @@ class TestHarness(implicit val p: Parameters) extends Module {
 
   def buildTop(p: Parameters): ExampleTop = LazyModule(new ExampleTop(p))
 
-  val dut = p(BuildExampleTop)(p).module
+  val dut = buildTop(p).module
   val ser = Module(new SimSerialWrapper(p(SerialInterfaceWidth)))
 
   val nMemChannels = dut.io.mem_axi.size

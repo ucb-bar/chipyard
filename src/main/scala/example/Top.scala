@@ -2,7 +2,6 @@ package example
 
 import chisel3._
 import cde.Parameters
-import diplomacy.LazyModule
 import testchipip._
 import rocketchip._
 
@@ -22,15 +21,3 @@ class ExampleTopModule[+L <: ExampleTop, +B <: ExampleTopBundle](p: Parameters, 
   with PeripheryBootROMModule with PeripheryCoreplexLocalInterrupterModule
   with PeripheryMasterMemModule with PeripherySerialModule
   with HardwiredResetVector with DirectConnection with NoDebug
-
-class ExampleTopWithPWM(q: Parameters) extends ExampleTop(q)
-    with PeripheryPWM {
-  override lazy val module = Module(
-    new ExampleTopWithPWMModule(p, this, new ExampleTopWithPWMBundle(p)))
-}
-
-class ExampleTopWithPWMBundle(p: Parameters) extends ExampleTopBundle(p)
-  with PeripheryPWMBundle
-
-class ExampleTopWithPWMModule(p: Parameters, l: ExampleTopWithPWM, b: => ExampleTopWithPWMBundle)
-  extends ExampleTopModule(p, l, b) with PeripheryPWMModule
