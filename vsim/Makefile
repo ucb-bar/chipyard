@@ -18,7 +18,7 @@ include $(base_dir)/Makefrag
 
 sim_vsrcs = \
 	$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).v \
-	$(base_dir)/testchipip/vsrc/TestDriver.v \
+	$(base_dir)/rocket-chip/vsrc/TestDriver.v \
 	$(base_dir)/testchipip/vsrc/SimSerial.v
 
 sim_csrcs = \
