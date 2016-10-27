@@ -237,11 +237,42 @@ The only thing we need to add to the DefaultExampleConfig is the definition
 of the BuildPWM field. We just instantiate our PWMTL module, connect the
 TileLink port and pass out the `pwmout` signal.
 
+Now we can test that the PWM is working. The test program is in tests/pwm.c
+
+    #define PWM_PERIOD 0x2000
+    #define PWM_DUTY 0x2008
+    #define PWM_ENABLE 0x2010
+
+    static inline void write_reg(unsigned long addr, unsigned long data)
+    {
+            volatile unsigned long *ptr = (volatile unsigned long *) addr;
+            *ptr = data;
+    }
+
+    static inline unsigned long read_reg(unsigned long addr)
+    {
+            volatile unsigned long *ptr = (volatile unsigned long *) addr;
+            return *ptr;
+    }
+
+    int main(void)
+    {
+            write_reg(PWM_PERIOD, 20);
+            write_reg(PWM_DUTY, 5);
+            write_reg(PWM_ENABLE, 1);
+    }
+
+This just writes out to the registers we defined earlier. The base of the
+module's MMIO region is at 0x2000. This will be printed out in the address
+map portion when you generated the verilog code.
+
+Compiling this program with make produces a `pwm.riscv` executable.
+
 Now with all of that done, we can go ahead and run our simulation.
 
     cd verisim
-    make PROJECT=pwm CONFIG=PWMConfig
-    ./simulator-pwm-PWMConfig ../tests/
+    make PROJECT=pwm CONFIG=PWMTLConfig
+    ./simulator-pwm-PWMTLConfig ../tests/pwm.riscv
 
 ## Adding a DMA port
 
