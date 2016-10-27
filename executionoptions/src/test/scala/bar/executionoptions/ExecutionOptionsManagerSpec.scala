@@ -16,16 +16,38 @@ class ExecutionOptionsManagerSpec extends FreeSpec with Matchers {
       manager.topName should be ("dog")
       manager.commonOptions.topName should be ("dog")
     }
-    "The add method should put a new version of a given type the manager" in {
-      val manager = new ExecutionOptionsManager("test") { commonOptions = CommonOptions(topName = "dog") }
+    "The proper way to change an option in is to copy the existing sub-option with the desired new value" in {
+      val manager = new ExecutionOptionsManager("test") {
+        commonOptions = CommonOptions(targetDirName = "fox", topName = "dog")
+      }
       val initialCommon = manager.commonOptions
+      initialCommon.targetDirName should be ("fox")
       initialCommon.topName should be ("dog")
 
-      manager.commonOptions = CommonOptions(topName = "cat")
+      manager.commonOptions = manager.commonOptions.copy(topName = "cat")
 
       val afterCommon = manager.commonOptions
       afterCommon.topName should be ("cat")
+      afterCommon.targetDirName should be ("fox")
       initialCommon.topName should be ("dog")
+    }
+    "The following way of changing a manager should not be used, as it could alter other desired values" - {
+      "Note that the initial setting targetDirName is lost when using this method" in {
+        val manager = new ExecutionOptionsManager("test") {
+          commonOptions = CommonOptions(targetDirName = "fox", topName = "dog")
+        }
+        val initialCommon = manager.commonOptions
+        initialCommon.topName should be("dog")
+
+        manager.commonOptions = CommonOptions(topName = "cat")
+
+        val afterCommon = manager.commonOptions
+        initialCommon.topName should be("dog")
+        afterCommon.topName should be("cat")
+
+        // This is probably bad
+        afterCommon.targetDirName should not be "fox"
+      }
     }
   }
 }
