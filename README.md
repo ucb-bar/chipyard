@@ -71,10 +71,10 @@ for your device.
     package pwm
 
     import chisel3._
-    import cde.Parameters
+    import cde.{Parameters, Field}
     import uncore.tilelink._
 
-    class PWM(implicit p: Parameters) extends Module {
+    class PWMTL(implicit p: Parameters) extends Module {
       val io = new Bundle {
         val tl = new ClientUncachedTileLinkIO().flip
         val pwmout = Bool(OUTPUT)
@@ -131,19 +131,24 @@ For the PWM peripheral, this will just be the `pwmout` pin.
     }
 
 The module implementation trait is where we instantiate our PWM module and
-connect it to the rest of the SoC.
+connect it to the rest of the SoC. 
+
+    case object BuildPWM extends Field[(ClientUncachedTileLinkIO, Parameters) => Bool]
 
     trait PeripheryPWMModule extends HasPeripheryParameters {
       val pBus: TileLinkRecursiveInterconnect
       val io: PeripheryPWMBundle
 
-      val pwm = Module(new PWM()(outerMMIOParams))
-      pwm.io.tl <> pBus.port("pwm")
-      io.pwmout := pwm.io.pwmout
+      io.pwmout := p(BuildPWM)(pBus.port("pwm"), outerMMIOParams)
     }
 
 We just need to connect the MMIO TileLink port to the PWM module's TileLink port
 and connect the PWM module's `pwmout` pin to the `pwmout` pin going off-chip.
+We would like to do this in a configurable way so that we can swap out the
+PWM module if need be. To do this, we create a new Field for the Parameters
+object that produces a function taking in the Tilelink port and returning
+the pwmout as a Bool. We will define this function later in the configuration
+file.
 
 Note that we extend the HasPeripheryParameters trait. This provides us the
 `outerMMIOParams` parameter object, which gets passed in as the `p` parameters
@@ -217,10 +222,20 @@ This defines all the settings in the Parameters object.
 
     import cde.{Parameters, Config, CDEMatchError}
 
-    class PWMConfig extends Config(new example.DefaultExampleConfig)
+    class WithPWMTL extends Config(
+      (pname, site, here) => pname match {
+        case BuildPWM => (port: ClientUncachedTileLinkIO, p: Parameters) => {
+          val pwm = Module(new PWMTL()(p))
+          pwm.io.tl <> port
+          pwm.io.pwmout
+        }
+      })
 
-We aren't really changing anything, so we can just base it off of the
-DefaultExampleConfig.
+    class PWMTLConfig extends Config(new WithPWMTL ++ new example.DefaultExampleConfig)
+
+The only thing we need to add to the DefaultExampleConfig is the definition
+of the BuildPWM field. We just instantiate our PWMTL module, connect the
+TileLink port and pass out the `pwmout` signal.
 
 Now with all of that done, we can go ahead and run our simulation.
 
