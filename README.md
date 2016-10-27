@@ -352,3 +352,24 @@ route custom0 and custom1 instructions to it, we could do the following.
 
     class CustomAcceleratorConfig extends Config(
       new WithCustomAccelerator ++ new BaseConfig)
+
+## Adding a submodule
+
+While developing, you want to include Chisel code in a submodule so that it
+can be shared by different projects. To add a submodule to the project
+template, make sure that your project is organized as follows.
+
+    yourproject/
+        build.sbt
+        src/main/scala/
+            YourFile.scala
+
+Put this in a git repository and make it accessible. Then add it as a submodule
+to the project template.
+
+    git submodule add https://git-repository.com/yourproject.git
+
+Then add `yourproject` to the `EXTRA_PACKAGES` variable in the Makefrag.
+Now your project will be bundled into a jar file alongside the rocket-chip
+and testchipip libraries. You can then import the classes defined in the
+submodule in a new project.
