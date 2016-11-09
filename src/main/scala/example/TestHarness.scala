@@ -4,7 +4,7 @@ import util.GeneratorApp
 import diplomacy.LazyModule
 import rocketchip._
 import testchipip._
-import chisel3._
+import Chisel._
 import cde.Parameters
 
 class TestHarness(implicit val p: Parameters) extends Module {
