@@ -136,6 +136,7 @@ connect it to the rest of the SoC.
     case object BuildPWM extends Field[(ClientUncachedTileLinkIO, Parameters) => Bool]
 
     trait PeripheryPWMModule extends HasPeripheryParameters {
+      implicit val p: Parameters
       val pBus: TileLinkRecursiveInterconnect
       val io: PeripheryPWMBundle
 
