@@ -99,7 +99,7 @@ The full module code, with comments can be found in src/main/scala/pwm/PWM.scala
 After creating the module, we need to hook it up to our SoC. Rocketchip
 accomplishes this using the [cake pattern](http://www.cakesolutions.net/teamblogs/2011/12/19/cake-pattern-in-depth).
 This basically involves placing code inside traits. In RocketChip, there are
-three kinds of traits: a LazyModule trait, and IO bundle trait, and a module
+three kinds of traits: a LazyModule trait, IO bundle trait and a module
 implementation trait.
 
 The LazyModule trait runs setup code that must execute before all the hardware
