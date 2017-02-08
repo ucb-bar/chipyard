@@ -17,12 +17,12 @@ class PWMBase extends Module {
   })
 
   // The counter should count up until period is reached
-  val counter = Reg(UInt(width = 64))
+  val counter = Reg(UInt(64.W))
 
-  when (counter >= (io.period - UInt(1))) {
-    counter := UInt(0)
+  when (counter >= (io.period - 1.U)) {
+    counter := 0.U
   } .otherwise {
-    counter := counter + UInt(1)
+    counter := counter + 1.U
   }
 
   // If PWM is enabled, pwmout is high when counter < duty
@@ -37,11 +37,11 @@ class PWMTL(implicit p: Parameters) extends Module {
   })
 
   // How many clock cycles in a PWM cycle?
-  val period = Reg(UInt(width = 64))
+  val period = Reg(UInt(64.W))
   // For how many cycles should the clock be high?
-  val duty = Reg(UInt(width = 64))
+  val duty = Reg(UInt(64.W))
   // Is the PWM even running at all?
-  val enable = Reg(init = Bool(false))
+  val enable = Reg(init = false.B)
 
   val base = Module(new PWMBase)
   io.pwmout := base.io.pwmout
@@ -73,23 +73,23 @@ class PWMTL(implicit p: Parameters) extends Module {
   io.tl.grant.valid := acq.valid
   acq.ready := io.tl.grant.ready
   io.tl.grant.bits := Grant(
-    is_builtin_type = Bool(true),
+    is_builtin_type = true.B,
     g_type = acq.bits.getBuiltInGrantType(),
     client_xact_id = acq.bits.client_xact_id,
-    manager_xact_id = UInt(0),
+    manager_xact_id = 0.U,
     addr_beat = acq.bits.addr_beat,
     // For gets, map the index to the three registers
-    data = MuxLookup(index, UInt(0), Seq(
-      UInt(0) -> period,
-      UInt(1) -> duty,
-      UInt(2) -> enable)))
+    data = MuxLookup(index, 0.U, Seq(
+      0.U -> period,
+      1.U -> duty,
+      2.U -> enable)))
 
   // If this is a put, update the registers according to the index
   when (acq.fire() && acq.bits.hasData()) {
     switch (index) {
-      is (UInt(0)) { period := acq.bits.data }
-      is (UInt(1)) { duty   := acq.bits.data }
-      is (UInt(2)) { enable := acq.bits.data(0) }
+      is (0.U) { period := acq.bits.data }
+      is (1.U) { duty   := acq.bits.data }
+      is (2.U) { enable := acq.bits.data(0) }
     }
   }
 }
@@ -101,11 +101,11 @@ class PWMAXI(implicit p: Parameters) extends Module {
   })
 
   // How many clock cycles in a PWM cycle?
-  val period = Reg(UInt(width = 64))
+  val period = Reg(UInt(64.W))
   // For how many cycles should the clock be high?
-  val duty = Reg(UInt(width = 64))
+  val duty = Reg(UInt(64.W))
   // Is the PWM even running at all?
-  val enable = Reg(init = Bool(false))
+  val enable = Reg(init = false.B)
 
   val base = Module(new PWMBase)
   io.pwmout := base.io.pwmout
@@ -126,10 +126,10 @@ class PWMAXI(implicit p: Parameters) extends Module {
   ar.ready := io.axi.r.ready
   io.axi.r.bits := NastiReadDataChannel(
     id = ar.bits.id,
-    data = MuxLookup(read_index, UInt(0), Seq(
-      UInt(0) -> period,
-      UInt(1) -> duty,
-      UInt(2) -> enable)))
+    data = MuxLookup(read_index, 0.U, Seq(
+      0.U -> period,
+      1.U -> duty,
+      2.U -> enable)))
 
   io.axi.b.valid := aw.valid && w.valid
   aw.ready := io.axi.b.ready && w.valid
@@ -138,17 +138,17 @@ class PWMAXI(implicit p: Parameters) extends Module {
 
   when (io.axi.b.fire()) {
     switch (write_index) {
-      is (UInt(0)) { period := w.bits.data }
-      is (UInt(1)) { duty   := w.bits.data }
-      is (UInt(2)) { enable := w.bits.data(0) }
+      is (0.U) { period := w.bits.data }
+      is (1.U) { duty   := w.bits.data }
+      is (2.U) { enable := w.bits.data(0) }
     }
   }
 
   require(io.axi.w.bits.nastiXDataBits == 64)
 
-  assert(!io.axi.ar.valid || (io.axi.ar.bits.len === UInt(0) && io.axi.ar.bits.size === UInt(3)))
-  assert(!io.axi.aw.valid || (io.axi.aw.bits.len === UInt(0) && io.axi.aw.bits.size === UInt(3)))
-  assert(!io.axi.w.valid || PopCount(io.axi.w.bits.strb) === UInt(8))
+  assert(!io.axi.ar.valid || (io.axi.ar.bits.len === 0.U && io.axi.ar.bits.size === 3.U))
+  assert(!io.axi.aw.valid || (io.axi.aw.bits.len === 0.U && io.axi.aw.bits.size === 3.U))
+  assert(!io.axi.w.valid || PopCount(io.axi.w.bits.strb) === 8.U)
 }
 
 trait PeripheryPWM extends LazyModule {
