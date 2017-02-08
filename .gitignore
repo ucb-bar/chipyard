@@ -2,3 +2,5 @@
 target
 *.jar
 *.stamp
+/vsim
+/verisim
