@@ -4,13 +4,13 @@ import util.GeneratorApp
 import diplomacy.LazyModule
 import rocketchip._
 import testchipip._
-import Chisel._
+import chisel3._
 import cde.Parameters
 
 class TestHarness(implicit val p: Parameters) extends Module {
-  val io = new Bundle {
-    val success = Bool(OUTPUT)
-  }
+  val io = IO(new Bundle {
+    val success = Output(Bool())
+  })
 
   def buildTop(p: Parameters): ExampleTop = LazyModule(new ExampleTop(p))
 

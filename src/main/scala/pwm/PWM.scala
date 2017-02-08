@@ -9,12 +9,12 @@ import diplomacy._
 import rocketchip._
 
 class PWMBase extends Module {
-  val io = new Bundle {
-    val pwmout = Bool(OUTPUT)
-    val period = UInt(INPUT, 64)
-    val duty = UInt(INPUT, 64)
-    val enable = Bool(INPUT)
-  }
+  val io = IO(new Bundle {
+    val pwmout = Output(Bool())
+    val period = Input(UInt(64.W))
+    val duty = Input(UInt(64.W))
+    val enable = Input(Bool())
+  })
 
   // The counter should count up until period is reached
   val counter = Reg(UInt(width = 64))
@@ -31,10 +31,10 @@ class PWMBase extends Module {
 }
 
 class PWMTL(implicit p: Parameters) extends Module {
-  val io = new Bundle {
-    val pwmout = Bool(OUTPUT)
-    val tl = new ClientUncachedTileLinkIO().flip
-  }
+  val io = IO(new Bundle {
+    val pwmout = Output(Bool())
+    val tl = Flipped(new ClientUncachedTileLinkIO())
+  })
 
   // How many clock cycles in a PWM cycle?
   val period = Reg(UInt(width = 64))
@@ -95,10 +95,10 @@ class PWMTL(implicit p: Parameters) extends Module {
 }
 
 class PWMAXI(implicit p: Parameters) extends Module {
-  val io = new Bundle {
-    val pwmout = Bool(OUTPUT)
-    val axi = new NastiIO().flip
-  }
+  val io = IO(new Bundle {
+    val pwmout = Output(Bool())
+    val axi = Flipped(new NastiIO())
+  })
 
   // How many clock cycles in a PWM cycle?
   val period = Reg(UInt(width = 64))
@@ -158,7 +158,7 @@ trait PeripheryPWM extends LazyModule {
 }
 
 trait PeripheryPWMBundle {
-  val pwmout = Bool(OUTPUT)
+  val pwmout = Output(Bool())
 }
 
 case object BuildPWM extends Field[(ClientUncachedTileLinkIO, Parameters) => Bool]
