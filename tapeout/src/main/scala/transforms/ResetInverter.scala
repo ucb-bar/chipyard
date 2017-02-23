@@ -48,9 +48,9 @@ class ResetInverterTransform extends Transform {
 
   override def execute(state: CircuitState): CircuitState = {
     getMyAnnotations(state) match {
-      case Nil => CircuitState(state.circuit, LowForm)
+      case Nil => state
       case Seq(ResetInverterAnnotation(ModuleName(state.circuit.main, CircuitName(_)))) =>
-        CircuitState(ResetN.run(state.circuit), LowForm)
+        state.copy(circuit = ResetN.run(state.circuit))
       case annotations =>
         throw new Exception(s"There should be only one InvertReset annotation: got ${annotations.mkString(" -- ")}")
     }

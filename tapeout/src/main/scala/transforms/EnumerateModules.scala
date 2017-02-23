@@ -27,6 +27,6 @@ class EnumerateModules(enumerate: (Module) => Unit) extends Transform with PassB
   def passSeq = Seq(new EnumerateModulesPass(enumerate))
 
   def execute(state: CircuitState): CircuitState = {
-    CircuitState(runPasses(state.circuit), state.form)
+    state.copy(circuit = runPasses(state.circuit))
   }
 }

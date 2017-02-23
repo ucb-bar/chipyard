@@ -37,6 +37,6 @@ class RenameModulesAndInstances(rename: (String) => String) extends Transform wi
   def passSeq = Seq(new RenameModulesAndInstancesPass(rename))
 
   def execute(state: CircuitState): CircuitState = {
-    CircuitState(runPasses(state.circuit), state.form)
+    state.copy(circuit = runPasses(state.circuit))
   }
 }

@@ -21,6 +21,6 @@ class ReParentCircuit(newTopName: String) extends Transform with PassBased {
   def passSeq = Seq(new ReParentCircuitPass(newTopName))
 
   def execute(state: CircuitState): CircuitState = {
-    CircuitState(runPasses(state.circuit), state.form)
+    state.copy(circuit = runPasses(state.circuit))
   }
 }

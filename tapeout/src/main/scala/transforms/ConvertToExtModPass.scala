@@ -31,6 +31,6 @@ class ConvertToExtMod(classify: (Module) => Boolean) extends Transform with Pass
   def passSeq = Seq(new ConvertToExtModPass(classify))
 
   def execute(state: CircuitState): CircuitState = {
-    CircuitState(runPasses(state.circuit), state.form)
+    state.copy(circuit = runPasses(state.circuit))
   }
 }
