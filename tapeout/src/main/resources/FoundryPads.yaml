@@ -1,0 +1,113 @@
+# Pad types must be one of digital, analog, or supply; pad names must be unique!
+# This just shows you how you can template things with {{}}, if/else,  and the following parameters:
+# isInput: Boolean (each digital pad entry should be configurable between both input and output)
+# isHorizontal: Boolean (each pad entry should be configurable between both horizontal and vertical)
+# NOTE: Expects 1-bit in/out to be named in/out for digital; and 1-bit io for analog (supplies don't have ports)
+# Expects module name to be obtained from {{name}} which is derived from yaml name, tpe in the Firrtl pass
+# Pipe is used for stripping margins, but indentation is required before the pipe for the yaml reader to work
+---
+tpe: analog
+name: slow_foundry
+width: 0
+height: 0
+verilog: |
+  |// Foundry Analog Pad Example
+  |// Pad Orientation: {{#if isHorizontal}}Horizontal{{else}}Vertical{{/if}}
+  |// Call your instance PAD
+  |module {{name}}(
+  |  inout io
+  |);
+  |endmodule
+---
+tpe: analog
+name: fast_custom
+width: 0
+height: 0
+verilog: |
+  |// Custom Analog Pad Example
+  |// Pad Orientation: {{#if isHorizontal}}Horizontal{{else}}Vertical{{/if}}
+  |// Call your instance PAD
+  |module {{name}}(
+  |  inout io
+  |);
+  |endmodule
+---
+tpe: digital
+name: from_tristate_foundry
+width: 0
+height: 0
+verilog: |
+  |// Digital Pad Example
+  |// Signal Direction: {{#if isInput}}Input{{else}}Output{{/if}}
+  |// Pad Orientation: {{#if isHorizontal}}Horizontal{{else}}Vertical{{/if}}
+  |// Call your instance PAD
+  |module {{name}}(
+  |  input in,
+  |  output reg out
+  |);
+  |  // Where you would normally dump your pad instance
+  |  always @* begin
+  |    out = in;
+  |  end
+  |endmodule
+---
+tpe: digital
+name: fake_digital
+width: 0
+height: 0
+verilog: |
+  |// (Fake/Unused) Digital Pad Example
+  |// Signal Direction: {{#if isInput}}Input{{else}}Output{{/if}}
+  |// Pad Orientation: {{#if isHorizontal}}Horizontal{{else}}Vertical{{/if}}
+  |// Call your instance PAD
+  |module {{name}}(
+  |  input in,
+  |  output reg out
+  |);
+  |  // Where you would normally dump your pad instance
+  |  always @* begin
+  |    out = in;
+  |  end
+  |endmodule
+---
+tpe: supply
+name: vdd
+width: 0
+height: 0
+supplySetNum: 1
+verilog: |
+  |// VDD Pad Example (No IO)
+  |// Can group some number together as required by the foundry
+  |// Pad Orientation: {{#if isHorizontal}}Horizontal{{else}}Vertical{{/if}}
+  |// Call your instance array PAD[0:0], PAD[2:0], etc.
+  |module {{name}}(
+  |);
+  |endmodule
+---
+tpe: supply
+name: vss
+width: 0
+height: 0
+supplySetNum: 2
+verilog: |
+  |// VSS Pad Example (No IO)
+  |// Can group some number together as required by the foundry
+  |// Pad Orientation: {{#if isHorizontal}}Horizontal{{else}}Vertical{{/if}}
+  |// Call your instance array PAD[0:0], PAD[2:0], etc.
+  |module {{name}}(
+  |);
+  |endmodule
+---
+tpe: supply
+name: avss
+width: 0
+height: 0
+supplySetNum: 1
+verilog: |
+  |// Analog VSS Pad Example (No IO)
+  |// Can group some number together as required by the foundry
+  |// Pad Orientation: {{#if isHorizontal}}Horizontal{{else}}Vertical{{/if}}
+  |// Call your instance array PAD[0:0], PAD[2:0], etc.
+  |module {{name}}(
+  |);
+  |endmodule

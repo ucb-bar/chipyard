@@ -6,7 +6,7 @@ lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
   version := "0.1-SNAPSHOT",
   scalaVersion := "2.11.8",
-  scalacOptions := Seq("-deprecation", "-feature"),
+  scalacOptions := Seq("-deprecation", "-feature", "-language:reflectiveCalls"),
   libraryDependencies ++= commonDependencies
 )
 
@@ -22,3 +22,4 @@ lazy val tapeout = (project in file("tapeout"))
       dep: String => "edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", defaultVersions(dep))
     }
   )
+  .settings(scalacOptions in Test ++= Seq("-language:reflectiveCalls"))

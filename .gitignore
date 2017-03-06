@@ -1,8 +1,11 @@
-### local stuff
+### Local stuff
+proprietary/
 src/main/scala/dsptools/sandbox.sc
 test_run_dir/
 *.fir
+*.f
 *.anno
+
 ### XilinxISE template
 # intermediate build files
 *.bgn
