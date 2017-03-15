@@ -21,7 +21,7 @@ class ClkSrcTransform extends Transform with SimpleRun {
           InferTypes,
           new CreateClkConstraints(clkModAnnos, clkPortAnnos, targetDir)
         )
-        CircuitState(runPasses(state.circuit, passSeq), LowForm)
+        state.copy(state = runPasses(state.circuit, passSeq), outputForm = outputForm)
     }
   }
 }
