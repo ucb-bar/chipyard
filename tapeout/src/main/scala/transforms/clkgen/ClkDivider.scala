@@ -2,7 +2,6 @@ package barstools.tapeout.transforms.clkgen
 
 import chisel3.experimental.{withClockAndReset, withClock, withReset}
 import chisel3._
-import chisel3.util.RegInit
 import barstools.tapeout.transforms._
 import chisel3.util.HasBlackBoxInline
 
