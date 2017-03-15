@@ -7,7 +7,7 @@ import firrtl.ir._
 import firrtl.passes.Pass
 
 // This doesn't rename ExtModules under the assumption that they're some
-// Verilog black box and therefor can't be renamed.  Since the point is to
+// Verilog black box and therefore can't be renamed.  Since the point is to
 // allow FIRRTL to be linked together using "cat" and ExtModules don't get
 // emitted, this should be safe.
 class RenameModulesAndInstancesPass(rename: (String) => String) extends Pass {
