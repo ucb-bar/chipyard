@@ -89,7 +89,7 @@ class CreateClkConstraints(
     }).toSet
 
     val inlineTransform = new InlineInstances
-    val inlinedCircuit = inlineTransform.run(onlyClockCircuit, modulesToInline, Set()).circuit
+    val inlinedCircuit = inlineTransform.run(onlyClockCircuit, modulesToInline, Set(), None).circuit
 
     val topModule = inlinedCircuit.modules.find(_.name == top).getOrElse(throwInternalError)
 

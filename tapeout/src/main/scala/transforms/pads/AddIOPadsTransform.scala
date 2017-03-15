@@ -16,7 +16,7 @@ class AddIOPadsTransform extends Transform with SimpleRun {
     val collectedAnnos = HasPadAnnotation(getMyAnnotations(state))
     collectedAnnos match {
       // Transform not used
-      case None => CircuitState(state.circuit, LowForm)
+      case None => state
       case Some(x) => 
         val techLoc = (new TechnologyLocation).get(state)
         // Get foundry pad templates from yaml
@@ -45,11 +45,10 @@ class AddIOPadsTransform extends Transform with SimpleRun {
         )
         // Expects BlackBox helper to be run after to inline pad Verilog!
         val prevAnnos = state.annotations.getOrElse(AnnotationMap(Seq.empty)).annotations
-        val cs = CircuitState(
-          runPasses(circuitWithBBs, passSeq), 
-          LowForm, 
-          Some(AnnotationMap(prevAnnos ++ bbAnnotations))
-        )
+        val cs = state.copy(
+          circuit = runPasses(circuitWithBBs, passSeq), 
+          annotations = Some(AnnotationMap(prevAnnos ++ bbAnnotations)))
+       
         // TODO: *.f file is overwritten on subsequent executions, but it doesn't seem to be used anywhere?
         (new firrtl.transforms.BlackBoxSourceHelper).execute(cs)
     }
