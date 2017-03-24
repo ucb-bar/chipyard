@@ -12,6 +12,7 @@ lookup_scala_srcs = $(shell find $(1)/ -iname "*.scala" 2> /dev/null)
 libs: $(rocketchip_stamp) $(extra_stamps)
 
 $(rocketchip_stamp): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR))
+	cd $(ROCKETCHIP_DIR)/firrtl && sbt publish-local
 	cd $(ROCKETCHIP_DIR) && $(SBT) pack
 	mkdir -p $(lib_dir)
 	cp $(ROCKETCHIP_DIR)/target/pack/lib/*.jar $(lib_dir)
