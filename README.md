@@ -33,7 +33,19 @@ the following steps are necessary.
 
 To compile the example design, run make in the "verisim" directory.
 This will elaborate the DefaultExampleConfig in the example project.
-It will produce an executable called simulator-example-DefaultExampleConfig.
+
+Note that due to mismanaged Chisel/Firrtl dependencies in the upstream
+code, you may see an error like this:
+
+    [error] (coreMacros/*:update) sbt.ResolveException: unresolved dependency: edu.berkeley.cs#firrtl_2.11;1.1-SNAPSHOT: not found
+
+You can work around this error by first building Firrtl and publishing
+the jar locally:
+
+    cd rocket-chip/firrtl; sbt publish-local
+
+Once these issues are resolved, an executable called
+simulator-example-DefaultExampleConfig will be produced.
 You can then use this executable to run any compatible RV64 code. For instance,
 to run one of the riscv-tools assembly tests.
 
