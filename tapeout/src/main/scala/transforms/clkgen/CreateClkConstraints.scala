@@ -24,7 +24,7 @@ class CreateClkConstraints(
   // TODO: Are annotations only valid on ports?
   
   def run(c: Circuit): Circuit = {
-
+/*
     val top = c.main
     
     // Remove everything from the circuit, unless it has a clock type
@@ -146,6 +146,7 @@ class CreateClkConstraints(
     clkSrcs.foreach { x => println(s"gen clk: $x")}
     clkModSinkToSourceMap.foreach { x => println(s"sink -> src: $x")}
     clkModSourceToSinkMap.foreach { x => println(s"src -> dependent sinks: $x")}
+*/
     c
   }
 }
