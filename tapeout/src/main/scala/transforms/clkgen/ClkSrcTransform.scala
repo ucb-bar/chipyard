@@ -24,7 +24,7 @@ class ClkSrcTransform extends Transform with SeqTransformBased {
         val targetDir = barstools.tapeout.transforms.GetTargetDir(state)
       
         transformList ++= Seq(
-          InferTypes,
+          // InferTypes,
           new CreateClkConstraints(clkModAnnos, clkPortAnnos, targetDir)
         )
         val ret = runTransforms(state)
