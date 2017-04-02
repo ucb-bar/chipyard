@@ -110,6 +110,7 @@ sealed trait GenerateTopAndHarnessApp extends App with LazyLogging {
     val post = if (top) { Seq(
       new passes.memlib.InferReadWrite(),
       new passes.memlib.ReplSeqMem(),
+      new AnalogRenamer(),
       new passes.clocklist.ClockListTransform()
     ) } else Seq()
 
@@ -151,12 +152,28 @@ sealed trait GenerateTopAndHarnessApp extends App with LazyLogging {
     Seq(
       new ConvertToExtMod((m) => m.name == synTop.get),
       new RemoveUnusedModules,
-      new RenameModulesAndInstances((m) => AllModules.rename(m))
+      new RenameModulesAndInstances((m) => AllModules.rename(m)),
+      new AnalogRenamer()
     )
   }
 
   // always the same for now
-  private def getSecondPhaseAnnotations: AnnotationMap = AnnotationMap(Seq.empty)
+  private def getSecondPhaseAnnotations: AnnotationMap = {
+    //Load annotations from file
+    val annotationArray = annoFile match {
+      case None => Array[Annotation]()
+      case Some(fileName) => {
+        val annotations = new File(fileName)
+        if(annotations.exists) {
+          val annotationsYaml = io.Source.fromFile(annotations).getLines().mkString("\n").parseYaml
+          annotationsYaml.convertTo[Array[Annotation]]
+        } else {
+          Array[Annotation]()
+        }
+      }
+    }
+    AnnotationMap(annotationArray)
+  }
 
   // Top Generation
   protected def firstPhase(top: Boolean, harness: Boolean): Unit = {
