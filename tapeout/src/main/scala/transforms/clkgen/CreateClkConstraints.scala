@@ -21,8 +21,6 @@ class CreateClkConstraints(
     clkPortAnnos: Seq[TargetClkPortAnnoF],
     targetDir: String) extends Pass {
 
-  def name = "Create clock constraints"
-
   // TODO: Are annotations only valid on ports?
   
   def run(c: Circuit): Circuit = {

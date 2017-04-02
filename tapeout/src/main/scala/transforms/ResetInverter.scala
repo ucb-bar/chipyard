@@ -18,7 +18,6 @@ object ResetInverterAnnotation {
 }
 
 object ResetN extends Pass {
-  def name: String = "ResetN"
   private val Bool = UIntType(IntWidth(1))
   // Only works on Modules with a Bool port named reset
   def invertReset(mod: Module): Module = {

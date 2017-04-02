@@ -9,7 +9,6 @@ import firrtl.passes.Pass
 // Removes all the unused modules in a circuit by recursing through every
 // instance (starting at the main module)
 class RemoveUnusedModulesPass extends Pass {
-  def name = "Remove Unused Modules"
 
   def run(c: Circuit): Circuit = {
     val modulesByName = c.modules.map{
@@ -48,12 +47,13 @@ class RemoveUnusedModulesPass extends Pass {
   }
 }
 
-class RemoveUnusedModules extends Transform with PassBased {
+class RemoveUnusedModules extends Transform with SeqTransformBased {
   def inputForm = MidForm
   def outputForm = MidForm
-  def passSeq = Seq(new RemoveUnusedModulesPass)
+  def transforms = Seq(new RemoveUnusedModulesPass)
 
   def execute(state: CircuitState): CircuitState = {
-    state.copy(circuit = runPasses(state.circuit))
+    val ret = runTransforms(state)
+    CircuitState(ret.circuit, outputForm, ret.annotations, ret.renames)
   }
 }

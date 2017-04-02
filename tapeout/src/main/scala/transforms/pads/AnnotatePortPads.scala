@@ -3,7 +3,6 @@ package barstools.tapeout.transforms.pads
 import firrtl.annotations._
 import firrtl._
 import firrtl.ir._
-import firrtl.passes._
 import barstools.tapeout.transforms._
 
 // TODO: Make some trait with commonalities between IO Pad + supply pad

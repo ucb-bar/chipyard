@@ -11,7 +11,6 @@ import firrtl.passes.Pass
 // allow FIRRTL to be linked together using "cat" and ExtModules don't get
 // emitted, this should be safe.
 class RenameModulesAndInstancesPass(rename: (String) => String) extends Pass {
-  def name = "Rename Modules and Instances"
 
   def renameInstances(body: Statement): Statement = {
     body match {
@@ -31,12 +30,13 @@ class RenameModulesAndInstancesPass(rename: (String) => String) extends Pass {
   }
 }
 
-class RenameModulesAndInstances(rename: (String) => String) extends Transform with PassBased {
+class RenameModulesAndInstances(rename: (String) => String) extends Transform with SeqTransformBased {
   def inputForm = LowForm
   def outputForm = LowForm
-  def passSeq = Seq(new RenameModulesAndInstancesPass(rename))
+  def transforms = Seq(new RenameModulesAndInstancesPass(rename))
 
   def execute(state: CircuitState): CircuitState = {
-    state.copy(circuit = runPasses(state.circuit))
+    val ret = runTransforms(state)
+    CircuitState(ret.circuit, outputForm, ret.annotations, ret.renames)
   }
 }

@@ -3,6 +3,7 @@
 package barstools.tapeout.transforms
 
 import firrtl._
+import firrtl.annotations.CircuitName
 import firrtl.ir._
 import firrtl.passes.Pass
 
@@ -10,8 +11,6 @@ import firrtl.passes.Pass
 // that function returns "true" then the module is converted into an ExtModule,
 // otherwise it's left alone.
 class ConvertToExtModPass(classify: (Module) => Boolean) extends Pass {
-  def name = "Convert to External Modules"
-
   def run(c: Circuit): Circuit = {
     val modulesx = c.modules.map {
       case m: ExtModule => m
@@ -25,12 +24,13 @@ class ConvertToExtModPass(classify: (Module) => Boolean) extends Pass {
     Circuit(c.info, modulesx, c.main)
   }
 }
-class ConvertToExtMod(classify: (Module) => Boolean) extends Transform with PassBased {
+class ConvertToExtMod(classify: (Module) => Boolean) extends Transform with SeqTransformBased {
   def inputForm = MidForm
   def outputForm = MidForm
-  def passSeq = Seq(new ConvertToExtModPass(classify))
+  def transforms = Seq(new ConvertToExtModPass(classify))
 
   def execute(state: CircuitState): CircuitState = {
-    state.copy(circuit = runPasses(state.circuit))
+    val ret = runTransforms(state)
+    CircuitState(ret.circuit, outputForm, ret.annotations, ret.renames)
   }
 }

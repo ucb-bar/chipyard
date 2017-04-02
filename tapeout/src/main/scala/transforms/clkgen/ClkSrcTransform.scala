@@ -1,28 +1,34 @@
+// See LICENSE for license details.
+
 package barstools.tapeout.transforms.clkgen
 
 import firrtl._
-import firrtl.annotations._
 import firrtl.passes._
-import firrtl.ir._
 
-class ClkSrcTransform extends Transform with SimpleRun {
+import scala.collection.mutable
+
+class ClkSrcTransform extends Transform with SeqTransformBased {
 
   override def inputForm: CircuitForm = LowForm
   override def outputForm: CircuitForm = LowForm
+
+  val transformList = new mutable.ArrayBuffer[Transform]
+  def transforms = transformList
 
   override def execute(state: CircuitState): CircuitState = {
     val collectedAnnos = HasClkAnnotation(getMyAnnotations(state))
     collectedAnnos match {
       // Transform not used
       case None => CircuitState(state.circuit, LowForm)
-      case Some((clkModAnnos, clkPortAnnos)) => 
+      case Some((clkModAnnos, clkPortAnnos)) =>
         val targetDir = barstools.tapeout.transforms.GetTargetDir(state)
-        val passSeq = Seq(
-          // TODO: Enable when it's legal?
-          // InferTypes,
+      
+        transformList ++= Seq(
+          InferTypes,
           new CreateClkConstraints(clkModAnnos, clkPortAnnos, targetDir)
         )
-        state.copy(circuit = runPasses(state.circuit, passSeq))
+        val ret = runTransforms(state)
+        CircuitState(ret.circuit, outputForm, ret.annotations, ret.renames)
     }
   }
 }

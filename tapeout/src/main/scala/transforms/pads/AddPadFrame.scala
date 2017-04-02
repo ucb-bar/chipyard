@@ -5,7 +5,7 @@ package barstools.tapeout.transforms.pads
 import firrtl.annotations._
 import firrtl.ir._
 import firrtl._
-import firrtl.passes._
+import firrtl.passes.Pass
 
 // Analog is like UInt, SInt; it's not a direction (which is kind of weird)
 // WARNING: Analog type is associated with Verilog InOut! i.e. even if digital pads are tri-statable, b/c tristate
@@ -18,8 +18,6 @@ class AddPadFrame(
     topInternalName: String, 
     ioPads: Seq[PortIOPad], 
     supplyPads: Seq[TopSupplyPad]) extends Pass {
-
-  def name: String = "Add Padframe"
 
   def run(c: Circuit): Circuit = {
     // New modules consist of old modules (with top renamed to internal) + padFrame + newTop
