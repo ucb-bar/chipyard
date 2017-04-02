@@ -117,7 +117,7 @@ class CreateClkConstraints(
         // sources of sinks are generated clks or top level clk inputs
         if (clkSrcsFlip.contains(sourceAbsPath)) clkSrcsFlip(sourceAbsPath)
         else if (topClksFlip.contains(sourceAbsPath)) topClksFlip(sourceAbsPath)
-        else throw new Exception(s"Absolute path of clk source for $sinkId not found!")
+        else throw new Exception(s"Absolute path $sourceAbsPath of clk source for $sinkId not found!")
       }
       sinkId -> sourceId
     }
@@ -131,7 +131,8 @@ class CreateClkConstraints(
             clkPortAnnos.find(x => 
               // TODO: Not sufficiently general for output clks? Might have forgotten to label a clk module...
               LowerName(x.target.name) == n && x.target.module.name == mod.name).getOrElse(
-              throw new Exception("All top module input clks/clk module output clocks must be sinks/sources!"))
+              throw new Exception(
+                s"All top module input clks/clk module output clocks must be sinks/sources! $n not annotated!"))
           case _ =>
         }
     }

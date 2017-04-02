@@ -18,7 +18,8 @@ class ClkSrcTransform extends Transform with SimpleRun {
       case Some((clkModAnnos, clkPortAnnos)) => 
         val targetDir = barstools.tapeout.transforms.GetTargetDir(state)
         val passSeq = Seq(
-          InferTypes,
+          // TODO: Enable when it's legal?
+          // InferTypes,
           new CreateClkConstraints(clkModAnnos, clkPortAnnos, targetDir)
         )
         state.copy(circuit = runPasses(state.circuit, passSeq))

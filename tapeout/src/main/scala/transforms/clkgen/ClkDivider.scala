@@ -72,6 +72,9 @@ class SEClkDivider(divBy: Int, phases: Seq[Int], analogFile: String = "", syncRe
     extends Module with IsClkModule {
 
   require(phases.distinct.length == phases.length, "Phases should be distinct!")
+  phases foreach { p => 
+    require(p < divBy, "Phases must be < divBy")
+  }
 
   val io = IO(new SEClkDividerIO(phases))
 
