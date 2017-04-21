@@ -1,7 +1,7 @@
 package example
 
-import cde.{Parameters, Config, CDEMatchError}
+import config.{Parameters, Config}
 import testchipip.WithSerialAdapter
 
 class DefaultExampleConfig extends Config(
-  new WithSerialAdapter ++ new rocketchip.BaseConfig)
+  new WithSerialAdapter ++ new rocketchip.DefaultConfig)
