@@ -7,10 +7,13 @@ OBJDUMP=riscv64-unknown-elf-objdump
 all: $(bootrom_img)
 
 %.img: %.elf
-	$(OBJCOPY) -O binary --change-addresses=-0x1000 --only-section .text $< $@
+	$(OBJCOPY) -O binary --change-addresses=-0x10000 $< $@
 
 %.elf: %.S linker.ld
 	$(GCC) -Tlinker.ld $< -nostdlib -static -o $@
 
 %.dump: %.elf
 	$(OBJDUMP) -d $< > $@
+
+clean:
+	rm -f *.elf *.dump *.img

@@ -30,9 +30,11 @@ $(FIRRTL_JAR): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR)/firrtl/src/main/scala
 
 build_dir=$(sim_dir)/generated-src
 
+bootrom_img = $(base_dir)/bootrom/bootrom.img
+
 CHISEL_ARGS ?=
 
-$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).fir: $(rocketchip_stamp) $(extra_stamps) $(call lookup_scala_srcs,$(base_dir)/src/main/scala)
+$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).fir: $(rocketchip_stamp) $(extra_stamps) $(call lookup_scala_srcs,$(base_dir)/src/main/scala) $(bootrom_img)
 	mkdir -p $(build_dir)
 	cd $(base_dir) && $(SBT) "run-main $(PROJECT).Generator $(CHISEL_ARGS) $(build_dir) $(PROJECT) $(MODEL) $(CFG_PROJECT) $(CONFIG)"
 

@@ -10,9 +10,9 @@ class ExampleTop(implicit p: Parameters) extends BaseTop()(p)
     with PeripheryBootROM
     with PeripheryZero
     with PeripheryCounter
-    with PeripheryDebug
     with HardwiredResetVector
     with RocketPlexMaster
+    with NoDebug
     with PeripherySerial {
   override lazy val module = new ExampleTopModule(this, () => new ExampleTopBundle(this))
 }
@@ -22,7 +22,6 @@ class ExampleTopBundle[+L <: ExampleTop](l: L) extends BaseTopBundle(l)
     with PeripheryBootROMBundle
     with PeripheryZeroBundle
     with PeripheryCounterBundle
-    with PeripheryDebugBundle
     with HardwiredResetVectorBundle
     with RocketPlexMasterBundle
     with PeripherySerialBundle
@@ -33,7 +32,7 @@ class ExampleTopModule[+L <: ExampleTop, +B <: ExampleTopBundle[L]](l: L, b: () 
     with PeripheryBootROMModule
     with PeripheryZeroModule
     with PeripheryCounterModule
-    with PeripheryDebugModule
     with HardwiredResetVectorModule
     with RocketPlexMasterModule
+    with NoDebugModule
     with PeripherySerialModule

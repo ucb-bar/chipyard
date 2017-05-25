@@ -5,16 +5,17 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <limits.h>
+#include <sys/signal.h>
 #include "util.h"
 
 #define SYS_write 64
-#define SYS_exit 93
-#define SYS_stats 1234
+
+#undef strcmp
 
 extern volatile uint64_t tohost;
 extern volatile uint64_t fromhost;
 
-static uintptr_t handle_frontend_syscall(uintptr_t which, uint64_t arg0, uint64_t arg1, uint64_t arg2)
+static uintptr_t syscall(uintptr_t which, uint64_t arg0, uint64_t arg1, uint64_t arg2)
 {
   volatile uint64_t magic_mem[8] __attribute__((aligned(64)));
   magic_mem[0] = which;
@@ -36,7 +37,7 @@ static uintptr_t handle_frontend_syscall(uintptr_t which, uint64_t arg0, uint64_
 static uintptr_t counters[NUM_COUNTERS];
 static char* counter_names[NUM_COUNTERS];
 
-static int handle_stats(int enable)
+void setStats(int enable)
 {
   int i = 0;
 #define READ_CTR(name) do { \
@@ -50,7 +51,6 @@ static int handle_stats(int enable)
   READ_CTR(minstret);
 
 #undef READ_CTR
-  return 0;
 }
 
 void __attribute__((noreturn)) tohost_exit(uintptr_t code)
@@ -59,39 +59,19 @@ void __attribute__((noreturn)) tohost_exit(uintptr_t code)
   while (1);
 }
 
-uintptr_t handle_trap(uintptr_t cause, uintptr_t epc, uintptr_t regs[32])
+uintptr_t __attribute__((weak)) handle_trap(uintptr_t cause, uintptr_t epc, uintptr_t regs[32])
 {
-  if (cause != CAUSE_MACHINE_ECALL)
-    tohost_exit(1337);
-  else if (regs[17] == SYS_exit)
-    tohost_exit(regs[10]);
-  else if (regs[17] == SYS_stats)
-    regs[10] = handle_stats(regs[10]);
-  else
-    regs[10] = handle_frontend_syscall(regs[17], regs[10], regs[11], regs[12]);
-
-  return epc + ((*(unsigned short*)epc & 3) == 3 ? 4 : 2);
-}
-
-static uintptr_t syscall(uintptr_t num, uintptr_t arg0, uintptr_t arg1, uintptr_t arg2)
-{
-  register uintptr_t a7 asm("a7") = num;
-  register uintptr_t a0 asm("a0") = arg0;
-  register uintptr_t a1 asm("a1") = arg1;
-  register uintptr_t a2 asm("a2") = arg2;
-  asm volatile ("scall" : "+r"(a0) : "r"(a1), "r"(a2), "r"(a7));
-  return a0;
+  tohost_exit(1337);
 }
 
 void exit(int code)
 {
-  syscall(SYS_exit, code, 0, 0);
-  while (1);
+  tohost_exit(code);
 }
 
-void setStats(int enable)
+void abort()
 {
-  syscall(SYS_stats, enable, 0, 0);
+  exit(128 + SIGABRT);
 }
 
 void printstr(const char* s)
