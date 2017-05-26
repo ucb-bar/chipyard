@@ -10,8 +10,8 @@ RISC-V SoC with MMIO-mapped peripherals, DMA, and custom accelerators.
 
 After cloning this repo, you will need to initialize all of the submodules
 
-    git clone https://github.com/ucb-bar/project-template.git
-    cd project-template
+    git clone https://github.com/flamederwolf/acceptable-riscv.git
+    cd acceptable-riscv
     git submodule update --init --recursive
 
 ### Building the tools
