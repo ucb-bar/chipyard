@@ -12,7 +12,7 @@ dumps: $(addsuffix .dump,$(PROGRAMS))
 %.o: %.S
 	$(GCC) $(CFLAGS) -D__ASSEMBLY__=1 -c $< -o $@
 
-%.o: %.c
+%.o: %.c mmio.h
 	$(GCC) $(CFLAGS) -c $< -o $@
 
 %.riscv: %.o crt.o syscalls.o

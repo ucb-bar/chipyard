@@ -2,17 +2,7 @@
 #define PWM_DUTY 0x2004
 #define PWM_ENABLE 0x2008
 
-static inline void write_reg(unsigned long addr, unsigned int data)
-{
-	volatile unsigned int *ptr = (volatile unsigned int *) addr;
-	*ptr = data;
-}
-
-static inline unsigned long read_reg(unsigned long addr)
-{
-	volatile unsigned int *ptr = (volatile unsigned int *) addr;
-	return *ptr;
-}
+#include "mmio.h"
 
 int main(void)
 {
