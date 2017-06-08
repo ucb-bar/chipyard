@@ -10,6 +10,8 @@ _start:
   sw zero, 0(a0) // clear the interrupt
   li a0, DRAM_BASE // program reset vector
   csrw mepc, a0 // return from interrupt to start of user program
+  csrr a0, mhartid // hartid for next level bootloader
+  la a1, _dtb // dtb address for next level bootloader
   mret
 
 .section .text.hang, "ax", @progbits
@@ -26,3 +28,5 @@ _hang:
 wfi_loop:
   wfi
   j wfi_loop
+
+_dtb:
