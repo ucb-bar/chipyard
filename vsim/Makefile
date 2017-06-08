@@ -57,6 +57,6 @@ $(simv_debug) : $(sim_vsrcs) $(sim_csrcs)
 	+define+DEBUG -debug_pp
 
 clean:
-	rm -rf csrc simv-* ucli.key vc_hdrs.h
+	rm -rf generated-src csrc simv-* ucli.key vc_hdrs.h
 
 .PHONY: clean
