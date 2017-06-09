@@ -4,6 +4,18 @@ This is a starter template for your custom RISC-V project. It will allow you
 to leverage the Chisel HDL and RocketChip SoC generator to produce a
 RISC-V SoC with MMIO-mapped peripherals, DMA, and custom accelerators.
 
+# Need experience:
+
+Gnu/Linux
+Bash
+Makefile
+Gcc
+Debuging
+C++(С)
+Java
+Scala
+Chisel3
+
 ## Getting started
 
 ### Checking out the sources
