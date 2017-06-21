@@ -76,9 +76,8 @@ class PWMTL(c: PWMParams)(implicit p: Parameters)
       new TLRegBundle(c, _) with PWMTLBundle)(
       new TLRegModule(c, _, _) with PWMTLModule)
 
-trait PeripheryPWM extends LazyModule with HasPeripheryParameters {
+trait HasPeripheryPWM extends HasSystemNetworks {
   implicit val p: Parameters
-  val peripheryBus: TLXbar
 
   private val address = 0x2000
 
@@ -89,14 +88,11 @@ trait PeripheryPWM extends LazyModule with HasPeripheryParameters {
     peripheryBusConfig.beatBytes, cacheBlockBytes)(peripheryBus.node)
 }
 
-trait PeripheryPWMBundle {
-  val pwmout = Output(Bool())
-}
-
-trait PeripheryPWMModule extends HasPeripheryParameters {
+trait HasPeripheryPWMModuleImp extends LazyMultiIOModuleImp {
   implicit val p: Parameters
-  val io: PeripheryPWMBundle
-  val outer: PeripheryPWM
+  val outer: HasPeripheryPWM
 
-  io.pwmout := outer.pwm.module.io.pwmout
+  val pwmout = IO(Output(Bool()))
+
+  pwmout := outer.pwm.module.io.pwmout
 }
