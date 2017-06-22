@@ -3,7 +3,7 @@ OBJDUMP=riscv64-unknown-elf-objdump
 CFLAGS=-mcmodel=medany -std=gnu99 -O2 -fno-common -fno-builtin-printf
 LDFLAGS=-static -nostdlib -nostartfiles -lgcc
 
-PROGRAMS = pwm blkdev
+PROGRAMS = pwm blkdev accum charcount
 
 default: $(addsuffix .riscv,$(PROGRAMS))
 

@@ -331,9 +331,14 @@ the accelerator can use to distinguish different instructions from each other.
 
 ### Creating an accelerator
 
-RoCC accelerators should extends the RoCC class.
+RoCC accelerators are lazy modules that extend the LazyRoCC class.
+Their implementation should extends the LazyRoCCModule class.
 
-    class CustomAccelerator(implicit p: Parameters) extends RoCC()(p) {
+    class CustomAccelerator(implicit p: Parameters) extends LazyRoCC {
+      override lazy val module = new CustomAcceleratorModule(this)
+    }
+
+    class CustomAcceleratorModule(outer: CustomAccelerator) extends LazyRoCCModule(outer) {
       val cmd = Queue(io.cmd)
       // The parts of the command are as follows
       // inst - the parts of the instruction itself
@@ -350,13 +355,19 @@ RoCC accelerators should extends the RoCC class.
       ...
     }
 
-The other interfaces available to the accelerator are `mem`, which provides
-access to the L1 cache, `ptw` which provides access to the page-table walker,
-`autl` which provides shared access to the L2 alongside the ICache refill,
-and `utl` which provides dedicated access to the L2.
+The LazyRoCC class contains two TLOutputNode instances, `atlNode` and `tlNode`.
+The former connects into a tile-local arbiter along with the backside of the
+L1 instruction cache. The latter connects directly to the L1-L2 crossbar.
+The corresponding Tilelink ports in the module implementation's IO bundle
+are `atl` and `tl`, respectively.
 
-Look at the examples in rocket-chip/src/main/scala/tile/LegacyRocc.scala for
-detailed information on the different IOs
+The other interfaces available to the accelerator are `mem`, which provides
+access to the L1 cache; `ptw` which provides access to the page-table walker;
+the `busy` signal, which indicates when the accelerator is still handling an
+instruction; and the `interrupt` signal, which can be used to interrupt the CPU.
+
+Look at the examples in rocket-chip/src/main/scala/tile/LazyRocc.scala for
+detailed information on the different IOs.
 
 ### Adding RoCC accelerator to Config
 
@@ -373,7 +384,7 @@ route custom0 and custom1 instructions to it, we could do the following.
         r.copy(rocc = Seq(
           RoCCParams(
             opcodes = OpcodeSet.custom0 | OpcodeSet.custom1,
-            generator = (p: Parameters) => Module(new CustomAccelerator()(p)))))
+            generator = (p: Parameters) => LazyModule(new CustomAccelerator()(p)))))
       }
     })
 
