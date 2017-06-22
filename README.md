@@ -63,11 +63,25 @@ The submodules and subdirectories for the project template are organized as
 follows.
 
  * rocket-chip - contains code for the RocketChip generator and Chisel HDL
- * testchipip - contains the serial adapter and associated verilog and C++ code
+ * testchipip - contains the serial adapter, block device, and associated verilog and C++ code
  * verisim - directory in which Verilator simulations are compiled and run
  * vsim - directory in which Synopsys VCS simulations are compiled and run
  * bootrom - sources for the first-stage bootloader included in the Boot ROM
  * src/main/scala - scala source files for your project go here
+
+## Using the block device
+
+The default example project just provides the Rocket coreplex, memory, and
+serial line. But testchipip also provides a simulated block device that can
+be used for non-volatile storage. You can build a simulator including the
+block device using the blkdev package.
+
+    make PROJECT=blkdev CONFIG=BlockDeviceConfig
+    ./simulator-blkdev-BlockDeviceConfig +blkdev=block-device.img ...
+
+By passing the +blkdev argument on the simulator command line, you can allow
+the RTL simulation to read and write from a file. Take a look at tests/blkdev.c
+for an example of how Rocket can program the block device controller.
 
 ## Creating your own project
 
@@ -77,135 +91,122 @@ under src/main/scala that has the same name as your package.
 
     mkdir src/main/scala/pwm
 
-Now let's add a peripheral device to the new SoC. First, add a Chisel module
-for your device.
+Now let's add a peripheral device to the new SoC. The easiest way to create a
+TileLink peripheral is to use the TLRegisterRouter, which abstracts away the
+details of handling the TileLink protocol and provides a convenient interface
+for specifying memory-mapped registers. To create a RegisterRouter-based
+peripheral, you will need to specify a parameter case class for the
+configuration settings, a bundle trait with the extra top-level ports, and
+a module implementation containing the actual RTL.
 
-    package pwm
+    case class PWMParams(address: BigInt, beatBytes: Int)
 
-    import chisel3._
-    import cde.{Parameters, Field}
-    import uncore.tilelink._
-
-    class PWMTL(implicit p: Parameters) extends Module {
-      val io = new Bundle {
-        val tl = new ClientUncachedTileLinkIO().flip
-        val pwmout = Bool(OUTPUT)
-      }
-
-      // ...
+    trait PWMTLBundle extends Bundle {
+      val pwmout = Output(Bool())
     }
 
-The `io` bundle holds the ports that this module exposes externally. It has
-two parts, a uncached TileLink port (tl), and a single-bit output (pwmout).
-The TL port is how the core communicates to the peripheral over MMIO.
-The pwmout signal is what we will drive as our PWM output.
+    trait PWMTLModule {
+      val io: PWMTLBundle
+      implicit val p: Parameters
+      def params: PWMParams
 
-Note that we have made our package `pwm` to match the subdirectory name.
-Also note that we have imported the chisel3 package, which contains all the HDL
-directives; cde.Parameters, an object which allows us to pass configurations
-to different parts of the code (mainly used by TileLink in this case); and
-the TileLink definitions from the uncore.tilelink package.
+      val w = params.beatBytes * 8
+      val period = Reg(UInt(w.W))
+      val duty = Reg(UInt(w.W))
+      val enable = RegInit(false.B)
 
-The full module code, with comments can be found in src/main/scala/pwm/PWM.scala.
+      // ... Use the registers to drive io.pwmout ...
+
+      regmap(
+        0x00 -> Seq(
+          RegField(w, period)),
+        0x04 -> Seq(
+          RegField(w, duty)),
+        0x08 -> Seq(
+          RegField(1, enable)))
+    }
+
+Once you have these classes, you can construct the final peripheral by
+extending the TLRegisterRouter and passing the proper arguments. The first
+set of arguments determines where the register router will be placed in the
+global address map and what information will be put in its device tree entry.
+The second set of arguments is the IO bundle constructor, which we create
+by extending TLRegBundle with our bundle trait. The final set of arguments
+is the module constructor, which we create by extends TLRegModule with our
+module trait.
+
+    class PWMTL(c: PWMParams)(implicit p: Parameters)
+      extends TLRegisterRouter(
+        c.address, "pwm", Seq("ucbbar,pwm"),
+        beatBytes = c.beatBytes)(
+          new TLRegBundle(c, _) with PWMTLBundle)(
+          new TLRegModule(c, _, _) with PWMTLModule)
+
+The full module code with comments can be found in src/main/scala/pwm/PWM.scala.
 
 After creating the module, we need to hook it up to our SoC. Rocketchip
 accomplishes this using the [cake pattern](http://www.cakesolutions.net/teamblogs/2011/12/19/cake-pattern-in-depth).
-This basically involves placing code inside traits. In RocketChip, there are
-three kinds of traits: a LazyModule trait, and IO bundle trait, and a module
-implementation trait.
+This basically involves placing code inside traits. In the RocketChip cake,
+there are two kinds of traits: a LazyModule trait and a module implementation
+trait.
 
 The LazyModule trait runs setup code that must execute before all the hardware
 gets elaborated. For a simple memory-mapped peripheral, this just involves
-adding an entry to the address map. The SoC generator provides each leaf node
-in the address map with a port from the MMIO interconnect.
+connecting the peripheral's TileLink node to the MMIO crossbar.
 
-    import junctions._
-    import diplomacy._
-    import rocketchip._
+    trait HasPeripheryPWM extends HasSystemNetworks {
+      implicit val p: Parameters
 
-    trait PeripheryPWM extends LazyModule {
-      val pDevices: ResourceManager[AddrMapEntry]
+      private val address = 0x2000
 
-      pDevices.add(AddrMapEntry("pwm", MemSize(4096, MemAttr(AddrMapProt.RW))))
+      val pwm = LazyModule(new PWMTL(
+        PWMParams(address, peripheryBusConfig.beatBytes))(p))
+
+      pwm.node := TLFragmenter(
+        peripheryBusConfig.beatBytes, cacheBlockBytes)(peripheryBus.node)
     }
 
-This adds an entry called "pwm" and makes it 4096 bytes in size. This is more
-than we really need, but to play nicely with the core's virtual memory system,
-address map regions must be page-aligned. We also give this regions
-read/write permissions. This device can be loaded from or stored to,
-but CPU instructions cannot be fetched from this location.
-
-The IO bundle trait contains the extra IO ports that will be exported off-chip.
-For the PWM peripheral, this will just be the `pwmout` pin.
-
-    trait PeripheryPWMBundle {
-      val pwmout = Bool(OUTPUT)
-    }
+Note that the PWMTL class we created from the register router is itself a
+LazyModule. Register routers have a TileLike node simply named "node", which
+we can hook up to the RocketChip peripheryBus. This will automatically add
+address map and device tree entries for the peripheral.
 
 The module implementation trait is where we instantiate our PWM module and
-connect it to the rest of the SoC. 
+connect it to the rest of the SoC. Since this module has an extra `pwmout`
+output, we declare that in this trait, using Chisel's multi-IO
+functionality. We then connect the PWMTL's pwmout to the pwmout we declared.
 
-    case object BuildPWM extends Field[(ClientUncachedTileLinkIO, Parameters) => Bool]
+    trait HasPeripheryPWMModuleImp extends LazyMultiIOModuleImp {
+      implicit val p: Parameters
+      val outer: HasPeripheryPWM
 
-    trait PeripheryPWMModule extends HasPeripheryParameters {
-      val pBus: TileLinkRecursiveInterconnect
-      val io: PeripheryPWMBundle
+      val pwmout = IO(Output(Bool()))
 
-      io.pwmout := p(BuildPWM)(pBus.port("pwm"), outerMMIOParams)
+      pwmout := outer.pwm.module.io.pwmout
     }
-
-We just need to connect the MMIO TileLink port to the PWM module's TileLink port
-and connect the PWM module's `pwmout` pin to the `pwmout` pin going off-chip.
-We would like to do this in a configurable way so that we can swap out the
-PWM module if need be. To do this, we create a new Field for the Parameters
-object that produces a function taking in the Tilelink port and returning
-the pwmout as a Bool. We will define this function later in the configuration
-file.
-
-Note that we extend the HasPeripheryParameters trait. This provides us the
-`outerMMIOParams` parameter object, which gets passed in as the `p` parameters
-object to the PWM module. We have several parameters objects because different
-TileLink interfaces need different configurations. For all MMIO ports
-(i.e. those coming from pBus), you will want to use `outerMMIOParams`.
-Peripheral devices can also connect TileLink client ports going into the
-coreplex, which use the `innerParams` object.
 
 Now we want to mix our traits into the system as a whole. This code is from
 src/main/scala/pwm/Top.scala.
 
-    package pwm
-
-    import chisel3._
-    import example._
-    import cde.Parameters
-
     class ExampleTopWithPWM(q: Parameters) extends ExampleTop(q)
         with PeripheryPWM {
       override lazy val module = Module(
-        new ExampleTopWithPWMModule(p, this, new ExampleTopWithPWMBundle(p)))
+        new ExampleTopWithPWMModule(p, this))
     }
 
-    class ExampleTopWithPWMBundle(p: Parameters) extends ExampleTopBundle(p)
-      with PeripheryPWMBundle
+    class ExampleTopWithPWMModule(l: ExampleTopWithPWM)
+      extends ExampleTopModule(l) with HasPeripheryPWMModuleImp
 
-    class ExampleTopWithPWMModule(p: Parameters, l: ExampleTopWithPWM, b: => ExampleTopWithPWMBundle)
-      extends ExampleTopModule(p, l, b) with PeripheryPWMModule
+Just as we need separate traits for LazyModule and module implementation, we
+need two classes to build the system. The ExampleTop classes from the example
+package already have the basic peripherals included for us, so we will just
+extend those.
 
-Just as we have three traits, we have three classes to build the system.
-The ExampleTop classes from the example package already have the basic
-peripherals included for us, so we will just extend those.
-
-The ExampleTop class includes the pre-elaboration code and also a lazy val
-to produce the module implementation (hence LazyModule). The ExampleTopBundle
-class becomes the top-level IO of the module implementation. And finally the
-ExampleTopModule class is the actual RTL that gets synthesized.
+The ExampleTop class includes the pre-elaboration code and also a lazy val to
+produce the module implementation (hence LazyModule). The ExampleTopModule
+class is the actual RTL that gets synthesized.
 
 Now we have the RTL for the chip, but we need a test harness to simulate it.
-
-    package pwm
-
-    import cde.Parameters
-    import diplomacy.LazyModule
 
     class TestHarness(q: Parameters) extends example.TestHarness()(q) {
       override def buildTop(p: Parameters) =
@@ -221,33 +222,14 @@ We also need to create a Generator object, which gets called as the entry
 point for elaboration.
 
     object Generator extends GeneratorApp {
-      val longName = names.topModuleProject + "." +
-                     names.topModuleClass + "." +
-                     names.configs
       generateFirrtl
     }
 
 Finally, we need to add a configuration class in src/main/scala/pwm/Configs.scala.
-This defines all the settings in the Parameters object.
+This defines all the settings in the Parameters object. We aren't adding any
+new parameters, so we can just extend the default configuration.
 
-    package pwm
-
-    import cde.{Parameters, Config, CDEMatchError}
-
-    class WithPWMTL extends Config(
-      (pname, site, here) => pname match {
-        case BuildPWM => (port: ClientUncachedTileLinkIO, p: Parameters) => {
-          val pwm = Module(new PWMTL()(p))
-          pwm.io.tl <> port
-          pwm.io.pwmout
-        }
-      })
-
-    class PWMTLConfig extends Config(new WithPWMTL ++ new example.DefaultExampleConfig)
-
-The only thing we need to add to the DefaultExampleConfig is the definition
-of the BuildPWM field. We just instantiate our PWMTL module, connect the
-TileLink port and pass out the `pwmout` signal.
+    class PWMTLConfig extends Config(new example.DefaultExampleConfig)
 
 Now we can test that the PWM is working. The test program is in tests/pwm.c
 
@@ -293,51 +275,41 @@ peripheral through MMIO. However, for IO devices (like a disk or network
 driver), we may want to have the device write directly to the coherent
 memory system instead. To add a device like that, you would do the following.
 
-    package dmadevice
-    
-    import chisel3._
-    import cde.Parameters
+    class DMADevice(implicit p: Parameters) extends LazyModule {
+      val node = TLClientNode(TLClientParameters(
+        name = "dma-device", sourceId = IdRange(0, 1)))
 
-    class ExtBundle extends Bundle {
-        ...
+      lazy val module = new DMADeviceModule(this)
     }
 
-    class DMADevice(implicit p: Parameters) extends Module {
-      val io = new Bundle {
-        val tl = new ClientUncachedTileLinkIO
+    class DMADeviceModule(outer: DMADevice) extends LazyModuleImp(outer) {
+      val io = IO(new Bundle {
+        val mem = outer.node.bundleOut
         val ext = new ExtBundle
-      }
+      })
 
-      ...
+      // ... rest of the code ...
     }
 
-    trait PeripheryDMA extends LazyModule {
-      val pBusMasters: RangeManager
+    trait HasPeripheryDMA extends HasSystemNetworks {
+      implicit val p: Parameters
 
-      pBusMasters.add("dma", 1)
+      val dma = LazyModule(new DMADevice)
+
+      fsb.node := dma.node
     }
 
-    trait PeripheryDMABundle extends HasPeripheryParameters {
-      val ext = new ExtBundle
-    }
-
-    trait PeripheryDMAModule {
-      val outer: PeripheryDMA
-      val io: PeripheryDMABundle
-      val coreplexIO: BaseCoreplexBundle
-
-      val (r_start, r_end) = outer.pBusMasters.range("dma")
-
-      val device = Module(new DMADevice()(innerParams))
-      io.ext <> device.io.ext
-      coreplexIO.slave(r_start) <> device.io.tl
+    trait HasPeripheryDMAModuleImp extends LazyMultiIOModuleImp {
+      val ext = IO(new ExtBundle)
+      ext <> outer.dma.module.io.ext
     }
 
 The `ExtBundle` contains the signals we connect off-chip that we get data from.
-The DMADevice also has a Tilelink port to communicate with the coherent memory
-system (note that there's no .flip() call). Another thing to note is that
-when we instantiate DMADevice in PeripheryDMAModule, the Parameters object
-we give to it is `innerParams` instead of `outerMMIOParams`.
+The DMADevice also has a Tilelink client port that we connect into the L1-L2
+crossbar through the front-side buffer (fsb). The sourceId variable given in
+the TLClientNode instantiation determines the range of ids that can be used
+in acquire messages from this device. Since we specified [0, 1) as our range,
+only the ID 0 can be used.
 
 ## Adding a RoCC accelerator
 
@@ -361,11 +333,6 @@ the accelerator can use to distinguish different instructions from each other.
 
 RoCC accelerators should extends the RoCC class.
 
-    package accel
-
-    import chisel3._
-    import rocket._
-
     class CustomAccelerator(implicit p: Parameters) extends RoCC()(p) {
       val cmd = Queue(io.cmd)
       // The parts of the command are as follows
@@ -388,7 +355,7 @@ access to the L1 cache, `ptw` which provides access to the page-table walker,
 `autl` which provides shared access to the L2 alongside the ICache refill,
 and `utl` which provides dedicated access to the L2.
 
-Look at the examples in rocket-chip/src/main/scala/rocket/rocc.scala for
+Look at the examples in rocket-chip/src/main/scala/tile/LegacyRocc.scala for
 detailed information on the different IOs
 
 ### Adding RoCC accelerator to Config
@@ -401,12 +368,14 @@ accelerator, and `generator` which specifies how to build the accelerator itself
 For instance, if we wanted to add the previously defined accelerator and
 route custom0 and custom1 instructions to it, we could do the following.
 
-    class WithCustomAccelerator extends Config(
-      (pname, site, here) => pname match {
-        case BuildRoCC => Seq(
-          opcodes = OpcodeSet.custom0 | OpcodeSet.custom1,
-          generator = (p: Parameters) => Module(new CustomAccelerator()(p)))
-      })
+    class WithCustomAccelerator extends Config((site, here, up) => {
+      case RocketTilesKey => up(RocketTilesKey, site).map { r =>
+        r.copy(rocc = Seq(
+          RoCCParams(
+            opcodes = OpcodeSet.custom0 | OpcodeSet.custom1,
+            generator = (p: Parameters) => Module(new CustomAccelerator()(p)))))
+      }
+    })
 
     class CustomAcceleratorConfig extends Config(
       new WithCustomAccelerator ++ new BaseConfig)
