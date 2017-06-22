@@ -52,7 +52,7 @@ trait PWMTLModule extends Module with HasRegMap {
   // For how many cycles should the clock be high?
   val duty = Reg(UInt(w.W))
   // Is the PWM even running at all?
-  val enable = Reg(init = false.B)
+  val enable = RegInit(false.B)
 
   val base = Module(new PWMBase(w))
   io.pwmout := base.io.pwmout
