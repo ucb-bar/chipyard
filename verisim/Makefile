@@ -24,10 +24,15 @@ long_name = $(PROJECT).$(MODEL).$(CONFIG)
 
 sim_vsrcs = \
 	$(build_dir)/$(long_name).v \
-	$(base_dir)/testchipip/vsrc/SimSerial.v
+	$(base_dir)/rocket-chip/vsrc/AsyncResetReg.v \
+	$(base_dir)/rocket-chip/vsrc/plusarg_reader.v \
+	$(base_dir)/testchipip/vsrc/SimSerial.v \
+	$(base_dir)/testchipip/vsrc/SimBlockDevice.v
 
 sim_csrcs = \
 	$(base_dir)/testchipip/csrc/SimSerial.cc \
+	$(base_dir)/testchipip/csrc/SimBlockDevice.cc \
+	$(base_dir)/testchipip/csrc/blkdev.cc \
 	$(base_dir)/testchipip/csrc/verilator-harness.cc
 
 model_dir = $(build_dir)/$(long_name)
@@ -40,6 +45,7 @@ model_mk = $(model_dir)/V$(MODEL).mk
 model_mk_debug = $(model_dir_debug)/V$(MODEL).mk
 
 $(model_mk): $(sim_vsrcs) $(INSTALLED_VERILATOR)
+	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name)
 	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name) \
 	-o $(sim) $< $(sim_csrcs) -LDFLAGS "$(LDFLAGS)" \
