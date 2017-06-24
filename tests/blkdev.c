@@ -27,42 +27,65 @@ size_t blkdev_max_req_len(void)
 	return read_reg(BLKDEV_MAX_REQUEST_LENGTH);
 }
 
-int blkdev_read(void *addr, unsigned long offset, size_t nsectors)
+void blkdev_read(void *addr, unsigned long offset, size_t nsectors)
 {
-	int req_tag, resp_tag;
+	int req_tag, resp_tag, ntags, i;
+	size_t nsectors_per_tag;
 
-	write_reg(BLKDEV_ADDR, (unsigned long) addr);
-	write_reg(BLKDEV_OFFSET, offset);
-	write_reg(BLKDEV_LEN, nsectors);
-	write_reg(BLKDEV_WRITE, 0);
+	ntags = read_reg(BLKDEV_NREQUEST);
+	nsectors_per_tag = nsectors / ntags;
 
-	while (read_reg(BLKDEV_NREQUEST) == 0);
-	req_tag = read_reg(BLKDEV_REQUEST);
+	printf("sending %d reads\n", ntags);
 
-	while (read_reg(BLKDEV_NCOMPLETE) == 0);
+	for (i = 0; i < ntags; i++) {
+		write_reg(BLKDEV_ADDR, (unsigned long) addr);
+		write_reg(BLKDEV_OFFSET, offset);
+		write_reg(BLKDEV_LEN, nsectors_per_tag);
+		write_reg(BLKDEV_WRITE, 0);
 
-	resp_tag = read_reg(BLKDEV_COMPLETE);
-	return (resp_tag == req_tag) ? 0 : -1;
+		req_tag = read_reg(BLKDEV_REQUEST);
+		addr += (nsectors_per_tag << BLKDEV_SECTOR_SHIFT);
+		offset += nsectors_per_tag;
+	}
+
+	while (read_reg(BLKDEV_NCOMPLETE) < ntags);
+
+	for (i = 0; i < ntags; i++) {
+		resp_tag = read_reg(BLKDEV_COMPLETE);
+		printf("completed read %d\n", resp_tag);
+	}
 }
 
-int blkdev_write(unsigned long offset, void *addr, size_t nsectors)
+void blkdev_write(unsigned long offset, void *addr, size_t nsectors)
 {
-	int req_tag, resp_tag;
+	int req_tag, resp_tag, ntags, i;
+	size_t nsectors_per_tag;
 
-	write_reg(BLKDEV_ADDR, (unsigned long) addr);
-	write_reg(BLKDEV_OFFSET, offset);
-	write_reg(BLKDEV_LEN, nsectors);
-	write_reg(BLKDEV_WRITE, 1);
+	ntags = read_reg(BLKDEV_NREQUEST);
+	nsectors_per_tag = nsectors / ntags;
 
-	req_tag = read_reg(BLKDEV_REQUEST);
+	printf("sending %d writes\n", ntags);
 
-	while (read_reg(BLKDEV_NCOMPLETE) == 0);
+	for (i = 0; i < ntags; i++) {
+		write_reg(BLKDEV_ADDR, (unsigned long) addr);
+		write_reg(BLKDEV_OFFSET, offset);
+		write_reg(BLKDEV_LEN, nsectors_per_tag);
+		write_reg(BLKDEV_WRITE, 1);
 
-	resp_tag = read_reg(BLKDEV_COMPLETE);
-	return (resp_tag == req_tag) ? 0 : -1;
+		req_tag = read_reg(BLKDEV_REQUEST);
+		addr += (nsectors_per_tag << BLKDEV_SECTOR_SHIFT);
+		offset += nsectors_per_tag;
+	}
+
+	while (read_reg(BLKDEV_NCOMPLETE) < ntags);
+
+	for (i = 0; i < ntags; i++) {
+		resp_tag = read_reg(BLKDEV_COMPLETE);
+		printf("completed write %d\n", resp_tag);
+	}
 }
 
-#define TEST_NSECTORS 2
+#define TEST_NSECTORS 4
 #define TEST_SIZE (TEST_NSECTORS * BLKDEV_SECTOR_SIZE / sizeof(int))
 
 unsigned int test_data[TEST_SIZE];
@@ -94,15 +117,8 @@ int main(void)
 
 	asm volatile ("fence");
 
-	if (blkdev_write(0, (void *) test_data, TEST_NSECTORS)) {
-		printf("write error\n");
-		return 1;
-	}
-
-	if (blkdev_read((void *) res_data, 0, TEST_NSECTORS)) {
-		printf("read error\n");
-		return 1;
-	}
+	blkdev_write(0, (void *) test_data, TEST_NSECTORS);
+	blkdev_read((void *) res_data, 0, TEST_NSECTORS);
 
 	for (int i = 0; i < TEST_SIZE; i++) {
 		if (test_data[i] != res_data[i]) {
