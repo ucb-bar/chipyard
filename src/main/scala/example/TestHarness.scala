@@ -4,16 +4,16 @@ import diplomacy.LazyModule
 import rocketchip._
 import testchipip._
 import chisel3._
-import config.Parameters
+import config.{Field, Parameters}
+
+case object BuildTop extends Field[Parameters => ExampleTopModule[ExampleTop]]
 
 class TestHarness(implicit val p: Parameters) extends Module {
   val io = IO(new Bundle {
     val success = Output(Bool())
   })
 
-  def buildTop(p: Parameters): ExampleTop = LazyModule(new ExampleTop()(p))
-
-  val dut = Module(buildTop(p).module)
+  val dut = p(BuildTop)(p)
   dut.connectSimAXIMem()
   io.success := dut.connectSimSerial()
 }

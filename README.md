@@ -83,21 +83,16 @@ By passing the +blkdev argument on the simulator command line, you can allow
 the RTL simulation to read and write from a file. Take a look at tests/blkdev.c
 for an example of how Rocket can program the block device controller.
 
-## Creating your own project
+## Adding an MMIO peripheral
 
-To create your own project, you should create your own scala package.
-Let's use the PWM package as an example. First you create a directory
-under src/main/scala that has the same name as your package.
-
-    mkdir src/main/scala/pwm
-
-Now let's add a peripheral device to the new SoC. The easiest way to create a
-TileLink peripheral is to use the TLRegisterRouter, which abstracts away the
-details of handling the TileLink protocol and provides a convenient interface
-for specifying memory-mapped registers. To create a RegisterRouter-based
-peripheral, you will need to specify a parameter case class for the
-configuration settings, a bundle trait with the extra top-level ports, and
-a module implementation containing the actual RTL.
+You can RocketChip to create your own memory-mapped IO device and add it into
+the SoC design. The easiest way to create a TileLink peripheral is to use the
+TLRegisterRouter, which abstracts away the details of handling the TileLink
+protocol and provides a convenient interface for specifying memory-mapped
+registers. To create a RegisterRouter-based peripheral, you will need to
+specify a parameter case class for the configuration settings, a bundle trait
+with the extra top-level ports, and a module implementation containing the
+actual RTL.
 
     case class PWMParams(address: BigInt, beatBytes: Int)
 
@@ -142,7 +137,7 @@ module trait.
           new TLRegBundle(c, _) with PWMTLBundle)(
           new TLRegModule(c, _, _) with PWMTLModule)
 
-The full module code with comments can be found in src/main/scala/pwm/PWM.scala.
+The full module code with comments can be found in src/main/scala/example/PWM.scala.
 
 After creating the module, we need to hook it up to our SoC. Rocketchip
 accomplishes this using the [cake pattern](http://www.cakesolutions.net/teamblogs/2011/12/19/cake-pattern-in-depth).
@@ -186,7 +181,7 @@ functionality. We then connect the PWMTL's pwmout to the pwmout we declared.
     }
 
 Now we want to mix our traits into the system as a whole. This code is from
-src/main/scala/pwm/Top.scala.
+src/main/scala/example/Top.scala.
 
     class ExampleTopWithPWM(q: Parameters) extends ExampleTop(q)
         with PeripheryPWM {
@@ -198,38 +193,23 @@ src/main/scala/pwm/Top.scala.
       extends ExampleTopModule(l) with HasPeripheryPWMModuleImp
 
 Just as we need separate traits for LazyModule and module implementation, we
-need two classes to build the system. The ExampleTop classes from the example
-package already have the basic peripherals included for us, so we will just
-extend those.
+need two classes to build the system. The ExampleTop classes already have the
+basic peripherals included for us, so we will just extend those.
 
 The ExampleTop class includes the pre-elaboration code and also a lazy val to
 produce the module implementation (hence LazyModule). The ExampleTopModule
 class is the actual RTL that gets synthesized.
 
-Now we have the RTL for the chip, but we need a test harness to simulate it.
+Finally, we need to add a configuration class in
+src/main/scala/example/Configs.scala that tells the TestHarness to instantiate
+ExampleTopWithPWM instead of the default ExampleTop.
 
-    class TestHarness(q: Parameters) extends example.TestHarness()(q) {
-      override def buildTop(p: Parameters) =
-        LazyModule(new ExampleTopWithPWM(p))
-    }
+    class WithPWM extends Config((site, here, up) => {
+      case BuildTop => (p: Parameters) =>
+        Module(LazyModule(new ExampleTopWithPWM()(p)).module)
+    })
 
-We just extend the TestHarness from the example package, which already has
-the extra RTL to simulate the memory system and tethered serial port.
-It provides us the hook function `buildTop` which we can override to build
-our ExampleTopWithPWM instead of the regular ExampleTop.
-
-We also need to create a Generator object, which gets called as the entry
-point for elaboration.
-
-    object Generator extends GeneratorApp {
-      generateFirrtl
-    }
-
-Finally, we need to add a configuration class in src/main/scala/pwm/Configs.scala.
-This defines all the settings in the Parameters object. We aren't adding any
-new parameters, so we can just extend the default configuration.
-
-    class PWMTLConfig extends Config(new example.DefaultExampleConfig)
+    class PWMConfig extends Config(new WithPWM ++ new BaseExampleConfig)
 
 Now we can test that the PWM is working. The test program is in tests/pwm.c
 
@@ -265,8 +245,8 @@ Compiling this program with make produces a `pwm.riscv` executable.
 Now with all of that done, we can go ahead and run our simulation.
 
     cd verisim
-    make PROJECT=pwm CONFIG=PWMTLConfig
-    ./simulator-pwm-PWMTLConfig ../tests/pwm.riscv
+    make PROJECT=pwm CONFIG=PWMConfig
+    ./simulator-pwm-PWMConfig ../tests/pwm.riscv
 
 ## Adding a DMA port
 
