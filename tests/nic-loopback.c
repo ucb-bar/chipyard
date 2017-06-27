@@ -5,46 +5,67 @@
 #define SIMPLENIC_BASE 0x10016000L
 #define SIMPLENIC_SEND (SIMPLENIC_BASE + 0)
 #define SIMPLENIC_RECV (SIMPLENIC_BASE + 8)
+#define SIMPLENIC_COMP (SIMPLENIC_BASE + 16)
+#define SIMPLENIC_COUNTS (SIMPLENIC_BASE + 18)
 
 uint64_t src[200];
 uint64_t dst[201];
 
-void nic_send(void *data, unsigned long len)
+static inline int nic_send_avail(void)
+{
+	return reg_read16(SIMPLENIC_COUNTS) & 0xf;
+}
+
+static inline int nic_recv_avail(void)
+{
+	return (reg_read16(SIMPLENIC_COUNTS) >> 4) & 0xf;
+}
+
+static inline int nic_comp_avail(void)
+{
+	return (reg_read16(SIMPLENIC_COUNTS) >> 8) & 0xf;
+}
+
+static void nic_send(void *data, unsigned long len)
 {
 	uintptr_t addr = ((uintptr_t) data) & ((1L << 48) - 1);
 	unsigned long packet = (len << 48) | addr;
 
-	asm volatile ("fence");
+	while (nic_send_avail() == 0);
 	reg_write64(SIMPLENIC_SEND, packet);
 }
 
-void nic_recv(void *dest)
+static int nic_recv(void *dest)
 {
 	uintptr_t addr = (uintptr_t) dest;
-	volatile uint64_t *words = (volatile uint64_t *) dest;
+	int len;
 
+	while (nic_recv_avail() == 0);
 	reg_write64(SIMPLENIC_RECV, addr);
 
 	// Poll for completion
-	while (!words[200]);
-	asm volatile ("fence");
+	while (nic_comp_avail() == 0);
+	len = reg_read16(SIMPLENIC_COMP);
+
+	return len;
 }
 
 #define TEST_LEN 128
 
 int main(void)
 {
-	int i;
+	int i, len;
 
 	for (i = 0; i < TEST_LEN; i++)
 		src[i] = i << 12;
 
 	printf("Sending data on loopback NIC\n");
 
+	asm volatile ("fence");
 	nic_send(src, TEST_LEN * sizeof(uint64_t));
-	nic_recv(dst);
+	len = nic_recv(dst);
 
-	printf("Received data\n");
+	printf("Received %d bytes\n", len);
 
 	for (i = 0; i < TEST_LEN; i++) {
 		if (dst[i] != src[i]) {
