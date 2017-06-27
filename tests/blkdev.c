@@ -19,12 +19,12 @@
 
 size_t blkdev_nsectors(void)
 {
-	return read_reg(BLKDEV_NSECTORS);
+	return reg_read32(BLKDEV_NSECTORS);
 }
 
 size_t blkdev_max_req_len(void)
 {
-	return read_reg(BLKDEV_MAX_REQUEST_LENGTH);
+	return reg_read32(BLKDEV_MAX_REQUEST_LENGTH);
 }
 
 void blkdev_read(void *addr, unsigned long offset, size_t nsectors)
@@ -32,26 +32,26 @@ void blkdev_read(void *addr, unsigned long offset, size_t nsectors)
 	int req_tag, resp_tag, ntags, i;
 	size_t nsectors_per_tag;
 
-	ntags = read_reg(BLKDEV_NREQUEST);
+	ntags = reg_read32(BLKDEV_NREQUEST);
 	nsectors_per_tag = nsectors / ntags;
 
 	printf("sending %d reads\n", ntags);
 
 	for (i = 0; i < ntags; i++) {
-		write_reg(BLKDEV_ADDR, (unsigned long) addr);
-		write_reg(BLKDEV_OFFSET, offset);
-		write_reg(BLKDEV_LEN, nsectors_per_tag);
-		write_reg(BLKDEV_WRITE, 0);
+		reg_write32(BLKDEV_ADDR, (unsigned long) addr);
+		reg_write32(BLKDEV_OFFSET, offset);
+		reg_write32(BLKDEV_LEN, nsectors_per_tag);
+		reg_write32(BLKDEV_WRITE, 0);
 
-		req_tag = read_reg(BLKDEV_REQUEST);
+		req_tag = reg_read32(BLKDEV_REQUEST);
 		addr += (nsectors_per_tag << BLKDEV_SECTOR_SHIFT);
 		offset += nsectors_per_tag;
 	}
 
-	while (read_reg(BLKDEV_NCOMPLETE) < ntags);
+	while (reg_read32(BLKDEV_NCOMPLETE) < ntags);
 
 	for (i = 0; i < ntags; i++) {
-		resp_tag = read_reg(BLKDEV_COMPLETE);
+		resp_tag = reg_read32(BLKDEV_COMPLETE);
 		printf("completed read %d\n", resp_tag);
 	}
 }
@@ -61,26 +61,26 @@ void blkdev_write(unsigned long offset, void *addr, size_t nsectors)
 	int req_tag, resp_tag, ntags, i;
 	size_t nsectors_per_tag;
 
-	ntags = read_reg(BLKDEV_NREQUEST);
+	ntags = reg_read32(BLKDEV_NREQUEST);
 	nsectors_per_tag = nsectors / ntags;
 
 	printf("sending %d writes\n", ntags);
 
 	for (i = 0; i < ntags; i++) {
-		write_reg(BLKDEV_ADDR, (unsigned long) addr);
-		write_reg(BLKDEV_OFFSET, offset);
-		write_reg(BLKDEV_LEN, nsectors_per_tag);
-		write_reg(BLKDEV_WRITE, 1);
+		reg_write32(BLKDEV_ADDR, (unsigned long) addr);
+		reg_write32(BLKDEV_OFFSET, offset);
+		reg_write32(BLKDEV_LEN, nsectors_per_tag);
+		reg_write32(BLKDEV_WRITE, 1);
 
-		req_tag = read_reg(BLKDEV_REQUEST);
+		req_tag = reg_read32(BLKDEV_REQUEST);
 		addr += (nsectors_per_tag << BLKDEV_SECTOR_SHIFT);
 		offset += nsectors_per_tag;
 	}
 
-	while (read_reg(BLKDEV_NCOMPLETE) < ntags);
+	while (reg_read32(BLKDEV_NCOMPLETE) < ntags);
 
 	for (i = 0; i < ntags; i++) {
-		resp_tag = read_reg(BLKDEV_COMPLETE);
+		resp_tag = reg_read32(BLKDEV_COMPLETE);
 		printf("completed write %d\n", resp_tag);
 	}
 }

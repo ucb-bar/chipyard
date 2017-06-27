@@ -6,9 +6,9 @@
 
 int main(void)
 {
-	write_reg(PWM_PERIOD, 20);
-	write_reg(PWM_DUTY, 5);
-	write_reg(PWM_ENABLE, 1);
+	reg_write32(PWM_PERIOD, 20);
+	reg_write32(PWM_DUTY, 5);
+	reg_write32(PWM_ENABLE, 1);
 
 	return 0;
 }

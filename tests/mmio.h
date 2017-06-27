@@ -1,15 +1,29 @@
 #ifndef __MMIO_H__
 #define __MMIO_H__
 
-static inline void write_reg(unsigned long addr, unsigned int data)
+#include <stdint.h>
+
+static inline void reg_write32(uintptr_t addr, uint32_t data)
 {
-	volatile unsigned int *ptr = (volatile unsigned int *) addr;
+	volatile uint32_t *ptr = (volatile uint32_t *) addr;
 	*ptr = data;
 }
 
-static inline unsigned long read_reg(unsigned long addr)
+static inline uint32_t reg_read32(uintptr_t addr)
 {
-	volatile unsigned int *ptr = (volatile unsigned int *) addr;
+	volatile uint32_t *ptr = (volatile uint32_t *) addr;
+	return *ptr;
+}
+
+static inline void reg_write64(unsigned long addr, uint64_t data)
+{
+	volatile uint64_t *ptr = (volatile uint64_t *) addr;
+	*ptr = data;
+}
+
+static inline uint64_t reg_read64(unsigned long addr)
+{
+	volatile uint64_t *ptr = (volatile uint64_t *) addr;
 	return *ptr;
 }
 
