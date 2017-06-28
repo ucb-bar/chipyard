@@ -119,6 +119,7 @@ specify a parameter case class for the configuration settings, a bundle trait
 with the extra top-level ports, and a module implementation containing the
 actual RTL.
 
+```scala
     case class PWMParams(address: BigInt, beatBytes: Int)
 
     trait PWMTLBundle extends Bundle {
@@ -145,6 +146,7 @@ actual RTL.
         0x08 -> Seq(
           RegField(1, enable)))
     }
+```
 
 Once you have these classes, you can construct the final peripheral by
 extending the TLRegisterRouter and passing the proper arguments. The first
@@ -155,12 +157,14 @@ by extending TLRegBundle with our bundle trait. The final set of arguments
 is the module constructor, which we create by extends TLRegModule with our
 module trait.
 
+```scala
     class PWMTL(c: PWMParams)(implicit p: Parameters)
       extends TLRegisterRouter(
         c.address, "pwm", Seq("ucbbar,pwm"),
         beatBytes = c.beatBytes)(
           new TLRegBundle(c, _) with PWMTLBundle)(
           new TLRegModule(c, _, _) with PWMTLModule)
+```
 
 The full module code with comments can be found in src/main/scala/example/PWM.scala.
 
@@ -174,6 +178,7 @@ The LazyModule trait runs setup code that must execute before all the hardware
 gets elaborated. For a simple memory-mapped peripheral, this just involves
 connecting the peripheral's TileLink node to the MMIO crossbar.
 
+```scala
     trait HasPeripheryPWM extends HasSystemNetworks {
       implicit val p: Parameters
 
@@ -185,6 +190,7 @@ connecting the peripheral's TileLink node to the MMIO crossbar.
       pwm.node := TLFragmenter(
         peripheryBusConfig.beatBytes, cacheBlockBytes)(peripheryBus.node)
     }
+```
 
 Note that the PWMTL class we created from the register router is itself a
 LazyModule. Register routers have a TileLike node simply named "node", which
@@ -196,6 +202,7 @@ connect it to the rest of the SoC. Since this module has an extra `pwmout`
 output, we declare that in this trait, using Chisel's multi-IO
 functionality. We then connect the PWMTL's pwmout to the pwmout we declared.
 
+```scala
     trait HasPeripheryPWMModuleImp extends LazyMultiIOModuleImp {
       implicit val p: Parameters
       val outer: HasPeripheryPWM
@@ -204,10 +211,12 @@ functionality. We then connect the PWMTL's pwmout to the pwmout we declared.
 
       pwmout := outer.pwm.module.io.pwmout
     }
+```
 
 Now we want to mix our traits into the system as a whole. This code is from
 src/main/scala/example/Top.scala.
 
+```scala
     class ExampleTopWithPWM(q: Parameters) extends ExampleTop(q)
         with PeripheryPWM {
       override lazy val module = Module(
@@ -216,6 +225,7 @@ src/main/scala/example/Top.scala.
 
     class ExampleTopWithPWMModule(l: ExampleTopWithPWM)
       extends ExampleTopModule(l) with HasPeripheryPWMModuleImp
+```
 
 Just as we need separate traits for LazyModule and module implementation, we
 need two classes to build the system. The ExampleTop classes already have the
@@ -229,15 +239,18 @@ Finally, we need to add a configuration class in
 src/main/scala/example/Configs.scala that tells the TestHarness to instantiate
 ExampleTopWithPWM instead of the default ExampleTop.
 
+```scala
     class WithPWM extends Config((site, here, up) => {
       case BuildTop => (p: Parameters) =>
         Module(LazyModule(new ExampleTopWithPWM()(p)).module)
     })
 
     class PWMConfig extends Config(new WithPWM ++ new BaseExampleConfig)
+```
 
 Now we can test that the PWM is working. The test program is in tests/pwm.c
 
+```c
     #define PWM_PERIOD 0x2000
     #define PWM_DUTY 0x2008
     #define PWM_ENABLE 0x2010
@@ -260,6 +273,7 @@ Now we can test that the PWM is working. The test program is in tests/pwm.c
             write_reg(PWM_DUTY, 5);
             write_reg(PWM_ENABLE, 1);
     }
+```
 
 This just writes out to the registers we defined earlier. The base of the
 module's MMIO region is at 0x2000. This will be printed out in the address
@@ -280,6 +294,7 @@ peripheral through MMIO. However, for IO devices (like a disk or network
 driver), we may want to have the device write directly to the coherent
 memory system instead. To add a device like that, you would do the following.
 
+```scala
     class DMADevice(implicit p: Parameters) extends LazyModule {
       val node = TLClientNode(TLClientParameters(
         name = "dma-device", sourceId = IdRange(0, 1)))
@@ -308,6 +323,7 @@ memory system instead. To add a device like that, you would do the following.
       val ext = IO(new ExtBundle)
       ext <> outer.dma.module.io.ext
     }
+```
 
 The `ExtBundle` contains the signals we connect off-chip that we get data from.
 The DMADevice also has a Tilelink client port that we connect into the L1-L2
@@ -339,6 +355,7 @@ the accelerator can use to distinguish different instructions from each other.
 RoCC accelerators are lazy modules that extend the LazyRoCC class.
 Their implementation should extends the LazyRoCCModule class.
 
+```scala
     class CustomAccelerator(implicit p: Parameters) extends LazyRoCC {
       override lazy val module = new CustomAcceleratorModule(this)
     }
@@ -359,6 +376,7 @@ Their implementation should extends the LazyRoCCModule class.
       // rs2 - the value of source register 2
       ...
     }
+```
 
 The LazyRoCC class contains two TLOutputNode instances, `atlNode` and `tlNode`.
 The former connects into a tile-local arbiter along with the backside of the
@@ -384,6 +402,7 @@ accelerator, and `generator` which specifies how to build the accelerator itself
 For instance, if we wanted to add the previously defined accelerator and
 route custom0 and custom1 instructions to it, we could do the following.
 
+```scala
     class WithCustomAccelerator extends Config((site, here, up) => {
       case RocketTilesKey => up(RocketTilesKey, site).map { r =>
         r.copy(rocc = Seq(
@@ -395,6 +414,7 @@ route custom0 and custom1 instructions to it, we could do the following.
 
     class CustomAcceleratorConfig extends Config(
       new WithCustomAccelerator ++ new BaseConfig)
+```
 
 ## Adding a submodule
 
