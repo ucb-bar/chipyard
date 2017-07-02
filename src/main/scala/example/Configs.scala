@@ -33,10 +33,18 @@ class WithSimBlockDevice extends Config((site, here, up) => {
   }
 })
 
-class WithSimpleNIC extends Config((site, here, up) => {
+class WithLoopbackNIC extends Config((site, here, up) => {
   case BuildTop => (p: Parameters) => {
     val top = Module(LazyModule(new ExampleTopWithSimpleNIC()(p)).module)
     top.connectNicLoopback()
+    top
+  }
+})
+
+class WithSimNetwork extends Config((site, here, up) => {
+  case BuildTop => (p: Parameters) => {
+    val top = Module(LazyModule(new ExampleTopWithSimpleNIC()(p)).module)
+    top.connectSimNetwork()
     top
   }
 })
@@ -60,8 +68,11 @@ class SimBlockDeviceConfig extends Config(
 class BlockDeviceModelConfig extends Config(
   new WithBlockDevice ++ new WithBlockDeviceModel ++ new BaseExampleConfig)
 
-class SimpleNICConfig extends Config(
-  new WithSimpleNIC ++ new BaseExampleConfig)
+class LoopbackNICConfig extends Config(
+  new WithLoopbackNIC ++ new BaseExampleConfig)
+
+class SimNetworkConfig extends Config(
+  new WithSimNetwork ++ new BaseExampleConfig)
 
 class WithTwoTrackers extends WithNBlockDeviceTrackers(2)
 class WithFourTrackers extends WithNBlockDeviceTrackers(4)

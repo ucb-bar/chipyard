@@ -23,11 +23,14 @@ sim_vsrcs = \
 	$(base_dir)/rocket-chip/vsrc/plusarg_reader.v \
 	$(base_dir)/testchipip/vsrc/SimSerial.v \
 	$(base_dir)/testchipip/vsrc/SimBlockDevice.v \
+	$(base_dir)/testchipip/vsrc/SimNetwork.v \
 
 sim_csrcs = \
 	$(base_dir)/testchipip/csrc/SimSerial.cc \
 	$(base_dir)/testchipip/csrc/SimBlockDevice.cc \
+	$(base_dir)/testchipip/csrc/SimNetwork.cc \
 	$(base_dir)/testchipip/csrc/blkdev.cc \
+	$(base_dir)/testchipip/csrc/network.cc \
 
 VCS = vcs -full64
 
