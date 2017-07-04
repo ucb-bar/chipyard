@@ -1,0 +1,34 @@
+[
+  {
+    "type": "sram",
+    "name": "vendor_sram",
+    "depth": 1024,
+    "width": 8,
+    "ports": [
+      {
+        "clock port name": "clock",
+        "mask granularity": 8,
+        "output port name": "R0O",
+        "address port name": "R0A",
+        "clock port polarity": "positive edge",
+        "output port polarity": "active high",
+        "address port polarity": "active high"
+      },
+      {
+        "clock port name": "clock",
+        "mask granularity": 8,
+        "input port name": "W0I",
+        "address port name": "W0A",
+        "mask port name": "W0M",
+        "chip enable port name": "W0E",
+        "write enable port name": "W0W",
+        "clock port polarity": "positive edge",
+        "input port polarity": "active high",
+        "address port polarity": "active high",
+        "mask port polarity": "active high",
+        "chip enable port polarity": "active high",
+        "write enable port polarity": "active high"
+      }
+    ]
+  }
+]

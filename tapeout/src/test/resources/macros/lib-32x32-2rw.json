@@ -1,0 +1,43 @@
+[
+  {
+    "name": "SRAM2RW32x32",
+    "type": "sram",
+    "family": "2rw",
+    "depth": 32,
+    "width": 32,
+    "ports": [
+      {
+        "clock port name": "CE1",
+        "clock port polarity": "positive edge",
+        "address port name": "A1",
+        "address port polarity": "active high",
+        "input port name": "I1",
+        "input port polarity": "active high",
+        "output port name": "O1",
+        "output port polarity": "active high",
+        "read enable port name": "OEB1",
+        "read enable port polarity": "active low",
+        "write enable port name": "WEB1",
+        "write enable port polarity": "active low",
+        "chip enable port name": "CSB1",
+        "chip enable port polarity": "active low"
+      },
+      {
+        "clock port name": "CE2",
+        "clock port polarity": "positive edge",
+        "address port name": "A2",
+        "address port polarity": "active high",
+        "input port name": "I2",
+        "input port polarity": "active high",
+        "output port name": "O2",
+        "output port polarity": "active high",
+        "read enable port name": "OEB2",
+        "read enable port polarity": "active low",
+        "write enable port name": "WEB2",
+        "write enable port polarity": "active low",
+        "chip enable port name": "CSB2",
+        "chip enable port polarity": "active low"
+      }
+    ]
+  }
+]
