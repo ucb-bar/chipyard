@@ -48,9 +48,9 @@ case class MacroPort(
     width: BigInt,
     depth: BigInt) {
   val effectiveMaskGran = maskGran.getOrElse(width)
-  private val AddrType = UIntType(IntWidth(ceilLog2(depth) max 1))
-  private val DataType = UIntType(IntWidth(width))
-  private val MaskType = UIntType(IntWidth(width / effectiveMaskGran))
+  val AddrType = UIntType(IntWidth(ceilLog2(depth) max 1))
+  val DataType = UIntType(IntWidth(width))
+  val MaskType = UIntType(IntWidth(width / effectiveMaskGran))
   val tpe = BundleType(Seq(
     Field(clockName, Flip, ClockType),
     Field(addressName, Flip, AddrType)) ++
@@ -93,6 +93,10 @@ class Macro(lib: Map[String, Any]) {
       depth
     )
   }
+  val writers = ports filter (p => p.inputName.isDefined && !p.outputName.isDefined)
+  val readers = ports filter (p => !p.inputName.isDefined && p.outputName.isDefined)
+  val readwriters = ports filter (p => p.inputName.isDefined && p.outputName.isDefined)
+  val sortedPorts = writers ++ readers ++ readwriters
   val extraPorts = lib get "extra ports" match {
     case None => Nil
     case Some(p) => p.asInstanceOf[List[_]] map { x =>
@@ -104,6 +108,7 @@ class Macro(lib: Map[String, Any]) {
       (name -> UIntLiteral(value, IntWidth(width)))
     }
   }
+  val tpe = BundleType(ports flatMap (_.tpe.fields))
   private val modPorts = (ports flatMap (_.ports)) ++
     (extraPorts map { case (name, value) => Port(NoInfo, name, Input, value.tpe) })
   val blackbox = ExtModule(NoInfo, name, modPorts, name, Nil)
@@ -140,4 +145,10 @@ object Utils {
     else DoPrim(PrimOps.Cat, Seq(es.head, cat(es.tail)), Nil, UnknownType)
   def not(e: Expression) =
     DoPrim(PrimOps.Not, Seq(e), Nil, e.tpe)
+
+  def invert(exp: Expression, polarity: Option[PortPolarity]) =
+    polarity match {
+      case Some(ActiveLow) | Some(NegativeEdge) => not(exp)
+      case _ => exp
+    }
 }

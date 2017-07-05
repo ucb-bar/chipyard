@@ -25,22 +25,10 @@ object MacroCompilerAnnotation {
   }
 }
 
-class MacroCompilerPass(memFile: Option[File],
-                        libFile: Option[File]) extends firrtl.passes.Pass {
-  require(memFile.isDefined)
-  private val mems: Option[Seq[Macro]] = readJSON(memFile) map (_ map (x => new Macro(x)))
-  private val libs: Option[Seq[Macro]] = readJSON(libFile) map (_ map (x => new Macro(x)))
-
+class MacroCompilerPass(mems: Option[Seq[Macro]],
+                        libs: Option[Seq[Macro]]) extends firrtl.passes.Pass {
   def compile(mem: Macro, lib: Macro): Option[(Module, ExtModule)] = {
-    val pairedPorts = (
-      (mem.ports filter (p => p.inputName.isDefined && !p.outputName.isDefined)) ++ // write
-      (mem.ports filter (p => !p.inputName.isDefined && p.outputName.isDefined)) ++ // read
-      (mem.ports filter (p => p.inputName.isDefined && p.outputName.isDefined)) // read writers
-    ) zip (
-      (lib.ports filter (p => p.inputName.isDefined && !p.outputName.isDefined)) ++ // write
-      (lib.ports filter (p => !p.inputName.isDefined && p.outputName.isDefined)) ++ // read
-      (lib.ports filter (p => p.inputName.isDefined && p.outputName.isDefined)) // read writers
-    )
+    val pairedPorts = mem.sortedPorts zip lib.sortedPorts
 
     // Parallel mapping
     val pairs = ArrayBuffer[(BigInt, BigInt)]()
@@ -74,7 +62,6 @@ class MacroCompilerPass(memFile: Option[File],
     pairs += ((last, mem.width.toInt - 1))
 
     // Serial mapping
-    val instType = BundleType(lib.ports flatMap (_.tpe.fields))
     val stmts = ArrayBuffer[Statement]()
     val selects = HashMap[String, Expression]()
     val outputs = HashMap[String, ArrayBuffer[(Expression, Expression)]]()
@@ -93,7 +80,7 @@ class MacroCompilerPass(memFile: Option[File],
     for ((off, i) <- (0 until mem.depth.toInt by lib.depth.toInt).zipWithIndex) {
       for (j <- pairs.indices) {
         val name = s"mem_${i}_${j}"
-        stmts += WDefInstance(NoInfo, name, lib.name, instType)
+        stmts += WDefInstance(NoInfo, name, lib.name, lib.tpe)
         // connect extra ports
         stmts ++= lib.extraPorts map { case (portName, portValue) =>
           Connect(NoInfo, WSubField(WRef(name), portName), portValue)
@@ -109,12 +96,7 @@ class MacroCompilerPass(memFile: Option[File],
         def andAddrMatch(e: Expression) = and(e, addrMatch)
         val cats = ArrayBuffer[Expression]()
         for (((low, high), j) <- pairs.zipWithIndex) {
-          val inst = WRef(s"mem_${i}_${j}", instType)
-          def invert(exp: Expression, polarity: Option[PortPolarity]) =
-            polarity match {
-              case Some(ActiveLow) | Some(NegativeEdge) => not(exp)
-              case _ => exp
-            }
+          val inst = WRef(s"mem_${i}_${j}", lib.tpe)
 
           def connectPorts(mem: Expression,
                            lib: String,
@@ -344,10 +326,13 @@ class MacroCompilerTransform extends Transform {
   def inputForm = HighForm
   def outputForm = HighForm
   def execute(state: CircuitState) = getMyAnnotations(state) match {
-    case Seq(MacroCompilerAnnotation(state.circuit.main, mem, lib, synflops)) =>
+    case Seq(MacroCompilerAnnotation(state.circuit.main, memFile, libFile, synflops)) =>
+      require(memFile.isDefined)
+      val mems: Option[Seq[Macro]] = readJSON(memFile) map (_ map (x => new Macro(x)))
+      val libs: Option[Seq[Macro]] = readJSON(libFile) map (_ map (x => new Macro(x)))
       val transforms = Seq(
-        new MacroCompilerPass(mem, lib),
-        // TODO: Syn flops
+        new MacroCompilerPass(mems, libs),
+        new SynFlopsPass(synflops, libs getOrElse mems.get),
         firrtl.passes.SplitExpressions
       )
       ((transforms foldLeft state)((s, xform) => xform runTransform s))
@@ -359,7 +344,7 @@ class MacroCompiler extends Compiler {
   def transforms =
     Seq(new MacroCompilerTransform) ++
     getLoweringTransforms(firrtl.HighForm, firrtl.LowForm) // ++
-    // Seq(new LowFirrtlOptimization) // Todo: This is dangerous...
+    // Seq(new LowFirrtlOptimization) // Todo: This is dangerous
 }
 
 object MacroCompiler extends App {

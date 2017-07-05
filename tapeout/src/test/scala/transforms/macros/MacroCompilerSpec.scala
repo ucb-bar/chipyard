@@ -5,6 +5,7 @@ import firrtl.ir.{Circuit, NoInfo}
 import firrtl.passes.RemoveEmpty
 import firrtl.Parser.parse
 import java.io.{File, StringWriter}
+import Utils.readJSON
 
 abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalatest.Matchers {
   val macroDir = new File("tapeout/src/test/resources/macros")
@@ -19,11 +20,16 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
     MacroCompiler.run(args(mem, lib, v, synflops))
   }
 
-  def execute(mem: Option[File], lib: Option[File], synflops: Boolean, output: String) {
-    require(mem.isDefined)
-    val macros = Utils.readJSON(mem).get map (x => (new Macro(x)).blackbox)
+  def execute(memFile: Option[File], libFile: Option[File], synflops: Boolean, output: String) {
+    require(memFile.isDefined)
+    val mems = readJSON(memFile) map (_ map (x => new Macro(x)))
+    val libs = readJSON(libFile) map (_ map (x => new Macro(x)))
+    val macros = mems.get map (_.blackbox)
     val circuit = Circuit(NoInfo, macros, macros.last.name)
-    val passes = Seq(new MacroCompilerPass(mem, lib), RemoveEmpty)
+    val passes = Seq(
+      new MacroCompilerPass(mems, libs),
+      new SynFlopsPass(synflops, libs getOrElse mems.get),
+      RemoveEmpty)
     val result = (passes foldLeft circuit)((c, pass) => pass run c)
     val gold = RemoveEmpty run parse(output)
     (result.serialize) should be (gold.serialize)
