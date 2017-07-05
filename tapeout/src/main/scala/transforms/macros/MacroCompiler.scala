@@ -376,18 +376,19 @@ object MacroCompiler extends App {
         throw new Exception(usage)
     }
 
-  def run(args: List[String]) = {
+  def run(args: List[String]) {
     val (params, synflops) = parseArgs(Map[MacroParam, File](), false, args)
     try {
       val macros = readJSON(params get Macros).get map (x => (new Macro(x)).blackbox)
-      val circuit = Circuit(NoInfo, macros, macros.last.name)
-      val annotations = AnnotationMap(Seq(MacroCompilerAnnotation(
-        circuit.main, params(Macros), params get Library, synflops)))
-      val state = CircuitState(circuit, HighForm, Some(annotations))
       val verilog = new FileWriter(params(Verilog))
-      val result = new MacroCompiler compile (state, verilog)
+      if (macros.nonEmpty) {
+        val circuit = Circuit(NoInfo, macros, macros.last.name)
+        val annotations = AnnotationMap(Seq(MacroCompilerAnnotation(
+          circuit.main, params(Macros), params get Library, synflops)))
+        val state = CircuitState(circuit, HighForm, Some(annotations))
+        val result = new MacroCompiler compile (state, verilog)
+      }
       verilog.close
-      result
     } catch {
       case e: java.util.NoSuchElementException =>
         throw new Exception(usage)

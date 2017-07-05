@@ -128,10 +128,10 @@ object Utils {
             case (res, _) => res
           }
         )
-        case _ => None
+        case _ => Some(Nil)
       }
     } catch {
-      case _: Throwable => None
+      case _: Throwable => Some(Nil)
     }
   }
 
