@@ -67,8 +67,8 @@ case class MacroPort(
 
 class Macro(lib: Map[String, Any]) {
   val name = lib("name").asInstanceOf[String]
-  val width = BigInt(lib("width").asInstanceOf[Double].toInt)
-  val depth = BigInt(lib("depth").asInstanceOf[Double].toInt)
+  val width = BigInt(lib("width").asInstanceOf[Double].toLong)
+  val depth = BigInt(lib("depth").asInstanceOf[Double].toLong)
   val ports = lib("ports").asInstanceOf[List[_]] map { x =>
     val map = x.asInstanceOf[Map[String, Any]]
     MacroPort(
@@ -88,15 +88,26 @@ class Macro(lib: Map[String, Any]) {
       map get "write enable port polarity",
       map get "mask port name" map (_.asInstanceOf[String]),
       map get "mask port polarity",
-      map get "mask granularity" map (x => BigInt(x.asInstanceOf[Double].toInt)),
+      map get "mask granularity" map (x => BigInt(x.asInstanceOf[Double].toLong)),
       width,
       depth
     )
   }
-  private val modPorts = ports flatMap (_.ports)
+  val extraPorts = lib get "extra ports" match {
+    case None => Nil
+    case Some(p) => p.asInstanceOf[List[_]] map { x =>
+      val map = x.asInstanceOf[Map[String, Any]]
+      assert(map("type").asInstanceOf[String] == "constant") // TODO: release it?
+      val name = map("name").asInstanceOf[String]
+      val width = BigInt(map("width").asInstanceOf[Double].toLong)
+      val value = BigInt(map("value").asInstanceOf[Double].toLong)
+      (name -> UIntLiteral(value, IntWidth(width)))
+    }
+  }
+  private val modPorts = (ports flatMap (_.ports)) ++
+    (extraPorts map { case (name, value) => Port(NoInfo, name, Input, value.tpe) })
   val blackbox = ExtModule(NoInfo, name, modPorts, name, Nil)
   def module(body: Statement) = Module(NoInfo, name, modPorts, body)
-
 }
 
 object Utils {

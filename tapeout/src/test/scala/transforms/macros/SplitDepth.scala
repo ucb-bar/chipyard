@@ -217,3 +217,59 @@ circuit name_of_sram_module :
   compile(mem, Some(lib), v, false)
   execute(Some(mem), Some(lib), false, output)
 }
+
+
+class SplitDepth2048x8_mrw_Sleep extends MacroCompilerSpec {
+  val mem = new File(macroDir, "mem-2048x8-mrw.json")
+  val lib = new File(macroDir, "lib-1024x8-sleep.json")
+  val v = new File(testDir, "split_depth_2048x8_sleep.v")
+  val output =
+"""
+circuit name_of_sram_module :
+  module name_of_sram_module :
+    input clock : Clock
+    input RW0A : UInt<11>
+    input RW0I : UInt<8>
+    output RW0O : UInt<8>
+    input RW0E : UInt<1>
+    input RW0W : UInt<1>
+    input RW0M : UInt<1>
+
+    node RW0A_sel = bits(RW0A, 10, 10)
+    inst mem_0_0 of vendor_sram
+    mem_0_0.sleep <= UInt<1>("h0")
+    mem_0_0.clock <= clock
+    mem_0_0.RW0A <= RW0A
+    node RW0O_0_0 = bits(mem_0_0.RW0O, 7, 0)
+    mem_0_0.RW0I <= bits(RW0I, 7, 0)
+    mem_0_0.RW0M <= bits(RW0M, 0, 0)
+    mem_0_0.RW0W <= and(RW0W, eq(RW0A_sel, UInt<1>("h0")))
+    mem_0_0.RW0E <= and(RW0E, eq(RW0A_sel, UInt<1>("h0")))
+    node RW0O_0 = RW0O_0_0
+    inst mem_1_0 of vendor_sram
+    mem_1_0.sleep <= UInt<1>("h0")
+    mem_1_0.clock <= clock
+    mem_1_0.RW0A <= RW0A
+    node RW0O_1_0 = bits(mem_1_0.RW0O, 7, 0)
+    mem_1_0.RW0I <= bits(RW0I, 7, 0)
+    mem_1_0.RW0M <= bits(RW0M, 0, 0)
+    mem_1_0.RW0W <= and(RW0W, eq(RW0A_sel, UInt<1>("h1")))
+    mem_1_0.RW0E <= and(RW0E, eq(RW0A_sel, UInt<1>("h1")))
+    node RW0O_1 = RW0O_1_0
+    RW0O <= mux(eq(RW0A_sel, UInt<1>("h0")), RW0O_0, mux(eq(RW0A_sel, UInt<1>("h1")), RW0O_1, UInt<1>("h0")))
+
+  extmodule vendor_sram :
+    input clock : Clock
+    input RW0A : UInt<10>
+    input RW0I : UInt<8>
+    output RW0O : UInt<8>
+    input RW0E : UInt<1>
+    input RW0W : UInt<1>
+    input RW0M : UInt<1>
+    input sleep : UInt<1>
+
+    defname = vendor_sram  
+"""
+  compile(mem, Some(lib), v, false)
+  execute(Some(mem), Some(lib), false, output)
+}

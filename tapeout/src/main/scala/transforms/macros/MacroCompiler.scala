@@ -92,7 +92,12 @@ class MacroCompilerPass(memFile: Option[File],
     }
     for ((off, i) <- (0 until mem.depth.toInt by lib.depth.toInt).zipWithIndex) {
       for (j <- pairs.indices) {
-        stmts += WDefInstance(NoInfo, s"mem_${i}_${j}", lib.name, instType)
+        val name = s"mem_${i}_${j}"
+        stmts += WDefInstance(NoInfo, name, lib.name, instType)
+        // connect extra ports
+        stmts ++= lib.extraPorts map { case (portName, portValue) =>
+          Connect(NoInfo, WSubField(WRef(name), portName), portValue)
+        }
       }
       for ((memPort, libPort) <- pairedPorts) {
         val addrMatch = selects get memPort.addressName match {
