@@ -83,6 +83,31 @@ By passing the +blkdev argument on the simulator command line, you can allow
 the RTL simulation to read and write from a file. Take a look at tests/blkdev.c
 for an example of how Rocket can program the block device controller.
 
+## Using the network device
+
+Testchipip also includes a basic ethernet controller (SimpleNIC). The simulator
+provides a way to connect this up to a tap interface and thus interact with
+rocketchip as if it was a regular network node.
+
+First set up the tap interface. If you want to run the simulation as a regular
+user (recommended), use the following commands.
+
+    sudo ip tuntap add mode tap dev tap0 user $USER
+    sudo ip link set tap0 up
+    sudo ip addr add 192.168.1.1/24 dev tap0
+
+Then build the SimNetworkConfig and pass it the name of the tap interface
+
+    make CONFIG=SimNetworkConfig
+    ./simulator-example-SimNetworkConfig +netdev=tap0 ../tests/pingd.riscv
+
+Then run ping in a separate terminal.
+
+    ping 192.168.1.2
+
+You should now see the ping responses come back. The `pingd.riscv` program
+will also log each packet it receives.
+
 ## Adding an MMIO peripheral
 
 You can RocketChip to create your own memory-mapped IO device and add it into
