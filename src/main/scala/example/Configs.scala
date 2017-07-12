@@ -1,10 +1,10 @@
 package example
 
 import chisel3._
-import config.{Parameters, Config}
-import diplomacy.LazyModule
-import coreplex.WithRoccExample
-import rocketchip.WithoutTLMonitors
+import freechips.rocketchip.chip.WithoutTLMonitors
+import freechips.rocketchip.config.{Parameters, Config}
+import freechips.rocketchip.coreplex.WithRoccExample
+import freechips.rocketchip.diplomacy.LazyModule
 import testchipip._
 
 class WithExampleTop extends Config((site, here, up) => {
@@ -52,7 +52,7 @@ class WithSimNetwork extends Config((site, here, up) => {
 class BaseExampleConfig extends Config(
   new WithoutTLMonitors ++
   new WithSerialAdapter ++
-  new rocketchip.DefaultConfig)
+  new freechips.rocketchip.chip.DefaultConfig)
 
 class DefaultExampleConfig extends Config(
   new WithExampleTop ++ new BaseExampleConfig)

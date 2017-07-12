@@ -1,10 +1,9 @@
 package example
 
-import diplomacy.LazyModule
-import rocketchip._
-import testchipip._
 import chisel3._
-import config.{Field, Parameters}
+import freechips.rocketchip.diplomacy.LazyModule
+import freechips.rocketchip.config.{Field, Parameters}
+import testchipip.GeneratorApp
 
 case object BuildTop extends Field[Parameters => ExampleTopModule[ExampleTop]]
 

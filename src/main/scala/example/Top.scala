@@ -1,9 +1,9 @@
 package example
 
 import chisel3._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
+import freechips.rocketchip.chip._
 import testchipip._
-import rocketchip._
 
 class ExampleTop(implicit p: Parameters) extends BaseSystem
     with HasPeripheryMasterAXI4MemPort

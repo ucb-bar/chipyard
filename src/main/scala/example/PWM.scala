@@ -2,14 +2,12 @@ package example
 
 import chisel3._
 import chisel3.util._
-import config.{Parameters, Field}
-import uncore.tilelink._
-import uncore.tilelink2._
-import junctions._
-import diplomacy._
-import regmapper.{HasRegMap, RegField}
-import rocketchip._
-import _root_.util.UIntIsOneOf
+import freechips.rocketchip.config.{Parameters, Field}
+import freechips.rocketchip.chip._
+import freechips.rocketchip.diplomacy._
+import freechips.rocketchip.regmapper.{HasRegMap, RegField}
+import freechips.rocketchip.tilelink._
+import freechips.rocketchip.util.UIntIsOneOf
 
 case class PWMParams(address: BigInt, beatBytes: Int)
 
