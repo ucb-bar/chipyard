@@ -11,7 +11,10 @@ lookup_scala_srcs = $(shell find $(1)/ -iname "*.scala" 2> /dev/null)
 
 libs: $(rocketchip_stamp) $(extra_stamps)
 
-$(rocketchip_stamp): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR))
+FIRRTL_JAR ?= $(ROCKETCHIP_DIR)/firrtl/utils/bin/firrtl.jar
+FIRRTL ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -cp $(FIRRTL_JAR) firrtl.Driver
+
+$(rocketchip_stamp): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR)) $(FIRRTL_JAR)
 	cd $(ROCKETCHIP_DIR) && $(SBT) pack
 	mkdir -p $(lib_dir)
 	cp $(ROCKETCHIP_DIR)/target/pack/lib/*.jar $(lib_dir)
@@ -22,11 +25,10 @@ $(rocketchip_stamp): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR))
 $(base_dir)/Makefrag.pkgs: $(base_dir)/generate-pkg-mk.sh
 	bash $(base_dir)/generate-pkg-mk.sh $(EXTRA_PACKAGES) > $@
 
-FIRRTL_JAR ?= $(ROCKETCHIP_DIR)/firrtl/utils/bin/firrtl.jar
-FIRRTL ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -cp $(FIRRTL_JAR) firrtl.Driver
-
 $(FIRRTL_JAR): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR)/firrtl/src/main/scala)
 	$(MAKE) -C $(ROCKETCHIP_DIR)/firrtl SBT="$(SBT)" root_dir=$(ROCKETCHIP_DIR)/firrtl build-scala
+	mkdir -p $(ROCKETCHIP_DIR)/lib
+	cp -p $(FIRRTL_JAR) $(ROCKETCHIP_DIR)/lib
 
 build_dir=$(sim_dir)/generated-src
 
