@@ -1,7 +1,7 @@
 package example
 
 import chisel3._
-import freechips.rocketchip.chip.WithoutTLMonitors
+import freechips.rocketchip.chip._
 import freechips.rocketchip.config.{Parameters, Config}
 import freechips.rocketchip.coreplex.WithRoccExample
 import freechips.rocketchip.diplomacy.LazyModule
@@ -76,3 +76,6 @@ class SimNetworkConfig extends Config(
 
 class WithTwoTrackers extends WithNBlockDeviceTrackers(2)
 class WithFourTrackers extends WithNBlockDeviceTrackers(4)
+
+class WithTwoMemChannels extends WithNMemoryChannels(2)
+class WithFourMemChannels extends WithNMemoryChannels(4)
