@@ -69,4 +69,4 @@ $(sim_debug): $(model_mk_debug) $(sim_csrcs)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(MODEL).mk
 
 clean:
-	rm -rf generated-src
+	rm -rf generated-src ./simulator-*

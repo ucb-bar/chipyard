@@ -1,5 +1,5 @@
 # Build and install our own Verilator, to work around versionining issues.
-VERILATOR_VERSION=3.884
+VERILATOR_VERSION=3.904
 VERILATOR_SRCDIR=verilator/src/verilator-$(VERILATOR_VERSION)
 INSTALLED_VERILATOR=$(abspath verilator/install/bin/verilator)
 $(INSTALLED_VERILATOR): $(VERILATOR_SRCDIR)/bin/verilator

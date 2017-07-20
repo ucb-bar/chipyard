@@ -50,7 +50,6 @@ class WithSimNetwork extends Config((site, here, up) => {
 })
 
 class BaseExampleConfig extends Config(
-  new WithoutTLMonitors ++
   new WithSerialAdapter ++
   new freechips.rocketchip.chip.DefaultConfig)
 
