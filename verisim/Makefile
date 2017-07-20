@@ -14,7 +14,7 @@ default: $(sim)
 
 debug: $(sim_debug)
 
-CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include
+CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -D__STDC_FORMAT_MACROS
 LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesvr -lpthread
 
 include $(base_dir)/Makefrag
