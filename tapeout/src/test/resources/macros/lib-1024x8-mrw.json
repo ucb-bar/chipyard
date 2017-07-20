@@ -4,6 +4,7 @@
     "name": "vendor_sram",
     "depth": 1024,
     "width": 8,
+    "family": "1rw",
     "ports": [
       {
         "clock port name": "clock",

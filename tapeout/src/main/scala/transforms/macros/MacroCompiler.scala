@@ -8,19 +8,20 @@ import firrtl.PrimOps
 import firrtl.Utils._
 import firrtl.annotations._
 import firrtl.CompilerUtils.getLoweringTransforms
+import mdf.macrolib.{PolarizedPort, PortPolarity}
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 import java.io.{File, FileWriter}
 import Utils._
 
 object MacroCompilerAnnotation {
-  def apply(c: String, mem: File, lib: Option[File], synflops: Boolean) = {
+  def apply(c: String, mem: String, lib: Option[String], synflops: Boolean) = {
     Annotation(CircuitName(c), classOf[MacroCompilerTransform],
       s"${mem} %s ${synflops}".format(lib map (_.toString) getOrElse ""))
   }
   private val matcher = "([^ ]+) ([^ ]*) (true|false)".r
   def unapply(a: Annotation) = a match {
     case Annotation(CircuitName(c), t, matcher(mem, lib, synflops)) if t == classOf[MacroCompilerTransform] =>
-      Some((c, Some(new File(mem)), if (lib.isEmpty) None else Some(new File(lib)), synflops.toBoolean))
+      Some((c, Some(mem), if (lib.isEmpty) None else Some(lib), synflops.toBoolean))
     case _ => None
   }
 }
@@ -33,11 +34,11 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
     // Parallel mapping
     val pairs = ArrayBuffer[(BigInt, BigInt)]()
     var last = 0
-    for (i <- 0 until mem.width.toInt) {
+    for (i <- 0 until mem.src.width) {
       if (i <= last + 1) {
         /* Palmer: Every memory is going to have to fit at least a single bit. */
         // continue
-      } else if ((i - last) % lib.width.toInt == 0) {
+      } else if ((i - last) % lib.src.width.toInt == 0) {
         /* Palmer: It's possible that we rolled over a memory's width here,
                    if so generate one. */
         pairs += ((last, i-1))
@@ -45,13 +46,13 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
       } else {
         /* Palmer: FIXME: This is a mess, I must just be super confused. */
         for ((memPort, libPort) <- pairedPorts) {
-          (memPort.maskGran, libPort.maskGran) match {
+          (memPort.src.maskGran, libPort.src.maskGran) match {
             case (_, Some(p)) if p == 1 => // continue
             case (Some(p), _) if i % p == 0 =>
               pairs += ((last, i-1))
               last = i
             case (_, None) => // continue
-            case (_, Some(p)) if p == lib.width => // continue
+            case (_, Some(p)) if p == lib.src.width => // continue
             case _ =>
               System.err println "Bit-mask (or unmasked) target memories are supported only"
               return None
@@ -59,7 +60,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
         }
       }
     }
-    pairs += ((last, mem.width.toInt - 1))
+    pairs += ((last, mem.src.width.toInt - 1))
 
     // Serial mapping
     val stmts = ArrayBuffer[Statement]()
@@ -67,27 +68,27 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
     val outputs = HashMap[String, ArrayBuffer[(Expression, Expression)]]()
     /* Palmer: If we've got a parallel memory then we've got to take the
       * address bits into account. */
-    if (mem.depth > lib.depth) {
-      mem.ports foreach { port =>
-        val high = ceilLog2(mem.depth)
-        val low = ceilLog2(lib.depth)
-        val ref = WRef(port.addressName)
+    if (mem.src.depth > lib.src.depth) {
+      mem.src.ports foreach { port =>
+        val high = ceilLog2(mem.src.depth)
+        val low = ceilLog2(lib.src.depth)
+        val ref = WRef(port.address.name)
         val name = s"${ref.name}_sel"
         selects(ref.name) =  WRef(name, UIntType(IntWidth(high-low)))
         stmts += DefNode(NoInfo, name, bits(ref, high-1, low))
       }
     }
-    for ((off, i) <- (0 until mem.depth.toInt by lib.depth.toInt).zipWithIndex) {
+    for ((off, i) <- (0 until mem.src.depth by lib.src.depth).zipWithIndex) {
       for (j <- pairs.indices) {
         val name = s"mem_${i}_${j}"
-        stmts += WDefInstance(NoInfo, name, lib.name, lib.tpe)
+        stmts += WDefInstance(NoInfo, name, lib.src.name, lib.tpe)
         // connect extra ports
         stmts ++= lib.extraPorts map { case (portName, portValue) =>
           Connect(NoInfo, WSubField(WRef(name), portName), portValue)
         }
       }
       for ((memPort, libPort) <- pairedPorts) {
-        val addrMatch = selects get memPort.addressName match {
+        val addrMatch = selects get memPort.src.address.name match {
           case None => one
           case Some(addr) =>
             val index = UIntLiteral(i, IntWidth(bitWidth(addr.tpe)))
@@ -98,33 +99,37 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
         for (((low, high), j) <- pairs.zipWithIndex) {
           val inst = WRef(s"mem_${i}_${j}", lib.tpe)
 
-          def connectPorts(mem: Expression,
+          def connectPorts2(mem: Expression,
                            lib: String,
                            polarity: Option[PortPolarity]): Statement =
-            Connect(NoInfo, WSubField(inst, lib), invert(mem, polarity))
+            Connect(NoInfo, WSubField(inst, lib), portToExpression(mem, polarity))
+          def connectPorts(mem: Expression,
+                           lib: String,
+                           polarity: PortPolarity): Statement =
+            connectPorts2(mem, lib, Some(polarity))
 
           // Clock port mapping
           /* Palmer: FIXME: I don't handle memories with read/write clocks yet. */
-          stmts += connectPorts(WRef(memPort.clockName),
-                                libPort.clockName,
-                                libPort.clockPolarity)
+          stmts += connectPorts(WRef(memPort.src.clock.name),
+                                libPort.src.clock.name,
+                                libPort.src.clock.polarity)
 
           // Adress port mapping
           /* Palmer: The address port to a memory is just the low-order bits of
            * the top address. */
-          stmts += connectPorts(WRef(memPort.addressName),
-                                libPort.addressName,
-                                libPort.addressPolarity)
+          stmts += connectPorts(WRef(memPort.src.address.name),
+                                libPort.src.address.name,
+                                libPort.src.address.polarity)
 
           // Output port mapping
-          (memPort.outputName, libPort.outputName) match {
-            case  (Some(mem), Some(lib)) =>
+          (memPort.src.output, libPort.src.output) match {
+            case (Some(PolarizedPort(mem, _)), Some(PolarizedPort(lib, lib_polarity))) =>
               /* Palmer: In order to produce the output of a memory we need to cat
                * together a bunch of narrower memories, which can only be
                * done after generating all the memories.  This saves up the
                * output statements for later. */
               val name = s"${mem}_${i}_${j}"
-              val exp = invert(bits(WSubField(inst, lib), high-low, 0), libPort.outputPolarity)
+              val exp = portToExpression(bits(WSubField(inst, lib), high-low, 0), Some(lib_polarity))
               stmts += DefNode(NoInfo, name, exp)
               cats += WRef(name)
             case (None, Some(lib)) =>
@@ -135,18 +140,18 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
               /* Palmer: If there's no output ports at all (ie, read-only
                * port on the memory) then just don't worry about it,
                * there's nothing to do. */
-            case (Some(mem), None) =>
+            case (Some(PolarizedPort(mem, _)), None) =>
               System.err println "WARNING: Unable to match output ports on memory"
               System.err println s"  outer output port: ${mem}"
               return None
           }
 
           // Input port mapping
-          (memPort.inputName, libPort.inputName) match {
-            case (Some(mem), Some(lib)) =>
+          (memPort.src.input, libPort.src.input) match {
+            case (Some(PolarizedPort(mem, _)), Some(PolarizedPort(lib, lib_polarity))) =>
               /* Palmer: The input port to a memory just needs to happen in parallel,
                * this does a part select to narrow the memory down. */
-              stmts += connectPorts(bits(WRef(mem), high, low), lib, libPort.inputPolarity)
+              stmts += connectPorts(bits(WRef(mem), high, low), lib, lib_polarity)
             case (None, Some(lib)) =>
               /* Palmer: If the inner memory has an input port but the other
                * one doesn't then it's safe to just leave the inner
@@ -157,43 +162,43 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
               /* Palmer: If there's no input ports at all (ie, read-only
                * port on the memory) then just don't worry about it,
                * there's nothing to do. */
-            case (Some(mem), None) =>
+            case (Some(PolarizedPort(mem, _)), None) =>
               System.err println "WARNING: Unable to match input ports on memory"
               System.err println s"  outer input port: ${mem}"
               return None
           }
 
           // Mask port mapping
-          val memMask = memPort.maskName match {
-            case Some(mem) =>
+          val memMask = memPort.src.maskPort match {
+            case Some(PolarizedPort(mem, _)) =>
               /* Palmer: The bits from the outer memory's write mask that will be
                * used as the write mask for this inner memory. */
-              if (libPort.effectiveMaskGran == libPort.width) {
-                bits(WRef(mem), low / memPort.effectiveMaskGran)
+              if (libPort.src.effectiveMaskGran == libPort.src.width) {
+                bits(WRef(mem), low / memPort.src.effectiveMaskGran)
               } else {
-                if (libPort.effectiveMaskGran != 1) {
+                if (libPort.src.effectiveMaskGran != 1) {
                   // TODO
                   System.err println "only single-bit mask supported"
                   return None
                 }
-                cat(((low to high) map (i => bits(WRef(mem), i / memPort.effectiveMaskGran))).reverse)
+                cat(((low to high) map (i => bits(WRef(mem), i / memPort.src.effectiveMaskGran))).reverse)
               }
             case None =>
               /* Palmer: If there is no input port on the source memory port
                * then we don't ever want to turn on this write
                * enable.  Otherwise, we just _always_ turn on the
                * write enable port on the inner memory. */
-              if (!libPort.maskName.isDefined) one
+              if (libPort.src.maskPort.isEmpty) one
               else {
-                val width = libPort.width / libPort.effectiveMaskGran
+                val width = libPort.src.width / libPort.src.effectiveMaskGran
                 val value = (BigInt(1) << width.toInt) - 1
                 UIntLiteral(value, IntWidth(width))
               }
           }
 
           // Write enable port mapping
-          val memWriteEnable = memPort.writeEnableName match {
-            case Some(mem) =>
+          val memWriteEnable = memPort.src.writeEnable match {
+            case Some(PolarizedPort(mem, _)) =>
               /* Palmer: The outer memory's write enable port, or a constant 1 if
                * there isn't a write enable port. */
               WRef(mem)
@@ -202,60 +207,65 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
                * then we don't ever want to turn on this write
                * enable.  Otherwise, we just _always_ turn on the
                * write enable port on the inner memory. */
-              if (!memPort.inputName.isDefined) zero else one
+              if (memPort.src.input.isEmpty) zero else one
           }
 
           // Chip enable port mapping
-          val memChipEnable = memPort.chipEnableName match {
-            case Some(mem) => WRef(mem)
+          val memChipEnable = memPort.src.chipEnable match {
+            case Some(PolarizedPort(mem, _)) => WRef(mem)
             case None      => one
           }
 
-          // Read enable port mapping 
+          // Read enable port mapping
           /* Palmer: It's safe to ignore read enables, but we pass them through
            * to the vendor memory if there's a port on there that
            * implements the read enables. */
-          (memPort.readEnableName, libPort.readEnableName) match {
+          (memPort.src.readEnable, libPort.src.readEnable) match {
             case (_, None) =>
-            case (Some(mem), Some(lib)) =>
-              stmts += connectPorts(andAddrMatch(WRef(mem)), lib, libPort.readEnablePolarity)
-            case (None, Some(lib)) =>
-              stmts += connectPorts(andAddrMatch(not(memWriteEnable)), lib, libPort.readEnablePolarity)
+            case (Some(PolarizedPort(mem, _)), Some(PolarizedPort(lib, lib_polarity))) =>
+              stmts += connectPorts(andAddrMatch(WRef(mem)), lib, lib_polarity)
+            case (None, Some(PolarizedPort(lib, lib_polarity))) =>
+              stmts += connectPorts(andAddrMatch(not(memWriteEnable)), lib, lib_polarity)
           }
 
           /* Palmer: This is actually the memory compiler: it figures out how to
            * implement the outer memory's collection of ports using what
-           * the inner memory has availiable. */ 
-          ((libPort.maskName, libPort.writeEnableName, libPort.chipEnableName): @unchecked) match {
-            case (Some(mask), Some(we), Some(en)) =>
+           * the inner memory has availiable. */
+          ((libPort.src.maskPort, libPort.src.writeEnable, libPort.src.chipEnable): @unchecked) match {
+            case (Some(PolarizedPort(mask, mask_polarity)), Some(PolarizedPort(we, we_polarity)), Some(PolarizedPort(en, en_polarity))) =>
               /* Palmer: This is the simple option: every port exists. */
-              stmts += connectPorts(memMask, mask, libPort.maskPolarity)
-              stmts += connectPorts(andAddrMatch(memWriteEnable), we, libPort.writeEnablePolarity) 
-              stmts += connectPorts(andAddrMatch(memChipEnable), en, libPort.chipEnablePolarity)
-            case (Some(mask), Some(we), None) =>
-              /* Palmer: If we don't have a chip enable but do have */
-              stmts += connectPorts(memMask, mask, libPort.maskPolarity)
+              stmts += connectPorts(memMask, mask, mask_polarity)
+              stmts += connectPorts(andAddrMatch(memWriteEnable), we, we_polarity)
+              stmts += connectPorts(andAddrMatch(memChipEnable), en, en_polarity)
+            case (Some(PolarizedPort(mask, mask_polarity)), Some(PolarizedPort(we, we_polarity)), None) =>
+              /* Palmer: If we don't have a chip enable but do have mask ports. */
+              stmts += connectPorts(memMask, mask, mask_polarity)
               stmts += connectPorts(andAddrMatch(and(memWriteEnable, memChipEnable)),
-                                    we, libPort.writeEnablePolarity)
-            case (None, Some(we), Some(en)) if bitWidth(memMask.tpe) == 1 =>
+                                    we, mask_polarity)
+            case (None, Some(PolarizedPort(we, we_polarity)), chipEnable) if bitWidth(memMask.tpe) == 1 =>
               /* Palmer: If we're expected to provide mask ports without a
                * memory that actually has them then we can use the
                * write enable port instead of the mask port. */
               stmts += connectPorts(andAddrMatch(and(memWriteEnable, memMask)),
-                                    we, libPort.writeEnablePolarity)
-              stmts += connectPorts(andAddrMatch(memChipEnable), en, libPort.chipEnablePolarity)
-            case (None, Some(we), Some(en)) =>
+                                    we, we_polarity)
+              chipEnable match {
+                case Some(PolarizedPort(en, en_polarity)) => {
+                  stmts += connectPorts(andAddrMatch(memChipEnable), en, en_polarity)
+                }
+                case _ => // TODO: do we care about the case where mem has chipEnable but lib doesn't?
+              }
+            case (None, Some(PolarizedPort(we, we_polarity)), Some(PolarizedPort(en, en_polarity))) =>
               // TODO
-              System.err println "cannot emulate multi-bit mask ports with write enable"
+              System.err.println("cannot emulate multi-bit mask ports with write enable")
               return None
             case (None, None, None) =>
               /* Palmer: There's nothing to do here since there aren't any
-               * ports to match up. */ 
+               * ports to match up. */
           }
         }
         // Cat macro outputs for selection
-        memPort.outputName match {
-          case Some(mem) if cats.nonEmpty =>
+        memPort.src.output match {
+          case Some(PolarizedPort(mem, _)) if cats.nonEmpty =>
             val name = s"${mem}_${i}"
             stmts += DefNode(NoInfo, name, cat(cats.toSeq.reverse))
             (outputs getOrElseUpdate (mem, ArrayBuffer[(Expression, Expression)]())) +=
@@ -265,9 +275,9 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
       }
     }
     // Connect mem outputs
-    mem.ports foreach { port =>
-      port.outputName match {
-        case Some(mem) => outputs get mem match {
+    mem.src.ports foreach { port =>
+      port.output match {
+        case Some(PolarizedPort(mem, _)) => outputs get mem match {
           case Some(select) =>
             val output = (select foldRight (zero: Expression)) {
               case ((cond, tval), fval) => Mux(cond, tval, fval, fval.tpe) }
@@ -285,10 +295,10 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
     val modules = (mems, libs) match {
       case (Some(mems), Some(libs)) => (mems foldLeft c.modules){ (modules, mem) =>
         val (best, cost) = (libs foldLeft (None: Option[(Module, ExtModule)], BigInt(Long.MaxValue))){
-          case ((best, area), lib) if mem.ports.size != lib.ports.size =>
+          case ((best, area), lib) if mem.src.ports.size != lib.src.ports.size =>
             /* Palmer: FIXME: This just assumes the Chisel and vendor ports are in the same
              * order, but I'm starting with what actually gets generated. */
-            System.err println s"INFO: unable to compile ${mem.name} using ${lib.name} port count must match"
+            System.err println s"INFO: unable to compile ${mem.src.name} using ${lib.src.name} port count must match"
             (best, area)
           case ((best, area), lib) =>
             /* Palmer: A quick cost function (that must be kept in sync with
@@ -298,10 +308,10 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
             // val cost = 100 * (mem.depth * mem.width) / (lib.depth * lib.width) +
             //                  (mem.depth * mem.width)
             // Donggyu: I re-define cost
-            val cost = (((mem.depth - 1) / lib.depth) + 1) *
-                       (((mem.width - 1) / lib.width) + 1) *
-                       (lib.depth * lib.width + 1) // weights on # cells
-            System.err println s"Cost of ${lib.name} for ${mem.name}: ${cost}"
+            val cost = (((mem.src.depth - 1) / lib.src.depth) + 1) *
+                       (((mem.src.width - 1) / lib.src.width) + 1) *
+                       (lib.src.depth * lib.src.width + 1) // weights on # cells
+            System.err.println(s"Cost of ${lib.src.name} for ${mem.src.name}: ${cost}")
             if (cost > area) (best, area)
             else compile(mem, lib) match {
               case None => (best, area)
@@ -326,8 +336,17 @@ class MacroCompilerTransform extends Transform {
   def execute(state: CircuitState) = getMyAnnotations(state) match {
     case Seq(MacroCompilerAnnotation(state.circuit.main, memFile, libFile, synflops)) =>
       require(memFile.isDefined)
-      val mems: Option[Seq[Macro]] = readJSON(memFile) map (_ map (x => new Macro(x)))
-      val libs: Option[Seq[Macro]] = readJSON(libFile) map (_ map (x => new Macro(x)))
+      // Read, eliminate None, get only SRAM, make firrtl macro
+      val mems: Option[Seq[Macro]] = mdf.macrolib.Utils.readMDFFromPath(memFile) match {
+        case Some(x:Seq[mdf.macrolib.Macro]) =>
+          Some(Utils.filterForSRAM(Some(x)) getOrElse(List()) map {new Macro(_)})
+        case _ => None
+      }
+      val libs: Option[Seq[Macro]] = mdf.macrolib.Utils.readMDFFromPath(libFile) match {
+        case Some(x:Seq[mdf.macrolib.Macro]) =>
+          Some(Utils.filterForSRAM(Some(x)) getOrElse(List()) map {new Macro(_)})
+        case _ => None
+      }
       val transforms = Seq(
         new MacroCompilerPass(mems, libs),
         new SynFlopsPass(synflops, libs getOrElse mems.get),
@@ -349,24 +368,24 @@ object MacroCompiler extends App {
   sealed trait MacroParam
   case object Macros extends MacroParam
   case object Library extends MacroParam
-  case object Verilog extends MacroParam 
-  type MacroParamMap = Map[MacroParam, File]
+  case object Verilog extends MacroParam
+  type MacroParamMap = Map[MacroParam, String]
   val usage = Seq(
     "Options:",
     "  -m, --macro-list: The set of macros to compile",
     "  -l, --library: The set of macros that have blackbox instances",
     "  -v, --verilog: Verilog output",
-    "  --syn-flop: Produces synthesizable flop-based memories") mkString "\n"
+    "  --syn-flop: Produces synthesizable flop-based memories (for all memories and library memory macros); likely useful for simulation purposes") mkString "\n"
 
   def parseArgs(map: MacroParamMap, synflops: Boolean, args: List[String]): (MacroParamMap, Boolean) =
     args match {
       case Nil => (map, synflops)
       case ("-m" | "--macro-list") :: value :: tail =>
-        parseArgs(map + (Macros  -> new File(value)), synflops, tail)
+        parseArgs(map + (Macros  -> value), synflops, tail)
       case ("-l" | "--library") :: value :: tail =>
-        parseArgs(map + (Library -> new File(value)), synflops, tail)
+        parseArgs(map + (Library -> value), synflops, tail)
       case ("-v" | "--verilog") :: value :: tail =>
-        parseArgs(map + (Verilog -> new File(value)), synflops, tail)
+        parseArgs(map + (Verilog -> value), synflops, tail)
       case "--syn-flops" :: tail =>
         parseArgs(map, true, tail)
       case arg :: tail =>
@@ -375,18 +394,29 @@ object MacroCompiler extends App {
     }
 
   def run(args: List[String]) {
-    val (params, synflops) = parseArgs(Map[MacroParam, File](), false, args)
+    val (params, synflops) = parseArgs(Map[MacroParam, String](), false, args)
     try {
-      val macros = readJSON(params get Macros).get map (x => (new Macro(x)).blackbox)
-      val verilog = new FileWriter(params(Verilog))
+      val macros = Utils.filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(params.get(Macros))).get map (x => (new Macro(x)).blackbox)
+
+      // Open the writer for the output Verilog file.
+      val verilogWriter = new FileWriter(new File(params.get(Verilog).get))
+
       if (macros.nonEmpty) {
         val circuit = Circuit(NoInfo, macros, macros.last.name)
         val annotations = AnnotationMap(Seq(MacroCompilerAnnotation(
-          circuit.main, params(Macros), params get Library, synflops)))
+          circuit.main, params.get(Macros).get, params.get(Library), synflops)))
         val state = CircuitState(circuit, HighForm, Some(annotations))
-        val result = new MacroCompiler compile (state, verilog)
+
+        // Run the compiler.
+        val result = new MacroCompiler().compileAndEmit(state)
+
+        // Extract Verilog circuit and write it.
+        verilogWriter.write(result.getEmittedCircuit.value)
       }
-      verilog.close
+
+      // Close the writer.
+      verilogWriter.close()
+
     } catch {
       case e: java.util.NoSuchElementException =>
         throw new Exception(usage)

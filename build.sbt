@@ -15,11 +15,18 @@ val defaultVersions = Map(
   "chisel-iotesters" -> "1.2-SNAPSHOT"
 )
 
+lazy val mdf = RootProject(file("mdf/scalalib"))
+
 lazy val tapeout = (project in file("tapeout"))
+  .dependsOn(mdf)
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq("chisel3","chisel-iotesters").map {
       dep: String => "edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", defaultVersions(dep))
-    }
+    },
+    resolvers ++= Seq(
+      Resolver.sonatypeRepo("snapshots"),
+      Resolver.sonatypeRepo("releases")
+    )
   )
   .settings(scalacOptions in Test ++= Seq("-language:reflectiveCalls"))

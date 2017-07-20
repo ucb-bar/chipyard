@@ -9,9 +9,9 @@ import firrtl.passes.MemPortUtils.{memPortField, memType}
 import Utils._
 
 class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pass {
-  lazy val libMods = (libs map { lib => lib.name -> {
-    val dataType = (lib.ports foldLeft (None: Option[BigInt]))((res, port) =>
-      (res, port.maskName) match {
+  lazy val libMods = (libs map { lib => lib.src.name -> {
+    val dataType = (lib.src.ports foldLeft (None: Option[BigInt]))((res, port) =>
+      (res, port.maskPort) match {
         case (_, None) =>
           res
         case (None, Some(_)) =>
@@ -21,15 +21,15 @@ class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pa
           res
       }
     ) match {
-      case None => UIntType(IntWidth(lib.width))
-      case Some(gran) => VectorType(UIntType(IntWidth(gran)), (lib.width / gran).toInt)
+      case None => UIntType(IntWidth(lib.src.width))
+      case Some(gran) => VectorType(UIntType(IntWidth(gran)), (lib.src.width / gran).toInt)
     }
 
     val mem = DefMemory(
       NoInfo,
       "ram",
       dataType,
-      lib.depth.toInt,
+      lib.src.depth,
       1, // writeLatency
       0, // readLatency
       (lib.readers ++ lib.readwriters).indices map (i => s"R_$i"),
@@ -38,14 +38,14 @@ class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pa
     )
 
     val readConnects = (lib.readers ++ lib.readwriters).zipWithIndex flatMap { case (r, i) =>
-      val clock = invert(WRef(r.clockName), r.clockPolarity)
-      val address = invert(WRef(r.addressName), r.addressPolarity)
-      val enable = (r.chipEnableName, r.readEnableName) match {
-        case (Some(en), Some(re)) =>
-          and(invert(WRef(en), r.chipEnablePolarity),
-              invert(WRef(re), r.readEnablePolarity))
-        case (Some(en), None) => invert(WRef(en), r.chipEnablePolarity)
-        case (None, Some(re)) => invert(WRef(re), r.readEnablePolarity)
+      val clock = portToExpression(r.src.clock)
+      val address = portToExpression(r.src.address)
+      val enable = (r.src chipEnable, r.src readEnable) match {
+        case (Some(en_port), Some(re_port)) =>
+          and(portToExpression(en_port),
+              portToExpression(re_port))
+        case (Some(en_port), None) => portToExpression(en_port)
+        case (None, Some(re_port)) => portToExpression(re_port)
         case (None, None) => one
       }
       val data = memPortField(mem, s"R_$i", "data")
@@ -60,25 +60,25 @@ class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pa
         Connect(NoInfo, memPortField(mem, s"R_$i", "clk"), clock),
         Connect(NoInfo, memPortField(mem, s"R_$i", "addr"), addrReg),
         Connect(NoInfo, memPortField(mem, s"R_$i", "en"), enable),
-        Connect(NoInfo, WRef(r.outputName.get), read),
+        Connect(NoInfo, WRef(r.src.output.get.name), read),
         Connect(NoInfo, addrReg, Mux(enable, address, addrReg, UnknownType))
       )
     }
 
     val writeConnects = (lib.writers ++ lib.readwriters).zipWithIndex flatMap { case (w, i) =>
-      val clock = invert(WRef(w.clockName), w.clockPolarity)
-      val address = invert(WRef(w.addressName), w.addressPolarity)
-      val enable = (w.chipEnableName, w.writeEnableName) match {
+      val clock = portToExpression(w.src.clock)
+      val address = portToExpression(w.src.address)
+      val enable = (w.src.chipEnable, w.src.writeEnable) match {
         case (Some(en), Some(we)) =>
-          and(invert(WRef(en), w.chipEnablePolarity),
-              invert(WRef(we), w.writeEnablePolarity))
-        case (Some(en), None) => invert(WRef(en), w.chipEnablePolarity)
-        case (None, Some(we)) => invert(WRef(we), w.writeEnablePolarity)
+          and(portToExpression(en),
+              portToExpression(we))
+        case (Some(en), None) => portToExpression(en)
+        case (None, Some(we)) => portToExpression(we)
         case (None, None) => zero // is it possible?
       }
       val mask = memPortField(mem, s"W_$i", "mask")
       val data = memPortField(mem, s"W_$i", "data")
-      val write = invert(WRef(w.inputName.get), w.inputPolarity)
+      val write = portToExpression(w.src.input.get)
       Seq(
         Connect(NoInfo, memPortField(mem, s"W_$i", "clk"), clock),
         Connect(NoInfo, memPortField(mem, s"W_$i", "addr"), address),
@@ -91,7 +91,7 @@ class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pa
                             bits(write, (k + 1) * width - 1, k * width)))) ++
           ((0 until size) map (k =>
             Connect(NoInfo, WSubIndex(mask, k, BoolType, UNKNOWNGENDER),
-                            bits(WRef(w.maskName.get), k))))
+                            bits(WRef(w.src.maskPort.get.name), k))))
         case _: UIntType =>
           Seq(Connect(NoInfo, data, write), Connect(NoInfo, mask, one))
       })
