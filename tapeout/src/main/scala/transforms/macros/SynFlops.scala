@@ -54,9 +54,9 @@ class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pa
           WSubIndex(data, k, tpe, UNKNOWNGENDER))).reverse)
         case _: UIntType => data
       }
-      val addrReg = WRef(s"R_${i}_addr_reg", r.AddrType, RegKind)
+      val addrReg = WRef(s"R_${i}_addr_reg", r.addrType, RegKind)
       Seq(
-        DefRegister(NoInfo, addrReg.name, r.AddrType, clock, zero, addrReg),
+        DefRegister(NoInfo, addrReg.name, r.addrType, clock, zero, addrReg),
         Connect(NoInfo, memPortField(mem, s"R_$i", "clk"), clock),
         Connect(NoInfo, memPortField(mem, s"R_$i", "addr"), addrReg),
         Connect(NoInfo, memPortField(mem, s"R_$i", "en"), enable),

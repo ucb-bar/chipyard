@@ -36,7 +36,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
     for (i <- 0 until mem.width.toInt) {
       if (i <= last + 1) {
         /* Palmer: Every memory is going to have to fit at least a single bit. */
-        // coninue
+        // continue
       } else if ((i - last) % lib.width.toInt == 0) {
         /* Palmer: It's possible that we rolled over a memory's width here,
                    if so generate one. */
@@ -53,7 +53,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
             case (_, None) => // continue
             case (_, Some(p)) if p == lib.width => // continue
             case _ =>
-              System.err println "Bit-mask (or unmasked) target memories are suppored only"
+              System.err println "Bit-mask (or unmasked) target memories are supported only"
               return None
           }
         }
@@ -198,7 +198,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
                * there isn't a write enable port. */
               WRef(mem)
             case None =>
-              /* Palemr: If there is no input port on the source memory port
+              /* Palmer: If there is no input port on the source memory port
                * then we don't ever want to turn on this write
                * enable.  Otherwise, we just _always_ turn on the
                * write enable port on the inner memory. */
@@ -316,9 +316,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
       }
       case _ => c.modules
     }
-    val circuit = c.copy(modules = modules)
-    // print(circuit.serialize)
-    circuit
+    c.copy(modules = modules)
   }
 }
 

@@ -17,11 +17,12 @@ case object NegativeEdge extends PortPolarity
 case object PositiveEdge extends PortPolarity
 object PortPolarity {
   implicit def toPortPolarity(s: Any): PortPolarity =
-    (s: @unchecked) match {
+    s match {
       case "active low" => ActiveLow
       case "active high" => ActiveHigh
       case "negative edge" => NegativeEdge 
       case "positive edge" => PositiveEdge
+      case _ => throw new firrtl.passes.PassException(s"Wrong port polarity: ${s.toString}")
     }
   implicit def toPortPolarity(s: Option[Any]): Option[PortPolarity] =
     s map toPortPolarity
@@ -48,18 +49,18 @@ case class MacroPort(
     width: BigInt,
     depth: BigInt) {
   val effectiveMaskGran = maskGran.getOrElse(width)
-  val AddrType = UIntType(IntWidth(ceilLog2(depth) max 1))
-  val DataType = UIntType(IntWidth(width))
-  val MaskType = UIntType(IntWidth(width / effectiveMaskGran))
+  val addrType = UIntType(IntWidth(ceilLog2(depth) max 1))
+  val dataType = UIntType(IntWidth(width))
+  val maskType = UIntType(IntWidth(width / effectiveMaskGran))
   val tpe = BundleType(Seq(
     Field(clockName, Flip, ClockType),
-    Field(addressName, Flip, AddrType)) ++
-    (inputName map (Field(_, Flip, DataType))) ++
-    (outputName map (Field(_, Default, DataType))) ++
+    Field(addressName, Flip, addrType)) ++
+    (inputName map (Field(_, Flip, dataType))) ++
+    (outputName map (Field(_, Default, dataType))) ++
     (chipEnableName map (Field(_, Flip, BoolType))) ++
     (readEnableName map (Field(_, Flip, BoolType))) ++
     (writeEnableName map (Field(_, Flip, BoolType))) ++
-    (maskName map (Field(_, Flip, MaskType)))
+    (maskName map (Field(_, Flip, maskType)))
   )
   val ports = tpe.fields map (f => Port(
      NoInfo, f.name, f.flip match { case Default => Output case Flip => Input }, f.tpe))
