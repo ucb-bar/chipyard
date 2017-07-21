@@ -178,6 +178,9 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
               } else {
                 require(libPort.src.effectiveMaskGran == 1, "only single-bit mask supported for now")
 
+                require(isPowerOfTwo(memPort.src.effectiveMaskGran), "only powers of two masks supported for now")
+                require(isPowerOfTwo(libPort.src.effectiveMaskGran), "only powers of two masks supported for now")
+
                 cat(((low to high) map (i => bits(WRef(mem), i / memPort.src.effectiveMaskGran))).reverse)
               }
             case None =>

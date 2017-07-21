@@ -93,4 +93,7 @@ object Utils {
       case Some(ActiveLow) | Some(NegativeEdge) => not(exp)
       case _ => exp
     }
+
+  // Check if a number is a power of two
+  def isPowerOfTwo(x: Int): Boolean = (x & (x - 1)) == 0
 }
