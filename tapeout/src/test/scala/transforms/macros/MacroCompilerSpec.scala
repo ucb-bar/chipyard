@@ -38,7 +38,7 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
 
 class RocketChipTest extends MacroCompilerSpec {
   val mem = new File(macroDir, "rocketchip.json")
-  val lib = new File(macroDir, "saed32.json")
+  val lib = new File(macroDir, "mylib.json")
   val v = new File(testDir, "rocketchip.macro.v")
   val output = // TODO: check correctness...
 """
