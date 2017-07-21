@@ -230,11 +230,21 @@ static int process_packet(void *buf, uint8_t *mac)
 	}
 }
 
-uint8_t macaddr[MAC_ADDR_SIZE] = {0xaa, 0xbc, 0xde, 0xff, 0x25, 0x37};
 uint64_t buffer[ETH_MAX_WORDS];
 
 int main(void)
 {
+	uint64_t macaddr_long;
+	uint8_t *macaddr;
+
+	macaddr_long = nic_macaddr();
+	macaddr = (uint8_t *) &macaddr_long;
+
+	printf("macaddr - %02x", macaddr[0]);
+	for (int i = 1; i < MAC_ADDR_SIZE; i++)
+		printf(":%02x", macaddr[i]);
+	printf("\n");
+
 	for (;;) {
 		if (process_packet(buffer, macaddr))
 			return -1;

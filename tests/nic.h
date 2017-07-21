@@ -4,6 +4,7 @@
 #define SIMPLENIC_SEND_COMP (SIMPLENIC_BASE + 16)
 #define SIMPLENIC_RECV_COMP (SIMPLENIC_BASE + 18)
 #define SIMPLENIC_COUNTS (SIMPLENIC_BASE + 20)
+#define SIMPLENIC_MACADDR (SIMPLENIC_BASE + 24)
 
 static inline int nic_send_req_avail(void)
 {
@@ -51,4 +52,9 @@ static int nic_recv(void *dest)
 	asm volatile ("fence");
 
 	return len;
+}
+
+static inline uint64_t nic_macaddr(void)
+{
+	return reg_read64(SIMPLENIC_MACADDR);
 }
