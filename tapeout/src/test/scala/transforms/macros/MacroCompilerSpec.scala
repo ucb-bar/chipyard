@@ -86,7 +86,7 @@ trait HasSRAMGenerator {
   import mdf.macrolib._
 
   // Generate a "simple" SRAM (active high/positive edge, 1 read-write port).
-  def generateSRAM(name: String, prefix: String, width: Int, depth: Int, maskGran: Option[Int] = None): SRAMMacro = {
+  def generateSRAM(name: String, prefix: String, width: Int, depth: Int, maskGran: Option[Int] = None, extraPorts: Seq[MacroExtraPort] = List()): SRAMMacro = {
     val realPrefix = prefix + "_"
     SRAMMacro(
       macroType=SRAM,
@@ -110,7 +110,8 @@ trait HasSRAMGenerator {
         maskGran=maskGran,
 
         width=width, depth=depth // These numbers don't matter here.
-      ))
+      )),
+      extraPorts=extraPorts
     )
   }
 }
