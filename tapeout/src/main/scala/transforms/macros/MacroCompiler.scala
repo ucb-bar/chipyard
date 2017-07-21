@@ -176,11 +176,8 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
               if (libPort.src.effectiveMaskGran == libPort.src.width) {
                 bits(WRef(mem), low / memPort.src.effectiveMaskGran)
               } else {
-                if (libPort.src.effectiveMaskGran != 1) {
-                  // TODO
-                  System.err println "only single-bit mask supported"
-                  return None
-                }
+                require(libPort.src.effectiveMaskGran == 1, "only single-bit mask supported for now")
+
                 cat(((low to high) map (i => bits(WRef(mem), i / memPort.src.effectiveMaskGran))).reverse)
               }
             case None =>

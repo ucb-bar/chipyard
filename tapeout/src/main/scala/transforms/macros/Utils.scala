@@ -18,9 +18,9 @@ class FirrtlMacroPort(port: MacroPort) {
   val isWriter = !port.writeEnable.isEmpty && port.readEnable.isEmpty
   val isReadWriter = !port.writeEnable.isEmpty && !port.readEnable.isEmpty
 
-  val AddrType = UIntType(IntWidth(ceilLog2(port.depth) max 1))
-  val DataType = UIntType(IntWidth(port.width))
-  val MaskType = UIntType(IntWidth(port.width / port.effectiveMaskGran))
+  val addrType = UIntType(IntWidth(ceilLog2(port.depth) max 1))
+  val dataType = UIntType(IntWidth(port.width))
+  val maskType = UIntType(IntWidth(port.width / port.effectiveMaskGran))
 
   // Bundle representing this macro port.
   val tpe = BundleType(Seq(
