@@ -51,8 +51,8 @@ class Macro(srcMacro: SRAMMacro) {
   val extraPorts = srcMacro.extraPorts map { p =>
     assert(p.portType == Constant) // TODO: release it?
     val name = p.name
-    val width = BigInt(p.width.asInstanceOf[Double].toLong)
-    val value = BigInt(p.value.asInstanceOf[Double].toLong)
+    val width = BigInt(p.width.toLong)
+    val value = BigInt(p.value.toLong)
     (name -> UIntLiteral(value, IntWidth(width)))
   }
 
