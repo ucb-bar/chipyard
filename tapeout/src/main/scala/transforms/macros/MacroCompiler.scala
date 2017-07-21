@@ -298,8 +298,8 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
             // val cost = 100 * (mem.depth * mem.width) / (lib.depth * lib.width) +
             //                  (mem.depth * mem.width)
             // Donggyu: I re-define cost
-            val cost = max(1, mem.depth / lib.depth) *
-                       max(1, mem.width / lib.width) *
+            val cost = (((mem.depth - 1) / lib.depth) + 1) *
+                       (((mem.width - 1) / lib.width) + 1) *
                        (lib.depth * lib.width + 1) // weights on # cells
             System.err println s"Cost of ${lib.name} for ${mem.name}: ${cost}"
             if (cost > area) (best, area)
