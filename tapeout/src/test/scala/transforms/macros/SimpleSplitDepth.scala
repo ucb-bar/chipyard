@@ -4,6 +4,7 @@ import firrtl.Utils.ceilLog2
 import mdf.macrolib._
 
 // Test the depth splitting aspect of the memory compiler.
+// This file is for simple tests: one read-write port, powers of two sizes, etc.
 // For example, implementing a 4096x32 memory using four 1024x32 memories.
 
 trait HasSimpleDepthTestGenerator {
@@ -33,7 +34,9 @@ trait HasSimpleDepthTestGenerator {
     writeToLib(lib, Seq(generateSRAM(lib_name, "lib", width, lib_depth)))
     writeToMem(mem, Seq(generateSRAM(mem_name, "outer", width, mem_depth)))
 
-    val expectedInstances = mem_depth / lib_depth
+    // Number of lib instances needed to hold the mem.
+    // Round up (e.g. 1.5 instances = effectively 2 instances)
+    val expectedInstances = math.ceil(mem_depth.toFloat / lib_depth).toInt
     val selectBits = mem_addr_width - lib_addr_width
     var output =
 s"""
@@ -151,9 +154,18 @@ class SplitDepth1024x8_rw extends MacroCompilerSpec with HasSRAMGenerator with H
 }
 
 // Non power of two
-class SplitDepth1024x8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
+class SplitDepth2000x8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
   override lazy val width = 8
-  override lazy val mem_depth = 1024
+  override lazy val mem_depth = 2000
+  override lazy val lib_depth = 1024
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitDepth2049x8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
+  override lazy val width = 8
+  override lazy val mem_depth = 2049
   override lazy val lib_depth = 1024
 
   compile(mem, lib, v, false)
