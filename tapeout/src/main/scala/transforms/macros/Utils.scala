@@ -25,13 +25,13 @@ class FirrtlMacroPort(port: MacroPort) {
   // Bundle representing this macro port.
   val tpe = BundleType(Seq(
     Field(port.clock.name, Flip, ClockType),
-    Field(port.address.name, Flip, AddrType)) ++
-    (port.input map (p => Field(p.name, Flip, DataType))) ++
-    (port.output map (p => Field(p.name, Default, DataType))) ++
+    Field(port.address.name, Flip, addrType)) ++
+    (port.input map (p => Field(p.name, Flip, dataType))) ++
+    (port.output map (p => Field(p.name, Default, dataType))) ++
     (port.chipEnable map (p => Field(p.name, Flip, BoolType))) ++
     (port.readEnable map (p => Field(p.name, Flip, BoolType))) ++
     (port.writeEnable map (p => Field(p.name, Flip, BoolType))) ++
-    (port.maskPort map (p => Field(p.name, Flip, MaskType)))
+    (port.maskPort map (p => Field(p.name, Flip, maskType)))
   )
   val ports = tpe.fields map (f => Port(
      NoInfo, f.name, f.flip match { case Default => Output case Flip => Input }, f.tpe))
