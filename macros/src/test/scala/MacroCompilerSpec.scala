@@ -1,6 +1,5 @@
-package barstools.tapeout.transforms.macros.test
+package barstools.macros
 
-import barstools.tapeout.transforms.macros._
 import firrtl.ir.{Circuit, NoInfo}
 import firrtl.passes.RemoveEmpty
 import firrtl.Parser.parse

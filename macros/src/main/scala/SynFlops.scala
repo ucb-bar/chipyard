@@ -1,6 +1,6 @@
 // See LICENSE for license details.
 
-package barstools.tapeout.transforms.macros
+package barstools.macros
 
 import firrtl._
 import firrtl.ir._

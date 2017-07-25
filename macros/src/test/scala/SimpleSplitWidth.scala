@@ -1,4 +1,4 @@
-//~ package barstools.tapeout.transforms.macros.test
+//~ package barstools.macros
 
 //~ import java.io.File
 
