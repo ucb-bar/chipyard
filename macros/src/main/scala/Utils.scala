@@ -14,9 +14,9 @@ import scala.language.implicitConversions
 class FirrtlMacroPort(port: MacroPort) {
   val src = port
 
-  val isReader = !port.readEnable.isEmpty && port.writeEnable.isEmpty
-  val isWriter = !port.writeEnable.isEmpty && port.readEnable.isEmpty
-  val isReadWriter = !port.writeEnable.isEmpty && !port.readEnable.isEmpty
+  val isReader = port.output.nonEmpty && port.input.isEmpty
+  val isWriter = port.input.nonEmpty && port.output.isEmpty
+  val isReadWriter = port.input.nonEmpty && port.output.nonEmpty
 
   val addrType = UIntType(IntWidth(ceilLog2(port.depth) max 1))
   val dataType = UIntType(IntWidth(port.width))
