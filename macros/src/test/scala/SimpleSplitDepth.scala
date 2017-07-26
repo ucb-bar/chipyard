@@ -394,8 +394,8 @@ circuit target_memory :
   execute(mem, lib, false, outputCustom)
 }
 
-// Split read and (masked) write ports (r+w).
-class SplitDepth_SplitPorts extends MacroCompilerSpec with HasSRAMGenerator {
+// Split read and (non-masked) write ports (r+w).
+class SplitDepth_SplitPortsNonMasked extends MacroCompilerSpec with HasSRAMGenerator {
   lazy val width = 8
   lazy val mem_depth = 2048
   lazy val lib_depth = 1024
@@ -406,9 +406,9 @@ class SplitDepth_SplitPorts extends MacroCompilerSpec with HasSRAMGenerator {
   import mdf.macrolib._
 
   "Non-masked split lib; split mem" should "split fine" in {
-    val lib = "lib-split_depth-r-mw-lib-regular-mem.json"
-    val mem = "mem-split_depth-r-mw-lib-regular-mem.json"
-    val v = "split_depth-r-mw-lib-regular-mem.v"
+    val lib = "lib-split_depth-rw-split-lib-split-mem.json"
+    val mem = "mem-split_depth-rw-split-lib-split-mem.json"
+    val v = "split_depth-rw-split-lib-split-mem.v"
 
     val libMacro = SRAMMacro(
       macroType=SRAM,
@@ -487,6 +487,40 @@ circuit target_memory :
     execute(mem, lib, false, output)
   }
 
+  "Non-masked regular lib; split mem" should "split fine" in {
+    // Enable this test when the memory compiler can compile non-matched
+    // memories (e.g. mrw mem and r+mw lib).
+    // Right now all we can get is a "port count must match" error.
+    pending
+
+    val lib = "lib-split_depth-r-mw-regular-lib-split-mem.json"
+    val mem = "mem-split_depth-r-mw-regular-lib-split-mem.json"
+    val v = "split_depth-r-mw-regular-lib-split-mem.v"
+
+    val memMacro = SRAMMacro(
+      macroType=SRAM,
+      name="target_memory",
+      width=width,
+      depth=mem_depth,
+      family="1r1w",
+      ports=Seq(
+        generateReadPort("outerB", width, mem_depth),
+        generateWritePort("outerA", width, mem_depth)
+      )
+    )
+
+    writeToLib(mem, Seq(memMacro))
+    writeToLib(lib, Seq(generateSRAM("awesome_lib_mem", "lib", width, lib_depth)))
+
+    val output =
+"""
+TODO
+"""
+
+    compile(mem, lib, v, false)
+    execute(mem, lib, false, output)
+  }
+
   "Non-masked split lib; regular mem" should "split fine" in {
     // Enable this test when the memory compiler can compile non-matched
     // memories (e.g. mrw mem and r+mw lib).
@@ -494,9 +528,9 @@ circuit target_memory :
     // [edwardw]: does this even make sense? Can we compile a 2-ported memory using 1-ported memories?
     pending
 
-    val lib = "lib-split_depth-r-mw-lib-regular-mem.json"
-    val mem = "mem-split_depth-r-mw-lib-regular-mem.json"
-    val v = "split_depth-r-mw-lib-regular-mem.v"
+    val lib = "lib-split_depth-rw-split-lib-regular-mem.json"
+    val mem = "mem-split_depth-rw-split-lib-regular-mem.json"
+    val v = "split_depth-rw-split-lib-regular-mem.v"
 
     val libMacro = SRAMMacro(
       macroType=SRAM,

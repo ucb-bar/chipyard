@@ -8,6 +8,12 @@ import java.io.{File, StringWriter}
 // TODO: we should think of a less brittle way to run these tests.
 
 abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalatest.Matchers {
+  /**
+   * Terminology note:
+   * mem - target memory to compile, in design (e.g. Mem() in rocket)
+   * lib - technology SRAM(s) to use to compile mem
+   */
+
   val macroDir: String = "tapeout/src/test/resources/macros"
   val testDir: String = "test_run_dir/macros"
   new File(testDir).mkdirs // Make sure the testDir exists
