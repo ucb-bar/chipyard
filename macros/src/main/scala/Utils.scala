@@ -75,6 +75,8 @@ object Utils {
 
   def and(e1: Expression, e2: Expression) =
     DoPrim(PrimOps.And, Seq(e1, e2), Nil, e1.tpe)
+  def or(e1: Expression, e2: Expression) =
+    DoPrim(PrimOps.Or, Seq(e1, e2), Nil, e1.tpe)
   def bits(e: Expression, high: BigInt, low: BigInt): Expression =
     DoPrim(PrimOps.Bits, Seq(e), Seq(high, low), UIntType(IntWidth(high-low+1)))
   def bits(e: Expression, idx: BigInt): Expression = bits(e, idx, idx)
