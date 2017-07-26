@@ -81,35 +81,71 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
   }
 }
 
+// A collection of standard SRAM generators.
 trait HasSRAMGenerator {
   import mdf.macrolib._
 
+  // Generate a standard (read/write/combo) port for testing.
+  def generateTestPort(
+    prefix: String,
+    width: Int,
+    depth: Int,
+    maskGran: Option[Int] = None,
+    read: Boolean,
+    readEnable: Boolean = false,
+    write: Boolean,
+    writeEnable: Boolean = false
+  ): MacroPort = {
+    val realPrefix = prefix + "_"
+
+    MacroPort(
+      address=PolarizedPort(name=realPrefix + "addr", polarity=ActiveHigh),
+      clock=PolarizedPort(name=realPrefix + "clk", polarity=PositiveEdge),
+
+      readEnable=if (readEnable) Some(PolarizedPort(name=realPrefix + "read_en", polarity=ActiveHigh)) else None,
+      writeEnable=if (writeEnable) Some(PolarizedPort(name=realPrefix + "write_en", polarity=ActiveHigh)) else None,
+
+      output=if (read) Some(PolarizedPort(name=realPrefix + "dout", polarity=ActiveHigh)) else None,
+      input=if (write) Some(PolarizedPort(name=realPrefix + "din", polarity=ActiveHigh)) else None,
+
+      maskPort=maskGran match {
+        case Some(x:Int) => Some(PolarizedPort(name=realPrefix + "mask", polarity=ActiveHigh))
+        case _ => None
+      },
+      maskGran=maskGran,
+
+      width=width, depth=depth // These numbers don't matter here.
+    )
+  }
+
+  // Generate a read port for testing.
+  def generateReadPort(prefix: String, width: Int, depth: Int, readEnable: Boolean = false): MacroPort = {
+    generateTestPort(prefix, width, depth, write=false, read=true, readEnable=readEnable)
+  }
+
+  // Generate a write port for testing.
+  def generateWritePort(prefix: String, width: Int, depth: Int, maskGran: Option[Int] = None, writeEnable: Boolean = true): MacroPort = {
+    generateTestPort(prefix, width, depth, maskGran=maskGran, write=true, read=false, writeEnable=writeEnable)
+  }
+
+  // Generate a simple read-write port for testing.
+  def generateReadWritePort(prefix: String, width: Int, depth: Int, maskGran: Option[Int] = None): MacroPort = {
+    generateTestPort(
+      prefix, width, depth, maskGran=maskGran,
+      write=true, writeEnable=true,
+      read=true, readEnable=false
+    )
+  }
+
   // Generate a "simple" SRAM (active high/positive edge, 1 read-write port).
   def generateSRAM(name: String, prefix: String, width: Int, depth: Int, maskGran: Option[Int] = None, extraPorts: Seq[MacroExtraPort] = List()): SRAMMacro = {
-    val realPrefix = prefix + "_"
     SRAMMacro(
       macroType=SRAM,
       name=name,
       width=width,
       depth=depth,
       family="1rw",
-      ports=Seq(MacroPort(
-        address=PolarizedPort(name=realPrefix + "addr", polarity=ActiveHigh),
-        clock=PolarizedPort(name=realPrefix + "clk", polarity=PositiveEdge),
-
-        writeEnable=Some(PolarizedPort(name=realPrefix + "write_en", polarity=ActiveHigh)),
-
-        output=Some(PolarizedPort(name=realPrefix + "dout", polarity=ActiveHigh)),
-        input=Some(PolarizedPort(name=realPrefix + "din", polarity=ActiveHigh)),
-
-        maskPort=maskGran match {
-          case Some(x:Int) => Some(PolarizedPort(name=realPrefix + "mask", polarity=ActiveHigh))
-          case _ => None
-        },
-        maskGran=maskGran,
-
-        width=width, depth=depth // These numbers don't matter here.
-      )),
+      ports=Seq(generateReadWritePort(prefix, width, depth, maskGran)),
       extraPorts=extraPorts
     )
   }
