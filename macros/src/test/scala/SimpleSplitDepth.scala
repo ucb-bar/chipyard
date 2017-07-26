@@ -336,66 +336,6 @@ class SplitDepth2048x32_mrw_mem9_lib1 extends MacroCompilerSpec with HasSRAMGene
   //execute(mem, lib, false, output)
 }
 
-//~ class SplitDepth2048x8_r_mw extends MacroCompilerSpec {
-  //~ val mem = new File(macroDir, "mem-2048x8-r-mw.json")
-  //~ val lib = new File(macroDir, "lib-1024x8-r-mw.json")
-  //~ val v = new File(testDir, "split_depth_2048x8_r_mw.v")
-  //~ val output =
-//~ """
-//~ circuit name_of_sram_module :
-  //~ module name_of_sram_module :
-    //~ input clock : Clock
-    //~ input W0A : UInt<11>
-    //~ input W0I : UInt<8>
-    //~ input W0E : UInt<1>
-    //~ input W0M : UInt<1>
-    //~ input clock : Clock
-    //~ input R0A : UInt<11>
-    //~ output R0O : UInt<8>
-
-    //~ node W0A_sel = bits(W0A, 10, 10)
-    //~ node R0A_sel = bits(R0A, 10, 10)
-    //~ inst mem_0_0 of vendor_sram
-    //~ mem_0_0.clock <= clock
-    //~ mem_0_0.W0A <= W0A
-    //~ mem_0_0.W0I <= bits(W0I, 7, 0)
-    //~ mem_0_0.W0M <= bits(W0M, 0, 0)
-    //~ mem_0_0.W0W <= and(UInt<1>("h1"), eq(W0A_sel, UInt<1>("h0")))
-    //~ mem_0_0.W0E <= and(W0E, eq(W0A_sel, UInt<1>("h0")))
-    //~ mem_0_0.clock <= clock
-    //~ mem_0_0.R0A <= R0A
-    //~ node R0O_0_0 = bits(mem_0_0.R0O, 7, 0)
-    //~ node R0O_0 = R0O_0_0
-    //~ inst mem_1_0 of vendor_sram
-    //~ mem_1_0.clock <= clock
-    //~ mem_1_0.W0A <= W0A
-    //~ mem_1_0.W0I <= bits(W0I, 7, 0)
-    //~ mem_1_0.W0M <= bits(W0M, 0, 0)
-    //~ mem_1_0.W0W <= and(UInt<1>("h1"), eq(W0A_sel, UInt<1>("h1")))
-    //~ mem_1_0.W0E <= and(W0E, eq(W0A_sel, UInt<1>("h1")))
-    //~ mem_1_0.clock <= clock
-    //~ mem_1_0.R0A <= R0A
-    //~ node R0O_1_0 = bits(mem_1_0.R0O, 7, 0)
-    //~ node R0O_1 = R0O_1_0
-    //~ R0O <= mux(eq(R0A_sel, UInt<1>("h0")), R0O_0, mux(eq(R0A_sel, UInt<1>("h1")), R0O_1, UInt<1>("h0")))
-
-  //~ extmodule vendor_sram :
-    //~ input clock : Clock
-    //~ input R0A : UInt<10>
-    //~ output R0O : UInt<8>
-    //~ input clock : Clock
-    //~ input W0A : UInt<10>
-    //~ input W0I : UInt<8>
-    //~ input W0E : UInt<1>
-    //~ input W0W : UInt<1>
-    //~ input W0M : UInt<1>
-
-    //~ defname = vendor_sram
-//~ """
-  //~ compile(mem, lib, v, false)
-  //~ execute(mem, lib, false, output)
-//~ }
-
 // Try an extra port
 class SplitDepth2048x8_extraPort extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
   import mdf.macrolib._
@@ -452,4 +392,133 @@ circuit target_memory :
   """
   compile(mem, lib, v, false)
   execute(mem, lib, false, outputCustom)
+}
+
+// Split read and (masked) write ports (r+w).
+class SplitDepth_SplitPorts extends MacroCompilerSpec with HasSRAMGenerator {
+  lazy val width = 8
+  lazy val mem_depth = 2048
+  lazy val lib_depth = 1024
+
+  override val memPrefix = testDir
+  override val libPrefix = testDir
+
+  import mdf.macrolib._
+
+  "Non-masked split lib; split mem" should "split fine" in {
+    val lib = "lib-split_depth-r-mw-lib-regular-mem.json"
+    val mem = "mem-split_depth-r-mw-lib-regular-mem.json"
+    val v = "split_depth-r-mw-lib-regular-mem.v"
+
+    val libMacro = SRAMMacro(
+      macroType=SRAM,
+      name="awesome_lib_mem",
+      width=width,
+      depth=lib_depth,
+      family="1r1w",
+      ports=Seq(
+        generateReadPort("innerA", width, lib_depth),
+        generateWritePort("innerB", width, lib_depth)
+      )
+    )
+
+    val memMacro = SRAMMacro(
+      macroType=SRAM,
+      name="target_memory",
+      width=width,
+      depth=mem_depth,
+      family="1r1w",
+      ports=Seq(
+        generateReadPort("outerB", width, mem_depth),
+        generateWritePort("outerA", width, mem_depth)
+      )
+    )
+
+    writeToLib(mem, Seq(memMacro))
+    writeToLib(lib, Seq(libMacro))
+
+    val output =
+"""
+circuit target_memory :
+  module target_memory :
+    input outerB_clk : Clock
+    input outerB_addr : UInt<11>
+    output outerB_dout : UInt<8>
+    input outerA_clk : Clock
+    input outerA_addr : UInt<11>
+    input outerA_din : UInt<8>
+    input outerA_write_en : UInt<1>
+
+    node outerB_addr_sel = bits(outerB_addr, 10, 10)
+    node outerA_addr_sel = bits(outerA_addr, 10, 10)
+    inst mem_0_0 of awesome_lib_mem
+    mem_0_0.innerA_clk <= outerB_clk
+    mem_0_0.innerA_addr <= outerB_addr
+    node outerB_dout_0_0 = bits(mem_0_0.innerA_dout, 7, 0)
+    node outerB_dout_0 = outerB_dout_0_0
+    mem_0_0.innerB_clk <= outerA_clk
+    mem_0_0.innerB_addr <= outerA_addr
+    mem_0_0.innerB_din <= bits(outerA_din, 7, 0)
+    mem_0_0.innerB_write_en <= and(and(outerA_write_en, UInt<1>("h1")), eq(outerA_addr_sel, UInt<1>("h0")))
+    inst mem_1_0 of awesome_lib_mem
+    mem_1_0.innerA_clk <= outerB_clk
+    mem_1_0.innerA_addr <= outerB_addr
+    node outerB_dout_1_0 = bits(mem_1_0.innerA_dout, 7, 0)
+    node outerB_dout_1 = outerB_dout_1_0
+    mem_1_0.innerB_clk <= outerA_clk
+    mem_1_0.innerB_addr <= outerA_addr
+    mem_1_0.innerB_din <= bits(outerA_din, 7, 0)
+    mem_1_0.innerB_write_en <= and(and(outerA_write_en, UInt<1>("h1")), eq(outerA_addr_sel, UInt<1>("h1")))
+    outerB_dout <= mux(eq(outerB_addr_sel, UInt<1>("h0")), outerB_dout_0, mux(eq(outerB_addr_sel, UInt<1>("h1")), outerB_dout_1, UInt<1>("h0")))
+
+  extmodule awesome_lib_mem :
+    input innerA_clk : Clock
+    input innerA_addr : UInt<10>
+    output innerA_dout : UInt<8>
+    input innerB_clk : Clock
+    input innerB_addr : UInt<10>
+    input innerB_din : UInt<8>
+    input innerB_write_en : UInt<1>
+
+    defname = awesome_lib_mem
+"""
+
+    compile(mem, lib, v, false)
+    execute(mem, lib, false, output)
+  }
+
+  "Non-masked split lib; regular mem" should "split fine" in {
+    // Enable this test when the memory compiler can compile non-matched
+    // memories (e.g. mrw mem and r+mw lib).
+    // Right now all we can get is a "port count must match" error.
+    // [edwardw]: does this even make sense? Can we compile a 2-ported memory using 1-ported memories?
+    pending
+
+    val lib = "lib-split_depth-r-mw-lib-regular-mem.json"
+    val mem = "mem-split_depth-r-mw-lib-regular-mem.json"
+    val v = "split_depth-r-mw-lib-regular-mem.v"
+
+    val libMacro = SRAMMacro(
+      macroType=SRAM,
+      name="awesome_lib_mem",
+      width=width,
+      depth=lib_depth,
+      family="1rw",
+      ports=Seq(
+        generateReadPort("innerA", width, lib_depth),
+        generateWritePort("innerB", width, lib_depth)
+      )
+    )
+
+    writeToLib(mem, Seq(generateSRAM("target_memory", "outer", width, mem_depth)))
+    writeToLib(lib, Seq(libMacro))
+
+    val output =
+"""
+TODO
+"""
+
+    compile(mem, lib, v, false)
+    execute(mem, lib, false, output)
+  }
 }
