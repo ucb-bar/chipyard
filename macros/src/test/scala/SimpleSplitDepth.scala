@@ -31,8 +31,8 @@ trait HasSimpleDepthTestGenerator {
     val memMaskBits = if (memHasMask) width / mem_maskGran.get else 0
     val libMaskBits = if (libHasMask) width / lib_maskGran.get else 0
     // Generate "mrw" vs "rw" tags.
-    val memTag = (if (memHasMask) "m" else "") + "rw"
-    val libTag = (if (libHasMask) "m" else "") + "rw"
+    val memTag = (if (memHasMask) "m" else "") + "rw" + (if (mem_maskGran.nonEmpty) s"_gran${mem_maskGran.get}" else "")
+    val libTag = (if (libHasMask) "m" else "") + "rw" + (if (lib_maskGran.nonEmpty) s"_gran${lib_maskGran.get}" else "")
 
     val mem = s"mem-${mem_depth}x${width}-${memTag}.json"
     val lib = s"lib-${lib_depth}x${width}-${libTag}.json"
