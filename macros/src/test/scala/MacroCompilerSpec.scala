@@ -3,6 +3,7 @@ package barstools.macros
 import firrtl.ir.{Circuit, NoInfo}
 import firrtl.passes.RemoveEmpty
 import firrtl.Parser.parse
+import firrtl.Utils.ceilLog2
 import java.io.{File, StringWriter}
 
 // TODO: we should think of a less brittle way to run these tests.
@@ -155,6 +156,107 @@ trait HasSRAMGenerator {
       extraPorts=extraPorts
     )
   }
+}
+
+// Generic "simple" test generator.
+// Set up scaffolding for generating memories, files, etc.
+// Override this generator to specify the expected FIRRTL output.
+trait HasSimpleTestGenerator {
+  this: MacroCompilerSpec with HasSRAMGenerator =>
+    // Override these with "override lazy val".
+    // Why lazy? These are used in the constructor here so overriding non-lazily
+    // would be too late.
+    def memWidth: Int
+    def libWidth: Int
+    def memDepth: Int
+    def libDepth: Int
+    def memMaskGran: Option[Int] = None
+    def libMaskGran: Option[Int] = None
+    def extraPorts: Seq[mdf.macrolib.MacroExtraPort] = List()
+    def extraTag: String = ""
+
+    // Override this in the sub-generator if you need a more specific name.
+    // Defaults to using reflection to pull the name of the test using this
+    // generator.
+    def generatorType: String = this.getClass.getSimpleName
+
+    require (memDepth >= libDepth)
+
+    override val memPrefix = testDir
+    override val libPrefix = testDir
+
+    // Convenience variables to check if a mask exists.
+    val memHasMask = memMaskGran != None
+    val libHasMask = libMaskGran != None
+    // We need to figure out how many mask bits there are in the mem.
+    val memMaskBits = if (memHasMask) memWidth / memMaskGran.get else 0
+    val libMaskBits = if (libHasMask) libWidth / libMaskGran.get else 0
+
+    val extraTagPrefixed = if (extraTag == "") "" else ("-" + extraTag)
+
+    val mem = s"mem-${generatorType}${extraTagPrefixed}.json"
+    val lib = s"lib-${generatorType}${extraTagPrefixed}.json"
+    val v = s"${generatorType}${extraTagPrefixed}.v"
+
+    val mem_name = "target_memory"
+    val mem_addr_width = ceilLog2(memDepth)
+
+    val lib_name = "awesome_lib_mem"
+    val lib_addr_width = ceilLog2(libDepth)
+
+    writeToLib(lib, Seq(generateSRAM(lib_name, "lib", libWidth, libDepth, libMaskGran, extraPorts)))
+    writeToMem(mem, Seq(generateSRAM(mem_name, "outer", memWidth, memDepth, memMaskGran)))
+
+    // Number of lib instances needed to hold the mem.
+    // Round up (e.g. 1.5 instances = effectively 2 instances)
+    val expectedInstances = math.ceil(memDepth.toFloat / libDepth).toInt
+    val selectBits = mem_addr_width - lib_addr_width
+
+    // Generate the header (contains the circuit statement and the target memory
+    // module.
+    def generateHeader(): String = {
+      val headerMask = if (memHasMask) s"input outer_mask : UInt<${memMaskBits}>" else ""
+      s"""
+circuit $mem_name :
+  module $mem_name :
+    input outer_clk : Clock
+    input outer_addr : UInt<$mem_addr_width>
+    input outer_din : UInt<$memWidth>
+    output outer_dout : UInt<$memWidth>
+    input outer_write_en : UInt<1>
+    ${headerMask}
+  """
+    }
+
+    // Generate the footer (contains the target memory extmodule).
+    def generateFooter(): String = {
+      val footerMask = if (libHasMask) s"input lib_mask : UInt<${libMaskBits}>" else ""
+      s"""
+  extmodule $lib_name :
+    input lib_clk : Clock
+    input lib_addr : UInt<$lib_addr_width>
+    input lib_din : UInt<$libWidth>
+    output lib_dout : UInt<$libWidth>
+    input lib_write_en : UInt<1>
+    ${footerMask}
+
+    defname = $lib_name
+  """
+    }
+
+    // Abstract method to generate body; to be overridden by specific generator type.
+    def generateBody(): String
+
+    // Generate the entire output from header, body, and footer.
+    def generateOutput(): String = {
+      s"""
+${generateHeader}
+${generateBody}
+${generateFooter}
+      """
+    }
+
+    val output = generateOutput()
 }
 
 //~ class RocketChipTest extends MacroCompilerSpec {
