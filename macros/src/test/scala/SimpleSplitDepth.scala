@@ -18,6 +18,7 @@ trait HasSimpleDepthTestGenerator {
     def mem_maskGran: Option[Int] = None
     def lib_maskGran: Option[Int] = None
     def extraPorts: Seq[mdf.macrolib.MacroExtraPort] = List()
+    def extraTag: String = ""
 
     require (mem_depth >= lib_depth)
 
@@ -34,9 +35,11 @@ trait HasSimpleDepthTestGenerator {
     val memTag = (if (memHasMask) "m" else "") + "rw" + (if (mem_maskGran.nonEmpty) s"_gran${mem_maskGran.get}" else "")
     val libTag = (if (libHasMask) "m" else "") + "rw" + (if (lib_maskGran.nonEmpty) s"_gran${lib_maskGran.get}" else "")
 
-    val mem = s"mem-${mem_depth}x${width}-${memTag}.json"
-    val lib = s"lib-${lib_depth}x${width}-${libTag}.json"
-    val v = s"split_depth_${mem_depth}x${width}_${memTag}.v"
+    val extraTagPrefixed = if (extraTag == "") "" else ("-" + extraTag)
+
+    val mem = s"mem-${mem_depth}x${width}-${memTag}${extraTagPrefixed}.json"
+    val lib = s"lib-${lib_depth}x${width}-${libTag}${extraTagPrefixed}.json"
+    val v = s"split_depth_${mem_depth}x${width}_${memTag}${extraTagPrefixed}.v"
 
     val mem_name = "target_memory"
     val mem_addr_width = ceilLog2(mem_depth)
@@ -403,6 +406,7 @@ class SplitDepth2048x8_extraPort extends MacroCompilerSpec with HasSRAMGenerator
   override lazy val extraPorts = List(
     MacroExtraPort(name="extra_port", width=8, portType=Constant, value=0xff)
   )
+  override lazy val extraTag = "extraPort"
 
   val outputCustom =
 """
