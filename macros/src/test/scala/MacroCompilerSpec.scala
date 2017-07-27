@@ -207,9 +207,10 @@ trait HasSimpleTestGenerator {
     writeToLib(lib, Seq(generateSRAM(lib_name, "lib", libWidth, libDepth, libMaskGran, extraPorts)))
     writeToMem(mem, Seq(generateSRAM(mem_name, "outer", memWidth, memDepth, memMaskGran)))
 
-    // Number of lib instances needed to hold the mem.
+    // Number of lib instances needed to hold the mem, in both directions.
     // Round up (e.g. 1.5 instances = effectively 2 instances)
-    val expectedInstances = math.ceil(memDepth.toFloat / libDepth).toInt
+    val depthInstances = math.ceil(memDepth.toFloat / libDepth).toInt
+    val widthInstances = math.ceil(memWidth.toFloat / libWidth).toInt
     val selectBits = mem_addr_width - lib_addr_width
 
     // Generate the header (contains the circuit statement and the target memory

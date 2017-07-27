@@ -24,7 +24,7 @@ trait HasSimpleDepthTestGenerator extends HasSimpleTestGenerator {
   """
       }
 
-      for (i <- 0 to expectedInstances - 1) {
+      for (i <- 0 to depthInstances - 1) {
         // We only support simple masks for now (either libMask == memMask or libMask == 1)
         val maskStatement = if (libHasMask) {
           if (libMaskGran.get == memMaskGran.get) {
@@ -58,18 +58,18 @@ trait HasSimpleDepthTestGenerator extends HasSimpleTestGenerator {
     node outer_dout_${i} = outer_dout_${i}_0
   """
       }
-      def generate_outer_dout_tree(i:Int, expectedInstances: Int): String = {
-        if (i > expectedInstances - 1) {
+      def generate_outer_dout_tree(i:Int, depthInstances: Int): String = {
+        if (i > depthInstances - 1) {
           "UInt<1>(\"h0\")"
         } else {
           "mux(eq(outer_addr_sel, UInt<%d>(\"h%s\")), outer_dout_%d, %s)".format(
-            selectBits, i.toHexString, i, generate_outer_dout_tree(i + 1, expectedInstances)
+            selectBits, i.toHexString, i, generate_outer_dout_tree(i + 1, depthInstances)
           )
         }
       }
       output += "  outer_dout <= "
       if (selectBits > 0) {
-        output += generate_outer_dout_tree(0, expectedInstances)
+        output += generate_outer_dout_tree(0, depthInstances)
       } else {
         output += """mux(UInt<1>("h1"), outer_dout_0, UInt<1>("h0"))"""
       }
