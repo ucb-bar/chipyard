@@ -43,8 +43,8 @@ class Macro(srcMacro: SRAMMacro) {
 
   val firrtlPorts = srcMacro.ports map { new FirrtlMacroPort(_) }
 
-  val writers = firrtlPorts filter (p => p.isReader)
-  val readers = firrtlPorts filter (p => p.isWriter)
+  val writers = firrtlPorts filter (p => p.isWriter)
+  val readers = firrtlPorts filter (p => p.isReader)
   val readwriters = firrtlPorts filter (p => p.isReadWriter)
 
   val sortedPorts = writers ++ readers ++ readwriters
