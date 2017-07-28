@@ -1,468 +1,595 @@
-//~ package barstools.macros
+package barstools.macros
 
-//~ import java.io.File
+// Test the width splitting aspect of the memory compiler.
+// For example, implementing a 1024x32 memory using four 1024x8 memories.
 
-//~ class SplitWidth2048x16_mrw extends MacroCompilerSpec {
-  //~ val mem = new File(macroDir, "mem-2048x16-mrw.json")
-  //~ val lib = new File(macroDir, "lib-2048x8-mrw.json")
-  //~ val v = new File(testDir, "split_width_2048x16_mrw.v")
-  //~ val output =
-//~ """
-//~ circuit name_of_sram_module :
-  //~ module name_of_sram_module :
-    //~ input clock : Clock
-    //~ input RW0A : UInt<11>
-    //~ input RW0I : UInt<16>
-    //~ output RW0O : UInt<16>
-    //~ input RW0E : UInt<1>
-    //~ input RW0W : UInt<1>
-    //~ input RW0M : UInt<2>
+trait HasSimpleWidthTestGenerator extends HasSimpleTestGenerator {
+  this: MacroCompilerSpec with HasSRAMGenerator =>
+    def depth: Int
 
-    //~ inst mem_0_0 of vendor_sram
-    //~ inst mem_0_1 of vendor_sram
-    //~ mem_0_0.clock <= clock
-    //~ mem_0_0.RW0A <= RW0A
-    //~ node RW0O_0_0 = bits(mem_0_0.RW0O, 7, 0)
-    //~ mem_0_0.RW0I <= bits(RW0I, 7, 0)
-    //~ mem_0_0.RW0M <= bits(RW0M, 0, 0)
-    //~ mem_0_0.RW0W <= and(RW0W, UInt<1>("h1"))
-    //~ mem_0_0.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ mem_0_1.clock <= clock
-    //~ mem_0_1.RW0A <= RW0A
-    //~ node RW0O_0_1 = bits(mem_0_1.RW0O, 7, 0)
-    //~ mem_0_1.RW0I <= bits(RW0I, 15, 8)
-    //~ mem_0_1.RW0M <= bits(RW0M, 1, 1)
-    //~ mem_0_1.RW0W <= and(RW0W, UInt<1>("h1"))
-    //~ mem_0_1.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ node RW0O_0 = cat(RW0O_0_1, RW0O_0_0)
-    //~ RW0O <= mux(UInt<1>("h1"), RW0O_0, UInt<1>("h0"))
+    override lazy val memDepth = depth
+    override lazy val libDepth = depth
 
-  //~ extmodule vendor_sram :
-    //~ input clock : Clock
-    //~ input RW0A : UInt<11>
-    //~ input RW0I : UInt<8>
-    //~ output RW0O : UInt<8>
-    //~ input RW0E : UInt<1>
-    //~ input RW0W : UInt<1>
-    //~ input RW0M : UInt<1>
+    override def generateBody(): String = {
+      val output = new StringBuilder
 
-    //~ defname = vendor_sram
-//~ """
-  //~ compile(mem, Some(lib), v, false)
-  //~ execute(Some(mem), Some(lib), false, output)
-//~ }
+      // Generate mem_0_<i> lines for number of width instances.
+      output.append(
+        ((0 to widthInstances - 1) map {i:Int => s"""
+    inst mem_0_${i} of ${lib_name}
+"""
+        }).reduceLeft(_ + _)
+      )
 
-//~ class SplitWidth2048x16_mrw_Uneven extends MacroCompilerSpec {
-  //~ val mem = new File(macroDir, "mem-2048x16-mrw.json")
-  //~ val lib = new File(macroDir, "lib-2048x10-rw.json")
-  //~ val v = new File(testDir, "split_width_2048x16_mrw_uneven.v")
-  //~ val output =
-//~ """
-//~ circuit name_of_sram_module :
-  //~ module name_of_sram_module :
-    //~ input clock : Clock
-    //~ input RW0A : UInt<11>
-    //~ input RW0I : UInt<16>
-    //~ output RW0O : UInt<16>
-    //~ input RW0E : UInt<1>
-    //~ input RW0W : UInt<1>
-    //~ input RW0M : UInt<2>
+      // Generate submemory connection blocks.
+      output append (for (i <- 0 to widthInstances - 1) yield {
+        // Width of this submemory.
+        val myMemWidth = if (i == widthInstances - 1) lastWidthBits else libWidth
+        // Base bit of this submemory.
+        // e.g. if libWidth is 8 and this is submemory 2 (0-indexed), then this
+        // would be 16.
+        val myBaseBit = libWidth*i
 
-    //~ inst mem_0_0 of vendor_sram
-    //~ inst mem_0_1 of vendor_sram
-    //~ mem_0_0.clock <= clock
-    //~ mem_0_0.RW0A <= RW0A
-    //~ node RW0O_0_0 = bits(mem_0_0.RW0O, 7, 0)
-    //~ mem_0_0.RW0I <= bits(RW0I, 7, 0)
-    //~ mem_0_0.RW0W <= and(and(RW0W, bits(RW0M, 0, 0)), UInt<1>("h1"))
-    //~ mem_0_0.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ mem_0_1.clock <= clock
-    //~ mem_0_1.RW0A <= RW0A
-    //~ node RW0O_0_1 = bits(mem_0_1.RW0O, 7, 0)
-    //~ mem_0_1.RW0I <= bits(RW0I, 15, 8)
-    //~ mem_0_1.RW0W <= and(and(RW0W, bits(RW0M, 1, 1)), UInt<1>("h1"))
-    //~ mem_0_1.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ node RW0O_0 = cat(RW0O_0_1, RW0O_0_0)
-    //~ RW0O <= mux(UInt<1>("h1"), RW0O_0, UInt<1>("h0"))
+        val maskStatement = if (libMaskGran.isDefined) {
+          if (memMaskGran.isEmpty) {
+            // If there is no memory mask, we should just turn all the lib mask
+            // bits high.
+            s"""mem_0_${i}.lib_mask <= UInt<${libMaskBits}>("h${((1 << libMaskBits) - 1).toHexString}")"""
+          } else if (libMaskGran.get == memMaskGran.get) {
+            s"mem_0_${i}.lib_mask <= bits(outer_mask, ${i}, ${i})"
+          } else if (libMaskGran.get == 1) {
+            // Calculate which bit of outer_mask contains the given bit.
+            // e.g. if memMaskGran = 2, libMaskGran = 1 and libWidth = 4, then
+            // calculateMaskBit({0, 1}) = 0 and calculateMaskBit({1, 2}) = 1
+            def calculateMaskBit(bit:Int): Int = (bit / libMaskGran.get) / memMaskGran.getOrElse(memWidth)
 
-  //~ extmodule vendor_sram :
-    //~ input clock : Clock
-    //~ input RW0A : UInt<11>
-    //~ input RW0I : UInt<10>
-    //~ output RW0O : UInt<10>
-    //~ input RW0E : UInt<1>
-    //~ input RW0W : UInt<1>
+            val bitsArr = ((libMaskBits - 1 to 0 by -1) map (x => {
+              val outerMaskBit = calculateMaskBit(x*libMaskGran.get + myBaseBit)
+              s"bits(outer_mask, ${outerMaskBit}, ${outerMaskBit})"
+            }))
+            val maskVal = bitsArr.init.foldRight(bitsArr.last)((bit, rest) => s"cat($bit, $rest)")
+            s"mem_0_${i}.lib_mask <= ${maskVal}"
+          } else "" // We support only bit-level masks for now.
+        } else ""
+s"""
+    mem_0_${i}.lib_clk <= outer_clk
+    mem_0_${i}.lib_addr <= outer_addr
+    node outer_dout_0_${i} = bits(mem_0_${i}.lib_dout, ${myMemWidth - 1}, 0)
+    mem_0_${i}.lib_din <= bits(outer_din, ${myBaseBit + myMemWidth - 1}, ${myBaseBit})
+    ${maskStatement}
+    mem_0_${i}.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+"""
+      }).reduceLeft(_ + _)
 
-    //~ defname = vendor_sram
-//~ """
-  //~ compile(mem, Some(lib), v, false)
-  //~ execute(Some(mem), Some(lib), false, output)
-//~ }
+      // Generate final output that concats together the sub-memories.
+      // e.g. cat(outer_dout_0_2, cat(outer_dout_0_1, outer_dout_0_0))
+      output append {
+        val doutStatements = ((widthInstances - 1 to 0 by -1) map (i => s"outer_dout_0_${i}"))
+        val catStmt = doutStatements.init.foldRight(doutStatements.last)((l: String, r: String) => s"cat($l, $r)")
+s"""
+    node outer_dout_0 = ${catStmt}
+"""
+      }
 
-//~ class SplitWidth2048x16_mrw_VeryUneven extends MacroCompilerSpec {
-  //~ val mem = new File(macroDir, "mem-2048x16-mrw-2.json")
-  //~ val lib = new File(macroDir, "lib-2048x10-rw.json")
-  //~ val v = new File(testDir, "split_width_2048x16_mrw_very_uneven.v")
-  //~ val output =
-//~ """
-//~ circuit name_of_sram_module :
-  //~ module name_of_sram_module :
-    //~ input clock : Clock
-    //~ input RW0A : UInt<11>
-    //~ input RW0I : UInt<16>
-    //~ output RW0O : UInt<16>
-    //~ input RW0E : UInt<1>
-    //~ input RW0W : UInt<1>
-    //~ input RW0M : UInt<8>
+      output append
+"""
+    outer_dout <= mux(UInt<1>("h1"), outer_dout_0, UInt<1>("h0"))
+"""
+      output.toString
+    }
+}
 
-    //~ inst mem_0_0 of vendor_sram
-    //~ inst mem_0_1 of vendor_sram
-    //~ inst mem_0_2 of vendor_sram
-    //~ inst mem_0_3 of vendor_sram
-    //~ inst mem_0_4 of vendor_sram
-    //~ inst mem_0_5 of vendor_sram
-    //~ inst mem_0_6 of vendor_sram
-    //~ inst mem_0_7 of vendor_sram
-    //~ mem_0_0.clock <= clock
-    //~ mem_0_0.RW0A <= RW0A
-    //~ node RW0O_0_0 = bits(mem_0_0.RW0O, 1, 0)
-    //~ mem_0_0.RW0I <= bits(RW0I, 1, 0)
-    //~ mem_0_0.RW0W <= and(and(RW0W, bits(RW0M, 0, 0)), UInt<1>("h1"))
-    //~ mem_0_0.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ mem_0_1.clock <= clock
-    //~ mem_0_1.RW0A <= RW0A
-    //~ node RW0O_0_1 = bits(mem_0_1.RW0O, 1, 0)
-    //~ mem_0_1.RW0I <= bits(RW0I, 3, 2)
-    //~ mem_0_1.RW0W <= and(and(RW0W, bits(RW0M, 1, 1)), UInt<1>("h1"))
-    //~ mem_0_1.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ mem_0_2.clock <= clock
-    //~ mem_0_2.RW0A <= RW0A
-    //~ node RW0O_0_2 = bits(mem_0_2.RW0O, 1, 0)
-    //~ mem_0_2.RW0I <= bits(RW0I, 5, 4)
-    //~ mem_0_2.RW0W <= and(and(RW0W, bits(RW0M, 2, 2)), UInt<1>("h1"))
-    //~ mem_0_2.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ mem_0_3.clock <= clock
-    //~ mem_0_3.RW0A <= RW0A
-    //~ node RW0O_0_3 = bits(mem_0_3.RW0O, 1, 0)
-    //~ mem_0_3.RW0I <= bits(RW0I, 7, 6)
-    //~ mem_0_3.RW0W <= and(and(RW0W, bits(RW0M, 3, 3)), UInt<1>("h1"))
-    //~ mem_0_3.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ mem_0_4.clock <= clock
-    //~ mem_0_4.RW0A <= RW0A
-    //~ node RW0O_0_4 = bits(mem_0_4.RW0O, 1, 0)
-    //~ mem_0_4.RW0I <= bits(RW0I, 9, 8)
-    //~ mem_0_4.RW0W <= and(and(RW0W, bits(RW0M, 4, 4)), UInt<1>("h1"))
-    //~ mem_0_4.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ mem_0_5.clock <= clock
-    //~ mem_0_5.RW0A <= RW0A
-    //~ node RW0O_0_5 = bits(mem_0_5.RW0O, 1, 0)
-    //~ mem_0_5.RW0I <= bits(RW0I, 11, 10)
-    //~ mem_0_5.RW0W <= and(and(RW0W, bits(RW0M, 5, 5)), UInt<1>("h1"))
-    //~ mem_0_5.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ mem_0_6.clock <= clock
-    //~ mem_0_6.RW0A <= RW0A
-    //~ node RW0O_0_6 = bits(mem_0_6.RW0O, 1, 0)
-    //~ mem_0_6.RW0I <= bits(RW0I, 13, 12)
-    //~ mem_0_6.RW0W <= and(and(RW0W, bits(RW0M, 6, 6)), UInt<1>("h1"))
-    //~ mem_0_6.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ mem_0_7.clock <= clock
-    //~ mem_0_7.RW0A <= RW0A
-    //~ node RW0O_0_7 = bits(mem_0_7.RW0O, 1, 0)
-    //~ mem_0_7.RW0I <= bits(RW0I, 15, 14)
-    //~ mem_0_7.RW0W <= and(and(RW0W, bits(RW0M, 7, 7)), UInt<1>("h1"))
-    //~ mem_0_7.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ node RW0O_0 = cat(RW0O_0_7, cat(RW0O_0_6, cat(RW0O_0_5, cat(RW0O_0_4, cat(RW0O_0_3, cat(RW0O_0_2, cat(RW0O_0_1, RW0O_0_0)))))))
-    //~ RW0O <= mux(UInt<1>("h1"), RW0O_0, UInt<1>("h0"))
+// Try different widths against a base memory width of 8.
+class SplitWidth1024x128_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 128
+  override lazy val libWidth = 8
 
-  //~ extmodule vendor_sram :
-    //~ input clock : Clock
-    //~ input RW0A : UInt<11>
-    //~ input RW0I : UInt<10>
-    //~ output RW0O : UInt<10>
-    //~ input RW0E : UInt<1>
-    //~ input RW0W : UInt<1>
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
 
-    //~ defname = vendor_sram
-//~ """
-  //~ compile(mem, Some(lib), v, false)
-  //~ execute(Some(mem), Some(lib), false, output)
-//~ }
+class SplitWidth1024x64_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 64
+  override lazy val libWidth = 8
 
-//~ class SplitWidth2048x16_mrw_ReadEnable extends MacroCompilerSpec {
-  //~ val mem = new File(macroDir, "mem-2048x16-mrw.json")
-  //~ val lib = new File(macroDir, "lib-2048x8-mrw-re.json")
-  //~ val v = new File(testDir, "split_width_2048x16_mrw_read_enable.v")
-  //~ val output =
-//~ """
-//~ circuit name_of_sram_module :
-  //~ module name_of_sram_module :
-    //~ input clock : Clock
-    //~ input RW0A : UInt<11>
-    //~ input RW0I : UInt<16>
-    //~ output RW0O : UInt<16>
-    //~ input RW0E : UInt<1>
-    //~ input RW0W : UInt<1>
-    //~ input RW0M : UInt<2>
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
 
-    //~ inst mem_0_0 of vendor_sram
-    //~ inst mem_0_1 of vendor_sram
-    //~ mem_0_0.clock <= clock
-    //~ mem_0_0.RW0A <= RW0A
-    //~ node RW0O_0_0 = bits(mem_0_0.RW0O, 7, 0)
-    //~ mem_0_0.RW0I <= bits(RW0I, 7, 0)
-    //~ mem_0_0.RW0R <= not(and(not(RW0W), UInt<1>("h1")))
-    //~ mem_0_0.RW0M <= bits(RW0M, 0, 0)
-    //~ mem_0_0.RW0W <= and(RW0W, UInt<1>("h1"))
-    //~ mem_0_0.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ mem_0_1.clock <= clock
-    //~ mem_0_1.RW0A <= RW0A
-    //~ node RW0O_0_1 = bits(mem_0_1.RW0O, 7, 0)
-    //~ mem_0_1.RW0I <= bits(RW0I, 15, 8)
-    //~ mem_0_1.RW0R <= not(and(not(RW0W), UInt<1>("h1")))
-    //~ mem_0_1.RW0M <= bits(RW0M, 1, 1)
-    //~ mem_0_1.RW0W <= and(RW0W, UInt<1>("h1"))
-    //~ mem_0_1.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ node RW0O_0 = cat(RW0O_0_1, RW0O_0_0)
-    //~ RW0O <= mux(UInt<1>("h1"), RW0O_0, UInt<1>("h0"))
+class SplitWidth1024x32_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 32
+  override lazy val libWidth = 8
 
-  //~ extmodule vendor_sram :
-    //~ input clock : Clock
-    //~ input RW0A : UInt<11>
-    //~ input RW0I : UInt<8>
-    //~ output RW0O : UInt<8>
-    //~ input RW0E : UInt<1>
-    //~ input RW0R : UInt<1>
-    //~ input RW0W : UInt<1>
-    //~ input RW0M : UInt<1>
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
 
-    //~ defname = vendor_sram
-//~ """
-  //~ compile(mem, Some(lib), v, false)
-  //~ execute(Some(mem), Some(lib), false, output)
-//~ }
+class SplitWidth1024x16_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 16
+  override lazy val libWidth = 8
 
-//~ class SplitWidth2048x16_n28 extends MacroCompilerSpec {
-  //~ val mem = new File(macroDir, "mem-2048x16-mrw.json")
-  //~ val lib = new File(macroDir, "lib-2048x16-n28.json")
-  //~ val v = new File(testDir, "split_width_2048x16_n28.v")
-  //~ val output =
-//~ """
-//~ circuit name_of_sram_module :
-  //~ module name_of_sram_module :
-    //~ input clock : Clock
-    //~ input RW0A : UInt<11>
-    //~ input RW0I : UInt<16>
-    //~ output RW0O : UInt<16>
-    //~ input RW0E : UInt<1>
-    //~ input RW0W : UInt<1>
-    //~ input RW0M : UInt<2>
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
 
-    //~ inst mem_0_0 of vendor_sram_16
-    //~ mem_0_0.clock <= clock
-    //~ mem_0_0.RW0A <= RW0A
-    //~ node RW0O_0_0 = bits(mem_0_0.RW0O, 15, 0)
-    //~ mem_0_0.RW0I <= bits(RW0I, 15, 0)
-    //~ mem_0_0.RW0M <= cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), bits(RW0M, 0, 0))))))))))))))))
-    //~ mem_0_0.RW0W <= and(RW0W, UInt<1>("h1"))
-    //~ mem_0_0.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ node RW0O_0 = RW0O_0_0
-    //~ RW0O <= mux(UInt<1>("h1"), RW0O_0, UInt<1>("h0"))
+class SplitWidth1024x8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 8
+  override lazy val libWidth = 8
 
-  //~ extmodule vendor_sram_16 :
-    //~ input clock : Clock
-    //~ input RW0A : UInt<11>
-    //~ input RW0I : UInt<16>
-    //~ output RW0O : UInt<16>
-    //~ input RW0E : UInt<1>
-    //~ input RW0W : UInt<1>
-    //~ input RW0M : UInt<16>
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
 
-    //~ defname = vendor_sram_16
-//~ """
-  //~ compile(mem, Some(lib), v, false)
-  //~ execute(Some(mem), Some(lib), false, output)
-//~ }
+// Try different widths against a base memory width of 16.
+class SplitWidth1024x128_lib16_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 128
+  override lazy val libWidth = 16
 
-//~ class SplitWidth2048x20_mrw_UnevenMask extends MacroCompilerSpec {
-  //~ val mem = new File(macroDir, "mem-2048x20-mrw.json")
-  //~ val lib = new File(macroDir, "lib-2048x8-mrw.json")
-  //~ val v = new File(testDir, "split_width_2048x20_mrw_uneven_mask.v")
-  //~ val output =
-//~ """
-//~ circuit name_of_sram_module :
-  //~ module name_of_sram_module :
-    //~ input clock : Clock
-    //~ input RW0A : UInt<11>
-    //~ input RW0I : UInt<20>
-    //~ output RW0O : UInt<20>
-    //~ input RW0E : UInt<1>
-    //~ input RW0W : UInt<1>
-    //~ input RW0M : UInt<2>
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
 
-    //~ inst mem_0_0 of vendor_sram
-    //~ inst mem_0_1 of vendor_sram
-    //~ inst mem_0_2 of vendor_sram
-    //~ inst mem_0_3 of vendor_sram
-    //~ mem_0_0.clock <= clock
-    //~ mem_0_0.RW0A <= RW0A
-    //~ node RW0O_0_0 = bits(mem_0_0.RW0O, 7, 0)
-    //~ mem_0_0.RW0I <= bits(RW0I, 7, 0)
-    //~ mem_0_0.RW0M <= bits(RW0M, 0, 0)
-    //~ mem_0_0.RW0W <= and(RW0W, UInt<1>("h1"))
-    //~ mem_0_0.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ mem_0_1.clock <= clock
-    //~ mem_0_1.RW0A <= RW0A
-    //~ node RW0O_0_1 = bits(mem_0_1.RW0O, 1, 0)
-    //~ mem_0_1.RW0I <= bits(RW0I, 9, 8)
-    //~ mem_0_1.RW0M <= bits(RW0M, 0, 0)
-    //~ mem_0_1.RW0W <= and(RW0W, UInt<1>("h1"))
-    //~ mem_0_1.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ mem_0_2.clock <= clock
-    //~ mem_0_2.RW0A <= RW0A
-    //~ node RW0O_0_2 = bits(mem_0_2.RW0O, 7, 0)
-    //~ mem_0_2.RW0I <= bits(RW0I, 17, 10)
-    //~ mem_0_2.RW0M <= bits(RW0M, 1, 1)
-    //~ mem_0_2.RW0W <= and(RW0W, UInt<1>("h1"))
-    //~ mem_0_2.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ mem_0_3.clock <= clock
-    //~ mem_0_3.RW0A <= RW0A
-    //~ node RW0O_0_3 = bits(mem_0_3.RW0O, 1, 0)
-    //~ mem_0_3.RW0I <= bits(RW0I, 19, 18)
-    //~ mem_0_3.RW0M <= bits(RW0M, 1, 1)
-    //~ mem_0_3.RW0W <= and(RW0W, UInt<1>("h1"))
-    //~ mem_0_3.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ node RW0O_0 = cat(RW0O_0_3, cat(RW0O_0_2, cat(RW0O_0_1, RW0O_0_0)))
-    //~ RW0O <= mux(UInt<1>("h1"), RW0O_0, UInt<1>("h0"))
+class SplitWidth1024x64_lib16_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 64
+  override lazy val libWidth = 16
 
-  //~ extmodule vendor_sram :
-    //~ input clock : Clock
-    //~ input RW0A : UInt<11>
-    //~ input RW0I : UInt<8>
-    //~ output RW0O : UInt<8>
-    //~ input RW0E : UInt<1>
-    //~ input RW0W : UInt<1>
-    //~ input RW0M : UInt<1>
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
 
-    //~ defname = vendor_sram
-//~ """
-  //~ compile(mem, Some(lib), v, false)
-  //~ execute(Some(mem), Some(lib), false, output)
-//~ }
+class SplitWidth1024x32_lib16_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 32
+  override lazy val libWidth = 16
 
-//~ class SplitWidth24x52 extends MacroCompilerSpec {
-  //~ val mem = new File(macroDir, "mem-24x52-r-w.json")
-  //~ val lib = new File(macroDir, "lib-32x32-2rw.json")
-  //~ val v = new File(testDir, "split_width_24x52.v")
-  //~ val output =
-//~ """
-//~ circuit entries_info_ext :
-  //~ module entries_info_ext :
-    //~ input R0_clk : Clock
-    //~ input R0_addr : UInt<5>
-    //~ output R0_data : UInt<52>
-    //~ input R0_en : UInt<1>
-    //~ input W0_clk : Clock
-    //~ input W0_addr : UInt<5>
-    //~ input W0_data : UInt<52>
-    //~ input W0_en : UInt<1>
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
 
-    //~ inst mem_0_0 of SRAM2RW32x32
-    //~ inst mem_0_1 of SRAM2RW32x32
-    //~ mem_0_0.CE1 <= W0_clk
-    //~ mem_0_0.A1 <= W0_addr
-    //~ mem_0_0.I1 <= bits(W0_data, 31, 0)
-    //~ mem_0_0.OEB1 <= not(and(not(UInt<1>("h1")), UInt<1>("h1")))
-    //~ mem_0_0.WEB1 <= not(and(and(UInt<1>("h1"), UInt<1>("h1")), UInt<1>("h1")))
-    //~ mem_0_0.CSB1 <= not(and(W0_en, UInt<1>("h1")))
-    //~ mem_0_1.CE1 <= W0_clk
-    //~ mem_0_1.A1 <= W0_addr
-    //~ mem_0_1.I1 <= bits(W0_data, 51, 32)
-    //~ mem_0_1.OEB1 <= not(and(not(UInt<1>("h1")), UInt<1>("h1")))
-    //~ mem_0_1.WEB1 <= not(and(and(UInt<1>("h1"), UInt<1>("h1")), UInt<1>("h1")))
-    //~ mem_0_1.CSB1 <= not(and(W0_en, UInt<1>("h1")))
-    //~ mem_0_0.CE2 <= R0_clk
-    //~ mem_0_0.A2 <= R0_addr
-    //~ node R0_data_0_0 = bits(mem_0_0.O2, 31, 0)
-    //~ mem_0_0.OEB2 <= not(and(not(UInt<1>("h0")), UInt<1>("h1")))
-    //~ mem_0_0.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), UInt<1>("h1")))
-    //~ mem_0_0.CSB2 <= not(and(R0_en, UInt<1>("h1")))
-    //~ mem_0_1.CE2 <= R0_clk
-    //~ mem_0_1.A2 <= R0_addr
-    //~ node R0_data_0_1 = bits(mem_0_1.O2, 19, 0)
-    //~ mem_0_1.OEB2 <= not(and(not(UInt<1>("h0")), UInt<1>("h1")))
-    //~ mem_0_1.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), UInt<1>("h1")))
-    //~ mem_0_1.CSB2 <= not(and(R0_en, UInt<1>("h1")))
-    //~ node R0_data_0 = cat(R0_data_0_1, R0_data_0_0)
-    //~ R0_data <= mux(UInt<1>("h1"), R0_data_0, UInt<1>("h0"))
+class SplitWidth1024x16_lib16_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 16
+  override lazy val libWidth = 16
 
-  //~ extmodule SRAM2RW32x32 :
-    //~ input CE1 : Clock
-    //~ input A1 : UInt<5>
-    //~ input I1 : UInt<32>
-    //~ output O1 : UInt<32>
-    //~ input CSB1 : UInt<1>
-    //~ input OEB1 : UInt<1>
-    //~ input WEB1 : UInt<1>
-    //~ input CE2 : Clock
-    //~ input A2 : UInt<5>
-    //~ input I2 : UInt<32>
-    //~ output O2 : UInt<32>
-    //~ input CSB2 : UInt<1>
-    //~ input OEB2 : UInt<1>
-    //~ input WEB2 : UInt<1>
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
 
-    //~ defname = SRAM2RW32x32
-//~ """
-  //~ compile(mem, Some(lib), v, false)
-  //~ execute(Some(mem), Some(lib), false, output)
-//~ }
+// Try different widths against a base memory width of 8 but depth 512 instead of 1024.
+class SplitWidth512x128_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 512
+  override lazy val memWidth = 128
+  override lazy val libWidth = 8
 
-//~ class SplitWidth32x160 extends MacroCompilerSpec {
-  //~ val mem = new File(macroDir, "mem-32x160-mrw.json")
-  //~ val lib = new File(macroDir, "lib-32x80-mrw.json")
-  //~ val v = new File(testDir, "split_width_32x160.v")
-  //~ val output =
-//~ """
-//~ circuit name_of_sram_module :
-  //~ module name_of_sram_module :
-    //~ input clock : Clock
-    //~ input RW0A : UInt<5>
-    //~ input RW0I : UInt<160>
-    //~ output RW0O : UInt<160>
-    //~ input RW0E : UInt<1>
-    //~ input RW0W : UInt<1>
-    //~ input RW0M : UInt<8>
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
 
-    //~ inst mem_0_0 of vendor_sram
-    //~ inst mem_0_1 of vendor_sram
-    //~ mem_0_0.clock <= clock
-    //~ mem_0_0.RW0A <= RW0A
-    //~ node RW0O_0_0 = bits(mem_0_0.RW0O, 79, 0)
-    //~ mem_0_0.RW0I <= bits(RW0I, 79, 0)
-    //~ mem_0_0.RW0M <= cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 3, 3), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 2, 2), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 1, 1), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), cat(bits(RW0M, 0, 0), bits(RW0M, 0, 0))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
-    //~ mem_0_0.RW0W <= and(RW0W, UInt<1>("h1"))
-    //~ mem_0_0.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ mem_0_1.clock <= clock
-    //~ mem_0_1.RW0A <= RW0A
-    //~ node RW0O_0_1 = bits(mem_0_1.RW0O, 79, 0)
-    //~ mem_0_1.RW0I <= bits(RW0I, 159, 80)
-    //~ mem_0_1.RW0M <= cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 7, 7), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 6, 6), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 5, 5), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), cat(bits(RW0M, 4, 4), bits(RW0M, 4, 4))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
-    //~ mem_0_1.RW0W <= and(RW0W, UInt<1>("h1"))
-    //~ mem_0_1.RW0E <= and(RW0E, UInt<1>("h1"))
-    //~ node RW0O_0 = cat(RW0O_0_1, RW0O_0_0)
-    //~ RW0O <= mux(UInt<1>("h1"), RW0O_0, UInt<1>("h0"))
+class SplitWidth512x64_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 512
+  override lazy val memWidth = 64
+  override lazy val libWidth = 8
 
-  //~ extmodule vendor_sram :
-    //~ input clock : Clock
-    //~ input RW0A : UInt<5>
-    //~ input RW0I : UInt<80>
-    //~ output RW0O : UInt<80>
-    //~ input RW0E : UInt<1>
-    //~ input RW0W : UInt<1>
-    //~ input RW0M : UInt<80>
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
 
-    //~ defname = vendor_sram
-//~ """
-  //~ compile(mem, Some(lib), v, false)
-  //~ execute(Some(mem), Some(lib), false, output)
-//~ }
+class SplitWidth512x32_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 512
+  override lazy val memWidth = 32
+  override lazy val libWidth = 8
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth512x16_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 512
+  override lazy val memWidth = 16
+  override lazy val libWidth = 8
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth512x8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 512
+  override lazy val memWidth = 8
+  override lazy val libWidth = 8
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+// Try non-power of two widths against a base memory width of 8.
+class SplitWidth1024x67_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 67
+  override lazy val libWidth = 8
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x60_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 60
+  override lazy val libWidth = 8
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x42_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 42
+  override lazy val libWidth = 8
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x20_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 20
+  override lazy val libWidth = 8
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x17_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 17
+  override lazy val libWidth = 8
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x15_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 15
+  override lazy val libWidth = 8
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x9_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 9
+  override lazy val libWidth = 8
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+// Try against a non-power of two base memory width.
+class SplitWidth1024x64_mem11_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 64
+  override lazy val libWidth = 11
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x33_mem11_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 33
+  override lazy val libWidth = 11
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x16_mem11_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 16
+  override lazy val libWidth = 11
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+// Masked RAM
+
+class SplitWidth1024x8_memGran_8_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 8
+  override lazy val libWidth = 8
+  override lazy val memMaskGran = Some(8)
+  override lazy val libMaskGran = Some(1)
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x16_memGran_8_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 16
+  override lazy val libWidth = 8
+  override lazy val memMaskGran = Some(8)
+  override lazy val libMaskGran = Some(1)
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x16_memGran_8_libGran_8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 16
+  override lazy val libWidth = 8
+  override lazy val memMaskGran = Some(8)
+  override lazy val libMaskGran = Some(8)
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x128_memGran_8_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 128
+  override lazy val libWidth = 32
+  override lazy val memMaskGran = Some(8)
+  override lazy val libMaskGran = Some(1)
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x16_memGran_4_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 16
+  override lazy val libWidth = 8
+  override lazy val memMaskGran = Some(4)
+  override lazy val libMaskGran = Some(1)
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x16_memGran_2_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 16
+  override lazy val libWidth = 8
+  override lazy val memMaskGran = Some(2)
+  override lazy val libMaskGran = Some(1)
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x16_memGran_16_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 16
+  override lazy val libWidth = 8
+  override lazy val memMaskGran = Some(16)
+  override lazy val libMaskGran = Some(1)
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+// Non-masked mem, masked lib
+
+class SplitWidth1024x16_libGran_8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 16
+  override lazy val libWidth = 8
+  override lazy val libMaskGran = Some(8)
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x16_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 16
+  override lazy val libWidth = 8
+  override lazy val libMaskGran = Some(1)
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+// Non-memMask and non-1 libMask
+
+class SplitWidth1024x16_memGran_8_libGran_2_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 16
+  override lazy val libWidth = 8
+  override lazy val memMaskGran = Some(8)
+  override lazy val libMaskGran = Some(2)
+
+  it should "be enabled when non-bit masks are supported" is (pending)
+  //~ compile(mem, lib, v, false)
+  //~ execute(mem, lib, false, output)
+}
+
+// Non-power of two memGran
+
+class SplitWidth1024x16_memGran_9_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 16
+  override lazy val libWidth = 8
+  override lazy val memMaskGran = Some(9)
+  override lazy val libMaskGran = Some(1)
+
+  it should "be enabled when non-power of two masks are supported" is (pending)
+  //~ compile(mem, lib, v, false)
+  //~ execute(mem, lib, false, output)
+}
+
+// Read enable
+
+class SplitWidth1024x32_readEnable_Lib extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  import mdf.macrolib._
+
+  override lazy val depth = 1024
+  override lazy val memWidth = 32
+  override lazy val libWidth = 8
+
+  override def generateLibSRAM() = {
+    SRAMMacro(
+      macroType=SRAM,
+      name=lib_name,
+      width=libWidth,
+      depth=libDepth,
+      family="1rw",
+      ports=Seq(generateTestPort(
+        "lib", libWidth, libDepth, maskGran=libMaskGran,
+        write=true, writeEnable=true,
+        read=true, readEnable=true
+      ))
+    )
+  }
+
+  override def generateBody() =
+"""
+    inst mem_0_0 of awesome_lib_mem
+    inst mem_0_1 of awesome_lib_mem
+    inst mem_0_2 of awesome_lib_mem
+    inst mem_0_3 of awesome_lib_mem
+    mem_0_0.lib_clk <= outer_clk
+    mem_0_0.lib_addr <= outer_addr
+    node outer_dout_0_0 = bits(mem_0_0.lib_dout, 7, 0)
+    mem_0_0.lib_din <= bits(outer_din, 7, 0)
+    mem_0_0.lib_read_en <= and(not(outer_write_en), UInt<1>("h1"))
+    mem_0_0.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_1.lib_clk <= outer_clk
+    mem_0_1.lib_addr <= outer_addr
+    node outer_dout_0_1 = bits(mem_0_1.lib_dout, 7, 0)
+    mem_0_1.lib_din <= bits(outer_din, 15, 8)
+    mem_0_1.lib_read_en <= and(not(outer_write_en), UInt<1>("h1"))
+    mem_0_1.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_2.lib_clk <= outer_clk
+    mem_0_2.lib_addr <= outer_addr
+    node outer_dout_0_2 = bits(mem_0_2.lib_dout, 7, 0)
+    mem_0_2.lib_din <= bits(outer_din, 23, 16)
+    mem_0_2.lib_read_en <= and(not(outer_write_en), UInt<1>("h1"))
+    mem_0_2.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_3.lib_clk <= outer_clk
+    mem_0_3.lib_addr <= outer_addr
+    node outer_dout_0_3 = bits(mem_0_3.lib_dout, 7, 0)
+    mem_0_3.lib_din <= bits(outer_din, 31, 24)
+    mem_0_3.lib_read_en <= and(not(outer_write_en), UInt<1>("h1"))
+    mem_0_3.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    node outer_dout_0 = cat(outer_dout_0_3, cat(outer_dout_0_2, cat(outer_dout_0_1, outer_dout_0_0)))
+    outer_dout <= mux(UInt<1>("h1"), outer_dout_0, UInt<1>("h0"))
+"""
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x32_readEnable_Mem extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  import mdf.macrolib._
+
+  override lazy val depth = 1024
+  override lazy val memWidth = 32
+  override lazy val libWidth = 8
+
+  override def generateMemSRAM() = {
+    SRAMMacro(
+      macroType=SRAM,
+      name=mem_name,
+      width=memWidth,
+      depth=memDepth,
+      family="1rw",
+      ports=Seq(generateTestPort(
+        "outer", memWidth, memDepth, maskGran=memMaskGran,
+        write=true, writeEnable=true,
+        read=true, readEnable=true
+      ))
+    )
+  }
+
+  // No need to override body here due to the lack of a readEnable in the lib.
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
+
+class SplitWidth1024x32_readEnable_LibMem extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  import mdf.macrolib._
+
+  override lazy val depth = 1024
+  override lazy val memWidth = 32
+  override lazy val libWidth = 8
+
+  override def generateLibSRAM() = {
+    SRAMMacro(
+      macroType=SRAM,
+      name=lib_name,
+      width=libWidth,
+      depth=libDepth,
+      family="1rw",
+      ports=Seq(generateTestPort(
+        "lib", libWidth, libDepth, maskGran=libMaskGran,
+        write=true, writeEnable=true,
+        read=true, readEnable=true
+      ))
+    )
+  }
+
+  override def generateMemSRAM() = {
+    SRAMMacro(
+      macroType=SRAM,
+      name=mem_name,
+      width=memWidth,
+      depth=memDepth,
+      family="1rw",
+      ports=Seq(generateTestPort(
+        "outer", memWidth, memDepth, maskGran=memMaskGran,
+        write=true, writeEnable=true,
+        read=true, readEnable=true
+      ))
+    )
+  }
+
+  override def generateBody() =
+"""
+    inst mem_0_0 of awesome_lib_mem
+    inst mem_0_1 of awesome_lib_mem
+    inst mem_0_2 of awesome_lib_mem
+    inst mem_0_3 of awesome_lib_mem
+    mem_0_0.lib_clk <= outer_clk
+    mem_0_0.lib_addr <= outer_addr
+    node outer_dout_0_0 = bits(mem_0_0.lib_dout, 7, 0)
+    mem_0_0.lib_din <= bits(outer_din, 7, 0)
+    mem_0_0.lib_read_en <= and(outer_read_en, UInt<1>("h1"))
+    mem_0_0.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_1.lib_clk <= outer_clk
+    mem_0_1.lib_addr <= outer_addr
+    node outer_dout_0_1 = bits(mem_0_1.lib_dout, 7, 0)
+    mem_0_1.lib_din <= bits(outer_din, 15, 8)
+    mem_0_1.lib_read_en <= and(outer_read_en, UInt<1>("h1"))
+    mem_0_1.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_2.lib_clk <= outer_clk
+    mem_0_2.lib_addr <= outer_addr
+    node outer_dout_0_2 = bits(mem_0_2.lib_dout, 7, 0)
+    mem_0_2.lib_din <= bits(outer_din, 23, 16)
+    mem_0_2.lib_read_en <= and(outer_read_en, UInt<1>("h1"))
+    mem_0_2.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_3.lib_clk <= outer_clk
+    mem_0_3.lib_addr <= outer_addr
+    node outer_dout_0_3 = bits(mem_0_3.lib_dout, 7, 0)
+    mem_0_3.lib_din <= bits(outer_din, 31, 24)
+    mem_0_3.lib_read_en <= and(outer_read_en, UInt<1>("h1"))
+    mem_0_3.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    node outer_dout_0 = cat(outer_dout_0_3, cat(outer_dout_0_2, cat(outer_dout_0_1, outer_dout_0_0)))
+    outer_dout <= mux(UInt<1>("h1"), outer_dout_0, UInt<1>("h0"))
+"""
+
+  compile(mem, lib, v, false)
+  execute(mem, lib, false, output)
+}
