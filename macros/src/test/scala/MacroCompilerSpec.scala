@@ -204,8 +204,8 @@ trait HasSimpleTestGenerator {
     val lib_name = "awesome_lib_mem"
     val lib_addr_width = ceilLog2(libDepth)
 
-    // These generate "simple" SRAMs (1 masked read-write port) but can be
-    // overridden if need be.
+    // These generate "simple" SRAMs (1 masked read-write port) by default,
+    // but can be overridden if need be.
     def generateLibSRAM() = generateSRAM(lib_name, "lib", libWidth, libDepth, libMaskGran, extraPorts)
     def generateMemSRAM() = generateSRAM(mem_name, "outer", memWidth, memDepth, memMaskGran)
 
