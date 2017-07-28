@@ -52,14 +52,28 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
     mdf.macrolib.Utils.writeMDFToPath(Some(concat(memPrefix, mem)), mems)
   }
 
-  // Execute the macro compiler and compare FIRRTL outputs after reparsing output.
-  def execute(memFile: String, libFile: Option[String], synflops: Boolean, output: String): Unit = {
-    execute(Some(memFile), libFile, synflops, output)
+  // Convenience function for running both compile, execute, and test at once.
+  def compileExecuteAndTest(mem: String, lib: String, v: String, output: String, synflops: Boolean = false): Unit = {
+    compile(mem, lib, v, synflops)
+    val result = execute(mem, lib, synflops)
+    test(result, output)
   }
-  def execute(memFile: String, libFile: String, synflops: Boolean, output: String): Unit = {
-    execute(Some(memFile), Some(libFile), synflops, output)
+
+  // Compare FIRRTL outputs after reparsing output with ScalaTest ("should be").
+  def test(result: Circuit, output: String): Unit = {
+    val gold = RemoveEmpty run parse(output)
+    (result.serialize) should be (gold.serialize)
   }
-  def execute(memFile: Option[String], libFile: Option[String], synflops: Boolean, output: String): Unit = {
+
+  // Execute the macro compiler and returns a Circuit containing the output of
+  // the memory compiler.
+  def execute(memFile: String, libFile: Option[String], synflops: Boolean): Circuit = {
+    execute(Some(memFile), libFile, synflops)
+  }
+  def execute(memFile: String, libFile: String, synflops: Boolean): Circuit = {
+    execute(Some(memFile), Some(libFile), synflops)
+  }
+  def execute(memFile: Option[String], libFile: Option[String], synflops: Boolean): Circuit = {
     var mem_full = concat(memPrefix, memFile)
     var lib_full = concat(libPrefix, libFile)
 
@@ -75,9 +89,8 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
       new MacroCompilerPass(Some(mems), libs),
       new SynFlopsPass(synflops, libs getOrElse mems),
       RemoveEmpty)
-    val result = (passes foldLeft circuit)((c, pass) => pass run c)
-    val gold = RemoveEmpty run parse(output)
-    (result.serialize) should be (gold.serialize)
+    val result: Circuit = (passes foldLeft circuit)((c, pass) => pass run c)
+    result
   }
 
   // Helper method to deal with String + Option[String]

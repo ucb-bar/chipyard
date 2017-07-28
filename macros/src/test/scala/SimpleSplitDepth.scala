@@ -84,8 +84,7 @@ class SplitDepth4096x32_rw extends MacroCompilerSpec with HasSRAMGenerator with 
   override lazy val memDepth = 4096
   override lazy val libDepth = 1024
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 class SplitDepth4096x16_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
@@ -93,8 +92,7 @@ class SplitDepth4096x16_rw extends MacroCompilerSpec with HasSRAMGenerator with 
   override lazy val memDepth = 4096
   override lazy val libDepth = 1024
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 class SplitDepth32768x8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
@@ -102,8 +100,7 @@ class SplitDepth32768x8_rw extends MacroCompilerSpec with HasSRAMGenerator with 
   override lazy val memDepth = 32768
   override lazy val libDepth = 1024
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 class SplitDepth4096x8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
@@ -111,8 +108,7 @@ class SplitDepth4096x8_rw extends MacroCompilerSpec with HasSRAMGenerator with H
   override lazy val memDepth = 4096
   override lazy val libDepth = 1024
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 class SplitDepth2048x8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
@@ -120,8 +116,7 @@ class SplitDepth2048x8_rw extends MacroCompilerSpec with HasSRAMGenerator with H
   override lazy val memDepth = 2048
   override lazy val libDepth = 1024
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 class SplitDepth1024x8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
@@ -129,8 +124,7 @@ class SplitDepth1024x8_rw extends MacroCompilerSpec with HasSRAMGenerator with H
   override lazy val memDepth = 1024
   override lazy val libDepth = 1024
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 // Non power of two
@@ -139,8 +133,7 @@ class SplitDepth2000x8_rw extends MacroCompilerSpec with HasSRAMGenerator with H
   override lazy val memDepth = 2000
   override lazy val libDepth = 1024
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 class SplitDepth2049x8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
@@ -148,8 +141,7 @@ class SplitDepth2049x8_rw extends MacroCompilerSpec with HasSRAMGenerator with H
   override lazy val memDepth = 2049
   override lazy val libDepth = 1024
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 // Masked RAMs
@@ -162,8 +154,7 @@ class SplitDepth2048x32_mrw_lib32 extends MacroCompilerSpec with HasSRAMGenerato
   override lazy val memMaskGran = Some(32)
   override lazy val libMaskGran = Some(32)
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 class SplitDepth2048x8_mrw_lib8 extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
@@ -173,8 +164,7 @@ class SplitDepth2048x8_mrw_lib8 extends MacroCompilerSpec with HasSRAMGenerator 
   override lazy val memMaskGran = Some(8)
   override lazy val libMaskGran = Some(8)
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 // Non-bit level mask
@@ -186,8 +176,7 @@ class SplitDepth2048x64_mrw_mem32_lib8 extends MacroCompilerSpec with HasSRAMGen
   override lazy val libMaskGran = Some(8)
 
   it should "be enabled when non-bitmasked memories are supported" is (pending)
-  //compile(mem, lib, v, false)
-  //execute(mem, lib, false, output)
+  //compileExecuteAndTest(mem, lib, v, output)
 }
 
 // Bit level mask
@@ -198,8 +187,7 @@ class SplitDepth2048x32_mrw_mem16_lib1 extends MacroCompilerSpec with HasSRAMGen
   override lazy val memMaskGran = Some(16)
   override lazy val libMaskGran = Some(1)
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 class SplitDepth2048x32_mrw_mem8_lib1 extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
@@ -209,8 +197,7 @@ class SplitDepth2048x32_mrw_mem8_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val memMaskGran = Some(8)
   override lazy val libMaskGran = Some(1)
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 class SplitDepth2048x32_mrw_mem4_lib1 extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
@@ -220,8 +207,7 @@ class SplitDepth2048x32_mrw_mem4_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val memMaskGran = Some(4)
   override lazy val libMaskGran = Some(1)
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 class SplitDepth2048x32_mrw_mem2_lib1 extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
@@ -231,8 +217,7 @@ class SplitDepth2048x32_mrw_mem2_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val memMaskGran = Some(2)
   override lazy val libMaskGran = Some(1)
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 // Non-powers of 2 mask sizes
@@ -244,8 +229,7 @@ class SplitDepth2048x32_mrw_mem3_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val libMaskGran = Some(1)
 
   it should "be enabled when non-power of two masks are supported" is (pending)
-  //compile(mem, lib, v, false)
-  //execute(mem, lib, false, output)
+  //compileExecuteAndTest(mem, lib, v, output)
 }
 
 class SplitDepth2048x32_mrw_mem7_lib1 extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
@@ -256,8 +240,7 @@ class SplitDepth2048x32_mrw_mem7_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val libMaskGran = Some(1)
 
   it should "be enabled when non-power of two masks are supported" is (pending)
-  //compile(mem, lib, v, false)
-  //execute(mem, lib, false, output)
+  //compileExecuteAndTest(mem, lib, v, output)
 }
 
 class SplitDepth2048x32_mrw_mem9_lib1 extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
@@ -268,8 +251,7 @@ class SplitDepth2048x32_mrw_mem9_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val libMaskGran = Some(1)
 
   it should "be enabled when non-power of two masks are supported" is (pending)
-  //compile(mem, lib, v, false)
-  //execute(mem, lib, false, output)
+  //compileExecuteAndTest(mem, lib, v, output)
 }
 
 // Try an extra port
@@ -327,8 +309,7 @@ circuit target_memory :
     defname = awesome_lib_mem
   """
 
-  compile(mem, lib, v, false)
-  execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 // Split read and (non-masked) write ports (r+w).
@@ -420,8 +401,7 @@ circuit target_memory :
     defname = awesome_lib_mem
 """
 
-    compile(mem, lib, v, false)
-    execute(mem, lib, false, output)
+    compileExecuteAndTest(mem, lib, v, output)
   }
 
   "Non-masked regular lib; split mem" should "split fine" in {
@@ -454,8 +434,7 @@ circuit target_memory :
 TODO
 """
 
-    compile(mem, lib, v, false)
-    execute(mem, lib, false, output)
+    compileExecuteAndTest(mem, lib, v, output)
   }
 
   "Non-masked split lib; regular mem" should "split fine" in {
@@ -489,8 +468,7 @@ TODO
 TODO
 """
 
-    compile(mem, lib, v, false)
-    execute(mem, lib, false, output)
+    compileExecuteAndTest(mem, lib, v, output)
   }
 }
 
@@ -589,8 +567,7 @@ circuit target_memory :
     defname = awesome_lib_mem
 """
 
-    compile(mem, lib, v, false)
-    execute(mem, lib, false, output)
+    compileExecuteAndTest(mem, lib, v, output)
   }
 
   "Non-masked regular lib; split mem" should "split fine" in {
@@ -623,8 +600,7 @@ circuit target_memory :
 TODO
 """
 
-    compile(mem, lib, v, false)
-    execute(mem, lib, false, output)
+    compileExecuteAndTest(mem, lib, v, output)
   }
 
   "Non-masked split lib; regular mem" should "split fine" in {
@@ -658,7 +634,6 @@ TODO
 TODO
 """
 
-    compile(mem, lib, v, false)
-    execute(mem, lib, false, output)
+    compileExecuteAndTest(mem, lib, v, output)
   }
 }
