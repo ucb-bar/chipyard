@@ -52,8 +52,10 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
     mdf.macrolib.Utils.writeMDFToPath(Some(concat(memPrefix, mem)), mems)
   }
 
-  // Execute the macro compiler and compare FIRRTL outputs.
-  // TODO: think of a less brittle way to test this?
+  // Execute the macro compiler and compare FIRRTL outputs after reparsing output.
+  def execute(memFile: String, libFile: Option[String], synflops: Boolean, output: String): Unit = {
+    execute(Some(memFile), libFile, synflops, output)
+  }
   def execute(memFile: String, libFile: String, synflops: Boolean, output: String): Unit = {
     execute(Some(memFile), Some(libFile), synflops, output)
   }
@@ -245,14 +247,13 @@ circuit $mem_name :
   """
     }
 
-    // Generate the footer (contains the target memory extmodule).
-    def generateFooter(): String = {
+    // Generate the target memory ports.
+    def generateFooterPorts(): String = {
       require (libSRAM.ports.size == 1, "Footer generator only supports single port lib")
 
       val readEnable = if (libSRAM.ports(0).readEnable.isDefined) s"input lib_read_en : UInt<1>" else ""
       val footerMask = if (libHasMask) s"input lib_mask : UInt<${libMaskBits}>" else ""
       s"""
-  extmodule $lib_name :
     input lib_clk : Clock
     input lib_addr : UInt<$lib_addr_width>
     input lib_din : UInt<$libWidth>
@@ -260,6 +261,18 @@ circuit $mem_name :
     ${readEnable}
     input lib_write_en : UInt<1>
     ${footerMask}
+  """
+    }
+
+    // Generate the footer (contains the target memory extmodule declaration by default).
+    def generateFooter(): String = {
+      require (libSRAM.ports.size == 1, "Footer generator only supports single port lib")
+
+      val readEnable = if (libSRAM.ports(0).readEnable.isDefined) s"input lib_read_en : UInt<1>" else ""
+      val footerMask = if (libHasMask) s"input lib_mask : UInt<${libMaskBits}>" else ""
+      s"""
+  extmodule $lib_name :
+${generateFooterPorts}
 
     defname = $lib_name
   """
