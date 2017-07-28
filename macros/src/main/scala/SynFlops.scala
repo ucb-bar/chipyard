@@ -31,7 +31,7 @@ class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pa
       dataType,
       lib.src.depth,
       1, // writeLatency
-      1, // readLatency
+      1, // readLatency. This is possible because of VerilogMemDelays
       lib.readers.indices map (i => s"R_$i"),
       lib.writers.indices map (i => s"W_$i"),
       lib.readwriters.indices map (i => s"RW_$i")
