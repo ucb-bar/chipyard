@@ -204,18 +204,33 @@ trait HasSimpleTestGenerator {
     val lib_name = "awesome_lib_mem"
     val lib_addr_width = ceilLog2(libDepth)
 
-    writeToLib(lib, Seq(generateSRAM(lib_name, "lib", libWidth, libDepth, libMaskGran, extraPorts)))
-    writeToMem(mem, Seq(generateSRAM(mem_name, "outer", memWidth, memDepth, memMaskGran)))
+    // These generate "simple" SRAMs (1 masked read-write port) but can be
+    // overridden if need be.
+    def generateLibSRAM() = generateSRAM(lib_name, "lib", libWidth, libDepth, libMaskGran, extraPorts)
+    def generateMemSRAM() = generateSRAM(mem_name, "outer", memWidth, memDepth, memMaskGran)
+
+    val libSRAM = generateLibSRAM
+    val memSRAM = generateMemSRAM
+
+    writeToLib(lib, Seq(libSRAM))
+    writeToMem(mem, Seq(memSRAM))
 
     // Number of lib instances needed to hold the mem, in both directions.
     // Round up (e.g. 1.5 instances = effectively 2 instances)
     val depthInstances = math.ceil(memDepth.toFloat / libDepth).toInt
     val widthInstances = math.ceil(memWidth.toFloat / libWidth).toInt
+    // Number of width bits in the last width-direction memory.
+    // e.g. if memWidth = 16 and libWidth = 8, this would be 8 since the last memory 0_1 has 8 bits of input width.
+    // e.g. if memWidth = 9 and libWidth = 8, this would be 1 since the last memory 0_1 has 1 bit of input width.
+    val lastWidthBits = if (memWidth % libWidth == 0) libWidth else (memWidth % libWidth)
     val selectBits = mem_addr_width - lib_addr_width
 
     // Generate the header (contains the circuit statement and the target memory
     // module.
     def generateHeader(): String = {
+      require (memSRAM.ports.size == 1, "Header generator only supports single port mem")
+
+      val readEnable = if (memSRAM.ports(0).readEnable.isDefined) s"input outer_read_en : UInt<1>" else ""
       val headerMask = if (memHasMask) s"input outer_mask : UInt<${memMaskBits}>" else ""
       s"""
 circuit $mem_name :
@@ -224,6 +239,7 @@ circuit $mem_name :
     input outer_addr : UInt<$mem_addr_width>
     input outer_din : UInt<$memWidth>
     output outer_dout : UInt<$memWidth>
+    ${readEnable}
     input outer_write_en : UInt<1>
     ${headerMask}
   """
@@ -231,6 +247,9 @@ circuit $mem_name :
 
     // Generate the footer (contains the target memory extmodule).
     def generateFooter(): String = {
+      require (libSRAM.ports.size == 1, "Footer generator only supports single port lib")
+
+      val readEnable = if (libSRAM.ports(0).readEnable.isDefined) s"input lib_read_en : UInt<1>" else ""
       val footerMask = if (libHasMask) s"input lib_mask : UInt<${libMaskBits}>" else ""
       s"""
   extmodule $lib_name :
@@ -238,6 +257,7 @@ circuit $mem_name :
     input lib_addr : UInt<$lib_addr_width>
     input lib_din : UInt<$libWidth>
     output lib_dout : UInt<$libWidth>
+    ${readEnable}
     input lib_write_en : UInt<1>
     ${footerMask}
 
