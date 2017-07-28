@@ -389,23 +389,23 @@ circuit target_memory :
     node outerB_addr_sel = bits(outerB_addr, 10, 10)
     node outerA_addr_sel = bits(outerA_addr, 10, 10)
     inst mem_0_0 of awesome_lib_mem
-    mem_0_0.innerA_clk <= outerB_clk
-    mem_0_0.innerA_addr <= outerB_addr
-    node outerB_dout_0_0 = bits(mem_0_0.innerA_dout, 7, 0)
-    node outerB_dout_0 = outerB_dout_0_0
     mem_0_0.innerB_clk <= outerA_clk
     mem_0_0.innerB_addr <= outerA_addr
     mem_0_0.innerB_din <= bits(outerA_din, 7, 0)
     mem_0_0.innerB_write_en <= and(and(outerA_write_en, UInt<1>("h1")), eq(outerA_addr_sel, UInt<1>("h0")))
+    mem_0_0.innerA_clk <= outerB_clk
+    mem_0_0.innerA_addr <= outerB_addr
+    node outerB_dout_0_0 = bits(mem_0_0.innerA_dout, 7, 0)
+    node outerB_dout_0 = outerB_dout_0_0
     inst mem_1_0 of awesome_lib_mem
-    mem_1_0.innerA_clk <= outerB_clk
-    mem_1_0.innerA_addr <= outerB_addr
-    node outerB_dout_1_0 = bits(mem_1_0.innerA_dout, 7, 0)
-    node outerB_dout_1 = outerB_dout_1_0
     mem_1_0.innerB_clk <= outerA_clk
     mem_1_0.innerB_addr <= outerA_addr
     mem_1_0.innerB_din <= bits(outerA_din, 7, 0)
     mem_1_0.innerB_write_en <= and(and(outerA_write_en, UInt<1>("h1")), eq(outerA_addr_sel, UInt<1>("h1")))
+    mem_1_0.innerA_clk <= outerB_clk
+    mem_1_0.innerA_addr <= outerB_addr
+    node outerB_dout_1_0 = bits(mem_1_0.innerA_dout, 7, 0)
+    node outerB_dout_1 = outerB_dout_1_0
     outerB_dout <= mux(eq(outerB_addr_sel, UInt<1>("h0")), outerB_dout_0, mux(eq(outerB_addr_sel, UInt<1>("h1")), outerB_dout_1, UInt<1>("h0")))
 
   extmodule awesome_lib_mem :
@@ -555,25 +555,25 @@ circuit target_memory :
     node outerB_addr_sel = bits(outerB_addr, 10, 10)
     node outerA_addr_sel = bits(outerA_addr, 10, 10)
     inst mem_0_0 of awesome_lib_mem
-    mem_0_0.innerA_clk <= outerB_clk
-    mem_0_0.innerA_addr <= outerB_addr
-    node outerB_dout_0_0 = bits(mem_0_0.innerA_dout, 7, 0)
-    node outerB_dout_0 = outerB_dout_0_0
     mem_0_0.innerB_clk <= outerA_clk
     mem_0_0.innerB_addr <= outerA_addr
     mem_0_0.innerB_din <= bits(outerA_din, 7, 0)
     mem_0_0.innerB_mask <= cat(bits(outerA_mask, 0, 0), cat(bits(outerA_mask, 0, 0), cat(bits(outerA_mask, 0, 0), cat(bits(outerA_mask, 0, 0), cat(bits(outerA_mask, 0, 0), cat(bits(outerA_mask, 0, 0), cat(bits(outerA_mask, 0, 0), bits(outerA_mask, 0, 0))))))))
     mem_0_0.innerB_write_en <= and(and(outerA_write_en, UInt<1>("h1")), eq(outerA_addr_sel, UInt<1>("h0")))
+    mem_0_0.innerA_clk <= outerB_clk
+    mem_0_0.innerA_addr <= outerB_addr
+    node outerB_dout_0_0 = bits(mem_0_0.innerA_dout, 7, 0)
+    node outerB_dout_0 = outerB_dout_0_0
     inst mem_1_0 of awesome_lib_mem
-    mem_1_0.innerA_clk <= outerB_clk
-    mem_1_0.innerA_addr <= outerB_addr
-    node outerB_dout_1_0 = bits(mem_1_0.innerA_dout, 7, 0)
-    node outerB_dout_1 = outerB_dout_1_0
     mem_1_0.innerB_clk <= outerA_clk
     mem_1_0.innerB_addr <= outerA_addr
     mem_1_0.innerB_din <= bits(outerA_din, 7, 0)
     mem_1_0.innerB_mask <= cat(bits(outerA_mask, 0, 0), cat(bits(outerA_mask, 0, 0), cat(bits(outerA_mask, 0, 0), cat(bits(outerA_mask, 0, 0), cat(bits(outerA_mask, 0, 0), cat(bits(outerA_mask, 0, 0), cat(bits(outerA_mask, 0, 0), bits(outerA_mask, 0, 0))))))))
     mem_1_0.innerB_write_en <= and(and(outerA_write_en, UInt<1>("h1")), eq(outerA_addr_sel, UInt<1>("h1")))
+    mem_1_0.innerA_clk <= outerB_clk
+    mem_1_0.innerA_addr <= outerB_addr
+    node outerB_dout_1_0 = bits(mem_1_0.innerA_dout, 7, 0)
+    node outerB_dout_1 = outerB_dout_1_0
     outerB_dout <= mux(eq(outerB_addr_sel, UInt<1>("h0")), outerB_dout_0, mux(eq(outerB_addr_sel, UInt<1>("h1")), outerB_dout_1, UInt<1>("h0")))
 
   extmodule awesome_lib_mem :
