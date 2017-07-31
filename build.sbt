@@ -26,6 +26,11 @@ lazy val mdf = (project in file("mdf/scalalib"))
 lazy val macros = (project in file("macros"))
   .dependsOn(mdf)
   .settings(commonSettings)
+  .settings(Seq(
+    libraryDependencies ++= Seq(
+      "edu.berkeley.cs" %% "firrtl-interpreter" % "0.1-SNAPSHOT" % Test
+    )
+  ))
 
 lazy val tapeout = (project in file("tapeout"))
   .settings(commonSettings)
