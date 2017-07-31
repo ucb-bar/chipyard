@@ -6,8 +6,6 @@ import firrtl.Parser.parse
 import firrtl.Utils.ceilLog2
 import java.io.{File, StringWriter}
 
-// TODO: we should think of a less brittle way to run these tests.
-
 abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalatest.Matchers {
   /**
    * Terminology note:
