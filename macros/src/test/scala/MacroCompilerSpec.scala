@@ -53,10 +53,13 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
   }
 
   // Convenience function for running both compile, execute, and test at once.
-  def compileExecuteAndTest(mem: String, lib: String, v: String, output: String, synflops: Boolean = false): Unit = {
+  def compileExecuteAndTest(mem: String, lib: Option[String], v: String, output: String, synflops: Boolean): Unit = {
     compile(mem, lib, v, synflops)
     val result = execute(mem, lib, synflops)
     test(result, output)
+  }
+  def compileExecuteAndTest(mem: String, lib: String, v: String, output: String, synflops: Boolean = false): Unit = {
+    compileExecuteAndTest(mem, Some(lib), v, output, synflops)
   }
 
   // Compare FIRRTL outputs after reparsing output with ScalaTest ("should be").
@@ -219,10 +222,14 @@ trait HasSimpleTestGenerator {
     val lib_name = "awesome_lib_mem"
     val lib_addr_width = ceilLog2(libDepth)
 
+    // Override these to change the port prefixes if needed.
+    def libPortPrefix: String = "lib"
+    def memPortPrefix: String = "outer"
+
     // These generate "simple" SRAMs (1 masked read-write port) by default,
     // but can be overridden if need be.
-    def generateLibSRAM() = generateSRAM(lib_name, "lib", libWidth, libDepth, libMaskGran, extraPorts)
-    def generateMemSRAM() = generateSRAM(mem_name, "outer", memWidth, memDepth, memMaskGran)
+    def generateLibSRAM() = generateSRAM(lib_name, libPortPrefix, libWidth, libDepth, libMaskGran, extraPorts)
+    def generateMemSRAM() = generateSRAM(mem_name, memPortPrefix, memWidth, memDepth, memMaskGran)
 
     val libSRAM = generateLibSRAM
     val memSRAM = generateMemSRAM
@@ -245,17 +252,17 @@ trait HasSimpleTestGenerator {
     def generateHeader(): String = {
       require (memSRAM.ports.size == 1, "Header generator only supports single port mem")
 
-      val readEnable = if (memSRAM.ports(0).readEnable.isDefined) s"input outer_read_en : UInt<1>" else ""
-      val headerMask = if (memHasMask) s"input outer_mask : UInt<${memMaskBits}>" else ""
+      val readEnable = if (memSRAM.ports(0).readEnable.isDefined) s"input ${memPortPrefix}_read_en : UInt<1>" else ""
+      val headerMask = if (memHasMask) s"input ${memPortPrefix}_mask : UInt<${memMaskBits}>" else ""
       s"""
 circuit $mem_name :
   module $mem_name :
-    input outer_clk : Clock
-    input outer_addr : UInt<$mem_addr_width>
-    input outer_din : UInt<$memWidth>
-    output outer_dout : UInt<$memWidth>
+    input ${memPortPrefix}_clk : Clock
+    input ${memPortPrefix}_addr : UInt<$mem_addr_width>
+    input ${memPortPrefix}_din : UInt<$memWidth>
+    output ${memPortPrefix}_dout : UInt<$memWidth>
     ${readEnable}
-    input outer_write_en : UInt<1>
+    input ${memPortPrefix}_write_en : UInt<1>
     ${headerMask}
   """
     }
@@ -264,15 +271,15 @@ circuit $mem_name :
     def generateFooterPorts(): String = {
       require (libSRAM.ports.size == 1, "Footer generator only supports single port lib")
 
-      val readEnable = if (libSRAM.ports(0).readEnable.isDefined) s"input lib_read_en : UInt<1>" else ""
-      val footerMask = if (libHasMask) s"input lib_mask : UInt<${libMaskBits}>" else ""
+      val readEnable = if (libSRAM.ports(0).readEnable.isDefined) s"input ${libPortPrefix}_read_en : UInt<1>" else ""
+      val footerMask = if (libHasMask) s"input ${libPortPrefix}_mask : UInt<${libMaskBits}>" else ""
       s"""
-    input lib_clk : Clock
-    input lib_addr : UInt<$lib_addr_width>
-    input lib_din : UInt<$libWidth>
-    output lib_dout : UInt<$libWidth>
+    input ${libPortPrefix}_clk : Clock
+    input ${libPortPrefix}_addr : UInt<$lib_addr_width>
+    input ${libPortPrefix}_din : UInt<$libWidth>
+    output ${libPortPrefix}_dout : UInt<$libWidth>
     ${readEnable}
-    input lib_write_en : UInt<1>
+    input ${libPortPrefix}_write_en : UInt<1>
     ${footerMask}
   """
     }
@@ -281,8 +288,8 @@ circuit $mem_name :
     def generateFooter(): String = {
       require (libSRAM.ports.size == 1, "Footer generator only supports single port lib")
 
-      val readEnable = if (libSRAM.ports(0).readEnable.isDefined) s"input lib_read_en : UInt<1>" else ""
-      val footerMask = if (libHasMask) s"input lib_mask : UInt<${libMaskBits}>" else ""
+      val readEnable = if (libSRAM.ports(0).readEnable.isDefined) s"input ${libPortPrefix}_read_en : UInt<1>" else ""
+      val footerMask = if (libHasMask) s"input ${libPortPrefix}_mask : UInt<${libMaskBits}>" else ""
       s"""
   extmodule $lib_name :
 ${generateFooterPorts}
