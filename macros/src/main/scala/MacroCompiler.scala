@@ -448,6 +448,8 @@ object MacroCompiler extends App {
       val verilogWriter = new FileWriter(new File(params.get(Verilog).get))
 
       if (macros.nonEmpty) {
+        // Note: the last macro in the input list is (seemingly arbitrarily)
+        // determined as the firrtl "top-level module".
         val circuit = Circuit(NoInfo, macros, macros.last.name)
         val annotations = AnnotationMap(Seq(MacroCompilerAnnotation(
           circuit.main, params.get(Macros).get, params.get(Library), synflops)))
