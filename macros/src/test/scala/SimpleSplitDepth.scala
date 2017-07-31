@@ -15,13 +15,17 @@ trait HasSimpleDepthTestGenerator extends HasSimpleTestGenerator {
 
     // Generate a depth-splitting body.
     override def generateBody(): String = {
-      var output = ""
+      val output = new StringBuilder
 
       if (selectBits > 0) {
-        output +=
-  s"""
+        output.append (
+s"""
     node outer_addr_sel = bits(outer_addr, ${mem_addr_width - 1}, $lib_addr_width)
-  """
+    reg outer_addr_sel_reg : UInt<${selectBits}>, outer_clk with :
+      reset => (UInt<1>("h0"), outer_addr_sel_reg)
+    outer_addr_sel_reg <= mux(UInt<1>("h1"), outer_addr_sel, outer_addr_sel_reg)
+"""
+        )
       }
 
       for (i <- 0 to depthInstances - 1) {
@@ -46,7 +50,7 @@ trait HasSimpleDepthTestGenerator extends HasSimpleTestGenerator {
         } else "" // No mask
 
         val enableIdentifier = if (selectBits > 0) s"""eq(outer_addr_sel, UInt<${selectBits}>("h${i.toHexString}"))""" else "UInt<1>(\"h1\")"
-        output +=
+        output.append(
   s"""
     inst mem_${i}_0 of awesome_lib_mem
     mem_${i}_0.lib_clk <= outer_clk
@@ -57,24 +61,25 @@ trait HasSimpleDepthTestGenerator extends HasSimpleTestGenerator {
     mem_${i}_0.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), ${enableIdentifier})
     node outer_dout_${i} = outer_dout_${i}_0
   """
+        )
       }
       def generate_outer_dout_tree(i:Int, depthInstances: Int): String = {
         if (i > depthInstances - 1) {
           "UInt<1>(\"h0\")"
         } else {
-          "mux(eq(outer_addr_sel, UInt<%d>(\"h%s\")), outer_dout_%d, %s)".format(
+          "mux(eq(outer_addr_sel_reg, UInt<%d>(\"h%s\")), outer_dout_%d, %s)".format(
             selectBits, i.toHexString, i, generate_outer_dout_tree(i + 1, depthInstances)
           )
         }
       }
-      output += "  outer_dout <= "
+      output append "  outer_dout <= "
       if (selectBits > 0) {
-        output += generate_outer_dout_tree(0, depthInstances)
+        output append generate_outer_dout_tree(0, depthInstances)
       } else {
-        output += """mux(UInt<1>("h1"), outer_dout_0, UInt<1>("h0"))"""
+        output append """mux(UInt<1>("h1"), outer_dout_0, UInt<1>("h0"))"""
       }
 
-      return output
+      output.toString
     }
 }
 
@@ -277,6 +282,9 @@ circuit target_memory :
     input outer_write_en : UInt<1>
 
     node outer_addr_sel = bits(outer_addr, 10, 10)
+    reg outer_addr_sel_reg : UInt<1>, outer_clk with :
+      reset => (UInt<1>("h0"), outer_addr_sel_reg)
+    outer_addr_sel_reg <= mux(UInt<1>("h1"), outer_addr_sel, outer_addr_sel_reg)
 
     inst mem_0_0 of awesome_lib_mem
     mem_0_0.extra_port <= UInt<8>("hff")
@@ -297,7 +305,7 @@ circuit target_memory :
 
     mem_1_0.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), eq(outer_addr_sel, UInt<1>("h1")))
     node outer_dout_1 = outer_dout_1_0
-    outer_dout <= mux(eq(outer_addr_sel, UInt<1>("h0")), outer_dout_0, mux(eq(outer_addr_sel, UInt<1>("h1")), outer_dout_1, UInt<1>("h0")))
+    outer_dout <= mux(eq(outer_addr_sel_reg, UInt<1>("h0")), outer_dout_0, mux(eq(outer_addr_sel_reg, UInt<1>("h1")), outer_dout_1, UInt<1>("h0")))
   extmodule awesome_lib_mem :
     input lib_clk : Clock
     input lib_addr : UInt<10>
@@ -368,6 +376,9 @@ circuit target_memory :
     input outerA_write_en : UInt<1>
 
     node outerB_addr_sel = bits(outerB_addr, 10, 10)
+    reg outerB_addr_sel_reg : UInt<1>, outerB_clk with :
+      reset => (UInt<1>("h0"), outerB_addr_sel_reg)
+    outerB_addr_sel_reg <= mux(UInt<1>("h1"), outerB_addr_sel, outerB_addr_sel_reg)
     node outerA_addr_sel = bits(outerA_addr, 10, 10)
     inst mem_0_0 of awesome_lib_mem
     mem_0_0.innerB_clk <= outerA_clk
@@ -387,7 +398,7 @@ circuit target_memory :
     mem_1_0.innerA_addr <= outerB_addr
     node outerB_dout_1_0 = bits(mem_1_0.innerA_dout, 7, 0)
     node outerB_dout_1 = outerB_dout_1_0
-    outerB_dout <= mux(eq(outerB_addr_sel, UInt<1>("h0")), outerB_dout_0, mux(eq(outerB_addr_sel, UInt<1>("h1")), outerB_dout_1, UInt<1>("h0")))
+    outerB_dout <= mux(eq(outerB_addr_sel_reg, UInt<1>("h0")), outerB_dout_0, mux(eq(outerB_addr_sel_reg, UInt<1>("h1")), outerB_dout_1, UInt<1>("h0")))
 
   extmodule awesome_lib_mem :
     input innerA_clk : Clock
@@ -531,6 +542,9 @@ circuit target_memory :
     input outerA_mask : UInt<1>
 
     node outerB_addr_sel = bits(outerB_addr, 10, 10)
+    reg outerB_addr_sel_reg : UInt<1>, outerB_clk with :
+      reset => (UInt<1>("h0"), outerB_addr_sel_reg)
+    outerB_addr_sel_reg <= mux(UInt<1>("h1"), outerB_addr_sel, outerB_addr_sel_reg)
     node outerA_addr_sel = bits(outerA_addr, 10, 10)
     inst mem_0_0 of awesome_lib_mem
     mem_0_0.innerB_clk <= outerA_clk
@@ -552,7 +566,7 @@ circuit target_memory :
     mem_1_0.innerA_addr <= outerB_addr
     node outerB_dout_1_0 = bits(mem_1_0.innerA_dout, 7, 0)
     node outerB_dout_1 = outerB_dout_1_0
-    outerB_dout <= mux(eq(outerB_addr_sel, UInt<1>("h0")), outerB_dout_0, mux(eq(outerB_addr_sel, UInt<1>("h1")), outerB_dout_1, UInt<1>("h0")))
+    outerB_dout <= mux(eq(outerB_addr_sel_reg, UInt<1>("h0")), outerB_dout_0, mux(eq(outerB_addr_sel_reg, UInt<1>("h1")), outerB_dout_1, UInt<1>("h0")))
 
   extmodule awesome_lib_mem :
     input innerA_clk : Clock
