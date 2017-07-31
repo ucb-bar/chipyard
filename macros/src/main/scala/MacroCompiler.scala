@@ -335,8 +335,14 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
             // val cost = 100 * (mem.depth * mem.width) / (lib.depth * lib.width) +
             //                  (mem.depth * mem.width)
             // Donggyu: I re-define cost
+            val memMask = mem.src.ports map (_.maskGran) find (_.isDefined) map (_.get)
+            val libMask = lib.src.ports map (_.maskGran) find (_.isDefined) map (_.get)
+            val memWidth = (memMask, libMask) match {
+              case (Some(1), Some(1)) | (None, _) => mem.src.width
+              case (Some(p), _) => p // assume that the memory consists of smaller chunks
+            }
             val cost = (((mem.src.depth - 1) / lib.src.depth) + 1) *
-                       (((mem.src.width - 1) / lib.src.width) + 1) *
+                       (((memWidth - 1) / lib.src.width) + 1) *
                        (lib.src.depth * lib.src.width + 1) // weights on # cells
             System.err.println(s"Cost of ${lib.src.name} for ${mem.src.name}: ${cost}")
             if (cost > area) (best, area)
