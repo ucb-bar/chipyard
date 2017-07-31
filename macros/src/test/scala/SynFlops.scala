@@ -1,21 +1,5 @@
 package barstools.macros
 
-// Use this trait for tests that invoke the memory compiler without lib.
-trait HasNoLibTestGenerator extends HasSimpleTestGenerator {
-  this: MacroCompilerSpec with HasSRAMGenerator =>
-
-    // If there isn't a lib, then the "lib" will become a FIRRTL "mem", which
-    // in turn becomes synthesized flops.
-    // Therefore, make "lib" width/depth equal to the mem.
-    override lazy val libDepth = memDepth
-    override lazy val libWidth = memWidth
-    // Do the same for port names.
-    override lazy val libPortPrefix = memPortPrefix
-
-    // If there is no lib, don't generate a body.
-    override def generateBody = ""
-}
-
 // Test flop synthesis of the memory compiler.
 
 trait HasSynFlopsTestGenerator extends HasSimpleTestGenerator {
