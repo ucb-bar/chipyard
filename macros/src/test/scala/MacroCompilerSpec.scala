@@ -119,7 +119,7 @@ trait HasSRAMGenerator {
     write: Boolean,
     writeEnable: Boolean = false
   ): MacroPort = {
-    val realPrefix = prefix + "_"
+    val realPrefix = if (prefix == "") "" else prefix + "_"
 
     MacroPort(
       address=PolarizedPort(name=realPrefix + "addr", polarity=ActiveHigh),
