@@ -103,6 +103,15 @@ object NewDefaultMetric extends CostMetric {
 object CostMetric {
   /** Define some default metric. */
   val default: CostMetric = NewDefaultMetric
+
+  /** Select a cost function from string. */
+  def getCostMetric(m: String, params: Map[String, String]): CostMetric = m match {
+    case "default" => default
+    case "PalmerMetric" => PalmerMetric
+    case "ExternalMetric" => new ExternalMetric(params.get("path").get)
+    case "NewDefaultMetric" => NewDefaultMetric
+    case _ => throw new IllegalArgumentException("Invalid cost metric " + m)
+  }
 }
 
 object MacroCompilerAnnotation {
@@ -508,32 +517,41 @@ object MacroCompiler extends App {
   case object Macros extends MacroParam
   case object Library extends MacroParam
   case object Verilog extends MacroParam
+  case object CostFunc extends MacroParam
   type MacroParamMap = Map[MacroParam, String]
+  type CostParamMap = Map[String, String]
   val usage = Seq(
     "Options:",
     "  -m, --macro-list: The set of macros to compile",
     "  -l, --library: The set of macros that have blackbox instances",
     "  -v, --verilog: Verilog output",
+    "  -c, --cost-func: Cost function to use. Optional (default: \"default\")",
+    "  -cp, --cost-param: Cost function parameter. (Optional depending on the cost function.). e.g. -c ExternalMetric -cp path /path/to/my/cost/script",
     "  --syn-flop: Produces synthesizable flop-based memories (for all memories and library memory macros); likely useful for simulation purposes") mkString "\n"
 
-  def parseArgs(map: MacroParamMap, synflops: Boolean, args: List[String]): (MacroParamMap, Boolean) =
+  def parseArgs(map: MacroParamMap, costMap: CostParamMap, synflops: Boolean, args: List[String]): (MacroParamMap, Boolean) =
     args match {
       case Nil => (map, synflops)
       case ("-m" | "--macro-list") :: value :: tail =>
-        parseArgs(map + (Macros  -> value), synflops, tail)
+        parseArgs(map + (Macros  -> value), costMap, synflops, tail)
       case ("-l" | "--library") :: value :: tail =>
-        parseArgs(map + (Library -> value), synflops, tail)
+        parseArgs(map + (Library -> value), costMap, synflops, tail)
       case ("-v" | "--verilog") :: value :: tail =>
-        parseArgs(map + (Verilog -> value), synflops, tail)
+        parseArgs(map + (Verilog -> value), costMap, synflops, tail)
+      case ("-c" | "--cost-func") :: value :: tail =>
+        parseArgs(map + (CostFunc -> value), costMap, synflops, tail)
+      case ("-cp" | "--cost-param") :: value1 :: value2 :: tail =>
+        parseArgs(map, costMap + (value1 -> value2), synflops, tail)
       case "--syn-flops" :: tail =>
-        parseArgs(map, true, tail)
+        parseArgs(map, costMap, true, tail)
       case arg :: tail =>
         println(s"Unknown field $arg\n")
-        throw new Exception(usage)
+        println(usage)
+        sys.exit(1)
     }
 
   def run(args: List[String]) {
-    val (params, synflops) = parseArgs(Map[MacroParam, String](), false, args)
+    val (params, synflops) = parseArgs(Map[MacroParam, String](), Map[String, String](), false, args)
     try {
       val macros = Utils.filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(params.get(Macros))).get map (x => (new Macro(x)).blackbox)
 
@@ -560,7 +578,8 @@ object MacroCompiler extends App {
 
     } catch {
       case e: java.util.NoSuchElementException =>
-        throw new Exception(usage)
+        println(usage)
+        sys.exit(1)
       case e: Throwable =>
         throw e
     }
