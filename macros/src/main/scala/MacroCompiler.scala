@@ -13,6 +13,60 @@ import scala.collection.mutable.{ArrayBuffer, HashMap}
 import java.io.{File, FileWriter}
 import Utils._
 
+/**
+ * Trait which can calculate the cost of compiling a memory against a certain
+ * library memory macro using a cost function.
+ */
+// TODO: eventually explore compiling a single target memory using multiple
+// different kinds of target memory.
+trait CostMetric {
+  /**
+   * Cost function that returns the cost of compiling a memory using a certain
+   * macro.
+   *
+   * @param mem Memory macro to compile (target memory)
+   * @param lib Library memory macro to use (library memory)
+   * @return The cost of this compile, defined by this cost metric, or None if
+   *         it cannot be compiled.
+   */
+  def cost(mem: Macro, lib: Macro): Option[BigInt]
+}
+
+/** Some default cost functions. */
+object PalmerMetric extends CostMetric {
+  override def cost(mem: Macro, lib: Macro): Option[BigInt] = {
+    /* Palmer: A quick cost function (that must be kept in sync with
+     * memory_cost()) that attempts to avoid compiling unncessary
+     * memories.  This is a lower bound on the cost of compiling a
+     * memory: it assumes 100% bit-cell utilization when mapping. */
+    // val cost = 100 * (mem.depth * mem.width) / (lib.depth * lib.width) +
+    //                  (mem.depth * mem.width)
+    ???
+  }
+}
+
+// The current default metric in barstools, re-defined by Donggyu.
+object NewDefaultMetric extends CostMetric {
+  override def cost(mem: Macro, lib: Macro): Option[BigInt] = {
+    val memMask = mem.src.ports map (_.maskGran) find (_.isDefined) map (_.get)
+    val libMask = lib.src.ports map (_.maskGran) find (_.isDefined) map (_.get)
+    val memWidth = (memMask, libMask) match {
+      case (Some(1), Some(1)) | (None, _) => mem.src.width
+      case (Some(p), _) => p // assume that the memory consists of smaller chunks
+    }
+    return Some(
+      (((mem.src.depth - 1) / lib.src.depth) + 1) *
+      (((memWidth - 1) / lib.src.width) + 1) *
+      (lib.src.depth * lib.src.width + 1) // weights on # cells
+    )
+  }
+}
+
+object CostMetric {
+  /** Define some default metric. */
+  val default: CostMetric = NewDefaultMetric
+}
+
 object MacroCompilerAnnotation {
   def apply(c: String, mem: File, lib: Option[File], synflops: Boolean): Annotation =
     apply(c, mem.toString, lib map (_.toString), synflops)
@@ -335,27 +389,17 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
             System.err println s"INFO: unable to compile ${mem.src.name} using ${lib.src.name} port count must match"
             (best, cost)
           case ((best, cost), lib) =>
-            /* Palmer: A quick cost function (that must be kept in sync with
-             * memory_cost()) that attempts to avoid compiling unncessary
-             * memories.  This is a lower bound on the cost of compiling a
-             * memory: it assumes 100% bit-cell utilization when mapping. */
-            // val cost = 100 * (mem.depth * mem.width) / (lib.depth * lib.width) +
-            //                  (mem.depth * mem.width)
-            // Donggyu: I re-define cost
-            val memMask = mem.src.ports map (_.maskGran) find (_.isDefined) map (_.get)
-            val libMask = lib.src.ports map (_.maskGran) find (_.isDefined) map (_.get)
-            val memWidth = (memMask, libMask) match {
-              case (Some(1), Some(1)) | (None, _) => mem.src.width
-              case (Some(p), _) => p // assume that the memory consists of smaller chunks
-            }
-            val newCost = (((mem.src.depth - 1) / lib.src.depth) + 1) *
-                       (((memWidth - 1) / lib.src.width) + 1) *
-                       (lib.src.depth * lib.src.width + 1) // weights on # cells
-            System.err.println(s"Cost of ${lib.src.name} for ${mem.src.name}: ${newCost}")
-            if (newCost > cost) (best, cost)
-            else compile(mem, lib) match {
-              case None => (best, cost)
-              case Some(p) => (Some(p), newCost)
+            // Run the cost function to evaluate this potential compile.
+            CostMetric.default.cost(mem, lib) match {
+              case Some(newCost) => {
+                System.err.println(s"Cost of ${lib.src.name} for ${mem.src.name}: ${newCost}")
+                if (newCost > cost) (best, cost)
+                else compile(mem, lib) match {
+                  case None => (best, cost)
+                  case Some(p) => (Some(p), newCost)
+                }
+              }
+              case _ => (best, cost) // Cost function rejected this combination.
             }
         }
 
