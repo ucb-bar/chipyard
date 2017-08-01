@@ -320,14 +320,21 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
 
   def run(c: Circuit): Circuit = {
     val modules = (mems, libs) match {
-      case (Some(mems), Some(libs)) => (mems foldLeft c.modules){ (modules, mem) =>
+      case (Some(mems), Some(libs)) =>
+        // Try to compile each of the memories in mems.
+        // The 'state' is c.modules, which is a list of all the firrtl modules
+        // in the 'circuit'.
+        (mems foldLeft c.modules){ (modules, mem) =>
+
+        // Try to compile mem against each lib in libs, keeping track of the
+        // best compiled version, external lib used, and cost.
         val (best, cost) = (libs foldLeft (None: Option[(Module, ExtModule)], BigInt(Long.MaxValue))){
-          case ((best, area), lib) if mem.src.ports.size != lib.src.ports.size =>
+          case ((best, cost), lib) if mem.src.ports.size != lib.src.ports.size =>
             /* Palmer: FIXME: This just assumes the Chisel and vendor ports are in the same
              * order, but I'm starting with what actually gets generated. */
             System.err println s"INFO: unable to compile ${mem.src.name} using ${lib.src.name} port count must match"
-            (best, area)
-          case ((best, area), lib) =>
+            (best, cost)
+          case ((best, cost), lib) =>
             /* Palmer: A quick cost function (that must be kept in sync with
              * memory_cost()) that attempts to avoid compiling unncessary
              * memories.  This is a lower bound on the cost of compiling a
@@ -341,16 +348,20 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
               case (Some(1), Some(1)) | (None, _) => mem.src.width
               case (Some(p), _) => p // assume that the memory consists of smaller chunks
             }
-            val cost = (((mem.src.depth - 1) / lib.src.depth) + 1) *
+            val newCost = (((mem.src.depth - 1) / lib.src.depth) + 1) *
                        (((memWidth - 1) / lib.src.width) + 1) *
                        (lib.src.depth * lib.src.width + 1) // weights on # cells
-            System.err.println(s"Cost of ${lib.src.name} for ${mem.src.name}: ${cost}")
-            if (cost > area) (best, area)
+            System.err.println(s"Cost of ${lib.src.name} for ${mem.src.name}: ${newCost}")
+            if (newCost > cost) (best, cost)
             else compile(mem, lib) match {
-              case None => (best, area)
-              case Some(p) => (Some(p), cost)
+              case None => (best, cost)
+              case Some(p) => (Some(p), newCost)
             }
         }
+
+        // If we were able to compile anything, then replace the original module
+        // in the modules list with a compiled version, as well as the extmodule
+        // stub for the lib.
         best match {
           case None => modules
           case Some((mod, bb)) =>
