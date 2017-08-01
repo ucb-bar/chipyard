@@ -90,6 +90,7 @@ class ExternalMetric(path: String) extends CostMetric {
 }
 
 /** The current default metric in barstools, re-defined by Donggyu. */
+// TODO: write tests for this function to make sure it selects the right things
 object NewDefaultMetric extends CostMetric {
   override def cost(mem: Macro, lib: Macro): Option[BigInt] = {
     val memMask = mem.src.ports map (_.maskGran) find (_.isDefined) map (_.get)

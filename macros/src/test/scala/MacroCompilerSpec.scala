@@ -15,6 +15,9 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
   val libPrefix: String = testDir
   val vPrefix: String = testDir
 
+  // Override this to use a different cost metric.
+  val costMetric: CostMetric = CostMetric.default
+
   private def args(mem: String, lib: Option[String], v: String, synflops: Boolean) =
     List("-m", mem.toString, "-v", v) ++
     (lib match { case None => Nil case Some(l) => List("-l", l.toString) }) ++
@@ -80,7 +83,7 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
     val macros = mems map (_.blackbox)
     val circuit = Circuit(NoInfo, macros, macros.last.name)
     val passes = Seq(
-      new MacroCompilerPass(Some(mems), libs),
+      new MacroCompilerPass(Some(mems), libs, costMetric),
       new SynFlopsPass(synflops, libs getOrElse mems),
       RemoveEmpty)
     val result: Circuit = (passes foldLeft circuit)((c, pass) => pass run c)
