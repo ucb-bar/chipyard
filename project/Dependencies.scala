@@ -9,7 +9,9 @@ object Dependencies {
 
   // Templating!
   val handlebarsVersion =  "2.1.1"
-  val handlebars = "com.gilt" %% "handlebars-scala" % handlebarsVersion
+  val handlebars = "com.gilt" %% "handlebars-scala" % handlebarsVersion exclude("org.slf4j", "slf4j-simple")
+  // org.slf4j.slf4j-simple's StaticLoggerBinder (from handlebars) conflicts with
+  // ch.qos.logback.logback-classic's StaticLoggerBinder (from firrtl).
 
   val commonDependencies: Seq[ModuleID] = Seq(
     scalatest,

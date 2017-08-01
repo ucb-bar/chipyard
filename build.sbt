@@ -22,6 +22,8 @@ lazy val commonSettings = Seq(
   )
 )
 
+disablePlugins(sbtassembly.AssemblyPlugin)
+
 lazy val mdf = (project in file("mdf/scalalib"))
 lazy val macros = (project in file("macros"))
   .dependsOn(mdf)
@@ -29,8 +31,10 @@ lazy val macros = (project in file("macros"))
   .settings(Seq(
     libraryDependencies ++= Seq(
       "edu.berkeley.cs" %% "firrtl-interpreter" % "0.1-SNAPSHOT" % Test
-    )
+    ),
+    mainClass := Some("barstools.macros.MacroCompiler")
   ))
+  .enablePlugins(sbtassembly.AssemblyPlugin)
 
 lazy val tapeout = (project in file("tapeout"))
   .settings(commonSettings)
