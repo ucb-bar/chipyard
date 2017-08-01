@@ -13,13 +13,12 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
    * lib - technology SRAM(s) to use to compile mem
    */
 
-  val macroDir: String = "tapeout/src/test/resources/macros"
   val testDir: String = "test_run_dir/macros"
   new File(testDir).mkdirs // Make sure the testDir exists
 
   // Override these to change the prefixing of macroDir and testDir
-  val memPrefix: String = macroDir
-  val libPrefix: String = macroDir
+  val memPrefix: String = testDir
+  val libPrefix: String = testDir
   val vPrefix: String = testDir
 
   private def args(mem: String, lib: Option[String], v: String, synflops: Boolean) =
@@ -197,9 +196,6 @@ trait HasSimpleTestGenerator {
     def generatorType: String = this.getClass.getSimpleName
 
     require (memDepth >= libDepth)
-
-    override val memPrefix = testDir
-    override val libPrefix = testDir
 
     // Convenience variables to check if a mask exists.
     val memHasMask = memMaskGran != None
