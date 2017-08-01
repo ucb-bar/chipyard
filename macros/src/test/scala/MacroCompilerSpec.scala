@@ -7,12 +7,6 @@ import firrtl.Utils.ceilLog2
 import java.io.{File, StringWriter}
 
 abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalatest.Matchers {
-  /**
-   * Terminology note:
-   * mem - target memory to compile, in design (e.g. Mem() in rocket)
-   * lib - technology SRAM(s) to use to compile mem
-   */
-
   val testDir: String = "test_run_dir/macros"
   new File(testDir).mkdirs // Make sure the testDir exists
 

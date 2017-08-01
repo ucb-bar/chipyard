@@ -1,5 +1,11 @@
 // See LICENSE for license details.
 
+/**
+ * Terminology note:
+ * mem - target memory to compile, in design (e.g. Mem() in rocket)
+ * lib - technology SRAM(s) to use to compile mem
+ */
+
 package barstools.macros
 
 import firrtl._
