@@ -87,7 +87,6 @@ class Synflops_SplitPorts_Read_Write extends MacroCompilerSpec with HasSRAMGener
   override lazy val width = 8
 
   override def generateLibSRAM = SRAMMacro(
-    macroType=SRAM,
     name=lib_name,
     width=width,
     depth=libDepth,
@@ -99,7 +98,6 @@ class Synflops_SplitPorts_Read_Write extends MacroCompilerSpec with HasSRAMGener
   )
 
   override def generateMemSRAM = SRAMMacro(
-    macroType=SRAM,
     name=mem_name,
     width=width,
     depth=memDepth,
@@ -198,7 +196,6 @@ class Synflops_SplitPorts_MaskedMem_Read_MaskedWrite extends MacroCompilerSpec w
   override lazy val libMaskGran = Some(1)
 
   override def generateLibSRAM = SRAMMacro(
-    macroType=SRAM,
     name=lib_name,
     width=width,
     depth=libDepth,
@@ -210,7 +207,6 @@ class Synflops_SplitPorts_MaskedMem_Read_MaskedWrite extends MacroCompilerSpec w
   )
 
   override def generateMemSRAM = SRAMMacro(
-    macroType=SRAM,
     name=mem_name,
     width=width,
     depth=memDepth,

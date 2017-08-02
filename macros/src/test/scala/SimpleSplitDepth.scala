@@ -337,7 +337,6 @@ class SplitDepth_SplitPortsNonMasked extends MacroCompilerSpec with HasSRAMGener
     val v = "split_depth-r-w-split-lib-split-mem.v"
 
     val libMacro = SRAMMacro(
-      macroType=SRAM,
       name="awesome_lib_mem",
       width=width,
       depth=libDepth,
@@ -349,7 +348,6 @@ class SplitDepth_SplitPortsNonMasked extends MacroCompilerSpec with HasSRAMGener
     )
 
     val memMacro = SRAMMacro(
-      macroType=SRAM,
       name="target_memory",
       width=width,
       depth=memDepth,
@@ -426,7 +424,6 @@ circuit target_memory :
     val v = "split_depth-r-w-regular-lib-split-mem.v"
 
     val memMacro = SRAMMacro(
-      macroType=SRAM,
       name="target_memory",
       width=width,
       depth=memDepth,
@@ -460,7 +457,6 @@ TODO
     val v = "split_depth-r-w-split-lib-regular-mem.v"
 
     val libMacro = SRAMMacro(
-      macroType=SRAM,
       name="awesome_lib_mem",
       width=width,
       depth=libDepth,
@@ -502,7 +498,6 @@ class SplitDepth_SplitPortsMasked extends MacroCompilerSpec with HasSRAMGenerato
     val v = "split_depth-r-mw-split-lib-split-mem.v"
 
     val libMacro = SRAMMacro(
-      macroType=SRAM,
       name="awesome_lib_mem",
       width=width,
       depth=libDepth,
@@ -514,7 +509,6 @@ class SplitDepth_SplitPortsMasked extends MacroCompilerSpec with HasSRAMGenerato
     )
 
     val memMacro = SRAMMacro(
-      macroType=SRAM,
       name="target_memory",
       width=width,
       depth=memDepth,
@@ -595,7 +589,6 @@ circuit target_memory :
     val v = "split_depth-r-mw-regular-lib-split-mem.v"
 
     val memMacro = SRAMMacro(
-      macroType=SRAM,
       name="target_memory",
       width=width,
       depth=memDepth,
@@ -629,7 +622,6 @@ TODO
     val v = "split_depth-r-mw-split-lib-regular-mem.v"
 
     val libMacro = SRAMMacro(
-      macroType=SRAM,
       name="awesome_lib_mem",
       width=width,
       depth=libDepth,

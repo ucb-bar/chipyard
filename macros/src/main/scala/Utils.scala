@@ -68,7 +68,7 @@ class Macro(srcMacro: SRAMMacro) {
 object Utils {
   def filterForSRAM(s: Option[Seq[mdf.macrolib.Macro]]): Option[Seq[mdf.macrolib.SRAMMacro]] = {
     s match {
-      case Some(l:Seq[mdf.macrolib.Macro]) => Some(l filter { _.macroType == mdf.macrolib.SRAM } map { m => m.asInstanceOf[mdf.macrolib.SRAMMacro] })
+      case Some(l:Seq[mdf.macrolib.Macro]) => Some(l filter { _.isInstanceOf[mdf.macrolib.SRAMMacro] } map { m => m.asInstanceOf[mdf.macrolib.SRAMMacro] })
       case _ => None
     }
   }

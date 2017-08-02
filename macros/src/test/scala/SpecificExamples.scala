@@ -11,7 +11,6 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
 
   val libSRAMs = Seq(
     SRAMMacro(
-      macroType=SRAM,
       name="SRAM1RW1024x8",
       depth=1024,
       width=8,
@@ -21,7 +20,6 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
       )
     ),
     SRAMMacro(
-      macroType=SRAM,
       name="SRAM1RW512x32",
       depth=512,
       width=32,
@@ -31,7 +29,6 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
       )
     ),
     SRAMMacro(
-      macroType=SRAM,
       name="SRAM1RW64x128",
       depth=64,
       width=128,
@@ -41,7 +38,6 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
       )
     ),
     SRAMMacro(
-      macroType=SRAM,
       name="SRAM1RW64x32",
       depth=64,
       width=32,
@@ -51,7 +47,6 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
       )
     ),
     SRAMMacro(
-      macroType=SRAM,
       name="SRAM1RW64x8",
       depth=64,
       width=8,
@@ -61,7 +56,6 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
       )
     ),
     SRAMMacro(
-      macroType=SRAM,
       name="SRAM1RW512x8",
       depth=512,
       width=8,
@@ -71,7 +65,6 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
       )
     ),
     SRAMMacro(
-      macroType=SRAM,
       name="SRAM2RW64x32",
       depth=64,
       width=32,

@@ -174,7 +174,6 @@ trait HasSRAMGenerator {
   // Generate a "simple" SRAM (active high/positive edge, 1 read-write port).
   def generateSRAM(name: String, prefix: String, width: Int, depth: Int, maskGran: Option[Int] = None, extraPorts: Seq[MacroExtraPort] = List()): SRAMMacro = {
     SRAMMacro(
-      macroType=SRAM,
       name=name,
       width=width,
       depth=depth,

@@ -407,7 +407,6 @@ class SplitWidth1024x32_readEnable_Lib extends MacroCompilerSpec with HasSRAMGen
 
   override def generateLibSRAM() = {
     SRAMMacro(
-      macroType=SRAM,
       name=lib_name,
       width=libWidth,
       depth=libDepth,
@@ -466,7 +465,6 @@ class SplitWidth1024x32_readEnable_Mem extends MacroCompilerSpec with HasSRAMGen
 
   override def generateMemSRAM() = {
     SRAMMacro(
-      macroType=SRAM,
       name=mem_name,
       width=memWidth,
       depth=memDepth,
@@ -493,7 +491,6 @@ class SplitWidth1024x32_readEnable_LibMem extends MacroCompilerSpec with HasSRAM
 
   override def generateLibSRAM() = {
     SRAMMacro(
-      macroType=SRAM,
       name=lib_name,
       width=libWidth,
       depth=libDepth,
@@ -508,7 +505,6 @@ class SplitWidth1024x32_readEnable_LibMem extends MacroCompilerSpec with HasSRAM
 
   override def generateMemSRAM() = {
     SRAMMacro(
-      macroType=SRAM,
       name=mem_name,
       width=memWidth,
       depth=memDepth,

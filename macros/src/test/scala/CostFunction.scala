@@ -30,7 +30,6 @@ class SelectCostMetric extends MacroCompilerSpec with HasSRAMGenerator {
 
   val libSRAMs = Seq(
     SRAMMacro(
-      macroType=SRAM,
       name="SRAM_WIDTH_128",
       depth=1024,
       width=128,
@@ -40,7 +39,6 @@ class SelectCostMetric extends MacroCompilerSpec with HasSRAMGenerator {
       )
     ),
     SRAMMacro(
-      macroType=SRAM,
       name="SRAM_WIDTH_64",
       depth=1024,
       width=64,
@@ -50,7 +48,6 @@ class SelectCostMetric extends MacroCompilerSpec with HasSRAMGenerator {
       )
     ),
     SRAMMacro(
-      macroType=SRAM,
       name="SRAM_WIDTH_32",
       depth=1024,
       width=32,
