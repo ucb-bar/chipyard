@@ -36,12 +36,28 @@ trait CostMetric extends Serializable {
    *         it cannot be compiled.
    */
   def cost(mem: Macro, lib: Macro): Option[BigInt]
+
+  /**
+   * Helper function to return the map of argments (or an empty map if there are none).
+   */
+  def commandLineParams(): Map[String, String]
+
+  // We also want this to show up for the class itself.
+  def name(): String
+}
+
+// Is there a better way to do this? (static method associated to CostMetric)
+trait CostMetricCompanion {
+  def name(): String
+
+  /** Construct this cost metric from a command line mapping. */
+  def construct(m: Map[String, String]): CostMetric
 }
 
 // Some default cost functions.
 
 /** Palmer's old metric. */
-object PalmerMetric extends CostMetric {
+object PalmerMetric extends CostMetric with CostMetricCompanion {
   override def cost(mem: Macro, lib: Macro): Option[BigInt] = {
     /* Palmer: A quick cost function (that must be kept in sync with
      * memory_cost()) that attempts to avoid compiling unncessary
@@ -51,6 +67,10 @@ object PalmerMetric extends CostMetric {
     //                  (mem.depth * mem.width)
     ???
   }
+
+  override def commandLineParams = Map()
+  override def name = "PalmerMetric"
+  override def construct(m: Map[String, String]) = PalmerMetric
 }
 
 /**
@@ -87,11 +107,27 @@ class ExternalMetric(path: String) extends CostMetric {
       case e: NumberFormatException => None
     }
   }
+
+  override def commandLineParams = Map("path" -> path)
+  override def name = ExternalMetric.name
+}
+
+object ExternalMetric extends CostMetricCompanion {
+  override def name = "ExternalMetric"
+
+  /** Construct this cost metric from a command line mapping. */
+  override def construct(m: Map[String, String]) = {
+    val pathOption = m.get("path")
+    pathOption match {
+      case Some(path:String) => new ExternalMetric(path)
+      case _ => throw new IllegalArgumentException("ExternalMetric missing option 'path'")
+    }
+  }
 }
 
 /** The current default metric in barstools, re-defined by Donggyu. */
 // TODO: write tests for this function to make sure it selects the right things
-object NewDefaultMetric extends CostMetric {
+object NewDefaultMetric extends CostMetric with CostMetricCompanion {
   override def cost(mem: Macro, lib: Macro): Option[BigInt] = {
     val memMask = mem.src.ports map (_.maskGran) find (_.isDefined) map (_.get)
     val libMask = lib.src.ports map (_.maskGran) find (_.isDefined) map (_.get)
@@ -105,6 +141,10 @@ object NewDefaultMetric extends CostMetric {
       (lib.src.depth * lib.src.width + 1) // weights on # cells
     )
   }
+
+  override def commandLineParams = Map()
+  override def name = "NewDefaultMetric"
+  override def construct(m: Map[String, String]) = NewDefaultMetric
 }
 
 object MacroCompilerUtil {
@@ -137,19 +177,31 @@ object CostMetric {
   /** Define some default metric. */
   val default: CostMetric = NewDefaultMetric
 
-  /** Select a cost function from string. */
-  def getCostMetric(m: String, params: Map[String, String]): CostMetric = m match {
-    case "default" => default
-    case "PalmerMetric" => PalmerMetric
-    case "ExternalMetric" => {
-      try {
-        new ExternalMetric(params.get("path").get)
-      } catch {
-        case e: NoSuchElementException => throw new IllegalArgumentException("Missing parameter 'path'")
-      }
+  val costMetricCreators: scala.collection.mutable.Map[String, CostMetricCompanion] = scala.collection.mutable.Map()
+
+  // Register some default metrics
+  registerCostMetric(PalmerMetric)
+  registerCostMetric(ExternalMetric)
+  registerCostMetric(NewDefaultMetric)
+
+  /**
+   * Register a cost metric.
+   * @param createFuncHelper Companion object to fetch the name and construct
+   *                         the metric.
+   */
+  def registerCostMetric(createFuncHelper: CostMetricCompanion): Unit = {
+    costMetricCreators.update(createFuncHelper.name, createFuncHelper)
+  }
+
+  /** Select a cost metric from string. */
+  def getCostMetric(m: String, params: Map[String, String]): CostMetric = {
+    if (m == "default") {
+      CostMetric.default
+    } else if (!costMetricCreators.contains(m)) {
+      throw new IllegalArgumentException("Invalid cost metric " + m)
+    } else {
+      costMetricCreators.get(m).get.construct(params)
     }
-    case "NewDefaultMetric" => NewDefaultMetric
-    case _ => throw new IllegalArgumentException("Invalid cost metric " + m)
   }
 }
 

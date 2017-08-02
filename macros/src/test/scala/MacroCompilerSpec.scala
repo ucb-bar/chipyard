@@ -16,11 +16,26 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
   val vPrefix: String = testDir
 
   // Override this to use a different cost metric.
-  val costMetric: CostMetric = CostMetric.default
+  // If this is None, the compile() call will not have any -c/-cp arguments, and
+  // execute() will use CostMetric.default.
+  val costMetric: Option[CostMetric] = None
+  private def getCostMetric: CostMetric = costMetric.getOrElse(CostMetric.default)
+
+  private def costMetricCmdLine = {
+    costMetric match {
+      case None => Nil
+      case Some(m) => {
+        val name = m.name
+        val params = m.commandLineParams
+        List("-c", name) ++ params.flatMap{ case (key, value) => List("-cp", key, value) }
+      }
+    }
+  }
 
   private def args(mem: String, lib: Option[String], v: String, synflops: Boolean) =
     List("-m", mem.toString, "-v", v) ++
     (lib match { case None => Nil case Some(l) => List("-l", l.toString) }) ++
+    costMetricCmdLine ++
     (if (synflops) List("--syn-flops") else Nil)
 
   // Run the full compiler as if from the command line interface.
@@ -83,7 +98,7 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
     val macros = mems map (_.blackbox)
     val circuit = Circuit(NoInfo, macros, macros.last.name)
     val passes = Seq(
-      new MacroCompilerPass(Some(mems), libs, costMetric),
+      new MacroCompilerPass(Some(mems), libs, getCostMetric),
       new SynFlopsPass(synflops, libs getOrElse mems),
       RemoveEmpty)
     val result: Circuit = (passes foldLeft circuit)((c, pass) => pass run c)

@@ -8,9 +8,13 @@ import mdf.macrolib._
  * A test metric that simply favours memories with smaller widths, to test that
  * the metric is chosen properly.
  */
-object TestMinWidthMetric extends CostMetric {
+object TestMinWidthMetric extends CostMetric with CostMetricCompanion {
   // Smaller width = lower cost = favoured
   override def cost(mem: Macro, lib: Macro): Option[BigInt] = Some(lib.src.width)
+
+  override def commandLineParams = Map()
+  override def name = "TestMinWidthMetric"
+  override def construct(m: Map[String, String]) = TestMinWidthMetric
 }
 
 /** Test that cost metric selection is working. */
@@ -19,7 +23,10 @@ class SelectCostMetric extends MacroCompilerSpec with HasSRAMGenerator {
   val lib = s"lib-SelectCostMetric.json"
   val v = s"SelectCostMetric.v"
 
-  override val costMetric = TestMinWidthMetric
+  // Cost metrics must be registered for them to work with the command line.
+  CostMetric.registerCostMetric(TestMinWidthMetric)
+
+  override val costMetric = Some(TestMinWidthMetric)
 
   val libSRAMs = Seq(
     SRAMMacro(
