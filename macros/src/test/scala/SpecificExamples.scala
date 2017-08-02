@@ -4,6 +4,23 @@ import mdf.macrolib._
 
 // Specific one-off tests to run, not created by a generator.
 
+// Check that verilog actually gets generated.
+// TODO: check the actual verilog's correctness?
+class GenerateSomeVerilog extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
+  override lazy val width = 32
+  override lazy val memDepth = 2048
+  override lazy val libDepth = 1024
+
+  it should "execute fine" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
+
+  it should "generate non-empty verilog" in {
+    val verilog = scala.io.Source.fromFile(vPrefix + "/" + v).getLines().mkString("\n")
+    verilog.isEmpty shouldBe false
+  }
+}
+
 class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
   val mem = s"mem-RocketChipTest.json"
   val lib = s"lib-RocketChipTest.json"
