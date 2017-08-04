@@ -1,9 +1,8 @@
 package example
 
 import chisel3._
-import freechips.rocketchip.chip._
 import freechips.rocketchip.config.{Parameters, Config}
-import freechips.rocketchip.coreplex.WithRoccExample
+import freechips.rocketchip.coreplex.{WithRoccExample, WithNMemoryChannels}
 import freechips.rocketchip.diplomacy.LazyModule
 import testchipip._
 
@@ -34,7 +33,7 @@ class WithSimBlockDevice extends Config((site, here, up) => {
 })
 
 class BaseExampleConfig extends Config(
-  new freechips.rocketchip.chip.DefaultConfig)
+  new freechips.rocketchip.system.DefaultConfig)
 
 class DefaultExampleConfig extends Config(
   new WithExampleTop ++ new BaseExampleConfig)

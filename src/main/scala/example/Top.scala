@@ -1,27 +1,24 @@
 package example
 
 import chisel3._
+import freechips.rocketchip.coreplex._
 import freechips.rocketchip.config.Parameters
-import freechips.rocketchip.chip._
+import freechips.rocketchip.devices.tilelink._
 import testchipip._
 
-class ExampleTop(implicit p: Parameters) extends BaseSystem
-    with HasPeripheryMasterAXI4MemPort
-    with HasPeripheryErrorSlave
-    with HasPeripheryZeroSlave
+class ExampleTop(implicit p: Parameters) extends RocketCoreplex
+    with HasMasterAXI4MemPort
     with HasPeripheryBootROM
-    with HasPeripheryRTCCounter
-    with HasRocketPlexMaster
+    with HasPeripheryErrorSlave
     with HasNoDebug
     with HasPeripherySerial {
   override lazy val module = new ExampleTopModule(this)
 }
 
-class ExampleTopModule[+L <: ExampleTop](l: L) extends BaseSystemModule(l)
-    with HasPeripheryMasterAXI4MemPortModuleImp
+class ExampleTopModule[+L <: ExampleTop](l: L) extends RocketCoreplexModule(l)
+    with HasRTCModuleImp
+    with HasMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
-    with HasPeripheryRTCCounterModuleImp
-    with HasRocketPlexMasterModuleImp
     with HasNoDebugModuleImp
     with HasPeripherySerialModuleImp
 
