@@ -36,7 +36,7 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
     List("-m", mem.toString, "-v", v) ++
     (lib match { case None => Nil case Some(l) => List("-l", l.toString) }) ++
     costMetricCmdLine ++
-    (if (synflops) List("--syn-flops") else Nil)
+    (if (synflops) List("--mode", "synflops") else Nil)
 
   // Run the full compiler as if from the command line interface.
   // Generates the Verilog; useful in testing since an error will throw an
@@ -98,7 +98,7 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
     val macros = mems map (_.blackbox)
     val circuit = Circuit(NoInfo, macros, macros.last.name)
     val passes = Seq(
-      new MacroCompilerPass(Some(mems), libs, getCostMetric),
+      new MacroCompilerPass(Some(mems), libs, getCostMetric, if (synflops) MacroCompilerAnnotation.Synflops else MacroCompilerAnnotation.Default),
       new SynFlopsPass(synflops, libs getOrElse mems),
       RemoveEmpty)
     val result: Circuit = (passes foldLeft circuit)((c, pass) => pass run c)

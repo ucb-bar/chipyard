@@ -19,15 +19,35 @@ import scala.collection.mutable.{ArrayBuffer, HashMap}
 import java.io.{File, FileWriter}
 import Utils._
 
+case class MacroCompilerException(msg: String) extends Exception(msg)
+
 object MacroCompilerAnnotation {
+  /** Macro compiler mode. */
+  sealed trait CompilerMode
+  /** Strict mode - must compile all memories or error out. */
+  case object Strict extends CompilerMode
+  /** Synflops mode - compile all memories with synflops (do not map to lib at all). */
+  case object Synflops extends CompilerMode
+  /** FallbackSynflops - compile all memories to SRAM when possible and fall back to synflops if a memory fails. **/
+  case object FallbackSynflops extends CompilerMode
+  /** Default mode - compile what is possible and do nothing with uncompiled memories. **/
+  case object Default extends CompilerMode
+  def stringToCompilerMode(str: String): CompilerMode = (str: @unchecked) match {
+    case "strict" => Strict
+    case "synflops" => Synflops
+    case "fallbacksynflops" => FallbackSynflops
+    case "default" => Default
+    case _ => throw new IllegalArgumentException("No such compiler mode " + str)
+  }
+
   /**
    * Parameters associated to this MacroCompilerAnnotation.
    * @param mem Path to memory lib
    * @param lib Path to library lib or None if no libraries
    * @param costMetric Cost metric to use
-   * @param synflops True to syn flops
+   * @param mode Compiler mode (see CompilerMode)
    */
-  case class Params(mem: String, lib: Option[String], costMetric: CostMetric, synflops: Boolean)
+  case class Params(mem: String, lib: Option[String], costMetric: CostMetric, mode: CompilerMode)
 
   /**
    * Create a MacroCompilerAnnotation.
@@ -48,7 +68,8 @@ object MacroCompilerAnnotation {
 
 class MacroCompilerPass(mems: Option[Seq[Macro]],
                         libs: Option[Seq[Macro]],
-                        costMetric: CostMetric = CostMetric.default) extends firrtl.passes.Pass {
+                        costMetric: CostMetric = CostMetric.default,
+                        mode: MacroCompilerAnnotation.CompilerMode = MacroCompilerAnnotation.Default) extends firrtl.passes.Pass {
   def compile(mem: Macro, lib: Macro): Option[(Module, ExtModule)] = {
     val pairedPorts = mem.sortedPorts zip lib.sortedPorts
 
@@ -441,10 +462,11 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
             costMetric.cost(mem, lib) match {
               case Some(newCost) => {
                 System.err.println(s"Cost of ${lib.src.name} for ${mem.src.name}: ${newCost}")
-                if (newCost > cost) (best, cost)
-                else compile(mem, lib) match {
-                  case None => (best, cost)
-                  case Some(p) => (Some(p), newCost)
+                // Try compiling
+                compile(mem, lib) match {
+                  // If it was successful and the new cost is lower
+                  case Some(p) if (newCost < cost) => (Some(p), newCost)
+                  case _ => (best, cost)
                 }
               }
               case _ => (best, cost) // Cost function rejected this combination.
@@ -455,7 +477,12 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
         // in the modules list with a compiled version, as well as the extmodule
         // stub for the lib.
         best match {
-          case None => modules
+          case None => {
+            if (mode == MacroCompilerAnnotation.Strict)
+              throw new MacroCompilerException(s"Target memory ${mem.src.name} could not be compiled and strict mode is activated - aborting.")
+            else
+              modules
+          }
           case Some((mod, bb)) =>
             (modules filterNot (m => m.name == mod.name || m.name == bb.name)) ++ Seq(mod, bb)
         }
@@ -470,7 +497,10 @@ class MacroCompilerTransform extends Transform {
   def inputForm = MidForm
   def outputForm = MidForm
   def execute(state: CircuitState) = getMyAnnotations(state) match {
-    case Seq(MacroCompilerAnnotation(state.circuit.main, MacroCompilerAnnotation.Params(memFile, libFile, costMetric, synflops))) =>
+    case Seq(MacroCompilerAnnotation(state.circuit.main, MacroCompilerAnnotation.Params(memFile, libFile, costMetric, mode))) =>
+      if (mode == MacroCompilerAnnotation.FallbackSynflops) {
+        throw new UnsupportedOperationException("Not implemented yet")
+      }
       // Read, eliminate None, get only SRAM, make firrtl macro
       val mems: Option[Seq[Macro]] = mdf.macrolib.Utils.readMDFFromPath(Some(memFile)) match {
         case Some(x:Seq[mdf.macrolib.Macro]) =>
@@ -483,8 +513,8 @@ class MacroCompilerTransform extends Transform {
         case _ => None
       }
       val transforms = Seq(
-        new MacroCompilerPass(mems, libs, costMetric),
-        new SynFlopsPass(synflops, libs getOrElse mems.get))
+        new MacroCompilerPass(mems, libs, costMetric, mode),
+        new SynFlopsPass(mode == MacroCompilerAnnotation.Synflops, libs getOrElse mems.get))
       (transforms foldLeft state)((s, xform) => xform runTransform s).copy(form=outputForm)
     case _ => state
   }
@@ -518,6 +548,7 @@ object MacroCompiler extends App {
   case object Library extends MacroParam
   case object Verilog extends MacroParam
   case object CostFunc extends MacroParam
+  case object Mode extends MacroParam
   type MacroParamMap = Map[MacroParam, String]
   type CostParamMap = Map[String, String]
   val usage = Seq(
@@ -527,23 +558,28 @@ object MacroCompiler extends App {
     "  -v, --verilog: Verilog output",
     "  -c, --cost-func: Cost function to use. Optional (default: \"default\")",
     "  -cp, --cost-param: Cost function parameter. (Optional depending on the cost function.). e.g. -c ExternalMetric -cp path /path/to/my/cost/script",
-    "  --syn-flops: Produces synthesizable flop-based memories (for all memories and library memory macros); likely useful for simulation purposes") mkString "\n"
+  """  --mode:
+    |    synflops: Produces synthesizable flop-based memories (for all memories and library memory macros); likely useful for simulation purposes")
+    |    fallbacksynflops: Compile all memories to library when possible and fall back to synthesizable flop-based memories when library synth is not possible
+    |    strict: Compile all memories to library or return an error
+    |    default: Compile all memories to library when possible and do nothing in case of errors.
+  """.stripMargin) mkString "\n"
 
-  def parseArgs(map: MacroParamMap, costMap: CostParamMap, synflops: Boolean, args: List[String]): (MacroParamMap, CostParamMap, Boolean) =
+  def parseArgs(map: MacroParamMap, costMap: CostParamMap, args: List[String]): (MacroParamMap, CostParamMap) =
     args match {
-      case Nil => (map, costMap, synflops)
+      case Nil => (map, costMap)
       case ("-m" | "--macro-list") :: value :: tail =>
-        parseArgs(map + (Macros  -> value), costMap, synflops, tail)
+        parseArgs(map + (Macros  -> value), costMap, tail)
       case ("-l" | "--library") :: value :: tail =>
-        parseArgs(map + (Library -> value), costMap, synflops, tail)
+        parseArgs(map + (Library -> value), costMap, tail)
       case ("-v" | "--verilog") :: value :: tail =>
-        parseArgs(map + (Verilog -> value), costMap, synflops, tail)
+        parseArgs(map + (Verilog -> value), costMap, tail)
       case ("-c" | "--cost-func") :: value :: tail =>
-        parseArgs(map + (CostFunc -> value), costMap, synflops, tail)
+        parseArgs(map + (CostFunc -> value), costMap, tail)
       case ("-cp" | "--cost-param") :: value1 :: value2 :: tail =>
-        parseArgs(map, costMap + (value1 -> value2), synflops, tail)
-      case "--syn-flops" :: tail =>
-        parseArgs(map, costMap, true, tail)
+        parseArgs(map, costMap + (value1 -> value2), tail)
+      case "--mode" :: value :: tail =>
+        parseArgs(map + (Mode -> value), costMap, tail)
       case arg :: tail =>
         println(s"Unknown field $arg\n")
         println(usage)
@@ -551,7 +587,7 @@ object MacroCompiler extends App {
     }
 
   def run(args: List[String]) {
-    val (params, costParams, synflops) = parseArgs(Map[MacroParam, String](), Map[String, String](), false, args)
+    val (params, costParams) = parseArgs(Map[MacroParam, String](), Map[String, String](), args)
     try {
       val macros = Utils.filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(params.get(Macros))).get map (x => (new Macro(x)).blackbox)
 
@@ -568,7 +604,7 @@ object MacroCompiler extends App {
             MacroCompilerAnnotation.Params(
               params.get(Macros).get, params.get(Library),
               CostMetric.getCostMetric(params.getOrElse(CostFunc, "default"), costParams),
-              synflops
+              MacroCompilerAnnotation.stringToCompilerMode(params.getOrElse(Mode, "default"))
             )
           ))
         )
@@ -583,10 +619,12 @@ object MacroCompiler extends App {
 
       // Close the writer.
       verilogWriter.close()
-
     } catch {
       case e: java.util.NoSuchElementException =>
         println(usage)
+        sys.exit(1)
+      case e: MacroCompilerException =>
+        System.err.println(e.getMessage)
         sys.exit(1)
       case e: Throwable =>
         throw e
