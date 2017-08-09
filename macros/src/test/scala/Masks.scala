@@ -91,6 +91,18 @@ class Masks_FourTypes_MaskedMem_MaskedLib_SmallerMaskGran extends MacroCompilerS
   compileExecuteAndTest(mem, lib, v, output)
 }
 
+// Bit-mask memories to non-masked libs whose width is larger than 1.
+
+class Masks_BitMaskedMem_NonMaskedLib extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
+  override lazy val depth = 1024
+  override lazy val memWidth = 16
+  override lazy val memMaskGran = Some(1)
+  override lazy val libWidth = 8
+  override lazy val libMaskGran = None
+
+  compileExecuteAndTest(mem, lib, v, output)
+}
+
 // FPGA-style byte-masked memories.
 
 class Masks_FPGAStyle_32_8 extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator with MasksTestSettings {
