@@ -24,40 +24,28 @@ trait HasSimpleWidthTestGenerator extends HasSimpleTestGenerator {
       // Generate submemory connection blocks.
       output append (for (i <- 0 to widthInstances - 1) yield {
         // Width of this submemory.
-        val myMemWidth = if (i == widthInstances - 1) lastWidthBits else libWidth
+        val myMemWidth = if (i == widthInstances - 1) lastWidthBits else usableLibWidth
         // Base bit of this submemory.
         // e.g. if libWidth is 8 and this is submemory 2 (0-indexed), then this
         // would be 16.
-        val myBaseBit = libWidth*i
+        val myBaseBit = usableLibWidth*i
 
-        val maskStatement = if (libMaskGran.isDefined) {
-          if (memMaskGran.isEmpty) {
-            // If there is no memory mask, we should just turn all the lib mask
-            // bits high.
-            s"""mem_0_${i}.lib_mask <= UInt<${libMaskBits}>("h${((1 << libMaskBits) - 1).toHexString}")"""
-          } else if (libMaskGran.get == memMaskGran.get) {
-            s"mem_0_${i}.lib_mask <= bits(outer_mask, ${i}, ${i})"
-          } else if (libMaskGran.get == 1) {
-            // Calculate which bit of outer_mask contains the given bit.
-            // e.g. if memMaskGran = 2, libMaskGran = 1 and libWidth = 4, then
-            // calculateMaskBit({0, 1}) = 0 and calculateMaskBit({1, 2}) = 1
-            def calculateMaskBit(bit:Int): Int = (bit / libMaskGran.get) / memMaskGran.getOrElse(memWidth)
+        val maskStatement = generateMaskStatement(i, 0)
 
-            val bitsArr = ((libMaskBits - 1 to 0 by -1) map (x => {
-              val outerMaskBit = calculateMaskBit(x*libMaskGran.get + myBaseBit)
-              s"bits(outer_mask, ${outerMaskBit}, ${outerMaskBit})"
-            }))
-            val maskVal = bitsArr.init.foldRight(bitsArr.last)((bit, rest) => s"cat($bit, $rest)")
-            s"mem_0_${i}.lib_mask <= ${maskVal}"
-          } else "" // We support only bit-level masks for now.
-        } else ""
+        // We need to use writeEnable as a crude "mask" if mem has a mask but
+        // lib does not.
+        val writeEnableBit = if (libMaskGran.isEmpty && memMaskGran.isDefined) {
+          val outerMaskBit = myBaseBit / memMaskGran.get
+          s"bits(outer_mask, ${outerMaskBit}, ${outerMaskBit})"
+        } else """UInt<1>("h1")"""
+
 s"""
     mem_0_${i}.lib_clk <= outer_clk
     mem_0_${i}.lib_addr <= outer_addr
     node outer_dout_0_${i} = bits(mem_0_${i}.lib_dout, ${myMemWidth - 1}, 0)
     mem_0_${i}.lib_din <= bits(outer_din, ${myBaseBit + myMemWidth - 1}, ${myBaseBit})
     ${maskStatement}
-    mem_0_${i}.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_${i}.lib_write_en <= and(and(outer_write_en, ${writeEnableBit}), UInt<1>("h1"))
 """
       }).reduceLeft(_ + _)
 

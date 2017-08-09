@@ -53,35 +53,113 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
     val pairedPorts = mem.sortedPorts zip lib.sortedPorts
 
     // Parallel mapping
-    val pairs = ArrayBuffer[(BigInt, BigInt)]()
-    var last = 0
-    for (i <- 0 until mem.src.width) {
-      if (i <= last + 1) {
-        /* Palmer: Every memory is going to have to fit at least a single bit. */
-        // continue
-      } else if ((i - last) % lib.src.width.toInt == 0) {
-        /* Palmer: It's possible that we rolled over a memory's width here,
-                   if so generate one. */
-        pairs += ((last, i-1))
-        last = i
-      } else {
-        /* Palmer: FIXME: This is a mess, I must just be super confused. */
-        for ((memPort, libPort) <- pairedPorts) {
-          (memPort.src.maskGran, libPort.src.maskGran) match {
-            case (_, Some(p)) if p == 1 => // continue
-            case (Some(p), _) if i % p == 0 =>
-              pairs += ((last, i-1))
-              last = i
-            case (_, None) => // continue
-            case (_, Some(p)) if p == lib.src.width => // continue
-            case _ =>
-              System.err println "Bit-mask (or unmasked) target memories are supported only"
-              return None
+
+    /**
+     * This is a list of submemories by width.
+     * The tuples are (lsb, msb) inclusive.
+     * e.g. (0, 7) and (8, 15) might be a split for a width=16 memory into two
+     * width=8 memories.
+     */
+    val bitPairs = ArrayBuffer[(BigInt, BigInt)]()
+    var currentLSB = 0
+
+    // Process every bit in the mem width.
+    for (memBit <- 0 until mem.src.width) {
+      val bitsInCurrentMem = memBit - currentLSB
+
+      /**
+       * Helper function to check if it's time to split memories.
+       * @param effectiveLibWidth Split memory when we have this many bits.
+       */
+      def splitMemory(effectiveLibWidth: Int): Unit = {
+        if (bitsInCurrentMem == effectiveLibWidth) {
+          bitPairs += ((currentLSB, memBit - 1))
+          currentLSB = memBit
+        }
+      }
+
+      for ((memPort, libPort) <- pairedPorts) {
+
+        // Make sure we don't have a maskGran larger than the width of the memory.
+        assert (memPort.src.effectiveMaskGran <= memPort.src.width)
+        assert (libPort.src.effectiveMaskGran <= libPort.src.width)
+
+        val libWidth = libPort.src.width
+
+        // Don't consider cases of maskGran == width as "masked" since those masks
+        // effectively function as write-enable bits.
+        val memMask = if (memPort.src.effectiveMaskGran == memPort.src.width) None else memPort.src.maskGran
+        val libMask = if (libPort.src.effectiveMaskGran == libPort.src.width) None else libPort.src.maskGran
+
+        (memMask, libMask) match {
+          // Neither lib nor mem is masked.
+          // No problems here.
+          case (None, None) => splitMemory(libWidth)
+
+          // Only the lib is masked.
+          // Not an issue; we can just make all the bits in the lib mask enabled.
+          case (None, Some(p)) => splitMemory(libWidth)
+
+          // Only the mem is masked.
+          case (Some(p), None) => {
+            if (p % libPort.src.width == 0) {
+              // If the mem mask is a multiple of the lib width, then we're good.
+              // Just roll over every lib width as usual.
+              // e.g. lib width=4, mem maskGran={4, 8, 12, 16, ...}
+              splitMemory(libWidth)
+            } else if (libPort.src.width % p == 0) {
+              // Lib width is a multiple of the mem mask.
+              // Consider the case where mem mask = 4 but lib width = 8, unmasked.
+              // We can still compile, but will need to waste the extra bits.
+              splitMemory(memMask.get)
+            } else {
+              // No neat multiples.
+              // We might still be able to compile extremely inefficiently.
+              if (p < libPort.src.width) {
+                // Compile using mem mask as the effective width. (note that lib is not masked)
+                // e.g. mem mask = 3, lib width = 8
+                splitMemory(memMask.get)
+              } else {
+                // e.g. mem mask = 13, lib width = 8
+                System.err.println(s"Unmasked target memory: unaligned mem maskGran ${p} with lib (${lib.src.name}) width ${libPort.src.width} not supported")
+                return None
+              }
+            }
+          }
+
+          // Both lib and mem are masked.
+          case (Some(m), Some(l)) => {
+            if (m == l) {
+              // Lib maskGran == mem maskGran, no problems
+              splitMemory(libWidth)
+            } else if (m > l) {
+              // Mem maskGran > lib maskGran
+              if (m % l == 0) {
+                // Mem maskGran is a multiple of lib maskGran, carry on as normal.
+                splitMemory(libWidth)
+              } else {
+                System.err.println(s"Mem maskGran ${m} is not a multiple of lib maskGran ${l}: currently not supported")
+                return None
+              }
+            } else { // m < l
+              // Lib maskGran > mem maskGran.
+              if (l % m == 0) {
+                // Lib maskGran is a multiple of mem maskGran.
+                // e.g. lib maskGran = 8, mem maskGran = 4.
+                // In this case we can only compile very wastefully (by treating
+                // lib as a mem maskGran width memory) :(
+                splitMemory(memMask.get)
+              } else {
+                System.err.println(s"Lib maskGran ${m} is not a multiple of mem maskGran ${l}: currently not supported")
+                return None
+              }
+            }
           }
         }
       }
     }
-    pairs += ((last, mem.src.width.toInt - 1))
+    // Add in the last chunk if there are any leftovers
+    bitPairs += ((currentLSB, mem.src.width.toInt - 1))
 
     // Serial mapping
     val stmts = ArrayBuffer[Statement]()
@@ -116,7 +194,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
       }
     }
     for ((off, i) <- (0 until mem.src.depth by lib.src.depth).zipWithIndex) {
-      for (j <- pairs.indices) {
+      for (j <- bitPairs.indices) {
         val name = s"mem_${i}_${j}"
         stmts += WDefInstance(NoInfo, name, lib.src.name, lib.tpe)
         // connect extra ports
@@ -141,7 +219,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
           and(e, addrMatch)
         }
         val cats = ArrayBuffer[Expression]()
-        for (((low, high), j) <- pairs.zipWithIndex) {
+        for (((low, high), j) <- bitPairs.zipWithIndex) {
           val inst = WRef(s"mem_${i}_${j}", lib.tpe)
 
           def connectPorts2(mem: Expression,
@@ -221,11 +299,18 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
               if (libPort.src.effectiveMaskGran == libPort.src.width) {
                 bits(WRef(mem), low / memPort.src.effectiveMaskGran)
               } else {
-                require(libPort.src.effectiveMaskGran == 1, "only single-bit mask supported for now")
-
                 require(isPowerOfTwo(libPort.src.effectiveMaskGran), "only powers of two masks supported for now")
 
-                cat(((low to high) map (i => bits(WRef(mem), i / memPort.src.effectiveMaskGran))).reverse)
+                val effectiveLibWidth = if (memPort.src.maskGran.get < libPort.src.effectiveMaskGran) memPort.src.maskGran.get else libPort.src.width
+                cat(((0 until libPort.src.width by libPort.src.effectiveMaskGran) map (i => {
+                  if (memPort.src.maskGran.get < libPort.src.effectiveMaskGran && i >= effectiveLibWidth) {
+                    // If the memMaskGran is smaller than the lib's gran, then
+                    // zero out the upper bits.
+                    zero
+                  } else {
+                    bits(WRef(mem), (low + i) / memPort.src.effectiveMaskGran)
+                  }
+                })).reverse)
               }
             case None =>
               /* Palmer: If there is no input port on the source memory port

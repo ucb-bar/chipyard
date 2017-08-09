@@ -29,26 +29,7 @@ s"""
       }
 
       for (i <- 0 to depthInstances - 1) {
-        // We only support simple masks for now (either libMask == memMask or libMask == 1)
-        val maskStatement = if (libHasMask) {
-          if (libMaskGran.get == memMaskGran.get) {
-            s"""mem_${i}_0.lib_mask <= bits(outer_mask, 0, 0)"""
-          } else if (libMaskGran.get == 1) {
-            // Construct a mask string.
-            // Each bit gets the # of bits specified in maskGran.
-            // Specify in descending order (MSB first)
-
-            // This builds an array like m[1], m[1], m[0], m[0]
-            val maskBitsArr: Seq[String] = ((memMaskBits - 1 to 0 by -1) flatMap (maskBit => {
-              ((0 to memMaskGran.get - 1) map (_ => s"bits(outer_mask, ${maskBit}, ${maskBit})"))
-            }))
-            // Now build it into a recursive string like
-            // cat(m[1], cat(m[1], cat(m[0], m[0])))
-            val maskBitsStr: String = maskBitsArr.reverse.tail.foldLeft(maskBitsArr.reverse.head)((prev: String, next: String) => s"cat(${next}, ${prev})")
-            s"""mem_${i}_0.lib_mask <= ${maskBitsStr}"""
-          } else "" // TODO: implement when non-bitmasked memories are supported
-        } else "" // No mask
-
+        val maskStatement = generateMaskStatement(0, i)
         val enableIdentifier = if (selectBits > 0) s"""eq(outer_addr_sel, UInt<${selectBits}>("h${i.toHexString}"))""" else "UInt<1>(\"h1\")"
         output.append(
   s"""

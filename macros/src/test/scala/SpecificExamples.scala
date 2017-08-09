@@ -188,90 +188,41 @@ circuit T_2172_ext :
     input RW0_wmode : UInt<1>
     input RW0_wmask : UInt<4>
 
-    inst mem_0_0 of SRAM1RW64x8
-    inst mem_0_1 of SRAM1RW64x8
-    inst mem_0_2 of SRAM1RW64x8
-    inst mem_0_3 of SRAM1RW64x8
-    inst mem_0_4 of SRAM1RW64x8
-    inst mem_0_5 of SRAM1RW64x8
-    inst mem_0_6 of SRAM1RW64x8
-    inst mem_0_7 of SRAM1RW64x8
-    inst mem_0_8 of SRAM1RW64x8
-    inst mem_0_9 of SRAM1RW64x8
-    inst mem_0_10 of SRAM1RW64x8
-    inst mem_0_11 of SRAM1RW64x8
+    inst mem_0_0 of SRAM1RW64x32
+    inst mem_0_1 of SRAM1RW64x32
+    inst mem_0_2 of SRAM1RW64x32
+    inst mem_0_3 of SRAM1RW64x32
     mem_0_0.clk <= RW0_clk
     mem_0_0.addr <= RW0_addr
-    node RW0_rdata_0_0 = bits(mem_0_0.dout, 7, 0)
-    mem_0_0.din <= bits(RW0_wdata, 7, 0)
+    node RW0_rdata_0_0 = bits(mem_0_0.dout, 19, 0)
+    mem_0_0.din <= bits(RW0_wdata, 19, 0)
     mem_0_0.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 0, 0)), UInt<1>("h1"))
     mem_0_1.clk <= RW0_clk
     mem_0_1.addr <= RW0_addr
-    node RW0_rdata_0_1 = bits(mem_0_1.dout, 7, 0)
-    mem_0_1.din <= bits(RW0_wdata, 15, 8)
-    mem_0_1.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 0, 0)), UInt<1>("h1"))
+    node RW0_rdata_0_1 = bits(mem_0_1.dout, 19, 0)
+    mem_0_1.din <= bits(RW0_wdata, 39, 20)
+    mem_0_1.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 1, 1)), UInt<1>("h1"))
     mem_0_2.clk <= RW0_clk
     mem_0_2.addr <= RW0_addr
-    node RW0_rdata_0_2 = bits(mem_0_2.dout, 3, 0)
-    mem_0_2.din <= bits(RW0_wdata, 19, 16)
-    mem_0_2.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 0, 0)), UInt<1>("h1"))
+    node RW0_rdata_0_2 = bits(mem_0_2.dout, 19, 0)
+    mem_0_2.din <= bits(RW0_wdata, 59, 40)
+    mem_0_2.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 2, 2)), UInt<1>("h1"))
     mem_0_3.clk <= RW0_clk
     mem_0_3.addr <= RW0_addr
-    node RW0_rdata_0_3 = bits(mem_0_3.dout, 7, 0)
-    mem_0_3.din <= bits(RW0_wdata, 27, 20)
-    mem_0_3.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 1, 1)), UInt<1>("h1"))
-    mem_0_4.clk <= RW0_clk
-    mem_0_4.addr <= RW0_addr
-    node RW0_rdata_0_4 = bits(mem_0_4.dout, 7, 0)
-    mem_0_4.din <= bits(RW0_wdata, 35, 28)
-    mem_0_4.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 1, 1)), UInt<1>("h1"))
-    mem_0_5.clk <= RW0_clk
-    mem_0_5.addr <= RW0_addr
-    node RW0_rdata_0_5 = bits(mem_0_5.dout, 3, 0)
-    mem_0_5.din <= bits(RW0_wdata, 39, 36)
-    mem_0_5.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 1, 1)), UInt<1>("h1"))
-    mem_0_6.clk <= RW0_clk
-    mem_0_6.addr <= RW0_addr
-    node RW0_rdata_0_6 = bits(mem_0_6.dout, 7, 0)
-    mem_0_6.din <= bits(RW0_wdata, 47, 40)
-    mem_0_6.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 2, 2)), UInt<1>("h1"))
-    mem_0_7.clk <= RW0_clk
-    mem_0_7.addr <= RW0_addr
-    node RW0_rdata_0_7 = bits(mem_0_7.dout, 7, 0)
-    mem_0_7.din <= bits(RW0_wdata, 55, 48)
-    mem_0_7.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 2, 2)), UInt<1>("h1"))
-    mem_0_8.clk <= RW0_clk
-    mem_0_8.addr <= RW0_addr
-    node RW0_rdata_0_8 = bits(mem_0_8.dout, 3, 0)
-    mem_0_8.din <= bits(RW0_wdata, 59, 56)
-    mem_0_8.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 2, 2)), UInt<1>("h1"))
-    mem_0_9.clk <= RW0_clk
-    mem_0_9.addr <= RW0_addr
-    node RW0_rdata_0_9 = bits(mem_0_9.dout, 7, 0)
-    mem_0_9.din <= bits(RW0_wdata, 67, 60)
-    mem_0_9.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 3, 3)), UInt<1>("h1"))
-    mem_0_10.clk <= RW0_clk
-    mem_0_10.addr <= RW0_addr
-    node RW0_rdata_0_10 = bits(mem_0_10.dout, 7, 0)
-    mem_0_10.din <= bits(RW0_wdata, 75, 68)
-    mem_0_10.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 3, 3)), UInt<1>("h1"))
-    mem_0_11.clk <= RW0_clk
-    mem_0_11.addr <= RW0_addr
-    node RW0_rdata_0_11 = bits(mem_0_11.dout, 3, 0)
-    mem_0_11.din <= bits(RW0_wdata, 79, 76)
-    mem_0_11.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 3, 3)), UInt<1>("h1"))
-    node RW0_rdata_0 = cat(RW0_rdata_0_11, cat(RW0_rdata_0_10, cat(RW0_rdata_0_9, cat(RW0_rdata_0_8, cat(RW0_rdata_0_7, cat(RW0_rdata_0_6, cat(RW0_rdata_0_5, cat(RW0_rdata_0_4, cat(RW0_rdata_0_3, cat(RW0_rdata_0_2, cat(RW0_rdata_0_1, RW0_rdata_0_0)))))))))))
+    node RW0_rdata_0_3 = bits(mem_0_3.dout, 19, 0)
+    mem_0_3.din <= bits(RW0_wdata, 79, 60)
+    mem_0_3.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 3, 3)), UInt<1>("h1"))
+    node RW0_rdata_0 = cat(RW0_rdata_0_3, cat(RW0_rdata_0_2, cat(RW0_rdata_0_1, RW0_rdata_0_0)))
     RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
 
-  extmodule SRAM1RW64x8 :
+  extmodule SRAM1RW64x32 :
     input clk : Clock
     input addr : UInt<6>
-    input din : UInt<8>
-    output dout : UInt<8>
+    input din : UInt<32>
+    output dout : UInt<32>
     input write_en : UInt<1>
 
-    defname = SRAM1RW64x8
-
+    defname = SRAM1RW64x32
 
   module T_1090_ext :
     input RW0_clk : Clock

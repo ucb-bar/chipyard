@@ -201,6 +201,9 @@ trait HasSimpleTestGenerator {
     def extraPorts: Seq[mdf.macrolib.MacroExtraPort] = List()
     def extraTag: String = ""
 
+    // "Effective" libMaskGran by considering write_enable.
+    val effectiveLibMaskGran = libMaskGran.getOrElse(libWidth)
+
     // Override this in the sub-generator if you need a more specific name.
     // Defaults to using reflection to pull the name of the test using this
     // generator.
@@ -242,15 +245,61 @@ trait HasSimpleTestGenerator {
     writeToLib(lib, Seq(libSRAM))
     writeToMem(mem, Seq(memSRAM))
 
+    // For masks, width it's a bit tricky since we have to consider cases like
+    // memMaskGran = 4 and libMaskGran = 8.
+    // Consider the actually usable libWidth in cases like the above.
+    val usableLibWidth = if (memMaskGran.getOrElse(Int.MaxValue) < effectiveLibMaskGran) memMaskGran.get else libWidth
+
     // Number of lib instances needed to hold the mem, in both directions.
     // Round up (e.g. 1.5 instances = effectively 2 instances)
     val depthInstances = math.ceil(memDepth.toFloat / libDepth).toInt
-    val widthInstances = math.ceil(memWidth.toFloat / libWidth).toInt
+    val widthInstances = math.ceil(memWidth.toFloat / usableLibWidth).toInt
+
     // Number of width bits in the last width-direction memory.
     // e.g. if memWidth = 16 and libWidth = 8, this would be 8 since the last memory 0_1 has 8 bits of input width.
     // e.g. if memWidth = 9 and libWidth = 8, this would be 1 since the last memory 0_1 has 1 bit of input width.
-    val lastWidthBits = if (memWidth % libWidth == 0) libWidth else (memWidth % libWidth)
+    val lastWidthBits = if (memWidth % usableLibWidth == 0) usableLibWidth else (memWidth % usableLibWidth)
     val selectBits = mem_addr_width - lib_addr_width
+
+    /**
+     * Convenience function to generate a mask statement.
+     * @param widthInst Width instance (mem_0_x)
+     * @param depthInst Depth instance (mem_x_0)
+     */
+    def generateMaskStatement(widthInst: Int, depthInst: Int): String = {
+      // Width of this submemory.
+      val myMemWidth = if (widthInst == widthInstances - 1) lastWidthBits else usableLibWidth
+      // Base bit of this submemory.
+      // e.g. if libWidth is 8 and this is submemory 2 (0-indexed), then this
+      // would be 16.
+      val myBaseBit = usableLibWidth*widthInst
+
+      if (libMaskGran.isDefined) {
+        if (memMaskGran.isEmpty) {
+          // If there is no memory mask, we should just turn all the lib mask
+          // bits high.
+          s"""mem_${depthInst}_${widthInst}.lib_mask <= UInt<${libMaskBits}>("h${((1 << libMaskBits) - 1).toHexString}")"""
+        } else {
+          // Calculate which bit of outer_mask contains the given bit.
+          // e.g. if memMaskGran = 2, libMaskGran = 1 and libWidth = 4, then
+          // calculateMaskBit({0, 1}) = 0 and calculateMaskBit({1, 2}) = 1
+          def calculateMaskBit(bit:Int): Int = bit / memMaskGran.getOrElse(memWidth)
+
+          val bitsArr = ((libMaskBits - 1 to 0 by -1) map (x => {
+            if (x*libMaskGran.get > myMemWidth) {
+              // If we have extra mask bits leftover after the effective width,
+              // disable those bits.
+              """UInt<1>("h0")"""
+            } else {
+              val outerMaskBit = calculateMaskBit(x*libMaskGran.get + myBaseBit)
+              s"bits(outer_mask, ${outerMaskBit}, ${outerMaskBit})"
+            }
+          }))
+          val maskVal = bitsArr.reduceRight((bit, rest) => s"cat($bit, $rest)")
+          s"mem_${depthInst}_${widthInst}.lib_mask <= ${maskVal}"
+        }
+      } else ""
+    }
 
     // Generate the header (contains the circuit statement and the target memory
     // module.
@@ -293,8 +342,6 @@ circuit $mem_name :
     def generateFooter(): String = {
       require (libSRAM.ports.size == 1, "Footer generator only supports single port lib")
 
-      val readEnable = if (libSRAM.ports(0).readEnable.isDefined) s"input ${libPortPrefix}_read_en : UInt<1>" else ""
-      val footerMask = if (libHasMask) s"input ${libPortPrefix}_mask : UInt<${libMaskBits}>" else ""
       s"""
   extmodule $lib_name :
 ${generateFooterPorts}
