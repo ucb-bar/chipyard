@@ -161,8 +161,7 @@ class SplitDepth2048x64_mrw_mem32_lib8 extends MacroCompilerSpec with HasSRAMGen
   override lazy val memMaskGran = Some(32)
   override lazy val libMaskGran = Some(8)
 
-  it should "be enabled when non-bitmasked memories are supported" is (pending)
-  //compileExecuteAndTest(mem, lib, v, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 // Bit level mask

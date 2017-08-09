@@ -365,9 +365,7 @@ class SplitWidth1024x16_memGran_8_libGran_2_rw extends MacroCompilerSpec with Ha
   override lazy val memMaskGran = Some(8)
   override lazy val libMaskGran = Some(2)
 
-  it should "be enabled when non-bit masks are supported" is (pending)
-  //~ compile(mem, lib, v, false)
-  //~ execute(mem, lib, false, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 // Non-power of two memGran

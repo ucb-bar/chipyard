@@ -154,8 +154,7 @@ class Masks_PowersOfTwo_32_4 extends MacroCompilerSpec with HasSRAMGenerator wit
   override lazy val memMaskGran = Some(32)
   override lazy val libMaskGran = Some(4)
 
-  it should "be enabled when non-power of two masks are supported" is (pending)
-  //compileExecuteAndTest(mem, lib, v, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 class Masks_PowersOfTwo_32_8 extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator with MasksTestSettings {
@@ -163,8 +162,7 @@ class Masks_PowersOfTwo_32_8 extends MacroCompilerSpec with HasSRAMGenerator wit
   override lazy val memMaskGran = Some(32)
   override lazy val libMaskGran = Some(8)
 
-  it should "be enabled when non-power of two masks are supported" is (pending)
-  //compileExecuteAndTest(mem, lib, v, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 class Masks_PowersOfTwo_8_8 extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator with MasksTestSettings {
@@ -172,8 +170,7 @@ class Masks_PowersOfTwo_8_8 extends MacroCompilerSpec with HasSRAMGenerator with
   override lazy val memMaskGran = Some(8)
   override lazy val libMaskGran = Some(8)
 
-  it should "be enabled when non-power of two masks are supported" is (pending)
-  //compileExecuteAndTest(mem, lib, v, output)
+  compileExecuteAndTest(mem, lib, v, output)
 }
 
 // Width as a multiple of the mask, bit-masked lib
