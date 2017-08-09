@@ -88,10 +88,8 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
     for (memBit <- 0 until mem.src.width) {
       val bitsInCurrentMem = memBit - currentLSB
 
-      /**
-       * Helper function to check if it's time to split memories.
-       * @param effectiveLibWidth Split memory when we have this many bits.
-       */
+      // Helper function to check if it's time to split memories.
+      // @param effectiveLibWidth Split memory when we have this many bits.
       def splitMemory(effectiveLibWidth: Int): Unit = {
         if (bitsInCurrentMem == effectiveLibWidth) {
           bitPairs += ((currentLSB, memBit - 1))
