@@ -65,8 +65,8 @@ serial line. But testchipip also provides a simulated block device that can
 be used for non-volatile storage. You can build a simulator including the
 block device using the blkdev package.
 
-    make PROJECT=blkdev CONFIG=BlockDeviceConfig
-    ./simulator-blkdev-BlockDeviceConfig +blkdev=block-device.img ...
+    make CONFIG=SimBlockDeviceConfig
+    ./simulator-example-SimBlockDeviceConfig +blkdev=block-device.img ...
 
 By passing the +blkdev argument on the simulator command line, you can allow
 the RTL simulation to read and write from a file. Take a look at tests/blkdev.c
@@ -273,8 +273,8 @@ Compiling this program with make produces a `pwm.riscv` executable.
 Now with all of that done, we can go ahead and run our simulation.
 
     cd verisim
-    make PROJECT=pwm CONFIG=PWMConfig
-    ./simulator-pwm-PWMConfig ../tests/pwm.riscv
+    make CONFIG=PWMConfig
+    ./simulator-example-PWMConfig ../tests/pwm.riscv
 
 ## Adding a DMA port
 
