@@ -21,6 +21,17 @@ import Utils._
 
 case class MacroCompilerException(msg: String) extends Exception(msg)
 
+/**
+ * The MacroCompilerAnnotation to trigger the macro compiler.
+ * Note that this annotation does NOT actually target any modules for
+ * compilation. It simply holds all the settings for the memory compiler. The
+ * actual selection of which memories to compile is set in the Params.
+ *
+ * To use, simply annotate the entire circuit itself with this annotation and
+ * include [[MacroCompilerTransform]].
+ *
+ * TODO: make this into a "true" annotation?
+ */
 object MacroCompilerAnnotation {
   /** Macro compiler mode. */
   sealed trait CompilerMode
@@ -30,12 +41,22 @@ object MacroCompilerAnnotation {
   case object Synflops extends CompilerMode
   /** FallbackSynflops - compile all memories to SRAM when possible and fall back to synflops if a memory fails. **/
   case object FallbackSynflops extends CompilerMode
-  /** Default mode - compile what is possible and do nothing with uncompiled memories. **/
-  case object Default extends CompilerMode
+  /** CompileAvailable - compile what is possible and do nothing with uncompiled memories. **/
+  case object CompileAvailable extends CompilerMode
+
+  /**
+   * The default mode for the macro compiler.
+   * TODO: Maybe set the default to FallbackSynflops (typical for
+   * vlsi_mem_gen-like scripts) once it's implemented?
+   */
+  val Default = CompileAvailable
+
+  /** Helper function to select a compiler mode. */
   def stringToCompilerMode(str: String): CompilerMode = (str: @unchecked) match {
     case "strict" => Strict
     case "synflops" => Synflops
     case "fallbacksynflops" => FallbackSynflops
+    case "compileavailable" => CompileAvailable
     case "default" => Default
     case _ => throw new IllegalArgumentException("No such compiler mode " + str)
   }
@@ -51,7 +72,7 @@ object MacroCompilerAnnotation {
 
   /**
    * Create a MacroCompilerAnnotation.
-   * @param c Name of the module(?) for this annotation.
+   * @param c Top-level circuit name (see class description)
    * @param p Parameters (see above).
    */
   def apply(c: String, p: Params): Annotation =
@@ -73,7 +94,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
   def compile(mem: Macro, lib: Macro): Option[(Module, ExtModule)] = {
     val pairedPorts = mem.sortedPorts zip lib.sortedPorts
 
-    // Parallel mapping
+    // Width mapping
 
     /**
      * This is a list of submemories by width.
@@ -168,6 +189,13 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
                 // In this case we can only compile very wastefully (by treating
                 // lib as a mem maskGran width memory) :(
                 splitMemory(memMask.get)
+
+                // TODO: there's an optimization that could allow us to pack more
+                // bits in and be more efficient.
+                // e.g. say if mem maskGran = 4, lib maskGran = 8, libWidth = 32
+                // We could use 16 of bit (bits 0-3, 8-11, 16-19, 24-27) instead
+                // of treating it as simply a width 4 (!!!) memory.
+                // This would require a major refactor though.
               } else {
                 System.err.println(s"Lib maskGran ${m} is not a multiple of mem maskGran ${l}: currently not supported")
                 return None
@@ -180,7 +208,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
     // Add in the last chunk if there are any leftovers
     bitPairs += ((currentLSB, mem.src.width.toInt - 1))
 
-    // Serial mapping
+    // Depth mapping
     val stmts = ArrayBuffer[Statement]()
     val outputs = HashMap[String, ArrayBuffer[(Expression, Expression)]]()
     val selects = HashMap[String, Expression]()
@@ -270,7 +298,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
                * together a bunch of narrower memories, which can only be
                * done after generating all the memories.  This saves up the
                * output statements for later. */
-              val name = s"${mem}_${i}_${j}"
+              val name = s"${mem}_${i}_${j}" // This name is the output from the instance (mem vs ${mem}).
               val exp = portToExpression(bits(WSubField(inst, lib), high-low, 0), Some(lib_polarity))
               stmts += DefNode(NoInfo, name, exp)
               cats += WRef(name)
@@ -332,15 +360,17 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
                 })).reverse)
               }
             case None =>
-              /* Palmer: If there is no input port on the source memory port
-               * then we don't ever want to turn on this write
-               * enable.  Otherwise, we just _always_ turn on the
-               * write enable port on the inner memory. */
-              if (libPort.src.maskPort.isEmpty) one
-              else {
+              /* If there is a lib mask port but no mem mask port, just turn on
+               * all bits of the lib mask port. */
+              if (libPort.src.maskPort.isDefined) {
                 val width = libPort.src.width / libPort.src.effectiveMaskGran
                 val value = (BigInt(1) << width.toInt) - 1
                 UIntLiteral(value, IntWidth(width))
+              } else {
+                // No mask ports on either side.
+                // We treat a "mask" of a single bit to be equivalent to a write
+                // enable (as used below).
+                one
               }
           }
 
@@ -390,25 +420,26 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
               stmts += connectPorts(memMask, mask, mask_polarity)
               stmts += connectPorts(andAddrMatch(and(memWriteEnable, memChipEnable)),
                                     we, mask_polarity)
-            case (None, Some(PolarizedPort(we, we_polarity)), chipEnable) if bitWidth(memMask.tpe) == 1 =>
-              /* Palmer: If we're expected to provide mask ports without a
-               * memory that actually has them then we can use the
-               * write enable port instead of the mask port. */
-              stmts += connectPorts(andAddrMatch(and(memWriteEnable, memMask)),
-                                    we, we_polarity)
-              chipEnable match {
-                case Some(PolarizedPort(en, en_polarity)) => {
-                  stmts += connectPorts(andAddrMatch(memChipEnable), en, en_polarity)
+            case (None, Some(PolarizedPort(we, we_polarity)), chipEnable) =>
+              if (bitWidth(memMask.tpe) == 1) {
+                /* Palmer: If we're expected to provide mask ports without a
+                 * memory that actually has them then we can use the
+                 * write enable port instead of the mask port. */
+                stmts += connectPorts(andAddrMatch(and(memWriteEnable, memMask)),
+                                      we, we_polarity)
+                chipEnable match {
+                  case Some(PolarizedPort(en, en_polarity)) => {
+                    stmts += connectPorts(andAddrMatch(memChipEnable), en, en_polarity)
+                  }
+                  case _ => // TODO: do we care about the case where mem has chipEnable but lib doesn't?
                 }
-                case _ => // TODO: do we care about the case where mem has chipEnable but lib doesn't?
+              } else {
+                System.err.println("cannot emulate multi-bit mask ports with write enable")
+                return None
               }
-            case (None, Some(PolarizedPort(we, we_polarity)), Some(PolarizedPort(en, en_polarity))) =>
-              // TODO
-              System.err.println("cannot emulate multi-bit mask ports with write enable")
-              return None
             case (None, None, None) =>
-              /* Palmer: There's nothing to do here since there aren't any
-               * ports to match up. */
+              // No write ports to match up (this may be a read-only port).
+              // This isn't necessarily an error condition.
           }
         }
         // Cat macro outputs for selection

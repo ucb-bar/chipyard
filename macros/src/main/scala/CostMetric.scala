@@ -21,7 +21,7 @@ trait CostMetric extends Serializable {
   def cost(mem: Macro, lib: Macro): Option[BigInt]
 
   /**
-   * Helper function to return the map of argments (or an empty map if there are none).
+   * Helper function to return the map of arguments (or an empty map if there are none).
    */
   def commandLineParams(): Map[String, String]
 
@@ -39,8 +39,10 @@ trait CostMetricCompanion {
 
 // Some default cost functions.
 
-/** Palmer's old metric. */
-object PalmerMetric extends CostMetric with CostMetricCompanion {
+/** Palmer's old metric.
+ * TODO: figure out what is the difference between this metric and the current
+ * default metric and either revive or delete this metric. */
+object OldMetric extends CostMetric with CostMetricCompanion {
   override def cost(mem: Macro, lib: Macro): Option[BigInt] = {
     /* Palmer: A quick cost function (that must be kept in sync with
      * memory_cost()) that attempts to avoid compiling unncessary
@@ -52,15 +54,15 @@ object PalmerMetric extends CostMetric with CostMetricCompanion {
   }
 
   override def commandLineParams = Map()
-  override def name = "PalmerMetric"
-  override def construct(m: Map[String, String]) = PalmerMetric
+  override def name = "OldMetric"
+  override def construct(m: Map[String, String]) = OldMetric
 }
 
 /**
  * An external cost function.
  * Calls the specified path with paths to the JSON MDF representation of the mem
- * and lib macros. The external executable should return a BigInt.
- * None will be returned if the external executable does not return a valid
+ * and lib macros. The external executable should print a BigInt.
+ * None will be returned if the external executable does not print a valid
  * BigInt.
  */
 class ExternalMetric(path: String) extends CostMetric {
@@ -110,7 +112,7 @@ object ExternalMetric extends CostMetricCompanion {
 
 /** The current default metric in barstools, re-defined by Donggyu. */
 // TODO: write tests for this function to make sure it selects the right things
-object NewDefaultMetric extends CostMetric with CostMetricCompanion {
+object DefaultMetric extends CostMetric with CostMetricCompanion {
   override def cost(mem: Macro, lib: Macro): Option[BigInt] = {
     val memMask = mem.src.ports map (_.maskGran) find (_.isDefined) map (_.get)
     val libMask = lib.src.ports map (_.maskGran) find (_.isDefined) map (_.get)
@@ -126,8 +128,8 @@ object NewDefaultMetric extends CostMetric with CostMetricCompanion {
   }
 
   override def commandLineParams = Map()
-  override def name = "NewDefaultMetric"
-  override def construct(m: Map[String, String]) = NewDefaultMetric
+  override def name = "DefaultMetric"
+  override def construct(m: Map[String, String]) = DefaultMetric
 }
 
 object MacroCompilerUtil {
@@ -158,14 +160,14 @@ object MacroCompilerUtil {
 
 object CostMetric {
   /** Define some default metric. */
-  val default: CostMetric = NewDefaultMetric
+  val default: CostMetric = DefaultMetric
 
   val costMetricCreators: scala.collection.mutable.Map[String, CostMetricCompanion] = scala.collection.mutable.Map()
 
   // Register some default metrics
-  registerCostMetric(PalmerMetric)
+  registerCostMetric(OldMetric)
   registerCostMetric(ExternalMetric)
-  registerCostMetric(NewDefaultMetric)
+  registerCostMetric(DefaultMetric)
 
   /**
    * Register a cost metric.

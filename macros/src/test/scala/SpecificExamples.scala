@@ -385,5 +385,9 @@ circuit T_2172_ext :
     defname = SRAM2RW64x32
 """
 
-  compileExecuteAndTest(mem, lib, v, output)
+  // TODO FIXME: Enable this test when firrtl #644 https://github.com/freechipsproject/firrtl/issues/644 is fixed
+  "rocket example" should "work" in {
+    pending
+  }
+  //~ compileExecuteAndTest(mem, lib, v, output)
 }
