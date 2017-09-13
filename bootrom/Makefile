@@ -1,10 +1,13 @@
 bootrom_img = bootrom.img
+bootrom_dump = bootrom.dump
 
 GCC=riscv64-unknown-elf-gcc
 OBJCOPY=riscv64-unknown-elf-objcopy
 OBJDUMP=riscv64-unknown-elf-objdump
 
-all: $(bootrom_img)
+img: $(bootrom_img)
+
+dump: $(bootrom_dump)
 
 %.img: %.elf
 	$(OBJCOPY) -O binary --change-addresses=-0x10000 $< $@

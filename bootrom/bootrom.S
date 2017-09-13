@@ -3,9 +3,20 @@
 .section .text.start, "ax", @progbits
 .globl _start
 _start:
-  csrr a0, mhartid
-  sll a0, a0, 2 // offset for hart msip
   li a1, 0x2000000 // base address of clint
+  csrr a0, mhartid
+  bnez a0, boot_core
+
+  addi a2, a1, 4
+  li a3, 1
+interrupt_loop:
+  sw a3, 0(a2)
+  addi a2, a2, 4
+  lw a3, -4(a2)
+  bnez a3, interrupt_loop
+
+boot_core:
+  sll a0, a0, 2 // offset for hart msip
   add a0, a0, a1
   sw zero, 0(a0) // clear the interrupt
   li a0, DRAM_BASE // program reset vector

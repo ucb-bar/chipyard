@@ -2,7 +2,7 @@ package example
 
 import chisel3._
 import freechips.rocketchip.config.{Parameters, Config}
-import freechips.rocketchip.coreplex.{WithRoccExample, WithNMemoryChannels}
+import freechips.rocketchip.coreplex.{WithRoccExample, WithNMemoryChannels, WithNBigCores}
 import freechips.rocketchip.diplomacy.LazyModule
 import testchipip._
 
@@ -54,3 +54,7 @@ class WithFourTrackers extends WithNBlockDeviceTrackers(4)
 
 class WithTwoMemChannels extends WithNMemoryChannels(2)
 class WithFourMemChannels extends WithNMemoryChannels(4)
+
+class DualCoreConfig extends Config(
+  // Core gets tacked onto existing list
+  new WithNBigCores(1) ++ new DefaultExampleConfig)
