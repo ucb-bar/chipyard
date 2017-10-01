@@ -9,7 +9,7 @@ import testchipip._
 class ExampleTop(implicit p: Parameters) extends RocketCoreplex
     with HasMasterAXI4MemPort
     with HasPeripheryBootROM
-    with HasPeripheryErrorSlave
+    with HasSystemErrorSlave
     with HasNoDebug
     with HasPeripherySerial {
   override lazy val module = new ExampleTopModule(this)

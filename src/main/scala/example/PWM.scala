@@ -37,7 +37,7 @@ trait PWMTLBundle extends Bundle {
   val pwmout = Output(Bool())
 }
 
-trait PWMTLModule extends Module with HasRegMap {
+trait PWMTLModule extends HasRegMap {
   val io: PWMTLBundle
   implicit val p: Parameters
   def params: PWMParams
@@ -85,7 +85,7 @@ trait HasPeripheryPWM extends HasPeripheryBus {
   pwm.node := pbus.toVariableWidthSlaves
 }
 
-trait HasPeripheryPWMModuleImp extends LazyMultiIOModuleImp {
+trait HasPeripheryPWMModuleImp extends LazyModuleImp {
   implicit val p: Parameters
   val outer: HasPeripheryPWM
 

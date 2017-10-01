@@ -7,17 +7,17 @@ import freechips.rocketchip.diplomacy.LazyModule
 import testchipip._
 
 class WithExampleTop extends Config((site, here, up) => {
-  case BuildTop => (p: Parameters) =>
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
     Module(LazyModule(new ExampleTop()(p)).module)
 })
 
 class WithPWM extends Config((site, here, up) => {
-  case BuildTop => (p: Parameters) =>
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
     Module(LazyModule(new ExampleTopWithPWM()(p)).module)
 })
 
 class WithBlockDeviceModel extends Config((site, here, up) => {
-  case BuildTop => (p: Parameters) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
     val top = Module(LazyModule(new ExampleTopWithBlockDevice()(p)).module)
     top.connectBlockDeviceModel()
     top
@@ -25,9 +25,9 @@ class WithBlockDeviceModel extends Config((site, here, up) => {
 })
 
 class WithSimBlockDevice extends Config((site, here, up) => {
-  case BuildTop => (p: Parameters) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
     val top = Module(LazyModule(new ExampleTopWithBlockDevice()(p)).module)
-    top.connectSimBlockDevice()
+    top.connectSimBlockDevice(clock, reset)
     top
   }
 })
