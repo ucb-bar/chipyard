@@ -588,10 +588,10 @@ object MacroCompiler extends App {
     "  -c, --cost-func: Cost function to use. Optional (default: \"default\")",
     "  -cp, --cost-param: Cost function parameter. (Optional depending on the cost function.). e.g. -c ExternalMetric -cp path /path/to/my/cost/script",
   """  --mode:
+    |    strict: Compile all memories to library or return an error.
     |    synflops: Produces synthesizable flop-based memories (for all memories and library memory macros); likely useful for simulation purposes.
     |    fallbacksynflops: Compile all memories to library when possible and fall back to synthesizable flop-based memories when library synth is not possible.
-    |    strict: Compile all memories to library or return an error.
-    |    default: Compile all memories to library when possible and do nothing in case of errors.
+    |    compileavailable: Compile all memories to library when possible and do nothing in case of errors. (default)
   """.stripMargin) mkString "\n"
 
   def parseArgs(map: MacroParamMap, costMap: CostParamMap, args: List[String]): (MacroParamMap, CostParamMap) =
