@@ -91,6 +91,17 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
                         libs: Option[Seq[Macro]],
                         costMetric: CostMetric = CostMetric.default,
                         mode: MacroCompilerAnnotation.CompilerMode = MacroCompilerAnnotation.Default) extends firrtl.passes.Pass {
+  // Helper function to check the legality of bitPairs.
+  // e.g. ((0,21), (22,43)) is legal
+  // ((0,21), (22,21)) is illegal and will throw an assert
+  private def checkBitPairs(bitPairs: Seq[(BigInt, BigInt)]): Unit = {
+    bitPairs.foldLeft(BigInt(-1))((lastBit, nextPair) => {
+      assert(lastBit + 1 == nextPair._1, s"Pair's first bit ${nextPair._1} does not follow last bit ${lastBit}");
+      assert(nextPair._2 >= nextPair._1, s"Pair ${nextPair} in bitPairs ${bitPairs} is illegal");
+      nextPair._2
+    })
+  }
+
   def compile(mem: Macro, lib: Macro): Option[(Module, ExtModule)] = {
     val pairedPorts = mem.sortedPorts zip lib.sortedPorts
 
@@ -103,22 +114,32 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
      * width=8 memories.
      */
     val bitPairs = ArrayBuffer[(BigInt, BigInt)]()
-    var currentLSB = 0
+    var currentLSB: BigInt = 0
 
     // Process every bit in the mem width.
     for (memBit <- 0 until mem.src.width) {
       val bitsInCurrentMem = memBit - currentLSB
 
-      // Helper function to check if it's time to split memories.
-      // @param effectiveLibWidth Split memory when we have this many bits.
-      def splitMemory(effectiveLibWidth: Int): Unit = {
-        if (bitsInCurrentMem == effectiveLibWidth) {
-          bitPairs += ((currentLSB, memBit - 1))
-          currentLSB = memBit
-        }
-      }
-
+      // We'll need to find a bitPair that works for *all* the ports of the memory.
+      // e.g. unmasked read port and masked write port.
+      // For each port, store a tentative candidate for the split.
+      // Afterwards, figure out which one to use.
+      val bitPairCandidates = ArrayBuffer[(BigInt, BigInt)]()
       for ((memPort, libPort) <- pairedPorts) {
+
+        // Sanity check to make sure we only split once per bit, once per port.
+        var alreadySplit: Boolean = false
+
+        // Helper function to check if it's time to split memories.
+        // @param effectiveLibWidth Split memory when we have this many bits.
+        def splitMemory(effectiveLibWidth: Int): Unit = {
+          assert (!alreadySplit)
+
+          if (bitsInCurrentMem == effectiveLibWidth) {
+            bitPairCandidates += ((currentLSB, memBit - 1))
+            alreadySplit = true
+          }
+        }
 
         // Make sure we don't have a maskGran larger than the width of the memory.
         assert (memPort.src.effectiveMaskGran <= memPort.src.width)
@@ -204,9 +225,23 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
           }
         }
       }
+
+      // Choose an actual bit pair to add.
+      // We'll have to choose the smallest one (e.g. unmasked read port might be more tolerant of a bigger split than the masked write port).
+      if (bitPairCandidates.length == 0) {
+        // No pair needed to split, just continue
+      } else {
+        val bestPair = bitPairCandidates.reduceLeft((leftPair, rightPair) => {
+          if (leftPair._2 - leftPair._1 + 1 > rightPair._2 - rightPair._1 + 1) leftPair else rightPair
+        })
+        bitPairs += bestPair
+        currentLSB = bestPair._2 + BigInt(1) // advance the LSB pointer
+      }
     }
     // Add in the last chunk if there are any leftovers
     bitPairs += ((currentLSB, mem.src.width.toInt - 1))
+    // Check bit pairs
+    checkBitPairs(bitPairs)
 
     // Depth mapping
     val stmts = ArrayBuffer[Statement]()
