@@ -1,7 +1,7 @@
 bootrom_img = bootrom.img
 bootrom_dump = bootrom.dump
 
-GCC=riscv64-unknown-elf-gcc
+GCC=riscv64-unknown-elf-gcc -march=rv64imafd
 OBJCOPY=riscv64-unknown-elf-objcopy
 OBJDUMP=riscv64-unknown-elf-objdump
 
