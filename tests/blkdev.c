@@ -5,15 +5,15 @@
 
 #define BLKDEV_BASE 0x10015000
 #define BLKDEV_ADDR BLKDEV_BASE
-#define BLKDEV_OFFSET (BLKDEV_BASE + 4)
-#define BLKDEV_LEN (BLKDEV_BASE + 8)
-#define BLKDEV_WRITE (BLKDEV_BASE + 12)
-#define BLKDEV_REQUEST (BLKDEV_BASE + 16)
-#define BLKDEV_NREQUEST (BLKDEV_BASE + 20)
-#define BLKDEV_COMPLETE (BLKDEV_BASE + 24)
-#define BLKDEV_NCOMPLETE (BLKDEV_BASE + 28)
-#define BLKDEV_NSECTORS (BLKDEV_BASE + 32)
-#define BLKDEV_MAX_REQUEST_LENGTH (BLKDEV_BASE + 36)
+#define BLKDEV_OFFSET (BLKDEV_BASE + 8)
+#define BLKDEV_LEN (BLKDEV_BASE + 12)
+#define BLKDEV_WRITE (BLKDEV_BASE + 16)
+#define BLKDEV_REQUEST (BLKDEV_BASE + 17)
+#define BLKDEV_NREQUEST (BLKDEV_BASE + 18)
+#define BLKDEV_COMPLETE (BLKDEV_BASE + 19)
+#define BLKDEV_NCOMPLETE (BLKDEV_BASE + 20)
+#define BLKDEV_NSECTORS (BLKDEV_BASE + 24)
+#define BLKDEV_MAX_REQUEST_LENGTH (BLKDEV_BASE + 28)
 #define BLKDEV_SECTOR_SIZE 512
 #define BLKDEV_SECTOR_SHIFT 9
 
@@ -32,26 +32,26 @@ void blkdev_read(void *addr, unsigned long offset, size_t nsectors)
 	int req_tag, resp_tag, ntags, i;
 	size_t nsectors_per_tag;
 
-	ntags = reg_read32(BLKDEV_NREQUEST);
+	ntags = reg_read8(BLKDEV_NREQUEST);
 	nsectors_per_tag = nsectors / ntags;
 
 	printf("sending %d reads\n", ntags);
 
 	for (i = 0; i < ntags; i++) {
-		reg_write32(BLKDEV_ADDR, (unsigned long) addr);
+		reg_write64(BLKDEV_ADDR, (unsigned long) addr);
 		reg_write32(BLKDEV_OFFSET, offset);
 		reg_write32(BLKDEV_LEN, nsectors_per_tag);
-		reg_write32(BLKDEV_WRITE, 0);
+		reg_write8(BLKDEV_WRITE, 0);
 
-		req_tag = reg_read32(BLKDEV_REQUEST);
+		req_tag = reg_read8(BLKDEV_REQUEST);
 		addr += (nsectors_per_tag << BLKDEV_SECTOR_SHIFT);
 		offset += nsectors_per_tag;
 	}
 
-	while (reg_read32(BLKDEV_NCOMPLETE) < ntags);
+	while (reg_read8(BLKDEV_NCOMPLETE) < ntags);
 
 	for (i = 0; i < ntags; i++) {
-		resp_tag = reg_read32(BLKDEV_COMPLETE);
+		resp_tag = reg_read8(BLKDEV_COMPLETE);
 		printf("completed read %d\n", resp_tag);
 	}
 }
@@ -61,26 +61,26 @@ void blkdev_write(unsigned long offset, void *addr, size_t nsectors)
 	int req_tag, resp_tag, ntags, i;
 	size_t nsectors_per_tag;
 
-	ntags = reg_read32(BLKDEV_NREQUEST);
+	ntags = reg_read8(BLKDEV_NREQUEST);
 	nsectors_per_tag = nsectors / ntags;
 
 	printf("sending %d writes\n", ntags);
 
 	for (i = 0; i < ntags; i++) {
-		reg_write32(BLKDEV_ADDR, (unsigned long) addr);
+		reg_write64(BLKDEV_ADDR, (unsigned long) addr);
 		reg_write32(BLKDEV_OFFSET, offset);
 		reg_write32(BLKDEV_LEN, nsectors_per_tag);
-		reg_write32(BLKDEV_WRITE, 1);
+		reg_write8(BLKDEV_WRITE, 1);
 
-		req_tag = reg_read32(BLKDEV_REQUEST);
+		req_tag = reg_read8(BLKDEV_REQUEST);
 		addr += (nsectors_per_tag << BLKDEV_SECTOR_SHIFT);
 		offset += nsectors_per_tag;
 	}
 
-	while (reg_read32(BLKDEV_NCOMPLETE) < ntags);
+	while (reg_read8(BLKDEV_NCOMPLETE) < ntags);
 
 	for (i = 0; i < ntags; i++) {
-		resp_tag = reg_read32(BLKDEV_COMPLETE);
+		resp_tag = reg_read8(BLKDEV_COMPLETE);
 		printf("completed write %d\n", resp_tag);
 	}
 }
