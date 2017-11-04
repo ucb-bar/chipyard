@@ -32,7 +32,7 @@ $(FIRRTL_JAR): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR)/firrtl/src/main/scala
 
 build_dir=$(sim_dir)/generated-src
 
-bootrom_img = $(base_dir)/bootrom/bootrom.img
+bootrom_img = $(base_dir)/bootrom/bootrom.rv64.img $(base_dir)/bootrom/bootrom.rv32.img
 
 CHISEL_ARGS ?=
 
