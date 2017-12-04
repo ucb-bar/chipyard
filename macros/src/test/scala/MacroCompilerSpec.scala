@@ -335,7 +335,7 @@ s"""
      * @param readEnable Has a read enable port?
      * @param mask Mask granularity (# bits) of the port or None. */
     def generateReadWriteFooterPort(prefix: String, readEnable: Boolean, mask: Option[Int]): String = {
-      generatePort(libPortPrefix, lib_addr_width, libWidth,
+      generatePort(prefix, lib_addr_width, libWidth,
         write=true, writeEnable=true, read=true, readEnable=readEnable, mask)
     }
 
@@ -344,7 +344,7 @@ s"""
      * @param readEnable Has a read enable port?
      * @param mask Mask granularity (# bits) of the port or None. */
     def generateReadWriteHeaderPort(prefix: String, readEnable: Boolean, mask: Option[Int]): String = {
-      generatePort(memPortPrefix, mem_addr_width, memWidth,
+      generatePort(prefix, mem_addr_width, memWidth,
         write=true, writeEnable=true, read=true, readEnable=readEnable, mask)
     }
 

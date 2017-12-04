@@ -611,6 +611,7 @@ object MacroCompiler extends App {
   case object Macros extends MacroParam
   case object Library extends MacroParam
   case object Verilog extends MacroParam
+  case object Firrtl extends MacroParam
   case object CostFunc extends MacroParam
   case object Mode extends MacroParam
   type MacroParamMap = Map[MacroParam, String]
@@ -620,6 +621,7 @@ object MacroCompiler extends App {
     "  -m, --macro-list: The set of macros to compile",
     "  -l, --library: The set of macros that have blackbox instances",
     "  -v, --verilog: Verilog output",
+    "  -f, --firrtl: FIRRTL output (optional)",
     "  -c, --cost-func: Cost function to use. Optional (default: \"default\")",
     "  -cp, --cost-param: Cost function parameter. (Optional depending on the cost function.). e.g. -c ExternalMetric -cp path /path/to/my/cost/script",
   """  --mode:
@@ -638,6 +640,8 @@ object MacroCompiler extends App {
         parseArgs(map + (Library -> value), costMap, tail)
       case ("-v" | "--verilog") :: value :: tail =>
         parseArgs(map + (Verilog -> value), costMap, tail)
+      case ("-f" | "--firrtl") :: value :: tail =>
+        parseArgs(map + (Firrtl -> value), costMap, tail)
       case ("-c" | "--cost-func") :: value :: tail =>
         parseArgs(map + (CostFunc -> value), costMap, tail)
       case ("-cp" | "--cost-param") :: value1 :: value2 :: tail =>
@@ -654,9 +658,6 @@ object MacroCompiler extends App {
     val (params, costParams) = parseArgs(Map[MacroParam, String](), Map[String, String](), args)
     try {
       val macros = Utils.filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(params.get(Macros))).get map (x => (new Macro(x)).blackbox)
-
-      // Open the writer for the output Verilog file.
-      val verilogWriter = new FileWriter(new File(params.get(Verilog).get))
 
       if (macros.nonEmpty) {
         // Note: the last macro in the input list is (seemingly arbitrarily)
@@ -677,18 +678,39 @@ object MacroCompiler extends App {
         // Run the compiler.
         val result = new MacroCompiler().compileAndEmit(state)
 
-        // Extract Verilog circuit and write it.
-        verilogWriter.write(result.getEmittedCircuit.value)
-      }
+        // Write output FIRRTL file.
+        params.get(Firrtl) match {
+          case Some(firrtlFile: String) => {
+            val fileWriter = new FileWriter(new File(firrtlFile))
+            fileWriter.write(result.circuit.serialize)
+            fileWriter.close()
+          }
+          case None =>
+        }
 
-      // Close the writer.
-      verilogWriter.close()
+        // Write output Verilog file.
+        params.get(Verilog) match {
+          case Some(verilogFile: String) => {
+            // Open the writer for the output Verilog file.
+            val verilogWriter = new FileWriter(new File(verilogFile))
+
+            // Extract Verilog circuit and write it.
+            verilogWriter.write(result.getEmittedCircuit.value)
+
+            // Close the writer.
+            verilogWriter.close()
+          }
+          case None =>
+        }
+      }
     } catch {
       case e: java.util.NoSuchElementException =>
         println(usage)
+        e.printStackTrace()
         sys.exit(1)
       case e: MacroCompilerException =>
-        System.err.println(e.getMessage)
+        println(usage)
+        e.printStackTrace()
         sys.exit(1)
       case e: Throwable =>
         throw e
