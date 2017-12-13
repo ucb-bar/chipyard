@@ -43,7 +43,7 @@ trait PWMTLModule extends HasRegMap {
   def params: PWMParams
 
   val w = params.beatBytes * 8
-  require(w <= 32)
+  require(w <= 64)
 
   // How many clock cycles in a PWM cycle?
   val period = Reg(UInt(w.W))
@@ -61,9 +61,9 @@ trait PWMTLModule extends HasRegMap {
   regmap(
     0x00 -> Seq(
       RegField(w, period)),
-    0x04 -> Seq(
-      RegField(w, duty)),
     0x08 -> Seq(
+      RegField(w, duty)),
+    0x016 -> Seq(
       RegField(1, enable)))
 }
 
