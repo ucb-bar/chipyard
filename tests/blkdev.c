@@ -43,6 +43,8 @@ void blkdev_read(void *addr, unsigned long offset, size_t nsectors)
 		reg_write32(BLKDEV_LEN, nsectors_per_tag);
 		reg_write8(BLKDEV_WRITE, 0);
 
+		asm volatile ("fence");
+
 		req_tag = reg_read8(BLKDEV_REQUEST);
 		addr += (nsectors_per_tag << BLKDEV_SECTOR_SHIFT);
 		offset += nsectors_per_tag;
@@ -71,6 +73,8 @@ void blkdev_write(unsigned long offset, void *addr, size_t nsectors)
 		reg_write32(BLKDEV_OFFSET, offset);
 		reg_write32(BLKDEV_LEN, nsectors_per_tag);
 		reg_write8(BLKDEV_WRITE, 1);
+
+		asm volatile ("fence");
 
 		req_tag = reg_read8(BLKDEV_REQUEST);
 		addr += (nsectors_per_tag << BLKDEV_SECTOR_SHIFT);

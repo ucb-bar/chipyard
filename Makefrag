@@ -1,7 +1,8 @@
 lib_dir=$(base_dir)/lib
 
 ROCKETCHIP_DIR=$(base_dir)/rocket-chip
-EXTRA_PACKAGES=testchipip
+EXTRA_PACKAGES=testchipip boom
+SCALA_VERSION=2.11.7
 
 rocketchip_stamp=$(base_dir)/lib/rocketchip.stamp
 SBT ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
