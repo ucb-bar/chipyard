@@ -68,7 +68,7 @@ object MacroCompilerAnnotation {
    * @param costMetric Cost metric to use
    * @param mode Compiler mode (see CompilerMode)
    */
-  case class Params(mem: String, lib: Option[String], costMetric: CostMetric, mode: CompilerMode)
+  case class Params(mem: String, lib: Option[String], costMetric: CostMetric, mode: CompilerMode, useCompiler: Boolean)
 
   /**
    * Create a MacroCompilerAnnotation.
@@ -142,15 +142,15 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
         }
 
         // Make sure we don't have a maskGran larger than the width of the memory.
-        assert (memPort.src.effectiveMaskGran <= memPort.src.width)
-        assert (libPort.src.effectiveMaskGran <= libPort.src.width)
+        assert (memPort.src.effectiveMaskGran <= memPort.src.width.get)
+        assert (libPort.src.effectiveMaskGran <= libPort.src.width.get)
 
-        val libWidth = libPort.src.width
+        val libWidth = libPort.src.width.get
 
         // Don't consider cases of maskGran == width as "masked" since those masks
         // effectively function as write-enable bits.
-        val memMask = if (memPort.src.effectiveMaskGran == memPort.src.width) None else memPort.src.maskGran
-        val libMask = if (libPort.src.effectiveMaskGran == libPort.src.width) None else libPort.src.maskGran
+        val memMask = if (memPort.src.effectiveMaskGran == memPort.src.width.get) None else memPort.src.maskGran
+        val libMask = if (libPort.src.effectiveMaskGran == libPort.src.width.get) None else libPort.src.maskGran
 
         (memMask, libMask) match {
           // Neither lib nor mem is masked.
@@ -163,12 +163,12 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
 
           // Only the mem is masked.
           case (Some(p), None) => {
-            if (p % libPort.src.width == 0) {
+            if (p % libPort.src.width.get == 0) {
               // If the mem mask is a multiple of the lib width, then we're good.
               // Just roll over every lib width as usual.
               // e.g. lib width=4, mem maskGran={4, 8, 12, 16, ...}
               splitMemory(libWidth)
-            } else if (libPort.src.width % p == 0) {
+            } else if (libPort.src.width.get % p == 0) {
               // Lib width is a multiple of the mem mask.
               // Consider the case where mem mask = 4 but lib width = 8, unmasked.
               // We can still compile, but will need to waste the extra bits.
@@ -176,13 +176,13 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
             } else {
               // No neat multiples.
               // We might still be able to compile extremely inefficiently.
-              if (p < libPort.src.width) {
+              if (p < libPort.src.width.get) {
                 // Compile using mem mask as the effective width. (note that lib is not masked)
                 // e.g. mem mask = 3, lib width = 8
                 splitMemory(memMask.get)
               } else {
                 // e.g. mem mask = 13, lib width = 8
-                System.err.println(s"Unmasked target memory: unaligned mem maskGran ${p} with lib (${lib.src.name}) width ${libPort.src.width} not supported")
+                System.err.println(s"Unmasked target memory: unaligned mem maskGran ${p} with lib (${lib.src.name}) width ${libPort.src.width.get} not supported")
                 return None
               }
             }
@@ -378,13 +378,13 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
             case Some(PolarizedPort(mem, _)) =>
               /* Palmer: The bits from the outer memory's write mask that will be
                * used as the write mask for this inner memory. */
-              if (libPort.src.effectiveMaskGran == libPort.src.width) {
+              if (libPort.src.effectiveMaskGran == libPort.src.width.get) {
                 bits(WRef(mem), low / memPort.src.effectiveMaskGran)
               } else {
                 require(isPowerOfTwo(libPort.src.effectiveMaskGran), "only powers of two masks supported for now")
 
-                val effectiveLibWidth = if (memPort.src.maskGran.get < libPort.src.effectiveMaskGran) memPort.src.maskGran.get else libPort.src.width
-                cat(((0 until libPort.src.width by libPort.src.effectiveMaskGran) map (i => {
+                val effectiveLibWidth = if (memPort.src.maskGran.get < libPort.src.effectiveMaskGran) memPort.src.maskGran.get else libPort.src.width.get
+                cat(((0 until libPort.src.width.get by libPort.src.effectiveMaskGran) map (i => {
                   if (memPort.src.maskGran.get < libPort.src.effectiveMaskGran && i >= effectiveLibWidth) {
                     // If the memMaskGran is smaller than the lib's gran, then
                     // zero out the upper bits.
@@ -398,7 +398,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
               /* If there is a lib mask port but no mem mask port, just turn on
                * all bits of the lib mask port. */
               if (libPort.src.maskPort.isDefined) {
-                val width = libPort.src.width / libPort.src.effectiveMaskGran
+                val width = libPort.src.width.get / libPort.src.effectiveMaskGran
                 val value = (BigInt(1) << width.toInt) - 1
                 UIntLiteral(value, IntWidth(width))
               } else {
@@ -525,7 +525,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
             // Run the cost function to evaluate this potential compile.
             costMetric.cost(mem, lib) match {
               case Some(newCost) => {
-                System.err.println(s"Cost of ${lib.src.name} for ${mem.src.name}: ${newCost}")
+                //System.err.println(s"Cost of ${lib.src.name} for ${mem.src.name}: ${newCost}")
                 // Try compiling
                 compile(mem, lib) match {
                   // If it was successful and the new cost is lower
@@ -561,7 +561,7 @@ class MacroCompilerTransform extends Transform {
   def inputForm = MidForm
   def outputForm = MidForm
   def execute(state: CircuitState) = getMyAnnotations(state) match {
-    case Seq(MacroCompilerAnnotation(state.circuit.main, MacroCompilerAnnotation.Params(memFile, libFile, costMetric, mode))) =>
+    case Seq(MacroCompilerAnnotation(state.circuit.main, MacroCompilerAnnotation.Params(memFile, libFile, costMetric, mode, useCompiler))) =>
       if (mode == MacroCompilerAnnotation.FallbackSynflops) {
         throw new UnsupportedOperationException("Not implemented yet")
       }
@@ -573,7 +573,10 @@ class MacroCompilerTransform extends Transform {
       }
       val libs: Option[Seq[Macro]] = mdf.macrolib.Utils.readMDFFromPath(libFile) match {
         case Some(x:Seq[mdf.macrolib.Macro]) =>
-          Some(Utils.filterForSRAM(Some(x)) getOrElse(List()) map {new Macro(_)})
+          if(useCompiler){
+            findSRAMCompiler(Some(x)).map{x => buildSRAMMacros(x).map(new Macro(_)) }
+          }
+          else Some(Utils.filterForSRAM(Some(x)) getOrElse(List()) map {new Macro(_)})
         case _ => None
       }
       val transforms = Seq(
@@ -614,12 +617,14 @@ object MacroCompiler extends App {
   case object Firrtl extends MacroParam
   case object CostFunc extends MacroParam
   case object Mode extends MacroParam
+  case object UseCompiler extends MacroParam
   type MacroParamMap = Map[MacroParam, String]
   type CostParamMap = Map[String, String]
   val usage = Seq(
     "Options:",
     "  -m, --macro-list: The set of macros to compile",
     "  -l, --library: The set of macros that have blackbox instances",
+    "  -u, --use-compiler: Flag, whether to use the memory compiler defined in library",
     "  -v, --verilog: Verilog output",
     "  -f, --firrtl: FIRRTL output (optional)",
     "  -c, --cost-func: Cost function to use. Optional (default: \"default\")",
@@ -638,6 +643,8 @@ object MacroCompiler extends App {
         parseArgs(map + (Macros  -> value), costMap, tail)
       case ("-l" | "--library") :: value :: tail =>
         parseArgs(map + (Library -> value), costMap, tail)
+      case ("-u" | "--use-compiler") :: tail =>
+        parseArgs(map + (UseCompiler -> ""), costMap, tail)
       case ("-v" | "--verilog") :: value :: tail =>
         parseArgs(map + (Verilog -> value), costMap, tail)
       case ("-f" | "--firrtl") :: value :: tail =>
@@ -669,7 +676,8 @@ object MacroCompiler extends App {
             MacroCompilerAnnotation.Params(
               params.get(Macros).get, params.get(Library),
               CostMetric.getCostMetric(params.getOrElse(CostFunc, "default"), costParams),
-              MacroCompilerAnnotation.stringToCompilerMode(params.getOrElse(Mode, "default"))
+              MacroCompilerAnnotation.stringToCompilerMode(params.getOrElse(Mode, "default")),
+              params.contains(UseCompiler)
             )
           ))
         )
@@ -705,6 +713,7 @@ object MacroCompiler extends App {
       }
     } catch {
       case e: java.util.NoSuchElementException =>
+        e.printStackTrace()
         println(usage)
         e.printStackTrace()
         sys.exit(1)

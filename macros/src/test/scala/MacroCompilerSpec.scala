@@ -7,6 +7,8 @@ import firrtl.Utils.ceilLog2
 import java.io.{File, StringWriter}
 
 abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalatest.Matchers {
+  import scala.language.implicitConversions
+  implicit def String2SomeString(i: String): Option[String] = Some(i)
   val testDir: String = "test_run_dir/macros"
   new File(testDir).mkdirs // Make sure the testDir exists
 
@@ -32,11 +34,12 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
     }
   }
 
-  private def args(mem: String, lib: Option[String], v: String, synflops: Boolean) =
+  private def args(mem: String, lib: Option[String], v: String, synflops: Boolean, useCompiler: Boolean) =
     List("-m", mem.toString, "-v", v) ++
     (lib match { case None => Nil case Some(l) => List("-l", l.toString) }) ++
     costMetricCmdLine ++
-    (if (synflops) List("--mode", "synflops") else Nil)
+    (if (synflops) List("--mode", "synflops") else Nil) ++
+    (if (useCompiler) List("--use-compiler") else Nil)
 
   // Run the full compiler as if from the command line interface.
   // Generates the Verilog; useful in testing since an error will throw an
@@ -44,12 +47,12 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
   def compile(mem: String, lib: String, v: String, synflops: Boolean) {
     compile(mem, Some(lib), v, synflops)
   }
-  def compile(mem: String, lib: Option[String], v: String, synflops: Boolean) {
+  def compile(mem: String, lib: Option[String], v: String, synflops: Boolean, useCompiler: Boolean = false) {
     var mem_full = concat(memPrefix, mem)
     var lib_full = concat(libPrefix, lib)
     var v_full = concat(vPrefix, v)
 
-    MacroCompiler.run(args(mem_full, lib_full, v_full, synflops))
+    MacroCompiler.run(args(mem_full, lib_full, v_full, synflops, useCompiler))
   }
 
   // Helper functions to write macro libraries to the given files.
@@ -62,13 +65,10 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
   }
 
   // Convenience function for running both compile, execute, and test at once.
-  def compileExecuteAndTest(mem: String, lib: Option[String], v: String, output: String, synflops: Boolean): Unit = {
-    compile(mem, lib, v, synflops)
-    val result = execute(mem, lib, synflops)
+  def compileExecuteAndTest(mem: String, lib: Option[String], v: String, output: String, synflops: Boolean = false, useCompiler: Boolean = false): Unit = {
+    compile(mem, lib, v, synflops, useCompiler)
+    val result = execute(mem, lib, synflops, useCompiler)
     test(result, output)
-  }
-  def compileExecuteAndTest(mem: String, lib: String, v: String, output: String, synflops: Boolean = false): Unit = {
-    compileExecuteAndTest(mem, Some(lib), v, output, synflops)
   }
 
   // Compare FIRRTL outputs after reparsing output with ScalaTest ("should be").
@@ -79,21 +79,20 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
 
   // Execute the macro compiler and returns a Circuit containing the output of
   // the memory compiler.
-  def execute(memFile: String, libFile: Option[String], synflops: Boolean): Circuit = {
-    execute(Some(memFile), libFile, synflops)
-  }
-  def execute(memFile: String, libFile: String, synflops: Boolean): Circuit = {
-    execute(Some(memFile), Some(libFile), synflops)
-  }
-  def execute(memFile: Option[String], libFile: Option[String], synflops: Boolean): Circuit = {
+  def execute(memFile: Option[String], libFile: Option[String], synflops: Boolean): Circuit = execute(memFile, libFile, synflops, false)
+  def execute(memFile: Option[String], libFile: Option[String], synflops: Boolean, useCompiler: Boolean): Circuit = {
     var mem_full = concat(memPrefix, memFile)
     var lib_full = concat(libPrefix, libFile)
 
     require(memFile.isDefined)
     val mems: Seq[Macro] = Utils.filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(mem_full)).get map (new Macro(_))
-    val libs: Option[Seq[Macro]] = Utils.filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(lib_full)) match {
-      case Some(x) => Some(x map (new Macro(_)))
-      case None => None
+    val libs: Option[Seq[Macro]] = if(useCompiler) {
+      Utils.findSRAMCompiler(mdf.macrolib.Utils.readMDFFromPath(lib_full)).map{x => Utils.buildSRAMMacros(x).map(new Macro(_)) }
+    } else {
+      Utils.filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(lib_full)) match {
+        case Some(x) => Some(x map (new Macro(_)))
+        case None => None
+      }
     }
     val macros = mems map (_.blackbox)
     val circuit = Circuit(NoInfo, macros, macros.last.name)
@@ -104,6 +103,7 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
     val result: Circuit = (passes foldLeft circuit)((c, pass) => pass run c)
     result
   }
+
 
   // Helper method to deal with String + Option[String]
   private def concat(a: String, b: String): String = {a + "/" + b}
@@ -118,12 +118,16 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
 // A collection of standard SRAM generators.
 trait HasSRAMGenerator {
   import mdf.macrolib._
+  import scala.language.implicitConversions
+  implicit def Int2SomeInt(i: Int): Option[Int] = Some(i)
+
 
   // Generate a standard (read/write/combo) port for testing.
+  // Helper methods for optional width argument
   def generateTestPort(
     prefix: String,
-    width: Int,
-    depth: Int,
+    width: Option[Int],
+    depth: Option[Int],
     maskGran: Option[Int] = None,
     read: Boolean,
     readEnable: Boolean = false,
@@ -133,54 +137,68 @@ trait HasSRAMGenerator {
     val realPrefix = if (prefix == "") "" else prefix + "_"
 
     MacroPort(
-      address=PolarizedPort(name=realPrefix + "addr", polarity=ActiveHigh),
-      clock=PolarizedPort(name=realPrefix + "clk", polarity=PositiveEdge),
+      address = PolarizedPort(name = realPrefix + "addr", polarity = ActiveHigh),
+      clock = PolarizedPort(name = realPrefix + "clk", polarity = PositiveEdge),
 
-      readEnable=if (readEnable) Some(PolarizedPort(name=realPrefix + "read_en", polarity=ActiveHigh)) else None,
-      writeEnable=if (writeEnable) Some(PolarizedPort(name=realPrefix + "write_en", polarity=ActiveHigh)) else None,
+      readEnable = if (readEnable) Some(PolarizedPort(name = realPrefix + "read_en", polarity = ActiveHigh)) else None,
+      writeEnable = if (writeEnable) Some(PolarizedPort(name = realPrefix + "write_en", polarity = ActiveHigh)) else None,
 
-      output=if (read) Some(PolarizedPort(name=realPrefix + "dout", polarity=ActiveHigh)) else None,
-      input=if (write) Some(PolarizedPort(name=realPrefix + "din", polarity=ActiveHigh)) else None,
+      output = if (read) Some(PolarizedPort(name = realPrefix + "dout", polarity = ActiveHigh)) else None,
+      input = if (write) Some(PolarizedPort(name = realPrefix + "din", polarity = ActiveHigh)) else None,
 
-      maskPort=maskGran match {
-        case Some(x:Int) => Some(PolarizedPort(name=realPrefix + "mask", polarity=ActiveHigh))
+      maskPort = maskGran match {
+        case Some(x: Int) => Some(PolarizedPort(name = realPrefix + "mask", polarity = ActiveHigh))
         case _ => None
       },
-      maskGran=maskGran,
+      maskGran = maskGran,
 
-      width=width, depth=depth // These numbers don't matter here.
+      width = width, depth = depth // These numbers don't matter here.
     )
   }
 
   // Generate a read port for testing.
-  def generateReadPort(prefix: String, width: Int, depth: Int, readEnable: Boolean = false): MacroPort = {
-    generateTestPort(prefix, width, depth, write=false, read=true, readEnable=readEnable)
+  def generateReadPort(prefix: String, width: Option[Int], depth: Option[Int], readEnable: Boolean = false): MacroPort = {
+    generateTestPort(prefix, width, depth, write = false, read = true, readEnable = readEnable)
   }
 
   // Generate a write port for testing.
-  def generateWritePort(prefix: String, width: Int, depth: Int, maskGran: Option[Int] = None, writeEnable: Boolean = true): MacroPort = {
-    generateTestPort(prefix, width, depth, maskGran=maskGran, write=true, read=false, writeEnable=writeEnable)
+  def generateWritePort(prefix: String, width: Option[Int], depth: Option[Int], maskGran: Option[Int] = None, writeEnable: Boolean = true): MacroPort = {
+    generateTestPort(prefix, width, depth, maskGran = maskGran, write = true, read = false, writeEnable = writeEnable)
   }
 
   // Generate a simple read-write port for testing.
-  def generateReadWritePort(prefix: String, width: Int, depth: Int, maskGran: Option[Int] = None): MacroPort = {
+  def generateReadWritePort(prefix: String, width: Option[Int], depth: Option[Int], maskGran: Option[Int] = None): MacroPort = {
     generateTestPort(
-      prefix, width, depth, maskGran=maskGran,
-      write=true, writeEnable=true,
-      read=true, readEnable=false
+      prefix, width, depth, maskGran = maskGran,
+      write = true, writeEnable = true,
+      read = true, readEnable = false
     )
   }
 
   // Generate a "simple" SRAM (active high/positive edge, 1 read-write port).
   def generateSRAM(name: String, prefix: String, width: Int, depth: Int, maskGran: Option[Int] = None, extraPorts: Seq[MacroExtraPort] = List()): SRAMMacro = {
     SRAMMacro(
-      name=name,
-      width=width,
-      depth=depth,
-      family="1rw",
-      ports=Seq(generateReadWritePort(prefix, width, depth, maskGran)),
-      extraPorts=extraPorts
+      name = name,
+      width = width,
+      depth = depth,
+      family = "1rw",
+      ports = Seq(generateReadWritePort(prefix, width, depth, maskGran)),
+      extraPorts = extraPorts
     )
+  }
+
+  // Generate a "simple" SRAM group (active high/positive edge, 1 read-write port).
+  def generateSimpleSRAMGroup(prefix: String, mux: Int, depth: Range, width: Range, maskGran: Option[Int] = None, extraPorts: Seq[MacroExtraPort] = List()): SRAMGroup = {
+    SRAMGroup(Seq("mygroup_", "width", "x", "depth", "_", "VT"), "1rw", Seq("svt", "lvt", "ulvt"), mux, depth, width, Seq(generateReadWritePort(prefix, None, None, maskGran)))
+  }
+
+  // 'vt': ('svt','lvt','ulvt'), 'mux': 2,  'depth': range(16,513,8),       'width': range(8,289,2),   'ports': 1
+  // 'vt': ('svt','lvt','ulvt'), 'mux': 4,  'depth': range(32,1025,16),     'width': range(4,145),     'ports': 1}
+  def generateSRAMCompiler(name: String, prefix: String): mdf.macrolib.SRAMCompiler = {
+    SRAMCompiler(name, Seq(
+      generateSimpleSRAMGroup(prefix, 2, Range(16, 512, 8), Range(8, 288, 2)),
+      generateSimpleSRAMGroup(prefix, 4, Range(32, 1024, 16), Range(4, 144, 1))
+    ))
   }
 }
 
@@ -192,6 +210,7 @@ trait HasSimpleTestGenerator {
     // Override these with "override lazy val".
     // Why lazy? These are used in the constructor here so overriding non-lazily
     // would be too late.
+    def useCompiler: Boolean = false
     def memWidth: Int
     def libWidth: Int
     def memDepth: Int
@@ -224,10 +243,10 @@ trait HasSimpleTestGenerator {
     val lib = s"lib-${generatorType}${extraTagPrefixed}.json"
     val v = s"${generatorType}${extraTagPrefixed}.v"
 
-    val mem_name = "target_memory"
+    lazy val mem_name = "target_memory"
     val mem_addr_width = ceilLog2(memDepth)
 
-    val lib_name = "awesome_lib_mem"
+    lazy val lib_name = "awesome_lib_mem"
     val lib_addr_width = ceilLog2(libDepth)
 
     // Override these to change the port prefixes if needed.
@@ -258,8 +277,8 @@ trait HasSimpleTestGenerator {
     // Number of width bits in the last width-direction memory.
     // e.g. if memWidth = 16 and libWidth = 8, this would be 8 since the last memory 0_1 has 8 bits of input width.
     // e.g. if memWidth = 9 and libWidth = 8, this would be 1 since the last memory 0_1 has 1 bit of input width.
-    val lastWidthBits = if (memWidth % usableLibWidth == 0) usableLibWidth else (memWidth % usableLibWidth)
-    val selectBits = mem_addr_width - lib_addr_width
+    lazy val lastWidthBits = if (memWidth % usableLibWidth == 0) usableLibWidth else (memWidth % usableLibWidth)
+    lazy val selectBits = mem_addr_width - lib_addr_width
 
     /**
      * Convenience function to generate a mask statement.
@@ -410,3 +429,4 @@ trait HasNoLibTestGenerator extends HasSimpleTestGenerator {
     // If there is no lib, don't generate a body.
     override def generateBody = ""
 }
+

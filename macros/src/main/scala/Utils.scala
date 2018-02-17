@@ -18,9 +18,9 @@ class FirrtlMacroPort(port: MacroPort) {
   val isWriter = port.input.nonEmpty && port.output.isEmpty
   val isReadWriter = port.input.nonEmpty && port.output.nonEmpty
 
-  val addrType = UIntType(IntWidth(ceilLog2(port.depth) max 1))
-  val dataType = UIntType(IntWidth(port.width))
-  val maskType = UIntType(IntWidth(port.width / port.effectiveMaskGran))
+  val addrType = UIntType(IntWidth(ceilLog2(port.depth.get) max 1))
+  val dataType = UIntType(IntWidth(port.width.get))
+  val maskType = UIntType(IntWidth(port.width.get / port.effectiveMaskGran))
 
   // Bundle representing this macro port.
   val tpe = BundleType(Seq(
@@ -70,6 +70,33 @@ object Utils {
     s match {
       case Some(l:Seq[mdf.macrolib.Macro]) => Some(l filter { _.isInstanceOf[mdf.macrolib.SRAMMacro] } map { m => m.asInstanceOf[mdf.macrolib.SRAMMacro] })
       case _ => None
+    }
+  }
+  def findSRAMCompiler(s: Option[Seq[mdf.macrolib.Macro]]): Option[mdf.macrolib.SRAMCompiler] = {
+    s match {
+      case Some(l:Seq[mdf.macrolib.Macro]) =>
+        l collectFirst {
+          case x: mdf.macrolib.SRAMCompiler => x
+        }
+      case _ => None
+    }
+  }
+  def buildSRAMMacros(s: mdf.macrolib.SRAMCompiler): Seq[mdf.macrolib.SRAMMacro] = {
+    for (g <- s.groups; d <- g.depth; w <- g.width; vt <- g.vt)
+      yield mdf.macrolib.SRAMMacro(makeName(g, d, w, vt), w, d, g.family, g.ports.map(_.copy(width=Some(w), depth=Some(d))), g.extraPorts)
+  }
+  def makeName(g: mdf.macrolib.SRAMGroup, depth: Int, width: Int, vt: String): String = {
+    g.name.foldLeft(""){ (builder, next) =>
+      next match {
+        case "depth"|"DEPTH" => builder + depth
+        case "width"|"WIDTH" => builder + width
+        case "vt" => builder + vt.toLowerCase
+        case "VT" => builder + vt.toUpperCase
+        case "family" => builder + g.family.toLowerCase
+        case "FAMILY" => builder + g.family.toUpperCase
+        case "mux"|"MUX" => builder + g.mux
+        case other => builder + other
+      }
     }
   }
 

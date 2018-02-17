@@ -20,27 +20,27 @@ trait HasSimpleDepthTestGenerator extends HasSimpleTestGenerator {
       if (selectBits > 0) {
         output.append (
 s"""
-    node outer_addr_sel = bits(outer_addr, ${mem_addr_width - 1}, $lib_addr_width)
-    reg outer_addr_sel_reg : UInt<${selectBits}>, outer_clk with :
-      reset => (UInt<1>("h0"), outer_addr_sel_reg)
-    outer_addr_sel_reg <= mux(UInt<1>("h1"), outer_addr_sel, outer_addr_sel_reg)
+    node ${memPortPrefix}_addr_sel = bits(${memPortPrefix}_addr, ${mem_addr_width - 1}, $lib_addr_width)
+    reg ${memPortPrefix}_addr_sel_reg : UInt<${selectBits}>, ${memPortPrefix}_clk with :
+      reset => (UInt<1>("h0"), ${memPortPrefix}_addr_sel_reg)
+    ${memPortPrefix}_addr_sel_reg <= mux(UInt<1>("h1"), ${memPortPrefix}_addr_sel, ${memPortPrefix}_addr_sel_reg)
 """
         )
       }
 
       for (i <- 0 to depthInstances - 1) {
         val maskStatement = generateMaskStatement(0, i)
-        val enableIdentifier = if (selectBits > 0) s"""eq(outer_addr_sel, UInt<${selectBits}>("h${i.toHexString}"))""" else "UInt<1>(\"h1\")"
+        val enableIdentifier = if (selectBits > 0) s"""eq(${memPortPrefix}_addr_sel, UInt<${selectBits}>("h${i.toHexString}"))""" else "UInt<1>(\"h1\")"
         output.append(
   s"""
-    inst mem_${i}_0 of awesome_lib_mem
-    mem_${i}_0.lib_clk <= outer_clk
-    mem_${i}_0.lib_addr <= outer_addr
-    node outer_dout_${i}_0 = bits(mem_${i}_0.lib_dout, ${width - 1}, 0)
-    mem_${i}_0.lib_din <= bits(outer_din, ${width - 1}, 0)
+    inst mem_${i}_0 of ${lib_name}
+    mem_${i}_0.${libPortPrefix}_clk <= ${memPortPrefix}_clk
+    mem_${i}_0.${libPortPrefix}_addr <= ${memPortPrefix}_addr
+    node ${memPortPrefix}_dout_${i}_0 = bits(mem_${i}_0.${libPortPrefix}_dout, ${width - 1}, 0)
+    mem_${i}_0.${libPortPrefix}_din <= bits(${memPortPrefix}_din, ${width - 1}, 0)
     ${maskStatement}
-    mem_${i}_0.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), ${enableIdentifier})
-    node outer_dout_${i} = outer_dout_${i}_0
+    mem_${i}_0.${libPortPrefix}_write_en <= and(and(${memPortPrefix}_write_en, UInt<1>("h1")), ${enableIdentifier})
+    node ${memPortPrefix}_dout_${i} = ${memPortPrefix}_dout_${i}_0
   """
         )
       }
@@ -48,16 +48,16 @@ s"""
         if (i > depthInstances - 1) {
           "UInt<1>(\"h0\")"
         } else {
-          "mux(eq(outer_addr_sel_reg, UInt<%d>(\"h%s\")), outer_dout_%d, %s)".format(
+          s"""mux(eq(${memPortPrefix}_addr_sel_reg, UInt<%d>("h%s")), ${memPortPrefix}_dout_%d, %s)""".format(
             selectBits, i.toHexString, i, generate_outer_dout_tree(i + 1, depthInstances)
           )
         }
       }
-      output append "  outer_dout <= "
+      output append s"  ${memPortPrefix}_dout <= "
       if (selectBits > 0) {
         output append generate_outer_dout_tree(0, depthInstances)
       } else {
-        output append """mux(UInt<1>("h1"), outer_dout_0, UInt<1>("h0"))"""
+        output append s"""mux(UInt<1>("h1"), ${memPortPrefix}_dout_0, UInt<1>("h0"))"""
       }
 
       output.toString

@@ -40,28 +40,28 @@ trait HasSimpleWidthTestGenerator extends HasSimpleTestGenerator {
         } else """UInt<1>("h1")"""
 
 s"""
-    mem_0_${i}.lib_clk <= outer_clk
-    mem_0_${i}.lib_addr <= outer_addr
-    node outer_dout_0_${i} = bits(mem_0_${i}.lib_dout, ${myMemWidth - 1}, 0)
-    mem_0_${i}.lib_din <= bits(outer_din, ${myBaseBit + myMemWidth - 1}, ${myBaseBit})
+    mem_0_${i}.${libPortPrefix}_clk <= ${memPortPrefix}_clk
+    mem_0_${i}.${libPortPrefix}_addr <= ${memPortPrefix}_addr
+    node ${memPortPrefix}_dout_0_${i} = bits(mem_0_${i}.${libPortPrefix}_dout, ${myMemWidth - 1}, 0)
+    mem_0_${i}.${libPortPrefix}_din <= bits(${memPortPrefix}_din, ${myBaseBit + myMemWidth - 1}, ${myBaseBit})
     ${maskStatement}
-    mem_0_${i}.lib_write_en <= and(and(outer_write_en, ${writeEnableBit}), UInt<1>("h1"))
+    mem_0_${i}.${libPortPrefix}_write_en <= and(and(${memPortPrefix}_write_en, ${writeEnableBit}), UInt<1>("h1"))
 """
       }).reduceLeft(_ + _)
 
       // Generate final output that concats together the sub-memories.
       // e.g. cat(outer_dout_0_2, cat(outer_dout_0_1, outer_dout_0_0))
       output append {
-        val doutStatements = ((widthInstances - 1 to 0 by -1) map (i => s"outer_dout_0_${i}"))
+        val doutStatements = ((widthInstances - 1 to 0 by -1) map (i => s"${memPortPrefix}_dout_0_${i}"))
         val catStmt = doutStatements.init.foldRight(doutStatements.last)((l: String, r: String) => s"cat($l, $r)")
 s"""
-    node outer_dout_0 = ${catStmt}
+    node ${memPortPrefix}_dout_0 = ${catStmt}
 """
       }
 
       output append
-"""
-    outer_dout <= mux(UInt<1>("h1"), outer_dout_0, UInt<1>("h0"))
+s"""
+    ${memPortPrefix}_dout <= mux(UInt<1>("h1"), ${memPortPrefix}_dout_0, UInt<1>("h0"))
 """
       output.toString
     }
@@ -398,7 +398,7 @@ class SplitWidth1024x32_readEnable_Lib extends MacroCompilerSpec with HasSRAMGen
       depth=libDepth,
       family="1rw",
       ports=Seq(generateTestPort(
-        "lib", libWidth, libDepth, maskGran=libMaskGran,
+        "lib", Some(libWidth), Some(libDepth), maskGran=libMaskGran,
         write=true, writeEnable=true,
         read=true, readEnable=true
       ))
@@ -456,7 +456,7 @@ class SplitWidth1024x32_readEnable_Mem extends MacroCompilerSpec with HasSRAMGen
       depth=memDepth,
       family="1rw",
       ports=Seq(generateTestPort(
-        "outer", memWidth, memDepth, maskGran=memMaskGran,
+        "outer", Some(memWidth), Some(memDepth), maskGran=memMaskGran,
         write=true, writeEnable=true,
         read=true, readEnable=true
       ))
@@ -482,7 +482,7 @@ class SplitWidth1024x32_readEnable_LibMem extends MacroCompilerSpec with HasSRAM
       depth=libDepth,
       family="1rw",
       ports=Seq(generateTestPort(
-        "lib", libWidth, libDepth, maskGran=libMaskGran,
+        "lib", Some(libWidth), Some(libDepth), maskGran=libMaskGran,
         write=true, writeEnable=true,
         read=true, readEnable=true
       ))
@@ -496,7 +496,7 @@ class SplitWidth1024x32_readEnable_LibMem extends MacroCompilerSpec with HasSRAM
       depth=memDepth,
       family="1rw",
       ports=Seq(generateTestPort(
-        "outer", memWidth, memDepth, maskGran=memMaskGran,
+        "outer", Some(memWidth), Some(memDepth), maskGran=memMaskGran,
         write=true, writeEnable=true,
         read=true, readEnable=true
       ))
