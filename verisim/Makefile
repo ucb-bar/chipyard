@@ -65,5 +65,22 @@ $(model_mk_debug): $(sim_vsrcs) $(INSTALLED_VERILATOR)
 $(sim_debug): $(model_mk_debug) $(sim_csrcs)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(MODEL).mk
 
+$(output_dir)/%.out: $(output_dir)/% $(sim)
+	$(sim) +verbose +max-cycles=1000000 $< 3>&1 1>&2 2>&3 | spike-dasm > $@
+
+$(output_dir)/%.run: $(output_dir)/% $(sim)
+	$(sim) +max-cycles=1000000 $< && touch $@
+
+$(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
+	rm -f $@.vcd && mkfifo $@.vcd
+	vcd2vpd $@.vcd $@ > /dev/null &
+	$(sim_debug) -v$@.vcd +max-cycles=1000000 $<
+
+run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))
+
+run-regression-tests-fast: $(addprefix $(output_dir)/,$(addsuffix .run,$(regression-tests)))
+
+run-regression-tests-debug: $(addprefix $(output_dir)/,$(addsuffix .vpd,$(regression-tests)))
+
 clean:
 	rm -rf generated-src ./simulator-*

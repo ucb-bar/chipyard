@@ -7,8 +7,8 @@ CONFIG ?= DefaultExampleConfig
 CFG_PROJECT ?= $(PROJECT)
 TB ?= TestDriver
 
-simv = simv-$(PROJECT)-$(CONFIG)
-simv_debug = simv-$(PROJECT)-$(CONFIG)-debug
+simv = $(sim_dir)/simv-$(PROJECT)-$(CONFIG)
+simv_debug = $(sim_dir)/simv-$(PROJECT)-$(CONFIG)-debug
 
 default: $(simv)
 
@@ -58,6 +58,21 @@ $(simv): $(sim_vsrcs) $(sim_csrcs)
 $(simv_debug) : $(sim_vsrcs) $(sim_csrcs)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	+define+DEBUG -debug_pp
+
+$(output_dir)/%.out: $(output_dir)/% $(simv)
+	$(simv) +verbose +max-cycles=1000000 $< 3>&1 1>&2 2>&3 | spike-dasm > $@
+
+$(output_dir)/%.run: $(output_dir)/% $(simv)
+	$(simv) +max-cycles=1000000 $< && touch $@
+
+$(output_dir)/%.vpd: $(output_dir)/% $(simv_debug)
+	$(simv_debug) +vcdplusfile=$@ +max-cycles=1000000 $<
+
+run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))
+
+run-regression-tests-fast: $(addprefix $(output_dir)/,$(addsuffix .run,$(regression-tests)))
+
+run-regression-tests-debug: $(addprefix $(output_dir)/,$(addsuffix .vpd,$(regression-tests)))
 
 clean:
 	rm -rf generated-src csrc simv-* ucli.key vc_hdrs.h
