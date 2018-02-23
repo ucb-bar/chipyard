@@ -42,17 +42,14 @@ trait PWMTLModule extends HasRegMap {
   implicit val p: Parameters
   def params: PWMParams
 
-  val w = params.beatBytes * 8
-  require(w <= 32)
-
   // How many clock cycles in a PWM cycle?
-  val period = Reg(UInt(w.W))
+  val period = Reg(UInt(32.W))
   // For how many cycles should the clock be high?
-  val duty = Reg(UInt(w.W))
+  val duty = Reg(UInt(32.W))
   // Is the PWM even running at all?
   val enable = RegInit(false.B)
 
-  val base = Module(new PWMBase(w))
+  val base = Module(new PWMBase(32))
   io.pwmout := base.io.pwmout
   base.io.period := period
   base.io.duty := duty
@@ -60,9 +57,9 @@ trait PWMTLModule extends HasRegMap {
 
   regmap(
     0x00 -> Seq(
-      RegField(w, period)),
+      RegField(32, period)),
     0x04 -> Seq(
-      RegField(w, duty)),
+      RegField(32, duty)),
     0x08 -> Seq(
       RegField(1, enable)))
 }
