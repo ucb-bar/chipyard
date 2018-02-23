@@ -36,9 +36,13 @@ bootrom_img = $(base_dir)/bootrom/bootrom.rv64.img $(base_dir)/bootrom/bootrom.r
 
 CHISEL_ARGS ?=
 
-$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).fir: $(rocketchip_stamp) $(extra_stamps) $(call lookup_scala_srcs,$(base_dir)/src/main/scala) $(bootrom_img)
+FIRRTL_FILE=$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).fir
+ANNO_FILE=$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).anno
+VERILOG_FILE=$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).v
+
+$(FIRRTL_FILE) $(ANNO_FILE): $(rocketchip_stamp) $(extra_stamps) $(call lookup_scala_srcs,$(base_dir)/src/main/scala) $(bootrom_img)
 	mkdir -p $(build_dir)
 	cd $(base_dir) && $(SBT) "runMain $(PROJECT).Generator $(CHISEL_ARGS) $(build_dir) $(PROJECT) $(MODEL) $(CFG_PROJECT) $(CONFIG)"
 
-$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).v: $(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).fir $(FIRRTL_JAR)
-	$(FIRRTL) -i $< -o $@ -X verilog
+$(VERILOG_FILE): $(FIRRTL_FILE) $(ANNO_FILE) $(FIRRTL_JAR)
+	$(FIRRTL) -i $(FIRRTL_FILE) -o $(VERILOG_FILE) -X verilog -faf $(ANNO_FILE)
