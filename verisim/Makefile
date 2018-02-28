@@ -19,8 +19,17 @@ CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -D__STDC_FORMAT_MACROS
 LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesvr -lpthread -ldramsim
 
 include $(base_dir)/Makefrag
-include $(sim_dir)/Makefrag-verilator
 include $(testchip_dir)/Makefrag
+
+# Run Verilator to produce a fast binary to emulate this circuit.
+VERILATOR := verilator --cc --exe
+VERILATOR_FLAGS := --top-module $(MODEL) \
+  +define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
+  +define+STOP_COND=\$$c\(\"done_reset\"\) --assert \
+  --output-split 20000 \
+	-Wno-STMTDLY --x-assign unique \
+  -I$(base_dir)/testchipip/vsrc -I$(base_dir)/rocket-chip/vsrc \
+  -O3 -CFLAGS "$(CXXFLAGS) -DVERILATOR -include $(base_dir)/rocket-chip/csrc/verilator.h"
 
 long_name = $(PROJECT).$(MODEL).$(CONFIG)
 
@@ -42,7 +51,7 @@ model_header_debug = $(model_dir_debug)/V$(MODEL).h
 model_mk = $(model_dir)/V$(MODEL).mk
 model_mk_debug = $(model_dir_debug)/V$(MODEL).mk
 
-$(model_mk): $(sim_vsrcs) $(INSTALLED_VERILATOR)
+$(model_mk): $(sim_vsrcs)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name)
 	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name) \
@@ -54,7 +63,7 @@ $(sim): $(model_mk) $(sim_csrcs)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name) -f V$(MODEL).mk
 
 
-$(model_mk_debug): $(sim_vsrcs) $(INSTALLED_VERILATOR)
+$(model_mk_debug): $(sim_vsrcs)
 	mkdir -p $(build_dir)/$(long_name).debug
 	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name).debug --trace \
 	-o $(sim_debug) $< $(sim_csrcs) -LDFLAGS "$(LDFLAGS)" \
