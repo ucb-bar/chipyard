@@ -64,7 +64,7 @@ $(output_dir)/%.out: $(output_dir)/% $(simv)
 	$(simv) +dramsim +verbose +max-cycles=1000000 $< 3>&1 1>&2 2>&3 | spike-dasm > $@ && [ $$PIPESTATUS -eq 0 ]
 
 $(output_dir)/%.run: $(output_dir)/% $(simv)
-	$(simv) +dramsim +max-cycles=1000000 $< && touch $@
+	$(simv) +dramsim +max-cycles=1000000 $< 2> $@
 
 $(output_dir)/%.vpd: $(output_dir)/% $(simv_debug)
 	$(simv_debug) +dramsim +vcdplusfile=$@ +max-cycles=1000000 $<
