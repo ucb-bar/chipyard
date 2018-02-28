@@ -61,13 +61,13 @@ $(simv_debug) : $(sim_vsrcs) $(sim_csrcs)
 	+define+DEBUG -debug_pp
 
 $(output_dir)/%.out: $(output_dir)/% $(simv)
-	$(simv) +verbose +max-cycles=1000000 $< 3>&1 1>&2 2>&3 | spike-dasm > $@ && [ $$PIPESTATUS -eq 0 ]
+	$(simv) +dramsim +verbose +max-cycles=1000000 $< 3>&1 1>&2 2>&3 | spike-dasm > $@ && [ $$PIPESTATUS -eq 0 ]
 
 $(output_dir)/%.run: $(output_dir)/% $(simv)
-	$(simv) +max-cycles=1000000 $< && touch $@
+	$(simv) +dramsim +max-cycles=1000000 $< && touch $@
 
 $(output_dir)/%.vpd: $(output_dir)/% $(simv_debug)
-	$(simv_debug) +vcdplusfile=$@ +max-cycles=1000000 $<
+	$(simv_debug) +dramsim +vcdplusfile=$@ +max-cycles=1000000 $<
 
 run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))
 
