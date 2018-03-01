@@ -60,7 +60,7 @@ $(model_mk): $(sim_vsrcs)
 	touch $@
 
 $(sim): $(model_mk) $(sim_csrcs)
-	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name) -f V$(MODEL).mk
+	$(MAKE) -j8 VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name) -f V$(MODEL).mk
 
 
 $(model_mk_debug): $(sim_vsrcs)
@@ -71,7 +71,7 @@ $(model_mk_debug): $(sim_vsrcs)
 	touch $@
 
 $(sim_debug): $(model_mk_debug) $(sim_csrcs)
-	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(MODEL).mk
+	$(MAKE) -j8 VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(MODEL).mk
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
 	$(sim) +dramsim +verbose +max-cycles=1000000 $< 3>&1 1>&2 2>&3 | spike-dasm > $@ && [ $$PIPESTATUS -eq 0 ]
