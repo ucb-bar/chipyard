@@ -69,13 +69,28 @@ $(output_dir)/%.run: $(output_dir)/% $(simv)
 $(output_dir)/%.vpd: $(output_dir)/% $(simv_debug)
 	$(simv_debug) +dramsim +vcdplusfile=$@ +max-cycles=1000000 $<
 
+$(output_dir)/%.riscv.out: $(output_dir)/%.riscv $(simv)
+	$(simv) +dramsim +verbose +max-cycles=1000000 $< 3>&1 1>&2 2>&3 | spike-dasm > $@ && [ $$PIPESTATUS -eq 0 ]
+
+$(output_dir)/%.riscv.run: $(output_dir)/%.riscv $(simv)
+	$(simv) +dramsim +max-cycles=1000000 $< 2> $@
+
+$(output_dir)/%.riscv.vpd: $(output_dir)/%.riscv $(simv_debug)
+	$(simv_debug) +dramsim +vcdplusfile=$@ +max-cycles=1000000 $<
+
 run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))
 
 run-regression-tests-fast: $(addprefix $(output_dir)/,$(addsuffix .run,$(regression-tests)))
 
 run-regression-tests-debug: $(addprefix $(output_dir)/,$(addsuffix .vpd,$(regression-tests)))
 
+run-benchmarks: $(addprefix $(output_dir)/,$(addsuffix .riscv.out,$(benchmarks)))
+
+run-benchmarks-fast: $(addprefix $(output_dir)/,$(addsuffix .riscv.run,$(benchmarks)))
+
+run-benchmarks-debug: $(addprefix $(output_dir)/,$(addsuffix .riscv.vpd,$(benchmarks)))
+
 clean:
 	rm -rf generated-src csrc simv-* ucli.key vc_hdrs.h
 
-.PHONY: clean
+.PHONY: clean run-regression-tests run-regression-tests-fast run-regression-tests-debug run-benchmarks run-benchmarks-fast run-benchmarks-debug

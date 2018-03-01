@@ -6,6 +6,7 @@ SCALA_VERSION=2.11.7
 
 rocketchip_stamp=$(base_dir)/lib/rocketchip.stamp
 SBT ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
+OBJCOPY=riscv64-unknown-elf-objcopy
 extra_stamps = $(addprefix $(lib_dir)/,$(addsuffix .stamp,$(EXTRA_PACKAGES)))
 
 lookup_scala_srcs = $(shell find $(1)/ -iname "*.scala" 2> /dev/null)
@@ -68,8 +69,25 @@ regression-tests = \
         rv64um-v-mulh \
         rv64si-p-dirty
 
+benchmarks = \
+	dhrystone \
+	median \
+	mm \
+	multiply \
+	qsort \
+	rsort \
+	towers \
+	vvadd \
+
 output_dir=$(sim_dir)/output
 
 $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
+	mkdir -p $(output_dir)
+	ln -sf $< $@
+
+$(output_dir)/%.bin: $(output_dir)/%
+	$(OBJCOPY) -O binary --change-addresses=-0x80000000 $< $@
+
+$(output_dir)/%.riscv: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/benchmarks/%.riscv
 	mkdir -p $(output_dir)
 	ln -sf $< $@
