@@ -72,7 +72,6 @@ regression-tests = \
 benchmarks = \
 	dhrystone \
 	median \
-	mm \
 	multiply \
 	qsort \
 	rsort \
