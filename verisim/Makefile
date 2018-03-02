@@ -30,7 +30,6 @@ VERILATOR_FLAGS := --top-module $(MODEL) \
 	-Wno-STMTDLY --x-assign unique \
   -I$(base_dir)/testchipip/vsrc -I$(base_dir)/rocket-chip/vsrc \
   -O3 -CFLAGS "$(CXXFLAGS) -DVERILATOR -include $(base_dir)/rocket-chip/csrc/verilator.h"
-PYTHON := python
 
 long_name = $(PROJECT).$(MODEL).$(CONFIG)
 
@@ -98,10 +97,8 @@ BMARK_OUT_FILES=$(addprefix $(output_dir)/,$(addsuffix .riscv.out,$(benchmarks))
 
 run-benchmarks: $(BMARK_OUT_FILES)
 
-$(output_dir)/benchmark-stats.txt: $(base_dir)/gen-report.py $(BMARK_OUT_FILES)
-	$(PYTHON) $< $(BMARK_OUT_FILES) > $@
-
-benchmark-stats: $(output_dir)/benchmark-stats.txt
+benchmark-stats: $(base_dir)/bmark-stats.sh $(BMARK_OUT_FILES)
+	$< $(BMARK_OUT_FILES)
 
 clean:
 	rm -rf generated-src ./simulator-* output

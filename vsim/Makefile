@@ -82,10 +82,8 @@ BMARK_OUT_FILES=$(addprefix $(output_dir)/,$(addsuffix .riscv.out,$(benchmarks))
 
 run-benchmarks: $(BMARK_OUT_FILES)
 
-$(output_dir)/benchmark-stats.txt: $(base_dir)/gen-report.py $(BMARK_OUT_FILES)
-	$(PYTHON) $< $(BMARK_OUT_FILES) > $@
-
-benchmark-stats: $(output_dir)/benchmark-stats.txt
+benchmark-stats: $(base_dir)/bmark-stats.sh $(BMARK_OUT_FILES)
+	$< $(BMARK_OUT_FILES)
 
 clean:
 	rm -rf generated-src csrc simv-* ucli.key vc_hdrs.h output
