@@ -1,2 +1,3 @@
 *.riscv
 *.dump
+*.out
