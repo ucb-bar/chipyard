@@ -21,6 +21,10 @@ object Lab3Settings {
   val N_MSHRS = 2
   val DCACHE_WAYS = 4
   val DCACHE_LINES = 256
+
+  val CUSTOM_BR_PRED_EN = false
+  val CUSTOM_BR_PRED_HISTORY_LEN = 1
+  val CUSTOM_BR_PRED_INFO_SIZE = 0
 }
 
 class WithBoomExampleTop extends Config((site, here, up) => {
@@ -48,6 +52,10 @@ class WithSimBlockDevice extends Config((site, here, up) => {
 import Lab3Settings._
 
 class WithLab3Settings extends Config((site, here, up) => {
+  case Lab3Key => Lab3Parameters(
+    enabled = CUSTOM_BR_PRED_EN,
+    history_length = CUSTOM_BR_PRED_HISTORY_LEN,
+    info_size = CUSTOM_BR_PRED_INFO_SIZE)
   case BHTKey => BHTParameters(num_entries = N_BHT_ENTRIES)
   case BoomTilesKey => up(BoomTilesKey, site).map { r => r.copy(
     core = r.core.copy(
