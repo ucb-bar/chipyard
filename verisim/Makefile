@@ -84,7 +84,7 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	vcd2vpd $@.vcd $@ > /dev/null &
 	$(sim_debug) -v$@.vcd +max-cycles=1000000 $<
 
-$(output_dir)/%.riscv.out: $(bmarks_dir)/%.riscv $(sim)
+$(output_dir)/%.riscv.out: $(bmarks_dir)/%.riscv $(sim) $(output_dir)/.dummy
 	$(sim) +dramsim +max-cycles=1000000 $< > $@
 
 run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))
