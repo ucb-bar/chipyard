@@ -69,7 +69,7 @@ $(output_dir)/%.run: $(output_dir)/% $(simv)
 $(output_dir)/%.vpd: $(output_dir)/% $(simv_debug)
 	$(simv_debug) +dramsim +vcdplusfile=$@ +max-cycles=1000000 $<
 
-$(output_dir)/%.riscv.out: $(output_dir)/%.riscv $(simv)
+$(output_dir)/%.riscv.out: $(bmarks_dir)/%.riscv $(simv)
 	$(simv) +dramsim +max-cycles=1000000 $< &> $@
 
 run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))

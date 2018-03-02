@@ -2,9 +2,9 @@ base_dir=$(abspath ..)
 sim_dir=$(abspath .)
 testchip_dir=$(base_dir)/testchipip
 
-PROJECT ?= example
+PROJECT ?= boomexample
 MODEL ?= TestHarness
-CONFIG ?= DefaultExampleConfig
+CONFIG ?= Lab3Config
 CFG_PROJECT ?= $(PROJECT)
 TB ?= TestDriver
 
@@ -85,8 +85,8 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	vcd2vpd $@.vcd $@ > /dev/null &
 	$(sim_debug) +dramsim -v$@.vcd +max-cycles=1000000 $<
 
-$(output_dir)/%.riscv.out: $(output_dir)/%.riscv $(sim)
-	$(sim) +dramsim +max-cycles=1000000 $< &> $@
+$(output_dir)/%.riscv.out: $(bmarks_dir)/%.riscv $(sim)
+	$(sim) +dramsim +max-cycles=5000000 $< &> $@
 
 run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))
 

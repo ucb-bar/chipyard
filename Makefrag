@@ -84,9 +84,4 @@ $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
 	mkdir -p $(output_dir)
 	ln -sf $< $@
 
-$(output_dir)/%.bin: $(output_dir)/%
-	$(OBJCOPY) -O binary --change-addresses=-0x80000000 $< $@
-
-$(output_dir)/%.riscv: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/benchmarks/%.riscv
-	mkdir -p $(output_dir)
-	ln -sf $< $@
+bmarks_dir=$(base_dir)/install/riscv-bmarks
