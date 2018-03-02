@@ -33,7 +33,7 @@ static uintptr_t syscall(uintptr_t which, uint64_t arg0, uint64_t arg1, uint64_t
   return magic_mem[0];
 }
 
-#define NUM_COUNTERS 2
+#define NUM_COUNTERS 4
 static uintptr_t counters[NUM_COUNTERS];
 static char* counter_names[NUM_COUNTERS];
 
@@ -47,8 +47,15 @@ void setStats(int enable)
     counters[i++] = csr; \
   } while (0)
 
+  if (enable) {
+    write_csr(mhpmevent3, 0x0401);
+    write_csr(mhpmevent4, 0x2001);
+  }
+
   READ_CTR(mcycle);
   READ_CTR(minstret);
+  READ_CTR(mhpmcounter3);
+  READ_CTR(mhpmcounter4);
 
 #undef READ_CTR
 }

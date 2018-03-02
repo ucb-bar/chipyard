@@ -3,61 +3,11 @@
 #ifndef __UTIL_H
 #define __UTIL_H
 
-//--------------------------------------------------------------------------
-// Macros
-
-// Set HOST_DEBUG to 1 if you are going to compile this for a host
-// machine (ie Athena/Linux) for debug purposes and set HOST_DEBUG
-// to 0 if you are compiling with the smips-gcc toolchain.
-
-#ifndef HOST_DEBUG
-#define HOST_DEBUG 0
-#endif
-
-// Set PREALLOCATE to 1 if you want to preallocate the benchmark
-// function before starting stats. If you have instruction/data
-// caches and you don't want to count the overhead of misses, then
-// you will need to use preallocation.
-
-#ifndef PREALLOCATE
-#define PREALLOCATE 0
-#endif
-
-// Set SET_STATS to 1 if you want to carve out the piece that actually
-// does the computation.
-
-#if HOST_DEBUG
-#include <stdio.h>
-static void setStats(int enable) {}
-#else
 extern void setStats(int enable);
-#endif
 
 #include <stdint.h>
 
 #define static_assert(cond) switch(0) { case 0: case !!(long)(cond): ; }
-
-static void printArray(const char name[], int n, const int arr[])
-{
-#if HOST_DEBUG
-  int i;
-  printf( " %10s :", name );
-  for ( i = 0; i < n; i++ )
-    printf( " %3d ", arr[i] );
-  printf( "\n" );
-#endif
-}
-
-static void printDoubleArray(const char name[], int n, const double arr[])
-{
-#if HOST_DEBUG
-  int i;
-  printf( " %10s :", name );
-  for ( i = 0; i < n; i++ )
-    printf( " %g ", arr[i] );
-  printf( "\n" );
-#endif
-}
 
 static int verify(int n, const volatile int* test, const int* verify)
 {
@@ -117,6 +67,11 @@ static uint64_t lfsr(uint64_t x)
   return (x >> 1) | (bit << 62);
 }
 
+static uintptr_t insn_len(uintptr_t pc)
+{
+  return (*(unsigned short*)pc & 3) ? 4 : 2;
+}
+
 #ifdef __riscv
 #include "encoding.h"
 #endif
@@ -125,11 +80,15 @@ static uint64_t lfsr(uint64_t x)
 #define stringify(s) stringify_1(s)
 #define stats(code, iter) do { \
     unsigned long _c = -read_csr(mcycle), _i = -read_csr(minstret); \
+    unsigned long _b = -read_csr(hpmcounter9), _m = -read_csr(hpmcounter24); \
     code; \
     _c += read_csr(mcycle), _i += read_csr(minstret); \
+    _b += read_csr(hpmcounter9), _m += read_csr(hpmcounter24); \
     if (cid == 0) \
       printf("\n%s: %ld cycles, %ld.%ld cycles/iter, %ld.%ld CPI\n", \
              stringify(code), _c, _c/iter, 10*_c/iter%10, _c/_i, 10*_c/_i%10); \
+      printf("%ld branches, %ld mispredicts, %ld.%ld mispredict rate\n", \
+	     _b, _m, _m/_b, (10*_m/_b)%10); \
   } while(0)
 
 #endif //__UTIL_H
