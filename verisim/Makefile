@@ -104,6 +104,6 @@ $(output_dir)/benchmark-stats.txt: $(base_dir)/gen-report.py $(BMARK_OUT_FILES)
 benchmark-stats: $(output_dir)/benchmark-stats.txt
 
 clean:
-	rm -rf generated-src ./simulator-*
+	rm -rf generated-src ./simulator-* output
 	
 .PHONY: clean run-regression-tests run-regression-tests-fast run-regression-tests-debug run-benchmarks benchmark-stats
