@@ -30,6 +30,7 @@ VERILATOR_FLAGS := --top-module $(MODEL) \
 	-Wno-STMTDLY --x-assign unique \
   -I$(base_dir)/testchipip/vsrc -I$(base_dir)/rocket-chip/vsrc \
   -O3 -CFLAGS "$(CXXFLAGS) -DVERILATOR -include $(base_dir)/rocket-chip/csrc/verilator.h"
+PYTHON := python
 
 long_name = $(PROJECT).$(MODEL).$(CONFIG)
 
@@ -85,15 +86,7 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	$(sim_debug) +dramsim -v$@.vcd +max-cycles=1000000 $<
 
 $(output_dir)/%.riscv.out: $(output_dir)/%.riscv $(sim)
-	$(sim) +dramsim +verbose +max-cycles=1000000 $< 3>&1 1>&2 2>&3 | spike-dasm > $@ && [ $$PIPESTATUS -eq 0 ]
-
-$(output_dir)/%.riscv.run: $(output_dir)/%.riscv $(sim)
-	$(sim) +dramsim +max-cycles=1000000 $< 2> $@
-
-$(output_dir)/%.riscv.vpd: $(output_dir)/%.riscv $(sim_debug)
-	rm -f $@.vcd && mkfifo $@.vcd
-	vcd2vpd $@.vcd $@ > /dev/null &
-	$(sim_debug) +dramsim -v$@.vcd +max-cycles=1000000 $<
+	$(sim) +dramsim +max-cycles=1000000 $< &> $@
 
 run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))
 
@@ -101,11 +94,16 @@ run-regression-tests-fast: $(addprefix $(output_dir)/,$(addsuffix .run,$(regress
 
 run-regression-tests-debug: $(addprefix $(output_dir)/,$(addsuffix .vpd,$(regression-tests)))
 
-run-benchmarks: $(addprefix $(output_dir)/,$(addsuffix .riscv.out,$(benchmarks)))
+BMARK_OUT_FILES=$(addprefix $(output_dir)/,$(addsuffix .riscv.out,$(benchmarks)))
 
-run-benchmarks-fast: $(addprefix $(output_dir)/,$(addsuffix .riscv.run,$(benchmarks)))
+run-benchmarks: $(BMARK_OUT_FILES)
 
-run-benchmarks-debug: $(addprefix $(output_dir)/,$(addsuffix .riscv.vpd,$(benchmarks)))
+$(output_dir)/benchmark-stats.txt: $(base_dir)/gen-report.py $(BMARK_OUT_FILES)
+	$(PYTHON) $< $(BMARK_OUT_FILES) > $@
+
+benchmark-stats: $(output_dir)/benchmark-stats.txt
 
 clean:
 	rm -rf generated-src ./simulator-*
+	
+.PHONY: clean run-regression-tests run-regression-tests-fast run-regression-tests-debug run-benchmarks benchmark-stats

@@ -70,13 +70,7 @@ $(output_dir)/%.vpd: $(output_dir)/% $(simv_debug)
 	$(simv_debug) +dramsim +vcdplusfile=$@ +max-cycles=1000000 $<
 
 $(output_dir)/%.riscv.out: $(output_dir)/%.riscv $(simv)
-	$(simv) +dramsim +verbose +max-cycles=1000000 $< 3>&1 1>&2 2>&3 | spike-dasm > $@ && [ $$PIPESTATUS -eq 0 ]
-
-$(output_dir)/%.riscv.run: $(output_dir)/%.riscv $(simv)
-	$(simv) +dramsim +max-cycles=1000000 $< 2> $@
-
-$(output_dir)/%.riscv.vpd: $(output_dir)/%.riscv $(simv_debug)
-	$(simv_debug) +dramsim +vcdplusfile=$@ +max-cycles=1000000 $<
+	$(simv) +dramsim +max-cycles=1000000 $< &> $@
 
 run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))
 
@@ -84,11 +78,14 @@ run-regression-tests-fast: $(addprefix $(output_dir)/,$(addsuffix .run,$(regress
 
 run-regression-tests-debug: $(addprefix $(output_dir)/,$(addsuffix .vpd,$(regression-tests)))
 
-run-benchmarks: $(addprefix $(output_dir)/,$(addsuffix .riscv.out,$(benchmarks)))
+BMARK_OUT_FILES=$(addprefix $(output_dir)/,$(addsuffix .riscv.out,$(benchmarks)))
 
-run-benchmarks-fast: $(addprefix $(output_dir)/,$(addsuffix .riscv.run,$(benchmarks)))
+run-benchmarks: $(BMARK_OUT_FILES)
 
-run-benchmarks-debug: $(addprefix $(output_dir)/,$(addsuffix .riscv.vpd,$(benchmarks)))
+$(output_dir)/benchmark-stats.txt: $(base_dir)/gen-report.py $(BMARK_OUT_FILES)
+	$(PYTHON) $< $(BMARK_OUT_FILES) > $@
+
+benchmark-stats: $(output_dir)/benchmark-stats.txt
 
 clean:
 	rm -rf generated-src csrc simv-* ucli.key vc_hdrs.h
