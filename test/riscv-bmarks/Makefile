@@ -26,6 +26,8 @@ bmarks = \
 	vvadd \
 	multiply \
 	dhrystone \
+	lsu_forwarding \
+	lsu_failures \
 
 #--------------------------------------------------------------------
 # Build rules
