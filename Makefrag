@@ -84,4 +84,8 @@ $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
 	mkdir -p $(output_dir)
 	ln -sf $< $@
 
+$(output_dir)/.dummy:
+	mkdir -p $(output_dir)
+	touch $@
+
 bmarks_dir=$(base_dir)/install/riscv-bmarks
