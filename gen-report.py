@@ -11,7 +11,7 @@ def calc_stats(fname):
             if m:
                 name, val = m.groups()
                 counts[name] = int(val)
-        cpi = float(counts['minstret']) / counts['mcycle']
+        cpi = float(counts['mcycle']) / counts['minstret']
         pa = 1.0 - float(counts['mhpmcounter3']) / counts['mhpmcounter4']
         return cpi, pa
 
