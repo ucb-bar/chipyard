@@ -81,11 +81,11 @@ date_suffix = $(shell date +%Y-%m-%d_%H-%M)
 install_dir = $(instbasedir)/$(instname)
 latest_install = $(shell ls -1 -d $(instbasedir)/$(instname)* | tail -n 1)
 
-install:
+install: $(bmarks_riscv_bin) $(bmarks_riscv_dump)
 	mkdir -p $(install_dir)
 	cp -r $(bmarks_riscv_bin) $(bmarks_riscv_dump) $(install_dir)
 
-install-link:
+install-link: $(bmarks_riscv_bin) $(bmarks_riscv_dump)
 	rm -rf $(instbasedir)/$(instname)
 	ln -s $(latest_install) $(instbasedir)/$(instname)
 
