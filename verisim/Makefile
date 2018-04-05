@@ -1,5 +1,6 @@
 base_dir=$(abspath ..)
 sim_dir=$(abspath .)
+testchip_dir=$(base_dir)/testchipip
 
 PROJECT ?= example
 MODEL ?= TestHarness
@@ -15,24 +16,22 @@ default: $(sim)
 debug: $(sim_debug)
 
 CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -D__STDC_FORMAT_MACROS
-LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesvr -lpthread
+LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesvr -lpthread -ldramsim
 
 include $(base_dir)/Makefrag
 include $(sim_dir)/Makefrag-verilator
+include $(testchip_dir)/Makefrag
 
 long_name = $(PROJECT).$(MODEL).$(CONFIG)
 
 sim_vsrcs = \
 	$(build_dir)/$(long_name).v \
 	$(base_dir)/rocket-chip/vsrc/AsyncResetReg.v \
-	$(base_dir)/testchipip/vsrc/SimSerial.v \
-	$(base_dir)/testchipip/vsrc/SimBlockDevice.v \
+	$(testchip_vsrcs)
 
 sim_csrcs = \
-	$(base_dir)/testchipip/csrc/SimSerial.cc \
-	$(base_dir)/testchipip/csrc/SimBlockDevice.cc \
-	$(base_dir)/testchipip/csrc/blkdev.cc \
-	$(base_dir)/testchipip/csrc/verilator-harness.cc
+	$(base_dir)/testchipip/csrc/verilator-harness.cc \
+	$(testchip_csrcs)
 
 model_dir = $(build_dir)/$(long_name)
 model_dir_debug = $(build_dir)/$(long_name).debug
@@ -48,7 +47,7 @@ $(model_mk): $(sim_vsrcs) $(INSTALLED_VERILATOR)
 	mkdir -p $(build_dir)/$(long_name)
 	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name) \
 	-o $(sim) $< $(sim_csrcs) -LDFLAGS "$(LDFLAGS)" \
-	-CFLAGS "-I$(build_dir) -include $(model_header)"
+	-CFLAGS "-I$(build_dir) $(testchip_includes) -include $(model_header)"
 	touch $@
 
 $(sim): $(model_mk) $(sim_csrcs)
@@ -59,7 +58,7 @@ $(model_mk_debug): $(sim_vsrcs) $(INSTALLED_VERILATOR)
 	mkdir -p $(build_dir)/$(long_name).debug
 	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name).debug --trace \
 	-o $(sim_debug) $< $(sim_csrcs) -LDFLAGS "$(LDFLAGS)" \
-	-CFLAGS "-I$(build_dir) -include $(model_header_debug)"
+	-CFLAGS "-I$(build_dir) $(testchip_includes) -include $(model_header_debug)"
 	touch $@
 
 $(sim_debug): $(model_mk_debug) $(sim_csrcs)

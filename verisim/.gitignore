@@ -1,3 +1,5 @@
+*
 !.gitignore
 !Makefile
 !Makefrag-verilator
+!dramsim2_ini/
