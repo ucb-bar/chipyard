@@ -75,6 +75,18 @@ run-regression-tests-fast: $(addprefix $(output_dir)/,$(addsuffix .run,$(regress
 
 run-regression-tests-debug: $(addprefix $(output_dir)/,$(addsuffix .vpd,$(regression-tests)))
 
+to_axe = python ../rocket-chip/scripts/toaxe.py
+axe = ../../axe/src/axe
+
+output/tracegen.out: $(simv)
+	$(simv) +dramsim +max-cycles=1000000 +verbose 3>&1 1>&2 2>&3 | grep -P '^\d+:' > $@
+
+output/tracegen.axe: output/tracegen.out
+	$(to_axe) $< > $@
+
+tracegen-check: output/tracegen.axe
+	$(axe) check wmo $<
+
 clean:
 	rm -rf generated-src csrc simv-* ucli.key vc_hdrs.h
 
