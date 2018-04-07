@@ -2,7 +2,7 @@ package example
 
 import chisel3._
 import freechips.rocketchip.config.{Parameters, Config}
-import freechips.rocketchip.coreplex.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
+import freechips.rocketchip.coreplex.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, WithMICoherence}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.tile.XLen
@@ -75,3 +75,6 @@ class DualCoreConfig extends Config(
 
 class RV32ExampleConfig extends Config(
   new WithRV32 ++ new DefaultExampleConfig)
+
+class MIDualCoreConfig extends Config(
+  new WithMICoherence ++ new DualCoreConfig)
