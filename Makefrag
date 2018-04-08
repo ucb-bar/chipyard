@@ -80,3 +80,6 @@ $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
 	mkdir -p $(output_dir)
 	ln -sf $< $@
 
+bmarks_dir=$(base_dir)/test/riscv-bmarks
+
+bmarks = mt-vvadd
