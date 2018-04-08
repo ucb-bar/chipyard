@@ -16,7 +16,7 @@ default: $(sim)
 debug: $(sim_debug)
 
 CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -D__STDC_FORMAT_MACROS
-LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesvr -lpthread -ldramsim
+LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -L$(testchip_dir)/DRAMSim2 -lfesvr -lpthread -ldramsim
 
 include $(base_dir)/Makefrag
 include $(sim_dir)/Makefrag-verilator
