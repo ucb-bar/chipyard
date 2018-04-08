@@ -51,7 +51,7 @@ $(model_mk): $(sim_vsrcs) $(INSTALLED_VERILATOR)
 	touch $@
 
 $(sim): $(model_mk) $(sim_csrcs)
-	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name) -f V$(MODEL).mk
+	$(MAKE) -j4 VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name) -f V$(MODEL).mk
 
 
 $(model_mk_debug): $(sim_vsrcs) $(INSTALLED_VERILATOR)
