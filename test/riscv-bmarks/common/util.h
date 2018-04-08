@@ -80,15 +80,11 @@ static uintptr_t insn_len(uintptr_t pc)
 #define stringify(s) stringify_1(s)
 #define stats(code, iter) do { \
     unsigned long _c = -read_csr(mcycle), _i = -read_csr(minstret); \
-    unsigned long _b = -read_csr(hpmcounter9), _m = -read_csr(hpmcounter24); \
     code; \
     _c += read_csr(mcycle), _i += read_csr(minstret); \
-    _b += read_csr(hpmcounter9), _m += read_csr(hpmcounter24); \
     if (cid == 0) \
       printf("\n%s: %ld cycles, %ld.%ld cycles/iter, %ld.%ld CPI\n", \
              stringify(code), _c, _c/iter, 10*_c/iter%10, _c/_i, 10*_c/_i%10); \
-      printf("%ld branches, %ld mispredicts, %ld.%ld mispredict rate\n", \
-	     _b, _m, _m/_b, (10*_m/_b)%10); \
   } while(0)
 
 #endif //__UTIL_H
