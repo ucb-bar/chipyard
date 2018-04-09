@@ -61,13 +61,13 @@ sub printArray
   my $numCols = 20;
   my $arrayLen = scalar(@{$arrayRef});
 
-  print "int ".$arrayName."[DATA_SIZE] = \n";
+  print "static data_t ".$arrayName."[DATA_SIZE] = \n";
   print "{\n";
 
   if ( $arrayLen <= $numCols ) {
     print "  ";
     for ( my $i = 0; $i < $arrayLen; $i++ ) {
-      print sprintf("%3d",$arrayRef->[$i]);
+      print sprintf("%3.2f",$arrayRef->[$i]);
       if ( $i != $arrayLen-1 ) {
         print ", ";
       }
@@ -81,7 +81,7 @@ sub printArray
       print "  ";
       for ( my $i = 0; $i < $numCols; $i++ ) {
         my $index = $j*$numCols + $i;
-        print sprintf("%3d",$arrayRef->[$index]);
+        print sprintf("%3.2f",$arrayRef->[$index]);
         if ( $index != $arrayLen-1 ) {
           print ", ";
         }
@@ -93,7 +93,7 @@ sub printArray
       print "  ";
       for ( my $i = 0; $i < ($arrayLen-($numRows*$numCols)); $i++ ) {
         my $index = $numCols*$numRows + $i;
-        print sprintf("%3d",$arrayRef->[$index]);
+        print sprintf("%3.2f",$arrayRef->[$index]);
         if ( $index != $arrayLen-1 ) {
           print ", ";
         }
@@ -120,8 +120,8 @@ sub main()
   my @values2;
   my @sum;
   for ( my $i = 0; $i < $opts{"size"}; $i++ ) {
-    my $value1 = int(rand(999));
-    my $value2 = int(rand(999));
+    my $value1 = int(rand(19));
+    my $value2 = int(rand(19));
     push( @values1, $value1 );
     push( @values2, $value2 );
     push( @sum, $value1 + $value2 );

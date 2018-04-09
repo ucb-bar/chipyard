@@ -19,7 +19,6 @@ instbasedir = $(UCB_VLSI_HOME)/install
 
 bmarks = \
 	vvadd \
-	mt-vvadd \
 
 #--------------------------------------------------------------------
 # Build rules
