@@ -16,3 +16,8 @@ void __attribute__((noinline)) vvadd(int coreid, int ncores, size_t n, const dat
       z[i] = x[i] + y[i];
    }
 }
+
+void __attribute__((noinline)) vvadd_opt(int coreid, int ncores, size_t n, const data_t* x, const data_t* y, data_t* z)
+{
+  // TODO: Your code here
+}

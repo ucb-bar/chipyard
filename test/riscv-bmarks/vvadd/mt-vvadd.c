@@ -36,6 +36,7 @@
 // vvadd function
 
 extern void __attribute__((noinline)) vvadd(int coreid, int ncores, size_t n, const data_t* x, const data_t* y, data_t* z);
+extern void __attribute__((noinline)) vvadd_opt(int coreid, int ncores, size_t n, const data_t* x, const data_t* y, data_t* z);
 
 
 //--------------------------------------------------------------------------
@@ -49,30 +50,26 @@ void thread_entry(int cid, int nc)
    // static allocates data in the binary, which is visible to both threads
    static data_t results_data[DATA_SIZE];
    
-   // First do out-of-place vvadd
+   // First do unoptimized vvadd
    barrier(nc);
    stats(vvadd(cid, nc, DATA_SIZE, input1_data, input2_data, results_data); barrier(nc), DATA_SIZE);
  
    if(cid == 0) {
      int res = verifyDouble(DATA_SIZE, results_data, verify_data);
      if(res) exit(res);
+     // clear out results_data for next run
+     for (int i = 0; i < DATA_SIZE; i++)
+       results_data[i] = 0.0;
    }
 
-   // Second do in-place vvadd
-   // Copying input
-   size_t i;
-   if(cid == 0) {
-     for (i = 0; i < DATA_SIZE; i++)
-           results_data[i] = input1_data[i];
-   }
    barrier(nc);
-   stats(vvadd(cid, nc, DATA_SIZE, results_data, input2_data, results_data); barrier(nc), DATA_SIZE);
- 
-   if(cid == 0) {
+   stats(vvadd_opt(cid, nc, DATA_SIZE, input1_data, input2_data, results_data); barrier(nc), DATA_SIZE);
+
+   if (cid == 0) {
      int res = verifyDouble(DATA_SIZE, results_data, verify_data);
-     if(res) exit(res);
+     if (res) exit(res);
    }
-   
+
    barrier(nc);
    exit(0);
 }
