@@ -19,3 +19,7 @@ void matmul(const size_t coreid, const size_t ncores, const size_t lda,  const d
     }
   }
 }
+
+void matmul_opt(const size_t coreid, const size_t ncores, const size_t lda,  const data_t A[], const data_t B[], data_t C[])
+{
+}
