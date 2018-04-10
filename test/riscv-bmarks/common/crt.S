@@ -24,8 +24,9 @@ _start:
   li  x7, 0
   li  x8, 0
   li  x9, 0
-  li  x10,0
-  li  x11,0
+  // a0 and a1 should be left alone
+  //li  x10,0
+  //li  x11,0
   li  x12,0
   li  x13,0
   li  x14,0
@@ -119,12 +120,6 @@ _start:
   la  tp, _end + 63
   and tp, tp, -64
 
-  # get core id
-  csrr a0, mhartid
-  # for now, assume only 1 core
-  li a1, 1
-1:bgeu a0, a1, 1b
-
   # give each core 128KB of stack + TLS
 #define STKSHIFT 17
   sll a2, a0, STKSHIFT
@@ -132,6 +127,13 @@ _start:
   add sp, a0, 1
   sll sp, sp, STKSHIFT
   add sp, sp, tp
+
+  # parse number of cores from dtb
+  mv a0, a1
+  jal query_harts
+  mv a1, a0
+  # get core id
+  csrr a0, mhartid
 
   j _init
 
