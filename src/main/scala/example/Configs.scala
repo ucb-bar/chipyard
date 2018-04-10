@@ -71,7 +71,7 @@ class WithFourMemChannels extends WithNMemoryChannels(4)
 
 class DualCoreConfig extends Config(
   // Core gets tacked onto existing list
-  new WithNBigCores(1) ++ new DefaultExampleConfig)
+  new WithNBigCores(2) ++ new DefaultExampleConfig)
 
 class RV32ExampleConfig extends Config(
   new WithRV32 ++ new DefaultExampleConfig)
