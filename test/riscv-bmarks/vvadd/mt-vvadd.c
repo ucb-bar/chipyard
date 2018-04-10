@@ -56,7 +56,10 @@ void thread_entry(int cid, int nc)
  
    if(cid == 0) {
      int res = verifyDouble(DATA_SIZE, results_data, verify_data);
-     if(res) exit(res);
+
+     if(res) printf("Naive vvadd: FAIL\n");
+     else printf("Naive vvadd: SUCCESS\n");
+
      // clear out results_data for next run
      for (int i = 0; i < DATA_SIZE; i++)
        results_data[i] = 0.0;
@@ -67,7 +70,8 @@ void thread_entry(int cid, int nc)
 
    if (cid == 0) {
      int res = verifyDouble(DATA_SIZE, results_data, verify_data);
-     if (res) exit(res);
+     if (res) printf("Optimized vvadd: FAIL\n");
+     else printf("Optimized vvadd: SUCCESS\n");
    }
 
    barrier(nc);

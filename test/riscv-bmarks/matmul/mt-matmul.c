@@ -52,8 +52,11 @@ void thread_entry(int cid, int nc)
 
    stats(matmul(cid, nc, DIM_SIZE, input1_data, input2_data, results_data); barrier(nc), DIM_SIZE * DIM_SIZE * DIM_SIZE);
  
-   int res = verify(ARRAY_SIZE, results_data, verify_data);
-   if (res) exit(res);
+   if (cid == 0) {
+     int res = verify(ARRAY_SIZE, results_data, verify_data);
+     if (res) printf("Naive matmul: FAIL\n");
+     else printf("Naive matmul: SUCCESS\n");
+   }
 
    // re-zero the array
    for (int i = 0; i < ARRAY_SIZE; i++)
@@ -62,6 +65,11 @@ void thread_entry(int cid, int nc)
    barrier(nc);
    stats(matmul_opt(cid, nc, DIM_SIZE, input1_data, input2_data, results_data); barrier(nc), DIM_SIZE * DIM_SIZE * DIM_SIZE);
 
-   res = verify(ARRAY_SIZE, results_data, verify_data);
-   exit(res);
+   if (cid == 0) {
+     int res = verify(ARRAY_SIZE, results_data, verify_data);
+     if (res) printf("Optimized matmul: FAIL\n");
+     else printf("Optimized matmul: SUCCESS\n");
+   }
+
+   exit(0);
 }
