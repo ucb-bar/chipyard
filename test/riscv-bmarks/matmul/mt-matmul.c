@@ -39,16 +39,6 @@
 extern void matmul(const size_t coreid, const size_t ncores, const size_t lda,  const data_t A[], const data_t B[], data_t C[] );
 extern void matmul_opt(const size_t coreid, const size_t ncores, const size_t lda,  const data_t A[], const data_t B[], data_t C[] );
 
-void printArray(data_t *results_data, int lda)
-{
-  for (int i = 0; i < lda; i++) {
-    for (int j = 0; j < lda; j++)
-      printf("%d ", results_data[i * lda + j]);
-    printf("\n");
-  }
-}
-
-
 //--------------------------------------------------------------------------
 // Main
 //
@@ -76,10 +66,13 @@ void thread_entry(int cid, int nc)
 
    if (cid == 0) {
      int res = verify(ARRAY_SIZE, results_data, verify_data);
-     if (res) printf("Optimized matmul: FAIL\n");
-     else printf("Optimized matmul: SUCCESS\n");
-     // Uncomment this line if you want to debug your results
-     //printArray(results_data, DIM_SIZE);
+     if (res) {
+       printf("Optimized matmul: FAIL\n");
+       printf("Correct matrix:\n");
+       printMatrix(verify_data, DIM_SIZE, DIM_SIZE);
+       printf("Actual matrix:\n");
+       printMatrix(results_data, DIM_SIZE, DIM_SIZE);
+     } else printf("Optimized matmul: SUCCESS\n");
    }
 
    barrier(nc);

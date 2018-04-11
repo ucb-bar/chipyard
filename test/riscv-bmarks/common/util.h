@@ -6,6 +6,7 @@
 extern void setStats(int enable);
 
 #include <stdint.h>
+#include <stdio.h>
 
 #define static_assert(cond) switch(0) { case 0: case !!(long)(cond): ; }
 
@@ -39,6 +40,31 @@ static int verifyDouble(int n, const volatile double* test, const double* verify
   if (n % 2 != 0 && test[n-1] != verify[n-1])
     return n;
   return 0;
+}
+
+static void printArray(int *results_data, int n)
+{
+  for (int i = 0; i < n - 1; i++)
+    printf("%d ", results_data[i]);
+  printf("%d\n", results_data[n-1]);
+}
+
+static void printMatrix(int *results_data, int m, int n)
+{
+  for (int i = 0; i < m; i++)
+    printArray(&results_data[i * n], n);
+}
+
+static void printDouble(double d)
+{
+  printf("%d.%1d ", (int) d, ((int) (d * 10)) % 10);
+}
+
+static void printDoubleArray(double *results_data, int n)
+{
+  for (int i = 0; i < n; i++)
+    printDouble(results_data[i]);
+  printf("\n");
 }
 
 static void __attribute__((noinline)) barrier(int ncores)

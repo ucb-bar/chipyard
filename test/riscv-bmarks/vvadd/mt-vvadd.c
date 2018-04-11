@@ -38,7 +38,6 @@
 extern void __attribute__((noinline)) vvadd(int coreid, int ncores, size_t n, const data_t* x, const data_t* y, data_t* z);
 extern void __attribute__((noinline)) vvadd_opt(int coreid, int ncores, size_t n, const data_t* x, const data_t* y, data_t* z);
 
-
 //--------------------------------------------------------------------------
 // Main
 //
@@ -70,7 +69,13 @@ void thread_entry(int cid, int nc)
 
    if (cid == 0) {
      int res = verifyDouble(DATA_SIZE, results_data, verify_data);
-     if (res) printf("Optimized vvadd: FAIL\n");
+     if (res) {
+       printf("Optimized vvadd: FAIL\n");
+       printf("Correct array:\n");
+       printDoubleArray(verify_data, DATA_SIZE);
+       printf("Actual array:\n");
+       printDoubleArray(results_data, DATA_SIZE);
+     }
      else printf("Optimized vvadd: SUCCESS\n");
    }
 
