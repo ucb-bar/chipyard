@@ -39,6 +39,15 @@
 extern void matmul(const size_t coreid, const size_t ncores, const size_t lda,  const data_t A[], const data_t B[], data_t C[] );
 extern void matmul_opt(const size_t coreid, const size_t ncores, const size_t lda,  const data_t A[], const data_t B[], data_t C[] );
 
+void printArray(data_t *results_data, int lda)
+{
+  for (int i = 0; i < lda; i++) {
+    for (int j = 0; j < lda; j++)
+      printf("%d ", results_data[i * lda + j]);
+    printf("\n");
+  }
+}
+
 
 //--------------------------------------------------------------------------
 // Main
@@ -50,17 +59,17 @@ void thread_entry(int cid, int nc)
 {
    static data_t results_data[ARRAY_SIZE];
 
+   barrier(nc);
    stats(matmul(cid, nc, DIM_SIZE, input1_data, input2_data, results_data); barrier(nc), DIM_SIZE * DIM_SIZE * DIM_SIZE);
  
    if (cid == 0) {
      int res = verify(ARRAY_SIZE, results_data, verify_data);
      if (res) printf("Naive matmul: FAIL\n");
      else printf("Naive matmul: SUCCESS\n");
+     // re-zero the array
+     for (int i = 0; i < ARRAY_SIZE; i++)
+       results_data[i] = 0;
    }
-
-   // re-zero the array
-   for (int i = 0; i < ARRAY_SIZE; i++)
-     results_data[i] = 0;
 
    barrier(nc);
    stats(matmul_opt(cid, nc, DIM_SIZE, input1_data, input2_data, results_data); barrier(nc), DIM_SIZE * DIM_SIZE * DIM_SIZE);
@@ -69,7 +78,10 @@ void thread_entry(int cid, int nc)
      int res = verify(ARRAY_SIZE, results_data, verify_data);
      if (res) printf("Optimized matmul: FAIL\n");
      else printf("Optimized matmul: SUCCESS\n");
+     // Uncomment this line if you want to debug your results
+     //printArray(results_data, DIM_SIZE);
    }
 
+   barrier(nc);
    exit(0);
 }
