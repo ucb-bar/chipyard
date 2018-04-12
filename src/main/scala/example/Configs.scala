@@ -2,10 +2,11 @@ package example
 
 import chisel3._
 import freechips.rocketchip.config.{Parameters, Config}
-import freechips.rocketchip.coreplex.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, WithMICoherence, WithMSICoherence}
+import freechips.rocketchip.coreplex._
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.tile.XLen
+import freechips.rocketchip.rocket._
+import freechips.rocketchip.tile.{XLen, RocketTileParams}
 import testchipip._
 
 class WithBootROM extends Config((site, here, up) => {
@@ -76,8 +77,39 @@ class DualCoreConfig extends Config(
 class RV32ExampleConfig extends Config(
   new WithRV32 ++ new DefaultExampleConfig)
 
-class MIDualCoreConfig extends Config(
-  new WithMICoherence ++ new DualCoreConfig)
+class WithNLab5Cores(n: Int) extends Config((site, here, up) => {
+  case RocketTilesKey => {
+    val lab5 = RocketTileParams(
+      core = RocketCoreParams(
+        mulDiv = Some(MulDivParams(
+          mulUnroll = 8,
+          mulEarlyOut = true,
+          divEarlyOut = true))),
+      dcache = Some(DCacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 16,
+        nWays = 4,
+        nTLBEntries = 4,
+        nMSHRs = 0,
+        blockBytes = site(CacheBlockBytes))),
+      icache = Some(ICacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 4,
+        nTLBEntries = 4,
+        blockBytes = site(CacheBlockBytes))))
+    List.tabulate(n)(i => lab5.copy(hartId = i))
+  }
+})
 
-class MSIDualCoreConfig extends Config(
-  new WithMSICoherence ++ new DualCoreConfig)
+class Lab5BaselineConfig extends Config(
+  new WithMSICoherence ++ new WithNLab5Cores(1) ++ new DefaultExampleConfig)
+
+class Lab5Config extends Config(
+  new WithNLab5Cores(2) ++ new DefaultExampleConfig)
+
+class Lab5MIConfig extends Config(
+  new WithMICoherence ++ new Lab5Config)
+
+class Lab5MSIConfig extends Config(
+  new WithMSICoherence ++ new Lab5Config)
