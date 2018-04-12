@@ -85,7 +85,7 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	$(sim_debug) -v$@.vcd +max-cycles=1000000 $<
 
 $(output_dir)/%.riscv.out: $(bmarks_dir)/%.riscv $(sim) $(output_dir)/.dummy
-	$(sim) +verbose +dramsim +max-cycles=1000000 $< 3>&1 1>&2 2>&3 | spike-dasm > $@
+	$(sim) +verbose +dramsim +max-cycles=5000000 $< 3>&1 1>&2 2>&3 | spike-dasm > $@
 
 run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))
 
