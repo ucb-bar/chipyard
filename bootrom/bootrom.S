@@ -14,7 +14,7 @@ interrupt_loop:
   addi a2, a2, 4
   lw a3, -4(a2)
   bnez a3, interrupt_loop
-  j boot_core
+  j boot_core_hart0
 
 .section .text.hang, "ax", @progbits
 .globl _hang
@@ -32,9 +32,12 @@ wfi_loop:
   j wfi_loop
 
 boot_core:
+  lw t0, 0(a1) // load hart 0 msip
+  bnez t0, boot_core // block until hart 0 clears own msip
   sll a0, a0, 2 // offset for hart msip
-  add a0, a0, a1
-  sw zero, 0(a0) // clear the interrupt
+  add a1, a0, a1
+boot_core_hart0:
+  sw zero, 0(a1) // clear the interrupt
   li a0, DRAM_BASE // program reset vector
   csrw mepc, a0 // return from interrupt to start of user program
   csrr a0, mhartid // hartid for next level bootloader
