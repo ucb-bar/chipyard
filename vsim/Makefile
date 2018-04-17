@@ -18,16 +18,13 @@ include $(base_dir)/Makefrag
 
 sim_vsrcs = \
 	$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).v \
-	$(base_dir)/rocket-chip/vsrc/TestDriver.v \
-	$(base_dir)/rocket-chip/vsrc/AsyncResetReg.v \
-	$(base_dir)/rocket-chip/vsrc/plusarg_reader.v \
-	$(base_dir)/testchipip/vsrc/SimSerial.v \
-	$(base_dir)/testchipip/vsrc/SimBlockDevice.v \
+	$(ROCKETCHIP_DIR)/vsrc/TestDriver.v \
+	$(ROCKETCHIP_DIR)/vsrc/AsyncResetReg.v \
+	$(ROCKETCHIP_DIR)/vsrc/plusarg_reader.v \
+	$(testchip_vsrcs)
 
 sim_csrcs = \
-	$(base_dir)/testchipip/csrc/SimSerial.cc \
-	$(base_dir)/testchipip/csrc/SimBlockDevice.cc \
-	$(base_dir)/testchipip/csrc/blkdev.cc \
+	$(testchip_csrcs)
 
 VCS = vcs -full64
 

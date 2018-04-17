@@ -24,15 +24,12 @@ long_name = $(PROJECT).$(MODEL).$(CONFIG)
 
 sim_vsrcs = \
 	$(build_dir)/$(long_name).v \
-	$(base_dir)/rocket-chip/vsrc/AsyncResetReg.v \
-	$(base_dir)/testchipip/vsrc/SimSerial.v \
-	$(base_dir)/testchipip/vsrc/SimBlockDevice.v \
+	$(ROCKETCHIP_DIR)/vsrc/AsyncResetReg.v \
+	$(testchip_vsrcs)
 
 sim_csrcs = \
-	$(base_dir)/testchipip/csrc/SimSerial.cc \
-	$(base_dir)/testchipip/csrc/SimBlockDevice.cc \
-	$(base_dir)/testchipip/csrc/blkdev.cc \
-	$(base_dir)/testchipip/csrc/verilator-harness.cc
+	$(testchip_dir)/csrc/verilator-harness.cc \
+	$(testchip_csrcs)
 
 model_dir = $(build_dir)/$(long_name)
 model_dir_debug = $(build_dir)/$(long_name).debug

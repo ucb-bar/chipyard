@@ -31,8 +31,9 @@ $(FIRRTL_JAR): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR)/firrtl/src/main/scala
 	cp -p $(FIRRTL_JAR) $(ROCKETCHIP_DIR)/lib
 
 build_dir=$(sim_dir)/generated-src
+testchip_dir = $(base_dir)/testchipip
 
-bootrom_img = $(base_dir)/bootrom/bootrom.rv64.img $(base_dir)/bootrom/bootrom.rv32.img
+include $(testchip_dir)/Makefrag
 
 CHISEL_ARGS ?=
 

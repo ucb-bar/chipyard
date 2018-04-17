@@ -10,7 +10,7 @@ import testchipip._
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMParams => BootROMParams(
-    contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img")
+    contentFileName = s"./testchipip/bootrom/bootrom.rv${site(XLen)}.img")
 })
 
 object ConfigValName {
