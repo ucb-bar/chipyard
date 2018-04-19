@@ -22,9 +22,12 @@ include $(sim_dir)/Makefrag-verilator
 
 long_name = $(PROJECT).$(MODEL).$(CONFIG)
 
+rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
+
 sim_vsrcs = \
 	$(build_dir)/$(long_name).v \
-	$(ROCKETCHIP_DIR)/vsrc/AsyncResetReg.v \
+	$(rocketchip_vsrc_dir)/AsyncResetReg.v \
+	$(rocketchip_vsrc_dir)/plusarg_reader.v \
 	$(testchip_vsrcs)
 
 sim_csrcs = \

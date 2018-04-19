@@ -11,8 +11,9 @@ lookup_scala_srcs = $(shell find $(1)/ -iname "*.scala" 2> /dev/null)
 
 libs: $(rocketchip_stamp) $(extra_stamps)
 
+ROCKETCHIP_JAR = $(lib_dir)/rocketchip_2.11-1.2.jar
 FIRRTL_JAR ?= $(ROCKETCHIP_DIR)/firrtl/utils/bin/firrtl.jar
-FIRRTL ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -cp $(FIRRTL_JAR) firrtl.Driver
+FIRRTL ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -cp $(ROCKETCHIP_JAR):$(FIRRTL_JAR) firrtl.Driver
 
 $(rocketchip_stamp): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR)) $(FIRRTL_JAR)
 	cd $(ROCKETCHIP_DIR) && $(SBT) pack
