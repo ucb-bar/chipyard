@@ -39,6 +39,8 @@ object MacroCompilerAnnotation {
   case object Strict extends CompilerMode
   /** Synflops mode - compile all memories with synflops (do not map to lib at all). */
   case object Synflops extends CompilerMode
+  /** CompileAndSynflops mode - compile all memories and create mock versions of the target libs with synflops. */
+  case object CompileAndSynflops extends CompilerMode
   /** FallbackSynflops - compile all memories to SRAM when possible and fall back to synflops if a memory fails. **/
   case object FallbackSynflops extends CompilerMode
   /** CompileAvailable - compile what is possible and do nothing with uncompiled memories. **/
@@ -51,14 +53,19 @@ object MacroCompilerAnnotation {
    */
   val Default = CompileAvailable
 
+  // Options as list of (CompilerMode, command-line name, description)
+  val options: Seq[(CompilerMode, String, String)] = Seq(
+    (Strict, "strict", "Compile all memories to library or return an error."),
+    (Synflops, "synflops", "Produces synthesizable flop-based memories for all memories (do not map to lib at all); likely useful for simulation purposes."),
+    (CompileAndSynflops, "compileandsynflops", "Compile all memories and create mock versions of the target libs with synflops; likely also useful for simulation purposes."),
+    (FallbackSynflops, "fallbacksynflops", "Compile all memories to library when possible and fall back to synthesizable flop-based memories when library synth is not possible."),
+    (CompileAvailable, "compileavailable", "Compile all memories to library when possible and do nothing in case of errors. (default)")
+  )
+
   /** Helper function to select a compiler mode. */
-  def stringToCompilerMode(str: String): CompilerMode = (str: @unchecked) match {
-    case "strict" => Strict
-    case "synflops" => Synflops
-    case "fallbacksynflops" => FallbackSynflops
-    case "compileavailable" => CompileAvailable
-    case "default" => Default
-    case _ => throw new IllegalArgumentException("No such compiler mode " + str)
+  def stringToCompilerMode(str: String): CompilerMode = options.collectFirst { case (mode, cmd, _) if cmd == str => mode } match {
+    case Some(x) => x
+    case None => throw new IllegalArgumentException("No such compiler mode " + str)
   }
 
   /**
@@ -614,8 +621,13 @@ class MacroCompilerTransform extends Transform {
         case _ => None
       }
       val transforms = Seq(
-        new MacroCompilerPass(mems, libs, costMetric, mode),
-        new SynFlopsPass(mode == MacroCompilerAnnotation.Synflops, libs getOrElse mems.get))
+        new MacroCompilerPass(mems, if (mode != MacroCompilerAnnotation.Synflops) libs else None, costMetric, mode),
+        new SynFlopsPass(mode == MacroCompilerAnnotation.Synflops || mode == MacroCompilerAnnotation.CompileAndSynflops,
+          if (mode == MacroCompilerAnnotation.CompileAndSynflops) {
+            libs.get
+          } else {
+            mems.get
+          }))
       (transforms foldLeft state)((s, xform) => xform runTransform s).copy(form=outputForm)
     case _ => state
   }
@@ -655,9 +667,12 @@ object MacroCompiler extends App {
   case object CostFunc extends MacroParam
   case object Mode extends MacroParam
   case object UseCompiler extends MacroParam
+
   type MacroParamMap = Map[MacroParam, String]
   type CostParamMap = Map[String, String]
-  val usage = Seq(
+  val modeOptions: Seq[String] = MacroCompilerAnnotation.options
+    .map { case (_, cmd, description) => s"    $cmd: $description" }
+  val usage: String = (Seq(
     "Options:",
     "  -m, --macro-list: The set of macros to compile",
     "  -l, --library: The set of macros that have blackbox instances",
@@ -666,12 +681,8 @@ object MacroCompiler extends App {
     "  -f, --firrtl: FIRRTL output (optional)",
     "  -c, --cost-func: Cost function to use. Optional (default: \"default\")",
     "  -cp, --cost-param: Cost function parameter. (Optional depending on the cost function.). e.g. -c ExternalMetric -cp path /path/to/my/cost/script",
-  """  --mode:
-    |    strict: Compile all memories to library or return an error.
-    |    synflops: Produces synthesizable flop-based memories (for all memories and library memory macros); likely useful for simulation purposes.
-    |    fallbacksynflops: Compile all memories to library when possible and fall back to synthesizable flop-based memories when library synth is not possible.
-    |    compileavailable: Compile all memories to library when possible and do nothing in case of errors. (default)
-  """.stripMargin) mkString "\n"
+    "  --mode:"
+  ) ++ modeOptions) mkString "\n"
 
   def parseArgs(map: MacroParamMap, costMap: CostParamMap, args: List[String]): (MacroParamMap, CostParamMap) =
     args match {
