@@ -1,3 +1,4 @@
+// See LICENSE for license details.
 package barstools.macros
 
 import mdf.macrolib._
@@ -1228,6 +1229,39 @@ circuit smem_0_ext :
 
     defname = my_sram_1rw_64x8
 """
+
+  compileExecuteAndTest(mem, lib, v, output)
+}
+
+class SmallTagArrayTest extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleTestGenerator {
+  // Test that mapping a smaller memory using a larger lib can still work.
+  override def memWidth: Int = 26
+  override def memDepth: Int = 2
+  override def memMaskGran: Option[Int] = Some(26)
+  override def memPortPrefix: String = ""
+
+  override def libWidth: Int = 32
+  override def libDepth: Int = 64
+  override def libMaskGran: Option[Int] = Some(1)
+  override def libPortPrefix: String = ""
+
+  override def extraPorts: Seq[MacroExtraPort] = Seq(
+    MacroExtraPort(name = "must_be_one", portType = Constant, width = 1, value = 1)
+  )
+
+  override def generateBody(): String =
+    s"""
+       |    inst mem_0_0 of $lib_name
+       |    mem_0_0.must_be_one <= UInt<1>("h1")
+       |    mem_0_0.clk <= clk
+       |    mem_0_0.addr <= addr
+       |    node dout_0_0 = bits(mem_0_0.dout, 25, 0)
+       |    mem_0_0.din <= bits(din, 25, 0)
+       |    mem_0_0.mask <= cat(UInt<1>("h0"), cat(UInt<1>("h0"), cat(UInt<1>("h0"), cat(UInt<1>("h0"), cat(UInt<1>("h0"), cat(UInt<1>("h0"), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), bits(mask, 0, 0))))))))))))))))))))))))))))))))
+       |    mem_0_0.write_en <= and(and(write_en, UInt<1>("h1")), UInt<1>("h1"))
+       |    node dout_0 = dout_0_0
+       |    dout <= mux(UInt<1>("h1"), dout_0, UInt<1>("h0"))
+    """.stripMargin
 
   compileExecuteAndTest(mem, lib, v, output)
 }
