@@ -10,7 +10,7 @@ import testchipip._
 class ExampleTop(implicit p: Parameters) extends RocketSubsystem
     with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
-    with HasSystemErrorSlave
+//  with HasSystemErrorSlave
     with HasSyncExtInterrupts
     with HasNoDebug
     with HasPeripherySerial {

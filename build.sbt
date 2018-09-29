@@ -1,9 +1,9 @@
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
   version := "1.0",
-  scalaVersion := "2.11.12",
+  scalaVersion := "2.12.4",
   traceLevel := 15,
-  scalacOptions ++= Seq("-deprecation","-unchecked"),
+  scalacOptions ++= Seq("-deprecation","-unchecked","-Xsource:2.11"),
   libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   libraryDependencies += "org.json4s" %% "json4s-native" % "3.5.3",
   libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
