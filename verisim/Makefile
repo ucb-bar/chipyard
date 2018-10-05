@@ -31,7 +31,7 @@ sim_vsrcs = \
 	$(testchip_vsrcs)
 
 sim_csrcs = \
-	$(testchip_dir)/csrc/verilator-harness.cc \
+	$(sim_dir)/csrc/verilator-harness.cc \
 	$(testchip_csrcs)
 
 model_dir = $(build_dir)/$(long_name)
