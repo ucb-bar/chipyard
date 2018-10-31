@@ -13,7 +13,7 @@ Example Usage:
 sbt
 > compile
 > project tapeout
-> run-main barstools.tapeout.transforms.GenerateTop -i <myfile>.fir -o <myfile>.v --syn-top <mysyntop> --harness-top <myharnesstop>
+> runMain barstools.tapeout.transforms.GenerateTop -i <myfile>.fir -o <myfile>.v --syn-top <mysyntop> --harness-top <myharnesstop>
 ```
 Building the macro compiler JAR:
 ```
