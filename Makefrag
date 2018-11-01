@@ -25,7 +25,7 @@ include $(testchip_dir)/Makefrag
 CHISEL_ARGS ?=
 
 FIRRTL_FILE=$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).fir
-ANNO_FILE=$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).anno
+ANNO_FILE=$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).anno.json
 VERILOG_FILE=$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).v
 
 $(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(bootrom_img) $(FIRRTL_JAR)
