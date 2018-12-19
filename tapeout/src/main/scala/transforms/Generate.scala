@@ -23,70 +23,78 @@ object AllModules {
   }
 }
 
-case class ParsedInput(args: Seq[String]) extends LazyLogging {
-  var input: Option[String] = None
-  var output: Option[String] = None
-  var topOutput: Option[String] = None
-  var harnessOutput: Option[String] = None
-  var annoFile: Option[String] = None
-  var synTop: Option[String] = None
-  var harnessTop: Option[String] = None
-  var seqMemFlags: Option[String] = Some("-o:unused.confg")
-  var listClocks: Option[String] = Some("-o:unused.clocks")
+trait HasTapeoutOptions { self: ExecutionOptionsManager with HasFirrtlOptions =>
+  var tapeoutOptions = TapeoutOptions()
 
-  var usedOptions = Set.empty[Integer]
-  args.zipWithIndex.foreach{ case (arg, i) =>
-    arg match {
-      case "-i" => {
-        input = Some(args(i+1))
-        usedOptions = usedOptions | Set(i+1)
-      }
-      case "-o" => {
-        output = Some(args(i+1))
-        usedOptions = usedOptions | Set(i+1)
-      }
-      case "--top-o" => {
-        topOutput = Some(args(i+1))
-        usedOptions = usedOptions | Set(i+1)
-      }
-      case "--harness-o" => {
-        harnessOutput = Some(args(i+1))
-        usedOptions = usedOptions | Set(i+1)
-      }
-      case "--anno-file" => {
-        annoFile = Some(args(i+1))
-        usedOptions = usedOptions | Set(i+1)
-      }
-      case "--syn-top" => {
-        synTop = Some(args(i+1))
-        usedOptions = usedOptions | Set(i+1)
-      }
-      case "--harness-top" => {
-        harnessTop = Some(args(i+1))
-        usedOptions = usedOptions | Set(i+1)
-      }
-      case "--seq-mem-flags" => {
-        seqMemFlags = Some(args(i+1))
-        usedOptions = usedOptions | Set(i+1)
-      }
-      case "--list-clocks" => {
-        listClocks = Some(args(i+1))
-        usedOptions = usedOptions | Set(i+1)
-      }
-      case _ => {
-        if (! (usedOptions contains i)) {
-          logger.error("Unknown option " + arg)
-        }
-      }
+  parser.note("tapeout options")
+
+  parser.opt[String]("harness-o")
+    .abbr("tho")
+    .valueName("<harness-output>")
+    .foreach { x =>
+      tapeoutOptions = tapeoutOptions.copy(
+        harnessOutput = Some(x)
+      )
+    }.text {
+      "use this to generate a harness at <harness-output>"
     }
-  }
 
+  parser.opt[String]("syn-top")
+    .abbr("tst")
+    .valueName("<syn-top")
+    .foreach { x =>
+      tapeoutOptions = tapeoutOptions.copy(
+        synTop = Some(x)
+      )
+    }.text {
+      "use this to set synTop"
+    }
+
+  parser.opt[String]("harness-top")
+    .abbr("tht")
+    .valueName("<harness-top>")
+    .foreach { x =>
+      tapeoutOptions = tapeoutOptions.copy(
+        harnessTop = Some(x)
+      )
+    }.text {
+      "use this to set harnessTop"
+    }
+
+  parser.opt[String]("list-clocks")
+    .abbr("tlc")
+    .valueName("<clocks>")
+    .foreach { x =>
+      tapeoutOptions = tapeoutOptions.copy(
+        listClocks = Some(x)
+      )
+    }.text {
+      "use this to list <clocks>"
+    }
+
+  parser.note("")
 }
+
+case class TapeoutOptions(
+  input: Option[String] = None,
+  output: Option[String] = None,
+  topOutput: Option[String] = None,
+  harnessOutput: Option[String] = None,
+  annoFile: Option[String] = None,
+  synTop: Option[String] = None,
+  harnessTop: Option[String] = None,
+  seqMemFlags: Option[String] = Some("-o:unused.confg"),
+  listClocks: Option[String] = Some("-o:unused.clocks")
+) extends LazyLogging
 
 // Requires two phases, one to collect modules below synTop in the hierarchy
 // and a second to remove those modules to generate the test harness
 sealed trait GenerateTopAndHarnessApp extends App with LazyLogging {
-  lazy val options: ParsedInput = ParsedInput(args)
+  val optionsManager = new ExecutionOptionsManager("tapeout") with HasFirrtlOptions with HasTapeoutOptions
+  if (!optionsManager.parse(args)) {
+    throw new Exception("Error parsing options!")
+  }
+  lazy val options = optionsManager.tapeoutOptions
   lazy val input = options.input
   lazy val output = options.output
   lazy val topOutput = options.topOutput
@@ -116,34 +124,32 @@ sealed trait GenerateTopAndHarnessApp extends App with LazyLogging {
     pre ++ enumerate ++ post
   }
 
-  private def getFirstPhaseAnnotations(top: Boolean): AnnotationMap = {
-    if (top) { 
+  private def getFirstPhaseAnnotations(top: Boolean): AnnotationSeq = {
+    if (top) {
       //Load annotations from file
-      val annotationArray = annoFile match {
+      val annotationArray: Seq[Annotation] = annoFile match {
         case None => Array[Annotation]()
         case Some(fileName) => {
           val annotations = new File(fileName)
           if(annotations.exists) {
-            val annotationsYaml = io.Source.fromFile(annotations).getLines().mkString("\n").parseYaml
-            annotationsYaml.convertTo[Array[Annotation]]
+            val annotationsYaml = io.Source.fromFile(annotations).getLines().mkString("\n")
+            Seq(AnnotationUtils.fromYaml(annotationsYaml)) // TODO
           } else {
-            Array[Annotation]()
+            Seq[Annotation]()
           }
         }
       }
       // add new annotations
-      AnnotationMap(Seq(
-        passes.memlib.InferReadWriteAnnotation(
-          s"${synTop.get}"
-        ),
-        passes.clocklist.ClockListAnnotation(
+      AnnotationSeq(Seq(
+        passes.memlib.InferReadWriteAnnotation,
+        passes.clocklist.ClockListAnnotation.parse(
           s"-c:${synTop.get}:-m:${synTop.get}:${listClocks.get}"
         ),
-        passes.memlib.ReplSeqMemAnnotation(
+        passes.memlib.ReplSeqMemAnnotation.parse(
           s"-c:${synTop.get}:${seqMemFlags.get}"
         )
       ) ++ annotationArray)
-    } else { AnnotationMap(Seq.empty) }
+    } else { AnnotationSeq(Seq.empty) }
   }
 
   private def getSecondPhasePasses: Seq[Transform] = {
@@ -156,31 +162,36 @@ sealed trait GenerateTopAndHarnessApp extends App with LazyLogging {
   }
 
   // always the same for now
-  private def getSecondPhaseAnnotations: AnnotationMap = AnnotationMap(Seq.empty)
+  private def getSecondPhaseAnnotations: AnnotationSeq = AnnotationSeq(Seq.empty)
 
   // Top Generation
   protected def firstPhase(top: Boolean, harness: Boolean): Unit = {
     require(top || harness, "Must specify either top or harness")
-    firrtl.Driver.compile(
-      input.get,
-      topOutput.getOrElse(output.get),
-      new VerilogCompiler(),
-      Parser.UseInfo,
-      getFirstPhasePasses(top, harness),
-      getFirstPhaseAnnotations(top)
+
+    val firrtlOptions = optionsManager.firrtlOptions
+    optionsManager.firrtlOptions = firrtlOptions.copy(
+      annotations = firrtlOptions.annotations ++ getFirstPhaseAnnotations(top)
+    )
+
+    optionsManager.firrtlOptions = firrtlOptions.copy(
+      customTransforms = firrtlOptions.customTransforms ++ getFirstPhasePasses(top, harness)
     )
   }
 
   // Harness Generation
   protected def secondPhase: Unit = {
-    firrtl.Driver.compile(
-      input.get,
-      harnessOutput.getOrElse(output.get),
-      new VerilogCompiler(),
-      Parser.UseInfo,
-      getSecondPhasePasses,
-      getSecondPhaseAnnotations
+    val firrtlOptions = optionsManager.firrtlOptions
+    optionsManager.firrtlOptions = firrtlOptions.copy(
+      annotations = firrtlOptions.annotations ++ getSecondPhaseAnnotations
     )
+
+    optionsManager.firrtlOptions = firrtlOptions.copy(
+      customTransforms = firrtlOptions.customTransforms ++ getSecondPhasePasses
+    )
+  }
+
+  protected def execute: Unit = {
+    firrtl.Driver.execute(optionsManager)
   }
 }
 
@@ -191,6 +202,7 @@ object GenerateTop extends GenerateTopAndHarnessApp {
     n => logger.warn(s"Not using generic output filename $n since you asked for just a top-level output and also specified a generic output.")})
   // Only need a single phase to generate the top module
   firstPhase(top = true, harness = false)
+  execute
 }
 
 object GenerateHarness extends GenerateTopAndHarnessApp {
@@ -206,6 +218,7 @@ object GenerateHarness extends GenerateTopAndHarnessApp {
   // Do minimal work for the first phase to generate test harness
   firstPhase(top = false, harness = true)
   secondPhase
+  execute
 }
 
 object GenerateTopAndHarness extends GenerateTopAndHarnessApp {
@@ -214,4 +227,5 @@ object GenerateTopAndHarness extends GenerateTopAndHarnessApp {
   // Do everything, top and harness generation
   firstPhase(top = true, harness = true)
   secondPhase
+  execute
 }

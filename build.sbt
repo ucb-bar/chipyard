@@ -1,21 +1,22 @@
 // See LICENSE for license details.
 
-import Dependencies._
-
 val defaultVersions = Map(
-  "chisel3" -> "3.1-SNAPSHOT",
-  "chisel-iotesters" -> "1.2-SNAPSHOT"
+  "chisel3" -> "3.2-SNAPSHOT",
+  "chisel-iotesters" -> "1.3-SNAPSHOT"
 )
 
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
   version := "0.1-SNAPSHOT",
-  scalaVersion := "2.11.8",
-  scalacOptions := Seq("-deprecation", "-feature", "-language:reflectiveCalls"),
-  libraryDependencies ++= commonDependencies,
+  scalaVersion := "2.12.8",
+  scalacOptions := Seq("-deprecation", "-feature", "-language:reflectiveCalls", "-Xsource:2.11"),
   libraryDependencies ++= Seq("chisel3","chisel-iotesters").map {
     dep: String => "edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", defaultVersions(dep))
   },
+  libraryDependencies in Test ++= Seq(
+    "org.scalatest" %% "scalatest" % "2.2.5" % "test",
+    "org.scalacheck" %% "scalacheck" % "1.12.4" % "test"
+  ),
   resolvers ++= Seq(
     Resolver.sonatypeRepo("snapshots"),
     Resolver.sonatypeRepo("releases")
@@ -30,7 +31,7 @@ lazy val macros = (project in file("macros"))
   .settings(commonSettings)
   .settings(Seq(
     libraryDependencies ++= Seq(
-      "edu.berkeley.cs" %% "firrtl-interpreter" % "0.1-SNAPSHOT" % Test
+      "edu.berkeley.cs" %% "firrtl-interpreter" % "1.2-SNAPSHOT" % Test
     ),
     mainClass := Some("barstools.macros.MacroCompiler")
   ))

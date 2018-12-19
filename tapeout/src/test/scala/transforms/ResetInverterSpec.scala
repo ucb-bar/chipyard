@@ -13,6 +13,8 @@ class ExampleModuleNeedsResetInverted extends Module with ResetInverter {
 
   val r = RegInit(0.U)
 
+  io.out := r
+
   invert(this)
 }
 

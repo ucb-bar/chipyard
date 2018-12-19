@@ -15,13 +15,10 @@ object WriteConfig {
 
 object GetTargetDir {
   def apply(state: CircuitState): String = {
-    val annos = state.annotations.getOrElse(AnnotationMap(Seq.empty)).annotations
+    val annos = state.annotations
     val destDir = annos.map {
-      case Annotation(f, t, s) if t == classOf[transforms.BlackBoxSourceHelper] =>
-        transforms.BlackBoxSource.parse(s) match {
-          case Some(transforms.BlackBoxTargetDir(dest)) => Some(dest)
-          case _ => None
-        }
+      case Annotation(f, t, s) if t == classOf[firrtl.transforms.BlackBoxTargetDirAnno] =>
+        Some(s)
       case _ => None
     }.flatten
     val loc = {
@@ -45,14 +42,14 @@ class TechnologyLocation extends Transform {
   def outputForm: CircuitForm = LowForm
   def execute(state: CircuitState) = throw new Exception("Technology Location transform execution doesn't work!")
   def get(state: CircuitState): String = {
-    val annos = state.annotations.getOrElse(AnnotationMap(Seq.empty)).annotations
+    val annos = state.annotations
     val dir = annos.map {
       case Annotation(f, t, s) if t == classOf[TechnologyLocation] => Some(s)
       case _ => None
     }.flatten
     dir.length match {
       case 0 => ""
-      case 1 => 
+      case 1 =>
         val targetDir = new java.io.File(dir.head)
         if(!targetDir.exists()) throw new Exception("Technology yaml directory doesn't exist!")
         dir.head
