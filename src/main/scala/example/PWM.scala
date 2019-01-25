@@ -2,6 +2,7 @@ package example
 
 import chisel3._
 import chisel3.util._
+import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.subsystem.BaseSubsystem
 import freechips.rocketchip.config.{Parameters, Field}
 import freechips.rocketchip.diplomacy._
@@ -33,12 +34,12 @@ class PWMBase(w: Int) extends Module {
   io.pwmout := io.enable && (counter < io.duty)
 }
 
-trait PWMTLBundle extends Bundle {
+trait PWMBundle extends Bundle {
   val pwmout = Output(Bool())
 }
 
-trait PWMTLModule extends HasRegMap {
-  val io: PWMTLBundle
+trait PWMModule extends HasRegMap {
+  val io: PWMBundle
   implicit val p: Parameters
   def params: PWMParams
 
@@ -68,10 +69,15 @@ class PWMTL(c: PWMParams)(implicit p: Parameters)
   extends TLRegisterRouter(
     c.address, "pwm", Seq("ucbbar,pwm"),
     beatBytes = c.beatBytes)(
-      new TLRegBundle(c, _) with PWMTLBundle)(
-      new TLRegModule(c, _, _) with PWMTLModule)
+      new TLRegBundle(c, _) with PWMBundle)(
+      new TLRegModule(c, _, _) with PWMModule)
 
-trait HasPeripheryPWM { this: BaseSubsystem =>
+class PWMAXI4(c: PWMParams)(implicit p: Parameters)
+  extends AXI4RegisterRouter(c.address, beatBytes = c.beatBytes)(
+      new AXI4RegBundle(c, _) with PWMBundle)(
+      new AXI4RegModule(c, _, _) with PWMModule)
+
+trait HasPeripheryPWMTL { this: BaseSubsystem =>
   implicit val p: Parameters
 
   private val address = 0x2000
@@ -83,9 +89,30 @@ trait HasPeripheryPWM { this: BaseSubsystem =>
   pbus.toVariableWidthSlave(Some(portName)) { pwm.node }
 }
 
-trait HasPeripheryPWMModuleImp extends LazyModuleImp {
+trait HasPeripheryPWMTLModuleImp extends LazyModuleImp {
   implicit val p: Parameters
-  val outer: HasPeripheryPWM
+  val outer: HasPeripheryPWMTL
+
+  val pwmout = IO(Output(Bool()))
+
+  pwmout := outer.pwm.module.io.pwmout
+}
+
+trait HasPeripheryPWMAXI4 { this: BaseSubsystem =>
+  implicit val p: Parameters
+
+  private val address = 0x2000
+  private val portName = "pwm"
+
+  val pwm = LazyModule(new PWMAXI4(
+    PWMParams(address, 8 * pbus.beatBytes))(p))
+
+  pbus.toFixedWidthSlave(Some(portName)) { pwm.node := TLToAXI4() }
+}
+
+trait HasPeripheryPWMAXI4ModuleImp extends LazyModuleImp {
+  implicit val p: Parameters
+  val outer: HasPeripheryPWMAXI4
 
   val pwmout = IO(Output(Bool()))
 

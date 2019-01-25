@@ -26,7 +26,12 @@ class WithExampleTop extends Config((site, here, up) => {
 
 class WithPWM extends Config((site, here, up) => {
   case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new ExampleTopWithPWM()(p)).module)
+    Module(LazyModule(new ExampleTopWithPWMTL()(p)).module)
+})
+
+class WithPWMAXI4 extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new ExampleTopWithPWMAXI4()(p)).module)
 })
 
 class WithBlockDeviceModel extends Config((site, here, up) => {
@@ -56,6 +61,8 @@ class RoccExampleConfig extends Config(
   new WithRoccExample ++ new DefaultExampleConfig)
 
 class PWMConfig extends Config(new WithPWM ++ new BaseExampleConfig)
+
+class PWMAXI4Config extends Config(new WithPWMAXI4 ++ new BaseExampleConfig)
 
 class SimBlockDeviceConfig extends Config(
   new WithBlockDevice ++ new WithSimBlockDevice ++ new BaseExampleConfig)
