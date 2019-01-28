@@ -396,7 +396,16 @@ to the project template.
 
     git submodule add https://git-repository.com/yourproject.git
 
-Then add `yourproject` to the `EXTRA_PACKAGES` variable in the Makefrag.
-Now your project will be bundled into a jar file alongside the rocket-chip
-and testchipip libraries. You can then import the classes defined in the
-submodule in a new project.
+Then add `yourproject` to the project-template build.sbt file.
+
+```scala
+    lazy val yourproject = project.settings(commonSettings).dependsOn(rocketchip)
+```
+
+You can then import the classes defined in the submodule in a new project if
+you add it as a dependency. For instance, if you want to use this code in
+the `example` project, change the final line in build.sbt to the following.
+
+```scala
+    lazy val example = (project in file(".")).settings(commonSettings).dependsOn(testchipip, yourproject)
+```
