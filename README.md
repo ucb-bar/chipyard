@@ -409,3 +409,6 @@ the `example` project, change the final line in build.sbt to the following.
 ```scala
     lazy val example = (project in file(".")).settings(commonSettings).dependsOn(testchipip, yourproject)
 ```
+
+Finally, add `yourproject` to the `PACKAGES` variable in the `Makefrag`. This will allow make to detect
+that your source files have changed when building the verilog/firrtl files.
