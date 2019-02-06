@@ -28,6 +28,17 @@ trait HasTapeoutOptions { self: ExecutionOptionsManager with HasFirrtlOptions =>
 
   parser.note("tapeout options")
 
+  parser.opt[String]("top-o")
+    .abbr("tto")
+    .valueName("<top-output>")
+    .foreach { x =>
+      tapeoutOptions = tapeoutOptions.copy(
+        topOutput = Some(x)
+      )
+    }.text {
+      "use this to generate top at <top-output>"
+    }
+
   parser.opt[String]("harness-o")
     .abbr("tho")
     .valueName("<harness-output>")
@@ -41,7 +52,7 @@ trait HasTapeoutOptions { self: ExecutionOptionsManager with HasFirrtlOptions =>
 
   parser.opt[String]("syn-top")
     .abbr("tst")
-    .valueName("<syn-top")
+    .valueName("<syn-top>")
     .foreach { x =>
       tapeoutOptions = tapeoutOptions.copy(
         synTop = Some(x)
@@ -89,10 +100,13 @@ case class TapeoutOptions(
 
 // Requires two phases, one to collect modules below synTop in the hierarchy
 // and a second to remove those modules to generate the test harness
-sealed trait GenerateTopAndHarnessApp extends App with LazyLogging {
-  val optionsManager = new ExecutionOptionsManager("tapeout") with HasFirrtlOptions with HasTapeoutOptions
-  if (!optionsManager.parse(args)) {
-    throw new Exception("Error parsing options!")
+sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
+  lazy val optionsManager = {
+    val optionsManager = new ExecutionOptionsManager("tapeout") with HasFirrtlOptions with HasTapeoutOptions
+    if (!optionsManager.parse(args)) {
+      throw new Exception("Error parsing options!")
+    }
+    optionsManager
   }
   lazy val options = optionsManager.tapeoutOptions
   lazy val input = options.input
@@ -195,17 +209,17 @@ sealed trait GenerateTopAndHarnessApp extends App with LazyLogging {
   }
 }
 
-object GenerateTop extends GenerateTopAndHarnessApp {
+object GenerateTop extends App with GenerateTopAndHarnessApp {
   // warn about unused options
   harnessOutput.foreach(n => logger.warn(s"Not using harness output filename $n since you asked for just a top-level output."))
-  topOutput.foreach(_.foreach{
-    n => logger.warn(s"Not using generic output filename $n since you asked for just a top-level output and also specified a generic output.")})
+  topOutput.foreach(
+    n => logger.warn(s"Not using generic output filename $n since you asked for just a top-level output and also specified a generic output."))
   // Only need a single phase to generate the top module
   firstPhase(top = true, harness = false)
   execute
 }
 
-object GenerateHarness extends GenerateTopAndHarnessApp {
+object GenerateHarness extends App with GenerateTopAndHarnessApp {
   // warn about unused options
   topOutput.foreach(n => logger.warn(s"Not using top-level output filename $n since you asked for just a test harness."))
   annoFile.foreach(n => logger.warn(s"Not using annotations file $n since you asked for just a test harness."))
@@ -213,15 +227,15 @@ object GenerateHarness extends GenerateTopAndHarnessApp {
     n => logger.warn(s"Not using SeqMem flags $n since you asked for just a test harness.") }
   listClocks.filter(_ != "-o:unused.clocks").foreach {
     n => logger.warn(s"Not using clocks list $n since you asked for just a test harness.") }
-  harnessOutput.foreach(_.foreach{
-    n => logger.warn(s"Not using generic output filename $n since you asked for just a test harness and also specified a generic output.")})
+  harnessOutput.foreach(
+    n => logger.warn(s"Not using generic output filename $n since you asked for just a test harness and also specified a generic output."))
   // Do minimal work for the first phase to generate test harness
   firstPhase(top = false, harness = true)
   secondPhase
   execute
 }
 
-object GenerateTopAndHarness extends GenerateTopAndHarnessApp {
+object GenerateTopAndHarness extends App with GenerateTopAndHarnessApp {
   // warn about unused options
   output.foreach(n => logger.warn(s"Not using generic output filename $n since you asked for both a top-level output and a test harness."))
   // Do everything, top and harness generation
