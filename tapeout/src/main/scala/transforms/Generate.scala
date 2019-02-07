@@ -122,14 +122,14 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
   private def getFirstPhasePasses(top: Boolean, harness: Boolean): Seq[Transform] = {
     val pre = Seq(
       new ReParentCircuit(synTop.get),
-      new RemoveUnusedModules
     )
 
     val enumerate = if (harness) { Seq(
-      new EnumerateModules( { m => if (m.name != options.synTop.get) { AllModules.add(m.name) } } )
+      new EnumerateModules( { m => if (m.name != options.harnessTop.get && m.name != options.synTop.get) { AllModules.add(m.name) } } ),
     ) } else Seq()
 
     val post = if (top) { Seq(
+      new RemoveUnusedModules,
       new passes.memlib.InferReadWrite(),
       new passes.memlib.ReplSeqMem(),
       new passes.clocklist.ClockListTransform()
@@ -170,8 +170,8 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
     // always the same for now
     Seq(
       new ConvertToExtMod((m) => m.name == synTop.get),
-      new RemoveUnusedModules,
-      new RenameModulesAndInstances((m) => AllModules.rename(m))
+      new RenameModulesAndInstances((m) => AllModules.rename(m)),
+      // new RemoveUnusedModules,
     )
   }
 
