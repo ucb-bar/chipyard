@@ -6,6 +6,7 @@ MODEL ?= TestHarness
 CONFIG ?= DefaultExampleConfig
 CFG_PROJECT ?= $(PROJECT)
 TB ?= TestDriver
+TOP ?= ExampleTop
 
 simv = $(sim_dir)/simv-$(PROJECT)-$(CONFIG)
 simv_debug = $(sim_dir)/simv-$(PROJECT)-$(CONFIG)-debug
@@ -19,7 +20,9 @@ include $(base_dir)/Makefrag
 rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
 
 sim_vsrcs = \
-	$(build_dir)/$(PROJECT).$(MODEL).$(CONFIG).v \
+	$(VERILOG_FILE) \
+	$(HARNESS_FILE) \
+	$(SMEMS_FILE) \
 	$(rocketchip_vsrc_dir)/TestDriver.v \
 	$(rocketchip_vsrc_dir)/AsyncResetReg.v \
 	$(rocketchip_vsrc_dir)/plusarg_reader.v \
