@@ -5,13 +5,15 @@ package barstools.tapeout.transforms
 import firrtl._
 import firrtl.ir._
 import firrtl.passes.Pass
+import firrtl.annotations.{SingleTargetAnnotation, Annotation}
+import firrtl.transforms.DontTouchAnnotation
 
-// Removes all the unused modules in a circuit by recursing through every
-// instance (starting at the main module)
-class RemoveUnusedModulesPass extends Pass {
+class RemoveUnusedModules extends Transform {
+  def inputForm = MidForm
+  def outputForm = MidForm
 
-  def run(c: Circuit): Circuit = {
-    val modulesByName = c.modules.map{
+  def execute(state: CircuitState): CircuitState = {
+    val modulesByName = state.circuit.modules.map{
       case m: Module => (m.name, Some(m))
       case m: ExtModule => (m.name, None)
     }.toMap
@@ -39,21 +41,23 @@ class RemoveUnusedModulesPass extends Pass {
         case None => Set.empty[String]
       }
     }
-    val usedModuleSet = getUsedModules(modulesByName(c.main))
+    val usedModuleSet = getUsedModules(modulesByName(state.circuit.main))
 
-    val usedModuleSeq = c.modules.filter { usedModuleSet contains _.name }
+    val usedModuleSeq = state.circuit.modules.filter { usedModuleSet contains _.name }
+    val usedModuleNames = usedModuleSeq.map(_.name)
 
-    Circuit(c.info, usedModuleSeq, c.main)
-  }
-}
+    val renames = state.renames.getOrElse(RenameMap())
 
-class RemoveUnusedModules extends Transform with SeqTransformBased {
-  def inputForm = MidForm
-  def outputForm = MidForm
-  def transforms = Seq(new RemoveUnusedModulesPass)
+    //state.circuit.modules.filterNot { usedModuleSet contains _.name } foreach { x => renames.record(ModuleTarget(state.circuit.main, x.name), Seq()) }
 
-  def execute(state: CircuitState): CircuitState = {
-    val ret = runTransforms(state)
-    CircuitState(ret.circuit, outputForm, ret.annotations, ret.renames)
+    val newCircuit = Circuit(state.circuit.info, usedModuleSeq, state.circuit.main)
+    val newAnnos = AnnotationSeq(state.annotations.toSeq.filter { _ match {
+      // XXX This is wrong, but it works for now
+      case x: DontTouchAnnotation => false
+      //case x: DontTouchAnnotation => usedModuleNames contains x.target.module
+      case _ => true
+    }})
+
+    CircuitState(newCircuit, outputForm, newAnnos, Some(renames))
   }
 }

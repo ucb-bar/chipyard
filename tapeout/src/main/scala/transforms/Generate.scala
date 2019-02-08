@@ -10,19 +10,6 @@ import firrtl.annotations.AnnotationYamlProtocol._
 import net.jcazevedo.moultingyaml._
 import com.typesafe.scalalogging.LazyLogging
 
-object AllModules {
-  private var modules = Set[String]()
-  def add(module: String) = {
-    modules = modules | Set(module)
-  }
-  def rename(module: String, suffix: String = "_inTestHarness") = {
-    var new_name = module
-    while (modules.contains(new_name))
-      new_name = new_name + suffix
-    new_name
-  }
-}
-
 trait HasTapeoutOptions { self: ExecutionOptionsManager with HasFirrtlOptions =>
   var tapeoutOptions = TapeoutOptions()
 
@@ -61,7 +48,6 @@ trait HasTapeoutOptions { self: ExecutionOptionsManager with HasFirrtlOptions =>
       "use this to set harnessTop"
     }
 
-  parser.note("")
 }
 
 case class TapeoutOptions(
@@ -73,75 +59,66 @@ case class TapeoutOptions(
 // Requires two phases, one to collect modules below synTop in the hierarchy
 // and a second to remove those modules to generate the test harness
 sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
-  def getOptionsManager = {
+  lazy val optionsManager = {
     val optionsManager = new ExecutionOptionsManager("tapeout") with HasFirrtlOptions with HasTapeoutOptions
     if (!optionsManager.parse(args)) {
       throw new Exception("Error parsing options!")
     }
     optionsManager
   }
-  lazy val optionsManager = getOptionsManager
   lazy val tapeoutOptions = optionsManager.tapeoutOptions
   // Tapeout options
-  lazy val harnessOutput = tapeoutOptions.harnessOutput
   lazy val synTop = tapeoutOptions.synTop
   lazy val harnessTop = tapeoutOptions.harnessTop
-
   lazy val firrtlOptions = optionsManager.firrtlOptions
   // FIRRTL options
   lazy val annoFiles = firrtlOptions.annotationFileNames
 
-  private def getFirstPhasePasses: Seq[Transform] = {
+  private def topTransforms: Seq[Transform] = {
     Seq(
       new ReParentCircuit(synTop.get),
       new RemoveUnusedModules
     )
   }
 
-  private def getSecondPhasePasses: Seq[Transform] = {
+
+  private def harnessTransforms: Seq[Transform] = {
+    // XXX this is a hack, we really should be checking the masters to see if they are ExtModules
+    val externals = Set(harnessTop.get, synTop.get, "SimSerial")
     Seq(
       new ConvertToExtMod((m) => m.name == synTop.get),
-      new EnumerateModules( { m => if (m.name != tapeoutOptions.harnessTop.get && m.name != tapeoutOptions.synTop.get) { AllModules.add(m.name) } } ),
-      new RenameModulesAndInstances((m) => AllModules.rename(m, "_in" + harnessTop.get)),
-      new RemoveUnusedModules
+      new RemoveUnusedModules,
+      new RenameModulesAndInstances((old) => if (externals contains old) old else (old + "_in" + harnessTop.get))
     )
   }
 
   // Top Generation
-  protected def firstPhase: Unit = {
+  protected def executeTop: Unit = {
 
-    val firstPhaseOptions = getOptionsManager
-    firstPhaseOptions.firrtlOptions = firstPhaseOptions.firrtlOptions.copy(
-      customTransforms = firrtlOptions.customTransforms ++ getFirstPhasePasses
+    optionsManager.firrtlOptions = optionsManager.firrtlOptions.copy(
+      customTransforms = firrtlOptions.customTransforms ++ topTransforms
     )
 
-    firrtl.Driver.execute(firstPhaseOptions)
+    firrtl.Driver.execute(optionsManager)
   }
 
   // Harness Generation
-  protected def secondPhase: Unit = {
-    val secondPhaseOptions = getOptionsManager
-    secondPhaseOptions.firrtlOptions = secondPhaseOptions.firrtlOptions.copy(
-      outputFileNameOverride = harnessOutput.get,
-      customTransforms = getSecondPhasePasses
+  protected def executeHarness: Unit = {
+
+    optionsManager.firrtlOptions = optionsManager.firrtlOptions.copy(
+      customTransforms = harnessTransforms
     )
 
-    firrtl.Driver.execute(secondPhaseOptions)
+    firrtl.Driver.execute(optionsManager)
   }
 }
 
 object GenerateTop extends App with GenerateTopAndHarnessApp {
   // Only need a single phase to generate the top module
-  firstPhase
+  executeTop
 }
 
 object GenerateHarness extends App with GenerateTopAndHarnessApp {
   // Do minimal work for the first phase to generate test harness
-  secondPhase
-}
-
-object GenerateTopAndHarness extends App with GenerateTopAndHarnessApp {
-  // Do everything, top and harness generation
-  firstPhase
-  secondPhase
+  executeHarness
 }
