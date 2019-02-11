@@ -1,26 +1,12 @@
-ROCKETCHIP_DIR=$(base_dir)/rocket-chip
-
-SBT ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -jar $(ROCKETCHIP_DIR)/sbt-launch.jar ++2.12.4
+SBT ?= sbt ++2.12.4
 
 lookup_scala_srcs = $(shell find $(1)/ -iname "*.scala" 2> /dev/null)
 
-PACKAGES=rocket-chip testchipip
-SCALA_SOURCES=$(foreach pkg,$(PACKAGES),$(call lookup_scala_srcs,$(base_dir)/$(pkg)/src/main/scala)) $(call lookup_scala_srcs,$(base_dir)/src/main/scala)
+PACKAGES=testchipip
 
-ROCKET_CLASSES ?= "$(ROCKETCHIP_DIR)/target/scala-2.12/classes:$(ROCKETCHIP_DIR)/chisel3/target/scala-2.12/*"
-FIRRTL_JAR ?= $(ROCKETCHIP_DIR)/lib/firrtl.jar
-FIRRTL ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -cp $(ROCKET_CLASSES):$(FIRRTL_JAR) firrtl.Driver
-
-$(FIRRTL_JAR): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR)/firrtl/src/main/scala)
-	$(MAKE) -C $(ROCKETCHIP_DIR)/firrtl SBT="$(SBT)" root_dir=$(ROCKETCHIP_DIR)/firrtl build-scala
-	mkdir -p $(dir $@)
-	cp -p $(ROCKETCHIP_DIR)/firrtl/utils/bin/firrtl.jar $@
-	touch $@
+FIRRTL ?= $(SBT) "runMain firrtl.Driver
 
 build_dir=$(sim_dir)/generated-src
-testchip_dir = $(base_dir)/testchipip
-
-include $(testchip_dir)/Makefrag
 
 CHISEL_ARGS ?=
 
@@ -33,7 +19,7 @@ $(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(bootrom_img) $(FIRRTL_JAR)
 	cd $(base_dir) && $(SBT) "runMain $(PROJECT).Generator $(CHISEL_ARGS) $(build_dir) $(PROJECT) $(MODEL) $(CFG_PROJECT) $(CONFIG)"
 
 $(VERILOG_FILE): $(FIRRTL_FILE) $(ANNO_FILE) $(FIRRTL_JAR)
-	$(FIRRTL) -i $(FIRRTL_FILE) -o $(VERILOG_FILE) -X verilog -faf $(ANNO_FILE)
+	$(FIRRTL) -i $(FIRRTL_FILE) -o $(VERILOG_FILE) -X verilog -faf $(ANNO_FILE)"
 
 regression-tests = \
 	rv64ud-v-fcvt \

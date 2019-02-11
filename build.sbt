@@ -7,14 +7,12 @@ lazy val commonSettings = Seq(
   libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   libraryDependencies += "org.json4s" %% "json4s-native" % "3.5.3",
   libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+  // libraryDependencies += "edu.berkeley.cs" %% "rocket-dsptools" % "1.2-020719-SNAPSHOT",
+  libraryDependencies += "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHOT",
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   resolvers ++= Seq(
     Resolver.sonatypeRepo("snapshots"),
     Resolver.sonatypeRepo("releases"),
     Resolver.mavenLocal))
 
-lazy val rocketchip = RootProject(file("rocket-chip"))
-
-lazy val testchipip = project.settings(commonSettings).dependsOn(rocketchip)
-
-lazy val example = (project in file(".")).settings(commonSettings).dependsOn(testchipip)
+lazy val example = (project in file(".")).settings(commonSettings)
