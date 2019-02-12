@@ -4,7 +4,7 @@ lookup_scala_srcs = $(shell find $(1)/ -iname "*.scala" 2> /dev/null)
 
 PACKAGES=testchipip
 
-FIRRTL ?= $(SBT) "runMain firrtl.Driver
+FIRRTL ?= cd $(base_dir) && $(SBT) "runMain firrtl.Driver
 
 build_dir=$(sim_dir)/generated-src
 
@@ -19,7 +19,7 @@ $(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(bootrom_img) $(FIRRTL_JAR)
 	cd $(base_dir) && $(SBT) "runMain $(PROJECT).Generator $(CHISEL_ARGS) $(build_dir) $(PROJECT) $(MODEL) $(CFG_PROJECT) $(CONFIG)"
 
 $(VERILOG_FILE): $(FIRRTL_FILE) $(ANNO_FILE) $(FIRRTL_JAR)
-	$(FIRRTL) -i $(FIRRTL_FILE) -o $(VERILOG_FILE) -X verilog -faf $(ANNO_FILE)"
+	$(FIRRTL) -i $(FIRRTL_FILE) -o $(VERILOG_FILE) -X verilog -td $(build_dir) -faf $(ANNO_FILE)"
 
 regression-tests = \
 	rv64ud-v-fcvt \

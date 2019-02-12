@@ -15,8 +15,21 @@ class TestHarness(implicit val p: Parameters) extends Module {
   val dut = p(BuildTop)(clock, reset.toBool, p)
   dut.debug := DontCare
   dut.connectSimAXIMem()
+  dut.connectSimAXIMMIO()
   dut.dontTouchPorts()
   dut.tieOffInterrupts()
+  dut.l2_frontend_bus_axi4.foreach(axi => {
+    axi.tieoff()
+    experimental.DataMirror.directionOf(axi.ar.ready) match {
+      case core.ActualDirection.Input =>
+        axi.r.bits := 0.U.asTypeOf(axi.r.bits)
+        axi.b.bits := 0.U.asTypeOf(axi.b.bits)
+      case core.ActualDirection.Output =>
+        axi.aw.bits := 0.U.asTypeOf(axi.aw.bits)
+        axi.ar.bits := 0.U.asTypeOf(axi.ar.bits)
+        axi.w.bits := 0.U.asTypeOf(axi.w.bits)
+    }
+  })
   io.success := dut.connectSimSerial()
 }
 
@@ -24,4 +37,5 @@ object Generator extends GeneratorApp {
   val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
   generateFirrtl
   generateAnno
+  generateArtefacts
 }
