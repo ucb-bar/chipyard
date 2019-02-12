@@ -92,9 +92,9 @@ object Utils {
         numR += 1
         MacroPort(
           width=Some(width), depth=Some(depth),
-          address=PolarizedPort(s"${portName}_address", ActiveHigh),
-          clock=PolarizedPort(s"${portName}_clock", PositiveEdge),
-          readEnable=Some(PolarizedPort(s"${portName}_ren", ActiveHigh)),
+          address=PolarizedPort(s"${portName}_addr", ActiveHigh),
+          clock=PolarizedPort(s"${portName}_clk", PositiveEdge),
+          chipEnable=Some(PolarizedPort(s"${portName}_en", ActiveHigh)),
           output=Some(PolarizedPort(s"${portName}_data", ActiveHigh))
         ) }
       case WritePort => {
@@ -102,9 +102,9 @@ object Utils {
         numW += 1
         MacroPort(
           width=Some(width), depth=Some(depth),
-          address=PolarizedPort(s"${portName}_address", ActiveHigh),
-          clock=PolarizedPort(s"${portName}_clock", PositiveEdge),
-          writeEnable=Some(PolarizedPort(s"${portName}_wen", ActiveHigh)),
+          address=PolarizedPort(s"${portName}_addr", ActiveHigh),
+          clock=PolarizedPort(s"${portName}_clk", PositiveEdge),
+          writeEnable=Some(PolarizedPort(s"${portName}_en", ActiveHigh)),
           input=Some(PolarizedPort(s"${portName}_data", ActiveHigh))
         ) }
       case MaskWritePort => {
@@ -112,9 +112,9 @@ object Utils {
         numW += 1
         MacroPort(
           width=Some(width), depth=Some(depth),
-          address=PolarizedPort(s"${portName}_address", ActiveHigh),
-          clock=PolarizedPort(s"${portName}_clock", PositiveEdge),
-          writeEnable=Some(PolarizedPort(s"${portName}_wen", ActiveHigh)),
+          address=PolarizedPort(s"${portName}_addr", ActiveHigh),
+          clock=PolarizedPort(s"${portName}_clk", PositiveEdge),
+          writeEnable=Some(PolarizedPort(s"${portName}_en", ActiveHigh)),
           maskPort=Some(PolarizedPort(s"${portName}_mask", ActiveHigh)),
           maskGran=maskGran,
           input=Some(PolarizedPort(s"${portName}_data", ActiveHigh))
@@ -124,10 +124,10 @@ object Utils {
         numRW += 1
         MacroPort(
           width=Some(width), depth=Some(depth),
-          address=PolarizedPort(s"${portName}_address", ActiveHigh),
-          clock=PolarizedPort(s"${portName}_clock", PositiveEdge),
-          writeEnable=Some(PolarizedPort(s"${portName}_wen", ActiveHigh)),
-          readEnable=Some(PolarizedPort(s"${portName}_ren", ActiveHigh)),
+          address=PolarizedPort(s"${portName}_addr", ActiveHigh),
+          clock=PolarizedPort(s"${portName}_clk", PositiveEdge),
+          chipEnable=Some(PolarizedPort(s"${portName}_en", ActiveHigh)),
+          writeEnable=Some(PolarizedPort(s"${portName}_wmode", ActiveHigh)),
           input=Some(PolarizedPort(s"${portName}_wdata", ActiveHigh)),
           output=Some(PolarizedPort(s"${portName}_rdata", ActiveHigh))
         ) }
@@ -136,11 +136,11 @@ object Utils {
         numRW += 1
         MacroPort(
           width=Some(width), depth=Some(depth),
-          address=PolarizedPort(s"${portName}_address", ActiveHigh),
-          clock=PolarizedPort(s"${portName}_clock", PositiveEdge),
-          writeEnable=Some(PolarizedPort(s"${portName}_wen", ActiveHigh)),
-          readEnable=Some(PolarizedPort(s"${portName}_ren", ActiveHigh)),
-          maskPort=Some(PolarizedPort(s"${portName}_mask", ActiveHigh)),
+          address=PolarizedPort(s"${portName}_addr", ActiveHigh),
+          clock=PolarizedPort(s"${portName}_clk", PositiveEdge),
+          chipEnable=Some(PolarizedPort(s"${portName}_en", ActiveHigh)),
+          writeEnable=Some(PolarizedPort(s"${portName}_wmode", ActiveHigh)),
+          maskPort=Some(PolarizedPort(s"${portName}_wmask", ActiveHigh)),
           maskGran=maskGran,
           input=Some(PolarizedPort(s"${portName}_wdata", ActiveHigh)),
           output=Some(PolarizedPort(s"${portName}_rdata", ActiveHigh))
