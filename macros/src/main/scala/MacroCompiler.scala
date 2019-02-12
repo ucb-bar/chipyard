@@ -13,6 +13,7 @@ import firrtl.ir._
 import firrtl.PrimOps
 import firrtl.Utils._
 import firrtl.annotations._
+import firrtl.transforms.{NoDCEAnnotation}
 import firrtl.CompilerUtils.getLoweringTransforms
 import mdf.macrolib.{PolarizedPort, PortPolarity}
 import scala.collection.mutable.{ArrayBuffer, HashMap}
@@ -764,7 +765,8 @@ object MacroCompiler extends App {
             )
           ))
         )
-        val state = CircuitState(circuit, HighForm, annotations)
+        // Append a NoDCEAnnotation to avoid dead code elimination removing the non-parent SRAMs
+        val state = CircuitState(circuit, HighForm, annotations :+ NoDCEAnnotation)
 
         // Run the compiler.
         val result = new MacroCompiler().compileAndEmit(state)
