@@ -618,7 +618,7 @@ class MacroCompilerTransform extends Transform {
       assert((forceCompile intersect forceSynflops).isEmpty, "Cannot have modules both forced to compile and synflops")
 
       // Read, eliminate None, get only SRAM, make firrtl macro
-      val mems: Option[Seq[Macro]] = mdf.macrolib.Utils.readMDFFromPath(Some(memFile)) match {
+      val mems: Option[Seq[Macro]] = Utils.readConfFromPath(Some(memFile)) match {
         case Some(x:Seq[mdf.macrolib.Macro]) =>
           Some(Utils.filterForSRAM(Some(x)) getOrElse(List()) map {new Macro(_)})
         case _ => None
@@ -701,7 +701,7 @@ object MacroCompiler extends App {
     .map { case (_, cmd, description) => s"    $cmd: $description" }
   val usage: String = (Seq(
     "Options:",
-    "  -m, --macro-list: The set of macros to compile",
+    "  -m, --macro-conf: The set of macros to compile in firrtl-generated conf format",
     "  -l, --library: The set of macros that have blackbox instances",
     "  -u, --use-compiler: Flag, whether to use the memory compiler defined in library",
     "  -v, --verilog: Verilog output",
@@ -717,7 +717,7 @@ object MacroCompiler extends App {
                 args: List[String]): (MacroParamMap, CostParamMap, ForcedMemories) =
     args match {
       case Nil => (map, costMap, forcedMemories)
-      case ("-m" | "--macro-list") :: value :: tail =>
+      case ("-m" | "--macro-conf") :: value :: tail =>
         parseArgs(map + (Macros  -> value), costMap, forcedMemories, tail)
       case ("-l" | "--library") :: value :: tail =>
         parseArgs(map + (Library -> value), costMap, forcedMemories, tail)
@@ -746,7 +746,7 @@ object MacroCompiler extends App {
   def run(args: List[String]) {
     val (params, costParams, forcedMemories) = parseArgs(Map[MacroParam, String](), Map[String, String](), (Set.empty, Set.empty), args)
     try {
-      val macros = Utils.filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(params.get(Macros))).get map (x => (new Macro(x)).blackbox)
+      val macros = Utils.filterForSRAM(Utils.readConfFromPath(params.get(Macros))).get map (x => (new Macro(x)).blackbox)
 
       if (macros.nonEmpty) {
         // Note: the last macro in the input list is (seemingly arbitrarily)

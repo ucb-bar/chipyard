@@ -7,7 +7,7 @@ import firrtl.ir._
 import firrtl.PrimOps
 import firrtl.Utils.{ceilLog2, BoolType}
 import mdf.macrolib.{Constant, MacroPort, SRAMMacro}
-import mdf.macrolib.{PolarizedPort, PortPolarity, ActiveLow, ActiveHigh, NegativeEdge, PositiveEdge}
+import mdf.macrolib.{PolarizedPort, PortPolarity, ActiveLow, ActiveHigh, NegativeEdge, PositiveEdge, MacroExtraPort}
 import java.io.File
 import scala.language.implicitConversions
 
@@ -71,6 +71,81 @@ object Utils {
       case Some(l:Seq[mdf.macrolib.Macro]) => Some(l filter { _.isInstanceOf[mdf.macrolib.SRAMMacro] } map { m => m.asInstanceOf[mdf.macrolib.SRAMMacro] })
       case _ => None
     }
+  }
+  // This utility reads a conf in and returns MDF like mdf.macrolib.Utils.readMDFFromPath
+  def readConfFromPath(path: Option[String]): Option[Seq[mdf.macrolib.Macro]] = {
+    path.map((p) => Utils.readConfFromString(scala.io.Source.fromFile(p).mkString))
+  }
+  def readConfFromString(str: String): Seq[mdf.macrolib.Macro] = {
+    MemConf.fromString(str).map { m:MemConf =>
+      SRAMMacro(m.name, m.width, m.depth, "", Utils.portSpecToMacroPort(m.width, m.depth, m.maskGranularity, m.ports), Seq.empty[MacroExtraPort])
+    }
+  }
+  // This translates between two represenations of ports
+  def portSpecToMacroPort(width: Int, depth: Int, maskGran: Option[Int], ports: Seq[MemPort]): Seq[MacroPort] = {
+    var numR = 0
+    var numW = 0
+    var numRW = 0
+    ports.map { _ match {
+      case ReadPort => {
+        val portName = s"R${numR}"
+        numR += 1
+        MacroPort(
+          width=Some(width), depth=Some(depth),
+          address=PolarizedPort(s"${portName}_address", ActiveHigh),
+          clock=PolarizedPort(s"${portName}_clock", PositiveEdge),
+          readEnable=Some(PolarizedPort(s"${portName}_ren", ActiveHigh)),
+          output=Some(PolarizedPort(s"${portName}_data", ActiveHigh))
+        ) }
+      case WritePort => {
+        val portName = s"W${numW}"
+        numW += 1
+        MacroPort(
+          width=Some(width), depth=Some(depth),
+          address=PolarizedPort(s"${portName}_address", ActiveHigh),
+          clock=PolarizedPort(s"${portName}_clock", PositiveEdge),
+          writeEnable=Some(PolarizedPort(s"${portName}_wen", ActiveHigh)),
+          input=Some(PolarizedPort(s"${portName}_data", ActiveHigh))
+        ) }
+      case MaskWritePort => {
+        val portName = s"W${numW}"
+        numW += 1
+        MacroPort(
+          width=Some(width), depth=Some(depth),
+          address=PolarizedPort(s"${portName}_address", ActiveHigh),
+          clock=PolarizedPort(s"${portName}_clock", PositiveEdge),
+          writeEnable=Some(PolarizedPort(s"${portName}_wen", ActiveHigh)),
+          maskPort=Some(PolarizedPort(s"${portName}_mask", ActiveHigh)),
+          maskGran=maskGran,
+          input=Some(PolarizedPort(s"${portName}_data", ActiveHigh))
+        ) }
+      case ReadWritePort => {
+        val portName = s"RW${numRW}"
+        numRW += 1
+        MacroPort(
+          width=Some(width), depth=Some(depth),
+          address=PolarizedPort(s"${portName}_address", ActiveHigh),
+          clock=PolarizedPort(s"${portName}_clock", PositiveEdge),
+          writeEnable=Some(PolarizedPort(s"${portName}_wen", ActiveHigh)),
+          readEnable=Some(PolarizedPort(s"${portName}_ren", ActiveHigh)),
+          input=Some(PolarizedPort(s"${portName}_wdata", ActiveHigh)),
+          output=Some(PolarizedPort(s"${portName}_rdata", ActiveHigh))
+        ) }
+      case MaskReadWritePort => {
+        val portName = s"RW${numRW}"
+        numRW += 1
+        MacroPort(
+          width=Some(width), depth=Some(depth),
+          address=PolarizedPort(s"${portName}_address", ActiveHigh),
+          clock=PolarizedPort(s"${portName}_clock", PositiveEdge),
+          writeEnable=Some(PolarizedPort(s"${portName}_wen", ActiveHigh)),
+          readEnable=Some(PolarizedPort(s"${portName}_ren", ActiveHigh)),
+          maskPort=Some(PolarizedPort(s"${portName}_mask", ActiveHigh)),
+          maskGran=maskGran,
+          input=Some(PolarizedPort(s"${portName}_wdata", ActiveHigh)),
+          output=Some(PolarizedPort(s"${portName}_rdata", ActiveHigh))
+        ) }
+    }}
   }
   def findSRAMCompiler(s: Option[Seq[mdf.macrolib.Macro]]): Option[mdf.macrolib.SRAMCompiler] = {
     s match {
