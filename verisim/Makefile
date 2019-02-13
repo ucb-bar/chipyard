@@ -6,6 +6,7 @@ MODEL ?= TestHarness
 CONFIG ?= DefaultExampleConfig
 CFG_PROJECT ?= $(PROJECT)
 TB ?= TestDriver
+TOP ?= ExampleTop
 
 sim = $(sim_dir)/simulator-$(PROJECT)-$(CONFIG)
 sim_debug = $(sim_dir)/simulator-$(PROJECT)-$(CONFIG)-debug
@@ -20,12 +21,12 @@ LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesv
 include $(base_dir)/Makefrag
 include $(sim_dir)/Makefrag-verilator
 
-long_name = $(PROJECT).$(MODEL).$(CONFIG)
-
 rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
 
 sim_vsrcs = \
-	$(build_dir)/$(long_name).v \
+	$(VERILOG_FILE) \
+	$(HARNESS_FILE) \
+	$(SMEMS_FILE) \
 	$(rocketchip_vsrc_dir)/AsyncResetReg.v \
 	$(rocketchip_vsrc_dir)/plusarg_reader.v \
 	$(testchip_vsrcs)
@@ -47,7 +48,7 @@ $(model_mk): $(sim_vsrcs) $(INSTALLED_VERILATOR)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name)
 	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name) \
-	-o $(sim) $< $(sim_csrcs) -LDFLAGS "$(LDFLAGS)" \
+	-o $(sim) $(sim_vsrcs) $(sim_csrcs) -LDFLAGS "$(LDFLAGS)" \
 	-CFLAGS "-I$(build_dir) -include $(model_header)"
 	touch $@
 
