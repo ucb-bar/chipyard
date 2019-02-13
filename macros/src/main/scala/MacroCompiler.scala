@@ -432,7 +432,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
                     // zero out the upper bits.
                     zero
                   } else {
-                    if (i >= memPort.src.width.get) {
+                    if ((low + i) >= memPort.src.width.get) {
                       // If our bit is larger than the whole width of the mem, just zero out the upper bits.
                       zero
                     } else {
