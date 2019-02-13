@@ -74,14 +74,14 @@ object MacroCompilerAnnotation {
     * Parameters associated to this MacroCompilerAnnotation.
     *
     * @param mem           Path to memory lib
-    * @param memMode       Type of memory lib (Some("conf"), Some("mdf"), or None (defaults to mdf))
+    * @param memFormat     Type of memory lib (Some("conf"), Some("mdf"), or None (defaults to mdf))
     * @param lib           Path to library lib or None if no libraries
     * @param costMetric    Cost metric to use
     * @param mode          Compiler mode (see CompilerMode)
     * @param forceCompile  Set of memories to force compiling to lib regardless of the mode
     * @param forceSynflops Set of memories to force compiling as flops regardless of the mode
     */
-  case class Params(mem: String, memMode: Option[String], lib: Option[String], costMetric: CostMetric, mode: CompilerMode, useCompiler: Boolean,
+  case class Params(mem: String, memFormat: Option[String], lib: Option[String], costMetric: CostMetric, mode: CompilerMode, useCompiler: Boolean,
                     forceCompile: Set[String], forceSynflops: Set[String])
 
   /**
