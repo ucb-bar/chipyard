@@ -8,6 +8,8 @@ import firrtl.passes.Pass
 import firrtl.annotations.{SingleTargetAnnotation, Annotation}
 import firrtl.transforms.DontTouchAnnotation
 
+// Removes all the unused modules in a circuit by recursing through every
+// instance (starting at the main module)
 class RemoveUnusedModules extends Transform {
   def inputForm = MidForm
   def outputForm = MidForm
@@ -48,11 +50,13 @@ class RemoveUnusedModules extends Transform {
 
     val renames = state.renames.getOrElse(RenameMap())
 
+    // This is what the annotation filter should look like, but for some reason it doesn't work.
     //state.circuit.modules.filterNot { usedModuleSet contains _.name } foreach { x => renames.record(ModuleTarget(state.circuit.main, x.name), Seq()) }
 
     val newCircuit = Circuit(state.circuit.info, usedModuleSeq, state.circuit.main)
     val newAnnos = AnnotationSeq(state.annotations.toSeq.filter { _ match {
       // XXX This is wrong, but it works for now
+      // Tracked by https://github.com/ucb-bar/barstools/issues/36
       case x: DontTouchAnnotation => false
       //case x: DontTouchAnnotation => usedModuleNames contains x.target.module
       case _ => true

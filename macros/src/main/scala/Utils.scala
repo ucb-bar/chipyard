@@ -107,7 +107,7 @@ object Utils {
           writeEnable=Some(PolarizedPort(s"${portName}_en", ActiveHigh)),
           input=Some(PolarizedPort(s"${portName}_data", ActiveHigh))
         ) }
-      case MaskWritePort => {
+      case MaskedWritePort => {
         val portName = s"W${numW}"
         numW += 1
         MacroPort(
@@ -131,7 +131,7 @@ object Utils {
           input=Some(PolarizedPort(s"${portName}_wdata", ActiveHigh)),
           output=Some(PolarizedPort(s"${portName}_rdata", ActiveHigh))
         ) }
-      case MaskReadWritePort => {
+      case MaskedReadWritePort => {
         val portName = s"RW${numRW}"
         numRW += 1
         MacroPort(

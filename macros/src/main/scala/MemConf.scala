@@ -8,13 +8,13 @@ sealed abstract class MemPort(val name: String) { override def toString = name }
 
 case object ReadPort extends MemPort("read")
 case object WritePort extends MemPort("write")
-case object MaskWritePort extends MemPort("mwrite")
+case object MaskedWritePort extends MemPort("mwrite")
 case object ReadWritePort extends MemPort("rw")
-case object MaskReadWritePort extends MemPort("mrw")
+case object MaskedReadWritePort extends MemPort("mrw")
 
 object MemPort {
 
-  val all = Set(ReadPort, WritePort, MaskWritePort, ReadWritePort, MaskReadWritePort)
+  val all = Set(ReadPort, WritePort, MaskedWritePort, ReadWritePort, MaskedReadWritePort)
 
   def apply(s: String): Option[MemPort] = MemPort.all.find(_.name == s)
 

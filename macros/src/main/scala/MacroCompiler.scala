@@ -755,10 +755,9 @@ object MacroCompiler extends App {
   def run(args: List[String]) {
     val (params, costParams, forcedMemories) = parseArgs(Map[MacroParam, String](), Map[String, String](), (Set.empty, Set.empty), args)
     try {
-      val macros = if (params.get(MacrosFormat) == Some("conf")) {
-        Utils.filterForSRAM(Utils.readConfFromPath(params.get(Macros))).get map (x => (new Macro(x)).blackbox)
-      } else {
-        Utils.filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(params.get(Macros))).get map (x => (new Macro(x)).blackbox)
+      val macros = params.get(MacrosFormat) match {
+        case Some("conf") => Utils.filterForSRAM(Utils.readConfFromPath(params.get(Macros))).get map (x => (new Macro(x)).blackbox)
+        case _ => Utils.filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(params.get(Macros))).get map (x => (new Macro(x)).blackbox)
       }
 
       if (macros.nonEmpty) {
