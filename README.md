@@ -320,11 +320,13 @@ RoCC accelerators are lazy modules that extend the LazyRoCC class.
 Their implementation should extends the LazyRoCCModule class.
 
 ```scala
-    class CustomAccelerator(implicit p: Parameters) extends LazyRoCC {
+    class CustomAccelerator(opcodes: OpcodeSet)
+        (implicit p: Parameters) extends LazyRoCC(opcodes) {
       override lazy val module = new CustomAcceleratorModule(this)
     }
 
-    class CustomAcceleratorModule(outer: CustomAccelerator) extends LazyRoCCModule(outer) {
+    class CustomAcceleratorModule(outer: CustomAccelerator)
+        extends LazyRoCCModuleImp(outer) {
       val cmd = Queue(io.cmd)
       // The parts of the command are as follows
       // inst - the parts of the instruction itself
@@ -342,7 +344,11 @@ Their implementation should extends the LazyRoCCModule class.
     }
 ```
 
-The LazyRoCC class contains two TLOutputNode instances, `atlNode` and `tlNode`.
+The `opcodes` parameter for `LazyRoCC` is
+the set of custom opcodes that will map to this accelerator. More on this
+in the next subsection.
+
+The `LazyRoCC` class contains two TLOutputNode instances, `atlNode` and `tlNode`.
 The former connects into a tile-local arbiter along with the backside of the
 L1 instruction cache. The latter connects directly to the L1-L2 crossbar.
 The corresponding Tilelink ports in the module implementation's IO bundle
@@ -358,26 +364,21 @@ detailed information on the different IOs.
 
 ### Adding RoCC accelerator to Config
 
-RoCC accelerators can be added to a core by overriding the BuildRoCC parameter
-in the configuration. This takes a sequence of RoccParameters objects, one
-for each accelerator you wish to add. The two required fields for this
-object are `opcodes` which determines which custom opcodes get routed to the
-accelerator, and `generator` which specifies how to build the accelerator itself.
+RoCC accelerators can be added to a core by overriding the `BuildRoCC` parameter
+in the configuration. This takes a sequence of functions producing `LazyRoCC`
+objects, one for each accelerator you wish to add.
+
 For instance, if we wanted to add the previously defined accelerator and
 route custom0 and custom1 instructions to it, we could do the following.
 
 ```scala
     class WithCustomAccelerator extends Config((site, here, up) => {
-      case RocketTilesKey => up(RocketTilesKey, site).map { r =>
-        r.copy(rocc = Seq(
-          RoCCParams(
-            opcodes = OpcodeSet.custom0 | OpcodeSet.custom1,
-            generator = (p: Parameters) => LazyModule(new CustomAccelerator()(p)))))
-      }
+      case BuildRoCC => Seq((p: Parameters) => LazyModule(
+        new CustomAccelerator(OpcodeSet.custom0 | OpcodeSet.custom1)(p)))
     })
 
     class CustomAcceleratorConfig extends Config(
-      new WithCustomAccelerator ++ new BaseConfig)
+      new WithCustomAccelerator ++ new DefaultExampleConfig)
 ```
 
 ## Adding a submodule
