@@ -3,4 +3,7 @@ target
 *.jar
 *.stamp
 /vsim
-/verisim
+/verisim/generated-src*
+/verisim/verilator
+simv*
+*.vcd
