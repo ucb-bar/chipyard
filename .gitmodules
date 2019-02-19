@@ -1,0 +1,9 @@
+[submodule "testchipip"]
+	path = testchipip
+	url = https://github.com/ucb-bar/testchipip.git
+[submodule "rocket-chip"]
+	path = rocket-chip
+	url = https://github.com/ucb-bar/rocket-chip.git
+[submodule "barstools"]
+	path = barstools
+	url = git@github.com:ucb-bar/barstools
