@@ -6,4 +6,4 @@
 	url = https://github.com/ucb-bar/testchipip.git
 [submodule "barstools"]
 	path = barstools
-	url = git@github.com:ucb-bar/barstools
+	url = https://github.com/ucb-bar/barstools.git
