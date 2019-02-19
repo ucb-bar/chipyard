@@ -4,6 +4,7 @@ target
 *.stamp
 /vsim
 /verisim/generated-src*
+/verisim/simulator-*
 /verisim/verilator
 simv*
 *.vcd

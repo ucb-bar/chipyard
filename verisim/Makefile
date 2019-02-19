@@ -28,13 +28,14 @@ rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
 sim_vsrcs = \
 	$(VERILOG_FILE) \
 	$(HARNESS_FILE) \
-	$(SMEMS_FILE)
+	$(SMEMS_FILE) \
+	$(rocketchip_vsrc_dir)/EICG_wrapper.v
 
 sim_csrcs = \
-	$(sim_dir)/$(csrc)/emulator.cc \
-	$(sim_dir)/$(csrc)/remote_bitbang.cc \
-	$(sim_dir)/$(csrc)/SimDTM.cc \
-	$(sim_dir)/$(csrc)/SimJTAG.cc
+	$(sim_dir)/csrc/emulator.cc \
+	$(sim_dir)/csrc/remote_bitbang.cc \
+	$(sim_dir)/csrc/SimDTM.cc \
+	$(sim_dir)/csrc/SimJTAG.cc
 
 model_dir = $(build_dir)/$(long_name)
 model_dir_debug = $(build_dir)/$(long_name).debug

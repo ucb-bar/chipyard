@@ -31,4 +31,4 @@ VERILATOR_FLAGS := --top-module $(MODEL) \
 	+define+STOP_COND=\$$c\(\"done_reset\"\) --assert \
 	--output-split 20000 \
 	-Wno-STMTDLY --x-assign unique \
-	-O3 -CFLAGS "$(CXXFLAGS) -DTEST_HARNESS=V$(MODEL) -DVERILATOR -include $(sim_dir)/$(csrc)/verilator.h"
+	-O3 -CFLAGS "$(CXXFLAGS) -DTEST_HARNESS=V$(MODEL) -DVERILATOR -include $(sim_dir)/csrc/verilator.h"
