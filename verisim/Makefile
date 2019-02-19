@@ -29,7 +29,7 @@ sim_vsrcs = \
 	$(VERILOG_FILE) \
 	$(HARNESS_FILE) \
 	$(SMEMS_FILE) \
-	$(rocketchip_vsrc_dir)/EICG_wrapper.v
+	$(sim_dir)/vsrc/EICG_wrapper.v
 # Remove EICG_wrapper.v when upstream rocket is updated
 
 sim_csrcs = \
@@ -86,5 +86,5 @@ run-regression-tests-fast: $(addprefix $(output_dir)/,$(addsuffix .run,$(regress
 
 run-regression-tests-debug: $(addprefix $(output_dir)/,$(addsuffix .vpd,$(regression-tests)))
 
-clean:
+clean: clean-scala
 	rm -rf generated-src ./simulator-*
