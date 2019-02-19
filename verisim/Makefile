@@ -30,6 +30,7 @@ sim_vsrcs = \
 	$(HARNESS_FILE) \
 	$(SMEMS_FILE) \
 	$(rocketchip_vsrc_dir)/EICG_wrapper.v
+# Remove EICG_wrapper.v when upstream rocket is updated
 
 sim_csrcs = \
 	$(sim_dir)/csrc/emulator.cc \
