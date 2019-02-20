@@ -29,15 +29,8 @@ rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
 sim_vsrcs = \
 	$(VERILOG_FILE) \
 	$(HARNESS_FILE) \
-	$(SMEMS_FILE) \
-	$(sim_dir)/vsrc/EICG_wrapper.v
+	$(SMEMS_FILE)
 # Remove EICG_wrapper.v when upstream rocket is updated
-
-sim_csrcs = \
-	$(sim_dir)/csrc/emulator.cc \
-	$(sim_dir)/csrc/remote_bitbang.cc \
-	$(sim_dir)/csrc/SimDTM.cc \
-	$(sim_dir)/csrc/SimJTAG.cc
 
 model_dir = $(build_dir)/$(long_name)
 model_dir_debug = $(build_dir)/$(long_name).debug
@@ -52,22 +45,22 @@ $(model_mk): $(sim_vsrcs) $(INSTALLED_VERILATOR)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name)
 	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name) \
-	-o $(sim) $(sim_vsrcs) $(sim_csrcs) -f $(sim_blackboxes) -LDFLAGS "$(LDFLAGS)" \
+	-o $(sim) $(sim_vsrcs) -f $(sim_blackboxes) -LDFLAGS "$(LDFLAGS)" \
 	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(model_header)"
 	touch $@
 
-$(sim): $(model_mk) $(sim_csrcs)
+$(sim): $(model_mk)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name) -f V$(MODEL).mk
 
 
 $(model_mk_debug): $(sim_vsrcs) $(INSTALLED_VERILATOR)
 	mkdir -p $(build_dir)/$(long_name).debug
 	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name).debug --trace \
-	-o $(sim_debug) $< $(sim_csrcs) -f $(sim_blackboxes) -LDFLAGS "$(LDFLAGS)" \
+	-o $(sim_debug) $< -f $(sim_blackboxes) -LDFLAGS "$(LDFLAGS)" \
 	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(model_header_debug)"
 	touch $@
 
-$(sim_debug): $(model_mk_debug) $(sim_csrcs)
+$(sim_debug): $(model_mk_debug)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(MODEL).mk
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)

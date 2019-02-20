@@ -1,13 +1,37 @@
 package example
 
 import chisel3._
+import chisel3.experimental._
+import firrtl.transforms.{BlackBoxResourceAnno, BlackBoxSourceHelper}
 import freechips.rocketchip.diplomacy.LazyModule
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.util.GeneratorApp
 
 case object BuildTop extends Field[(Clock, Bool, Parameters) => ExampleTopModule[ExampleTop]]
 
-class TestHarness(implicit val p: Parameters) extends Module {
+//
+// Workaround for files that aren't included as blackboxresource files
+//
+trait HasResource extends experimental.RawModule { self =>
+  def setResource(resource: String): Unit = {
+    val anno = new ChiselAnnotation with RunFirrtlTransform {
+      def toFirrtl = BlackBoxResourceAnno(self.toNamed, resource)
+      def transformClass = classOf[BlackBoxSourceHelper]
+    }
+    chisel3.experimental.annotate(anno)
+  }
+}
+
+class TestHarness(implicit val p: Parameters) extends Module with HasResource {
+
+  // TODO(rigge): make conditional on if we are using verilator
+  setResource("/csrc/emulator.cc")
+  // setResource("/csrc/remote_bitbang.h")
+  setResource("/csrc/remote_bitbang.cc")
+  // setResource("/csrc/verilator.h")
+  // TODO(rigge): remove when my PR is merged
+  setResource("/vsrc/EICG_wrapper.v")
+
   val io = IO(new Bundle {
     val success = Output(Bool())
   })
