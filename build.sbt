@@ -23,7 +23,10 @@ lazy val rocketchip = RootProject(file("rocket-chip"))
 lazy val testchipip = project.settings(commonSettings)
   .dependsOn(rocketchip)
 
-def dependsOnRocket(prj: Project): Project = {
+// Checks for -DROCKET_USE_MAVEN.
+// If it's there, use a maven dependency.
+// Else, depend on subprojects in git submodules.
+def conditionalDependsOn(prj: Project): Project = {
   if (sys.props.contains("ROCKET_USE_MAVEN")) {
     prj.settings(Seq(
       // libraryDependencies += "edu.berkeley.cs" %% "rocket-dsptools" % "1.2-020719-SNAPSHOT",
@@ -33,15 +36,15 @@ def dependsOnRocket(prj: Project): Project = {
     prj.dependsOn(testchipip)
   }
 }
-lazy val example = dependsOnRocket(project in file("."))
+lazy val example = conditionalDependsOn(project in file("."))
   .settings(commonSettings)
 
-lazy val tapeout = dependsOnRocket(project in file("./barstools/tapeout/"))
+lazy val tapeout = conditionalDependsOn(project in file("./barstools/tapeout/"))
   .settings(commonSettings)
 
 lazy val mdf = (project in file("./barstools/mdf/scalalib/"))
 
-lazy val `barstools-macros` = dependsOnRocket(project in file("./barstools/macros/"))
+lazy val `barstools-macros` = conditionalDependsOn(project in file("./barstools/macros/"))
   .enablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonSettings)
   .dependsOn(mdf)
