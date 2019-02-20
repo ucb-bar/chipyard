@@ -45,7 +45,7 @@ $(model_mk): $(sim_vsrcs) $(INSTALLED_VERILATOR)
 	mkdir -p $(build_dir)/$(long_name)
 	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name) \
 	-o $(sim) $(sim_vsrcs) -f $(sim_blackboxes) -LDFLAGS "$(LDFLAGS)" \
-	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(model_header)"
+	-CFLAGS "-I$(build_dir) -I$(sim_dir)/csrc/ -include $(build_dir)/$(long_name).plusArgs -include $(model_header)"
 	touch $@
 
 $(sim): $(model_mk)
@@ -56,7 +56,7 @@ $(model_mk_debug): $(sim_vsrcs) $(INSTALLED_VERILATOR)
 	mkdir -p $(build_dir)/$(long_name).debug
 	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name).debug --trace \
 	-o $(sim_debug) $< -f $(sim_blackboxes) -LDFLAGS "$(LDFLAGS)" \
-	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(model_header_debug)"
+	-CFLAGS "-I$(build_dir) -I$(sim_dir)/csrc -include $(build_dir)/$(long_name).plusArgs -include $(model_header_debug)"
 	touch $@
 
 $(sim_debug): $(model_mk_debug)
