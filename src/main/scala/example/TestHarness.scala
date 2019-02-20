@@ -26,6 +26,8 @@ class TestHarness(implicit val p: Parameters) extends Module with HasResource {
 
   // TODO(rigge): make conditional on if we are using verilator
   setResource("/csrc/emulator.cc")
+  setResource("/csrc/SimDTM.cc")
+  setResource("/csrc/SimJTAG.cc")
   // setResource("/csrc/remote_bitbang.h")
   setResource("/csrc/remote_bitbang.cc")
   // setResource("/csrc/verilator.h")
