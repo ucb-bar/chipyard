@@ -30,7 +30,6 @@ sim_vsrcs = \
 	$(VERILOG_FILE) \
 	$(HARNESS_FILE) \
 	$(SMEMS_FILE)
-# Remove EICG_wrapper.v when upstream rocket is updated
 
 model_dir = $(build_dir)/$(long_name)
 model_dir_debug = $(build_dir)/$(long_name).debug
