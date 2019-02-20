@@ -25,9 +25,9 @@ class TestHarness(implicit val p: Parameters) extends Module {
         axi.r.bits := DontCare
         axi.b.bits := DontCare
       case core.ActualDirection.Output =>
-        axi.aw.bits := 0.U.asTypeOf(axi.aw.bits)
-        axi.ar.bits := 0.U.asTypeOf(axi.ar.bits)
-        axi.w.bits := 0.U.asTypeOf(axi.w.bits)
+        axi.aw.bits := DontCare
+        axi.ar.bits := DontCare
+        axi.w.bits := DontCare
     }
   })
   io.success := dut.connectSimSerial()
