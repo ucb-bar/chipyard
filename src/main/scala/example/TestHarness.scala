@@ -22,8 +22,8 @@ class TestHarness(implicit val p: Parameters) extends Module {
     axi.tieoff()
     experimental.DataMirror.directionOf(axi.ar.ready) match {
       case core.ActualDirection.Input =>
-        axi.r.bits := 0.U.asTypeOf(axi.r.bits)
-        axi.b.bits := 0.U.asTypeOf(axi.b.bits)
+        axi.r.bits := DontCare
+        axi.b.bits := DontCare
       case core.ActualDirection.Output =>
         axi.aw.bits := 0.U.asTypeOf(axi.aw.bits)
         axi.ar.bits := 0.U.asTypeOf(axi.ar.bits)

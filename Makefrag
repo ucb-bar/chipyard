@@ -4,7 +4,6 @@ TESTCHIP_DIR = $(base_dir)/testchipip
 SCALA_VERSION=2.12.4
 SCALA_VERSION_MAJOR=$(basename $(SCALA_VERSION))
 
-# SBT ?= sbt ++2.12.4
 SBT ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -jar $(ROCKETCHIP_DIR)/sbt-launch.jar ++$(SCALA_VERSION)
 
 lookup_scala_srcs = $(shell find $(1)/ -iname "*.scala" 2> /dev/null)
