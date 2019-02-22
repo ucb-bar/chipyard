@@ -33,6 +33,7 @@ VERILOG_FILE ?=$(build_dir)/$(long_name).top.v
 HARNESS_FILE ?=$(build_dir)/$(long_name).harness.v
 SMEMS_FILE   ?=$(build_dir)/$(long_name).mems.v
 SMEMS_CONF   ?=$(build_dir)/$(long_name).mems.conf
+verilator_dotf ?= $(build_dir)/verilator_files.f
 
 REPL_SEQ_MEM = --repl-seq-mem -c:$(MODEL):-o:$(SMEMS_CONF)
 
@@ -53,7 +54,10 @@ $(MACROCOMPILER_JAR): $(call lookup_scala_srcs, $(base_dir)/barstools/macros/src
 .PHONY: jars
 jars: $(MACROCOMPILER_JAR) $(TAPEOUT_JAR)
 
-$(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(bootrom_img)
+$(verilator_dotf): $(SCALA_SOURCES)
+	cd $(base_dir) && $(SBT) "runMain example.GenerateSimFiles -td $(build_dir)"
+
+$(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(verilator_dotf)
 	mkdir -p $(build_dir)
 	cd $(base_dir) && $(SBT) "runMain $(PROJECT).Generator $(CHISEL_ARGS) $(build_dir) $(PROJECT) $(MODEL) $(CFG_PROJECT) $(CONFIG)"
 

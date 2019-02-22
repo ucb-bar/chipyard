@@ -10,5 +10,7 @@ int main(void)
 	reg_write32(PWM_DUTY, 5);
 	reg_write32(PWM_ENABLE, 1);
 
+  printf("Oh hai mark\n");
+
 	return 0;
 }
