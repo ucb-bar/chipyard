@@ -8,3 +8,4 @@ target
 /verisim/verilator
 simv*
 *.vcd
+.DS_Store
