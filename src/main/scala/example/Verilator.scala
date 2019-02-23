@@ -70,9 +70,16 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
     "/csrc/remote_bitbang.cc",
     "/csrc/verilator.h",
     "/vsrc/EICG_wrapper.v",
+    "/testchipip/bootrom/bootrom.rv64.img",
   )
 
+  def writeBootrom(): Unit = {
+    firrtl.FileUtils.makeDirectory("./bootrom/")
+    writeResource("/testchipip/bootrom/bootrom.rv64.img", "./bootrom/")
+  }
+
   def writeFiles(cfg: GenerateSimConfig): Unit = {
+    writeBootrom()
     firrtl.FileUtils.makeDirectory(cfg.targetDir)
     val files = resources.map { writeResource(_, cfg.targetDir) }
     writeDotF(files.map(addOption), cfg)
