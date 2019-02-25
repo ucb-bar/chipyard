@@ -30,7 +30,6 @@ lazy val testchipip = project.settings(commonSettings)
 def conditionalDependsOn(prj: Project): Project = {
   if (sys.props.contains("ROCKET_USE_MAVEN")) {
     prj.settings(Seq(
-      // libraryDependencies += "edu.berkeley.cs" %% "rocket-dsptools" % "1.2-020719-SNAPSHOT",
       libraryDependencies += "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHOT",
     ))
   } else {
