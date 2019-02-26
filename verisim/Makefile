@@ -59,7 +59,7 @@ $(sim): $(model_mk) $(sim_csrcs)
 $(model_mk_debug): $(sim_vsrcs) $(INSTALLED_VERILATOR)
 	mkdir -p $(build_dir)/$(long_name).debug
 	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name).debug --trace \
-	-o $(sim_debug) $< $(sim_csrcs) -LDFLAGS "$(LDFLAGS)" \
+	-o $(sim_debug) $(sim_vsrcs) $(sim_csrcs) -LDFLAGS "$(LDFLAGS)" \
 	-CFLAGS "-I$(build_dir) -include $(model_header_debug)"
 	touch $@
 
