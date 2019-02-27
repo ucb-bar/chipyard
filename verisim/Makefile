@@ -20,6 +20,9 @@ LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesv
 
 include $(base_dir)/Makefrag
 include $(sim_dir)/Makefrag-verilator
+ifneq ($(filter run% %.run %.out %.vpd %.vcd,$(MAKECMDGOALS)),)
+-include $(build_dir)/$(long_name).d
+endif
 
 rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
 
