@@ -84,7 +84,7 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
 
   private def harnessTransforms: Seq[Transform] = {
     // XXX this is a hack, we really should be checking the masters to see if they are ExtModules
-    val externals = Set(harnessTop.get, synTop.get, "SimSerial")
+    val externals = Set(harnessTop.get, synTop.get, "SimSerial", "SimDTM")
     Seq(
       new ConvertToExtMod((m) => m.name == synTop.get),
       new RemoveUnusedModules,
