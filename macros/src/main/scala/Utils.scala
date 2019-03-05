@@ -5,6 +5,7 @@ package barstools.macros
 import firrtl._
 import firrtl.ir._
 import firrtl.PrimOps
+import firrtl.passes.memlib.{MemConf, MemPort, ReadPort, WritePort, ReadWritePort, MaskedWritePort, MaskedReadWritePort}
 import firrtl.Utils.{ceilLog2, BoolType}
 import mdf.macrolib.{Constant, MacroPort, SRAMMacro}
 import mdf.macrolib.{PolarizedPort, PortPolarity, ActiveLow, ActiveHigh, NegativeEdge, PositiveEdge, MacroExtraPort}
@@ -78,7 +79,8 @@ object Utils {
   }
   def readConfFromString(str: String): Seq[mdf.macrolib.Macro] = {
     MemConf.fromString(str).map { m:MemConf =>
-      SRAMMacro(m.name, m.width, m.depth, Utils.portSpecToFamily(m.ports), Utils.portSpecToMacroPort(m.width, m.depth, m.maskGranularity, m.ports))
+      val ports = m.ports.map { case (port, num) => Seq.fill(num)(port) } reduce (_ ++ _)
+      SRAMMacro(m.name, m.width, m.depth, Utils.portSpecToFamily(ports), Utils.portSpecToMacroPort(m.width, m.depth, m.maskGranularity, ports))
     }
   }
   def portSpecToFamily(ports: Seq[MemPort]): String = {
