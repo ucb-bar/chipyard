@@ -1,0 +1,110 @@
+ROCKETCHIP_DIR=$(base_dir)/generators/rocket-chip
+TESTCHIP_DIR = $(base_dir)/generators/testchipip
+
+SCALA_VERSION=2.12.4
+SCALA_VERSION_MAJOR=$(basename $(SCALA_VERSION))
+
+SBT ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -jar $(ROCKETCHIP_DIR)/sbt-launch.jar ++$(SCALA_VERSION)
+
+lookup_scala_srcs = $(shell find $(1)/ -iname "*.scala" 2> /dev/null)
+
+PACKAGES=rocket-chip testchipip
+SCALA_SOURCES=$(foreach pkg,$(PACKAGES),$(call lookup_scala_srcs,$(base_dir)/generators/$(pkg)/src/main/scala)) $(call lookup_scala_srcs,$(base_dir)/src/main/scala)
+
+ROCKET_CLASSES ?= "$(ROCKETCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/classes:$(ROCKETCHIP_DIR)/chisel3/target/scala-$(SCALA_VERSION_MAJOR)/*"
+TESTCHIPIP_CLASSES ?= "$(TESTCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/classes"
+FIRRTL_JAR ?= $(ROCKETCHIP_DIR)/lib/firrtl.jar
+
+$(FIRRTL_JAR): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR)/firrtl/src/main/scala)
+	$(MAKE) -C $(ROCKETCHIP_DIR)/firrtl SBT="$(SBT)" root_dir=$(ROCKETCHIP_DIR)/firrtl build-scala
+	mkdir -p $(dir $@)
+	cp -p $(ROCKETCHIP_DIR)/firrtl/utils/bin/firrtl.jar $@
+	touch $@
+
+build_dir=$(sim_dir)/generated-src
+
+CHISEL_ARGS ?=
+
+long_name=$(PROJECT).$(MODEL).$(CONFIG)
+
+FIRRTL_FILE  ?=$(build_dir)/$(long_name).fir
+ANNO_FILE    ?=$(build_dir)/$(long_name).anno.json
+VERILOG_FILE ?=$(build_dir)/$(long_name).top.v
+HARNESS_FILE ?=$(build_dir)/$(long_name).harness.v
+SMEMS_FILE   ?=$(build_dir)/$(long_name).mems.v
+SMEMS_CONF   ?=$(build_dir)/$(long_name).mems.conf
+sim_dotf ?= $(build_dir)/sim_files.f
+
+REPL_SEQ_MEM = --repl-seq-mem -c:$(MODEL):-o:$(SMEMS_CONF)
+
+# This should match whatever the commonSettings version is in build.sbt
+BARSTOOLS_VER=1.0
+TAPEOUT_JAR=$(base_dir)/tools/barstools/tapeout/target/scala-$(SCALA_VERSION_MAJOR)/tapeout-assembly-$(BARSTOOLS_VER).jar
+MACROCOMPILER_JAR=$(base_dir)/tools/barstools/macros/target/scala-$(SCALA_VERSION_MAJOR)/barstools-macros-assembly-$(BARSTOOLS_VER).jar
+
+TAPEOUT ?= java -Xmx8G -Xss8M -cp $(ROCKET_CLASSES):$(TESTCHIPIP_CLASSES):$(TAPEOUT_JAR)
+MACROCOMPILER ?= java -Xmx8G -Xss8M -cp $(ROCKET_CLASSES):$(TESTCHIPIP_CLASSES):$(MACROCOMPILER_JAR)
+
+$(TAPEOUT_JAR): $(call lookup_scala_srcs, $(base_dir)/tools/barstools/tapeout/src/main/scala)
+	cd $(base_dir) && $(SBT) "tapeout/assembly"
+
+$(MACROCOMPILER_JAR): $(call lookup_scala_srcs, $(base_dir)/tools/barstools/macros/src/main/scala) $(call lookup_scala_srcs, $(base_dir)/tools/barstools/mdf/scalalib/src/main/scala)
+	cd $(base_dir) && $(SBT) "barstools-macros/assembly"
+
+.PHONY: jars
+jars: $(MACROCOMPILER_JAR) $(TAPEOUT_JAR)
+
+$(sim_dotf): $(SCALA_SOURCES) $(FIRRTL_JAR)
+	cd $(base_dir) && $(SBT) "runMain example.GenerateSimFiles -td $(build_dir) -sim $(sim_name)"
+
+$(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(sim_dotf)
+	mkdir -p $(build_dir)
+	cd $(base_dir) && $(SBT) "runMain $(PROJECT).Generator $(CHISEL_ARGS) $(build_dir) $(PROJECT) $(MODEL) $(CFG_PROJECT) $(CONFIG)"
+
+$(VERILOG_FILE) $(SMEMS_CONF): $(FIRRTL_FILE) $(ANNO_FILE) $(TAPEOUT_JAR)
+	$(TAPEOUT) barstools.tapeout.transforms.GenerateTop -o $(VERILOG_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) $(REPL_SEQ_MEM) -td $(build_dir)
+
+$(HARNESS_FILE): $(FIRRTL_FILE) $(ANNO_FILE) $(TAPEOUT_JAR)
+	$(TAPEOUT) barstools.tapeout.transforms.GenerateHarness -o $(HARNESS_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) -td $(build_dir)
+
+# This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
+$(SMEMS_FILE): $(SMEMS_CONF) $(MACROCOMPILER_JAR)
+	$(MACROCOMPILER) barstools.macros.MacroCompiler -n $(SMEMS_CONF) -v $(SMEMS_FILE) --mode synflops
+
+regression-tests = \
+	rv64ud-v-fcvt \
+        rv64ud-p-fdiv \
+        rv64ud-v-fadd \
+        rv64uf-v-fadd \
+        rv64um-v-mul \
+        rv64mi-p-breakpoint \
+        rv64uc-v-rvc \
+        rv64ud-v-structural \
+        rv64si-p-wfi \
+        rv64um-v-divw \
+        rv64ua-v-lrsc \
+        rv64ui-v-fence_i \
+        rv64ud-v-fcvt_w \
+        rv64uf-v-fmin \
+        rv64ui-v-sb \
+        rv64ua-v-amomax_d \
+        rv64ud-v-move \
+        rv64ud-v-fclass \
+        rv64ua-v-amoand_d \
+        rv64ua-v-amoxor_d \
+        rv64si-p-sbreak \
+        rv64ud-v-fmadd \
+        rv64uf-v-ldst \
+        rv64um-v-mulh \
+        rv64si-p-dirty
+
+output_dir=$(sim_dir)/output
+
+$(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
+	mkdir -p $(output_dir)
+	ln -sf $< $@
+
+.PHONY: clean-scala
+clean-scala:
+	rm -rf $(MACROCOMPILER_JAR) $(TAPEOUT_JAR)
+

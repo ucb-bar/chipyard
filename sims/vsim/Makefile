@@ -1,96 +1,81 @@
-#########################################################################################
-# vcs makefile
-#########################################################################################
-
-#########################################################################################
-# general path variables
-#########################################################################################
 base_dir=$(abspath ../..)
 sim_dir=$(abspath .)
 
-#########################################################################################
-# include shared variables
-#########################################################################################
-include $(base_dir)/variables.mk
+PROJECT ?= example
+MODEL ?= TestHarness
+CONFIG ?= DefaultExampleConfig
+CFG_PROJECT ?= $(PROJECT)
+TB ?= TestDriver
+TOP ?= ExampleTop
 
-#########################################################################################
-# name of simulator (used to generate *.f arguments file)
-#########################################################################################
 sim_name = vcs
 
-#########################################################################################
-# vcs simulator types and rules
-#########################################################################################
-sim_prefix = simv
-sim = $(sim_dir)/$(sim_prefix)-$(PROJECT)-$(CONFIG)
-sim_debug = $(sim_dir)/$(sim_prefix)-$(PROJECT)-$(CONFIG)-debug
+simv = $(sim_dir)/simv-$(PROJECT)-$(CONFIG)
+simv_debug = $(sim_dir)/simv-$(PROJECT)-$(CONFIG)-debug
 
-.PHONY: default debug
-default: $(sim)
-debug: $(sim_debug)
+default: $(simv)
 
-#########################################################################################
-# import other necessary rules and variables
-#########################################################################################
-include $(base_dir)/common.mk
+debug: $(simv_debug)
 
-#########################################################################################
-# vcs binary and arguments
-#########################################################################################
+include $(base_dir)/Makefrag
+
+sim_blackboxes = \
+  $(build_dir)/firrtl_black_box_resource_files.f
+
+rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
+
+sim_vsrcs = \
+	$(VERILOG_FILE) \
+	$(HARNESS_FILE) \
+	$(SMEMS_FILE)
+
 VCS = vcs -full64
 
-VCS_CC_OPTS = \
-	-CC "-I$(VCS_HOME)/include" \
+VCS_OPTS = -notice -line +lint=all,noVCDE,noONGS,noUI -error=PCWM-L -timescale=1ns/10ps -quiet \
+	+rad +v2k +vcs+lic+wait \
+	+vc+list -CC "-I$(VCS_HOME)/include" \
 	-CC "-I$(RISCV)/include" \
 	-CC "-std=c++11" \
 	-CC "-Wl,-rpath,$(RISCV)/lib" \
-	$(RISCV)/lib/libfesvr.so
-
-VCS_NONCC_OPTS = \
-	+lint=all,noVCDE,noONGS,noUI \
-	-error=PCWM-L \
-	-timescale=1ns/10ps \
-	-quiet \
-	+rad \
-	+v2k \
-	+vcs+lic+wait \
-	+vc+list \
-	-f $(sim_blackboxes) \
-	-f $(sim_dotf) \
+	-f $(sim_blackboxes) -f $(sim_dotf) \
+	$(RISCV)/lib/libfesvr.so \
 	-sverilog \
-	+incdir+$(build_dir) \
-	+define+CLOCK_PERIOD=1.0 \
-    $(sim_vsrcs) \
+	+incdir+$(generated_dir) \
+	+define+CLOCK_PERIOD=1.0 $(sim_vsrcs) \
 	+define+PRINTF_COND=$(TB).printf_cond \
 	+define+STOP_COND=!$(TB).reset \
 	+define+RANDOMIZE_MEM_INIT \
 	+define+RANDOMIZE_REG_INIT \
 	+define+RANDOMIZE_GARBAGE_ASSIGN \
 	+define+RANDOMIZE_INVALID_ASSIGN \
-	+libext+.v
+	+libext+.v \
 
-VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS)
+verilog: $(sim_vsrcs)
 
-#########################################################################################
-# vcs simulator rules
-#########################################################################################
-$(sim): $(sim_vsrcs) $(sim_dotf)
+$(simv): $(sim_vsrcs) $(sim_dotf)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	-debug_pp
 
-$(sim_debug) : $(sim_vsrcs) $(sim_dotf)
+$(simv_debug) : $(sim_vsrcs) $(sim_dotf)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	+define+DEBUG -debug_pp
 
-#########################################################################################
-# create a vcs vpd rule
-#########################################################################################
-$(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
-	$(sim_debug) +vcdplusfile=$@ +max-cycles=$(timeout_cycles) $<
+$(output_dir)/%.out: $(output_dir)/% $(simv)
+	$(simv) +verbose +max-cycles=1000000 $< 3>&1 1>&2 2>&3 | spike-dasm > $@
 
-#########################################################################################
-# general cleanup rule
-#########################################################################################
+$(output_dir)/%.run: $(output_dir)/% $(simv)
+	$(simv) +max-cycles=1000000 $< && touch $@
+
+$(output_dir)/%.vpd: $(output_dir)/% $(simv_debug)
+	$(simv_debug) +vcdplusfile=$@ +max-cycles=1000000 $<
+
+run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))
+
+run-regression-tests-fast: $(addprefix $(output_dir)/,$(addsuffix .run,$(regression-tests)))
+
+run-regression-tests-debug: $(addprefix $(output_dir)/,$(addsuffix .vpd,$(regression-tests)))
+
+clean:
+	rm -rf generated-src csrc simv-* ucli.key vc_hdrs.h
+
 .PHONY: clean
-clean: clean-scala
-	rm -rf $(build_dir) csrc $(sim_prefix)-* ucli.key vc_hdrs.h
