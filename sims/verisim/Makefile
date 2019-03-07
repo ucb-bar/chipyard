@@ -1,4 +1,4 @@
-base_dir=$(abspath ..)
+base_dir=$(abspath ../..)
 sim_dir=$(abspath .)
 
 PROJECT ?= example

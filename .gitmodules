@@ -1,9 +1,9 @@
 [submodule "rocket-chip"]
-	path = rocket-chip
+	path = generators/rocket-chip
 	url = https://github.com/ucb-bar/rocket-chip.git
 [submodule "testchipip"]
-	path = testchipip
+	path = generators/testchipip
 	url = https://github.com/ucb-bar/testchipip.git
 [submodule "barstools"]
-	path = barstools
+	path = tools/barstools
 	url = https://github.com/ucb-bar/barstools.git

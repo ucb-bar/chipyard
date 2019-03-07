@@ -19,9 +19,9 @@ lazy val commonSettings = Seq(
     Resolver.sonatypeRepo("releases"),
     Resolver.mavenLocal))
 
-lazy val rocketchip = RootProject(file("rocket-chip"))
+lazy val rocketchip = RootProject(file("generators/rocket-chip"))
 
-lazy val testchipip = project.settings(commonSettings)
+lazy val testchipip = (project in file("generators/testchipip")).settings(commonSettings)
   .dependsOn(rocketchip)
 
 // Checks for -DROCKET_USE_MAVEN.
@@ -39,12 +39,12 @@ def conditionalDependsOn(prj: Project): Project = {
 lazy val example = conditionalDependsOn(project in file("."))
   .settings(commonSettings)
 
-lazy val tapeout = conditionalDependsOn(project in file("./barstools/tapeout/"))
+lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
   .settings(commonSettings)
 
-lazy val mdf = (project in file("./barstools/mdf/scalalib/"))
+lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
 
-lazy val `barstools-macros` = conditionalDependsOn(project in file("./barstools/macros/"))
+lazy val `barstools-macros` = conditionalDependsOn(project in file("./tools/barstools/macros/"))
   .enablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonSettings)
   .dependsOn(mdf)
