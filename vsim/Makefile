@@ -41,7 +41,7 @@ VCS_OPTS = -notice -line +lint=all,noVCDE,noONGS,noUI -error=PCWM-L -timescale=1
 	$(RISCV)/lib/libfesvr.so \
 	-sverilog \
 	+incdir+$(generated_dir) \
-	+define+CLOCK_PERIOD=1.0 $(sim_vsrcs) $(sim_csrcs) \
+	+define+CLOCK_PERIOD=1.0 $(sim_vsrcs) \
 	+define+PRINTF_COND=$(TB).printf_cond \
 	+define+STOP_COND=!$(TB).reset \
 	+define+RANDOMIZE_MEM_INIT \
@@ -52,11 +52,11 @@ VCS_OPTS = -notice -line +lint=all,noVCDE,noONGS,noUI -error=PCWM-L -timescale=1
 
 verilog: $(sim_vsrcs)
 
-$(simv): $(sim_vsrcs) $(sim_csrcs)
+$(simv): $(sim_vsrcs) $(sim_dotf)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	-debug_pp
 
-$(simv_debug) : $(sim_vsrcs) $(sim_csrcs)
+$(simv_debug) : $(sim_vsrcs) $(sim_dotf)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	+define+DEBUG -debug_pp
 

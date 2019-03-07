@@ -41,11 +41,16 @@ trait HasGenerateSimConfig {
 }
 
 object GenerateSimFiles extends App with HasGenerateSimConfig {
-  def addOption(file: File): String = {
+  def addOption(file: File, cfg: GenerateSimConfig): String = {
     val fname = file.getCanonicalPath
-    // add -FI flag for header files
+    // deal with header files
     if (fname.takeRight(2) == ".h") {
-      s"-FI ${fname}"
+      cfg.simulator match {
+        // verilator needs to explicitly include verilator.h, so use the -FI option
+        case VerilatorSimulator => s"-FI ${fname}"
+        // vcs pulls headers in with +incdir, doesn't have anything like verilator.h
+        case VCSSimulator => ""
+      }
     } else { // do nothing otherwise
       fname
     }
@@ -101,7 +106,7 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
     writeBootrom()
     firrtl.FileUtils.makeDirectory(cfg.targetDir)
     val files = resources(cfg.simulator).map { writeResource(_, cfg.targetDir) }
-    writeDotF(files.map(addOption), cfg)
+    writeDotF(files.map(addOption(_, cfg)), cfg)
   }
 
   parser.parse(args, GenerateSimConfig()) match {
