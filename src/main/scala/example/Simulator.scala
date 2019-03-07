@@ -4,12 +4,27 @@ import java.io.File
 
 case class GenerateSimConfig(
   targetDir: String = ".",
-  dotFName: String = "verilator_files.f",
+  dotFName: String = "sim_files.f",
+  simulator: Simulator = VerilatorSimulator,
 )
+
+sealed trait Simulator
+object VerilatorSimulator extends Simulator
+object VCSSimulator extends Simulator
 
 trait HasGenerateSimConfig {
   val parser = new scopt.OptionParser[GenerateSimConfig]("GenerateSimFiles") {
     head("GenerateSimFiles", "0.1")
+
+    opt[String]("simulator")
+      .abbr("sim")
+      .valueName("<simulator-name>")
+      .action((x, c) => x match {
+        case "verilator" => c.copy(simulator = VerilatorSimulator)
+        case "vcs" => c.copy(simulator = VCSSimulator)
+        case _ => throw new Exception(s"Unrecognized simulator $x")
+      })
+      .text("Name of simulator to generate files for (verilator, vcs)")
 
     opt[String]("target-dir")
       .abbr("td")
@@ -61,17 +76,21 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
     out.write(text)
     out.close()
   }
-  val resources = Seq(
-    // TODO(rigge): make conditional on if we are using verilator
-    "/project-template/csrc/emulator.cc",
+  def resources(sim: Simulator): Seq[String] = Seq(
     "/csrc/SimDTM.cc",
     "/csrc/SimJTAG.cc",
     "/csrc/remote_bitbang.h",
     "/csrc/remote_bitbang.cc",
-    "/csrc/verilator.h",
     "/vsrc/EICG_wrapper.v",
-    "/testchipip/bootrom/bootrom.rv64.img",
-  )
+  ) ++ (sim match { // simulator specific files to include
+    case VerilatorSimulator => Seq(
+      "/project-template/csrc/emulator.cc",
+      "/csrc/verilator.h",
+    )
+    case VCSSimulator => Seq(
+      "/vsrc/TestDriver.v",
+    )
+  })
 
   def writeBootrom(): Unit = {
     firrtl.FileUtils.makeDirectory("./bootrom/")
@@ -81,7 +100,7 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
   def writeFiles(cfg: GenerateSimConfig): Unit = {
     writeBootrom()
     firrtl.FileUtils.makeDirectory(cfg.targetDir)
-    val files = resources.map { writeResource(_, cfg.targetDir) }
+    val files = resources(cfg.simulator).map { writeResource(_, cfg.targetDir) }
     writeDotF(files.map(addOption), cfg)
   }
 
