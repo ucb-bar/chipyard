@@ -13,3 +13,9 @@
 [submodule "tools/firrtl"]
 	path = tools/firrtl
 	url = https://github.com/freechipsproject/firrtl
+[submodule "generators/boom"]
+	path = generators/boom
+	url = git@github.com:riscv-boom/riscv-boom.git
+[submodule "tools/torture"]
+	path = tools/torture
+	url = git@github.com:ucb-bar/riscv-torture.git

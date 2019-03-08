@@ -1,7 +1,17 @@
-# Build and install our own Verilator, to work around versionining issues.
-VERILATOR_VERSION=3.920
+#########################################################################################
+# verilator installation makefrag
+#########################################################################################
+
+#########################################################################################
+# verilator version, binary, and path
+#########################################################################################
+VERILATOR_VERSION=4.008
 VERILATOR_SRCDIR=verilator/src/verilator-$(VERILATOR_VERSION)
 INSTALLED_VERILATOR=$(abspath verilator/install/bin/verilator)
+
+#########################################################################################
+# build and install our own verilator to work around versioning issues
+#########################################################################################
 $(INSTALLED_VERILATOR): $(VERILATOR_SRCDIR)/bin/verilator
 	$(MAKE) -C $(VERILATOR_SRCDIR) installbin installdata
 	touch $@
@@ -24,8 +34,11 @@ verilator/verilator-$(VERILATOR_VERSION).tar.gz:
 	mkdir -p $(dir $@)
 	wget http://www.veripool.org/ftp/verilator-$(VERILATOR_VERSION).tgz -O $@
 
-# Run Verilator to produce a fast binary to emulate this circuit.
+#########################################################################################
+# verilator binary and flags
+#########################################################################################
 VERILATOR := $(INSTALLED_VERILATOR) --cc --exe
+CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -D__STDC_FORMAT_MACROS
 VERILATOR_FLAGS := --top-module $(MODEL) \
 	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
 	+define+STOP_COND=\$$c\(\"done_reset\"\) --assert \
