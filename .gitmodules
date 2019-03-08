@@ -13,3 +13,9 @@
 [submodule "tools/firrtl"]
 	path = tools/firrtl
 	url = https://github.com/freechipsproject/firrtl
+[submodule "riscv-tools"]
+	path = toolchains/riscv-tools
+	url = https://github.com/riscv/riscv-tools.git
+[submodule "esp-tools"]
+	path = toolchains/esp-tools
+	url = https://github.com/ucb-bar/esp-tools.git
