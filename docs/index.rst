@@ -1,10 +1,10 @@
 .. ReBAR documentation master file, created by
-   sphinx-quickstart on Thu Apr 26 23:51:51 2018.
+   sphinx-quickstart on Fri Mar  8 11:46:38 2019.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
 Welcome to ReBAR's documentation!
-===================================
+=================================
 
 ReBAR is a a framework for designing and evaluating full-system hardware using agile teams. It is composed of a collection of tools and libraries designed to provide an intergration between open-source and commercial tools for the development of systems-on-chip. New to ReBAR? Jump to the :ref:`rebar-basics` page for more info.
 
@@ -51,6 +51,7 @@ ReBAR is a a framework for designing and evaluating full-system hardware using a
    :caption: Software:
 
    Software/Toolchains/index
+
 
 
 Indices and tables
