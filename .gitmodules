@@ -7,3 +7,9 @@
 [submodule "barstools"]
 	path = tools/barstools
 	url = https://github.com/ucb-bar/barstools.git
+[submodule "tools/chisel3"]
+	path = tools/chisel3
+	url = https://github.com/freechipsproject/chisel3.git
+[submodule "tools/firrtl"]
+	path = tools/firrtl
+	url = https://github.com/freechipsproject/firrtl
