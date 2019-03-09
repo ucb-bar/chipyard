@@ -3,10 +3,11 @@ bootrom
 target
 *.jar
 *.stamp
-/vsim
-/verisim/generated-src*
-/verisim/simulator-*
-/verisim/verilator
+/sims/vsim
+/sims/verisim
 simv*
 *.vcd
+*.swp
+.idea
 .DS_Store
+tags
