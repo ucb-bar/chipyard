@@ -3,9 +3,6 @@ bootrom
 target
 *.jar
 *.stamp
-/sims/vsim
-/sims/verisim
-simv*
 *.vcd
 *.swp
 .idea
