@@ -6,11 +6,11 @@
 # default variables to invoke the generator
 # descriptions:
 #   PROJECT = the scala package to find the MODEL in
-#   MODEL = the top level module of the project
+#   MODEL = the top level module of the project (normally the harness)
 #   CONFIG = the configuration class to give the parameters for the project
 #   CFG_PROJECT = the scala package to find the CONFIG class
-#   TB = TODO
-#   TOP = TODO
+#   TB = wrapper over the TestHarness needed to simulate in VCS
+#   TOP = top level module of the project (normally the module instantiated by the harness)
 #########################################################################################
 PROJECT     ?= example
 MODEL       ?= TestHarness

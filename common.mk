@@ -79,6 +79,12 @@ $(SMEMS_FILE): $(SMEMS_CONF) $(MACROCOMPILER_JAR)
 	$(MACROCOMPILER) barstools.macros.MacroCompiler -n $(SMEMS_CONF) -v $(SMEMS_FILE) --mode synflops
 
 #########################################################################################
+# helper rule to just make verilog files
+#########################################################################################
+.PHONY: verilog
+verilog: $(sim_vsrcs)
+
+#########################################################################################
 # run assembly/benchmarks rules
 #########################################################################################
 $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
