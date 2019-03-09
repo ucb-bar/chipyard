@@ -11,7 +11,7 @@ sim_dir=$(abspath .)
 #########################################################################################
 # include shared variables
 #########################################################################################
-include $(base_dir)/Makefrag-Variables
+include $(base_dir)/variables.mk
 
 #########################################################################################
 # name of simulator (used to generate *.f arguments file)
@@ -32,8 +32,8 @@ debug: $(sim_debug)
 #########################################################################################
 # import other necessary rules and variables
 #########################################################################################
-include $(base_dir)/Makefrag
-include $(sim_dir)/Makefrag-Verilator
+include $(base_dir)/common.mk
+include $(sim_dir)/verilator.mk
 
 #########################################################################################
 # verilator build paths and file names
