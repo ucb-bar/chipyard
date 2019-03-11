@@ -8,6 +8,8 @@ CFG_PROJECT ?= $(PROJECT)
 TB ?= TestDriver
 TOP ?= ExampleTop
 
+sim_name = vcs
+
 simv = $(sim_dir)/simv-$(PROJECT)-$(CONFIG)
 simv_debug = $(sim_dir)/simv-$(PROJECT)-$(CONFIG)-debug
 
@@ -20,32 +22,29 @@ ifneq ($(filter run% %.run %.out %.vpd %.vcd,$(MAKECMDGOALS)),)
 -include $(build_dir)/$(long_name).d
 endif
 
+sim_blackboxes = \
+  $(build_dir)/firrtl_black_box_resource_files.f
+
 rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
 
 sim_vsrcs = \
 	$(VERILOG_FILE) \
 	$(HARNESS_FILE) \
-	$(SMEMS_FILE) \
-	$(rocketchip_vsrc_dir)/TestDriver.v \
-	$(rocketchip_vsrc_dir)/AsyncResetReg.v \
-	$(rocketchip_vsrc_dir)/plusarg_reader.v \
-	$(testchip_vsrcs)
-
-sim_csrcs = \
-	$(testchip_csrcs)
+	$(SMEMS_FILE)
 
 VCS = vcs -full64
 
 VCS_OPTS = -notice -line +lint=all,noVCDE,noONGS,noUI -error=PCWM-L -timescale=1ns/10ps -quiet \
 	+rad +v2k +vcs+lic+wait \
 	+vc+list -CC "-I$(VCS_HOME)/include" \
-	-CC "-I$(RISCV)/include -I$(base_dir)/testchipip/csrc" \
+	-CC "-I$(RISCV)/include" \
 	-CC "-std=c++11" \
 	-CC "-Wl,-rpath,$(RISCV)/lib" \
+	-f $(sim_blackboxes) -f $(sim_dotf) \
 	$(RISCV)/lib/libfesvr.so \
 	-sverilog \
 	+incdir+$(generated_dir) \
-	+define+CLOCK_PERIOD=1.0 $(sim_vsrcs) $(sim_csrcs) \
+	+define+CLOCK_PERIOD=1.0 $(sim_vsrcs) \
 	+define+PRINTF_COND=$(TB).printf_cond \
 	+define+STOP_COND=!$(TB).reset \
 	+define+RANDOMIZE_MEM_INIT \
@@ -56,11 +55,11 @@ VCS_OPTS = -notice -line +lint=all,noVCDE,noONGS,noUI -error=PCWM-L -timescale=1
 
 verilog: $(sim_vsrcs)
 
-$(simv): $(sim_vsrcs) $(sim_csrcs)
+$(simv): $(sim_vsrcs) $(sim_dotf)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	-debug_pp
 
-$(simv_debug) : $(sim_vsrcs) $(sim_csrcs)
+$(simv_debug) : $(sim_vsrcs) $(sim_dotf)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	+define+DEBUG -debug_pp
 

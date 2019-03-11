@@ -1,6 +1,12 @@
+bootrom
 /Makefrag.pkgs
 target
 *.jar
 *.stamp
 /vsim
-/verisim
+/verisim/generated-src*
+/verisim/simulator-*
+/verisim/verilator
+simv*
+*.vcd
+.DS_Store

@@ -105,9 +105,15 @@ trait HasPeripheryPWMAXI4 { this: BaseSubsystem =>
   private val portName = "pwm"
 
   val pwm = LazyModule(new PWMAXI4(
-    PWMParams(address, 8 * pbus.beatBytes))(p))
+    PWMParams(address, pbus.beatBytes))(p))
 
-  pbus.toFixedWidthSlave(Some(portName)) { pwm.node := TLToAXI4() }
+  pbus.toSlave(Some(portName)) {
+    pwm.node :=
+      AXI4Buffer () :=
+      TLToAXI4() :=
+      // toVariableWidthSlave doesn't use holdFirstDeny, which TLToAXI4() needs
+      TLFragmenter(pbus.beatBytes, pbus.blockBytes, holdFirstDeny = true)
+  }
 }
 
 trait HasPeripheryPWMAXI4ModuleImp extends LazyModuleImp {
