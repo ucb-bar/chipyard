@@ -302,7 +302,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
             case (None, None) => one
           }
           selectRegs(ref.name) = WRef(regName, tpe)
-          stmts += DefRegister(NoInfo, regName, tpe, WRef(port.clock.name), zero, WRef(regName))
+          stmts += DefRegister(NoInfo, regName, tpe, WRef(port.clock.get.name), zero, WRef(regName))
           stmts += Connect(NoInfo, WRef(regName), Mux(enable, WRef(nodeName), WRef(regName), tpe))
         }
       }
@@ -348,9 +348,11 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
 
           // Clock port mapping
           /* Palmer: FIXME: I don't handle memories with read/write clocks yet. */
-          stmts += connectPorts(WRef(memPort.src.clock.name),
-                                libPort.src.clock.name,
-                                libPort.src.clock.polarity)
+          /* Colin not all libPorts have clocks but all memPorts do*/
+          libPort.src.clock.foreach { cPort =>
+            stmts += connectPorts(WRef(memPort.src.clock.get.name),
+                                       cPort.name,
+                                       cPort.polarity) }
 
           // Adress port mapping
           /* Palmer: The address port to a memory is just the low-order bits of

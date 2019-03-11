@@ -38,7 +38,7 @@ class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pa
     )
 
     val readConnects = lib.readers.zipWithIndex flatMap { case (r, i) =>
-      val clock = portToExpression(r.src.clock)
+      val clock = portToExpression(r.src.clock.get)
       val address = portToExpression(r.src.address)
       val enable = (r.src chipEnable, r.src readEnable) match {
         case (Some(en_port), Some(re_port)) =>
@@ -63,7 +63,7 @@ class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pa
     }
 
     val writeConnects = lib.writers.zipWithIndex flatMap { case (w, i) =>
-      val clock = portToExpression(w.src.clock)
+      val clock = portToExpression(w.src.clock.get)
       val address = portToExpression(w.src.address)
       val enable = (w.src.chipEnable, w.src.writeEnable) match {
         case (Some(en), Some(we)) =>
@@ -95,7 +95,7 @@ class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pa
     }
 
     val readwriteConnects = lib.readwriters.zipWithIndex flatMap { case (rw, i) =>
-      val clock = portToExpression(rw.src.clock)
+      val clock = portToExpression(rw.src.clock.get)
       val address = portToExpression(rw.src.address)
       val wmode = rw.src.writeEnable match {
         case Some(we) => portToExpression(we)

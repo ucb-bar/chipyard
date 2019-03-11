@@ -24,8 +24,8 @@ class FirrtlMacroPort(port: MacroPort) {
 
   // Bundle representing this macro port.
   val tpe = BundleType(Seq(
-    Field(port.clock.name, Flip, ClockType),
     Field(port.address.name, Flip, addrType)) ++
+    (port.clock map (p => Field(p.name, Flip, ClockType))) ++
     (port.input map (p => Field(p.name, Flip, dataType))) ++
     (port.output map (p => Field(p.name, Default, dataType))) ++
     (port.chipEnable map (p => Field(p.name, Flip, BoolType))) ++
@@ -93,7 +93,7 @@ object Utils {
         MacroPort(
           width=Some(width), depth=Some(depth),
           address=PolarizedPort(s"${portName}_addr", ActiveHigh),
-          clock=PolarizedPort(s"${portName}_clk", PositiveEdge),
+          clock=Some(PolarizedPort(s"${portName}_clk", PositiveEdge)),
           chipEnable=Some(PolarizedPort(s"${portName}_en", ActiveHigh)),
           output=Some(PolarizedPort(s"${portName}_data", ActiveHigh))
         ) }
@@ -103,7 +103,7 @@ object Utils {
         MacroPort(
           width=Some(width), depth=Some(depth),
           address=PolarizedPort(s"${portName}_addr", ActiveHigh),
-          clock=PolarizedPort(s"${portName}_clk", PositiveEdge),
+          clock=Some(PolarizedPort(s"${portName}_clk", PositiveEdge)),
           writeEnable=Some(PolarizedPort(s"${portName}_en", ActiveHigh)),
           input=Some(PolarizedPort(s"${portName}_data", ActiveHigh))
         ) }
@@ -113,7 +113,7 @@ object Utils {
         MacroPort(
           width=Some(width), depth=Some(depth),
           address=PolarizedPort(s"${portName}_addr", ActiveHigh),
-          clock=PolarizedPort(s"${portName}_clk", PositiveEdge),
+          clock=Some(PolarizedPort(s"${portName}_clk", PositiveEdge)),
           writeEnable=Some(PolarizedPort(s"${portName}_en", ActiveHigh)),
           maskPort=Some(PolarizedPort(s"${portName}_mask", ActiveHigh)),
           maskGran=maskGran,
@@ -125,7 +125,7 @@ object Utils {
         MacroPort(
           width=Some(width), depth=Some(depth),
           address=PolarizedPort(s"${portName}_addr", ActiveHigh),
-          clock=PolarizedPort(s"${portName}_clk", PositiveEdge),
+          clock=Some(PolarizedPort(s"${portName}_clk", PositiveEdge)),
           chipEnable=Some(PolarizedPort(s"${portName}_en", ActiveHigh)),
           writeEnable=Some(PolarizedPort(s"${portName}_wmode", ActiveHigh)),
           input=Some(PolarizedPort(s"${portName}_wdata", ActiveHigh)),
@@ -137,7 +137,7 @@ object Utils {
         MacroPort(
           width=Some(width), depth=Some(depth),
           address=PolarizedPort(s"${portName}_addr", ActiveHigh),
-          clock=PolarizedPort(s"${portName}_clk", PositiveEdge),
+          clock=Some(PolarizedPort(s"${portName}_clk", PositiveEdge)),
           chipEnable=Some(PolarizedPort(s"${portName}_en", ActiveHigh)),
           writeEnable=Some(PolarizedPort(s"${portName}_wmode", ActiveHigh)),
           maskPort=Some(PolarizedPort(s"${portName}_wmask", ActiveHigh)),
