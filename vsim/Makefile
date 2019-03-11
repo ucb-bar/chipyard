@@ -18,6 +18,9 @@ default: $(simv)
 debug: $(simv_debug)
 
 include $(base_dir)/Makefrag
+ifneq ($(filter run% %.run %.out %.vpd %.vcd,$(MAKECMDGOALS)),)
+-include $(build_dir)/$(long_name).d
+endif
 
 sim_blackboxes = \
   $(build_dir)/firrtl_black_box_resource_files.f
