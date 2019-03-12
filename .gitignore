@@ -10,3 +10,5 @@ target
 simv*
 *.vcd
 .DS_Store
+*~
+\#*\#
