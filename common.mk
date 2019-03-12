@@ -6,7 +6,7 @@ SHELL=/bin/bash
 #########################################################################################
 # variables to get all *.scala files
 #########################################################################################
-lookup_scala_srcs = $(shell find $(1)/ -iname "*.scala" 2> /dev/null)
+lookup_scala_srcs = $(shell find -L $(1)/ -iname "*.scala" 2> /dev/null)
 
 PACKAGES=rocket-chip testchipip
 SCALA_SOURCES=$(foreach pkg,$(PACKAGES),$(call lookup_scala_srcs,$(base_dir)/generators/$(pkg)/src/main/scala)) $(call lookup_scala_srcs,$(base_dir)/src/main/scala)
