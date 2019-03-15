@@ -18,7 +18,7 @@ trait CostMetric extends Serializable {
    * @return The cost of this compile, defined by this cost metric, or None if
    *         it cannot be compiled.
    */
-  def cost(mem: Macro, lib: Macro): Option[BigInt]
+  def cost(mem: Macro, lib: Macro): Option[Double]
 
   /**
    * Helper function to return the map of arguments (or an empty map if there are none).
@@ -43,7 +43,7 @@ trait CostMetricCompanion {
  * TODO: figure out what is the difference between this metric and the current
  * default metric and either revive or delete this metric. */
 object OldMetric extends CostMetric with CostMetricCompanion {
-  override def cost(mem: Macro, lib: Macro): Option[BigInt] = {
+  override def cost(mem: Macro, lib: Macro): Option[Double] = {
     /* Palmer: A quick cost function (that must be kept in sync with
      * memory_cost()) that attempts to avoid compiling unncessary
      * memories.  This is a lower bound on the cost of compiling a
@@ -61,9 +61,9 @@ object OldMetric extends CostMetric with CostMetricCompanion {
 /**
  * An external cost function.
  * Calls the specified path with paths to the JSON MDF representation of the mem
- * and lib macros. The external executable should print a BigInt.
+ * and lib macros. The external executable should print a Double.
  * None will be returned if the external executable does not print a valid
- * BigInt.
+ * Double.
  */
 class ExternalMetric(path: String) extends CostMetric {
   import mdf.macrolib.Utils.writeMacroToPath
@@ -71,7 +71,7 @@ class ExternalMetric(path: String) extends CostMetric {
   import scala.language.postfixOps // for !! postfix op
   import sys.process._
 
-  override def cost(mem: Macro, lib: Macro): Option[BigInt] = {
+  override def cost(mem: Macro, lib: Macro): Option[Double] = {
     // Create temporary files.
     val memFile = File.createTempFile("_macrocompiler_mem_", ".json")
     val libFile = File.createTempFile("_macrocompiler_lib_", ".json")
@@ -87,7 +87,7 @@ class ExternalMetric(path: String) extends CostMetric {
     libFile.delete()
 
     try {
-      Some(BigInt(result))
+      Some(result.toDouble)
     } catch {
       case e: NumberFormatException => None
     }
@@ -113,18 +113,16 @@ object ExternalMetric extends CostMetricCompanion {
 /** The current default metric in barstools, re-defined by Donggyu. */
 // TODO: write tests for this function to make sure it selects the right things
 object DefaultMetric extends CostMetric with CostMetricCompanion {
-  override def cost(mem: Macro, lib: Macro): Option[BigInt] = {
+  override def cost(mem: Macro, lib: Macro): Option[Double] = {
     val memMask = mem.src.ports map (_.maskGran) find (_.isDefined) map (_.get)
     val libMask = lib.src.ports map (_.maskGran) find (_.isDefined) map (_.get)
     val memWidth = (memMask, libMask) match {
-      case (Some(1), Some(1)) | (None, _) => mem.src.width
+      case (Some(_), Some(1)) | (None, _) => mem.src.width
       case (Some(p), _) => p // assume that the memory consists of smaller chunks
     }
-    return Some(
-      (((mem.src.depth - 1) / lib.src.depth) + 1) *
-      (((memWidth - 1) / lib.src.width) + 1) *
-      (lib.src.depth * lib.src.width + 1) // weights on # cells
-    )
+    val depthCost = (mem.src.depth.toDouble / lib.src.depth.toDouble)
+    val widthCost = (memWidth.toDouble / lib.src.width.toDouble)
+    return Some(depthCost * widthCost)
   }
 
   override def commandLineParams = Map()

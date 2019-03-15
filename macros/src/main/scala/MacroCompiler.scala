@@ -565,7 +565,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
 
         // Try to compile mem against each lib in libs, keeping track of the
         // best compiled version, external lib used, and cost.
-        val (best, cost) = (libs foldLeft (None: Option[(Module, ExtModule)], BigInt(Long.MaxValue))){
+        val (best, cost) = (fullLibs foldLeft (None: Option[(Module, ExtModule)], Double.MaxValue)){
           case ((best, cost), lib) if mem.src.ports.size != lib.src.ports.size =>
             /* Palmer: FIXME: This just assumes the Chisel and vendor ports are in the same
              * order, but I'm starting with what actually gets generated. */
