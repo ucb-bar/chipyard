@@ -15,7 +15,7 @@ import firrtl.Utils._
 import firrtl.annotations._
 import firrtl.transforms.{NoDCEAnnotation}
 import firrtl.CompilerUtils.getLoweringTransforms
-import mdf.macrolib.{PolarizedPort, PortPolarity}
+import mdf.macrolib.{PolarizedPort, PortPolarity, SRAMMacro, SRAMGroup, SRAMCompiler}
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 import java.io.{File, FileWriter}
 import Utils._
@@ -103,6 +103,7 @@ object MacroCompilerAnnotation {
 
 class MacroCompilerPass(mems: Option[Seq[Macro]],
                         libs: Option[Seq[Macro]],
+                        compilers: Option[SRAMCompiler],
                         costMetric: CostMetric = CostMetric.default,
                         mode: MacroCompilerAnnotation.CompilerMode = MacroCompilerAnnotation.Default) extends firrtl.passes.Pass {
   // Helper function to check the legality of bitPairs.
@@ -563,6 +564,29 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
         // in the 'circuit'.
         (mems foldLeft c.modules){ (modules, mem) =>
 
+        val sram = mem.src
+        def groupMatchesMask(group: SRAMGroup, mem:SRAMMacro): Boolean = {
+          val memMask = mem.ports map (_.maskGran) find (_.isDefined) map (_.get)
+          val libMask = group.ports map (_.maskGran) find (_.isDefined) map (_.get)
+          (memMask, libMask) match {
+            case (_, Some(1)) => true
+            case (None, _) => true
+            case (Some(_), None) => false
+            case (Some(m), Some(l)) => l <= m //Ignore memories that don't have nice mask
+          }
+        }
+        // Add compiler memories that might map well to libs
+        val compLibs = compilers match {
+          case Some(SRAMCompiler(_, groups)) => {
+            groups.filter(g => g.family == sram.family && groupMatchesMask(g, sram)).map( g => {
+              for(w <- g.width; d <- g.depth if((sram.width % w == 0) && (sram.depth % d == 0)))
+                yield Seq(new Macro(buildSRAMMacro(g, d, w, g.vt.head)))
+            } )
+          }
+          case None => Seq()
+        }
+        val fullLibs = libs ++ compLibs.flatten.flatten
+
         // Try to compile mem against each lib in libs, keeping track of the
         // best compiled version, external lib used, and cost.
         val (best, cost) = (fullLibs foldLeft (None: Option[(Module, ExtModule)], Double.MaxValue)){
@@ -632,12 +656,18 @@ class MacroCompilerTransform extends Transform {
       }
       val libs: Option[Seq[Macro]] = mdf.macrolib.Utils.readMDFFromPath(libFile) match {
         case Some(x:Seq[mdf.macrolib.Macro]) =>
-          if(useCompiler){
-            findSRAMCompiler(Some(x)).map{x => buildSRAMMacros(x).map(new Macro(_)) }
-          }
-          else Some(Utils.filterForSRAM(Some(x)) getOrElse(List()) map {new Macro(_)})
+          Some(Utils.filterForSRAM(Some(x)) getOrElse(List()) map {new Macro(_)})
         case _ => None
       }
+      val compilers: Option[mdf.macrolib.SRAMCompiler] = mdf.macrolib.Utils.readMDFFromPath(libFile) match {
+        case Some(x:Seq[mdf.macrolib.Macro]) =>
+          if(useCompiler){
+            findSRAMCompiler(Some(x))
+          }
+          else None
+        case _ => None
+      }
+
 
       // Helper function to turn a set of mem names into a Seq[Macro].
       def setToSeqMacro(names: Set[String]): Seq[Macro] = {
@@ -655,7 +685,7 @@ class MacroCompilerTransform extends Transform {
       }.getOrElse(Seq.empty)
 
       val transforms = Seq(
-        new MacroCompilerPass(memCompile, libs, costMetric, mode),
+        new MacroCompilerPass(memCompile, libs, compilers, costMetric, mode),
         new SynFlopsPass(true, memSynflops ++ (if (mode == MacroCompilerAnnotation.CompileAndSynflops) {
           libs.get
         } else {

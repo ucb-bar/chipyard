@@ -78,8 +78,17 @@ object Utils {
   }
   def readConfFromString(str: String): Seq[mdf.macrolib.Macro] = {
     MemConf.fromString(str).map { m:MemConf =>
-      SRAMMacro(m.name, m.width, m.depth, "", Utils.portSpecToMacroPort(m.width, m.depth, m.maskGranularity, m.ports), Seq.empty[MacroExtraPort])
+      SRAMMacro(m.name, m.width, m.depth, Utils.portSpecToFamily(m.ports), Utils.portSpecToMacroPort(m.width, m.depth, m.maskGranularity, m.ports), Seq.empty[MacroExtraPort])
     }
+  }
+  def portSpecToFamily(ports: Seq[MemPort]): String = {
+    val numR = ports.count(_ match { case ReadPort => true; case _ => false})
+    val numW = ports.count(_ match { case WritePort|MaskedWritePort => true; case _ => false})
+    val numRW = ports.count(_ match { case ReadWritePort|MaskedReadWritePort => true; case _ => false})
+    val numRStr = if(numR > 0) s"${numR}r" else ""
+    val numWStr = if(numW > 0) s"${numW}w" else ""
+    val numRWStr = if(numRW > 0) s"${numRW}rw" else ""
+    return numRStr + numWStr + numRWStr
   }
   // This translates between two represenations of ports
   def portSpecToMacroPort(width: Int, depth: Int, maskGran: Option[Int], ports: Seq[MemPort]): Seq[MacroPort] = {
@@ -159,6 +168,9 @@ object Utils {
   def buildSRAMMacros(s: mdf.macrolib.SRAMCompiler): Seq[mdf.macrolib.SRAMMacro] = {
     for (g <- s.groups; d <- g.depth; w <- g.width; vt <- g.vt)
       yield mdf.macrolib.SRAMMacro(makeName(g, d, w, vt), w, d, g.family, g.ports.map(_.copy(width=Some(w), depth=Some(d))), g.extraPorts)
+  }
+  def buildSRAMMacro(g: mdf.macrolib.SRAMGroup, d: Int, w: Int, vt: String): mdf.macrolib.SRAMMacro = {
+    return mdf.macrolib.SRAMMacro(makeName(g, d, w, vt), w, d, g.family, g.ports.map(_.copy(width=Some(w), depth=Some(d))), g.extraPorts)
   }
   def makeName(g: mdf.macrolib.SRAMGroup, depth: Int, width: Int, vt: String): String = {
     g.name.foldLeft(""){ (builder, next) =>
