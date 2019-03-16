@@ -1,3 +1,4 @@
+*
 !.gitignore
 !Makefile
-!Makefrag-verilator
+!verilator.mk
