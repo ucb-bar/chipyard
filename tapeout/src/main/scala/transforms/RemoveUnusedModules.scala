@@ -11,8 +11,8 @@ import firrtl.transforms.DontTouchAnnotation
 // Removes all the unused modules in a circuit by recursing through every
 // instance (starting at the main module)
 class RemoveUnusedModules extends Transform {
-  def inputForm = MidForm
-  def outputForm = MidForm
+  def inputForm = HighForm
+  def outputForm = HighForm
 
   def execute(state: CircuitState): CircuitState = {
     val modulesByName = state.circuit.modules.map{

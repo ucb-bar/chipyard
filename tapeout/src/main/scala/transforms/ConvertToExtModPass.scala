@@ -25,8 +25,8 @@ class ConvertToExtModPass(classify: (Module) => Boolean) extends Pass {
   }
 }
 class ConvertToExtMod(classify: (Module) => Boolean) extends Transform with SeqTransformBased {
-  def inputForm = MidForm
-  def outputForm = MidForm
+  def inputForm = HighForm
+  def outputForm = HighForm
   def transforms = Seq(new ConvertToExtModPass(classify))
 
   def execute(state: CircuitState): CircuitState = {
