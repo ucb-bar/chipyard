@@ -122,7 +122,16 @@ object DefaultMetric extends CostMetric with CostMetricCompanion {
     }
     val depthCost = (mem.src.depth.toDouble / lib.src.depth.toDouble)
     val widthCost = (memWidth.toDouble / lib.src.width.toDouble)
-    return Some(depthCost * widthCost)
+    val bitsCost = (lib.src.depth * lib.src.width)
+    // The most complicated case occurs when you have a 1x1 lib and a 1Mx1M lib and a third sane lib.
+    // In this case you want to ensure that a lib slightly smaller or larger than mem as the third lib
+    // will always be selected over the stupid libs.
+    if(widthCost < 1 && depthCost < 1) Some(bitsCost) // If the lib is bigger than pick the smallest lib
+    // If its not bigger in both dimensions pick the smallest in the dimension that the lib is larger in
+    else if(widthCost < 1) Some(depthCost * lib.src.width)
+    else if(depthCost < 1) Some(widthCost * lib.src.depth)
+    // If the lib is equal or smaller than source mem pick the largest lib
+    else Some(depthCost * widthCost)
   }
 
   override def commandLineParams = Map()

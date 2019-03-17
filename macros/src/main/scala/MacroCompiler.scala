@@ -569,7 +569,6 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
           val memMask = mem.ports map (_.maskGran) find (_.isDefined) map (_.get)
           val libMask = group.ports map (_.maskGran) find (_.isDefined) map (_.get)
           (memMask, libMask) match {
-            case (_, Some(1)) => true
             case (None, _) => true
             case (Some(_), None) => false
             case (Some(m), Some(l)) => l <= m //Ignore memories that don't have nice mask
