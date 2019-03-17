@@ -35,7 +35,7 @@ SMEMS_FILE   ?=$(build_dir)/$(long_name).mems.v
 SMEMS_CONF   ?=$(build_dir)/$(long_name).mems.conf
 sim_dotf ?= $(build_dir)/sim_files.f
 
-REPL_SEQ_MEM = --repl-seq-mem -c:$(MODEL):-o:$(SMEMS_CONF)
+REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SMEMS_CONF)
 
 # This should match whatever the commonSettings version is in build.sbt
 BARSTOOLS_VER=1.0
