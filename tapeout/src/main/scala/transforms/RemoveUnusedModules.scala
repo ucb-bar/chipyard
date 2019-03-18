@@ -28,6 +28,8 @@ class RemoveUnusedModules extends Transform {
               case b: Block => 
                 b.stmts.map{ someStatements(_) }
                   .foldLeft(Seq[Statement]())(_ ++ _)
+              case when: Conditionally =>
+                someStatements(when.conseq) ++ someStatements(when.alt)
               case i: DefInstance => Seq(i)
               case w: WDefInstance => Seq(w)
               case _ => Seq()
