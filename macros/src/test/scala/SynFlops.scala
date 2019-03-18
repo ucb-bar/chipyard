@@ -112,11 +112,11 @@ class Synflops_SplitPorts_Read_Write extends MacroCompilerSpec with HasSRAMGener
 """
 circuit target_memory :
   module target_memory :
-    input outerB_clk : Clock
     input outerB_addr : UInt<11>
+    input outerB_clk : Clock
     output outerB_dout : UInt<8>
-    input outerA_clk : Clock
     input outerA_addr : UInt<11>
+    input outerA_clk : Clock
     input outerA_din : UInt<8>
     input outerA_write_en : UInt<1>
 """
@@ -151,11 +151,11 @@ circuit target_memory :
 
   override def generateFooterPorts =
 """
-    input innerA_clk : Clock
     input innerA_addr : UInt<10>
+    input innerA_clk : Clock
     output innerA_dout : UInt<8>
-    input innerB_clk : Clock
     input innerB_addr : UInt<10>
+    input innerB_clk : Clock
     input innerB_din : UInt<8>
     input innerB_write_en : UInt<1>
 """
@@ -221,11 +221,11 @@ class Synflops_SplitPorts_MaskedMem_Read_MaskedWrite extends MacroCompilerSpec w
 """
 circuit target_memory :
   module target_memory :
-    input outerB_clk : Clock
     input outerB_addr : UInt<11>
+    input outerB_clk : Clock
     output outerB_dout : UInt<8>
-    input outerA_clk : Clock
     input outerA_addr : UInt<11>
+    input outerA_clk : Clock
     input outerA_din : UInt<8>
     input outerA_write_en : UInt<1>
     input outerA_mask : UInt<1>
@@ -263,11 +263,11 @@ circuit target_memory :
 
   override def generateFooterPorts =
 """
-    input innerA_clk : Clock
     input innerA_addr : UInt<10>
+    input innerA_clk : Clock
     output innerA_dout : UInt<8>
-    input innerB_clk : Clock
     input innerB_addr : UInt<10>
+    input innerB_clk : Clock
     input innerB_din : UInt<8>
     input innerB_write_en : UInt<1>
     input innerB_mask : UInt<8>

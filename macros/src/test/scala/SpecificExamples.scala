@@ -203,12 +203,12 @@ class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
 """
 circuit smem_0_ext :
   module _T_182_ext :
-    input R0_clk : Clock
     input R0_addr : UInt<6>
+    input R0_clk : Clock
     output R0_data : UInt<88>
     input R0_en : UInt<1>
-    input W0_clk : Clock
     input W0_addr : UInt<6>
+    input W0_clk : Clock
     input W0_data : UInt<88>
     input W0_en : UInt<1>
     input W0_mask : UInt<4>
@@ -249,24 +249,28 @@ circuit smem_0_ext :
     mem_0_0.CE2 <= R0_clk
     mem_0_0.A2 <= R0_addr
     node R0_data_0_0 = bits(mem_0_0.O2, 21, 0)
+    mem_0_0.I2 is invalid
     mem_0_0.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<1>("h0"))))
     mem_0_0.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<1>("h0"))))
     mem_0_0.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<1>("h0"))))
     mem_0_1.CE2 <= R0_clk
     mem_0_1.A2 <= R0_addr
     node R0_data_0_1 = bits(mem_0_1.O2, 21, 0)
+    mem_0_1.I2 is invalid
     mem_0_1.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<1>("h0"))))
     mem_0_1.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<1>("h0"))))
     mem_0_1.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<1>("h0"))))
     mem_0_2.CE2 <= R0_clk
     mem_0_2.A2 <= R0_addr
     node R0_data_0_2 = bits(mem_0_2.O2, 21, 0)
+    mem_0_2.I2 is invalid
     mem_0_2.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<1>("h0"))))
     mem_0_2.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<1>("h0"))))
     mem_0_2.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<1>("h0"))))
     mem_0_3.CE2 <= R0_clk
     mem_0_3.A2 <= R0_addr
     node R0_data_0_3 = bits(mem_0_3.O2, 21, 0)
+    mem_0_3.I2 is invalid
     mem_0_3.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<1>("h0"))))
     mem_0_3.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<1>("h0"))))
     mem_0_3.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<1>("h0"))))
@@ -302,56 +306,42 @@ circuit smem_0_ext :
     mem_1_0.CE2 <= R0_clk
     mem_1_0.A2 <= R0_addr
     node R0_data_1_0 = bits(mem_1_0.O2, 21, 0)
+    mem_1_0.I2 is invalid
     mem_1_0.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<1>("h1"))))
     mem_1_0.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<1>("h1"))))
     mem_1_0.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<1>("h1"))))
     mem_1_1.CE2 <= R0_clk
     mem_1_1.A2 <= R0_addr
     node R0_data_1_1 = bits(mem_1_1.O2, 21, 0)
+    mem_1_1.I2 is invalid
     mem_1_1.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<1>("h1"))))
     mem_1_1.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<1>("h1"))))
     mem_1_1.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<1>("h1"))))
     mem_1_2.CE2 <= R0_clk
     mem_1_2.A2 <= R0_addr
     node R0_data_1_2 = bits(mem_1_2.O2, 21, 0)
+    mem_1_2.I2 is invalid
     mem_1_2.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<1>("h1"))))
     mem_1_2.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<1>("h1"))))
     mem_1_2.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<1>("h1"))))
     mem_1_3.CE2 <= R0_clk
     mem_1_3.A2 <= R0_addr
     node R0_data_1_3 = bits(mem_1_3.O2, 21, 0)
+    mem_1_3.I2 is invalid
     mem_1_3.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<1>("h1"))))
     mem_1_3.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<1>("h1"))))
     mem_1_3.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<1>("h1"))))
     node R0_data_1 = cat(R0_data_1_3, cat(R0_data_1_2, cat(R0_data_1_1, R0_data_1_0)))
     R0_data <= mux(eq(R0_addr_sel_reg, UInt<1>("h0")), R0_data_0, mux(eq(R0_addr_sel_reg, UInt<1>("h1")), R0_data_1, UInt<1>("h0")))
 
-  extmodule my_sram_2rw_32x22 :
-    input CE1 : Clock
-    input A1 : UInt<5>
-    input I1 : UInt<22>
-    output O1 : UInt<22>
-    input CSB1 : UInt<1>
-    input OEB1 : UInt<1>
-    input WEB1 : UInt<1>
-    input CE2 : Clock
-    input A2 : UInt<5>
-    input I2 : UInt<22>
-    output O2 : UInt<22>
-    input CSB2 : UInt<1>
-    input OEB2 : UInt<1>
-    input WEB2 : UInt<1>
-
-    defname = my_sram_2rw_32x22
-
 
   module _T_84_ext :
-    input R0_clk : Clock
     input R0_addr : UInt<9>
+    input R0_clk : Clock
     output R0_data : UInt<64>
     input R0_en : UInt<1>
-    input W0_clk : Clock
     input W0_addr : UInt<9>
+    input W0_clk : Clock
     input W0_data : UInt<64>
     input W0_en : UInt<1>
     input W0_mask : UInt<1>
@@ -378,12 +368,14 @@ circuit smem_0_ext :
     mem_0_0.CE2 <= R0_clk
     mem_0_0.A2 <= R0_addr
     node R0_data_0_0 = bits(mem_0_0.O2, 31, 0)
+    mem_0_0.I2 is invalid
     mem_0_0.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<2>("h0"))))
     mem_0_0.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<2>("h0"))))
     mem_0_0.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<2>("h0"))))
     mem_0_1.CE2 <= R0_clk
     mem_0_1.A2 <= R0_addr
     node R0_data_0_1 = bits(mem_0_1.O2, 31, 0)
+    mem_0_1.I2 is invalid
     mem_0_1.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<2>("h0"))))
     mem_0_1.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<2>("h0"))))
     mem_0_1.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<2>("h0"))))
@@ -405,12 +397,14 @@ circuit smem_0_ext :
     mem_1_0.CE2 <= R0_clk
     mem_1_0.A2 <= R0_addr
     node R0_data_1_0 = bits(mem_1_0.O2, 31, 0)
+    mem_1_0.I2 is invalid
     mem_1_0.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<2>("h1"))))
     mem_1_0.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<2>("h1"))))
     mem_1_0.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<2>("h1"))))
     mem_1_1.CE2 <= R0_clk
     mem_1_1.A2 <= R0_addr
     node R0_data_1_1 = bits(mem_1_1.O2, 31, 0)
+    mem_1_1.I2 is invalid
     mem_1_1.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<2>("h1"))))
     mem_1_1.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<2>("h1"))))
     mem_1_1.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<2>("h1"))))
@@ -432,12 +426,14 @@ circuit smem_0_ext :
     mem_2_0.CE2 <= R0_clk
     mem_2_0.A2 <= R0_addr
     node R0_data_2_0 = bits(mem_2_0.O2, 31, 0)
+    mem_2_0.I2 is invalid
     mem_2_0.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<2>("h2"))))
     mem_2_0.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<2>("h2"))))
     mem_2_0.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<2>("h2"))))
     mem_2_1.CE2 <= R0_clk
     mem_2_1.A2 <= R0_addr
     node R0_data_2_1 = bits(mem_2_1.O2, 31, 0)
+    mem_2_1.I2 is invalid
     mem_2_1.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<2>("h2"))))
     mem_2_1.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<2>("h2"))))
     mem_2_1.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<2>("h2"))))
@@ -459,12 +455,14 @@ circuit smem_0_ext :
     mem_3_0.CE2 <= R0_clk
     mem_3_0.A2 <= R0_addr
     node R0_data_3_0 = bits(mem_3_0.O2, 31, 0)
+    mem_3_0.I2 is invalid
     mem_3_0.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<2>("h3"))))
     mem_3_0.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<2>("h3"))))
     mem_3_0.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<2>("h3"))))
     mem_3_1.CE2 <= R0_clk
     mem_3_1.A2 <= R0_addr
     node R0_data_3_1 = bits(mem_3_1.O2, 31, 0)
+    mem_3_1.I2 is invalid
     mem_3_1.OEB2 <= not(and(not(UInt<1>("h0")), eq(R0_addr_sel, UInt<2>("h3"))))
     mem_3_1.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<2>("h3"))))
     mem_3_1.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<2>("h3"))))
@@ -472,15 +470,15 @@ circuit smem_0_ext :
     R0_data <= mux(eq(R0_addr_sel_reg, UInt<2>("h0")), R0_data_0, mux(eq(R0_addr_sel_reg, UInt<2>("h1")), R0_data_1, mux(eq(R0_addr_sel_reg, UInt<2>("h2")), R0_data_2, mux(eq(R0_addr_sel_reg, UInt<2>("h3")), R0_data_3, UInt<1>("h0")))))
 
   extmodule my_sram_2rw_128x32 :
-    input CE1 : Clock
     input A1 : UInt<7>
+    input CE1 : Clock
     input I1 : UInt<32>
     output O1 : UInt<32>
     input CSB1 : UInt<1>
     input OEB1 : UInt<1>
     input WEB1 : UInt<1>
-    input CE2 : Clock
     input A2 : UInt<7>
+    input CE2 : Clock
     input I2 : UInt<32>
     output O2 : UInt<32>
     input CSB2 : UInt<1>
@@ -491,8 +489,8 @@ circuit smem_0_ext :
 
 
   module tag_array_ext :
-    input RW0_clk : Clock
     input RW0_addr : UInt<6>
+    input RW0_clk : Clock
     input RW0_wdata : UInt<80>
     output RW0_rdata : UInt<80>
     input RW0_en : UInt<1>
@@ -535,8 +533,8 @@ circuit smem_0_ext :
     RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
 
   extmodule my_sram_1rw_64x32 :
-    input CE : Clock
     input A : UInt<6>
+    input CE : Clock
     input I : UInt<32>
     output O : UInt<32>
     input CSB : UInt<1>
@@ -547,8 +545,8 @@ circuit smem_0_ext :
 
 
   module _T_886_ext :
-    input RW0_clk : Clock
     input RW0_addr : UInt<9>
+    input RW0_clk : Clock
     input RW0_wdata : UInt<64>
     output RW0_rdata : UInt<64>
     input RW0_en : UInt<1>
@@ -574,8 +572,8 @@ circuit smem_0_ext :
     RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
 
   extmodule my_sram_1rw_512x32 :
-    input CE : Clock
     input A : UInt<9>
+    input CE : Clock
     input I : UInt<32>
     output O : UInt<32>
     input CSB : UInt<1>
@@ -586,105 +584,68 @@ circuit smem_0_ext :
 
 
   module entries_info_ext :
-    input R0_clk : Clock
     input R0_addr : UInt<5>
+    input R0_clk : Clock
     output R0_data : UInt<40>
     input R0_en : UInt<1>
-    input W0_clk : Clock
     input W0_addr : UInt<5>
+    input W0_clk : Clock
     input W0_data : UInt<40>
     input W0_en : UInt<1>
 
-    inst mem_0_0 of my_sram_2rw_32x8
-    inst mem_0_1 of my_sram_2rw_32x8
-    inst mem_0_2 of my_sram_2rw_32x8
-    inst mem_0_3 of my_sram_2rw_32x8
-    inst mem_0_4 of my_sram_2rw_32x8
+    inst mem_0_0 of my_sram_2rw_32x22
+    inst mem_0_1 of my_sram_2rw_32x22
     mem_0_0.CE1 <= W0_clk
     mem_0_0.A1 <= W0_addr
-    mem_0_0.I1 <= bits(W0_data, 7, 0)
+    mem_0_0.I1 <= bits(W0_data, 21, 0)
     mem_0_0.OEB1 <= not(and(not(UInt<1>("h1")), UInt<1>("h1")))
     mem_0_0.WEB1 <= not(and(and(UInt<1>("h1"), UInt<1>("h1")), UInt<1>("h1")))
     mem_0_0.CSB1 <= not(and(W0_en, UInt<1>("h1")))
     mem_0_1.CE1 <= W0_clk
     mem_0_1.A1 <= W0_addr
-    mem_0_1.I1 <= bits(W0_data, 15, 8)
+    mem_0_1.I1 <= bits(W0_data, 39, 22)
     mem_0_1.OEB1 <= not(and(not(UInt<1>("h1")), UInt<1>("h1")))
     mem_0_1.WEB1 <= not(and(and(UInt<1>("h1"), UInt<1>("h1")), UInt<1>("h1")))
     mem_0_1.CSB1 <= not(and(W0_en, UInt<1>("h1")))
-    mem_0_2.CE1 <= W0_clk
-    mem_0_2.A1 <= W0_addr
-    mem_0_2.I1 <= bits(W0_data, 23, 16)
-    mem_0_2.OEB1 <= not(and(not(UInt<1>("h1")), UInt<1>("h1")))
-    mem_0_2.WEB1 <= not(and(and(UInt<1>("h1"), UInt<1>("h1")), UInt<1>("h1")))
-    mem_0_2.CSB1 <= not(and(W0_en, UInt<1>("h1")))
-    mem_0_3.CE1 <= W0_clk
-    mem_0_3.A1 <= W0_addr
-    mem_0_3.I1 <= bits(W0_data, 31, 24)
-    mem_0_3.OEB1 <= not(and(not(UInt<1>("h1")), UInt<1>("h1")))
-    mem_0_3.WEB1 <= not(and(and(UInt<1>("h1"), UInt<1>("h1")), UInt<1>("h1")))
-    mem_0_3.CSB1 <= not(and(W0_en, UInt<1>("h1")))
-    mem_0_4.CE1 <= W0_clk
-    mem_0_4.A1 <= W0_addr
-    mem_0_4.I1 <= bits(W0_data, 39, 32)
-    mem_0_4.OEB1 <= not(and(not(UInt<1>("h1")), UInt<1>("h1")))
-    mem_0_4.WEB1 <= not(and(and(UInt<1>("h1"), UInt<1>("h1")), UInt<1>("h1")))
-    mem_0_4.CSB1 <= not(and(W0_en, UInt<1>("h1")))
     mem_0_0.CE2 <= R0_clk
     mem_0_0.A2 <= R0_addr
-    node R0_data_0_0 = bits(mem_0_0.O2, 7, 0)
+    node R0_data_0_0 = bits(mem_0_0.O2, 21, 0)
+    mem_0_0.I2 is invalid
     mem_0_0.OEB2 <= not(and(not(UInt<1>("h0")), UInt<1>("h1")))
     mem_0_0.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), UInt<1>("h1")))
     mem_0_0.CSB2 <= not(and(R0_en, UInt<1>("h1")))
     mem_0_1.CE2 <= R0_clk
     mem_0_1.A2 <= R0_addr
-    node R0_data_0_1 = bits(mem_0_1.O2, 7, 0)
+    node R0_data_0_1 = bits(mem_0_1.O2, 17, 0)
+    mem_0_1.I2 is invalid
     mem_0_1.OEB2 <= not(and(not(UInt<1>("h0")), UInt<1>("h1")))
     mem_0_1.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), UInt<1>("h1")))
     mem_0_1.CSB2 <= not(and(R0_en, UInt<1>("h1")))
-    mem_0_2.CE2 <= R0_clk
-    mem_0_2.A2 <= R0_addr
-    node R0_data_0_2 = bits(mem_0_2.O2, 7, 0)
-    mem_0_2.OEB2 <= not(and(not(UInt<1>("h0")), UInt<1>("h1")))
-    mem_0_2.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), UInt<1>("h1")))
-    mem_0_2.CSB2 <= not(and(R0_en, UInt<1>("h1")))
-    mem_0_3.CE2 <= R0_clk
-    mem_0_3.A2 <= R0_addr
-    node R0_data_0_3 = bits(mem_0_3.O2, 7, 0)
-    mem_0_3.OEB2 <= not(and(not(UInt<1>("h0")), UInt<1>("h1")))
-    mem_0_3.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), UInt<1>("h1")))
-    mem_0_3.CSB2 <= not(and(R0_en, UInt<1>("h1")))
-    mem_0_4.CE2 <= R0_clk
-    mem_0_4.A2 <= R0_addr
-    node R0_data_0_4 = bits(mem_0_4.O2, 7, 0)
-    mem_0_4.OEB2 <= not(and(not(UInt<1>("h0")), UInt<1>("h1")))
-    mem_0_4.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), UInt<1>("h1")))
-    mem_0_4.CSB2 <= not(and(R0_en, UInt<1>("h1")))
-    node R0_data_0 = cat(R0_data_0_4, cat(R0_data_0_3, cat(R0_data_0_2, cat(R0_data_0_1, R0_data_0_0))))
+    node R0_data_0 = cat(R0_data_0_1, R0_data_0_0)
     R0_data <= mux(UInt<1>("h1"), R0_data_0, UInt<1>("h0"))
 
-  extmodule my_sram_2rw_32x8 :
-    input CE1 : Clock
+  extmodule my_sram_2rw_32x22 :
     input A1 : UInt<5>
-    input I1 : UInt<8>
-    output O1 : UInt<8>
+    input CE1 : Clock
+    input I1 : UInt<22>
+    output O1 : UInt<22>
     input CSB1 : UInt<1>
     input OEB1 : UInt<1>
     input WEB1 : UInt<1>
-    input CE2 : Clock
     input A2 : UInt<5>
-    input I2 : UInt<8>
-    output O2 : UInt<8>
+    input CE2 : Clock
+    input I2 : UInt<22>
+    output O2 : UInt<22>
     input CSB2 : UInt<1>
     input OEB2 : UInt<1>
     input WEB2 : UInt<1>
 
-    defname = my_sram_2rw_32x8
+    defname = my_sram_2rw_32x22
 
 
   module smem_ext :
-    input RW0_clk : Clock
     input RW0_addr : UInt<5>
+    input RW0_clk : Clock
     input RW0_wdata : UInt<32>
     output RW0_rdata : UInt<32>
     input RW0_en : UInt<1>
@@ -951,8 +912,8 @@ circuit smem_0_ext :
     RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
 
   module smem_0_ext :
-    input RW0_clk : Clock
     input RW0_addr : UInt<6>
+    input RW0_clk : Clock
     input RW0_wdata : UInt<32>
     output RW0_rdata : UInt<32>
     input RW0_en : UInt<1>
@@ -1219,8 +1180,8 @@ circuit smem_0_ext :
     RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
 
   extmodule my_sram_1rw_64x8 :
-    input CE : Clock
     input A : UInt<6>
+    input CE : Clock
     input I : UInt<8>
     output O : UInt<8>
     input CSB : UInt<1>
@@ -1425,8 +1386,8 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
 """
 circuit T_2172_ext :
   module tag_array_ext :
-    input RW0_clk : Clock
     input RW0_addr : UInt<6>
+    input RW0_clk : Clock
     input RW0_wdata : UInt<80>
     output RW0_rdata : UInt<80>
     input RW0_en : UInt<1>
@@ -1461,8 +1422,8 @@ circuit T_2172_ext :
     RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
 
   extmodule SRAM1RW64x32 :
-    input clk : Clock
     input addr : UInt<6>
+    input clk : Clock
     input din : UInt<32>
     output dout : UInt<32>
     input write_en : UInt<1>
@@ -1470,8 +1431,8 @@ circuit T_2172_ext :
     defname = SRAM1RW64x32
 
   module T_1090_ext :
-    input RW0_clk : Clock
     input RW0_addr : UInt<9>
+    input RW0_clk : Clock
     input RW0_wdata : UInt<64>
     output RW0_rdata : UInt<64>
     input RW0_en : UInt<1>
@@ -1493,8 +1454,8 @@ circuit T_2172_ext :
     RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
 
   extmodule SRAM1RW512x32 :
-    input clk : Clock
     input addr : UInt<9>
+    input clk : Clock
     input din : UInt<32>
     output dout : UInt<32>
     input write_en : UInt<1>
@@ -1503,8 +1464,8 @@ circuit T_2172_ext :
 
 
   module T_406_ext :
-    input RW0_clk : Clock
     input RW0_addr : UInt<9>
+    input RW0_clk : Clock
     input RW0_wdata : UInt<64>
     output RW0_rdata : UInt<64>
     input RW0_en : UInt<1>
@@ -1563,8 +1524,8 @@ circuit T_2172_ext :
     RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
 
   extmodule SRAM1RW512x8 :
-    input clk : Clock
     input addr : UInt<9>
+    input clk : Clock
     input din : UInt<8>
     output dout : UInt<8>
     input write_en : UInt<1>
@@ -1573,13 +1534,13 @@ circuit T_2172_ext :
 
 
   module T_2172_ext :
-    input W0_clk : Clock
     input W0_addr : UInt<6>
+    input W0_clk : Clock
     input W0_data : UInt<88>
     input W0_en : UInt<1>
     input W0_mask : UInt<4>
-    input R0_clk : Clock
     input R0_addr : UInt<6>
+    input R0_clk : Clock
     output R0_data : UInt<88>
     input R0_en : UInt<1>
 
@@ -1619,11 +1580,11 @@ circuit T_2172_ext :
     R0_data <= mux(UInt<1>("h1"), R0_data_0, UInt<1>("h0"))
 
   extmodule SRAM2RW64x32 :
-    input portA_clk : Clock
     input portA_addr : UInt<6>
+    input portA_clk : Clock
     output portA_dout : UInt<32>
-    input portB_clk : Clock
     input portB_addr : UInt<6>
+    input portB_clk : Clock
     input portB_din : UInt<32>
     input portB_write_en : UInt<1>
 

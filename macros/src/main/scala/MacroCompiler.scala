@@ -393,12 +393,14 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
               /* Palmer: The input port to a memory just needs to happen in parallel,
                * this does a part select to narrow the memory down. */
               stmts += connectPorts(bits(WRef(mem), high, low), lib, lib_polarity)
-            case (None, Some(lib)) =>
+              case (None, Some(lib)) =>
               /* Palmer: If the inner memory has an input port but the other
                * one doesn't then it's safe to just leave the inner
                * port floating.  This should be handled by the
                * default value of the write enable, so nothing should
                * every make it into the memory. */
+              //Firrtl cares about dangling inputs now tie it off
+              stmts += IsInvalid(NoInfo, WSubField(inst, lib.name))
             case (None, None) =>
               /* Palmer: If there's no input ports at all (ie, read-only
                * port on the memory) then just don't worry about it,

@@ -117,21 +117,22 @@ object DefaultMetric extends CostMetric with CostMetricCompanion {
     val memMask = mem.src.ports map (_.maskGran) find (_.isDefined) map (_.get)
     val libMask = lib.src.ports map (_.maskGran) find (_.isDefined) map (_.get)
     val memWidth = (memMask, libMask) match {
-      case (Some(_), Some(1)) | (None, _) => mem.src.width
-      case (Some(p), _) => p // assume that the memory consists of smaller chunks
+      case (None, _) => mem.src.width
+      case (Some(p), None) => (mem.src.width/p)*math.ceil(p.toDouble/lib.src.width)*lib.src.width //We map the mask to distinct memories
+      case (Some(p), Some(m)) => {
+        if(m <= p) (mem.src.width/p)*math.ceil(p.toDouble/m)*m //Using multiple m's to create a p (integeraly)
+        else (mem.src.width/p)*m //Waste the extra maskbits
+      }
     }
-    val depthCost = (mem.src.depth.toDouble / lib.src.depth.toDouble)
-    val widthCost = (memWidth.toDouble / lib.src.width.toDouble)
+    val depthCost = math.ceil(mem.src.depth.toDouble / lib.src.depth.toDouble)
+    val widthCost = math.ceil(memWidth.toDouble / lib.src.width.toDouble)
     val bitsCost = (lib.src.depth * lib.src.width)
-    // The most complicated case occurs when you have a 1x1 lib and a 1Mx1M lib and a third sane lib.
-    // In this case you want to ensure that a lib slightly smaller or larger than mem as the third lib
-    // will always be selected over the stupid libs.
-    if(widthCost < 1 && depthCost < 1) Some(bitsCost) // If the lib is bigger than pick the smallest lib
-    // If its not bigger in both dimensions pick the smallest in the dimension that the lib is larger in
-    else if(widthCost < 1) Some(depthCost * lib.src.width)
-    else if(depthCost < 1) Some(widthCost * lib.src.depth)
-    // If the lib is equal or smaller than source mem pick the largest lib
-    else Some(depthCost * widthCost)
+    // Fraction of wasted bits plus const per mem
+    val requestedBits = mem.src.depth * mem.src.width
+    val bitsWasted = depthCost*widthCost*bitsCost - requestedBits
+    val wastedConst = 0.05 // 0 means waste as few bits with no regard for instance count
+    val costPerInst = wastedConst*depthCost*widthCost
+    Some(1.0*bitsWasted/requestedBits+costPerInst)
   }
 
   override def commandLineParams = Map()

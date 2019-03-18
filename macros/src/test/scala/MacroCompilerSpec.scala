@@ -99,7 +99,7 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
     val macros = mems map (_.blackbox)
     val circuit = Circuit(NoInfo, macros, macros.last.name)
     val passes = Seq(
-      new MacroCompilerPass(Some(mems), libs, getCostMetric, if (synflops) MacroCompilerAnnotation.Synflops else MacroCompilerAnnotation.Default),
+      new MacroCompilerPass(Some(mems), libs, None, getCostMetric, if (synflops) MacroCompilerAnnotation.Synflops else MacroCompilerAnnotation.Default),
       new SynFlopsPass(synflops, libs getOrElse mems),
       RemoveEmpty)
     val result: Circuit = (passes foldLeft circuit)((c, pass) => pass run c)
@@ -140,7 +140,7 @@ trait HasSRAMGenerator {
 
     MacroPort(
       address = PolarizedPort(name = realPrefix + "addr", polarity = ActiveHigh),
-      clock = PolarizedPort(name = realPrefix + "clk", polarity = PositiveEdge),
+      clock = Some(PolarizedPort(name = realPrefix + "clk", polarity = PositiveEdge)),
 
       readEnable = if (readEnable) Some(PolarizedPort(name = realPrefix + "read_en", polarity = ActiveHigh)) else None,
       writeEnable = if (writeEnable) Some(PolarizedPort(name = realPrefix + "write_en", polarity = ActiveHigh)) else None,
@@ -350,8 +350,8 @@ trait HasSimpleTestGenerator {
       }
       val extraPortsStr = extraPorts.map { case (name, bits) => s"    input $name : UInt<$bits>" }.mkString("\n")
       s"""
-    input ${realPrefix}clk : Clock
     input ${realPrefix}addr : UInt<$addrWidth>
+    input ${realPrefix}clk : Clock
     $writeStr
     $readStr
     $readEnableStr

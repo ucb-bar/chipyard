@@ -255,8 +255,8 @@ class SplitDepth2048x8_extraPort extends MacroCompilerSpec with HasSRAMGenerator
 """
 circuit target_memory :
   module target_memory :
-    input outer_clk : Clock
     input outer_addr : UInt<11>
+    input outer_clk : Clock
     input outer_din : UInt<8>
     output outer_dout : UInt<8>
     input outer_write_en : UInt<1>
@@ -287,8 +287,8 @@ circuit target_memory :
     node outer_dout_1 = outer_dout_1_0
     outer_dout <= mux(eq(outer_addr_sel_reg, UInt<1>("h0")), outer_dout_0, mux(eq(outer_addr_sel_reg, UInt<1>("h1")), outer_dout_1, UInt<1>("h0")))
   extmodule awesome_lib_mem :
-    input lib_clk : Clock
     input lib_addr : UInt<10>
+    input lib_clk : Clock
     input lib_din : UInt<8>
     output lib_dout : UInt<8>
     input lib_write_en : UInt<1>
@@ -345,11 +345,11 @@ class SplitDepth_SplitPortsNonMasked extends MacroCompilerSpec with HasSRAMGener
 """
 circuit target_memory :
   module target_memory :
-    input outerB_clk : Clock
     input outerB_addr : UInt<11>
+    input outerB_clk : Clock
     output outerB_dout : UInt<8>
-    input outerA_clk : Clock
     input outerA_addr : UInt<11>
+    input outerA_clk : Clock
     input outerA_din : UInt<8>
     input outerA_write_en : UInt<1>
 
@@ -379,11 +379,11 @@ circuit target_memory :
     outerB_dout <= mux(eq(outerB_addr_sel_reg, UInt<1>("h0")), outerB_dout_0, mux(eq(outerB_addr_sel_reg, UInt<1>("h1")), outerB_dout_1, UInt<1>("h0")))
 
   extmodule awesome_lib_mem :
-    input innerA_clk : Clock
     input innerA_addr : UInt<10>
+    input innerA_clk : Clock
     output innerA_dout : UInt<8>
-    input innerB_clk : Clock
     input innerB_addr : UInt<10>
+    input innerB_clk : Clock
     input innerB_din : UInt<8>
     input innerB_write_en : UInt<1>
 
@@ -506,11 +506,11 @@ class SplitDepth_SplitPortsMasked extends MacroCompilerSpec with HasSRAMGenerato
 """
 circuit target_memory :
   module target_memory :
-    input outerB_clk : Clock
     input outerB_addr : UInt<11>
+    input outerB_clk : Clock
     output outerB_dout : UInt<8>
-    input outerA_clk : Clock
     input outerA_addr : UInt<11>
+    input outerA_clk : Clock
     input outerA_din : UInt<8>
     input outerA_write_en : UInt<1>
     input outerA_mask : UInt<1>
@@ -543,11 +543,11 @@ circuit target_memory :
     outerB_dout <= mux(eq(outerB_addr_sel_reg, UInt<1>("h0")), outerB_dout_0, mux(eq(outerB_addr_sel_reg, UInt<1>("h1")), outerB_dout_1, UInt<1>("h0")))
 
   extmodule awesome_lib_mem :
-    input innerA_clk : Clock
     input innerA_addr : UInt<10>
+    input innerA_clk : Clock
     output innerA_dout : UInt<8>
-    input innerB_clk : Clock
     input innerB_addr : UInt<10>
+    input innerB_clk : Clock
     input innerB_din : UInt<8>
     input innerB_write_en : UInt<1>
     input innerB_mask : UInt<8>

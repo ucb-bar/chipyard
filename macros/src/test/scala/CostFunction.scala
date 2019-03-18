@@ -10,7 +10,7 @@ import mdf.macrolib._
  */
 object TestMinWidthMetric extends CostMetric with CostMetricCompanion {
   // Smaller width = lower cost = favoured
-  override def cost(mem: Macro, lib: Macro): Option[BigInt] = Some(lib.src.width)
+  override def cost(mem: Macro, lib: Macro): Option[Double] = Some(lib.src.width)
 
   override def commandLineParams = Map()
   override def name = "TestMinWidthMetric"
@@ -68,8 +68,8 @@ class SelectCostMetric extends MacroCompilerSpec with HasSRAMGenerator {
 """
 circuit target_memory :
   module target_memory :
-    input clk : Clock
     input addr : UInt<10>
+    input clk : Clock
     input din : UInt<128>
     output dout : UInt<128>
     input write_en : UInt<1>
@@ -102,8 +102,8 @@ circuit target_memory :
     dout <= mux(UInt<1>("h1"), dout_0, UInt<1>("h0"))
 
   extmodule SRAM_WIDTH_32 :
-    input clk : Clock
     input addr : UInt<10>
+    input clk : Clock
     input din : UInt<32>
     output dout : UInt<32>
     input write_en : UInt<1>
