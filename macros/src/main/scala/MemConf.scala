@@ -47,9 +47,13 @@ object MemConf {
   val regex = raw"\s*name\s+(\w+)\s+depth\s+(\d+)\s+width\s+(\d+)\s+ports\s+([^\s]+)\s+(?:mask_gran\s+(\d+))?\s*".r
 
   def fromString(s: String): Seq[MemConf] = {
-    s.split("\n").toSeq.map(_ match {
-      case MemConf.regex(name, depth, width, ports, maskGran) => MemConf(name, depth.toInt, width.toInt, MemPort.fromString(ports), Option(maskGran).map(_.toInt))
-      case _ => throw new Exception(s"Error parsing MemConf string : ${s}")
-    })
+    if (s.isEmpty) {
+      Seq[MemConf]()
+    } else {
+      s.split("\n").toSeq.map(_ match {
+        case MemConf.regex(name, depth, width, ports, maskGran) => MemConf(name, depth.toInt, width.toInt, MemPort.fromString(ports), Option(maskGran).map(_.toInt))
+        case _ => throw new Exception(s"Error parsing MemConf string : ${s}")
+      })
+    }
   }
 }

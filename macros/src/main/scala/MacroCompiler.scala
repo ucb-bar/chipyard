@@ -839,6 +839,19 @@ object MacroCompiler extends App {
           }
           case None =>
         }
+      } else {
+        // Warn user
+        System.err println "WARNING: Empty *.mems.conf file. No memories generated."
+
+        // Emit empty verilog file if no macros found
+        params.get(Verilog) match {
+          case Some(verilogFile: String) => {
+            // Create an empty verilog file
+            val verilogWriter = new FileWriter(new File(verilogFile))
+            verilogWriter.close()
+          }
+          case None =>
+        }
       }
     } catch {
       case e: java.util.NoSuchElementException =>
