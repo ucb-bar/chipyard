@@ -78,7 +78,7 @@ object Utils {
   }
   def readConfFromString(str: String): Seq[mdf.macrolib.Macro] = {
     MemConf.fromString(str).map { m:MemConf =>
-      SRAMMacro(m.name, m.width, m.depth, Utils.portSpecToFamily(m.ports), Utils.portSpecToMacroPort(m.width, m.depth, m.maskGranularity, m.ports), Seq.empty[MacroExtraPort])
+      SRAMMacro(m.name, m.width, m.depth, Utils.portSpecToFamily(m.ports), Utils.portSpecToMacroPort(m.width, m.depth, m.maskGranularity, m.ports))
     }
   }
   def portSpecToFamily(ports: Seq[MemPort]): String = {
@@ -167,10 +167,10 @@ object Utils {
   }
   def buildSRAMMacros(s: mdf.macrolib.SRAMCompiler): Seq[mdf.macrolib.SRAMMacro] = {
     for (g <- s.groups; d <- g.depth; w <- g.width; vt <- g.vt)
-      yield mdf.macrolib.SRAMMacro(makeName(g, d, w, vt), w, d, g.family, g.ports.map(_.copy(width=Some(w), depth=Some(d))), g.extraPorts)
+      yield mdf.macrolib.SRAMMacro(makeName(g, d, w, vt), w, d, g.family, g.ports.map(_.copy(width=Some(w), depth=Some(d))), vt, g.mux, g.extraPorts)
   }
   def buildSRAMMacro(g: mdf.macrolib.SRAMGroup, d: Int, w: Int, vt: String): mdf.macrolib.SRAMMacro = {
-    return mdf.macrolib.SRAMMacro(makeName(g, d, w, vt), w, d, g.family, g.ports.map(_.copy(width=Some(w), depth=Some(d))), g.extraPorts)
+    return mdf.macrolib.SRAMMacro(makeName(g, d, w, vt), w, d, g.family, g.ports.map(_.copy(width=Some(w), depth=Some(d))), vt, g.mux, g.extraPorts)
   }
   def makeName(g: mdf.macrolib.SRAMGroup, depth: Int, width: Int, vt: String): String = {
     g.name.foldLeft(""){ (builder, next) =>

@@ -18,6 +18,7 @@ import firrtl.CompilerUtils.getLoweringTransforms
 import mdf.macrolib.{PolarizedPort, PortPolarity, SRAMMacro, SRAMGroup, SRAMCompiler}
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 import java.io.{File, FileWriter}
+import scala.io.{Source}
 import Utils._
 
 case class MacroCompilerException(msg: String) extends Exception(msg)
@@ -76,12 +77,14 @@ object MacroCompilerAnnotation {
     * @param mem           Path to memory lib
     * @param memFormat     Type of memory lib (Some("conf"), Some("mdf"), or None (defaults to mdf))
     * @param lib           Path to library lib or None if no libraries
+    * @param hammerIR      Path to HammerIR output or None (not generated in this case)
     * @param costMetric    Cost metric to use
     * @param mode          Compiler mode (see CompilerMode)
     * @param forceCompile  Set of memories to force compiling to lib regardless of the mode
     * @param forceSynflops Set of memories to force compiling as flops regardless of the mode
     */
-  case class Params(mem: String, memFormat: Option[String], lib: Option[String], costMetric: CostMetric, mode: CompilerMode, useCompiler: Boolean,
+   case class Params(mem: String, memFormat: Option[String], lib: Option[String], hammerIR: Option[String],
+                    costMetric: CostMetric, mode: CompilerMode, useCompiler: Boolean,
                     forceCompile: Set[String], forceSynflops: Set[String])
 
   /**
@@ -104,6 +107,7 @@ object MacroCompilerAnnotation {
 class MacroCompilerPass(mems: Option[Seq[Macro]],
                         libs: Option[Seq[Macro]],
                         compilers: Option[SRAMCompiler],
+                        hammerIR: Option[String],
                         costMetric: CostMetric = CostMetric.default,
                         mode: MacroCompilerAnnotation.CompilerMode = MacroCompilerAnnotation.Default) extends firrtl.passes.Pass {
   // Helper function to check the legality of bitPairs.
@@ -262,7 +266,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
     bitPairs.toSeq
   }
 
-  def compile(mem: Macro, lib: Macro): Option[(Module, ExtModule)] = {
+  def compile(mem: Macro, lib: Macro): Option[(Module, Macro)] = {
     assert(mem.sortedPorts.lengthCompare(lib.sortedPorts.length) == 0,
       "mem and lib should have an equal number of ports")
     val pairedPorts = mem.sortedPorts zip lib.sortedPorts
@@ -555,10 +559,11 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
       }
     }
 
-    Some((mem.module(Block(stmts.toSeq)), lib.blackbox))
+    Some((mem.module(Block(stmts.toSeq)), lib))
   }
 
   def run(c: Circuit): Circuit = {
+    var firstLib = true
     val modules = (mems, libs) match {
       case (Some(mems), Some(libs)) =>
         // Try to compile each of the memories in mems.
@@ -590,7 +595,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
 
         // Try to compile mem against each lib in libs, keeping track of the
         // best compiled version, external lib used, and cost.
-        val (best, cost) = (fullLibs foldLeft (None: Option[(Module, ExtModule)], Double.MaxValue)){
+        val (best, cost) = (fullLibs foldLeft (None: Option[(Module, Macro)], Double.MaxValue)){
           case ((best, cost), lib) if mem.src.ports.size != lib.src.ports.size =>
             /* Palmer: FIXME: This just assumes the Chisel and vendor ports are in the same
              * order, but I'm starting with what actually gets generated. */
@@ -623,7 +628,18 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
               modules
           }
           case Some((mod, bb)) =>
-            (modules filterNot (m => m.name == mod.name || m.name == bb.name)) ++ Seq(mod, bb)
+            hammerIR match {
+              case Some(f) => {
+                val hammerIRWriter = new FileWriter(new File(f), !firstLib)
+                if(firstLib) hammerIRWriter.write("[\n")
+                hammerIRWriter.write(bb.src.toJSON().toString())
+                hammerIRWriter.write("\n,\n")
+                hammerIRWriter.close()
+                firstLib = false
+              }
+              case None =>
+            }
+            (modules filterNot (m => m.name == mod.name || m.name == bb.blackbox.name)) ++ Seq(mod, bb.blackbox)
         }
       }
       case _ => c.modules
@@ -638,7 +654,7 @@ class MacroCompilerTransform extends Transform {
 
   def execute(state: CircuitState) = getMyAnnotations(state) match {
     case Seq(MacroCompilerAnnotation(state.circuit.main,
-    MacroCompilerAnnotation.Params(memFile, memFileFormat, libFile, costMetric, mode, useCompiler, forceCompile, forceSynflops))) =>
+    MacroCompilerAnnotation.Params(memFile, memFileFormat, libFile, hammerIR, costMetric, mode, useCompiler, forceCompile, forceSynflops))) =>
       if (mode == MacroCompilerAnnotation.FallbackSynflops) {
         throw new UnsupportedOperationException("Not implemented yet")
       }
@@ -686,7 +702,7 @@ class MacroCompilerTransform extends Transform {
       }.getOrElse(Seq.empty)
 
       val transforms = Seq(
-        new MacroCompilerPass(memCompile, libs, compilers, costMetric, mode),
+        new MacroCompilerPass(memCompile, libs, compilers, hammerIR, costMetric, mode),
         new SynFlopsPass(true, memSynflops ++ (if (mode == MacroCompilerAnnotation.CompileAndSynflops) {
           libs.get
         } else {
@@ -729,6 +745,7 @@ object MacroCompiler extends App {
   case object Library extends MacroParam
   case object Verilog extends MacroParam
   case object Firrtl extends MacroParam
+  case object HammerIR extends MacroParam
   case object CostFunc extends MacroParam
   case object Mode extends MacroParam
   case object UseCompiler extends MacroParam
@@ -746,6 +763,7 @@ object MacroCompiler extends App {
     "  -u, --use-compiler: Flag, whether to use the memory compiler defined in library",
     "  -v, --verilog: Verilog output",
     "  -f, --firrtl: FIRRTL output (optional)",
+    "  -hir, --hammer-ir: Hammer-IR output currently only needed for IP compilers",
     "  -c, --cost-func: Cost function to use. Optional (default: \"default\")",
     "  -cp, --cost-param: Cost function parameter. (Optional depending on the cost function.). e.g. -c ExternalMetric -cp path /path/to/my/cost/script",
     "  --force-compile [mem]: Force the given memory to be compiled to target libs regardless of the mode",
@@ -769,6 +787,8 @@ object MacroCompiler extends App {
         parseArgs(map + (Verilog -> value), costMap, forcedMemories, tail)
       case ("-f" | "--firrtl") :: value :: tail =>
         parseArgs(map + (Firrtl -> value), costMap, forcedMemories, tail)
+      case ("-hir" | "--hammer-ir") :: value :: tail =>
+        parseArgs(map + (HammerIR -> value), costMap, forcedMemories, tail)
       case ("-c" | "--cost-func") :: value :: tail =>
         parseArgs(map + (CostFunc -> value), costMap, forcedMemories, tail)
       case ("-cp" | "--cost-param") :: value1 :: value2 :: tail =>
@@ -802,6 +822,7 @@ object MacroCompiler extends App {
             circuit.main,
             MacroCompilerAnnotation.Params(
               params.get(Macros).get, params.get(MacrosFormat), params.get(Library),
+              params.get(HammerIR),
               CostMetric.getCostMetric(params.getOrElse(CostFunc, "default"), costParams),
               MacroCompilerAnnotation.stringToCompilerMode(params.getOrElse(Mode, "default")),
               params.contains(UseCompiler),
@@ -836,6 +857,17 @@ object MacroCompiler extends App {
 
             // Close the writer.
             verilogWriter.close()
+          }
+          case None =>
+        }
+        params.get(HammerIR) match {
+          case Some(hammerIRFile: String) => {
+            val lines = Source.fromFile(hammerIRFile).getLines().toList
+            val hammerIRWriter = new FileWriter(new File(hammerIRFile))
+            // JSON means we need to destroy the last comma :(
+            lines.dropRight(1).foreach(l => hammerIRWriter.write(l + "\n"))
+            hammerIRWriter.write("]\n")
+            hammerIRWriter.close()
           }
           case None =>
         }

@@ -99,7 +99,7 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
     val macros = mems map (_.blackbox)
     val circuit = Circuit(NoInfo, macros, macros.last.name)
     val passes = Seq(
-      new MacroCompilerPass(Some(mems), libs, None, getCostMetric, if (synflops) MacroCompilerAnnotation.Synflops else MacroCompilerAnnotation.Default),
+      new MacroCompilerPass(Some(mems), libs, None, None, getCostMetric, if (synflops) MacroCompilerAnnotation.Synflops else MacroCompilerAnnotation.Default),
       new SynFlopsPass(synflops, libs getOrElse mems),
       RemoveEmpty)
     val result: Circuit = (passes foldLeft circuit)((c, pass) => pass run c)
