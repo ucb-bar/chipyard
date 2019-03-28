@@ -82,6 +82,7 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
     out.close()
   }
   def resources(sim: Simulator): Seq[String] = Seq(
+    "/testchipip/csrc/SimSerial.cc",
     "/csrc/SimDTM.cc",
     "/csrc/SimJTAG.cc",
     "/csrc/remote_bitbang.h",
