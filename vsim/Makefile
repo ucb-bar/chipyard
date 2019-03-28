@@ -22,8 +22,6 @@ ifneq ($(filter run% %.run %.out %.vpd %.vcd,$(MAKECMDGOALS)),)
 -include $(build_dir)/$(long_name).d
 endif
 
-sim_blackboxes = \
-  $(build_dir)/firrtl_black_box_resource_files.f
 
 rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
 
@@ -40,7 +38,7 @@ VCS_OPTS = -notice -line +lint=all,noVCDE,noONGS,noUI -error=PCWM-L -timescale=1
 	-CC "-I$(RISCV)/include" \
 	-CC "-std=c++11" \
 	-CC "-Wl,-rpath,$(RISCV)/lib" \
-	-f $(sim_blackboxes) -f $(sim_dotf) \
+	-f $(sim_top_blackboxes) -f $(sim_harness_blackboxes) -f $(sim_dotf) \
 	$(RISCV)/lib/libfesvr.so \
 	-sverilog \
 	+incdir+$(generated_dir) \

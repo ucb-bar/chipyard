@@ -26,9 +26,6 @@ ifneq ($(filter run% %.run %.out %.vpd %.vcd,$(MAKECMDGOALS)),)
 -include $(build_dir)/$(long_name).d
 endif
 
-sim_blackboxes = \
-  $(build_dir)/firrtl_black_box_resource_files.f
-
 rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
 
 sim_vsrcs = \
@@ -49,7 +46,7 @@ $(model_mk): $(sim_vsrcs) $(sim_dotf) $(INSTALLED_VERILATOR)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name)
 	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name) \
-	-o $(sim) $(sim_vsrcs) -f $(sim_dotf) -f $(sim_blackboxes) -LDFLAGS "$(LDFLAGS)" \
+	-o $(sim) $(sim_vsrcs) -f $(sim_dotf) -f $(sim_top_blackboxes) -f $(sim_harness_blackboxes) -LDFLAGS "$(LDFLAGS)" \
 	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(model_header)"
 	touch $@
 
@@ -61,7 +58,7 @@ $(model_mk_debug): $(sim_vsrcs) $(sim_dotf) $(INSTALLED_VERILATOR)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name).debug
 	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name).debug --trace \
-	-o $(sim_debug) $(sim_vsrcs) -f $(sim_dotf) -f $(sim_blackboxes) -LDFLAGS "$(LDFLAGS)" \
+	-o $(sim_debug) $(sim_vsrcs) -f $(sim_dotf) -f $(sim_top_blackboxes) -f $(sim_harness_blackboxes) -LDFLAGS "$(LDFLAGS)" \
 	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(model_header_debug)"
 	touch $@
 
