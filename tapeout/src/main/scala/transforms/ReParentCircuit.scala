@@ -5,21 +5,20 @@ package barstools.tapeout.transforms
 import firrtl._
 import firrtl.ir._
 import firrtl.passes.Pass
+import firrtl.annotations._
 
-// "Re-Parents" a circuit, which changes the top module to something else.
-class ReParentCircuitPass(newTopName: String) extends Pass {
-  def run(c: Circuit): Circuit = {
-    Circuit(c.info, c.modules, newTopName)
-  }
-}
-
-class ReParentCircuit(newTopName: String) extends Transform with SeqTransformBased {
+class ReParentCircuit(newTopName: String) extends Transform {
   def inputForm = HighForm
   def outputForm = HighForm
-  def transforms = Seq(new ReParentCircuitPass(newTopName))
+
+  def run(c: Circuit, newTopName: String): (Circuit, RenameMap) = {
+    val myRenames = RenameMap()
+    myRenames.record(CircuitTarget(c.main), CircuitTarget(newTopName))
+    (Circuit(c.info, c.modules, newTopName),  myRenames)
+  }
 
   def execute(state: CircuitState): CircuitState = {
-    val ret = runTransforms(state)
-    CircuitState(ret.circuit, outputForm, ret.annotations, ret.renames)
+    val (ret, renames) = run(state.circuit, newTopName)
+    state.copy(circuit = ret, renames = Some(renames))
   }
 }
