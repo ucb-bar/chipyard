@@ -30,9 +30,14 @@ long_name=$(PROJECT).$(MODEL).$(CONFIG)
 FIRRTL_FILE  ?=$(build_dir)/$(long_name).fir
 ANNO_FILE    ?=$(build_dir)/$(long_name).anno.json
 VERILOG_FILE ?=$(build_dir)/$(long_name).top.v
+TOP_FIR      ?=$(build_dir)/$(long_name).top.fir
+TOP_ANNO     ?=$(build_dir)/$(long_name).top.anno.json
 HARNESS_FILE ?=$(build_dir)/$(long_name).harness.v
+HARNESS_FIR  ?=$(build_dir)/$(long_name).harness.fir
+HARNESS_ANNO ?=$(build_dir)/$(long_name).harness.anno.json
 SMEMS_FILE   ?=$(build_dir)/$(long_name).mems.v
 SMEMS_CONF   ?=$(build_dir)/$(long_name).mems.conf
+SMEMS_FIR    ?=$(build_dir)/$(long_name).mems.fir
 sim_dotf ?= $(build_dir)/sim_files.f
 sim_harness_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
 sim_top_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.top.f
@@ -63,17 +68,17 @@ $(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(sim_dotf)
 	mkdir -p $(build_dir)
 	cd $(base_dir) && $(SBT) "runMain $(PROJECT).Generator $(CHISEL_ARGS) $(build_dir) $(PROJECT) $(MODEL) $(CFG_PROJECT) $(CONFIG)"
 
-$(VERILOG_FILE) $(SMEMS_CONF): $(FIRRTL_FILE) $(ANNO_FILE) $(TAPEOUT_JAR)
-	$(TAPEOUT) barstools.tapeout.transforms.GenerateTop -o $(VERILOG_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) $(REPL_SEQ_MEM) -td $(build_dir)
+$(VERILOG_FILE) $(SMEMS_CONF) $(TOP_ANNO) $(TOP_FIR) $(sim_top_blackboxes): $(FIRRTL_FILE) $(ANNO_FILE) $(TAPEOUT_JAR)
+	$(TAPEOUT) barstools.tapeout.transforms.GenerateTop -o $(VERILOG_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) -tsaof $(TOP_ANNO) -tsf $(TOP_FIR) $(REPL_SEQ_MEM) -td $(build_dir)
 	cp $(build_dir)/firrtl_black_box_resource_files.f $(sim_top_blackboxes)
 
-$(HARNESS_FILE): $(FIRRTL_FILE) $(ANNO_FILE) $(TAPEOUT_JAR) $(sim_top_blackboxes)
-	$(TAPEOUT) barstools.tapeout.transforms.GenerateHarness -o $(HARNESS_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) -td $(build_dir)
+$(HARNESS_FILE) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes): $(FIRRTL_FILE) $(ANNO_FILE) $(TAPEOUT_JAR) $(sim_top_blackboxes)
+	$(TAPEOUT) barstools.tapeout.transforms.GenerateHarness -o $(HARNESS_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) -thaof $(HARNESS_ANNO) -thf $(HARNESS_FIR) -td $(build_dir)
 	grep -v "SimSerial.cc\|SimDTM.cc\|SimJTAG.cc" $(build_dir)/firrtl_black_box_resource_files.f > $(sim_harness_blackboxes)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
-$(SMEMS_FILE): $(SMEMS_CONF) $(MACROCOMPILER_JAR)
-	$(MACROCOMPILER) barstools.macros.MacroCompiler -n $(SMEMS_CONF) -v $(SMEMS_FILE) --mode synflops
+$(SMEMS_FILE) $(SMEMS_FIR): $(SMEMS_CONF) $(MACROCOMPILER_JAR)
+	$(MACROCOMPILER) barstools.macros.MacroCompiler -n $(SMEMS_CONF) -v $(SMEMS_FILE) -f $(SMEMS_FIR) --mode synflops
 
 regression-tests = \
 	rv64ud-v-fcvt \
