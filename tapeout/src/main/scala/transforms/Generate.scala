@@ -37,6 +37,28 @@ trait HasTapeoutOptions { self: ExecutionOptionsManager with HasFirrtlOptions =>
       "use this to set synTop"
     }
 
+  parser.opt[String]("top-fir")
+    .abbr("tsf")
+    .valueName("<top-fir>")
+    .foreach { x =>
+      tapeoutOptions = tapeoutOptions.copy(
+        topFir = Some(x)
+      )
+    }.text {
+      "use this to set topFir"
+    }
+
+  parser.opt[String]("top-anno-out")
+    .abbr("tsaof")
+    .valueName("<top-anno-out>")
+    .foreach { x =>
+      tapeoutOptions = tapeoutOptions.copy(
+        topAnnoOut = Some(x)
+      )
+    }.text {
+      "use this to set topAnnoOut"
+    }
+
   parser.opt[String]("harness-top")
     .abbr("tht")
     .valueName("<harness-top>")
@@ -48,12 +70,38 @@ trait HasTapeoutOptions { self: ExecutionOptionsManager with HasFirrtlOptions =>
       "use this to set harnessTop"
     }
 
+  parser.opt[String]("harness-fir")
+    .abbr("thf")
+    .valueName("<harness-fir>")
+    .foreach { x =>
+      tapeoutOptions = tapeoutOptions.copy(
+        harnessFir = Some(x)
+      )
+    }.text {
+      "use this to set harnessFir"
+    }
+
+  parser.opt[String]("harness-anno-out")
+    .abbr("thaof")
+    .valueName("<harness-anno-out>")
+    .foreach { x =>
+      tapeoutOptions = tapeoutOptions.copy(
+        harnessAnnoOut = Some(x)
+      )
+    }.text {
+      "use this to set harnessAnnoOut"
+    }
+
 }
 
 case class TapeoutOptions(
   harnessOutput: Option[String] = None,
   synTop: Option[String] = None,
-  harnessTop: Option[String] = None
+  topFir: Option[String] = None,
+  topAnnoOut: Option[String] = None,
+  harnessTop: Option[String] = None,
+  harnessFir: Option[String] = None,
+  harnessAnnoOut: Option[String] = None
 ) extends LazyLogging
 
 // Requires two phases, one to collect modules below synTop in the hierarchy
@@ -99,7 +147,26 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
       customTransforms = firrtlOptions.customTransforms ++ topTransforms
     )
 
-    firrtl.Driver.execute(optionsManager)
+    val result = firrtl.Driver.execute(optionsManager)
+
+    result match {
+      case x: FirrtlExecutionSuccess =>
+        tapeoutOptions.topFir.foreach { firFile =>
+          val outputFile = new java.io.PrintWriter(firFile)
+          outputFile.write(x.circuitState.circuit.serialize)
+          outputFile.close()
+        }
+        tapeoutOptions.topAnnoOut.foreach { annoFile =>
+          val outputFile = new java.io.PrintWriter(annoFile)
+          outputFile.write(JsonProtocol.serialize(x.circuitState.annotations.filter(_ match {
+            case EmittedVerilogCircuitAnnotation(_) => false
+            case _ => true
+          })))
+          outputFile.close()
+        }
+      case _ =>
+    }
+
   }
 
   // Harness Generation
@@ -109,7 +176,25 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
       customTransforms = harnessTransforms
     )
 
-    firrtl.Driver.execute(optionsManager)
+    val result = firrtl.Driver.execute(optionsManager)
+
+    result match {
+      case x: FirrtlExecutionSuccess =>
+        tapeoutOptions.harnessFir.foreach { firFile =>
+          val outputFile = new java.io.PrintWriter(firFile)
+          outputFile.write(x.circuitState.circuit.serialize)
+          outputFile.close()
+        }
+        tapeoutOptions.harnessAnnoOut.foreach { annoFile =>
+          val outputFile = new java.io.PrintWriter(annoFile)
+          outputFile.write(JsonProtocol.serialize(x.circuitState.annotations.filter(_ match {
+            case EmittedVerilogCircuitAnnotation(_) => false
+            case _ => true
+          })))
+          outputFile.close()
+        }
+      case _ =>
+    }
   }
 }
 
