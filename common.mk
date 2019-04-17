@@ -22,31 +22,11 @@ TESTCHIPIP_CLASSES ?= "$(TESTCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/class
 #########################################################################################
 FIRRTL_JAR ?= $(ROCKETCHIP_DIR)/lib/firrtl.jar
 
-# this should match whatever the commonSettings version is in build.sbt
-BARSTOOLS_VER=1.0
-TAPEOUT_JAR=$(base_dir)/tools/barstools/tapeout/target/scala-$(SCALA_VERSION_MAJOR)/tapeout-assembly-$(BARSTOOLS_VER).jar
-MACROCOMPILER_JAR=$(base_dir)/tools/barstools/macros/target/scala-$(SCALA_VERSION_MAJOR)/barstools-macros-assembly-$(BARSTOOLS_VER).jar
-
 $(FIRRTL_JAR): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR)/firrtl/src/main/scala)
 	$(MAKE) -C $(ROCKETCHIP_DIR)/firrtl SBT="$(SBT)" root_dir=$(ROCKETCHIP_DIR)/firrtl build-scala
 	mkdir -p $(dir $@)
 	cp -p $(ROCKETCHIP_DIR)/firrtl/utils/bin/firrtl.jar $@
 	touch $@
-
-$(TAPEOUT_JAR): $(call lookup_scala_srcs, $(base_dir)/tools/barstools/tapeout/src/main/scala)
-	cd $(base_dir) && $(SBT) "tapeout/assembly"
-
-$(MACROCOMPILER_JAR): $(call lookup_scala_srcs, $(base_dir)/tools/barstools/macros/src/main/scala) $(call lookup_scala_srcs, $(base_dir)/tools/barstools/mdf/scalalib/src/main/scala)
-	cd $(base_dir) && $(SBT) "barstools-macros/assembly"
-
-.PHONY: jars
-jars: $(MACROCOMPILER_JAR) $(TAPEOUT_JAR)
-
-#########################################################################################
-# tapeout and macrocompiler commands
-#########################################################################################
-TAPEOUT ?= java -Xmx8G -Xss8M -cp $(ROCKET_CLASSES):$(TESTCHIPIP_CLASSES):$(TAPEOUT_JAR)
-MACROCOMPILER ?= java -Xmx8G -Xss8M -cp $(ROCKET_CLASSES):$(TESTCHIPIP_CLASSES):$(MACROCOMPILER_JAR)
 
 #########################################################################################
 # create simulation args file rule
@@ -68,15 +48,18 @@ $(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(sim_dotf)
 #########################################################################################
 REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SMEMS_CONF)
 
-$(VERILOG_FILE) $(SMEMS_CONF): $(FIRRTL_FILE) $(ANNO_FILE) $(TAPEOUT_JAR)
-	$(TAPEOUT) barstools.tapeout.transforms.GenerateTop -o $(VERILOG_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) $(REPL_SEQ_MEM) -td $(build_dir)
+$(VERILOG_FILE) $(SMEMS_CONF) $(TOP_ANNO) $(TOP_FIR) $(sim_top_blackboxes): $(FIRRTL_FILE) $(ANNO_FILE)
+	cd $(base_dir) && $(SBT) "project tapeout" "runMain barstools.tapeout.transforms.GenerateTop -o $(VERILOG_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) -tsaof $(TOP_ANNO) -tsf $(TOP_FIR) $(REPL_SEQ_MEM) -td $(build_dir)"
+	cp $(build_dir)/firrtl_black_box_resource_files.f $(sim_top_blackboxes)
 
-$(HARNESS_FILE): $(FIRRTL_FILE) $(ANNO_FILE) $(TAPEOUT_JAR)
-	$(TAPEOUT) barstools.tapeout.transforms.GenerateHarness -o $(HARNESS_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) -td $(build_dir)
+$(HARNESS_FILE) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes): $(FIRRTL_FILE) $(ANNO_FILE) $(sim_top_blackboxes)
+	cd $(base_dir) && $(SBT) "project tapeout" "runMain barstools.tapeout.transforms.GenerateHarness -o $(HARNESS_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) -thaof $(HARNESS_ANNO) -thf $(HARNESS_FIR) -td $(build_dir)"
+	grep -v "SimSerial.cc\|SimDTM.cc\|SimJTAG.cc" $(build_dir)/firrtl_black_box_resource_files.f > $(sim_harness_blackboxes)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
-$(SMEMS_FILE): $(SMEMS_CONF) $(MACROCOMPILER_JAR)
-	$(MACROCOMPILER) barstools.macros.MacroCompiler -n $(SMEMS_CONF) -v $(SMEMS_FILE) --mode synflops
+MACROCOMPILER_MODE ?= --mode synflops
+$(SMEMS_FILE) $(SMEMS_FIR): $(SMEMS_CONF)
+	cd $(base_dir) && $(SBT) "project barstools-macros" "runMain barstools.macros.MacroCompiler -n $(SMEMS_CONF) -v $(SMEMS_FILE) -f $(SMEMS_FIR) $(MACROCOMPILER_MODE)"
 
 #########################################################################################
 # helper rule to just make verilog files
@@ -139,11 +122,3 @@ regression-tests = \
 run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))
 run-regression-tests-fast: $(addprefix $(output_dir)/,$(addsuffix .run,$(regression-tests)))
 run-regression-tests-debug: $(addprefix $(output_dir)/,$(addsuffix .vpd,$(regression-tests)))
-
-#########################################################################################
-# general jar cleanup rule
-#########################################################################################
-.PHONY: clean-scala
-clean-scala:
-	rm -rf $(MACROCOMPILER_JAR) $(TAPEOUT_JAR)
-

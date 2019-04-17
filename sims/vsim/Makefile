@@ -55,7 +55,8 @@ VCS_NONCC_OPTS = \
 	+v2k \
 	+vcs+lic+wait \
 	+vc+list \
-	-f $(sim_blackboxes) \
+	-f $(sim_top_blackboxes) \
+	-f $(sim_harness_blackboxes) \
 	-f $(sim_dotf) \
 	-sverilog \
 	+incdir+$(build_dir) \
