@@ -60,8 +60,9 @@ $(HARNESS_FILE) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes): $(FIRR
 	grep -v "SimSerial.cc\|SimDTM.cc\|SimJTAG.cc" $(build_dir)/firrtl_black_box_resource_files.f > $(sim_harness_blackboxes)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
+MACROCOMPILER_MODE ?= --mode synflops
 $(SMEMS_FILE) $(SMEMS_FIR): $(SMEMS_CONF)
-	cd $(base_dir) && $(SBT) "project barstools-macros" "runMain barstools.macros.MacroCompiler -n $(SMEMS_CONF) -v $(SMEMS_FILE) -f $(SMEMS_FIR) --mode synflops"
+	cd $(base_dir) && $(SBT) "project barstools-macros" "runMain barstools.macros.MacroCompiler -n $(SMEMS_CONF) -v $(SMEMS_FILE) -f $(SMEMS_FIR) $(MACROCOMPILER_MODE)"
 
 regression-tests = \
 	rv64ud-v-fcvt \
