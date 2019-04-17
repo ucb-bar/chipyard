@@ -24,9 +24,6 @@ lazy val rocketchip = RootProject(file("generators/rocket-chip"))
 lazy val testchipip = (project in file("generators/testchipip")).settings(commonSettings)
   .dependsOn(rocketchip)
 
-lazy val boom = (project in file("generators/boom")).settings(commonSettings)
-  .dependsOn(rocketchip)
-
 // Checks for -DROCKET_USE_MAVEN.
 // If it's there, use a maven dependency.
 // Else, depend on subprojects in git submodules.
@@ -40,6 +37,9 @@ def conditionalDependsOn(prj: Project): Project = {
   }
 }
 lazy val example = conditionalDependsOn(project in file("."))
+  .settings(commonSettings)
+
+lazy val boom = conditionalDependsOn(project in file("generators/boom"))
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))

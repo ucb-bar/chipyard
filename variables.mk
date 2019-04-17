@@ -5,7 +5,7 @@
 #########################################################################################
 # default variables to invoke the generator
 # descriptions:
-#   PROJECT = the scala package to find the MODEL in
+#   PROJECT = the scala package to find the MODEL/Generator in
 #   MODEL = the top level module of the project (normally the harness)
 #   CONFIG = the configuration class to give the parameters for the project
 #   CFG_PROJECT = the scala package to find the CONFIG class
