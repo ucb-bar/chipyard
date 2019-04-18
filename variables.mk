@@ -34,8 +34,9 @@ endif
 #########################################################################################
 # path to rocket-chip and testchipip
 #########################################################################################
-ROCKETCHIP_DIR = $(base_dir)/generators/rocket-chip
-TESTCHIP_DIR   = $(base_dir)/generators/testchipip
+ROCKETCHIP_DIR   = $(base_dir)/generators/rocket-chip
+TESTCHIP_DIR     = $(base_dir)/generators/testchipip
+REBAR_FIRRTL_DIR = $(base_dir)/tools/firrtl
 
 #########################################################################################
 # names of various files needed to compile and run things

@@ -31,7 +31,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
 // Checks for -DROCKET_USE_MAVEN.
 // If it's there, use a maven dependency.
 // Else, depend on subprojects in git submodules.
-def testchipIpDependsOn(prj: Project): Project = {
+def conditionalDependsOn(prj: Project): Project = {
   if (sys.props.contains("ROCKET_USE_MAVEN")) {
     prj.settings(Seq(
       libraryDependencies += "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHOT",
@@ -41,7 +41,7 @@ def testchipIpDependsOn(prj: Project): Project = {
   }
 }
 
-lazy val example = testchipIpDependsOn(project in file("."))
+lazy val example = conditionalDependsOn(project in file("."))
   .settings(commonSettings)
 
 lazy val boom = (project in file("generators/boom"))

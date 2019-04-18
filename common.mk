@@ -20,13 +20,12 @@ TESTCHIPIP_CLASSES ?= "$(TESTCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/class
 #########################################################################################
 # jar creation variables and rules
 #########################################################################################
-FIRRTL_DIR = $(base_dir)/tools/firrtl
-FIRRTL_JAR ?= $(base_dir)/lib/firrtl.jar
+FIRRTL_JAR ?= $(ROCKETCHIP_DIR)/lib/firrtl.jar
 
-$(FIRRTL_JAR): $(call lookup_scala_srcs, $(FIRRTL_DIR)/firrtl/src/main/scala)
-	$(MAKE) -C $(FIRRTL_DIR) SBT="$(SBT)" root_dir=$(FIRRTL_DIR) build-scala
+$(FIRRTL_JAR): $(call lookup_scala_srcs, $(REBAR_FIRRTL_DIR)/src/main/scala)
+	$(MAKE) -C $(REBAR_FIRRTL_DIR) SBT="$(SBT)" root_dir=$(REBAR_FIRRTL_DIR) build-scala
 	mkdir -p $(dir $@)
-	cp -p $(FIRRTL_DIR)/utils/bin/firrtl.jar $@
+	cp -p $(REBAR_FIRRTL_DIR)/utils/bin/firrtl.jar $@
 	touch $@
 
 #########################################################################################
