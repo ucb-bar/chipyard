@@ -12,6 +12,9 @@
 #   SBT_PROJECT = the SBT project that you should find the Generator class in
 #   TB = wrapper over the TestHarness needed to simulate in VCS
 #   TOP = top level module of the project (normally the module instantiated by the harness)
+#
+# project specific:
+# 	SUB_PROJECT = use the specific subproject default variables
 #########################################################################################
 PROJECT     ?= example
 MODEL       ?= TestHarness
@@ -20,6 +23,13 @@ CFG_PROJECT ?= $(PROJECT)
 SBT_PROJECT ?= $(PROJECT)
 TB          ?= TestDriver
 TOP         ?= ExampleTop
+
+SUB_PROJECT ?= example
+ifeq ($(SUB_PROJECT),boom) # make it so that you only change 1 param to change them all!
+	SBT_PROJECT=boom
+	PROJECT=boom.system
+	TOP=ExampleBoomSystem
+endif
 
 #########################################################################################
 # path to rocket-chip and testchipip

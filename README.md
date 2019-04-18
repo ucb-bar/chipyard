@@ -2,7 +2,7 @@
 
 **THIS BRANCH IS UNDER DEVELOPMENT**
 **IT CURRENTLY HAS MANY SUBMODULES**
-**PLEASE RUN ./build.sh TO UPDATE SUBMODULES, UNLESS YOU WANT TO SPEND A LONG TIME WAITING FOR SUBMODULE TO CLONE** 
+**PLEASE RUN ./scripts/init-submodules-no-riscv-tools.sh TO UPDATE SUBMODULES, UNLESS YOU WANT TO SPEND A LONG TIME WAITING FOR SUBMODULE TO CLONE**
 
 This is a starter template for your custom RISC-V project. It will allow you
 to leverage the Chisel HDL and RocketChip SoC generator to produce a
@@ -61,6 +61,26 @@ follows.
  * vsim - directory in which Synopsys VCS simulations are compiled and run
  * bootrom - sources for the first-stage bootloader included in the Boot ROM
  * src/main/scala - scala source files for your project go here
+
+## For submodule developers
+
+Depending on the submodule that you develop in, you might want to run things out of the submodule.
+For example, `boom` has its own Generator, package, top module, and configurations separate from
+the `example` package in `src/main/scala`. Thus, to build a `boom` project you do something like
+the following:
+
+    make SBT_PROJECT=boom PROJECT=boom.system CONFIG=<BOOM Config to use> TOP=ExampleBoomSystem
+
+However, that is very long to write everytime there is a compile. Thus, a shorthand way to build
+the subproject is the following:
+
+    make SUB_PROJECT=boom CONFIG=<BOOM Config to use>
+
+This sets the proper configuration flags for make to work correctly.
+
+Currently, the supported `SUB_PROJECT` flags are:
+
+ * boom - to build and run `boom` subproject configurations
 
 ## Using the block device
 
