@@ -20,12 +20,13 @@ TESTCHIPIP_CLASSES ?= "$(TESTCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/class
 #########################################################################################
 # jar creation variables and rules
 #########################################################################################
-FIRRTL_JAR ?= $(ROCKETCHIP_DIR)/lib/firrtl.jar
+FIRRTL_DIR = $(base_dir)/tools/firrtl
+FIRRTL_JAR ?= $(base_dir)/lib/firrtl.jar
 
-$(FIRRTL_JAR): $(call lookup_scala_srcs, $(ROCKETCHIP_DIR)/firrtl/src/main/scala)
-	$(MAKE) -C $(ROCKETCHIP_DIR)/firrtl SBT="$(SBT)" root_dir=$(ROCKETCHIP_DIR)/firrtl build-scala
+$(FIRRTL_JAR): $(call lookup_scala_srcs, $(FIRRTL_DIR)/firrtl/src/main/scala)
+	$(MAKE) -C $(FIRRTL_DIR) SBT="$(SBT)" root_dir=$(FIRRTL_DIR) build-scala
 	mkdir -p $(dir $@)
-	cp -p $(ROCKETCHIP_DIR)/firrtl/utils/bin/firrtl.jar $@
+	cp -p $(FIRRTL_DIR)/utils/bin/firrtl.jar $@
 	touch $@
 
 #########################################################################################
@@ -49,7 +50,7 @@ $(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(sim_dotf)
 REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SMEMS_CONF)
 
 $(VERILOG_FILE) $(SMEMS_CONF) $(TOP_ANNO) $(TOP_FIR) $(sim_top_blackboxes): $(FIRRTL_FILE) $(ANNO_FILE)
-	cd $(base_dir) && $(SBT) "project tapeout" "runMain barstools.tapeout.transforms.GenerateTop -o $(VERILOG_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) -tsaof $(TOP_ANNO) -tsf $(TOP_FIR) $(REPL_SEQ_MEM) -td $(build_dir)"
+	cd $(base_dir) && $(SBT) "project tapeout" "runMain barstools.tapeout.transforms.GenerateTop -ll info -o $(VERILOG_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) -tsaof $(TOP_ANNO) -tsf $(TOP_FIR) $(REPL_SEQ_MEM) -td $(build_dir)"
 	cp $(build_dir)/firrtl_black_box_resource_files.f $(sim_top_blackboxes)
 
 $(HARNESS_FILE) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes): $(FIRRTL_FILE) $(ANNO_FILE) $(sim_top_blackboxes)
