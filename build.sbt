@@ -48,8 +48,8 @@ lazy val boom = (project in file("generators/boom"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
-lazy val tapeout = (project in file("./tools/barstools/tapeout/"))
-  .dependsOn(rebarFirrtl, rocketchip)
+lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
+  .dependsOn(rebarFirrtl)
   .settings(commonSettings)
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
