@@ -33,10 +33,17 @@ long_name = $(PROJECT).$(MODEL).$(CONFIG)
 FIRRTL_FILE  ?= $(build_dir)/$(long_name).fir
 ANNO_FILE    ?= $(build_dir)/$(long_name).anno.json
 VERILOG_FILE ?= $(build_dir)/$(long_name).top.v
+TOP_FIR      ?= $(build_dir)/$(long_name).top.fir
+TOP_ANNO     ?= $(build_dir)/$(long_name).top.anno.json
 HARNESS_FILE ?= $(build_dir)/$(long_name).harness.v
+HARNESS_FIR  ?= $(build_dir)/$(long_name).harness.fir
+HARNESS_ANNO ?= $(build_dir)/$(long_name).harness.anno.json
 SMEMS_FILE   ?= $(build_dir)/$(long_name).mems.v
 SMEMS_CONF   ?= $(build_dir)/$(long_name).mems.conf
+SMEMS_FIR    ?= $(build_dir)/$(long_name).mems.fir
 sim_dotf     ?= $(build_dir)/sim_files.f
+sim_harness_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
+sim_top_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.top.f
 
 #########################################################################################
 # default sbt launch command
@@ -64,9 +71,6 @@ rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
 #########################################################################################
 # sources needed to run simulators
 #########################################################################################
-sim_blackboxes = \
-  $(build_dir)/firrtl_black_box_resource_files.f
-
 sim_vsrcs = \
 	$(VERILOG_FILE) \
 	$(HARNESS_FILE) \
