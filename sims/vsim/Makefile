@@ -93,5 +93,5 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 # general cleanup rule
 #########################################################################################
 .PHONY: clean
-clean: clean-scala
+clean:
 	rm -rf $(build_dir) csrc $(sim_prefix)-* ucli.key vc_hdrs.h
