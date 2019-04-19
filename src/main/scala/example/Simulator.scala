@@ -101,6 +101,7 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
   def writeBootrom(): Unit = {
     firrtl.FileUtils.makeDirectory("./bootrom/")
     writeResource("/testchipip/bootrom/bootrom.rv64.img", "./bootrom/")
+    writeResource("/testchipip/bootrom/bootrom.rv32.img", "./bootrom/")
   }
 
   def writeFiles(cfg: GenerateSimConfig): Unit = {

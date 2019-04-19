@@ -8,21 +8,25 @@ lazy val commonSettings = Seq(
     case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
     case _ => MergeStrategy.first}},
   scalacOptions ++= Seq("-deprecation","-unchecked","-Xsource:2.11"),
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test",
-  libraryDependencies += "org.json4s" %% "json4s-native" % "3.5.3",
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test",
+  libraryDependencies += "org.json4s" %% "json4s-native" % "3.6.1",
   libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
   libraryDependencies += "edu.berkeley.cs" %% "firrtl-interpreter" % "1.2-SNAPSHOT",
-  libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.1",
+  libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.0",
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   resolvers ++= Seq(
     Resolver.sonatypeRepo("snapshots"),
     Resolver.sonatypeRepo("releases"),
     Resolver.mavenLocal))
 
+lazy val rebarFirrtl = (project in file("tools/firrtl"))
+  .settings(commonSettings)
+
 lazy val rocketchip = RootProject(file("generators/rocket-chip"))
 
-lazy val testchipip = (project in file("generators/testchipip")).settings(commonSettings)
+lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip)
+  .settings(commonSettings)
 
 // Checks for -DROCKET_USE_MAVEN.
 // If it's there, use a maven dependency.
@@ -36,16 +40,22 @@ def conditionalDependsOn(prj: Project): Project = {
     prj.dependsOn(testchipip)
   }
 }
+
 lazy val example = conditionalDependsOn(project in file("."))
   .settings(commonSettings)
 
+lazy val boom = (project in file("generators/boom"))
+  .dependsOn(rocketchip)
+  .settings(commonSettings)
+
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
+  .dependsOn(rebarFirrtl)
   .settings(commonSettings)
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
+  .settings(commonSettings)
 
-lazy val `barstools-macros` = conditionalDependsOn(project in file("./tools/barstools/macros/"))
+lazy val `barstools-macros` = (project in file("./tools/barstools/macros/"))
+  .dependsOn(mdf, rocketchip, rebarFirrtl)
   .enablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonSettings)
-  .dependsOn(mdf)
-

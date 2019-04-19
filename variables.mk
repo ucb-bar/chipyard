@@ -5,25 +5,38 @@
 #########################################################################################
 # default variables to invoke the generator
 # descriptions:
-#   PROJECT = the scala package to find the MODEL in
+#   PROJECT = the scala package to find the MODEL/Generator in
 #   MODEL = the top level module of the project (normally the harness)
 #   CONFIG = the configuration class to give the parameters for the project
 #   CFG_PROJECT = the scala package to find the CONFIG class
+#   SBT_PROJECT = the SBT project that you should find the Generator class in
 #   TB = wrapper over the TestHarness needed to simulate in VCS
 #   TOP = top level module of the project (normally the module instantiated by the harness)
+#
+# project specific:
+# 	SUB_PROJECT = use the specific subproject default variables
 #########################################################################################
 PROJECT     ?= example
 MODEL       ?= TestHarness
 CONFIG      ?= DefaultExampleConfig
 CFG_PROJECT ?= $(PROJECT)
+SBT_PROJECT ?= $(PROJECT)
 TB          ?= TestDriver
 TOP         ?= ExampleTop
+
+SUB_PROJECT ?= example
+ifeq ($(SUB_PROJECT),boom) # make it so that you only change 1 param to change them all!
+	SBT_PROJECT=boom
+	PROJECT=boom.system
+	TOP=ExampleBoomSystem
+endif
 
 #########################################################################################
 # path to rocket-chip and testchipip
 #########################################################################################
-ROCKETCHIP_DIR = $(base_dir)/generators/rocket-chip
-TESTCHIP_DIR   = $(base_dir)/generators/testchipip
+ROCKETCHIP_DIR   = $(base_dir)/generators/rocket-chip
+TESTCHIP_DIR     = $(base_dir)/generators/testchipip
+REBAR_FIRRTL_DIR = $(base_dir)/tools/firrtl
 
 #########################################################################################
 # names of various files needed to compile and run things
