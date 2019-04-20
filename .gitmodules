@@ -25,3 +25,6 @@
 [submodule "generators/boom"]
 	path = generators/boom
 	url = git@github.com:riscv-boom/riscv-boom.git
+[submodule "generators/sifive-blocks"]
+	path = generators/sifive-blocks
+	url = git@github.com:sifive/sifive-blocks.git

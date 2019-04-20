@@ -42,6 +42,7 @@ def conditionalDependsOn(prj: Project): Project = {
 }
 
 lazy val example = conditionalDependsOn(project in file("."))
+  .dependsOn(boom)
   .settings(commonSettings)
 
 lazy val boom = (project in file("generators/boom"))

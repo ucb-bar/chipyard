@@ -8,6 +8,8 @@ import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.util.DontTouch
 import testchipip._
 
+//---------------------------------------------------------------------------------------------------------
+
 class ExampleTop(implicit p: Parameters) extends ExampleRocketSystem //RocketSubsystem
     with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
@@ -27,6 +29,8 @@ class ExampleTopModule[+L <: ExampleTop](l: L) extends ExampleRocketSystemModule
     with HasPeripherySerialModuleImp
     with DontTouch
 
+//---------------------------------------------------------------------------------------------------------
+
 class ExampleTopWithPWMTL(implicit p: Parameters) extends ExampleTop
     with HasPeripheryPWMTL {
   override lazy val module = new ExampleTopWithPWMTLModule(this)
@@ -35,6 +39,8 @@ class ExampleTopWithPWMTL(implicit p: Parameters) extends ExampleTop
 class ExampleTopWithPWMTLModule(l: ExampleTopWithPWMTL)
   extends ExampleTopModule(l) with HasPeripheryPWMTLModuleImp
 
+//---------------------------------------------------------------------------------------------------------
+
 class ExampleTopWithPWMAXI4(implicit p: Parameters) extends ExampleTop
     with HasPeripheryPWMAXI4 {
   override lazy val module = new ExampleTopWithPWMAXI4Module(this)
@@ -42,6 +48,8 @@ class ExampleTopWithPWMAXI4(implicit p: Parameters) extends ExampleTop
 
 class ExampleTopWithPWMAXI4Module(l: ExampleTopWithPWMAXI4)
   extends ExampleTopModule(l) with HasPeripheryPWMAXI4ModuleImp
+
+//---------------------------------------------------------------------------------------------------------
 
 class ExampleTopWithBlockDevice(implicit p: Parameters) extends ExampleTop
     with HasPeripheryBlockDevice {
