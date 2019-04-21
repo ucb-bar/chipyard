@@ -63,13 +63,13 @@ class RocketTopWithBlockDeviceModule(l: RocketTopWithBlockDevice)
 // BOOM Top Level Systems
 // ----------------------
 
-class BoomTop(implicit p: Parameters) extends boom.system.BoomSystem
+class BoomTop(implicit p: Parameters) extends boom.system.ExampleBoomSystem
   with HasNoDebug
   with HasPeripherySerial {
   override lazy val module = new BoomTopModule(this)
 }
 
-class BoomTopModule[+L <: BoomTop](l: L) extends boom.system.BoomSystemModule(l)
+class BoomTopModule[+L <: BoomTop](l: L) extends boom.system.ExampleBoomSystemModule(l)
   with HasRTCModuleImp
   with HasNoDebugModuleImp
   with HasPeripherySerialModuleImp

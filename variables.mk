@@ -3,7 +3,7 @@
 #########################################################################################
 
 #########################################################################################
-# default variables to invoke the generator
+# default variables to invoke the generator for a example Rocket system
 # descriptions:
 #   PROJECT = the scala package to find the MODEL/Generator in
 #   MODEL = the top level module of the project (normally the harness)
@@ -17,17 +17,28 @@
 # 	SUB_PROJECT = use the specific subproject default variables
 #########################################################################################
 PROJECT     ?= example
-MODEL       ?= TestHarness
-CONFIG      ?= DefaultExampleConfig
+MODEL       ?= RocketTestHarness
+CONFIG      ?= DefaultRocketConfig
 CFG_PROJECT ?= $(PROJECT)
 SBT_PROJECT ?= $(PROJECT)
 TB          ?= TestDriver
-TOP         ?= ExampleTop
+TOP         ?= RocketTop
 
+# make it so that you only change 1 param to change most or all of them!
 SUB_PROJECT ?= example
-ifeq ($(SUB_PROJECT),boom) # make it so that you only change 1 param to change them all!
-	SBT_PROJECT=boom
+ifeq ($(SUB_PROJECT),boomexample)
+	# for a BOOM based system (provides all necessary params)
+	MODEL=BoomTestHarness
+	CONFIG=DefaultBoomConfig
+	TOP=BoomTop
+endif
+ifeq ($(SUB_PROJECT),boom)
+	# for BOOM developers (only need to provide a CONFIG)
 	PROJECT=boom.system
+	MODEL=TestHarness
+	#CONFIG: User specified
+	CFG_PROJECT=boom.system
+	SBT_PROJECT=boom
 	TOP=ExampleBoomSystem
 endif
 
