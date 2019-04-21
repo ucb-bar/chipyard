@@ -36,6 +36,7 @@ class RocketTestHarness(implicit val p: Parameters) extends Module {
         axi.w.bits := DontCare
     }
   })
+
   io.success := dut.connectSimSerial()
 }
 

@@ -7,6 +7,7 @@ import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.util.DontTouch
 import testchipip._
+import sifive.blocks.devices.gpio._
 
 // ------------------------
 // Rocket Top Level Systems
@@ -59,6 +60,17 @@ class RocketTopWithBlockDeviceModule(l: RocketTopWithBlockDevice)
   extends RocketTopModule(l)
   with HasPeripheryBlockDeviceModuleImp
 
+//---------------------------------------------------------------------------------------------------------
+
+class RocketTopWithGPIO(implicit p: Parameters) extends RocketTop
+    with HasPeripheryGPIO {
+  override lazy val module = new RocketTopWithGPIOModule(this)
+}
+
+class RocketTopWithGPIOModule(l: RocketTopWithGPIO)
+  extends RocketTopModule(l)
+  with HasPeripheryGPIOModuleImp
+
 // ----------------------
 // BOOM Top Level Systems
 // ----------------------
@@ -104,3 +116,14 @@ class BoomTopWithBlockDevice(implicit p: Parameters) extends BoomTop
 
 class BoomTopWithBlockDeviceModule(l: BoomTopWithBlockDevice) extends BoomTopModule(l)
   with HasPeripheryBlockDeviceModuleImp
+
+//---------------------------------------------------------------------------------------------------------
+
+class BoomTopWithGPIO(implicit p: Parameters) extends BoomTop
+    with HasPeripheryGPIO {
+  override lazy val module = new BoomTopWithGPIOModule(this)
+}
+
+class BoomTopWithGPIOModule(l: BoomTopWithGPIO)
+  extends BoomTopModule(l)
+  with HasPeripheryGPIOModuleImp
