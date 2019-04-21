@@ -8,54 +8,99 @@ import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.util.DontTouch
 import testchipip._
 
-//---------------------------------------------------------------------------------------------------------
+// ------------------------
+// Rocket Top Level Systems
+// ------------------------
 
-class ExampleTop(implicit p: Parameters) extends ExampleRocketSystem //RocketSubsystem
+class RocketTop(implicit p: Parameters) extends RocketSystem
     with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
-//  with HasSystemErrorSlave
-//    with HasSyncExtInterrupts
     with HasNoDebug
     with HasPeripherySerial {
-  override lazy val module = new ExampleTopModule(this)
+  override lazy val module = new RocketTopModule(this)
 }
 
-class ExampleTopModule[+L <: ExampleTop](l: L) extends ExampleRocketSystemModuleImp(l) // RocketSubsystemModuleImp(l)
+class RocketTopModule[+L <: RocketTop](l: L) extends RocketSystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
-//    with HasExtInterruptsModuleImp
     with HasNoDebugModuleImp
     with HasPeripherySerialModuleImp
     with DontTouch
 
 //---------------------------------------------------------------------------------------------------------
 
-class ExampleTopWithPWMTL(implicit p: Parameters) extends ExampleTop
+class RocketTopWithPWMTL(implicit p: Parameters) extends RocketTop
     with HasPeripheryPWMTL {
-  override lazy val module = new ExampleTopWithPWMTLModule(this)
+  override lazy val module = new RocketTopWithPWMTLModule(this)
 }
 
-class ExampleTopWithPWMTLModule(l: ExampleTopWithPWMTL)
-  extends ExampleTopModule(l) with HasPeripheryPWMTLModuleImp
+class RocketTopWithPWMTLModule(l: RocketTopWithPWMTL)
+  extends RocketTopModule(l) with HasPeripheryPWMTLModuleImp
 
 //---------------------------------------------------------------------------------------------------------
 
-class ExampleTopWithPWMAXI4(implicit p: Parameters) extends ExampleTop
+class RocketTopWithPWMAXI4(implicit p: Parameters) extends RocketTop
     with HasPeripheryPWMAXI4 {
-  override lazy val module = new ExampleTopWithPWMAXI4Module(this)
+  override lazy val module = new RocketTopWithPWMAXI4Module(this)
 }
 
-class ExampleTopWithPWMAXI4Module(l: ExampleTopWithPWMAXI4)
-  extends ExampleTopModule(l) with HasPeripheryPWMAXI4ModuleImp
+class RocketTopWithPWMAXI4Module(l: RocketTopWithPWMAXI4)
+  extends RocketTopModule(l) with HasPeripheryPWMAXI4ModuleImp
 
 //---------------------------------------------------------------------------------------------------------
 
-class ExampleTopWithBlockDevice(implicit p: Parameters) extends ExampleTop
+class RocketTopWithBlockDevice(implicit p: Parameters) extends RocketTop
     with HasPeripheryBlockDevice {
-  override lazy val module = new ExampleTopWithBlockDeviceModule(this)
+  override lazy val module = new RocketTopWithBlockDeviceModule(this)
 }
 
-class ExampleTopWithBlockDeviceModule(l: ExampleTopWithBlockDevice)
-  extends ExampleTopModule(l)
+class RocketTopWithBlockDeviceModule(l: RocketTopWithBlockDevice)
+  extends RocketTopModule(l)
+  with HasPeripheryBlockDeviceModuleImp
+
+// ----------------------
+// BOOM Top Level Systems
+// ----------------------
+
+class BoomTop(implicit p: Parameters) extends boom.system.BoomSystem
+  with HasNoDebug
+  with HasPeripherySerial {
+  override lazy val module = new BoomTopModule(this)
+}
+
+class BoomTopModule[+L <: BoomTop](l: L) extends boom.system.BoomSystemModule(l)
+  with HasRTCModuleImp
+  with HasNoDebugModuleImp
+  with HasPeripherySerialModuleImp
+  with DontTouch
+
+//---------------------------------------------------------------------------------------------------------
+
+class BoomTopWithPWMTL(implicit p: Parameters) extends BoomTop
+  with HasPeripheryPWMTL {
+  override lazy val module = new BoomTopWithPWMTLModule(this)
+}
+
+class BoomTopWithPWMTLModule(l: BoomTopWithPWMTL) extends BoomTopModule(l)
+  with HasPeripheryPWMTLModuleImp
+
+//---------------------------------------------------------------------------------------------------------
+
+class BoomTopWithPWMAXI4(implicit p: Parameters) extends BoomTop
+  with HasPeripheryPWMAXI4 {
+  override lazy val module = new BoomTopWithPWMAXI4Module(this)
+}
+
+class BoomTopWithPWMAXI4Module(l: BoomTopWithPWMAXI4) extends BoomTopModule(l)
+  with HasPeripheryPWMAXI4ModuleImp
+
+//---------------------------------------------------------------------------------------------------------
+
+class BoomTopWithBlockDevice(implicit p: Parameters) extends BoomTop
+  with HasPeripheryBlockDevice {
+  override lazy val module = new BoomTopWithBlockDeviceModule(this)
+}
+
+class BoomTopWithBlockDeviceModule(l: BoomTopWithBlockDevice) extends BoomTopModule(l)
   with HasPeripheryBlockDeviceModuleImp

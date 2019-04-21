@@ -42,7 +42,7 @@ def conditionalDependsOn(prj: Project): Project = {
 }
 
 lazy val example = conditionalDependsOn(project in file("."))
-  .dependsOn(boom)
+  .dependsOn(boom, sifive_blocks)
   .settings(commonSettings)
 
 lazy val boom = (project in file("generators/boom"))
@@ -59,4 +59,8 @@ lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
 lazy val `barstools-macros` = (project in file("./tools/barstools/macros/"))
   .dependsOn(mdf, rocketchip, rebarFirrtl)
   .enablePlugins(sbtassembly.AssemblyPlugin)
+  .settings(commonSettings)
+
+lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
+  .dependsOn(rocketchip)
   .settings(commonSettings)
