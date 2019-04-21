@@ -12,7 +12,7 @@ import testchipip._
 // Rocket Top Level Systems
 // ------------------------
 
-class RocketTop(implicit p: Parameters) extends RocketSystem
+class RocketTop(implicit p: Parameters) extends ExampleRocketSystem
     with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
     with HasNoDebug
@@ -20,7 +20,7 @@ class RocketTop(implicit p: Parameters) extends RocketSystem
   override lazy val module = new RocketTopModule(this)
 }
 
-class RocketTopModule[+L <: RocketTop](l: L) extends RocketSystemModuleImp(l)
+class RocketTopModule[+L <: RocketTop](l: L) extends ExampleRocketSystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
