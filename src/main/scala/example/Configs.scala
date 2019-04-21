@@ -34,7 +34,7 @@ class WithBootROM extends Config((site, here, up) => {
  */
 class WithGPIO extends Config((site, here, up) => {
   case PeripheryGPIOKey => List(
-    GPIOParams(address = 0x10012000, width = 4, includeIOF = true))
+    GPIOParams(address = 0x10012000, width = 4, includeIOF = false))
 })
 
 // -------------------------------
@@ -94,6 +94,11 @@ class WithSimBlockDeviceRocketTop extends Config((site, here, up) => {
 class WithGPIORocketTop extends Config((site, here, up) => {
   case BuildRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
     val top = Module(LazyModule(new RocketTopWithGPIO()(p)).module)
+    for (gpio <- top.gpio) {
+      for (pin <- gpio.pins) {
+        pin.i.ival := false.B
+      }
+    }
     top
   }
 })
@@ -202,6 +207,11 @@ class WithSimBlockDeviceBoomTop extends Config((site, here, up) => {
 class WithGPIOBoomTop extends Config((site, here, up) => {
   case BuildBoomTop => (clock: Clock, reset: Bool, p: Parameters) => {
     val top = Module(LazyModule(new BoomTopWithGPIO()(p)).module)
+    for (gpio <- top.gpio) {
+      for (pin <- gpio.pins) {
+        pin.i.ival := false.B
+      }
+    }
     top
   }
 })
