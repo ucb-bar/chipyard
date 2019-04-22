@@ -222,7 +222,7 @@ class WithGPIOBoomTop extends Config((site, here, up) => {
 
 class BaseBoomConfig extends Config(
   new WithBootROM ++
-  new boom.system.SmallBoomConfig)
+  new boom.system.BoomConfig)
 
 class DefaultBoomConfig extends Config(
   new WithNormalBoomTop ++
