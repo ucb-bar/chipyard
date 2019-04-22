@@ -7,20 +7,15 @@ import freechips.rocketchip.diplomacy.LazyModule
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.util.GeneratorApp
 
-case object BuildTop extends Field[(Clock, Bool, Parameters) => BeagleTopModule[BeagleTop]]
-case object BoomBuildTop extends Field[(Clock, Bool, Parameters) => BeagleBoomTopModule[BeagleBoomTop]]
+case object RocketBuildTop extends Field[(Clock, Bool, Parameters) => BeagleRocketTopModule[BeagleRocketTop]]
+case object   BoomBuildTop extends Field[(Clock, Bool, Parameters) =>   BeagleBoomTopModule[  BeagleBoomTop]]
 
-class BaseTestHarness extends Module {
+class RocketTestHarness(implicit val p: Parameters) extends Module {
   val io = IO(new Bundle {
     val success = Output(Bool())
   })
 
-  //require(!((p(BuildTop) != None) && (p(BoomBuildTop) != None))) // There can only be one "BuildTop"
-  //require(!((p(BuildTop) == None) && (p(BoomBuildTop) == None))) // There must be at least one "BuildTop"
-}
-
-class TestHarness(implicit val p: Parameters) extends BaseTestHarness {
-  val dut = p(BuildTop)(clock, reset.toBool, p)
+  val dut = p(RocketBuildTop)(clock, reset.toBool, p)
   dut.debug := DontCare
   dut.connectSimAXIMem()
   dut.connectSimAXIMMIO()
@@ -41,7 +36,11 @@ class TestHarness(implicit val p: Parameters) extends BaseTestHarness {
   io.success := dut.connectSimSerial()
 }
 
-class BoomTestHarness(implicit val p: Parameters) extends BaseTestHarness {
+class BoomTestHarness(implicit val p: Parameters) extends Module {
+  val io = IO(new Bundle {
+    val success = Output(Bool())
+  })
+
   val dut = p(BoomBuildTop)(clock, reset.toBool, p)
   dut.debug := DontCare
   dut.connectSimAXIMem()

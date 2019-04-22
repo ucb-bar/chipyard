@@ -11,15 +11,15 @@ import example.{HasPeripheryPWMTL, HasPeripheryPWMAXI4, HasPeripheryPWMTLModuleI
 
 //---------------------------------------------------------------------------------------------------------
 
-class BeagleTop(implicit p: Parameters) extends ExampleRocketSystem
+class BeagleRocketTop(implicit p: Parameters) extends ExampleRocketSystem
   with CanHaveMasterAXI4MemPort
   with HasPeripheryBootROM
   with HasNoDebug
   with HasPeripherySerial {
-  override lazy val module = new BeagleTopModule(this)
+  override lazy val module = new BeagleRocketTopModule(this)
 }
 
-class BeagleTopModule[+L <: BeagleTop](l: L) extends ExampleRocketSystemModuleImp(l)
+class BeagleRocketTopModule[+L <: BeagleRocketTop](l: L) extends ExampleRocketSystemModuleImp(l)
   with HasRTCModuleImp
   with CanHaveMasterAXI4MemPortModuleImp
   with HasPeripheryBootROMModuleImp

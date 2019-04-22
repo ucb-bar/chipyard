@@ -8,19 +8,14 @@ import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.tile.XLen
 import testchipip._
 
-class WithBootROM extends Config((site, here, up) => {
-  case BootROMParams => BootROMParams(
-    contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img")
-})
-
 object ConfigValName {
   implicit val valName = ValName("TestHarness")
 }
 import ConfigValName._
 
-class WithBeagleTop extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    Module(LazyModule(new BeagleTop()(p)).module)
+class WithBeagleRocketTop extends Config((site, here, up) => {
+  case RocketBuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    Module(LazyModule(new BeagleRocketTop()(p)).module)
   }
   case BoomBuildTop => None
 })
@@ -29,13 +24,13 @@ class WithBeagleBoomTop extends Config((site, here, up) => {
   case BoomBuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
     Module(LazyModule(new BeagleBoomTop()(p)).module)
   }
-  case BuildTop => None
+  case RocketBuildTop => None
 })
 
-class BeagleConfig extends Config(
-  new WithBeagleTop ++
+class BeagleRocketConfig extends Config(
+  new WithBeagleRocketTop ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new WithBootROM ++
+  new example.WithBootROM ++
   new freechips.rocketchip.subsystem.WithRationalRocketTiles ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
   new freechips.rocketchip.subsystem.WithNBanks(2) ++
@@ -45,7 +40,7 @@ class BeagleConfig extends Config(
 class BeagleBoomConfig extends Config(
   new WithBeagleBoomTop ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new WithBootROM ++
+  new example.WithBootROM ++
   new freechips.rocketchip.subsystem.WithRationalRocketTiles ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
   new freechips.rocketchip.subsystem.WithNBanks(2) ++

@@ -57,7 +57,7 @@ lazy val hwacha = (project in file ("generators/hwacha"))
   .settings(commonSettings)
 
 lazy val beagle = conditionalDependsOn(project in file("."))
-  .dependsOn(boom)
+  .dependsOn(boom, sifive_blocks)
   .settings(commonSettings)
 
 lazy val boom = (project in file("generators/boom"))
