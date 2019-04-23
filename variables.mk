@@ -7,7 +7,7 @@
 # descriptions:
 #   PROJECT = the scala package to find the MODEL/Generator in
 #   MODEL = the top level module of the project in Chisel (normally the harness)
-#   FIRRTL_MODEL = the top level module of the project in Firrtl (normally the harness)
+#   VLOG_MODEL = the top level module of the project in Firrtl/Verilog (normally the harness)
 #   CONFIG = the configuration class to give the parameters for the project
 #   CFG_PROJECT = the scala package to find the CONFIG class
 #   SBT_PROJECT = the SBT project that you should find the Generator class in
@@ -17,14 +17,14 @@
 # project specific:
 # 	SUB_PROJECT = use the specific subproject default variables
 #########################################################################################
-PROJECT      ?= example
-MODEL        ?= RocketTestHarness
-FIRRTL_MODEL ?= TestHarness
-CONFIG       ?= DefaultRocketConfig
-CFG_PROJECT  ?= $(PROJECT)
-SBT_PROJECT  ?= $(PROJECT)
-TB           ?= TestDriver
-TOP          ?= RocketTop
+PROJECT     ?= example
+MODEL       ?= RocketTestHarness
+VLOG_MODEL  ?= TestHarness
+CONFIG      ?= DefaultRocketConfig
+CFG_PROJECT ?= $(PROJECT)
+SBT_PROJECT ?= $(PROJECT)
+TB          ?= TestDriver
+TOP         ?= RocketTop
 
 # make it so that you only change 1 param to change most or all of them!
 SUB_PROJECT ?= example
