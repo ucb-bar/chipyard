@@ -28,28 +28,38 @@ TOP         ?= RocketTop
 
 # make it so that you only change 1 param to change most or all of them!
 SUB_PROJECT ?= example
+# for a BOOM based system (provides all necessary params)
 ifeq ($(SUB_PROJECT),boomexample)
-	# for a BOOM based system (provides all necessary params)
 	MODEL=BoomTestHarness
 	CONFIG=DefaultBoomConfig
 	TOP=BoomTop
 endif
+# for BOOM developers (only need to provide a CONFIG)
 ifeq ($(SUB_PROJECT),boom)
-	# for BOOM developers (only need to provide a CONFIG)
 	PROJECT=boom.system
 	MODEL=TestHarness
 	CFG_PROJECT=boom.system
 	SBT_PROJECT=boom
 	TOP=ExampleBoomSystem
 endif
+# for Rocket-chip developers
 ifeq ($(SUB_PROJECT),rocketchip)
-	# for Rocket-chip developers
 	PROJECT=freechips.rocketchip.system
 	MODEL=TestHarness
 	CONFIG=DefaultConfig
 	CFG_PROJECT=freechips.rocketchip.system
 	SBT_PROJECT=rebarrocketchip
 	TOP=ExampleRocketSystem
+endif
+# for Hwacha developers (only need to provide a CONFIG)
+ifeq ($(SUB_PROJECT),hwacha)
+	PROJECT=freechips.rocketchip.system
+	MODEL=TestHarness
+	CFG_PROJECT=hwacha
+	SBT_PROJECT=hwacha
+	TOP=ExampleRocketSystem
+	TB=TestDriver
+	CONFIG=HwachaConfig
 endif
 
 #########################################################################################

@@ -28,3 +28,6 @@
 [submodule "generators/sifive-blocks"]
 	path = generators/sifive-blocks
 	url = git@github.com:sifive/sifive-blocks.git
+[submodule "generators/hwacha"]
+	path = generators/hwacha
+	url = git@github.com:ucb-bar/hwacha.git
