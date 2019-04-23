@@ -24,8 +24,12 @@ lazy val rebarFirrtl = (project in file("tools/firrtl"))
 
 lazy val rocketchip = RootProject(file("generators/rocket-chip"))
 
-lazy val testchipip = (project in file("generators/testchipip"))
+lazy val rebarrocketchip = project
   .dependsOn(rocketchip)
+  .settings(commonSettings)
+
+lazy val testchipip = (project in file("generators/testchipip"))
+  .dependsOn(rebarrocketchip)
   .settings(commonSettings)
 
 // Checks for -DROCKET_USE_MAVEN.
@@ -42,10 +46,11 @@ def conditionalDependsOn(prj: Project): Project = {
 }
 
 lazy val example = conditionalDependsOn(project in file("."))
+  .dependsOn(boom, sifive_blocks)
   .settings(commonSettings)
 
 lazy val boom = (project in file("generators/boom"))
-  .dependsOn(rocketchip)
+  .dependsOn(rebarrocketchip)
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
@@ -56,6 +61,10 @@ lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
   .settings(commonSettings)
 
 lazy val `barstools-macros` = (project in file("./tools/barstools/macros/"))
-  .dependsOn(mdf, rocketchip, rebarFirrtl)
+  .dependsOn(mdf, rebarrocketchip, rebarFirrtl)
   .enablePlugins(sbtassembly.AssemblyPlugin)
+  .settings(commonSettings)
+
+lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
+  .dependsOn(rebarrocketchip)
   .settings(commonSettings)

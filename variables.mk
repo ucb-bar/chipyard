@@ -3,10 +3,11 @@
 #########################################################################################
 
 #########################################################################################
-# default variables to invoke the generator
+# default variables to invoke the generator for a example Rocket system
 # descriptions:
 #   PROJECT = the scala package to find the MODEL/Generator in
-#   MODEL = the top level module of the project (normally the harness)
+#   MODEL = the top level module of the project in Chisel (normally the harness)
+#   VLOG_MODEL = the top level module of the project in Firrtl/Verilog (normally the harness)
 #   CONFIG = the configuration class to give the parameters for the project
 #   CFG_PROJECT = the scala package to find the CONFIG class
 #   SBT_PROJECT = the SBT project that you should find the Generator class in
@@ -17,18 +18,38 @@
 # 	SUB_PROJECT = use the specific subproject default variables
 #########################################################################################
 PROJECT     ?= example
-MODEL       ?= TestHarness
-CONFIG      ?= DefaultExampleConfig
+MODEL       ?= RocketTestHarness
+VLOG_MODEL  ?= TestHarness
+CONFIG      ?= DefaultRocketConfig
 CFG_PROJECT ?= $(PROJECT)
 SBT_PROJECT ?= $(PROJECT)
 TB          ?= TestDriver
-TOP         ?= ExampleTop
+TOP         ?= RocketTop
 
+# make it so that you only change 1 param to change most or all of them!
 SUB_PROJECT ?= example
-ifeq ($(SUB_PROJECT),boom) # make it so that you only change 1 param to change them all!
-	SBT_PROJECT=boom
+ifeq ($(SUB_PROJECT),boomexample)
+	# for a BOOM based system (provides all necessary params)
+	MODEL=BoomTestHarness
+	CONFIG=DefaultBoomConfig
+	TOP=BoomTop
+endif
+ifeq ($(SUB_PROJECT),boom)
+	# for BOOM developers (only need to provide a CONFIG)
 	PROJECT=boom.system
+	MODEL=TestHarness
+	CFG_PROJECT=boom.system
+	SBT_PROJECT=boom
 	TOP=ExampleBoomSystem
+endif
+ifeq ($(SUB_PROJECT),rocketchip)
+	# for Rocket-chip developers
+	PROJECT=freechips.rocketchip.system
+	MODEL=TestHarness
+	CONFIG=DefaultConfig
+	CFG_PROJECT=freechips.rocketchip.system
+	SBT_PROJECT=rebarrocketchip
+	TOP=ExampleRocketSystem
 endif
 
 #########################################################################################
@@ -42,6 +63,11 @@ REBAR_FIRRTL_DIR = $(base_dir)/tools/firrtl
 # names of various files needed to compile and run things
 #########################################################################################
 long_name = $(PROJECT).$(MODEL).$(CONFIG)
+
+# if building from rocketchip, override the long_name to match what they expect
+ifeq ($(SBT_PROJECT),rebarrocketchip)
+	long_name=$(PROJECT).$(CONFIG)
+endif
 
 FIRRTL_FILE  ?= $(build_dir)/$(long_name).fir
 ANNO_FILE    ?= $(build_dir)/$(long_name).anno.json

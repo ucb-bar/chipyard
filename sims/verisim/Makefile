@@ -41,11 +41,11 @@ include $(sim_dir)/verilator.mk
 model_dir = $(build_dir)/$(long_name)
 model_dir_debug = $(build_dir)/$(long_name).debug
 
-model_header = $(model_dir)/V$(MODEL).h
-model_header_debug = $(model_dir_debug)/V$(MODEL).h
+model_header = $(model_dir)/V$(VLOG_MODEL).h
+model_header_debug = $(model_dir_debug)/V$(VLOG_MODEL).h
 
-model_mk = $(model_dir)/V$(MODEL).mk
-model_mk_debug = $(model_dir_debug)/V$(MODEL).mk
+model_mk = $(model_dir)/V$(VLOG_MODEL).mk
+model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
 
 #########################################################################################
 # build makefile fragment that builds the verilator sim rules
@@ -72,10 +72,10 @@ $(model_mk_debug): $(sim_vsrcs) $(sim_dotf) $(INSTALLED_VERILATOR)
 # invoke make to make verilator sim rules
 #########################################################################################
 $(sim): $(model_mk)
-	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name) -f V$(MODEL).mk
+	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name) -f V$(VLOG_MODEL).mk
 
 $(sim_debug): $(model_mk_debug)
-	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(MODEL).mk
+	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(VLOG_MODEL).mk
 
 #########################################################################################
 # create a vcs vpd rule

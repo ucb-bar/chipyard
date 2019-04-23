@@ -2,7 +2,7 @@
 
 **This branch is under development**
 **It currently has many submodules**
-**Please run ./scripts/init-submodules-no-riscv-tools.sh to update submodules, unless you want to spend a long time waiting for submodule to clone**
+**Please run ./scripts/init-submodules-no-riscv-tools.sh to update submodules, unless you want to spend a long time waiting for submodules to clone**
 
 This is a starter template for your custom RISC-V project. It will allow you
 to leverage the Chisel HDL and RocketChip SoC generator to produce a

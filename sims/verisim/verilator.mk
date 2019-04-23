@@ -39,9 +39,9 @@ verilator/verilator-$(VERILATOR_VERSION).tar.gz:
 #########################################################################################
 VERILATOR := $(INSTALLED_VERILATOR) --cc --exe
 CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -D__STDC_FORMAT_MACROS
-VERILATOR_FLAGS := --top-module $(MODEL) \
+VERILATOR_FLAGS := --top-module $(VLOG_MODEL) \
 	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
 	+define+STOP_COND=\$$c\(\"done_reset\"\) --assert \
 	--output-split 20000 \
 	-Wno-STMTDLY --x-assign unique \
-	-O3 -CFLAGS "$(CXXFLAGS) -DTEST_HARNESS=V$(MODEL) -DVERILATOR"
+	-O3 -CFLAGS "$(CXXFLAGS) -DTEST_HARNESS=V$(VLOG_MODEL) -DVERILATOR"
