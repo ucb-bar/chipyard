@@ -42,6 +42,15 @@ ifeq ($(SUB_PROJECT),boom)
 	SBT_PROJECT=boom
 	TOP=ExampleBoomSystem
 endif
+ifeq ($(SUB_PROJECT),rocketchip)
+	# for Rocket-chip developers
+	PROJECT=freechips.rocketchip.system
+	MODEL=TestHarness
+	CONFIG=DefaultConfig
+	CFG_PROJECT=freechips.rocketchip.system
+	SBT_PROJECT=rebarrocketchip
+	TOP=ExampleRocketSystem
+endif
 
 #########################################################################################
 # path to rocket-chip and testchipip
@@ -54,6 +63,11 @@ REBAR_FIRRTL_DIR = $(base_dir)/tools/firrtl
 # names of various files needed to compile and run things
 #########################################################################################
 long_name = $(PROJECT).$(MODEL).$(CONFIG)
+
+# if building from rocketchip, override the long_name to match what they expect
+ifeq ($(SBT_PROJECT),rebarrocketchip)
+	long_name=$(PROJECT).$(CONFIG)
+endif
 
 FIRRTL_FILE  ?= $(build_dir)/$(long_name).fir
 ANNO_FILE    ?= $(build_dir)/$(long_name).anno.json
