@@ -18,6 +18,9 @@ class RocketTestHarness(implicit val p: Parameters) extends Module {
     val success = Output(Bool())
   })
 
+  // force Chisel to rename module
+  override def desiredName = "TestHarness"
+
   val dut = p(BuildRocketTop)(clock, reset.toBool, p)
   dut.debug := DontCare
   dut.connectSimAXIMem()
@@ -50,6 +53,9 @@ class BoomTestHarness(implicit val p: Parameters) extends Module {
   val io = IO(new Bundle {
     val success = Output(Bool())
   })
+
+  // force Chisel to rename module
+  override def desiredName = "TestHarness"
 
   val dut = p(BuildBoomTop)(clock, reset.toBool, p)
   dut.debug := DontCare

@@ -6,7 +6,8 @@
 # default variables to invoke the generator for a example Rocket system
 # descriptions:
 #   PROJECT = the scala package to find the MODEL/Generator in
-#   MODEL = the top level module of the project (normally the harness)
+#   MODEL = the top level module of the project in Chisel (normally the harness)
+#   FIRRTL_MODEL = the top level module of the project in Firrtl (normally the harness)
 #   CONFIG = the configuration class to give the parameters for the project
 #   CFG_PROJECT = the scala package to find the CONFIG class
 #   SBT_PROJECT = the SBT project that you should find the Generator class in
@@ -16,13 +17,14 @@
 # project specific:
 # 	SUB_PROJECT = use the specific subproject default variables
 #########################################################################################
-PROJECT     ?= example
-MODEL       ?= RocketTestHarness
-CONFIG      ?= DefaultRocketConfig
-CFG_PROJECT ?= $(PROJECT)
-SBT_PROJECT ?= $(PROJECT)
-TB          ?= TestDriver
-TOP         ?= RocketTop
+PROJECT      ?= example
+MODEL        ?= RocketTestHarness
+FIRRTL_MODEL ?= TestHarness
+CONFIG       ?= DefaultRocketConfig
+CFG_PROJECT  ?= $(PROJECT)
+SBT_PROJECT  ?= $(PROJECT)
+TB           ?= TestDriver
+TOP          ?= RocketTop
 
 # make it so that you only change 1 param to change most or all of them!
 SUB_PROJECT ?= example
@@ -36,7 +38,6 @@ ifeq ($(SUB_PROJECT),boom)
 	# for BOOM developers (only need to provide a CONFIG)
 	PROJECT=boom.system
 	MODEL=TestHarness
-	#CONFIG: User specified
 	CFG_PROJECT=boom.system
 	SBT_PROJECT=boom
 	TOP=ExampleBoomSystem
