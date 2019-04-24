@@ -20,13 +20,6 @@ class WithBeagleRocketTop extends Config((site, here, up) => {
   case BoomBuildTop => None
 })
 
-class WithBeagleBoomTop extends Config((site, here, up) => {
-  case BoomBuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    Module(LazyModule(new BeagleBoomTop()(p)).module)
-  }
-  case RocketBuildTop => None
-})
-
 class BeagleRocketConfig extends Config(
   new WithBeagleRocketTop ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
@@ -36,13 +29,3 @@ class BeagleRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBanks(2) ++
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   new freechips.rocketchip.system.BaseConfig)
-
-class BeagleBoomConfig extends Config(
-  new WithBeagleBoomTop ++
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new example.WithBootROM ++
-  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
-  new freechips.rocketchip.subsystem.WithNBanks(2) ++
-  new boom.system.WithNBoomCores(2) ++
-  new boom.system.BoomConfig)
