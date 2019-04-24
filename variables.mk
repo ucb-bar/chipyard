@@ -26,15 +26,21 @@ SBT_PROJECT ?= $(PROJECT)
 TB          ?= TestDriver
 TOP         ?= RocketTop
 
-# make it so that you only change 1 param to change most or all of them!
+#########################################################################################
+# subproject overrides
+# description:
+#   - make it so that you only change 1 param to change most or all of them!
+#   - mainly intended for quick developer setup for common flags
+#   - for each you only need to specify a CONFIG
+#########################################################################################
 SUB_PROJECT ?= example
-# for a BOOM based system (provides all necessary params)
+
+# for a BOOM based example system
 ifeq ($(SUB_PROJECT),boomexample)
 	MODEL=BoomTestHarness
-	CONFIG=DefaultBoomConfig
 	TOP=BoomTop
 endif
-# for BOOM developers (only need to provide a CONFIG)
+# for BOOM developers
 ifeq ($(SUB_PROJECT),boom)
 	PROJECT=boom.system
 	MODEL=TestHarness
@@ -46,12 +52,11 @@ endif
 ifeq ($(SUB_PROJECT),rocketchip)
 	PROJECT=freechips.rocketchip.system
 	MODEL=TestHarness
-	CONFIG=DefaultConfig
 	CFG_PROJECT=freechips.rocketchip.system
 	SBT_PROJECT=rebarrocketchip
 	TOP=ExampleRocketSystem
 endif
-# for Hwacha developers (only need to provide a CONFIG)
+# for Hwacha developers
 ifeq ($(SUB_PROJECT),hwacha)
 	PROJECT=freechips.rocketchip.system
 	MODEL=TestHarness
@@ -59,7 +64,6 @@ ifeq ($(SUB_PROJECT),hwacha)
 	SBT_PROJECT=hwacha
 	TOP=ExampleRocketSystem
 	TB=TestDriver
-	CONFIG=HwachaConfig
 endif
 
 #########################################################################################
@@ -75,8 +79,8 @@ REBAR_FIRRTL_DIR = $(base_dir)/tools/firrtl
 long_name = $(PROJECT).$(MODEL).$(CONFIG)
 
 # if building from rocketchip, override the long_name to match what they expect
-ifeq ($(SBT_PROJECT),rebarrocketchip)
-	long_name=$(PROJECT).$(CONFIG)
+ifeq ($(PROJECT),freechips.rocketchip.system)
+	long_name=$(CFG_PROJECT).$(CONFIG)
 endif
 
 FIRRTL_FILE  ?= $(build_dir)/$(long_name).fir
