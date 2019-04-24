@@ -19,17 +19,32 @@ lazy val commonSettings = Seq(
     Resolver.sonatypeRepo("releases"),
     Resolver.mavenLocal))
 
-lazy val rebarFirrtl = (project in file("tools/firrtl"))
-  .settings(commonSettings)
-
+// -------------------------------
+// Root SBT Rocket-chip project(s)
+// -------------------------------
 lazy val rocketchip = RootProject(file("generators/rocket-chip"))
 
-lazy val rebarrocketchip = project
+lazy val rebarRocketchip = project
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
+// ---------------------------------------
+// SBT projects that depend on Rocket-Chip
+// ---------------------------------------
 lazy val testchipip = (project in file("generators/testchipip"))
-  .dependsOn(rebarrocketchip)
+  .dependsOn(rebarRocketchip)
+  .settings(commonSettings)
+
+lazy val boom = (project in file("generators/boom"))
+  .dependsOn(rebarRocketchip)
+  .settings(commonSettings)
+
+lazy val hwacha = (project in file ("generators/hwacha"))
+  .dependsOn(rebarRocketchip)
+  .settings(commonSettings)
+
+lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
+  .dependsOn(rebarRocketchip)
   .settings(commonSettings)
 
 // Checks for -DROCKET_USE_MAVEN.
@@ -45,23 +60,24 @@ def conditionalDependsOn(prj: Project): Project = {
   }
 }
 
+// -------------------
+// Larger SBT projects
+// -------------------
 lazy val example = conditionalDependsOn(project in file("generators/example"))
   .dependsOn(boom, hwacha, sifive_blocks)
   .settings(commonSettings)
 
-lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))
-  .settings(commonSettings)
-
-lazy val hwacha = (project in file ("generators/hwacha"))
-  .dependsOn(rebarrocketchip)
-  .settings(commonSettings)
-
-lazy val beagle = conditionalDependsOn(project in file("."))
+lazy val beagle = conditionalDependsOn(project in file("generators/beagle"))
   .dependsOn(boom, hwacha, sifive_blocks)
   .settings(commonSettings)
 
-lazy val boom = (project in file("generators/boom"))
-  .dependsOn(rebarrocketchip)
+// --------------------------------
+// SBT projects for tools/utilities
+// --------------------------------
+lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))
+  .settings(commonSettings)
+
+lazy val rebarFirrtl = (project in file("tools/firrtl"))
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
@@ -72,10 +88,7 @@ lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
   .settings(commonSettings)
 
 lazy val `barstools-macros` = (project in file("./tools/barstools/macros/"))
-  .dependsOn(mdf, rebarrocketchip, rebarFirrtl)
+  .dependsOn(mdf, rebarRocketchip, rebarFirrtl)
   .enablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonSettings)
 
-lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
-  .dependsOn(rebarrocketchip)
-  .settings(commonSettings)

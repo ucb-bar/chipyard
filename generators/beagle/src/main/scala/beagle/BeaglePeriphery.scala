@@ -122,7 +122,13 @@ trait HasPeripheryBeagle {
   val bootScratchPadBuffer = LazyModule( new TLBuffer())
   pbus.toVariableWidthSlave(Some("boot_scratchpad")) { bootScratchPad.node := bootScratchPadBuffer.node := TLBuffer() }
 
-  val lbwif = LazyModule(new TLSerdesser(4, ctrlParams, memParams, extParams.beatBytes, p(BeagleSinkIds)*lanesPerMemoryChannel))
+  val lanesPerMemoryChannel = 1 // TODO: Gotten from HBWIF
+  val lbwif = LazyModule(new TLSerdesser(
+    w=4,
+    clientParams=ctrlParams,
+    managerParams=memParams,
+    beatBytes=extParams.beatBytes,
+    endSinkId=p(BeagleSinkIds)*lanesPerMemoryChannel))
   val base = AddressSet(extParams.base, extParams.size-1)
   val filters = (0 until extMem.nMemoryChannels).map { case id =>
     AddressSet(id * p(CacheBlockBytes) * p(CacheBlockStriping), ~((extMem.nMemoryChannels-1) * p(CacheBlockBytes) * p(CacheBlockStriping)))

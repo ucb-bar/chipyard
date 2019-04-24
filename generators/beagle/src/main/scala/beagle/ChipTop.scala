@@ -32,34 +32,21 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
   }
 
   val reset           = IO(Input(Bool()))
+  val boot            = IO(Input(Bool()))
+
   val cclk            = IO(Input(Vec(3, Clock())))
   val clk_sel         = IO(Input(UInt(2.W)))
-  val boot            = IO(Input(Bool()))
+  //val refClock        = IO(Vec(3, new Differential))
+
   val tl_serial       = IO(chiselTypeOf(system.tl_serial))
   val tl_serial_clock = IO(Output(Clock()))
+
   val gpio            = IO(new GPIOPins(() => new EnhancedPin(), p(PeripheryGPIOKey).head))
   val jtag            = IO(new JTAGPins(() => new BasePin(), false))
   val i2c             = IO(new I2CPins(() => new BasePin()))
   val spi             = IO(new SPIPins(() => new BasePin(), p(PeripherySPIKey).head))
   val uart            = IO(new UARTPins(() => new BasePin()))
-  val refClock        = IO(Vec(3, new Differential))
 
-  //Clock Muxing
-  val Seq(pll_refclk, refclk_0, refclk_1) = refClock.map { clockIO =>
-    val clockRX = withClockAndReset(sysClock, sysReset) {
-      Module(new ClockReceiver())
-    }
-    clockRX.io.VIP <> clockIO.p
-    clockRX.io.VIN <> clockIO.n
-    clockRX.io.VOBUF
-  }
-  val hard_clock_mux = withClockAndReset(sysClock, sysReset) {
-    testchipip.ClockMutexMux(pll_refclk +: cclk)
-  }
-  hard_clock_mux.io.sel := clk_sel
-  hard_clock_mux.io.resetAsync := reset.toBool
-  system.pllRefClock := hard_clock_mux.io.clockOut
-  pllclk_out := system.unclusterClockOut
 
   require(system.auto.elements.isEmpty)
   //This has built in synchronizer/connection

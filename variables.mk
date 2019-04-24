@@ -101,13 +101,13 @@ endif
 # for beagle project
 ifeq ($(SUB_PROJECT),beagle)
 	SBT_PROJECT=beagle
-	MODEL=ChipTop
-	VLOG_MODEL=ChipTop
+	MODEL=BeagleChipTop
+	VLOG_MODEL=BeagleChipTop
 	MODEL_PACKAGE=beagle
 	CONFIG=BeagleRocketConfig
 	CONFIG_PACKAGE=beagle
-	GENERATOR_PACKAGE=hwatcha
-	TOP=ChipTop
+	GENERATOR_PACKAGE=hwacha
+	TOP=BeagleChipTop
 endif
 
 
