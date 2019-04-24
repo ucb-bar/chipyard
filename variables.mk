@@ -98,6 +98,18 @@ ifeq ($(SUB_PROJECT),hwacha)
 	TB                ?= TestDriver
 	TOP               ?= ExampleRocketSystem
 endif
+# for beagle project
+ifeq ($(SUB_PROJECT),beagle)
+	SBT_PROJECT=beagle
+	MODEL=ChipTop
+	VLOG_MODEL=ChipTop
+	MODEL_PACKAGE=beagle
+	CONFIG=BeagleRocketConfig
+	CONFIG_PACKAGE=beagle
+	GENERATOR_PACKAGE=hwatcha
+	TOP=ChipTop
+endif
+
 
 #########################################################################################
 # path to rocket-chip and testchipip

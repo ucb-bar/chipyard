@@ -21,12 +21,6 @@ import sifive.blocks.devices.jtag._
 import sifive.blocks.devices.pinctrl._
 
 import testchipip._
-import hbwif._
-import hbwif.tilelink._
-
-import eagle.serdes._
-import eagle.clocking._
-import eagle.clockrx._
 
 class BeagleChipTop(implicit val p: Parameters) extends RawModule
   with freechips.rocketchip.util.DontTouch {
@@ -91,6 +85,6 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
   sysClock := system.unclusterClockOut
   withClockAndReset(sysClock, reset.toBool) {
     // This is duplicated during synthesis
-    sysReset := AsyncResetShiftReg(ResetCatchAndSync(system.unclusterClockOut, reset.toBool), depth = p(EaglePipelineResetDepth), init=1)
+    sysReset := AsyncResetShiftReg(ResetCatchAndSync(system.unclusterClockOut, reset.toBool), depth = p(BeaglePipelineResetDepth), init=1)
   }
 }

@@ -1,26 +1,30 @@
 package beagle
 
 import chisel3._
+
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system._
 import freechips.rocketchip.config.Parameters
+import freechips.rocketchip.tilelink.{BankBinder}
 import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.util.DontTouch
-import testchipip._
-import example.{HasPeripheryPWMTL, HasPeripheryPWMAXI4, HasPeripheryPWMTLModuleImp, HasPeripheryPWMAXI4ModuleImp}
+import freechips.rocketchip.diplomacy.{NoCrossing, FlipRendering, SynchronousCrossing}
 
-//---------------------------------------------------------------------------------------------------------
+import sifive.blocks.devices.gpio._
+import sifive.blocks.devices.spi._
+import sifive.blocks.devices.uart._
+import sifive.blocks.devices.i2c._
+import sifive.blocks.devices.jtag._
 
-class BeagleRocketTop(implicit p: Parameters) extends RocketSystem
+class BeagleRocketTop(implicit p: Parameters) extends RocketSubsystem
   with HasPeripheryBootROM
   with HasPeripheryGPIO
   with HasPeripherySPI
   with HasPeripheryI2C
   with HasPeripheryUART
-  with HasPeripheryEagle {
+  with HasPeripheryBeagle {
 
-  require(clusterPLLParams.size == p(NClusters))
-
+  /** START: COPIED FROM ROCKET-CHIP */
   override lazy val module = new BeagleRocketTopModule(this)
 
   // The sbus masters the cbus; here we convert TL-UH -> TL-UL
@@ -41,6 +45,7 @@ class BeagleRocketTop(implicit p: Parameters) extends RocketSystem
     sbus.coupleTo("coherence_manager") { in :*= _ }
     mbus.coupleFrom("coherence_manager") { _ :=* BankBinder(mbus.blockBytes * (nBanks-1)) :*= out }
   }
+  /** END: COPIED FROM ROCKET-CHIP */
 }
 
 class BeagleRocketTopModule[+L <: BeagleRocketTop](l: L) extends RocketSubsystemModuleImp(l)
@@ -50,29 +55,13 @@ class BeagleRocketTopModule[+L <: BeagleRocketTop](l: L) extends RocketSubsystem
   with HasPeripherySPIModuleImp
   with HasPeripheryI2CModuleImp
   with HasPeripheryUARTModuleImp
-  with HasPeripheryEagleModuleImp
+  with HasPeripheryBeagleModuleImp
   with HasTilesBundle
   with freechips.rocketchip.util.DontTouch {
 
+  // TODO: How do deal with the I/O out of the Rocket System?
   val cclk = IO(Input(Vec(3, Clock())))
   val clk_sel = IO(Input(UInt(2.W)))
   val unclusterClockOut = IO(Output(Clock()))
   val lbwifClockOut = IO(Output(Clock()))
-
-  val clusterClocks = (clusterClockSels zip outer.clusterPLLs).zipWithIndex.map { case ((sel, pll), i) =>
-    val mux = testchipip.ClockMutexMux(Seq(pll.module.io.clockOut,
-      pll.module.io.clockOutDiv, pllRefClock) ++ cclk).suggestName(s"cluster_clock_mux$i")
-    require(mux.n == p(PeripheryEagleKey).numClusterClocks)
-    mux.io.sel := sel
-    mux.io.resetAsync := resetAsync
-    mux.io.clockOut
-  }
-
-  //We put the refClock at zero and three so that there are no invalid configs of unclusterClockSel although this isn't necessary
-  val uncluster_clock_mux = testchipip.ClockMutexMux(Seq(pllRefClock,
-    outer.unclusterPLL.module.io.clockOut, outer.unclusterPLL.module.io.clockOutDiv, pllRefClock))
-  uncluster_clock_mux.io.sel := unclusterClockSel
-  uncluster_clock_mux.io.resetAsync := resetAsync
-  unclusterClockOut := uncluster_clock_mux.io.clockOut
-  lbwifClockOut := lbwifClock
 }

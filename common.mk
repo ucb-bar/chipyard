@@ -69,8 +69,10 @@ $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): $(HARNESS_SMEMS_CONF)
 #########################################################################################
 # helper rule to just make verilog files
 #########################################################################################
-.PHONY: verilog
+.PHONY: verilog top
 verilog: $(sim_vsrcs)
+
+beagle: $(VERILOG_FILE) $(SMEMS_CONF)
 
 #########################################################################################
 # helper rules to run simulator
