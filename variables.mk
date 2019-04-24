@@ -5,26 +5,28 @@
 #########################################################################################
 # default variables to invoke the generator for a example Rocket system
 # descriptions:
-#   PROJECT = the scala package to find the MODEL/Generator in
+#   SBT_PROJECT = the SBT project that you should find the classes/packages in
 #   MODEL = the top level module of the project in Chisel (normally the harness)
 #   VLOG_MODEL = the top level module of the project in Firrtl/Verilog (normally the harness)
+#   MODEL_PACKAGE = the scala package to find the MODEL in
 #   CONFIG = the configuration class to give the parameters for the project
-#   CFG_PROJECT = the scala package to find the CONFIG class
-#   SBT_PROJECT = the SBT project that you should find the Generator class in
+#   CONFIG_PACKAGE = the scala package to find the CONFIG class
+#   GENERATOR_PACKAGE = the scala package to find the Generator class in
 #   TB = wrapper over the TestHarness needed to simulate in VCS
 #   TOP = top level module of the project (normally the module instantiated by the harness)
 #
 # project specific:
 # 	SUB_PROJECT = use the specific subproject default variables
 #########################################################################################
-PROJECT     ?= example
-MODEL       ?= RocketTestHarness
-VLOG_MODEL  ?= TestHarness
-CONFIG      ?= DefaultRocketConfig
-CFG_PROJECT ?= $(PROJECT)
-SBT_PROJECT ?= $(PROJECT)
-TB          ?= TestDriver
-TOP         ?= RocketTop
+SBT_PROJECT       ?= example
+MODEL             ?= RocketTestHarness
+VLOG_MODEL        ?= TestHarness
+MODEL_PACKAGE     ?= $(SBT_PROJECT)
+CONFIG            ?= DefaultRocketConfig
+CONFIG_PACKAGE    ?= $(SBT_PROJECT)
+GENERATOR_PACKAGE ?= $(SBT_PROJECT)
+TB                ?= TestDriver
+TOP               ?= RocketTop
 
 #########################################################################################
 # subproject overrides
@@ -42,28 +44,30 @@ ifeq ($(SUB_PROJECT),boomexample)
 endif
 # for BOOM developers
 ifeq ($(SUB_PROJECT),boom)
-	PROJECT=boom.system
-	MODEL=TestHarness
-	CFG_PROJECT=boom.system
 	SBT_PROJECT=boom
+	MODEL_PACKAGE=boom.system
+	MODEL=TestHarness
+	CONFIG_PACKAGE=boom.system
+	GENERATOR_PACKAGE=boom.system
 	TOP=ExampleBoomSystem
 endif
 # for Rocket-chip developers
 ifeq ($(SUB_PROJECT),rocketchip)
-	PROJECT=freechips.rocketchip.system
-	MODEL=TestHarness
-	CFG_PROJECT=freechips.rocketchip.system
 	SBT_PROJECT=rebarrocketchip
+	MODEL_PACKAGE=freechips.rocketchip.system
+	MODEL=TestHarness
+	CONFIG_PACKAGE=freechips.rocketchip.system
+	GENERATOR_PACKAGE=freechips.rocketchip.system
 	TOP=ExampleRocketSystem
 endif
 # for Hwacha developers
 ifeq ($(SUB_PROJECT),hwacha)
-	PROJECT=freechips.rocketchip.system
-	MODEL=TestHarness
-	CFG_PROJECT=hwacha
 	SBT_PROJECT=hwacha
+	MODEL_PACKAGE=freechips.rocketchip.system
+	MODEL=TestHarness
+	CONFIG_PACKAGE=hwacha
+	GENERATOR_PACKAGE=hwacha
 	TOP=ExampleRocketSystem
-	TB=TestDriver
 endif
 
 #########################################################################################
@@ -76,11 +80,14 @@ REBAR_FIRRTL_DIR = $(base_dir)/tools/firrtl
 #########################################################################################
 # names of various files needed to compile and run things
 #########################################################################################
-long_name = $(PROJECT).$(MODEL).$(CONFIG)
+long_name = $(MODEL_PACKAGE).$(MODEL).$(CONFIG)
 
-# if building from rocketchip, override the long_name to match what they expect
-ifeq ($(PROJECT),freechips.rocketchip.system)
-	long_name=$(CFG_PROJECT).$(CONFIG)
+# match the long_name to what the specific generator will output
+ifeq ($(GENERATOR_PACKAGE),freechips.rocketchip.system)
+	long_name=$(CONFIG_PACKAGE).$(CONFIG)
+endif
+ifeq ($(GENERATOR_PACKAGE),hwacha)
+	long_name=$(MODEL_PACKAGE).$(CONFIG)
 endif
 
 FIRRTL_FILE  ?= $(build_dir)/$(long_name).fir

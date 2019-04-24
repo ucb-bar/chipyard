@@ -22,8 +22,8 @@ sim_name = verilator
 # vcs simulator types and rules
 #########################################################################################
 sim_prefix = simulator
-sim = $(sim_dir)/$(sim_prefix)-$(PROJECT)-$(CONFIG)
-sim_debug = $(sim_dir)/$(sim_prefix)-$(PROJECT)-$(CONFIG)-debug
+sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
+sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
 .PHONY: default debug
 default: $(sim)
