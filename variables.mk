@@ -12,7 +12,7 @@
 #   CONFIG = the configuration class to give the parameters for the project
 #   CONFIG_PACKAGE = the scala package to find the CONFIG class
 #   GENERATOR_PACKAGE = the scala package to find the Generator class in
-#   TB = wrapper over the TestHarness needed to simulate in VCS
+#   TB = wrapper over the TestHarness needed to simulate in a verilog simulator
 #   TOP = top level module of the project (normally the module instantiated by the harness)
 #
 # project specific:
