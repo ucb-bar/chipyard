@@ -1,6 +1,7 @@
 package beagle
 
 import chisel3._
+import chisel3.util._
 
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system._
@@ -59,9 +60,21 @@ class BeagleRocketTopModule[+L <: BeagleRocketTop](l: L) extends RocketSubsystem
   with HasTilesBundle
   with freechips.rocketchip.util.DontTouch {
 
-  // TODO: How do deal with the I/O out of the Rocket System?
-  val cclk = IO(Input(Vec(3, Clock())))
-  val clk_sel = IO(Input(UInt(2.W)))
-  val unclusterClockOut = IO(Output(Clock()))
-  val lbwifClockOut = IO(Output(Clock()))
+  // backup clocks coming from offchip
+  val alt_clks    = IO(Input(Vec(1, Clock())))
+  val alt_clk_sel = IO(Input(UInt(1.W)))
+
+  val clk_out       = IO(Output(Clock()))
+  val lbwif_clk_out = IO(Output(Clock()))
+
+  // pipe out the lbwif clock out
+  lbwif_clk_out := lbwif_clk
+
+  // get the actual clock from the multiple alternate clocks
+  val all_clks = Seq(lbwif_clk) ++ alt_clks
+  require(alt_clk_sel.getWidth >= log2Ceil(all_clks.length), "[sys-top] must be able to select all input clocks")
+  val clockMux = testchipip.ClockMutexMux(all_clks)
+  clockMux.io.sel := alt_clk_sel
+  clockMux.io.resetAsync := rst_async
+  clk_out := clockMux.io.clockOut
 }

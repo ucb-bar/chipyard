@@ -25,53 +25,62 @@ import testchipip._
 class BeagleChipTop(implicit val p: Parameters) extends RawModule
   with freechips.rocketchip.util.DontTouch {
 
-  val sysClock = Wire(Clock())
-  val sysReset = Wire(Bool())
-  val system = withClockAndReset(sysClock, sysReset) {
+  val sys_clk = Wire(Clock())
+  val sys_rst = Wire(Bool())
+  val sys = withClockAndReset(sys_clk, sys_rst) {
     Module(LazyModule(new BeagleRocketTop).module)
   }
 
-  val reset           = IO(Input(Bool()))
-  val boot            = IO(Input(Bool()))
+  val reset           = IO(Input(Bool())) // reset from off chip
+  val boot            = IO(Input(Bool())) // boot from sdcard or tether
 
-  val cclk            = IO(Input(Vec(3, Clock())))
-  val clk_sel         = IO(Input(UInt(2.W)))
-  //val refClock        = IO(Vec(3, new Differential))
+  val alt_clks        = IO(Input(Vec(1, Clock()))) // extra "chicken bit" clocks
+  val alt_clk_sel     = IO(Input(UInt(1.W)))
 
-  val tl_serial       = IO(chiselTypeOf(system.tl_serial))
+  val tl_serial       = IO(chiselTypeOf(sys.tl_serial))
   val tl_serial_clock = IO(Output(Clock()))
 
   val gpio            = IO(new GPIOPins(() => new EnhancedPin(), p(PeripheryGPIOKey).head))
-  val jtag            = IO(new JTAGPins(() => new BasePin(), false))
   val i2c             = IO(new I2CPins(() => new BasePin()))
   val spi             = IO(new SPIPins(() => new BasePin(), p(PeripherySPIKey).head))
   val uart            = IO(new UARTPins(() => new BasePin()))
 
+  val jtag            = IO(new JTAGPins(() => new BasePin(), false))
 
-  require(system.auto.elements.isEmpty)
+  // -----------------------------------------------------------------------
+
+  require(sys.auto.elements.isEmpty)
+
   //This has built in synchronizer/connection
-  SPIPinsFromPort(spi, system.spi.head, sysClock, sysReset, 3)
-  system.spi.head.dq(2) := DontCare
-  system.spi.head.dq(3) := DontCare
-  I2CPinsFromPort(i2c, system.i2c.head, sysClock, sysReset, 3)
-  UARTPinsFromPort(uart, system.uart.head, sysClock, sysReset, 3)
-  GPIOPinsFromPort(gpio, system.gpio.head, sysClock, sysReset)
-  tl_serial   <> system.tl_serial
-  tl_serial_clock := system.lbwifClockOut
-  system.cclk <> cclk
-  system.clk_sel := clk_sel
-  system.boot := boot
-  system.resetAsync := reset.toBool
+  tl_serial       <> sys.tl_serial
+  tl_serial_clock := sys.lbwif_clk_out
 
-  system.debug.systemjtag.foreach { sj =>
+  // pass in alternate clocks coming from offchip
+  sys.alt_clks <> alt_clks
+  sys.alt_clk_sel := alt_clk_sel
+
+  sys.boot := boot
+  sys.rst_async := reset.asBool
+
+  // jtag setup
+  sys.debug.systemjtag.foreach { sj =>
     JTAGPinsFromPort(jtag, sj.jtag)
     sj.mfr_id := p(JtagDTMKey).idcodeManufId.U(11.W)
-    sj.reset := ResetCatchAndSync(sj.jtag.TCK, reset.toBool)
+    sj.reset := ResetCatchAndSync(sj.jtag.TCK, reset.asBool)
   }
 
-  sysClock := system.unclusterClockOut
-  withClockAndReset(sysClock, reset.toBool) {
+  // sifive block peripheral connections
+  SPIPinsFromPort(spi, sys.spi.head, sys_clk, sys_rst, 3)
+  sys.spi.head.dq(2) := DontCare
+  sys.spi.head.dq(3) := DontCare
+  I2CPinsFromPort(i2c, sys.i2c.head, sys_clk, sys_rst, 3)
+  UARTPinsFromPort(uart, sys.uart.head, sys_clk, sys_rst, 3)
+  GPIOPinsFromPort(gpio, sys.gpio.head, sys_clk, sys_rst)
+
+  // setup system clocks and reset
+  sys_clk := sys.clk_out
+  withClockAndReset(sys_clk, reset.asBool) {
     // This is duplicated during synthesis
-    sysReset := AsyncResetShiftReg(ResetCatchAndSync(system.unclusterClockOut, reset.toBool), depth = p(BeaglePipelineResetDepth), init=1)
+    sys_rst := AsyncResetShiftReg(ResetCatchAndSync(sys.clk_out, reset.asBool), depth = p(BeaglePipelineResetDepth), init=1)
   }
 }

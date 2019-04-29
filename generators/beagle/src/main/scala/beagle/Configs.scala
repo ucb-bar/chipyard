@@ -15,19 +15,13 @@ import sifive.blocks.devices.jtag._
 
 import hwacha.{DefaultHwachaConfig}
 
-case object NClusters extends Field[Int]
-case object CacheBlockStriping extends Field[Int]
-
-class WithBeagleUnClusterChanges extends Config((site, here, up) => {
+class WithBeagleChanges extends Config((site, here, up) => {
   case SystemBusKey => up(SystemBusKey).copy(beatBytes = 16)
   case MemoryBusKey => up(MemoryBusKey).copy(beatBytes = 8)
   case ControlBusKey => {
     val cBus = up(ControlBusKey)
     cBus.copy(errorDevice = cBus.errorDevice.map(e => e.copy(maxTransfer=64)))
   }
-  case BeagleSinkIds => 32
-  case NClusters => 1
-  case CacheBlockStriping => 1
   case BeaglePipelineResetDepth => 5
 })
 
@@ -47,7 +41,7 @@ class WithHierTiles extends Config((site, here, up) => {
 class BeagleRocketConfig extends Config(
   new example.WithBootROM ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new WithBeagleUnClusterChanges ++
+  new WithBeagleChanges ++
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
   new WithHierTiles ++

@@ -72,7 +72,7 @@ $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): $(HARNESS_SMEMS_CONF)
 .PHONY: verilog top
 verilog: $(sim_vsrcs)
 
-beagle: $(VERILOG_FILE) $(SMEMS_CONF)
+top: $(VERILOG_FILE) $(SMEMS_CONF)
 
 #########################################################################################
 # helper rules to run simulator

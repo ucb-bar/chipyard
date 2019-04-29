@@ -21,24 +21,20 @@ case object BeagleSinkIds extends Field[Int]
 
 case class BeagleParams(
   scrAddress: Int,
-  numClusterClocks: Int = 6,
-  unclusterClockSelBits: Int = 2,
-  unclusterDividerBits: Int = 8,
+  clkSelBits: Int = 1,
+  dividerBits: Int = 8,
   lbwifDividerBits: Int = 8
-) {
-  def clockSelBits = log2Ceil(numClusterClocks)
-}
+)
 
 trait HasBeagleTopBundleContents extends Bundle {
   implicit val p: Parameters
-  val clusterResets = Output(Vec(p(NClusters), Bool()))
-  val clusterClockSels = Output(Vec(p(NClusters), UInt(p(PeripheryBeagleKey).clockSelBits.W)))
-  val switcherSel = Output(Bool())
-  val boot = Input(Bool())
-  val unclusterClockSel = Output(UInt(p(PeripheryBeagleKey).unclusterClockSelBits.W))
-  val unclusterDivider = Output(UInt(p(PeripheryBeagleKey).unclusterDividerBits.W))
-  val lbwifDivider = Output(UInt(p(PeripheryBeagleKey).lbwifDividerBits.W))
-  val resetAsync = Input(Bool())
+
+  val boot          = Input(Bool())
+  val rst_async     = Input(Bool())
+
+  val clk_sel       = Output(UInt(p(PeripheryBeagleKey).clkSelBits.W))
+  val divider       = Output(UInt(p(PeripheryBeagleKey).dividerBits.W))
+  val lbwif_divider = Output(UInt(p(PeripheryBeagleKey).lbwifDividerBits.W))
 }
 
 trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap {
@@ -47,56 +43,54 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap {
   def params: BeagleParams
   def c = params
 
-  val clusterResets = Seq.fill(p(NClusters)) {
-    withReset(io.resetAsync) { Module(new AsyncResetRegVec(w = 1, init = 1)) }
+  val clk_sel = withReset(io.rst_async) {
+    Module(new AsyncResetRegVec(w = c.clkSelBits, init = 0))
   }
-  val clusterClockSels = Seq.fill(p(NClusters)) {
-    withReset(io.resetAsync) { Module(new AsyncResetRegVec(w = p(PeripheryBeagleKey).clockSelBits, init = 2)) }
+  val divider = withReset(io.rst_async) {
+    Module(new AsyncResetRegVec(w = c.dividerBits, init = 4))
   }
-  val switcherSel = withReset(io.resetAsync) { Module(new AsyncResetRegVec(w = 1, init = 1)) }
-  val unclusterClockSel = withReset(io.resetAsync) {
-    Module(new AsyncResetRegVec(w = c.unclusterClockSelBits, init = 0))
-  }
-  val unclusterDivider = withReset(io.resetAsync) {
-    Module(new AsyncResetRegVec(w = c.unclusterDividerBits, init = 4))
-  }
-  val lbwifDivider = withReset(io.resetAsync) {
+  val lbwif_divider = withReset(io.rst_async) {
     Module(new AsyncResetRegVec(w = c.lbwifDividerBits, init = 8))
   }
 
-  io.clusterResets := VecInit(clusterResets.map(_.io.q))
-  io.clusterClockSels := VecInit(clusterClockSels.map(_.io.q))
-  io.switcherSel := switcherSel.io.q
-  io.unclusterClockSel := unclusterClockSel.io.q
-  io.unclusterDivider := unclusterDivider.io.q
-  io.lbwifDivider := lbwifDivider.io.q
+  io.clk_sel := clk_sel.io.q
+  io.divider := divider.io.q
+  io.lbwif_divider := lbwif_divider.io.q
 
   regmap(
-    0x00 -> clusterResets.map(x => RegField.rwReg(1, x.io)),
-    0x04 -> clusterClockSels.map(x => RegField.rwReg(c.clockSelBits, x.io)),
     0x08 -> Seq(RegField.r(1, RegReadFn(io.boot))),
-    0x0c -> Seq(RegField.rwReg(1, switcherSel.io)),
-    0x14 -> Seq(RegField.rwReg(c.unclusterClockSelBits, unclusterClockSel.io)),
-    0x18 -> Seq(RegField.rwReg(c.unclusterDividerBits, unclusterDivider.io)),
-    0x1c -> Seq(RegField.rwReg(c.lbwifDividerBits, lbwifDivider.io))
+    0x14 -> Seq(RegField.rwReg(c.clkSelBits, clk_sel.io)),
+    0x18 -> Seq(RegField.rwReg(c.dividerBits, divider.io)),
+    0x1c -> Seq(RegField.rwReg(c.lbwifDividerBits, lbwif_divider.io))
   )
 }
 
 class TLBeagle(w: Int, c: BeagleParams)(implicit p: Parameters)
-  extends TLRegisterRouter(c.scrAddress, "eagle-scr", Seq("ucb-bar,eagle-scr"), interrupts = 0, beatBytes = w)(
+  extends TLRegisterRouter(c.scrAddress, "beagle-scr", Seq("ucb-bar,beagle-scr"), interrupts = 0, beatBytes = w)(
     new TLRegBundle(c, _) with HasBeagleTopBundleContents)(
     new TLRegModule(c, _, _) with HasBeagleTopModuleContents)
 
-
 trait HasPeripheryBeagle {
   this: BaseSubsystem =>
+
   val scrParams = p(PeripheryBeagleKey)
-  val myName = Some("eagle_scr")
+
+  val myName = Some("beagle_scr")
   val scr = LazyModule(new TLBeagle(pbus.beatBytes, scrParams)).suggestName(myName)
-  pbus.toVariableWidthSlave(myName) { scr.node := TLBuffer()}
+  pbus.toVariableWidthSlave(myName) { scr.node := TLBuffer() }
+
+  // setup boot scratch pad
+  val bootScratchPad = LazyModule(new TLRAM(
+    address = AddressSet(0x50000000, 0xffff),
+    cacheable = false,
+    executable = true,
+    beatBytes = 8))
+  val bootScratchPadBuffer = LazyModule(new TLBuffer())
+  pbus.toVariableWidthSlave(Some("boot_scratchpad")) { bootScratchPad.node := bootScratchPadBuffer.node := TLBuffer() }
+
+  // setup the backup serdes (otherwise known as the lbwif)
   val extMem = p(ExtMem).get
   val extParams = extMem.master
-  println(s"Beagle ExtMem:${extParams.base} size: ${extParams.size}")
 
   val memParams = TLManagerParameters(
     address = Seq(AddressSet(extParams.base, extParams.size-1)),
@@ -104,49 +98,20 @@ trait HasPeripheryBeagle {
     regionType = RegionType.UNCACHED, // cacheable
     executable = true,
     fifoId = Some(0),
-    supportsGet = TransferSizes(1, p(CacheBlockBytes)),
-    supportsPutFull = TransferSizes(1, p(CacheBlockBytes)),
-    supportsAcquireT   = TransferSizes(1, p(CacheBlockBytes)),
-    supportsAcquireB   = TransferSizes(1, p(CacheBlockBytes)),
-    supportsArithmetic = TransferSizes(1, p(CacheBlockBytes)),
-    supportsLogical    = TransferSizes(1, p(CacheBlockBytes)),
-    supportsPutPartial = TransferSizes(1, p(CacheBlockBytes)),
-    supportsHint       = TransferSizes(1, p(CacheBlockBytes)))
+    supportsGet        = TransferSizes(1, p(CacheBlockBytes)),
+    supportsPutFull    = TransferSizes(1, p(CacheBlockBytes)),
+    supportsPutPartial = TransferSizes(1, p(CacheBlockBytes)))
   val ctrlParams = TLClientParameters(
     name = "tl_serdes_control",
     sourceId = IdRange(0,128),
     requestFifo = true) //TODO: how many outstanding xacts
 
-  val bootScratchPad = LazyModule(new TLRAM(AddressSet(0x50000000, 0xffff),
-    cacheable = false, executable = true, beatBytes = 8))
-  val bootScratchPadBuffer = LazyModule( new TLBuffer())
-  pbus.toVariableWidthSlave(Some("boot_scratchpad")) { bootScratchPad.node := bootScratchPadBuffer.node := TLBuffer() }
 
-  val lanesPerMemoryChannel = 1 // TODO: Gotten from HBWIF
   val lbwif = LazyModule(new TLSerdesser(
     w=4,
     clientParams=ctrlParams,
     managerParams=memParams,
-    beatBytes=extParams.beatBytes,
-    endSinkId=p(BeagleSinkIds)*lanesPerMemoryChannel))
-  val base = AddressSet(extParams.base, extParams.size-1)
-  val filters = (0 until extMem.nMemoryChannels).map { case id =>
-    AddressSet(id * p(CacheBlockBytes) * p(CacheBlockStriping), ~((extMem.nMemoryChannels-1) * p(CacheBlockBytes) * p(CacheBlockStriping)))
-  }
-  val addresses = filters.map{ case filt =>
-    base.intersect(filt).get
-  }
-  val switcher = LazyModule(new TLSwitcher(
-    inPortN = extMem.nMemoryChannels,
-    outPortN = Seq(extMem.nMemoryChannels, 1),
-    address = addresses,
-    beatBytes = extParams.beatBytes,
-    lineBytes = p(CacheBlockBytes),
-    idBits = 7
-    //,endSinkId = p(BeagleSinkIds)*lanesPerMemoryChannel
-  ))
-
-  switcher.innode :*= mbus.coupleTo("switcherPort") { TLBuffer() :*= _}// toDRAMController(Some("switcherPort")) { TLBuffer() }
+    beatBytes=extParams.beatBytes))
 
   val lbwifCrossingSource = LazyModule(new TLAsyncCrossingSource)
   val lbwifCrossingSink = LazyModule(new TLAsyncCrossingSink)
@@ -154,7 +119,7 @@ trait HasPeripheryBeagle {
   (lbwif.managerNode
     := lbwifCrossingSink.node
     := TLAsyncCrossingSource()
-    := switcher.outnodes(1))
+    := mbus.coupleTo("lbwif"){ TLBuffer() :*= _ })
 
   (fbus.fromMaster()()
     := TLBuffer()
@@ -165,7 +130,7 @@ trait HasPeripheryBeagle {
 }
 
 trait HasPeripheryBeagleBundle {
-  val resetAsync: Bool
+  val rst_async: Bool
   val boot: Bool
 
   def tieoffBoot() {
@@ -175,27 +140,24 @@ trait HasPeripheryBeagleBundle {
 
 trait HasPeripheryBeagleModuleImp extends LazyModuleImp with HasPeripheryBeagleBundle {
   val outer: HasPeripheryBeagle
-  val resetAsync = IO(Input(Bool()))
+  val rst_async = IO(Input(Bool()))
   val boot = IO(Input(Bool()))
 
   val tl_serial = IO(chiselTypeOf(outer.lbwif.module.io.ser))
   tl_serial <> outer.lbwif.module.io.ser
 
-  val lbwifClockDiv = Module(new testchipip.ClockDivider(outer.scrParams.lbwifDividerBits))
-  val lbwifClock = lbwifClockDiv.io.clockOut
-  val lbwifReset = ResetCatchAndSync(lbwifClock, reset.toBool)
-  lbwifClockDiv.io.divisor := outer.scr.module.io.lbwifDivider
+  val lbwifClkDiv = Module(new testchipip.ClockDivider(outer.scrParams.lbwifDividerBits))
+  val lbwif_clk = lbwifClkDiv.io.clockOut
+  val lbwif_rst = ResetCatchAndSync(lbwif_clk, reset.toBool)
+  lbwifClkDiv.io.divisor := outer.scr.module.io.lbwif_divider
   Seq(outer.lbwif, outer.lbwifCrossingSource, outer.lbwifCrossingSink).foreach { m =>
-    m.module.clock := lbwifClock
-    m.module.reset := lbwifReset
+    m.module.clock := lbwif_clk
+    m.module.reset := lbwif_rst
   }
 
-  val clusterResets     = outer.scr.module.io.clusterResets
-  val clusterClockSels  = outer.scr.module.io.clusterClockSels
-  val unclusterClockSel = outer.scr.module.io.unclusterClockSel
-  val unclusterDivider  = outer.scr.module.io.unclusterDivider
+  val clk_sel = outer.scr.module.io.clk_sel
+  val divider  = outer.scr.module.io.divider
 
-  outer.switcher.module.io.sel := outer.scr.module.io.switcherSel
   outer.scr.module.io.boot := boot
-  outer.scr.module.io.resetAsync := resetAsync
+  outer.scr.module.io.rst_async := rst_async
 }
