@@ -22,8 +22,8 @@ sim_name = verilator
 # vcs simulator types and rules
 #########################################################################################
 sim_prefix = simulator
-sim = $(sim_dir)/$(sim_prefix)-$(PROJECT)-$(CONFIG)
-sim_debug = $(sim_dir)/$(sim_prefix)-$(PROJECT)-$(CONFIG)-debug
+sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
+sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
 .PHONY: default debug
 default: $(sim)
@@ -78,7 +78,7 @@ $(sim_debug): $(model_mk_debug)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(VLOG_MODEL).mk
 
 #########################################################################################
-# create a vcs vpd rule
+# create a verisim vpd rule
 #########################################################################################
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd

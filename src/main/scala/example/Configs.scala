@@ -17,6 +17,10 @@ class DefaultRocketConfig extends Config(
   new WithNormalRocketTop ++
   new BaseRocketConfig)
 
+class HwachaConfig extends Config(
+  new hwacha.DefaultHwachaConfig ++
+  new DefaultRocketConfig)
+
 class RoccRocketConfig extends Config(
   new WithRoccExample ++
   new DefaultRocketConfig)
@@ -63,6 +67,10 @@ class BaseBoomConfig extends Config(
 class DefaultBoomConfig extends Config(
   new WithNormalBoomTop ++
   new BaseBoomConfig)
+
+class HwachaBoomConfig extends Config(
+  new hwacha.DefaultHwachaConfig ++
+  new DefaultBoomConfig)
 
 class RoccBoomConfig extends Config(
   new WithRoccExample ++

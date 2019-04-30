@@ -8,7 +8,7 @@ SHELL=/bin/bash
 #########################################################################################
 lookup_scala_srcs = $(shell find -L $(1)/ -iname "*.scala" 2> /dev/null)
 
-PACKAGES=rocket-chip testchipip boom
+PACKAGES=rocket-chip testchipip boom hwacha sifive-blocks
 SCALA_SOURCES=$(foreach pkg,$(PACKAGES),$(call lookup_scala_srcs,$(base_dir)/generators/$(pkg)/src/main/scala)) $(call lookup_scala_srcs,$(base_dir)/src/main/scala)
 
 #########################################################################################
@@ -41,7 +41,7 @@ CHISEL_ARGS ?=
 
 $(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(sim_dotf)
 	mkdir -p $(build_dir)
-	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(PROJECT).Generator $(CHISEL_ARGS) $(build_dir) $(PROJECT) $(MODEL) $(CFG_PROJECT) $(CONFIG)"
+	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator $(CHISEL_ARGS) $(build_dir) $(MODEL_PACKAGE) $(MODEL) $(CONFIG_PACKAGE) $(CONFIG)"
 
 #########################################################################################
 # create verilog files rules and variables
@@ -78,7 +78,7 @@ $(output_dir)/%.run: $(output_dir)/% $(sim)
 	$(sim) +max-cycles=$(timeout_cycles) $< && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	$(sim) +verbose +max-cycles=$(timeout_cycles) $< 3>&1 1>&2 2>&3 | spike-dasm > $@
+	$(sim) +permissive +verbose +max-cycles=$(timeout_cycles) +permissive-off $< 3>&1 1>&2 2>&3 | spike-dasm > $@
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
