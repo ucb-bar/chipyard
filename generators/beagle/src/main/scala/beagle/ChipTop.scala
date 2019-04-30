@@ -34,11 +34,11 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
   val reset           = IO(Input(Bool())) // reset from off chip
   val boot            = IO(Input(Bool())) // boot from sdcard or tether
 
-  val alt_clks        = IO(Input(Vec(1, Clock()))) // extra "chicken bit" clocks
+  val alt_clks        = IO(Input(Vec(2, Clock()))) // extra "chicken bit" clocks
   val alt_clk_sel     = IO(Input(UInt(1.W)))
 
-  val tl_serial       = IO(chiselTypeOf(sys.tl_serial))
-  val tl_serial_clock = IO(Output(Clock()))
+  val lbwif_serial     = IO(chiselTypeOf(sys.lbwif_serial))
+  val lbwif_serial_clk = IO(Output(Clock()))
 
   val gpio            = IO(new GPIOPins(() => new EnhancedPin(), p(PeripheryGPIOKey).head))
   val i2c             = IO(new I2CPins(() => new BasePin()))
@@ -52,13 +52,14 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
   require(sys.auto.elements.isEmpty)
 
   //This has built in synchronizer/connection
-  tl_serial       <> sys.tl_serial
-  tl_serial_clock := sys.lbwif_clk_out
+  lbwif_serial     <> sys.lbwif_serial
+  lbwif_serial_clk := sys.lbwif_clk_out
 
   // pass in alternate clocks coming from offchip
   sys.alt_clks <> alt_clks
   sys.alt_clk_sel := alt_clk_sel
 
+  // other signals
   sys.boot := boot
   sys.rst_async := reset.asBool
 

@@ -106,7 +106,6 @@ trait HasPeripheryBeagle {
     sourceId = IdRange(0,128),
     requestFifo = true) //TODO: how many outstanding xacts
 
-
   val lbwif = LazyModule(new TLSerdesser(
     w=4,
     clientParams=ctrlParams,
@@ -143,8 +142,8 @@ trait HasPeripheryBeagleModuleImp extends LazyModuleImp with HasPeripheryBeagleB
   val rst_async = IO(Input(Bool()))
   val boot = IO(Input(Bool()))
 
-  val tl_serial = IO(chiselTypeOf(outer.lbwif.module.io.ser))
-  tl_serial <> outer.lbwif.module.io.ser
+  val lbwif_serial = IO(chiselTypeOf(outer.lbwif.module.io.ser))
+  lbwif_serial <> outer.lbwif.module.io.ser
 
   val lbwifClkDiv = Module(new testchipip.ClockDivider(outer.scrParams.lbwifDividerBits))
   val lbwif_clk = lbwifClkDiv.io.clockOut
