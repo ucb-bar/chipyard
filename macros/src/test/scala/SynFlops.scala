@@ -6,6 +6,22 @@ trait HasSynFlopsTestGenerator extends HasSimpleTestGenerator {
   this: MacroCompilerSpec with HasSRAMGenerator =>
     def generateFlops: String = {
 s"""
+    inst mem_0_0 of split_${lib_name}
+    mem_0_0.${libPortPrefix}_clk <= ${libPortPrefix}_clk
+    mem_0_0.${libPortPrefix}_addr <= ${libPortPrefix}_addr
+    node ${libPortPrefix}_dout_0_0 = bits(mem_0_0.${libPortPrefix}_dout, ${libWidth-1}, 0)
+    mem_0_0.${libPortPrefix}_din <= bits(${libPortPrefix}_din, ${libWidth-1}, 0)
+    mem_0_0.${libPortPrefix}_write_en <= and(and(${libPortPrefix}_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    node ${libPortPrefix}_dout_0 = ${libPortPrefix}_dout_0_0
+    ${libPortPrefix}_dout <= mux(UInt<1>("h1"), ${libPortPrefix}_dout_0, UInt<1>("h0"))
+
+  module split_${lib_name} :
+    input ${libPortPrefix}_addr : UInt<${lib_addr_width}>
+    input ${libPortPrefix}_clk : Clock
+    input ${libPortPrefix}_din : UInt<${libWidth}>
+    output ${libPortPrefix}_dout : UInt<${libWidth}>
+    input ${libPortPrefix}_write_en : UInt<1>
+
     mem ram :
       data-type => UInt<${libWidth}>
       depth => ${libDepth}
@@ -17,9 +33,9 @@ s"""
     ram.RW_0.addr <= ${libPortPrefix}_addr
     ram.RW_0.en <= UInt<1>("h1")
     ram.RW_0.wmode <= ${libPortPrefix}_write_en
+    ram.RW_0.wmask <= UInt<1>("h1")
     ${libPortPrefix}_dout <= ram.RW_0.rdata
     ram.RW_0.wdata <= ${libPortPrefix}_din
-    ram.RW_0.wmask <= UInt<1>("h1")
 """
     }
 
@@ -43,29 +59,29 @@ ${generateFlops}
 }
 
 class Synflops2048x8_noLib extends MacroCompilerSpec with HasSRAMGenerator with HasNoLibTestGenerator with HasSynFlopsTestGenerator {
-  override lazy val memDepth = 2048
+  override lazy val memDepth = BigInt(2048)
   override lazy val memWidth = 8
 
   compileExecuteAndTest(mem, None, v, output, true)
 }
 
 class Synflops2048x16_noLib extends MacroCompilerSpec with HasSRAMGenerator with HasNoLibTestGenerator with HasSynFlopsTestGenerator {
-  override lazy val memDepth = 2048
+  override lazy val memDepth = BigInt(2048)
   override lazy val memWidth = 16
 
   compileExecuteAndTest(mem, None, v, output, true)
 }
 
 class Synflops8192x16_noLib extends MacroCompilerSpec with HasSRAMGenerator with HasNoLibTestGenerator with HasSynFlopsTestGenerator {
-  override lazy val memDepth = 8192
+  override lazy val memDepth = BigInt(8192)
   override lazy val memWidth = 16
 
   compileExecuteAndTest(mem, None, v, output, true)
 }
 
 class Synflops2048x16_depth_Lib extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator with HasSynFlopsTestGenerator {
-  override lazy val memDepth = 2048
-  override lazy val libDepth = 1024
+  override lazy val memDepth = BigInt(2048)
+  override lazy val libDepth = BigInt(1024)
   override lazy val width = 16
 
   compileExecuteAndTest(mem, lib, v, output, true)
@@ -74,7 +90,7 @@ class Synflops2048x16_depth_Lib extends MacroCompilerSpec with HasSRAMGenerator 
 class Synflops2048x64_width_Lib extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator with HasSynFlopsTestGenerator {
   override lazy val memWidth = 64
   override lazy val libWidth = 8
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
 
   compileExecuteAndTest(mem, lib, v, output, true)
 }
@@ -82,8 +98,8 @@ class Synflops2048x64_width_Lib extends MacroCompilerSpec with HasSRAMGenerator 
 class Synflops_SplitPorts_Read_Write extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator with HasSynFlopsTestGenerator {
   import mdf.macrolib._
 
-  override lazy val memDepth = 2048
-  override lazy val libDepth = 1024
+  override lazy val memDepth = BigInt(2048)
+  override lazy val libDepth = BigInt(1024)
   override lazy val width = 8
 
   override def generateLibSRAM = SRAMMacro(
@@ -162,6 +178,26 @@ circuit target_memory :
 
   override def generateFlops =
 """
+    inst mem_0_0 of split_awesome_lib_mem
+    mem_0_0.innerB_clk <= innerB_clk
+    mem_0_0.innerB_addr <= innerB_addr
+    mem_0_0.innerB_din <= bits(innerB_din, 7, 0)
+    mem_0_0.innerB_write_en <= and(and(innerB_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_0.innerA_clk <= innerA_clk
+    mem_0_0.innerA_addr <= innerA_addr
+    node innerA_dout_0_0 = bits(mem_0_0.innerA_dout, 7, 0)
+    node innerA_dout_0 = innerA_dout_0_0
+    innerA_dout <= mux(UInt<1>("h1"), innerA_dout_0, UInt<1>("h0"))
+
+  module split_awesome_lib_mem :
+    input innerA_addr : UInt<10>
+    input innerA_clk : Clock
+    output innerA_dout : UInt<8>
+    input innerB_addr : UInt<10>
+    input innerB_clk : Clock
+    input innerB_din : UInt<8>
+    input innerB_write_en : UInt<1>
+
     mem ram :
       data-type => UInt<8>
       depth => 1024
@@ -177,8 +213,8 @@ circuit target_memory :
     ram.W_0.clk <= innerB_clk
     ram.W_0.addr <= innerB_addr
     ram.W_0.en <= innerB_write_en
-    ram.W_0.data <= innerB_din
     ram.W_0.mask <= UInt<1>("h1")
+    ram.W_0.data <= innerB_din
 """
 
   "Non-masked split lib; split mem" should "syn flops fine" in {
@@ -189,8 +225,8 @@ circuit target_memory :
 class Synflops_SplitPorts_MaskedMem_Read_MaskedWrite extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator with HasSynFlopsTestGenerator {
   import mdf.macrolib._
 
-  override lazy val memDepth = 2048
-  override lazy val libDepth = 1024
+  override lazy val memDepth = BigInt(2048)
+  override lazy val libDepth = BigInt(1024)
   override lazy val width = 8
   override lazy val memMaskGran = Some(8)
   override lazy val libMaskGran = Some(1)
@@ -275,8 +311,94 @@ circuit target_memory :
 
   override def generateFlops =
 """
+    inst mem_0_0 of split_awesome_lib_mem
+    inst mem_0_1 of split_awesome_lib_mem
+    inst mem_0_2 of split_awesome_lib_mem
+    inst mem_0_3 of split_awesome_lib_mem
+    inst mem_0_4 of split_awesome_lib_mem
+    inst mem_0_5 of split_awesome_lib_mem
+    inst mem_0_6 of split_awesome_lib_mem
+    inst mem_0_7 of split_awesome_lib_mem
+    mem_0_0.innerB_clk <= innerB_clk
+    mem_0_0.innerB_addr <= innerB_addr
+    mem_0_0.innerB_din <= bits(innerB_din, 0, 0)
+    mem_0_0.innerB_mask <= bits(innerB_mask, 0, 0)
+    mem_0_0.innerB_write_en <= and(and(innerB_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_1.innerB_clk <= innerB_clk
+    mem_0_1.innerB_addr <= innerB_addr
+    mem_0_1.innerB_din <= bits(innerB_din, 1, 1)
+    mem_0_1.innerB_mask <= bits(innerB_mask, 1, 1)
+    mem_0_1.innerB_write_en <= and(and(innerB_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_2.innerB_clk <= innerB_clk
+    mem_0_2.innerB_addr <= innerB_addr
+    mem_0_2.innerB_din <= bits(innerB_din, 2, 2)
+    mem_0_2.innerB_mask <= bits(innerB_mask, 2, 2)
+    mem_0_2.innerB_write_en <= and(and(innerB_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_3.innerB_clk <= innerB_clk
+    mem_0_3.innerB_addr <= innerB_addr
+    mem_0_3.innerB_din <= bits(innerB_din, 3, 3)
+    mem_0_3.innerB_mask <= bits(innerB_mask, 3, 3)
+    mem_0_3.innerB_write_en <= and(and(innerB_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_4.innerB_clk <= innerB_clk
+    mem_0_4.innerB_addr <= innerB_addr
+    mem_0_4.innerB_din <= bits(innerB_din, 4, 4)
+    mem_0_4.innerB_mask <= bits(innerB_mask, 4, 4)
+    mem_0_4.innerB_write_en <= and(and(innerB_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_5.innerB_clk <= innerB_clk
+    mem_0_5.innerB_addr <= innerB_addr
+    mem_0_5.innerB_din <= bits(innerB_din, 5, 5)
+    mem_0_5.innerB_mask <= bits(innerB_mask, 5, 5)
+    mem_0_5.innerB_write_en <= and(and(innerB_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_6.innerB_clk <= innerB_clk
+    mem_0_6.innerB_addr <= innerB_addr
+    mem_0_6.innerB_din <= bits(innerB_din, 6, 6)
+    mem_0_6.innerB_mask <= bits(innerB_mask, 6, 6)
+    mem_0_6.innerB_write_en <= and(and(innerB_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_7.innerB_clk <= innerB_clk
+    mem_0_7.innerB_addr <= innerB_addr
+    mem_0_7.innerB_din <= bits(innerB_din, 7, 7)
+    mem_0_7.innerB_mask <= bits(innerB_mask, 7, 7)
+    mem_0_7.innerB_write_en <= and(and(innerB_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_0.innerA_clk <= innerA_clk
+    mem_0_0.innerA_addr <= innerA_addr
+    node innerA_dout_0_0 = bits(mem_0_0.innerA_dout, 0, 0)
+    mem_0_1.innerA_clk <= innerA_clk
+    mem_0_1.innerA_addr <= innerA_addr
+    node innerA_dout_0_1 = bits(mem_0_1.innerA_dout, 0, 0)
+    mem_0_2.innerA_clk <= innerA_clk
+    mem_0_2.innerA_addr <= innerA_addr
+    node innerA_dout_0_2 = bits(mem_0_2.innerA_dout, 0, 0)
+    mem_0_3.innerA_clk <= innerA_clk
+    mem_0_3.innerA_addr <= innerA_addr
+    node innerA_dout_0_3 = bits(mem_0_3.innerA_dout, 0, 0)
+    mem_0_4.innerA_clk <= innerA_clk
+    mem_0_4.innerA_addr <= innerA_addr
+    node innerA_dout_0_4 = bits(mem_0_4.innerA_dout, 0, 0)
+    mem_0_5.innerA_clk <= innerA_clk
+    mem_0_5.innerA_addr <= innerA_addr
+    node innerA_dout_0_5 = bits(mem_0_5.innerA_dout, 0, 0)
+    mem_0_6.innerA_clk <= innerA_clk
+    mem_0_6.innerA_addr <= innerA_addr
+    node innerA_dout_0_6 = bits(mem_0_6.innerA_dout, 0, 0)
+    mem_0_7.innerA_clk <= innerA_clk
+    mem_0_7.innerA_addr <= innerA_addr
+    node innerA_dout_0_7 = bits(mem_0_7.innerA_dout, 0, 0)
+    node innerA_dout_0 = cat(innerA_dout_0_7, cat(innerA_dout_0_6, cat(innerA_dout_0_5, cat(innerA_dout_0_4, cat(innerA_dout_0_3, cat(innerA_dout_0_2, cat(innerA_dout_0_1, innerA_dout_0_0)))))))
+    innerA_dout <= mux(UInt<1>("h1"), innerA_dout_0, UInt<1>("h0"))
+
+
+  module split_awesome_lib_mem :
+    input innerA_addr : UInt<10>
+    input innerA_clk : Clock
+    output innerA_dout : UInt<1>
+    input innerB_addr : UInt<10>
+    input innerB_clk : Clock
+    input innerB_din : UInt<1>
+    input innerB_write_en : UInt<1>
+    input innerB_mask : UInt<1>
+
     mem ram :
-      data-type => UInt<1>[8]
+      data-type => UInt<1>
       depth => 1024
       read-latency => 1
       write-latency => 1
@@ -286,26 +408,12 @@ circuit target_memory :
     ram.R_0.clk <= innerA_clk
     ram.R_0.addr <= innerA_addr
     ram.R_0.en <= UInt<1>("h1")
-    innerA_dout <= cat(ram.R_0.data[7], cat(ram.R_0.data[6], cat(ram.R_0.data[5], cat(ram.R_0.data[4], cat(ram.R_0.data[3], cat(ram.R_0.data[2], cat(ram.R_0.data[1], ram.R_0.data[0])))))))
+    innerA_dout <= ram.R_0.data
     ram.W_0.clk <= innerB_clk
     ram.W_0.addr <= innerB_addr
     ram.W_0.en <= innerB_write_en
-    ram.W_0.data[0] <= bits(innerB_din, 0, 0)
-    ram.W_0.data[1] <= bits(innerB_din, 1, 1)
-    ram.W_0.data[2] <= bits(innerB_din, 2, 2)
-    ram.W_0.data[3] <= bits(innerB_din, 3, 3)
-    ram.W_0.data[4] <= bits(innerB_din, 4, 4)
-    ram.W_0.data[5] <= bits(innerB_din, 5, 5)
-    ram.W_0.data[6] <= bits(innerB_din, 6, 6)
-    ram.W_0.data[7] <= bits(innerB_din, 7, 7)
-    ram.W_0.mask[0] <= bits(innerB_mask, 0, 0)
-    ram.W_0.mask[1] <= bits(innerB_mask, 1, 1)
-    ram.W_0.mask[2] <= bits(innerB_mask, 2, 2)
-    ram.W_0.mask[3] <= bits(innerB_mask, 3, 3)
-    ram.W_0.mask[4] <= bits(innerB_mask, 4, 4)
-    ram.W_0.mask[5] <= bits(innerB_mask, 5, 5)
-    ram.W_0.mask[6] <= bits(innerB_mask, 6, 6)
-    ram.W_0.mask[7] <= bits(innerB_mask, 7, 7)
+    ram.W_0.mask <= innerB_mask
+    ram.W_0.data <= innerB_din
 """
 
   "masked split lib; masked split mem" should "syn flops fine" in {

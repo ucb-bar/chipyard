@@ -122,6 +122,7 @@ trait HasSRAMGenerator {
   import mdf.macrolib._
   import scala.language.implicitConversions
   implicit def Int2SomeInt(i: Int): Option[Int] = Some(i)
+  implicit def BigInt2SomeBigInt(i: BigInt): Option[BigInt] = Some(i)
 
 
   // Generate a standard (read/write/combo) port for testing.
@@ -129,7 +130,7 @@ trait HasSRAMGenerator {
   def generateTestPort(
     prefix: String,
     width: Option[Int],
-    depth: Option[Int],
+    depth: Option[BigInt],
     maskGran: Option[Int] = None,
     read: Boolean,
     readEnable: Boolean = false,
@@ -159,17 +160,17 @@ trait HasSRAMGenerator {
   }
 
   // Generate a read port for testing.
-  def generateReadPort(prefix: String, width: Option[Int], depth: Option[Int], readEnable: Boolean = false): MacroPort = {
+  def generateReadPort(prefix: String, width: Option[Int], depth: Option[BigInt], readEnable: Boolean = false): MacroPort = {
     generateTestPort(prefix, width, depth, write = false, read = true, readEnable = readEnable)
   }
 
   // Generate a write port for testing.
-  def generateWritePort(prefix: String, width: Option[Int], depth: Option[Int], maskGran: Option[Int] = None, writeEnable: Boolean = true): MacroPort = {
+  def generateWritePort(prefix: String, width: Option[Int], depth: Option[BigInt], maskGran: Option[Int] = None, writeEnable: Boolean = true): MacroPort = {
     generateTestPort(prefix, width, depth, maskGran = maskGran, write = true, read = false, writeEnable = writeEnable)
   }
 
   // Generate a simple read-write port for testing.
-  def generateReadWritePort(prefix: String, width: Option[Int], depth: Option[Int], maskGran: Option[Int] = None): MacroPort = {
+  def generateReadWritePort(prefix: String, width: Option[Int], depth: Option[BigInt], maskGran: Option[Int] = None): MacroPort = {
     generateTestPort(
       prefix, width, depth, maskGran = maskGran,
       write = true, writeEnable = true,
@@ -178,7 +179,7 @@ trait HasSRAMGenerator {
   }
 
   // Generate a "simple" SRAM (active high/positive edge, 1 read-write port).
-  def generateSRAM(name: String, prefix: String, width: Int, depth: Int, maskGran: Option[Int] = None, extraPorts: Seq[MacroExtraPort] = List()): SRAMMacro = {
+  def generateSRAM(name: String, prefix: String, width: Int, depth: BigInt, maskGran: Option[Int] = None, extraPorts: Seq[MacroExtraPort] = List()): SRAMMacro = {
     SRAMMacro(
       name = name,
       width = width,
@@ -215,8 +216,8 @@ trait HasSimpleTestGenerator {
     def useCompiler: Boolean = false
     def memWidth: Int
     def libWidth: Int
-    def memDepth: Int
-    def libDepth: Int
+    def memDepth: BigInt
+    def libDepth: BigInt
     def memMaskGran: Option[Int] = None
     def libMaskGran: Option[Int] = None
     def extraPorts: Seq[mdf.macrolib.MacroExtraPort] = List()
@@ -276,7 +277,7 @@ trait HasSimpleTestGenerator {
 
     // Number of lib instances needed to hold the mem, in both directions.
     // Round up (e.g. 1.5 instances = effectively 2 instances)
-    val depthInstances = math.ceil(memDepth.toFloat / libDepth).toInt
+    val depthInstances = math.ceil(memDepth.toFloat / libDepth.toFloat).toInt
     val widthInstances = math.ceil(memWidth.toFloat / usableLibWidth).toInt
 
     // Number of width bits in the last width-direction memory.
@@ -440,6 +441,7 @@ trait HasNoLibTestGenerator extends HasSimpleTestGenerator {
     // Therefore, make "lib" width/depth equal to the mem.
     override lazy val libDepth = memDepth
     override lazy val libWidth = memWidth
+    override lazy val lib_name = mem_name
     // Do the same for port names.
     override lazy val libPortPrefix = memPortPrefix
 

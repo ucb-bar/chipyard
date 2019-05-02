@@ -6,8 +6,8 @@ import mdf.macrolib._
 
 trait MasksTestSettings {
   this: MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator =>
-    override lazy val memDepth = 2048
-    override lazy val libDepth = 1024
+    override lazy val memDepth = BigInt(2048)
+    override lazy val libDepth = BigInt(1024)
 }
 
 // Try all four different kinds of mask config:
@@ -22,7 +22,7 @@ trait MasksTestSettings {
  */
 
 class Masks_FourTypes_NonMaskedMem_NonMaskedLib extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 32
   override lazy val memMaskGran = None
   override lazy val libWidth = 8 
@@ -32,7 +32,7 @@ class Masks_FourTypes_NonMaskedMem_NonMaskedLib extends MacroCompilerSpec with H
 }
 
 class Masks_FourTypes_NonMaskedMem_MaskedLib extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 32
   override lazy val memMaskGran = None
   override lazy val libWidth = 8
@@ -42,7 +42,7 @@ class Masks_FourTypes_NonMaskedMem_MaskedLib extends MacroCompilerSpec with HasS
 }
 
 class Masks_FourTypes_MaskedMem_NonMaskedLib extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 32
   override lazy val memMaskGran = Some(8)
   override lazy val libWidth = 8
@@ -52,7 +52,7 @@ class Masks_FourTypes_MaskedMem_NonMaskedLib extends MacroCompilerSpec with HasS
 }
 
 class Masks_FourTypes_MaskedMem_NonMaskedLib_SmallerMaskGran extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 32
   override lazy val memMaskGran = Some(4)
   override lazy val libWidth = 8
@@ -62,7 +62,7 @@ class Masks_FourTypes_MaskedMem_NonMaskedLib_SmallerMaskGran extends MacroCompil
 }
 
 class Masks_FourTypes_MaskedMem_MaskedLib extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 32
   override lazy val memMaskGran = Some(8)
   override lazy val libWidth = 16
@@ -72,7 +72,7 @@ class Masks_FourTypes_MaskedMem_MaskedLib extends MacroCompilerSpec with HasSRAM
 }
 
 class Masks_FourTypes_MaskedMem_MaskedLib_SameMaskGran extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 32
   override lazy val memMaskGran = Some(8)
   override lazy val libWidth = 16
@@ -82,7 +82,7 @@ class Masks_FourTypes_MaskedMem_MaskedLib_SameMaskGran extends MacroCompilerSpec
 }
 
 class Masks_FourTypes_MaskedMem_MaskedLib_SmallerMaskGran extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 64
   override lazy val memMaskGran = Some(4)
   override lazy val libWidth = 32
@@ -94,7 +94,7 @@ class Masks_FourTypes_MaskedMem_MaskedLib_SmallerMaskGran extends MacroCompilerS
 // Bit-mask memories to non-masked libs whose width is larger than 1.
 
 class Masks_BitMaskedMem_NonMaskedLib extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val memMaskGran = Some(1)
   override lazy val libWidth = 8

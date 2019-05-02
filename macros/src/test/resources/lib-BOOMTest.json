@@ -22,7 +22,7 @@
     ],
     "name": "my_sram_1rw_1024x8",
     "type": "sram",
-    "depth": 1024
+    "depth": "1024"
   },
   {
     "family": "1rw",
@@ -47,7 +47,7 @@
     ],
     "name": "my_sram_1rw_128x46",
     "type": "sram",
-    "depth": 128
+    "depth": "128"
   },
   {
     "family": "1rw",
@@ -72,7 +72,7 @@
     ],
     "name": "my_sram_1rw_128x48",
     "type": "sram",
-    "depth": 128
+    "depth": "128"
   },
   {
     "family": "1rw",
@@ -97,7 +97,7 @@
     ],
     "name": "my_sram_1rw_128x8",
     "type": "sram",
-    "depth": 128
+    "depth": "128"
   },
   {
     "family": "1rw",
@@ -122,7 +122,7 @@
     ],
     "name": "my_sram_1rw_256x128",
     "type": "sram",
-    "depth": 256
+    "depth": "256"
   },
   {
     "family": "1rw",
@@ -147,7 +147,7 @@
     ],
     "name": "my_sram_1rw_256x32",
     "type": "sram",
-    "depth": 256
+    "depth": "256"
   },
   {
     "family": "1rw",
@@ -172,7 +172,7 @@
     ],
     "name": "my_sram_1rw_256x46",
     "type": "sram",
-    "depth": 256
+    "depth": "256"
   },
   {
     "family": "1rw",
@@ -197,7 +197,7 @@
     ],
     "name": "my_sram_1rw_256x48",
     "type": "sram",
-    "depth": 256
+    "depth": "256"
   },
   {
     "family": "1rw",
@@ -222,7 +222,7 @@
     ],
     "name": "my_sram_1rw_256x8",
     "type": "sram",
-    "depth": 256
+    "depth": "256"
   },
   {
     "family": "1rw",
@@ -247,7 +247,7 @@
     ],
     "name": "my_sram_1rw_32x50",
     "type": "sram",
-    "depth": 32
+    "depth": "32"
   },
   {
     "family": "1rw",
@@ -272,7 +272,7 @@
     ],
     "name": "my_sram_1rw_512x128",
     "type": "sram",
-    "depth": 512
+    "depth": "512"
   },
   {
     "family": "1rw",
@@ -297,7 +297,7 @@
     ],
     "name": "my_sram_1rw_512x32",
     "type": "sram",
-    "depth": 512
+    "depth": "512"
   },
   {
     "family": "1rw",
@@ -322,7 +322,7 @@
     ],
     "name": "my_sram_1rw_512x8",
     "type": "sram",
-    "depth": 512
+    "depth": "512"
   },
   {
     "family": "1rw",
@@ -347,7 +347,7 @@
     ],
     "name": "my_sram_1rw_64x128",
     "type": "sram",
-    "depth": 64
+    "depth": "64"
   },
   {
     "family": "1rw",
@@ -372,7 +372,7 @@
     ],
     "name": "my_sram_1rw_64x32",
     "type": "sram",
-    "depth": 64
+    "depth": "64"
   },
   {
     "family": "1rw",
@@ -397,7 +397,7 @@
     ],
     "name": "my_sram_1rw_64x34",
     "type": "sram",
-    "depth": 64
+    "depth": "64"
   },
   {
     "family": "1rw",
@@ -422,7 +422,7 @@
     ],
     "name": "my_sram_1rw_64x8",
     "type": "sram",
-    "depth": 64
+    "depth": "64"
   },
   {
     "family": "2rw",
@@ -463,7 +463,7 @@
     ],
     "name": "my_sram_2rw_128x16",
     "type": "sram",
-    "depth": 128
+    "depth": "128"
   },
   {
     "family": "2rw",
@@ -504,7 +504,7 @@
     ],
     "name": "my_sram_2rw_128x32",
     "type": "sram",
-    "depth": 128
+    "depth": "128"
   },
   {
     "family": "2rw",
@@ -545,7 +545,7 @@
     ],
     "name": "my_sram_2rw_128x4",
     "type": "sram",
-    "depth": 128
+    "depth": "128"
   },
   {
     "family": "2rw",
@@ -586,7 +586,7 @@
     ],
     "name": "my_sram_2rw_128x8",
     "type": "sram",
-    "depth": 128
+    "depth": "128"
   },
   {
     "family": "2rw",
@@ -627,7 +627,7 @@
     ],
     "name": "my_sram_2rw_16x16",
     "type": "sram",
-    "depth": 16
+    "depth": "16"
   },
   {
     "family": "2rw",
@@ -668,7 +668,7 @@
     ],
     "name": "my_sram_2rw_16x32",
     "type": "sram",
-    "depth": 16
+    "depth": "16"
   },
   {
     "family": "2rw",
@@ -709,7 +709,7 @@
     ],
     "name": "my_sram_2rw_16x4",
     "type": "sram",
-    "depth": 16
+    "depth": "16"
   },
   {
     "family": "2rw",
@@ -750,7 +750,7 @@
     ],
     "name": "my_sram_2rw_16x8",
     "type": "sram",
-    "depth": 16
+    "depth": "16"
   },
   {
     "family": "2rw",
@@ -791,7 +791,7 @@
     ],
     "name": "my_sram_2rw_32x16",
     "type": "sram",
-    "depth": 32
+    "depth": "32"
   },
   {
     "family": "2rw",
@@ -832,7 +832,7 @@
     ],
     "name": "my_sram_2rw_32x22",
     "type": "sram",
-    "depth": 32
+    "depth": "32"
   },
   {
     "family": "2rw",
@@ -873,7 +873,7 @@
     ],
     "name": "my_sram_2rw_32x32",
     "type": "sram",
-    "depth": 32
+    "depth": "32"
   },
   {
     "family": "2rw",
@@ -914,7 +914,7 @@
     ],
     "name": "my_sram_2rw_32x39",
     "type": "sram",
-    "depth": 32
+    "depth": "32"
   },
   {
     "family": "2rw",
@@ -955,7 +955,7 @@
     ],
     "name": "my_sram_2rw_32x4",
     "type": "sram",
-    "depth": 32
+    "depth": "32"
   },
   {
     "family": "2rw",
@@ -996,7 +996,7 @@
     ],
     "name": "my_sram_2rw_32x8",
     "type": "sram",
-    "depth": 32
+    "depth": "32"
   },
   {
     "family": "2rw",
@@ -1037,7 +1037,7 @@
     ],
     "name": "my_sram_2rw_64x16",
     "type": "sram",
-    "depth": 64
+    "depth": "64"
   },
   {
     "family": "2rw",
@@ -1078,7 +1078,7 @@
     ],
     "name": "my_sram_2rw_64x32",
     "type": "sram",
-    "depth": 64
+    "depth": "64"
   },
   {
     "family": "2rw",
@@ -1119,7 +1119,7 @@
     ],
     "name": "my_sram_2rw_64x4",
     "type": "sram",
-    "depth": 64
+    "depth": "64"
   },
   {
     "family": "2rw",
@@ -1160,6 +1160,6 @@
     ],
     "name": "my_sram_2rw_64x8",
     "type": "sram",
-    "depth": 64
+    "depth": "64"
   }
 ]

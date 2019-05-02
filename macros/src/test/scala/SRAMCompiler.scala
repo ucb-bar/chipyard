@@ -5,7 +5,7 @@ import mdf.macrolib._
 class SRAMCompiler extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
   val compiler = generateSRAMCompiler("awesome", "A")
   val verilog = s"v-SRAMCompiler.v"
-  override lazy val depth = 16
+  override lazy val depth = BigInt(16)
   override lazy val memWidth = 8
   override lazy val libWidth = 8
   override lazy val mem_name = "mymem"

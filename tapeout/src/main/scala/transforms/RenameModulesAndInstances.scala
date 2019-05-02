@@ -3,6 +3,7 @@
 package barstools.tapeout.transforms
 
 import firrtl._
+import firrtl.annotations._
 import firrtl.ir._
 import firrtl.passes.Pass
 
@@ -10,7 +11,9 @@ import firrtl.passes.Pass
 // Verilog black box and therefore can't be renamed.  Since the point is to
 // allow FIRRTL to be linked together using "cat" and ExtModules don't get
 // emitted, this should be safe.
-class RenameModulesAndInstancesPass(rename: (String) => String) extends Pass {
+class RenameModulesAndInstances(rename: (String) => String) extends Transform {
+  def inputForm = LowForm
+  def outputForm = LowForm
 
   def renameInstances(body: Statement): Statement = {
     body match {
@@ -21,22 +24,22 @@ class RenameModulesAndInstancesPass(rename: (String) => String) extends Pass {
     }
   }
 
-  def run(c: Circuit): Circuit = {
+  def run(state: CircuitState): (Circuit, RenameMap) = {
+    val myRenames = RenameMap()
+    val c = state.circuit
     val modulesx = c.modules.map {
-      case m: ExtModule => m
-      case m: Module => new Module(m.info, rename(m.name), m.ports, renameInstances(m.body))
+      case m: ExtModule =>
+        myRenames.record(ModuleTarget(c.main, m.name), ModuleTarget(c.main, rename(m.name)))
+        m.copy(name = rename(m.name))
+      case m: Module =>
+        myRenames.record(ModuleTarget(c.main, m.name), ModuleTarget(c.main, rename(m.name)))
+        new Module(m.info, rename(m.name), m.ports, renameInstances(m.body))
     }
-    Circuit(c.info, modulesx, c.main)
+    (Circuit(c.info, modulesx, c.main), myRenames)
   }
-}
-
-class RenameModulesAndInstances(rename: (String) => String) extends Transform with SeqTransformBased {
-  def inputForm = LowForm
-  def outputForm = LowForm
-  def transforms = Seq(new RenameModulesAndInstancesPass(rename))
 
   def execute(state: CircuitState): CircuitState = {
-    val ret = runTransforms(state)
-    CircuitState(ret.circuit, outputForm, ret.annotations, ret.renames)
+    val (ret, renames) = run(state)
+    state.copy(circuit = ret, renames = Some(renames))
   }
 }

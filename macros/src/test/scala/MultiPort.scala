@@ -6,7 +6,7 @@ package barstools.macros
 class SplitWidth_2rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
   import mdf.macrolib._
 
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 64
   override lazy val memMaskGran = Some(16)
   override lazy val libWidth = 16
@@ -18,11 +18,11 @@ class SplitWidth_2rw extends MacroCompilerSpec with HasSRAMGenerator with HasSim
       depth=memDepth,
       family="2rw",
       ports=Seq(generateTestPort(
-        "portA", memWidth, memDepth, maskGran=memMaskGran,
+        "portA", memWidth, Some(memDepth), maskGran=memMaskGran,
         write=true, writeEnable=true,
         read=true, readEnable=true
       ), generateTestPort(
-        "portB", memWidth, memDepth, maskGran=memMaskGran,
+        "portB", memWidth, Some(memDepth), maskGran=memMaskGran,
         write=true, writeEnable=true,
         read=true, readEnable=true
       ))
@@ -121,7 +121,7 @@ class SplitWidth_2rw extends MacroCompilerSpec with HasSRAMGenerator with HasSim
 class SplitWidth_1r_1w extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
   import mdf.macrolib._
 
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 64
   override lazy val memMaskGran = Some(16)
   override lazy val libWidth = 16
@@ -133,11 +133,11 @@ class SplitWidth_1r_1w extends MacroCompilerSpec with HasSRAMGenerator with HasS
       depth=memDepth,
       family="1r1w",
       ports=Seq(generateTestPort(
-        "portA", memWidth, memDepth, maskGran=memMaskGran,
+        "portA", memWidth, Some(memDepth), maskGran=memMaskGran,
         write=false, writeEnable=false,
         read=true, readEnable=true
       ), generateTestPort(
-        "portB", memWidth, memDepth, maskGran=memMaskGran,
+        "portB", memWidth, Some(memDepth), maskGran=memMaskGran,
         write=true, writeEnable=true,
         read=false, readEnable=false
       ))
@@ -224,7 +224,7 @@ class SplitWidth_1r_1w extends MacroCompilerSpec with HasSRAMGenerator with HasS
 class SplitWidth_2rw_differentMasks extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
   import mdf.macrolib._
 
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 64
   override lazy val memMaskGran = Some(16)
   override lazy val libWidth = 16
@@ -239,11 +239,11 @@ class SplitWidth_2rw_differentMasks extends MacroCompilerSpec with HasSRAMGenera
       depth=memDepth,
       family="2rw",
       ports=Seq(generateTestPort(
-        "portA", memWidth, memDepth, maskGran=memMaskGran,
+        "portA", memWidth, Some(memDepth), maskGran=memMaskGran,
         write=true, writeEnable=true,
         read=true, readEnable=true
       ), generateTestPort(
-        "portB", memWidth, memDepth, maskGran=Some(memMaskGranB),
+        "portB", memWidth, Some(memDepth), maskGran=Some(memMaskGranB),
         write=true, writeEnable=true,
         read=true, readEnable=true
       ))

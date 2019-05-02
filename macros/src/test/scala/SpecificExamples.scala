@@ -9,8 +9,8 @@ import mdf.macrolib._
 // TODO: check the actual verilog's correctness?
 class GenerateSomeVerilog extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
   override lazy val width = 32
-  override lazy val memDepth = 2048
-  override lazy val libDepth = 1024
+  override lazy val memDepth = BigInt(2048)
+  override lazy val libDepth = BigInt(1024)
 
   it should "execute fine" in {
     compileExecuteAndTest(mem, lib, v, output)
@@ -35,7 +35,7 @@ class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
   "type" : "sram",
   "name" : "_T_182_ext",
   "width" : 88,
-  "depth" : 64,
+  "depth" : "64",
   "ports" : [ {
     "address port name" : "R0_addr",
     "address port polarity" : "active high",
@@ -62,7 +62,7 @@ class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
   "type" : "sram",
   "name" : "_T_84_ext",
   "width" : 64,
-  "depth" : 512,
+  "depth" : "512",
   "ports" : [ {
     "address port name" : "R0_addr",
     "address port polarity" : "active high",
@@ -89,7 +89,7 @@ class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
   "type" : "sram",
   "name" : "tag_array_ext",
   "width" : 80,
-  "depth" : 64,
+  "depth" : "64",
   "ports" : [ {
     "address port name" : "RW0_addr",
     "address port polarity" : "active high",
@@ -111,7 +111,7 @@ class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
   "type" : "sram",
   "name" : "_T_886_ext",
   "width" : 64,
-  "depth" : 512,
+  "depth" : "512",
   "ports" : [ {
     "address port name" : "RW0_addr",
     "address port polarity" : "active high",
@@ -130,7 +130,7 @@ class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
   "type" : "sram",
   "name" : "entries_info_ext",
   "width" : 40,
-  "depth" : 24,
+  "depth" : "24",
   "ports" : [ {
     "address port name" : "R0_addr",
     "address port polarity" : "active high",
@@ -154,7 +154,7 @@ class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
   "type" : "sram",
   "name" : "smem_ext",
   "width" : 32,
-  "depth" : 32,
+  "depth" : "32",
   "ports" : [ {
     "address port name" : "RW0_addr",
     "address port polarity" : "active high",
@@ -176,7 +176,7 @@ class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
   "type" : "sram",
   "name" : "smem_0_ext",
   "width" : 32,
-  "depth" : 64,
+  "depth" : "64",
   "ports" : [ {
     "address port name" : "RW0_addr",
     "address port polarity" : "active high",
@@ -1197,12 +1197,12 @@ circuit smem_0_ext :
 class SmallTagArrayTest extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleTestGenerator {
   // Test that mapping a smaller memory using a larger lib can still work.
   override def memWidth: Int = 26
-  override def memDepth: Int = 2
+  override def memDepth: BigInt = BigInt(2)
   override def memMaskGran: Option[Int] = Some(26)
   override def memPortPrefix: String = ""
 
   override def libWidth: Int = 32
-  override def libDepth: Int = 64
+  override def libDepth: BigInt = BigInt(64)
   override def libMaskGran: Option[Int] = Some(1)
   override def libPortPrefix: String = ""
 
@@ -1239,7 +1239,7 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
       width=8,
       family="1rw",
       ports=Seq(
-        generateReadWritePort("", 8, 1024)
+        generateReadWritePort("", 8, BigInt(1024))
       )
     ),
     SRAMMacro(
@@ -1248,7 +1248,7 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
       width=32,
       family="1rw",
       ports=Seq(
-        generateReadWritePort("", 32, 512)
+        generateReadWritePort("", 32, BigInt(512))
       )
     ),
     SRAMMacro(
@@ -1257,7 +1257,7 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
       width=128,
       family="1rw",
       ports=Seq(
-        generateReadWritePort("", 128, 64)
+        generateReadWritePort("", 128, BigInt(64))
       )
     ),
     SRAMMacro(
@@ -1266,7 +1266,7 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
       width=32,
       family="1rw",
       ports=Seq(
-        generateReadWritePort("", 32, 64)
+        generateReadWritePort("", 32, BigInt(64))
       )
     ),
     SRAMMacro(
@@ -1275,7 +1275,7 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
       width=8,
       family="1rw",
       ports=Seq(
-        generateReadWritePort("", 8, 64)
+        generateReadWritePort("", 8, BigInt(64))
       )
     ),
     SRAMMacro(
@@ -1284,7 +1284,7 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
       width=8,
       family="1rw",
       ports=Seq(
-        generateReadWritePort("", 8, 512)
+        generateReadWritePort("", 8, BigInt(512))
       )
     ),
     SRAMMacro(
@@ -1293,8 +1293,8 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
       width=32,
       family="1r1w",
       ports=Seq(
-        generateReadPort("portA", 32, 64),
-        generateWritePort("portB", 32, 64)
+        generateReadPort("portA", 32, BigInt(64)),
+        generateWritePort("portB", 32, BigInt(64))
       )
     )
   )

@@ -7,8 +7,8 @@ import firrtl_interpreter.InterpretiveTester
 // Synchronous write and read back.
 class SynchronousReadAndWrite extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
   override lazy val width = 12
-  override lazy val memDepth = 2048
-  override lazy val libDepth = 1024
+  override lazy val memDepth = BigInt(2048)
+  override lazy val libDepth = BigInt(1024)
 
   compile(mem, lib, v, true)
   val result = execute(mem, lib, true)
@@ -67,8 +67,8 @@ class SynchronousReadAndWrite extends MacroCompilerSpec with HasSRAMGenerator wi
 // between two submemories.
 class DontReadCombinationally extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
   override lazy val width = 8
-  override lazy val memDepth = 2048
-  override lazy val libDepth = 1024
+  override lazy val memDepth = BigInt(2048)
+  override lazy val libDepth = BigInt(1024)
 
   compile(mem, lib, v, true)
   val result = execute(mem, lib, true)

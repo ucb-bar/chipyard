@@ -30,7 +30,7 @@ object MemPort {
 // TODO standardize this in FIRRTL
 case class MemConf(
   name: String,
-  depth: Int,
+  depth: BigInt,
   width: Int,
   ports: Seq[MemPort],
   maskGranularity: Option[Int]
@@ -51,7 +51,7 @@ object MemConf {
       Seq[MemConf]()
     } else {
       s.split("\n").toSeq.map(_ match {
-        case MemConf.regex(name, depth, width, ports, maskGran) => MemConf(name, depth.toInt, width.toInt, MemPort.fromString(ports), Option(maskGran).map(_.toInt))
+        case MemConf.regex(name, depth, width, ports, maskGran) => MemConf(name, BigInt(depth), width.toInt, MemPort.fromString(ports), Option(maskGran).map(_.toInt))
         case _ => throw new Exception(s"Error parsing MemConf string : ${s}")
       })
     }

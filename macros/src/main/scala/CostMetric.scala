@@ -126,9 +126,9 @@ object DefaultMetric extends CostMetric with CostMetricCompanion {
     }
     val depthCost = math.ceil(mem.src.depth.toDouble / lib.src.depth.toDouble)
     val widthCost = math.ceil(memWidth.toDouble / lib.src.width.toDouble)
-    val bitsCost = (lib.src.depth * lib.src.width)
+    val bitsCost = (lib.src.depth * lib.src.width).toDouble
     // Fraction of wasted bits plus const per mem
-    val requestedBits = mem.src.depth * mem.src.width
+    val requestedBits = (mem.src.depth * mem.src.width).toDouble
     val bitsWasted = depthCost*widthCost*bitsCost - requestedBits
     val wastedConst = 0.05 // 0 means waste as few bits with no regard for instance count
     val costPerInst = wastedConst*depthCost*widthCost

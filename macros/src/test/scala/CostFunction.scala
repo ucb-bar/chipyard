@@ -31,34 +31,34 @@ class SelectCostMetric extends MacroCompilerSpec with HasSRAMGenerator {
   val libSRAMs = Seq(
     SRAMMacro(
       name="SRAM_WIDTH_128",
-      depth=1024,
+      depth=BigInt(1024),
       width=128,
       family="1rw",
       ports=Seq(
-        generateReadWritePort("", 128, 1024)
+        generateReadWritePort("", 128, BigInt(1024))
       )
     ),
     SRAMMacro(
       name="SRAM_WIDTH_64",
-      depth=1024,
+      depth=BigInt(1024),
       width=64,
       family="1rw",
       ports=Seq(
-        generateReadWritePort("", 64, 1024)
+        generateReadWritePort("", 64, BigInt(1024))
       )
     ),
     SRAMMacro(
       name="SRAM_WIDTH_32",
-      depth=1024,
+      depth=BigInt(1024),
       width=32,
       family="1rw",
       ports=Seq(
-        generateReadWritePort("", 32, 1024)
+        generateReadWritePort("", 32, BigInt(1024))
       )
     )
   )
 
-  val memSRAMs = Seq(generateSRAM("target_memory", "", 128, 1024))
+  val memSRAMs = Seq(generateSRAM("target_memory", "", 128, BigInt(1024)))
 
   writeToLib(lib, libSRAMs)
   writeToMem(mem, memSRAMs)

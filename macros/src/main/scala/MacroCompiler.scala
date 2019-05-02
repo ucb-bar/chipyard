@@ -312,7 +312,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
         }
       }
     }
-    for ((off, i) <- (0 until mem.src.depth by lib.src.depth).zipWithIndex) {
+    for ((off, i) <- (BigInt(0).until(mem.src.depth, lib.src.depth)).zipWithIndex) {
       for (j <- bitPairs.indices) {
         val name = s"mem_${i}_${j}"
         // Create the instance.

@@ -5,7 +5,7 @@ package barstools.macros
 
 trait HasSimpleWidthTestGenerator extends HasSimpleTestGenerator {
   this: MacroCompilerSpec with HasSRAMGenerator =>
-    def depth: Int
+    def depth: BigInt
 
     override lazy val memDepth = depth
     override lazy val libDepth = depth
@@ -69,7 +69,7 @@ s"""
 
 // Try different widths against a base memory width of 8.
 class SplitWidth1024x128_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 128
   override lazy val libWidth = 8
 
@@ -77,7 +77,7 @@ class SplitWidth1024x128_rw extends MacroCompilerSpec with HasSRAMGenerator with
 }
 
 class SplitWidth1024x64_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 64
   override lazy val libWidth = 8
 
@@ -85,7 +85,7 @@ class SplitWidth1024x64_rw extends MacroCompilerSpec with HasSRAMGenerator with 
 }
 
 class SplitWidth1024x32_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 32
   override lazy val libWidth = 8
 
@@ -93,7 +93,7 @@ class SplitWidth1024x32_rw extends MacroCompilerSpec with HasSRAMGenerator with 
 }
 
 class SplitWidth1024x16_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
 
@@ -101,7 +101,7 @@ class SplitWidth1024x16_rw extends MacroCompilerSpec with HasSRAMGenerator with 
 }
 
 class SplitWidth1024x8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 8
   override lazy val libWidth = 8
 
@@ -110,7 +110,7 @@ class SplitWidth1024x8_rw extends MacroCompilerSpec with HasSRAMGenerator with H
 
 // Try different widths against a base memory width of 16.
 class SplitWidth1024x128_lib16_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 128
   override lazy val libWidth = 16
 
@@ -118,7 +118,7 @@ class SplitWidth1024x128_lib16_rw extends MacroCompilerSpec with HasSRAMGenerato
 }
 
 class SplitWidth1024x64_lib16_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 64
   override lazy val libWidth = 16
 
@@ -126,7 +126,7 @@ class SplitWidth1024x64_lib16_rw extends MacroCompilerSpec with HasSRAMGenerator
 }
 
 class SplitWidth1024x32_lib16_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 32
   override lazy val libWidth = 16
 
@@ -134,7 +134,7 @@ class SplitWidth1024x32_lib16_rw extends MacroCompilerSpec with HasSRAMGenerator
 }
 
 class SplitWidth1024x16_lib16_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 16
 
@@ -143,7 +143,7 @@ class SplitWidth1024x16_lib16_rw extends MacroCompilerSpec with HasSRAMGenerator
 
 // Try different widths against a base memory width of 8 but depth 512 instead of 1024.
 class SplitWidth512x128_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 512
+  override lazy val depth = BigInt(512)
   override lazy val memWidth = 128
   override lazy val libWidth = 8
 
@@ -151,7 +151,7 @@ class SplitWidth512x128_rw extends MacroCompilerSpec with HasSRAMGenerator with 
 }
 
 class SplitWidth512x64_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 512
+  override lazy val depth = BigInt(512)
   override lazy val memWidth = 64
   override lazy val libWidth = 8
 
@@ -159,7 +159,7 @@ class SplitWidth512x64_rw extends MacroCompilerSpec with HasSRAMGenerator with H
 }
 
 class SplitWidth512x32_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 512
+  override lazy val depth = BigInt(512)
   override lazy val memWidth = 32
   override lazy val libWidth = 8
 
@@ -167,7 +167,7 @@ class SplitWidth512x32_rw extends MacroCompilerSpec with HasSRAMGenerator with H
 }
 
 class SplitWidth512x16_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 512
+  override lazy val depth = BigInt(512)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
 
@@ -175,7 +175,7 @@ class SplitWidth512x16_rw extends MacroCompilerSpec with HasSRAMGenerator with H
 }
 
 class SplitWidth512x8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 512
+  override lazy val depth = BigInt(512)
   override lazy val memWidth = 8
   override lazy val libWidth = 8
 
@@ -184,7 +184,7 @@ class SplitWidth512x8_rw extends MacroCompilerSpec with HasSRAMGenerator with Ha
 
 // Try non-power of two widths against a base memory width of 8.
 class SplitWidth1024x67_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 67
   override lazy val libWidth = 8
 
@@ -192,7 +192,7 @@ class SplitWidth1024x67_rw extends MacroCompilerSpec with HasSRAMGenerator with 
 }
 
 class SplitWidth1024x60_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 60
   override lazy val libWidth = 8
 
@@ -200,7 +200,7 @@ class SplitWidth1024x60_rw extends MacroCompilerSpec with HasSRAMGenerator with 
 }
 
 class SplitWidth1024x42_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 42
   override lazy val libWidth = 8
 
@@ -208,7 +208,7 @@ class SplitWidth1024x42_rw extends MacroCompilerSpec with HasSRAMGenerator with 
 }
 
 class SplitWidth1024x20_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 20
   override lazy val libWidth = 8
 
@@ -216,7 +216,7 @@ class SplitWidth1024x20_rw extends MacroCompilerSpec with HasSRAMGenerator with 
 }
 
 class SplitWidth1024x17_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 17
   override lazy val libWidth = 8
 
@@ -224,7 +224,7 @@ class SplitWidth1024x17_rw extends MacroCompilerSpec with HasSRAMGenerator with 
 }
 
 class SplitWidth1024x15_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 15
   override lazy val libWidth = 8
 
@@ -232,7 +232,7 @@ class SplitWidth1024x15_rw extends MacroCompilerSpec with HasSRAMGenerator with 
 }
 
 class SplitWidth1024x9_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 9
   override lazy val libWidth = 8
 
@@ -241,7 +241,7 @@ class SplitWidth1024x9_rw extends MacroCompilerSpec with HasSRAMGenerator with H
 
 // Try against a non-power of two base memory width.
 class SplitWidth1024x64_mem11_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 64
   override lazy val libWidth = 11
 
@@ -249,7 +249,7 @@ class SplitWidth1024x64_mem11_rw extends MacroCompilerSpec with HasSRAMGenerator
 }
 
 class SplitWidth1024x33_mem11_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 33
   override lazy val libWidth = 11
 
@@ -257,7 +257,7 @@ class SplitWidth1024x33_mem11_rw extends MacroCompilerSpec with HasSRAMGenerator
 }
 
 class SplitWidth1024x16_mem11_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 11
 
@@ -267,7 +267,7 @@ class SplitWidth1024x16_mem11_rw extends MacroCompilerSpec with HasSRAMGenerator
 // Masked RAM
 
 class SplitWidth1024x8_memGran_8_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 8
   override lazy val libWidth = 8
   override lazy val memMaskGran = Some(8)
@@ -277,7 +277,7 @@ class SplitWidth1024x8_memGran_8_libGran_1_rw extends MacroCompilerSpec with Has
 }
 
 class SplitWidth1024x16_memGran_8_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
   override lazy val memMaskGran = Some(8)
@@ -287,7 +287,7 @@ class SplitWidth1024x16_memGran_8_libGran_1_rw extends MacroCompilerSpec with Ha
 }
 
 class SplitWidth1024x16_memGran_8_libGran_8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
   override lazy val memMaskGran = Some(8)
@@ -297,7 +297,7 @@ class SplitWidth1024x16_memGran_8_libGran_8_rw extends MacroCompilerSpec with Ha
 }
 
 class SplitWidth1024x128_memGran_8_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 128
   override lazy val libWidth = 32
   override lazy val memMaskGran = Some(8)
@@ -307,7 +307,7 @@ class SplitWidth1024x128_memGran_8_libGran_1_rw extends MacroCompilerSpec with H
 }
 
 class SplitWidth1024x16_memGran_4_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
   override lazy val memMaskGran = Some(4)
@@ -317,7 +317,7 @@ class SplitWidth1024x16_memGran_4_libGran_1_rw extends MacroCompilerSpec with Ha
 }
 
 class SplitWidth1024x16_memGran_2_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
   override lazy val memMaskGran = Some(2)
@@ -327,7 +327,7 @@ class SplitWidth1024x16_memGran_2_libGran_1_rw extends MacroCompilerSpec with Ha
 }
 
 class SplitWidth1024x16_memGran_16_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
   override lazy val memMaskGran = Some(16)
@@ -339,7 +339,7 @@ class SplitWidth1024x16_memGran_16_libGran_1_rw extends MacroCompilerSpec with H
 // Non-masked mem, masked lib
 
 class SplitWidth1024x16_libGran_8_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
   override lazy val libMaskGran = Some(8)
@@ -348,7 +348,7 @@ class SplitWidth1024x16_libGran_8_rw extends MacroCompilerSpec with HasSRAMGener
 }
 
 class SplitWidth1024x16_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
   override lazy val libMaskGran = Some(1)
@@ -359,7 +359,7 @@ class SplitWidth1024x16_libGran_1_rw extends MacroCompilerSpec with HasSRAMGener
 // Non-memMask and non-1 libMask
 
 class SplitWidth1024x16_memGran_8_libGran_2_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
   override lazy val memMaskGran = Some(8)
@@ -371,7 +371,7 @@ class SplitWidth1024x16_memGran_8_libGran_2_rw extends MacroCompilerSpec with Ha
 // Non-power of two memGran
 
 class SplitWidth1024x16_memGran_9_libGran_1_rw extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
   override lazy val memMaskGran = Some(9)
@@ -387,7 +387,7 @@ class SplitWidth1024x16_memGran_9_libGran_1_rw extends MacroCompilerSpec with Ha
 class SplitWidth1024x32_readEnable_Lib extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
   import mdf.macrolib._
 
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 32
   override lazy val libWidth = 8
 
@@ -445,7 +445,7 @@ class SplitWidth1024x32_readEnable_Lib extends MacroCompilerSpec with HasSRAMGen
 class SplitWidth1024x32_readEnable_Mem extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
   import mdf.macrolib._
 
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 32
   override lazy val libWidth = 8
 
@@ -471,7 +471,7 @@ class SplitWidth1024x32_readEnable_Mem extends MacroCompilerSpec with HasSRAMGen
 class SplitWidth1024x32_readEnable_LibMem extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
   import mdf.macrolib._
 
-  override lazy val depth = 1024
+  override lazy val depth = BigInt(1024)
   override lazy val memWidth = 32
   override lazy val libWidth = 8
 

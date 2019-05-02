@@ -91,7 +91,7 @@ object Utils {
     return numRStr + numWStr + numRWStr
   }
   // This translates between two represenations of ports
-  def portSpecToMacroPort(width: Int, depth: Int, maskGran: Option[Int], ports: Seq[MemPort]): Seq[MacroPort] = {
+  def portSpecToMacroPort(width: Int, depth: BigInt, maskGran: Option[Int], ports: Seq[MemPort]): Seq[MacroPort] = {
     var numR = 0
     var numW = 0
     var numRW = 0
@@ -103,7 +103,7 @@ object Utils {
           width=Some(width), depth=Some(depth),
           address=PolarizedPort(s"${portName}_addr", ActiveHigh),
           clock=Some(PolarizedPort(s"${portName}_clk", PositiveEdge)),
-          chipEnable=Some(PolarizedPort(s"${portName}_en", ActiveHigh)),
+          readEnable=Some(PolarizedPort(s"${portName}_en", ActiveHigh)),
           output=Some(PolarizedPort(s"${portName}_data", ActiveHigh))
         ) }
       case WritePort => {
