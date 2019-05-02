@@ -28,6 +28,7 @@ rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
 sim_vsrcs = \
 	$(VERILOG_FILE) \
 	$(HARNESS_FILE) \
+	$(HARNESS_SMEMS_FILE) \
 	$(SMEMS_FILE)
 
 VCS = vcs -full64
