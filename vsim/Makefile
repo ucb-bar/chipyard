@@ -63,13 +63,13 @@ $(simv_debug) : $(sim_vsrcs) $(sim_dotf)
 	+define+DEBUG -debug_pp
 
 $(output_dir)/%.out: $(output_dir)/% $(simv)
-	$(simv) +verbose +max-cycles=1000000 $< 3>&1 1>&2 2>&3 | spike-dasm > $@
+	$(simv) +permissive -q +ntb_random_seed_automatic +verbose +max-cycles=1000000 +permissive-off $< 3>&1 1>&2 2>&3 | spike-dasm > $@
 
 $(output_dir)/%.run: $(output_dir)/% $(simv)
-	$(simv) +max-cycles=1000000 $< && touch $@
+	$(simv) +permissive -q +ntb_random_seed_automatic +max-cycles=1000000 +permissive-off $< && touch $@
 
 $(output_dir)/%.vpd: $(output_dir)/% $(simv_debug)
-	$(simv_debug) +vcdplusfile=$@ +max-cycles=1000000 $<
+	$(simv_debug) +permissive -q +ntb_random_seed_automatic +vcdplusfile=$@ +max-cycles=1000000 +permissive-off $<
 
 run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))
 

@@ -8,7 +8,7 @@ SBT ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -jar $(ROCKETCHIP_DIR)/sbt-launch
 
 lookup_scala_srcs = $(shell find $(1)/ -iname "*.scala" 2> /dev/null)
 
-PACKAGES=rocket-chip testchipip
+PACKAGES=rocket-chip testchipip barstools
 SCALA_SOURCES=$(foreach pkg,$(PACKAGES),$(call lookup_scala_srcs,$(base_dir)/$(pkg)/src/main/scala)) $(call lookup_scala_srcs,$(base_dir)/src/main/scala)
 
 ROCKET_CLASSES ?= "$(ROCKETCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/classes:$(ROCKETCHIP_DIR)/chisel3/target/scala-$(SCALA_VERSION_MAJOR)/*"
@@ -25,7 +25,11 @@ build_dir=$(sim_dir)/generated-src
 
 CHISEL_ARGS ?=
 
+ifneq ($(GENERATOR_PROJECT),example)
+long_name=$(PROJECT).$(CONFIG)
+else
 long_name=$(PROJECT).$(MODEL).$(CONFIG)
+endif
 
 FIRRTL_FILE  ?=$(build_dir)/$(long_name).fir
 ANNO_FILE    ?=$(build_dir)/$(long_name).anno.json
