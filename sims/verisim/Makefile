@@ -90,4 +90,4 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 #########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(build_dir) $(sim_prefix)-*
+	rm -rf $(gen_dir)/* $(sim_prefix)-*
