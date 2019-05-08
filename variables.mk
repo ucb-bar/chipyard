@@ -138,7 +138,8 @@ output_dir=$(sim_dir)/output
 #########################################################################################
 # build output directory for compilation
 #########################################################################################
-build_dir=$(sim_dir)/generated-src/$(long_name)
+gen_dir=$(sim_dir)/generated-src
+build_dir=$(gen_dir)/$(long_name)
 
 #########################################################################################
 # vsrcs needed to run projects

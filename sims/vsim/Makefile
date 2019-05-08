@@ -61,7 +61,7 @@ VCS_NONCC_OPTS = \
 	-sverilog \
 	+incdir+$(build_dir) \
 	+define+CLOCK_PERIOD=1.0 \
-        $(sim_vsrcs) \
+	$(sim_vsrcs) \
 	+define+PRINTF_COND=$(TB).printf_cond \
 	+define+STOP_COND=!$(TB).reset \
 	+define+RANDOMIZE_MEM_INIT \
@@ -94,4 +94,4 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 #########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(sim_dir)/generated-src/* csrc $(sim_prefix)-* ucli.key vc_hdrs.h
+	rm -rf $(gen_dir)/* csrc $(sim_prefix)-* ucli.key vc_hdrs.h
