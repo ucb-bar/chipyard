@@ -15,6 +15,9 @@ INSTALLED_VERILATOR=$(abspath verilator/install/bin/verilator)
 $(INSTALLED_VERILATOR): $(VERILATOR_SRCDIR)/bin/verilator
 	$(MAKE) -C $(VERILATOR_SRCDIR) installbin installdata
 	touch $@
+	
+.PHONY:
+verilator_install: $(INSTALLED_VERILATOR)
 
 $(VERILATOR_SRCDIR)/bin/verilator: $(VERILATOR_SRCDIR)/Makefile
 	$(MAKE) -C $(VERILATOR_SRCDIR) verilator_bin
