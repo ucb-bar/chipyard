@@ -2,7 +2,7 @@ package example
 
 import chisel3._
 import freechips.rocketchip.config.{Config}
-import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
+import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, WithExtMemSize}
 import testchipip._
 
 // --------------
@@ -55,6 +55,10 @@ class GPIORocketConfig extends Config(
   new WithGPIO ++
   new WithGPIORocketTop ++
   new BaseRocketConfig)
+
+class GB1MemoryConfig extends Config(
+  new WithExtMemSize((1<<30) * 1L) ++
+  new DefaultRocketConfig)
 
 // ------------
 // BOOM Configs

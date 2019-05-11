@@ -1,4 +1,4 @@
-package example
+package utilities
 
 import java.io.File
 
@@ -102,7 +102,7 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
     firrtl.FileUtils.makeDirectory("./bootrom/")
     writeResource("/testchipip/bootrom/bootrom.rv64.img", "./bootrom/")
     writeResource("/testchipip/bootrom/bootrom.rv32.img", "./bootrom/")
-    writeResource("/project-template/bootrom/bootrom.img", "./bootrom/")
+    writeResource("/bootrom/bootrom.img", "./bootrom/")
   }
 
   def writeFiles(cfg: GenerateSimConfig): Unit = {
