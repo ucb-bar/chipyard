@@ -1,4 +1,4 @@
-bootrom
+bootrom/*
 /Makefrag.pkgs
 target
 *.jar
