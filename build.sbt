@@ -45,11 +45,11 @@ def conditionalDependsOn(prj: Project): Project = {
   }
 }
 
-lazy val example = conditionalDependsOn(project in file("example"))
+lazy val example = conditionalDependsOn(project in file("generators/example"))
   .dependsOn(boom, hwacha, sifive_blocks)
   .settings(commonSettings)
 
-lazy val utilities = conditionalDependsOn(project in file("utilities"))
+lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))
   .settings(commonSettings)
 
 lazy val hwacha = (project in file ("generators/hwacha"))
