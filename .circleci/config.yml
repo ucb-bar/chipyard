@@ -104,6 +104,15 @@ jobs:
             # Checkout the code
             - checkout
 
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+
             - restore_cache:
                 keys:
                     - verilator-installed-v1-{{ checksum "sims/verisim/verilator.mk" }}
@@ -137,10 +146,6 @@ jobs:
             - restore_cache:
                 keys:
                     - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
-
-            - restore_cache:
-                keys:
-                    - esp-tools-installed-v1-{{ checksum "../esp-tools.hash" }}
 
             - restore_cache:
                 keys:
