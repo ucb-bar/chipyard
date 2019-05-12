@@ -171,6 +171,7 @@ workflows:
             # Prepare the verilator builds
             - prepare-example:
                 requires:
+                    - install-riscv-toolchain
                     - install-verilator 
 
             # Run the respective tests
@@ -178,5 +179,5 @@ workflows:
             # Run the example tests
             - example-run-benchmark-tests:
                 requires:
-                    - prepare-example
                     - install-riscv-toolchain
+                    - prepare-example
