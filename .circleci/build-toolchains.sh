@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# create the riscv tools binaries from riscv-boom/boom-template with rocket-chip hash given by riscv-boom
+# create the riscv tools/esp tools binaries
 
 # turn echo on and error on earliest command
 set -ex
