@@ -317,7 +317,7 @@ jobs:
 
             - run:
                 name: Run boomexample benchmark tests
-                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=boomexample
+                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=boomexample CONFIG=SmallDefaultBoomConfig
 
     boom-run-benchmark-tests:
         docker:
