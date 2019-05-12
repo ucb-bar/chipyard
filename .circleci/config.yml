@@ -125,7 +125,7 @@ jobs:
             - save_cache:
                 key: example-{{ .Branch }}-{{ .Revision }}
                 paths:
-                    - "/home/riscvuser/project/sims/verisim"
+                    - "/home/riscvuser/project"
 
     example-run-benchmark-tests:
         docker:

@@ -13,3 +13,5 @@ cd $HOME/project
 cd sims/verisim
 make clean
 make SUB_PROJECT=$1 JAVA_ARGS="-Xmx2G -Xss8M"
+
+rm -rf ../../project
