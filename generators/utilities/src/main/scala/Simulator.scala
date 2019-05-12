@@ -90,7 +90,7 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
     "/vsrc/EICG_wrapper.v",
   ) ++ (sim match { // simulator specific files to include
     case VerilatorSimulator => Seq(
-      "/project-template/csrc/emulator.cc",
+      "/csrc/emulator.cc",
       "/csrc/verilator.h",
     )
     case VCSSimulator => Seq(
