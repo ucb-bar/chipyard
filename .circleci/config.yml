@@ -87,7 +87,7 @@ jobs:
                     - verilator-installed-v1-{{ checksum "sims/verisim/verilator.mk" }}
 
             - run:
-                name: Building BoomConfig using Verilator
+                name: Building the example subproject using Verilator
                 command: .circleci/do-rtl-build.sh example
                 no_output_timeout: 120m
 

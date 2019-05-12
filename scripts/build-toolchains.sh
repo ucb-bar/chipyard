@@ -27,7 +27,7 @@ RISCV="$(pwd)/$INSTALL_DIR"
 # install risc-v tools
 export RISCV="$RISCV"
 git -C $REBAR_DIR submodule update --init --recursive toolchains/$TOOLCHAIN #--jobs 8
-cd "toolchains/$TOOLCHAIN"
+cd "$REBAR_DIR/toolchains/$TOOLCHAIN"
 export MAKEFLAGS="-j16"
 ./build.sh
 cd $RDIR
