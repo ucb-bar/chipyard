@@ -5,7 +5,7 @@ version: 2
 
 # set of jobs to run
 jobs:
-    install-toolchains:
+    install-riscv-toolchain:
         docker:
             - image: riscvboom/riscvboom-images:0.0.5
         environment:
@@ -25,20 +25,42 @@ jobs:
                 keys:
                     - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
 
-            - restore_cache:
-                keys:
-                    - esp-tools-installed-v1-{{ checksum "../esp-tools.hash" }}
-
             - run:
-                name: Building toolchains
+                name: Building riscv-tools toolchain
                 command: |
-                    .circleci/build-toolchains.sh
+                    .circleci/build-toolchains.sh riscv-tools
                 no_output_timeout: 120m
 
             - save_cache:
                 key: riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
                 paths:
                     - "/home/riscvuser/riscv-tools-install"
+
+    install-esp-toolchain:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+
+            - restore_cache:
+                keys:
+                    - esp-tools-installed-v1-{{ checksum "../esp-tools.hash" }}
+
+            - run:
+                name: Building esp-tools toolchain
+                command: |
+                    .circleci/build-toolchains.sh esp-tools
+                no_output_timeout: 120m
 
             - save_cache:
                 key: esp-tools-installed-v1-{{ checksum "../esp-tools.hash" }}
@@ -133,13 +155,13 @@ workflows:
     version: 2
     build-and-test-rebar-integration:
         jobs:
-            # Make the toolchain
-            - install-toolchains
+            # Make the toolchains
+            - install-riscv-toolchain
+
+            - install-esp-toolchain
 
             # Build verilator
-            - install-verilator:
-                requires:
-                    - install-toolchains
+            - install-verilator
 
             # Prepare the verilator builds
             - prepare-example:
@@ -152,3 +174,4 @@ workflows:
             - example-run-benchmark-tests:
                 requires:
                     - prepare-example
+                    - install-riscv-toolchain
