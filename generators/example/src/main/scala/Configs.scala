@@ -68,9 +68,17 @@ class BaseBoomConfig extends Config(
   new WithBootROM ++
   new boom.system.BoomConfig)
 
+class SmallBaseBoomConfig extends Config(
+  new WithBootROM ++
+  new boom.system.SmallBoomConfig)
+
 class DefaultBoomConfig extends Config(
   new WithNormalBoomTop ++
   new BaseBoomConfig)
+
+class SmallDefaultBoomConfig extends Config(
+  new WithNormalBoomTop ++
+  new SmallBaseBoomConfig)
 
 class HwachaBoomConfig extends Config(
   new hwacha.DefaultHwachaConfig ++
