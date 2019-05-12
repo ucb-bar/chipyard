@@ -1,0 +1,154 @@
+# CircleCI Configuration File
+
+# version of circleci
+version: 2
+
+# set of jobs to run
+jobs:
+    install-toolchains:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+
+            - restore_cache:
+                keys:
+                    - esp-tools-installed-v1-{{ checksum "../esp-tools.hash" }}
+
+            - run:
+                name: Building toolchains
+                command: |
+                    .circleci/build-toolchains.sh
+                no_output_timeout: 120m
+
+            - save_cache:
+                key: riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                paths:
+                    - "/home/riscvuser/riscv-tools-install"
+
+            - save_cache:
+                key: esp-tools-installed-v1-{{ checksum "../esp-tools.hash" }}
+                paths:
+                    - "/home/riscvuser/esp-tools-install"
+
+    install-verilator:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - restore_cache:
+                keys:
+                    - verilator-installed-v1-{{ checksum "sims/verisim/verilator.mk" }}
+
+            - run:
+                name: Build Verilator
+                command: |
+                    .circleci/build-verilator.sh
+                no_output_timeout: 120m
+
+            - save_cache:
+                key: verilator-installed-v1-{{ checksum "sims/verisim/verilator.mk" }}
+                paths:
+                    - "/home/riscvuser/project/sims/verisim/verilator"
+
+    prepare-example:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - restore_cache:
+                keys:
+                    - verilator-installed-v1-{{ checksum "sims/verisim/verilator.mk" }}
+
+            - run:
+                name: Building BoomConfig using Verilator
+                command: .circleci/do-rtl-build.sh example
+                no_output_timeout: 120m
+
+            - save_cache:
+                key: example-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/home/riscvuser/project/sims/verisim"
+
+    example-run-benchmark-tests:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+
+            - restore_cache:
+                keys:
+                    - esp-tools-installed-v1-{{ checksum "../esp-tools.hash" }}
+
+            - restore_cache:
+                keys:
+                    - example-{{ .Branch }}-{{ .Revision }}
+
+            - run:
+                name: Run example benchmark tests
+                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=example
+
+# Order and dependencies of jobs to run
+workflows:
+    version: 2
+    build-and-test-boom-configs:
+        jobs:
+            # Make the toolchain
+            - install-toolchains
+
+            # Build verilator
+            - install-verilator:
+                requires:
+                    - install-toolchains
+
+            # Prepare the verilator builds
+            - prepare-example:
+                requires:
+                    - install-verilator 
+
+            # Run the respective tests
+
+            # Run the example tests
+            - example-run-benchmark-tests:
+                requires:
+                    - prepare-example
