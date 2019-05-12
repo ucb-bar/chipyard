@@ -78,7 +78,7 @@ $(output_dir)/%.run: $(output_dir)/% $(sim)
 	$(sim) +max-cycles=$(timeout_cycles) $< && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	$(sim) +permissive +verbose +max-cycles=$(timeout_cycles) +permissive-off $< 3>&1 1>&2 2>&3 | spike-dasm > $@
+	$(sim) $(PERMISSIVEON) +verbose +max-cycles=$(timeout_cycles) $(PERMISSIVEOFF) $< 3>&1 1>&2 2>&3 | spike-dasm > $@
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
