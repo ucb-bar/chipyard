@@ -10,7 +10,7 @@ if [ ! -d "$HOME/esp-tools-install" ]; then
     cd $HOME/
 
     # init all submodules including the tools
-    ./project/scripts/build-toolchains.sh esp-tools
+    REBAR_DIR=$HOME/project ./project/scripts/build-toolchains.sh esp-tools
 fi
 
 if [ ! -d "$HOME/riscv-tools-install" ]; then
@@ -18,5 +18,5 @@ if [ ! -d "$HOME/riscv-tools-install" ]; then
     cd $HOME/
 
     # init all submodules including the tools
-    ./project/scripts/build-toolchains.sh riscv-tools
+    REBAR_DIR=$HOME/project ./project/scripts/build-toolchains.sh riscv-tools
 fi
