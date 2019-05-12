@@ -127,6 +127,142 @@ jobs:
                 paths:
                     - "/home/riscvuser/project"
 
+    prepare-boomexample:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+
+            - restore_cache:
+                keys:
+                    - verilator-installed-v1-{{ checksum "sims/verisim/verilator.mk" }}
+
+            - run:
+                name: Building the boomexample subproject using Verilator
+                command: .circleci/do-rtl-build.sh boomexample
+                no_output_timeout: 120m
+
+            - save_cache:
+                key: boomexample-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/home/riscvuser/project"
+
+    prepare-boom:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+
+            - restore_cache:
+                keys:
+                    - verilator-installed-v1-{{ checksum "sims/verisim/verilator.mk" }}
+
+            - run:
+                name: Building the boom subproject using Verilator
+                command: .circleci/do-rtl-build.sh boom
+                no_output_timeout: 120m
+
+            - save_cache:
+                key: boom-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/home/riscvuser/project"
+
+    prepare-rocketchip:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+
+            - restore_cache:
+                keys:
+                    - verilator-installed-v1-{{ checksum "sims/verisim/verilator.mk" }}
+
+            - run:
+                name: Building the rocketchip subproject using Verilator
+                command: .circleci/do-rtl-build.sh rocketchip
+                no_output_timeout: 120m
+
+            - save_cache:
+                key: rocketchip-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/home/riscvuser/project"
+
+    prepare-hwacha:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+
+            - restore_cache:
+                keys:
+                    - verilator-installed-v1-{{ checksum "sims/verisim/verilator.mk" }}
+
+            - run:
+                name: Building the hwacha subproject using Verilator
+                command: .circleci/do-rtl-build.sh hwacha
+                no_output_timeout: 120m
+
+            - save_cache:
+                key: hwacha-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/home/riscvuser/project"
+
     example-run-benchmark-tests:
         docker:
             - image: riscvboom/riscvboom-images:0.0.5
@@ -155,6 +291,118 @@ jobs:
                 name: Run example benchmark tests
                 command: make run-bmark-tests -C sims/verisim SUB_PROJECT=example
 
+    boomexample-run-benchmark-tests:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+
+            - restore_cache:
+                keys:
+                    - boomexample-{{ .Branch }}-{{ .Revision }}
+
+            - run:
+                name: Run boomexample benchmark tests
+                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=boomexample
+
+    boom-run-benchmark-tests:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+
+            - restore_cache:
+                keys:
+                    - boom-{{ .Branch }}-{{ .Revision }}
+
+            - run:
+                name: Run boom benchmark tests
+                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=boom
+
+    rocketchip-run-benchmark-tests:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+
+            - restore_cache:
+                keys:
+                    - rocketchip-{{ .Branch }}-{{ .Revision }}
+
+            - run:
+                name: Run rocketchip benchmark tests
+                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=rocketchip
+
+    hwacha-run-benchmark-tests:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+
+            - restore_cache:
+                keys:
+                    - hwacha-{{ .Branch }}-{{ .Revision }}
+
+            - run:
+                name: Run hwacha benchmark tests
+                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=hwacha
+
 # Order and dependencies of jobs to run
 workflows:
     version: 2
@@ -172,7 +420,27 @@ workflows:
             - prepare-example:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator 
+                    - install-verilator
+
+            - prepare-boomexample:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-boom:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-rocketchip:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-hwacha:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
 
             # Run the respective tests
 
@@ -181,3 +449,23 @@ workflows:
                 requires:
                     - install-riscv-toolchain
                     - prepare-example
+
+            - boomexample-run-benchmark-tests:
+                requires:
+                    - install-riscv-toolchain
+                    - prepare-boomexample
+
+            - boom-run-benchmark-tests:
+                requires:
+                    - install-riscv-toolchain
+                    - prepare-boom
+
+            - rocketchip-run-benchmark-tests:
+                requires:
+                    - install-riscv-toolchain
+                    - prepare-rocketchip
+
+            - hwacha-run-benchmark-tests:
+                requires:
+                    - install-riscv-toolchain
+                    - prepare-hwacha
