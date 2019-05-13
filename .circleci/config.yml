@@ -229,7 +229,7 @@ jobs:
                 paths:
                     - "/home/riscvuser/project"
 
-    prepare-hwacha:
+    prepare-hwacha-verilog-only:
         docker:
             - image: riscvboom/riscvboom-images:0.0.5
         environment:
@@ -437,7 +437,7 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-hwacha:
+            - prepare-hwacha-verilog-only:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
