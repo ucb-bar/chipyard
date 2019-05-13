@@ -255,7 +255,7 @@ jobs:
 
             - run:
                 name: Building the hwacha subproject using Verilator
-                command: .circleci/do-rtl-build.sh SUB_PROJECT=example MODEL=TestHarness MODEL_PACKAGE=freechips.rocketchip.system CONFIG=SmallRocketForHwachaCIConfig CONFIG_PACKAGE=example GENERATOR_PACKAGE=hwacha TOP=ExampleRocketSystem
+                command: .circleci/do-rtl-build.sh SUB_PROJECT=hwacha verilog
                 no_output_timeout: 120m
 
             - save_cache:
@@ -375,33 +375,33 @@ jobs:
                 name: Run rocketchip benchmark tests
                 command: make run-bmark-tests -C sims/verisim SUB_PROJECT=rocketchip
 
-    hwacha-run-benchmark-tests:
-        docker:
-            - image: riscvboom/riscvboom-images:0.0.5
-        environment:
-            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
-            TERM: dumb
-
-        steps:
-            # Checkout the code
-            - checkout
-
-            - run:
-                name: Create hash of toolchains
-                command: |
-                    .circleci/create-hash.sh
-
-            - restore_cache:
-                keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
-
-            - restore_cache:
-                keys:
-                    - hwacha-{{ .Branch }}-{{ .Revision }}
-
-            - run:
-                name: Run hwacha benchmark tests
-                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=example MODEL=TestHarness MODEL_PACKAGE=freechips.rocketchip.system CONFIG=SmallRocketForHwachaCIConfig CONFIG_PACKAGE=example GENERATOR_PACKAGE=hwacha TOP=ExampleRocketSystem
+#    hwacha-run-benchmark-tests:
+#        docker:
+#            - image: riscvboom/riscvboom-images:0.0.5
+#        environment:
+#            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+#            TERM: dumb
+#
+#        steps:
+#            # Checkout the code
+#            - checkout
+#
+#            - run:
+#                name: Create hash of toolchains
+#                command: |
+#                    .circleci/create-hash.sh
+#
+#            - restore_cache:
+#                keys:
+#                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+#
+#            - restore_cache:
+#                keys:
+#                    - hwacha-{{ .Branch }}-{{ .Revision }}
+#
+#            - run:
+#                name: Run hwacha benchmark tests
+#                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=hwacha
 
 # Order and dependencies of jobs to run
 workflows:
@@ -465,7 +465,7 @@ workflows:
                     - install-riscv-toolchain
                     - prepare-rocketchip
 
-            - hwacha-run-benchmark-tests:
-                requires:
-                    - install-riscv-toolchain
-                    - prepare-hwacha
+#            - hwacha-run-benchmark-tests:
+#                requires:
+#                    - install-riscv-toolchain
+#                    - prepare-hwacha

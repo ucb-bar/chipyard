@@ -21,12 +21,6 @@ class HwachaConfig extends Config(
   new hwacha.DefaultHwachaConfig ++
   new DefaultRocketConfig)
 
-class SmallRocketForHwachaCIConfig extends Config(
-  new WithNBanks(1) ++
-  new WithNHwachaSmallCores(1) ++
-  new hwacha.DefaultHwachaConfig ++
-  new DefaultRocketConfig)
-
 class RoccRocketConfig extends Config(
   new WithRoccExample ++
   new DefaultRocketConfig)
