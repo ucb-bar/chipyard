@@ -255,7 +255,7 @@ jobs:
 
             - run:
                 name: Building the hwacha subproject using Verilator
-                command: .circleci/do-rtl-build.sh SUB_PROJECT=example MODEL=TestHarness MODEL_PACKAGE=freechips.rocketchip.system CONFIG=SmallHwachaConfig CONFIG_PACKAGE=example GENERATOR_PACKAGE=hwacha TOP=ExampleRocketSystem
+                command: .circleci/do-rtl-build.sh SUB_PROJECT=example MODEL=TestHarness MODEL_PACKAGE=freechips.rocketchip.system CONFIG=SmallRocketForHwachaCIConfig CONFIG_PACKAGE=example GENERATOR_PACKAGE=hwacha TOP=ExampleRocketSystem
                 no_output_timeout: 120m
 
             - save_cache:
@@ -401,7 +401,7 @@ jobs:
 
             - run:
                 name: Run hwacha benchmark tests
-                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=example MODEL=TestHarness MODEL_PACKAGE=freechips.rocketchip.system CONFIG=SmallHwachaConfig CONFIG_PACKAGE=example GENERATOR_PACKAGE=hwacha TOP=ExampleRocketSystem
+                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=example MODEL=TestHarness MODEL_PACKAGE=freechips.rocketchip.system CONFIG=SmallRocketForHwachaCIConfig CONFIG_PACKAGE=example GENERATOR_PACKAGE=hwacha TOP=ExampleRocketSystem
 
 # Order and dependencies of jobs to run
 workflows:

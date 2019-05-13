@@ -2,10 +2,11 @@ package example
 
 import chisel3._
 import freechips.rocketchip.config.{Parameters, Config}
-import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
+import freechips.rocketchip.subsystem.{SystemBusKey, RocketTilesKey, CacheBlockBytes, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.tile.XLen
+import freechips.rocketchip.tile.{XLen, RocketTileParams}
+import freechips.rocketchip.rocket.{RocketCoreParams, DCacheParams, ICacheParams, MulDivParams}
 import testchipip._
 import sifive.blocks.devices.gpio._
 
@@ -166,5 +167,37 @@ class WithGPIOBoomTop extends Config((site, here, up) => {
       }
     }
     top
+  }
+})
+
+// -------------
+// Mixins for CI
+// -------------
+
+/**
+ * Class to specify a smaller Rocket core for Hwacha CI
+ */
+class WithNHwachaSmallCores(n: Int) extends Config((site, here, up) => {
+  case RocketTilesKey => {
+    val small = RocketTileParams(
+      core   = RocketCoreParams(mulDiv = Some(MulDivParams(
+        mulUnroll = 8,
+        mulEarlyOut = true,
+        divEarlyOut = true))),
+      btb = None,
+      dcache = Some(DCacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 32,
+        nWays = 1,
+        nTLBEntries = 4,
+        nMSHRs = 0,
+        blockBytes = site(CacheBlockBytes))),
+      icache = Some(ICacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 32,
+        nWays = 1,
+        nTLBEntries = 4,
+        blockBytes = site(CacheBlockBytes))))
+    List.tabulate(n)(i => small.copy(hartId = i))
   }
 })
