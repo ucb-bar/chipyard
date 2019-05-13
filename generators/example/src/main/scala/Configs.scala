@@ -2,7 +2,7 @@ package example
 
 import chisel3._
 import freechips.rocketchip.config.{Config}
-import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, WithExtMemSize}
+import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, WithExtMemSize, WithNBanks}
 import testchipip._
 
 // --------------
@@ -22,9 +22,9 @@ class HwachaConfig extends Config(
   new DefaultRocketConfig)
 
 class SmallHwachaConfig extends Config(
-  new hwacha.WithNBanks(1) ++
+  new WithNBanks(1) ++
   new hwacha.DefaultHwachaConfig ++
-  new DefaultConfig)
+  new freechips.rocketchip.system.DefaultConfig)
 
 class RoccRocketConfig extends Config(
   new WithRoccExample ++
