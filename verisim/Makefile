@@ -31,6 +31,7 @@ rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
 sim_vsrcs = \
 	$(VERILOG_FILE) \
 	$(HARNESS_FILE) \
+	$(HARNESS_SMEMS_FILE) \
 	$(SMEMS_FILE)
 
 model_dir = $(build_dir)/$(long_name)
@@ -82,5 +83,5 @@ run-regression-tests-fast: $(addprefix $(output_dir)/,$(addsuffix .run,$(regress
 
 run-regression-tests-debug: $(addprefix $(output_dir)/,$(addsuffix .vpd,$(regression-tests)))
 
-clean: clean-scala
+clean:
 	rm -rf generated-src ./simulator-*

@@ -2,7 +2,7 @@ package example
 
 import chisel3._
 import freechips.rocketchip.config.{Parameters, Config}
-import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
+import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, WithExtMemSize}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.tile.XLen
@@ -75,6 +75,19 @@ class WithFourTrackers extends WithNBlockDeviceTrackers(4)
 
 class WithTwoMemChannels extends WithNMemoryChannels(2)
 class WithFourMemChannels extends WithNMemoryChannels(4)
+
+// 16GB of off chip memory
+class BigMemoryConfig extends Config(
+  new WithExtMemSize((1<<30) * 16L) ++ new DefaultExampleConfig)
+// 1GB of off chip memory
+class GB1MemoryConfig extends Config(
+  new WithExtMemSize((1<<30) * 1L) ++ new DefaultExampleConfig)
+class GB2MemoryConfig extends Config(
+  new WithExtMemSize((1<<30) * 2L) ++ new DefaultExampleConfig)
+class GB4MemoryConfig extends Config(
+  new WithExtMemSize((1<<30) * 4L) ++ new DefaultExampleConfig)
+class GB8MemoryConfig extends Config(
+  new WithExtMemSize((1<<30) * 8L) ++ new DefaultExampleConfig)
 
 class DualCoreConfig extends Config(
   // Core gets tacked onto existing list
