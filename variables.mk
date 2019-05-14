@@ -98,16 +98,16 @@ ifeq ($(SUB_PROJECT),hwacha)
 	TB                ?= TestDriver
 	TOP               ?= ExampleRocketSystem
 endif
-# for beagle project
+# for BEAGLE project
 ifeq ($(SUB_PROJECT),beagle)
-	SBT_PROJECT=beagle
-	MODEL=BeagleChipTop
-	VLOG_MODEL=BeagleChipTop
-	MODEL_PACKAGE=beagle
-	CONFIG=BeagleRocketConfig
-	CONFIG_PACKAGE=beagle
-	GENERATOR_PACKAGE=hwacha
-	TOP=BeagleChipTop
+	SBT_PROJECT       ?= beagle
+	MODEL             ?= BeagleChipTop
+	VLOG_MODEL        ?= BeagleChipTop
+	MODEL_PACKAGE     ?= beagle
+	CONFIG            ?= BeagleBoomAndRocketHwachaConfig
+	CONFIG_PACKAGE    ?= beagle
+	GENERATOR_PACKAGE ?= boom.system
+	TOP               ?= BeagleChipTop
 endif
 
 

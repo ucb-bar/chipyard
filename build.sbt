@@ -68,7 +68,7 @@ lazy val example = conditionalDependsOn(project in file("generators/example"))
   .settings(commonSettings)
 
 lazy val beagle = conditionalDependsOn(project in file("generators/beagle"))
-  .dependsOn(boom, hwacha, sifive_blocks)
+  .dependsOn(example)
   .settings(commonSettings)
 
 // --------------------------------

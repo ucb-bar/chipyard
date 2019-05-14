@@ -8,7 +8,7 @@ SHELL=/bin/bash
 #########################################################################################
 lookup_scala_srcs = $(shell find -L $(1)/ -iname "*.scala" 2> /dev/null)
 
-PACKAGES=rocket-chip testchipip boom hwacha sifive-blocks example
+PACKAGES=rocket-chip testchipip boom hwacha sifive-blocks utilities example beagle
 SCALA_SOURCES=$(foreach pkg,$(PACKAGES),$(call lookup_scala_srcs,$(base_dir)/generators/$(pkg)/src/main/scala))
 
 #########################################################################################

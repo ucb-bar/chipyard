@@ -28,7 +28,7 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
   val sys_clk = Wire(Clock())
   val sys_rst = Wire(Bool())
   val sys = withClockAndReset(sys_clk, sys_rst) {
-    Module(LazyModule(new BeagleRocketTop).module)
+    Module(LazyModule(new BeagleTop).module)
   }
 
   val reset           = IO(Input(Bool())) // reset from off chip

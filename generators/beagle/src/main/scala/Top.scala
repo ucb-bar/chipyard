@@ -17,7 +17,7 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.i2c._
 import sifive.blocks.devices.jtag._
 
-class BeagleRocketTop(implicit p: Parameters) extends RocketSubsystem
+class BeagleTop(implicit p: Parameters) extends BoomAndRocketSubsystem
   with HasPeripheryBootROM
   with HasPeripheryGPIO
   with HasPeripherySPI
@@ -26,7 +26,7 @@ class BeagleRocketTop(implicit p: Parameters) extends RocketSubsystem
   with HasPeripheryBeagle {
 
   /** START: COPIED FROM ROCKET-CHIP */
-  override lazy val module = new BeagleRocketTopModule(this)
+  override lazy val module = new BeagleTopModule(this)
 
   // The sbus masters the cbus; here we convert TL-UH -> TL-UL
   sbus.crossToBus(cbus, NoCrossing)
@@ -49,7 +49,7 @@ class BeagleRocketTop(implicit p: Parameters) extends RocketSubsystem
   /** END: COPIED FROM ROCKET-CHIP */
 }
 
-class BeagleRocketTopModule[+L <: BeagleRocketTop](l: L) extends RocketSubsystemModuleImp(l)
+class BeagleTopModule[+L <: BeagleTop](l: L) extends BoomAndRocketSubsystemModuleImp(l)
   with HasRTCModuleImp
   with HasPeripheryBootROMModuleImp
   with HasPeripheryGPIOModuleImp
