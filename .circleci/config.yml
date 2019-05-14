@@ -439,7 +439,8 @@ workflows:
 
             - prepare-hwacha-verilog-only:
                 requires:
-                    - install-riscv-toolchain
+                    - install-riscv-toolchain # TODO: Remove when esp-tools is used
+                    - install-esp-toolchain
                     - install-verilator
 
             # Run the respective tests
@@ -467,5 +468,6 @@ workflows:
 
 #            - hwacha-run-benchmark-tests:
 #                requires:
-#                    - install-riscv-toolchain
+#                    - install-riscv-toolchain # TODO: Remove when esp-tools is used
+#                    - install-esp-toolchain
 #                    - prepare-hwacha

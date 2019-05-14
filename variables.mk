@@ -123,12 +123,17 @@ sim_harness_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
 sim_top_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.top.f
 
 #########################################################################################
+# java arguments used in sbt
+#########################################################################################
+JAVA_ARGS ?= -Xmx8G -Xss8M -XX:MaxPermSize=256M
+
+#########################################################################################
 # default sbt launch command
 #########################################################################################
 SCALA_VERSION=2.12.4
 SCALA_VERSION_MAJOR=$(basename $(SCALA_VERSION))
 
-SBT ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -jar $(ROCKETCHIP_DIR)/sbt-launch.jar ++$(SCALA_VERSION)
+SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar ++$(SCALA_VERSION)
 
 #########################################################################################
 # output directory for tests
