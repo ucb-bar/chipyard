@@ -43,6 +43,13 @@ lazy val hwacha = (project in file ("generators/hwacha"))
   .dependsOn(rebarRocketchip)
   .settings(commonSettings)
 
+lazy val systolicArray = (project in file ("generators/systolic-array"))
+  .dependsOn(rebarRocketchip, icenet)
+  .settings(commonSettings)
+
+lazy val icenet = conditionalDependsOn(project in file ("generators/icenet"))
+  .settings(commonSettings)
+
 lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
   .dependsOn(rebarRocketchip)
   .settings(commonSettings)
@@ -68,7 +75,7 @@ lazy val example = conditionalDependsOn(project in file("generators/example"))
   .settings(commonSettings)
 
 lazy val beagle = conditionalDependsOn(project in file("generators/beagle"))
-  .dependsOn(example)
+  .dependsOn(example, systolicArray)
   .settings(commonSettings)
 
 // --------------------------------

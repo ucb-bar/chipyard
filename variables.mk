@@ -104,7 +104,7 @@ ifeq ($(SUB_PROJECT),beagle)
 	MODEL             ?= BeagleChipTop
 	VLOG_MODEL        ?= BeagleChipTop
 	MODEL_PACKAGE     ?= beagle
-	CONFIG            ?= BeagleBoomAndRocketHwachaConfig
+	CONFIG            ?= BeagleConfig
 	CONFIG_PACKAGE    ?= beagle
 	GENERATOR_PACKAGE ?= boom.system
 	TOP               ?= BeagleChipTop

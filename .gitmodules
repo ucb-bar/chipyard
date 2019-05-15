@@ -31,3 +31,9 @@
 [submodule "generators/hwacha"]
 	path = generators/hwacha
 	url = git@github.com:ucb-bar/hwacha.git
+[submodule "generators/systolic-array"]
+	path = generators/systolic-array
+	url = git@github.com:ucb-bar/systolic-array-generator.git
+[submodule "generators/icenet"]
+	path = generators/icenet
+	url = git@github.com:firesim/icenet.git
