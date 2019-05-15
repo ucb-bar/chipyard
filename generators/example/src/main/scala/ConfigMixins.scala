@@ -5,7 +5,7 @@ import freechips.rocketchip.config.{Parameters, Config}
 import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.tile.XLen
+import freechips.rocketchip.tile.{XLen}
 import testchipip._
 import sifive.blocks.devices.gpio._
 

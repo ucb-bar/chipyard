@@ -6,6 +6,7 @@ set -o pipefail
 
 unamestr=$(uname)
 RDIR=$(pwd)
+: ${REBAR_DIR:=$(pwd)} #default value is the PWD unless overridden
 
 if [ $# -ne 0 ]; then
   TOOLCHAIN=$1
@@ -25,8 +26,8 @@ RISCV="$(pwd)/$INSTALL_DIR"
 
 # install risc-v tools
 export RISCV="$RISCV"
-git submodule update --init --recursive toolchains/$TOOLCHAIN #--jobs 8
-cd "toolchains/$TOOLCHAIN"
+git -C $REBAR_DIR submodule update --init --recursive toolchains/$TOOLCHAIN #--jobs 8
+cd "$REBAR_DIR/toolchains/$TOOLCHAIN"
 export MAKEFLAGS="-j16"
 ./build.sh
 cd $RDIR

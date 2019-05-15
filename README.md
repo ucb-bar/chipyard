@@ -1,4 +1,4 @@
-# RISC-V Project Template
+# RISC-V Project Template [![CircleCI](https://circleci.com/gh/ucb-bar/project-template/tree/master.svg?style=svg)](https://circleci.com/gh/ucb-bar/project-template/tree/master)
 
 **This branch is under development**
 **It currently has many submodules**
