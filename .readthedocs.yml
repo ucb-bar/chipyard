@@ -4,4 +4,4 @@ sphinx:
   configuration: docs/conf.py
 python:
    install:
-      - requirements: requirements/local-docs-build.txt
+      - requirements: docs/requirements.txt
