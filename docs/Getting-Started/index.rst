@@ -1,6 +1,6 @@
-.. _ReBAR Basics:
+.. _Getting Started:
 
-ReBAR Basics
+Getting Started
 ================================
 
 These guides will walk you through the basics of the ReBAR framework:
