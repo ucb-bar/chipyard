@@ -5,14 +5,15 @@ A significant portion of generators in the ReBAR framework use the Rocket chip p
 This parameter system enables for the flexible configuration of the SoC without invasive RTL changes.
 In order to use the parameter system correctly, we will use several terms and conventions:
 
-**Parameter**
-
+Parameter
+--------------------
 TODO: Need to explain up, site, field, and other stuff from Henry's thesis.
 
 It is important to note that a significant challenge with the Rocket parameter system is being able to identify the correct parameter to use, and the impact that parameter has on the overall system. We are still investigating methods to facilitate parameter exploration and discovery.
 
 
-**Config**
+Config
+---------------------
 A `Config` is a collection of multiple parameters being set to specific values.
 Configs are additive, and can override each other.
 A Config can be composed of other configs.  
@@ -58,7 +59,8 @@ Example of additive configs:
   )
 
 
-**Cake Pattern**
+Cake Pattern
+-------------------------
 The cake pattern is a scala programming pattern, which enable "mixing" of multiple traits or interface definitions (sometimes refered to as dependancy injection). It is used in the Rocket chip SoC library and ReBAR framework in merging multiple system components and IO interfaces into a large system component.
 
 Example of using the cake pattern to merge multiple system components into a single top-level design, extending a basic Rocket SoC:
@@ -77,7 +79,8 @@ Example of using the cake pattern to merge multiple system components into a sin
   }
 
 
-**Mix-in**
+Mix-in
+---------------------------
 A mix-in is a scala trait, which sets parameters for specific system components, as well as enabling instantiation and wiring of the relevant system components to system buses. 
 The naming convetion for an additive mix-in is ``Has<YourMixin>``.
 
