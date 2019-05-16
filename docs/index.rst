@@ -45,7 +45,7 @@ The documentation outline should look like this
    :caption: Getting Started:
    :numbered:
 
-   ReBAR-Basics/index
+   Getting-Started/index
 
 
 Indices and tables

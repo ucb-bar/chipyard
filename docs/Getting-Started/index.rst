@@ -13,7 +13,10 @@ Hit next to get started!
 
 .. toctree::
    :maxdepth: 2
-   :caption: ReBAR Basics:
+   :caption: Getting Started:
 
-   rebar-generator-mixins
+   ReBAR-Basics
+   Configs-Parameters-Mixins   
    Adding-An-Accelerator-Tutorial
+   Running-A-Simulation
+   rebar-generator-mixins
