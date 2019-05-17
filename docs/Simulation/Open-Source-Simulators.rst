@@ -1,4 +1,4 @@
-Open Source Simulators
+Open Source Software RTL Simulators
 ==============================
 
 Verilator

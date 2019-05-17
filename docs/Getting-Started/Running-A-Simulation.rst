@@ -43,7 +43,7 @@ Once the simulator has been constructed, we would like to run RISC-V programs on
 
 .. code-block:: shell
 
-  TODO
+  ./simulator-<my_sbt_package_name>-<my_config_name> my_program_binary
 
 Alternatively, we can run a pre-packaged suite of RISC-V assembly tests, by adding the make target run-asm-tests. For example
 
@@ -95,7 +95,7 @@ Once the simulator has been constructed, we would like to run RISC-V programs on
 
 .. code-block:: shell
 
-  TODO
+  ./simulator-<my_sbt_package_name>-<my_config_name> my_program_binary
 
 Alternatively, we can run a pre-packaged suite of RISC-V assembly tests, by adding the make target run-asm-tests. For example
 

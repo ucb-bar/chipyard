@@ -28,7 +28,6 @@ The documentation outline should look like this
 
 
    Simulation:
-
    Simulation/Open-Source-Simulators/index
    Simulation/Commercial-Simulators/index
    Simulation/FPGA-Based-Simulation/index
@@ -46,6 +45,26 @@ The documentation outline should look like this
    :numbered:
 
    Getting-Started/index
+
+   :maxdepth: 3
+   :caption: Simulation:
+   :numbered:
+   Simulation/index
+
+   :maxdepth: 3
+   :caption: Generators:
+   :numbered:
+   Generators/index
+
+   :maxdepth: 3
+   :caption: Tools:
+   :numbered:
+   Tools/index
+
+   :maxdepth: 3
+   :caption: VLSI Production:
+   :numbered:
+   VLSI/index
 
 
 Indices and tables

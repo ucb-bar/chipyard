@@ -1,4 +1,4 @@
-Commericial Simulators
+Commericial Software RTL Simulators
 ==============================
 The ReBAR framework currently supports only the VCS commerical simulator
 

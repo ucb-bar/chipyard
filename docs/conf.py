@@ -181,4 +181,6 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {'python' : ('https://docs.python.org/', None),
+                       'boom' : ('https://docs.boom-core.org/en/latest/', None),
+                        'firesim' : ('http://docs.fires.im/en/latest/', None) }
