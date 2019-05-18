@@ -37,3 +37,6 @@
 [submodule "generators/icenet"]
 	path = generators/icenet
 	url = git@github.com:firesim/icenet.git
+[submodule "generators/awl"]
+	path = generators/awl
+	url = git@github.com:ucb-bar/chisel-awl.git

@@ -3,8 +3,8 @@ package beagle
 import chisel3._
 
 import freechips.rocketchip.config.{Field, Parameters, Config}
-import freechips.rocketchip.subsystem.{RocketTilesKey, WithJtagDTM, WithRationalRocketTiles, WithNMemoryChannels, WithNBanks, SystemBusKey, MemoryBusKey, ControlBusKey, CacheBlockBytes}
-import freechips.rocketchip.diplomacy.{LazyModule, ValName}
+import freechips.rocketchip.subsystem.{ExtMem, RocketTilesKey, BankedL2Key, WithJtagDTM, WithRationalRocketTiles, WithNMemoryChannels, WithNBanks, SystemBusKey, MemoryBusKey, ControlBusKey, CacheBlockBytes}
+import freechips.rocketchip.diplomacy.{LazyModule, ValName, AddressSet}
 import freechips.rocketchip.tile.{LazyRoCC, BuildRoCC, OpcodeSet, TileKey, RocketTileParams}
 import freechips.rocketchip.rocket.{RocketCoreParams, BTBParams, DCacheParams, ICacheParams, MulDivParams}
 
@@ -13,6 +13,9 @@ import sifive.blocks.devices.spi._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.i2c._
 import sifive.blocks.devices.jtag._
+
+import hbwif.tilelink._
+import hbwif._
 
 import hwacha.{Hwacha}
 
@@ -32,8 +35,14 @@ class WithBeagleChanges extends Config((site, here, up) => {
     cBus.copy(errorDevice = cBus.errorDevice.map(e => e.copy(maxTransfer=64)))
   }
   case BeaglePipelineResetDepth => 5
+  case HbwifPipelineResetDepth => 5
+  case CacheBlockStriping => 2
+  case BeagleSinkIds => 32
 })
 
+/**
+ * Mixin for adding external I/O
+ */
 class WithBeagleSiFiveBlocks extends Config((site, here, up) => {
   case PeripheryGPIOKey => Seq(GPIOParams(address = 0x9000, width = 16))
   case PeripherySPIKey => Seq(SPIParams(rAddress = 0xa000))
@@ -45,8 +54,25 @@ class WithBeagleSiFiveBlocks extends Config((site, here, up) => {
 class WithHierTiles extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey, site) map { r =>
     r.copy(boundaryBuffers = true) }
-  case BoomTilesKey => up(RocketTilesKey, site) map { r =>
+  case BoomTilesKey => up(BoomTilesKey, site) map { r =>
     r.copy(boundaryBuffers = true) }
+})
+
+/**
+ * Mixin to change generic serdes parameters
+ *
+ * banks should be 1
+ * lanes should be 2 or 4
+ * clientPort = false
+ * managerTL(UH\C) = false
+ */
+class WithBeagleSerdesChanges extends Config((site, here, up) => {
+  case HbwifNumLanes => 2
+  case HbwifTLKey => up(HbwifTLKey, site).copy(
+    numBanks = 2,
+    clientPort = false,
+    managerTLUH = false,
+    managerTLC = false)
 })
 
 class WithSystolicParams extends Config((site, here, up) => {
@@ -134,6 +160,28 @@ class WithSystolicAcceleratorMiniCore extends Config((site, here, up) => {
 // -------
 
 /**
+ * Rocket
+ */
+class BeagleRocketConfig extends Config(
+  // uncore mixins
+  new example.WithBootROM ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new WithBeagleChanges ++
+  new WithBeagleSiFiveBlocks ++
+  new WithJtagDTM ++
+  new WithHierTiles ++
+  new WithRationalRocketTiles ++
+  new WithNMemoryChannels(2) ++
+  new WithNBanks(2) ++
+  new WithBeagleSerdesChanges ++
+  new WithGenericSerdes ++
+  // rocket mixins
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  // subsystem mixin
+  new freechips.rocketchip.system.BaseConfig)
+
+
+/**
  * Dual (Rocket + Hwacha)
  */
 class BeagleDualRocketPlusHwachaConfig extends Config(
@@ -147,10 +195,12 @@ class BeagleDualRocketPlusHwachaConfig extends Config(
   new WithRationalRocketTiles ++
   new WithNMemoryChannels(2) ++
   new WithNBanks(2) ++
+  new WithBeagleSerdesChanges ++
+  new WithGenericSerdes ++
   // hwacha mixins
   new hwacha.DefaultHwachaConfig ++
   // rocket mixins
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   // subsystem mixin
   new freechips.rocketchip.system.BaseConfig)
 
@@ -168,6 +218,8 @@ class BeagleDualBoomPlusHwachaConfig extends Config(
   new WithRationalRocketTiles ++
   new WithNMemoryChannels(2) ++
   new WithNBanks(2) ++
+  new WithBeagleSerdesChanges ++
+  new WithGenericSerdes ++
   // hwacha mixins
   new hwacha.DefaultHwachaConfig ++
   // boom mixins
@@ -191,6 +243,8 @@ class BeagleBoomAndRocketNoHwachaConfig extends Config(
   new WithRationalRocketTiles ++
   new WithNMemoryChannels(2) ++
   new WithNBanks(2) ++
+  new WithBeagleSerdesChanges ++
+  new WithGenericSerdes ++
   // boom mixins
   new boom.common.WithRVC ++
   new boom.common.DefaultBoomConfig ++
@@ -214,6 +268,8 @@ class BeagleBoomAndRocketHwachaConfig extends Config(
   new WithRationalRocketTiles ++
   new WithNMemoryChannels(2) ++
   new WithNBanks(2) ++
+  new WithBeagleSerdesChanges ++
+  new WithGenericSerdes ++
   // hwacha mixins
   new hwacha.DefaultHwachaConfig ++
   // boom mixins
@@ -240,6 +296,8 @@ class BeagleConfig extends Config(
   new WithRationalRocketTiles ++
   new WithNMemoryChannels(2) ++
   new WithNBanks(2) ++
+  new WithBeagleSerdesChanges ++
+  new WithGenericSerdes ++
 
   // note: THIS MUST BE ABOVE hwacha.DefaultHwachaConfig TO WORK
   new WithMultiRoCC ++ // attach particular RoCC accelerators based on the hart

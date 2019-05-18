@@ -46,6 +46,8 @@ trait HasBoomAndRocketTiles extends HasTiles
     rocket
   }
 
+  println(s"DEBUG: Amount of rocket tiles: ${rocketTiles.length}")
+
   val boomTiles = boomTileParams.zip(boomCrossings).map { case (tp, crossing) =>
     val boomCore = LazyModule(
       new boom.common.BoomTile(tp, crossing.crossingType)(augmentedTileParameters(tp))).suggestName(tp.name)
@@ -57,10 +59,10 @@ trait HasBoomAndRocketTiles extends HasTiles
     boomCore
   }
 
+  println(s"DEBUG: Amount of boom tiles: ${boomTiles.length}")
+
   val boomAndRocketTiles = rocketTiles ++ boomTiles
   println(s"DEBUG: Amount of both tiles: ${boomAndRocketTiles.length}")
-  println(s"DEBUG: Amount of rocket tiles: ${rocketTiles.length}")
-  println(s"DEBUG: Amount of boom tiles: ${boomTiles.length}")
 
   def coreMonitorBundles = (rocketTiles map { t => t.module.core.rocketImpl.coreMonitorBundle}).toList ++
                              (boomTiles map { t => t.module.core.coreMonitorBundle}).toList

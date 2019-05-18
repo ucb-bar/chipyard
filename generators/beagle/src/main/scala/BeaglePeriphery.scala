@@ -13,11 +13,15 @@ import freechips.rocketchip.regmapper._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.util._
 
+import hbwif.tilelink.{HbwifNumLanes, BuildHbwif, HbwifTLKey}
+import hbwif.{Differential}
+
 import testchipip._
 
 case object PeripheryBeagleKey extends Field[BeagleParams]
 case object BeaglePipelineResetDepth extends Field[Int]
 case object BeagleSinkIds extends Field[Int]
+case object CacheBlockStriping extends Field[Int]
 
 case class BeagleParams(
   scrAddress: Int,
@@ -33,8 +37,10 @@ trait HasBeagleTopBundleContents extends Bundle {
   val rst_async     = Input(Bool())
 
   val clk_sel       = Output(UInt(p(PeripheryBeagleKey).clkSelBits.W))
-  val divider       = Output(UInt(p(PeripheryBeagleKey).dividerBits.W))
   val lbwif_divider = Output(UInt(p(PeripheryBeagleKey).lbwifDividerBits.W))
+  val hbwif_rsts    = Output(Vec(p(HbwifNumLanes), Bool()))
+
+  val switcher_sel  = Output(Bool())
 }
 
 trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap {
@@ -46,21 +52,28 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap {
   val clk_sel = withReset(io.rst_async) {
     Module(new AsyncResetRegVec(w = c.clkSelBits, init = 0))
   }
-  val divider = withReset(io.rst_async) {
-    Module(new AsyncResetRegVec(w = c.dividerBits, init = 4))
-  }
   val lbwif_divider = withReset(io.rst_async) {
     Module(new AsyncResetRegVec(w = c.lbwifDividerBits, init = 8))
   }
+  val hbwif_rsts = Seq.fill(p(HbwifNumLanes)) {
+    withReset(io.rst_async) {
+      Module(new AsyncResetRegVec(w = 1, init = 1))
+    }
+  }
+  val switcher_sel = withReset(io.rst_async) {
+    Module(new AsyncResetRegVec(w = 1, init = 1))
+  }
 
   io.clk_sel := clk_sel.io.q
-  io.divider := divider.io.q
   io.lbwif_divider := lbwif_divider.io.q
+  io.hbwif_rsts := VecInit(hbwif_rsts.map(_.io.q))
+  io.switcher_sel := switcher_sel.io.q
 
   regmap(
     0x08 -> Seq(RegField.r(1, RegReadFn(io.boot))),
+    0x0c -> Seq(RegField.rwReg(1, switcher_sel.io)),
+    0x10 -> hbwif_rsts.map(rst => RegField.rwReg(1, rst.io)),
     0x14 -> Seq(RegField.rwReg(c.clkSelBits, clk_sel.io)),
-    0x18 -> Seq(RegField.rwReg(c.dividerBits, divider.io)),
     0x1c -> Seq(RegField.rwReg(c.lbwifDividerBits, lbwif_divider.io))
   )
 }
@@ -88,10 +101,50 @@ trait HasPeripheryBeagle {
   val bootScratchPadBuffer = LazyModule(new TLBuffer())
   pbus.toVariableWidthSlave(Some("boot_scratchpad")) { bootScratchPad.node := bootScratchPadBuffer.node := TLBuffer() }
 
-  // setup the backup serdes (otherwise known as the lbwif)
   val extMem = p(ExtMem).get
   val extParams = extMem.master
+  //println(f"DEBUG: Beagle ExtMem: Base:${extParams.base}%X Sz:${extParams.size}%X")
 
+  // setup the hbwif
+  val lanesPerMemoryChannel = p(HbwifNumLanes)/extMem.nMemoryChannels
+  val base = AddressSet(extParams.base, extParams.size-1)
+  val filters = (0 until extMem.nMemoryChannels).map { case id =>
+    AddressSet(id * p(CacheBlockBytes) * p(CacheBlockStriping), ~((extMem.nMemoryChannels-1) * p(CacheBlockBytes) * p(CacheBlockStriping)))
+  }
+  val addresses = filters.map{ case filt =>
+    base.intersect(filt).get
+  }
+  //println(s"DEBUG: Addresses:$addresses Length:${addresses.length}")
+  //println(s"DEBUG: NumMemChannels:${extMem.nMemoryChannels}")
+
+  // switch between lbwif and hbwif
+  val switcher = LazyModule(new TLSwitcher(
+    inPortN = extMem.nMemoryChannels,
+    outPortN = Seq(extMem.nMemoryChannels, 1),
+    address = addresses,
+    beatBytes = extParams.beatBytes,
+    lineBytes = p(CacheBlockBytes),
+    idBits = 12))
+  switcher.innode :*= mbus.coupleTo("switcherPort") { TLBuffer() :*= _ }
+
+  val hbwif = LazyModule(p(BuildHbwif)(p))
+
+  val memSplitXbar = (0 until extMem.nMemoryChannels).map{_ => LazyModule(new TLXbar)}
+  for (i <- 0 until p(HbwifNumLanes)) {
+    pbus.toVariableWidthSlave(Some(s"hbwif_config$i")) { hbwif.configNodes(i) := TLBuffer() := TLBuffer() := TLWidthWidget(pbus.beatBytes) }
+    /* Add filters dividing numMemChannels into numHbiwfLanes */
+    val lane = i
+    val mbusIndex = i/lanesPerMemoryChannel
+    val smallerMask = ~BigInt((p(HbwifNumLanes)-1) * p(CacheBlockBytes))
+    val smallerOffset = i
+    hbwif.managerNode := memSplitXbar(mbusIndex).node
+    // Every lanesPerMemoryChannel hbwif lane we also connect the new xbar to the switcher
+    if ((i % lanesPerMemoryChannel) == 0) {
+      memSplitXbar(mbusIndex).node := TLBuffer() := switcher.outnodes(0)
+    }
+  }
+
+  // setup the backup serdes (otherwise known as the lbwif)
   val memParams = TLManagerParameters(
     address = Seq(AddressSet(extParams.base, extParams.size-1)),
     resources = (new MemoryDevice).reg,
@@ -110,7 +163,8 @@ trait HasPeripheryBeagle {
     w=4,
     clientParams=ctrlParams,
     managerParams=memParams,
-    beatBytes=extParams.beatBytes))
+    beatBytes=extParams.beatBytes))//,
+    //endSinkId=p(BeagleSinkIds)*lanesPerMemoryChannel))
 
   val lbwifCrossingSource = LazyModule(new TLAsyncCrossingSource)
   val lbwifCrossingSink = LazyModule(new TLAsyncCrossingSink)
@@ -118,7 +172,7 @@ trait HasPeripheryBeagle {
   (lbwif.managerNode
     := lbwifCrossingSink.node
     := TLAsyncCrossingSource()
-    := mbus.coupleTo("lbwif"){ TLBuffer() :*= _ })
+    := switcher.outnodes(1))
 
   (fbus.fromMaster()()
     := TLBuffer()
@@ -132,6 +186,10 @@ trait HasPeripheryBeagleBundle {
   val rst_async: Bool
   val boot: Bool
 
+  val hbwif_clks: Vec[Clock]
+  val hbwif_tx: Vec[Differential]
+  val hbwif_rx: Vec[Differential]
+
   def tieoffBoot() {
     boot := true.B
   }
@@ -139,9 +197,15 @@ trait HasPeripheryBeagleBundle {
 
 trait HasPeripheryBeagleModuleImp extends LazyModuleImp with HasPeripheryBeagleBundle {
   val outer: HasPeripheryBeagle
+
   val rst_async = IO(Input(Bool()))
   val boot = IO(Input(Bool()))
 
+  val hbwif_clks = IO(Input(Vec(p(HbwifTLKey).numBanks, Clock()))) // clks for hbwif
+  val hbwif_tx = IO(chiselTypeOf(outer.hbwif.module.tx))
+  val hbwif_rx = IO(chiselTypeOf(outer.hbwif.module.rx))
+
+  // setup lbwif
   val lbwif_serial = IO(chiselTypeOf(outer.lbwif.module.io.ser))
   lbwif_serial <> outer.lbwif.module.io.ser
 
@@ -154,8 +218,18 @@ trait HasPeripheryBeagleModuleImp extends LazyModuleImp with HasPeripheryBeagleB
     m.module.reset := lbwif_rst
   }
 
+  // switch from lbwif and hbwif
+  outer.switcher.module.io.sel := outer.scr.module.io.switcher_sel
+
+  // setup hbwif
+  outer.hbwif.module.hbwifResets := outer.scr.module.io.hbwif_rsts
+  outer.hbwif.module.resetAsync := rst_async
+  outer.hbwif.module.hbwifRefClocks := hbwif_clks
+  hbwif_tx <> outer.hbwif.module.tx
+  hbwif_rx <> outer.hbwif.module.rx
+
+  // other
   val clk_sel = outer.scr.module.io.clk_sel
-  val divider  = outer.scr.module.io.divider
 
   outer.scr.module.io.boot := boot
   outer.scr.module.io.rst_async := rst_async

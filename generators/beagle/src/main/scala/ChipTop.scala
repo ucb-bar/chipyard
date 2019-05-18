@@ -20,6 +20,9 @@ import sifive.blocks.devices.i2c._
 import sifive.blocks.devices.jtag._
 import sifive.blocks.devices.pinctrl._
 
+import hbwif.{Differential}
+import hbwif.tilelink.{HbwifTLKey}
+
 import testchipip._
 
 class BeagleChipTop(implicit val p: Parameters) extends RawModule
@@ -35,14 +38,21 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
   val boot            = IO(Input(Bool())) // boot from sdcard or tether
 
   val alt_clks        = IO(Input(Vec(2, Clock()))) // extra "chicken bit" clocks
-  val alt_clk_sel     = IO(Input(UInt(1.W)))
+  val alt_clk_sel     = IO(Input(UInt(1.W))) // selector for them
 
-  val lbwif_serial     = IO(chiselTypeOf(sys.lbwif_serial))
-  val lbwif_serial_clk = IO(Output(Clock()))
+  val lbwif_serial     = IO(chiselTypeOf(sys.lbwif_serial)) // lbwif signals
+  val lbwif_serial_clk = IO(Output(Clock())) // clock to sample lbwif
+
+  val hbwif            = IO(new Bundle { // hbwif signals
+    val tx = chiselTypeOf(sys.hbwif_tx)
+    val rx = chiselTypeOf(sys.hbwif_rx)
+  })
+
+  val hbwif_diff_clks      = IO(Vec(p(HbwifTLKey).numBanks, new Differential)) // clks for hbwif
 
   val gpio            = IO(new GPIOPins(() => new EnhancedPin(), p(PeripheryGPIOKey).head))
-  val i2c             = IO(new I2CPins(() => new BasePin()))
-  val spi             = IO(new SPIPins(() => new BasePin(), p(PeripherySPIKey).head))
+  val i2c             = IO(new  I2CPins(() => new BasePin()))
+  val spi             = IO(new  SPIPins(() => new BasePin(), p(PeripherySPIKey).head))
   val uart            = IO(new UARTPins(() => new BasePin()))
 
   val jtag            = IO(new JTAGPins(() => new BasePin(), false))
@@ -51,9 +61,13 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
 
   require(sys.auto.elements.isEmpty)
 
-  //This has built in synchronizer/connection
+  // this has built in synchronizer/connection
   lbwif_serial     <> sys.lbwif_serial
   lbwif_serial_clk := sys.lbwif_clk_out
+
+  // setup hbwif
+  hbwif.tx <> sys.hbwif_tx
+  hbwif.rx <> sys.hbwif_rx
 
   // pass in alternate clocks coming from offchip
   sys.alt_clks <> alt_clks
@@ -84,4 +98,16 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
     // This is duplicated during synthesis
     sys_rst := AsyncResetShiftReg(ResetCatchAndSync(sys.clk_out, reset.asBool), depth = p(BeaglePipelineResetDepth), init=1)
   }
+
+  // convert differential clocks into normal clocks
+  val hbwif_clks = hbwif_diff_clks.map { clock_io =>
+    val clock_rx = withClockAndReset(sys_clk, sys_rst) {
+      Module(new ClockReceiver())
+    }
+    clock_rx.io.VIP <> clock_io.p
+    clock_rx.io.VIN <> clock_io.n
+    clock_rx.io.VOBUF
+  }
+
+  sys.hbwif_clks <> hbwif_clks
 }

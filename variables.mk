@@ -101,13 +101,21 @@ endif
 # for BEAGLE project
 ifeq ($(SUB_PROJECT),beagle)
 	SBT_PROJECT       ?= beagle
-	MODEL             ?= BeagleChipTop
-	VLOG_MODEL        ?= BeagleChipTop
+	MODEL             ?= BeagleTestHarness
+	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= beagle
-	CONFIG            ?= BeagleConfig
+	CONFIG            ?= BeagleRocketConfig
 	CONFIG_PACKAGE    ?= beagle
-	GENERATOR_PACKAGE ?= boom.system
+	GENERATOR_PACKAGE ?= freechips.rocketchip.system
 	TOP               ?= BeagleChipTop
+	#SBT_PROJECT       ?= beagle
+	#MODEL             ?= BeagleTestHarness
+	#VLOG_MODEL        ?= TestHarness
+	#MODEL_PACKAGE     ?= beagle
+	#CONFIG            ?= BeagleConfig
+	#CONFIG_PACKAGE    ?= beagle
+	#GENERATOR_PACKAGE ?= boom.system
+	#TOP               ?= BeagleChipTop
 endif
 
 
