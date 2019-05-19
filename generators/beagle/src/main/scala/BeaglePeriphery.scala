@@ -22,6 +22,7 @@ case object PeripheryBeagleKey extends Field[BeagleParams]
 case object BeaglePipelineResetDepth extends Field[Int]
 case object BeagleSinkIds extends Field[Int]
 case object CacheBlockStriping extends Field[Int]
+case object LbwifBitWidth extends Field[Int]
 
 case class BeagleParams(
   scrAddress: Int,
@@ -156,11 +157,11 @@ trait HasPeripheryBeagle {
     supportsPutPartial = TransferSizes(1, p(CacheBlockBytes)))
   val ctrlParams = TLClientParameters(
     name = "tl_serdes_control",
-    sourceId = IdRange(0,128),
+    sourceId = IdRange(0, (1 << 7)),
     requestFifo = true) //TODO: how many outstanding xacts
 
   val lbwif = LazyModule(new TLSerdesser(
-    w=4,
+    w=p(LbwifBitWidth),
     clientParams=ctrlParams,
     managerParams=memParams,
     beatBytes=extParams.beatBytes))//,

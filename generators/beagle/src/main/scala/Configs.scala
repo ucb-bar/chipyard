@@ -38,6 +38,7 @@ class WithBeagleChanges extends Config((site, here, up) => {
   case HbwifPipelineResetDepth => 5
   case CacheBlockStriping => 2
   case BeagleSinkIds => 32
+  case LbwifBitWidth => 4
 })
 
 /**
