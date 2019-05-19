@@ -8,7 +8,7 @@ SHELL=/bin/bash
 #########################################################################################
 lookup_scala_srcs = $(shell find -L $(1)/ -iname "*.scala" 2> /dev/null)
 
-PACKAGES=rocket-chip testchipip boom hwacha sifive-blocks utilities example
+PACKAGES=rocket-chip testchipip boom hwacha sifive-blocks example
 SCALA_SOURCES=$(foreach pkg,$(PACKAGES),$(call lookup_scala_srcs,$(base_dir)/generators/$(pkg)/src/main/scala))
 
 #########################################################################################
@@ -31,7 +31,7 @@ $(FIRRTL_JAR): $(call lookup_scala_srcs, $(REBAR_FIRRTL_DIR)/src/main/scala)
 #########################################################################################
 # create simulation args file rule
 #########################################################################################
-$(sim_dotf): $(SCALA_SOURCES) $(FIRRTL_JAR)
+$(sim_dotf): $(call lookup_scala_srcs,$(base_dir)/generators/utilities/src/main/scala) $(FIRRTL_JAR)
 	cd $(base_dir) && $(SBT) "project utilities" "runMain utilities.GenerateSimFiles -td $(build_dir) -sim $(sim_name)"
 
 #########################################################################################
