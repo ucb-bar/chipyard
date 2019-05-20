@@ -68,6 +68,12 @@ $(SMEMS_FILE) $(SMEMS_FIR): $(SMEMS_CONF)
 verilog: $(sim_vsrcs)
 
 #########################################################################################
+# helper rules to run simulator
+#########################################################################################
+run-binary: $(sim)
+	$(sim) $(PERMISSIVEON) $(SIM_FLAGS) $(PERMISSIVEOFF) $(BINARY)
+
+#########################################################################################
 # run assembly/benchmarks rules
 #########################################################################################
 $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%

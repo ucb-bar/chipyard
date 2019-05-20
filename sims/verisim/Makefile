@@ -81,6 +81,12 @@ $(sim_debug): $(model_mk_debug)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(VLOG_MODEL).mk
 
 #########################################################################################
+# helper rules to run simulator with debug
+#########################################################################################
+run-binary-debug: $(sim_debug)
+	$(sim_debug) $(SIM_FLAGS) -v$(long_name).vcd $(BINARY)
+
+#########################################################################################
 # create a verisim vpd rule
 #########################################################################################
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)

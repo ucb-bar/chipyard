@@ -87,6 +87,12 @@ $(sim_debug) : $(sim_vsrcs) $(sim_dotf)
 	+define+DEBUG -debug_pp
 
 #########################################################################################
+# helper rules to run simulator with debug
+#########################################################################################
+run-binary-debug: $(sim_debug)
+	$(sim_debug) $(PERMISSIVEON) $(SIM_FLAGS) +vcdplusfile=$(long_name).vpd $(PERMISSIVEOFF) $(BINARY)
+
+#########################################################################################
 # create a vcs vpd rule
 #########################################################################################
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
