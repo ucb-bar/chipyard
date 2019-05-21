@@ -138,7 +138,14 @@ SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar ++$(SCALA_VERSION
 #########################################################################################
 # output directory for tests
 #########################################################################################
-output_dir=$(sim_dir)/output
+output_dir=$(sim_dir)/output/$(long_name)
+
+#########################################################################################
+# helper variables to run binaries
+#########################################################################################
+BINARY ?=
+SIM_FLAGS ?= +verbose
+sim_out_name = $(notdir $(basename $(BINARY))).$(long_name)
 
 #########################################################################################
 # build output directory for compilation

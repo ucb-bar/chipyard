@@ -68,6 +68,12 @@ $(SMEMS_FILE) $(SMEMS_FIR): $(SMEMS_CONF)
 verilog: $(sim_vsrcs)
 
 #########################################################################################
+# helper rules to run simulator
+#########################################################################################
+run-binary: $(sim)
+	$(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out
+
+#########################################################################################
 # run assembly/benchmarks rules
 #########################################################################################
 $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
@@ -75,10 +81,10 @@ $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
 	ln -sf $< $@
 
 $(output_dir)/%.run: $(output_dir)/% $(sim)
-	$(sim) +max-cycles=$(timeout_cycles) $< && touch $@
+	$(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(PERMISSIVE_OFF) $< && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	$(sim) $(PERMISSIVEON) +verbose +max-cycles=$(timeout_cycles) $(PERMISSIVEOFF) $< 3>&1 1>&2 2>&3 | spike-dasm > $@
+	$(sim) $(PERMISSIVE_ON) +verbose +max-cycles=$(timeout_cycles) $(PERMISSIVE_OFF) $< 3>&1 1>&2 2>&3 | spike-dasm > $@
 
 #########################################################################################
 # include build/project specific makefrags made from the generator

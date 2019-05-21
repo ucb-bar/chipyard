@@ -25,8 +25,8 @@ sim_prefix = simv
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
-PERMISSIVEON=+permissive
-PERMISSIVEOFF=+permissive-off
+PERMISSIVE_ON=+permissive
+PERMISSIVE_OFF=+permissive-off
 
 .PHONY: default debug
 default: $(sim)
@@ -87,10 +87,16 @@ $(sim_debug) : $(sim_vsrcs) $(sim_dotf)
 	+define+DEBUG -debug_pp
 
 #########################################################################################
+# helper rules to run simulator with debug
+#########################################################################################
+run-binary-debug: $(sim_debug)
+	$(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) +vcdplusfile=$(sim_out_name).vpd $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out
+
+#########################################################################################
 # create a vcs vpd rule
 #########################################################################################
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
-	$(sim_debug) +vcdplusfile=$@ +max-cycles=$(timeout_cycles) $<
+	$(sim_debug) $(PERMISSIVE_ON) +vcdplusfile=$@ +max-cycles=$(timeout_cycles) $(PERMISSIVE_OFF) $<
 
 #########################################################################################
 # general cleanup rule

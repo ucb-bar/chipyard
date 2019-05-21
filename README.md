@@ -50,6 +50,16 @@ build an alternate configuration.
     make PROJECT=yourproject CONFIG=YourConfig
     ./simulator-yourproject-YourConfig ...
 
+Additionally, you can use a helper make rule to run your simulation binary. The output will be in the "verisim"
+directory under the file names: `<binary-name>.<type of project/config/etc it ran on>.*`
+
+    # first make your verisim rtl simulator binary
+    make SUB_PROJECT=example
+    # then run the binary (with no vcd generation)
+    make SUB_PROJECT=example BINARY=<my-riscv-binary> run-binary
+    # then run the binary (with vcd generation)
+    make SUB_PROJECT=example BINARY=<my-riscv-binary> run-binary-debug
+
 ## Submodules and Subdirectories
 
 The submodules and subdirectories for the project template are organized as

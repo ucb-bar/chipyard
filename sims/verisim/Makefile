@@ -25,8 +25,8 @@ sim_prefix = simulator
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
-PERMISSIVEON=
-PERMISSIVEOFF=
+PERMISSIVE_ON=
+PERMISSIVE_OFF=
 
 .PHONY: default debug
 default: $(sim)
@@ -79,6 +79,12 @@ $(sim): $(model_mk)
 
 $(sim_debug): $(model_mk_debug)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(VLOG_MODEL).mk
+
+#########################################################################################
+# helper rules to run simulator with debug
+#########################################################################################
+run-binary-debug: $(sim_debug)
+	$(sim_debug) $(SIM_FLAGS) -v$(sim_out_name).vcd $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out
 
 #########################################################################################
 # create a verisim vpd rule
