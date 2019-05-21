@@ -25,8 +25,8 @@ sim_prefix = simulator
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
-PERMISSIVEON=
-PERMISSIVEOFF=
+PERMISSIVE_ON=
+PERMISSIVE_OFF=
 
 .PHONY: default debug
 default: $(sim)
