@@ -1,13 +1,19 @@
 package example
 
 import chisel3._
+import chisel3.util.{log2Up}
+
 import freechips.rocketchip.config.{Parameters, Config}
-import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
+import freechips.rocketchip.subsystem.{RocketTilesKey, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.tile.{XLen}
+import freechips.rocketchip.tile.{XLen, MaxHartIdBits}
+
 import testchipip._
+
 import sifive.blocks.devices.gpio._
+
+import boom.system.{BoomTilesKey}
 
 /**
  * TODO: Why do we need this?
@@ -233,4 +239,20 @@ class WithGPIOBoomAndRocketTop extends Config((site, here, up) => {
     }
     top
   }
+})
+
+/**
+ * Class to renumber BOOM + Rocket harts so that there are no overlapped harts
+ * This mixin assumes Rocket tiles are numbered before BOOM tiles
+ * Also makes support for multiple harts depend on Rocket + BOOM
+ * Note: Must come after all harts are assigned for it to apply
+ */
+class WithRenumberHarts extends Config((site, here, up) => {
+  case RocketTilesKey => up(RocketTilesKey, site).zipWithIndex map { case (r, i) =>
+    r.copy(hartId = i)
+  }
+  case BoomTilesKey => up(BoomTilesKey, site).zipWithIndex map { case (b, i) =>
+    b.copy(hartId = i + up(RocketTilesKey, site).length)
+  }
+  case MaxHartIdBits => log2Up(up(BoomTilesKey, site).size + up(RocketTilesKey, site).size)
 })
