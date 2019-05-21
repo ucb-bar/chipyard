@@ -50,6 +50,18 @@ ifeq ($(SUB_PROJECT),boomexample)
 	TB                ?= TestDriver
 	TOP               ?= BoomTop
 endif
+# for a BOOM + Rocket based example system
+ifeq ($(SUB_PROJECT),boomrocketexample)
+	SBT_PROJECT       ?= example
+	MODEL             ?= BoomAndRocketTestHarness
+	VLOG_MODEL        ?= TestHarness
+	MODEL_PACKAGE     ?= $(SBT_PROJECT)
+	CONFIG            ?= DefaultBoomAndRocketConfig
+	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
+	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
+	TB                ?= TestDriver
+	TOP               ?= BoomAndRocketTop
+endif
 # for BOOM developers
 ifeq ($(SUB_PROJECT),boom)
 	SBT_PROJECT       ?= boom
