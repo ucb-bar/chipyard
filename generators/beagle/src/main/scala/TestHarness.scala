@@ -27,23 +27,19 @@ class BeagleTestHarness(implicit val p: Parameters) extends Module
    // force Chisel to rename module
   override def desiredName = "TestHarness"
 
-  val inner = Module(LazyModule(new BeagleTestHarnessBackend).module)
+  val inner = Module(LazyModule(new BeagleTestHarnessImp).module)
   io.success := inner.io.success
 }
 
-class BeagleTestHarnessBackend(implicit p: Parameters) extends LazyModule
+class BeagleTestHarnessImp(implicit p: Parameters) extends LazyModule
 {
   val adapter = LazyModule(new SerialAdapter)
 
-  // TODO: Think that the 7 should match the 11 on the switch?
   val lbwif = LazyModule(new TLSerdesser(
     w = p(LbwifBitWidth),
     clientParams = TLClientParameters(
       name = "tl_serdes_control",
-      sourceId = IdRange(0, (1 << 7)), // match DUT source bits
-      supportsGet        = TransferSizes(1, p(CacheBlockBytes)),
-      supportsPutFull    = TransferSizes(1, p(CacheBlockBytes)),
-      supportsPutPartial = TransferSizes(1, p(CacheBlockBytes)),
+      sourceId = IdRange(0, 1), // match DUT source bits
       requestFifo = true),
     managerParams = TLManagerParameters(
       address = Seq(AddressSet(p(ExtMem).get.master.base, p(ExtMem).get.master.size-1)),
@@ -82,7 +78,8 @@ class BeagleTestHarnessBackend(implicit p: Parameters) extends LazyModule
     dut.hbwif_diff_clks := DontCare
 
     // SimSerial <-> SerialAdapter <-> Serdes <--ChipConnection--> Lbwif
-    val sim = Module(new SimSerial(p(LbwifBitWidth)))
+
+    val sim = Module(new SimSerial(SerialAdapter.SERIAL_IF_WIDTH))
 
     sim.io.clock := clock
     sim.io.reset := reset
@@ -100,13 +97,13 @@ class BeagleTestHarnessBackend(implicit p: Parameters) extends LazyModule
     lbwif_rx_queue.io.deq_clock <> clock
     lbwif_rx_queue.io.deq_reset <> reset
 
-    dut.lbwif_serial.out <> lbwif_tx_queue.io.deq
+    dut.lbwif_serial.in <> lbwif_tx_queue.io.deq
     lbwif_tx_queue.io.deq_clock := dut.lbwif_serial_clk
     lbwif_tx_queue.io.deq_reset := reset // TODO: should be onchip reset
 
-    lbwif_rx_queue.io.enq <> dut.lbwif_serial.in
+    lbwif_rx_queue.io.enq <> dut.lbwif_serial.out
     lbwif_rx_queue.io.enq_clock := dut.lbwif_serial_clk
-    lbwif_rx_queue.io.enq_reset := reset // TODO: should be serial reset
+    lbwif_rx_queue.io.enq_reset := reset // TODO: should be onchip reset
 
     sim.io.serial.out <> Queue(adapter.module.io.serial.out)
     adapter.module.io.serial.in <> Queue(sim.io.serial.in)
