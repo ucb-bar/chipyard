@@ -84,7 +84,7 @@ $(sim_debug): $(model_mk_debug)
 # helper rules to run simulator with debug
 #########################################################################################
 run-binary-debug: $(sim_debug)
-	$(sim_debug) $(SIM_FLAGS) -v$(long_name).vcd $(BINARY)
+	$(sim_debug) $(SIM_FLAGS) -v$(sim_out_name).vcd $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out
 
 #########################################################################################
 # create a verisim vpd rule

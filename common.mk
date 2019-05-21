@@ -71,7 +71,7 @@ verilog: $(sim_vsrcs)
 # helper rules to run simulator
 #########################################################################################
 run-binary: $(sim)
-	$(sim) $(PERMISSIVEON) $(SIM_FLAGS) $(PERMISSIVEOFF) $(BINARY)
+	$(sim) $(PERMISSIVEON) $(SIM_FLAGS) $(PERMISSIVEOFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out
 
 #########################################################################################
 # run assembly/benchmarks rules

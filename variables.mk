@@ -143,8 +143,9 @@ output_dir=$(sim_dir)/output/$(long_name)
 #########################################################################################
 # helper variables to run binaries
 #########################################################################################
-BINARY ?= none
+BINARY ?=
 SIM_FLAGS ?= +verbose
+sim_out_name = $(notdir $(basename $(BINARY))).$(long_name)
 
 #########################################################################################
 # build output directory for compilation
