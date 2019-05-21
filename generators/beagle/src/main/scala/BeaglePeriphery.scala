@@ -148,7 +148,6 @@ trait HasPeripheryBeagle {
   // setup the backup serdes (otherwise known as the lbwif)
   val memParams = TLManagerParameters(
     address = Seq(AddressSet(extParams.base, extParams.size-1)),
-    resources = (new MemoryDevice).reg,
     regionType = RegionType.UNCACHED, // cacheable
     executable = true,
     fifoId = Some(0),
@@ -158,7 +157,7 @@ trait HasPeripheryBeagle {
   val ctrlParams = TLClientParameters(
     name = "tl_serdes_control",
     sourceId = IdRange(0, (1 << 7)),
-    requestFifo = true) //TODO: how many outstanding xacts
+    requestFifo = true)
 
   val lbwif = LazyModule(new TLSerdesser(
     w=p(LbwifBitWidth),

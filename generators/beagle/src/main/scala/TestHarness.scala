@@ -27,19 +27,19 @@ class BeagleTestHarness(implicit val p: Parameters) extends Module
    // force Chisel to rename module
   override def desiredName = "TestHarness"
 
-  val inner = Module(LazyModule(new BeagleTestHarnessImp).module)
+  val inner = Module(LazyModule(new BeagleTestHarnessInner).module)
   io.success := inner.io.success
 }
 
-class BeagleTestHarnessImp(implicit p: Parameters) extends LazyModule
+class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
 {
-  val adapter = LazyModule(new SerialAdapter)
+  val adapter = LazyModule(new SerialAdapter(1 << 7))
 
   val lbwif = LazyModule(new TLSerdesser(
     w = p(LbwifBitWidth),
     clientParams = TLClientParameters(
       name = "tl_serdes_control",
-      sourceId = IdRange(0, 1), // match DUT source bits
+      sourceId = IdRange(0, (1 << 7)), // match DUT source bits
       requestFifo = true),
     managerParams = TLManagerParameters(
       address = Seq(AddressSet(p(ExtMem).get.master.base, p(ExtMem).get.master.size-1)),
@@ -79,6 +79,7 @@ class BeagleTestHarnessImp(implicit p: Parameters) extends LazyModule
 
     // SimSerial <-> SerialAdapter <-> Serdes <--ChipConnection--> Lbwif
 
+    printf(s"DEBUG: ${SerialAdapter.SERIAL_IF_WIDTH}")
     val sim = Module(new SimSerial(SerialAdapter.SERIAL_IF_WIDTH))
 
     sim.io.clock := clock
