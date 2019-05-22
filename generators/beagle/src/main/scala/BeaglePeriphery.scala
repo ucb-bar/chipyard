@@ -107,7 +107,7 @@ trait HasPeripheryBeagle {
   //println(f"DEBUG: Beagle ExtMem: Base:${extParams.base}%X Sz:${extParams.size}%X")
 
   // setup the hbwif
-  val lanesPerMemoryChannel = p(HbwifNumLanes)/extMem.nMemoryChannels
+  val lanesPerMemoryChannel = if (p(HbwifNumLanes)/extMem.nMemoryChannels == 0) 1 else p(HbwifNumLanes)/extMem.nMemoryChannels
   val base = AddressSet(extParams.base, extParams.size-1)
   val filters = (0 until extMem.nMemoryChannels).map { case id =>
     AddressSet(id * p(CacheBlockBytes) * p(CacheBlockStriping), ~((extMem.nMemoryChannels-1) * p(CacheBlockBytes) * p(CacheBlockStriping)))
@@ -125,7 +125,7 @@ trait HasPeripheryBeagle {
     address = addresses,
     beatBytes = extParams.beatBytes,
     lineBytes = p(CacheBlockBytes),
-    idBits = 12))
+    idBits = 9))
   switcher.innode :*= mbus.coupleTo("switcherPort") { TLBuffer() :*= _ }
 
   val hbwif = LazyModule(p(BuildHbwif)(p))
@@ -148,23 +148,24 @@ trait HasPeripheryBeagle {
   // setup the backup serdes (otherwise known as the lbwif)
   val memParams = TLManagerParameters(
     address = Seq(AddressSet(extParams.base, extParams.size-1)),
+    resources = (new MemoryDevice).reg,
     regionType = RegionType.UNCACHED, // cacheable
     executable = true,
-    fifoId = Some(0),
     supportsGet        = TransferSizes(1, p(CacheBlockBytes)),
     supportsPutFull    = TransferSizes(1, p(CacheBlockBytes)),
-    supportsPutPartial = TransferSizes(1, p(CacheBlockBytes)))
+    supportsPutPartial = TransferSizes(1, p(CacheBlockBytes)),
+    fifoId = Some(0))
   val ctrlParams = TLClientParameters(
     name = "tl_serdes_control",
-    sourceId = IdRange(0, (1 << 7)),
+    sourceId = IdRange(0, (1 << 4)),
     requestFifo = true)
 
+  println("ONCHIP")
   val lbwif = LazyModule(new TLSerdesser(
     w=p(LbwifBitWidth),
     clientParams=ctrlParams,
     managerParams=memParams,
-    beatBytes=extParams.beatBytes))//,
-    //endSinkId=p(BeagleSinkIds)*lanesPerMemoryChannel))
+    beatBytes=extParams.beatBytes))
 
   val lbwifCrossingSource = LazyModule(new TLAsyncCrossingSource)
   val lbwifCrossingSink = LazyModule(new TLAsyncCrossingSink)

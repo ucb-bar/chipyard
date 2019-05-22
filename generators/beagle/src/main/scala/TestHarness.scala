@@ -33,13 +33,14 @@ class BeagleTestHarness(implicit val p: Parameters) extends Module
 
 class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
 {
-  val adapter = LazyModule(new SerialAdapter(1 << 7))
+  val adapter = LazyModule(new SerialAdapter(1 << 4))
 
+  println("TESTHARNESS")
   val lbwif = LazyModule(new TLSerdesser(
     w = p(LbwifBitWidth),
     clientParams = TLClientParameters(
       name = "tl_serdes_control",
-      sourceId = IdRange(0, (1 << 7)), // match DUT source bits
+      sourceId = IdRange(0, (1 << 9)), // match DUT source bits
       requestFifo = true),
     managerParams = TLManagerParameters(
       address = Seq(AddressSet(p(ExtMem).get.master.base, p(ExtMem).get.master.size-1)),
@@ -49,7 +50,8 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
       supportsGet        = TransferSizes(1, p(CacheBlockBytes)),
       supportsPutFull    = TransferSizes(1, p(CacheBlockBytes)),
       supportsPutPartial = TransferSizes(1, p(CacheBlockBytes))),
-     beatBytes = p(ExtMem).get.master.beatBytes))
+     beatBytes = p(ExtMem).get.master.beatBytes,
+     endSinkId = 0))
 
   val harnessRam = LazyModule(new TLTestRAM(
     address = p(HbwifTLKey).managerAddressSet,
@@ -79,7 +81,7 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
 
     // SimSerial <-> SerialAdapter <-> Serdes <--ChipConnection--> Lbwif
 
-    printf(s"DEBUG: ${SerialAdapter.SERIAL_IF_WIDTH}")
+    println(s"DEBUG: SerialWidth: ${SerialAdapter.SERIAL_IF_WIDTH}")
     val sim = Module(new SimSerial(SerialAdapter.SERIAL_IF_WIDTH))
 
     sim.io.clock := clock
