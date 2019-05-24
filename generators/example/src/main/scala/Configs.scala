@@ -75,11 +75,11 @@ class SmallBaseBoomConfig extends Config(
   new boom.system.SmallBoomConfig)
 
 class DefaultBoomConfig extends Config(
-  new WithNormalBoomTop ++
+  new WithNormalBoomAndRocketTop ++
   new BaseBoomConfig)
 
 class SmallDefaultBoomConfig extends Config(
-  new WithNormalBoomTop ++
+  new WithNormalBoomAndRocketTop ++
   new SmallBaseBoomConfig)
 
 class HwachaBoomConfig extends Config(
@@ -91,26 +91,26 @@ class RoccBoomConfig extends Config(
   new DefaultBoomConfig)
 
 class PWMBoomConfig extends Config(
-  new WithPWMBoomTop ++
+  new WithPWMBoomAndRocketTop ++
   new BaseBoomConfig)
 
 class PWMAXI4BoomConfig extends Config(
-  new WithPWMAXI4BoomTop ++
+  new WithPWMAXI4BoomAndRocketTop ++
   new BaseBoomConfig)
 
 class SimBlockDeviceBoomConfig extends Config(
   new WithBlockDevice ++
-  new WithSimBlockDeviceBoomTop ++
+  new WithSimBlockDeviceBoomAndRocketTop ++
   new BaseBoomConfig)
 
 class BlockDeviceModelBoomConfig extends Config(
   new WithBlockDevice ++
-  new WithBlockDeviceModelBoomTop ++
+  new WithBlockDeviceModelBoomAndRocketTop ++
   new BaseBoomConfig)
 
 class GPIOBoomConfig extends Config(
   new WithGPIO ++
-  new WithGPIOBoomTop ++
+  new WithGPIOBoomAndRocketTop ++
   new BaseBoomConfig)
 
 /**
@@ -118,7 +118,7 @@ class GPIOBoomConfig extends Config(
  * the `WithNBoomCores` with the DefaultBoomConfig params
  */
 class DualCoreBoomConfig extends Config(
-  new WithNormalBoomTop ++
+  new WithNormalBoomAndRocketTop ++
   new WithBootROM ++
   new boom.common.WithRVC ++
   new boom.common.DefaultBoomConfig ++
@@ -127,7 +127,7 @@ class DualCoreBoomConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class DualCoreSmallBoomConfig extends Config(
-  new WithNormalBoomTop ++
+  new WithNormalBoomAndRocketTop ++
   new WithBootROM ++
   new boom.common.WithRVC ++
   new boom.common.WithSmallBooms ++
@@ -137,7 +137,7 @@ class DualCoreSmallBoomConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class RV32UnifiedBoomConfig extends Config(
-  new WithNormalBoomTop ++
+  new WithNormalBoomAndRocketTop ++
   new WithBootROM ++
   new boom.system.SmallRV32UnifiedBoomConfig)
 
@@ -147,7 +147,7 @@ class RV32UnifiedBoomConfig extends Config(
 
 class BaseBoomAndRocketConfig extends Config(
   new WithBootROM ++
-  new WithRenumberHarts ++
+  new boom.system.WithRenumberHarts ++
   new boom.common.WithRVC ++
   new boom.common.DefaultBoomConfig ++
   new boom.system.WithNBoomCores(1) ++
@@ -157,7 +157,7 @@ class BaseBoomAndRocketConfig extends Config(
 
 class SmallBaseBoomAndRocketConfig extends Config(
   new WithBootROM ++
-  new WithRenumberHarts ++
+  new boom.system.WithRenumberHarts ++
   new boom.common.WithRVC ++
   new boom.common.WithSmallBooms ++
   new boom.common.DefaultBoomConfig ++
@@ -208,7 +208,7 @@ class GPIOBoomAndRocketConfig extends Config(
 class DualCoreBoomAndOneRocketConfig extends Config(
   new WithNormalBoomAndRocketTop ++
   new WithBootROM ++
-  new WithRenumberHarts ++
+  new boom.system.WithRenumberHarts ++
   new boom.common.WithRVC ++
   new boom.common.DefaultBoomConfig ++
   new boom.system.WithNBoomCores(2) ++
@@ -219,7 +219,7 @@ class DualCoreBoomAndOneRocketConfig extends Config(
 class RV32BoomAndRocketConfig extends Config(
   new WithNormalBoomAndRocketTop ++
   new WithBootROM ++
-  new WithRenumberHarts ++
+  new boom.system.WithRenumberHarts ++
   new boom.common.WithBoomRV32 ++
   new boom.common.WithRVC ++
   new boom.common.DefaultBoomConfig ++

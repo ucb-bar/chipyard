@@ -110,72 +110,6 @@ class WithGPIORocketTop extends Config((site, here, up) => {
 })
 
 // --------------------------------------
-// BOOM Top Level System Parameter Mixins
-// --------------------------------------
-
-/**
- * Class to specify a "plain" top level BOOM system
- */
-class WithNormalBoomTop extends Config((site, here, up) => {
-  case BuildBoomTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    Module(LazyModule(new BoomTop()(p)).module)
-  }
-})
-
-/**
- * Class to specify a top level BOOM system with PWM
- */
-class WithPWMBoomTop extends Config((site, here, up) => {
-  case BuildBoomTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new BoomTopWithPWMTL()(p)).module)
-})
-
-/**
- * Class to specify a top level BOOM system with a PWM AXI4
- */
-class WithPWMAXI4BoomTop extends Config((site, here, up) => {
-  case BuildBoomTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new BoomTopWithPWMAXI4()(p)).module)
-})
-
-/**
- * Class to specify a top level BOOM system with a block device
- */
-class WithBlockDeviceModelBoomTop extends Config((site, here, up) => {
-  case BuildBoomTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomTopWithBlockDevice()(p)).module)
-    top.connectBlockDeviceModel()
-    top
-  }
-})
-
-/**
- * Class to specify a top level BOOM system with a simulator block device
- */
-class WithSimBlockDeviceBoomTop extends Config((site, here, up) => {
-  case BuildBoomTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomTopWithBlockDevice()(p)).module)
-    top.connectSimBlockDevice(clock, reset)
-    top
-  }
-})
-
-/**
- * Class to specify a top level BOOM system with GPIO
- */
-class WithGPIOBoomTop extends Config((site, here, up) => {
-  case BuildBoomTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomTopWithGPIO()(p)).module)
-    for (gpio <- top.gpio) {
-      for (pin <- gpio.pins) {
-        pin.i.ival := false.B
-      }
-    }
-    top
-  }
-})
-
-// --------------------------------------
 // BOOM + Rocket Top Level System Parameter Mixins
 // --------------------------------------
 
@@ -239,20 +173,4 @@ class WithGPIOBoomAndRocketTop extends Config((site, here, up) => {
     }
     top
   }
-})
-
-/**
- * Class to renumber BOOM + Rocket harts so that there are no overlapped harts
- * This mixin assumes Rocket tiles are numbered before BOOM tiles
- * Also makes support for multiple harts depend on Rocket + BOOM
- * Note: Must come after all harts are assigned for it to apply
- */
-class WithRenumberHarts extends Config((site, here, up) => {
-  case RocketTilesKey => up(RocketTilesKey, site).zipWithIndex map { case (r, i) =>
-    r.copy(hartId = i)
-  }
-  case BoomTilesKey => up(BoomTilesKey, site).zipWithIndex map { case (b, i) =>
-    b.copy(hartId = i + up(RocketTilesKey, site).length)
-  }
-  case MaxHartIdBits => log2Up(up(BoomTilesKey, site).size + up(RocketTilesKey, site).size)
 })

@@ -48,7 +48,7 @@ ifeq ($(SUB_PROJECT),boomexample)
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
-	TOP               ?= BoomTop
+	TOP               ?= BoomAndRocketTop
 endif
 # for a BOOM + Rocket based example system
 ifeq ($(SUB_PROJECT),boomrocketexample)
@@ -72,7 +72,7 @@ ifeq ($(SUB_PROJECT),boom)
 	CONFIG_PACKAGE    ?= boom.system
 	GENERATOR_PACKAGE ?= boom.system
 	TB                ?= TestDriver
-	TOP               ?= ExampleBoomSystem
+	TOP               ?= ExampleBoomAndRocketSystem
 endif
 # for Rocket-chip developers
 ifeq ($(SUB_PROJECT),rocketchip)
@@ -186,4 +186,3 @@ sim_vsrcs = \
 # assembly/benchmark variables
 #########################################################################################
 timeout_cycles = 10000000
-bmark_timeout_cycles = 100000000
