@@ -82,7 +82,6 @@ class BoomAndRocketTop(implicit p: Parameters) extends boom.system.ExampleBoomAn
 }
 
 class BoomAndRocketTopModule[+L <: BoomAndRocketTop](l: L) extends boom.system.ExampleBoomAndRocketSystemModule(l)
-  with HasRTCModuleImp
   with HasNoDebugModuleImp
   with HasPeripherySerialModuleImp
   with DontTouch

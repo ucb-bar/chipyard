@@ -109,9 +109,9 @@ class WithGPIORocketTop extends Config((site, here, up) => {
   }
 })
 
-// --------------------------------------
+// -----------------------------------------------
 // BOOM + Rocket Top Level System Parameter Mixins
-// --------------------------------------
+// -----------------------------------------------
 
 /**
  * Class to specify a "plain" top level BOOM + Rocket system
