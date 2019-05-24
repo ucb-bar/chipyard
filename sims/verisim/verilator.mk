@@ -15,7 +15,7 @@ INSTALLED_VERILATOR=$(abspath verilator/install/bin/verilator)
 $(INSTALLED_VERILATOR): $(VERILATOR_SRCDIR)/bin/verilator
 	$(MAKE) -C $(VERILATOR_SRCDIR) installbin installdata
 	touch $@
-	
+
 .PHONY:
 verilator_install: $(INSTALLED_VERILATOR)
 
@@ -47,4 +47,5 @@ VERILATOR_FLAGS := --top-module $(VLOG_MODEL) \
 	+define+STOP_COND=\$$c\(\"done_reset\"\) --assert \
 	--output-split 20000 \
 	-Wno-STMTDLY --x-assign unique \
+	-Wno-fatal \
 	-O3 -CFLAGS "$(CXXFLAGS) -DTEST_HARNESS=V$(VLOG_MODEL) -DVERILATOR"

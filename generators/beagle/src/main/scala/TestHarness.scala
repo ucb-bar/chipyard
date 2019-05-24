@@ -35,7 +35,6 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
 {
   val adapter = LazyModule(new SerialAdapter(1 << 4))
 
-  println("TESTHARNESS")
   val lbwif = LazyModule(new TLSerdesser(
     w = p(LbwifBitWidth),
     clientParams = TLClientParameters(
@@ -53,7 +52,6 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
      beatBytes = p(ExtMem).get.master.beatBytes,
      endSinkId = 0))
 
-  println(s"DEBUG: ${p(HbwifTLKey).managerAddressSet}")
   val harness_rams = p(HbwifTLKey).managerAddressSet.map(addrSet =>
     LazyModule(new TLTestRAM(
       address = addrSet,

@@ -20,9 +20,9 @@ import testchipip._
 
 case object PeripheryBeagleKey extends Field[BeagleParams]
 case object BeaglePipelineResetDepth extends Field[Int]
-case object BeagleSinkIds extends Field[Int]
 case object CacheBlockStriping extends Field[Int]
 case object LbwifBitWidth extends Field[Int]
+case object LbwifDividerInit extends Field[Int]
 
 case class BeagleParams(
   scrAddress: Int,
@@ -54,7 +54,7 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap {
     Module(new AsyncResetRegVec(w = c.clkSelBits, init = 0))
   }
   val lbwif_divider = withReset(io.rst_async) {
-    Module(new AsyncResetRegVec(w = c.lbwifDividerBits, init = 2)) // start slow v fast?
+    Module(new AsyncResetRegVec(w = c.lbwifDividerBits, init = p(LbwifDividerInit)))
   }
   val hbwif_rsts = Seq.fill(p(HbwifNumLanes)) {
     withReset(io.rst_async) {
@@ -104,7 +104,6 @@ trait HasPeripheryBeagle {
 
   val extMem = p(ExtMem).get
   val extParams = extMem.master
-  //println(f"DEBUG: Beagle ExtMem: Base:${extParams.base}%X Sz:${extParams.size}%X")
 
   // setup the hbwif
   val lanesPerMemoryChannel = if (p(HbwifNumLanes)/extMem.nMemoryChannels == 0) 1 else p(HbwifNumLanes)/extMem.nMemoryChannels
@@ -115,8 +114,6 @@ trait HasPeripheryBeagle {
   val addresses = filters.map{ case filt =>
     base.flatMap(_.intersect(filt))
   }
-  //println(s"DEBUG: Addresses:$addresses Length:${addresses.length}")
-  //println(s"DEBUG: NumMemChannels:${extMem.nMemoryChannels}")
 
   // switch between lbwif and hbwif
   val switcher = LazyModule(new TLSwitcher(
@@ -160,7 +157,6 @@ trait HasPeripheryBeagle {
     sourceId = IdRange(0, (1 << 4)),
     requestFifo = true)
 
-  println("ONCHIP")
   val lbwif = LazyModule(new TLSerdesser(
     w=p(LbwifBitWidth),
     clientParams=ctrlParams,
