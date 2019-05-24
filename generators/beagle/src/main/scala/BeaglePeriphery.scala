@@ -54,7 +54,7 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap {
     Module(new AsyncResetRegVec(w = c.clkSelBits, init = 0))
   }
   val lbwif_divider = withReset(io.rst_async) {
-    Module(new AsyncResetRegVec(w = c.lbwifDividerBits, init = 8))
+    Module(new AsyncResetRegVec(w = c.lbwifDividerBits, init = 2)) // start slow v fast?
   }
   val hbwif_rsts = Seq.fill(p(HbwifNumLanes)) {
     withReset(io.rst_async) {
@@ -108,12 +108,12 @@ trait HasPeripheryBeagle {
 
   // setup the hbwif
   val lanesPerMemoryChannel = if (p(HbwifNumLanes)/extMem.nMemoryChannels == 0) 1 else p(HbwifNumLanes)/extMem.nMemoryChannels
-  val base = AddressSet(extParams.base, extParams.size-1)
+  val base = AddressSet.misaligned(extParams.base, extParams.size)
   val filters = (0 until extMem.nMemoryChannels).map { case id =>
     AddressSet(id * p(CacheBlockBytes) * p(CacheBlockStriping), ~((extMem.nMemoryChannels-1) * p(CacheBlockBytes) * p(CacheBlockStriping)))
   }
   val addresses = filters.map{ case filt =>
-    base.intersect(filt).get
+    base.flatMap(_.intersect(filt))
   }
   //println(s"DEBUG: Addresses:$addresses Length:${addresses.length}")
   //println(s"DEBUG: NumMemChannels:${extMem.nMemoryChannels}")
@@ -125,7 +125,7 @@ trait HasPeripheryBeagle {
     address = addresses,
     beatBytes = extParams.beatBytes,
     lineBytes = p(CacheBlockBytes),
-    idBits = 9))
+    idBits = 13))
   switcher.innode :*= mbus.coupleTo("switcherPort") { TLBuffer() :*= _ }
 
   val hbwif = LazyModule(p(BuildHbwif)(p))
@@ -147,7 +147,7 @@ trait HasPeripheryBeagle {
 
   // setup the backup serdes (otherwise known as the lbwif)
   val memParams = TLManagerParameters(
-    address = Seq(AddressSet(extParams.base, extParams.size-1)),
+    address = AddressSet.misaligned(extParams.base, extParams.size),
     resources = (new MemoryDevice).reg,
     regionType = RegionType.UNCACHED, // cacheable
     executable = true,

@@ -91,7 +91,7 @@ lazy val rebarFirrtl = (project in file("tools/firrtl"))
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
-  .dependsOn(rebarFirrtl)
+  .dependsOn(rebarFirrtl, awl)
   .settings(commonSettings)
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))

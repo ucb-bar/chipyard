@@ -70,6 +70,7 @@ class WithHierTiles extends Config((site, here, up) => {
 class WithBeagleSerdesChanges extends Config((site, here, up) => {
   case HbwifNumLanes => 2
   case HbwifTLKey => up(HbwifTLKey, site).copy(
+    managerAddressSet = AddressSet.misaligned(site(ExtMem).get.master.base, site(ExtMem).get.master.size),
     numBanks = 1,
     numXact = 16,
     clientPort = false,
@@ -182,6 +183,24 @@ class BeagleRocketConfig extends Config(
   // subsystem mixin
   new freechips.rocketchip.system.BaseConfig)
 
+/**
+ * BOOM
+ */
+class BeagleBoomConfig extends Config(
+  // uncore mixins
+  new example.WithBootROM ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new WithBeagleChanges ++
+  new WithBeagleSiFiveBlocks ++
+  new WithJtagDTM ++
+  new WithHierTiles ++
+  new WithRationalRocketTiles ++
+  new WithNMemoryChannels(2) ++
+  new WithNBanks(2) ++
+  new WithBeagleSerdesChanges ++
+  new WithGenericSerdes ++
+  // boom mixins
+  new boom.system.BoomConfig)
 
 /**
  * Dual (Rocket + Hwacha)

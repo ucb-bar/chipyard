@@ -57,7 +57,6 @@ class BeagleTopModule[+L <: BeagleTop](l: L) extends example.BoomAndRocketSubsys
   with HasPeripheryI2CModuleImp
   with HasPeripheryUARTModuleImp
   with HasPeripheryBeagleModuleImp
-  with HasTilesBundle
   with freechips.rocketchip.util.DontTouch {
 
   // backup clocks coming from offchip

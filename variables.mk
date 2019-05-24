@@ -104,19 +104,11 @@ ifeq ($(SUB_PROJECT),beagle)
 	MODEL             ?= BeagleTestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= beagle
-	CONFIG            ?= BeagleRocketConfig
+	CONFIG            ?= BeagleConfig
 	CONFIG_PACKAGE    ?= beagle
-	GENERATOR_PACKAGE ?= freechips.rocketchip.system
+	GENERATOR_PACKAGE ?= boom.system
 	TB                ?= TestDriver
 	TOP               ?= BeagleChipTop
-	#SBT_PROJECT       ?= beagle
-	#MODEL             ?= BeagleTestHarness
-	#VLOG_MODEL        ?= TestHarness
-	#MODEL_PACKAGE     ?= beagle
-	#CONFIG            ?= BeagleConfig
-	#CONFIG_PACKAGE    ?= beagle
-	#GENERATOR_PACKAGE ?= boom.system
-	#TOP               ?= BeagleChipTop
 endif
 
 
@@ -202,11 +194,10 @@ sim_vsrcs = \
 	$(HARNESS_FILE) \
 	$(SMEMS_FILE) \
 	$(build_dir)/AsyncResetReg.v \
-	$(base_dir)/generators/awl/src/main/resources/generic_transceiver.sv \
 	$(base_dir)/generators/beagle/src/main/resources/ClockReceiver.v \
 	$(HARNESS_SMEMS_FILE)
 
 #########################################################################################
 # assembly/benchmark variables
 #########################################################################################
-timeout_cycles = 10000000
+timeout_cycles = 100000000

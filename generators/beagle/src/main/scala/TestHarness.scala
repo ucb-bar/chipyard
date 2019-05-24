@@ -40,7 +40,7 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
     w = p(LbwifBitWidth),
     clientParams = TLClientParameters(
       name = "tl_serdes_control",
-      sourceId = IdRange(0, (1 << 9)), // match DUT source bits
+      sourceId = IdRange(0, (1 << 13)), // match DUT source bits
       requestFifo = true),
     managerParams = TLManagerParameters(
       address = Seq(AddressSet(p(ExtMem).get.master.base, p(ExtMem).get.master.size-1)),
@@ -53,12 +53,20 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
      beatBytes = p(ExtMem).get.master.beatBytes,
      endSinkId = 0))
 
-  val harnessRam = LazyModule(new TLTestRAM(
-    address = p(HbwifTLKey).managerAddressSet,
-    beatBytes = p(ExtMem).get.master.beatBytes))
+  println(s"DEBUG: ${p(HbwifTLKey).managerAddressSet}")
+  val harness_rams = p(HbwifTLKey).managerAddressSet.map(addrSet =>
+    LazyModule(new TLTestRAM(
+      address = addrSet,
+      beatBytes = p(ExtMem).get.master.beatBytes,
+      trackCorruption = false)))
+
+  val mem_xbar = LazyModule(new TLXbar)
+  harness_rams.foreach { ram =>
+    ram.node := TLFragmenter(p(ExtMem).get.master.beatBytes, p(CacheBlockBytes)) := mem_xbar.node
+  }
 
   lbwif.managerNode := TLBuffer() := adapter.node
-  harnessRam.node := TLFragmenter(p(ExtMem).get.master.beatBytes, p(CacheBlockBytes)) := TLBuffer() := lbwif.clientNode
+  mem_xbar.node := TLBuffer() := lbwif.clientNode
 
   lazy val module = new LazyModuleImp(this) {
     val io = IO(new Bundle {
@@ -81,7 +89,6 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
 
     // SimSerial <-> SerialAdapter <-> Serdes <--ChipConnection--> Lbwif
 
-    println(s"DEBUG: SerialWidth: ${SerialAdapter.SERIAL_IF_WIDTH}")
     val sim = Module(new SimSerial(SerialAdapter.SERIAL_IF_WIDTH))
 
     sim.io.clock := clock
