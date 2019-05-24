@@ -41,7 +41,7 @@ endif
 # for a BOOM based example system
 ifeq ($(SUB_PROJECT),boomexample)
 	SBT_PROJECT       ?= example
-	MODEL             ?= BoomTestHarness
+	MODEL             ?= BoomAndRocketTestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= $(SBT_PROJECT)
 	CONFIG            ?= DefaultBoomConfig
