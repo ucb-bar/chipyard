@@ -266,7 +266,7 @@ class BeagleBoomAndRocketNoHwachaConfig extends Config(
   new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
   new WithGenericSerdes ++
-  new example.WithRenumberHarts ++
+  new boom.system.WithRenumberHarts ++
   // boom mixins
   new boom.common.WithRVC ++
   new boom.common.DefaultBoomConfig ++
@@ -292,7 +292,7 @@ class BeagleBoomAndRocketHwachaConfig extends Config(
   new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
   new WithGenericSerdes ++
-  new example.WithRenumberHarts ++
+  new boom.system.WithRenumberHarts ++
   // hwacha mixins
   new hwacha.DefaultHwachaConfig ++
   // boom mixins
