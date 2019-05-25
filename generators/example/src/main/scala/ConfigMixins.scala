@@ -106,3 +106,43 @@ class WithGPIOBoomRocketTop extends Config((site, here, up) => {
     top
   }
 })
+
+// ------------------
+// Multi-RoCC Support
+// ------------------
+
+/**
+ * Map from a hartId to a particular RoCC accelerator
+ */
+case object MultiRoCCKey extends Field[Map[Int, Seq[Parameters => LazyRoCC]]](Map.empty[Int, Seq[Parameters => LazyRoCC]])
+
+/**
+ * Mixin to enable different RoCCs based on the hartId
+ */
+class WithMultiRoCC extends Config((site, here, up) => {
+  case BuildRoCC => site(MultiRoCCKey).getOrElse(site(TileKey).hartId, Nil)
+})
+
+/**
+ * Mixin to add Hwachas to cores based on hart
+ *
+ * For ex:
+ *   Core 0, 1, 2, 3 have been defined earlier
+ *     with hartIds of 0, 1, 2, 3 respectively
+ *   And you call WithMultiRoCCHwacha(Seq(0,1))
+ *   Then Core 0 and 1 will get a Hwacha
+ *
+ * @param harts Seq of harts to specifiy which will get a Hwacha
+ */
+class WithMultiRoCCHwacha(harts: Seq[Int]) extends Config((site, here, up) => {
+  case MultiRoCCKey => {
+    require(harts.max <= ((up(RocketTilesKey, site).length + up(BoomTilesKey, site).length) - 1))
+    up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
+      (i -> Seq((p: Parameters) => {
+        implicit val q = p
+        implicit val v = implicitly[ValName]
+        LazyModule(new Hwacha()(p))
+      }))
+    }
+  }
+})
