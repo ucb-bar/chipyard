@@ -3,13 +3,17 @@ package example
 import chisel3._
 import chisel3.util.{log2Up}
 
-import freechips.rocketchip.config.{Parameters, Config}
-import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
+import freechips.rocketchip.config.{Field, Parameters, Config}
+import freechips.rocketchip.subsystem.{RocketTilesKey, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.tile.{XLen}
+import freechips.rocketchip.tile.{XLen, BuildRoCC, TileKey, LazyRoCC}
+
+import boom.system.{BoomTilesKey}
 
 import testchipip._
+
+import hwacha.{Hwacha}
 
 import sifive.blocks.devices.gpio._
 
@@ -132,16 +136,14 @@ class WithMultiRoCC extends Config((site, here, up) => {
  *   And you call WithMultiRoCCHwacha(Seq(0,1))
  *   Then Core 0 and 1 will get a Hwacha
  *
- * @param harts Seq of harts to specifiy which will get a Hwacha
+ * @param harts Seq of harts to specify which will get a Hwacha
  */
 class WithMultiRoCCHwacha(harts: Seq[Int]) extends Config((site, here, up) => {
   case MultiRoCCKey => {
     require(harts.max <= ((up(RocketTilesKey, site).length + up(BoomTilesKey, site).length) - 1))
     up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
       (i -> Seq((p: Parameters) => {
-        implicit val q = p
-        implicit val v = implicitly[ValName]
-        LazyModule(new Hwacha()(p))
+        LazyModule(new Hwacha()(p)).suggestName("hwacha")
       }))
     }
   }
