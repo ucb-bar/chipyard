@@ -147,7 +147,7 @@ output_dir=$(sim_dir)/output/$(long_name)
 # helper variables to run binaries
 #########################################################################################
 BINARY ?=
-SIM_FLAGS ?= +verbose +max-cycles=$(timeout_cycles)
+SIM_FLAGS ?= +max-cycles=$(timeout_cycles)
 sim_out_name = $(notdir $(basename $(BINARY))).$(long_name)
 
 #########################################################################################
