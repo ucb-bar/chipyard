@@ -29,34 +29,10 @@ SUB_PROJECT ?= example
 
 ifeq ($(SUB_PROJECT),example)
 	SBT_PROJECT       ?= example
-	MODEL             ?= RocketTestHarness
+	MODEL             ?= BoomAndRocketTestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= $(SBT_PROJECT)
 	CONFIG            ?= DefaultRocketConfig
-	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
-	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
-	TB                ?= TestDriver
-	TOP               ?= RocketTop
-endif
-# for a BOOM based example system
-ifeq ($(SUB_PROJECT),boomexample)
-	SBT_PROJECT       ?= example
-	MODEL             ?= BoomAndRocketTestHarness
-	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= $(SBT_PROJECT)
-	CONFIG            ?= DefaultBoomConfig
-	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
-	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
-	TB                ?= TestDriver
-	TOP               ?= BoomAndRocketTop
-endif
-# for a BOOM + Rocket based example system
-ifeq ($(SUB_PROJECT),boomrocketexample)
-	SBT_PROJECT       ?= example
-	MODEL             ?= BoomAndRocketTestHarness
-	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= $(SBT_PROJECT)
-	CONFIG            ?= DefaultBoomAndRocketConfig
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver

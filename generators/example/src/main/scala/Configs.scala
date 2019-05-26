@@ -16,7 +16,7 @@ class BaseRocketConfig extends Config(
   new freechips.rocketchip.system.DefaultConfig)
 
 class DefaultRocketConfig extends Config(
-  new WithNormalRocketTop ++
+  new WithNormalBoomAndRocketTop ++
   new BaseRocketConfig)
 
 class HwachaConfig extends Config(
@@ -28,26 +28,26 @@ class RoccRocketConfig extends Config(
   new DefaultRocketConfig)
 
 class PWMRocketConfig extends Config(
-  new WithPWMRocketTop ++
+  new WithPWMBoomAndRocketTop ++
   new BaseRocketConfig)
 
 class PWMAXI4RocketConfig extends Config(
-  new WithPWMAXI4RocketTop ++
+  new WithPWMAXI4BoomAndRocketTop ++
   new BaseRocketConfig)
 
 class SimBlockDeviceRocketConfig extends Config(
   new WithBlockDevice ++
-  new WithSimBlockDeviceRocketTop ++
+  new WithSimBlockDeviceBoomAndRocketTop ++
   new BaseRocketConfig)
 
 class BlockDeviceModelRocketConfig extends Config(
   new WithBlockDevice ++
-  new WithBlockDeviceModelRocketTop ++
+  new WithBlockDeviceModelBoomAndRocketTop ++
   new BaseRocketConfig)
 
 class GPIORocketConfig extends Config(
   new WithGPIO ++
-  new WithGPIORocketTop ++
+  new WithGPIOBoomAndRocketTop ++
   new BaseRocketConfig)
 
 class DualCoreRocketConfig extends Config(

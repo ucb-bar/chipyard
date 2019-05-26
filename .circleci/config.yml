@@ -153,7 +153,7 @@ jobs:
 
             - run:
                 name: Building the boomexample subproject using Verilator
-                command: .circleci/do-rtl-build.sh SUB_PROJECT=boomexample CONFIG=SmallDefaultBoomConfig
+                command: .circleci/do-rtl-build.sh SUB_PROJECT=example CONFIG=SmallDefaultBoomConfig
                 no_output_timeout: 120m
 
             - save_cache:
@@ -187,7 +187,7 @@ jobs:
 
             - run:
                 name: Building the boomrocketexample subproject using Verilator
-                command: .circleci/do-rtl-build.sh SUB_PROJECT=boomrocketexample CONFIG=SmallDefaultBoomAndRocketConfig
+                command: .circleci/do-rtl-build.sh SUB_PROJECT=example CONFIG=SmallDefaultBoomAndRocketConfig
                 no_output_timeout: 120m
 
             - save_cache:
@@ -351,7 +351,7 @@ jobs:
 
             - run:
                 name: Run boomexample benchmark tests
-                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=boomexample CONFIG=SmallDefaultBoomConfig
+                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=example CONFIG=SmallDefaultBoomConfig
 
     boomrocketexample-run-benchmark-tests:
         docker:
@@ -379,7 +379,7 @@ jobs:
 
             - run:
                 name: Run boomrocketexample benchmark tests
-                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=boomexample CONFIG=SmallDefaultBoomAndRocketConfig
+                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=example CONFIG=SmallDefaultBoomAndRocketConfig
 
     boom-run-benchmark-tests:
         docker:
