@@ -8,23 +8,25 @@ SHELL=/bin/bash
 #########################################################################################
 lookup_scala_srcs = $(shell find -L $(1)/ -iname "*.scala" 2> /dev/null)
 
-PACKAGES=rocket-chip testchipip boom hwacha sifive-blocks example
-SCALA_SOURCES=$(foreach pkg,$(PACKAGES),$(call lookup_scala_srcs,$(base_dir)/generators/$(pkg)/src/main/scala))
+PACKAGES=$(addprefix generators/, rocket-chip testchipip boom hwacha sifive-blocks example) \
+		 $(addprefix sims/firesim/sim/, . firesim-lib midas midas/targetutils)
+SCALA_SOURCES=$(foreach pkg,$(PACKAGES),$(call lookup_scala_srcs,$(base_dir)/$(pkg)/src/main/scala))
 
 #########################################################################################
 # rocket and testchipip classes
 #########################################################################################
-ROCKET_CLASSES ?= "$(ROCKETCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/classes:$(ROCKETCHIP_DIR)/chisel3/target/scala-$(SCALA_VERSION_MAJOR)/*"
+# NB: target/ lives under source ----V , due to how we're handling midas dependency injection
+ROCKET_CLASSES ?= "$(ROCKETCHIP_DIR)/src/target/scala-$(SCALA_VERSION_MAJOR)/classes:$(ROCKETCHIP_DIR)/chisel3/target/scala-$(SCALA_VERSION_MAJOR)/*"
 TESTCHIPIP_CLASSES ?= "$(TESTCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/classes"
 
 #########################################################################################
 # jar creation variables and rules
 #########################################################################################
-FIRRTL_JAR ?= $(ROCKETCHIP_DIR)/lib/firrtl.jar
+FIRRTL_JAR := $(base_dir)/lib/firrtl.jar
 
 $(FIRRTL_JAR): $(call lookup_scala_srcs, $(REBAR_FIRRTL_DIR)/src/main/scala)
 	$(MAKE) -C $(REBAR_FIRRTL_DIR) SBT="$(SBT)" root_dir=$(REBAR_FIRRTL_DIR) build-scala
-	mkdir -p $(dir $@)
+	mkdir -p $(@D)
 	cp -p $(REBAR_FIRRTL_DIR)/utils/bin/firrtl.jar $@
 	touch $@
 
