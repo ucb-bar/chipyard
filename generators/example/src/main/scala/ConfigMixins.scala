@@ -133,12 +133,12 @@ class WithMultiRoCC extends Config((site, here, up) => {
  * For ex:
  *   Core 0, 1, 2, 3 have been defined earlier
  *     with hartIds of 0, 1, 2, 3 respectively
- *   And you call WithMultiRoCCHwacha(Seq(0,1))
+ *   And you call WithMultiRoCCHwacha(0,1)
  *   Then Core 0 and 1 will get a Hwacha
  *
- * @param harts Seq of harts to specify which will get a Hwacha
+ * @param harts harts to specify which will get a Hwacha
  */
-class WithMultiRoCCHwacha(harts: Seq[Int]) extends Config((site, here, up) => {
+class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
   case MultiRoCCKey => {
     require(harts.max <= ((up(RocketTilesKey, site).length + up(BoomTilesKey, site).length) - 1))
     up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>

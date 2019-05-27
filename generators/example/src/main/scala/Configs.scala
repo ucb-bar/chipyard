@@ -220,7 +220,7 @@ class DualCoreBoomAndOneHwachaRocketConfig extends Config(
   new WithNormalBoomAndRocketTop ++
   new WithBootROM ++
   new WithMultiRoCC ++
-  new WithMultiRoCCHwacha(Seq(0)) ++ // put Hwacha just on hart0 which was renumbered to Rocket
+  new WithMultiRoCCHwacha(0) ++ // put Hwacha just on hart0 which was renumbered to Rocket
   new boom.system.WithRenumberHarts ++
   new hwacha.DefaultHwachaConfig ++
   new boom.common.WithRVC ++
