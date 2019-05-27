@@ -88,6 +88,9 @@ For example:
 
 Note: You need to specify all the make variables once again to match what the build gave to run the assembly tests or the benchmarks or the binaries if you are using the make option.
 
+Finally, in the ``generated-src/<...>-<package>-<config>/`` directory resides all of the collateral and Verilog source files for the build/simulation.
+Specifically, the SoC top-level (``TOP``) Verilog file is denoted with ``*.top.v`` while the ``TestHarness`` file is denoted with ``*.harness.v``.
+
 FPGA Accelerated Simulation
 ---------------------------
 FireSim enables simulations at 1000x-100000x the speed of standard software simulation.
