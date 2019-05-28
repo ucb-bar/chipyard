@@ -168,42 +168,42 @@ class SmallBaseBoomAndRocketConfig extends Config(
 
 class DefaultBoomAndRocketConfig extends Config(
   new WithNormalBoomRocketTop ++
-  new BaseBoomRocketConfig)
+  new BaseBoomAndRocketConfig)
 
 class SmallDefaultBoomAndRocketConfig extends Config(
   new WithNormalBoomRocketTop ++
-  new SmallBaseBoomRocketConfig)
+  new SmallBaseBoomAndRocketConfig)
 
 class HwachaBoomAndRocketConfig extends Config(
   new hwacha.DefaultHwachaConfig ++
-  new DefaultBoomRocketConfig)
+  new DefaultBoomAndRocketConfig)
 
 class RoccBoomAndRocketConfig extends Config(
   new WithRoccExample ++
-  new DefaultBoomRocketConfig)
+  new DefaultBoomAndRocketConfig)
 
 class PWMBoomAndRocketConfig extends Config(
   new WithPWMBoomRocketTop ++
-  new BaseBoomRocketConfig)
+  new BaseBoomAndRocketConfig)
 
 class PWMAXI4BoomAndRocketConfig extends Config(
   new WithPWMAXI4BoomRocketTop ++
-  new BaseBoomRocketConfig)
+  new BaseBoomAndRocketConfig)
 
 class SimBlockDeviceBoomAndRocketConfig extends Config(
   new WithBlockDevice ++
   new WithSimBlockDeviceBoomRocketTop ++
-  new BaseBoomRocketConfig)
+  new BaseBoomAndRocketConfig)
 
 class BlockDeviceModelBoomAndRocketConfig extends Config(
   new WithBlockDevice ++
   new WithBlockDeviceModelBoomRocketTop ++
-  new BaseBoomRocketConfig)
+  new BaseBoomAndRocketConfig)
 
 class GPIOBoomAndRocketConfig extends Config(
   new WithGPIO ++
   new WithGPIOBoomRocketTop ++
-  new BaseBoomRocketConfig)
+  new BaseBoomAndRocketConfig)
 
 class DualCoreBoomAndOneRocketConfig extends Config(
   new WithNormalBoomRocketTop ++
