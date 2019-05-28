@@ -19,7 +19,7 @@ abstract class FireSimTestSuite(
     targetConfigs: String,
     platformConfigs: String,
     N: Int = 8
-  ) extends firesim.midasexamples.TestSuiteCommon with HasFireSimGeneratorUtilities {
+  ) extends firesim.TestSuiteCommon with IsFireSimGeneratorLike {
   import scala.concurrent.duration._
   import ExecutionContext.Implicits.global
 

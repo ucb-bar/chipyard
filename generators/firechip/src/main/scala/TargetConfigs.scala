@@ -17,7 +17,7 @@ import icenet._
 class WithBootROM extends Config((site, here, up) => {
   case BootROMParams => {
     val rebarBootROM = new File(s"./generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
-    val firesimBootROM = new File(s"./target-rtl/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
+    val firesimBootROM = new File(s"./target-rtl/firechip/generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
 
      val bootROMPath = if (rebarBootROM.exists()) {
       rebarBootROM.getAbsolutePath()

@@ -21,11 +21,11 @@ lazy val commonSettings = Seq(
 
 val rocketChipDir = file("generators/rocket-chip")
 
-lazy val firesimAsLibrary = sys.env.get("FIRESIM_IS_TOP") == None
+lazy val firesimAsLibrary = sys.env.get("FIRESIM_STANDALONE") == None
 lazy val firesimDir = if (firesimAsLibrary) {
   file("sims/firesim/sim/")
 } else {
-  file("../../sim/")
+  file("../../")
 }
 
 // Checks for -DROCKET_USE_MAVEN.
