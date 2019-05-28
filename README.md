@@ -1,4 +1,8 @@
-# RISC-V Project Template
+# RISC-V Project Template [![CircleCI](https://circleci.com/gh/ucb-bar/project-template/tree/master.svg?style=svg)](https://circleci.com/gh/ucb-bar/project-template/tree/master)
+
+**This branch is under development**
+**It currently has many submodules**
+**Please run ./scripts/init-submodules-no-riscv-tools.sh to update submodules, unless you want to spend a long time waiting for submodules to clone**
 
 This is a starter template for your custom RISC-V project. It will allow you
 to leverage the Chisel HDL and RocketChip SoC generator to produce a
@@ -46,6 +50,16 @@ build an alternate configuration.
     make PROJECT=yourproject CONFIG=YourConfig
     ./simulator-yourproject-YourConfig ...
 
+Additionally, you can use a helper make rule to run your simulation binary. The output will be in the "verisim"
+directory under the file names: `<binary-name>.<type of project/config/etc it ran on>.*`
+
+    # first make your verisim rtl simulator binary
+    make SUB_PROJECT=example
+    # then run the binary (with no vcd generation)
+    make SUB_PROJECT=example BINARY=<my-riscv-binary> run-binary
+    # then run the binary (with vcd generation)
+    make SUB_PROJECT=example BINARY=<my-riscv-binary> run-binary-debug
+
 ## Submodules and Subdirectories
 
 The submodules and subdirectories for the project template are organized as
@@ -57,6 +71,26 @@ follows.
  * vsim - directory in which Synopsys VCS simulations are compiled and run
  * bootrom - sources for the first-stage bootloader included in the Boot ROM
  * src/main/scala - scala source files for your project go here
+
+## For submodule developers
+
+Depending on the submodule that you develop in, you might want to run things out of the submodule.
+For example, `boom` has its own Generator, package, top module, and configurations separate from
+the `example` package in `src/main/scala`. Thus, to build a `boom` project you do something like
+the following:
+
+    make SBT_PROJECT=boom PROJECT=boom.system CONFIG=<BOOM Config to use> TOP=ExampleBoomSystem
+
+However, that is very long to write everytime there is a compile. Thus, a shorthand way to build
+the subproject is the following:
+
+    make SUB_PROJECT=boom CONFIG=<BOOM Config to use>
+
+This sets the proper configuration flags for make to work correctly.
+
+Currently, the supported `SUB_PROJECT` flags are:
+
+ * boom - to build and run `boom` subproject configurations
 
 ## Using the block device
 
