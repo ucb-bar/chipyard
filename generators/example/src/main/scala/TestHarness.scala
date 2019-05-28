@@ -10,12 +10,12 @@ import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.util.GeneratorApp
 
 // --------------------------
-// BOOM + Rocket Test Harness
+// BOOM and/or Rocket Test Harness
 // --------------------------
 
-case object BuildBoomAndRocketTop extends Field[(Clock, Bool, Parameters) => BoomAndRocketTopModule[BoomAndRocketTop]]
+case object BuildBoomRocketTop extends Field[(Clock, Bool, Parameters) => BoomRocketTopModule[BoomRocketTop]]
 
-class BoomAndRocketTestHarness(implicit val p: Parameters) extends Module {
+class BoomRocketTestHarness(implicit val p: Parameters) extends Module {
   val io = IO(new Bundle {
     val success = Output(Bool())
   })
@@ -23,7 +23,7 @@ class BoomAndRocketTestHarness(implicit val p: Parameters) extends Module {
   // force Chisel to rename module
   override def desiredName = "TestHarness"
 
-  val dut = p(BuildBoomAndRocketTop)(clock, reset.toBool, p)
+  val dut = p(BuildBoomRocketTop)(clock, reset.toBool, p)
   dut.debug := DontCare
   dut.connectSimAXIMem()
   dut.connectSimAXIMMIO()

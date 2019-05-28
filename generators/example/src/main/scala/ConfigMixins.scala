@@ -42,62 +42,62 @@ class WithGPIO extends Config((site, here, up) => {
 })
 
 // -----------------------------------------------
-// BOOM + Rocket Top Level System Parameter Mixins
+// BOOM and/or Rocket Top Level System Parameter Mixins
 // -----------------------------------------------
 
 /**
- * Class to specify a "plain" top level BOOM + Rocket system
+ * Class to specify a "plain" top level BOOM and/or Rocket system
  */
-class WithNormalBoomAndRocketTop extends Config((site, here, up) => {
-  case BuildBoomAndRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    Module(LazyModule(new BoomAndRocketTop()(p)).module)
+class WithNormalBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    Module(LazyModule(new BoomRocketTop()(p)).module)
   }
 })
 
 /**
- * Class to specify a top level BOOM + Rocket system with PWM
+ * Class to specify a top level BOOM and/or Rocket system with PWM
  */
-class WithPWMBoomAndRocketTop extends Config((site, here, up) => {
-  case BuildBoomAndRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new BoomAndRocketTopWithPWMTL()(p)).module)
+class WithPWMBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new BoomRocketTopWithPWMTL()(p)).module)
 })
 
 /**
- * Class to specify a top level BOOM + Rocket system with a PWM AXI4
+ * Class to specify a top level BOOM and/or Rocket system with a PWM AXI4
  */
-class WithPWMAXI4BoomAndRocketTop extends Config((site, here, up) => {
-  case BuildBoomAndRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new BoomAndRocketTopWithPWMAXI4()(p)).module)
+class WithPWMAXI4BoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new BoomRocketTopWithPWMAXI4()(p)).module)
 })
 
 /**
- * Class to specify a top level BOOM + Rocket system with a block device
+ * Class to specify a top level BOOM and/or Rocket system with a block device
  */
-class WithBlockDeviceModelBoomAndRocketTop extends Config((site, here, up) => {
-  case BuildBoomAndRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomAndRocketTopWithBlockDevice()(p)).module)
+class WithBlockDeviceModelBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new BoomRocketTopWithBlockDevice()(p)).module)
     top.connectBlockDeviceModel()
     top
   }
 })
 
 /**
- * Class to specify a top level BOOM + Rocket system with a simulator block device
+ * Class to specify a top level BOOM and/or Rocket system with a simulator block device
  */
-class WithSimBlockDeviceBoomAndRocketTop extends Config((site, here, up) => {
-  case BuildBoomAndRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomAndRocketTopWithBlockDevice()(p)).module)
+class WithSimBlockDeviceBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new BoomRocketTopWithBlockDevice()(p)).module)
     top.connectSimBlockDevice(clock, reset)
     top
   }
 })
 
 /**
- * Class to specify a top level BOOM + Rocket system with GPIO
+ * Class to specify a top level BOOM and/or Rocket system with GPIO
  */
-class WithGPIOBoomAndRocketTop extends Config((site, here, up) => {
-  case BuildBoomAndRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomAndRocketTopWithGPIO()(p)).module)
+class WithGPIOBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new BoomRocketTopWithGPIO()(p)).module)
     for (gpio <- top.gpio) {
       for (pin <- gpio.pins) {
         pin.i.ival := false.B
