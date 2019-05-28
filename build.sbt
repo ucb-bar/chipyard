@@ -1,3 +1,5 @@
+import Tests._
+
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
   version := "1.0",
@@ -40,6 +42,14 @@ def conditionalDependsOn(prj: Project): Project = {
     prj.dependsOn(testchipip)
   }
 }
+
+// Fork each scala test for now, to work around persistent mutable state
+// in Rocket-Chip based generators
+def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
+      val options = ForkOptions()
+      new Group(test.name, Seq(test), SubProcess(options))
+  } toSeq
+
 
 // Subproject definitions begin
 
@@ -117,5 +127,8 @@ lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 
 lazy val firechip = (project in file("generators/firechip"))
   .dependsOn(boom, icenet, testchipip, sifive_blocks, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
-  .settings(commonSettings)
+  .settings(
+    commonSettings,
+    testGrouping in Test := isolateAllTests( (definedTests in Test).value )
+  )
 
