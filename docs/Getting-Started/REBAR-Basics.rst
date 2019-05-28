@@ -17,7 +17,7 @@ Processor Cores
   An out-of-order RISC-V core.
   See :ref:`Berkeley Out-of-Order Machine (BOOM)` for more information.
 
-Data-Parallel Accelerators
+Accelerators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Hwacha**

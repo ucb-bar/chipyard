@@ -97,7 +97,7 @@ FireSim enables simulations at 1000x-100000x the speed of standard software simu
 This is enabled using FPGA-acceleration on F1 instances of the AWS (Amazon Web Services) public cloud.
 Therefore FireSim simulation requires to be set-up on the AWS public cloud rather than on our local development machine.
 
-To run an FPGA-accelerated simulation using FireSim, a we need to clone the REBAR repository (or our fork of the REBAR repository) to an AWS EC2, and follow the setup instructions specificied in the FireSim Initial Setup documentation page.
+To run an FPGA-accelerated simulation using FireSim, a we need to clone the REBAR repository (or our fork of the REBAR repository) to an AWS EC2, and follow the setup instructions specified in the FireSim Initial Setup documentation page.
 
 After setting up the FireSim environment, we now need to generate a FireSim simulation around our selected digital design.
 We will work from within the ``sims/firesim`` directory.

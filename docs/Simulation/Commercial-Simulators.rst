@@ -1,11 +1,11 @@
-Commericial Software RTL Simulators
+Commercial Software RTL Simulators
 ==============================
 
 VCS
 -----------------------
 
 `VCS <https://www.synopsys.com/verification/simulation/vcs.html>`__ is a commercial RTL simulator developed by Synopsys.
-It requires commerical licenses.
+It requires commercial licenses.
 The REBAR framework can compile and execute simulations using VCS.
 VCS simulation will generally compile faster than Verilator simulations.
 
@@ -33,7 +33,7 @@ If you later create your own project, you can use environment variables to build
     ./simulator-<yourproject>-<yourconfig> ...
 
 If you would like to extract waveforms from the simulation, run the command ``make debug`` instead of just ``make``.
-This will generate a vpd file (this is a proprietry waveform representation format used by Synopsys) that can be loaded to vpd-supported waveform viewers.
+This will generate a vpd file (this is a proprietary waveform representation format used by Synopsys) that can be loaded to vpd-supported waveform viewers.
 If you have Synopsys licenses, we recommend using the DVE waveform viewer.
 
 Please refer to :ref:`Running A Simulation` for a step by step tutorial on how to get a simulator up and running.

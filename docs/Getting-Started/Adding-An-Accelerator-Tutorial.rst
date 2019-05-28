@@ -22,7 +22,7 @@ The X will be a number 0-3, and determines the opcode of the instruction, which 
 The ``rd``, ``rs1``, and ``rs2`` fields are the register numbers of the destination register and two source registers.
 The ``funct`` field is a 7-bit integer that the accelerator can use to distinguish different instructions from each other.
 
-Note that communication through a RoCC interface requires a custom software toolchain, whereas MMIO peripherals can use that standard toolchain with approriate driver support.
+Note that communication through a RoCC interface requires a custom software toolchain, whereas MMIO peripherals can use that standard toolchain with appropriate driver support.
 
 Integrating into the Generator Build System
 -------------------------------------------
@@ -138,7 +138,7 @@ For a simple memory-mapped peripheral, this just involves connecting the periphe
 
 
 Note that the ``PWMTL`` class we created from the register router is itself a ``LazyModule``.
-Register routers have a TileLike node simply named "node", which we can hook up to the Rocket Chip bus.
+Register routers have a TileLink node simply named "node", which we can hook up to the Rocket Chip bus.
 This will automatically add address map and device tree entries for the peripheral.
 
 The module implementation trait is where we instantiate our PWM module and connect it to the rest of the SoC.

@@ -3,7 +3,7 @@ Getting Started
 
 These guides will walk you through the basics of the REBAR framework:
 
-- First, we will go over the different configurations avaliable.
+- First, we will go over the different configurations available.
 
 - Then, we will walk through adding a custom accelerator.
 
