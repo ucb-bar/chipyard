@@ -8,7 +8,7 @@ Welcome to REBAR's documentation!
 
 REBAR is a a framework for designing and evaluating full-system hardware using agile teams.
 It is composed of a collection of tools and libraries designed to provide an intergration between open-source and commercial tools for the development of systems-on-chip.
-New to REBAR? Jump to the :ref:`Getting Starting` page for more info.
+New to REBAR? Jump to the :ref:`Getting Started` page for more info.
 
 .. toctree::
    :maxdepth: 3

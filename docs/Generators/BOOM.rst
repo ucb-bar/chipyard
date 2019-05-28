@@ -8,4 +8,4 @@ Like the R10k and the 21264, BOOM is a unified physical register file design (al
 Conceptually, BOOM is broken up into 10 stages: Fetch, Decode, Register Rename, Dispatch, Issue, Register Read, Execute, Memory, Writeback and Commit.
 However, many of those stages are combined in the current implementation, yielding seven stages: Fetch, Decode/Rename, Rename/Dispatch, Issue/RegisterRead, Execute, Memory and Writeback (Commit occurs asynchronously, so it is not counted as part of the “pipeline”).
 
-Additional information about the BOOM micro-architecture can be found in the `BOOM documentation pages <https://docs.boom-core.org/>__`.
+Additional information about the BOOM micro-architecture can be found in the `BOOM documentation pages <https://docs.boom-core.org/>`__.

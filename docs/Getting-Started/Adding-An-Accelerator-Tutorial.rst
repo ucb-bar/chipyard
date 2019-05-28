@@ -14,7 +14,8 @@ In contrast, the processor communicates with a RoCC accelerators through a custo
 Each core can have up to four accelerators that are controlled by custom instructions and share resources with the CPU.
 RoCC coprocessor instructions have the following form.
 
-.. code-block::
+.. code-block:: none
+
     customX rd, rs1, rs2, funct
 
 The X will be a number 0-3, and determines the opcode of the instruction, which controls which accelerator an instruction will be routed to.
@@ -29,7 +30,8 @@ Integrating into the Generator Build System
 While developing, you want to include Chisel code in a submodule so that it can be shared by different projects.
 To add a submodule to the REBAR framework, make sure that your project is organized as follows.
 
-.. code-block::
+.. code-block:: none
+
     yourproject/
         build.sbt
         src/main/scala/
@@ -39,12 +41,14 @@ Put this in a git repository and make it accessible.
 Then add it as a submodule to under the following directory hierarchy: ``generators/yourproject``.
 
 .. code-block:: shell
+
     cd generators/
     git submodule add https://git-repository.com/yourproject.git
 
 Then add ``yourproject`` to the REBAR top-level build.sbt file.
 
 .. code-block:: scala
+
     lazy val yourproject = project.settings(commonSettings).dependsOn(rocketchip)
 
 You can then import the classes defined in the submodule in a new project if
@@ -52,6 +56,7 @@ you add it as a dependency. For instance, if you want to use this code in
 the ``example`` project, change the final line in build.sbt to the following.
 
 .. code-block:: scala
+
     lazy val example = (project in file(".")).settings(commonSettings).dependsOn(testchipip, yourproject)
 
 Finally, add ``yourproject`` to the ``PACKAGES`` variable in the ``common.mk`` file in the REBAR top level.
@@ -64,6 +69,7 @@ The easiest way to create a TileLink peripheral is to use the ``TLRegisterRouter
 To create a RegisterRouter-based peripheral, you will need to specify a parameter case class for the configuration settings, a bundle trait with the extra top-level ports, and a module implementation containing the actual RTL.
 
 .. code-block:: scala
+
     case class PWMParams(address: BigInt, beatBytes: Int)
 
     trait PWMTLBundle extends Bundle {
@@ -98,6 +104,7 @@ The second set of arguments is the IO bundle constructor, which we create by ext
 The final set of arguments is the module constructor, which we create by extends ``TLRegModule`` with our module trait.
 
 .. code-block:: scala
+
     class PWMTL(c: PWMParams)(implicit p: Parameters)
       extends TLRegisterRouter(
         c.address, "pwm", Seq("ucbbar,pwm"),
@@ -116,6 +123,7 @@ The ``LazyModule`` trait runs setup code that must execute before all the hardwa
 For a simple memory-mapped peripheral, this just involves connecting the peripheral's TileLink node to the MMIO crossbar.
 
 .. code-block:: scala
+
     trait HasPeripheryPWM extends HasSystemNetworks {
       implicit val p: Parameters
 
@@ -138,6 +146,7 @@ Since this module has an extra `pwmout` output, we declare that in this trait, u
 We then connect the ``PWMTL``'s pwmout to the pwmout we declared.
 
 .. code-block:: scala
+
     trait HasPeripheryPWMModuleImp extends LazyMultiIOModuleImp {
       implicit val p: Parameters
       val outer: HasPeripheryPWM
@@ -151,6 +160,7 @@ Now we want to mix our traits into the system as a whole.
 This code is from ``generators/example/src/main/scala/Top.scala``.
 
 .. code-block:: scala
+
     class ExampleTopWithPWM(q: Parameters) extends ExampleTop(q)
         with PeripheryPWM {
       override lazy val module = Module(
@@ -170,6 +180,7 @@ The ``ExampleTopModule`` class is the actual RTL that gets synthesized.
 Finally, we need to add a configuration class in ``generators/example/src/main/scala/Configs.scala`` that tells the ``TestHarness`` to instantiate ``ExampleTopWithPWM`` instead of the default ``ExampleTop``.
 
 .. code-block:: scala
+
     class WithPWM extends Config((site, here, up) => {
       case BuildTop => (p: Parameters) =>
         Module(LazyModule(new ExampleTopWithPWM()(p)).module)
@@ -181,6 +192,7 @@ Finally, we need to add a configuration class in ``generators/example/src/main/s
 Now we can test that the PWM is working. The test program is in ``tests/pwm.c``.
 
 .. code-block:: c
+
     #define PWM_PERIOD 0x2000
     #define PWM_DUTY 0x2008
     #define PWM_ENABLE 0x2010
@@ -214,6 +226,7 @@ Compiling this program with make produces a ``pwm.riscv`` executable.
 Now with all of that done, we can go ahead and run our simulation.
 
 .. code-block:: shell
+
     cd verisim
     make CONFIG=PWMConfig
     ./simulator-example-PWMConfig ../tests/pwm.riscv
@@ -225,6 +238,7 @@ RoCC accelerators are lazy modules that extend the ``LazyRoCC`` class.
 Their implementation should extends the ``LazyRoCCModule`` class.
 
 .. code-block:: scala
+
     class CustomAccelerator(opcodes: OpcodeSet)
         (implicit p: Parameters) extends LazyRoCC(opcodes) {
       override lazy val module = new CustomAcceleratorModule(this)
@@ -273,6 +287,7 @@ This takes a sequence of functions producing ``LazyRoCC`` objects, one for each 
 For instance, if we wanted to add the previously defined accelerator and route custom0 and custom1 instructions to it, we could do the following.
 
 .. code-block:: scala
+
     class WithCustomAccelerator extends Config((site, here, up) => {
       case BuildRoCC => Seq((p: Parameters) => LazyModule(
         new CustomAccelerator(OpcodeSet.custom0 | OpcodeSet.custom1)(p)))
@@ -288,6 +303,7 @@ IO devices or accelerators (like a disk or network driver), we may want to have 
 To add a device like that, you would do the following.
 
 .. code-block:: scala
+
     class DMADevice(implicit p: Parameters) extends LazyModule {
       val node = TLClientNode(TLClientParameters(
         name = "dma-device", sourceId = IdRange(0, 1)))

@@ -16,4 +16,4 @@ However, if that passes, the output of the generator gives you an FIRRTL file an
 See :ref:`FIRRTL` for more information on how to get a FIRRTL file to Verilog.
 
 For an interactive tutorial on how to use Chisel and get started please visit the `Chisel Bootcamp <https://github.com/freechipsproject/chisel-bootcamp>`__.
-Otherwise, for all things Chisel related including API documentation, news, etc, visit their `website <>`__.
+Otherwise, for all things Chisel related including API documentation, news, etc, visit their `website <https://chisel.eecs.berkeley.edu/>`__.
