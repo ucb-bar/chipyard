@@ -1,12 +1,16 @@
 package example
 
 import chisel3._
+import chisel3.util.{log2Up}
+
 import freechips.rocketchip.config.{Parameters, Config}
 import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.tile.{XLen}
+
 import testchipip._
+
 import sifive.blocks.devices.gpio._
 
 /**
@@ -37,129 +41,63 @@ class WithGPIO extends Config((site, here, up) => {
     GPIOParams(address = 0x10012000, width = 4, includeIOF = false))
 })
 
-// ----------------------------------------
-// Rocket Top Level System Parameter Mixins
-// ----------------------------------------
+// -----------------------------------------------
+// BOOM and/or Rocket Top Level System Parameter Mixins
+// -----------------------------------------------
 
 /**
- * Class to specify a "plain" top level rocket-chip system
+ * Class to specify a "plain" top level BOOM and/or Rocket system
  */
-class WithNormalRocketTop extends Config((site, here, up) => {
-  case BuildRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    Module(LazyModule(new RocketTop()(p)).module)
+class WithNormalBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    Module(LazyModule(new BoomRocketTop()(p)).module)
   }
 })
 
 /**
- * Class to specify a top level rocket-chip system with PWM
+ * Class to specify a top level BOOM and/or Rocket system with PWM
  */
-class WithPWMRocketTop extends Config((site, here, up) => {
-  case BuildRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new RocketTopWithPWMTL()(p)).module)
+class WithPWMBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new BoomRocketTopWithPWMTL()(p)).module)
 })
 
 /**
- * Class to specify a top level rocket-chip system with a PWM AXI4
+ * Class to specify a top level BOOM and/or Rocket system with a PWM AXI4
  */
-class WithPWMAXI4RocketTop extends Config((site, here, up) => {
-  case BuildRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new RocketTopWithPWMAXI4()(p)).module)
+class WithPWMAXI4BoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new BoomRocketTopWithPWMAXI4()(p)).module)
 })
 
 /**
- * Class to specify a top level rocket-chip system with a block device
+ * Class to specify a top level BOOM and/or Rocket system with a block device
  */
-class WithBlockDeviceModelRocketTop extends Config((site, here, up) => {
-  case BuildRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new RocketTopWithBlockDevice()(p)).module)
+class WithBlockDeviceModelBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new BoomRocketTopWithBlockDevice()(p)).module)
     top.connectBlockDeviceModel()
     top
   }
 })
 
 /**
- * Class to specify a top level rocket-chip system with a simulator block device
+ * Class to specify a top level BOOM and/or Rocket system with a simulator block device
  */
-class WithSimBlockDeviceRocketTop extends Config((site, here, up) => {
-  case BuildRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new RocketTopWithBlockDevice()(p)).module)
+class WithSimBlockDeviceBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new BoomRocketTopWithBlockDevice()(p)).module)
     top.connectSimBlockDevice(clock, reset)
     top
   }
 })
 
 /**
- * Class to specify a top level rocket-chip system with GPIO
+ * Class to specify a top level BOOM and/or Rocket system with GPIO
  */
-class WithGPIORocketTop extends Config((site, here, up) => {
-  case BuildRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new RocketTopWithGPIO()(p)).module)
-    for (gpio <- top.gpio) {
-      for (pin <- gpio.pins) {
-        pin.i.ival := false.B
-      }
-    }
-    top
-  }
-})
-
-// --------------------------------------
-// BOOM Top Level System Parameter Mixins
-// --------------------------------------
-
-/**
- * Class to specify a "plain" top level BOOM system
- */
-class WithNormalBoomTop extends Config((site, here, up) => {
-  case BuildBoomTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    Module(LazyModule(new BoomTop()(p)).module)
-  }
-})
-
-/**
- * Class to specify a top level BOOM system with PWM
- */
-class WithPWMBoomTop extends Config((site, here, up) => {
-  case BuildBoomTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new BoomTopWithPWMTL()(p)).module)
-})
-
-/**
- * Class to specify a top level BOOM system with a PWM AXI4
- */
-class WithPWMAXI4BoomTop extends Config((site, here, up) => {
-  case BuildBoomTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new BoomTopWithPWMAXI4()(p)).module)
-})
-
-/**
- * Class to specify a top level BOOM system with a block device
- */
-class WithBlockDeviceModelBoomTop extends Config((site, here, up) => {
-  case BuildBoomTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomTopWithBlockDevice()(p)).module)
-    top.connectBlockDeviceModel()
-    top
-  }
-})
-
-/**
- * Class to specify a top level BOOM system with a simulator block device
- */
-class WithSimBlockDeviceBoomTop extends Config((site, here, up) => {
-  case BuildBoomTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomTopWithBlockDevice()(p)).module)
-    top.connectSimBlockDevice(clock, reset)
-    top
-  }
-})
-
-/**
- * Class to specify a top level BOOM system with GPIO
- */
-class WithGPIOBoomTop extends Config((site, here, up) => {
-  case BuildBoomTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomTopWithGPIO()(p)).module)
+class WithGPIOBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new BoomRocketTopWithGPIO()(p)).module)
     for (gpio <- top.gpio) {
       for (pin <- gpio.pins) {
         pin.i.ival := false.B

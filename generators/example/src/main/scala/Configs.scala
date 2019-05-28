@@ -1,8 +1,10 @@
 package example
 
 import chisel3._
+
 import freechips.rocketchip.config.{Config}
 import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, WithExtMemSize, WithNBanks}
+
 import testchipip._
 
 // --------------
@@ -14,7 +16,7 @@ class BaseRocketConfig extends Config(
   new freechips.rocketchip.system.DefaultConfig)
 
 class DefaultRocketConfig extends Config(
-  new WithNormalRocketTop ++
+  new WithNormalBoomRocketTop ++
   new BaseRocketConfig)
 
 class HwachaConfig extends Config(
@@ -26,21 +28,26 @@ class RoccRocketConfig extends Config(
   new DefaultRocketConfig)
 
 class PWMRocketConfig extends Config(
-  new WithPWMRocketTop ++
+  new WithPWMBoomRocketTop ++
   new BaseRocketConfig)
 
 class PWMAXI4RocketConfig extends Config(
-  new WithPWMAXI4RocketTop ++
+  new WithPWMAXI4BoomRocketTop ++
   new BaseRocketConfig)
 
 class SimBlockDeviceRocketConfig extends Config(
   new WithBlockDevice ++
-  new WithSimBlockDeviceRocketTop ++
+  new WithSimBlockDeviceBoomRocketTop ++
   new BaseRocketConfig)
 
 class BlockDeviceModelRocketConfig extends Config(
   new WithBlockDevice ++
-  new WithBlockDeviceModelRocketTop ++
+  new WithBlockDeviceModelBoomRocketTop ++
+  new BaseRocketConfig)
+
+class GPIORocketConfig extends Config(
+  new WithGPIO ++
+  new WithGPIOBoomRocketTop ++
   new BaseRocketConfig)
 
 class DualCoreRocketConfig extends Config(
@@ -50,11 +57,6 @@ class DualCoreRocketConfig extends Config(
 class RV32RocketConfig extends Config(
   new WithRV32 ++
   new DefaultRocketConfig)
-
-class GPIORocketConfig extends Config(
-  new WithGPIO ++
-  new WithGPIORocketTop ++
-  new BaseRocketConfig)
 
 class GB1MemoryConfig extends Config(
   new WithExtMemSize((1<<30) * 1L) ++
@@ -73,11 +75,11 @@ class SmallBaseBoomConfig extends Config(
   new boom.system.SmallBoomConfig)
 
 class DefaultBoomConfig extends Config(
-  new WithNormalBoomTop ++
+  new WithNormalBoomRocketTop ++
   new BaseBoomConfig)
 
 class SmallDefaultBoomConfig extends Config(
-  new WithNormalBoomTop ++
+  new WithNormalBoomRocketTop ++
   new SmallBaseBoomConfig)
 
 class HwachaBoomConfig extends Config(
@@ -89,33 +91,140 @@ class RoccBoomConfig extends Config(
   new DefaultBoomConfig)
 
 class PWMBoomConfig extends Config(
-  new WithPWMBoomTop ++
+  new WithPWMBoomRocketTop ++
   new BaseBoomConfig)
 
 class PWMAXI4BoomConfig extends Config(
-  new WithPWMAXI4BoomTop ++
+  new WithPWMAXI4BoomRocketTop ++
   new BaseBoomConfig)
 
 class SimBlockDeviceBoomConfig extends Config(
   new WithBlockDevice ++
-  new WithSimBlockDeviceBoomTop ++
+  new WithSimBlockDeviceBoomRocketTop ++
   new BaseBoomConfig)
 
 class BlockDeviceModelBoomConfig extends Config(
   new WithBlockDevice ++
-  new WithBlockDeviceModelBoomTop ++
+  new WithBlockDeviceModelBoomRocketTop ++
   new BaseBoomConfig)
-
-class DualCoreBoomConfig extends Config(
-  // Core gets tacked onto existing list
-  new boom.system.WithNBoomCores(2) ++
-  new DefaultBoomConfig)
-
-class RV32BoomConfig extends Config(
-  new WithBootROM ++
-  new boom.system.SmallRV32UnifiedBoomConfig)
 
 class GPIOBoomConfig extends Config(
   new WithGPIO ++
-  new WithGPIOBoomTop ++
+  new WithGPIOBoomRocketTop ++
   new BaseBoomConfig)
+
+/**
+ * Slightly different looking configs since we need to override
+ * the `WithNBoomCores` with the DefaultBoomConfig params
+ */
+class DualCoreBoomConfig extends Config(
+  new WithNormalBoomRocketTop ++
+  new WithBootROM ++
+  new boom.common.WithRVC ++
+  new boom.common.DefaultBoomConfig ++
+  new boom.system.WithNBoomCores(2) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class DualCoreSmallBoomConfig extends Config(
+  new WithNormalBoomRocketTop ++
+  new WithBootROM ++
+  new boom.common.WithRVC ++
+  new boom.common.WithSmallBooms ++
+  new boom.common.DefaultBoomConfig ++
+  new boom.system.WithNBoomCores(2) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class RV32UnifiedBoomConfig extends Config(
+  new WithNormalBoomRocketTop ++
+  new WithBootROM ++
+  new boom.system.SmallRV32UnifiedBoomConfig)
+
+// ---------------------
+// BOOM and Rocket Configs
+// ---------------------
+
+class BaseBoomAndRocketConfig extends Config(
+  new WithBootROM ++
+  new boom.system.WithRenumberHarts ++
+  new boom.common.WithRVC ++
+  new boom.common.DefaultBoomConfig ++
+  new boom.system.WithNBoomCores(1) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class SmallBaseBoomAndRocketConfig extends Config(
+  new WithBootROM ++
+  new boom.system.WithRenumberHarts ++
+  new boom.common.WithRVC ++
+  new boom.common.WithSmallBooms ++
+  new boom.common.DefaultBoomConfig ++
+  new boom.system.WithNBoomCores(1) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class DefaultBoomAndRocketConfig extends Config(
+  new WithNormalBoomRocketTop ++
+  new BaseBoomAndRocketConfig)
+
+class SmallDefaultBoomAndRocketConfig extends Config(
+  new WithNormalBoomRocketTop ++
+  new SmallBaseBoomAndRocketConfig)
+
+class HwachaBoomAndRocketConfig extends Config(
+  new hwacha.DefaultHwachaConfig ++
+  new DefaultBoomAndRocketConfig)
+
+class RoccBoomAndRocketConfig extends Config(
+  new WithRoccExample ++
+  new DefaultBoomAndRocketConfig)
+
+class PWMBoomAndRocketConfig extends Config(
+  new WithPWMBoomRocketTop ++
+  new BaseBoomAndRocketConfig)
+
+class PWMAXI4BoomAndRocketConfig extends Config(
+  new WithPWMAXI4BoomRocketTop ++
+  new BaseBoomAndRocketConfig)
+
+class SimBlockDeviceBoomAndRocketConfig extends Config(
+  new WithBlockDevice ++
+  new WithSimBlockDeviceBoomRocketTop ++
+  new BaseBoomAndRocketConfig)
+
+class BlockDeviceModelBoomAndRocketConfig extends Config(
+  new WithBlockDevice ++
+  new WithBlockDeviceModelBoomRocketTop ++
+  new BaseBoomAndRocketConfig)
+
+class GPIOBoomAndRocketConfig extends Config(
+  new WithGPIO ++
+  new WithGPIOBoomRocketTop ++
+  new BaseBoomAndRocketConfig)
+
+class DualCoreBoomAndOneRocketConfig extends Config(
+  new WithNormalBoomRocketTop ++
+  new WithBootROM ++
+  new boom.system.WithRenumberHarts ++
+  new boom.common.WithRVC ++
+  new boom.common.DefaultBoomConfig ++
+  new boom.system.WithNBoomCores(2) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class RV32BoomAndRocketConfig extends Config(
+  new WithNormalBoomRocketTop ++
+  new WithBootROM ++
+  new boom.system.WithRenumberHarts ++
+  new boom.common.WithBoomRV32 ++
+  new boom.common.WithRVC ++
+  new boom.common.DefaultBoomConfig ++
+  new boom.system.WithNBoomCores(1) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new WithRV32 ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
