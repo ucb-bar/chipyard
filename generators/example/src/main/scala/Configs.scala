@@ -217,7 +217,7 @@ class DualCoreBoomAndOneRocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class DualCoreBoomAndOneHwachaRocketConfig extends Config(
-  new WithNormalBoomAndRocketTop ++
+  new WithNormalBoomRocketTop ++
   new WithBootROM ++
   new WithMultiRoCC ++
   new WithMultiRoCCHwacha(0) ++ // put Hwacha just on hart0 which was renumbered to Rocket
