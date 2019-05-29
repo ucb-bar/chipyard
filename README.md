@@ -8,7 +8,7 @@ To get started using REBAR, see the documentation on the REBAR documentation sit
 
 REBAR is an open source starter template for your custom Chisel project.
 It will allow you to leverage the Chisel HDL, Rocket Chip SoC generator, and other [Berkeley][berkeley] projects to produce a [RISC-V][riscv] SoC with everything from MMIO-mapped peripherals to custom accelerators.
-It contains processor cores ([Rocket][rocket], [BOOM][boom]), accelerators ([Hwacha][hwacha]), FPGA simulation tools ([FireSim][firesim]), ASIC tools ([HAMMER][hammer]) and other tooling to help create a full featured SoC.
+It contains processor cores ([Rocket][rocket-chip], [BOOM][boom]), accelerators ([Hwacha][hwacha]), FPGA simulation tools ([FireSim][firesim]), ASIC tools ([HAMMER][hammer]) and other tooling to help create a full featured SoC.
 REBAR is actively developed in the [Berkeley Architecture Research Group][ucb-bar] in the [Electrical Engineering and Computer Sciences Department][eecs] at the [University of California, Berkeley][berkeley].
 
 ## Resources
