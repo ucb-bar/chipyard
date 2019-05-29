@@ -7,6 +7,7 @@ Checking out the sources
 After cloning this repo, you will need to initialize all of the submodules.
 
 .. code-block:: shell
+
     git clone https://github.com/ucb-bar/project-template.git
     cd project-template
     ./scripts/init-submodules-no-riscv-tools.sh
@@ -20,6 +21,7 @@ There are detailed instructions at https://github.com/riscv/riscv-tools to insta
 But to get a basic installation, just the following steps are necessary.
 
 .. code-block:: shell
+
     ./scripts/build-toolchains.sh riscv # for a normal risc-v toolchain
 
     # OR
