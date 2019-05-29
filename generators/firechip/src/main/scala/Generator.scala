@@ -122,3 +122,12 @@ object FireSimGenerator extends App with IsFireSimGeneratorLike {
   generateArtefacts
   generateTclEnvFile
 }
+
+// For now, provide a separate generator app when not specifically building for FireSim
+object Generator extends freechips.rocketchip.util.GeneratorApp with HasTestSuites {
+  val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
+  generateFirrtl
+  generateAnno
+  generateTestSuiteMakefrags
+  generateArtefacts
+}

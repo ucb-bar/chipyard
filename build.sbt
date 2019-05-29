@@ -50,14 +50,7 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
       new Group(test.name, Seq(test), SubProcess(options))
   } toSeq
 
-
 // Subproject definitions begin
-
-// Biancolin: get to the bottom of these
-//lazy val rebarFirrtl = (project in file("tools/firrtl"))
-//  .settings(commonSettings)
-// Overlaps with the dependency-injected version
-// lazy val rocketchip = RootProject(rocketChipDir)
 
 // NB: FIRRTL dependency is unmanaged (and dropped in sim/lib)
 lazy val chisel  = (project in rocketChipDir / "chisel3")
@@ -76,7 +69,7 @@ lazy val rocketMacros  = (project in rocketChipDir / "macros")
 // HACK: I'm strugging to override settings in rocket-chip's build.sbt (i want
 // the subproject to register a new library dependendency on midas's targetutils library)
 // So instead, avoid the existing build.sbt altogether and specify the project's root at src/
-lazy val rebarRocketchip = (project in rocketChipDir / "src")
+lazy val rocketchip = (project in rocketChipDir / "src")
   .settings(
     commonSettings,
     scalaSource in Compile := baseDirectory.value / "main" / "scala",
@@ -84,7 +77,7 @@ lazy val rebarRocketchip = (project in rocketChipDir / "src")
   .dependsOn(chisel, hardfloat, rocketMacros)
 
 lazy val testchipip = (project in file("generators/testchipip"))
-  .dependsOn(rebarRocketchip)
+  .dependsOn(rocketchip)
   .settings(commonSettings)
 
 lazy val example = conditionalDependsOn(project in file("generators/example"))
@@ -95,15 +88,15 @@ lazy val utilities = conditionalDependsOn(project in file("generators/utilities"
   .settings(commonSettings)
 
 lazy val icenet = (project in file("generators/icenet"))
-  .dependsOn(rebarRocketchip, testchipip)
+  .dependsOn(rocketchip, testchipip)
   .settings(commonSettings)
 
 lazy val hwacha = (project in file("generators/hwacha"))
-  .dependsOn(rebarRocketchip)
+  .dependsOn(rocketchip)
   .settings(commonSettings)
 
 lazy val boom = (project in file("generators/boom"))
-  .dependsOn(rebarRocketchip)
+  .dependsOn(rocketchip)
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
@@ -113,12 +106,12 @@ lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
   .settings(commonSettings)
 
 lazy val barstoolsMacros = (project in file("./tools/barstools/macros/"))
-  .dependsOn(mdf, rebarRocketchip)
+  .dependsOn(mdf, rocketchip)
   .enablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonSettings)
 
 lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
-  .dependsOn(rebarRocketchip)
+  .dependsOn(rocketchip)
   .settings(commonSettings)
 
 // Library components of FireSim
