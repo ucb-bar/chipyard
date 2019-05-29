@@ -16,5 +16,6 @@ Hit next to get started!
    REBAR-Basics
    Configs-Parameters-Mixins
    Adding-An-Accelerator-Tutorial
+   Initial-Repo-Setup
    Running-A-Simulation
    rebar-generator-mixins
