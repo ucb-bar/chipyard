@@ -188,10 +188,10 @@ class BeagleConfig extends Config(
   new WithGenericSerdes ++
 
   // note: THIS MUST BE ABOVE hwacha.DefaultHwachaConfig TO WORK
-  new WithMultiRoCC ++ // attach particular RoCC accelerators based on the hart
-  new WithMultiRoCCHwachaWithHarts(Seq(1)) ++ // add a hwacha to just boom
-  new WithMultiRoCCSystolicWithHarts(Seq(0)) ++ // add a systolic to just rocket
-  new boom.system.WithRenumberHarts ++ // renumber harts with rocket starting at 0 then boom
+  new example.WithMultiRoCC ++ // attach particular RoCC accelerators based on the hart
+  new example.WithMultiRoCCHwacha(0) ++ // add a hwacha to just boom
+  new WithMultiRoCCSystolic(1) ++ // add a systolic to just rocket
+  new boom.system.WithRenumberHarts(rocketFirst=false) ++ // renumber harts with boom starting at 0 then rocket
 
   // systolic parameter setup mixins
   new WithSystolicParams ++
@@ -231,10 +231,10 @@ class BeagleSimConfig extends Config(
   new WithGenericSerdes ++
 
   // note: THIS MUST BE ABOVE hwacha.DefaultHwachaConfig TO WORK
-  new WithMultiRoCC ++ // attach particular RoCC accelerators based on the hart
-  new WithMultiRoCCHwachaWithHarts(Seq(1)) ++ // add a hwacha to just boom
-  new WithMultiRoCCSystolicWithHarts(Seq(0)) ++ // add a systolic to just rocket
-  new boom.system.WithRenumberHarts ++ // renumber harts with rocket starting at 0 then boom
+  new example.WithMultiRoCC ++ // attach particular RoCC accelerators based on the hart
+  new example.WithMultiRoCCHwacha(0) ++ // add a hwacha to just boom
+  new WithMultiRoCCSystolic(1) ++ // add a systolic to just rocket
+  new boom.system.WithRenumberHarts(rocketFirst=false) ++ // renumber harts with boom starting at 0 then rocket
 
   // systolic parameter setup mixins
   new WithSystolicParams ++

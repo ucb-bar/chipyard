@@ -29,38 +29,14 @@ SUB_PROJECT ?= example
 
 ifeq ($(SUB_PROJECT),example)
 	SBT_PROJECT       ?= example
-	MODEL             ?= RocketTestHarness
+	MODEL             ?= BoomRocketTestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= $(SBT_PROJECT)
 	CONFIG            ?= DefaultRocketConfig
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
-	TOP               ?= RocketTop
-endif
-# for a BOOM based example system
-ifeq ($(SUB_PROJECT),boomexample)
-	SBT_PROJECT       ?= example
-	MODEL             ?= BoomAndRocketTestHarness
-	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= $(SBT_PROJECT)
-	CONFIG            ?= DefaultBoomConfig
-	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
-	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
-	TB                ?= TestDriver
-	TOP               ?= BoomAndRocketTop
-endif
-# for a BOOM + Rocket based example system
-ifeq ($(SUB_PROJECT),boomrocketexample)
-	SBT_PROJECT       ?= example
-	MODEL             ?= BoomAndRocketTestHarness
-	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= $(SBT_PROJECT)
-	CONFIG            ?= DefaultBoomAndRocketConfig
-	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
-	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
-	TB                ?= TestDriver
-	TOP               ?= BoomAndRocketTop
+	TOP               ?= BoomRocketTop
 endif
 # for BOOM developers
 ifeq ($(SUB_PROJECT),boom)
@@ -110,7 +86,6 @@ ifeq ($(SUB_PROJECT),beagle)
 	TB                ?= TestDriver
 	TOP               ?= BeagleChipTop
 endif
-
 
 #########################################################################################
 # path to rocket-chip and testchipip
@@ -172,7 +147,7 @@ output_dir=$(sim_dir)/output/$(long_name)
 # helper variables to run binaries
 #########################################################################################
 BINARY ?=
-SIM_FLAGS ?= +verbose
+SIM_FLAGS ?= +max-cycles=$(timeout_cycles)
 sim_out_name = $(notdir $(basename $(BINARY))).$(long_name)
 
 #########################################################################################
@@ -200,4 +175,5 @@ sim_vsrcs = \
 #########################################################################################
 # assembly/benchmark variables
 #########################################################################################
-timeout_cycles = 100000000
+timeout_cycles = 10000000
+bmark_timeout_cycles = 100000000

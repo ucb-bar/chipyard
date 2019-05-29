@@ -3,13 +3,17 @@ package example
 import chisel3._
 import chisel3.util.{log2Up}
 
-import freechips.rocketchip.config.{Parameters, Config}
-import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
+import freechips.rocketchip.config.{Field, Parameters, Config}
+import freechips.rocketchip.subsystem.{RocketTilesKey, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.tile.{XLen}
+import freechips.rocketchip.tile.{XLen, BuildRoCC, TileKey, LazyRoCC}
+
+import boom.system.{BoomTilesKey}
 
 import testchipip._
+
+import hwacha.{Hwacha}
 
 import sifive.blocks.devices.gpio._
 
@@ -41,63 +45,63 @@ class WithGPIO extends Config((site, here, up) => {
     GPIOParams(address = 0x10012000, width = 4, includeIOF = false))
 })
 
-// ----------------------------------------
-// Rocket Top Level System Parameter Mixins
-// ----------------------------------------
+// -----------------------------------------------
+// BOOM and/or Rocket Top Level System Parameter Mixins
+// -----------------------------------------------
 
 /**
- * Class to specify a "plain" top level rocket-chip system
+ * Class to specify a "plain" top level BOOM and/or Rocket system
  */
-class WithNormalRocketTop extends Config((site, here, up) => {
-  case BuildRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    Module(LazyModule(new RocketTop()(p)).module)
+class WithNormalBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    Module(LazyModule(new BoomRocketTop()(p)).module)
   }
 })
 
 /**
- * Class to specify a top level rocket-chip system with PWM
+ * Class to specify a top level BOOM and/or Rocket system with PWM
  */
-class WithPWMRocketTop extends Config((site, here, up) => {
-  case BuildRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new RocketTopWithPWMTL()(p)).module)
+class WithPWMBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new BoomRocketTopWithPWMTL()(p)).module)
 })
 
 /**
- * Class to specify a top level rocket-chip system with a PWM AXI4
+ * Class to specify a top level BOOM and/or Rocket system with a PWM AXI4
  */
-class WithPWMAXI4RocketTop extends Config((site, here, up) => {
-  case BuildRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new RocketTopWithPWMAXI4()(p)).module)
+class WithPWMAXI4BoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new BoomRocketTopWithPWMAXI4()(p)).module)
 })
 
 /**
- * Class to specify a top level rocket-chip system with a block device
+ * Class to specify a top level BOOM and/or Rocket system with a block device
  */
-class WithBlockDeviceModelRocketTop extends Config((site, here, up) => {
-  case BuildRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new RocketTopWithBlockDevice()(p)).module)
+class WithBlockDeviceModelBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new BoomRocketTopWithBlockDevice()(p)).module)
     top.connectBlockDeviceModel()
     top
   }
 })
 
 /**
- * Class to specify a top level rocket-chip system with a simulator block device
+ * Class to specify a top level BOOM and/or Rocket system with a simulator block device
  */
-class WithSimBlockDeviceRocketTop extends Config((site, here, up) => {
-  case BuildRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new RocketTopWithBlockDevice()(p)).module)
+class WithSimBlockDeviceBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new BoomRocketTopWithBlockDevice()(p)).module)
     top.connectSimBlockDevice(clock, reset)
     top
   }
 })
 
 /**
- * Class to specify a top level rocket-chip system with GPIO
+ * Class to specify a top level BOOM and/or Rocket system with GPIO
  */
-class WithGPIORocketTop extends Config((site, here, up) => {
-  case BuildRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new RocketTopWithGPIO()(p)).module)
+class WithGPIOBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new BoomRocketTopWithGPIO()(p)).module)
     for (gpio <- top.gpio) {
       for (pin <- gpio.pins) {
         pin.i.ival := false.B
@@ -107,68 +111,40 @@ class WithGPIORocketTop extends Config((site, here, up) => {
   }
 })
 
-// -----------------------------------------------
-// BOOM + Rocket Top Level System Parameter Mixins
-// -----------------------------------------------
+// ------------------
+// Multi-RoCC Support
+// ------------------
 
 /**
- * Class to specify a "plain" top level BOOM + Rocket system
+ * Map from a hartId to a particular RoCC accelerator
  */
-class WithNormalBoomAndRocketTop extends Config((site, here, up) => {
-  case BuildBoomAndRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    Module(LazyModule(new BoomAndRocketTop()(p)).module)
-  }
+case object MultiRoCCKey extends Field[Map[Int, Seq[Parameters => LazyRoCC]]](Map.empty[Int, Seq[Parameters => LazyRoCC]])
+
+/**
+ * Mixin to enable different RoCCs based on the hartId
+ */
+class WithMultiRoCC extends Config((site, here, up) => {
+  case BuildRoCC => site(MultiRoCCKey).getOrElse(site(TileKey).hartId, Nil)
 })
 
 /**
- * Class to specify a top level BOOM + Rocket system with PWM
+ * Mixin to add Hwachas to cores based on hart
+ *
+ * For ex:
+ *   Core 0, 1, 2, 3 have been defined earlier
+ *     with hartIds of 0, 1, 2, 3 respectively
+ *   And you call WithMultiRoCCHwacha(0,1)
+ *   Then Core 0 and 1 will get a Hwacha
+ *
+ * @param harts harts to specify which will get a Hwacha
  */
-class WithPWMBoomAndRocketTop extends Config((site, here, up) => {
-  case BuildBoomAndRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new BoomAndRocketTopWithPWMTL()(p)).module)
-})
-
-/**
- * Class to specify a top level BOOM + Rocket system with a PWM AXI4
- */
-class WithPWMAXI4BoomAndRocketTop extends Config((site, here, up) => {
-  case BuildBoomAndRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new BoomAndRocketTopWithPWMAXI4()(p)).module)
-})
-
-/**
- * Class to specify a top level BOOM + Rocket system with a block device
- */
-class WithBlockDeviceModelBoomAndRocketTop extends Config((site, here, up) => {
-  case BuildBoomAndRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomAndRocketTopWithBlockDevice()(p)).module)
-    top.connectBlockDeviceModel()
-    top
-  }
-})
-
-/**
- * Class to specify a top level BOOM + Rocket system with a simulator block device
- */
-class WithSimBlockDeviceBoomAndRocketTop extends Config((site, here, up) => {
-  case BuildBoomAndRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomAndRocketTopWithBlockDevice()(p)).module)
-    top.connectSimBlockDevice(clock, reset)
-    top
-  }
-})
-
-/**
- * Class to specify a top level BOOM + Rocket system with GPIO
- */
-class WithGPIOBoomAndRocketTop extends Config((site, here, up) => {
-  case BuildBoomAndRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomAndRocketTopWithGPIO()(p)).module)
-    for (gpio <- top.gpio) {
-      for (pin <- gpio.pins) {
-        pin.i.ival := false.B
-      }
+class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
+  case MultiRoCCKey => {
+    require(harts.max <= ((up(RocketTilesKey, site).length + up(BoomTilesKey, site).length) - 1))
+    up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
+      (i -> Seq((p: Parameters) => {
+        LazyModule(new Hwacha()(p)).suggestName("hwacha")
+      }))
     }
-    top
   }
 })

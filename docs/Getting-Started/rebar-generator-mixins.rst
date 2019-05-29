@@ -1,5 +1,3 @@
-
-
 SoC Generator Config Mix-ins:
 ==============================
 
@@ -88,8 +86,8 @@ SiFive Blocks
     - HasSPIProtocol
         - HasSPIEndian
         - HasSPILength
-        - HasSPICSMode 
-    - HasPeripherySPIFlash 
+        - HasSPICSMode
+    - HasPeripherySPIFlash
     - HasPeripheryUART
 
 

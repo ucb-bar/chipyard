@@ -23,6 +23,8 @@ import boom.system.{BoomTilesKey}
 
 import systolic.{SystolicArray, SystolicArrayKey, SystolicArrayConfig, Dataflow}
 
+import example.{MultiRoCCKey}
+
 // --------------
 // Special MIXINS
 // --------------
@@ -101,43 +103,9 @@ class WithSystolicParams extends Config((site, here, up) => {
       dataflow = Dataflow.BOTH)
 })
 
-// ------ NOTE: This can be a bit confusing with the MultiRoCC stuff
-
-/**
- * Map from a hartId to a particular RoCC accelerator
- */
-case object MultiRoCCKey extends Field[Map[Int, Seq[Parameters => LazyRoCC]]](Map.empty[Int, Seq[Parameters => LazyRoCC]])
-
-/**
- * Mixin to enable different RoCCs based on the hardId
- */
-class WithMultiRoCC extends Config((site, here, up) => {
-  case BuildRoCC => site(MultiRoCCKey).getOrElse(site(TileKey).hartId, Nil)
-})
-
-/**
- * Mixin to add Hwachas to cores
- *
- * For ex:
- *   Core 0, 1, 2, 3 have been defined earlier
- *     with hardIds of 0, 1, 2, 3 respectively
- *   And you call WithMultiRoCCHwachaWithHarts(Seq(0,1))
- *   Then Core 0 and 1 will get a Hwacha
- *
- * @param harts Seq of harts to specifiy which will get a Hwacha
- */
-class WithMultiRoCCHwachaWithHarts(harts: Seq[Int]) extends Config((site, here, up) => {
-  case MultiRoCCKey => {
-    require(harts.max <= ((up(RocketTilesKey, site).length + up(BoomTilesKey, site).length) - 1))
-    up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
-      (i -> Seq((p: Parameters) => {
-        implicit val q = p
-        implicit val v = implicitly[ValName]
-        LazyModule(new Hwacha()(p))
-      }))
-    }
-  }
-})
+// ---------------------
+// Systolic Array Mixins
+// ---------------------
 
 /**
  * Mixin to add SystolicArrays to cores
@@ -145,19 +113,19 @@ class WithMultiRoCCHwachaWithHarts(harts: Seq[Int]) extends Config((site, here, 
  * For ex:
  *   Core 0, 1, 2, 3 have been defined earlier
  *     with hardIds of 0, 1, 2, 3 respectively
- *   And you call WithMultiRoCCSystolicWithHarts(Seq(0,1))
+ *   And you call WithMultiRoCCSystolicWithHarts(0,1)
  *   Then Core 0 and 1 will get a SystolicArray
  *
- * @param harts Seq of harts to specifiy which will get a SystolicArray
+ * @param harts Seq of harts to specify which will get a SystolicArray
  */
-class WithMultiRoCCSystolicWithHarts(harts: Seq[Int]) extends Config((site, here, up) => {
+class WithMultiRoCCSystolic(harts: Int*) extends Config((site, here, up) => {
   case MultiRoCCKey => {
     require(harts.max <= ((up(RocketTilesKey, site).length + up(BoomTilesKey, site).length) - 1))
     up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
       (i -> Seq((p: Parameters) => {
         implicit val q = p
         implicit val v = implicitly[ValName]
-        LazyModule(new SystolicArray(SInt(16.W), SInt(16.W), SInt(32.W), OpcodeSet.custom3))
+        LazyModule(new SystolicArray(SInt(16.W), SInt(16.W), SInt(32.W), OpcodeSet.custom3)).suggestName("systolic_array")
       }))
     }
   }

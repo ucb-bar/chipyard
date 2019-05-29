@@ -1,11 +1,9 @@
-.. _Getting Started:
-
 Getting Started
 ================================
 
-These guides will walk you through the basics of the ReBAR framework:
+These guides will walk you through the basics of the REBAR framework:
 
-- First, we will go over the different configurations avaliable.
+- First, we will go over the different configurations available.
 
 - Then, we will walk through adding a custom accelerator.
 
@@ -15,8 +13,8 @@ Hit next to get started!
    :maxdepth: 2
    :caption: Getting Started:
 
-   ReBAR-Basics
-   Configs-Parameters-Mixins   
+   REBAR-Basics
+   Configs-Parameters-Mixins
    Adding-An-Accelerator-Tutorial
    Running-A-Simulation
    rebar-generator-mixins
