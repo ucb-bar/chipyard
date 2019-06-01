@@ -89,18 +89,20 @@ class WithSystolicParams extends Config((site, here, up) => {
   case SystolicArrayKey =>
     SystolicArrayConfig(
       tileRows = 1,
-      tileColumns = 8,
-      meshRows = 8,
-      meshColumns = 1,
+      tileColumns = 1,
+      meshRows = 16,
+      meshColumns = 16,
       ld_str_queue_length = 10,
       ex_queue_length = 10,
-      sp_banks = 7,
-      sp_bank_entries = 16, // has to be a multiply of meshRows*tileRows
+      sp_banks = 4,
+      sp_bank_entries = 256 * 1024 * 8 / (4 * 16 * 8), // has to be a multiply of meshRows*tileRows
       sp_width = 8 * 16, // has to be meshRows*tileRows*dataWidth // TODO should this be changeable?
       shifter_banks = 1, // TODO add separate parameters for left and up shifter banks
       depq_len = 256,
-      acc_rows = 64,
-      dataflow = Dataflow.BOTH)
+      dataflow = Dataflow.BOTH,
+      acc_rows = 64 * 1024 * 8 / (16 * 32),
+      mem_pipeline = 1
+    )
 })
 
 // ---------------------
@@ -143,9 +145,13 @@ class WithMiniRocketCore extends Config((site, here, up) => {
       btb = Some(BTBParams(nEntries = 14, nRAS = 2)),
       dcache = Some(DCacheParams(
         rowBits = site(SystemBusKey).beatBits,
-        blockBytes = site(CacheBlockBytes))),
+        blockBytes = site(CacheBlockBytes),
+        nSets = 64,
+        nWays = 4)),
       icache = Some(ICacheParams(
         rowBits = site(SystemBusKey).beatBits,
-        blockBytes = site(CacheBlockBytes))),
+        blockBytes = site(CacheBlockBytes),
+        nSets = 64,
+        nWays = 4)),
       hartId = up(BoomTilesKey, site).length + up(RocketTilesKey, site).length)
 })
