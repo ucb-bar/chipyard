@@ -45,9 +45,9 @@ class WithGPIO extends Config((site, here, up) => {
     GPIOParams(address = 0x10012000, width = 4, includeIOF = false))
 })
 
-// -----------------------------------------------
+// ----------------------------------------------------
 // BOOM and/or Rocket Top Level System Parameter Mixins
-// -----------------------------------------------
+// ----------------------------------------------------
 
 /**
  * Class to specify a "plain" top level BOOM and/or Rocket system

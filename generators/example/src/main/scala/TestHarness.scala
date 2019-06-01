@@ -13,8 +13,14 @@ import freechips.rocketchip.util.GeneratorApp
 // BOOM and/or Rocket Test Harness
 // --------------------------
 
+/**
+ * Rocket Chip parameter that can be overridden to support multiple different systems (i.e. ones with PWMs, GPIOs, etc)
+ */
 case object BuildBoomRocketTop extends Field[(Clock, Bool, Parameters) => BoomRocketTopModule[BoomRocketTop]]
 
+/**
+ * Default Test Harness used to instantiate the system and connect the relevant ports
+ */
 class BoomRocketTestHarness(implicit val p: Parameters) extends Module {
   val io = IO(new Bundle {
     val success = Output(Bool())
