@@ -18,7 +18,7 @@ search () {
         echo "Running check on submodule $submodule in $dir"
         hash=$(echo "$status" | grep $submodule | awk '{print$1}' | grep -o "[[:alnum:]]*")
         echo "Searching for $hash in origin/master of $submodule"
-        git -C $dir/$submodule log origin/master | grep "$hash" # needs init'ed submodules
+        git -C $dir/$submodule branch -r --contains "$hash" | grep "origin/master" # needs init'ed submodules
     done
 }
 
