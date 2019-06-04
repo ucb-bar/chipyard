@@ -27,8 +27,8 @@ case object LbwifDividerInit extends Field[Int]
 case class BeagleParams(
   scrAddress: Int,
   clkSelBits: Int = 1,
-  dividerBits: Int = 8,
-  lbwifDividerBits: Int = 8
+  coreClkDividerBits: Int = 8,
+  lbwif_clk_dividerBits: Int = 8
 )
 
 trait HasBeagleTopBundleContents extends Bundle {
@@ -37,9 +37,11 @@ trait HasBeagleTopBundleContents extends Bundle {
   val boot          = Input(Bool())
   val rst_async     = Input(Bool())
 
-  val clk_sel       = Output(UInt(p(PeripheryBeagleKey).clkSelBits.W))
-  val lbwif_divider = Output(UInt(p(PeripheryBeagleKey).lbwifDividerBits.W))
-  val hbwif_rsts    = Output(Vec(p(HbwifNumLanes), Bool()))
+  val clk_sel             = Output(UInt(p(PeripheryBeagleKey).clkSelBits.W))
+  val core_inclk_divider  = Output(UInt(p(PeripheryBeagleKey).coreClkDividerBits.W))
+  val core_outclk_divider = Output(UInt(p(PeripheryBeagleKey).coreClkDividerBits.W))
+  val lbwif_clk_divider   = Output(UInt(p(PeripheryBeagleKey).lbwif_clk_dividerBits.W))
+  val hbwif_rsts          = Output(Vec(p(HbwifNumLanes), Bool()))
 
   val switcher_sel  = Output(Bool())
 }
@@ -53,8 +55,14 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap {
   val clk_sel = withReset(io.rst_async) {
     Module(new AsyncResetRegVec(w = c.clkSelBits, init = 0))
   }
-  val lbwif_divider = withReset(io.rst_async) {
-    Module(new AsyncResetRegVec(w = c.lbwifDividerBits, init = p(LbwifDividerInit)))
+  val lbwif_clk_divider = withReset(io.rst_async) {
+    Module(new AsyncResetRegVec(w = c.lbwif_clk_dividerBits, init = p(LbwifDividerInit)))
+  }
+  val core_inclk_divider = withReset(io.rst_async) {
+    Module(new AsyncResetRegVec(w = c.coreClkDividerBits, init = p(CoreDividerInit)))
+  }
+  val core_outclk_divider = withReset(io.rst_async) {
+    Module(new AsyncResetRegVec(w = c.coreClkDividerBits, init = p(CoreDividerInit)))
   }
   val hbwif_rsts = Seq.fill(p(HbwifNumLanes)) {
     withReset(io.rst_async) {
@@ -66,7 +74,9 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap {
   }
 
   io.clk_sel := clk_sel.io.q
-  io.lbwif_divider := lbwif_divider.io.q
+  io.lbwif_clk_divider := lbwif_clk_divider.io.q
+  io.core_inclk_divider := core_inclk_divider.io.q
+  io.core_outclk_divider := core_outclk_divider.io.q
   io.hbwif_rsts := VecInit(hbwif_rsts.map(_.io.q))
   io.switcher_sel := switcher_sel.io.q
 
@@ -75,7 +85,9 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap {
     0x0c -> Seq(RegField.rwReg(1, switcher_sel.io)),
     0x10 -> hbwif_rsts.map(rst => RegField.rwReg(1, rst.io)),
     0x14 -> Seq(RegField.rwReg(c.clkSelBits, clk_sel.io)),
-    0x1c -> Seq(RegField.rwReg(c.lbwifDividerBits, lbwif_divider.io))
+    0x1c -> Seq(RegField.rwReg(c.lbwif_clk_dividerBits, lbwif_clk_divider.io))
+    0x2c -> Seq(RegField.rwReg(c.coreClkDividerBits, core_inclk_divider.io))
+    0x3c -> Seq(RegField.rwReg(c.coreClkDividerBits, core_outclk_divider.io))
   )
 }
 
@@ -206,14 +218,36 @@ trait HasPeripheryBeagleModuleImp extends LazyModuleImp with HasPeripheryBeagleB
   val lbwif_serial = IO(chiselTypeOf(outer.lbwif.module.io.ser))
   lbwif_serial <> outer.lbwif.module.io.ser
 
-  val lbwifClkDiv = Module(new testchipip.ClockDivider(outer.scrParams.lbwifDividerBits))
-  val lbwif_clk = lbwifClkDiv.io.clockOut
+  val lbwif_clk_div = Module(new testchipip.ClockDivider(outer.scrParams.lbwif_clk_dividerBits))
+  val lbwif_clk = lbwif_clk_div.io.clockOut
   val lbwif_rst = ResetCatchAndSync(lbwif_clk, reset.toBool)
-  lbwifClkDiv.io.divisor := outer.scr.module.io.lbwif_divider
+  lbwif_clk_div.io.divisor := outer.scr.module.io.lbwif_clk_divider
   Seq(outer.lbwif, outer.lbwifCrossingSource, outer.lbwifCrossingSink).foreach { m =>
     m.module.clock := lbwif_clk
     m.module.reset := lbwif_rst
   }
+
+  // setup core clock
+  val core_inclk_div = Module(new testchipip.ClockDivider(outer.scrParams.lbwif_clk_dividerBits))
+  val core_inclk = core_inclk_div.io.clockOut
+  val lbwif_rst = ResetCatchAndSync(core_inclk, reset.toBool)
+  core_inclk_div.io.divisor := outer.scr.module.io.core_inclk_divider
+  Seq(outer.lbwif, outer.lbwifCrossingSource, outer.lbwifCrossingSink).foreach { m =>
+    m.module.clock := lbwif_clk
+    m.module.reset := lbwif_rst
+  }
+
+  // setup core clock
+  val lbwif_clk_div = Module(new testchipip.ClockDivider(outer.scrParams.lbwif_clk_dividerBits))
+  val lbwif_clk = lbwif_clk_div.io.clockOut
+  val lbwif_rst = ResetCatchAndSync(lbwif_clk, reset.toBool)
+  lbwif_clk_div.io.divisor := outer.scr.module.io.lbwif_clk_divider
+  Seq(outer.lbwif, outer.lbwifCrossingSource, outer.lbwifCrossingSink).foreach { m =>
+    m.module.clock := lbwif_clk
+    m.module.reset := lbwif_rst
+  }
+  val core_inclk_divider  = Output(UInt(p(PeripheryBeagleKey).coreClkDividerBits.W))
+  val core_outclk_divider = Output(UInt(p(PeripheryBeagleKey).coreClkDividerBits.W))
 
   // switch from lbwif and hbwif
   outer.switcher.module.io.sel := outer.scr.module.io.switcher_sel

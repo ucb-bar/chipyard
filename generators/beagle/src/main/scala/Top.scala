@@ -60,7 +60,8 @@ class BeagleTopModule[+L <: BeagleTop](l: L) extends boom.system.BoomAndRocketSu
   with freechips.rocketchip.util.DontTouch {
 
   // backup clocks coming from offchip
-  val alt_clks    = IO(Input(Vec(2, Clock())))
+  val alt_clks_single = IO(Input(Vec(1, Clock())))
+  val alt_clks_diff = IO(Input(Vec(1, Clock())))
   val alt_clk_sel = IO(Input(UInt(1.W)))
 
   val clk_out       = IO(Output(Clock()))
@@ -70,8 +71,8 @@ class BeagleTopModule[+L <: BeagleTop](l: L) extends boom.system.BoomAndRocketSu
   lbwif_clk_out := lbwif_clk
 
   // get the actual clock from the multiple alternate clocks
-  require(alt_clk_sel.getWidth >= log2Ceil(alt_clks.length), "[sys-top] must be able to select all input clocks")
-  val clockMux = testchipip.ClockMutexMux(alt_clks)
+  require(alt_clk_sel.getWidth >= (log2Ceil(alt_clks_single.length) + log2Ceil(alt_clks_diff.length)), "[sys-top] must be able to select all input clocks")
+  val clockMux = testchipip.ClockMutexMux(alt_clks_single ++ alt_clks_diff)
   clockMux.io.sel := alt_clk_sel
   clockMux.io.resetAsync := rst_async
   clk_out := clockMux.io.clockOut

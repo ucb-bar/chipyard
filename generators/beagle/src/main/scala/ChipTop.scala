@@ -37,7 +37,9 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
   val reset           = IO(Input(Bool())) // reset from off chip
   val boot            = IO(Input(Bool())) // boot from sdcard or tether
 
-  val alt_clks        = IO(Input(Vec(2, Clock()))) // extra "chicken bit" clocks
+  val alt_clks_single = IO(Input(Vec(1, Clock()))) // extra "chicken bit" clocks
+  val alt_clks_diff   = IO(Vec(1, new Differential)) // extra "chicken bit" clocks
+  val alt_clks        = IO(Input(Vec(1, Clock()))) // extra "chicken bit" clocks
   val alt_clk_sel     = IO(Input(UInt(1.W))) // selector for them
 
   val lbwif_serial     = IO(chiselTypeOf(sys.lbwif_serial)) // lbwif signals
@@ -70,7 +72,17 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
   hbwif.rx <> sys.hbwif_rx
 
   // pass in alternate clocks coming from offchip
-  sys.alt_clks <> alt_clks
+  sys.alt_clks_single <> alt_clks_single
+  // convert differential clocks into normal clocks
+  val alt_clks_diff_converted = alt_clks_diff.map { clock_io =>
+    val clock_rx = withClockAndReset(sys_clk, sys_rst) {
+      Module(new ClockReceiver())
+    }
+    clock_rx.io.VIP <> clock_io.p
+    clock_rx.io.VIN <> clock_io.n
+    clock_rx.io.VOBUF
+  }
+  sys.alt_clks_diff <> alt_clks_diff_converted
   sys.alt_clk_sel := alt_clk_sel
 
   // other signals
