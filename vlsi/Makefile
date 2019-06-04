@@ -26,7 +26,7 @@ include $(base_dir)/common.mk
 #sim_name is unused, but GenerateSimFiles expects it
 sim_name     ?= vcs
 tech_name    ?= 
-tech_dir     ?= $(vlsi_dir)/hammer-$(tech_nam)-plugin/$(tech_name)
+tech_dir     ?= $(vlsi_dir)/hammer-$(tech_name)-plugin/$(tech_name)
 SMEMS_COMP   ?= $(tech_dir)/sram-compiler.json
 SMEMS_HAMMER ?= $(build_dir)/$(long_name).mems.hammer.json
 MACROCOMPILER_MODE ?= -l $(SMEMS_COMP) --use-compiler -hir $(SMEMS_HAMMER)

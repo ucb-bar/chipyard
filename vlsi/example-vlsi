@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 import hammer_vlsi
-from hammer_vlsi import CLIDriver
+from hammer_vlsi import CLIDriver, HammerToolHookAction
 
-from typing import Dict, Callable, Optional
+from typing import Dict, Callable, Optional, List
 
 def example_place_tap_cells(x: hammer_vlsi.HammerTool) -> bool:
     x.append('''
@@ -12,25 +12,8 @@ def example_place_tap_cells(x: hammer_vlsi.HammerTool) -> bool:
     return True
 
 class ExampleDriver(CLIDriver):
-
-    def action_map(self) -> Dict[str, Callable[[hammer_vlsi.HammerDriver, Callable[[str], None]], Optional[dict]]]:
-        par_action = self.create_par_action(custom_hooks=[
-            hammer_vlsi.HammerTool.make_replacement_hook("place_tap_cells", example_place_tap_cells)
-        ])
-
-        new_dict = dict(super().action_map())
-        new_dict.update({
-            "par": par_action
-        })
-        return new_dict
-
-    def par_action(self, driver: hammer_vlsi.HammerDriver, append_error_func: Callable[[str], None]) -> Optional[dict]:
-        if not driver.load_par_tool():
-            return None
-        success, par_output = driver.run_par(hook_actions=[
-            hammer_vlsi.HammerTool.make_replacement_hook("place_tap_cells", example_place_tap_cells)
-            ])
-        return par_output
+    def get_extra_par_hooks(self) -> List[HammerToolHookAction]:
+        return [hammer_vlsi.HammerTool.make_replacement_hook("place_tap_cells", example_place_tap_cells)]
 
 if __name__ == '__main__':
     ExampleDriver().main()
