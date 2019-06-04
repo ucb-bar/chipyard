@@ -40,3 +40,7 @@
 [submodule "generators/block-inclusivecache-sifive"]
 	path = generators/sifive-cache
 	url = https://github.com/sifive/block-inclusivecache-sifive.git
+[submodule "vlsi/hammer"]
+	path = vlsi/hammer
+	url = git@github.com:ucb-bar/hammer.git
+
