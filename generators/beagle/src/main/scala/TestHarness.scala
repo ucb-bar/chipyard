@@ -75,15 +75,17 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
 
     dut.reset := reset
     dut.boot := true.B
-    dut.alt_clks.foreach { _ := clock }
-    dut.alt_clk_sel := 0.U
+    dut.single_clks.foreach { _ := clock }
+    dut.diff_clks.foreach { _ := DontCare }
+    dut.bh_clk_sel := 0.U
+    dut.rs_clk_sel := 0.U
     dut.gpio := DontCare
     dut.i2c  := DontCare
     dut.spi  := DontCare
     dut.uart := DontCare
     dut.jtag := DontCare
     dut.hbwif := DontCare
-    dut.hbwif_diff_clks := DontCare
+    dut.hbwif_diff_clks.foreach { _ := DontCare }
 
     // SimSerial <-> SerialAdapter <-> Serdes <--ChipConnection--> Lbwif
 
@@ -106,11 +108,11 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
     lbwif_rx_queue.io.deq_reset <> reset
 
     dut.lbwif_serial.in <> lbwif_tx_queue.io.deq
-    lbwif_tx_queue.io.deq_clock := dut.lbwif_serial_clk
+    lbwif_tx_queue.io.deq_clock := dut.lbwif_clk_out
     lbwif_tx_queue.io.deq_reset := reset // TODO: should be onchip reset
 
     lbwif_rx_queue.io.enq <> dut.lbwif_serial.out
-    lbwif_rx_queue.io.enq_clock := dut.lbwif_serial_clk
+    lbwif_rx_queue.io.enq_clock := dut.lbwif_clk_out
     lbwif_rx_queue.io.enq_reset := reset // TODO: should be onchip reset
 
     sim.io.serial.out <> Queue(adapter.module.io.serial.out)

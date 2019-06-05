@@ -28,110 +28,26 @@ import systolic.{SystolicArray, SystolicArrayKey, SystolicArrayConfig, Dataflow}
 // -------
 
 /**
- * Rocket
- */
-class BeagleRocketConfig extends Config(
-  // uncore mixins
-  new example.WithBootROM ++
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new WithBeagleChanges ++
-  new WithBeagleSiFiveBlocks ++
-  new WithJtagDTM ++
-  new WithHierTiles ++
-  new WithRationalRocketTiles ++
-  new WithNMemoryChannels(2) ++
-  new WithNBanks(2) ++
-  new WithBeagleSerdesChanges ++
-  new WithGenericSerdes ++
-  // rocket mixins
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  // subsystem mixin
-  new freechips.rocketchip.system.BaseConfig)
-
-/**
- * BOOM
- */
-class BeagleBoomConfig extends Config(
-  // uncore mixins
-  new example.WithBootROM ++
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new WithBeagleChanges ++
-  new WithBeagleSiFiveBlocks ++
-  new WithJtagDTM ++
-  new WithHierTiles ++
-  new WithRationalRocketTiles ++
-  new WithNMemoryChannels(2) ++
-  new WithNBanks(2) ++
-  new WithBeagleSerdesChanges ++
-  new WithGenericSerdes ++
-  // boom mixins
-  new boom.system.BoomConfig)
-
-/**
- * Dual (Rocket + Hwacha)
- */
-class BeagleDualRocketPlusHwachaConfig extends Config(
-  // uncore mixins
-  new example.WithBootROM ++
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new WithBeagleChanges ++
-  new WithBeagleSiFiveBlocks ++
-  new WithJtagDTM ++
-  new WithHierTiles ++
-  new WithRationalRocketTiles ++
-  new WithNMemoryChannels(2) ++
-  new WithNBanks(2) ++
-  new WithBeagleSerdesChanges ++
-  new WithGenericSerdes ++
-  // hwacha mixins
-  new hwacha.DefaultHwachaConfig ++
-  // rocket mixins
-  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
-  // subsystem mixin
-  new freechips.rocketchip.system.BaseConfig)
-
-/**
- * Dual (BOOM + Hwacha)
- */
-class BeagleDualBoomPlusHwachaConfig extends Config(
-  // uncore mixins
-  new example.WithBootROM ++
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new WithBeagleChanges ++
-  new WithBeagleSiFiveBlocks ++
-  new WithJtagDTM ++
-  new WithHierTiles ++
-  new WithRationalRocketTiles ++
-  new WithNMemoryChannels(2) ++
-  new WithNBanks(2) ++
-  new WithBeagleSerdesChanges ++
-  new WithGenericSerdes ++
-  // hwacha mixins
-  new hwacha.DefaultHwachaConfig ++
-  // boom mixins
-  new boom.common.WithRVC ++
-  new boom.common.DefaultBoomConfig ++
-  new boom.system.WithNBoomCores(2) ++
-  // subsystem mixin
-  new freechips.rocketchip.system.BaseConfig)
-
-/**
  * Heterogeneous (BOOM + Rocket)
  */
 class BeagleBoomAndRocketNoHwachaConfig extends Config(
   // uncore mixins
   new example.WithBootROM ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new WithBeagleSimChanges ++
   new WithBeagleChanges ++
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
   new WithHierTiles ++
-  new WithRationalRocketTiles ++
+  //new WithRationalRocketTiles ++
   new WithNMemoryChannels(2) ++
   new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
   new WithGenericSerdes ++
   new boom.system.WithRenumberHarts ++
+  // make tiles have different clocks
+  new boom.system.WithAsynchronousBoomTiles(4, 4) ++
+  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(4, 4) ++
   // boom mixins
   new boom.common.WithRVC ++
   new boom.common.DefaultBoomConfig ++
@@ -148,11 +64,12 @@ class BeagleBoomAndRocketHwachaConfig extends Config(
   // uncore mixins
   new example.WithBootROM ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new WithBeagleSimChanges ++
   new WithBeagleChanges ++
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
   new WithHierTiles ++
-  new WithRationalRocketTiles ++
+  //new WithRationalRocketTiles ++
   new WithNMemoryChannels(2) ++
   new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
@@ -160,6 +77,9 @@ class BeagleBoomAndRocketHwachaConfig extends Config(
   new boom.system.WithRenumberHarts ++
   // hwacha mixins
   new hwacha.DefaultHwachaConfig ++
+  // make tiles have different clocks
+  new boom.system.WithAsynchronousBoomTiles(4, 4) ++
+  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(4, 4) ++
   // boom mixins
   new boom.common.WithRVC ++
   new boom.common.DefaultBoomConfig ++
@@ -181,7 +101,7 @@ class BeagleConfig extends Config(
   new WithBeagleChanges ++
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
-  new WithRationalRocketTiles ++
+  //new WithRationalRocketTiles ++
   new WithNMemoryChannels(2) ++
   new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
@@ -198,10 +118,14 @@ class BeagleConfig extends Config(
   // hwacha parameter setup mixins
   new hwacha.DefaultHwachaConfig ++
 
+  // make tiles have different clocks
+  new boom.system.WithAsynchronousBoomTiles(4, 4) ++
+  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(4, 4) ++
+
   // rocket mixins
   new WithMiniRocketCore ++
 
-    // boom mixins
+  // boom mixins
   new boom.common.WithRVC ++
   new boom.common.DefaultBoomConfig ++
   new boom.system.WithNBoomCores(1) ++
@@ -224,7 +148,7 @@ class BeagleSimConfig extends Config(
   new WithBeagleChanges ++
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
-  new WithRationalRocketTiles ++
+  //new WithRationalRocketTiles ++
   new WithNMemoryChannels(2) ++
   new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
@@ -241,10 +165,14 @@ class BeagleSimConfig extends Config(
   // hwacha parameter setup mixins
   new hwacha.DefaultHwachaConfig ++
 
+  // make tiles have different clocks
+  new boom.system.WithAsynchronousBoomTiles(4, 4) ++
+  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(4, 4) ++
+
   // rocket mixins
   new WithMiniRocketCore ++
 
-    // boom mixins
+  // boom mixins
   new boom.common.WithRVC ++
   new boom.common.DefaultBoomConfig ++
   new boom.system.WithNBoomCores(1) ++

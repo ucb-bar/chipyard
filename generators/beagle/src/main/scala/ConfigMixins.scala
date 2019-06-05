@@ -40,13 +40,16 @@ class WithBeagleChanges extends Config((site, here, up) => {
   case HbwifPipelineResetDepth => 5
   case CacheBlockStriping => 2
   case LbwifBitWidth => 4
-  case LbwifDividerInit => 8
   case PeripheryBeagleKey => BeagleParams(scrAddress = 0x110000)
 })
 
 class WithBeagleSimChanges extends Config((site, here, up) => {
   case LbwifBitWidth => 32
-  case LbwifDividerInit => 2
+  case PeripheryBeagleKey => up(PeripheryBeagleKey).copy(
+    uncoreClkDivInit = 1,
+    bhClkDivInit = 1,
+    rsClkDivInit = 1,
+    lbwifClkDivInit = 1)
 })
 
 /**
@@ -62,8 +65,8 @@ class WithBeagleSiFiveBlocks extends Config((site, here, up) => {
 class WithHierTiles extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey, site) map { r =>
     r.copy(boundaryBuffers = true) }
-  case BoomTilesKey => up(BoomTilesKey, site) map { r =>
-    r.copy(boundaryBuffers = true) }
+  case BoomTilesKey => up(BoomTilesKey, site) map { b =>
+    b.copy(boundaryBuffers = true) }
 })
 
 /**
@@ -139,6 +142,7 @@ class WithMultiRoCCSystolic(harts: Int*) extends Config((site, here, up) => {
 class WithMiniRocketCore extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey, site) :+
     RocketTileParams(
+      name = Some("rocket_tile"),
       core = RocketCoreParams(
         useVM = true,
         mulDiv = Some(MulDivParams(mulUnroll = 8))),
