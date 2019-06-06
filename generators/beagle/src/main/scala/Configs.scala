@@ -3,7 +3,7 @@ package beagle
 import chisel3._
 
 import freechips.rocketchip.config.{Field, Parameters, Config}
-import freechips.rocketchip.subsystem.{ExtMem, RocketTilesKey, BankedL2Key, WithJtagDTM, WithRationalRocketTiles, WithNMemoryChannels, WithNBanks, SystemBusKey, MemoryBusKey, ControlBusKey, CacheBlockBytes}
+import freechips.rocketchip.subsystem.{ExtMem, RocketTilesKey, BankedL2Key, WithJtagDTM, WithNMemoryChannels, WithNBanks, SystemBusKey, MemoryBusKey, ControlBusKey, CacheBlockBytes}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName, AddressSet}
 import freechips.rocketchip.tile.{LazyRoCC, BuildRoCC, OpcodeSet, TileKey, RocketTileParams}
 import freechips.rocketchip.rocket.{RocketCoreParams, BTBParams, DCacheParams, ICacheParams, MulDivParams}
@@ -39,7 +39,6 @@ class BeagleBoomAndRocketNoHwachaConfig extends Config(
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
   new WithHierTiles ++
-  //new WithRationalRocketTiles ++
   new WithNMemoryChannels(2) ++
   new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
@@ -69,7 +68,6 @@ class BeagleBoomAndRocketHwachaConfig extends Config(
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
   new WithHierTiles ++
-  //new WithRationalRocketTiles ++
   new WithNMemoryChannels(2) ++
   new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
@@ -101,7 +99,6 @@ class BeagleConfig extends Config(
   new WithBeagleChanges ++
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
-  //new WithRationalRocketTiles ++
   new WithNMemoryChannels(2) ++
   new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
@@ -148,7 +145,6 @@ class BeagleSimConfig extends Config(
   new WithBeagleChanges ++
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
-  //new WithRationalRocketTiles ++
   new WithNMemoryChannels(2) ++
   new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
