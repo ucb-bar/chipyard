@@ -73,10 +73,20 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
 
     val dut = Module(new BeagleChipTop)
 
+    val harness_clk_divider = Module(new testchipip.ClockDivider(2))
+    harness_clk_divider.io.divisor := 2.U
+    val harness_slow_clk = harness_clk_divider.io.clockOut
+
+    val harness_fast_clk = hbwif.ClockToDifferential(clock)
+
     dut.reset := reset
     dut.boot := true.B
-    dut.single_clks.foreach { _ := clock }
+    dut.single_clks.foreach { _ := harness_slow_clk }
     dut.diff_clks.foreach { _ := DontCare }
+    dut.diff_clks.foreach { diff_clk =>
+      attach(diff_clk.p, harness_fast_clk.p)
+      attach(diff_clk.n, harness_fast_clk.n)
+    }
     dut.bh_clk_sel := 0.U
     dut.rs_clk_sel := 0.U
     dut.uncore_clk_sel := 0.U
@@ -87,6 +97,10 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
     dut.jtag := DontCare
     dut.hbwif := DontCare
     dut.hbwif_diff_clks.foreach { _ := DontCare }
+    dut.hbwif_diff_clks.foreach { diff_clk =>
+      attach(diff_clk.p, harness_fast_clk.p)
+      attach(diff_clk.n, harness_fast_clk.n)
+    }
 
     // SimSerial <-> SerialAdapter <-> Serdes <--ChipConnection--> Lbwif
 
@@ -94,8 +108,6 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
 
     sim.io.clock := clock
     sim.io.reset := reset
-    //adapter.module.io.clock := clock
-    //adapter.module.io.reset := reset
 
     val lbwif_tx_queue = Module(new AsyncQueue(chiselTypeOf(lbwif.module.io.ser.out.bits)))
     val lbwif_rx_queue = Module(new AsyncQueue(chiselTypeOf(lbwif.module.io.ser.in.bits)))

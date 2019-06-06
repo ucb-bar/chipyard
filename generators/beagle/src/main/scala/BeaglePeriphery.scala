@@ -303,80 +303,66 @@ trait HasPeripheryBeagleModuleImp extends LazyModuleImp with HasPeripheryBeagleB
 
   // ------------------------------------------------
 
+  /**
+   * Helper function to wrap a clock divider and return the clock
+   */
+  def clkDiv(clk: Clock, rst: Bool, divBits: Int, divisor: UInt): Clock = {
+    val clk_divider = withClockAndReset(clk, rst) {
+      Module(new testchipip.ClockDivider(divBits))
+    }
+    clk_divider.io.divisor := divisor
+    clk_divider.io.clockOut
+  }
+
+  /**
+   * Helper function to wrap a clock mux and return the clock
+   */
+  def clkMux(clks: Seq[Clock], sel: UInt, rst_async: Bool): Clock = {
+    val clk_mux = testchipip.ClockMutexMux(clks)
+    clk_mux.io.sel := sel
+    clk_mux.io.resetAsync := rst_async
+    clk_mux.io.clockOut
+  }
+
   // get the actual clock from the io clocks
-  require(bh_clk_sel.getWidth >= (log2Ceil(single_clks.length) + log2Ceil(diff_clks.length)), "[sys-top] must be able to select all input clocks")
-  require(rs_clk_sel.getWidth >= (log2Ceil(single_clks.length) + log2Ceil(diff_clks.length)), "[sys-top] must be able to select all input clocks")
-  require(uncore_clk_sel.getWidth >= (log2Ceil(single_clks.length) + log2Ceil(diff_clks.length)), "[sys-top] must be able to select all input clocks")
+  val offchip_clks = single_clks ++ diff_clks
+  require(    bh_clk_sel.getWidth >= log2Ceil(offchip_clks.length), "[sys-top] must be able to select all input clocks")
+  require(    rs_clk_sel.getWidth >= log2Ceil(offchip_clks.length), "[sys-top] must be able to select all input clocks")
+  require(uncore_clk_sel.getWidth >= log2Ceil(offchip_clks.length), "[sys-top] must be able to select all input clocks")
 
   // setup uncore muxes and divider
 
-  val uncore_clk_mux = testchipip.ClockMutexMux(single_clks ++ diff_clks)
-  uncore_clk_mux.io.sel := uncore_clk_sel
-  uncore_clk_mux.io.resetAsync := rst_async
-  val uncore_clk_mux_out = uncore_clk_mux.io.clockOut
-  val uncore_clk_mux_rst = ResetCatchAndSync(uncore_clk_mux.io.clockOut, reset.asBool)
+  val uncore_clk_mux_out = clkMux(offchip_clks, uncore_clk_sel, rst_async)
+  val uncore_clk_mux_rst = ResetCatchAndSync(uncore_clk_mux_out, reset.asBool)
 
-  val uncore_clk_divider = withClockAndReset(uncore_clk_mux_out, uncore_clk_mux_rst) {
-    Module(new testchipip.ClockDivider(outer.scrParams.uncoreClkDivBits))
-  }
-  uncore_clk_divider.io.divisor := scr_mod.io.uncore_clk_divisor
+  val uncore_div_clk = clkDiv(uncore_clk_mux_out, uncore_clk_mux_rst, outer.scrParams.uncoreClkDivBits, scr_mod.io.uncore_clk_divisor)
 
   // mux between the divided uncore and the undivided
-  val uncore_clks_pre_muxed = Seq(uncore_clk_mux_out, uncore_clk_divider.io.clockOut)
+  val uncore_clks_pre_muxed = Seq(uncore_clk_mux_out, uncore_div_clk)
   require(scr_mod.io.uncore_clk_pass_sel.getWidth >= log2Ceil(uncore_clks_pre_muxed.length), "[sys-top] must be able to select the uncore clocks")
-  val uncore_clk_pass_mux = testchipip.ClockMutexMux(uncore_clks_pre_muxed)
-  uncore_clk_pass_mux.io.sel := scr_mod.io.uncore_clk_pass_sel
-  uncore_clk_pass_mux.io.resetAsync := rst_async
-  val uncore_clk = uncore_clk_pass_mux.io.clockOut
-  val uncore_rst = ResetCatchAndSync(uncore_clk_pass_mux.io.clockOut, reset.asBool)
+  val uncore_clk = clkMux(uncore_clks_pre_muxed, scr_mod.io.uncore_clk_pass_sel, rst_async)
+  val uncore_rst = ResetCatchAndSync(uncore_clk, reset.asBool)
 
   // setup tile muxes
 
-  val bh_clk_mux = testchipip.ClockMutexMux(single_clks ++ diff_clks)
-  bh_clk_mux.io.sel := bh_clk_sel
-  bh_clk_mux.io.resetAsync := rst_async
-  val bh_clk_mux_out = bh_clk_mux.io.clockOut
-  val bh_clk_mux_rst = ResetCatchAndSync(bh_clk_mux.io.clockOut, reset.asBool)
+  val bh_clk_mux_out = clkMux(offchip_clks, bh_clk_sel, rst_async)
+  val bh_clk_mux_rst = ResetCatchAndSync(bh_clk_mux_out, reset.asBool)
 
-  val rs_clk_mux = testchipip.ClockMutexMux(single_clks ++ diff_clks)
-  rs_clk_mux.io.sel := rs_clk_sel
-  rs_clk_mux.io.resetAsync := rst_async
-  val rs_clk_mux_out = rs_clk_mux.io.clockOut
-  val rs_clk_mux_rst = ResetCatchAndSync(rs_clk_mux.io.clockOut, reset.asBool)
+  val rs_clk_mux_out = clkMux(offchip_clks, rs_clk_sel, rst_async)
+  val rs_clk_mux_rst = ResetCatchAndSync(rs_clk_mux_out, reset.asBool)
 
   // setup clock dividers
 
-  val bh_clk_divider = withClockAndReset(bh_clk_mux_out, bh_clk_mux_rst) {
-    Module(new testchipip.ClockDivider(outer.scrParams.bhClkDivBits))
-  }
-  bh_clk_divider.io.divisor := scr_mod.io.bh_clk_divisor
-  val bh_clk = bh_clk_divider.io.clockOut
+  val bh_clk = clkDiv(bh_clk_mux_out, bh_clk_mux_rst, outer.scrParams.bhClkDivBits, scr_mod.io.bh_clk_divisor)
   val bh_rst = ResetCatchAndSync(bh_clk, bh_clk_mux_rst)
 
-  val rs_clk_divider = withClockAndReset(rs_clk_mux_out, rs_clk_mux_rst) {
-    Module(new testchipip.ClockDivider(outer.scrParams.rsClkDivBits))
-  }
-  rs_clk_divider.io.divisor := scr_mod.io.rs_clk_divisor
-  val rs_clk = rs_clk_divider.io.clockOut
+  val rs_clk = clkDiv(rs_clk_mux_out, rs_clk_mux_rst, outer.scrParams.rsClkDivBits, scr_mod.io.rs_clk_divisor)
   val rs_rst = ResetCatchAndSync(rs_clk, rs_clk_mux_rst)
 
-  val bh_clk_out_divider = withClockAndReset(bh_clk, bh_rst) {
-    Module(new testchipip.ClockDivider(outer.scrParams.bhClkDivBits))
-  }
-  bh_clk_out_divider.io.divisor := scr_mod.io.bh_clk_out_divisor
-  val bh_clk_div2_out = bh_clk_out_divider.io.clockOut
+  val bh_clk_div2_out = clkDiv(bh_clk, bh_rst, outer.scrParams.bhClkDivBits, scr_mod.io.bh_clk_out_divisor)
+  val rs_clk_div2_out = clkDiv(rs_clk, rs_rst, outer.scrParams.rsClkDivBits, scr_mod.io.rs_clk_out_divisor)
 
-  val rs_clk_out_divider = withClockAndReset(rs_clk, rs_rst) {
-    Module(new testchipip.ClockDivider(outer.scrParams.rsClkDivBits))
-  }
-  rs_clk_out_divider.io.divisor := scr_mod.io.rs_clk_out_divisor
-  val rs_clk_div2_out = rs_clk_out_divider.io.clockOut
-
-  val lbwif_clk_divider = withClockAndReset(uncore_clk, uncore_rst) {
-    Module(new testchipip.ClockDivider(outer.scrParams.lbwifClkDivBits))
-  }
-  lbwif_clk_divider.io.divisor := scr_mod.io.lbwif_clk_divisor
-  val lbwif_clk = lbwif_clk_divider.io.clockOut
+  val lbwif_clk = clkDiv(uncore_clk, uncore_rst, outer.scrParams.lbwifClkDivBits, scr_mod.io.lbwif_clk_divisor)
   val lbwif_rst = ResetCatchAndSync(lbwif_clk, uncore_rst)
 
   // setup lbwif
