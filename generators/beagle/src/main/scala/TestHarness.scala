@@ -79,6 +79,7 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
     dut.diff_clks.foreach { _ := DontCare }
     dut.bh_clk_sel := 0.U
     dut.rs_clk_sel := 0.U
+    dut.uncore_clk_sel := 0.U
     dut.gpio := DontCare
     dut.i2c  := DontCare
     dut.spi  := DontCare

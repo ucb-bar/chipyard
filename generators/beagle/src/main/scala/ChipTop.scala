@@ -38,8 +38,8 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
   // -----------------------------------------------------------------------
 
   // base signals
-  val reset           = IO(Input(Bool())) // reset from off chip
-  val boot            = IO(Input(Bool())) // boot from sdcard or tether
+  val reset = IO(Input(Bool())) // reset from off chip
+  val boot  = IO(Input(Bool())) // boot from sdcard or tether
 
   // input clocks
   val single_clks = IO(Input(Vec(1, Clock()))) // slow clock
@@ -55,6 +55,7 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
   // clock mux select signals
   val bh_clk_sel = IO(Input(Bool())) // selector to choose fast or slow clk for boom + hwacha
   val rs_clk_sel = IO(Input(Bool())) // selector to choose fast or slow clk for rocket + systolic
+  val uncore_clk_sel = IO(Input(Bool())) // selector to choose fast or slow clk for uncore
 
   // setup interfaces
   val lbwif_serial  = IO(chiselTypeOf(sys.lbwif_serial)) // lbwif signals
@@ -64,11 +65,11 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
   })
 
   // setup external IO
-  val gpio            = IO(new GPIOPins(() => new EnhancedPin(), p(PeripheryGPIOKey).head))
-  val i2c             = IO(new  I2CPins(() => new BasePin()))
-  val spi             = IO(new  SPIPins(() => new BasePin(), p(PeripherySPIKey).head))
-  val uart            = IO(new UARTPins(() => new BasePin()))
-  val jtag            = IO(new JTAGPins(() => new BasePin(), false))
+  val gpio = IO(new GPIOPins(() => new EnhancedPin(), p(PeripheryGPIOKey).head))
+  val i2c  = IO(new  I2CPins(() => new BasePin()))
+  val spi  = IO(new  SPIPins(() => new BasePin(), p(PeripherySPIKey).head))
+  val uart = IO(new UARTPins(() => new BasePin()))
+  val jtag = IO(new JTAGPins(() => new BasePin(), false))
 
   // -----------------------------------------------------------------------
 
@@ -113,6 +114,7 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
   // clock mux select signals
   sys.bh_clk_sel := bh_clk_sel
   sys.rs_clk_sel := rs_clk_sel
+  sys.uncore_clk_sel := uncore_clk_sel
 
   // convert differential clocks into normal clocks
   val hbwif_clks = hbwif_diff_clks.map { clock_io =>
