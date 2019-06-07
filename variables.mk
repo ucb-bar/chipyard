@@ -168,8 +168,8 @@ sim_vsrcs = \
 	$(VERILOG_FILE) \
 	$(HARNESS_FILE) \
 	$(SMEMS_FILE) \
-	$(build_dir)/AsyncResetReg.v \
 	$(base_dir)/generators/beagle/src/main/resources/ClockReceiver.v \
+	$(base_dir)/generators/awl/src/main/resources/util.v \
 	$(HARNESS_SMEMS_FILE)
 
 #########################################################################################

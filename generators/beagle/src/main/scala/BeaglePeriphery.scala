@@ -318,10 +318,20 @@ trait HasPeripheryBeagleModuleImp extends LazyModuleImp with HasPeripheryBeagleB
    * Helper function to wrap a clock mux and return the clock
    */
   def clkMux(clks: Seq[Clock], sel: UInt, rst_async: Bool): Clock = {
-    val clk_mux = testchipip.ClockMutexMux(clks)
-    clk_mux.io.sel := sel
-    clk_mux.io.resetAsync := rst_async
-    clk_mux.io.clockOut
+    val mux_clk = testchipip.ClockMutexMux(clks)
+    mux_clk.io.sel := sel
+    mux_clk.io.resetAsync := rst_async
+    mux_clk.io.clockOut
+  }
+
+  /**
+   * Helper function to wrap a clock mux and divider
+   */
+  def clkMuxThenDiv(clks: Seq[Clock], sel: UInt, rst_async: Bool, rst: Bool, divBits: Int, divisor: UInt): (Clock, Bool) = {
+    val mux_clk = clkMux(clks, sel, rst_async)
+    val mux_rst = ResetCatchAndSync(mux_clk, rst)
+    val div_clk = clkDiv(mux_clk, mux_rst, divBits, divisor)
+    (div_clk, ResetCatchAndSync(div_clk, mux_rst))
   }
 
   // get the actual clock from the io clocks
@@ -332,32 +342,22 @@ trait HasPeripheryBeagleModuleImp extends LazyModuleImp with HasPeripheryBeagleB
 
   // setup uncore muxes and divider
 
-  val uncore_clk_mux_out = clkMux(offchip_clks, uncore_clk_sel, rst_async)
-  val uncore_clk_mux_rst = ResetCatchAndSync(uncore_clk_mux_out, reset.asBool)
+  val uncore_mux_clk_out = clkMux(offchip_clks, uncore_clk_sel, rst_async)
+  val uncore_mux_clk_rst = ResetCatchAndSync(uncore_mux_clk_out, reset.asBool)
 
-  val uncore_div_clk = clkDiv(uncore_clk_mux_out, uncore_clk_mux_rst, outer.scrParams.uncoreClkDivBits, scr_mod.io.uncore_clk_divisor)
+  val uncore_div_clk = clkDiv(uncore_mux_clk_out, uncore_mux_clk_rst, outer.scrParams.uncoreClkDivBits, scr_mod.io.uncore_clk_divisor)
 
   // mux between the divided uncore and the undivided
-  val uncore_clks_pre_muxed = Seq(uncore_clk_mux_out, uncore_div_clk)
+  val uncore_clks_pre_muxed = Seq(uncore_mux_clk_out, uncore_div_clk)
   require(scr_mod.io.uncore_clk_pass_sel.getWidth >= log2Ceil(uncore_clks_pre_muxed.length), "[sys-top] must be able to select the uncore clocks")
   val uncore_clk = clkMux(uncore_clks_pre_muxed, scr_mod.io.uncore_clk_pass_sel, rst_async)
   val uncore_rst = ResetCatchAndSync(uncore_clk, reset.asBool)
 
   // setup tile muxes
-
-  val bh_clk_mux_out = clkMux(offchip_clks, bh_clk_sel, rst_async)
-  val bh_clk_mux_rst = ResetCatchAndSync(bh_clk_mux_out, reset.asBool)
-
-  val rs_clk_mux_out = clkMux(offchip_clks, rs_clk_sel, rst_async)
-  val rs_clk_mux_rst = ResetCatchAndSync(rs_clk_mux_out, reset.asBool)
+  val (bh_clk, bh_rst) = clkMuxThenDiv(offchip_clks, bh_clk_sel, rst_async, reset.asBool, outer.scrParams.bhClkDivBits, scr_mod.io.bh_clk_divisor)
+  val (rs_clk, rs_rst) = clkMuxThenDiv(offchip_clks, rs_clk_sel, rst_async, reset.asBool, outer.scrParams.rsClkDivBits, scr_mod.io.rs_clk_divisor)
 
   // setup clock dividers
-
-  val bh_clk = clkDiv(bh_clk_mux_out, bh_clk_mux_rst, outer.scrParams.bhClkDivBits, scr_mod.io.bh_clk_divisor)
-  val bh_rst = ResetCatchAndSync(bh_clk, bh_clk_mux_rst)
-
-  val rs_clk = clkDiv(rs_clk_mux_out, rs_clk_mux_rst, outer.scrParams.rsClkDivBits, scr_mod.io.rs_clk_divisor)
-  val rs_rst = ResetCatchAndSync(rs_clk, rs_clk_mux_rst)
 
   val bh_clk_div2_out = clkDiv(bh_clk, bh_rst, outer.scrParams.bhClkDivBits, scr_mod.io.bh_clk_out_divisor)
   val rs_clk_div2_out = clkDiv(rs_clk, rs_rst, outer.scrParams.rsClkDivBits, scr_mod.io.rs_clk_out_divisor)
