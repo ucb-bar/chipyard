@@ -74,7 +74,7 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
     val dut = Module(new BeagleChipTop)
 
     val harness_clk_divider = Module(new testchipip.ClockDivider(2))
-    harness_clk_divider.io.divisor := 2.U
+    harness_clk_divider.io.divisor := 1.U
     val harness_slow_clk = harness_clk_divider.io.clockOut
 
     val harness_fast_clk = hbwif.ClockToDifferential(clock)

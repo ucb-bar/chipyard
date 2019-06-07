@@ -20,6 +20,10 @@ import hbwif._
 import hwacha.{Hwacha}
 
 import boom.system.{BoomTilesKey}
+import boom.exu.{IssueParams}
+import boom.ifu.{FtqParameters}
+import boom.bpu.{GShareParameters, BoomBTBParameters}
+import boom.common._
 
 import systolic.{SystolicArray, SystolicArrayKey, SystolicArrayConfig, Dataflow}
 
@@ -159,3 +163,40 @@ class WithMiniRocketCore extends Config((site, here, up) => {
         nWays = 4)),
       hartId = up(BoomTilesKey, site).length + up(RocketTilesKey, site).length)
 })
+
+// ---------------------
+// BOOM Mixins
+// ---------------------
+
+/**
+ * Beagle BOOM design point
+ */
+class WithMegaBeagleBooms extends Config((site, here, up) => {
+   case BoomTilesKey => up(BoomTilesKey, site) map { b => b.copy(
+      core = b.core.copy(
+         fetchWidth = 4,
+         decodeWidth = 4,
+         numRobEntries = 128,
+         issueParams = Seq(
+            IssueParams(issueWidth=1, numEntries=30, iqType=IQT_MEM.litValue, dispatchWidth=2),
+            IssueParams(issueWidth=2, numEntries=30, iqType=IQT_INT.litValue, dispatchWidth=2),
+            IssueParams(issueWidth=1, numEntries=30, iqType=IQT_FP.litValue , dispatchWidth=2)),
+         numIntPhysRegisters = 128,
+         numFpPhysRegisters = 96,
+         numLdqEntries = 32,
+         numStqEntries = 18,
+         maxBrCount = 16,
+         ftq = FtqParameters(nEntries=32),
+         btb = BoomBTBParameters(btbsa=true, densebtb=false, nSets=512, nWays=4, nRAS=16, tagSz=13),
+         bpdBaseOnly = None,
+         gshare = Some(GShareParameters(historyLength=12, numSets=4096)),
+         tage = None,
+         bpdRandom = None,
+         nPerfCounters = 29,
+         fpu = Some(freechips.rocketchip.tile.FPUParams(sfmaLatency=4, dfmaLatency=4, divSqrt=true))),
+      btb = Some(BTBParams(nEntries = 0, updatesOutOfOrder = true)),
+      dcache = Some(DCacheParams(rowBits = site(SystemBusKey).beatBits, nSets=64, nWays=8, nMSHRs=4, nTLBEntries=16)),
+      icache = Some(ICacheParams(fetchBytes = 4*4, rowBits = site(SystemBusKey).beatBits, nSets=64, nWays=8))
+    )}
+})
+
