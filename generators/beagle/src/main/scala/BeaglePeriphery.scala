@@ -30,8 +30,8 @@ case class BeagleParams(
   rsClkDivBits: Int = 8,
   lbwifClkDivBits: Int = 8,
   uncoreClkDivInit: Int = 4,
-  bhClkDivInit: Int = 4,
-  rsClkDivInit: Int = 4,
+  bhClkDivInit: Int = 2,
+  rsClkDivInit: Int = 2,
   lbwifClkDivInit: Int = 4
 )
 
@@ -52,14 +52,17 @@ trait HasBeagleTopBundleContents extends Bundle
   val rs_clk_out_divisor = Output(UInt(p(PeripheryBeagleKey).rsClkDivBits.W))
   val lbwif_clk_divisor  = Output(UInt(p(PeripheryBeagleKey).lbwifClkDivBits.W))
 
-  val uncore_clk_pass_sel = Output(Bool()) // used to choose the undivided uncore clock or divided
+  val uncore_clk_pass_sel = Output(Bool()) // used to choose the undivided uncore clock or divided (default to divided)
+  val bh_clk_pass_sel = Output(Bool()) // used to choose the undivided bh clock or divided (default to undivided)
+  val rs_clk_pass_sel = Output(Bool()) // used to choose the undivided rs clock or divided (default to undivided)
 
   val hbwif_rsts   = Output(Vec(p(HbwifNumLanes), Bool()))
+
   val switcher_sel = Output(Bool())
 }
 
 /**
- * MMIO controlled components
+ * MMIO controlled components (system control registers (SCR))
  */
 trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap
 {
@@ -95,8 +98,16 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap
     Module(new AsyncResetRegVec(w = c.lbwifClkDivBits, init = c.lbwifClkDivInit))
   }
 
-  // uncore select bit reg
+  // divided or undivided clock select bit regs
   val r_uncore_clk_pass_sel = withReset(io.rst_async) {
+    Module(new AsyncResetRegVec(w = 1, init = 1))
+  }
+
+  val r_bh_clk_pass_sel = withReset(io.rst_async) {
+    Module(new AsyncResetRegVec(w = 1, init = 0))
+  }
+
+  val r_rs_clk_pass_sel = withReset(io.rst_async) {
     Module(new AsyncResetRegVec(w = 1, init = 0))
   }
 
@@ -120,6 +131,8 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap
   io.rs_clk_out_divisor  := r_rs_clk_out_divisor.io.q
   io.lbwif_clk_divisor   := r_lbwif_clk_divisor.io.q
   io.uncore_clk_pass_sel := r_uncore_clk_pass_sel.io.q
+  io.bh_clk_pass_sel     := r_bh_clk_pass_sel.io.q
+  io.rs_clk_pass_sel     := r_rs_clk_pass_sel.io.q
   io.hbwif_rsts          := VecInit(r_hbwif_rsts.map(_.io.q))
   io.switcher_sel        := r_switcher_sel.io.q
 
@@ -141,7 +154,9 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap
     0x50 -> Seq(RegField.rwReg(    c.bhClkDivBits,  r_bh_clk_out_divisor.io)),
     0x60 -> Seq(RegField.rwReg(    c.rsClkDivBits,  r_rs_clk_out_divisor.io)),
     0x70 -> Seq(RegField.rwReg( c.lbwifClkDivBits,   r_lbwif_clk_divisor.io)),
-    0x80 -> Seq(RegField.rwReg(                 1, r_uncore_clk_pass_sel.io))
+    0x80 -> Seq(RegField.rwReg(                 1, r_uncore_clk_pass_sel.io)),
+    0x88 -> Seq(RegField.rwReg(                 1,     r_bh_clk_pass_sel.io)),
+    0x90 -> Seq(RegField.rwReg(                 1,     r_rs_clk_pass_sel.io))
   )
 }
 
@@ -324,51 +339,47 @@ trait HasPeripheryBeagleModuleImp extends LazyModuleImp with HasPeripheryBeagleB
     mux_clk.io.clockOut
   }
 
-  /**
-   * Helper function to wrap a clock mux and divider
-   */
-  def clkMuxThenDiv(clks: Seq[Clock], sel: UInt, rst_async: Bool, rst: Bool, divBits: Int, divisor: UInt): (Clock, Bool) = {
-    val mux_clk = clkMux(clks, sel, rst_async)
-    dontTouch(mux_clk)
-    val mux_rst = ResetCatchAndSync(mux_clk, rst)
-    dontTouch(mux_rst)
-    val div_clk = clkDiv(mux_clk, mux_rst, divBits, divisor)
-    dontTouch(div_clk)
-    val div_rst = ResetCatchAndSync(div_clk, mux_rst)
-    dontTouch(div_rst)
-    (div_clk, div_rst)
-  }
-
   // get the actual clock from the io clocks
   val offchip_clks = single_clks ++ diff_clks
   require(    bh_clk_sel.getWidth >= log2Ceil(offchip_clks.length), "[sys-top] must be able to select all input clocks")
   require(    rs_clk_sel.getWidth >= log2Ceil(offchip_clks.length), "[sys-top] must be able to select all input clocks")
   require(uncore_clk_sel.getWidth >= log2Ceil(offchip_clks.length), "[sys-top] must be able to select all input clocks")
 
-  // setup uncore muxes and divider
+  // setup muxes and dividers
 
   val uncore_mux_clk_out = clkMux(offchip_clks, uncore_clk_sel, rst_async)
   val uncore_mux_clk_rst = ResetCatchAndSync(uncore_mux_clk_out, rst_async)
-  dontTouch(uncore_mux_clk_out)
-  dontTouch(uncore_mux_clk_rst)
-
   val uncore_div_clk = clkDiv(uncore_mux_clk_out, uncore_mux_clk_rst, outer.scrParams.uncoreClkDivBits, scr_mod.io.uncore_clk_divisor)
-  dontTouch(uncore_div_clk)
-
-  // mux between the divided uncore and the undivided
   val uncore_clks_pre_muxed = Seq(uncore_mux_clk_out, uncore_div_clk)
+
+  val bh_mux_clk_out = clkMux(offchip_clks, bh_clk_sel, rst_async)
+  val bh_mux_clk_rst = ResetCatchAndSync(bh_mux_clk_out, rst_async)
+  val bh_div_clk = clkDiv(bh_mux_clk_out, bh_mux_clk_rst, outer.scrParams.bhClkDivBits, scr_mod.io.bh_clk_divisor)
+  val bh_clks_pre_muxed = Seq(bh_mux_clk_out, bh_div_clk)
+
+  val rs_mux_clk_out = clkMux(offchip_clks, rs_clk_sel, rst_async)
+  val rs_mux_clk_rst = ResetCatchAndSync(rs_mux_clk_out, rst_async)
+  val rs_div_clk = clkDiv(rs_mux_clk_out, rs_mux_clk_rst, outer.scrParams.rsClkDivBits, scr_mod.io.rs_clk_divisor)
+  val rs_clks_pre_muxed = Seq(rs_mux_clk_out, rs_div_clk)
+
   require(scr_mod.io.uncore_clk_pass_sel.getWidth >= log2Ceil(uncore_clks_pre_muxed.length), "[sys-top] must be able to select the uncore clocks")
   val uncore_clk = clkMux(uncore_clks_pre_muxed, scr_mod.io.uncore_clk_pass_sel, rst_async)
 
-  // setup tile muxes
-  val (bh_clk, bh_rst) = clkMuxThenDiv(offchip_clks, bh_clk_sel, rst_async, rst_async, outer.scrParams.bhClkDivBits, scr_mod.io.bh_clk_divisor)
-  val (rs_clk, rs_rst) = clkMuxThenDiv(offchip_clks, rs_clk_sel, rst_async, rst_async, outer.scrParams.rsClkDivBits, scr_mod.io.rs_clk_divisor)
+  require(scr_mod.io.bh_clk_pass_sel.getWidth >= log2Ceil(bh_clks_pre_muxed.length), "[sys-top] must be able to select the bh clocks")
+  val bh_clk = clkMux(bh_clks_pre_muxed, scr_mod.io.bh_clk_pass_sel, rst_async)
+  val bh_rst = ResetCatchAndSync(bh_clk, bh_mux_clk_rst, 50) // TODO: Change into SCR and have FESVR manage
+
+  require(scr_mod.io.rs_clk_pass_sel.getWidth >= log2Ceil(rs_clks_pre_muxed.length), "[sys-top] must be able to select the rs clocks")
+  val rs_clk = clkMux(rs_clks_pre_muxed, scr_mod.io.rs_clk_pass_sel, rst_async)
+  val rs_rst = ResetCatchAndSync(rs_clk, rs_mux_clk_rst, 50) // TODO: Change into SCR and have FESVR manage
 
   // setup clock dividers
 
+  // Note: by default these clocks are %2 at a minimum
   val bh_clk_div2_out = clkDiv(bh_clk, bh_rst, outer.scrParams.bhClkDivBits, scr_mod.io.bh_clk_out_divisor)
   val rs_clk_div2_out = clkDiv(rs_clk, rs_rst, outer.scrParams.rsClkDivBits, scr_mod.io.rs_clk_out_divisor)
 
+  // setup lbwif clock based on uncore
   val lbwif_clk = clkDiv(clock, reset.asBool, outer.scrParams.lbwifClkDivBits, scr_mod.io.lbwif_clk_divisor)
   val lbwif_rst = ResetCatchAndSync(lbwif_clk, reset.asBool)
 
