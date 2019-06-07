@@ -268,3 +268,29 @@ class MegaBeagleSimConfig extends Config(
   // for faster simulation
   new WithBeagleSimChanges ++
   new MegaBeagleConfig)
+
+/**
+ * BOOM
+ */
+class MegaBoomConfig extends Config(
+  // uncore mixins
+  new example.WithBootROM ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new WithBeagleChanges ++
+  new WithBeagleSiFiveBlocks ++
+  new WithJtagDTM ++
+  new WithHierTiles ++
+  new WithRationalRocketTiles ++
+  new WithNMemoryChannels(2) ++
+  new WithNBanks(2) ++
+  new WithBeagleSerdesChanges ++
+  new WithGenericSerdes ++
+  new WithBeagleSimChanges ++
+
+  // boom mixins
+  new boom.common.WithRVC ++
+  new WithMegaBeagleBooms ++
+  new boom.system.WithNBoomCores(1) ++
+
+  // subsystem mixin
+  new freechips.rocketchip.system.BaseConfig)
