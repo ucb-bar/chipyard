@@ -56,7 +56,7 @@ class WithBeagleChanges extends Config((site, here, up) => {
  * Large scratchpad size
  */
 class WithLargerScratchpad extends Config((site, here, up) => {
-  case ScratchPadAddressSet => AddressSet(0x50000000, 0xffff)
+  case ScratchPadAddressSet => AddressSet(0x50000000, 0xfffff)
 })
 
 /**
@@ -194,9 +194,9 @@ class WithMegaBeagleBooms extends Config((site, here, up) => {
          decodeWidth = 4,
          numRobEntries = 128,
          issueParams = Seq(
-            IssueParams(issueWidth=1, numEntries=30, iqType=IQT_MEM.litValue, dispatchWidth=2),
-            IssueParams(issueWidth=2, numEntries=30, iqType=IQT_INT.litValue, dispatchWidth=2),
-            IssueParams(issueWidth=1, numEntries=30, iqType=IQT_FP.litValue , dispatchWidth=2)),
+            IssueParams(issueWidth=1, numEntries=20, iqType=IQT_MEM.litValue, dispatchWidth=2),
+            IssueParams(issueWidth=2, numEntries=20, iqType=IQT_INT.litValue, dispatchWidth=2),
+            IssueParams(issueWidth=1, numEntries=20, iqType=IQT_FP.litValue , dispatchWidth=2)),
          numIntPhysRegisters = 128,
          numFpPhysRegisters = 96,
          numLdqEntries = 32,
