@@ -57,7 +57,7 @@ class WithBeagleChanges extends Config((site, here, up) => {
  */
 class WithLargerScratchpad extends Config((site, here, up) => {
   case ScratchPadAddressSet => AddressSet(0x50000000, 0xffff)
-}
+})
 
 /**
  * Increase the LBWIF size and reduce the dividers
