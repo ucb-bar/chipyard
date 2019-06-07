@@ -23,6 +23,7 @@ case object BeaglePipelineResetDepth extends Field[Int]
 case object CacheBlockStriping extends Field[Int]
 case object LbwifBitWidth extends Field[Int]
 case object LbwifDividerInit extends Field[Int]
+case object ScratchPadAddressSet extends Field[AddressSet]
 
 case class BeagleParams(
   scrAddress: Int,
@@ -95,7 +96,7 @@ trait HasPeripheryBeagle {
 
   // setup boot scratch pad
   val bootScratchPad = LazyModule(new TLRAM(
-    address = AddressSet(0x50000000, 0xffff),
+    address = p(ScratchPadAddressSet),
     cacheable = false,
     executable = true,
     beatBytes = 8))

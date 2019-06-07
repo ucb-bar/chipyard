@@ -213,14 +213,21 @@ class BeagleConfig extends Config(
  * Heterogeneous ((BOOM + Hwacha) + (Rocket + Systolic))
  *
  * FOR FASTER SIMULATION
+ */
+class BeagleSimConfig extends Config(
+  new WithBeagleSimChanges ++
+  new BeagleConfig)
+
+/**
+ * Heterogeneous ((Mega BOOM + Hwacha) + (Rocket + Systolic))
  *
  * Note: ORDER OF MIXINS MATTERS
  */
-class BeagleSimConfig extends Config(
+class MegaBeagleConfig extends Config(
   // uncore mixins
   new example.WithBootROM ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new WithBeagleSimChanges ++
+  new WithLargerScratchpad ++
   new WithBeagleChanges ++
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
@@ -244,10 +251,20 @@ class BeagleSimConfig extends Config(
   // rocket mixins
   new WithMiniRocketCore ++
 
-    // boom mixins
+  // boom mixins
   new boom.common.WithRVC ++
-  new boom.common.DefaultBoomConfig ++
+  new WithMegaBeagleBooms ++
   new boom.system.WithNBoomCores(1) ++
 
   // subsystem mixin
   new freechips.rocketchip.system.BaseConfig)
+
+/**
+ * Heterogeneous ((Mega BOOM + Hwacha) + (Rocket + Systolic))
+ *
+ * FOR FASTER SIMULATION
+ */
+class MegaBeagleSimConfig extends Config(
+  // for faster simulation
+  new WithBeagleSimChanges ++
+  new MegaBeagleConfig)
