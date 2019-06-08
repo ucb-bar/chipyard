@@ -53,10 +53,12 @@ trait HasBeagleTopBundleContents extends Bundle
   val lbwif_clk_divisor  = Output(UInt(p(PeripheryBeagleKey).lbwifClkDivBits.W))
 
   val uncore_clk_pass_sel = Output(Bool()) // used to choose the undivided uncore clock or divided (default to divided)
-  val bh_clk_pass_sel = Output(Bool()) // used to choose the undivided bh clock or divided (default to undivided)
-  val rs_clk_pass_sel = Output(Bool()) // used to choose the undivided rs clock or divided (default to undivided)
+  val bh_clk_pass_sel     = Output(Bool()) // used to choose the undivided bh clock or divided (default to undivided)
+  val rs_clk_pass_sel     = Output(Bool()) // used to choose the undivided rs clock or divided (default to undivided)
 
-  val hbwif_rsts   = Output(Vec(p(HbwifNumLanes), Bool()))
+  val hbwif_rsts = Output(Vec(p(HbwifNumLanes), Bool()))
+  val bh_rst     = Output(Bool())
+  val rs_rst     = Output(Bool())
 
   val switcher_sel = Output(Bool())
 }
@@ -111,11 +113,19 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap
     Module(new AsyncResetRegVec(w = 1, init = 0))
   }
 
-  // hbwif reset signals
+  // reset signals
   val r_hbwif_rsts = Seq.fill(p(HbwifNumLanes)) {
     withReset(io.rst_async) {
       Module(new AsyncResetRegVec(w = 1, init = 1))
     }
+  }
+
+  val r_bh_rst = withReset(io.rst_async) {
+    Module(new AsyncResetRegVec(w = 1, init = 1))
+  }
+
+  val r_rs_rst = withReset(io.rst_async) {
+    Module(new AsyncResetRegVec(w = 1, init = 1))
   }
 
   // connect hbwif or lbwif to memory system
@@ -130,33 +140,46 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap
   io.bh_clk_out_divisor  := r_bh_clk_out_divisor.io.q
   io.rs_clk_out_divisor  := r_rs_clk_out_divisor.io.q
   io.lbwif_clk_divisor   := r_lbwif_clk_divisor.io.q
+
   io.uncore_clk_pass_sel := r_uncore_clk_pass_sel.io.q
   io.bh_clk_pass_sel     := r_bh_clk_pass_sel.io.q
   io.rs_clk_pass_sel     := r_rs_clk_pass_sel.io.q
+
   io.hbwif_rsts          := VecInit(r_hbwif_rsts.map(_.io.q))
+  io.bh_rst              := r_bh_rst.io.q
+  io.rs_rst              := r_rs_rst.io.q
+
   io.switcher_sel        := r_switcher_sel.io.q
 
   // connect to mmio
 
   // needed to space out the mmio correctly
-  require(c.uncoreClkDivBits == 8)
-  require(    c.bhClkDivBits == 8)
-  require(    c.rsClkDivBits == 8)
-  require( c.lbwifClkDivBits == 8)
+  require(c.uncoreClkDivBits <= 32)
+  require(    c.bhClkDivBits <= 32)
+  require(    c.rsClkDivBits <= 32)
+  require( c.lbwifClkDivBits <= 32)
+  require(  p(HbwifNumLanes) <= 32)
 
+  // this corresponds to byte addressable memory (0x0 -> 0x1 == 8 bits)
   regmap(
-    0x08 -> Seq(RegField.r(1, RegReadFn(io.boot))),
-    0x0c -> Seq(RegField.rwReg(1, r_switcher_sel.io)),
-    0x10 -> r_hbwif_rsts.map(rst => RegField.rwReg(1, rst.io)),
+    0x00 -> Seq(RegField.r(1, RegReadFn(io.boot))),
+
+    0x04 -> Seq(RegField.rwReg(1, r_switcher_sel.io)),
+
+    0x08 -> r_hbwif_rsts.map(rst => RegField.rwReg(1, rst.io)),
+    0x0c -> Seq(RegField.rwReg(1, r_bh_rst.io)),
+    0x10 -> Seq(RegField.rwReg(1, r_rs_rst.io)),
+
     0x20 -> Seq(RegField.rwReg(c.uncoreClkDivBits,  r_uncore_clk_divisor.io)),
-    0x30 -> Seq(RegField.rwReg(    c.bhClkDivBits,      r_bh_clk_divisor.io)),
-    0x40 -> Seq(RegField.rwReg(    c.rsClkDivBits,      r_rs_clk_divisor.io)),
-    0x50 -> Seq(RegField.rwReg(    c.bhClkDivBits,  r_bh_clk_out_divisor.io)),
-    0x60 -> Seq(RegField.rwReg(    c.rsClkDivBits,  r_rs_clk_out_divisor.io)),
-    0x70 -> Seq(RegField.rwReg( c.lbwifClkDivBits,   r_lbwif_clk_divisor.io)),
-    0x80 -> Seq(RegField.rwReg(                 1, r_uncore_clk_pass_sel.io)),
-    0x88 -> Seq(RegField.rwReg(                 1,     r_bh_clk_pass_sel.io)),
-    0x90 -> Seq(RegField.rwReg(                 1,     r_rs_clk_pass_sel.io))
+    0x24 -> Seq(RegField.rwReg(    c.bhClkDivBits,      r_bh_clk_divisor.io)),
+    0x28 -> Seq(RegField.rwReg(    c.rsClkDivBits,      r_rs_clk_divisor.io)),
+    0x2c -> Seq(RegField.rwReg(    c.bhClkDivBits,  r_bh_clk_out_divisor.io)),
+    0x30 -> Seq(RegField.rwReg(    c.rsClkDivBits,  r_rs_clk_out_divisor.io)),
+    0x34 -> Seq(RegField.rwReg( c.lbwifClkDivBits,   r_lbwif_clk_divisor.io)),
+
+    0x50 -> Seq(RegField.rwReg(1, r_uncore_clk_pass_sel.io)),
+    0x54 -> Seq(RegField.rwReg(1,     r_bh_clk_pass_sel.io)),
+    0x58 -> Seq(RegField.rwReg(1,     r_rs_clk_pass_sel.io))
   )
 }
 
@@ -367,11 +390,11 @@ trait HasPeripheryBeagleModuleImp extends LazyModuleImp with HasPeripheryBeagleB
 
   require(scr_mod.io.bh_clk_pass_sel.getWidth >= log2Ceil(bh_clks_pre_muxed.length), "[sys-top] must be able to select the bh clocks")
   val bh_clk = clkMux(bh_clks_pre_muxed, scr_mod.io.bh_clk_pass_sel, rst_async)
-  val bh_rst = ResetCatchAndSync(bh_clk, bh_mux_clk_rst, 50) // TODO: Change into SCR and have FESVR manage
+  val bh_rst = scr_mod.io.bh_rst
 
   require(scr_mod.io.rs_clk_pass_sel.getWidth >= log2Ceil(rs_clks_pre_muxed.length), "[sys-top] must be able to select the rs clocks")
   val rs_clk = clkMux(rs_clks_pre_muxed, scr_mod.io.rs_clk_pass_sel, rst_async)
-  val rs_rst = ResetCatchAndSync(rs_clk, rs_mux_clk_rst, 50) // TODO: Change into SCR and have FESVR manage
+  val rs_rst = scr_mod.io.rs_rst
 
   // setup clock dividers
 

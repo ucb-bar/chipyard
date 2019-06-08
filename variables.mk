@@ -25,7 +25,7 @@
 #   - make it so that you only change 1 param to change most or all of them!
 #   - mainly intended for quick developer setup for common flags
 #########################################################################################
-SUB_PROJECT ?= example
+SUB_PROJECT ?= beagle
 
 ifeq ($(SUB_PROJECT),example)
 	SBT_PROJECT       ?= example
@@ -175,5 +175,5 @@ sim_vsrcs = \
 #########################################################################################
 # assembly/benchmark variables
 #########################################################################################
-timeout_cycles = 10000000
-bmark_timeout_cycles = 100000000
+timeout_cycles = 100000
+bmark_timeout_cycles = 1000000
