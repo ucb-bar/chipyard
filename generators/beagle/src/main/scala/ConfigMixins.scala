@@ -47,7 +47,6 @@ class WithBeagleChanges extends Config((site, here, up) => {
   case HbwifPipelineResetDepth => 5
   case CacheBlockStriping => 2
   case LbwifBitWidth => 4
-  case LbwifDividerInit => 8
   case PeripheryBeagleKey => BeagleParams(scrAddress = 0x110000)
   case ScratchPadAddressSet => AddressSet(0x50000000, 0xffff)
 })
@@ -64,14 +63,22 @@ class WithLargerScratchpad extends Config((site, here, up) => {
  */
 class WithBeagleSimChanges extends Config((site, here, up) => {
   case LbwifBitWidth => 32
-  case LbwifDividerInit => 2
+  case PeripheryBeagleKey => up(PeripheryBeagleKey).copy(
+    uncoreClkDivInit = 1, // %2
+    bhClkDivInit = 1, // %2
+    rsClkDivInit = 1, // %2
+    lbwifClkDivInit = 1, // %2
+    uncoreClkPassSelInit = 1, // div clk
+    bhClkPassSelInit = 0, // undiv clk
+    rsClkPassSelInit = 0, // undiv clk
+    lbwifClkPassSelInit = 0) // undiv clk
 })
 
 /**
  * Mixin for adding external I/O
  */
 class WithBeagleSiFiveBlocks extends Config((site, here, up) => {
-  case PeripheryGPIOKey => Seq(GPIOParams(address = 0x9000, width = 16))
+  case PeripheryGPIOKey => Seq(GPIOParams(address = 0x9000, width = 11))
   case PeripherySPIKey => Seq(SPIParams(rAddress = 0xa000))
   case PeripheryI2CKey => Seq(I2CParams(address = 0xb000))
   case PeripheryUARTKey => Seq(UARTParams(address = 0xc000))
@@ -83,8 +90,8 @@ class WithBeagleSiFiveBlocks extends Config((site, here, up) => {
 class WithHierTiles extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey, site) map { r =>
     r.copy(boundaryBuffers = true) }
-  case BoomTilesKey => up(BoomTilesKey, site) map { r =>
-    r.copy(boundaryBuffers = true) }
+  case BoomTilesKey => up(BoomTilesKey, site) map { b =>
+    b.copy(boundaryBuffers = true) }
 })
 
 /**
@@ -99,7 +106,7 @@ class WithBeagleSerdesChanges extends Config((site, here, up) => {
   case HbwifNumLanes => 2
   case HbwifTLKey => up(HbwifTLKey, site).copy(
     managerAddressSet = AddressSet.misaligned(site(ExtMem).get.master.base, site(ExtMem).get.master.size),
-    numBanks = 1,
+    numBanks = 2,
     numXact = 16,
     clientPort = false,
     managerTLUH = false,
@@ -163,6 +170,7 @@ class WithMultiRoCCSystolic(harts: Int*) extends Config((site, here, up) => {
 class WithMiniRocketCore extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey, site) :+
     RocketTileParams(
+      name = Some("rocket_tile"),
       core = RocketCoreParams(
         useVM = true,
         mulDiv = Some(MulDivParams(mulUnroll = 8))),
