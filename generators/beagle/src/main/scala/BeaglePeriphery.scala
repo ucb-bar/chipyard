@@ -32,7 +32,11 @@ case class BeagleParams(
   uncoreClkDivInit: Int = 4,
   bhClkDivInit: Int = 2,
   rsClkDivInit: Int = 2,
-  lbwifClkDivInit: Int = 4
+  lbwifClkDivInit: Int = 4,
+  uncoreClkPassSelInit: Int = 1, // default div
+  bhClkPassSelInit: Int = 0, // default undiv
+  rsClkPassSelInit: Int = 0, // default undiv
+  lbwifClkPassSelInit: Int = 1 // default div
 )
 
 /**
@@ -52,9 +56,11 @@ trait HasBeagleTopBundleContents extends Bundle
   val rs_clk_out_divisor = Output(UInt(p(PeripheryBeagleKey).rsClkDivBits.W))
   val lbwif_clk_divisor  = Output(UInt(p(PeripheryBeagleKey).lbwifClkDivBits.W))
 
-  val uncore_clk_pass_sel = Output(Bool()) // used to choose the undivided uncore clock or divided (default to divided)
-  val bh_clk_pass_sel     = Output(Bool()) // used to choose the undivided bh clock or divided (default to undivided)
-  val rs_clk_pass_sel     = Output(Bool()) // used to choose the undivided rs clock or divided (default to undivided)
+  // used to choose divided or undivided clock
+  val uncore_clk_pass_sel = Output(Bool())
+  val bh_clk_pass_sel     = Output(Bool())
+  val rs_clk_pass_sel     = Output(Bool())
+  val lbwif_clk_pass_sel  = Output(Bool())
 
   val hbwif_rsts = Output(Vec(p(HbwifNumLanes), Bool()))
   val bh_rst     = Output(Bool())
@@ -102,15 +108,19 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap
 
   // divided or undivided clock select bit regs
   val r_uncore_clk_pass_sel = withReset(io.rst_async) {
-    Module(new AsyncResetRegVec(w = 1, init = 1))
+    Module(new AsyncResetRegVec(w = 1, init = c.uncoreClkPassSelInit))
   }
 
   val r_bh_clk_pass_sel = withReset(io.rst_async) {
-    Module(new AsyncResetRegVec(w = 1, init = 0))
+    Module(new AsyncResetRegVec(w = 1, init = c.bhClkPassSelInit))
   }
 
   val r_rs_clk_pass_sel = withReset(io.rst_async) {
-    Module(new AsyncResetRegVec(w = 1, init = 0))
+    Module(new AsyncResetRegVec(w = 1, init = c.rsClkPassSelInit))
+  }
+
+  val r_lbwif_clk_pass_sel = withReset(io.rst_async) {
+    Module(new AsyncResetRegVec(w = 1, init = c.lbwifClkPassSelInit))
   }
 
   // reset signals
@@ -144,6 +154,7 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap
   io.uncore_clk_pass_sel := r_uncore_clk_pass_sel.io.q
   io.bh_clk_pass_sel     := r_bh_clk_pass_sel.io.q
   io.rs_clk_pass_sel     := r_rs_clk_pass_sel.io.q
+  io.lbwif_clk_pass_sel  := r_lbwif_clk_pass_sel.io.q
 
   io.hbwif_rsts          := VecInit(r_hbwif_rsts.map(_.io.q))
   io.bh_rst              := r_bh_rst.io.q
@@ -179,7 +190,8 @@ trait HasBeagleTopModuleContents extends MultiIOModule with HasRegMap
 
     0x50 -> Seq(RegField.rwReg(1, r_uncore_clk_pass_sel.io)),
     0x54 -> Seq(RegField.rwReg(1,     r_bh_clk_pass_sel.io)),
-    0x58 -> Seq(RegField.rwReg(1,     r_rs_clk_pass_sel.io))
+    0x58 -> Seq(RegField.rwReg(1,     r_rs_clk_pass_sel.io)),
+    0x5c -> Seq(RegField.rwReg(1,  r_lbwif_clk_pass_sel.io))
   )
 }
 
@@ -402,8 +414,10 @@ trait HasPeripheryBeagleModuleImp extends LazyModuleImp with HasPeripheryBeagleB
   val bh_clk_div2_out = clkDiv(bh_clk, bh_rst, outer.scrParams.bhClkDivBits, scr_mod.io.bh_clk_out_divisor)
   val rs_clk_div2_out = clkDiv(rs_clk, rs_rst, outer.scrParams.rsClkDivBits, scr_mod.io.rs_clk_out_divisor)
 
-  // setup lbwif clock based on uncore
-  val lbwif_clk = clkDiv(clock, reset.asBool, outer.scrParams.lbwifClkDivBits, scr_mod.io.lbwif_clk_divisor)
+  // setup lbwif clock based on uncore (has a passthrough)
+  val lbwif_div_clk = clkDiv(clock, reset.asBool, outer.scrParams.lbwifClkDivBits, scr_mod.io.lbwif_clk_divisor)
+  val lbwif_clks_pre_muxed = Seq(clock, lbwif_div_clk)
+  val lbwif_clk = clkMux(lbwif_clks_pre_muxed, scr_mod.io.lbwif_clk_pass_sel, rst_async)
   val lbwif_rst = ResetCatchAndSync(lbwif_clk, reset.asBool)
 
   // setup lbwif

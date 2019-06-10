@@ -50,10 +50,14 @@ class WithBeagleChanges extends Config((site, here, up) => {
 class WithBeagleSimChanges extends Config((site, here, up) => {
   case LbwifBitWidth => 32
   case PeripheryBeagleKey => up(PeripheryBeagleKey).copy(
-    uncoreClkDivInit = 1,
-    bhClkDivInit = 1,
-    rsClkDivInit = 1,
-    lbwifClkDivInit = 1)
+    uncoreClkDivInit = 1, // %2
+    bhClkDivInit = 1, // %2
+    rsClkDivInit = 1, // %2
+    lbwifClkDivInit = 1, // %2
+    uncoreClkPassSelInit = 1, // div clk
+    bhClkPassSelInit = 0, // undiv clk
+    rsClkPassSelInit = 0, // undiv clk
+    lbwifClkPassSelInit = 0) // undiv clk
 })
 
 /**
