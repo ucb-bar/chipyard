@@ -217,7 +217,7 @@ trait HasPeripheryBeagle
   pbus.toVariableWidthSlave(scrName) { scr.node := TLBuffer() }
 
   // setup boot scratch pad
-  val bootScratchPad = LazyModule(new TLRAM(
+  val boot_scratchpad = LazyModule(new TLRAM(
     address = p(ScratchPadAddressSet),
     cacheable = false,
     executable = true,

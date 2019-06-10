@@ -30,7 +30,7 @@ import systolic.{SystolicArray, SystolicArrayKey, SystolicArrayConfig, Dataflow}
 /**
  * Heterogeneous (BOOM + Rocket)
  */
-class BeagleBoomAndRocketNoHwachaConfig extends Config(
+class BeagleBoomRocketSimConfig extends Config(
   // uncore mixins
   new example.WithBootROM ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
@@ -44,7 +44,7 @@ class BeagleBoomAndRocketNoHwachaConfig extends Config(
   new WithBeagleSerdesChanges ++
   new WithGenericSerdes ++
   new boom.system.WithRenumberHarts ++
-  // make tiles have different clocks
+  // make tiles support different clocks
   new boom.system.WithAsynchronousBoomTiles(4, 4) ++
   new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(4, 4) ++
   // boom mixins
@@ -59,7 +59,7 @@ class BeagleBoomAndRocketNoHwachaConfig extends Config(
 /**
  * Heterogeneous ((BOOM + Hwacha) + (Rocket + Hwacha))
  */
-class BeagleBoomAndRocketHwachaConfig extends Config(
+class BeagleBoomRocketHwachaSimConfig extends Config(
   // uncore mixins
   new example.WithBootROM ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
@@ -75,7 +75,7 @@ class BeagleBoomAndRocketHwachaConfig extends Config(
   new boom.system.WithRenumberHarts ++
   // hwacha mixins
   new hwacha.DefaultHwachaConfig ++
-  // make tiles have different clocks
+  // make tiles support different clocks
   new boom.system.WithAsynchronousBoomTiles(4, 4) ++
   new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(4, 4) ++
   // boom mixins
@@ -115,7 +115,7 @@ class BeagleConfig extends Config(
   // hwacha parameter setup mixins
   new hwacha.DefaultHwachaConfig ++
 
-  // make tiles have different clocks
+  // make tiles support different clocks
   new boom.system.WithAsynchronousBoomTiles(4, 4) ++
   new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(4, 4) ++
 
@@ -152,7 +152,6 @@ class MegaBeagleConfig extends Config(
   new WithBeagleChanges ++
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
-  new WithRationalRocketTiles ++
   new WithNMemoryChannels(2) ++
   new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
@@ -168,6 +167,10 @@ class MegaBeagleConfig extends Config(
   new WithSystolicParams ++
   // hwacha parameter setup mixins
   new hwacha.DefaultHwachaConfig ++
+
+  // make tiles support different clocks
+  new boom.system.WithAsynchronousBoomTiles(4, 4) ++
+  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(4, 4) ++
 
   // rocket mixins
   new WithMiniRocketCore ++
