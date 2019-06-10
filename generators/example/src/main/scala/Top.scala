@@ -16,13 +16,13 @@ import sifive.blocks.devices.gpio._
 // BOOM and/or Rocket Top Level Systems
 // -------------------------------
 
-class BoomRocketTop(implicit p: Parameters) extends boom.system.ExampleBoomAndRocketSystem
+class BoomRocketTop(implicit p: Parameters) extends boom.system.BoomRocketSystem
   with HasNoDebug
   with HasPeripherySerial {
   override lazy val module = new BoomRocketTopModule(this)
 }
 
-class BoomRocketTopModule[+L <: BoomRocketTop](l: L) extends boom.system.ExampleBoomAndRocketSystemModule(l)
+class BoomRocketTopModule[+L <: BoomRocketTop](l: L) extends boom.system.BoomRocketSystemModule(l)
   with HasNoDebugModuleImp
   with HasPeripherySerialModuleImp
   with DontTouch
