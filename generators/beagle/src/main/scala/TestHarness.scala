@@ -73,17 +73,34 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
 
     val dut = Module(new BeagleChipTop)
 
+    val harness_clk_divider = Module(new testchipip.ClockDivider(2))
+    harness_clk_divider.io.divisor := 1.U
+    val harness_slow_clk = harness_clk_divider.io.clockOut
+
+    val harness_fast_clk = hbwif.ClockToDifferential(clock)
+
     dut.reset := reset
     dut.boot := true.B
-    dut.alt_clks.foreach { _ := clock }
-    dut.alt_clk_sel := 0.U
+    dut.single_clks.foreach { _ := harness_slow_clk }
+    dut.diff_clks.foreach { _ := DontCare }
+    dut.diff_clks.foreach { diff_clk =>
+      attach(diff_clk.p, harness_fast_clk.p)
+      attach(diff_clk.n, harness_fast_clk.n)
+    }
+    dut.bh_clk_sel := 0.U
+    dut.rs_clk_sel := 0.U
+    dut.uncore_clk_sel := 0.U
     dut.gpio := DontCare
     dut.i2c  := DontCare
     dut.spi  := DontCare
     dut.uart := DontCare
     dut.jtag := DontCare
     dut.hbwif := DontCare
-    dut.hbwif_diff_clks := DontCare
+    dut.hbwif_diff_clks.foreach { _ := DontCare }
+    dut.hbwif_diff_clks.foreach { diff_clk =>
+      attach(diff_clk.p, harness_fast_clk.p)
+      attach(diff_clk.n, harness_fast_clk.n)
+    }
 
     // SimSerial <-> SerialAdapter <-> Serdes <--ChipConnection--> Lbwif
 
@@ -91,8 +108,6 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
 
     sim.io.clock := clock
     sim.io.reset := reset
-    //adapter.module.io.clock := clock
-    //adapter.module.io.reset := reset
 
     val lbwif_tx_queue = Module(new AsyncQueue(chiselTypeOf(lbwif.module.io.ser.out.bits)))
     val lbwif_rx_queue = Module(new AsyncQueue(chiselTypeOf(lbwif.module.io.ser.in.bits)))
@@ -106,11 +121,11 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
     lbwif_rx_queue.io.deq_reset <> reset
 
     dut.lbwif_serial.in <> lbwif_tx_queue.io.deq
-    lbwif_tx_queue.io.deq_clock := dut.lbwif_serial_clk
+    lbwif_tx_queue.io.deq_clock := dut.lbwif_clk_out
     lbwif_tx_queue.io.deq_reset := reset // TODO: should be onchip reset
 
     lbwif_rx_queue.io.enq <> dut.lbwif_serial.out
-    lbwif_rx_queue.io.enq_clock := dut.lbwif_serial_clk
+    lbwif_rx_queue.io.enq_clock := dut.lbwif_clk_out
     lbwif_rx_queue.io.enq_reset := reset // TODO: should be onchip reset
 
     sim.io.serial.out <> Queue(adapter.module.io.serial.out)

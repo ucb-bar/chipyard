@@ -23,8 +23,8 @@ class BeagleTop(implicit p: Parameters) extends boom.system.BoomAndRocketSubsyst
   with HasPeripherySPI
   with HasPeripheryI2C
   with HasPeripheryUART
-  with HasPeripheryBeagle {
-
+  with HasPeripheryBeagle
+{
   /** START: COPIED FROM ROCKET-CHIP */
   override lazy val module = new BeagleTopModule(this)
 
@@ -57,22 +57,16 @@ class BeagleTopModule[+L <: BeagleTop](l: L) extends boom.system.BoomAndRocketSu
   with HasPeripheryI2CModuleImp
   with HasPeripheryUARTModuleImp
   with HasPeripheryBeagleModuleImp
-  with freechips.rocketchip.util.DontTouch {
+  with freechips.rocketchip.util.DontTouch
+{
+  // assign the tiles with a specific clock
+  outer.boomTiles.foreach { bt =>
+    bt.module.clock := bh_clk
+    bt.module.reset := bh_rst
+  }
 
-  // backup clocks coming from offchip
-  val alt_clks    = IO(Input(Vec(2, Clock())))
-  val alt_clk_sel = IO(Input(UInt(1.W)))
-
-  val clk_out       = IO(Output(Clock()))
-  val lbwif_clk_out = IO(Output(Clock()))
-
-  // pipe out the lbwif clock out
-  lbwif_clk_out := lbwif_clk
-
-  // get the actual clock from the multiple alternate clocks
-  require(alt_clk_sel.getWidth >= log2Ceil(alt_clks.length), "[sys-top] must be able to select all input clocks")
-  val clockMux = testchipip.ClockMutexMux(alt_clks)
-  clockMux.io.sel := alt_clk_sel
-  clockMux.io.resetAsync := rst_async
-  clk_out := clockMux.io.clockOut
+  outer.rocketTiles.foreach { rt =>
+    rt.module.clock := rs_clk
+    rt.module.reset := rs_rst
+  }
 }
