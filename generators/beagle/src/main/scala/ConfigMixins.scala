@@ -191,6 +191,11 @@ class WithMiniRocketCore extends Config((site, here, up) => {
 // ---------------------
 // BOOM Mixins
 // ---------------------
+class WithNewFetchBuffer extends Config((site, here, up) => {
+  case BoomTilesKey => up(BoomTilesKey, site) map { b => b.copy(
+    core = b.core.copy(useNewFetchBuffer = true)
+  )}
+})
 
 /**
  * Beagle BOOM design point

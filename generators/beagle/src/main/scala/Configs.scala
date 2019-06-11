@@ -48,6 +48,7 @@ class BeagleBoomRocketSimConfig extends Config(
   new boom.system.WithAsynchronousBoomTiles(4, 4) ++
   new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(4, 4) ++
   // boom mixins
+  new WithNewFetchBuffer ++
   new boom.common.WithRVC ++
   new boom.common.DefaultBoomConfig ++
   new boom.system.WithNBoomCores(1) ++
@@ -79,6 +80,7 @@ class BeagleBoomRocketHwachaSimConfig extends Config(
   new boom.system.WithAsynchronousBoomTiles(4, 4) ++
   new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(4, 4) ++
   // boom mixins
+  new WithNewFetchBuffer ++
   new boom.common.WithRVC ++
   new boom.common.DefaultBoomConfig ++
   new boom.system.WithNBoomCores(1) ++
@@ -123,6 +125,7 @@ class BeagleConfig extends Config(
   new WithMiniRocketCore ++
 
   // boom mixins
+  new WithNewFetchBuffer ++
   new boom.common.WithRVC ++
   new boom.common.DefaultBoomConfig ++
   new boom.system.WithNBoomCores(1) ++
@@ -176,6 +179,7 @@ class MegaBeagleConfig extends Config(
   new WithMiniRocketCore ++
 
   // boom mixins
+  //new WithNewFetchBuffer ++
   new boom.common.WithRVC ++
   new WithMegaBeagleBooms ++
   new boom.system.WithNBoomCores(1) ++
