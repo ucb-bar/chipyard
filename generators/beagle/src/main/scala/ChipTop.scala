@@ -51,6 +51,8 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
   val bh_clk_out = IO(Output(Clock()))
   val rs_clk_out = IO(Output(Clock()))
   val lbwif_clk_out = IO(Output(Clock())) // clock to sample lbwif
+  val hbwif_rx_0_clk_out = IO(Output(Clock())) // TODO: Connect properly
+  val hbwif_rx_1_clk_out = IO(Output(Clock()))
 
   // clock mux select signals
   val bh_clk_sel = IO(Input(Bool())) // selector to choose fast or slow clk for boom + hwacha
@@ -86,6 +88,9 @@ class BeagleChipTop(implicit val p: Parameters) extends RawModule
   // punch hbwif to top level
   hbwif.tx <> sys.hbwif_tx
   hbwif.rx <> sys.hbwif_rx
+  // TODO: TODO: TODO: Replace with HBWIF clks
+  hbwif_rx_0_clk_out := lbwif_clk_out
+  hbwif_rx_1_clk_out := lbwif_clk_out
 
   // setup correct clocking from offchip
 

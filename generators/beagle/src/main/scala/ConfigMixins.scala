@@ -78,7 +78,7 @@ class WithBeagleSimChanges extends Config((site, here, up) => {
  * Mixin for adding external I/O
  */
 class WithBeagleSiFiveBlocks extends Config((site, here, up) => {
-  case PeripheryGPIOKey => Seq(GPIOParams(address = 0x9000, width = 11))
+  case PeripheryGPIOKey => Seq(GPIOParams(address = 0x9000, width = 6))
   case PeripherySPIKey => Seq(SPIParams(rAddress = 0xa000))
   case PeripheryI2CKey => Seq(I2CParams(address = 0xb000))
   case PeripheryUARTKey => Seq(UARTParams(address = 0xc000))
