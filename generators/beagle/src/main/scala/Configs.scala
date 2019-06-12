@@ -106,8 +106,8 @@ class BeagleConfig extends Config(
 
   // note: THIS MUST BE ABOVE hwacha.DefaultHwachaConfig TO WORK
   new example.WithMultiRoCC ++ // attach particular RoCC accelerators based on the hart
-  new example.WithMultiRoCCHwacha(1) ++ // add a hwacha to just boom
-  new WithMultiRoCCSystolic(0) ++ // add a systolic to just rocket
+  new example.WithMultiRoCCHwacha(0) ++ // add a hwacha to just boom
+  new WithMultiRoCCSystolic(1) ++ // add a systolic to just rocket
   new boom.system.WithRenumberHarts ++ // renumber harts with boom starting at 0 then rocket
 
   // systolic parameter setup mixins
@@ -159,8 +159,8 @@ class MegaBeagleConfig extends Config(
 
   // note: THIS MUST BE ABOVE hwacha.DefaultHwachaConfig TO WORK
   new example.WithMultiRoCC ++ // attach particular RoCC accelerators based on the hart
-  new example.WithMultiRoCCHwacha(1) ++ // add a hwacha to just boom
-  new WithMultiRoCCSystolic(0) ++ // add a systolic to just rocket
+  new example.WithMultiRoCCHwacha(0) ++ // add a hwacha to just boom
+  new WithMultiRoCCSystolic(1) ++ // add a systolic to just rocket
   new boom.system.WithRenumberHarts ++ // renumber harts with boom starting at 0 then rocket
 
   // systolic parameter setup mixins
