@@ -179,7 +179,7 @@ class MegaBeagleConfig extends Config(
   new WithMiniRocketCore ++
 
   // boom mixins
-  //new WithNewFetchBuffer ++
+  new WithNewFetchBuffer ++
   new boom.common.WithRVC ++
   new WithMegaBeagleBooms ++
   new boom.system.WithNBoomCores(1) ++
