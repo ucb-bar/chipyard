@@ -48,7 +48,7 @@ ifeq ($(SUB_PROJECT),boom)
 	CONFIG_PACKAGE    ?= boom.system
 	GENERATOR_PACKAGE ?= boom.system
 	TB                ?= TestDriver
-	TOP               ?= ExampleBoomAndRocketSystem
+	TOP               ?= BoomRocketSystem
 endif
 # for Rocket-chip developers
 ifeq ($(SUB_PROJECT),rocketchip)
