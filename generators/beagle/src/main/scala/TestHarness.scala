@@ -12,7 +12,7 @@ import freechips.rocketchip.util.GeneratorApp
 import freechips.rocketchip.devices.tilelink.{TLTestRAM}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.util.{AsyncQueue}
+import freechips.rocketchip.util.{AsyncQueue, ShiftRegInit}
 
 import testchipip.{SerialAdapter, SimSerial, TLSerdesser}
 
@@ -107,7 +107,7 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
     val sim = Module(new SimSerial(SerialAdapter.SERIAL_IF_WIDTH))
 
     sim.io.clock := clock
-    sim.io.reset := reset
+    sim.io.reset := ShiftRegInit(reset, 100, 1.U)
 
     val lbwif_tx_queue = Module(new AsyncQueue(chiselTypeOf(lbwif.module.io.ser.out.bits)))
     val lbwif_rx_queue = Module(new AsyncQueue(chiselTypeOf(lbwif.module.io.ser.in.bits)))
