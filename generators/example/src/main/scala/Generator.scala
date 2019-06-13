@@ -57,11 +57,11 @@ object Generator extends GeneratorApp {
     import freechips.rocketchip.system.DefaultTestSuites._
     val xlen = params(XLen)
 
-    // TODO: for now only generate tests for the first rocket/boom tile in the subsystem
     // TODO: support heterogenous systems?
+    // TODO: generate tests for hart0 of the system since asm tests run on hart0 by default
 
     // rocket specific tests
-    params(RocketTilesKey).headOption.map { tileParams =>
+    params(RocketTilesKey).find(_.hartId == 0).map { tileParams =>
       val coreParams = tileParams.core
       val vm = coreParams.useVM
       val env = if (vm) List("p","v") else List("p")
@@ -95,7 +95,7 @@ object Generator extends GeneratorApp {
     }
 
     // boom specific tests
-    params(BoomTilesKey).headOption.map { tileParams =>
+    params(BoomTilesKey).find(_.hartId == 0).map { tileParams =>
       val coreParams = tileParams.core
       val vm = coreParams.useVM
       val env = if (vm) List("p","v") else List("p")
