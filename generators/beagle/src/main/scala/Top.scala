@@ -17,7 +17,9 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.i2c._
 import sifive.blocks.devices.jtag._
 
-class BeagleTop(implicit p: Parameters) extends boom.system.BoomAndRocketSubsystem
+import boom.system.{BoomRocketSubsystem, BoomRocketSubsystemModuleImp}
+
+class BeagleTop(implicit p: Parameters) extends BoomRocketSubsystem
   with HasPeripheryBootROM
   with HasPeripheryGPIO
   with HasPeripherySPI
@@ -49,7 +51,7 @@ class BeagleTop(implicit p: Parameters) extends boom.system.BoomAndRocketSubsyst
   /** END: COPIED FROM ROCKET-CHIP */
 }
 
-class BeagleTopModule[+L <: BeagleTop](l: L) extends boom.system.BoomAndRocketSubsystemModuleImp(l)
+class BeagleTopModule[+L <: BeagleTop](l: L) extends BoomRocketSubsystemModuleImp(l)
   with HasRTCModuleImp
   with HasPeripheryBootROMModuleImp
   with HasPeripheryGPIOModuleImp

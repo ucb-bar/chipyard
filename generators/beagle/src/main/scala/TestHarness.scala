@@ -107,7 +107,7 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
     val sim = Module(new SimSerial(SerialAdapter.SERIAL_IF_WIDTH))
 
     sim.io.clock := clock
-    sim.io.reset := ShiftRegInit(reset, 100, 1.U)
+    sim.io.reset := reset
 
     val lbwif_tx_queue = Module(new AsyncQueue(chiselTypeOf(lbwif.module.io.ser.out.bits)))
     val lbwif_rx_queue = Module(new AsyncQueue(chiselTypeOf(lbwif.module.io.ser.in.bits)))
