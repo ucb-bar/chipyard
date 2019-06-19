@@ -207,9 +207,9 @@ class WithMegaBeagleBooms extends Config((site, here, up) => {
          decodeWidth = 3,
          numRobEntries = 120,
          issueParams = Seq(
-            IssueParams(issueWidth=1, numEntries=24, iqType=IQT_MEM.litValue, dispatchWidth=4),
-            IssueParams(issueWidth=2, numEntries=24, iqType=IQT_INT.litValue, dispatchWidth=4),
-            IssueParams(issueWidth=1, numEntries=24, iqType=IQT_FP.litValue , dispatchWidth=4)),
+            IssueParams(issueWidth=1, numEntries=24, iqType=IQT_MEM.litValue, dispatchWidth=3),
+            IssueParams(issueWidth=2, numEntries=24, iqType=IQT_INT.litValue, dispatchWidth=3),
+            IssueParams(issueWidth=1, numEntries=24, iqType=IQT_FP.litValue , dispatchWidth=3)),
          numIntPhysRegisters = 128,
          numFpPhysRegisters = 96,
          numLdqEntries = 24,
