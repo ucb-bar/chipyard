@@ -1,13 +1,13 @@
 Running A Simulation
 ========================================================
 
-REBAR provides support and integration for multiple simulation flows, for various user levels and requirements.
+Chipyard provides support and integration for multiple simulation flows, for various user levels and requirements.
 In the majority of cases during a digital design development process, simple software RTL simulation is needed.
 When more advanced full-system evaluation is required, with long running workloads, FPGA-accelerated simulation will then become a preferable solution.
 
 Software RTL Simulation
 ------------------------
-The REBAR framework provides wrappers for two common software RTL simulators:
+The Chipyard framework provides wrappers for two common software RTL simulators:
 the open-source Verilator simulator and the proprietary VCS simulator.
 For more information on either of these simulators, please refer to :ref:`Verilator` or :ref:`VCS`.
 The following instructions assume at least one of these simulators is installed.
@@ -97,7 +97,7 @@ FireSim enables simulations at 1000x-100000x the speed of standard software simu
 This is enabled using FPGA-acceleration on F1 instances of the AWS (Amazon Web Services) public cloud.
 Therefore FireSim simulation requires to be set-up on the AWS public cloud rather than on our local development machine.
 
-To run an FPGA-accelerated simulation using FireSim, a we need to clone the REBAR repository (or our fork of the REBAR repository) to an AWS EC2, and follow the setup instructions specified in the FireSim Initial Setup documentation page.
+To run an FPGA-accelerated simulation using FireSim, a we need to clone the Chipyard repository (or our fork of the Chipyard repository) to an AWS EC2, and follow the setup instructions specified in the FireSim Initial Setup documentation page.
 
 After setting up the FireSim environment, we now need to generate a FireSim simulation around our selected digital design.
 We will work from within the ``sims/firesim`` directory.

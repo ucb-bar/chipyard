@@ -22,10 +22,10 @@ TESTCHIPIP_CLASSES ?= "$(TESTCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/class
 #########################################################################################
 FIRRTL_JAR ?= $(ROCKETCHIP_DIR)/lib/firrtl.jar
 
-$(FIRRTL_JAR): $(call lookup_scala_srcs, $(REBAR_FIRRTL_DIR)/src/main/scala)
-	$(MAKE) -C $(REBAR_FIRRTL_DIR) SBT="$(SBT)" root_dir=$(REBAR_FIRRTL_DIR) build-scala
+$(FIRRTL_JAR): $(call lookup_scala_srcs, $(CHIPYARD_FIRRTL_DIR)/src/main/scala)
+	$(MAKE) -C $(CHIPYARD_FIRRTL_DIR) SBT="$(SBT)" root_dir=$(CHIPYARD_FIRRTL_DIR) build-scala
 	mkdir -p $(dir $@)
-	cp -p $(REBAR_FIRRTL_DIR)/utils/bin/firrtl.jar $@
+	cp -p $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl.jar $@
 	touch $@
 
 #########################################################################################
