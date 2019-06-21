@@ -1,7 +1,7 @@
 Heterogeneous SoCs
 ===============================
 
-The REBAR framework involves multiple cores and accelerators that can be composed in arbitrary ways.
+The Chipyard framework involves multiple cores and accelerators that can be composed in arbitrary ways.
 This discussion will focus on how you combine Rocket, BOOM and Hwacha in particular ways to create a unique SoC.
 
 Creating a Rocket and BOOM System
@@ -10,11 +10,11 @@ Creating a Rocket and BOOM System
 Instantiating an SoC with Rocket and BOOM cores is all done with the configuration system and two specific mixins.
 Both BOOM and Rocket have mixins labelled ``WithNBoomCores(X)`` and ``WithNBigCores(X)`` that automatically create ``X`` copies of the core.
 When used together you can create a heterogeneous system.
-The following example shows a dual core BOOM with a single Rocket.
+The following example shows a dual core BOOM with a single core Rocket.
 
 .. code-block:: scala
 
-    class DualCoreBoomAndRocketConfig extends Config(
+    class DualBoomAndOneRocketConfig extends Config(
       new WithNormalBoomRocketTop ++
       new WithBootROM ++
       new boom.system.WithRenumberHarts ++
@@ -33,8 +33,8 @@ This mixin applies to all the BOOM cores in the system and sets up the parameter
 Great! Now you have a heterogeneous setup with BOOMs and Rockets.
 The final thing you need to make this system work is to renumber the ``hartId``'s of the cores so that each core has a unique ``hartId``.
 This is done with ``WithRenumberHarts`` (which can label the Rocket cores first or the BOOM cores first).
-The reason this is needed is because by default the ``WithN...Cores(X)`` mixin assumes that there are only that type of core in the system.
-Thus, without the renumber mixin, each set of cores is labeled starting from zero.
+The reason this is needed is because by default the ``WithN...Cores(X)`` mixin assumes that there are only BOOM or only Rocket cores in the system.
+Thus, without the ``WithRenumberHarts`` mixin, each set of cores is labeled starting from zero causing multiple cores to be assigned the same ``hartId``.
 
 Another option to create a multi heterogeneous core system is to override the parameters yourself so you can specify the core parameters per core.
 The mixin to add to your system would look something like the following.
@@ -68,7 +68,7 @@ Then you could use this new mixin like the following.
       new WithHeterCoresSetup ++
       new freechips.rocketchip.system.BaseConfig)
 
-Note, in this setup you most likely dont need the ``WithRenumberHarts`` mixin since you have to assign the ``hartId`` of each tile in the params yourself.
+Note, in this setup you most likely don't need the ``WithRenumberHarts`` mixin since you have to assign the ``hartId`` of each tile in the tile parameters yourself.
 
 Adding Hwachas
 -------------------------------------------
@@ -78,7 +78,7 @@ An example of adding a Hwacha to all tiles in the system is below.
 
 .. code-block:: scala
 
-    class DualCoreBoomAndRocketWithHwachasConfig extends Config(
+    class DualBoomAndRocketWithHwachasConfig extends Config(
       new WithNormalBoomRocketTop ++
       new WithBootROM ++
       new hwacha.DefaultHwachaConfig ++
@@ -90,25 +90,25 @@ An example of adding a Hwacha to all tiles in the system is below.
       new freechips.rocketchip.subsystem.WithNBigCores(1) ++
       new freechips.rocketchip.system.BaseConfig)
 
-In this example, Hwachas are added to both BOOM's and to the Rocket tile.
+In this example, Hwachas are added to both BOOM tiles and to the Rocket tile.
 All with the same Hwacha parameters.
 
 Assigning Accelerators to Specific Tiles with MultiRoCC
 -------------------------------------------------------
 
-Located in ``generators/example/src/main/scala/ConfigMixins.scala`` is a Mixin that provides support for adding RoCC accelerators to specific tiles in your SoC.
+Located in ``generators/example/src/main/scala/ConfigMixins.scala`` is a mixin that provides support for adding RoCC accelerators to specific tiles in your SoC.
 Named ``MultiRoCCKey``, this key allows you to attach RoCC accelerators based on the ``hartId`` of the tile.
 For example, using this allows you to create a 8 tile system with a RoCC accelerator on only a subset of the tiles.
-An example is shown below with two BOOM cores, and one Rocket attached to a Hwacha.
+An example is shown below with two BOOM cores, and one Rocket tile with a Hwacha attached.
 
 .. code-block:: scala
 
-    class DualCoreBoomAndOneHwachaRocketConfig extends Config(
+    class DualBoomAndOneHwachaRocketConfig extends Config(
       new WithNormalBoomRocketTop ++
       new WithBootROM ++
       new WithMultiRoCC ++
       new WithMultiRoCCHwacha(0) ++ // put Hwacha just on hart0 which was renumbered to Rocket
-      new boom.system.WithRenumberHarts ++
+      new boom.system.WithRenumberHarts(rocketFirst = true) ++
       new hwacha.DefaultHwachaConfig ++
       new boom.common.WithRVC ++
       new boom.common.DefaultBoomConfig ++
