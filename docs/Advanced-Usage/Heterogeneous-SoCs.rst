@@ -25,13 +25,12 @@ The following example shows a dual core BOOM with a single core Rocket.
       new freechips.rocketchip.subsystem.WithNBigCores(1) ++
       new freechips.rocketchip.system.BaseConfig)
 
-In this example, the ``WithN...Cores(X)`` mixins set up particular parameters for the duplicated core.
-For example, the Rocket tiles will be "BigCores" while BOOM has some generic parameters set in its mixin.
-In BOOMs case, we override these base core parameters to create multiple "DefaultBoom"s with calling ``DefaultBoomConfig`` after the multi-core instantiation.
-This mixin applies to all the BOOM cores in the system and sets up the parameters for each.
+In this example, the ``WithNBoomCores`` and ``WithNBigCores`` mixins set up the default parameters for the multiple BOOM and Rocket cores, respectively.
+However, for BOOM, an extra mixin called ``DefaultBoomConfig`` is added to override the default parameters with a "normal" sized out-of-order core.
+This mixin applies to all BOOM cores in the system and changes the parameters for each.
 
 Great! Now you have a heterogeneous setup with BOOMs and Rockets.
-The final thing you need to make this system work is to renumber the ``hartId``'s of the cores so that each core has a unique ``hartId``.
+The final thing you need to make this system work is to renumber the ``hartId``'s of the cores so that each core has a unique ``hartId`` (a ``hartId`` is the hardware thread id of the core).
 This is done with ``WithRenumberHarts`` (which can label the Rocket cores first or the BOOM cores first).
 The reason this is needed is because by default the ``WithN...Cores(X)`` mixin assumes that there are only BOOM or only Rocket cores in the system.
 Thus, without the ``WithRenumberHarts`` mixin, each set of cores is labeled starting from zero causing multiple cores to be assigned the same ``hartId``.
@@ -68,7 +67,7 @@ Then you could use this new mixin like the following.
       new WithHeterCoresSetup ++
       new freechips.rocketchip.system.BaseConfig)
 
-Note, in this setup you most likely don't need the ``WithRenumberHarts`` mixin since you have to assign the ``hartId`` of each tile in the tile parameters yourself.
+Note, in this setup you need to specify the ``hartId`` of each core in the "TileParams", where each ``hartId`` is unique.
 
 Adding Hwachas
 -------------------------------------------
