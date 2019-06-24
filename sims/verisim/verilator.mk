@@ -5,7 +5,7 @@
 #########################################################################################
 # verilator version, binary, and path
 #########################################################################################
-VERILATOR_VERSION=4.008
+VERILATOR_VERSION=4.016
 VERILATOR_SRCDIR=verilator/src/verilator-$(VERILATOR_VERSION)
 INSTALLED_VERILATOR=$(abspath verilator/install/bin/verilator)
 
@@ -15,7 +15,7 @@ INSTALLED_VERILATOR=$(abspath verilator/install/bin/verilator)
 $(INSTALLED_VERILATOR): $(VERILATOR_SRCDIR)/bin/verilator
 	$(MAKE) -C $(VERILATOR_SRCDIR) installbin installdata
 	touch $@
-	
+
 .PHONY:
 verilator_install: $(INSTALLED_VERILATOR)
 
