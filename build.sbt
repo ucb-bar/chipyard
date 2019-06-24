@@ -19,17 +19,17 @@ lazy val commonSettings = Seq(
     Resolver.sonatypeRepo("releases"),
     Resolver.mavenLocal))
 
-lazy val rebarFirrtl = (project in file("tools/firrtl"))
+lazy val chipyardFirrtl = (project in file("tools/firrtl"))
   .settings(commonSettings)
 
 lazy val rocketchip = RootProject(file("generators/rocket-chip"))
 
-lazy val rebarrocketchip = project
+lazy val chipyardrocketchip = project
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
 lazy val testchipip = (project in file("generators/testchipip"))
-  .dependsOn(rebarrocketchip)
+  .dependsOn(chipyardrocketchip)
   .settings(commonSettings)
 
 // Checks for -DROCKET_USE_MAVEN.
@@ -53,25 +53,25 @@ lazy val utilities = conditionalDependsOn(project in file("generators/utilities"
   .settings(commonSettings)
 
 lazy val hwacha = (project in file ("generators/hwacha"))
-  .dependsOn(rebarrocketchip)
+  .dependsOn(chipyardrocketchip)
   .settings(commonSettings)
 
 lazy val boom = (project in file("generators/boom"))
-  .dependsOn(rebarrocketchip)
+  .dependsOn(chipyardrocketchip)
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
-  .dependsOn(rebarFirrtl)
+  .dependsOn(chipyardFirrtl)
   .settings(commonSettings)
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
   .settings(commonSettings)
 
 lazy val `barstools-macros` = (project in file("./tools/barstools/macros/"))
-  .dependsOn(mdf, rebarrocketchip, rebarFirrtl)
+  .dependsOn(mdf, chipyardrocketchip, chipyardFirrtl)
   .enablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonSettings)
 
 lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
-  .dependsOn(rebarrocketchip)
+  .dependsOn(chipyardrocketchip)
   .settings(commonSettings)

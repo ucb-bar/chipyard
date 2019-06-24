@@ -52,7 +52,7 @@ ifeq ($(SUB_PROJECT),boom)
 endif
 # for Rocket-chip developers
 ifeq ($(SUB_PROJECT),rocketchip)
-	SBT_PROJECT       ?= rebarrocketchip
+	SBT_PROJECT       ?= chipyardrocketchip
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= freechips.rocketchip.system
@@ -78,9 +78,9 @@ endif
 #########################################################################################
 # path to rocket-chip and testchipip
 #########################################################################################
-ROCKETCHIP_DIR   = $(base_dir)/generators/rocket-chip
-TESTCHIP_DIR     = $(base_dir)/generators/testchipip
-REBAR_FIRRTL_DIR = $(base_dir)/tools/firrtl
+ROCKETCHIP_DIR      = $(base_dir)/generators/rocket-chip
+TESTCHIP_DIR        = $(base_dir)/generators/testchipip
+CHIPYARD_FIRRTL_DIR = $(base_dir)/tools/firrtl
 
 #########################################################################################
 # names of various files needed to compile and run things

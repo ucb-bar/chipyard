@@ -1,5 +1,5 @@
-REBAR CI
-========
+Chipyard CI
+===========
 
 Website: https://circleci.com/gh/ucb-bar/project-template
 
@@ -32,17 +32,17 @@ Here the key is built from a string where the `checksum` portion converts the fi
 .circleci directory
 -------------------
 
-This directory contains all the collateral for the REBAR CI to work.
+This directory contains all the collateral for the Chipyard CI to work.
 The following is included:
-    
+
     build-toolchains.sh # build either riscv-tools or esp-tools
     build-verilator.sh  # build verilator
     create-hash.sh      # create hashes of riscv-tools/esp-tools so circleci caching can work
     do-rtl-build.sh     # use verilator to build a sim executable
     config.yml          # main circleci config script to enumerate jobs/workflows
 
-How things are setup for REBAR
-------------------------------
+How things are setup for Chipyard
+---------------------------------
 
 The steps for CI to run are as follows.
 1st, build the toolchains in parallel (note: `esp-tools` is currently not used in the run).
