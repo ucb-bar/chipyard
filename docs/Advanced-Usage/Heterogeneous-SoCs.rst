@@ -26,7 +26,7 @@ The following example shows a dual core BOOM with a single core Rocket.
       new freechips.rocketchip.system.BaseConfig)
 
 In this example, the ``WithNBoomCores`` and ``WithNBigCores`` mixins set up the default parameters for the multiple BOOM and Rocket cores, respectively.
-However, for BOOM, an extra mixin called ``DefaultBoomConfig`` is added to override the default parameters with a "normal" sized out-of-order core.
+However, for BOOM, an extra mixin called ``DefaultBoomConfig`` is added to override the default parameters with a different set of more common default parameters.
 This mixin applies to all BOOM cores in the system and changes the parameters for each.
 
 Great! Now you have a heterogeneous setup with BOOMs and Rockets.
