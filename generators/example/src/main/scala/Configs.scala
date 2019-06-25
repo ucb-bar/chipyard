@@ -205,7 +205,7 @@ class GPIOBoomAndRocketConfig extends Config(
   new WithGPIOBoomRocketTop ++
   new BaseBoomAndRocketConfig)
 
-class DualCoreBoomAndOneRocketConfig extends Config(
+class DualBoomAndOneRocketConfig extends Config(
   new WithNormalBoomRocketTop ++
   new WithBootROM ++
   new boom.system.WithRenumberHarts ++
@@ -216,12 +216,12 @@ class DualCoreBoomAndOneRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
-class DualCoreBoomAndOneHwachaRocketConfig extends Config(
+class DualBoomAndOneHwachaRocketConfig extends Config(
   new WithNormalBoomRocketTop ++
   new WithBootROM ++
   new WithMultiRoCC ++
   new WithMultiRoCCHwacha(0) ++ // put Hwacha just on hart0 which was renumbered to Rocket
-  new boom.system.WithRenumberHarts ++
+  new boom.system.WithRenumberHarts(rocketFirst = true) ++
   new hwacha.DefaultHwachaConfig ++
   new boom.common.WithRVC ++
   new boom.common.DefaultBoomConfig ++
