@@ -35,7 +35,7 @@ This is done with ``WithRenumberHarts`` (which can label the Rocket cores first 
 The reason this is needed is because by default the ``WithN...Cores(X)`` mixin assumes that there are only BOOM or only Rocket cores in the system.
 Thus, without the ``WithRenumberHarts`` mixin, each set of cores is labeled starting from zero causing multiple cores to be assigned the same ``hartId``.
 
-Another option to create a multi heterogeneous core system is to override the parameters yourself so you can specify the core parameters per core.
+Another alternative option to create a multi heterogeneous core system is to override the parameters yourself so you can specify the core parameters per core.
 The mixin to add to your system would look something like the following.
 
 .. code-block:: scala
@@ -98,7 +98,7 @@ Assigning Accelerators to Specific Tiles with MultiRoCC
 Located in ``generators/example/src/main/scala/ConfigMixins.scala`` is a mixin that provides support for adding RoCC accelerators to specific tiles in your SoC.
 Named ``MultiRoCCKey``, this key allows you to attach RoCC accelerators based on the ``hartId`` of the tile.
 For example, using this allows you to create a 8 tile system with a RoCC accelerator on only a subset of the tiles.
-An example is shown below with two BOOM cores, and one Rocket tile with a Hwacha attached.
+An example is shown below with two BOOM cores, and one Rocket tile with a RoCC accelerator (Hwacha) attached.
 
 .. code-block:: scala
 
