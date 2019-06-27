@@ -57,6 +57,12 @@ lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
   .dependsOn(rebarRocketchip)
   .settings(commonSettings)
 
+lazy val sifive_l2 = (project in file("generators/sifive-l2"))
+  .dependsOn(rebarRocketchip)
+  .settings(
+    commonSettings,
+    scalaSource in Compile := baseDirectory.value / "craft")
+
 // Checks for -DROCKET_USE_MAVEN.
 // If it's there, use a maven dependency.
 // Else, depend on subprojects in git submodules.
@@ -78,7 +84,7 @@ lazy val example = conditionalDependsOn(project in file("generators/example"))
   .settings(commonSettings)
 
 lazy val beagle = conditionalDependsOn(project in file("generators/beagle"))
-  .dependsOn(example, boom, hwacha, sifive_blocks, systolicArray, awl)
+  .dependsOn(example, boom, hwacha, sifive_blocks, systolicArray, awl, sifive_l2)
   .settings(commonSettings)
 
 // --------------------------------

@@ -3,7 +3,7 @@ package beagle
 import chisel3._
 
 import freechips.rocketchip.config.{Field, Parameters, Config}
-import freechips.rocketchip.subsystem.{ExtMem, RocketTilesKey, BankedL2Key, WithJtagDTM, WithNMemoryChannels, WithNBanks, SystemBusKey, MemoryBusKey, ControlBusKey, CacheBlockBytes}
+import freechips.rocketchip.subsystem.{ExtMem, RocketTilesKey, BankedL2Key, WithJtagDTM, WithNMemoryChannels, SystemBusKey, MemoryBusKey, ControlBusKey, CacheBlockBytes}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName, AddressSet}
 import freechips.rocketchip.tile.{LazyRoCC, BuildRoCC, OpcodeSet, TileKey, RocketTileParams}
 import freechips.rocketchip.rocket.{RocketCoreParams, BTBParams, DCacheParams, ICacheParams, MulDivParams}
@@ -34,13 +34,13 @@ class BeagleBoomRocketSimConfig extends Config(
   // uncore mixins
   new example.WithBootROM ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new WithBeagleL2 ++
   new WithBeagleSimChanges ++
   new WithBeagleChanges ++
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
   new WithHierTiles ++
   new WithNMemoryChannels(2) ++
-  new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
   new WithGenericSerdes ++
   new boom.system.WithRenumberHarts ++
@@ -50,7 +50,8 @@ class BeagleBoomRocketSimConfig extends Config(
   // boom mixins
   new WithNewFetchBuffer ++
   new boom.common.WithRVC ++
-  new boom.common.DefaultBoomConfig ++
+  new boom.common.WithLargeBooms ++
+  new boom.common.BaseBoomConfig ++
   new boom.system.WithNBoomCores(1) ++
   // rocket mixins
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -64,13 +65,13 @@ class BeagleBoomRocketHwachaSimConfig extends Config(
   // uncore mixins
   new example.WithBootROM ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new WithBeagleL2 ++
   new WithBeagleSimChanges ++
   new WithBeagleChanges ++
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
   new WithHierTiles ++
   new WithNMemoryChannels(2) ++
-  new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
   new WithGenericSerdes ++
   new boom.system.WithRenumberHarts ++
@@ -82,7 +83,8 @@ class BeagleBoomRocketHwachaSimConfig extends Config(
   // boom mixins
   new WithNewFetchBuffer ++
   new boom.common.WithRVC ++
-  new boom.common.DefaultBoomConfig ++
+  new boom.common.WithLargeBooms ++
+  new boom.common.BaseBoomConfig ++
   new boom.system.WithNBoomCores(1) ++
   // rocket mixins
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -98,11 +100,11 @@ class BeagleConfig extends Config(
   // uncore mixins
   new example.WithBootROM ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new WithBeagleL2 ++
   new WithBeagleChanges ++
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
   new WithNMemoryChannels(2) ++
-  new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
   new WithGenericSerdes ++
 
@@ -127,7 +129,8 @@ class BeagleConfig extends Config(
   // boom mixins
   new WithNewFetchBuffer ++
   new boom.common.WithRVC ++
-  new boom.common.DefaultBoomConfig ++
+  new boom.common.WithLargeBooms ++
+  new boom.common.BaseBoomConfig ++
   new boom.system.WithNBoomCores(1) ++
 
   // subsystem mixin
@@ -151,12 +154,11 @@ class MegaBeagleConfig extends Config(
   // uncore mixins
   new example.WithBootROM ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new WithLargerScratchpad ++
+  new WithBeagleL2 ++
   new WithBeagleChanges ++
   new WithBeagleSiFiveBlocks ++
   new WithJtagDTM ++
   new WithNMemoryChannels(2) ++
-  new WithNBanks(2) ++
   new WithBeagleSerdesChanges ++
   new WithGenericSerdes ++
 
@@ -182,6 +184,7 @@ class MegaBeagleConfig extends Config(
   new WithNewFetchBuffer ++
   new boom.common.WithRVC ++
   new WithMegaBeagleBooms ++
+  new boom.common.BaseBoomConfig ++
   new boom.system.WithNBoomCores(1) ++
 
   // subsystem mixin

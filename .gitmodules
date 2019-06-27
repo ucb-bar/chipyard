@@ -40,3 +40,6 @@
 [submodule "generators/awl"]
 	path = generators/awl
 	url = https://github.com/ucb-bar/chisel-awl.git
+[submodule "generators/sifive-l2"]
+	path = generators/sifive-l2
+	url = https://github.com/sifive/block-inclusivecache-sifive.git
