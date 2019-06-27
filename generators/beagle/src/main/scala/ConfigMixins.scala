@@ -38,7 +38,7 @@ import example.{MultiRoCCKey}
  */
 class WithBeagleL2 extends Config(
   new WithInclusiveCache(
-    nBanks = 2,
+    nBanks = 4,
     capacityKB = 1024)
 )
 
@@ -54,7 +54,7 @@ class WithBeagleChanges extends Config((site, here, up) => {
   }
   case BeaglePipelineResetDepth => 5
   case HbwifPipelineResetDepth => 5
-  case CacheBlockStriping => 2
+  case CacheBlockStriping => 4
   case LbwifBitWidth => 4
   case PeripheryBeagleKey => BeagleParams(scrAddress = 0x110000)
 })
