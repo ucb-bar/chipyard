@@ -24,10 +24,10 @@ TESTCHIPIP_CLASSES ?= "$(TESTCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/class
 #########################################################################################
 FIRRTL_JAR := $(base_dir)/lib/firrtl.jar
 
-$(FIRRTL_JAR): $(call lookup_scala_srcs, $(REBAR_FIRRTL_DIR)/src/main/scala)
-	$(MAKE) -C $(REBAR_FIRRTL_DIR) SBT="$(SBT)" root_dir=$(REBAR_FIRRTL_DIR) build-scala
+$(FIRRTL_JAR): $(call lookup_scala_srcs, $(CHIPYARD_FIRRTL_DIR)/src/main/scala)
+	$(MAKE) -C $(CHIPYARD_FIRRTL_DIR) SBT="$(SBT)" root_dir=$(CHIPYARD_FIRRTL_DIR) build-scala
 	mkdir -p $(@D)
-	cp -p $(REBAR_FIRRTL_DIR)/utils/bin/firrtl.jar $@
+	cp -p $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl.jar $@
 	touch $@
 
 #########################################################################################
@@ -39,11 +39,9 @@ $(sim_dotf): $(call lookup_scala_srcs,$(base_dir)/generators/utilities/src/main/
 #########################################################################################
 # create firrtl file rule and variables
 #########################################################################################
-CHISEL_ARGS ?=
-
 $(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(sim_dotf)
 	mkdir -p $(build_dir)
-	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator $(CHISEL_ARGS) $(build_dir) $(MODEL_PACKAGE) $(MODEL) $(CONFIG_PACKAGE) $(CONFIG)"
+	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator $(build_dir) $(MODEL_PACKAGE) $(MODEL) $(CONFIG_PACKAGE) $(CONFIG)"
 
 #########################################################################################
 # create verilog files rules and variables

@@ -6,7 +6,7 @@ VCS
 
 `VCS <https://www.synopsys.com/verification/simulation/vcs.html>`__ is a commercial RTL simulator developed by Synopsys.
 It requires commercial licenses.
-The REBAR framework can compile and execute simulations using VCS.
+The Chipyard framework can compile and execute simulations using VCS.
 VCS simulation will generally compile faster than Verilator simulations.
 
 To run a simulation using VCS, perform the following steps:

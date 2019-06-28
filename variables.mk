@@ -48,7 +48,7 @@ ifeq ($(SUB_PROJECT),boom)
 	CONFIG_PACKAGE    ?= boom.system
 	GENERATOR_PACKAGE ?= boom.system
 	TB                ?= TestDriver
-	TOP               ?= ExampleBoomAndRocketSystem
+	TOP               ?= BoomRocketSystem
 endif
 # for Rocket-chip developers
 ifeq ($(SUB_PROJECT),rocketchip)
@@ -90,9 +90,9 @@ endif
 #########################################################################################
 # path to rocket-chip and testchipip
 #########################################################################################
-ROCKETCHIP_DIR   = $(base_dir)/generators/rocket-chip
-TESTCHIP_DIR     = $(base_dir)/generators/testchipip
-REBAR_FIRRTL_DIR = $(base_dir)/tools/firrtl
+ROCKETCHIP_DIR      = $(base_dir)/generators/rocket-chip
+TESTCHIP_DIR        = $(base_dir)/generators/testchipip
+CHIPYARD_FIRRTL_DIR = $(base_dir)/tools/firrtl
 
 #########################################################################################
 # names of various files needed to compile and run things
