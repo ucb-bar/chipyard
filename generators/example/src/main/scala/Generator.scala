@@ -1,15 +1,19 @@
 package example
 
 import scala.collection.mutable.LinkedHashSet
+
 import chisel3._
 import chisel3.experimental._
+
 import firrtl.transforms.{BlackBoxResourceAnno, BlackBoxSourceHelper}
+
 import freechips.rocketchip.subsystem.{RocketTilesKey}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.util.{GeneratorApp}
 import freechips.rocketchip.tile.{XLen}
 import freechips.rocketchip.system.{TestGeneration, RegressionTestSuite}
+
 import boom.system.{BoomTilesKey, BoomTestSuites}
 
 object Generator extends GeneratorApp {

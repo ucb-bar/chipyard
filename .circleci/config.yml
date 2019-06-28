@@ -153,11 +153,45 @@ jobs:
 
             - run:
                 name: Building the boomexample subproject using Verilator
-                command: .circleci/do-rtl-build.sh SUB_PROJECT=boomexample CONFIG=SmallDefaultBoomConfig
+                command: .circleci/do-rtl-build.sh SUB_PROJECT=example CONFIG=SmallDefaultBoomConfig
                 no_output_timeout: 120m
 
             - save_cache:
                 key: boomexample-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/home/riscvuser/project"
+
+    prepare-boomrocketexample:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+
+            - restore_cache:
+                keys:
+                    - verilator-installed-v1-{{ checksum "sims/verisim/verilator.mk" }}
+
+            - run:
+                name: Building the boomrocketexample subproject using Verilator
+                command: .circleci/do-rtl-build.sh SUB_PROJECT=example CONFIG=SmallDefaultBoomAndRocketConfig
+                no_output_timeout: 120m
+
+            - save_cache:
+                key: boomrocketexample-{{ .Branch }}-{{ .Revision }}
                 paths:
                     - "/home/riscvuser/project"
 
@@ -317,7 +351,35 @@ jobs:
 
             - run:
                 name: Run boomexample benchmark tests
-                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=boomexample CONFIG=SmallDefaultBoomConfig
+                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=example CONFIG=SmallDefaultBoomConfig
+
+    boomrocketexample-run-benchmark-tests:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.5
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+
+        steps:
+            # Checkout the code
+            - checkout
+
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+
+            - restore_cache:
+                keys:
+                    - boomrocketexample-{{ .Branch }}-{{ .Revision }}
+
+            - run:
+                name: Run boomrocketexample benchmark tests
+                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=example CONFIG=SmallDefaultBoomAndRocketConfig
 
     boom-run-benchmark-tests:
         docker:
@@ -427,6 +489,11 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
+            - prepare-boomrocketexample:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
             - prepare-boom:
                 requires:
                     - install-riscv-toolchain
@@ -455,6 +522,11 @@ workflows:
                 requires:
                     - install-riscv-toolchain
                     - prepare-boomexample
+
+            - boomrocketexample-run-benchmark-tests:
+                requires:
+                    - install-riscv-toolchain
+                    - prepare-boomrocketexample
 
             - boom-run-benchmark-tests:
                 requires:

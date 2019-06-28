@@ -29,26 +29,14 @@ SUB_PROJECT ?= example
 
 ifeq ($(SUB_PROJECT),example)
 	SBT_PROJECT       ?= example
-	MODEL             ?= RocketTestHarness
+	MODEL             ?= BoomRocketTestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= $(SBT_PROJECT)
 	CONFIG            ?= DefaultRocketConfig
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
-	TOP               ?= RocketTop
-endif
-# for a BOOM based example system
-ifeq ($(SUB_PROJECT),boomexample)
-	SBT_PROJECT       ?= example
-	MODEL             ?= BoomTestHarness
-	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= $(SBT_PROJECT)
-	CONFIG            ?= DefaultBoomConfig
-	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
-	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
-	TB                ?= TestDriver
-	TOP               ?= BoomTop
+	TOP               ?= BoomRocketTop
 endif
 # for BOOM developers
 ifeq ($(SUB_PROJECT),boom)
@@ -60,7 +48,7 @@ ifeq ($(SUB_PROJECT),boom)
 	CONFIG_PACKAGE    ?= boom.system
 	GENERATOR_PACKAGE ?= boom.system
 	TB                ?= TestDriver
-	TOP               ?= ExampleBoomSystem
+	TOP               ?= ExampleBoomAndRocketSystem
 endif
 # for Rocket-chip developers
 ifeq ($(SUB_PROJECT),rocketchip)
@@ -159,7 +147,7 @@ output_dir=$(sim_dir)/output/$(long_name)
 # helper variables to run binaries
 #########################################################################################
 BINARY ?=
-SIM_FLAGS ?= +verbose
+SIM_FLAGS ?= +max-cycles=$(timeout_cycles)
 sim_out_name = $(notdir $(basename $(BINARY))).$(long_name)
 
 #########################################################################################

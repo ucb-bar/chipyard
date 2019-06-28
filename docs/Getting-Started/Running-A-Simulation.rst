@@ -1,123 +1,106 @@
 Running A Simulation
 ========================================================
 
-ReBAR provides support and intergration for multiple simulation flows, for various user levels and requirments.
-In the majority of cases during a digital design development process, simple software RTL. When more advanced full-system evaluation is required, with long running workloads, FPGA-accelerated simulation will then become a preferable solution.
-
+REBAR provides support and integration for multiple simulation flows, for various user levels and requirements.
+In the majority of cases during a digital design development process, simple software RTL simulation is needed.
+When more advanced full-system evaluation is required, with long running workloads, FPGA-accelerated simulation will then become a preferable solution.
 
 Software RTL Simulation
 ------------------------
-The ReBAR framework provides wrappers for two common software RTL simulators: the open-source Verilator simulator. and the proprietry VCS simulator.The following instructions assume at least one of these simulators is installed.
+The REBAR framework provides wrappers for two common software RTL simulators:
+the open-source Verilator simulator and the proprietary VCS simulator.
+For more information on either of these simulators, please refer to :ref:`Verilator` or :ref:`VCS`.
+The following instructions assume at least one of these simulators is installed.
 
-Verilator
+Verilator/VCS Flows
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Verilator is an open-source RTL simulator. We run Verilator simulations from within the ``sims/verisim`` directory. Therefore, we will start by entering that directory:
+Verilator is an open-source RTL simulator.
+We run Verilator simulations from within the ``sims/verisim`` directory which provides the necessary ``Makefile`` to both install and run Verilator simulations.
+On the other hand, VCS is a proprietary RTL simulator.
+We run VCS simulations from within the ``sims/vsim`` directory.
+Assuming VCS is already installed on the machine running simulations (and is found on our ``PATH``), then this guide is the same for both Verilator and VCS.
+
+First, we will start by entering the Verilator or VCS directory:
 
 .. code-block:: shell
 
-  cd sims/verisim
+    # Enter Verilator directory
+    cd sims/verisim
 
-In order to construct the simulator with our custom design, we run the following command within the ``sims/verisim`` directory:
+    # OR
 
-.. code-block:: shell
+    # Enter VCS directory
+    cd sims/vsim
 
-  make TOP=<my_top_level_name> CONFIG=<my_config_name> SBT_PROJECT=<my_sbt_package_name> MODEL=<my_test_environment>
-
-Where ``<my_top_level_name>`` is the class name of the top level design, ``<my_config_name>`` is the name of the class we create for our parameters configuration, ``<my_sbt_package_name>`` is the name of the sbt package the include both our top-level class and our config class, and ``<my_test_environment>`` is the name of the class which defines the test harness for our system.
-The ``make`` command may have additional parameters (such as ``CONFIG_PACKAGE`` or ``MODEL_PACKAGE``) depending on the complexity of the design and integration with multiple sub-project repositories in the sbt-based build system.
-
-Common configurations are package using a ``SUB_PROJECT`` make variable. There, in order to simulate a simple Rocket-based example system we can use:
+In order to construct the simulator with our custom design, we run the following command within the simulator directory:
 
 .. code-block:: shell
 
-  make SUB_PROJECT=example
+    make SBT_PROJECT=... MODEL=... VLOG_MODEL=... MODEL_PACKAGE=... CONFIG=... CONFIG_PACKAGE=... GENERATOR_PACKAGE=... TB=... TOP=...
+
+Each of these make variables correspond to a particular part of the design/codebase and are needed so that the make system can correctly build and make a RTL simulation.
+The ``SBT_PROJECT`` is the ``build.sbt`` project that holds all of the source files and that will be run during the RTL build.
+The ``MODEL`` and ``VLOG_MODEL`` are the top-level class names of the design.
+Normally, these are the same, but in some cases these can differ (if the Chisel class differs than what is emitted in the Verilog).
+The ``MODEL_PACKAGE`` is the Scala package (in the Scala code that says ``package ...``) that holds the ``MODEL`` class.
+The ``CONFIG`` is the name of the class used for the parameter Config while the ``CONFIG_PACKAGE`` is the Scala package it resides in.
+The ``GENERATOR_PACKAGE`` is the Scala package that holds the Generator class that elaborates the design.
+The ``TB`` is the name of the Verilog wrapper that connects the ``TestHarness`` to VCS/Verilator for simulation.
+Finally, the ``TOP`` variable is used to distinguish between the top-level of the design and the ``TestHarness`` in our system.
+For example, in the normal case, the ``MODEL`` variable specifies the ``TestHarness`` as the top-level of the design.
+However, the true top-level design, the SoC being simulated, is pointed to by the ``TOP`` variable.
+This separation allows the infrastructure to separate files based on the harness or the SoC top level.
+
+Common configurations of all these variables are packaged using a ``SUB_PROJECT`` make variable.
+Therefore, in order to simulate a simple Rocket-based example system we can use:
+
+.. code-block:: shell
+
+    make SUB_PROJECT=example
 
 Alternatively, if we would like to simulate a simple BOOM-based example system we can use:
 
 .. code-block:: shell
 
-  make SUB_PROJECT=exampleboom
+    make SUB_PROJECT=exampleboom
 
-
-Once the simulator has been constructed, we would like to run RISC-V programs on it. In the `sims/verisim` directory, we will find an executable file called `TODO`. We run this executable with out target RISC-V program as a command line argument. For example:
-
-.. code-block:: shell
-
-  ./simulator-<my_sbt_package_name>-<my_config_name> my_program_binary
-
-Alternatively, we can run a pre-packaged suite of RISC-V assembly tests, by adding the make target run-asm-tests. For example
+Once the simulator has been constructed, we would like to run RISC-V programs on it.
+In the simulation directory, we will find an executable file called ``<...>-<package>-<config>``.
+We run this executable with our target RISC-V program as a command line argument in one of two ways.
+One, we can directly call the simulator binary or use make to run the binary for us with extra simulation flags.
+For example:
 
 .. code-block:: shell
 
-  make run-asm-tests TOP=<my_top_level_name> CONFIG=<my_config_name> SBT_PROJECT=<my_sbt_package_name> MODEL=<my_test_environment>
+    # directly calling the simulation binary
+    ./<...>-<package>-<config> my_program_binary
 
-or 
+    # using make to do it
+    make SUB_PROJECT=example BINARY=my_program_binary run-binary
 
-.. code-block:: shell
-
-  make run-asm-tests SUB_PROJECT=example
-
-
-
-VCS
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-VCS is a proprietry RTL simulator. This guide assumes that the VCS installation is found on our PATH.  We run VCS simulations from within the ``sims/vsim`` directory. Therefore, we will start by entering the directory:
+Alternatively, we can run a pre-packaged suite of RISC-V assembly or benchmark tests, by adding the make target ``run-asm-tests`` or ``run-bmark-tests``.
+For example:
 
 .. code-block:: shell
 
-  cd sims/vsim
+    make SUB_PROJECT=example run-asm-tests
+    make SUB_PROJECT=example run-bmark-tests
 
+Note: You need to specify all the make variables once again to match what the build gave to run the assembly tests or the benchmarks or the binaries if you are using the make option.
 
-In order to construct the simulator with our custom design, we run the following command within the ``sims/vsim`` directory:
-
-.. code-block:: shell
-
-  make TOP=<my_top_level_name> CONFIG=<my_config_name> SBT_PROJECT=<my_sbt_package_name> MODEL=<my_test_environment>
-
-Where ``<my_top_level_name>`` is the class name of the top level design, ``<my_config_name>`` is the name of the class we create for our parameters configuration, ``<my_sbt_package_name>`` is the name of the sbt package the include both our top-level class and our config class, and ``<my_test_environment>`` is the name of the class which defines the test harness for our system.
-The ``make`` command my have additional parameters (such as ``CONFIG_PACKAGE`` or ``MODEL_PACKAGE``) depending on the complexity of the design and integration with multiple sub-project repositories in the sbt-based build system.
-
-Common configurations are package using a ``SUB_PROJECT`` make variable. There, in order to simulate a simple Rocket-based example system we can use:
-
-.. code-block:: shell
-
-  make SUB_PROJECT=example
-
-Alternatively, if we would like to simulate a simple BOOM-based example system we can use:
-
-.. code-block:: shell
-
-  make SUB_PROJECT=exampleboom
-
-
-Once the simulator has been constructed, we would like to run RISC-V programs on it. In the ``sims/vsim`` directory, we will find an executable file called ``TODO``. We run this executable with out target RISC-V program as a command line argument. For example:
-
-.. code-block:: shell
-
-  ./simulator-<my_sbt_package_name>-<my_config_name> my_program_binary
-
-Alternatively, we can run a pre-packaged suite of RISC-V assembly tests, by adding the make target run-asm-tests. For example
-
-.. code-block:: shell
-
-  make run-asm-tests TOP=<my_top_level_name> CONFIG=<my_config_name> SBT_PROJECT=<my_sbt_package_name> MODEL=<my_test_environment>
-
-or 
-
-.. code-block:: shell
-
-  make run-asm-tests SUB_PROJECT=example
-
-
+Finally, in the ``generated-src/<...>-<package>-<config>/`` directory resides all of the collateral and Verilog source files for the build/simulation.
+Specifically, the SoC top-level (``TOP``) Verilog file is denoted with ``*.top.v`` while the ``TestHarness`` file is denoted with ``*.harness.v``.
 
 FPGA Accelerated Simulation
 ---------------------------
-FireSim enables simulations at 1000x-100000x the speed of standard software simulation. This is enabled using FPGA-acceleration on F1 instances of the AWS (Amazon Web Services) public cloud. There FireSim simulation require to be set-up on the AWS public cloud rather than on our local development machine. 
+FireSim enables simulations at 1000x-100000x the speed of standard software simulation.
+This is enabled using FPGA-acceleration on F1 instances of the AWS (Amazon Web Services) public cloud.
+Therefore FireSim simulation requires to be set-up on the AWS public cloud rather than on our local development machine.
 
-To run an FPGA-accelerated simulation using FireSim, a we need to clone the ReBAR repository (or our fork of the ReBAR repository) to an AWS EC2, and follow the setup instructions specificied in the FireSim Initial Setup documentation page.
+To run an FPGA-accelerated simulation using FireSim, a we need to clone the REBAR repository (or our fork of the REBAR repository) to an AWS EC2, and follow the setup instructions specified in the FireSim Initial Setup documentation page.
 
-After setting up the FireSim environment, we now need to generate a FireSim simulation around our selected digital design. We will work from within the ``sims/firesim`` directory.
+After setting up the FireSim environment, we now need to generate a FireSim simulation around our selected digital design.
+We will work from within the ``sims/firesim`` directory.
 
 TODO: Continue from here
- 
+
