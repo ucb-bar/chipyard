@@ -10,7 +10,6 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.rocket.TracedInstruction
 import firesim.endpoints.{TraceOutputTop, DeclockedTracedInstruction}
-import boom.system.BoomSubsystem
 
 import midas.models.AXI4BundleWithEdge
 import midas.targetutils.ExcludeInstanceAsserts

@@ -11,7 +11,7 @@ import freechips.rocketchip.util.{HeterogeneousBag}
 import freechips.rocketchip.amba.axi4.AXI4Bundle
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy.LazyModule
-import boom.system.{BoomSubsystem, BoomSubsystemModuleImp}
+import boom.system.{BoomRocketSubsystem, BoomRocketSubsystemModuleImp}
 import icenet._
 import testchipip._
 import testchipip.SerialAdapter.SERIAL_IF_WIDTH
@@ -80,7 +80,7 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNIC](l: L) extends RocketSubsystemMod
     with HasTraceIOImp
 
 
-class FireBoom(implicit p: Parameters) extends BoomSubsystem
+class FireBoom(implicit p: Parameters) extends BoomRocketSubsystem
     with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
@@ -94,7 +94,7 @@ class FireBoom(implicit p: Parameters) extends BoomSubsystem
   override lazy val module = new FireBoomModuleImp(this)
 }
 
-class FireBoomModuleImp[+L <: FireBoom](l: L) extends BoomSubsystemModuleImp(l)
+class FireBoomModuleImp[+L <: FireBoom](l: L) extends BoomRocketSubsystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
@@ -106,7 +106,7 @@ class FireBoomModuleImp[+L <: FireBoom](l: L) extends BoomSubsystemModuleImp(l)
     with HasTraceIOImp
     with ExcludeInvalidBoomAssertions
 
-class FireBoomNoNIC(implicit p: Parameters) extends BoomSubsystem
+class FireBoomNoNIC(implicit p: Parameters) extends BoomRocketSubsystem
     with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
@@ -119,7 +119,7 @@ class FireBoomNoNIC(implicit p: Parameters) extends BoomSubsystem
   override lazy val module = new FireBoomNoNICModuleImp(this)
 }
 
-class FireBoomNoNICModuleImp[+L <: FireBoomNoNIC](l: L) extends BoomSubsystemModuleImp(l)
+class FireBoomNoNICModuleImp[+L <: FireBoomNoNIC](l: L) extends BoomRocketSubsystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
