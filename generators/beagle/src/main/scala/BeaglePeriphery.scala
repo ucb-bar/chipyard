@@ -30,13 +30,13 @@ case class BeagleParams(
   rsClkDivBits: Int = 8,
   lbwifClkDivBits: Int = 8,
   uncoreClkDivInit: Int = 4,
-  bhClkDivInit: Int = 2,
-  rsClkDivInit: Int = 2,
-  lbwifClkDivInit: Int = 4,
+  bhClkDivInit: Int = 1,
+  rsClkDivInit: Int = 1,
+  lbwifClkDivInit: Int = 1,
   uncoreClkPassSelInit: Int = 1, // default div
-  bhClkPassSelInit: Int = 0, // default undiv
-  rsClkPassSelInit: Int = 0, // default undiv
-  lbwifClkPassSelInit: Int = 1 // default div
+  bhClkPassSelInit: Int = 1, // default div
+  rsClkPassSelInit: Int = 1, // default div
+  lbwifClkPassSelInit: Int = 0 // default undiv
 )
 
 /**

@@ -50,7 +50,7 @@ class BeagleBoomRocketSimConfig extends Config(
   // boom mixins
   new WithNewFetchBuffer ++
   new boom.common.WithRVC ++
-  new boom.common.WithLargeBooms ++
+  new WithMegaBeagleBooms ++
   new boom.common.BaseBoomConfig ++
   new boom.system.WithNBoomCores(1) ++
   // rocket mixins
@@ -83,67 +83,13 @@ class BeagleBoomRocketHwachaSimConfig extends Config(
   // boom mixins
   new WithNewFetchBuffer ++
   new boom.common.WithRVC ++
-  new boom.common.WithLargeBooms ++
+  new WithMegaBeagleBooms ++
   new boom.common.BaseBoomConfig ++
   new boom.system.WithNBoomCores(1) ++
   // rocket mixins
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   // subsystem mixin
   new freechips.rocketchip.system.BaseConfig)
-
-/**
- * Heterogeneous ((BOOM + Hwacha) + (Rocket + Systolic))
- *
- * Note: ORDER OF MIXINS MATTERS
- */
-class BeagleConfig extends Config(
-  // uncore mixins
-  new example.WithBootROM ++
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new WithBeagleL2 ++
-  new WithBeagleChanges ++
-  new WithBeagleSiFiveBlocks ++
-  new WithJtagDTM ++
-  new WithNMemoryChannels(2) ++
-  new WithBeagleSerdesChanges ++
-  new WithGenericSerdes ++
-
-  // note: THIS MUST BE ABOVE hwacha.DefaultHwachaConfig TO WORK
-  new example.WithMultiRoCC ++ // attach particular RoCC accelerators based on the hart
-  new example.WithMultiRoCCHwacha(0) ++ // add a hwacha to just boom
-  new WithMultiRoCCSystolic(1) ++ // add a systolic to just rocket
-  new boom.system.WithRenumberHarts ++ // renumber harts with boom starting at 0 then rocket
-
-  // systolic parameter setup mixins
-  new WithSystolicParams ++
-  // hwacha parameter setup mixins
-  new hwacha.DefaultHwachaConfig ++
-
-  // make tiles support different clocks
-  new boom.system.WithAsynchronousBoomTiles(4, 4) ++
-  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(4, 4) ++
-
-  // rocket mixins
-  new WithMiniRocketCore ++
-
-  // boom mixins
-  new WithNewFetchBuffer ++
-  new boom.common.WithRVC ++
-  new boom.common.WithLargeBooms ++
-  new boom.common.BaseBoomConfig ++
-  new boom.system.WithNBoomCores(1) ++
-
-  // subsystem mixin
-  new freechips.rocketchip.system.BaseConfig)
-
-/**
- * Heterogeneous ((BOOM + Hwacha) + (Rocket + Systolic))
- *
- * FOR FASTER SIMULATION
- */
-class BeagleSimConfig extends Config(
-  new WithBeagleSimChanges ++
-  new BeagleConfig)
 
 /**
  * Heterogeneous ((Mega BOOM + Hwacha) + (Rocket + Systolic))
