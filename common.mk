@@ -8,23 +8,25 @@ SHELL=/bin/bash
 #########################################################################################
 lookup_scala_srcs = $(shell find -L $(1)/ -iname "*.scala" 2> /dev/null)
 
-PACKAGES=rocket-chip testchipip boom hwacha sifive-blocks example
-SCALA_SOURCES=$(foreach pkg,$(PACKAGES),$(call lookup_scala_srcs,$(base_dir)/generators/$(pkg)/src/main/scala))
+PACKAGES=$(addprefix generators/, rocket-chip testchipip boom hwacha sifive-blocks example) \
+		 $(addprefix sims/firesim/sim/, . firesim-lib midas midas/targetutils)
+SCALA_SOURCES=$(foreach pkg,$(PACKAGES),$(call lookup_scala_srcs,$(base_dir)/$(pkg)/src/main/scala))
 
 #########################################################################################
 # rocket and testchipip classes
 #########################################################################################
-ROCKET_CLASSES ?= "$(ROCKETCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/classes:$(ROCKETCHIP_DIR)/chisel3/target/scala-$(SCALA_VERSION_MAJOR)/*"
+# NB: target/ lives under source ----V , due to how we're handling midas dependency injection
+ROCKET_CLASSES ?= "$(ROCKETCHIP_DIR)/src/target/scala-$(SCALA_VERSION_MAJOR)/classes:$(ROCKETCHIP_DIR)/chisel3/target/scala-$(SCALA_VERSION_MAJOR)/*"
 TESTCHIPIP_CLASSES ?= "$(TESTCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/classes"
 
 #########################################################################################
 # jar creation variables and rules
 #########################################################################################
-FIRRTL_JAR ?= $(ROCKETCHIP_DIR)/lib/firrtl.jar
+FIRRTL_JAR := $(base_dir)/lib/firrtl.jar
 
 $(FIRRTL_JAR): $(call lookup_scala_srcs, $(CHIPYARD_FIRRTL_DIR)/src/main/scala)
 	$(MAKE) -C $(CHIPYARD_FIRRTL_DIR) SBT="$(SBT)" root_dir=$(CHIPYARD_FIRRTL_DIR) build-scala
-	mkdir -p $(dir $@)
+	mkdir -p $(@D)
 	cp -p $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl.jar $@
 	touch $@
 
@@ -58,11 +60,11 @@ $(HARNESS_FILE) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes): $(FIRR
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 MACROCOMPILER_MODE ?= --mode synflops
 $(SMEMS_FILE) $(SMEMS_FIR): $(SMEMS_CONF)
-	cd $(base_dir) && $(SBT) "project barstools-macros" "runMain barstools.macros.MacroCompiler -n $(SMEMS_CONF) -v $(SMEMS_FILE) -f $(SMEMS_FIR) $(MACROCOMPILER_MODE)"
+	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(SMEMS_CONF) -v $(SMEMS_FILE) -f $(SMEMS_FIR) $(MACROCOMPILER_MODE)"
 
 HARNESS_MACROCOMPILER_MODE = --mode synflops
 $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): $(HARNESS_SMEMS_CONF)
-	cd $(base_dir) && $(SBT) "project barstools-macros" "runMain barstools.macros.MacroCompiler -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE)"
+	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE)"
 
 #########################################################################################
 # helper rule to just make verilog files

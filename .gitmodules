@@ -21,13 +21,19 @@
 	url = https://github.com/ucb-bar/esp-tools.git
 [submodule "tools/torture"]
 	path = tools/torture
-	url = git@github.com:ucb-bar/riscv-torture.git
+	url = https://github.com/ucb-bar/riscv-torture.git
 [submodule "generators/boom"]
 	path = generators/boom
-	url = git@github.com:riscv-boom/riscv-boom.git
+	url = https://github.com/riscv-boom/riscv-boom.git
 [submodule "generators/sifive-blocks"]
 	path = generators/sifive-blocks
-	url = git@github.com:sifive/sifive-blocks.git
+	url = https://github.com/sifive/sifive-blocks.git
 [submodule "generators/hwacha"]
 	path = generators/hwacha
-	url = git@github.com:ucb-bar/hwacha.git
+	url = https://github.com/ucb-bar/hwacha.git
+[submodule "sims/firesim"]
+	path = sims/firesim
+	url = https://github.com/firesim/firesim.git
+[submodule "generators/icenet"]
+	path = generators/icenet
+	url = https://github.com/firesim/icenet.git
