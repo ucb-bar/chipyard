@@ -44,7 +44,7 @@ ifeq ($(SUB_PROJECT),boom)
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= boom.system
-	CONFIG            ?= BoomConfig
+	CONFIG            ?= LargeBoomConfig
 	CONFIG_PACKAGE    ?= boom.system
 	GENERATOR_PACKAGE ?= boom.system
 	TB                ?= TestDriver
