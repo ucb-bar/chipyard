@@ -8,22 +8,22 @@
 
 static inline int nic_send_req_avail(void)
 {
-	return reg_read16(SIMPLENIC_COUNTS) & 0xf;
+	return reg_read32(SIMPLENIC_COUNTS) & 0xff;
 }
 
 static inline int nic_recv_req_avail(void)
 {
-	return (reg_read16(SIMPLENIC_COUNTS) >> 4) & 0xf;
+	return (reg_read32(SIMPLENIC_COUNTS) >> 8) & 0xff;
 }
 
 static inline int nic_send_comp_avail(void)
 {
-	return (reg_read16(SIMPLENIC_COUNTS) >> 8) & 0xf;
+	return (reg_read32(SIMPLENIC_COUNTS) >> 16) & 0xff;
 }
 
 static inline int nic_recv_comp_avail(void)
 {
-	return (reg_read16(SIMPLENIC_COUNTS) >> 12) & 0xf;
+	return (reg_read32(SIMPLENIC_COUNTS) >> 24) & 0xff;
 }
 
 static void nic_send(void *data, unsigned long len)
