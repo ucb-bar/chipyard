@@ -81,7 +81,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(commonSettings)
 
 lazy val example = conditionalDependsOn(project in file("generators/example"))
-  .dependsOn(boom, hwacha, sifive_blocks)
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache)
   .settings(commonSettings)
 
 lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))
@@ -114,12 +114,17 @@ lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
+lazy val sifive_cache = (project in file("generators/sifive-cache")).settings(
+    commonSettings,
+    scalaSource in Compile := baseDirectory.value / "craft"
+  ).dependsOn(rocketchip)
+
 // Library components of FireSim
 lazy val midas      = ProjectRef(firesimDir, "midas")
 lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 
 lazy val firechip = (project in file("generators/firechip"))
-  .dependsOn(boom, icenet, testchipip, sifive_blocks, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
+  .dependsOn(boom, icenet, testchipip, sifive_blocks, sifive_cache, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
     testGrouping in Test := isolateAllTests( (definedTests in Test).value )

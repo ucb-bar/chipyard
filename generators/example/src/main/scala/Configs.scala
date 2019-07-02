@@ -3,7 +3,7 @@ package example
 import chisel3._
 
 import freechips.rocketchip.config.{Config}
-import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, WithExtMemSize, WithNBanks}
+import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, WithExtMemSize, WithNBanks, WithInclusiveCache}
 
 import testchipip._
 
@@ -247,3 +247,12 @@ class RV32BoomAndRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRV32 ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+
+class RocketL2Config extends Config(
+  new WithInclusiveCache ++ new DefaultRocketConfig)
+
+class BoomL2Config extends Config(
+  new WithInclusiveCache ++ new SmallDefaultBoomConfig)
+
+class DualCoreRocketL2Config extends Config(
+  new WithInclusiveCache ++ new DualCoreRocketConfig)
