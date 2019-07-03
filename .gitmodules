@@ -37,3 +37,6 @@
 [submodule "generators/icenet"]
 	path = generators/icenet
 	url = https://github.com/firesim/icenet.git
+[submodule "generators/block-inclusivecache-sifive"]
+	path = generators/sifive-cache
+	url = https://github.com/sifive/block-inclusivecache-sifive.git
