@@ -62,6 +62,9 @@ class GB1MemoryConfig extends Config(
   new WithExtMemSize((1<<30) * 1L) ++
   new DefaultRocketConfig)
 
+class RocketL2Config extends Config(
+  new WithInclusiveCache ++ new DefaultRocketConfig)
+
 // ------------
 // BOOM Configs
 // ------------
@@ -141,6 +144,9 @@ class RV32UnifiedBoomConfig extends Config(
   new WithNormalBoomRocketTop ++
   new WithBootROM ++
   new boom.system.SmallRV32UnifiedBoomConfig)
+
+class BoomL2Config extends Config(
+  new WithInclusiveCache ++ new SmallDefaultBoomConfig)
 
 // ---------------------
 // BOOM and Rocket Configs
@@ -247,12 +253,6 @@ class RV32BoomAndRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRV32 ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
-
-class RocketL2Config extends Config(
-  new WithInclusiveCache ++ new DefaultRocketConfig)
-
-class BoomL2Config extends Config(
-  new WithInclusiveCache ++ new SmallDefaultBoomConfig)
 
 class DualCoreRocketL2Config extends Config(
   new WithInclusiveCache ++ new DualCoreRocketConfig)
