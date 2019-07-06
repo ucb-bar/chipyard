@@ -7,4 +7,6 @@ target
 *.swp
 .idea
 .DS_Store
+env.sh
+riscv-tools-install
 tags
