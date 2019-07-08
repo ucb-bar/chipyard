@@ -76,7 +76,7 @@ verilog: $(sim_vsrcs)
 # helper rules to run simulator
 #########################################################################################
 run-binary: $(sim)
-	$(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
 
 #########################################################################################
 # run assembly/benchmarks rules
@@ -89,7 +89,7 @@ $(output_dir)/%.run: $(output_dir)/% $(sim)
 	$(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(PERMISSIVE_OFF) $< && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	$(sim) $(PERMISSIVE_ON) +verbose +max-cycles=$(timeout_cycles) $(PERMISSIVE_OFF) $< 3>&1 1>&2 2>&3 | spike-dasm > $@
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +verbose +max-cycles=$(timeout_cycles) $(PERMISSIVE_OFF) $< 3>&1 1>&2 2>&3 | spike-dasm > $@)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
