@@ -5,9 +5,10 @@
 #########################################################################################
 # verilator version, binary, and path
 #########################################################################################
-VERILATOR_VERSION=4.016
-VERILATOR_SRCDIR=verilator/src/verilator-$(VERILATOR_VERSION)
-INSTALLED_VERILATOR=$(abspath verilator/install/bin/verilator)
+VERILATOR_VERSION      = 4.016
+VERILATOR_INSTALL_DIR ?= verilator
+VERILATOR_SRCDIR       = $(VERILATOR_INSTALL_DIR)/src/verilator-$(VERILATOR_VERSION)
+INSTALLED_VERILATOR    = $(abspath $(VERILATOR_INSTALL_DIR)/install/bin/verilator)
 
 #########################################################################################
 # build and install our own verilator to work around versioning issues
@@ -25,15 +26,15 @@ $(VERILATOR_SRCDIR)/bin/verilator: $(VERILATOR_SRCDIR)/Makefile
 
 $(VERILATOR_SRCDIR)/Makefile: $(VERILATOR_SRCDIR)/configure
 	mkdir -p $(dir $@)
-	cd $(dir $@) && ./configure --prefix=$(abspath verilator/install)
+	cd $(dir $@) && ./configure --prefix=$(abspath $(VERILATOR_INSTALL_DIR)/install)
 
-$(VERILATOR_SRCDIR)/configure: verilator/verilator-$(VERILATOR_VERSION).tar.gz
+$(VERILATOR_SRCDIR)/configure: $(VERILATOR_INSTALL_DIR)/verilator-$(VERILATOR_VERSION).tar.gz
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
 	cat $^ | tar -xz --strip-components=1 -C $(dir $@)
 	touch $@
 
-verilator/verilator-$(VERILATOR_VERSION).tar.gz:
+$(VERILATOR_INSTALL_DIR)/verilator-$(VERILATOR_VERSION).tar.gz:
 	mkdir -p $(dir $@)
 	wget http://www.veripool.org/ftp/verilator-$(VERILATOR_VERSION).tgz -O $@
 

@@ -121,6 +121,7 @@ int main(int argc, char** argv)
   FILE * vcdfile = NULL;
   uint64_t start = 0;
 #endif
+  char ** htif_argv = NULL;
   int verilog_plusargs_legal = 1;
 
   while (1) {
@@ -242,6 +243,10 @@ done_processing:
     usage(argv[0]);
     return 1;
   }
+  int htif_argc = 1 + argc - optind;
+  htif_argv = (char **) malloc((htif_argc) * sizeof (char *));
+  htif_argv[0] = argv[0];
+  for (int i = 1; optind < argc;) htif_argv[i++] = argv[optind++];
 
   if (verbose)
     fprintf(stderr, "using random seed %u\n", random_seed);
@@ -264,8 +269,8 @@ done_processing:
 #endif
 
   jtag = new remote_bitbang_t(rbb_port);
-  dtm = new dtm_t(argc, argv);
-  tsi = new tsi_t(argc, argv);
+  dtm = new dtm_t(htif_argc, htif_argv);
+  tsi = new tsi_t(htif_argc, htif_argv);
 
   signal(SIGTERM, handle_sigterm);
 
@@ -346,5 +351,6 @@ done_processing:
   if (tsi) delete tsi;
   if (jtag) delete jtag;
   if (tile) delete tile;
+  if (htif_argv) free(htif_argv);
   return ret;
 }
