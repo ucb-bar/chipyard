@@ -84,7 +84,7 @@ int main(void)
 
 	for (i = 0; i < NPACKETS; i++) {
 		for (j = 0; j < ARRAY_LEN; j++)
-			src[i][j] = i * ARRAY_LEN + j;
+			src[i][j] = (i * ARRAY_LEN + j) << 16;
 	}
 
 	for (i = 0; i < NTRIALS; i++) {

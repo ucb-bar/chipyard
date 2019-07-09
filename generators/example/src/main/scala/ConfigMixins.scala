@@ -17,6 +17,8 @@ import hwacha.{Hwacha}
 
 import sifive.blocks.devices.gpio._
 
+import icenet.{NICKey, NICConfig}
+
 /**
  * TODO: Why do we need this?
  */
@@ -146,5 +148,20 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
         LazyModule(new Hwacha()(p)).suggestName("hwacha")
       }))
     }
+  }
+})
+
+class WithIceNIC(inBufFlits: Int = 1800, usePauser: Boolean = false)
+    extends Config((site, here, up) => {
+  case NICKey => NICConfig(
+    inBufFlits = inBufFlits,
+    usePauser = usePauser)
+})
+
+class WithLoopbackNICBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new BoomRocketTopWithIceNIC()(p)).module)
+    top.connectNicLoopback()
+    top
   }
 })

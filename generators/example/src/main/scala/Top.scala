@@ -12,6 +12,8 @@ import testchipip._
 
 import sifive.blocks.devices.gpio._
 
+import icenet.{HasPeripheryIceNIC, HasPeripheryIceNICModuleImp}
+
 // -------------------------------
 // BOOM and/or Rocket Top Level Systems
 // -------------------------------
@@ -67,3 +69,12 @@ class BoomRocketTopWithGPIO(implicit p: Parameters) extends BoomRocketTop
 class BoomRocketTopWithGPIOModule(l: BoomRocketTopWithGPIO)
   extends BoomRocketTopModule(l)
   with HasPeripheryGPIOModuleImp
+
+class BoomRocketTopWithIceNIC(implicit p: Parameters) extends BoomRocketTop
+    with HasPeripheryIceNIC {
+  override lazy val module = new BoomRocketTopWithIceNICModule(this)
+}
+
+class BoomRocketTopWithIceNICModule(outer: BoomRocketTopWithIceNIC)
+  extends BoomRocketTopModule(outer)
+  with HasPeripheryIceNICModuleImp

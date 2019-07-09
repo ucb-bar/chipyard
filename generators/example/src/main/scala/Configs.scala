@@ -256,3 +256,8 @@ class RV32BoomAndRocketConfig extends Config(
 
 class DualCoreRocketL2Config extends Config(
   new WithInclusiveCache ++ new DualCoreRocketConfig)
+
+class LoopbackNICRocketConfig extends Config(
+  new WithIceNIC ++
+  new WithLoopbackNICBoomRocketTop ++
+  new BaseRocketConfig)

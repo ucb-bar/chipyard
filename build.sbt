@@ -81,7 +81,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(commonSettings)
 
 lazy val example = conditionalDependsOn(project in file("generators/example"))
-  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache)
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, icenet)
   .settings(commonSettings)
 
 lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))
