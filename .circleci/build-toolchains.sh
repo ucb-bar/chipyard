@@ -7,8 +7,7 @@
 set -ex
 
 if [ ! -d "$HOME/$1-install" ]; then
-
-    cd $HOME/
+    cd $HOME
 
     # init all submodules including the tools
     CHIPYARD_DIR=$HOME/project ./project/scripts/build-toolchains.sh $1
