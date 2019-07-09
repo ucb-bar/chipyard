@@ -19,6 +19,7 @@ git config submodule.sims/firesim.update none
 git submodule update --init --recursive #--jobs 8
 # unignore riscv-tools,catapult-shell2 globally
 git config --global --unset submodule.riscv-tools.update
+git config --global --unset submodule.esp-tools.update
 git config --global --unset submodule.experimental-blocks.update
 
 # Renable firesim and init only the required submodules to provide
