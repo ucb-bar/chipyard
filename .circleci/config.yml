@@ -441,30 +441,24 @@ workflows:
             # Run the example tests
             - example-run-benchmark-tests:
                 requires:
-                    - install-riscv-toolchain
                     - prepare-example
 
             - boomexample-run-benchmark-tests:
                 requires:
-                    - install-riscv-toolchain
                     - prepare-boomexample
 
             - boomrocketexample-run-benchmark-tests:
                 requires:
-                    - install-riscv-toolchain
                     - prepare-boomrocketexample
 
             - boom-run-benchmark-tests:
                 requires:
-                    - install-riscv-toolchain
                     - prepare-boom
 
             - rocketchip-run-benchmark-tests:
                 requires:
-                    - install-riscv-toolchain
                     - prepare-rocketchip
 
             - hwacha-run-benchmark-tests:
                 requires:
-                    - install-esp-toolchain
                     - prepare-hwacha
