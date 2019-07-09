@@ -47,7 +47,7 @@ VCS_CC_OPTS = \
 	-CC "-I$(RISCV)/include" \
 	-CC "-std=c++11" \
 	-CC "-Wl,-rpath,$(RISCV)/lib" \
-	/scratch/abejgonza/beagle/beagle-fesvr/build/libfesvr.so
+	/scratch/abejgonza/beagle/beagle-temp-work/beagle-fesvr/build/libfesvr.so
 
 VCS_NONCC_OPTS = \
 	+lint=all,noVCDE,noONGS,noUI \

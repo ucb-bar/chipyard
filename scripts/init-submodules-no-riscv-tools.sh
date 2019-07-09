@@ -16,4 +16,5 @@ git config --global submodule.experimental-blocks.update none
 git submodule update --init --recursive #--jobs 8
 # unignore riscv-tools,catapult-shell2 globally
 git config --global --unset submodule.riscv-tools.update
+git config --global --unset submodule.esp-tools.update
 git config --global --unset submodule.experimental-blocks.update
