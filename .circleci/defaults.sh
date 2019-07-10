@@ -8,6 +8,10 @@ run () {
     ssh -o "StrictHostKeyChecking no" -t $SERVER $1
 }
 
+run_script () {
+    ssh -o "StrictHostKeyChecking no" -t $SERVER 'bash -s' < $1
+}
+
 clean () {
     # remove remote work dir
     run "rm -rf $REMOTE_WORK_DIR"
