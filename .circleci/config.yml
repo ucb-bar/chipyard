@@ -140,7 +140,7 @@ jobs:
                     - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
             - run:
                 name: Building the boomexample subproject using Verilator
-                command: .circleci/do-rtl-build.sh SUB_PROJECT=example CONFIG=SmallDefaultBoomConfig
+                command: .circleci/do-rtl-build.sh SUB_PROJECT=example CONFIG=DefaultBoomConfig
                 no_output_timeout: 120m
             - save_cache:
                 key: boomexample-{{ .Branch }}-{{ .Revision }}
@@ -169,7 +169,7 @@ jobs:
                     - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
             - run:
                 name: Building the boomrocketexample subproject using Verilator
-                command: .circleci/do-rtl-build.sh SUB_PROJECT=example CONFIG=SmallDefaultBoomAndRocketConfig
+                command: .circleci/do-rtl-build.sh SUB_PROJECT=example CONFIG=DefaultBoomAndRocketConfig
                 no_output_timeout: 120m
             - save_cache:
                 key: boomrocketexample-{{ .Branch }}-{{ .Revision }}
