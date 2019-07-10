@@ -31,7 +31,7 @@ copy $LOCAL_VERILATOR_DIR/ $SERVER:$REMOTE_VERILATOR_DIR
 
 # enter the verisim directory and build the specific config on remote server
 run "make -C $REMOTE_SIM_DIR clean"
-run "export RISCV=\"$REMOTE_RISCV_DIR\"; export VERILATOR_ROOT=$REMOTE_VERILATOR_DIR; make -C $REMOTE_SIM_DIR VERILATOR_INSTALL_DIR=$REMOTE_VERILATOR_DIR JAVA_ARGS=\"-Xmx8G -Xss8M\" $@"
+run "export RISCV=\"$REMOTE_RISCV_DIR\"; export VERILATOR_ROOT=$REMOTE_VERILATOR_DIR/install/share/verilator; make -C $REMOTE_SIM_DIR VERILATOR_INSTALL_DIR=$REMOTE_VERILATOR_DIR JAVA_ARGS=\"-Xmx8G -Xss8M\" $@"
 run "rm -rf $REMOTE_CHIPYARD_DIR/project"
 
 # copy back the final build
