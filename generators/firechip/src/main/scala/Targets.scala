@@ -31,7 +31,7 @@ import java.io.File
 *******************************************************************************/
 
 class FireSim(implicit p: Parameters) extends RocketSubsystem
-    with HasDefaultBusConfiguration
+    with HasHierarchicalBusTopology
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
     with HasNoDebug
@@ -57,7 +57,7 @@ class FireSimModuleImp[+L <: FireSim](l: L) extends RocketSubsystemModuleImp(l)
 
 
 class FireSimNoNIC(implicit p: Parameters) extends RocketSubsystem
-    with HasDefaultBusConfiguration
+    with HasHierarchicalBusTopology
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
     with HasNoDebug
@@ -81,7 +81,7 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNIC](l: L) extends RocketSubsystemMod
 
 
 class FireBoom(implicit p: Parameters) extends BoomRocketSubsystem
-    with HasDefaultBusConfiguration
+    with HasHierarchicalBusTopology
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
     with HasNoDebug
@@ -107,7 +107,7 @@ class FireBoomModuleImp[+L <: FireBoom](l: L) extends BoomRocketSubsystemModuleI
     with ExcludeInvalidBoomAssertions
 
 class FireBoomNoNIC(implicit p: Parameters) extends BoomRocketSubsystem
-    with HasDefaultBusConfiguration
+    with HasHierarchicalBusTopology
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
     with HasNoDebug
