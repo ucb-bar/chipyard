@@ -9,13 +9,13 @@ set -ex
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
+export VERILATOR_ROOT=$LOCAL_VERILATOR_DIR/install/share/verilator
+
 run_bmark () {
-    export VERILATOR_ROOT=$LOCAL_VERILATOR_DIR/install/share/verilator
     make run-bmark-tests-fast -C $LOCAL_SIM_DIR VERILATOR_INSTALL_DIR=$LOCAL_VERILATOR_DIR $@
 }
 
 run_asm () {
-    export VERILATOR_ROOT=$LOCAL_VERILATOR_DIR/install/share/verilator
     make run-asm-tests-fast -C $LOCAL_SIM_DIR VERILATOR_INSTALL_DIR=$LOCAL_VERILATOR_DIR $@
 }
 
@@ -26,22 +26,22 @@ run_both () {
 
 case $1 in
     example)
-        run_bmark SUB_PROJECT=example
+        run_bmark $mapping[$1]
         ;;
     boomexample)
-        run_bmark SUB_PROJECT=example CONFIG=DefaultBoomConfig
+        run_bmark $mapping[$1]
         ;;
     boomrocketexample)
-        run_bmark SUB_PROJECT=example CONFIG=DefaultBoomAndRocketConfig
+        run_bmark $mapping[$1]
         ;;
     boom)
-        run_bmark SUB_PROJECT=boom
+        run_bmark $mapping[$1]
         ;;
     rocketchip)
-        run_bmark SUB_PROJECT=rocketchip
+        run_bmark $mapping[$1]
         ;;
     hwacha)
-        run_bmark SUB_PROJECT=hwacha
+        make run-rv64uv-p-asm-tests-fst -C $LOCAL_SIM_DIR VERILATOR_INSTALL_DIR=$LOCAL_VERILATOR_DIR $mapping[$1]
         ;;
     *)
         echo "No set of tests for $1. Did you spell it right?"

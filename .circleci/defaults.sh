@@ -32,3 +32,12 @@ LOCAL_ESP_DIR=$HOME/esp-tools-install
 LOCAL_CHIPYARD_DIR=$LOCAL_CHECKOUT_DIR
 LOCAL_VERILATOR_DIR=$HOME/verilator
 LOCAL_SIM_DIR=$LOCAL_CHIPYARD_DIR/sims/verisim
+
+# key value store to get the build strings
+declare -A mapping
+mapping["example"]="SUB_PROJECT=example"
+mapping["boomexample"]="SUB_PROJECT=example CONFIG=DefaultBoomConfig"
+mapping["boomrocketexample"]="SUB_PROJECT=example CONFIG=DefaultBoomAndRocketConfig"
+mapping["boom"]="SUB_PROJECT=boom"
+mapping["rocketchip"]="SUB_PROJECT=rocketchip"
+mapping["hwacha"]="SUB_PROJECT=hwacha"
