@@ -262,7 +262,7 @@ jobs:
                 key: hwacha-{{ .Branch }}-{{ .Revision }}
                 paths:
                     - "/home/riscvuser/project"
-    example-run-benchmark-tests:
+    example-run-tests:
         docker:
             - image: riscvboom/riscvboom-images:0.0.10
         environment:
@@ -280,10 +280,13 @@ jobs:
             - restore_cache:
                 keys:
                     - example-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
             - run:
                 name: Run example benchmark tests
-                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=example
-    boomexample-run-benchmark-tests:
+                command: .circleci/run-tests.sh example
+    boomexample-run-tests:
         docker:
             - image: riscvboom/riscvboom-images:0.0.10
         environment:
@@ -301,10 +304,13 @@ jobs:
             - restore_cache:
                 keys:
                     - boomexample-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
             - run:
                 name: Run boomexample benchmark tests
-                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=example CONFIG=SmallDefaultBoomConfig
-    boomrocketexample-run-benchmark-tests:
+                command: .circleci/run-tests.sh boomexample
+    boomrocketexample-run-tests:
         docker:
             - image: riscvboom/riscvboom-images:0.0.10
         environment:
@@ -322,10 +328,13 @@ jobs:
             - restore_cache:
                 keys:
                     - boomrocketexample-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
             - run:
                 name: Run boomrocketexample benchmark tests
-                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=example CONFIG=SmallDefaultBoomAndRocketConfig
-    boom-run-benchmark-tests:
+                command: .circleci/run-tests.sh boomrocketexample
+    boom-run-tests:
         docker:
             - image: riscvboom/riscvboom-images:0.0.10
         environment:
@@ -343,10 +352,13 @@ jobs:
             - restore_cache:
                 keys:
                     - boom-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
             - run:
                 name: Run boom benchmark tests
-                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=boom
-    rocketchip-run-benchmark-tests:
+                command: .circleci/run-tests.sh boom
+    rocketchip-run-tests:
         docker:
             - image: riscvboom/riscvboom-images:0.0.10
         environment:
@@ -364,10 +376,13 @@ jobs:
             - restore_cache:
                 keys:
                     - rocketchip-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
             - run:
                 name: Run rocketchip benchmark tests
-                command: make run-bmark-tests -C sims/verisim SUB_PROJECT=rocketchip
-    hwacha-run-benchmark-tests:
+                command: .circleci/run-tests.sh rocketchip
+    hwacha-run-tests:
         docker:
             - image: riscvboom/riscvboom-images:0.0.10
         environment:
@@ -385,9 +400,12 @@ jobs:
             - restore_cache:
                 keys:
                     - hwacha-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
             - run:
                 name: Run hwacha benchmark tests
-                command: export RISCV=/home/riscvuser/esp-tools-install; export LD_LIBRARY_PATH=$RISCV/lib; make run-bmark-tests -C sims/verisim SUB_PROJECT=hwacha
+                command: export RISCV=/home/riscvuser/esp-tools-install; export LD_LIBRARY_PATH=$RISCV/lib; .circleci/run-tests.sh hwacha
 
 # Order and dependencies of jobs to run
 workflows:
@@ -439,26 +457,26 @@ workflows:
             # Run the respective tests
 
             # Run the example tests
-            - example-run-benchmark-tests:
+            - example-run-tests:
                 requires:
                     - prepare-example
 
-            - boomexample-run-benchmark-tests:
+            - boomexample-run-tests:
                 requires:
                     - prepare-boomexample
 
-            - boomrocketexample-run-benchmark-tests:
+            - boomrocketexample-run-tests:
                 requires:
                     - prepare-boomrocketexample
 
-            - boom-run-benchmark-tests:
+            - boom-run-tests:
                 requires:
                     - prepare-boom
 
-            - rocketchip-run-benchmark-tests:
+            - rocketchip-run-tests:
                 requires:
                     - prepare-rocketchip
 
-            - hwacha-run-benchmark-tests:
+            - hwacha-run-tests:
                 requires:
                     - prepare-hwacha
