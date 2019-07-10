@@ -1,10 +1,7 @@
 #!/bin/bash
 
 # clean directories that are older than 30 days
-
-# get shared variables
-SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
-source $SCRIPT_DIR/defaults.sh
+# argument is used as the directory to look in
 
 age () {
 	local AGE_SEC
@@ -21,10 +18,12 @@ age () {
 	echo $(expr $DIFF_SEC / $SEC_PER_DAY)
 }
 
-for d in $CI_DIR/*/ ; do
+for d in $1/*/ ; do
 	DIR_AGE="$(age $d)"
 	if [ $DIR_AGE -ge 30 ]; then
 		echo "Deleting $d since is it $DIR_AGE old"
 		rm -rf $d
+	else
+	    echo "Keep $d since it is $DIR_AGE old"
 	fi
 done

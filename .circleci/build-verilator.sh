@@ -12,7 +12,7 @@ source $SCRIPT_DIR/defaults.sh
 # call clean on exit
 trap clean EXIT
 
-run_script $LOCAL_CHIPYARD_DIR/.circleci/clean-old-files.sh
+run_script $LOCAL_CHIPYARD_DIR/.circleci/clean-old-files.sh $CI_DIR
 
 if [ ! -d "$LOCAL_VERILATOR_DIR" ]; then
     # set stricthostkeychecking to no (must happen before rsync)
