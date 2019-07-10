@@ -3,7 +3,7 @@ package example
 import chisel3._
 
 import freechips.rocketchip.config.{Config}
-import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, WithExtMemSize, WithNBanks}
+import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, WithExtMemSize, WithNBanks, WithInclusiveCache}
 
 import testchipip._
 
@@ -61,6 +61,9 @@ class RV32RocketConfig extends Config(
 class GB1MemoryConfig extends Config(
   new WithExtMemSize((1<<30) * 1L) ++
   new DefaultRocketConfig)
+
+class RocketL2Config extends Config(
+  new WithInclusiveCache ++ new DefaultRocketConfig)
 
 // ------------
 // BOOM Configs
@@ -142,6 +145,9 @@ class RV32UnifiedBoomConfig extends Config(
   new WithBootROM ++
   new boom.system.SmallRV32UnifiedBoomConfig)
 
+class BoomL2Config extends Config(
+  new WithInclusiveCache ++ new SmallDefaultBoomConfig)
+
 // ---------------------
 // BOOM and Rocket Configs
 // ---------------------
@@ -219,12 +225,12 @@ class DualCoreBoomAndOneRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
-class DualCoreBoomAndOneHwachaRocketConfig extends Config(
+class DualBoomAndOneHwachaRocketConfig extends Config(
   new WithNormalBoomRocketTop ++
   new WithBootROM ++
   new WithMultiRoCC ++
   new WithMultiRoCCHwacha(0) ++ // put Hwacha just on hart0 which was renumbered to Rocket
-  new boom.system.WithRenumberHarts ++
+  new boom.system.WithRenumberHarts(rocketFirst = true) ++
   new hwacha.DefaultHwachaConfig ++
   new boom.common.WithRVC ++
   new boom.common.WithLargeBooms ++
@@ -247,3 +253,6 @@ class RV32BoomAndRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRV32 ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+
+class DualCoreRocketL2Config extends Config(
+  new WithInclusiveCache ++ new DualCoreRocketConfig)

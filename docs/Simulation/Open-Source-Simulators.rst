@@ -5,7 +5,7 @@ Verilator
 -----------------------
 
 `Verilator <https://www.veripool.org/wiki/verilator>`__ is an open-source LGPL-Licensed simulator maintained by `Veripool <https://www.veripool.org/>`__.
-The REBAR framework can download, build, and execute simulations using Verilator.
+The Chipyard framework can download, build, and execute simulations using Verilator.
 
 To run a simulation using Verilator, perform the following steps:
 

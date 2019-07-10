@@ -1,10 +1,10 @@
-REBAR Basics
+Chipyard Basics
 ===============================
 
 Generators
 -------------------------------------------
 
-The REBAR Framework currently consists of the following RTL generators:
+The Chipyard Framework currently consists of the following RTL generators:
 
 Processor Cores
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -72,7 +72,7 @@ Toolchains
   A collection of software toolchains used to develop and execute software on the RISC-V ISA.
   The include compiler and assembler toolchains, functional ISA simulator (spike), the Berkeley Boot Loader (BBL) and proxy kernel.
   The riscv-tools repository was previously required to run any RISC-V software, however, many of the riscv-tools components have since been upstreamed to their respective open-source projects (Linux, GNU, etc.).
-  Nevertheless, for consistent versioning, as well as software design flexibility for custom hardware, we include the riscv-tools repository and installation in the REBAR framework.
+  Nevertheless, for consistent versioning, as well as software design flexibility for custom hardware, we include the riscv-tools repository and installation in the Chipyard framework.
 
 **esp-tools**
   A fork of riscv-tools, designed to work with the Hwacha non-standard RISC-V extension.

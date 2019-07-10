@@ -28,7 +28,7 @@ Integrating into the Generator Build System
 -------------------------------------------
 
 While developing, you want to include Chisel code in a submodule so that it can be shared by different projects.
-To add a submodule to the REBAR framework, make sure that your project is organized as follows.
+To add a submodule to the Chipyard framework, make sure that your project is organized as follows.
 
 .. code-block:: none
 
@@ -45,7 +45,7 @@ Then add it as a submodule to under the following directory hierarchy: ``generat
     cd generators/
     git submodule add https://git-repository.com/yourproject.git
 
-Then add ``yourproject`` to the REBAR top-level build.sbt file.
+Then add ``yourproject`` to the Chipyard top-level build.sbt file.
 
 .. code-block:: scala
 
@@ -59,7 +59,7 @@ the ``example`` project, change the final line in build.sbt to the following.
 
     lazy val example = (project in file(".")).settings(commonSettings).dependsOn(testchipip, yourproject)
 
-Finally, add ``yourproject`` to the ``PACKAGES`` variable in the ``common.mk`` file in the REBAR top level.
+Finally, add ``yourproject`` to the ``PACKAGES`` variable in the ``common.mk`` file in the Chipyard top level.
 This will allow make to detect that your source files have changed when building the Verilog/FIRRTL files.
 
 MMIO Peripheral

@@ -1,7 +1,7 @@
 Getting Started
 ================================
 
-These guides will walk you through the basics of the REBAR framework:
+These guides will walk you through the basics of the Chipyard framework:
 
 - First, we will go over the different configurations available.
 
@@ -13,9 +13,9 @@ Hit next to get started!
    :maxdepth: 2
    :caption: Getting Started:
 
-   REBAR-Basics
+   Chipyard-Basics
    Configs-Parameters-Mixins
    Adding-An-Accelerator-Tutorial
    Initial-Repo-Setup
    Running-A-Simulation
-   rebar-generator-mixins
+   Chipyard-Generator-Mixins

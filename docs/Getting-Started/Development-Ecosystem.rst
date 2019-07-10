@@ -1,12 +1,12 @@
 Development Ecosystem
 ===============================
 
-REBAR Approach
+Chipyard Approach
 -------------------------------------------
 
 The trend towards agile hardware design and evaluation provides an ecosystem of debugging and implementation tools, that make it easier for computer architecture researchers to develop novel concepts.
-REBAR hopes to build on this prior work in order to create a singular location to which multiple projects within the `Berkeley Architecture Research <https://bar.eecs.berkeley.edu/index.html>`__ can coexist and be used together.
-REBAR aims to be the "one-stop shop" for creating and testing your own unique System on a Chip (SoC).
+Chipyard hopes to build on this prior work in order to create a singular location to which multiple projects within the `Berkeley Architecture Research <https://bar.eecs.berkeley.edu/index.html>`__ can coexist and be used together.
+Chipyard aims to be the "one-stop shop" for creating and testing your own unique System on a Chip (SoC).
 
 Chisel/FIRRTL
 -------------------------------------------
