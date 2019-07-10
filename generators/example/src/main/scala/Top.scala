@@ -14,6 +14,8 @@ import sifive.blocks.devices.gpio._
 
 import icenet.{HasPeripheryIceNIC, HasPeripheryIceNICModuleImp}
 
+import memblade.client.{HasPeripheryRemoteMemClient, HasPeripheryRemoteMemClientModuleImp}
+
 // -------------------------------
 // BOOM and/or Rocket Top Level Systems
 // -------------------------------
@@ -78,3 +80,13 @@ class BoomRocketTopWithIceNIC(implicit p: Parameters) extends BoomRocketTop
 class BoomRocketTopWithIceNICModule(outer: BoomRocketTopWithIceNIC)
   extends BoomRocketTopModule(outer)
   with HasPeripheryIceNICModuleImp
+
+class BoomRocketTopWithRemoteMemClient(implicit p: Parameters)
+    extends BoomRocketTop
+    with HasPeripheryRemoteMemClient {
+  override lazy val module = new BoomRocketTopWithRemoteMemClientModule(this)
+}
+
+class BoomRocketTopWithRemoteMemClientModule(outer: BoomRocketTopWithRemoteMemClient)
+  extends BoomRocketTopModule(outer)
+  with HasPeripheryRemoteMemClientModuleImp

@@ -1,6 +1,6 @@
 [submodule "rocket-chip"]
 	path = generators/rocket-chip
-	url = https://github.com/ucb-bar/rocket-chip.git
+	url = https://github.com/firesim/rocket-chip.git
 [submodule "testchipip"]
 	path = generators/testchipip
 	url = https://github.com/ucb-bar/testchipip.git
@@ -40,3 +40,6 @@
 [submodule "generators/block-inclusivecache-sifive"]
 	path = generators/sifive-cache
 	url = https://github.com/sifive/block-inclusivecache-sifive.git
+[submodule "generators/memory-blade"]
+	path = generators/memory-blade
+	url = git@bitbucket.org:zhemao/memory-blade.git

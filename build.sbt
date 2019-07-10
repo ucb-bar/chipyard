@@ -81,7 +81,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(commonSettings)
 
 lazy val example = conditionalDependsOn(project in file("generators/example"))
-  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, icenet)
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, memory_blade)
   .settings(commonSettings)
 
 lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))
@@ -118,6 +118,10 @@ lazy val sifive_cache = (project in file("generators/sifive-cache")).settings(
     commonSettings,
     scalaSource in Compile := baseDirectory.value / "craft"
   ).dependsOn(rocketchip)
+
+lazy val memory_blade = (project in file("generators/memory-blade"))
+  .dependsOn(rocketchip, icenet, testchipip)
+  .settings(commonSettings)
 
 // Library components of FireSim
 lazy val midas      = ProjectRef(firesimDir, "midas")

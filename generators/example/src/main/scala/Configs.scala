@@ -261,3 +261,10 @@ class LoopbackNICRocketConfig extends Config(
   new WithIceNIC ++
   new WithLoopbackNICBoomRocketTop ++
   new BaseRocketConfig)
+
+class RemoteMemClientRocketConfig extends Config(
+  new WithIceNIC ++
+  new WithRemoteMemClient(1024) ++
+  new WithMemBlade(Some(1024)) ++
+  new WithRemoteMemClientBoomRocketTop ++
+  new BaseRocketConfig)

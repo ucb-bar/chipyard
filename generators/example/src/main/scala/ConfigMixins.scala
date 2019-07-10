@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util.{log2Up}
 
 import freechips.rocketchip.config.{Field, Parameters, Config}
-import freechips.rocketchip.subsystem.{RocketTilesKey, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
+import freechips.rocketchip.subsystem.{RocketTilesKey, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, CacheBlockBytes}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.tile.{XLen, BuildRoCC, TileKey, LazyRoCC}
@@ -18,6 +18,11 @@ import hwacha.{Hwacha}
 import sifive.blocks.devices.gpio._
 
 import icenet.{NICKey, NICConfig}
+
+import memblade.client.{RemoteMemClientKey, RemoteMemClientConfig}
+import memblade.manager.{MemBladeKey, MemBladeParams, MemBladeQueueParams}
+
+import scala.math.max
 
 /**
  * TODO: Why do we need this?
@@ -162,6 +167,33 @@ class WithLoopbackNICBoomRocketTop extends Config((site, here, up) => {
   case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
     val top = Module(LazyModule(new BoomRocketTopWithIceNIC()(p)).module)
     top.connectNicLoopback()
+    top
+  }
+})
+
+class WithRemoteMemClient(spanBytes: Int = 1024)
+    extends Config((site, here, up) => {
+  case RemoteMemClientKey => RemoteMemClientConfig(
+    spanBytes = spanBytes,
+    nRMemXacts = 32768 / spanBytes)
+})
+
+class WithMemBlade(spanBytes: Option[Int] = None)
+    extends Config((site, here, up) => {
+  case MemBladeKey => {
+    val spanBytesVal = spanBytes.getOrElse(site(CacheBlockBytes))
+    MemBladeParams(
+      spanBytes = spanBytesVal,
+      nSpanTrackers = max(384 / spanBytesVal, 2),
+      spanQueue = MemBladeQueueParams(reqHeadDepth = 32, respHeadDepth = 32),
+      wordQueue = MemBladeQueueParams(reqHeadDepth = 32, respHeadDepth = 32))
+  }
+})
+
+class WithRemoteMemClientBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new BoomRocketTopWithRemoteMemClient()(p)).module)
+    top.connectTestMemBlade()
     top
   }
 })
