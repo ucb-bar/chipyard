@@ -7,7 +7,7 @@ import freechips.rocketchip.config.{Field, Parameters, Config}
 import freechips.rocketchip.subsystem.{RocketTilesKey, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, CacheBlockBytes}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.tile.{XLen, BuildRoCC, TileKey, LazyRoCC}
+import freechips.rocketchip.tile.{XLen, BuildRoCC, TileKey, LazyRoCC, OpcodeSet}
 
 import boom.system.{BoomTilesKey}
 
@@ -19,8 +19,10 @@ import sifive.blocks.devices.gpio._
 
 import icenet.{NICKey, NICConfig}
 
+import memblade.cache.{DRAMCacheKey, DRAMCacheConfig}
 import memblade.client.{RemoteMemClientKey, RemoteMemClientConfig}
 import memblade.manager.{MemBladeKey, MemBladeParams, MemBladeQueueParams}
+import memblade.prefetcher.{PrefetchRoCC, SoftPrefetchConfig, AutoPrefetchConfig}
 
 import scala.math.max
 
@@ -196,4 +198,43 @@ class WithRemoteMemClientBoomRocketTop extends Config((site, here, up) => {
     top.connectTestMemBlade()
     top
   }
+})
+
+class WithDRAMCache(
+    sizeKB: Int,
+    nWays: Int = 7,
+    nTrackersPerBank: Int = 1,
+    nBanksPerChannel: Int = 1) extends Config((site, here, up) => {
+  case DRAMCacheKey => {
+    val spanBytes = site(CacheBlockBytes)
+    val nSets = (sizeKB * 1024) / (nWays * spanBytes)
+    DRAMCacheConfig(
+      nSets = nSets,
+      nWays = nWays,
+      spanBytes = spanBytes,
+      baseAddr = 1L << 32,
+      extentBytes = 1 << 20,
+      logAddrBits = 28,
+      nTrackersPerBank = nTrackersPerBank,
+      nBanksPerChannel = nBanksPerChannel,
+      zeroMetadata = true)
+  }
+})
+
+class WithDRAMCacheBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new BoomRocketTopWithDRAMCache()(p)).module)
+    top.connectTestMemBlade(100)
+    top.connectSimAXICacheMem()
+    top
+  }
+})
+
+class WithPrefetchRoCC extends Config((site, here, up) => {
+  case BuildRoCC => Seq((p: Parameters) =>
+    LazyModule(new PrefetchRoCC(
+      opcodes = OpcodeSet.custom2,
+      soft = Some(new SoftPrefetchConfig(nMemXacts = 32)),
+      auto = Some(new AutoPrefetchConfig(
+        nWays = 4, nBlocks = 8, timeoutPeriod = 750)))(p)))
 })

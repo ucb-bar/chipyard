@@ -3,7 +3,7 @@ OBJDUMP=riscv64-unknown-elf-objdump
 CFLAGS=-mcmodel=medany -std=gnu99 -O2 -fno-common -fno-builtin-printf -Wall
 LDFLAGS=-static -nostdlib -nostartfiles -lgcc
 
-PROGRAMS = pwm blkdev accum charcount nic-loopback big-blkdev pingd nic-loopback memblade-loopback
+PROGRAMS = pwm blkdev accum charcount nic-loopback big-blkdev pingd nic-loopback memblade-loopback copy-test
 
 default: $(addsuffix .riscv,$(PROGRAMS))
 

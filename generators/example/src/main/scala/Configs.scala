@@ -268,3 +268,13 @@ class RemoteMemClientRocketConfig extends Config(
   new WithMemBlade(Some(1024)) ++
   new WithRemoteMemClientBoomRocketTop ++
   new BaseRocketConfig)
+
+class DRAMCacheRocketConfig extends Config(
+  new WithIceNIC ++
+  new WithInclusiveCache(capacityKB = 16) ++
+  new WithDRAMCache(
+    sizeKB = 112, nTrackersPerBank = 4, nBanksPerChannel = 2) ++
+  new WithMemBlade ++
+  new WithPrefetchRoCC ++
+  new WithDRAMCacheBoomRocketTop ++
+  new BaseRocketConfig)
