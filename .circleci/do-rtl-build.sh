@@ -13,6 +13,9 @@ source $SCRIPT_DIR/defaults.sh
 # call clean on exit
 trap clean EXIT
 
+cd $LOCAL_CHIPYARD_DIR
+./scripts/init-submodules-no-riscv-tools.sh
+
 # set stricthostkeychecking to no (must happen before rsync)
 run "echo \"Ping $SERVER\""
 
@@ -27,9 +30,8 @@ copy $LOCAL_CHIPYARD_DIR/ $SERVER:$REMOTE_CHIPYARD_DIR
 copy $LOCAL_VERILATOR_DIR/ $SERVER:$REMOTE_VERILATOR_DIR
 
 # enter the verisim directory and build the specific config on remote server
-run "cd $REMOTE_CHIPYARD_DIR && ./scripts/init-submodules-no-riscv-tools.sh"
 run "make -C $REMOTE_SIM_DIR clean"
-run "export RISCV=\"$REMOTE_RISCV_DIR\"; make -C $REMOTE_SIM_DIR VERILATOR_INSTALL_DIR=$REMOTE_VERILATOR_DIR JAVA_ARGS=\"-Xmx8G -Xss8M\" $@"
+run "export RISCV=\"$REMOTE_RISCV_DIR\"; export VERILATOR_ROOT=$REMOTE_VERILATOR_DIR; make -C $REMOTE_SIM_DIR VERILATOR_INSTALL_DIR=$REMOTE_VERILATOR_DIR JAVA_ARGS=\"-Xmx8G -Xss8M\" $@"
 run "rm -rf $REMOTE_CHIPYARD_DIR/project"
 
 # copy back the final build
