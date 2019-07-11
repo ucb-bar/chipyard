@@ -250,7 +250,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - esp-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - esp-tools-installed-v1-{{ checksum "../esp-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
