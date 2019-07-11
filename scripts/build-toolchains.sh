@@ -29,7 +29,7 @@ export RISCV="$RISCV"
 git -C $CHIPYARD_DIR submodule update --init --recursive toolchains/$TOOLCHAIN #--jobs 8
 cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN"
 export MAKEFLAGS="-j16"
-./build.sh
+./build.sh linux
 cd $RDIR
 
 echo "export RISCV=$RISCV" > env.sh
