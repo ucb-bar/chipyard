@@ -21,17 +21,27 @@ run "echo \"Ping $SERVER\""
 
 clean
 
-# copy over riscv-tools, verilator, and chipyard to remote
-run "mkdir -p $REMOTE_RISCV_DIR"
+# copy over riscv/esp-tools, verilator, and chipyard to remote
 run "mkdir -p $REMOTE_CHIPYARD_DIR"
 run "mkdir -p $REMOTE_VERILATOR_DIR"
-copy $LOCAL_RISCV_DIR/ $SERVER:$REMOTE_RISCV_DIR
 copy $LOCAL_CHIPYARD_DIR/ $SERVER:$REMOTE_CHIPYARD_DIR
 copy $LOCAL_VERILATOR_DIR/ $SERVER:$REMOTE_VERILATOR_DIR
 
+TOOLS_DIR=$REMOTE_RISCV_DIR
+LD_LIB_DIR=$REMOTE_RISCV_DIR/lib
+if [ $1 = "hwacha" ]; then
+    TOOLS_DIR=$REMOTE_ESP_DIR
+    LD_LIB_DIR=$REMOTE_ESP_DIR/lib
+    run "mkdir -p $REMOTE_ESP_DIR"
+    copy $LOCAL_ESP_DIR/ $SERVER:$REMOTE_ESP_DIR
+else
+    run "mkdir -p $REMOTE_RISCV_DIR"
+    copy $LOCAL_RISCV_DIR/ $SERVER:$REMOTE_RISCV_DIR
+fi
+
 # enter the verisim directory and build the specific config on remote server
 run "make -C $REMOTE_SIM_DIR clean"
-run "export RISCV=\"$REMOTE_RISCV_DIR\"; export VERILATOR_ROOT=$REMOTE_VERILATOR_DIR/install/share/verilator; make -C $REMOTE_SIM_DIR VERILATOR_INSTALL_DIR=$REMOTE_VERILATOR_DIR JAVA_ARGS=\"-Xmx8G -Xss8M\" ${mapping[$1]}"
+run "export RISCV=\"$TOOLS_DIR\"; export LD_LIBRARY_PATH=\"$LD_LIB_DIR\"; export VERILATOR_ROOT=$REMOTE_VERILATOR_DIR/install/share/verilator; make -C $REMOTE_SIM_DIR VERILATOR_INSTALL_DIR=$REMOTE_VERILATOR_DIR JAVA_ARGS=\"-Xmx8G -Xss8M\" ${mapping[$1]}"
 run "rm -rf $REMOTE_CHIPYARD_DIR/project"
 
 # copy back the final build

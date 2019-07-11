@@ -250,7 +250,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - esp-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
@@ -405,7 +405,7 @@ jobs:
                     - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
             - run:
                 name: Run hwacha tests
-                command: export RISCV=/home/riscvuser/esp-tools-install; export LD_LIBRARY_PATH=$RISCV/lib; .circleci/run-tests.sh hwacha
+                command: .circleci/run-tests.sh hwacha
 
 # Order and dependencies of jobs to run
 workflows:
