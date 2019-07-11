@@ -58,8 +58,7 @@ VCS_NONCC_OPTS = \
 	+v2k \
 	+vcs+lic+wait \
 	+vc+list \
-	-f $(sim_top_blackboxes) \
-	-f $(sim_harness_blackboxes) \
+	-f $(sim_vcs_blackboxes) \
 	-f $(sim_dotf) \
 	-sverilog \
 	+incdir+$(build_dir) \
@@ -75,14 +74,22 @@ VCS_NONCC_OPTS = \
 
 VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS)
 
+########################################################################################
+# remove duplicate blackboxes
+########################################################################################
+sim_vcs_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.vcs.f
+
+$(sim_vcs_blackboxes): $(sim_top_blackboxes) $(sim_harness_blackboxes)
+	awk '{print $1;}' $^ | sort -u > $@
+
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
-$(sim): $(sim_vsrcs) $(sim_dotf)
+$(sim): $(sim_vsrcs) $(sim_dotf) $(sim_vcs_blackboxes)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	-debug_pp
 
-$(sim_debug) : $(sim_vsrcs) $(sim_dotf)
+$(sim_debug) : $(sim_vsrcs) $(sim_dotf) $(sim_vcs_blackboxes)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	+define+DEBUG -debug_pp
 
