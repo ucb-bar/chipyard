@@ -1,4 +1,4 @@
-FPGA-Based Simulators
+FPGA-Accelerated Simulators
 ==============================
 
 FireSim
