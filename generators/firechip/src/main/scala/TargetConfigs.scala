@@ -11,7 +11,7 @@ import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.DebugModuleParams
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import boom.system.BoomTilesKey
-import testchipip.{WithBlockDevice, BlockDeviceKey, BlockDeviceConfig}
+import testchipip.{WithBlockDevice, BlockDeviceKey, BlockDeviceConfig, MemBenchKey, MemBenchParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import memblade.manager.{MemBladeKey, MemBladeParams, MemBladeQueueParams}
 import memblade.client.{RemoteMemClientKey, RemoteMemClientConfig}
@@ -105,6 +105,10 @@ class WithPrefetchRoCC extends Config((site, here, up) => {
         hitThreshold = 1,
         timeoutPeriod = 4096))))
   })
+})
+
+class WithMemBenchKey(nXacts: Int = 32) extends Config((site, here, up) => {
+  case MemBenchKey => MemBenchParams(nXacts = nXacts)
 })
 
 class WithRocketL2TLBs(entries: Int) extends Config((site, here, up) => {
@@ -229,7 +233,7 @@ class FireSimPrefetcherQuadCoreConfig extends Config(
 
 class FireSimDRAMCacheConfig extends Config(
   new WithPrefetchRoCC ++
-  //new WithMemBenchKey ++
+  new WithMemBenchKey ++
   new WithDRAMCacheKey ++
   new WithExtMemSize(15L << 30) ++
   new WithStandardL2 ++
