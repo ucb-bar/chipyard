@@ -156,6 +156,25 @@ class FireSimBoomQuadCoreConfig extends Config(
   new WithNDuplicatedBoomCores(4) ++
   new FireSimBoomConfig)
 
+
+
+class FireSimRocketChipSystolicConfig extends Config(
+  new WithBootROM ++
+  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
+  new WithExtMemSize(0x400000000L) ++ // 16GB
+  new WithoutTLMonitors ++
+  new WithUARTKey ++
+  new WithNICKey ++
+  new WithBlockDevice ++
+  new WithRocketL2TLBs(1024) ++
+  new WithPerfCounters ++
+  new WithoutClockGating ++
+  new WithInclusiveCache ++
+  new systolic.DefaultSystolicConfig ++
+  new freechips.rocketchip.system.DefaultConfig)
+
+
+
 //**********************************************************************************
 //* Supernode Configurations
 //*********************************************************************************/

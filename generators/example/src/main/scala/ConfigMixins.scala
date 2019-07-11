@@ -14,6 +14,7 @@ import boom.system.{BoomTilesKey}
 import testchipip._
 
 import hwacha.{Hwacha}
+import systolic.{SystolicArray}
 
 import sifive.blocks.devices.gpio._
 
@@ -148,3 +149,16 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
     }
   }
 })
+
+/*
+class WithMultiRoCCSystolic(harts: Int*) extends Config((site, here, up) => {
+  case MultiRoCCKey => {
+    require(harts.max <= ((up(RocketTilesKey, site).length + up(BoomTilesKey, site).length) - 1))
+    up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
+      (i -> Seq((p: Parameters) => {
+        LazyModule(new SystolicArray(SInt(8.W), SInt(16.W), SInt(32.W), freechips.rocketchip.tile.OpcodeSet.custom3)).suggestName("systolic")
+      }))
+    }
+  }
+})
+*/

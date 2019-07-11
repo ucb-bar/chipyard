@@ -81,7 +81,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(commonSettings)
 
 lazy val example = conditionalDependsOn(project in file("generators/example"))
-  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache)
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, systolic_array)
   .settings(commonSettings)
 
 lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))
@@ -98,6 +98,10 @@ lazy val hwacha = (project in file("generators/hwacha"))
 lazy val boom = (project in file("generators/boom"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
+
+lazy val systolic_array = (project in file("generators/systolic-array"))
+   .settings(commonSettings)
+   .dependsOn(icenet)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
   .settings(commonSettings)
@@ -124,7 +128,7 @@ lazy val midas      = ProjectRef(firesimDir, "midas")
 lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 
 lazy val firechip = (project in file("generators/firechip"))
-  .dependsOn(boom, icenet, testchipip, sifive_blocks, sifive_cache, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
+  .dependsOn(boom, icenet, testchipip, sifive_blocks, sifive_cache, systolic_array, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
     testGrouping in Test := isolateAllTests( (definedTests in Test).value )

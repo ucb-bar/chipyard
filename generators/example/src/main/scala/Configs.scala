@@ -256,3 +256,15 @@ class RV32BoomAndRocketConfig extends Config(
 
 class DualCoreRocketL2Config extends Config(
   new WithInclusiveCache ++ new DualCoreRocketConfig)
+
+
+
+// ---------------------
+// Systolic Configs
+// ---------------------
+
+class SystolicConfig extends Config(
+  new WithInclusiveCache ++
+  new systolic.DefaultSystolicConfig ++
+  new DefaultRocketConfig
+)

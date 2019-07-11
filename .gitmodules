@@ -40,3 +40,6 @@
 [submodule "generators/block-inclusivecache-sifive"]
 	path = generators/sifive-cache
 	url = https://github.com/sifive/block-inclusivecache-sifive.git
+[submodule "generators/systolic-array"]
+	path = generators/systolic-array
+	url = https://github.com/ucb-bar/systolic-array-generator.git
