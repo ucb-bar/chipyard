@@ -19,6 +19,10 @@ import sifive.blocks.devices.uart._
 import midas.models.AXI4BundleWithEdge
 import java.io.File
 
+import memblade.client.{HasPeripheryRemoteMemClient, HasPeripheryRemoteMemClientModuleImpValidOnly}
+import memblade.cache.{HasPeripheryDRAMCache, HasPeripheryDRAMCacheModuleImpValidOnly}
+import memblade.manager.{HasPeripheryMemBlade, HasPeripheryMemBladeModuleImpValidOnly}
+
 /*******************************************************************************
 * Top level DESIGN configurations. These describe the basic instantiations of
 * the designs being simulated.
@@ -174,3 +178,29 @@ class FireSimSupernode(implicit p: Parameters) extends Module {
   } }
 }
 
+class FireSimRemoteMemClient(implicit p: Parameters) extends FireSimNoNIC
+    with HasPeripheryRemoteMemClient {
+  override lazy val module = new FireSimRemoteMemClientModuleImp(this)
+}
+
+class FireSimRemoteMemClientModuleImp(outer: FireSimRemoteMemClient)
+  extends FireSimNoNICModuleImp(outer)
+  with HasPeripheryRemoteMemClientModuleImpValidOnly
+
+class FireSimMemBlade(implicit p: Parameters) extends FireSimNoNIC
+    with HasPeripheryMemBlade {
+  override lazy val module = new FireSimMemBladeModuleImp(this)
+}
+
+class FireSimMemBladeModuleImp(outer: FireSimMemBlade)
+  extends FireSimNoNICModuleImp(outer)
+  with HasPeripheryMemBladeModuleImpValidOnly
+
+class FireSimDRAMCache(implicit p: Parameters) extends FireSimNoNIC
+    with HasPeripheryDRAMCache {
+  override lazy val module = new FireSimDRAMCacheModuleImp(this)
+}
+
+class FireSimDRAMCacheModuleImp(outer: FireSimDRAMCache)
+  extends FireSimNoNICModuleImp(outer)
+  with HasPeripheryDRAMCacheModuleImpValidOnly

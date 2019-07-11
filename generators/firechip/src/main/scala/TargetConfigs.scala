@@ -9,10 +9,16 @@ import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.DebugModuleParams
+import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import boom.system.BoomTilesKey
 import testchipip.{WithBlockDevice, BlockDeviceKey, BlockDeviceConfig}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
+import memblade.manager.{MemBladeKey, MemBladeParams, MemBladeQueueParams}
+import memblade.client.{RemoteMemClientKey, RemoteMemClientConfig}
+import memblade.cache.{DRAMCacheKey, DRAMCacheConfig, RemoteAccessDepths, WritebackDepths, MemoryQueueParams}
+import memblade.prefetcher.{PrefetchRoCC, SoftPrefetchConfig, AutoPrefetchConfig, StreamBufferConfig}
 import icenet._
+import scala.math.max
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMParams => {
@@ -42,7 +48,63 @@ class WithUARTKey extends Config((site, here, up) => {
 class WithNICKey extends Config((site, here, up) => {
   case NICKey => NICConfig(
     inBufFlits = 8192,
-    ctrlQueueDepth = 64)
+    ctrlQueueDepth = 64,
+    usePauser = true)
+})
+
+class WithMemBladeKey(spanBytes: Option[Int] = None) extends Config(
+  (site, here, up) => {
+    case MemBladeKey => {
+      val spanBytesVal = spanBytes.getOrElse(site(CacheBlockBytes))
+      MemBladeParams(
+        spanBytes = spanBytesVal,
+        nSpanTrackers = max(384 / spanBytesVal, 2),
+        nWordTrackers = 4,
+        spanQueue = MemBladeQueueParams(reqHeadDepth = 32, respHeadDepth = 32),
+        wordQueue = MemBladeQueueParams(reqHeadDepth = 32, respHeadDepth = 32))
+    }
+  }
+)
+
+class WithRemoteMemClientKey(spanBytes: Int = 1024) extends Config((site, here, up) => {
+  case RemoteMemClientKey => RemoteMemClientConfig(
+    spanBytes = spanBytes,
+    nRMemXacts = 32768 / spanBytes)
+})
+
+class WithDRAMCacheKey extends Config((site, here, up) => {
+  case DRAMCacheKey => DRAMCacheConfig(
+    nSets = 1 << 21,
+    nWays = 7,
+    baseAddr = BigInt(1) << 37,
+    nTrackersPerBank = 4,
+    nBanksPerChannel = 8,
+    nChannels = 1,
+    nSecondaryRequests = 1,
+    spanBytes = site(CacheBlockBytes),
+    logAddrBits = 37,
+    outIdBits = 4,
+    nWritebackRemXacts = 32,
+    remAccessQueue = RemoteAccessDepths(1, 8, 1, 8),
+    wbQueue = WritebackDepths(1, 1),
+    memInQueue = MemoryQueueParams(0, 0, 8, 2, 8, 2),
+    memOutQueue = MemoryQueueParams(0, 0, 2, 2, 2, 2),
+    zeroMetadata = false)
+})
+
+class WithPrefetchRoCC extends Config((site, here, up) => {
+  case BuildRoCC => Seq((q: Parameters) => {
+    implicit val p = q
+    implicit val valName = ValName("FireSim")
+    LazyModule(new PrefetchRoCC(
+      opcodes = OpcodeSet.custom2,
+      soft = Some(SoftPrefetchConfig(nMemXacts = 32, nBackends = 2)),
+      auto = Some(AutoPrefetchConfig(
+        nWays = 4,
+        nBlocks = 28,
+        hitThreshold = 1,
+        timeoutPeriod = 4096))))
+  })
 })
 
 class WithRocketL2TLBs(entries: Int) extends Config((site, here, up) => {
@@ -125,6 +187,62 @@ class FireSimRocketChipHexaCoreConfig extends Config(
 class FireSimRocketChipOctaCoreConfig extends Config(
   new WithNDuplicatedRocketCores(8) ++
   new FireSimRocketChipSingleCoreConfig)
+
+class FireSimMemBladeConfig extends Config(
+  new WithMemBladeKey ++ new FireSimRocketChipConfig)
+
+class FireSimMemBlade1024Config extends Config(
+  new WithMemBladeKey(Some(1024)) ++ new FireSimRocketChipConfig)
+
+class WithStandardL2 extends WithInclusiveCache(
+  nBanks = 4,
+  capacityKB = 1024,
+  outerLatencyCycles = 50)
+
+class FireSimRemoteMemClientConfig extends Config(
+  new WithRemoteMemClientKey ++
+  new WithStandardL2 ++
+  new FireSimRocketChipConfig)
+
+class FireSimRemoteMemClientSingleCoreConfig extends Config(
+  new WithNBigCores(1) ++ new FireSimRemoteMemClientConfig)
+
+class FireSimRemoteMemClientDualCoreConfig extends Config(
+  new WithNBigCores(2) ++ new FireSimRemoteMemClientConfig)
+
+class FireSimRemoteMemClientQuadCoreConfig extends Config(
+  new WithNBigCores(4) ++ new FireSimRemoteMemClientConfig)
+
+class FireSimPrefetcherConfig extends Config(
+  new WithPrefetchRoCC ++
+  new WithStandardL2 ++
+  new FireSimRocketChipConfig)
+
+class FireSimPrefetcherSingleCoreConfig extends Config(
+  new WithNBigCores(1) ++ new FireSimPrefetcherConfig)
+
+class FireSimPrefetcherDualCoreConfig extends Config(
+  new WithNBigCores(2) ++ new FireSimPrefetcherConfig)
+
+class FireSimPrefetcherQuadCoreConfig extends Config(
+  new WithNBigCores(4) ++ new FireSimPrefetcherConfig)
+
+class FireSimDRAMCacheConfig extends Config(
+  new WithPrefetchRoCC ++
+  //new WithMemBenchKey ++
+  new WithDRAMCacheKey ++
+  new WithExtMemSize(15L << 30) ++
+  new WithStandardL2 ++
+  new FireSimRocketChipConfig)
+
+class FireSimDRAMCacheSingleCoreConfig extends Config(
+  new WithNBigCores(1) ++ new FireSimDRAMCacheConfig)
+
+class FireSimDRAMCacheDualCoreConfig extends Config(
+  new WithNBigCores(2) ++ new FireSimDRAMCacheConfig)
+
+class FireSimDRAMCacheQuadCoreConfig extends Config(
+  new WithNBigCores(4) ++ new FireSimDRAMCacheConfig)
 
 class FireSimBoomConfig extends Config(
   new WithBootROM ++
