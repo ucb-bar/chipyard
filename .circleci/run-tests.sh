@@ -41,8 +41,8 @@ case $1 in
         run_bmark ${mapping[$1]}
         ;;
     hwacha)
-        export RISCV=$REMOTE_ESP_DIR
-        export LD_LIBRARY_PATH=$REMOTE_ESP_DIR/lib
+        export RISCV=$LOCAL_ESP_DIR
+        export LD_LIBRARY_PATH=$LOCAL_ESP_DIR/lib
         make run-rv64uv-p-asm-tests-fst -C $LOCAL_SIM_DIR VERILATOR_INSTALL_DIR=$LOCAL_VERILATOR_DIR ${mapping[$1]}
         ;;
     *)
