@@ -80,7 +80,7 @@ ifeq ($(SUB_PROJECT),beagle)
 	MODEL             ?= BeagleTestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= beagle
-	CONFIG            ?= BeagleConfig
+	CONFIG            ?= MegaBeagleConfig
 	CONFIG_PACKAGE    ?= beagle
 	GENERATOR_PACKAGE ?= boom.system
 	TB                ?= TestDriver
