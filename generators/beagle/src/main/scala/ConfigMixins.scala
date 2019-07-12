@@ -159,7 +159,7 @@ class WithMultiRoCCSystolic(harts: Int*) extends Config((site, here, up) => {
       (i -> Seq((p: Parameters) => {
         implicit val q = p
         implicit val v = implicitly[ValName]
-        LazyModule(new SystolicArray(SInt(16.W), SInt(16.W), SInt(32.W), OpcodeSet.custom3)).suggestName("systolic_array")
+        LazyModule(new SystolicArray(SInt(8.W), SInt(16.W), SInt(32.W), OpcodeSet.custom3)).suggestName("systolic_array")
       }))
     }
   }
