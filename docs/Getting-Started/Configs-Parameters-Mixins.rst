@@ -1,7 +1,7 @@
 Configs, Parameters, Mix-ins, and Everything In Between
 ========================================================
 
-A significant portion of generators in the REBAR framework use the Rocket Chip parameter system.
+A significant portion of generators in the Chipyard framework use the Rocket Chip parameter system.
 This parameter system enables for the flexible configuration of the SoC without invasive RTL changes.
 In order to use the parameter system correctly, we will use several terms and conventions:
 
@@ -69,7 +69,7 @@ Cake Pattern
 -------------------------
 
 A cake pattern is a Scala programming pattern, which enable "mixing" of multiple traits or interface definitions (sometimes referred to as dependency injection).
-It is used in the Rocket Chip SoC library and REBAR framework in merging multiple system components and IO interfaces into a large system component.
+It is used in the Rocket Chip SoC library and Chipyard framework in merging multiple system components and IO interfaces into a large system component.
 
 :numref:`cake-example` shows a Rocket Chip based SoC that merges multiple system components (BootROM, UART, etc) into a single top-level design.
 

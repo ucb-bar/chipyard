@@ -1,10 +1,10 @@
 Simulators
 =======================
 
-REBAR provides support and integration for multiple simulation flows, for various user levels and requirements.
+Chipyard provides support and integration for multiple simulation flows, for various user levels and requirements.
 In the majority of cases during a digital design development process, a simple software RTL simulation will do.
 When more advanced full-system evaluation is required, with long running workloads, FPGA-accelerated simulation will then become a preferable solution.
-The following pages provide detailed information about the simulation possibilities within the REBAR framework.
+The following pages provide detailed information about the simulation possibilities within the Chipyard framework.
 
 .. toctree::
    :maxdepth: 2

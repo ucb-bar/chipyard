@@ -44,7 +44,7 @@ ifeq ($(SUB_PROJECT),boom)
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= boom.system
-	CONFIG            ?= BoomConfig
+	CONFIG            ?= LargeBoomConfig
 	CONFIG_PACKAGE    ?= boom.system
 	GENERATOR_PACKAGE ?= boom.system
 	TB                ?= TestDriver
@@ -52,7 +52,7 @@ ifeq ($(SUB_PROJECT),boom)
 endif
 # for Rocket-chip developers
 ifeq ($(SUB_PROJECT),rocketchip)
-	SBT_PROJECT       ?= rebarrocketchip
+	SBT_PROJECT       ?= rocketchip
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= freechips.rocketchip.system
@@ -86,13 +86,26 @@ ifeq ($(SUB_PROJECT),beagle)
 	TB                ?= TestDriver
 	TOP               ?= BeagleChipTop
 endif
+# Stand-in firechip variables:
+# TODO: need a seperate generator and test harnesses for each target
+#ifeq ($(SUB_PROJECT),firechip)
+#	SBT_PROJECT       ?= $(SUB_PROJECT)
+#	MODEL             ?= TestHarness
+#	VLOG_MODEL        ?= TestHarness
+#	MODEL_PACKAGE     ?= freechips.rocketchip.system
+#	CONFIG            ?= FireSimRocketChipConfig
+#	CONFIG_PACKAGE    ?= firesim.firesim
+#	GENERATOR_PACKAGE ?= firesim.firesim
+#	TB                ?= TestDriver
+#	TOP               ?= FireSimNoNIC
+#endif
 
 #########################################################################################
 # path to rocket-chip and testchipip
 #########################################################################################
-ROCKETCHIP_DIR   = $(base_dir)/generators/rocket-chip
-TESTCHIP_DIR     = $(base_dir)/generators/testchipip
-REBAR_FIRRTL_DIR = $(base_dir)/tools/firrtl
+ROCKETCHIP_DIR      = $(base_dir)/generators/rocket-chip
+TESTCHIP_DIR        = $(base_dir)/generators/testchipip
+CHIPYARD_FIRRTL_DIR = $(base_dir)/tools/firrtl
 
 #########################################################################################
 # names of various files needed to compile and run things

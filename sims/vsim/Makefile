@@ -97,7 +97,7 @@ $(sim_debug) : $(sim_vsrcs) $(sim_dotf) $(sim_vcs_blackboxes)
 # helper rules to run simulator with debug
 #########################################################################################
 run-binary-debug: $(sim_debug)
-	$(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) +vcdplusfile=$(sim_out_name).vpd $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) +vcdplusfile=$(sim_out_name).vpd $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
 
 #########################################################################################
 # create a vcs vpd rule

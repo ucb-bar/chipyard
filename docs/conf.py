@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# REBAR documentation build configuration file, created by
+# Chipyard documentation build configuration file, created by
 # sphinx-quickstart on Fri Mar  8 11:46:38 2019.
 #
 # This file is execfile()d with the current directory set to its
@@ -52,7 +52,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'REBAR'
+project = u'Chipyard'
 copyright = u'2019, Berkeley Architecture Research'
 author = u'Berkeley Architecture Research'
 
@@ -125,7 +125,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'REBARdoc'
+htmlhelp_basename = 'Chipyarddoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -152,7 +152,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'REBAR.tex', u'REBAR Documentation',
+    (master_doc, 'Chipyard.tex', u'Chipyard Documentation',
      u'Berkeley Architecture Research', 'manual'),
 ]
 
@@ -162,7 +162,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'rebar', u'REBAR Documentation',
+    (master_doc, 'chipyard', u'Chipyard Documentation',
      [author], 1)
 ]
 
@@ -173,8 +173,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'REBAR', u'REBAR Documentation',
-     author, 'REBAR', 'One line description of project.',
+    (master_doc, 'Chipyard', u'Chipyard Documentation',
+     author, 'Chipyard', 'One line description of project.',
      'Miscellaneous'),
 ]
 
