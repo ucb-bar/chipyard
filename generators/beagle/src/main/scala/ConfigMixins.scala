@@ -192,11 +192,6 @@ class WithMiniRocketCore extends Config((site, here, up) => {
 // ---------------------
 // BOOM Mixins
 // ---------------------
-class WithNewFetchBuffer extends Config((site, here, up) => {
-  case BoomTilesKey => up(BoomTilesKey, site) map { b => b.copy(
-    core = b.core.copy(useNewFetchBuffer = true)
-  )}
-})
 
 /**
  * Beagle BOOM design point
@@ -216,10 +211,12 @@ class WithMegaBeagleBooms extends Config((site, here, up) => {
          numLdqEntries = 24,
          numStqEntries = 24,
          maxBrCount = 16,
+         useNewFetchBuffer = false,
+         numFetchBufferEntries = 24,
          ftq = FtqParameters(nEntries=32),
          btb = BoomBTBParameters(btbsa=true, densebtb=false, nSets=512, nWays=4, nRAS=16, tagSz=13),
          bpdBaseOnly = None,
-         gshare = Some(GShareParameters(historyLength=12, numSets=4096)),
+         gshare = Some(GShareParameters(historyLength=13, numSets=8192)),
          tage = None,
          bpdRandom = None,
          nPerfCounters = 29,

@@ -45,7 +45,6 @@ class BeagleTop(implicit p: Parameters) extends BoomRocketSubsystem
   private val BankedL2Params(nBanks, coherenceManager) = p(BankedL2Key)
   private val (in, out, halt) = coherenceManager(this)
   if (nBanks != 0) {
-    println(s"numBanks: $nBanks")
     sbus.coupleTo("coherence_manager") { in :*= _ }
     mbus.coupleFrom("coherence_manager") { _ :=* BankBinder(mbus.blockBytes * (nBanks-1)) :*= out }
   }
