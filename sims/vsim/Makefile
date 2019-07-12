@@ -60,8 +60,7 @@ VCS_NONCC_OPTS = \
 	+v2k \
 	+vcs+lic+wait \
 	+vc+list \
-	-f $(sim_vcs_blackboxes) \
-	-f $(sim_dotf) \
+	-f $(sim_files) \
 	-sverilog \
 	+incdir+$(build_dir) \
 	+define+CLOCK_PERIOD=1.0 \
@@ -76,22 +75,14 @@ VCS_NONCC_OPTS = \
 
 VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS)
 
-########################################################################################
-# remove duplicate blackboxes
-########################################################################################
-sim_vcs_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.vcs.f
-
-$(sim_vcs_blackboxes): $(sim_top_blackboxes) $(sim_harness_blackboxes)
-	awk '{print $1;}' $^ | sort -u > $@
-
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
-$(sim): $(sim_vsrcs) $(sim_dotf) $(sim_vcs_blackboxes)
+$(sim): $(sim_vsrcs) $(sim_files)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	-debug_pp
 
-$(sim_debug) : $(sim_vsrcs) $(sim_dotf) $(sim_vcs_blackboxes)
+$(sim_debug) : $(sim_vsrcs) $(sim_files)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	+define+DEBUG -debug_pp
 
@@ -106,4 +97,4 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 #########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(gen_dir)/* csrc $(sim_prefix)-* ucli.key vc_hdrs.h
+	rm -rf $(gen_dir) csrc $(sim_prefix)-* ucli.key vc_hdrs.h

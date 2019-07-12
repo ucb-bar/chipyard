@@ -53,9 +53,10 @@ $(VERILOG_FILE) $(SMEMS_CONF) $(TOP_ANNO) $(TOP_FIR) $(sim_top_blackboxes): $(FI
 	cd $(base_dir) && $(SBT) "project tapeout" "runMain barstools.tapeout.transforms.GenerateTop -o $(VERILOG_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) -tsaof $(TOP_ANNO) -tsf $(TOP_FIR) $(REPL_SEQ_MEM) -td $(build_dir)"
 	cp $(build_dir)/firrtl_black_box_resource_files.f $(sim_top_blackboxes)
 
-$(HARNESS_FILE) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes): $(FIRRTL_FILE) $(ANNO_FILE) $(sim_top_blackboxes)
+# note: this depends on sim_top_blackboxes to avoid race condition where firrtl_black_box_resource_files.f is created at the same time
+$(HARNESS_FILE) $(HARNESS_SMEMS_CONF) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes): $(FIRRTL_FILE) $(ANNO_FILE) $(sim_top_blackboxes)
 	cd $(base_dir) && $(SBT) "project tapeout" "runMain barstools.tapeout.transforms.GenerateHarness -o $(HARNESS_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(VLOG_MODEL) -faf $(ANNO_FILE) -thaof $(HARNESS_ANNO) -thf $(HARNESS_FIR) $(HARNESS_REPL_SEQ_MEM) -td $(build_dir)"
-	grep -v ".*\.cc" $(build_dir)/firrtl_black_box_resource_files.f > $(sim_harness_blackboxes)
+	cp $(build_dir)/firrtl_black_box_resource_files.f $(sim_harness_blackboxes)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 MACROCOMPILER_MODE ?= --mode synflops
@@ -65,6 +66,14 @@ $(SMEMS_FILE) $(SMEMS_FIR): $(SMEMS_CONF)
 HARNESS_MACROCOMPILER_MODE = --mode synflops
 $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): $(HARNESS_SMEMS_CONF)
 	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE)"
+
+########################################################################################
+# remove duplicate/*.h files in blackbox/simfiles
+########################################################################################
+sim_files ?= $(build_dir)/sim_files.common.f
+
+$(sim_files): $(sim_top_blackboxes) $(sim_harness_blackboxes) $(sim_dotf)
+	awk '{print $1;}' $^ | sort -u | grep -v ".*\.h" > $@
 
 #########################################################################################
 # helper rule to just make verilog files
