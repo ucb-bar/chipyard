@@ -34,6 +34,9 @@
 [submodule "generators/block-inclusivecache-sifive"]
 	path = generators/sifive-cache
 	url = https://github.com/sifive/block-inclusivecache-sifive.git
+[submodule "generators/awl"]
+	path = generators/awl
+	url = https://github.com/ucb-bar/chisel-awl
 [submodule "toolchains/riscv-tools/riscv-gnu-toolchain"]
 	path = toolchains/riscv-tools/riscv-gnu-toolchain
 	url = https://github.com/riscv/riscv-gnu-toolchain.git
