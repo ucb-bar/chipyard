@@ -80,7 +80,7 @@ VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS)
 sim_vcs_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.vcs.f
 
 $(sim_vcs_blackboxes): $(sim_top_blackboxes) $(sim_harness_blackboxes)
-	join -a 1 -a 2 <(sort $(sim_top_blackboxes)) <(sort $(sim_harness_blackboxes)) > $@
+	awk '{print $1;}' $^ | sort -u > $@
 
 #########################################################################################
 # vcs simulator rules
