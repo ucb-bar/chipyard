@@ -67,6 +67,13 @@ $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): $(HARNESS_SMEMS_CONF)
 	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE)"
 
 #########################################################################################
+# create a particular fesvr for bringup
+#########################################################################################
+$(fesvr_so): $(shell find -L $(FESVR_DIR)/fesvr/ -iname "*.scala" 2> /dev/null)
+	mkdir -p $(FESVR_DIR)/build
+	cd $(FESVR_DIR)/build && ./../configure --prefix=$(PWD) && make
+
+#########################################################################################
 # helper rule to just make verilog files
 #########################################################################################
 .PHONY: verilog top

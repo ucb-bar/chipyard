@@ -47,7 +47,7 @@ VCS_CC_OPTS = \
 	-CC "-I$(RISCV)/include" \
 	-CC "-std=c++11" \
 	-CC "-Wl,-rpath,$(RISCV)/lib" \
-	/scratch/abejgonza/beagle/beagle-temp-work/beagle-fesvr/build/libfesvr.so
+	$(fesvr_so)
 
 VCS_NONCC_OPTS = \
 	+lint=all,noVCDE,noONGS,noUI \
@@ -85,11 +85,11 @@ $(sim_vcs_blackboxes): $(sim_top_blackboxes) $(sim_harness_blackboxes)
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
-$(sim): $(sim_vsrcs) $(sim_dotf) $(sim_vcs_blackboxes)
+$(sim): $(sim_vsrcs) $(sim_dotf) $(sim_vcs_blackboxes) $(fesvr_so)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	-debug_pp
 
-$(sim_debug) : $(sim_vsrcs) $(sim_dotf) $(sim_vcs_blackboxes)
+$(sim_debug) : $(sim_vsrcs) $(sim_dotf) $(sim_vcs_blackboxes) $(fesvr_so)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	+define+DEBUG -debug_pp
 

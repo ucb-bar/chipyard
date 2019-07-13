@@ -82,7 +82,7 @@ ifeq ($(SUB_PROJECT),beagle)
 	MODEL_PACKAGE     ?= beagle
 	CONFIG            ?= MegaBeagleConfig
 	CONFIG_PACKAGE    ?= beagle
-	GENERATOR_PACKAGE ?= boom.system
+	GENERATOR_PACKAGE ?= beagle
 	TB                ?= TestDriver
 	TOP               ?= BeagleChipTop
 endif
@@ -101,11 +101,12 @@ endif
 #endif
 
 #########################################################################################
-# path to rocket-chip and testchipip
+# path to different areas
 #########################################################################################
 ROCKETCHIP_DIR      = $(base_dir)/generators/rocket-chip
 TESTCHIP_DIR        = $(base_dir)/generators/testchipip
 CHIPYARD_FIRRTL_DIR = $(base_dir)/tools/firrtl
+FESVR_DIR           = $(base_dir)/tools/beagle-fesvr
 
 #########################################################################################
 # names of various files needed to compile and run things
@@ -137,6 +138,7 @@ SMEMS_FIR          ?= $(build_dir)/$(long_name).mems.fir
 sim_dotf               ?= $(build_dir)/sim_files.f
 sim_harness_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
 sim_top_blackboxes     ?= $(build_dir)/firrtl_black_box_resource_files.top.f
+fesvr_so           ?= $(FESVR_DIR)/build/libfesvr.so
 
 #########################################################################################
 # java arguments used in sbt

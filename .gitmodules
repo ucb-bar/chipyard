@@ -46,3 +46,6 @@
 [submodule "generators/block-inclusivecache-sifive"]
 	path = generators/sifive-cache
 	url = https://github.com/sifive/block-inclusivecache-sifive.git
+[submodule "tools/beagle-fesvr"]
+	path = tools/beagle-fesvr
+	url = https://github.com/abejgonzalez/beagle-fesvr.git

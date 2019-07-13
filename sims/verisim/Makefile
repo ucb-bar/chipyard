@@ -74,10 +74,10 @@ $(model_mk_debug): $(sim_vsrcs) $(sim_dotf) $(INSTALLED_VERILATOR)
 #########################################################################################
 # invoke make to make verilator sim rules
 #########################################################################################
-$(sim): $(model_mk)
+$(sim): $(model_mk) $(fesvr_so)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name) -f V$(VLOG_MODEL).mk
 
-$(sim_debug): $(model_mk_debug)
+$(sim_debug): $(model_mk_debug) $(fesvr_so)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(VLOG_MODEL).mk
 
 #########################################################################################
