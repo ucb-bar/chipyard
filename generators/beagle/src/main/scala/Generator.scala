@@ -15,12 +15,12 @@ object Generator extends GeneratorApp {
     TestSuiteHelper.addRocketTestSuites
     TestSuiteHelper.addBoomTestSuites
 
-    // add hwacha bmarks
-    //import hwacha.HwachaTestSuites._
-    //TestGeneration.addSuites(rv64uv.map(_("p")))
-    //TestGeneration.addSuites(rv64uv.map(_("vp")))
-    //TestGeneration.addSuite(rv64sv("p"))
-    //TestGeneration.addSuite(hwachaBmarks)
+    // add hwacha bmarks + asm tests
+    import hwacha.HwachaTestSuites._
+    TestGeneration.addSuites(rv64uv.map(_("p")))
+    TestGeneration.addSuites(rv64uv.map(_("vp")))
+    TestGeneration.addSuite(rv64sv("p"))
+    TestGeneration.addSuite(hwachaBmarks)
   }
 
   override def generateTestSuiteMakefrags {
