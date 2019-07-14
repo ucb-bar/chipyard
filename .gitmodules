@@ -30,7 +30,7 @@
 	url = https://github.com/sifive/sifive-blocks.git
 [submodule "generators/hwacha"]
 	path = generators/hwacha
-	url = https://github.com/ucb-bar/hwacha.git
+	url = https://github.com/ucb-bar/hwacha-internal.git
 [submodule "generators/systolic-array"]
 	path = generators/systolic-array
 	url = https://github.com/ucb-bar/systolic-array-generator.git

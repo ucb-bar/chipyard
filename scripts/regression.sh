@@ -5,13 +5,14 @@ set -ex
 cd sims/vsim/
 
 # no hwacha tests for right now
+echo "Make sure you are using esp-tools!!!!!"
 
 BCONFIG=MegaBeagleSimConfig
 
 # test asm/bmark tests
 make CONFIG=$BCONFIG
 make CONFIG=$BCONFIG run-asm-tests
-#make CONFIG=$BCONFIG run-bmark-tests
+make CONFIG=$BCONFIG run-bmark-tests
 
 # test with systolic array
 TEST_DIR=$(pwd)/../../tests/beagle-systolic-tests
