@@ -116,9 +116,6 @@ TOP_ANNO           ?= $(build_dir)/$(long_name).top.anno.json
 HARNESS_FILE       ?= $(build_dir)/$(long_name).harness.v
 HARNESS_FIR        ?= $(build_dir)/$(long_name).harness.fir
 HARNESS_ANNO       ?= $(build_dir)/$(long_name).harness.anno.json
-HARNESS_SMEMS_FILE ?= $(build_dir)/$(long_name).harness.mems.v
-HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
-HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
 SMEMS_FILE         ?= $(build_dir)/$(long_name).mems.v
 SMEMS_CONF         ?= $(build_dir)/$(long_name).mems.conf
 SMEMS_FIR          ?= $(build_dir)/$(long_name).mems.fir
@@ -168,8 +165,7 @@ rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
 sim_vsrcs = \
 	$(VERILOG_FILE) \
 	$(HARNESS_FILE) \
-	$(SMEMS_FILE) \
-	$(HARNESS_SMEMS_FILE)
+	$(SMEMS_FILE)
 
 #########################################################################################
 # assembly/benchmark variables
