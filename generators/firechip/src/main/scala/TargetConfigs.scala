@@ -4,14 +4,18 @@ import java.io.File
 
 import chisel3.util.{log2Up}
 import freechips.rocketchip.config.{Parameters, Config}
+import freechips.rocketchip.groundtest.TraceGenParams
 import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
+import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.DebugModuleParams
 import boom.system.BoomTilesKey
 import testchipip.{WithBlockDevice, BlockDeviceKey, BlockDeviceConfig}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
+import scala.math.{min, max}
+import tracegen.TraceGenKey
 import icenet._
 
 class WithBootROM extends Config((site, here, up) => {
@@ -203,3 +207,69 @@ class SupernodeFireSimRocketChipOctaCoreConfig extends Config(
   new WithExtMemSize(0x200000000L) ++ // 8GB
   new FireSimRocketChipOctaCoreConfig)
 
+class WithTraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
+    extends Config((site, here, up) => {
+  case TraceGenKey => params.map { dcp => TraceGenParams(
+    dcache = Some(dcp),
+    wordBits = site(XLen),
+    addrBits = 48,
+    addrBag = {
+      val nSets = dcp.nSets
+      val nWays = dcp.nWays
+      val blockOffset = site(SystemBusKey).blockOffset
+      val nBeats = min(2, site(SystemBusKey).blockBeats)
+      val beatBytes = site(SystemBusKey).beatBytes
+      List.tabulate(2 * nWays) { i =>
+        Seq.tabulate(nBeats) { j =>
+          BigInt((j * beatBytes) + ((i * nSets) << blockOffset))
+        }
+      }.flatten
+    },
+    maxRequests = nReqs,
+    memStart = site(ExtMem).get.master.base,
+    numGens = params.size)
+  }
+  case MaxHartIdBits => log2Up(params.size)
+})
+
+class FireSimTraceGenConfig extends Config(
+  new WithTraceGen(
+    List.fill(2) { DCacheParams(nMSHRs = 2, nSets = 16, nWays = 2) }) ++
+  new FireSimRocketChipConfig)
+
+class WithL2TraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
+    extends Config((site, here, up) => {
+  case TraceGenKey => params.map { dcp => TraceGenParams(
+    dcache = Some(dcp),
+    wordBits = site(XLen),
+    addrBits = 48,
+    addrBag = {
+      val sbp = site(SystemBusKey)
+      val l2p = site(InclusiveCacheKey)
+      val nSets = max(l2p.sets, dcp.nSets)
+      val nWays = max(l2p.ways, dcp.nWays)
+      val nBanks = site(BankedL2Key).nBanks
+      val blockOffset = sbp.blockOffset
+      val nBeats = min(2, sbp.blockBeats)
+      val beatBytes = sbp.beatBytes
+      List.tabulate(2 * nWays) { i =>
+        Seq.tabulate(nBeats) { j =>
+          BigInt((j * beatBytes) + ((i * nSets * nBanks) << blockOffset))
+        }
+      }.flatten
+    },
+    maxRequests = nReqs,
+    memStart = site(ExtMem).get.master.base,
+    numGens = params.size)
+  }
+  case MaxHartIdBits => log2Up(params.size)
+})
+
+class FireSimTraceGenL2Config extends Config(
+  new WithL2TraceGen(
+    List.fill(2) { DCacheParams(nMSHRs = 2, nSets = 16, nWays = 2) }) ++
+  new WithInclusiveCache(
+    nBanks = 4,
+    capacityKB = 1024,
+    outerLatencyCycles = 50) ++
+  new FireSimRocketChipConfig)
