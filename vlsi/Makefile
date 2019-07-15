@@ -31,7 +31,7 @@ SMEMS_COMP   ?= $(tech_dir)/sram-compiler.json
 SMEMS_HAMMER ?= $(build_dir)/$(long_name).mems.hammer.json
 MACROCOMPILER_MODE ?= -l $(SMEMS_COMP) --use-compiler -hir $(SMEMS_HAMMER)
 OBJ_DIR      ?= $(vlsi_dir)/build
-ENV_YML      ?= $(vlsi_dir)/hammer-cad-plugins/bwrc-env.yml
+ENV_YML      ?= $(vlsi_dir)/bwrc-env.yml
 INPUT_CONFS  ?= example.yml $(dir $(tech_dir))/bwrc.yml
 HAMMER_EXEC  ?= ./example-vlsi
 
