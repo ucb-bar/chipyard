@@ -16,6 +16,8 @@ git config --global submodule.esp-tools.update none
 git config --global submodule.experimental-blocks.update none
 # Disable updates to the FireSim submodule until explicitly requested
 git config submodule.sims/firesim.update none
+# Disable updates to the hammer-cad-plugins repo
+git config submodule.vlsi/hammer-cad-plugins.update none
 git submodule update --init --recursive #--jobs 8
 # unignore riscv-tools,catapult-shell2 globally
 git config --global --unset submodule.riscv-tools.update
