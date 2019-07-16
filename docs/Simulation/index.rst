@@ -1,15 +1,20 @@
 Simulators
 =======================
 
-Chipyard provides support and integration for multiple simulation flows, for various user levels and requirements.
-In the majority of cases during a digital design development process, a simple software RTL simulation will do.
-When more advanced full-system evaluation is required, with long running workloads, FPGA-accelerated simulation will then become a preferable solution.
-The following pages provide detailed information about the simulation possibilities within the Chipyard framework.
+Chipyard supports two classes of simulation:
+
+#. Software RTL simulation using commercial or open-source (Verilator) RTL simulators 
+#. FPGA-accelerated full-system simulation using FireSim
+
+Software RTL simulators of Chipyard designs run at O(1 KHz), but compile
+quickly and provide full waveforms. Conversly, FPGA-accelerated simulators run
+at O(100 MHz), making them appropriate for booting an operating system and
+running a complete workload, but have multi-hour compile times and poorer debug
+visability.
 
 .. toctree::
    :maxdepth: 2
    :caption: Simulators:
 
-   Open-Source-Simulators
-   Commercial-Simulators
-   FPGA-Based-Simulators
+   Software-RTL-Simulators
+   FPGA-Accelerated-Simulators
