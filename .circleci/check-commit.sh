@@ -26,7 +26,7 @@ search () {
     done
 }
 
-submodules=("boom" "firechip" "hwacha" "icenet" "rocket-chip" "sifive-blocks" "sifive-cache" "testchipip")
+submodules=("boom" "hwacha" "icenet" "rocket-chip" "sifive-blocks" "sifive-cache" "testchipip")
 dir="generators"
 
 search
