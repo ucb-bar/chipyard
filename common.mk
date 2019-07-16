@@ -77,7 +77,19 @@ verilog: $(sim_vsrcs)
 #########################################################################################
 .PHONY: run-binary run-fast
 run-binary: $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
+
+#########################################################################################
+# helper rules to run simulator as fast as possible
+#########################################################################################
+run-binary-fast: $(sim)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
+
+#########################################################################################
+# helper rules to run simulator with as much debug info as possible
+#########################################################################################
+run-binary-debug: $(sim_debug)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAG) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
@@ -89,10 +101,10 @@ $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
 	ln -sf $< $@
 
 $(output_dir)/%.run: $(output_dir)/% $(sim)
-	$(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(PERMISSIVE_OFF) $< && touch $@
+	$(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $< && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +verbose +max-cycles=$(timeout_cycles) $(PERMISSIVE_OFF) $< 3>&1 1>&2 2>&3 | spike-dasm > $@)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< 3>&1 1>&2 2>&3 | spike-dasm > $@)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator

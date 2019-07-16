@@ -28,6 +28,8 @@ sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 PERMISSIVE_ON=
 PERMISSIVE_OFF=
 
+WAVEFORM_FLAG=-v$(sim_out_name).vcd
+
 .PHONY: default debug
 default: $(sim)
 debug: $(sim_debug)
@@ -81,18 +83,12 @@ $(sim_debug): $(model_mk_debug)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(VLOG_MODEL).mk
 
 #########################################################################################
-# helper rules to run simulator with debug
-#########################################################################################
-run-binary-debug: $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(SIM_FLAGS) -v$(sim_out_name).vcd $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
-
-#########################################################################################
 # create a verisim vpd rule
 #########################################################################################
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd
 	vcd2vpd $@.vcd $@ > /dev/null &
-	$(sim_debug) -v$@.vcd +max-cycles=$(timeout_cycles) $<
+	$(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) $<
 
 #########################################################################################
 # general cleanup rule
