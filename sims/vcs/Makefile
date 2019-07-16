@@ -56,6 +56,7 @@ VCS_NONCC_OPTS = \
 	-error=PCWM-L \
 	-timescale=1ns/10ps \
 	-quiet \
+	-q \
 	+rad \
 	+v2k \
 	+vcs+lic+wait \

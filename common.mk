@@ -73,8 +73,9 @@ $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): $(HARNESS_SMEMS_CONF)
 verilog: $(sim_vsrcs)
 
 #########################################################################################
-# helper rules to run simulator
+# helper rules to run simulations
 #########################################################################################
+.PHONY: run-binary run-fast
 run-binary: $(sim)
 	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
 
@@ -89,6 +90,8 @@ run-binary-fast: $(sim)
 #########################################################################################
 run-binary-debug: $(sim_debug)
 	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAG) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
+
+run-fast: run-asm-tests-fast run-bmark-tests-fast
 
 #########################################################################################
 # run assembly/benchmarks rules

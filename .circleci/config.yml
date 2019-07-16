@@ -78,14 +78,14 @@ jobs:
             - checkout
             - restore_cache:
                 keys:
-                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
                 name: Build Verilator
                 command: |
                     .circleci/build-verilator.sh
                 no_output_timeout: 120m
             - save_cache:
-                key: verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                key: verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
                 paths:
                     - "/home/riscvuser/verilator"
     prepare-example:
@@ -108,7 +108,7 @@ jobs:
                     - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
-                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
                 name: Building the example subproject using Verilator
                 command: .circleci/do-rtl-build.sh example
@@ -137,7 +137,7 @@ jobs:
                     - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
-                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
                 name: Building the boomexample subproject using Verilator
                 command: .circleci/do-rtl-build.sh boomexample
@@ -166,7 +166,7 @@ jobs:
                     - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
-                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
                 name: Building the boomrocketexample subproject using Verilator
                 command: .circleci/do-rtl-build.sh boomrocketexample
@@ -195,7 +195,7 @@ jobs:
                     - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
-                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
                 name: Building the boom subproject using Verilator
                 command: .circleci/do-rtl-build.sh boom
@@ -224,7 +224,7 @@ jobs:
                     - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
-                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
                 name: Building the rocketchip subproject using Verilator
                 command: .circleci/do-rtl-build.sh rocketchip
@@ -253,7 +253,7 @@ jobs:
                     - esp-tools-installed-v1-{{ checksum "../esp-tools.hash" }}
             - restore_cache:
                 keys:
-                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
                 name: Building the hwacha subproject using Verilator
                 command: .circleci/do-rtl-build.sh hwacha
@@ -282,7 +282,7 @@ jobs:
                     - example-{{ .Branch }}-{{ .Revision }}
             - restore_cache:
                 keys:
-                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
                 name: Run example tests
                 command: .circleci/run-tests.sh example
@@ -306,7 +306,7 @@ jobs:
                     - boomexample-{{ .Branch }}-{{ .Revision }}
             - restore_cache:
                 keys:
-                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
                 name: Run boomexample tests
                 command: .circleci/run-tests.sh boomexample
@@ -330,7 +330,7 @@ jobs:
                     - boomrocketexample-{{ .Branch }}-{{ .Revision }}
             - restore_cache:
                 keys:
-                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
                 name: Run boomrocketexample tests
                 command: .circleci/run-tests.sh boomrocketexample
@@ -354,7 +354,7 @@ jobs:
                     - boom-{{ .Branch }}-{{ .Revision }}
             - restore_cache:
                 keys:
-                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
                 name: Run boom tests
                 command: .circleci/run-tests.sh boom
@@ -378,7 +378,7 @@ jobs:
                     - rocketchip-{{ .Branch }}-{{ .Revision }}
             - restore_cache:
                 keys:
-                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
                 name: Run rocketchip tests
                 command: .circleci/run-tests.sh rocketchip
@@ -402,7 +402,7 @@ jobs:
                     - hwacha-{{ .Branch }}-{{ .Revision }}
             - restore_cache:
                 keys:
-                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
                 name: Run hwacha tests
                 command: .circleci/run-tests.sh hwacha
