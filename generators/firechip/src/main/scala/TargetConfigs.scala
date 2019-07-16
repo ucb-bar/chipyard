@@ -157,7 +157,6 @@ class FireSimBoomQuadCoreConfig extends Config(
   new FireSimBoomConfig)
 
 
-
 class FireSimRocketChipSystolicConfig extends Config(
   new WithBootROM ++
   new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
@@ -172,6 +171,148 @@ class FireSimRocketChipSystolicConfig extends Config(
   new WithInclusiveCache ++
   new systolic.DefaultSystolicConfig ++
   new freechips.rocketchip.system.DefaultConfig)
+
+
+//************************************************************************
+//====================Systolic DSE========================================
+//************************************************************************
+
+class FireSimRocketChipSystolicDSE1Config extends Config(
+  new WithBootROM ++
+  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithExtMemSize(0x400000000L) ++ // 16GB
+  new WithoutTLMonitors ++
+  new WithUARTKey ++
+  new WithNICKey ++
+  new WithBlockDevice ++
+  new WithRocketL2TLBs(1024) ++
+  new WithPerfCounters ++
+  new WithoutClockGating ++
+  new WithInclusiveCache ++
+  new systolic.SystolicParamsDSE1 ++
+  new freechips.rocketchip.system.DefaultConfig)
+
+class FireSimRocketChipSystolicDSE2Config extends Config(
+  new WithBootROM ++
+  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithExtMemSize(0x400000000L) ++ // 16GB
+  new WithoutTLMonitors ++
+  new WithUARTKey ++
+  new WithNICKey ++
+  new WithBlockDevice ++
+  new WithRocketL2TLBs(1024) ++
+  new WithPerfCounters ++
+  new WithoutClockGating ++
+  new WithInclusiveCache ++
+  new systolic.SystolicParamsDSE2 ++
+  new freechips.rocketchip.system.DefaultConfig)
+
+class FireSimRocketChipSystolicDSE3Config extends Config(
+  new WithBootROM ++
+  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithExtMemSize(0x400000000L) ++ // 16GB
+  new WithoutTLMonitors ++
+  new WithUARTKey ++
+  new WithNICKey ++
+  new WithBlockDevice ++
+  new WithRocketL2TLBs(1024) ++
+  new WithPerfCounters ++
+  new WithoutClockGating ++
+  new WithInclusiveCache ++
+  new systolic.SystolicParamsDSE3 ++
+  new freechips.rocketchip.system.DefaultConfig)
+
+class FireSimRocketChipSystolicDSE4Config extends Config(
+  new WithBootROM ++
+  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithExtMemSize(0x400000000L) ++ // 16GB
+  new WithoutTLMonitors ++
+  new WithUARTKey ++
+  new WithNICKey ++
+  new WithBlockDevice ++
+  new WithRocketL2TLBs(1024) ++
+  new WithPerfCounters ++
+  new WithoutClockGating ++
+  new WithInclusiveCache ++
+  new systolic.SystolicParamsDSE4 ++
+  new freechips.rocketchip.system.DefaultConfig)
+
+class FireSimRocketChipSystolicDSE5Config extends Config(
+  new WithBootROM ++
+  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithExtMemSize(0x400000000L) ++ // 16GB
+  new WithoutTLMonitors ++
+  new WithUARTKey ++
+  new WithNICKey ++
+  new WithBlockDevice ++
+  new WithRocketL2TLBs(1024) ++
+  new WithPerfCounters ++
+  new WithoutClockGating ++
+  new WithInclusiveCache ++
+  new systolic.SystolicParamsDSE5 ++
+  new freechips.rocketchip.system.DefaultConfig)
+
+class FireSimRocketChipSystolicDSE6Config extends Config(
+  new WithBootROM ++
+  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithExtMemSize(0x400000000L) ++ // 16GB
+  new WithoutTLMonitors ++
+  new WithUARTKey ++
+  new WithNICKey ++
+  new WithBlockDevice ++
+  new WithRocketL2TLBs(1024) ++
+  new WithPerfCounters ++
+  new WithoutClockGating ++
+  new WithInclusiveCache ++
+  new systolic.SystolicParamsDSE6 ++
+  new freechips.rocketchip.system.DefaultConfig)
+
+class FireSimRocketChipSystolicDSE7Config extends Config(
+  new WithBootROM ++
+  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithExtMemSize(0x400000000L) ++ // 16GB
+  new WithoutTLMonitors ++
+  new WithUARTKey ++
+  new WithNICKey ++
+  new WithBlockDevice ++
+  new WithRocketL2TLBs(1024) ++
+  new WithPerfCounters ++
+  new WithoutClockGating ++
+  new WithInclusiveCache ++
+  new systolic.SystolicParamsDSE7 ++
+  new freechips.rocketchip.system.DefaultConfig)
+
+class FireSimRocketChipSystolicDSE8Config extends Config(
+  new WithBootROM ++
+  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithExtMemSize(0x400000000L) ++ // 16GB
+  new WithoutTLMonitors ++
+  new WithUARTKey ++
+  new WithNICKey ++
+  new WithBlockDevice ++
+  new WithRocketL2TLBs(1024) ++
+  new WithPerfCounters ++
+  new WithoutClockGating ++
+  new WithInclusiveCache ++
+  new systolic.SystolicParamsDSE8 ++
+  new freechips.rocketchip.system.DefaultConfig)
+
+/*
+class FireSimRocketChipSystolicDSE10Config extends Config(
+  new WithBootROM ++
+  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithExtMemSize(0x400000000L) ++ // 16GB
+  new WithoutTLMonitors ++
+  new WithUARTKey ++
+  new WithNICKey ++
+  new WithBlockDevice ++
+  new WithRocketL2TLBs(1024) ++
+  new WithPerfCounters ++
+  new WithoutClockGating ++
+  new WithInclusiveCache ++
+  new systolic.SystolicParamsDSE10 ++
+  new freechips.rocketchip.system.DefaultConfig)
+*/
 
 
 
