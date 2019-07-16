@@ -70,8 +70,6 @@ $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): $(HARNESS_SMEMS_CONF)
 ########################################################################################
 # remove duplicate/*.h files in blackbox/simfiles
 ########################################################################################
-sim_files ?= $(build_dir)/sim_files.common.f
-
 $(sim_files): $(sim_top_blackboxes) $(sim_harness_blackboxes) $(sim_dotf)
 	awk '{print $1;}' $^ | sort -u | grep -v ".*\.h" > $@
 
