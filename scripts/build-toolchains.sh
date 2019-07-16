@@ -12,9 +12,10 @@ RDIR=$(pwd)
 
 function usage
 {
-    echo "usage: build-setup.sh [ firesim | --firesim] [--submodules-only]"
+    echo "usage: ./scripts/build-toolchains.sh [riscv] [hwacha] [ firesim | --firesim] [--submodules-only]"
+    echo "   riscv: if set, builds the riscv toolchain (this is also the default)"
+    echo "   hwacha: if set, builds esp-tools toolchain"
     echo "   firesim: if set, pulls in a pre-compiled RISC-V toolchain for an EC2 manager instance"
-    echo "   submodules-only: if set, skips toolchain handling (cloning or building)"
 }
 
 #taken from riscv-tools to check for open-ocd autoconf versions
@@ -30,14 +31,19 @@ if [ "$1" == "--help" -o "$1" == "-h" -o "$1" == "-H" ]; then
     exit 3
 fi
 
+TOOLCHAIN="riscv-tools"
+FIRESIMINSTALL="false"
 while test $# -gt 0
 do
    case "$1" in
+        riscv)
+            TOOLCHAIN="riscv-tools"
+            ;;
+        hwacha)
+            TOOLCHAIN="esp-tools"
+            ;;
         firesim | --firesim) # I don't want to break this api
             FIRESIMINSTALL=true
-            ;;
-        --submodules-only)
-            SUBMODULES_ONLY=true;
             ;;
         -h | -H | --help)
             usage
@@ -55,11 +61,7 @@ do
     shift
 done
 
-
-if [ $# -ne 0 ]; then
-  TOOLCHAIN=$1
-  if [ $1 == "riscv" ]; then
-    TOOLCHAIN="riscv-tools"
+if [ "TOOLCHAINS" = "riscv-tools" ]; then
     if [ "$FIRESIMINSTALL" = "true" ]; then
       cd sims/firesim/
       git clone https://github.com/firesim/firesim-riscv-tools-prebuilt.git
@@ -74,11 +76,6 @@ if [ $# -ne 0 ]; then
           #just call a fireism build-toolchain script?
       fi
     fi
-  elif [ $1 == "hwacha" ]; then
-    TOOLCHAIN="esp-tools"
-  fi
-else
-  TOOLCHAIN="riscv-tools"
 fi
 
 INSTALL_DIR="$TOOLCHAIN-install"
