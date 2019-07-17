@@ -126,7 +126,6 @@ HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
 HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
 
 sim_files                  ?= $(build_dir)/sim_files.f
-sim_files                  ?= $(build_dir)/sim_files.f
 sim_top_blackboxes         ?= $(build_dir)/firrtl_black_box_resource_files.top.f
 sim_harness_blackboxes     ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
 sim_common_files           ?= $(build_dir)/sim_files.common.f
