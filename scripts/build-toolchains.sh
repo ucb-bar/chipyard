@@ -33,6 +33,7 @@ fi
 
 TOOLCHAIN="riscv-tools"
 FIRESIMINSTALL="false"
+FASTINSTALL="false"
 while test $# -gt 0
 do
    case "$1" in
@@ -118,19 +119,23 @@ else
     make -j16 linux
     echo -e "\\nRISC-V Linux GNU Toolchain installation completed!"
 
-    if [ "$FIRESIMINSTALL" = "false" ]; then
-        check_version automake 1.14 "OpenOCD build"
-        check_version autoconf 2.64 "OpenOCD build"
-        build_project riscv-openocd --prefix=$RISCV --enable-remote-bitbang --enable-jtag_vpi --disable-werror      
-        echo -e "\\nRISC-V OpenOCD installation completed!"
-    fi
-
 fi
 
 cd $RDIR
 
 echo "export CHIPYARD_TOOLCHAIN_SOURCED=1" > env.sh
-echo "export RISCV=$RISCV" > env.sh
+echo "export RISCV=$RISCV" >> env.sh
 echo "export PATH=$RISCV/bin:$RDIR/$DTCversion:\$PATH" >> env.sh
 echo "export LD_LIBRARY_PATH=$RISCV/lib" >> env.sh
 echo "Toolchain Build Complete!"
+
+
+if [ "$FASTINSTALL" = "false" ]; then
+    if [ "$FIRESIMINSTALL" = "false" ]; then
+        echo "Building RISC-V OpenOCD Complete!"
+        check_version automake 1.14 "OpenOCD build"
+        check_version autoconf 2.64 "OpenOCD build"
+        build_project riscv-openocd --prefix=$RISCV --enable-remote-bitbang --enable-jtag_vpi --disable-werror
+        echo -e "\\nRISC-V OpenOCD installation completed!"
+    fi
+fi
