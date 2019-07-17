@@ -62,7 +62,7 @@ do
     shift
 done
 
-if [ "$TOOLCHAINS" = "riscv-tools" ]; then
+if [ "$TOOLCHAIN" = "riscv-tools" ]; then
     if [ "$FIRESIMINSTALL" = "true" ]; then
       cd sims/firesim/
       git clone https://github.com/firesim/firesim-riscv-tools-prebuilt.git
