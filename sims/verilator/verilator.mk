@@ -36,4 +36,4 @@ $(VERILATOR_SRCDIR)/configure: $(VERILATOR_INSTALL_DIR)/verilator-$(VERILATOR_VE
 
 $(VERILATOR_INSTALL_DIR)/verilator-$(VERILATOR_VERSION).tar.gz:
 	mkdir -p $(dir $@)
-	wget http://www.veripool.org/ftp/verilator-$(VERILATOR_VERSION).tgz -O $@
+	wget https://www.veripool.org/ftp/verilator-$(VERILATOR_VERSION).tgz -O $@
