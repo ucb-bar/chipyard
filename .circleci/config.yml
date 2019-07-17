@@ -253,7 +253,7 @@ jobs:
                     - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
-                    - verilator-installed-v3-{{ checksum "sims/verisim/verilator.mk" }}
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
                 name: Building the blockdevrocketchip subproject using Verilator
                 command: .circleci/do-rtl-build.sh blockdevrocketchip

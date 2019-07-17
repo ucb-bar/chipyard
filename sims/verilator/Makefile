@@ -92,7 +92,7 @@ $(sim_debug): $(model_mk_debug)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(VLOG_MODEL).mk
 
 #########################################################################################
-# create a verisim vpd rule
+# create a verilator vpd rule
 #########################################################################################
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd
