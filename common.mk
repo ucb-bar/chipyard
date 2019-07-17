@@ -82,7 +82,7 @@ verilog: $(sim_vsrcs)
 #########################################################################################
 # helper rules to run simulations
 #########################################################################################
-.PHONY: run-binary run-fast
+.PHONY: run-binary run-binary-fast run-binary-debug run-fast
 run-binary: $(sim)
 	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
 
