@@ -15,9 +15,9 @@ The following instructions assume at least one of these simulators is installed.
 Verilator/VCS Flows
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Verilator is an open-source RTL simulator.
-We run Verilator simulations from within the ``sims/verisim`` directory which provides the necessary ``Makefile`` to both install and run Verilator simulations.
+We run Verilator simulations from within the ``sims/verilator`` directory which provides the necessary ``Makefile`` to both install and run Verilator simulations.
 On the other hand, VCS is a proprietary RTL simulator.
-We run VCS simulations from within the ``sims/vsim`` directory.
+We run VCS simulations from within the ``sims/vcs`` directory.
 Assuming VCS is already installed on the machine running simulations (and is found on our ``PATH``), then this guide is the same for both Verilator and VCS.
 
 First, we will start by entering the Verilator or VCS directory:
@@ -25,12 +25,12 @@ First, we will start by entering the Verilator or VCS directory:
 .. code-block:: shell
 
     # Enter Verilator directory
-    cd sims/verisim
+    cd sims/verilator
 
     # OR
 
     # Enter VCS directory
-    cd sims/vsim
+    cd sims/vcs
 
 In order to construct the simulator with our custom design, we run the following command within the simulator directory:
 

@@ -121,24 +121,28 @@ ifeq ($(GENERATOR_PACKAGE),hwacha)
 	long_name=$(MODEL_PACKAGE).$(CONFIG)
 endif
 
-FIRRTL_FILE        ?= $(build_dir)/$(long_name).fir
-ANNO_FILE          ?= $(build_dir)/$(long_name).anno.json
-VERILOG_FILE       ?= $(build_dir)/$(long_name).top.v
-TOP_FIR            ?= $(build_dir)/$(long_name).top.fir
-TOP_ANNO           ?= $(build_dir)/$(long_name).top.anno.json
+FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
+ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
+
+TOP_FILE       ?= $(build_dir)/$(long_name).top.v
+TOP_FIR        ?= $(build_dir)/$(long_name).top.fir
+TOP_ANNO       ?= $(build_dir)/$(long_name).top.anno.json
+TOP_SMEMS_FILE ?= $(build_dir)/$(long_name).top.mems.v
+TOP_SMEMS_CONF ?= $(build_dir)/$(long_name).top.mems.conf
+TOP_SMEMS_FIR  ?= $(build_dir)/$(long_name).top.mems.fir
+
 HARNESS_FILE       ?= $(build_dir)/$(long_name).harness.v
 HARNESS_FIR        ?= $(build_dir)/$(long_name).harness.fir
 HARNESS_ANNO       ?= $(build_dir)/$(long_name).harness.anno.json
 HARNESS_SMEMS_FILE ?= $(build_dir)/$(long_name).harness.mems.v
 HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
 HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
-SMEMS_FILE         ?= $(build_dir)/$(long_name).mems.v
-SMEMS_CONF         ?= $(build_dir)/$(long_name).mems.conf
-SMEMS_FIR          ?= $(build_dir)/$(long_name).mems.fir
-sim_dotf               ?= $(build_dir)/sim_files.f
-sim_harness_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
+
+sim_files              ?= $(build_dir)/sim_files.f
 sim_top_blackboxes     ?= $(build_dir)/firrtl_black_box_resource_files.top.f
-fesvr_so           ?= $(FESVR_DIR)/build/libfesvr.so
+sim_harness_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
+sim_common_files       ?= $(build_dir)/sim_files.common.f
+fesvr_so               ?= $(FESVR_DIR)/build/libfesvr.so
 
 #########################################################################################
 # java arguments used in sbt
@@ -162,7 +166,8 @@ output_dir=$(sim_dir)/output/$(long_name)
 # helper variables to run binaries
 #########################################################################################
 BINARY ?=
-SIM_FLAGS ?= +max-cycles=$(timeout_cycles)
+SIM_FLAGS ?=
+VERBOSE_FLAGS ?= +verbose
 sim_out_name = $(notdir $(basename $(BINARY))).$(long_name)
 
 #########################################################################################
@@ -180,9 +185,9 @@ rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
 # sources needed to run simulators
 #########################################################################################
 sim_vsrcs = \
-	$(VERILOG_FILE) \
+	$(TOP_FILE) \
 	$(HARNESS_FILE) \
-	$(SMEMS_FILE) \
+	$(TOP_SMEMS_FILE) \
 	$(base_dir)/generators/beagle/src/main/resources/ClockReceiver.v \
 	$(base_dir)/generators/awl/src/main/resources/util.v \
 	$(HARNESS_SMEMS_FILE)

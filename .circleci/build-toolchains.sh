@@ -6,10 +6,13 @@
 # turn echo on and error on earliest command
 set -ex
 
-if [ ! -d "$HOME/$1-install" ]; then
+# get shared variables
+SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
+source $SCRIPT_DIR/defaults.sh
 
-    cd $HOME/
+if [ ! -d "$HOME/$1-install" ]; then
+    cd $HOME
 
     # init all submodules including the tools
-    CHIPYARD_DIR=$HOME/project ./project/scripts/build-toolchains.sh $1
+    CHIPYARD_DIR=$LOCAL_CHIPYARD_DIR .$LOCAL_CHIPYARD_DIR/scripts/build-toolchains.sh $1
 fi
