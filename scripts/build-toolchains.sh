@@ -69,10 +69,10 @@ if [ "$TOOLCHAIN" = "riscv-tools" ]; then
       cd firesim-riscv-tools-prebuilt
       git checkout 56a40961c98db5e8f904f15dc6efd0870bfefd9e
       PREBUILTHASH="$(cat HASH)"
-      cd $RDIR/toolchain/riscv-tools/
-      GITHASH="git rev-parse HEAD"
+      cd $RDIR/toolchains/riscv-tools/
+      GITHASH="$(git rev-parse HEAD)"
       cd $RDIR
-      if [[ "$PREBUILTHASH" == "$GITHASH" && "$FIRESIMINSTALL" == "true" ]]; then
+      if [[ $PREBUILTHASH == $GITHASH && "$FIRESIMINSTALL" == "true" ]]; then
           FASTINSTALL=true
           #just call a fireism build-toolchain script?
       fi
