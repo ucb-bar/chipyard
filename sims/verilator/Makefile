@@ -56,20 +56,29 @@ model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
 # build makefile fragment that builds the verilator sim rules
 #########################################################################################
 LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesvr -lpthread
+SHARED_FLAGS := \
+	$(sim_vsrcs) \
+	-f $(sim_common_files) \
+	-LDFLAGS "$(LDFLAGS)"
 
-$(model_mk): $(sim_vsrcs) $(sim_dotf) $(INSTALLED_VERILATOR)
+$(model_mk): $(sim_vsrcs) $(sim_common_files) $(INSTALLED_VERILATOR)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name)
-	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name) \
-	-o $(sim) $(sim_vsrcs) -f $(sim_dotf) -f $(sim_top_blackboxes) -f $(sim_harness_blackboxes) -LDFLAGS "$(LDFLAGS)" \
+	$(VERILATOR) $(VERILATOR_FLAGS) \
+	-Mdir $(build_dir)/$(long_name) \
+	-o $(sim) \
+	$(SHARED_FLAGS) \
 	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(model_header)"
 	touch $@
 
-$(model_mk_debug): $(sim_vsrcs) $(sim_dotf) $(INSTALLED_VERILATOR)
+$(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(INSTALLED_VERILATOR)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name).debug
-	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name).debug --trace \
-	-o $(sim_debug) $(sim_vsrcs) -f $(sim_dotf) -f $(sim_top_blackboxes) -f $(sim_harness_blackboxes) -LDFLAGS "$(LDFLAGS)" \
+	$(VERILATOR) $(VERILATOR_FLAGS) \
+	-Mdir $(build_dir)/$(long_name).debug \
+	--trace \
+	-o $(sim_debug)  \
+	$(SHARED_FLAGS) \
 	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(model_header_debug)"
 	touch $@
 
@@ -83,7 +92,7 @@ $(sim_debug): $(model_mk_debug)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(VLOG_MODEL).mk
 
 #########################################################################################
-# create a verisim vpd rule
+# create a verilator vpd rule
 #########################################################################################
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd
@@ -95,4 +104,4 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 #########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(gen_dir)/* $(sim_prefix)-*
+	rm -rf $(gen_dir) $(sim_prefix)-*

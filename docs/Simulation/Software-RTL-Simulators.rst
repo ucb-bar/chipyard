@@ -9,7 +9,7 @@ The Chipyard framework can download, build, and execute simulations using Verila
 
 To run a simulation using Verilator, perform the following steps:
 
-To compile the example design, run ``make`` in the ``sims/verisim`` directory.
+To compile the example design, run ``make`` in the ``sims/verilator`` directory.
 This will elaborate the ``DefaultRocketConfig`` in the example project.
 
 An executable called ``simulator-example-DefaultRocketConfig`` will be produced.
@@ -47,7 +47,7 @@ To run a simulation using VCS, perform the following steps:
 
 Make sure that the VCS simulator is on your ``PATH``.
 
-To compile the example design, run make in the ``sims/vsim`` directory.
+To compile the example design, run make in the ``sims/vcs`` directory.
 This will elaborate the ``DefaultRocketConfig`` in the example project.
 
 An executable called ``simulator-example-DefaultRocketConfig`` will be produced.
