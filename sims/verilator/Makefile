@@ -56,20 +56,29 @@ model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
 # build makefile fragment that builds the verilator sim rules
 #########################################################################################
 LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesvr -lpthread
+SHARED_FLAGS := \
+	$(sim_vsrcs) \
+	-f $(sim_common_files) \
+	-LDFLAGS "$(LDFLAGS)"
 
-$(model_mk): $(sim_vsrcs) $(sim_files) $(INSTALLED_VERILATOR)
+$(model_mk): $(sim_vsrcs) $(sim_common_files) $(INSTALLED_VERILATOR)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name)
-	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name) \
-	-o $(sim) $(sim_vsrcs) -f $(sim_files) -LDFLAGS "$(LDFLAGS)" \
+	$(VERILATOR) $(VERILATOR_FLAGS) \
+	-Mdir $(build_dir)/$(long_name) \
+	-o $(sim) \
+	$(SHARED_FLAGS) \
 	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(model_header)"
 	touch $@
 
-$(model_mk_debug): $(sim_vsrcs) $(sim_files) $(INSTALLED_VERILATOR)
+$(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(INSTALLED_VERILATOR)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name).debug
-	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name).debug --trace \
-	-o $(sim_debug) $(sim_vsrcs) -f $(sim_files) -LDFLAGS "$(LDFLAGS)" \
+	$(VERILATOR) $(VERILATOR_FLAGS) \
+	-Mdir $(build_dir)/$(long_name).debug \
+	--trace \
+	-o $(sim_debug)  \
+	$(SHARED_FLAGS) \
 	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(model_header_debug)"
 	touch $@
 

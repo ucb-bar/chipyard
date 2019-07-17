@@ -61,7 +61,7 @@ VCS_NONCC_OPTS = \
 	+v2k \
 	+vcs+lic+wait \
 	+vc+list \
-	-f $(sim_files) \
+	-f $(sim_common_files) \
 	-sverilog \
 	+incdir+$(build_dir) \
 	+define+CLOCK_PERIOD=1.0 \
@@ -79,11 +79,11 @@ VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS)
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
-$(sim): $(sim_vsrcs) $(sim_files)
+$(sim): $(sim_vsrcs) $(sim_common_files)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	-debug_pp
 
-$(sim_debug) : $(sim_vsrcs) $(sim_files)
+$(sim_debug) : $(sim_vsrcs) $(sim_common_files)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	+define+DEBUG -debug_pp
 
