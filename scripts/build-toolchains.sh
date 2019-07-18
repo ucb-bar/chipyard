@@ -32,7 +32,7 @@ if [ "$1" == "--help" -o "$1" == "-h" -o "$1" == "-H" ]; then
 fi
 
 TOOLCHAIN="riscv-tools"
-FIRESIMINSTALL="false"
+EC2INSTALL="false"
 EC2FASTINSTALL="false"
 FASTINSTALL="false"
 while test $# -gt 0
@@ -44,8 +44,8 @@ do
         hwacha)
             TOOLCHAIN="esp-tools"
             ;;
-        firesim | --firesim) # I don't want to break this api
-            FIRESIMINSTALL=true
+        ec2 | --ec2) 
+            EC2INSTALL=true
             ;;
         ec2fast | --ec2fast) # I don't want to break this api
             EC2FASTINSTALL=true
@@ -145,7 +145,7 @@ echo "Toolchain Build Complete!"
 
 
 if [ "$FASTINSTALL" = "false" ]; then
-    if [ "$FIRESIMINSTALL" = "false" ]; then
+    if [ "$EC2INSTALL" = "false" ]; then
         echo "Building RISC-V OpenOCD Complete!"
         check_version automake 1.14 "OpenOCD build"
         check_version autoconf 2.64 "OpenOCD build"
