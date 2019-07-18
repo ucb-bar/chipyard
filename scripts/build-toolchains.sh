@@ -32,7 +32,6 @@ if [ "$1" == "--help" -o "$1" == "-h" -o "$1" == "-H" ]; then
 fi
 
 TOOLCHAIN="riscv-tools"
-EC2INSTALL="false"
 EC2FASTINSTALL="false"
 FASTINSTALL="false"
 while test $# -gt 0
@@ -43,9 +42,6 @@ do
             ;;
         hwacha)
             TOOLCHAIN="esp-tools"
-            ;;
-        ec2 | --ec2) 
-            EC2INSTALL=true
             ;;
         ec2fast | --ec2fast) # I don't want to break this api
             EC2FASTINSTALL=true
@@ -145,7 +141,10 @@ echo "Toolchain Build Complete!"
 
 
 if [ "$FASTINSTALL" = "false" ]; then
-    if [ "$EC2INSTALL" = "false" ]; then
+    # commands to run only on EC2
+    # see if the instance info page exists. if not, we are not on ec2.
+    # this is one of the few methods that works without sudo
+    if wget -T 1 -t 3 -O /dev/null http://169.254.169.254/; then
         echo "Building RISC-V OpenOCD"
         check_version automake 1.14 "OpenOCD build"
         check_version autoconf 2.64 "OpenOCD build"
