@@ -73,7 +73,7 @@ if [ "$EC2FASTINSTALL" = "true" ]; then
       cd firesim-riscv-tools-prebuilt
       git checkout 56a40961c98db5e8f904f15dc6efd0870bfefd9e
       PREBUILTHASH="$(cat HASH)"
-      cd $RDIR/toolchains/riscv-tools/
+      cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN"
       GITHASH="$(git rev-parse HEAD)"
       cd $RDIR
       echo "prebuilt hash: $PREBUILTHASH"
