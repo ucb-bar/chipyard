@@ -25,8 +25,8 @@ fi
 
 # test asm/bmark tests (includes hwacha tests (asm/bmark))
 make CONFIG=$BCONFIG
-make CONFIG=$BCONFIG run-asm-tests
-make CONFIG=$BCONFIG run-bmark-tests
+make CONFIG=$BCONFIG run-asm-tests-fast
+make CONFIG=$BCONFIG run-bmark-tests-fast
 
 # test individual binaries with the systolic array (assumes sys. is on hart1)
 TEST_DIR=$(pwd)/../../tests/beagle-systolic-tests
