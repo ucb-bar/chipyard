@@ -66,6 +66,7 @@ do
     shift
 done
 
+
 if [ "$EC2FASTINSTALL" = "true" ]; then
     if [ "$TOOLCHAIN" = "riscv-tools" ]; then
       cd $RDIR
@@ -73,6 +74,7 @@ if [ "$EC2FASTINSTALL" = "true" ]; then
       cd firesim-riscv-tools-prebuilt
       git checkout 56a40961c98db5e8f904f15dc6efd0870bfefd9e
       PREBUILTHASH="$(cat HASH)"
+      git -C $CHIPYARD_DIR submodule update --init  toolchains/$TOOLCHAIN
       cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN"
       GITHASH="$(git rev-parse HEAD)"
       cd $RDIR
