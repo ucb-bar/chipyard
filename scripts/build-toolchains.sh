@@ -124,7 +124,7 @@ else
 
     # build static libfesvr library for linking into firesim driver (or others)
     cd riscv-fesvr/build
-    $CHIPYARD_DIR/sims/firesim/scripts/build-static-libfesvr.sh
+    $CHIPYARD_DIR/scripts/build-static-libfesvr.sh
     cd $RDIR
     # build linux toolchain
     cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN/riscv-gnu-toolchain/build"
