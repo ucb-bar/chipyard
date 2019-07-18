@@ -13,6 +13,7 @@ source $SCRIPT_DIR/defaults.sh
 cd $LOCAL_CHIPYARD_DIR
 
 # initialize submodules and get the hashes
+git config submodule.vlsi/hammer-cad-plugins.update none
 git submodule update --init
 status=$(git submodule status)
 

@@ -1,0 +1,6 @@
+inputs.yml
+__pycache__
+hammer*.log
+build
+src/test/output-*.json
+generated-src
