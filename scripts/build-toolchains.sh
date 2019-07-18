@@ -145,6 +145,8 @@ if [ "$FASTINSTALL" = "false" ]; then
     # see if the instance info page exists. if not, we are not on ec2.
     # this is one of the few methods that works without sudo
     if wget -T 1 -t 3 -O /dev/null http://169.254.169.254/; then
+        echo "Skipping RISC-V OpenOCD"
+    else
         echo "Building RISC-V OpenOCD"
         check_version automake 1.14 "OpenOCD build"
         check_version autoconf 2.64 "OpenOCD build"
