@@ -15,7 +15,7 @@ function usage
     echo "usage: ./scripts/build-toolchains.sh [riscv] [hwacha] [ firesim | --firesim] [--submodules-only]"
     echo "   riscv: if set, builds the riscv toolchain (this is also the default)"
     echo "   hwacha: if set, builds esp-tools toolchain"
-    echo "   firesim: if set, pulls in a pre-compiled RISC-V toolchain for an EC2 manager instance"
+    echo "   ec2fast: if set, pulls in a pre-compiled RISC-V toolchain for an EC2 manager instance"
 }
 
 #taken from riscv-tools to check for open-ocd autoconf versions
@@ -33,6 +33,7 @@ fi
 
 TOOLCHAIN="riscv-tools"
 FIRESIMINSTALL="false"
+EC2FASTINSTALL="false"
 FASTINSTALL="false"
 while test $# -gt 0
 do
@@ -45,6 +46,9 @@ do
             ;;
         firesim | --firesim) # I don't want to break this api
             FIRESIMINSTALL=true
+            ;;
+        ec2fast | --ec2fast) # I don't want to break this api
+            EC2FASTINSTALL=true
             ;;
         -h | -H | --help)
             usage
@@ -62,9 +66,9 @@ do
     shift
 done
 
-if [ "$TOOLCHAIN" = "riscv-tools" ]; then
-    if [ "$FIRESIMINSTALL" = "true" ]; then
-      cd sims/firesim/
+if [ "$EC2FASTINSTALL" = "true" ]; then
+    if [ "$TOOLCHAIN" = "riscv-tools" ]; then
+      cd $RDIR
       git clone https://github.com/firesim/firesim-riscv-tools-prebuilt.git
       cd firesim-riscv-tools-prebuilt
       git checkout 56a40961c98db5e8f904f15dc6efd0870bfefd9e
@@ -72,10 +76,18 @@ if [ "$TOOLCHAIN" = "riscv-tools" ]; then
       cd $RDIR/toolchains/riscv-tools/
       GITHASH="$(git rev-parse HEAD)"
       cd $RDIR
-      if [[ $PREBUILTHASH == $GITHASH && "$FIRESIMINSTALL" == "true" ]]; then
+      echo "prebuilt hash: $PREBUILTHASH"
+      echo "git      hash: $GITHASH"
+      if [[ $PREBUILTHASH == $GITHASH && "$EC2FASTINSTALL" == "true" ]]; then
           FASTINSTALL=true
-          #just call a fireism build-toolchain script?
+          echo "Using fast pre-compiled install for riscv-tools"
+      else
+          echo "Error: hash of precompiled toolchain doesn't match the riscv-tools submodule hash."
+          exit
       fi
+    else
+          echo "Error: No precompiled toolchain for esp-tools or other non-native riscv-tools."
+          exit 
     fi
 fi
 
@@ -88,13 +100,13 @@ RISCV="$(pwd)/$INSTALL_DIR"
 export RISCV="$RISCV"
 
 if [ "$FASTINSTALL" = true ]; then
-    cd sims/firesim/firesim-riscv-tools-prebuilt
+    cd firesim-riscv-tools-prebuilt
     ./installrelease.sh
-    mv distrib $(pwd)/$INSTALL_DIR
+    mv distrib $RISCV
     # copy HASH in case user wants it later
-    cp HASH $(pwd)/$INSTALL_DIR
+    cp HASH $RISCV
     cd $RDIR
-    rm -rf sims/firesim/firesim-riscv-tools-prebuilt
+    rm -rf firesim-riscv-tools-prebuilt
 else
     git -C $CHIPYARD_DIR submodule update --init --recursive toolchains/$TOOLCHAIN #--jobs 8
     cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN"
