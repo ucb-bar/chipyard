@@ -211,7 +211,7 @@ class WithMegaBeagleBooms extends Config((site, here, up) => {
          numLdqEntries = 24,
          numStqEntries = 24,
          maxBrCount = 16,
-         useNewFetchBuffer = false,
+         useNewFetchBuffer = true,
          numFetchBufferEntries = 24,
          ftq = FtqParameters(nEntries=32),
          btb = BoomBTBParameters(btbsa=true, densebtb=false, nSets=512, nWays=4, nRAS=16, tagSz=13),
