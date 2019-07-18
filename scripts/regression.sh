@@ -6,7 +6,7 @@
 
 set -ex
 
-cd sims/vsim/
+cd sims/vcs/
 
 echo ">>>Make sure you are using RISCV=.../esp-tools<<<"
 echo ">>>>>This will break if you are using the default toolchain<<<<<"
