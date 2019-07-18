@@ -146,7 +146,7 @@ echo "Toolchain Build Complete!"
 
 if [ "$FASTINSTALL" = "false" ]; then
     if [ "$EC2INSTALL" = "false" ]; then
-        echo "Building RISC-V OpenOCD Complete!"
+        echo "Building RISC-V OpenOCD"
         check_version automake 1.14 "OpenOCD build"
         check_version autoconf 2.64 "OpenOCD build"
         build_project riscv-openocd --prefix=$RISCV --enable-remote-bitbang --enable-jtag_vpi --disable-werror
