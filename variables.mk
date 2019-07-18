@@ -34,6 +34,7 @@ ifeq ($(SUB_PROJECT),example)
 	MODEL_PACKAGE     ?= $(SBT_PROJECT)
 	CONFIG            ?= DefaultRocketConfig
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
+	GENERATOR         ?= Generator
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
 	TOP               ?= BoomRocketTop
@@ -46,6 +47,7 @@ ifeq ($(SUB_PROJECT),boom)
 	MODEL_PACKAGE     ?= boom.system
 	CONFIG            ?= LargeBoomConfig
 	CONFIG_PACKAGE    ?= boom.system
+	GENERATOR         ?= Generator
 	GENERATOR_PACKAGE ?= boom.system
 	TB                ?= TestDriver
 	TOP               ?= BoomRocketSystem
@@ -58,6 +60,7 @@ ifeq ($(SUB_PROJECT),rocketchip)
 	MODEL_PACKAGE     ?= freechips.rocketchip.system
 	CONFIG            ?= DefaultConfig
 	CONFIG_PACKAGE    ?= freechips.rocketchip.system
+	GENERATOR         ?= Generator
 	GENERATOR_PACKAGE ?= freechips.rocketchip.system
 	TB                ?= TestDriver
 	TOP               ?= ExampleRocketSystem
@@ -70,6 +73,7 @@ ifeq ($(SUB_PROJECT),hwacha)
 	MODEL_PACKAGE     ?= freechips.rocketchip.system
 	CONFIG            ?= HwachaConfig
 	CONFIG_PACKAGE    ?= hwacha
+	GENERATOR         ?= Generator
 	GENERATOR_PACKAGE ?= hwacha
 	TB                ?= TestDriver
 	TOP               ?= ExampleRocketSystem
@@ -83,6 +87,7 @@ endif
 #	MODEL_PACKAGE     ?= freechips.rocketchip.system
 #	CONFIG            ?= FireSimRocketChipConfig
 #	CONFIG_PACKAGE    ?= firesim.firesim
+#	GENERATOR         ?= Generator
 #	GENERATOR_PACKAGE ?= firesim.firesim
 #	TB                ?= TestDriver
 #	TOP               ?= FireSimNoNIC

@@ -41,7 +41,7 @@ $(sim_files): $(call lookup_scala_srcs,$(base_dir)/generators/utilities/src/main
 #########################################################################################
 $(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(sim_files)
 	mkdir -p $(build_dir)
-	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator $(build_dir) $(MODEL_PACKAGE) $(MODEL) $(CONFIG_PACKAGE) $(CONFIG)"
+	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).$(GENERATOR) $(build_dir) $(MODEL_PACKAGE) $(MODEL) $(CONFIG_PACKAGE) $(CONFIG)"
 
 #########################################################################################
 # create verilog files rules and variables
