@@ -66,6 +66,10 @@ do
     shift
 done
 
+if [ "$FIRESIMINSTALL" = "true" ]; then
+   CHIPYARD_DIR="$RDIR/target-design/chipyard"  
+fi
+
 if [ "$EC2FASTINSTALL" = "true" ]; then
     if [ "$TOOLCHAIN" = "riscv-tools" ]; then
       cd $RDIR
