@@ -5,8 +5,12 @@
 # turn echo on and error on earliest command
 set -ex
 
+# get shared variables
+SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
+source $SCRIPT_DIR/defaults.sh
+
 # enter bhd repo
-cd $HOME/project
+cd $LOCAL_CHIPYARD_DIR
 
 # initialize submodules and get the hashes
 git submodule update --init
@@ -22,7 +26,7 @@ search () {
     done
 }
 
-submodules=("boom" "hwacha" "rocket-chip" "sifive-blocks" "testchipip")
+submodules=("boom" "hwacha" "icenet" "rocket-chip" "sifive-blocks" "sifive-cache" "testchipip")
 dir="generators"
 
 search

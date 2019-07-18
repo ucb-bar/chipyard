@@ -81,14 +81,14 @@ Toolchains
 Sims
 -------------------------------------------
 
-**verisim (Verilator wrapper)**
+**verilator (Verilator wrapper)**
   Verilator is an open source Verilog simulator.
-  The ``verisim`` directory provides wrappers which construct Verilator-based simulators from relevant generated RTL, allowing for execution of test RISC-V programs on the simulator (including vcd waveform files).
+  The ``verilator`` directory provides wrappers which construct Verilator-based simulators from relevant generated RTL, allowing for execution of test RISC-V programs on the simulator (including vcd waveform files).
   See :ref:`Verilator` for more information.
 
-**vsim (VCS wrapper)**
+**vcs (VCS wrapper)**
   VCS is a proprietary Verilog simulator.
-  Assuming the user has valid VCS licenses and installations, the ``vsim`` directory provides wrappers which construct VCS-based simulators from relevant generated RTL, allowing for execution of test RISC-V programs on the simulator (including vcd/vpd waveform files).
+  Assuming the user has valid VCS licenses and installations, the ``vcs`` directory provides wrappers which construct VCS-based simulators from relevant generated RTL, allowing for execution of test RISC-V programs on the simulator (including vcd/vpd waveform files).
   See :ref:`VCS` for more information.
 
 **FireSim**

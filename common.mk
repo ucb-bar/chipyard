@@ -33,38 +33,45 @@ $(FIRRTL_JAR): $(call lookup_scala_srcs, $(CHIPYARD_FIRRTL_DIR)/src/main/scala)
 #########################################################################################
 # create simulation args file rule
 #########################################################################################
-$(sim_dotf): $(call lookup_scala_srcs,$(base_dir)/generators/utilities/src/main/scala) $(FIRRTL_JAR)
+$(sim_files): $(call lookup_scala_srcs,$(base_dir)/generators/utilities/src/main/scala) $(FIRRTL_JAR)
 	cd $(base_dir) && $(SBT) "project utilities" "runMain utilities.GenerateSimFiles -td $(build_dir) -sim $(sim_name)"
 
 #########################################################################################
 # create firrtl file rule and variables
 #########################################################################################
-$(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(sim_dotf)
+$(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(sim_files)
 	mkdir -p $(build_dir)
 	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator $(build_dir) $(MODEL_PACKAGE) $(MODEL) $(CONFIG_PACKAGE) $(CONFIG)"
 
 #########################################################################################
 # create verilog files rules and variables
 #########################################################################################
-REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SMEMS_CONF)
+REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(TOP_SMEMS_CONF)
 HARNESS_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(HARNESS_SMEMS_CONF)
 
-$(VERILOG_FILE) $(SMEMS_CONF) $(TOP_ANNO) $(TOP_FIR) $(sim_top_blackboxes): $(FIRRTL_FILE) $(ANNO_FILE)
-	cd $(base_dir) && $(SBT) "project tapeout" "runMain barstools.tapeout.transforms.GenerateTop -o $(VERILOG_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) -tsaof $(TOP_ANNO) -tsf $(TOP_FIR) $(REPL_SEQ_MEM) -td $(build_dir)"
-	cp $(build_dir)/firrtl_black_box_resource_files.f $(sim_top_blackboxes)
+$(TOP_FILE) $(TOP_SMEMS_CONF) $(TOP_ANNO) $(TOP_FIR) $(sim_top_blackboxes): $(FIRRTL_FILE) $(ANNO_FILE)
+	cd $(base_dir) && $(SBT) "project tapeout" "runMain barstools.tapeout.transforms.GenerateTop -o $(TOP_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(MODEL) -faf $(ANNO_FILE) -tsaof $(TOP_ANNO) -tsf $(TOP_FIR) $(REPL_SEQ_MEM) -td $(build_dir)"
+	grep -v ".*\.h" $(build_dir)/firrtl_black_box_resource_files.f > $(sim_top_blackboxes)
 
-$(HARNESS_FILE) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes): $(FIRRTL_FILE) $(ANNO_FILE) $(sim_top_blackboxes)
+# note: this depends on sim_top_blackboxes to avoid race condition where firrtl_black_box_resource_files.f is created at the same time
+$(HARNESS_FILE) $(HARNESS_SMEMS_CONF) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes): $(FIRRTL_FILE) $(ANNO_FILE) $(sim_top_blackboxes)
 	cd $(base_dir) && $(SBT) "project tapeout" "runMain barstools.tapeout.transforms.GenerateHarness -o $(HARNESS_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(VLOG_MODEL) -faf $(ANNO_FILE) -thaof $(HARNESS_ANNO) -thf $(HARNESS_FIR) $(HARNESS_REPL_SEQ_MEM) -td $(build_dir)"
-	grep -v ".*\.cc" $(build_dir)/firrtl_black_box_resource_files.f > $(sim_harness_blackboxes)
+	grep -v ".*\.h" $(build_dir)/firrtl_black_box_resource_files.f > $(sim_harness_blackboxes)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 MACROCOMPILER_MODE ?= --mode synflops
-$(SMEMS_FILE) $(SMEMS_FIR): $(SMEMS_CONF)
-	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(SMEMS_CONF) -v $(SMEMS_FILE) -f $(SMEMS_FIR) $(MACROCOMPILER_MODE)"
+$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR): $(TOP_SMEMS_CONF)
+	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE)"
 
 HARNESS_MACROCOMPILER_MODE = --mode synflops
 $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): $(HARNESS_SMEMS_CONF)
 	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE)"
+
+########################################################################################
+# remove duplicate files in blackbox/simfiles
+########################################################################################
+$(sim_common_files): $(sim_top_blackboxes) $(sim_harness_blackboxes) $(sim_files)
+	awk '{print $1;}' $^ | sort -u > $@
 
 #########################################################################################
 # create a particular fesvr for bringup
@@ -82,10 +89,25 @@ verilog: $(sim_vsrcs)
 top: $(VERILOG_FILE) $(SMEMS_CONF)
 
 #########################################################################################
-# helper rules to run simulator
+# helper rules to run simulations
 #########################################################################################
+.PHONY: run-binary run-binary-fast run-binary-debug run-fast
 run-binary: $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
+
+#########################################################################################
+# helper rules to run simulator as fast as possible
+#########################################################################################
+run-binary-fast: $(sim)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
+
+#########################################################################################
+# helper rules to run simulator with as much debug info as possible
+#########################################################################################
+run-binary-debug: $(sim_debug)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAG) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
+
+run-fast: run-asm-tests-fast run-bmark-tests-fast
 
 #########################################################################################
 # run assembly/benchmarks rules
@@ -95,10 +117,10 @@ $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
 	ln -sf $< $@
 
 $(output_dir)/%.run: $(output_dir)/% $(sim)
-	$(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(PERMISSIVE_OFF) $< && touch $@
+	$(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $< && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +verbose +max-cycles=$(timeout_cycles) $(PERMISSIVE_OFF) $< 3>&1 1>&2 2>&3 | spike-dasm > $@)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< 3>&1 1>&2 2>&3 | spike-dasm > $@)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
