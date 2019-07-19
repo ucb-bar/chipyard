@@ -12,7 +12,7 @@ RDIR=$(pwd)
 
 function usage
 {
-    echo "usage: ./scripts/build-toolchains.sh [riscv] [hwacha] [ firesim | --firesim] [--submodules-only]"
+    echo "usage: ./scripts/build-toolchains.sh [riscv] [hwacha] [ ec2fast | --ec2fast] "
     echo "   riscv: if set, builds the riscv toolchain (this is also the default)"
     echo "   hwacha: if set, builds esp-tools toolchain"
     echo "   ec2fast: if set, pulls in a pre-compiled RISC-V toolchain for an EC2 manager instance"
