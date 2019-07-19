@@ -92,7 +92,6 @@ if [ "$EC2FASTINSTALL" = "true" ]; then
 fi
 
 INSTALL_DIR="$TOOLCHAIN-install"
-mkdir -p "$(pwd)/$INSTALL_DIR"
 
 RISCV="$(pwd)/$INSTALL_DIR"
 
@@ -102,12 +101,13 @@ export RISCV="$RISCV"
 if [ "$FASTINSTALL" = true ]; then
     cd firesim-riscv-tools-prebuilt
     ./installrelease.sh
-    mv distrib $RISCV
+    mv distrib "$RISCV"
     # copy HASH in case user wants it later
-    cp HASH $RISCV
+    cp HASH "$RISCV"
     cd $RDIR
     rm -rf firesim-riscv-tools-prebuilt
 else
+    mkdir -p "$RISCV"
     git -C $CHIPYARD_DIR submodule update --init --recursive toolchains/$TOOLCHAIN #--jobs 8
     cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN"
     export MAKEFLAGS="-j16"
