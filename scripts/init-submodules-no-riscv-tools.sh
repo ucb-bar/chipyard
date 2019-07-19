@@ -23,6 +23,7 @@ git submodule update --init --recursive #--jobs 8
 git config --global --unset submodule.riscv-tools.update
 git config --global --unset submodule.esp-tools.update
 git config --global --unset submodule.experimental-blocks.update
+git config --unset submodule.vlsi/hammer-cad-plugins.update
 
 # Renable firesim and init only the required submodules to provide
 # all required scala deps, without doing a full build-setup
