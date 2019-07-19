@@ -41,6 +41,31 @@ include $(base_dir)/common.mk
 include $(sim_dir)/verilator.mk
 
 #########################################################################################
+# verilator binary and flags
+#########################################################################################
+VERILATOR := $(INSTALLED_VERILATOR) --cc --exe
+
+CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -D__STDC_FORMAT_MACROS
+LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesvr -lpthread
+
+VERILATOR_CC_OPTS = \
+	-O3 \
+	-CFLAGS "$(CXXFLAGS) -DTEST_HARNESS=V$(VLOG_MODEL) -DVERILATOR" \
+	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs" \
+	-LDFLAGS "$(LDFLAGS)"
+
+VERILATOR_NONCC_OPTS = \
+	--top-module $(VLOG_MODEL) \
+	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
+	+define+STOP_COND=\$$c\(\"done_reset\"\) \
+	--assert \
+	--output-split 20000 \
+	$(sim_vsrcs) \
+	-f $(sim_common_files)
+
+VERILATOR_OPTS = $(VERILATOR_CC_OPTS) $(VERILATOR_NONCC_OPTS)
+
+#########################################################################################
 # verilator build paths and file names
 #########################################################################################
 model_dir = $(build_dir)/$(long_name)
@@ -55,35 +80,30 @@ model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
 #########################################################################################
 # build makefile fragment that builds the verilator sim rules
 #########################################################################################
-LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesvr -lpthread
 
-$(model_mk): $(sim_vsrcs) $(sim_dotf) $(INSTALLED_VERILATOR)
+$(model_mk): $(sim_vsrcs) $(sim_common_files) $(INSTALLED_VERILATOR)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name)
-	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name) \
-	-o $(sim) $(sim_vsrcs) -f $(sim_dotf) -f $(sim_top_blackboxes) -f $(sim_harness_blackboxes) -LDFLAGS "$(LDFLAGS)" \
-	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(model_header)"
+	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim) -Mdir $(model_dir) -CFLAGS "-include $(model_header)"
 	touch $@
 
-$(model_mk_debug): $(sim_vsrcs) $(sim_dotf) $(INSTALLED_VERILATOR)
+$(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(INSTALLED_VERILATOR)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name).debug
-	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(build_dir)/$(long_name).debug --trace \
-	-o $(sim_debug) $(sim_vsrcs) -f $(sim_dotf) -f $(sim_top_blackboxes) -f $(sim_harness_blackboxes) -LDFLAGS "$(LDFLAGS)" \
-	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(model_header_debug)"
+	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim_debug) --trace -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
 	touch $@
 
 #########################################################################################
 # invoke make to make verilator sim rules
 #########################################################################################
 $(sim): $(model_mk)
-	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name) -f V$(VLOG_MODEL).mk
+	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir) -f V$(VLOG_MODEL).mk
 
 $(sim_debug): $(model_mk_debug)
-	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(build_dir)/$(long_name).debug -f V$(VLOG_MODEL).mk
+	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir_debug) -f V$(VLOG_MODEL).mk
 
 #########################################################################################
-# create a verisim vpd rule
+# create a verilator vpd rule
 #########################################################################################
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd
@@ -95,4 +115,4 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 #########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(gen_dir)/* $(sim_prefix)-*
+	rm -rf $(gen_dir) $(sim_prefix)-*

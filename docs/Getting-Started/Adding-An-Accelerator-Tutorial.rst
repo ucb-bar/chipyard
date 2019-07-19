@@ -227,7 +227,7 @@ Now with all of that done, we can go ahead and run our simulation.
 
 .. code-block:: shell
 
-    cd verisim
+    cd verilator
     make CONFIG=PWMConfig
     ./simulator-example-PWMConfig ../tests/pwm.riscv
 
