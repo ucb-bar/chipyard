@@ -44,7 +44,7 @@ ROCKET_SRCS = \
 	$(ROCKET_SRC_DIR)/plusarg_reader.v \
 	$(ROCKET_SRC_DIR)/EICG_wrapper.v \
 
-ALL_RTL = $(ROCKET_SRCS) $(VERILOG_FILE) $(SMEMS_FILE)
+ALL_RTL = $(ROCKET_SRCS) $(TOP_FILE) $(TOP_SMEMS_FILE)
 
 CLOCK_DOMAINS = $(build_dir)/$(long_name).domains
 
