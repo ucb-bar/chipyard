@@ -142,7 +142,8 @@ sim_files              ?= $(build_dir)/sim_files.f
 sim_top_blackboxes     ?= $(build_dir)/firrtl_black_box_resource_files.top.f
 sim_harness_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
 sim_common_files       ?= $(build_dir)/sim_files.common.f
-fesvr_so               ?= $(FESVR_DIR)/build/libfesvr.so
+
+fesvr_so ?= $(FESVR_DIR)/build/libfesvr.so
 
 #########################################################################################
 # java arguments used in sbt
@@ -188,9 +189,9 @@ sim_vsrcs = \
 	$(TOP_FILE) \
 	$(HARNESS_FILE) \
 	$(TOP_SMEMS_FILE) \
+	$(HARNESS_SMEMS_FILE) \
 	$(base_dir)/generators/beagle/src/main/resources/ClockReceiver.v \
-	$(base_dir)/generators/awl/src/main/resources/util.v \
-	$(HARNESS_SMEMS_FILE)
+	$(base_dir)/generators/awl/src/main/resources/util.v
 
 #########################################################################################
 # assembly/benchmark variables
