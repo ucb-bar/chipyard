@@ -10,6 +10,8 @@ unamestr=$(uname)
 RDIR=$(pwd)
 : ${CHIPYARD_DIR:=$(pwd)} #default value is the PWD unless overridden
 
+PRECOMPILED_REPO_HASH=56a40961c98db5e8f904f15dc6efd0870bfefd9e
+
 function usage
 {
     echo "usage: ./scripts/build-toolchains.sh [riscv] [hwacha] [ ec2fast | --ec2fast] "
@@ -68,7 +70,7 @@ if [ "$EC2FASTINSTALL" = "true" ]; then
       cd $RDIR
       git clone https://github.com/firesim/firesim-riscv-tools-prebuilt.git
       cd firesim-riscv-tools-prebuilt
-      git checkout 56a40961c98db5e8f904f15dc6efd0870bfefd9e
+      git checkout $PRECOMPILED_REPO_HASH
       PREBUILTHASH="$(cat HASH)"
       git -C $CHIPYARD_DIR submodule update --init  toolchains/$TOOLCHAIN
       cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN"
@@ -141,7 +143,7 @@ echo "Toolchain Build Complete!"
 
 
 if [ "$FASTINSTALL" = "false" ]; then
-    # commands to run only on EC2
+    # commands that can't run on EC2 (specifically, OpenOCD because of autoconf version_
     # see if the instance info page exists. if not, we are not on ec2.
     # this is one of the few methods that works without sudo
     if wget -T 1 -t 3 -O /dev/null http://169.254.169.254/; then

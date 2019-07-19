@@ -13,9 +13,6 @@
 [submodule "tools/firrtl"]
 	path = tools/firrtl
 	url = https://github.com/freechipsproject/firrtl
-[submodule "esp-tools"]
-	path = toolchains/esp-tools
-	url = https://github.com/ucb-bar/esp-tools.git
 [submodule "tools/torture"]
 	path = tools/torture
 	url = https://github.com/ucb-bar/riscv-torture.git
@@ -40,3 +37,6 @@
 [submodule "toolchains/riscv-tools"]
 	path = toolchains/riscv-tools
 	url = https://github.com/freechipsproject/rocket-tools.git
+[submodule "toolchains/esp-tools"]
+	path = toolchains/esp-tools
+	url = https://github.com/ucb-bar/esp-tools.git
