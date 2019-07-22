@@ -50,7 +50,7 @@ do
             ;;
         -h | -H | --help)
             usage
-            exit
+            exit 3
             ;;
         --*) echo "ERROR: bad option $1"
             usage

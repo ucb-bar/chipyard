@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This ungodly script surreptitiously builds an archive from existing fesvr objects
 # Invoke from riscv-fesvr/build
