@@ -14,7 +14,7 @@ PRECOMPILED_REPO_HASH=56a40961c98db5e8f904f15dc6efd0870bfefd9e
 
 function usage
 {
-    echo "usage: ./scripts/build-toolchains.sh [riscv] [hwacha] [ ec2fast | --ec2fast] "
+    echo "usage: ./scripts/build-toolchains.sh [riscv-tools] [esp-tools] [ec2fast | --ec2fast] "
     echo "   riscv: if set, builds the riscv toolchain (this is also the default)"
     echo "   hwacha: if set, builds esp-tools toolchain"
     echo "   ec2fast: if set, pulls in a pre-compiled RISC-V toolchain for an EC2 manager instance"
@@ -39,10 +39,10 @@ FASTINSTALL="false"
 while test $# -gt 0
 do
    case "$1" in
-        riscv)
+        riscv-tools)
             TOOLCHAIN="riscv-tools"
             ;;
-        hwacha)
+        esp-tools)
             TOOLCHAIN="esp-tools"
             ;;
         ec2fast | --ec2fast) # I don't want to break this api
