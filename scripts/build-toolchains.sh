@@ -155,5 +155,6 @@ if [ "$FASTINSTALL" = "false" ]; then
         check_version autoconf 2.64 "OpenOCD build"
         build_project riscv-openocd --prefix=$RISCV --enable-remote-bitbang --enable-jtag_vpi --disable-werror
         echo -e "\\nRISC-V OpenOCD installation completed!"
+        cd $RDIR
     fi
 fi
