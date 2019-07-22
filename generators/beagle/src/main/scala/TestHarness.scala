@@ -150,6 +150,16 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
 
     Module(new SimJTAG(tickDelay=3)).connect(jtag_io, clock, reset.asUInt.asBool, ~reset.asUInt.asBool, jtag_success)
 
+    // connect gpios in loopback
+    dut.gpio.pins(3).i.ival := Mux(dut.gpio.pins(3).o.ie, dut.gpio.pins(0).o.oe && dut.gpio.pins(0).o.oval, 0.U)
+    dut.gpio.pins(4).i.ival := Mux(dut.gpio.pins(3).o.ie, dut.gpio.pins(1).o.oe && dut.gpio.pins(1).o.oval, 0.U)
+    dut.gpio.pins(5).i.ival := Mux(dut.gpio.pins(3).o.ie, dut.gpio.pins(2).o.oe && dut.gpio.pins(2).o.oval, 0.U)
+
+    // connect the uart
+    dut.uart.rxd.i.ival := Mux(dut.uart.rxd.o.ie, dut.uart.txd.o.oe && dut.uart.txd.o.oval, 0.U)
+
+    // connect the exit signal
+
     io.success := sim.io.exit || jtag_success
   }
 }

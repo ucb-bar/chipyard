@@ -144,6 +144,7 @@ sim_harness_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
 sim_common_files       ?= $(build_dir)/sim_files.common.f
 
 fesvr_so ?= $(FESVR_DIR)/build/libfesvr.so
+io_test ?= $(base_dir)/tests/riscv-code-constructor/bin/ioTests.riscv
 
 #########################################################################################
 # java arguments used in sbt
