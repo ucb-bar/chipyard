@@ -150,6 +150,7 @@ if [ "$FASTINSTALL" = "false" ]; then
         echo "Skipping RISC-V OpenOCD"
     else
         echo "Building RISC-V OpenOCD"
+        cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN"
         check_version automake 1.14 "OpenOCD build"
         check_version autoconf 2.64 "OpenOCD build"
         build_project riscv-openocd --prefix=$RISCV --enable-remote-bitbang --enable-jtag_vpi --disable-werror
