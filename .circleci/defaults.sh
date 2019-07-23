@@ -41,4 +41,4 @@ mapping["boomrocketexample"]="SUB_PROJECT=example CONFIG=DefaultBoomAndRocketCon
 mapping["boom"]="SUB_PROJECT=boom"
 mapping["rocketchip"]="SUB_PROJECT=rocketchip"
 mapping["blockdevrocketchip"]="SUB_PROJECT=example CONFIG=BlockDeviceModelRocketConfig TOP=BoomRocketTopWithBlockDevice"
-mapping["hwacha"]="SUB_PROJECT=hwacha"
+mapping["hwacha"]="SUB_PROJECT=example CONFIG=HwachaL2Config GENERATOR_PACKAGE=hwacha"

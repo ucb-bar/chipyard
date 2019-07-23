@@ -10,3 +10,4 @@ target
 env.sh
 riscv-tools-install
 tags
+*~
