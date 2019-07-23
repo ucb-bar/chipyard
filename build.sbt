@@ -84,7 +84,9 @@ lazy val example = conditionalDependsOn(project in file("generators/example"))
   .dependsOn(boom, hwacha, sifive_blocks, sifive_cache)
   .settings(commonSettings)
 
-lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))
+// should depend on just the *.jars of rocket-chip and testchipip
+// shouldn't have to rebuild if they change (as long as they are rebuilt before this)
+lazy val utilities = (project in file("generators/utilities"))
   .settings(commonSettings)
 
 lazy val icenet = (project in file("generators/icenet"))
@@ -99,7 +101,10 @@ lazy val boom = (project in file("generators/boom"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
-lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
+// should depend on just the *.jar of testchipip
+// shouldn't have to rebuild if testchipip changes (as long as testchipip is rebuilt before this)
+lazy val tapeout = (project in file("./tools/barstools/tapeout/"))
+  .dependsOn(rocketchip)
   .settings(commonSettings)
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
