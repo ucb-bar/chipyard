@@ -29,10 +29,15 @@ make CONFIG=$BCONFIG run-asm-tests-fast
 make CONFIG=$BCONFIG run-bmark-tests-fast
 
 # test individual binaries with the systolic array (assumes sys. is on hart1)
-TEST_DIR=$(pwd)/../../tests/beagle-systolic-tests
+TEST_DIR=$(pwd)/../../tests
+SYST_TEST_DIR=$TEST_DIR/beagle-systolic-tests
 tests=("matmul" "matmul_os" "matmul_ws" "mvin_mvout" "mvin_mvout_acc" "mvin_mvout_acc_stride" "mvin_mvout_stride" "raw_hazard" "tiled_matmul_os" "tiled_matmul_ws")
 for t in "${tests[@]}"
 do
-    echo "Running program $t in $TEST_DIR"
-    make CONFIG=$BCONFIG BINARY=$TEST_DIR/$t run-binary
+    echo "Running program $t in $SYST_TEST_DIR"
+    make CONFIG=$BCONFIG BINARY=$SYST_TEST_DIR/$t run-binary
 done
+
+# run other io tests
+make iotest
+make CONFIG=$BCONFIG BINARY=$TEST_DIR/riscv-code-constructor/bin/ioTests.riscv run-binary

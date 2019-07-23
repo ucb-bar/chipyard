@@ -49,3 +49,6 @@
 [submodule "tools/beagle-fesvr"]
 	path = tools/beagle-fesvr
 	url = https://github.com/abejgonzalez/beagle-fesvr.git
+[submodule "tests/riscv-code-constructor"]
+	path = tests/riscv-code-constructor
+	url = git@github.com:abejgonzalez/riscv-code-constructor.git

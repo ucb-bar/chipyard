@@ -81,6 +81,15 @@ $(fesvr_so): $(shell find -L $(FESVR_DIR)/fesvr/ -iname "*.scala" 2> /dev/null)
 	cd $(FESVR_DIR)/build && ./../configure --prefix=$(PWD) && make
 
 #########################################################################################
+# build the io tests
+#########################################################################################
+.PHONY: iotest
+iotest: $(io_test)
+$(io_test): FORCE
+	cd $(base_dir)/tests/riscv-code-constructor && $(MAKE)
+FORCE:
+
+#########################################################################################
 # helper rule to just make verilog files
 #########################################################################################
 .PHONY: verilog top

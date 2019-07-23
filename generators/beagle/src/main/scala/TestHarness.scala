@@ -13,6 +13,8 @@ import freechips.rocketchip.devices.tilelink.{TLTestRAM}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util.{AsyncQueue, ShiftRegInit}
+import freechips.rocketchip.devices.debug.{SimJTAG}
+import freechips.rocketchip.jtag.{JTAGIO}
 
 import testchipip.{SerialAdapter, SimSerial, TLSerdesser}
 
@@ -131,6 +133,33 @@ class BeagleTestHarnessInner(implicit p: Parameters) extends LazyModule
     sim.io.serial.out <> Queue(adapter.module.io.serial.out)
     adapter.module.io.serial.in <> Queue(sim.io.serial.in)
 
-    io.success := sim.io.exit
+    // connect the jtag port
+    val jtag_success = Wire(Bool())
+    val jtag_io = Wire(new JTAGIO())
+
+    dut.jtag.TCK.i.ival := jtag_io.TCK.asUInt.asBool
+    dut.jtag.TMS.i.ival := jtag_io.TMS
+    dut.jtag.TDI.i.ival := jtag_io.TDI
+    jtag_io.TRSTn.foreach{t =>
+      dut.jtag.TRSTn.get.i.ival := t
+    }
+    jtag_io.TDO.data := dut.jtag.TDO.o.oval
+    jtag_io.TDO.driven := dut.jtag.TDO.o.oe
+
+    dut.jtag.TDO.i.ival := DontCare
+
+    Module(new SimJTAG(tickDelay=3)).connect(jtag_io, clock, reset.asUInt.asBool, ~reset.asUInt.asBool, jtag_success)
+
+    // connect gpios in loopback
+    dut.gpio.pins(3).i.ival := Mux(dut.gpio.pins(3).o.ie, dut.gpio.pins(0).o.oe && dut.gpio.pins(0).o.oval, 0.U)
+    dut.gpio.pins(4).i.ival := Mux(dut.gpio.pins(3).o.ie, dut.gpio.pins(1).o.oe && dut.gpio.pins(1).o.oval, 0.U)
+    dut.gpio.pins(5).i.ival := Mux(dut.gpio.pins(3).o.ie, dut.gpio.pins(2).o.oe && dut.gpio.pins(2).o.oval, 0.U)
+
+    // connect the uart
+    dut.uart.rxd.i.ival := Mux(dut.uart.rxd.o.ie, dut.uart.txd.o.oe && dut.uart.txd.o.oval, 0.U)
+
+    // connect the exit signal
+
+    io.success := sim.io.exit || jtag_success
   }
 }
