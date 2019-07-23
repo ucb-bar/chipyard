@@ -1,6 +1,7 @@
 package firesim.firesim
 
 import chisel3._
+import chisel3.experimental.annotate
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
@@ -12,7 +13,31 @@ import freechips.rocketchip.rocket.TracedInstruction
 import firesim.endpoints.{TraceOutputTop, DeclockedTracedInstruction}
 
 import midas.models.AXI4BundleWithEdge
-import midas.targetutils.ExcludeInstanceAsserts
+import midas.targetutils.{ExcludeInstanceAsserts, MemModelAnnotation}
+
+/** Ties together Subsystem buses in the same fashion done in the example top of Rocket Chip */
+trait HasDefaultBusConfiguration {
+  this: BaseSubsystem =>
+  // The sbus masters the cbus; here we convert TL-UH -> TL-UL
+  sbus.crossToBus(cbus, NoCrossing)
+
+  // The cbus masters the pbus; which might be clocked slower
+  cbus.crossToBus(pbus, SynchronousCrossing())
+
+  // The fbus masters the sbus; both are TL-UH or TL-C
+  FlipRendering { implicit p =>
+    sbus.crossFromBus(fbus, SynchronousCrossing())
+  }
+
+  // The sbus masters the mbus; here we convert TL-C -> TL-UH
+  private val BankedL2Params(nBanks, coherenceManager) = p(BankedL2Key)
+  private val (in, out, halt) = coherenceManager(this)
+  if (nBanks != 0) {
+    sbus.coupleTo("coherence_manager") { in :*= _ }
+    mbus.coupleFrom("coherence_manager") { _ :=* BankBinder(mbus.blockBytes * (nBanks-1)) :*= out }
+  }
+}
+
 
 /** Copied from RC and modified to change the IO type of the Imp to include the Diplomatic edges
   *  associated with each port. This drives FASED functional model sizing
@@ -104,3 +129,26 @@ trait ExcludeInvalidBoomAssertions extends LazyModuleImp {
   ExcludeInstanceAsserts(("NonBlockingDCache", "dtlb"))
 }
 
+trait CanHaveBoomMultiCycleRegfileImp {
+  val outer: boom.system.BoomRocketSubsystem
+  val cores = outer.boomTiles.map(tile => tile.module.core)
+  cores.foreach({ core =>
+    core.iregfile match {
+      case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
+      case _ => Nil
+    }
+
+     if (core.fp_pipeline != null) core.fp_pipeline.fregfile match {
+      case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
+      case _ => Nil
+    }
+
+   })
+}
+trait CanHaveRocketMultiCycleRegfileImp {
+  val outer: RocketSubsystem
+  outer.rocketTiles.foreach({ tile =>
+    annotate(MemModelAnnotation(tile.module.core.rocketImpl.rf.rf))
+    tile.module.fpuOpt.foreach(fpu => annotate(MemModelAnnotation(fpu.fpuImpl.regfile)))
+  })
+}

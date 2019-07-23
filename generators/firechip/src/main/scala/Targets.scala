@@ -31,7 +31,7 @@ import java.io.File
 *******************************************************************************/
 
 class FireSim(implicit p: Parameters) extends RocketSubsystem
-    with HasHierarchicalBusTopology
+    with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
     with HasNoDebug
@@ -54,10 +54,11 @@ class FireSimModuleImp[+L <: FireSim](l: L) extends RocketSubsystemModuleImp(l)
     with HasPeripheryIceNICModuleImpValidOnly
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
+    with CanHaveRocketMultiCycleRegfileImp
 
 
 class FireSimNoNIC(implicit p: Parameters) extends RocketSubsystem
-    with HasHierarchicalBusTopology
+    with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
     with HasNoDebug
@@ -78,10 +79,11 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNIC](l: L) extends RocketSubsystemMod
     with HasPeripheryUARTModuleImp
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
+    with CanHaveRocketMultiCycleRegfileImp
 
 
 class FireBoom(implicit p: Parameters) extends BoomRocketSubsystem
-    with HasHierarchicalBusTopology
+    with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
     with HasNoDebug
@@ -105,9 +107,10 @@ class FireBoomModuleImp[+L <: FireBoom](l: L) extends BoomRocketSubsystemModuleI
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
     with ExcludeInvalidBoomAssertions
+    with CanHaveBoomMultiCycleRegfileImp
 
 class FireBoomNoNIC(implicit p: Parameters) extends BoomRocketSubsystem
-    with HasHierarchicalBusTopology
+    with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
     with HasNoDebug
@@ -129,6 +132,7 @@ class FireBoomNoNICModuleImp[+L <: FireBoomNoNIC](l: L) extends BoomRocketSubsys
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
     with ExcludeInvalidBoomAssertions
+    with CanHaveBoomMultiCycleRegfileImp
 
 case object NumNodes extends Field[Int]
 
