@@ -179,7 +179,7 @@ class FireSimRocketChipSystolicConfig extends Config(
 
 class FireSimRocketChipSystolicDSE1Config extends Config(
   new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithPeripheryBusFrequency(BigInt(1000000000L)) ++
   new WithExtMemSize(0x400000000L) ++ // 16GB
   new WithoutTLMonitors ++
   new WithUARTKey ++
@@ -194,7 +194,7 @@ class FireSimRocketChipSystolicDSE1Config extends Config(
 
 class FireSimRocketChipSystolicDSE2Config extends Config(
   new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithPeripheryBusFrequency(BigInt(1000000000L)) ++
   new WithExtMemSize(0x400000000L) ++ // 16GB
   new WithoutTLMonitors ++
   new WithUARTKey ++
@@ -209,7 +209,7 @@ class FireSimRocketChipSystolicDSE2Config extends Config(
 
 class FireSimRocketChipSystolicDSE3Config extends Config(
   new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithPeripheryBusFrequency(BigInt(1000000000L)) ++
   new WithExtMemSize(0x400000000L) ++ // 16GB
   new WithoutTLMonitors ++
   new WithUARTKey ++
@@ -224,7 +224,7 @@ class FireSimRocketChipSystolicDSE3Config extends Config(
 
 class FireSimRocketChipSystolicDSE4Config extends Config(
   new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithPeripheryBusFrequency(BigInt(1000000000L)) ++
   new WithExtMemSize(0x400000000L) ++ // 16GB
   new WithoutTLMonitors ++
   new WithUARTKey ++
@@ -239,7 +239,7 @@ class FireSimRocketChipSystolicDSE4Config extends Config(
 
 class FireSimRocketChipSystolicDSE5Config extends Config(
   new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithPeripheryBusFrequency(BigInt(1000000000L)) ++
   new WithExtMemSize(0x400000000L) ++ // 16GB
   new WithoutTLMonitors ++
   new WithUARTKey ++
@@ -254,7 +254,7 @@ class FireSimRocketChipSystolicDSE5Config extends Config(
 
 class FireSimRocketChipSystolicDSE6Config extends Config(
   new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithPeripheryBusFrequency(BigInt(1000000000L)) ++
   new WithExtMemSize(0x400000000L) ++ // 16GB
   new WithoutTLMonitors ++
   new WithUARTKey ++
@@ -269,7 +269,7 @@ class FireSimRocketChipSystolicDSE6Config extends Config(
 
 class FireSimRocketChipSystolicDSE7Config extends Config(
   new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithPeripheryBusFrequency(BigInt(1000000000L)) ++
   new WithExtMemSize(0x400000000L) ++ // 16GB
   new WithoutTLMonitors ++
   new WithUARTKey ++
@@ -284,7 +284,7 @@ class FireSimRocketChipSystolicDSE7Config extends Config(
 
 class FireSimRocketChipSystolicDSE8Config extends Config(
   new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithPeripheryBusFrequency(BigInt(1000000000L)) ++
   new WithExtMemSize(0x400000000L) ++ // 16GB
   new WithoutTLMonitors ++
   new WithUARTKey ++
@@ -300,7 +300,7 @@ class FireSimRocketChipSystolicDSE8Config extends Config(
 /*
 class FireSimRocketChipSystolicDSE10Config extends Config(
   new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(500000000L)) ++
+  new WithPeripheryBusFrequency(BigInt(1000000000L)) ++
   new WithExtMemSize(0x400000000L) ++ // 16GB
   new WithoutTLMonitors ++
   new WithUARTKey ++
