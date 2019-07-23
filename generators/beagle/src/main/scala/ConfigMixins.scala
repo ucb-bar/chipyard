@@ -17,7 +17,7 @@ import sifive.blocks.devices.jtag._
 import hbwif.tilelink._
 import hbwif._
 
-import hwacha.{Hwacha}
+import hwacha.{Hwacha, HwachaStagesDFMA, HwachaStagesSFMA, HwachaStagesHFMA, HwachaStagesIMul, HwachaConfPrec}
 
 import boom.system.{BoomTilesKey}
 import boom.exu.{IssueParams}
@@ -57,6 +57,14 @@ class WithBeagleChanges extends Config((site, here, up) => {
   case CacheBlockStriping => 4
   case LbwifBitWidth => 4
   case PeripheryBeagleKey => BeagleParams(scrAddress = 0x110000)
+  case RocketTilesKey => up(RocketTilesKey, site) map { r =>
+    r.copy(core = r.core.copy(fpu = r.core.fpu.map(_.copy(sfmaLatency = 4, dfmaLatency = 5))))
+  }
+  case HwachaStagesDFMA => 5
+  case HwachaStagesSFMA => 4
+  case HwachaStagesHFMA => 3
+  case HwachaStagesIMul => 4
+  case HwachaConfPrec => true
 })
 
 /**
