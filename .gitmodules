@@ -45,4 +45,4 @@
 	url = https://github.com/ucb-bar/hammer.git
 [submodule "vlsi/hammer-cad-plugins"]
 	path = vlsi/hammer-cad-plugins
-	url = https://github.com/ucb-bar/hammer-cad-plugins
+	url = https://github.com/ucb-bar/hammer-cad-plugins.git
