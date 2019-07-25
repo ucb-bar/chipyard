@@ -8,14 +8,18 @@ Welcome to Chipyard's documentation!
 
 Chipyard is a a framework for designing and evaluating full-system hardware using agile teams.
 It is composed of a collection of tools and libraries designed to provide an intergration between open-source and commercial tools for the development of systems-on-chip.
-New to Chipyard? Jump to the :ref:`Getting Started` page for more info.
+New to Chipyard? Jump to the :ref:`Chipyard Basics` page for more info.
+
+
+.. include:: Quick-Start.rst
+
 
 .. toctree::
    :maxdepth: 3
    :caption: Contents:
    :numbered:
 
-   Getting-Started/index
+   Chipyard-Basics/index
 
    :maxdepth: 3
    :caption: Simulation:
@@ -38,9 +42,9 @@ New to Chipyard? Jump to the :ref:`Getting Started` page for more info.
    VLSI/index
 
    :maxdepth: 3
-   :caption: Advanced Usage:
+   :caption: Customization:
    :numbered:
-   Advanced-Usage/index
+   Customization/index
 
 Indices and tables
 ==================

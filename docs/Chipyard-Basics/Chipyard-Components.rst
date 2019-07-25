@@ -1,4 +1,4 @@
-Chipyard Basics
+Chipyard Components
 ===============================
 
 Generators

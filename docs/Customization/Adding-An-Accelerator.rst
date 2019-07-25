@@ -49,7 +49,7 @@ Then add ``yourproject`` to the Chipyard top-level build.sbt file.
 
 .. code-block:: scala
 
-    lazy val yourproject = project.settings(commonSettings).dependsOn(rocketchip)
+    lazy val yourproject = (project in file("generators/yourproject")).settings(commonSettings).dependsOn(rocketchip)
 
 You can then import the classes defined in the submodule in a new project if
 you add it as a dependency. For instance, if you want to use this code in
@@ -61,6 +61,12 @@ the ``example`` project, change the final line in build.sbt to the following.
 
 Finally, add ``yourproject`` to the ``PACKAGES`` variable in the ``common.mk`` file in the Chipyard top level.
 This will allow make to detect that your source files have changed when building the Verilog/FIRRTL files.
+
+.. code-block:: shell
+   
+     PACKAGES=$(addprefix generators/, rocket-chip testchipip boom hwacha sifive-blocks sifive-cache example yourproject) \
+		 $(addprefix sims/firesim/sim/, . firesim-lib midas midas/targetutils) 
+
 
 MMIO Peripheral
 ------------------
