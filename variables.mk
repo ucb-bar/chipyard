@@ -29,7 +29,7 @@ SUB_PROJECT ?= example
 
 ifeq ($(SUB_PROJECT),example)
 	SBT_PROJECT       ?= example
-	MODEL             ?= BoomRocketTestHarness
+	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= $(SBT_PROJECT)
 	CONFIG            ?= DefaultRocketConfig
