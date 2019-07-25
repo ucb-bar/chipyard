@@ -96,7 +96,7 @@ run-binary-fast: $(sim)
 # helper rules to run simulator with as much debug info as possible
 #########################################################################################
 run-binary-debug: $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAG) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
