@@ -21,7 +21,7 @@ import hwacha.{Hwacha}
 
 import boom.system.{BoomTilesKey}
 
-import systolic.{SystolicArray, SystolicArrayKey, SystolicArrayConfig, Dataflow}
+import systolic.{SystolicArray, SystolicArrayConfig, Dataflow}
 
 // -------
 // CONFIGS
@@ -112,8 +112,6 @@ class MegaBeagleConfig extends Config(
   new WithMultiRoCCSystolic(1) ++ // add a systolic to just rocket
   new boom.system.WithRenumberHarts ++ // renumber harts with boom starting at 0 then rocket
 
-  // systolic parameter setup mixins
-  new WithSystolicParams ++
   // hwacha parameter setup mixins
   new hwacha.DefaultHwachaConfig ++
 

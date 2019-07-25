@@ -25,7 +25,7 @@ import boom.ifu.{FtqParameters}
 import boom.bpu.{GShareParameters, BoomBTBParameters}
 import boom.common._
 
-import systolic.{SystolicArray, SystolicArrayKey, SystolicArrayConfig, Dataflow}
+import systolic.{SystolicArray, SystolicArrayConfig, Dataflow}
 
 import example.{MultiRoCCKey}
 
@@ -129,25 +129,29 @@ class WithBeagleSerdesChanges extends Config((site, here, up) => {
 /**
  * Systolic Array Params
  */
-class WithSystolicParams extends Config((site, here, up) => {
-  case SystolicArrayKey =>
-    SystolicArrayConfig(
-      tileRows = 1,
-      tileColumns = 1,
-      meshRows = 16,
-      meshColumns = 16,
-      ld_str_queue_length = 10,
-      ex_queue_length = 10,
-      sp_banks = 4,
-      sp_bank_entries = 256 * 1024 * 8 / (4 * 16 * 8), // has to be a multiply of meshRows*tileRows
-      sp_width = 8 * 16, // has to be meshRows*tileRows*dataWidth // TODO should this be changeable?
-      shifter_banks = 1, // TODO add separate parameters for left and up shifter banks
-      depq_len = 65536,
-      dataflow = Dataflow.BOTH,
-      acc_rows = 64 * 1024 * 8 / (16 * 32),
-      mem_pipeline = 1
-    )
-})
+object SystolicConfigs {
+  val defaultConfig = SystolicArrayConfig(
+    tileRows = 1,
+    tileColumns = 1,
+    meshRows = 16,
+    meshColumns = 16,
+    ld_str_queue_length = 10,
+    ex_queue_length = 10,
+    sp_banks = 4,
+    sp_bank_entries = 256 * 1024 * 8 / (4 * 16 * 8), // has to be a multiply of meshRows*tileRows
+    sp_width = 8 * 16, // has to be meshRows*tileRows*dataWidth // TODO should this be changeable?
+    shifter_banks = 1, // TODO add separate parameters for left and up shifter banks
+    depq_len = 65536,
+    dataflow = Dataflow.BOTH,
+    acc_rows = 64 * 1024 * 8 / (16 * 32),
+    mem_pipeline = 1,
+    dma_maxbytes = 128, // TODO get this from cacheblockbytes
+    dma_buswidth = 128, // TODO get this from SystemBusKey
+    inputType = SInt(8.W),
+    outputType = SInt(19.W),
+    accType = SInt(32.W)
+  )
+}
 
 /**
  * Mixin to add SystolicArrays to cores
@@ -167,7 +171,7 @@ class WithMultiRoCCSystolic(harts: Int*) extends Config((site, here, up) => {
       (i -> Seq((p: Parameters) => {
         implicit val q = p
         implicit val v = implicitly[ValName]
-        LazyModule(new SystolicArray(SInt(8.W), SInt(16.W), SInt(32.W), OpcodeSet.custom3)).suggestName("systolic_array")
+        LazyModule(new SystolicArray(OpcodeSet.custom3, SystolicConfigs.defaultConfig)).suggestName("systolic_array")
       }))
     }
   }
