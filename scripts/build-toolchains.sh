@@ -138,7 +138,7 @@ cd $RDIR
 echo "export CHIPYARD_TOOLCHAIN_SOURCED=1" > env.sh
 echo "export RISCV=$RISCV" >> env.sh
 echo "export PATH=$RISCV/bin:$RDIR/$DTCversion:\$PATH" >> env.sh
-echo "export LD_LIBRARY_PATH=$RISCV/lib:\$LD_LIBRARY_PATH" >> env.sh
+echo "export LD_LIBRARY_PATH=$RISCV/lib\${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}" >> env.sh
 echo "Toolchain Build Complete!"
 
 
