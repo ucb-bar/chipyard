@@ -102,6 +102,7 @@ lazy val boom = (project in file("generators/boom"))
 lazy val systolic_array = (project in file("generators/systolic-array"))
    .settings(commonSettings)
    .dependsOn(icenet)
+   .dependsOn(boom)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
   .settings(commonSettings)
