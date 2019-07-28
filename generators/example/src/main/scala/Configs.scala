@@ -77,6 +77,10 @@ class SmallBaseBoomConfig extends Config(
   new WithBootROM ++
   new boom.system.SmallBoomConfig)
 
+class MediumBaseBoomConfig extends Config(
+  new WithBootROM ++
+  new boom.system.MediumBoomConfig)
+
 class DefaultBoomConfig extends Config(
   new WithNormalBoomRocketTop ++
   new BaseBoomConfig)
