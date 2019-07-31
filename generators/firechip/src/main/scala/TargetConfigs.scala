@@ -125,7 +125,6 @@ class FireSimRocketChipHexaCoreConfig extends Config(
 class FireSimRocketChipOctaCoreConfig extends Config(
   new WithNDuplicatedRocketCores(8) ++
   new FireSimRocketChipSingleCoreConfig)
-
 class FireSimBoomConfig extends Config(
   new WithBootROM ++
   new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
@@ -136,8 +135,7 @@ class FireSimBoomConfig extends Config(
   new WithBlockDevice ++
   new WithBoomL2TLBs(1024) ++
   new WithoutClockGating ++
-  // Using a small config because it has 64-bit system bus, and compiles quickly
-  new boom.system.SmallBoomConfig)
+  new boom.system.LargeBoomConfig)
 
 // A safer implementation than the one in BOOM in that it
 // duplicates whatever BOOMTileKey.head is present N times. This prevents
