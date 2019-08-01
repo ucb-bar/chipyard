@@ -1,10 +1,3 @@
-//******************************************************************************
-// Copyright (c) 2015 - 2019, The Regents of the University of California (Regents).
-// All Rights Reserved. See LICENSE and LICENSE.SiFive for license details.
-//------------------------------------------------------------------------------
-// Author: Christopher Celio, Abraham Gonzalez, Ben Korpan, Jerry Zhao
-//------------------------------------------------------------------------------
-
 package example
 
 import chisel3._
