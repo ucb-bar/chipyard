@@ -25,7 +25,7 @@ class WithBootROM extends Config((site, here, up) => {
     val chipyardBootROM = new File(s"./generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
     val firesimBootROM = new File(s"./target-rtl/chipyard/generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
 
-     val bootROMPath = if (chipyardBootROM.exists()) {
+    val bootROMPath = if (chipyardBootROM.exists()) {
       chipyardBootROM.getAbsolutePath()
     } else {
       firesimBootROM.getAbsolutePath()
@@ -277,6 +277,55 @@ class FireSimBoomDualCoreConfig extends Config(
 class FireSimBoomQuadCoreConfig extends Config(
   new WithNDuplicatedBoomCores(4) ++
   new FireSimBoomConfig)
+
+class FireSimBoomL2Config extends Config(
+  new WithStandardL2 ++ 
+  new FireSimBoomConfig)
+
+class FireSimLargeBoomConfig extends Config(
+  new WithBootROM ++
+  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
+  new WithExtMemSize(0x400000000L) ++ // 16GB
+  new WithoutTLMonitors ++
+  new WithUARTKey ++
+  new WithNICKey ++
+  new WithBlockDevice ++
+  new WithBoomL2TLBs(1024) ++
+  new WithoutClockGating ++
+  new boom.system.LargeBoomConfig)
+
+class FireSimLargeBoomDualCoreConfig extends Config(
+  new WithNDuplicatedBoomCores(2) ++
+  new FireSimLargeBoomConfig)
+
+class FireSimLargeBoomL2Config extends Config(
+  new WithStandardL2 ++
+  new FireSimLargeBoomConfig)
+
+class FireSimLargeBoomDualCoreL2Config extends Config(
+  new WithNDuplicatedBoomCores(2) ++
+  new FireSimLargeBoomL2Config)
+
+class FireSimLargeBoomPrefetcherConfig extends Config(
+  new WithPrefetchRoCC ++
+  new WithStandardL2 ++
+  new FireSimLargeBoomConfig)
+
+class FireSimLargeBoomPrefetcherDualCoreConfig extends Config(
+  new WithNDuplicatedBoomCores(2) ++
+  new FireSimLargeBoomPrefetcherConfig)
+
+class FireSimLargeBoomDRAMCacheConfig extends Config(
+  new WithPrefetchRoCC ++
+  new WithMemBenchKey ++
+  new WithDRAMCacheKey ++
+  new WithExtMemSize(15L << 30) ++
+  new WithStandardL2 ++
+  new FireSimLargeBoomConfig)
+
+class FireSimLargeBoomDRAMCacheDualCoreConfig extends Config(
+  new WithNDuplicatedBoomCores(2) ++
+  new FireSimLargeBoomDRAMCacheConfig)
 
 //**********************************************************************************
 //* Supernode Configurations

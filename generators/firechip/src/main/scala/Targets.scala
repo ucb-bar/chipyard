@@ -205,3 +205,13 @@ class FireSimDRAMCache(implicit p: Parameters) extends FireSimNoNIC
 class FireSimDRAMCacheModuleImp(outer: FireSimDRAMCache)
   extends FireSimNoNICModuleImp(outer)
   with HasPeripheryDRAMCacheModuleImpValidOnly
+
+class FireBoomDRAMCache(implicit p: Parameters) extends FireBoomNoNIC
+    with HasPeripheryMemBench
+    with HasPeripheryDRAMCache {
+  override lazy val module = new FireBoomDRAMCacheModuleImp(this)
+}
+
+class FireBoomDRAMCacheModuleImp(outer: FireBoomDRAMCache)
+  extends FireBoomNoNICModuleImp(outer)
+  with HasPeripheryDRAMCacheModuleImpValidOnly

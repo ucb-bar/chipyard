@@ -41,6 +41,7 @@ class FireSimDDR3LLC4MBConfig extends Config(
   new FireSimConfig)
 
 class FireSimDDR3FRFCFSConfig extends Config(
+  new WithSynthAsserts ++
   new FRFCFS16GBQuadRank ++
   new FireSimConfig)
 
