@@ -12,9 +12,9 @@ import testchipip._
 
 import sifive.blocks.devices.gpio._
 
-// -------------------------------
+// ------------------------------------
 // BOOM and/or Rocket Top Level Systems
-// -------------------------------
+// ------------------------------------
 
 class BoomRocketTop(implicit p: Parameters) extends boom.system.BoomRocketSystem
   with HasNoDebug
@@ -67,3 +67,12 @@ class BoomRocketTopWithGPIO(implicit p: Parameters) extends BoomRocketTop
 class BoomRocketTopWithGPIOModule(l: BoomRocketTopWithGPIO)
   extends BoomRocketTopModule(l)
   with HasPeripheryGPIOModuleImp
+
+//---------------------------------------------------------------------------------------------------------
+
+class BoomRocketTopWithDTM(implicit p: Parameters) extends boom.system.BoomRocketSystem
+{
+  override lazy val module = new BoomRocketTopWithDTMModule(this)
+}
+
+class BoomRocketTopWithDTMModule[+L <: BoomRocketTopWithDTM](l: L) extends boom.system.BoomRocketSystemModule(l)

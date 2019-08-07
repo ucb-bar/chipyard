@@ -9,3 +9,4 @@ They expect you to know about Chisel, Parameters, Configs, etc.
    :caption: Getting Started:
 
    Heterogeneous-SoCs
+   DTM-Debugging
