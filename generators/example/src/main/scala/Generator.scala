@@ -5,8 +5,6 @@ import chisel3._
 import freechips.rocketchip.config.{Parameters}
 import freechips.rocketchip.util.{GeneratorApp}
 
-import boom.system.{BoomTilesKey, TestSuiteHelper}
-
 object Generator extends GeneratorApp {
   // add unique test suites
   override def addTestSuites {
