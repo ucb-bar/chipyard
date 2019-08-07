@@ -63,7 +63,13 @@ class GB1MemoryConfig extends Config(
   new DefaultRocketConfig)
 
 class RocketL2Config extends Config(
-  new WithInclusiveCache ++ new DefaultRocketConfig)
+  new WithInclusiveCache ++
+  new DefaultRocketConfig)
+
+class HwachaL2Config extends Config(
+  new hwacha.DefaultHwachaConfig ++
+  new WithInclusiveCache ++
+  new DefaultRocketConfig)
 
 // ------------
 // BOOM Configs
@@ -146,7 +152,8 @@ class RV32UnifiedBoomConfig extends Config(
   new boom.system.SmallRV32UnifiedBoomConfig)
 
 class BoomL2Config extends Config(
-  new WithInclusiveCache ++ new SmallDefaultBoomConfig)
+  new WithInclusiveCache ++
+  new SmallDefaultBoomConfig)
 
 // ---------------------
 // BOOM and Rocket Configs
@@ -255,7 +262,8 @@ class RV32BoomAndRocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class DualCoreRocketL2Config extends Config(
-  new WithInclusiveCache ++ new DualCoreRocketConfig)
+  new WithInclusiveCache ++
+  new DualCoreRocketConfig)
 
 class LoopbackNICRocketConfig extends Config(
   new WithIceNIC ++

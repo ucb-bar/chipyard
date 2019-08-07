@@ -1,8 +1,8 @@
-# Chipyard Framework [![CircleCI](https://circleci.com/gh/ucb-bar/project-template/tree/master.svg?style=svg)](https://circleci.com/gh/ucb-bar/project-template/tree/master)
+# Chipyard Framework [![CircleCI](https://circleci.com/gh/ucb-bar/chipyard/tree/master.svg?style=svg)](https://circleci.com/gh/ucb-bar/chipyard/tree/master)
 
 ## Using Chipyard
 
-To get started using Chipyard, see the documentation on the Chipyard documentation site: https://bar-project-template.readthedocs.io/en/latest/
+To get started using Chipyard, see the documentation on the Chipyard documentation site: https://chipyard.readthedocs.io/en/latest/
 
 ## What is Chipyard
 
@@ -14,7 +14,7 @@ Chipyard is actively developed in the [Berkeley Architecture Research Group][ucb
 ## Resources
 
 * Chipyard Website: ...TBD at a later date...
-* Chipyard Documentation: https://bar-project-template.readthedocs.io/
+* Chipyard Documentation: https://chipyard.readthedocs.io/
 
 [hwacha]:http://hwacha.org
 [hammer]:https://github.com/ucb-bar/hammer
