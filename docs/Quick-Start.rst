@@ -12,15 +12,14 @@ Start by fetching Chipyard's sources. Run:
     cd chipyard
     ./scripts/init-submodules-no-riscv-tools.sh
 
-This will have initialized submodules and installed the RISC-V tools and
-other dependencies.
+This will have initialized the git submodules.
 
 Installing the RISC-V Tools
 -------------------------------------------
 
 We need to install the RISC-V toolchain in order to be able to run RISC-V programs using the Chipyard infrastructure.
 This will take about 20-30 minutes. You can expedite the process by setting a ``make`` environment variable to use parallel cores: ``export MAKEFLAGS=-j8``.
-TO build the toolchains, you should run: 
+To build the toolchains, you should run:
 
 ::
 
@@ -34,10 +33,10 @@ What's Next?
 -------------------------------------------
 
 This depends on what you are planning to do with Chipyard.
-- If you want to learn about the structure of Chipyard, go to <>.
-- If you intend to build one of the vanilla Chipyard examples, go to <> and follow the instructions.
-- If you intend to add a new accelerator, go to <> and follow the instructions.
+- If you want to learn about the structure of Chipyard, go to :ref:`chipyard-components`.
+- If you intend to build one of the vanilla Chipyard examples, go to :ref:`build-a-chip` and follow the instructions.
+- If you intend to add a new accelerator, go to :ref:`adding-an-accelerator` and follow the instructions.
 - If you intend to run a simulation of one of the vanilla Chipyard examples, go to :ref:`sw-rtl-sim-intro` and follow the instructions.
 - If you intend to run a simulation of a custom Chipyard SoC Configuration, go to <> and follow the instructions.
-- If you intend to run a full-system FireSim simulation, go to :ref:`firesim-sim-intro` and follow the instructions.  
-- If you intend to run a VLSI flow using one of the vanilla Chipyard examples, go to <> and follow the instructions.  
+- If you intend to run a full-system FireSim simulation, go to :ref:`firesim-sim-intro` and follow the instructions.
+- If you intend to run a VLSI flow using one of the vanilla Chipyard examples, go to <> and follow the instructions.

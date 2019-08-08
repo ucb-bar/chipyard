@@ -1,3 +1,5 @@
+.. _chipyard-components:
+
 Chipyard Components
 ===============================
 
