@@ -270,6 +270,11 @@ class LoopbackNICRocketConfig extends Config(
   new WithLoopbackNICBoomRocketTop ++
   new BaseRocketConfig)
 
+class LoopbackNICBoomConfig extends Config(
+  new WithIceNIC ++
+  new WithLoopbackNICBoomRocketTop ++
+  new BaseBoomConfig)
+
 class RemoteMemClientRocketConfig extends Config(
   new WithIceNIC ++
   new WithRemoteMemClient(1024) ++
@@ -286,3 +291,13 @@ class DRAMCacheRocketConfig extends Config(
   new WithPrefetchRoCC ++
   new WithDRAMCacheBoomRocketTop ++
   new BaseRocketConfig)
+
+class DRAMCacheBoomConfig extends Config(
+  new WithIceNIC ++
+  new WithInclusiveCache(capacityKB = 16) ++
+  new WithDRAMCache(
+    sizeKB = 112, nTrackersPerBank = 4, nBanksPerChannel = 2) ++
+  new WithMemBlade ++
+  new WithPrefetchRoCC ++
+  new WithDRAMCacheBoomRocketTop ++
+  new BaseBoomConfig)
