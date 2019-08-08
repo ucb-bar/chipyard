@@ -38,7 +38,7 @@ declare -A mapping
 mapping["example"]="SUB_PROJECT=example"
 mapping["boomexample"]="SUB_PROJECT=example CONFIG=DefaultBoomConfig"
 mapping["boomrocketexample"]="SUB_PROJECT=example CONFIG=DefaultBoomAndRocketConfig"
-mapping["boom"]="SUB_PROJECT=boom"
+mapping["boom"]="SUB_PROJECT=example CONFIG=SmallBoomConfig"
 mapping["rocketchip"]="SUB_PROJECT=rocketchip"
 mapping["blockdevrocketchip"]="SUB_PROJECT=example CONFIG=BlockDeviceModelRocketConfig TOP=BoomRocketTopWithBlockDevice"
 mapping["hwacha"]="SUB_PROJECT=example CONFIG=HwachaL2Config GENERATOR_PACKAGE=hwacha"

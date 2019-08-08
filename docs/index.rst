@@ -46,6 +46,13 @@ New to Chipyard? Jump to the :ref:`Chipyard Basics` page for more info.
    :numbered:
    Customization/index
 
+   :maxdepth: 3
+   :caption: Advanced Usage:
+   :numbered:
+   Advanced-Usage/index
+
+
+
 Indices and tables
 ==================
 

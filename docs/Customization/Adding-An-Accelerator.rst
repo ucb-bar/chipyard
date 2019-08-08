@@ -1,3 +1,5 @@
+.. _adding-an-accelerator:
+
 Adding An Accelerator/Device
 ===============================
 
@@ -63,9 +65,9 @@ Finally, add ``yourproject`` to the ``PACKAGES`` variable in the ``common.mk`` f
 This will allow make to detect that your source files have changed when building the Verilog/FIRRTL files.
 
 .. code-block:: shell
-   
+
      PACKAGES=$(addprefix generators/, rocket-chip testchipip boom hwacha sifive-blocks sifive-cache example yourproject) \
-		 $(addprefix sims/firesim/sim/, . firesim-lib midas midas/targetutils) 
+		 $(addprefix sims/firesim/sim/, . firesim-lib midas midas/targetutils)
 
 
 MMIO Peripheral
