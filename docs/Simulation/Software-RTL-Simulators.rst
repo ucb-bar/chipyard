@@ -1,3 +1,5 @@
+.. _sw-rtl-sim-intro:
+
 Software RTL Simulators
 ===================================
 

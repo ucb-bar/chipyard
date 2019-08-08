@@ -6,7 +6,7 @@ They expect you to know about Chisel, Parameters, Configs, etc.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Getting Started:
+   :caption: Advanced Usage:
 
-   Heterogeneous-SoCs
    DTM-Debugging
+   Resources
