@@ -21,7 +21,7 @@ We need to install the RISC-V toolchain in order to be able to run RISC-V progra
 This will take about 20-30 minutes. You can expedite the process by setting a ``make`` environment variable to use parallel cores: ``export MAKEFLAGS=-j8``.
 To build the toolchains, you should run:
 
-::
+.. code-block:: shell
 
     ./scripts/build-toolchains.sh
 

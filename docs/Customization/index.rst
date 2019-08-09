@@ -12,6 +12,7 @@ Hit next to get started!
 .. toctree::
    :maxdepth: 2
    :caption: Customization:
+
    Heterogeneous-SoCs
    Adding-An-Accelerator
    Memory-Hierarchy
