@@ -48,24 +48,26 @@ Current Limitations:
 ++++++++++++++++++++
 
 FireSim integration in Chipyard is still a work in progress. Presently, you
-cannot build a FireSim simulator from any generator project in Chipyard except ``firechip``, 
+cannot build a FireSim simulator from any generator project in Chipyard except ``firechip``,
 which properly invokes MIDAS on the target RTL.
 
 In the interim, workaround this limitation by importing Config and Module
-classes from other generator projects into FireChip. For example, assuming you Chipyard 
+classes from other generator projects into FireChip. For example, assuming you Chipyard
 config looks as following:
 
 .. code-block:: scala
+
   class CustomConfig extends Config(
     new WithInclusiveCache ++
     new myproject.MyCustomConfig ++
     new DefaultRocketConfig
   )
 
-Then the equivalent FireChip config (in `generators/firechip/src/main/scala/TargetConfigs.scala`) based on `FireSimRocketChipConfig` 
+Then the equivalent FireChip config (in `generators/firechip/src/main/scala/TargetConfigs.scala`) based on `FireSimRocketChipConfig`
 will look as follows:
 
 .. code-block:: scala
+
   class FireSimCustomConfig extends Config(
     new WithBootROM ++
     new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
@@ -80,7 +82,7 @@ will look as follows:
     new WithInclusiveCache ++
     new myproject.MyCustomConfig ++
     new freechips.rocketchip.system.DefaultConfig)
-  
+
 
 You should then be able to refer to those classes or an alias of them in your ``DESIGN`` or ``TARGET_CONFIG``
 variables. Note that if your target machine has I/O not provided in the default
