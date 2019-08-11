@@ -74,6 +74,17 @@ ifeq ($(SUB_PROJECT),hwacha)
 	TB                ?= TestDriver
 	TOP               ?= ExampleRocketSystem
 endif
+ifeq ($(SUB_PROJECT),ofdm)
+	SBT_PROJECT       ?= ofdmRocket
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= TestHarness
+	MODEL_PACKAGE     ?= motion
+	CONFIG            ?= DefaultConfig
+	CONFIG_PACKAGE    ?= freechips.rocketchip.system
+	GENERATOR_PACKAGE ?= freechips.rocketchip.system
+	TB                ?= TestDriver
+	TOP               ?= FireSimTop
+endif
 # Stand-in firechip variables:
 # TODO: need a seperate generator and test harnesses for each target
 #ifeq ($(SUB_PROJECT),firechip)

@@ -52,6 +52,9 @@
 [submodule "tools/chisel-testers"]
 	path = tools/chisel-testers
 	url = https://github.com/freechipsproject/chisel-testers.git
+[submodule "generators/ofdm"]
+	path = generators/ofdm
+	url = https://github.com/grebe/ofdm
 [submodule "tools/treadle"]
 	path = tools/treadle
 	url = https://github.com/freechipsproject/treadle.git

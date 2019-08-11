@@ -88,7 +88,8 @@ lazy val `chisel-testers` = freshProject("chisel-testers", file("./tools/chisel-
 
  // Contains annotations & firrtl passes you may wish to use in rocket-chip without
 // introducing a circular dependency between RC and MIDAS
-lazy val midasTargetUtils = ProjectRef(firesimDir, "targetutils")
+lazy val midasTargetUtils = (project in firesimDir / "midas" / "targetutils")
+  .settings(commonSettings).dependsOn(chisel)
 
  // Rocket-chip dependencies (subsumes making RC a RootProject)
 lazy val hardfloat  = (project in rocketChipDir / "hardfloat")
@@ -125,6 +126,7 @@ lazy val boom = (project in file("generators/boom"))
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
+  .dependsOn(ofdmRocket)
   .settings(commonSettings)
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
@@ -151,6 +153,21 @@ lazy val `rocket-dsptools` = (project in file("./tools/dsptools/rocket"))
   .dependsOn(rocketchip, dsptools)
   .settings(commonSettings)
 
+lazy val ofdm = freshProject("ofdm", file("generators/ofdm"))
+  .dependsOn(dsptools)
+  .settings(
+      commonSettings,
+      libraryDependencies += "org.tukaani" % "xz" % "1.0"
+    )
+
+lazy val ofdmRocket = (project in file("generators/ofdm/rocket"))
+  .dependsOn(ofdm, `rocket-dsptools`)
+  .settings(commonSettings)
+
+lazy val ofdmFiresim = (project in file("generators/ofdm/firesim"))
+  .dependsOn(ofdmRocket, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
+  .settings(commonSettings)
+
 lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
@@ -161,11 +178,15 @@ lazy val sifive_cache = (project in file("generators/sifive-cache")).settings(
   ).dependsOn(rocketchip)
 
 // Library components of FireSim
-lazy val midas      = ProjectRef(firesimDir, "midas")
-lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
+lazy val midas      = freshProject("midas", firesimDir / "midas")
+  .dependsOn(tapeout, barstoolsMacros, midasTargetUtils)
+  .settings(commonSettings)
+lazy val firesimLib = freshProject("firesimLib", firesimDir / "firesim-lib")
+  .dependsOn(midas, icenet, testchipip, sifive_blocks)
+  .settings(commonSettings)
 
 lazy val firechip = (project in file("generators/firechip"))
-  .dependsOn(boom, icenet, testchipip, sifive_blocks, sifive_cache, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
+  .dependsOn(boom, icenet, ofdmFiresim, testchipip, sifive_blocks, sifive_cache, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
     testGrouping in Test := isolateAllTests( (definedTests in Test).value )

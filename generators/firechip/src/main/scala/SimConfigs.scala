@@ -22,6 +22,7 @@ import firesim.configs._
 class FireSimConfig extends Config(
   new WithSerialWidget ++
   new WithUARTWidget ++
+  new motion.WithMotionWidget ++
   new WithSimpleNICWidget ++
   new WithBlockDevWidget ++
   new WithDefaultMemModel ++
