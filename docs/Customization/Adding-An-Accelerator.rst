@@ -1,3 +1,5 @@
+.. _adding-an-accelerator:
+
 Adding An Accelerator/Device
 ===============================
 
@@ -28,7 +30,7 @@ Integrating into the Generator Build System
 -------------------------------------------
 
 While developing, you want to include Chisel code in a submodule so that it can be shared by different projects.
-To add a submodule to the REBAR framework, make sure that your project is organized as follows.
+To add a submodule to the Chipyard framework, make sure that your project is organized as follows.
 
 .. code-block:: none
 
@@ -45,11 +47,11 @@ Then add it as a submodule to under the following directory hierarchy: ``generat
     cd generators/
     git submodule add https://git-repository.com/yourproject.git
 
-Then add ``yourproject`` to the REBAR top-level build.sbt file.
+Then add ``yourproject`` to the Chipyard top-level build.sbt file.
 
 .. code-block:: scala
 
-    lazy val yourproject = project.settings(commonSettings).dependsOn(rocketchip)
+    lazy val yourproject = (project in file("generators/yourproject")).settings(commonSettings).dependsOn(rocketchip)
 
 You can then import the classes defined in the submodule in a new project if
 you add it as a dependency. For instance, if you want to use this code in
@@ -59,8 +61,14 @@ the ``example`` project, change the final line in build.sbt to the following.
 
     lazy val example = (project in file(".")).settings(commonSettings).dependsOn(testchipip, yourproject)
 
-Finally, add ``yourproject`` to the ``PACKAGES`` variable in the ``common.mk`` file in the REBAR top level.
+Finally, add ``yourproject`` to the ``PACKAGES`` variable in the ``common.mk`` file in the Chipyard top level.
 This will allow make to detect that your source files have changed when building the Verilog/FIRRTL files.
+
+.. code-block:: shell
+
+     PACKAGES=$(addprefix generators/, rocket-chip testchipip boom hwacha sifive-blocks sifive-cache example yourproject) \
+		 $(addprefix sims/firesim/sim/, . firesim-lib midas midas/targetutils)
+
 
 MMIO Peripheral
 ------------------
@@ -227,7 +235,7 @@ Now with all of that done, we can go ahead and run our simulation.
 
 .. code-block:: shell
 
-    cd verisim
+    cd verilator
     make CONFIG=PWMConfig
     ./simulator-example-PWMConfig ../tests/pwm.riscv
 

@@ -28,6 +28,8 @@ sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 PERMISSIVE_ON=+permissive
 PERMISSIVE_OFF=+permissive-off
 
+WAVEFORM_FLAG=+vcdplusfile=$(sim_out_name).vpd
+
 .PHONY: default debug
 default: $(sim)
 debug: $(sim_debug)
@@ -54,13 +56,12 @@ VCS_NONCC_OPTS = \
 	-error=PCWM-L \
 	-timescale=1ns/10ps \
 	-quiet \
+	-q \
 	+rad \
 	+v2k \
 	+vcs+lic+wait \
 	+vc+list \
-	-f $(sim_top_blackboxes) \
-	-f $(sim_harness_blackboxes) \
-	-f $(sim_dotf) \
+	-f $(sim_common_files) \
 	-sverilog \
 	+incdir+$(build_dir) \
 	+define+CLOCK_PERIOD=1.0 \
@@ -78,29 +79,23 @@ VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS)
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
-$(sim): $(sim_vsrcs) $(sim_dotf)
+$(sim): $(sim_vsrcs) $(sim_common_files)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	-debug_pp
 
-$(sim_debug) : $(sim_vsrcs) $(sim_dotf)
+$(sim_debug) : $(sim_vsrcs) $(sim_common_files)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	+define+DEBUG -debug_pp
-
-#########################################################################################
-# helper rules to run simulator with debug
-#########################################################################################
-run-binary-debug: $(sim_debug)
-	$(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) +vcdplusfile=$(sim_out_name).vpd $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out
 
 #########################################################################################
 # create a vcs vpd rule
 #########################################################################################
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
-	$(sim_debug) $(PERMISSIVE_ON) +vcdplusfile=$@ +max-cycles=$(timeout_cycles) $(PERMISSIVE_OFF) $<
+	$(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $<
 
 #########################################################################################
 # general cleanup rule
 #########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(gen_dir)/* csrc $(sim_prefix)-* ucli.key vc_hdrs.h
+	rm -rf $(gen_dir) csrc $(sim_prefix)-* ucli.key vc_hdrs.h

@@ -1,7 +1,7 @@
-REBAR CI
-========
+Chipyard CI
+===========
 
-Website: https://circleci.com/gh/ucb-bar/project-template
+Website: https://circleci.com/gh/ucb-bar/chipyard
 
 CircleCI Brief Explanation
 ---------------------------
@@ -32,17 +32,18 @@ Here the key is built from a string where the `checksum` portion converts the fi
 .circleci directory
 -------------------
 
-This directory contains all the collateral for the REBAR CI to work.
+This directory contains all the collateral for the Chipyard CI to work.
 The following is included:
-    
-    build-toolchains.sh # build either riscv-tools or esp-tools
-    build-verilator.sh  # build verilator
-    create-hash.sh      # create hashes of riscv-tools/esp-tools so circleci caching can work
-    do-rtl-build.sh     # use verilator to build a sim executable
-    config.yml          # main circleci config script to enumerate jobs/workflows
 
-How things are setup for REBAR
-------------------------------
+    `build-toolchains.sh` # build either riscv-tools or esp-tools
+    `build-verilator.sh`  # build verilator (remotely)
+    `create-hash.sh`      # create hashes of riscv-tools/esp-tools so circleci caching can work
+    `do-rtl-build.sh`     # use verilator to build a sim executable (remotely)
+    `config.yml`          # main circleci config script to enumerate jobs/workflows
+    `defaults.sh`         # default variables used
+
+How things are setup for Chipyard
+---------------------------------
 
 The steps for CI to run are as follows.
 1st, build the toolchains in parallel (note: `esp-tools` is currently not used in the run).
@@ -52,3 +53,18 @@ The docker image sets up the `PATH` and `RISCV` variable so that `riscv-tools` i
 This requires the `riscv-tools` for `fesvr` and `verilator` to be able to build the binary.
 This stores all collateral for the tests (srcs, generated-srcs, sim binary, etc) to run "out of the gate" in the next job (make needs everything or else it will run again).
 4th, finally run the tests that were wanted.
+
+Other CI Setup
+--------------
+
+To get the CI to work correctly you need to setup CircleCI environment variables to point to the remote directory to build files and the server user/ip.
+In the project settings, you can find this under "Build Settings" "Environment Variables".
+You need to add two variables like the following:
+
+CI\_DIR = /path/to/where/you/want/to/store/remote/files
+SERVER = username@myserver.coolmachine.berkeley.edu
+
+Additionally, you need to add under the "PERMISSIONS" "SSH Permissions" section a private key that is on the build server that you are using.
+After adding a private key, it will show a fingerprint that should be added under the jobs that need to be run.
+
+Note: On the remote server you need to have the `*.pub` key file added to the `authorized_keys` file.

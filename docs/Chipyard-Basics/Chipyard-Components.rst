@@ -1,10 +1,12 @@
-REBAR Basics
+.. _chipyard-components:
+
+Chipyard Components
 ===============================
 
 Generators
 -------------------------------------------
 
-The REBAR Framework currently consists of the following RTL generators:
+The Chipyard Framework currently consists of the following RTL generators:
 
 Processor Cores
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -72,7 +74,7 @@ Toolchains
   A collection of software toolchains used to develop and execute software on the RISC-V ISA.
   The include compiler and assembler toolchains, functional ISA simulator (spike), the Berkeley Boot Loader (BBL) and proxy kernel.
   The riscv-tools repository was previously required to run any RISC-V software, however, many of the riscv-tools components have since been upstreamed to their respective open-source projects (Linux, GNU, etc.).
-  Nevertheless, for consistent versioning, as well as software design flexibility for custom hardware, we include the riscv-tools repository and installation in the REBAR framework.
+  Nevertheless, for consistent versioning, as well as software design flexibility for custom hardware, we include the riscv-tools repository and installation in the Chipyard framework.
 
 **esp-tools**
   A fork of riscv-tools, designed to work with the Hwacha non-standard RISC-V extension.
@@ -81,14 +83,14 @@ Toolchains
 Sims
 -------------------------------------------
 
-**verisim (Verilator wrapper)**
+**verilator (Verilator wrapper)**
   Verilator is an open source Verilog simulator.
-  The ``verisim`` directory provides wrappers which construct Verilator-based simulators from relevant generated RTL, allowing for execution of test RISC-V programs on the simulator (including vcd waveform files).
+  The ``verilator`` directory provides wrappers which construct Verilator-based simulators from relevant generated RTL, allowing for execution of test RISC-V programs on the simulator (including vcd waveform files).
   See :ref:`Verilator` for more information.
 
-**vsim (VCS wrapper)**
+**vcs (VCS wrapper)**
   VCS is a proprietary Verilog simulator.
-  Assuming the user has valid VCS licenses and installations, the ``vsim`` directory provides wrappers which construct VCS-based simulators from relevant generated RTL, allowing for execution of test RISC-V programs on the simulator (including vcd/vpd waveform files).
+  Assuming the user has valid VCS licenses and installations, the ``vcs`` directory provides wrappers which construct VCS-based simulators from relevant generated RTL, allowing for execution of test RISC-V programs on the simulator (including vcd/vpd waveform files).
   See :ref:`VCS` for more information.
 
 **FireSim**

@@ -3,7 +3,7 @@ package example
 import chisel3._
 
 import freechips.rocketchip.config.{Config}
-import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, WithExtMemSize, WithNBanks}
+import freechips.rocketchip.subsystem.{WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, WithExtMemSize, WithNBanks, WithInclusiveCache}
 
 import testchipip._
 
@@ -62,17 +62,26 @@ class GB1MemoryConfig extends Config(
   new WithExtMemSize((1<<30) * 1L) ++
   new DefaultRocketConfig)
 
+class RocketL2Config extends Config(
+  new WithInclusiveCache ++
+  new DefaultRocketConfig)
+
+class HwachaL2Config extends Config(
+  new hwacha.DefaultHwachaConfig ++
+  new WithInclusiveCache ++
+  new DefaultRocketConfig)
+
 // ------------
 // BOOM Configs
 // ------------
 
 class BaseBoomConfig extends Config(
   new WithBootROM ++
-  new boom.system.BoomConfig)
+  new boom.common.LargeBoomConfig)
 
 class SmallBaseBoomConfig extends Config(
   new WithBootROM ++
-  new boom.system.SmallBoomConfig)
+  new boom.common.SmallBoomConfig)
 
 class DefaultBoomConfig extends Config(
   new WithNormalBoomRocketTop ++
@@ -121,8 +130,9 @@ class DualCoreBoomConfig extends Config(
   new WithNormalBoomRocketTop ++
   new WithBootROM ++
   new boom.common.WithRVC ++
-  new boom.common.DefaultBoomConfig ++
-  new boom.system.WithNBoomCores(2) ++
+  new boom.common.WithLargeBooms ++
+  new boom.common.BaseBoomConfig ++
+  new boom.common.WithNBoomCores(2) ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.system.BaseConfig)
 
@@ -131,15 +141,19 @@ class DualCoreSmallBoomConfig extends Config(
   new WithBootROM ++
   new boom.common.WithRVC ++
   new boom.common.WithSmallBooms ++
-  new boom.common.DefaultBoomConfig ++
-  new boom.system.WithNBoomCores(2) ++
+  new boom.common.BaseBoomConfig ++
+  new boom.common.WithNBoomCores(2) ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.system.BaseConfig)
 
 class RV32UnifiedBoomConfig extends Config(
   new WithNormalBoomRocketTop ++
   new WithBootROM ++
-  new boom.system.SmallRV32UnifiedBoomConfig)
+  new boom.common.SmallRV32UnifiedBoomConfig)
+
+class BoomL2Config extends Config(
+  new WithInclusiveCache ++
+  new SmallDefaultBoomConfig)
 
 // ---------------------
 // BOOM and Rocket Configs
@@ -147,21 +161,22 @@ class RV32UnifiedBoomConfig extends Config(
 
 class BaseBoomAndRocketConfig extends Config(
   new WithBootROM ++
-  new boom.system.WithRenumberHarts ++
+  new boom.common.WithRenumberHarts ++
   new boom.common.WithRVC ++
-  new boom.common.DefaultBoomConfig ++
-  new boom.system.WithNBoomCores(1) ++
+  new boom.common.WithLargeBooms ++
+  new boom.common.BaseBoomConfig ++
+  new boom.common.WithNBoomCores(1) ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
 class SmallBaseBoomAndRocketConfig extends Config(
   new WithBootROM ++
-  new boom.system.WithRenumberHarts ++
+  new boom.common.WithRenumberHarts ++
   new boom.common.WithRVC ++
   new boom.common.WithSmallBooms ++
-  new boom.common.DefaultBoomConfig ++
-  new boom.system.WithNBoomCores(1) ++
+  new boom.common.BaseBoomConfig ++
+  new boom.common.WithNBoomCores(1) ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -208,24 +223,26 @@ class GPIOBoomAndRocketConfig extends Config(
 class DualCoreBoomAndOneRocketConfig extends Config(
   new WithNormalBoomRocketTop ++
   new WithBootROM ++
-  new boom.system.WithRenumberHarts ++
+  new boom.common.WithRenumberHarts ++
   new boom.common.WithRVC ++
-  new boom.common.DefaultBoomConfig ++
-  new boom.system.WithNBoomCores(2) ++
+  new boom.common.WithLargeBooms ++
+  new boom.common.BaseBoomConfig ++
+  new boom.common.WithNBoomCores(2) ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
-class DualCoreBoomAndOneHwachaRocketConfig extends Config(
+class DualBoomAndOneHwachaRocketConfig extends Config(
   new WithNormalBoomRocketTop ++
   new WithBootROM ++
   new WithMultiRoCC ++
   new WithMultiRoCCHwacha(0) ++ // put Hwacha just on hart0 which was renumbered to Rocket
-  new boom.system.WithRenumberHarts ++
+  new boom.common.WithRenumberHarts(rocketFirst = true) ++
   new hwacha.DefaultHwachaConfig ++
   new boom.common.WithRVC ++
-  new boom.common.DefaultBoomConfig ++
-  new boom.system.WithNBoomCores(2) ++
+  new boom.common.WithLargeBooms ++
+  new boom.common.BaseBoomConfig ++
+  new boom.common.WithNBoomCores(2) ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -233,12 +250,17 @@ class DualCoreBoomAndOneHwachaRocketConfig extends Config(
 class RV32BoomAndRocketConfig extends Config(
   new WithNormalBoomRocketTop ++
   new WithBootROM ++
-  new boom.system.WithRenumberHarts ++
+  new boom.common.WithRenumberHarts ++
   new boom.common.WithBoomRV32 ++
   new boom.common.WithRVC ++
-  new boom.common.DefaultBoomConfig ++
-  new boom.system.WithNBoomCores(1) ++
+  new boom.common.WithLargeBooms ++
+  new boom.common.BaseBoomConfig ++
+  new boom.common.WithNBoomCores(1) ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new WithRV32 ++
+  new freechips.rocketchip.subsystem.WithRV32 ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+
+class DualCoreRocketL2Config extends Config(
+  new WithInclusiveCache ++
+  new DualCoreRocketConfig)
