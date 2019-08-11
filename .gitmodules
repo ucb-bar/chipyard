@@ -46,3 +46,12 @@
 [submodule "vlsi/hammer-cad-plugins"]
 	path = vlsi/hammer-cad-plugins
 	url = https://github.com/ucb-bar/hammer-cad-plugins.git
+[submodule "tools/dsptools"]
+	path = tools/dsptools
+	url = https://github.com/ucb-bar/dsptools.git
+[submodule "tools/chisel-testers"]
+	path = tools/chisel-testers
+	url = https://github.com/freechipsproject/chisel-testers.git
+[submodule "tools/treadle"]
+	path = tools/treadle
+	url = https://github.com/freechipsproject/treadle.git
