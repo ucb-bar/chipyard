@@ -5,6 +5,7 @@ target
 *.stamp
 *.vcd
 *.swp
+*.log
 *#
 *~
 .idea
