@@ -105,6 +105,7 @@ $(sim_debug): $(model_mk_debug)
 #########################################################################################
 # create a verilator vpd rule
 #########################################################################################
+.PRECIOUS: $(output_dir)/%.vpd %.vcd
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd
 	vcd2vpd $@.vcd $@ > /dev/null &
