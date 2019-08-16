@@ -123,30 +123,30 @@ endif
 #########################################################################################
 regression-tests = \
 	rv64ud-v-fcvt \
-        rv64ud-p-fdiv \
-        rv64ud-v-fadd \
-        rv64uf-v-fadd \
-        rv64um-v-mul \
-        rv64mi-p-breakpoint \
-        rv64uc-v-rvc \
-        rv64ud-v-structural \
-        rv64si-p-wfi \
-        rv64um-v-divw \
-        rv64ua-v-lrsc \
-        rv64ui-v-fence_i \
-        rv64ud-v-fcvt_w \
-        rv64uf-v-fmin \
-        rv64ui-v-sb \
-        rv64ua-v-amomax_d \
-        rv64ud-v-move \
-        rv64ud-v-fclass \
-        rv64ua-v-amoand_d \
-        rv64ua-v-amoxor_d \
-        rv64si-p-sbreak \
-        rv64ud-v-fmadd \
-        rv64uf-v-ldst \
-        rv64um-v-mulh \
-        rv64si-p-dirty
+	rv64ud-p-fdiv \
+	rv64ud-v-fadd \
+	rv64uf-v-fadd \
+	rv64um-v-mul \
+	rv64mi-p-breakpoint \
+	rv64uc-v-rvc \
+	rv64ud-v-structural \
+	rv64si-p-wfi \
+	rv64um-v-divw \
+	rv64ua-v-lrsc \
+	rv64ui-v-fence_i \
+	rv64ud-v-fcvt_w \
+	rv64uf-v-fmin \
+	rv64ui-v-sb \
+	rv64ua-v-amomax_d \
+	rv64ud-v-move \
+	rv64ud-v-fclass \
+	rv64ua-v-amoand_d \
+	rv64ua-v-amoxor_d \
+	rv64si-p-sbreak \
+	rv64ud-v-fmadd \
+	rv64uf-v-ldst \
+	rv64um-v-mulh \
+	rv64si-p-dirty
 
 .PHONY: run-regression-tests run-regression-tests-fast run-regression-tests-debug
 run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))
