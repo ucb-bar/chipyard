@@ -17,8 +17,14 @@ import testchipip._
 import testchipip.SerialAdapter.SERIAL_IF_WIDTH
 import sifive.blocks.devices.uart._
 import midas.models.AXI4BundleWithEdge
+import firesim.util.IOMatchingMIDASEnvironment
 import java.io.File
 
+
+object FireSimValName {
+  implicit val valName = ValName("TestHarness")
+}
+import FireSimValName._
 /*******************************************************************************
 * Top level DESIGN configurations. These describe the basic instantiations of
 * the designs being simulated.
@@ -30,7 +36,7 @@ import java.io.File
 * determine which driver to build.
 *******************************************************************************/
 
-class FireSim(implicit p: Parameters) extends RocketSubsystem
+class FireSimDUT(implicit p: Parameters) extends RocketSubsystem
     with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
@@ -44,7 +50,7 @@ class FireSim(implicit p: Parameters) extends RocketSubsystem
   override lazy val module = new FireSimModuleImp(this)
 }
 
-class FireSimModuleImp[+L <: FireSim](l: L) extends RocketSubsystemModuleImp(l)
+class FireSimModuleImp[+L <: FireSimDUT](l: L) extends RocketSubsystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
@@ -56,8 +62,9 @@ class FireSimModuleImp[+L <: FireSim](l: L) extends RocketSubsystemModuleImp(l)
     with HasTraceIOImp
     with CanHaveRocketMultiCycleRegfileImp
 
+class FireSim(implicit p: Parameters) extends IOMatchingMIDASEnvironment(() => LazyModule(new FireSimDUT).module)
 
-class FireSimNoNIC(implicit p: Parameters) extends RocketSubsystem
+class FireSimNoNICDUT(implicit p: Parameters) extends RocketSubsystem
     with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
@@ -70,7 +77,7 @@ class FireSimNoNIC(implicit p: Parameters) extends RocketSubsystem
   override lazy val module = new FireSimNoNICModuleImp(this)
 }
 
-class FireSimNoNICModuleImp[+L <: FireSimNoNIC](l: L) extends RocketSubsystemModuleImp(l)
+class FireSimNoNICModuleImp[+L <: FireSimNoNICDUT](l: L) extends RocketSubsystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
@@ -82,7 +89,9 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNIC](l: L) extends RocketSubsystemMod
     with CanHaveRocketMultiCycleRegfileImp
 
 
-class FireBoom(implicit p: Parameters) extends BoomRocketSubsystem
+class FireSimNoNIC(implicit p: Parameters) extends IOMatchingMIDASEnvironment(() => LazyModule(new FireSimNoNICDUT).module)
+
+class FireBoomDUT(implicit p: Parameters) extends BoomRocketSubsystem
     with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
@@ -96,7 +105,7 @@ class FireBoom(implicit p: Parameters) extends BoomRocketSubsystem
   override lazy val module = new FireBoomModuleImp(this)
 }
 
-class FireBoomModuleImp[+L <: FireBoom](l: L) extends BoomRocketSubsystemModuleImp(l)
+class FireBoomModuleImp[+L <: FireBoomDUT](l: L) extends BoomRocketSubsystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
@@ -109,7 +118,9 @@ class FireBoomModuleImp[+L <: FireBoom](l: L) extends BoomRocketSubsystemModuleI
     with ExcludeInvalidBoomAssertions
     with CanHaveBoomMultiCycleRegfileImp
 
-class FireBoomNoNIC(implicit p: Parameters) extends BoomRocketSubsystem
+class FireBoom(implicit p: Parameters) extends IOMatchingMIDASEnvironment(() => LazyModule(new FireBoomDUT).module)
+
+class FireBoomNoNICDUT(implicit p: Parameters) extends BoomRocketSubsystem
     with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
@@ -122,7 +133,7 @@ class FireBoomNoNIC(implicit p: Parameters) extends BoomRocketSubsystem
   override lazy val module = new FireBoomNoNICModuleImp(this)
 }
 
-class FireBoomNoNICModuleImp[+L <: FireBoomNoNIC](l: L) extends BoomRocketSubsystemModuleImp(l)
+class FireBoomNoNICModuleImp[+L <: FireBoomNoNICDUT](l: L) extends BoomRocketSubsystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
@@ -133,6 +144,8 @@ class FireBoomNoNICModuleImp[+L <: FireBoomNoNIC](l: L) extends BoomRocketSubsys
     with HasTraceIOImp
     with ExcludeInvalidBoomAssertions
     with CanHaveBoomMultiCycleRegfileImp
+
+class FireBoomNoNIC(implicit p: Parameters) extends IOMatchingMIDASEnvironment(() => LazyModule(new FireBoomNoNICDUT).module)
 
 case object NumNodes extends Field[Int]
 
@@ -152,10 +165,10 @@ class SupernodeIO(
 }
 
 
-class FireSimSupernode(implicit p: Parameters) extends Module {
+class FireSimSupernodeDUT(implicit p: Parameters) extends Module {
   val nNodes = p(NumNodes)
   val nodes = Seq.fill(nNodes) {
-    Module(LazyModule(new FireSim).module)
+    Module(LazyModule(new FireSimDUT).module)
   }
 
   val io = IO(new SupernodeIO(nNodes, SERIAL_IF_WIDTH, nodes(0).mem_axi4.get))
@@ -178,3 +191,4 @@ class FireSimSupernode(implicit p: Parameters) extends Module {
   } }
 }
 
+class FireSimSupernode(implicit p: Parameters) extends IOMatchingMIDASEnvironment(() => new FireSimSupernodeDUT)
