@@ -51,7 +51,7 @@ LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesv
 VERILATOR_CC_OPTS = \
 	-O3 \
 	-CFLAGS "$(CXXFLAGS) -DTEST_HARNESS=V$(VLOG_MODEL) -DVERILATOR" \
-	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs" \
+	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(build_dir)/verilator.h" \
 	-LDFLAGS "$(LDFLAGS)"
 
 VERILATOR_NONCC_OPTS = \
