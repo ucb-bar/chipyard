@@ -1,4 +1,4 @@
-package example
+package utilities
 
 import scala.collection.mutable.{LinkedHashSet}
 

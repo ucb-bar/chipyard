@@ -137,7 +137,7 @@ class FireSimBoomConfig extends Config(
   new WithBoomL2TLBs(1024) ++
   new WithoutClockGating ++
   // Using a small config because it has 64-bit system bus, and compiles quickly
-  new boom.system.SmallBoomConfig)
+  new boom.common.SmallBoomConfig)
 
 // A safer implementation than the one in BOOM in that it
 // duplicates whatever BOOMTileKey.head is present N times. This prevents

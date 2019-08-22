@@ -4,6 +4,7 @@ import chisel3._
 
 import freechips.rocketchip.config.{Parameters}
 import freechips.rocketchip.util.{GeneratorApp}
+import utilities.TestSuiteHelper
 
 object Generator extends GeneratorApp {
   // add unique test suites
