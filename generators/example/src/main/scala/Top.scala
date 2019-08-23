@@ -17,9 +17,9 @@ import icenet.{HasPeripheryIceNIC, HasPeripheryIceNICModuleImp}
 import memblade.client.{HasPeripheryRemoteMemClient, HasPeripheryRemoteMemClientModuleImp}
 import memblade.cache.{HasPeripheryDRAMCache, HasPeripheryDRAMCacheModuleImp}
 
-// -------------------------------
+// ------------------------------------
 // BOOM and/or Rocket Top Level Systems
-// -------------------------------
+// ------------------------------------
 
 class BoomRocketTop(implicit p: Parameters) extends boom.system.BoomRocketSystem
   with HasNoDebug
@@ -101,3 +101,12 @@ class BoomRocketTopWithDRAMCache(implicit p: Parameters)
 class BoomRocketTopWithDRAMCacheModule(outer: BoomRocketTopWithDRAMCache)
   extends BoomRocketTopModule(outer)
   with HasPeripheryDRAMCacheModuleImp
+
+//---------------------------------------------------------------------------------------------------------
+
+class BoomRocketTopWithDTM(implicit p: Parameters) extends boom.system.BoomRocketSystem
+{
+  override lazy val module = new BoomRocketTopWithDTMModule(this)
+}
+
+class BoomRocketTopWithDTMModule[+L <: BoomRocketTopWithDTM](l: L) extends boom.system.BoomRocketSystemModule(l)

@@ -1,4 +1,6 @@
-Chipyard Basics
+.. _chipyard-components:
+
+Chipyard Components
 ===============================
 
 Generators

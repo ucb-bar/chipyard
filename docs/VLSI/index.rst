@@ -1,11 +1,11 @@
-VLSI Production
+VLSI Flow
 ================================
 
-The Chipyard framework aim to provide wrappers to a general VLSI flow.
-In particular, we aim to support the HAMMER flow.
+The Chipyard framework aims to provide wrappers for a general VLSI flow.
+In particular, we aim to support the HAMMER physical design generator flow.
 
 .. toctree::
    :maxdepth: 2
-   :caption: VLSI Production:
+   :caption: VLSI Flow:
 
    HAMMER

@@ -68,6 +68,15 @@ class WithNormalBoomRocketTop extends Config((site, here, up) => {
 })
 
 /**
+ * Class to specify a top level BOOM and/or Rocket system with DTM
+ */
+class WithDTMBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTopWithDTM => (clock: Clock, reset: Bool, p: Parameters) => {
+    Module(LazyModule(new BoomRocketTopWithDTM()(p)).module)
+  }
+})
+
+/**
  * Class to specify a top level BOOM and/or Rocket system with PWM
  */
 class WithPWMBoomRocketTop extends Config((site, here, up) => {
