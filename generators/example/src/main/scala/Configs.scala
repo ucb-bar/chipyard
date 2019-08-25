@@ -27,6 +27,10 @@ class RoccRocketConfig extends Config(
   new WithRoccExample ++
   new DefaultRocketConfig)
 
+class Sha3RocketConfig extends Config(
+  new sha3.WithSha3Accel ++
+  new DefaultRocketConfig)
+
 class PWMRocketConfig extends Config(
   new WithPWMBoomRocketTop ++
   new BaseRocketConfig)
