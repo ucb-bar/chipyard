@@ -27,8 +27,8 @@ trait HasTestSuites {
       "rv64ud-v-fadd",
       "rv64uf-v-fadd",
       "rv64um-v-mul",
-      // "rv64mi-p-breakpoint", // Not implemented in BOOM
-      // "rv64uc-v-rvc", // Not implemented in BOOM
+      "rv64mi-p-breakpoint",
+      "rv64uc-v-rvc",
       "rv64ud-v-structural",
       "rv64si-p-wfi",
       "rv64um-v-divw",
