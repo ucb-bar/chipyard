@@ -117,35 +117,6 @@ jobs:
                 key: example-{{ .Branch }}-{{ .Revision }}
                 paths:
                     - "/home/riscvuser/project"
-    prepare-boomexample:
-        docker:
-            - image: riscvboom/riscvboom-images:0.0.10
-        environment:
-            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
-            TERM: dumb
-        steps:
-            - add_ssh_keys:
-                fingerprints:
-                    - "3e:c3:02:5b:ed:64:8c:b7:b0:04:43:bc:83:43:73:1e"
-            - checkout
-            - run:
-                name: Create hash of toolchains
-                command: |
-                    .circleci/create-hash.sh
-            - restore_cache:
-                keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
-            - restore_cache:
-                keys:
-                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
-            - run:
-                name: Building the boomexample subproject using Verilator
-                command: .circleci/do-rtl-build.sh boomexample
-                no_output_timeout: 120m
-            - save_cache:
-                key: boomexample-{{ .Branch }}-{{ .Revision }}
-                paths:
-                    - "/home/riscvuser/project"
     prepare-boomrocketexample:
         docker:
             - image: riscvboom/riscvboom-images:0.0.10
@@ -315,30 +286,6 @@ jobs:
             - run:
                 name: Run example tests
                 command: .circleci/run-tests.sh example
-    boomexample-run-tests:
-        docker:
-            - image: riscvboom/riscvboom-images:0.0.10
-        environment:
-            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
-            TERM: dumb
-        steps:
-            - checkout
-            - run:
-                name: Create hash of toolchains
-                command: |
-                    .circleci/create-hash.sh
-            - restore_cache:
-                keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
-            - restore_cache:
-                keys:
-                    - boomexample-{{ .Branch }}-{{ .Revision }}
-            - restore_cache:
-                keys:
-                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
-            - run:
-                name: Run boomexample tests
-                command: .circleci/run-tests.sh boomexample
     boomrocketexample-run-tests:
         docker:
             - image: riscvboom/riscvboom-images:0.0.10
@@ -468,11 +415,6 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-boomexample:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
             - prepare-boomrocketexample:
                 requires:
                     - install-riscv-toolchain
@@ -504,10 +446,6 @@ workflows:
             - example-run-tests:
                 requires:
                     - prepare-example
-
-            - boomexample-run-tests:
-                requires:
-                    - prepare-boomexample
 
             - boomrocketexample-run-tests:
                 requires:
