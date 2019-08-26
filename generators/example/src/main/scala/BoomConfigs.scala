@@ -11,10 +11,10 @@ import freechips.rocketchip.config.{Config}
 class SmallBoomConfig extends Config(
   new WithTop ++                                            // use normal top
   new WithBootROM ++                                        // use testchipip bootrom
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++  // use Sifive L2 cache
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++  // use SiFive L2 cache
   new boom.common.WithSmallBooms ++                         // 1-wide BOOM
   new boom.common.WithNBoomCores(1) ++                      // single-core
-  new freechips.rocketchip.system.BaseConfig)               // "Base" rocketchip system
+  new freechips.rocketchip.system.BaseConfig)               // "base" rocketchip system
 
 class MediumBoomConfig extends Config(
   new WithTop ++

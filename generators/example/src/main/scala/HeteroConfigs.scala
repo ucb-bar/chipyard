@@ -9,14 +9,14 @@ import freechips.rocketchip.config.{Config}
 // ---------------------
 
 class LargeBoomAndRocketConfig extends Config(
-  new WithTop ++                                          // default top
-  new WithBootROM ++                                      // default bootrom
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++ // use Sifive l2
-  new boom.common.WithRenumberHarts ++                    // avoid hartid overlap
-  new boom.common.WithLargeBooms ++                       // 3-wide boom
-  new boom.common.WithNBoomCores(1) ++                    // single-core boom
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++  // single-core rocket
-  new freechips.rocketchip.system.BaseConfig)             // "Base" rocketchip system
+  new WithTop ++                                           // default top
+  new WithBootROM ++                                       // default bootrom
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++ // use SiFive l2
+  new boom.common.WithRenumberHarts ++                     // avoid hartid overlap
+  new boom.common.WithLargeBooms ++                        // 3-wide boom
+  new boom.common.WithNBoomCores(1) ++                     // single-core boom
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++   // single-core rocket
+  new freechips.rocketchip.system.BaseConfig)              // "base" rocketchip system
 
 class HwachaLargeBoomAndHwachaRocketConfig extends Config(
   new WithTop ++
