@@ -143,7 +143,7 @@ output_dir=$(sim_dir)/output/$(long_name)
 BINARY ?=
 SIM_FLAGS ?=
 VERBOSE_FLAGS ?= +verbose
-sim_out_name = $(notdir $(basename $(BINARY))).$(long_name)
+sim_out_name = $(subst $() $(),_,$(notdir $(basename $(BINARY))).$(long_name))
 
 #########################################################################################
 # build output directory for compilation
