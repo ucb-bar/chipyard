@@ -141,7 +141,7 @@ jobs:
             - run:
                 name: Building the boomrocketexample subproject using Verilator
                 command: .circleci/do-rtl-build.sh boomrocketexample
-                no_output_timeout: 120m
+                no_output_timeout: 240m
             - save_cache:
                 key: boomrocketexample-{{ .Branch }}-{{ .Revision }}
                 paths:
