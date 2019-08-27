@@ -61,6 +61,7 @@ class SmallRV32UnifiedBoomConfig extends Config(
   new WithTop ++
   new WithBootROM ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new boom.common.WithoutBoomFPU ++                       // no floating point
   new boom.common.WithUnifiedMemIntIQs ++                 // use unified mem+int issue queues
   new boom.common.WithSmallBooms ++
   new boom.common.WithNBoomCores(1) ++
