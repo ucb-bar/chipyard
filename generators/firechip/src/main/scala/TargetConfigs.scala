@@ -103,7 +103,7 @@ class WithPrefetchRoCC extends Config((site, here, up) => {
         nWays = 4,
         nBlocks = 28,
         hitThreshold = 1,
-        timeoutPeriod = 4096))))
+        timeoutPeriod = 8192))))
   })
 })
 
