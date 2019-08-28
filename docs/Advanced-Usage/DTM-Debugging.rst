@@ -16,12 +16,12 @@ This involves specifying the SoC top-level to add a DTM as well as configuring t
 .. code-block:: scala
 
     class DTMBoomConfig extends Config(
-      new WithDTMBoomRocketTop ++
+      new WithDTMTop ++
       new WithBootROM ++
       new WithJtagDTM ++
       new boom.common.SmallBoomConfig)
 
-In this example, the ``WithDTMBoomRocketTop`` mixin specifies that the top-level SoC will instantiate a DTM.
+In this example, the ``WithDTMTop`` mixin specifies that the top-level SoC will instantiate a DTM.
 The ``WithJtagDTM`` will configure that instantiated DTM to use JTAG as the bringup method (note: this can be removed if you want a DTM-only bringup).
 The rest of the mixins specify the rest of the system (cores, accelerators, etc).
 
@@ -36,7 +36,7 @@ After creating the config, call the ``make`` command like the following:
     # or
     cd sims/vcs
 
-    make CONFIG=DTMBoomConfig TOP=BoomRocketTopWithDTM MODEL=TestHarnessWithDTM
+    make CONFIG=DTMBoomConfig TOP=TopWithDTM MODEL=TestHarnessWithDTM
 
 In this example, this will use the config that you previously specified, as well as set the other parameters that are needed to satisfy the build system.
 After that point, you should have a JTAG enabled simulation that you can attach to using OpenOCD and GDB!
