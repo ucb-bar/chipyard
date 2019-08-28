@@ -67,7 +67,7 @@ $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): $(HARNESS_SMEMS_CONF)
 # remove duplicate files in blackbox/simfiles
 ########################################################################################
 $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes)
-	awk '{print $1;}' $^ | sort -u > $@
+	awk '{print $1;}' $^ | sort -u | grep -v '.*\.h' > $@
 
 #########################################################################################
 # helper rule to just make verilog files
@@ -92,7 +92,7 @@ run-binary-fast: $(sim)
 # helper rules to run simulator with as much debug info as possible
 #########################################################################################
 run-binary-debug: $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAG) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
@@ -122,30 +122,30 @@ endif
 #########################################################################################
 regression-tests = \
 	rv64ud-v-fcvt \
-        rv64ud-p-fdiv \
-        rv64ud-v-fadd \
-        rv64uf-v-fadd \
-        rv64um-v-mul \
-        rv64mi-p-breakpoint \
-        rv64uc-v-rvc \
-        rv64ud-v-structural \
-        rv64si-p-wfi \
-        rv64um-v-divw \
-        rv64ua-v-lrsc \
-        rv64ui-v-fence_i \
-        rv64ud-v-fcvt_w \
-        rv64uf-v-fmin \
-        rv64ui-v-sb \
-        rv64ua-v-amomax_d \
-        rv64ud-v-move \
-        rv64ud-v-fclass \
-        rv64ua-v-amoand_d \
-        rv64ua-v-amoxor_d \
-        rv64si-p-sbreak \
-        rv64ud-v-fmadd \
-        rv64uf-v-ldst \
-        rv64um-v-mulh \
-        rv64si-p-dirty
+	rv64ud-p-fdiv \
+	rv64ud-v-fadd \
+	rv64uf-v-fadd \
+	rv64um-v-mul \
+	rv64mi-p-breakpoint \
+	rv64uc-v-rvc \
+	rv64ud-v-structural \
+	rv64si-p-wfi \
+	rv64um-v-divw \
+	rv64ua-v-lrsc \
+	rv64ui-v-fence_i \
+	rv64ud-v-fcvt_w \
+	rv64uf-v-fmin \
+	rv64ui-v-sb \
+	rv64ua-v-amomax_d \
+	rv64ud-v-move \
+	rv64ud-v-fclass \
+	rv64ua-v-amoand_d \
+	rv64ua-v-amoxor_d \
+	rv64si-p-sbreak \
+	rv64ud-v-fmadd \
+	rv64uf-v-ldst \
+	rv64um-v-mulh \
+	rv64si-p-dirty
 
 .PHONY: run-regression-tests run-regression-tests-fast run-regression-tests-debug
 run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))

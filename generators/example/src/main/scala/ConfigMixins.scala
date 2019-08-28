@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util.{log2Up}
 
 import freechips.rocketchip.config.{Field, Parameters, Config}
-import freechips.rocketchip.subsystem.{RocketTilesKey, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, CacheBlockBytes}
+import freechips.rocketchip.subsystem.{RocketTilesKey, CacheBlockBytes}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.tile.{XLen, BuildRoCC, TileKey, LazyRoCC, OpcodeSet}
@@ -64,6 +64,15 @@ class WithGPIO extends Config((site, here, up) => {
 class WithNormalBoomRocketTop extends Config((site, here, up) => {
   case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
     Module(LazyModule(new BoomRocketTop()(p)).module)
+  }
+})
+
+/**
+ * Class to specify a top level BOOM and/or Rocket system with DTM
+ */
+class WithDTMBoomRocketTop extends Config((site, here, up) => {
+  case BuildBoomRocketTopWithDTM => (clock: Clock, reset: Bool, p: Parameters) => {
+    Module(LazyModule(new BoomRocketTopWithDTM()(p)).module)
   }
 })
 
