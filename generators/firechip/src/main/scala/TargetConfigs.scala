@@ -292,7 +292,7 @@ class FireSimLargeBoomConfig extends Config(
   new WithBlockDevice ++
   new WithBoomL2TLBs(1024) ++
   new WithoutClockGating ++
-  new boom.system.LargeBoomConfig)
+  new boom.common.LargeBoomConfig)
 
 class FireSimLargeBoomDualCoreConfig extends Config(
   new WithNDuplicatedBoomCores(2) ++
