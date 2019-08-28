@@ -11,7 +11,7 @@ import freechips.rocketchip.util.{HeterogeneousBag}
 import freechips.rocketchip.amba.axi4.AXI4Bundle
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy.LazyModule
-import example.{Subsystem, SubsystemModuleImp}
+import utilities.{Subsystem, SubsystemModuleImp}
 import icenet._
 import testchipip._
 import testchipip.SerialAdapter.SERIAL_IF_WIDTH

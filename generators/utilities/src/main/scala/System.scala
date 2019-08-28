@@ -3,7 +3,7 @@
 // All Rights Reserved. See LICENSE and LICENSE.SiFive for license details.
 //------------------------------------------------------------------------------
 
-package example
+package utilities
 
 import chisel3._
 

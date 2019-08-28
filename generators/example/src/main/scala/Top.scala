@@ -10,6 +10,8 @@ import freechips.rocketchip.util.DontTouch
 
 import testchipip._
 
+import utilities.{System, SystemModule}
+
 import sifive.blocks.devices.gpio._
 
 // ------------------------------------
