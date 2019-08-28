@@ -48,15 +48,6 @@ class DualSmallBoomConfig extends Config(
   new boom.common.WithNBoomCores(2) ++                      // dual-core
   new freechips.rocketchip.system.BaseConfig)
 
-class TracedSmallBoomConfig extends Config(
-  new WithTop ++
-  new WithBootROM ++
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++
-  new boom.common.WithTrace ++                             // enable trace port on BOOM
-  new boom.common.WithSmallBooms ++
-  new boom.common.WithNBoomCores(1) ++
-  new freechips.rocketchip.system.BaseConfig)
-
 class SmallRV32UnifiedBoomConfig extends Config(
   new WithTop ++
   new WithBootROM ++
