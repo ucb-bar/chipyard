@@ -54,6 +54,11 @@ class DualCoreRocketConfig extends Config(
   new WithNBigCores(2) ++
   new DefaultRocketConfig)
 
+class DualChannelRocketConfig extends Config(
+  new WithNBanks(8) ++
+  new WithNMemoryChannels(2) ++
+  new DefaultRocketConfig)
+
 class RV32RocketConfig extends Config(
   new WithRV32 ++
   new DefaultRocketConfig)
@@ -284,9 +289,11 @@ class RemoteMemClientRocketConfig extends Config(
 
 class DRAMCacheRocketConfig extends Config(
   new WithIceNIC ++
-  new WithInclusiveCache(capacityKB = 16) ++
+  new WithInclusiveCache(nBanks = 4, capacityKB = 16) ++
   new WithDRAMCache(
-    sizeKB = 112, nTrackersPerBank = 4, nBanksPerChannel = 2) ++
+    sizeKB = 112,
+    nTrackersPerBank = 4,
+    nBanksPerChannel = 2) ++
   new WithMemBlade ++
   new WithPrefetchRoCC ++
   new WithDRAMCacheBoomRocketTop ++
