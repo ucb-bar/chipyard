@@ -61,15 +61,6 @@ the ``example`` project, change the final line in build.sbt to the following.
 
     lazy val example = (project in file(".")).settings(commonSettings).dependsOn(testchipip, yourproject)
 
-Finally, add ``yourproject`` to the ``PACKAGES`` variable in the ``common.mk`` file in the Chipyard top level.
-This will allow make to detect that your source files have changed when building the Verilog/FIRRTL files.
-
-.. code-block:: shell
-
-     PACKAGES=$(addprefix generators/, rocket-chip testchipip boom hwacha sifive-blocks sifive-cache example yourproject) \
-		 $(addprefix sims/firesim/sim/, . firesim-lib midas midas/targetutils)
-
-
 MMIO Peripheral
 ------------------
 
