@@ -262,6 +262,35 @@ jobs:
                 key: hwacha-{{ .Branch }}-{{ .Revision }}
                 paths:
                     - "/home/riscvuser/project"
+    prepare-diff-l2:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.10
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+        steps:
+            - add_ssh_keys:
+                fingerprints:
+                    - "3e:c3:02:5b:ed:64:8c:b7:b0:04:43:bc:83:43:73:1e"
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
+            - run:
+                name: Building a different configuration of the L2$ with rocketchip using Verilator
+                command: .circleci/do-rtl-build.sh diff-l2
+                no_output_timeout: 120m
+            - save_cache:
+                key: diff-l2-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/home/riscvuser/project"
     example-run-tests:
         docker:
             - image: riscvboom/riscvboom-images:0.0.10
@@ -382,6 +411,31 @@ jobs:
             - run:
                 name: Run hwacha tests
                 command: .circleci/run-tests.sh hwacha
+    diff-l2-run-tests:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.10
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+        steps:
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+            - restore_cache:
+                keys:
+                    - diff-l2-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
+            - run:
+                name: Run different L2$ configuration tests on rocketchip
+                command: .circleci/run-tests.sh diff-l2
+
 
 # Order and dependencies of jobs to run
 workflows:
@@ -440,6 +494,11 @@ workflows:
                     - install-esp-toolchain
                     - install-verilator
 
+            - prepare-diff-l2:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
             # Run the respective tests
 
             # Run the example tests
@@ -462,3 +521,7 @@ workflows:
             - hwacha-run-tests:
                 requires:
                     - prepare-hwacha
+
+            - diff-l2-run-tests:
+                requires:
+                    - prepare-diff-l2
