@@ -59,7 +59,7 @@ VERILATOR_NONCC_OPTS = \
 	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
 	+define+STOP_COND=\$$c\(\"done_reset\"\) \
 	--assert \
-        --output-split 10000 \
+	--output-split 10000 \
 	--output-split-cfuncs 100 \
 	$(sim_vsrcs) \
 	-f $(sim_common_files)
