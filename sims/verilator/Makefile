@@ -59,7 +59,8 @@ VERILATOR_NONCC_OPTS = \
 	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
 	+define+STOP_COND=\$$c\(\"done_reset\"\) \
 	--assert \
-	--output-split 20000 \
+        --output-split 10000 \
+	--output-split-cfuncs 100 \
 	$(sim_vsrcs) \
 	-f $(sim_common_files)
 
@@ -96,11 +97,12 @@ $(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(INSTALLED_VERILATOR)
 #########################################################################################
 # invoke make to make verilator sim rules
 #########################################################################################
+VERILATOR_MAKEFLAGS=-j8
 $(sim): $(model_mk)
-	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir) -f V$(VLOG_MODEL).mk
+	$(MAKE) $(VERILATOR_MAKEFLAGS) VM_PARALLEL_BUILDS=1 -C $(model_dir) -f V$(VLOG_MODEL).mk
 
 $(sim_debug): $(model_mk_debug)
-	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir_debug) -f V$(VLOG_MODEL).mk
+	$(MAKE) $(VERILATOR_MAKEFLAGS) VM_PARALLEL_BUILDS=1 -C $(model_dir_debug) -f V$(VLOG_MODEL).mk
 
 #########################################################################################
 # create a verilator vpd rule
