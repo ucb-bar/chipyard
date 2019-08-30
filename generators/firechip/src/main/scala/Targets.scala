@@ -15,6 +15,7 @@ import utilities.{Subsystem, SubsystemModuleImp}
 import icenet._
 import testchipip._
 import testchipip.SerialAdapter.SERIAL_IF_WIDTH
+import tracegen.{HasTraceGenTiles, HasTraceGenTilesModuleImp}
 import sifive.blocks.devices.uart._
 import midas.models.AXI4BundleWithEdge
 import java.io.File
@@ -174,3 +175,14 @@ class FireSimSupernode(implicit p: Parameters) extends Module {
   } }
 }
 
+class FireSimTraceGen(implicit p: Parameters) extends BaseSubsystem
+    with HasHierarchicalBusTopology
+    with HasTraceGenTiles
+    with CanHaveFASEDOptimizedMasterAXI4MemPort {
+  override lazy val module = new FireSimTraceGenModuleImp(this)
+}
+
+class FireSimTraceGenModuleImp(outer: FireSimTraceGen)
+  extends BaseSubsystemModuleImp(outer)
+  with HasTraceGenTilesModuleImp
+  with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
