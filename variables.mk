@@ -32,11 +32,11 @@ ifeq ($(SUB_PROJECT),example)
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= $(SBT_PROJECT)
-	CONFIG            ?= DefaultRocketConfig
+	CONFIG            ?= RocketConfig
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
-	TOP               ?= BoomRocketTop
+	TOP               ?= Top
 endif
 # for Rocket-chip developers
 ifeq ($(SUB_PROJECT),rocketchip)

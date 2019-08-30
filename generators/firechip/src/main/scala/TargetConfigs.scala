@@ -9,7 +9,7 @@ import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.DebugModuleParams
-import boom.system.BoomTilesKey
+import boom.common.BoomTilesKey
 import testchipip.{WithBlockDevice, BlockDeviceKey, BlockDeviceConfig}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import icenet._
@@ -136,8 +136,10 @@ class FireSimBoomConfig extends Config(
   new WithBlockDevice ++
   new WithBoomL2TLBs(1024) ++
   new WithoutClockGating ++
-  // Using a small config because it has 64-bit system bus, and compiles quickly
-  new boom.common.SmallBoomConfig)
+  new boom.common.WithLargeBooms ++
+  new boom.common.WithNBoomCores(1) ++
+  new freechips.rocketchip.system.BaseConfig
+)
 
 // A safer implementation than the one in BOOM in that it
 // duplicates whatever BOOMTileKey.head is present N times. This prevents
