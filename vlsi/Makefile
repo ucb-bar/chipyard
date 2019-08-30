@@ -24,7 +24,8 @@ SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
 SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
 SMEMS_HAMMER       ?= $(build_dir)/$(long_name).mems.hammer.json
 MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
-OBJ_DIR            ?= $(vlsi_dir)/build
+VLSI_OBJ_DIR       ?= $(vlsi_dir)/build
+OBJ_DIR            ?= $(VLSI_OBJ_DIR)/$(long_name)
 ENV_YML            ?= $(vlsi_dir)/bwrc-env.yml
 INPUT_CONFS        ?= example.yml $(dir $(tech_dir))/bwrc.yml
 HAMMER_EXEC        ?= ./example-vlsi
@@ -104,4 +105,4 @@ $(OBJ_DIR)/hammer.d: $(HAMMER_D_DEPS)
 #########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(gen_dir)
+	rm -rf $(VLSI_OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(gen_dir)
