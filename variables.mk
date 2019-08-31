@@ -37,8 +37,9 @@ ifeq ($(SUB_PROJECT),example)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
 	TOP               ?= BoomRocketTop
+endif
 # for BOOM developers
-else ifeq ($(SUB_PROJECT),boom)
+ifeq ($(SUB_PROJECT),boom)
 	SBT_PROJECT       ?= boom
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
@@ -48,8 +49,9 @@ else ifeq ($(SUB_PROJECT),boom)
 	GENERATOR_PACKAGE ?= boom.system
 	TB                ?= TestDriver
 	TOP               ?= BoomRocketSystem
+endif
 # for Rocket-chip developers
-else ifeq ($(SUB_PROJECT),rocketchip)
+ifeq ($(SUB_PROJECT),rocketchip)
 	SBT_PROJECT       ?= rocketchip
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
@@ -59,8 +61,9 @@ else ifeq ($(SUB_PROJECT),rocketchip)
 	GENERATOR_PACKAGE ?= freechips.rocketchip.system
 	TB                ?= TestDriver
 	TOP               ?= ExampleRocketSystem
+endif
 # for Hwacha developers
-else ifeq ($(SUB_PROJECT),hwacha)
+ifeq ($(SUB_PROJECT),hwacha)
 	SBT_PROJECT       ?= hwacha
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
@@ -70,17 +73,6 @@ else ifeq ($(SUB_PROJECT),hwacha)
 	GENERATOR_PACKAGE ?= hwacha
 	TB                ?= TestDriver
 	TOP               ?= ExampleRocketSystem
-# Package with unit tests
-else
-	SBT_PROJECT       ?= $(SUB_PROJECT)
-	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= $(SBT_PROJECT)
-	CONFIG            ?= UnitTestConfig # This will need to be overridden
-	CONFIG_PACKAGE    ?= $(MODEL_PACKAGE)
-	GENERATOR_PACKAGE ?= $(MODEL_PACKAGE)
-	TB                ?= TestDriver
-	TOP               ?= UnitTestSuite
 endif
 # Stand-in firechip variables:
 # TODO: need a seperate generator and test harnesses for each target
