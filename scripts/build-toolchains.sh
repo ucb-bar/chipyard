@@ -12,12 +12,16 @@ RDIR=$(pwd)
 
 PRECOMPILED_REPO_HASH=56a40961c98db5e8f904f15dc6efd0870bfefd9e
 
-function usage
-{
-    echo "usage: ./scripts/build-toolchains.sh [riscv-tools] [esp-tools] [ec2fast | --ec2fast] "
+usage() {
+    echo "usage: ${0} [riscv-tools | esp-tools | ec2fast]"
     echo "   riscv: if set, builds the riscv toolchain (this is also the default)"
     echo "   hwacha: if set, builds esp-tools toolchain"
     echo "   ec2fast: if set, pulls in a pre-compiled RISC-V toolchain for an EC2 manager instance"
+    exit "$1"
+}
+
+error() {
+    echo "${0##*/}: ${1}" >&2
 }
 
 #taken from riscv-tools to check for open-ocd autoconf versions
@@ -28,41 +32,37 @@ check_version() {
     )
 }
 
-if [ "$1" == "--help" -o "$1" == "-h" -o "$1" == "-H" ]; then
-    usage
-    exit 3
-fi
-
 TOOLCHAIN="riscv-tools"
 EC2FASTINSTALL="false"
 FASTINSTALL="false"
-while test $# -gt 0
-do
-   case "$1" in
-        riscv-tools)
-            TOOLCHAIN="riscv-tools"
-            ;;
-        esp-tools)
-            TOOLCHAIN="esp-tools"
-            ;;
-        ec2fast | --ec2fast) # I don't want to break this api
-            EC2FASTINSTALL=true
-            ;;
-        -h | -H | --help)
-            usage
-            exit 3
-            ;;
-        --*) echo "ERROR: bad option $1"
-            usage
-            exit 1
-            ;;
-        *) echo "ERROR: bad argument $1"
-            usage
-            exit 2
-            ;;
+
+while getopts 'hH-:' opt ; do
+    case $opt in
+    h|H)
+        usage 3 ;;
+    -)
+        case $OPTARG in
+        help)
+            usage 3 ;;
+        ec2fast) # Preserve compatibility
+            EC2FASTINSTALL=true ;;
+        *)
+            error "invalid option: --${OPTARG}"
+            usage 1 ;;
+        esac ;;
+    *)
+        error "invalid option: -${opt}"
+        usage 1 ;;
     esac
-    shift
 done
+
+shift $((OPTIND - 1))
+
+if [ "$1" = ec2fast ] ; then
+    EC2FASTINSTALL=true
+elif [ -z "$1" ] ; then
+    TOOLCHAIN="$1"
+fi
 
 
 if [ "$EC2FASTINSTALL" = "true" ]; then
