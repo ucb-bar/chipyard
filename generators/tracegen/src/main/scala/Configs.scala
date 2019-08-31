@@ -9,6 +9,7 @@ import freechips.rocketchip.system.BaseConfig
 import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.tile.{MaxHartIdBits, XLen}
 import scala.math.{max, min}
+import testchipip.WithRingSystemBus
 
 class WithTraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
     extends Config((site, here, up) => {
@@ -74,3 +75,6 @@ class NonBlockingTraceGenL2Config extends Config(
   new WithL2TraceGen(List.fill(2)(DCacheParams(nMSHRs = 2, nSets = 16, nWays = 4))) ++
   new WithInclusiveCache ++
   new BaseConfig)
+
+class NonBlockingTraceGenL2RingConfig extends Config(
+  new WithRingSystemBus ++ new NonBlockingTraceGenL2Config)

@@ -17,6 +17,7 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 import tracegen.TraceGenKey
 import icenet._
+import testchipip.WithRingSystemBus
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMParams => {
@@ -275,3 +276,14 @@ class FireSimTraceGenL2Config extends Config(
     capacityKB = 1024,
     outerLatencyCycles = 50) ++
   new FireSimRocketChipConfig)
+
+class FireSimBoomL2Config extends Config(
+  new WithInclusiveCache(
+    nBanks = 4,
+    capacityKB = 1024,
+    outerLatencyCycles = 50) ++
+  new FireSimBoomConfig)
+
+class FireSimBoomRingL2Config extends Config(
+  new WithRingSystemBus(8) ++
+  new FireSimBoomL2Config)
