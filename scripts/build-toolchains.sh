@@ -82,12 +82,12 @@ if [ "$EC2FASTINSTALL" = "true" ]; then
           FASTINSTALL=true
           echo "Using fast pre-compiled install for riscv-tools"
       else
-          echo "Error: hash of precompiled toolchain doesn't match the riscv-tools submodule hash."
-          exit
+          error 'error: hash of precompiled toolchain does not match the riscv-tools submodule hash'
+          exit -1
       fi
     else
-          echo "Error: No precompiled toolchain for esp-tools or other non-native riscv-tools."
-          exit 
+          error "error: unsupported precompiled toolchain: ${TOOLCHAIN}"
+          exit -1
     fi
 fi
 
