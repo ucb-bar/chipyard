@@ -110,7 +110,18 @@ else
     mkdir -p "$RISCV"
     git -C "${CHIPYARD_DIR}" submodule update --init --recursive "toolchains/${TOOLCHAIN}" #--jobs 8
     cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN"
-    export MAKEFLAGS="-j16"
+
+    # Scale number of parallel make jobs by hardware thread count
+    ncpu="$(getconf _NPROCESSORS_ONLN || # GNU
+        getconf NPROCESSORS_ONLN || # *BSD, Solaris
+        nproc --all || # Linux
+        sysctl -n hw.ncpu || # *BSD, OS X
+        :)" 2>/dev/null
+    case ${ncpu} in
+    ''|*[^0-9]*) ;; # Ignore non-integer values
+    *) export MAKEFLAGS="-j ${ncpu}" ;;
+    esac
+
     #build the actual toolchain
     #./build.sh
     source build.common
@@ -128,7 +139,7 @@ else
     cd "$RDIR"
     # build linux toolchain
     cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN/riscv-gnu-toolchain/build"
-    make -j16 linux
+    make linux
     echo -e "\\nRISC-V Linux GNU Toolchain installation completed!"
 
 fi
