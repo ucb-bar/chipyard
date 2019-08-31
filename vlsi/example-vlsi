@@ -8,12 +8,41 @@ from typing import Dict, Callable, Optional, List
 def example_place_tap_cells(x: hammer_vlsi.HammerTool) -> bool:
     x.append('''
 # TODO
+# Place custom TCL here
+''')
+    return True
+
+def example_add_fillers(x: hammer_vlsi.HammerTool) -> bool:
+    x.append('''
+# TODO
+# Place custom TCL here
+''')
+    return True
+
+def example_tool_settings(x: hammer_vlsi.HammerTool) -> bool:
+    x.append('''
+# TODO
+# Place custom TCL here
 ''')
     return True
 
 class ExampleDriver(CLIDriver):
     def get_extra_par_hooks(self) -> List[HammerToolHookAction]:
-        return [hammer_vlsi.HammerTool.make_replacement_hook("place_tap_cells", example_place_tap_cells)]
+        extra_hooks = [
+
+            # Default set of steps can be found in the CAD tool plugin's __init__.py
+
+            # make_pre_insertion_hook will execute the custom hook before the specified step
+            hammer_vlsi.HammerTool.make_pre_insertion_hook("route_design", example_add_fillers),  # SYNTAX: make_pre_insertion_hook("EXISTING_STEP", INSERTED_HOOK)
+            # make_post_insertion_hook will execute the custom hook after the specified step
+            hammer_vlsi.HammerTool.make_post_insertion_hook("init_design", example_tool_settings),
+            # make_replacement_hook will replace the specified step with a custom hook
+            hammer_vlsi.HammerTool.make_replacement_hook("place_tap_cells", example_place_tap_cells),
+            # make_removal_hook will remove the specified step from the flow
+            hammer_vlsi.HammerTool.make_removal_hook("place_bumps")
+            # The target step in any of the above calls may be a default step or another one of your custom hooks
+        ]
+        return extra_hooks 
 
 if __name__ == '__main__':
     ExampleDriver().main()
