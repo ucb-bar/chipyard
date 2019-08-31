@@ -365,3 +365,6 @@ class ScratchpadRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: scratchpadrocket
+
+class RingSystemBusRocketConfig extends Config(
+  new testchipip.WithRingSystemBus ++ new RocketConfig)

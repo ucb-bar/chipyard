@@ -34,3 +34,6 @@ class NonBlockingTraceGenL2Config extends Config(
   new tracegen.WithL2TraceGen(List.fill(2)(DCacheParams(nMSHRs = 2, nSets = 16, nWays = 4))) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.system.BaseConfig)
+
+class NonBlockingTraceGenL2RingConfig extends Config(
+  new testchipip.WithRingSystemBus ++ new NonBlockingTraceGenL2Config)

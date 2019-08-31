@@ -19,6 +19,7 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 import tracegen.TraceGenKey
 import icenet._
+import testchipip.WithRingSystemBus
 
 import firesim.bridges._
 import firesim.configs._
@@ -147,6 +148,15 @@ class FireSimGemminiRocketConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.GemminiRocketConfig)
+
+//******************************************************************
+// Configuration with Ring topology SystemBus
+//******************************************************************
+class FireSimRingSystemBusRocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.RingSystemBusRocketConfig)
 
 //**********************************************************************************
 // Supernode Configurations, base off chipyard's RocketConfig
