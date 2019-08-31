@@ -32,11 +32,22 @@ ifeq ($(SUB_PROJECT),example)
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= $(SBT_PROJECT)
-	CONFIG            ?= DefaultRocketConfig
+	CONFIG            ?= RocketConfig
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
-	TOP               ?= BoomRocketTop
+	TOP               ?= Top
+endif
+ifeq ($(SUB_PROJECT),tracegen)
+	SBT_PROJECT       ?= tracegen
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
+	MODEL_PACKAGE     ?= $(SBT_PROJECT)
+	CONFIG            ?= TraceGenConfig
+	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
+	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
+	TB                ?= TestDriver
+	TOP               ?= TraceGenSystem
 endif
 # for BOOM developers
 ifeq ($(SUB_PROJECT),boom)
@@ -155,7 +166,7 @@ output_dir=$(sim_dir)/output/$(long_name)
 BINARY ?=
 SIM_FLAGS ?=
 VERBOSE_FLAGS ?= +verbose
-sim_out_name = $(notdir $(basename $(BINARY))).$(long_name)
+sim_out_name = $(subst $() $(),_,$(notdir $(basename $(BINARY))).$(long_name))
 
 #########################################################################################
 # build output directory for compilation

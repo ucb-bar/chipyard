@@ -9,7 +9,7 @@ import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.tile.{XLen, BuildRoCC, TileKey, LazyRoCC, OpcodeSet}
 
-import boom.system.{BoomTilesKey}
+import boom.common.{BoomTilesKey}
 
 import testchipip._
 
@@ -61,43 +61,43 @@ class WithGPIO extends Config((site, here, up) => {
 /**
  * Class to specify a "plain" top level BOOM and/or Rocket system
  */
-class WithNormalBoomRocketTop extends Config((site, here, up) => {
-  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    Module(LazyModule(new BoomRocketTop()(p)).module)
+class WithTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    Module(LazyModule(new Top()(p)).module)
   }
 })
 
 /**
  * Class to specify a top level BOOM and/or Rocket system with DTM
  */
-class WithDTMBoomRocketTop extends Config((site, here, up) => {
-  case BuildBoomRocketTopWithDTM => (clock: Clock, reset: Bool, p: Parameters) => {
-    Module(LazyModule(new BoomRocketTopWithDTM()(p)).module)
+class WithDTMTop extends Config((site, here, up) => {
+  case BuildTopWithDTM => (clock: Clock, reset: Bool, p: Parameters) => {
+    Module(LazyModule(new TopWithDTM()(p)).module)
   }
 })
 
 /**
  * Class to specify a top level BOOM and/or Rocket system with PWM
  */
-class WithPWMBoomRocketTop extends Config((site, here, up) => {
-  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new BoomRocketTopWithPWMTL()(p)).module)
+class WithPWMTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new TopWithPWMTL()(p)).module)
 })
 
 /**
  * Class to specify a top level BOOM and/or Rocket system with a PWM AXI4
  */
-class WithPWMAXI4BoomRocketTop extends Config((site, here, up) => {
-  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new BoomRocketTopWithPWMAXI4()(p)).module)
+class WithPWMAXI4Top extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new TopWithPWMAXI4()(p)).module)
 })
 
 /**
  * Class to specify a top level BOOM and/or Rocket system with a block device
  */
-class WithBlockDeviceModelBoomRocketTop extends Config((site, here, up) => {
-  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomRocketTopWithBlockDevice()(p)).module)
+class WithBlockDeviceModelTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new TopWithBlockDevice()(p)).module)
     top.connectBlockDeviceModel()
     top
   }
@@ -106,9 +106,9 @@ class WithBlockDeviceModelBoomRocketTop extends Config((site, here, up) => {
 /**
  * Class to specify a top level BOOM and/or Rocket system with a simulator block device
  */
-class WithSimBlockDeviceBoomRocketTop extends Config((site, here, up) => {
-  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomRocketTopWithBlockDevice()(p)).module)
+class WithSimBlockDeviceTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new TopWithBlockDevice()(p)).module)
     top.connectSimBlockDevice(clock, reset)
     top
   }
@@ -117,9 +117,9 @@ class WithSimBlockDeviceBoomRocketTop extends Config((site, here, up) => {
 /**
  * Class to specify a top level BOOM and/or Rocket system with GPIO
  */
-class WithGPIOBoomRocketTop extends Config((site, here, up) => {
-  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomRocketTopWithGPIO()(p)).module)
+class WithGPIOTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new TopWithGPIO()(p)).module)
     for (gpio <- top.gpio) {
       for (pin <- gpio.pins) {
         pin.i.ival := false.B
@@ -174,9 +174,9 @@ class WithIceNIC(inBufFlits: Int = 1800, usePauser: Boolean = false)
     usePauser = usePauser)
 })
 
-class WithLoopbackNICBoomRocketTop extends Config((site, here, up) => {
-  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomRocketTopWithIceNIC()(p)).module)
+class WithLoopbackNICTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new TopWithIceNIC()(p)).module)
     top.connectNicLoopback()
     top
   }
@@ -201,9 +201,9 @@ class WithMemBlade(spanBytes: Option[Int] = None)
   }
 })
 
-class WithRemoteMemClientBoomRocketTop extends Config((site, here, up) => {
-  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomRocketTopWithRemoteMemClient()(p)).module)
+class WithRemoteMemClientTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new TopWithRemoteMemClient()(p)).module)
     top.connectTestMemBlade()
     top
   }
@@ -230,9 +230,9 @@ class WithDRAMCache(
   }
 })
 
-class WithDRAMCacheBoomRocketTop extends Config((site, here, up) => {
-  case BuildBoomRocketTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new BoomRocketTopWithDRAMCache()(p)).module)
+class WithDRAMCacheTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new TopWithDRAMCache()(p)).module)
     top.connectTestMemBlade(100)
     top.connectSimAXICacheMem()
     top

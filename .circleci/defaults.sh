@@ -36,9 +36,8 @@ LOCAL_SIM_DIR=$LOCAL_CHIPYARD_DIR/sims/verilator
 # key value store to get the build strings
 declare -A mapping
 mapping["example"]="SUB_PROJECT=example"
-mapping["boomexample"]="SUB_PROJECT=example CONFIG=DefaultBoomConfig"
-mapping["boomrocketexample"]="SUB_PROJECT=example CONFIG=DefaultBoomAndRocketConfig"
+mapping["boomrocketexample"]="SUB_PROJECT=example CONFIG=LargeBoomAndRocketConfig"
 mapping["boom"]="SUB_PROJECT=example CONFIG=SmallBoomConfig"
 mapping["rocketchip"]="SUB_PROJECT=rocketchip"
-mapping["blockdevrocketchip"]="SUB_PROJECT=example CONFIG=SimBlockDeviceRocketConfig TOP=BoomRocketTopWithBlockDevice"
-mapping["hwacha"]="SUB_PROJECT=example CONFIG=HwachaL2Config GENERATOR_PACKAGE=hwacha"
+mapping["blockdevrocketchip"]="SUB_PROJECT=example CONFIG=SimBlockDeviceRocketConfig TOP=TopWithBlockDevice"
+mapping["hwacha"]="SUB_PROJECT=example CONFIG=HwachaRocketConfig GENERATOR_PACKAGE=hwacha"

@@ -12,16 +12,16 @@ The Chipyard framework can download, build, and execute simulations using Verila
 To run a simulation using Verilator, perform the following steps:
 
 To compile the example design, run ``make`` in the ``sims/verilator`` directory.
-This will elaborate the ``DefaultRocketConfig`` in the example project.
+This will elaborate the ``RocketConfig`` in the example project.
 
-An executable called ``simulator-example-DefaultRocketConfig`` will be produced.
+An executable called ``simulator-example-RocketConfig`` will be produced.
 This executable is a simulator that has been compiled based on the design that was built.
 You can then use this executable to run any compatible RV64 code.
 For instance, to run one of the riscv-tools assembly tests.
 
 .. code-block:: shell
 
-    ./simulator-example-DefaultRocketConfig $RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
+    ./simulator-example-RocketConfig $RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
 
 If you later create your own project, you can use environment variables to build an alternate configuration.
 
@@ -50,16 +50,16 @@ To run a simulation using VCS, perform the following steps:
 Make sure that the VCS simulator is on your ``PATH``.
 
 To compile the example design, run make in the ``sims/vcs`` directory.
-This will elaborate the ``DefaultRocketConfig`` in the example project.
+This will elaborate the ``RocketConfig`` in the example project.
 
-An executable called ``simulator-example-DefaultRocketConfig`` will be produced.
+An executable called ``simulator-example-RocketConfig`` will be produced.
 This executable is a simulator that has been compiled based on the design that was built.
 You can then use this executable to run any compatible RV64 code.
 For instance, to run one of the riscv-tools assembly tests.
 
 .. code-block:: shell
 
-    ./simulator-example-DefaultRocketConfig $RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
+    ./simulator-example-RocketConfig $RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
 
 If you later create your own project, you can use environment variables to build an alternate configuration.
 

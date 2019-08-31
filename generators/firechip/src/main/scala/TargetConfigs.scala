@@ -4,19 +4,23 @@ import java.io.File
 
 import chisel3.util.{log2Up}
 import freechips.rocketchip.config.{Parameters, Config}
+import freechips.rocketchip.groundtest.TraceGenParams
 import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
+import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.DebugModuleParams
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
-import boom.system.BoomTilesKey
+import boom.common.BoomTilesKey
 import testchipip.{WithBlockDevice, BlockDeviceKey, BlockDeviceConfig, MemBenchKey, MemBenchParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import memblade.manager.{MemBladeKey, MemBladeParams, MemBladeQueueParams}
 import memblade.client.{RemoteMemClientKey, RemoteMemClientConfig}
 import memblade.cache.{DRAMCacheKey, DRAMCacheConfig, RemoteAccessDepths, WritebackDepths, MemoryQueueParams}
 import memblade.prefetcher.{PrefetchRoCC, SoftPrefetchConfig, AutoPrefetchConfig, StreamBufferConfig}
+import scala.math.{min, max}
+import tracegen.TraceGenKey
 import icenet._
 import scala.math.max
 
@@ -258,8 +262,10 @@ class FireSimBoomConfig extends Config(
   new WithBlockDevice ++
   new WithBoomL2TLBs(1024) ++
   new WithoutClockGating ++
-  // Using a small config because it has 64-bit system bus, and compiles quickly
-  new boom.common.SmallBoomConfig)
+  new boom.common.WithLargeBooms ++
+  new boom.common.WithNBoomCores(1) ++
+  new freechips.rocketchip.system.BaseConfig
+)
 
 // A safer implementation than the one in BOOM in that it
 // duplicates whatever BOOMTileKey.head is present N times. This prevents
@@ -282,50 +288,30 @@ class FireSimBoomL2Config extends Config(
   new WithStandardL2 ++ 
   new FireSimBoomConfig)
 
-class FireSimLargeBoomConfig extends Config(
-  new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
-  new WithExtMemSize(0x400000000L) ++ // 16GB
-  new WithoutTLMonitors ++
-  new WithUARTKey ++
-  new WithNICKey ++
-  new WithBlockDevice ++
-  new WithBoomL2TLBs(1024) ++
-  new WithoutClockGating ++
-  new boom.common.LargeBoomConfig)
-
-class FireSimLargeBoomDualCoreConfig extends Config(
+class FireSimBoomDualCoreL2Config extends Config(
   new WithNDuplicatedBoomCores(2) ++
-  new FireSimLargeBoomConfig)
+  new FireSimBoomL2Config)
 
-class FireSimLargeBoomL2Config extends Config(
-  new WithStandardL2 ++
-  new FireSimLargeBoomConfig)
-
-class FireSimLargeBoomDualCoreL2Config extends Config(
-  new WithNDuplicatedBoomCores(2) ++
-  new FireSimLargeBoomL2Config)
-
-class FireSimLargeBoomPrefetcherConfig extends Config(
+class FireSimBoomPrefetcherConfig extends Config(
   new WithPrefetchRoCC ++
   new WithStandardL2 ++
-  new FireSimLargeBoomConfig)
+  new FireSimBoomConfig)
 
-class FireSimLargeBoomPrefetcherDualCoreConfig extends Config(
+class FireSimBoomPrefetcherDualCoreConfig extends Config(
   new WithNDuplicatedBoomCores(2) ++
-  new FireSimLargeBoomPrefetcherConfig)
+  new FireSimBoomPrefetcherConfig)
 
-class FireSimLargeBoomDRAMCacheConfig extends Config(
+class FireSimBoomDRAMCacheConfig extends Config(
   new WithPrefetchRoCC ++
   new WithMemBenchKey ++
   new WithDRAMCacheKey ++
   new WithExtMemSize(15L << 30) ++
   new WithStandardL2 ++
-  new FireSimLargeBoomConfig)
+  new FireSimBoomConfig)
 
-class FireSimLargeBoomDRAMCacheDualCoreConfig extends Config(
+class FireSimBoomDRAMCacheDualCoreConfig extends Config(
   new WithNDuplicatedBoomCores(2) ++
-  new FireSimLargeBoomDRAMCacheConfig)
+  new FireSimBoomDRAMCacheConfig)
 
 //**********************************************************************************
 //* Supernode Configurations
@@ -374,3 +360,69 @@ class SupernodeFireSimRocketChipOctaCoreConfig extends Config(
   new WithExtMemSize(0x200000000L) ++ // 8GB
   new FireSimRocketChipOctaCoreConfig)
 
+class WithTraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
+    extends Config((site, here, up) => {
+  case TraceGenKey => params.map { dcp => TraceGenParams(
+    dcache = Some(dcp),
+    wordBits = site(XLen),
+    addrBits = 48,
+    addrBag = {
+      val nSets = dcp.nSets
+      val nWays = dcp.nWays
+      val blockOffset = site(SystemBusKey).blockOffset
+      val nBeats = min(2, site(SystemBusKey).blockBeats)
+      val beatBytes = site(SystemBusKey).beatBytes
+      List.tabulate(2 * nWays) { i =>
+        Seq.tabulate(nBeats) { j =>
+          BigInt((j * beatBytes) + ((i * nSets) << blockOffset))
+        }
+      }.flatten
+    },
+    maxRequests = nReqs,
+    memStart = site(ExtMem).get.master.base,
+    numGens = params.size)
+  }
+  case MaxHartIdBits => log2Up(params.size)
+})
+
+class FireSimTraceGenConfig extends Config(
+  new WithTraceGen(
+    List.fill(2) { DCacheParams(nMSHRs = 2, nSets = 16, nWays = 2) }) ++
+  new FireSimRocketChipConfig)
+
+class WithL2TraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
+    extends Config((site, here, up) => {
+  case TraceGenKey => params.map { dcp => TraceGenParams(
+    dcache = Some(dcp),
+    wordBits = site(XLen),
+    addrBits = 48,
+    addrBag = {
+      val sbp = site(SystemBusKey)
+      val l2p = site(InclusiveCacheKey)
+      val nSets = max(l2p.sets, dcp.nSets)
+      val nWays = max(l2p.ways, dcp.nWays)
+      val nBanks = site(BankedL2Key).nBanks
+      val blockOffset = sbp.blockOffset
+      val nBeats = min(2, sbp.blockBeats)
+      val beatBytes = sbp.beatBytes
+      List.tabulate(2 * nWays) { i =>
+        Seq.tabulate(nBeats) { j =>
+          BigInt((j * beatBytes) + ((i * nSets * nBanks) << blockOffset))
+        }
+      }.flatten
+    },
+    maxRequests = nReqs,
+    memStart = site(ExtMem).get.master.base,
+    numGens = params.size)
+  }
+  case MaxHartIdBits => log2Up(params.size)
+})
+
+class FireSimTraceGenL2Config extends Config(
+  new WithL2TraceGen(
+    List.fill(2) { DCacheParams(nMSHRs = 2, nSets = 16, nWays = 2) }) ++
+  new WithInclusiveCache(
+    nBanks = 4,
+    capacityKB = 1024,
+    outerLatencyCycles = 50) ++
+  new FireSimRocketChipConfig)
