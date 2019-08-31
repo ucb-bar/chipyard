@@ -85,6 +85,18 @@ ifeq ($(SUB_PROJECT),hwacha)
 	TB                ?= TestDriver
 	TOP               ?= ExampleRocketSystem
 endif
+# for TestChipIP developers
+ifeq ($(SUB_PROJECT),testchipip)
+	SBT_PROJECT       ?= testchipip
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= TestHarness
+	MODEL_PACKAGE     ?= testchipip
+	CONFIG            ?= TestChipUnitTestConfig
+	CONFIG_PACKAGE    ?= testchipip
+	GENERATOR_PACKAGE ?= testchipip
+	TB                ?= TestDriver
+	TOP               ?= UnitTestSuite
+endif
 # Stand-in firechip variables:
 # TODO: need a seperate generator and test harnesses for each target
 #ifeq ($(SUB_PROJECT),firechip)

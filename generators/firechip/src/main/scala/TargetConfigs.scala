@@ -23,6 +23,7 @@ import scala.math.{min, max}
 import tracegen.TraceGenKey
 import icenet._
 import scala.math.max
+import testchipip.WithRingSystemBus
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMParams => {
@@ -240,6 +241,7 @@ class FireSimDRAMCacheConfig extends Config(
   new WithMemBenchKey ++
   new WithDRAMCacheKey ++
   new WithExtMemSize(15L << 30) ++
+  new WithRingSystemBus ++
   new WithStandardL2 ++
   new FireSimRocketChipConfig)
 
@@ -421,8 +423,9 @@ class WithL2TraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
 class FireSimTraceGenL2Config extends Config(
   new WithL2TraceGen(
     List.fill(2) { DCacheParams(nMSHRs = 2, nSets = 16, nWays = 2) }) ++
-  new WithInclusiveCache(
-    nBanks = 4,
-    capacityKB = 1024,
-    outerLatencyCycles = 50) ++
+  new WithStandardL2 ++
   new FireSimRocketChipConfig)
+
+class FireSimBoomRingL2Config extends Config(
+  new WithRingSystemBus ++
+  new FireSimBoomL2Config)
