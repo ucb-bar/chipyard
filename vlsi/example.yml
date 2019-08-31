@@ -1,0 +1,35 @@
+# Technology Setup
+# Technology used is ASAP7
+vlsi.core.technology: asap7
+vlsi.core.node: 7
+technology.asap7.tarball_dir: "SPECIFY DIR WITH ASAP7 TARBALL"
+technology.asap7.install_dir: "SPECIFY EXTRACTED DIR HERE IF NOT USING TARBALL"
+
+vlsi.core.max_threads: 12
+
+# General Hammer Inputs
+
+vlsi.inputs.supplies.VDD: "0.7 V"
+
+# Hammer will auto-generate a CPF for simple power designs; see hammer/src/hammer-vlsi/defaults.yml for more info
+vlsi.inputs.power_spec_mode: "auto"
+
+# Specify the setup and hold corners for ASAP7
+vlsi.inputs.mmmc_corners: [
+    {name: "PVT_0P63V_100C", type: "setup", voltage: "0.63 V", temp: "100 C"},
+    {name: "PVT_0P77V_0C", type: "hold", voltage: "0.77 V", temp: "0 C"}
+]
+
+# Specify clock signals
+vlsi.inputs.clocks: [
+    {name: "clock", period: "10ns", uncertainty: "0.1ns"}
+]
+
+# Generate Make include to aid in flow 
+vlsi.core.build_system: make
+
+# Power Straps
+par.power_straps_mode: generate
+
+# Placement Constraints
+#vlsi.inputs.placement_constraints:
