@@ -26,10 +26,10 @@ error() {
 
 #taken from riscv-tools to check for open-ocd autoconf versions
 check_version() {
-    $1 --version | awk "NR==1 {if (\$NF>$2) {exit 0} exit 1}" || (
-        echo $3 requires at least version $2 of $1. Aborting.
+    "$1" --version | awk "NR==1 {if (\$NF>$2) {exit 0} exit 1}" || {
+        error "${3} requires at least ${1} version ${2}"
         exit 1
-    )
+    }
 }
 
 TOOLCHAIN="riscv-tools"
@@ -60,22 +60,22 @@ shift $((OPTIND - 1))
 
 if [ "$1" = ec2fast ] ; then
     EC2FASTINSTALL=true
-elif [ -z "$1" ] ; then
+elif [ -n "$1" ] ; then
     TOOLCHAIN="$1"
 fi
 
 
 if [ "$EC2FASTINSTALL" = "true" ]; then
     if [ "$TOOLCHAIN" = "riscv-tools" ]; then
-      cd $RDIR
+      cd "$RDIR"
       git clone https://github.com/firesim/firesim-riscv-tools-prebuilt.git
       cd firesim-riscv-tools-prebuilt
-      git checkout $PRECOMPILED_REPO_HASH
+      git checkout "$PRECOMPILED_REPO_HASH"
       PREBUILTHASH="$(cat HASH)"
-      git -C $CHIPYARD_DIR submodule update --init  toolchains/$TOOLCHAIN
+      git -C "${CHIPYARD_DIR}" submodule update --init "toolchains/${TOOLCHAIN}"
       cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN"
       GITHASH="$(git rev-parse HEAD)"
-      cd $RDIR
+      cd "$RDIR"
       echo "prebuilt hash: $PREBUILTHASH"
       echo "git      hash: $GITHASH"
       if [[ $PREBUILTHASH == $GITHASH && "$EC2FASTINSTALL" == "true" ]]; then
@@ -104,28 +104,28 @@ if [ "$FASTINSTALL" = true ]; then
     mv distrib "$RISCV"
     # copy HASH in case user wants it later
     cp HASH "$RISCV"
-    cd $RDIR
+    cd "$RDIR"
     rm -rf firesim-riscv-tools-prebuilt
 else
     mkdir -p "$RISCV"
-    git -C $CHIPYARD_DIR submodule update --init --recursive toolchains/$TOOLCHAIN #--jobs 8
+    git -C "${CHIPYARD_DIR}" submodule update --init --recursive "toolchains/${TOOLCHAIN}" #--jobs 8
     cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN"
     export MAKEFLAGS="-j16"
     #build the actual toolchain
     #./build.sh
     source build.common
     echo "Starting RISC-V Toolchain build process"
-    build_project riscv-fesvr --prefix=$RISCV
-    build_project riscv-isa-sim --prefix=$RISCV --with-fesvr=$RISCV
-    build_project riscv-gnu-toolchain --prefix=$RISCV
-    CC= CXX= build_project riscv-pk --prefix=$RISCV --host=riscv64-unknown-elf
-    build_project riscv-tests --prefix=$RISCV/riscv64-unknown-elf
+    build_project riscv-fesvr --prefix="${RISCV}"
+    build_project riscv-isa-sim --prefix="${RISCV}" --with-fesvr="${RISCV}"
+    build_project riscv-gnu-toolchain --prefix="${RISCV}"
+    CC= CXX= build_project riscv-pk --prefix="${RISCV}" --host=riscv64-unknown-elf
+    build_project riscv-tests --prefix="${RISCV}/riscv64-unknown-elf"
     echo -e "\\nRISC-V Toolchain installation completed!"
 
     # build static libfesvr library for linking into firesim driver (or others)
     cd riscv-fesvr/build
-    $CHIPYARD_DIR/scripts/build-static-libfesvr.sh
-    cd $RDIR
+    "${CHIPYARD_DIR}/scripts/build-static-libfesvr.sh"
+    cd "$RDIR"
     # build linux toolchain
     cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN/riscv-gnu-toolchain/build"
     make -j16 linux
@@ -133,7 +133,7 @@ else
 
 fi
 
-cd $RDIR
+cd "$RDIR"
 
 echo "export CHIPYARD_TOOLCHAIN_SOURCED=1" > env.sh
 echo "export RISCV=$RISCV" >> env.sh
@@ -153,8 +153,8 @@ if [ "$FASTINSTALL" = "false" ]; then
         cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN"
         check_version automake 1.14 "OpenOCD build"
         check_version autoconf 2.64 "OpenOCD build"
-        build_project riscv-openocd --prefix=$RISCV --enable-remote-bitbang --enable-jtag_vpi --disable-werror
+        build_project riscv-openocd --prefix="${RISCV}" --enable-remote-bitbang --enable-jtag_vpi --disable-werror
         echo -e "\\nRISC-V OpenOCD installation completed!"
-        cd $RDIR
+        cd "$RDIR"
     fi
 fi

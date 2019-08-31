@@ -28,9 +28,9 @@ git config --unset submodule.vlsi/hammer-cad-plugins.update
 # Renable firesim and init only the required submodules to provide
 # all required scala deps, without doing a full build-setup
 git config --unset submodule.sims/firesim.update
-cd $scripts_dir/../sims/
+cd "${scripts_dir}/../sims"
 git submodule update --init firesim
 cd firesim/sim
 git submodule update --init midas
-cd $RDIR
+cd "$RDIR"
 git config submodule.sims/firesim.update none

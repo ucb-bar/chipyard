@@ -13,5 +13,5 @@ set -e
 
 objs=$(head -n 1 <(make -f <( echo -e 'include Makefile\n$(info $(value fesvr_objs))') -n))
 ar rcs -o libfesvr.a $objs
-cp -f libfesvr.a $RISCV/lib
+cp -f libfesvr.a "${RISCV}/lib"
 
