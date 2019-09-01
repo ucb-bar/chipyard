@@ -106,7 +106,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(commonSettings)
 
 lazy val example = conditionalDependsOn(project in file("generators/example"))
-  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities)
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, sha3)
   .settings(commonSettings)
 
 lazy val tracegen = conditionalDependsOn(project in file("generators/tracegen"))
@@ -127,6 +127,10 @@ lazy val hwacha = (project in file("generators/hwacha"))
 
 lazy val boom = (project in file("generators/boom"))
   .dependsOn(rocketchip)
+  .settings(commonSettings)
+
+lazy val sha3 = (project in file("generators/sha3"))
+  .dependsOn(rocketchip, `chisel-testers`)
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
