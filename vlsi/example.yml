@@ -30,6 +30,58 @@ vlsi.core.build_system: make
 
 # Power Straps
 par.power_straps_mode: generate
+par.generate_power_straps_method: by_tracks
+par.blockage_spacing: 2.0
+par.generate_power_straps_options:
+  by_tracks:
+    strap_layers:
+      - M3
+      - M4
+      - M5
+      - M6
+      - M7
+      - M8
+      - M9
+    track_width: 6
+    track_spacing: 0
+    power_utilization: 0.05
+    power_utilization_M8: 1.0
+    power_utilization_M9: 1.0
 
 # Placement Constraints
-#vlsi.inputs.placement_constraints:
+vlsi.inputs.placement_constraints:
+  - path: "ExampleTop"
+    type: "toplevel"
+    x: 0
+    y: 0
+    width: 50
+    height: 50
+    margins:
+      left: 0
+      right: 0
+      top: 0
+      bottom: 0
+
+# SRAM Compiler compiler options
+vlsi.core.sram_generator_tool: "sram_compiler"
+vlsi.core.sram_generator_tool_path: ["SPECIFY LOCATION OF SRAM GENERATOR IN TECH PLUGIN"]
+vlsi.core.sram_generator_tool_path_meta: "append"
+
+# Tool options. Replace with your tool plugin of choice.
+# Genus options
+vlsi.core.synthesis_tool: "genus"
+vlsi.core.synthesis_tool_path: ["hammer-cadence-plugins/synthesis"]
+vlsi.core.synthesis_tool_path_meta: "append"
+synthesis.genus.version: "181"
+# Innovus options
+vlsi.core.par_tool: "innovus"
+vlsi.core.par_tool_path: ["hammer-cadence-plugins/par"]
+vlsi.core.par_tool_path_meta: "append"
+par.innovus.version: "181"
+par.innovus.design_flow_effort: "standard"
+par.inputs.gds_merge: true
+# Calibre options
+vlsi.core.drc_tool: "calibre"
+vlsi.core.drc_tool_path: ["hammer-cad-plugins/drc"]
+vlsi.core.lvs_tool: "calibre"
+vlsi.core.lvs_tool_path: ["hammer-cad-plugins/lvs"]
