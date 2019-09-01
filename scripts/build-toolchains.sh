@@ -138,8 +138,8 @@ else
     "${CHIPYARD_DIR}/scripts/build-static-libfesvr.sh"
     cd "$RDIR"
     # build linux toolchain
-    cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN/riscv-gnu-toolchain/build"
-    make linux
+#   cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN/riscv-gnu-toolchain/build"
+#   make linux
     echo -e "\\nRISC-V Linux GNU Toolchain installation completed!"
 
 fi
@@ -153,6 +153,8 @@ cd "$RDIR"
     echo "export LD_LIBRARY_PATH=\${RISCV}/lib\${LD_LIBRARY_PATH:+":\${LD_LIBRARY_PATH}"}"
 } > env.sh
 echo "Toolchain Build Complete!"
+
+exit
 
 if [ "$FASTINSTALL" = "false" ]; then
     # commands that can't run on EC2 (specifically, OpenOCD because of autoconf version_
