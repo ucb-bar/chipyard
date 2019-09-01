@@ -1,9 +1,11 @@
 GCC=riscv64-unknown-elf-gcc
 OBJDUMP=riscv64-unknown-elf-objdump
 CFLAGS=-mcmodel=medany -std=gnu99 -O2 -fno-common -fno-builtin-printf -Wall
+CFLAGS+= -Wa,-march=rv64gcxcustom
 LDFLAGS=-static -nostdlib -nostartfiles -lgcc
 
-PROGRAMS = pwm blkdev accum charcount nic-loopback big-blkdev pingd
+PROGRAMS = pwm blkdev accum charcount nic-loopback big-blkdev pingd \
+	sha3-sw sha3-sw-bm sha3-rocc sha3-rocc-bm
 
 default: $(addsuffix .riscv,$(PROGRAMS))
 
