@@ -18,7 +18,7 @@ make buildfile
 ```
 
 # Example design
-In this example, you will be running a SHA-3 accelerator through the VLSI flow. To elaborate the Sha3RocketConfig and set up all prerequisites for the build system:
+In this example, you will be running a SHA-3 accelerator through the VLSI flow in the ASAP7 process. To elaborate the Sha3RocketConfig and set up all prerequisites for the build system:
 ```shell
 export MACROCOMPILER_MODE=' --mode synflops'
 export CONFIG=Sha3RocketConfig
@@ -26,7 +26,6 @@ export TOP=Sha3Accel
 make buildfile
 ```
 Note that because the ASAP7 process does not yet have a memory compiler, synflops are elaborated instead.
->>>>>>> fix incorrect block for syn/par, but still have timing violations
 
 HAMMER's configuration is driven by a JSON/YAML format. For HAMMER, JSON and YAML files are equivalent - you can use either one since HAMMER will convert them to the same representation for itself.
 
@@ -38,6 +37,8 @@ source $HAMMER_HOME/sourceme.sh
 ```
 
 The configuration for the example design is contained in `example.yml` and the entry script with hooks is contained in `example-vlsi`. You may go through Hammer's readme to learn about the supported configuration options and how to write hooks.
+
+In order to install the process, edit the keys `vlsi.technology.asap7.tarball_dir` if you already have the ASAP7 tarball downloaded and `vlsi.technology.asap7.install_dir` if you have already extracted it. If omitted, Hammer will automatically download and extract the tarballs into the `build/asap7-tech-cache` directory when you first run synthesis.
 
 To synthesize a design:
 
