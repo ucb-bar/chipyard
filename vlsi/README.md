@@ -18,7 +18,15 @@ make buildfile
 ```
 
 # Example design
-In this example, you will be running a SHA-3 accelerator through the VLSI flow. It is assumed that you have already run through the flow to elaborate the Chisel into Verilog.
+In this example, you will be running a SHA-3 accelerator through the VLSI flow. To elaborate the Sha3RocketConfig and set up all prerequisites for the build system:
+```shell
+export MACROCOMPILER_MODE=' --mode synflops'
+export CONFIG=Sha3RocketConfig
+export TOP=Sha3Accel
+make buildfile
+```
+Note that because the ASAP7 process does not yet have a memory compiler, synflops are elaborated instead.
+>>>>>>> fix incorrect block for syn/par, but still have timing violations
 
 HAMMER's configuration is driven by a JSON/YAML format. For HAMMER, JSON and YAML files are equivalent - you can use either one since HAMMER will convert them to the same representation for itself.
 

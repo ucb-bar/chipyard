@@ -2,8 +2,10 @@
 # Technology used is ASAP7
 vlsi.core.technology: asap7
 vlsi.core.node: 7
-technology.asap7.tarball_dir: "SPECIFY DIR WITH ASAP7 TARBALL"
-technology.asap7.install_dir: "SPECIFY EXTRACTED DIR HERE IF NOT USING TARBALL"
+# Specify dir with ASAP7 tarball
+technology.asap7.tarball_dir: "/tools/B/asap7"
+# Specify extracted dir here if not using tarball
+technology.asap7.install_dir: "/tools/B/asap7"
 
 vlsi.core.max_threads: 12
 
@@ -13,16 +15,17 @@ vlsi.inputs.supplies.VDD: "0.7 V"
 
 # Hammer will auto-generate a CPF for simple power designs; see hammer/src/hammer-vlsi/defaults.yml for more info
 vlsi.inputs.power_spec_mode: "auto"
+vlsi.inputs.power_spec_type: "cpf"
 
 # Specify the setup and hold corners for ASAP7
 vlsi.inputs.mmmc_corners: [
-    {name: "PVT_0P63V_100C", type: "setup", voltage: "0.63 V", temp: "100 C"},
-    {name: "PVT_0P77V_0C", type: "hold", voltage: "0.77 V", temp: "0 C"}
+  {name: "PVT_0P63V_100C", type: "setup", voltage: "0.63 V", temp: "100 C"},
+  {name: "PVT_0P77V_0C", type: "hold", voltage: "0.77 V", temp: "0 C"}
 ]
 
 # Specify clock signals
 vlsi.inputs.clocks: [
-    {name: "clock", period: "10ns", uncertainty: "0.1ns"}
+  {name: "clock", period: "20ns", uncertainty: "0.1ns"}
 ]
 
 # Generate Make include to aid in flow 
@@ -50,17 +53,24 @@ par.generate_power_straps_options:
 
 # Placement Constraints
 vlsi.inputs.placement_constraints:
-  - path: "ExampleTop"
+  - path: "Sha3Accel"
     type: "toplevel"
     x: 0
     y: 0
-    width: 50
-    height: 50
+    width: 500
+    height: 500
     margins:
       left: 0
       right: 0
       top: 0
       bottom: 0
+
+# Pin placement constraints
+vlsi.inputs.pin_mode: generated
+vlsi.inputs.pin.generate_mode: semi_auto
+vlsi.inputs.pin.assignments: [
+  {pins: "*", layers: ["M5", "M7"], side: "bottom"}
+]
 
 # SRAM Compiler compiler options
 vlsi.core.sram_generator_tool: "sram_compiler"
@@ -82,6 +92,6 @@ par.innovus.design_flow_effort: "standard"
 par.inputs.gds_merge: true
 # Calibre options
 vlsi.core.drc_tool: "calibre"
-vlsi.core.drc_tool_path: ["hammer-cad-plugins/drc"]
+vlsi.core.drc_tool_path: ["hammer-mentor-plugins/drc"]
 vlsi.core.lvs_tool: "calibre"
-vlsi.core.lvs_tool_path: ["hammer-cad-plugins/lvs"]
+vlsi.core.lvs_tool_path: ["hammer-mentor-plugins/lvs"]
