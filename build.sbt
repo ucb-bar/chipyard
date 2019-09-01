@@ -106,10 +106,15 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(commonSettings)
 
 lazy val example = conditionalDependsOn(project in file("generators/example"))
-  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, rocc_template)
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, sha3)
+  .settings(commonSettings)
+
+lazy val tracegen = conditionalDependsOn(project in file("generators/tracegen"))
+  .dependsOn(rocketchip, sifive_cache)
   .settings(commonSettings)
 
 lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))
+  .dependsOn(rocketchip, boom)
   .settings(commonSettings)
 
 lazy val icenet = (project in file("generators/icenet"))
@@ -124,7 +129,7 @@ lazy val boom = (project in file("generators/boom"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
-lazy val rocc_template = (project in file("generators/rocc-template"))
+lazy val sha3 = (project in file("generators/sha3"))
   .dependsOn(rocketchip, `chisel-testers`)
   .settings(commonSettings)
 
@@ -169,7 +174,7 @@ lazy val midas      = ProjectRef(firesimDir, "midas")
 lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 
 lazy val firechip = (project in file("generators/firechip"))
-  .dependsOn(boom, icenet, testchipip, sifive_blocks, sifive_cache, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
+  .dependsOn(boom, icenet, testchipip, sifive_blocks, sifive_cache, utilities, tracegen, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
     testGrouping in Test := isolateAllTests( (definedTests in Test).value )

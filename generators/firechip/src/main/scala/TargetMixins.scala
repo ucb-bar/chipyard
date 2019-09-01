@@ -103,4 +103,3 @@ trait HasTraceIOImp extends LazyModuleImp {
 trait ExcludeInvalidBoomAssertions extends LazyModuleImp {
   ExcludeInstanceAsserts(("NonBlockingDCache", "dtlb"))
 }
-

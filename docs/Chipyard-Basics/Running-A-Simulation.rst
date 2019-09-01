@@ -58,12 +58,6 @@ Therefore, in order to simulate a simple Rocket-based example system we can use:
 
     make SUB_PROJECT=example
 
-Alternatively, if we would like to simulate a simple BOOM-based example system we can use:
-
-.. code-block:: shell
-
-    make SUB_PROJECT=exampleboom
-
 Once the simulator has been constructed, we would like to run RISC-V programs on it.
 In the simulation directory, we will find an executable file called ``<...>-<package>-<config>``.
 We run this executable with our target RISC-V program as a command line argument in one of two ways.

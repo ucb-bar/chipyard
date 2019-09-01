@@ -6,11 +6,10 @@ SHELL=/bin/bash
 #########################################################################################
 # variables to get all *.scala files
 #########################################################################################
-lookup_scala_srcs = $(shell find -L $(1)/ -iname "*.scala" 2> /dev/null)
+lookup_scala_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.scala" -print 2> /dev/null)
 
-PACKAGES=$(addprefix generators/, rocket-chip testchipip boom hwacha sifive-blocks sifive-cache rocc-template example) \
-		 $(addprefix sims/firesim/sim/, . firesim-lib midas midas/targetutils)
-SCALA_SOURCES=$(foreach pkg,$(PACKAGES),$(call lookup_scala_srcs,$(base_dir)/$(pkg)/src/main/scala))
+SOURCE_DIRS=$(addprefix $(base_dir)/,generators sims/firesim/sim)
+SCALA_SOURCES=$(call lookup_scala_srcs,$(SOURCE_DIRS))
 
 #########################################################################################
 # rocket and testchipip classes
@@ -68,7 +67,7 @@ $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): $(HARNESS_SMEMS_CONF)
 # remove duplicate files in blackbox/simfiles
 ########################################################################################
 $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes)
-	awk '{print $1;}' $^ | sort -u > $@
+	awk '{print $1;}' $^ | sort -u | grep -v '.*\.h' > $@
 
 #########################################################################################
 # helper rule to just make verilog files
