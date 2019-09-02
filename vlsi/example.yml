@@ -2,10 +2,8 @@
 # Technology used is ASAP7
 vlsi.core.technology: asap7
 vlsi.core.node: 7
-# Specify dir with ASAP7 tarball
-technology.asap7.tarball_dir: "/tools/B/asap7"
-# Specify extracted dir here if not using tarball
-technology.asap7.install_dir: "/tools/B/asap7"
+technology.asap7.tarball_dir: "SPECIFY DIR WITH ASAP7 TARBALL"
+technology.asap7.install_dir: "SPECIFY EXTRACTED DIR HERE IF NOT USING TARBALL"
 
 vlsi.core.max_threads: 12
 
