@@ -7,22 +7,17 @@ If you are a UCB-affiliate, you may be able to acquire access to the tool & tech
 # Initial Setup Instructions (For all technologies)
 Run the `init-vlsi.sh` script to pull correct versions of hammer, hammer-TOOL\_VENDOR-plugins, and the hammer-TECH\_NAME-plugins. Note the included technology 'asap7' is already included and will not submodule a tech plugin.
 ```shell
-scripts/init-vlsi.sh TECH_NAME
+./scripts/init-vlsi.sh TECH_NAME
 ```
 
 An example of tool environment configuration for BWRC affiliates is given in `bwrc-env.yml`. Replace as necessary for your environment.
 
-Finally, set up all prerequisites for the build system:
-```shell
-make buildfile
-```
-
 # Example design
-In this example, you will be running a SHA-3 accelerator through the VLSI flow in the ASAP7 process. To elaborate the Sha3RocketConfig and set up all prerequisites for the build system:
+In this example, you will be running a SHA-3 accelerator with a dummy hard macro through the VLSI flow in the ASAP7 process. To elaborate the Sha3RocketConfig and set up all prerequisites for the build system:
 ```shell
 export MACROCOMPILER_MODE=' --mode synflops'
 export CONFIG=Sha3RocketConfig
-export TOP=Sha3Accel
+export TOP=Sha3AccelwBB
 make buildfile
 ```
 Note that because the ASAP7 process does not yet have a memory compiler, synflops are elaborated instead.

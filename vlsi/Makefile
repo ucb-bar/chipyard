@@ -33,7 +33,7 @@ HAMMER_EXEC        ?= ./example-vlsi
 # general rules
 #########################################################################################
 ALL_RTL = $(TOP_FILE) $(TOP_SMEMS_FILE) $(extra_v_includes)
-extra_v_includes = $(build_dir)/EICG_wrapper.v
+extra_v_includes = $(build_dir)/EICG_wrapper.v $(vlsi_dir)/example.v
 
 .PHONY: default verilog
 default: all
@@ -74,7 +74,7 @@ $(SRAM_CONF): $(SRAM_GENERATOR_CONF)
 # synthesis input configuration
 #########################################################################################
 SYN_CONF = $(OBJ_DIR)/inputs.yml
-GENERATED_CONFS = $(SYN_CONF) $(SRAM_CONF)
+GENERATED_CONFS = $(SYN_CONF) $(if $(filter $(tech_name), asap7), , $(SRAM_CONF))
 
 $(SYN_CONF): $(ALL_RTL) $(extra_v_includes) $(sim_top_blackboxes)
 	mkdir -p $(dir $@)
