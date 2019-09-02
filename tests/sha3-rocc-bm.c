@@ -19,6 +19,8 @@ int main(void)
     __asm__ __volatile__ ("fence");
     unsigned long start = rdcycle();
 
+#if 0 /*** FIXME: Uncomment code to invoke RoCC accelerator ***/
+
     // Setup accelerator with input and output pointers
     //                      opcode rd  rs1          rs2          funct
     __asm__ __volatile__ ("custom2 x0, %[msg_addr], %[hash_addr], 0"
@@ -28,6 +30,8 @@ int main(void)
     //                      opcode rd  rs1        rs2 funct
     __asm__ __volatile__ ("custom2 x0, %[length], x0, 1"
         :: [length] "r" (sizeof(input)));
+
+#endif
 
     __asm__ __volatile__ ("fence");
     unsigned long end = rdcycle();
