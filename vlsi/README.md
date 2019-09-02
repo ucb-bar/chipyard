@@ -1,3 +1,4 @@
+# HAMMER VLSI flow
 This is the starting point for a vlsi flow from this repository.
 
 This flow will not work without the necessary CAD and technology plugins for HAMMER.
@@ -5,7 +6,7 @@ This flow will not work without the necessary CAD and technology plugins for HAM
 If you are a UCB-affiliate, you may be able to acquire access to the tool & tech plugins.
 
 # Initial Setup Instructions (For all technologies)
-Run the `init-vlsi.sh` script to pull correct versions of hammer, hammer-TOOL\_VENDOR-plugins, and the hammer-TECH\_NAME-plugins. Note the included technology 'asap7' is already included and will not submodule a tech plugin.
+Run the `init-vlsi.sh` script to pull correct versions of hammer, hammer-TOOL\_VENDOR-plugins, and the hammer-TECH\_NAME-plugins. Note the technologies `asap7` and `saed32` are already included and will not submodule a tech plugin.
 ```shell
 ./scripts/init-vlsi.sh TECH_NAME
 ```
@@ -13,15 +14,16 @@ Run the `init-vlsi.sh` script to pull correct versions of hammer, hammer-TOOL\_V
 An example of tool environment configuration for BWRC affiliates is given in `bwrc-env.yml`. Replace as necessary for your environment.
 
 # Example design
-In this example, you will be running a SHA-3 accelerator with a dummy hard macro through the VLSI flow in the ASAP7 process. To elaborate the Sha3RocketConfig and set up all prerequisites for the build system:
+## Building the design
+In this example, you will be running a SHA-3 accelerator with a dummy hard macro through the VLSI flow in the ASAP7 process. To elaborate the Sha3RocketConfig (Rocketchip w/ the accelerator) and set up all prerequisites for the build system:
 ```shell
 export MACROCOMPILER_MODE=' --mode synflops'
 export CONFIG=Sha3RocketConfig
-export TOP=Sha3AccelwBB
 make buildfile
 ```
 Note that because the ASAP7 process does not yet have a memory compiler, synflops are elaborated instead.
 
+## Using HAMMER
 HAMMER's configuration is driven by a JSON/YAML format. For HAMMER, JSON and YAML files are equivalent - you can use either one since HAMMER will convert them to the same representation for itself.
 
 We start by pulling the HAMMER environment into the shell:
@@ -33,10 +35,15 @@ source $HAMMER_HOME/sourceme.sh
 
 The configuration for the example design is contained in `example.yml` and the entry script with hooks is contained in `example-vlsi`. You may go through Hammer's readme to learn about the supported configuration options and how to write hooks.
 
-In order to install the process, edit the keys `vlsi.technology.asap7.tarball_dir` if you already have the ASAP7 tarball downloaded and `vlsi.technology.asap7.install_dir` if you have already extracted it. If omitted, Hammer will automatically download and extract the tarballs into the `build/asap7-tech-cache` directory when you first run synthesis.
+In order to install the process, download (and optionally extract) the ASAP7 PDK tarball. Then, edit the key `vlsi.technology.asap7.tarball_dir` if you want Hammer to extract for you or `vlsi.technology.asap7.install_dir` if you have already extracted it.
 
-To synthesize a design:
+To synthesize the just the SHA-3 accelerator with the hard macro we have to change the physical top module (this step is not necessary if you are pushing the entire Rocket-chip through the VLSI flow):
+```shell
+export TOP=Sha3AccelwBB
+rm build/inputs.yml
+```
 
+Then, to run synthesis:
 ```shell
 make syn
 ```

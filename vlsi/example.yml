@@ -82,12 +82,15 @@ vlsi.inputs.pin.assignments: [
 ]
 
 # Paths to extra libraries
-vlsi.technology.extra_libraries_meta: "append"
+vlsi.technology.extra_libraries_meta: ["append", "deepsubst"]
 vlsi.technology.extra_libraries:
   - library:
-      nldm liberty file: "extra_libraries/dco/dco_SS.lib"
-      lef file: "extra_libraries/dco/dco.lef"
-      gds file: "extra_libraries/dco/dco.gds"
+      nldm liberty file_deepsubst_meta: "local"
+      nldm liberty file: "extra_libraries/dco/ExampleDCO_PVT_0P63V_100C.lib"
+      lef file_deepsubst_meta: "local"
+      lef file: "extra_libraries/dco/ExampleDCO.lef"
+      gds file_deepsubst_meta: "local"
+      gds file: "extra_libraries/dco/ExampleDCO.gds"
       corner:
         nmos: "slow"
         pmos: "slow"
@@ -96,9 +99,12 @@ vlsi.technology.extra_libraries:
         VDD: "0.63 V"
         GND: "0 V"
   - library:
-      nldm liberty file: "extra_libraries/dco/dco_FF.lib"
-      lef file: "extra_libraries/dco/dco.lef"
-      gds file: "extra_libraries/dco/dco.gds"
+      nldm liberty file_deepsubst_meta: "local"
+      nldm liberty file: "extra_libraries/dco/ExampleDCO_PVT_0P77V_0C.lib"
+      lef file_deepsubst_meta: "local"
+      lef file: "extra_libraries/dco/ExampleDCO.lef"
+      gds file_deepsubst_meta: "local"
+      gds file: "extra_libraries/dco/ExampleDCO.gds"
       corner:
         nmos: "fast"
         pmos: "fast"
