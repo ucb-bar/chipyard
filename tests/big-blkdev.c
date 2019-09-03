@@ -5,7 +5,7 @@
 #include "blkdev.h"
 
 #define SECTOR_WORDS (BLKDEV_SECTOR_SIZE / sizeof(uint64_t))
-#define TEST_SECTORS 128
+#define TEST_SECTORS 16
 
 unsigned long sector_buf[SECTOR_WORDS];
 
