@@ -22,8 +22,9 @@ vlsi.inputs.mmmc_corners: [
 ]
 
 # Specify clock signals
+# ASAP7 bug: period value should actually be in ps
 vlsi.inputs.clocks: [
-  {name: "clock", period: "20ns", uncertainty: "0.1ns"}
+  {name: "clock", period: "1000ns", uncertainty: "0.1ns"}
 ]
 
 # Generate Make include to aid in flow 
@@ -59,17 +60,17 @@ vlsi.inputs.placement_constraints:
     type: "toplevel"
     x: 0
     y: 0
-    width: 500
-    height: 500
+    width: 300
+    height: 300
     margins:
-      left: 0
-      right: 0
-      top: 0
-      bottom: 0
+      left: 10
+      right: 10
+      top: 10
+      bottom: 10
   - path: "Sha3AccelwBB/dco"
     type: "hardmacro"
-    x: 400
-    y: 400
+    x: 100
+    y: 100
     width: 32
     height: 32
     orientation: "r0"
