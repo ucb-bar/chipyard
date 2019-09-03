@@ -30,7 +30,7 @@ $(FIRRTL_JAR): $(call lookup_scala_srcs, $(CHIPYARD_FIRRTL_DIR)/src/main/scala)
 	touch $@
 
 #########################################################################################
-# create simulation args file rule
+# create list of simulation file inputs
 #########################################################################################
 $(sim_files): $(call lookup_scala_srcs,$(base_dir)/generators/utilities/src/main/scala) $(FIRRTL_JAR)
 	cd $(base_dir) && $(SBT) "project utilities" "runMain utilities.GenerateSimFiles -td $(build_dir) -sim $(sim_name)"
@@ -72,7 +72,7 @@ harness_macro_temp: $(HARNESS_SMEMS_CONF)
 	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE)"
 
 ########################################################################################
-# remove duplicate files in blackbox/simfiles
+# remove duplicate files and headers in list of simulation file inputs
 ########################################################################################
 $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes)
 	awk '{print $1;}' $^ | sort -u | grep -v '.*\.h' > $@
