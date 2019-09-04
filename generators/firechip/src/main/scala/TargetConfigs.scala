@@ -82,7 +82,7 @@ class WithDRAMCacheKey extends Config((site, here, up) => {
     nSets = 1 << 21,
     nWays = 7,
     baseAddr = BigInt(1) << 37,
-    nTrackersPerBank = 4,
+    nTrackersPerBank = 8,
     nBanksPerChannel = 8,
     nChannels = 1,
     nSecondaryRequests = 1,
@@ -204,7 +204,7 @@ class FireSimMemBlade1024Config extends Config(
   new WithMemBladeKey(Some(1024)) ++ new FireSimRocketChipConfig)
 
 class WithStandardL2 extends WithInclusiveCache(
-  nBanks = 4,
+  nBanks = 8,
   capacityKB = 1024,
   outerLatencyCycles = 50)
 
