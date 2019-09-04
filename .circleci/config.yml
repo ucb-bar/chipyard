@@ -678,6 +678,12 @@ workflows:
 
             # Run the respective tests
 
+            # Run midasexamples test
+            - midasexamples-run-tests:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
             # Run the example tests
             - example-run-tests:
                 requires:
