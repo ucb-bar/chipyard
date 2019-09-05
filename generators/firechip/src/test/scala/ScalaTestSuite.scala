@@ -109,9 +109,9 @@ abstract class FireSimTestSuite(
         val lines = Source.fromFile(file).getLines.toList
         lines.filter(_.startsWith("TRACEPORT")).drop(dropLines)
       }
-      val resetLength = 50
+      val resetLength = 51
       val verilatedOutput  = getLines(new File(outDir,  s"/${verilatedLog}"))
-      val synthPrintOutput = getLines(new File(genDir, s"/TRACEFILE"), resetLength + 1)
+      val synthPrintOutput = getLines(new File(genDir, s"/TRACEFILE"), resetLength)
       assert(verilatedOutput.size == synthPrintOutput.size, "Outputs differ in length")
       assert(verilatedOutput.nonEmpty)
       for ( (vPrint, sPrint) <- verilatedOutput.zip(synthPrintOutput) ) {
@@ -131,8 +131,9 @@ abstract class FireSimTestSuite(
 }
 
 class RocketF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimRocketChipConfig", "FireSimConfig")
-class RocketF1ClockDivTests extends FireSimTestSuite("FireSimNoNIC", "FireSimRocketChipConfig", "FireSimClockDivConfig")
 class BoomF1Tests extends FireSimTestSuite("FireBoomNoNIC", "FireSimBoomConfig", "FireSimConfig")
 class RocketNICF1Tests extends FireSimTestSuite("FireSim", "FireSimRocketChipConfig", "FireSimConfig") {
   runSuite("verilator")(NICLoopbackTests)
 }
+class RamModelRocketF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimRocketChipDualCoreConfig", "Midas2Config")
+class RamModelBoomF1Tests extends FireSimTestSuite("FireBoomNoNIC", "FireSimBoomConfig", "Midas2Config")

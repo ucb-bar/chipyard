@@ -1,6 +1,7 @@
 package firesim.firesim
 
 import chisel3._
+import chisel3.experimental.annotate
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
@@ -12,7 +13,7 @@ import freechips.rocketchip.rocket.TracedInstruction
 import firesim.endpoints.{TraceOutputTop, DeclockedTracedInstruction}
 
 import midas.models.AXI4BundleWithEdge
-import midas.targetutils.ExcludeInstanceAsserts
+import midas.targetutils.{ExcludeInstanceAsserts, MemModelAnnotation}
 
 /** Copied from RC and modified to change the IO type of the Imp to include the Diplomatic edges
   *  associated with each port. This drives FASED functional model sizing
@@ -102,4 +103,28 @@ trait HasTraceIOImp extends LazyModuleImp {
 // Prevent MIDAS from synthesizing assertions in the dummy TLB included in BOOM
 trait ExcludeInvalidBoomAssertions extends LazyModuleImp {
   ExcludeInstanceAsserts(("NonBlockingDCache", "dtlb"))
+}
+
+trait CanHaveBoomMultiCycleRegfileImp {
+  val outer: boom.system.BoomRocketSubsystem
+  val cores = outer.boomTiles.map(tile => tile.module.core)
+  cores.foreach({ core =>
+    core.iregfile match {
+      case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
+      case _ => Nil
+    }
+
+     if (core.fp_pipeline != null) core.fp_pipeline.fregfile match {
+      case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
+      case _ => Nil
+    }
+
+   })
+}
+trait CanHaveRocketMultiCycleRegfileImp {
+  val outer: RocketSubsystem
+  outer.rocketTiles.foreach({ tile =>
+    annotate(MemModelAnnotation(tile.module.core.rocketImpl.rf.rf))
+    tile.module.fpuOpt.foreach(fpu => annotate(MemModelAnnotation(fpu.fpuImpl.regfile)))
+  })
 }

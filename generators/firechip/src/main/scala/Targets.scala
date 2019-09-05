@@ -55,6 +55,7 @@ class FireSimModuleImp[+L <: FireSim](l: L) extends RocketSubsystemModuleImp(l)
     with HasPeripheryIceNICModuleImpValidOnly
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
+    with CanHaveRocketMultiCycleRegfileImp
 
 
 class FireSimNoNIC(implicit p: Parameters) extends RocketSubsystem
@@ -79,6 +80,7 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNIC](l: L) extends RocketSubsystemMod
     with HasPeripheryUARTModuleImp
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
+    with CanHaveRocketMultiCycleRegfileImp
 
 
 class FireBoom(implicit p: Parameters) extends Subsystem
@@ -106,6 +108,7 @@ class FireBoomModuleImp[+L <: FireBoom](l: L) extends SubsystemModuleImp(l)
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
     with ExcludeInvalidBoomAssertions
+    with CanHaveBoomMultiCycleRegfileImp
 
 class FireBoomNoNIC(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
@@ -130,6 +133,7 @@ class FireBoomNoNICModuleImp[+L <: FireBoomNoNIC](l: L) extends SubsystemModuleI
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
     with ExcludeInvalidBoomAssertions
+    with CanHaveBoomMultiCycleRegfileImp
 
 case object NumNodes extends Field[Int]
 
