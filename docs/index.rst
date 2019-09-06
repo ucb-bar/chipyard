@@ -14,39 +14,20 @@ New to Chipyard? Jump to the :ref:`Chipyard Basics` page for more info.
 
 .. toctree::
    :maxdepth: 3
-   :caption: Contents:
    :numbered:
 
    Chipyard-Basics/index
 
-   :maxdepth: 3
-   :caption: Simulation:
-   :numbered:
    Simulation/index
 
-   :maxdepth: 3
-   :caption: Generators:
-   :numbered:
    Generators/index
 
-   :maxdepth: 3
-   :caption: Tools:
-   :numbered:
    Tools/index
 
-   :maxdepth: 3
-   :caption: VLSI Production:
-   :numbered:
    VLSI/index
 
-   :maxdepth: 3
-   :caption: Customization:
-   :numbered:
    Customization/index
 
-   :maxdepth: 3
-   :caption: Advanced Usage:
-   :numbered:
    Advanced-Usage/index
 
 
