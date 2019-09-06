@@ -3,12 +3,13 @@ package firesim.firesim
 import chisel3._
 import chisel3.experimental.RawModule
 
-import freechips.rocketchip.config.Parameters
+import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug.HasPeripheryDebugModuleImp
 import sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
 
 import testchipip.{HasPeripherySerialModuleImp, HasPeripheryBlockDeviceModuleImp}
+import icenet.HasPeripheryIceNICModuleImpValidOnly
 
 import junctions.{NastiKey, NastiParameters}
 import midas.widgets.{IsEndpoint, PeekPokeEndpoint}
@@ -26,11 +27,14 @@ import firesim.configs.MemModelKey
 // SimAXI4Mem). Since cake traits live in Rocket Chip it was easiest to match
 // on the types rather than change trait code.
 
+case object NumNodes extends Field[Int](1)
+
 class DefaultFireSimEnvironment[T <: LazyModule](dutGen: () => T)(implicit val p: Parameters) extends RawModule {
   val clock = IO(Input(Clock()))
   val reset = WireInit(false.B)
   withClockAndReset(clock, reset) {
-    val target = Module(LazyModule(dutGen()).module)
+    // Instantiate multiple instances of the DUT to implement supernode
+    val targets = Seq.fill(p(NumNodes))(Module(LazyModule(dutGen()).module))
     val peekPokeEndpoint = PeekPokeEndpoint(reset)
     // A Seq of partial functions that will instantiate the right endpoint only
     // if that Mixin trait is present in the target's class instance
@@ -48,6 +52,7 @@ class DefaultFireSimEnvironment[T <: LazyModule](dutGen: () => T)(implicit val p
         Seq()
       },
       { case t: HasPeripherySerialModuleImp => Seq(SerialEndpoint(t.serial)) },
+      { case t: HasPeripheryIceNICModuleImpValidOnly => Seq(NICEndpoint(t.net)) },
       { case t: HasPeripheryUARTModuleImp => t.uart.map(u => UARTEndpoint(u)) },
       { case t: HasPeripheryBlockDeviceModuleImp => Seq(BlockDevEndpoint(t.bdev, reset)) },
       { case t: CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp =>
@@ -66,7 +71,9 @@ class DefaultFireSimEnvironment[T <: LazyModule](dutGen: () => T)(implicit val p
       },
       { case t: HasTraceIOImp => TracerVEndpoint(t.traceIO) }
     )
-    // Apply each partial function to the DUT; collecting the generated endpoints
-    val endpoints = endpointBinders.map(_.lift).flatMap(elaborator => elaborator(target))
+    // Apply each partial function to each DUT instance
+    for ((target) <- targets) {
+      endpointBinders.map(_.lift).flatMap(elaborator => elaborator(target))
+    }
   }
 }

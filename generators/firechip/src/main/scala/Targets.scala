@@ -60,6 +60,8 @@ class FireSimModuleImp[+L <: FireSimDUT](l: L) extends RocketSubsystemModuleImp(
     with HasTraceIOImp
     with CanHaveRocketMultiCycleRegfileImp
 
+class FireSim(implicit p: Parameters) extends DefaultFireSimEnvironment(() => new FireSimDUT)
+
 class FireSimNoNICDUT(implicit p: Parameters) extends RocketSubsystem
     with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
@@ -110,6 +112,8 @@ class FireBoomModuleImp[+L <: FireBoomDUT](l: L) extends BoomRocketSubsystemModu
     with ExcludeInvalidBoomAssertions
     with CanHaveBoomMultiCycleRegfileImp
 
+class FireBoom(implicit p: Parameters) extends DefaultFireSimEnvironment(() => new FireBoomDUT)
+
 class FireBoomNoNICDUT(implicit p: Parameters) extends BoomRocketSubsystem
     with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
@@ -133,46 +137,7 @@ class FireBoomNoNICModuleImp[+L <: FireBoomNoNICDUT](l: L) extends BoomRocketSub
     with ExcludeInvalidBoomAssertions
     with CanHaveBoomMultiCycleRegfileImp
 
-case object NumNodes extends Field[Int]
+class FireBoomNoNIC(implicit p: Parameters) extends DefaultFireSimEnvironment(() => new FireBoomNoNICDUT)
 
-class SupernodeIO(
-      nNodes: Int,
-      serialWidth: Int,
-      bagPrototype: HeterogeneousBag[midas.models.AXI4BundleWithEdge])(implicit p: Parameters)
-    extends Bundle {
-
-    val serial = Vec(nNodes, new SerialIO(serialWidth))
-    val mem_axi = Vec(nNodes, bagPrototype.cloneType)
-    val bdev = Vec(nNodes, new BlockDeviceIO)
-    val net = Vec(nNodes, new NICIOvonly)
-    val uart = Vec(nNodes, new UARTPortIO)
-
-    override def cloneType = new SupernodeIO(nNodes, serialWidth, bagPrototype).asInstanceOf[this.type]
-}
-
-
-class FireSimSupernodeDUT(implicit p: Parameters) extends Module {
-  val nNodes = p(NumNodes)
-  val nodes = Seq.fill(nNodes) {
-    Module(LazyModule(new FireSimDUT).module)
-  }
-
-  val io = IO(new SupernodeIO(nNodes, SERIAL_IF_WIDTH, nodes(0).mem_axi4.get))
-
-  io.mem_axi.zip(nodes.map(_.mem_axi4)).foreach {
-    case (out, mem_axi4) => out <> mem_axi4.get
-  }
-  io.serial <> nodes.map(_.serial)
-  io.bdev <> nodes.map(_.bdev)
-  io.net <> nodes.map(_.net)
-  io.uart <> nodes.map(_.uart(0))
-  nodes.foreach{ case n => {
-    n.debug.clockeddmi.get.dmi.req.valid := false.B
-    n.debug.clockeddmi.get.dmi.resp.ready := false.B
-    n.debug.clockeddmi.get.dmiClock := clock
-    n.debug.clockeddmi.get.dmiReset := reset.toBool
-    n.debug.clockeddmi.get.dmi.req.bits.data := DontCare
-    n.debug.clockeddmi.get.dmi.req.bits.addr := DontCare
-    n.debug.clockeddmi.get.dmi.req.bits.op := DontCare
-  } }
-}
+// Supernoded-ness comes from setting p(NumNodes) (see DefaultFiresimEnvironment) to something > 1
+class FireSimSupernode(implicit p: Parameters) extends DefaultFireSimEnvironment(() => new FireSimDUT)
