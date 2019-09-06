@@ -55,6 +55,3 @@
 [submodule "tools/treadle"]
 	path = tools/treadle
 	url = https://github.com/freechipsproject/treadle.git
-[submodule "generators/rocc-template"]
-	path = generators/sha3
-	url = https://github.com/ucb-bar/rocc-template.git
