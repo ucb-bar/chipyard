@@ -75,7 +75,7 @@ To create a RegisterRouter-based peripheral, you will need to specify a paramete
       val pwmout = Output(Bool())
     }
 
-    trait PWMTLModule {
+    trait PWMTLModule extends HasRegMap {
       val io: PWMTLBundle
       implicit val p: Parameters
       def params: PWMParams
@@ -159,7 +159,7 @@ This code is from ``generators/example/src/main/scala/Top.scala``.
 
 .. code-block:: scala
 
-    class TopWithPWM(implicit p: Parameters) extends Top(p)
+    class TopWithPWM(implicit p: Parameters) extends Top
         with HasPeripheryPWM {
       override lazy val module = Module(new TopWithPWMModule(this))
     }
@@ -311,22 +311,23 @@ To add a device like that, you would do the following.
 .. code-block:: scala
 
     class DMADevice(implicit p: Parameters) extends LazyModule {
-      val node = TLClientNode(TLClientParameters(
-        name = "dma-device", sourceId = IdRange(0, 1)))
+      val node = TLHelper.makeClientNode(
+        name = "dma-device", sourceId = IdRange(0, 1))
 
       lazy val module = new DMADeviceModule(this)
     }
 
     class DMADeviceModule(outer: DMADevice) extends LazyModuleImp(outer) {
       val io = IO(new Bundle {
-        val mem = outer.node.bundleOut
         val ext = new ExtBundle
       })
+
+      val (mem, edge) = outer.node.out(0)
 
       // ... rest of the code ...
     }
 
-    trait HasPeripheryDMA extends HasSystemNetworks {
+    trait HasPeripheryDMA { this: BaseSubsystem =>
       implicit val p: Parameters
 
       val dma = LazyModule(new DMADevice)
@@ -334,10 +335,18 @@ To add a device like that, you would do the following.
       fbus.fromPort(Some(portName))() := dma.node
     }
 
-    trait HasPeripheryDMAModuleImp extends LazyMultiIOModuleImp {
+    trait HasPeripheryDMAModuleImp extends LazyModuleImp {
       val ext = IO(new ExtBundle)
       ext <> outer.dma.module.io.ext
     }
+
+    class TopWithDMA(implicit p: Parameters) extends Top
+        with HasPeripheryDMA {
+      override lazy val module = new TopWithDMAModule
+    }
+
+    class TopWithDMAModule(l: TopWithDMA) extends TopModule(l)
+        with HasPeripheryDMAModuleImp
 
 
 The ``ExtBundle`` contains the signals we connect off-chip that we get data from.
