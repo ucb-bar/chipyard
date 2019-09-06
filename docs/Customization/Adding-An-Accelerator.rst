@@ -123,16 +123,15 @@ For a simple memory-mapped peripheral, this just involves connecting the periphe
 
 .. code-block:: scala
 
-    trait HasPeripheryPWM extends HasSystemNetworks {
+    trait HasPeripheryPWM { this: BaseSubsystem =>
       implicit val p: Parameters
 
       private val address = 0x2000
+      private val portName = "pwm"
 
-      val pwm = LazyModule(new PWMTL(
-        PWMParams(address, peripheryBusConfig.beatBytes))(p))
+      val pwm = LazyModule(new PWMTL(PWMParams(address, pbus.beatBytes)))
 
-      pwm.node := TLFragmenter(
-        peripheryBusConfig.beatBytes, cacheBlockBytes)(peripheryBus.node)
+      pbus.toVariableWidthSlave(Some(portName)) { pwm.node }
     }
 
 
@@ -146,7 +145,7 @@ We then connect the ``PWMTL``'s pwmout to the pwmout we declared.
 
 .. code-block:: scala
 
-    trait HasPeripheryPWMModuleImp extends LazyMultiIOModuleImp {
+    trait HasPeripheryPWMModuleImp extends LazyModuleImp {
       implicit val p: Parameters
       val outer: HasPeripheryPWM
 
@@ -160,33 +159,39 @@ This code is from ``generators/example/src/main/scala/Top.scala``.
 
 .. code-block:: scala
 
-    class ExampleTopWithPWM(q: Parameters) extends ExampleTop(q)
-        with PeripheryPWM {
-      override lazy val module = Module(
-        new ExampleTopWithPWMModule(p, this))
+    class TopWithPWM(implicit p: Parameters) extends Top(p)
+        with HasPeripheryPWM {
+      override lazy val module = Module(new TopWithPWMModule(this))
     }
 
-    class ExampleTopWithPWMModule(l: ExampleTopWithPWM)
-      extends ExampleTopModule(l) with HasPeripheryPWMModuleImp
+    class TopWithPWMModule(l: TopWithPWM) extends TopModule(l)
+        with HasPeripheryPWMModuleImp
 
 
 Just as we need separate traits for ``LazyModule`` and module implementation, we need two classes to build the system.
-The ``ExampleTop`` classes already have the basic peripherals included for us, so we will just extend those.
+The ``Top`` classes already have the basic peripherals included for us, so we will just extend those.
 
-The ``ExampleTop`` class includes the pre-elaboration code and also a ``lazy val`` to produce the module implementation (hence ``LazyModule``).
-The ``ExampleTopModule`` class is the actual RTL that gets synthesized.
+The ``Top`` class includes the pre-elaboration code and also a ``lazy val`` to produce the module implementation (hence ``LazyModule``).
+The ``TopModule`` class is the actual RTL that gets synthesized.
 
-Finally, we need to add a configuration class in ``generators/example/src/main/scala/Configs.scala`` that tells the ``TestHarness`` to instantiate ``ExampleTopWithPWM`` instead of the default ``ExampleTop``.
+Next, we need to add a configuration mixin in ``generators/example/src/main/scala/ConfigMixins.scala`` that tells the ``TestHarness`` to instantiate ``TopWithPWM`` instead of the default ``Top``.
 
 .. code-block:: scala
 
-    class WithPWM extends Config((site, here, up) => {
+    class WithPWMTop extends Config((site, here, up) => {
       case BuildTop => (p: Parameters) =>
-        Module(LazyModule(new ExampleTopWithPWM()(p)).module)
+        Module(LazyModule(new TopWithPWM()(p)).module)
     })
 
-    class PWMConfig extends Config(new WithPWM ++ new BaseExampleConfig)
+And finally, we create a configuration class in ``generators/example/src/main/scala/RocketConfigs.scala`` that uses this mixin.
 
+.. code-block:: scala
+
+    class PWMRocketConfig extends Config(
+        new WithPWMTop ++
+        new WithBootROM ++
+        new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+        new freechips.rocketchip.system.BaseConfig)
 
 Now we can test that the PWM is working. The test program is in ``tests/pwm.c``.
 
@@ -293,7 +298,9 @@ For instance, if we wanted to add the previously defined accelerator and route c
     })
 
     class CustomAcceleratorConfig extends Config(
-      new WithCustomAccelerator ++ new DefaultExampleConfig)
+      new WithCustomAccelerator ++ new RocketConfig)
+
+To add RoCC instructions in your program, use the RoCC C macros provided in ``tests/rocc.h``. You can find examples in the files ``tests/accum.c`` and ``charcount.c``.
 
 Adding a DMA port
 -------------------
@@ -324,7 +331,7 @@ To add a device like that, you would do the following.
 
       val dma = LazyModule(new DMADevice)
 
-      fsb.node := dma.node
+      fbus.fromPort(Some(portName))() := dma.node
     }
 
     trait HasPeripheryDMAModuleImp extends LazyMultiIOModuleImp {
@@ -334,6 +341,6 @@ To add a device like that, you would do the following.
 
 
 The ``ExtBundle`` contains the signals we connect off-chip that we get data from.
-The DMADevice also has a Tilelink client port that we connect into the L1-L2 crossbar through the front-side buffer (fsb).
+The DMADevice also has a Tilelink client port that we connect into the L1-L2 crossbar through the frontend bus (fbus).
 The sourceId variable given in the ``TLClientNode`` instantiation determines the range of ids that can be used in acquire messages from this device.
 Since we specified [0, 1) as our range, only the ID 0 can be used.
