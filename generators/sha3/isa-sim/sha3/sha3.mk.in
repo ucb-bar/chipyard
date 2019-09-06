@@ -1,0 +1,12 @@
+sha3_subproject_deps = \
+	riscv \
+
+sha3_install_prog_srcs = \
+
+sha3_hdrs = \
+	sha3.h \
+
+sha3_srcs = \
+	sha3.cc \
+
+sha3_test_srcs =
