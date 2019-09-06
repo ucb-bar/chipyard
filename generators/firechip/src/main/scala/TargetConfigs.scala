@@ -14,7 +14,6 @@ import testchipip.{BlockDeviceKey, BlockDeviceConfig}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import icenet._
 
-import firesim.util.{EndpointKey, TieOffDebug}
 import firesim.endpoints._
 import firesim.configs.WithDefaultMemModel
 
@@ -37,33 +36,15 @@ class WithPeripheryBusFrequency(freq: BigInt) extends Config((site, here, up) =>
 })
 
 class WithUARTKey extends Config((site, here, up) => {
-  case EndpointKey => up(EndpointKey) ++ Seq(UARTEndpoint)
   case PeripheryUARTKey => List(UARTParams(
      address = BigInt(0x54000000L),
      nTxEntries = 256,
      nRxEntries = 256))
 })
 
-class WithSerialEndpoint extends Config((site, here, up) => {
-  case EndpointKey => up(EndpointKey) ++ Seq(SerialEndpoint)
-})
-
-class WithTracerVEndpoint extends Config((site, here, up) => {
-  case EndpointKey => up(EndpointKey) ++ Seq(TracerVEndpoint)
-})
-
-class WithBlockDevice extends Config(
-  new Config((site, here, up) => {
-    case EndpointKey => up(EndpointKey) ++ Seq(BlockDevEndpoint, firesim.util.FASEDEndpointMatcher)
-  }) ++ new testchipip.WithBlockDevice
-)
-
-class WithTieOffDebug extends Config((site, here, up) => {
-  case EndpointKey => up(EndpointKey) ++ Seq(TieOffDebug)
-})
+class WithBlockDevice extends Config(new testchipip.WithBlockDevice)
 
 class WithNICKey extends Config((site, here, up) => {
-  //case EndpointKey => up(EndpointKey) ++ Seq(NICEndpoint)
   case NICKey => NICConfig(
     inBufFlits = 8192,
     ctrlQueueDepth = 64)
@@ -122,9 +103,6 @@ class FireSimRocketChipConfig extends Config(
   new WithPerfCounters ++
   new WithoutClockGating ++
   new WithDefaultMemModel ++
-  new WithSerialEndpoint ++
-  new WithTracerVEndpoint ++
-  new WithTieOffDebug ++
   new freechips.rocketchip.system.DefaultConfig)
 
 class WithNDuplicatedRocketCores(n: Int) extends Config((site, here, up) => {
@@ -165,9 +143,6 @@ class FireSimBoomConfig extends Config(
   new WithBoomL2TLBs(1024) ++
   new WithoutClockGating ++
   new WithDefaultMemModel ++
-  new WithSerialEndpoint ++
-  new WithTracerVEndpoint ++
-  new WithTieOffDebug ++
   // Using a small config because it has 64-bit system bus, and compiles quickly
   new boom.system.SmallBoomConfig)
 

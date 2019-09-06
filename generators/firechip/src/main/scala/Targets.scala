@@ -6,6 +6,7 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.devices.tilelink._
+import freechips.rocketchip.devices.debug.HasPeripheryDebugModuleImp
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.util.{HeterogeneousBag}
 import freechips.rocketchip.amba.axi4.AXI4Bundle
@@ -16,15 +17,14 @@ import icenet._
 import testchipip._
 import testchipip.SerialAdapter.SERIAL_IF_WIDTH
 import sifive.blocks.devices.uart._
-import midas.models.AXI4BundleWithEdge
-import firesim.util.IOMatchingMIDASEnvironment
 import java.io.File
 
 
 object FireSimValName {
-  implicit val valName = ValName("TestHarness")
+  implicit val valName = ValName("FireSimHarness")
 }
 import FireSimValName._
+
 /*******************************************************************************
 * Top level DESIGN configurations. These describe the basic instantiations of
 * the designs being simulated.
@@ -40,7 +40,6 @@ class FireSimDUT(implicit p: Parameters) extends RocketSubsystem
     with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
-    with HasNoDebug
     with HasPeripherySerial
     with HasPeripheryUART
     with HasPeripheryIceNIC
@@ -54,7 +53,6 @@ class FireSimModuleImp[+L <: FireSimDUT](l: L) extends RocketSubsystemModuleImp(
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
-    with HasNoDebugModuleImp
     with HasPeripherySerialModuleImp
     with HasPeripheryUARTModuleImp
     with HasPeripheryIceNICModuleImpValidOnly
@@ -62,13 +60,10 @@ class FireSimModuleImp[+L <: FireSimDUT](l: L) extends RocketSubsystemModuleImp(
     with HasTraceIOImp
     with CanHaveRocketMultiCycleRegfileImp
 
-class FireSim(implicit p: Parameters) extends IOMatchingMIDASEnvironment(() => LazyModule(new FireSimDUT).module)
-
 class FireSimNoNICDUT(implicit p: Parameters) extends RocketSubsystem
     with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
-    with HasNoDebug
     with HasPeripherySerial
     with HasPeripheryUART
     with HasPeripheryBlockDevice
@@ -81,7 +76,6 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNICDUT](l: L) extends RocketSubsystem
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
-    with HasNoDebugModuleImp
     with HasPeripherySerialModuleImp
     with HasPeripheryUARTModuleImp
     with HasPeripheryBlockDeviceModuleImp
@@ -89,13 +83,12 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNICDUT](l: L) extends RocketSubsystem
     with CanHaveRocketMultiCycleRegfileImp
 
 
-class FireSimNoNIC(implicit p: Parameters) extends IOMatchingMIDASEnvironment(() => LazyModule(new FireSimNoNICDUT).module)
+class FireSimNoNIC(implicit p: Parameters) extends DefaultFireSimEnvironment(() => new FireSimNoNICDUT)
 
 class FireBoomDUT(implicit p: Parameters) extends BoomRocketSubsystem
     with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
-    with HasNoDebug
     with HasPeripherySerial
     with HasPeripheryUART
     with HasPeripheryIceNIC
@@ -109,7 +102,6 @@ class FireBoomModuleImp[+L <: FireBoomDUT](l: L) extends BoomRocketSubsystemModu
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
-    with HasNoDebugModuleImp
     with HasPeripherySerialModuleImp
     with HasPeripheryUARTModuleImp
     with HasPeripheryIceNICModuleImpValidOnly
@@ -118,13 +110,10 @@ class FireBoomModuleImp[+L <: FireBoomDUT](l: L) extends BoomRocketSubsystemModu
     with ExcludeInvalidBoomAssertions
     with CanHaveBoomMultiCycleRegfileImp
 
-class FireBoom(implicit p: Parameters) extends IOMatchingMIDASEnvironment(() => LazyModule(new FireBoomDUT).module)
-
 class FireBoomNoNICDUT(implicit p: Parameters) extends BoomRocketSubsystem
     with HasDefaultBusConfiguration
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
-    with HasNoDebug
     with HasPeripherySerial
     with HasPeripheryUART
     with HasPeripheryBlockDevice
@@ -137,7 +126,6 @@ class FireBoomNoNICModuleImp[+L <: FireBoomNoNICDUT](l: L) extends BoomRocketSub
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
-    with HasNoDebugModuleImp
     with HasPeripherySerialModuleImp
     with HasPeripheryUARTModuleImp
     with HasPeripheryBlockDeviceModuleImp
@@ -145,14 +133,12 @@ class FireBoomNoNICModuleImp[+L <: FireBoomNoNICDUT](l: L) extends BoomRocketSub
     with ExcludeInvalidBoomAssertions
     with CanHaveBoomMultiCycleRegfileImp
 
-class FireBoomNoNIC(implicit p: Parameters) extends IOMatchingMIDASEnvironment(() => LazyModule(new FireBoomNoNICDUT).module)
-
 case object NumNodes extends Field[Int]
 
 class SupernodeIO(
       nNodes: Int,
       serialWidth: Int,
-      bagPrototype: HeterogeneousBag[AXI4BundleWithEdge])(implicit p: Parameters)
+      bagPrototype: HeterogeneousBag[midas.models.AXI4BundleWithEdge])(implicit p: Parameters)
     extends Bundle {
 
     val serial = Vec(nNodes, new SerialIO(serialWidth))
@@ -190,5 +176,3 @@ class FireSimSupernodeDUT(implicit p: Parameters) extends Module {
     n.debug.clockeddmi.get.dmi.req.bits.op := DontCare
   } }
 }
-
-class FireSimSupernode(implicit p: Parameters) extends IOMatchingMIDASEnvironment(() => new FireSimSupernodeDUT)
