@@ -308,6 +308,7 @@ class FireSimBoomDRAMCacheConfig extends Config(
   new WithMemBenchKey ++
   new WithDRAMCacheKey ++
   new WithExtMemSize(15L << 30) ++
+  new WithRingSystemBus ++
   new WithStandardL2 ++
   new FireSimBoomConfig)
 
