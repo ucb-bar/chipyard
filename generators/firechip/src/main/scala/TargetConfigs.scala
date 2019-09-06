@@ -112,7 +112,7 @@ class WithPrefetchRoCC extends Config((site, here, up) => {
   })
 })
 
-class WithMemBenchKey(nXacts: Int = 32) extends Config((site, here, up) => {
+class WithMemBenchKey(nXacts: Int = 64) extends Config((site, here, up) => {
   case MemBenchKey => MemBenchParams(nXacts = nXacts)
 })
 
