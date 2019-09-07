@@ -30,6 +30,7 @@ New to Chipyard? Jump to the :ref:`Chipyard Basics` page for more info.
 
    Advanced-Usage/index
 
+   TileLink-Diplomacy-Reference/index
 
 
 Indices and tables
