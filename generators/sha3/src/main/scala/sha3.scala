@@ -3,6 +3,7 @@
 package sha3
 
 import Chisel._
+import chisel3.util.{HasBlackBoxInline, HasBlackBoxResource, HasBlackBoxPath}
 import freechips.rocketchip.tile._
 import freechips.rocketchip.config._
 import freechips.rocketchip.diplomacy._
@@ -39,6 +40,19 @@ class Sha3Accel(opcodes: OpcodeSet)(implicit p: Parameters) extends LazyRoCC(opc
   override lazy val module = new Sha3AccelImp(this)
 }
 
+class watbundle(nPTWports: Int)(implicit p: Parameters) extends Bundle {
+  val io = new RoCCIO(nPTWports)
+  val clock = Clock(INPUT)
+  val reset = Input(UInt(1.W))
+}
+
+
+class Sha3BlackBox(nPTWports: Int)(implicit p: Parameters) extends BlackBox with HasBlackBoxResource {
+  val io = IO(new watbundle(nPTWports))
+
+  setResource("/vsrc/Sha3BlackBox.v")
+}
+
 class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCModuleImp(outer) {
   //parameters
   val W = p(Sha3WidthP)
@@ -50,6 +64,23 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
   val rounds = 24 //12 + 2l
   val hash_size_words = 256/W
   val bytes_per_word = W/8
+
+
+
+
+
+  // TODO CLOCK AND RESET
+
+  val sha3bb = Module(new Sha3BlackBox(0))
+
+  io <> sha3bb.io.io
+  sha3bb.io.clock := clock
+  sha3bb.io.reset := reset
+
+  //sha3bb.io <> io
+
+
+/*
 
   //RoCC Interface defined in testMems.scala
   //cmd
@@ -91,7 +122,7 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
   dpath.io.round := ctrl.io.round
   dpath.io.stage := ctrl.io.stage
   dpath.io.aindex := ctrl.io.aindex
-
+*/
 }
 
 class WithSha3Accel extends Config ((site, here, up) => {
