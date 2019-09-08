@@ -198,3 +198,46 @@ output for write.
 
 In order to use this variant, you need to set ``concurrency`` to a value
 larger than 0.
+
+Register Routers for Other Protocols
+------------------------------------
+
+One useful feature of the register router interface is that you can easily
+change the protocol being used. For instance, in the first example in
+:ref:`Basic Usage`, you could simply change the ``TLRegisterNode`` to
+and ``AXI4RegisterNode``.
+
+.. code-block:: scala
+
+    import chisel3._
+    import chisel3.util._
+    import freechips.rocketchip.config.Parameters
+    import freechips.rocketchip.diplomacy.{SimpleDevice, AddressSet}
+    import freechips.rocketchip.amba.axi4.AXI4RegisterNode
+
+    class MyAXI4DeviceController(implicit p: Parameters) extends LazyModule {
+      val node = AXI4RegisterNode(
+        address = Seq(AddressSet(0x10019000, 0xfff)),
+        beatBytes = 8,
+        concurrency = 1)
+
+      lazy val module = new LazyModuleImp(this) {
+        val bigReg = RegInit(0.U(64.W))
+        val mediumReg = RegInit(0.U(32.W))
+        val smallReg = RegInit(0.U(16.W))
+
+        val tinyReg0 = RegInit(0.U(4.W))
+        val tinyReg1 = RegInit(0.U(4.W))
+
+        node.regmap(
+          0x00 -> Seq(RegField(64, bigReg)),
+          0x08 -> Seq(RegField(32, mediumReg)),
+          0x0C -> Seq(RegField(16, smallReg)),
+          0x0E -> Seq(
+            RegField(4, tinyReg0),
+            RegField(4, tinyReg1)))
+      }
+    }
+
+Other than the fact that AXI4 nodes don't take a ``device`` argument,
+everything else is unchanged.
