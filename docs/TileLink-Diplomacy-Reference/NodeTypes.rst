@@ -29,7 +29,7 @@ object from testchipip like so:
         name = "my-client",
         sourceId = IdRange(0, 4),
         requestFifo = true,
-        visibility = Seq(AddressSet(0, 0xffff))))
+        visibility = Seq(AddressSet(0x10000, 0xffff))))
 
       lazy val module = new LazyModuleImp(this) {
         val (tl, edge) = node.out(0)
@@ -53,13 +53,13 @@ If it is set to true, the client will request that downstream managers that
 support it send responses in FIFO order (that is, in the same order the
 corresponding requests were sent).
 
-The ``visibility`` argument specifies the address ranges that the client
-will access. By default it is set to include all addresses. In this example,
-we set it to contain a single address range ``AddressSet(0, 0xffff)``, which
-means that the client will only access addresses in this range. Clients
-normally do not specify this, but it can help downstream crossbar generators 
-optimize the hardware by not arbitrating the client to managers with address
-ranges that don't overlap with its visibility.
+The ``visibility`` argument specifies the address ranges that the client will
+access. By default it is set to include all addresses. In this example, we set
+it to contain a single address range ``AddressSet(0x10000, 0xffff)``, which
+means that the client will only be able to access addresses from 0x10000 to
+0x1ffff.  normally do not specify this, but it can help downstream crossbar
+generators optimize the hardware by not arbitrating the client to managers with
+address ranges that don't overlap with its visibility.
 
 Inside your lazy module implementation, you can call ``node.out`` to get a
 list of bundle/edge pairs. If you used the TLHelper, you only specified a
@@ -116,7 +116,11 @@ is a TLManagerParameters object.
 
 The only required argument for ``TLManagerParameters`` is the ``address``,
 which is the set of address ranges that this manager will serve.
-This information is used to route requests from the clients.
+This information is used to route requests from the clients. In this example,
+the manager will only take requests for addresses from 0x20000 to 0x20fff.
+The second argument in ``AddressSet`` is a mask, not a size.
+You should generally set it to be one less than a power of two. Otherwise,
+the addressing behavior may not be what you expect.
 
 The second argument is ``resources``, which is usually retrieved from a
 ``Device`` object. In this case, we use a ``SimpleDevice`` object.
