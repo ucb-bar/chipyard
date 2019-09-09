@@ -31,7 +31,7 @@ import java.io.File
 * determine which driver to build.
 *******************************************************************************/
 
-class FireSim(implicit p: Parameters) extends RocketSubsystem
+class FireSim(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
@@ -45,7 +45,7 @@ class FireSim(implicit p: Parameters) extends RocketSubsystem
   override lazy val module = new FireSimModuleImp(this)
 }
 
-class FireSimModuleImp[+L <: FireSim](l: L) extends RocketSubsystemModuleImp(l)
+class FireSimModuleImp[+L <: FireSim](l: L) extends SubsystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
@@ -55,10 +55,10 @@ class FireSimModuleImp[+L <: FireSim](l: L) extends RocketSubsystemModuleImp(l)
     with HasPeripheryIceNICModuleImpValidOnly
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
-    with CanHaveRocketMultiCycleRegfileImp
+    with CanHaveMultiCycleRegfileImp
 
 
-class FireSimNoNIC(implicit p: Parameters) extends RocketSubsystem
+class FireSimNoNIC(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
@@ -71,7 +71,7 @@ class FireSimNoNIC(implicit p: Parameters) extends RocketSubsystem
   override lazy val module = new FireSimNoNICModuleImp(this)
 }
 
-class FireSimNoNICModuleImp[+L <: FireSimNoNIC](l: L) extends RocketSubsystemModuleImp(l)
+class FireSimNoNICModuleImp[+L <: FireSimNoNIC](l: L) extends SubsystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
@@ -80,7 +80,7 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNIC](l: L) extends RocketSubsystemMod
     with HasPeripheryUARTModuleImp
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
-    with CanHaveRocketMultiCycleRegfileImp
+    with CanHaveMultiCycleRegfileImp
 
 
 class FireBoom(implicit p: Parameters) extends Subsystem
@@ -108,7 +108,7 @@ class FireBoomModuleImp[+L <: FireBoom](l: L) extends SubsystemModuleImp(l)
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
     with ExcludeInvalidBoomAssertions
-    with CanHaveBoomMultiCycleRegfileImp
+    with CanHaveMultiCycleRegfileImp
 
 class FireBoomNoNIC(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
@@ -133,7 +133,7 @@ class FireBoomNoNICModuleImp[+L <: FireBoomNoNIC](l: L) extends SubsystemModuleI
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
     with ExcludeInvalidBoomAssertions
-    with CanHaveBoomMultiCycleRegfileImp
+    with CanHaveMultiCycleRegfileImp
 
 case object NumNodes extends Field[Int]
 
