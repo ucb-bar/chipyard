@@ -10,6 +10,9 @@ BootROM and RISC-V Frontend Server
 The first instructions to run when the SoC is powered on are those stored in
 the BootROM. The assembly for the BootROM code is located in
 `generators/testchipip/src/main/resources/testchipip/bootrom/bootrom.S <https://github.com/ucb-bar/testchipip/blob/master/src/main/resources/testchipip/bootrom/bootrom.S>`_.
+The BootROM address space starts at ``0x10000`` and execution starts at address
+``0x10040``, which is marked by the ``_hang`` label in the BootROM assembly.
+
 The Chisel generator encodes the assembled instructions into the BootROM
 hardware at elaboration time, so if you want to change the BootROM code, you
 will need to run ``make`` in the bootrom directory and then regenerate the
