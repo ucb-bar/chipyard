@@ -58,7 +58,7 @@ and the number of banks must be powers of 2.
         new RocketConfig)
 
 The Broadcast Hub
-----------------
+-----------------
 
 If you do not want to use the L2 cache (say, for a resource-limited embedded
 design), you can create a configuration without it. Instead of using the L2
@@ -102,3 +102,11 @@ number of DRAM channels is restricted to powers of two.
     class DualChannelRocketConfig extends Config(
         new WithNMemoryChannels(2) ++
         new RocketConfig)
+
+In VCS and Verilator simulation, the DRAM is simulated using the
+``SimAXIMem`` module, which simply attaches a single-cycle SRAM to each
+memory channel.
+
+If you want a more realistic memory simulation, you can use FireSim, which
+can simulate the timing of DDR3 controllers. More documentation on FireSim
+memory models is available in the `FireSim docs <https://docs.fires.im/en/latest/>`_.

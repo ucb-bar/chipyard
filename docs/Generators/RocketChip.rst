@@ -1,8 +1,13 @@
 RocketChip
 ==========
 
-RocketChip is an SoC generator supported by SiFive. Chipyard uses RocketChip
-as the basis for producing a RISC-V SoC including Rocket, BOOM, and/or Hwacha.
+RocketChip is an SoC generator developed at Berkeley and now supported by
+SiFive. Chipyard uses RocketChip as the basis for producing a RISC-V SoC.
+
+RocketChip is distinct from Rocket, the in-order RISC-V CPU generator.
+RocketChip includes many parts of the SoC besides the CPU. Though RocketChip
+uses Rocket CPUs by default, it can also be configured to use the BOOM
+out-of-order core generator or some other custom CPU generator instead.
 
 A detailed diagram of a typical RocketChip system is shown below.
 
@@ -11,8 +16,9 @@ A detailed diagram of a typical RocketChip system is shown below.
 Tiles
 -----
 
-This is a dual-core ``Rocket`` system. Each ``Rocket`` core is grouped with a
-page-table walker, L1 instruction cache, and L1 data cache into a ``RocketTile``.
+The diagram shows a dual-core ``Rocket`` system. Each ``Rocket`` core is
+grouped with a page-table walker, L1 instruction cache, and L1 data cache into
+a ``RocketTile``.
 
 The ``Rocket`` core can also be swapped for a ``BOOM`` core. Each tile can
 also be configured with a RoCC accelerator that connects to the core as a
