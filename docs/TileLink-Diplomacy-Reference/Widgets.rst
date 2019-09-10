@@ -382,7 +382,7 @@ also uses the AXI4 user field to store some information, so you will need an
 fields.
 
 Before you connect an AXI4 port to the AXI4ToTL widget, you will need to
-add an :ref:`AXI4Fragmenter` and :ref:`UserYanker` because the converter cannot
+add an :ref:`AXI4Fragmenter` and :ref:`AXI4UserYanker` because the converter cannot
 deal with multi-beat transactions or user fields.
 
 TLROM
