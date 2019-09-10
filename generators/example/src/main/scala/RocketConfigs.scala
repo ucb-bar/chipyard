@@ -39,12 +39,14 @@ class jtagRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+// DOC include start: PWMRocketConfig
 class PWMRocketConfig extends Config(
   new WithPWMTop ++                                        // use top with tilelink-controlled PWM
   new WithBootROM ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: PWMRocketConfig
 
 class PWMRAXI4ocketConfig extends Config(
   new WithPWMAXI4Top ++                                    // use top with axi4-controlled PWM

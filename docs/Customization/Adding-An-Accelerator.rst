@@ -66,50 +66,23 @@ MMIO Peripheral
 
 The easiest way to create a TileLink peripheral is to use the ``TLRegisterRouter``, which abstracts away the details of handling the TileLink protocol and provides a convenient interface for specifying memory-mapped registers.
 To create a RegisterRouter-based peripheral, you will need to specify a parameter case class for the configuration settings, a bundle trait with the extra top-level ports, and a module implementation containing the actual RTL.
+In this case we use a submodule ``PWMBase`` to actually perform the pulse-width modulation. The ``PWMModule`` class only creates the registers and hooks them
+up using ``regmap``.
 
-.. code-block:: scala
-
-    case class PWMParams(address: BigInt, beatBytes: Int)
-
-    trait PWMTLBundle extends Bundle {
-      val pwmout = Output(Bool())
-    }
-
-    trait PWMTLModule extends HasRegMap {
-      val io: PWMTLBundle
-      implicit val p: Parameters
-      def params: PWMParams
-
-      val w = params.beatBytes * 8
-      val period = Reg(UInt(w.W))
-      val duty = Reg(UInt(w.W))
-      val enable = RegInit(false.B)
-
-      // ... Use the registers to drive io.pwmout ...
-
-      regmap(
-        0x00 -> Seq(
-          RegField(w, period)),
-        0x04 -> Seq(
-          RegField(w, duty)),
-        0x08 -> Seq(
-          RegField(1, enable)))
-    }
-
+.. literalinclude:: ../../generators/example/src/main/scala/PWM.scala
+    :language: scala
+    :start-after: DOC include start: PWM generic traits
+    :end-before: DOC include end: PWM generic traits
 
 Once you have these classes, you can construct the final peripheral by extending the ``TLRegisterRouter`` and passing the proper arguments.
 The first set of arguments determines where the register router will be placed in the global address map and what information will be put in its device tree entry.
 The second set of arguments is the IO bundle constructor, which we create by extending ``TLRegBundle`` with our bundle trait.
 The final set of arguments is the module constructor, which we create by extends ``TLRegModule`` with our module trait.
 
-.. code-block:: scala
-
-    class PWMTL(c: PWMParams)(implicit p: Parameters)
-      extends TLRegisterRouter(
-        c.address, "pwm", Seq("ucbbar,pwm"),
-        beatBytes = c.beatBytes)(
-          new TLRegBundle(c, _) with PWMTLBundle)(
-          new TLRegModule(c, _, _) with PWMTLModule)
+.. literalinclude:: ../../generators/example/src/main/scala/PWM.scala
+    :language: scala
+    :start-after: DOC include start: PWMTL
+    :end-before: DOC include end: PWMTL
 
 The full module code can be found in ``generators/example/src/main/scala/PWM.scala``.
 
@@ -121,19 +94,10 @@ In the Rocket Chip cake, there are two kinds of traits: a ``LazyModule`` trait a
 The ``LazyModule`` trait runs setup code that must execute before all the hardware gets elaborated.
 For a simple memory-mapped peripheral, this just involves connecting the peripheral's TileLink node to the MMIO crossbar.
 
-.. code-block:: scala
-
-    trait HasPeripheryPWM { this: BaseSubsystem =>
-      implicit val p: Parameters
-
-      private val address = 0x2000
-      private val portName = "pwm"
-
-      val pwm = LazyModule(new PWMTL(PWMParams(address, pbus.beatBytes)))
-
-      pbus.toVariableWidthSlave(Some(portName)) { pwm.node }
-    }
-
+.. literalinclude:: ../../generators/example/src/main/scala/PWM.scala
+    :language: scala
+    :start-after: DOC include start: HasPeripheryPWMTL
+    :end-before: DOC include end: HasPeripheryPWMTL
 
 Note that the ``PWMTL`` class we created from the register router is itself a ``LazyModule``.
 Register routers have a TileLink node simply named "node", which we can hook up to the Rocket Chip bus.
@@ -143,30 +107,18 @@ The module implementation trait is where we instantiate our PWM module and conne
 Since this module has an extra `pwmout` output, we declare that in this trait, using Chisel's multi-IO functionality.
 We then connect the ``PWMTL``'s pwmout to the pwmout we declared.
 
-.. code-block:: scala
-
-    trait HasPeripheryPWMModuleImp extends LazyModuleImp {
-      implicit val p: Parameters
-      val outer: HasPeripheryPWM
-
-      val pwmout = IO(Output(Bool()))
-
-      pwmout := outer.pwm.module.io.pwmout
-    }
+.. literalinclude:: ../../generators/example/src/main/scala/PWM.scala
+    :language: scala
+    :start-after: DOC include start: HasPeripheryPWMTLModuleImp
+    :end-before: DOC include end: HasPeripheryPWMTLModuleImp
 
 Now we want to mix our traits into the system as a whole.
 This code is from ``generators/example/src/main/scala/Top.scala``.
 
-.. code-block:: scala
-
-    class TopWithPWM(implicit p: Parameters) extends Top
-        with HasPeripheryPWM {
-      override lazy val module = Module(new TopWithPWMModule(this))
-    }
-
-    class TopWithPWMModule(l: TopWithPWM) extends TopModule(l)
-        with HasPeripheryPWMModuleImp
-
+.. literalinclude:: ../../generators/example/src/main/scala/Top.scala
+    :language: scala
+    :start-after: DOC include start: TopWithPWMTL
+    :end-before: DOC include end: TopWithPWMTL
 
 Just as we need separate traits for ``LazyModule`` and module implementation, we need two classes to build the system.
 The ``Top`` classes already have the basic peripherals included for us, so we will just extend those.
@@ -174,52 +126,24 @@ The ``Top`` classes already have the basic peripherals included for us, so we wi
 The ``Top`` class includes the pre-elaboration code and also a ``lazy val`` to produce the module implementation (hence ``LazyModule``).
 The ``TopModule`` class is the actual RTL that gets synthesized.
 
-Next, we need to add a configuration mixin in ``generators/example/src/main/scala/ConfigMixins.scala`` that tells the ``TestHarness`` to instantiate ``TopWithPWM`` instead of the default ``Top``.
+Next, we need to add a configuration mixin in ``generators/example/src/main/scala/ConfigMixins.scala`` that tells the ``TestHarness`` to instantiate ``TopWithPWMTL`` instead of the default ``Top``.
 
-.. code-block:: scala
+.. literalinclude:: ../../generators/example/src/main/scala/ConfigMixins.scala
+    :language: scala
+    :start-after: DOC include start: WithPWMTop
+    :end-before: DOC include end: WithPWMTop
 
-    class WithPWMTop extends Config((site, here, up) => {
-      case BuildTop => (p: Parameters) =>
-        Module(LazyModule(new TopWithPWM()(p)).module)
-    })
+And finally, we create a configuration class in ``generators/example/src/main/scala/Configs.scala`` that uses this mixin.
 
-And finally, we create a configuration class in ``generators/example/src/main/scala/RocketConfigs.scala`` that uses this mixin.
-
-.. code-block:: scala
-
-    class PWMRocketConfig extends Config(
-        new WithPWMTop ++
-        new WithBootROM ++
-        new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-        new freechips.rocketchip.system.BaseConfig)
+.. literalinclude:: ../../generators/example/src/main/scala/RocketConfigs.scala
+    :language: scala
+    :start-after: DOC include start: PWMRocketConfig
+    :end-before: DOC include end: PWMRocketConfig
 
 Now we can test that the PWM is working. The test program is in ``tests/pwm.c``.
 
-.. code-block:: c
-
-    #define PWM_PERIOD 0x2000
-    #define PWM_DUTY 0x2008
-    #define PWM_ENABLE 0x2010
-
-    static inline void write_reg(unsigned long addr, unsigned long data)
-    {
-            volatile unsigned long *ptr = (volatile unsigned long *) addr;
-            *ptr = data;
-    }
-
-    static inline unsigned long read_reg(unsigned long addr)
-    {
-            volatile unsigned long *ptr = (volatile unsigned long *) addr;
-            return *ptr;
-    }
-
-    int main(void)
-    {
-            write_reg(PWM_PERIOD, 20);
-            write_reg(PWM_DUTY, 5);
-            write_reg(PWM_ENABLE, 1);
-    }
-
+.. literalinclude:: ../../tests/pwm.c
+    :language: c
 
 This just writes out to the registers we defined earlier.
 The base of the module's MMIO region is at 0x2000.

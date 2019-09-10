@@ -30,6 +30,7 @@ class TopModule[+L <: Top](l: L) extends SystemModule(l)
   with DontTouch
 
 //---------------------------------------------------------------------------------------------------------
+// DOC include start: TopWithPWMTL
 
 class TopWithPWMTL(implicit p: Parameters) extends Top
   with HasPeripheryPWMTL {
@@ -39,6 +40,7 @@ class TopWithPWMTL(implicit p: Parameters) extends Top
 class TopWithPWMTLModule(l: TopWithPWMTL) extends TopModule(l)
   with HasPeripheryPWMTLModuleImp
 
+// DOC include end: TopWithPWMTL
 //---------------------------------------------------------------------------------------------------------
 
 class TopWithPWMAXI4(implicit p: Parameters) extends Top
