@@ -13,8 +13,8 @@ lazy val commonSettings = Seq(
   libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test",
   libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.1",
   libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-  libraryDependencies += "edu.berkeley.cs" %% "firrtl-interpreter" % "1.2-SNAPSHOT",
   libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.0",
+  libraryDependencies += "org.scala-lang.modules" % "scala-jline" % "2.12.1",
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   resolvers ++= Seq(
     Resolver.sonatypeRepo("snapshots"),
@@ -67,15 +67,23 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
   } toSeq
 
 // Subproject definitions begin
+//
+lazy val firrtl = (project in file("tools/firrtl"))
+  .settings(commonSettings)
+
+lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))
+  .dependsOn(firrtl)
+  .settings(commonSettings)
 
 // NB: FIRRTL dependency is unmanaged (and dropped in sim/lib)
 lazy val chisel  = (project in rocketChipDir / "chisel3")
 
 lazy val treadle = freshProject("treadle", file("tools/treadle"))
+  .dependsOn(firrtl)
   .settings(commonSettings)
 
 lazy val `chisel-testers` = freshProject("chisel-testers", file("./tools/chisel-testers"))
-  .dependsOn(treadle, chisel)
+  .dependsOn(treadle, firrtl_interpreter, chisel)
   .settings(
       commonSettings,
       libraryDependencies ++= Seq(
@@ -134,6 +142,7 @@ lazy val sha3 = (project in file("generators/sha3"))
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
+  .dependsOn(firrtl_interpreter)
   .settings(commonSettings)
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
@@ -145,7 +154,7 @@ lazy val barstoolsMacros = (project in file("./tools/barstools/macros/"))
   .settings(commonSettings)
 
 lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
-  .dependsOn(chisel, `chisel-testers`)
+  .dependsOn(chisel, `chisel-testers`, firrtl_interpreter)
   .settings(
       commonSettings,
       libraryDependencies ++= Seq(
