@@ -38,7 +38,7 @@ object from testchipip like so:
       }
     }
 
-The ``name`` argument identifies the node in the diplomacy graph. It is the
+The ``name`` argument identifies the node in the Diplomacy graph. It is the
 only required argument for TLClientParameters.
 
 The ``sourceId`` argument specifies the range of source identifiers that this
@@ -71,7 +71,7 @@ of TL-C) decoupled bundles corresponding to the TileLink channels. This is
 what you should connect your hardware logic to in order to actually send/receive
 TileLink messages.
 
-The ``edge`` object represents the edge of the diplomacy graph. It contains
+The ``edge`` object represents the edge of the Diplomacy graph. It contains
 some useful helper functions which will be documented in
 :ref:`TileLink Edge Object Methods`.
 

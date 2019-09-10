@@ -1,7 +1,7 @@
 Diplomacy Connectors
 ====================
 
-Nodes in a diplomacy graph are connected to each other with edges. The diplomacy
+Nodes in a Diplomacy graph are connected to each other with edges. The Diplomacy
 library provides four operators that can be used to form edges between nodes.
 
 :=
@@ -9,7 +9,7 @@ library provides four operators that can be used to form edges between nodes.
 
 This is the basic connection operator. It is the same syntax as the Chisel
 uni-directional connector, but it is not equivalent. This operator connects
-diplomacy node, not Chisel bundles. 
+Diplomacy nodes, not Chisel bundles. 
 
 The basic connection operator always creates a single edge between the two
 nodes.
