@@ -5,9 +5,9 @@ TileLink is the cache coherence and memory protocol used by RocketChip and
 other Chipyard generators. It is how different modules like caches, memories,
 peripherals, and DMA devices communicate with each other.
 
-TileLink is built on top of diplomacy, a framework for exchanging
-configuration information among Chisel generators in a two-phase elaboration
-scheme.
+RocketChip's TileLink implementation is built on top of Diplomacy, a framework
+for exchanging configuration information among Chisel generators in a two-phase
+elaboration scheme.
 
 A brief overview of how to connect simple TileLink widgets can be found
 in the :ref:`Adding-an-Accelerator` section. This section will provide a
