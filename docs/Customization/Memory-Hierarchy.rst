@@ -63,6 +63,9 @@ The Broadcast Hub
 If you do not want to use the L2 cache (say, for a resource-limited embedded
 design), you can create a configuration without it. Instead of using the L2
 cache, you will instead use RocketChip's TileLink broadcast hub.
+To make such a configuration, you can just copy the definition of
+``RocketConfig`` but omit the ``WithInclusiveCache`` mixin from the
+list of included mixims.
 
 .. code-block:: scala
 
