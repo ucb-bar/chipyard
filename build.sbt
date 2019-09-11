@@ -68,15 +68,16 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
 
 // Subproject definitions begin
 //
+// NB: FIRRTL should not be a managed dependency of chisel or rocketchip.
+// Instead, they will get firrtl from the JAR file placed in /lib
+lazy val chisel  = (project in rocketChipDir / "chisel3")
+
 lazy val firrtl = (project in file("tools/firrtl"))
   .settings(commonSettings)
 
 lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))
   .dependsOn(firrtl)
   .settings(commonSettings)
-
-// NB: FIRRTL dependency is unmanaged (and dropped in sim/lib)
-lazy val chisel  = (project in rocketChipDir / "chisel3")
 
 lazy val treadle = freshProject("treadle", file("tools/treadle"))
   .dependsOn(firrtl)
@@ -142,19 +143,19 @@ lazy val sha3 = (project in file("generators/sha3"))
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
-  .dependsOn(firrtl_interpreter, `chisel-testers`)
+  .dependsOn(`chisel-testers`)
   .settings(commonSettings)
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
   .settings(commonSettings)
 
 lazy val barstoolsMacros = (project in file("./tools/barstools/macros/"))
-  .dependsOn(mdf, rocketchip)
+  .dependsOn(firrtl_interpreter, mdf, rocketchip)
   .enablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonSettings)
 
 lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
-  .dependsOn(chisel, `chisel-testers`, firrtl_interpreter)
+  .dependsOn(chisel, `chisel-testers`)
   .settings(
       commonSettings,
       libraryDependencies ++= Seq(
