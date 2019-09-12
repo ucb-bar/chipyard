@@ -79,7 +79,7 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
 // before launching sbt if any of the firrtl source files has been updated
 // The jar is dropped in chipyard's lib/ directory, which is used as the unmanagedBase
 // for all subprojects
-lazy val chisel  = (project in rocketChipDir / "chisel3")
+lazy val chisel  = (project in file("tools/chisel3"))
 
 lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))
   .settings(commonSettings)
