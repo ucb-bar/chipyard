@@ -18,6 +18,12 @@ from memory. The D channel response to this message will be an
  - ``toAddress: UInt`` - The address to read from
  - ``lgSize: UInt`` - Base two logarithm of the number of bytes to be read
 
+**Returns:**
+
+A ``(Bool, TLBundleA)`` tuple. The first item in the pair is a boolean
+indicating whether or not the operation is legal for this edge. The second
+is the A channel bundle.
+
 Put
 ---
 
@@ -36,6 +42,12 @@ including the address. The manager will respond to this message with a single
  - ``lgSize: UInt`` - Base two logarithm of the number of bytes to be written.
  - ``data: UInt`` - The data to write on this beat.
  - ``mask: UInt`` - (optional) The write mask for this beat.
+
+**Returns:**
+
+A ``(Bool, TLBundleA)`` tuple. The first item in the pair is a boolean
+indicating whether or not the operation is legal for this edge. The second
+is the A channel bundle.
 
 Arithmetic
 ----------
@@ -56,6 +68,12 @@ of an ``AccessAckData``.
  - ``data: UInt`` - Right-hand operand of the arithmetic operation
  - ``atomic: UInt`` - Arithmetic operation type (from ``TLAtomics``)
 
+**Returns:**
+
+A ``(Bool, TLBundleA)`` tuple. The first item in the pair is a boolean
+indicating whether or not the operation is legal for this edge. The second
+is the A channel bundle.
+
 Logical
 -------
 
@@ -72,6 +90,12 @@ memory location will be returned in an ``AccessAckData`` response.
  - ``lgSize: UInt`` - Base two logarithm of the number of bytes to operate on.
  - ``data: UInt`` - Right-hand operand of the logical operation
  - ``atomic: UInt`` - Logical operation type (from ``TLAtomics``)
+
+**Returns:**
+
+A ``(Bool, TLBundleA)`` tuple. The first item in the pair is a boolean
+indicating whether or not the operation is legal for this edge. The second
+is the A channel bundle.
 
 Hint
 ----
@@ -93,6 +117,12 @@ sent in response.
  - ``lgSize: UInt`` - Base two logarithm of the number of bytes to prefetch
  - ``param: UInt`` - Hint type (from TLHints)
 
+**Returns:**
+
+A ``(Bool, TLBundleA)`` tuple. The first item in the pair is a boolean
+indicating whether or not the operation is legal for this edge. The second
+is the A channel bundle.
+
 AccessAck
 ---------
 
@@ -105,6 +135,10 @@ message. If the optional ``data`` field is supplied, it will be an
  - ``a: TLBundleA`` - The A channel message to acknowledge
  - ``data: UInt`` - (optional) The data to send back
 
+**Returns:**
+
+The ``TLBundleD`` for the D channel message.
+
 HintAck
 -------
 
@@ -114,17 +148,65 @@ Constructor for a TLBundleD encoding a ``HintAck`` message.
 
  - ``a: TLBundleA`` - The A channel message to acknowledge
 
-first/last/count
-----------------
+**Returns:**
 
-These methods take a decoupled channel (either the A channel or D channel)
-and determines whether the current beat is the first of the transaction,
-whether the current beat is the last in the transaction, or the count
-(starting from 0) of the current beat in the transaction.
+The ``TLBundleD`` for the D channel message.
+
+first
+-----
+
+This method take a decoupled channel (either the A channel or D channel)
+and determines whether the current beat is the first beat in the transaction.
 
 **Arguments:**
 
  - ``x: DecoupledIO[TLChannel]`` - The decoupled channel to snoop on.
+
+**Returns:**
+
+A ``Boolean`` which is true if the current beat is the first, or false otherwise.
+
+last
+----
+
+This method take a decoupled channel (either the A channel or D channel)
+and determines whether the current beat is the last in the transaction.
+
+**Arguments:**
+
+ - ``x: DecoupledIO[TLChannel]`` - The decoupled channel to snoop on.
+
+**Returns:**
+
+A ``Boolean`` which is true if the current beat is the last, or false otherwise.
+
+done
+----
+
+Equivalent to ``x.fire() && last(x)``.
+
+**Arguments:**
+
+ - ``x: DecoupledIO[TLChannel]`` - The decoupled channel to snoop on.
+
+**Returns:**
+
+A ``Boolean`` which is true if the current beat is the last and a beat is
+sent on this cycle. False otherwise.
+
+count
+-----
+
+This method take a decoupled channel (either the A channel or D channel) and
+determines the count (starting from 0) of the current beat in the transaction.
+
+**Arguments:**
+
+ - ``x: DecoupledIO[TLChannel]`` - The decoupled channel to snoop on.
+
+**Returns:**
+
+A ``UInt`` indicating the count of the current beat.
 
 numBeats
 ---------
@@ -135,6 +217,10 @@ for the transaction.
 **Arguments:**
 
  - ``x: TLChannel`` - The TileLink bundle to get the number of beats from
+
+**Returns:**
+
+A ``UInt`` that is the number of beats in the current transaction.
 
 numBeats1
 ---------
@@ -147,6 +233,10 @@ this is more efficient.
 
  - ``x: TLChannel`` - The TileLink bundle to get the number of beats from
 
+**Returns:**
+
+A ``UInt`` that is the number of beats in the current transaction minus one.
+
 hasData
 --------
 
@@ -156,3 +246,7 @@ if the message is a PutFull, PutPartial, Arithmetic, Logical, or AccessAckData.
 **Arguments:**
 
  - ``x: TLChannel`` - The TileLink bundle to check
+
+**Returns:**
+
+A ``Boolean`` that is true if the current message has data and false otherwise.
