@@ -22,6 +22,20 @@ configure 4 KiB direct-mapped caches for L1I and L1D.
         new WithNMediumCores(1) ++
         new RocketConfig)
 
+If you only want to change the size or associativity, there are configuration
+mixins for those too.
+
+.. code-block:: scala
+
+    import freechips.rocketchip.subsystem.{WithL1ICacheSets, WithL1DCacheSets, WithL1ICacheWays, WithL1DCacheWays}
+
+    class MyL1RocketConfig extends Config(
+        new WithL1ICacheSets(128) ++
+        new WithL1ICacheWays(2) ++
+        new WithL1DCacheSets(128) ++
+        new WithL1DCacheWays(2) ++
+        new RocketConfig)
+
 You can also configure the L1 data cache as an data scratchpad instead.
 However, there are some limitations on this. If you are using a data scratchpad,
 you can only use a single core and you cannot give the design an external DRAM.
