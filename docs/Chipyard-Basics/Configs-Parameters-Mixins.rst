@@ -65,6 +65,11 @@ Thus, the order of the parameters being set will first start with the ``DefaultE
     new DefaultExampleConfig
   )
 
+The ``site``, ``here``, and ``up`` objects in ``WithMyMoreComplexAcceleratorConfig`` are maps from configuration keys to their definitions.
+The ``site`` map gives you the definitions as seen from the root of the configuration hierarchy (in this example, ``SomeAdditiveConfig``).
+The ``here`` map gives the definitions as seen at the current level of the hierarchy (i.e. in ``WithMyMoreComplexAcceleratorConfig`` itself).
+The ``up`` map gives the definitions as seen from the next level up from the current (i.e. from ``WithMyAcceleratorParams``).
+
 Cake Pattern
 -------------------------
 
