@@ -93,7 +93,7 @@ class WithDRAMCacheKey extends Config((site, here, up) => {
     nWritebackRemXacts = 64,
     remAccessQueue = RemoteAccessDepths(1, 8, 1, 8),
     wbQueue = WritebackDepths(1, 1),
-    memInQueue = MemoryQueueParams(0, 0, 8, 2, 8, 2),
+    memInQueue = MemoryQueueParams(0, 0, 2, 2, 8, 2),
     memOutQueue = MemoryQueueParams(0, 0, 2, 2, 2, 2),
     zeroMetadata = false)
 })
