@@ -155,9 +155,9 @@ Now with all of that done, we can go ahead and run our simulation.
 
 .. code-block:: shell
 
-    cd verilator
-    make CONFIG=PWMConfig
-    ./simulator-example-PWMConfig ../tests/pwm.riscv
+    cd sims/verilator
+    make CONFIG=PWMRocketConfig TOP=TopWithPWMTL
+    ./simulator-example-PWMRocketConfig ../../tests/pwm.riscv
 
 Adding a RoCC Accelerator
 ----------------------------
