@@ -115,12 +115,14 @@ class MyCounterRegisters(implicit p: Parameters) extends LazyModule {
 
     def readCounter(ready: Bool): (Bool, UInt) = {
       when (ready) { counter := counter - 1.U }
+      // (ready, bits)
       (true.B, counter)
     }
 
     def writeCounter(valid: Bool, bits: UInt): Bool = {
       when (valid) { counter := counter + 1.U }
       // Ignore bits
+      // Return ready
       true.B
     }
 
@@ -153,10 +155,11 @@ class MyCounterReqRespRegisters(implicit p: Parameters) extends LazyModule {
         responding := false.B
       }
 
+      // (iready, ovalid, obits)
       (!responding, responding, counter)
     }
 
-    def writeCounter(ivalid: Bool, oready: Bool, bits: UInt): (Bool, Bool) = {
+    def writeCounter(ivalid: Bool, oready: Bool, ibits: UInt): (Bool, Bool) = {
       val responding = RegInit(false.B)
 
       when (ivalid && !responding) { responding := true.B }
@@ -166,6 +169,7 @@ class MyCounterReqRespRegisters(implicit p: Parameters) extends LazyModule {
         responding := false.B
       }
 
+      // (iready, ovalid)
       (!responding, responding)
     }
 

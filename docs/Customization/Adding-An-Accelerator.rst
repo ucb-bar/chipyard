@@ -229,51 +229,33 @@ To add RoCC instructions in your program, use the RoCC C macros provided in ``te
 Adding a DMA port
 -------------------
 
-IO devices or accelerators (like a disk or network driver), we may want to have the device write directly to the coherent memory system instead.
-To add a device like that, you would do the following.
+For IO devices or accelerators (like a disk or network driver), instead of
+having the CPU poll data from the device, we may want to have the device write
+directly to the coherent memory system instead. For example, here is a device
+that writes zeros to the memory at a configured address.
 
-.. code-block:: scala
+.. literalinclude:: ../../generators/example/src/main/scala/InitZero.scala
+    :language: scala
 
-    class DMADevice(implicit p: Parameters) extends LazyModule {
-      val node = TLHelper.makeClientNode(
-        name = "dma-device", sourceId = IdRange(0, 1))
+.. literalinclude:: ../../generators/example/src/main/scala/Top.scala
+    :language: scala
+    :start-after: DOC include start: TopWithInitZero
+    :end-before: DOC include end: TopWithInitZero
 
-      lazy val module = new DMADeviceModule(this)
-    }
+We use ``TLHelper.makeClientNode`` to create a TileLink client node for us.
+We then connect the client node to the memory system through the front bus (fbus).
+For more info on creating TileLink client nodes, take a look at :ref:`Client Node`.
 
-    class DMADeviceModule(outer: DMADevice) extends LazyModuleImp(outer) {
-      val io = IO(new Bundle {
-        val ext = new ExtBundle
-      })
+Once we've created our top-level module including the DMA widget, we can create a configuration for it as we did before.
 
-      val (mem, edge) = outer.node.out(0)
+.. literalinclude:: ../../generators/example/src/main/scala/ConfigMixins.scala
+    :language: scala
+    :start-after: DOC include start: WithInitZero
+    :end-before: DOC include end: WithInitZero
 
-      // ... rest of the code ...
-    }
-
-    trait HasPeripheryDMA { this: BaseSubsystem =>
-      implicit val p: Parameters
-
-      val dma = LazyModule(new DMADevice)
-
-      fbus.fromPort(Some(portName))() := dma.node
-    }
-
-    trait HasPeripheryDMAModuleImp extends LazyModuleImp {
-      val ext = IO(new ExtBundle)
-      ext <> outer.dma.module.io.ext
-    }
-
-    class TopWithDMA(implicit p: Parameters) extends Top
-        with HasPeripheryDMA {
-      override lazy val module = new TopWithDMAModule
-    }
-
-    class TopWithDMAModule(l: TopWithDMA) extends TopModule(l)
-        with HasPeripheryDMAModuleImp
+.. literalinclude:: ../../generators/example/src/main/scala/RocketConfigs.scala
+    :language: scala
+    :start-after: DOC include start: InitZeroRocketConfig
+    :end-before: DOC include end: InitZeroRocketConfig
 
 
-The ``ExtBundle`` contains the signals we connect off-chip that we get data from.
-The DMADevice also has a Tilelink client port that we connect into the L1-L2 crossbar through the frontend bus (fbus).
-The sourceId variable given in the ``TLClientNode`` instantiation determines the range of ids that can be used in acquire messages from this device.
-Since we specified [0, 1) as our range, only the ID 0 can be used.
