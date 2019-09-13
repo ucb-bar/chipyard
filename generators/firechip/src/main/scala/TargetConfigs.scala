@@ -15,6 +15,7 @@ import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import boom.common.BoomTilesKey
 import testchipip.{WithBlockDevice, BlockDeviceKey, BlockDeviceConfig, MemBenchKey, MemBenchParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
+import sifive.blocks.inclusivecache.InclusiveCachePortParameters
 import memblade.manager.{MemBladeKey, MemBladeParams, MemBladeQueueParams}
 import memblade.client.{RemoteMemClientKey, RemoteMemClientConfig}
 import memblade.cache.{DRAMCacheKey, DRAMCacheConfig, RemoteAccessDepths, WritebackDepths, MemoryQueueParams}
@@ -203,10 +204,19 @@ class FireSimMemBladeConfig extends Config(
 class FireSimMemBlade1024Config extends Config(
   new WithMemBladeKey(Some(1024)) ++ new FireSimRocketChipConfig)
 
-class WithStandardL2 extends WithInclusiveCache(
-  nBanks = 8,
-  capacityKB = 1024,
-  outerLatencyCycles = 50)
+class WithL2InnerExteriorBuffer(aDepth: Int, dDepth: Int) extends Config(
+  (site, here, up) => {
+    case InclusiveCacheKey => up(InclusiveCacheKey).copy(
+      bufInnerExterior = InclusiveCachePortParameters(
+        aDepth, 0, 0, dDepth, 0))
+  })
+
+class WithStandardL2 extends Config(
+  new WithL2InnerExteriorBuffer(8, 2) ++
+  new WithInclusiveCache(
+    nBanks = 8,
+    capacityKB = 1024,
+    outerLatencyCycles = 50))
 
 class FireSimRemoteMemClientConfig extends Config(
   new WithRemoteMemClientKey ++
