@@ -12,6 +12,16 @@ New to Chipyard? Jump to the :ref:`Chipyard Basics` page for more info.
 
 .. include:: Quick-Start.rst
 
+Getting Help
+------------
+
+If you have a question about Chipyard that isn't answered by the existing
+documentation, feel free to ask for help on the
+`Chipyard Google Group <https://groups.google.com/forum/#!forum/chipyard>`_.
+
+Table of Contents
+-----------------
+
 .. toctree::
    :maxdepth: 3
    :numbered:
