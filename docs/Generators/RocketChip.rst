@@ -59,7 +59,7 @@ It can also optionally expose an external AXI4 port, which can be attached to
 vendor-supplied AXI4 IP.
 
 To learn more about adding MMIO peripherals, check out the :ref:`MMIO Peripheral`
-section of :ref:`Adding An Accelerator/Device`.
+section of :ref:`Adding an Accelerator/Device`.
 
 DMA
 ---

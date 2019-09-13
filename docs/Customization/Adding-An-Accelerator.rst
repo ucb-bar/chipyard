@@ -1,6 +1,6 @@
 .. _adding-an-accelerator:
 
-Adding An Accelerator/Device
+Adding an Accelerator/Device
 ===============================
 
 Accelerators or custom IO devices can be added to your SoC in several ways:
