@@ -109,3 +109,13 @@ class Sha3RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+
+// DOC include start: InitZeroRocketConfig
+class InitZeroRocketConfig extends Config(
+  new WithInitZero(0x88000000L, 0x1000L) ++
+  new WithInitZeroTop ++
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+// DOC include end: InitZeroRocketConfig

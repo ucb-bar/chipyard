@@ -80,3 +80,14 @@ class TopWithDTM(implicit p: Parameters) extends System
 }
 
 class TopWithDTMModule[+L <: TopWithDTM](l: L) extends SystemModule(l)
+
+//---------------------------------------------------------------------------------------------------------
+// DOC include start: TopWithInitZero
+class TopWithInitZero(implicit p: Parameters) extends Top
+    with HasPeripheryInitZero {
+  override lazy val module = new TopWithInitZeroModuleImp(this)
+}
+
+class TopWithInitZeroModuleImp(l: TopWithInitZero) extends TopModule(l)
+  with HasPeripheryInitZeroModuleImp
+// DOC include end: TopWithInitZero

@@ -159,3 +159,14 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
     }
   }
 })
+
+// DOC include start: WithInitZero
+class WithInitZero(base: BigInt, size: BigInt) extends Config((site, here, up) => {
+  case InitZeroKey => InitZeroConfig(base, size)
+})
+
+class WithInitZeroTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new TopWithInitZero()(p)).module)
+})
+// DOC include end: WithInitZero
