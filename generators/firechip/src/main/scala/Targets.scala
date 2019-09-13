@@ -38,7 +38,7 @@ import FireSimValName._
 
 class FireSimDUT(implicit p: Parameters) extends RocketSubsystem
     with HasDefaultBusConfiguration
-    with CanHaveFASEDOptimizedMasterAXI4MemPort
+    with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
     with HasPeripherySerial
     with HasPeripheryUART
@@ -51,7 +51,7 @@ class FireSimDUT(implicit p: Parameters) extends RocketSubsystem
 
 class FireSimModuleImp[+L <: FireSimDUT](l: L) extends RocketSubsystemModuleImp(l)
     with HasRTCModuleImp
-    with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
+    with CanHaveMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
     with HasPeripherySerialModuleImp
     with HasPeripheryUARTModuleImp
@@ -64,7 +64,7 @@ class FireSim(implicit p: Parameters) extends DefaultFireSimEnvironment(() => ne
 
 class FireSimNoNICDUT(implicit p: Parameters) extends RocketSubsystem
     with HasDefaultBusConfiguration
-    with CanHaveFASEDOptimizedMasterAXI4MemPort
+    with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
     with HasPeripherySerial
     with HasPeripheryUART
@@ -76,7 +76,7 @@ class FireSimNoNICDUT(implicit p: Parameters) extends RocketSubsystem
 
 class FireSimNoNICModuleImp[+L <: FireSimNoNICDUT](l: L) extends RocketSubsystemModuleImp(l)
     with HasRTCModuleImp
-    with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
+    with CanHaveMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
     with HasPeripherySerialModuleImp
     with HasPeripheryUARTModuleImp
@@ -89,7 +89,7 @@ class FireSimNoNIC(implicit p: Parameters) extends DefaultFireSimEnvironment(() 
 
 class FireBoomDUT(implicit p: Parameters) extends BoomRocketSubsystem
     with HasDefaultBusConfiguration
-    with CanHaveFASEDOptimizedMasterAXI4MemPort
+    with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
     with HasPeripherySerial
     with HasPeripheryUART
@@ -102,7 +102,7 @@ class FireBoomDUT(implicit p: Parameters) extends BoomRocketSubsystem
 
 class FireBoomModuleImp[+L <: FireBoomDUT](l: L) extends BoomRocketSubsystemModuleImp(l)
     with HasRTCModuleImp
-    with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
+    with CanHaveMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
     with HasPeripherySerialModuleImp
     with HasPeripheryUARTModuleImp
@@ -116,7 +116,7 @@ class FireBoom(implicit p: Parameters) extends DefaultFireSimEnvironment(() => n
 
 class FireBoomNoNICDUT(implicit p: Parameters) extends BoomRocketSubsystem
     with HasDefaultBusConfiguration
-    with CanHaveFASEDOptimizedMasterAXI4MemPort
+    with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
     with HasPeripherySerial
     with HasPeripheryUART
@@ -128,7 +128,7 @@ class FireBoomNoNICDUT(implicit p: Parameters) extends BoomRocketSubsystem
 
 class FireBoomNoNICModuleImp[+L <: FireBoomNoNICDUT](l: L) extends BoomRocketSubsystemModuleImp(l)
     with HasRTCModuleImp
-    with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
+    with CanHaveMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
     with HasPeripherySerialModuleImp
     with HasPeripheryUARTModuleImp

@@ -6,6 +6,7 @@ import chisel3.experimental.RawModule
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug.HasPeripheryDebugModuleImp
+import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPortModuleImp}
 import sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
 
 import testchipip.{HasPeripherySerialModuleImp, HasPeripheryBlockDeviceModuleImp}
@@ -55,7 +56,7 @@ class DefaultFireSimEnvironment[T <: LazyModule](dutGen: () => T)(implicit val p
       { case t: HasPeripheryIceNICModuleImpValidOnly => Seq(NICEndpoint(t.net)) },
       { case t: HasPeripheryUARTModuleImp => t.uart.map(u => UARTEndpoint(u)) },
       { case t: HasPeripheryBlockDeviceModuleImp => Seq(BlockDevEndpoint(t.bdev, reset)) },
-      { case t: CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp =>
+      { case t: CanHaveMasterAXI4MemPortModuleImp =>
         (t.mem_axi4 zip t.outer.memAXI4Node).flatMap({ case (io, node) =>
           (io zip node.in).map({ case (axi4Bundle, (_, edge)) =>
             val nastiKey = NastiParameters(axi4Bundle.r.bits.data.getWidth,
