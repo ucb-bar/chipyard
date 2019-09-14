@@ -95,6 +95,7 @@ class WithDRAMCacheKey extends Config((site, here, up) => {
     wbQueue = WritebackDepths(1, 1),
     memInQueue = MemoryQueueParams(0, 0, 2, 2, 8, 2),
     memOutQueue = MemoryQueueParams(0, 0, 2, 2, 2, 2),
+    buildOutNetwork = memblade.cache.OutNetwork.ring,
     zeroMetadata = false)
 })
 
