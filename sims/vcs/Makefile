@@ -92,7 +92,7 @@ $(sim_debug) : $(sim_vsrcs) $(sim_common_files)
 #########################################################################################
 .PRECIOUS: $(output_dir)/%.vpd %.vpd
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
-	$(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $<
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $< 3>&1 1>&2 2>&3 | spike-dasm > $<.out)
 
 #########################################################################################
 # general cleanup rule
