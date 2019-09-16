@@ -17,26 +17,10 @@ The L1 caches and DMA devices in RocketChip/Chipyard have client nodes.
 You can add a TileLink client node to your LazyModule using the TLHelper
 object from testchipip like so:
 
-.. code-block:: scala
-
-    import freechips.rocketchip.config.Parameters
-    import freechips.rocketchip.diplomacy._
-    import freechips.rocketchip.tilelink.{TLClientParameters}
-    import testchipip.TLHelper
-
-    class MyClient(implicit p: Parameters) extends LazyModule {
-      val node = TLHelper.makeClientNode(TLClientParameters(
-        name = "my-client",
-        sourceId = IdRange(0, 4),
-        requestFifo = true,
-        visibility = Seq(AddressSet(0x10000, 0xffff))))
-
-      lazy val module = new LazyModuleImp(this) {
-        val (tl, edge) = node.out(0)
-
-        // Rest of code here
-      }
-    }
+.. literalinclude:: ../../generators/example/src/main/scala/NodeTypes.scala
+    :language: scala
+    :start-after: DOC include start: MyClient
+    :end-before: DOC include end: MyClient
 
 The ``name`` argument identifies the node in the Diplomacy graph. It is the
 only required argument for TLClientParameters.
@@ -82,33 +66,10 @@ TileLink managers take requests from clients on the A channel and send
 responses back on the D channel. You can create a manager node using the
 TLHelper like so:
 
-.. code-block:: scala
-
-    import freechips.rocketchip.config.Parameters
-    import freechips.rocketchip.diplomacy._
-    import freechips.rocketchip.tilelink.{TLManagerParameters}
-    import testchipip.TLHelper
-
-    class MyManager(implicit p: Parameters) extends LazyModule {
-      val device = new SimpleDevice("my-device", Seq("tutorial,my-device0"))
-      val beatBytes = 8
-      val node = TLHelper.makeManagerNode(beatBytes, TLManagerParameters(
-        address = Seq(AddressSet(0x20000, 0xfff)),
-        resources = device.reg,
-        regionType = RegionType.UNCACHED,
-        executable = true,
-        supportsArithemetic = TransferSizes(1, beatBytes),
-        supportsLogical = TransferSizes(1, beatBytes),
-        supportsGet = TransferSizes(1, beatBytes),
-        supportsPutFull = TransferSizes(1, beatBytes),
-        supportsPutPartial = TransferSizes(1, beatBytes),
-        supportsHint = TransferSizes(1, beatBytes),
-        fifoId = Some(0)))
-
-      lazy val module = new LazyModuleImp(this) {
-        val (tl, edge) = node.in(0)
-      }
-    }
+.. literalinclude:: ../../generators/example/src/main/scala/NodeTypes.scala
+    :language: scala
+    :start-after: DOC include start: MyManager
+    :end-before: DOC include end: MyManager
 
 The ``makeManagerNode`` method takes two arguments. The first is ``beatBytes``,
 which is the physical width of the TileLink interface in bytes. The second
@@ -185,71 +146,32 @@ to the outputs unchanged. This node is mainly used to combine multiple
 nodes into a single node with multiple edges. For instance, say we have two
 client lazy modules, each with their own client node.
 
-.. code-block:: scala
-
-    class MyClient1(implicit p: Parameters) extends LazyModule {
-      val node = TLHelper.makeClientNode("my-client1", IdRange(0, 1))
-
-      // ...
-    }
-
-    class MyClient2(implicit p: Parameters) extends LazyModule {
-      val node = TLHelper.makeClientNode("my-client2", IdRange(0, 1))
-
-      // ...
-    }
+.. literalinclude:: ../../generators/example/src/main/scala/NodeTypes.scala
+    :language: scala
+    :start-after: DOC include start: MyClient1+MyClient2
+    :end-before: DOC include end: MyClient1+MyClient2
 
 Now we instantiate these two clients in another lazy module and expose their
 nodes as a single node.
 
-.. code-block:: scala
-
-    class MyClientGroup(implicit p: Parameters) extends LazyModule {
-      val client1 = LazyModule(new MyClient1)
-      val client2 = LazyModule(new MyClient2)
-      val node = TLIdentityNode()
-
-      node := client1.node
-      node := client2.node
-
-      // ...
-    }
+.. literalinclude:: ../../generators/example/src/main/scala/NodeTypes.scala
+    :language: scala
+    :start-after: DOC include start: MyClientGroup
+    :end-before: DOC include end: MyClientGroup
 
 We can also do the same for managers.
 
-.. code-block:: scala
-
-    class MyManager1(beatBytes: Int)(implicit p: Parameters) extends LazyModule {
-      val node = TLHelper.makeManagerNode(beatBytes, TLManagerParameters(
-        address = Seq(AddressSet(0x0, 0xfff))))
-      // ...
-    }
-
-    class MyManager2(beatBytes: Int)(implicit p: Parameters) extends LazyModule {
-      val node = TLHelper.makeManagerNode(beatBytes, TLManagerParameters(
-        address = Seq(AddressSet(0x1000, 0xfff))))
-      // ...
-    }
-
-    class MyManagerGroup(beatBytes: Int)(implicit p: Parameters) extends LazyModule {
-      val man1 = LazyModule(new MyManager1(beatBytes))
-      val man2 = LazyModule(new MyManager2(beatBytes))
-      val node = TLIdentityNode()
-
-      man1.node := node
-      man2.node := node
-    }
+.. literalinclude:: ../../generators/example/src/main/scala/NodeTypes.scala
+    :language: scala
+    :start-after: DOC include start: MyManagerGroup
+    :end-before: DOC include end: MyManagerGroup
 
 If we want to connect the client and manager groups together, we can now do this.
 
-.. code-block:: scala
-
-    class ClientManagerComplex(implicit p: Parameters) extends LazyModule {
-      val client = LazyModule(new MyClientGroup)
-      val manager = LazyModule(new MyManagerGroup(8))
-
-      manager.node :=* client.node
-    }
+.. literalinclude:: ../../generators/example/src/main/scala/NodeTypes.scala
+    :language: scala
+    :start-after: DOC include start: MyClientManagerComplex
+    :end-before: DOC include end: MyClientManagerComplex
 
 The meaning of the ``:=*`` operator is explained in more detail in the
 :ref:`Diplomacy Connectors` section. In summary, it connects two nodes together
