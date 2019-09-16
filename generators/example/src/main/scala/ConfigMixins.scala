@@ -70,10 +70,12 @@ class WithDTMTop extends Config((site, here, up) => {
 /**
  * Class to specify a top level BOOM and/or Rocket system with PWM
  */
+// DOC include start: WithPWMTop
 class WithPWMTop extends Config((site, here, up) => {
   case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
     Module(LazyModule(new TopWithPWMTL()(p)).module)
 })
+// DOC include end: WithPWMTop
 
 /**
  * Class to specify a top level BOOM and/or Rocket system with a PWM AXI4
@@ -157,3 +159,14 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
     }
   }
 })
+
+// DOC include start: WithInitZero
+class WithInitZero(base: BigInt, size: BigInt) extends Config((site, here, up) => {
+  case InitZeroKey => InitZeroConfig(base, size)
+})
+
+class WithInitZeroTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new TopWithInitZero()(p)).module)
+})
+// DOC include end: WithInitZero

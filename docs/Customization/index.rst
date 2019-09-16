@@ -16,3 +16,4 @@ Hit next to get started!
    Heterogeneous-SoCs
    Adding-An-Accelerator
    Memory-Hierarchy
+   Boot-Process

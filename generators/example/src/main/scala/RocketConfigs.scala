@@ -39,12 +39,14 @@ class jtagRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+// DOC include start: PWMRocketConfig
 class PWMRocketConfig extends Config(
   new WithPWMTop ++                                        // use top with tilelink-controlled PWM
   new WithBootROM ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: PWMRocketConfig
 
 class PWMRAXI4ocketConfig extends Config(
   new WithPWMAXI4Top ++                                    // use top with axi4-controlled PWM
@@ -107,3 +109,13 @@ class Sha3RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+
+// DOC include start: InitZeroRocketConfig
+class InitZeroRocketConfig extends Config(
+  new WithInitZero(0x88000000L, 0x1000L) ++
+  new WithInitZeroTop ++
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+// DOC include end: InitZeroRocketConfig

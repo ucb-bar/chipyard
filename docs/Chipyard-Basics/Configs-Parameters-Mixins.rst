@@ -21,7 +21,7 @@ Configs are additive, can override each other, and can be composed of other Conf
 The naming convention for an additive Config is ``With<YourConfigName>``, while the naming convention for a non-additive Config will be ``<YourConfig>``.
 Configs can take arguments which will in-turn set parameters in the design or reference other parameters in the design (see :ref:`Parameters`).
 
-:numref:`basic-config-example` shows a basic additive Config class that takes in zero arguments and instead uses hardcoded values to set the RTL design parameters.
+This example shows a basic additive Config class that takes in zero arguments and instead uses hardcoded values to set the RTL design parameters.
 In this example, ``MyAcceleratorConfig`` is a Scala case class that defines a set of variables that the generator can use when referencing the ``MyAcceleratorKey`` in the design.
 
 .. _basic-config-example:
@@ -38,7 +38,7 @@ In this example, ``MyAcceleratorConfig`` is a Scala case class that defines a se
         someLength = 256)
   })
 
-This next example (:numref:`complex-config-example`) shows a "higher-level" additive Config that uses prior parameters that were set to derive other parameters.
+This next example shows a "higher-level" additive Config that uses prior parameters that were set to derive other parameters.
 
 .. _complex-config-example:
 .. code-block:: scala
@@ -52,7 +52,7 @@ This next example (:numref:`complex-config-example`) shows a "higher-level" addi
         hartId = up(RocketTilesKey, site).length)
   })
 
-:numref:`top-level-config` shows a non-additive Config that combines the prior two additive Configs using ``++``.
+The following example shows a non-additive Config that combines the prior two additive Configs using ``++``.
 The additive Configs are applied from the right to left in the list (or bottom to top in the example).
 Thus, the order of the parameters being set will first start with the ``DefaultExampleConfig``, then ``WithMyAcceleratorParams``, then ``WithMyMoreComplexAcceleratorConfig``.
 
@@ -65,13 +65,18 @@ Thus, the order of the parameters being set will first start with the ``DefaultE
     new DefaultExampleConfig
   )
 
+The ``site``, ``here``, and ``up`` objects in ``WithMyMoreComplexAcceleratorConfig`` are maps from configuration keys to their definitions.
+The ``site`` map gives you the definitions as seen from the root of the configuration hierarchy (in this example, ``SomeAdditiveConfig``).
+The ``here`` map gives the definitions as seen at the current level of the hierarchy (i.e. in ``WithMyMoreComplexAcceleratorConfig`` itself).
+The ``up`` map gives the definitions as seen from the next level up from the current (i.e. from ``WithMyAcceleratorParams``).
+
 Cake Pattern
 -------------------------
 
 A cake pattern is a Scala programming pattern, which enable "mixing" of multiple traits or interface definitions (sometimes referred to as dependency injection).
 It is used in the Rocket Chip SoC library and Chipyard framework in merging multiple system components and IO interfaces into a large system component.
 
-:numref:`cake-example` shows a Rocket Chip based SoC that merges multiple system components (BootROM, UART, etc) into a single top-level design.
+This example shows a Rocket Chip based SoC that merges multiple system components (BootROM, UART, etc) into a single top-level design.
 
 .. _cake-example:
 .. code-block:: scala
@@ -92,7 +97,7 @@ Mix-in
 
 A mix-in is a Scala trait, which sets parameters for specific system components, as well as enabling instantiation and wiring of the relevant system components to system buses.
 The naming convention for an additive mix-in is ``Has<YourMixin>``.
-This is show in :numref:`cake-example` where things such as ``HasPeripherySerial`` connect a RTL component to a bus and expose signals to the top-level.
+This is shown in the MySoC class where things such as ``HasPeripherySerial`` connect a RTL component to a bus and expose signals to the top-level.
 
 Additional References
 ---------------------------

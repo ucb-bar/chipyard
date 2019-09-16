@@ -10,6 +10,7 @@ import freechips.rocketchip.regmapper.{HasRegMap, RegField}
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util.UIntIsOneOf
 
+// DOC include start: PWM generic traits
 case class PWMParams(address: BigInt, beatBytes: Int)
 
 class PWMBase(w: Int) extends Module {
@@ -64,19 +65,23 @@ trait PWMModule extends HasRegMap {
     0x08 -> Seq(
       RegField(1, enable)))
 }
+// DOC include end: PWM generic traits
 
+// DOC include start: PWMTL
 class PWMTL(c: PWMParams)(implicit p: Parameters)
   extends TLRegisterRouter(
     c.address, "pwm", Seq("ucbbar,pwm"),
     beatBytes = c.beatBytes)(
       new TLRegBundle(c, _) with PWMBundle)(
       new TLRegModule(c, _, _) with PWMModule)
+// DOC include end: PWMTL
 
 class PWMAXI4(c: PWMParams)(implicit p: Parameters)
   extends AXI4RegisterRouter(c.address, beatBytes = c.beatBytes)(
       new AXI4RegBundle(c, _) with PWMBundle)(
       new AXI4RegModule(c, _, _) with PWMModule)
 
+// DOC include start: HasPeripheryPWMTL
 trait HasPeripheryPWMTL { this: BaseSubsystem =>
   implicit val p: Parameters
 
@@ -88,7 +93,9 @@ trait HasPeripheryPWMTL { this: BaseSubsystem =>
 
   pbus.toVariableWidthSlave(Some(portName)) { pwm.node }
 }
+// DOC include end: HasPeripheryPWMTL
 
+// DOC include start: HasPeripheryPWMTLModuleImp
 trait HasPeripheryPWMTLModuleImp extends LazyModuleImp {
   implicit val p: Parameters
   val outer: HasPeripheryPWMTL
@@ -97,6 +104,7 @@ trait HasPeripheryPWMTLModuleImp extends LazyModuleImp {
 
   pwmout := outer.pwm.module.io.pwmout
 }
+// DOC include end: HasPeripheryPWMTLModuleImp
 
 trait HasPeripheryPWMAXI4 { this: BaseSubsystem =>
   implicit val p: Parameters
