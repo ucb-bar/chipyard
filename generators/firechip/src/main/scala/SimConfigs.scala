@@ -3,8 +3,6 @@ package firesim.firesim
 
 import freechips.rocketchip.config.{Parameters, Config, Field}
 
-import midas.{EndpointKey}
-import midas.widgets.{EndpointMap}
 import midas.models._
 
 import firesim.endpoints._

@@ -12,7 +12,6 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.rocket.TracedInstruction
 import firesim.endpoints.{TraceOutputTop, DeclockedTracedInstruction}
 
-import midas.models.AXI4BundleWithEdge
 import midas.targetutils.{ExcludeInstanceAsserts, MemModelAnnotation}
 
 /** Ties together Subsystem buses in the same fashion done in the example top of Rocket Chip */
