@@ -99,6 +99,12 @@ class WithDRAMCacheKey extends Config((site, here, up) => {
     zeroMetadata = false)
 })
 
+class WithDRAMCacheExtentTableInit(suffix: Int = 0x0300) extends Config(
+  (site, here, up) => {
+    case DRAMCacheKey => up(DRAMCacheKey).copy(
+      extentTableInit = Seq.tabulate(16) { i => (suffix, i + 1) })
+  })
+
 class WithPrefetchRoCC extends Config((site, here, up) => {
   case BuildRoCC => Seq((q: Parameters) => {
     implicit val p = q
@@ -265,6 +271,13 @@ class FireSimDRAMCacheDualCoreConfig extends Config(
 class FireSimDRAMCacheQuadCoreConfig extends Config(
   new WithNBigCores(4) ++ new FireSimDRAMCacheConfig)
 
+class FireSimDRAMCacheTraceGenConfig extends Config(
+  new WithDRAMCacheTraceGen ++
+  new WithTraceGen(
+    List.fill(2) { DCacheParams(nMSHRs = 2, nSets = 16, nWays = 2) }) ++
+  new WithDRAMCacheExtentTableInit ++
+  new FireSimDRAMCacheConfig)
+
 class FireSimBoomConfig extends Config(
   new WithBootROM ++
   new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
@@ -397,6 +410,28 @@ class WithTraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
     numGens = params.size)
   }
   case MaxHartIdBits => log2Up(params.size)
+})
+
+class WithDRAMCacheTraceGen extends Config((site, here, up) => {
+  case TraceGenKey => up(TraceGenKey).map { tg =>
+    val cacheKey = site(DRAMCacheKey)
+    tg.copy(
+      addrBag = {
+        val nSets = cacheKey.nSets
+        val nWays = cacheKey.nWays
+        val spanBytes = cacheKey.spanBytes
+        val nChannels = cacheKey.nChannels
+        val nBanks = cacheKey.nBanksPerChannel * nChannels
+        val mcRows = cacheKey.nMetaCacheRows
+        List.tabulate(nWays + 1) { i =>
+          Seq.tabulate(nBanks) { j =>
+            val base = BigInt((j + i * nSets) * spanBytes)
+            Seq(base, base + (mcRows * nBanks * spanBytes))
+          }.flatten
+        }.flatten
+      },
+      memStart = cacheKey.baseAddr)
+  }
 })
 
 class FireSimTraceGenConfig extends Config(

@@ -21,7 +21,7 @@ import midas.models.AXI4BundleWithEdge
 import java.io.File
 
 import memblade.client.{HasPeripheryRemoteMemClient, HasPeripheryRemoteMemClientModuleImpValidOnly}
-import memblade.cache.{HasPeripheryDRAMCache, HasPeripheryDRAMCacheModuleImpValidOnly}
+import memblade.cache._
 import memblade.manager.{HasPeripheryMemBlade, HasPeripheryMemBladeModuleImpValidOnly}
 
 /*******************************************************************************
@@ -224,7 +224,16 @@ class FireSimTraceGen(implicit p: Parameters) extends BaseSubsystem
   override lazy val module = new FireSimTraceGenModuleImp(this)
 }
 
-class FireSimTraceGenModuleImp(outer: FireSimTraceGen)
+class FireSimTraceGenModuleImp[+L <: FireSimTraceGen](outer: L)
   extends BaseSubsystemModuleImp(outer)
   with HasTraceGenTilesModuleImp
   with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
+
+class FireSimDRAMCacheTraceGen(implicit p: Parameters) extends FireSimTraceGen
+    with HasDRAMCacheNoNIC {
+  override lazy val module = new FireSimDRAMCacheTraceGenModuleImp(this)
+}
+
+class FireSimDRAMCacheTraceGenModuleImp(outer: FireSimDRAMCacheTraceGen)
+  extends FireSimTraceGenModuleImp(outer)
+  with HasDRAMCacheNoNICModuleImp
