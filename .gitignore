@@ -5,6 +5,9 @@ target
 *.stamp
 *.vcd
 *.swp
+*.log
+*#
+*~
 .idea
 .DS_Store
 env.sh

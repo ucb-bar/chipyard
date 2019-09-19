@@ -15,108 +15,93 @@ sim_dir=$(abspath .)
 include $(base_dir)/variables.mk
 
 #########################################################################################
+# vlsi types and rules
+#########################################################################################
+sim_name           ?= vcs # needed for GenerateSimFiles, but is unused
+tech_name          ?=
+tech_dir           ?= $(vlsi_dir)/hammer-$(tech_name)-plugin/$(tech_name)
+SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
+SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
+SMEMS_HAMMER       ?= $(build_dir)/$(long_name).mems.hammer.json
+MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
+OBJ_DIR            ?= $(vlsi_dir)/build
+ENV_YML            ?= $(vlsi_dir)/bwrc-env.yml
+INPUT_CONFS        ?= example.yml $(dir $(tech_dir))/bwrc.yml
+HAMMER_EXEC        ?= ./example-vlsi
+
+#########################################################################################
+# general rules
+#########################################################################################
+ALL_RTL = $(TOP_FILE) $(TOP_SMEMS_FILE) $(extra_v_includes)
+extra_v_includes = $(build_dir)/EICG_wrapper.v
+
+.PHONY: default verilog
+default: all
+
+all: drc lvs
+
+verilog: $(ALL_RTL)
+
+#########################################################################################
 # import other necessary rules and variables
 #########################################################################################
 include $(base_dir)/common.mk
 
 #########################################################################################
-# vlsi types and rules
+# srams
 #########################################################################################
+SRAM_GENERATOR_CONF = $(build_dir)/sram_generator-input.yml
+SRAM_CONF=$(build_dir)/sram_generator-output.json
 
-#sim_name is unused, but GenerateSimFiles expects it
-sim_name     ?= vcs
-tech_name    ?= 
-tech_dir     ?= $(vlsi_dir)/hammer-$(tech_name)-plugin/$(tech_name)
-SMEMS_COMP   ?= $(tech_dir)/sram-compiler.json
-SMEMS_HAMMER ?= $(build_dir)/$(long_name).mems.hammer.json
-MACROCOMPILER_MODE ?= -l $(SMEMS_COMP) --use-compiler -hir $(SMEMS_HAMMER)
-OBJ_DIR      ?= $(vlsi_dir)/build
-ENV_YML      ?= $(vlsi_dir)/bwrc-env.yml
-INPUT_CONFS  ?= example.yml $(dir $(tech_dir))/bwrc.yml
-HAMMER_EXEC  ?= ./example-vlsi
+## SRAM Generator
+.PHONY: sram_generator srams
+srams: sram_generator
+sram_generator: $(SRAM_CONF)
 
-ROCKET_SRC_DIR=$(ROCKETCHIP_DIR)/src/main/resources/vsrc
+# This should be built alongside $(SMEMS_FILE)
+$(SMEMS_HAMMER): $(SMEMS_FILE)
 
-ROCKET_SRCS = \
-	$(ROCKET_SRC_DIR)/ClockDivider2.v \
-	$(ROCKET_SRC_DIR)/ClockDivider3.v \
-	$(ROCKET_SRC_DIR)/AsyncResetReg.v \
-	$(ROCKET_SRC_DIR)/plusarg_reader.v \
-	$(ROCKET_SRC_DIR)/EICG_wrapper.v \
+$(SRAM_GENERATOR_CONF): $(SMEMS_HAMMER)
+	mkdir -p $(dir $@)
+	echo "vlsi.inputs.sram_parameters: '$(SMEMS_HAMMER)'" >> $@
+	echo "vlsi.inputs.sram_parameters_meta: [\"transclude\", \"json2list\"]">> $@
 
-ALL_RTL = $(ROCKET_SRCS) $(TOP_FILE) $(TOP_SMEMS_FILE)
+$(SRAM_CONF): $(SRAM_GENERATOR_CONF)
+	cd $(vlsi_dir) && $(HAMMER_EXEC) -e $(ENV_YML) $(foreach x,$(INPUT_CONFS) $(SRAM_GENERATOR_CONF), -p $(x)) --obj_dir $(build_dir) sram_generator
+	cd $(vlsi_dir) && cp output.json $@
 
-CLOCK_DOMAINS = $(build_dir)/$(long_name).domains
+#########################################################################################
+# synthesis input configuration
+#########################################################################################
+SYN_CONF = $(OBJ_DIR)/inputs.yml
+GENERATED_CONFS = $(SYN_CONF) $(SRAM_CONF)
 
-.PHONY: default
-default: all
-
-all: drc lvs
-
-
-###################################################### SYN ############################################################
-
-SYNTH_CONF = $(OBJ_DIR)/inputs.yml
-
-$(SYNTH_CONF):
+$(SYN_CONF): $(ALL_RTL) $(extra_v_includes) $(sim_top_blackboxes)
 	mkdir -p $(dir $@)
 	echo "synthesis.inputs:" > $@
 	echo "  top_module: $(TOP)" >> $@
 	echo "  input_files:" >> $@
-	for x in $(ALL_RTL); do \
+	for x in $(ALL_RTL) $(extra_v_includes) `cat $(sim_top_blackboxes)`; do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 
-GENERATED_CONFS=$(SYNTH_CONF) $(SRAM_CONF)
+#########################################################################################
+# AUTO BUILD FLOW
+#########################################################################################
 
-.PHONY: syn synthesis
-syn: $(OBJ_DIR)/syn-rundir/$(TOP).mapped.v
-synthesis: syn
+.PHONY: buildfile
+buildfile: $(OBJ_DIR)/hammer.d
+# Tip: Set HAMMER_D_DEPS to an empty string to avoid unnecessary RTL rebuilds
+# TODO: make this dependency smarter so that we don't need this at all
+HAMMER_D_DEPS ?= $(GENERATED_CONFS)
+$(OBJ_DIR)/hammer.d: $(HAMMER_D_DEPS)
+	$(HAMMER_EXEC) -e $(ENV_YML) $(foreach x,$(INPUT_CONFS) $(GENERATED_CONFS), -p $(x)) --obj_dir $(OBJ_DIR) build
 
-$(OBJ_DIR)/syn-rundir/$(TOP).mapped.v $(OBJ_DIR)/syn-rundir/syn-output.json: $(ENV_YML) $(INPUT_CONFS) $(GENERATED_CONFS) $(ALL_RTL)
-	mkdir -p $(dir $@)
-	$(HAMMER_EXEC) -e $(ENV_YML) $(foreach x,$(INPUT_CONFS) $(GENERATED_CONFS), -p $(x)) --obj_dir $(OBJ_DIR) syn
+-include $(OBJ_DIR)/hammer.d
 
-$(OBJ_DIR)/par-input.json: $(OBJ_DIR)/syn-rundir/syn-output.json
-	mkdir -p $(dir $@)
-	$(HAMMER_EXEC) -e $(ENV_YML) $(foreach x,$(INPUT_CONFS) $<, -p $(x)) -o $@ syn_to_par
-
-###################################################### PAR ############################################################
-
-.PHONY: par place-and-route
-par: $(OBJ_DIR)/par-rundir/$(TOP).gds
-place-and-route: par
-
-$(OBJ_DIR)/par-rundir/$(TOP).gds $(OBJ_DIR)/par-rundir/par-output.json: $(OBJ_DIR)/par-input.json $(OBJ_DIR)/syn-rundir/$(TOP).mapped.v
-	mkdir -p $(dir $@)
-	$(HAMMER_EXEC) -e $(ENV_YML) -p $< --obj_dir $(OBJ_DIR) par
-
-$(OBJ_DIR)/drc-input.json: $(OBJ_DIR)/par-input.json $(OBJ_DIR)/par-rundir/par-output.json
-	mkdir -p $(dir $@)
-	$(HAMMER_EXEC) -e $(ENV_YML) $(foreach x,$^, -p $(x)) -o $@ --obj_dir $(OBJ_DIR) par_to_drc
-
-###################################################### DRC ############################################################
-# TODO unimplemented
-.PHONY: drc
-drc: $(OBJ_DIR)/drc-rundir/drc_results.db
-
-$(OBJ_DIR)/drc-rundir/drc_results.db: $(OBJ_DIR)/drc-input.json $(OBJ_DIR)/par-rundir/$(TOP).gds
-	mkdir -p $(dir $@)
-	$(HAMMER_EXEC) -e $(ENV_YML) -p $< --obj_dir $(OBJ_DIR) drc
-
-###################################################### LVS ############################################################
-# TODO unimplemented
-$(OBJ_DIR)/lvs-input.json: $(OBJ_DIR)/par-input.json $(OBJ_DIR)/par-rundir/par-output.json
-	mkdir -p $(dir $@)
-	$(HAMMER_EXEC) -e $(ENV_YML) $(foreach x,$^, -p $(x)) -o $@ --obj_dir $(OBJ_DIR) par_to_lvs
-
-.PHONY: lvs
-lvs: $(OBJ_DIR)/lvs-rundir/lvs_results.rpt
-
-$(OBJ_DIR)/lvs-rundir/lvs_results.rpt: $(OBJ_DIR)/lvs-input.json $(OBJ_DIR)/par-rundir/$(TOP).gds
-	mkdir -p $(dir $@)
-	$(HAMMER_EXEC) -e $(ENV_YML) -p $< --obj_dir $(OBJ_DIR) lvs
-
+#########################################################################################
+# general cleanup rule
+#########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) generated-src
+	rm -rf $(OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(gen_dir)
