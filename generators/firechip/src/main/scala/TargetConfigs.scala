@@ -95,7 +95,6 @@ class WithDRAMCacheKey extends Config((site, here, up) => {
     wbQueue = WritebackDepths(1, 1),
     memInQueue = MemoryQueueParams(0, 0, 2, 2, 8, 2),
     memOutQueue = MemoryQueueParams(0, 0, 2, 2, 2, 2),
-    buildOutNetwork = memblade.cache.OutNetwork.ring,
     zeroMetadata = false)
 })
 
@@ -219,7 +218,7 @@ class WithL2InnerExteriorBuffer(aDepth: Int, dDepth: Int) extends Config(
   })
 
 class WithStandardL2 extends Config(
-  new WithL2InnerExteriorBuffer(8, 2) ++
+  new WithL2InnerExteriorBuffer(2, 2) ++
   new WithInclusiveCache(
     nBanks = 8,
     capacityKB = 1024,
