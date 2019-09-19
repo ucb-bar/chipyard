@@ -74,10 +74,10 @@ trait ExcludeInvalidBoomAssertions extends LazyModuleImp {
   ExcludeInstanceAsserts(("NonBlockingDCache", "dtlb"))
 }
 
-trait CanHaveBoomMultiCycleRegfileImp {
-  val outer: boom.system.BoomRocketSubsystem
-  val cores = outer.boomTiles.map(tile => tile.module.core)
-  cores.foreach({ core =>
+trait CanHaveMultiCycleRegfileImp {
+  val outer: utilities.HasBoomAndRocketTiles
+  val boomCores = outer.boomTiles.map(tile => tile.module.core)
+  boomCores.foreach({ core =>
     core.iregfile match {
       case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
       case _ => Nil
@@ -87,11 +87,8 @@ trait CanHaveBoomMultiCycleRegfileImp {
       case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
       case _ => Nil
     }
+  })
 
-   })
-}
-trait CanHaveRocketMultiCycleRegfileImp {
-  val outer: RocketSubsystem
   outer.rocketTiles.foreach({ tile =>
     annotate(MemModelAnnotation(tile.module.core.rocketImpl.rf.rf))
     tile.module.fpuOpt.foreach(fpu => annotate(MemModelAnnotation(fpu.fpuImpl.regfile)))

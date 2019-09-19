@@ -1,4 +1,4 @@
-package example
+package utilities
 
 import scala.collection.mutable.{LinkedHashSet}
 
@@ -8,7 +8,7 @@ import freechips.rocketchip.config.{Parameters}
 import freechips.rocketchip.util.{GeneratorApp}
 import freechips.rocketchip.system.{TestGeneration, RegressionTestSuite}
 
-import boom.system.{BoomTilesKey}
+import boom.common.{BoomTilesKey}
 
 /**
  * A set of pre-chosen regression tests

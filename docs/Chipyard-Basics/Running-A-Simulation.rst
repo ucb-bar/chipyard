@@ -9,7 +9,7 @@ Software RTL Simulation
 ------------------------
 The Chipyard framework provides wrappers for two common software RTL simulators:
 the open-source Verilator simulator and the proprietary VCS simulator.
-For more information on either of these simulators, please refer to :ref:`Verilator` or :ref:`VCS`.
+For more information on either of these simulators, please refer to :ref:`Verilator (Open-Source)` or :ref:`Synopsys VCS (License Required)`.
 The following instructions assume at least one of these simulators is installed.
 
 Verilator/VCS Flows
@@ -57,12 +57,6 @@ Therefore, in order to simulate a simple Rocket-based example system we can use:
 .. code-block:: shell
 
     make SUB_PROJECT=example
-
-Alternatively, if we would like to simulate a simple BOOM-based example system we can use:
-
-.. code-block:: shell
-
-    make SUB_PROJECT=exampleboom
 
 Once the simulator has been constructed, we would like to run RISC-V programs on it.
 In the simulation directory, we will find an executable file called ``<...>-<package>-<config>``.

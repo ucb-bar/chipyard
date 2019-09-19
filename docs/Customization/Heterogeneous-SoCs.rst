@@ -15,18 +15,18 @@ The following example shows a dual core BOOM with a single core Rocket.
 .. code-block:: scala
 
     class DualBoomAndOneRocketConfig extends Config(
-      new WithNormalBoomRocketTop ++
+      new WithTop ++
       new WithBootROM ++
       new boom.system.WithRenumberHarts ++
       new boom.common.WithRVC ++
-      new boom.common.DefaultBoomConfig ++
+      new boom.common.LargeBoomConfig ++
       new boom.system.WithNBoomCores(2) ++
       new freechips.rocketchip.subsystem.WithoutTLMonitors ++
       new freechips.rocketchip.subsystem.WithNBigCores(1) ++
       new freechips.rocketchip.system.BaseConfig)
 
 In this example, the ``WithNBoomCores`` and ``WithNBigCores`` mixins set up the default parameters for the multiple BOOM and Rocket cores, respectively.
-However, for BOOM, an extra mixin called ``DefaultBoomConfig`` is added to override the default parameters with a different set of more common default parameters.
+However, for BOOM, an extra mixin called ``LargeBoomConfig`` is added to override the default parameters with a different set of more common default parameters.
 This mixin applies to all BOOM cores in the system and changes the parameters for each.
 
 Great! Now you have a heterogeneous setup with BOOMs and Rockets.
@@ -62,7 +62,7 @@ Then you could use this new mixin like the following.
 .. code-block:: scala
 
     class SixCoreConfig extends Config(
-      new WithNormalBoomRocketTop ++
+      new WithTop ++
       new WithBootROM ++
       new WithHeterCoresSetup ++
       new freechips.rocketchip.system.BaseConfig)
@@ -78,12 +78,12 @@ An example of adding a Hwacha to all tiles in the system is below.
 .. code-block:: scala
 
     class DualBoomAndRocketWithHwachasConfig extends Config(
-      new WithNormalBoomRocketTop ++
+      new WithTop ++
       new WithBootROM ++
       new hwacha.DefaultHwachaConfig ++
       new boom.system.WithRenumberHarts ++
       new boom.common.WithRVC ++
-      new boom.common.DefaultBoomConfig ++
+      new boom.common.LargeBoomConfig ++
       new boom.system.WithNBoomCores(2) ++
       new freechips.rocketchip.subsystem.WithoutTLMonitors ++
       new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -103,14 +103,14 @@ An example is shown below with two BOOM cores, and one Rocket tile with a RoCC a
 .. code-block:: scala
 
     class DualBoomAndOneHwachaRocketConfig extends Config(
-      new WithNormalBoomRocketTop ++
+      new WithTop ++
       new WithBootROM ++
       new WithMultiRoCC ++
       new WithMultiRoCCHwacha(0) ++ // put Hwacha just on hart0 which was renumbered to Rocket
       new boom.system.WithRenumberHarts(rocketFirst = true) ++
       new hwacha.DefaultHwachaConfig ++
       new boom.common.WithRVC ++
-      new boom.common.DefaultBoomConfig ++
+      new boom.common.LargeBoomConfig ++
       new boom.system.WithNBoomCores(2) ++
       new freechips.rocketchip.subsystem.WithoutTLMonitors ++
       new freechips.rocketchip.subsystem.WithNBigCores(1) ++
