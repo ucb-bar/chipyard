@@ -12,18 +12,10 @@ Both BOOM and Rocket have mixins labelled ``WithNBoomCores(X)`` and ``WithNBigCo
 When used together you can create a heterogeneous system.
 The following example shows a dual core BOOM with a single core Rocket.
 
-.. code-block:: scala
-
-    class DualBoomAndOneRocketConfig extends Config(
-      new WithTop ++
-      new WithBootROM ++
-      new boom.system.WithRenumberHarts ++
-      new boom.common.WithRVC ++
-      new boom.common.LargeBoomConfig ++
-      new boom.system.WithNBoomCores(2) ++
-      new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-      new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-      new freechips.rocketchip.system.BaseConfig)
+.. literalinclude:: ../../generators/example/src/main/scala/HeteroConfigs.scala
+    :language: scala
+    :start-after: DOC include start: DualBoomAndRocket
+    :end-before: DOC include end: DualBoomAndRocket
 
 In this example, the ``WithNBoomCores`` and ``WithNBigCores`` mixins set up the default parameters for the multiple BOOM and Rocket cores, respectively.
 However, for BOOM, an extra mixin called ``LargeBoomConfig`` is added to override the default parameters with a different set of more common default parameters.
@@ -75,19 +67,10 @@ Adding Hwachas
 Adding a Hwacha accelerator is as easy as adding the ``DefaultHwachaConfig`` so that it can setup the Hwacha parameters and add itself to the ``BuildRoCC`` parameter.
 An example of adding a Hwacha to all tiles in the system is below.
 
-.. code-block:: scala
-
-    class DualBoomAndRocketWithHwachasConfig extends Config(
-      new WithTop ++
-      new WithBootROM ++
-      new hwacha.DefaultHwachaConfig ++
-      new boom.system.WithRenumberHarts ++
-      new boom.common.WithRVC ++
-      new boom.common.LargeBoomConfig ++
-      new boom.system.WithNBoomCores(2) ++
-      new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-      new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-      new freechips.rocketchip.system.BaseConfig)
+.. literalinclude:: ../../generators/example/src/main/scala/HeteroConfigs.scala
+    :language: scala
+    :start-after: DOC include start: BoomAndRocketWithHwacha
+    :end-before: DOC include end: BoomAndRocketWithHwacha
 
 In this example, Hwachas are added to both BOOM tiles and to the Rocket tile.
 All with the same Hwacha parameters.
@@ -100,24 +83,13 @@ Named ``MultiRoCCKey``, this key allows you to attach RoCC accelerators based on
 For example, using this allows you to create a 8 tile system with a RoCC accelerator on only a subset of the tiles.
 An example is shown below with two BOOM cores, and one Rocket tile with a RoCC accelerator (Hwacha) attached.
 
-.. code-block:: scala
-
-    class DualBoomAndOneHwachaRocketConfig extends Config(
-      new WithTop ++
-      new WithBootROM ++
-      new WithMultiRoCC ++
-      new WithMultiRoCCHwacha(0) ++ // put Hwacha just on hart0 which was renumbered to Rocket
-      new boom.system.WithRenumberHarts(rocketFirst = true) ++
-      new hwacha.DefaultHwachaConfig ++
-      new boom.common.WithRVC ++
-      new boom.common.LargeBoomConfig ++
-      new boom.system.WithNBoomCores(2) ++
-      new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-      new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-      new freechips.rocketchip.system.BaseConfig)
+.. literalinclude:: ../../generators/example/src/main/scala/HeteroConfigs.scala
+    :language: scala
+    :start-after: DOC include start: DualBoomAndRocketOneHwacha
+    :end-before: DOC include end: DualBoomAndRocketOneHwacha
 
 In this example, the ``WithRenumberHarts`` relabels the ``hartId``'s of all the BOOM/Rocket cores.
-Then after that is applied to the parameters, the ``WithMultiRoCCHwacha(0)`` is used to assign to ``hartId`` zero a Hwacha (in this case ``hartId`` zero is Rocket).
+Then after that is applied to the parameters, the ``WithMultiRoCCHwacha`` is used to assign to a Hwacha accelerator to a particular ``hartId`` (in this case the ``hartId`` corresponding to Rocket).
 Finally, the ``WithMultiRoCC`` mixin is called.
 This mixin sets the ``BuildRoCC`` key to use the ``MultiRoCCKey`` instead of the default.
 This must be used after all the RoCC parameters are set because it needs to override the ``BuildRoCC`` parameter.

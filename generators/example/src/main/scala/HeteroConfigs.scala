@@ -28,6 +28,7 @@ class SmallBoomAndRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+// DOC include start: BoomAndRocketWithHwacha
 class HwachaLargeBoomAndHwachaRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
@@ -38,6 +39,7 @@ class HwachaLargeBoomAndHwachaRocketConfig extends Config(
   new boom.common.WithNBoomCores(1) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: BoomAndRocketWithHwacha
 
 class RoccLargeBoomAndRoccRocketConfig extends Config(
   new WithTop ++
@@ -60,6 +62,7 @@ class DualLargeBoomAndRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+// DOC include start: DualBoomAndRocketOneHwacha
 class DualLargeBoomAndHwachaRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
@@ -71,6 +74,7 @@ class DualLargeBoomAndHwachaRocketConfig extends Config(
   new boom.common.WithNBoomCores(2) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: DualBoomAndRocketOneHwacha
 
 class LargeBoomAndRV32RocketConfig extends Config(
   new WithTop ++
@@ -83,6 +87,7 @@ class LargeBoomAndRV32RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+// DOC include start: DualBoomAndRocket
 class DualLargeBoomAndDualRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
@@ -92,3 +97,4 @@ class DualLargeBoomAndDualRocketConfig extends Config(
   new boom.common.WithNBoomCores(2) ++                   // 2 boom cores
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++ // 2 rocket cores
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: DualBoomAndRocket

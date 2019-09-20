@@ -8,8 +8,6 @@ In order to use the parameter system correctly, we will use several terms and co
 Parameters
 --------------------
 
-TODO: Need to explain up, site, field, and other stuff from Henry's thesis.
-
 It is important to note that a significant challenge with the Rocket parameter system is being able to identify the correct parameter to use, and the impact that parameter has on the overall system.
 We are still investigating methods to facilitate parameter exploration and discovery.
 

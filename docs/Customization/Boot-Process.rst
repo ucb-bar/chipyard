@@ -7,11 +7,12 @@ SoC boots a Linux kernel and the changes you can make to customize this process.
 BootROM and RISC-V Frontend Server
 ----------------------------------
 
-The first instructions to run when the SoC is powered on are those stored in
-the BootROM. The assembly for the BootROM code is located in
+The BootROM contains both the first instructions to run when the SoC is powered on as well as the
+Device Tree Binary (dtb) which details the components of the system.
+The assembly for the BootROM code is located in
 `generators/testchipip/src/main/resources/testchipip/bootrom/bootrom.S <https://github.com/ucb-bar/testchipip/blob/master/src/main/resources/testchipip/bootrom/bootrom.S>`_.
-The BootROM address space starts at ``0x10000`` and execution starts at address
-``0x10040``, which is marked by the ``_hang`` label in the BootROM assembly.
+The BootROM address space starts at ``0x10000`` (determined by the ``BootROMParams`` key in the configuration) and execution starts at address
+``0x10040`` (given by the linker script and reset vector in the ``BootROMParams``), which is marked by the ``_hang`` label in the BootROM assembly.
 
 The Chisel generator encodes the assembled instructions into the BootROM
 hardware at elaboration time, so if you want to change the BootROM code, you
