@@ -48,12 +48,12 @@ class DualSmallBoomConfig extends Config(
   new boom.common.WithNBoomCores(2) ++                      // dual-core
   new freechips.rocketchip.system.BaseConfig)
 
-class SmallRV32UnifiedBoomConfig extends Config(
+class SmallRV32BoomConfig extends Config(
   new WithTop ++
   new WithBootROM ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
-  new boom.common.WithoutBoomFPU ++                       // no floating point
-  new boom.common.WithUnifiedMemIntIQs ++                 // use unified mem+int issue queues
+  new boom.common.WithoutBoomFPU ++                        // no fp
+  new boom.common.WithBoomRV32 ++                          // rv32 (32bit)
   new boom.common.WithSmallBooms ++
   new boom.common.WithNBoomCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
