@@ -1,9 +1,8 @@
 # Technology Setup
 # Technology used is ASAP7
 vlsi.core.technology: asap7
-vlsi.core.node: 7
+# Specify dir with ASAP7 tarball
 technology.asap7.tarball_dir: "SPECIFY DIR WITH ASAP7 TARBALL"
-technology.asap7.install_dir: "SPECIFY EXTRACTED DIR HERE IF NOT USING TARBALL"
 
 vlsi.core.max_threads: 12
 
@@ -22,9 +21,8 @@ vlsi.inputs.mmmc_corners: [
 ]
 
 # Specify clock signals
-# ASAP7 bug: period value should actually be in ps
 vlsi.inputs.clocks: [
-  {name: "clock", period: "1000ns", uncertainty: "0.1ns"}
+  {name: "clock", period: "1ns", uncertainty: "0.1ns"}
 ]
 
 # Generate Make include to aid in flow 
@@ -44,12 +42,11 @@ par.generate_power_straps_options:
       - M7
       - M8
       - M9
-    track_width: 14
-    track_width_M3: 7
-    track_width_M5: 24
+    track_width: 5
     track_width_M8: 6
     track_width_M9: 6
     track_spacing: 0
+    track_start: 10
     power_utilization: 0.05
     power_utilization_M8: 1.0
     power_utilization_M9: 1.0
@@ -113,6 +110,11 @@ vlsi.technology.extra_libraries:
       supplies:
         VDD: "0.77 V"
         GND: "0 V"
+
+# Because the DCO is a dummy layout, we treat it as a physical-only cell
+par.inputs.physical_only_cells_mode: append
+par.inputs.physical_only_cells_list:
+  - ExampleDCO
 
 # SRAM Compiler compiler options
 vlsi.core.sram_generator_tool: "sram_compiler"
