@@ -287,6 +287,7 @@ class FireSimBoomConfig extends Config(
   new WithBlockDevice ++
   new WithBoomL2TLBs(1024) ++
   new WithoutClockGating ++
+  new boom.common.WithTrace ++
   new boom.common.WithLargeBooms ++
   new boom.common.WithNBoomCores(1) ++
   new freechips.rocketchip.system.BaseConfig
