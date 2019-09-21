@@ -1,8 +1,9 @@
 Accessing Scala Resources
 ===============================
 
-A simple way to copy over a source file to the build directory to be used for a simulation compile or VLSI flow is to use the ``addResource`` functions given by FIRRTL.
-It can be used in the following way:
+A simple way to copy over a source file to the build directory to be used for a simulation compile or VLSI flow is to use the ``addResource`` function given by FIRRTL.
+An example of its use can be seen in `generators/testchipip/src/main/scala/SerialAdapter.scala <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/SerialAdapter.scala>`_.
+Here is the example inlined:
 
 .. code-block:: scala
 

@@ -8,22 +8,15 @@ Creating a Rocket and BOOM System
 -------------------------------------------
 
 Instantiating an SoC with Rocket and BOOM cores is all done with the configuration system and two specific mixins.
-Both BOOM and Rocket have mixins labelled ``WithNBoomCores(X)`` and ``WithNBigCores(X)`` that automatically create ``X`` copies of the core.
+Both BOOM and Rocket have mixins labelled ``WithNBoomCores(X)`` and ``WithNBigCores(X)`` that automatically create ``X`` copies of the core/tile [1]_.
 When used together you can create a heterogeneous system.
+
 The following example shows a dual core BOOM with a single core Rocket.
 
-.. code-block:: scala
-
-    class DualBoomAndOneRocketConfig extends Config(
-      new WithTop ++
-      new WithBootROM ++
-      new boom.system.WithRenumberHarts ++
-      new boom.common.WithRVC ++
-      new boom.common.LargeBoomConfig ++
-      new boom.system.WithNBoomCores(2) ++
-      new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-      new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-      new freechips.rocketchip.system.BaseConfig)
+.. literalinclude:: ../../generators/example/src/main/scala/HeteroConfigs.scala
+    :language: scala
+    :start-after: DOC include start: DualBoomAndRocket
+    :end-before: DOC include end: DualBoomAndRocket
 
 In this example, the ``WithNBoomCores`` and ``WithNBigCores`` mixins set up the default parameters for the multiple BOOM and Rocket cores, respectively.
 However, for BOOM, an extra mixin called ``LargeBoomConfig`` is added to override the default parameters with a different set of more common default parameters.
@@ -31,7 +24,7 @@ This mixin applies to all BOOM cores in the system and changes the parameters fo
 
 Great! Now you have a heterogeneous setup with BOOMs and Rockets.
 The final thing you need to make this system work is to renumber the ``hartId``'s of the cores so that each core has a unique ``hartId`` (a ``hartId`` is the hardware thread id of the core).
-This is done with ``WithRenumberHarts`` (which can label the Rocket cores first or the BOOM cores first).
+The ``WithRenumberHarts`` mixin solves this by assigning a unique ``hartId`` to all cores in the system (it can label the Rocket cores first or the BOOM cores first).
 The reason this is needed is because by default the ``WithN...Cores(X)`` mixin assumes that there are only BOOM or only Rocket cores in the system.
 Thus, without the ``WithRenumberHarts`` mixin, each set of cores is labeled starting from zero causing multiple cores to be assigned the same ``hartId``.
 
@@ -75,19 +68,10 @@ Adding Hwachas
 Adding a Hwacha accelerator is as easy as adding the ``DefaultHwachaConfig`` so that it can setup the Hwacha parameters and add itself to the ``BuildRoCC`` parameter.
 An example of adding a Hwacha to all tiles in the system is below.
 
-.. code-block:: scala
-
-    class DualBoomAndRocketWithHwachasConfig extends Config(
-      new WithTop ++
-      new WithBootROM ++
-      new hwacha.DefaultHwachaConfig ++
-      new boom.system.WithRenumberHarts ++
-      new boom.common.WithRVC ++
-      new boom.common.LargeBoomConfig ++
-      new boom.system.WithNBoomCores(2) ++
-      new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-      new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-      new freechips.rocketchip.system.BaseConfig)
+.. literalinclude:: ../../generators/example/src/main/scala/HeteroConfigs.scala
+    :language: scala
+    :start-after: DOC include start: BoomAndRocketWithHwacha
+    :end-before: DOC include end: BoomAndRocketWithHwacha
 
 In this example, Hwachas are added to both BOOM tiles and to the Rocket tile.
 All with the same Hwacha parameters.
@@ -100,27 +84,20 @@ Named ``MultiRoCCKey``, this key allows you to attach RoCC accelerators based on
 For example, using this allows you to create a 8 tile system with a RoCC accelerator on only a subset of the tiles.
 An example is shown below with two BOOM cores, and one Rocket tile with a RoCC accelerator (Hwacha) attached.
 
-.. code-block:: scala
-
-    class DualBoomAndOneHwachaRocketConfig extends Config(
-      new WithTop ++
-      new WithBootROM ++
-      new WithMultiRoCC ++
-      new WithMultiRoCCHwacha(0) ++ // put Hwacha just on hart0 which was renumbered to Rocket
-      new boom.system.WithRenumberHarts(rocketFirst = true) ++
-      new hwacha.DefaultHwachaConfig ++
-      new boom.common.WithRVC ++
-      new boom.common.LargeBoomConfig ++
-      new boom.system.WithNBoomCores(2) ++
-      new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-      new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-      new freechips.rocketchip.system.BaseConfig)
+.. literalinclude:: ../../generators/example/src/main/scala/HeteroConfigs.scala
+    :language: scala
+    :start-after: DOC include start: DualBoomAndRocketOneHwacha
+    :end-before: DOC include end: DualBoomAndRocketOneHwacha
 
 In this example, the ``WithRenumberHarts`` relabels the ``hartId``'s of all the BOOM/Rocket cores.
-Then after that is applied to the parameters, the ``WithMultiRoCCHwacha(0)`` is used to assign to ``hartId`` zero a Hwacha (in this case ``hartId`` zero is Rocket).
+Then after that is applied to the parameters, the ``WithMultiRoCCHwacha`` mixin assigns a Hwacha accelerator to a particular ``hartId`` (in this case, the ``hartId`` of ``2`` corresponds to the Rocket core).
 Finally, the ``WithMultiRoCC`` mixin is called.
 This mixin sets the ``BuildRoCC`` key to use the ``MultiRoCCKey`` instead of the default.
 This must be used after all the RoCC parameters are set because it needs to override the ``BuildRoCC`` parameter.
 If this is used earlier in the configuration sequence, then MultiRoCC does not work.
 
 This mixin can be changed to put more accelerators on more cores by changing the arguments to cover more ``hartId``'s (i.e. ``WithMultiRoCCHwacha(0,1,3,6,...)``).
+
+
+.. [1] Note, in this section "core" and "tile" are used interchangeably but there is subtle distinction between a "core" and "tile" ("tile" contains a "core", L1D/I$, PTW).
+    For many places in the documentation, we usually use "core" to mean "tile" (doesn't make a large difference but worth the mention).
