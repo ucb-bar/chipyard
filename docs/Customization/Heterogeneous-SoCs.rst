@@ -90,7 +90,7 @@ An example is shown below with two BOOM cores, and one Rocket tile with a RoCC a
     :end-before: DOC include end: DualBoomAndRocketOneHwacha
 
 In this example, the ``WithRenumberHarts`` relabels the ``hartId``'s of all the BOOM/Rocket cores.
-Then after that is applied to the parameters, the ``WithMultiRoCCHwacha`` is used to assign to a Hwacha accelerator to a particular ``hartId`` (in this case the ``hartId`` of ``2`` corresponds to the Rocket core).
+Then after that is applied to the parameters, the ``WithMultiRoCCHwacha`` mixin assigns a Hwacha accelerator to a particular ``hartId`` (in this case, the ``hartId`` of ``2`` corresponds to the Rocket core).
 Finally, the ``WithMultiRoCC`` mixin is called.
 This mixin sets the ``BuildRoCC`` key to use the ``MultiRoCCKey`` instead of the default.
 This must be used after all the RoCC parameters are set because it needs to override the ``BuildRoCC`` parameter.
