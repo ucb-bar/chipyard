@@ -99,5 +99,5 @@ If this is used earlier in the configuration sequence, then MultiRoCC does not w
 This mixin can be changed to put more accelerators on more cores by changing the arguments to cover more ``hartId``'s (i.e. ``WithMultiRoCCHwacha(0,1,3,6,...)``).
 
 
-.. [1] Note, in this section core and tile are used interchangeably but there is subtle distinction between a core and tile (tile contains a core, L1D/I$, PTW).
-    For many places in the documentation, we usually use core to mean tile (doesn't make a large difference but worth the mention).
+.. [1] Note, in this section "core" and "tile" are used interchangeably but there is subtle distinction between a "core" and "tile" ("tile" contains a "core", L1D/I$, PTW).
+    For many places in the documentation, we usually use "core" to mean "tile" (doesn't make a large difference but worth the mention).
