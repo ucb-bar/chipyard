@@ -8,8 +8,9 @@ Creating a Rocket and BOOM System
 -------------------------------------------
 
 Instantiating an SoC with Rocket and BOOM cores is all done with the configuration system and two specific mixins.
-Both BOOM and Rocket have mixins labelled ``WithNBoomCores(X)`` and ``WithNBigCores(X)`` that automatically create ``X`` copies of the core.
+Both BOOM and Rocket have mixins labelled ``WithNBoomCores(X)`` and ``WithNBigCores(X)`` that automatically create ``X`` copies of the core/tile [1]_.
 When used together you can create a heterogeneous system.
+
 The following example shows a dual core BOOM with a single core Rocket.
 
 .. literalinclude:: ../../generators/example/src/main/scala/HeteroConfigs.scala
@@ -23,7 +24,7 @@ This mixin applies to all BOOM cores in the system and changes the parameters fo
 
 Great! Now you have a heterogeneous setup with BOOMs and Rockets.
 The final thing you need to make this system work is to renumber the ``hartId``'s of the cores so that each core has a unique ``hartId`` (a ``hartId`` is the hardware thread id of the core).
-This is done with ``WithRenumberHarts`` (which can label the Rocket cores first or the BOOM cores first).
+The ``WithRenumberHarts`` mixin solves this by assigning a unique ``hartId`` to all cores in the system (it can label the Rocket cores first or the BOOM cores first).
 The reason this is needed is because by default the ``WithN...Cores(X)`` mixin assumes that there are only BOOM or only Rocket cores in the system.
 Thus, without the ``WithRenumberHarts`` mixin, each set of cores is labeled starting from zero causing multiple cores to be assigned the same ``hartId``.
 
@@ -89,10 +90,14 @@ An example is shown below with two BOOM cores, and one Rocket tile with a RoCC a
     :end-before: DOC include end: DualBoomAndRocketOneHwacha
 
 In this example, the ``WithRenumberHarts`` relabels the ``hartId``'s of all the BOOM/Rocket cores.
-Then after that is applied to the parameters, the ``WithMultiRoCCHwacha`` is used to assign to a Hwacha accelerator to a particular ``hartId`` (in this case the ``hartId`` corresponding to Rocket).
+Then after that is applied to the parameters, the ``WithMultiRoCCHwacha`` is used to assign to a Hwacha accelerator to a particular ``hartId`` (in this case the ``hartId`` of ``2`` corresponds to the Rocket core).
 Finally, the ``WithMultiRoCC`` mixin is called.
 This mixin sets the ``BuildRoCC`` key to use the ``MultiRoCCKey`` instead of the default.
 This must be used after all the RoCC parameters are set because it needs to override the ``BuildRoCC`` parameter.
 If this is used earlier in the configuration sequence, then MultiRoCC does not work.
 
 This mixin can be changed to put more accelerators on more cores by changing the arguments to cover more ``hartId``'s (i.e. ``WithMultiRoCCHwacha(0,1,3,6,...)``).
+
+
+.. [1] Note, in this section core and tile are used interchangeably but there is subtle distinction between a core and tile (tile contains a core, L1D/I$, PTW).
+    For many places in the documentation, we usually use core to mean tile (doesn't make a large difference but worth the mention).
