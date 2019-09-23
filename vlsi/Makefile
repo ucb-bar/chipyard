@@ -28,12 +28,20 @@ OBJ_DIR            ?= $(vlsi_dir)/build
 ENV_YML            ?= $(vlsi_dir)/bwrc-env.yml
 INPUT_CONFS        ?= example.yml
 HAMMER_EXEC        ?= ./example-vlsi
+VLSI_TOP           ?= $(TOP)
 
 #########################################################################################
 # general rules
 #########################################################################################
-ALL_RTL = $(TOP_FILE) $(TOP_SMEMS_FILE) $(extra_v_includes)
+ALL_RTL = $(TOP_FILE) $(TOP_SMEMS_FILE)
 extra_v_includes = $(build_dir)/EICG_wrapper.v $(vlsi_dir)/example.v
+ifneq ($(CUSTOM_VLOG), )
+	VLSI_RTL = $(CUSTOM_VLOG)
+	VLSI_BB = /dev/null
+else
+	VLSI_RTL = $(ALL_RTL) $(extra_v_includes)
+	VLSI_BB = $(sim_top_blackboxes)
+endif
 
 .PHONY: default verilog
 default: all
@@ -74,14 +82,17 @@ $(SRAM_CONF): $(SRAM_GENERATOR_CONF)
 # synthesis input configuration
 #########################################################################################
 SYN_CONF = $(OBJ_DIR)/inputs.yml
-GENERATED_CONFS = $(SYN_CONF) $(if $(filter $(tech_name), asap7), , $(SRAM_CONF))
+GENERATED_CONFS = $(SYN_CONF)
+ifeq ($(CUSTOM_VLOG), )
+	GENERATED_CONFS += $(if $(filter $(tech_name), asap7), , $(SRAM_CONF))
+endif
 
-$(SYN_CONF): $(ALL_RTL) $(extra_v_includes) $(sim_top_blackboxes)
+$(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 	mkdir -p $(dir $@)
 	echo "synthesis.inputs:" > $@
-	echo "  top_module: $(TOP)" >> $@
+	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
-	for x in $(ALL_RTL) $(extra_v_includes) `cat $(sim_top_blackboxes)`; do \
+	for x in $(VLSI_RTL) `cat $(VLSI_BB)`; do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 

@@ -43,8 +43,6 @@ par.generate_power_straps_options:
       - M8
       - M9
     track_width: 5
-    track_width_M8: 6
-    track_width_M9: 6
     track_spacing: 0
     track_start: 10
     power_utilization: 0.05
@@ -60,10 +58,10 @@ vlsi.inputs.placement_constraints:
     width: 300
     height: 300
     margins:
-      left: 10
-      right: 10
-      top: 10
-      bottom: 10
+      left: 0
+      right: 0
+      top: 0
+      bottom: 1.08 #must be at least this number
   - path: "Sha3AccelwBB/dco"
     type: "hardmacro"
     x: 100
