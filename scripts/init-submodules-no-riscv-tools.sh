@@ -13,7 +13,6 @@ scripts_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # in the submodule tree will get pulled anyway
 git config submodule.toolchains/riscv-tools.update none
 git config submodule.toolchains/esp-tools.update none
-git config --global submodule.experimental-blocks.update none
 # Disable updates to the FireSim submodule until explicitly requested
 git config submodule.sims/firesim.update none
 # Disable updates to the hammer tool plugins repos
@@ -24,7 +23,6 @@ git submodule update --init --recursive #--jobs 8
 # unignore riscv-tools,catapult-shell2 globally
 git config --unset submodule.toolchains/riscv-tools.update
 git config --unset submodule.toolchains/esp-tools.update
-git config --global --unset submodule.experimental-blocks.update
 git config --unset submodule.vlsi/hammer-cadence-plugins.update
 git config --unset submodule.vlsi/hammer-synopsys-plugins.update
 git config --unset submodule.vlsi/hammer-mentor-plugins.update
