@@ -34,12 +34,22 @@
 [submodule "generators/block-inclusivecache-sifive"]
 	path = generators/sifive-cache
 	url = https://github.com/sifive/block-inclusivecache-sifive.git
-[submodule "toolchains/riscv-tools"]
-	path = toolchains/riscv-tools
-	url = https://github.com/freechipsproject/rocket-tools.git
-[submodule "toolchains/esp-tools"]
-	path = toolchains/esp-tools
-	url = https://github.com/ucb-bar/esp-tools.git
+[submodule "toolchains/riscv-tools/riscv-gnu-toolchain"]
+	path = toolchains/riscv-tools/riscv-gnu-toolchain
+	url = https://github.com/riscv/riscv-gnu-toolchain.git
+[submodule "toolchains/riscv-tools/riscv-gnu-toolchain-prebuilt"]
+	path = toolchains/riscv-tools/riscv-gnu-toolchain-prebuilt
+	url = https://github.com/ucb-bar/chipyard-toolchain-prebuilt.git
+	shallow = true
+[submodule "toolchains/riscv-tools/riscv-isa-sim"]
+	path = toolchains/riscv-tools/riscv-isa-sim
+	url = https://github.com/riscv/riscv-isa-sim.git
+[submodule "toolchains/riscv-tools/riscv-pk"]
+	path = toolchains/riscv-tools/riscv-pk
+	url = https://github.com/riscv/riscv-pk.git
+[submodule "toolchains/riscv-tools/riscv-tests"]
+	path = toolchains/riscv-tools/riscv-tests
+	url = https://github.com/riscv/riscv-tests.git
 [submodule "vlsi/hammer"]
 	path = vlsi/hammer
 	url = https://github.com/ucb-bar/hammer.git

@@ -6,11 +6,8 @@
 set -e
 set -o pipefail
 
-unamestr=$(uname)
 RDIR=$(pwd)
-: ${CHIPYARD_DIR:=$(pwd)} #default value is the PWD unless overridden
-
-PRECOMPILED_REPO_HASH=56a40961c98db5e8f904f15dc6efd0870bfefd9e
+CHIPYARD_DIR="${CHIPYARD_DIR:-$(git rev-parse --show-toplevel)}"
 
 usage() {
     echo "usage: ${0} [riscv-tools | esp-tools | ec2fast]"
@@ -23,18 +20,13 @@ usage() {
 error() {
     echo "${0##*/}: ${1}" >&2
 }
-
-#taken from riscv-tools to check for open-ocd autoconf versions
-check_version() {
-    "$1" --version | awk "NR==1 {if (\$NF>$2) {exit 0} exit 1}" || {
-        error "${3} requires at least ${1} version ${2}"
-        exit 1
-    }
+die() {
+    error "$1"
+    exit "${2:--1}"
 }
 
 TOOLCHAIN="riscv-tools"
 EC2FASTINSTALL="false"
-FASTINSTALL="false"
 
 while getopts 'hH-:' opt ; do
     case $opt in
@@ -64,33 +56,6 @@ elif [ -n "$1" ] ; then
     TOOLCHAIN="$1"
 fi
 
-
-if [ "$EC2FASTINSTALL" = "true" ]; then
-    if [ "$TOOLCHAIN" = "riscv-tools" ]; then
-      cd "$RDIR"
-      git clone https://github.com/firesim/firesim-riscv-tools-prebuilt.git
-      cd firesim-riscv-tools-prebuilt
-      git checkout "$PRECOMPILED_REPO_HASH"
-      PREBUILTHASH="$(cat HASH)"
-      git -C "${CHIPYARD_DIR}" submodule update --init "toolchains/${TOOLCHAIN}"
-      cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN"
-      GITHASH="$(git rev-parse HEAD)"
-      cd "$RDIR"
-      echo "prebuilt hash: $PREBUILTHASH"
-      echo "git      hash: $GITHASH"
-      if [[ $PREBUILTHASH == $GITHASH && "$EC2FASTINSTALL" == "true" ]]; then
-          FASTINSTALL=true
-          echo "Using fast pre-compiled install for riscv-tools"
-      else
-          error 'error: hash of precompiled toolchain does not match the riscv-tools submodule hash'
-          exit -1
-      fi
-    else
-          error "error: unsupported precompiled toolchain: ${TOOLCHAIN}"
-          exit -1
-    fi
-fi
-
 INSTALL_DIR="$TOOLCHAIN-install"
 
 RISCV="$(pwd)/$INSTALL_DIR"
@@ -98,51 +63,56 @@ RISCV="$(pwd)/$INSTALL_DIR"
 # install risc-v tools
 export RISCV="$RISCV"
 
-if [ "$FASTINSTALL" = true ]; then
-    cd firesim-riscv-tools-prebuilt
-    ./installrelease.sh
-    mv distrib "$RISCV"
-    # copy HASH in case user wants it later
-    cp HASH "$RISCV"
-    cd "$RDIR"
-    rm -rf firesim-riscv-tools-prebuilt
+cd "${CHIPYARD_DIR}"
+
+SRCDIR="$(pwd)/toolchains/${TOOLCHAIN}"
+[ -d "${SRCDIR}" ] || die "unsupported toolchain: ${TOOLCHAIN}"
+. ./scripts/build-util.sh
+
+
+if [ "${EC2FASTINSTALL}" = true ] ; then
+    [ "${TOOLCHAIN}" = 'riscv-tools' ] ||
+        die "unsupported precompiled toolchain: ${TOOLCHAIN}"
+
+    echo '=>  Fetching pre-built toolchain'
+    module=toolchains/riscv-tools/riscv-gnu-toolchain-prebuilt
+    git config --unset submodule."${module}".update || :
+    git submodule update --init --depth 1 "${module}"
+
+    echo '==>  Verifying toolchain version hash'
+    # Find commit hash without initializing the submodule
+    hashsrc="$(git ls-tree -d HEAD "${SRCDIR}/riscv-gnu-toolchain" | {
+        unset IFS && read -r _ type obj _ &&
+        test -n "${obj}" && test "${type}" = 'commit' && echo "${obj}"
+    }; )" ||
+        die 'failed to obtain riscv-gnu-toolchain submodule hash' "$?"
+
+    read -r hashbin < "${module}/HASH" ||
+        die 'failed to obtain riscv-gnu-toolchain-prebuilt hash' "$?"
+
+    echo "==>  ${hashsrc}"
+    [ "${hashsrc}" = "${hashbin}" ] ||
+        die "pre-built version mismatch: ${hashbin}"
+
+    echo '==>  Installing pre-built toolchain'
+    "${MAKE}" -C "${module}" DESTDIR="${RISCV}" install
+    git submodule deinit "${module}" || :
+
 else
-    mkdir -p "$RISCV"
-    git -C "${CHIPYARD_DIR}" submodule update --init --recursive "toolchains/${TOOLCHAIN}" #--jobs 8
-    cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN"
-
-    # Scale number of parallel make jobs by hardware thread count
-    ncpu="$(getconf _NPROCESSORS_ONLN || # GNU
-        getconf NPROCESSORS_ONLN || # *BSD, Solaris
-        nproc --all || # Linux
-        sysctl -n hw.ncpu || # *BSD, OS X
-        :)" 2>/dev/null
-    case ${ncpu} in
-    ''|*[^0-9]*) ;; # Ignore non-integer values
-    *) export MAKEFLAGS="-j ${ncpu}" ;;
-    esac
-
-    #build the actual toolchain
-    #./build.sh
-    source build.common
-    echo "Starting RISC-V Toolchain build process"
-    build_project riscv-fesvr --prefix="${RISCV}"
-    build_project riscv-isa-sim --prefix="${RISCV}" --with-fesvr="${RISCV}"
-    build_project riscv-gnu-toolchain --prefix="${RISCV}"
-    CC= CXX= build_project riscv-pk --prefix="${RISCV}" --host=riscv64-unknown-elf
-    build_project riscv-tests --prefix="${RISCV}/riscv64-unknown-elf"
-    echo -e "\\nRISC-V Toolchain installation completed!"
-
-    # build static libfesvr library for linking into firesim driver (or others)
-    cd riscv-fesvr/build
-    "${CHIPYARD_DIR}/scripts/build-static-libfesvr.sh"
-    cd "$RDIR"
-    # build linux toolchain
-    cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN/riscv-gnu-toolchain/build"
-    make linux
-    echo -e "\\nRISC-V Linux GNU Toolchain installation completed!"
-
+    module_prepare riscv-gnu-toolchain qemu
+    module_build riscv-gnu-toolchain --prefix="${RISCV}"
+    echo '==>  Building GNU/Linux toolchain'
+    module_make riscv-gnu-toolchain linux
 fi
+
+module_all riscv-isa-sim --prefix="${RISCV}"
+# build static libfesvr library for linking into firesim driver (or others)
+echo '==>  Installing libfesvr static library'
+module_make riscv-isa-sim libfesvr.a
+cp -p "${SRCDIR}/riscv-isa-sim/build/libfesvr.a" "${RISCV}/lib/"
+
+CC= CXX= module_all riscv-pk --prefix="${RISCV}" --host=riscv64-unknown-elf
+module_all riscv-tests --prefix="${RISCV}/riscv64-unknown-elf"
 
 cd "$RDIR"
 
@@ -153,20 +123,3 @@ cd "$RDIR"
     echo "export LD_LIBRARY_PATH=\${RISCV}/lib\${LD_LIBRARY_PATH:+":\${LD_LIBRARY_PATH}"}"
 } > env.sh
 echo "Toolchain Build Complete!"
-
-if [ "$FASTINSTALL" = "false" ]; then
-    # commands that can't run on EC2 (specifically, OpenOCD because of autoconf version_
-    # see if the instance info page exists. if not, we are not on ec2.
-    # this is one of the few methods that works without sudo
-    if wget -T 1 -t 3 -O /dev/null http://169.254.169.254/; then
-        echo "Skipping RISC-V OpenOCD"
-    else
-        echo "Building RISC-V OpenOCD"
-        cd "$CHIPYARD_DIR/toolchains/$TOOLCHAIN"
-        check_version automake 1.14 "OpenOCD build"
-        check_version autoconf 2.64 "OpenOCD build"
-        build_project riscv-openocd --prefix="${RISCV}" --enable-remote-bitbang --enable-jtag_vpi --disable-werror
-        echo -e "\\nRISC-V OpenOCD installation completed!"
-        cd "$RDIR"
-    fi
-fi
