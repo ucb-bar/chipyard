@@ -1,3 +1,5 @@
+//See LICENSE for license details.
+
 package firesim.firesim
 
 import chisel3._
@@ -18,19 +20,21 @@ import midas.models.{FASEDEndpoint, FasedAXI4Edge}
 import firesim.endpoints._
 import firesim.configs.MemModelKey
 
-// Creates a wrapper module that instantiates endpoints based on the scala type
-// of the Target (_not_ its IO). This avoids needing to duplicate environments
-// (essentially test harnesses) for each target type,
+// Creates a wrapper FireSim harness module that instantiates endpoints based
+// on the scala type of the Target (_not_ its IO). This avoids needing to
+// duplicate harnesses (essentially test harnesses) for each target.
 //
-// You could just as well create a custom environment (essentially, test
-// harness) module that instantiates endpoints explicitly, or add methods to
+// You could just as well create a custom harness module that instantiates
+// endpoints explicitly, or add methods to
 // your target traits that instantiate the endpoint there (i.e., akin to
 // SimAXI4Mem). Since cake traits live in Rocket Chip it was easiest to match
 // on the types rather than change trait code.
 
+// Determines the number of times to instantiate the DUT in the harness.
+// Subsumes legacy supernode support
 case object NumNodes extends Field[Int](1)
 
-class DefaultFireSimEnvironment[T <: LazyModule](dutGen: () => T)(implicit val p: Parameters) extends RawModule {
+class DefaultFireSimHarness[T <: LazyModule](dutGen: () => T)(implicit val p: Parameters) extends RawModule {
   val clock = IO(Input(Clock()))
   val reset = WireInit(false.B)
   withClockAndReset(clock, reset) {

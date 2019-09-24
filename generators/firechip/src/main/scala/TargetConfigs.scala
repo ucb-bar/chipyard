@@ -107,6 +107,7 @@ class FireSimRocketChipConfig extends Config(
   new WithPerfCounters ++
   new WithoutClockGating ++
   new WithDefaultMemModel ++
+  new WithDefaultFireSimEndpoints ++
   new freechips.rocketchip.system.DefaultConfig)
 
 class WithNDuplicatedRocketCores(n: Int) extends Config((site, here, up) => {
@@ -149,6 +150,7 @@ class FireSimBoomConfig extends Config(
   new WithDefaultMemModel ++
   new boom.common.WithLargeBooms ++
   new boom.common.WithNBoomCores(1) ++
+  new WithDefaultFireSimEndpoints ++
   new freechips.rocketchip.system.BaseConfig
 )
 

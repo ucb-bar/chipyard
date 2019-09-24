@@ -61,7 +61,7 @@ class FireSimModuleImp[+L <: FireSimDUT](l: L) extends SubsystemModuleImp(l)
     with HasTraceIOImp
     with CanHaveMultiCycleRegfileImp
 
-class FireSim(implicit p: Parameters) extends DefaultFireSimEnvironment(() => new FireSimDUT)
+class FireSim(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimDUT)
 
 class FireSimNoNICDUT(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
@@ -86,7 +86,7 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNICDUT](l: L) extends SubsystemModule
     with CanHaveMultiCycleRegfileImp
 
 
-class FireSimNoNIC(implicit p: Parameters) extends DefaultFireSimEnvironment(() => new FireSimNoNICDUT)
+class FireSimNoNIC(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimNoNICDUT)
 
 class FireBoomDUT(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
@@ -113,7 +113,7 @@ class FireBoomModuleImp[+L <: FireBoomDUT](l: L) extends SubsystemModuleImp(l)
     with ExcludeInvalidBoomAssertions
     with CanHaveMultiCycleRegfileImp
 
-class FireBoom(implicit p: Parameters) extends DefaultFireSimEnvironment(() => new FireBoomDUT)
+class FireBoom(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireBoomDUT)
 
 class FireBoomNoNICDUT(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
@@ -138,7 +138,7 @@ class FireBoomNoNICModuleImp[+L <: FireBoomNoNICDUT](l: L) extends SubsystemModu
     with ExcludeInvalidBoomAssertions
     with CanHaveMultiCycleRegfileImp
 
-class FireBoomNoNIC(implicit p: Parameters) extends DefaultFireSimEnvironment(() => new FireBoomNoNICDUT)
+class FireBoomNoNIC(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireBoomNoNICDUT)
 
 class FireSimTraceGen(implicit p: Parameters) extends BaseSubsystem
     with HasHierarchicalBusTopology
@@ -151,5 +151,5 @@ class FireSimTraceGenModuleImp(outer: FireSimTraceGen) extends BaseSubsystemModu
     with HasTraceGenTilesModuleImp
     with CanHaveMasterAXI4MemPortModuleImp
 
-// Supernoded-ness comes from setting p(NumNodes) (see DefaultFiresimEnvironment) to something > 1
-class FireSimSupernode(implicit p: Parameters) extends DefaultFireSimEnvironment(() => new FireSimDUT)
+// Supernoded-ness comes from setting p(NumNodes) (see DefaultFiresimHarness) to something > 1
+class FireSimSupernode(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimDUT)
