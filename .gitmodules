@@ -50,6 +50,9 @@
 [submodule "toolchains/riscv-tools/riscv-tests"]
 	path = toolchains/riscv-tools/riscv-tests
 	url = https://github.com/riscv/riscv-tests.git
+[submodule "toolchains/riscv-tools/riscv-openocd"]
+	path = toolchains/riscv-tools/riscv-openocd
+	url = https://github.com/riscv/riscv-openocd.git
 [submodule "vlsi/hammer"]
 	path = vlsi/hammer
 	url = https://github.com/ucb-bar/hammer.git
