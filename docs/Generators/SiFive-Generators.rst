@@ -32,6 +32,8 @@ For example, a GPIO device would require a GPIO pin, and therefore we would writ
     :start-after: DOC include start: WithGPIOTop
     :end-before: DOC include end: WithGPIOTop
 
+This example instantiates a top-level module with include GPIO ports (``TopWithGPIO``), and then ties-off the GPIO port inputs to 0 (``false.B``).
+
 
 Finally, you add the relevant config mixin to the SoC config. For example:
 
