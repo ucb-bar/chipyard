@@ -22,6 +22,11 @@ The block device controller provides a generic interface for secondary storage.
 This device is primarily used in FireSim to interface with a block device
 software simulation model. The default Linux configuration in `firesim-software <https://github.com/firesim/firesim-software>`_
 
+To add a block device to your design, add ``HasPeripheryBlockDevice`` to your
+lazy module and ``HasPeripheryBlockDeviceModuleImp`` to the implementation.
+Then add the ``WithBlockDevice`` config mixin to your configuration.
+
+
 TileLink SERDES
 ---------------
 
@@ -38,6 +43,10 @@ and tunnels B and D on its outbound link. Finally, ``TLSerdesser`` exposes
 both client and manager interface to the chip and can tunnel all channels in
 both directions.
 
+For an example of how to use the SERDES classes, take a look at the
+``SerdesTest`` unit test in `the Test Chip IP unit test suite
+<https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/Unittests.scala>`_.
+
 TileLink Switcher
 -----------------
 
@@ -49,3 +58,6 @@ from the client node will be directed to one of the manager nodes.
 The select signal must be set before any TileLink messages are sent and be
 kept stable throughout the remainder of operation. It is not safe to change
 the select signal once TileLink messages have begun sending.
+
+For an example of how to use the switcher, take a look at the ``SwitcherTest``
+unit test in the `Test Chip IP unit tests <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/Unittests.scala>`_.

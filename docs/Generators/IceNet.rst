@@ -71,3 +71,14 @@ The default Linux configuration provided by `firesim-software <https://github.co
 contains an IceNet driver. If launch a FireSim image that has IceNIC on it,
 the driver will automatically detect the device, and you will be able to use
 the full Linux networking stack in userspace.
+
+Configuration
+-------------
+
+To add IceNIC to your design, add ``HasPeripheryIceNIC`` to your lazy module
+and ``HasPeripheryIceNICModuleImp`` to the module implementation.
+
+Then add the ``WithIceNIC`` config mixin to your configuration. This mixin
+takes two arguments. The ``inBufFlits`` argument is the number of 64-bit flits
+that the input packet buffer can hold and the ``usePauser`` argument determines
+whether or not the NIC will have a pause handler.
