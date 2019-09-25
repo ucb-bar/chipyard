@@ -23,6 +23,8 @@ abstract class FireSimTestSuite(
   import scala.concurrent.duration._
   import ExecutionContext.Implicits.global
 
+  val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
+
   lazy val generatorArgs = GeneratorArgs(
     midasFlowKind = "midas",
     targetDir = "generated-src",
@@ -42,7 +44,6 @@ abstract class FireSimTestSuite(
   val commonMakeArgs = Seq(s"DESIGN=${generatorArgs.topModuleClass}",
                            s"TARGET_CONFIG=${generatorArgs.targetConfigs}",
                            s"PLATFORM_CONFIG=${generatorArgs.platformConfigs}")
-  override lazy val platform = hostParams(midas.Platform)
 
   def invokeMlSimulator(backend: String, name: String, debug: Boolean, additionalArgs: Seq[String] = Nil) = {
     make((Seq(s"${outDir.getAbsolutePath}/${name}.%s".format(if (debug) "vpd" else "out"),
@@ -122,7 +123,7 @@ abstract class FireSimTestSuite(
 
   clean
   mkdirs
-  elaborateAndCompileWithMidas
+  elaborate
   generateTestSuiteMakefrags
   runTest("verilator", "rv64ui-p-simple", false, Seq(s"""EXTRA_SIM_ARGS=+trace-test-output0"""))
   diffTracelog("rv64ui-p-simple.out")

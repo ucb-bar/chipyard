@@ -14,8 +14,7 @@ import testchipip.{HasPeripherySerialModuleImp, HasPeripheryBlockDeviceModuleImp
 import icenet.HasPeripheryIceNICModuleImpValidOnly
 
 import junctions.{NastiKey, NastiParameters}
-import midas.widgets.{IsEndpoint}
-import midas.models.{FASEDEndpoint, FasedAXI4Edge}
+import midas.models.{FASEDEndpoint, AXI4EdgeSummary, CompleteConfig}
 import firesim.endpoints._
 import firesim.configs.MemModelKey
 import firesim.util.RegisterEndpointBinder
@@ -55,11 +54,8 @@ class WithFASEDEndpoint extends RegisterEndpointBinder({
         val nastiKey = NastiParameters(axi4Bundle.r.bits.data.getWidth,
                                        axi4Bundle.ar.bits.addr.getWidth,
                                        axi4Bundle.ar.bits.id.getWidth)
-        val fasedP = p.alterPartial({
-          case NastiKey => nastiKey
-          case FasedAXI4Edge => Some(edge)
-        })
-        FASEDEndpoint(axi4Bundle, t.reset.toBool, p(MemModelKey)(fasedP))(fasedP)
+        FASEDEndpoint(axi4Bundle, t.reset.toBool,
+          CompleteConfig(p(firesim.configs.MemModelKey), nastiKey, Some(AXI4EdgeSummary(edge))))
       })
     }).toSeq
 })
