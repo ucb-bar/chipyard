@@ -1,5 +1,7 @@
-Treadle
+Treadle and FIRRTL Interpreter
 ==============================
 
-`Treadle <https://github.com/freechipsproject/treadle>`__ is a circuit simulator that directly executes FIRRTL.
-It is especially useful for interactive debugging and small unit tests that benefit from a low-overhead simulator.
+`Treadle <https://github.com/freechipsproject/treadle>`__ and `FIRRTL Interpreter <https://github.com/freechipsproject/firrtl-interpreter>`__
+are circuit simulators that directly execute FIRRTL (specifically low-firrtl IR).
+They are especially useful for interactive debugging and many of projects within Chipyard
+use them for a low-overhead simulator.
