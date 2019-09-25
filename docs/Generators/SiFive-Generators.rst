@@ -4,16 +4,16 @@ SiFive Generators
 Chipyard includes several open-source generators developed and maintained by `SiFive <https://www.sifive.com/>`__. 
 These are currently organized within two submodules named ``sifive-blocks`` and ``sifive-cache``.
 
-L2 Cache
----------
+Last-Level Cache Generator
+-----------------------------
 
-``sifive-cache`` includes an L2 cache geneator. To use this L2 cache, you should add the ``freechips.rocketchip.subsystem.WithInclusiveCache`` mixin to your SoC configuration.
-To learn more about configuring this L2, please refer to the :ref:`memory-hierarchy` section.
+``sifive-cache`` includes last-level cache geneator. The Chipyard framework uses this last-level cache as an L2 cache. To use this L2 cache, you should add the ``freechips.rocketchip.subsystem.WithInclusiveCache`` mixin to your SoC configuration.
+To learn more about configuring this L2 cache, please refer to the :ref:`memory-hierarchy` section.
 
 
 Perihperal Devices
 -------------------
-``sifive-blocks`` includes multiple peripheral device generators. These include UART, SPI, PWM, JTAG, GPIO and more.
+``sifive-blocks`` includes multiple peripheral device generators, such as UART, SPI, PWM, JTAG, GPIO and more.
 
 These peripheral devices usually affect the memory map of the SoC, and its top-level IO as well.
 To integrate one of these devices in your SoC, you will need to define a custom mixin with the approriate address for the device using the Rocket Chip parameter system. As an example, for a GPIO device you could add the following mixin to set the GPIO address to ``0x10012000``. 
@@ -42,4 +42,4 @@ Finally, you add the relevant config mixin to the SoC config. For example:
     :start-after: DOC include start: GPIORocketConfig
     :end-before: DOC include end: GPIORocketConfig
 
-Some of the devices in ``sifive-blocks`` (such as GPIO) may already have pre-defined mixins within the Chipyard example project. You may be able to use these config mixin directly, but you should be aware of their addresses within the SoC address map. 
+Some of the devices in ``sifive-blocks`` (such as GPIO) may already have pre-defined mixins within the Chipyard example project. You may be able to use these config mixins directly, but you should be aware of their addresses within the SoC address map. 
