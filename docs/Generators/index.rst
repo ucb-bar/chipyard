@@ -13,6 +13,6 @@ The following pages introduce the generators integrated with the Chipyard framew
 
    RocketChip
    Rocket
-   BOOM Core
+   BOOM
    Hwacha
    SiFive-Generators
