@@ -9,7 +9,7 @@ For more information on the Hwacha project, please visit the `Hwacha website <ht
 
 To add the Hwacha vector unit to an SoC, you should add the ``hwacha.DefaultHwachaConfig`` config mixin to the SoC configurations. The Hwacha vector unit uses the RoCC port of a Rocket or BOOM `tile`, and by default connects to the memory system through the `System Bus` (i.e., directly to the L2 cache). 
 
-To change the configuration of the Hwacha vector unit, you can write a custom configuration to replace the ``DefaultHwachaConfig``. You can view the ``DefaultHwachaConfig`` under ``generators/hwacha/src/main/scala/configs.scala`` to see the possible configuration parameters.
+To change the configuration of the Hwacha vector unit, you can write a custom configuration to replace the ``DefaultHwachaConfig``. You can view the ``DefaultHwachaConfig`` under `generators/hwacha/src/main/scala/configs.scala <https://github.com/ucb-bar/hwacha/blob/master/src/main/scala/configs.scala>`__ to see the possible configuration parameters.
  
 Since Hwacha implements a non-standard RISC-V extension, it requires a unique software toolchain to be able to compile and asseble its vector instructions.
 To install the Hwacha toolchain, run the ``./scripts/build-toolchains.sh esp-tools`` command within the root Chipyard directory. This may take a while, and it will install the ``esp-tools-install`` directory within your Chipyard root directory. ``esp-tools`` is a fork of ``riscv-tools`` (formerly a collection of relevant software RISC-V tools) that was enhanced with additional non-standard vector instructions. However, due to the upstreaming of the equivalent RISC-V toolchains, ``esp-tools`` may not be up-to-date with the latest mainline version of the tools included in it.
