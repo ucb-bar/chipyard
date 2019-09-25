@@ -2,7 +2,12 @@ Hwacha
 ====================================
 
 The Hwacha project is developing a new vector architecture for future computer systems that are constrained in their power and energy consumption.
-Inspired by traditional vector machines from the 70s and 80s, and lessons learned from our previous vector-thread architectures Scale and Maven, we are bringing back elegant, performant, and energy-efficient aspects of vector processing to modern data-parallel architectures.
-We propose a new vector-fetch architectural paradigm, which focuses on the following aspects for higher performance, better energy efficiency, and lower complexity.
+The Hwacha project is inspired by traditional vector machines from the 70s and 80s, and lessons learned from our previous vector-thread architectures such as Scale and Maven
+The Hwacha project includes the Hwacha microarchitecture generator, as well as the Hwacha non-standard RISC-V extension. Hwacha does not implement the RISC-V standard vector extension proposal.
 
-For more information, please visit the `Hwacha website <http://hwacha.org/>`__.
+For more information on the Hwacha project, please visit the `Hwacha website <http://hwacha.org/>`__.
+
+To add the Hwacha vector unit to an SoC, you should add the ``hwacha.DefaultHwachaConfig`` config mixin to the SoC configurations.
+ 
+Since Hwacha implements a non-standard RISC-V extension, it requires a unique software toolchain to be able to compile and asseble its vector instructions.
+To install the Hwacha toolchain, run the ``./scripts/build-toolchains.sh esp-tools`` command within the root Chipyard directory. This may take a while, and it will install the ``esp-tools-install`` directory within your Chipyard root directory. ``esp-tools`` are a fork of ``riscv-tools`` (formelty a collection of relevant software RISC-V tools) that were enhanced with the additional non-standard vector instructions. However, due to the upstreaming of the equivalent RISC-V toolchains, esp-tools may not be up-to-date with the latest mainline version of the tools included in it.
