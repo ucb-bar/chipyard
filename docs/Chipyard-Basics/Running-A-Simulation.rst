@@ -62,7 +62,7 @@ Alternatively, if we would like to simulate a simple BOOM-based example system w
 
 .. code-block:: shell
 
-    make CONFIG=DefaultBoomConfig
+    make CONFIG=LargeBoomConfig
 
 Once the simulator has been constructed, we would like to run RISC-V programs on it.
 In the simulation directory, we will find an executable file called ``<...>-<package>-<config>``.
@@ -76,7 +76,7 @@ For example:
     ./<...>-<package>-<config> my_program_binary
 
     # using make to do it
-    make CONFIG=DefaultBoomConfig BINARY=my_program_binary run-binary
+    make CONFIG=LargeBoomConfig BINARY=my_program_binary run-binary
 
 Alternatively, we can run a pre-packaged suite of RISC-V assembly or benchmark tests, by adding the make target ``run-asm-tests`` or ``run-bmark-tests``.
 For example:
