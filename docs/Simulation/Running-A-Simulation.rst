@@ -39,13 +39,21 @@ In order to construct the simulator with our custom design, we run the following
     make SBT_PROJECT=... MODEL=... VLOG_MODEL=... MODEL_PACKAGE=... CONFIG=... CONFIG_PACKAGE=... GENERATOR_PACKAGE=... TB=... TOP=...
 
 Each of these make variables correspond to a particular part of the design/codebase and are needed so that the make system can correctly build and make a RTL simulation.
+
 The ``SBT_PROJECT`` is the ``build.sbt`` project that holds all of the source files and that will be run during the RTL build.
+
 The ``MODEL`` and ``VLOG_MODEL`` are the top-level class names of the design.
+
 Normally, these are the same, but in some cases these can differ (if the Chisel class differs than what is emitted in the Verilog).
+
 The ``MODEL_PACKAGE`` is the Scala package (in the Scala code that says ``package ...``) that holds the ``MODEL`` class.
+
 The ``CONFIG`` is the name of the class used for the parameter Config while the ``CONFIG_PACKAGE`` is the Scala package it resides in.
+
 The ``GENERATOR_PACKAGE`` is the Scala package that holds the Generator class that elaborates the design.
+
 The ``TB`` is the name of the Verilog wrapper that connects the ``TestHarness`` to VCS/Verilator for simulation.
+
 Finally, the ``TOP`` variable is used to distinguish between the top-level of the design and the ``TestHarness`` in our system.
 For example, in the normal case, the ``MODEL`` variable specifies the ``TestHarness`` as the top-level of the design.
 However, the true top-level design, the SoC being simulated, is pointed to by the ``TOP`` variable.
