@@ -1,6 +1,21 @@
 Initial Repository Setup
 ========================================================
 
+Requirements
+-------------------------------------------
+
+Using Linux is recommended.
+The provided scripts will not work on macOS out of the box, but they may be able to be modified to support it.
+Working under Windows is not recommended.
+
+* dtc (design-tree-compiler)
+
+* GNU awk
+
+* GNU sed
+
+* GNU make
+
 Checking out the sources
 ------------------------
 
@@ -28,6 +43,6 @@ But to get a basic installation, just the following steps are necessary.
 
     ./scripts/build-toolchains.sh esp-tools # for a modified risc-v toolchain with Hwacha vector instructions
 
-Once the script is run, a ``env.sh`` file is emitted at sets the ``PATH``, ``RISCV``, and ``LD_LIBRARY_PATH`` environment variables.
+Once the script is run, a ``env.sh`` file is emitted that sets the ``PATH``, ``RISCV``, and ``LD_LIBRARY_PATH`` environment variables.
 You can put this in your ``.bashrc`` or equivalent environment setup file to get the proper variables.
 These variables need to be set for the make system to work properly.
