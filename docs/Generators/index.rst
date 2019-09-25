@@ -11,7 +11,7 @@ The following pages introduce the generators integrated with the Chipyard framew
    :maxdepth: 2
    :caption: Generators:
 
-   Rocket
-   BOOM
+   Rocket Chip
+   Rocket Core
+   BOOM Core
    Hwacha
-   RocketChip
