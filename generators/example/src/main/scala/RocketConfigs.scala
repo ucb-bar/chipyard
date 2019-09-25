@@ -104,6 +104,7 @@ class GB1MemoryRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+// DOC include start: Sha3Rocket
 class Sha3RocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
@@ -111,6 +112,7 @@ class Sha3RocketConfig extends Config(
   new sha3.WithSha3Accel ++                                // add SHA3 rocc accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: Sha3Rocket
 
 // DOC include start: InitZeroRocketConfig
 class InitZeroRocketConfig extends Config(

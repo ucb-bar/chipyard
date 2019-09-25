@@ -68,3 +68,18 @@ on which available execution unit they should be run. Once
 the message is fully hashed, the hash is written to memory
 with a simple state machine.
 
+
+Using a SHA3 Accelerator
+------------------------
+Since the SHA3 accelerator is designed as a RoCC accelerator,
+it can be mised into a Rocket or BOOM core by overriding the
+BuildRoCC key. The configuration mixin is defined in the SHA3
+generator. An example configuration highlighting the use of
+this mixin is shown here:
+
+.. literalinclude:: ../../generators/example/src/main/scala/RocketConfigs.scala
+   :language: scala
+   :start-after: DOC include start: Sha3Rocket
+   :end-before: DOC include end: Sha3Rocket
+
+
