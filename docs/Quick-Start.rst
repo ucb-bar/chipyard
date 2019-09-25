@@ -52,3 +52,5 @@ This depends on what you are planning to do with Chipyard.
 * To run a FPGA-accelerated simulation using FireSim, see :ref:`firesim-sim-intro`.
 
 * To run a VLSI flow using one of the vanilla Chipyard examples, see <>.
+
+* To change the generators (BOOM, Rocket, &c) themselves, see :ref:`generator-index`.
