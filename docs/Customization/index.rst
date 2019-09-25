@@ -17,3 +17,4 @@ Hit next to get started!
    Adding-An-Accelerator
    Memory-Hierarchy
    Boot-Process
+   Firrtl-Transforms
