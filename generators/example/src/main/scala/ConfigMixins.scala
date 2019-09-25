@@ -37,6 +37,7 @@ class WithBootROM extends Config((site, here, up) => {
     contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img")
 })
 
+// DOC include start: WithGPIO
 /**
  * Class to add in GPIO
  */
@@ -44,6 +45,7 @@ class WithGPIO extends Config((site, here, up) => {
   case PeripheryGPIOKey => List(
     GPIOParams(address = 0x10012000, width = 4, includeIOF = false))
 })
+// DOC include end: WithGPIO
 
 // -----------------------------------------------
 // BOOM and/or Rocket Top Level System Parameter Mixins
@@ -107,6 +109,7 @@ class WithSimBlockDeviceTop extends Config((site, here, up) => {
   }
 })
 
+// DOC include start: WithGPIOTop
 /**
  * Class to specify a top level BOOM and/or Rocket system with GPIO
  */
@@ -121,6 +124,7 @@ class WithGPIOTop extends Config((site, here, up) => {
     top
   }
 })
+// DOC include end: WithGPIOTop
 
 // ------------------
 // Multi-RoCC Support

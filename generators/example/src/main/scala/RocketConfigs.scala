@@ -73,6 +73,7 @@ class BlockDeviceModelRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+// DOC include start: GPIORocketConfig
 class GPIORocketConfig extends Config(
   new WithGPIO ++                                          // add GPIOs to the peripherybus
   new WithGPIOTop ++                                       // use top with GPIOs
@@ -80,6 +81,7 @@ class GPIORocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: GPIORocketConfig
 
 class DualCoreRocketConfig extends Config(
   new WithTop ++
