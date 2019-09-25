@@ -108,6 +108,7 @@ trait ExcludeInvalidBoomAssertions extends LazyModuleImp {
 trait CanHaveMultiCycleRegfileImp {
   val outer: utilities.HasBoomAndRocketTiles
   val boomCores = outer.boomTiles.map(tile => tile.module.core)
+  // DOC include start: ChiselAnnotation
   boomCores.foreach({ core =>
     core.iregfile match {
       case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
@@ -119,6 +120,7 @@ trait CanHaveMultiCycleRegfileImp {
       case _ => Nil
     }
   })
+  // DOC include end: ChiselAnnotation
 
   outer.rocketTiles.foreach({ tile =>
     annotate(MemModelAnnotation(tile.module.core.rocketImpl.rf.rf))
