@@ -2,23 +2,15 @@
 # Technology used is ASAP7
 vlsi.core.technology: asap7
 # Specify dir with ASAP7 tarball
-technology.asap7.tarball_dir: "SPECIFY DIR WITH ASAP7 TARBALL"
+technology.asap7.tarball_dir: ""
 
 vlsi.core.max_threads: 12
 
 # General Hammer Inputs
 
-vlsi.inputs.supplies.VDD: "0.7 V"
-
 # Hammer will auto-generate a CPF for simple power designs; see hammer/src/hammer-vlsi/defaults.yml for more info
 vlsi.inputs.power_spec_mode: "auto"
 vlsi.inputs.power_spec_type: "cpf"
-
-# Specify the setup and hold corners for ASAP7
-vlsi.inputs.mmmc_corners: [
-  {name: "PVT_0P63V_100C", type: "setup", voltage: "0.63 V", temp: "100 C"},
-  {name: "PVT_0P77V_0C", type: "hold", voltage: "0.77 V", temp: "0 C"}
-]
 
 # Specify clock signals
 vlsi.inputs.clocks: [
@@ -50,9 +42,10 @@ par.generate_power_straps_options:
     power_utilization_M9: 1.0
 
 # Placement Constraints
+# For ASAP7, all numbers must be 4x larger than final GDS
 vlsi.inputs.placement_constraints:
   - path: "Sha3AccelwBB"
-    type: "toplevel"
+    type: toplevel
     x: 0
     y: 0
     width: 300
@@ -63,12 +56,13 @@ vlsi.inputs.placement_constraints:
       top: 0
       bottom: 1.08 #must be at least this number
   - path: "Sha3AccelwBB/dco"
-    type: "hardmacro"
-    x: 100
-    y: 100
-    width: 32
-    height: 32
-    orientation: "r0"
+    type: hardmacro
+    x: 108
+    y: 108
+    width: 128
+    height: 128
+    orientation: r0
+    top_layer: M9
 
 # Pin placement constraints
 vlsi.inputs.pin_mode: generated
@@ -116,7 +110,8 @@ par.inputs.physical_only_cells_list:
 
 # SRAM Compiler compiler options
 vlsi.core.sram_generator_tool: "sram_compiler"
-vlsi.core.sram_generator_tool_path: ["SPECIFY LOCATION OF SRAM GENERATOR IN TECH PLUGIN"]
+# You should specify a location for the SRAM generator in the tech plugin
+vlsi.core.sram_generator_tool_path: []
 vlsi.core.sram_generator_tool_path_meta: "append"
 
 # Tool options. Replace with your tool plugin of choice.
@@ -124,12 +119,12 @@ vlsi.core.sram_generator_tool_path_meta: "append"
 vlsi.core.synthesis_tool: "genus"
 vlsi.core.synthesis_tool_path: ["hammer-cadence-plugins/synthesis"]
 vlsi.core.synthesis_tool_path_meta: "append"
-synthesis.genus.version: "181"
+synthesis.genus.version: "1813"
 # Innovus options
 vlsi.core.par_tool: "innovus"
 vlsi.core.par_tool_path: ["hammer-cadence-plugins/par"]
 vlsi.core.par_tool_path_meta: "append"
-par.innovus.version: "181"
+par.innovus.version: "191"
 par.innovus.design_flow_effort: "standard"
 par.inputs.gds_merge: true
 # Calibre options

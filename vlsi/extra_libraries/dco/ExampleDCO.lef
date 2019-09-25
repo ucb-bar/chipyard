@@ -3,26 +3,25 @@ BUSBITCHARS "[]" ;
 DIVIDERCHAR "/" ;
 
 MACRO ExampleDCO
-  CLASS CORE ;
+  CLASS BLOCK ;
   ORIGIN 0 0 ;
   FOREIGN ExampleDCO 0 0 ;
-  SIZE 32.001 BY 32 ;
+  SIZE 128.0 BY 128.0 ;
   SYMMETRY X Y ;
-  SITE coreSite ;
   PIN VDD
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-      LAYER M9 ;
-        RECT 8.24 31 8.4 32 ;
+      LAYER M7 ;
+        RECT 32.96 124.0 33.6 128.0 ; 
     END
   END VDD
   PIN VSS
     DIRECTION INOUT ;
     USE GROUND ;
     PORT
-      LAYER M9 ;
-        RECT 23.28 31 23.44 32 ;
+      LAYER M5 ;
+        RECT 93.12 124.0 93.76 128.0 ; 
     END
   END VSS
   PIN col_sel_b[13]
@@ -30,7 +29,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 28.32 1 28.416 ;
+        RECT 0.0 113.28 4.0 113.664 ; 
     END
   END col_sel_b[13]
   PIN col_sel_b[11]
@@ -38,7 +37,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 26.912 1 27.008 ;
+        RECT 0.0 107.648 4.0 108.032 ; 
     END
   END col_sel_b[11]
   PIN col_sel_b[5]
@@ -46,7 +45,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 22.688 1 22.784 ;
+        RECT 0.0 90.752 4.0 91.136 ; 
     END
   END col_sel_b[5]
   PIN col_sel_b[12]
@@ -54,7 +53,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 27.616 1 27.712 ;
+        RECT 0.0 110.464 4.0 110.848 ; 
     END
   END col_sel_b[12]
   PIN col_sel_b[10]
@@ -62,7 +61,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 26.208 1 26.304 ;
+        RECT 0.0 104.832 4.0 105.216 ; 
     END
   END col_sel_b[10]
   PIN col_sel_b[9]
@@ -70,7 +69,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 25.504 1 25.6 ;
+        RECT 0.0 102.016 4.0 102.4 ; 
     END
   END col_sel_b[9]
   PIN col_sel_b[8]
@@ -78,7 +77,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 24.8 1 24.896 ;
+        RECT 0.0 99.2 4.0 99.584 ; 
     END
   END col_sel_b[8]
   PIN col_sel_b[7]
@@ -86,7 +85,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 24.096 1 24.192 ;
+        RECT 0.0 96.384 4.0 96.768 ; 
     END
   END col_sel_b[7]
   PIN col_sel_b[6]
@@ -94,7 +93,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 23.392 1 23.488 ;
+        RECT 0.0 93.568 4.0 93.952 ; 
     END
   END col_sel_b[6]
   PIN col_sel_b[4]
@@ -102,7 +101,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 21.984 1 22.08 ;
+        RECT 0.0 87.936 4.0 88.32 ; 
     END
   END col_sel_b[4]
   PIN col_sel_b[3]
@@ -110,7 +109,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 21.28 1 21.376 ;
+        RECT 0.0 85.12 4.0 85.504 ; 
     END
   END col_sel_b[3]
   PIN col_sel_b[2]
@@ -118,7 +117,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 20.576 1 20.672 ;
+        RECT 0.0 82.304 4.0 82.688 ; 
     END
   END col_sel_b[2]
   PIN col_sel_b[1]
@@ -126,7 +125,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 19.872 1 19.968 ;
+        RECT 0.0 79.488 4.0 79.872 ; 
     END
   END col_sel_b[1]
   PIN col_sel_b[0]
@@ -134,7 +133,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 19.168 1 19.264 ;
+        RECT 0.0 76.672 4.0 77.056 ; 
     END
   END col_sel_b[0]
   PIN row_sel_b[14]
@@ -142,7 +141,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 17.76 1 17.856 ;
+        RECT 0.0 71.04 4.0 71.424 ; 
     END
   END row_sel_b[14]
   PIN row_sel_b[13]
@@ -150,7 +149,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 17.056 1 17.152 ;
+        RECT 0.0 68.224 4.0 68.608 ; 
     END
   END row_sel_b[13]
   PIN row_sel_b[12]
@@ -158,7 +157,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 16.352 1 16.448 ;
+        RECT 0.0 65.408 4.0 65.792 ; 
     END
   END row_sel_b[12]
   PIN row_sel_b[11]
@@ -166,7 +165,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 15.648 1 15.744 ;
+        RECT 0.0 62.592 4.0 62.976 ; 
     END
   END row_sel_b[11]
   PIN row_sel_b[10]
@@ -174,7 +173,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 14.944 1 15.04 ;
+        RECT 0.0 59.776 4.0 60.16 ; 
     END
   END row_sel_b[10]
   PIN row_sel_b[9]
@@ -182,7 +181,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 14.24 1 14.336 ;
+        RECT 0.0 56.96 4.0 57.344 ; 
     END
   END row_sel_b[9]
   PIN row_sel_b[8]
@@ -190,7 +189,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 13.536 1 13.632 ;
+        RECT 0.0 54.144 4.0 54.528 ; 
     END
   END row_sel_b[8]
   PIN row_sel_b[7]
@@ -198,7 +197,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 12.832 1 12.928 ;
+        RECT 0.0 51.328 4.0 51.712 ; 
     END
   END row_sel_b[7]
   PIN row_sel_b[6]
@@ -206,7 +205,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 12.128 1 12.224 ;
+        RECT 0.0 48.512 4.0 48.896 ; 
     END
   END row_sel_b[6]
   PIN row_sel_b[5]
@@ -214,7 +213,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 11.424 1 11.52 ;
+        RECT 0.0 45.696 4.0 46.08 ; 
     END
   END row_sel_b[5]
   PIN row_sel_b[4]
@@ -222,7 +221,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 10.72 1 10.816 ;
+        RECT 0.0 42.88 4.0 43.264 ; 
     END
   END row_sel_b[4]
   PIN row_sel_b[3]
@@ -230,7 +229,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 10.016 1 10.112 ;
+        RECT 0.0 40.064 4.0 40.448 ; 
     END
   END row_sel_b[3]
   PIN row_sel_b[2]
@@ -238,7 +237,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 9.312 1 9.408 ;
+        RECT 0.0 37.248 4.0 37.632 ; 
     END
   END row_sel_b[2]
   PIN row_sel_b[1]
@@ -246,7 +245,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 8.608 1 8.704 ;
+        RECT 0.0 34.432 4.0 34.816 ; 
     END
   END row_sel_b[1]
   PIN row_sel_b[0]
@@ -254,7 +253,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 7.904 1 8 ;
+        RECT 0.0 31.616 4.0 32.0 ; 
     END
   END row_sel_b[0]
   PIN code_regulator[7]
@@ -262,7 +261,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 7.2 1 7.296 ;
+        RECT 0.0 28.8 4.0 29.184 ; 
     END
   END code_regulator[7]
   PIN code_regulator[6]
@@ -270,7 +269,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 6.496 1 6.592 ;
+        RECT 0.0 25.984 4.0 26.368 ; 
     END
   END code_regulator[6]
   PIN code_regulator[5]
@@ -278,7 +277,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 5.792 1 5.888 ;
+        RECT 0.0 23.168 4.0 23.552 ; 
     END
   END code_regulator[5]
   PIN code_regulator[4]
@@ -286,7 +285,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 5.088 1 5.184 ;
+        RECT 0.0 20.352 4.0 20.736 ; 
     END
   END code_regulator[4]
   PIN code_regulator[3]
@@ -294,7 +293,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 4.384 1 4.48 ;
+        RECT 0.0 17.536 4.0 17.92 ; 
     END
   END code_regulator[3]
   PIN code_regulator[2]
@@ -302,7 +301,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 3.68 1 3.776 ;
+        RECT 0.0 14.72 4.0 15.104 ; 
     END
   END code_regulator[2]
   PIN code_regulator[1]
@@ -310,7 +309,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 2.976 1 3.072 ;
+        RECT 0.0 11.904 4.0 12.288 ; 
     END
   END code_regulator[1]
   PIN code_regulator[0]
@@ -318,7 +317,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 2.272 1 2.368 ;
+        RECT 0.0 9.088 4.0 9.472 ; 
     END
   END code_regulator[0]
   PIN row_sel_b[15]
@@ -326,7 +325,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 18.464 1 18.56 ;
+        RECT 0.0 73.856 4.0 74.24 ; 
     END
   END row_sel_b[15]
   PIN dither
@@ -334,7 +333,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 0 1.568 1 1.664 ;
+        RECT 0.0 6.272 4.0 6.656 ; 
     END
   END dither
   PIN sleep_b
@@ -342,7 +341,7 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M5 ;
-        RECT 2.448 0 2.544 1 ;
+        RECT 9.792 0.0 10.176 4.0 ; 
     END
   END sleep_b
   PIN clock
@@ -350,26 +349,30 @@ MACRO ExampleDCO
     USE SIGNAL ;
     PORT
       LAYER M4 ;
-        RECT 31 17.716 32 17.812 ;
+        RECT 124.0 70.864 128.0 71.248 ; 
     END
   END clock
   OBS
     LAYER M1 ;
-      RECT 1 1 31 31 ;
+      RECT 4.0 4.0 124.0 124.0 ; 
     LAYER M2 ;
-      RECT 1 1 31 31 ;
+      RECT 4.0 4.0 124.0 124.0 ; 
     LAYER M3 ;
-      RECT 1 1 31 31 ;
+      RECT 4.0 4.0 124.0 124.0 ; 
     LAYER M4 ;
-      RECT 1 1 31 31 ;
+      RECT 4.0 4.0 124.0 124.0 ; 
+    LAYER M5 ;
+      RECT 4.0 4.0 124.0 124.0 ;
     LAYER M6 ;
-      RECT 1 1 31 31 ;
+      RECT 4.0 4.0 124.0 124.0 ; 
     LAYER M7 ;
-      RECT 1 1 31 31 ;
+      RECT 4.0 4.0 124.0 124.0 ; 
     LAYER M8 ;
-      RECT 1 1 31 31 ;
+      RECT 0.0 0.0 128.0 128.0 ; 
     LAYER M9 ;
-      RECT 1 1 31 31 ;
+      RECT 0.0 0.0 128.0 128.0 ; 
+    LAYER Pad ;
+      RECT 0.0 0.0 128.0 128.0 ; 
   END
 END ExampleDCO
 
