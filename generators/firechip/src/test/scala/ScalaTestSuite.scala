@@ -109,10 +109,10 @@ abstract class FireSimTestSuite(
         val lines = Source.fromFile(file).getLines.toList
         lines.filter(_.startsWith("TRACEPORT")).drop(dropLines)
       }
-      val resetLength = 50
+      val resetLength = 51
       val verilatedOutput  = getLines(new File(outDir,  s"/${verilatedLog}"))
       val synthPrintOutput = getLines(new File(genDir, s"/TRACEFILE"), resetLength)
-      assert(verilatedOutput.size == synthPrintOutput.size, "Outputs differ in length")
+      assert(math.abs(verilatedOutput.size - synthPrintOutput.size) <= 1, "Outputs differ in length")
       assert(verilatedOutput.nonEmpty)
       for ( (vPrint, sPrint) <- verilatedOutput.zip(synthPrintOutput) ) {
         assert(vPrint == sPrint)

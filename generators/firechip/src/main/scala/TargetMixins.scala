@@ -1,6 +1,7 @@
 package firesim.firesim
 
 import chisel3._
+import chisel3.util.Cat
 import chisel3.experimental.annotate
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy._
@@ -41,7 +42,7 @@ trait HasTraceIOImp extends LazyModuleImp {
   // Enabled to test TracerV trace capture
   if (p(PrintTracePort)) {
     val traceprint = Wire(UInt(512.W))
-    traceprint := traceIO.asUInt
+    traceprint := Cat(traceIO.traces.map(_.asUInt))
     printf("TRACEPORT: %x\n", traceprint)
   }
 }
