@@ -11,7 +11,7 @@ Last-Level Cache Generator
 To learn more about configuring this L2 cache, please refer to the :ref:`memory-hierarchy` section.
 
 
-Perihperal Devices
+Peripheral Devices
 -------------------
 ``sifive-blocks`` includes multiple peripheral device generators, such as UART, SPI, PWM, JTAG, GPIO and more.
 
