@@ -57,6 +57,13 @@ class PWMAXI4RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+class GCDRocketConfig extends Config(                      // add MMIO GCD module
+  new WithGCDTop ++
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+
 class SimBlockDeviceRocketConfig extends Config(
   new testchipip.WithBlockDevice ++                        // add block-device module to peripherybus
   new WithSimBlockDeviceTop ++                             // use top with block-device IOs and connect to simblockdevice

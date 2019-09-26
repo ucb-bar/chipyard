@@ -53,6 +53,16 @@ class TopWithPWMAXI4Module(l: TopWithPWMAXI4) extends TopModule(l)
 
 //---------------------------------------------------------------------------------------------------------
 
+class TopWithGCD(implicit p: Parameters) extends Top
+  with HasPeripheryGCD {
+  override lazy val module = new TopWithGCDModule(this)
+}
+
+class TopWithGCDModule(l: TopWithGCD) extends TopModule(l)
+  with HasPeripheryGCDModuleImp
+
+//---------------------------------------------------------------------------------------------------------
+
 class TopWithBlockDevice(implicit p: Parameters) extends Top
   with HasPeripheryBlockDevice {
   override lazy val module = new TopWithBlockDeviceModule(this)
