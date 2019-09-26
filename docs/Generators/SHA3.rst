@@ -1,5 +1,9 @@
 SHA3 RoCC Accelerator
 ===================================
+The SHA3 accelerator is a basic RoCC accelerator for the SHA3 hashing algorithm.
+We like using SHA3 in Chipyard tutorial content because it is a self-contained, simple
+example of integrating a custom accelerator into Chipyard.
+
 
 Introduction
 -----------------------------------
@@ -15,11 +19,8 @@ the message into a set of state bits and permuting the state. The absorbing is a
 XOR while the permutation is a more complex function composed of several operations, χ, θ, ρ,
 π, ι, that all perform various bitwise operations, including rotations, parity calculations, XORs,
 etc. The Keccak hashing function is parameterized for different sizes of state and message chunks
-but for this lab we will only support the Keccak-256 variant with 1600 bits of state and 1088 bit
-message chunks. In addition, for this lab we will ignore the variable length portion to avoid one
-of the most complicated parts of Keccak the padding. Our interface, which is discussed further
-below, assume a single chunk of message is ready to be absorbed and hashed. A diagram of the SHA3
-accelerator is shown below.
+but for this accelerator we will only support the Keccak-256 variant with 1600 bits of state and
+1088 bit message chunks. A diagram of the SHA3 accelerator is shown below.
 
 .. image:: ../_static/images/sha3.png
 
@@ -35,17 +36,16 @@ words to the co-processor, the request for a return value,
 and a small field for the function requested. The accelerator
 receives these requests using a ready/valid interface. The
 ROCC instruction is parsed and the needed information is
-stored into one of the T execution contexts, only if there is
-one available. These execution contexts contain the memory
-address of the message being hashed, the memory address
+stored into a execution context. The execution context contains
+the memory address of the message being hashed, the memory address
 to store the resulting hash in, the length of the message, and
 several other control fields.
 
 Once the execution context is valid the memory subsystem
 then begins to fetch chunks of the message. The memory
 subsystem is fully decoupled from the other subsystems
-and maintains either T or 4 memory buffers, whichever is
-smaller. The accelerators memory interface can provide a
+and maintains a single full round memory buffers.
+The accelerators memory interface can provide a
 maximum of one 64 bit word per cycle which corresponds
 to 17 requests needed to fill a buffer (the size is dictated by
 the SHA3 algorithm). Memory requests to fill these buffers
@@ -53,18 +53,13 @@ are sent out as rapidly as the memory interface can handle,
 with a tag field set to allow the different memory buffers
 requests to be distinguished, as they may be returned out of
 order. Once the memory subsystem has filled a buffer the
-control unit absorbs the buffer into the appropriate execution
+control unit absorbs the buffer into the execution
 context, at which point the execution context is free to
 begin permutation, and the memory buffer is free to send
 more memory requests.
 
 After the buffer is absorbed, the hashing computation
-subsystem begins the permutation operations. Because the
-hashing subsystem has a parameterized number of execution
-units in parallel, D, as well as a parameterized number
-of round execution units, N, it requires a dynamic scheduler
-to determine which execution context are ready to run and
-on which available execution unit they should be run. Once
+subsystem begins the permutation operations. Once
 the message is fully hashed, the hash is written to memory
 with a simple state machine.
 
@@ -72,7 +67,7 @@ with a simple state machine.
 Using a SHA3 Accelerator
 ------------------------
 Since the SHA3 accelerator is designed as a RoCC accelerator,
-it can be mised into a Rocket or BOOM core by overriding the
+it can be mixed into a Rocket or BOOM core by overriding the
 BuildRoCC key. The configuration mixin is defined in the SHA3
 generator. An example configuration highlighting the use of
 this mixin is shown here:
