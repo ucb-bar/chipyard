@@ -14,6 +14,7 @@ import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy.LazyModule
 import utilities.{Subsystem, SubsystemModuleImp}
 import icenet._
+import firesim.util.DefaultFireSimHarness
 import testchipip._
 import testchipip.SerialAdapter.SERIAL_IF_WIDTH
 import tracegen.{HasTraceGenTiles, HasTraceGenTilesModuleImp}

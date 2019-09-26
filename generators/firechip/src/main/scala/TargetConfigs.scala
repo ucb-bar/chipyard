@@ -19,6 +19,7 @@ import tracegen.TraceGenKey
 import icenet._
 
 import firesim.endpoints._
+import firesim.util.{WithNumNodes}
 import firesim.configs.WithDefaultMemModel
 
 class WithBootROM extends Config((site, here, up) => {
@@ -174,9 +175,6 @@ class FireSimBoomQuadCoreConfig extends Config(
 //**********************************************************************************
 //* Supernode Configurations
 //*********************************************************************************/
-class WithNumNodes(n: Int) extends Config((pname, site, here) => {
-  case NumNodes => n
-})
 
 class SupernodeFireSimRocketChipConfig extends Config(
   new WithNumNodes(4) ++

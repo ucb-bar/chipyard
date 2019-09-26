@@ -3,9 +3,8 @@
 package firesim.firesim
 
 import chisel3._
-import chisel3.experimental.RawModule
 
-import freechips.rocketchip.config.{Field, Parameters, Config}
+import freechips.rocketchip.config.{Field, Config}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug.HasPeripheryDebugModuleImp
 import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPortModuleImp}
@@ -15,23 +14,12 @@ import testchipip.{HasPeripherySerialModuleImp, HasPeripheryBlockDeviceModuleImp
 import icenet.HasPeripheryIceNICModuleImpValidOnly
 
 import junctions.{NastiKey, NastiParameters}
-import midas.widgets.{IsEndpoint, PeekPokeEndpoint}
+import midas.widgets.{IsEndpoint}
 import midas.models.{FASEDEndpoint, FasedAXI4Edge}
 import firesim.endpoints._
 import firesim.configs.MemModelKey
+import firesim.util.RegisterEndpointBinder
 
-
-// A sequence of partial functions that match on the type the DUT (_not_ it's
-// IO) to generate an appropriate endpoint. You can add your own endpoint by prepending 
-// a custom PartialFunction to this Seq
-case object EndpointBinders extends Field[Seq[PartialFunction[Any, Seq[IsEndpoint]]]](Seq())
-
-// Config sugar that accepts a partial function and prepends it to EndpointBinders
-class RegisterEndpointBinder(pf: =>PartialFunction[Any, Seq[IsEndpoint]]) extends Config((site, here, up) => {
-  case EndpointBinders => pf +: up(EndpointBinders, site)
-})
-
-// Default FireSim Endpoint binders follow
 class WithTiedOffDebug extends RegisterEndpointBinder({ case target: HasPeripheryDebugModuleImp =>
   target.debug.clockeddmi.foreach({ cdmi =>
     cdmi.dmi.req.valid := false.B
