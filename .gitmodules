@@ -53,6 +53,18 @@
 [submodule "toolchains/riscv-tools/riscv-openocd"]
 	path = toolchains/riscv-tools/riscv-openocd
 	url = https://github.com/riscv/riscv-openocd.git
+[submodule "toolchains/esp-tools/riscv-gnu-toolchain"]
+	path = toolchains/esp-tools/riscv-gnu-toolchain
+	url = https://github.com/ucb-bar/esp-gnu-toolchain.git
+[submodule "toolchains/esp-tools/riscv-isa-sim"]
+	path = toolchains/esp-tools/riscv-isa-sim
+	url = https://github.com/ucb-bar/esp-isa-sim.git
+[submodule "toolchains/esp-tools/riscv-pk"]
+	path = toolchains/esp-tools/riscv-pk
+	url = https://github.com/riscv/riscv-pk.git
+[submodule "toolchains/esp-tools/riscv-tests"]
+	path = toolchains/esp-tools/riscv-tests
+	url = https://github.com/ucb-bar/esp-tests.git
 [submodule "vlsi/hammer"]
 	path = vlsi/hammer
 	url = https://github.com/ucb-bar/hammer.git
