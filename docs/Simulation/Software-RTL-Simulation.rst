@@ -42,6 +42,7 @@ For a proprietry VCS simulation, enter the ``sims/vcs`` directory
 
 
 .. _sim-default:
+
 Simulating The Default Example
 -------------------------------
 
@@ -72,8 +73,9 @@ For example:
 
 
 .. _sw-sim-custom:
+
 Simulating A Custom Project
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 
 If you later create your own project, you can use environment variables to build an alternate configuration.
 
