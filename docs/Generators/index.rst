@@ -10,7 +10,7 @@ However, by using meta-programming and parameter systems, generators can allow f
 The following pages introduce the generators integrated with the Chipyard framework.
 
 Chipyard bundles the source code for the generators, under the ``generators`` directory.
-It builds them from source each time (although ``sbt`` will cache results if they have not changed),
+It builds them from source each time (although the build system will cache results if they have not changed),
 so changes to the generators themselves will automatically be used when building with Chipyard.
 
 .. toctree::
