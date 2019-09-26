@@ -56,6 +56,8 @@ For instance, to run one of the riscv-tools assembly tests.
 
     ./simulator-example-RocketConfig $RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
 
+.. Note:: in a VCS simulator, the simulator name will be ``simv-example-RocketConfig`` ``instead of simulator-example-RocketConfig``.
+
 Alternatively, we can run a pre-packaged suite of RISC-V assembly or benchmark tests, by adding the make target ``run-asm-tests`` or ``run-bmark-tests``.
 For example:
 
