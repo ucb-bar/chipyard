@@ -88,6 +88,14 @@ class WithPWMAXI4Top extends Config((site, here, up) => {
 })
 
 /**
+ * Class to specify a top level BOOM and/or Rocket system with a TL-attached GCD device
+ */
+class WithGCDTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new TopWithGCD()(p)).module)
+})
+
+/**
  * Class to specify a top level BOOM and/or Rocket system with a block device
  */
 class WithBlockDeviceModelTop extends Config((site, here, up) => {
