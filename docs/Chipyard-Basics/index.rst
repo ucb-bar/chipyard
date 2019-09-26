@@ -20,5 +20,3 @@ Hit next to get started!
    Chipyard-Components
    Configs-Parameters-Mixins
    Initial-Repo-Setup
-   Running-A-Simulation
-   Building-A-Chip

@@ -18,7 +18,9 @@ so changes to the generators themselves will automatically be used when building
    :maxdepth: 2
    :caption: Generators:
 
+   Rocket-Chip
    Rocket
    BOOM
    Hwacha
-
+   SiFive-Generators   
+   SHA3

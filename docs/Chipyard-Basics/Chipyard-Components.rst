@@ -8,12 +8,13 @@ Generators
 
 The Chipyard Framework currently consists of the following RTL generators:
 
+
 Processor Cores
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Rocket**
+**Rocket Core**
   An in-order RISC-V core.
-  See :ref:`Rocket` for more information.
+  See :ref:`Rocket Core` for more information.
 
 **BOOM (Berkeley Out-of-Order Machine)**
   An out-of-order RISC-V core.
@@ -86,12 +87,12 @@ Sims
 **verilator (Verilator wrapper)**
   Verilator is an open source Verilog simulator.
   The ``verilator`` directory provides wrappers which construct Verilator-based simulators from relevant generated RTL, allowing for execution of test RISC-V programs on the simulator (including vcd waveform files).
-  See :ref:`Verilator` for more information.
+  See :ref:`Verilator (Open-Source)` for more information.
 
 **vcs (VCS wrapper)**
   VCS is a proprietary Verilog simulator.
   Assuming the user has valid VCS licenses and installations, the ``vcs`` directory provides wrappers which construct VCS-based simulators from relevant generated RTL, allowing for execution of test RISC-V programs on the simulator (including vcd/vpd waveform files).
-  See :ref:`VCS` for more information.
+  See :ref:`Synopsys VCS (License Required)` for more information.
 
 **FireSim**
   FireSim is an open-source FPGA-accelerated simulation platform, using Amazon Web Services (AWS) EC2 F1 instances on the public cloud.
@@ -109,4 +110,4 @@ VLSI
   The HAMMER flow provide automated scripts which generate relevant tool commands based on a higher level description of physical design constraints.
   The HAMMER flow also allows for re-use of process technology knowledge by enabling the construction of process-technology-specific plug-ins, which describe particular constraints relating to that process technology (obsolete standard cells, metal layer routing constraints, etc.).
   The HAMMER flow requires access to proprietary EDA tools and process technology libraries.
-  See :ref:`HAMMER` for more information.
+  See :ref:`Core HAMMER` for more information.

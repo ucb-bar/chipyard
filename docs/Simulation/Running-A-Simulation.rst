@@ -9,7 +9,7 @@ Software RTL Simulation
 ------------------------
 The Chipyard framework provides wrappers for two common software RTL simulators:
 the open-source Verilator simulator and the proprietary VCS simulator.
-For more information on either of these simulators, please refer to :ref:`Verilator` or :ref:`VCS`.
+For more information on either of these simulators, please refer to :ref:`Verilator (Open-Source)` or :ref:`Synopsys VCS (License Required)`.
 The following instructions assume at least one of these simulators is installed.
 
 Verilator/VCS Flows
@@ -39,13 +39,21 @@ In order to construct the simulator with our custom design, we run the following
     make SBT_PROJECT=... MODEL=... VLOG_MODEL=... MODEL_PACKAGE=... CONFIG=... CONFIG_PACKAGE=... GENERATOR_PACKAGE=... TB=... TOP=...
 
 Each of these make variables correspond to a particular part of the design/codebase and are needed so that the make system can correctly build and make a RTL simulation.
+
 The ``SBT_PROJECT`` is the ``build.sbt`` project that holds all of the source files and that will be run during the RTL build.
+
 The ``MODEL`` and ``VLOG_MODEL`` are the top-level class names of the design.
+
 Normally, these are the same, but in some cases these can differ (if the Chisel class differs than what is emitted in the Verilog).
+
 The ``MODEL_PACKAGE`` is the Scala package (in the Scala code that says ``package ...``) that holds the ``MODEL`` class.
+
 The ``CONFIG`` is the name of the class used for the parameter Config while the ``CONFIG_PACKAGE`` is the Scala package it resides in.
+
 The ``GENERATOR_PACKAGE`` is the Scala package that holds the Generator class that elaborates the design.
+
 The ``TB`` is the name of the Verilog wrapper that connects the ``TestHarness`` to VCS/Verilator for simulation.
+
 Finally, the ``TOP`` variable is used to distinguish between the top-level of the design and the ``TestHarness`` in our system.
 For example, in the normal case, the ``MODEL`` variable specifies the ``TestHarness`` as the top-level of the design.
 However, the true top-level design, the SoC being simulated, is pointed to by the ``TOP`` variable.
@@ -57,12 +65,6 @@ Therefore, in order to simulate a simple Rocket-based example system we can use:
 .. code-block:: shell
 
     make SUB_PROJECT=example
-
-Alternatively, if we would like to simulate a simple BOOM-based example system we can use:
-
-.. code-block:: shell
-
-    make SUB_PROJECT=exampleboom
 
 Once the simulator has been constructed, we would like to run RISC-V programs on it.
 In the simulation directory, we will find an executable file called ``<...>-<package>-<config>``.

@@ -6,11 +6,10 @@ SHELL=/bin/bash
 #########################################################################################
 # variables to get all *.scala files
 #########################################################################################
-lookup_scala_srcs = $(shell find -L $(1)/ -iname "*.scala" 2> /dev/null)
+lookup_scala_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.scala" -print 2> /dev/null)
 
-PACKAGES=$(addprefix generators/, rocket-chip testchipip boom hwacha sifive-blocks sifive-cache example) \
-		 $(addprefix sims/firesim/sim/, . firesim-lib midas midas/targetutils)
-SCALA_SOURCES=$(foreach pkg,$(PACKAGES),$(call lookup_scala_srcs,$(base_dir)/$(pkg)/src/main/scala))
+SOURCE_DIRS=$(addprefix $(base_dir)/,generators sims/firesim/sim)
+SCALA_SOURCES=$(call lookup_scala_srcs,$(SOURCE_DIRS))
 
 #########################################################################################
 # rocket and testchipip classes
@@ -31,7 +30,7 @@ $(FIRRTL_JAR): $(call lookup_scala_srcs, $(CHIPYARD_FIRRTL_DIR)/src/main/scala)
 	touch $@
 
 #########################################################################################
-# create simulation args file rule
+# create list of simulation file inputs
 #########################################################################################
 $(sim_files): $(call lookup_scala_srcs,$(base_dir)/generators/utilities/src/main/scala) $(FIRRTL_JAR)
 	cd $(base_dir) && $(SBT) "project utilities" "runMain utilities.GenerateSimFiles -td $(build_dir) -sim $(sim_name)"
@@ -39,7 +38,9 @@ $(sim_files): $(call lookup_scala_srcs,$(base_dir)/generators/utilities/src/main
 #########################################################################################
 # create firrtl file rule and variables
 #########################################################################################
-$(FIRRTL_FILE) $(ANNO_FILE): $(SCALA_SOURCES) $(sim_files)
+.INTERMEDIATE: generator_temp
+$(FIRRTL_FILE) $(ANNO_FILE): generator_temp
+generator_temp: $(SCALA_SOURCES) $(sim_files)
 	mkdir -p $(build_dir)
 	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator $(build_dir) $(MODEL_PACKAGE) $(MODEL) $(CONFIG_PACKAGE) $(CONFIG)"
 
@@ -52,23 +53,29 @@ HARNESS_CONF_FLAGS = -thconf $(HARNESS_SMEMS_CONF)
 TOP_TARGETS = $(TOP_FILE) $(TOP_SMEMS_CONF) $(TOP_ANNO) $(TOP_FIR) $(sim_top_blackboxes)
 HARNESS_TARGETS = $(HARNESS_FILE) $(HARNESS_SMEMS_CONF) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes)
 
-$(TOP_TARGETS) $(HARNESS_TARGETS): $(FIRRTL_FILE) $(ANNO_FILE)
+.INTERMEDIATE: firrtl_temp
+$(TOP_TARGETS) $(HARNESS_TARGETS): firrtl_temp
+firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE)
 	cd $(base_dir) && $(SBT) "project tapeout" "runMain barstools.tapeout.transforms.GenerateTopAndHarness -o $(TOP_FILE) -tho $(HARNESS_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(VLOG_MODEL) -faf $(ANNO_FILE) -tsaof $(TOP_ANNO) -tdf $(sim_top_blackboxes) -tsf $(TOP_FIR) -thaof $(HARNESS_ANNO) -hdf $(sim_harness_blackboxes) -thf $(HARNESS_FIR) $(REPL_SEQ_MEM) $(HARNESS_CONF_FLAGS) -td $(build_dir)"
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 MACROCOMPILER_MODE ?= --mode synflops
-$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR): $(TOP_SMEMS_CONF)
+.INTERMEDIATE: top_macro_temp
+$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR): top_macro_temp
+top_macro_temp: $(TOP_SMEMS_CONF)
 	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE)"
 
 HARNESS_MACROCOMPILER_MODE = --mode synflops
-$(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): $(HARNESS_SMEMS_CONF)
+.INTERMEDIATE: harness_macro_temp
+$(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): harness_macro_temp
+harness_macro_temp: $(HARNESS_SMEMS_CONF)
 	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE)"
 
 ########################################################################################
-# remove duplicate files in blackbox/simfiles
+# remove duplicate files and headers in list of simulation file inputs
 ########################################################################################
 $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes)
-	awk '{print $1;}' $^ | sort -u > $@
+	awk '{print $1;}' $^ | sort -u | grep -v '.*\.h' > $@
 
 #########################################################################################
 # helper rule to just make verilog files
@@ -93,7 +100,7 @@ run-binary-fast: $(sim)
 # helper rules to run simulator with as much debug info as possible
 #########################################################################################
 run-binary-debug: $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAG) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) 3>&1 1>&2 2>&3 | spike-dasm > $(sim_out_name).out)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
@@ -116,39 +123,3 @@ $(output_dir)/%.out: $(output_dir)/% $(sim)
 ifneq ($(filter run% %.run %.out %.vpd %.vcd,$(MAKECMDGOALS)),)
 -include $(build_dir)/$(long_name).d
 endif
-
-#########################################################################################
-# default regression tests variables and rules
-# TODO: Remove in favor of each project having its own regression tests?
-#########################################################################################
-regression-tests = \
-	rv64ud-v-fcvt \
-        rv64ud-p-fdiv \
-        rv64ud-v-fadd \
-        rv64uf-v-fadd \
-        rv64um-v-mul \
-        rv64mi-p-breakpoint \
-        rv64uc-v-rvc \
-        rv64ud-v-structural \
-        rv64si-p-wfi \
-        rv64um-v-divw \
-        rv64ua-v-lrsc \
-        rv64ui-v-fence_i \
-        rv64ud-v-fcvt_w \
-        rv64uf-v-fmin \
-        rv64ui-v-sb \
-        rv64ua-v-amomax_d \
-        rv64ud-v-move \
-        rv64ud-v-fclass \
-        rv64ua-v-amoand_d \
-        rv64ua-v-amoxor_d \
-        rv64si-p-sbreak \
-        rv64ud-v-fmadd \
-        rv64uf-v-ldst \
-        rv64um-v-mulh \
-        rv64si-p-dirty
-
-.PHONY: run-regression-tests run-regression-tests-fast run-regression-tests-debug
-run-regression-tests: $(addprefix $(output_dir)/,$(addsuffix .out,$(regression-tests)))
-run-regression-tests-fast: $(addprefix $(output_dir)/,$(addsuffix .run,$(regression-tests)))
-run-regression-tests-debug: $(addprefix $(output_dir)/,$(addsuffix .vpd,$(regression-tests)))

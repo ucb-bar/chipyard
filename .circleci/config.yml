@@ -88,6 +88,32 @@ jobs:
                 key: verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
                 paths:
                     - "/home/riscvuser/verilator"
+    build-extra-tests:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.10
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+        steps:
+            - add_ssh_keys:
+                fingerprints:
+                    - "3e:c3:02:5b:ed:64:8c:b7:b0:04:43:bc:83:43:73:1e"
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+            - run:
+                name: Build extra tests
+                command: .circleci/build-extra-tests.sh
+                no_output_timeout: 120m
+            - save_cache:
+                key: extra-tests-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/home/riscvuser/project/tests"
     prepare-example:
         docker:
             - image: riscvboom/riscvboom-images:0.0.10
@@ -117,35 +143,6 @@ jobs:
                 key: example-{{ .Branch }}-{{ .Revision }}
                 paths:
                     - "/home/riscvuser/project"
-    prepare-boomexample:
-        docker:
-            - image: riscvboom/riscvboom-images:0.0.10
-        environment:
-            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
-            TERM: dumb
-        steps:
-            - add_ssh_keys:
-                fingerprints:
-                    - "3e:c3:02:5b:ed:64:8c:b7:b0:04:43:bc:83:43:73:1e"
-            - checkout
-            - run:
-                name: Create hash of toolchains
-                command: |
-                    .circleci/create-hash.sh
-            - restore_cache:
-                keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
-            - restore_cache:
-                keys:
-                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
-            - run:
-                name: Building the boomexample subproject using Verilator
-                command: .circleci/do-rtl-build.sh boomexample
-                no_output_timeout: 120m
-            - save_cache:
-                key: boomexample-{{ .Branch }}-{{ .Revision }}
-                paths:
-                    - "/home/riscvuser/project"
     prepare-boomrocketexample:
         docker:
             - image: riscvboom/riscvboom-images:0.0.10
@@ -170,7 +167,7 @@ jobs:
             - run:
                 name: Building the boomrocketexample subproject using Verilator
                 command: .circleci/do-rtl-build.sh boomrocketexample
-                no_output_timeout: 120m
+                no_output_timeout: 240m
             - save_cache:
                 key: boomrocketexample-{{ .Branch }}-{{ .Revision }}
                 paths:
@@ -291,6 +288,114 @@ jobs:
                 key: hwacha-{{ .Branch }}-{{ .Revision }}
                 paths:
                     - "/home/riscvuser/project"
+    prepare-firesim:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.10
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+        steps:
+            - add_ssh_keys:
+                fingerprints:
+                    - "3e:c3:02:5b:ed:64:8c:b7:b0:04:43:bc:83:43:73:1e"
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
+            - run:
+                name: Building FireSim MIDAS simulator using Verilator
+                command: .circleci/do-firesim-build.sh firesim
+                no_output_timeout: 120m
+            - save_cache:
+                key: firesim-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/home/riscvuser/project"
+    prepare-fireboom:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.10
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+        steps:
+            - add_ssh_keys:
+                fingerprints:
+                    - "3e:c3:02:5b:ed:64:8c:b7:b0:04:43:bc:83:43:73:1e"
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
+            - run:
+                name: Building FireSim MIDAS simulator using Verilator
+                command: .circleci/do-firesim-build.sh fireboom
+                no_output_timeout: 120m
+            - save_cache:
+                key: fireboom-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/home/riscvuser/project"
+    prepare-firesim-clockdiv:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.10
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+        steps:
+            - add_ssh_keys:
+                fingerprints:
+                    - "3e:c3:02:5b:ed:64:8c:b7:b0:04:43:bc:83:43:73:1e"
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
+            - run:
+                name: Building FireSim MIDAS simulator using Verilator
+                command: .circleci/do-firesim-build.sh firesim-clockdiv
+                no_output_timeout: 120m
+            - save_cache:
+                key: firesim-clockdiv-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/home/riscvuser/project"
+    midasexamples-run-tests:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.10
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+        steps:
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
+            - run:
+                name: Run midasexamples tests
+                command: .circleci/run-midasexamples-tests.sh
     example-run-tests:
         docker:
             - image: riscvboom/riscvboom-images:0.0.10
@@ -315,30 +420,6 @@ jobs:
             - run:
                 name: Run example tests
                 command: .circleci/run-tests.sh example
-    boomexample-run-tests:
-        docker:
-            - image: riscvboom/riscvboom-images:0.0.10
-        environment:
-            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
-            TERM: dumb
-        steps:
-            - checkout
-            - run:
-                name: Create hash of toolchains
-                command: |
-                    .circleci/create-hash.sh
-            - restore_cache:
-                keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
-            - restore_cache:
-                keys:
-                    - boomexample-{{ .Branch }}-{{ .Revision }}
-            - restore_cache:
-                keys:
-                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
-            - run:
-                name: Run boomexample tests
-                command: .circleci/run-tests.sh boomexample
     boomrocketexample-run-tests:
         docker:
             - image: riscvboom/riscvboom-images:0.0.10
@@ -435,6 +516,89 @@ jobs:
             - run:
                 name: Run hwacha tests
                 command: .circleci/run-tests.sh hwacha
+    firesim-run-tests:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.10
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+        steps:
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+            - restore_cache:
+                keys:
+                    - firesim-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - extra-tests-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
+            - run:
+                name: Run FireSim tests
+                command: .circleci/run-firesim-tests.sh firesim
+    fireboom-run-tests:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.10
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+        steps:
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+            - restore_cache:
+                keys:
+                    - fireboom-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - extra-tests-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
+            - run:
+                name: Run FireSim tests
+                command: .circleci/run-firesim-tests.sh fireboom
+                no_output_timeout: 20m
+    firesim-clockdiv-run-tests:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.10
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+        steps:
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+            - restore_cache:
+                keys:
+                    - firesim-clockdiv-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - extra-tests-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
+            - run:
+                name: Run FireSim tests
+                command: .circleci/run-firesim-tests.sh firesim-clockdiv
+
 
 # Order and dependencies of jobs to run
 workflows:
@@ -453,7 +617,6 @@ workflows:
 
     build-and-test-chipyard-integration:
         jobs:
-
             # Make the toolchains
             - install-riscv-toolchain
 
@@ -462,13 +625,13 @@ workflows:
             # Build verilator
             - install-verilator
 
-            # Prepare the verilator builds
-            - prepare-example:
+            # Build extra tests
+            - build-extra-tests:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator
 
-            - prepare-boomexample:
+            # Prepare the verilator builds
+            - prepare-example:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
@@ -498,16 +661,33 @@ workflows:
                     - install-esp-toolchain
                     - install-verilator
 
+            - prepare-firesim:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-fireboom:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-firesim-clockdiv:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
             # Run the respective tests
+
+            # Run midasexamples test
+            - midasexamples-run-tests:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
 
             # Run the example tests
             - example-run-tests:
                 requires:
                     - prepare-example
-
-            - boomexample-run-tests:
-                requires:
-                    - prepare-boomexample
 
             - boomrocketexample-run-tests:
                 requires:
@@ -524,3 +704,19 @@ workflows:
             - hwacha-run-tests:
                 requires:
                     - prepare-hwacha
+
+            # Run the firesim tests
+            - firesim-run-tests:
+                requires:
+                    - prepare-firesim
+                    - build-extra-tests
+
+            - fireboom-run-tests:
+                requires:
+                    - prepare-fireboom
+                    - build-extra-tests
+
+            - firesim-clockdiv-run-tests:
+                requires:
+                    - prepare-firesim-clockdiv
+                    - build-extra-tests

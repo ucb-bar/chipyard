@@ -11,10 +11,11 @@ import freechips.rocketchip.util.{HeterogeneousBag}
 import freechips.rocketchip.amba.axi4.AXI4Bundle
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy.LazyModule
-import boom.system.{BoomRocketSubsystem, BoomRocketSubsystemModuleImp}
+import utilities.{Subsystem, SubsystemModuleImp}
 import icenet._
 import testchipip._
 import testchipip.SerialAdapter.SERIAL_IF_WIDTH
+import tracegen.{HasTraceGenTiles, HasTraceGenTilesModuleImp}
 import sifive.blocks.devices.uart._
 import midas.models.AXI4BundleWithEdge
 import java.io.File
@@ -30,7 +31,7 @@ import java.io.File
 * determine which driver to build.
 *******************************************************************************/
 
-class FireSim(implicit p: Parameters) extends RocketSubsystem
+class FireSim(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
@@ -44,7 +45,7 @@ class FireSim(implicit p: Parameters) extends RocketSubsystem
   override lazy val module = new FireSimModuleImp(this)
 }
 
-class FireSimModuleImp[+L <: FireSim](l: L) extends RocketSubsystemModuleImp(l)
+class FireSimModuleImp[+L <: FireSim](l: L) extends SubsystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
@@ -54,9 +55,10 @@ class FireSimModuleImp[+L <: FireSim](l: L) extends RocketSubsystemModuleImp(l)
     with HasPeripheryIceNICModuleImpValidOnly
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
+    with CanHaveMultiCycleRegfileImp
 
 
-class FireSimNoNIC(implicit p: Parameters) extends RocketSubsystem
+class FireSimNoNIC(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
@@ -69,7 +71,7 @@ class FireSimNoNIC(implicit p: Parameters) extends RocketSubsystem
   override lazy val module = new FireSimNoNICModuleImp(this)
 }
 
-class FireSimNoNICModuleImp[+L <: FireSimNoNIC](l: L) extends RocketSubsystemModuleImp(l)
+class FireSimNoNICModuleImp[+L <: FireSimNoNIC](l: L) extends SubsystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
@@ -78,9 +80,10 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNIC](l: L) extends RocketSubsystemMod
     with HasPeripheryUARTModuleImp
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
+    with CanHaveMultiCycleRegfileImp
 
 
-class FireBoom(implicit p: Parameters) extends BoomRocketSubsystem
+class FireBoom(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
@@ -94,7 +97,7 @@ class FireBoom(implicit p: Parameters) extends BoomRocketSubsystem
   override lazy val module = new FireBoomModuleImp(this)
 }
 
-class FireBoomModuleImp[+L <: FireBoom](l: L) extends BoomRocketSubsystemModuleImp(l)
+class FireBoomModuleImp[+L <: FireBoom](l: L) extends SubsystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
@@ -105,8 +108,9 @@ class FireBoomModuleImp[+L <: FireBoom](l: L) extends BoomRocketSubsystemModuleI
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
     with ExcludeInvalidBoomAssertions
+    with CanHaveMultiCycleRegfileImp
 
-class FireBoomNoNIC(implicit p: Parameters) extends BoomRocketSubsystem
+class FireBoomNoNIC(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
     with CanHaveFASEDOptimizedMasterAXI4MemPort
     with HasPeripheryBootROM
@@ -119,7 +123,7 @@ class FireBoomNoNIC(implicit p: Parameters) extends BoomRocketSubsystem
   override lazy val module = new FireBoomNoNICModuleImp(this)
 }
 
-class FireBoomNoNICModuleImp[+L <: FireBoomNoNIC](l: L) extends BoomRocketSubsystemModuleImp(l)
+class FireBoomNoNICModuleImp[+L <: FireBoomNoNIC](l: L) extends SubsystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
@@ -129,6 +133,7 @@ class FireBoomNoNICModuleImp[+L <: FireBoomNoNIC](l: L) extends BoomRocketSubsys
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
     with ExcludeInvalidBoomAssertions
+    with CanHaveMultiCycleRegfileImp
 
 case object NumNodes extends Field[Int]
 
@@ -174,3 +179,14 @@ class FireSimSupernode(implicit p: Parameters) extends Module {
   } }
 }
 
+class FireSimTraceGen(implicit p: Parameters) extends BaseSubsystem
+    with HasHierarchicalBusTopology
+    with HasTraceGenTiles
+    with CanHaveFASEDOptimizedMasterAXI4MemPort {
+  override lazy val module = new FireSimTraceGenModuleImp(this)
+}
+
+class FireSimTraceGenModuleImp(outer: FireSimTraceGen)
+  extends BaseSubsystemModuleImp(outer)
+  with HasTraceGenTilesModuleImp
+  with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp

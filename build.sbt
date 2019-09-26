@@ -1,5 +1,9 @@
 import Tests._
 
+// This gives us a nicer handle  to the root project instead of using the
+// implicit one
+lazy val chipyardRoot = RootProject(file("."))
+
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
   version := "1.0",
@@ -13,9 +17,12 @@ lazy val commonSettings = Seq(
   libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test",
   libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.1",
   libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-  libraryDependencies += "edu.berkeley.cs" %% "firrtl-interpreter" % "1.2-SNAPSHOT",
   libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.0",
+  libraryDependencies += "org.scala-lang.modules" % "scala-jline" % "2.12.1",
+  libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.10",
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+  unmanagedBase := (chipyardRoot / unmanagedBase).value,
+  allDependencies := allDependencies.value.filterNot(_.organization == "edu.berkeley.cs"),
   resolvers ++= Seq(
     Resolver.sonatypeRepo("snapshots"),
     Resolver.sonatypeRepo("releases"),
@@ -43,6 +50,22 @@ def conditionalDependsOn(prj: Project): Project = {
   }
 }
 
+/**
+  * It has been a struggle for us to override settings in subprojects.
+  * An example would be adding a dependency to rocketchip on midas's targetutils library,
+  * or replacing dsptools's maven dependency on chisel with the local chisel project.
+  *
+  * This function works around this by specifying the project's root at src/ and overriding
+  * scalaSource and resourceDirectory.
+  */
+def freshProject(name: String, dir: File): Project = {
+  Project(id = name, base = dir / "src")
+    .settings(
+      scalaSource in Compile := baseDirectory.value / "main" / "scala",
+      resourceDirectory in Compile := baseDirectory.value / "main" / "resources"
+    )
+}
+
 // Fork each scala test for now, to work around persistent mutable state
 // in Rocket-Chip based generators
 def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
@@ -51,11 +74,32 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
   } toSeq
 
 // Subproject definitions begin
+//
+// FIRRTL is handled as an unmanaged dependency. Make will build the firrtl jar
+// before launching sbt if any of the firrtl source files has been updated
+// The jar is dropped in chipyard's lib/ directory, which is used as the unmanagedBase
+// for all subprojects
+lazy val chisel  = (project in file("tools/chisel3"))
 
-// NB: FIRRTL dependency is unmanaged (and dropped in sim/lib)
-lazy val chisel  = (project in rocketChipDir / "chisel3")
+lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))
+  .settings(commonSettings)
 
- // Contains annotations & firrtl passes you may wish to use in rocket-chip without
+lazy val treadle = (project in file("tools/treadle"))
+  .settings(commonSettings)
+
+lazy val chisel_testers = (project in file("tools/chisel-testers"))
+  .dependsOn(chisel, firrtl_interpreter, treadle)
+  .settings(
+      commonSettings,
+      libraryDependencies ++= Seq(
+        "junit" % "junit" % "4.12",
+        "org.scalatest" %% "scalatest" % "3.0.5",
+        "org.scalacheck" %% "scalacheck" % "1.14.0",
+        "com.github.scopt" %% "scopt" % "3.7.0"
+      )
+    )
+
+// Contains annotations & firrtl passes you may wish to use in rocket-chip without
 // introducing a circular dependency between RC and MIDAS
 lazy val midasTargetUtils = ProjectRef(firesimDir, "targetutils")
 
@@ -66,14 +110,8 @@ lazy val hardfloat  = (project in rocketChipDir / "hardfloat")
 lazy val rocketMacros  = (project in rocketChipDir / "macros")
   .settings(commonSettings)
 
-// HACK: I'm strugging to override settings in rocket-chip's build.sbt (i want
-// the subproject to register a new library dependendency on midas's targetutils library)
-// So instead, avoid the existing build.sbt altogether and specify the project's root at src/
-lazy val rocketchip = (project in rocketChipDir / "src")
-  .settings(
-    commonSettings,
-    scalaSource in Compile := baseDirectory.value / "main" / "scala",
-    resourceDirectory in Compile := baseDirectory.value / "main" / "resources")
+lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
+  .settings(commonSettings)
   .dependsOn(chisel, hardfloat, rocketMacros)
 
 lazy val testchipip = (project in file("generators/testchipip"))
@@ -81,10 +119,15 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(commonSettings)
 
 lazy val example = conditionalDependsOn(project in file("generators/example"))
-  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache)
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, sha3)
+  .settings(commonSettings)
+
+lazy val tracegen = conditionalDependsOn(project in file("generators/tracegen"))
+  .dependsOn(rocketchip, sifive_cache)
   .settings(commonSettings)
 
 lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))
+  .dependsOn(rocketchip, boom)
   .settings(commonSettings)
 
 lazy val icenet = (project in file("generators/icenet"))
@@ -99,15 +142,36 @@ lazy val boom = (project in file("generators/boom"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
+lazy val sha3 = (project in file("generators/sha3"))
+  .dependsOn(rocketchip, chisel_testers)
+  .settings(commonSettings)
+
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
+  .dependsOn(chisel_testers)
   .settings(commonSettings)
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
   .settings(commonSettings)
 
 lazy val barstoolsMacros = (project in file("./tools/barstools/macros/"))
-  .dependsOn(mdf, rocketchip)
+  .dependsOn(firrtl_interpreter, mdf, rocketchip)
   .enablePlugins(sbtassembly.AssemblyPlugin)
+  .settings(commonSettings)
+
+lazy val dsptools = (project in file("./tools/dsptools"))
+  .dependsOn(chisel, chisel_testers)
+  .settings(
+      commonSettings,
+      libraryDependencies ++= Seq(
+        "org.typelevel" %% "spire" % "0.14.1",
+        "org.scalanlp" %% "breeze" % "0.13.2",
+        "junit" % "junit" % "4.12" % "test",
+        "org.scalatest" %% "scalatest" % "3.0.5" % "test",
+        "org.scalacheck" %% "scalacheck" % "1.14.0" % "test"
+  ))
+
+lazy val `rocket-dsptools` = (project in file("./tools/dsptools/rocket"))
+  .dependsOn(rocketchip, dsptools)
   .settings(commonSettings)
 
 lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
@@ -124,7 +188,7 @@ lazy val midas      = ProjectRef(firesimDir, "midas")
 lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 
 lazy val firechip = (project in file("generators/firechip"))
-  .dependsOn(boom, icenet, testchipip, sifive_blocks, sifive_cache, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
+  .dependsOn(boom, icenet, testchipip, sifive_blocks, sifive_cache, utilities, tracegen, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
     testGrouping in Test := isolateAllTests( (definedTests in Test).value )

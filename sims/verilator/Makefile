@@ -51,7 +51,7 @@ LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesv
 VERILATOR_CC_OPTS = \
 	-O3 \
 	-CFLAGS "$(CXXFLAGS) -DTEST_HARNESS=V$(VLOG_MODEL) -DVERILATOR" \
-	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs" \
+	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(build_dir)/verilator.h" \
 	-LDFLAGS "$(LDFLAGS)"
 
 VERILATOR_NONCC_OPTS = \
@@ -59,7 +59,8 @@ VERILATOR_NONCC_OPTS = \
 	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
 	+define+STOP_COND=\$$c\(\"done_reset\"\) \
 	--assert \
-	--output-split 20000 \
+	--output-split 10000 \
+	--output-split-cfuncs 100 \
 	$(sim_vsrcs) \
 	-f $(sim_common_files)
 
@@ -105,10 +106,11 @@ $(sim_debug): $(model_mk_debug)
 #########################################################################################
 # create a verilator vpd rule
 #########################################################################################
+.PRECIOUS: $(output_dir)/%.vpd %.vcd
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd
 	vcd2vpd $@.vcd $@ > /dev/null &
-	$(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) $<
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) $< 3>&1 1>&2 2>&3 | spike-dasm > $<.out)
 
 #########################################################################################
 # general cleanup rule
