@@ -65,6 +65,9 @@ For example:
     make run-bmark-tests
 
 
+.. Note:: Before running the pre-packaged suites, you must run the plain ``make`` command, since the elaboration command generates a Makefile fragment that contains the target for the pre-packaged test suites. Otherwise, you will likely encounter a Makefile target error. 
+
+
 .. _sw-sim-custom:
 Simulating A Custom Project
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
