@@ -80,15 +80,28 @@ This example shows a Rocket Chip based SoC that merges multiple system component
 .. code-block:: scala
 
   class MySoC(implicit p: Parameters) extends RocketSubsystem
-    with CanHaveMisalignedMasterAXI4MemPort
+    with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
     with HasNoDebug
     with HasPeripherySerial
     with HasPeripheryUART
     with HasPeripheryIceNIC
   {
-     //Additional top-level specific instantiations or wiring
+     lazy val module = new MySoCModuleImp(this)
   }
+
+  class MySoCModuleImp(outer: MySoC) extends RocketSubsystemModuleImp(outer)
+    with CanHaveMasterAXI4MemPortModuleImp
+    with HasPeripheryBootROMModuleImp
+    with HasNoDebugModuleImp
+    with HasPeripherySerialModuleImp
+    with HasPeripheryUARTModuleImp
+    with HasPeripheryIceNICModuleImp
+
+There are two "cakes" here. One for the lazy module and one for the module
+implementation. The lazy module defines all the logical connections between
+generators and exchanges configuration information among them, while the
+module implementation performs the actual Chisel RTL elaboration.
 
 Mix-in
 ---------------------------

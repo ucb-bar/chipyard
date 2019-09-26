@@ -3,8 +3,8 @@ IceNet
 
 IceNet is a library of Chisel designs related to networking. The main component
 of IceNet is IceNIC, a network interface controller that is used primarily
-in `FireSim <https://fires.im/>`_. A diagram of IceNet's microarchitecture
-is shown below.
+in `FireSim <https://fires.im/>`_ for multi-node networked simulation.
+A diagram of IceNet's microarchitecture is shown below.
 
 .. image:: ../_static/images/nic-design.png
 
@@ -68,7 +68,7 @@ Linux Driver
 ------------
 
 The default Linux configuration provided by `firesim-software <https://github.com/firesim/firesim-software>`_
-contains an IceNet driver. If launch a FireSim image that has IceNIC on it,
+contains an IceNet driver. If you launch a FireSim image that has IceNIC on it,
 the driver will automatically detect the device, and you will be able to use
 the full Linux networking stack in userspace.
 
@@ -76,9 +76,12 @@ Configuration
 -------------
 
 To add IceNIC to your design, add ``HasPeripheryIceNIC`` to your lazy module
-and ``HasPeripheryIceNICModuleImp`` to the module implementation.
+and ``HasPeripheryIceNICModuleImp`` to the module implementation. If you
+are confused about the distinction between lazy module and module
+implementation, refer to :ref:`Cake Pattern`.
 
-Then add the ``WithIceNIC`` config mixin to your configuration. This mixin
+Then add the ``WithIceNIC`` config mixin to your configuration. This will
+define ``NICKey``, which IceNIC uses to determine its parameters. The mixin
 takes two arguments. The ``inBufFlits`` argument is the number of 64-bit flits
 that the input packet buffer can hold and the ``usePauser`` argument determines
 whether or not the NIC will have a pause handler.
