@@ -10,3 +10,5 @@ In particular, we aim to support the HAMMER physical design generator flow.
 
    Building-A-Chip
    HAMMER
+   Tutorial
+   Advanced-Usage
