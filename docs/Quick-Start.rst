@@ -1,6 +1,13 @@
 Quick Start
 ===============================
 
+Requirements
+-------------------------------------------
+
+Chipyard is developed and tested on Linux-based systems.
+It is possible to use this on macOS or other BSD-based systems, although GNU tools will need to be installed; it is also recommended to install the RISC-V toolchain from ``brew``.
+Working under Windows is not recommended.
+
 Setting up the Chipyard Repo
 -------------------------------------------
 
@@ -49,7 +56,8 @@ This depends on what you are planning to do with Chipyard.
 
 * If you want to learn about the structure of Chipyard, go to :ref:`chipyard-components`.
 
+* If you intend to change the generators (BOOM, Rocket, etc) themselves, see :ref:`generator-index`.
+
 * If you intend to run a VLSI flow using one of the vanilla Chipyard examples, go to <> and follow the instructions.
 
 * If you intend to build a chip using one of the vanilla Chipyard examples, go to :ref:`build-a-chip` and follow the instructions.
-
