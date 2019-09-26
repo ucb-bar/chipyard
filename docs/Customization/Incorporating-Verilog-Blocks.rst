@@ -158,8 +158,8 @@ write.
     :start-after: DOC include start: GCD test
     :end-before: DOC include end: GCD test
 
-Support for Verilog in Downstream Berkeley Tools
-------------------------------------------------
+Support for Verilog Within Chipyard Tool Flows
+----------------------------------------------
 
 There are important differences in how Verilog blackboxes are treated
 by downstream tools. Since they remain blackboxes in FIRRTL, their
