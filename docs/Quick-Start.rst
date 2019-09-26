@@ -52,3 +52,5 @@ This depends on what you are planning to do with Chipyard.
 * If you intend to build one of the vanilla Chipyard examples, go to :ref:`build-a-chip` and follow the instructions.
 
 * If you intend to run a VLSI flow using one of the vanilla Chipyard examples, go to <> and follow the instructions.
+
+* If you intend to change the generators (BOOM, Rocket, etc) themselves, see :ref:`generator-index`.
