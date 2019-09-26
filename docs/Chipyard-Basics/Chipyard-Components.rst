@@ -8,12 +8,13 @@ Generators
 
 The Chipyard Framework currently consists of the following RTL generators:
 
+
 Processor Cores
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Rocket**
+**Rocket Core**
   An in-order RISC-V core.
-  See :ref:`Rocket` for more information.
+  See :ref:`Rocket Core` for more information.
 
 **BOOM (Berkeley Out-of-Order Machine)**
   An out-of-order RISC-V core.

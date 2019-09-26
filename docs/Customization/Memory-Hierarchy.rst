@@ -1,3 +1,5 @@
+.. _memory-hierarchy:
+
 Memory Hierarchy
 ===============================
 
@@ -105,7 +107,7 @@ the Broadcast Hub to use a bufferless design.
 The Outer Memory System
 -----------------------
 
-The L2 coherence agent (either L2 cache of Broadcast Hub) makes requests to
+The L2 coherence agent (either L2 cache or Broadcast Hub) makes requests to
 an outer memory system consisting of an AXI4-compatible DRAM controller.
 
 The default configuration uses a single memory channel, but you can configure
