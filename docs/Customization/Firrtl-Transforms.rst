@@ -3,14 +3,16 @@
 Adding a Firrtl Transform
 =========================
 
-After writing the Chisel RTL, you can make further modifications by adding transforms during the FIRRTL compilation phase.
-As mentioned in Section <>, transforms are modifications that happen on the FIRRTL IR that can modify a circuit.
-Transforms are a powerful tool to take in the FIRRTL IR that is emitted from Chisel and run analysis (https://www.youtube.com/watch?v=FktjrjRVBoY) or convert the circuit into a new form.
+Similar to how LLVM IR passes can perform transformations and optimizations on software, FIRRTL transforms can
+modify Chisel-elaborated RTL.
+As mentioned in Section :ref:`firrtl`, transforms are modifications that happen on the FIRRTL IR that can modify a circuit.
+Transforms are a powerful tool to take in the FIRRTL IR that is emitted from Chisel and run analysis or convert the circuit into a new form.
 
 Where to add transforms
 -----------------------
 
-In Chipyard, the FIRRTL compiler is called multiple times to create a "Top" file that has the DUT and a "Harness" file that has all harness collateral.
+In Chipyard, the FIRRTL compiler is called multiple times to create a "Top" file that contains the DUT and a "Harness" file containing the test harness, which instantiates the DUT.
+The "Harness" file does not contain the DUT's module definition or any of its submodules.
 This done by the ``tapeout`` SBT project (located in ``tools/barstools/tapeout``) which calls ``GenerateTopAndHarness`` (a function that wraps the multiple FIRRTL compiler calls and extra transforms).
 
 .. literalinclude:: ../../common.mk
@@ -19,7 +21,7 @@ This done by the ``tapeout`` SBT project (located in ``tools/barstools/tapeout``
     :end-before: DOC include end: FirrtlCompiler
 
 If you look inside of the `tools/barstools/tapeout/src/main/scala/transforms/Generate.scala <https://github.com/ucb-bar/barstools/blob/master/tapeout/src/main/scala/transforms/Generate.scala>`__ file,
-you can see that FIRRTL invoked twice, once for the "Top" and once for the "Harness". If you want to add transforms to just modify the DUT, you can add them to ``topTransforms``.
+you can see that FIRRTL is invoked twice, once for the "Top" and once for the "Harness". If you want to add transforms to just modify the DUT, you can add them to ``topTransforms``.
 Otherwise, if you want to add transforms to just modify the test harness, you can add them to ``harnessTransforms``.
 
 Examples of transforms
@@ -31,38 +33,51 @@ This includes transforms that can flatten modules (``Flatten``), group modules t
 
 Transforms can be standalone or can take annotations as input. Annotations are used to pass information between FIRRTL transforms. This includes information on
 what modules to flatten, group, and more. Annotations can be added to the code by
-adding them to your Chisel source or by creating the ``.json`` file and adding it to the FIRRTL compiler (note: adding to the Chisel source will add the ``json`` snippet into the build system for you).
-**The recommended way to annotate something is to do it in the Chisel source**.
+adding them to your Chisel source or by creating a serialized annotation ``json`` file and adding it to the FIRRTL compiler
+(note: annotating the Chisel source will automatically serialize the annotation as a ``json`` snippet into the build system for you).
+**The recommended way to annotate something is to do it in the Chisel source, but not all annotation types have Chisel APIs**.
 
-Here is an example of adding an annotation within the Chisel source. This example is taken from the
-``firechip`` project and uses an annotation to mark BOOM's register file for optimization:
+Here is an example of adding a ``DontTouchAnnotation`` within the Chisel source. This annotation
+makes sure that a particular signal is not removed by the "Dead Code Elimination" pass in FIRRTL:
 
-.. literalinclude:: ../../generators/firechip/src/main/scala/TargetMixins.scala
-    :language: make
-    :start-after: DOC include start: ChiselAnnotation
-    :end-before: DOC include end: ChiselAnnotation
+.. code-block:: scala
 
-Here is an example of grouping a series of modules by specifying the ``.json`` file.
+    class TopModule extends Module {
+        ...
+        val submod = Module(new Submodule)
+        ...
+    }
+
+    class Submodule extends Module {
+        ...
+        val some_signal := ...
+        annotate(new ChiselAnnotation {
+            def toFirrtl = DontTouchAnnotation(some_signal.toNamed)
+        })
+
+        // or use the wrapper for this
+        // chisel3.experimental.dontTouch(some_signal)
+        ...
+    }
+
+Here is an example of the ``DontTouchAnnotation`` when it is serialized:
 
 .. code-block:: json
 
    [
        {
-           "class": "firrtl.transforms.GroupAnnotation",
-           "components": [
-               "BeagleChipTop.BeagleChipTop.instance1",
-               "BeagleChipTop.BeagleChipTop.instance2",
-           ],
-           "newModule": "NewModule",
-           "newInstance": "newModInst"
+           "class": "firrtl.transforms.DontTouchAnnotation",
+           "target": "~TopModule|Submodule>some_signal"
        }
    ]
 
-In this case, the specific syntax depends on the type of annotation. The best way to figure out
-what the ``json`` file should contain is to first try to annotate in the Chisel
-source and then see what the ``json`` output gives and copy that format.
+In this case, the specific syntax depends on the type of annotation and its fields.
+One of the easier ways to figure out the serialized syntax is to first try and find a Chisel
+annotation to add to the code. Then you can look at the collateral that is generated from the
+build system, find the ``*.anno.json``, and find the proper syntax for the annotation.
 
-Once ``yourAnnoFile.json`` is created then you can add ``-faf yourAnnoFile.json`` to the FIRRTL compiler invocation in ``common.mk``.
+Once ``yourAnnoFile.json`` is created then you can add ``-faf yourAnnoFile.json`` to the FIRRTL
+compiler invocation in ``common.mk``.
 
 .. literalinclude:: ../../common.mk
     :language: make
