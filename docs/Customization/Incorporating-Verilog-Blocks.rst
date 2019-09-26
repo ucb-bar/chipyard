@@ -37,7 +37,10 @@ different directory from Chisel (Scala) sources.
 In addition to the steps outlined in the previous section on adding a
 project to the ``build.sbt`` at the top level, it is also necessary to
 add any projects that contain Verilog IP as dependencies to the
-``tapeout`` project.
+``tapeout`` project. This ensures that the Verilog sources are visible
+to the downstream FIRRTL passes that provide utilities for integrating
+Verilog files into the build process, which are part of the
+``tapeout`` package in ``barstools/tapeout``.
 
 .. code-block:: scala
 
@@ -154,3 +157,25 @@ write.
     :language: scala
     :start-after: DOC include start: GCD test
     :end-before: DOC include end: GCD test
+
+Support for Verilog in Downstream Berkeley Tools
+------------------------------------------------
+
+There are important differences in how Verilog blackboxes are treated
+by downstream tools. Since they remain blackboxes in FIRRTL, their
+ability to be processed by FIRRTL transforms is limited, and some
+advanced features of Chipyard may provide weaker support for
+blackboxes. Note that the remainder of the target design may still
+generally be transformed or augmented by any Chipyard FIRRTL
+transform.
+
+* Verilog blackboxes are fully supported for generating tapeout-ready RTL
+* HAMMER workflows offer robust support for integrating Verilog blackboxes
+* FireSim relies on FIRRTL transformations to generate a decoupled
+  FPGA simulator. Therefore, support for Verilog blackboxes in FireSim
+  is currently limited but rapidly evolving. Stay tuned!
+
+As mentioned earlier in this section, ``BlackBox`` resource files must
+be integrated into the build process, so any project providing
+``BlackBox`` resources must be made visible to the ``tapeout`` project
+in ``build.sbt``
