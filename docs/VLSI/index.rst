@@ -8,4 +8,5 @@ In particular, we aim to support the HAMMER physical design generator flow.
    :maxdepth: 2
    :caption: VLSI Flow:
 
+   Building-A-Chip
    HAMMER
