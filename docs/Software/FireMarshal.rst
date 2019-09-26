@@ -7,7 +7,7 @@ currently only supports the FireSim FPGA-accelerated simulation platform.
 **Workloads** in FireMarshal consist of a series of **Jobs** that are assigned
 to logical nodes in the target system. If no jobs are specified, then the
 workload is considered ``uniform`` and only a single image will be produced for
-all nodes in the system. Workloads are described by a json file and a
+all nodes in the system. Workloads are described by a ``json`` file and a
 corresponding workload directory and can inherit their definitions from
 existing workloads. Typically, workload configurations are kept in
 ``workloads/`` although you can use any directory you like. We provide a few
