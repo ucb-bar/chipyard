@@ -38,6 +38,8 @@ Table of Contents
 
    Customization/index
 
+   Software/index
+
    Advanced-Usage/index
 
    TileLink-Diplomacy-Reference/index
