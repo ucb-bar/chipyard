@@ -4,17 +4,9 @@ Quick Start
 Requirements
 -------------------------------------------
 
-Using Linux is recommended.
-The provided scripts will not work on macOS out of the box, but they may be able to be modified to support it.
+Chipyard is developed and tested on Linux-based systems.
+It is possible to use this on macOS or other BSD-based systems, although GNU tools will need to be installed; it is also recommended to install the RISC-V toolchain from ``brew``.
 Working under Windows is not recommended.
-
-* dtc (design-tree-compiler)
-
-* GNU awk
-
-* GNU sed
-
-* GNU make
 
 Setting up the Chipyard Repo
 -------------------------------------------
