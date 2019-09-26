@@ -50,7 +50,7 @@ class PWMRocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: PWMRocketConfig
 
-class PWMRAXI4ocketConfig extends Config(
+class PWMAXI4RocketConfig extends Config(
   new WithPWMAXI4Top ++                                    // use top with axi4-controlled PWM
   new WithBootROM ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
