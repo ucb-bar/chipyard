@@ -98,36 +98,37 @@ This example shows a Rocket Chip based SoC that merges multiple system component
     with HasPeripheryUARTModuleImp
     with HasPeripheryIceNICModuleImp
 
-There are two "cakes" here. One for the lazy module and one for the module
-implementation. The lazy module defines all the logical connections between
-generators and exchanges configuration information among them, while the
-module implementation performs the actual Chisel RTL elaboration.
+There are two "cakes" here. One for the lazy module (ex. ``HasNoDebug``) and one for the lazy module
+implementation (ex. ``HasNoDebugModuleImp`` where ``Imp`` refers to implementation). The lazy module defines
+all the logical connections between generators and exchanges configuration information among them, while the
+lazy module implementation performs the actual Chisel RTL elaboration.
 
-In the MySoC example class, the "outer" ``MySoC`` instantiates the "inner" 
-``MySoCModuleImp`` as a lazy module. This delays immediate elaboration 
-of the module. The ``RocketSubsystem`` outer base class, as well as the 
-``HasPeripheryX`` outer traits contain code to perform high-level logical 
+In the MySoC example class, the "outer" ``MySoC`` instantiates the "inner"
+``MySoCModuleImp`` as a lazy module implementation. This delays immediate elaboration
+of the module until all logical connections are determined and all configuration information is exchanged.
+The ``RocketSubsystem`` outer base class, as well as the
+``HasPeripheryX`` outer traits contain code to perform high-level logical
 connections. For example, the ``HasPeripherySerial`` outer trait contains code
-to lazily instantiate the ``SerialAdapter``, and connect the SerialAdapter's 
-TileLink node to the frontbus. 
+to lazily instantiate the ``SerialAdapter``, and connect the ``SerialAdapter``'s
+TileLink node to the Front bus.
 
 The ``ModuleImp`` classes and traits perform elaboration of real RTL.
 For example, the ``HasPeripherySerialModuleImp`` trait physically connects
-the ``SerialAdapter`` module, and instantiates queues. 
+the ``SerialAdapter`` module, and instantiates queues.
 
-In the test harness, the SoC is elaborated with 
-``val dut = Module(LazyModule(MySoC))``. 
+In the test harness, the SoC is elaborated with
+``val dut = Module(LazyModule(MySoC))``.
 After elaboration, the result will be a MySoC module, which contains a
 SerialAdapter module (among others).
 
-From a high level, classes which extend LazyModule *must* reference 
-their module implementation through``lazy val module``, and they 
+From a high level, classes which extend LazyModule *must* reference
+their module implementation through ``lazy val module``, and they
 *may* optionally reference other lazy modules (which will elaborate
- as child modules in the module hierarchy). The "inner" modules 
- contain the implementation for the module, and may instantiate 
- other normal modules OR lazy modules (for nested Diplomacy 
- graphs, for example. This is very advanced).
- 
+as child modules in the module hierarchy). The "inner" modules
+contain the implementation for the module, and may instantiate
+other normal modules OR lazy modules (for nested Diplomacy
+graphs, for example).
+
  Mix-in
 ---------------------------
 
