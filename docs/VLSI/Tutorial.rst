@@ -18,9 +18,9 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
   * Hammer output directory. Can be changed with the ``OBJ_DIR`` variable.
   * Will contain subdirectories such as ``syn-rundir`` and ``par-rundir`` and the ``inputs.yml`` denoting the top module and input Verilog files.
 
-* bwrc-env.yml
+* env.yml
 
-  * An example of tool environment configuration for BWRC affiliates. Replace as necessary for your environment.
+  * A template file for tool environment configuration. Fill in the install and license server paths for your environment.
 
 * example-vlsi
 
@@ -86,9 +86,13 @@ To elaborate the Sha3RocketConfig (Rocketchip w/ the accelerator) and set up all
     export VLSI_TOP=Sha3AccelwBB
     make buildfile
 
-Note that because the ASAP7 process does not yet have a memory compiler, flip-flop arrays are used instead.
+The ``MACROCOMPILER_MODE='--mode synflops'`` is needed because the ASAP7 process does not yet have a memory compiler. Therefore, flip-flop arrays are used instead.
 
-For the curious, Hammer generates a set of Make targets in ``build/hammer.d``. ``make buildfile`` needs to be re-run if Make variables are changed.
+The ``CONFIG=Sha3RocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework.
+
+The ``VLSI_TOP=Sha3AccelwBB`` indicates that we are only interested in physical design of the accelerator block. If this variable is not set, the entire SoC will be pushed through physical design.
+
+For the curious, ``make buildfile`` generates a set of Make targets in ``build/hammer.d``. It needs to be re-run if environment variables are changed.
 
 Running the VLSI Flow
 ---------------------
@@ -101,7 +105,7 @@ example.yml
 ^^^^^^^^^^^
 This contains the Hammer configuration for this example project. Example clock constraints, power straps definitions, placement constraints, and pin constraints are given. Additional configuration for the extra libraries and tools are at the bottom.
 
-First, set ``technology.asap7.tarball_dir`` to where you downloaded the ASAP7 PDK.
+First, set ``technology.asap7.tarball_dir`` to the absolute path of where the downloaded the ASAP7 PDK tarball lives.
 
 Synthesis
 ^^^^^^^^^

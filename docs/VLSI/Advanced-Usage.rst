@@ -12,11 +12,36 @@ The Make-based build system provided supports using Hammer without using RTL gen
     export CUSTOM_VLOG=<your verilog files>
     export VLSI_TOP=<your top module>
 
+``CUSTOM_VLOG`` breaks the dependency on the rest of the 
+
+Under the Hood
+--------------
+To uncover what is happening under the hood, here are the commands that are executed:
+
+For ``make syn``:
+
+.. code-block:: shell
+
+    ./example-vlsi -e /path/to/env.yml -p /path/to/example.yml -p /path/to/inputs.yml --obj_dir /path/to/build syn
+
+``example-vlsi`` is the entry script as explained before, ``-e`` provides the environment yml, ``-p`` points to configuration yml/jsons, ``--obj_dir`` speficies the destination directory,  and ``syn`` is the action.
+
+For ``make par``:
+
+.. code-block:: shell
+
+    ./example-vlsi -e /path/to/env.yml -p /path/to/syn-output-full.json -o /path/to/par-input.json --obj_dir /path/to/build syn-to-par
+    ./example-vlsi -e /path/to/env.yml -p /path/to/par-input.json --obj_dir /path/to/build par
+    
+A ``syn-to-par`` action translates the synthesis output configuration into an input configuration given by ``-o``. Then, this is passed to the ``par`` action.
+
+For more information about all the options that can be passed to the Hammer command-line driver, please see the Hammer documentation.
+
 Manual Step Execution & Dependency Tracking
 -------------------------------------------
 It is invariably necessary to debug certain steps of the flow, e.g. if the power strap settings need to be updated. The underlying Hammer commands support options such as ``--to_step``, ``--from_step``, and ``--only_step``. These allow you to control which steps of a particular action are executed.
 
-Make's dependency tracking can sometimes result in re-starting the entire flow when the user only wants to re-run a certain action. Hammer's build system has "redo" targets such as ``redo-syn`` and ``redo-par``.
+Make's dependency tracking can sometimes result in re-starting the entire flow when the user only wants to re-run a certain action. Hammer's build system has "redo" targets such as ``redo-syn`` and ``redo-par`` to run certain actions without typing out the entire Hammer command.
 
 Say you need to update some power straps settings in ``example.yml`` and want to try out the new settings:
 

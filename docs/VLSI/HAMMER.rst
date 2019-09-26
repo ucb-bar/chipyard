@@ -62,7 +62,7 @@ Technology Plugins
 
 Hammer supports separately managed technology plugins to satisfy NDAs. You may be able to acquire access to certain pre-built technology plugins with permission from the technology vendor. Or, to build your own tech plugin, you need at least a ``<tech_name>.tech.json`` and ``defaults.yml``. An ``__init__.py`` is optional if there are any technology-specific methods or hooks to run.
 
-The `ASAP7 plugin <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/technology/asap7>`__ is a good starting point for setting up a technology plugin. Refer to Hammer's documentation for the schema and setup instructions.
+The `ASAP7 plugin <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/technology/asap7>`__ is a good starting point for setting up a technology plugin because it is an open-source example that is not suitable for taping out a chip. Refer to Hammer's documentation for the schema and detailed setup instructions.
 
 Several configuration variables are needed to configure your technology of choice.
 
