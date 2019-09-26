@@ -1,15 +1,15 @@
-RocketChip
-==========
+Rocket Chip
+===========
 
-RocketChip is an SoC generator developed at Berkeley and now supported by
-SiFive. Chipyard uses RocketChip as the basis for producing a RISC-V SoC.
+Rocket Chip generator is an SoC generator developed at Berkeley and now supported by
+SiFive. Chipyard uses the Rocket Chip generator as the basis for producing a RISC-V SoC.
 
-RocketChip is distinct from Rocket, the in-order RISC-V CPU generator.
-RocketChip includes many parts of the SoC besides the CPU. Though RocketChip
-uses Rocket CPUs by default, it can also be configured to use the BOOM
+`Rocket Chip` is distinct from `Rocket core`, the in-order RISC-V CPU generator.
+Rocket Chip includes many parts of the SoC besides the CPU. Though Rocket Chip
+uses Rocket core CPUs by default, it can also be configured to use the BOOM
 out-of-order core generator or some other custom CPU generator instead.
 
-A detailed diagram of a typical RocketChip system is shown below.
+A detailed diagram of a typical Rocket Chip system is shown below.
 
 .. image:: ../_static/images/rocketchip-diagram.png
 

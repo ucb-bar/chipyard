@@ -11,8 +11,9 @@ The following pages introduce the generators integrated with the Chipyard framew
    :maxdepth: 2
    :caption: Generators:
 
+   Rocket-Chip
    Rocket
    BOOM
    Hwacha
-   RocketChip
+   SiFive-Generators   
    SHA3

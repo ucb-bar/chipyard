@@ -1,3 +1,5 @@
+.. _memory-hierarchy:
+
 Memory Hierarchy
 ===============================
 
