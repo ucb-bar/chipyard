@@ -7,7 +7,7 @@ version: 2
 jobs:
     commit-on-master-check:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -19,7 +19,7 @@ jobs:
                     .circleci/check-commit.sh
     install-riscv-toolchain:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -43,7 +43,7 @@ jobs:
                     - "/home/riscvuser/riscv-tools-install"
     install-esp-toolchain:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -67,7 +67,7 @@ jobs:
                     - "/home/riscvuser/esp-tools-install"
     install-verilator:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -90,7 +90,7 @@ jobs:
                     - "/home/riscvuser/verilator"
     build-extra-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -116,7 +116,7 @@ jobs:
                     - "/home/riscvuser/project/tests"
     prepare-example:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -145,7 +145,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-boomrocketexample:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -174,7 +174,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-boom:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -203,7 +203,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-rocketchip:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -232,7 +232,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-blockdevrocketchip:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -261,7 +261,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-hwacha:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -290,7 +290,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-firesim:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -319,7 +319,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-fireboom:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -348,7 +348,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-firesim-clockdiv:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -377,7 +377,7 @@ jobs:
                     - "/home/riscvuser/project"
     midasexamples-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -398,7 +398,7 @@ jobs:
                 command: .circleci/run-midasexamples-tests.sh
     example-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -422,7 +422,7 @@ jobs:
                 command: .circleci/run-tests.sh example
     boomrocketexample-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -446,7 +446,7 @@ jobs:
                 command: .circleci/run-tests.sh boomrocketexample
     boom-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -470,7 +470,7 @@ jobs:
                 command: .circleci/run-tests.sh boom
     rocketchip-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -494,7 +494,7 @@ jobs:
                 command: .circleci/run-tests.sh rocketchip
     hwacha-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -518,7 +518,7 @@ jobs:
                 command: .circleci/run-tests.sh hwacha
     firesim-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -545,7 +545,7 @@ jobs:
                 command: .circleci/run-firesim-tests.sh firesim
     fireboom-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -573,7 +573,7 @@ jobs:
                 no_output_timeout: 20m
     firesim-clockdiv-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
