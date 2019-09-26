@@ -1,30 +1,34 @@
-Tops, TestHarnesses, and TestDriver
+Tops, Test-Harnesses, and the Test-Driver
 ====================================
 
 The three highest levels of hierarchy in a Chipyard
-SoC are the Top, TestHarness, and the Testbench. The Top and TestHarness are both emitted by Chisel generators.
+SoC are the Top, TestHarness, and the TestDriver.
+The Top and TestHarness are both emitted by Chisel generators.
+The TestDriver serves as our testbench, and is a verilog
+file n rocketchip.
+
 
 Top/DUT
 -------------------------
-The top-level module of a Rocketchip SoC is composed via cake-pattern. Specifically, "Tops" extend a "System", which extends a "Subsystem", which extends a "BaseSubsystem"
+The top-level module of a Rocket Chip SoC is composed via cake-pattern. Specifically, "Tops" extend a ``System``, which extends a ``Subsystem``, which extends a ``BaseSubsystem``
 
 
 BaseSubsystem
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The BaseSubsystem is defined in ``generators/rocketchip/src/main/scala/subsystem/BaseSubsystem.scala``. Looking at the BaseSubsystem abstract class, we see that this class instantiates the top-level buses (frontbus, systembus, peripherybus, etc.), but does not specify a topology. We also see this class define several "ElaborationArtefacts", for example the device tree string, and the diplomacy GraphML.
+The BaseSubsystem is defined in ``generators/rocketchip/src/main/scala/subsystem/BaseSubsystem.scala``. Looking at the ``BaseSubsystem`` abstract class, we see that this class instantiates the top-level buses (frontbus, systembus, peripherybus, etc.), but does not specify a topology. We also see this class define several ``ElaborationArtefacts``, for example the device tree string, and the diplomacy GraphML.
 
 Subsystem
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Looking in ``generators/utilities/src/main/scala/Subsystem.scala``, we can see how Chipyard extends the BaseSubsystem abstract class. The ``HasBoomAndRocketTiles`` trait defines and instantiates BOOM or Rocket tiles, depending on the parameters specified. We also connect connect some basic IOs for each tile here, specifically the hartids and the reset_vector.
+Looking in ``generators/utilities/src/main/scala/Subsystem.scala``, we can see how Chipyard extends the ``BaseSubsystem`` abstract class. The ``HasBoomAndRocketTiles`` trait defines and instantiates BOOM or Rocket tiles, depending on the parameters specified. We also connect connect some basic IOs for each tile here, specifically the hartids and the reset_vector.
 
 System
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``generators/utilities/src/main/scala/System.scala`` completes the definition of the System.
 
-- ``HasHierarchicalBusTopology`` is defined in Rocketchip, and specifies connections between the top-level buses.
+- ``HasHierarchicalBusTopology`` is defined in Rocket Chip, and specifies connections between the top-level buses.
 - ``HasAsyncExtInterrupts`` and ``HasExtInterruptsModuleImp`` adds IOs for external interrupts and wires them appropriately to tiles
 - ``CanHave...AXI4Port`` adds various Master and Slave AXI4 ports, adds TL-to-AXI4 converters, and connects them to the appropriate buses
 - ``HasPeripheryBootROM`` adds a BootROM device
@@ -51,7 +55,7 @@ While this roundabout way of attaching to the IOs of the top may see unnecessari
 
 Specifying a Top
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-To see why the Top connection method is useful, consider the case where we want to use a custom Top with additional GPIO pins. In ``generators/example/src/main/scala/Top.scala``, we can see how the ``TopWithGPIO`` class adds the ``HasPeripheryGPIO`` trait. This trait adds IOs to the top module, instantiates a TileLikn GPIO node, and connects it to the proper buses.
+To see why the Top connection method is useful, consider the case where we want to use a custom Top with additional GPIO pins. In ``generators/example/src/main/scala/Top.scala``, we can see how the ``TopWithGPIO`` class adds the ``HasPeripheryGPIO`` trait. This trait adds IOs to the top module, instantiates a TileLink GPIO node, and connects it to the proper buses.
 
 If we look at the ``WithGPIOTop`` mixin in the ``ConfigMixins.scala`` file, we see that adding this mixin to the top-level Config overrides the ``BuildTop`` key with a custom function that both instantiates the custom Top, and drives all the GPIO pins. When the TestHarness looksup the BuildTop key, this function will run and perform this wiring, and then return the Top module.
 
