@@ -67,7 +67,7 @@ For example:
     make run-bmark-tests
 
 
-.. Note:: Before running the pre-packaged suites, you must run the plain ``make`` command, since the elaboration command generates a Makefile fragment that contains the target for the pre-packaged test suites. Otherwise, you will likely encounter a Makefile target error. 
+.. Note:: Before running the pre-packaged suites, you must run the plain ``make`` command, since the elaboration command generates a Makefile fragment that contains the target for the pre-packaged test suites. Otherwise, you will likely encounter a Makefile target error.
 
 
 .. _sw-sim-custom:
@@ -113,11 +113,11 @@ Therefore, in order to simulate a simple Rocket-based example system we can use:
     ./simulator-<yourproject>-<yourconfig> ...
 
 
-All `Make` targets that can be applied to the default example, can also be applied to custom project using the custom environment variables. For example, the following code example will run the RISC-V assembly benchmark suite on the BOOM subproject:
+All `Make` targets that can be applied to the default example, can also be applied to custom project using the custom environment variables. For example, the following code example will run the RISC-V assembly benchmark suite on the Hwacha subproject:
 
 .. code-block:: shell
 
-    make SUB_PROJECT=boom run-asm-tests
+    make SUB_PROJECT=hwacha run-asm-tests
 
 
 Finally, in the ``generated-src/<...>-<package>-<config>/`` directory resides all of the collateral and Verilog source files for the build/simulation.
