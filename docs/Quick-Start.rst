@@ -48,7 +48,7 @@ This depends on what you are planning to do with Chipyard.
 
 * If you intend to run a simulation of one of the vanilla Chipyard examples, go to :ref:`sw-rtl-sim-intro` and follow the instructions.
 
-* If you intend to run a simulation of a custom Chipyard SoC Configuration, go to :ref:`sw-sim-custom` and follow the instructions.
+* If you intend to run a simulation of a custom Chipyard SoC Configuration, go to :ref:`Simulating A Custom Project` and follow the instructions.
 
 * If you intend to run a full-system FireSim simulation, go to :ref:`firesim-sim-intro` and follow the instructions.
 
@@ -56,8 +56,8 @@ This depends on what you are planning to do with Chipyard.
 
 * If you want to learn about the structure of Chipyard, go to :ref:`chipyard-components`.
 
-* If you intend to build one of the vanilla Chipyard examples, go to :ref:`build-a-chip` and follow the instructions.
+* If you intend to change the generators (BOOM, Rocket, etc) themselves, see :ref:`generator-index`.
 
 * If you intend to run a VLSI flow using one of the vanilla Chipyard examples, go to <> and follow the instructions.
 
-* If you intend to change the generators (BOOM, Rocket, etc) themselves, see :ref:`generator-index`.
+* If you intend to build a chip using one of the vanilla Chipyard examples, go to :ref:`build-a-chip` and follow the instructions.
