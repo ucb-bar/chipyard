@@ -27,6 +27,7 @@ Choice of Simulator
 First, we will start by entering the Verilator or VCS directory:
 
 For an open-source Verilator simulation, enter the ``sims/verilator`` directory
+
 .. code-block:: shell
 
     # Enter Verilator directory
@@ -86,9 +87,7 @@ Each of these make variables correspond to a particular part of the design/codeb
 
 The ``SBT_PROJECT`` is the ``build.sbt`` project that holds all of the source files and that will be run during the RTL build.
 
-The ``MODEL`` and ``VLOG_MODEL`` are the top-level class names of the design.
-
-Normally, these are the same, but in some cases these can differ (if the Chisel class differs than what is emitted in the Verilog).
+The ``MODEL`` and ``VLOG_MODEL`` are the top-level class names of the design. Normally, these are the same, but in some cases these can differ (if the Chisel class differs than what is emitted in the Verilog).
 
 The ``MODEL_PACKAGE`` is the Scala package (in the Scala code that says ``package ...``) that holds the ``MODEL`` class.
 
