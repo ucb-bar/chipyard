@@ -16,7 +16,7 @@ Perihperal Devices
 ``sifive-blocks`` includes multiple peripheral device generators, such as UART, SPI, PWM, JTAG, GPIO and more.
 
 These peripheral devices usually affect the memory map of the SoC, and its top-level IO as well.
-To integrate one of these devices in your SoC, you will need to define a custom mixin with the approriate address for the device using the Rocket Chip parameter system. As an example, for a GPIO device you could add the following mixin to set the GPIO address to ``0x10012000``. 
+To integrate one of these devices in your SoC, you will need to define a custom mixin with the approriate address for the device using the Rocket Chip parameter system. As an example, for a GPIO device you could add the following mixin to set the GPIO address to ``0x10012000``. This address is the start address for the GPIO configuration registers. 
 
 .. literalinclude:: ../../generators/example/src/main/scala/ConfigMixins.scala
     :language: scala
