@@ -98,8 +98,8 @@ This example shows a Rocket Chip based SoC that merges multiple system component
     with HasPeripheryUARTModuleImp
     with HasPeripheryIceNICModuleImp
 
-There are two "cakes" here. One for the lazy module (ex. ``HasNoDebug``) and one for the lazy module
-implementation (ex. ``HasNoDebugModuleImp`` where ``Imp`` refers to implementation). The lazy module defines
+There are two "cakes" here. One for the lazy module (ex. ``HasPeripherySerial``) and one for the lazy module
+implementation (ex. ``HasPeripherySerialModuleImp`` where ``Imp`` refers to implementation). The lazy module defines
 all the logical connections between generators and exchanges configuration information among them, while the
 lazy module implementation performs the actual Chisel RTL elaboration.
 
