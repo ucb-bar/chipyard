@@ -17,7 +17,7 @@ algorithm. There are a few steps to adding a Verilog peripheral:
 * Instantiating the ``BlackBox`` and interfacing ``RegField`` entries
 * Setting up a chip ``Top`` and ``Config`` that use the peripheral
 
-Adding a Verilog blackbox resource file
+Adding a Verilog Blackbox Resource File
 ---------------------------------------
 
 As before, it is possible to incorporate peripherals as part of your
@@ -112,7 +112,7 @@ previous memory-mapped PWM device example.
 Advanced Features of RegField Entries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-One signficant difference from the PWM example is in the peripheral's
+One significant difference from the PWM example is in the peripheral's
 memory map. ``RegField`` exposes polymorphic ``r`` and ``w`` methods
 that allow read- and write-only memory-mapped registers to be
 interfaced to hardware in multiple ways.
@@ -162,18 +162,23 @@ Support for Verilog Within Chipyard Tool Flows
 ----------------------------------------------
 
 There are important differences in how Verilog blackboxes are treated
-by downstream tools. Since they remain blackboxes in FIRRTL, their
-ability to be processed by FIRRTL transforms is limited, and some
-advanced features of Chipyard may provide weaker support for
-blackboxes. Note that the remainder of the target design may still
-generally be transformed or augmented by any Chipyard FIRRTL
-transform.
+by various flows within the Chipyard framework. Some flows within
+Chipyard rely on FIRRTL in order to provide robust, non-invasive
+transformations of source code. Since Verilog blackboxes remain
+blackboxes in FIRRTL, their ability to be processed by FIRRTL
+transforms is limited, and some advanced features of Chipyard may
+provide weaker support for blackboxes. Note that the remainder of the
+design (the "non-Verilog" part of the design) may still generally be
+transformed or augmented by any Chipyard FIRRTL transform.
 
 * Verilog blackboxes are fully supported for generating tapeout-ready RTL
 * HAMMER workflows offer robust support for integrating Verilog blackboxes
 * FireSim relies on FIRRTL transformations to generate a decoupled
   FPGA simulator. Therefore, support for Verilog blackboxes in FireSim
   is currently limited but rapidly evolving. Stay tuned!
+* Custom FIRRTL transformations and analyses may sometimes be able to
+  handle blackbox Verilog, depending on the mechanism of the
+  particular transform
 
 As mentioned earlier in this section, ``BlackBox`` resource files must
 be integrated into the build process, so any project providing
