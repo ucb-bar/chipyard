@@ -13,7 +13,7 @@ Where to add transforms
 
 In Chipyard, the FIRRTL compiler is called multiple times to create a "Top" file that contains the DUT and a "Harness" file containing the test harness, which instantiates the DUT.
 The "Harness" file does not contain the DUT's module definition or any of its submodules.
-This done by the ``tapeout`` SBT project (located in ``tools/barstools/tapeout``) which calls ``GenerateTopAndHarness`` (a function that wraps the multiple FIRRTL compiler calls and extra transforms).
+This is done by the ``tapeout`` SBT project (located in ``tools/barstools/tapeout``) which calls ``GenerateTopAndHarness`` (a function that wraps the multiple FIRRTL compiler calls and extra transforms).
 
 .. literalinclude:: ../../common.mk
     :language: make
@@ -23,6 +23,8 @@ This done by the ``tapeout`` SBT project (located in ``tools/barstools/tapeout``
 If you look inside of the `tools/barstools/tapeout/src/main/scala/transforms/Generate.scala <https://github.com/ucb-bar/barstools/blob/master/tapeout/src/main/scala/transforms/Generate.scala>`__ file,
 you can see that FIRRTL is invoked twice, once for the "Top" and once for the "Harness". If you want to add transforms to just modify the DUT, you can add them to ``topTransforms``.
 Otherwise, if you want to add transforms to just modify the test harness, you can add them to ``harnessTransforms``.
+
+For more information on Barstools, please visit the :ref:`Barstools` section.
 
 Examples of transforms
 ----------------------
@@ -38,7 +40,9 @@ adding them to your Chisel source or by creating a serialized annotation ``json`
 **The recommended way to annotate something is to do it in the Chisel source, but not all annotation types have Chisel APIs**.
 
 Here is an example of adding a ``DontTouchAnnotation`` within the Chisel source. This annotation
-makes sure that a particular signal is not removed by the "Dead Code Elimination" pass in FIRRTL:
+makes sure that a particular signal is not removed by the "Dead Code Elimination" pass in FIRRTL.
+The example below shows both how to directly annotate the signal with the ``annotate`` function and the ``DontTouchAnnotation``
+class as well as the Chisel wrapper function called ``dontTouch`` that does this automatically for you (more `dontTouch <https://www.chisel-lang.org/api/SNAPSHOT/chisel3/dontTouch$.html>`__ information):
 
 .. code-block:: scala
 
@@ -55,8 +59,9 @@ makes sure that a particular signal is not removed by the "Dead Code Elimination
             def toFirrtl = DontTouchAnnotation(some_signal.toNamed)
         })
 
-        // or use the wrapper for this
-        // chisel3.experimental.dontTouch(some_signal)
+        // or use the Chisel wrapper for this
+
+        chisel3.dontTouch(some_signal)
         ...
     }
 
