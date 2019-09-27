@@ -3,13 +3,13 @@
 Communicating with the Chip/DUT
 ===============================
 
-What good is a chip/DUT if it can't communicate with the outside world? There are two types of designs that can be
+There are two types of designs that can be
 made: tethered or standalone designs. A tethered design is where a host must interact with the DUT (a target) to bringup the design.
 A standalone design is a design that can bringup itself (has its own bootrom, loads programs itself, etc). An example of a tethered design
 is a Chipyard simulation where the host computer loads the test program into the designs memory. An example of a standalone design is
 a design where a program can be loaded from an SDCard by default.
 
-Chipyard designs communicate to the outside world in one of two ways that mainly correspond to a tethered design:
+There are two ways the outside world (or host) can communicate with a tethered Chipyard design:
 
 * using the Tethered Serial Interface (TSI) or the Debug Module Interface (DMI) with the Front-End Server (FESVR) to communicate with the design
 * using the JTAG interface with OpenOCD and GDB to communicate with the design
@@ -25,8 +25,8 @@ Primer on the Front-End Server (FESVR)
 
 FESVR is a C++ library that manages communication
 between a host machine and a RISC-V target. For debugging, it provides a simple API to reset,
-send messages, and load/run programs on a DUT but it also provides peripheral device emulation.
-It can be added used simulators (VCS, Verilator, FireSim) as well as in a bringup sequence
+send messages, and load/run programs on a DUT. It also emulates peripheral devices.
+It can be incorporated with simulators (VCS, Verilator, FireSim), or used in a bringup sequence
 for a taped out chip.
 
 Specifically, FESVR uses the Host Target Interface (HTIF), a communication bus for the hardware,
@@ -37,7 +37,7 @@ Using the Tethered Serial Interface (TSI)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 By default, Chipyard uses the Tethered Serial Interface (TSI) to communicate with the target.
-TSI is the implementation of the HTIF that is used to send commands to the
+TSI is an implementation of HTIF that is used to send commands to the
 RISC-V target. These TSI commands are simple R/W commands
 that are able to probe the DUT's memory space. In simulation, these TSI commands connect
 to a ``SimSerial`` (located in the ``generators/testchipip`` project) simulation C++
@@ -45,9 +45,9 @@ class that is added to simulation. This ``SimSerial`` device sends the TSI comma
 the DUT which contains a ``SerialAdapter`` (located in the ``generators/testchipip``
 project) that converts the TSI commands to TileLink requests. In simulation, FESVR
 resets the DUT, and writes into memory the test program. This is currently the fastest
-mechanism to simulate the DUT.
+mechanism to communicate with the DUT in simulation.
 
-In the case of a chip tapeout bringup, TSI commands can be sent over a modified communication
+In the case of a chip tapeout bringup, TSI commands can be sent over a custom communication
 medium to communicate with the chip. For example, some Berkeley tapeouts have a FPGA
 with a RISC-V soft-core that runs FESVR. The FESVR on the soft-core sends TSI commands
 to a TSI to TileLink converter living on the FPGA (i.e. ``SerialAdapter``). Then this converter
