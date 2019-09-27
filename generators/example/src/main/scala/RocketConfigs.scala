@@ -34,12 +34,21 @@ class RoccRocketConfig extends Config(
 // DOC include start: JtagRocket
 class jtagRocketConfig extends Config(
   new WithDTMTop ++                                        // use top with dtm
-  new freechips.rocketchip.subsystem.WithJtagDTM ++        // add jtag/DTM module to coreplex
+  new freechips.rocketchip.subsystem.WithJtagDTM ++        // add jtag+DTM module to coreplex
   new WithBootROM ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: JtagRocket
+
+// DOC include start: DmiRocket
+class dmiRocketConfig extends Config(
+  new WithDTMTop ++                                        // use top with dtm
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+// DOC include end: DmiRocket
 
 // DOC include start: PWMRocketConfig
 class PWMRocketConfig extends Config(
