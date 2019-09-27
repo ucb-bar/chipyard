@@ -39,12 +39,11 @@ adding them to your Chisel source or by creating a serialized annotation ``json`
 (note: annotating the Chisel source will automatically serialize the annotation as a ``json`` snippet into the build system for you).
 **The recommended way to annotate something is to do it in the Chisel source, but not all annotation types have Chisel APIs**.
 
-Here is an example of adding a ``DontTouchAnnotation`` within the Chisel source. This annotation
-makes sure that a particular signal is not removed by the "Dead Code Elimination" pass in FIRRTL.
-The example below shows two ways to annotate the signal:
+The example below shows two ways to annotate the signal using the ``DontTouchAnnotation``
+(makes sure that a particular signal is not removed by the "Dead Code Elimination" pass in FIRRTL):
 
-* directly annotate the signal with the ``annotate`` function and the ``DontTouchAnnotation`` class if there is no Chisel API for it (note: most FIRRTL annotations have Chisel APIs for them)
 * use the Chisel API/wrapper function called ``dontTouch`` that does this automatically for you (more `dontTouch <https://www.chisel-lang.org/api/SNAPSHOT/chisel3/dontTouch$.html>`__ information):
+* directly annotate the signal with the ``annotate`` function and the ``DontTouchAnnotation`` class if there is no Chisel API for it (note: most FIRRTL annotations have Chisel APIs for them)
 
 .. code-block:: scala
 
@@ -58,13 +57,14 @@ The example below shows two ways to annotate the signal:
         ...
         val some_signal := ...
 
+        // MAIN WAY TO USE `dontTouch`
+        // how to annotate if there is a Chisel API/wrapper
+        chisel3.dontTouch(some_signal)
+
         // how to annotate WITHOUT a Chisel API/wrapper
         annotate(new ChiselAnnotation {
             def toFirrtl = DontTouchAnnotation(some_signal.toNamed)
         })
-
-        // how to annotate if there is a Chisel API/wrapper
-        chisel3.dontTouch(some_signal)
 
         ...
     }
