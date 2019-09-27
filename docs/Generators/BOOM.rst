@@ -1,6 +1,8 @@
 Berkeley Out-of-Order Machine (BOOM)
 ==============================================
 
+.. image:: ../_static/images/boom-pipeline-detailed.png
+
 The `Berkeley Out-of-Order Machine (BOOM) <https://boom-core.org/>`__ is a synthesizable and parameterizable open source RV64GC RISC-V core written in the Chisel hardware construction language.
 It serves as a drop-in replacement to the Rocket core given by Rocket Chip (replaces the RocketTile with a BoomTile).
 BOOM is heavily inspired by the MIPS R10k and the Alpha 21264 out-of-order processors.

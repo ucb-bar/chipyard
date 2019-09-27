@@ -59,8 +59,15 @@ class PWMRocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: PWMRocketConfig
 
-class PWMRAXI4ocketConfig extends Config(
+class PWMAXI4RocketConfig extends Config(
   new WithPWMAXI4Top ++                                    // use top with axi4-controlled PWM
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class GCDRocketConfig extends Config(                      // add MMIO GCD module
+  new WithGCDTop ++
   new WithBootROM ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -82,6 +89,7 @@ class BlockDeviceModelRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+// DOC include start: GPIORocketConfig
 class GPIORocketConfig extends Config(
   new WithGPIO ++                                          // add GPIOs to the peripherybus
   new WithGPIOTop ++                                       // use top with GPIOs
@@ -89,6 +97,7 @@ class GPIORocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: GPIORocketConfig
 
 class DualCoreRocketConfig extends Config(
   new WithTop ++
@@ -113,6 +122,7 @@ class GB1MemoryRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+// DOC include start: Sha3Rocket
 class Sha3RocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
@@ -120,6 +130,7 @@ class Sha3RocketConfig extends Config(
   new sha3.WithSha3Accel ++                                // add SHA3 rocc accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: Sha3Rocket
 
 // DOC include start: InitZeroRocketConfig
 class InitZeroRocketConfig extends Config(
