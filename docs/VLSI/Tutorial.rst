@@ -2,7 +2,7 @@
 
 ASAP7 Tutorial
 ==============
-The ``vlsi`` folder of this repository contains an example HAMMER flow with the SHA-3 accelerator and a dummy hard macro in the ASAP7 PDK. It is intended for use with the Cadence and Mentor tool plugins.
+The ``vlsi`` folder of this repository contains an example HAMMER flow with the SHA-3 accelerator and a dummy hard macro. This example tutorial uses the built-in ASAP7 technology plugin and requires access to the included Cadence and Mentor tool plugin submodules. Cadence is necessary for synthesis & place-and-route, while Mentor is needed for DRC & LVS.
 
 Project Structure
 -----------------
@@ -81,18 +81,15 @@ To elaborate the Sha3RocketConfig (Rocketchip w/ the accelerator) and set up all
 
 .. code-block:: shell
 
-    export MACROCOMPILER_MODE='--mode synflops'
-    export CONFIG=Sha3RocketConfig
-    export VLSI_TOP=Sha3AccelwBB
-    make buildfile
+    make buildfile MACROCOMPILER_MODE='--mode synflops' CONFIG=Sha3RocketConfig VLSI_TOP=Sha3AccelwBB
 
 The ``MACROCOMPILER_MODE='--mode synflops'`` is needed because the ASAP7 process does not yet have a memory compiler. Therefore, flip-flop arrays are used instead.
 
-The ``CONFIG=Sha3RocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework.
+The ``CONFIG=Sha3RocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a Rocket-chip with the Sha3Accel module.
 
-The ``VLSI_TOP=Sha3AccelwBB`` indicates that we are only interested in physical design of the accelerator block. If this variable is not set, the entire SoC will be pushed through physical design.
+The ``VLSI_TOP=Sha3AccelwBB`` indicates that we are only interested in physical design of the accelerator block. If this variable is not set, the entire SoC will be pushed through physical design. Note that you should not set the ``TOP`` variable because it is used during Chisel elaboration.
 
-For the curious, ``make buildfile`` generates a set of Make targets in ``build/hammer.d``. It needs to be re-run if environment variables are changed.
+For the curious, ``make buildfile`` generates a set of Make targets in ``build/hammer.d``. It needs to be re-run if environment variables are changed. It is recommended that you edit these variables directly in the Makefile rather than exporting them to your shell environment.
 
 Running the VLSI Flow
 ---------------------
