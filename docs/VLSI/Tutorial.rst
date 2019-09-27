@@ -2,7 +2,7 @@
 
 ASAP7 Tutorial
 ==============
-The ``vlsi`` folder of this repository contains an example HAMMER flow with the SHA-3 accelerator and a dummy hard macro. This example tutorial uses the built-in ASAP7 technology plugin and requires access to the included Cadence and Mentor tool plugin submodules. Cadence is necessary for synthesis & place-and-route, while Mentor is needed for DRC & LVS.
+The ``vlsi`` folder of this repository contains an example Hammer flow with the SHA-3 accelerator and a dummy hard macro. This example tutorial uses the built-in ASAP7 technology plugin and requires access to the included Cadence and Mentor tool plugin submodules. Cadence is necessary for synthesis & place-and-route, while Mentor is needed for DRC & LVS.
 
 Project Structure
 -----------------
@@ -54,8 +54,8 @@ Prerequisites
 * Genus, Innovus, and Calibre licenses
 * For ASAP7 specifically:
 
-  * Download the `ASAP7 PDK <http://asap.asu.edu/asap/>`__ tarball and do not extract it
-  * If you have additional ASAP7 hard macros, their LEF & GDS need to be 4x upscaled @ 4000 DBU precision
+  * Download the `ASAP7 PDK <http://asap.asu.edu/asap/>`__ tarball to a directory of choice but do not extract it
+  * If you have additional ASAP7 hard macros, their LEF & GDS need to be 4x upscaled @ 4000 DBU precision. They may live outside ``extra_libraries`` at your discretion.
 
 Initial Setup
 -------------
@@ -65,7 +65,7 @@ In the Chipyard root, run:
 
     ``./scripts/init-vlsi.sh asap7`` 
     
-to pull the HAMMER & plugin submodules. Note that for technologies other than ``asap7``, the tech submodule must be added in the ``vlsi`` folder first.
+to pull the Hammer & plugin submodules. Note that for technologies other than ``asap7``, the tech submodule must be added in the ``vlsi`` folder first.
 
 Pull the Hammer environment into the shell:
 
@@ -77,7 +77,7 @@ Pull the Hammer environment into the shell:
 
 Building the Design
 -------------------
-To elaborate the Sha3RocketConfig (Rocketchip w/ the accelerator) and set up all prerequisites for the build system to push just the accelerator + hard macro through the flow:
+To elaborate the ``Sha3RocketConfig`` (Rocket Chip w/ the accelerator) and set up all prerequisites for the build system to push just the accelerator + hard macro through the flow:
 
 .. code-block:: shell
 
@@ -85,7 +85,7 @@ To elaborate the Sha3RocketConfig (Rocketchip w/ the accelerator) and set up all
 
 The ``MACROCOMPILER_MODE='--mode synflops'`` is needed because the ASAP7 process does not yet have a memory compiler. Therefore, flip-flop arrays are used instead.
 
-The ``CONFIG=Sha3RocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a Rocket-chip with the Sha3Accel module.
+The ``CONFIG=Sha3RocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a Rocket Chip with the Sha3Accel module.
 
 The ``VLSI_TOP=Sha3AccelwBB`` indicates that we are only interested in physical design of the accelerator block. If this variable is not set, the entire SoC will be pushed through physical design. Note that you should not set the ``TOP`` variable because it is used during Chisel elaboration.
 
@@ -96,7 +96,7 @@ Running the VLSI Flow
 
 example-vlsi
 ^^^^^^^^^^^^
-This is the entry script with placeholders for hooks. In the ``ExampleDriver`` class, a list of hooks is passed in the ``get_extra_par_hooks``. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods.
+This is the entry script with placeholders for hooks. In the ``ExampleDriver`` class, a list of hooks is passed in the ``get_extra_par_hooks``. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in this example. Refer to the Hammer documentation on hooks for a detailed description of how these are injected into the VLSI flow.
 
 example.yml
 ^^^^^^^^^^^
@@ -110,7 +110,7 @@ Synthesis
 
     ``make syn``
 
-Post-synthesis logs and collateral are in ``build/syn-rundir``. The Raw QoR data is available at ``build/syn-rundir/reports``, and methods to extract this information for design space exploration are a WIP.
+Post-synthesis logs and collateral are in ``build/syn-rundir``. The raw QoR data is available at ``build/syn-rundir/reports``, and methods to extract this information for design space exploration are a WIP.
 
 Place-and-Route
 ^^^^^^^^^^^^^^^

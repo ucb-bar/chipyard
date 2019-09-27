@@ -1,12 +1,12 @@
 .. _hammer:
 
-Core HAMMER
+Core Hammer
 ================================
 
-`HAMMER <https://github.com/ucb-bar/hammer>`__ is a physical design generator that wraps around vendor specific technologies and tools to provide a single API to create ASICs.
-HAMMER allows for reusability in ASIC design while still providing the designers leeway to make their own modifications.
+`Hammer <https://github.com/ucb-bar/hammer>`__ is a physical design generator that wraps around vendor specific technologies and tools to provide a single API to create ASICs.
+Hammer allows for reusability in ASIC design while still providing the designers leeway to make their own modifications.
 
-For more information, read the `HAMMER paper <https://people.eecs.berkeley.edu/~edwardw/pubs/hammer-woset-2018.pdf>`__ and see the `GitHub repository <https://github.com/ucb-bar/hammer>`__ and associated documentation.
+For more information, read the `Hammer paper <https://people.eecs.berkeley.edu/~edwardw/pubs/hammer-woset-2018.pdf>`__ and see the `GitHub repository <https://github.com/ucb-bar/hammer>`__ and associated documentation.
 
 Hammer implements a VLSI flow using the following high-level constructs:
 
@@ -28,7 +28,7 @@ Hooks are modifications to steps or actions that are programmatically defined in
 Configuration (Hammer IR)
 =========================
 
-To configure a Hammer flow, supply a set yaml or json configuration files that chooses the tool and technology plugins and versions as well as any design specific configuration options. Collectively, this configuration API is referred to as Hammer IR and can be generated from higher-level abstractions.
+To configure a Hammer flow, supply a set ``yaml`` or ``json`` configuration files that chooses the tool and technology plugins and versions as well as any design specific configuration options. Collectively, this configuration API is referred to as Hammer IR and can be generated from higher-level abstractions.
 
 The current set of all available Hammer APIs is codified `here <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/defaults.yml>`__.
 
