@@ -18,3 +18,4 @@ Hit next to get started!
    Incorporating-Verilog-Blocks
    Memory-Hierarchy
    Boot-Process
+   Firrtl-Transforms
