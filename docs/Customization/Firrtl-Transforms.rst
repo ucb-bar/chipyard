@@ -41,8 +41,10 @@ adding them to your Chisel source or by creating a serialized annotation ``json`
 
 Here is an example of adding a ``DontTouchAnnotation`` within the Chisel source. This annotation
 makes sure that a particular signal is not removed by the "Dead Code Elimination" pass in FIRRTL.
-The example below shows both how to directly annotate the signal with the ``annotate`` function and the ``DontTouchAnnotation``
-class as well as the Chisel wrapper function called ``dontTouch`` that does this automatically for you (more `dontTouch <https://www.chisel-lang.org/api/SNAPSHOT/chisel3/dontTouch$.html>`__ information):
+The example below shows two ways to annotate the signal:
+
+* directly annotate the signal with the ``annotate`` function and the ``DontTouchAnnotation`` class if there is no Chisel API for it (note: most FIRRTL annotations have Chisel APIs for them)
+* use the Chisel API/wrapper function called ``dontTouch`` that does this automatically for you (more `dontTouch <https://www.chisel-lang.org/api/SNAPSHOT/chisel3/dontTouch$.html>`__ information):
 
 .. code-block:: scala
 
@@ -55,13 +57,15 @@ class as well as the Chisel wrapper function called ``dontTouch`` that does this
     class Submodule extends Module {
         ...
         val some_signal := ...
+
+        // how to annotate WITHOUT a Chisel API/wrapper
         annotate(new ChiselAnnotation {
             def toFirrtl = DontTouchAnnotation(some_signal.toNamed)
         })
 
-        // or use the Chisel wrapper for this
-
+        // how to annotate if there is a Chisel API/wrapper
         chisel3.dontTouch(some_signal)
+
         ...
     }
 
