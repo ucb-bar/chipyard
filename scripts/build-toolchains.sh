@@ -99,6 +99,13 @@ if [ "${EC2FASTINSTALL}" = true ] ; then
     git submodule deinit "${module}" || :
 
 else
+    "${MAKE}" --version | (
+        read -r makever
+        case ${makever} in
+        'GNU Make '[4-9]\.*|'GNU Make '[1-9][0-9]) ;;
+        *) false ;;
+        esac; ) || die 'obsolete make version; need GNU make 4.x or later'
+
     module_prepare riscv-gnu-toolchain qemu
     module_build riscv-gnu-toolchain --prefix="${RISCV}"
     echo '==>  Building GNU/Linux toolchain'

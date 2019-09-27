@@ -14,7 +14,7 @@ case ${ncpu} in
 *) export MAKEFLAGS="-j ${ncpu} ${MAKEFLAGS}" ;;
 esac
 
-MAKE=$(command -v gmake || command -v make)
+MAKE=$(command -v gnumake || command -v gmake || command -v make)
 readonly MAKE
 
 
