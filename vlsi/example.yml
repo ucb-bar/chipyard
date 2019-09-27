@@ -76,11 +76,11 @@ vlsi.technology.extra_libraries_meta: ["append", "deepsubst"]
 vlsi.technology.extra_libraries:
   - library:
       nldm liberty file_deepsubst_meta: "local"
-      nldm liberty file: "extra_libraries/dco/ExampleDCO_PVT_0P63V_100C.lib"
+      nldm liberty file: "extra_libraries/example/ExampleDCO_PVT_0P63V_100C.lib"
       lef file_deepsubst_meta: "local"
-      lef file: "extra_libraries/dco/ExampleDCO.lef"
+      lef file: "extra_libraries/example/ExampleDCO.lef"
       gds file_deepsubst_meta: "local"
-      gds file: "extra_libraries/dco/ExampleDCO.gds"
+      gds file: "extra_libraries/example/ExampleDCO.gds"
       corner:
         nmos: "slow"
         pmos: "slow"
@@ -90,11 +90,11 @@ vlsi.technology.extra_libraries:
         GND: "0 V"
   - library:
       nldm liberty file_deepsubst_meta: "local"
-      nldm liberty file: "extra_libraries/dco/ExampleDCO_PVT_0P77V_0C.lib"
+      nldm liberty file: "extra_libraries/example/ExampleDCO_PVT_0P77V_0C.lib"
       lef file_deepsubst_meta: "local"
-      lef file: "extra_libraries/dco/ExampleDCO.lef"
+      lef file: "extra_libraries/example/ExampleDCO.lef"
       gds file_deepsubst_meta: "local"
-      gds file: "extra_libraries/dco/ExampleDCO.gds"
+      gds file: "extra_libraries/example/ExampleDCO.gds"
       corner:
         nmos: "fast"
         pmos: "fast"
