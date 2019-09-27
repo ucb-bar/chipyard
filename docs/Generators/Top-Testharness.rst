@@ -16,7 +16,7 @@ The top-level module of a Rocket Chip SoC is composed via cake-pattern. Specific
 BaseSubsystem
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``BaseSubsystem`` is defined in ``generators/rocketchip/src/main/scala/subsystem/BaseSubsystem.scala``. Looking at the ``BaseSubsystem`` abstract class, we see that this class instantiates the top-level buses (frontbus, systembus, peripherybus, etc.), but does not specify a topology. We also see this class define several ``ElaborationArtefacts``, for example the device tree string, and the diplomacy GraphML.
+The ``BaseSubsystem`` is defined in ``generators/rocketchip/src/main/scala/subsystem/BaseSubsystem.scala``. Looking at the ``BaseSubsystem`` abstract class, we see that this class instantiates the top-level buses (frontbus, systembus, peripherybus, etc.), but does not specify a topology. We also see this class define several ``ElaborationArtefacts``, files emitted after Chisel elaboration (e.g. the device tree string, and the diplomacy GraphML).
 
 Subsystem
 ^^^^^^^^^^^^^^^^^^^^^^^^^
