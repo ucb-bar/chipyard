@@ -99,6 +99,8 @@ reminder, to run a software RTL simulation, run:
 
    make CONFIG=LargeBoomConfig run-asm-tests
 
+FireSim FPGA-accelerated simulations use TSI by default as well.
+
 If you would like to build and simulate a Chipyard configuration with a DTM configured for DMI communication, then you must create a
 top-level system with the DTM (``TopWithDTM``), a test-harness to connect to the DTM (``TestHarnessWithDTM``), as well as a config to use that top-level system.
 
