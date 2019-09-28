@@ -60,7 +60,7 @@ mechanism to communicate with the DUT in simulation.
 In the case of a chip tapeout bringup, TSI commands can be sent over a custom communication
 medium to communicate with the chip. For example, some Berkeley tapeouts have a FPGA
 with a RISC-V soft-core that runs FESVR. The FESVR on the soft-core sends TSI commands
-to a TSI to TileLink converter living on the FPGA (i.e. ``SerialAdapter``). Then this converter
+to a TSI-to-TileLink converter living on the FPGA (i.e. ``SerialAdapter``). Then this converter
 sends the converted TileLink commands over a serial link to the chip. The following image shows this flow:
 
 .. image:: ../_static/images/chip-bringup.png
