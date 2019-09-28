@@ -40,7 +40,7 @@ Table of Contents
 
    Software/index
 
-   Advanced-Usage/index
+   Advanced-Concepts/index
 
    TileLink-Diplomacy-Reference/index
 
