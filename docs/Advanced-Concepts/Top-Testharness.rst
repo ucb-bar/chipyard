@@ -80,7 +80,7 @@ instantiates a TileLink GPIO node, and connects it to the proper buses.
 
 If we look at the ``WithGPIOTop`` mixin in the ``ConfigMixins.scala`` file, we see that adding this mixin to the top-level Config overrides the
 ``BuildTop`` key with a custom function that both instantiates the custom Top, and drives all the GPIO pins.
-When the ``TestHarness`` looksup the ``BuildTop`` key, this function will run and perform this wiring, and then return the Top module.
+When the ``TestHarness`` looks up the ``BuildTop`` key, this function will run and perform the specified wiring, and then return the Top module.
 
 TestDriver
 -------------------------
