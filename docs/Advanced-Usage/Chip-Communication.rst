@@ -153,7 +153,7 @@ After creating the config, call the ``make`` command like the following to build
 
     make CONFIG=jtagRocketConfig TOP=TopWithDTM MODEL=TestHarnessWithDTM
 
-In this example, this will use the config that you previously specified, as well as set
+In this example, the simulation will use the config that you previously specified, as well as set
 the other parameters that are needed to satisfy the build system. After that point, you
 should have a JTAG enabled simulator that you can attach to using OpenOCD and GDB!
 
