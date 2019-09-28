@@ -43,9 +43,6 @@
 [submodule "vlsi/hammer"]
 	path = vlsi/hammer
 	url = https://github.com/ucb-bar/hammer.git
-[submodule "vlsi/hammer-cad-plugins"]
-	path = vlsi/hammer-cad-plugins
-	url = https://github.com/ucb-bar/hammer-cad-plugins.git
 [submodule "tools/dsptools"]
 	path = tools/dsptools
 	url = https://github.com/ucb-bar/dsptools.git
@@ -61,3 +58,12 @@
 [submodule "tools/firrtl-interpreter"]
 	path = tools/firrtl-interpreter
 	url = https://github.com/freechipsproject/firrtl-interpreter.git
+[submodule "vlsi/hammer-cadence-plugins"]
+	path = vlsi/hammer-cadence-plugins
+	url = git@github.com:ucb-bar/hammer-cadence-plugins.git
+[submodule "vlsi/hammer-synopsys-plugins"]
+	path = vlsi/hammer-synopsys-plugins
+	url = git@github.com:ucb-bar/hammer-synopsys-plugins.git
+[submodule "vlsi/hammer-mentor-plugins"]
+	path = vlsi/hammer-mentor-plugins
+	url = git@github.com:ucb-bar/hammer-mentor-plugins.git

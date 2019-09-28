@@ -16,14 +16,18 @@ git config submodule.toolchains/esp-tools.update none
 git config --global submodule.experimental-blocks.update none
 # Disable updates to the FireSim submodule until explicitly requested
 git config submodule.sims/firesim.update none
-# Disable updates to the hammer-cad-plugins repo
-git config submodule.vlsi/hammer-cad-plugins.update none
+# Disable updates to the hammer tool plugins repos
+git config submodule.vlsi/hammer-cadence-plugins.update none
+git config submodule.vlsi/hammer-synopsys-plugins.update none
+git config submodule.vlsi/hammer-mentor-plugins.update none
 git submodule update --init --recursive #--jobs 8
 # unignore riscv-tools,catapult-shell2 globally
 git config --unset submodule.toolchains/riscv-tools.update
 git config --unset submodule.toolchains/esp-tools.update
 git config --global --unset submodule.experimental-blocks.update
-git config --unset submodule.vlsi/hammer-cad-plugins.update
+git config --unset submodule.vlsi/hammer-cadence-plugins.update
+git config --unset submodule.vlsi/hammer-synopsys-plugins.update
+git config --unset submodule.vlsi/hammer-mentor-plugins.update
 
 # Renable firesim and init only the required submodules to provide
 # all required scala deps, without doing a full build-setup
