@@ -8,5 +8,5 @@ They expect you to know about Chisel, Parameters, Configs, etc.
    :maxdepth: 2
    :caption: Advanced Usage:
 
-   DTM-Debugging
+   Chip-Communication
    Resources
