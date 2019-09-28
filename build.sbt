@@ -147,7 +147,7 @@ lazy val sha3 = (project in file("generators/sha3"))
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
-  .dependsOn(chisel_testers)
+  .dependsOn(chisel_testers, example)
   .settings(commonSettings)
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))

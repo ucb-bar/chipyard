@@ -15,5 +15,7 @@ Hit next to get started!
 
    Heterogeneous-SoCs
    Adding-An-Accelerator
+   Incorporating-Verilog-Blocks
    Memory-Hierarchy
    Boot-Process
+   Firrtl-Transforms
