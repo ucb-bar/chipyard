@@ -20,3 +20,4 @@ Hit next to get started!
    Chipyard-Components
    Configs-Parameters-Mixins
    Initial-Repo-Setup
+   Top-Testharness
