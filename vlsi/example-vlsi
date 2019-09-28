@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 
 import hammer_vlsi
 from hammer_vlsi import CLIDriver, HammerToolHookAction
@@ -26,6 +27,22 @@ def example_tool_settings(x: hammer_vlsi.HammerTool) -> bool:
 ''')
     return True
 
+def scale_final_gds(x: hammer_vlsi.HammerTool) -> bool:
+    """
+    Scale the final GDS by a factor of 4
+    """
+    x.append('''
+# Write script out to a temporary file and execute it
+set fp [open "{script_file}" "w"]
+puts -nonewline $fp "{script_text}"
+close $fp
+if {{ [catch {{ exec python3 {script_file} }} msg] }} {{
+    puts "$::errorInfo"
+}}
+'''.format(script_text=x.technology.scale_gds_script(x.output_gds_filename), script_file=os.path.join(x.run_dir, "gds_scale.py")))
+    return True
+
+
 class ExampleDriver(CLIDriver):
     def get_extra_par_hooks(self) -> List[HammerToolHookAction]:
         extra_hooks = [
@@ -39,8 +56,11 @@ class ExampleDriver(CLIDriver):
             # make_replacement_hook will replace the specified step with a custom hook
             hammer_vlsi.HammerTool.make_replacement_hook("place_tap_cells", example_place_tap_cells),
             # make_removal_hook will remove the specified step from the flow
-            hammer_vlsi.HammerTool.make_removal_hook("place_bumps")
+            hammer_vlsi.HammerTool.make_removal_hook("place_bumps"),
             # The target step in any of the above calls may be a default step or another one of your custom hooks
+
+            # This is an example of a technology-supplied hook (look in hammer/src/hammer-vlsi/technology/asap7/__init__.py)
+            hammer_vlsi.HammerTool.make_post_insertion_hook("write_design", scale_final_gds)
         ]
         return extra_hooks 
 

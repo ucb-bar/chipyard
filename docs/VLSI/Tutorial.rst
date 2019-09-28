@@ -98,6 +98,8 @@ example-vlsi
 ^^^^^^^^^^^^
 This is the entry script with placeholders for hooks. In the ``ExampleDriver`` class, a list of hooks is passed in the ``get_extra_par_hooks``. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in this example. Refer to the Hammer documentation on hooks for a detailed description of how these are injected into the VLSI flow.
 
+The ``scale_final_gds`` hook is a particularly powerful hook. It dumps a Python script provided by the ASAP7 tech plugin, an executes it within the Innovus TCL interpreter. This hook is run after ``write_design`` because the ASAP7 PDK requires post-par GDSs to be scaled down by a factor of 4.
+
 example.yml
 ^^^^^^^^^^^
 This contains the Hammer configuration for this example project. Example clock constraints, power straps definitions, placement constraints, and pin constraints are given. Additional configuration for the extra libraries and tools are at the bottom.
