@@ -9,8 +9,6 @@ These guides will walk you through the basics of the Chipyard framework:
 
 - Then, we will go over initial framework setup.
 
-- Finally, we will briefly walk through what you can do with the Chipyard tools.
-
 Hit next to get started!
 
 .. toctree::

@@ -24,5 +24,6 @@ so changes to the generators themselves will automatically be used when building
    Hwacha
    IceNet
    TestChipIP
-   SiFive-Generators   
+   SiFive-Generators
    SHA3
+
