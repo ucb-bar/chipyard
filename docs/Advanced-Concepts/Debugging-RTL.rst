@@ -7,13 +7,16 @@ IP, or by modifying existing Chisel generators. Such changes might introduce
 bugs. This section aims to run through a typical debugging flow
 using Chipyard. We assume the user has a custom SoC configuration,
 and is trying to verify functionality by running some software test.
+We also assume the software has already been verified on a functional
+simulator, such as Spike or QEMU. This section will focus on debugging
+hardware.
 
 Waveforms
 ---------------------------
 
-The default SW simulators do not dump waveforms during execution. To build
-simulators with wave dump capabilities use must use the ``debug`` make target.
-For example:
+The default software RTL simulators do not dump waveforms during execution.
+To build simulators with wave dump capabilities use must use the ``debug``
+make target. For example:
 
 .. code-block:: shell
 
@@ -81,5 +84,6 @@ directory.
 Firesim Debugging
 ---------------------------
 Chisel printfs, asserts, and waveform generation are also available in FireSim
-FPGA-accelerated simulation. See the FireSim docs for more detail.
+FPGA-accelerated simulation. See the FireSim
+`documentation <https://docs.fires.im/en/latest/>`__ for more detail.
 
