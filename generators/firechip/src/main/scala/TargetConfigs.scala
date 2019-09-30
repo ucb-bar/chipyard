@@ -12,11 +12,15 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.DebugModuleParams
 import boom.common.BoomTilesKey
-import testchipip.{WithBlockDevice, BlockDeviceKey, BlockDeviceConfig}
+import testchipip.{BlockDeviceKey, BlockDeviceConfig}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 import tracegen.TraceGenKey
 import icenet._
+
+import firesim.endpoints._
+import firesim.util.{WithNumNodes}
+import firesim.configs.WithDefaultMemModel
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMParams => {
@@ -37,11 +41,13 @@ class WithPeripheryBusFrequency(freq: BigInt) extends Config((site, here, up) =>
 })
 
 class WithUARTKey extends Config((site, here, up) => {
-   case PeripheryUARTKey => List(UARTParams(
+  case PeripheryUARTKey => List(UARTParams(
      address = BigInt(0x54000000L),
      nTxEntries = 256,
      nRxEntries = 256))
 })
+
+class WithBlockDevice extends Config(new testchipip.WithBlockDevice)
 
 class WithNICKey extends Config((site, here, up) => {
   case NICKey => NICConfig(
@@ -101,6 +107,8 @@ class FireSimRocketChipConfig extends Config(
   new WithRocketL2TLBs(1024) ++
   new WithPerfCounters ++
   new WithoutClockGating ++
+  new WithDefaultMemModel ++
+  new WithDefaultFireSimEndpoints ++
   new freechips.rocketchip.system.DefaultConfig)
 
 class WithNDuplicatedRocketCores(n: Int) extends Config((site, here, up) => {
@@ -140,8 +148,10 @@ class FireSimBoomConfig extends Config(
   new WithBlockDevice ++
   new WithBoomL2TLBs(1024) ++
   new WithoutClockGating ++
+  new WithDefaultMemModel ++
   new boom.common.WithLargeBooms ++
   new boom.common.WithNBoomCores(1) ++
+  new WithDefaultFireSimEndpoints ++
   new freechips.rocketchip.system.BaseConfig
 )
 
@@ -165,9 +175,6 @@ class FireSimBoomQuadCoreConfig extends Config(
 //**********************************************************************************
 //* Supernode Configurations
 //*********************************************************************************/
-class WithNumNodes(n: Int) extends Config((pname, site, here) => {
-  case NumNodes => n
-})
 
 class SupernodeFireSimRocketChipConfig extends Config(
   new WithNumNodes(4) ++

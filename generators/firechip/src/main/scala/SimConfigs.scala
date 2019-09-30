@@ -3,8 +3,6 @@ package firesim.firesim
 
 import freechips.rocketchip.config.{Parameters, Config, Field}
 
-import midas.{EndpointKey}
-import midas.widgets.{EndpointMap}
 import midas.models._
 
 import firesim.endpoints._
@@ -19,40 +17,26 @@ import firesim.configs._
 * reconstruct what is in a particular AGFI. These tags are also used to
 * determine which driver to build.
 *******************************************************************************/
-class FireSimConfig extends Config(
-  new WithSerialWidget ++
-  new WithUARTWidget ++
-  new WithSimpleNICWidget ++
-  new WithBlockDevWidget ++
-  new WithDefaultMemModel ++
-  new WithTracerVWidget ++
-  new BasePlatformConfig)
+class FireSimConfig extends Config(new BasePlatformConfig)
 
 class FireSimClockDivConfig extends Config(
-  new WithDefaultMemModel(clockDivision = 2) ++
   new FireSimConfig)
 
 class FireSimDDR3Config extends Config(
-  new FCFS16GBQuadRank ++
   new FireSimConfig)
 
 class FireSimDDR3LLC4MBConfig extends Config(
-  new FCFS16GBQuadRankLLC4MB ++
   new FireSimConfig)
 
 class FireSimDDR3FRFCFSConfig extends Config(
-  new FRFCFS16GBQuadRank ++
   new FireSimConfig)
 
 class FireSimDDR3FRFCFSLLC4MBConfig extends Config(
-  new FRFCFS16GBQuadRankLLC4MB ++
   new FireSimConfig)
 
 class FireSimDDR3FRFCFSLLC4MB3ClockDivConfig extends Config(
-  new FRFCFS16GBQuadRankLLC4MB3Div ++
   new FireSimConfig)
 
 class Midas2Config extends Config(
   new WithMultiCycleRamModels ++
   new FireSimConfig)
-
