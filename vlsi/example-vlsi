@@ -36,9 +36,7 @@ def scale_final_gds(x: hammer_vlsi.HammerTool) -> bool:
 set fp [open "{script_file}" "w"]
 puts -nonewline $fp "{script_text}"
 close $fp
-if {{ [catch {{ exec python3 {script_file} }} msg] }} {{
-    puts "$::errorInfo"
-}}
+exec python3 {script_file}
 '''.format(script_text=x.technology.scale_gds_script(x.output_gds_filename), script_file=os.path.join(x.run_dir, "gds_scale.py")))
     return True
 

@@ -124,7 +124,7 @@ synthesis.genus.version: "1813"
 vlsi.core.par_tool: "innovus"
 vlsi.core.par_tool_path: ["hammer-cadence-plugins/par"]
 vlsi.core.par_tool_path_meta: "append"
-par.innovus.version: "191"
+par.innovus.version: "181"
 par.innovus.design_flow_effort: "standard"
 par.inputs.gds_merge: true
 # Calibre options

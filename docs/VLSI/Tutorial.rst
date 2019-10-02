@@ -54,8 +54,9 @@ Prerequisites
 * Genus, Innovus, and Calibre licenses
 * For ASAP7 specifically:
 
-  * Download the `ASAP7 PDK <http://asap.asu.edu/asap/>`__ tarball to a directory of choice but do not extract it
+  * Download the `ASAP7 PDK <http://asap.asu.edu/asap/>`__ tarball to a directory of choice but do not extract it. The tech plugin will extract and setup the PDK for you into a cache directory.
   * If you have additional ASAP7 hard macros, their LEF & GDS need to be 4x upscaled @ 4000 DBU precision. They may live outside ``extra_libraries`` at your discretion.
+  * Innovus version must be >= 15.2 or <= 18.1 (ISRs excluded).
 
 Initial Setup
 -------------
@@ -83,7 +84,7 @@ To elaborate the ``Sha3RocketConfig`` (Rocket Chip w/ the accelerator) and set u
 
     make buildfile MACROCOMPILER_MODE='--mode synflops' CONFIG=Sha3RocketConfig VLSI_TOP=Sha3AccelwBB
 
-The ``MACROCOMPILER_MODE='--mode synflops'`` is needed because the ASAP7 process does not yet have a memory compiler. Therefore, flip-flop arrays are used instead.
+The ``MACROCOMPILER_MODE='--mode synflops'`` is needed because the ASAP7 process does not yet have a memory compiler. Therefore, flip-flop arrays are used instead. Note this will dramatically increase synthesis runtimes if your design has a lot of caches.
 
 The ``CONFIG=Sha3RocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a Rocket Chip with the Sha3Accel module.
 
