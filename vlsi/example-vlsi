@@ -24,6 +24,8 @@ def example_tool_settings(x: hammer_vlsi.HammerTool) -> bool:
     x.append('''
 # TODO
 # Place custom TCL here
+set_db route_design_bottom_routing_layer 2
+set_db route_design_top_routing_layer 7
 ''')
     return True
 
@@ -36,7 +38,10 @@ def scale_final_gds(x: hammer_vlsi.HammerTool) -> bool:
 set fp [open "{script_file}" "w"]
 puts -nonewline $fp "{script_text}"
 close $fp
-exec python3 {script_file}
+
+# Innovus <19.1 appends some bad LD_LIBRARY_PATHS, so remove them before executing python
+set env(LD_LIBRARY_PATH) [join [lsearch -not -all -inline [split $env(LD_LIBRARY_PATH) ":"] "*INNOVUS*"] ":"]
+python3 {script_file}
 '''.format(script_text=x.technology.scale_gds_script(x.output_gds_filename), script_file=os.path.join(x.run_dir, "gds_scale.py")))
     return True
 
