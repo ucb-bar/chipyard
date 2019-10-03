@@ -6,6 +6,18 @@ set -o pipefail
 
 RDIR=$(git rev-parse --show-toplevel)
 
+NO_FIRESIM=false
+
+while test $# -gt 0
+do
+  case "$1" in
+    --no-firesim)
+      NO_FIRESIM=true;
+      ;;
+  esac
+  shift
+done
+
 # Ignore toolchain submodules
 cd "$RDIR"
 for name in toolchains/*/*/ ; do
@@ -26,9 +38,12 @@ git config --unset submodule.vlsi/hammer-cadence-plugins.update
 git config --unset submodule.vlsi/hammer-synopsys-plugins.update
 git config --unset submodule.vlsi/hammer-mentor-plugins.update
 
-# Renable firesim and init only the required submodules to provide
-# all required scala deps, without doing a full build-setup
-git config --unset submodule.sims/firesim.update
-git submodule update --init sims/firesim
-git -C sims/firesim submodule update --init sim/midas
-git config submodule.sims/firesim.update none
+if [ "NO_FIRESIM" = false ]; then
+  # Renable firesim and init only the required submodules to provide
+  # all required scala deps, without doing a full build-setup
+  git config --unset submodule.sims/firesim.update
+  git submodule update --init sims/firesim
+  git -C sims/firesim submodule update --init sim/midas
+  git -C sims/firesim submodule update --init --recursive sw/firesim-software
+  git config submodule.sims/firesim.update none
+fi
