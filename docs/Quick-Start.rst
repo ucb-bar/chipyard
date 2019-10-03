@@ -5,8 +5,10 @@ Requirements
 -------------------------------------------
 
 Chipyard is developed and tested on Linux-based systems.
-It is possible to use this on macOS or other BSD-based systems, although GNU tools will need to be installed; it is also recommended to install the RISC-V toolchain from ``brew``.
-Working under Windows is not recommended.
+
+.. Warning:: It is possible to use this on macOS or other BSD-based systems, although GNU tools will need to be installed; it is also recommended to install the RISC-V toolchain from ``brew``.
+
+.. Warning:: Working under Windows is not recommended.
 
 Setting up the Chipyard Repo
 -------------------------------------------
