@@ -6,17 +6,24 @@ set -o pipefail
 
 RDIR=$(git rev-parse --show-toplevel)
 
-NO_FIRESIM=false
+_usage() {
+  echo "usage: ${0} [--no-firesim]" >&2
+  exit 1
+}
 
-while test $# -gt 0
-do
-  case "$1" in
-    --no-firesim)
-      NO_FIRESIM=true;
-      ;;
+NO_FIRESIM=false
+while getopts 'h-:' opt ; do
+  case ${opt} in
+  -)
+    case ${OPTARG} in
+    no-firesim) NO_FIRESIM=true ;;
+    *) echo "invalid option: --${OPTARG}" >&2 ; _usage ;;
+    esac ;;
+  h) _usage ;;
+  *) echo "invalid option: -${opt}" >&2 ; _usage ;;
   esac
-  shift
 done
+shift $((OPTIND - 1))
 
 # Ignore toolchain submodules
 cd "$RDIR"
@@ -39,6 +46,7 @@ git config --unset submodule.vlsi/hammer-synopsys-plugins.update
 git config --unset submodule.vlsi/hammer-mentor-plugins.update
 
 if [ $NO_FIRESIM = false ]; then
+echo "initializing firesim"
   # Renable firesim and init only the required submodules to provide
   # all required scala deps, without doing a full build-setup
   git config --unset submodule.sims/firesim.update
