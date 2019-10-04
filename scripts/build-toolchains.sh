@@ -11,8 +11,8 @@ CHIPYARD_DIR="${CHIPYARD_DIR:-$(git rev-parse --show-toplevel)}"
 
 usage() {
     echo "usage: ${0} [riscv-tools | esp-tools | ec2fast]"
-    echo "   riscv: if set, builds the riscv toolchain (this is also the default)"
-    echo "   hwacha: if set, builds esp-tools toolchain"
+    echo "   riscv-tools: if set, builds the riscv toolchain (this is also the default)"
+    echo "   esp-tools: if set, builds esp-tools toolchain used for the hwacha vector accelerator"
     echo "   ec2fast: if set, pulls in a pre-compiled RISC-V toolchain for an EC2 manager instance"
     exit "$1"
 }
