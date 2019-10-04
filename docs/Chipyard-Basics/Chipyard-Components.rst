@@ -29,6 +29,13 @@ Accelerators
   Hwacha integrates with a Rocket or BOOM core using the RoCC (Rocket Custom Co-processor) interface.
   See :ref:`Hwacha` for more information.
 
+.. Fixed Function Accelerators:
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   TBD
+**SHA3**
+  A fixed-function accelerator for the SHA3 hash function. This simple accelerator is used as a demonstration for some of the
+  Chipyard integration flows using the RoCC interface.
+
 System Components:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -45,9 +52,6 @@ System Components:
 **testchipip**
   A collection of utilities used for testing chips and interfacing them with larger test environments.
 
-.. Fixed Function Accelerators:
-   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   TBD
 
 Tools
 -------------------------------------------
@@ -67,6 +71,9 @@ Tools
 **Barstools**
   A collection of common FIRRTL transformations used to manipulate a digital circuit without changing the generator source RTL.
   See :ref:`Barstools` for more information.
+
+**Dsptools**
+  A Chisel library for writing custom signal processing hardware, as well as integrating custom signal processing hardware into an SoC (especially a Rocket-based SoC).
 
 Toolchains
 -------------------------------------------
@@ -105,9 +112,9 @@ Sims
 VLSI
 -------------------------------------------
 
-**HAMMER**
-  HAMMER is a VLSI flow designed to provide a layer of abstraction between general physical design concepts to vendor-specific EDA tool commands.
+**Hammer**
+  Hammer is a VLSI flow designed to provide a layer of abstraction between general physical design concepts to vendor-specific EDA tool commands.
   The HAMMER flow provide automated scripts which generate relevant tool commands based on a higher level description of physical design constraints.
-  The HAMMER flow also allows for re-use of process technology knowledge by enabling the construction of process-technology-specific plug-ins, which describe particular constraints relating to that process technology (obsolete standard cells, metal layer routing constraints, etc.).
-  The HAMMER flow requires access to proprietary EDA tools and process technology libraries.
+  The Hammer flow also allows for re-use of process technology knowledge by enabling the construction of process-technology-specific plug-ins, which describe particular constraints relating to that process technology (obsolete standard cells, metal layer routing constraints, etc.).
+  The Hammer flow requires access to proprietary EDA tools and process technology libraries.
   See :ref:`Core HAMMER` for more information.

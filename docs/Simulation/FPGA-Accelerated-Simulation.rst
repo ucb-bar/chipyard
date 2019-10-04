@@ -1,6 +1,6 @@
 .. _firesim-sim-intro:
 
-FPGA-Accelerated Simulators
+FPGA-Accelerated Simulation
 ==============================
 
 FireSim
@@ -17,7 +17,7 @@ documentation  <http://docs.fires.im/en/latest/Initial-Setup/index.html>`__.
 Then clone Chipyard onto your FireSim manager
 instance, and setup your Chipyard repository as you would normally.
 
-Next, initalize FireSim as library in Chipyard by running:
+Next, initalize FireSim as a library in Chipyard by running:
 
 .. code-block:: shell
 

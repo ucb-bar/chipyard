@@ -1,5 +1,5 @@
 Tops, Test-Harnesses, and the Test-Driver
-====================================
+===========================================
 
 The three highest levels of hierarchy in a Chipyard
 SoC are the Top (DUT), ``TestHarness``, and the ``TestDriver``.

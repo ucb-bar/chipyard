@@ -129,7 +129,8 @@ contain the implementation for the module, and may instantiate
 other normal modules OR lazy modules (for nested Diplomacy
 graphs, for example).
 
- Mix-in
+
+Mix-in
 ---------------------------
 
 A mix-in is a Scala trait, which sets parameters for specific system components, as well as enabling instantiation and wiring of the relevant system components to system buses.

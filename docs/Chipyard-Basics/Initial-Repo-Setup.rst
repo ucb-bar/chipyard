@@ -24,12 +24,12 @@ Building a Toolchain
 
 The `toolchains` directory contains toolchains that include a cross-compiler toolchain, frontend server, and proxy kernel, which you will need in order to compile code to RISC-V instructions and run them on your design.
 Currently there are two toolchains, one for normal RISC-V programs, and another for Hwacha (``esp-tools``).
-There are detailed instructions at https://github.com/riscv/riscv-tools to install the ``riscv-tools`` toolchain, however, the instructions are similar for the Hwacha ``esp-tools`` toolchain.
-But to get a basic installation, just the following steps are necessary.
+For custom installations, Each tool within the toolchains contains individual installation procedures within its README file.
+To get a basic installation (which is the only thing needed for most Chipyard use-cases), just the following steps are necessary.
 
 .. code-block:: shell
 
-    ./scripts/build-toolchains.sh riscv # for a normal risc-v toolchain
+    ./scripts/build-toolchains.sh riscv-tools # for a normal risc-v toolchain
 
     # OR
 
