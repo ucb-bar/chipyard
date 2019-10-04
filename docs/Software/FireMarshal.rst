@@ -1,5 +1,6 @@
 FireMarshal
 =================
+``software/firemarshal``
 
 FireMarshal is a workload generation tool for RISC-V based systems. It
 currently only supports the FireSim FPGA-accelerated simulation platform.
