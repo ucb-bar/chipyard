@@ -34,7 +34,11 @@ par.generate_power_straps_options:
       - M7
       - M8
       - M9
+    pin_layers:
+      - M9
     track_width: 5
+    track_width_M2: 7 # minimum allowed
+    track_width_M3: 7 # minimum allowed
     track_spacing: 0
     track_start: 10
     power_utilization: 0.05
