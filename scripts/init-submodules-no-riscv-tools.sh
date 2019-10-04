@@ -30,6 +30,8 @@ cd "$RDIR"
 for name in toolchains/*/*/ ; do
     git config submodule."${name%/}".update none
 done
+git config submodule.toolchains.qemu.update none
+
 # Disable updates to the FireSim submodule until explicitly requested
 git config submodule.sims/firesim.update none
 # Disable updates to the hammer tool plugins repos
