@@ -24,7 +24,7 @@ def example_tool_settings(x: hammer_vlsi.HammerTool) -> bool:
     x.append('''
 # TODO
 # Place custom TCL here
-set_db route_design_bottom_routing_layer 1
+set_db route_design_bottom_routing_layer 2
 set_db route_design_top_routing_layer 7
 ''')
     return True
