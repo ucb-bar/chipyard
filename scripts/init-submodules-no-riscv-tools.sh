@@ -30,7 +30,7 @@ cd "$RDIR"
 for name in toolchains/*/*/ ; do
     git config submodule."${name%/}".update none
 done
-git config submodule.toolchains.qemu.update none
+git config submodule.toolchains/qemu.update none
 
 # Disable updates to the FireSim submodule until explicitly requested
 git config submodule.sims/firesim.update none
@@ -43,6 +43,8 @@ git submodule update --init --recursive #--jobs 8
 for name in toolchains/*/*/ ; do
     git config --unset submodule."${name%/}".update
 done
+git config --unset submodule.toolchains/qemu.update
+
 git config --unset submodule.vlsi/hammer-cadence-plugins.update
 git config --unset submodule.vlsi/hammer-synopsys-plugins.update
 git config --unset submodule.vlsi/hammer-mentor-plugins.update
