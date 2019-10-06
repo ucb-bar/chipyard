@@ -14,12 +14,12 @@ import testchipip.{HasPeripherySerialModuleImp, HasPeripheryBlockDeviceModuleImp
 import icenet.HasPeripheryIceNICModuleImpValidOnly
 
 import junctions.{NastiKey, NastiParameters}
-import midas.models.{FASEDEndpoint, AXI4EdgeSummary, CompleteConfig}
-import firesim.endpoints._
+import midas.models.{FASEDBridge, AXI4EdgeSummary, CompleteConfig}
+import firesim.bridges._
 import firesim.configs.MemModelKey
-import firesim.util.RegisterEndpointBinder
+import firesim.util.RegisterBridgeBinder
 
-class WithTiedOffDebug extends RegisterEndpointBinder({ case target: HasPeripheryDebugModuleImp =>
+class WithTiedOffDebug extends RegisterBridgeBinder({ case target: HasPeripheryDebugModuleImp =>
   target.debug.clockeddmi.foreach({ cdmi =>
     cdmi.dmi.req.valid := false.B
     cdmi.dmi.req.bits := DontCare
@@ -30,23 +30,23 @@ class WithTiedOffDebug extends RegisterEndpointBinder({ case target: HasPeripher
   Seq()
 })
 
-class WithSerialEndpoint extends RegisterEndpointBinder({
-  case target: HasPeripherySerialModuleImp => Seq(SerialEndpoint(target.serial)(target.p)) 
+class WithSerialBridge extends RegisterBridgeBinder({
+  case target: HasPeripherySerialModuleImp => Seq(SerialBridge(target.serial)(target.p)) 
 })
 
-class WithNICEndpoint extends RegisterEndpointBinder({
-  case target: HasPeripheryIceNICModuleImpValidOnly => Seq(NICEndpoint(target.net)(target.p)) 
+class WithNICBridge extends RegisterBridgeBinder({
+  case target: HasPeripheryIceNICModuleImpValidOnly => Seq(NICBridge(target.net)(target.p)) 
 })
 
-class WithUARTEndpoint extends RegisterEndpointBinder({
-  case target: HasPeripheryUARTModuleImp => target.uart.map(u => UARTEndpoint(u)(target.p)) 
+class WithUARTBridge extends RegisterBridgeBinder({
+  case target: HasPeripheryUARTModuleImp => target.uart.map(u => UARTBridge(u)(target.p)) 
 })
 
-class WithBlockDeviceEndpoint extends RegisterEndpointBinder({
-  case target: HasPeripheryBlockDeviceModuleImp => Seq(BlockDevEndpoint(target.bdev, target.reset.toBool)(target.p)) 
+class WithBlockDeviceBridge extends RegisterBridgeBinder({
+  case target: HasPeripheryBlockDeviceModuleImp => Seq(BlockDevBridge(target.bdev, target.reset.toBool)(target.p)) 
 })
 
-class WithFASEDEndpoint extends RegisterEndpointBinder({
+class WithFASEDBridge extends RegisterBridgeBinder({
   case t: CanHaveMasterAXI4MemPortModuleImp =>
     implicit val p = t.p
     (t.mem_axi4 zip t.outer.memAXI4Node).flatMap({ case (io, node) =>
@@ -54,23 +54,23 @@ class WithFASEDEndpoint extends RegisterEndpointBinder({
         val nastiKey = NastiParameters(axi4Bundle.r.bits.data.getWidth,
                                        axi4Bundle.ar.bits.addr.getWidth,
                                        axi4Bundle.ar.bits.id.getWidth)
-        FASEDEndpoint(axi4Bundle, t.reset.toBool,
+        FASEDBridge(axi4Bundle, t.reset.toBool,
           CompleteConfig(p(firesim.configs.MemModelKey), nastiKey, Some(AXI4EdgeSummary(edge))))
       })
     }).toSeq
 })
 
-class WithTracerVEndpoint extends RegisterEndpointBinder({
-  case target: HasTraceIOImp => TracerVEndpoint(target.traceIO)(target.p)
+class WithTracerVBridge extends RegisterBridgeBinder({
+  case target: HasTraceIOImp => TracerVBridge(target.traceIO)(target.p)
 })
 
-// Shorthand to register all of the provided endpoints above
-class WithDefaultFireSimEndpoints extends Config(
+// Shorthand to register all of the provided bridges above
+class WithDefaultFireSimBridges extends Config(
   new WithTiedOffDebug ++
-  new WithSerialEndpoint ++
-  new WithNICEndpoint ++
-  new WithUARTEndpoint ++
-  new WithBlockDeviceEndpoint ++
-  new WithFASEDEndpoint ++
-  new WithTracerVEndpoint
+  new WithSerialBridge ++
+  new WithNICBridge ++
+  new WithUARTBridge ++
+  new WithBlockDeviceBridge ++
+  new WithFASEDBridge ++
+  new WithTracerVBridge
 )

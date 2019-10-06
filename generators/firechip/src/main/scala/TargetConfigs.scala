@@ -18,7 +18,7 @@ import scala.math.{min, max}
 import tracegen.TraceGenKey
 import icenet._
 
-import firesim.endpoints._
+import firesim.bridges._
 import firesim.util.{WithNumNodes}
 import firesim.configs._
 
@@ -113,7 +113,7 @@ class FireSimRocketChipConfig extends Config(
   new WithPerfCounters ++
   new WithoutClockGating ++
   new WithDefaultMemModel ++
-  new WithDefaultFireSimEndpoints ++
+  new WithDefaultFireSimBridges ++
   new freechips.rocketchip.system.DefaultConfig)
 
 class WithNDuplicatedRocketCores(n: Int) extends Config((site, here, up) => {
@@ -163,7 +163,7 @@ class FireSimBoomConfig extends Config(
   new WithDefaultMemModel ++
   new boom.common.WithLargeBooms ++
   new boom.common.WithNBoomCores(1) ++
-  new WithDefaultFireSimEndpoints ++
+  new WithDefaultFireSimBridges ++
   new freechips.rocketchip.system.BaseConfig
 )
 

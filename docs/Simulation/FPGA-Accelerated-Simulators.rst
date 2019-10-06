@@ -87,4 +87,4 @@ will look as follows:
 You should then be able to refer to those classes or an alias of them in your ``DESIGN`` or ``TARGET_CONFIG``
 variables. Note that if your target machine has I/O not provided in the default
 FireChip targets (see ``generators/firechip/src/main/scala/Targets.scala``) you may need
-to write a custom endpoint.
+to write a custom bridge.
