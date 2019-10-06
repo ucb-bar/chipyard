@@ -23,6 +23,7 @@ lazy val commonSettings = Seq(
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
   allDependencies := allDependencies.value.filterNot(_.organization == "edu.berkeley.cs"),
+  exportJars := true,
   resolvers ++= Seq(
     Resolver.sonatypeRepo("snapshots"),
     Resolver.sonatypeRepo("releases"),
