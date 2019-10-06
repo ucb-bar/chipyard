@@ -91,6 +91,9 @@ class WithScalaTestFeatures extends Config((site, here, up) => {
 class DDR3FRFCFSLLC4MB extends FRFCFS16GBQuadRankLLC4MB
 class DDR3FRFCFSLLC4MB3Div extends FRFCFS16GBQuadRankLLC4MB3Div
 
+// L2 Config Aliases. For use with "_" concatenation
+class L2SingleBank512K extends freechips.rocketchip.subsystem.WithInclusiveCache
+
 /*******************************************************************************
 * Full TARGET_CONFIG configurations. These set parameters of the target being
 * simulated.
