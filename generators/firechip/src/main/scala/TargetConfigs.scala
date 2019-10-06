@@ -18,9 +18,9 @@ import scala.math.{min, max}
 import tracegen.TraceGenKey
 import icenet._
 
-import firesim.endpoints._
+import firesim.bridges._
 import firesim.util.{WithNumNodes}
-import firesim.configs.WithDefaultMemModel
+import firesim.configs._
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMParams => {
@@ -86,6 +86,11 @@ class WithScalaTestFeatures extends Config((site, here, up) => {
     case PrintTracePort => true
 })
 
+// FASED Config Aliases. This to enable config generation via "_" concatenation
+// which requires that all config classes be defined in the same package
+class DDR3FRFCFSLLC4MB extends FRFCFS16GBQuadRankLLC4MB
+class DDR3FRFCFSLLC4MB3Div extends FRFCFS16GBQuadRankLLC4MB3Div
+
 /*******************************************************************************
 * Full TARGET_CONFIG configurations. These set parameters of the target being
 * simulated.
@@ -108,7 +113,7 @@ class FireSimRocketChipConfig extends Config(
   new WithPerfCounters ++
   new WithoutClockGating ++
   new WithDefaultMemModel ++
-  new WithDefaultFireSimEndpoints ++
+  new WithDefaultFireSimBridges ++
   new freechips.rocketchip.system.DefaultConfig)
 
 class WithNDuplicatedRocketCores(n: Int) extends Config((site, here, up) => {
@@ -138,6 +143,13 @@ class FireSimRocketChipOctaCoreConfig extends Config(
   new WithNDuplicatedRocketCores(8) ++
   new FireSimRocketChipSingleCoreConfig)
 
+// SHA-3 accelerator config
+class FireSimRocketChipSha3L2Config extends Config(
+  new WithInclusiveCache ++
+  new sha3.WithSha3Accel ++
+  new WithNBigCores(1) ++
+  new FireSimRocketChipConfig)
+
 class FireSimBoomConfig extends Config(
   new WithBootROM ++
   new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
@@ -151,7 +163,7 @@ class FireSimBoomConfig extends Config(
   new WithDefaultMemModel ++
   new boom.common.WithLargeBooms ++
   new boom.common.WithNBoomCores(1) ++
-  new WithDefaultFireSimEndpoints ++
+  new WithDefaultFireSimBridges ++
   new freechips.rocketchip.system.BaseConfig
 )
 

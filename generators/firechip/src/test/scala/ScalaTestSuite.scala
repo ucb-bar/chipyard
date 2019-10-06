@@ -23,6 +23,8 @@ abstract class FireSimTestSuite(
   import scala.concurrent.duration._
   import ExecutionContext.Implicits.global
 
+  val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
+
   lazy val generatorArgs = GeneratorArgs(
     midasFlowKind = "midas",
     targetDir = "generated-src",
@@ -42,7 +44,6 @@ abstract class FireSimTestSuite(
   val commonMakeArgs = Seq(s"DESIGN=${generatorArgs.topModuleClass}",
                            s"TARGET_CONFIG=${generatorArgs.targetConfigs}",
                            s"PLATFORM_CONFIG=${generatorArgs.platformConfigs}")
-  override lazy val platform = hostParams(midas.Platform)
 
   def invokeMlSimulator(backend: String, name: String, debug: Boolean, additionalArgs: Seq[String] = Nil) = {
     make((Seq(s"${outDir.getAbsolutePath}/${name}.%s".format(if (debug) "vpd" else "out"),
@@ -122,7 +123,7 @@ abstract class FireSimTestSuite(
 
   clean
   mkdirs
-  elaborateAndCompileWithMidas
+  elaborate
   generateTestSuiteMakefrags
   runTest("verilator", "rv64ui-p-simple", false, Seq(s"""EXTRA_SIM_ARGS=+trace-test-output0"""))
   diffTracelog("rv64ui-p-simple.out")
@@ -130,10 +131,10 @@ abstract class FireSimTestSuite(
   runSuite("verilator")(FastBlockdevTests)
 }
 
-class RocketF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimRocketChipConfig", "FireSimConfig")
-class BoomF1Tests extends FireSimTestSuite("FireBoomNoNIC", "FireSimBoomConfig", "FireSimConfig")
-class RocketNICF1Tests extends FireSimTestSuite("FireSim", "FireSimRocketChipConfig", "FireSimConfig") {
+class RocketF1Tests extends FireSimTestSuite("FireSimNoNIC", "DDR3FRFCFSLLC4MB_FireSimRocketChipQuadCoreConfig", "BaseF1Config")
+class BoomF1Tests extends FireSimTestSuite("FireBoomNoNIC", "DDR3FRFCFSLLC4MB_FireSimBoomConfig", "BaseF1Config")
+class RocketNICF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimRocketChipConfig", "BaseF1Config") {
   runSuite("verilator")(NICLoopbackTests)
 }
-class RamModelRocketF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimRocketChipDualCoreConfig", "Midas2Config")
-class RamModelBoomF1Tests extends FireSimTestSuite("FireBoomNoNIC", "FireSimBoomConfig", "Midas2Config")
+class RamModelRocketF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimRocketChipDualCoreConfig", "BaseF1Config_MCRams")
+class RamModelBoomF1Tests extends FireSimTestSuite("FireBoomNoNIC", "FireSimBoomConfig", "BaseF1Config_MCRams")
