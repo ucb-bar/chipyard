@@ -21,7 +21,7 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.amba.axi4._
 
-import boom.common.{BoomTile, BoomTilesKey, BoomCrossingKey}
+import boom.common.{BoomTile, BoomTilesKey, BoomCrossingKey, BoomTileParams}
 
 
 trait HasBoomAndRocketTiles extends HasTiles
@@ -34,49 +34,47 @@ trait HasBoomAndRocketTiles extends HasTiles
 
   protected val rocketTileParams = p(RocketTilesKey)
   protected val boomTileParams = p(BoomTilesKey)
+
   // crossing can either be per tile or global (aka only 1 crossing specified)
   private val rocketCrossings = perTileOrGlobalSetting(p(RocketCrossingKey), rocketTileParams.size)
   private val boomCrossings = perTileOrGlobalSetting(p(BoomCrossingKey), boomTileParams.size)
+
+  val allTilesInfo = (rocketTileParams ++ boomTileParams) zip (rocketCrossings ++ boomCrossings)
 
   // Make a tile and wire its nodes into the system,
   // according to the specified type of clock crossing.
   // Note that we also inject new nodes into the tile itself,
   // also based on the crossing type.
-  val rocketTiles = rocketTileParams.zip(rocketCrossings).map { case (tp, crossing) =>
-    val rocket = LazyModule(new RocketTile(tp, crossing, PriorityMuxHartIdFromSeq(rocketTileParams), logicalTreeNode))
+  // This MUST be performed in order of hartid
+  val tiles = allTilesInfo.sortWith(_._1.hartId < _._1.hartId).map {
+    case (param, crossing) => {
+      val (tile, rocketLogicalTree) = param match {
+        case r: RocketTileParams => {
+          val t = LazyModule(new RocketTile(r, crossing, PriorityMuxHartIdFromSeq(rocketTileParams), logicalTreeNode))
+          (t, t.rocketLogicalTree)
+        }
+        case b: BoomTileParams => {
+          val t = LazyModule(new BoomTile(b, crossing, PriorityMuxHartIdFromSeq(boomTileParams), logicalTreeNode))
+          (t, t.rocketLogicalTree) // TODO FIX rocketLogicalTree is not a member of the superclass, both child classes define it separately
+        }
+      }
+      connectMasterPortsToSBus(tile, crossing)
+      connectSlavePortsToCBus(tile, crossing)
 
-    connectMasterPortsToSBus(rocket, crossing)
-    connectSlavePortsToCBus(rocket, crossing)
+      def treeNode: RocketTileLogicalTreeNode = new RocketTileLogicalTreeNode(rocketLogicalTree.getOMInterruptTargets)
+      LogicalModuleTree.add(logicalTreeNode, rocketLogicalTree)
 
-    def treeNode: RocketTileLogicalTreeNode = new RocketTileLogicalTreeNode(rocket.rocketLogicalTree.getOMInterruptTargets)
-    LogicalModuleTree.add(logicalTreeNode, rocket.rocketLogicalTree)
-
-    rocket
-  }
-
-  val boomTiles = boomTileParams.zip(boomCrossings).map { case (tp, crossing) =>
-    val boom = LazyModule(new BoomTile(tp, crossing, PriorityMuxHartIdFromSeq(boomTileParams), logicalTreeNode))
-
-    connectMasterPortsToSBus(boom, crossing)
-    connectSlavePortsToCBus(boom, crossing)
-
-    def treeNode: RocketTileLogicalTreeNode = new RocketTileLogicalTreeNode(boom.rocketLogicalTree.getOMInterruptTargets)
-    LogicalModuleTree.add(logicalTreeNode, boom.rocketLogicalTree)
-
-    boom
-  }
-
-  // combine tiles and connect interrupts based on the order of harts
-  val boomAndRocketTiles = (rocketTiles ++ boomTiles).sortWith(_.tileParams.hartId < _.tileParams.hartId).map {
-    tile => {
       connectInterrupts(tile, Some(debug), clintOpt, plicOpt)
 
       tile
     }
   }
 
-  def coreMonitorBundles = (rocketTiles map { t => t.module.core.rocketImpl.coreMonitorBundle}).toList ++
-                             (boomTiles map { t => t.module.core.coreMonitorBundle}).toList
+
+  def coreMonitorBundles = tiles.map {
+    case r: RocketTile => r.module.core.rocketImpl.coreMonitorBundle
+    case b: BoomTile => b.module.core.coreMonitorBundle
+  }.toList
 }
 
 trait HasBoomAndRocketTilesModuleImp extends HasTilesModuleImp
@@ -88,7 +86,6 @@ trait HasBoomAndRocketTilesModuleImp extends HasTilesModuleImp
 class Subsystem(implicit p: Parameters) extends BaseSubsystem
   with HasBoomAndRocketTiles
 {
-  val tiles = boomAndRocketTiles
   override lazy val module = new SubsystemModuleImp(this)
 
   def getOMInterruptDevice(resourceBindingsMap: ResourceBindingsMap): Seq[OMInterrupt] = Nil
