@@ -8,12 +8,15 @@ import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.util._
+import freechips.rocketchip.tile._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.rocket.TracedInstruction
 import firesim.endpoints.{TraceOutputTop, DeclockedTracedInstruction}
 
 import midas.models.AXI4BundleWithEdge
 import midas.targetutils.{ExcludeInstanceAsserts, MemModelAnnotation}
+
+import boom.common.BoomTile
 
 /** Copied from RC and modified to change the IO type of the Imp to include the Diplomatic edges
   *  associated with each port. This drives FASED functional model sizing
@@ -107,21 +110,23 @@ trait ExcludeInvalidBoomAssertions extends LazyModuleImp {
 
 trait CanHaveMultiCycleRegfileImp {
   val outer: utilities.HasBoomAndRocketTiles
-  val boomCores = outer.boomTiles.map(tile => tile.module.core)
-  boomCores.foreach({ core =>
-    core.iregfile match {
-      case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
-      case _ => Nil
-    }
 
-     if (core.fp_pipeline != null) core.fp_pipeline.fregfile match {
-      case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
-      case _ => Nil
+  outer.tiles.map {
+    case r: RocketTile => {
+      annotate(MemModelAnnotation(r.module.core.rocketImpl.rf.rf))
+      r.module.fpuOpt.foreach(fpu => annotate(MemModelAnnotation(fpu.fpuImpl.regfile)))
     }
-  })
-
-  outer.rocketTiles.foreach({ tile =>
-    annotate(MemModelAnnotation(tile.module.core.rocketImpl.rf.rf))
-    tile.module.fpuOpt.foreach(fpu => annotate(MemModelAnnotation(fpu.fpuImpl.regfile)))
-  })
+    case b: BoomTile => {
+      val core = b.module.core
+      core.iregfile match {
+        case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
+        case _ => Nil
+      }
+      if (core.fp_pipeline != null) core.fp_pipeline.fregfile match {
+        case frf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(frf.regfile))
+        case _ => Nil
+      }
+    }
+  }
 }
+
