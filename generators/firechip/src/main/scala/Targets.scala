@@ -86,60 +86,7 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNICDUT](l: L) extends SubsystemModule
     with HasTraceIOImp
     with CanHaveMultiCycleRegfileImp
 
-
 class FireSimNoNIC(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimNoNICDUT)
-
-class FireBoomDUT(implicit p: Parameters) extends Subsystem
-    with HasHierarchicalBusTopology
-    with CanHaveMasterAXI4MemPort
-    with HasPeripheryBootROM
-    with HasPeripherySerial
-    with HasPeripheryUART
-    with HasPeripheryIceNIC
-    with HasPeripheryBlockDevice
-    with HasTraceIO
-{
-  override lazy val module = new FireBoomModuleImp(this)
-}
-
-class FireBoomModuleImp[+L <: FireBoomDUT](l: L) extends SubsystemModuleImp(l)
-    with HasRTCModuleImp
-    with CanHaveMasterAXI4MemPortModuleImp
-    with HasPeripheryBootROMModuleImp
-    with HasPeripherySerialModuleImp
-    with HasPeripheryUARTModuleImp
-    with HasPeripheryIceNICModuleImpValidOnly
-    with HasPeripheryBlockDeviceModuleImp
-    with HasTraceIOImp
-    with ExcludeInvalidBoomAssertions
-    with CanHaveMultiCycleRegfileImp
-
-class FireBoom(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireBoomDUT)
-
-class FireBoomNoNICDUT(implicit p: Parameters) extends Subsystem
-    with HasHierarchicalBusTopology
-    with CanHaveMasterAXI4MemPort
-    with HasPeripheryBootROM
-    with HasPeripherySerial
-    with HasPeripheryUART
-    with HasPeripheryBlockDevice
-    with HasTraceIO
-{
-  override lazy val module = new FireBoomNoNICModuleImp(this)
-}
-
-class FireBoomNoNICModuleImp[+L <: FireBoomNoNICDUT](l: L) extends SubsystemModuleImp(l)
-    with HasRTCModuleImp
-    with CanHaveMasterAXI4MemPortModuleImp
-    with HasPeripheryBootROMModuleImp
-    with HasPeripherySerialModuleImp
-    with HasPeripheryUARTModuleImp
-    with HasPeripheryBlockDeviceModuleImp
-    with HasTraceIOImp
-    with ExcludeInvalidBoomAssertions
-    with CanHaveMultiCycleRegfileImp
-
-class FireBoomNoNIC(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireBoomNoNICDUT)
 
 class FireSimTraceGen(implicit p: Parameters) extends BaseSubsystem
     with HasHierarchicalBusTopology

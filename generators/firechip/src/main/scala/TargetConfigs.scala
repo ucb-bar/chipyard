@@ -188,6 +188,19 @@ class FireSimBoomQuadCoreConfig extends Config(
   new FireSimBoomConfig)
 
 //**********************************************************************************
+//* Heterogeneous Configurations
+//*********************************************************************************/
+
+// dual core config (rocket + small boom)
+class FireSimRocketBoomConfig extends Config(
+  new WithBoomL2TLBs(1024) ++ // reset l2 tlb amt ("WithSmallBooms" overrides it)
+  new boom.common.WithRenumberHarts ++ // fix hart numbering
+  new boom.common.WithSmallBooms ++ // change single BOOM to small
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++ // add a "big" rocket core
+  new FireSimBoomConfig
+)
+
+//**********************************************************************************
 //* Supernode Configurations
 //*********************************************************************************/
 

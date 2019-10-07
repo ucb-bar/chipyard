@@ -14,7 +14,9 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.rocket.TracedInstruction
 import firesim.bridges.{TraceOutputTop, DeclockedTracedInstruction}
 
-import midas.targetutils.{ExcludeInstanceAsserts, MemModelAnnotation}
+import midas.targetutils.MemModelAnnotation
+
+import boom.common.BoomTile
 
 import boom.common.BoomTile
 
@@ -48,11 +50,6 @@ trait HasTraceIOImp extends LazyModuleImp {
     traceprint := Cat(traceIO.traces.map(_.asUInt))
     printf("TRACEPORT: %x\n", traceprint)
   }
-}
-
-// Prevent MIDAS from synthesizing assertions in the dummy TLB included in BOOM
-trait ExcludeInvalidBoomAssertions extends LazyModuleImp {
-  ExcludeInstanceAsserts(("NonBlockingDCache", "dtlb"))
 }
 
 trait CanHaveMultiCycleRegfileImp {
