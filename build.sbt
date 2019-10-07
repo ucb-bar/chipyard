@@ -145,7 +145,7 @@ lazy val boom = (project in file("generators/boom"))
 
 //lazy val sha3 = (project in file("generators/sha3"))
 //  .dependsOn(rocketchip, chisel_testers)
-//  .settings(commonSettings)`
+//  .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
   .dependsOn(chisel_testers, example)
