@@ -127,6 +127,14 @@ Intermediate database are written in ``build/par-rundir`` between each step of t
 
 Timing reports are found in ``build/par-rundir/timingReports``. They are gzipped text files.
 
+`gdspy` can be used to `view the final layout <https://gdspy.readthedocs.io/en/stable/reference.html?highlight=scale#layoutviewer>`__, but it is somewhat crude and slow (wait a few minutes for it to load):
+
+.. code-block:: shell
+
+    ``python3 view_gds.py build/par-rundir/Sha3AccelwBB.gds``
+
+By default, this script only shows the M2 thru M4 routing. Layers can be toggled in the layout viewer's side pane and ``view_gds.py`` has a mapping of layer numbers to layer names.
+
 DRC & LVS
 ^^^^^^^^^
 To run DRC & LVS, and view the results in Calibre:
