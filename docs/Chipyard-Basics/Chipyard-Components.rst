@@ -88,6 +88,13 @@ Toolchains
   A fork of riscv-tools, designed to work with the Hwacha non-standard RISC-V extension.
   This fork can also be used as an example demonstrating how to add additional RoCC accelerators to the ISA-level simulation (Spike) and the higher-level software toolchain (GNU binutils, riscv-opcodes, etc.)
 
+Software
+-------------------------------------------
+
+**FireMarshal**
+  FireMarshal is the default workload generation tool that Chipyard uses to create software to run on its platforms.
+  See :ref:`fire-marshal` for more information.
+
 Sims
 -------------------------------------------
 

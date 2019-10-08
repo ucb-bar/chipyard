@@ -37,7 +37,7 @@ Finally, source the following environment at the root of the firesim directory:
     # (Recommended) The default manager environment (includes env.sh)
     source sourceme-f1-manager.sh
 
-`Every time you want to use FireSim with a fresh shell, you must source this sourceme.sh`
+.. Note:: Every time you want to use FireSim with a fresh shell, you must source this ``sourceme-f1-manager.sh``
 
 At this point you're ready to use FireSim with Chipyard. If you're not already
 familiar with FireSim, please return to the `FireSim Docs
@@ -63,7 +63,7 @@ config looks as following:
     new DefaultRocketConfig
   )
 
-Then the equivalent FireChip config (in `generators/firechip/src/main/scala/TargetConfigs.scala`) based on `FireSimRocketChipConfig`
+Then the equivalent FireChip config (in ``generators/firechip/src/main/scala/TargetConfigs.scala``) based on ``FireSimRocketChipConfig``
 will look as follows:
 
 .. code-block:: scala

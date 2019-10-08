@@ -1,3 +1,4 @@
+.. _fire-marshal:
 FireMarshal
 =================
 ``software/firemarshal``

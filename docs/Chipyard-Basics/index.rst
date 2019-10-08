@@ -1,11 +1,11 @@
 Chipyard Basics
 ================================
 
-These guides will walk you through the basics of the Chipyard framework:
+These sections will walk you through the basics of the Chipyard framework:
 
 - First, we will go over the components of the framework.
 
-- Next, we will go over the different configurations available.
+- Next, we will go over how to understand how Chipyard configures its designs.
 
 - Then, we will go over initial framework setup.
 
