@@ -122,7 +122,7 @@ html_sidebars = {
     ]
 }
 
-html_logo = ' _static/images/chipyard-logo.png'
+html_logo = '_static/images/chipyard-logo.png'
 
 # -- Options for HTMLHelp output ------------------------------------------
 
