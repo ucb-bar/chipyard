@@ -6,6 +6,7 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.devices.tilelink._
+import freechips.rocketchip.devices.debug.HasPeripheryDebugModuleImp
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.util.{HeterogeneousBag}
 import freechips.rocketchip.amba.axi4.AXI4Bundle
@@ -13,12 +14,18 @@ import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy.LazyModule
 import utilities.{Subsystem, SubsystemModuleImp}
 import icenet._
+import firesim.util.DefaultFireSimHarness
 import testchipip._
 import testchipip.SerialAdapter.SERIAL_IF_WIDTH
 import tracegen.{HasTraceGenTiles, HasTraceGenTilesModuleImp}
 import sifive.blocks.devices.uart._
-import midas.models.AXI4BundleWithEdge
 import java.io.File
+
+
+object FireSimValName {
+  implicit val valName = ValName("FireSimHarness")
+}
+import FireSimValName._
 
 /*******************************************************************************
 * Top level DESIGN configurations. These describe the basic instantiations of
@@ -31,11 +38,10 @@ import java.io.File
 * determine which driver to build.
 *******************************************************************************/
 
-class FireSim(implicit p: Parameters) extends Subsystem
+class FireSimDUT(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
-    with CanHaveFASEDOptimizedMasterAXI4MemPort
+    with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
-    with HasNoDebug
     with HasPeripherySerial
     with HasPeripheryUART
     with HasPeripheryIceNIC
@@ -45,11 +51,10 @@ class FireSim(implicit p: Parameters) extends Subsystem
   override lazy val module = new FireSimModuleImp(this)
 }
 
-class FireSimModuleImp[+L <: FireSim](l: L) extends SubsystemModuleImp(l)
+class FireSimModuleImp[+L <: FireSimDUT](l: L) extends SubsystemModuleImp(l)
     with HasRTCModuleImp
-    with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
+    with CanHaveMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
-    with HasNoDebugModuleImp
     with HasPeripherySerialModuleImp
     with HasPeripheryUARTModuleImp
     with HasPeripheryIceNICModuleImpValidOnly
@@ -57,12 +62,12 @@ class FireSimModuleImp[+L <: FireSim](l: L) extends SubsystemModuleImp(l)
     with HasTraceIOImp
     with CanHaveMultiCycleRegfileImp
 
+class FireSim(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimDUT)
 
-class FireSimNoNIC(implicit p: Parameters) extends Subsystem
+class FireSimNoNICDUT(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
-    with CanHaveFASEDOptimizedMasterAXI4MemPort
+    with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
-    with HasNoDebug
     with HasPeripherySerial
     with HasPeripheryUART
     with HasPeripheryBlockDevice
@@ -71,11 +76,10 @@ class FireSimNoNIC(implicit p: Parameters) extends Subsystem
   override lazy val module = new FireSimNoNICModuleImp(this)
 }
 
-class FireSimNoNICModuleImp[+L <: FireSimNoNIC](l: L) extends SubsystemModuleImp(l)
+class FireSimNoNICModuleImp[+L <: FireSimNoNICDUT](l: L) extends SubsystemModuleImp(l)
     with HasRTCModuleImp
-    with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
+    with CanHaveMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
-    with HasNoDebugModuleImp
     with HasPeripherySerialModuleImp
     with HasPeripheryUARTModuleImp
     with HasPeripheryBlockDeviceModuleImp
@@ -83,11 +87,12 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNIC](l: L) extends SubsystemModuleImp
     with CanHaveMultiCycleRegfileImp
 
 
-class FireBoom(implicit p: Parameters) extends Subsystem
+class FireSimNoNIC(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimNoNICDUT)
+
+class FireBoomDUT(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
-    with CanHaveFASEDOptimizedMasterAXI4MemPort
+    with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
-    with HasNoDebug
     with HasPeripherySerial
     with HasPeripheryUART
     with HasPeripheryIceNIC
@@ -97,11 +102,10 @@ class FireBoom(implicit p: Parameters) extends Subsystem
   override lazy val module = new FireBoomModuleImp(this)
 }
 
-class FireBoomModuleImp[+L <: FireBoom](l: L) extends SubsystemModuleImp(l)
+class FireBoomModuleImp[+L <: FireBoomDUT](l: L) extends SubsystemModuleImp(l)
     with HasRTCModuleImp
-    with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
+    with CanHaveMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
-    with HasNoDebugModuleImp
     with HasPeripherySerialModuleImp
     with HasPeripheryUARTModuleImp
     with HasPeripheryIceNICModuleImpValidOnly
@@ -110,11 +114,12 @@ class FireBoomModuleImp[+L <: FireBoom](l: L) extends SubsystemModuleImp(l)
     with ExcludeInvalidBoomAssertions
     with CanHaveMultiCycleRegfileImp
 
-class FireBoomNoNIC(implicit p: Parameters) extends Subsystem
+class FireBoom(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireBoomDUT)
+
+class FireBoomNoNICDUT(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
-    with CanHaveFASEDOptimizedMasterAXI4MemPort
+    with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
-    with HasNoDebug
     with HasPeripherySerial
     with HasPeripheryUART
     with HasPeripheryBlockDevice
@@ -123,11 +128,10 @@ class FireBoomNoNIC(implicit p: Parameters) extends Subsystem
   override lazy val module = new FireBoomNoNICModuleImp(this)
 }
 
-class FireBoomNoNICModuleImp[+L <: FireBoomNoNIC](l: L) extends SubsystemModuleImp(l)
+class FireBoomNoNICModuleImp[+L <: FireBoomNoNICDUT](l: L) extends SubsystemModuleImp(l)
     with HasRTCModuleImp
-    with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
+    with CanHaveMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
-    with HasNoDebugModuleImp
     with HasPeripherySerialModuleImp
     with HasPeripheryUARTModuleImp
     with HasPeripheryBlockDeviceModuleImp
@@ -135,58 +139,18 @@ class FireBoomNoNICModuleImp[+L <: FireBoomNoNIC](l: L) extends SubsystemModuleI
     with ExcludeInvalidBoomAssertions
     with CanHaveMultiCycleRegfileImp
 
-case object NumNodes extends Field[Int]
-
-class SupernodeIO(
-      nNodes: Int,
-      serialWidth: Int,
-      bagPrototype: HeterogeneousBag[AXI4BundleWithEdge])(implicit p: Parameters)
-    extends Bundle {
-
-    val serial = Vec(nNodes, new SerialIO(serialWidth))
-    val mem_axi = Vec(nNodes, bagPrototype.cloneType)
-    val bdev = Vec(nNodes, new BlockDeviceIO)
-    val net = Vec(nNodes, new NICIOvonly)
-    val uart = Vec(nNodes, new UARTPortIO)
-
-    override def cloneType = new SupernodeIO(nNodes, serialWidth, bagPrototype).asInstanceOf[this.type]
-}
-
-
-class FireSimSupernode(implicit p: Parameters) extends Module {
-  val nNodes = p(NumNodes)
-  val nodes = Seq.fill(nNodes) {
-    Module(LazyModule(new FireSim).module)
-  }
-
-  val io = IO(new SupernodeIO(nNodes, SERIAL_IF_WIDTH, nodes(0).mem_axi4.get))
-
-  io.mem_axi.zip(nodes.map(_.mem_axi4)).foreach {
-    case (out, mem_axi4) => out <> mem_axi4.get
-  }
-  io.serial <> nodes.map(_.serial)
-  io.bdev <> nodes.map(_.bdev)
-  io.net <> nodes.map(_.net)
-  io.uart <> nodes.map(_.uart(0))
-  nodes.foreach{ case n => {
-    n.debug.clockeddmi.get.dmi.req.valid := false.B
-    n.debug.clockeddmi.get.dmi.resp.ready := false.B
-    n.debug.clockeddmi.get.dmiClock := clock
-    n.debug.clockeddmi.get.dmiReset := reset.toBool
-    n.debug.clockeddmi.get.dmi.req.bits.data := DontCare
-    n.debug.clockeddmi.get.dmi.req.bits.addr := DontCare
-    n.debug.clockeddmi.get.dmi.req.bits.op := DontCare
-  } }
-}
+class FireBoomNoNIC(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireBoomNoNICDUT)
 
 class FireSimTraceGen(implicit p: Parameters) extends BaseSubsystem
     with HasHierarchicalBusTopology
     with HasTraceGenTiles
-    with CanHaveFASEDOptimizedMasterAXI4MemPort {
+    with CanHaveMasterAXI4MemPort {
   override lazy val module = new FireSimTraceGenModuleImp(this)
 }
 
-class FireSimTraceGenModuleImp(outer: FireSimTraceGen)
-  extends BaseSubsystemModuleImp(outer)
-  with HasTraceGenTilesModuleImp
-  with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
+class FireSimTraceGenModuleImp(outer: FireSimTraceGen) extends BaseSubsystemModuleImp(outer)
+    with HasTraceGenTilesModuleImp
+    with CanHaveMasterAXI4MemPortModuleImp
+
+// Supernoded-ness comes from setting p(NumNodes) (see DefaultFiresimHarness) to something > 1
+class FireSimSupernode(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimDUT)

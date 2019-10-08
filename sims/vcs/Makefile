@@ -48,8 +48,7 @@ VCS_CC_OPTS = \
 	-CC "-I$(VCS_HOME)/include" \
 	-CC "-I$(RISCV)/include" \
 	-CC "-std=c++11" \
-	-CC "-Wl,-rpath,$(RISCV)/lib" \
-	$(RISCV)/lib/libfesvr.so
+	$(RISCV)/lib/libfesvr.a
 
 VCS_NONCC_OPTS = \
 	+lint=all,noVCDE,noONGS,noUI \

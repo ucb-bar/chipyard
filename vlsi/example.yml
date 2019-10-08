@@ -34,8 +34,11 @@ par.generate_power_straps_options:
       - M7
       - M8
       - M9
-    track_width: 5
+    pin_layers:
+      - M9
+    track_width: 7 # minimum allowed for M2 & M3
     track_spacing: 0
+    track_spacing_M3: 1 # to avoid M2 shorts at higher density
     track_start: 10
     power_utilization: 0.05
     power_utilization_M8: 1.0
@@ -54,7 +57,7 @@ vlsi.inputs.placement_constraints:
       left: 0
       right: 0
       top: 0
-      bottom: 1.08 #must be at least this number
+      bottom: 0
   - path: "Sha3AccelwBB/dco"
     type: hardmacro
     x: 108
@@ -63,6 +66,13 @@ vlsi.inputs.placement_constraints:
     height: 128
     orientation: r0
     top_layer: M9
+  - path: "Sha3AccelwBB/place_obs_bottom"
+    type: obstruction
+    obs_types: ["place"]
+    x: 0
+    y: 0
+    width: 300
+    height: 1.08 # 1 core site tall, necessary to avoid shorts
 
 # Pin placement constraints
 vlsi.inputs.pin_mode: generated
@@ -124,7 +134,7 @@ synthesis.genus.version: "1813"
 vlsi.core.par_tool: "innovus"
 vlsi.core.par_tool_path: ["hammer-cadence-plugins/par"]
 vlsi.core.par_tool_path_meta: "append"
-par.innovus.version: "191"
+par.innovus.version: "181"
 par.innovus.design_flow_effort: "standard"
 par.inputs.gds_merge: true
 # Calibre options

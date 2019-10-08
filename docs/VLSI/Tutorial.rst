@@ -54,8 +54,9 @@ Prerequisites
 * Genus, Innovus, and Calibre licenses
 * For ASAP7 specifically:
 
-  * Download the `ASAP7 PDK <http://asap.asu.edu/asap/>`__ tarball to a directory of choice but do not extract it
+  * Download the `ASAP7 PDK <http://asap.asu.edu/asap/>`__ tarball to a directory of choice but do not extract it. The tech plugin is configured to extract the PDK into a cache directory for you.
   * If you have additional ASAP7 hard macros, their LEF & GDS need to be 4x upscaled @ 4000 DBU precision. They may live outside ``extra_libraries`` at your discretion.
+  * Innovus version must be >= 15.2 or <= 18.1 (ISRs excluded).
 
 Initial Setup
 -------------
@@ -83,7 +84,7 @@ To elaborate the ``Sha3RocketConfig`` (Rocket Chip w/ the accelerator) and set u
 
     make buildfile MACROCOMPILER_MODE='--mode synflops' CONFIG=Sha3RocketConfig VLSI_TOP=Sha3AccelwBB
 
-The ``MACROCOMPILER_MODE='--mode synflops'`` is needed because the ASAP7 process does not yet have a memory compiler. Therefore, flip-flop arrays are used instead.
+The ``MACROCOMPILER_MODE='--mode synflops'`` is needed because the ASAP7 process does not yet have a memory compiler, so flip-flop arrays are used instead. This will dramatically increase the synthesis runtime if your design has a lot of memory state (e.g. large caches).
 
 The ``CONFIG=Sha3RocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a Rocket Chip with the Sha3Accel module.
 
@@ -98,7 +99,7 @@ example-vlsi
 ^^^^^^^^^^^^
 This is the entry script with placeholders for hooks. In the ``ExampleDriver`` class, a list of hooks is passed in the ``get_extra_par_hooks``. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in this example. Refer to the Hammer documentation on hooks for a detailed description of how these are injected into the VLSI flow.
 
-The ``scale_final_gds`` hook is a particularly powerful hook. It dumps a Python script provided by the ASAP7 tech plugin, an executes it within the Innovus TCL interpreter. This hook is run after ``write_design`` because the ASAP7 PDK requires post-par GDSs to be scaled down by a factor of 4.
+The ``scale_final_gds`` hook is a particularly powerful hook. It dumps a Python script provided by the ASAP7 tech plugin, an executes it within the Innovus TCL interpreter, and should be inserted after ``write_design``. This hook is necessary because the ASAP7 PDK does place-and-route using 4x upscaled LEFs for Innovus licensing reasons, thereby requiring the cells created in the post-P&R GDS to be scaled down by a factor of 4.
 
 example.yml
 ^^^^^^^^^^^
@@ -125,6 +126,14 @@ After completion, the final database can be opened in an interactive Innovus ses
 Intermediate database are written in ``build/par-rundir`` between each step of the ``par`` action, and can be restored in an interactive Innovus session as desired for debugging purposes. 
 
 Timing reports are found in ``build/par-rundir/timingReports``. They are gzipped text files.
+
+`gdspy` can be used to `view the final layout <https://gdspy.readthedocs.io/en/stable/reference.html?highlight=scale#layoutviewer>`__, but it is somewhat crude and slow (wait a few minutes for it to load):
+
+.. code-block:: shell
+
+    ``python3 view_gds.py build/par-rundir/Sha3AccelwBB.gds``
+
+By default, this script only shows the M2 thru M4 routing. Layers can be toggled in the layout viewer's side pane and ``view_gds.py`` has a mapping of layer numbers to layer names.
 
 DRC & LVS
 ^^^^^^^^^

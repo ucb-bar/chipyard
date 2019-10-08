@@ -7,7 +7,7 @@ version: 2
 jobs:
     commit-on-master-check:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -19,7 +19,7 @@ jobs:
                     .circleci/check-commit.sh
     install-riscv-toolchain:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -31,19 +31,19 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - run:
                 name: Building riscv-tools toolchain
                 command: |
                     .circleci/build-toolchains.sh riscv-tools
                 no_output_timeout: 120m
             - save_cache:
-                key: riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                key: riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
                 paths:
                     - "/home/riscvuser/riscv-tools-install"
     install-esp-toolchain:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -55,19 +55,19 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - esp-tools-installed-v1-{{ checksum "../esp-tools.hash" }}
+                    - esp-tools-installed-v2-{{ checksum "../esp-tools.hash" }}
             - run:
                 name: Building esp-tools toolchain
                 command: |
                     .circleci/build-toolchains.sh esp-tools
                 no_output_timeout: 120m
             - save_cache:
-                key: esp-tools-installed-v1-{{ checksum "../esp-tools.hash" }}
+                key: esp-tools-installed-v2-{{ checksum "../esp-tools.hash" }}
                 paths:
                     - "/home/riscvuser/esp-tools-install"
     install-verilator:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -90,7 +90,7 @@ jobs:
                     - "/home/riscvuser/verilator"
     build-extra-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -105,7 +105,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - run:
                 name: Build extra tests
                 command: .circleci/build-extra-tests.sh
@@ -116,7 +116,7 @@ jobs:
                     - "/home/riscvuser/project/tests"
     prepare-example:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -131,7 +131,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -145,7 +145,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-boomrocketexample:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -160,7 +160,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -174,7 +174,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-boom:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -189,7 +189,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -203,7 +203,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-rocketchip:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -218,7 +218,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -232,7 +232,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-blockdevrocketchip:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -247,7 +247,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -261,7 +261,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-hwacha:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -276,7 +276,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - esp-tools-installed-v1-{{ checksum "../esp-tools.hash" }}
+                    - esp-tools-installed-v2-{{ checksum "../esp-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -290,7 +290,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-firesim:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -305,7 +305,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -319,7 +319,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-fireboom:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -334,7 +334,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -348,7 +348,7 @@ jobs:
                     - "/home/riscvuser/project"
     prepare-firesim-clockdiv:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -363,7 +363,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -377,7 +377,7 @@ jobs:
                     - "/home/riscvuser/project"
     midasexamples-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -389,7 +389,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -398,7 +398,7 @@ jobs:
                 command: .circleci/run-midasexamples-tests.sh
     example-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -410,7 +410,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - example-{{ .Branch }}-{{ .Revision }}
@@ -422,7 +422,7 @@ jobs:
                 command: .circleci/run-tests.sh example
     boomrocketexample-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -434,7 +434,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - boomrocketexample-{{ .Branch }}-{{ .Revision }}
@@ -446,7 +446,7 @@ jobs:
                 command: .circleci/run-tests.sh boomrocketexample
     boom-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -458,7 +458,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - boom-{{ .Branch }}-{{ .Revision }}
@@ -470,7 +470,7 @@ jobs:
                 command: .circleci/run-tests.sh boom
     rocketchip-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -482,7 +482,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - rocketchip-{{ .Branch }}-{{ .Revision }}
@@ -494,7 +494,7 @@ jobs:
                 command: .circleci/run-tests.sh rocketchip
     hwacha-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -506,7 +506,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - esp-tools-installed-v1-{{ checksum "../esp-tools.hash" }}
+                    - esp-tools-installed-v2-{{ checksum "../esp-tools.hash" }}
             - restore_cache:
                 keys:
                     - hwacha-{{ .Branch }}-{{ .Revision }}
@@ -518,7 +518,7 @@ jobs:
                 command: .circleci/run-tests.sh hwacha
     firesim-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -530,7 +530,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - firesim-{{ .Branch }}-{{ .Revision }}
@@ -545,7 +545,7 @@ jobs:
                 command: .circleci/run-firesim-tests.sh firesim
     fireboom-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -557,7 +557,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - fireboom-{{ .Branch }}-{{ .Revision }}
@@ -573,7 +573,7 @@ jobs:
                 no_output_timeout: 20m
     firesim-clockdiv-run-tests:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.10
+            - image: riscvboom/riscvboom-images:0.0.11
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
             TERM: dumb
@@ -585,7 +585,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v1-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - firesim-clockdiv-{{ .Branch }}-{{ .Revision }}

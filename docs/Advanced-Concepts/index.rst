@@ -10,4 +10,5 @@ They expect you to know about Chisel, Parameters, Configs, etc.
 
    Top-Testharness
    Chip-Communication
+   Debugging-RTL
    Resources

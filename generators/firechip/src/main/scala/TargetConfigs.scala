@@ -12,11 +12,15 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.DebugModuleParams
 import boom.common.BoomTilesKey
-import testchipip.{WithBlockDevice, BlockDeviceKey, BlockDeviceConfig}
+import testchipip.{BlockDeviceKey, BlockDeviceConfig}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 import tracegen.TraceGenKey
 import icenet._
+
+import firesim.bridges._
+import firesim.util.{WithNumNodes}
+import firesim.configs._
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMParams => {
@@ -37,11 +41,13 @@ class WithPeripheryBusFrequency(freq: BigInt) extends Config((site, here, up) =>
 })
 
 class WithUARTKey extends Config((site, here, up) => {
-   case PeripheryUARTKey => List(UARTParams(
+  case PeripheryUARTKey => List(UARTParams(
      address = BigInt(0x54000000L),
      nTxEntries = 256,
      nRxEntries = 256))
 })
+
+class WithBlockDevice extends Config(new testchipip.WithBlockDevice)
 
 class WithNICKey extends Config((site, here, up) => {
   case NICKey => NICConfig(
@@ -80,6 +86,14 @@ class WithScalaTestFeatures extends Config((site, here, up) => {
     case PrintTracePort => true
 })
 
+// FASED Config Aliases. This to enable config generation via "_" concatenation
+// which requires that all config classes be defined in the same package
+class DDR3FRFCFSLLC4MB extends FRFCFS16GBQuadRankLLC4MB
+class DDR3FRFCFSLLC4MB3Div extends FRFCFS16GBQuadRankLLC4MB3Div
+
+// L2 Config Aliases. For use with "_" concatenation
+class L2SingleBank512K extends freechips.rocketchip.subsystem.WithInclusiveCache
+
 /*******************************************************************************
 * Full TARGET_CONFIG configurations. These set parameters of the target being
 * simulated.
@@ -101,6 +115,8 @@ class FireSimRocketChipConfig extends Config(
   new WithRocketL2TLBs(1024) ++
   new WithPerfCounters ++
   new WithoutClockGating ++
+  new WithDefaultMemModel ++
+  new WithDefaultFireSimBridges ++
   new freechips.rocketchip.system.DefaultConfig)
 
 class WithNDuplicatedRocketCores(n: Int) extends Config((site, here, up) => {
@@ -130,6 +146,13 @@ class FireSimRocketChipOctaCoreConfig extends Config(
   new WithNDuplicatedRocketCores(8) ++
   new FireSimRocketChipSingleCoreConfig)
 
+// SHA-3 accelerator config
+class FireSimRocketChipSha3L2Config extends Config(
+  new WithInclusiveCache ++
+  new sha3.WithSha3Accel ++
+  new WithNBigCores(1) ++
+  new FireSimRocketChipConfig)
+
 class FireSimBoomConfig extends Config(
   new WithBootROM ++
   new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
@@ -140,8 +163,10 @@ class FireSimBoomConfig extends Config(
   new WithBlockDevice ++
   new WithBoomL2TLBs(1024) ++
   new WithoutClockGating ++
+  new WithDefaultMemModel ++
   new boom.common.WithLargeBooms ++
   new boom.common.WithNBoomCores(1) ++
+  new WithDefaultFireSimBridges ++
   new freechips.rocketchip.system.BaseConfig
 )
 
@@ -165,9 +190,6 @@ class FireSimBoomQuadCoreConfig extends Config(
 //**********************************************************************************
 //* Supernode Configurations
 //*********************************************************************************/
-class WithNumNodes(n: Int) extends Config((pname, site, here) => {
-  case NumNodes => n
-})
 
 class SupernodeFireSimRocketChipConfig extends Config(
   new WithNumNodes(4) ++
