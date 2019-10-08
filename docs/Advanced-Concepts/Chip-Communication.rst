@@ -74,7 +74,7 @@ In order to communicate with the DUT with the DMI protocol, the DUT needs to con
 The DTM is given in the `RISC-V Debug Specification <https://riscv.org/specifications/debug-specification/>`__
 and is responsible for managing communication between the DUT and whatever lives on the other side of the DMI (in this case FESVR).
 This is implemented in the Rocket Chip ``Subsystem`` by having the ``HasPeripheryDebug`` and ``HasPeripheryDebugModuleImp`` mixins.
- During simulation, the host sends DMI commands to a
+During simulation, the host sends DMI commands to a
 simulation stub called ``SimDTM`` (C++ class) that resides in a ``SimDTM`` verilog module
 (both are located in the ``generators/rocket-chip`` project). This ``SimDTM`` verilog module then
 sends the DMI command recieved by the simulation stub into the DUT which then converts the DMI

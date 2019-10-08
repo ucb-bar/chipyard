@@ -97,6 +97,7 @@ html_theme = 'sphinx_rtd_theme'
 #
 html_theme_options = {
     'collapse_navigation': False,
+    'logo_only': True,
 #    'display_version': True,
 #    'navigation_depth': 4,
 }
@@ -121,6 +122,7 @@ html_sidebars = {
     ]
 }
 
+html_logo = '_static/images/chipyard-logo.png'
 
 # -- Options for HTMLHelp output ------------------------------------------
 

@@ -21,7 +21,7 @@ Start by fetching Chipyard's sources. Run:
     cd chipyard
     ./scripts/init-submodules-no-riscv-tools.sh
 
-This will have initialized the git submodules.
+This will initialize and checkout all of the necessary git submodules.
 
 Installing the RISC-V Tools
 -------------------------------------------
@@ -34,7 +34,7 @@ To build the toolchains, you should run:
 
     ./scripts/build-toolchains.sh
 
-.. Note:: If you are planning to use the Hwacha vector unit, or other RoCC-based accelerators, you should build the esp-tools toolchains by adding the ``esp-tools`` argument to the script above.
+.. Note:: If you are planning to use the Hwacha vector unit, or other RoCC-based accelerators, you should build the esp-tools toolchain by adding the ``esp-tools`` argument to the script above.
   If you are running on an Amazon Web Services EC2 instance, intending to use FireSim, you can also use the ``--ec2fast`` flag for an expedited installation of a pre-compiled toolchain.
 
 Finally, set up Chipyard's environment variables and put the newly built toolchain on your path:
@@ -60,6 +60,6 @@ This depends on what you are planning to do with Chipyard.
 
 * If you intend to change the generators (BOOM, Rocket, etc) themselves, see :ref:`generator-index`.
 
-* If you intend to run a VLSI flow using one of the vanilla Chipyard examples, go to <> and follow the instructions.
+* If you intend to run a tutorial VLSI flow using one of the Chipyard examples, go to :ref:`tutorial` and follow the instructions.
 
 * If you intend to build a chip using one of the vanilla Chipyard examples, go to :ref:`build-a-chip` and follow the instructions.

@@ -103,7 +103,7 @@ implementation (ex. ``HasPeripherySerialModuleImp`` where ``Imp`` refers to impl
 all the logical connections between generators and exchanges configuration information among them, while the
 lazy module implementation performs the actual Chisel RTL elaboration.
 
-In the MySoC example class, the "outer" ``MySoC`` instantiates the "inner"
+In the ``MySoC`` example class, the "outer" ``MySoC`` instantiates the "inner"
 ``MySoCModuleImp`` as a lazy module implementation. This delays immediate elaboration
 of the module until all logical connections are determined and all configuration information is exchanged.
 The ``RocketSubsystem`` outer base class, as well as the
@@ -118,10 +118,10 @@ the ``SerialAdapter`` module, and instantiates queues.
 
 In the test harness, the SoC is elaborated with
 ``val dut = Module(LazyModule(MySoC))``.
-After elaboration, the result will be a MySoC module, which contains a
-SerialAdapter module (among others).
+After elaboration, the result will be a ``MySoC`` module, which contains a
+``SerialAdapter`` module (among others).
 
-From a high level, classes which extend LazyModule *must* reference
+From a high level, classes which extend ``LazyModule`` *must* reference
 their module implementation through ``lazy val module``, and they
 *may* optionally reference other lazy modules (which will elaborate
 as child modules in the module hierarchy). The "inner" modules
@@ -129,12 +129,13 @@ contain the implementation for the module, and may instantiate
 other normal modules OR lazy modules (for nested Diplomacy
 graphs, for example).
 
- Mix-in
+
+Mix-in
 ---------------------------
 
 A mix-in is a Scala trait, which sets parameters for specific system components, as well as enabling instantiation and wiring of the relevant system components to system buses.
 The naming convention for an additive mix-in is ``Has<YourMixin>``.
-This is shown in the MySoC class where things such as ``HasPeripherySerial`` connect a RTL component to a bus and expose signals to the top-level.
+This is shown in the ``MySoC`` class where things such as ``HasPeripherySerial`` connect a RTL component to a bus and expose signals to the top-level.
 
 Additional References
 ---------------------------

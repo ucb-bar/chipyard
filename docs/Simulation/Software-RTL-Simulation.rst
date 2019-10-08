@@ -58,7 +58,7 @@ For instance, to run one of the riscv-tools assembly tests.
 
     ./simulator-example-RocketConfig $RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
 
-.. Note:: in a VCS simulator, the simulator name will be ``simv-example-RocketConfig`` ``instead of simulator-example-RocketConfig``.
+.. Note:: In a VCS simulator, the simulator name will be ``simv-example-RocketConfig`` instead of ``simulator-example-RocketConfig``.
 
 Alternatively, we can run a pre-packaged suite of RISC-V assembly or benchmark tests, by adding the make target ``run-asm-tests`` or ``run-bmark-tests``.
 For example:
@@ -69,7 +69,7 @@ For example:
     make run-bmark-tests
 
 
-.. Note:: Before running the pre-packaged suites, you must run the plain ``make`` command, since the elaboration command generates a Makefile fragment that contains the target for the pre-packaged test suites. Otherwise, you will likely encounter a Makefile target error.
+.. Note:: Before running the pre-packaged suites, you must run the plain ``make`` command, since the elaboration command generates a ``Makefile`` fragment that contains the target for the pre-packaged test suites. Otherwise, you will likely encounter a ``Makefile`` target error.
 
 
 .. _sw-sim-custom:
@@ -114,7 +114,7 @@ Therefore, in order to simulate a simple Rocket-based example system we can use:
     ./simulator-<yourproject>-<yourconfig> ...
 
 
-All `Make` targets that can be applied to the default example, can also be applied to custom project using the custom environment variables. For example, the following code example will run the RISC-V assembly benchmark suite on the Hwacha subproject:
+All ``make`` targets that can be applied to the default example, can also be applied to custom project using the custom environment variables. For example, the following code example will run the RISC-V assembly benchmark suite on the Hwacha subproject:
 
 .. code-block:: shell
 
@@ -130,10 +130,8 @@ Generating Waveforms
 
 If you would like to extract waveforms from the simulation, run the command ``make debug`` instead of just ``make``.
 
-
 For a Verilator simulation, this will generate a vcd file (vcd is a standard waveform representation file format) that can be loaded to any common waveform viewer.
 An open-source vcd-capable waveform viewer is `GTKWave <http://gtkwave.sourceforge.net/>`__.
-
 
 For a VCS simulation, this will generate a vpd file (this is a proprietary waveform representation format used by Synopsys) that can be loaded to vpd-supported waveform viewers.
 If you have Synopsys licenses, we recommend using the DVE waveform viewer.

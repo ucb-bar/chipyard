@@ -19,5 +19,5 @@ Click next to see how to run a simulation.
    :caption: Simulation:
 
    Software-RTL-Simulation
-   FPGA-Accelerated-Simulators
+   FPGA-Accelerated-Simulation
 
