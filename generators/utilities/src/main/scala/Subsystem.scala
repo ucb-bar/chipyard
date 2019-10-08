@@ -46,6 +46,8 @@ trait HasBoomAndRocketTiles extends HasTiles
   // Note that we also inject new nodes into the tile itself,
   // also based on the crossing type.
   // This MUST be performed in order of hartid
+  // There is something weird with registering tile-local interrupt controllers to the CLINT.
+  // TODO: investigate why
   val tiles = allTilesInfo.sortWith(_._1.hartId < _._1.hartId).map {
     case (param, crossing) => {
       val (tile, rocketLogicalTree) = param match {
