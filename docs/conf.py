@@ -121,7 +121,7 @@ html_sidebars = {
     ]
 }
 
-html_logo = ' _static/images/chipyard-logo.svg'
+html_logo = ' _static/images/chipyard-logo.png'
 
 # -- Options for HTMLHelp output ------------------------------------------
 
