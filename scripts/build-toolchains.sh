@@ -122,7 +122,7 @@ CC= CXX= module_all riscv-pk --prefix="${RISCV}" --host=riscv64-unknown-elf
 module_all riscv-tests --prefix="${RISCV}/riscv64-unknown-elf"
 
 # Common tools (not in any particular toolchain dir)
-SRCDIR="$RDIR/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv64-softmmu
+SRCDIR="$(pwd)/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv64-softmmu
 
 cd "$RDIR"
 
