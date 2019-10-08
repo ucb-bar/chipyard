@@ -18,8 +18,6 @@ import midas.targetutils.MemModelAnnotation
 
 import boom.common.BoomTile
 
-import boom.common.BoomTile
-
 /* Wires out tile trace ports to the top; and wraps them in a Bundle that the
  * TracerV bridge can match on.
  */
