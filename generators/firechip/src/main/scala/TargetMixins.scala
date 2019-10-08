@@ -11,12 +11,12 @@ import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.util._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.rocket.TracedInstruction
-import firesim.endpoints.{TraceOutputTop, DeclockedTracedInstruction}
+import firesim.bridges.{TraceOutputTop, DeclockedTracedInstruction}
 
 import midas.targetutils.{ExcludeInstanceAsserts, MemModelAnnotation}
 
 /* Wires out tile trace ports to the top; and wraps them in a Bundle that the
- * TracerV endpoint can match on.
+ * TracerV bridge can match on.
  */
 object PrintTracePort extends Field[Boolean](false)
 
