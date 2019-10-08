@@ -9,7 +9,7 @@ import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.util._
-import freechips.rocketchip.tile._
+import freechips.rocketchip.tile.RocketTile
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.rocket.TracedInstruction
 import firesim.bridges.{TraceOutputTop, DeclockedTracedInstruction}
