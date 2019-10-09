@@ -88,8 +88,8 @@ class WithScalaTestFeatures extends Config((site, here, up) => {
 
 // FASED Config Aliases. This to enable config generation via "_" concatenation
 // which requires that all config classes be defined in the same package
-class DDR3FRFCFSLLC4MB extends FRFCFS16GBQuadRankLLC4MB
-class DDR3FRFCFSLLC4MB3Div extends FRFCFS16GBQuadRankLLC4MB3Div
+class DDR3FRFCFSLLC2MB extends FRFCFS16GBQuadRankLLC2MB
+class DDR3FRFCFSLLC2MB3Div extends FRFCFS16GBQuadRankLLC2MB3Div
 
 // L2 Config Aliases. For use with "_" concatenation
 class L2SingleBank512K extends freechips.rocketchip.subsystem.WithInclusiveCache
