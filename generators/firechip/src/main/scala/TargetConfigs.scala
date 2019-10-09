@@ -18,8 +18,8 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import sifive.blocks.inclusivecache.InclusiveCachePortParameters
 import memblade.manager.{MemBladeKey, MemBladeParams, MemBladeQueueParams}
 import memblade.client.{RemoteMemClientKey, RemoteMemClientConfig}
-import memblade.cache.{DRAMCacheKey, DRAMCacheConfig, RemoteAccessDepths, WritebackDepths, MemoryQueueParams}
-import memblade.prefetcher.{PrefetchRoCC, SoftPrefetchConfig, AutoPrefetchConfig, StreamBufferConfig}
+import memblade.cache._
+import memblade.prefetcher._
 import scala.math.{min, max}
 import tracegen.TraceGenKey
 import icenet._
@@ -85,16 +85,16 @@ class WithDRAMCacheKey extends Config((site, here, up) => {
     baseAddr = BigInt(1) << 37,
     nTrackersPerBank = 8,
     nBanksPerChannel = 8,
-    nChannels = 1,
+    nChannels = 2,
     nSecondaryRequests = 1,
     spanBytes = site(CacheBlockBytes),
     logAddrBits = 37,
     outIdBits = 4,
-    nWritebackRemXacts = 64,
+    nWritebackRemXacts = 128,
     remAccessQueue = RemoteAccessDepths(1, 8, 1, 8),
     wbQueue = WritebackDepths(1, 1),
-    memInQueue = MemoryQueueParams(0, 0, 2, 2, 8, 2),
-    memOutQueue = MemoryQueueParams(0, 0, 2, 2, 2, 2),
+    memInQueue = MemoryQueueParams(0, 0, 8, 2, 8, 2),
+    memOutQueue = MemoryQueueParams(2, 2, 2, 2, 2, 2),
     zeroMetadata = false)
 })
 
@@ -115,7 +115,8 @@ class WithPrefetchRoCC extends Config((site, here, up) => {
         nWays = 4,
         nBlocks = 28,
         hitThreshold = 1,
-        timeoutPeriod = 8192))))
+        timeoutPeriod = 8192,
+        lookAhead = 4))))
   })
 })
 
@@ -218,11 +219,27 @@ class WithL2InnerExteriorBuffer(aDepth: Int, dDepth: Int) extends Config(
   })
 
 class WithStandardL2 extends Config(
-  new WithL2InnerExteriorBuffer(2, 2) ++
+  new WithL2InnerExteriorBuffer(4, 2) ++
   new WithInclusiveCache(
-    nBanks = 8,
+    nBanks = 4,
     capacityKB = 1024,
     outerLatencyCycles = 50))
+
+class WithLargeL2 extends Config(
+  new WithL2InnerExteriorBuffer(2, 2) ++
+  new WithInclusiveCache(
+    nBanks = 4,
+    capacityKB = 1024,
+    outerLatencyCycles = 25))
+
+class WithPrefetchMiddleMan extends Config((site, here, up) => {
+  case PrefetchMiddleManKey => AutoPrefetchConfig(
+    nWays = 4,
+    nBlocks = 32,
+    hitThreshold = 1,
+    timeoutPeriod = 8192,
+    lookAhead = 4)
+})
 
 class FireSimRemoteMemClientConfig extends Config(
   new WithRemoteMemClientKey ++
@@ -257,7 +274,7 @@ class FireSimDRAMCacheConfig extends Config(
   new WithMemBenchKey ++
   new WithDRAMCacheKey ++
   new WithExtMemSize(15L << 30) ++
-  new WithRingSystemBus ++
+  new WithPrefetchMiddleMan ++
   new WithStandardL2 ++
   new FireSimRocketChipConfig)
 
@@ -320,7 +337,7 @@ class FireSimBoomDualCoreL2Config extends Config(
 
 class FireSimBoomPrefetcherConfig extends Config(
   new WithPrefetchRoCC ++
-  new WithStandardL2 ++
+  new WithLargeL2 ++
   new FireSimBoomConfig)
 
 class FireSimBoomPrefetcherDualCoreConfig extends Config(
@@ -332,8 +349,8 @@ class FireSimBoomDRAMCacheConfig extends Config(
   new WithMemBenchKey ++
   new WithDRAMCacheKey ++
   new WithExtMemSize(15L << 30) ++
-  new WithRingSystemBus ++
-  new WithStandardL2 ++
+  new WithPrefetchMiddleMan ++
+  new WithLargeL2 ++
   new FireSimBoomConfig)
 
 class FireSimBoomDRAMCacheDualCoreConfig extends Config(

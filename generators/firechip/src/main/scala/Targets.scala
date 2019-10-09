@@ -23,6 +23,7 @@ import java.io.File
 import memblade.client.{HasPeripheryRemoteMemClient, HasPeripheryRemoteMemClientModuleImpValidOnly}
 import memblade.cache._
 import memblade.manager.{HasPeripheryMemBlade, HasPeripheryMemBladeModuleImpValidOnly}
+import memblade.prefetcher.HasMiddleManBusTopology
 
 /*******************************************************************************
 * Top level DESIGN configurations. These describe the basic instantiations of
@@ -197,24 +198,57 @@ class FireSimMemBladeModuleImp(outer: FireSimMemBlade)
   extends FireSimNoNICModuleImp(outer)
   with HasPeripheryMemBladeModuleImpValidOnly
 
-class FireSimDRAMCache(implicit p: Parameters) extends FireSimNoNIC
+class FireSimDRAMCache(implicit p: Parameters) extends RocketSubsystem
+    with HasMiddleManBusTopology
+    with CanHaveFASEDOptimizedMasterAXI4MemPort
+    with HasPeripheryBootROM
+    with HasNoDebug
+    with HasPeripherySerial
+    with HasPeripheryUART
+    with HasPeripheryBlockDevice
+    with HasTraceIO
     with HasPeripheryMemBench
     with HasPeripheryDRAMCache {
   override lazy val module = new FireSimDRAMCacheModuleImp(this)
 }
 
 class FireSimDRAMCacheModuleImp(outer: FireSimDRAMCache)
-  extends FireSimNoNICModuleImp(outer)
+  extends RocketSubsystemModuleImp(outer)
+  with HasRTCModuleImp
+  with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
+  with HasPeripheryBootROMModuleImp
+  with HasNoDebugModuleImp
+  with HasPeripherySerialModuleImp
+  with HasPeripheryUARTModuleImp
+  with HasPeripheryBlockDeviceModuleImp
+  with HasTraceIOImp
   with HasPeripheryDRAMCacheModuleImpValidOnly
 
-class FireBoomDRAMCache(implicit p: Parameters) extends FireBoomNoNIC
+class FireBoomDRAMCache(implicit p: Parameters) extends Subsystem
+    with HasMiddleManBusTopology
+    with CanHaveFASEDOptimizedMasterAXI4MemPort
+    with HasPeripheryBootROM
+    with HasNoDebug
+    with HasPeripherySerial
+    with HasPeripheryUART
+    with HasPeripheryBlockDevice
+    with HasTraceIO
     with HasPeripheryMemBench
     with HasPeripheryDRAMCache {
   override lazy val module = new FireBoomDRAMCacheModuleImp(this)
 }
 
 class FireBoomDRAMCacheModuleImp(outer: FireBoomDRAMCache)
-  extends FireBoomNoNICModuleImp(outer)
+  extends SubsystemModuleImp(outer)
+  with HasRTCModuleImp
+  with CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
+  with HasPeripheryBootROMModuleImp
+  with HasNoDebugModuleImp
+  with HasPeripherySerialModuleImp
+  with HasPeripheryUARTModuleImp
+  with HasPeripheryBlockDeviceModuleImp
+  with HasTraceIOImp
+  with ExcludeInvalidBoomAssertions
   with HasPeripheryDRAMCacheModuleImpValidOnly
 
 class FireSimTraceGen(implicit p: Parameters) extends BaseSubsystem
