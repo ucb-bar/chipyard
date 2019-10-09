@@ -97,6 +97,51 @@ ifeq ($(SUB_PROJECT),testchipip)
 	TB                ?= TestDriver
 	TOP               ?= UnitTestSuite
 endif
+ifeq ($(SUB_PROJECT),icenet)
+	SBT_PROJECT       ?= icenet
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= TestHarness
+	MODEL_PACKAGE     ?= icenet
+	CONFIG            ?= IceNetUnitTestConfig
+	CONFIG_PACKAGE    ?= icenet
+	GENERATOR_PACKAGE ?= icenet
+	TB                ?= TestDriver
+	TOP               ?= UnitTestSuite
+endif
+ifeq ($(SUB_PROJECT),memblade.prefetcher)
+	SBT_PROJECT       ?= memory_blade
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= TestHarness
+	MODEL_PACKAGE     ?= memblade.prefetcher
+	CONFIG            ?= PrefetcherUnitTestConfig
+	CONFIG_PACKAGE    ?= memblade.prefetcher
+	GENERATOR_PACKAGE ?= memblade.prefetcher
+	TB                ?= TestDriver
+	TOP               ?= UnitTestSuite
+endif
+ifeq ($(SUB_PROJECT),memblade.cache)
+	SBT_PROJECT       ?= memory_blade
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= TestHarness
+	MODEL_PACKAGE     ?= memblade.cache
+	CONFIG            ?= DRAMCacheUnitTestConfig
+	CONFIG_PACKAGE    ?= memblade.cache
+	GENERATOR_PACKAGE ?= memblade.cache
+	TB                ?= TestDriver
+	TOP               ?= UnitTestSuite
+endif
+ifeq ($(SUB_PROJECT),memblade.manager)
+	SBT_PROJECT       ?= memory_blade
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= TestHarness
+	MODEL_PACKAGE     ?= memblade.manager
+	CONFIG            ?= MemBladeUnitTestConfig
+	CONFIG_PACKAGE    ?= memblade.manager
+	GENERATOR_PACKAGE ?= memblade.manager
+	TB                ?= TestDriver
+	TOP               ?= UnitTestSuite
+endif
+
 # Stand-in firechip variables:
 # TODO: need a seperate generator and test harnesses for each target
 #ifeq ($(SUB_PROJECT),firechip)
