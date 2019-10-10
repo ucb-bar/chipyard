@@ -9,11 +9,14 @@ import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.util._
+import freechips.rocketchip.tile.RocketTile
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.rocket.TracedInstruction
 import firesim.bridges.{TraceOutputTop, DeclockedTracedInstruction}
 
-import midas.targetutils.{ExcludeInstanceAsserts, MemModelAnnotation}
+import midas.targetutils.MemModelAnnotation
+
+import boom.common.BoomTile
 
 /* Wires out tile trace ports to the top; and wraps them in a Bundle that the
  * TracerV bridge can match on.
@@ -47,28 +50,25 @@ trait HasTraceIOImp extends LazyModuleImp {
   }
 }
 
-// Prevent MIDAS from synthesizing assertions in the dummy TLB included in BOOM
-trait ExcludeInvalidBoomAssertions extends LazyModuleImp {
-  ExcludeInstanceAsserts(("NonBlockingDCache", "dtlb"))
-}
-
 trait CanHaveMultiCycleRegfileImp {
   val outer: utilities.HasBoomAndRocketTiles
-  val boomCores = outer.boomTiles.map(tile => tile.module.core)
-  boomCores.foreach({ core =>
-    core.iregfile match {
-      case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
-      case _ => Nil
-    }
 
-     if (core.fp_pipeline != null) core.fp_pipeline.fregfile match {
-      case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
-      case _ => Nil
+  outer.tiles.map {
+    case r: RocketTile => {
+      annotate(MemModelAnnotation(r.module.core.rocketImpl.rf.rf))
+      r.module.fpuOpt.foreach(fpu => annotate(MemModelAnnotation(fpu.fpuImpl.regfile)))
     }
-  })
-
-  outer.rocketTiles.foreach({ tile =>
-    annotate(MemModelAnnotation(tile.module.core.rocketImpl.rf.rf))
-    tile.module.fpuOpt.foreach(fpu => annotate(MemModelAnnotation(fpu.fpuImpl.regfile)))
-  })
+    case b: BoomTile => {
+      val core = b.module.core
+      core.iregfile match {
+        case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
+        case _ => Nil
+      }
+      if (core.fp_pipeline != null) core.fp_pipeline.fregfile match {
+        case frf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(frf.regfile))
+        case _ => Nil
+      }
+    }
+  }
 }
+
