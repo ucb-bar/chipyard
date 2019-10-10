@@ -132,9 +132,9 @@ abstract class FireSimTestSuite(
 }
 
 class RocketF1Tests extends FireSimTestSuite("FireSimNoNIC", "DDR3FRFCFSLLC4MB_FireSimRocketChipQuadCoreConfig", "BaseF1Config")
-class BoomF1Tests extends FireSimTestSuite("FireBoomNoNIC", "DDR3FRFCFSLLC4MB_FireSimBoomConfig", "BaseF1Config")
+class BoomF1Tests extends FireSimTestSuite("FireSimNoNIC", "DDR3FRFCFSLLC4MB_FireSimBoomConfig", "BaseF1Config")
 class RocketNICF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimRocketChipConfig", "BaseF1Config") {
   runSuite("verilator")(NICLoopbackTests)
 }
 class RamModelRocketF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimRocketChipDualCoreConfig", "BaseF1Config_MCRams")
-class RamModelBoomF1Tests extends FireSimTestSuite("FireBoomNoNIC", "FireSimBoomConfig", "BaseF1Config_MCRams")
+class RamModelBoomF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimBoomConfig", "BaseF1Config_MCRams")

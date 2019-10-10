@@ -1,3 +1,5 @@
+![CHIPYARD](https://raw.githubusercontent.com/ucb-bar/chipyard/dev/docs/_static/images/chipyard_logo.svg?sanitize=true)
+
 # Chipyard Framework [![CircleCI](https://circleci.com/gh/ucb-bar/chipyard/tree/master.svg?style=svg)](https://circleci.com/gh/ucb-bar/chipyard/tree/master)
 
 ## Using Chipyard

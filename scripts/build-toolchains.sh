@@ -11,8 +11,8 @@ CHIPYARD_DIR="${CHIPYARD_DIR:-$(git rev-parse --show-toplevel)}"
 
 usage() {
     echo "usage: ${0} [riscv-tools | esp-tools | ec2fast]"
-    echo "   riscv: if set, builds the riscv toolchain (this is also the default)"
-    echo "   hwacha: if set, builds esp-tools toolchain"
+    echo "   riscv-tools: if set, builds the riscv toolchain (this is also the default)"
+    echo "   esp-tools: if set, builds esp-tools toolchain used for the hwacha vector accelerator"
     echo "   ec2fast: if set, pulls in a pre-compiled RISC-V toolchain for an EC2 manager instance"
     exit "$1"
 }
@@ -122,7 +122,7 @@ CC= CXX= module_all riscv-pk --prefix="${RISCV}" --host=riscv64-unknown-elf
 module_all riscv-tests --prefix="${RISCV}/riscv64-unknown-elf"
 
 # Common tools (not in any particular toolchain dir)
-SRCDIR="$RDIR/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv64-softmmu
+SRCDIR="$(pwd)/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv64-softmmu
 
 cd "$RDIR"
 

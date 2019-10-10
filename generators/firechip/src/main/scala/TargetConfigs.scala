@@ -153,6 +153,14 @@ class FireSimRocketChipSha3L2Config extends Config(
   new WithNBigCores(1) ++
   new FireSimRocketChipConfig)
 
+// SHA-3 accelerator config with synth printfs enabled
+class FireSimRocketChipSha3L2PrintfConfig extends Config(
+  new WithInclusiveCache ++
+  new sha3.WithSha3Printf ++ 
+  new sha3.WithSha3Accel ++
+  new WithNBigCores(1) ++
+  new FireSimRocketChipConfig)
+
 class FireSimBoomConfig extends Config(
   new WithBootROM ++
   new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
@@ -186,6 +194,19 @@ class FireSimBoomDualCoreConfig extends Config(
 class FireSimBoomQuadCoreConfig extends Config(
   new WithNDuplicatedBoomCores(4) ++
   new FireSimBoomConfig)
+
+//**********************************************************************************
+//* Heterogeneous Configurations
+//*********************************************************************************/
+
+// dual core config (rocket + small boom)
+class FireSimRocketBoomConfig extends Config(
+  new WithBoomL2TLBs(1024) ++ // reset l2 tlb amt ("WithSmallBooms" overrides it)
+  new boom.common.WithRenumberHarts ++ // fix hart numbering
+  new boom.common.WithSmallBooms ++ // change single BOOM to small
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++ // add a "big" rocket core
+  new FireSimBoomConfig
+)
 
 //**********************************************************************************
 //* Supernode Configurations
