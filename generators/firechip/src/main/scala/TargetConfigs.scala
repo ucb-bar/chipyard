@@ -149,7 +149,6 @@ class FireSimRocketChipOctaCoreConfig extends Config(
 // SHA-3 accelerator config
 class FireSimRocketChipSha3L2Config extends Config(
   new WithInclusiveCache ++
-  new sha3.WithSha3Printf ++ 
   new sha3.WithSha3Accel ++
   new WithNBigCores(1) ++
   new FireSimRocketChipConfig)
