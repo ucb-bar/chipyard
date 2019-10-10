@@ -154,6 +154,14 @@ class FireSimRocketChipSha3L2Config extends Config(
   new WithNBigCores(1) ++
   new FireSimRocketChipConfig)
 
+// SHA-3 accelerator config with synth printfs enabled
+class FireSimRocketChipSha3L2PrintfConfig extends Config(
+  new WithInclusiveCache ++
+  new sha3.WithSha3Printf ++ 
+  new sha3.WithSha3Accel ++
+  new WithNBigCores(1) ++
+  new FireSimRocketChipConfig)
+
 class FireSimBoomConfig extends Config(
   new WithBootROM ++
   new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
