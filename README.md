@@ -23,7 +23,7 @@ Chipyard is actively developed in the [Berkeley Architecture Research Group][ucb
 ## Need help?
 
 * Join the Chipyard Mailing List: https://groups.google.com/forum/#!forum/chipyard
-* Post an issue on this repo
+* If you find a bug, post an issue on this repo
 
 ## Contributing
 
