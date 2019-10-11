@@ -15,6 +15,13 @@ class RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++   // single rocket-core
   new freechips.rocketchip.system.BaseConfig)              // "base" rocketchip system
 
+class TutorialRocketConfig extends Config(
+  new WithTop ++                                           // use default top
+  new WithBootROM ++                                       // use default bootrom
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++ // use Sifive L2 cache
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++   // single rocket-core
+  new freechips.rocketchip.system.BaseConfig)              // "base" rocketchip system
+
 class HwachaRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
