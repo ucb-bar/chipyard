@@ -1,4 +1,4 @@
-![CHIPYARD](https://raw.githubusercontent.com/ucb-bar/chipyard/dev/docs/_static/images/chipyard_logo.svg?sanitize=true)
+![CHIPYARD](https://github.com/ucb-bar/chipyard/raw/alon-docs-dev/docs/_static/images/chipyard-logo-full.png)
 
 # Chipyard Framework [![CircleCI](https://circleci.com/gh/ucb-bar/chipyard/tree/master.svg?style=svg)](https://circleci.com/gh/ucb-bar/chipyard/tree/master)
 
