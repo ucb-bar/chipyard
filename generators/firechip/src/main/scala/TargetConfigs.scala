@@ -333,6 +333,20 @@ class FireSimRocketChipSha3L2PrintfConfig extends Config(
   new WithNBigCores(1) ++
   new FireSimRocketChipConfig)
 
+class FireSimDRAMCacheHwachaConfig extends Config(
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new hwacha.DefaultHwachaConfig ++
+  new WithMemBenchKey ++
+  new WithDRAMCacheKey(8, 8, 2) ++
+  new WithExtMemSize(14L << 30) ++
+  new WithPrefetchMiddleMan ++
+  new WithLargeL2 ++
+  new FireSimRocketChipConfig ++
+  new WithDRAMCacheBridge)
+
+class FireSimDRAMCacheHwachaDualCoreConfig extends Config(
+  new WithNBigCores(2) ++ new FireSimDRAMCacheHwachaConfig)
+
 class FireSimBoomConfig extends Config(
   new WithBootROM ++
   new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
