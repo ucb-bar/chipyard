@@ -615,11 +615,6 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-firesim-clockdiv:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
             # Run the respective tests
 
             # Run midasexamples test
@@ -658,9 +653,4 @@ workflows:
             - fireboom-run-tests:
                 requires:
                     - prepare-fireboom
-                    - build-extra-tests
-
-            - firesim-clockdiv-run-tests:
-                requires:
-                    - prepare-firesim-clockdiv
                     - build-extra-tests
