@@ -6,7 +6,6 @@ import chisel3._
 
 import freechips.rocketchip.config.{Parameters}
 import freechips.rocketchip.util.{GeneratorApp}
-import freechips.rocketchip.tile.{BuildRoCC}
 import freechips.rocketchip.system.{TestGeneration}
 
 import utilities.{TestSuiteHelper}
