@@ -1,6 +1,6 @@
 package example
 
-import scala.util.control.Exception
+import scala.util.Try
 
 import chisel3._
 
@@ -19,16 +19,15 @@ object Generator extends GeneratorApp {
     TestSuiteHelper.addBoomTestSuites
 
     // if hwacha parameter exists then generate its tests
-    // TODO: find a more elegant way to do this
-    Exception.ignoring(classOf[java.lang.IllegalArgumentException]){
-      if (p(hwacha.HwachaIcacheKey) != null) {
-        // add hwacha bmarks + asm tests
-        import hwacha.HwachaTestSuites._
-        TestGeneration.addSuites(rv64uv.map(_("p")))
-        TestGeneration.addSuites(rv64uv.map(_("vp")))
-        TestGeneration.addSuite(rv64sv("p"))
-        TestGeneration.addSuite(hwachaBmarks)
-      }
+    // TODO: find a more elegant way to do this. either through
+    // trying to disambiguate BuildRoCC, having a AccelParamsKey,
+    // or having the Accelerator/Tile add its own tests
+    import hwacha.HwachaTestSuites._
+    if (Try(p(hwacha.HwachaNLanes)).getOrElse(0) > 0) {
+      TestGeneration.addSuites(rv64uv.map(_("p")))
+      TestGeneration.addSuites(rv64uv.map(_("vp")))
+      TestGeneration.addSuite(rv64sv("p"))
+      TestGeneration.addSuite(hwachaBmarks)
     }
   }
 
@@ -36,9 +35,8 @@ object Generator extends GeneratorApp {
   val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
 
   // generate files
-  generateTestSuiteMakefrags
   generateFirrtl
   generateAnno
-  //generateTestSuiteMakefrags
+  generateTestSuiteMakefrags
   generateArtefacts
 }
