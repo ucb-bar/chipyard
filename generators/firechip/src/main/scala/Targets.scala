@@ -88,16 +88,19 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNICDUT](l: L) extends SubsystemModule
 
 class FireSimNoNIC(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimNoNICDUT)
 
-class FireSimTraceGen(implicit p: Parameters) extends BaseSubsystem
+class FireSimTraceGenDUT(implicit p: Parameters) extends BaseSubsystem
     with HasHierarchicalBusTopology
     with HasTraceGenTiles
     with CanHaveMasterAXI4MemPort {
   override lazy val module = new FireSimTraceGenModuleImp(this)
 }
 
-class FireSimTraceGenModuleImp(outer: FireSimTraceGen) extends BaseSubsystemModuleImp(outer)
+class FireSimTraceGenModuleImp(outer: FireSimTraceGenDUT) extends BaseSubsystemModuleImp(outer)
     with HasTraceGenTilesModuleImp
     with CanHaveMasterAXI4MemPortModuleImp
+
+class FireSimTraceGen(implicit p: Parameters) extends DefaultFireSimHarness(
+  () => new FireSimTraceGenDUT)
 
 // Supernoded-ness comes from setting p(NumNodes) (see DefaultFiresimHarness) to something > 1
 class FireSimSupernode(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimDUT)

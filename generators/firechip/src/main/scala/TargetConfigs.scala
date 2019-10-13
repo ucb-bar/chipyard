@@ -88,6 +88,7 @@ class WithScalaTestFeatures extends Config((site, here, up) => {
 
 // FASED Config Aliases. This to enable config generation via "_" concatenation
 // which requires that all config classes be defined in the same package
+class DDR3FRFCFS extends FRFCFS16GBQuadRank
 class DDR3FRFCFSLLC4MB extends FRFCFS16GBQuadRankLLC4MB
 
 // L2 Config Aliases. For use with "_" concatenation
@@ -279,6 +280,7 @@ class WithTraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
 class FireSimTraceGenConfig extends Config(
   new WithTraceGen(
     List.fill(2) { DCacheParams(nMSHRs = 2, nSets = 16, nWays = 2) }) ++
+  new WithTraceGenBridge ++
   new FireSimRocketChipConfig)
 
 class WithL2TraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
@@ -316,4 +318,5 @@ class FireSimTraceGenL2Config extends Config(
     nBanks = 4,
     capacityKB = 1024,
     outerLatencyCycles = 50) ++
+  new WithTraceGenBridge ++
   new FireSimRocketChipConfig)

@@ -95,3 +95,6 @@
 [submodule "toolchains/qemu"]
 	path = toolchains/qemu
 	url = https://github.com/qemu/qemu.git
+[submodule "tools/axe"]
+	path = tools/axe
+	url = https://github.com/CTSRD-CHERI/axe.git

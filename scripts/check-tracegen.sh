@@ -3,7 +3,7 @@
 set -e
 
 SCRIPT_DIR=$(dirname $0)
-AXE_DIR=$(realpath ${SCRIPT_DIR}/../../axe)
+AXE_DIR=$(realpath ${SCRIPT_DIR}/../tools/axe)
 ROCKET_DIR=$(realpath ${SCRIPT_DIR}/../generators/rocket-chip)
 
 TO_AXE=${ROCKET_DIR}/scripts/toaxe.py

@@ -125,3 +125,23 @@ $(output_dir)/%.out: $(output_dir)/% $(sim)
 ifneq ($(filter run% %.run %.out %.vpd %.vcd,$(MAKECMDGOALS)),)
 -include $(build_dir)/$(long_name).d
 endif
+
+#################################################
+# Rules for running and checking tracegen tests #
+#################################################
+
+AXE_DIR=$(base_dir)/tools/axe/src
+AXE=$(AXE_DIR)/axe
+
+$(AXE): $(wildcard $(AXE_DIR)/*.[ch]) $(AXE_DIR)/make.sh
+	cd $(AXE_DIR) && ./make.sh
+
+$(output_dir)/tracegen.out: $(sim)
+	mkdir -p $(output_dir) && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) none 2> $@
+
+$(output_dir)/tracegen.result: $(output_dir)/tracegen.out $(AXE)
+	$(base_dir)/scripts/check-tracegen.sh $< > $@
+
+tracegen: $(output_dir)/tracegen.result
+
+.PHONY: tracegen
