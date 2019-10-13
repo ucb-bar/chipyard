@@ -126,10 +126,14 @@ SRCDIR="$(pwd)/toolchains" module_all qemu --prefix="${RISCV}" --target-list=ris
 
 cd "$RDIR"
 
+# create specific env.sh
 {
     echo "export CHIPYARD_TOOLCHAIN_SOURCED=1"
     echo "export RISCV=$(printf '%q' "$RISCV")"
     echo "export PATH=\${RISCV}/bin:\${PATH}"
     echo "export LD_LIBRARY_PATH=\${RISCV}/lib\${LD_LIBRARY_PATH:+":\${LD_LIBRARY_PATH}"}"
-} > env.sh
+} > env-$TOOLCHAIN.sh
+
+# create general env.sh
+ln -s env-$TOOLCHAIN.sh env.sh
 echo "Toolchain Build Complete!"
