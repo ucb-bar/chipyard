@@ -135,5 +135,5 @@ cd "$RDIR"
 } > env-$TOOLCHAIN.sh
 
 # create general env.sh
-ln -s env-$TOOLCHAIN.sh env.sh
+ln -sf env-$TOOLCHAIN.sh env.sh
 echo "Toolchain Build Complete!"
