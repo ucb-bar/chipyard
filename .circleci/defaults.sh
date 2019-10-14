@@ -46,7 +46,7 @@ mapping["boomrocketexample"]="SUB_PROJECT=example CONFIG=LargeBoomAndRocketConfi
 mapping["boom"]="SUB_PROJECT=example CONFIG=SmallBoomConfig"
 mapping["rocketchip"]="SUB_PROJECT=rocketchip"
 mapping["blockdevrocketchip"]="SUB_PROJECT=example CONFIG=SimBlockDeviceRocketConfig TOP=TopWithBlockDevice"
-mapping["hwacha"]="SUB_PROJECT=example CONFIG=HwachaRocketConfig GENERATOR_PACKAGE=hwacha"
+mapping["hwacha"]="SUB_PROJECT=example CONFIG=HwachaRocketConfig"
 mapping["firesim"]="DESIGN=FireSim TARGET_CONFIG=DDR3FRFCFSLLC4MB_FireSimRocketChipConfig PLATFORM_CONFIG=BaseF1Config"
 mapping["fireboom"]="DESIGN=FireSim TARGET_CONFIG=DDR3FRFCFSLLC4MB_FireSimBoomConfig PLATFORM_CONFIG=BaseF1Config"
 mapping["firesim-clockdiv"]="DESIGN=FireSim TARGET_CONFIG=DDR3FRFCFSLLC4MB3Div_FireSimRocketChipConfig PLATFORM_CONFIG=BaseF1Config"
