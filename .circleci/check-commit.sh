@@ -66,6 +66,12 @@ branch="master"
 
 search
 
+submodules=("firesim")
+dir="sims"
+branch="master"
+
+search
+
 # turn off verbose printing to make this easier to read
 set +x
 
