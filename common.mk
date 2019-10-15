@@ -96,7 +96,7 @@ run-binary: $(sim)
 # helper rules to run simulator as fast as possible
 #########################################################################################
 run-binary-fast: $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) | tee $(sim_out_name).log)
 
 #########################################################################################
 # helper rules to run simulator with as much debug info as possible
@@ -114,7 +114,7 @@ $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
 	ln -sf $< $@
 
 $(output_dir)/%.run: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $< 2> >(spike-dasm > $@) | tee $<.log) && touch $@
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $< | tee $<.log) && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
 	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< 2> >(spike-dasm > $@) | tee $<.log)
