@@ -101,3 +101,15 @@ class FireSimTraceGenModuleImp(outer: FireSimTraceGen) extends BaseSubsystemModu
 
 // Supernoded-ness comes from setting p(NumNodes) (see DefaultFiresimHarness) to something > 1
 class FireSimSupernode(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimDUT)
+
+// Verilog blackbox integration demo
+class FireSimVerilogGCDDUT(implicit p: Parameters) extends FireSimDUT
+    with example.HasPeripheryGCD
+{
+  override lazy val module = new FireSimVerilogGCDModuleImp(this)
+}
+
+class FireSimVerilogGCDModuleImp[+L <: FireSimVerilogGCDDUT](l: L) extends FireSimModuleImp(l)
+    with example.HasPeripheryGCDModuleImp
+
+class FireSimVerilogGCD(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimVerilogGCDDUT)

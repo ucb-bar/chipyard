@@ -189,7 +189,7 @@ lazy val midas      = ProjectRef(firesimDir, "midas")
 lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 
 lazy val firechip = (project in file("generators/firechip"))
-  .dependsOn(boom, icenet, testchipip, sifive_blocks, sifive_cache, sha3, utilities, tracegen, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
+  .dependsOn(example, icenet, testchipip, tracegen, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
     testGrouping in Test := isolateAllTests( (definedTests in Test).value )
