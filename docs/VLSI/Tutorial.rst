@@ -64,7 +64,7 @@ In the Chipyard root, run:
 
 .. code-block:: shell
 
-    ``./scripts/init-vlsi.sh asap7`` 
+    ./scripts/init-vlsi.sh asap7
     
 to pull the Hammer & plugin submodules. Note that for technologies other than ``asap7``, the tech submodule must be added in the ``vlsi`` folder first.
 
@@ -82,7 +82,8 @@ To elaborate the ``Sha3RocketConfig`` (Rocket Chip w/ the accelerator) and set u
 
 .. code-block:: shell
 
-    make buildfile MACROCOMPILER_MODE='--mode synflops' CONFIG=Sha3RocketConfig VLSI_TOP=Sha3AccelwBB
+    export MACROCOMPILER_MODE='--mode synflops'
+    make buildfile CONFIG=Sha3RocketConfig VLSI_TOP=Sha3AccelwBB
 
 The ``MACROCOMPILER_MODE='--mode synflops'`` is needed because the ASAP7 process does not yet have a memory compiler, so flip-flop arrays are used instead. This will dramatically increase the synthesis runtime if your design has a lot of memory state (e.g. large caches).
 
@@ -111,7 +112,7 @@ Synthesis
 ^^^^^^^^^
 .. code-block:: shell
 
-    ``make syn``
+    make syn
 
 Post-synthesis logs and collateral are in ``build/syn-rundir``. The raw QoR data is available at ``build/syn-rundir/reports``, and methods to extract this information for design space exploration are a WIP.
 
@@ -119,7 +120,7 @@ Place-and-Route
 ^^^^^^^^^^^^^^^
 .. code-block:: shell
 
-    ``make par``
+    make par
 
 After completion, the final database can be opened in an interactive Innovus session via ``./build/par-rundir/generated-scripts/open_chip``.
 
@@ -131,7 +132,7 @@ Timing reports are found in ``build/par-rundir/timingReports``. They are gzipped
 
 .. code-block:: shell
 
-    ``python3 view_gds.py build/par-rundir/Sha3AccelwBB.gds``
+    python3 view_gds.py build/par-rundir/Sha3AccelwBB.gds
 
 By default, this script only shows the M2 thru M4 routing. Layers can be toggled in the layout viewer's side pane and ``view_gds.py`` has a mapping of layer numbers to layer names.
 
