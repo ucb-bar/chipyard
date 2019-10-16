@@ -82,10 +82,9 @@ To elaborate the ``Sha3RocketConfig`` (Rocket Chip w/ the accelerator) and set u
 
 .. code-block:: shell
 
-    export MACROCOMPILER_MODE='--mode synflops'
-    make buildfile CONFIG=Sha3RocketConfig VLSI_TOP=Sha3AccelwBB
+    make buildfile MACROCOMPILER_MODE='--mode synflops' CONFIG=Sha3RocketConfig VLSI_TOP=Sha3AccelwBB
 
-The ``MACROCOMPILER_MODE='--mode synflops'`` is needed because the ASAP7 process does not yet have a memory compiler, so flip-flop arrays are used instead. This will dramatically increase the synthesis runtime if your design has a lot of memory state (e.g. large caches).
+The ``MACROCOMPILER_MODE='--mode synflops'`` is needed because the ASAP7 process does not yet have a memory compiler, so flip-flop arrays are used instead. This will dramatically increase the synthesis runtime if your design has a lot of memory state (e.g. large caches). This change is automatically inferred by the makefile but is included here for completeness.
 
 The ``CONFIG=Sha3RocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a Rocket Chip with the Sha3Accel module.
 
