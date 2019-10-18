@@ -123,6 +123,11 @@ vlsi.core.sram_generator_tool: "sram_compiler"
 # You should specify a location for the SRAM generator in the tech plugin
 vlsi.core.sram_generator_tool_path: []
 vlsi.core.sram_generator_tool_path_meta: "append"
+vlsi.core.sram_generator_tool_path: ["hammer/src/hammer-vlsi/technology/asap7"]
+vlsi.core.sram_generator_tool_path_meta: "append"
+# Specify this since we are not using macrocompiler
+vlsi.inputs.sram_parameters: "hammer/src/hammer-vlsi/technology/asap7/sram-cache.json"
+vlsi.inputs.sram_parameters_meta: ["transclude", "json2list"]
 
 # Tool options. Replace with your tool plugin of choice.
 # Genus options

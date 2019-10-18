@@ -67,8 +67,8 @@ include $(base_dir)/common.mk
 #########################################################################################
 # srams
 #########################################################################################
-SRAM_GENERATOR_CONF = $(build_dir)/sram_generator-input.yml
-SRAM_CONF=$(build_dir)/sram_generator-output.json
+SRAM_GENERATOR_CONF ?= $(build_dir)/sram_generator-input.yml
+SRAM_CONF ?= $(build_dir)/sram_generator-output.json
 
 ## SRAM Generator
 .PHONY: sram_generator srams
@@ -91,10 +91,7 @@ $(SRAM_CONF): $(SRAM_GENERATOR_CONF)
 # synthesis input configuration
 #########################################################################################
 SYN_CONF = $(OBJ_DIR)/inputs.yml
-GENERATED_CONFS = $(SYN_CONF)
-ifeq ($(CUSTOM_VLOG), )
-	GENERATED_CONFS += $(if $(filter $(tech_name), asap7), , $(SRAM_CONF))
-endif
+GENERATED_CONFS ?= $(SYN_CONF) $(SRAM_CONF)
 
 $(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 	mkdir -p $(dir $@)

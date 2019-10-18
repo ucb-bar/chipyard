@@ -82,9 +82,7 @@ To elaborate the ``Sha3RocketConfig`` (Rocket Chip w/ the accelerator) and set u
 
 .. code-block:: shell
 
-    make buildfile MACROCOMPILER_MODE='--mode synflops' CONFIG=Sha3RocketConfig VLSI_TOP=Sha3AccelwBB
-
-The ``MACROCOMPILER_MODE='--mode synflops'`` is needed because the ASAP7 process does not yet have a memory compiler, so flip-flop arrays are used instead. This will dramatically increase the synthesis runtime if your design has a lot of memory state (e.g. large caches). This change is automatically inferred by the makefile but is included here for completeness.
+    make buildfile CONFIG=Sha3RocketConfig VLSI_TOP=Sha3AccelwBB
 
 The ``CONFIG=Sha3RocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a Rocket Chip with the Sha3Accel module.
 
@@ -106,6 +104,15 @@ example.yml
 This contains the Hammer configuration for this example project. Example clock constraints, power straps definitions, placement constraints, and pin constraints are given. Additional configuration for the extra libraries and tools are at the bottom.
 
 First, set ``technology.asap7.tarball_dir`` to the absolute path of where the downloaded the ASAP7 PDK tarball lives.
+
+SRAM Compilation
+^^^^^^^^^^^^^^^^
+Hammer can automatically add the collateral for the SRAMs in the design.
+.. code-block:: shell
+
+    make srams
+
+This generates a `generated-src/example.TestHarness.Sha3RocketConfig/sram_generator-output.json` that will then be consumed by the steps below.
 
 Synthesis
 ^^^^^^^^^

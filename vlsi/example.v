@@ -63,3 +63,36 @@ module ExampleDCO (
   output        clock
 );
 endmodule
+
+module adder(
+  input [31:0] a,
+  input [31:0] b,
+  output [31:0] c,
+  input clock,
+  input reset
+);
+
+reg [31:0] pipeline_a = 0;
+reg [31:0] pipeline_b = 0;
+reg [31:0] pipeline_2 = 0;
+
+wire [31:0] sum;
+
+assign sum = a + b;
+
+always @(posedge clock) begin
+    if (reset) begin
+        pipeline_a <= 0;
+        pipeline_b <= 0;
+        pipeline_2 <= 0;
+    end
+    else begin
+        pipeline_a <= a;
+        pipeline_b <= b;
+        pipeline_2 <= pipeline_a + pipeline_b;
+    end
+end
+
+assign c = pipeline_2;
+
+endmodule
