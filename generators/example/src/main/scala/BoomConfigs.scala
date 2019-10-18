@@ -57,3 +57,14 @@ class SmallRV32BoomConfig extends Config(
   new boom.common.WithSmallBooms ++
   new boom.common.WithNBoomCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+
+class HwachaLargeBoomConfig extends Config(
+  new WithTop ++
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new hwacha.DefaultHwachaConfig ++                         // use Hwacha vector accelerator
+  new boom.common.WithLargeBooms ++                         // 3-wide BOOM
+  new boom.common.WithNBoomCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+
+
