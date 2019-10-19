@@ -49,4 +49,3 @@ mapping["blockdevrocketchip"]="SUB_PROJECT=example CONFIG=SimBlockDeviceRocketCo
 mapping["hwacha"]="SUB_PROJECT=example CONFIG=HwachaRocketConfig"
 mapping["firesim"]="DESIGN=FireSim TARGET_CONFIG=DDR3FRFCFSLLC4MB_FireSimRocketChipConfig PLATFORM_CONFIG=BaseF1Config"
 mapping["fireboom"]="DESIGN=FireSim TARGET_CONFIG=DDR3FRFCFSLLC4MB_FireSimBoomConfig PLATFORM_CONFIG=BaseF1Config"
-mapping["firesim-clockdiv"]="DESIGN=FireSim TARGET_CONFIG=DDR3FRFCFSLLC4MB3Div_FireSimRocketChipConfig PLATFORM_CONFIG=BaseF1Config"

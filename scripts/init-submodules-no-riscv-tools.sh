@@ -50,7 +50,7 @@ git config --unset submodule.vlsi/hammer-synopsys-plugins.update
 git config --unset submodule.vlsi/hammer-mentor-plugins.update
 
 if [ $NO_FIRESIM = false ]; then
-echo "initializing firesim"
+  echo "initializing firesim"
   # Renable firesim and init only the required submodules to provide
   # all required scala deps, without doing a full build-setup
   git config --unset submodule.sims/firesim.update
