@@ -122,3 +122,11 @@ class DRAMCacheRocketConfig extends Config(
   new WithPrefetchRoCC ++
   new WithDRAMCacheTop ++
   new RocketConfig)
+
+class Sha3RocketConfig extends Config(
+  new sha3.WithSha3Accel ++                                // add SHA3 rocc accelerator
+  new WithTop ++
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)

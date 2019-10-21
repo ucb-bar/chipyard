@@ -97,12 +97,11 @@ $(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(INSTALLED_VERILATOR)
 #########################################################################################
 # invoke make to make verilator sim rules
 #########################################################################################
-VERILATOR_MAKEFLAGS=-j8
 $(sim): $(model_mk)
-	$(MAKE) $(VERILATOR_MAKEFLAGS) VM_PARALLEL_BUILDS=1 -C $(model_dir) -f V$(VLOG_MODEL).mk
+	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir) -f V$(VLOG_MODEL).mk
 
 $(sim_debug): $(model_mk_debug)
-	$(MAKE) $(VERILATOR_MAKEFLAGS) VM_PARALLEL_BUILDS=1 -C $(model_dir_debug) -f V$(VLOG_MODEL).mk
+	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir_debug) -f V$(VLOG_MODEL).mk
 
 #########################################################################################
 # create a verilator vpd rule
