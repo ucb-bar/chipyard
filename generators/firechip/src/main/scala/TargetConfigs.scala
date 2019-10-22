@@ -84,14 +84,17 @@ class WithRemoteMemClientKey(spanBytes: Int = 1024) extends Config((site, here, 
     nRMemXacts = 32768 / spanBytes)
 })
 
-class WithDRAMCacheKey extends Config((site, here, up) => {
+class WithDRAMCacheKey(
+    nTrackersPerBank: Int,
+    nBanksPerChannel: Int,
+    nChannels: Int = 1) extends Config((site, here, up) => {
   case DRAMCacheKey => DRAMCacheConfig(
     nSets = 1 << 21,
     nWays = 7,
     baseAddr = BigInt(1) << 37,
-    nTrackersPerBank = 8,
-    nBanksPerChannel = 8,
-    nChannels = 2,
+    nTrackersPerBank = nTrackersPerBank,
+    nBanksPerChannel = nBanksPerChannel,
+    nChannels = nChannels,
     nSecondaryRequests = 1,
     spanBytes = site(CacheBlockBytes),
     logAddrBits = 37,
@@ -292,7 +295,7 @@ class FireSimPrefetcherQuadCoreConfig extends Config(
 class FireSimDRAMCacheConfig extends Config(
   new WithPrefetchRoCC ++
   new WithMemBenchKey ++
-  new WithDRAMCacheKey ++
+  new WithDRAMCacheKey(4, 8) ++
   new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
   new WithStandardL2 ++
@@ -385,8 +388,8 @@ class FireSimBoomPrefetcherDualCoreConfig extends Config(
 class FireSimBoomDRAMCacheConfig extends Config(
   new WithPrefetchRoCC ++
   new WithMemBenchKey ++
-  new WithDRAMCacheKey ++
-  new WithExtMemSize(15L << 30) ++
+  new WithDRAMCacheKey(8, 8, 2) ++
+  new WithExtMemSize(14L << 30) ++
   new WithPrefetchMiddleMan ++
   new WithLargeL2 ++
   new FireSimBoomConfig ++
