@@ -31,23 +31,43 @@ class RoccRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+// DOC include start: JtagRocket
 class jtagRocketConfig extends Config(
   new WithDTMTop ++                                        // use top with dtm
-  new freechips.rocketchip.subsystem.WithJtagDTM ++        // add jtag/DTM module to coreplex
+  new freechips.rocketchip.subsystem.WithJtagDTM ++        // add jtag+DTM module to coreplex
   new WithBootROM ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: JtagRocket
 
+// DOC include start: DmiRocket
+class dmiRocketConfig extends Config(
+  new WithDTMTop ++                                        // use top with dtm
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+// DOC include end: DmiRocket
+
+// DOC include start: PWMRocketConfig
 class PWMRocketConfig extends Config(
   new WithPWMTop ++                                        // use top with tilelink-controlled PWM
   new WithBootROM ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: PWMRocketConfig
 
-class PWMRAXI4ocketConfig extends Config(
+class PWMAXI4RocketConfig extends Config(
   new WithPWMAXI4Top ++                                    // use top with axi4-controlled PWM
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class GCDRocketConfig extends Config(                      // add MMIO GCD module
+  new WithGCDTop ++
   new WithBootROM ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -69,6 +89,7 @@ class BlockDeviceModelRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+// DOC include start: GPIORocketConfig
 class GPIORocketConfig extends Config(
   new WithGPIO ++                                          // add GPIOs to the peripherybus
   new WithGPIOTop ++                                       // use top with GPIOs
@@ -76,6 +97,7 @@ class GPIORocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: GPIORocketConfig
 
 class DualCoreRocketConfig extends Config(
   new WithTop ++
@@ -123,10 +145,23 @@ class DRAMCacheRocketConfig extends Config(
   new WithDRAMCacheTop ++
   new RocketConfig)
 
+
+// DOC include start: Sha3Rocket
 class Sha3RocketConfig extends Config(
-  new sha3.WithSha3Accel ++                                // add SHA3 rocc accelerator
   new WithTop ++
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new sha3.WithSha3Accel ++                                // add SHA3 rocc accelerator
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+// DOC include end: Sha3Rocket
+
+// DOC include start: InitZeroRocketConfig
+class InitZeroRocketConfig extends Config(
+  new WithInitZero(0x88000000L, 0x1000L) ++
+  new WithInitZeroTop ++
   new WithBootROM ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: InitZeroRocketConfig

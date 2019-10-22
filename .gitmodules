@@ -37,18 +37,40 @@
 [submodule "generators/memory-blade"]
 	path = generators/memory-blade
 	url = git@bitbucket.org:zhemao/memory-blade.git
-[submodule "toolchains/riscv-tools"]
-	path = toolchains/riscv-tools
-	url = https://github.com/freechipsproject/rocket-tools.git
-[submodule "toolchains/esp-tools"]
-	path = toolchains/esp-tools
-	url = https://github.com/ucb-bar/esp-tools.git
+[submodule "toolchains/riscv-tools/riscv-gnu-toolchain"]
+	path = toolchains/riscv-tools/riscv-gnu-toolchain
+	url = https://github.com/riscv/riscv-gnu-toolchain.git
+[submodule "toolchains/riscv-tools/riscv-gnu-toolchain-prebuilt"]
+	path = toolchains/riscv-tools/riscv-gnu-toolchain-prebuilt
+	url = https://github.com/ucb-bar/chipyard-toolchain-prebuilt.git
+	shallow = true
+[submodule "toolchains/riscv-tools/riscv-isa-sim"]
+	path = toolchains/riscv-tools/riscv-isa-sim
+	url = https://github.com/riscv/riscv-isa-sim.git
+[submodule "toolchains/riscv-tools/riscv-pk"]
+	path = toolchains/riscv-tools/riscv-pk
+	url = https://github.com/riscv/riscv-pk.git
+[submodule "toolchains/riscv-tools/riscv-tests"]
+	path = toolchains/riscv-tools/riscv-tests
+	url = https://github.com/riscv/riscv-tests.git
+[submodule "toolchains/riscv-tools/riscv-openocd"]
+	path = toolchains/riscv-tools/riscv-openocd
+	url = https://github.com/riscv/riscv-openocd.git
+[submodule "toolchains/esp-tools/riscv-gnu-toolchain"]
+	path = toolchains/esp-tools/riscv-gnu-toolchain
+	url = https://github.com/ucb-bar/esp-gnu-toolchain.git
+[submodule "toolchains/esp-tools/riscv-isa-sim"]
+	path = toolchains/esp-tools/riscv-isa-sim
+	url = https://github.com/ucb-bar/esp-isa-sim.git
+[submodule "toolchains/esp-tools/riscv-pk"]
+	path = toolchains/esp-tools/riscv-pk
+	url = https://github.com/riscv/riscv-pk.git
+[submodule "toolchains/esp-tools/riscv-tests"]
+	path = toolchains/esp-tools/riscv-tests
+	url = https://github.com/ucb-bar/esp-tests.git
 [submodule "vlsi/hammer"]
 	path = vlsi/hammer
 	url = https://github.com/ucb-bar/hammer.git
-[submodule "vlsi/hammer-cad-plugins"]
-	path = vlsi/hammer-cad-plugins
-	url = https://github.com/ucb-bar/hammer-cad-plugins.git
 [submodule "tools/dsptools"]
 	path = tools/dsptools
 	url = https://github.com/ucb-bar/dsptools.git
@@ -58,9 +80,24 @@
 [submodule "tools/treadle"]
 	path = tools/treadle
 	url = https://github.com/freechipsproject/treadle.git
-[submodule "generators/rocc-template"]
+[submodule "generators/sha3"]
 	path = generators/sha3
-	url = https://github.com/ucb-bar/rocc-template.git
+	url = https://github.com/ucb-bar/sha3.git
 [submodule "tools/firrtl-interpreter"]
 	path = tools/firrtl-interpreter
 	url = https://github.com/freechipsproject/firrtl-interpreter.git
+[submodule "vlsi/hammer-cadence-plugins"]
+	path = vlsi/hammer-cadence-plugins
+	url = https://github.com/ucb-bar/hammer-cadence-plugins.git
+[submodule "vlsi/hammer-synopsys-plugins"]
+	path = vlsi/hammer-synopsys-plugins
+	url = https://github.com/ucb-bar/hammer-synopsys-plugins.git
+[submodule "vlsi/hammer-mentor-plugins"]
+	path = vlsi/hammer-mentor-plugins
+	url = https://github.com/ucb-bar/hammer-mentor-plugins.git
+[submodule "toolchains/qemu"]
+	path = toolchains/qemu
+	url = https://github.com/qemu/qemu.git
+[submodule "tools/axe"]
+	path = tools/axe
+	url = https://github.com/CTSRD-CHERI/axe.git

@@ -8,12 +8,13 @@ Generators
 
 The Chipyard Framework currently consists of the following RTL generators:
 
+
 Processor Cores
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Rocket**
+**Rocket Core**
   An in-order RISC-V core.
-  See :ref:`Rocket` for more information.
+  See :ref:`Rocket Core` for more information.
 
 **BOOM (Berkeley Out-of-Order Machine)**
   An out-of-order RISC-V core.
@@ -27,6 +28,13 @@ Accelerators
   Hwacha currently implements a non-standard RISC-V extension, using a vector architecture programming model.
   Hwacha integrates with a Rocket or BOOM core using the RoCC (Rocket Custom Co-processor) interface.
   See :ref:`Hwacha` for more information.
+
+.. Fixed Function Accelerators:
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   TBD
+**SHA3**
+  A fixed-function accelerator for the SHA3 hash function. This simple accelerator is used as a demonstration for some of the
+  Chipyard integration flows using the RoCC interface.
 
 System Components:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -44,9 +52,6 @@ System Components:
 **testchipip**
   A collection of utilities used for testing chips and interfacing them with larger test environments.
 
-.. Fixed Function Accelerators:
-   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   TBD
 
 Tools
 -------------------------------------------
@@ -67,6 +72,9 @@ Tools
   A collection of common FIRRTL transformations used to manipulate a digital circuit without changing the generator source RTL.
   See :ref:`Barstools` for more information.
 
+**Dsptools**
+  A Chisel library for writing custom signal processing hardware, as well as integrating custom signal processing hardware into an SoC (especially a Rocket-based SoC).
+
 Toolchains
 -------------------------------------------
 
@@ -80,18 +88,25 @@ Toolchains
   A fork of riscv-tools, designed to work with the Hwacha non-standard RISC-V extension.
   This fork can also be used as an example demonstrating how to add additional RoCC accelerators to the ISA-level simulation (Spike) and the higher-level software toolchain (GNU binutils, riscv-opcodes, etc.)
 
+Software
+-------------------------------------------
+
+**FireMarshal**
+  FireMarshal is the default workload generation tool that Chipyard uses to create software to run on its platforms.
+  See :ref:`fire-marshal` for more information.
+
 Sims
 -------------------------------------------
 
 **verilator (Verilator wrapper)**
   Verilator is an open source Verilog simulator.
   The ``verilator`` directory provides wrappers which construct Verilator-based simulators from relevant generated RTL, allowing for execution of test RISC-V programs on the simulator (including vcd waveform files).
-  See :ref:`Verilator` for more information.
+  See :ref:`Verilator (Open-Source)` for more information.
 
 **vcs (VCS wrapper)**
   VCS is a proprietary Verilog simulator.
   Assuming the user has valid VCS licenses and installations, the ``vcs`` directory provides wrappers which construct VCS-based simulators from relevant generated RTL, allowing for execution of test RISC-V programs on the simulator (including vcd/vpd waveform files).
-  See :ref:`VCS` for more information.
+  See :ref:`Synopsys VCS (License Required)` for more information.
 
 **FireSim**
   FireSim is an open-source FPGA-accelerated simulation platform, using Amazon Web Services (AWS) EC2 F1 instances on the public cloud.
@@ -104,9 +119,9 @@ Sims
 VLSI
 -------------------------------------------
 
-**HAMMER**
-  HAMMER is a VLSI flow designed to provide a layer of abstraction between general physical design concepts to vendor-specific EDA tool commands.
+**Hammer**
+  Hammer is a VLSI flow designed to provide a layer of abstraction between general physical design concepts to vendor-specific EDA tool commands.
   The HAMMER flow provide automated scripts which generate relevant tool commands based on a higher level description of physical design constraints.
-  The HAMMER flow also allows for re-use of process technology knowledge by enabling the construction of process-technology-specific plug-ins, which describe particular constraints relating to that process technology (obsolete standard cells, metal layer routing constraints, etc.).
-  The HAMMER flow requires access to proprietary EDA tools and process technology libraries.
-  See :ref:`HAMMER` for more information.
+  The Hammer flow also allows for re-use of process technology knowledge by enabling the construction of process-technology-specific plug-ins, which describe particular constraints relating to that process technology (obsolete standard cells, metal layer routing constraints, etc.).
+  The Hammer flow requires access to proprietary EDA tools and process technology libraries.
+  See :ref:`Core HAMMER` for more information.

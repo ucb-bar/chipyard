@@ -1,4 +1,4 @@
-Simulators
+Simulation
 =======================
 
 Chipyard supports two classes of simulation:
@@ -12,9 +12,12 @@ at O(100 MHz), making them appropriate for booting an operating system and
 running a complete workload, but have multi-hour compile times and poorer debug
 visability.
 
+Click next to see how to run a simulation.
+
 .. toctree::
    :maxdepth: 2
-   :caption: Simulators:
+   :caption: Simulation:
 
-   Software-RTL-Simulators
-   FPGA-Accelerated-Simulators
+   Software-RTL-Simulation
+   FPGA-Accelerated-Simulation
+

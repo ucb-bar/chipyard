@@ -1,5 +1,9 @@
 import Tests._
 
+// This gives us a nicer handle  to the root project instead of using the
+// implicit one
+lazy val chipyardRoot = RootProject(file("."))
+
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
   version := "1.0",
@@ -15,7 +19,11 @@ lazy val commonSettings = Seq(
   libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
   libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.0",
   libraryDependencies += "org.scala-lang.modules" % "scala-jline" % "2.12.1",
+  libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.10",
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+  unmanagedBase := (chipyardRoot / unmanagedBase).value,
+  allDependencies := allDependencies.value.filterNot(_.organization == "edu.berkeley.cs"),
+  exportJars := true,
   resolvers ++= Seq(
     Resolver.sonatypeRepo("snapshots"),
     Resolver.sonatypeRepo("releases"),
@@ -68,23 +76,20 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
 
 // Subproject definitions begin
 //
-// NB: FIRRTL should not be a managed dependency of chisel or rocketchip.
-// Instead, they will get firrtl from the JAR file placed in /lib
-lazy val chisel  = (project in rocketChipDir / "chisel3")
-
-lazy val firrtl = (project in file("tools/firrtl"))
-  .settings(commonSettings)
+// FIRRTL is handled as an unmanaged dependency. Make will build the firrtl jar
+// before launching sbt if any of the firrtl source files has been updated
+// The jar is dropped in chipyard's lib/ directory, which is used as the unmanagedBase
+// for all subprojects
+lazy val chisel  = (project in file("tools/chisel3"))
 
 lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))
-  .dependsOn(firrtl)
   .settings(commonSettings)
 
-lazy val treadle = freshProject("treadle", file("tools/treadle"))
-  .dependsOn(firrtl)
+lazy val treadle = (project in file("tools/treadle"))
   .settings(commonSettings)
 
-lazy val `chisel-testers` = freshProject("chisel-testers", file("./tools/chisel-testers"))
-  .dependsOn(treadle, firrtl_interpreter, chisel)
+lazy val chisel_testers = (project in file("tools/chisel-testers"))
+  .dependsOn(chisel, firrtl_interpreter, treadle)
   .settings(
       commonSettings,
       libraryDependencies ++= Seq(
@@ -95,7 +100,7 @@ lazy val `chisel-testers` = freshProject("chisel-testers", file("./tools/chisel-
       )
     )
 
- // Contains annotations & firrtl passes you may wish to use in rocket-chip without
+// Contains annotations & firrtl passes you may wish to use in rocket-chip without
 // introducing a circular dependency between RC and MIDAS
 lazy val midasTargetUtils = ProjectRef(firesimDir, "targetutils")
 
@@ -139,11 +144,11 @@ lazy val boom = (project in file("generators/boom"))
   .settings(commonSettings)
 
 lazy val sha3 = (project in file("generators/sha3"))
-  .dependsOn(rocketchip, `chisel-testers`)
+  .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
-  .dependsOn(`chisel-testers`)
+  .dependsOn(chisel_testers, example)
   .settings(commonSettings)
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
@@ -154,8 +159,8 @@ lazy val barstoolsMacros = (project in file("./tools/barstools/macros/"))
   .enablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonSettings)
 
-lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
-  .dependsOn(chisel, `chisel-testers`)
+lazy val dsptools = (project in file("./tools/dsptools"))
+  .dependsOn(chisel, chisel_testers)
   .settings(
       commonSettings,
       libraryDependencies ++= Seq(
@@ -188,9 +193,7 @@ lazy val midas      = ProjectRef(firesimDir, "midas")
 lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 
 lazy val firechip = (project in file("generators/firechip"))
-  .dependsOn(boom, icenet, testchipip, sifive_blocks, sifive_cache,
-    memory_blade, utilities, tracegen,
-    midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
+  .dependsOn(example, icenet, testchipip, tracegen, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
     testGrouping in Test := isolateAllTests( (definedTests in Test).value )

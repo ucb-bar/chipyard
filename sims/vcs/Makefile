@@ -48,8 +48,7 @@ VCS_CC_OPTS = \
 	-CC "-I$(VCS_HOME)/include" \
 	-CC "-I$(RISCV)/include" \
 	-CC "-std=c++11" \
-	-CC "-Wl,-rpath,$(RISCV)/lib" \
-	$(RISCV)/lib/libfesvr.so
+	$(RISCV)/lib/libfesvr.a
 
 VCS_NONCC_OPTS = \
 	+lint=all,noVCDE,noONGS,noUI \
@@ -92,7 +91,7 @@ $(sim_debug) : $(sim_vsrcs) $(sim_common_files)
 #########################################################################################
 .PRECIOUS: $(output_dir)/%.vpd %.vpd
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
-	$(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $<
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $< 2> >(spike-dasm > $<.out) | tee $<.log)
 
 #########################################################################################
 # general cleanup rule

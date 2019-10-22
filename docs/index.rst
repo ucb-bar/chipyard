@@ -6,49 +6,45 @@
 Welcome to Chipyard's documentation!
 ====================================
 
+.. image:: ./_static/images/chipyard-logo.svg
+
 Chipyard is a a framework for designing and evaluating full-system hardware using agile teams.
 It is composed of a collection of tools and libraries designed to provide an intergration between open-source and commercial tools for the development of systems-on-chip.
 New to Chipyard? Jump to the :ref:`Chipyard Basics` page for more info.
 
 .. include:: Quick-Start.rst
 
+Getting Help
+------------
+
+If you have a question about Chipyard that isn't answered by the existing
+documentation, feel free to ask for help on the
+`Chipyard Google Group <https://groups.google.com/forum/#!forum/chipyard>`_.
+
+Table of Contents
+-----------------
+
 .. toctree::
    :maxdepth: 3
-   :caption: Contents:
    :numbered:
 
    Chipyard-Basics/index
 
-   :maxdepth: 3
-   :caption: Simulation:
-   :numbered:
    Simulation/index
 
-   :maxdepth: 3
-   :caption: Generators:
-   :numbered:
    Generators/index
 
-   :maxdepth: 3
-   :caption: Tools:
-   :numbered:
    Tools/index
 
-   :maxdepth: 3
-   :caption: VLSI Production:
-   :numbered:
    VLSI/index
 
-   :maxdepth: 3
-   :caption: Customization:
-   :numbered:
    Customization/index
 
-   :maxdepth: 3
-   :caption: Advanced Usage:
-   :numbered:
-   Advanced-Usage/index
+   Software/index
 
+   Advanced-Concepts/index
+
+   TileLink-Diplomacy-Reference/index
 
 
 Indices and tables

@@ -18,22 +18,34 @@ include $(base_dir)/variables.mk
 # vlsi types and rules
 #########################################################################################
 sim_name           ?= vcs # needed for GenerateSimFiles, but is unused
-tech_name          ?=
-tech_dir           ?= $(vlsi_dir)/hammer-$(tech_name)-plugin/$(tech_name)
+tech_name          ?= asap7
+tech_dir           ?= $(if $(filter $(tech_name), asap7), $(vlsi_dir)/hammer/src/hammer-vlsi/technology/$(tech_name), $(vlsi_dir)/hammer-$(tech_name)-plugin/$(tech_name))
 SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
 SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
 SMEMS_HAMMER       ?= $(build_dir)/$(long_name).mems.hammer.json
-MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
+ifeq ($(tech_name),asap7)
+	MACROCOMPILER_MODE ?= --mode synflops
+else
+	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
+endif
 OBJ_DIR            ?= $(vlsi_dir)/build
-ENV_YML            ?= $(vlsi_dir)/bwrc-env.yml
-INPUT_CONFS        ?= example.yml $(dir $(tech_dir))/bwrc.yml
+ENV_YML            ?= $(vlsi_dir)/env.yml
+INPUT_CONFS        ?= example.yml
 HAMMER_EXEC        ?= ./example-vlsi
+VLSI_TOP           ?= $(TOP)
 
 #########################################################################################
 # general rules
 #########################################################################################
-ALL_RTL = $(TOP_FILE) $(TOP_SMEMS_FILE) $(extra_v_includes)
-extra_v_includes = $(build_dir)/EICG_wrapper.v
+ALL_RTL = $(TOP_FILE) $(TOP_SMEMS_FILE)
+extra_v_includes = $(build_dir)/EICG_wrapper.v $(vlsi_dir)/example.v
+ifneq ($(CUSTOM_VLOG), )
+	VLSI_RTL = $(CUSTOM_VLOG)
+	VLSI_BB = /dev/null
+else
+	VLSI_RTL = $(ALL_RTL) $(extra_v_includes)
+	VLSI_BB = $(sim_top_blackboxes)
+endif
 
 .PHONY: default verilog
 default: all
@@ -74,14 +86,17 @@ $(SRAM_CONF): $(SRAM_GENERATOR_CONF)
 # synthesis input configuration
 #########################################################################################
 SYN_CONF = $(OBJ_DIR)/inputs.yml
-GENERATED_CONFS = $(SYN_CONF) $(SRAM_CONF)
+GENERATED_CONFS = $(SYN_CONF)
+ifeq ($(CUSTOM_VLOG), )
+	GENERATED_CONFS += $(if $(filter $(tech_name), asap7), , $(SRAM_CONF))
+endif
 
-$(SYN_CONF): $(ALL_RTL) $(extra_v_includes) $(sim_top_blackboxes)
+$(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 	mkdir -p $(dir $@)
 	echo "synthesis.inputs:" > $@
-	echo "  top_module: $(TOP)" >> $@
+	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
-	for x in $(ALL_RTL) $(extra_v_includes) `cat $(sim_top_blackboxes)`; do \
+	for x in $(VLSI_RTL) `cat $(VLSI_BB)`; do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 

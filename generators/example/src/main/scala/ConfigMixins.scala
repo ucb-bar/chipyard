@@ -46,6 +46,7 @@ class WithBootROM extends Config((site, here, up) => {
     contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img")
 })
 
+// DOC include start: WithGPIO
 /**
  * Class to add in GPIO
  */
@@ -53,6 +54,7 @@ class WithGPIO extends Config((site, here, up) => {
   case PeripheryGPIOKey => List(
     GPIOParams(address = 0x10012000, width = 4, includeIOF = false))
 })
+// DOC include end: WithGPIO
 
 // -----------------------------------------------
 // BOOM and/or Rocket Top Level System Parameter Mixins
@@ -79,10 +81,12 @@ class WithDTMTop extends Config((site, here, up) => {
 /**
  * Class to specify a top level BOOM and/or Rocket system with PWM
  */
+// DOC include start: WithPWMTop
 class WithPWMTop extends Config((site, here, up) => {
   case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
     Module(LazyModule(new TopWithPWMTL()(p)).module)
 })
+// DOC include end: WithPWMTop
 
 /**
  * Class to specify a top level BOOM and/or Rocket system with a PWM AXI4
@@ -90,6 +94,14 @@ class WithPWMTop extends Config((site, here, up) => {
 class WithPWMAXI4Top extends Config((site, here, up) => {
   case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
     Module(LazyModule(new TopWithPWMAXI4()(p)).module)
+})
+
+/**
+ * Class to specify a top level BOOM and/or Rocket system with a TL-attached GCD device
+ */
+class WithGCDTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new TopWithGCD()(p)).module)
 })
 
 /**
@@ -114,6 +126,7 @@ class WithSimBlockDeviceTop extends Config((site, here, up) => {
   }
 })
 
+// DOC include start: WithGPIOTop
 /**
  * Class to specify a top level BOOM and/or Rocket system with GPIO
  */
@@ -128,6 +141,7 @@ class WithGPIOTop extends Config((site, here, up) => {
     top
   }
 })
+// DOC include end: WithGPIOTop
 
 // ------------------
 // Multi-RoCC Support
@@ -247,3 +261,14 @@ class WithPrefetchRoCC extends Config((site, here, up) => {
       auto = Some(new AutoPrefetchConfig(
         nWays = 4, nBlocks = 8, timeoutPeriod = 750)))(p)))
 })
+
+// DOC include start: WithInitZero
+class WithInitZero(base: BigInt, size: BigInt) extends Config((site, here, up) => {
+  case InitZeroKey => InitZeroConfig(base, size)
+})
+
+class WithInitZeroTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new TopWithInitZero()(p)).module)
+})
+// DOC include end: WithInitZero

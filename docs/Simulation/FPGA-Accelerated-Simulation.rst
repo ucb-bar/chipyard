@@ -1,6 +1,6 @@
 .. _firesim-sim-intro:
 
-FPGA-Accelerated Simulators
+FPGA-Accelerated Simulation
 ==============================
 
 FireSim
@@ -17,7 +17,7 @@ documentation  <http://docs.fires.im/en/latest/Initial-Setup/index.html>`__.
 Then clone Chipyard onto your FireSim manager
 instance, and setup your Chipyard repository as you would normally.
 
-Next, initalize FireSim as library in Chipyard by running:
+Next, initalize FireSim as a library in Chipyard by running:
 
 .. code-block:: shell
 
@@ -37,7 +37,7 @@ Finally, source the following environment at the root of the firesim directory:
     # (Recommended) The default manager environment (includes env.sh)
     source sourceme-f1-manager.sh
 
-`Every time you want to use FireSim with a fresh shell, you must source this sourceme.sh`
+.. Note:: Every time you want to use FireSim with a fresh shell, you must source this ``sourceme-f1-manager.sh``
 
 At this point you're ready to use FireSim with Chipyard. If you're not already
 familiar with FireSim, please return to the `FireSim Docs
@@ -63,7 +63,7 @@ config looks as following:
     new DefaultRocketConfig
   )
 
-Then the equivalent FireChip config (in `generators/firechip/src/main/scala/TargetConfigs.scala`) based on `FireSimRocketChipConfig`
+Then the equivalent FireChip config (in ``generators/firechip/src/main/scala/TargetConfigs.scala``) based on ``FireSimRocketChipConfig``
 will look as follows:
 
 .. code-block:: scala
@@ -87,4 +87,4 @@ will look as follows:
 You should then be able to refer to those classes or an alias of them in your ``DESIGN`` or ``TARGET_CONFIG``
 variables. Note that if your target machine has I/O not provided in the default
 FireChip targets (see ``generators/firechip/src/main/scala/Targets.scala``) you may need
-to write a custom endpoint.
+to write a custom bridge.

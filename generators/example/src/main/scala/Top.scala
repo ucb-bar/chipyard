@@ -35,6 +35,7 @@ class TopModule[+L <: Top](l: L) extends SystemModule(l)
   with DontTouch
 
 //---------------------------------------------------------------------------------------------------------
+// DOC include start: TopWithPWMTL
 
 class TopWithPWMTL(implicit p: Parameters) extends Top
   with HasPeripheryPWMTL {
@@ -44,6 +45,7 @@ class TopWithPWMTL(implicit p: Parameters) extends Top
 class TopWithPWMTLModule(l: TopWithPWMTL) extends TopModule(l)
   with HasPeripheryPWMTLModuleImp
 
+// DOC include end: TopWithPWMTL
 //---------------------------------------------------------------------------------------------------------
 
 class TopWithPWMAXI4(implicit p: Parameters) extends Top
@@ -53,6 +55,16 @@ class TopWithPWMAXI4(implicit p: Parameters) extends Top
 
 class TopWithPWMAXI4Module(l: TopWithPWMAXI4) extends TopModule(l)
   with HasPeripheryPWMAXI4ModuleImp
+
+//---------------------------------------------------------------------------------------------------------
+
+class TopWithGCD(implicit p: Parameters) extends Top
+  with HasPeripheryGCD {
+  override lazy val module = new TopWithGCDModule(this)
+}
+
+class TopWithGCDModule(l: TopWithGCD) extends TopModule(l)
+  with HasPeripheryGCDModuleImp
 
 //---------------------------------------------------------------------------------------------------------
 
@@ -112,3 +124,14 @@ class TopWithDTM(implicit p: Parameters) extends System
 }
 
 class TopWithDTMModule[+L <: TopWithDTM](l: L) extends SystemModule(l)
+
+//---------------------------------------------------------------------------------------------------------
+// DOC include start: TopWithInitZero
+class TopWithInitZero(implicit p: Parameters) extends Top
+    with HasPeripheryInitZero {
+  override lazy val module = new TopWithInitZeroModuleImp(this)
+}
+
+class TopWithInitZeroModuleImp(l: TopWithInitZero) extends TopModule(l)
+  with HasPeripheryInitZeroModuleImp
+// DOC include end: TopWithInitZero

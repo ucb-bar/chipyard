@@ -23,6 +23,8 @@ abstract class FireSimTestSuite(
   import scala.concurrent.duration._
   import ExecutionContext.Implicits.global
 
+  val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
+
   lazy val generatorArgs = GeneratorArgs(
     midasFlowKind = "midas",
     targetDir = "generated-src",
@@ -42,7 +44,6 @@ abstract class FireSimTestSuite(
   val commonMakeArgs = Seq(s"DESIGN=${generatorArgs.topModuleClass}",
                            s"TARGET_CONFIG=${generatorArgs.targetConfigs}",
                            s"PLATFORM_CONFIG=${generatorArgs.platformConfigs}")
-  override lazy val platform = hostParams(midas.Platform)
 
   def invokeMlSimulator(backend: String, name: String, debug: Boolean, additionalArgs: Seq[String] = Nil) = {
     make((Seq(s"${outDir.getAbsolutePath}/${name}.%s".format(if (debug) "vpd" else "out"),
@@ -109,10 +110,10 @@ abstract class FireSimTestSuite(
         val lines = Source.fromFile(file).getLines.toList
         lines.filter(_.startsWith("TRACEPORT")).drop(dropLines)
       }
-      val resetLength = 50
+      val resetLength = 51
       val verilatedOutput  = getLines(new File(outDir,  s"/${verilatedLog}"))
-      val synthPrintOutput = getLines(new File(genDir, s"/TRACEFILE"), resetLength + 1)
-      assert(verilatedOutput.size == synthPrintOutput.size, "Outputs differ in length")
+      val synthPrintOutput = getLines(new File(genDir, s"/TRACEFILE"), resetLength)
+      assert(math.abs(verilatedOutput.size - synthPrintOutput.size) <= 1, "Outputs differ in length")
       assert(verilatedOutput.nonEmpty)
       for ( (vPrint, sPrint) <- verilatedOutput.zip(synthPrintOutput) ) {
         assert(vPrint == sPrint)
@@ -122,7 +123,7 @@ abstract class FireSimTestSuite(
 
   clean
   mkdirs
-  elaborateAndCompileWithMidas
+  elaborate
   generateTestSuiteMakefrags
   runTest("verilator", "rv64ui-p-simple", false, Seq(s"""EXTRA_SIM_ARGS=+trace-test-output0"""))
   diffTracelog("rv64ui-p-simple.out")
@@ -130,9 +131,45 @@ abstract class FireSimTestSuite(
   runSuite("verilator")(FastBlockdevTests)
 }
 
-class RocketF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimRocketChipConfig", "FireSimConfig")
-class RocketF1ClockDivTests extends FireSimTestSuite("FireSimNoNIC", "FireSimRocketChipConfig", "FireSimClockDivConfig")
-class BoomF1Tests extends FireSimTestSuite("FireBoomNoNIC", "FireSimBoomConfig", "FireSimConfig")
-class RocketNICF1Tests extends FireSimTestSuite("FireSim", "FireSimRocketChipConfig", "FireSimConfig") {
+class RocketF1Tests extends FireSimTestSuite("FireSimNoNIC", "DDR3FRFCFSLLC4MB_FireSimRocketChipQuadCoreConfig", "BaseF1Config")
+class BoomF1Tests extends FireSimTestSuite("FireSimNoNIC", "DDR3FRFCFSLLC4MB_FireSimBoomConfig", "BaseF1Config")
+class RocketNICF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimRocketChipConfig", "BaseF1Config") {
   runSuite("verilator")(NICLoopbackTests)
 }
+class RamModelRocketF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimRocketChipDualCoreConfig", "BaseF1Config_MCRams")
+class RamModelBoomF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimBoomConfig", "BaseF1Config_MCRams")
+
+abstract class FireSimTraceGenTest(targetConfig: String, platformConfig: String)
+    extends firesim.TestSuiteCommon with IsFireSimGeneratorLike {
+  val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
+
+  lazy val generatorArgs = GeneratorArgs(
+    midasFlowKind = "midas",
+    targetDir = "generated-src",
+    topModuleProject = "firesim.firesim",
+    topModuleClass = "FireSimTraceGen",
+    targetConfigProject = "firesim.firesim",
+    targetConfigs = targetConfig ++ "_WithScalaTestFeatures",
+    platformConfigProject = "firesim.firesim",
+    platformConfigs = platformConfig)
+
+  // From HasFireSimGeneratorUtilities
+  // For the firesim utilities to use the same directory as the test suite
+  override lazy val testDir = genDir
+
+  // From TestSuiteCommon
+  val targetTuple = generatorArgs.tupleName
+  val commonMakeArgs = Seq(s"DESIGN=${generatorArgs.topModuleClass}",
+                           s"TARGET_CONFIG=${generatorArgs.targetConfigs}",
+                           s"PLATFORM_CONFIG=${generatorArgs.platformConfigs}")
+
+  it should "pass" in {
+    assert(make("fsim-tracegen") == 0)
+  }
+}
+
+class FireSimLLCTraceGenTest extends FireSimTraceGenTest(
+  "DDR3FRFCFSLLC4MB_FireSimTraceGenConfig", "BaseF1Config")
+
+class FireSimL2TraceGenTest extends FireSimTraceGenTest(
+  "DDR3FRFCFS_FireSimTraceGenL2Config", "BaseF1Config")

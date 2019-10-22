@@ -13,7 +13,7 @@ import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.DebugModuleParams
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import boom.common.BoomTilesKey
-import testchipip.{WithBlockDevice, BlockDeviceKey, BlockDeviceConfig, MemBenchKey, MemBenchParams}
+import testchipip.{BlockDeviceKey, BlockDeviceConfig, MemBenchKey, MemBenchParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import sifive.blocks.inclusivecache.InclusiveCachePortParameters
 import memblade.manager.{MemBladeKey, MemBladeParams, MemBladeQueueParams}
@@ -25,6 +25,10 @@ import tracegen.TraceGenKey
 import icenet._
 import scala.math.max
 import testchipip.WithRingSystemBus
+
+import firesim.bridges._
+import firesim.util.{WithNumNodes}
+import firesim.configs._
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMParams => {
@@ -45,11 +49,13 @@ class WithPeripheryBusFrequency(freq: BigInt) extends Config((site, here, up) =>
 })
 
 class WithUARTKey extends Config((site, here, up) => {
-   case PeripheryUARTKey => List(UARTParams(
+  case PeripheryUARTKey => List(UARTParams(
      address = BigInt(0x54000000L),
      nTxEntries = 256,
      nRxEntries = 256))
 })
+
+class WithBlockDevice extends Config(new testchipip.WithBlockDevice)
 
 class WithNICKey extends Config((site, here, up) => {
   case NICKey => NICConfig(
@@ -155,6 +161,14 @@ class WithScalaTestFeatures extends Config((site, here, up) => {
     case PrintTracePort => true
 })
 
+// FASED Config Aliases. This to enable config generation via "_" concatenation
+// which requires that all config classes be defined in the same package
+class DDR3FRFCFS extends FRFCFS16GBQuadRank
+class DDR3FRFCFSLLC4MB extends FRFCFS16GBQuadRankLLC4MB
+
+// L2 Config Aliases. For use with "_" concatenation
+class L2SingleBank512K extends freechips.rocketchip.subsystem.WithInclusiveCache
+
 /*******************************************************************************
 * Full TARGET_CONFIG configurations. These set parameters of the target being
 * simulated.
@@ -176,6 +190,8 @@ class FireSimRocketChipConfig extends Config(
   new WithRocketL2TLBs(1024) ++
   new WithPerfCounters ++
   new WithoutClockGating ++
+  new WithDefaultMemModel ++
+  new WithDefaultFireSimBridges ++
   new freechips.rocketchip.system.DefaultConfig)
 
 class WithNDuplicatedRocketCores(n: Int) extends Config((site, here, up) => {
@@ -206,10 +222,14 @@ class FireSimRocketChipOctaCoreConfig extends Config(
   new FireSimRocketChipSingleCoreConfig)
 
 class FireSimMemBladeConfig extends Config(
-  new WithMemBladeKey ++ new FireSimRocketChipConfig)
+  new WithMemBladeKey ++
+  new WithMemBladeBridge ++
+  new FireSimRocketChipConfig)
 
 class FireSimMemBlade1024Config extends Config(
-  new WithMemBladeKey(Some(1024)) ++ new FireSimRocketChipConfig)
+  new WithMemBladeKey(Some(1024)) ++
+  new WithMemBladeBridge ++
+  new FireSimRocketChipConfig)
 
 class WithL2InnerExteriorBuffer(aDepth: Int, dDepth: Int) extends Config(
   (site, here, up) => {
@@ -276,7 +296,8 @@ class FireSimDRAMCacheConfig extends Config(
   new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
   new WithStandardL2 ++
-  new FireSimRocketChipConfig)
+  new FireSimRocketChipConfig ++
+  new WithDRAMCacheBridge)
 
 class FireSimDRAMCacheSingleCoreConfig extends Config(
   new WithNBigCores(1) ++ new FireSimDRAMCacheConfig)
@@ -294,6 +315,21 @@ class FireSimDRAMCacheTraceGenConfig extends Config(
   new WithDRAMCacheExtentTableInit ++
   new FireSimDRAMCacheConfig)
 
+// SHA-3 accelerator config
+class FireSimRocketChipSha3L2Config extends Config(
+  new WithInclusiveCache ++
+  new sha3.WithSha3Accel ++
+  new WithNBigCores(1) ++
+  new FireSimRocketChipConfig)
+
+// SHA-3 accelerator config with synth printfs enabled
+class FireSimRocketChipSha3L2PrintfConfig extends Config(
+  new WithInclusiveCache ++
+  new sha3.WithSha3Printf ++ 
+  new sha3.WithSha3Accel ++
+  new WithNBigCores(1) ++
+  new FireSimRocketChipConfig)
+
 class FireSimBoomConfig extends Config(
   new WithBootROM ++
   new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
@@ -305,8 +341,10 @@ class FireSimBoomConfig extends Config(
   new WithBoomL2TLBs(1024) ++
   new WithoutClockGating ++
   new boom.common.WithTrace ++
+  new WithDefaultMemModel ++
   new boom.common.WithLargeBooms ++
   new boom.common.WithNBoomCores(1) ++
+  new WithDefaultFireSimBridges ++
   new freechips.rocketchip.system.BaseConfig
 )
 
@@ -351,18 +389,29 @@ class FireSimBoomDRAMCacheConfig extends Config(
   new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
   new WithLargeL2 ++
-  new FireSimBoomConfig)
+  new FireSimBoomConfig ++
+  new WithDRAMCacheBridge)
 
 class FireSimBoomDRAMCacheDualCoreConfig extends Config(
   new WithNDuplicatedBoomCores(2) ++
   new FireSimBoomDRAMCacheConfig)
 
 //**********************************************************************************
+//* Heterogeneous Configurations
+//*********************************************************************************/
+
+// dual core config (rocket + small boom)
+class FireSimRocketBoomConfig extends Config(
+  new WithBoomL2TLBs(1024) ++ // reset l2 tlb amt ("WithSmallBooms" overrides it)
+  new boom.common.WithRenumberHarts ++ // fix hart numbering
+  new boom.common.WithSmallBooms ++ // change single BOOM to small
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++ // add a "big" rocket core
+  new FireSimBoomConfig
+)
+
+//**********************************************************************************
 //* Supernode Configurations
 //*********************************************************************************/
-class WithNumNodes(n: Int) extends Config((pname, site, here) => {
-  case NumNodes => n
-})
 
 class SupernodeFireSimRocketChipConfig extends Config(
   new WithNumNodes(4) ++
@@ -454,6 +503,7 @@ class WithDRAMCacheTraceGen extends Config((site, here, up) => {
 class FireSimTraceGenConfig extends Config(
   new WithTraceGen(
     List.fill(2) { DCacheParams(nMSHRs = 2, nSets = 16, nWays = 2) }) ++
+  new WithTraceGenBridge ++
   new FireSimRocketChipConfig)
 
 class WithL2TraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
@@ -487,7 +537,11 @@ class WithL2TraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
 class FireSimTraceGenL2Config extends Config(
   new WithL2TraceGen(
     List.fill(2) { DCacheParams(nMSHRs = 2, nSets = 16, nWays = 2) }) ++
-  new WithStandardL2 ++
+  new WithInclusiveCache(
+    nBanks = 4,
+    capacityKB = 1024,
+    outerLatencyCycles = 50) ++
+  new WithTraceGenBridge ++
   new FireSimRocketChipConfig)
 
 class FireSimBoomRingL2Config extends Config(
