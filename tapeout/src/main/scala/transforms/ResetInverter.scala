@@ -58,7 +58,9 @@ class ResetInverterTransform extends Transform {
 
 trait ResetInverter {
   self: chisel3.Module =>
-  def invert(component: InstanceId): Unit = {
-    annotate(chisel3.experimental.ChiselAnnotation(component, classOf[ResetInverterTransform], "invert"))
+  def invert[T <: chisel3.experimental.LegacyModule](module: T): Unit = {
+    chisel3.experimental.annotate(new chisel3.experimental.ChiselAnnotation{
+      def toFirrtl: Annotation = ResetInverterAnnotation(module.toNamed)
+    })
   }
 }
