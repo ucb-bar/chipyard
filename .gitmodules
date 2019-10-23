@@ -98,3 +98,6 @@
 [submodule "tools/axe"]
 	path = tools/axe
 	url = https://github.com/CTSRD-CHERI/axe.git
+[submodule "generators/gemmini"]
+	path = generators/gemmini
+	url = https://github.com/ucb-bar/gemmini
