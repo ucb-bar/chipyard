@@ -99,7 +99,7 @@ class WithDRAMCacheKey(
     spanBytes = site(CacheBlockBytes),
     logAddrBits = 37,
     outIdBits = 4,
-    nWritebackRemXacts = 128,
+    nWritebackRemXacts = nTrackersPerBank * nBanksPerChannel,
     remAccessQueue = RemoteAccessDepths(1, 8, 1, 8),
     wbQueue = WritebackDepths(1, 1),
     memInQueue = MemoryQueueParams(0, 0, 8, 2, 8, 2),
