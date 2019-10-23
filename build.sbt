@@ -148,7 +148,7 @@ lazy val sha3 = (project in file("generators/sha3"))
   .settings(commonSettings)
 
 lazy val gemmini = (project in file("generators/gemmini"))
-  .dependsOn(rocketchip, chisel_testers)
+  .dependsOn(rocketchip, chisel_testers, testchipip)
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
