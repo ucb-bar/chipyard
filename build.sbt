@@ -20,6 +20,7 @@ lazy val commonSettings = Seq(
   libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.0",
   libraryDependencies += "org.scala-lang.modules" % "scala-jline" % "2.12.1",
   libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.10",
+  libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.5",
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
   allDependencies := allDependencies.value.filterNot(_.organization == "edu.berkeley.cs"),
@@ -119,8 +120,20 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
+lazy val fcl = (project in file("tools/fcl-floorplan/fcl"))
+  .dependsOn(chisel)
+  .settings(commonSettings)
+
+lazy val floorplan = (project in file("tools/fcl-floorplan/floorplan"))
+  .dependsOn(chisel, fcl)
+  .settings(commonSettings)
+
+lazy val aoplib = (project in file("tools/fcl-floorplan/aoplib"))
+  .dependsOn(chisel, fcl, floorplan)
+  .settings(commonSettings)
+
 lazy val example = conditionalDependsOn(project in file("generators/example"))
-  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, sha3)
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, sha3, aoplib)
   .settings(commonSettings)
 
 lazy val tracegen = conditionalDependsOn(project in file("generators/tracegen"))
