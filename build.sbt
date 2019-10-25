@@ -128,8 +128,12 @@ lazy val floorplan = (project in file("tools/fcl-floorplan/floorplan"))
   .dependsOn(chisel, fcl)
   .settings(commonSettings)
 
+lazy val barstools_floorplan = (project in file("tools/barstools/floorplan"))
+  .dependsOn(chisel)
+  .settings(commonSettings)
+
 lazy val aoplib = (project in file("tools/fcl-floorplan/aoplib"))
-  .dependsOn(chisel, fcl, floorplan)
+  .dependsOn(chisel, fcl, floorplan, barstools_floorplan)
   .settings(commonSettings)
 
 lazy val example = conditionalDependsOn(project in file("generators/example"))
