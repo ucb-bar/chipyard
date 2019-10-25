@@ -138,3 +138,38 @@ class RocketNICF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_Fir
 }
 class RamModelRocketF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimRocketChipDualCoreConfig", "BaseF1Config_MCRams")
 class RamModelBoomF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimBoomConfig", "BaseF1Config_MCRams")
+
+abstract class FireSimTraceGenTest(targetConfig: String, platformConfig: String)
+    extends firesim.TestSuiteCommon with IsFireSimGeneratorLike {
+  val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
+
+  lazy val generatorArgs = GeneratorArgs(
+    midasFlowKind = "midas",
+    targetDir = "generated-src",
+    topModuleProject = "firesim.firesim",
+    topModuleClass = "FireSimTraceGen",
+    targetConfigProject = "firesim.firesim",
+    targetConfigs = targetConfig ++ "_WithScalaTestFeatures",
+    platformConfigProject = "firesim.firesim",
+    platformConfigs = platformConfig)
+
+  // From HasFireSimGeneratorUtilities
+  // For the firesim utilities to use the same directory as the test suite
+  override lazy val testDir = genDir
+
+  // From TestSuiteCommon
+  val targetTuple = generatorArgs.tupleName
+  val commonMakeArgs = Seq(s"DESIGN=${generatorArgs.topModuleClass}",
+                           s"TARGET_CONFIG=${generatorArgs.targetConfigs}",
+                           s"PLATFORM_CONFIG=${generatorArgs.platformConfigs}")
+
+  it should "pass" in {
+    assert(make("fsim-tracegen") == 0)
+  }
+}
+
+class FireSimLLCTraceGenTest extends FireSimTraceGenTest(
+  "DDR3FRFCFSLLC4MB_FireSimTraceGenConfig", "BaseF1Config")
+
+class FireSimL2TraceGenTest extends FireSimTraceGenTest(
+  "DDR3FRFCFS_FireSimTraceGenL2Config", "BaseF1Config")

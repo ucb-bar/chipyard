@@ -23,7 +23,11 @@ tech_dir           ?= $(if $(filter $(tech_name), asap7), $(vlsi_dir)/hammer/src
 SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
 SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
 SMEMS_HAMMER       ?= $(build_dir)/$(long_name).mems.hammer.json
-MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
+ifeq ($(tech_name),asap7)
+	MACROCOMPILER_MODE ?= --mode synflops
+else
+	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
+endif
 OBJ_DIR            ?= $(vlsi_dir)/build
 ENV_YML            ?= $(vlsi_dir)/env.yml
 INPUT_CONFS        ?= example.yml
