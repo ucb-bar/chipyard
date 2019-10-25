@@ -71,7 +71,7 @@ srams: sram_generator
 sram_generator: $(SRAM_CONF)
 
 # This should be built alongside $(SMEMS_FILE)
-$(SMEMS_HAMMER): $(SMEMS_FILE)
+$(SMEMS_HAMMER): $(TOP_SMEMS_FILE)
 
 $(SRAM_GENERATOR_CONF): $(SMEMS_HAMMER)
 	mkdir -p $(dir $@)
