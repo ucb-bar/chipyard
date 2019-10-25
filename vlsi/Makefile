@@ -70,7 +70,7 @@ SRAM_CONF=$(build_dir)/sram_generator-output.json
 srams: sram_generator
 sram_generator: $(SRAM_CONF)
 
-# This should be built alongside $(SMEMS_FILE)
+# This should be built alongside $(TOP_SMEMS_FILE)
 $(SMEMS_HAMMER): $(TOP_SMEMS_FILE)
 
 $(SRAM_GENERATOR_CONF): $(SMEMS_HAMMER)
