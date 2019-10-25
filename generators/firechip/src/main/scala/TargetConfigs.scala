@@ -399,6 +399,11 @@ class FireSimBoomDRAMCacheDualCoreConfig extends Config(
   new WithNDuplicatedBoomCores(2) ++
   new FireSimBoomDRAMCacheConfig)
 
+class FireSimBoomRocketDRAMCacheConfig extends Config(
+  new boom.common.WithRenumberHarts ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new FireSimBoomDRAMCacheConfig)
+
 //**********************************************************************************
 //* Heterogeneous Configurations
 //*********************************************************************************/
