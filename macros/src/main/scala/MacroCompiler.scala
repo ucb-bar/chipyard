@@ -511,7 +511,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
               /* Palmer: If we don't have a chip enable but do have mask ports. */
               stmts += connectPorts(memMask, mask, mask_polarity)
               stmts += connectPorts(andAddrMatch(and(memWriteEnable, memChipEnable)),
-                                    we, mask_polarity)
+                                    we, we_polarity)
             case (None, Some(PolarizedPort(we, we_polarity)), chipEnable) =>
               if (bitWidth(memMask.tpe) == 1) {
                 /* Palmer: If we're expected to provide mask ports without a
