@@ -772,38 +772,37 @@ object MacroCompiler extends App {
   ) ++ modeOptions) mkString "\n"
 
   def parseArgs(map: MacroParamMap, costMap: CostParamMap, forcedMemories: ForcedMemories,
-                args: List[String]): (MacroParamMap, CostParamMap, ForcedMemories) = {
-      args match {
-        case Nil => (map, costMap, forcedMemories)
-        case ("-n" | "--macro-conf") :: value :: tail =>
-          parseArgs(map + (Macros  -> value) + (MacrosFormat -> "conf"), costMap, forcedMemories, tail)
-        case ("-m" | "--macro-mdf") :: value :: tail =>
-          parseArgs(map + (Macros  -> value) + (MacrosFormat -> "mdf"), costMap, forcedMemories, tail)
-        case ("-l" | "--library") :: value :: tail =>
-          parseArgs(map + (Library -> value), costMap, forcedMemories, tail)
-        case ("-u" | "--use-compiler") :: tail =>
-          parseArgs(map + (UseCompiler -> ""), costMap, forcedMemories, tail)
-        case ("-v" | "--verilog") :: value :: tail =>
-          parseArgs(map + (Verilog -> value), costMap, forcedMemories, tail)
-        case ("-f" | "--firrtl") :: value :: tail =>
-          parseArgs(map + (Firrtl -> value), costMap, forcedMemories, tail)
-        case ("-hir" | "--hammer-ir") :: value :: tail =>
-          parseArgs(map + (HammerIR -> value), costMap, forcedMemories, tail)
-        case ("-c" | "--cost-func") :: value :: tail =>
-          parseArgs(map + (CostFunc -> value), costMap, forcedMemories, tail)
-        case ("-cp" | "--cost-param") :: value1 :: value2 :: tail =>
-          parseArgs(map, costMap + (value1 -> value2), forcedMemories, tail)
-        case "--force-compile" :: value :: tail =>
-          parseArgs(map, costMap, forcedMemories.copy(_1 = forcedMemories._1 + value), tail)
-        case "--force-synflops" :: value :: tail =>
-          parseArgs(map, costMap, forcedMemories.copy(_2 = forcedMemories._2 + value), tail)
-        case "--mode" :: value :: tail =>
-          parseArgs(map + (Mode -> value), costMap, forcedMemories, tail)
-        case arg :: tail =>
-          println(s"Unknown field $arg\n")
-          println(usage)
-          sys.exit(1)
-      }
+                args: List[String]): (MacroParamMap, CostParamMap, ForcedMemories) =
+    args match {
+      case Nil => (map, costMap, forcedMemories)
+      case ("-n" | "--macro-conf") :: value :: tail =>
+        parseArgs(map + (Macros  -> value) + (MacrosFormat -> "conf"), costMap, forcedMemories, tail)
+      case ("-m" | "--macro-mdf") :: value :: tail =>
+        parseArgs(map + (Macros  -> value) + (MacrosFormat -> "mdf"), costMap, forcedMemories, tail)
+      case ("-l" | "--library") :: value :: tail =>
+        parseArgs(map + (Library -> value), costMap, forcedMemories, tail)
+      case ("-u" | "--use-compiler") :: tail =>
+        parseArgs(map + (UseCompiler -> ""), costMap, forcedMemories, tail)
+      case ("-v" | "--verilog") :: value :: tail =>
+        parseArgs(map + (Verilog -> value), costMap, forcedMemories, tail)
+      case ("-f" | "--firrtl") :: value :: tail =>
+        parseArgs(map + (Firrtl -> value), costMap, forcedMemories, tail)
+      case ("-hir" | "--hammer-ir") :: value :: tail =>
+        parseArgs(map + (HammerIR -> value), costMap, forcedMemories, tail)
+      case ("-c" | "--cost-func") :: value :: tail =>
+        parseArgs(map + (CostFunc -> value), costMap, forcedMemories, tail)
+      case ("-cp" | "--cost-param") :: value1 :: value2 :: tail =>
+        parseArgs(map, costMap + (value1 -> value2), forcedMemories, tail)
+      case "--force-compile" :: value :: tail =>
+        parseArgs(map, costMap, forcedMemories.copy(_1 = forcedMemories._1 + value), tail)
+      case "--force-synflops" :: value :: tail =>
+        parseArgs(map, costMap, forcedMemories.copy(_2 = forcedMemories._2 + value), tail)
+      case "--mode" :: value :: tail =>
+        parseArgs(map + (Mode -> value), costMap, forcedMemories, tail)
+      case arg :: tail =>
+        println(s"Unknown field $arg\n")
+        println(usage)
+        sys.exit(1)
     }
 
   def run(args: List[String]) {
