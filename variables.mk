@@ -110,6 +110,9 @@ endif
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
 
+FPIR_IN_FILE  ?= $(build_dir)/$(long_name).fpir.in.json
+FLIR_OUT_FILE ?= $(build_dir)/$(long_name).fpir.out.json
+
 TOP_FILE       ?= $(build_dir)/$(long_name).top.v
 TOP_FIR        ?= $(build_dir)/$(long_name).top.fir
 TOP_ANNO       ?= $(build_dir)/$(long_name).top.anno.json

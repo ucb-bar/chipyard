@@ -83,6 +83,16 @@ $(SRAM_CONF): $(SRAM_GENERATOR_CONF)
 	cd $(vlsi_dir) && cp output.json $@
 
 #########################################################################################
+# floorplan
+#########################################################################################
+.PHONY: floorplan fp
+fp: floorplan
+floorplan: $(FPIR_OUT_FILE)
+
+$(FPIR_OUT_FILE): $(FPIR_IN_FILE)
+	cd $(base_dir) && $(SBT) "project floorplan" "runMain barstools.floorplan.compiler.FloorplanCompiler -i $(FPIR_IN_FILE) -o $(FPIR_OUT_FILE)"
+
+#########################################################################################
 # synthesis input configuration
 #########################################################################################
 SYN_CONF = $(OBJ_DIR)/inputs.yml
