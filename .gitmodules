@@ -98,3 +98,6 @@
 [submodule "tools/fcl-floorplan"]
 	path = tools/fcl-floorplan
 	url = https://github.com/ucb-bar/fcl-floorplan.git
+[submodule "tools/axe"]
+	path = tools/axe
+	url = https://github.com/CTSRD-CHERI/axe.git

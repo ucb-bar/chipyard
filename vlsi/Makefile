@@ -23,7 +23,11 @@ tech_dir           ?= $(if $(filter $(tech_name), asap7), $(vlsi_dir)/hammer/src
 SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
 SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
 SMEMS_HAMMER       ?= $(build_dir)/$(long_name).mems.hammer.json
-MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
+ifeq ($(tech_name),asap7)
+	MACROCOMPILER_MODE ?= --mode synflops
+else
+	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
+endif
 OBJ_DIR            ?= $(vlsi_dir)/build
 ENV_YML            ?= $(vlsi_dir)/env.yml
 INPUT_CONFS        ?= example.yml
@@ -77,6 +81,16 @@ $(SRAM_GENERATOR_CONF): $(SMEMS_HAMMER)
 $(SRAM_CONF): $(SRAM_GENERATOR_CONF)
 	cd $(vlsi_dir) && $(HAMMER_EXEC) -e $(ENV_YML) $(foreach x,$(INPUT_CONFS) $(SRAM_GENERATOR_CONF), -p $(x)) --obj_dir $(build_dir) sram_generator
 	cd $(vlsi_dir) && cp output.json $@
+
+#########################################################################################
+# floorplan
+#########################################################################################
+.PHONY: floorplan fp
+fp: floorplan
+floorplan: $(FPIR_OUT_FILE)
+
+$(FPIR_OUT_FILE): $(FPIR_IN_FILE)
+	cd $(base_dir) && $(SBT) "project floorplan" "runMain barstools.floorplan.compiler.FloorplanCompiler -i $(FPIR_IN_FILE) -o $(FPIR_OUT_FILE)"
 
 #########################################################################################
 # synthesis input configuration
