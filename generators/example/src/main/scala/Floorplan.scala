@@ -3,8 +3,6 @@ package example
 import aoplib.floorplan.{FloorplanAspect, FloorplanAspectNew}
 import chisel3.{Data, Vec}
 import chisel3.Bundle
-import floorplan._
-import FloatingPointDimensionImplicits._
 import chisel3.aop.Select
 import firrtl.options.{RegisteredLibrary, ShellOption}
 import firrtl.{AnnotationSeq}
@@ -13,19 +11,9 @@ import barstools.floorplan.firrtl.{FloorplanModuleAnnotation}
 
 object Floorplans {
 
-  def layoutTop(th: TestHarness): LayoutBase = {
-    val top = th.dut
-    val topLayout = VBox("top", Seq(
-      HardMacro(top.outer.tiles.head.module, "tile", 500, 200),
-      VerticalExpander(),
-      HardMacro(top.outer.sbus.module, "uncore", 500, 300)
-    ))
-    println(s"TOPLAYOUT:\n${topLayout}")
-    topLayout.replaceWidthAndHeight(500,500)
-  }
-
   def layoutTopNew(th: TestHarness): AnnotationSeq = {
     val top = th.dut
+    val tileMacro = FloorplanModuleAnnotation(top.outer.tiles.head.module.toTarget, ConcreteMacro("tile", LengthUnit(500), LengthUnit(200)).serialize)
     Seq(FloorplanModuleAnnotation(top.outer.sbus.module.toTarget, ConcreteMacro("sbus", LengthUnit(500), LengthUnit(500)).serialize))
   }
 }

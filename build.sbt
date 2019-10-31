@@ -123,20 +123,12 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
-lazy val fcl = (project in file("tools/fcl-floorplan/fcl"))
-  .dependsOn(chisel)
-  .settings(commonSettings)
-
-lazy val floorplan = (project in file("tools/fcl-floorplan/floorplan"))
-  .dependsOn(chisel, fcl)
-  .settings(commonSettings)
-
 lazy val barstools_floorplan = (project in file("tools/barstools/floorplan"))
   .dependsOn(chisel)
   .settings(commonSettings)
 
-lazy val aoplib = (project in file("tools/fcl-floorplan/aoplib"))
-  .dependsOn(chisel, fcl, floorplan, barstools_floorplan)
+lazy val aoplib = (project in file("tools/barstools/aoplib"))
+  .dependsOn(chisel, barstools_floorplan)
   .settings(commonSettings)
 
 lazy val example = conditionalDependsOn(project in file("generators/example"))
