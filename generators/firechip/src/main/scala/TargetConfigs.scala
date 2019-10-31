@@ -281,6 +281,8 @@ class FireSimRemoteMemClientQuadCoreConfig extends Config(
 
 class FireSimPrefetcherConfig extends Config(
   new WithPrefetchRoCC ++
+  new WithMemBenchKey ++
+  new WithPrefetchMiddleMan ++
   new WithStandardL2 ++
   new FireSimRocketChipConfig)
 
@@ -393,11 +395,18 @@ class FireSimBoomDualCoreL2Config extends Config(
 
 class FireSimBoomPrefetcherConfig extends Config(
   new WithPrefetchRoCC ++
+  new WithMemBenchKey ++
+  new WithPrefetchMiddleMan ++
   new WithLargeL2 ++
   new FireSimBoomConfig)
 
 class FireSimBoomPrefetcherDualCoreConfig extends Config(
   new WithNDuplicatedBoomCores(2) ++
+  new FireSimBoomPrefetcherConfig)
+
+class FireSimBoomRocketPrefetcherConfig extends Config(
+  new boom.common.WithRenumberHarts ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new FireSimBoomPrefetcherConfig)
 
 class FireSimBoomDRAMCacheConfig extends Config(
