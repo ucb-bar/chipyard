@@ -1,6 +1,6 @@
 package example
 
-import aoplib.floorplan.{FloorplanAspect, FloorplanAspectNew}
+import aoplib.floorplan.{FloorplanAspectNew}
 import chisel3.{Data, Vec}
 import chisel3.Bundle
 import chisel3.aop.Select
