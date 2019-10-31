@@ -39,7 +39,7 @@ class RetimeTransform extends Transform {
 
 trait RetimeLib {
   self: chisel3.Module =>
-  def retime[T <: chisel3.experimental.LegacyModule](module: T): Unit = {
+  def retime[T <: chisel3.internal.LegacyModule](module: T): Unit = {
     chisel3.experimental.annotate(new chisel3.experimental.ChiselAnnotation{
       def toFirrtl: Annotation = RetimeAnnotation(module.toNamed)
     })
