@@ -3,7 +3,6 @@ package example
 import scala.util.Try
 
 import chisel3._
-import chisel3.experimental.{RawModule}
 import chisel3.internal.firrtl.{Circuit}
 import chisel3.stage.{ChiselStage, ChiselCli, ChiselOptions}
 import firrtl.AnnotationSeq
@@ -69,7 +68,8 @@ object Generator extends GeneratorApp {
       topModuleProject = args(1),
       topModuleClass = args(2),
       configProject = args(3),
-      configs = args(4))
+      configs = args(4),
+      None)
   }
 
   // add unique test suites
@@ -92,7 +92,7 @@ object Generator extends GeneratorApp {
   }
 
   // specify the name that the generator outputs files as
-  val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
+  override lazy val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
   val additionalAnnos = new scala.collection.mutable.ArrayBuffer[firrtl.annotations.Annotation]()
 
   override def elaborate(fullTopModuleClassName: String, params: Parameters): Circuit = {

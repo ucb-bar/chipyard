@@ -7,14 +7,14 @@ lazy val chipyardRoot = RootProject(file("."))
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
   version := "1.0",
-  scalaVersion := "2.12.4",
+  scalaVersion := "2.12.10",
   traceLevel := 15,
   test in assembly := {},
   assemblyMergeStrategy in assembly := { _ match {
     case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
     case _ => MergeStrategy.first}},
   scalacOptions ++= Seq("-deprecation","-unchecked","-Xsource:2.11"),
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test",
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test",
   libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.1",
   libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
   libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.0",
@@ -112,9 +112,12 @@ lazy val hardfloat  = (project in rocketChipDir / "hardfloat")
 lazy val rocketMacros  = (project in rocketChipDir / "macros")
   .settings(commonSettings)
 
+lazy val rocketConfig = (project in rocketChipDir / "api-config-chipsalliance/build-rules/sbt")
+  .settings(commonSettings)
+
 lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
   .settings(commonSettings)
-  .dependsOn(chisel, hardfloat, rocketMacros)
+  .dependsOn(chisel, hardfloat, rocketMacros, rocketConfig)
 
 lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip)
@@ -198,7 +201,7 @@ lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
 
 lazy val sifive_cache = (project in file("generators/sifive-cache")).settings(
     commonSettings,
-    scalaSource in Compile := baseDirectory.value / "craft"
+    scalaSource in Compile := baseDirectory.value / "design/craft"
   ).dependsOn(rocketchip)
 
 // Library components of FireSim

@@ -26,7 +26,7 @@ object Floorplans {
 
   def layoutTopNew(th: TestHarness): AnnotationSeq = {
     val top = th.dut
-    Seq(FloorplanModuleAnnotation(top.toTarget, ConcreteMacro("top", LengthUnit(500), LengthUnit(500)).serialize))
+    Seq(FloorplanModuleAnnotation(top.outer.sbus.module.toTarget, ConcreteMacro("sbus", LengthUnit(500), LengthUnit(500)).serialize))
   }
 }
 
