@@ -41,6 +41,7 @@ trait HasTraceIOImp extends LazyModuleImp {
   (traceIO.traces zip outer.traceNexus.in).foreach({ case (port, (tileTrace, _)) =>
     port := DeclockedTracedInstruction.fromVec(tileTrace)
   })
+  traceIO.clock := clock
 
   // Enabled to test TracerV trace capture
   if (p(PrintTracePort)) {

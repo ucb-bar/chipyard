@@ -32,19 +32,19 @@ class WithTiedOffDebug extends RegisterBridgeBinder({ case target: HasPeripheryD
 })
 
 class WithSerialBridge extends RegisterBridgeBinder({
-  case target: HasPeripherySerialModuleImp => Seq(SerialBridge(target.serial)(target.p)) 
+  case target: HasPeripherySerialModuleImp => Seq(SerialBridge(target.clock, target.serial)(target.p))
 })
 
 class WithNICBridge extends RegisterBridgeBinder({
-  case target: HasPeripheryIceNICModuleImpValidOnly => Seq(NICBridge(target.net)(target.p)) 
+  case target: HasPeripheryIceNICModuleImpValidOnly => Seq(NICBridge(target.clock, target.net)(target.p))
 })
 
 class WithUARTBridge extends RegisterBridgeBinder({
-  case target: HasPeripheryUARTModuleImp => target.uart.map(u => UARTBridge(u)(target.p)) 
+  case target: HasPeripheryUARTModuleImp => target.uart.map(u => UARTBridge(target.clock, u)(target.p))
 })
 
 class WithBlockDeviceBridge extends RegisterBridgeBinder({
-  case target: HasPeripheryBlockDeviceModuleImp => Seq(BlockDevBridge(target.bdev, target.reset.toBool)(target.p)) 
+  case target: HasPeripheryBlockDeviceModuleImp => Seq(BlockDevBridge(target.clock ,target.bdev, target.reset.toBool)(target.p))
 })
 
 class WithFASEDBridge extends RegisterBridgeBinder({
@@ -55,7 +55,7 @@ class WithFASEDBridge extends RegisterBridgeBinder({
         val nastiKey = NastiParameters(axi4Bundle.r.bits.data.getWidth,
                                        axi4Bundle.ar.bits.addr.getWidth,
                                        axi4Bundle.ar.bits.id.getWidth)
-        FASEDBridge(axi4Bundle, t.reset.toBool,
+        FASEDBridge(t.clock, axi4Bundle, t.reset.toBool,
           CompleteConfig(p(firesim.configs.MemModelKey), nastiKey, Some(AXI4EdgeSummary(edge))))
       })
     }).toSeq
