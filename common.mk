@@ -80,7 +80,7 @@ harness_macro_temp: $(HARNESS_SMEMS_CONF)
 # remove duplicate files and headers in list of simulation file inputs
 ########################################################################################
 $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes)
-	awk '{print $1;}' $^ | sort -u | grep -v '.*\.h' > $@
+	awk '{print $1;}' $^ | sort -u | grep -v '.*\.h$$' > $@
 
 #########################################################################################
 # helper rule to just make verilog files
