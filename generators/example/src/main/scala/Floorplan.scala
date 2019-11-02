@@ -7,12 +7,18 @@ import chisel3.aop.Select
 import firrtl.options.{RegisteredLibrary, ShellOption}
 import firrtl.{AnnotationSeq}
 import barstools.floorplan.chisel._
+import barstools.floorplan.Rational
 
 object ExampleFloorplans {
 
   def simple(th: TestHarness): AnnotationSeq = {
     val top = th.dut
-    val tileMacro = Floorplan.createRect(top.outer.tiles.head.module)
+    val tile = top.outer.tiles.head.asInstanceOf[freechips.rocketchip.tile.RocketTile]
+    val tileMacro = Floorplan.createRect(tile.module)
+
+    val cacheGrid = Floorplan.createGrid(tile.module, "myGrid", 3, 1, true)
+    cacheGrid.set(0, 0, Floorplan.createRect(tile.dcache.module), Rational(2))
+    cacheGrid.setModule(2, 0, tile.frontend.icache.module, Rational(2))
 
     Floorplan.commitAndGetAnnotations()
   }

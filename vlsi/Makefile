@@ -90,7 +90,7 @@ fp: floorplan
 floorplan: $(FPIR_OUT_FILE)
 
 $(FPIR_OUT_FILE): $(FPIR_IN_FILE)
-	cd $(base_dir) && $(SBT) "project floorplan" "runMain barstools.floorplan.compiler.FloorplanCompiler -i $(FPIR_IN_FILE) -o $(FPIR_OUT_FILE)"
+	cd $(base_dir) && $(SBT) "project barstools_floorplan" "runMain barstools.floorplan.compiler.FloorplanCompiler -i $(FPIR_IN_FILE) -o $(FPIR_OUT_FILE)"
 
 #########################################################################################
 # synthesis input configuration
