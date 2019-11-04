@@ -22,6 +22,90 @@ class GenerateSomeVerilog extends MacroCompilerSpec with HasSRAMGenerator with H
   }
 }
 
+class MaskPortTest extends MacroCompilerSpec with HasSRAMGenerator {
+  val mem = s"mem-MaskPortTest.json" // mem. you want to create
+  val lib = s"lib-MaskPortTest.json" // lib. of mems to create it
+  val v = s"MaskPortTest.json"
+
+  override val libPrefix = "macros/src/test/resources"
+
+  val memSRAMs = mdf.macrolib.Utils.readMDFFromString(
+"""
+[ {
+  "type" : "sram",
+  "name" : "cc_dir_ext",
+  "width" : 128,
+  "depth" : "512",
+  "mux" : 1,
+  "ports" : [ {
+    "address port name" : "RW0_addr",
+    "address port polarity" : "active high",
+    "clock port name" : "RW0_clk",
+    "clock port polarity" : "positive edge",
+    "write enable port name" : "RW0_wmode",
+    "write enable port polarity" : "active high",
+    "chip enable port name" : "RW0_en",
+    "chip enable port polarity" : "active high",
+    "output port name" : "RW0_rdata",
+    "output port polarity" : "active high",
+    "input port name" : "RW0_wdata",
+    "input port polarity" : "active high",
+    "mask port name" : "RW0_wmask",
+    "mask port polarity" : "active high",
+    "mask granularity" : 16
+  } ],
+  "family" : "1rw"
+} ]
+""").getOrElse(List())
+
+  writeToMem(mem, memSRAMs)
+
+  val output =
+"""
+circuit cc_dir_ext :
+  module cc_dir_ext :
+    input RW0_addr : UInt<9>
+    input RW0_clk : Clock
+    input RW0_wdata : UInt<128>
+    output RW0_rdata : UInt<128>
+    input RW0_en : UInt<1>
+    input RW0_wmode : UInt<1>
+    input RW0_wmask : UInt<8>
+
+    inst mem_0_0 of fake_mem
+    inst mem_0_1 of fake_mem
+    mem_0_0.clk <= RW0_clk
+    mem_0_0.addr <= RW0_addr
+    node RW0_rdata_0_0 = bits(mem_0_0.dataout, 63, 0)
+    mem_0_0.datain <= bits(RW0_wdata, 63, 0)
+    mem_0_0.ren <= and(not(RW0_wmode), UInt<1>("h1"))
+    mem_0_0.mport <= not(cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 3, 3), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 2, 2), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 1, 1), cat(bits(RW0_wmask, 0, 0), cat(bits(RW0_wmask, 0, 0), cat(bits(RW0_wmask, 0, 0), cat(bits(RW0_wmask, 0, 0), cat(bits(RW0_wmask, 0, 0), cat(bits(RW0_wmask, 0, 0), cat(bits(RW0_wmask, 0, 0), cat(bits(RW0_wmask, 0, 0), cat(bits(RW0_wmask, 0, 0), cat(bits(RW0_wmask, 0, 0), cat(bits(RW0_wmask, 0, 0), cat(bits(RW0_wmask, 0, 0), cat(bits(RW0_wmask, 0, 0), cat(bits(RW0_wmask, 0, 0), cat(bits(RW0_wmask, 0, 0), bits(RW0_wmask, 0, 0)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+    mem_0_0.wen <= and(and(RW0_wmode, RW0_en), UInt<1>("h1"))
+    mem_0_1.clk <= RW0_clk
+    mem_0_1.addr <= RW0_addr
+    node RW0_rdata_0_1 = bits(mem_0_1.dataout, 63, 0)
+    mem_0_1.datain <= bits(RW0_wdata, 127, 64)
+    mem_0_1.ren <= and(not(RW0_wmode), UInt<1>("h1"))
+    mem_0_1.mport <= not(cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), bits(RW0_wmask, 4, 4)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+    mem_0_1.wen <= and(and(RW0_wmode, RW0_en), UInt<1>("h1"))
+    node RW0_rdata_0 = cat(RW0_rdata_0_1, RW0_rdata_0_0)
+    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
+
+  extmodule fake_mem :
+    input addr : UInt<9>
+    input clk : Clock
+    input datain : UInt<64>
+    output dataout : UInt<64>
+    input ren : UInt<1>
+    input wen : UInt<1>
+    input mport : UInt<64>
+
+    defname = fake_mem
+"""
+
+  compileExecuteAndTest(mem, lib, v, output)
+}
+
 class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
   val mem = s"mem-BOOMTest.json"
   val lib = s"lib-BOOMTest.json"
