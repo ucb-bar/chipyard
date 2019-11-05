@@ -70,10 +70,16 @@ class WithMemBladeKey(spanBytes: Option[Int] = None) extends Config(
       val spanBytesVal = spanBytes.getOrElse(site(CacheBlockBytes))
       MemBladeParams(
         spanBytes = spanBytesVal,
-        nSpanTrackers = max(384 / spanBytesVal, 2),
+        nSpanTrackers = max(256 / spanBytesVal, 2),
         nWordTrackers = 4,
+        nBanks = 4,
         spanQueue = MemBladeQueueParams(reqHeadDepth = 32, respHeadDepth = 32),
-        wordQueue = MemBladeQueueParams(reqHeadDepth = 32, respHeadDepth = 32))
+        wordQueue = MemBladeQueueParams(reqHeadDepth = 32, respHeadDepth = 32),
+        bankQueue = MemBladeQueueParams(
+          reqHeadDepth = 2,
+          reqDataDepth = 8,
+          respHeadDepth = 2,
+          respDataDepth = 8))
     }
   }
 )
@@ -227,6 +233,8 @@ class FireSimRocketChipOctaCoreConfig extends Config(
 
 class FireSimMemBladeConfig extends Config(
   new WithMemBladeKey ++
+  new WithNBanks(4) ++
+  new WithNMemoryChannels(4) ++
   new WithMemBladeBridge ++
   new FireSimRocketChipConfig)
 
