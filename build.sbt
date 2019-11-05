@@ -35,7 +35,7 @@ lazy val firesimAsLibrary = sys.env.get("FIRESIM_STANDALONE") == None
 lazy val firesimDir = if (firesimAsLibrary) {
   file("sims/firesim/sim/")
 } else {
-  file("../../")
+  file("../../sim")
 }
 
 // Checks for -DROCKET_USE_MAVEN.
