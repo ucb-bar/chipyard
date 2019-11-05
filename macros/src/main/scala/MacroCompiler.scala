@@ -517,13 +517,16 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
                 /* Palmer: If we're expected to provide mask ports without a
                  * memory that actually has them then we can use the
                  * write enable port instead of the mask port. */
-                stmts += connectPorts(andAddrMatch(and(memWriteEnable, memMask)),
-                                      we, we_polarity)
                 chipEnable match {
                   case Some(PolarizedPort(en, en_polarity)) => {
+                    stmts += connectPorts(andAddrMatch(and(memWriteEnable, memMask)),
+                                      we, we_polarity)
                     stmts += connectPorts(andAddrMatch(memChipEnable), en, en_polarity)
                   }
-                  case _ => // TODO: do we care about the case where mem has chipEnable but lib doesn't?
+                  case _ => {
+                    stmts += connectPorts(andAddrMatch(and(and(memWriteEnable, memChipEnable), memMask)),
+                                      we, we_polarity)
+                  }
                 }
               } else {
                 System.err.println("cannot emulate multi-bit mask ports with write enable")
