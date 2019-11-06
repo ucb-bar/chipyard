@@ -28,8 +28,8 @@ ifeq ($(tech_name),asap7)
 else
 	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
 endif
-ENV_YML            ?= $(vlsi_dir)/bwrc-env.yml
-INPUT_CONFS        ?= example.yml $(dir $(tech_dir))/bwrc.yml
+ENV_YML            ?= $(vlsi_dir)/env.yml
+INPUT_CONFS        ?= example.yml
 HAMMER_EXEC        ?= ./example-vlsi
 VLSI_TOP           ?= $(TOP)
 VLSI_OBJ_DIR       ?= $(vlsi_dir)/build
