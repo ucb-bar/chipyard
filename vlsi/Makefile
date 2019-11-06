@@ -28,11 +28,16 @@ ifeq ($(tech_name),asap7)
 else
 	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
 endif
-OBJ_DIR            ?= $(vlsi_dir)/build
-ENV_YML            ?= $(vlsi_dir)/env.yml
-INPUT_CONFS        ?= example.yml
+ENV_YML            ?= $(vlsi_dir)/bwrc-env.yml
+INPUT_CONFS        ?= example.yml $(dir $(tech_dir))/bwrc.yml
 HAMMER_EXEC        ?= ./example-vlsi
 VLSI_TOP           ?= $(TOP)
+VLSI_OBJ_DIR       ?= $(vlsi_dir)/build
+ifneq($(CUSTOM_VLOG), )
+	OBJ_DIR        ?= $(VLSI_OBJ_DIR)/custom-$(VLSI_TOP)
+else
+	OBJ_DIR        ?= $(VLSI_OBJ_DIR)/$(long_name)-$(VLSI_TOP)
+endif
 
 #########################################################################################
 # general rules
@@ -119,4 +124,4 @@ $(OBJ_DIR)/hammer.d: $(HAMMER_D_DEPS)
 #########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(gen_dir)
+	rm -rf $(VLSI_OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(gen_dir)
