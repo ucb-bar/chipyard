@@ -98,3 +98,9 @@
 [submodule "tools/axe"]
 	path = tools/axe
 	url = https://github.com/CTSRD-CHERI/axe.git
+[submodule "software/spec2017"]
+	path = software/spec2017
+	url = https://github.com/ucb-bar/spec2017-workload.git
+[submodule "software/coremark"]
+	path = software/coremark
+	url = https://github.com/ucb-bar/coremark-workload.git
