@@ -1,7 +1,7 @@
 Chisel
 ===========================
 
-`Chisel <https://chisel.eecs.berkeley.edu/>`__ is an open-source hardware description language embedded in Scala.
+`Chisel <https://chisel-lang.org/>`__ is an open-source hardware description language embedded in Scala.
 It supports advanced hardware design using highly parameterized generators and supports things such as Rocket Chip and BOOM.
 
 After writing Chisel, there are multiple steps before the Chisel source code "turns into" Verilog.
@@ -16,4 +16,4 @@ However, if that passes, the output of the generator gives you an FIRRTL file an
 See :ref:`FIRRTL` for more information on how to get a FIRRTL file to Verilog.
 
 For an interactive tutorial on how to use Chisel and get started please visit the `Chisel Bootcamp <https://github.com/freechipsproject/chisel-bootcamp>`__.
-Otherwise, for all things Chisel related including API documentation, news, etc, visit their `website <https://chisel.eecs.berkeley.edu/>`__.
+Otherwise, for all things Chisel related including API documentation, news, etc, visit their `website <https://chisel-lang.org/>`__.

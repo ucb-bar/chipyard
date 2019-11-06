@@ -10,69 +10,94 @@ import freechips.rocketchip.util.DontTouch
 
 import testchipip._
 
+import utilities.{System, SystemModule}
+
 import sifive.blocks.devices.gpio._
 
 // ------------------------------------
 // BOOM and/or Rocket Top Level Systems
 // ------------------------------------
 
-class BoomRocketTop(implicit p: Parameters) extends boom.system.BoomRocketSystem
+class Top(implicit p: Parameters) extends System
   with HasNoDebug
   with HasPeripherySerial {
-  override lazy val module = new BoomRocketTopModule(this)
+  override lazy val module = new TopModule(this)
 }
 
-class BoomRocketTopModule[+L <: BoomRocketTop](l: L) extends boom.system.BoomRocketSystemModule(l)
+class TopModule[+L <: Top](l: L) extends SystemModule(l)
   with HasNoDebugModuleImp
   with HasPeripherySerialModuleImp
   with DontTouch
 
 //---------------------------------------------------------------------------------------------------------
+// DOC include start: TopWithPWMTL
 
-class BoomRocketTopWithPWMTL(implicit p: Parameters) extends BoomRocketTop
+class TopWithPWMTL(implicit p: Parameters) extends Top
   with HasPeripheryPWMTL {
-  override lazy val module = new BoomRocketTopWithPWMTLModule(this)
+  override lazy val module = new TopWithPWMTLModule(this)
 }
 
-class BoomRocketTopWithPWMTLModule(l: BoomRocketTopWithPWMTL) extends BoomRocketTopModule(l)
+class TopWithPWMTLModule(l: TopWithPWMTL) extends TopModule(l)
   with HasPeripheryPWMTLModuleImp
 
+// DOC include end: TopWithPWMTL
 //---------------------------------------------------------------------------------------------------------
 
-class BoomRocketTopWithPWMAXI4(implicit p: Parameters) extends BoomRocketTop
+class TopWithPWMAXI4(implicit p: Parameters) extends Top
   with HasPeripheryPWMAXI4 {
-  override lazy val module = new BoomRocketTopWithPWMAXI4Module(this)
+  override lazy val module = new TopWithPWMAXI4Module(this)
 }
 
-class BoomRocketTopWithPWMAXI4Module(l: BoomRocketTopWithPWMAXI4) extends BoomRocketTopModule(l)
+class TopWithPWMAXI4Module(l: TopWithPWMAXI4) extends TopModule(l)
   with HasPeripheryPWMAXI4ModuleImp
 
 //---------------------------------------------------------------------------------------------------------
 
-class BoomRocketTopWithBlockDevice(implicit p: Parameters) extends BoomRocketTop
-  with HasPeripheryBlockDevice {
-  override lazy val module = new BoomRocketTopWithBlockDeviceModule(this)
+class TopWithGCD(implicit p: Parameters) extends Top
+  with HasPeripheryGCD {
+  override lazy val module = new TopWithGCDModule(this)
 }
 
-class BoomRocketTopWithBlockDeviceModule(l: BoomRocketTopWithBlockDevice) extends BoomRocketTopModule(l)
+class TopWithGCDModule(l: TopWithGCD) extends TopModule(l)
+  with HasPeripheryGCDModuleImp
+
+//---------------------------------------------------------------------------------------------------------
+
+class TopWithBlockDevice(implicit p: Parameters) extends Top
+  with HasPeripheryBlockDevice {
+  override lazy val module = new TopWithBlockDeviceModule(this)
+}
+
+class TopWithBlockDeviceModule(l: TopWithBlockDevice) extends TopModule(l)
   with HasPeripheryBlockDeviceModuleImp
 
 //---------------------------------------------------------------------------------------------------------
 
-class BoomRocketTopWithGPIO(implicit p: Parameters) extends BoomRocketTop
-    with HasPeripheryGPIO {
-  override lazy val module = new BoomRocketTopWithGPIOModule(this)
+class TopWithGPIO(implicit p: Parameters) extends Top
+  with HasPeripheryGPIO {
+  override lazy val module = new TopWithGPIOModule(this)
 }
 
-class BoomRocketTopWithGPIOModule(l: BoomRocketTopWithGPIO)
-  extends BoomRocketTopModule(l)
+class TopWithGPIOModule(l: TopWithGPIO)
+  extends TopModule(l)
   with HasPeripheryGPIOModuleImp
 
 //---------------------------------------------------------------------------------------------------------
 
-class BoomRocketTopWithDTM(implicit p: Parameters) extends boom.system.BoomRocketSystem
+class TopWithDTM(implicit p: Parameters) extends System
 {
-  override lazy val module = new BoomRocketTopWithDTMModule(this)
+  override lazy val module = new TopWithDTMModule(this)
 }
 
-class BoomRocketTopWithDTMModule[+L <: BoomRocketTopWithDTM](l: L) extends boom.system.BoomRocketSystemModule(l)
+class TopWithDTMModule[+L <: TopWithDTM](l: L) extends SystemModule(l)
+
+//---------------------------------------------------------------------------------------------------------
+// DOC include start: TopWithInitZero
+class TopWithInitZero(implicit p: Parameters) extends Top
+    with HasPeripheryInitZero {
+  override lazy val module = new TopWithInitZeroModuleImp(this)
+}
+
+class TopWithInitZeroModuleImp(l: TopWithInitZero) extends TopModule(l)
+  with HasPeripheryInitZeroModuleImp
+// DOC include end: TopWithInitZero

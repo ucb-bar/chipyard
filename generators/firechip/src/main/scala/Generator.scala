@@ -2,7 +2,7 @@
 
 package firesim.firesim
 
-import java.io.{File}
+import java.io.{File, FileWriter}
 
 import chisel3.experimental.RawModule
 import chisel3.internal.firrtl.{Circuit, Port}
@@ -21,42 +21,6 @@ import firesim.util.{GeneratorArgs, HasTargetAgnosticUtilites, HasFireSimGenerat
 import utilities.TestSuiteHelper
 
 trait HasTestSuites {
-  val rv64RegrTestNames = collection.mutable.LinkedHashSet(
-      "rv64ud-v-fcvt",
-      "rv64ud-p-fdiv",
-      "rv64ud-v-fadd",
-      "rv64uf-v-fadd",
-      "rv64um-v-mul",
-      // "rv64mi-p-breakpoint", // Not implemented in BOOM
-      // "rv64uc-v-rvc", // Not implemented in BOOM
-      "rv64ud-v-structural",
-      "rv64si-p-wfi",
-      "rv64um-v-divw",
-      "rv64ua-v-lrsc",
-      "rv64ui-v-fence_i",
-      "rv64ud-v-fcvt_w",
-      "rv64uf-v-fmin",
-      "rv64ui-v-sb",
-      "rv64ua-v-amomax_d",
-      "rv64ud-v-move",
-      "rv64ud-v-fclass",
-      "rv64ua-v-amoand_d",
-      "rv64ua-v-amoxor_d",
-      "rv64si-p-sbreak",
-      "rv64ud-v-fmadd",
-      "rv64uf-v-ldst",
-      "rv64um-v-mulh",
-      "rv64si-p-dirty")
-
-  val rv32RegrTestNames = collection.mutable.LinkedHashSet(
-      "rv32mi-p-ma_addr",
-      "rv32mi-p-csr",
-      "rv32ui-p-sh",
-      "rv32ui-p-lh",
-      "rv32uc-p-rvc",
-      "rv32mi-p-sbreak",
-      "rv32ui-p-sll")
-
   def addTestSuites(targetName: String, params: Parameters) {
     TestSuiteHelper.addRocketTestSuites(params)
     TestSuiteHelper.addBoomTestSuites(params)
@@ -84,13 +48,14 @@ trait IsFireSimGeneratorLike extends HasFireSimGeneratorUtilities with HasTestSu
 }
 
 object FireSimGenerator extends App with IsFireSimGeneratorLike {
+  val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
   lazy val generatorArgs = GeneratorArgs(args)
   lazy val genDir = new File(names.targetDir)
-  elaborateAndCompileWithMidas
+  // The only reason this is not generateFirrtl; generateAnno is that we need to use a different 
+  // JsonProtocol to properly write out the annotations. Fix once the generated are unified
+  elaborate
   generateTestSuiteMakefrags
-  generateHostVerilogHeader
   generateArtefacts
-  generateTclEnvFile
 }
 
 // For now, provide a separate generator app when not specifically building for FireSim

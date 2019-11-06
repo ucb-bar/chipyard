@@ -14,8 +14,8 @@ import freechips.rocketchip.devices.debug.{Debug}
 // BOOM and/or Rocket Test Harness
 // -------------------------------
 
-case object BuildBoomRocketTop extends Field[(Clock, Bool, Parameters) => BoomRocketTopModule[BoomRocketTop]]
-case object BuildBoomRocketTopWithDTM extends Field[(Clock, Bool, Parameters) => BoomRocketTopWithDTMModule[BoomRocketTopWithDTM]]
+case object BuildTop extends Field[(Clock, Bool, Parameters) => TopModule[Top]]
+case object BuildTopWithDTM extends Field[(Clock, Bool, Parameters) => TopWithDTMModule[TopWithDTM]]
 
 /**
  * Test harness using TSI to bringup the system
@@ -28,7 +28,7 @@ class TestHarness(implicit val p: Parameters) extends Module {
   // force Chisel to rename module
   override def desiredName = "TestHarness"
 
-  val dut = p(BuildBoomRocketTop)(clock, reset.toBool, p)
+  val dut = p(BuildTop)(clock, reset.toBool, p)
 
   dut.debug := DontCare
   dut.connectSimAXIMem()
@@ -63,7 +63,7 @@ class TestHarnessWithDTM(implicit p: Parameters) extends Module
   // force Chisel to rename module
   override def desiredName = "TestHarness"
 
-  val dut = p(BuildBoomRocketTopWithDTM)(clock, reset.toBool, p)
+  val dut = p(BuildTopWithDTM)(clock, reset.toBool, p)
 
   dut.reset := reset.asBool | dut.debug.ndreset
   dut.connectSimAXIMem()

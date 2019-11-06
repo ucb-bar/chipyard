@@ -32,11 +32,22 @@ ifeq ($(SUB_PROJECT),example)
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= $(SBT_PROJECT)
-	CONFIG            ?= DefaultRocketConfig
+	CONFIG            ?= RocketConfig
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
-	TOP               ?= BoomRocketTop
+	TOP               ?= Top
+endif
+ifeq ($(SUB_PROJECT),tracegen)
+	SBT_PROJECT       ?= tracegen
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
+	MODEL_PACKAGE     ?= $(SBT_PROJECT)
+	CONFIG            ?= TraceGenConfig
+	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
+	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
+	TB                ?= TestDriver
+	TOP               ?= TraceGenSystem
 endif
 # for Rocket-chip developers
 ifeq ($(SUB_PROJECT),rocketchip)
@@ -113,9 +124,11 @@ HARNESS_SMEMS_FILE ?= $(build_dir)/$(long_name).harness.mems.v
 HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
 HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
 
+# files that contain lists of files needed for VCS or Verilator simulation
 sim_files                  ?= $(build_dir)/sim_files.f
 sim_top_blackboxes         ?= $(build_dir)/firrtl_black_box_resource_files.top.f
 sim_harness_blackboxes     ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
+# single file that contains all files needed for VCS or Verilator simulation (unique and without .h's)
 sim_common_files           ?= $(build_dir)/sim_files.common.f
 
 #########################################################################################

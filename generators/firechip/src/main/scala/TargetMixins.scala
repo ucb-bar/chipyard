@@ -1,74 +1,25 @@
 package firesim.firesim
 
 import chisel3._
+import chisel3.util.Cat
+import chisel3.experimental.annotate
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.util._
+import freechips.rocketchip.tile.RocketTile
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.rocket.TracedInstruction
-import firesim.endpoints.{TraceOutputTop, DeclockedTracedInstruction}
+import firesim.bridges.{TraceOutputTop, DeclockedTracedInstruction}
 
-import midas.models.AXI4BundleWithEdge
-import midas.targetutils.ExcludeInstanceAsserts
+import midas.targetutils.MemModelAnnotation
 
-/** Copied from RC and modified to change the IO type of the Imp to include the Diplomatic edges
-  *  associated with each port. This drives FASED functional model sizing
-  */
-trait CanHaveFASEDOptimizedMasterAXI4MemPort { this: BaseSubsystem =>
-  val module: CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp
-
-  val memAXI4Node = p(ExtMem).map { case MemoryPortParams(memPortParams, nMemoryChannels) =>
-    val portName = "axi4"
-    val device = new MemoryDevice
-
-    val memAXI4Node = AXI4SlaveNode(Seq.tabulate(nMemoryChannels) { channel =>
-      val base = AddressSet.misaligned(memPortParams.base, memPortParams.size)
-      val filter = AddressSet(channel * mbus.blockBytes, ~((nMemoryChannels-1) * mbus.blockBytes))
-
-      AXI4SlavePortParameters(
-        slaves = Seq(AXI4SlaveParameters(
-          address       = base.flatMap(_.intersect(filter)),
-          resources     = device.reg,
-          regionType    = RegionType.UNCACHED, // cacheable
-          executable    = true,
-          supportsWrite = TransferSizes(1, mbus.blockBytes),
-          supportsRead  = TransferSizes(1, mbus.blockBytes),
-          interleavedId = Some(0))), // slave does not interleave read responses
-        beatBytes = memPortParams.beatBytes)
-    })
-
-    memAXI4Node := mbus.toDRAMController(Some(portName)) {
-      AXI4UserYanker() := AXI4IdIndexer(memPortParams.idBits) := TLToAXI4()
-    }
-
-    memAXI4Node
-  }
-}
-
-/** Actually generates the corresponding IO in the concrete Module */
-trait CanHaveFASEDOptimizedMasterAXI4MemPortModuleImp extends LazyModuleImp {
-  val outer: CanHaveFASEDOptimizedMasterAXI4MemPort
-
-  val mem_axi4 = outer.memAXI4Node.map(x => IO(HeterogeneousBag(AXI4BundleWithEdge.fromNode(x.in))))
-  (mem_axi4 zip outer.memAXI4Node) foreach { case (io, node) =>
-    (io zip node.in).foreach { case (io, (bundle, _)) => io <> bundle }
-  }
-
-  def connectSimAXIMem() {
-    (mem_axi4 zip outer.memAXI4Node).foreach { case (io, node) =>
-      (io zip node.in).foreach { case (io, (_, edge)) =>
-        val mem = LazyModule(new SimAXIMem(edge, size = p(ExtMem).get.master.size))
-        Module(mem.module).io.axi4.head <> io
-      }
-    }
-  }
-}
+import boom.common.BoomTile
 
 /* Wires out tile trace ports to the top; and wraps them in a Bundle that the
- * TracerV endpoint can match on.
+ * TracerV bridge can match on.
  */
 object PrintTracePort extends Field[Boolean](false)
 
@@ -94,13 +45,30 @@ trait HasTraceIOImp extends LazyModuleImp {
   // Enabled to test TracerV trace capture
   if (p(PrintTracePort)) {
     val traceprint = Wire(UInt(512.W))
-    traceprint := traceIO.asUInt
+    traceprint := Cat(traceIO.traces.map(_.asUInt))
     printf("TRACEPORT: %x\n", traceprint)
   }
 }
 
-// Prevent MIDAS from synthesizing assertions in the dummy TLB included in BOOM
-trait ExcludeInvalidBoomAssertions extends LazyModuleImp {
-  ExcludeInstanceAsserts(("NonBlockingDCache", "dtlb"))
+trait CanHaveMultiCycleRegfileImp {
+  val outer: utilities.HasBoomAndRocketTiles
+
+  outer.tiles.map {
+    case r: RocketTile => {
+      annotate(MemModelAnnotation(r.module.core.rocketImpl.rf.rf))
+      r.module.fpuOpt.foreach(fpu => annotate(MemModelAnnotation(fpu.fpuImpl.regfile)))
+    }
+    case b: BoomTile => {
+      val core = b.module.core
+      core.iregfile match {
+        case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
+        case _ => Nil
+      }
+      if (core.fp_pipeline != null) core.fp_pipeline.fregfile match {
+        case frf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(frf.regfile))
+        case _ => Nil
+      }
+    }
+  }
 }
 

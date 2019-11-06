@@ -12,5 +12,6 @@ target
 .DS_Store
 env.sh
 riscv-tools-install
+esp-tools-install
 tags
 *~

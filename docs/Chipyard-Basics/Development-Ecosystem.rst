@@ -11,7 +11,7 @@ Chipyard aims to be the "one-stop shop" for creating and testing your own unique
 Chisel/FIRRTL
 -------------------------------------------
 
-One of the tools to help create new RTL designs quickly is the `Chisel Hardware Construction Language <https://chisel.eecs.berkeley.edu/>`__ and the `FIRRTL Compiler <https://freechipsproject.github.io/firrtl/>`__.
+One of the tools to help create new RTL designs quickly is the `Chisel Hardware Construction Language <https://chisel-lang.org/>`__ and the `FIRRTL Compiler <https://chisel-lang.org/firrtl/>`__.
 Chisel is an embedded language within Scala that provides a set of libraries to help hardware designers create highly parameterizable RTL.
 FIRRTL on the other hand is a compiler for hardware which allows the user to run FIRRTL passes that can do dead code elimination, circuit analysis, connectivity checks, and much more!
 These two tools in combination allow quick design space exploration and development of new RTL.
