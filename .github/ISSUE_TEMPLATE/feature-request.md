@@ -9,3 +9,5 @@ about: Propose a change to Chipyard
 
 **Description**
 <!-- include detailed explanation, related issues, links for us to have context, ... -->
+
+**What is a motivating example for changing the behavior?**
