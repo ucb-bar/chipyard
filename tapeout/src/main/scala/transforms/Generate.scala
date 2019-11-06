@@ -202,6 +202,8 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
     annoFile.foreach { annoPath =>
       val outputFile = new java.io.PrintWriter(annoPath)
       outputFile.write(JsonProtocol.serialize(res.circuitState.annotations.filter(_ match {
+        case da: DeletedAnnotation => false
+        case ec: EmittedComponent => false
         case ea: EmittedAnnotation[_] => false
         case fca: FirrtlCircuitAnnotation => false
         case _ => true
