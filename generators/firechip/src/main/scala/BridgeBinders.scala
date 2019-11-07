@@ -20,7 +20,7 @@ import firesim.configs.MemModelKey
 import firesim.util.RegisterBridgeBinder
 import tracegen.HasTraceGenTilesModuleImp
 
-import memblade.cache.HasPeripheryDRAMCacheModuleImpValidOnly
+import memblade.cache.{HasDRAMCacheNoNICModuleImp, HasPeripheryDRAMCacheModuleImpValidOnly}
 import memblade.manager.HasPeripheryMemBladeModuleImpValidOnly
 
 class WithTiedOffDebug extends RegisterBridgeBinder({ case target: HasPeripheryDebugModuleImp =>
@@ -75,6 +75,20 @@ class WithTraceGenBridge extends RegisterBridgeBinder({
 
 class WithDRAMCacheBridge extends RegisterBridgeBinder({
   case t: HasPeripheryDRAMCacheModuleImpValidOnly =>
+    implicit val p = t.p
+    val io = t.cache_axi4
+    val node = t.outer.outAXI4Node
+    val axiBridges = (io zip node.in).map({ case (axi4Bundle, (_, edge)) =>
+      val nastiKey = NastiParameters(axi4Bundle.r.bits.data.getWidth,
+                                     axi4Bundle.ar.bits.addr.getWidth,
+                                     axi4Bundle.ar.bits.id.getWidth)
+      FASEDBridge(axi4Bundle, t.reset.toBool,
+        CompleteConfig(p(firesim.configs.MemModelKey), nastiKey, Some(AXI4EdgeSummary(edge))))
+    }).toSeq
+    val nicBridge = NICBridge(t.net)
+    nicBridge +: axiBridges
+
+  case t: HasDRAMCacheNoNICModuleImp =>
     implicit val p = t.p
     val io = t.cache_axi4
     val node = t.outer.outAXI4Node
