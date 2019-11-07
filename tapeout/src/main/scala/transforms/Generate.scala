@@ -219,7 +219,7 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
         dump(x, tapeoutOptions.topFir, tapeoutOptions.topAnnoOut)
         x.circuitState.circuit.modules.collect{ case e: ExtModule => e }
       case x =>
-        throw new Exception(s"executeTop failed while executing FIRRTL!\n${e}")
+        throw new Exception(s"executeTop failed while executing FIRRTL!\n${x}")
     }
   }
 
@@ -243,7 +243,7 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
     val harnessResult = firrtl.Driver.execute(optionsManager)
     harnessResult match {
       case x: FirrtlExecutionSuccess => dump(x, tapeoutOptions.harnessFir, tapeoutOptions.harnessAnnoOut)
-      case x => throw new Exception(s"executeHarness failed while executing FIRRTL!\n${e}")
+      case x => throw new Exception(s"executeHarness failed while executing FIRRTL!\n${x}")
     }
   }
 }
