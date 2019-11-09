@@ -58,8 +58,13 @@ class WithFASEDBridge extends RegisterBridgeBinder({
         val nastiKey = NastiParameters(axi4Bundle.r.bits.data.getWidth,
                                        axi4Bundle.ar.bits.addr.getWidth,
                                        axi4Bundle.ar.bits.id.getWidth)
+        val lastChannel = axi4Bundle == io.last
         FASEDBridge(axi4Bundle, t.reset.toBool,
-          CompleteConfig(p(firesim.configs.MemModelKey), nastiKey, Some(AXI4EdgeSummary(edge))))
+          CompleteConfig(
+            p(firesim.configs.MemModelKey),
+            nastiKey,
+            Some(AXI4EdgeSummary(edge)),
+            lastChannel))
       })
     }).toSeq
 })
@@ -82,8 +87,13 @@ class WithDRAMCacheBridge extends RegisterBridgeBinder({
       val nastiKey = NastiParameters(axi4Bundle.r.bits.data.getWidth,
                                      axi4Bundle.ar.bits.addr.getWidth,
                                      axi4Bundle.ar.bits.id.getWidth)
+      val lastChannel = axi4Bundle == io.last
       FASEDBridge(axi4Bundle, t.reset.toBool,
-        CompleteConfig(p(firesim.configs.MemModelKey), nastiKey, Some(AXI4EdgeSummary(edge))))
+        CompleteConfig(
+          p(firesim.configs.MemModelKey),
+          nastiKey,
+          Some(AXI4EdgeSummary(edge)),
+          lastChannel))
     }).toSeq
     val nicBridge = NICBridge(t.net)
     nicBridge +: axiBridges
@@ -96,8 +106,13 @@ class WithDRAMCacheBridge extends RegisterBridgeBinder({
       val nastiKey = NastiParameters(axi4Bundle.r.bits.data.getWidth,
                                      axi4Bundle.ar.bits.addr.getWidth,
                                      axi4Bundle.ar.bits.id.getWidth)
+      val lastChannel = axi4Bundle == io.last
       FASEDBridge(axi4Bundle, t.reset.toBool,
-        CompleteConfig(p(firesim.configs.MemModelKey), nastiKey, Some(AXI4EdgeSummary(edge))))
+        CompleteConfig(
+          p(firesim.configs.MemModelKey),
+          nastiKey,
+          Some(AXI4EdgeSummary(edge)),
+          lastChannel))
     }).toSeq
     val nicBridge = NICBridge(t.net)
     nicBridge +: axiBridges

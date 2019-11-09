@@ -23,6 +23,7 @@ import memblade.prefetcher._
 import scala.math.{min, max}
 import tracegen.TraceGenKey
 import icenet._
+import icenet.IceNetConsts._
 import scala.math.max
 import testchipip.WithRingSystemBus
 
@@ -68,18 +69,23 @@ class WithMemBladeKey(spanBytes: Option[Int] = None) extends Config(
   (site, here, up) => {
     case MemBladeKey => {
       val spanBytesVal = spanBytes.getOrElse(site(CacheBlockBytes))
+      val nSpanBeats = spanBytesVal / NET_IF_BYTES
+      val commonQueueParams = MemBladeQueueParams(
+        reqHeadDepth = 2,
+        reqDataDepth = nSpanBeats,
+        respHeadDepth = 2,
+        respDataDepth = nSpanBeats)
+      val nTrackers = site(BroadcastKey).nTrackers
+      val nBanks = site(BankedL2Key).nBanks
+
       MemBladeParams(
         spanBytes = spanBytesVal,
-        nSpanTrackers = max(256 / spanBytesVal, 2),
+        nSpanTrackers = nTrackers,
         nWordTrackers = 4,
-        nBanks = 4,
-        spanQueue = MemBladeQueueParams(reqHeadDepth = 32, respHeadDepth = 32),
-        wordQueue = MemBladeQueueParams(reqHeadDepth = 32, respHeadDepth = 32),
-        bankQueue = MemBladeQueueParams(
-          reqHeadDepth = 2,
-          reqDataDepth = 8,
-          respHeadDepth = 2,
-          respDataDepth = 8))
+        nBanks = nBanks,
+        spanQueue = commonQueueParams,
+        wordQueue = commonQueueParams,
+        bankQueue = commonQueueParams)
     }
   }
 )
@@ -233,6 +239,7 @@ class FireSimRocketChipOctaCoreConfig extends Config(
 
 class FireSimMemBladeConfig extends Config(
   new WithMemBladeKey ++
+  new WithNTrackersPerBank(4) ++
   new WithNBanks(4) ++
   new WithNMemoryChannels(4) ++
   new WithMemBladeBridge ++
@@ -587,3 +594,6 @@ class FireSimTraceGenL2Config extends Config(
 class FireSimBoomRingL2Config extends Config(
   new WithRingSystemBus ++
   new FireSimBoomL2Config)
+
+class DualChannel extends WithNMemoryChannels(2)
+class QuadChannel extends WithNMemoryChannels(4)
