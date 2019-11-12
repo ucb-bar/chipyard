@@ -32,6 +32,9 @@ for name in toolchains/*/*/ ; do
 done
 git config submodule.toolchains/qemu.update none
 
+# Don't automatically initialize generators with big submodules (e.g. linux source)
+git config submodule.generators/sha3.update none
+
 # Disable updates to the FireSim submodule until explicitly requested
 git config submodule.sims/firesim.update none
 # Disable updates to the hammer tool plugins repos
@@ -48,6 +51,8 @@ git config --unset submodule.toolchains/qemu.update
 git config --unset submodule.vlsi/hammer-cadence-plugins.update
 git config --unset submodule.vlsi/hammer-synopsys-plugins.update
 git config --unset submodule.vlsi/hammer-mentor-plugins.update
+
+git config --unset submodule.generators/sha3.update
 
 if [ $NO_FIRESIM = false ]; then
   echo "initializing firesim"
