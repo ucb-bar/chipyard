@@ -23,17 +23,13 @@ tech_dir           ?= $(if $(filter $(tech_name), asap7), $(vlsi_dir)/hammer/src
 SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
 SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
 SMEMS_HAMMER       ?= $(build_dir)/$(long_name).mems.hammer.json
-ifeq ($(tech_name),asap7)
-	MACROCOMPILER_MODE ?= --mode synflops
-else
-	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
-endif
+MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
 ENV_YML            ?= $(vlsi_dir)/env.yml
 INPUT_CONFS        ?= example.yml
 HAMMER_EXEC        ?= ./example-vlsi
 VLSI_TOP           ?= $(TOP)
 VLSI_OBJ_DIR       ?= $(vlsi_dir)/build
-ifneq($(CUSTOM_VLOG), )
+ifneq ($(CUSTOM_VLOG), )
 	OBJ_DIR        ?= $(VLSI_OBJ_DIR)/custom-$(VLSI_TOP)
 else
 	OBJ_DIR        ?= $(VLSI_OBJ_DIR)/$(long_name)-$(VLSI_TOP)
@@ -91,7 +87,10 @@ $(SRAM_CONF): $(SRAM_GENERATOR_CONF)
 # synthesis input configuration
 #########################################################################################
 SYN_CONF = $(OBJ_DIR)/inputs.yml
-GENERATED_CONFS ?= $(SYN_CONF) $(SRAM_CONF)
+GENERATED_CONFS = $(SYN_CONF)
+ifeq ($(CUSTOM_VLOG), )
+	GENERATED_CONFS += $(SRAM_CONF)
+endif
 
 $(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 	mkdir -p $(dir $@)

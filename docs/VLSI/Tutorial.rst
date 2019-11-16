@@ -84,7 +84,7 @@ To elaborate the ``Sha3RocketConfig`` (Rocket Chip w/ the accelerator) and set u
 
     make buildfile CONFIG=Sha3RocketConfig VLSI_TOP=Sha3AccelwBB
 
-The ``CONFIG=Sha3RocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a Rocket Chip with the Sha3Accel module.
+The ``CONFIG=Sha3RocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a Rocket Chip with the Sha3Accel module. It also runs a `barstools MacroCompiler<https://github.com/ucb-bar/barstools>`__ FIRRTL pass that maps memories in this Rocket-chip config to dummy ASAP7 SRAMs.
 
 The ``VLSI_TOP=Sha3AccelwBB`` indicates that we are only interested in physical design of the accelerator block. If this variable is not set, the entire SoC will be pushed through physical design. Note that you should not set the ``TOP`` variable because it is used during Chisel elaboration.
 
@@ -107,12 +107,13 @@ First, set ``technology.asap7.tarball_dir`` to the absolute path of where the do
 
 SRAM Compilation
 ^^^^^^^^^^^^^^^^
-Hammer can automatically add the collateral for the SRAMs in the design.
+Hammer can automatically add the collateral for the SRAMs in the ``Sha3RocketConfig``.
+
 .. code-block:: shell
 
     make srams
 
-This generates a `generated-src/example.TestHarness.Sha3RocketConfig/sram_generator-output.json` that will then be consumed by the steps below.
+This generates a ``generated-src/example.TestHarness.Sha3RocketConfig/sram_generator-output.json`` that will then be consumed by the steps below. Note however, that for the ``Sha3AccelwBB`` that we are pushing the VLSI flow, none of those SRAMs are used.
 
 Synthesis
 ^^^^^^^^^
