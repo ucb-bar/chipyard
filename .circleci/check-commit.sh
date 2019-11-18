@@ -75,7 +75,7 @@ dir="toolchains/riscv-tools"
 branches=("riscv")
 search
 
-submodules=("qemu")
+submodules=("qemu" "libgloss")
 dir="toolchains"
 branches=("master")
 search

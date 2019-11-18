@@ -27,9 +27,10 @@ shift $((OPTIND - 1))
 
 # Ignore toolchain submodules
 cd "$RDIR"
-for name in toolchains/*/*/ ; do
+for name in toolchains/*-tools/*/ ; do
     git config submodule."${name%/}".update none
 done
+git config submodule.toolchains/libgloss.update none
 git config submodule.toolchains/qemu.update none
 
 # Don't automatically initialize generators with big submodules (e.g. linux source)
@@ -42,10 +43,12 @@ git config submodule.vlsi/hammer-cadence-plugins.update none
 git config submodule.vlsi/hammer-synopsys-plugins.update none
 git config submodule.vlsi/hammer-mentor-plugins.update none
 git submodule update --init --recursive #--jobs 8
+
 # Un-ignore toolchain submodules
-for name in toolchains/*/*/ ; do
+for name in toolchains/*-tools/*/ ; do
     git config --unset submodule."${name%/}".update
 done
+git config --unset submodule.toolchains/libgloss.update
 git config --unset submodule.toolchains/qemu.update
 
 git config --unset submodule.vlsi/hammer-cadence-plugins.update
