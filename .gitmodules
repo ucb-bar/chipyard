@@ -24,7 +24,7 @@
 	url = https://github.com/sifive/sifive-blocks.git
 [submodule "generators/hwacha"]
 	path = generators/hwacha
-	url = https://github.com/ucb-bar/hwacha.git
+	url = git@github.com:ucb-bar/hwacha-internal.git
 [submodule "sims/firesim"]
 	path = sims/firesim
 	url = https://github.com/firesim/firesim.git
