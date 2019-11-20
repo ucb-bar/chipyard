@@ -67,7 +67,7 @@ class WithTracerVBridge extends RegisterBridgeBinder({
 
 class WithTraceGenBridge extends RegisterBridgeBinder({
   case target: HasTraceGenTilesModuleImp =>
-    Seq(GroundTestBridge(target.success)(target.p))
+    Seq(GroundTestBridge(target.clock, target.success)(target.p))
 })
 
 // Shorthand to register all of the provided bridges above
