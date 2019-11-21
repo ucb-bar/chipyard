@@ -3,6 +3,7 @@ package firesim.firesim
 import java.io.File
 
 import chisel3.util.{log2Up}
+import example.{WithMultiRoCC, WithMultiRoCCHwacha}
 import freechips.rocketchip.config.{Parameters, Config}
 import freechips.rocketchip.groundtest.TraceGenParams
 import freechips.rocketchip.tile._
@@ -351,19 +352,19 @@ class FireSimRocketChipSha3L2PrintfConfig extends Config(
   new WithNBigCores(1) ++
   new FireSimRocketChipConfig)
 
-class FireSimDRAMCacheHwachaConfig extends Config(
+class FireSimHwachaDRAMCacheConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new hwacha.DefaultHwachaConfig ++
   new WithMemBenchKey ++
   new WithDRAMCacheKey(8, 8, 2) ++
-  new WithExtMemSize(14L << 30) ++
+  new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
   new WithLargeL2 ++
   new FireSimRocketChipConfig ++
   new WithDRAMCacheBridge)
 
-class FireSimDRAMCacheHwachaDualCoreConfig extends Config(
-  new WithNBigCores(2) ++ new FireSimDRAMCacheHwachaConfig)
+class FireSimHwachaDRAMCacheDualCoreConfig extends Config(
+  new WithNBigCores(2) ++ new FireSimHwachaDRAMCacheConfig)
 
 class FireSimBoomConfig extends Config(
   new WithBootROM ++
@@ -442,6 +443,23 @@ class FireSimBoomRocketDRAMCacheConfig extends Config(
   new boom.common.WithRenumberHarts ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new FireSimBoomDRAMCacheConfig)
+
+class FireSimBoomHwachaDRAMCacheConfig extends Config(
+  new WithMultiRoCC ++
+  new WithMultiRoCCHwacha(0) ++
+  new boom.common.WithRenumberHarts ++
+  new hwacha.DefaultHwachaConfig ++
+  new WithMemBenchKey ++
+  new WithDRAMCacheKey(8, 8, 2) ++
+  new WithExtMemSize(15L << 30) ++
+  new WithPrefetchMiddleMan ++
+  new WithLargeL2 ++
+  new FireSimBoomConfig ++
+  new WithDRAMCacheBridge)
+
+class FireSimBoomHwachaRocketDRAMCacheConfig extends Config(
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new FireSimBoomHwachaDRAMCacheConfig)
 
 //**********************************************************************************
 //* Heterogeneous Configurations
