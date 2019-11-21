@@ -33,7 +33,7 @@ INPUT_CONFS        ?= example.yml
 HAMMER_EXEC        ?= ./example-vlsi
 VLSI_TOP           ?= $(TOP)
 VLSI_OBJ_DIR       ?= $(vlsi_dir)/build
-ifneq($(CUSTOM_VLOG), )
+ifneq ($(CUSTOM_VLOG), )
 	OBJ_DIR        ?= $(VLSI_OBJ_DIR)/custom-$(VLSI_TOP)
 else
 	OBJ_DIR        ?= $(VLSI_OBJ_DIR)/$(long_name)-$(VLSI_TOP)
