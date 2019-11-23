@@ -139,6 +139,9 @@ class RocketNICF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_Fir
 class RamModelRocketF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimRocketChipDualCoreConfig", "BaseF1Config_MCRams")
 class RamModelBoomF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimBoomConfig", "BaseF1Config_MCRams")
 
+// Multiclock tests
+class RocketMulticlockF1Tests extends FireSimTestSuite("FireSimNoNIC", "HalfRateUncore_DDR3FRFCFSLLC4MB_FireSimRocketChipQuadCoreConfig", "BaseF1Config")
+
 abstract class FireSimTraceGenTest(targetConfig: String, platformConfig: String)
     extends firesim.TestSuiteCommon with IsFireSimGeneratorLike {
   val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs

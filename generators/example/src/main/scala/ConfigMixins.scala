@@ -182,3 +182,4 @@ class WithInitZeroTop extends Config((site, here, up) => {
     Module(LazyModule(new TopWithInitZero()(p)).module)
 })
 // DOC include end: WithInitZero
+

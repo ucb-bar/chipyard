@@ -11,7 +11,8 @@ import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.DebugModuleParams
-import boom.common.BoomTilesKey
+import freechips.rocketchip.diplomacy.{RationalCrossing}
+import boom.common.{BoomCrossingKey, BoomTilesKey}
 import testchipip.{BlockDeviceKey, BlockDeviceConfig}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
@@ -19,7 +20,7 @@ import tracegen.TraceGenKey
 import icenet._
 
 import firesim.bridges._
-import firesim.util.{WithNumNodes}
+import firesim.util.{WithNumNodes, FireSimClockKey, FireSimClockParameters}
 import firesim.configs._
 
 class WithBootROM extends Config((site, here, up) => {
@@ -320,3 +321,16 @@ class FireSimTraceGenL2Config extends Config(
     outerLatencyCycles = 50) ++
   new WithTraceGenBridge ++
   new FireSimRocketChipConfig)
+
+
+class WithRationalTiles(multiplier: Int, divisor: Int) extends Config((site, here, up) => {
+  case FireSimClockKey => FireSimClockParameters(Seq(multiplier -> divisor))
+  case RocketCrossingKey => up(RocketCrossingKey, site) map { r =>
+    r.copy(crossingType = RationalCrossing())
+  }
+  case BoomCrossingKey => up(BoomCrossingKey, site) map { r =>
+    r.copy(crossingType = RationalCrossing())
+  }
+})
+
+class HalfRateUncore extends WithRationalTiles(2,1)

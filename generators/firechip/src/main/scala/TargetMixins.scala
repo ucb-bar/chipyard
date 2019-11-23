@@ -13,6 +13,7 @@ import freechips.rocketchip.tile.RocketTile
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.rocket.TracedInstruction
 import firesim.bridges.{TraceOutputTop, DeclockedTracedInstruction}
+import firesim.util.{HasAdditionalClocks, FireSimClockKey}
 
 import midas.targetutils.MemModelAnnotation
 
@@ -73,3 +74,15 @@ trait CanHaveMultiCycleRegfileImp {
   }
 }
 
+trait HasFireSimClockingImp extends HasAdditionalClocks {
+  val outer: HasTiles
+  val (tileClock, tileReset) = p(FireSimClockKey).additionalClocks.headOption match {
+    case Some((numer, denom)) if numer != denom => (clocks(1), ResetCatchAndSync(clocks(1), reset.toBool))
+    case None => (clocks(0), reset)
+  }
+
+  outer.tiles.foreach({ case tile =>
+    tile.module.clock := tileClock
+    tile.module.reset := tileReset
+  })
+}

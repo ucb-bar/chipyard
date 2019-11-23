@@ -60,6 +60,7 @@ class FireSimModuleImp[+L <: FireSimDUT](l: L) extends SubsystemModuleImp(l)
     with HasPeripheryIceNICModuleImpValidOnly
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
+    with HasFireSimClockingImp
     with CanHaveMultiCycleRegfileImp
 
 class FireSim(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimDUT)
@@ -84,6 +85,7 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNICDUT](l: L) extends SubsystemModule
     with HasPeripheryUARTModuleImp
     with HasPeripheryBlockDeviceModuleImp
     with HasTraceIOImp
+    with HasFireSimClockingImp
     with CanHaveMultiCycleRegfileImp
 
 class FireSimNoNIC(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimNoNICDUT)
