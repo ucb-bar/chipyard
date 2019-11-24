@@ -622,6 +622,8 @@ workflows:
             # Build verilator
             - install-verilator
 
+            - commit-on-master-check
+
             # Build extra tests
             - build-extra-tests:
                 requires:
