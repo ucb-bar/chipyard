@@ -47,6 +47,7 @@ class TestHarness(implicit val p: Parameters) extends Module {
         axi.w.bits := DontCare
     }
   })
+  dut.connectSimUARTs()
 
   io.success := dut.connectSimSerial()
 }

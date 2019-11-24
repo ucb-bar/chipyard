@@ -11,6 +11,7 @@ import freechips.rocketchip.config.{Config}
 class RocketConfig extends Config(
   new WithTop ++                                           // use default top
   new WithBootROM ++                                       // use default bootrom
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++ // use Sifive L2 cache
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++   // single rocket-core
   new freechips.rocketchip.system.BaseConfig)              // "base" rocketchip system
@@ -18,6 +19,7 @@ class RocketConfig extends Config(
 class HwachaRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new hwacha.DefaultHwachaConfig ++                        // use Hwacha vector accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -26,6 +28,7 @@ class HwachaRocketConfig extends Config(
 class RoccRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithRoccExample ++    // use example RoCC-based accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -102,6 +105,7 @@ class GPIORocketConfig extends Config(
 class DualCoreRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++   // dual-core (2 RocketTiles)
   new freechips.rocketchip.system.BaseConfig)
@@ -109,6 +113,7 @@ class DualCoreRocketConfig extends Config(
 class RV32RocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithRV32 ++           // set RocketTiles to be 32-bit
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -117,6 +122,7 @@ class RV32RocketConfig extends Config(
 class GB1MemoryRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithExtMemSize((1<<30) * 1L) ++ // use 2GB simulated external memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -126,6 +132,7 @@ class GB1MemoryRocketConfig extends Config(
 class Sha3RocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new sha3.WithSha3Accel ++                                // add SHA3 rocc accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
