@@ -134,6 +134,32 @@ class WithGPIOTop extends Config((site, here, up) => {
 })
 // DOC include end: WithGPIOTop
 
+/**
+ * Class to specify a top level BOOM and/or Rocket system with
+ * an AXI4 slave port (to have an offchip device master the system)
+ * and an AXI4 master port (to have the system master an offchip device)
+ */
+class WithAXI4PortsTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new TopWithAXI4Ports()(p)).module)
+    top.connectSimAXIMMIO()
+    top.l2_frontend_bus_axi4.foreach(axi => {
+      axi.tieoff()
+      experimental.DataMirror.directionOf(axi.ar.ready) match {
+        case core.ActualDirection.Input =>
+          axi.r.bits := DontCare
+          axi.b.bits := DontCare
+        case core.ActualDirection.Output =>
+          axi.aw.bits := DontCare
+          axi.ar.bits := DontCare
+          axi.w.bits := DontCare
+      }
+    })
+    top
+  }
+})
+
+
 // ------------------
 // Multi-RoCC Support
 // ------------------

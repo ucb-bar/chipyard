@@ -99,6 +99,13 @@ class GPIORocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: GPIORocketConfig
 
+class AXI4PortsRocketConfig extends Config(
+  new WithAXI4PortsTop ++                                   // use top that creates a 2 axi4 ports to be a slave/master to offchip devices
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+
 class DualCoreRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++

@@ -92,6 +92,7 @@ class TopWithDTM(implicit p: Parameters) extends System
 class TopWithDTMModule[+L <: TopWithDTM](l: L) extends SystemModule(l)
 
 //---------------------------------------------------------------------------------------------------------
+
 // DOC include start: TopWithInitZero
 class TopWithInitZero(implicit p: Parameters) extends Top
     with HasPeripheryInitZero {
@@ -101,3 +102,15 @@ class TopWithInitZero(implicit p: Parameters) extends Top
 class TopWithInitZeroModuleImp(l: TopWithInitZero) extends TopModule(l)
   with HasPeripheryInitZeroModuleImp
 // DOC include end: TopWithInitZero
+
+//---------------------------------------------------------------------------------------------------------
+
+class TopWithAXI4Ports(implicit p: Parameters) extends Top
+    with CanHaveMasterAXI4MMIOPort
+    with CanHaveSlaveAXI4Port {
+  override lazy val module = new TopWithAXI4PortsModuleImp(this)
+}
+
+class TopWithAXI4PortsModuleImp(l: TopWithAXI4Ports) extends TopModule(l)
+  with CanHaveMasterAXI4MMIOPortModuleImp
+  with CanHaveSlaveAXI4PortModuleImp
