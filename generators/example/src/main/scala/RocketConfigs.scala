@@ -11,6 +11,7 @@ import freechips.rocketchip.config.{Config}
 class RocketConfig extends Config(
   new WithTop ++                                           // use default top
   new WithBootROM ++                                       // use default bootrom
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++ // use Sifive L2 cache
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++   // single rocket-core
   new freechips.rocketchip.system.BaseConfig)              // "base" rocketchip system
@@ -18,6 +19,7 @@ class RocketConfig extends Config(
 class HwachaRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new hwacha.DefaultHwachaConfig ++                        // use Hwacha vector accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -27,6 +29,7 @@ class HwachaRocketConfig extends Config(
 class GemminiRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new gemmini.DefaultGemminiConfig ++                        // use Gemmini systolic array GEMM accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -36,6 +39,7 @@ class GemminiRocketConfig extends Config(
 class RoccRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithRoccExample ++    // use example RoCC-based accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -46,6 +50,7 @@ class jtagRocketConfig extends Config(
   new WithDTMTop ++                                        // use top with dtm
   new freechips.rocketchip.subsystem.WithJtagDTM ++        // add jtag+DTM module to coreplex
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -55,6 +60,7 @@ class jtagRocketConfig extends Config(
 class dmiRocketConfig extends Config(
   new WithDTMTop ++                                        // use top with dtm
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -64,6 +70,7 @@ class dmiRocketConfig extends Config(
 class PWMRocketConfig extends Config(
   new WithPWMTop ++                                        // use top with tilelink-controlled PWM
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -72,6 +79,7 @@ class PWMRocketConfig extends Config(
 class PWMAXI4RocketConfig extends Config(
   new WithPWMAXI4Top ++                                    // use top with axi4-controlled PWM
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -79,6 +87,7 @@ class PWMAXI4RocketConfig extends Config(
 class GCDRocketConfig extends Config(                      // add MMIO GCD module
   new WithGCDTop ++
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -87,6 +96,7 @@ class SimBlockDeviceRocketConfig extends Config(
   new testchipip.WithBlockDevice ++                        // add block-device module to peripherybus
   new WithSimBlockDeviceTop ++                             // use top with block-device IOs and connect to simblockdevice
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -95,6 +105,7 @@ class BlockDeviceModelRocketConfig extends Config(
   new testchipip.WithBlockDevice ++                        // add block-device module to periphery bus
   new WithBlockDeviceModelTop ++                           // use top with block-device IOs and connect to a blockdevicemodel
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -104,6 +115,7 @@ class GPIORocketConfig extends Config(
   new WithGPIO ++                                          // add GPIOs to the peripherybus
   new WithGPIOTop ++                                       // use top with GPIOs
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -112,6 +124,7 @@ class GPIORocketConfig extends Config(
 class DualCoreRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++   // dual-core (2 RocketTiles)
   new freechips.rocketchip.system.BaseConfig)
@@ -119,6 +132,7 @@ class DualCoreRocketConfig extends Config(
 class RV32RocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithRV32 ++           // set RocketTiles to be 32-bit
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -127,6 +141,7 @@ class RV32RocketConfig extends Config(
 class GB1MemoryRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithExtMemSize((1<<30) * 1L) ++ // use 2GB simulated external memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -136,6 +151,7 @@ class GB1MemoryRocketConfig extends Config(
 class Sha3RocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new sha3.WithSha3Accel ++                                // add SHA3 rocc accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -147,6 +163,7 @@ class InitZeroRocketConfig extends Config(
   new WithInitZero(0x88000000L, 0x1000L) ++
   new WithInitZeroTop ++
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -156,6 +173,7 @@ class LoopbackNICRocketConfig extends Config(
   new WithIceNIC ++
   new WithLoopbackNICTop ++
   new WithBootROM ++
+  new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
