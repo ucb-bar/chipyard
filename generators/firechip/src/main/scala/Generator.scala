@@ -18,6 +18,8 @@ import freechips.rocketchip.tile.XLen
 
 import firesim.util.{GeneratorArgs, HasTargetAgnosticUtilites, HasFireSimGeneratorUtilities}
 
+import scala.util.Try
+
 import utilities.TestSuiteHelper
 
 trait HasTestSuites {
@@ -28,6 +30,14 @@ trait HasTestSuites {
     TestGeneration.addSuite(SlowBlockdevTests)
     if (!targetName.contains("NoNIC"))
       TestGeneration.addSuite(NICLoopbackTests)
+
+    import hwacha.HwachaTestSuites._
+    if (Try(params(hwacha.HwachaNLanes)).getOrElse(0) > 0) {
+      TestGeneration.addSuites(rv64uv.map(_("p")))
+      TestGeneration.addSuites(rv64uv.map(_("vp")))
+      TestGeneration.addSuite(rv64sv("p"))
+      TestGeneration.addSuite(hwachaBmarks)
+    }
   }
 }
 
