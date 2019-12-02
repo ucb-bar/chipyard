@@ -20,6 +20,14 @@ class WithNumNodes(n: Int) extends Config((pname, site, here) => {
   case NumNodes => n
 })
 
+// Hacky: Set before each node is generated. Ideally we'd give IO binders
+// accesses to the the Harness's parameters instance. We could then alter that.
+object NodeIdx {
+  private var idx = 0
+  def increment(): Unit = {idx = idx + 1 }
+  def apply(): Int = idx
+}
+
 class FireSim(implicit val p: Parameters) extends RawModule {
   val clockBridge = Module(new RationalClockBridge)
   val clock = clockBridge.io.clocks.head
@@ -32,8 +40,9 @@ class FireSim(implicit val p: Parameters) extends RawModule {
     // if that Mixin trait is present in the target's class instance
     //
     // Apply each partial function to each DUT instance
-    for ((target) <- targets) {
+    for (target <- targets) {
       p(IOBinders).values.map(fn => fn(clock, reset.asBool, false.B, target))
+      NodeIdx.increment()
     }
   }
 }

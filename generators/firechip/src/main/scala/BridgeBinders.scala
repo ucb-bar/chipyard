@@ -28,9 +28,14 @@ import boom.common.{BoomTile}
 import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder}
 import chipyard.HasChipyardTilesModuleImp
 
+object MainMemoryConsts {
+  val regionNamePrefix = "MainMemory"
+  def globalName(): String = s"${regionNamePrefix}_${NodeIdx()}"
+}
+
 class WithSerialBridge extends OverrideIOBinder({
   (c, r, s, target: CanHavePeripherySerialModuleImp) =>
-    target.serial.map(s => SerialBridge(target.clock, s)(target.p)).toSeq
+    target.serial.map(s => SerialBridge(target.clock, s, MainMemoryConsts.globalName)(target.p)).toSeq
 })
 
 class WithNICBridge extends OverrideIOBinder({
@@ -48,7 +53,19 @@ class WithBlockDeviceBridge extends OverrideIOBinder({
     target.bdev.map(b => BlockDevBridge(target.clock, b, target.reset.toBool)(target.p)).toSeq
 })
 
-class WithFASEDBridge extends OverrideIOBinder({
+// Assign a unique name to each target memory space, consisting of one or more
+// memory channels. In the multi-node case, serial widgets can then disambiguate
+// each memory region using this string instead of relying on the assumption
+// the target has a single memory channel.
+object MemoryRegionNames {
+  var idx = -1
+  def getName(): String = {
+    idx += 1
+    s"memory_${idx}"
+  }
+}
+
+class WithFASEDBridge extends OverrideIOBinder ({
   (c, r, s, t: CanHaveMasterAXI4MemPortModuleImp) => {
     implicit val p = t.p
     (t.mem_axi4 zip t.outer.memAXI4Node).flatMap({ case (io, node) =>
@@ -57,7 +74,10 @@ class WithFASEDBridge extends OverrideIOBinder({
                                        axi4Bundle.ar.bits.addr.getWidth,
                                        axi4Bundle.ar.bits.id.getWidth)
         FASEDBridge(t.clock, axi4Bundle, t.reset.toBool,
-          CompleteConfig(p(firesim.configs.MemModelKey), nastiKey, Some(AXI4EdgeSummary(edge))))
+          CompleteConfig(p(firesim.configs.MemModelKey),
+                         nastiKey,
+                         Some(AXI4EdgeSummary(edge)),
+                         Some(MainMemoryConsts.globalName)))
       })
     }).toSeq
   }
