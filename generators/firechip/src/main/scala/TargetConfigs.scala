@@ -352,6 +352,10 @@ class FireSimRocketChipSha3L2PrintfConfig extends Config(
   new WithNBigCores(1) ++
   new FireSimRocketChipConfig)
 
+class WithHwachaNVMTEntries(nVMT: Int) extends Config((site, here, up) => {
+  case hwacha.HwachaNVMTEntries => nVMT
+})
+
 class FireSimHwachaDRAMCacheConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new hwacha.DefaultHwachaConfig ++
@@ -445,6 +449,7 @@ class FireSimBoomRocketDRAMCacheConfig extends Config(
   new FireSimBoomDRAMCacheConfig)
 
 class FireSimBoomHwachaDRAMCacheConfig extends Config(
+  new WithHwachaNVMTEntries(112) ++
   new WithMultiRoCC ++
   new WithMultiRoCCHwacha(0) ++
   new boom.common.WithRenumberHarts ++

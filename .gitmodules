@@ -33,7 +33,7 @@
 	url = https://github.com/firesim/icenet.git
 [submodule "generators/block-inclusivecache-sifive"]
 	path = generators/sifive-cache
-	url = https://github.com/sifive/block-inclusivecache-sifive.git
+	url = https://github.com/zhemao/block-inclusivecache-sifive.git
 [submodule "generators/memory-blade"]
 	path = generators/memory-blade
 	url = git@bitbucket.org:zhemao/memory-blade.git
