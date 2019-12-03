@@ -57,6 +57,7 @@ class dmiRocketConfig extends Config(
 class PWMRocketConfig extends Config(
   new WithPWMTop ++                                        // use top with tilelink-controlled PWM
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -65,6 +66,7 @@ class PWMRocketConfig extends Config(
 class PWMAXI4RocketConfig extends Config(
   new WithPWMAXI4Top ++                                    // use top with axi4-controlled PWM
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -72,6 +74,7 @@ class PWMAXI4RocketConfig extends Config(
 class GCDRocketConfig extends Config(                      // add MMIO GCD module
   new WithGCDTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -80,6 +83,7 @@ class SimBlockDeviceRocketConfig extends Config(
   new testchipip.WithBlockDevice ++                        // add block-device module to peripherybus
   new WithSimBlockDeviceTop ++                             // use top with block-device IOs and connect to simblockdevice
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -88,6 +92,7 @@ class BlockDeviceModelRocketConfig extends Config(
   new testchipip.WithBlockDevice ++                        // add block-device module to periphery bus
   new WithBlockDeviceModelTop ++                           // use top with block-device IOs and connect to a blockdevicemodel
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -97,6 +102,7 @@ class GPIORocketConfig extends Config(
   new WithGPIO ++                                          // add GPIOs to the peripherybus
   new WithGPIOTop ++                                       // use top with GPIOs
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
@@ -144,6 +150,7 @@ class InitZeroRocketConfig extends Config(
   new WithInitZero(0x88000000L, 0x1000L) ++
   new WithInitZeroTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)

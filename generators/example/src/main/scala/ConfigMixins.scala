@@ -49,7 +49,7 @@ class WithGPIO extends Config((site, here, up) => {
 // DOC include end: WithGPIO
 
 /**
- * Class to add in UART
+ * Class to add in UART with an adapter in the TestHarness to connect to it
  */
 class WithUART extends Config((site, here, up) => {
   case PeripheryUARTKey => Seq(
