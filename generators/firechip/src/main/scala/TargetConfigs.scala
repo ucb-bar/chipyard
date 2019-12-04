@@ -278,7 +278,7 @@ class WithPrefetchMiddleMan extends Config((site, here, up) => {
     nBlocks = 32,
     hitThreshold = 1,
     timeoutPeriod = 8192,
-    lookAhead = 1)
+    lookAhead = 4)
 })
 
 class FireSimRemoteMemClientConfig extends Config(
