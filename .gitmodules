@@ -33,7 +33,7 @@
 	url = https://github.com/firesim/icenet.git
 [submodule "generators/block-inclusivecache-sifive"]
 	path = generators/sifive-cache
-	url = https://github.com/sifive/block-inclusivecache-sifive.git
+	url = https://github.com/colinschmidt/block-inclusivecache-sifive.git
 [submodule "toolchains/riscv-tools/riscv-gnu-toolchain"]
 	path = toolchains/riscv-tools/riscv-gnu-toolchain
 	url = https://github.com/riscv/riscv-gnu-toolchain.git

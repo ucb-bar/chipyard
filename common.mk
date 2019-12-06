@@ -51,16 +51,20 @@ firrtl: $(FIRRTL_FILE)
 # create verilog files rules and variables
 #########################################################################################
 REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(TOP_SMEMS_CONF)
-HARNESS_CONF_FLAGS = -thconf $(HARNESS_SMEMS_CONF)
+#HARNESS_CONF_FLAGS = -thconf $(HARNESS_SMEMS_CONF)
 
 TOP_TARGETS = $(TOP_FILE) $(TOP_SMEMS_CONF) $(TOP_ANNO) $(TOP_FIR) $(sim_top_blackboxes)
 HARNESS_TARGETS = $(HARNESS_FILE) $(HARNESS_SMEMS_CONF) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes)
 
+BARSTOOLS_CLASSES = $(base_dir)/tools/barstools/floorplan/target/scala-$(SCALA_VERSION_MAJOR)/classes
+TESTCHIPIP_CLASSES = $(base_dir)/generators/testchipip/target/scala-$(SCALA_VERSION_MAJOR)/classes
+FIRRTL ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -cp "$(FIRRTL_JAR)":"$(ROCKET_CLASSES)":"$(BARSTOOLS_CLASSES)":"$(TESTCHIPIP_CLASSES)" firrtl.Driver
+
 # DOC include start: FirrtlCompiler
-.INTERMEDIATE: firrtl_temp
+#.INTERMEDIATE: firrtl_temp
 $(TOP_TARGETS) $(HARNESS_TARGETS) $(FPIR_IN_FILE): firrtl_temp
-firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE)
-	cd $(base_dir) && $(SBT) "project tapeout" "runMain barstools.tapeout.transforms.GenerateTopAndHarness -o $(TOP_FILE) -tho $(HARNESS_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(VLOG_MODEL) -faf $(ANNO_FILE) -tsaof $(TOP_ANNO) -tdf $(sim_top_blackboxes) -tsf $(TOP_FIR) -thaof $(HARNESS_ANNO) -hdf $(sim_harness_blackboxes) -thf $(HARNESS_FIR) $(REPL_SEQ_MEM) $(HARNESS_CONF_FLAGS) -td $(build_dir)" && touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
+firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(FIRRTL_JAR)
+	cd $(base_dir) && $(FIRRTL) -o $(TOP_FILE) -i $(FIRRTL_FILE) -faf $(ANNO_FILE) $(REPL_SEQ_MEM) $(HARNESS_CONF_FLAGS) -td $(build_dir) && touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
 # DOC include end: FirrtlCompiler
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
@@ -68,13 +72,13 @@ MACROCOMPILER_MODE ?= --mode synflops
 .INTERMEDIATE: top_macro_temp
 $(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR): top_macro_temp
 top_macro_temp: $(TOP_SMEMS_CONF)
-	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE)"
+	#cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE)"
 
 HARNESS_MACROCOMPILER_MODE = --mode synflops
 .INTERMEDIATE: harness_macro_temp
 $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): harness_macro_temp
 harness_macro_temp: $(HARNESS_SMEMS_CONF)
-	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE)"
+	#cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE)"
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs

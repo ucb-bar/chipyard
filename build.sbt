@@ -101,6 +101,9 @@ lazy val chisel_testers = (project in file("tools/chisel-testers"))
       )
     )
 
+lazy val firrtl = (project in file("tools/firrtl"))
+  .settings(commonSettings)
+
 // Contains annotations & firrtl passes you may wish to use in rocket-chip without
 // introducing a circular dependency between RC and MIDAS
 lazy val midasTargetUtils = ProjectRef(firesimDir, "targetutils")
@@ -117,7 +120,7 @@ lazy val rocketConfig = (project in rocketChipDir / "api-config-chipsalliance/bu
 
 lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
   .settings(commonSettings)
-  .dependsOn(chisel, hardfloat, rocketMacros, rocketConfig)
+  .dependsOn(chisel, hardfloat, rocketMacros, rocketConfig, barstools_floorplan)
 
 lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip)
