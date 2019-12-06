@@ -50,6 +50,24 @@ case $1 in
         export PATH=$RISCV/bin:$PATH
         make run-rv64uv-p-asm-tests -j$NPROC -C $LOCAL_SIM_DIR VERILATOR_INSTALL_DIR=$LOCAL_VERILATOR_DIR ${mapping[$1]}
         ;;
+    gemmini)
+        export RISCV=$LOCAL_ESP_DIR
+        export LD_LIBRARY_PATH=$LOCAL_ESP_DIR/lib
+        export PATH=$RISCV/bin:$PATH
+        GEMMINI_SOFTWARE_DIR=$LOCAL_SIM_DIR/../../generators/gemmini/software/gemmini-rocc-tests
+        # TODO: (Alon) Write the test execution command within the verilator directory
+        # enable error on first non-zero error code
+        #set -e
+        cd $GEMMINI_SOFTWARE_DIR
+        ./build.sh
+        cd $LOCAL_SIM_DIR
+        $LOCAL_SIM_DIR/simv-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/aligned-baremetal
+        $LOCAL_SIM_DIR/simv-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/raw_hazard-baremetal
+        $LOCAL_SIM_DIR/simv-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal
+        # check error code $?
+        # disable error on first non-zero error code
+        #set +e
+        ;;
     tracegen)
         run_tracegen ${mapping[$1]}
         ;;
