@@ -55,7 +55,7 @@ class WithUART extends Config((site, here, up) => {
   case PeripheryUARTKey => Seq(
     UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256))
   case UARTAdapterKey => Seq(
-    UARTAdapterParams(baudRateInit = BigInt(3686400)))
+    UARTAdapterParams(baudRateInit = BigInt(115200)))
 })
 
 // -----------------------------------------------
