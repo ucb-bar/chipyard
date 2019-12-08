@@ -22,7 +22,7 @@ import icenet.{NICKey, NICConfig}
 import memblade.cache.{DRAMCacheKey, DRAMCacheConfig}
 import memblade.client.{RemoteMemClientKey, RemoteMemClientConfig}
 import memblade.manager.{MemBladeKey, MemBladeParams, MemBladeQueueParams}
-import memblade.prefetcher.{PrefetchRoCC, SoftPrefetchConfig, AutoPrefetchConfig}
+import memblade.prefetcher.{PrefetchRoCC, SoftPrefetchConfig, SequentialPrefetchConfig}
 
 import scala.math.max
 
@@ -258,7 +258,7 @@ class WithPrefetchRoCC extends Config((site, here, up) => {
     LazyModule(new PrefetchRoCC(
       opcodes = OpcodeSet.custom2,
       soft = Some(new SoftPrefetchConfig(nMemXacts = 32)),
-      auto = Some(new AutoPrefetchConfig(
+      auto = Some(new SequentialPrefetchConfig(
         nWays = 4, nBlocks = 8, timeoutPeriod = 750)))(p)))
 })
 

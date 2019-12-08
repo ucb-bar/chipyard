@@ -134,7 +134,7 @@ class WithPrefetchRoCC extends Config((site, here, up) => {
     LazyModule(new PrefetchRoCC(
       opcodes = OpcodeSet.custom2,
       soft = Some(SoftPrefetchConfig(nMemXacts = 32, nBackends = 2)),
-      auto = Some(AutoPrefetchConfig(
+      auto = Some(SequentialPrefetchConfig(
         nWays = 4,
         nBlocks = 28,
         hitThreshold = 1,
@@ -273,7 +273,7 @@ class WithLargeL2 extends Config(
     outerLatencyCycles = 25))
 
 class WithPrefetchMiddleMan extends Config((site, here, up) => {
-  case PrefetchMiddleManKey => AutoPrefetchConfig(
+  case PrefetchMiddleManKey => SequentialPrefetchConfig(
     nWays = 4,
     nBlocks = 32,
     hitThreshold = 1,
