@@ -14,6 +14,8 @@ import utilities.{System, SystemModule}
 
 import sifive.blocks.devices.gpio._
 
+import icenet.{HasPeripheryIceNIC, HasPeripheryIceNICModuleImp}
+
 // ------------------------------------
 // BOOM and/or Rocket Top Level Systems
 // ------------------------------------
@@ -101,3 +103,12 @@ class TopWithInitZero(implicit p: Parameters) extends Top
 class TopWithInitZeroModuleImp(l: TopWithInitZero) extends TopModule(l)
   with HasPeripheryInitZeroModuleImp
 // DOC include end: TopWithInitZero
+
+class TopWithIceNIC(implicit p: Parameters) extends Top
+    with HasPeripheryIceNIC {
+  override lazy val module = new TopWithIceNICModule(this)
+}
+
+class TopWithIceNICModule(outer: TopWithIceNIC)
+  extends TopModule(outer)
+  with HasPeripheryIceNICModuleImp

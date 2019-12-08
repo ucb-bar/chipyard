@@ -151,3 +151,11 @@ class InitZeroRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: InitZeroRocketConfig
+
+class LoopbackNICRocketConfig extends Config(
+  new WithIceNIC ++
+  new WithLoopbackNICTop ++
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)

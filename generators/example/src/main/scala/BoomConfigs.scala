@@ -67,4 +67,11 @@ class HwachaLargeBoomConfig extends Config(
   new boom.common.WithNBoomCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
-
+class LoopbackNICBoomConfig extends Config(
+  new WithIceNIC ++
+  new WithLoopbackNICTop ++
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new boom.common.WithLargeBooms ++                         // 3-wide BOOM
+  new boom.common.WithNBoomCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)

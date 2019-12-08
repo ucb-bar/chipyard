@@ -123,7 +123,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(commonSettings)
 
 lazy val example = conditionalDependsOn(project in file("generators/example"))
-  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, sha3, gemmini)
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, sha3, gemmini, icenet)
   .settings(commonSettings)
 
 lazy val tracegen = conditionalDependsOn(project in file("generators/tracegen"))

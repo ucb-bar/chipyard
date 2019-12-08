@@ -18,6 +18,8 @@ import hwacha.{Hwacha}
 
 import sifive.blocks.devices.gpio._
 
+import icenet.{NICKey, NICConfig}
+
 /**
  * TODO: Why do we need this?
  */
@@ -212,4 +214,19 @@ class WithControlCore extends Config((site, here, up) => {
       hartId = up(RocketTilesKey, site).size + up(BoomTilesKey, site).size
     )
   case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
+})
+
+class WithIceNIC(inBufFlits: Int = 1800, usePauser: Boolean = false)
+    extends Config((site, here, up) => {
+  case NICKey => NICConfig(
+    inBufFlits = inBufFlits,
+    usePauser = usePauser)
+})
+
+class WithLoopbackNICTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
+    val top = Module(LazyModule(new TopWithIceNIC()(p)).module)
+    top.connectNicLoopback()
+    top
+  }
 })
