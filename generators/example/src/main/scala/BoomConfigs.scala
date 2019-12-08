@@ -9,8 +9,10 @@ import freechips.rocketchip.config.{Config}
 // ---------------------
 
 class SmallBoomConfig extends Config(
-  new WithTop ++                                            // use normal top
+  new WithSimBlockDeviceTop ++                              // use top with block-device IOs and connect to simblockdevice
+  new testchipip.WithBlockDevice ++                         // add block-device module to periphery bus
   new WithBootROM ++                                        // use testchipip bootrom
+  new freechips.rocketchip.subsystem.WithExtMemSize(((1 << 20) * 64)) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++  // use SiFive L2 cache
   new boom.common.WithSmallBooms ++                         // 1-wide BOOM
   new boom.common.WithNBoomCores(1) ++                      // single-core
@@ -19,14 +21,17 @@ class SmallBoomConfig extends Config(
 class MediumBoomConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithExtMemSize(((1 << 20) * 64)) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new boom.common.WithMediumBooms ++                        // 2-wide BOOM
   new boom.common.WithNBoomCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
 class LargeBoomConfig extends Config(
-  new WithTop ++
+  new WithSimBlockDeviceTop ++                             // use top with block-device IOs and connect to simblockdevice
+  new testchipip.WithBlockDevice ++                        // add block-device module to periphery bus
   new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithExtMemSize(((1 << 20) * 64)) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new boom.common.WithLargeBooms ++                         // 3-wide BOOM
   new boom.common.WithNBoomCores(1) ++

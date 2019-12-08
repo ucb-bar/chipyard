@@ -29,6 +29,7 @@ class TestHarness(implicit val p: Parameters) extends Module {
   override def desiredName = "TestHarness"
 
   val dut = p(BuildTop)(clock, reset.toBool, p)
+  dut.suggestName("dut")
 
   dut.debug := DontCare
   dut.connectSimAXIMem()
