@@ -103,9 +103,9 @@ class MultiCoreWithControlCoreConfig extends Config(
   new WithTop ++
   new WithBootROM ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new WithControlCore ++                                 // add small control core (last hartid)
   new boom.common.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++
   new boom.common.WithNBoomCores(2) ++                   // 2 normal boom cores
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++ // 2 normal rocket cores
-  new WithControlCore ++                                 // add small control core
   new freechips.rocketchip.system.BaseConfig)
