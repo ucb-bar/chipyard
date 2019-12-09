@@ -220,7 +220,8 @@ class WithIceNIC(inBufFlits: Int = 1800, usePauser: Boolean = false)
     extends Config((site, here, up) => {
   case NICKey => NICConfig(
     inBufFlits = inBufFlits,
-    usePauser = usePauser)
+    usePauser = usePauser,
+    checksumOffload = true)
 })
 
 class WithLoopbackNICTop extends Config((site, here, up) => {

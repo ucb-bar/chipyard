@@ -52,7 +52,8 @@ class WithBlockDevice extends Config(new testchipip.WithBlockDevice)
 class WithNICKey extends Config((site, here, up) => {
   case NICKey => NICConfig(
     inBufFlits = 8192,
-    ctrlQueueDepth = 64)
+    ctrlQueueDepth = 64,
+    checksumOffload = true)
 })
 
 class WithRocketL2TLBs(entries: Int) extends Config((site, here, up) => {
