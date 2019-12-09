@@ -61,9 +61,9 @@ case $1 in
         cd $GEMMINI_SOFTWARE_DIR
         ./build.sh
         cd $LOCAL_SIM_DIR
-        $LOCAL_SIM_DIR/simv-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/aligned-baremetal
-        $LOCAL_SIM_DIR/simv-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/raw_hazard-baremetal
-        $LOCAL_SIM_DIR/simv-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal
+        $LOCAL_SIM_DIR/simulator-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/aligned-baremetal
+        $LOCAL_SIM_DIR/simulator-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/raw_hazard-baremetal
+        $LOCAL_SIM_DIR/simulator-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal
         # check error code $?
         # disable error on first non-zero error code
         #set +e
