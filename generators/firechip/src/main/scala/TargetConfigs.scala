@@ -263,14 +263,14 @@ class WithStandardL2 extends Config(
   new WithInclusiveCache(
     nBanks = 4,
     capacityKB = 1024,
-    outerLatencyCycles = 50))
+    outerLatencyCycles = 40))
 
 class WithLargeL2 extends Config(
   new WithL2InnerExteriorBuffer(2, 2) ++
   new WithInclusiveCache(
     nBanks = 4,
     capacityKB = 1024,
-    outerLatencyCycles = 25))
+    outerLatencyCycles = 20))
 
 class WithPrefetchMiddleMan extends Config((site, here, up) => {
   case PrefetchMiddleManKey => SequentialPrefetchConfig(
@@ -449,7 +449,7 @@ class FireSimBoomRocketDRAMCacheConfig extends Config(
   new FireSimBoomDRAMCacheConfig)
 
 class FireSimBoomHwachaDRAMCacheConfig extends Config(
-  new WithHwachaNVMTEntries(112) ++
+  new WithHwachaNVMTEntries(80) ++
   new WithMultiRoCC ++
   new WithMultiRoCCHwacha(0) ++
   new boom.common.WithRenumberHarts ++
