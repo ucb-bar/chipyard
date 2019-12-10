@@ -7,7 +7,7 @@ import freechips.rocketchip.config.{Field, Parameters, Config}
 import freechips.rocketchip.subsystem.{SystemBusKey, RocketTilesKey, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, CacheBlockBytes}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.tile.{RocketTileParams, XLen, BuildRoCC, TileKey, LazyRoCC}
+import freechips.rocketchip.tile.{RocketTileParams, MaxHartIdBits, XLen, BuildRoCC, TileKey, LazyRoCC}
 import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams}
 
 import boom.common.{BoomTilesKey}
@@ -209,6 +209,7 @@ class WithControlCore extends Config((site, here, up) => {
         nWays = 1,
         nTLBEntries = 4,
         blockBytes = site(CacheBlockBytes))),
-      hartId = up(RocketTilesKey, site).length + up(BoomTilesKey, site).length
+      hartId = up(RocketTilesKey, site).size + up(BoomTilesKey, site).size
     )
+  case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
 })
