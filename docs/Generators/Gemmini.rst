@@ -1,18 +1,25 @@
 Gemmini
 ====================================
 
-The Gemmini project is developing a systolic-array based matrix multiplication acceleration generation for the investigation of SoC integration of such accelerators. It is inspired by recent trends in machine learning accelerators for edge and mobile SoCs.
+The Gemmini project is developing a systolic-array based matrix multiplication unit generator for the investigation of software/hardware implications of such integrated SoC accelerators. It is inspired by recent trends in machine learning accelerators for edge and mobile SoCs.
 
 Gemmini is implemented as a RoCC accelerator with non-standard RISC-V custom instructions. The Gemmini unit uses the RoCC port of a Rocket or BOOM `tile`, and by default connects to the memory system through the System Bus (i.e., directly to the L2 cache). 
 
 To add a Gemmini unit to an SoC, you should add the ``gemmini.DefaultGemminiConfig`` config mixin to the SoC configurations. To change the configuration of the Gemmini accelerator unit, you can write a custom configuration to replace the ``DefaultGemminiConfig``, which you can view under `generators/gemmini/src/main/scala/configs.scala <https://github.com/ucb-bar/gemmini/blob/master/src/main/scala/gemmini/configs.scala>`__ to see the possible configuration parameters.
 
-Alternatively, to build our example Gemmini-equipped SoC simulator, run the following commands:
+The example Chipyard config includes the following example SoC configuration which includes Gemmini:
+
+.. literalinclude:: ../../generators/example/src/main/scala/RocketConfigs.scala
+    :language: scala
+    :start-after: DOC include start: GemminiRocketConfig
+    :end-before: DOC include end: GemminiRocketConfig
+
+To build a simulation of this example Chipyard config, run the following commands:
 
 .. code-block:: shell
 
     cd sims/vcs # or "cd sims/verilator"
-    make CONFIG=GemminiAcceleratorConfig CONFIG_PACKAGE=gemmini MODEL_PACKAGE=freechips.rocketchip.system GENERATOR_PACKAGE=freechips.rocketchip.system TOP=ExampleRocketSystem
+    make CONFIG=GemminiRocketConfig
 
 .. image:: ../_static/images/gemmini-system.png
 
@@ -44,9 +51,29 @@ The ISA includes configuration instructions, data movement instructions (from ma
 Since Gemmini instructions are not exposed through the GNU binutils assembler, several C macros are provided in order to construct the instruction encodings to call these instructions.
 
 The Gemmini generator includes a C matrix multiplication library which wraps the calls to the custom Gemmini instructions.
-The ``software`` directory of the generator includes the aforementioned library and macros, as well as bare-metal tests, and some FireMarshal workloads to run the tests in a Linux environment. In particular, the matrix multiplication C library can be found in the ``software/gemmini-rocc-tests/include/systolic.h`` file. 
+The ``software`` directory of the generator includes the aforementioned library and macros, as well as bare-metal tests, and some FireMarshal workloads to run the tests in a Linux environment. In particular, the matrix multiplication C library can be found in the ``software/gemmini-rocc-tests/include/gemmini.h`` file. 
 
-The Gemmini generator generates a C header file based on the generator parameters. This header files gets compiled together with the matrix multiplication library to tune library performance. The generated header file can be found under ``software/gemmini-rocc-tests/include/systolic_params.h``
+The Gemmini generator generates a C header file based on the generator parameters. This header files gets compiled together with the matrix multiplication library to tune library performance. The generated header file can be found under ``software/gemmini-rocc-tests/include/gemmini_params.h``
 
-The Gemmini generator implements a custom non-standard version of the Spike functional ISA simulator. This implementation is based on the ``esp-tools`` Spike implementation that is mixed with the Hwacha vector accelerator. Is is currently a separate branch within the ``esp-tools`` Spike repository, but it is in the process of upstreaming to the main ``esp-tools`` branch.
+The Gemmini generator implements a custom non-standard version of the Spike functional ISA simulator. This implementation is found within the ``esp-tools`` Spike implementation, together with the Hwacha vector accelerator non-standard ISA-extension. In order to use this version of Spike, please make sure to build the ``esp-tools`` software toolchain, as describes in :ref:`build-toolchains`.
+
+In order to run Spike with the gemmini functional model, you will need to use the ``--extension=gemmini`` flag. For example:
+
+.. code-block:: shell
+
+    spike --extension=gemmini <some/gemmini/baremetal/test>
+
+Spike is build by default with now commit log. However, if you would like to add detailed functional log of gemmini operation to the spike model, you can rebuild spike manually (based on the instructions in the ``esp-tools/riscv-isa-sim/README`` file), with the ``--enable-gemminicommitlog`` option added to the ``configure`` step.
+
+
+Alternative SoC Configs
+--------------------------
+
+The Gemmini generator includes additional alternative SoC configs (configs that are not in the Chipyard example project). 
+If you would like to build one of these alternative SoC configurations which are defined in within the Gemmini project repository, you can run the following commands. This commands are similar to the one required when building a simulation from the example project, but there specify that the location of the configs are in the Gemmini subproject, as opposed to the chipyard example project:
+
+.. code-block:: shell
+
+    cd sims/vcs # or "cd sims/verilator"
+    make CONFIG=GemminiAcceleratorConfig CONFIG_PACKAGE=gemmini MODEL_PACKAGE=freechips.rocketchip.system GENERATOR_PACKAGE=freechips.rocketchip.system TOP=ExampleRocketSystem
 
