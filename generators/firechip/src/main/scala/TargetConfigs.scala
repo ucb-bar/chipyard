@@ -138,7 +138,7 @@ class WithPrefetchRoCC extends Config((site, here, up) => {
         nWays = 4,
         nBlocks = 28,
         hitThreshold = 1,
-        timeoutPeriod = 8192,
+        maxTimeout = 8192,
         lookAhead = 4))))
   })
 })
@@ -277,7 +277,7 @@ class WithPrefetchMiddleMan extends Config((site, here, up) => {
     nWays = 4,
     nBlocks = 32,
     hitThreshold = 1,
-    timeoutPeriod = 8192,
+    maxTimeout = (1 << 16) - 1,
     lookAhead = 4)
 })
 

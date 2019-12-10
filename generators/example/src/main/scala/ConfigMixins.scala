@@ -259,7 +259,7 @@ class WithPrefetchRoCC extends Config((site, here, up) => {
       opcodes = OpcodeSet.custom2,
       soft = Some(new SoftPrefetchConfig(nMemXacts = 32)),
       auto = Some(new SequentialPrefetchConfig(
-        nWays = 4, nBlocks = 8, timeoutPeriod = 750)))(p)))
+        nWays = 4, nBlocks = 8, maxTimeout = 750)))(p)))
 })
 
 // DOC include start: WithInitZero
