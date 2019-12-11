@@ -63,14 +63,14 @@ In order to run Spike with the gemmini functional model, you will need to use th
 
     spike --extension=gemmini <some/gemmini/baremetal/test>
 
-Spike is build by default with now commit log. However, if you would like to add detailed functional log of gemmini operation to the spike model, you can rebuild spike manually (based on the instructions in the ``esp-tools/riscv-isa-sim/README`` file), with the ``--enable-gemminicommitlog`` option added to the ``configure`` step.
+Spike is built by default without a commit log. However, if you would like to add detailed functional log of gemmini operation to the spike model, you can rebuild spike manually (based on the instructions in the ``esp-tools/riscv-isa-sim/README`` file), with the ``--enable-gemminicommitlog`` option added to the ``configure`` step.
 
 
 Alternative SoC Configs
 --------------------------
 
 The Gemmini generator includes additional alternative SoC configs (configs that are not in the Chipyard example project). 
-If you would like to build one of these alternative SoC configurations which are defined in within the Gemmini project repository, you can run the following commands. This commands are similar to the one required when building a simulation from the example project, but there specify that the location of the configs are in the Gemmini subproject, as opposed to the chipyard example project:
+If you would like to build one of these alternative SoC configurations which are defined in within the Gemmini project repository, you can run the following commands. These commands are similar to the one required when building a simulation from the example project, but they specify that the location of the configs are in the Gemmini subproject, as opposed to the Chipyard example project:
 
 .. code-block:: shell
 
