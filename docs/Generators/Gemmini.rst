@@ -18,7 +18,7 @@ To build a simulation of this example Chipyard config, run the following command
 
 .. code-block:: shell
 
-    cd sims/vcs # or "cd sims/verilator"
+    cd sims/verilator # or "cd sims/vcs"
     make CONFIG=GemminiRocketConfig
 
 .. image:: ../_static/images/gemmini-system.png
@@ -55,7 +55,19 @@ The ``software`` directory of the generator includes the aforementioned library 
 
 The Gemmini generator generates a C header file based on the generator parameters. This header files gets compiled together with the matrix multiplication library to tune library performance. The generated header file can be found under ``software/gemmini-rocc-tests/include/gemmini_params.h``
 
-The Gemmini generator implements a custom non-standard version of the Spike functional ISA simulator. This implementation is found within the ``esp-tools`` Spike implementation, together with the Hwacha vector accelerator non-standard ISA-extension. In order to use this version of Spike, please make sure to build the ``esp-tools`` software toolchain, as describes in :ref:`build-toolchains`.
+Build and Run Gemmini Programs
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To build pre-packaged Gemmini programs:
+
+.. code-block:: shell
+
+    cd generators/gemmini/software/gemmini-rocc-tests/
+    ./build.sh
+    
+Afterwards, the program binaries will be found in ``generators/gemmini/software/gemmini-rocc-tests/build``. Binaries whose names end in ``-baremetal`` are meant to be run in a bare-metal environment, while binaries whose names end in ``-linux`` are meant to run in a Linux environment. You can run the programs either on a cycle-accurate RTL simulator, or on a (much faster) functional ISA simulator called Spike.
+
+The Gemmini generator implements a custom non-standard version of Spike. This implementation is found within the ``esp-tools`` Spike implementation, together with the Hwacha vector accelerator non-standard ISA-extension. In order to use this version of Spike, please make sure to build the ``esp-tools`` software toolchain, as described in :ref:`build-toolchains`.
 
 In order to run Spike with the gemmini functional model, you will need to use the ``--extension=gemmini`` flag. For example:
 
@@ -65,6 +77,20 @@ In order to run Spike with the gemmini functional model, you will need to use th
 
 Spike is built by default without a commit log. However, if you would like to add detailed functional log of gemmini operation to the spike model, you can rebuild spike manually (based on the instructions in the ``esp-tools/riscv-isa-sim/README`` file), with the ``--enable-gemminicommitlog`` option added to the ``configure`` step.
 
+Writing Your Own Gemmini Programs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can find a template for a Gemmini program, written in C, in `generators/gemmini/software/gemmini-rocc-tests/bareMetalC/template.c <https://github.com/ucb-bar/gemmini-rocc-tests/blob/master/bareMetalC/template.c>`__. Feel free to copy this file, say to ``my_program.c``, and add ``my_program`` to the `tests` list in `generators/gemmini/software/gemmini-rocc-tests/bareMetalC/Makefile <https://github.com/ucb-bar/gemmini-rocc-tests/blob/64566ad99ff90147a06546d04da328abffb89722/bareMetalC/Makefile#L3>`__:
+
+.. code-block:: shell
+
+    tests = \
+        my_program \
+        mvin_mvout \
+        mvin_mvout_stride \
+        ...
+
+Afterwards as described above, run ``./build.sh`` again and you will be able to find the ``my_program-baremetal`` and ``my_program-linux`` binaries in the ``build/`` directory.
 
 Alternative SoC Configs
 --------------------------
