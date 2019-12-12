@@ -4,7 +4,7 @@ package firesim.firesim
 
 import java.io.{File, FileWriter}
 
-import chisel3.experimental.RawModule
+import chisel3.RawModule
 import chisel3.internal.firrtl.{Circuit, Port}
 
 import freechips.rocketchip.diplomacy.{ValName, AutoBundle}
@@ -58,7 +58,7 @@ trait IsFireSimGeneratorLike extends HasFireSimGeneratorUtilities with HasTestSu
 }
 
 object FireSimGenerator extends App with IsFireSimGeneratorLike {
-  val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
+  override lazy val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
   lazy val generatorArgs = GeneratorArgs(args)
   lazy val genDir = new File(names.targetDir)
   // The only reason this is not generateFirrtl; generateAnno is that we need to use a different 
@@ -70,7 +70,7 @@ object FireSimGenerator extends App with IsFireSimGeneratorLike {
 
 // For now, provide a separate generator app when not specifically building for FireSim
 object Generator extends freechips.rocketchip.util.GeneratorApp with HasTestSuites {
-  val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
+  override lazy val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
   generateFirrtl
   generateAnno
   generateTestSuiteMakefrags

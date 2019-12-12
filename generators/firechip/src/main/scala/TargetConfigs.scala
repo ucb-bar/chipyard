@@ -10,7 +10,7 @@ import freechips.rocketchip.tilelink._
 import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.devices.debug.DebugModuleParams
+import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import boom.common.BoomTilesKey
 import testchipip.{BlockDeviceKey, BlockDeviceConfig}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
@@ -77,7 +77,7 @@ class WithBoomL2TLBs(entries: Int) extends Config((site, here, up) => {
 
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
 class WithoutClockGating extends Config((site, here, up) => {
-  case DebugModuleParams => up(DebugModuleParams, site).copy(clockGate = false)
+  case DebugModuleKey => up(DebugModuleKey, site).map(_.copy(clockGate = false))
 })
 
 // Testing configurations

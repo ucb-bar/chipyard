@@ -21,13 +21,13 @@ import firesim.util.RegisterBridgeBinder
 import tracegen.HasTraceGenTilesModuleImp
 
 class WithTiedOffDebug extends RegisterBridgeBinder({ case target: HasPeripheryDebugModuleImp =>
-  target.debug.clockeddmi.foreach({ cdmi =>
+  target.debug.foreach(_.clockeddmi.foreach({ cdmi =>
     cdmi.dmi.req.valid := false.B
     cdmi.dmi.req.bits := DontCare
     cdmi.dmi.resp.ready := false.B
     cdmi.dmiClock := false.B.asClock
     cdmi.dmiReset := false.B
-  })
+  }))
   Seq()
 })
 
