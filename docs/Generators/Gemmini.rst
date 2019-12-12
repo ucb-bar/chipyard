@@ -100,6 +100,6 @@ If you would like to build one of these alternative SoC configurations which are
 
 .. code-block:: shell
 
-    cd sims/vcs # or "cd sims/verilator"
+    cd sims/verilator # or "cd sims/vcs"
     make CONFIG=GemminiAcceleratorConfig CONFIG_PACKAGE=gemmini MODEL_PACKAGE=freechips.rocketchip.system GENERATOR_PACKAGE=freechips.rocketchip.system TOP=ExampleRocketSystem
 
