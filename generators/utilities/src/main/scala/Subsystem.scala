@@ -66,7 +66,7 @@ trait HasBoomAndRocketTiles extends HasTiles
       def treeNode: RocketTileLogicalTreeNode = new RocketTileLogicalTreeNode(rocketLogicalTree.getOMInterruptTargets)
       LogicalModuleTree.add(logicalTreeNode, rocketLogicalTree)
 
-      connectInterrupts(tile, Some(debug), clintOpt, plicOpt)
+      connectInterrupts(tile, debugOpt, clintOpt, plicOpt)
 
       tile
     }

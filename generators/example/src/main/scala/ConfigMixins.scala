@@ -4,10 +4,11 @@ import chisel3._
 import chisel3.util.{log2Up}
 
 import freechips.rocketchip.config.{Field, Parameters, Config}
-import freechips.rocketchip.subsystem.{RocketTilesKey, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32}
+import freechips.rocketchip.subsystem.{SystemBusKey, RocketTilesKey, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, CacheBlockBytes}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.tile.{XLen, BuildRoCC, TileKey, LazyRoCC}
+import freechips.rocketchip.tile.{RocketTileParams, MaxHartIdBits, XLen, BuildRoCC, TileKey, LazyRoCC}
+import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams}
 
 import boom.common.{BoomTilesKey}
 
@@ -182,3 +183,33 @@ class WithInitZeroTop extends Config((site, here, up) => {
     Module(LazyModule(new TopWithInitZero()(p)).module)
 })
 // DOC include end: WithInitZero
+
+/**
+ * Mixin to add a small Rocket core to the system as a "control" core.
+ * Used as an example of a PMU core.
+ */
+class WithControlCore extends Config((site, here, up) => {
+  case RocketTilesKey => up(RocketTilesKey, site) :+
+    RocketTileParams(
+      core = RocketCoreParams(
+        useVM = false,
+        fpu = None,
+        mulDiv = Some(MulDivParams(mulUnroll = 8))),
+      btb = None,
+      dcache = Some(DCacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 1,
+        nTLBEntries = 4,
+        nMSHRs = 0,
+        blockBytes = site(CacheBlockBytes))),
+      icache = Some(ICacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 1,
+        nTLBEntries = 4,
+        blockBytes = site(CacheBlockBytes))),
+      hartId = up(RocketTilesKey, site).size + up(BoomTilesKey, site).size
+    )
+  case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
+})
