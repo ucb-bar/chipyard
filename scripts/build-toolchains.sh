@@ -10,10 +10,17 @@ RDIR=$(pwd)
 CHIPYARD_DIR="${CHIPYARD_DIR:-$(git rev-parse --show-toplevel)}"
 
 usage() {
-    echo "usage: ${0} [riscv-tools | esp-tools | ec2fast]"
+    echo "usage: ${0} [OPTIONS] [riscv-tools | esp-tools | ec2fast]"
+    echo ""
+    echo "Installation Types"
     echo "   riscv-tools: if set, builds the riscv toolchain (this is also the default)"
     echo "   esp-tools: if set, builds esp-tools toolchain used for the hwacha vector accelerator"
     echo "   ec2fast: if set, pulls in a pre-compiled RISC-V toolchain for an EC2 manager instance"
+    echo ""
+    echo "Options"
+    echo "   --prefix PREFIX : Install destination. If unset, defaults to $(pwd)/riscv-tools-install"
+    echo "                     or $(pwd)/esp-tools-install"
+    echo "   --help -h       : Display this message"
     exit "$1"
 }
 
@@ -27,38 +34,34 @@ die() {
 
 TOOLCHAIN="riscv-tools"
 EC2FASTINSTALL="false"
+RISCV=""
 
-while getopts 'hH-:' opt ; do
-    case $opt in
-    h|H)
-        usage 3 ;;
-    -)
-        case $OPTARG in
-        help)
+# getopts does not support long options, and is inflexible
+while [ "$1" != "" ];
+do
+    case $1 in
+        -h | --help | help )
             usage 3 ;;
-        ec2fast) # Preserve compatibility
-            EC2FASTINSTALL=true ;;
-        *)
-            error "invalid option: --${OPTARG}"
+        -p | --prefix )
+            shift
+            RISCV=$(realpath $1) ;;
+        riscv-tools | esp-tools)
+            TOOLCHAIN=$1 ;;
+        ec2fast )
+            EC2FASTINSTALL="true" ;;
+        * )
+            error "invalid option $1"
             usage 1 ;;
-        esac ;;
-    *)
-        error "invalid option: -${opt}"
-        usage 1 ;;
     esac
+    shift
 done
 
-shift $((OPTIND - 1))
-
-if [ "$1" = ec2fast ] ; then
-    EC2FASTINSTALL=true
-elif [ -n "$1" ] ; then
-    TOOLCHAIN="$1"
+if [ -z "$RISCV" ] ; then
+      INSTALL_DIR="$TOOLCHAIN-install"
+      RISCV="$(pwd)/$INSTALL_DIR"
 fi
 
-INSTALL_DIR="$TOOLCHAIN-install"
-
-RISCV="$(pwd)/$INSTALL_DIR"
+echo "Installing toolchain to $RISCV"
 
 # install risc-v tools
 export RISCV="$RISCV"
