@@ -85,7 +85,7 @@ dir="software"
 branches=("master")
 search
 
-submodules=("axe" "barstools" "chisel3" "firrtl" "torture" "dsptools" "chisel-testers" "treadle" "firrtl-interpreter")
+submodules=("axe" "barstools" "torture" "dsptools" "chisel-testers" "treadle" "firrtl-interpreter")
 dir="tools"
 if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
 then
