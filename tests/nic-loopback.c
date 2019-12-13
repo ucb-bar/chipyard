@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <riscv-pk/encoding.h>
 #include "nic.h"
-#include "encoding.h"
 
 #define NPACKETS 10
 #define TEST_OFFSET 3
