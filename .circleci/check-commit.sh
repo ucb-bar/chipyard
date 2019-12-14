@@ -48,7 +48,7 @@ search () {
     done
 }
 
-submodules=("boom" "hwacha" "icenet" "sha3" "rocket-chip" "sifive-blocks" "sifive-cache" "testchipip")
+submodules=("boom" "hwacha" "icenet" "sha3" "rocket-chip" "sifive-blocks" "sifive-cache" "testchipip" "gemmini")
 dir="generators"
 if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
 then

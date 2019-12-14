@@ -23,6 +23,16 @@ class HwachaRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+// DOC include start: GemminiRocketConfig
+class GemminiRocketConfig extends Config(
+  new WithTop ++
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new gemmini.DefaultGemminiConfig ++                        // use Gemmini systolic array GEMM accelerator
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+// DOC include end: GemminiRocketConfig
+
 class RoccRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++

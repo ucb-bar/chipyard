@@ -22,6 +22,7 @@ so changes to the generators themselves will automatically be used when building
    Rocket
    BOOM
    Hwacha
+   Gemmini
    IceNet
    TestChipIP
    SiFive-Generators

@@ -104,3 +104,6 @@
 [submodule "software/coremark"]
 	path = software/coremark
 	url = https://github.com/ucb-bar/coremark-workload.git
+[submodule "generators/gemmini"]
+	path = generators/gemmini
+	url = https://github.com/ucb-bar/gemmini

@@ -288,6 +288,35 @@ jobs:
                 key: hwacha-{{ .Branch }}-{{ .Revision }}
                 paths:
                     - "/home/riscvuser/project"
+    prepare-gemmini:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.12
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+        steps:
+            - add_ssh_keys:
+                fingerprints:
+                    - "3e:c3:02:5b:ed:64:8c:b7:b0:04:43:bc:83:43:73:1e"
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - esp-tools-installed-v2-{{ checksum "../esp-tools.hash" }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
+            - run:
+                name: Building the gemmini subproject using Verilator
+                command: .circleci/do-rtl-build.sh gemmini
+                no_output_timeout: 120m
+            - save_cache:
+                key: gemmini-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/home/riscvuser/project"
     prepare-tracegen:
         docker:
             - image: riscvboom/riscvboom-images:0.0.12
@@ -516,6 +545,30 @@ jobs:
             - run:
                 name: Run hwacha tests
                 command: .circleci/run-tests.sh hwacha
+    gemmini-run-tests:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.12
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+        steps:
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - esp-tools-installed-v2-{{ checksum "../esp-tools.hash" }}
+            - restore_cache:
+                keys:
+                    - gemmini-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
+            - run:
+                name: Run gemmini tests
+                command: .circleci/run-tests.sh gemmini
     tracegen-run-tests:
         docker:
             - image: riscvboom/riscvboom-images:0.0.12
@@ -660,6 +713,11 @@ workflows:
                     - install-esp-toolchain
                     - install-verilator
 
+            - prepare-gemmini:
+                requires:
+                    - install-esp-toolchain
+                    - install-verilator
+
             - prepare-tracegen:
                 requires:
                     - install-riscv-toolchain
@@ -703,6 +761,10 @@ workflows:
             - hwacha-run-tests:
                 requires:
                     - prepare-hwacha
+
+            - gemmini-run-tests:
+                requires:
+                    - prepare-gemmini
 
             - tracegen-run-tests:
                 requires:

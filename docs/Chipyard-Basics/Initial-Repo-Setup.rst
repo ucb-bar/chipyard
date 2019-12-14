@@ -21,6 +21,8 @@ After cloning this repo, you will need to initialize all of the submodules.
     cd chipyard
     ./scripts/init-submodules-no-riscv-tools.sh
 
+.. _build-toolchains:
+
 Building a Toolchain
 ------------------------
 

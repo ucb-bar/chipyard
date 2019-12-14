@@ -209,6 +209,18 @@ class FireSimRocketBoomConfig extends Config(
 )
 
 //**********************************************************************************
+//* Gemmini Configurations
+//*********************************************************************************/
+
+// Gemmini systolic accelerator default config
+class FireSimRocketChipGemminiL2Config extends Config(
+  new WithInclusiveCache ++
+  new gemmini.DefaultGemminiConfig ++
+  new WithNBigCores(1) ++
+  new FireSimRocketChipConfig)
+
+
+//**********************************************************************************
 //* Supernode Configurations
 //*********************************************************************************/
 
