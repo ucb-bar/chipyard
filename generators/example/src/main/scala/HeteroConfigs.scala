@@ -11,6 +11,7 @@ import freechips.rocketchip.config.{Config}
 class LargeBoomAndRocketConfig extends Config(
   new WithTop ++                                           // default top
   new WithBootROM ++                                       // default bootrom
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++ // use SiFive l2
   new boom.common.WithRenumberHarts ++                     // avoid hartid overlap
   new boom.common.WithLargeBooms ++                        // 3-wide boom
@@ -21,6 +22,7 @@ class LargeBoomAndRocketConfig extends Config(
 class SmallBoomAndRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new boom.common.WithRenumberHarts ++
   new boom.common.WithSmallBooms ++                        // 1-wide boom
@@ -32,6 +34,7 @@ class SmallBoomAndRocketConfig extends Config(
 class HwachaLargeBoomAndHwachaRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new hwacha.DefaultHwachaConfig ++                      // add hwacha to all harts
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new boom.common.WithRenumberHarts ++
@@ -44,6 +47,7 @@ class HwachaLargeBoomAndHwachaRocketConfig extends Config(
 class RoccLargeBoomAndRoccRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithRoccExample ++  // add example rocc accelerator to all harts
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new boom.common.WithRenumberHarts ++
@@ -55,6 +59,7 @@ class RoccLargeBoomAndRoccRocketConfig extends Config(
 class DualLargeBoomAndRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new boom.common.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++
@@ -66,6 +71,7 @@ class DualLargeBoomAndRocketConfig extends Config(
 class DualLargeBoomAndHwachaRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new WithMultiRoCC ++                                  // support heterogeneous rocc
   new WithMultiRoCCHwacha(2) ++                         // put hwacha on hart-2 (rocket)
@@ -79,6 +85,7 @@ class DualLargeBoomAndHwachaRocketConfig extends Config(
 class LargeBoomAndRV32RocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new boom.common.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++
@@ -91,6 +98,7 @@ class LargeBoomAndRV32RocketConfig extends Config(
 class DualLargeBoomAndDualRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
+  new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new boom.common.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++

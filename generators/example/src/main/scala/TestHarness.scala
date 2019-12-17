@@ -29,6 +29,7 @@ class TestHarness(implicit val p: Parameters) extends Module {
   override def desiredName = "TestHarness"
 
   val dut = p(BuildTop)(clock, reset.toBool, p)
+  dut.suggestName("dut")
 
   dut.debug.foreach(_ := DontCare)
   dut.connectSimAXIMem()
@@ -47,6 +48,7 @@ class TestHarness(implicit val p: Parameters) extends Module {
         axi.w.bits := DontCare
     }
   })
+  dut.connectSimUARTs()
 
   io.success := dut.connectSimSerial()
 }
