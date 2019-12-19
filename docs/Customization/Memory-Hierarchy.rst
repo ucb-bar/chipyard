@@ -17,6 +17,12 @@ configure 4 KiB direct-mapped caches for L1I and L1D.
     import freechips.rocketchip.subsystem.{WithNMediumCores, WithNSmallCores}
 
     class SmallRocketConfig extends Config(
+    new WithTop ++                                       // use default top
+    new WithBootROM ++                                   // use default bootrom
+    new freechips.rocketchip.subsystem.WithNSmallCores(1) ++
+    new freechips.rocketchip.system.BaseConfig)
+
+    class SmallRocketConfig extends Config(
         new WithNSmallCores(1) ++
         new RocketConfig)
 
@@ -44,12 +50,23 @@ you can only use a single core and you cannot give the design an external DRAM.
 
 .. code-block:: scala
 
-    import freechips.rocketchip.subsystem.{WithNoMemPort, WithScratchpadsOnly}
+    import freechips.rocketchip.subsystem.{WithNSmallCore, sWithNoMemPort, WithScratchpadsOnly}
 
+    class SmallRocketConfig extends Config( 
+        new WithTop ++                              // use default top 
+        new WithBootROM ++                          // use default bootrom 
+        new freechips.rocketchip.subsystem.WithNSmallCores(1) ++ 
+        new freechips.rocketchip.system.BaseConfig)          
+                                                
     class ScratchpadRocketConfig extends Config(
-        new WithNoMemPort ++
-        new WithScratchpadsOnly ++
-        new SmallRocketConfig)
+        new freechips.rocketchip.subsystem.WithNoMemPort ++ 
+        new freechips.rocketchip.subsystem.WithNMemoryChannels(0) ++ 
+        new freechips.rocketchip.subsystem.WithNBanks(0) ++ 
+        new freechips.rocketchip.subsystem.WithScratchpadsOnly ++ 
+        new SmallRocketConfig) 
+
+This configuration fully removes the L2 cache and memory bus by setting the
+number of channels and number of banks to 0.
 
 The SiFive L2 Cache
 -------------------
