@@ -117,7 +117,7 @@ class WithDRAMCacheKey(
     nWritebackSpans = nTrackersPerBank,
     remAccessQueue = RemoteAccessDepths(1, 8, 1, 8),
     wbQueue = WritebackDepths(1, 1),
-    memInQueue = MemoryQueueParams(0, 0, 8, 2, 8, 2),
+    memInQueue = MemoryQueueParams(0, 0, 2, 2, 2, 2),
     memOutQueue = MemoryQueueParams(2, 2, 2, 2, 2, 2),
     zeroMetadata = false)
 })
@@ -248,21 +248,21 @@ class WithStandardL2 extends Config(
   new WithInclusiveCache(
     nBanks = 4,
     capacityKB = 1024,
-    outerLatencyCycles = 40))
+    outerLatencyCycles = 32))
 
 class WithLargeL2 extends Config(
   new WithL2InnerExteriorBuffer(2, 2) ++
   new WithInclusiveCache(
     nBanks = 4,
     capacityKB = 1024,
-    outerLatencyCycles = 20))
+    outerLatencyCycles = 16))
 
 class WithPrefetchMiddleMan extends Config((site, here, up) => {
   case PrefetchMiddleManKey => SequentialPrefetchConfig(
     nWays = 4,
     nBlocks = 32,
     hitThreshold = 1,
-    maxTimeout = (1 << 16) - 1,
+    maxTimeout = (1 << 30) - 1,
     lookAhead = 4)
 })
 
@@ -400,13 +400,12 @@ class FireSimBoomRocketDRAMCacheConfig extends Config(
   new FireSimBoomDRAMCacheConfig)
 
 class FireSimBoomHwachaDRAMCacheConfig extends Config(
-  new WithHwachaNVMTEntries(80) ++
+  new WithHwachaNVMTEntries(64) ++
   new WithMultiRoCC ++
   new WithMultiRoCCHwacha(0) ++
-  new boom.common.WithRenumberHarts ++
   new hwacha.DefaultHwachaConfig ++
   new WithMemBenchKey ++
-  new WithDRAMCacheKey(8, 8, 2) ++
+  new WithDRAMCacheKey(7, 8, 2) ++
   new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
   new WithLargeL2 ++
@@ -414,7 +413,8 @@ class FireSimBoomHwachaDRAMCacheConfig extends Config(
   new WithDRAMCacheBridge)
 
 class FireSimBoomHwachaRocketDRAMCacheConfig extends Config(
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new boom.common.WithRenumberHarts ++
+  new freechips.rocketchip.subsystem.WithNMedCores(1) ++
   new FireSimBoomHwachaDRAMCacheConfig)
 
 //**********************************************************************************
