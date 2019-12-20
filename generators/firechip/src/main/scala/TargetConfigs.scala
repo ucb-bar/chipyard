@@ -11,7 +11,7 @@ import freechips.rocketchip.tilelink._
 import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.devices.debug.DebugModuleParams
+import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import boom.common.BoomTilesKey
 import testchipip.{BlockDeviceKey, BlockDeviceConfig, MemBenchKey, MemBenchParams}
@@ -63,7 +63,8 @@ class WithNICKey extends Config((site, here, up) => {
   case NICKey => NICConfig(
     inBufFlits = 8192,
     ctrlQueueDepth = 64,
-    usePauser = true)
+    usePauser = true,
+    checksumOffload = true)
 })
 
 class WithMemBladeKey(spanBytes: Option[Int] = None) extends Config(
@@ -153,7 +154,7 @@ class WithBoomL2TLBs(entries: Int) extends Config((site, here, up) => {
 
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
 class WithoutClockGating extends Config((site, here, up) => {
-  case DebugModuleParams => up(DebugModuleParams, site).copy(clockGate = false)
+  case DebugModuleKey => up(DebugModuleKey, site).map(_.copy(clockGate = false))
 })
 
 // Testing configurations
@@ -428,6 +429,18 @@ class FireSimRocketBoomConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++ // add a "big" rocket core
   new FireSimBoomConfig
 )
+
+//**********************************************************************************
+//* Gemmini Configurations
+//*********************************************************************************/
+
+// Gemmini systolic accelerator default config
+class FireSimRocketChipGemminiL2Config extends Config(
+  new WithInclusiveCache ++
+  new gemmini.DefaultGemminiConfig ++
+  new WithNBigCores(1) ++
+  new FireSimRocketChipConfig)
+
 
 //**********************************************************************************
 //* Supernode Configurations

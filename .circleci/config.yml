@@ -31,14 +31,14 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - run:
                 name: Building riscv-tools toolchain
                 command: |
                     .circleci/build-toolchains.sh riscv-tools
                 no_output_timeout: 120m
             - save_cache:
-                key: riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                key: riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
                 paths:
                     - "/home/riscvuser/riscv-tools-install"
     install-esp-toolchain:
@@ -55,14 +55,14 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - esp-tools-installed-v2-{{ checksum "../esp-tools.hash" }}
+                    - esp-tools-installed-v3-{{ checksum "../esp-tools.hash" }}
             - run:
                 name: Building esp-tools toolchain
                 command: |
                     .circleci/build-toolchains.sh esp-tools
                 no_output_timeout: 120m
             - save_cache:
-                key: esp-tools-installed-v2-{{ checksum "../esp-tools.hash" }}
+                key: esp-tools-installed-v3-{{ checksum "../esp-tools.hash" }}
                 paths:
                     - "/home/riscvuser/esp-tools-install"
     install-verilator:
@@ -105,7 +105,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - run:
                 name: Build extra tests
                 command: .circleci/build-extra-tests.sh
@@ -131,7 +131,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -160,7 +160,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -189,7 +189,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -218,7 +218,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -247,7 +247,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -276,7 +276,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - esp-tools-installed-v2-{{ checksum "../esp-tools.hash" }}
+                    - esp-tools-installed-v3-{{ checksum "../esp-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -286,6 +286,35 @@ jobs:
                 no_output_timeout: 120m
             - save_cache:
                 key: hwacha-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/home/riscvuser/project"
+    prepare-gemmini:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.12
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+        steps:
+            - add_ssh_keys:
+                fingerprints:
+                    - "3e:c3:02:5b:ed:64:8c:b7:b0:04:43:bc:83:43:73:1e"
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - esp-tools-installed-v2-{{ checksum "../esp-tools.hash" }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
+            - run:
+                name: Building the gemmini subproject using Verilator
+                command: .circleci/do-rtl-build.sh gemmini
+                no_output_timeout: 120m
+            - save_cache:
+                key: gemmini-{{ .Branch }}-{{ .Revision }}
                 paths:
                     - "/home/riscvuser/project"
     prepare-tracegen:
@@ -305,7 +334,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -334,7 +363,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -363,7 +392,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -389,7 +418,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
@@ -410,7 +439,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - example-{{ .Branch }}-{{ .Revision }}
@@ -434,7 +463,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - boomrocketexample-{{ .Branch }}-{{ .Revision }}
@@ -458,7 +487,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - boom-{{ .Branch }}-{{ .Revision }}
@@ -482,7 +511,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - rocketchip-{{ .Branch }}-{{ .Revision }}
@@ -506,7 +535,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - esp-tools-installed-v2-{{ checksum "../esp-tools.hash" }}
+                    - esp-tools-installed-v3-{{ checksum "../esp-tools.hash" }}
             - restore_cache:
                 keys:
                     - hwacha-{{ .Branch }}-{{ .Revision }}
@@ -516,6 +545,30 @@ jobs:
             - run:
                 name: Run hwacha tests
                 command: .circleci/run-tests.sh hwacha
+    gemmini-run-tests:
+        docker:
+            - image: riscvboom/riscvboom-images:0.0.12
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            TERM: dumb
+        steps:
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - esp-tools-installed-v2-{{ checksum "../esp-tools.hash" }}
+            - restore_cache:
+                keys:
+                    - gemmini-{{ .Branch }}-{{ .Revision }}
+            - restore_cache:
+                keys:
+                    - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
+            - run:
+                name: Run gemmini tests
+                command: .circleci/run-tests.sh gemmini
     tracegen-run-tests:
         docker:
             - image: riscvboom/riscvboom-images:0.0.12
@@ -530,7 +583,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - tracegen-{{ .Branch }}-{{ .Revision }}
@@ -554,7 +607,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - firesim-{{ .Branch }}-{{ .Revision }}
@@ -581,7 +634,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v3-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - fireboom-{{ .Branch }}-{{ .Revision }}
@@ -622,6 +675,8 @@ workflows:
             # Build verilator
             - install-verilator
 
+            - commit-on-master-check
+
             # Build extra tests
             - build-extra-tests:
                 requires:
@@ -654,6 +709,11 @@ workflows:
                     - install-verilator
 
             - prepare-hwacha:
+                requires:
+                    - install-esp-toolchain
+                    - install-verilator
+
+            - prepare-gemmini:
                 requires:
                     - install-esp-toolchain
                     - install-verilator
@@ -701,6 +761,10 @@ workflows:
             - hwacha-run-tests:
                 requires:
                     - prepare-hwacha
+
+            - gemmini-run-tests:
+                requires:
+                    - prepare-gemmini
 
             - tracegen-run-tests:
                 requires:

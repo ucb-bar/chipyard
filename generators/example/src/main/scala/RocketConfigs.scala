@@ -23,6 +23,16 @@ class HwachaRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+// DOC include start: GemminiRocketConfig
+class GemminiRocketConfig extends Config(
+  new WithTop ++
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new gemmini.DefaultGemminiConfig ++                        // use Gemmini systolic array GEMM accelerator
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+// DOC include end: GemminiRocketConfig
+
 class RoccRocketConfig extends Config(
   new WithTop ++
   new WithBootROM ++
@@ -122,11 +132,6 @@ class GB1MemoryRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
-class LoopbackNICRocketConfig extends Config(
-  new WithIceNIC ++
-  new WithLoopbackNICTop ++
-  new RocketConfig)
-
 class RemoteMemClientRocketConfig extends Config(
   new WithIceNIC ++
   new WithRemoteMemClient(1024) ++
@@ -164,3 +169,11 @@ class InitZeroRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: InitZeroRocketConfig
+
+class LoopbackNICRocketConfig extends Config(
+  new WithIceNIC ++
+  new WithLoopbackNICTop ++
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)

@@ -23,54 +23,93 @@ status=$(git submodule status)
 
 all_names=()
 
+
+search_submodule() {
+    echo "Running check on submodule $submodule in $dir"
+    hash=$(echo "$status" | grep "$dir.*$submodule " | awk '{print$1}' | grep -o "[[:alnum:]]*")
+    for branch in "${branches[@]}"
+    do
+        echo "Searching for $hash in origin/$branch of $submodule"
+        (git -C $dir/$submodule branch -r --contains "$hash" | grep "origin/$branch") && true # needs init'ed submodules
+        if [ $? -eq 0 ]
+        then
+            all_names+=("$dir/$submodule $hash 0")
+            return
+        fi
+    done
+    all_names+=("$dir/$submodule $hash 1")
+    return
+}
+
 search () {
     for submodule in "${submodules[@]}"
     do
-        echo "Running check on submodule $submodule in $dir"
-        hash=$(echo "$status" | grep "$dir.*$submodule " | awk '{print$1}' | grep -o "[[:alnum:]]*")
-        echo "Searching for $hash in origin/$branch of $submodule"
-        (git -C $dir/$submodule branch -r --contains "$hash" | grep "origin/$branch") && true # needs init'ed submodules
-        all_names+=("$dir/$submodule $hash $?")
+        search_submodule
     done
 }
 
-submodules=("boom" "hwacha" "icenet" "rocket-chip" "sifive-blocks" "sifive-cache" "testchipip")
+submodules=("boom" "hwacha" "icenet" "sha3" "rocket-chip" "sifive-blocks" "sifive-cache" "testchipip" "gemmini")
 dir="generators"
-branch="master"
-
+if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
+then
+    branches=("master")
+else
+    branches=("master" "dev")
+fi
 search
 
 submodules=("riscv-gnu-toolchain" "riscv-isa-sim" "riscv-pk" "riscv-tests")
 dir="toolchains/esp-tools"
-branch="master"
-
+branches=("master")
 search
 
 
 submodules=("riscv-gnu-toolchain" "riscv-isa-sim" "riscv-pk" "riscv-tests" "riscv-gnu-toolchain-prebuilt")
 dir="toolchains/riscv-tools"
-branch="master"
-
+branches=("master")
 search
 
 # riscv-openocd doesn't use its master branch
 submodules=("riscv-openocd")
 dir="toolchains/riscv-tools"
-branch="riscv"
-
+branches=("riscv")
 search
 
-submodules=("barstools" "chisel3" "firrtl" "torture")
-dir="tools"
-branch="master"
+submodules=("qemu")
+dir="toolchains"
+branches=("master")
+search
 
+submodules=("spec2017" "coremark")
+dir="software"
+branches=("master")
+search
+
+submodules=("axe" "barstools" "torture" "dsptools" "chisel-testers" "treadle" "firrtl-interpreter")
+dir="tools"
+if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
+then
+    branches=("master")
+else
+    branches=("master" "dev")
+fi
 search
 
 submodules=("firesim")
 dir="sims"
-branch="master"
-
+if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
+then
+    branches=("master")
+else
+    branches=("master" "dev")
+fi
 search
+
+submodules=("hammer")
+dir="vlsi"
+branches=("master")
+search
+
 
 # turn off verbose printing to make this easier to read
 set +x
@@ -90,3 +129,4 @@ do
 done
 
 echo "Done checking all submodules"
+
