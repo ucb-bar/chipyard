@@ -22,7 +22,7 @@ import icenet.{NICKey, NICConfig}
 import memblade.cache.{DRAMCacheKey, DRAMCacheConfig}
 import memblade.client.{RemoteMemClientKey, RemoteMemClientConfig}
 import memblade.manager.{MemBladeKey, MemBladeParams, MemBladeQueueParams}
-import memblade.prefetcher.{PrefetchRoCC, SoftPrefetchConfig, SequentialPrefetchConfig}
+import memblade.prefetcher.{SequentialPrefetchConfig}
 
 import scala.math.max
 
@@ -251,15 +251,6 @@ class WithDRAMCacheTop extends Config((site, here, up) => {
     top.connectSimAXICacheMem()
     top
   }
-})
-
-class WithPrefetchRoCC extends Config((site, here, up) => {
-  case BuildRoCC => Seq((p: Parameters) =>
-    LazyModule(new PrefetchRoCC(
-      opcodes = OpcodeSet.custom2,
-      soft = Some(new SoftPrefetchConfig(nMemXacts = 32)),
-      auto = Some(new SequentialPrefetchConfig(
-        nWays = 4, nBlocks = 8, maxTimeout = 750)))(p)))
 })
 
 // DOC include start: WithInitZero

@@ -127,22 +127,6 @@ class WithDRAMCacheExtentTableInit(suffix: Int = 0x0300) extends Config(
       extentTableInit = Seq.tabulate(16) { i => (suffix, i + 1) })
   })
 
-class WithPrefetchRoCC extends Config((site, here, up) => {
-  case BuildRoCC => Seq((q: Parameters) => {
-    implicit val p = q
-    implicit val valName = ValName("FireSim")
-    LazyModule(new PrefetchRoCC(
-      opcodes = OpcodeSet.custom2,
-      soft = Some(SoftPrefetchConfig(nMemXacts = 32, nBackends = 2)),
-      auto = Some(SequentialPrefetchConfig(
-        nWays = 4,
-        nBlocks = 28,
-        hitThreshold = 1,
-        maxTimeout = 8192,
-        lookAhead = 4))))
-  })
-})
-
 class WithMemBenchKey(nXacts: Int = 64) extends Config((site, here, up) => {
   case MemBenchKey => MemBenchParams(nXacts = nXacts)
 })
@@ -295,24 +279,7 @@ class FireSimRemoteMemClientDualCoreConfig extends Config(
 class FireSimRemoteMemClientQuadCoreConfig extends Config(
   new WithNBigCores(4) ++ new FireSimRemoteMemClientConfig)
 
-class FireSimPrefetcherConfig extends Config(
-  new WithPrefetchRoCC ++
-  new WithMemBenchKey ++
-  new WithPrefetchMiddleMan ++
-  new WithStandardL2 ++
-  new FireSimRocketChipConfig)
-
-class FireSimPrefetcherSingleCoreConfig extends Config(
-  new WithNBigCores(1) ++ new FireSimPrefetcherConfig)
-
-class FireSimPrefetcherDualCoreConfig extends Config(
-  new WithNBigCores(2) ++ new FireSimPrefetcherConfig)
-
-class FireSimPrefetcherQuadCoreConfig extends Config(
-  new WithNBigCores(4) ++ new FireSimPrefetcherConfig)
-
 class FireSimDRAMCacheConfig extends Config(
-  new WithPrefetchRoCC ++
   new WithMemBenchKey ++
   new WithDRAMCacheKey(4, 8) ++
   new WithExtMemSize(15L << 30) ++
@@ -413,24 +380,7 @@ class FireSimBoomDualCoreL2Config extends Config(
   new WithNDuplicatedBoomCores(2) ++
   new FireSimBoomL2Config)
 
-class FireSimBoomPrefetcherConfig extends Config(
-  new WithPrefetchRoCC ++
-  new WithMemBenchKey ++
-  new WithPrefetchMiddleMan ++
-  new WithLargeL2 ++
-  new FireSimBoomConfig)
-
-class FireSimBoomPrefetcherDualCoreConfig extends Config(
-  new WithNDuplicatedBoomCores(2) ++
-  new FireSimBoomPrefetcherConfig)
-
-class FireSimBoomRocketPrefetcherConfig extends Config(
-  new boom.common.WithRenumberHarts ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new FireSimBoomPrefetcherConfig)
-
 class FireSimBoomDRAMCacheConfig extends Config(
-  new WithPrefetchRoCC ++
   new WithMemBenchKey ++
   new WithDRAMCacheKey(8, 8, 2) ++
   new WithExtMemSize(14L << 30) ++

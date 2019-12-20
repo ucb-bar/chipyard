@@ -68,7 +68,6 @@ class DRAMCacheBoomConfig extends Config(
   new WithDRAMCache(
     sizeKB = 112, nTrackersPerBank = 4, nBanksPerChannel = 2) ++
   new WithMemBlade ++
-  new WithPrefetchRoCC ++
   new WithDRAMCacheTop ++
   new LargeBoomConfig)
 

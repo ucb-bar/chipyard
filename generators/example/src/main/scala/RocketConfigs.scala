@@ -141,7 +141,6 @@ class DRAMCacheRocketConfig extends Config(
     nTrackersPerBank = 4,
     nBanksPerChannel = 2) ++
   new WithMemBlade ++
-  new WithPrefetchRoCC ++
   new WithDRAMCacheTop ++
   new RocketConfig)
 
