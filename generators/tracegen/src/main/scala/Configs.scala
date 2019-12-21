@@ -10,7 +10,7 @@ import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.tile.{MaxHartIdBits, XLen}
 import scala.math.{max, min}
 
-class WithTraceGen(params: Seq[DCacheParams], boom_params: Seq[DCacheParams] = Nil, nReqs: Int = 8192)
+class WithTraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
     extends Config((site, here, up) => {
   case TraceGenKey => params.map { dcp => TraceGenParams(
     dcache = Some(dcp),
@@ -32,7 +32,12 @@ class WithTraceGen(params: Seq[DCacheParams], boom_params: Seq[DCacheParams] = N
     memStart = site(ExtMem).get.master.base,
     numGens = params.size)
   }
-  case BoomTraceGenKey => boom_params.map { dcp => TraceGenParams(
+  case MaxHartIdBits => log2Ceil(params.size + up(BoomTraceGenKey, site).length) max 1
+})
+
+class WithBoomTraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
+    extends Config((site, here, up) => {
+  case BoomTraceGenKey => params.map { dcp => TraceGenParams(
     dcache = Some(dcp),
     wordBits = site(XLen),
     addrBits = 48,
@@ -52,9 +57,9 @@ class WithTraceGen(params: Seq[DCacheParams], boom_params: Seq[DCacheParams] = N
     memStart = site(ExtMem).get.master.base,
     numGens = params.size)
   }
-  case MaxHartIdBits => if (params.size + boom_params.size == 1) 1
-      else log2Ceil(params.size + boom_params.size)
+  case MaxHartIdBits => log2Ceil(params.size + up(TraceGenKey, site).length) max 1
 })
+
 
 class TraceGenConfig extends Config(
   new WithTraceGen(List.fill(2) { DCacheParams(nMSHRs = 0, nSets = 16, nWays = 2) }) ++
@@ -65,7 +70,7 @@ class NonBlockingTraceGenConfig extends Config(
   new BaseConfig)
 
 class BoomTraceGenConfig extends Config(
-  new WithTraceGen(Nil, List.fill(2) { DCacheParams(nMSHRs = 8, nSets = 16, nWays = 2) }) ++
+  new WithBoomTraceGen(List.fill(2) { DCacheParams(nMSHRs = 8, nSets = 16, nWays = 2) }) ++
   new BaseConfig)
 
 class WithL2TraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
