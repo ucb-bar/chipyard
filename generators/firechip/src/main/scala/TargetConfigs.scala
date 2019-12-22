@@ -405,7 +405,7 @@ class FireSimBoomHwachaDRAMCacheConfig extends Config(
   new WithMultiRoCCHwacha(0) ++
   new hwacha.DefaultHwachaConfig ++
   new WithMemBenchKey ++
-  new WithDRAMCacheKey(7, 8, 2) ++
+  new WithDRAMCacheKey(6, 8, 2) ++
   new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
   new WithLargeL2 ++
@@ -414,7 +414,7 @@ class FireSimBoomHwachaDRAMCacheConfig extends Config(
 
 class FireSimBoomHwachaRocketDRAMCacheConfig extends Config(
   new boom.common.WithRenumberHarts ++
-  new freechips.rocketchip.subsystem.WithNMedCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new FireSimBoomHwachaDRAMCacheConfig)
 
 //**********************************************************************************
