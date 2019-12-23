@@ -326,6 +326,7 @@ class WithHwachaNVMTEntries(nVMT: Int) extends Config((site, here, up) => {
 
 class FireSimHwachaDRAMCacheConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new hwacha.WithNLanes(4) ++
   new hwacha.DefaultHwachaConfig ++
   new WithMemBenchKey ++
   new WithDRAMCacheKey(8, 8, 2) ++
