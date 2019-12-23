@@ -50,7 +50,7 @@ you can only use a single core and you cannot give the design an external DRAM.
 
 .. code-block:: scala
 
-    import freechips.rocketchip.subsystem.{WithNSmallCore, sWithNoMemPort, WithScratchpadsOnly}
+    import freechips.rocketchip.subsystem.{WithNSmallCore, WithNoMemPort, WithScratchpadsOnly}
 
     class SmallRocketConfig extends Config( 
         new WithTop ++                              // use default top 
