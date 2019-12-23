@@ -17,10 +17,10 @@ configure 4 KiB direct-mapped caches for L1I and L1D.
     import freechips.rocketchip.subsystem.{WithNMediumCores, WithNSmallCores}
 
     class SmallRocketConfig extends Config(
-    new WithTop ++                                       // use default top
-    new WithBootROM ++                                   // use default bootrom
-    new freechips.rocketchip.subsystem.WithNSmallCores(1) ++
-    new freechips.rocketchip.system.BaseConfig)
+        new WithTop ++                                       // use default top
+        new WithBootROM ++                                   // use default bootrom
+        new freechips.rocketchip.subsystem.WithNSmallCores(1) ++
+        new freechips.rocketchip.system.BaseConfig)
 
     class SmallRocketConfig extends Config(
         new WithNSmallCores(1) ++
