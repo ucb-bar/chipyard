@@ -3,7 +3,7 @@ package firesim.firesim
 import java.io.File
 
 import chisel3.util.{log2Up}
-import example.{WithMultiRoCC, WithMultiRoCCHwacha}
+import example.{WithMultiRoCC, WithMultiRoCCHwacha, WithHwachaConfPrec}
 import freechips.rocketchip.config.{Parameters, Config}
 import freechips.rocketchip.groundtest.TraceGenParams
 import freechips.rocketchip.tile._
@@ -183,7 +183,7 @@ class L2SingleBank512K extends freechips.rocketchip.subsystem.WithInclusiveCache
 *******************************************************************************/
 class FireSimRocketChipConfig extends Config(
   new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
+  new WithPeripheryBusFrequency(BigInt(3000000000L)) ++
   new WithExtMemSize(0x400000000L) ++ // 16GB
   new WithoutTLMonitors ++
   new WithUARTKey ++
@@ -244,26 +244,36 @@ class WithL2InnerExteriorBuffer(aDepth: Int, dDepth: Int) extends Config(
   })
 
 class WithStandardL2 extends Config(
-  new WithL2InnerExteriorBuffer(4, 2) ++
+  new WithL2InnerExteriorBuffer(2, 2) ++
   new WithInclusiveCache(
-    nBanks = 4,
-    capacityKB = 1024,
-    outerLatencyCycles = 32))
+    nBanks = 2,
+    nWays = 4,
+    capacityKB = 256,
+    outerLatencyCycles = 64))
 
 class WithLargeL2 extends Config(
   new WithL2InnerExteriorBuffer(2, 2) ++
   new WithInclusiveCache(
-    nBanks = 4,
-    capacityKB = 1024,
-    outerLatencyCycles = 16))
+    nBanks = 2,
+    nWays = 4,
+    capacityKB = 256,
+    outerLatencyCycles = 32))
 
 class WithPrefetchMiddleMan extends Config((site, here, up) => {
-  case PrefetchMiddleManKey => SequentialPrefetchConfig(
-    nWays = 4,
-    nBlocks = 32,
-    hitThreshold = 1,
-    maxTimeout = (1 << 30) - 1,
-    lookAhead = 4)
+  case PrefetchMiddleManKey => {
+    val l2key = site(BankedL2Key)
+    val ickey = site(InclusiveCacheKey)
+    val dckey = site(DRAMCacheKey)
+    val blockBeats = site(CacheBlockBytes) / site(SystemBusKey).beatBytes
+    val nMSHRs = (ickey.memCycles - 1) / blockBeats + 1
+    val nTrackers = dckey.nChannels * dckey.nBanksPerChannel * dckey.nTrackersPerBank
+    SequentialPrefetchConfig(
+      nWays = 4,
+      nBlocks = nTrackers / l2key.nBanks,
+      hitThreshold = 1,
+      maxTimeout = (1 << 30) - 1,
+      lookAhead = nMSHRs)
+  }
 })
 
 class FireSimRemoteMemClientConfig extends Config(
@@ -326,10 +336,12 @@ class WithHwachaNVMTEntries(nVMT: Int) extends Config((site, here, up) => {
 
 class FireSimHwachaDRAMCacheConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new hwacha.WithNLanes(4) ++
+  new WithHwachaNVMTEntries(64) ++
+  new hwacha.WithNLanes(2) ++
+  new WithHwachaConfPrec ++
   new hwacha.DefaultHwachaConfig ++
   new WithMemBenchKey ++
-  new WithDRAMCacheKey(8, 8, 2) ++
+  new WithDRAMCacheKey(6, 8, 2) ++
   new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
   new WithLargeL2 ++
@@ -341,7 +353,7 @@ class FireSimHwachaDRAMCacheDualCoreConfig extends Config(
 
 class FireSimBoomConfig extends Config(
   new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
+  new WithPeripheryBusFrequency(BigInt(3000000000L)) ++
   new WithExtMemSize(0x400000000L) ++ // 16GB
   new WithoutTLMonitors ++
   new WithUARTKey ++
@@ -402,6 +414,8 @@ class FireSimBoomRocketDRAMCacheConfig extends Config(
 
 class FireSimBoomHwachaDRAMCacheConfig extends Config(
   new WithHwachaNVMTEntries(64) ++
+  new hwacha.WithNLanes(2) ++
+  new WithHwachaConfPrec ++
   new WithMultiRoCC ++
   new WithMultiRoCCHwacha(0) ++
   new hwacha.DefaultHwachaConfig ++

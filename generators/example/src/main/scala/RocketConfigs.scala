@@ -23,6 +23,10 @@ class HwachaRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+class ConfPrecHwachaRocketConfig extends Config(
+  new WithHwachaConfPrec ++
+  new HwachaRocketConfig)
+
 // DOC include start: GemminiRocketConfig
 class GemminiRocketConfig extends Config(
   new WithTop ++

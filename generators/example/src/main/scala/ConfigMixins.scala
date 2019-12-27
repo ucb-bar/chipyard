@@ -295,3 +295,9 @@ class WithLoopbackNICTop extends Config((site, here, up) => {
     top
   }
 })
+
+class WithHwachaConfPrec extends Config((site, here, up) => {
+  case hwacha.HwachaConfPrec => true
+  // With ConfPrec on, there can 4x the number of elements per SRAM entry
+  case hwacha.HwachaMaxVLen => up(hwacha.HwachaMaxVLen) * 4
+})
