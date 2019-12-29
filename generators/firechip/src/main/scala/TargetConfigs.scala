@@ -246,18 +246,18 @@ class WithL2InnerExteriorBuffer(aDepth: Int, dDepth: Int) extends Config(
 class WithStandardL2 extends Config(
   new WithL2InnerExteriorBuffer(2, 2) ++
   new WithInclusiveCache(
-    nBanks = 2,
+    nBanks = 4,
     nWays = 4,
     capacityKB = 256,
-    outerLatencyCycles = 64))
+    outerLatencyCycles = 32))
 
 class WithLargeL2 extends Config(
   new WithL2InnerExteriorBuffer(2, 2) ++
   new WithInclusiveCache(
-    nBanks = 2,
+    nBanks = 4,
     nWays = 4,
     capacityKB = 256,
-    outerLatencyCycles = 32))
+    outerLatencyCycles = 16))
 
 class WithPrefetchMiddleMan extends Config((site, here, up) => {
   case PrefetchMiddleManKey => {
@@ -272,7 +272,7 @@ class WithPrefetchMiddleMan extends Config((site, here, up) => {
       nBlocks = nTrackers / l2key.nBanks,
       hitThreshold = 1,
       maxTimeout = (1 << 30) - 1,
-      lookAhead = nMSHRs)
+      lookAhead = nMSHRs-1)
   }
 })
 
@@ -341,7 +341,7 @@ class FireSimHwachaDRAMCacheConfig extends Config(
   new WithHwachaConfPrec ++
   new hwacha.DefaultHwachaConfig ++
   new WithMemBenchKey ++
-  new WithDRAMCacheKey(6, 8, 2) ++
+  new WithDRAMCacheKey(5, 8, 4) ++
   new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
   new WithLargeL2 ++
@@ -396,8 +396,8 @@ class FireSimBoomDualCoreL2Config extends Config(
 
 class FireSimBoomDRAMCacheConfig extends Config(
   new WithMemBenchKey ++
-  new WithDRAMCacheKey(8, 8, 2) ++
-  new WithExtMemSize(14L << 30) ++
+  new WithDRAMCacheKey(5, 8, 4) ++
+  new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
   new WithLargeL2 ++
   new FireSimBoomConfig ++
@@ -420,7 +420,7 @@ class FireSimBoomHwachaDRAMCacheConfig extends Config(
   new WithMultiRoCCHwacha(0) ++
   new hwacha.DefaultHwachaConfig ++
   new WithMemBenchKey ++
-  new WithDRAMCacheKey(6, 8, 2) ++
+  new WithDRAMCacheKey(5, 8, 4) ++
   new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
   new WithLargeL2 ++
