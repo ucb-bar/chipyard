@@ -9,12 +9,10 @@ The L1 Caches
 Each CPU tile has an L1 instruction cache and L1 data cache. The size and
 associativity of these caches can be configured. The default ``RocketConfig``
 uses 16 KiB, 4-way set-associative instruction and data caches. However,
-if you use the ``NMediumCores`` or ``NSmallCores`` configurations, you can
+if you use the ``NMedCores`` or ``NSmallCores`` configurations, you can
 configure 4 KiB direct-mapped caches for L1I and L1D.
 
 .. code-block:: scala
-
-    import freechips.rocketchip.subsystem.{WithNMediumCores, WithNSmallCores}
 
     class SmallRocketConfig extends Config(
         new WithTop ++                                       // use default top
@@ -23,11 +21,11 @@ configure 4 KiB direct-mapped caches for L1I and L1D.
         new freechips.rocketchip.system.BaseConfig)
 
     class SmallRocketConfig extends Config(
-        new WithNSmallCores(1) ++
+        new freechips.rocketchip.subsystem.WithNSmallCores(1) ++
         new RocketConfig)
 
     class MediumRocketConfig extends Config(
-        new WithNMediumCores(1) ++
+        new freechips.rocketchip.subsystem.WithNMedCores(1) ++
         new RocketConfig)
 
 If you only want to change the size or associativity, there are configuration
@@ -47,12 +45,11 @@ mixins for those too.
 You can also configure the L1 data cache as an data scratchpad instead.
 However, there are some limitations on this. If you are using a data scratchpad,
 you can only use a single core and you cannot give the design an external DRAM.
+Note that these configurations fully remove the L2 cache and mbus.
 
 .. code-block:: scala
 
-    import freechips.rocketchip.subsystem.{WithNSmallCore, WithNoMemPort, WithScratchpadsOnly}
-
-    class SmallRocketConfig extends Config( 
+    class SmallRocketConfigNoL2 extends Config( 
         new WithTop ++                              // use default top 
         new WithBootROM ++                          // use default bootrom 
         new freechips.rocketchip.subsystem.WithNSmallCores(1) ++ 
@@ -63,7 +60,7 @@ you can only use a single core and you cannot give the design an external DRAM.
         new freechips.rocketchip.subsystem.WithNMemoryChannels(0) ++ 
         new freechips.rocketchip.subsystem.WithNBanks(0) ++ 
         new freechips.rocketchip.subsystem.WithScratchpadsOnly ++ 
-        new SmallRocketConfig) 
+        new SmallRocketConfigNoL2) 
 
 This configuration fully removes the L2 cache and memory bus by setting the
 number of channels and number of banks to 0.
