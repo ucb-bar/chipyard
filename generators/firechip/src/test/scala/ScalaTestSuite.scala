@@ -140,7 +140,10 @@ class RamModelRocketF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimRoc
 class RamModelBoomF1Tests extends FireSimTestSuite("FireSimNoNIC", "FireSimBoomConfig", "BaseF1Config_MCRams")
 
 // Multiclock tests
-class RocketMulticlockF1Tests extends FireSimTestSuite("FireSimNoNIC", "HalfRateUncore_DDR3FRFCFSLLC4MB_FireSimRocketChipQuadCoreConfig", "BaseF1Config")
+class RocketMulticlockF1Tests extends FireSimTestSuite(
+  "FireSimNoNIC",
+  "HalfRateUncore_DDR3FRFCFSLLC4MB_FireSimRocketChipQuadCoreConfig",
+  "WithSynthAsserts_BaseF1Config")
 
 abstract class FireSimTraceGenTest(targetConfig: String, platformConfig: String)
     extends firesim.TestSuiteCommon with IsFireSimGeneratorLike {
