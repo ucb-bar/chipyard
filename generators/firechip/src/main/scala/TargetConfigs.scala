@@ -334,3 +334,16 @@ class WithRationalTiles(multiplier: Int, divisor: Int) extends Config((site, her
 })
 
 class HalfRateUncore extends WithRationalTiles(2,1)
+
+// Eagle X Mock Configs
+class EagleMockConfig(numCores: Int) extends Config(
+  new WithBootROM ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(nBanks = 16, capacityKB = 8192) ++
+  new hwacha.DefaultHwachaConfig ++                        // use Hwacha vector accelerator
+  new WithNBigCores(numCores) ++
+  new FireSimRocketChipConfig)
+
+class EX20C extends EagleMockConfig(20)
+class EX16C extends EagleMockConfig(16)
+class EX12C extends EagleMockConfig(12)
+class EX8C extends EagleMockConfig(8)
