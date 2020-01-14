@@ -38,12 +38,11 @@ debug: $(sim_debug)
 # import other necessary rules and variables
 #########################################################################################
 include $(base_dir)/common.mk
-include $(sim_dir)/verilator.mk
 
 #########################################################################################
 # verilator binary and flags
 #########################################################################################
-VERILATOR := $(INSTALLED_VERILATOR) --cc --exe
+VERILATOR := verilator --cc --exe
 
 CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -D__STDC_FORMAT_MACROS
 LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesvr -lpthread
@@ -82,13 +81,13 @@ model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
 # build makefile fragment that builds the verilator sim rules
 #########################################################################################
 
-$(model_mk): $(sim_vsrcs) $(sim_common_files) $(INSTALLED_VERILATOR)
+$(model_mk): $(sim_vsrcs) $(sim_common_files)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name)
 	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim) -Mdir $(model_dir) -CFLAGS "-include $(model_header)"
 	touch $@
 
-$(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(INSTALLED_VERILATOR)
+$(model_mk_debug): $(sim_vsrcs) $(sim_common_files)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name).debug
 	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim_debug) --trace -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
