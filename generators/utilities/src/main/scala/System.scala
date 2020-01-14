@@ -42,4 +42,5 @@ class SystemModule[+L <: System](_outer: L) extends SubsystemModuleImp(_outer)
   with CanHaveMasterAXI4MMIOPortModuleImp
   with CanHaveSlaveAXI4PortModuleImp
   with HasPeripheryBootROMModuleImp
+  with HasDRAMModuleImp
   with DontTouch

@@ -37,7 +37,7 @@ class TestHarness(implicit val p: Parameters) extends Module {
 
   val dut = p(BuildTop)(clock, reset.toBool, p, io.success)
   dut.connectSimUARTs()
-  dut.connectSimAXIMem()
+  dut.connectSimDRAM()
   dut.connectSimAXIMMIO()
   dut.dontTouchPorts()
   dut.tieOffInterrupts()

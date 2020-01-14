@@ -40,12 +40,22 @@ debug: $(sim_debug)
 include $(base_dir)/common.mk
 
 #########################################################################################
+# DRAMSim2
+#########################################################################################
+
+dramsim_dir := $(abspath ../firesim/sim/midas/src/main/cc/dramsim2)
+dramsim_lib := $(dramsim_dir)/libdramsim.so
+
+$(dramsim_lib):
+	$(MAKE) -C $(dir $@) $(notdir $@)
+
+#########################################################################################
 # verilator binary and flags
 #########################################################################################
 VERILATOR := verilator --cc --exe
 
-CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -D__STDC_FORMAT_MACROS
-LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesvr -lpthread
+CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -D__STDC_FORMAT_MACROS -I$(dramsim_dir)
+LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -L$(dramsim_dir) -Wl,-rpath,$(dramsim_dir) -lfesvr -lpthread -ldramsim
 
 VERILATOR_CC_OPTS = \
 	-O3 \
@@ -65,6 +75,8 @@ VERILATOR_NONCC_OPTS = \
 
 VERILATOR_OPTS = $(VERILATOR_CC_OPTS) $(VERILATOR_NONCC_OPTS)
 
+SIM_FLAGS += +dramsim
+
 #########################################################################################
 # verilator build paths and file names
 #########################################################################################
@@ -81,13 +93,13 @@ model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
 # build makefile fragment that builds the verilator sim rules
 #########################################################################################
 
-$(model_mk): $(sim_vsrcs) $(sim_common_files)
+$(model_mk): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name)
 	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim) -Mdir $(model_dir) -CFLAGS "-include $(model_header)"
 	touch $@
 
-$(model_mk_debug): $(sim_vsrcs) $(sim_common_files)
+$(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name).debug
 	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim_debug) --trace -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
@@ -116,4 +128,5 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 #########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(gen_dir) $(sim_prefix)-*
+	rm -rf $(gen_dir) $(sim_prefix)-* dramsim*.log
+	$(MAKE) -C $(dramsim_dir) clean

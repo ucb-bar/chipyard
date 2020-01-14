@@ -35,6 +35,7 @@
 extern tsi_t* tsi;
 extern dtm_t* dtm;
 extern remote_bitbang_t * jtag;
+extern bool dramsim;
 
 static uint64_t trace_count = 0;
 bool verbose;
@@ -136,13 +137,14 @@ int main(int argc, char** argv)
       {"vcd",         required_argument, 0, 'v' },
       {"dump-start",  required_argument, 0, 'x' },
 #endif
+      {"dramsim",     no_argument,       0, 'D' },
       HTIF_LONG_OPTIONS
     };
     int option_index = 0;
 #if VM_TRACE
-    int c = getopt_long(argc, argv, "-chm:s:r:v:Vx:", long_options, &option_index);
+    int c = getopt_long(argc, argv, "-chm:s:r:v:Vx:D", long_options, &option_index);
 #else
-    int c = getopt_long(argc, argv, "-chm:s:r:V", long_options, &option_index);
+    int c = getopt_long(argc, argv, "-chm:s:r:VD", long_options, &option_index);
 #endif
     if (c == -1) break;
  retry:
@@ -166,6 +168,7 @@ int main(int argc, char** argv)
       }
       case 'x': start = atoll(optarg);      break;
 #endif
+      case 'D': dramsim = 1;                break;
       // Process legacy '+' EMULATOR arguments by replacing them with
       // their getopt equivalents
       case 1: {
@@ -188,6 +191,8 @@ int main(int argc, char** argv)
 #endif
         else if (arg.substr(0, 12) == "+cycle-count")
           c = 'c';
+        else if (arg == "+dramsim")
+          c = 'D';
         // If we don't find a legacy '+' EMULATOR argument, it still could be
         // a VERILOG_PLUSARG and not an error.
         else if (verilog_plusargs_legal) {
