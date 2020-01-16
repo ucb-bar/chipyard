@@ -13,6 +13,7 @@ import testchipip._
 import utilities.{System, SystemModule}
 
 import sifive.blocks.devices.gpio._
+import sifive.blocks.devices.uart._
 
 import icenet.{HasPeripheryIceNIC, HasPeripheryIceNICModuleImp}
 
@@ -22,13 +23,15 @@ import icenet.{HasPeripheryIceNIC, HasPeripheryIceNICModuleImp}
 
 class Top(implicit p: Parameters) extends System
   with HasNoDebug
-  with HasPeripherySerial {
+  with HasPeripherySerial
+  with CanHavePeripheryUARTWithAdapter {
   override lazy val module = new TopModule(this)
 }
 
 class TopModule[+L <: Top](l: L) extends SystemModule(l)
   with HasNoDebugModuleImp
   with HasPeripherySerialModuleImp
+  with CanHavePeripheryUARTWithAdapterImp
   with DontTouch
 
 //---------------------------------------------------------------------------------------------------------
