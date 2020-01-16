@@ -16,6 +16,7 @@ Hit next to get started!
    :caption: Chipyard Basics:
 
    Chipyard-Components
+   Development-Ecosystem
    Configs-Parameters-Mixins
    Initial-Repo-Setup
 

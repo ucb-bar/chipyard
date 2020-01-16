@@ -7,8 +7,10 @@ import freechips.rocketchip.config.{Field, Parameters, Config}
 import freechips.rocketchip.subsystem.{SystemBusKey, RocketTilesKey, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, CacheBlockBytes}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.tile.{RocketTileParams, MaxHartIdBits, XLen, BuildRoCC, TileKey, LazyRoCC}
+import freechips.rocketchip.devices.debug.{Debug}
+import freechips.rocketchip.tile.{XLen, BuildRoCC, TileKey, LazyRoCC, RocketTileParams, MaxHartIdBits}
 import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams}
+import freechips.rocketchip.util.{AsyncResetReg}
 
 import boom.common.{BoomTilesKey}
 
@@ -33,109 +35,21 @@ import ConfigValName._
 // Common Parameter Mixins
 // -----------------------
 
-/**
- * Class to specify where the BootRom file is (from `rebar` top)
- */
 class WithBootROM extends Config((site, here, up) => {
   case BootROMParams => BootROMParams(
     contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img")
 })
 
-// DOC include start: WithGPIO
-/**
- * Class to add in GPIO
- */
+// DOC include start: gpio mixin
 class WithGPIO extends Config((site, here, up) => {
   case PeripheryGPIOKey => Seq(
     GPIOParams(address = 0x10012000, width = 4, includeIOF = false))
-})
-// DOC include end: WithGPIO
-
-/**
- * Class to add in UART
- */
-class WithUART extends Config((site, here, up) => {
-  case PeripheryUARTKey => Seq(
-    UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256))
-})
-
-// -----------------------------------------------
-// BOOM and/or Rocket Top Level System Parameter Mixins
-// -----------------------------------------------
-
-/**
- * Class to specify a "plain" top level BOOM and/or Rocket system
- */
-class WithTop extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    Module(LazyModule(new Top()(p)).module)
-  }
-})
-
-/**
- * Class to specify a top level BOOM and/or Rocket system with DTM
- */
-class WithDTMTop extends Config((site, here, up) => {
-  case BuildTopWithDTM => (clock: Clock, reset: Bool, p: Parameters) => {
-    Module(LazyModule(new TopWithDTM()(p)).module)
-  }
-})
-
-/**
- * Class to specify a top level BOOM and/or Rocket system with PWM
- */
-// DOC include start: WithPWMTop
-class WithPWMTop extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new TopWithPWMTL()(p)).module)
-})
-// DOC include end: WithPWMTop
-
-/**
- * Class to specify a top level BOOM and/or Rocket system with a PWM AXI4
- */
-class WithPWMAXI4Top extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new TopWithPWMAXI4()(p)).module)
-})
-
-/**
- * Class to specify a top level BOOM and/or Rocket system with a TL-attached GCD device
- */
-class WithGCDTop extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new TopWithGCD()(p)).module)
-})
-
-/**
- * Class to specify a top level BOOM and/or Rocket system with a block device
- */
-class WithBlockDeviceModelTop extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new TopWithBlockDevice()(p)).module)
-    top.connectBlockDeviceModel()
-    top
-  }
-})
-
-/**
- * Class to specify a top level BOOM and/or Rocket system with a simulator block device
- */
-class WithSimBlockDeviceTop extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new TopWithBlockDevice()(p)).module)
-    top.connectSimBlockDevice(clock, reset)
-    top
-  }
-})
-
-// DOC include start: WithGPIOTop
-/**
- * Class to specify a top level BOOM and/or Rocket system with GPIO
- */
-class WithGPIOTop extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new TopWithGPIO()(p)).module)
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters, success: Bool) => {
+    val top = up(BuildTop, site)(clock, reset, p, success)
+    // TODO: Currently FIRRTL will error if the GPIO input
+    // pins are unconnected, so tie them to 0.
+    // In future IO cell blackboxes will replace this with
+    // more correct functionality
     for (gpio <- top.gpio) {
       for (pin <- gpio.pins) {
         pin.i.ival := false.B
@@ -144,7 +58,68 @@ class WithGPIOTop extends Config((site, here, up) => {
     top
   }
 })
-// DOC include end: WithGPIOTop
+// DOC include end: gpio mixin
+
+/**
+ * Class to add in UAbRT
+ */
+class WithUART extends Config((site, here, up) => {
+  case PeripheryUARTKey => Seq(
+    UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256))
+})
+
+
+class WithNoGPIO extends Config((site, here, up) => {
+  case PeripheryGPIOKey => Seq()
+})
+
+// DOC include start: tsi mixin
+class WithTSI extends Config((site, here, up) => {
+  case SerialKey => true
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters, success: Bool) => {
+    val top = up(BuildTop, site)(clock, reset, p, success)
+    success := top.connectSimSerial()
+    top
+  }
+})
+// DOC include end: tsi mixin
+
+class WithDTM extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters, success: Bool) => {
+    val top = up(BuildTop, site)(clock, reset, p, success)
+    top.reset := reset.asBool | top.debug.map { debug => AsyncResetReg(debug.ndreset) }.getOrElse(false.B)
+    Debug.connectDebug(top.debug, top.psd, clock, reset.asBool, success)(p)
+    top
+  }
+})
+
+// DOC include start: GCD mixin
+class WithGCD(useAXI4: Boolean, useBlackBox: Boolean) extends Config((site, here, up) => {
+  case GCDKey => Some(GCDParams(useAXI4 = useAXI4, useBlackBox = useBlackBox))
+})
+// DOC include end: GCD mixin
+
+class WithBlockDeviceModel extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters, success: Bool) => {
+    val top = up(BuildTop, site)(clock, reset, p, success)
+    top.connectBlockDeviceModel()
+    top
+  }
+})
+
+class WithSimBlockDevice extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters, success: Bool) => {
+    val top = up(BuildTop, site)(clock, reset, p, success)
+    top.connectSimBlockDevice(clock, reset)
+    top
+  }
+})
+
+// DOC include start: WithInitZero
+class WithInitZero(base: BigInt, size: BigInt) extends Config((site, here, up) => {
+  case InitZeroKey => Some(InitZeroConfig(base, size))
+})
+// DOC include end: WithInitZero
 
 // ------------------
 // Multi-RoCC Support
@@ -184,16 +159,6 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
   }
 })
 
-// DOC include start: WithInitZero
-class WithInitZero(base: BigInt, size: BigInt) extends Config((site, here, up) => {
-  case InitZeroKey => InitZeroConfig(base, size)
-})
-
-class WithInitZeroTop extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new TopWithInitZero()(p)).module)
-})
-// DOC include end: WithInitZero
 
 /**
  * Mixin to add a small Rocket core to the system as a "control" core.
@@ -227,15 +192,15 @@ class WithControlCore extends Config((site, here, up) => {
 
 class WithIceNIC(inBufFlits: Int = 1800, usePauser: Boolean = false)
     extends Config((site, here, up) => {
-  case NICKey => NICConfig(
+  case NICKey => Some(NICConfig(
     inBufFlits = inBufFlits,
     usePauser = usePauser,
-    checksumOffload = true)
+    checksumOffload = true))
 })
 
-class WithLoopbackNICTop extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) => {
-    val top = Module(LazyModule(new TopWithIceNIC()(p)).module)
+class WithLoopbackNIC extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters, success: Bool) => {
+    val top = up(BuildTop, site)(clock, reset, p, success)
     top.connectNicLoopback()
     top
   }

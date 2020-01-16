@@ -56,7 +56,7 @@ The ``software`` directory of the generator includes the aforementioned library 
 The Gemmini generator generates a C header file based on the generator parameters. This header files gets compiled together with the matrix multiplication library to tune library performance. The generated header file can be found under ``software/gemmini-rocc-tests/include/gemmini_params.h``
 
 Build and Run Gemmini Tests
-^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To build Gemmini tests:
 
