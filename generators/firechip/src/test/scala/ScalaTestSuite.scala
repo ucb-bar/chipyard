@@ -106,14 +106,17 @@ abstract class FireSimTestSuite(
   def diffTracelog(verilatedLog: String) {
     behavior of "captured instruction trace"
     it should s"match the chisel printf in ${verilatedLog}" in {
-      def getLines(file: File, dropLines: Int = 0): Seq[String] = {
+      def getLines(file: File, dropLines: Int = 0, prefixFilter: String = ""): Seq[String] = {
         val lines = Source.fromFile(file).getLines.toList
-        lines.filter(_.startsWith("TRACEPORT")).drop(dropLines)
+        lines.filter(_.startsWith(prefixFilter))
+             .drop(dropLines)
+             .map(_.stripPrefix(prefixFilter))
       }
       val resetLength = 51
-      val verilatedOutput  = getLines(new File(outDir,  s"/${verilatedLog}"))
-      val synthPrintOutput = getLines(new File(genDir, s"/TRACEFILE"), resetLength)
-      assert(math.abs(verilatedOutput.size - synthPrintOutput.size) <= 1, "Outputs differ in length")
+      val verilatedOutput  = getLines(new File(outDir,  s"/${verilatedLog}"), prefixFilter = "TRACEPORT 0: ")
+      val synthPrintOutput = getLines(new File(genDir, s"/TRACEFILE"), dropLines = resetLength)
+      assert(math.abs(verilatedOutput.size - synthPrintOutput.size) <= 1,
+        s"\nPrintf Length: ${verilatedOutput.size}, Trace Length: ${synthPrintOutput.size}")
       assert(verilatedOutput.nonEmpty)
       for ( (vPrint, sPrint) <- verilatedOutput.zip(synthPrintOutput) ) {
         assert(vPrint == sPrint)
@@ -125,7 +128,7 @@ abstract class FireSimTestSuite(
   mkdirs
   elaborate
   generateTestSuiteMakefrags
-  runTest("verilator", "rv64ui-p-simple", false, Seq(s"""EXTRA_SIM_ARGS=+trace-test-output0"""))
+  runTest("verilator", "rv64ui-p-simple", false, Seq(s"""EXTRA_SIM_ARGS=+trace-humanreadable0"""))
   diffTracelog("rv64ui-p-simple.out")
   runSuite("verilator")(benchmarks)
   runSuite("verilator")(FastBlockdevTests)

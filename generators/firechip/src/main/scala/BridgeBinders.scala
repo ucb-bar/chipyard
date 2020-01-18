@@ -61,9 +61,7 @@ class WithFASEDBridge extends RegisterBridgeBinder({
     }).toSeq
 })
 
-class WithTracerVBridge extends RegisterBridgeBinder({
-  case target: HasTraceIOImp => TracerVBridge(target.traceIO)(target.p)
-})
+class WithTracerVBridge extends Config((_,_,_) => { case InstantiateTracerVBridges => true })
 
 class WithTraceGenBridge extends RegisterBridgeBinder({
   case target: HasTraceGenTilesModuleImp =>

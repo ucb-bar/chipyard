@@ -12,7 +12,7 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.tile.RocketTile
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.rocket.TracedInstruction
-import firesim.bridges.{TraceOutputTop, DeclockedTracedInstruction}
+import firesim.bridges.{TracerVBridge}
 import firesim.util.{HasAdditionalClocks, FireSimClockKey}
 
 import midas.targetutils.MemModelAnnotation
@@ -22,34 +22,33 @@ import boom.common.BoomTile
 /* Wires out tile trace ports to the top; and wraps them in a Bundle that the
  * TracerV bridge can match on.
  */
-object PrintTracePort extends Field[Boolean](false)
+case object PrintTracePort extends Field[Boolean](false)
+case object InstantiateTracerVBridges extends Field[Boolean](false)
 
 trait HasTraceIO {
   this: HasTiles =>
   val module: HasTraceIOImp
 
   // Bind all the trace nodes to a BB; we'll use this to generate the IO in the imp
-  val traceNexus = BundleBridgeNexus[Vec[TracedInstruction]]
-  val tileTraceNodes = tiles.map(tile => tile.traceNode)
-  tileTraceNodes foreach { traceNexus := _ }
+  val tileTraceNodes = tiles.map({ tile =>
+    val node = BundleBridgeSink[Vec[TracedInstruction]]
+    node := tile.traceNode
+    node
+  })
 }
 
 trait HasTraceIOImp extends LazyModuleImp {
   val outer: HasTraceIO
-
-  val traceIO = IO(Output(new TraceOutputTop(
-    DeclockedTracedInstruction.fromNode(outer.traceNexus.in))))
-  (traceIO.traces zip outer.traceNexus.in).foreach({ case (port, (tileTrace, _)) =>
-    port := DeclockedTracedInstruction.fromVec(tileTrace)
+  outer.tileTraceNodes.zipWithIndex.foreach({ case (node, idx) =>
+    if (p(InstantiateTracerVBridges)) {
+      val b = TracerVBridge(node.bundle)
+      if (p(PrintTracePort)) {
+        val traceprint = WireDefault(0.U(512.W))
+        traceprint := b.io.traces.asUInt
+        printf(s"TRACEPORT ${idx}: %x\n", traceprint)
+      }
+    }
   })
-  traceIO.clock := clock
-
-  // Enabled to test TracerV trace capture
-  if (p(PrintTracePort)) {
-    val traceprint = Wire(UInt(512.W))
-    traceprint := Cat(traceIO.traces.map(_.asUInt))
-    printf("TRACEPORT: %x\n", traceprint)
-  }
 }
 
 trait CanHaveMultiCycleRegfileImp {
