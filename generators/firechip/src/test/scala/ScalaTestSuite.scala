@@ -113,7 +113,8 @@ abstract class FireSimTestSuite(
         case line if line.startsWith(printfPrefix) => line.stripPrefix(printfPrefix) })
 
       // Last bit indicates the core was under reset; reject those tokens
-      val synthPrintOutput = getLines(new File(genDir, s"/TRACEFILE")).filter(line =>
+      // Tail to drop the first token which is initialized in the channel
+      val synthPrintOutput = getLines(new File(genDir, s"/TRACEFILE")).tail.filter(line =>
         (line.last.toInt & 1) == 0)
 
       assert(math.abs(verilatedOutput.size - synthPrintOutput.size) <= 1,
