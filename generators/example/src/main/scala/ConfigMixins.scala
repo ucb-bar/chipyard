@@ -61,7 +61,7 @@ class WithGPIO extends Config((site, here, up) => {
 // DOC include end: gpio mixin
 
 /**
- * Class to add in UAbRT
+ * Class to add in UART
  */
 class WithUART extends Config((site, here, up) => {
   case PeripheryUARTKey => Seq(
