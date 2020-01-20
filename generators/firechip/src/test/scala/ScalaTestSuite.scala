@@ -106,15 +106,16 @@ abstract class FireSimTestSuite(
   def diffTracelog(verilatedLog: String) {
     behavior of "captured instruction trace"
     it should s"match the chisel printf in ${verilatedLog}" in {
-      def getLines(file: File, dropLines: Int = 0, prefixFilter: String = ""): Seq[String] = {
-        val lines = Source.fromFile(file).getLines.toList
-        lines.filter(_.startsWith(prefixFilter))
-             .drop(dropLines)
-             .map(_.stripPrefix(prefixFilter))
-      }
-      val resetLength = 51
-      val verilatedOutput  = getLines(new File(outDir,  s"/${verilatedLog}"), prefixFilter = "TRACEPORT 0: ")
-      val synthPrintOutput = getLines(new File(genDir, s"/TRACEFILE"), dropLines = resetLength)
+      def getLines(file: File): Seq[String] = Source.fromFile(file).getLines.toList
+
+      val printfPrefix =  "TRACEPORT 0: "
+      val verilatedOutput  = getLines(new File(outDir,  s"/${verilatedLog}")).collect({
+        case line if line.startsWith(printfPrefix) => line.stripPrefix(printfPrefix) })
+
+      // Last bit indicates the core was under reset; reject those tokens
+      val synthPrintOutput = getLines(new File(genDir, s"/TRACEFILE")).filter(line =>
+        (line.last.toInt & 1) == 0)
+
       assert(math.abs(verilatedOutput.size - synthPrintOutput.size) <= 1,
         s"\nPrintf Length: ${verilatedOutput.size}, Trace Length: ${synthPrintOutput.size}")
       assert(verilatedOutput.nonEmpty)

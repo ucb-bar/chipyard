@@ -42,10 +42,13 @@ trait HasTraceIOImp extends LazyModuleImp {
   outer.tileTraceNodes.zipWithIndex.foreach({ case (node, idx) =>
     if (p(InstantiateTracerVBridges)) {
       val b = TracerVBridge(node.bundle)
+      // Used for verifying the TracerV bridge
       if (p(PrintTracePort)) {
-        val traceprint = WireDefault(0.U(512.W))
-        traceprint := b.io.traces.asUInt
-        printf(s"TRACEPORT ${idx}: %x\n", traceprint)
+        withClockAndReset(node.bundle.head.clock, node.bundle.head.reset) {
+          val traceprint = WireDefault(0.U(512.W))
+          traceprint := b.io.traces.asUInt
+          printf(s"TRACEPORT ${idx}: %x\n", traceprint)
+        }
       }
     }
   })
