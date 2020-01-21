@@ -40,7 +40,7 @@ $(sim_files): $(call lookup_scala_srcs,$(base_dir)/generators/utilities/src/main
 #########################################################################################
 .INTERMEDIATE: generator_temp
 $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
-	touch $@
+	@echo "" > /dev/null
 
 generator_temp: $(SCALA_SOURCES) $(sim_files)
 	mkdir -p $(build_dir)
@@ -62,7 +62,7 @@ HARNESS_TARGETS = $(HARNESS_FILE) $(HARNESS_SMEMS_CONF) $(HARNESS_ANNO) $(HARNES
 # NOTE: These *_temp intermediate targets will get removed in favor of make 4.3 grouped targets (&: operator)
 .INTERMEDIATE: firrtl_temp
 $(TOP_TARGETS) $(HARNESS_TARGETS): firrtl_temp
-	touch $@
+	@echo "" > /dev/null
 
 firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE)
 	cd $(base_dir) && $(SBT) "project tapeout" "runMain barstools.tapeout.transforms.GenerateTopAndHarness -o $(TOP_FILE) -tho $(HARNESS_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(VLOG_MODEL) -faf $(ANNO_FILE) -tsaof $(TOP_ANNO) -tdf $(sim_top_blackboxes) -tsf $(TOP_FIR) -thaof $(HARNESS_ANNO) -hdf $(sim_harness_blackboxes) -thf $(HARNESS_FIR) $(REPL_SEQ_MEM) $(HARNESS_CONF_FLAGS) -td $(build_dir)" && touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
@@ -72,7 +72,7 @@ firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE)
 MACROCOMPILER_MODE ?= --mode synflops
 .INTERMEDIATE: top_macro_temp
 $(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR): top_macro_temp
-	touch $@
+	@echo "" > /dev/null
 
 top_macro_temp: $(TOP_SMEMS_CONF)
 	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE)"
@@ -80,7 +80,7 @@ top_macro_temp: $(TOP_SMEMS_CONF)
 HARNESS_MACROCOMPILER_MODE = --mode synflops
 .INTERMEDIATE: harness_macro_temp
 $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): harness_macro_temp
-	touch $@
+	@echo "" > /dev/null
 
 harness_macro_temp: $(HARNESS_SMEMS_CONF)
 	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE)"
