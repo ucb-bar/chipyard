@@ -64,7 +64,7 @@ branches=("master")
 search
 
 
-submodules=("riscv-gnu-toolchain" "riscv-isa-sim" "riscv-pk" "riscv-tests" "riscv-gnu-toolchain-prebuilt")
+submodules=("riscv-gnu-toolchain" "riscv-isa-sim" "riscv-pk" "riscv-tests")
 dir="toolchains/riscv-tools"
 branches=("master")
 search
