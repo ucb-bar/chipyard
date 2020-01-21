@@ -46,7 +46,8 @@ trait HasTraceIOImp extends LazyModuleImp {
       if (p(PrintTracePort)) {
         withClockAndReset(node.bundle.head.clock, node.bundle.head.reset) {
           val traceprint = WireDefault(0.U(512.W))
-          traceprint := b.io.traces.asUInt
+          // The reverse is here to match the behavior the Cat used in the bridge
+          traceprint := b.io.traces.reverse.asUInt
           printf(s"TRACEPORT ${idx}: %x\n", traceprint)
         }
       }

@@ -76,6 +76,10 @@ class WithBoomL2TLBs(entries: Int) extends Config((site, here, up) => {
   ))
 })
 
+class WithBoomEnableTrace extends Config((site, here, up) => {
+  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
+})
+
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
 class WithoutClockGating extends Config((site, here, up) => {
   case DebugModuleParams => up(DebugModuleParams, site).copy(clockGate = false)
@@ -170,6 +174,7 @@ class FireSimBoomConfig extends Config(
   new WithUARTKey ++
   new WithNICKey ++
   new WithBlockDevice ++
+  new WithBoomEnableTrace ++
   new WithBoomL2TLBs(1024) ++
   new WithoutClockGating ++
   new WithDefaultMemModel ++
