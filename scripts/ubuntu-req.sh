@@ -14,6 +14,6 @@ sudo apt-get install -y python3.6 patch diffstat texi2html texinfo subversion ch
 # deps for qemu
 sudo apt-get install -y libgtk-3-dev
 # deps for firemarshal
-sudo apt-get install -y python3-pip python3.6-dev rsync
+sudo apt-get install -y python3-pip python3.6-dev rsync libguestfs-tools expat ctags
 # install DTC
 sudo apt-get install -y device-tree-compiler

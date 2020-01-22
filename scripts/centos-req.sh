@@ -10,7 +10,7 @@ sudo yum install -y python36 patch diffstat texi2html texinfo subversion chrpath
 # deps for qemu
 sudo yum install -y gtk3-devel
 # deps for firemarshal
-sudo yum install -y python36-pip python36-devel rsync
+sudo yum install -y python36-pip python36-devel rsync libguestfs-tools makeinfo yac bison flex expat glib-devel ctags
 # Install GNU make 4.x (needed to cross-compile glibc 2.28+)
 sudo yum install -y centos-release-scl
 sudo yum install -y devtoolset-8-make
