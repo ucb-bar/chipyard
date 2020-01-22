@@ -30,7 +30,8 @@ class Top(implicit p: Parameters) extends System
   with CanHavePeripheryInitZero // Enables optionally adding the initzero example widget
   with CanHavePeripheryGCD // Enables optionally adding the GCD example widget
   with CanHavePeripherySerial // Enables optionally adding the TSI serial-adapter and port
-  with CanHavePeripheryIceNIC // Enables optionally adding the IceNIC for firesim
+  with CanHavePeripheryIceNIC // Enables optionally adding the IceNIC for FireSim
+  with CanHaveBackingScratchpad // Enables optionally adding a backing scratchpad
 {
   override lazy val module = new TopModule(this)
 }

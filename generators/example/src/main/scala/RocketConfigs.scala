@@ -216,11 +216,24 @@ class InitZeroRocketConfig extends Config(
 
 class LoopbackNICRocketConfig extends Config(
   new WithTSI ++
-  new WithIceNIC ++
+  new WithIceNIC ++                                         // add an IceNIC
   new WithNoGPIO ++
-  new WithLoopbackNIC ++
+  new WithLoopbackNIC ++                                    // loopback the IceNIC
   new WithBootROM ++
   new WithUART ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class ScratchpadRocketConfig extends Config(
+  new WithTSI ++
+  new WithNoGPIO ++
+  new WithBootROM ++
+  new WithUART ++
+  new WithBackingScratchpad ++                              // add backing scratchpad
+  new freechips.rocketchip.subsystem.WithNoMemPort ++       // remove offchip mem port
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
