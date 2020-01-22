@@ -341,7 +341,7 @@ class FireSimHwachaDRAMCacheConfig extends Config(
   new WithHwachaConfPrec ++
   new hwacha.DefaultHwachaConfig ++
   new WithMemBenchKey ++
-  new WithDRAMCacheKey(5, 8, 4) ++
+  new WithDRAMCacheKey(4, 8, 4) ++
   new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
   new WithLargeL2 ++
@@ -396,7 +396,7 @@ class FireSimBoomDualCoreL2Config extends Config(
 
 class FireSimBoomDRAMCacheConfig extends Config(
   new WithMemBenchKey ++
-  new WithDRAMCacheKey(5, 8, 4) ++
+  new WithDRAMCacheKey(4, 8, 4) ++
   new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
   new WithLargeL2 ++
@@ -420,7 +420,7 @@ class FireSimBoomHwachaDRAMCacheConfig extends Config(
   new WithMultiRoCCHwacha(0) ++
   new hwacha.DefaultHwachaConfig ++
   new WithMemBenchKey ++
-  new WithDRAMCacheKey(5, 8, 4) ++
+  new WithDRAMCacheKey(4, 8, 4) ++
   new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
   new WithLargeL2 ++
