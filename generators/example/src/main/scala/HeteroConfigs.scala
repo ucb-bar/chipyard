@@ -9,10 +9,13 @@ import freechips.rocketchip.config.{Config}
 // ---------------------
 
 class LargeBoomAndRocketConfig extends Config(
-  new WithTop ++                                           // default top
+  new WithTSI ++                                           // use testchipip serial offchip link
+  new WithNoGPIO ++                                        // no top-level GPIO pins (overrides default set in sifive-blocks)
   new WithBootROM ++                                       // default bootrom
   new WithUART ++                                          // add a UART
   new freechips.rocketchip.subsystem.WithInclusiveCache ++ // use SiFive l2
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++     // no top-level MMIO master port (overrides default set in rocketchip)
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++    // no top-level MMIO slave port (overrides default set in rocketchip)
   new boom.common.WithRenumberHarts ++                     // avoid hartid overlap
   new boom.common.WithLargeBooms ++                        // 3-wide boom
   new boom.common.WithNBoomCores(1) ++                     // single-core boom
@@ -20,10 +23,13 @@ class LargeBoomAndRocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)              // "base" rocketchip system
 
 class SmallBoomAndRocketConfig extends Config(
-  new WithTop ++
+  new WithTSI ++
+  new WithNoGPIO ++
   new WithBootROM ++
   new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new boom.common.WithRenumberHarts ++
   new boom.common.WithSmallBooms ++                        // 1-wide boom
   new boom.common.WithNBoomCores(1) ++
@@ -32,11 +38,14 @@ class SmallBoomAndRocketConfig extends Config(
 
 // DOC include start: BoomAndRocketWithHwacha
 class HwachaLargeBoomAndHwachaRocketConfig extends Config(
-  new WithTop ++
+  new WithTSI ++
+  new WithNoGPIO ++
   new WithBootROM ++
   new WithUART ++
   new hwacha.DefaultHwachaConfig ++                      // add hwacha to all harts
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new boom.common.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++
   new boom.common.WithNBoomCores(1) ++
@@ -45,10 +54,13 @@ class HwachaLargeBoomAndHwachaRocketConfig extends Config(
 // DOC include end: BoomAndRocketWithHwacha
 
 class RoccLargeBoomAndRoccRocketConfig extends Config(
-  new WithTop ++
+  new WithTSI ++
+  new WithNoGPIO ++
   new WithBootROM ++
   new WithUART ++
   new freechips.rocketchip.subsystem.WithRoccExample ++  // add example rocc accelerator to all harts
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new boom.common.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++
@@ -57,9 +69,12 @@ class RoccLargeBoomAndRoccRocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class DualLargeBoomAndRocketConfig extends Config(
-  new WithTop ++
+  new WithTSI ++
+  new WithNoGPIO ++
   new WithBootROM ++
   new WithUART ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new boom.common.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++
@@ -69,10 +84,13 @@ class DualLargeBoomAndRocketConfig extends Config(
 
 // DOC include start: DualBoomAndRocketOneHwacha
 class DualLargeBoomAndHwachaRocketConfig extends Config(
-  new WithTop ++
+  new WithTSI ++
+  new WithNoGPIO ++
   new WithBootROM ++
   new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new WithMultiRoCC ++                                  // support heterogeneous rocc
   new WithMultiRoCCHwacha(2) ++                         // put hwacha on hart-2 (rocket)
   new boom.common.WithRenumberHarts ++
@@ -83,10 +101,13 @@ class DualLargeBoomAndHwachaRocketConfig extends Config(
 // DOC include end: DualBoomAndRocketOneHwacha
 
 class LargeBoomAndRV32RocketConfig extends Config(
-  new WithTop ++
+  new WithTSI ++
+  new WithNoGPIO ++
   new WithBootROM ++
   new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new boom.common.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++
   new boom.common.WithNBoomCores(1) ++
@@ -96,10 +117,13 @@ class LargeBoomAndRV32RocketConfig extends Config(
 
 // DOC include start: DualBoomAndRocket
 class DualLargeBoomAndDualRocketConfig extends Config(
-  new WithTop ++
+  new WithTSI ++
+  new WithNoGPIO ++
   new WithBootROM ++
   new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new boom.common.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++
   new boom.common.WithNBoomCores(2) ++                   // 2 boom cores
@@ -108,10 +132,13 @@ class DualLargeBoomAndDualRocketConfig extends Config(
 // DOC include end: DualBoomAndRocket
 
 class MultiCoreWithControlCoreConfig extends Config(
-  new WithTop ++
+  new WithTSI ++
+  new WithNoGPIO ++
   new WithBootROM ++
   new WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new WithControlCore ++                                 // add small control core (last hartid)
   new boom.common.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++
