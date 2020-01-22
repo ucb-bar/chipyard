@@ -11,26 +11,10 @@ sudo apt-get install -y libxpat1-dev libusb-dev libncurses5-dev cmake
 # deps for poky
 sudo apt-get install -y python3.6 patch diffstat texi2html texinfo subversion chrpath git wget
 # deps for qemu
-sudo apt-get install libgtk-3-dev
+sudo apt-get install -y libgtk-3-dev
 # deps for firemarshal
-sudo apt-get install python3-pip python3.6-dev rsync
+sudo apt-get install -y python3-pip python3.6-dev rsync
 # Install GNU make 4.x (needed to cross-compile glibc 2.28+)
-sudo apt-get install build-essential
-
+sudo apt-get install -y build-essential
 # install DTC
-DTCversion=dtc-1.4.4
-wget https://git.kernel.org/pub/scm/utils/dtc/dtc.git/snapshot/$DTCversion.tar.gz
-tar -xvf $DTCversion.tar.gz
-cd $DTCversion
-make -j16
-make install
-cd ..
-rm -rf $DTCversion.tar.gz
-rm -rf $DTCversion
-
-# install verilator
-git clone http://git.veripool.org/git/verilator
-cd verilator/
-git checkout v4.002
-autoconf && ./configure && make -j16 && sudo make install
-cd ..
+sudo apt-get install -y device-tree-compiler

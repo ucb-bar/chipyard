@@ -11,7 +11,7 @@ Chipyard is developed and tested on Linux-based systems.
 .. Warning:: Working under Windows is not recommended.
 
 
-In Centos-based platforms, we recommend installing the following dependencies:
+In CentOS-based platforms, we recommend installing the following dependencies:
 
 .. include:: /../scripts/centos-req.sh
    :code: bash
@@ -21,7 +21,7 @@ In Ubuntu/Debian-based platforms (Ubuntu), we recommend installing the following
 .. include:: /../scripts/ubuntu-req.sh
    :code: bash
 
-Note that when running on an Amazon Web Services EC2 FPGA-development instance (for FireSim), FireSim includes a machine setup script that will install all of the aforementioned dependencies (and some additional ones).
+.. Note:: When running on an Amazon Web Services EC2 FPGA-development instance (for FireSim), FireSim includes a machine setup script that will install all of the aforementioned dependencies (and some additional ones).
 
 Checking out the sources
 ------------------------
