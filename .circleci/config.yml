@@ -188,105 +188,76 @@ jobs:
                 key: extra-tests-{{ .Branch }}-{{ .Revision }}
                 paths:
                     - "/home/riscvuser/project/tests"
-    prepare-example:
+    prepare-chipyard-rocket:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "example"
-    prepare-boomrocketexample:
+                project-key: "chipyard-rocket"
+    prepare-chipyard-hetero:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "boomrocketexample"
+                project-key: "chipyard-hetero"
                 timeout: "240m"
-    prepare-boom:
+    prepare-chipyard-boom:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "boom"
+                project-key: "chipyard-boom"
     prepare-rocketchip:
         executor: main-env
         steps:
             - prepare-rtl:
                 project-key: "rocketchip"
-    prepare-blockdevrocketchip:
+    prepare-chipyard-blkdev:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "blockdevrocketchip"
-    prepare-hwacha:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                tools-version: "esp-tools"
-                project-key: "hwacha"
-    prepare-gemmini:
+                project-key: "chipyard-blkdev"
+    prepare-chipyard-hwacha:
         executor: main-env
         steps:
             - prepare-rtl:
                 tools-version: "esp-tools"
-                project-key: "gemmini"
-    prepare-tracegen:
+                project-key: "chipyard-hwacha"
+    prepare-chipyard-gemmini:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "tracegen"
-    prepare-tracegen-boom:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "tracegen-boom"
-    prepare-firesim:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "firesim"
-                build-script: "do-firesim-build.sh"
-    prepare-fireboom:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "fireboom"
-                build-script: "do-firesim-build.sh"
-    midasexamples-run-tests:
-        executor: main-env
-        steps:
-            - setup-tools-verilator
-            - run:
-                name: Run midasexamples tests
-                command: .circleci/run-midasexamples-tests.sh
-    example-run-tests:
+                tools-version: "esp-tools"
+                project-key: "chipyard-gemmini"
+    chipyard-rocket-run-tests:
         executor: main-env
         steps:
             - run-tests:
-                project-key: "example"
-    boomrocketexample-run-tests:
+                project-key: "chipyard-rocket"
+    chipyard-hetero-run-tests:
         executor: main-env
         steps:
             - run-tests:
-                project-key: "boomrocketexample"
-    boom-run-tests:
+                project-key: "chipyard-hetero"
+    chipyard-boom-run-tests:
         executor: main-env
         steps:
             - run-tests:
-                project-key: "boom"
+                project-key: "chipyard-boom"
     rocketchip-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 project-key: "rocketchip"
-    hwacha-run-tests:
+    chipyard-hwacha-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 tools-version: "esp-tools"
-                project-key: "hwacha"
-    gemmini-run-tests:
+                project-key: "chipyard-hwacha"
+    chipyard-gemmini-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 tools-version: "esp-tools"
-                project-key: "gemmini"
+                project-key: "chipyard-gemmini"
     tracegen-run-tests:
         executor: main-env
         steps:
@@ -346,17 +317,17 @@ workflows:
                     - install-riscv-toolchain
 
             # Prepare the verilator builds
-            - prepare-example:
+            - prepare-chipyard-rocket:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-boomrocketexample:
+            - prepare-chipyard-hetero:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-boom:
+            - prepare-chipyard-boom:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
@@ -366,17 +337,17 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-blockdevrocketchip:
+            - prepare-chipyard-blkdev:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-hwacha:
+            - prepare-chipyard-hwacha:
                 requires:
                     - install-esp-toolchain
                     - install-verilator
 
-            - prepare-gemmini:
+            - prepare-chipyard-gemmini:
                 requires:
                     - install-esp-toolchain
                     - install-verilator
@@ -410,29 +381,29 @@ workflows:
                     - install-verilator
 
             # Run the example tests
-            - example-run-tests:
+            - chipyard-rocket-run-tests:
                 requires:
-                    - prepare-example
+                    - prepare-chipyard-rocket
 
-            - boomrocketexample-run-tests:
+            - chipyard-hetero-run-tests:
                 requires:
-                    - prepare-boomrocketexample
+                    - prepare-chipyard-hetero
 
-            - boom-run-tests:
+            - chipyard-boom-run-tests:
                 requires:
-                    - prepare-boom
+                    - prepare-chipyard-boom
 
             - rocketchip-run-tests:
                 requires:
                     - prepare-rocketchip
 
-            - hwacha-run-tests:
+            - chipyard-hwacha-run-tests:
                 requires:
-                    - prepare-hwacha
+                    - prepare-chipyard-hwacha
 
-            - gemmini-run-tests:
+            - chipyard-gemmini-run-tests:
                 requires:
-                    - prepare-gemmini
+                    - prepare-chipyard-gemmini
 
             - tracegen-run-tests:
                 requires:

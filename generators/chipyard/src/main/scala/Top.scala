@@ -1,4 +1,4 @@
-package example
+package chipyard
 
 import chisel3._
 
@@ -9,8 +9,6 @@ import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.util.DontTouch
 
 import testchipip._
-
-import utilities.{System, SystemModule}
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._

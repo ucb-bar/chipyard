@@ -12,7 +12,6 @@ import freechips.rocketchip.util.{HeterogeneousBag}
 import freechips.rocketchip.amba.axi4.AXI4Bundle
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy.LazyModule
-import utilities.{Subsystem, SubsystemModuleImp}
 import icenet._
 import firesim.util.DefaultFireSimHarness
 import testchipip._
@@ -38,53 +37,20 @@ import FireSimValName._
 * determine which driver to build.
 *******************************************************************************/
 
-class FireSimDUT(implicit p: Parameters) extends Subsystem
-    with HasHierarchicalBusTopology
-    with CanHaveMasterAXI4MemPort
-    with HasPeripheryBootROM
-    with CanHavePeripherySerial
-    with HasPeripheryUART
-    with CanHavePeripheryIceNIC
-    with CanHavePeripheryBlockDevice
+class FireSimDUT(implicit p: Parameters) extends chipyard.Top
     with HasTraceIO
 {
   override lazy val module = new FireSimModuleImp(this)
 }
 
-class FireSimModuleImp[+L <: FireSimDUT](l: L) extends SubsystemModuleImp(l)
-    with HasRTCModuleImp
-    with CanHaveMasterAXI4MemPortModuleImp
-    with HasPeripheryBootROMModuleImp
-    with CanHavePeripherySerialModuleImp
-    with HasPeripheryUARTModuleImp
-    with HasPeripheryIceNICModuleImpValidOnly
-    with CanHavePeripheryBlockDeviceModuleImp
+class FireSimModuleImp[+L <: FireSimDUT](l: L) extends chipyard.TopModule(l)
     with HasTraceIOImp
     with CanHaveMultiCycleRegfileImp
 
 class FireSim(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimDUT)
 
-class FireSimNoNICDUT(implicit p: Parameters) extends Subsystem
-    with HasHierarchicalBusTopology
-    with CanHaveMasterAXI4MemPort
-    with HasPeripheryBootROM
-    with CanHavePeripherySerial
-    with HasPeripheryUART
-    with CanHavePeripheryBlockDevice
-    with HasTraceIO
-{
-  override lazy val module = new FireSimNoNICModuleImp(this)
-}
-
-class FireSimNoNICModuleImp[+L <: FireSimNoNICDUT](l: L) extends SubsystemModuleImp(l)
-    with HasRTCModuleImp
-    with CanHaveMasterAXI4MemPortModuleImp
-    with HasPeripheryBootROMModuleImp
-    with CanHavePeripherySerialModuleImp
-    with HasPeripheryUARTModuleImp
-    with CanHavePeripheryBlockDeviceModuleImp
-    with HasTraceIOImp
-    with CanHaveMultiCycleRegfileImp
+// Kept for legacy-reasons, this is equivalent to FireSimDUT
+class FireSimNoNICDUT(implicit p: Parameters) extends FireSimDUT
 
 class FireSimNoNIC(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimNoNICDUT)
 
@@ -107,7 +73,7 @@ class FireSimSupernode(implicit p: Parameters) extends DefaultFireSimHarness(() 
 
 // Verilog blackbox integration demo
 class FireSimVerilogGCDDUT(implicit p: Parameters) extends FireSimDUT
-    with example.CanHavePeripheryGCD
+    with chipyard.CanHavePeripheryGCD
 {
   override lazy val module = new FireSimVerilogGCDModuleImp(this)
 }

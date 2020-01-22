@@ -51,7 +51,7 @@ trait HasTraceIOImp extends LazyModuleImp {
 }
 
 trait CanHaveMultiCycleRegfileImp {
-  val outer: utilities.HasBoomAndRocketTiles
+  val outer: chipyard.HasBoomAndRocketTiles
 
   outer.tiles.map {
     case r: RocketTile => {

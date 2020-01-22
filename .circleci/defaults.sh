@@ -41,13 +41,13 @@ LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 
 # key value store to get the build strings
 declare -A mapping
-mapping["example"]="SUB_PROJECT=example"
-mapping["boomrocketexample"]="SUB_PROJECT=example CONFIG=LargeBoomAndRocketConfig"
-mapping["boom"]="SUB_PROJECT=example CONFIG=SmallBoomConfig"
+mapping["chipyard-rocket"]="SUB_PROJECT=chipyard"
+mapping["chipyard-hetero"]="SUB_PROJECT=chipyard CONFIG=LargeBoomAndRocketConfig"
+mapping["chipyard-boom"]="SUB_PROJECT=chipyard CONFIG=SmallBoomConfig"
 mapping["rocketchip"]="SUB_PROJECT=rocketchip"
-mapping["blockdevrocketchip"]="SUB_PROJECT=example CONFIG=SimBlockDeviceRocketConfig"
-mapping["hwacha"]="SUB_PROJECT=example CONFIG=HwachaRocketConfig"
-mapping["gemmini"]="SUB_PROJECT=example CONFIG=GemminiRocketConfig"
+mapping["chipyard-blkdev"]="SUB_PROJECT=chipyard CONFIG=SimBlockDeviceRocketConfig"
+mapping["chipyard-hwacha"]="SUB_PROJECT=chipyard CONFIG=HwachaRocketConfig"
+mapping["chipyard-gemmini"]="SUB_PROJECT=chipyard CONFIG=GemminiRocketConfig"
 mapping["tracegen"]="SUB_PROJECT=tracegen CONFIG=NonBlockingTraceGenL2Config"
 mapping["tracegen-boom"]="SUB_PROJECT=tracegen CONFIG=BoomTraceGenConfig"
 mapping["firesim"]="DESIGN=FireSim TARGET_CONFIG=DDR3FRFCFSLLC4MB_FireSimRocketChipConfig PLATFORM_CONFIG=BaseF1Config"

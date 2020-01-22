@@ -29,28 +29,25 @@ run_tracegen () {
 }
 
 case $1 in
-    example)
+    chipyard-rocket)
         run_bmark ${mapping[$1]}
         ;;
-    boomexample)
+    chipyard-boom)
         run_bmark ${mapping[$1]}
         ;;
-    boomrocketexample)
-        run_bmark ${mapping[$1]}
-        ;;
-    boom)
+    chipyard-hetero)
         run_bmark ${mapping[$1]}
         ;;
     rocketchip)
         run_bmark ${mapping[$1]}
         ;;
-    hwacha)
+    chipyard-hwacha)
         export RISCV=$LOCAL_ESP_DIR
         export LD_LIBRARY_PATH=$LOCAL_ESP_DIR/lib
         export PATH=$RISCV/bin:$PATH
         make run-rv64uv-p-asm-tests -j$NPROC -C $LOCAL_SIM_DIR VERILATOR_INSTALL_DIR=$LOCAL_VERILATOR_DIR ${mapping[$1]}
         ;;
-    gemmini)
+    chipyard-gemmini)
         export RISCV=$LOCAL_ESP_DIR
         export LD_LIBRARY_PATH=$LOCAL_ESP_DIR/lib
         export PATH=$RISCV/bin:$PATH
@@ -58,9 +55,9 @@ case $1 in
         cd $GEMMINI_SOFTWARE_DIR
         ./build.sh
         cd $LOCAL_SIM_DIR
-        $LOCAL_SIM_DIR/simulator-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/aligned-baremetal
-        $LOCAL_SIM_DIR/simulator-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/raw_hazard-baremetal
-        $LOCAL_SIM_DIR/simulator-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal
+        make run-binary ${mapping[$1]} BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/aligned-baremetal
+        make run-binary ${mapping[$1]} BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/raw_hazard-baremetal
+        make run-binary ${mapping[$1]} BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal
         ;;
     tracegen)
         run_tracegen ${mapping[$1]}

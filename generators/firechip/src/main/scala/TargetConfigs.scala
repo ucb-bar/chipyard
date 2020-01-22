@@ -114,6 +114,7 @@ class L2SingleBank512K extends freechips.rocketchip.subsystem.WithInclusiveCache
 * determine which driver to build.
 *******************************************************************************/
 class FireSimRocketChipConfig extends Config(
+  new chipyard.WithNoGPIO ++
   new WithBootROM ++
   new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
   new WithExtMemSize(0x400000000L) ++ // 16GB
@@ -172,6 +173,7 @@ class FireSimRocketChipSha3L2PrintfConfig extends Config(
   new FireSimRocketChipConfig)
 
 class FireSimBoomConfig extends Config(
+  new chipyard.WithNoGPIO ++
   new WithBootROM ++
   new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
   new WithExtMemSize(0x400000000L) ++ // 16GB

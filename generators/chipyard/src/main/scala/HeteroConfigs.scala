@@ -1,4 +1,4 @@
-package example
+package chipyard
 
 import chisel3._
 

@@ -20,7 +20,7 @@ import firesim.util.{GeneratorArgs, HasTargetAgnosticUtilites, HasFireSimGenerat
 
 import scala.util.Try
 
-import utilities.TestSuiteHelper
+import chipyard.TestSuiteHelper
 
 trait HasTestSuites {
   def addTestSuites(targetName: String, params: Parameters) {
