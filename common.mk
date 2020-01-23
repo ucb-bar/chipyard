@@ -82,7 +82,7 @@ HARNESS_MACROCOMPILER_MODE = --mode synflops
 $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): harness_macro_temp
 	@echo "" > /dev/null
 
-harness_macro_temp: $(HARNESS_SMEMS_CONF)
+harness_macro_temp: $(HARNESS_SMEMS_CONF) | top_macro_temp
 	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE)"
 
 ########################################################################################
