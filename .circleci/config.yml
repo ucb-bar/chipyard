@@ -363,7 +363,7 @@ jobs:
                     .circleci/create-hash.sh
             - restore_cache:
                 keys:
-                    - riscv-tools-installed-v2-{{ checksum "../riscv-tools.hash" }}
+                    - riscv-tools-installed-v4-{{ checksum "../riscv-tools.hash" }}
             - restore_cache:
                 keys:
                     - verilator-installed-v3-{{ checksum "sims/verilator/verilator.mk" }}
