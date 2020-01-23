@@ -17,7 +17,7 @@ These guides will walk you through customization of your system-on-chip:
 
 - Connect widgets which act as TileLink masters
 
-- Adding custom blackboxed verilog to a Chipyard design
+- Adding custom blackboxed Verilog to a Chipyard design
 
 We also provide information on:
 

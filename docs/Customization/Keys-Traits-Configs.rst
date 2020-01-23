@@ -21,7 +21,7 @@ Keys should be defined and documented in sub-projects, since they generally deal
     :start-after: DOC include start: GCD key
     :end-before: DOC include end: GCD key
 
-The object within a key is typically a ``case class XXXParams``, which defines a set of parameters which some block accepts. For example, the GCD widget's ``GCDParams`` parameterizes its address, operand widths, whether the widget should be connected by Tilelink or AXI4, and whether the widget should use the blackbox-verilog implementation, or the Chisel implementation.
+The object within a key is typically a ``case class XXXParams``, which defines a set of parameters which some block accepts. For example, the GCD widget's ``GCDParams`` parameterizes its address, operand widths, whether the widget should be connected by Tilelink or AXI4, and whether the widget should use the blackbox-Verilog implementation, or the Chisel implementation.
 
 
 .. literalinclude:: ../../generators/example/src/main/scala/GCD.scala
@@ -95,7 +95,7 @@ For example, conside a config that contains the mixins ``WithGPIO ++ WithTSI``. 
 When ``WithGPIO ++ WithTSI`` is evaluated right to left, the call to ``up(BuildTop, site)`` in ``WithGPIO`` will reference the function defined in the ``BuildTop`` key of ``WithTSI``. Thus, at elaboration time, when the ``BuildTop`` function is called by the ``TestHarness``, first the ``BuildTop`` function in ``WithTSI`` will be evaluated. This connects the ``success`` signal of the ``TestHarness`` to the ``SerialAdapter`` enabled by ``WithTSI``. Then, the rest of the code in the ``BuildTop`` function of ``WithGPIO`` will execute, tieing off the top-level GPIO input pins. Thus the evaluation of the ``BuildTop`` functions in a completed config is "right-to-left", matching how the evaluation of the mixins at compile-time is also "right-to-left".
 
 .. warning::
-   Note that in some cases, the ordering and duplication of mixins which extend ``BuildTop`` will have unintended consequences.
+   In some cases, the ordering and duplication of mixins which extend ``BuildTop`` will have unintended consequences.
    For example, ``WithTSI ++ WithTSI`` will attempt to generate and connect two ``SimSerial`` widgets in the ``TestHarness``,
    which will likely break the simulation.
    In general, you should avoid attaching multiple mixins which interface to the same top-level ports.

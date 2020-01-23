@@ -61,7 +61,7 @@ and Verilog sources follow the prescribed directory layout.
             resources/
                 vsrc/
                     GCDMMIOBlackBox.v
-      
+
 Defining a Chisel BlackBox
 --------------------------
 
@@ -78,11 +78,11 @@ Of particular interest is the fact that parameterized Verilog modules
 can be passed the full space of possible parameter values. These
 values may depend on elaboration-time values in the Chisel generator,
 as the bitwidth of the GCD calculation does in this example.
-  
+
 **Verilog GCD port list and parameters**
 
 .. literalinclude:: ../../generators/example/src/main/resources/vsrc/GCDMMIOBlackBox.v
-    :language: verilog
+    :language: Verilog
     :start-after: DOC include start: GCD portlist
     :end-before: DOC include end: GCD portlist
 
@@ -113,7 +113,7 @@ Defining a Chip with a BlackBox
 ---------------------------------------
 
 Since we've parameterized the GCD instantiation to choose between the
-Chisel and the verilog module, creating a config is easy.
+Chisel and the Verilog module, creating a config is easy.
 
 .. literalinclude:: ../../generators/example/src/main/scala/RocketConfigs.scala
     :language: scala

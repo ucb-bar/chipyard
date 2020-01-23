@@ -127,7 +127,7 @@ Now we can test that the GCD is working. The test program is in ``tests/gcd.c``.
 
 This just writes out to the registers we defined earlier.
 The base of the module's MMIO region is at 0x2000 by default.
-This will be printed out in the address map portion when you generate the verilog code.
+This will be printed out in the address map portion when you generate the Verilog code.
 You can also see how this changes the emitted ``.json`` addressmap files in ``generated-src``.
 
 Compiling this program with ``make`` produces a ``gcd.riscv`` executable.
