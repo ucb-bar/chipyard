@@ -65,6 +65,9 @@ case $1 in
     tracegen)
         run_tracegen ${mapping[$1]}
         ;;
+    tracegen-boom)
+        run_tracegen ${mapping[$1]}
+        ;;
     *)
         echo "No set of tests for $1. Did you spell it right?"
         exit 1

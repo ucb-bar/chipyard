@@ -49,5 +49,6 @@ mapping["blockdevrocketchip"]="SUB_PROJECT=example CONFIG=SimBlockDeviceRocketCo
 mapping["hwacha"]="SUB_PROJECT=example CONFIG=HwachaRocketConfig"
 mapping["gemmini"]="SUB_PROJECT=example CONFIG=GemminiRocketConfig"
 mapping["tracegen"]="SUB_PROJECT=tracegen CONFIG=NonBlockingTraceGenL2Config"
+mapping["tracegen-boom"]="SUB_PROJECT=tracegen CONFIG=BoomTraceGenConfig"
 mapping["firesim"]="DESIGN=FireSim TARGET_CONFIG=DDR3FRFCFSLLC4MB_FireSimRocketChipConfig PLATFORM_CONFIG=BaseF1Config"
 mapping["fireboom"]="DESIGN=FireSim TARGET_CONFIG=DDR3FRFCFSLLC4MB_FireSimBoomConfig PLATFORM_CONFIG=BaseF1Config"
