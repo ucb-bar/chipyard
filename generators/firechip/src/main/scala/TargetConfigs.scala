@@ -105,6 +105,7 @@ class WithDRAMCacheKey(
   case DRAMCacheKey => DRAMCacheConfig(
     nSets = 1 << 21,
     nWays = 7,
+    nMetaCacheRows = 512,
     baseAddr = BigInt(1) << 37,
     nTrackersPerBank = nTrackersPerBank,
     nBanksPerChannel = nBanksPerChannel,
@@ -128,8 +129,11 @@ class WithDRAMCacheExtentTableInit(suffix: Int = 0x0300) extends Config(
       extentTableInit = Seq.tabulate(16) { i => (suffix, i + 1) })
   })
 
-class WithMemBenchKey(nXacts: Int = 64) extends Config((site, here, up) => {
-  case MemBenchKey => MemBenchParams(nXacts = nXacts)
+class WithMemBenchKey(nWorkers: Int = 1, nXacts: Int = 64)
+    extends Config((site, here, up) => {
+  case MemBenchKey => MemBenchParams(
+    nWorkers = nWorkers,
+    nXacts = nXacts)
 })
 
 class WithRocketL2TLBs(entries: Int) extends Config((site, here, up) => {
