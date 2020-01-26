@@ -31,7 +31,7 @@ Chipyard is actively developed in the [Berkeley Architecture Research Group][ucb
 
 ## Chipyard-related Publications
 
-These publications cover many of the internal components used in Chipyard. However, for the most up-to-date usage instructions, users should refer to the Chipyard docs.
+These publications cover many of the internal components used in Chipyard. However, for the most up-to-date details, users should refer to the Chipyard docs.
 
 * **Generators**
     * **Rocket Chip**: K. Asanovic, et al., *UCB EECS TR*. [PDF](http://www2.eecs.berkeley.edu/Pubs/TechRpts/2016/EECS-2016-17.pdf).
