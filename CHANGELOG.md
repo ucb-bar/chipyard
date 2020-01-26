@@ -27,7 +27,7 @@ A more detailed account of everything included is included in the dev to master 
 * `run-binary`-like interface now dumps `.log` (stdout) and `.out` (stderr) files (PR #308)
 * Split the VLSI build dir on type of design (PR #331)
 * Reduce Ctags runtime and only look at scala, C, C++, and Python files (PR #346)
-* Top/Top-level-traits now behave as a configuraboe generator (PR #347)
+* Top/Top-level-traits now behave as a configurable generator (PR #347)
 * Test suite makefrag generator includes Hwacha test suites (PR #342)
 
 ### Fixed
