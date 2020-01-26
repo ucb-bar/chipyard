@@ -23,12 +23,21 @@ tech_dir           ?= $(if $(filter $(tech_name), asap7), $(vlsi_dir)/hammer/src
 SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
 SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
 SMEMS_HAMMER       ?= $(build_dir)/$(long_name).mems.hammer.json
-MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
-OBJ_DIR            ?= $(vlsi_dir)/build
+ifeq ($(tech_name),asap7)
+	MACROCOMPILER_MODE ?= --mode synflops
+else
+	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
+endif
 ENV_YML            ?= $(vlsi_dir)/env.yml
 INPUT_CONFS        ?= example.yml
 HAMMER_EXEC        ?= ./example-vlsi
 VLSI_TOP           ?= $(TOP)
+VLSI_OBJ_DIR       ?= $(vlsi_dir)/build
+ifneq ($(CUSTOM_VLOG), )
+	OBJ_DIR        ?= $(VLSI_OBJ_DIR)/custom-$(VLSI_TOP)
+else
+	OBJ_DIR        ?= $(VLSI_OBJ_DIR)/$(long_name)-$(VLSI_TOP)
+endif
 
 #########################################################################################
 # general rules
@@ -66,8 +75,8 @@ SRAM_CONF=$(build_dir)/sram_generator-output.json
 srams: sram_generator
 sram_generator: $(SRAM_CONF)
 
-# This should be built alongside $(SMEMS_FILE)
-$(SMEMS_HAMMER): $(SMEMS_FILE)
+# This should be built alongside $(TOP_SMEMS_FILE)
+$(SMEMS_HAMMER): $(TOP_SMEMS_FILE)
 
 $(SRAM_GENERATOR_CONF): $(SMEMS_HAMMER)
 	mkdir -p $(dir $@)
@@ -115,4 +124,4 @@ $(OBJ_DIR)/hammer.d: $(HAMMER_D_DEPS)
 #########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(gen_dir)
+	rm -rf $(VLSI_OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(gen_dir)

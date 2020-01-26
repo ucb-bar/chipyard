@@ -48,8 +48,8 @@ By default, Chipyard uses the Tethered Serial Interface (TSI) to communicate wit
 TSI protocol is an implementation of HTIF that is used to send commands to the
 RISC-V DUT. These TSI commands are simple R/W commands
 that are able to probe the DUT's memory space. During simulation, the host sends TSI commands to a
-simulation stub called ``SimSerial`` (C++ class) that resides in a ``SimSerial`` verilog module
-(both are located in the ``generators/testchipip`` project). This ``SimSerial`` verilog module then
+simulation stub called ``SimSerial`` (C++ class) that resides in a ``SimSerial`` Verilog module
+(both are located in the ``generators/testchipip`` project). This ``SimSerial`` Verilog module then
 sends the TSI command recieved by the simulation stub into the DUT which then converts the TSI
 command into a TileLink request. This conversion is done by the ``SerialAdapter`` module
 (located in the ``generators/testchipip`` project). In simulation, FESVR
@@ -60,10 +60,18 @@ mechanism to communicate with the DUT in simulation.
 In the case of a chip tapeout bringup, TSI commands can be sent over a custom communication
 medium to communicate with the chip. For example, some Berkeley tapeouts have a FPGA
 with a RISC-V soft-core that runs FESVR. The FESVR on the soft-core sends TSI commands
-to a TSI-to-TileLink converter living on the FPGA (i.e. ``SerialAdapter``). Then this converter
-sends the converted TileLink commands over a serial link to the chip. The following image shows this flow:
+to a TSI-to-TileLink converter living on the FPGA (i.e. ``SerialAdapter``). After the transaction is
+converted to TileLink, the ``TLSerdesser`` (located in ``generators/testchipip``) serializes the
+transaction and sends it to the chip (this ``TLSerdesser`` is sometimes also referred to as a
+serial-link or serdes). Once the serialized transaction is received on the
+chip, it is deserialized and masters a bus on the chip. The following image shows this flow:
 
 .. image:: ../_static/images/chip-bringup.png
+
+.. note::
+    The ``TLSerdesser`` can also be used as a slave (client), so it can sink memory requests from the chip
+    and connect to off-chip backing memory. Or in other words, ``TLSerdesser`` creates a bi-directional TileLink
+    interface.
 
 Using the Debug Module Interface (DMI)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,8 +83,8 @@ The DTM is given in the `RISC-V Debug Specification <https://riscv.org/specifica
 and is responsible for managing communication between the DUT and whatever lives on the other side of the DMI (in this case FESVR).
 This is implemented in the Rocket Chip ``Subsystem`` by having the ``HasPeripheryDebug`` and ``HasPeripheryDebugModuleImp`` mixins.
 During simulation, the host sends DMI commands to a
-simulation stub called ``SimDTM`` (C++ class) that resides in a ``SimDTM`` verilog module
-(both are located in the ``generators/rocket-chip`` project). This ``SimDTM`` verilog module then
+simulation stub called ``SimDTM`` (C++ class) that resides in a ``SimDTM`` Verilog module
+(both are located in the ``generators/rocket-chip`` project). This ``SimDTM`` Verilog module then
 sends the DMI command recieved by the simulation stub into the DUT which then converts the DMI
 command into a TileLink request. This conversion is done by the DTM named ``DebugModule`` in the ``generators/rocket-chip`` project.
 When the DTM receives the program to load, it starts to write the binary byte-wise into memory.
@@ -109,7 +117,7 @@ top-level system with the DTM (``TopWithDTM``), a test-harness to connect to the
     :start-after: DOC include start: DmiRocket
     :end-before: DOC include end: DmiRocket
 
-In this example, the ``WithDTMTop`` mixin specifies that the top-level SoC will instantiate a DTM (that by default is setup to use DMI).
+In this example, the ``WithDTM`` mixin specifies that the top-level SoC will instantiate a DTM (that by default is setup to use DMI).
 The rest of the mixins specify the rest of the system (cores, accelerators, etc).
 Then you can run simulations with the new DMI-enabled top-level and test-harness.
 
@@ -119,7 +127,7 @@ Then you can run simulations with the new DMI-enabled top-level and test-harness
     # or
     cd sims/vcs
 
-    make CONFIG=dmiRocketConfig TOP=TopWithDTM MODEL=TestHarnessWithDTM run-asm-tests
+    make CONFIG=dmiRocketConfig run-asm-tests
 
 Using the JTAG Interface
 ------------------------
@@ -132,8 +140,7 @@ Creating a DTM+JTAG Config
 
 First, a DTM config must be created for the system that you want to create.
 This step is similar to the DMI simulation section within the :ref:`Starting the TSI or DMI Simulation` section.
-First, you must make a top-level system (``TopWithDTM``) and test-harness (``TestHarnessWithDTM``) that instantiates
-and connects the DTM correctly. The configuration is very similar to a DMI-based configuration. The main difference
+The configuration is very similar to a DMI-based configuration. The main difference
 is the addition of the ``WithJtagDTM`` mixin that configures the instantiated DTM to use the JTAG protocol as the
 bringup method.
 
@@ -153,7 +160,7 @@ After creating the config, call the ``make`` command like the following to build
     # or
     cd sims/vcs
 
-    make CONFIG=jtagRocketConfig TOP=TopWithDTM MODEL=TestHarnessWithDTM
+    make CONFIG=jtagRocketConfig
 
 In this example, the simulation will use the config that you previously specified, as well as set
 the other parameters that are needed to satisfy the build system. After that point, you

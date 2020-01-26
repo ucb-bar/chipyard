@@ -24,6 +24,10 @@ run_both () {
     run_asm $@
 }
 
+run_tracegen () {
+    make tracegen -C $LOCAL_SIM_DIR VERILATOR_INSTALL_DIR=$LOCAL_VERILATOR_DIR $@
+}
+
 case $1 in
     example)
         run_bmark ${mapping[$1]}
@@ -45,6 +49,24 @@ case $1 in
         export LD_LIBRARY_PATH=$LOCAL_ESP_DIR/lib
         export PATH=$RISCV/bin:$PATH
         make run-rv64uv-p-asm-tests -j$NPROC -C $LOCAL_SIM_DIR VERILATOR_INSTALL_DIR=$LOCAL_VERILATOR_DIR ${mapping[$1]}
+        ;;
+    gemmini)
+        export RISCV=$LOCAL_ESP_DIR
+        export LD_LIBRARY_PATH=$LOCAL_ESP_DIR/lib
+        export PATH=$RISCV/bin:$PATH
+        GEMMINI_SOFTWARE_DIR=$LOCAL_SIM_DIR/../../generators/gemmini/software/gemmini-rocc-tests
+        cd $GEMMINI_SOFTWARE_DIR
+        ./build.sh
+        cd $LOCAL_SIM_DIR
+        $LOCAL_SIM_DIR/simulator-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/aligned-baremetal
+        $LOCAL_SIM_DIR/simulator-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/raw_hazard-baremetal
+        $LOCAL_SIM_DIR/simulator-example-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal
+        ;;
+    tracegen)
+        run_tracegen ${mapping[$1]}
+        ;;
+    tracegen-boom)
+        run_tracegen ${mapping[$1]}
         ;;
     *)
         echo "No set of tests for $1. Did you spell it right?"

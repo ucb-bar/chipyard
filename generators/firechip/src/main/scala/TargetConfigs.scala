@@ -10,9 +10,9 @@ import freechips.rocketchip.tilelink._
 import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.devices.debug.DebugModuleParams
+import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import boom.common.BoomTilesKey
-import testchipip.{BlockDeviceKey, BlockDeviceConfig}
+import testchipip.{BlockDeviceKey, BlockDeviceConfig, SerialKey}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 import tracegen.TraceGenKey
@@ -47,12 +47,17 @@ class WithUARTKey extends Config((site, here, up) => {
      nRxEntries = 256))
 })
 
+class WithSerial extends Config((site, here, up) => {
+  case SerialKey => true
+})
+
 class WithBlockDevice extends Config(new testchipip.WithBlockDevice)
 
 class WithNICKey extends Config((site, here, up) => {
-  case NICKey => NICConfig(
+  case NICKey => Some(NICConfig(
     inBufFlits = 8192,
-    ctrlQueueDepth = 64)
+    ctrlQueueDepth = 64,
+    checksumOffload = true))
 })
 
 class WithRocketL2TLBs(entries: Int) extends Config((site, here, up) => {
@@ -77,7 +82,7 @@ class WithBoomL2TLBs(entries: Int) extends Config((site, here, up) => {
 
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
 class WithoutClockGating extends Config((site, here, up) => {
-  case DebugModuleParams => up(DebugModuleParams, site).copy(clockGate = false)
+  case DebugModuleKey => up(DebugModuleKey, site).map(_.copy(clockGate = false))
 })
 
 // Testing configurations
@@ -88,6 +93,7 @@ class WithScalaTestFeatures extends Config((site, here, up) => {
 
 // FASED Config Aliases. This to enable config generation via "_" concatenation
 // which requires that all config classes be defined in the same package
+class DDR3FRFCFS extends FRFCFS16GBQuadRank
 class DDR3FRFCFSLLC4MB extends FRFCFS16GBQuadRankLLC4MB
 
 // L2 Config Aliases. For use with "_" concatenation
@@ -110,6 +116,7 @@ class FireSimRocketChipConfig extends Config(
   new WithoutTLMonitors ++
   new WithUARTKey ++
   new WithNICKey ++
+  new WithSerial ++
   new WithBlockDevice ++
   new WithRocketL2TLBs(1024) ++
   new WithPerfCounters ++
@@ -167,6 +174,7 @@ class FireSimBoomConfig extends Config(
   new WithoutTLMonitors ++
   new WithUARTKey ++
   new WithNICKey ++
+  new WithSerial ++
   new WithBlockDevice ++
   new WithBoomL2TLBs(1024) ++
   new WithoutClockGating ++
@@ -206,6 +214,18 @@ class FireSimRocketBoomConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++ // add a "big" rocket core
   new FireSimBoomConfig
 )
+
+//**********************************************************************************
+//* Gemmini Configurations
+//*********************************************************************************/
+
+// Gemmini systolic accelerator default config
+class FireSimRocketChipGemminiL2Config extends Config(
+  new WithInclusiveCache ++
+  new gemmini.DefaultGemminiConfig ++
+  new WithNBigCores(1) ++
+  new FireSimRocketChipConfig)
+
 
 //**********************************************************************************
 //* Supernode Configurations
@@ -279,6 +299,7 @@ class WithTraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
 class FireSimTraceGenConfig extends Config(
   new WithTraceGen(
     List.fill(2) { DCacheParams(nMSHRs = 2, nSets = 16, nWays = 2) }) ++
+  new WithTraceGenBridge ++
   new FireSimRocketChipConfig)
 
 class WithL2TraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
@@ -316,4 +337,5 @@ class FireSimTraceGenL2Config extends Config(
     nBanks = 4,
     capacityKB = 1024,
     outerLatencyCycles = 50) ++
+  new WithTraceGenBridge ++
   new FireSimRocketChipConfig)

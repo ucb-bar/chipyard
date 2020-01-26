@@ -10,7 +10,8 @@ module GCDMMIOBlackBox
     input [WIDTH-1:0]      y,
     input                  output_ready,
     output                 output_valid,
-    output reg [WIDTH-1:0] gcd
+    output reg [WIDTH-1:0] gcd,
+    output                 busy
     );
 // DOC include end: GCD portlist
 
@@ -21,6 +22,7 @@ module GCDMMIOBlackBox
 
    assign input_ready = state == S_IDLE;
    assign output_valid = state == S_DONE;
+   assign busy = state != S_IDLE;
 
    always @(posedge clock) begin
       if (reset)

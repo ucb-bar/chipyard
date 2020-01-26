@@ -42,10 +42,10 @@ class FireSimDUT(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
     with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
-    with HasPeripherySerial
+    with CanHavePeripherySerial
     with HasPeripheryUART
-    with HasPeripheryIceNIC
-    with HasPeripheryBlockDevice
+    with CanHavePeripheryIceNIC
+    with CanHavePeripheryBlockDevice
     with HasTraceIO
 {
   override lazy val module = new FireSimModuleImp(this)
@@ -55,10 +55,10 @@ class FireSimModuleImp[+L <: FireSimDUT](l: L) extends SubsystemModuleImp(l)
     with HasRTCModuleImp
     with CanHaveMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
-    with HasPeripherySerialModuleImp
+    with CanHavePeripherySerialModuleImp
     with HasPeripheryUARTModuleImp
     with HasPeripheryIceNICModuleImpValidOnly
-    with HasPeripheryBlockDeviceModuleImp
+    with CanHavePeripheryBlockDeviceModuleImp
     with HasTraceIOImp
     with CanHaveMultiCycleRegfileImp
 
@@ -68,9 +68,9 @@ class FireSimNoNICDUT(implicit p: Parameters) extends Subsystem
     with HasHierarchicalBusTopology
     with CanHaveMasterAXI4MemPort
     with HasPeripheryBootROM
-    with HasPeripherySerial
+    with CanHavePeripherySerial
     with HasPeripheryUART
-    with HasPeripheryBlockDevice
+    with CanHavePeripheryBlockDevice
     with HasTraceIO
 {
   override lazy val module = new FireSimNoNICModuleImp(this)
@@ -80,24 +80,38 @@ class FireSimNoNICModuleImp[+L <: FireSimNoNICDUT](l: L) extends SubsystemModule
     with HasRTCModuleImp
     with CanHaveMasterAXI4MemPortModuleImp
     with HasPeripheryBootROMModuleImp
-    with HasPeripherySerialModuleImp
+    with CanHavePeripherySerialModuleImp
     with HasPeripheryUARTModuleImp
-    with HasPeripheryBlockDeviceModuleImp
+    with CanHavePeripheryBlockDeviceModuleImp
     with HasTraceIOImp
     with CanHaveMultiCycleRegfileImp
 
 class FireSimNoNIC(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimNoNICDUT)
 
-class FireSimTraceGen(implicit p: Parameters) extends BaseSubsystem
+class FireSimTraceGenDUT(implicit p: Parameters) extends BaseSubsystem
     with HasHierarchicalBusTopology
     with HasTraceGenTiles
     with CanHaveMasterAXI4MemPort {
   override lazy val module = new FireSimTraceGenModuleImp(this)
 }
 
-class FireSimTraceGenModuleImp(outer: FireSimTraceGen) extends BaseSubsystemModuleImp(outer)
+class FireSimTraceGenModuleImp(outer: FireSimTraceGenDUT) extends BaseSubsystemModuleImp(outer)
     with HasTraceGenTilesModuleImp
     with CanHaveMasterAXI4MemPortModuleImp
 
+class FireSimTraceGen(implicit p: Parameters) extends DefaultFireSimHarness(
+  () => new FireSimTraceGenDUT)
+
 // Supernoded-ness comes from setting p(NumNodes) (see DefaultFiresimHarness) to something > 1
 class FireSimSupernode(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimDUT)
+
+// Verilog blackbox integration demo
+class FireSimVerilogGCDDUT(implicit p: Parameters) extends FireSimDUT
+    with example.CanHavePeripheryGCD
+{
+  override lazy val module = new FireSimVerilogGCDModuleImp(this)
+}
+
+class FireSimVerilogGCDModuleImp[+L <: FireSimVerilogGCDDUT](l: L) extends FireSimModuleImp(l)
+
+class FireSimVerilogGCD(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimVerilogGCDDUT)

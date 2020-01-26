@@ -40,14 +40,18 @@ make variable to set additional simulator flags:
 
    make CONFIG=CustomConfig run-binary-debug BINARY=linux.riscv SIM_FLAGS=+vpdfilesize=1024
 
+.. note::
+    In some cases where there is multiple simulator flags, you can write the ``SIM_FLAGS``
+    like the following: ``SIM_FLAGS="+vpdfilesize=XYZ +some_other_flag=ABC"``.
+
 Print Output
 ---------------------------
 
 Both Rocket and BOOM can be configured with varying levels of print output.
-For information see the Rocket core source code, or the BOOM `documentation 
-<https://docs.boom-core.org/en/latest/>`__ .website. In addition, developers
-may insert arbitrary printfs at arbitrary conditions within the Chisel g
-enerators. See the Chisel documentation for information on this.
+For information see the Rocket core source code, or the BOOM `documentation
+<https://docs.boom-core.org/en/latest/>`__ website. In addition, developers
+may insert arbitrary printfs at arbitrary conditions within the Chisel generators.
+See the Chisel documentation for information on this.
 
 Once the cores have been configured with the desired print statements, the
 ``+verbose`` flag will cause the simulator to print the statements. The following
@@ -56,6 +60,7 @@ commands will all generate desired print statements:
 .. code-block:: shell
 
    make CONFIG=CustomConfig run-binary-debug BINARY=helloworld.riscv
+
    # The below command does the same thing
    ./simv-CustomConfig-debug +verbose helloworld.riscv
 

@@ -10,10 +10,17 @@ RDIR=$(pwd)
 CHIPYARD_DIR="${CHIPYARD_DIR:-$(git rev-parse --show-toplevel)}"
 
 usage() {
-    echo "usage: ${0} [riscv-tools | esp-tools | ec2fast]"
+    echo "usage: ${0} [OPTIONS] [riscv-tools | esp-tools | ec2fast]"
+    echo ""
+    echo "Installation Types"
     echo "   riscv-tools: if set, builds the riscv toolchain (this is also the default)"
     echo "   esp-tools: if set, builds esp-tools toolchain used for the hwacha vector accelerator"
     echo "   ec2fast: if set, pulls in a pre-compiled RISC-V toolchain for an EC2 manager instance"
+    echo ""
+    echo "Options"
+    echo "   --prefix PREFIX : Install destination. If unset, defaults to $(pwd)/riscv-tools-install"
+    echo "                     or $(pwd)/esp-tools-install"
+    echo "   --help -h       : Display this message"
     exit "$1"
 }
 
@@ -27,38 +34,34 @@ die() {
 
 TOOLCHAIN="riscv-tools"
 EC2FASTINSTALL="false"
+RISCV=""
 
-while getopts 'hH-:' opt ; do
-    case $opt in
-    h|H)
-        usage 3 ;;
-    -)
-        case $OPTARG in
-        help)
+# getopts does not support long options, and is inflexible
+while [ "$1" != "" ];
+do
+    case $1 in
+        -h | --help | help )
             usage 3 ;;
-        ec2fast) # Preserve compatibility
-            EC2FASTINSTALL=true ;;
-        *)
-            error "invalid option: --${OPTARG}"
+        -p | --prefix )
+            shift
+            RISCV=$(realpath $1) ;;
+        riscv-tools | esp-tools)
+            TOOLCHAIN=$1 ;;
+        ec2fast )
+            EC2FASTINSTALL="true" ;;
+        * )
+            error "invalid option $1"
             usage 1 ;;
-        esac ;;
-    *)
-        error "invalid option: -${opt}"
-        usage 1 ;;
     esac
+    shift
 done
 
-shift $((OPTIND - 1))
-
-if [ "$1" = ec2fast ] ; then
-    EC2FASTINSTALL=true
-elif [ -n "$1" ] ; then
-    TOOLCHAIN="$1"
+if [ -z "$RISCV" ] ; then
+      INSTALL_DIR="$TOOLCHAIN-install"
+      RISCV="$(pwd)/$INSTALL_DIR"
 fi
 
-INSTALL_DIR="$TOOLCHAIN-install"
-
-RISCV="$(pwd)/$INSTALL_DIR"
+echo "Installing toolchain to $RISCV"
 
 # install risc-v tools
 export RISCV="$RISCV"
@@ -107,7 +110,7 @@ else
         esac; ) || die 'obsolete make version; need GNU make 4.x or later'
 
     module_prepare riscv-gnu-toolchain qemu
-    module_build riscv-gnu-toolchain --prefix="${RISCV}"
+    module_build riscv-gnu-toolchain --prefix="${RISCV}" --with-cmodel=medany
     echo '==>  Building GNU/Linux toolchain'
     module_make riscv-gnu-toolchain linux
 fi
@@ -122,14 +125,21 @@ CC= CXX= module_all riscv-pk --prefix="${RISCV}" --host=riscv64-unknown-elf
 module_all riscv-tests --prefix="${RISCV}/riscv64-unknown-elf"
 
 # Common tools (not in any particular toolchain dir)
+
+SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv64-unknown-elf" --host=riscv64-unknown-elf
+
 SRCDIR="$(pwd)/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv64-softmmu
 
 cd "$RDIR"
 
+# create specific env.sh
 {
     echo "export CHIPYARD_TOOLCHAIN_SOURCED=1"
     echo "export RISCV=$(printf '%q' "$RISCV")"
     echo "export PATH=\${RISCV}/bin:\${PATH}"
     echo "export LD_LIBRARY_PATH=\${RISCV}/lib\${LD_LIBRARY_PATH:+":\${LD_LIBRARY_PATH}"}"
-} > env.sh
+} > env-$TOOLCHAIN.sh
+
+# create general env.sh
+ln -sf env-$TOOLCHAIN.sh env.sh
 echo "Toolchain Build Complete!"

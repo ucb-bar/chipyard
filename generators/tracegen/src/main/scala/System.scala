@@ -6,12 +6,18 @@ import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, BufferParams}
 import freechips.rocketchip.groundtest.{DebugCombiner, TraceGenParams}
 import freechips.rocketchip.subsystem._
 
-case object TraceGenKey extends Field[Seq[TraceGenParams]]
+case object BoomTraceGenKey extends Field[Seq[TraceGenParams]](Nil)
+case object TraceGenKey extends Field[Seq[TraceGenParams]](Nil)
 
 trait HasTraceGenTiles { this: BaseSubsystem =>
-  val tiles = p(TraceGenKey).zipWithIndex.map { case (params, i) =>
+  val rocket_tiles = p(TraceGenKey).zipWithIndex.map { case (params, i) =>
     LazyModule(new TraceGenTile(i, params, p))
   }
+  val boom_tiles = p(BoomTraceGenKey).zipWithIndex.map { case (params, i) =>
+    LazyModule(new BoomTraceGenTile(i, params, p))
+  }
+
+  val tiles = rocket_tiles ++ boom_tiles
 
   tiles.foreach { t =>
     sbus.fromTile(None, buffer = BufferParams.default) { t.masterNode }
@@ -26,7 +32,10 @@ trait HasTraceGenTilesModuleImp extends LazyModuleImp {
     t.module.constants.hartid := i.U
   }
 
-  val status = DebugCombiner(outer.tiles.map(_.module.status))
+  val status = DebugCombiner(
+    outer.rocket_tiles.map(_.module.status) ++
+    outer.boom_tiles.map(_.module.status)
+  )
   success := status.finished
 }
 

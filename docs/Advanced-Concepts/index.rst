@@ -12,3 +12,5 @@ They expect you to know about Chisel, Parameters, Configs, etc.
    Chip-Communication
    Debugging-RTL
    Resources
+   CDEs
+
