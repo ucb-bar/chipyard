@@ -45,7 +45,7 @@ trait HasTraceIOImp extends LazyModuleImp {
   // Enabled to test TracerV trace capture
   if (p(PrintTracePort)) {
     val traceprint = Wire(UInt(512.W))
-    traceprint := Cat(traceIO.traces.map(_.asUInt))
+    traceprint := Cat(traceIO.traces.map(_.reverse.asUInt))
     printf("TRACEPORT: %x\n", traceprint)
   }
 }
