@@ -60,3 +60,4 @@ git submodule update --init software/firemarshal
 if [ ! -f $RDIR/software/firemarshal/marshal-config.yaml ]; then
   echo "firesim-dir: '../../sims/firesim/'" > $RDIR/software/firemarshal/marshal-config.yaml
 fi
+echo "PATH=$RDIR/software/firemarshal:\$PATH" >> $RDIR/env.sh
