@@ -68,6 +68,9 @@
 [submodule "toolchains/esp-tools/riscv-tests"]
 	path = toolchains/esp-tools/riscv-tests
 	url = https://github.com/ucb-bar/esp-tests.git
+[submodule "toolchains/libgloss"]
+	path = toolchains/libgloss
+	url = https://github.com/ucb-bar/libgloss-htif.git
 [submodule "vlsi/hammer"]
 	path = vlsi/hammer
 	url = https://github.com/ucb-bar/hammer.git

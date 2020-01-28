@@ -54,7 +54,7 @@ This depends on what you are planning to do with Chipyard.
 
 * If you intend to run a full-system FireSim simulation, go to :ref:`firesim-sim-intro` and follow the instructions.
 
-* If you intend to add a new accelerator, go to :ref:`adding-an-accelerator` and follow the instructions.
+* If you intend to add a new accelerator, go to :ref:`customization` and follow the instructions.
 
 * If you want to learn about the structure of Chipyard, go to :ref:`chipyard-components`.
 

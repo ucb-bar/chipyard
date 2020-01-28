@@ -14,7 +14,7 @@ import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import boom.common.BoomTilesKey
-import testchipip.{BlockDeviceKey, BlockDeviceConfig, MemBenchKey, MemBenchParams}
+import testchipip.{BlockDeviceKey, BlockDeviceConfig, MemBenchKey, MemBenchParams, SerialKey}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import sifive.blocks.inclusivecache.InclusiveCachePortParameters
 import memblade.manager.{MemBladeKey, MemBladeParams, MemBladeQueueParams}
@@ -57,14 +57,18 @@ class WithUARTKey extends Config((site, here, up) => {
      nRxEntries = 256))
 })
 
+class WithSerial extends Config((site, here, up) => {
+  case SerialKey => true
+})
+
 class WithBlockDevice extends Config(new testchipip.WithBlockDevice)
 
 class WithNICKey extends Config((site, here, up) => {
-  case NICKey => NICConfig(
+  case NICKey => Some(NICConfig(
     inBufFlits = 8192,
     ctrlQueueDepth = 64,
     usePauser = true,
-    checksumOffload = true)
+    checksumOffload = true))
 })
 
 class WithMemBladeKey(spanBytes: Option[Int] = None) extends Config(
@@ -192,6 +196,7 @@ class FireSimRocketChipConfig extends Config(
   new WithoutTLMonitors ++
   new WithUARTKey ++
   new WithNICKey ++
+  new WithSerial ++
   new WithBlockDevice ++
   new WithRocketL2TLBs(1024) ++
   new WithPerfCounters ++
@@ -362,6 +367,7 @@ class FireSimBoomConfig extends Config(
   new WithoutTLMonitors ++
   new WithUARTKey ++
   new WithNICKey ++
+  new WithSerial ++
   new WithBlockDevice ++
   new WithBoomL2TLBs(1024) ++
   new WithoutClockGating ++

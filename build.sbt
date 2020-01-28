@@ -119,7 +119,7 @@ lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
   .dependsOn(chisel, hardfloat, rocketMacros, rocketConfig)
 
 lazy val testchipip = (project in file("generators/testchipip"))
-  .dependsOn(rocketchip)
+  .dependsOn(rocketchip, sifive_blocks)
   .settings(commonSettings)
 
 lazy val example = conditionalDependsOn(project in file("generators/example"))
@@ -127,7 +127,7 @@ lazy val example = conditionalDependsOn(project in file("generators/example"))
   .settings(commonSettings)
 
 lazy val tracegen = conditionalDependsOn(project in file("generators/tracegen"))
-  .dependsOn(rocketchip, sifive_cache)
+  .dependsOn(rocketchip, sifive_cache, boom)
   .settings(commonSettings)
 
 lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))
