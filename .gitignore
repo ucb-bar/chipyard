@@ -16,3 +16,4 @@ esp-tools-install
 tags
 *~
 env-riscv-tools.sh
+env-esp-tools.sh
