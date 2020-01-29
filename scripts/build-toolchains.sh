@@ -141,5 +141,5 @@ cd "$RDIR"
 } > env-$TOOLCHAIN.sh
 
 # create general env.sh
-echo "source env-$TOOLCHAIN.sh" >> env.sh
+echo "source \$( realpath \$(dirname "\${BASH_SOURCE[0]}") )/env-$TOOLCHAIN.sh" >> env.sh
 echo "Toolchain Build Complete!"
