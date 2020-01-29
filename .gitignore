@@ -15,3 +15,4 @@ riscv-tools-install
 esp-tools-install
 tags
 *~
+env-riscv-tools.sh
