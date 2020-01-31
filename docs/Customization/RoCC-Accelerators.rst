@@ -45,7 +45,7 @@ The other interfaces available to the accelerator are ``mem``, which provides ac
 the ``busy`` signal, which indicates when the accelerator is still handling an instruction;
 and the ``interrupt`` signal, which can be used to interrupt the CPU.
 
-Look at the examples in ``generators/rocket-chip/src/main/scala/tile/LazyRocc.scala`` for detailed information on the different IOs.
+Look at the examples in ``generators/rocket-chip/src/main/scala/tile/LazyRoCC.scala`` for detailed information on the different IOs.
 
 Adding RoCC accelerator to Config
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
