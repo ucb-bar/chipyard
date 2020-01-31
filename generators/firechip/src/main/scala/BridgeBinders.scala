@@ -21,6 +21,7 @@ import firesim.util.RegisterBridgeBinder
 import tracegen.HasTraceGenTilesModuleImp
 
 import memblade.cache.{HasDRAMCacheNoNICModuleImp, HasPeripheryDRAMCacheModuleImpValidOnly}
+import memblade.client.HasPeripheryRemoteMemClientModuleImpValidOnly
 import memblade.manager.HasPeripheryMemBladeModuleImpValidOnly
 
 class WithTiedOffDebug extends RegisterBridgeBinder({ case target: HasPeripheryDebugModuleImp =>
@@ -120,6 +121,11 @@ class WithDRAMCacheBridge extends RegisterBridgeBinder({
 
 class WithMemBladeBridge extends RegisterBridgeBinder({
   case t: HasPeripheryMemBladeModuleImpValidOnly =>
+    Seq(NICBridge(t.net)(t.p))
+})
+
+class WithRemoteMemClientBridge extends RegisterBridgeBinder({
+  case t: HasPeripheryRemoteMemClientModuleImpValidOnly =>
     Seq(NICBridge(t.net)(t.p))
 })
 

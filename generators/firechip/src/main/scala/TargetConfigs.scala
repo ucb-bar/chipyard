@@ -245,8 +245,7 @@ class FireSimMemBladeConfig extends Config(
 
 class FireSimMemBlade1024Config extends Config(
   new WithMemBladeKey(Some(1024)) ++
-  new WithMemBladeBridge ++
-  new FireSimRocketChipConfig)
+  new FireSimMemBladeConfig)
 
 class WithL2InnerExteriorBuffer(aDepth: Int, dDepth: Int) extends Config(
   (site, here, up) => {
@@ -291,6 +290,7 @@ class WithPrefetchMiddleMan extends Config((site, here, up) => {
 class FireSimRemoteMemClientConfig extends Config(
   new WithRemoteMemClientKey ++
   new WithStandardL2 ++
+  new WithRemoteMemClientBridge ++
   new FireSimRocketChipConfig)
 
 class FireSimRemoteMemClientSingleCoreConfig extends Config(
