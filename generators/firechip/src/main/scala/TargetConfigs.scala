@@ -109,7 +109,7 @@ class WithDRAMCacheKey(
   case DRAMCacheKey => DRAMCacheConfig(
     nSets = 1 << 21,
     nWays = 7,
-    nMetaCacheRows = 512,
+    nMetaCacheRows = 256,
     baseAddr = BigInt(1) << 37,
     nTrackersPerBank = nTrackersPerBank,
     nBanksPerChannel = nBanksPerChannel,
@@ -124,6 +124,9 @@ class WithDRAMCacheKey(
     wbQueue = WritebackDepths(1, 1),
     memInQueue = MemoryQueueParams(0, 0, 2, 2, 2, 2),
     memOutQueue = MemoryQueueParams(2, 2, 2, 2, 2, 2),
+    buildChannelOutNetwork = OutNetwork.ring,
+    writebackArbTopology = NetworkTopology.Ring,
+    remChannelArbTopology = NetworkTopology.Ring,
     zeroMetadata = false)
 })
 
