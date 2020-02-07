@@ -1,4 +1,4 @@
-package chipyard
+package chipyard.config
 
 import chisel3._
 import chisel3.util.{log2Up}
@@ -21,7 +21,7 @@ import hwacha.{Hwacha}
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 
-import icenet.{NICKey, NICConfig}
+import chipyard.{BuildTop}
 
 /**
  * TODO: Why do we need this?
@@ -35,117 +35,40 @@ import ConfigValName._
 // Common Parameter Mixins
 // -----------------------
 
-/**
- * Mixin to add the Chipyard bootrom
- */
 class WithBootROM extends Config((site, here, up) => {
   case BootROMParams => BootROMParams(
     contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img")
 })
 
 // DOC include start: gpio mixin
-/**
- * Mixin to add GPIOs and tie them off outside the DUT
- */
 class WithGPIO extends Config((site, here, up) => {
   case PeripheryGPIOKey => Seq(
     GPIOParams(address = 0x10012000, width = 4, includeIOF = false))
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters, success: Bool) => {
-    val top = up(BuildTop, site)(clock, reset, p, success)
-    // TODO: Currently FIRRTL will error if the GPIO input
-    // pins are unconnected, so tie them to 0.
-    // In future IO cell blackboxes will replace this with
-    // more correct functionality
-    for (gpio <- top.gpio) {
-      for (pin <- gpio.pins) {
-        pin.i.ival := false.B
-      }
-    }
-    top
-  }
 })
 // DOC include end: gpio mixin
 
-/**
- * Mixin to add in UART
- */
 class WithUART extends Config((site, here, up) => {
   case PeripheryUARTKey => Seq(
     UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256))
 })
 
-/**
- * Mixin to remove any GPIOs
- */
 class WithNoGPIO extends Config((site, here, up) => {
   case PeripheryGPIOKey => Seq()
 })
 
-// DOC include start: tsi mixin
-/**
- * Mixin to add an offchip TSI link (used for backing memory)
- */
-class WithTSI extends Config((site, here, up) => {
-  case SerialKey => true
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters, success: Bool) => {
-    val top = up(BuildTop, site)(clock, reset, p, success)
-    success := top.connectSimSerial()
-    top
-  }
-})
-// DOC include end: tsi mixin
-
-/**
- * Mixin to add an DTM (used for dmi or jtag bringup)
- */
-class WithDTM extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters, success: Bool) => {
-    val top = up(BuildTop, site)(clock, reset, p, success)
-    top.reset := reset.asBool | top.debug.map { debug => AsyncResetReg(debug.ndreset) }.getOrElse(false.B)
-    Debug.connectDebug(top.debug, top.psd, clock, reset.asBool, success)(p)
-    top
-  }
+class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
+  case RocketTilesKey => up(RocketTilesKey) map (tile => tile.copy(
+    core = tile.core.copy(nL2TLBEntries = entries)
+  ))
+  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(
+    core = tile.core.copy(nL2TLBEntries = entries)
+  ))
 })
 
-// DOC include start: GCD mixin
-/**
- * Mixin to add a GCD peripheral
- */
-class WithGCD(useAXI4: Boolean, useBlackBox: Boolean) extends Config((site, here, up) => {
-  case GCDKey => Some(GCDParams(useAXI4 = useAXI4, useBlackBox = useBlackBox))
-})
-// DOC include end: GCD mixin
-
-/**
- * Mixin to add a RTL block device model
- */
-class WithBlockDeviceModel extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters, success: Bool) => {
-    val top = up(BuildTop, site)(clock, reset, p, success)
-    top.connectBlockDeviceModel()
-    top
-  }
+class WithTracegenTop extends Config((site, here, up) => {
+  case BuildTop => (p: Parameters) => Module(LazyModule(new tracegen.TraceGenSystem()(p)).suggestName("Top").module)
 })
 
-/**
- * Mixin to add a simulated block device model
- */
-class WithSimBlockDevice extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters, success: Bool) => {
-    val top = up(BuildTop, site)(clock, reset, p, success)
-    top.connectSimBlockDevice(clock, reset)
-    top
-  }
-})
-
-// DOC include start: WithInitZero
-/**
- * Mixin to add a peripheral that clears memory
- */
-class WithInitZero(base: BigInt, size: BigInt) extends Config((site, here, up) => {
-  case InitZeroKey => Some(InitZeroConfig(base, size))
-})
-// DOC include end: WithInitZero
 
 // ------------------
 // Multi-RoCC Support
@@ -214,33 +137,4 @@ class WithControlCore extends Config((site, here, up) => {
       hartId = up(RocketTilesKey, site).size + up(BoomTilesKey, site).size
     )
   case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
-})
-
-/**
- * Mixin to add an IceNIC
- */
-class WithIceNIC(inBufFlits: Int = 1800, usePauser: Boolean = false)
-    extends Config((site, here, up) => {
-  case NICKey => Some(NICConfig(
-    inBufFlits = inBufFlits,
-    usePauser = usePauser,
-    checksumOffload = true))
-})
-
-/**
- * Mixin to loopback the IceNIC
- */
-class WithLoopbackNIC extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters, success: Bool) => {
-    val top = up(BuildTop, site)(clock, reset, p, success)
-    top.connectNicLoopback()
-    top
-  }
-})
-
-/**
- * Mixin to add a backing scratchpad (default size 4MB)
- */
-class WithBackingScratchpad(base: BigInt = 0x80000000L, mask: BigInt = ((4 << 20) - 1)) extends Config((site, here, up) => {
-  case BackingScratchpadKey => Some(BackingScratchpadParams(base, mask))
 })

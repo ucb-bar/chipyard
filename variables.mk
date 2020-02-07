@@ -38,17 +38,6 @@ ifeq ($(SUB_PROJECT),chipyard)
 	TB                ?= TestDriver
 	TOP               ?= Top
 endif
-ifeq ($(SUB_PROJECT),tracegen)
-	SBT_PROJECT       ?= tracegen
-	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= $(MODEL)
-	MODEL_PACKAGE     ?= $(SBT_PROJECT)
-	CONFIG            ?= TraceGenConfig
-	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
-	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
-	TB                ?= TestDriver
-	TOP               ?= TraceGenSystem
-endif
 # for Rocket-chip developers
 ifeq ($(SUB_PROJECT),rocketchip)
 	SBT_PROJECT       ?= rocketchip

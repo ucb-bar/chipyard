@@ -1,11 +1,11 @@
-package chipyard
+package chipyard.example
 
 import chisel3._
 import chisel3.util._
 import chisel3.experimental.{IntParam, BaseModule}
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.subsystem.BaseSubsystem
-import freechips.rocketchip.config.{Parameters, Field}
+import freechips.rocketchip.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper.{HasRegMap, RegField}
 import freechips.rocketchip.tilelink._
@@ -198,3 +198,10 @@ trait CanHavePeripheryGCDModuleImp extends LazyModuleImp {
 }
 
 // DOC include end: GCD imp trait
+
+
+// DOC include start: GCD mixin
+class WithGCD(useAXI4: Boolean, useBlackBox: Boolean) extends Config((site, here, up) => {
+  case GCDKey => Some(GCDParams(useAXI4 = useAXI4, useBlackBox = useBlackBox))
+})
+// DOC include end: GCD mixin

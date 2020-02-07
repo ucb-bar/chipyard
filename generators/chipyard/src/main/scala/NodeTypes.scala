@@ -1,4 +1,4 @@
-package chipyard
+package chipyard.example
 
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._

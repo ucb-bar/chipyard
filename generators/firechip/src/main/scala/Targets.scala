@@ -26,6 +26,8 @@ object FireSimValName {
 }
 import FireSimValName._
 
+
+
 /*******************************************************************************
 * Top level DESIGN configurations. These describe the basic instantiations of
 * the designs being simulated.
@@ -44,40 +46,23 @@ class FireSimDUT(implicit p: Parameters) extends chipyard.Top
 }
 
 class FireSimModuleImp[+L <: FireSimDUT](l: L) extends chipyard.TopModule(l)
-    with HasTraceIOImp
-    with CanHaveMultiCycleRegfileImp
+  with HasTraceIOImp
+  with CanHaveMultiCycleRegfileImp
 
-class FireSim(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimDUT)
+class FireSim(implicit p: Parameters) extends DefaultFireSimHarness
 
-// Kept for legacy-reasons, this is equivalent to FireSimDUT
-class FireSimNoNICDUT(implicit p: Parameters) extends FireSimDUT
 
-class FireSimNoNIC(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimNoNICDUT)
-
-class FireSimTraceGenDUT(implicit p: Parameters) extends BaseSubsystem
-    with HasHierarchicalBusTopology
-    with HasTraceGenTiles
-    with CanHaveMasterAXI4MemPort {
-  override lazy val module = new FireSimTraceGenModuleImp(this)
-}
-
-class FireSimTraceGenModuleImp(outer: FireSimTraceGenDUT) extends BaseSubsystemModuleImp(outer)
-    with HasTraceGenTilesModuleImp
-    with CanHaveMasterAXI4MemPortModuleImp
-
-class FireSimTraceGen(implicit p: Parameters) extends DefaultFireSimHarness(
-  () => new FireSimTraceGenDUT)
-
-// Supernoded-ness comes from setting p(NumNodes) (see DefaultFiresimHarness) to something > 1
-class FireSimSupernode(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimDUT)
-
-// Verilog blackbox integration demo
-class FireSimVerilogGCDDUT(implicit p: Parameters) extends FireSimDUT
-    with chipyard.CanHavePeripheryGCD
+class FireSimNoNIC(implicit p: Parameters) extends DefaultFireSimHarness
 {
-  override lazy val module = new FireSimVerilogGCDModuleImp(this)
+  throw new Exception("FireSimNoNIC is deprecated. Please add WithNoNIC to your TARGET_CONFIG and set DESIGN=FireSim to build a NoNIC simulator")
 }
 
-class FireSimVerilogGCDModuleImp[+L <: FireSimVerilogGCDDUT](l: L) extends FireSimModuleImp(l)
 
-class FireSimVerilogGCD(implicit p: Parameters) extends DefaultFireSimHarness(() => new FireSimVerilogGCDDUT)
+object FireSimTypeAliases {
+  // Supernoded-ness comes from setting p(NumNodes) (see DefaultFiresimHarness) to something > 1
+  type FireSimSupernode = FireSim
+
+  // Verilog blackbox integration demo
+  type FireSimVerilogGCD = FireSim
+}
+import FireSimTypeAliases._

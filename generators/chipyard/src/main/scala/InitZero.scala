@@ -1,9 +1,9 @@
-package chipyard
+package chipyard.example
 
 import chisel3._
 import chisel3.util._
 import freechips.rocketchip.subsystem.{BaseSubsystem, CacheBlockBytes}
-import freechips.rocketchip.config.{Parameters, Field}
+import freechips.rocketchip.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, IdRange}
 import testchipip.TLHelper
 
@@ -65,3 +65,10 @@ trait CanHavePeripheryInitZero { this: BaseSubsystem =>
     fbus.fromPort(Some("init-zero"))() := initZero.node
   }
 }
+
+
+// DOC include start: WithInitZero
+class WithInitZero(base: BigInt, size: BigInt) extends Config((site, here, up) => {
+  case InitZeroKey => Some(InitZeroConfig(base, size))
+})
+// DOC include end: WithInitZero

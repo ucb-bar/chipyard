@@ -32,6 +32,18 @@ run "cp -r ~/.sbt  $REMOTE_WORK_DIR"
 
 TOOLS_DIR=$REMOTE_RISCV_DIR
 LD_LIB_DIR=$REMOTE_RISCV_DIR/lib
+
+if [ $1 = "chipyard-gemmini" ]; then
+    export RISCV=$LOCAL_ESP_DIR
+    export LD_LIBRARY_PATH=$LOCAL_ESP_DIR/lib
+    export PATH=$RISCV/bin:$PATH
+    GEMMINI_SOFTWARE_DIR=$LOCAL_SIM_DIR/../../generators/gemmini/software/gemmini-rocc-tests
+    cd $LOCAL_SIM_DIR/../../generators/gemmini/software
+    git submodule update --init --recursive gemmini-rocc-tests
+    cd gemmini-rocc-tests
+    ./build.sh
+fi
+
 if [ $1 = "chipyard-hwacha" ] || [ $1 = "chipyard-gemmini" ]; then
     TOOLS_DIR=$REMOTE_ESP_DIR
     LD_LIB_DIR=$REMOTE_ESP_DIR/lib

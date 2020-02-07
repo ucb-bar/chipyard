@@ -52,12 +52,11 @@ case $1 in
         export LD_LIBRARY_PATH=$LOCAL_ESP_DIR/lib
         export PATH=$RISCV/bin:$PATH
         GEMMINI_SOFTWARE_DIR=$LOCAL_SIM_DIR/../../generators/gemmini/software/gemmini-rocc-tests
-        cd $GEMMINI_SOFTWARE_DIR
-        ./build.sh
+        rm -rf $GEMMINI_SOFTWARE_DIR/riscv-tests
         cd $LOCAL_SIM_DIR
-        make run-binary ${mapping[$1]} BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/aligned-baremetal
-        make run-binary ${mapping[$1]} BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/raw_hazard-baremetal
-        make run-binary ${mapping[$1]} BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal
+        $LOCAL_SIM_DIR/simulator-chipyard-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/aligned-baremetal
+        $LOCAL_SIM_DIR/simulator-chipyard-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/raw_hazard-baremetal
+        $LOCAL_SIM_DIR/simulator-chipyard-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal
         ;;
     tracegen)
         run_tracegen ${mapping[$1]}

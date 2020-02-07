@@ -226,6 +226,31 @@ jobs:
             - prepare-rtl:
                 tools-version: "esp-tools"
                 project-key: "chipyard-gemmini"
+    prepare-tracegen:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "tracegen"
+    prepare-tracegen-boom:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "tracegen-boom"
+    prepare-firesim:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "firesim"
+                build-script: "do-firesim-build.sh"
+    prepare-fireboom:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "fireboom"
+                build-script: "do-firesim-build.sh"
+
+
+
     chipyard-rocket-run-tests:
         executor: main-env
         steps:
@@ -284,6 +309,13 @@ jobs:
                 run-script: "run-firesim-tests.sh"
                 timeout: "20m"
 
+    midasexamples-run-tests:
+        executor: main-env
+        steps:
+            - setup-tools-verilator
+            - run:
+                name: Run midasexamples tests
+                command: .circleci/run-midasexamples-tests.sh
 # Order and dependencies of jobs to run
 workflows:
     version: 2

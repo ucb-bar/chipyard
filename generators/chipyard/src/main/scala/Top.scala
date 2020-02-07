@@ -6,14 +6,6 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.devices.tilelink._
-import freechips.rocketchip.util.DontTouch
-
-import testchipip._
-
-import sifive.blocks.devices.gpio._
-import sifive.blocks.devices.uart._
-
-import icenet.{CanHavePeripheryIceNIC, CanHavePeripheryIceNICModuleImp}
 
 // ------------------------------------
 // BOOM and/or Rocket Top Level Systems
@@ -21,26 +13,24 @@ import icenet.{CanHavePeripheryIceNIC, CanHavePeripheryIceNICModuleImp}
 
 // DOC include start: Top
 class Top(implicit p: Parameters) extends System
-  with CanHavePeripheryUARTAdapter // Enables optionally adding the UART print adapter
-  with HasPeripheryUART // Enables optionally adding the sifive UART
-  with HasPeripheryGPIO // Enables optionally adding the sifive GPIOs
-  with CanHavePeripheryBlockDevice // Enables optionally adding the block device
-  with CanHavePeripheryInitZero // Enables optionally adding the initzero example widget
-  with CanHavePeripheryGCD // Enables optionally adding the GCD example widget
-  with CanHavePeripherySerial // Enables optionally adding the TSI serial-adapter and port
-  with CanHavePeripheryIceNIC // Enables optionally adding the IceNIC for FireSim
-  with CanHaveBackingScratchpad // Enables optionally adding a backing scratchpad
+  with testchipip.CanHaveBackingScratchpad // Enables optionally adding a backing scratchpad
+  with testchipip.CanHavePeripheryBlockDevice // Enables optionally adding the block device
+  with testchipip.CanHavePeripherySerial // Enables optionally adding the TSI serial-adapter and port
+  with sifive.blocks.devices.uart.HasPeripheryUART // Enables optionally adding the sifive UART
+  with sifive.blocks.devices.gpio.HasPeripheryGPIO // Enables optionally adding the sifive GPIOs
+  with icenet.CanHavePeripheryIceNIC // Enables optionally adding the IceNIC for FireSim
+  with chipyard.example.CanHavePeripheryInitZero // Enables optionally adding the initzero example widget
+  with chipyard.example.CanHavePeripheryGCD // Enables optionally adding the GCD example widget
 {
   override lazy val module = new TopModule(this)
 }
 
 class TopModule[+L <: Top](l: L) extends SystemModule(l)
-  with HasPeripheryGPIOModuleImp
-  with HasPeripheryUARTModuleImp
-  with CanHavePeripheryBlockDeviceModuleImp
-  with CanHavePeripheryGCDModuleImp
-  with CanHavePeripherySerialModuleImp
-  with CanHavePeripheryIceNICModuleImp
-  with CanHavePeripheryUARTAdapterModuleImp
-  with DontTouch
+  with testchipip.CanHavePeripheryBlockDeviceModuleImp
+  with testchipip.CanHavePeripherySerialModuleImp
+  with sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
+  with sifive.blocks.devices.gpio.HasPeripheryGPIOModuleImp
+  with icenet.CanHavePeripheryIceNICModuleImp
+  with chipyard.example.CanHavePeripheryGCDModuleImp
+  with freechips.rocketchip.util.DontTouch
 // DOC include end: Top
