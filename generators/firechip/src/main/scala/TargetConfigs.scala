@@ -302,6 +302,18 @@ class FireSimRemoteMemClientDualCoreConfig extends Config(
 class FireSimRemoteMemClientQuadCoreConfig extends Config(
   new WithNBigCores(4) ++ new FireSimRemoteMemClientConfig)
 
+class FireSimHwachaRemoteMemClientConfig extends Config(
+  new WithNBigCores(1) ++
+  new WithHwachaNVMTEntries(64) ++
+  new hwacha.WithNLanes(2) ++
+  new WithHwachaConfPrec ++
+  new hwacha.DefaultHwachaConfig ++
+  new WithRemoteMemClientKey ++
+  new WithLargeL2 ++
+  new WithNMemoryChannels(4) ++
+  new WithRemoteMemClientBridge ++
+  new FireSimRocketChipConfig)
+
 class FireSimDRAMCacheConfig extends Config(
   new WithMemBenchKey ++
   new WithDRAMCacheKey(4, 8) ++
