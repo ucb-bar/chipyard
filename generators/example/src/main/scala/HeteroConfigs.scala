@@ -92,7 +92,8 @@ class DualLargeBoomAndHwachaRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new WithMultiRoCC ++                                  // support heterogeneous rocc
-  new WithMultiRoCCHwacha(2) ++                         // put hwacha on hart-2 (rocket)
+  new WithMultiRoCCHwacha(2) ++                         // override: put hwacha on hart-2 (rocket)
+  new hwacha.DefaultHwachaConfig ++                     // setup hwacha on all harts
   new boom.common.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++
   new boom.common.WithNBoomCores(2) ++
