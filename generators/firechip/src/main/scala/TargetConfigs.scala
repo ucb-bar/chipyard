@@ -260,7 +260,7 @@ class WithStandardL2 extends Config(
     nBanks = 4,
     nWays = 4,
     capacityKB = 256,
-    outerLatencyCycles = 32))
+    outerLatencyCycles = 24))
 
 class WithLargeL2 extends Config(
   new WithL2InnerExteriorBuffer(2, 2) ++
@@ -268,7 +268,7 @@ class WithLargeL2 extends Config(
     nBanks = 4,
     nWays = 4,
     capacityKB = 256,
-    outerLatencyCycles = 16))
+    outerLatencyCycles = 12))
 
 class WithPrefetchMiddleMan extends Config((site, here, up) => {
   case PrefetchMiddleManKey => {
