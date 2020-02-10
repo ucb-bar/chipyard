@@ -23,6 +23,7 @@ git config submodule.sims/firesim.update none
 git config submodule.vlsi/hammer-cadence-plugins.update none
 git config submodule.vlsi/hammer-synopsys-plugins.update none
 git config submodule.vlsi/hammer-mentor-plugins.update none
+git config submodule.software/firemarshal.update none
 git submodule update --init --recursive #--jobs 8
 
 # Un-ignore toolchain submodules
@@ -37,6 +38,8 @@ git config --unset submodule.vlsi/hammer-synopsys-plugins.update
 git config --unset submodule.vlsi/hammer-mentor-plugins.update
 
 git config --unset submodule.generators/sha3.update
+git config --unset submodule.software/firemarshal.update
+
 # Non-recursive clone to exclude riscv-linux
 git submodule update --init generators/sha3
 
@@ -47,7 +50,14 @@ git submodule update --init sims/firesim
     cd sims/firesim
     # Initialize dependencies for MIDAS-level RTL simulation
     git submodule update --init sim/midas
-    # Exclude riscv-linux
-    git submodule update --init sw/firesim-software
 )
 git config submodule.sims/firesim.update none
+
+# Only shallow clone needed for basic SW tests
+git submodule update --init software/firemarshal
+
+# Configure firemarshal to know where our firesim installation is
+if [ ! -f $RDIR/software/firemarshal/marshal-config.yaml ]; then
+  echo "firesim-dir: '../../sims/firesim/'" > $RDIR/software/firemarshal/marshal-config.yaml
+fi
+echo "PATH=\$( realpath \$(dirname "\${BASH_SOURCE[0]}") )/software/firemarshal:\$PATH" >> $RDIR/env.sh
