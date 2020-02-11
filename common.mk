@@ -4,7 +4,7 @@
 SHELL=/bin/bash
 
 ifndef RISCV
-$(error RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
+$(error source ~cs152/sp21/cs152.lab2.bashrc)
 else
 $(info Running with RISCV=$(RISCV))
 endif
@@ -167,6 +167,10 @@ run-binary-fast: $(output_dir) $(sim)
 
 # run simulator with as much debug info as possible
 run-binary-debug: $(output_dir) $(sim_debug)
+ifeq ($(sim_name),verilator)
+	rm -f $(sim_out_name).vcd && mkfifo $(sim_out_name).vcd
+	vcd2vpd $(sim_out_name).vcd $(sim_out_name).vpd > /dev/null &
+endif
 	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
@@ -205,8 +209,11 @@ $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/% $(output_d
 $(output_dir)/%.run: $(output_dir)/% $(sim)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
 
-$(output_dir)/%.out: $(output_dir)/% $(sim)
+$(output_dir)/%.out: $(output_dir)/% $(output_dir)/%.hex $(sim)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
+
+run-bmark-tests run-bmark-tests-debug: override LOADMEM_ADDR = 80000000
+run-bmark-tests run-bmark-tests-debug: override SIM_FLAGS += +loadmem=$<.hex +loadmem_addr=$(LOADMEM_ADDR)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
