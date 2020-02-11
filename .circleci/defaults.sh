@@ -52,3 +52,4 @@ mapping["tracegen"]="SUB_PROJECT=chipyard CONFIG=NonBlockingTraceGenL2Config TOP
 mapping["tracegen-boom"]="SUB_PROJECT=chipyard CONFIG=BoomTraceGenConfig TOP=TraceGenSystem"
 mapping["firesim"]="DESIGN=FireSim TARGET_CONFIG=WithNIC_DDR3FRFCFSLLC4MB_FireSimRocketConfig PLATFORM_CONFIG=BaseF1Config"
 mapping["fireboom"]="DESIGN=FireSim TARGET_CONFIG=WithNIC_DDR3FRFCFSLLC4MB_FireSimLargeBoomConfig PLATFORM_CONFIG=BaseF1Config"
+mapping["chipyard-ariane"]="SUB_PROJECT=chipyard CONFIG=ArianeConfig"

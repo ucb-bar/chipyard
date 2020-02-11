@@ -8,7 +8,6 @@ import freechips.rocketchip.config.{Config}
 // BOOM Configs
 // ---------------------
 
-
 class SmallBoomConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++                      // display UART with a SimUARTAdapter
   new chipyard.iobinders.WithTieOffInterrupts ++                 // tie off top-level interrupts
@@ -27,7 +26,6 @@ class SmallBoomConfig extends Config(
   new boom.common.WithSmallBooms ++                              // small boom config
   new boom.common.WithNBoomCores(1) ++                           // single-core boom
   new freechips.rocketchip.system.BaseConfig)                    // "base" rocketchip system
-
 
 class MediumBoomConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++

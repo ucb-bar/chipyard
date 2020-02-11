@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 sudo apt-get install -y build-essential bison flex
 sudo apt-get install -y libgmp-dev libmpfr-dev libmpc-dev zlib1g-dev vim git default-jdk default-jre
 # install sbt: https://www.scala-sbt.org/release/docs/Installing-sbt-on-Linux.html
@@ -17,3 +19,9 @@ sudo apt-get install -y libgtk-3-dev
 sudo apt-get install -y python3-pip python3.6-dev rsync libguestfs-tools expat ctags
 # install DTC
 sudo apt-get install -y device-tree-compiler
+
+# install verilator
+git clone http://git.veripool.org/git/verilator
+cd verilator
+git checkout v4.028
+autoconf && ./configure && make -j16 && sudo make install

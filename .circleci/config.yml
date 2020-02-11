@@ -248,8 +248,11 @@ jobs:
             - prepare-rtl:
                 project-key: "fireboom"
                 build-script: "do-firesim-build.sh"
-
-
+    prepare-chipyard-ariane:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-ariane"
 
     chipyard-rocket-run-tests:
         executor: main-env
@@ -308,7 +311,6 @@ jobs:
                 project-key: "fireboom"
                 run-script: "run-firesim-tests.sh"
                 timeout: "30m"
-
     midasexamples-run-tests:
         executor: main-env
         steps:
@@ -316,6 +318,12 @@ jobs:
             - run:
                 name: Run midasexamples tests
                 command: .circleci/run-midasexamples-tests.sh
+    chipyard-ariane-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-ariane"
+
 # Order and dependencies of jobs to run
 workflows:
     version: 2
@@ -404,6 +412,11 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
+            - prepare-chipyard-ariane:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
             # Run the respective tests
 
             # Run midasexamples test
@@ -455,3 +468,7 @@ workflows:
                 requires:
                     - prepare-fireboom
                     - build-extra-tests
+
+            - chipyard-ariane-run-tests:
+                requires:
+                    - prepare-chipyard-ariane

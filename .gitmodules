@@ -113,3 +113,6 @@
 [submodule "software/firemarshal"]
 	path = software/firemarshal
 	url = https://github.com/firesim/FireMarshal.git
+[submodule "generators/ariane"]
+	path = generators/ariane
+	url = https://github.com/ucb-bar/ariane-wrapper.git
