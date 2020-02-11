@@ -202,3 +202,7 @@ lazy val firechip = (project in file("generators/firechip"))
     testGrouping in Test := isolateAllTests( (definedTests in Test).value )
   )
 
+// CS152
+lazy val cs152 = (project in file("generators/cs152"))
+  .dependsOn(firechip)
+  .settings(commonSettings)
