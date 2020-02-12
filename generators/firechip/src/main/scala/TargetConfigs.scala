@@ -254,21 +254,21 @@ class WithL2InnerExteriorBuffer(aDepth: Int, dDepth: Int) extends Config(
         aDepth, 0, 0, dDepth, 0))
   })
 
-class WithStandardL2 extends Config(
+class WithStandardL2(nTrackersPerBank: Int = 3) extends Config(
   new WithL2InnerExteriorBuffer(2, 2) ++
   new WithInclusiveCache(
     nBanks = 4,
     nWays = 4,
     capacityKB = 256,
-    outerLatencyCycles = 24))
+    outerLatencyCycles = 8 * nTrackersPerBank))
 
-class WithLargeL2 extends Config(
+class WithLargeL2(nTrackersPerBank: Int = 3) extends Config(
   new WithL2InnerExteriorBuffer(2, 2) ++
   new WithInclusiveCache(
     nBanks = 4,
     nWays = 4,
     capacityKB = 256,
-    outerLatencyCycles = 12))
+    outerLatencyCycles = 4 * nTrackersPerBank))
 
 class WithPrefetchMiddleMan extends Config((site, here, up) => {
   case PrefetchMiddleManKey => {
