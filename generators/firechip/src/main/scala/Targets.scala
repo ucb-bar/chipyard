@@ -39,30 +39,5 @@ import FireSimValName._
 * determine which driver to build.
 *******************************************************************************/
 
-class FireSimDUT(implicit p: Parameters) extends chipyard.Top
-    with HasTraceIO
-{
-  override lazy val module = new FireSimModuleImp(this)
-}
-
-class FireSimModuleImp[+L <: FireSimDUT](l: L) extends chipyard.TopModule(l)
-  with HasTraceIOImp
-  with CanHaveMultiCycleRegfileImp
 
 class FireSim(implicit p: Parameters) extends DefaultFireSimHarness
-
-
-class FireSimNoNIC(implicit p: Parameters) extends DefaultFireSimHarness
-{
-  throw new Exception("FireSimNoNIC is deprecated. Please add WithNoNIC to your TARGET_CONFIG and set DESIGN=FireSim to build a NoNIC simulator")
-}
-
-
-object FireSimTypeAliases {
-  // Supernoded-ness comes from setting p(NumNodes) (see DefaultFiresimHarness) to something > 1
-  type FireSimSupernode = FireSim
-
-  // Verilog blackbox integration demo
-  type FireSimVerilogGCD = FireSim
-}
-import FireSimTypeAliases._

@@ -307,7 +307,7 @@ jobs:
                 extra-cache-restore: "extra-tests"
                 project-key: "fireboom"
                 run-script: "run-firesim-tests.sh"
-                timeout: "20m"
+                timeout: "30m"
 
     midasexamples-run-tests:
         executor: main-env

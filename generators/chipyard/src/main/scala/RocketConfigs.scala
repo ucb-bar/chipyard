@@ -228,7 +228,7 @@ class GPIORocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: GPIORocketConfig
 
-class DualCoreRocketConfig extends Config(
+class QuadRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithSimAXIMem ++
@@ -243,7 +243,7 @@ class DualCoreRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(2) ++   // dual-core (2 RocketTiles)
+  new freechips.rocketchip.subsystem.WithNBigCores(4) ++   // quad-core (4 RocketTiles)
   new freechips.rocketchip.system.BaseConfig)
 
 class RV32RocketConfig extends Config(

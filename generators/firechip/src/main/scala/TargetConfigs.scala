@@ -14,7 +14,7 @@ import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import freechips.rocketchip.diplomacy.LazyModule
 import boom.common.BoomTilesKey
-import testchipip.{BlockDeviceKey, BlockDeviceConfig, SerialKey}
+import testchipip.{BlockDeviceKey, BlockDeviceConfig, SerialKey, TracePortKey, TracePortParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 import tracegen.TraceGenKey
@@ -52,10 +52,6 @@ class WithPerfCounters extends Config((site, here, up) => {
 })
 
 
-class WithBoomEnableTrace extends Config((site, here, up) => {
-  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
-})
-
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
 class WithoutClockGating extends Config((site, here, up) => {
   case DebugModuleKey => up(DebugModuleKey, site).map(_.copy(clockGate = false))
@@ -64,20 +60,37 @@ class WithoutClockGating extends Config((site, here, up) => {
 // Testing configurations
 // This enables printfs used in testing
 class WithScalaTestFeatures extends Config((site, here, up) => {
-  case PrintTracePort => true
+  case TracePortKey => up(TracePortKey, site).map(_.copy(print = true))
 })
 
-class WithFireSimTop extends Config((site, here, up) => {
-  case BuildTop => (p: Parameters) => Module(LazyModule(new FireSimDUT()(p)).suggestName("top").module)
-})
 
 // FASED Config Aliases. This to enable config generation via "_" concatenation
 // which requires that all config classes be defined in the same package
 class DDR3FRFCFS extends FRFCFS16GBQuadRank
 class DDR3FRFCFSLLC4MB extends FRFCFS16GBQuadRankLLC4MB
 
-// L2 Config Aliases. For use with "_" concatenation
-class L2SingleBank512K extends freechips.rocketchip.subsystem.WithInclusiveCache
+class WithNIC extends icenet.WithIceNIC(inBufFlits = 8192, ctrlQueueDepth = 64)
+
+
+
+// Enables tracing on all cores
+class WithTraceIO extends Config((site, here, up) => {
+  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
+  case TracePortKey => Some(TracePortParams())
+})
+
+
+// Tweaks that are generally applied to all firesim configs
+class WithFireSimConfigTweaks extends Config(
+  new WithBootROM ++ // needed to support FireSim-as-top
+  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++ // 3.2 GHz
+  new WithoutClockGating ++
+  new WithTraceIO ++
+  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++ // 16 GB
+  new testchipip.WithTSI ++
+  new testchipip.WithBlockDevice ++
+  new chipyard.config.WithUART
+)
 
 /*******************************************************************************
 * Full TARGET_CONFIG configurations. These set parameters of the target being
@@ -88,178 +101,69 @@ class L2SingleBank512K extends freechips.rocketchip.subsystem.WithInclusiveCache
 * will store this name as part of the tags for the AGFI, so that later you can
 * reconstruct what is in a particular AGFI. These tags are also used to
 * determine which driver to build.
-*******************************************************************************/
-class FireSimRocketChipConfig extends Config(
-  new chipyard.config.WithNoGPIO ++
-  new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
-  new WithExtMemSize(0x400000000L) ++ // 16GB
-  new WithoutTLMonitors ++
-  new chipyard.config.WithUART ++
-  new icenet.WithIceNIC(inBufFlits = 8192, ctrlQueueDepth = 64) ++
-  new testchipip.WithTSI ++
-  new testchipip.WithBlockDevice ++
-  new chipyard.config.WithL2TLBs(1024) ++
-  new WithPerfCounters ++
-  new WithoutClockGating ++
-  new WithDefaultMemModel ++
+ *******************************************************************************/
+
+//*****************************************************************
+// Rocket configs, base off chipyard's RocketConfig
+//*****************************************************************
+class FireSimRocketConfig extends Config(
   new WithDefaultFireSimBridges ++
-  new WithFireSimTop ++
-  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-  new freechips.rocketchip.subsystem.WithNoSlavePort ++
-  new freechips.rocketchip.system.DefaultConfig)
-
-class WithNDuplicatedRocketCores(n: Int) extends Config((site, here, up) => {
-  case RocketTilesKey => List.tabulate(n)(i => up(RocketTilesKey).head.copy(hartId = i))
-})
-
-// single core config
-class FireSimRocketChipSingleCoreConfig extends Config(new FireSimRocketChipConfig)
-
-// dual core config
-class FireSimRocketChipDualCoreConfig extends Config(
-  new WithNDuplicatedRocketCores(2) ++
-  new FireSimRocketChipSingleCoreConfig)
-
-// quad core config
-class FireSimRocketChipQuadCoreConfig extends Config(
-  new WithNDuplicatedRocketCores(4) ++
-  new FireSimRocketChipSingleCoreConfig)
-
-// hexa core config
-class FireSimRocketChipHexaCoreConfig extends Config(
-  new WithNDuplicatedRocketCores(6) ++
-  new FireSimRocketChipSingleCoreConfig)
-
-// octa core config
-class FireSimRocketChipOctaCoreConfig extends Config(
-  new WithNDuplicatedRocketCores(8) ++
-  new FireSimRocketChipSingleCoreConfig)
-
-// SHA-3 accelerator config
-class FireSimRocketChipSha3L2Config extends Config(
-  new WithInclusiveCache ++
-  new sha3.WithSha3Accel ++
-  new WithNBigCores(1) ++
-  new FireSimRocketChipConfig)
-
-// SHA-3 accelerator config with synth printfs enabled
-class FireSimRocketChipSha3L2PrintfConfig extends Config(
-  new WithInclusiveCache ++
-  new sha3.WithSha3Printf ++ 
-  new sha3.WithSha3Accel ++
-  new WithNBigCores(1) ++
-  new FireSimRocketChipConfig)
-
-class FireSimBoomConfig extends Config(
-  new chipyard.config.WithNoGPIO ++
-  new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
-  new WithExtMemSize(0x400000000L) ++ // 16GB
-  new WithoutTLMonitors ++
-  new WithBoomEnableTrace ++
-  new chipyard.config.WithUART ++
-  new icenet.WithIceNIC(inBufFlits = 8192, ctrlQueueDepth = 64) ++
-  new testchipip.WithTSI ++
-  new testchipip.WithBlockDevice ++
-  new chipyard.config.WithL2TLBs(1024) ++
-  new WithoutClockGating ++
   new WithDefaultMemModel ++
-  new boom.common.WithLargeBooms ++
-  new boom.common.WithNBoomCores(1) ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.RocketConfig)
+
+class FireSimQuadRocketConfig extends Config(
   new WithDefaultFireSimBridges ++
-  new WithFireSimTop ++
-  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-  new freechips.rocketchip.subsystem.WithNoSlavePort ++
-  new freechips.rocketchip.system.BaseConfig
-)
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.QuadRocketConfig)
 
-// A safer implementation than the one in BOOM in that it
-// duplicates whatever BOOMTileKey.head is present N times. This prevents
-// accidentally (and silently) blowing away configurations that may change the
-// tile in the "up" view
-class WithNDuplicatedBoomCores(n: Int) extends Config((site, here, up) => {
-  case BoomTilesKey => List.tabulate(n)(i => up(BoomTilesKey).head.copy(hartId = i))
-  case MaxHartIdBits => log2Up(site(BoomTilesKey).size)
-})
 
-class FireSimBoomDualCoreConfig extends Config(
-  new WithNDuplicatedBoomCores(2) ++
-  new FireSimBoomConfig)
+//*****************************************************************
+// Sha3 rocc-accel configs, base off chipyard's Sha3RocketConfig
+//*****************************************************************
+class FireSimSha3RocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.Sha3RocketConfig)
 
-class FireSimBoomQuadCoreConfig extends Config(
-  new WithNDuplicatedBoomCores(4) ++
-  new FireSimBoomConfig)
+class FireSimSha3PrintfRocketConfig extends Config(
+  new sha3.WithSha3Printf ++
+  new FireSimSha3RocketConfig)
 
-//**********************************************************************************
-//* Heterogeneous Configurations
-//*********************************************************************************/
+//*****************************************************************
+// Boom config, base off chipyard's LargeBoomConfig
+//*****************************************************************
+class FireSimLargeBoomConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.LargeBoomConfig)
 
-// dual core config (rocket + small boom)
-class FireSimRocketBoomConfig extends Config(
-  new chipyard.config.WithL2TLBs(1024) ++ // reset l2 tlb amt ("WithSmallBooms" overrides it)
-  new boom.common.WithRenumberHarts ++ // fix hart numbering
-  new boom.common.WithSmallBooms ++ // change single BOOM to small
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++ // add a "big" rocket core
-  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-  new freechips.rocketchip.subsystem.WithNoSlavePort ++
-  new FireSimBoomConfig
-)
 
-//**********************************************************************************
-//* Gemmini Configurations
-//*********************************************************************************/
+//********************************************************************
+// Heterogeneous config, base off chipyard's LargeBoomAndRocketConfig
+//********************************************************************
+class FireSimLargeBoomAndRocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.LargeBoomAndRocketConfig)
 
-// Gemmini systolic accelerator default config
-class FireSimRocketChipGemminiL2Config extends Config(
-  new WithInclusiveCache ++
-  new gemmini.DefaultGemminiConfig ++
-  new WithNBigCores(1) ++
-  new FireSimRocketChipConfig)
-
+//******************************************************************
+// Gemmini NN accel config, base off chipyard's GemminiRocketConfig
+//******************************************************************
+class FireSimGemminiRocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.GemminiRocketConfig)
 
 //**********************************************************************************
-//* Supernode Configurations
-//*********************************************************************************/
-
-class SupernodeFireSimRocketChipConfig extends Config(
+// Supernode Configurations, base off chipyard's RocketConfig
+//**********************************************************************************
+class SupernodeFireSimRocketConfig extends Config(
   new WithNumNodes(4) ++
-  new WithExtMemSize(0x200000000L) ++ // 8GB
-  new FireSimRocketChipConfig)
-
-class SupernodeFireSimRocketChipSingleCoreConfig extends Config(
-  new WithNumNodes(4) ++
-  new WithExtMemSize(0x200000000L) ++ // 8GB
-  new FireSimRocketChipSingleCoreConfig)
-
-class SupernodeSixNodeFireSimRocketChipSingleCoreConfig extends Config(
-  new WithNumNodes(6) ++
-  new WithExtMemSize(0x40000000L) ++ // 1GB
-  new FireSimRocketChipSingleCoreConfig)
-
-class SupernodeEightNodeFireSimRocketChipSingleCoreConfig extends Config(
-  new WithNumNodes(8) ++
-  new WithExtMemSize(0x40000000L) ++ // 1GB
-  new FireSimRocketChipSingleCoreConfig)
-
-class SupernodeFireSimRocketChipDualCoreConfig extends Config(
-  new WithNumNodes(4) ++
-  new WithExtMemSize(0x200000000L) ++ // 8GB
-  new FireSimRocketChipDualCoreConfig)
-
-class SupernodeFireSimRocketChipQuadCoreConfig extends Config(
-  new WithNumNodes(4) ++
-  new WithExtMemSize(0x200000000L) ++ // 8GB
-  new FireSimRocketChipQuadCoreConfig)
-
-class SupernodeFireSimRocketChipHexaCoreConfig extends Config(
-  new WithNumNodes(4) ++
-  new WithExtMemSize(0x200000000L) ++ // 8GB
-  new FireSimRocketChipHexaCoreConfig)
-
-class SupernodeFireSimRocketChipOctaCoreConfig extends Config(
-  new WithNumNodes(4) ++
-  new WithExtMemSize(0x200000000L) ++ // 8GB
-  new FireSimRocketChipOctaCoreConfig)
+  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 8L) ++ // 8 GB
+  new FireSimRocketConfig)

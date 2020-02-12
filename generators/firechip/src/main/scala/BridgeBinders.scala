@@ -12,7 +12,7 @@ import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPortModuleImp}
 import freechips.rocketchip.tile.{RocketTile}
 import sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
 
-import testchipip.{CanHavePeripherySerialModuleImp, CanHavePeripheryBlockDeviceModuleImp}
+import testchipip.{CanHavePeripherySerialModuleImp, CanHavePeripheryBlockDeviceModuleImp, CanHaveTraceIOModuleImp}
 import icenet.CanHavePeripheryIceNICModuleImp
 
 import junctions.{NastiKey, NastiParameters}
@@ -59,7 +59,7 @@ class WithFASEDBridge extends RegisterIOBinder({
 })
 
 class WithTracerVBridge extends RegisterIOBinder({
-  (c, r, s, target: HasTraceIOImp) => Seq(TracerVBridge(target.traceIO)(target.p))
+  (c, r, s, target: CanHaveTraceIOModuleImp) => target.traceIO.map(t => TracerVBridge(t)(target.p)).toSeq
 })
 
 class WithTraceGenBridge extends RegisterIOBinder({
@@ -93,6 +93,7 @@ class WithFireSimMultiCycleRegfile extends RegisterIOBinder({
 
 // Shorthand to register all of the provided bridges above
 class WithDefaultFireSimBridges extends Config(
+  new chipyard.iobinders.WithGPIOTiedOff ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new WithSerialBridge ++
