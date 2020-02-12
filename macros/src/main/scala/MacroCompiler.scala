@@ -549,11 +549,12 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
       }
     }
     // Connect mem outputs
+    val zeroOutputValue: Expression = UIntLiteral(0, IntWidth(mem.src.width))
     mem.src.ports foreach { port =>
       port.output match {
         case Some(PolarizedPort(mem, _)) => outputs get mem match {
           case Some(select) =>
-            val output = (select foldRight (zero: Expression)) {
+            val output = (select foldRight (zeroOutputValue)) {
               case ((cond, tval), fval) => Mux(cond, tval, fval, fval.tpe) }
             stmts += Connect(NoInfo, WRef(mem), output)
           case None =>
