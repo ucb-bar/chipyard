@@ -45,8 +45,8 @@ include $(sim_dir)/verilator.mk
 #########################################################################################
 VERILATOR := $(INSTALLED_VERILATOR) --cc --exe
 
-CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -D__STDC_FORMAT_MACROS
-LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(sim_dir) -lfesvr -lpthread
+CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -I$(dramsim_dir) -D__STDC_FORMAT_MACROS
+LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(dramsim_dir) -Wl,-rpath,$(dramsim_dir) -L$(sim_dir) -lfesvr -lpthread -ldramsim
 
 VERILATOR_CC_OPTS = \
 	-O3 \
@@ -97,10 +97,10 @@ $(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(INSTALLED_VERILATOR)
 #########################################################################################
 # invoke make to make verilator sim rules
 #########################################################################################
-$(sim): $(model_mk)
+$(sim): $(model_mk) $(dramsim_lib)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir) -f V$(VLOG_MODEL).mk
 
-$(sim_debug): $(model_mk_debug)
+$(sim_debug): $(model_mk_debug) $(dramsim_lib)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir_debug) -f V$(VLOG_MODEL).mk
 
 #########################################################################################

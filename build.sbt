@@ -127,7 +127,7 @@ lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
   .settings(commonSettings)
 
 lazy val tracegen = conditionalDependsOn(project in file("generators/tracegen"))
-  .dependsOn(rocketchip, sifive_cache, boom)
+  .dependsOn(rocketchip, sifive_cache, boom, utilities)
   .settings(commonSettings)
 
 lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))

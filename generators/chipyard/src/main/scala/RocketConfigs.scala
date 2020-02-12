@@ -11,7 +11,7 @@ import freechips.rocketchip.config.{Config}
 class RocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++                      // display UART with a SimUARTAdapter
   new chipyard.iobinders.WithTieOffInterrupts ++                 // tie off top-level interrupts
-  new chipyard.iobinders.WithSimAXIMem ++                        // drive the master AXI4 memory with a SimAXIMem
+  new chipyard.iobinders.WithBlackBoxSimMem ++                        // drive the master AXI4 memory with a SimAXIMem
   new chipyard.iobinders.WithTiedOffDebug ++                     // tie off debug (since we are using SimSerial for testing)
   new chipyard.iobinders.WithSimSerial ++                        // drive TSI with SimSerial for testing
   new testchipip.WithTSI ++                                      // use testchipip serial offchip link
@@ -29,7 +29,7 @@ class RocketConfig extends Config(
 class HwachaRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
@@ -49,7 +49,7 @@ class HwachaRocketConfig extends Config(
 class GemminiRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
@@ -69,7 +69,7 @@ class GemminiRocketConfig extends Config(
 class RoccRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
@@ -89,7 +89,7 @@ class RoccRocketConfig extends Config(
 class jtagRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithSimDebug ++    // add SimJtag and SimSerial, use both to drive sim
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
@@ -110,7 +110,7 @@ class jtagRocketConfig extends Config(
 class dmiRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffSerial ++
   new chipyard.iobinders.WithSimDebug ++               // add SimDebug and use it to drive simulation
   new chipyard.config.WithNoGPIO ++
@@ -129,7 +129,7 @@ class dmiRocketConfig extends Config(
 class GCDTLRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
@@ -150,7 +150,7 @@ class GCDTLRocketConfig extends Config(
 class GCDAXI4BlackBoxRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
@@ -170,7 +170,7 @@ class GCDAXI4BlackBoxRocketConfig extends Config(
 class SimBlockDeviceRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new chipyard.iobinders.WithSimBlockDevice ++             // drive block-device IOs with SimBlockDevice
@@ -190,7 +190,7 @@ class SimBlockDeviceRocketConfig extends Config(
 class BlockDeviceModelRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new chipyard.iobinders.WithBlockDeviceModel ++           // drive block-device IOs with a BlockDeviceModel
@@ -211,7 +211,7 @@ class BlockDeviceModelRocketConfig extends Config(
 class GPIORocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new chipyard.iobinders.WithGPIOTiedOff ++                // tie off GPIO inputs into the top
@@ -231,7 +231,7 @@ class GPIORocketConfig extends Config(
 class QuadRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
@@ -249,7 +249,7 @@ class QuadRocketConfig extends Config(
 class RV32RocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
@@ -267,7 +267,7 @@ class RV32RocketConfig extends Config(
 class GB1MemoryRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
@@ -287,7 +287,7 @@ class GB1MemoryRocketConfig extends Config(
 class Sha3RocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
@@ -308,7 +308,7 @@ class Sha3RocketConfig extends Config(
 class InitZeroRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
@@ -328,7 +328,7 @@ class InitZeroRocketConfig extends Config(
 class LoopbackNICRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new chipyard.iobinders.WithLoopbackNIC ++                        // drive NIC IOs with loopback
