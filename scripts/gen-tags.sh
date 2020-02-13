@@ -14,4 +14,4 @@
 #   * tags file in the directory that this was called in
 
 # ctags wrapper
-ctags -R --exclude=@.ctagsignore --links=no
+ctags -R --exclude=@.ctagsignore --links=no --languages=scala,C,C++,python

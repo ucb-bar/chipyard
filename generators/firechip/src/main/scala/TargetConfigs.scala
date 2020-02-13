@@ -10,10 +10,10 @@ import freechips.rocketchip.tilelink._
 import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.devices.debug.DebugModuleParams
+import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import freechips.rocketchip.diplomacy.{RationalCrossing}
-import boom.common.{BoomCrossingKey, BoomTilesKey}
-import testchipip.{BlockDeviceKey, BlockDeviceConfig}
+import boom.common.{BoomTilesKey, BoomCrossingKey}
+import testchipip.{BlockDeviceKey, BlockDeviceConfig, SerialKey}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 import tracegen.TraceGenKey
@@ -48,12 +48,17 @@ class WithUARTKey extends Config((site, here, up) => {
      nRxEntries = 256))
 })
 
+class WithSerial extends Config((site, here, up) => {
+  case SerialKey => true
+})
+
 class WithBlockDevice extends Config(new testchipip.WithBlockDevice)
 
 class WithNICKey extends Config((site, here, up) => {
-  case NICKey => NICConfig(
+  case NICKey => Some(NICConfig(
     inBufFlits = 8192,
-    ctrlQueueDepth = 64)
+    ctrlQueueDepth = 64,
+    checksumOffload = true))
 })
 
 class WithRocketL2TLBs(entries: Int) extends Config((site, here, up) => {
@@ -82,7 +87,7 @@ class WithBoomEnableTrace extends Config((site, here, up) => {
 
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
 class WithoutClockGating extends Config((site, here, up) => {
-  case DebugModuleParams => up(DebugModuleParams, site).copy(clockGate = false)
+  case DebugModuleKey => up(DebugModuleKey, site).map(_.copy(clockGate = false))
 })
 
 // Testing configurations
@@ -116,6 +121,7 @@ class FireSimRocketChipConfig extends Config(
   new WithoutTLMonitors ++
   new WithUARTKey ++
   new WithNICKey ++
+  new WithSerial ++
   new WithBlockDevice ++
   new WithRocketL2TLBs(1024) ++
   new WithPerfCounters ++
@@ -173,6 +179,7 @@ class FireSimBoomConfig extends Config(
   new WithoutTLMonitors ++
   new WithUARTKey ++
   new WithNICKey ++
+  new WithSerial ++
   new WithBlockDevice ++
   new WithBoomEnableTrace ++
   new WithBoomL2TLBs(1024) ++
@@ -213,6 +220,18 @@ class FireSimRocketBoomConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++ // add a "big" rocket core
   new FireSimBoomConfig
 )
+
+//**********************************************************************************
+//* Gemmini Configurations
+//*********************************************************************************/
+
+// Gemmini systolic accelerator default config
+class FireSimRocketChipGemminiL2Config extends Config(
+  new WithInclusiveCache ++
+  new gemmini.DefaultGemminiConfig ++
+  new WithNBigCores(1) ++
+  new FireSimRocketChipConfig)
+
 
 //**********************************************************************************
 //* Supernode Configurations

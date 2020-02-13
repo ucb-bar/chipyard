@@ -18,7 +18,7 @@
 	url = https://github.com/ucb-bar/riscv-torture.git
 [submodule "generators/boom"]
 	path = generators/boom
-	url = https://github.com/davidbiancolin/riscv-boom.git
+	url = https://github.com/riscv-boom/riscv-boom.git
 [submodule "generators/sifive-blocks"]
 	path = generators/sifive-blocks
 	url = https://github.com/sifive/sifive-blocks.git
@@ -65,6 +65,9 @@
 [submodule "toolchains/esp-tools/riscv-tests"]
 	path = toolchains/esp-tools/riscv-tests
 	url = https://github.com/ucb-bar/esp-tests.git
+[submodule "toolchains/libgloss"]
+	path = toolchains/libgloss
+	url = https://github.com/ucb-bar/libgloss-htif.git
 [submodule "vlsi/hammer"]
 	path = vlsi/hammer
 	url = https://github.com/ucb-bar/hammer.git
@@ -98,3 +101,15 @@
 [submodule "tools/axe"]
 	path = tools/axe
 	url = https://github.com/CTSRD-CHERI/axe.git
+[submodule "software/spec2017"]
+	path = software/spec2017
+	url = https://github.com/ucb-bar/spec2017-workload.git
+[submodule "software/coremark"]
+	path = software/coremark
+	url = https://github.com/ucb-bar/coremark-workload.git
+[submodule "generators/gemmini"]
+	path = generators/gemmini
+	url = https://github.com/ucb-bar/gemmini
+[submodule "software/firemarshal"]
+	path = software/firemarshal
+	url = https://github.com/firesim/FireMarshal.git

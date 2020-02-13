@@ -3,13 +3,13 @@ Test Chip IP
 
 Chipyard includes a Test Chip IP library which provides various hardware
 widgets that may be useful when designing SoCs. This includes a :ref:`Serial Adapter`,
-:ref:`Block Device Controller`, :ref:`TileLink SERDES`, and :ref:`TileLink Switcher`.
+:ref:`Block Device Controller`, :ref:`TileLink SERDES`, :ref:`TileLink Switcher`, and :ref:`UART Adapter`.
 
 Serial Adapter
 --------------
 
 The serial adapter is used by tethered test chips to communicate with the host
-processor. An instance of RISC-V frontend server running on the host CPU 
+processor. An instance of RISC-V frontend server running on the host CPU
 can send commands to the serial adapter to read and write data from the memory
 system. The frontend server uses this functionality to load the test program
 into memory and to poll for completion of the program. More information on
@@ -61,3 +61,15 @@ the select signal once TileLink messages have begun sending.
 
 For an example of how to use the switcher, take a look at the ``SwitcherTest``
 unit test in the `Test Chip IP unit tests <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/Unittests.scala>`_.
+
+UART Adapter
+------------
+
+The UART Adapter is a device that lives in the TestHarness and connects to the
+UART port of the DUT to simulate communication over UART (ex. printing out to UART
+during Linux boot). In addition to working with ``stdin/stdout`` of the host, it is able to
+output a UART log to a particular file using ``+uartlog=<NAME_OF_FILE>`` during simulation.
+
+By default, this UART Adapter is added to all systems within Chipyard by adding the
+``CanHavePeripheryUARTWithAdapter`` and ``CanHavePeripheryUARTWithAdapterImp`` traits to the ``Top`` system.
+These traits add a SiFive UART to the system as well as add the UART Adapter to the TestHarness.

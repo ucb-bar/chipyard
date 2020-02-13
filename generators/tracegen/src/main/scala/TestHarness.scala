@@ -17,7 +17,7 @@ class TestHarness(implicit p: Parameters) extends Module {
 
 object Generator extends GeneratorApp {
   // specify the name that the generator outputs files as
-  val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
+  override lazy val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
 
   // generate files
   generateFirrtl

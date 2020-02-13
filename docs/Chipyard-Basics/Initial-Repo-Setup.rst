@@ -10,6 +10,19 @@ Chipyard is developed and tested on Linux-based systems.
 
 .. Warning:: Working under Windows is not recommended.
 
+
+In CentOS-based platforms, we recommend installing the following dependencies:
+
+.. include:: /../scripts/centos-req.sh
+   :code: bash
+
+In Ubuntu/Debian-based platforms (Ubuntu), we recommend installing the following dependencies:
+
+.. include:: /../scripts/ubuntu-req.sh
+   :code: bash
+
+.. Note:: When running on an Amazon Web Services EC2 FPGA-development instance (for FireSim), FireSim includes a machine setup script that will install all of the aforementioned dependencies (and some additional ones).
+
 Checking out the sources
 ------------------------
 
@@ -20,6 +33,8 @@ After cloning this repo, you will need to initialize all of the submodules.
     git clone https://github.com/ucb-bar/chipyard.git
     cd chipyard
     ./scripts/init-submodules-no-riscv-tools.sh
+
+.. _build-toolchains:
 
 Building a Toolchain
 ------------------------

@@ -15,7 +15,6 @@ trap clean EXIT
 
 cd $LOCAL_CHIPYARD_DIR
 ./scripts/init-submodules-no-riscv-tools.sh
-cd sims/firesim/sim/midas && git submodule update --init
 
 # set stricthostkeychecking to no (must happen before rsync)
 run "echo \"Ping $SERVER\""
@@ -35,7 +34,7 @@ TOOLS_DIR=$REMOTE_RISCV_DIR
 LD_LIB_DIR=$REMOTE_RISCV_DIR/lib
 VERILATOR_BIN_DIR=$REMOTE_VERILATOR_DIR/install/bin
 
-if [ $1 = "hwacha" ]; then
+if [ $1 = "hwacha" ] || [ $1 = "gemmini" ]; then
     TOOLS_DIR=$REMOTE_ESP_DIR
     LD_LIB_DIR=$REMOTE_ESP_DIR/lib
     run "mkdir -p $REMOTE_ESP_DIR"

@@ -10,7 +10,7 @@ import freechips.rocketchip.devices.debug.HasPeripheryDebugModuleImp
 import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPortModuleImp}
 import sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
 
-import testchipip.{HasPeripherySerialModuleImp, HasPeripheryBlockDeviceModuleImp}
+import testchipip.{CanHavePeripherySerialModuleImp, CanHavePeripheryBlockDeviceModuleImp}
 import icenet.HasPeripheryIceNICModuleImpValidOnly
 
 import junctions.{NastiKey, NastiParameters}
@@ -21,18 +21,18 @@ import firesim.util.RegisterBridgeBinder
 import tracegen.HasTraceGenTilesModuleImp
 
 class WithTiedOffDebug extends RegisterBridgeBinder({ case target: HasPeripheryDebugModuleImp =>
-  target.debug.clockeddmi.foreach({ cdmi =>
+  target.debug.foreach(_.clockeddmi.foreach({ cdmi =>
     cdmi.dmi.req.valid := false.B
     cdmi.dmi.req.bits := DontCare
     cdmi.dmi.resp.ready := false.B
     cdmi.dmiClock := false.B.asClock
     cdmi.dmiReset := false.B
-  })
+  }))
   Seq()
 })
 
 class WithSerialBridge extends RegisterBridgeBinder({
-  case target: HasPeripherySerialModuleImp => Seq(SerialBridge(target.clock, target.serial)(target.p))
+  case target: CanHavePeripherySerialModuleImp => Seq(SerialBridge(target.clock, target.serial.get)(target.p))
 })
 
 class WithNICBridge extends RegisterBridgeBinder({
@@ -44,7 +44,8 @@ class WithUARTBridge extends RegisterBridgeBinder({
 })
 
 class WithBlockDeviceBridge extends RegisterBridgeBinder({
-  case target: HasPeripheryBlockDeviceModuleImp => Seq(BlockDevBridge(target.clock ,target.bdev, target.reset.toBool)(target.p))
+  case target: CanHavePeripheryBlockDeviceModuleImp =>
+    Seq(BlockDevBridge(target.clock, target.bdev.get, target.reset.toBool)(target.p))
 })
 
 class WithFASEDBridge extends RegisterBridgeBinder({
