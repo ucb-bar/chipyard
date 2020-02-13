@@ -24,7 +24,7 @@ import tracegen.HasTraceGenTilesModuleImp
 
 import boom.common.{BoomTile}
 
-import chipyard.iobinders.{IOBinders, RegisterIOBinder}
+import chipyard.iobinders.{IOBinders, RegisterIOBinder, RegisterBinder}
 import chipyard.HasBoomAndRocketTilesModuleImp
 
 class WithSerialBridge extends RegisterIOBinder({
@@ -66,7 +66,7 @@ class WithTraceGenBridge extends RegisterIOBinder({
   (c, r, s, target: HasTraceGenTilesModuleImp) => Seq(GroundTestBridge(target.success)(target.p))
 })
 
-class WithFireSimMultiCycleRegfile extends RegisterIOBinder({
+class WithFireSimMultiCycleRegfile extends RegisterBinder({
   (c, r, s, target: HasBoomAndRocketTilesModuleImp) => {
     target.outer.tiles.map {
       case r: RocketTile => {

@@ -18,14 +18,50 @@ import tracegen.{HasTraceGenTilesModuleImp}
 
 import scala.reflect.{ClassTag, classTag}
 
+// System for instantiating binders based
+// on the scala type of the Target (_not_ its IO). This avoids needing to
+// duplicate harnesses (essentially test harnesses) for each target.
+//
+// You could just as well create a custom harness module that instantiates
+// bridges explicitly, or add methods to
+// your target traits that instantiate the bridge there (i.e., akin to
+// SimAXI4Mem). Since cake traits live in Rocket Chip it was easiest to match
+// on the types rather than change trait code.
+
+
+
+// A map of partial functions that match on the type the DUT (_not_ it's
+// IO) to generate an appropriate bridge. You can add your own binder by adding
+// a new (key, fn) pair. You should override existing pairs in this map when
+// using a custom IOBinder
+
+// Since we also want to compose this structure like the existing config system,
+// use the scala string representation of the matched trait as a key
+
 case object IOBinders extends Field[Map[String, (Clock, Bool, Bool, Any) => Seq[Any]]](Map())
 
+
+// This macro overrides previous matches on some Top mixin. This is useful for
+// binders which modify IO, since those typically cannot be composed
 class RegisterIOBinder[T](fn: => (Clock, Bool, Bool, T) => Seq[Any])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
   case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString ->
       ((clock: Clock, reset: Bool, success: Bool, t: Any) => {
         t match {
           case top: T => fn(clock, reset, success, top)
           case _ => Nil
+        }
+      })
+  )
+})
+
+// This macro composes with previous matches on some Top mixin. This is useful for
+// annotation-like binders, since those can typically be composed
+class RegisterBinder[T](fn: => (Clock, Bool, Bool, T) => Seq[Any])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+  case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString ->
+      ((clock: Clock, reset: Bool, success: Bool, t: Any) => {
+        t match {
+          case top: T => fn(clock, reset, success, top) ++
+            up(IOBinders, site).getOrElse(tag.runtimeClass.toString, (c: Clock, r: Bool, s: Bool, t: Any) => Nil)(clock, reset, success, top)
         }
       })
   )
