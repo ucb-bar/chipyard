@@ -27,7 +27,7 @@ We also see this class define several ``ElaborationArtefacts``, files emitted af
 Subsystem
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Looking in `generators/utilities/src/main/scala/Subsystem.scala <https://github.com/ucb-bar/chipyard/blob/master/generators/utilities/src/main/scala/Subsystem.scala>`__, we can see how Chipyard's ``Subsystem``
+Looking in `generators/chipyard/src/main/scala/Subsystem.scala <https://github.com/ucb-bar/chipyard/blob/master/generators/chipyard/src/main/scala/Subsystem.scala>`__, we can see how Chipyard's ``Subsystem``
 extends the ``BaseSubsystem`` abstract class. ``Subsystem`` mixes in the ``HasBoomAndRocketTiles`` trait that
 defines and instantiates BOOM or Rocket tiles, depending on the parameters specified.
 We also connect some basic IOs for each tile here, specifically the hartids and the reset vector.
@@ -35,7 +35,7 @@ We also connect some basic IOs for each tile here, specifically the hartids and 
 System
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``generators/utilities/src/main/scala/System.scala`` completes the definition of the ``System``.
+``generators/chipyard/src/main/scala/System.scala`` completes the definition of the ``System``.
 
 - ``HasHierarchicalBusTopology`` is defined in Rocket Chip, and specifies connections between the top-level buses
 - ``HasAsyncExtInterrupts`` and ``HasExtInterruptsModuleImp`` adds IOs for external interrupts and wires them appropriately to tiles
@@ -45,7 +45,7 @@ System
 Tops
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A SoC Top then extends the ``System`` class with any config-specific components.
+A SoC Top then extends the ``System`` class with traits for custom components.
 In Chipyard, this includes things like adding a NIC, UART, and GPIO as well as setting up the hardware for the bringup method.
 Please refer to :ref:`Communicating with the DUT` for more information on these bringup methods.
 
@@ -55,7 +55,7 @@ TestHarness
 The wiring between the ``TestHarness`` and the Top are performed in methods defined in mixins added to the Top.
 When these methods are called from the ``TestHarness``, they may instantiate modules within the scope of the harness,
 and then connect them to the DUT. For example, the ``connectSimAXIMem`` method defined in the
-``CanHaveMasterAXI4MemPortModuleImp`` trait, when called from the ``TestHarness``, will instantiate ``SimAXIMem``s
+``CanHaveMasterAXI4MemPortModuleImp`` trait, when called from the ``TestHarness``, will instantiate ``SimAXIMems``
 and connect them to the correct IOs of the top.
 
 While this roundabout way of attaching to the IOs of the top may seem to be unnecessarily complex, it allows the designer to compose
@@ -66,4 +66,4 @@ TestDriver
 
 The ``TestDriver`` is defined in ``generators/rocketchip/src/main/resources/vsrc/TestDriver.v``.
 This Verilog file executes a simulation by instantiating the ``TestHarness``, driving the clock and reset signals, and interpreting the success output.
-This file is compiled with the generated Verilog for the ``TestHarness`` and the Top to produce a simulator.
+This file is compiled with the generated Verilog for the ``TestHarness`` and the ``Top`` to produce a simulator.

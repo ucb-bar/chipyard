@@ -11,7 +11,7 @@ elaboration scheme. For a detailed explanation of Diplomacy, see `the paper
 by Cook, Terpstra, and Lee <https://carrv.github.io/2017/papers/cook-diplomacy-carrv2017.pdf>`_.
 
 A brief overview of how to connect simple TileLink widgets can be found
-in the :ref:`Adding-an-Accelerator` section. This section will provide a
+in the :ref:`mmio-accelerators` section. This section will provide a
 detailed reference for the TileLink and Diplomacy functionality provided by
 RocketChip.
 

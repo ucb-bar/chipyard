@@ -14,25 +14,43 @@ configure 4 KiB direct-mapped caches for L1I and L1D.
 
 .. code-block:: scala
 
-    class SmallRocketConfig extends Config(
-        new WithTSI ++
-        new WithNoGPIO ++
-        new WithBootROM ++
-        new WithUART ++
-        new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-        new freechips.rocketchip.subsystem.WithNoSlavePort ++
-        new freechips.rocketchip.subsystem.WithNSmallCores(1) ++ // small rocket cores
-        new freechips.rocketchip.system.BaseConfig)
+     class SmallRocketConfig extends Config(
+         new chipyard.iobinders.WithUARTAdapter ++
+         new chipyard.iobinders.WithTieOffInterrupts ++
+         new chipyard.iobinders.WithSimAXIMem ++
+         new chipyard.iobinders.WithTiedOffDebug ++
+         new chipyard.iobinders.WithSimSerial ++
+         new testchipip.WithTSI ++
+         new chipyard.config.WithNoGPIO ++
+         new chipyard.config.WithBootROM ++
+         new chipyard.config.WithUART ++
+         new chipyard.config.WithL2TLBs(1024) ++
+         new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+         new freechips.rocketchip.subsystem.WithNoSlavePort ++
+         new freechips.rocketchip.subsystem.WithInclusiveCache ++
+         new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+         new freechips.rocketchip.subsystem.WithNSmallCores(1) ++ // small rocket cores
+         new freechips.rocketchip.system.BaseConfig)
 
-    class MediumRocketConfig extends Config(
-        new WithTSI ++
-        new WithNoGPIO ++
-        new WithBootROM ++
-        new WithUART ++
-        new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-        new freechips.rocketchip.subsystem.WithNoSlavePort ++
-        new freechips.rocketchip.subsystem.WithNMedCores(1) ++ // medium rocket cores
-        new freechips.rocketchip.system.BaseConfig)
+     class MediumRocketConfig extends Config(
+         new chipyard.iobinders.WithUARTAdapter ++
+         new chipyard.iobinders.WithTieOffInterrupts ++
+         new chipyard.iobinders.WithSimAXIMem ++
+         new chipyard.iobinders.WithTiedOffDebug ++
+         new chipyard.iobinders.WithSimSerial ++
+         new testchipip.WithTSI ++
+         new chipyard.config.WithNoGPIO ++
+         new chipyard.config.WithBootROM ++
+         new chipyard.config.WithUART ++
+         new chipyard.config.WithL2TLBs(1024) ++
+         new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+         new freechips.rocketchip.subsystem.WithNoSlavePort ++
+         new freechips.rocketchip.subsystem.WithInclusiveCache ++
+         new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+         new freechips.rocketchip.subsystem.WithNMediumCores(1) ++ // Medium rocket cores
+         new freechips.rocketchip.system.BaseConfig)
+
+
 
 If you only want to change the size or associativity, there are configuration
 mixins for those too.
@@ -42,18 +60,11 @@ mixins for those too.
     import freechips.rocketchip.subsystem.{WithL1ICacheSets, WithL1DCacheSets, WithL1ICacheWays, WithL1DCacheWays}
 
     class MyL1RocketConfig extends Config(
-        new WithTSI ++
-        new WithNoGPIO ++
-        new WithBootROM ++
-        new WithUART ++
-        new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-        new freechips.rocketchip.subsystem.WithNoSlavePort ++
-        new WithL1ICacheSets(128) ++                              // change rocket I$
-        new WithL1ICacheWays(2) ++                                // change rocket I$
-        new WithL1DCacheSets(128) ++                              // change rocket D$
-        new WithL1DCacheWays(2) ++                                // change rocket D$
-        new freechips.rocketchip.subsystem.WithNSmallCores(1) ++
-        new freechips.rocketchip.system.BaseConfig)
+         new freechips.rocketchip.subsystem.WithL1ICacheSets(128) ++  // change rocket I$
+         new freechips.rocketchip.subsystem.WithL1ICacheWays(2) ++    // change rocket I$
+         new freechips.rocketchip.subsystem.WithL1DCacheSets(128) ++  // change rocket D$
+         new freechips.rocketchip.subsystem.WithL1DCacheWays(2) ++    // change rocket D$
+         new RocketConfig)
 
 You can also configure the L1 data cache as an data scratchpad instead.
 However, there are some limitations on this. If you are using a data scratchpad,
@@ -62,22 +73,26 @@ Note that these configurations fully remove the L2 cache and mbus.
 
 .. code-block:: scala
 
-    class SmallRocketConfigNoL2 extends Config(
-        new WithTSI ++
-        new WithNoGPIO ++
-        new WithBootROM ++
-        new WithUART ++
-        new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-        new freechips.rocketchip.subsystem.WithNoSlavePort ++
-        new freechips.rocketchip.subsystem.WithNSmallCores(1) ++
-        new freechips.rocketchip.system.BaseConfig)
+    class ScratchpadSmallRocketConfig extends Config(
+         new chipyard.iobinders.WithUARTAdapter ++
+         new chipyard.iobinders.WithTieOffInterrupts ++
+         new chipyard.iobinders.WithSimAXIMem ++
+         new chipyard.iobinders.WithTiedOffDebug ++
+         new chipyard.iobinders.WithSimSerial ++
+         new testchipip.WithTSI ++
+         new chipyard.config.WithNoGPIO ++
+         new chipyard.config.WithBootROM ++
+         new chipyard.config.WithUART ++
+         new chipyard.config.WithL2TLBs(1024) ++
+         new freechips.rocketchip.subsystem.WithNMemoryChannels(0) ++
+         new freechips.rocketchip.subsystem.WithNBanks(0) ++
+         new freechips.rocketchip.subsystem.WithScratchpadsOnly ++
+         new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+         new freechips.rocketchip.subsystem.WithNoSlavePort ++
+         new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+         new freechips.rocketchip.subsystem.WithNSmallCores(1) ++
+         new freechips.rocketchip.system.BaseConfig)
 
-    class ScratchpadRocketConfig extends Config(
-        new freechips.rocketchip.subsystem.WithNoMemPort ++
-        new freechips.rocketchip.subsystem.WithNMemoryChannels(0) ++
-        new freechips.rocketchip.subsystem.WithNBanks(0) ++
-        new freechips.rocketchip.subsystem.WithScratchpadsOnly ++
-        new SmallRocketConfigNoL2)
 
 This configuration fully removes the L2 cache and memory bus by setting the
 number of channels and number of banks to 0.
@@ -92,23 +107,8 @@ set-associativity. However, you can change these parameters to obtain your
 desired cache configuration. The main restriction is that the number of ways
 and the number of banks must be powers of 2.
 
-.. code-block:: scala
-
-    import freechips.rocketchip.subsystem.WithInclusiveCache
-
-    class MyCacheRocketConfig extends Config(
-        new WithTSI ++
-        new WithNoGPIO ++
-        new WithBootROM ++
-        new WithUART ++
-        new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-        new freechips.rocketchip.subsystem.WithNoSlavePort ++
-        new WithInclusiveCache(                                // add 1MB, 4-way, 4-bank cache
-            capacityKB = 1024,
-            nWays = 4,
-            nBanks = 4) ++
-        new freechips.rocketchip.subsystem.WithNSmallCores(1) ++
-        new freechips.rocketchip.system.BaseConfig)
+Refer to the ``CacheParameters`` object defined in sifive-cache for
+customization options.
 
 The Broadcast Hub
 -----------------
@@ -120,28 +120,29 @@ To make such a configuration, you can just copy the definition of
 ``RocketConfig`` but omit the ``WithInclusiveCache`` mixin from the
 list of included mixims.
 
-.. code-block:: scala
-
-    class CachelessRocketConfig extends Config(
-        new WithTSI ++
-        new WithNoGPIO ++
-        new WithBootROM ++
-        new WithUART ++
-        new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-        new freechips.rocketchip.subsystem.WithNoSlavePort ++
-        new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-        new freechips.rocketchip.system.BaseConfig)
-
 If you want to reduce the resources used even further, you can configure
 the Broadcast Hub to use a bufferless design.
 
 .. code-block:: scala
 
-    import freechips.rocketchip.subsystem.WithBufferlessBroadcastHub
+     class NoL2SmallRocketConfig extends Config(
+         new chipyard.iobinders.WithUARTAdapter ++
+         new chipyard.iobinders.WithTieOffInterrupts ++
+         new chipyard.iobinders.WithSimAXIMem ++
+         new chipyard.iobinders.WithTiedOffDebug ++
+         new chipyard.iobinders.WithSimSerial ++
+         new testchipip.WithTSI ++
+         new chipyard.config.WithNoGPIO ++
+         new chipyard.config.WithBootROM ++
+         new chipyard.config.WithUART ++
+         new chipyard.config.WithL2TLBs(1024) ++
+         new freechips.rocketchip.subsystem.WithBufferlessBroadcastHub ++
+         new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+         new freechips.rocketchip.subsystem.WithNoSlavePort ++
+         new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+         new freechips.rocketchip.subsystem.WithNSmallCores(1) ++
+         new freechips.rocketchip.system.BaseConfig)
 
-    class BufferlessRocketConfig extends Config(
-        new WithBufferlessBroadcastHub ++
-        new CachelessRocketConfig)
 
 The Outer Memory System
 -----------------------
@@ -158,15 +159,9 @@ number of DRAM channels is restricted to powers of two.
     import freechips.rocketchip.subsystem.WithNMemoryChannels
 
     class DualChannelRocketConfig extends Config(
-        new WithTSI ++
-        new WithNoGPIO ++
-        new WithBootROM ++
-        new WithUART ++
-        new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-        new freechips.rocketchip.subsystem.WithNoSlavePort ++
-        new WithNMemoryChannels(2) ++                          // multi-channel outer mem
-        new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-        new freechips.rocketchip.system.BaseConfig)
+        new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
+        new RocketConfig)
+
 
 In VCS and Verilator simulation, the DRAM is simulated using the
 ``SimAXIMem`` module, which simply attaches a single-cycle SRAM to each

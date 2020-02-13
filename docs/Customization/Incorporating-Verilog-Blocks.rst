@@ -48,12 +48,12 @@ Verilog files into the build process, which are part of the
       .settings(commonSettings)
 
 For this concrete GCD example, we will be using a ``GCDMMIOBlackBox``
-Verilog module that is defined in the ``example`` project. The Scala
+Verilog module that is defined in the ``chipyard`` project. The Scala
 and Verilog sources follow the prescribed directory layout.
 
 .. code-block:: none
 
-    generators/example/
+    generators/chipyard/
         build.sbt
         src/main/
             scala/
@@ -81,14 +81,14 @@ as the bitwidth of the GCD calculation does in this example.
 
 **Verilog GCD port list and parameters**
 
-.. literalinclude:: ../../generators/example/src/main/resources/vsrc/GCDMMIOBlackBox.v
+.. literalinclude:: ../../generators/chipyard/src/main/resources/vsrc/GCDMMIOBlackBox.v
     :language: Verilog
     :start-after: DOC include start: GCD portlist
     :end-before: DOC include end: GCD portlist
 
 **Chisel BlackBox Definition**
 
-.. literalinclude:: ../../generators/example/src/main/scala/GCD.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/GCD.scala
     :language: scala
     :start-after: DOC include start: GCD blackbox
     :end-before: DOC include end: GCD blackbox
@@ -103,7 +103,7 @@ peripheral-specific traits into a ``TLRegisterRouter``. The ``params``
 member and ``HasRegMap`` base trait should look familiar from the
 previous memory-mapped GCD device example.
 
-.. literalinclude:: ../../generators/example/src/main/scala/GCD.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/GCD.scala
     :language: scala
     :start-after: DOC include start: GCD instance regmap
     :end-before: DOC include end: GCD instance regmap
@@ -115,7 +115,7 @@ Defining a Chip with a BlackBox
 Since we've parameterized the GCD instantiation to choose between the
 Chisel and the Verilog module, creating a config is easy.
 
-.. literalinclude:: ../../generators/example/src/main/scala/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
     :language: scala
     :start-after: DOC include start: GCDAXI4BlackBoxRocketConfig
     :end-before: DOC include end: GCDAXI4BlackBoxRocketConfig
