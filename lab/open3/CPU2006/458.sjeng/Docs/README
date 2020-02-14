@@ -1,0 +1,4 @@
+Modifications to the SPEC version of Sjeng are allowed only if they are 
+for portability reasons or integration into the SPEC benchmark suite.  
+It is not allowed to change (reduce) the working set (memory usage) or 
+internal workings.

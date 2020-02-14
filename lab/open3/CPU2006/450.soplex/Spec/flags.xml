@@ -1,0 +1,303 @@
+<?xml version="1.0"?>
+<!DOCTYPE flagsdescription SYSTEM
+       "http://www.spec.org/dtd/cpuflags1.dtd">
+
+<!-- This file defines flags that appear in the sources for 450.soplex.
+
+  Copyright (C) 2005-2006 Standard Performance Evaluation Corporation
+
+  $Revision: 5344 $
+  $Date: 2007-06-04 16:49:13 -0400 (Mon, 04 Jun 2007) $
+-->
+<flagsdescription>
+
+<!-- Normal flags file should suggest a name for themselves -->
+<filename>450.soplex.flags</filename>
+
+<title>450.soplex Flags</title>
+
+<header>
+<![CDATA[
+<p>These are flags that appear in the benchmark sources, categorized as to
+whether they are portability candidates, mandatory, or forbidden.
+</p>
+]]>
+</header>
+
+<flag name="DCLK_TCK" class="forbidden">
+System clock ticks per second
+</flag>
+
+<flag name="DDEBUGGING" class="forbidden">
+Turn on output for debugging
+</flag>
+
+<flag name="DDEFAULT_BND_VIOL" class="forbidden">
+Sets the tolerance for bounds violations based on precision level
+</flag>
+
+<flag name="DDEFAULT_EPS_ZERO" class="forbidden">
+Defines  additive zero. 1.0 + EPS_ZERO == 1.0
+</flag>
+
+<flag name="DFULL_SHIFT" class="forbidden">
+Defines a different method for perturbation analysis
+</flag>
+
+<flag name="DTEST" class="forbidden">
+Enable a test to aid in debugging
+</flag>
+
+<flag name="DTRACE_METHOD" class="forbidden">
+Yet another debugging define
+</flag>
+
+<flag name="DTWO_LOOPS" class="forbidden">
+Enables a piece of code with two loops that is much slower than the default path.
+</flag>
+
+<flag name="DUSE_OLD" class="forbidden">
+USE_OLD allows the use of old, buggy, optimization-dependent code
+</flag>
+
+<flag name="DWITH_LONG_DOUBLE" class="forbidden">
+WITH_LONG_DOUBLE declares real variables as long double rather than double
+</flag>
+
+<flag name="DWITH_L_ROWS" class="forbidden">
+WITH_L_ROWS is always defined as 1
+</flag>
+
+<flag name="D_ARRAY_H_" class="forbidden">
+Header guard for array.h
+</flag>
+
+<flag name="D_CLUFACTOR_H_" class="forbidden">
+Header guard for clufactor.h
+</flag>
+
+<flag name="D_CRING_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_DATAARRAY_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_DATAHAHSTABLE_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_DATAKEY_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_DATASET_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_DIDXSET_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_DSVECTOR_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_DVECTOR_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_IDLIST_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_IDXSET_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_ISLIST_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_LPCOLSET_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_LPCOL_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_LPROWSET_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_LPROW_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_NAMESET_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_RANDOM_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SLINSOLVER_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SLUFACTOR_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SOPLEX_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SORTER_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXAGGREGATESM_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXALLOC_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXBASIS_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXDEFAULTPR_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXDEFAULTRT_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXDEFINES_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXDEVEXPR_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXDSTARTER_H_" class="forbidden">
+Header guard for spxstarter.h
+</flag>
+
+<flag name="D_SPXEQUILI_H_" class="forbidden">
+Header guard for  spxequilisc.h
+</flag>
+
+<flag name="D_SPXFASTRT_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXGENERALSM_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXHARRISRT_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXHYBRIDPR_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXID_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXLP_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXPARMULTPR_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXPRICE_H_" class="forbidden">
+Header guard for spxpricer.h
+</flag>
+
+<flag name="D_SPXRATIOTESTER_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXREDUNDANTSM_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXREM1SM_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXSCALER_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXSIMPLIFIER_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXSOLVER_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXSTEEPPR_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXSUMST_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXVECTORST_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXWEIGHTPR_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SPXWEIGHTST_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SSVECTOR_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SVECTOR_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_SVSET_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_TIMER_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_UNITVECTOR_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_UPDATEVECTOR_H_" class="forbidden">
+Header guard
+</flag>
+
+<flag name="D_VECTOR_H_" class="forbidden">
+Header guard
+</flag>
+
+</flagsdescription>

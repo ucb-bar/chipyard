@@ -1,0 +1,179 @@
+<?xml version="1.0"?>
+<!DOCTYPE flagsdescription SYSTEM
+       "http://www.spec.org/dtd/cpuflags1.dtd">
+
+<!-- This file defines flags that appear in the sources for 401.bzip2.
+
+  Copyright (C) 2005-2006 Standard Performance Evaluation Corporation
+
+  $Revision: 5344 $
+  $Date: 2007-06-04 16:49:13 -0400 (Mon, 04 Jun 2007) $
+-->
+<flagsdescription>
+
+<!-- Normal flags file should suggest a name for themselves -->
+<filename>401.bzip2.flags</filename>
+
+<title>401.bzip2 Flags</title>
+
+<header>
+<![CDATA[
+<p>These are flags that appear in the benchmark sources, categorized as to
+whether they are portability candidates, mandatory, or forbidden.</p>
+]]>
+</header>
+
+<flag name="DBZ_DEBUG" class="forbidden">
+Use of this flag enables some output which should never be generated.
+</flag>
+
+<flag name="DBZ_EXPORT" class="portability">
+<include text="-DBZ_API(func)=func" />
+<include text="-DBZ_EXTERN=extern" />
+This flag indicates that the functions from bzlib should not be imported from
+a DLL.  This flag is set by default in the benchmark.
+</flag>
+
+<flag name="BZ_EXTERN" class="forbidden" regexp="[-/]DBZ_EXTERN(?:=\S*)?">
+This macro defines text that should be used to indicate that a function is
+externally defined (as in a dynamic library).
+Because the benchmark does not build or use dynamic libraries, setting this
+flag to something other than the default is forbidden.
+</flag>
+
+<flag name="BZ_API" class="forbidden" regexp="[-/]DBZ_API(?:\([^\)]+\)=\S*)?">
+This macro defines text that should be used to indicate how a function should
+be marked in a Windows library or DLL.
+Because the benchmark does not build a library, setting this
+flag to something other than the default is forbidden.
+</flag>
+
+<flag name="DBZ_IMPORT" class="forbidden">
+Use of this flag indicates that the bzlib functions should be imported from
+the DLL.
+Because the benchmark does not build or use DLL, use of this flag is forbidden.
+</flag>
+
+<flag name="DBZ_LCCWIN32" class="portability">
+This flag indicates that the benchmark is being built with lcc under Windows.
+</flag>
+
+<flag name="DBZ_NO_STDIO" class="forbidden">
+Use of this flag indicates that stdio should not be used.  Because it also
+cuts out a lot of the file I/O functions, use of this flag is forbidden.
+</flag>
+
+<flag name="DBZ_STRICT_ANSI" class="forbidden">
+This flag has no effect in 401.bzip2.
+</flag>
+
+<flag name="DBZ_UNIX" class="portability">
+In the original bzip2 source, this flag indicates that the source is being
+built on a Unix-like system.  As this primarily concerns file I/O (which
+the benchmark does not do), all systems get this flag in the benchmark
+version.
+</flag>
+
+<flag name="DDEBUG" class="forbidden">
+This flag enables copious debug output which is guaranteed to cause the
+benchmark to miscompare.  Its use in reportable runs is forbidden.
+</flag>
+
+<flag name="DDEBUG_DUMP" class="forbidden">
+This flag causes buffers generated during the benchmark run to be dumped to
+files.  Because this causes actual file I/O, its use in reportable runs is
+forbidden.
+</flag>
+
+<flag name="DMSDOS" class="portability">
+This flag indicates that the source is being built on MS-DOS.  While that
+seems unlikely, it's not forbidden.
+</flag>
+
+<flag name="DNULL" class="forbidden">
+NULL should be defined by your system headers.  Setting it explicitly is
+forbidden.
+</flag>
+
+<flag name="DOS2" class="portability">
+This flag indicates that the source is being built on OS/2.  While that
+seems unlikely, it's not forbidden.
+</flag>
+
+<flag name="DSPEC_BZIP" class="mandatory">
+This flag indicates that the benchmark should be built to run in the
+CPU2006 harness.  Without the flag, there is no hope that the benchmark
+will work.
+</flag>
+
+<flag name="DSPEC_CPU" class="mandatory">
+<include flag="DBZ_UNIX" />
+This flag is set by the CPU2006 tools harness when building benchmark
+sources.
+</flag>
+
+<flag name="DTIMING_OUTPUT" class="forbidden">
+Use of this flag causes some internal timing to be done and output via the
+debug output facility.  Its use is forbidden for reportable runs.
+</flag>
+
+<flag name="D_BZLIB_H" class="forbidden">
+This macro is a guard against multiple inclusion of bzlib.h.  Setting it
+explicitly is forbidden.
+</flag>
+
+<flag name="D_BZLIB_PRIVATE_H" class="forbidden">
+This macro is a guard against multiple inclusion of bzlib_private.h.  Setting it
+explicitly is forbidden.
+</flag>
+
+<flag name="D_WIN32" class="portability">
+This flag indicates that the source is being built on Windows.
+</flag>
+
+<flag name="D__CYGWIN__" class="portability">
+This flag indicates that the source is being built under Windows using the
+Cygwin toolset.
+</flag>
+
+<flag name="D__DJGPP__" class="portability">
+This flag indicates that the source is being built under MS-DOS using the
+DJGPP compiler.
+</flag>
+
+<flag name="D__GNUC__" class="portability">
+This flag indicates that the source is being built with the GNU Compiler
+Collection.  It has no effect in the CPU2006 version of the code.
+</flag>
+
+<flag name="D__cplusplus" class="portability">
+This flag indicates that the source is being built with a C++ compiler.
+</flag>
+
+<flag name="Dsmall" class="forbidden" regexp="[-/]Dsmall(?:=\S*)?">
+This flag is sometimes implicitly set on Windows; in the bzip2 source code,
+if it is present, it is undefined.
+</flag>
+
+<flag name="SPEC_STDIN" class="forbidden" regexp="[-/]DSPEC_STDIN(?:=\d*)?">
+This flag is used to set the file number for stdin used by the benchmark's
+file I/O abstraction layer.  Its default value must not be changed.
+</flag>
+
+<flag name="SPEC_STDOUT" class="forbidden" regexp="[-/]DSPEC_STDOUT(?:=\d*)?">
+This flag is used to set the file number for stdout used by the benchmark's
+file I/O abstraction layer.  Its default value must not be changed.
+</flag>
+
+<flag name="SPEC_STDERR" class="forbidden" regexp="[-/]DSPEC_STDERR(?:=\d*)?">
+This flag is used to set the file number for stderr used by the benchmark's
+file I/O abstraction layer.  Its default value must not be changed.
+</flag>
+
+<flag name="SPEC_NULLCAST" class="portability" regexp="[-/]DSPEC_NULLCAST(?:=\S*)?">
+This macro defines a cast which is used when comparing a file handle value
+(from the I/O abstraction layer) to NULL.  It must match the type used for
+the file handle, which is int.
+</flag>
+
+</flagsdescription>

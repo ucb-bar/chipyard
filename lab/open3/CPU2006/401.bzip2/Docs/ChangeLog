@@ -1,0 +1,8 @@
+* Kit 1
+  Minor munging to eliminate int<->ptr comparison warnings
+  Slightly more major munging to eliminate possibilty of confusion between
+    SPEC's fake stdin/stdout and the real system things
+* Kit 0
+  Munged bzip2 1.0.1 source into framework developed for CPU2000's 256.bzip2
+
+$Id: ChangeLog 2818 2005-06-03 02:43:52Z cloyce $

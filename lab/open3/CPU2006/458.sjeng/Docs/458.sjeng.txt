@@ -1,0 +1,91 @@
+                                   458.sjeng
+                       SPEC CPU2006 Benchmark Description
+
+Benchmark Name
+
+   458.sjeng
+
+     ----------------------------------------------------------------------
+
+Benchmark Authors
+
+   Gian-Carlo Pascutto <gcp [at] sjeng.org>
+   Vincent Diepeveen <diep [at] xs4all.nl>
+
+     ----------------------------------------------------------------------
+
+Benchmark Program General Category
+
+   Artificial Intelligence (game tree search & pattern recognition)
+
+     ----------------------------------------------------------------------
+
+Benchmark Description
+
+   458.sjeng is based on Sjeng 11.2, which is a program that plays chess and
+   several chess variants, such as drop-chess (similar to Shogi), and
+   'losing' chess.
+
+   It attempts to find the best move via a combination of alpha-beta or
+   priority proof number tree searches, advanced move ordering, positional
+   evaluation and heuristic forward pruning. Practically, it will explore the
+   tree of variations resulting from a given position to a given base depth,
+   extending interesting variations but discarding doubtful or irrelevant
+   ones. From this tree the optimal line of play for both players ("principle
+   variation") is determined, as well as a score reflecting the balance of
+   power between the two.
+
+   The SPEC version is an enhanced version of the free Sjeng 11.2 program,
+   modified to be more portable and more accurately reflect the workload of
+   current professional programs.
+
+     ----------------------------------------------------------------------
+
+Input Description
+
+   458.sjeng's input consists of a textfile containing alternations of
+
+    1. a chess position in the standard Forsyth-Edwards Notation (FEN)
+    2. the depth to which this position should be analyzed, in half-moves
+       (ply depth)
+
+   The SPEC reference input consists of 9 positions belonging to various
+   phases of the game.
+
+     ----------------------------------------------------------------------
+
+Output Description
+
+   458.sjeng's output consists, per position, of some side information
+   (textual display of the chessboard, phase of the game, used parameters...)
+   followed by the output from the tree searching module as it progresses.
+   This is formatted as follows:
+
+    1. Attained depth in half-moves (plies)
+    2. Score for the player that is to move, in equivalents of 1 pawn
+    3. Number of positions investigated
+    4. The optimal line of play ("principle variation")
+
+     ----------------------------------------------------------------------
+
+Programming Language
+
+   ANSI C
+
+     ----------------------------------------------------------------------
+
+Known portability issues
+
+   Requires that "int" is at least 32 bits wide.
+
+     ----------------------------------------------------------------------
+
+References
+
+     * Sjeng 11.2 & Deep Sjeng: http://www.sjeng.org
+     * Portable Game Notation Specification (including FEN/EPD):
+       http://www.tim-mann.org/Standard
+
+     ----------------------------------------------------------------------
+
+   Last updated: 27 July 2006

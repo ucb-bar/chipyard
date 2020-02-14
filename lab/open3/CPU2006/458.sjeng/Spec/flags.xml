@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<!DOCTYPE flagsdescription SYSTEM
+       "http://www.spec.org/dtd/cpuflags1.dtd">
+
+<!-- This file defines flags that appear in the sources for 458.sjeng.
+
+  Copyright (C) 2005-2006 Standard Performance Evaluation Corporation
+
+  $Revision: 3869 $
+  $Date: 2006-02-24 10:01:32 -0500 (Fri, 24 Feb 2006) $
+-->
+<flagsdescription>
+
+<!-- Normal flags file should suggest a name for themselves -->
+<filename>458.sjeng.flags</filename>
+
+<title>458.sjeng Flags</title>
+
+<header>
+<![CDATA[
+<p>These are flags that appear in the benchmark sources, categorized as to
+whether they are portability candidates, mandatory, or forbidden.
+</p>
+]]>
+</header>
+
+<flag name="DFTIME" class="forbidden">
+This flag is forbidden because in the context of SPEC CPU, time 
+is measured by the SPEC harness, rather than by the benchmark itself.
+</flag>
+
+<flag name="DGETTICKCOUNT" class="forbidden">
+This flag is forbidden because in the context of SPEC CPU, time 
+is measured by the SPEC harness, rather than by the benchmark itself.
+</flag>
+
+<flag name="DGETTIMEOFDAY" class="forbidden">
+This flag is forbidden because in the context of SPEC CPU, time 
+is measured by the SPEC harness, rather than by the benchmark itself.
+</flag>
+
+<flag name="DINPROBECODE" class="forbidden">
+It seems likely that setting this flag would break the build; 
+in any case, it's untested, and forbidden in a SPEC run.
+</flag>
+
+<flag name="DPN2" class="forbidden">
+If set, this would cause sjeng to search by a quite different 
+method than the one used in the SPEC benchmark.
+</flag>
+
+<flag name="DPROTOS_H" class="forbidden">
+This flag is used to prohibit multiple includes of a header 
+file.  Explicitly defining this flag would presumably break the 
+build; setting this flag on the command-line during compile is 
+therefore forbidden. 
+</flag>
+
+<flag name="DSJENG_H" class="forbidden">
+This flag is used to prohibit multiple includes of a header 
+file.  Explicitly defining this flag would presumably break the 
+build; setting this flag on the command-line during compile is 
+therefore forbidden. 
+</flag>
+
+<flag name="Dmax" class="forbidden">
+max and min are macros defined in sjeng.h; defining them on the 
+command line would presumabbly break the build, so they are 
+forbidden.
+</flag>
+
+<flag name="Dmin" class="forbidden">
+max and min are macros defined in sjeng.h; defining them on the 
+command line would presumabbly break the build, so they are 
+forbidden.
+</flag>
+
+
+</flagsdescription>

@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>470.lbm: CPU2006 Benchmark Description</title>
+<style type="text/css">
+<!--
+.center { text-align: center }
+.boxed {
+  padding: 1em;
+  border-width: 1px;
+  border-color: black;
+  border-style: solid;
+  background-color: #dddddd;
+  color: black;
+}
+.red { color: red; }
+-->
+</style>
+</head>
+<body>
+<div class="center">
+<h1>470.lbm<br />
+SPEC CPU2006 Benchmark Description File</h1>
+</div>
+
+<hr />
+
+<h2>Benchmark Name</h2>
+
+<p>470.lbm</p>
+
+<hr />
+
+<h2>Benchmark Author</h2>
+
+<p>Thomas Pohl &lt;thomas.pohl &#x5b;at&#x5d; informatik.uni-erlangen.de&gt;</p>
+
+<hr />
+
+<h2>Benchmark Program General Category</h2>
+
+<p>Computational Fluid Dynmaics, Lattice Boltzmann Method</p>
+
+<hr />
+
+<h2>Benchmark Description</h2>
+
+<p>This program implements the so-called "Lattice Boltzmann Method"
+(LBM) to simulate incompressible fluids in 3D as described in
+<a href="#b1">[1]</a>. It is the computationally most important
+part of a larger code which is used in the field of material
+science to simulate the behavior of fluids with free surfaces, in
+particluar the formation and movement of gas bubbles in metal foams
+(see the <a href=
+"http://www10.informatik.uni-erlangen.de/en/Research/Projects/FreeWiHR/">
+FreeWiHR homepage</a> for animations of the results). For
+benchmarking purposes and easy optimization for different
+architectures, the code makes extensive use of macros which hide
+the details of the data access. A visualization of the results of
+the submitted code can be seen below (flow through a porous medium,
+grid size 150x150x150, 1000 time steps).</p>
+
+<p class="center"><img src="what_you_compute.png" alt=
+"[Image of what is computed]" /><br />
+Flow of a fluid through an array of spheres</p>
+
+<hr />
+
+<h2>Input Description</h2>
+
+<p>The <tt>lbm</tt> program requires several command line
+arguments:</p>
+
+<pre>
+lbm &lt;time steps&gt; &lt;result file&gt; &lt;0: nil, 1: cmp, 2: str&gt; &lt;0: ldc, 1: channel flow&gt; [&lt;obstacle file&gt;]
+</pre>
+
+<p>Description of the arguments:</p>
+
+<dl>
+<dt>&lt;time steps&gt;</dt>
+
+<dd>number of time steps that should be performed before storing
+the results</dd>
+
+<dt>&lt;result file&gt;</dt>
+
+<dd>name of the result file</dd>
+
+<dt>&lt;0: nil, 1: cmp, 2: str&gt;</dt>
+
+<dd>determines what should be done with the specified result file:
+action '0' does nothing; with action '1' the computed results are
+compared with the results stored in the specified file; action '2'
+stores the computed results (if the file already exists, it will be
+overwritten)</dd>
+
+<dt>&lt;0: ldc, 1: channel flow&gt;</dt>
+
+<dd>chooses among two basic simulation setups, lid-driven cavity
+(shear flow driven by a "sliding wall" boundary condition) and
+channel flow (flow driven by inflow/outflow boundary
+conditions)</dd>
+
+<dt>[&lt;obstacle file&gt;]</dt>
+
+<dd>optional argument that specifies the obstacle file which is
+loaded before the simulation is run</dd>
+</dl>
+
+<p>The basic steps of the simulation code are as follows:</p>
+
+<ol>
+<li>If an obstacle file was specified it is read and the obstacle
+cells are set accordingly.</li>
+
+<li>The specified number of time steps are calculated in the
+selected simulation setup (lid-driven cavity or channel flow).</li>
+
+<li>Depending on the action chosen the result is either stored,
+compared to an existing result file, or thrown away.</li>
+</ol>
+
+<h3>Benchmarking</h3>
+
+<p>For benchmarking purposes, where the SPEC tools are used to
+validate the solution, the computed results are only stored.</p>
+
+<p>In the Lattice Boltzmann Method, a steady state solution is
+achieved by running a sufficient number of model time steps. For
+the reference workload, 3000 time steps are computed. For the test
+and training workloads, a far smaller number of time steps are
+computed.</p>
+
+<p>The geometry used in the training workload is different from the
+geometry used in the reference benchmark workload. Also, the
+reference workload uses a shear flow boundary condition, whereas
+the training workload does not. Nevertheless, the computational
+steps stressed by the training workload are the same as those
+stressed in the reference run.</p>
+
+<h3>Obstacle File Format</h3>
+
+<p>The file format which specifies the location of obstacle and
+fluid cells is a simple ASCII format. The dot character '.' stands
+for a fluid cell, while all other characters (here '#') denote an
+obstacle cell. Each line represents the cells along the x axis.
+After each line a newline has to be included. After a complete x/y
+plane another newline has to be included.</p>
+
+<p>Below you see an example of an obstacle file for the simulation
+domain x = 6, y = 5, and z = 3. The red comments just show the
+corresponding coordinates for each line and must not be included in
+the obstacle file itself.</p>
+
+<pre class="boxed">
+......                <span class="red">(y = 0, z = 0)</span>
+...#..                <span class="red">(y = 1, z = 0)</span>
+..##..                <span class="red">(y = 2, z = 0)</span>
+.###..                <span class="red">(y = 3, z = 0)</span>
+......                <span class="red">(y = 4, z = 0)</span>
+
+......                <span class="red">(y = 0, z = 1)</span>
+......                <span class="red">(y = 1, z = 1)</span>
+...#..                <span class="red">(y = 2, z = 1)</span>
+..##..                <span class="red">(y = 3, z = 1)</span>
+......                <span class="red">(y = 4, z = 1)</span>
+
+......                <span class="red">(y = 0, z = 2)</span>
+......                <span class="red">(y = 1, z = 2)</span>
+......                <span class="red">(y = 2, z = 2)</span>
+...#..                <span class="red">(y = 3, z = 2)</span>
+......                <span class="red">(y = 4, z = 2)</span>
+</pre>
+
+<hr />
+
+<h2>Output Description</h2>
+
+<p>If the store action '2' has been specified in the command line
+arguments, a result file containing the 3D velocity vector for each
+cell is stored.</p>
+
+<p>The default file format is a sequence of binary single precision
+values (little endian) with the following ordering:</p>
+
+<p class="boxed">v<sub>x</sub>(0,0,0), v<sub>y</sub>(0,0,0),
+v<sub>z</sub>(0,0,0),&nbsp;&nbsp;&nbsp;&nbsp; v<sub>x</sub>(1,0,0),
+v<sub>y</sub>(1,0,0), v<sub>z</sub>(1,0,0),&nbsp;&nbsp;&nbsp;&nbsp;
+v<sub>x</sub>(2,0,0), v<sub>y</sub>(2,0,0),
+v<sub>z</sub>(2,0,0),&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;...,&nbsp;&nbsp;&nbsp;&nbsp;
+v<sub>x</sub>(X,0,0)&nbsp;&nbsp;v<sub>y</sub>(X,0,0)&nbsp;&nbsp;v<sub>z</sub>(X,0,0),<br />
+
+v<sub>x</sub>(0,1,0), v<sub>y</sub>(0,1,0),
+v<sub>z</sub>(0,1,0),&nbsp;&nbsp;&nbsp;&nbsp; v<sub>x</sub>(1,1,0),
+v<sub>y</sub>(1,1,0), v<sub>z</sub>(1,1,0),&nbsp;&nbsp;&nbsp;&nbsp;
+v<sub>x</sub>(2,1,0), v<sub>y</sub>(2,1,0),
+v<sub>z</sub>(2,1,0),&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;...,&nbsp;&nbsp;&nbsp;&nbsp;
+v<sub>x</sub>(X,1,0)&nbsp;&nbsp;v<sub>y</sub>(X,1,0)&nbsp;&nbsp;v<sub>z</sub>(X,1,0),<br />
+
+...<br />
+v<sub>x</sub>(0,Y,0), v<sub>y</sub>(0,Y,0),
+v<sub>z</sub>(0,Y,0),&nbsp;&nbsp;&nbsp;&nbsp; v<sub>x</sub>(1,Y,0),
+v<sub>y</sub>(1,Y,0), v<sub>z</sub>(1,Y,0),&nbsp;&nbsp;&nbsp;&nbsp;
+v<sub>x</sub>(2,Y,0), v<sub>y</sub>(2,Y,0),
+v<sub>z</sub>(2,Y,0),&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;...,&nbsp;&nbsp;&nbsp;&nbsp;
+v<sub>x</sub>(X,Y,0)&nbsp;&nbsp;v<sub>y</sub>(X,Y,0)&nbsp;&nbsp;v<sub>z</sub>(X,Y,0),<br />
+
+...<br />
+v<sub>x</sub>(0,Y,Z), v<sub>y</sub>(0,Y,Z),
+v<sub>z</sub>(0,Y,Z),&nbsp;&nbsp;&nbsp;&nbsp; v<sub>x</sub>(1,Y,Z),
+v<sub>y</sub>(1,Y,Z), v<sub>z</sub>(1,Y,Z),&nbsp;&nbsp;&nbsp;&nbsp;
+v<sub>x</sub>(2,Y,Z), v<sub>y</sub>(2,Y,Z),
+v<sub>z</sub>(2,Y,Z),&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;...,&nbsp;&nbsp;&nbsp;&nbsp;
+v<sub>x</sub>(X,Y,Z)&nbsp;&nbsp;v<sub>y</sub>(X,Y,Z)&nbsp;&nbsp;v<sub>z</sub>(X,Y,Z)</p>
+
+<p>Although the default format cannot be altered via command line
+arguments, it is possible to change the output precision to double
+precision in <tt>config.h</tt>.</p>
+
+<p>If the computed result should be compared to an existing result
+(action '1'), the program returns the maximum absolute difference
+of the velocity comparing each cell individually. If the difference
+is smaller than a certian threshold, the two results are considered
+to be equal.</p>
+
+<hr />
+
+<h2>Programming Language</h2>
+
+<p>ANSI C</p>
+
+<hr />
+
+<h2>Known portability issues</h2>
+
+<p>None</p>
+
+<hr />
+
+<h2>Reference</h2>
+
+<ol>
+<li><a name="b1" id="b1">Y.-H. Qian, D. d'Humieres, and P.
+Lallemand: <i>Lattice BGK models for Navier-Stokes equation</i>.
+Europhys. Lett. 17(6): 479-484, 1992</a>
+</li>
+
+<li>Thomas Pohl, Markus Kowarschik, Jens Wilke, Klaus Iglberger,
+and Ulrich R&uuml;de: <i>Optimization and Profiling of the Cache
+Performance of Parallel Lattice Boltzmann Codes</i>. Parallel
+Processing Letter 13(4) 549-560, 2003, <a href=
+"pohl_ppl.ps">postscript copy available here</a></li>
+</ol>
+
+<hr />
+
+<p>Last Updated: 7 March 2006</p>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>458.sjeng: SPEC CPU2006 Benchmark Description</title>
+</head>
+<body>
+<div style="text-align: center">
+<h1>458.sjeng<br />
+SPEC CPU2006 Benchmark Description</h1>
+</div>
+
+<h2>Benchmark Name</h2>
+
+<p>458.sjeng</p>
+
+<hr />
+
+<h2>Benchmark Authors</h2>
+
+<p>Gian-Carlo Pascutto &lt;gcp &#x5b;at&#x5d; sjeng.org&gt;<br />
+Vincent Diepeveen &lt;diep &#x5b;at&#x5d; xs4all.nl&gt;</p>
+
+<hr />
+
+<h2>Benchmark Program General Category</h2>
+
+<p>Artificial Intelligence (game tree search &amp; pattern
+recognition)</p>
+
+<hr />
+
+<h2>Benchmark Description</h2>
+
+<p>458.sjeng is based on Sjeng 11.2, which is a program that 
+plays chess and several chess variants,
+such as drop-chess (similar to Shogi), and 'losing' chess. </p>
+
+<p>It
+attempts to find the best move via a combination of alpha-beta or
+priority proof number tree searches, advanced move ordering,
+positional evaluation and heuristic forward pruning. Practically,
+it will explore the tree of variations resulting from a given
+position to a given base depth, extending interesting variations
+but discarding doubtful or irrelevant ones. From this tree the
+optimal line of play for both players ("principle variation") is
+determined, as well as a score reflecting the balance of power
+between the two.</p>
+
+<p>
+The SPEC version is an enhanced version of the free Sjeng 11.2
+program, modified to be more portable and more accurately reflect
+the workload of current professional programs.</p>
+
+<hr />
+
+<h2>Input Description</h2>
+
+<p>458.sjeng's input consists of a textfile containing alternations
+of</p>
+
+<ol>
+<li>a chess position in the standard Forsyth-Edwards Notation
+(FEN)</li>
+
+<li>the depth to which this position should be analyzed, in
+half-moves (ply depth)</li>
+</ol>
+
+<p>The SPEC reference input consists of 9 positions belonging to
+various phases of the game.</p>
+
+<hr />
+
+<h2>Output Description</h2>
+
+<p>458.sjeng's output consists, per position, of some side
+information (textual display of the chessboard, phase of the game,
+used parameters...) followed by the output from the tree searching
+module as it progresses. This is formatted as follows:</p>
+
+<ol>
+<li>Attained depth in half-moves (plies)</li>
+
+<li>Score for the player that is to move, in equivalents of 1
+pawn</li>
+
+<li>Number of positions investigated</li>
+
+<li>The optimal line of play ("principle variation")</li>
+</ol>
+
+<hr />
+
+<h2>Programming Language</h2>
+
+<p>ANSI C</p>
+
+<hr />
+
+<h2>Known portability issues</h2>
+
+<p>Requires that "<tt>int</tt>" is at least 32 bits wide.</p>
+
+<hr />
+
+<h2>References</h2>
+
+<ul>
+<li>Sjeng 11.2 &amp; Deep Sjeng: <a href=
+"http://www.sjeng.org/">http://www.sjeng.org</a></li>
+
+<li>Portable Game Notation Specification (including FEN/EPD):
+<a href=
+"http://www.tim-mann.org/Standard">http://www.tim-mann.org/Standard</a></li>
+</ul>
+
+<hr />
+
+<p>Last updated: 27 July 2006</p>
+</body>
+</html>
