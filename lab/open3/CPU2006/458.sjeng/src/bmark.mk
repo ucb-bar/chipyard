@@ -16,7 +16,7 @@ $(build_dir)/458.sjeng: $(458_sjeng_c_objs)
 	$(CC) -o $@ $(LDFLAGS) $^ $(LIBS) $(458_sjeng_LIBS)
 
 $(build_dir)/458.sjeng.out: $(build_dir)/458.sjeng $(TARGET_DEPENDS)
-	$(TARGET_RUN) $< $(458_sjeng_src_dir)/../data/test/input/test.txt $(TARGET_REDIRECT) $@
+	$(TARGET_RUN) $< $(458_sjeng_src_dir)/../data/test/input/andrew.txt $(TARGET_REDIRECT) $@
 
 .PHONY: run-sjeng
 run-sjeng: $(build_dir)/458.sjeng.out

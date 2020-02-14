@@ -281,7 +281,7 @@ int spec_putc(unsigned char ch, int fd) {
     return ch;
 }
 
-#define MB (1024*1024)
+#define KB (1024)
 #ifdef SPEC_CPU
 int main (int argc, char *argv[]) {
     int i, level;
@@ -297,23 +297,23 @@ int main (int argc, char *argv[]) {
     else
 	compressed_size=input_size;
 
-    spec_fd[0].limit=input_size*MB;
-    spec_fd[1].limit=compressed_size*MB;
-    spec_fd[2].limit=input_size*MB;
+    spec_fd[0].limit=input_size*KB;
+    spec_fd[1].limit=compressed_size*KB;
+    spec_fd[2].limit=input_size*KB;
     spec_init();
 
     debug_time();
     debug(2, "Loading Input Data\n");
-    spec_load(0, input_name, input_size*MB);
+    spec_load(0, input_name, input_size*KB);
     debug1(3, "Input data %d bytes in length\n", spec_fd[0].len);
 
-    validate_array = (unsigned char *)malloc(input_size*MB/1024);
+    validate_array = (unsigned char *)malloc(input_size*KB/1024);
     if (validate_array == NULL) {
 	printf ("main: Error mallocing memory!\n");
 	exit (0);
     }
     /* Save off one byte every ~1k for validation */
-    for (i = 0; i*VALIDATE_SKIP < input_size*MB; i++) {
+    for (i = 0; i*VALIDATE_SKIP < input_size*KB; i++) {
 	validate_array[i] = spec_fd[0].buf[i*VALIDATE_SKIP];
     }
 
@@ -364,9 +364,9 @@ int main (int argc, char *argv[]) {
 	}
 #endif
 
-	for (i = 0; i*VALIDATE_SKIP < input_size*MB; i++) {
+	for (i = 0; i*VALIDATE_SKIP < input_size*KB; i++) {
 	    if (validate_array[i] != spec_fd[0].buf[i*VALIDATE_SKIP]) {
-		printf ("Tested %dMB buffer: Miscompared!!\n", input_size);
+		printf ("Tested %dKB buffer: Miscompared!!\n", input_size);
 		exit (0);
 	    }
 	}
@@ -375,7 +375,7 @@ int main (int argc, char *argv[]) {
 	spec_reset(1);
 	spec_rewind(0);
     }
-    printf ("Tested %dMB buffer: OK!\n", input_size);
+    printf ("Tested %dKB buffer: OK!\n", input_size);
 
     return 0;
 }
