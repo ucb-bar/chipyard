@@ -1,0 +1,91 @@
+<!DOCTYPE html
+     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>401.bzip2: SPEC CPU2006 Benchmark Description</title>
+<meta name="generator" content="Cloyce+VIM 6.2" />
+<meta name="revision"
+      content="$Id: 401.bzip2.html 4362 2006-06-06 20:54:23Z cloyce $" />
+</head>
+
+<body>
+<div style="text-align: center">
+<h1>401.bzip2<br />
+SPEC CPU2006 Benchmark Description</h1>
+</div>
+ 
+<h2>Benchmark Name</h2>
+<p>401.bzip2</p>
+<hr />
+
+<h2>Benchmark Author</h2>
+<p>Julian Seward &lt;jseward &#x5b;at&#x5d; acm.org&gt;</p>
+<hr />
+
+<h2>Benchmark Program General Category</h2>
+<p>Compression</p>
+<hr />
+ 
+<h2>Benchmark Description</h2>
+<p>401.bzip2 is based on Julian Seward's bzip2 version 1.0.3.  The only
+difference between bzip2 1.0.3 and 401.bzip2 is that SPEC's version of bzip2
+performs no file I/O other than reading the input.  All compression and
+decompression happens entirely in memory.  This is to help isolate the work
+done to only the CPU and memory subsystem.</p>
+
+<hr />
+
+<h2>Input Description</h2>
+<p>401.bzip2's reference workload has six components: two small JPEG images, a
+program binary, some program source code in a tar file, an HTML file, and
+a "combined" file, which is representative of an archive that contains
+both highly compressible and not very compressible files.</p>
+
+<p>Each input set is compressed and decompressed at three different blocking
+factors ("compression levels"), with the end result of the process being
+compared to the original data after each decompression step.</p>
+
+<hr />
+
+<h2>Output Description</h2>
+<p>The output files provide a brief outline of what the benchmark is doing as
+it runs.  Output sizes for each compression and decompression are printed
+to facilitate validation, and the results of decompression are compared
+with the input data to ensure that they match.</p>
+<hr />
+
+<h2>Programming Language</h2>
+<p>ANSI C</p>
+<hr />
+
+<h2>Known portability issues</h2>
+<p>None</p>
+<hr />
+
+<h2>References</h2>
+<ul>
+<li>Michael Burrows and D. J. Wheeler: "A block-sorting lossless data
+    compression algorithm" 10th May 1994. Digital SRC Research Report 124.<br />
+    <a href="ftp://ftp.digital.com/pub/DEC/SRC/research-reports/SRC-124.ps.gz">ftp://ftp.digital.com/pub/DEC/SRC/research-reports/SRC-124.ps.gz</a></li>
+
+<li>Daniel S. Hirschberg and Debra A. LeLewer, "Efficient Decoding of Prefix
+    Codes", Communications of the ACM, April 1990, Vol 33, # 4.</li>
+
+<li>David J. Wheeler, Program bred3.c and accompanying document bred3.ps.<br />
+    <a href="ftp://ftp.cl.cam.ac.uk/users/djw3/">ftp://ftp.cl.cam.ac.uk/users/djw3/</a></li>
+
+<li>Jon L. Bentley and Robert Sedgewick, "Fast Algorithms for Sorting and
+    Searching Strings", Available from Sedgewick's web page, <br />
+    <a href="http://www.cs.princeton.edu/~rs/">http://www.cs.princeton.edu/~rs/</a></li>
+
+<li>Peter Fenwick, "Block Sorting Text Compression -- Final Report", The
+    University of Auckland, Department of Computer Science Report No. 130,
+    April 1996.<br />
+    <a href="ftp://ftp.cs.auckland.ac.nz/pub/staff/peter-f/TechRep130.ps">ftp://ftp.cs.auckland.ac.nz/pub/staff/peter-f/TechRep130.ps</a></li>
+</ul>
+
+<hr />
+<p>Last updated: 9 May 2006</p>
+</body>
+</html>

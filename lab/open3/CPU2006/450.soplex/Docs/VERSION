@@ -1,0 +1,97 @@
+
+Benchmrk 450.soplex, history / changes
+--------------------------------------
+
+Author: Thorsten Koch, ZIB Berlin / Germany
+
+Project Leader: Rinhold Weicker, Fujitu Siemens
+
+
+-- Still to be inserted: Initial history --
+
+
+April,2004:
+
+Asked author to provide a new input file,
+with the two goals:
+- Smaller memory footprint. Was 1.5 GB, should be
+  reduced to <= 900 MB.
+- Shorter execution time, by a factor of 2-3.
+
+
+April 8, 2004: 
+
+New input file (ref input) received from author.
+First test shows that the execution times has been
+reduced too much, by a factor of about 10.
+
+
+April 15, 2004:
+
+Test of memory footprint (manually executing "kmap" while
+the benchmark is running) shows that the memory
+footprint goal has been achieved, it's now about
+500 MB.
+
+Made tar file, sent to SPEC benchathin for inclusion
+in next kit. Change only in files
+  450.soplex/data/ref/input/ref.mps
+and the corresponding output file
+  450.soplex/data/ref/input/ref.out
+Execution time for "ref" is now too short but this
+can be taken care of later.
+
+
+November 17, 2004
+
+After tests and email discussion with the author,
+new input ref.mps (the one that was received April 21)
+and new benchmark invocation parameters
+  -s0 -g0 -p2
+"-p2" activates a non-default pricing model which is, however,
+as representatitive for real applicatons as the default one, -p4.
+Execution time now seems long enough. If necessary, it could
+be made even longer with another input file ref.mps
+(dated Nov. 08, 2004).
+Update of benchmark documenation.
+
+April 6, 2005
+
+Tests in the period Dec. 2004 - March 2005 had shown
+validation errors (VE) on several systems.
+Investigation into these errors showed:
+- The "soluation value" in the files *.out did not mismatch
+  (within the CPU2006 default tolerances)
+- However, the number "iterations" mismatched in several cases.
+  (The program, in its form for kit 72, was an iterative solver
+  that stopped the main loop's iteration once a certain
+  number was below epsilon.)
+  On different platforms, this number of iterations in the
+  main loop was different.
+- The mismatch seemed to appear in those cases (only)
+  where optimizations were applied that did not follow
+  language and/or IEEE 754 standardsn the FP area.
+
+It was debated whether for benchmarking purposes, a run
+with a significantly different number of iterations
+- even if the "solution value" produced did not deviate -
+would be acceptable. Note that with non-standard optimization
+settings, we essentially do not know how accurate or reproduceable
+the solution is.
+
+In email correspondence between the author and the project leader,
+it was decided that for SPEC benchmarking purposes,
+we introduce an upper limit for the number of iterations.
+With "ref" input, this limit (set in file Spec/object.pm as an
+invocation command line parameter, to 900) will be
+reached on all platforms, and there will be 900
+iterations (ref input) for all platforms.
+This leaves the "solution value" as the only number in the
+(ref) output file that is really significant to indicate
+a correct run. The relative tolerance ($reltol in Spec/object.pm)
+was decreased to 0.00005, based on a recommendation
+from the author.
+At the same time, some other cleanup as performed on the
+sources.
+The resulting directory was submitted for the "kit 74" round of tests.
+

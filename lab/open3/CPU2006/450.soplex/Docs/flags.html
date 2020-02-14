@@ -1,0 +1,2060 @@
+<!DOCTYPE html
+     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta name="generator" content="SPEC CPU2006 Tools  (flags v5476)" />
+<meta http-equiv="Content-type" content="text/html;charset=utf-8" />
+<style type="text/css" id="internalScreen" media="screen">
+<!--
+body {
+  margin:  1em;
+  border:  0;
+  padding: 0;
+  background: white;
+  color:      black;
+  font-family: "Times Roman", times, serif;
+}
+
+.tt {
+  font-family: monospace;
+}
+
+div.flagClass > h2 {
+  border-bottom: 1px dotted black;
+  width: 80%;
+  font-family: sans-serif;
+}
+
+div.flagDesc {
+  clear: both;
+  background-color: rgb(255, 245, 220);
+  border: 1px solid blue; /* XXX This is for debugging */ 
+  margin: 0 auto;
+  width: 90%;
+}
+
+li.flagName {
+  font-weight: bold;
+  width: 100%;
+  border-bottom: 1px solid black;
+  display: block;
+  margin: 0.5em 0 0.5em 0;
+  font-size: 125%;
+  white-space: nowrap;
+}
+
+/* (presumably short) informationals all get grouped together near the top
+ * of the flag description block.
+ */
+.flagOrigin, .flagDescClass, .flagDescCompiler, .flagDescRE, .flagVar {
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  float: left;
+  padding: 0.25em;
+  margin: 0 0 0.25em 0;
+}
+
+.flagDescClass::before {
+  content: "Flag Class: ";
+}
+.flagDescCompiler::before {
+  content: "Compilers that recognize this flag: ";
+}
+.flagDescRE::before {
+  content: "Regular Expression: ";
+}
+.flagVar::before {
+  content: "Found In: ";
+}
+
+span.flagDescInc {
+  border-bottom: 1px solid black;
+}
+
+/* The description text stands alone. */
+.descText {
+  clear: both;
+  padding: 0.5em 1em 0.5em 1em;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  margin: 0.5em 0 0.5em 0;
+}
+
+/* This is a separate class so that in the print style sheet it can
+ * be ignored.
+ * Also, 'style="clear:both;"' is longer than 'class="clear"'
+ */
+.clear {
+  clear: both;
+}
+
+/* This is really for the link _to_ the flag report */
+li.unknown > a:link, a:visited { text-decoration: none; }
+
+.monospace {
+  font-family: Courier, "Courier New", monospace;
+}
+
+ul.flagDescList {
+  clear: both;
+  list-style-type: none;
+}
+
+/* Arrange for each flag description to have some headroom. */
+ul.flagDescList > li {
+  margin: 2em 0 0 0;
+}
+
+ul.flagDesc {
+  list-style-type: none;
+}
+
+div.flagTOC {
+  border: 1px solid white;
+  padding: 0.5em 1em;
+  margin: 0 auto;
+  width: 80%;
+}
+
+ul.flagTOC {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+ul.flagTOC > li {
+  border: 1px solid white; /* rgb(211, 211, 211); */
+  margin: 0;
+  padding: 0.25em 0 0.25em 0;
+  float: left;
+  display: inline-block; /* Fix IE bug; compliant browsers will ignore this */
+  width: 24.3%;
+  min-height: 1.5em;
+  overflow: hidden; /* If the table gets squeezed too much, don't let the
+                     * text overlap
+                     */
+  white-space: nowrap;
+}
+
+ul.SubMenu li {
+  border: 1px solid white; /* rgb(211, 211, 211); */
+}
+
+ul.SubMenu {
+  display: none;
+  position: absolute;
+  list-style-type: none;
+  border: 1px solid black;
+  background-color: white;
+  margin: 0 0 0 2em;
+  padding: 0.25em 5em 0.25em 0.5em;
+  white-space: nowrap;
+}
+
+li:hover > ul.SubMenu, ul.SubMenu:hover {
+  display: block;
+}
+
+ul.SubMenu > li:hover, ul.flagTOC > li:hover {
+  background-color: rgb(176, 196, 238); /* lightsteelgray... almost */
+  border: 1px solid rgb(128, 128, 128);
+}
+
+
+.resultpage a:link, .resultpage a:visited {
+  text-decoration: none;
+  border-bottom: 1px dashed black;
+  color: inherit;
+}
+
+.resultpage {
+  margin: auto;
+  padding: 0;
+  width: 800px;
+}
+
+div.logo {
+  float: left;
+  width: 38px;
+  height: 57px;
+}
+
+.titlebarcontainer, .resultstable {
+  border: solid 1px;
+  width: 100%;
+  float: left;
+}
+
+.titlebar {
+  float: left;
+  padding: 0em 1em 0em 1em;
+  text-align: center;
+  width: 91%;
+}
+
+div.titlebar > h1, div.titlebar > p {
+  margin: 0 1em 0 1em;
+}
+
+.systembar {
+  float: left;
+  width: 65%;
+  font-size: 150%;
+  margin: 0;
+  padding: 0.1em;
+  border-right: solid 1px black;
+}
+
+.metricbar {
+  padding: 0.1em;
+  margin: 0;
+  float: right;
+  width: 33%;
+  height: 50%;
+  font-size: 120%;
+}
+
+.metricbar#base {
+  background-color: #c8c8c8;
+  color: black;
+}
+
+.metricbar#peak {
+  background-color: transparent;
+  color: #2626b3;       /* peak blue */
+}
+
+.metricbar p {
+  margin: 0;
+  padding: 0.2em;
+}
+
+.datebar p, .systembar p {
+  margin: 0;
+  padding: 0;
+}
+
+/* Datebar stuff for older results */
+.datebar p {
+  float: left;
+  border-left: solid 1px black;
+}
+
+span.item {
+  float: left;
+  margin: 0;
+  padding: 0.1em 0 0.1em 0.5em;
+}
+
+span.value {
+  float: right;
+  padding: 0.1em 0.5em 0.1em 0;
+}
+
+div.datebar {
+  width: 100%;
+  float: left;
+  min-height: 100%;
+  border: solid 1px black;
+}
+
+p#test_sponsor         { width: 48%; }
+p#tester               { width: 48%; }
+p#license_num          { width: 24%; }
+p#test_date            { width: 23%; }
+p#hw_avail, p#sw_avail { width: 25%; }
+
+/* Table-based datebar on newer results */
+table.datebar {
+  float: left;
+  width: 100%;
+  min-height: 100%;
+  border-collapse: collapse;
+  border: solid 1px black;
+  table-layout: fixed;
+}
+
+table.datebar th {
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  padding-left: 0.5em;
+  padding: 0 0.5em 0 0.25em;
+}
+
+table.datebar td {
+  text-align: left;
+  padding: 0 0.5em 0 0;
+}
+
+th#license_num          { width: 17%; }
+th#test_sponsor         { width: 17%; }
+th#tester               { width: 17%; }
+th#test_date            { width: 22%; }
+th#hw_avail             { width: 22%; }
+th#sw_avail             { width: 22%; }
+td#license_num_val      { width: 52%; }
+td#test_sponsor_val     { width: 52%; }
+td#tester_val           { width: 52%; }
+td#test_date_val        { width: 13%; white-space: nowrap; }
+td#hw_avail_val         { width: 13%; white-space: nowrap; }
+td#sw_avail_val         { width: 13%; white-space: nowrap; }
+
+
+div.graph {
+  margin: auto;
+}
+
+div.sysdesc > h2 {
+  text-align: center;
+  background-color: #c8c8c8;
+  color: black;
+  padding: 0.5em 0 0.5em 0;
+  margin: 0;
+} 
+  
+div.sysdesc {
+  margin: 0.5em 0 0.5em 0;
+}
+
+div.infobox, div.sysdesc {
+  float: left;
+  width: 100%;
+  padding: 0;
+  border: solid 1px black;
+}
+
+div.infobox table {
+  width: 49%;
+  float: left;
+}
+
+div.infobox table tr {
+  vertical-align: top;
+}
+
+div.infobox table#Hardware,
+div.infobox table#BenchmarkSoftware {
+  width: 50%;
+  border-right: 1px solid black;
+}
+
+div.infobox table#Systems {
+  width: 100%;
+}
+
+div.infobox table#Systems tbody th {
+  width: 20%;
+}
+
+div.infobox thead th {
+  font-size: 200%;
+}
+
+div.infobox tbody th {
+  text-align: left;
+}
+
+.resultstable h2, div.notes h2 {
+  text-align: center;
+  margin: 0.1em;
+}
+
+div.notes h3 {
+  margin: 0.1em;
+}
+
+div.notes table {
+  width: 100%;
+}
+
+div.notes table tr td {
+  text-align: right;
+}
+
+/* Alas, IE6... if only you didn't suck so much...
+div.notes table tr td + td {
+*/
+div.notes table td.al {
+  text-align: left;
+  width: 85%;
+}
+
+div.notes table tr td {
+  padding-bottom: 1em;
+}
+
+div.notes table.portability tr td {
+  padding: 0em;
+}
+
+div.notes table.portability {
+  padding: 1em;
+}
+
+.resultstable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.resultstable th.basecol, .resultstable th.peakcol {
+  padding: 0.1em;
+  font-size: 90%;
+}
+
+.resultstable th {
+  border: solid 2px black;
+}
+
+.resultstable td {
+  border: solid 1px #b8b8b8;
+}
+
+td.bm, th.bm { 
+  border-right: solid 2px black;
+  border-left: solid 2px black;
+}
+
+td.secs { 
+  border-left: solid 2px black;
+}
+
+td.ratio { 
+  border-right: solid 2px black;
+}
+
+.resultstable tfoot td {
+  text-align: center;
+  border: solid 2px black;
+}
+
+th.basecol {
+  background-color: #c8c8c8;
+  color: black;
+}
+td.basecol {
+  text-align: right;
+  background-color: transparent;
+  color: black;
+}
+
+th.peakcol {
+  text-align: center;
+}
+
+.peakcol {
+  background-color: transparent;
+  color: #2626b3;       /* peak blue */
+  text-align: right;
+}
+
+td.bm {
+  /* Basically, the benchmark name and copies columns */
+  background-color: #c8c8c8;
+  color: black;
+}
+
+span.selected {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.selected a:link, .selected a:visited {
+  border-bottom: 0;
+}
+
+div.notes {
+  width: 100%;
+  float: left;
+  border: solid 1px black;
+}
+
+div.flagfooter {
+  text-align: center;
+}
+
+div.errors {
+  border: solid 2px red;
+}
+div.errors h2 {
+  background-color: transparent;
+  color: red;
+}
+
+div.footer {
+  border: none;
+}
+
+/* People find the "double underline" confusing.  And Safari 1.3 doesn't deal
+ * well with attempting to disable the border for userflag links.  So just
+ * give up and don't decorate user flags specially.
+********************
+span.userflag {
+  text-decoration: underline;
+}
+
+.userflag a:link {
+  border-bottom: 0;
+}
+********************
+*/
+
+/* Keep flags from being wrapped */
+span.userflag, span.flagtext {
+  white-space: nowrap;
+}
+/* Most of the screen-specific CSS is also the common CSS */
+
+/* Style for the non-image W3C marking at the bottom of the page, courtesy of
+ * Marek Prokop (http://www.sovavsiti.cz/css/w3c_buttons.html)
+ */
+.w3cbutton3 {
+  margin: 1em 1em 0 0;
+  width: 9em;
+  border: 1px solid #ccc;
+  font-family: helvetica,arial,sans-serif;
+  font-size: 70%;
+  font-weight: bold;
+  float: left;
+}
+.w3cbutton3 a {
+  display: block;
+  width: 100%;
+}
+.w3cbutton3 a:link,
+.w3cbutton3 a:visited,
+.w3cbutton3 a:hover {
+  background-color: #fc6;
+  color: #000;
+  text-decoration: none;
+  border-bottom: none;
+}
+.w3cbutton3 span.w3c {
+  padding: 0 0.4em;
+  background-color: #fff;
+  color: #0c479d;
+}
+
+-->
+</style>
+<style type="text/css" id="internalPrint" media="print">
+<!--
+body {
+  margin:  1em;
+  border:  0;
+  padding: 0;
+  background: white;
+  color:      black;
+  font-family: "Times Roman", times, serif;
+}
+
+.tt {
+  font-family: monospace;
+}
+
+div.flagClass > h2 {
+  border-bottom: 1px dotted black;
+  width: 80%;
+  font-family: sans-serif;
+}
+
+div.flagDesc {
+  clear: both;
+  background-color: rgb(255, 245, 220);
+  border: 1px solid blue; /* XXX This is for debugging */ 
+  margin: 0 auto;
+  width: 90%;
+}
+
+li.flagName {
+  font-weight: bold;
+  width: 100%;
+  border-bottom: 1px solid black;
+  display: block;
+  margin: 0.5em 0 0.5em 0;
+  font-size: 125%;
+  white-space: nowrap;
+}
+
+/* (presumably short) informationals all get grouped together near the top
+ * of the flag description block.
+ */
+.flagOrigin, .flagDescClass, .flagDescCompiler, .flagDescRE, .flagVar {
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  float: left;
+  padding: 0.25em;
+  margin: 0 0 0.25em 0;
+}
+
+.flagDescClass::before {
+  content: "Flag Class: ";
+}
+.flagDescCompiler::before {
+  content: "Compilers that recognize this flag: ";
+}
+.flagDescRE::before {
+  content: "Regular Expression: ";
+}
+.flagVar::before {
+  content: "Found In: ";
+}
+
+span.flagDescInc {
+  border-bottom: 1px solid black;
+}
+
+/* The description text stands alone. */
+.descText {
+  clear: both;
+  padding: 0.5em 1em 0.5em 1em;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  margin: 0.5em 0 0.5em 0;
+}
+
+/* This is a separate class so that in the print style sheet it can
+ * be ignored.
+ * Also, 'style="clear:both;"' is longer than 'class="clear"'
+ */
+.clear {
+  clear: both;
+}
+
+/* This is really for the link _to_ the flag report */
+li.unknown > a:link, a:visited { text-decoration: none; }
+
+.monospace {
+  font-family: Courier, "Courier New", monospace;
+}
+
+ul.flagDescList {
+  clear: both;
+  list-style-type: none;
+}
+
+/* Arrange for each flag description to have some headroom. */
+ul.flagDescList > li {
+  margin: 2em 0 0 0;
+}
+
+ul.flagDesc {
+  list-style-type: none;
+}
+
+div.flagTOC {
+  border: 1px solid white;
+  padding: 0.5em 1em;
+  margin: 0 auto;
+  width: 80%;
+}
+
+ul.flagTOC {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+ul.flagTOC > li {
+  border: 1px solid white; /* rgb(211, 211, 211); */
+  margin: 0;
+  padding: 0.25em 0 0.25em 0;
+  float: left;
+  display: inline-block; /* Fix IE bug; compliant browsers will ignore this */
+  width: 24.3%;
+  min-height: 1.5em;
+  overflow: hidden; /* If the table gets squeezed too much, don't let the
+                     * text overlap
+                     */
+  white-space: nowrap;
+}
+
+ul.SubMenu li {
+  border: 1px solid white; /* rgb(211, 211, 211); */
+}
+
+ul.SubMenu {
+  display: none;
+  position: absolute;
+  list-style-type: none;
+  border: 1px solid black;
+  background-color: white;
+  margin: 0 0 0 2em;
+  padding: 0.25em 5em 0.25em 0.5em;
+  white-space: nowrap;
+}
+
+li:hover > ul.SubMenu, ul.SubMenu:hover {
+  display: block;
+}
+
+ul.SubMenu > li:hover, ul.flagTOC > li:hover {
+  background-color: rgb(176, 196, 238); /* lightsteelgray... almost */
+  border: 1px solid rgb(128, 128, 128);
+}
+
+
+.resultpage a:link, .resultpage a:visited {
+  text-decoration: none;
+  border-bottom: 1px dashed black;
+  color: inherit;
+}
+
+.resultpage {
+  margin: auto;
+  padding: 0;
+  width: 800px;
+}
+
+div.logo {
+  float: left;
+  width: 38px;
+  height: 57px;
+}
+
+.titlebarcontainer, .resultstable {
+  border: solid 1px;
+  width: 100%;
+  float: left;
+}
+
+.titlebar {
+  float: left;
+  padding: 0em 1em 0em 1em;
+  text-align: center;
+  width: 91%;
+}
+
+div.titlebar > h1, div.titlebar > p {
+  margin: 0 1em 0 1em;
+}
+
+.systembar {
+  float: left;
+  width: 65%;
+  font-size: 150%;
+  margin: 0;
+  padding: 0.1em;
+  border-right: solid 1px black;
+}
+
+.metricbar {
+  padding: 0.1em;
+  margin: 0;
+  float: right;
+  width: 33%;
+  height: 50%;
+  font-size: 120%;
+}
+
+.metricbar#base {
+  background-color: #c8c8c8;
+  color: black;
+}
+
+.metricbar#peak {
+  background-color: transparent;
+  color: #2626b3;       /* peak blue */
+}
+
+.metricbar p {
+  margin: 0;
+  padding: 0.2em;
+}
+
+.datebar p, .systembar p {
+  margin: 0;
+  padding: 0;
+}
+
+/* Datebar stuff for older results */
+.datebar p {
+  float: left;
+  border-left: solid 1px black;
+}
+
+span.item {
+  float: left;
+  margin: 0;
+  padding: 0.1em 0 0.1em 0.5em;
+}
+
+span.value {
+  float: right;
+  padding: 0.1em 0.5em 0.1em 0;
+}
+
+div.datebar {
+  width: 100%;
+  float: left;
+  min-height: 100%;
+  border: solid 1px black;
+}
+
+p#test_sponsor         { width: 48%; }
+p#tester               { width: 48%; }
+p#license_num          { width: 24%; }
+p#test_date            { width: 23%; }
+p#hw_avail, p#sw_avail { width: 25%; }
+
+/* Table-based datebar on newer results */
+table.datebar {
+  float: left;
+  width: 100%;
+  min-height: 100%;
+  border-collapse: collapse;
+  border: solid 1px black;
+  table-layout: fixed;
+}
+
+table.datebar th {
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  padding-left: 0.5em;
+  padding: 0 0.5em 0 0.25em;
+}
+
+table.datebar td {
+  text-align: left;
+  padding: 0 0.5em 0 0;
+}
+
+th#license_num          { width: 17%; }
+th#test_sponsor         { width: 17%; }
+th#tester               { width: 17%; }
+th#test_date            { width: 22%; }
+th#hw_avail             { width: 22%; }
+th#sw_avail             { width: 22%; }
+td#license_num_val      { width: 52%; }
+td#test_sponsor_val     { width: 52%; }
+td#tester_val           { width: 52%; }
+td#test_date_val        { width: 13%; white-space: nowrap; }
+td#hw_avail_val         { width: 13%; white-space: nowrap; }
+td#sw_avail_val         { width: 13%; white-space: nowrap; }
+
+
+div.graph {
+  margin: auto;
+}
+
+div.sysdesc > h2 {
+  text-align: center;
+  background-color: #c8c8c8;
+  color: black;
+  padding: 0.5em 0 0.5em 0;
+  margin: 0;
+} 
+  
+div.sysdesc {
+  margin: 0.5em 0 0.5em 0;
+}
+
+div.infobox, div.sysdesc {
+  float: left;
+  width: 100%;
+  padding: 0;
+  border: solid 1px black;
+}
+
+div.infobox table {
+  width: 49%;
+  float: left;
+}
+
+div.infobox table tr {
+  vertical-align: top;
+}
+
+div.infobox table#Hardware,
+div.infobox table#BenchmarkSoftware {
+  width: 50%;
+  border-right: 1px solid black;
+}
+
+div.infobox table#Systems {
+  width: 100%;
+}
+
+div.infobox table#Systems tbody th {
+  width: 20%;
+}
+
+div.infobox thead th {
+  font-size: 200%;
+}
+
+div.infobox tbody th {
+  text-align: left;
+}
+
+.resultstable h2, div.notes h2 {
+  text-align: center;
+  margin: 0.1em;
+}
+
+div.notes h3 {
+  margin: 0.1em;
+}
+
+div.notes table {
+  width: 100%;
+}
+
+div.notes table tr td {
+  text-align: right;
+}
+
+/* Alas, IE6... if only you didn't suck so much...
+div.notes table tr td + td {
+*/
+div.notes table td.al {
+  text-align: left;
+  width: 85%;
+}
+
+div.notes table tr td {
+  padding-bottom: 1em;
+}
+
+div.notes table.portability tr td {
+  padding: 0em;
+}
+
+div.notes table.portability {
+  padding: 1em;
+}
+
+.resultstable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.resultstable th.basecol, .resultstable th.peakcol {
+  padding: 0.1em;
+  font-size: 90%;
+}
+
+.resultstable th {
+  border: solid 2px black;
+}
+
+.resultstable td {
+  border: solid 1px #b8b8b8;
+}
+
+td.bm, th.bm { 
+  border-right: solid 2px black;
+  border-left: solid 2px black;
+}
+
+td.secs { 
+  border-left: solid 2px black;
+}
+
+td.ratio { 
+  border-right: solid 2px black;
+}
+
+.resultstable tfoot td {
+  text-align: center;
+  border: solid 2px black;
+}
+
+th.basecol {
+  background-color: #c8c8c8;
+  color: black;
+}
+td.basecol {
+  text-align: right;
+  background-color: transparent;
+  color: black;
+}
+
+th.peakcol {
+  text-align: center;
+}
+
+.peakcol {
+  background-color: transparent;
+  color: #2626b3;       /* peak blue */
+  text-align: right;
+}
+
+td.bm {
+  /* Basically, the benchmark name and copies columns */
+  background-color: #c8c8c8;
+  color: black;
+}
+
+span.selected {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.selected a:link, .selected a:visited {
+  border-bottom: 0;
+}
+
+div.notes {
+  width: 100%;
+  float: left;
+  border: solid 1px black;
+}
+
+div.flagfooter {
+  text-align: center;
+}
+
+div.errors {
+  border: solid 2px red;
+}
+div.errors h2 {
+  background-color: transparent;
+  color: red;
+}
+
+div.footer {
+  border: none;
+}
+
+/* People find the "double underline" confusing.  And Safari 1.3 doesn't deal
+ * well with attempting to disable the border for userflag links.  So just
+ * give up and don't decorate user flags specially.
+********************
+span.userflag {
+  text-decoration: underline;
+}
+
+.userflag a:link {
+  border-bottom: 0;
+}
+********************
+*/
+
+/* Keep flags from being wrapped */
+span.userflag, span.flagtext {
+  white-space: nowrap;
+}
+/* Classes that contain links - useless on paper */
+.flagTOC, .SubMenu, .NoPrint {
+  display: none;
+}
+
+/* Don't decorate links - they're not clickable */
+a {
+  text-decoration: none;
+  background: inherit;
+  color: inherit;
+}
+
+.resultpage {
+  width: 100%;
+}
+
+.w3cbutton3 {
+  display: none;
+}
+-->
+</style>
+<title>450.soplex Flags</title>
+</head><body>
+<h1>450.soplex Flags</h1>
+
+
+<p>These are flags that appear in the benchmark sources, categorized as to
+whether they are portability candidates, mandatory, or forbidden.
+</p>
+
+<div class="NoPrint">
+<h3>Sections</h3>
+<p>Selecting one of the following will take you directly to that section:</p>
+<ul>
+<li><a href="#Section_forbidden">Forbidden Flags</a></li>
+</ul>
+</div>
+
+<hr />
+
+<div class="flagClass" id="forbidden">
+<h2><a name="Section_forbidden" id="Section_forbidden">Forbidden Flags</a></h2>
+<div class="flagTOC">
+<ul class="flagTOC">
+ <li><a href="#b450.soplex_DCLK_TCK">-DCLK_TCK</a></li>
+ <li><a href="#b450.soplex_DDEBUGGING">-DDEBUGGING</a></li>
+ <li><a href="#b450.soplex_DDEFAULT_BND_VIOL">-DDEFAULT_BND_VIOL</a></li>
+ <li><a href="#b450.soplex_DDEFAULT_EPS_ZERO">-DDEFAULT_EPS_ZERO</a></li>
+ <li><a href="#b450.soplex_DFULL_SHIFT">-DFULL_SHIFT</a></li>
+ <li><a href="#b450.soplex_DTEST">-DTEST</a></li>
+ <li><a href="#b450.soplex_DTRACE_METHOD">-DTRACE_METHOD</a></li>
+ <li><a href="#b450.soplex_DTWO_LOOPS">-DTWO_LOOPS</a></li>
+ <li><a href="#b450.soplex_DUSE_OLD">-DUSE_OLD</a></li>
+ <li><a href="#b450.soplex_DWITH_LONG_DOUBLE">-DWITH_LONG_DOUBLE</a></li>
+ <li><a href="#b450.soplex_DWITH_L_ROWS">-DWITH_L_ROWS</a></li>
+ <li><a href="#b450.soplex_D_ARRAY_H_">-D_ARRAY_H_</a></li>
+ <li><a href="#b450.soplex_D_CLUFACTOR_H_">-D_CLUFACTOR_H_</a></li>
+ <li><a href="#b450.soplex_D_CRING_H_">-D_CRING_H_</a></li>
+ <li><a href="#b450.soplex_D_DATAARRAY_H_">-D_DATAARRAY_H_</a></li>
+ <li><a href="#b450.soplex_D_DATAHAHSTABLE_H_">-D_DATAHAHSTABLE_H_</a></li>
+ <li><a href="#b450.soplex_D_DATAKEY_H_">-D_DATAKEY_H_</a></li>
+ <li><a href="#b450.soplex_D_DATASET_H_">-D_DATASET_H_</a></li>
+ <li><a href="#b450.soplex_D_DIDXSET_H_">-D_DIDXSET_H_</a></li>
+ <li><a href="#b450.soplex_D_DSVECTOR_H_">-D_DSVECTOR_H_</a></li>
+ <li><a href="#b450.soplex_D_DVECTOR_H_">-D_DVECTOR_H_</a></li>
+ <li><a href="#b450.soplex_D_IDLIST_H_">-D_IDLIST_H_</a></li>
+ <li><a href="#b450.soplex_D_IDXSET_H_">-D_IDXSET_H_</a></li>
+ <li><a href="#b450.soplex_D_ISLIST_H_">-D_ISLIST_H_</a></li>
+ <li><a href="#b450.soplex_D_LPCOLSET_H_">-D_LPCOLSET_H_</a></li>
+ <li><a href="#b450.soplex_D_LPCOL_H_">-D_LPCOL_H_</a></li>
+ <li><a href="#b450.soplex_D_LPROWSET_H_">-D_LPROWSET_H_</a></li>
+ <li><a href="#b450.soplex_D_LPROW_H_">-D_LPROW_H_</a></li>
+ <li><a href="#b450.soplex_D_NAMESET_H_">-D_NAMESET_H_</a></li>
+ <li><a href="#b450.soplex_D_RANDOM_H_">-D_RANDOM_H_</a></li>
+ <li><a href="#b450.soplex_D_SLINSOLVER_H_">-D_SLINSOLVER_H_</a></li>
+ <li><a href="#b450.soplex_D_SLUFACTOR_H_">-D_SLUFACTOR_H_</a></li>
+ <li><a href="#b450.soplex_D_SOPLEX_H_">-D_SOPLEX_H_</a></li>
+ <li><a href="#b450.soplex_D_SORTER_H_">-D_SORTER_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXAGGREGATESM_H_">-D_SPXAGGREGATESM_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXALLOC_H_">-D_SPXALLOC_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXBASIS_H_">-D_SPXBASIS_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXDEFAULTPR_H_">-D_SPXDEFAULTPR_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXDEFAULTRT_H_">-D_SPXDEFAULTRT_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXDEFINES_H_">-D_SPXDEFINES_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXDEVEXPR_H_">-D_SPXDEVEXPR_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXDSTARTER_H_">-D_SPXDSTARTER_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXEQUILI_H_">-D_SPXEQUILI_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXFASTRT_H_">-D_SPXFASTRT_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXGENERALSM_H_">-D_SPXGENERALSM_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXHARRISRT_H_">-D_SPXHARRISRT_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXHYBRIDPR_H_">-D_SPXHYBRIDPR_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXID_H_">-D_SPXID_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXLP_H_">-D_SPXLP_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXPARMULTPR_H_">-D_SPXPARMULTPR_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXPRICE_H_">-D_SPXPRICE_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXRATIOTESTER_H_">-D_SPXRATIOTESTER_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXREDUNDANTSM_H_">-D_SPXREDUNDANTSM_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXREM1SM_H_">-D_SPXREM1SM_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXSCALER_H_">-D_SPXSCALER_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXSIMPLIFIER_H_">-D_SPXSIMPLIFIER_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXSOLVER_H_">-D_SPXSOLVER_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXSTEEPPR_H_">-D_SPXSTEEPPR_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXSUMST_H_">-D_SPXSUMST_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXVECTORST_H_">-D_SPXVECTORST_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXWEIGHTPR_H_">-D_SPXWEIGHTPR_H_</a></li>
+ <li><a href="#b450.soplex_D_SPXWEIGHTST_H_">-D_SPXWEIGHTST_H_</a></li>
+ <li><a href="#b450.soplex_D_SSVECTOR_H_">-D_SSVECTOR_H_</a></li>
+ <li><a href="#b450.soplex_D_SVECTOR_H_">-D_SVECTOR_H_</a></li>
+ <li><a href="#b450.soplex_D_SVSET_H_">-D_SVSET_H_</a></li>
+ <li><a href="#b450.soplex_D_TIMER_H_">-D_TIMER_H_</a></li>
+ <li><a href="#b450.soplex_D_UNITVECTOR_H_">-D_UNITVECTOR_H_</a></li>
+ <li><a href="#b450.soplex_D_UPDATEVECTOR_H_">-D_UPDATEVECTOR_H_</a></li>
+ <li><a href="#b450.soplex_D_VECTOR_H_">-D_VECTOR_H_</a></li>
+</ul>
+<div class="clear"></div>
+</div>
+
+<ul class="flagDescList">
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_DCLK_TCK" id="b450.soplex_DCLK_TCK">-DCLK_TCK</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DCLK_TCK(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+System clock ticks per second
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_DDEBUGGING" id="b450.soplex_DDEBUGGING">-DDEBUGGING</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DDEBUGGING(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Turn on output for debugging
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_DDEFAULT_BND_VIOL" id="b450.soplex_DDEFAULT_BND_VIOL">-DDEFAULT_BND_VIOL</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DDEFAULT_BND_VIOL(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Sets the tolerance for bounds violations based on precision level
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_DDEFAULT_EPS_ZERO" id="b450.soplex_DDEFAULT_EPS_ZERO">-DDEFAULT_EPS_ZERO</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DDEFAULT_EPS_ZERO(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Defines  additive zero. 1.0 + EPS_ZERO == 1.0
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_DFULL_SHIFT" id="b450.soplex_DFULL_SHIFT">-DFULL_SHIFT</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DFULL_SHIFT(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Defines a different method for perturbation analysis
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_DTEST" id="b450.soplex_DTEST">-DTEST</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DTEST(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Enable a test to aid in debugging
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_DTRACE_METHOD" id="b450.soplex_DTRACE_METHOD">-DTRACE_METHOD</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DTRACE_METHOD(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Yet another debugging define
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_DTWO_LOOPS" id="b450.soplex_DTWO_LOOPS">-DTWO_LOOPS</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DTWO_LOOPS(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Enables a piece of code with two loops that is much slower than the default path.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_DUSE_OLD" id="b450.soplex_DUSE_OLD">-DUSE_OLD</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DUSE_OLD(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+USE_OLD allows the use of old, buggy, optimization-dependent code
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_DWITH_LONG_DOUBLE" id="b450.soplex_DWITH_LONG_DOUBLE">-DWITH_LONG_DOUBLE</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DWITH_LONG_DOUBLE(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+WITH_LONG_DOUBLE declares real variables as long double rather than double
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_DWITH_L_ROWS" id="b450.soplex_DWITH_L_ROWS">-DWITH_L_ROWS</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DWITH_L_ROWS(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+WITH_L_ROWS is always defined as 1
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_ARRAY_H_" id="b450.soplex_D_ARRAY_H_">-D_ARRAY_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_ARRAY_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard for array.h
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_CLUFACTOR_H_" id="b450.soplex_D_CLUFACTOR_H_">-D_CLUFACTOR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_CLUFACTOR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard for clufactor.h
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_CRING_H_" id="b450.soplex_D_CRING_H_">-D_CRING_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_CRING_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_DATAARRAY_H_" id="b450.soplex_D_DATAARRAY_H_">-D_DATAARRAY_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_DATAARRAY_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_DATAHAHSTABLE_H_" id="b450.soplex_D_DATAHAHSTABLE_H_">-D_DATAHAHSTABLE_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_DATAHAHSTABLE_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_DATAKEY_H_" id="b450.soplex_D_DATAKEY_H_">-D_DATAKEY_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_DATAKEY_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_DATASET_H_" id="b450.soplex_D_DATASET_H_">-D_DATASET_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_DATASET_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_DIDXSET_H_" id="b450.soplex_D_DIDXSET_H_">-D_DIDXSET_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_DIDXSET_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_DSVECTOR_H_" id="b450.soplex_D_DSVECTOR_H_">-D_DSVECTOR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_DSVECTOR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_DVECTOR_H_" id="b450.soplex_D_DVECTOR_H_">-D_DVECTOR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_DVECTOR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_IDLIST_H_" id="b450.soplex_D_IDLIST_H_">-D_IDLIST_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_IDLIST_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_IDXSET_H_" id="b450.soplex_D_IDXSET_H_">-D_IDXSET_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_IDXSET_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_ISLIST_H_" id="b450.soplex_D_ISLIST_H_">-D_ISLIST_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_ISLIST_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_LPCOLSET_H_" id="b450.soplex_D_LPCOLSET_H_">-D_LPCOLSET_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_LPCOLSET_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_LPCOL_H_" id="b450.soplex_D_LPCOL_H_">-D_LPCOL_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_LPCOL_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_LPROWSET_H_" id="b450.soplex_D_LPROWSET_H_">-D_LPROWSET_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_LPROWSET_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_LPROW_H_" id="b450.soplex_D_LPROW_H_">-D_LPROW_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_LPROW_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_NAMESET_H_" id="b450.soplex_D_NAMESET_H_">-D_NAMESET_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_NAMESET_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_RANDOM_H_" id="b450.soplex_D_RANDOM_H_">-D_RANDOM_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_RANDOM_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SLINSOLVER_H_" id="b450.soplex_D_SLINSOLVER_H_">-D_SLINSOLVER_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SLINSOLVER_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SLUFACTOR_H_" id="b450.soplex_D_SLUFACTOR_H_">-D_SLUFACTOR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SLUFACTOR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SOPLEX_H_" id="b450.soplex_D_SOPLEX_H_">-D_SOPLEX_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SOPLEX_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SORTER_H_" id="b450.soplex_D_SORTER_H_">-D_SORTER_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SORTER_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXAGGREGATESM_H_" id="b450.soplex_D_SPXAGGREGATESM_H_">-D_SPXAGGREGATESM_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXAGGREGATESM_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXALLOC_H_" id="b450.soplex_D_SPXALLOC_H_">-D_SPXALLOC_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXALLOC_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXBASIS_H_" id="b450.soplex_D_SPXBASIS_H_">-D_SPXBASIS_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXBASIS_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXDEFAULTPR_H_" id="b450.soplex_D_SPXDEFAULTPR_H_">-D_SPXDEFAULTPR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXDEFAULTPR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXDEFAULTRT_H_" id="b450.soplex_D_SPXDEFAULTRT_H_">-D_SPXDEFAULTRT_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXDEFAULTRT_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXDEFINES_H_" id="b450.soplex_D_SPXDEFINES_H_">-D_SPXDEFINES_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXDEFINES_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXDEVEXPR_H_" id="b450.soplex_D_SPXDEVEXPR_H_">-D_SPXDEVEXPR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXDEVEXPR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXDSTARTER_H_" id="b450.soplex_D_SPXDSTARTER_H_">-D_SPXDSTARTER_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXDSTARTER_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard for spxstarter.h
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXEQUILI_H_" id="b450.soplex_D_SPXEQUILI_H_">-D_SPXEQUILI_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXEQUILI_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard for  spxequilisc.h
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXFASTRT_H_" id="b450.soplex_D_SPXFASTRT_H_">-D_SPXFASTRT_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXFASTRT_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXGENERALSM_H_" id="b450.soplex_D_SPXGENERALSM_H_">-D_SPXGENERALSM_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXGENERALSM_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXHARRISRT_H_" id="b450.soplex_D_SPXHARRISRT_H_">-D_SPXHARRISRT_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXHARRISRT_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXHYBRIDPR_H_" id="b450.soplex_D_SPXHYBRIDPR_H_">-D_SPXHYBRIDPR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXHYBRIDPR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXID_H_" id="b450.soplex_D_SPXID_H_">-D_SPXID_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXID_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXLP_H_" id="b450.soplex_D_SPXLP_H_">-D_SPXLP_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXLP_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXPARMULTPR_H_" id="b450.soplex_D_SPXPARMULTPR_H_">-D_SPXPARMULTPR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXPARMULTPR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXPRICE_H_" id="b450.soplex_D_SPXPRICE_H_">-D_SPXPRICE_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXPRICE_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard for spxpricer.h
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXRATIOTESTER_H_" id="b450.soplex_D_SPXRATIOTESTER_H_">-D_SPXRATIOTESTER_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXRATIOTESTER_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXREDUNDANTSM_H_" id="b450.soplex_D_SPXREDUNDANTSM_H_">-D_SPXREDUNDANTSM_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXREDUNDANTSM_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXREM1SM_H_" id="b450.soplex_D_SPXREM1SM_H_">-D_SPXREM1SM_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXREM1SM_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXSCALER_H_" id="b450.soplex_D_SPXSCALER_H_">-D_SPXSCALER_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXSCALER_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXSIMPLIFIER_H_" id="b450.soplex_D_SPXSIMPLIFIER_H_">-D_SPXSIMPLIFIER_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXSIMPLIFIER_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXSOLVER_H_" id="b450.soplex_D_SPXSOLVER_H_">-D_SPXSOLVER_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXSOLVER_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXSTEEPPR_H_" id="b450.soplex_D_SPXSTEEPPR_H_">-D_SPXSTEEPPR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXSTEEPPR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXSUMST_H_" id="b450.soplex_D_SPXSUMST_H_">-D_SPXSUMST_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXSUMST_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXVECTORST_H_" id="b450.soplex_D_SPXVECTORST_H_">-D_SPXVECTORST_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXVECTORST_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXWEIGHTPR_H_" id="b450.soplex_D_SPXWEIGHTPR_H_">-D_SPXWEIGHTPR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXWEIGHTPR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SPXWEIGHTST_H_" id="b450.soplex_D_SPXWEIGHTST_H_">-D_SPXWEIGHTST_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SPXWEIGHTST_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SSVECTOR_H_" id="b450.soplex_D_SSVECTOR_H_">-D_SSVECTOR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SSVECTOR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SVECTOR_H_" id="b450.soplex_D_SVECTOR_H_">-D_SVECTOR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SVECTOR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_SVSET_H_" id="b450.soplex_D_SVSET_H_">-D_SVSET_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_SVSET_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_TIMER_H_" id="b450.soplex_D_TIMER_H_">-D_TIMER_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_TIMER_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_UNITVECTOR_H_" id="b450.soplex_D_UNITVECTOR_H_">-D_UNITVECTOR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_UNITVECTOR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_UPDATEVECTOR_H_" id="b450.soplex_D_UPDATEVECTOR_H_">-D_UPDATEVECTOR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_UPDATEVECTOR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b450.soplex_D_VECTOR_H_" id="b450.soplex_D_VECTOR_H_">-D_VECTOR_H_</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_VECTOR_H_(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Header guard
+</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+
+</div>
+<hr />
+</body>
+</html>

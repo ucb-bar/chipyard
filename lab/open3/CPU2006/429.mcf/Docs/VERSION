@@ -1,0 +1,86 @@
+Benchmark 429.mcf, Change History of the CPU2006 version
+--------------------------------------------------------
+
+January 2002
+------------
+
+First version supplied by the author, Andreas Loebel.
+
+Source code  basically unchanged from the CPU2000 version.
+
+Input (and output) sizes enlarged for CPU2006,
+correlating with larger memory size during execution:
+
+Target size (ref input) is now 900 MB in a 32-bit data model.
+In a 64-bit memory model, it will be above the target size
+of 1 GB but we consider this OK: By 2004, systems will
+have more memory.
+
+
+SPEC Benchathon, Jan. 28, 2002
+-------------------------
+
+Lines 
+  #ident
+removed from sources: Not ANSI C; the IBM compiler complains.
+
+Changed some long to size_t for P64 portability
+
+
+March 13, 2002
+--------------
+
+New version from Andreas Loebel, his numbering: 429.mcf-1.8.tgz
+Calibrated the memory requirements as follows:
+test 186 MB
+train 280 MB
+ref 899 MB
+
+Additionally, incorporated the changes that were made locally during the
+SPEC benchathon into the main version.
+
+
+November 16, 2004
+-----------------
+
+Generated documentation file, with most of the contents
+copied from the respective documentation file for
+181.mcf in CPU2000.
+ 
+
+November 21, 2004
+-----------------
+
+Changes made by the author:
+
+A) Whenever possible, long typed attributes of struct node and struct arc are
+   replaced by 32 bit integer whenever possible, e.g., if used as boolean
+   type. Pointers remain unaffected and map to 32 or 64 bit long depending on
+   the compilation model to ensure compatibility to 64 bit systems for truly
+   large scale problem instances requiring more than 2 GB memory.
+
+B) To reduce cache misses and accellerate program performance somewhat, the
+   elements of struct node and struct arc, respectively, are rearranged
+   according to the proposals made in "Memory Profiling using Hardware Counters"
+   by Marty Itzkowitz, Brian Wylie, Christopher Aoki, and Nicolai Kosche.
+
+
+December 3, 2004 rw
+================
+
+Reintroduced -DWANT_STDC_PROTO as a required flag for
+SPEC benchmark compilations (File 429.mcf/Spec/object.pm).
+
+
+February 21,, 2005 rw
+==================
+
+New version supplied by the author, with
+- longer execution timwe (ref input)
+- slightly reduced memory footprint
+Both were requested at the SPEC OSG meeting
+of January 2005.
+
+Documentation updated, now available in HTML.
+
+

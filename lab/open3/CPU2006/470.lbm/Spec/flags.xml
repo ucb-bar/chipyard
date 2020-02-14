@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE flagsdescription SYSTEM "http://www.spec.org/dtd/cpuflags1.dtd">
+
+<!-- This file defines flags that appear in the sources for 470.lbm.
+
+  Copyright (C) 2005-2006 Standard Performance Evaluation Corporation
+
+  $Revision: 3869 $
+  $Date: 2006-02-24 10:01:32 -0500 (Fri, 24 Feb 2006) $
+-->
+<flagsdescription>
+
+<!-- Normal flags file should suggest a name for themselves -->
+<filename>470.lbm.flags</filename>
+
+<title>470.lbm Flags</title>
+
+<header>
+<![CDATA[
+<p>These are flags that appear in the benchmark sources, categorized as to
+whether they are portability candidates, mandatory, or forbidden.
+</p>
+]]>
+</header>
+<!-- no flags currently are known to be needed -->
+
+</flagsdescription>

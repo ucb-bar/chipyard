@@ -1,0 +1,17 @@
+Delta   =     1.000000e-06
+Epsilon =     1.000000e-17
+Entering algorithm
+Column representation
+Forest-Tomlin update
+Steep pricing
+Fast ratiotest
+No scaling
+No simplifier
+Weight starter
+loading LP file test.mps
+LP has 497	rows and
+       614	columns
+solving LP
+Finished solving (status=1, objValue=1.727911e+05)
+solution value is: 1.7279107e+05
+

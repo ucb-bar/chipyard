@@ -1,0 +1,139 @@
+                                   450.soplex
+                       SPEC CPU2006 Benchmark Description
+
+Benchmark Name
+
+   450.soplex
+
+     ----------------------------------------------------------------------
+
+Benchmark Author
+
+   Roland Wunderling, Thorsten Koch, Tobias Achterberg
+   koch [at] zib.de
+
+     ----------------------------------------------------------------------
+
+Benchmark Program General Category
+
+   Simplex Linear Program (LP) Solver
+
+     ----------------------------------------------------------------------
+
+Benchmark Description
+
+   450.soplex is based on SoPlex Version 1.2.1. SoPlex solves a linear
+   program using the Simplex algorithm.
+
+   The LP is given as a sparse m by n matrix A, together with a right hand
+   side vector b of dimension m and an objective function coefficient vector
+   c of dimension n. In general, the problem is to find the vector x to:
+
+                                                                      
+ minimize  c'x                                                       
+ subject to Ax  <= b                                             
+ with        x  >= 0 .                                            
+
+   In practice, x may also have upper bounds and the A(i,.)x <= b(i)
+   constraints could also be greater-than-or-equal-to constraints or equality
+   constraints (where A(i,.) is row i of the matrix A).
+
+   Note that the matrix A is rather sparse in practice. Therefore SoPlex,
+   like most other implementations of the simplex algorithm, employs
+   algorithms for sparse linear algebra, in particular a sparse
+   LU-Factorization and appropriate solving routines for the resulting
+   triangular equation systems.
+
+   c'x is known as the objective function.
+
+     ----------------------------------------------------------------------
+
+Input Description
+
+   For SoPlex, the input files can be in either MPS file format or CPLEX LP
+   file format.
+
+   The input files provided with 450.soplex are in MPS format and
+   predominately define transportation planning models. The input data files
+   are all from public domain sources. An overview of the input files of size
+   test, train and ref (reference) is:
+
+     * Test: test.mps is the "finnis" test problem from the netlib collection
+       of LP input data files. It specifies a linear program (LP) with 497
+       rows (constraints) and 614 columns (variables). A bit more information
+       on this dataset is available at the netlib readme.
+     * Train: train.mps contains the rail582 model (details on the 'rail'
+       problems below) with 582 rows and 55,515 columns, and pds-20.mps (one
+       of the PDS problems described below) has 33,874 rows and 105,728
+       columns.
+     * Ref: The ref datasets describe larger models similar to the train
+       models: ref.mps defines the rail2586 model with 2586 rows and 920,683
+       columns, and pds-50.mps has 83,060 rows and 270,095 columns.
+
+   The PDS train and ref input files are military airlift models and part of
+   the "Kennington" problems described in "An Empirical Evaluation of the
+   KORBX Algorithms for Military Airlift Applications" by W. J. Carolan, J.
+   E. Hill, J. L. Kennington, S. Niemi, S. J. Wichmann (Operations Research
+   vol. 38, no. 2 (1990), pp. 240-248). The pds-20 and pds-50 models were
+   obtained from Hans Mittelman's website Benchmarks for Optimization
+   Software and, in particular, here.
+
+   The 'rail' problems (rail582 and rail2586) are described at J. E.
+   Beasley's OR Library and they can be obtained from Mittelmann's rail
+   directory. These data files arise from an application in Italian railways
+   and have been contributed by Paolo Nobili. They are instances of the
+   "set-covering" class of problems and have a number of special
+   characteristics, specifically:
+
+     * all column costs are either one or two
+     * a column covers at most 12 rows
+     * substantial reductions can be made by applying known row/column
+       reduction tests
+
+   Only the 'test' model is solved to full optimality. In order to provide a
+   consistent workload across CPU architectures and FP precision levels, the
+   train and ref datasets are solved until an iteration limit is reached. The
+   models are not necessarily close to optimality at the stopping point.
+
+     ----------------------------------------------------------------------
+
+Output Description
+
+   The *.out files have value of the objective function for the optimal
+   solution (as for the test input) or the value of the objective function
+   after the iteration limit (the -mNNNN command line parameter) has been
+   reached (as for the train and ref inputs). The *.stderr output files are
+   just additional output files, their presence does not indicate an error in
+   the run. They list the total number of iterations; the number of
+   iterations that used the Enter and Leave algorithms; and the number of
+   factorizations performed before the program terminated.
+
+     ----------------------------------------------------------------------
+
+Programming Language
+
+   ANSI C++
+
+     ----------------------------------------------------------------------
+
+Known portability issues
+
+   none
+
+     ----------------------------------------------------------------------
+
+References
+
+     * SoPlex Homepage
+     * Roland Wunderling,
+       Paralleler und Objektorientierter Simplex-Algorithmus, (in German) ZIB
+       technical report TR 96-09, Berlin 1996.
+     * Vasek Chvatal, Linear Programming, W. H. Freeman and company, 1983.
+     * Robert J. Venderbei, Linear Programming: Foundations and Extensions,
+       Second Edition, Kluwer Academic Publishers, 2001.
+     * George Dantzig, Linear Programming and Extensions, Princeton
+       University Press 1998, (1963).
+
+     ----------------------------------------------------------------------
+
+   Last updated: 9 May 2006

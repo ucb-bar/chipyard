@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>429.mcf: SPEC CPU2006 Benchmark Description</title>
+</head>
+<body>
+<div style="text-align: center">
+<h1>429.mcf<br />
+SPEC CPU2006 Benchmark Description</h1>
+</div>
+
+<h2>Benchmark Name</h2>
+
+<p>429.mcf</p>
+
+<hr />
+
+<h2>Benchmark Author</h2>
+
+<p>Andreas L&ouml;bel</p>
+
+<pre>
+Dr. Andreas L&ouml;bel
+Konrad-Zuse-Zentrum Berlin (ZIB)
+Takustr. 7
+D-14195 Berlin, Germany
+
+E-mail:    loebel &#x5b;at&#x5d; zib.de
+Phone:     +49 (0)30 841 85 - 239
+Fax:                        - 269
+Secretary:                  - 208
+</pre>
+
+<hr />
+
+<h2>SPEC Project Leader</h2>
+
+<pre>
+Dr. Reinhold Weicker
+Retired, company address was:
+   Fujitsu Siemens Computers
+   EP XS BMC
+   Heinz-Nixdorf-Ring 1
+   33100 Paderborn
+   Germany
+   reinhold.weicker &#x5b;at&#x5d; fujitsu-siemens.com 
+
+Home: reinhold.weicker &#x5b;at&#x5d; t-online.de (home)
+</pre>
+
+<h2>Benchmark Program General Category</h2>
+
+<p>Combinatorial optimization / Single-depot vehicle scheduling</p>
+
+<hr />
+
+<h2>Benchmark Description</h2>
+
+<p>429.mcf is a benchmark which is derived from MCF, a program used for single-depot vehicle
+scheduling in public mass transportation. The program is written in
+C.  The benchmark version uses almost exclusively integer
+arithmetic.</p>
+
+<p>The program is designed for the solution of single-depot vehicle
+scheduling (sub-)problems occurring in the planning process of
+public transportation companies. It considers one single depot and
+a homogeneous vehicle fleet. Based on a line plan and service
+frequenciesd, so-called timetabled trips with fixed
+departure/arrival locations and times are derived. Each of these
+timetabled trips has to be serviced by exactly one vehicle. The
+links between these trips are so-called dead-head trips. In
+addition, there are pull-out and pull-in trips for leaving and
+entering the depot.</p>
+
+<p>Cost coefficients are given for all dead-head, pull-out, and
+pull-in trips. It is the task to schedule all timetabled trips to
+so-called blocks such that the number of necessary vehicles is as
+small as possible and, subordinate, the operational costs among all
+minimal fleet solutions are minimized.</p>
+
+<p>For simplification in the benchmark test, we assume that each
+pull-out and pull-in trip is defined implicitly with a duration of
+15 minutes and a cost coefficient of 15.</p>
+
+<p>For the considered single-depot case, the problem can be
+formulated as a large-scale minimum-cost flow problem that we solve
+with a network simplex algorithm accelerated with a column
+generation. The core of the benchmark 429.mcf is the network
+simplex code "MCF Version 1.2 -- A network simplex implementation",
+For this benchmark, MCF is embedded in the column generation
+process.</p>
+
+<p>The network simplex algorithm is a specialized version of the
+well known simplex algorithm for network flow problems. The linear
+algebra of the general algorithm is replaced by simple network
+operations such as finding cycles or modifying spanning trees that
+can be performed very quickly. The main work of our network simplex
+implementation is pointer and integer arithmetic.</p>
+
+<p>Because there have been no significant errors or changes during
+the years 2000 - 2004, most of the source code of the CPU2000
+benchmark 181.mcf was not changed in the transition to CPU2006
+benchmark 429.mcf. However, several central type definitions were
+changed for the CPU2006 version by the author:</p>
+
+<ul>
+<li><p>Whenever possible, long typed attributes of struct <tt>node</tt> and
+struct <tt>arc</tt> are replaced by 32 bit integer, for example 
+if used as boolean type. Pointers remain unaffected and map to 32
+or 64 bit long, depending on the compilation model, to ensure
+compatibility to 64 bit systems for truly large scale problem
+instances.</p> </li>
+
+<li><p>To reduce cache misses and accelerate program performance
+somewhat, the elements of struct <tt>node</tt> and struct <tt>arc</tt>, respectively,
+are rearranged according to the proposals made in "Memory Profiling
+using Hardware Counters" by Marty Itzkowitz, Brian Wylie,
+Christopher Aoki, and Nicolai Kosche (<a href=
+"http://www.sc-conference.org/sc2003/paperpdfs/pap182.pdf">http://www.sc-conference.org/sc2003/paperpdfs/pap182.pdf</a>)</p></li>
+</ul>
+
+<h2>Input Description</h2>
+
+<p>The input file contains line by line</p>
+
+<ul>
+<li>the number of timetabled and dead-head trips (first line),</li>
+
+<li>for each timetabled trip its starting and ending time,</li>
+
+<li>for each dead-head trip its starting and ending timetabled trip
+and its cost.</li>
+</ul>
+
+<p>Worst case execution time is pseudo-polynomial in the number
+timetabled and dead-head trips and in the amount of the maximal
+cost coefficient. The expected execution time, however, is in the
+order of a low-order polynomial.</p>
+
+<p>In the version for CPU2006 (429.mcf), new input files were
+defined for test, train, and ref, with the goal of longer execution
+times. The heap data size, and with it the overall memory
+footprint, increased accordingly.</p>
+
+<h2>Memory Requirements</h2>
+
+<p>429.mcf requires about 860 and 1700 megabyte for a 32 and a 64
+bit data model, respectively.</p>
+
+<h2>Output Description</h2>
+
+<p>The benchmark writes to two output files, <tt>inp.out</tt> and <tt>mcf.out</tt>.</p>
+<ul>
+<li><tt>inp.out</tt> contains log information and a checksum</li>
+<li><tt>mcf.out</tt> contains
+check output values describing an optimal schedule computed by the
+program.</li>
+</ul>
+
+<h2>Programming Language</h2>
+
+<p>ANSI C, mathematical library (libm) required.</p>
+
+<h2>Known portability issues</h2>
+
+<p>The header source file "prototyp.h", which is (indirectly)
+required by all modules, contains the lines</p>
+
+<pre>
+  #ifndef _PROTO_
+  #if defined(__STDC__) || defined(__cplusplus) || defined(WANT_STDC_PROTO)
+  #define _PROTO_( args ) args
+  #else
+  #define _PROTO_( args )
+  #endif
+  #endif
+</pre>
+
+<p>All C functions (subroutines) are defined in the original
+program with and without function prototypes, e.g.:</p>
+
+<pre>
+/* function defined externally: */
+
+  extern long suspend_impl _PROTO_(( network_t *, cost_t, long ));
+
+/* function defined in this module: */
+
+  #ifdef _PROTO_
+  long resize_prob( network_t *net )
+  #else
+  long resize_prob( net )
+    network_t *net;
+  #endif
+</pre>
+
+<p>In the SPEC version, 
+<span style="font-family:monospace; white-space:nowrap">-DWANT_STDC_PROTO</span> 
+is set as a required
+compilation flag via the parameter file <tt>429.mcf/Spec/object.pm</tt>,
+line</p>
+
+<pre>
+$bench_cflags='-DWANT_STDC_PROTO';
+</pre>
+
+<p>This line, controlling compilations performed within the SPEC
+tool harness, has the effect that all compilers, predefining
+<tt>__STDC__</tt> or not, use ANSI C prototyping. This is intended for
+reasons of compatibility and standard adherence.</p>
+
+<h2>Other information, WWW Resource</h2>
+
+<p>Background information about the vehicle scheduling problem can
+be found in the author's Ph.D. thesis "Optimal Vehicle scheduling
+in public transit", which is available via WWW at the author's
+homepage <a href="http://www.zib.de/loebel">www.zib.de/loebel</a> or at
+ftp://ftp.zib.de/pub/zib-publications/books/Loebel.disser.ps.</p>
+
+<p>The work horse in the benchmark 429.mcf is the code "MCF Version
+1.2 -- A network simplex implementation", which is available for
+academic use free of charge via WWW at www.zib.de. Information
+about MCF is available in <a href=
+"http://www.zib.de/Optimization/Software/Mcf/">http://www.zib.de/Optimization/Software/Mcf/</a></p>
+
+<p>An excellent text book about the network simplex algorithm and
+network flow in general is Ahuja, Magnanti, and Orlin: "Network
+Flows: Theory, Algorithms, and Applications", Prentice-Hall, Inc.,
+Englewood Cliffs, New Jersey, 1993.</p>
+
+<p>MCF had originally been developed for application in the public
+transportation systems of Hamburg and Berlin (BVG). For BVG, bus
+scheduling was optimized in 1998 on the basis of MCF; BVG also owns
+usage rights to the software that has been integrated into their
+planning system BERTA.</p>
+
+<p>The MCF method for vehicle scheduling later has been integrated,
+into the vehicle and personel planning system MICROBUS. This system
+in now marketed by IVU Traffic Technologies AG (<a href=
+"http://www.ivu.de">http://www.ivu.de</a>) to public transportation
+companies; the bus service divions of the German and the Austrian
+railway companies are among the licencees.</p>
+
+<p>Compared with the original and the commercial versions, the
+benchmark version has been simplified in the
+I/O area, to keep the I/O content small. The main algorithmic part,
+however, has been retained.</p>
+
+<hr />
+
+<p>Last update: 29 June 2006</p>
+</body>
+</html>

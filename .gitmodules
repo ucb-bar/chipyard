@@ -134,3 +134,6 @@
 [submodule "fpga/fpga-shells"]
 	path = fpga/fpga-shells
 	url = https://github.com/sifive/fpga-shells.git
+[submodule "lab/open3/riscv-isa-sim"]
+	path = lab/open3/riscv-isa-sim
+	url = https://github.com/riscv/riscv-isa-sim.git

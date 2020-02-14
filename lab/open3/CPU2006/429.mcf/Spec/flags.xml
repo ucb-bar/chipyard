@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<!DOCTYPE flagsdescription SYSTEM
+       "http://www.spec.org/dtd/cpuflags1.dtd">
+
+<!-- This file defines flags that appear in the sources for 429.mcf.
+
+  Copyright (C) 2005-2006 Standard Performance Evaluation Corporation
+
+  $Revision: 3869 $
+  $Date: 2006-02-24 10:01:32 -0500 (Fri, 24 Feb 2006) $
+-->
+<flagsdescription>
+
+<!-- Normal flags file should suggest a name for themselves -->
+<filename>429.mcf.flags</filename>
+
+<title>429.mcf Flags</title>
+
+<header>
+<![CDATA[
+<p>These are flags that appear in the benchmark sources, categorized as to
+whether they are portability candidates, mandatory, or forbidden.
+</p>
+]]>
+</header>
+
+<flag name="DABS" class="forbidden" regexp="[-/]DABS(?:=\S*)?\b">
+<example>-DABS</example>
+Use of this flag is forbidden.
+</flag>
+
+<flag name="DAT_HOME" class="forbidden" regexp="[-/]DAT_HOME(?:=\S*)?\b">
+<example>-DAT_HOME</example>
+Use of this flag is forbidden.
+</flag>
+
+<flag name="DAT_ZERO" class="forbidden" regexp="[-/]DAT_ZERO(?:=\S*)?\b">
+<example>-DAT_ZERO</example>
+Use of this flag is forbidden.
+</flag>
+
+<flag name="DDEBUG" class="forbidden" regexp="[-/]DDEBUG(?:=\S*)?\b">
+<example>-DDEBUG</example>
+Use of this flag is forbidden.
+</flag>
+
+<flag name="DFREE" class="forbidden" regexp="[-/]DFREE(?:=\S*)?\b">
+<example>-DFREE</example>
+Use of this flag is forbidden.
+</flag>
+
+<flag name="DINTERNAL_TIMING" class="forbidden" regexp="[-/]DINTERNAL_TIMING(?:=\S*)?\b">
+<example>-DINTERNAL_TIMING</example>
+Use of this flag is forbidden.
+</flag>
+
+<flag name="DMAX" class="forbidden" regexp="[-/]DMAX(?:=\S*)?\b">
+<example>-DMAX</example>
+Use of this flag is forbidden.
+</flag>
+
+<flag name="DNULL" class="forbidden" regexp="[-/]DNULL(?:=\S*)?\b">
+<example>-DNULL</example>
+Use of this flag is forbidden.
+</flag>
+
+<flag name="DREPORT" class="forbidden" regexp="[-/]DREPORT(?:=\S*)?\b">
+<example>-DREPORT</example>
+Use of this flag is forbidden.
+</flag>
+
+<flag name="DSET_ZERO" class="forbidden" regexp="[-/]DSET_ZERO(?:=\S*)?\b">
+<example>-DSET_ZERO</example>
+Use of this flag is forbidden.
+<!--
+Note that this disallows, for SPEC benchmarking purposes,
+use of "bzero()"
+-->
+</flag>
+
+<flag name="DSPEC_STATIC" class="mandatory">
+SPEC_STATIC is set unconditionally in the source code, mcflimit.h
+</flag>
+
+<flag name="DWANT_STDC_PROTO" class="mandatory">
+This flag is set by default in Spec/object.pm.
+</flag>
+
+<flag name="header_guards" class="forbidden" regexp="[-/]D_(?:DEFINES|IMPLICIT|MCFUTIL|MCF|MCF_LIMITS|OUTPUT|PBEAMPP|PBLA|PFLOWUP|PROTOTYP|PSIMPLEX|PSTART|READMIN|TREEUP)_H(?:=\S*)?\b">
+<example>
+-D_DEFINES_H,
+-D_IMPLICIT_H,
+-D_MCFUTIL_H,
+-D_MCF_H,
+-D_MCF_LIMITS_H,
+-D_OUTPUT_H,
+-D_PBEAMPP_H,
+-D_PBLA_H,
+-D_PFLOWUP_H,
+-D_PROTOTYP_H,
+-D_PSIMPLEX_H,
+-D_PSTART_H,
+-D_READMIN_H,
+-D_TREEUP_H
+</example>
+This macro is used to guard against multiple header inclusion, and may not
+be set explicitly.
+</flag>
+
+<flag name="D_PROTO_" class="forbidden">
+Setting _PROTO would undermine SPEC's intention in file prototype.h.
+It is forbidden to redefine it.
+</flag>
+
+<flag name="D_WIN32" class="portability">
+<![CDATA[
+This flag controls inclusion or non-inclusion of <unistd.h>, in file defines.h.
+]]>
+</flag>
+
+<flag name="D__STDC__" class="portability">
+Because we always set SPEC_CPU, this flag has no effect anyway, see prototyp.h.
+</flag>
+
+<flag name="D__cplusplus" class="portability">
+Because we always set SPEC_CPU, this flag has no effect anyway, see prototyp.h.
+</flag>
+
+</flagsdescription>

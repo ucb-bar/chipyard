@@ -1,0 +1,1571 @@
+<!DOCTYPE html
+     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta name="generator" content="SPEC CPU2006 Tools  (flags v5476)" />
+<meta http-equiv="Content-type" content="text/html;charset=utf-8" />
+<style type="text/css" id="internalScreen" media="screen">
+<!--
+body {
+  margin:  1em;
+  border:  0;
+  padding: 0;
+  background: white;
+  color:      black;
+  font-family: "Times Roman", times, serif;
+}
+
+.tt {
+  font-family: monospace;
+}
+
+div.flagClass > h2 {
+  border-bottom: 1px dotted black;
+  width: 80%;
+  font-family: sans-serif;
+}
+
+div.flagDesc {
+  clear: both;
+  background-color: rgb(255, 245, 220);
+  border: 1px solid blue; /* XXX This is for debugging */ 
+  margin: 0 auto;
+  width: 90%;
+}
+
+li.flagName {
+  font-weight: bold;
+  width: 100%;
+  border-bottom: 1px solid black;
+  display: block;
+  margin: 0.5em 0 0.5em 0;
+  font-size: 125%;
+  white-space: nowrap;
+}
+
+/* (presumably short) informationals all get grouped together near the top
+ * of the flag description block.
+ */
+.flagOrigin, .flagDescClass, .flagDescCompiler, .flagDescRE, .flagVar {
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  float: left;
+  padding: 0.25em;
+  margin: 0 0 0.25em 0;
+}
+
+.flagDescClass::before {
+  content: "Flag Class: ";
+}
+.flagDescCompiler::before {
+  content: "Compilers that recognize this flag: ";
+}
+.flagDescRE::before {
+  content: "Regular Expression: ";
+}
+.flagVar::before {
+  content: "Found In: ";
+}
+
+span.flagDescInc {
+  border-bottom: 1px solid black;
+}
+
+/* The description text stands alone. */
+.descText {
+  clear: both;
+  padding: 0.5em 1em 0.5em 1em;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  margin: 0.5em 0 0.5em 0;
+}
+
+/* This is a separate class so that in the print style sheet it can
+ * be ignored.
+ * Also, 'style="clear:both;"' is longer than 'class="clear"'
+ */
+.clear {
+  clear: both;
+}
+
+/* This is really for the link _to_ the flag report */
+li.unknown > a:link, a:visited { text-decoration: none; }
+
+.monospace {
+  font-family: Courier, "Courier New", monospace;
+}
+
+ul.flagDescList {
+  clear: both;
+  list-style-type: none;
+}
+
+/* Arrange for each flag description to have some headroom. */
+ul.flagDescList > li {
+  margin: 2em 0 0 0;
+}
+
+ul.flagDesc {
+  list-style-type: none;
+}
+
+div.flagTOC {
+  border: 1px solid white;
+  padding: 0.5em 1em;
+  margin: 0 auto;
+  width: 80%;
+}
+
+ul.flagTOC {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+ul.flagTOC > li {
+  border: 1px solid white; /* rgb(211, 211, 211); */
+  margin: 0;
+  padding: 0.25em 0 0.25em 0;
+  float: left;
+  display: inline-block; /* Fix IE bug; compliant browsers will ignore this */
+  width: 24.3%;
+  min-height: 1.5em;
+  overflow: hidden; /* If the table gets squeezed too much, don't let the
+                     * text overlap
+                     */
+  white-space: nowrap;
+}
+
+ul.SubMenu li {
+  border: 1px solid white; /* rgb(211, 211, 211); */
+}
+
+ul.SubMenu {
+  display: none;
+  position: absolute;
+  list-style-type: none;
+  border: 1px solid black;
+  background-color: white;
+  margin: 0 0 0 2em;
+  padding: 0.25em 5em 0.25em 0.5em;
+  white-space: nowrap;
+}
+
+li:hover > ul.SubMenu, ul.SubMenu:hover {
+  display: block;
+}
+
+ul.SubMenu > li:hover, ul.flagTOC > li:hover {
+  background-color: rgb(176, 196, 238); /* lightsteelgray... almost */
+  border: 1px solid rgb(128, 128, 128);
+}
+
+
+.resultpage a:link, .resultpage a:visited {
+  text-decoration: none;
+  border-bottom: 1px dashed black;
+  color: inherit;
+}
+
+.resultpage {
+  margin: auto;
+  padding: 0;
+  width: 800px;
+}
+
+div.logo {
+  float: left;
+  width: 38px;
+  height: 57px;
+}
+
+.titlebarcontainer, .resultstable {
+  border: solid 1px;
+  width: 100%;
+  float: left;
+}
+
+.titlebar {
+  float: left;
+  padding: 0em 1em 0em 1em;
+  text-align: center;
+  width: 91%;
+}
+
+div.titlebar > h1, div.titlebar > p {
+  margin: 0 1em 0 1em;
+}
+
+.systembar {
+  float: left;
+  width: 65%;
+  font-size: 150%;
+  margin: 0;
+  padding: 0.1em;
+  border-right: solid 1px black;
+}
+
+.metricbar {
+  padding: 0.1em;
+  margin: 0;
+  float: right;
+  width: 33%;
+  height: 50%;
+  font-size: 120%;
+}
+
+.metricbar#base {
+  background-color: #c8c8c8;
+  color: black;
+}
+
+.metricbar#peak {
+  background-color: transparent;
+  color: #2626b3;       /* peak blue */
+}
+
+.metricbar p {
+  margin: 0;
+  padding: 0.2em;
+}
+
+.datebar p, .systembar p {
+  margin: 0;
+  padding: 0;
+}
+
+/* Datebar stuff for older results */
+.datebar p {
+  float: left;
+  border-left: solid 1px black;
+}
+
+span.item {
+  float: left;
+  margin: 0;
+  padding: 0.1em 0 0.1em 0.5em;
+}
+
+span.value {
+  float: right;
+  padding: 0.1em 0.5em 0.1em 0;
+}
+
+div.datebar {
+  width: 100%;
+  float: left;
+  min-height: 100%;
+  border: solid 1px black;
+}
+
+p#test_sponsor         { width: 48%; }
+p#tester               { width: 48%; }
+p#license_num          { width: 24%; }
+p#test_date            { width: 23%; }
+p#hw_avail, p#sw_avail { width: 25%; }
+
+/* Table-based datebar on newer results */
+table.datebar {
+  float: left;
+  width: 100%;
+  min-height: 100%;
+  border-collapse: collapse;
+  border: solid 1px black;
+  table-layout: fixed;
+}
+
+table.datebar th {
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  padding-left: 0.5em;
+  padding: 0 0.5em 0 0.25em;
+}
+
+table.datebar td {
+  text-align: left;
+  padding: 0 0.5em 0 0;
+}
+
+th#license_num          { width: 17%; }
+th#test_sponsor         { width: 17%; }
+th#tester               { width: 17%; }
+th#test_date            { width: 22%; }
+th#hw_avail             { width: 22%; }
+th#sw_avail             { width: 22%; }
+td#license_num_val      { width: 52%; }
+td#test_sponsor_val     { width: 52%; }
+td#tester_val           { width: 52%; }
+td#test_date_val        { width: 13%; white-space: nowrap; }
+td#hw_avail_val         { width: 13%; white-space: nowrap; }
+td#sw_avail_val         { width: 13%; white-space: nowrap; }
+
+
+div.graph {
+  margin: auto;
+}
+
+div.sysdesc > h2 {
+  text-align: center;
+  background-color: #c8c8c8;
+  color: black;
+  padding: 0.5em 0 0.5em 0;
+  margin: 0;
+} 
+  
+div.sysdesc {
+  margin: 0.5em 0 0.5em 0;
+}
+
+div.infobox, div.sysdesc {
+  float: left;
+  width: 100%;
+  padding: 0;
+  border: solid 1px black;
+}
+
+div.infobox table {
+  width: 49%;
+  float: left;
+}
+
+div.infobox table tr {
+  vertical-align: top;
+}
+
+div.infobox table#Hardware,
+div.infobox table#BenchmarkSoftware {
+  width: 50%;
+  border-right: 1px solid black;
+}
+
+div.infobox table#Systems {
+  width: 100%;
+}
+
+div.infobox table#Systems tbody th {
+  width: 20%;
+}
+
+div.infobox thead th {
+  font-size: 200%;
+}
+
+div.infobox tbody th {
+  text-align: left;
+}
+
+.resultstable h2, div.notes h2 {
+  text-align: center;
+  margin: 0.1em;
+}
+
+div.notes h3 {
+  margin: 0.1em;
+}
+
+div.notes table {
+  width: 100%;
+}
+
+div.notes table tr td {
+  text-align: right;
+}
+
+/* Alas, IE6... if only you didn't suck so much...
+div.notes table tr td + td {
+*/
+div.notes table td.al {
+  text-align: left;
+  width: 85%;
+}
+
+div.notes table tr td {
+  padding-bottom: 1em;
+}
+
+div.notes table.portability tr td {
+  padding: 0em;
+}
+
+div.notes table.portability {
+  padding: 1em;
+}
+
+.resultstable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.resultstable th.basecol, .resultstable th.peakcol {
+  padding: 0.1em;
+  font-size: 90%;
+}
+
+.resultstable th {
+  border: solid 2px black;
+}
+
+.resultstable td {
+  border: solid 1px #b8b8b8;
+}
+
+td.bm, th.bm { 
+  border-right: solid 2px black;
+  border-left: solid 2px black;
+}
+
+td.secs { 
+  border-left: solid 2px black;
+}
+
+td.ratio { 
+  border-right: solid 2px black;
+}
+
+.resultstable tfoot td {
+  text-align: center;
+  border: solid 2px black;
+}
+
+th.basecol {
+  background-color: #c8c8c8;
+  color: black;
+}
+td.basecol {
+  text-align: right;
+  background-color: transparent;
+  color: black;
+}
+
+th.peakcol {
+  text-align: center;
+}
+
+.peakcol {
+  background-color: transparent;
+  color: #2626b3;       /* peak blue */
+  text-align: right;
+}
+
+td.bm {
+  /* Basically, the benchmark name and copies columns */
+  background-color: #c8c8c8;
+  color: black;
+}
+
+span.selected {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.selected a:link, .selected a:visited {
+  border-bottom: 0;
+}
+
+div.notes {
+  width: 100%;
+  float: left;
+  border: solid 1px black;
+}
+
+div.flagfooter {
+  text-align: center;
+}
+
+div.errors {
+  border: solid 2px red;
+}
+div.errors h2 {
+  background-color: transparent;
+  color: red;
+}
+
+div.footer {
+  border: none;
+}
+
+/* People find the "double underline" confusing.  And Safari 1.3 doesn't deal
+ * well with attempting to disable the border for userflag links.  So just
+ * give up and don't decorate user flags specially.
+********************
+span.userflag {
+  text-decoration: underline;
+}
+
+.userflag a:link {
+  border-bottom: 0;
+}
+********************
+*/
+
+/* Keep flags from being wrapped */
+span.userflag, span.flagtext {
+  white-space: nowrap;
+}
+/* Most of the screen-specific CSS is also the common CSS */
+
+/* Style for the non-image W3C marking at the bottom of the page, courtesy of
+ * Marek Prokop (http://www.sovavsiti.cz/css/w3c_buttons.html)
+ */
+.w3cbutton3 {
+  margin: 1em 1em 0 0;
+  width: 9em;
+  border: 1px solid #ccc;
+  font-family: helvetica,arial,sans-serif;
+  font-size: 70%;
+  font-weight: bold;
+  float: left;
+}
+.w3cbutton3 a {
+  display: block;
+  width: 100%;
+}
+.w3cbutton3 a:link,
+.w3cbutton3 a:visited,
+.w3cbutton3 a:hover {
+  background-color: #fc6;
+  color: #000;
+  text-decoration: none;
+  border-bottom: none;
+}
+.w3cbutton3 span.w3c {
+  padding: 0 0.4em;
+  background-color: #fff;
+  color: #0c479d;
+}
+
+-->
+</style>
+<style type="text/css" id="internalPrint" media="print">
+<!--
+body {
+  margin:  1em;
+  border:  0;
+  padding: 0;
+  background: white;
+  color:      black;
+  font-family: "Times Roman", times, serif;
+}
+
+.tt {
+  font-family: monospace;
+}
+
+div.flagClass > h2 {
+  border-bottom: 1px dotted black;
+  width: 80%;
+  font-family: sans-serif;
+}
+
+div.flagDesc {
+  clear: both;
+  background-color: rgb(255, 245, 220);
+  border: 1px solid blue; /* XXX This is for debugging */ 
+  margin: 0 auto;
+  width: 90%;
+}
+
+li.flagName {
+  font-weight: bold;
+  width: 100%;
+  border-bottom: 1px solid black;
+  display: block;
+  margin: 0.5em 0 0.5em 0;
+  font-size: 125%;
+  white-space: nowrap;
+}
+
+/* (presumably short) informationals all get grouped together near the top
+ * of the flag description block.
+ */
+.flagOrigin, .flagDescClass, .flagDescCompiler, .flagDescRE, .flagVar {
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  float: left;
+  padding: 0.25em;
+  margin: 0 0 0.25em 0;
+}
+
+.flagDescClass::before {
+  content: "Flag Class: ";
+}
+.flagDescCompiler::before {
+  content: "Compilers that recognize this flag: ";
+}
+.flagDescRE::before {
+  content: "Regular Expression: ";
+}
+.flagVar::before {
+  content: "Found In: ";
+}
+
+span.flagDescInc {
+  border-bottom: 1px solid black;
+}
+
+/* The description text stands alone. */
+.descText {
+  clear: both;
+  padding: 0.5em 1em 0.5em 1em;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  margin: 0.5em 0 0.5em 0;
+}
+
+/* This is a separate class so that in the print style sheet it can
+ * be ignored.
+ * Also, 'style="clear:both;"' is longer than 'class="clear"'
+ */
+.clear {
+  clear: both;
+}
+
+/* This is really for the link _to_ the flag report */
+li.unknown > a:link, a:visited { text-decoration: none; }
+
+.monospace {
+  font-family: Courier, "Courier New", monospace;
+}
+
+ul.flagDescList {
+  clear: both;
+  list-style-type: none;
+}
+
+/* Arrange for each flag description to have some headroom. */
+ul.flagDescList > li {
+  margin: 2em 0 0 0;
+}
+
+ul.flagDesc {
+  list-style-type: none;
+}
+
+div.flagTOC {
+  border: 1px solid white;
+  padding: 0.5em 1em;
+  margin: 0 auto;
+  width: 80%;
+}
+
+ul.flagTOC {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+ul.flagTOC > li {
+  border: 1px solid white; /* rgb(211, 211, 211); */
+  margin: 0;
+  padding: 0.25em 0 0.25em 0;
+  float: left;
+  display: inline-block; /* Fix IE bug; compliant browsers will ignore this */
+  width: 24.3%;
+  min-height: 1.5em;
+  overflow: hidden; /* If the table gets squeezed too much, don't let the
+                     * text overlap
+                     */
+  white-space: nowrap;
+}
+
+ul.SubMenu li {
+  border: 1px solid white; /* rgb(211, 211, 211); */
+}
+
+ul.SubMenu {
+  display: none;
+  position: absolute;
+  list-style-type: none;
+  border: 1px solid black;
+  background-color: white;
+  margin: 0 0 0 2em;
+  padding: 0.25em 5em 0.25em 0.5em;
+  white-space: nowrap;
+}
+
+li:hover > ul.SubMenu, ul.SubMenu:hover {
+  display: block;
+}
+
+ul.SubMenu > li:hover, ul.flagTOC > li:hover {
+  background-color: rgb(176, 196, 238); /* lightsteelgray... almost */
+  border: 1px solid rgb(128, 128, 128);
+}
+
+
+.resultpage a:link, .resultpage a:visited {
+  text-decoration: none;
+  border-bottom: 1px dashed black;
+  color: inherit;
+}
+
+.resultpage {
+  margin: auto;
+  padding: 0;
+  width: 800px;
+}
+
+div.logo {
+  float: left;
+  width: 38px;
+  height: 57px;
+}
+
+.titlebarcontainer, .resultstable {
+  border: solid 1px;
+  width: 100%;
+  float: left;
+}
+
+.titlebar {
+  float: left;
+  padding: 0em 1em 0em 1em;
+  text-align: center;
+  width: 91%;
+}
+
+div.titlebar > h1, div.titlebar > p {
+  margin: 0 1em 0 1em;
+}
+
+.systembar {
+  float: left;
+  width: 65%;
+  font-size: 150%;
+  margin: 0;
+  padding: 0.1em;
+  border-right: solid 1px black;
+}
+
+.metricbar {
+  padding: 0.1em;
+  margin: 0;
+  float: right;
+  width: 33%;
+  height: 50%;
+  font-size: 120%;
+}
+
+.metricbar#base {
+  background-color: #c8c8c8;
+  color: black;
+}
+
+.metricbar#peak {
+  background-color: transparent;
+  color: #2626b3;       /* peak blue */
+}
+
+.metricbar p {
+  margin: 0;
+  padding: 0.2em;
+}
+
+.datebar p, .systembar p {
+  margin: 0;
+  padding: 0;
+}
+
+/* Datebar stuff for older results */
+.datebar p {
+  float: left;
+  border-left: solid 1px black;
+}
+
+span.item {
+  float: left;
+  margin: 0;
+  padding: 0.1em 0 0.1em 0.5em;
+}
+
+span.value {
+  float: right;
+  padding: 0.1em 0.5em 0.1em 0;
+}
+
+div.datebar {
+  width: 100%;
+  float: left;
+  min-height: 100%;
+  border: solid 1px black;
+}
+
+p#test_sponsor         { width: 48%; }
+p#tester               { width: 48%; }
+p#license_num          { width: 24%; }
+p#test_date            { width: 23%; }
+p#hw_avail, p#sw_avail { width: 25%; }
+
+/* Table-based datebar on newer results */
+table.datebar {
+  float: left;
+  width: 100%;
+  min-height: 100%;
+  border-collapse: collapse;
+  border: solid 1px black;
+  table-layout: fixed;
+}
+
+table.datebar th {
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  padding-left: 0.5em;
+  padding: 0 0.5em 0 0.25em;
+}
+
+table.datebar td {
+  text-align: left;
+  padding: 0 0.5em 0 0;
+}
+
+th#license_num          { width: 17%; }
+th#test_sponsor         { width: 17%; }
+th#tester               { width: 17%; }
+th#test_date            { width: 22%; }
+th#hw_avail             { width: 22%; }
+th#sw_avail             { width: 22%; }
+td#license_num_val      { width: 52%; }
+td#test_sponsor_val     { width: 52%; }
+td#tester_val           { width: 52%; }
+td#test_date_val        { width: 13%; white-space: nowrap; }
+td#hw_avail_val         { width: 13%; white-space: nowrap; }
+td#sw_avail_val         { width: 13%; white-space: nowrap; }
+
+
+div.graph {
+  margin: auto;
+}
+
+div.sysdesc > h2 {
+  text-align: center;
+  background-color: #c8c8c8;
+  color: black;
+  padding: 0.5em 0 0.5em 0;
+  margin: 0;
+} 
+  
+div.sysdesc {
+  margin: 0.5em 0 0.5em 0;
+}
+
+div.infobox, div.sysdesc {
+  float: left;
+  width: 100%;
+  padding: 0;
+  border: solid 1px black;
+}
+
+div.infobox table {
+  width: 49%;
+  float: left;
+}
+
+div.infobox table tr {
+  vertical-align: top;
+}
+
+div.infobox table#Hardware,
+div.infobox table#BenchmarkSoftware {
+  width: 50%;
+  border-right: 1px solid black;
+}
+
+div.infobox table#Systems {
+  width: 100%;
+}
+
+div.infobox table#Systems tbody th {
+  width: 20%;
+}
+
+div.infobox thead th {
+  font-size: 200%;
+}
+
+div.infobox tbody th {
+  text-align: left;
+}
+
+.resultstable h2, div.notes h2 {
+  text-align: center;
+  margin: 0.1em;
+}
+
+div.notes h3 {
+  margin: 0.1em;
+}
+
+div.notes table {
+  width: 100%;
+}
+
+div.notes table tr td {
+  text-align: right;
+}
+
+/* Alas, IE6... if only you didn't suck so much...
+div.notes table tr td + td {
+*/
+div.notes table td.al {
+  text-align: left;
+  width: 85%;
+}
+
+div.notes table tr td {
+  padding-bottom: 1em;
+}
+
+div.notes table.portability tr td {
+  padding: 0em;
+}
+
+div.notes table.portability {
+  padding: 1em;
+}
+
+.resultstable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.resultstable th.basecol, .resultstable th.peakcol {
+  padding: 0.1em;
+  font-size: 90%;
+}
+
+.resultstable th {
+  border: solid 2px black;
+}
+
+.resultstable td {
+  border: solid 1px #b8b8b8;
+}
+
+td.bm, th.bm { 
+  border-right: solid 2px black;
+  border-left: solid 2px black;
+}
+
+td.secs { 
+  border-left: solid 2px black;
+}
+
+td.ratio { 
+  border-right: solid 2px black;
+}
+
+.resultstable tfoot td {
+  text-align: center;
+  border: solid 2px black;
+}
+
+th.basecol {
+  background-color: #c8c8c8;
+  color: black;
+}
+td.basecol {
+  text-align: right;
+  background-color: transparent;
+  color: black;
+}
+
+th.peakcol {
+  text-align: center;
+}
+
+.peakcol {
+  background-color: transparent;
+  color: #2626b3;       /* peak blue */
+  text-align: right;
+}
+
+td.bm {
+  /* Basically, the benchmark name and copies columns */
+  background-color: #c8c8c8;
+  color: black;
+}
+
+span.selected {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.selected a:link, .selected a:visited {
+  border-bottom: 0;
+}
+
+div.notes {
+  width: 100%;
+  float: left;
+  border: solid 1px black;
+}
+
+div.flagfooter {
+  text-align: center;
+}
+
+div.errors {
+  border: solid 2px red;
+}
+div.errors h2 {
+  background-color: transparent;
+  color: red;
+}
+
+div.footer {
+  border: none;
+}
+
+/* People find the "double underline" confusing.  And Safari 1.3 doesn't deal
+ * well with attempting to disable the border for userflag links.  So just
+ * give up and don't decorate user flags specially.
+********************
+span.userflag {
+  text-decoration: underline;
+}
+
+.userflag a:link {
+  border-bottom: 0;
+}
+********************
+*/
+
+/* Keep flags from being wrapped */
+span.userflag, span.flagtext {
+  white-space: nowrap;
+}
+/* Classes that contain links - useless on paper */
+.flagTOC, .SubMenu, .NoPrint {
+  display: none;
+}
+
+/* Don't decorate links - they're not clickable */
+a {
+  text-decoration: none;
+  background: inherit;
+  color: inherit;
+}
+
+.resultpage {
+  width: 100%;
+}
+
+.w3cbutton3 {
+  display: none;
+}
+-->
+</style>
+<title>401.bzip2 Flags</title>
+</head><body>
+<h1>401.bzip2 Flags</h1>
+
+
+<p>These are flags that appear in the benchmark sources, categorized as to
+whether they are portability candidates, mandatory, or forbidden.</p>
+
+<div class="NoPrint">
+<h3>Sections</h3>
+<p>Selecting one of the following will take you directly to that section:</p>
+<ul>
+<li><a href="#Section_portability">Portability Flags</a></li>
+<li><a href="#Section_mandatory">Mandatory Flags</a></li>
+<li><a href="#Section_forbidden">Forbidden Flags</a></li>
+</ul>
+</div>
+
+<hr />
+
+<div class="flagClass" id="portability">
+<h2><a name="Section_portability" id="Section_portability">Portability Flags</a></h2>
+<div class="flagTOC">
+<ul class="flagTOC">
+ <li><a href="#b401.bzip2_DBZ_EXPORT">-DBZ_EXPORT</a></li>
+ <li><a href="#b401.bzip2_DBZ_LCCWIN32">-DBZ_LCCWIN32</a></li>
+ <li><a href="#b401.bzip2_DBZ_UNIX">-DBZ_UNIX</a></li>
+ <li><a href="#b401.bzip2_DMSDOS">-DMSDOS</a></li>
+ <li><a href="#b401.bzip2_DOS2">-DOS2</a></li>
+ <li><a href="#b401.bzip2_D_WIN32">-D_WIN32</a></li>
+ <li><a href="#b401.bzip2_D__CYGWIN__">-D__CYGWIN__</a></li>
+ <li><a href="#b401.bzip2_D__DJGPP__">-D__DJGPP__</a></li>
+ <li><a href="#b401.bzip2_D__GNUC__">-D__GNUC__</a></li>
+ <li><a href="#b401.bzip2_D__cplusplus">-D__cplusplus</a></li>
+ <li><a href="#b401.bzip2_SPEC_NULLCAST">-SPEC_NULLCAST</a></li>
+</ul>
+<div class="clear"></div>
+</div>
+
+<ul class="flagDescList">
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DBZ_EXPORT" id="b401.bzip2_DBZ_EXPORT">-DBZ_EXPORT</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DBZ_EXPORT(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This flag indicates that the functions from bzlib should not be imported from
+a DLL.  This flag is set by default in the benchmark.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DBZ_LCCWIN32" id="b401.bzip2_DBZ_LCCWIN32">-DBZ_LCCWIN32</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DBZ_LCCWIN32(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This flag indicates that the benchmark is being built with lcc under Windows.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DBZ_UNIX" id="b401.bzip2_DBZ_UNIX">-DBZ_UNIX</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DBZ_UNIX(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+In the original bzip2 source, this flag indicates that the source is being
+built on a Unix-like system.  As this primarily concerns file I/O (which
+the benchmark does not do), all systems get this flag in the benchmark
+version.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DMSDOS" id="b401.bzip2_DMSDOS">-DMSDOS</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DMSDOS(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This flag indicates that the source is being built on MS-DOS.  While that
+seems unlikely, it's not forbidden.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DOS2" id="b401.bzip2_DOS2">-DOS2</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DOS2(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This flag indicates that the source is being built on OS/2.  While that
+seems unlikely, it's not forbidden.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_D_WIN32" id="b401.bzip2_D_WIN32">-D_WIN32</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_WIN32(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This flag indicates that the source is being built on Windows.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_D__CYGWIN__" id="b401.bzip2_D__CYGWIN__">-D__CYGWIN__</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D__CYGWIN__(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This flag indicates that the source is being built under Windows using the
+Cygwin toolset.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_D__DJGPP__" id="b401.bzip2_D__DJGPP__">-D__DJGPP__</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D__DJGPP__(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This flag indicates that the source is being built under MS-DOS using the
+DJGPP compiler.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_D__GNUC__" id="b401.bzip2_D__GNUC__">-D__GNUC__</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D__GNUC__(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This flag indicates that the source is being built with the GNU Compiler
+Collection.  It has no effect in the CPU2006 version of the code.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_D__cplusplus" id="b401.bzip2_D__cplusplus">-D__cplusplus</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D__cplusplus(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This flag indicates that the source is being built with a C++ compiler.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_SPEC_NULLCAST" id="b401.bzip2_SPEC_NULLCAST">-SPEC_NULLCAST</a></li>
+<li class="flagDescRE"><span class="tt">[-/]DSPEC_NULLCAST(?:=\S*)?</span></li>
+<li class="descText">
+<p>
+This macro defines a cast which is used when comparing a file handle value
+(from the I/O abstraction layer) to NULL.  It must match the type used for
+the file handle, which is int.
+</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+
+</div>
+<hr />
+<div class="flagClass" id="mandatory">
+<h2><a name="Section_mandatory" id="Section_mandatory">Mandatory Flags</a></h2>
+<div class="flagTOC">
+<ul class="flagTOC">
+ <li><a href="#b401.bzip2_DSPEC_BZIP">-DSPEC_BZIP</a></li>
+ <li><a href="#b401.bzip2_DSPEC_CPU">-DSPEC_CPU</a>
+  <ul class="SubMenu">
+   <li><a href="#b401.bzip2_DBZ_UNIX">-DBZ_UNIX</a></li>
+  </ul>
+ </li>
+</ul>
+<div class="clear"></div>
+</div>
+
+<ul class="flagDescList">
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DSPEC_BZIP" id="b401.bzip2_DSPEC_BZIP">-DSPEC_BZIP</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DSPEC_BZIP(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This flag indicates that the benchmark should be built to run in the
+CPU2006 harness.  Without the flag, there is no hope that the benchmark
+will work.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DSPEC_CPU" id="b401.bzip2_DSPEC_CPU">-DSPEC_CPU</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DSPEC_CPU(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This flag is set by the CPU2006 tools harness when building benchmark
+sources.
+</p>
+</li>
+<li class="flagDescInc"><span class="flagDescInc">Includes:</span>
+ <ul class="flagTOC">
+  <li><a href="http://www.spec.org/auto/cpu2006/flags/401.bzip2.flags.html#b401.bzip2_DBZ_UNIX">-DBZ_UNIX</a></li>
+ </ul>
+<div class="clear"></div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+
+</div>
+<hr />
+<div class="flagClass" id="forbidden">
+<h2><a name="Section_forbidden" id="Section_forbidden">Forbidden Flags</a></h2>
+<div class="flagTOC">
+<ul class="flagTOC">
+ <li><a href="#b401.bzip2_DBZ_DEBUG">-DBZ_DEBUG</a></li>
+ <li><a href="#b401.bzip2_BZ_EXTERN">-BZ_EXTERN</a></li>
+ <li><a href="#b401.bzip2_BZ_API">-BZ_API</a></li>
+ <li><a href="#b401.bzip2_DBZ_IMPORT">-DBZ_IMPORT</a></li>
+ <li><a href="#b401.bzip2_DBZ_NO_STDIO">-DBZ_NO_STDIO</a></li>
+ <li><a href="#b401.bzip2_DBZ_STRICT_ANSI">-DBZ_STRICT_ANSI</a></li>
+ <li><a href="#b401.bzip2_DDEBUG">-DDEBUG</a></li>
+ <li><a href="#b401.bzip2_DDEBUG_DUMP">-DDEBUG_DUMP</a></li>
+ <li><a href="#b401.bzip2_DNULL">-DNULL</a></li>
+ <li><a href="#b401.bzip2_DTIMING_OUTPUT">-DTIMING_OUTPUT</a></li>
+ <li><a href="#b401.bzip2_D_BZLIB_H">-D_BZLIB_H</a></li>
+ <li><a href="#b401.bzip2_D_BZLIB_PRIVATE_H">-D_BZLIB_PRIVATE_H</a></li>
+ <li><a href="#b401.bzip2_Dsmall">-Dsmall</a></li>
+ <li><a href="#b401.bzip2_SPEC_STDIN">-SPEC_STDIN</a></li>
+ <li><a href="#b401.bzip2_SPEC_STDOUT">-SPEC_STDOUT</a></li>
+ <li><a href="#b401.bzip2_SPEC_STDERR">-SPEC_STDERR</a></li>
+</ul>
+<div class="clear"></div>
+</div>
+
+<ul class="flagDescList">
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DBZ_DEBUG" id="b401.bzip2_DBZ_DEBUG">-DBZ_DEBUG</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DBZ_DEBUG(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Use of this flag enables some output which should never be generated.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_BZ_EXTERN" id="b401.bzip2_BZ_EXTERN">-BZ_EXTERN</a></li>
+<li class="flagDescRE"><span class="tt">[-/]DBZ_EXTERN(?:=\S*)?</span></li>
+<li class="descText">
+<p>
+This macro defines text that should be used to indicate that a function is
+externally defined (as in a dynamic library).
+Because the benchmark does not build or use dynamic libraries, setting this
+flag to something other than the default is forbidden.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_BZ_API" id="b401.bzip2_BZ_API">-BZ_API</a></li>
+<li class="flagDescRE"><span class="tt">[-/]DBZ_API(?:\([^\)]+\)=\S*)?</span></li>
+<li class="descText">
+<p>
+This macro defines text that should be used to indicate how a function should
+be marked in a Windows library or DLL.
+Because the benchmark does not build a library, setting this
+flag to something other than the default is forbidden.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DBZ_IMPORT" id="b401.bzip2_DBZ_IMPORT">-DBZ_IMPORT</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DBZ_IMPORT(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Use of this flag indicates that the bzlib functions should be imported from
+the DLL.
+Because the benchmark does not build or use DLL, use of this flag is forbidden.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DBZ_NO_STDIO" id="b401.bzip2_DBZ_NO_STDIO">-DBZ_NO_STDIO</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DBZ_NO_STDIO(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Use of this flag indicates that stdio should not be used.  Because it also
+cuts out a lot of the file I/O functions, use of this flag is forbidden.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DBZ_STRICT_ANSI" id="b401.bzip2_DBZ_STRICT_ANSI">-DBZ_STRICT_ANSI</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DBZ_STRICT_ANSI(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This flag has no effect in 401.bzip2.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DDEBUG" id="b401.bzip2_DDEBUG">-DDEBUG</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DDEBUG(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This flag enables copious debug output which is guaranteed to cause the
+benchmark to miscompare.  Its use in reportable runs is forbidden.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DDEBUG_DUMP" id="b401.bzip2_DDEBUG_DUMP">-DDEBUG_DUMP</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DDEBUG_DUMP(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This flag causes buffers generated during the benchmark run to be dumped to
+files.  Because this causes actual file I/O, its use in reportable runs is
+forbidden.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DNULL" id="b401.bzip2_DNULL">-DNULL</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DNULL(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+NULL should be defined by your system headers.  Setting it explicitly is
+forbidden.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_DTIMING_OUTPUT" id="b401.bzip2_DTIMING_OUTPUT">-DTIMING_OUTPUT</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]DTIMING_OUTPUT(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+Use of this flag causes some internal timing to be done and output via the
+debug output facility.  Its use is forbidden for reportable runs.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_D_BZLIB_H" id="b401.bzip2_D_BZLIB_H">-D_BZLIB_H</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_BZLIB_H(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This macro is a guard against multiple inclusion of bzlib.h.  Setting it
+explicitly is forbidden.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_D_BZLIB_PRIVATE_H" id="b401.bzip2_D_BZLIB_PRIVATE_H">-D_BZLIB_PRIVATE_H</a></li>
+<li class="flagDescRE"><span class="tt">(?:^|(?&lt;=\s))[-/]D_BZLIB_PRIVATE_H(?:=\S*)?(?=\s|$)</span></li>
+<li class="descText">
+<p>
+This macro is a guard against multiple inclusion of bzlib_private.h.  Setting it
+explicitly is forbidden.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_Dsmall" id="b401.bzip2_Dsmall">-Dsmall</a></li>
+<li class="flagDescRE"><span class="tt">[-/]Dsmall(?:=\S*)?</span></li>
+<li class="descText">
+<p>
+This flag is sometimes implicitly set on Windows; in the bzip2 source code,
+if it is present, it is undefined.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_SPEC_STDIN" id="b401.bzip2_SPEC_STDIN">-SPEC_STDIN</a></li>
+<li class="flagDescRE"><span class="tt">[-/]DSPEC_STDIN(?:=\d*)?</span></li>
+<li class="descText">
+<p>
+This flag is used to set the file number for stdin used by the benchmark's
+file I/O abstraction layer.  Its default value must not be changed.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_SPEC_STDOUT" id="b401.bzip2_SPEC_STDOUT">-SPEC_STDOUT</a></li>
+<li class="flagDescRE"><span class="tt">[-/]DSPEC_STDOUT(?:=\d*)?</span></li>
+<li class="descText">
+<p>
+This flag is used to set the file number for stdout used by the benchmark's
+file I/O abstraction layer.  Its default value must not be changed.
+</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<div class="flagDesc">
+<ul class="flagDesc">
+<li class="flagName"><a name="b401.bzip2_SPEC_STDERR" id="b401.bzip2_SPEC_STDERR">-SPEC_STDERR</a></li>
+<li class="flagDescRE"><span class="tt">[-/]DSPEC_STDERR(?:=\d*)?</span></li>
+<li class="descText">
+<p>
+This flag is used to set the file number for stderr used by the benchmark's
+file I/O abstraction layer.  Its default value must not be changed.
+</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+
+</div>
+<hr />
+</body>
+</html>
