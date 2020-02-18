@@ -254,21 +254,14 @@ class WithL2InnerExteriorBuffer(aDepth: Int, dDepth: Int) extends Config(
         aDepth, 0, 0, dDepth, 0))
   })
 
-class WithStandardL2(nTrackersPerBank: Int = 3) extends Config(
-  new WithL2InnerExteriorBuffer(2, 2) ++
+class WithStandardL2(
+    nBeatsPerBlock: Int = 8, nTrackersPerBank: Int = 3) extends Config(
+  new WithL2InnerExteriorBuffer(nBeatsPerBlock, 2) ++
   new WithInclusiveCache(
     nBanks = 4,
     nWays = 4,
     capacityKB = 256,
-    outerLatencyCycles = 8 * nTrackersPerBank))
-
-class WithLargeL2(nTrackersPerBank: Int = 3) extends Config(
-  new WithL2InnerExteriorBuffer(2, 2) ++
-  new WithInclusiveCache(
-    nBanks = 4,
-    nWays = 4,
-    capacityKB = 256,
-    outerLatencyCycles = 4 * nTrackersPerBank))
+    outerLatencyCycles = nBeatsPerBlock * nTrackersPerBank))
 
 class WithPrefetchMiddleMan extends Config((site, here, up) => {
   case PrefetchMiddleManKey => {
@@ -309,7 +302,7 @@ class FireSimHwachaRemoteMemClientConfig extends Config(
   new WithHwachaConfPrec ++
   new hwacha.DefaultHwachaConfig ++
   new WithRemoteMemClientKey ++
-  new WithLargeL2 ++
+  new WithStandardL2(4) ++
   new WithNMemoryChannels(4) ++
   new WithRemoteMemClientBridge ++
   new FireSimRocketChipConfig)
@@ -368,7 +361,7 @@ class FireSimHwachaDRAMCacheConfig extends Config(
   new WithDRAMCacheKey(4, 8, 4) ++
   new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
-  new WithLargeL2 ++
+  new WithStandardL2(4, 6) ++
   new FireSimRocketChipConfig ++
   new WithDRAMCacheBridge)
 
@@ -424,7 +417,7 @@ class FireSimBoomDRAMCacheConfig extends Config(
   new WithDRAMCacheKey(4, 8, 4) ++
   new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
-  new WithLargeL2 ++
+  new WithStandardL2(4) ++
   new FireSimBoomConfig ++
   new WithDRAMCacheBridge)
 
@@ -448,7 +441,7 @@ class FireSimBoomHwachaDRAMCacheConfig extends Config(
   new WithDRAMCacheKey(4, 8, 4) ++
   new WithExtMemSize(15L << 30) ++
   new WithPrefetchMiddleMan ++
-  new WithLargeL2 ++
+  new WithStandardL2(4) ++
   new FireSimBoomConfig ++
   new WithDRAMCacheBridge)
 
