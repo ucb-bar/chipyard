@@ -244,3 +244,16 @@ class WithLoopbackNIC extends Config((site, here, up) => {
 class WithBackingScratchpad(base: BigInt = 0x80000000L, mask: BigInt = ((4 << 20) - 1)) extends Config((site, here, up) => {
   case BackingScratchpadKey => Some(BackingScratchpadParams(base, mask))
 })
+
+/**
+ * Mixin to add DSPTools components
+ */
+class WithTLUIntPassthroughTop extends Config((site, here, up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
+    Module(LazyModule(new TopWithTLUIntPassthrough()(p)).module)
+})
+
+class WithTLUIntTestFIRTop extends Config((site, here,up) => {
+  case BuildTop => (clock: Clock, reset: Bool, p:Parameters) =>
+    Module(LazyModule(new TopWithTLUIntTestFIR()(p)).module)
+})
