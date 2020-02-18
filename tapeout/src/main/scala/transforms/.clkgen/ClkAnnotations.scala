@@ -42,8 +42,8 @@ case object ClkGen extends ClkModType {
   def serialize: String = "gen"
 }
 
-// Unlike typical SDC, starts at 0. 
-// Otherwise, see pg. 63 of "Constraining Designs for Synthesis and Timing Analysis" 
+// Unlike typical SDC, starts at 0.
+// Otherwise, see pg. 63 of "Constraining Designs for Synthesis and Timing Analysis"
 // by S. Gangadharan
 // original clk:     |-----|_____|-----|_____|
 // edges:            0     1     2     3     4
@@ -51,9 +51,9 @@ case object ClkGen extends ClkModType {
 // --->              |-----------|___________|
 // sources = source id's
 case class GeneratedClk(
-    id: String, 
-    sources: Seq[String] = Seq(), 
-    referenceEdges: Seq[Int] = Seq(), 
+    id: String,
+    sources: Seq[String] = Seq(),
+    referenceEdges: Seq[Int] = Seq(),
     period: Option[Double] = None) {
   require(referenceEdges.sorted == referenceEdges, "Edges must be in order for generated clk")
   if (referenceEdges.nonEmpty) require(referenceEdges.length % 2 == 1, "# of reference edges must be odd!")
@@ -64,13 +64,13 @@ case class ClkModAnnotation(tpe: String, generatedClks: Seq[GeneratedClk]) {
   def modType: ClkModType = HasClkAnnotation.modType(tpe)
 
   modType match {
-    case ClkDiv => 
+    case ClkDiv =>
       generatedClks foreach { c =>
         require(c.referenceEdges.nonEmpty, "Reference edges must be defined for clk divider!")
         require(c.sources.length == 1, "Clk divider output can only have 1 source")
         require(c.period.isEmpty, "No period should be specified for clk divider output")
       }
-    case ClkMux => 
+    case ClkMux =>
       generatedClks foreach { c =>
         require(c.referenceEdges.isEmpty, "Reference edges must not be defined for clk mux!")
         require(c.period.isEmpty, "No period should be specified for clk mux output")
@@ -92,22 +92,24 @@ abstract class FirrtlClkTransformAnnotation {
 }
 
 // Firrtl version
-case class TargetClkModAnnoF(target: ModuleName, anno: ClkModAnnotation) extends FirrtlClkTransformAnnotation {
+case class TargetClkModAnnoF(target: ModuleName, anno: ClkModAnnotation) extends FirrtlClkTransformAnnotation with SingleTargetAnnotation[ModuleName] {
+  def duplicate(n: ModuleName): TargetClkModAnnoF = this.copy(target = n)
   def getAnno = Annotation(target, classOf[ClkSrcTransform], anno.serialize)
   def targetName = target.name
   def modType = anno.modType
   def generatedClks = anno.generatedClks
-  def getAllClkPorts = anno.generatedClks.map(x => 
+  def getAllClkPorts = anno.generatedClks.map(x =>
     List(List(x.id), x.sources).flatten).flatten.distinct.map(Seq(targetName, _).mkString("."))
 }
 
 // Chisel version
-case class TargetClkModAnnoC(target: Module, anno: ClkModAnnotation) {
-  def getAnno = ChiselAnnotation(target, classOf[ClkSrcTransform], anno.serialize)
+case class TargetClkModAnnoC(target: Module, anno: ClkModAnnotation) extends ChiselAnnotation {
+  def toFirrtl = TargetClkModAnnoF(target.toNamed, anno)
 }
 
 // Firrtl version
-case class TargetClkPortAnnoF(target: ComponentName, anno: ClkPortAnnotation) extends FirrtlClkTransformAnnotation {
+case class TargetClkPortAnnoF(target: ComponentName, anno: ClkPortAnnotation) extends FirrtlClkTransformAnnotation with SingleTargetAnnotation[ComponentName] {
+  def duplicate(n: ComponentName): TargetClkPortAnnoF = this.copy(target = n)
   def getAnno = Annotation(target, classOf[ClkSrcTransform], anno.serialize)
   def targetName = Seq(target.module.name, target.name).mkString(".")
   def modId = Seq(target.module.name, anno.id).mkString(".")
@@ -115,8 +117,8 @@ case class TargetClkPortAnnoF(target: ComponentName, anno: ClkPortAnnotation) ex
 }
 
 // Chisel version
-case class TargetClkPortAnnoC(target: Element, anno: ClkPortAnnotation) {
-  def getAnno = ChiselAnnotation(target, classOf[ClkSrcTransform], anno.serialize)
+case class TargetClkPortAnnoC(target: Element, anno: ClkPortAnnotation) extends ChiselAnnotation {
+  def toFirrtl = TargetClkPortAnnoF(target.toNamed, anno)
 }
 
 object HasClkAnnotation {
@@ -132,31 +134,31 @@ object HasClkAnnotation {
 
   def unapply(a: Annotation): Option[FirrtlClkTransformAnnotation] = a match {
     case Annotation(f, t, s) if t == classOf[ClkSrcTransform] => f match {
-      case m: ModuleName => 
+      case m: ModuleName =>
         Some(TargetClkModAnnoF(m, s.parseYaml.convertTo[ClkModAnnotation]))
       case c: ComponentName =>
         Some(TargetClkPortAnnoF(c, s.parseYaml.convertTo[ClkPortAnnotation]))
-      case _ => throw new Exception("Clk source annotation only valid on module or component!")    
+      case _ => throw new Exception("Clk source annotation only valid on module or component!")
     }
     case _ => None
   }
 
   def apply(annos: Seq[Annotation]): Option[(Seq[TargetClkModAnnoF],Seq[TargetClkPortAnnoF])] = {
     // Get all clk-related annotations
-    val clkAnnos = annos.map(x => unapply(x)).flatten 
+    val clkAnnos = annos.map(x => unapply(x)).flatten
     val targets = clkAnnos.map(x => x.targetName)
     require(targets.distinct.length == targets.length, "Only 1 clk related annotation is allowed per component/module")
     if (clkAnnos.length == 0) None
     else {
-      val componentAnnos = clkAnnos.filter { 
+      val componentAnnos = clkAnnos.filter {
         case TargetClkPortAnnoF(ComponentName(_, ModuleName(_, _)), _) => true
         case _ => false
       }.map(x => x.asInstanceOf[TargetClkPortAnnoF])
       val associatedMods = componentAnnos.map(x => x.target.module.name)
-      val moduleAnnos = clkAnnos.filter { 
-        case TargetClkModAnnoF(ModuleName(m, _), _) => 
+      val moduleAnnos = clkAnnos.filter {
+        case TargetClkModAnnoF(ModuleName(m, _), _) =>
           require(associatedMods contains m, "Clk modules should always have clk port annotations!")
-          true 
+          true
         case _ => false
       }.map(x => x.asInstanceOf[TargetClkModAnnoF])
       Some((moduleAnnos, componentAnnos))
@@ -170,29 +172,26 @@ trait IsClkModule {
 
   self: chisel3.Module =>
 
-  private def doNotDedup(module: Module): Unit = {
-    annotate(ChiselAnnotation(module, classOf[DedupModules], "nodedup!"))
-  }
   doNotDedup(this)
 
   private def extractElementNames(signal: Data): Seq[String] = {
     val names = signal match {
-      case elt: Record => 
+      case elt: Record =>
         elt.elements.map { case (key, value) => extractElementNames(value).map(x => key + "_" + x) }.toSeq.flatten
-      case elt: Vec[_] => 
+      case elt: Vec[_] =>
         elt.zipWithIndex.map { case (elt, i) => extractElementNames(elt).map(x => i + "_" + x) }.toSeq.flatten
       case elt: Element => Seq("")
       case elt => throw new Exception(s"Cannot extractElementNames for type ${elt.getClass}")
     }
-    names.map(s => s.stripSuffix("_")) 
+    names.map(s => s.stripSuffix("_"))
   }
 
   // TODO: Replace!
   def extractElements(signal: Data): Seq[Element] = {
     signal match {
-      case elt: Record => 
+      case elt: Record =>
         elt.elements.map { case (key, value) => extractElements(value) }.toSeq.flatten
-      case elt: Vec[_] => 
+      case elt: Vec[_] =>
         elt.map { elt => extractElements(elt) }.toSeq.flatten
       case elt: Element => Seq(elt)
       case elt => throw new Exception(s"Cannot extractElements for type ${elt.getClass}")
@@ -200,7 +199,7 @@ trait IsClkModule {
   }
 
   def getIOName(signal: Element): String = {
-    val possibleNames = extractElements(io).zip(extractElementNames(io)).map { 
+    val possibleNames = extractElements(io).zip(extractElementNames(io)).map {
       case (sig, name) if sig == signal => Some(name)
       case _ => None
     }.flatten
@@ -208,11 +207,11 @@ trait IsClkModule {
     else throw new Exception("You can only get the name of an io port!")
   }
 
-  def annotateDerivedClks(tpe: ClkModType, generatedClks: Seq[GeneratedClk]): Unit = 
+  def annotateDerivedClks(tpe: ClkModType, generatedClks: Seq[GeneratedClk]): Unit =
     annotateDerivedClks(ClkModAnnotation(tpe.serialize, generatedClks))
   def annotateDerivedClks(anno: ClkModAnnotation): Unit = annotateDerivedClks(this, anno)
-  def annotateDerivedClks(m: Module, anno: ClkModAnnotation): Unit = 
-    annotate(TargetClkModAnnoC(m, anno).getAnno)
+  def annotateDerivedClks(m: Module, anno: ClkModAnnotation): Unit =
+    annotate(TargetClkModAnnoC(m, anno))
 
   def annotateClkPort(p: Element): Unit = annotateClkPort(p, None, "")
   def annotateClkPort(p: Element, sink: Sink): Unit = annotateClkPort(p, Some(sink), "")
@@ -221,7 +220,7 @@ trait IsClkModule {
   def annotateClkPort(p: Element, sink: Option[Sink], id: String): Unit = {
     // If no id is specified, it'll try to figure out a name, assuming p is an io port
     val newId = id match {
-      case "" => 
+      case "" =>
         getIOName(p)
       case _ => id
     }
@@ -229,12 +228,12 @@ trait IsClkModule {
   }
 
   def annotateClkPort(p: Element, anno: ClkPortAnnotation): Unit = {
-    p.dir match {
-      case chisel3.core.Direction.Input => 
+    DataMirror.directionOf(p) match {
+      case chisel3.core.ActualDirection.Input =>
         require(anno.tag.nonEmpty, "Module inputs must be clk sinks")
-        require(anno.tag.get.src.isEmpty, 
+        require(anno.tag.get.src.isEmpty,
           "Clock module (not top) input clks should not have clk period, etc. specified")
-      case chisel3.core.Direction.Output =>
+      case chisel3.core.ActualDirection.Output =>
         require(anno.tag.isEmpty, "Module outputs must not be clk sinks (they're sources!)")
       case _ =>
         throw new Exception("Clk port direction must be specified!")
@@ -243,6 +242,6 @@ trait IsClkModule {
       case _: chisel3.core.Clock =>
       case _ => throw new Exception("Clock port must be of type Clock")
     }
-    annotate(TargetClkPortAnnoC(p, anno).getAnno)
+    annotate(TargetClkPortAnnoC(p, anno))
   }
 }

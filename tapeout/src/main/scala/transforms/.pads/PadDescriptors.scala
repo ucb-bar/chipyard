@@ -28,13 +28,6 @@ case object NoPad extends PadType {
   def serialize: String = "none"
 }
 
-case object InOut extends Direction {
-  def serialize: String = "inout"
-}
-case object NoDirection extends Direction {
-  def serialize: String = "none"
-}
-
 abstract class PadSide extends FirrtlNode {
   def orientation: PadOrientation
 }
