@@ -110,6 +110,9 @@
 [submodule "generators/gemmini"]
 	path = generators/gemmini
 	url = https://github.com/ucb-bar/gemmini
+[submodule "lab/open1/ccbench"]
+	path = lab/open1/ccbench
+	url = https://github.com/ucb-bar/ccbench.git
 [submodule "lab/open3/riscv-isa-sim"]
 	path = lab/open3/riscv-isa-sim
 	url = https://github.com/riscv/riscv-isa-sim.git
