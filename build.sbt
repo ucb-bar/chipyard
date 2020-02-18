@@ -125,6 +125,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
 lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
   .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
+    dsptools, `rocket-dsptools`,
     gemmini, icenet, tracegen, ariane)
   .settings(commonSettings)
 
