@@ -31,6 +31,8 @@ s"""
       for (i <- 0 to depthInstances - 1) {
         val maskStatement = generateMaskStatement(0, i)
         val enableIdentifier = if (selectBits > 0) s"""eq(${memPortPrefix}_addr_sel, UInt<${selectBits}>("h${i.toHexString}"))""" else "UInt<1>(\"h1\")"
+        val chipEnable = s"""UInt<1>("h1")"""
+        val writeEnable = if (memMaskGran.isEmpty) s"and(${memPortPrefix}_write_en, ${chipEnable})" else s"${memPortPrefix}_write_en"
         output.append(
   s"""
     inst mem_${i}_0 of ${lib_name}
@@ -39,7 +41,7 @@ s"""
     node ${memPortPrefix}_dout_${i}_0 = bits(mem_${i}_0.${libPortPrefix}_dout, ${width - 1}, 0)
     mem_${i}_0.${libPortPrefix}_din <= bits(${memPortPrefix}_din, ${width - 1}, 0)
     ${maskStatement}
-    mem_${i}_0.${libPortPrefix}_write_en <= and(and(${memPortPrefix}_write_en, UInt<1>("h1")), ${enableIdentifier})
+    mem_${i}_0.${libPortPrefix}_write_en <= and(and(${writeEnable}, UInt<1>("h1")), ${enableIdentifier})
     node ${memPortPrefix}_dout_${i} = ${memPortPrefix}_dout_${i}_0
   """
         )
@@ -273,7 +275,7 @@ circuit target_memory :
     node outer_dout_0_0 = bits(mem_0_0.lib_dout, 7, 0)
     mem_0_0.lib_din <= bits(outer_din, 7, 0)
 
-    mem_0_0.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), eq(outer_addr_sel, UInt<1>("h0")))
+    mem_0_0.lib_write_en <= and(and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1")), eq(outer_addr_sel, UInt<1>("h0")))
     node outer_dout_0 = outer_dout_0_0
 
     inst mem_1_0 of awesome_lib_mem
@@ -283,7 +285,7 @@ circuit target_memory :
     node outer_dout_1_0 = bits(mem_1_0.lib_dout, 7, 0)
     mem_1_0.lib_din <= bits(outer_din, 7, 0)
 
-    mem_1_0.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), eq(outer_addr_sel, UInt<1>("h1")))
+    mem_1_0.lib_write_en <= and(and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1")), eq(outer_addr_sel, UInt<1>("h1")))
     node outer_dout_1 = outer_dout_1_0
     outer_dout <= mux(eq(outer_addr_sel_reg, UInt<1>("h0")), outer_dout_0, mux(eq(outer_addr_sel_reg, UInt<1>("h1")), outer_dout_1, UInt<1>("h0")))
   extmodule awesome_lib_mem :
@@ -362,7 +364,7 @@ circuit target_memory :
     mem_0_0.innerB_clk <= outerA_clk
     mem_0_0.innerB_addr <= outerA_addr
     mem_0_0.innerB_din <= bits(outerA_din, 7, 0)
-    mem_0_0.innerB_write_en <= and(and(outerA_write_en, UInt<1>("h1")), eq(outerA_addr_sel, UInt<1>("h0")))
+    mem_0_0.innerB_write_en <= and(and(and(outerA_write_en, UInt<1>("h1")), UInt<1>("h1")), eq(outerA_addr_sel, UInt<1>("h0")))
     mem_0_0.innerA_clk <= outerB_clk
     mem_0_0.innerA_addr <= outerB_addr
     node outerB_dout_0_0 = bits(mem_0_0.innerA_dout, 7, 0)
@@ -371,7 +373,7 @@ circuit target_memory :
     mem_1_0.innerB_clk <= outerA_clk
     mem_1_0.innerB_addr <= outerA_addr
     mem_1_0.innerB_din <= bits(outerA_din, 7, 0)
-    mem_1_0.innerB_write_en <= and(and(outerA_write_en, UInt<1>("h1")), eq(outerA_addr_sel, UInt<1>("h1")))
+    mem_1_0.innerB_write_en <= and(and(and(outerA_write_en, UInt<1>("h1")), UInt<1>("h1")), eq(outerA_addr_sel, UInt<1>("h1")))
     mem_1_0.innerA_clk <= outerB_clk
     mem_1_0.innerA_addr <= outerB_addr
     node outerB_dout_1_0 = bits(mem_1_0.innerA_dout, 7, 0)

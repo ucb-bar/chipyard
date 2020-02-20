@@ -22,7 +22,7 @@ class ResetNSpec extends FreeSpec with Matchers {
 
   "Inverting reset needs to be done throughout module" in {
     val optionsManager = new ExecutionOptionsManager("dsptools") with HasChiselExecutionOptions with HasFirrtlOptions {
-      firrtlOptions = firrtlOptions.copy(compilerName = "low")
+      firrtlOptions = firrtlOptions.copy(compilerName = "low", customTransforms = List(new ResetInverterTransform)),
     }
     chisel3.Driver.execute(optionsManager, () => new ExampleModuleNeedsResetInverted) match {
       case ChiselExecutionSuccess(_, chirrtl, Some(FirrtlExecutionSuccess(_, firrtl))) =>

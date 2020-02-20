@@ -38,6 +38,8 @@ trait HasSimpleWidthTestGenerator extends HasSimpleTestGenerator {
           val outerMaskBit = myBaseBit / memMaskGran.get
           s"bits(outer_mask, ${outerMaskBit}, ${outerMaskBit})"
         } else """UInt<1>("h1")"""
+        val chipEnable = s"""UInt<1>("h1")"""
+        val writeEnableExpr = if (libMaskGran.isEmpty) s"and(${memPortPrefix}_write_en, ${chipEnable})" else s"${memPortPrefix}_write_en"
 
 s"""
     mem_0_${i}.${libPortPrefix}_clk <= ${memPortPrefix}_clk
@@ -45,7 +47,7 @@ s"""
     node ${memPortPrefix}_dout_0_${i} = bits(mem_0_${i}.${libPortPrefix}_dout, ${myMemWidth - 1}, 0)
     mem_0_${i}.${libPortPrefix}_din <= bits(${memPortPrefix}_din, ${myBaseBit + myMemWidth - 1}, ${myBaseBit})
     ${maskStatement}
-    mem_0_${i}.${libPortPrefix}_write_en <= and(and(${memPortPrefix}_write_en, ${writeEnableBit}), UInt<1>("h1"))
+    mem_0_${i}.${libPortPrefix}_write_en <= and(and(${writeEnableExpr}, ${writeEnableBit}), UInt<1>("h1"))
 """
       }).reduceLeft(_ + _)
 
@@ -415,26 +417,26 @@ class SplitWidth1024x32_readEnable_Lib extends MacroCompilerSpec with HasSRAMGen
     mem_0_0.lib_addr <= outer_addr
     node outer_dout_0_0 = bits(mem_0_0.lib_dout, 7, 0)
     mem_0_0.lib_din <= bits(outer_din, 7, 0)
-    mem_0_0.lib_read_en <= and(not(outer_write_en), UInt<1>("h1"))
-    mem_0_0.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_0.lib_read_en <= and(and(not(outer_write_en), UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_0.lib_write_en <= and(and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     mem_0_1.lib_clk <= outer_clk
     mem_0_1.lib_addr <= outer_addr
     node outer_dout_0_1 = bits(mem_0_1.lib_dout, 7, 0)
     mem_0_1.lib_din <= bits(outer_din, 15, 8)
-    mem_0_1.lib_read_en <= and(not(outer_write_en), UInt<1>("h1"))
-    mem_0_1.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_1.lib_read_en <= and(and(not(outer_write_en), UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_1.lib_write_en <= and(and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     mem_0_2.lib_clk <= outer_clk
     mem_0_2.lib_addr <= outer_addr
     node outer_dout_0_2 = bits(mem_0_2.lib_dout, 7, 0)
     mem_0_2.lib_din <= bits(outer_din, 23, 16)
-    mem_0_2.lib_read_en <= and(not(outer_write_en), UInt<1>("h1"))
-    mem_0_2.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_2.lib_read_en <= and(and(not(outer_write_en), UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_2.lib_write_en <= and(and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     mem_0_3.lib_clk <= outer_clk
     mem_0_3.lib_addr <= outer_addr
     node outer_dout_0_3 = bits(mem_0_3.lib_dout, 7, 0)
     mem_0_3.lib_din <= bits(outer_din, 31, 24)
-    mem_0_3.lib_read_en <= and(not(outer_write_en), UInt<1>("h1"))
-    mem_0_3.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_3.lib_read_en <= and(and(not(outer_write_en), UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_3.lib_write_en <= and(and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     node outer_dout_0 = cat(outer_dout_0_3, cat(outer_dout_0_2, cat(outer_dout_0_1, outer_dout_0_0)))
     outer_dout <= mux(UInt<1>("h1"), outer_dout_0, UInt<1>("h0"))
 """
@@ -514,25 +516,25 @@ class SplitWidth1024x32_readEnable_LibMem extends MacroCompilerSpec with HasSRAM
     node outer_dout_0_0 = bits(mem_0_0.lib_dout, 7, 0)
     mem_0_0.lib_din <= bits(outer_din, 7, 0)
     mem_0_0.lib_read_en <= and(outer_read_en, UInt<1>("h1"))
-    mem_0_0.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_0.lib_write_en <= and(and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     mem_0_1.lib_clk <= outer_clk
     mem_0_1.lib_addr <= outer_addr
     node outer_dout_0_1 = bits(mem_0_1.lib_dout, 7, 0)
     mem_0_1.lib_din <= bits(outer_din, 15, 8)
     mem_0_1.lib_read_en <= and(outer_read_en, UInt<1>("h1"))
-    mem_0_1.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_1.lib_write_en <= and(and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     mem_0_2.lib_clk <= outer_clk
     mem_0_2.lib_addr <= outer_addr
     node outer_dout_0_2 = bits(mem_0_2.lib_dout, 7, 0)
     mem_0_2.lib_din <= bits(outer_din, 23, 16)
     mem_0_2.lib_read_en <= and(outer_read_en, UInt<1>("h1"))
-    mem_0_2.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_2.lib_write_en <= and(and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     mem_0_3.lib_clk <= outer_clk
     mem_0_3.lib_addr <= outer_addr
     node outer_dout_0_3 = bits(mem_0_3.lib_dout, 7, 0)
     mem_0_3.lib_din <= bits(outer_din, 31, 24)
     mem_0_3.lib_read_en <= and(outer_read_en, UInt<1>("h1"))
-    mem_0_3.lib_write_en <= and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_3.lib_write_en <= and(and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     node outer_dout_0 = cat(outer_dout_0_3, cat(outer_dout_0_2, cat(outer_dout_0_1, outer_dout_0_0)))
     outer_dout <= mux(UInt<1>("h1"), outer_dout_0, UInt<1>("h0"))
 """

@@ -11,7 +11,7 @@ s"""
     mem_0_0.${libPortPrefix}_addr <= ${libPortPrefix}_addr
     node ${libPortPrefix}_dout_0_0 = bits(mem_0_0.${libPortPrefix}_dout, ${libWidth-1}, 0)
     mem_0_0.${libPortPrefix}_din <= bits(${libPortPrefix}_din, ${libWidth-1}, 0)
-    mem_0_0.${libPortPrefix}_write_en <= and(and(${libPortPrefix}_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_0.${libPortPrefix}_write_en <= and(and(and(${libPortPrefix}_write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     node ${libPortPrefix}_dout_0 = ${libPortPrefix}_dout_0_0
     ${libPortPrefix}_dout <= mux(UInt<1>("h1"), ${libPortPrefix}_dout_0, UInt<1>("h0"))
 
@@ -148,7 +148,7 @@ circuit target_memory :
     mem_0_0.innerB_clk <= outerA_clk
     mem_0_0.innerB_addr <= outerA_addr
     mem_0_0.innerB_din <= bits(outerA_din, 7, 0)
-    mem_0_0.innerB_write_en <= and(and(outerA_write_en, UInt<1>("h1")), eq(outerA_addr_sel, UInt<1>("h0")))
+    mem_0_0.innerB_write_en <= and(and(and(outerA_write_en, UInt<1>("h1")), UInt<1>("h1")), eq(outerA_addr_sel, UInt<1>("h0")))
     mem_0_0.innerA_clk <= outerB_clk
     mem_0_0.innerA_addr <= outerB_addr
     node outerB_dout_0_0 = bits(mem_0_0.innerA_dout, 7, 0)
@@ -157,7 +157,7 @@ circuit target_memory :
     mem_1_0.innerB_clk <= outerA_clk
     mem_1_0.innerB_addr <= outerA_addr
     mem_1_0.innerB_din <= bits(outerA_din, 7, 0)
-    mem_1_0.innerB_write_en <= and(and(outerA_write_en, UInt<1>("h1")), eq(outerA_addr_sel, UInt<1>("h1")))
+    mem_1_0.innerB_write_en <= and(and(and(outerA_write_en, UInt<1>("h1")), UInt<1>("h1")), eq(outerA_addr_sel, UInt<1>("h1")))
     mem_1_0.innerA_clk <= outerB_clk
     mem_1_0.innerA_addr <= outerB_addr
     node outerB_dout_1_0 = bits(mem_1_0.innerA_dout, 7, 0)
@@ -182,7 +182,7 @@ circuit target_memory :
     mem_0_0.innerB_clk <= innerB_clk
     mem_0_0.innerB_addr <= innerB_addr
     mem_0_0.innerB_din <= bits(innerB_din, 7, 0)
-    mem_0_0.innerB_write_en <= and(and(innerB_write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_0.innerB_write_en <= and(and(and(innerB_write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     mem_0_0.innerA_clk <= innerA_clk
     mem_0_0.innerA_addr <= innerA_addr
     node innerA_dout_0_0 = bits(mem_0_0.innerA_dout, 7, 0)
