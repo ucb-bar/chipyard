@@ -63,7 +63,7 @@ s"""
 
       output append
 s"""
-    ${memPortPrefix}_dout <= mux(UInt<1>("h1"), ${memPortPrefix}_dout_0, UInt<1>("h0"))
+    ${memPortPrefix}_dout <= mux(UInt<1>("h1"), ${memPortPrefix}_dout_0, UInt<${memWidth}>("h0"))
 """
       output.toString
     }
@@ -438,7 +438,7 @@ class SplitWidth1024x32_readEnable_Lib extends MacroCompilerSpec with HasSRAMGen
     mem_0_3.lib_read_en <= and(and(not(outer_write_en), UInt<1>("h1")), UInt<1>("h1"))
     mem_0_3.lib_write_en <= and(and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     node outer_dout_0 = cat(outer_dout_0_3, cat(outer_dout_0_2, cat(outer_dout_0_1, outer_dout_0_0)))
-    outer_dout <= mux(UInt<1>("h1"), outer_dout_0, UInt<1>("h0"))
+    outer_dout <= mux(UInt<1>("h1"), outer_dout_0, UInt<32>("h0"))
 """
 
   compileExecuteAndTest(mem, lib, v, output)
@@ -536,7 +536,7 @@ class SplitWidth1024x32_readEnable_LibMem extends MacroCompilerSpec with HasSRAM
     mem_0_3.lib_read_en <= and(outer_read_en, UInt<1>("h1"))
     mem_0_3.lib_write_en <= and(and(and(outer_write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     node outer_dout_0 = cat(outer_dout_0_3, cat(outer_dout_0_2, cat(outer_dout_0_1, outer_dout_0_0)))
-    outer_dout <= mux(UInt<1>("h1"), outer_dout_0, UInt<1>("h0"))
+    outer_dout <= mux(UInt<1>("h1"), outer_dout_0, UInt<32>("h0"))
 """
 
   compileExecuteAndTest(mem, lib, v, output)

@@ -76,7 +76,7 @@ circuit cc_banks_0_ext :
     mem_0_0.ren <= and(and(not(RW0_wmode), RW0_en), UInt<1>("h1"))
     mem_0_0.wen <= and(and(and(RW0_wmode, RW0_en), UInt<1>("h1")), UInt<1>("h1"))
     node RW0_rdata_0 = RW0_rdata_0_0
-    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
+    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<64>("h0"))
 
   extmodule fake_mem :
     input addr : UInt<12>
@@ -159,7 +159,7 @@ circuit cc_dir_ext :
     mem_0_1.mport <= not(cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 7, 7), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 6, 6), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 5, 5), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), cat(bits(RW0_wmask, 4, 4), bits(RW0_wmask, 4, 4)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
     mem_0_1.wen <= and(and(RW0_wmode, RW0_en), UInt<1>("h1"))
     node RW0_rdata_0 = cat(RW0_rdata_0_1, RW0_rdata_0_0)
-    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
+    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<128>("h0"))
 
   extmodule fake_mem :
     input addr : UInt<9>
@@ -486,7 +486,7 @@ circuit smem_0_ext :
     mem_1_3.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<1>("h1"))))
     mem_1_3.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<1>("h1"))))
     node R0_data_1 = cat(R0_data_1_3, cat(R0_data_1_2, cat(R0_data_1_1, R0_data_1_0)))
-    R0_data <= mux(eq(R0_addr_sel_reg, UInt<1>("h0")), R0_data_0, mux(eq(R0_addr_sel_reg, UInt<1>("h1")), R0_data_1, UInt<1>("h0")))
+    R0_data <= mux(eq(R0_addr_sel_reg, UInt<1>("h0")), R0_data_0, mux(eq(R0_addr_sel_reg, UInt<1>("h1")), R0_data_1, UInt<88>("h0")))
 
 
   module _T_84_ext :
@@ -621,7 +621,7 @@ circuit smem_0_ext :
     mem_3_1.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), eq(R0_addr_sel, UInt<2>("h3"))))
     mem_3_1.CSB2 <= not(and(R0_en, eq(R0_addr_sel, UInt<2>("h3"))))
     node R0_data_3 = cat(R0_data_3_1, R0_data_3_0)
-    R0_data <= mux(eq(R0_addr_sel_reg, UInt<2>("h0")), R0_data_0, mux(eq(R0_addr_sel_reg, UInt<2>("h1")), R0_data_1, mux(eq(R0_addr_sel_reg, UInt<2>("h2")), R0_data_2, mux(eq(R0_addr_sel_reg, UInt<2>("h3")), R0_data_3, UInt<1>("h0")))))
+    R0_data <= mux(eq(R0_addr_sel_reg, UInt<2>("h0")), R0_data_0, mux(eq(R0_addr_sel_reg, UInt<2>("h1")), R0_data_1, mux(eq(R0_addr_sel_reg, UInt<2>("h2")), R0_data_2, mux(eq(R0_addr_sel_reg, UInt<2>("h3")), R0_data_3, UInt<64>("h0")))))
 
   extmodule my_sram_2rw_128x32 :
     input A1 : UInt<7>
@@ -684,7 +684,7 @@ circuit smem_0_ext :
     mem_0_3.WEB <= not(and(and(RW0_wmode, bits(RW0_wmask, 3, 3)), UInt<1>("h1")))
     mem_0_3.CSB <= not(and(RW0_en, UInt<1>("h1")))
     node RW0_rdata_0 = cat(RW0_rdata_0_3, cat(RW0_rdata_0_2, cat(RW0_rdata_0_1, RW0_rdata_0_0)))
-    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
+    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<80>("h0"))
 
   extmodule my_sram_1rw_64x32 :
     input A : UInt<6>
@@ -723,7 +723,7 @@ circuit smem_0_ext :
     mem_0_1.WEB <= not(and(and(RW0_wmode, UInt<1>("h1")), UInt<1>("h1")))
     mem_0_1.CSB <= not(and(RW0_en, UInt<1>("h1")))
     node RW0_rdata_0 = cat(RW0_rdata_0_1, RW0_rdata_0_0)
-    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
+    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<64>("h0"))
 
   extmodule my_sram_1rw_512x32 :
     input A : UInt<9>
@@ -776,7 +776,7 @@ circuit smem_0_ext :
     mem_0_1.WEB2 <= not(and(and(UInt<1>("h0"), UInt<1>("h1")), UInt<1>("h1")))
     mem_0_1.CSB2 <= not(and(R0_en, UInt<1>("h1")))
     node R0_data_0 = cat(R0_data_0_1, R0_data_0_0)
-    R0_data <= mux(UInt<1>("h1"), R0_data_0, UInt<1>("h0"))
+    R0_data <= mux(UInt<1>("h1"), R0_data_0, UInt<40>("h0"))
 
   extmodule my_sram_2rw_32x22 :
     input A1 : UInt<5>
@@ -1063,7 +1063,7 @@ circuit smem_0_ext :
     mem_0_31.WEB <= not(and(and(RW0_wmode, bits(RW0_wmask, 31, 31)), UInt<1>("h1")))
     mem_0_31.CSB <= not(and(RW0_en, UInt<1>("h1")))
     node RW0_rdata_0 = cat(RW0_rdata_0_31, cat(RW0_rdata_0_30, cat(RW0_rdata_0_29, cat(RW0_rdata_0_28, cat(RW0_rdata_0_27, cat(RW0_rdata_0_26, cat(RW0_rdata_0_25, cat(RW0_rdata_0_24, cat(RW0_rdata_0_23, cat(RW0_rdata_0_22, cat(RW0_rdata_0_21, cat(RW0_rdata_0_20, cat(RW0_rdata_0_19, cat(RW0_rdata_0_18, cat(RW0_rdata_0_17, cat(RW0_rdata_0_16, cat(RW0_rdata_0_15, cat(RW0_rdata_0_14, cat(RW0_rdata_0_13, cat(RW0_rdata_0_12, cat(RW0_rdata_0_11, cat(RW0_rdata_0_10, cat(RW0_rdata_0_9, cat(RW0_rdata_0_8, cat(RW0_rdata_0_7, cat(RW0_rdata_0_6, cat(RW0_rdata_0_5, cat(RW0_rdata_0_4, cat(RW0_rdata_0_3, cat(RW0_rdata_0_2, cat(RW0_rdata_0_1, RW0_rdata_0_0)))))))))))))))))))))))))))))))
-    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
+    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<32>("h0"))
 
   module smem_0_ext :
     input RW0_addr : UInt<6>
@@ -1331,7 +1331,7 @@ circuit smem_0_ext :
     mem_0_31.WEB <= not(and(and(RW0_wmode, bits(RW0_wmask, 31, 31)), UInt<1>("h1")))
     mem_0_31.CSB <= not(and(RW0_en, UInt<1>("h1")))
     node RW0_rdata_0 = cat(RW0_rdata_0_31, cat(RW0_rdata_0_30, cat(RW0_rdata_0_29, cat(RW0_rdata_0_28, cat(RW0_rdata_0_27, cat(RW0_rdata_0_26, cat(RW0_rdata_0_25, cat(RW0_rdata_0_24, cat(RW0_rdata_0_23, cat(RW0_rdata_0_22, cat(RW0_rdata_0_21, cat(RW0_rdata_0_20, cat(RW0_rdata_0_19, cat(RW0_rdata_0_18, cat(RW0_rdata_0_17, cat(RW0_rdata_0_16, cat(RW0_rdata_0_15, cat(RW0_rdata_0_14, cat(RW0_rdata_0_13, cat(RW0_rdata_0_12, cat(RW0_rdata_0_11, cat(RW0_rdata_0_10, cat(RW0_rdata_0_9, cat(RW0_rdata_0_8, cat(RW0_rdata_0_7, cat(RW0_rdata_0_6, cat(RW0_rdata_0_5, cat(RW0_rdata_0_4, cat(RW0_rdata_0_3, cat(RW0_rdata_0_2, cat(RW0_rdata_0_1, RW0_rdata_0_0)))))))))))))))))))))))))))))))
-    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
+    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<32>("h0"))
 
   extmodule my_sram_1rw_64x8 :
     input A : UInt<6>
@@ -1375,7 +1375,7 @@ class SmallTagArrayTest extends MacroCompilerSpec with HasSRAMGenerator with Has
        |    mem_0_0.mask <= cat(UInt<1>("h0"), cat(UInt<1>("h0"), cat(UInt<1>("h0"), cat(UInt<1>("h0"), cat(UInt<1>("h0"), cat(UInt<1>("h0"), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), cat(bits(mask, 0, 0), bits(mask, 0, 0))))))))))))))))))))))))))))))))
        |    mem_0_0.write_en <= and(and(write_en, UInt<1>("h1")), UInt<1>("h1"))
        |    node dout_0 = dout_0_0
-       |    dout <= mux(UInt<1>("h1"), dout_0, UInt<1>("h0"))
+       |    dout <= mux(UInt<1>("h1"), dout_0, UInt<26>("h0"))
     """.stripMargin
 
   compileExecuteAndTest(mem, lib, v, output)
@@ -1573,7 +1573,7 @@ circuit T_2172_ext :
     mem_0_3.din <= bits(RW0_wdata, 79, 60)
     mem_0_3.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 3, 3)), UInt<1>("h1"))
     node RW0_rdata_0 = cat(RW0_rdata_0_3, cat(RW0_rdata_0_2, cat(RW0_rdata_0_1, RW0_rdata_0_0)))
-    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
+    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<80>("h0"))
 
   extmodule SRAM1RW64x32 :
     input addr : UInt<6>
@@ -1605,7 +1605,7 @@ circuit T_2172_ext :
     mem_0_1.din <= bits(RW0_wdata, 63, 32)
     mem_0_1.write_en <= and(and(RW0_wmode, UInt<1>("h1")), UInt<1>("h1"))
     node RW0_rdata_0 = cat(RW0_rdata_0_1, RW0_rdata_0_0)
-    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
+    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<64>("h0"))
 
   extmodule SRAM1RW512x32 :
     input addr : UInt<9>
@@ -1675,7 +1675,7 @@ circuit T_2172_ext :
     mem_0_7.din <= bits(RW0_wdata, 63, 56)
     mem_0_7.write_en <= and(and(RW0_wmode, bits(RW0_wmask, 7, 7)), UInt<1>("h1"))
     node RW0_rdata_0 = cat(RW0_rdata_0_7, cat(RW0_rdata_0_6, cat(RW0_rdata_0_5, cat(RW0_rdata_0_4, cat(RW0_rdata_0_3, cat(RW0_rdata_0_2, cat(RW0_rdata_0_1, RW0_rdata_0_0)))))))
-    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<1>("h0"))
+    RW0_rdata <= mux(UInt<1>("h1"), RW0_rdata_0, UInt<64>("h0"))
 
   extmodule SRAM1RW512x8 :
     input addr : UInt<9>
@@ -1731,7 +1731,7 @@ circuit T_2172_ext :
     mem_0_3.portA_addr <= R0_addr
     node R0_data_0_3 = bits(mem_0_3.portA_dout, 21, 0)
     node R0_data_0 = cat(R0_data_0_3, cat(R0_data_0_2, cat(R0_data_0_1, R0_data_0_0)))
-    R0_data <= mux(UInt<1>("h1"), R0_data_0, UInt<1>("h0"))
+    R0_data <= mux(UInt<1>("h1"), R0_data_0, UInt<88>("h0"))
 
   extmodule SRAM2RW64x32 :
     input portA_addr : UInt<6>

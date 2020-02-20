@@ -13,7 +13,7 @@ s"""
     mem_0_0.${libPortPrefix}_din <= bits(${libPortPrefix}_din, ${libWidth-1}, 0)
     mem_0_0.${libPortPrefix}_write_en <= and(and(and(${libPortPrefix}_write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     node ${libPortPrefix}_dout_0 = ${libPortPrefix}_dout_0_0
-    ${libPortPrefix}_dout <= mux(UInt<1>("h1"), ${libPortPrefix}_dout_0, UInt<1>("h0"))
+    ${libPortPrefix}_dout <= mux(UInt<1>("h1"), ${libPortPrefix}_dout_0, UInt<${libWidth}>("h0"))
 
   module split_${lib_name} :
     input ${libPortPrefix}_addr : UInt<${lib_addr_width}>
@@ -162,7 +162,7 @@ circuit target_memory :
     mem_1_0.innerA_addr <= outerB_addr
     node outerB_dout_1_0 = bits(mem_1_0.innerA_dout, 7, 0)
     node outerB_dout_1 = outerB_dout_1_0
-    outerB_dout <= mux(eq(outerB_addr_sel_reg, UInt<1>("h0")), outerB_dout_0, mux(eq(outerB_addr_sel_reg, UInt<1>("h1")), outerB_dout_1, UInt<1>("h0")))
+    outerB_dout <= mux(eq(outerB_addr_sel_reg, UInt<1>("h0")), outerB_dout_0, mux(eq(outerB_addr_sel_reg, UInt<1>("h1")), outerB_dout_1, UInt<8>("h0")))
 """
 
   override def generateFooterPorts =
@@ -187,7 +187,7 @@ circuit target_memory :
     mem_0_0.innerA_addr <= innerA_addr
     node innerA_dout_0_0 = bits(mem_0_0.innerA_dout, 7, 0)
     node innerA_dout_0 = innerA_dout_0_0
-    innerA_dout <= mux(UInt<1>("h1"), innerA_dout_0, UInt<1>("h0"))
+    innerA_dout <= mux(UInt<1>("h1"), innerA_dout_0, UInt<8>("h0"))
 
   module split_awesome_lib_mem :
     input innerA_addr : UInt<10>
@@ -294,7 +294,7 @@ circuit target_memory :
     mem_1_0.innerA_addr <= outerB_addr
     node outerB_dout_1_0 = bits(mem_1_0.innerA_dout, 7, 0)
     node outerB_dout_1 = outerB_dout_1_0
-    outerB_dout <= mux(eq(outerB_addr_sel_reg, UInt<1>("h0")), outerB_dout_0, mux(eq(outerB_addr_sel_reg, UInt<1>("h1")), outerB_dout_1, UInt<1>("h0")))
+    outerB_dout <= mux(eq(outerB_addr_sel_reg, UInt<1>("h0")), outerB_dout_0, mux(eq(outerB_addr_sel_reg, UInt<1>("h1")), outerB_dout_1, UInt<8>("h0")))
 """
 
   override def generateFooterPorts =
@@ -384,7 +384,7 @@ circuit target_memory :
     mem_0_7.innerA_addr <= innerA_addr
     node innerA_dout_0_7 = bits(mem_0_7.innerA_dout, 0, 0)
     node innerA_dout_0 = cat(innerA_dout_0_7, cat(innerA_dout_0_6, cat(innerA_dout_0_5, cat(innerA_dout_0_4, cat(innerA_dout_0_3, cat(innerA_dout_0_2, cat(innerA_dout_0_1, innerA_dout_0_0)))))))
-    innerA_dout <= mux(UInt<1>("h1"), innerA_dout_0, UInt<1>("h0"))
+    innerA_dout <= mux(UInt<1>("h1"), innerA_dout_0, UInt<8>("h0"))
 
 
   module split_awesome_lib_mem :

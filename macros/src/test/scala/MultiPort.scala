@@ -111,8 +111,8 @@ class SplitWidth_2rw extends MacroCompilerSpec with HasSRAMGenerator with HasSim
     mem_0_3.portB_read_en <= and(portB_read_en, UInt<1>("h1"))
     mem_0_3.portB_write_en <= and(and(and(portB_write_en, UInt<1>("h1")), bits(portB_mask, 3, 3)), UInt<1>("h1"))
     node portB_dout_0 = cat(portB_dout_0_3, cat(portB_dout_0_2, cat(portB_dout_0_1, portB_dout_0_0)))
-    portA_dout <= mux(UInt<1>("h1"), portA_dout_0, UInt<1>("h0"))
-    portB_dout <= mux(UInt<1>("h1"), portB_dout_0, UInt<1>("h0"))
+    portA_dout <= mux(UInt<1>("h1"), portA_dout_0, UInt<64>("h0"))
+    portB_dout <= mux(UInt<1>("h1"), portB_dout_0, UInt<64>("h0"))
 """
 
   compileExecuteAndTest(mem, lib, v, output)
@@ -215,7 +215,7 @@ class SplitWidth_1r_1w extends MacroCompilerSpec with HasSRAMGenerator with HasS
     node portA_dout_0_3 = bits(mem_0_3.portA_dout, 15, 0)
     mem_0_3.portA_read_en <= and(portA_read_en, UInt<1>("h1"))
     node portA_dout_0 = cat(portA_dout_0_3, cat(portA_dout_0_2, cat(portA_dout_0_1, portA_dout_0_0)))
-    portA_dout <= mux(UInt<1>("h1"), portA_dout_0, UInt<1>("h0"))
+    portA_dout <= mux(UInt<1>("h1"), portA_dout_0, UInt<64>("h0"))
 """
 
   compileExecuteAndTest(mem, lib, v, output)
@@ -384,8 +384,8 @@ class SplitWidth_2rw_differentMasks extends MacroCompilerSpec with HasSRAMGenera
     mem_0_7.portB_read_en <= and(portB_read_en, UInt<1>("h1"))
     mem_0_7.portB_write_en <= and(and(and(portB_write_en, UInt<1>("h1")), bits(portB_mask, 7, 7)), UInt<1>("h1"))
     node portB_dout_0 = cat(portB_dout_0_7, cat(portB_dout_0_6, cat(portB_dout_0_5, cat(portB_dout_0_4, cat(portB_dout_0_3, cat(portB_dout_0_2, cat(portB_dout_0_1, portB_dout_0_0)))))))
-    portA_dout <= mux(UInt<1>("h1"), portA_dout_0, UInt<1>("h0"))
-    portB_dout <= mux(UInt<1>("h1"), portB_dout_0, UInt<1>("h0"))
+    portA_dout <= mux(UInt<1>("h1"), portA_dout_0, UInt<64>("h0"))
+    portB_dout <= mux(UInt<1>("h1"), portB_dout_0, UInt<64>("h0"))
 """
 
   compileExecuteAndTest(mem, lib, v, output)

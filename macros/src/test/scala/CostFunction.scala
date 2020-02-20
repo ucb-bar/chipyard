@@ -99,7 +99,7 @@ circuit target_memory :
     mem_0_3.din <= bits(din, 127, 96)
     mem_0_3.write_en <= and(and(and(write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     node dout_0 = cat(dout_0_3, cat(dout_0_2, cat(dout_0_1, dout_0_0)))
-    dout <= mux(UInt<1>("h1"), dout_0, UInt<1>("h0"))
+    dout <= mux(UInt<1>("h1"), dout_0, UInt<128>("h0"))
 
   extmodule SRAM_WIDTH_32 :
     input addr : UInt<10>
