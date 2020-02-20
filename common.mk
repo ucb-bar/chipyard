@@ -6,7 +6,7 @@ SHELL=/bin/bash
 #########################################################################################
 # variables to get all *.scala files
 #########################################################################################
-lookup_scala_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.scala" -print 2> /dev/null)
+lookup_scala_srcs = $(shell find -L $(1)/ -name target -prune -o \( -iname "*.scala" -o -iname "*.cc" -o -iname "*.v" \) -print 2> /dev/null)
 
 SOURCE_DIRS=$(addprefix $(base_dir)/,generators sims/firesim/sim)
 SCALA_SOURCES=$(call lookup_scala_srcs,$(SOURCE_DIRS))
