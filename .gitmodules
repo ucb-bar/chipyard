@@ -46,7 +46,7 @@
 	url = https://github.com/riscv/riscv-isa-sim.git
 [submodule "toolchains/riscv-tools/riscv-pk"]
 	path = toolchains/riscv-tools/riscv-pk
-	url = https://github.com/riscv/riscv-pk.git
+	url = https://github.com/firesim/riscv-pk.git
 [submodule "toolchains/riscv-tools/riscv-tests"]
 	path = toolchains/riscv-tools/riscv-tests
 	url = https://github.com/riscv/riscv-tests.git
