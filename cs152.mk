@@ -32,3 +32,7 @@ pk := $(RISCV)/riscv64-unknown-elf/bin/pk
 run-pk: run-binary-hex $(pk)
 run-pk-debug: run-binary-debug-hex $(pk)
 run-pk run-pk-debug: BINARY = $(pk) $(PAYLOAD)
+
+run-bfs: run-binary-hex
+run-bfs-debug: run-binary-debug-hex
+run-bfs run-bfs-debug: BINARY := $(base_dir)/lab/open2/gapbs/bfs -g 8 -n 1

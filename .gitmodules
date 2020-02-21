@@ -137,6 +137,9 @@
 [submodule "lab/open1/ccbench"]
 	path = lab/open1/ccbench
 	url = https://github.com/ucb-bar/ccbench.git
+[submodule "lab/open2/gapbs"]
+	path = lab/open2/gapbs
+	url = https://github.com/sbeamer/gapbs.git
 [submodule "lab/open3/riscv-isa-sim"]
 	path = lab/open3/riscv-isa-sim
 	url = https://github.com/riscv/riscv-isa-sim.git
