@@ -24,3 +24,16 @@ class FireSimGemminiEE290Lab2BigSPRocketConfig extends Config(
   new WithNBigCores(1) ++
   new FireSimRocketChipConfig)
 
+class FireSimGemminiEE290Lab3RocketConfig extends Config(
+  new WithInclusiveCache ++
+  new gemmini.GemminiEE290Lab3Config ++
+  new WithNBigCores(1) ++
+  new FireSimRocketChipConfig)
+
+
+class FireSimGemminiEE290Lab3SmallSPRocketConfig extends Config(
+  new WithInclusiveCache ++
+  new gemmini.GemminiEE290Lab3SmallSPConfig ++
+  new WithNBigCores(1) ++
+  new FireSimRocketChipConfig)
+
