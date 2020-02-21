@@ -8,7 +8,7 @@ RDIR=$(git rev-parse --show-toplevel)
 
 # Ignore toolchain submodules
 cd "$RDIR"
-for name in toolchains/*-tools/*/ ; do
+for name in software/*/ toolchains/*-tools/*/ ; do
     git config submodule."${name%/}".update none
 done
 git config submodule.toolchains/libgloss.update none
@@ -26,7 +26,7 @@ git config submodule.vlsi/hammer-mentor-plugins.update none
 git submodule update --init --recursive #--jobs 8
 
 # Un-ignore toolchain submodules
-for name in toolchains/*-tools/*/ ; do
+for name in software/*/ toolchains/*-tools/*/ ; do
     git config --unset submodule."${name%/}".update
 done
 git config --unset submodule.toolchains/libgloss.update
@@ -47,7 +47,6 @@ git submodule update --init sims/firesim
     cd sims/firesim
     # Initialize dependencies for MIDAS-level RTL simulation
     git submodule update --init sim/midas
-    # Exclude riscv-linux
-    git submodule update --init sw/firesim-software
+    # CS152
+    git submodule update --init platforms
 )
-git config submodule.sims/firesim.update none
