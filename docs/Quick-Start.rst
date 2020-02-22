@@ -35,7 +35,7 @@ To build the toolchains, you should run:
     ./scripts/build-toolchains.sh
 
 .. Note:: If you are planning to use the Hwacha vector unit, or other RoCC-based accelerators, you should build the esp-tools toolchain by adding the ``esp-tools`` argument to the script above.
-  If you are running on an Amazon Web Services EC2 instance, intending to use FireSim, you can also use the ``--ec2fast`` flag for an expedited installation of a pre-compiled toolchain.
+  If you are running on an Amazon Web Services EC2 instance (using the FPGA Developer AMI), intending to use FireSim, you can also use the ``ec2fast`` flag for an expedited installation of a pre-compiled toolchain.
 
 Finally, set up Chipyard's environment variables and put the newly built toolchain on your path:
 
