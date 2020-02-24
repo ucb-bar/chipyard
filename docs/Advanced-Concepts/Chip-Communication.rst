@@ -109,7 +109,7 @@ reminder, to run a software RTL simulation, run:
 
 FireSim FPGA-accelerated simulations use TSI by default as well.
 
-If you would like to build and simulate a Chipyard configuration with a DTM configured for DMI communication, then you must tie-off the TSI interface, and instantiate the `SimDTM`. Note that we use `WithTiedOffSerial ++ WithSimDTM` instead of `WithTiedOffDebug ++ WithSimSerial`.
+If you would like to build and simulate a Chipyard configuration with a DTM configured for DMI communication, then you must tie-off the TSI interface, and instantiate the `SimDTM`. Note that we use `WithTiedOffSerial ++ WithSimDebug` instead of `WithTiedOffDebug ++ WithSimSerial`.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
     :language: scala

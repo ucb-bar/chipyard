@@ -16,34 +16,29 @@ import testchipip._
 import icenet._
 import tracegen.{HasTraceGenTilesModuleImp}
 
-import scala.reflect.{ClassTag, classTag}
+import scala.reflect.{ClassTag}
 
 // System for instantiating binders based
 // on the scala type of the Target (_not_ its IO). This avoids needing to
 // duplicate harnesses (essentially test harnesses) for each target.
-//
-// You could just as well create a custom harness module that instantiates
-// bridges explicitly, or add methods to
-// your target traits that instantiate the bridge there (i.e., akin to
-// SimAXI4Mem). Since cake traits live in Rocket Chip it was easiest to match
-// on the types rather than change trait code.
 
+// IOBinders is map between string representations of traits to the desired
+// IO connection behavior for tops matching that trait. We use strings to enable
+// composition and overriding of IOBinders, much like how normal Keys in the config
+// system are used/ At elaboration, the testharness traverses this set of functions,
+// and functions which match the type of the Top are evaluated.
 
+// You can add your own binder by adding a new (key, fn) pair, typically by using
+// the OverrideIOBinder or ComposeIOBinder macros
 
-// A map of partial functions that match on the type the DUT (_not_ it's
-// IO) to generate an appropriate bridge. You can add your own binder by adding
-// a new (key, fn) pair. You should override existing pairs in this map when
-// using a custom IOBinder
-
-// Since we also want to compose this structure like the existing config system,
-// use the scala string representation of the matched trait as a key
-
-case object IOBinders extends Field[Map[String, (Clock, Bool, Bool, Any) => Seq[Any]]](Map())
-
+// DOC include start: IOBinders
+case object IOBinders extends Field[Map[String, (Clock, Bool, Bool, Any) => Seq[Any]]](
+  Map[String, (Clock, Bool, Bool, Any) => Seq[Any]]().withDefaultValue((c: Clock, r: Bool, s: Bool, t: Any) => Nil)
+)
 
 // This macro overrides previous matches on some Top mixin. This is useful for
-// binders which modify IO, since those typically cannot be composed
-class RegisterIOBinder[T](fn: => (Clock, Bool, Bool, T) => Seq[Any])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+// binders which drive IO, since those typically cannot be composed
+class OverrideIOBinder[T](fn: => (Clock, Bool, Bool, T) => Seq[Any])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
   case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString ->
       ((clock: Clock, reset: Bool, success: Bool, t: Any) => {
         t match {
@@ -56,34 +51,41 @@ class RegisterIOBinder[T](fn: => (Clock, Bool, Bool, T) => Seq[Any])(implicit ta
 
 // This macro composes with previous matches on some Top mixin. This is useful for
 // annotation-like binders, since those can typically be composed
-class RegisterBinder[T](fn: => (Clock, Bool, Bool, T) => Seq[Any])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+class ComposeIOBinder[T](fn: => (Clock, Bool, Bool, T) => Seq[Any])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
   case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString ->
       ((clock: Clock, reset: Bool, success: Bool, t: Any) => {
         t match {
-          case top: T => fn(clock, reset, success, top) ++
-            up(IOBinders, site).getOrElse(tag.runtimeClass.toString, (c: Clock, r: Bool, s: Bool, t: Any) => Nil)(clock, reset, success, top)
+          case top: T => (up(IOBinders, site)(tag.runtimeClass.toString)(clock, reset, success, top)
+            ++ fn(clock, reset, success, top))
+          case _ => Nil
         }
       })
   )
 })
 
-class WithGPIOTiedOff extends RegisterIOBinder({
+// DOC include end: IOBinders
+
+class WithGPIOTiedOff extends OverrideIOBinder({
   (c, r, s, top: HasPeripheryGPIOModuleImp) => top.gpio.map(gpio => gpio.pins.map(p => p.i.ival := false.B)); Nil
 })
 
-class WithSimBlockDevice extends RegisterIOBinder({
+class WithSimBlockDevice extends OverrideIOBinder({
   (c, r, s, top: CanHavePeripheryBlockDeviceModuleImp) => top.connectSimBlockDevice(c, r); Nil
 })
 
-class WithBlockDeviceModel extends RegisterIOBinder({
+class WithBlockDeviceModel extends OverrideIOBinder({
   (c, r, s, top: CanHavePeripheryBlockDeviceModuleImp) => top.connectBlockDeviceModel(); Nil
 })
 
-class WithLoopbackNIC extends RegisterIOBinder({
+class WithLoopbackNIC extends OverrideIOBinder({
   (c, r, s, top: CanHavePeripheryIceNICModuleImp) => top.connectNicLoopback(); Nil
 })
 
-class WithUARTAdapter extends RegisterIOBinder({
+class WithSimNIC extends OverrideIOBinder({
+  (c, r, s, top: CanHavePeripheryIceNICModuleImp) => top.connectSimNetwork(c, r); Nil
+})
+
+class WithUARTAdapter extends OverrideIOBinder({
   (c, r, s, top: HasPeripheryUARTModuleImp) => {
     val defaultBaudRate = 115200 // matches sifive-blocks uart baudrate
     top.uart.zipWithIndex.foreach{ case (dut_io, i) =>
@@ -95,23 +97,25 @@ class WithUARTAdapter extends RegisterIOBinder({
   }
 })
 
-class WithSimAXIMem extends RegisterIOBinder({
+// DOC include start: WithSimAXIMem
+class WithSimAXIMem extends OverrideIOBinder({
   (c, r, s, top: CanHaveMasterAXI4MemPortModuleImp) => top.connectSimAXIMem(); Nil
 })
+// DOC include end: WithSimAXIMem
 
-class WithSimAXIMMIO extends RegisterIOBinder({
+class WithSimAXIMMIO extends OverrideIOBinder({
   (c, r, s, top: CanHaveMasterAXI4MMIOPortModuleImp) => top.connectSimAXIMMIO(); Nil
 })
 
-class WithDontTouchPorts extends RegisterIOBinder({
+class WithDontTouchPorts extends OverrideIOBinder({
   (c, r, s, top: DontTouch) => top.dontTouchPorts(); Nil
 })
 
-class WithTieOffInterrupts extends RegisterIOBinder({
+class WithTieOffInterrupts extends OverrideIOBinder({
   (c, r, s, top: HasExtInterruptsBundle) => top.tieOffInterrupts(); Nil
 })
 
-class WithTieOffL2FBusAXI extends RegisterIOBinder({
+class WithTieOffL2FBusAXI extends OverrideIOBinder({
   (c, r, s, top: CanHaveSlaveAXI4PortModuleImp) => {
     top.l2_frontend_bus_axi4.foreach(axi => {
       axi.tieoff()
@@ -129,7 +133,7 @@ class WithTieOffL2FBusAXI extends RegisterIOBinder({
   }
 })
 
-class WithTiedOffDebug extends RegisterIOBinder({
+class WithTiedOffDebug extends OverrideIOBinder({
   (c, r, s, top: HasPeripheryDebugModuleImp) => {
     Debug.tieoffDebug(top.debug, top.psd)
     // tieoffDebug doesn't actually tie everything off :/
@@ -138,7 +142,7 @@ class WithTiedOffDebug extends RegisterIOBinder({
   }
 })
 
-class WithSimSerial extends RegisterIOBinder({
+class WithSimSerial extends OverrideIOBinder({
   (c, r, s, top: CanHavePeripherySerialModuleImp) => {
     val ser_success = top.connectSimSerial()
     when (ser_success) { s := true.B }
@@ -146,12 +150,12 @@ class WithSimSerial extends RegisterIOBinder({
   }
 })
 
-class WithTiedOffSerial extends RegisterIOBinder({
+class WithTiedOffSerial extends OverrideIOBinder({
   (c, r, s, top: CanHavePeripherySerialModuleImp) => top.tieoffSerial(); Nil
 })
 
 
-class WithSimDTM extends RegisterIOBinder({
+class WithSimDebug extends OverrideIOBinder({
   (c, r, s, top: HasPeripheryDebugModuleImp) => {
     val dtm_success = Wire(Bool())
     top.reset := r | top.debug.map { debug => AsyncResetReg(debug.ndreset) }.getOrElse(false.B)
@@ -162,6 +166,6 @@ class WithSimDTM extends RegisterIOBinder({
 })
 
 
-class WithTraceGenSuccessBinder extends RegisterIOBinder({
-  (c, r, s, top: HasTraceGenTilesModuleImp) => s := top.success; Nil
+class WithTraceGenSuccessBinder extends OverrideIOBinder({
+  (c, r, s, top: HasTraceGenTilesModuleImp) => when (top.success) { s := true.B };  Nil
 })

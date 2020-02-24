@@ -44,47 +44,19 @@ familiar with FireSim, please return to the `FireSim Docs
 <https://docs.fires.im/en/latest/Initial-Setup/Setting-up-your-Manager-Instance.html#completing-setup-using-the-manager>`__,
 and proceed with the rest of the tutorial.
 
-Current Limitations:
-++++++++++++++++++++
-
-FireSim integration in Chipyard is still a work in progress. Presently, you
-cannot build a FireSim simulator from any generator project in Chipyard except ``firechip``,
-which properly invokes MIDAS on the target RTL.
-
-In the interim, workaround this limitation by importing Config and Module
-classes from other generator projects into FireChip. For example, assuming you Chipyard
-config looks as following:
-
-.. code-block:: scala
-
-  class CustomConfig extends Config(
-    new WithInclusiveCache ++
-    new myproject.MyCustomConfig ++
-    new DefaultRocketConfig
-  )
-
-Then the equivalent FireChip config (in ``generators/firechip/src/main/scala/TargetConfigs.scala``) based on ``FireSimRocketChipConfig``
-will look as follows:
-
-.. code-block:: scala
-
-  class FireSimCustomConfig extends Config(
-    new WithBootROM ++
-    new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
-    new WithExtMemSize(0x400000000L) ++ // 16GB
-    new WithoutTLMonitors ++
-    new WithUARTKey ++
-    new WithNICKey ++
-    new WithBlockDevice ++
-    new WithRocketL2TLBs(1024) ++
-    new WithPerfCounters ++
-    new WithoutClockGating ++
-    new WithInclusiveCache ++
-    new myproject.MyCustomConfig ++
-    new freechips.rocketchip.system.DefaultConfig)
+Running your Design in FireSim
+------------------------------
+Converting a Chipyard config (one in ``chipyard/src/main/scala`` to run in FireSim is simple. We are using the same target (top) RTL, and only need to specify a new set of connection behaviors for the IOs of that module. Simply create a matching config within ``generators/firechip/src/main/scala/TargetConfigs`` that inherits your config defined in ``chipyard``.
 
 
-You should then be able to refer to those classes or an alias of them in your ``DESIGN`` or ``TARGET_CONFIG``
-variables. Note that if your target machine has I/O not provided in the default
-FireChip targets (see ``generators/firechip/src/main/scala/Targets.scala``) you may need
-to write a custom bridge.
+.. literalinclude:: ../../generators/firechip/src/main/scala/TargetConfigs.scala
+    :language: scala
+    :start-after: DOC include start: firesimconfig
+    :end-before: DOC include end: firesimconfig
+
+
+Only 3 additional config-mixins are needed.
+
+* ``WithFireSimConfigTweaks`` modifies your design to better fit the FireSim usage model. For example, FireSim designs typically include a UART. Technically, adding this in is optional, but *strongly* recommended.
+* ``WithDefaultMemModel`` sets the external memory model in the FireSim simulation. See the FireSim documentation for details.
+* ``WithDefaultFireSimBridges`` sets the ``IOBinders`` key to use FireSim's Bridge system, which can drive target IOs with software bridge models running on the simulation host. See the FireSIm documnetation for details.

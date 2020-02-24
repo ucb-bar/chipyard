@@ -24,26 +24,26 @@ import tracegen.HasTraceGenTilesModuleImp
 
 import boom.common.{BoomTile}
 
-import chipyard.iobinders.{IOBinders, RegisterIOBinder, RegisterBinder}
+import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder}
 import chipyard.HasBoomAndRocketTilesModuleImp
 
-class WithSerialBridge extends RegisterIOBinder({
+class WithSerialBridge extends OverrideIOBinder({
   (c, r, s, target: CanHavePeripherySerialModuleImp) => target.serial.map(s => SerialBridge(s)(target.p)).toSeq
 })
 
-class WithNICBridge extends RegisterIOBinder({
+class WithNICBridge extends OverrideIOBinder({
   (c, r, s, target: CanHavePeripheryIceNICModuleImp) => target.net.map(n => NICBridge(n)(target.p)).toSeq
 })
 
-class WithUARTBridge extends RegisterIOBinder({
+class WithUARTBridge extends OverrideIOBinder({
   (c, r, s, target: HasPeripheryUARTModuleImp) => target.uart.map(u => UARTBridge(u)(target.p)).toSeq
 })
 
-class WithBlockDeviceBridge extends RegisterIOBinder({
+class WithBlockDeviceBridge extends OverrideIOBinder({
   (c, r, s, target: CanHavePeripheryBlockDeviceModuleImp) => target.bdev.map(b => BlockDevBridge(b, target.reset.toBool)(target.p)).toSeq
 })
 
-class WithFASEDBridge extends RegisterIOBinder({
+class WithFASEDBridge extends OverrideIOBinder({
   (c, r, s, t: CanHaveMasterAXI4MemPortModuleImp) => {
     implicit val p = t.p
     (t.mem_axi4 zip t.outer.memAXI4Node).flatMap({ case (io, node) =>
@@ -58,15 +58,15 @@ class WithFASEDBridge extends RegisterIOBinder({
   }
 })
 
-class WithTracerVBridge extends RegisterIOBinder({
+class WithTracerVBridge extends OverrideIOBinder({
   (c, r, s, target: CanHaveTraceIOModuleImp) => target.traceIO.map(t => TracerVBridge(t)(target.p)).toSeq
 })
 
-class WithTraceGenBridge extends RegisterIOBinder({
+class WithTraceGenBridge extends OverrideIOBinder({
   (c, r, s, target: HasTraceGenTilesModuleImp) => Seq(GroundTestBridge(target.success)(target.p))
 })
 
-class WithFireSimMultiCycleRegfile extends RegisterBinder({
+class WithFireSimMultiCycleRegfile extends ComposeIOBinder({
   (c, r, s, target: HasBoomAndRocketTilesModuleImp) => {
     target.outer.tiles.map {
       case r: RocketTile => {

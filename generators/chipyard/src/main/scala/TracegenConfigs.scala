@@ -24,6 +24,7 @@ class BoomTraceGenConfig extends Config(
   new chipyard.iobinders.WithTraceGenSuccessBinder ++
   new chipyard.config.WithTracegenTop ++
   new tracegen.WithBoomTraceGen(List.fill(2) { DCacheParams(nMSHRs = 8, nSets = 16, nWays = 2) }) ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.system.BaseConfig)
 
 class NonBlockingTraceGenL2Config extends Config(

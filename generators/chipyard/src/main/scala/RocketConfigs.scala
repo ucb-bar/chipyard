@@ -90,7 +90,7 @@ class jtagRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithSimAXIMem ++
-  new chipyard.iobinders.WithSimDTM ++    // add SimJtag and SimSerial, use both to drive sim
+  new chipyard.iobinders.WithSimDebug ++    // add SimJtag and SimSerial, use both to drive sim
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
   new chipyard.config.WithNoGPIO ++
@@ -112,7 +112,7 @@ class dmiRocketConfig extends Config(
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithSimAXIMem ++
   new chipyard.iobinders.WithTiedOffSerial ++
-  new chipyard.iobinders.WithSimDTM ++                   // add SimDTM and use it to drive simulation
+  new chipyard.iobinders.WithSimDebug ++               // add SimDebug and use it to drive simulation
   new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
@@ -345,6 +345,7 @@ class LoopbackNICRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+// DOC include start: scratchpadrocket
 class ScratchpadRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
@@ -363,3 +364,4 @@ class ScratchpadRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: scratchpadrocket

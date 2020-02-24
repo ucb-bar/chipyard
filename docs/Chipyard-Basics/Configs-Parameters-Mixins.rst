@@ -91,8 +91,8 @@ lazy module implementation performs the actual Chisel RTL elaboration.
 In the ``Top`` example class, the "outer" ``Top`` instantiates the "inner"
 ``TopModule`` as a lazy module implementation. This delays immediate elaboration
 of the module until all logical connections are determined and all configuration information is exchanged.
-The ``Syatem`` outer base class, as well as the
-``CanHavePeripheryX`` outer traits contain code to perform high-level logical
+The ``System`` outer base class, as well as the
+``CanHavePeriphery<X>`` outer traits contain code to perform high-level logical
 connections. For example, the ``CanHavePeripherySerial`` outer trait contains code
 to optionally lazily instantiate the ``SerialAdapter``, and connect the ``SerialAdapter``'s
 TileLink node to the Front bus.

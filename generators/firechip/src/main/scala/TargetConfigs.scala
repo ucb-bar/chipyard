@@ -21,7 +21,6 @@ import tracegen.TraceGenKey
 import icenet._
 
 import firesim.bridges._
-import firesim.util.{WithNumNodes}
 import firesim.configs._
 import chipyard.{BuildTop}
 import chipyard.config.ConfigValName._
@@ -106,11 +105,13 @@ class WithFireSimConfigTweaks extends Config(
 //*****************************************************************
 // Rocket configs, base off chipyard's RocketConfig
 //*****************************************************************
+// DOC include start: firesimconfig
 class FireSimRocketConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.RocketConfig)
+// DOC include end: firesimconfig
 
 class FireSimQuadRocketConfig extends Config(
   new WithDefaultFireSimBridges ++
@@ -118,19 +119,6 @@ class FireSimQuadRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.QuadRocketConfig)
 
-
-//*****************************************************************
-// Sha3 rocc-accel configs, base off chipyard's Sha3RocketConfig
-//*****************************************************************
-class FireSimSha3RocketConfig extends Config(
-  new WithDefaultFireSimBridges ++
-  new WithDefaultMemModel ++
-  new WithFireSimConfigTweaks ++
-  new chipyard.Sha3RocketConfig)
-
-class FireSimSha3PrintfRocketConfig extends Config(
-  new sha3.WithSha3Printf ++
-  new FireSimSha3RocketConfig)
 
 //*****************************************************************
 // Boom config, base off chipyard's LargeBoomConfig
