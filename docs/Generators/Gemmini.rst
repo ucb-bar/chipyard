@@ -9,7 +9,7 @@ To add a Gemmini unit to an SoC, you should add the ``gemmini.DefaultGemminiConf
 
 The example Chipyard config includes the following example SoC configuration which includes Gemmini:
 
-.. literalinclude:: ../../generators/example/src/main/scala/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
     :language: scala
     :start-after: DOC include start: GemminiRocketConfig
     :end-before: DOC include end: GemminiRocketConfig
@@ -42,7 +42,7 @@ Major parameters of interest include:
 
 * DMA parameters (``dma_maxbytes``, ``dma_buswidth``, ``mem_pipeline``): Gemmini implements a DMA to move data from main memory to the Gemmini scratchpad, and from the Gemmini accumulators to main memory. The size of these DMA transactions is determined by the DMA parameters. These DMA parameters are tightly coupled with Rocket Chip SoC system parameters: in particular ``dma_buswidth`` is associated with the ``SystemBusKey`` ``beatBytes`` parameter, and ``dma_maxbytes`` is associated with ``cacheblockbytes`` Rocket Chip parameters.
 
-Software
+Gemmini Software
 ------------------
 
 The Gemmini non-standard ISA extension is specified in the `Gemmini repository <https://github.com/ucb-bar/gemmini/blob/master/README.md>`__.

@@ -1,6 +1,6 @@
 .. _generator-index:
 
-Generators
+Included RTL Generators
 ============================
 
 A Generator can be thought of as a generalized RTL design, written using a mix of meta-programming and standard RTL.

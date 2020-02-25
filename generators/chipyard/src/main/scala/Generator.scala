@@ -1,4 +1,4 @@
-package example
+package chipyard
 
 import scala.util.Try
 
@@ -7,8 +7,6 @@ import chisel3._
 import freechips.rocketchip.config.{Parameters}
 import freechips.rocketchip.util.{GeneratorApp}
 import freechips.rocketchip.system.{TestGeneration}
-
-import utilities.{TestSuiteHelper}
 
 object Generator extends GeneratorApp {
   // add unique test suites
