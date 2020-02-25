@@ -59,4 +59,4 @@ Only 3 additional config-mixins are needed.
 
 * ``WithFireSimConfigTweaks`` modifies your design to better fit the FireSim usage model. For example, FireSim designs typically include a UART. Technically, adding this in is optional, but *strongly* recommended.
 * ``WithDefaultMemModel`` sets the external memory model in the FireSim simulation. See the FireSim documentation for details.
-* ``WithDefaultFireSimBridges`` sets the ``IOBinders`` key to use FireSim's Bridge system, which can drive target IOs with software bridge models running on the simulation host. See the FireSIm documnetation for details.
+* ``WithDefaultFireSimBridges`` sets the ``IOBinders`` key to use FireSim's Bridge system, which can drive target IOs with software bridge models running on the simulation host. See the FireSIm documentation for details.
