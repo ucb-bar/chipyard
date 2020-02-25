@@ -57,32 +57,36 @@ class GenericFIR[T<:Data:Ring](genIn:T, genOut:T, coeffs: Seq[T]) extends Module
   val directCells = Seq.fill(coeffs.length){ Module(new GenericFIRDirectCell(genIn, genOut)).io }
 
   // Construct the direct FIR chain
-  // connect input to first cell
-  directCells(0).in.bits.data := io.in.bits.data
-  directCells(0).in.bits.carry := Ring[T].zero
-  directCells(0).in.valid := io.in.valid
-  io.in.ready := directCells(0).in.ready
+  for ((cell, coeff) <- directCells.zip(coeffs)) {
+    cell.coeff := coeff
+  }
 
-  for(i <- 0 until coeffs.length) {
-  	directCells(i).coeff := coeffs(i) // wire coefficient from supplied vector
-  	if (i != coeffs.length - 1) { // connect adjacent cells
-  	  directCells(i+1).in.bits := directCells(i).out.bits  // connect out to in chain
-	    directCells(i+1).in.valid := directCells(i).out.valid // connect valid chain
-      directCells(i).out.ready := directCells(i+1).in.ready // connect ready chain
-  	} else { // connect output to last cell
-      io.out.bits.data := directCells(i).out.bits.carry
-      directCells(i).out.ready := io.out.ready
-	    io.out.valid := directCells(i).out.valid
-    }
-  }  
+  // connect input to first cell
+  directCells.head.in.bits.data := io.in.bits.data
+  directCells.head.in.bits.carry := Ring[T].zero
+  directCells.head.in.valid := io.in.valid
+  io.in.ready := directCells.head.in.ready
+
+  // connect adjacent cells
+  for ((current, next) <- directCells.zip(directCells.tail)) {
+    next.in.bits := current.out.bits
+    next.in.valid := current.out.valid
+    current.out.ready := next.in.ready
+  }
+
+  // connect output to last cell
+  io.out.bits.data := directCells.last.out.bits.carry
+  directCells.last.out.ready := io.out.ready
+  io.out.valid := directCells.last.out.valid
+
 }
 
 // A generic FIR direct cell used to construct a larger direct FIR chain
 //
 //   in ----- [z^-1]-- out
-//	            |
+//	        |
 //   coeff ----[*]
-//	            |
+//	        |
 //   carryIn --[+]-- carryOut
 //
 class GenericFIRDirectCell[T<:Data:Ring](genIn: T, genOut: T) extends Module {
@@ -90,7 +94,7 @@ class GenericFIRDirectCell[T<:Data:Ring](genIn: T, genOut: T) extends Module {
 	
   // Registers to delay the input and the valid to propagate with calculations
   val hasNewData = RegInit(0.U)
-  val inputReg = Reg(genIn)
+  val inputReg = Reg(genIn.cloneType)
 
   // Passthrough ready
   io.in.ready := io.out.ready
