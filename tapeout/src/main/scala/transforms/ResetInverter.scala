@@ -34,11 +34,12 @@ object ResetN extends Pass {
     mod.copy(ports = portsx, body = bodyx)
   }
 
-  def run(c: Circuit): Circuit =
+  def run(c: Circuit): Circuit = {
     c.copy(modules = c.modules map {
       case mod: Module if mod.name == c.main => invertReset(mod)
       case other => other
     })
+  }
 }
 
 class ResetInverterTransform extends Transform {

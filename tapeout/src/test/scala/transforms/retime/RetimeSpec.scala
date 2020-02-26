@@ -27,10 +27,10 @@ class RetimeSpec extends FlatSpec with Matchers {
     val dir = uniqueDirName(gen, "RetimeModule")
     chisel3.Driver.execute(Array("-td", s"test_run_dir/$dir", "-foaf", s"test_run_dir/$dir/final"), gen) shouldBe a [ChiselExecutionSuccess]
 
-    val lines = io.Source.fromFile(s"test_run_dir/$dir/final.anno.json").getLines().map(normalized).mkString("\n")
+    val lines = io.Source.fromFile(s"test_run_dir/$dir/test_run_dir/$dir/final.anno.json").getLines().map(normalized).mkString("\n")
     lines should include("barstools.tapeout.transforms.retime.RetimeTransform")
   }
-  
+
   // TODO(azidar): need to fix/add instance annotations
   ignore should "pass simple retime instance annotation" in {
     val gen = () => new RetimeInstance()

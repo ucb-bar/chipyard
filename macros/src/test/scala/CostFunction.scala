@@ -82,24 +82,24 @@ circuit target_memory :
     mem_0_0.addr <= addr
     node dout_0_0 = bits(mem_0_0.dout, 31, 0)
     mem_0_0.din <= bits(din, 31, 0)
-    mem_0_0.write_en <= and(and(write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_0.write_en <= and(and(and(write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     mem_0_1.clk <= clk
     mem_0_1.addr <= addr
     node dout_0_1 = bits(mem_0_1.dout, 31, 0)
     mem_0_1.din <= bits(din, 63, 32)
-    mem_0_1.write_en <= and(and(write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_1.write_en <= and(and(and(write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     mem_0_2.clk <= clk
     mem_0_2.addr <= addr
     node dout_0_2 = bits(mem_0_2.dout, 31, 0)
     mem_0_2.din <= bits(din, 95, 64)
-    mem_0_2.write_en <= and(and(write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_2.write_en <= and(and(and(write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     mem_0_3.clk <= clk
     mem_0_3.addr <= addr
     node dout_0_3 = bits(mem_0_3.dout, 31, 0)
     mem_0_3.din <= bits(din, 127, 96)
-    mem_0_3.write_en <= and(and(write_en, UInt<1>("h1")), UInt<1>("h1"))
+    mem_0_3.write_en <= and(and(and(write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     node dout_0 = cat(dout_0_3, cat(dout_0_2, cat(dout_0_1, dout_0_0)))
-    dout <= mux(UInt<1>("h1"), dout_0, UInt<1>("h0"))
+    dout <= mux(UInt<1>("h1"), dout_0, UInt<128>("h0"))
 
   extmodule SRAM_WIDTH_32 :
     input addr : UInt<10>

@@ -39,6 +39,11 @@ lazy val macros = (project in file("macros"))
 
 lazy val tapeout = (project in file("tapeout"))
   .settings(commonSettings)
+  .settings(Seq(
+    libraryDependencies ++= Seq(
+      "io.github.daviddenton" %% "handlebars-scala-fork" % "2.3.0"
+    )
+  ))
   .settings(scalacOptions in Test ++= Seq("-language:reflectiveCalls"))
 
 lazy val root = (project in file(".")).aggregate(macros, tapeout)

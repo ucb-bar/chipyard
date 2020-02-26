@@ -52,9 +52,9 @@ class AddIOPadsTransform extends Transform with SeqTransformBased {
         )
         // Expects BlackBox helper to be run after to inline pad Verilog!
         val ret = runTransforms(state)
-        val currentAnnos = ret.annotations.getOrElse(AnnotationMap(Seq.empty)).annotations
-        val newAnnoMap = AnnotationMap(currentAnnos ++ bbAnnotations)
-        val newState = CircuitState(ret.circuit, outputForm, Some(newAnnoMap), ret.renames)
+        val currentAnnos = ret.annotations
+        val newAnnoMap = AnnotationSeq(currentAnnos ++ bbAnnotations)
+        val newState = CircuitState(ret.circuit, outputForm, newAnnoMap, ret.renames)
 
         // TODO: *.f file is overwritten on subsequent executions, but it doesn't seem to be used anywhere?
         (new firrtl.transforms.BlackBoxSourceHelper).execute(newState)

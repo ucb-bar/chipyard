@@ -40,7 +40,7 @@ object CreatePadBBs {
   }
 
   def checkLegalPadName(namespace: Namespace, usedPads: Seq[UsedPadInfo]): Unit = {
-    usedPads foreach { x => 
+    usedPads foreach { x =>
       if (namespace contains x.padName)
         throw new Exception(s"Pad name ${x.padName} already used!")
       if (namespace contains x.padArrayName)
@@ -61,21 +61,21 @@ object CreatePadBBs {
 
     // Note that we need to check for Firrtl name uniqueness here! (due to parameterization)
     val uniqueExtMods = scala.collection.mutable.ArrayBuffer[UsedPadInfo]()
-    usedPads foreach { x => 
+    usedPads foreach { x =>
       if (uniqueExtMods.find(_.firrtlBBName == x.firrtlBBName).isEmpty)
         uniqueExtMods += x
     }
 
-    // Collecting unique parameterized black boxes 
+    // Collecting unique parameterized black boxes
     // (for io, they're wrapped pads; for supply, they're pad modules directly)
     val uniqueParameterizedBBs = scala.collection.mutable.ArrayBuffer[UsedPadInfo]()
-    uniqueExtMods foreach { x => 
+    uniqueExtMods foreach { x =>
       if (uniqueParameterizedBBs.find(_.padArrayName == x.padArrayName).isEmpty)
         uniqueParameterizedBBs += x
     }
 
-    // Note: Firrtl is silly and doesn't implement true parameterization -- each module with 
-    // parameterization that potentially affects # of IO needs to be uniquely identified 
+    // Note: Firrtl is silly and doesn't implement true parameterization -- each module with
+    // parameterization that potentially affects # of IO needs to be uniquely identified
     // (but only in Firrtl)
     val bbs = uniqueExtMods.map(x => {
       // Supply pads don't have ports
@@ -100,8 +100,8 @@ object CreatePadBBs {
 
     // Add annotations to black boxes to inline Verilog from template
     // Again, note the weirdness in parameterization -- just need to hook to one matching Firrtl instance
-    val annos = uniqueParameterizedBBs.map(x => 
-      BlackBoxSourceAnnotation(ModuleName(x.firrtlBBName, CircuitName(c.main)), x.padInline)
+    val annos = uniqueParameterizedBBs.map(x =>
+      BlackBoxInlineAnno(ModuleName(x.firrtlBBName, CircuitName(c.main)), x.firrtlBBName, x.padInline)
     ).toSeq
     (c.copy(modules = c.modules ++ bbs), annos)
   }

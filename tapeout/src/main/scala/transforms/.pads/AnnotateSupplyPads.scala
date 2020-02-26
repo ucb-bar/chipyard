@@ -22,13 +22,13 @@ case class TopSupplyPad(
   require(pad.padType == SupplyPad)
 
   def padOrientation = padSide.orientation
-  def getPadName = pad.getName(NoDirection, padOrientation)
+  def getPadName = pad.getName(Output/*Should be None*/, padOrientation)
   def firrtlBBName = getPadName
   private def instNamePrefix = Seq(firrtlBBName, padSide.serialize).mkString("_")
   def instNames = (0 until num).map(i => Seq(instNamePrefix, i.toString).mkString("_"))
 
   def createPadInline(): String = {
-    def getPadVerilog(): String = pad.getVerilog(NoDirection, padOrientation)
+  def getPadVerilog(): String = pad.getVerilog(Output/*Should be None*/, padOrientation)
     s"""inline
       |${getPadName}.v
       |${getPadVerilog}""".stripMargin
@@ -37,14 +37,14 @@ case class TopSupplyPad(
 
 object AnnotateSupplyPads {
   def apply(
-      pads: Seq[FoundryPad], 
+      pads: Seq[FoundryPad],
       supplyAnnos: Seq[SupplyAnnotation]
   ): Seq[TopSupplyPad] = {
-    supplyAnnos.map( a => 
+    supplyAnnos.map( a =>
       pads.find(_.name == a.padName) match {
-        case None => 
+        case None =>
           throw new Exception(s"Supply pad ${a.padName} not found in Yaml file!")
-        case Some(x) => 
+        case Some(x) =>
           Seq(
             TopSupplyPad(x, Left, a.leftSide),
             TopSupplyPad(x, Right, a.rightSide),
