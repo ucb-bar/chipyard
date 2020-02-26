@@ -123,7 +123,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(commonSettings)
 
 lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
-  .dependsOn(ariane, boom, hwacha, sifive_blocks, sifive_cache, utilities, sha3, gemmini, icenet, tracegen)
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, sha3, gemmini, icenet, tracegen, ariane)
   .settings(commonSettings)
 
 lazy val tracegen = conditionalDependsOn(project in file("generators/tracegen"))
@@ -199,9 +199,8 @@ lazy val midas      = ProjectRef(firesimDir, "midas")
 lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 
 lazy val firechip = (project in file("generators/firechip"))
-  .dependsOn(ariane, boom, hwacha, chipyard, icenet, testchipip, sifive_blocks, sifive_cache, sha3, utilities, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
+  .dependsOn(chipyard, testchipip, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
     testGrouping in Test := isolateAllTests( (definedTests in Test).value )
   )
-

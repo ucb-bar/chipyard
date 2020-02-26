@@ -14,7 +14,6 @@ target
 env.sh
 riscv-tools-install
 esp-tools-install
-verilator*
 tags
 *~
 env-riscv-tools.sh

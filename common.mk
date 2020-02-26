@@ -10,7 +10,7 @@ lookup_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.$(2)" -prin
 
 SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim)
 SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
-VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv)
+VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE_DIRS),v)
 
 #########################################################################################
 # rocket and testchipip classes

@@ -1,6 +1,9 @@
 #########################################################################################
 # verilator makefile
 #########################################################################################
+ifeq ($(shell which verilator),)
+$(error Did not find Verilator in PATH. Make sure all requirements are installed)
+endif
 
 #########################################################################################
 # general path variables
