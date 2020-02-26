@@ -13,7 +13,7 @@ When used together you can create a heterogeneous system.
 
 The following example shows a dual core BOOM with a single core Rocket.
 
-.. literalinclude:: ../../generators/example/src/main/scala/HeteroConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/HeteroConfigs.scala
     :language: scala
     :start-after: DOC include start: DualBoomAndRocket
     :end-before: DOC include end: DualBoomAndRocket
@@ -72,7 +72,7 @@ Adding Hwachas
 Adding a Hwacha accelerator is as easy as adding the ``DefaultHwachaConfig`` so that it can setup the Hwacha parameters and add itself to the ``BuildRoCC`` parameter.
 An example of adding a Hwacha to all tiles in the system is below.
 
-.. literalinclude:: ../../generators/example/src/main/scala/HeteroConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/HeteroConfigs.scala
     :language: scala
     :start-after: DOC include start: BoomAndRocketWithHwacha
     :end-before: DOC include end: BoomAndRocketWithHwacha
@@ -83,12 +83,12 @@ All with the same Hwacha parameters.
 Assigning Accelerators to Specific Tiles with MultiRoCC
 -------------------------------------------------------
 
-Located in ``generators/example/src/main/scala/ConfigMixins.scala`` is a mixin that provides support for adding RoCC accelerators to specific tiles in your SoC.
+Located in ``generators/chipyard/src/main/scala/ConfigMixins.scala`` is a mixin that provides support for adding RoCC accelerators to specific tiles in your SoC.
 Named ``MultiRoCCKey``, this key allows you to attach RoCC accelerators based on the ``hartId`` of the tile.
 For example, using this allows you to create a 8 tile system with a RoCC accelerator on only a subset of the tiles.
 An example is shown below with two BOOM cores, and one Rocket tile with a RoCC accelerator (Hwacha) attached.
 
-.. literalinclude:: ../../generators/example/src/main/scala/HeteroConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/HeteroConfigs.scala
     :language: scala
     :start-after: DOC include start: DualBoomAndRocketOneHwacha
     :end-before: DOC include end: DualBoomAndRocketOneHwacha

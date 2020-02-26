@@ -15,6 +15,13 @@ trap clean EXIT
 
 cd $LOCAL_CHIPYARD_DIR
 ./scripts/init-submodules-no-riscv-tools.sh
+cd $LOCAL_CHIPYARD_DIR/sims/firesim/sim/firesim-lib/src/main/cc/lib
+git submodule update --init elfutils libdwarf
+cd $LOCAL_CHIPYARD_DIR/sims/firesim
+./scripts/build-libelf.sh
+./scripts/build-libdwarf.sh
+cd $LOCAL_CHIPYARD_DIR
+
 
 # set stricthostkeychecking to no (must happen before rsync)
 run "echo \"Ping $SERVER\""

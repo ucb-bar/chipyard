@@ -58,8 +58,8 @@ The ``PeripheryBus`` attaches additional peripherals like the NIC and Block Devi
 It can also optionally expose an external AXI4 port, which can be attached to
 vendor-supplied AXI4 IP.
 
-To learn more about adding MMIO peripherals, check out the :ref:`MMIO Peripheral`
-section of :ref:`Adding an Accelerator/Device`.
+To learn more about adding MMIO peripherals, check out the :ref:`mmio-accelerators`
+section.
 
 DMA
 ---
@@ -68,5 +68,4 @@ You can also add DMA devices that read and write directly from the memory
 system. These are attached to the ``FrontendBus``. The ``FrontendBus`` can also
 connect vendor-supplied AXI4 DMA devices through an AXI4 to TileLink converter.
 
-To learn more about adding DMA devices, see the :ref:`Adding a DMA port` section
-of :ref:`Adding an Accelerator/Device`.
+To learn more about adding DMA devices, see the :ref:`dma-devices` section.

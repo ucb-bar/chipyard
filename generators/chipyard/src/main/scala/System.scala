@@ -3,7 +3,7 @@
 // All Rights Reserved. See LICENSE and LICENSE.SiFive for license details.
 //------------------------------------------------------------------------------
 
-package utilities
+package chipyard
 
 import chisel3._
 

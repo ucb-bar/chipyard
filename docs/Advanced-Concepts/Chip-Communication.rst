@@ -109,16 +109,13 @@ reminder, to run a software RTL simulation, run:
 
 FireSim FPGA-accelerated simulations use TSI by default as well.
 
-If you would like to build and simulate a Chipyard configuration with a DTM configured for DMI communication, then you must create a
-top-level system with the DTM (``TopWithDTM``), a test-harness to connect to the DTM (``TestHarnessWithDTM``), as well as a config to use that top-level system.
+If you would like to build and simulate a Chipyard configuration with a DTM configured for DMI communication, then you must tie-off the TSI interface, and instantiate the `SimDTM`. Note that we use `WithTiedOffSerial ++ WithSimDebug` instead of `WithTiedOffDebug ++ WithSimSerial`.
 
-.. literalinclude:: ../../generators/example/src/main/scala/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
     :language: scala
     :start-after: DOC include start: DmiRocket
     :end-before: DOC include end: DmiRocket
 
-In this example, the ``WithDTM`` mixin specifies that the top-level SoC will instantiate a DTM (that by default is setup to use DMI).
-The rest of the mixins specify the rest of the system (cores, accelerators, etc).
 Then you can run simulations with the new DMI-enabled top-level and test-harness.
 
 .. code-block:: bash
@@ -144,7 +141,7 @@ The configuration is very similar to a DMI-based configuration. The main differe
 is the addition of the ``WithJtagDTM`` mixin that configures the instantiated DTM to use the JTAG protocol as the
 bringup method.
 
-.. literalinclude:: ../../generators/example/src/main/scala/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
     :language: scala
     :start-after: DOC include start: JtagRocket
     :end-before: DOC include end: JtagRocket
