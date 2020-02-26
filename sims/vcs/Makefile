@@ -42,12 +42,14 @@ include $(base_dir)/common.mk
 #########################################################################################
 # vcs binary and arguments
 #########################################################################################
-VCS = vcs -full64
+VCS = vcs -full64 -j 8
 
 VCS_CC_OPTS = \
 	-CC "-I$(VCS_HOME)/include" \
 	-CC "-I$(RISCV)/include" \
 	-CC "-std=c++11" \
+	-CC "-I/scratch/abejgonza/boom-work/dromajo/src" \
+	/scratch/abejgonza/boom-work/dromajo/src/libdromajo_cosim.a \
 	$(RISCV)/lib/libfesvr.a
 
 VCS_NONCC_OPTS = \
@@ -67,10 +69,11 @@ VCS_NONCC_OPTS = \
 	$(sim_vsrcs) \
 	+define+PRINTF_COND=$(TB).printf_cond \
 	+define+STOP_COND=!$(TB).reset \
-	+define+RANDOMIZE_MEM_INIT \
 	+define+RANDOMIZE_REG_INIT \
 	+define+RANDOMIZE_GARBAGE_ASSIGN \
 	+define+RANDOMIZE_INVALID_ASSIGN \
+	+define+RANDOMIZE_MEM_INIT \
+	+define+RANDOM=0 \
 	+libext+.v
 
 VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS)
