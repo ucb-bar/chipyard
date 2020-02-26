@@ -8,6 +8,8 @@ import freechips.rocketchip.config.{Config}
 // BOOM Configs
 // ---------------------
 
+//  new WithSimBlockDeviceTop ++                              // use top with block-device IOs and connect to simblockdevice
+//  new testchipip.WithBlockDevice ++                         // add block-device module to periphery bus
 
 class SmallBoomConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++                      // display UART with a SimUARTAdapter
