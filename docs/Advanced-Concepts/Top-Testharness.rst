@@ -52,7 +52,7 @@ Please refer to :ref:`Communicating with the DUT` for more information on these 
 TestHarness
 -------------------------
 
-The wiring between the ``TestHarness`` and the Top are performed in methods defined in mixins added to the Top.
+The wiring between the ``TestHarness`` and the Top are performed in methods defined in traits added to the Top.
 When these methods are called from the ``TestHarness``, they may instantiate modules within the scope of the harness,
 and then connect them to the DUT. For example, the ``connectSimAXIMem`` method defined in the
 ``CanHaveMasterAXI4MemPortModuleImp`` trait, when called from the ``TestHarness``, will instantiate ``SimAXIMems``

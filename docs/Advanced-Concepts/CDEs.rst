@@ -28,11 +28,11 @@ Consider the following example using CDEs.
     }
 
 
-When forming a query based on a ``Parameters`` object, like ``p(SomeKeyX)``, the configuration system traverses the "chain" of mixins until it finds a partial function which is defined at the key, and then returns that value.
+When forming a query based on a ``Parameters`` object, like ``p(SomeKeyX)``, the configuration system traverses the "chain" of config fragments until it finds a partial function which is defined at the key, and then returns that value.
 
 .. code:: scala
 
-    val params = Config(new WithX(true) ++ new WithY(true)) // "chain" together mixins
+    val params = Config(new WithX(true) ++ new WithY(true)) // "chain" together config fragments
     params(SomeKeyX) // evaluates to true
     params(SomeKeyY) // evaluates to true
     params(SomeKeyZ) // evaluates to false
@@ -103,7 +103,7 @@ Up
     params_1(SomeKeyX) // evaluates to true
     params_2(SomeKeyX) // evaluates to false
 
-In this example, note how ``up(SomeKeyY, site)`` in ``WithXEqualsYUp`` will refer to *either* the the partial function defining ``SomeKeyY`` in ``WithY(true)`` *or* the default value for ``SomeKeyY`` provided in the original ``case object SomeKeyY`` definition, *depending on the order in which the mixins were used*. Since the order of mixins affects the the order of the ``View`` traversal, ``up`` provides a different ``View`` of the parameterization in ``params_1`` and ``params_2``.
+In this example, note how ``up(SomeKeyY, site)`` in ``WithXEqualsYUp`` will refer to *either* the the partial function defining ``SomeKeyY`` in ``WithY(true)`` *or* the default value for ``SomeKeyY`` provided in the original ``case object SomeKeyY`` definition, *depending on the order in which the fragments were used*. Since the order of config fragments affects the the order of the ``View`` traversal, ``up`` provides a different ``View`` of the parameterization in ``params_1`` and ``params_2``.
 
 
 Also note that again, ``site`` must be recursively passed through the call to ``up``.

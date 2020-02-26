@@ -54,19 +54,19 @@ These traits are added to the default ``Top`` in Chipyard.
     :start-after: DOC include start: Top
     :end-before: DOC include end: Top
 
-Mixins
-------
+Fragments
+---------
 
-Config mixins set the keys to a non-default value. Together, the collection of Mixins which define a configuration generate the values for all the keys used by the generator.
+Config fragments set the keys to a non-default value. Together, the collection of config fragments which define a configuration generate the values for all the keys used by the generator.
 
-For example, the ``WithGCDMixin`` is parameterized by the type of GCD widget you want to instantiate. When this mixin is added to a config, the ``GCDKey`` is set to a instance of ``GCDParams``, informing the previously mentioned traits to instantiate and connect the GCD widget appropriately.
+For example, the ``WithGCD`` fragment is parameterized by the type of GCD widget you want to instantiate. When this fragment is added to a config, the ``GCDKey`` is set to a instance of ``GCDParams``, informing the previously mentioned traits to instantiate and connect the GCD widget appropriately.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/GCD.scala
     :language: scala
-    :start-after: DOC include start: GCD mixin
-    :end-before: DOC include end: GCD mixin
+    :start-after: DOC include start: GCD fragment
+    :end-before: DOC include end: GCD fragment
 
-We can use this mixin when composing our configs.
+We can use this fragment when composing our configs.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
     :language: scala

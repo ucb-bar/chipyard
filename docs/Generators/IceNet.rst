@@ -8,7 +8,7 @@ A diagram of IceNet's microarchitecture is shown below.
 
 .. image:: ../_static/images/nic-design.png
 
-There are four basic parts of the NIC: the :ref:`Controller`, which takes requests 
+There are four basic parts of the NIC: the :ref:`Controller`, which takes requests
 from and sends responses to the CPU; the :ref:`Send Path`, which reads data from
 memory and sends it out to the network; the :ref:`Receive Path`, which receives
 data from the network and writes it to memory; and, optionally,
@@ -80,8 +80,8 @@ and ``HasPeripheryIceNICModuleImp`` to the module implementation. If you
 are confused about the distinction between lazy module and module
 implementation, refer to :ref:`Cake Pattern`.
 
-Then add the ``WithIceNIC`` config mixin to your configuration. This will
-define ``NICKey``, which IceNIC uses to determine its parameters. The mixin
+Then add the ``WithIceNIC`` config fragment to your configuration. This will
+define ``NICKey``, which IceNIC uses to determine its parameters. The fragment
 takes two arguments. The ``inBufFlits`` argument is the number of 64-bit flits
 that the input packet buffer can hold and the ``usePauser`` argument determines
 whether or not the NIC will have a pause handler.

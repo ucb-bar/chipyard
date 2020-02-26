@@ -53,6 +53,7 @@ This next example shows a "higher-level" additive Config that uses prior paramet
 The following example shows a non-additive Config that combines the prior two additive Configs using ``++``.
 The additive Configs are applied from the right to left in the list (or bottom to top in the example).
 Thus, the order of the parameters being set will first start with the ``DefaultExampleConfig``, then ``WithMyAcceleratorParams``, then ``WithMyMoreComplexAcceleratorConfig``.
+In many places in this documentation, we refer to the additive Configs as config fragments since they can be "assembled" into a larger Config.
 
 .. _top-level-config:
 .. code-block:: scala

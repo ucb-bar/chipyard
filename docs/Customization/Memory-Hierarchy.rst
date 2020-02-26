@@ -13,7 +13,7 @@ if you use the ``WithNMedCores`` or ``WithNSmallCores`` configurations, you can
 configure 4 KiB direct-mapped caches for L1I and L1D.
 
 If you only want to change the size or associativity, there are configuration
-mixins for those too. See :ref:`Mixins` for how to add these to a custom ``Config``
+fragments for those too. See :ref:`Fragments` for how to add these to a custom ``Config``
 
 .. code-block:: scala
 
@@ -58,11 +58,11 @@ If you do not want to use the L2 cache (say, for a resource-limited embedded
 design), you can create a configuration without it. Instead of using the L2
 cache, you will instead use RocketChip's TileLink broadcast hub.
 To make such a configuration, you can just copy the definition of
-``RocketConfig`` but omit the ``WithInclusiveCache`` mixin from the
+``RocketConfig`` but omit the ``WithInclusiveCache`` fragment from the
 list of included mixims.
 
 If you want to reduce the resources used even further, you can configure
-the Broadcast Hub to use a bufferless design. This mixin is
+the Broadcast Hub to use a bufferless design. This fragment is
 ``freechips.rocketchip.subsystem.WithBufferlessBroadcastHub``.
 
 
