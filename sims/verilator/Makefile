@@ -66,14 +66,8 @@ VERILATOR_NONCC_OPTS = \
 	$(ENABLE_ASSERTS) \
 	--output-split 10000 \
 	--output-split-cfuncs 100 \
-	-Wall \
-	-Wno-STMTDLY \
 	-Werror-IMPLICIT \
-	-Wno-ASSIGNDLY \
-	-Wno-UNOPTFLAT \
 	-Wno-BLKANDNBLK \
-	-Wno-UNUSED \
-	-Wno-DECLFILENAME \
 	-Wno-fatal \
 	-f $(sim_common_files) \
 	$(sim_vsrcs)
