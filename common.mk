@@ -11,6 +11,7 @@ lookup_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.$(2)" -prin
 SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim)
 SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
 VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE_DIRS),v)
+ARIANE_VLOG_SOURCES = $(call lookup_srcs,$(base_dir)/generators/ariane,sv) $(call lookup_srcs,$(base_dir)/generators/ariane,v)
 
 #########################################################################################
 # rocket and testchipip classes
@@ -43,7 +44,8 @@ $(sim_files): $(call lookup_scala_srcs,$(base_dir)/generators/utilities/src/main
 $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 	@echo "" > /dev/null
 
-generator_temp: $(SCALA_SOURCES) $(sim_files)
+# AG: must re-elaborate if ariane sources have changed... otherwise just run firrtl compile
+generator_temp: $(SCALA_SOURCES) $(ARIANE_VLOG_SOURCES) $(sim_files)
 	mkdir -p $(build_dir)
 	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator $(build_dir) $(MODEL_PACKAGE) $(MODEL) $(CONFIG_PACKAGE) $(CONFIG)"
 

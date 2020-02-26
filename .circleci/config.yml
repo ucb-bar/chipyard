@@ -4,9 +4,6 @@
 version: 2.1
 
 parameters:
-    verilator-cache-version:
-        type: string
-        default: "v3"
     tools-cache-version:
         type: string
         default: "v4"
@@ -15,7 +12,7 @@ parameters:
 executors:
     main-env:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.12
+            - image: riscvboom/riscvboom-images:0.0.13
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 
@@ -54,8 +51,8 @@ commands:
                     - "3e:c3:02:5b:ed:64:8c:b7:b0:04:43:bc:83:43:73:1e"
             - checkout
 
-    setup-tools-verilator:
-        description: "Get toolchain and verilator"
+    setup-tools:
+        description: "Get toolchain"
         parameters:
             tools-version:
                 type: string
@@ -69,9 +66,6 @@ commands:
             - restore_cache:
                 keys:
                     - << parameters.tools-version >>-installed-<< pipeline.parameters.tools-cache-version >>-{{ checksum "../<< parameters.tools-version >>.hash" }}
-            - restore_cache:
-                keys:
-                    - verilator-installed-<< pipeline.parameters.verilator-cache-version >>-{{ checksum "sims/verilator/verilator.mk" }}
 
     prepare-rtl:
         description: "Run the prepare step of RTL"
@@ -88,7 +82,7 @@ commands:
                 type: string
                 default: "do-rtl-build.sh"
         steps:
-            - setup-tools-verilator:
+            - setup-tools:
                 tools-version: "<< parameters.tools-version >>"
             - run:
                 name: Building << parameters.project-key >> subproject using Verilator
@@ -117,7 +111,7 @@ commands:
                 type: string
                 default: "10m"
         steps:
-            - setup-tools-verilator:
+            - setup-tools:
                 tools-version: "<< parameters.tools-version >>"
             - restore_cache:
                 keys:
@@ -153,22 +147,6 @@ jobs:
         steps:
             - toolchain-build:
                 tools-version: "esp-tools"
-    install-verilator:
-        executor: main-env
-        steps:
-            - ssh-checkout
-            - restore_cache:
-                keys:
-                    - verilator-installed-<< pipeline.parameters.verilator-cache-version >>-{{ checksum "sims/verilator/verilator.mk" }}
-            - run:
-                name: Build Verilator
-                command: |
-                    .circleci/build-verilator.sh
-                no_output_timeout: 120m
-            - save_cache:
-                key: verilator-installed-<< pipeline.parameters.verilator-cache-version >>-{{ checksum "sims/verilator/verilator.mk" }}
-                paths:
-                    - "/home/riscvuser/verilator"
     build-extra-tests:
         executor: main-env
         steps:
@@ -320,7 +298,7 @@ jobs:
     midasexamples-run-tests:
         executor: main-env
         steps:
-            - setup-tools-verilator
+            - setup-tools
             - run:
                 name: Run midasexamples tests
                 command: .circleci/run-midasexamples-tests.sh
@@ -360,9 +338,6 @@ workflows:
 
             - install-esp-toolchain
 
-            # Build verilator
-            - install-verilator
-
             - commit-on-master-check
 
             # Build extra tests
@@ -374,67 +349,54 @@ workflows:
             - prepare-chipyard-rocket:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator
 
             - prepare-chipyard-hetero:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator
 
             - prepare-chipyard-boom:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator
 
             - prepare-rocketchip:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator
 
             - prepare-chipyard-blkdev:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator
 
             - prepare-chipyard-hwacha:
                 requires:
                     - install-esp-toolchain
-                    - install-verilator
 
             - prepare-chipyard-gemmini:
                 requires:
                     - install-esp-toolchain
-                    - install-verilator
 
             - prepare-tracegen:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator
 
             - prepare-tracegen-boom:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator
 
             - prepare-firesim:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator
 
             - prepare-fireboom:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator
 
             - prepare-chipyard-ariane:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator
 
             - prepare-fireariane:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator
 
             # Run the respective tests
 
@@ -442,7 +404,6 @@ workflows:
             - midasexamples-run-tests:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator
 
             # Run the example tests
             - chipyard-rocket-run-tests:
