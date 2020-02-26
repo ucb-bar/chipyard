@@ -9,14 +9,12 @@ set -ex
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
-export VERILATOR_ROOT=$LOCAL_VERILATOR_DIR/install/share/verilator
-
 run_bmark () {
-    make run-bmark-tests-fast -j$NPROC -C $LOCAL_SIM_DIR VERILATOR_INSTALL_DIR=$LOCAL_VERILATOR_DIR $@
+    make run-bmark-tests-fast -j$NPROC -C $LOCAL_SIM_DIR $@
 }
 
 run_asm () {
-    make run-asm-tests-fast -j$NPROC -C $LOCAL_SIM_DIR VERILATOR_INSTALL_DIR=$LOCAL_VERILATOR_DIR $@
+    make run-asm-tests-fast -j$NPROC -C $LOCAL_SIM_DIR $@
 }
 
 run_both () {
@@ -25,7 +23,7 @@ run_both () {
 }
 
 run_tracegen () {
-    make tracegen -C $LOCAL_SIM_DIR VERILATOR_INSTALL_DIR=$LOCAL_VERILATOR_DIR $@
+    make tracegen -C $LOCAL_SIM_DIR $@
 }
 
 case $1 in
@@ -45,7 +43,7 @@ case $1 in
         export RISCV=$LOCAL_ESP_DIR
         export LD_LIBRARY_PATH=$LOCAL_ESP_DIR/lib
         export PATH=$RISCV/bin:$PATH
-        make run-rv64uv-p-asm-tests -j$NPROC -C $LOCAL_SIM_DIR VERILATOR_INSTALL_DIR=$LOCAL_VERILATOR_DIR ${mapping[$1]}
+        make run-rv64uv-p-asm-tests -j$NPROC -C $LOCAL_SIM_DIR ${mapping[$1]}
         ;;
     chipyard-gemmini)
         export RISCV=$LOCAL_ESP_DIR
