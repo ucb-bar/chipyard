@@ -14,9 +14,9 @@ We are still investigating methods to facilitate parameter exploration and disco
 Configs
 ---------------------
 
-A *Config* is a collection of multiple generator parameters being set to specific values.
-Configs are additive, can override each other, and can be composed of other Configs (sometimes referred to as config fragments).
-The naming convention for an additive Config or config fragment is ``With<YourConfigName>``, while the naming convention for a non-additive Config will be ``<YourConfig>``.
+A *config* is a collection of multiple generator parameters being set to specific values.
+Configs are additive, can override each other, and can be composed of other configs (sometimes referred to as config fragments).
+The naming convention for an additive config or config fragment is ``With<YourConfigName>``, while the naming convention for a non-additive config will be ``<YourConfig>``.
 Configs can take arguments which will in-turn set parameters in the design or reference other parameters in the design (see :ref:`Parameters`).
 
 This example shows a basic config fragment class that takes in zero arguments and instead uses hardcoded values to set the RTL design parameters.
@@ -36,7 +36,7 @@ In this example, ``MyAcceleratorConfig`` is a Scala case class that defines a se
         someLength = 256)
   })
 
-This next example shows a "higher-level" additive Config fragment that uses prior parameters that were set to derive other parameters.
+This next example shows a "higher-level" additive config fragment that uses prior parameters that were set to derive other parameters.
 
 .. _complex-config-example:
 .. code-block:: scala
@@ -50,8 +50,8 @@ This next example shows a "higher-level" additive Config fragment that uses prio
         hartId = up(RocketTilesKey, site).length)
   })
 
-The following example shows a non-additive Config that combines or "assembles" the prior two Config fragments using ``++``.
-The additive Configs fragments are applied from the right to left in the list (or bottom to top in the example).
+The following example shows a non-additive config that combines or "assembles" the prior two config fragments using ``++``.
+The additive config fragments are applied from the right to left in the list (or bottom to top in the example).
 Thus, the order of the parameters being set will first start with the ``DefaultExampleConfig``, then ``WithMyAcceleratorParams``, then ``WithMyMoreComplexAcceleratorConfig``.
 
 .. _top-level-config:

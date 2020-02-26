@@ -3,7 +3,7 @@
 Keys, Traits, and Configs
 =========================
 
-You have probably seen snippets of Chisel referencing Keys, Traits, and Configs by this point.
+You have probably seen snippets of Chisel referencing keys, traits, and configs by this point.
 This section aims to elucidate the interactions between these Chisel/Scala components, and provide
 best practices for how these should be used to create a parameterized design and configure it.
 
@@ -36,9 +36,9 @@ Traits
 
 Typically, most custom blocks will need to modify the behavior of some pre-existing block. For example, the GCD widget needs the ``Top`` module to instantiate and connect the widget via Tilelink, generate a top-level ``gcd_busy`` port, and connect that to the module as well. Traits let us do this without modifying the existing code for the ``Top``, and enables compartmentalization of code for different custom blocks.
 
-Top-level traits specify that the ``Top`` has been parameterized to read some custom Key and optionally instantiate and connect a widget defined by that Key. Traits **should not** mandate the instantiation of custom logic. In other words, traits should be written with ``CanHave`` semantics, where the default behavior when the Key is unset is a no-op.
+Top-level traits specify that the ``Top`` has been parameterized to read some custom key and optionally instantiate and connect a widget defined by that key. Traits **should not** mandate the instantiation of custom logic. In other words, traits should be written with ``CanHave`` semantics, where the default behavior when the key is unset is a no-op.
 
-Top-level traits should be defined and documented in subprojects, alongside their corresponding Keys. The traits should then be added to the ``Top`` being used by Chipyard.
+Top-level traits should be defined and documented in subprojects, alongside their corresponding keys. The traits should then be added to the ``Top`` being used by Chipyard.
 
 Below we see the traits for the GCD example. The Lazy trait connects the GCD module to the Diplomacy graph, while the Implementation trait causes the ``Top`` to instantiate an additional port and concretely connect it to the GCD module.
 

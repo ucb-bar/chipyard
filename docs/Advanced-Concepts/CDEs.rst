@@ -68,7 +68,7 @@ In this example, the partial function in ``WithXEqualsYSite`` will look up the v
 Here
 ~~~~
 
-``here`` provides a ``View`` of the locally defined Config, which typically just contains some partial function.
+``here`` provides a ``View`` of the locally defined config, which typically just contains some partial function.
 
 .. code:: scala
 
@@ -103,7 +103,7 @@ Up
     params_1(SomeKeyX) // evaluates to true
     params_2(SomeKeyX) // evaluates to false
 
-In this example, note how ``up(SomeKeyY, site)`` in ``WithXEqualsYUp`` will refer to *either* the the partial function defining ``SomeKeyY`` in ``WithY(true)`` *or* the default value for ``SomeKeyY`` provided in the original ``case object SomeKeyY`` definition, *depending on the order in which the fragments were used*. Since the order of config fragments affects the the order of the ``View`` traversal, ``up`` provides a different ``View`` of the parameterization in ``params_1`` and ``params_2``.
+In this example, note how ``up(SomeKeyY, site)`` in ``WithXEqualsYUp`` will refer to *either* the the partial function defining ``SomeKeyY`` in ``WithY(true)`` *or* the default value for ``SomeKeyY`` provided in the original ``case object SomeKeyY`` definition, *depending on the order in which the config fragments were used*. Since the order of config fragments affects the the order of the ``View`` traversal, ``up`` provides a different ``View`` of the parameterization in ``params_1`` and ``params_2``.
 
 
 Also note that again, ``site`` must be recursively passed through the call to ``up``.

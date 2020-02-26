@@ -13,7 +13,7 @@ if you use the ``WithNMedCores`` or ``WithNSmallCores`` configurations, you can
 configure 4 KiB direct-mapped caches for L1I and L1D.
 
 If you only want to change the size or associativity, there are config
-fragments for those too. See :ref:`Config Fragments` for how to add these to a custom ``Config``
+fragments for those too. See :ref:`Config Fragments` for how to add these to a custom ``Config``.
 
 .. code-block:: scala
 
@@ -41,7 +41,7 @@ number of channels and number of banks to 0.
 The SiFive L2 Cache
 -------------------
 
-The default RocketConfig provided in the Chipyard example project uses SiFive's
+The default ``RocketConfig`` provided in the Chipyard example project uses SiFive's
 InclusiveCache generator to produce a shared L2 cache. In the default
 configuration, the L2 uses a single cache bank with 512 KiB capacity and 8-way
 set-associativity. However, you can change these parameters to obtain your
