@@ -1,4 +1,4 @@
-Configs, Parameters, Mix-ins, and Everything In Between
+Configs, Parameters, Mixins, and Everything In Between
 ========================================================
 
 A significant portion of generators in the Chipyard framework use the Rocket Chip parameter system.
@@ -15,11 +15,11 @@ Configs
 ---------------------
 
 A *Config* is a collection of multiple generator parameters being set to specific values.
-Configs are additive, can override each other, and can be composed of other Configs.
-The naming convention for an additive Config is ``With<YourConfigName>``, while the naming convention for a non-additive Config will be ``<YourConfig>``.
+Configs are additive, can override each other, and can be composed of other Configs (sometimes referred to as config fragments).
+The naming convention for an additive Config or config fragment is ``With<YourConfigName>``, while the naming convention for a non-additive Config will be ``<YourConfig>``.
 Configs can take arguments which will in-turn set parameters in the design or reference other parameters in the design (see :ref:`Parameters`).
 
-This example shows a basic additive Config class that takes in zero arguments and instead uses hardcoded values to set the RTL design parameters.
+This example shows a basic config fragment class that takes in zero arguments and instead uses hardcoded values to set the RTL design parameters.
 In this example, ``MyAcceleratorConfig`` is a Scala case class that defines a set of variables that the generator can use when referencing the ``MyAcceleratorKey`` in the design.
 
 .. _basic-config-example:
@@ -36,7 +36,7 @@ In this example, ``MyAcceleratorConfig`` is a Scala case class that defines a se
         someLength = 256)
   })
 
-This next example shows a "higher-level" additive Config that uses prior parameters that were set to derive other parameters.
+This next example shows a "higher-level" additive Config fragment that uses prior parameters that were set to derive other parameters.
 
 .. _complex-config-example:
 .. code-block:: scala
@@ -50,10 +50,9 @@ This next example shows a "higher-level" additive Config that uses prior paramet
         hartId = up(RocketTilesKey, site).length)
   })
 
-The following example shows a non-additive Config that combines the prior two additive Configs using ``++``.
-The additive Configs are applied from the right to left in the list (or bottom to top in the example).
+The following example shows a non-additive Config that combines or "assembles" the prior two Config fragments using ``++``.
+The additive Configs fragments are applied from the right to left in the list (or bottom to top in the example).
 Thus, the order of the parameters being set will first start with the ``DefaultExampleConfig``, then ``WithMyAcceleratorParams``, then ``WithMyMoreComplexAcceleratorConfig``.
-In many places in this documentation, we refer to the additive Configs as config fragments since they can be "assembled" into a larger Config.
 
 .. _top-level-config:
 .. code-block:: scala
@@ -69,10 +68,10 @@ The ``site`` map gives you the definitions as seen from the root of the configur
 The ``here`` map gives the definitions as seen at the current level of the hierarchy (i.e. in ``WithMyMoreComplexAcceleratorConfig`` itself).
 The ``up`` map gives the definitions as seen from the next level up from the current (i.e. from ``WithMyAcceleratorParams``).
 
-Cake Pattern
+Cake Pattern / Mixin
 -------------------------
 
-A cake pattern is a Scala programming pattern, which enable "mixing" of multiple traits or interface definitions (sometimes referred to as dependency injection).
+A cake pattern or mixin is a Scala programming pattern, which enable "mixing" of multiple traits or interface definitions (sometimes referred to as dependency injection).
 It is used in the Rocket Chip SoC library and Chipyard framework in merging multiple system components and IO interfaces into a large system component.
 
 This example shows the Chipyard default top that composes multiple traits together into a fully-featured SoC with many optional components.
@@ -84,7 +83,7 @@ This example shows the Chipyard default top that composes multiple traits togeth
     :end-before: DOC include end: Top
 
 
-There are two "cakes" here. One for the lazy module (ex. ``CanHavePeripherySerial``) and one for the lazy module
+There are two "cakes" or mixins here. One for the lazy module (ex. ``CanHavePeripherySerial``) and one for the lazy module
 implementation (ex. ``CanHavePeripherySerialModuleImp`` where ``Imp`` refers to implementation). The lazy module defines
 all the logical connections between generators and exchanges configuration information among them, while the
 lazy module implementation performs the actual Chisel RTL elaboration.
@@ -115,15 +114,13 @@ contain the implementation for the module, and may instantiate
 other normal modules OR lazy modules (for nested Diplomacy
 graphs, for example).
 
-
-Mix-in
----------------------------
-
-A mix-in is a Scala trait, which sets parameters for specific system components, as well as enabling instantiation and wiring of the relevant system components to system buses.
-The naming convention for an additive mix-in is ``CanHave<YourMixin>``.
+The naming convention for an additive mixin or trait is ``CanHave<YourMixin>``.
 This is shown in the ``Top`` class where things such as ``CanHavePeripherySerial`` connect a RTL component to a bus and expose signals to the top-level.
 
 Additional References
 ---------------------------
 
-A brief explanation of some of these topics is given in the following video: https://www.youtube.com/watch?v=Eko86PGEoDY.
+Another description of traits/mixins and config fragments is given in :ref:`Keys, Traits, and Configs`.
+Additionally, a brief explanation of some of these topics (with slightly different naming) is given in the following video: https://www.youtube.com/watch?v=Eko86PGEoDY.
+
+.. Note:: Chipyard uses the name "config fragments" over "config mixins" to avoid confusion between a mixin applying to a config or to the system ``Top`` (even though both are technically Scala mixins).

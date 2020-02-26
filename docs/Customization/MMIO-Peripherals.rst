@@ -105,7 +105,7 @@ The ``TopModule`` class is the actual RTL that gets synthesized.
 
 
 
-And finally, we create a configuration class in ``generators/chipyard/src/main/scala/Configs.scala`` that uses the ``WithGCD`` fragment defined earlier.
+And finally, we create a configuration class in ``generators/chipyard/src/main/scala/Configs.scala`` that uses the ``WithGCD`` config fragment defined earlier.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/GCD.scala
     :language: scala

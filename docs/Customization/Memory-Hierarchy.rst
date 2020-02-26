@@ -12,8 +12,8 @@ uses 16 KiB, 4-way set-associative instruction and data caches. However,
 if you use the ``WithNMedCores`` or ``WithNSmallCores`` configurations, you can
 configure 4 KiB direct-mapped caches for L1I and L1D.
 
-If you only want to change the size or associativity, there are configuration
-fragments for those too. See :ref:`Fragments` for how to add these to a custom ``Config``
+If you only want to change the size or associativity, there are config
+fragments for those too. See :ref:`Config Fragments` for how to add these to a custom ``Config``
 
 .. code-block:: scala
 
@@ -58,11 +58,11 @@ If you do not want to use the L2 cache (say, for a resource-limited embedded
 design), you can create a configuration without it. Instead of using the L2
 cache, you will instead use RocketChip's TileLink broadcast hub.
 To make such a configuration, you can just copy the definition of
-``RocketConfig`` but omit the ``WithInclusiveCache`` fragment from the
+``RocketConfig`` but omit the ``WithInclusiveCache`` config fragment from the
 list of included mixims.
 
 If you want to reduce the resources used even further, you can configure
-the Broadcast Hub to use a bufferless design. This fragment is
+the Broadcast Hub to use a bufferless design. This config fragment is
 ``freechips.rocketchip.subsystem.WithBufferlessBroadcastHub``.
 
 

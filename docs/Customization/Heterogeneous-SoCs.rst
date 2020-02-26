@@ -8,7 +8,7 @@ Creating a Rocket and BOOM System
 -------------------------------------------
 
 Instantiating an SoC with Rocket and BOOM cores is all done with the configuration system and two specific config fragments.
-Both BOOM and Rocket have fragments labelled ``WithNBoomCores(X)`` and ``WithNBigCores(X)`` that automatically create ``X`` copies of the core/tile [1]_.
+Both BOOM and Rocket have config fragments labelled ``WithNBoomCores(X)`` and ``WithNBigCores(X)`` that automatically create ``X`` copies of the core/tile [1]_.
 When used together you can create a heterogeneous system.
 
 The following example shows a dual core BOOM with a single core Rocket.
@@ -19,7 +19,7 @@ The following example shows a dual core BOOM with a single core Rocket.
     :end-before: DOC include end: DualBoomAndRocket
 
 In this example, the ``WithNBoomCores`` and ``WithNBigCores`` config fragments set up the default parameters for the multiple BOOM and Rocket cores, respectively.
-However, for BOOM, an extra fragment called ``WithLargeBooms`` is added to override the default parameters with a different set of more common default parameters.
+However, for BOOM, an extra config fragment called ``WithLargeBooms`` is added to override the default parameters with a different set of more common default parameters.
 This config fragment applies to all BOOM cores in the system and changes the parameters for each.
 
 Great! Now you have a heterogeneous setup with BOOMs and Rockets.
@@ -83,7 +83,7 @@ All with the same Hwacha parameters.
 Assigning Accelerators to Specific Tiles with MultiRoCC
 -------------------------------------------------------
 
-Located in ``generators/chipyard/src/main/scala/ConfigFragments.scala`` is a fragment that provides support for adding RoCC accelerators to specific tiles in your SoC.
+Located in ``generators/chipyard/src/main/scala/ConfigFragments.scala`` is a config fragment that provides support for adding RoCC accelerators to specific tiles in your SoC.
 Named ``MultiRoCCKey``, this key allows you to attach RoCC accelerators based on the ``hartId`` of the tile.
 For example, using this allows you to create a 8 tile system with a RoCC accelerator on only a subset of the tiles.
 An example is shown below with two BOOM cores, and one Rocket tile with a RoCC accelerator (Hwacha) attached.
@@ -94,8 +94,8 @@ An example is shown below with two BOOM cores, and one Rocket tile with a RoCC a
     :end-before: DOC include end: DualBoomAndRocketOneHwacha
 
 In this example, the ``WithRenumberHarts`` relabels the ``hartId``'s of all the BOOM/Rocket cores.
-Then after that is applied to the parameters, the ``WithMultiRoCCHwacha`` fragment assigns a Hwacha accelerator to a particular ``hartId`` (in this case, the ``hartId`` of ``2`` corresponds to the Rocket core).
-Finally, the ``WithMultiRoCC`` fragment is called.
+Then after that is applied to the parameters, the ``WithMultiRoCCHwacha`` config fragment assigns a Hwacha accelerator to a particular ``hartId`` (in this case, the ``hartId`` of ``2`` corresponds to the Rocket core).
+Finally, the ``WithMultiRoCC`` config fragment is called.
 This config fragment sets the ``BuildRoCC`` key to use the ``MultiRoCCKey`` instead of the default.
 This must be used after all the RoCC parameters are set because it needs to override the ``BuildRoCC`` parameter.
 If this is used earlier in the configuration sequence, then MultiRoCC does not work.
