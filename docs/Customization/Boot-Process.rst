@@ -17,7 +17,7 @@ The BootROM address space starts at ``0x10000`` (determined by the ``BootROMPara
 The Chisel generator encodes the assembled instructions into the BootROM
 hardware at elaboration time, so if you want to change the BootROM code, you
 will need to run ``make`` in the bootrom directory and then regenerate the
-verilog. If you don't want to overwrite the existing ``bootrom.S``, you can
+Verilog. If you don't want to overwrite the existing ``bootrom.S``, you can
 also point the generator to a different bootrom image by overriding the
 ``BootROMParams`` key in the configuration.
 

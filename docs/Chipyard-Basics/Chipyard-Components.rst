@@ -29,9 +29,9 @@ Accelerators
   Hwacha integrates with a Rocket or BOOM core using the RoCC (Rocket Custom Co-processor) interface.
   See :ref:`Hwacha` for more information.
 
-.. Fixed Function Accelerators:
-   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   TBD
+**Gemmini**
+  A matrix-multiply accelerator targeting neural-networks
+
 **SHA3**
   A fixed-function accelerator for the SHA3 hash function. This simple accelerator is used as a demonstration for some of the
   Chipyard integration flows using the RoCC interface.

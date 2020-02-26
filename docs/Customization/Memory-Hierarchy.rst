@@ -9,47 +9,34 @@ The L1 Caches
 Each CPU tile has an L1 instruction cache and L1 data cache. The size and
 associativity of these caches can be configured. The default ``RocketConfig``
 uses 16 KiB, 4-way set-associative instruction and data caches. However,
-if you use the ``NMediumCores`` or ``NSmallCores`` configurations, you can
+if you use the ``WithNMedCores`` or ``WithNSmallCores`` configurations, you can
 configure 4 KiB direct-mapped caches for L1I and L1D.
 
-.. code-block:: scala
-
-    import freechips.rocketchip.subsystem.{WithNMediumCores, WithNSmallCores}
-
-    class SmallRocketConfig extends Config(
-        new WithNSmallCores(1) ++
-        new RocketConfig)
-
-    class MediumRocketConfig extends Config(
-        new WithNMediumCores(1) ++
-        new RocketConfig)
-
 If you only want to change the size or associativity, there are configuration
-mixins for those too.
+mixins for those too. See :ref:`Mixins` for how to add these to a custom ``Config``
 
 .. code-block:: scala
 
-    import freechips.rocketchip.subsystem.{WithL1ICacheSets, WithL1DCacheSets, WithL1ICacheWays, WithL1DCacheWays}
+         new freechips.rocketchip.subsystem.WithL1ICacheSets(128) ++  // change rocket I$
+         new freechips.rocketchip.subsystem.WithL1ICacheWays(2) ++    // change rocket I$
+         new freechips.rocketchip.subsystem.WithL1DCacheSets(128) ++  // change rocket D$
+         new freechips.rocketchip.subsystem.WithL1DCacheWays(2) ++    // change rocket D$
 
-    class MyL1RocketConfig extends Config(
-        new WithL1ICacheSets(128) ++
-        new WithL1ICacheWays(2) ++
-        new WithL1DCacheSets(128) ++
-        new WithL1DCacheWays(2) ++
-        new RocketConfig)
 
 You can also configure the L1 data cache as an data scratchpad instead.
 However, there are some limitations on this. If you are using a data scratchpad,
 you can only use a single core and you cannot give the design an external DRAM.
+Note that these configurations fully remove the L2 cache and mbus.
 
-.. code-block:: scala
 
-    import freechips.rocketchip.subsystem.{WithNoMemPort, WithScratchpadsOnly}
+.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
+    :language: scala
+    :start-after: DOC include start: scratchpadrocket
+    :end-before: DOC include end: scratchpadrocket
 
-    class ScratchpadRocketConfig extends Config(
-        new WithNoMemPort ++
-        new WithScratchpadsOnly ++
-        new SmallRocketConfig)
+
+This configuration fully removes the L2 cache and memory bus by setting the
+number of channels and number of banks to 0.
 
 The SiFive L2 Cache
 -------------------
@@ -61,17 +48,8 @@ set-associativity. However, you can change these parameters to obtain your
 desired cache configuration. The main restriction is that the number of ways
 and the number of banks must be powers of 2.
 
-.. code-block:: scala
-
-    import freechips.rocketchip.subsystem.WithInclusiveCache
-
-    # Create an SoC with 1 MB, 4-way, 4-bank cache
-    class MyCacheRocketConfig extends Config(
-        new WithInclusiveCache(
-            capacityKB = 1024,
-            nWays = 4,
-            nBanks = 4) ++
-        new RocketConfig)
+Refer to the ``CacheParameters`` object defined in sifive-cache for
+customization options.
 
 The Broadcast Hub
 -----------------
@@ -83,26 +61,10 @@ To make such a configuration, you can just copy the definition of
 ``RocketConfig`` but omit the ``WithInclusiveCache`` mixin from the
 list of included mixims.
 
-.. code-block:: scala
-
-    import freechips.rocketchip.subsystem.{WithNBigCores, BaseConfig}
-
-    class CachelessRocketConfig extends Config(
-        new WithTop ++
-        new WithBootROM ++
-        new WithNBigCores(1) ++
-        new BaseConfig)
-
 If you want to reduce the resources used even further, you can configure
-the Broadcast Hub to use a bufferless design.
+the Broadcast Hub to use a bufferless design. This mixin is
+``freechips.rocketchip.subsystem.WithBufferlessBroadcastHub``.
 
-.. code-block:: scala
-
-    import freechips.rocketchip.subsystem.WithBufferlessBroadcastHub
-
-    class BufferlessRocketConfig extends Config(
-        new WithBufferlessBroadcastHub ++
-        new CachelessRocketConfig)
 
 The Outer Memory System
 -----------------------
@@ -116,11 +78,8 @@ number of DRAM channels is restricted to powers of two.
 
 .. code-block:: scala
 
-    import freechips.rocketchip.subsystem.WithNMemoryChannels
+    new freechips.rocketchip.subsystem.WithNMemoryChannels(2)
 
-    class DualChannelRocketConfig extends Config(
-        new WithNMemoryChannels(2) ++
-        new RocketConfig)
 
 In VCS and Verilator simulation, the DRAM is simulated using the
 ``SimAXIMem`` module, which simply attaches a single-cycle SRAM to each

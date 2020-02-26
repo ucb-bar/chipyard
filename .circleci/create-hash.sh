@@ -15,7 +15,8 @@ cd $LOCAL_CHIPYARD_DIR
 
 # Use normalized output of git-submodule status as hashfile
 for tools in 'riscv-tools' 'esp-tools' ; do
-    git submodule status "toolchains/${tools}" "toolchains/qemu" | while read -r line ; do
+    git submodule status "toolchains/${tools}" 'toolchains/libgloss' 'toolchains/qemu' |
+    while read -r line ; do
         echo "${line#[!0-9a-f]}"
     done > "${HOME}/${tools}.hash"
 done

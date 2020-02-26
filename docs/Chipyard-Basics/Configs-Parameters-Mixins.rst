@@ -74,52 +74,37 @@ Cake Pattern
 A cake pattern is a Scala programming pattern, which enable "mixing" of multiple traits or interface definitions (sometimes referred to as dependency injection).
 It is used in the Rocket Chip SoC library and Chipyard framework in merging multiple system components and IO interfaces into a large system component.
 
-This example shows a Rocket Chip based SoC that merges multiple system components (BootROM, UART, etc) into a single top-level design.
+This example shows the Chipyard default top that composes multiple traits together into a fully-featured SoC with many optional components.
 
-.. _cake-example:
-.. code-block:: scala
 
-  class MySoC(implicit p: Parameters) extends RocketSubsystem
-    with CanHaveMasterAXI4MemPort
-    with HasPeripheryBootROM
-    with HasNoDebug
-    with HasPeripherySerial
-    with HasPeripheryUART
-    with HasPeripheryIceNIC
-  {
-     lazy val module = new MySoCModuleImp(this)
-  }
+.. literalinclude:: ../../generators/chipyard/src/main/scala/Top.scala
+    :language: scala
+    :start-after: DOC include start: Top
+    :end-before: DOC include end: Top
 
-  class MySoCModuleImp(outer: MySoC) extends RocketSubsystemModuleImp(outer)
-    with CanHaveMasterAXI4MemPortModuleImp
-    with HasPeripheryBootROMModuleImp
-    with HasNoDebugModuleImp
-    with HasPeripherySerialModuleImp
-    with HasPeripheryUARTModuleImp
-    with HasPeripheryIceNICModuleImp
 
-There are two "cakes" here. One for the lazy module (ex. ``HasPeripherySerial``) and one for the lazy module
-implementation (ex. ``HasPeripherySerialModuleImp`` where ``Imp`` refers to implementation). The lazy module defines
+There are two "cakes" here. One for the lazy module (ex. ``CanHavePeripherySerial``) and one for the lazy module
+implementation (ex. ``CanHavePeripherySerialModuleImp`` where ``Imp`` refers to implementation). The lazy module defines
 all the logical connections between generators and exchanges configuration information among them, while the
 lazy module implementation performs the actual Chisel RTL elaboration.
 
-In the ``MySoC`` example class, the "outer" ``MySoC`` instantiates the "inner"
-``MySoCModuleImp`` as a lazy module implementation. This delays immediate elaboration
+In the ``Top`` example class, the "outer" ``Top`` instantiates the "inner"
+``TopModule`` as a lazy module implementation. This delays immediate elaboration
 of the module until all logical connections are determined and all configuration information is exchanged.
-The ``RocketSubsystem`` outer base class, as well as the
-``HasPeripheryX`` outer traits contain code to perform high-level logical
-connections. For example, the ``HasPeripherySerial`` outer trait contains code
-to lazily instantiate the ``SerialAdapter``, and connect the ``SerialAdapter``'s
+The ``System`` outer base class, as well as the
+``CanHavePeriphery<X>`` outer traits contain code to perform high-level logical
+connections. For example, the ``CanHavePeripherySerial`` outer trait contains code
+to optionally lazily instantiate the ``SerialAdapter``, and connect the ``SerialAdapter``'s
 TileLink node to the Front bus.
 
 The ``ModuleImp`` classes and traits perform elaboration of real RTL.
-For example, the ``HasPeripherySerialModuleImp`` trait physically connects
+For example, the ``CanHavePeripherySerialModuleImp`` trait optionally physically connects
 the ``SerialAdapter`` module, and instantiates queues.
 
 In the test harness, the SoC is elaborated with
-``val dut = Module(LazyModule(MySoC))``.
-After elaboration, the result will be a ``MySoC`` module, which contains a
-``SerialAdapter`` module (among others).
+``val dut = Module(LazyModule(Top))``.
+After elaboration, the result will be a ``Top`` module, which contains a
+``SerialAdapter`` module (among others), if the config specified for that block to be instantiated.
 
 From a high level, classes which extend ``LazyModule`` *must* reference
 their module implementation through ``lazy val module``, and they
@@ -134,8 +119,8 @@ Mix-in
 ---------------------------
 
 A mix-in is a Scala trait, which sets parameters for specific system components, as well as enabling instantiation and wiring of the relevant system components to system buses.
-The naming convention for an additive mix-in is ``Has<YourMixin>``.
-This is shown in the ``MySoC`` class where things such as ``HasPeripherySerial`` connect a RTL component to a bus and expose signals to the top-level.
+The naming convention for an additive mix-in is ``CanHave<YourMixin>``.
+This is shown in the ``Top`` class where things such as ``CanHavePeripherySerial`` connect a RTL component to a bus and expose signals to the top-level.
 
 Additional References
 ---------------------------

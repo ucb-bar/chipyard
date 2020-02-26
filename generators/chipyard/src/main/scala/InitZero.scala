@@ -1,14 +1,14 @@
-package example
+package chipyard.example
 
 import chisel3._
 import chisel3.util._
 import freechips.rocketchip.subsystem.{BaseSubsystem, CacheBlockBytes}
-import freechips.rocketchip.config.{Parameters, Field}
+import freechips.rocketchip.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, IdRange}
 import testchipip.TLHelper
 
 case class InitZeroConfig(base: BigInt, size: BigInt)
-case object InitZeroKey extends Field[InitZeroConfig]
+case object InitZeroKey extends Field[Option[InitZeroConfig]](None)
 
 class InitZero(implicit p: Parameters) extends LazyModule {
   val node = TLHelper.makeClientNode(
@@ -18,7 +18,7 @@ class InitZero(implicit p: Parameters) extends LazyModule {
 }
 
 class InitZeroModuleImp(outer: InitZero) extends LazyModuleImp(outer) {
-  val config = p(InitZeroKey)
+  val config = p(InitZeroKey).get
 
   val (mem, edge) = outer.node.out(0)
   val addrBits = edge.bundle.addressBits
@@ -57,13 +57,18 @@ class InitZeroModuleImp(outer: InitZero) extends LazyModuleImp(outer) {
   }
 }
 
-trait HasPeripheryInitZero { this: BaseSubsystem =>
+trait CanHavePeripheryInitZero { this: BaseSubsystem =>
   implicit val p: Parameters
 
-  val initZero = LazyModule(new InitZero()(p))
-  fbus.fromPort(Some("init-zero"))() := initZero.node
+  p(InitZeroKey) .map { k =>
+    val initZero = LazyModule(new InitZero()(p))
+    fbus.fromPort(Some("init-zero"))() := initZero.node
+  }
 }
 
-trait HasPeripheryInitZeroModuleImp extends LazyModuleImp {
-  // Don't need anything here
-}
+
+// DOC include start: WithInitZero
+class WithInitZero(base: BigInt, size: BigInt) extends Config((site, here, up) => {
+  case InitZeroKey => Some(InitZeroConfig(base, size))
+})
+// DOC include end: WithInitZero

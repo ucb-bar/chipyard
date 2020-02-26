@@ -49,16 +49,16 @@ Simulating The Default Example
 To compile the example design, run ``make`` in the selected verilator or VCS directory.
 This will elaborate the ``RocketConfig`` in the example project.
 
-An executable called ``simulator-example-RocketConfig`` will be produced.
+An executable called ``simulator-chipyard-RocketConfig`` will be produced.
 This executable is a simulator that has been compiled based on the design that was built.
 You can then use this executable to run any compatible RV64 code.
 For instance, to run one of the riscv-tools assembly tests.
 
 .. code-block:: shell
 
-    ./simulator-example-RocketConfig $RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
+    ./simulator-chipyard-RocketConfig $RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
 
-.. Note:: In a VCS simulator, the simulator name will be ``simv-example-RocketConfig`` instead of ``simulator-example-RocketConfig``.
+.. Note:: In a VCS simulator, the simulator name will be ``simv-chipyard-RocketConfig`` instead of ``simulator-chipyard-RocketConfig``.
 
 Alternatively, we can run a pre-packaged suite of RISC-V assembly or benchmark tests, by adding the make target ``run-asm-tests`` or ``run-bmark-tests``.
 For example:

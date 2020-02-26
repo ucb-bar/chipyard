@@ -8,8 +8,7 @@ design flows. Fortunately, both Chisel and Chipyard provide extensive
 support for Verilog integration.
 
 Here, we will examine the process of incorporating an MMIO peripheral
-(similar to the PWM example from the previous section) that uses a
-Verilog implementation of Greatest Common Denominator (GCD)
+that uses a Verilog implementation of Greatest Common Denominator (GCD)
 algorithm. There are a few steps to adding a Verilog peripheral:
 
 * Adding a Verilog resource file to the project
@@ -49,20 +48,20 @@ Verilog files into the build process, which are part of the
       .settings(commonSettings)
 
 For this concrete GCD example, we will be using a ``GCDMMIOBlackBox``
-Verilog module that is defined in the ``example`` project. The Scala
+Verilog module that is defined in the ``chipyard`` project. The Scala
 and Verilog sources follow the prescribed directory layout.
 
 .. code-block:: none
 
-    generators/example/
+    generators/chipyard/
         build.sbt
         src/main/
             scala/
-                GCDMMIOBlackBox.scala
+                GCD.scala
             resources/
                 vsrc/
                     GCDMMIOBlackBox.v
-      
+
 Defining a Chisel BlackBox
 --------------------------
 
@@ -79,17 +78,17 @@ Of particular interest is the fact that parameterized Verilog modules
 can be passed the full space of possible parameter values. These
 values may depend on elaboration-time values in the Chisel generator,
 as the bitwidth of the GCD calculation does in this example.
-  
+
 **Verilog GCD port list and parameters**
 
-.. literalinclude:: ../../generators/example/src/main/resources/vsrc/GCDMMIOBlackBox.v
-    :language: verilog
+.. literalinclude:: ../../generators/chipyard/src/main/resources/vsrc/GCDMMIOBlackBox.v
+    :language: Verilog
     :start-after: DOC include start: GCD portlist
     :end-before: DOC include end: GCD portlist
 
 **Chisel BlackBox Definition**
 
-.. literalinclude:: ../../generators/example/src/main/scala/GCDMMIOBlackBox.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/GCD.scala
     :language: scala
     :start-after: DOC include start: GCD blackbox
     :end-before: DOC include end: GCD blackbox
@@ -102,54 +101,32 @@ diplomatic memory mapping on the system bus, we still have to
 integrate the peripheral at the Chisel level by mixing
 peripheral-specific traits into a ``TLRegisterRouter``. The ``params``
 member and ``HasRegMap`` base trait should look familiar from the
-previous memory-mapped PWM device example.
+previous memory-mapped GCD device example.
 
-.. literalinclude:: ../../generators/example/src/main/scala/GCDMMIOBlackBox.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/GCD.scala
     :language: scala
     :start-after: DOC include start: GCD instance regmap
     :end-before: DOC include end: GCD instance regmap
 
-Advanced Features of RegField Entries
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-One significant difference from the PWM example is in the peripheral's
-memory map. ``RegField`` exposes polymorphic ``r`` and ``w`` methods
-that allow read- and write-only memory-mapped registers to be
-interfaced to hardware in multiple ways.
-
-* ``RegField.r(2, status)`` is used to create a 2-bit, read-only register that captures the current value of the ``status`` signal when read.
-* ``RegField.r(params.width, gcd)`` "connects" the decoupled handshaking interface ``gcd`` to a read-only memory-mapped register. When this register is read via MMIO, the ``ready`` signal is asserted. This is in turn connected to ``output_ready`` on the Verilog blackbox through the glue logic.
-* ``RegField.w(params.width, x)`` exposes a plain register (much like those in the PWM example) via MMIO, but makes it write-only.
-* ``RegField.w(params.width, y)`` associates the decoupled interface signal ``y`` with a write-only memory-mapped register, causing ``y.valid`` to be asserted when the register is written.
-
-Since the ready/valid signals of ``y`` are connected to the
-``input_ready`` and ``input_valid`` signals of the blackbox,
-respectively, this register map and glue logic has the effect of
-triggering the GCD algorithm when ``y`` is written. Therefore, the
-algorithm is set up by first writing ``x`` and then performing a
-triggering write to ``y``. Polling can be used for status checks.
-
-Defining a Chip with a GCD Peripheral
+Defining a Chip with a BlackBox
 ---------------------------------------
 
-As with the PWM example, a few more pieces are needed to tie the system together.
+Since we've parameterized the GCD instantiation to choose between the
+Chisel and the Verilog module, creating a config is easy.
 
-**Composing traits into a complete cake pattern peripheral**
-
-.. literalinclude:: ../../generators/example/src/main/scala/GCDMMIOBlackBox.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
     :language: scala
-    :start-after: DOC include start: GCD cake
-    :end-before: DOC include end: GCD cake
+    :start-after: DOC include start: GCDAXI4BlackBoxRocketConfig
+    :end-before: DOC include end: GCDAXI4BlackBoxRocketConfig
 
-Note the differences arising due to the fact that this peripheral has
-no top-level IO. To build a complete system, a new ``Top`` and new
-``Config`` objects are added in a manner exactly analogous to the PWM
-example.
+You can play with the parameterization of the mixin to choose a TL/AXI4, BlackBox/Chisel
+version of the GCD.
 
 Software Testing
 ----------------
 
-The GCD module has a slightly more complex interface, so polling is
+The GCD module has a more complex interface, so polling is
 used to check the status of the device before each triggering read or
 write.
 
