@@ -68,9 +68,9 @@ Using a SHA3 Accelerator
 ------------------------
 Since the SHA3 accelerator is designed as a RoCC accelerator,
 it can be mixed into a Rocket or BOOM core by overriding the
-``BuildRoCC`` key. The configuration fragment is defined in the SHA3
+``BuildRoCC`` key. The config fragment is defined in the SHA3
 generator. An example configuration highlighting the use of
-this fragment is shown here:
+this config fragment is shown here:
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
    :language: scala
