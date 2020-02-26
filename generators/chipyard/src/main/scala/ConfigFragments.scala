@@ -31,21 +31,21 @@ object ConfigValName {
 }
 import ConfigValName._
 
-// --------------------------
-// Common Parameter Fragments
-// --------------------------
+// -----------------------
+// Common Config Fragments
+// -----------------------
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMParams => BootROMParams(
     contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img")
 })
 
-// DOC include start: gpio fragment
+// DOC include start: gpio config fragment
 class WithGPIO extends Config((site, here, up) => {
   case PeripheryGPIOKey => Seq(
     GPIOParams(address = 0x10012000, width = 4, includeIOF = false))
 })
-// DOC include end: gpio fragment
+// DOC include end: gpio config fragment
 
 class WithUART extends Config((site, here, up) => {
   case PeripheryUARTKey => Seq(
@@ -80,14 +80,14 @@ class WithTracegenTop extends Config((site, here, up) => {
 case object MultiRoCCKey extends Field[Map[Int, Seq[Parameters => LazyRoCC]]](Map.empty[Int, Seq[Parameters => LazyRoCC]])
 
 /**
- * Fragment to enable different RoCCs based on the hartId
+ * Config fragment to enable different RoCCs based on the hartId
  */
 class WithMultiRoCC extends Config((site, here, up) => {
   case BuildRoCC => site(MultiRoCCKey).getOrElse(site(TileKey).hartId, Nil)
 })
 
 /**
- * Fragment to add Hwachas to cores based on hart
+ * Config fragment to add Hwachas to cores based on hart
  *
  * For ex:
  *   Core 0, 1, 2, 3 have been defined earlier
@@ -110,7 +110,7 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
 
 
 /**
- * Fragment to add a small Rocket core to the system as a "control" core.
+ * Config fragment to add a small Rocket core to the system as a "control" core.
  * Used as an example of a PMU core.
  */
 class WithControlCore extends Config((site, here, up) => {

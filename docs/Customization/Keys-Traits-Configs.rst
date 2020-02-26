@@ -63,8 +63,8 @@ For example, the ``WithGCD`` config fragment is parameterized by the type of GCD
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/GCD.scala
     :language: scala
-    :start-after: DOC include start: GCD fragment
-    :end-before: DOC include end: GCD fragment
+    :start-after: DOC include start: GCD config fragment
+    :end-before: DOC include end: GCD config fragment
 
 We can use this config fragment when composing our configs.
 

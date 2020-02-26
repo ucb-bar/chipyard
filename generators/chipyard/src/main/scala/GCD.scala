@@ -200,8 +200,8 @@ trait CanHavePeripheryGCDModuleImp extends LazyModuleImp {
 // DOC include end: GCD imp trait
 
 
-// DOC include start: GCD fragment
+// DOC include start: GCD config fragment
 class WithGCD(useAXI4: Boolean, useBlackBox: Boolean) extends Config((site, here, up) => {
   case GCDKey => Some(GCDParams(useAXI4 = useAXI4, useBlackBox = useBlackBox))
 })
-// DOC include end: GCD fragment
+// DOC include end: GCD config fragment
