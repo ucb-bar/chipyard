@@ -81,7 +81,7 @@ are confused about the distinction between lazy module and module
 implementation, refer to :ref:`Cake Pattern`.
 
 Then add the ``WithIceNIC`` config fragment to your configuration. This will
-define ``NICKey``, which IceNIC uses to determine its parameters. The fragment
+define ``NICKey``, which IceNIC uses to determine its parameters. The config fragment
 takes two arguments. The ``inBufFlits`` argument is the number of 64-bit flits
 that the input packet buffer can hold and the ``usePauser`` argument determines
 whether or not the NIC will have a pause handler.
