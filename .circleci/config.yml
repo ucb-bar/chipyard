@@ -12,7 +12,7 @@ parameters:
 executors:
     main-env:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.14
+            - image: riscvboom/riscvboom-images:0.0.13
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 
@@ -147,6 +147,14 @@ jobs:
         steps:
             - toolchain-build:
                 tools-version: "esp-tools"
+    install-verilator:
+        executor: main-env
+        steps:
+            - ssh-checkout
+            - run:
+                name: Install Verilator to remote
+                command: |
+                    .circleci/install-verilator.sh
     build-extra-tests:
         executor: main-env
         steps:
@@ -338,6 +346,8 @@ workflows:
 
             - install-esp-toolchain
 
+            - install-verilator
+
             - commit-on-master-check
 
             # Build extra tests
@@ -349,54 +359,67 @@ workflows:
             - prepare-chipyard-rocket:
                 requires:
                     - install-riscv-toolchain
+                    - install-verilator
 
             - prepare-chipyard-hetero:
                 requires:
                     - install-riscv-toolchain
+                    - install-verilator
 
             - prepare-chipyard-boom:
                 requires:
                     - install-riscv-toolchain
+                    - install-verilator
 
             - prepare-rocketchip:
                 requires:
                     - install-riscv-toolchain
+                    - install-verilator
 
             - prepare-chipyard-blkdev:
                 requires:
                     - install-riscv-toolchain
+                    - install-verilator
 
             - prepare-chipyard-hwacha:
                 requires:
                     - install-esp-toolchain
+                    - install-verilator
 
             - prepare-chipyard-gemmini:
                 requires:
                     - install-esp-toolchain
+                    - install-verilator
 
             - prepare-tracegen:
                 requires:
                     - install-riscv-toolchain
+                    - install-verilator
 
             - prepare-tracegen-boom:
                 requires:
                     - install-riscv-toolchain
+                    - install-verilator
 
             - prepare-firesim:
                 requires:
                     - install-riscv-toolchain
+                    - install-verilator
 
             - prepare-fireboom:
                 requires:
                     - install-riscv-toolchain
+                    - install-verilator
 
             - prepare-chipyard-ariane:
                 requires:
                     - install-riscv-toolchain
+                    - install-verilator
 
             - prepare-fireariane:
                 requires:
                     - install-riscv-toolchain
+                    - install-verilator
 
             # Run the respective tests
 

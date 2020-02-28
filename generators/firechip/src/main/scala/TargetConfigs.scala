@@ -19,6 +19,7 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 import tracegen.TraceGenKey
 import icenet._
+import ariane.ArianeTilesKey
 
 import firesim.bridges._
 import firesim.configs._

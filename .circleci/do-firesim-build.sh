@@ -51,7 +51,10 @@ fi
 # Build MIDAS-level verilator sim
 FIRESIM_VARS="${mapping[$1]}"
 run "export FIRESIM_ENV_SOURCED=1; make -C $REMOTE_FIRESIM_DIR clean"
-run "export RISCV=\"$TOOLS_DIR\"; export LD_LIBRARY_PATH=\"$LD_LIB_DIR\"; \
+run "export RISCV=\"$TOOLS_DIR\"; \
+     export LD_LIBRARY_PATH=\"$LD_LIB_DIR\"; \
+     export PATH=\"$REMOTE_VERILATOR_DIR/bin:\$PATH\"; \
+     export VERILATOR_ROOT=\"$REMOTE_VERILATOR_DIR\"; \
      export FIRESIM_ENV_SOURCED=1; \
      make -C $REMOTE_FIRESIM_DIR JAVA_ARGS=\"$REMOTE_JAVA_ARGS\" $FIRESIM_VARS verilator"
 run "rm -rf $REMOTE_CHIPYARD_DIR/project"

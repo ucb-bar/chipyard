@@ -20,6 +20,9 @@ clean () {
 # make parallelism
 NPROC=8
 
+# verilator version
+VERILATOR_VERSION=v4.028
+
 # remote variables
 REMOTE_WORK_DIR=$CI_DIR/$CIRCLE_PROJECT_REPONAME-$CIRCLE_BRANCH-$CIRCLE_SHA1-$CIRCLE_JOB
 REMOTE_RISCV_DIR=$REMOTE_WORK_DIR/riscv-tools-install
@@ -28,6 +31,7 @@ REMOTE_CHIPYARD_DIR=$REMOTE_WORK_DIR/chipyard
 REMOTE_SIM_DIR=$REMOTE_CHIPYARD_DIR/sims/verilator
 REMOTE_FIRESIM_DIR=$REMOTE_CHIPYARD_DIR/sims/firesim/sim
 REMOTE_JAVA_ARGS="-Xmx8G -Xss8M -Dsbt.ivy.home=$REMOTE_WORK_DIR/.ivy2 -Dsbt.global.base=$REMOTE_WORK_DIR/.sbt -Dsbt.boot.directory=$REMOTE_WORK_DIR/.sbt/boot"
+REMOTE_VERILATOR_DIR=$CI_DIR/$CIRCLE_PROJECT_REPONAME-$CIRCLE_BRANCH-$CIRCLE_SHA1-verilator-install
 
 # local variables (aka within the docker container)
 LOCAL_CHECKOUT_DIR=$HOME/project
