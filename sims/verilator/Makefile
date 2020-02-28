@@ -56,14 +56,14 @@ VERILATOR_CC_OPTS = \
 	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(build_dir)/verilator.h" \
 	-LDFLAGS "$(LDFLAGS)"
 
-# temporary until ariane supports --assert flag
-ifeq ($(shell grep -i "module.*ariane" $(build_dir)/*.*v),)
-	ENABLE_ASSERTS=--assert
-endif
-
+# brief description of special flags:
+# --assert : disable if running with ariane (temporary until it is supported by them)
+# -Werror-IMPLICIT : error on implicitly declared wires
+# -Wno-BLKANDNBLK : ignore blocking and non-blocking assignment mixes
+# -Wno-fatal : disable fatal exit on warnings
 VERILATOR_NONCC_OPTS = \
 	--top-module $(VLOG_MODEL) \
-	$(ENABLE_ASSERTS) \
+	$(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; then echo "--assert"; fi) \
 	--output-split 10000 \
 	--output-split-cfuncs 100 \
 	-Werror-IMPLICIT \
@@ -94,7 +94,6 @@ model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
 #########################################################################################
 # build makefile fragment that builds the verilator sim rules
 #########################################################################################
-
 $(model_mk): $(sim_vsrcs) $(sim_common_files)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name)

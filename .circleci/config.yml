@@ -245,7 +245,6 @@ jobs:
             - prepare-rtl:
                 project-key: "fireariane"
                 build-script: "do-firesim-build.sh"
-
     chipyard-rocket-run-tests:
         executor: main-env
         steps:
@@ -322,7 +321,7 @@ jobs:
                 extra-cache-restore: "extra-tests"
                 project-key: "fireariane"
                 run-script: "run-firesim-tests.sh"
-                timeout: "30m"
+                timeout: "60m"
 
 # Order and dependencies of jobs to run
 workflows:
