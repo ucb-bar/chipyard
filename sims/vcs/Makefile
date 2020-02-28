@@ -25,10 +25,7 @@ sim_prefix = simv
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
-PERMISSIVE_ON=+permissive
-PERMISSIVE_OFF=+permissive-off
-
-WAVEFORM_FLAG=+vcdplusfile=$(sim_out_name).vpd
+include $(base_dir)/vcs.mk
 
 .PHONY: default debug
 default: $(sim)
