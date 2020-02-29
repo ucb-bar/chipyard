@@ -37,6 +37,9 @@ LD_LIB_DIR=$REMOTE_RISCV_DIR/lib
 # Run midasexamples test
 
 run "export FIRESIM_ENV_SOURCED=1; make -C $REMOTE_FIRESIM_DIR clean"
-run "export RISCV=\"$TOOLS_DIR\"; export LD_LIBRARY_PATH=\"$LD_LIB_DIR\"; \
+run "export RISCV=\"$TOOLS_DIR\"; \
+     export LD_LIBRARY_PATH=\"$LD_LIB_DIR\"; \
      export FIRESIM_ENV_SOURCED=1; \
+     export PATH=\"$REMOTE_VERILATOR_DIR/bin:\$PATH\"; \
+     export VERILATOR_ROOT=\"$REMOTE_VERILATOR_DIR\"; \
      make -C $REMOTE_FIRESIM_DIR JAVA_ARGS=\"$REMOTE_JAVA_ARGS\" TARGET_PROJECT=midasexamples test"
