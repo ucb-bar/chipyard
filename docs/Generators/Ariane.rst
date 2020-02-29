@@ -9,4 +9,6 @@ The core by itself exposes an AXI interface, interrupt ports, and other misc. po
 
 While the core itself is not a generator, we expose the same parameterization that the Ariane core provides (i.e. change branch prediction parameters).
 
+.. Warning:: Although you can use Verilator with the core in Chipyard, it sometimes non-deterministically fails due to Ariane/Verilator errors (saying that the model doesn't settle/converge). If this happens, try re-running the simulation or using VCS.
+
 For more information, please refer to the `GitHub repository <https://github.com/pulp-platform/ariane>`__.

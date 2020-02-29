@@ -63,7 +63,7 @@ case $1 in
         run_tracegen ${mapping[$1]}
         ;;
     chipyard-ariane)
-        run_bmark ${mapping[$1]}
+        make run-binary-fast -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
         ;;
     *)
         echo "No set of tests for $1. Did you spell it right?"

@@ -239,12 +239,6 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "chipyard-ariane"
-    prepare-fireariane:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "fireariane"
-                build-script: "do-firesim-build.sh"
     chipyard-rocket-run-tests:
         executor: main-env
         steps:
@@ -314,14 +308,6 @@ jobs:
         steps:
             - run-tests:
                 project-key: "chipyard-ariane"
-    fireariane-run-tests:
-        executor: main-env
-        steps:
-            - run-tests:
-                extra-cache-restore: "extra-tests"
-                project-key: "fireariane"
-                run-script: "run-firesim-tests.sh"
-                timeout: "60m"
 
 # Order and dependencies of jobs to run
 workflows:
@@ -415,11 +401,6 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-fireariane:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
             # Run the respective tests
 
             # Run midasexamples test
@@ -474,10 +455,3 @@ workflows:
             - chipyard-ariane-run-tests:
                 requires:
                     - prepare-chipyard-ariane
-
-            - fireariane-run-tests:
-                requires:
-                    - prepare-fireariane
-                    - build-extra-tests
-
-

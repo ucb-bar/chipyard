@@ -56,23 +56,33 @@ VERILATOR_CC_OPTS = \
 	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(build_dir)/verilator.h" \
 	-LDFLAGS "$(LDFLAGS)"
 
-# brief description of special flags:
-# --assert : disable if running with ariane (temporary until it is supported by them)
-# -Werror-IMPLICIT : error on implicitly declared wires
-# -Wno-BLKANDNBLK : ignore blocking and non-blocking assignment mixes
-# -Wno-fatal : disable fatal exit on warnings
+# default flags added for ariane
+ARIANE_VERILATOR_FLAGS = \
+	--unroll-count 256 \
+	-Werror-PINMISSING \
+	-Werror-IMPLICIT \
+	-Wno-fatal \
+	-Wno-PINCONNECTEMPTY \
+	-Wno-ASSIGNDLY \
+	-Wno-DECLFILENAME \
+	-Wno-UNUSED \
+	-Wno-UNOPTFLAT \
+	-Wno-BLKANDNBLK \
+	-Wno-style \
+	-Wall
+
+# normal flags used for chipyard builds (that are incompatible with ariane)
+CHIPYARD_VERILATOR_FLAGS = \
+	--assert
+
 VERILATOR_NONCC_OPTS = \
 	--top-module $(VLOG_MODEL) \
-	$(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; then echo "--assert"; fi) \
+	$(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; then echo "$(CHIPYARD_VERILATOR_FLAGS)"; else echo "$(ARIANE_VERILATOR_FLAGS)"; fi) \
 	--output-split 10000 \
 	--output-split-cfuncs 100 \
-	-Werror-IMPLICIT \
-	-Wno-BLKANDNBLK \
-	-Wno-fatal \
 	-f $(sim_common_files) \
 	$(sim_vsrcs)
 
-# must define variables for the pre-processing step
 VERILATOR_DEFINES = \
 	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
 	+define+STOP_COND=\$$c\(\"done_reset\"\)
