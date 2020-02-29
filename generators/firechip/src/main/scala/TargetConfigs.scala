@@ -158,6 +158,21 @@ class FireSimRingSystemBusRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.RingSystemBusRocketConfig)
 
+class FireSimManyCoreRocketConfig extends Config(
+  // Have to omit TracerVBridge because too many cores
+  new chipyard.iobinders.WithGPIOTiedOff ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new WithSerialBridge ++
+  new WithNICBridge ++
+  new WithUARTBridge ++
+  new WithBlockDeviceBridge ++
+  new WithFASEDBridge ++
+  new WithFireSimMultiCycleRegfile ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.ManyCoreRocketConfig)
+
 //**********************************************************************************
 // Supernode Configurations, base off chipyard's RocketConfig
 //**********************************************************************************
