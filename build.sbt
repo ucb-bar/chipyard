@@ -198,8 +198,8 @@ lazy val sifive_cache = (project in file("generators/sifive-cache")).settings(
 lazy val midas      = ProjectRef(firesimDir, "midas")
 lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 
-lazy val firechip = (project in file("generators/firechip"))
-  .dependsOn(chipyard, testchipip, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
+lazy val firechip = conditionalDependsOn(project in file("generators/firechip"))
+  .dependsOn(chipyard, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
     testGrouping in Test := isolateAllTests( (definedTests in Test).value )
