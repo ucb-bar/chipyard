@@ -1,6 +1,6 @@
 //// See LICENSE for license details.
 //
-package rocketdsptools
+package example
 
 import chisel3._
 import chisel3.{Bundle, Module}
@@ -8,12 +8,21 @@ import chisel3.util._
 import dspblocks._
 import dsptools.numbers._
 import freechips.rocketchip.amba.axi4stream._
-import freechips.rocketchip.config.Parameters
+import freechips.rocketchip.config.{Parameters, Field}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
 
 // Simple passthrough to use as testbed sanity check
+// Passthrough params
+case class PassthroughParams(
+  writeAddress: BigInt = 0x2000,
+  readAddress: BigInt = 0x2100,
+  depth: Int
+)
+
+// Passthrough key
+case object PassthroughKey extends Field[Option[PassthroughParams]](None)
 
 class PassthroughBundle[T<:Data:Ring](proto: T) extends Bundle {
     val data: T = proto.cloneType
@@ -114,13 +123,13 @@ with TLDspBlock
   */
 /*
 class PassthroughChain[T<:Data:Ring]
-(
-  val depth: Int = 8,
+( 
+  val params: PassthroughParams
 )(implicit p: Parameters) extends TLChain(
   Seq(
-    {implicit p: Parameters => { val writeQueue = LazyModule(new TLWriteQueue(depth)); writeQueue}},
-    {implicit p: Parameters => { val passthrough = LazyModule(new TLPassthroughBlock(proto)); passthrough}},
-    {implicit p: Parameters => { val readQueue = LazyModule(new TLReadQueue(depth)); readQueue}},
+    {implicit p: Parameters => { val writeQueue = LazyModule(new TLWriteQueue(params.depth, AddressSet(params.writeAddress, 0xff))); writeQueue}},
+    {implicit p: Parameters => { val passthrough = LazyModule(new TLPassthroughBlock(UInt(32.W)); passthrough}},
+    {implicit p: Parameters => { val readQueue = LazyModule(new TLReadQueue(params.depth, AddressSet(params.readAddress, 0xff))); readQueue}},
   )
 )
 */
@@ -135,12 +144,12 @@ class PassthroughChain[T<:Data:Ring]
   * @param p
   * @tparam T Type parameter for passthrough, i.e. FixedPoint or DspReal
   */
-class TLPassthroughThing[T<:Data:Ring] (proto: T, depth: Int)(implicit p: Parameters)
+class TLPassthroughThing[T<:Data:Ring](params: PassthroughParams, proto: T)(implicit p: Parameters)
   extends LazyModule {
   // instantiate lazy modules
-  val writeQueue = LazyModule(new TLWriteQueue(depth))
+  val writeQueue = LazyModule(new TLWriteQueue(params.depth, AddressSet(params.writeAddress, 0xff)))
   val passthrough = LazyModule(new TLPassthroughBlock(proto))
-  val readQueue = LazyModule(new TLReadQueue(depth))
+  val readQueue = LazyModule(new TLReadQueue(params.depth, AddressSet(params.readAddress, 0xff)))
 
   // connect streamNodes of queues and passthrough
   readQueue.streamNode := passthrough.streamNode := writeQueue.streamNode
@@ -148,11 +157,16 @@ class TLPassthroughThing[T<:Data:Ring] (proto: T, depth: Int)(implicit p: Parame
   lazy val module = new LazyModuleImp(this)
 }
 
+trait CanHavePeripheryUIntPassthrough { this: BaseSubsystem =>
+  val passthrough = p(PassthroughKey) match {
+    case Some(params) => {
+      val passthrough = LazyModule(new TLPassthroughThing(params, UInt(32.W)))
 
-trait HasPeripheryTLUIntPassthrough extends BaseSubsystem {
-  val passthrough = LazyModule(new TLPassthroughThing(UInt(32.W), 8))
-
-  pbus.toVariableWidthSlave(Some("passthrougWrite")) { passthrough.writeQueue.mem.get }
-  pbus.toVariableWidthSlave(Some("passthroughRead")) { passthrough.readQueue.mem.get }
+      pbus.toVariableWidthSlave(Some("passthroughWrite")) { passthrough.writeQueue.mem.get }
+      pbus.toVariableWidthSlave(Some("passthroughRead")) { passthrough.readQueue.mem.get }
+      
+      Some(passthrough)
+    }
+    case None => None
+  }
 }
-

@@ -248,12 +248,10 @@ class WithBackingScratchpad(base: BigInt = 0x80000000L, mask: BigInt = ((4 << 20
 /**
  * Mixin to add DSPTools components
  */
-class WithTLUIntPassthroughTop extends Config((site, here, up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p: Parameters) =>
-    Module(LazyModule(new TopWithTLUIntPassthrough()(p)).module)
+class WithUIntPassthrough extends Config((site, here, up) => {
+  case PassthroughKey => Some(PassthroughParams(depth = 8))
 })
 
-class WithTLUIntTestFIRTop extends Config((site, here,up) => {
-  case BuildTop => (clock: Clock, reset: Bool, p:Parameters) =>
-    Module(LazyModule(new TopWithTLUIntTestFIR()(p)).module)
+class WithUIntTestFIR extends Config((site, here, up) => {
+  case GenericFIRKey => Some(GenericFIRParams(depth = 8))
 })

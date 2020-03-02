@@ -1,6 +1,6 @@
 //// See LICENSE for license details.
 //
-package rocketdsptools
+package example
 
 import chisel3._
 import chisel3.{Bundle, Module}
@@ -8,10 +8,19 @@ import chisel3.util._
 import dspblocks._
 import dsptools.numbers._
 import freechips.rocketchip.amba.axi4stream._
-import freechips.rocketchip.config.Parameters
+import freechips.rocketchip.config.{Parameters, Field}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
+
+// FIR params
+case class GenericFIRParams(
+  writeAddress: BigInt = 0x2000,
+  readAddress: BigInt = 0x2100,
+  depth: Int
+)
+
+case object GenericFIRKey extends Field[Option[GenericFIRParams]](None)
 
 class GenericFIRCellBundle[T<:Data:Ring](genIn:T, genOut:T) extends Bundle {
   val data: T = genIn.cloneType
@@ -163,11 +172,11 @@ GenericFIRBlock[TLClientPortParameters, TLManagerPortParameters, TLEdgeOut, TLEd
     genIn, genOut, coeffs
 ) with TLDspBlock
 
-class TLGenericFIRThing[T<:Data:Ring] (genIn: T, genOut: T, coeffs: Seq[T], depth: Int)(implicit p: Parameters)
+class TLGenericFIRThing[T<:Data:Ring] (genIn: T, genOut: T, coeffs: Seq[T], params: GenericFIRParams)(implicit p: Parameters)
   extends LazyModule {
-  val writeQueue = LazyModule(new TLWriteQueue(depth))
+  val writeQueue = LazyModule(new TLWriteQueue(params.depth, AddressSet(params.writeAddress, 0xff)))
   val fir = LazyModule(new TLGenericFIRBlock(genIn, genOut, coeffs))
-  val readQueue = LazyModule(new TLReadQueue(depth))
+  val readQueue = LazyModule(new TLReadQueue(params.depth, AddressSet(params.readAddress, 0xff)))
 
   // connect streamNodes of queues and FIR
   readQueue.streamNode := fir.streamNode := writeQueue.streamNode
@@ -175,9 +184,14 @@ class TLGenericFIRThing[T<:Data:Ring] (genIn: T, genOut: T, coeffs: Seq[T], dept
   lazy val module = new LazyModuleImp(this)
 }
 
-trait HasPeripheryTLUIntTestFIR extends BaseSubsystem {
-  val fir = LazyModule(new TLGenericFIRThing(UInt(8.W), UInt(12.W), Seq(1.U, 2.U, 3.U), 8))
-
-  pbus.toVariableWidthSlave(Some("firWrite")) { fir.writeQueue.mem.get }
-  pbus.toVariableWidthSlave(Some("firRead")) { fir.readQueue.mem.get }
+trait CanHavePeripheryUIntTestFIR extends BaseSubsystem {
+  val fir = p(GenericFIRKey) match {
+    case Some(params) => {
+      val fir = LazyModule(new TLGenericFIRThing(UInt(8.W), UInt(12.W), Seq(1.U, 2.U, 3.U), params))
+      
+      pbus.toVariableWidthSlave(Some("firWrite")) { fir.writeQueue.mem.get }
+      pbus.toVariableWidthSlave(Some("firRead")) { fir.readQueue.mem.get }
+    }
+    case None => None
+  }
 }
