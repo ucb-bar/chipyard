@@ -11,8 +11,8 @@ CFLAGS := -O2 -std=gnu11 -Wall -specs=htif_nano.specs
 all: transpose.dump
 
 .PRECIOUS: %.riscv
-%.riscv: %.c $(wildcard *.h)
-	$(CC) $(CFLAGS) -o $@ $<
+%.riscv: %.c trap.c $(wildcard *.h)
+	$(CC) $(CFLAGS) -o $@ $< trap.c
 
 %.dump: %.riscv
 	$(OBJDUMP) -d $< > $@
