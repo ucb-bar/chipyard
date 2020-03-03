@@ -39,8 +39,8 @@ class CS152RocketChipConfig extends Config(
   new WithL1ICacheWays(1) ++
   new WithL1DCacheSets(64) ++
   new WithL1DCacheWays(1) ++
-  new WithCacheBlockBytes(64) ++
-  new CS152RocketChipDefaultConfig)
+  new CS152RocketChipDefaultConfig ++
+  new WithCacheBlockBytes(64))
 
 class CS152RocketChipL2Config extends Config(
   new WithInclusiveCache(nBanks = 1, nWays = 8, capacityKB = 64) ++
