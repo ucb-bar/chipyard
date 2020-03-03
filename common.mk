@@ -156,10 +156,14 @@ $(output_dir)/tracegen.result: $(output_dir)/tracegen.out $(AXE)
 
 tracegen: $(output_dir)/tracegen.result
 
+.PHONY: tracegen
+
+#######################################
+# Rules for building DRAMSim2 library #
+#######################################
+
 dramsim_dir = $(base_dir)/tools/DRAMSim2
 dramsim_lib = $(dramsim_dir)/libdramsim.a
 
 $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
-
-.PHONY: tracegen
