@@ -4,6 +4,14 @@
 set -e
 set -o pipefail
 
+# Check that git version is at least 1.7.8
+MYGIT=$(git --version | awk '{print $3;}')
+MINGIT="1.7.8"
+if [ "$MINGIT" != "$(echo -e "$MINGIT\n$MYGIT" | sort -V | head -n1)" ]; then
+  echo "This script requires git version $MINGIT or greater. Exiting."
+  false
+fi
+
 RDIR=$(git rev-parse --show-toplevel)
 
 # Ignore toolchain submodules
