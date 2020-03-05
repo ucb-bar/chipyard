@@ -22,9 +22,7 @@ The block device controller provides a generic interface for secondary storage.
 This device is primarily used in FireSim to interface with a block device
 software simulation model. The default Linux configuration in `firesim-software <https://github.com/firesim/firesim-software>`_
 
-To add a block device to your design, add ``HasPeripheryBlockDevice`` to your
-lazy module and ``HasPeripheryBlockDeviceModuleImp`` to the implementation.
-Then add the ``WithBlockDevice`` config mixin to your configuration.
+To add a block device to your design, add the ``WithBlockDevice`` config fragment to your configuration.
 
 
 TileLink SERDES
@@ -71,5 +69,4 @@ during Linux boot). In addition to working with ``stdin/stdout`` of the host, it
 output a UART log to a particular file using ``+uartlog=<NAME_OF_FILE>`` during simulation.
 
 By default, this UART Adapter is added to all systems within Chipyard by adding the
-``CanHavePeripheryUARTWithAdapter`` and ``CanHavePeripheryUARTWithAdapterImp`` traits to the ``Top`` system.
-These traits add a SiFive UART to the system as well as add the UART Adapter to the TestHarness.
+``WithUART`` and ``WithUARTAdapter`` configs.

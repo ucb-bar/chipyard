@@ -1,4 +1,4 @@
-package utilities
+package chipyard
 
 import scala.collection.mutable.{LinkedHashSet}
 

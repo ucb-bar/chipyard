@@ -81,7 +81,7 @@ Similar to TSI, the DMI protocol is an implementation of HTIF.
 In order to communicate with the DUT with the DMI protocol, the DUT needs to contain a Debug Transfer Module (DTM).
 The DTM is given in the `RISC-V Debug Specification <https://riscv.org/specifications/debug-specification/>`__
 and is responsible for managing communication between the DUT and whatever lives on the other side of the DMI (in this case FESVR).
-This is implemented in the Rocket Chip ``Subsystem`` by having the ``HasPeripheryDebug`` and ``HasPeripheryDebugModuleImp`` mixins.
+This is implemented in the Rocket Chip ``Subsystem`` by having the ``HasPeripheryDebug`` and ``HasPeripheryDebugModuleImp`` traits.
 During simulation, the host sends DMI commands to a
 simulation stub called ``SimDTM`` (C++ class) that resides in a ``SimDTM`` Verilog module
 (both are located in the ``generators/rocket-chip`` project). This ``SimDTM`` Verilog module then
@@ -109,16 +109,13 @@ reminder, to run a software RTL simulation, run:
 
 FireSim FPGA-accelerated simulations use TSI by default as well.
 
-If you would like to build and simulate a Chipyard configuration with a DTM configured for DMI communication, then you must create a
-top-level system with the DTM (``TopWithDTM``), a test-harness to connect to the DTM (``TestHarnessWithDTM``), as well as a config to use that top-level system.
+If you would like to build and simulate a Chipyard configuration with a DTM configured for DMI communication, then you must tie-off the TSI interface, and instantiate the `SimDTM`. Note that we use `WithTiedOffSerial ++ WithSimDebug` instead of `WithTiedOffDebug ++ WithSimSerial`.
 
-.. literalinclude:: ../../generators/example/src/main/scala/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
     :language: scala
     :start-after: DOC include start: DmiRocket
     :end-before: DOC include end: DmiRocket
 
-In this example, the ``WithDTM`` mixin specifies that the top-level SoC will instantiate a DTM (that by default is setup to use DMI).
-The rest of the mixins specify the rest of the system (cores, accelerators, etc).
 Then you can run simulations with the new DMI-enabled top-level and test-harness.
 
 .. code-block:: bash
@@ -141,10 +138,10 @@ Creating a DTM+JTAG Config
 First, a DTM config must be created for the system that you want to create.
 This step is similar to the DMI simulation section within the :ref:`Starting the TSI or DMI Simulation` section.
 The configuration is very similar to a DMI-based configuration. The main difference
-is the addition of the ``WithJtagDTM`` mixin that configures the instantiated DTM to use the JTAG protocol as the
+is the addition of the ``WithJtagDTM`` config fragment that configures the instantiated DTM to use the JTAG protocol as the
 bringup method.
 
-.. literalinclude:: ../../generators/example/src/main/scala/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
     :language: scala
     :start-after: DOC include start: JtagRocket
     :end-before: DOC include end: JtagRocket

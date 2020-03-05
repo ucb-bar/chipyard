@@ -49,6 +49,6 @@ Say you need to update some power straps settings in ``example.yml`` and want to
 
    make redo-par HAMMER_REDO_ARGS='-p example.yml --only_step power_straps'
 
-Simulation
-----------
+RTL and Gate-level Simulation
+-----------------------------
 With the Synopsys plugin, RTL and gate-level simulation is supported using VCS. While this example does not implement any simulation, refer to Hammer's documentation for how to set it up for your design.
