@@ -42,6 +42,7 @@ LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 # key value store to get the build strings
 declare -A mapping
 mapping["chipyard-rocket"]="SUB_PROJECT=chipyard"
+mapping["chipyard-sha3"]="SUB_PROJECT=chipyard CONFIG=Sha3RocketConfig"
 mapping["chipyard-hetero"]="SUB_PROJECT=chipyard CONFIG=LargeBoomAndRocketConfig"
 mapping["chipyard-boom"]="SUB_PROJECT=chipyard CONFIG=SmallBoomConfig"
 mapping["rocketchip"]="SUB_PROJECT=rocketchip"

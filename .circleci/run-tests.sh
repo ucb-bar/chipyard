@@ -28,6 +28,8 @@ run_tracegen () {
     make tracegen -C $LOCAL_SIM_DIR VERILATOR_INSTALL_DIR=$LOCAL_VERILATOR_DIR $@
 }
 
+# TODO BUG: the run-binary command forces a rebuild of the simulator in CI
+#           instead, directly run the simulator binary
 case $1 in
     chipyard-rocket)
         run_bmark ${mapping[$1]}
@@ -57,6 +59,10 @@ case $1 in
         $LOCAL_SIM_DIR/simulator-chipyard-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/aligned-baremetal
         $LOCAL_SIM_DIR/simulator-chipyard-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/raw_hazard-baremetal
         $LOCAL_SIM_DIR/simulator-chipyard-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal
+        ;;
+    chipyard-sha3)
+        (cd $LOCAL_CHIPYARD_DIR/generators/sha3/software && ./build.sh)
+        $LOCAL_SIM_DIR/simulator-chipyard-Sha3RocketConfig $LOCAL_CHIPYARD_DIR/generators/sha3/software/benchmarks/bare/sha3-rocc.riscv
         ;;
     tracegen)
         run_tracegen ${mapping[$1]}
