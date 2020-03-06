@@ -32,7 +32,9 @@ class FireSim(implicit val p: Parameters) extends RawModule {
     //
     // Apply each partial function to each DUT instance
     for ((target) <- targets) {
-      p(IOBinders).values.map(fn => fn(clock, reset.asBool, false.B, target))
+      p(IOBinders).toSeq.sortBy(_._1).map { case (name, fn) =>
+        fn(clock, reset.asBool, false.B, target)
+      }
     }
   }
 }
