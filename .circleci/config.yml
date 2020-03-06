@@ -143,6 +143,15 @@ jobs:
                 name: Check commits of each submodule
                 command: |
                     .circleci/check-commit.sh
+    tutorial-setup-check:
+        executor: main-env
+        steps:
+            - checkout
+            - run:
+                name: Check that the tutorial-setup patches apply
+                command: |
+                    scripts/tutorial-setup.sh
+
     install-riscv-toolchain:
         executor: main-env
         steps:
@@ -193,6 +202,11 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "chipyard-rocket"
+    prepare-chipyard-sha3:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-sha3"
     prepare-chipyard-hetero:
         executor: main-env
         steps:
@@ -256,6 +270,11 @@ jobs:
         steps:
             - run-tests:
                 project-key: "chipyard-rocket"
+    chipyard-sha3-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-sha3"
     chipyard-hetero-run-tests:
         executor: main-env
         steps:
@@ -343,6 +362,9 @@ workflows:
 
             - commit-on-master-check
 
+            # Attempt to apply the tutorial patches
+            - tutorial-setup-check
+
             # Build extra tests
             - build-extra-tests:
                 requires:
@@ -350,6 +372,11 @@ workflows:
 
             # Prepare the verilator builds
             - prepare-chipyard-rocket:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-sha3:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
@@ -416,6 +443,10 @@ workflows:
             - chipyard-rocket-run-tests:
                 requires:
                     - prepare-chipyard-rocket
+
+            - chipyard-sha3-run-tests:
+                requires:
+                    - prepare-chipyard-sha3
 
             - chipyard-hetero-run-tests:
                 requires:

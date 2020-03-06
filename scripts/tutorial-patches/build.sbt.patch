@@ -1,0 +1,35 @@
+diff --git a/build.sbt b/build.sbt
+index 52fc3cb..875e3b4 100644
+--- a/build.sbt
++++ b/build.sbt
+@@ -124,7 +124,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
+ 
+ lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
+   .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities,
+-    sha3, // On separate line to allow for cleaner tutorial-setup patches
++//    sha3, // On separate line to allow for cleaner tutorial-setup patches
+     gemmini, icenet, tracegen)
+   .settings(commonSettings)
+ 
+@@ -147,9 +147,9 @@ lazy val boom = (project in file("generators/boom"))
+   .dependsOn(rocketchip)
+   .settings(commonSettings)
+ 
+-lazy val sha3 = (project in file("generators/sha3"))
+-  .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
+-  .settings(commonSettings)
++// lazy val sha3 = (project in file("generators/sha3"))
++//   .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
++//   .settings(commonSettings)
+ 
+ lazy val gemmini = (project in file("generators/gemmini"))
+   .dependsOn(rocketchip, chisel_testers, testchipip)
+@@ -198,7 +198,7 @@ lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
+ 
+ lazy val firechip = (project in file("generators/firechip"))
+   .dependsOn(boom, hwacha, chipyard, icenet, testchipip, sifive_blocks, sifive_cache,
+-    sha3, // On separate line to allow for cleaner tutorial-setup patches
++//    sha3, // On separate line to allow for cleaner tutorial-setup patches
+     utilities, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
+   .settings(
+     commonSettings,
