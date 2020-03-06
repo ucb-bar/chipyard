@@ -379,6 +379,7 @@ class MemBlade1024Config extends Config(
   new MemBladeConfig)
 
 class RemoteMemClientConfig extends Config(
+  new chipyard.config.WithMemBenchKey ++
   new chipyard.config.WithRemoteMemClientKey ++
   new chipyard.config.WithRemoteMemClientTop ++
   new chipyard.config.WithStandardL2 ++
@@ -388,6 +389,7 @@ class HwachaRemoteMemClientConfig extends Config(
   new hwacha.WithNLanes(2) ++
   new chipyard.config.WithHwachaNVMTEntries(64) ++
   new chipyard.config.WithHwachaConfPrec ++
+  new chipyard.config.WithMemBenchKey ++
   new chipyard.config.WithRemoteMemClientKey ++
   new chipyard.config.WithRemoteMemClientTop ++
   new chipyard.config.WithStandardL2(4) ++
