@@ -55,7 +55,7 @@ Converting a Chipyard config (one in ``chipyard/src/main/scala`` to run in FireS
     :end-before: DOC include end: firesimconfig
 
 
-Only 3 additional config-mixins are needed.
+Only 3 additional config fragments are needed.
 
 * ``WithFireSimConfigTweaks`` modifies your design to better fit the FireSim usage model. For example, FireSim designs typically include a UART. Technically, adding this in is optional, but *strongly* recommended.
 * ``WithDefaultMemModel`` sets the external memory model in the FireSim simulation. See the FireSim documentation for details.

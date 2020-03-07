@@ -132,7 +132,7 @@ $(output_dir)/%.run: $(output_dir)/% $(sim)
 	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
@@ -160,3 +160,13 @@ $(output_dir)/tracegen.result: $(output_dir)/tracegen.out $(AXE)
 tracegen: $(output_dir)/tracegen.result
 
 .PHONY: tracegen
+
+#######################################
+# Rules for building DRAMSim2 library #
+#######################################
+
+dramsim_dir = $(base_dir)/tools/DRAMSim2
+dramsim_lib = $(dramsim_dir)/libdramsim.a
+
+$(dramsim_lib):
+	$(MAKE) -C $(dramsim_dir) $(notdir $@)

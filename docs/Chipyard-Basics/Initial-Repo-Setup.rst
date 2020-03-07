@@ -34,6 +34,9 @@ After cloning this repo, you will need to initialize all of the submodules.
     cd chipyard
     ./scripts/init-submodules-no-riscv-tools.sh
 
+When updating Chipyard to a new version, you will also want to rerun this script to update the submodules.
+Using git directly will try to initialize all submodules; this is not recommended unless you expressly desire this behavior.
+
 .. _build-toolchains:
 
 Building a Toolchain

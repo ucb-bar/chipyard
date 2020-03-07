@@ -81,7 +81,7 @@ Similar to TSI, the DMI protocol is an implementation of HTIF.
 In order to communicate with the DUT with the DMI protocol, the DUT needs to contain a Debug Transfer Module (DTM).
 The DTM is given in the `RISC-V Debug Specification <https://riscv.org/specifications/debug-specification/>`__
 and is responsible for managing communication between the DUT and whatever lives on the other side of the DMI (in this case FESVR).
-This is implemented in the Rocket Chip ``Subsystem`` by having the ``HasPeripheryDebug`` and ``HasPeripheryDebugModuleImp`` mixins.
+This is implemented in the Rocket Chip ``Subsystem`` by having the ``HasPeripheryDebug`` and ``HasPeripheryDebugModuleImp`` traits.
 During simulation, the host sends DMI commands to a
 simulation stub called ``SimDTM`` (C++ class) that resides in a ``SimDTM`` Verilog module
 (both are located in the ``generators/rocket-chip`` project). This ``SimDTM`` Verilog module then
@@ -138,7 +138,7 @@ Creating a DTM+JTAG Config
 First, a DTM config must be created for the system that you want to create.
 This step is similar to the DMI simulation section within the :ref:`Starting the TSI or DMI Simulation` section.
 The configuration is very similar to a DMI-based configuration. The main difference
-is the addition of the ``WithJtagDTM`` mixin that configures the instantiated DTM to use the JTAG protocol as the
+is the addition of the ``WithJtagDTM`` config fragment that configures the instantiated DTM to use the JTAG protocol as the
 bringup method.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala

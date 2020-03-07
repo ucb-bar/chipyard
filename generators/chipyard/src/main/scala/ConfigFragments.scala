@@ -32,7 +32,7 @@ object ConfigValName {
 import ConfigValName._
 
 // -----------------------
-// Common Parameter Mixins
+// Common Config Fragments
 // -----------------------
 
 class WithBootROM extends Config((site, here, up) => {
@@ -40,12 +40,12 @@ class WithBootROM extends Config((site, here, up) => {
     contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img")
 })
 
-// DOC include start: gpio mixin
+// DOC include start: gpio config fragment
 class WithGPIO extends Config((site, here, up) => {
   case PeripheryGPIOKey => Seq(
     GPIOParams(address = 0x10012000, width = 4, includeIOF = false))
 })
-// DOC include end: gpio mixin
+// DOC include end: gpio config fragment
 
 class WithUART extends Config((site, here, up) => {
   case PeripheryUARTKey => Seq(
@@ -70,6 +70,18 @@ class WithTracegenTop extends Config((site, here, up) => {
 })
 
 
+class WithRenumberHarts(rocketFirst: Boolean = false) extends Config((site, here, up) => {
+  case RocketTilesKey => up(RocketTilesKey, site).zipWithIndex map { case (r, i) =>
+    r.copy(hartId = i + (if(rocketFirst) 0 else up(BoomTilesKey, site).length))
+  }
+  case BoomTilesKey => up(BoomTilesKey, site).zipWithIndex map { case (b, i) =>
+    b.copy(hartId = i + (if(rocketFirst) up(RocketTilesKey, site).length else 0))
+  }
+  case MaxHartIdBits => log2Up(up(BoomTilesKey, site).size + up(RocketTilesKey, site).size)
+})
+
+
+
 // ------------------
 // Multi-RoCC Support
 // ------------------
@@ -80,14 +92,14 @@ class WithTracegenTop extends Config((site, here, up) => {
 case object MultiRoCCKey extends Field[Map[Int, Seq[Parameters => LazyRoCC]]](Map.empty[Int, Seq[Parameters => LazyRoCC]])
 
 /**
- * Mixin to enable different RoCCs based on the hartId
+ * Config fragment to enable different RoCCs based on the hartId
  */
 class WithMultiRoCC extends Config((site, here, up) => {
   case BuildRoCC => site(MultiRoCCKey).getOrElse(site(TileKey).hartId, Nil)
 })
 
 /**
- * Mixin to add Hwachas to cores based on hart
+ * Config fragment to add Hwachas to cores based on hart
  *
  * For ex:
  *   Core 0, 1, 2, 3 have been defined earlier
@@ -110,7 +122,7 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
 
 
 /**
- * Mixin to add a small Rocket core to the system as a "control" core.
+ * Config fragment to add a small Rocket core to the system as a "control" core.
  * Used as an example of a PMU core.
  */
 class WithControlCore extends Config((site, here, up) => {
