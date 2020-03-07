@@ -34,6 +34,7 @@ $(output_dir):
 	mkdir -p $@
 
 EMUL ?= verilator
+export EMUL
 
 # Build simulator preemptively
 .PHONY: $(EMUL)
@@ -63,7 +64,8 @@ ccbench_plot := $(ccbench_dir)/plots/plot-$(TARGET_CONFIG).pdf
 $(ccbench_report): $(ccbench_logs)
 	{ \
 		echo 'NumDataPointsPerSet:[$(words $^)]' && \
-		grep -F 'App:[caches]' '$(output_dir)'/ccbench-*.out ; \
+		cd '$(output_dir)' && \
+		grep -F -n 'App:[caches]' $(shell echo $(notdir $^) | sort -n -u) ; \
 	} > $@
 
 # Generate plot
