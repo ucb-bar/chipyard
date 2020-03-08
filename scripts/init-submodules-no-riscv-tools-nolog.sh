@@ -19,6 +19,18 @@ fi
 
 RDIR=$(git rev-parse --show-toplevel)
 
+FIRESIM=true
+
+while test $# -gt 0
+do
+    case "$1" in
+        --no-firesim)
+            FIRESIM=false
+            ;;
+    esac
+    shift
+done
+
 # Ignore toolchain submodules
 cd "$RDIR"
 for name in toolchains/*-tools/*/ ; do
@@ -56,15 +68,17 @@ git config --unset submodule.software/firemarshal.update
 # Non-recursive clone to exclude riscv-linux
 git submodule update --init generators/sha3
 
-git config --unset submodule.sims/firesim.update
-# Minimal non-recursive clone to initialize sbt dependencies
-git submodule update --init sims/firesim
-(
-    cd sims/firesim
-    # Initialize dependencies for MIDAS-level RTL simulation
-    git submodule update --init sim/midas
-)
-git config submodule.sims/firesim.update none
+if [ "$FIRESIM" = "true" ]; then
+    git config --unset submodule.sims/firesim.update
+    # Minimal non-recursive clone to initialize sbt dependencies
+    git submodule update --init sims/firesim
+    (
+        cd sims/firesim
+        # Initialize dependencies for MIDAS-level RTL simulation
+        git submodule update --init sim/midas
+    )
+    git config submodule.sims/firesim.update none
+fi
 
 # Only shallow clone needed for basic SW tests
 git submodule update --init software/firemarshal
