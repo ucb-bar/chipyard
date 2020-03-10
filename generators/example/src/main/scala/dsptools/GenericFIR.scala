@@ -59,6 +59,7 @@ object GenericFIRIO {
 }
 
 // A generic FIR filter
+// DOC include start: GenericFIR chisel
 class GenericFIR[T<:Data:Ring](genIn:T, genOut:T, coeffs: Seq[T]) extends Module {
   val io = IO(GenericFIRIO(genIn, genOut))
 
@@ -89,6 +90,7 @@ class GenericFIR[T<:Data:Ring](genIn:T, genOut:T, coeffs: Seq[T]) extends Module
   io.out.valid := directCells.last.out.valid
 
 }
+// DOC include end: GenericFIR chisel
 
 // A generic FIR direct cell used to construct a larger direct FIR chain
 //
@@ -98,6 +100,7 @@ class GenericFIR[T<:Data:Ring](genIn:T, genOut:T, coeffs: Seq[T]) extends Module
 //	        |
 //   carryIn --[+]-- carryOut
 //
+// DOC include start: GenericFIRDirectCell chisel
 class GenericFIRDirectCell[T<:Data:Ring](genIn: T, genOut: T) extends Module {
 	val io = IO(GenericFIRCellIO(genIn, genOut))
 	
@@ -126,7 +129,10 @@ class GenericFIRDirectCell[T<:Data:Ring](genIn: T, genOut: T) extends Module {
   // (a * b) maps to (Ring[T].prod(a, b)) for whicever T you use
   io.out.bits.carry := inputReg * io.coeff + io.in.bits.carry 
 }
+// DOC include end: GenericFIRDirectCell chisel
 
+
+// DOC include start: GenericFIRBlock chisel
 abstract class GenericFIRBlock[D, U, EO, EI, B<:Data, T<:Data:Ring]
 (
   genIn: T,
@@ -143,25 +149,26 @@ abstract class GenericFIRBlock[D, U, EO, EI, B<:Data, T<:Data:Ring]
     val in = streamNode.in.head._1
     val out = streamNode.out.head._1
 
-    // instantiate passthrough
+    // instantiate generic fir
     val fir = Module(new GenericFIR(genIn, genOut, coeffs))
 
-    // Pass ready and valid from read queue to write queue
+    // Attach ready and valid to outside interface
     in.ready := fir.io.in.ready
     fir.io.in.valid := in.valid
-
-    // cast UInt to T
-    fir.io.in.bits := in.bits.data.asTypeOf(GenericFIRBundle(genIn))
 
     fir.io.out.ready := out.ready
     out.valid := fir.io.out.valid
 
+    // cast UInt to T
+    fir.io.in.bits := in.bits.data.asTypeOf(GenericFIRBundle(genIn))
+
     // cast T to UInt
     out.bits.data := fir.io.out.bits.asUInt
   }
-
 }
+// DOC include end: GenericFIRBlock chisel
 
+// DOC include start: TLGenericFIRBLock chisel
 class TLGenericFIRBlock[T<:Data:Ring]
 (
   val genIn: T,
@@ -171,8 +178,10 @@ class TLGenericFIRBlock[T<:Data:Ring]
 GenericFIRBlock[TLClientPortParameters, TLManagerPortParameters, TLEdgeOut, TLEdgeIn, TLBundle, T](
     genIn, genOut, coeffs
 ) with TLDspBlock
+// DOC include end: TLGenericFIRBlock chisel
 
-class TLGenericFIRThing[T<:Data:Ring] (genIn: T, genOut: T, coeffs: Seq[T], params: GenericFIRParams)(implicit p: Parameters)
+// DOC include start: TLGenericFIRChain chisel
+class TLGenericFIRChain[T<:Data:Ring] (genIn: T, genOut: T, coeffs: Seq[T], params: GenericFIRParams)(implicit p: Parameters)
   extends LazyModule {
   val writeQueue = LazyModule(new TLWriteQueue(params.depth, AddressSet(params.writeAddress, 0xff)))
   val fir = LazyModule(new TLGenericFIRBlock(genIn, genOut, coeffs))
@@ -183,7 +192,9 @@ class TLGenericFIRThing[T<:Data:Ring] (genIn: T, genOut: T, coeffs: Seq[T], para
 
   lazy val module = new LazyModuleImp(this)
 }
+// DOC include end: TLGenericFIRChain chisel
 
+// DOC include start: CanHavePeripheryUIntTestFIR chisel
 trait CanHavePeripheryUIntTestFIR extends BaseSubsystem {
   val fir = p(GenericFIRKey) match {
     case Some(params) => {
@@ -195,3 +206,4 @@ trait CanHavePeripheryUIntTestFIR extends BaseSubsystem {
     case None => None
   }
 }
+// DOC include end: CanHavePeripheryUIntTestFIR chisel

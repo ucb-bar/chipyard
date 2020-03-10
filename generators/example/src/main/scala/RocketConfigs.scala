@@ -248,6 +248,7 @@ class UIntPassthroughRocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig
 )
 
+// DOC include start: FIRRocketConfig
 class UIntTestFIRRocketConfig extends Config (
   new WithUIntTestFIR ++ // use top with tilelink-controlled FIR
   new WithBootROM ++
@@ -255,3 +256,4 @@ class UIntTestFIRRocketConfig extends Config (
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig
 )
+// DOC include end: FIRRocketConfig
