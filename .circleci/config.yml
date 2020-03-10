@@ -12,7 +12,7 @@ parameters:
 executors:
     main-env:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.13
+            - image: ucbbar/chipyard-image:1.0.0
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 
