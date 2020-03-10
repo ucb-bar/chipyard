@@ -125,7 +125,7 @@ trait GCDModule extends HasRegMap {
   gcd.valid := impl.io.output_valid
   impl.io.output_ready := gcd.ready
 
-  status := Cat(impl.io.input_ready, impl.io.output_ready)
+  status := Cat(impl.io.input_ready, impl.io.output_valid)
   io.gcd_busy := impl.io.busy
 
   regmap(
