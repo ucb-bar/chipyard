@@ -252,6 +252,8 @@ class WithUIntPassthrough extends Config((site, here, up) => {
   case PassthroughKey => Some(PassthroughParams(depth = 8))
 })
 
+// DOC include start: WithTestFIR
 class WithUIntTestFIR extends Config((site, here, up) => {
   case GenericFIRKey => Some(GenericFIRParams(depth = 8))
 })
+// DOC include end: WithTestFIR
