@@ -21,11 +21,12 @@ import midas.targetutils.{MemModelAnnotation}
 import firesim.bridges._
 import firesim.configs.MemModelKey
 import tracegen.HasTraceGenTilesModuleImp
+import ariane.ArianeTile
 
 import boom.common.{BoomTile}
 
 import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder}
-import chipyard.HasBoomAndRocketTilesModuleImp
+import chipyard.HasChipyardTilesModuleImp
 
 class WithSerialBridge extends OverrideIOBinder({
   (c, r, s, target: CanHavePeripherySerialModuleImp) => target.serial.map(s => SerialBridge(s)(target.p)).toSeq
@@ -67,7 +68,7 @@ class WithTraceGenBridge extends OverrideIOBinder({
 })
 
 class WithFireSimMultiCycleRegfile extends ComposeIOBinder({
-  (c, r, s, target: HasBoomAndRocketTilesModuleImp) => {
+  (c, r, s, target: HasChipyardTilesModuleImp) => {
     target.outer.tiles.map {
       case r: RocketTile => {
         annotate(MemModelAnnotation(r.module.core.rocketImpl.rf.rf))
@@ -84,6 +85,7 @@ class WithFireSimMultiCycleRegfile extends ComposeIOBinder({
           case _ => Nil
         }
       }
+      case a: ArianeTile => Nil
     }
     Nil
   }

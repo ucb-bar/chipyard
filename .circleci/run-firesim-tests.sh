@@ -7,7 +7,6 @@ set -ex
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
-export PATH=$LOCAL_VERILATOR_DIR/install/bin:$PATH
 export FIRESIM_ENV_SOURCED=1
 
 SIMULATION_ARGS="${mapping[$1]}"
