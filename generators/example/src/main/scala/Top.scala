@@ -32,7 +32,7 @@ class Top(implicit p: Parameters) extends System
   with CanHavePeripherySerial // Enables optionally adding the TSI serial-adapter and port
   with CanHavePeripheryIceNIC // Enables optionally adding the IceNIC for FireSim
   with CanHaveBackingScratchpad // Enables optionally adding a backing scratchpad
-  with CanHavePeripheryUIntPassthrough // Enables optionally adding a UInt Passthrough
+  with CanHavePeripheryUIntStreamingPassthrough // Enables optionally adding a UInt StreamingPassthrough
   with CanHavePeripheryUIntTestFIR // Enables optionally adding a UInt FIR with test coefficients
 {
   override lazy val module = new TopModule(this)

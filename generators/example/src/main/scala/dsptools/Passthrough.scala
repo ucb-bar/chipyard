@@ -14,35 +14,35 @@ import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
 
 // Simple passthrough to use as testbed sanity check
-// Passthrough params
-case class PassthroughParams(
+// StreamingPassthrough params
+case class StreamingPassthroughParams(
   writeAddress: BigInt = 0x2000,
   readAddress: BigInt = 0x2100,
   depth: Int
 )
 
-// Passthrough key
-case object PassthroughKey extends Field[Option[PassthroughParams]](None)
+// StreamingPassthrough key
+case object StreamingPassthroughKey extends Field[Option[StreamingPassthroughParams]](None)
 
-class PassthroughBundle[T<:Data:Ring](proto: T) extends Bundle {
+class StreamingPassthroughBundle[T<:Data:Ring](proto: T) extends Bundle {
     val data: T = proto.cloneType
 
-    override def cloneType: this.type = PassthroughBundle(proto).asInstanceOf[this.type]
+    override def cloneType: this.type = StreamingPassthroughBundle(proto).asInstanceOf[this.type]
 }
-object PassthroughBundle {
-    def apply[T<:Data:Ring](proto: T): PassthroughBundle[T] = new PassthroughBundle(proto)
-}
-
-class PassthroughIO[T<:Data:Ring](proto: T) extends Bundle {
-    val in = Flipped(Decoupled(PassthroughBundle(proto)))
-    val out = Decoupled(PassthroughBundle(proto))
-}
-object PassthroughIO {
-    def apply[T<:Data:Ring](proto: T): PassthroughIO[T] = new PassthroughIO(proto)
+object StreamingPassthroughBundle {
+    def apply[T<:Data:Ring](proto: T): StreamingPassthroughBundle[T] = new StreamingPassthroughBundle(proto)
 }
 
-class Passthrough[T<:Data:Ring](proto: T) extends Module {
-    val io = IO(PassthroughIO(proto))
+class StreamingPassthroughIO[T<:Data:Ring](proto: T) extends Bundle {
+    val in = Flipped(Decoupled(StreamingPassthroughBundle(proto)))
+    val out = Decoupled(StreamingPassthroughBundle(proto))
+}
+object StreamingPassthroughIO {
+    def apply[T<:Data:Ring](proto: T): StreamingPassthroughIO[T] = new StreamingPassthroughIO(proto)
+}
+
+class StreamingPassthrough[T<:Data:Ring](proto: T) extends Module {
+    val io = IO(StreamingPassthroughIO(proto))
 
     io.in.ready := io.out.ready
     io.out.bits.data := io.in.bits.data
@@ -50,7 +50,7 @@ class Passthrough[T<:Data:Ring](proto: T) extends Module {
 }
 
 /**
-  * Make DspBlock wrapper for Passthrough
+  * Make DspBlock wrapper for StreamingPassthrough
   * @param cordicParams parameters for cordic
   * @param ev$1
   * @param ev$2
@@ -63,7 +63,7 @@ class Passthrough[T<:Data:Ring](proto: T) extends Module {
   * @tparam B
   * @tparam T Type parameter for passthrough, i.e. FixedPoint or DspReal
   */
-abstract class PassthroughBlock[D, U, EO, EI, B<:Data, T<:Data:Ring]
+abstract class StreamingPassthroughBlock[D, U, EO, EI, B<:Data, T<:Data:Ring]
 (
   proto: T
 )(implicit p: Parameters) extends DspBlock[D, U, EO, EI, B] {
@@ -78,14 +78,14 @@ abstract class PassthroughBlock[D, U, EO, EI, B<:Data, T<:Data:Ring]
     val out = streamNode.out.head._1
 
     // instantiate passthrough
-    val passthrough = Module(new Passthrough(proto))
+    val passthrough = Module(new StreamingPassthrough(proto))
 
     // Pass ready and valid from read queue to write queue
     in.ready := passthrough.io.in.ready
     passthrough.io.in.valid := in.valid
 
     // cast UInt to T
-    passthrough.io.in.bits := in.bits.data.asTypeOf(PassthroughBundle(proto))
+    passthrough.io.in.bits := in.bits.data.asTypeOf(StreamingPassthroughBundle(proto))
 
     passthrough.io.out.ready := out.ready
     out.valid := passthrough.io.out.valid
@@ -96,7 +96,7 @@ abstract class PassthroughBlock[D, U, EO, EI, B<:Data, T<:Data:Ring]
 }
 
 /**
-  * TLDspBlock specialization of Passthrough
+  * TLDspBlock specialization of StreamingPassthrough
   * @param cordicParams parameters for passthrough
   * @param ev$1
   * @param ev$2
@@ -104,39 +104,15 @@ abstract class PassthroughBlock[D, U, EO, EI, B<:Data, T<:Data:Ring]
   * @param p
   * @tparam T Type parameter for passthrough data type
   */
-class TLPassthroughBlock[T<:Data:Ring]
+class TLStreamingPassthroughBlock[T<:Data:Ring]
 (
   val proto: T
 )(implicit p: Parameters) extends
-PassthroughBlock[TLClientPortParameters, TLManagerPortParameters, TLEdgeOut, TLEdgeIn, TLBundle, T](proto)
+StreamingPassthroughBlock[TLClientPortParameters, TLManagerPortParameters, TLEdgeOut, TLEdgeIn, TLBundle, T](proto)
 with TLDspBlock
 
 /**
-  * This doesn't work right now, TLChain seems to be broken. This is the "right way" to connect several DspBlocks and
-  * add interconnect
-  * @param depth
-  * @param ev$1
-  * @param ev$2
-  * @param ev$3
-  * @param p
-  * @tparam T
-  */
-/*
-class PassthroughChain[T<:Data:Ring]
-( 
-  val params: PassthroughParams
-)(implicit p: Parameters) extends TLChain(
-  Seq(
-    {implicit p: Parameters => { val writeQueue = LazyModule(new TLWriteQueue(params.depth, AddressSet(params.writeAddress, 0xff))); writeQueue}},
-    {implicit p: Parameters => { val passthrough = LazyModule(new TLPassthroughBlock(UInt(32.W)); passthrough}},
-    {implicit p: Parameters => { val readQueue = LazyModule(new TLReadQueue(params.depth, AddressSet(params.readAddress, 0xff))); readQueue}},
-  )
-)
-*/
-
-/**
-  * PassthroughChain is the "right way" to do this, but the dspblocks library seems to be broken.
-  * In the interim, this should work.
+  * A chain of queues acting as our MMIOs with the passthrough module in between them.
   * @param depth depth of queues
   * @param ev$1
   * @param ev$2
@@ -144,11 +120,11 @@ class PassthroughChain[T<:Data:Ring]
   * @param p
   * @tparam T Type parameter for passthrough, i.e. FixedPoint or DspReal
   */
-class TLPassthroughThing[T<:Data:Ring](params: PassthroughParams, proto: T)(implicit p: Parameters)
+class TLStreamingPassthroughChain[T<:Data:Ring](params: StreamingPassthroughParams, proto: T)(implicit p: Parameters)
   extends LazyModule {
   // instantiate lazy modules
   val writeQueue = LazyModule(new TLWriteQueue(params.depth, AddressSet(params.writeAddress, 0xff)))
-  val passthrough = LazyModule(new TLPassthroughBlock(proto))
+  val passthrough = LazyModule(new TLStreamingPassthroughBlock(proto))
   val readQueue = LazyModule(new TLReadQueue(params.depth, AddressSet(params.readAddress, 0xff)))
 
   // connect streamNodes of queues and passthrough
@@ -157,10 +133,10 @@ class TLPassthroughThing[T<:Data:Ring](params: PassthroughParams, proto: T)(impl
   lazy val module = new LazyModuleImp(this)
 }
 
-trait CanHavePeripheryUIntPassthrough { this: BaseSubsystem =>
-  val passthrough = p(PassthroughKey) match {
+trait CanHavePeripheryUIntStreamingPassthrough { this: BaseSubsystem =>
+  val passthrough = p(StreamingPassthroughKey) match {
     case Some(params) => {
-      val passthrough = LazyModule(new TLPassthroughThing(params, UInt(32.W)))
+      val passthrough = LazyModule(new TLStreamingPassthroughChain(params, UInt(32.W)))
 
       pbus.toVariableWidthSlave(Some("passthroughWrite")) { passthrough.writeQueue.mem.get }
       pbus.toVariableWidthSlave(Some("passthroughRead")) { passthrough.readQueue.mem.get }

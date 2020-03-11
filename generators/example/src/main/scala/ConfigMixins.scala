@@ -248,8 +248,8 @@ class WithBackingScratchpad(base: BigInt = 0x80000000L, mask: BigInt = ((4 << 20
 /**
  * Mixin to add DSPTools components
  */
-class WithUIntPassthrough extends Config((site, here, up) => {
-  case PassthroughKey => Some(PassthroughParams(depth = 8))
+class WithUIntStreamingPassthrough extends Config((site, here, up) => {
+  case StreamingPassthroughKey => Some(StreamingPassthroughParams(depth = 8))
 })
 
 // DOC include start: WithTestFIR
