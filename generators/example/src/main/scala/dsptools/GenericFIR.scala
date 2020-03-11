@@ -71,20 +71,26 @@ class GenericFIR[T<:Data:Ring](genIn:T, genOut:T, coeffs: Seq[T]) extends Module
     cell.coeff := coeff
   }
 
-  // connect input to first cell
+  // Connect input to first cell
   directCells.head.in.bits.data := io.in.bits.data
   directCells.head.in.bits.carry := Ring[T].zero
   directCells.head.in.valid := io.in.valid
   io.in.ready := directCells.head.in.ready
 
-  // connect adjacent cells
+  // Connect adjacent cells
+  // Note that .tail() returns a collection that consists of all
+  // elements in the inital collection minus the first one.
+  // This means that we zip together directCells[0, n] and 
+  // directCells[1, n]. However, since zip ignores unmatched elements,
+  // the resulting zip is (directCells[0], directCells[1]) ... 
+  // (directCells[n-1], directCells[n])
   for ((current, next) <- directCells.zip(directCells.tail)) {
     next.in.bits := current.out.bits
     next.in.valid := current.out.valid
     current.out.ready := next.in.ready
   }
 
-  // connect output to last cell
+  // Connect output to last cell
   io.out.bits.data := directCells.last.out.bits.carry
   directCells.last.out.ready := io.out.ready
   io.out.valid := directCells.last.out.valid
@@ -198,7 +204,7 @@ class TLGenericFIRChain[T<:Data:Ring] (genIn: T, genOut: T, coeffs: Seq[T], para
 trait CanHavePeripheryUIntTestFIR extends BaseSubsystem {
   val fir = p(GenericFIRKey) match {
     case Some(params) => {
-      val fir = LazyModule(new TLGenericFIRThing(UInt(8.W), UInt(12.W), Seq(1.U, 2.U, 3.U), params))
+      val fir = LazyModule(new TLGenericFIRChain(UInt(8.W), UInt(12.W), Seq(1.U, 2.U, 3.U), params))
       
       pbus.toVariableWidthSlave(Some("firWrite")) { fir.writeQueue.mem.get }
       pbus.toVariableWidthSlave(Some("firRead")) { fir.readQueue.mem.get }
