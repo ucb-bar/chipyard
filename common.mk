@@ -103,9 +103,14 @@ verilog: $(sim_vsrcs)
 #########################################################################################
 # helper rules to run simulations
 #########################################################################################
+
+# BOOM branch analysis script
+boom_bpd_count := 20
+boom_bpd_script := python3 $(base_dir)/generators/boom/util/branch-processor.py -v - $(boom_bpd_count)
+
 .PHONY: run-binary run-binary-fast run-binary-debug run-fast
 run-binary: $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm | $(boom_bpd_script) > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 #########################################################################################
 # helper rules to run simulator as fast as possible
@@ -124,6 +129,7 @@ run-fast: run-asm-tests-fast run-bmark-tests-fast
 #########################################################################################
 # run assembly/benchmarks rules
 #########################################################################################
+
 $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
 	mkdir -p $(output_dir)
 	ln -sf $< $@
@@ -132,7 +138,7 @@ $(output_dir)/%.run: $(output_dir)/% $(sim)
 	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm | $(boom_bpd_script) > $@) | tee $<.log)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
