@@ -18,3 +18,5 @@ tags
 *~
 env-riscv-tools.sh
 env-esp-tools.sh
+.ivy2/
+.sbt/
