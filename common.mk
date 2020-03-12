@@ -165,3 +165,18 @@ dramsim_lib = $(dramsim_dir)/libdramsim.a
 
 $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
+
+
+#############################
+# local ivy2 and sbt caches #
+#############################
+
+_JAVA_OPTIONS := \
+	-Dsbt.ivy.home=$(base_dir)/.ivy2 \
+	-Dsbt.global.base=$(base_dir)/.sbt \
+	-Dsbt.boot.directory=$(base_dir)/.sbt/boot
+
+COURSIER_CACHE := $(base_dir)/.coursier
+
+export _JAVA_OPTIONS
+export COURSIER_CACHE
