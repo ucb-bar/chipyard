@@ -177,6 +177,17 @@ dramsim_lib = $(dramsim_dir)/libdramsim.a
 $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
 
+###############
+# CS152 hacks #
+###############
+
+# FIXME: Update blackbox resources without rerunning Chisel elaboration
+boom_csrc_dir := $(base_dir)/generators/boom/src/main/resources/csrc
+boom_csrcs := $(wildcard $(boom_csrc_dir)/*_sw.cc)
+sim_csrcs := $(addprefix $(build_dir)/,$(notdir $(boom_csrcs)))
+
+$(sim_csrcs): $(build_dir)/%: $(boom_csrc_dir)/%
+	cp -p $< $@
 
 #############################
 # local ivy2 and sbt caches #

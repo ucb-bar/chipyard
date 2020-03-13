@@ -85,11 +85,11 @@ VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(VCS_DEFINES)
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
-$(sim): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib)
+$(sim): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(sim_csrcs)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	-debug_pp
 
-$(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib)
+$(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(sim_csrcs)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	+define+DEBUG \
 	-debug_pp

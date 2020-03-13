@@ -119,10 +119,10 @@ $(model_mk_debug): $(sim_vsrcs) $(sim_common_files)
 #########################################################################################
 # invoke make to make verilator sim rules
 #########################################################################################
-$(sim): $(model_mk) $(dramsim_lib)
+$(sim): $(model_mk) $(dramsim_lib) $(sim_csrcs)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir) -f V$(VLOG_MODEL).mk
 
-$(sim_debug): $(model_mk_debug) $(dramsim_lib)
+$(sim_debug): $(model_mk_debug) $(dramsim_lib) $(sim_csrcs)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir_debug) -f V$(VLOG_MODEL).mk
 
 #########################################################################################
