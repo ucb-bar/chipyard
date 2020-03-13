@@ -285,4 +285,5 @@ class WithHwachaNVMTEntries(nVMT: Int) extends Config((site, here, up) => {
 
 class WithHwachaConfPrec extends Config((site, here, up) => {
   case hwacha.HwachaConfPrec => true
+  case hwacha.HwachaMaxVLen => up(hwacha.HwachaMaxVLen) * 4
 })
