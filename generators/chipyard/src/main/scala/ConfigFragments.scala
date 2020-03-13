@@ -222,7 +222,8 @@ class WithDRAMCacheKey(
     buildChannelOutNetwork = OutNetwork.ring,
     writebackArbTopology = NetworkTopology.Ring,
     remChannelArbTopology = NetworkTopology.Ring,
-    zeroMetadata = false)
+    zeroMetadata = false,
+    lruReplacement = false)
 })
 
 class WithDRAMCacheExtentTableInit(suffix: Int = 0x0300) extends Config(
