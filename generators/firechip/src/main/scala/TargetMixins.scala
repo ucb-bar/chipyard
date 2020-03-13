@@ -16,6 +16,7 @@ import firesim.bridges.{TracerVBridge}
 import firesim.util.{HasAdditionalClocks, FireSimClockKey}
 
 import midas.targetutils.MemModelAnnotation
+import midas.widgets.RationalClock
 
 import boom.common.BoomTile
 
@@ -80,7 +81,7 @@ trait CanHaveMultiCycleRegfileImp {
 trait HasFireSimClockingImp extends HasAdditionalClocks {
   val outer: HasTiles
   val (tileClock, tileReset) = p(FireSimClockKey).additionalClocks.headOption match {
-    case Some((numer, denom)) if numer != denom => (clocks(1), ResetCatchAndSync(clocks(1), reset.toBool))
+    case Some(RationalClock(_, numer, denom)) if numer != denom => (clocks(1), ResetCatchAndSync(clocks(1), reset.toBool))
     case None => (clocks(0), reset)
   }
 

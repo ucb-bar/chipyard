@@ -22,6 +22,7 @@ import icenet._
 import firesim.bridges._
 import firesim.util.{WithNumNodes, FireSimClockKey, FireSimClockParameters}
 import firesim.configs._
+import midas.widgets.RationalClock
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMParams => {
@@ -348,7 +349,7 @@ class FireSimTraceGenL2Config extends Config(
 
 
 class WithRationalTiles(multiplier: Int, divisor: Int) extends Config((site, here, up) => {
-  case FireSimClockKey => FireSimClockParameters(Seq(multiplier -> divisor))
+  case FireSimClockKey => FireSimClockParameters(Seq(RationalClock("TileDomain", multiplier, divisor)))
   case RocketCrossingKey => up(RocketCrossingKey, site) map { r =>
     r.copy(crossingType = RationalCrossing())
   }
