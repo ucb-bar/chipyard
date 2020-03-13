@@ -13,7 +13,7 @@ import freechips.rocketchip.devices.tilelink._
 
 // DOC include start: Top
 class Top(implicit p: Parameters) extends System
-  with testchipip.CanHaveTraceIO // Enables optionally adding trace IO
+  with chipyard.CanHaveTraceIO // Enables optionally adding trace IO
   with testchipip.CanHaveBackingScratchpad // Enables optionally adding a backing scratchpad
   with testchipip.CanHavePeripheryBlockDevice // Enables optionally adding the block device
   with testchipip.CanHavePeripherySerial // Enables optionally adding the TSI serial-adapter and port
@@ -27,7 +27,7 @@ class Top(implicit p: Parameters) extends System
 }
 
 class TopModule[+L <: Top](l: L) extends SystemModule(l)
-  with testchipip.CanHaveTraceIOModuleImp
+  with chipyard.CanHaveTraceIOModuleImp
   with testchipip.CanHavePeripheryBlockDeviceModuleImp
   with testchipip.CanHavePeripherySerialModuleImp
   with sifive.blocks.devices.uart.HasPeripheryUARTModuleImp

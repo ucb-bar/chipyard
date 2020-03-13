@@ -14,7 +14,8 @@ import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import freechips.rocketchip.diplomacy.LazyModule
 import boom.common.BoomTilesKey
-import testchipip.{BlockDeviceKey, BlockDeviceConfig, SerialKey, TracePortKey, TracePortParams}
+import testchipip.{BlockDeviceKey, BlockDeviceConfig, SerialKey}
+import chipyard.{TracePortKey, TracePortParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 import tracegen.TraceGenKey
@@ -129,6 +130,17 @@ class FireSimLargeBoomConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.LargeBoomConfig)
 
+class FireSimSmallBoomConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.SmallBoomConfig)
+
+class FireSimMediumBoomConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.MediumBoomConfig)
 
 //********************************************************************
 // Heterogeneous config, base off chipyard's LargeBoomAndRocketConfig

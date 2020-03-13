@@ -12,7 +12,7 @@ import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPortModuleImp}
 import freechips.rocketchip.tile.{RocketTile}
 import sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
 
-import testchipip.{CanHavePeripherySerialModuleImp, CanHavePeripheryBlockDeviceModuleImp, CanHaveTraceIOModuleImp}
+import testchipip.{CanHavePeripherySerialModuleImp, CanHavePeripheryBlockDeviceModuleImp}
 import icenet.CanHavePeripheryIceNICModuleImp
 
 import junctions.{NastiKey, NastiParameters}
@@ -26,6 +26,7 @@ import boom.common.{BoomTile}
 
 import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder}
 import chipyard.HasBoomAndRocketTilesModuleImp
+import chipyard.{CanHaveTraceIOModuleImp}
 
 class WithSerialBridge extends OverrideIOBinder({
   (c, r, s, target: CanHavePeripherySerialModuleImp) => target.serial.map(s => SerialBridge(s)(target.p)).toSeq
@@ -60,6 +61,10 @@ class WithFASEDBridge extends OverrideIOBinder({
 
 class WithTracerVBridge extends OverrideIOBinder({
   (c, r, s, target: CanHaveTraceIOModuleImp) => target.traceIO.map(t => TracerVBridge(t)(target.p)).toSeq
+})
+
+class WithDromajoBridge extends OverrideIOBinder({
+  (c, r, s, target: CanHaveTraceIOModuleImp) => target.traceIO.map(t => DromajoBridge(t)(target.p)).toSeq
 })
 
 class WithTraceGenBridge extends OverrideIOBinder({
@@ -102,5 +107,5 @@ class WithDefaultFireSimBridges extends Config(
   new WithBlockDeviceBridge ++
   new WithFASEDBridge ++
   new WithFireSimMultiCycleRegfile ++
-  new WithTracerVBridge
+  new WithDromajoBridge
 )
