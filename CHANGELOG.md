@@ -2,6 +2,43 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.2.0] - 2020-03-14
+
+A more detailed account of everything included is included in the dev to master PR for this release: https://github.com/ucb-bar/chipyard/pull/418
+
+### Added
+* Ring Topology System Bus NoC (#461)
+* Integration of the Ariane core into Chipyard (#448)
+* FireMarshal now generates an extra copy of linux kernel with dwarf debugging info for use in FirePerf (#427)
+* Add option to use blackboxed SimDRAM instead of SimAXIMem (#449)
+* Log `init-submodules` script (#433)
+* Moved the Docker image used for CI into Chipyard (prev. in BOOM) (#463)
+
+### Changed
+* Bump FireSim to 1.9.0 - Includes FirePerf TracerV Flame Graph features
+* IOBinders and BuildTop unification between FireChip and Chipyard (#390)
+* Bump BOOM to version 2.2.4 (#463)
+* Bump Gemmini to version 0.2 (#469)
+* Update to CircleCI 2.1 config. syntax and cleanup CI file (#421)
+* FireMarshal moved from FireSim to Chipyard (#415)
+* Rename config. mixins to config fragments (#451)
+
+### Fixed
+* `git status` should be clean. (Although you will need to manually cleanup the libgloss and qemu directories after first setup). (#411, #414)
+* Fix Hetero. BOOM + Rocket + Hwacha config (#413)
+* Fix VCS stdout (#417)
+* Add a git version check to the init scripts and make them work outside of the repo root (#459)
+* Fix generation of env.sh for zsh (#435)
+* GCD example bug (#465)
+
+### Deprecated
+
+
+### Removed
+
+
+
+
 ## [1.1.0] - 2020-01-25
 
 A more detailed account of everything included is included in the dev to master PR for this release: https://github.com/ucb-bar/chipyard/pull/367
