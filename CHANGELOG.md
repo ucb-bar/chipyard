@@ -17,7 +17,7 @@ A more detailed account of everything included is included in the dev to master 
 ### Changed
 * IOBinders and BuildTop unification between FireChip and Chipyard (#390)
 * Update to CircleCI 2.1 config. syntax and cleanup CI file (#421)
-* Bump FireSim to version 1.9 - Includes FirePerf TracerV stack unwinding features
+* Bump FireSim to version 1.9.0 - Includes FirePerf TracerV stack unwinding features
 * Bump BOOM to version 2.2.4 (#463)
 * Bump Gemmini to version 0.2 (#469)
 * FireMarshal moved from FireSim to Chipyard (#415)
