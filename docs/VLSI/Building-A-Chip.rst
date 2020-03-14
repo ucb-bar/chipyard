@@ -18,10 +18,13 @@ This often includes modifying the logical hierarchy to match the physical hierar
 Modifying the logical hierarchy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Something about complex chips -> needs hierarchical
-Logical hierarchy is not always easy to describe with the desired physical hierarchy.
+Building a large or complex chip often requires using hierarchical design to place and route sections of the chip separately.
+In addition, the design as written in chipyard may not have a hierarchy that matches the physical hierarchy that would work best in the place and route tool.
+In order to reorganize the design to have its logical hierarchy match its physical hierarchy there are severl FIRRTL transformations that can be run.
+These include grouping, which pull several modules into a larger one, and flattening, which dissolves a modules boundary leaving its components in its containing module.
+These transformations can be applied repeatedly to different parts of the design to arrange it as the physical designer sees fit.
+More details on how to use these transformations to reorganize the design hierarchy are forthcoming.
 
-TODO finish me
 
 Creating a floorplan
 --------------------
