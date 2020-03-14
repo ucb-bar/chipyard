@@ -66,6 +66,30 @@ The ``--cost-param`` option allows the user to specify parameters to pass to the
 The ``--force-synflops [mem]`` options allows the user to override any heuristics in MacroCompiler and force it to map the given memory to flip-flops.
 Likewise, the ``--force-compile [mem]`` option allows the user to force MacroCompiler to map the given ``mem`` to a technology macro.
 
+SRAM MDF Fields
++++++++++++++++
+
+Technology SRAM macros described in MDF can be defined at three levels of detail.
+A single instance can be defined with the `SRAMMacro` format.
+A group of instances that share the number and type of ports but vary in width and depth can be defined with the `SRAMGroup` format.
+A set of groups of SRAMs that can be generated together from a single source like a compiler can be defined with the `SRAMCompiler` format.
+
+At the most concrete level the `SRAMMAcro` defines a particular instance of an SRAM.
+That includes its functinoal attributes such as its width, depth, and number of access ports.
+These ports can be read, write, or read and write ports, and the instance can have any number.
+In order to correctly map to these functional ports to the physical instance each port is described in a list of sub-structures, in the parent instance's structure.
+Each port is only required to have an address and data field, but can have many other optional fields.
+These optional fields include a clock, write enable, read enable, chip enable, mask.
+The mask field can have a different granularity than the data field, e.g. it could be a bit mask or a byte mask.
+Each field must also specify its polarity, whether it is active high or active low.
+
+In adddition to these functional descriptions of the SRAM there are also other fields that specify physical/implementation characteristics.
+These include the threshold voltage, the mux factor, as well as a list of extra non-functional ports.
+
+The next level of detail, an `SRAMGroup` includes a range of depths and widths, as well as a set of threshold voltages.
+A range has a lower bound, upper bound, and a step size.
+The least concrete level, an `SRAMCompiler` is simply a set of `SRAMGroups`.
+
 Separating the top module from the test harness
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -75,6 +99,14 @@ To do this, there is a FIRRTL ``App`` in :ref:`Barstools` called ``GenerateTopAn
 This also renames modules in the test harness so that any modules that are instantiated in both the test harness and the chip are uniquified.
 
 .. Note:: For VLSI projects, this ``App`` is run instead of the normal FIRRTL ``App`` to elaborate Verilog.
+
+Macro Description Format
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The SRAM technology macros and IO cells are described in a json format called Macro Description Format (MDF).
+MDF is specialized for each type of macro it supports.
+The specialization is defined in their respective sections.
+
 
 
 Mapping technology IO cells
