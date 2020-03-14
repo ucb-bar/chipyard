@@ -7,19 +7,19 @@ This changelog follows the format defined here: https://keepachangelog.com/en/1.
 A more detailed account of everything included is included in the dev to master PR for this release: https://github.com/ucb-bar/chipyard/pull/418
 
 ### Added
-* FireMarshal now generates an extra copy of linux kernel with dwarf debugging info for use in FirePerf (#427)
-* Ring Topology System Bus NoC (#461 )
-* Add option to use blackboxed SimDRAM instead of SimAXIMem (#449)
-* Log `init-submodules` script (#433 )
+* Ring Topology System Bus NoC (#461)
 * Integration of the Ariane core into Chipyard (#448)
+* FireMarshal now generates an extra copy of linux kernel with dwarf debugging info for use in FirePerf (#427)
+* Add option to use blackboxed SimDRAM instead of SimAXIMem (#449)
+* Log `init-submodules` script (#433)
 * Moved the Docker image used for CI into Chipyard (prev. in BOOM) (#463)
 
 ### Changed
+* Bump FireSim to 1.9.0 - Includes FirePerf TracerV Flame Graph features
 * IOBinders and BuildTop unification between FireChip and Chipyard (#390)
-* Update to CircleCI 2.1 config. syntax and cleanup CI file (#421)
-* Bump FireSim to version 1.9.0 - Includes FirePerf TracerV stack unwinding features
 * Bump BOOM to version 2.2.4 (#463)
 * Bump Gemmini to version 0.2 (#469)
+* Update to CircleCI 2.1 config. syntax and cleanup CI file (#421)
 * FireMarshal moved from FireSim to Chipyard (#415)
 * Rename config. mixins to config fragments (#451)
 
