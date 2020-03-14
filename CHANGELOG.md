@@ -32,10 +32,10 @@ A more detailed account of everything included is included in the dev to master 
 * GCD example bug (#465)
 
 ### Deprecated
-
+* N/A
 
 ### Removed
-
+* N/A
 
 
 
