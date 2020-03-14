@@ -8,6 +8,7 @@ For the full documentation on how to use the VLSI tool flow, see the `Hammer Doc
 
 Transforming the RTL
 --------------------
+
 Building a chip requires specializing the generic verilog emitted by FIRRTL to adhere to the constraints imposed by the technology used for fabrication.
 This includes mapping Chisel memories to available technology macros such as SRAMs, mapping the input and output of your chip to connect to technology IO cells, see :ref:`Barstools`.
 In addition to these required transformations it may also be benefical to transform the RTL to make physical design easier.

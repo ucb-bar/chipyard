@@ -5,7 +5,7 @@ Barstools is a collection of useful FIRRTL transformations and compilers to help
 Included in the tools are a MacroCompiler (used to map Chisel memory constructs to vendor SRAMs), FIRRTL transforms (to separate harness and top-level SoC files), and more.
 
 Mapping technology SRAMs (MacroCompiler)
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you are planning on building a real chip, it is likely that you will plan on using some amount of static random access memory, or SRAM.
 SRAM macros offer superior storage density over flip-flop arrays at the cost of restricting the number of read or write transactions that can happen in a cycle.
@@ -19,18 +19,19 @@ However, this method can be fragile and laborious.
 
 The FIRRTL compiler contains a transformation to replace the ``SeqMem`` primitives called ``ReplSeqMem``.
 This simply converts all ``SeqMem`` instances above a size threshold into external module references.
+An external module reference is a FIRRTL construct that enables a design to reference a module without decsribing its contents, only its inputs and outputs.
 A list of unique SRAM configurations is output to a ``.conf`` file by FIRRTL, which is used to map technology SRAMs.
-Without this transform, FIRRTL will map all ``SeqMem`` s to flip-flop arrays with equivalent behavior.
-With very high capacity ``SeqMem`` s, this may lead to a design that is difficult to route.
+Without this transform, FIRRTL will map all ``SeqMem`` s to flip-flop arrays with equivalent behavior, which may lead to a design that is difficult to route.
 
 The ``.conf`` file is consumed by a tool called MacroCompiler, which is part of the :ref:`Barstools` scala package.
 MacroCompiler is also passed an ``.mdf`` file that describes the available list of technology SRAMs or the capabilities of the SRAM compiler, if one is provided by the foundry.
+Typically a foundary SRAM compiler will be able to generate a set of different SRAMs collateral based on some requirements on size, aspect ratio, etc. (see :ref:`SRAM MDF Fields`).
 Using a user-customizable cost function, MacroCompiler will select the SRAMs that are the best fit for each dimensionality in the ``.conf`` file.
 This may include overprovisioning (e.g. using a 64x1024 SRAM for a requested 60x1024, if the latter is not available) or arraying.
 Arraying can be done in both width and depth, as well as to solve masking constraints.
 For example, a 128x2048 array could be composed of four 64x1024 arrays, with two macros in parallel to create two 128x1024 virtual SRAMs which are combinationally muxed to add depth.
 If this macro requires byte-granularity write masking, but no technology SRAMs support masking, then the tool may choose to use thirty-two 8x1024 arrays in a similar configuration.
-For information on writing ``.mdf`` files, look at `MDF on github <https://github.com/ucb-bar/plsi-mdf>`__.
+For information on writing ``.mdf`` files, look at `MDF on github <https://github.com/ucb-bar/plsi-mdf>`__ and a brief description in :ref:`SRAM MDF Fields` section.
 
 The output of MacroCompiler is a Verilog file containing modules that wrap the technology SRAMs into the specified interface names from the ``.conf``.
 If the technology supports an SRAM compiler, then MacroCompiler will also emit HammerIR that can be passed to Hammer to run the compiler itself and generate design collateral.
@@ -44,11 +45,11 @@ The ``strict`` value forces MacroCompiler to map all memories to technology macr
 The ``synflops`` value forces MacroCompiler to map all memories to flip flops.
 The ``compileandsynflops`` value instructs MacroCompiler to use the technology compiler to determine sizes of technology macros used but to then create mock versions of these macros with flip flops.
 The ``fallbacksynflops`` value causes MacroCompiler to compile all possible memories to technology macros but when unable to do so to use flip flops to implement the remaining memories.
-The final and default value, ``compileavailble``, instructs MacroCompiler to compile all memories to the technology macros and do nothing if it is unable to map them.
+The final and default value, ``compileavailable``, instructs MacroCompiler to compile all memories to the technology macros and do nothing if it is unable to map them.
 
 Most of the rest of the options are used to control where different inputs and outputs are expected and produced.
 The option ``--macro-conf`` is the file that contains the set of input ``SeqMem`` configuartions to map in the ``.conf`` format described above.
-The option ``--macor-mdf`` also describes the input ``SeqMem`` s but is instead in the ``.mdf`` format.
+The option ``--macro-mdf`` also describes the input ``SeqMem`` s but is instead in the ``.mdf`` format.
 The option ``--library`` is an ``.mdf`` description of the available technology macros that can be mapped to.
 This file could be a list of fixed size memories often refered to as a cache of macros, or a description of what size memories could be made available through some technology specific process (usually an SRAM compiler), or a mix of both.
 The option ``--use-compiler`` instructs MacroCompiler that it is allowed to use any compilers listed in the ``--library`` specification.
@@ -90,8 +91,8 @@ The next level of detail, an `SRAMGroup` includes a range of depths and widths, 
 A range has a lower bound, upper bound, and a step size.
 The least concrete level, an `SRAMCompiler` is simply a set of `SRAMGroups`.
 
-Separating the top module from the test harness
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Separating the Top module from the TestHarness module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Unlike the FireSim and Software simulation flows, we need to separate the test harness and the chip (a.k.a. DUT) into separate files.
 This is necessary to facilitate post-synthesis and post-place-and-route simulation, as the module names in the RTL and gate-level verilog files would collide.
@@ -114,7 +115,7 @@ Mapping technology IO cells
 
 Like technology SRAMs, IO cells are almost always included in digital ASIC designs to allow pin configurability, increase the voltage level of the IO signal, and provide ESD protection.
 Unlike SRAMs, there is no corresponding primitive in Chisel or FIRRTL.
-However, this problem can be solved similarly to ``SeqMem``s by leveraging the strong typing available in these scala-based tools.
+However, this problem can be solved similarly to ``SeqMems`` by leveraging the strong typing available in these scala-based tools.
 We are actively developing a FIRRTL transform that will automatically configure, map, and connect technology IO cells.
 Stay tuned for more information!
 
