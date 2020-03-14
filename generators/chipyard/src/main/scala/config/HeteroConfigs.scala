@@ -7,6 +7,7 @@ import freechips.rocketchip.config.{Config}
 // ---------------------
 
 class LargeBoomAndRocketConfig extends Config(
+  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++       // connect clock and reset to a ChipTop design
   new chipyard.iobinders.WithUARTAdapter ++                      // display UART with a SimUARTAdapter
   new chipyard.iobinders.WithTieOffInterrupts ++                 // tie off top-level interrupts
   new chipyard.iobinders.WithBlackBoxSimMem ++                   // drive the master AXI4 memory with a SimAXIMem
@@ -29,6 +30,7 @@ class LargeBoomAndRocketConfig extends Config(
 
 // DOC include start: BoomAndRocketWithHwacha
 class HwachaLargeBoomAndHwachaRocketConfig extends Config(
+  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -52,6 +54,7 @@ class HwachaLargeBoomAndHwachaRocketConfig extends Config(
 // DOC include end: BoomAndRocketWithHwacha
 
 class DualLargeBoomAndRocketConfig extends Config(
+  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -75,6 +78,7 @@ class DualLargeBoomAndRocketConfig extends Config(
 // DOC include start: DualBoomAndRocketOneHwacha
 
 class LargeBoomAndHwachaRocketConfig extends Config(
+  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -101,6 +105,7 @@ class LargeBoomAndHwachaRocketConfig extends Config(
 
 
 class LargeBoomAndRV32RocketConfig extends Config(
+  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -125,6 +130,7 @@ class LargeBoomAndRV32RocketConfig extends Config(
 
 // DOC include start: DualBoomAndRocket
 class DualLargeBoomAndDualRocketConfig extends Config(
+  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -147,6 +153,7 @@ class DualLargeBoomAndDualRocketConfig extends Config(
 // DOC include end: DualBoomAndRocket
 
 class LargeBoomAndRocketWithControlCoreConfig extends Config(
+  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++

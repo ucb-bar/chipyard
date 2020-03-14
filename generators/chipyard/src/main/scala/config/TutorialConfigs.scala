@@ -20,6 +20,7 @@ import freechips.rocketchip.config.{Config}
 class TutorialStarterConfig extends Config(
   // IOBinders specify how to connect to IOs in our TestHarness
   // These config fragments do not affect
+  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++       // connect clock and reset to a ChipTop design
   new chipyard.iobinders.WithUARTAdapter ++       // Connect a SimUART adapter to display UART on stdout
   new chipyard.iobinders.WithBlackBoxSimMem ++    // Connect simulated external memory
   new chipyard.iobinders.WithTieOffInterrupts ++  // Do not simulate external interrupts
@@ -58,6 +59,7 @@ class TutorialStarterConfig extends Config(
 
 // Tutorial Phase 2: Integrate a TileLink or AXI4 MMIO device
 class TutorialMMIOConfig extends Config(
+  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTieOffInterrupts ++
@@ -86,6 +88,7 @@ class TutorialMMIOConfig extends Config(
 
 // Tutorial Phase 3: Integrate a SHA3 RoCC accelerator
 class TutorialSha3Config extends Config(
+  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTieOffInterrupts ++
@@ -112,6 +115,7 @@ class TutorialSha3Config extends Config(
 
 // Tutorial Phase 4: Integrate a Black-box verilog version of the SHA3 RoCC accelerator
 class TutorialSha3BlackBoxConfig extends Config(
+  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTieOffInterrupts ++

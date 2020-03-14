@@ -12,6 +12,8 @@ import freechips.rocketchip.util._
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 
+import chipyard.chiptop._
+import chipyard.TestHarnessUtils
 import testchipip._
 import icenet._
 import tracegen.{HasTraceGenTilesModuleImp}
@@ -65,42 +67,55 @@ class ComposeIOBinder[T](fn: => (Clock, Bool, Bool, T) => Seq[Any])(implicit tag
 
 // DOC include end: IOBinders
 
-class WithGPIOTiedOff extends OverrideIOBinder({
-  (c, r, s, top: HasPeripheryGPIOModuleImp) => top.gpio.map(gpio => gpio.pins.map(p => p.i.ival := false.B)); Nil
-})
-
-class WithSimBlockDevice extends OverrideIOBinder({
-  (c, r, s, top: CanHavePeripheryBlockDeviceModuleImp) => top.connectSimBlockDevice(c, r); Nil
-})
-
-class WithBlockDeviceModel extends OverrideIOBinder({
-  (c, r, s, top: CanHavePeripheryBlockDeviceModuleImp) => top.connectBlockDeviceModel(); Nil
-})
-
-class WithLoopbackNIC extends OverrideIOBinder({
-  (c, r, s, top: CanHavePeripheryIceNICModuleImp) => top.connectNicLoopback(); Nil
-})
-
-class WithSimNIC extends OverrideIOBinder({
-  (c, r, s, top: CanHavePeripheryIceNICModuleImp) => top.connectSimNetwork(c, r); Nil
-})
-
-class WithUARTAdapter extends OverrideIOBinder({
-  (c, r, s, top: HasPeripheryUARTModuleImp) => {
-    val defaultBaudRate = 115200 // matches sifive-blocks uart baudrate
-    top.uart.zipWithIndex.foreach{ case (dut_io, i) =>
-      val uart_sim = Module(new UARTAdapter(i, defaultBaudRate)(top.p))
-      uart_sim.io.uart.txd := dut_io.txd
-      dut_io.rxd := uart_sim.io.uart.rxd
-    }
+class WithChipTopSimpleClockAndReset extends OverrideIOBinder({
+  (c, r, s, top: HasChipTopSimpleClockAndReset) => {
+    top.clock := c
+    top.reset := r
     Nil
   }
 })
+
+class WithGPIOTiedOff extends Config(new OverrideIOBinder({
+  (c, r, s, top: HasPeripheryGPIOModuleImp) => top.gpio.foreach(_.pins.foreach(_.i.ival := false.B)); Nil
+}) ++ new OverrideIOBinder({
+  (c, r, s, top: CanHaveChipTopGPIO) => top.gpio.foreach(_ := false.B); Nil
+}))
+
+class WithSimBlockDevice extends Config(new OverrideIOBinder({
+  (c, r, s, top: CanHavePeripheryBlockDeviceModuleImp) => SimBlockDevice.connect(c, r, top.bdev)(top.p); Nil
+}) ++ new OverrideIOBinder({
+  (c, r, s, top: CanHaveChipTopBlockDevice) => SimBlockDevice.connect(c, r, top.bdev)(top.p); Nil
+}))
+
+class WithBlockDeviceModel extends Config(new OverrideIOBinder({
+  (c, r, s, top: CanHavePeripheryBlockDeviceModuleImp) => BlockDeviceModel.connect(top.bdev)(top.p); Nil
+}) ++ new OverrideIOBinder({
+  (c, r, s, top: CanHaveChipTopBlockDevice) => BlockDeviceModel.connect(top.bdev)(top.p); Nil
+}))
+
+class WithLoopbackNIC extends Config(new OverrideIOBinder({
+  (c, r, s, top: CanHavePeripheryIceNICModuleImp) => NicLoopback.connect(top.net, top.nicConf); Nil
+}) ++ new OverrideIOBinder({
+  (c, r, s, top: CanHaveChipTopIceNIC) => NicLoopback.connect(top.net, top.nicConf); Nil
+}))
+
+class WithSimNIC extends Config(new OverrideIOBinder({
+  (c, r, s, top: CanHavePeripheryIceNICModuleImp) => SimNetwork.connect(top.net, c, r); Nil
+}) ++ new OverrideIOBinder({
+  (c, r, s, top: CanHaveChipTopIceNIC) => SimNetwork.connect(top.net, c, r); Nil
+}))
+
+class WithUARTAdapter extends Config(new OverrideIOBinder({
+  (c, r, s, top: HasPeripheryUARTModuleImp) => UARTAdapter.connect(top.uart)(top.p); Nil
+}) ++ new OverrideIOBinder({
+  (c, r, s, top: CanHaveChipTopUART) => UARTAdapter.connect(top.uart)(top.p); Nil
+}))
 
 // DOC include start: WithSimAXIMem
 class WithSimAXIMem extends OverrideIOBinder({
   (c, r, s, top: CanHaveMasterAXI4MemPortModuleImp) => top.connectSimAXIMem(); Nil
 })
+// Note: No equivalent ChipTop binder, as you generally wouldn't expose AXI4 at the chip level in a real system
 // DOC include end: WithSimAXIMem
 
 class WithBlackBoxSimMem extends OverrideIOBinder({
@@ -117,18 +132,22 @@ class WithBlackBoxSimMem extends OverrideIOBinder({
     }; Nil
   }
 })
+// Note: No equivalent ChipTop binder, as you generally wouldn't expose AXI4 at the chip level in a real system
 
 class WithSimAXIMMIO extends OverrideIOBinder({
   (c, r, s, top: CanHaveMasterAXI4MMIOPortModuleImp) => top.connectSimAXIMMIO(); Nil
 })
+// Note: No equivalent ChipTop binder, as you generally wouldn't expose AXI4 at the chip level in a real system
 
 class WithDontTouchPorts extends OverrideIOBinder({
   (c, r, s, top: DontTouch) => top.dontTouchPorts(); Nil
 })
 
-class WithTieOffInterrupts extends OverrideIOBinder({
+class WithTieOffInterrupts extends Config(new OverrideIOBinder({
   (c, r, s, top: HasExtInterruptsBundle) => top.tieOffInterrupts(); Nil
-})
+}) ++ new OverrideIOBinder({
+  (c, r, s, top: CanHaveChipTopExtInterrupts) => top.tieOffInterrupts(); Nil
+}))
 
 class WithTieOffL2FBusAXI extends OverrideIOBinder({
   (c, r, s, top: CanHaveSlaveAXI4PortModuleImp) => {
@@ -142,45 +161,51 @@ class WithTieOffL2FBusAXI extends OverrideIOBinder({
           axi.aw.bits := DontCare
           axi.ar.bits := DontCare
           axi.w.bits := DontCare
+        case _ => throw new Exception("Unknown AXI port direction")
       }
     })
     Nil
   }
 })
+// Note: No equivalent ChipTop binder, as you generally wouldn't expose AXI4 at the chip level in a real system
 
-class WithTiedOffDebug extends OverrideIOBinder({
-  (c, r, s, top: HasPeripheryDebugModuleImp) => {
-    Debug.tieoffDebug(top.debug, top.psd)
-    // tieoffDebug doesn't actually tie everything off :/
-    top.debug.foreach(_.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare }))
-    Nil
-  }
-})
+class WithTiedOffDebug extends Config(new OverrideIOBinder({
+  (c, r, s, top: HasPeripheryDebugModuleImp) => TestHarnessUtils.tieoffDebug(c, r, top.debug, top.psd); Nil
+}) ++ new OverrideIOBinder({
+  (c, r, s, top: CanHaveChipTopDebug) => top.psd.foreach { psd => TestHarnessUtils.tieoffDebug(c, r, top.debug, psd) }; Nil
+}))
 
-class WithSimSerial extends OverrideIOBinder({
+class WithSimSerial extends Config(new OverrideIOBinder({
   (c, r, s, top: CanHavePeripherySerialModuleImp) => {
     val ser_success = top.connectSimSerial()
     when (ser_success) { s := true.B }
     Nil
   }
-})
-
-class WithTiedOffSerial extends OverrideIOBinder({
-  (c, r, s, top: CanHavePeripherySerialModuleImp) => top.tieoffSerial(); Nil
-})
-
-
-class WithSimDebug extends OverrideIOBinder({
-  (c, r, s, top: HasPeripheryDebugModuleImp) => {
-    val dtm_success = Wire(Bool())
-    top.reset := r | top.debug.map { debug => AsyncResetReg(debug.ndreset) }.getOrElse(false.B)
-    Debug.connectDebug(top.debug, top.psd, c, r, dtm_success)(top.p)
-    when (dtm_success) { s := true.B }
+}) ++ new OverrideIOBinder({
+  (c, r, s, top: CanHaveChipTopSerial) => {
+    val ser_success = top.connectSimSerial(c, r)
+    when (ser_success) { s := true.B }
     Nil
   }
-})
+}))
 
+class WithTiedOffSerial extends Config(new OverrideIOBinder({
+  (c, r, s, top: CanHavePeripherySerialModuleImp) => top.tieoffSerial(); Nil
+}) ++ new OverrideIOBinder({
+  (c, r, s, top: CanHaveChipTopSerial) => top.tieoffSerial(); Nil
+}))
 
-class WithTraceGenSuccessBinder extends OverrideIOBinder({
+class WithSimDebug extends Config(new OverrideIOBinder({
+  (c, r, s, top: HasPeripheryDebugModuleImp) => top.reset := TestHarnessUtils.connectSimDebug(c, r, s, top.debug, top.psd)(top.p); Nil
+}) ++ new OverrideIOBinder({
+  (c, r, s, top: CanHaveChipTopDebug) => top.psd.foreach { psd =>
+    top.asInstanceOf[BaseChipTop].connectReset(TestHarnessUtils.connectSimDebug(c, r, s, top.debug, psd)(top.p))
+  }; Nil
+}))
+
+class WithTraceGenSuccessBinder extends Config(new OverrideIOBinder({
   (c, r, s, top: HasTraceGenTilesModuleImp) => when (top.success) { s := true.B };  Nil
-})
+}) ++ new OverrideIOBinder({
+  (c, r, s, top: CanHaveChipTopTraceGen) => when (top.success) { s := true.B };  Nil
+}))
+
