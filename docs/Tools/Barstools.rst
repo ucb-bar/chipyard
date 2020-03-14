@@ -63,6 +63,10 @@ This file can then be passed to HAMMER to have it run the technology compiler pr
 The ``--cost-func`` option allows the user to specify a different cost function for the mapping task.
 Because the mapping of memories is a multi-dimensional space spanning performance, power, and area, the cost function setting of MacroCompiler allows the user to tune the mapping to their preference.
 The default option is a reasonable heuristic that attempts to minimize the number of technology macros instantiated per ``SeqMem`` without wasting too many memory bits.
+There are two ways to add additional cost functions.
+First, you can simply write another one in scala and call `registerCostMetric` which then enables you to pass its name to this command-line flag.
+Second, there is a pre-defined `ExternalMetric` which will execute a program (passed in as a path) with the MDF description of the memory being compiled and the memory being proposed as a mapping.
+The program should print a floating point number which is the cost for this mapping, if no number is printed MacroCompiler will assume this is an illegal mapping.
 The ``--cost-param`` option allows the user to specify parameters to pass to the cost function if the cost function supports that.
 The ``--force-synflops [mem]`` options allows the user to override any heuristics in MacroCompiler and force it to map the given memory to flip-flops.
 Likewise, the ``--force-compile [mem]`` option allows the user to force MacroCompiler to map the given ``mem`` to a technology macro.
