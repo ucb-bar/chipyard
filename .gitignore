@@ -1,4 +1,5 @@
 bootrom/*
+docs/warnings.txt
 /Makefrag.pkgs
 target
 *.jar
@@ -15,3 +16,5 @@ riscv-tools-install
 esp-tools-install
 tags
 *~
+env-riscv-tools.sh
+env-esp-tools.sh

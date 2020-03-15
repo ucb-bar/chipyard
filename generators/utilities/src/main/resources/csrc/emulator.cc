@@ -35,6 +35,7 @@
 extern tsi_t* tsi;
 extern dtm_t* dtm;
 extern remote_bitbang_t * jtag;
+extern int dramsim;
 
 static uint64_t trace_count = 0;
 bool verbose;
@@ -124,6 +125,8 @@ int main(int argc, char** argv)
   char ** htif_argv = NULL;
   int verilog_plusargs_legal = 1;
 
+  dramsim = 0;
+
   while (1) {
     static struct option long_options[] = {
       {"cycle-count", no_argument,       0, 'c' },
@@ -132,6 +135,7 @@ int main(int argc, char** argv)
       {"seed",        required_argument, 0, 's' },
       {"rbb-port",    required_argument, 0, 'r' },
       {"verbose",     no_argument,       0, 'V' },
+      {"dramsim",     no_argument,       0, 'D' },
 #if VM_TRACE
       {"vcd",         required_argument, 0, 'v' },
       {"dump-start",  required_argument, 0, 'x' },
@@ -140,9 +144,9 @@ int main(int argc, char** argv)
     };
     int option_index = 0;
 #if VM_TRACE
-    int c = getopt_long(argc, argv, "-chm:s:r:v:Vx:", long_options, &option_index);
+    int c = getopt_long(argc, argv, "-chm:s:r:v:Vx:D", long_options, &option_index);
 #else
-    int c = getopt_long(argc, argv, "-chm:s:r:V", long_options, &option_index);
+    int c = getopt_long(argc, argv, "-chm:s:r:VD", long_options, &option_index);
 #endif
     if (c == -1) break;
  retry:
@@ -155,6 +159,7 @@ int main(int argc, char** argv)
       case 's': random_seed = atoi(optarg); break;
       case 'r': rbb_port = atoi(optarg);    break;
       case 'V': verbose = true;             break;
+      case 'D': dramsim = 1;                break;
 #if VM_TRACE
       case 'v': {
         vcdfile = strcmp(optarg, "-") == 0 ? stdout : fopen(optarg, "w");
@@ -188,6 +193,8 @@ int main(int argc, char** argv)
 #endif
         else if (arg.substr(0, 12) == "+cycle-count")
           c = 'c';
+        else if (arg == "+dramsim")
+          c = 'D';
         // If we don't find a legacy '+' EMULATOR argument, it still could be
         // a VERILOG_PLUSARG and not an error.
         else if (verilog_plusargs_legal) {

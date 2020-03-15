@@ -1,4 +1,4 @@
-package example
+package chipyard
 
 import scala.util.Try
 
@@ -8,14 +8,13 @@ import freechips.rocketchip.config.{Parameters}
 import freechips.rocketchip.util.{GeneratorApp}
 import freechips.rocketchip.system.{TestGeneration}
 
-import utilities.{TestSuiteHelper}
-
 object Generator extends GeneratorApp {
   // add unique test suites
   override def addTestSuites {
     implicit val p: Parameters = params
     TestSuiteHelper.addRocketTestSuites
     TestSuiteHelper.addBoomTestSuites
+    TestSuiteHelper.addArianeTestSuites
 
     // if hwacha parameter exists then generate its tests
     // TODO: find a more elegant way to do this. either through
