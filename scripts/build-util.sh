@@ -14,7 +14,8 @@ case ${ncpu} in
 *) export MAKEFLAGS="-j ${ncpu} ${MAKEFLAGS}" ;;
 esac
 
-MAKE=$(command -v gnumake || command -v gmake || command -v make)
+# Allow user to override MAKE
+[ -n "${MAKE}" ] || MAKE=$(command -v gnumake || command -v gmake || command -v make)
 readonly MAKE
 
 
