@@ -29,7 +29,7 @@ you can only use a single core and you cannot give the design an external DRAM.
 Note that these configurations fully remove the L2 cache and mbus.
 
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
     :language: scala
     :start-after: DOC include start: scratchpadrocket
     :end-before: DOC include end: scratchpadrocket

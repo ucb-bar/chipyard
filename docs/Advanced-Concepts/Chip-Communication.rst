@@ -111,7 +111,7 @@ FireSim FPGA-accelerated simulations use TSI by default as well.
 
 If you would like to build and simulate a Chipyard configuration with a DTM configured for DMI communication, then you must tie-off the TSI interface, and instantiate the `SimDTM`. Note that we use `WithTiedOffSerial ++ WithSimDebug` instead of `WithTiedOffDebug ++ WithSimSerial`.
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
     :language: scala
     :start-after: DOC include start: DmiRocket
     :end-before: DOC include end: DmiRocket
@@ -141,7 +141,7 @@ The configuration is very similar to a DMI-based configuration. The main differe
 is the addition of the ``WithJtagDTM`` config fragment that configures the instantiated DTM to use the JTAG protocol as the
 bringup method.
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
     :language: scala
     :start-after: DOC include start: JtagRocket
     :end-before: DOC include end: JtagRocket
