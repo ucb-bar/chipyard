@@ -86,7 +86,7 @@ class BoomLSUShim(implicit p: Parameters) extends BoomModule()(p)
 
   io.lsu.dis_uops(0).valid         := io.tracegen.req.fire()
   io.lsu.dis_uops(0).bits          := tracegen_uop
-  
+
   when (io.tracegen.req.fire()) {
     rob_tail := WrapInc(rob_tail, rob_sz)
     rob_bsy(rob_tail)   := true.B
@@ -165,8 +165,8 @@ class BoomLSUShim(implicit p: Parameters) extends BoomModule()(p)
   io.lsu.rob_pnr_idx := rob_tail
   io.lsu.commit_load_at_rob_head := false.B
 
-  io.lsu.brinfo := DontCare
-  io.lsu.brinfo.valid := false.B
+  io.lsu.brupdate := DontCare
+  //io.lsu.brupdate.valid := false.B
   io.lsu.rob_head_idx := rob_head
 
 
