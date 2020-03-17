@@ -131,5 +131,5 @@ This, unfortunately, breaks the process-agnostic RTL abstraction, so it is recom
 The simplest way to do this is to have a config fragment that when included updates instantiates the IO cells and connects them in the test harness.
 When simulating chip-specific designs, it is important to include the IO cells.
 The IO cell behavioral models will often assert if they are connected incorrectly, which is a useful runtime check.
-They also keep the IO interface at the chip and test harness boundary (see :ref:`Separating the top module from the test harness`) consistent after synthesis and place-and-route,
+They also keep the IO interface at the chip and test harness boundary (see :ref:`Separating the Top module from the TestHarness module`) consistent after synthesis and place-and-route,
 which allows the RTL simulation test harness to be reused.

@@ -2,8 +2,8 @@
 #
 
 # You can set these variables from the command line.
-SPHINXOPTS    = -w warnings.txt
-SPHINXBUILD   = python -msphinx
+SPHINXOPTS    = -w warnings.txt -n -W
+SPHINXBUILD   = python3 -msphinx
 SPHINXPROJ    = Chipyard
 SOURCEDIR     = .
 BUILDDIR      = _build
