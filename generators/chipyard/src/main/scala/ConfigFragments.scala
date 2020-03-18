@@ -21,7 +21,7 @@ import hwacha.{Hwacha}
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 
-import chipyard.{BuildTop}
+import chipyard.{BuildTop, TracePortKey, TracePortParams}
 
 /**
  * TODO: Why do we need this?
@@ -149,4 +149,9 @@ class WithControlCore extends Config((site, here, up) => {
       hartId = up(RocketTilesKey, site).size + up(BoomTilesKey, site).size
     )
   case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
+})
+
+class WithBoomTraceIO extends Config((site, here, up) => {
+  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
+  case TracePortKey => Some(TracePortParams())
 })

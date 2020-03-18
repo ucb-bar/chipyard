@@ -16,6 +16,8 @@ import testchipip._
 import icenet._
 import tracegen.{HasTraceGenTilesModuleImp}
 
+import chipyard.{CanHaveTraceIOModuleImp}
+
 import scala.reflect.{ClassTag}
 
 // System for instantiating binders based
@@ -183,4 +185,8 @@ class WithSimDebug extends OverrideIOBinder({
 
 class WithTraceGenSuccessBinder extends OverrideIOBinder({
   (c, r, s, top: HasTraceGenTilesModuleImp) => when (top.success) { s := true.B };  Nil
+})
+
+class WithSimDromajoBridge extends OverrideIOBinder({
+  (c, r, s, target: CanHaveTraceIOModuleImp) => target.traceIO.map(t => SimDromajoBridge(t)(target.p)).toSeq
 })
