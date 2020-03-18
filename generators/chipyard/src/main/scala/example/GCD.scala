@@ -125,7 +125,7 @@ trait GCDModule extends HasRegMap {
   gcd.valid := impl.io.output_valid
   impl.io.output_ready := gcd.ready
 
-  status := Cat(impl.io.input_ready, impl.io.output_ready)
+  status := Cat(impl.io.input_ready, impl.io.output_valid)
   io.gcd_busy := impl.io.busy
 
   regmap(
@@ -200,8 +200,8 @@ trait CanHavePeripheryGCDModuleImp extends LazyModuleImp {
 // DOC include end: GCD imp trait
 
 
-// DOC include start: GCD mixin
+// DOC include start: GCD config fragment
 class WithGCD(useAXI4: Boolean, useBlackBox: Boolean) extends Config((site, here, up) => {
   case GCDKey => Some(GCDParams(useAXI4 = useAXI4, useBlackBox = useBlackBox))
 })
-// DOC include end: GCD mixin
+// DOC include end: GCD config fragment

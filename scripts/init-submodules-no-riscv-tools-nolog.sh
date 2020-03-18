@@ -4,6 +4,19 @@
 set -e
 set -o pipefail
 
+# Check that git version is at least 1.7.8
+MYGIT=$(git --version)
+MYGIT=${MYGIT#'git version '} # Strip prefix
+case ${MYGIT} in
+[1-9]*) ;;
+*) echo 'warning: unknown git version' ;;
+esac
+MINGIT="1.7.8"
+if [ "$MINGIT" != "$(echo -e "$MINGIT\n$MYGIT" | sort -V | head -n1)" ]; then
+  echo "This script requires git version $MINGIT or greater. Exiting."
+  false
+fi
+
 RDIR=$(git rev-parse --show-toplevel)
 
 # Ignore toolchain submodules
@@ -61,4 +74,3 @@ if [ ! -f $RDIR/software/firemarshal/marshal-config.yaml ]; then
   echo "firesim-dir: '../../sims/firesim/'" > $RDIR/software/firemarshal/marshal-config.yaml
 fi
 echo "PATH=\$( realpath \$(dirname "\${BASH_SOURCE[0]:-\${\(%\):-%x}}") )/software/firemarshal:\$PATH" >> $RDIR/env.sh
-

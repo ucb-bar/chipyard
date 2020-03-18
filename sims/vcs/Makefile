@@ -47,9 +47,9 @@ VCS = vcs -full64 -j 8
 VCS_CC_OPTS = \
 	-CC "-I$(VCS_HOME)/include" \
 	-CC "-I$(RISCV)/include" \
+	-CC "-I$(dramsim_dir)" \
 	-CC "-std=c++11" \
-	-CC "-I/scratch/abejgonza/boom-work/dromajo/src" \
-	/scratch/abejgonza/boom-work/dromajo/src/libdromajo_cosim.a \
+	$(dramsim_lib) \
 	$(RISCV)/lib/libfesvr.a
 
 VCS_NONCC_OPTS = \
@@ -62,32 +62,36 @@ VCS_NONCC_OPTS = \
 	+v2k \
 	+vcs+lic+wait \
 	+vc+list \
-	-f $(sim_common_files) \
+	-error=noZMMCM \
+	-assert svaext \
 	-sverilog \
+	+libext+.v \
 	+incdir+$(build_dir) \
+	-f $(sim_common_files) \
+	$(sim_vsrcs)
+
+VCS_DEFINES = \
+	+define+VCS \
 	+define+CLOCK_PERIOD=1.0 \
-	$(sim_vsrcs) \
 	+define+PRINTF_COND=$(TB).printf_cond \
 	+define+STOP_COND=!$(TB).reset \
 	+define+RANDOMIZE_REG_INIT \
 	+define+RANDOMIZE_GARBAGE_ASSIGN \
-	+define+RANDOMIZE_INVALID_ASSIGN \
-	+define+RANDOMIZE_MEM_INIT \
-	+define+RANDOM=0 \
-	+libext+.v
+	+define+RANDOMIZE_INVALID_ASSIGN
 
-VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS)
+VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(VCS_DEFINES)
 
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
-$(sim): $(sim_vsrcs) $(sim_common_files)
+$(sim): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	-debug_pp
 
-$(sim_debug) : $(sim_vsrcs) $(sim_common_files)
+$(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
-	+define+DEBUG -debug_pp
+	+define+DEBUG \
+	-debug_pp
 
 #########################################################################################
 # create a vcs vpd rule

@@ -93,7 +93,7 @@ The ``MODEL`` and ``VLOG_MODEL`` are the top-level class names of the design. No
 
 The ``MODEL_PACKAGE`` is the Scala package (in the Scala code that says ``package ...``) that holds the ``MODEL`` class.
 
-The ``CONFIG`` is the name of the class used for the parameter Config while the ``CONFIG_PACKAGE`` is the Scala package it resides in.
+The ``CONFIG`` is the name of the class used for the parameter config while the ``CONFIG_PACKAGE`` is the Scala package it resides in.
 
 The ``GENERATOR_PACKAGE`` is the Scala package that holds the Generator class that elaborates the design.
 

@@ -12,7 +12,7 @@ having the CPU poll data from the device, we may want to have the device write
 directly to the coherent memory system instead. For example, here is a device
 that writes zeros to the memory at a configured address.
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/InitZero.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/InitZero.scala
     :language: scala
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/Top.scala
@@ -26,12 +26,12 @@ For more info on creating TileLink client nodes, take a look at :ref:`Client Nod
 
 Once we've created our top-level module including the DMA widget, we can create a configuration for it as we did before.
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/InitZero.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/InitZero.scala
     :language: scala
     :start-after: DOC include start: WithInitZero
     :end-before: DOC include end: WithInitZero
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
     :language: scala
     :start-after: DOC include start: InitZeroRocketConfig
     :end-before: DOC include end: InitZeroRocketConfig

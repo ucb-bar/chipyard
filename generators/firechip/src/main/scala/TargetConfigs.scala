@@ -20,6 +20,8 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 import tracegen.TraceGenKey
 import icenet._
+import ariane.ArianeTilesKey
+import testchipip.WithRingSystemBus
 
 import firesim.bridges._
 import firesim.configs._
@@ -76,6 +78,7 @@ class WithNIC extends icenet.WithIceNIC(inBufFlits = 8192, ctrlQueueDepth = 64)
 // Enables tracing on all cores
 class WithTraceIO extends Config((site, here, up) => {
   case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
+  case ArianeTilesKey => up(ArianeTilesKey) map (tile => tile.copy(trace = true))
   case TracePortKey => Some(TracePortParams())
 })
 
@@ -160,6 +163,15 @@ class FireSimGemminiRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.GemminiRocketConfig)
 
+//******************************************************************
+// Configuration with Ring topology SystemBus
+//******************************************************************
+class FireSimRingSystemBusRocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.RingSystemBusRocketConfig)
+
 //**********************************************************************************
 // Supernode Configurations, base off chipyard's RocketConfig
 //**********************************************************************************
@@ -167,3 +179,12 @@ class SupernodeFireSimRocketConfig extends Config(
   new WithNumNodes(4) ++
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 8L) ++ // 8 GB
   new FireSimRocketConfig)
+
+//**********************************************************************************
+//* Ariane Configurations
+//*********************************************************************************/
+class FireSimArianeConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.ArianeConfig)

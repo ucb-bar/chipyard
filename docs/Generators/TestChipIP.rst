@@ -22,7 +22,7 @@ The block device controller provides a generic interface for secondary storage.
 This device is primarily used in FireSim to interface with a block device
 software simulation model. The default Linux configuration in `firesim-software <https://github.com/firesim/firesim-software>`_
 
-To add a block device to your design, add the ``WithBlockDevice`` config mixin to your configuration.
+To add a block device to your design, add the ``WithBlockDevice`` config fragment to your configuration.
 
 
 TileLink SERDES

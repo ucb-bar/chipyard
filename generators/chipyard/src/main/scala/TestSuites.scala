@@ -9,6 +9,7 @@ import freechips.rocketchip.util.{GeneratorApp}
 import freechips.rocketchip.system.{TestGeneration, RegressionTestSuite}
 
 import boom.common.{BoomTilesKey}
+import ariane.{ArianeTilesKey}
 
 /**
  * A set of pre-chosen regression tests
@@ -139,4 +140,44 @@ object TestSuiteHelper
       TestGeneration.addSuite(new RegressionTestSuite(if (xlen == 64) rv64RegrTestNames else rv32RegrTestNames))
     }
   }
+
+  /**
+  * Add Ariane tests (asm, bmark, regression)
+  */
+  def addArianeTestSuites(implicit p: Parameters) = {
+    val xlen = p(XLen)
+    p(ArianeTilesKey).find(_.hartId == 0).map { tileParams =>
+      val coreParams = tileParams.core
+      val vm = coreParams.useVM
+      val env = if (vm) List("p","v") else List("p")
+      coreParams.fpu foreach { case cfg =>
+        if (xlen == 32) {
+          TestGeneration.addSuites(env.map(rv32uf))
+          if (cfg.fLen >= 64)
+            TestGeneration.addSuites(env.map(rv32ud))
+        } else {
+          TestGeneration.addSuite(rv32udBenchmarks)
+          TestGeneration.addSuites(env.map(rv64uf))
+          if (cfg.fLen >= 64)
+            TestGeneration.addSuites(env.map(rv64ud))
+        }
+      }
+      if (coreParams.useAtomics) {
+        if (tileParams.dcache.flatMap(_.scratch).isEmpty)
+          TestGeneration.addSuites(env.map(if (xlen == 64) rv64ua else rv32ua))
+        else
+          TestGeneration.addSuites(env.map(if (xlen == 64) rv64uaSansLRSC else rv32uaSansLRSC))
+      }
+      if (coreParams.useCompressed) TestGeneration.addSuites(env.map(if (xlen == 64) rv64uc else rv32uc))
+      val (rvi, rvu) =
+        if (xlen == 64) ((if (vm) rv64i else rv64pi), rv64u)
+        else            ((if (vm) rv32i else rv32pi), rv32u)
+
+      TestGeneration.addSuites(rvi.map(_("p")))
+      TestGeneration.addSuites((if (vm) List("v") else List()).flatMap(env => rvu.map(_(env))))
+      TestGeneration.addSuite(benchmarks)
+      TestGeneration.addSuite(new RegressionTestSuite(if (xlen == 64) rv64RegrTestNames else rv32RegrTestNames))
+    }
+  }
+
 }

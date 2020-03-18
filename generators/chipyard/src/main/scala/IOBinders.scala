@@ -103,6 +103,21 @@ class WithSimAXIMem extends OverrideIOBinder({
 })
 // DOC include end: WithSimAXIMem
 
+class WithBlackBoxSimMem extends OverrideIOBinder({
+  (clock, reset, _, top: CanHaveMasterAXI4MemPortModuleImp) => {
+    (top.mem_axi4 zip top.outer.memAXI4Node).foreach { case (io, node) =>
+      val memSize = top.p(ExtMem).get.master.size
+      val lineSize = top.p(CacheBlockBytes)
+      (io zip node.in).foreach { case (axi4, (_, edge)) =>
+        val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
+        mem.io.axi <> axi4
+        mem.io.clock := clock
+        mem.io.reset := reset
+      }
+    }; Nil
+  }
+})
+
 class WithSimAXIMMIO extends OverrideIOBinder({
   (c, r, s, top: CanHaveMasterAXI4MMIOPortModuleImp) => top.connectSimAXIMMIO(); Nil
 })
