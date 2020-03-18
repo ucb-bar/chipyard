@@ -121,7 +121,8 @@ class SubsystemModuleImp[+L <: Subsystem](_outer: L) extends BaseSubsystemModule
   dromajoParams += "\n" + "#define DROMAJO_PLIC_SIZE " + "\"" + "0x" + f"${PLICConsts.size(plicParams.maxHarts)}%X" + "\""
   dromajoParams += "\n" + "#define DROMAJO_CLINT_BASE " + "\"" + "0x" + f"${clintParams.baseAddress}%X" + "\""
   dromajoParams += "\n" + "#define DROMAJO_CLINT_SIZE " + "\"" + "0x" + f"${CLINTConsts.size}%X" + "\""
-  dromajoParams += "\n" + "#define DROMAJO_MEM_SIZE " + "\"" + "0x" + f"${extMemParams.master.size}%X" + "\""
+  // dromajo memory is in MiB chunks
+  dromajoParams += "\n" + "#define DROMAJO_MEM_SIZE " + "\"" + "0x" + f"${extMemParams.master.size >> 20}%X" + "\""
   dromajoParams += "\n\n#endif"
 
   ElaborationArtefacts.add("""dromajo_params.h""", dromajoParams)
