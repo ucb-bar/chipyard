@@ -2,7 +2,7 @@
 #
 
 # You can set these variables from the command line.
-SPHINXOPTS    =
+SPHINXOPTS    = -w warnings.txt
 SPHINXBUILD   = python -msphinx
 SPHINXPROJ    = Chipyard
 SOURCEDIR     = .

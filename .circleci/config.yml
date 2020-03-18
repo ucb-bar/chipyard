@@ -4,9 +4,6 @@
 version: 2.1
 
 parameters:
-    verilator-cache-version:
-        type: string
-        default: "v3"
     tools-cache-version:
         type: string
         default: "v4"
@@ -15,7 +12,7 @@ parameters:
 executors:
     main-env:
         docker:
-            - image: riscvboom/riscvboom-images:0.0.12
+            - image: ucbbar/chipyard-image:1.0.0
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 
@@ -54,8 +51,8 @@ commands:
                     - "3e:c3:02:5b:ed:64:8c:b7:b0:04:43:bc:83:43:73:1e"
             - checkout
 
-    setup-tools-verilator:
-        description: "Get toolchain and verilator"
+    setup-tools:
+        description: "Get toolchain"
         parameters:
             tools-version:
                 type: string
@@ -69,9 +66,6 @@ commands:
             - restore_cache:
                 keys:
                     - << parameters.tools-version >>-installed-<< pipeline.parameters.tools-cache-version >>-{{ checksum "../<< parameters.tools-version >>.hash" }}
-            - restore_cache:
-                keys:
-                    - verilator-installed-<< pipeline.parameters.verilator-cache-version >>-{{ checksum "sims/verilator/verilator.mk" }}
 
     prepare-rtl:
         description: "Run the prepare step of RTL"
@@ -88,7 +82,7 @@ commands:
                 type: string
                 default: "do-rtl-build.sh"
         steps:
-            - setup-tools-verilator:
+            - setup-tools:
                 tools-version: "<< parameters.tools-version >>"
             - run:
                 name: Building << parameters.project-key >> subproject using Verilator
@@ -117,7 +111,7 @@ commands:
                 type: string
                 default: "10m"
         steps:
-            - setup-tools-verilator:
+            - setup-tools:
                 tools-version: "<< parameters.tools-version >>"
             - restore_cache:
                 keys:
@@ -143,6 +137,15 @@ jobs:
                 name: Check commits of each submodule
                 command: |
                     .circleci/check-commit.sh
+    tutorial-setup-check:
+        executor: main-env
+        steps:
+            - checkout
+            - run:
+                name: Check that the tutorial-setup patches apply
+                command: |
+                    scripts/tutorial-setup.sh
+
     install-riscv-toolchain:
         executor: main-env
         steps:
@@ -157,18 +160,10 @@ jobs:
         executor: main-env
         steps:
             - ssh-checkout
-            - restore_cache:
-                keys:
-                    - verilator-installed-<< pipeline.parameters.verilator-cache-version >>-{{ checksum "sims/verilator/verilator.mk" }}
             - run:
-                name: Build Verilator
+                name: Install Verilator to remote
                 command: |
-                    .circleci/build-verilator.sh
-                no_output_timeout: 120m
-            - save_cache:
-                key: verilator-installed-<< pipeline.parameters.verilator-cache-version >>-{{ checksum "sims/verilator/verilator.mk" }}
-                paths:
-                    - "/home/riscvuser/verilator"
+                    .circleci/install-verilator.sh
     build-extra-tests:
         executor: main-env
         steps:
@@ -188,44 +183,49 @@ jobs:
                 key: extra-tests-{{ .Branch }}-{{ .Revision }}
                 paths:
                     - "/home/riscvuser/project/tests"
-    prepare-example:
+    prepare-chipyard-rocket:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "example"
-    prepare-boomrocketexample:
+                project-key: "chipyard-rocket"
+    prepare-chipyard-sha3:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "boomrocketexample"
+                project-key: "chipyard-sha3"
+    prepare-chipyard-hetero:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-hetero"
                 timeout: "240m"
-    prepare-boom:
+    prepare-chipyard-boom:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "boom"
+                project-key: "chipyard-boom"
     prepare-rocketchip:
         executor: main-env
         steps:
             - prepare-rtl:
                 project-key: "rocketchip"
-    prepare-blockdevrocketchip:
+    prepare-chipyard-blkdev:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "blockdevrocketchip"
-    prepare-hwacha:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                tools-version: "esp-tools"
-                project-key: "hwacha"
-    prepare-gemmini:
+                project-key: "chipyard-blkdev"
+    prepare-chipyard-hwacha:
         executor: main-env
         steps:
             - prepare-rtl:
                 tools-version: "esp-tools"
-                project-key: "gemmini"
+                project-key: "chipyard-hwacha"
+    prepare-chipyard-gemmini:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                tools-version: "esp-tools"
+                project-key: "chipyard-gemmini"
     prepare-tracegen:
         executor: main-env
         steps:
@@ -248,45 +248,48 @@ jobs:
             - prepare-rtl:
                 project-key: "fireboom"
                 build-script: "do-firesim-build.sh"
-    midasexamples-run-tests:
+    prepare-chipyard-ariane:
         executor: main-env
         steps:
-            - setup-tools-verilator
-            - run:
-                name: Run midasexamples tests
-                command: .circleci/run-midasexamples-tests.sh
-    example-run-tests:
-        executor: main-env
-        steps:
-            - run-tests:
-                project-key: "example"
-    boomrocketexample-run-tests:
+            - prepare-rtl:
+                project-key: "chipyard-ariane"
+    chipyard-rocket-run-tests:
         executor: main-env
         steps:
             - run-tests:
-                project-key: "boomrocketexample"
-    boom-run-tests:
+                project-key: "chipyard-rocket"
+    chipyard-sha3-run-tests:
         executor: main-env
         steps:
             - run-tests:
-                project-key: "boom"
+                project-key: "chipyard-sha3"
+    chipyard-hetero-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-hetero"
+    chipyard-boom-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-boom"
     rocketchip-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 project-key: "rocketchip"
-    hwacha-run-tests:
+    chipyard-hwacha-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 tools-version: "esp-tools"
-                project-key: "hwacha"
-    gemmini-run-tests:
+                project-key: "chipyard-hwacha"
+    chipyard-gemmini-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 tools-version: "esp-tools"
-                project-key: "gemmini"
+                project-key: "chipyard-gemmini"
     tracegen-run-tests:
         executor: main-env
         steps:
@@ -311,7 +314,19 @@ jobs:
                 extra-cache-restore: "extra-tests"
                 project-key: "fireboom"
                 run-script: "run-firesim-tests.sh"
-                timeout: "20m"
+                timeout: "30m"
+    midasexamples-run-tests:
+        executor: main-env
+        steps:
+            - setup-tools
+            - run:
+                name: Run midasexamples tests
+                command: .circleci/run-midasexamples-tests.sh
+    chipyard-ariane-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-ariane"
 
 # Order and dependencies of jobs to run
 workflows:
@@ -335,10 +350,12 @@ workflows:
 
             - install-esp-toolchain
 
-            # Build verilator
             - install-verilator
 
             - commit-on-master-check
+
+            # Attempt to apply the tutorial patches
+            - tutorial-setup-check
 
             # Build extra tests
             - build-extra-tests:
@@ -346,17 +363,22 @@ workflows:
                     - install-riscv-toolchain
 
             # Prepare the verilator builds
-            - prepare-example:
+            - prepare-chipyard-rocket:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-boomrocketexample:
+            - prepare-chipyard-sha3:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-boom:
+            - prepare-chipyard-hetero:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-boom:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
@@ -366,17 +388,17 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-blockdevrocketchip:
+            - prepare-chipyard-blkdev:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-hwacha:
+            - prepare-chipyard-hwacha:
                 requires:
                     - install-esp-toolchain
                     - install-verilator
 
-            - prepare-gemmini:
+            - prepare-chipyard-gemmini:
                 requires:
                     - install-esp-toolchain
                     - install-verilator
@@ -401,38 +423,46 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
+            - prepare-chipyard-ariane:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
             # Run the respective tests
 
             # Run midasexamples test
             - midasexamples-run-tests:
                 requires:
                     - install-riscv-toolchain
-                    - install-verilator
 
             # Run the example tests
-            - example-run-tests:
+            - chipyard-rocket-run-tests:
                 requires:
-                    - prepare-example
+                    - prepare-chipyard-rocket
 
-            - boomrocketexample-run-tests:
+            - chipyard-sha3-run-tests:
                 requires:
-                    - prepare-boomrocketexample
+                    - prepare-chipyard-sha3
 
-            - boom-run-tests:
+            - chipyard-hetero-run-tests:
                 requires:
-                    - prepare-boom
+                    - prepare-chipyard-hetero
+
+            - chipyard-boom-run-tests:
+                requires:
+                    - prepare-chipyard-boom
 
             - rocketchip-run-tests:
                 requires:
                     - prepare-rocketchip
 
-            - hwacha-run-tests:
+            - chipyard-hwacha-run-tests:
                 requires:
-                    - prepare-hwacha
+                    - prepare-chipyard-hwacha
 
-            - gemmini-run-tests:
+            - chipyard-gemmini-run-tests:
                 requires:
-                    - prepare-gemmini
+                    - prepare-chipyard-gemmini
 
             - tracegen-run-tests:
                 requires:
@@ -452,3 +482,7 @@ workflows:
                 requires:
                     - prepare-fireboom
                     - build-extra-tests
+
+            - chipyard-ariane-run-tests:
+                requires:
+                    - prepare-chipyard-ariane

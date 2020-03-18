@@ -3,7 +3,7 @@
 // All Rights Reserved. See LICENSE and LICENSE.SiFive for license details.
 //------------------------------------------------------------------------------
 
-package utilities
+package chipyard
 
 import chisel3._
 import chisel3.internal.sourceinfo.{SourceInfo}
@@ -22,24 +22,26 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.amba.axi4._
 
 import boom.common.{BoomTile, BoomTilesKey, BoomCrossingKey, BoomTileParams}
+import ariane.{ArianeTile, ArianeTilesKey, ArianeCrossingKey, ArianeTileParams}
 
-
-trait HasBoomAndRocketTiles extends HasTiles
+trait HasChipyardTiles extends HasTiles
   with CanHavePeripheryPLIC
   with CanHavePeripheryCLINT
   with HasPeripheryDebug
 { this: BaseSubsystem =>
 
-  val module: HasBoomAndRocketTilesModuleImp
+  val module: HasChipyardTilesModuleImp
 
   protected val rocketTileParams = p(RocketTilesKey)
   protected val boomTileParams = p(BoomTilesKey)
+  protected val arianeTileParams = p(ArianeTilesKey)
 
   // crossing can either be per tile or global (aka only 1 crossing specified)
   private val rocketCrossings = perTileOrGlobalSetting(p(RocketCrossingKey), rocketTileParams.size)
   private val boomCrossings = perTileOrGlobalSetting(p(BoomCrossingKey), boomTileParams.size)
+  private val arianeCrossings = perTileOrGlobalSetting(p(ArianeCrossingKey), arianeTileParams.size)
 
-  val allTilesInfo = (rocketTileParams ++ boomTileParams) zip (rocketCrossings ++ boomCrossings)
+  val allTilesInfo = (rocketTileParams ++ boomTileParams ++ arianeTileParams) zip (rocketCrossings ++ boomCrossings ++ arianeCrossings)
 
   // Make a tile and wire its nodes into the system,
   // according to the specified type of clock crossing.
@@ -57,6 +59,10 @@ trait HasBoomAndRocketTiles extends HasTiles
         }
         case b: BoomTileParams => {
           val t = LazyModule(new BoomTile(b, crossing, PriorityMuxHartIdFromSeq(boomTileParams), logicalTreeNode))
+          (t, t.rocketLogicalTree) // TODO FIX rocketLogicalTree is not a member of the superclass, both child classes define it separately
+        }
+        case a: ArianeTileParams => {
+          val t = LazyModule(new ArianeTile(a, crossing, PriorityMuxHartIdFromSeq(arianeTileParams), logicalTreeNode))
           (t, t.rocketLogicalTree) // TODO FIX rocketLogicalTree is not a member of the superclass, both child classes define it separately
         }
       }
@@ -79,14 +85,14 @@ trait HasBoomAndRocketTiles extends HasTiles
   }.toList
 }
 
-trait HasBoomAndRocketTilesModuleImp extends HasTilesModuleImp
+trait HasChipyardTilesModuleImp extends HasTilesModuleImp
   with HasPeripheryDebugModuleImp
 {
-  val outer: HasBoomAndRocketTiles
+  val outer: HasChipyardTiles
 }
 
 class Subsystem(implicit p: Parameters) extends BaseSubsystem
-  with HasBoomAndRocketTiles
+  with HasChipyardTiles
 {
   override lazy val module = new SubsystemModuleImp(this)
 
@@ -95,7 +101,7 @@ class Subsystem(implicit p: Parameters) extends BaseSubsystem
 
 class SubsystemModuleImp[+L <: Subsystem](_outer: L) extends BaseSubsystemModuleImp(_outer)
   with HasResetVectorWire
-  with HasBoomAndRocketTilesModuleImp
+  with HasChipyardTilesModuleImp
 {
   tile_inputs.zip(outer.hartIdList).foreach { case(wire, i) =>
     wire.hartid := i.U

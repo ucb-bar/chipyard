@@ -6,7 +6,7 @@ set -e
 set -o pipefail
 
 RDIR=$(pwd)
-scripts_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+scripts_dir="$( cd "$( dirname "${BASH_SOURCE[0]:-${(%):-%x}}" )" >/dev/null 2>&1 && pwd )"
 
 cd "${scripts_dir}/.."
 
