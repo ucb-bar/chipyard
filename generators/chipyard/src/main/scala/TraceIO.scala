@@ -14,6 +14,8 @@ import freechips.rocketchip.tile.{RocketTile}
 
 import boom.common.{BoomTile}
 
+import ariane.{ArianeTile}
+
 import testchipip.{ExtendedTracedInstruction, TraceOutputTop, DeclockedTracedInstruction}
 
 case class TracePortParams(
@@ -22,13 +24,14 @@ case class TracePortParams(
 
 object TracePortKey extends Field[Option[TracePortParams]](None)
 
-trait CanHaveTraceIO { this: HasBoomAndRocketTiles =>
+trait CanHaveTraceIO { this: HasChipyardTiles =>
   val module: CanHaveTraceIOModuleImp
 
   // Bind all the trace nodes to a BB; we'll use this to generate the IO in the imp
   val traceNexus = BundleBridgeNexus[Vec[TracedInstruction]]
   val tileTraceNodes = tiles.collect {
     case r: RocketTile => r
+    case a: ArianeTile => a
   }.map { _.traceNode }
 
   val extTraceNexus = BundleBridgeNexus[Vec[ExtendedTracedInstruction]]

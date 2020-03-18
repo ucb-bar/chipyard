@@ -42,7 +42,7 @@ include $(base_dir)/common.mk
 #########################################################################################
 # vcs binary and arguments
 #########################################################################################
-VCS = vcs -full64 -j 8
+VCS = vcs -full64
 
 VCS_CC_OPTS = \
 	-CC "-I$(VCS_HOME)/include" \
@@ -75,6 +75,7 @@ VCS_DEFINES = \
 	+define+CLOCK_PERIOD=1.0 \
 	+define+PRINTF_COND=$(TB).printf_cond \
 	+define+STOP_COND=!$(TB).reset \
+	+define+RANDOMIZE_MEM_INIT \
 	+define+RANDOMIZE_REG_INIT \
 	+define+RANDOMIZE_GARBAGE_ASSIGN \
 	+define+RANDOMIZE_INVALID_ASSIGN

@@ -12,9 +12,7 @@ class SmallBoomConfig extends Config(
   new chipyard.iobinders.WithBlackBoxSimMem ++                   // drive the master AXI4 memory with a SimAXIMem
   new chipyard.iobinders.WithTiedOffDebug ++                     // tie off debug (since we are using SimSerial for testing)
   new chipyard.iobinders.WithSimSerial ++                        // drive TSI with SimSerial for testing
-  new chipyard.iobinders.WithSimBlockDevice ++                   // drive block-device IOs with SimBlockDevice
   new testchipip.WithTSI ++                                      // use testchipip serial offchip link
-  new testchipip.WithBlockDevice ++                              // add block-device module to periphery bus
   new chipyard.config.WithNoGPIO ++                              // no top-level GPIO pins (overrides default set in sifive-blocks)
   new chipyard.config.WithBootROM ++                             // use default bootrom
   new chipyard.config.WithUART ++                                // add a UART
@@ -33,9 +31,7 @@ class MediumBoomConfig extends Config(
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
-  new chipyard.iobinders.WithSimBlockDevice ++                   // drive block-device IOs with SimBlockDevice
   new testchipip.WithTSI ++
-  new testchipip.WithBlockDevice ++                              // add block-device module to periphery bus
   new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
@@ -54,9 +50,7 @@ class LargeBoomConfig extends Config(
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
-  new chipyard.iobinders.WithSimBlockDevice ++                   // drive block-device IOs with SimBlockDevice
   new testchipip.WithTSI ++
-  new testchipip.WithBlockDevice ++                              // add block-device module to periphery bus
   new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
@@ -75,9 +69,7 @@ class MegaBoomConfig extends Config(
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
-  new chipyard.iobinders.WithSimBlockDevice ++                   // drive block-device IOs with SimBlockDevice
   new testchipip.WithTSI ++
-  new testchipip.WithBlockDevice ++                              // add block-device module to periphery bus
   new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
