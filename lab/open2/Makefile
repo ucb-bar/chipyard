@@ -8,7 +8,10 @@ OBJDUMP := riscv64-unknown-elf-objdump
 CFLAGS := -O2 -std=gnu11 -Wall
 
 .PHONY: all
-all: spectre.dump
+all: spectre.dump baremetal.dump
+
+spectre.riscv: CFLAGS += -specs=nano.specs
+baremetal.riscv: CFLAGS += -specs=htif_nano.specs
 
 .PRECIOUS: %.riscv
 %.riscv: %.c $(wildcard *.h)
