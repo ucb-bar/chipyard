@@ -94,57 +94,45 @@ include $(base_dir)/vcs.mk
 SIM_CONF = $(OBJ_DIR)/sim-inputs.yml
 SIM_DEBUG_CONF = $(OBJ_DIR)/sim-debug-inputs.yml
 
+.PHONY: $(SIM_CONF) $(SIM_DEBUG_CONF)
+# Update hammer top-level sim targets to include our generated sim configs
+redo-sim: $(SIM_CONF)
+redo-sim: override HAMMER_EXTRA_ARGS += -p $(SIM_CONF)
+redo-sim-debug: $(SIM_DEBUG_CONF) redo-sim
+redo-sim-debug: override HAMMER_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
+
+redo-sim-syn: $(SIM_CONF)
+redo-sim-syn: override HAMMER_EXTRA_ARGS += -p $(SIM_CONF)
+redo-sim-syn-debug: $(SIM_DEBUG_CONF) redo-sim-syn
+redo-sim-syn-debug: override HAMMER_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
+
+redo-sim-par: $(SIM_CONF)
+redo-sim-par: override HAMMER_EXTRA_ARGS += -p $(SIM_CONF)
+redo-sim-par-debug: $(SIM_DEBUG_CONF) redo-sim-par
+redo-sim-par-debug: override HAMMER_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
+
+sim: $(SIM_CONF)
+sim: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_CONF)
+sim-debug: $(SIM_DEBUG_CONF) sim
+sim-debug: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
+$(OBJ_DIR)/sim-rundir/sim-output-full.json: private override HAMMER_EXTRA_ARGS += $(HAMMER_SIM_EXTRA_ARGS)
+
+sim-syn: $(SIM_CONF)
+sim-syn: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_CONF)
+sim-syn-debug: $(SIM_DEBUG_CONF) sim-syn
+sim-syn-debug: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
+$(OBJ_DIR)/sim-syn-rundir/sim-output-full.json: private override HAMMER_EXTRA_ARGS += $(HAMMER_SIM_EXTRA_ARGS)
+
+sim-par: $(SIM_CONF)
+sim-par: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_CONF)
+sim-par-debug: $(SIM_DEBUG_CONF) sim-par
+sim-par-debug: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
+$(OBJ_DIR)/sim-par-rundir/sim-output-full.json: private override HAMMER_EXTRA_ARGS += $(HAMMER_SIM_EXTRA_ARGS)
+
 $(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
-	echo "  level: 'gl'" >> $@
-	echo "  input_files:" >> $@
-	for x in $(HARNESS_FILE) $(HARNESS_SMEMS_FILE); do \
-		echo '    - "'$$x'"' >> $@; \
-	done
-	echo "  input_files_meta: 'append'" >> $@
-	echo "  timescale: '1ns/10ps'" >> $@
-	echo "  options: [" >> $@
-	echo "    '$(RISCV)/lib/libfesvr.a'," >> $@
-	echo "    '+lint=all,noVCDE,noONGS,noUI'," >> $@
-	echo "    '-error=PCWM-L'," >> $@
-	echo "    '-quiet'," >> $@
-	echo "    '-q'," >> $@
-	echo "    '+rad'," >> $@
-	echo "    '+v2k'," >> $@
-	echo "    '+vcs+lic+wait'," >> $@
-	echo "    '+vc+list'," >> $@
-	echo "    '-f $(sim_common_files)'," >> $@
-	echo "    '-sverilog']" >> $@
-	echo "  options_meta: 'append'" >> $@
-	echo "  defines: [" >> $@
-	echo "    'CLOCK_PERIOD=1.0'," >> $@
-	echo "    'PRINTF_COND=$(TB).printf_cond'," >> $@
-	echo "    'STOP_COND=!$(TB).reset'," >> $@
-	echo "    'RANDOMIZE_MEM_INIT'," >> $@
-	echo "    'RANDOMIZE_REG_INIT'," >> $@
-	echo "    'RANDOMIZE_GARBAGE_ASSIGN'," >> $@
-	echo "    'RANDOMIZE_INVALID_ASSIGN']" >> $@
-	echo "  defines_meta: 'append'" >> $@
-	echo "  compiler_opts: [" >> $@
-	echo "    '-I$(RISCV)/include'," >> $@
-	echo "    '-std=c++11']" >> $@
-	echo "  compiler_opts_meta: 'append'" >> $@
-	echo "  execution_flags_prepend: ['$(PERMISSIVE_ON)']" >> $@
-	echo "  execution_flags_append: ['$(PERMISSIVE_OFF)']" >> $@
-	echo "  execution_flags: [" >> $@
-	echo "    '+max-cycles=$(timeout_cycles)'," >> $@
-	for x in $(SIM_FLAGS) $(VERBOSE_FLAGS); do \
-	  echo '    "'$$x'",' >> $@; \
-	done
-	echo "  ]" >> $@
-	echo "  execution_flags_meta: 'append'" >> $@
-	echo "  benchmarks: ['$(RISCV)/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-dgemm-opt.riscv']" >> $@
-
-$(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
-	mkdir -p $(dir $@)
-	echo "sim.inputs:" > $@
-	echo "  level: 'gl'" >> $@
+	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
 	for x in $(HARNESS_FILE) $(HARNESS_SMEMS_FILE); do \
 		echo '    - "'$$x'"' >> $@; \
@@ -166,7 +154,6 @@ $(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_commo
 	echo "    '-debug_pp']" >> $@
 	echo "  options_meta: 'append'" >> $@
 	echo "  defines: [" >> $@
-	echo "    'DEBUG'," >> $@
 	echo "    'CLOCK_PERIOD=1.0'," >> $@
 	echo "    'PRINTF_COND=$(TB).printf_cond'," >> $@
 	echo "    'STOP_COND=!$(TB).reset'," >> $@
@@ -183,34 +170,50 @@ $(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_commo
 	echo "  execution_flags_append: ['$(PERMISSIVE_OFF)']" >> $@
 	echo "  execution_flags: [" >> $@
 	echo "    '+max-cycles=$(timeout_cycles)'," >> $@
-	for x in $(SIM_FLAGS) $(VERBOSE_FLAGS); do \
+	for x in $(SIM_FLAGS); do \
 	  echo '    "'$$x'",' >> $@; \
 	done
-	echo "    '+vcdplusfile=$(OBJ_DIR)/sim-tool-output.vpd']" >> $@
+	echo "  ]" >> $@
 	echo "  execution_flags_meta: 'append'" >> $@
+	echo "  benchmarks: ['$(BINARY)']" >> $@
 	echo "  tb_dut: 'testHarness.top'" >> $@
-	echo "  benchmarks: ['$(RISCV)/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-dgemm-opt.riscv']" >> $@
 
-	#echo "  benchmarks: ['$(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-add']" >> $@
+$(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
+	mkdir -p $(dir $@)
+	echo "sim.inputs:" > $@
+	echo "  defines: [" >> $@
+	echo "    'DEBUG']" >> $@
+	echo "  defines_meta: 'append'" >> $@
+	echo "  execution_flags: [" >> $@
+	for x in $(VERBOSE_FLAGS) $(WAVEFORM_FLAG); do \
+	  echo '    "'$$x'",' >> $@; \
+	done
+	echo "  ]" >> $@
+	echo "  execution_flags_meta: 'append'" >> $@
+
 
 $(POWER_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
 	echo "power.inputs:" > $@
 
-sim_conf_temp: $(SIM_CONF) $(SIM_DEBUG_CONF)
-
 #########################################################################################
 # synthesis input configuration
 #########################################################################################
 SYN_CONF = $(OBJ_DIR)/inputs.yml
-GENERATED_CONFS = $(SYN_CONF) $(SIM_CONF)
+GENERATED_CONFS = $(SYN_CONF)
 ifeq ($(CUSTOM_VLOG), )
 	GENERATED_CONFS += $(if $(filter $(tech_name), asap7), , $(SRAM_CONF))
 endif
 
 $(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 	mkdir -p $(dir $@)
-	echo "synthesis.inputs:" > $@
+	echo "sim.inputs:" > $@
+	echo "  input_files:" >> $@
+	for x in $(VLSI_RTL); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  input_files_meta: 'append'" >> $@
+	echo "synthesis.inputs:" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
 	for x in $(VLSI_RTL) `cat $(VLSI_BB)`; do \
@@ -236,4 +239,4 @@ $(OBJ_DIR)/hammer.d: $(HAMMER_D_DEPS)
 #########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(VLSI_OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(gen_dir)
+	rm -rf $(VLSI_OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(gen_dir) $(SIM_CONF) $(SIM_DEBUG_CONF)
