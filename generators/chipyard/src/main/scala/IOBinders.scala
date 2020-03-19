@@ -12,6 +12,8 @@ import freechips.rocketchip.util._
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 
+import barstools.iocell.chisel.{AnalogConst}
+
 import chipyard.chiptop._
 import chipyard.TestHarnessUtils
 import testchipip._
@@ -78,7 +80,7 @@ class WithChipTopSimpleClockAndReset extends OverrideIOBinder({
 class WithGPIOTiedOff extends Config(new OverrideIOBinder({
   (c, r, s, top: HasPeripheryGPIOModuleImp) => top.gpio.foreach(_.pins.foreach(_.i.ival := false.B)); Nil
 }) ++ new OverrideIOBinder({
-  (c, r, s, top: CanHaveChipTopGPIO) => top.gpio.foreach(_ := false.B); Nil
+  (c, r, s, top: CanHaveChipTopGPIO) => top.gpio.foreach(_ <> AnalogConst(0)); Nil
 }))
 
 class WithSimBlockDevice extends Config(new OverrideIOBinder({

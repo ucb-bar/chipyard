@@ -3,7 +3,9 @@ package chipyard.chiptop
 import chisel3._
 import chipyard.{Top, System, SystemModule}
 
-//import chisel3.experimental.{DataMirror}
+import scala.collection.mutable.{ArrayBuffer}
+
+import chisel3.experimental.{Analog}
 import freechips.rocketchip.config.{Parameters, Field}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug.{DebugIO, PSDIO, HasPeripheryDebugModuleImp}
@@ -15,12 +17,16 @@ import icenet.{NICConfig, NICIOvonly, CanHavePeripheryIceNICModuleImp}
 import tracegen.{HasTraceGenTilesModuleImp}
 import chipyard.config.ConfigValName._
 
+import barstools.iocell.chisel._
+
 case object BuildSystem extends Field[Parameters => SystemModule[System]]((p: Parameters) => Module(LazyModule(new Top()(p)).suggestName("system").module))
 
 abstract class BaseChipTop(implicit val p: Parameters) extends RawModule {
 
-  val systemClock = Wire(Clock())
-  val systemReset = Wire(Reset())
+  val iocells = ArrayBuffer.empty[IOCell]
+
+  val systemClock = Wire(Input(Clock()))
+  val systemReset = Wire(Input(Bool()))
 
   val system = withClockAndReset(systemClock, systemReset) { p(BuildSystem)(p) }
 
@@ -31,29 +37,42 @@ abstract class BaseChipTop(implicit val p: Parameters) extends RawModule {
 trait HasChipTopSimpleClockAndReset { this: BaseChipTop =>
   implicit val p: Parameters
 
-  val clock = IO(Input(Clock()))
   // TODO how to handle async vs sync reset?
+  val clock = IO(Input(Clock()))
   val reset = IO(Input(Bool()))
 
-  //this.systemClock := DigitalInputIO(clock)
-  //this.systemReset := DigitalInputIO(reset)
+  private val systemClockIO = IOCell.generateFromSignal(systemClock, clock).head
+  private val systemResetIO = IOCell.generateFromSignal(systemReset, reset).head
 
-  this.systemClock := clock
-  this.systemReset := reset
+  systemClockIO.suggestName("iocell_clock")
+  systemResetIO.suggestName("iocell_reset")
+
+  iocells += systemClockIO
+  iocells += systemResetIO
 
   def connectReset(r: Bool) { reset := r }
 
 }
 
+// TODO add a reset catch and sync block?
+
 trait CanHaveChipTopGPIO { this: BaseChipTop =>
   implicit val p: Parameters
   // TODO this becomes analog
-  val gpio: Seq[Bool] = system match {
+  val gpio: Seq[Analog] = system match {
     case system: HasPeripheryGPIOModuleImp => {
-      system.gpio.map(_.pins).map(_.map(_.i.ival)).flatten.map { pin =>
-        // TODO sane naming
-        val g = IO(Input(Bool()))
-        pin := g
+      // TODO number sanely?
+      system.gpio.map(_.pins).flatten.zipWithIndex.map { case (pin, i) =>
+        val g = IO(Analog(1.W))
+        // TODO functionalize this?
+        val iocell = IOCell.exampleGPIO()
+        iocell.suggestName(s"iocell_gpio_$i")
+        iocells += iocell
+        iocell.io.o := pin.o.oval
+        iocell.io.oe := pin.o.oe
+        iocell.io.ie := pin.o.ie
+        pin.i.ival := iocell.io.i
+        iocell.io.pad <> g
         g
       }
     }
@@ -66,9 +85,11 @@ trait CanHaveChipTopUART { this: BaseChipTop =>
   val uart: Seq[UARTPortIO] = system match {
     case system: HasPeripheryUARTModuleImp => {
       system.uart.map { uart =>
-        val io = IO(new UARTPortIO())
-        io <> uart
-        io
+        val port = IO(new UARTPortIO)
+        val ios = IOCell.generateFromSignal(uart, port)
+        // iocell suggestName?
+        iocells ++= ios
+        port
       }
     }
     case _ => Seq()
@@ -80,9 +101,11 @@ trait CanHaveChipTopBlockDevice { this: BaseChipTop =>
   val bdev: Option[BlockDeviceIO] = system match {
     case system: CanHavePeripheryBlockDeviceModuleImp => {
       system.bdev.map { bdev =>
-        val io = IO(new BlockDeviceIO)
-        io <> bdev
-        io
+        val port = IO(new BlockDeviceIO)
+        val ios = IOCell.generateFromSignal(bdev, port)
+        // iocell suggestName?
+        iocells ++= ios
+        port
       }
     }
     case _ => None
@@ -98,9 +121,11 @@ trait CanHaveChipTopIceNIC { this: BaseChipTop =>
   val net: Option[NICIOvonly] = system match {
     case system: CanHavePeripheryIceNICModuleImp  => {
       system.net.map { net =>
-        val io = IO(new NICIOvonly)
-        io <> net
-        io
+        val port = IO(new NICIOvonly)
+        val ios = IOCell.generateFromSignal(net, port)
+         // iocell suggestName?
+        iocells ++= ios
+        port
       }
     }
     case _ => None
@@ -112,9 +137,11 @@ trait CanHaveChipTopExtInterrupts { this: BaseChipTop =>
 
   val interrupts = system match {
     case system: HasExtInterruptsModuleImp => {
-      val io = IO(Input(UInt(system.interrupts.getWidth.W)))
-      io <> system.interrupts
-      Some(io)
+      val port = IO(Input(UInt(system.interrupts.getWidth.W)))
+      val ios = IOCell.generateFromSignal(system.interrupts, port)
+      // io suggestName?
+      iocells ++= ios
+      Some(port)
     }
     case _ => None
   }
@@ -127,19 +154,23 @@ trait CanHaveChipTopDebug { this: BaseChipTop =>
 
   val psd = system match {
     case system: HasPeripheryDebugModuleImp => {
-      val io = IO(new PSDIO()(system.p))
-      io <> system.psd
-      Some(io)
+      val port = IO(new PSDIO()(system.p))
+      val ios = IOCell.generateFromSignal(system.psd, port)
+      // io suggestName?
+      iocells ++= ios
+      Some(port)
     }
     case _ => None
   }
 
   val debug = system match {
     case system: HasPeripheryDebugModuleImp => {
-      system.debug.map { debug =>
-        val io = IO(new DebugIO()(system.p))
-        io <> debug
-        io
+      system.debug.map { d =>
+        val port = IO(new DebugIO()(system.p))
+        val ios = IOCell.generateFromSignal(d, port)
+        // io suggestName?
+        iocells ++= ios
+        port
       }
     }
     case _ => None
@@ -155,9 +186,11 @@ trait CanHaveChipTopSerial { this: BaseChipTop =>
   val serial = system match {
     case system: CanHavePeripherySerialModuleImp => {
       system.serial.map { s =>
-        val io = IO(new SerialIO(SerialAdapter.SERIAL_IF_WIDTH))
-        io <> s
-        Some(io)
+        val port = IO(new SerialIO(SerialAdapter.SERIAL_IF_WIDTH))
+        val ios = IOCell.generateFromSignal(s, port)
+        // io suggestName?
+        iocells ++= ios
+        Some(port)
       }
     }
     case _ => None
@@ -174,11 +207,14 @@ trait CanHaveChipTopSerial { this: BaseChipTop =>
 trait CanHaveChipTopTraceGen { this: BaseChipTop =>
   implicit val p: Parameters
 
+
   val success = system match {
     case system: HasTraceGenTilesModuleImp => {
-      val io = IO(Output(Bool()))
-      io <> system.success
-      io
+      val port = IO(Output(Bool()))
+      val ios = IOCell.generateFromSignal(system.success, port)
+      // io suggestName?
+      iocells ++= ios
+      port
     }
     case _ => false.B
   }
@@ -199,11 +235,11 @@ class ChipTop(implicit p: Parameters) extends BaseChipTop()(p)
   with HasChipTopSimpleClockAndReset
   with CanHaveChipTopGPIO
   with CanHaveChipTopUART
-  with CanHaveChipTopSerial
   with CanHaveChipTopBlockDevice
   with CanHaveChipTopIceNIC
   with CanHaveChipTopExtInterrupts
   with CanHaveChipTopDebug
   with CanHaveChipTopTraceGen
   with CanHaveChipTopAXI4Memory
+  with CanHaveChipTopSerial
 
