@@ -5,9 +5,9 @@ import chisel3.experimental._
 
 import firrtl.transforms.{BlackBoxResourceAnno, BlackBoxSourceHelper}
 
-import freechips.rocketchip.diplomacy.LazyModule
+import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.config.{Field, Parameters}
-import freechips.rocketchip.util.GeneratorApp
+import freechips.rocketchip.util.{GeneratorApp}
 import freechips.rocketchip.devices.debug.{Debug}
 
 import chipyard.config.ConfigValName._
