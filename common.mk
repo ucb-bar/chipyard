@@ -41,13 +41,15 @@ $(sim_files): $(call lookup_scala_srcs,$(base_dir)/generators/utilities/src/main
 # create firrtl file rule and variables
 #########################################################################################
 .INTERMEDIATE: generator_temp
-$(FIRRTL_FILE) $(ANNO_FILE): generator_temp
+$(FIRRTL_FILE) $(ANNO_FILE) $(DTS_FILE) $(DTB_FILE) $(DROMAJO_PARAMS_FILE): generator_temp
 	@echo "" > /dev/null
 
 # AG: must re-elaborate if ariane sources have changed... otherwise just run firrtl compile
 generator_temp: $(SCALA_SOURCES) $(ARIANE_VLOG_SOURCES) $(sim_files)
 	mkdir -p $(build_dir)
 	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator $(build_dir) $(MODEL_PACKAGE) $(MODEL) $(CONFIG_PACKAGE) $(CONFIG)"
+	if [ -f $(DTS_FILE) ]; then dtc -I dts -O dtb -o $(DTB_FILE) $(DTS_FILE); fi
+	ln -s $(DROMAJO_PARAMS_FILE) $(DROMAJO_PARAMS_SYMLINK)
 
 .PHONY: firrtl
 firrtl: $(FIRRTL_FILE)
@@ -104,21 +106,21 @@ verilog: $(sim_vsrcs)
 # helper rules to run simulations
 #########################################################################################
 .PHONY: run-binary run-binary-fast run-binary-debug run-fast
+
+# Run a binary
 run-binary: $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(DROMAJO_FLAGS) +drj_bin=$(BINARY) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
-#########################################################################################
-# helper rules to run simulator as fast as possible
-#########################################################################################
+# Run a binary as fast-as-possible
 run-binary-fast: $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(DROMAJO_FLAGS) +drj_bin=$(BINARY)$(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
 
-#########################################################################################
-# helper rules to run simulator with as much debug info as possible
-#########################################################################################
+
+# Run a binary with debug info
 run-binary-debug: $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(DROMAJO_FLAGS) +drj_bin=$(BINARY) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
+# Run fast asm and bmark tests
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
 #########################################################################################
@@ -129,10 +131,10 @@ $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
 	ln -sf $< $@
 
 $(output_dir)/%.run: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(DROMAJO_FLAGS) +drj_bin=$< $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(DROMAJO_FLAGS) +drj_bin=$< $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
@@ -151,8 +153,8 @@ AXE=$(AXE_DIR)/axe
 $(AXE): $(wildcard $(AXE_DIR)/*.[ch]) $(AXE_DIR)/make.sh
 	cd $(AXE_DIR) && ./make.sh
 
-$(output_dir)/tracegen.out: $(sim)
-	mkdir -p $(output_dir) && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) none </dev/null 2> $@
+$(output_dir)/tracegen.out: $(sim_debug)
+	mkdir -p $(output_dir) && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) +vcdplusfile=tracegen.vpd $(PERMISSIVE_OFF) none </dev/null 2> $@
 
 $(output_dir)/tracegen.result: $(output_dir)/tracegen.out $(AXE)
 	$(base_dir)/scripts/check-tracegen.sh $< > $@
@@ -170,3 +172,18 @@ dramsim_lib = $(dramsim_dir)/libdramsim.a
 
 $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
+
+
+#######################################
+# Rules for Dromajo                   #
+#######################################
+dromajo_dir = $(base_dir)/tools/dromajo/src
+dromajo_lib = $(dromajo_dir)/libdromajo_cosim.a
+
+# Dromajo assumes using the default bootrom
+dromajo_rom = $(base_dir)/bootrom/bootrom.rv64.img
+
+$(dromajo_lib):
+	$(MAKE) -C $(dromajo_dir)
+
+DROMAJO_FLAGS = +drj_dtb=$(DTB_FILE) +drj_rom=$(dromajo_rom)

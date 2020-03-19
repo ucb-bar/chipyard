@@ -47,8 +47,19 @@ include $(base_dir)/common.mk
 #########################################################################################
 VERILATOR := verilator --cc --exe
 
-CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -I$(dramsim_dir) -D__STDC_FORMAT_MACROS
-LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(dramsim_dir) -Wl,-rpath,$(dramsim_dir) -L$(sim_dir) -lfesvr -lpthread -ldramsim
+CXXFLAGS := \
+	$(CXXFLAGS) -O1 -std=c++11 \
+	-I$(RISCV)/include \
+	-I$(dramsim_dir) \
+	-I$(dromajo_dir) \
+	-D__STDC_FORMAT_MACROS
+
+LDFLAGS := \
+	$(LDFLAGS) \
+	-L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib \
+	-L$(dramsim_dir) -Wl,-rpath,$(dramsim_dir) \
+	-L$(dromajo_dir) -Wl,-rpath,$(dromajo_dir) \
+	-L$(sim_dir) -lfesvr -lpthread -ldramsim
 
 VERILATOR_CC_OPTS = \
 	-O3 \
@@ -119,10 +130,10 @@ $(model_mk_debug): $(sim_vsrcs) $(sim_common_files)
 #########################################################################################
 # invoke make to make verilator sim rules
 #########################################################################################
-$(sim): $(model_mk) $(dramsim_lib)
+$(sim): $(model_mk) $(dramsim_lib) $(dromajo_lib)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir) -f V$(VLOG_MODEL).mk
 
-$(sim_debug): $(model_mk_debug) $(dramsim_lib)
+$(sim_debug): $(model_mk_debug) $(dramsim_lib) $(dromajo_lib)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir_debug) -f V$(VLOG_MODEL).mk
 
 #########################################################################################
@@ -132,7 +143,7 @@ $(sim_debug): $(model_mk_debug) $(dramsim_lib)
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd
 	vcd2vpd $@.vcd $@ > /dev/null &
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) -v$@.vcd $(DROMAJO_FLAGS) +drj_bin=$< $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
 
 #########################################################################################
 # general cleanup rule

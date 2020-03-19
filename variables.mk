@@ -98,6 +98,10 @@ endif
 
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
+DTS_FILE    ?= $(build_dir)/$(long_name).dts
+DTB_FILE    ?= $(build_dir)/$(long_name).dtb
+DROMAJO_PARAMS_FILE    ?= $(build_dir)/$(long_name).dromajo_params.h
+DROMAJO_PARAMS_SYMLINK ?= $(build_dir)/dromajo_params.h
 
 TOP_FILE       ?= $(build_dir)/$(long_name).top.v
 TOP_FIR        ?= $(build_dir)/$(long_name).top.fir

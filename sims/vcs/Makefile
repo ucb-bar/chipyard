@@ -48,8 +48,10 @@ VCS_CC_OPTS = \
 	-CC "-I$(VCS_HOME)/include" \
 	-CC "-I$(RISCV)/include" \
 	-CC "-I$(dramsim_dir)" \
+	-CC "-I$(dromajo_dir)" \
 	-CC "-std=c++11" \
 	$(dramsim_lib) \
+	$(dromajo_lib) \
 	$(RISCV)/lib/libfesvr.a
 
 VCS_NONCC_OPTS = \
@@ -85,11 +87,11 @@ VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(VCS_DEFINES)
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
-$(sim): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib)
+$(sim): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(dromajo_lib)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	-debug_pp
 
-$(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib)
+$(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(dromajo_lib)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	+define+DEBUG \
 	-debug_pp
@@ -99,7 +101,7 @@ $(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib)
 #########################################################################################
 .PRECIOUS: $(output_dir)/%.vpd %.vpd
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(DROMAJO_FLAGS) +drj_bin=$< $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
 
 #########################################################################################
 # general cleanup rule
