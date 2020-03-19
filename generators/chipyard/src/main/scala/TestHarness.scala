@@ -12,12 +12,13 @@ import freechips.rocketchip.devices.debug.{Debug, DebugIO, PSDIO}
 import chipyard.config.ConfigValName._
 
 import chipyard.iobinders.{IOBinders}
+import chipyard.chiptop.{ChipTop}
 
 // -------------------------------
 // BOOM and/or Rocket Test Harness
 // -------------------------------
 
-case object BuildTop extends Field[Parameters => Any]((p: Parameters) => Module(LazyModule(new Top()(p)).suggestName("top").module))
+case object BuildTop extends Field[Parameters => Any]((p: Parameters) => Module(new ChipTop()(p)).suggestName("top"))
 
 class TestHarness(implicit val p: Parameters) extends Module {
   val io = IO(new Bundle {

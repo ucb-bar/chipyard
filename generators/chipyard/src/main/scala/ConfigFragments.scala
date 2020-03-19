@@ -155,6 +155,6 @@ class WithControlCore extends Config((site, here, up) => {
  * Config fragment to use ChipTop as the Top module (DUT) to build.
  * Use the BuildSystem key to override the system inside of ChipTop
  */
-class WithChipTop extends Config((site, here, up) => {
-  case BuildTop => (p: Parameters) => Module(new chipyard.chiptop.ChipTop()(p)).suggestName("top")
+class WithNoIOCells extends Config((site, here, up) => {
+  case BuildTop => (p: Parameters) => Module(new chipyard.chiptop.ChipTopNoIOCells()(p)).suggestName("top")
 })
