@@ -80,7 +80,7 @@ class WithChipTopSimpleClockAndReset extends OverrideIOBinder({
 class WithGPIOTiedOff extends Config(new OverrideIOBinder({
   (c, r, s, top: HasPeripheryGPIOModuleImp) => top.gpio.foreach(_.pins.foreach(_.i.ival := false.B)); Nil
 }) ++ new OverrideIOBinder({
-  (c, r, s, top: CanHaveChipTopGPIO) => top.gpio.foreach(_ <> AnalogConst(0)); Nil
+  (c, r, s, top: CanHaveChipTopGPIO) => top.gpio.flatten.foreach(_ <> AnalogConst(0)); Nil
 }))
 
 class WithSimBlockDevice extends Config(new OverrideIOBinder({
