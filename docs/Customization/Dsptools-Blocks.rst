@@ -3,7 +3,7 @@
 Dsptools Blocks
 ===============
  
-Another way to create a MMIO peripheral is to use the Dsptools library for Chisel. In this method, a chain is created by placing a custom module inside a ``DspBlock`` and sandwiching that block between a ``ReadQueue`` and ``WriteQueue``. Those queues then act as memory mapped interfaces to the Rocket Chip SoCs. This section will again primarily focuso n designing Tilelink-based peripherals. However, through the resources provided in Dsptools, one could also define an AXI4-based peripheral by following similar steps.
+Another way to create a MMIO peripheral is to use the Dsptools library for Chisel. In this method, a chain is created by placing a custom module inside a ``DspBlock`` and sandwiching that block between a ``ReadQueue`` and ``WriteQueue``. Those queues then act as memory mapped interfaces to the Rocket Chip SoCs. This section will again primarily focus on designing Tilelink-based peripherals. However, through the resources provided in Dsptools, one could also define an AXI4-based peripheral by following similar steps.
 
 For this example, we will show you how to connect a simple FIR filter created using Dsptools as an MMIO peripheral. The full code can be found in ``generators/example/src/main/scala/dsptools/GenericFIR.scala``.
 
