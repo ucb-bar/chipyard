@@ -27,7 +27,7 @@ import boom.common.{BoomTile}
 
 import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder}
 import chipyard.{HasChipyardTilesModuleImp}
-import chipyard.{CanHaveTraceIOModuleImp}
+import testchipip.{CanHaveTraceIOModuleImp}
 
 class WithSerialBridge extends OverrideIOBinder({
   (c, r, s, target: CanHavePeripherySerialModuleImp) => target.serial.map(s => SerialBridge(s)(target.p)).toSeq
