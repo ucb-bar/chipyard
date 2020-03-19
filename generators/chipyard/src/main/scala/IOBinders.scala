@@ -16,8 +16,6 @@ import testchipip._
 import icenet._
 import tracegen.{HasTraceGenTilesModuleImp}
 
-import chipyard.{CanHaveTraceIOModuleImp}
-
 import scala.reflect.{ClassTag}
 
 // System for instantiating binders based

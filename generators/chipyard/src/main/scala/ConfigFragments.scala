@@ -21,7 +21,7 @@ import hwacha.{Hwacha}
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 
-import chipyard.{BuildTop, TracePortKey, TracePortParams}
+import chipyard.{BuildTop}
 
 /**
  * TODO: Why do we need this?
