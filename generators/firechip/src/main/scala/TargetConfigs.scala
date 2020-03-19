@@ -12,9 +12,8 @@ import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
-import freechips.rocketchip.diplomacy.{RationalCrossing}
 import freechips.rocketchip.diplomacy.LazyModule
-import boom.common.{BoomTilesKey, BoomCrossingKey}
+import boom.common.BoomTilesKey
 import testchipip.{BlockDeviceKey, BlockDeviceConfig, SerialKey, TracePortKey, TracePortParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
@@ -24,7 +23,6 @@ import ariane.ArianeTilesKey
 import testchipip.WithRingSystemBus
 
 import firesim.bridges._
-import midas.widgets.{RationalClock}
 import firesim.configs._
 import chipyard.{BuildTop}
 import chipyard.config.ConfigValName._
@@ -46,18 +44,6 @@ class WithBootROM extends Config((site, here, up) => {
 class WithPeripheryBusFrequency(freq: BigInt) extends Config((site, here, up) => {
   case PeripheryBusKey => up(PeripheryBusKey).copy(frequency=freq)
 })
-
-class WithRationalTiles(multiplier: Int, divisor: Int) extends Config((site, here, up) => {
-  case FireSimClockKey => FireSimClockParameters(Seq(RationalClock("TileDomain", multiplier, divisor)))
-  case RocketCrossingKey => up(RocketCrossingKey, site) map { r =>
-    r.copy(crossingType = RationalCrossing())
-  }
-  case BoomCrossingKey => up(BoomCrossingKey, site) map { r =>
-    r.copy(crossingType = RationalCrossing())
-  }
-})
-
-class HalfRateUncore extends WithRationalTiles(2,1)
 
 
 class WithPerfCounters extends Config((site, here, up) => {
@@ -197,7 +183,6 @@ class SupernodeFireSimRocketConfig extends Config(
 //**********************************************************************************
 //* Ariane Configurations
 //*********************************************************************************/
-
 class FireSimArianeConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++

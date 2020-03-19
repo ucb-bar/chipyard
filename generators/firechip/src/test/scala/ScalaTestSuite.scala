@@ -131,23 +131,24 @@ abstract class FireSimTestSuite(
   elaborate
   generateTestSuiteMakefrags
   runTest("verilator", "rv64ui-p-simple", false, Seq(s"""EXTRA_SIM_ARGS=+trace-humanreadable0"""))
-  diffTracelog("rv64ui-p-simple.out")
+  //diffTracelog("rv64ui-p-simple.out")
   runSuite("verilator")(benchmarks)
   runSuite("verilator")(FastBlockdevTests)
 }
 
-class RocketF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimQuadRocketConfig", "BaseF1Config")
+class RocketF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimQuadRocketConfig", "WithSynthAsserts_BaseF1Config")
 class BoomF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimBoomConfig", "BaseF1Config")
 class RocketNICF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimRocketConfig", "BaseF1Config") {
   runSuite("verilator")(NICLoopbackTests)
 }
-class RamModelRocketF1Tests extends FireSimTestSuite("FireSim", "FireSimDualRocketConfig", "BaseF1Config_MCRams")
-class RamModelBoomF1Tests extends FireSimTestSuite("FireSim", "FireSimBoomConfig", "BaseF1Config_MCRams")
+// Disabled until RAM optimizations re-enabled in multiclock
+//class RamModelRocketF1Tests extends FireSimTestSuite("FireSim", "FireSimDualRocketConfig", "BaseF1Config_MCRams")
+//class RamModelBoomF1Tests extends FireSimTestSuite("FireSim", "FireSimBoomConfig", "BaseF1Config_MCRams")
 
 // Multiclock tests
 class RocketMulticlockF1Tests extends FireSimTestSuite(
-  "FireSim",
-  "HalfRateUncore_DDR3FRFCFSLLC4MB_FireSimQuadRocketConfig",
+  "FireSimMulticlockPOC",
+  "FireSimQuadRocketMulticlockConfig",
   "WithSynthAsserts_BaseF1Config")
 
 abstract class FireSimTraceGenTest(targetConfig: String, platformConfig: String)
