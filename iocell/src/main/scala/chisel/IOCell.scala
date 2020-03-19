@@ -4,7 +4,7 @@ package barstools.iocell.chisel
 
 import chisel3._
 import chisel3.util.{Cat, HasBlackBoxResource}
-import chisel3.experimental.{Analog, DataMirror}
+import chisel3.experimental.{Analog, DataMirror, IO}
 
 class AnalogIOCellBundle extends Bundle {
   val pad = Analog(1.W)
@@ -76,110 +76,115 @@ object IOCell {
   def exampleInput() = Module(new ExampleDigitalInIOCell)
   def exampleOutput() = Module(new ExampleDigitalOutIOCell)
 
-  def generateRaw[T <: Data](signal: T,
+/* This doesn't work because chiselTypeOf doesn't preserve direction info :(
+  def generateIOFromSignal[T <: Data](coreSignal: T,
     inFn: () => DigitalInIOCell = IOCell.exampleInput,
     outFn: () => DigitalOutIOCell = IOCell.exampleOutput,
     anaFn: () => AnalogIOCell = IOCell.exampleAnalog): (T, Seq[IOCell]) =
   {
-    (signal match {
-      case signal: Analog => {
-        require(signal.getWidth <= 1, "Analogs wider than 1 bit are not supported because we can't bit Analogs (https://github.com/freechipsproject/chisel3/issues/536)")
-        if (signal.getWidth == 0) {
-          (Analog(0.W), Seq())
+    val padSignal = DataMirror.specifiedDirectionOf(coreSignal) match {
+      case SpecifiedDirection.Input => IO(Input(chiselTypeOf(coreSignal)))
+      case SpecifiedDirection.Output => IO(Output(chiselTypeOf(coreSignal)))
+      case SpecifiedDirection.Flip => IO(Flipped(chiselTypeOf(coreSignal)))
+      case _ => IO(chiselTypeOf(coreSignal))
+    }
+
+    val iocells = IOCell.generateFromSignal(coreSignal, padSignal, inFn, outFn, anaFn)
+    (padSignal, iocells).asInstanceOf[(T, Seq[IOCell])]
+  }
+*/
+
+  def generateFromSignal[T <: Data](coreSignal: T, padSignal: T,
+    inFn: () => DigitalInIOCell = IOCell.exampleInput,
+    outFn: () => DigitalOutIOCell = IOCell.exampleOutput,
+    anaFn: () => AnalogIOCell = IOCell.exampleAnalog): Seq[IOCell] =
+  {
+    coreSignal match {
+      case coreSignal: Analog => {
+        if (coreSignal.getWidth == 0) {
+          Seq()
         } else {
+          require(coreSignal.getWidth == 1, "Analogs wider than 1 bit are not supported because we can't bit-select Analogs (https://github.com/freechipsproject/chisel3/issues/536)")
           val iocell = anaFn()
-          iocell.io.core <> signal
-          (iocell.io.pad, Seq(iocell))
+          iocell.io.core <> coreSignal
+          padSignal <> iocell.io.pad
+          Seq(iocell)
         }
       }
-      case signal: Clock => {
-        DataMirror.specifiedDirectionOf(signal) match {
-          case SpecifiedDirection.Input => {
+      case coreSignal: Clock => {
+        DataMirror.directionOf(coreSignal) match {
+          case ActualDirection.Input => {
             val iocell = inFn()
-            signal := iocell.io.i.asClock
+            coreSignal := iocell.io.i.asClock
             iocell.io.ie := true.B
-            val ck = Wire(Clock())
-            iocell.io.pad := ck.asUInt.asBool
-            (ck, Seq(iocell))
+            iocell.io.pad := padSignal.asUInt.asBool
+            Seq(iocell)
           }
-          case SpecifiedDirection.Output => {
+          case ActualDirection.Output => {
             val iocell = outFn()
-            iocell.io.o := signal.asUInt.asBool
+            iocell.io.o := coreSignal.asUInt.asBool
             iocell.io.oe := true.B
-            (iocell.io.pad.asClock, Seq(iocell))
+            padSignal := iocell.io.pad.asClock
+            Seq(iocell)
           }
           case _ => throw new Exception("Unknown direction")
         }
       }
-      // TODO we may not actually need Bool (it is probably covered by Bits)
-      case signal: Bool => {
-        DataMirror.specifiedDirectionOf(signal) match {
-          case SpecifiedDirection.Input => {
-            val iocell = inFn()
-            signal := iocell.io.i
-            iocell.io.ie := true.B
-            (iocell.io.pad, Seq(iocell))
+      case coreSignal: Bits => {
+        require(padSignal.getWidth == coreSignal.getWidth, "padSignal and coreSignal must be the same width")
+        if (padSignal.getWidth == 0) {
+          // This dummy assignment will prevent invalid firrtl from being emitted
+          DataMirror.directionOf(coreSignal) match {
+            case ActualDirection.Input => coreSignal := 0.U
           }
-          case SpecifiedDirection.Output => {
-            val iocell = outFn()
-            iocell.io.o := signal
-            iocell.io.oe := true.B
-            (iocell.io.pad, Seq(iocell))
+          Seq()
+        } else {
+          DataMirror.directionOf(coreSignal) match {
+            case ActualDirection.Input => {
+              // this type cast is safe because we guarantee that padSignal and coreSignal are the same type (T), but the compiler is not smart enough to know that
+              val iocells = padSignal.asInstanceOf[Bits].asBools.map { w =>
+                val iocell = inFn()
+                iocell.io.pad := w
+                iocell.io.ie := true.B
+                iocell
+              }
+              coreSignal := Cat(iocells.map(_.io.i).reverse)
+              iocells
+            }
+            case ActualDirection.Output => {
+              val iocells = coreSignal.asBools.map { w =>
+                val iocell = outFn()
+                iocell.io.o := w
+                iocell.io.oe := true.B
+                iocell
+              }
+              padSignal := Cat(iocells.map(_.io.pad).reverse)
+              iocells
+            }
+            case _ => throw new Exception("Unknown direction")
           }
-          case _ => throw new Exception("Unknown direction")
         }
       }
-      case signal: Bits => {
-        DataMirror.specifiedDirectionOf(signal) match {
-          case SpecifiedDirection.Input => {
-            val wire = Wire(chiselTypeOf(signal))
-            val iocells = wire.asBools.map { w =>
-              val iocell = inFn()
-              iocell.io.pad := w
-              iocell.io.ie := true.B
-              iocell
-            }
-            if (iocells.size > 0) {
-              signal := Cat(iocells.map(_.io.i).reverse)
-            }
-            (wire, iocells)
-          }
-          case SpecifiedDirection.Output => {
-            val iocells = signal.asBools.map { b =>
-              val iocell = outFn()
-              iocell.io.o := b
-              iocell.io.oe := true.B
-              iocell
-            }
-            if (iocells.size > 0) {
-              (Cat(iocells.map(_.io.pad).reverse), iocells)
-            } else {
-              (Wire(Bits(0.W)), iocells)
-            }
-          }
-          case _ => throw new Exception("Unknown direction")
-        }
-      }
-      case signal: Vec[_] => {
-        val wire = Wire(chiselTypeOf(signal))
-        val iocells = signal.zip(wire).foldLeft(Seq.empty[IOCell]) { case (total, (sig, w)) =>
-          val (pad, ios) = IOCell.generateRaw(sig, inFn, outFn, anaFn)
-          w <> pad
+      case coreSignal: Vec[Data] => {
+        // this type cast is safe because we guarantee that padSignal and coreSignal are the same type (T), but the compiler is not smart enough to know that
+        val padSignal2 = padSignal.asInstanceOf[Vec[Data]]
+        require(padSignal2.size == coreSignal.size, "size of Vec for padSignal and coreSignal must be the same")
+        coreSignal.zip(padSignal2).foldLeft(Seq.empty[IOCell]) { case (total, (core, pad)) =>
+          val ios = IOCell.generateFromSignal(core, pad, inFn, outFn, anaFn)
           total ++ ios
         }
-        (wire, iocells)
       }
-      case signal: Record => {
-        val wire = Wire(chiselTypeOf(signal))
-        val iocells = signal.elements.foldLeft(Seq.empty[IOCell]) { case (total, (name, sig)) =>
-          val (pad, ios) = IOCell.generateRaw(sig, inFn, outFn, anaFn)
-          wire.elements(name) <> pad
+      case coreSignal: Record => {
+        // this type cast is safe because we guarantee that padSignal and coreSignal are the same type (T), but the compiler is not smart enough to know that
+        val padSignal2 = padSignal.asInstanceOf[Record]
+        coreSignal.elements.foldLeft(Seq.empty[IOCell]) { case (total, (name, core)) =>
+          val pad = padSignal2.elements(name)
+          val ios = IOCell.generateFromSignal(core, pad, inFn, outFn, anaFn)
           total ++ ios
         }
-        (wire, iocells)
       }
       case _ => { throw new Exception("Oops, I don't know how to handle this signal.") }
-    }).asInstanceOf[(T, Seq[IOCell])]
+    }
   }
 
 }
