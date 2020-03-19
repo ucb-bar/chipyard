@@ -76,25 +76,17 @@ object IOCell {
   def exampleInput() = Module(new ExampleDigitalInIOCell)
   def exampleOutput() = Module(new ExampleDigitalOutIOCell)
 
-/* This doesn't work because chiselTypeOf doesn't preserve direction info :(
-  def generateIOFromSignal[T <: Data](coreSignal: T,
+  def generateIOFromSignal[T <: Data](coreSignal: T, name: Option[String] = None,
     inFn: () => DigitalInIOCell = IOCell.exampleInput,
     outFn: () => DigitalOutIOCell = IOCell.exampleOutput,
     anaFn: () => AnalogIOCell = IOCell.exampleAnalog): (T, Seq[IOCell]) =
   {
-    val padSignal = DataMirror.specifiedDirectionOf(coreSignal) match {
-      case SpecifiedDirection.Input => IO(Input(chiselTypeOf(coreSignal)))
-      case SpecifiedDirection.Output => IO(Output(chiselTypeOf(coreSignal)))
-      case SpecifiedDirection.Flip => IO(Flipped(chiselTypeOf(coreSignal)))
-      case _ => IO(chiselTypeOf(coreSignal))
-    }
-
-    val iocells = IOCell.generateFromSignal(coreSignal, padSignal, inFn, outFn, anaFn)
-    (padSignal, iocells).asInstanceOf[(T, Seq[IOCell])]
+    val padSignal = IO(DataMirror.internal.chiselTypeClone[T](coreSignal))
+    val iocells = IOCell.generateFromSignal(coreSignal, padSignal, name, inFn, outFn, anaFn)
+    (padSignal, iocells)
   }
-*/
 
-  def generateFromSignal[T <: Data](coreSignal: T, padSignal: T,
+  def generateFromSignal[T <: Data](coreSignal: T, padSignal: T, name: Option[String] = None,
     inFn: () => DigitalInIOCell = IOCell.exampleInput,
     outFn: () => DigitalOutIOCell = IOCell.exampleOutput,
     anaFn: () => AnalogIOCell = IOCell.exampleAnalog): Seq[IOCell] =
@@ -106,6 +98,7 @@ object IOCell {
         } else {
           require(coreSignal.getWidth == 1, "Analogs wider than 1 bit are not supported because we can't bit-select Analogs (https://github.com/freechipsproject/chisel3/issues/536)")
           val iocell = anaFn()
+          name.foreach(n => iocell.suggestName(n))
           iocell.io.core <> coreSignal
           padSignal <> iocell.io.pad
           Seq(iocell)
@@ -115,6 +108,7 @@ object IOCell {
         DataMirror.directionOf(coreSignal) match {
           case ActualDirection.Input => {
             val iocell = inFn()
+            name.foreach(n => iocell.suggestName(n))
             coreSignal := iocell.io.i.asClock
             iocell.io.ie := true.B
             iocell.io.pad := padSignal.asUInt.asBool
@@ -122,6 +116,7 @@ object IOCell {
           }
           case ActualDirection.Output => {
             val iocell = outFn()
+            name.foreach(n => iocell.suggestName(n))
             iocell.io.o := coreSignal.asUInt.asBool
             iocell.io.oe := true.B
             padSignal := iocell.io.pad.asClock
@@ -136,14 +131,16 @@ object IOCell {
           // This dummy assignment will prevent invalid firrtl from being emitted
           DataMirror.directionOf(coreSignal) match {
             case ActualDirection.Input => coreSignal := 0.U
+            case _ => {}
           }
           Seq()
         } else {
           DataMirror.directionOf(coreSignal) match {
             case ActualDirection.Input => {
               // this type cast is safe because we guarantee that padSignal and coreSignal are the same type (T), but the compiler is not smart enough to know that
-              val iocells = padSignal.asInstanceOf[Bits].asBools.map { w =>
+              val iocells = padSignal.asInstanceOf[Bits].asBools.zipWithIndex.map { case (w, i) =>
                 val iocell = inFn()
+                name.foreach(n => iocell.suggestName(n + "_" + i))
                 iocell.io.pad := w
                 iocell.io.ie := true.B
                 iocell
@@ -152,8 +149,9 @@ object IOCell {
               iocells
             }
             case ActualDirection.Output => {
-              val iocells = coreSignal.asBools.map { w =>
+              val iocells = coreSignal.asBools.zipWithIndex.map { case (w, i) =>
                 val iocell = outFn()
+                name.foreach(n => iocell.suggestName(n + "_" + i))
                 iocell.io.o := w
                 iocell.io.oe := true.B
                 iocell
@@ -169,17 +167,17 @@ object IOCell {
         // this type cast is safe because we guarantee that padSignal and coreSignal are the same type (T), but the compiler is not smart enough to know that
         val padSignal2 = padSignal.asInstanceOf[Vec[Data]]
         require(padSignal2.size == coreSignal.size, "size of Vec for padSignal and coreSignal must be the same")
-        coreSignal.zip(padSignal2).foldLeft(Seq.empty[IOCell]) { case (total, (core, pad)) =>
-          val ios = IOCell.generateFromSignal(core, pad, inFn, outFn, anaFn)
+        coreSignal.zip(padSignal2).zipWithIndex.foldLeft(Seq.empty[IOCell]) { case (total, ((core, pad), i)) =>
+          val ios = IOCell.generateFromSignal(core, pad, name.map(_ + "_" + i), inFn, outFn, anaFn)
           total ++ ios
         }
       }
       case coreSignal: Record => {
         // this type cast is safe because we guarantee that padSignal and coreSignal are the same type (T), but the compiler is not smart enough to know that
         val padSignal2 = padSignal.asInstanceOf[Record]
-        coreSignal.elements.foldLeft(Seq.empty[IOCell]) { case (total, (name, core)) =>
-          val pad = padSignal2.elements(name)
-          val ios = IOCell.generateFromSignal(core, pad, inFn, outFn, anaFn)
+        coreSignal.elements.foldLeft(Seq.empty[IOCell]) { case (total, (eltName, core)) =>
+          val pad = padSignal2.elements(eltName)
+          val ios = IOCell.generateFromSignal(core, pad, name.map(_ + "_" + eltName), inFn, outFn, anaFn)
           total ++ ios
         }
       }
