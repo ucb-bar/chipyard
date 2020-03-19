@@ -74,23 +74,16 @@ class WithNIC extends icenet.WithIceNIC(inBufFlits = 8192, ctrlQueueDepth = 64)
 
 
 
-// Enables tracing on all cores
-class WithTraceIO extends Config((site, here, up) => {
-  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
-  case ArianeTilesKey => up(ArianeTilesKey) map (tile => tile.copy(trace = true))
-  case TracePortKey => Some(TracePortParams())
-})
-
 
 // Tweaks that are generally applied to all firesim configs
 class WithFireSimConfigTweaks extends Config(
   new WithBootROM ++ // needed to support FireSim-as-top
   new WithPeripheryBusFrequency(BigInt(3200000000L)) ++ // 3.2 GHz
   new WithoutClockGating ++
-  new WithTraceIO ++
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++ // 16 GB
   new testchipip.WithTSI ++
   new testchipip.WithBlockDevice ++
+  new chipyard.config.WithTraceIO ++
   new chipyard.config.WithUART
 )
 
