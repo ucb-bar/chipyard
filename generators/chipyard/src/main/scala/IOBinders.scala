@@ -96,9 +96,9 @@ class WithBlockDeviceModel extends Config(new OverrideIOBinder({
 }))
 
 class WithLoopbackNIC extends Config(new OverrideIOBinder({
-  (c, r, s, top: CanHavePeripheryIceNICModuleImp) => NicLoopback.connect(top.net, top.nicConf); Nil
+  (c, r, s, top: CanHavePeripheryIceNICModuleImp) => NicLoopback.connect(top.net, top.p(NICKey)); Nil
 }) ++ new OverrideIOBinder({
-  (c, r, s, top: CanHaveChipTopIceNIC) => NicLoopback.connect(top.net, top.nicConf); Nil
+  (c, r, s, top: CanHaveChipTopIceNIC) => NicLoopback.connect(top.net, top.p(NICKey)); Nil
 }))
 
 class WithSimNIC extends Config(new OverrideIOBinder({

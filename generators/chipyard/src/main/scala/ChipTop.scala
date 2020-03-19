@@ -13,7 +13,7 @@ import freechips.rocketchip.subsystem.{HasExtInterruptsModuleImp, CanHaveMasterA
 import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp}
 import sifive.blocks.devices.uart.{UARTPortIO, HasPeripheryUARTModuleImp}
 import testchipip.{BlockDeviceIO, CanHavePeripheryBlockDeviceModuleImp, SerialIO, CanHavePeripherySerialModuleImp}
-import icenet.{NICConfig, NICIOvonly, CanHavePeripheryIceNICModuleImp}
+import icenet.{NICIOvonly, CanHavePeripheryIceNICModuleImp}
 import tracegen.{HasTraceGenTilesModuleImp}
 import chipyard.config.ConfigValName._
 
@@ -104,10 +104,6 @@ trait CanHaveChipTopBlockDevice { this: BaseChipTop =>
 
 trait CanHaveChipTopIceNIC { this: BaseChipTop =>
   implicit val p: Parameters
-  val nicConf = system match {
-    case system: CanHavePeripheryIceNICModuleImp => system.nicConf
-    case _ => NICConfig()
-  }
   val net: Option[NICIOvonly] = system match {
     case system: CanHavePeripheryIceNICModuleImp  => {
       system.net.map { net =>
