@@ -111,8 +111,8 @@ else
 
     module_prepare riscv-gnu-toolchain qemu
     module_build riscv-gnu-toolchain --prefix="${RISCV}" --with-cmodel=medany
-    echo '==>  Building GNU/Linux toolchain'
-    module_make riscv-gnu-toolchain linux
+#   echo '==>  Building GNU/Linux toolchain'
+#   module_make riscv-gnu-toolchain linux
 fi
 
 module_all riscv-isa-sim --prefix="${RISCV}"
@@ -128,7 +128,7 @@ module_all riscv-tests --prefix="${RISCV}/riscv64-unknown-elf"
 
 SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv64-unknown-elf" --host=riscv64-unknown-elf
 
-SRCDIR="$(pwd)/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv64-softmmu
+#SRCDIR="$(pwd)/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv64-softmmu
 
 cd "$RDIR"
 
