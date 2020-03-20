@@ -4,6 +4,13 @@
 SHELL=/bin/bash
 
 #########################################################################################
+# specific make variables/rules from subprojects
+#########################################################################################
+include $(base_dir)/generators/ariane/ariane.mk
+include $(base_dir)/generators/tracegen/tracegen.mk
+include $(base_dir)/tools/dromajo/dromajo.mk
+
+#########################################################################################
 # variables to get all *.scala files
 #########################################################################################
 lookup_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.$(2)" -print 2> /dev/null)
@@ -11,7 +18,6 @@ lookup_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.$(2)" -prin
 SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim)
 SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
 VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE_DIRS),v)
-ARIANE_VLOG_SOURCES = $(call lookup_srcs,$(base_dir)/generators/ariane,sv) $(call lookup_srcs,$(base_dir)/generators/ariane,v)
 
 #########################################################################################
 # rocket and testchipip classes
@@ -45,7 +51,8 @@ $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 	@echo "" > /dev/null
 
 # AG: must re-elaborate if ariane sources have changed... otherwise just run firrtl compile
-generator_temp: $(SCALA_SOURCES) $(ARIANE_VLOG_SOURCES) $(sim_files)
+generator_temp: $(SCALA_SOURCES) $(PROJECT_GENERATOR_SOURCES) $(sim_files)
+	echo $(PROJECT_GENERATOR_SOURCES)
 	mkdir -p $(build_dir)
 	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator $(build_dir) $(MODEL_PACKAGE) $(MODEL) $(CONFIG_PACKAGE) $(CONFIG)"
 
@@ -105,19 +112,22 @@ verilog: $(sim_vsrcs)
 #########################################################################################
 .PHONY: run-binary run-binary-fast run-binary-debug run-fast
 run-binary: $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	echo $(PROJECT_SIM_FLAGS)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PROJECT_SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 #########################################################################################
 # helper rules to run simulator as fast as possible
 #########################################################################################
 run-binary-fast: $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
+	echo $(PROJECT_SIM_FLAGS)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PROJECT_SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
 
 #########################################################################################
 # helper rules to run simulator with as much debug info as possible
 #########################################################################################
 run-binary-debug: $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	echo $(PROJECT_SIM_FLAGS)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PROJECT_SIM_FLAGS) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
@@ -129,10 +139,11 @@ $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
 	ln -sf $< $@
 
 $(output_dir)/%.run: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
+	echo $(PROJECT_SIM_FLAGS)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PROJECT_SIM_FLAGS) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(SIM_FLAGS) $(PROJECT_SIM_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
@@ -140,26 +151,6 @@ $(output_dir)/%.out: $(output_dir)/% $(sim)
 ifneq ($(filter run% %.run %.out %.vpd %.vcd,$(MAKECMDGOALS)),)
 -include $(build_dir)/$(long_name).d
 endif
-
-#################################################
-# Rules for running and checking tracegen tests #
-#################################################
-
-AXE_DIR=$(base_dir)/tools/axe/src
-AXE=$(AXE_DIR)/axe
-
-$(AXE): $(wildcard $(AXE_DIR)/*.[ch]) $(AXE_DIR)/make.sh
-	cd $(AXE_DIR) && ./make.sh
-
-$(output_dir)/tracegen.out: $(sim)
-	mkdir -p $(output_dir) && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) none </dev/null 2> $@
-
-$(output_dir)/tracegen.result: $(output_dir)/tracegen.out $(AXE)
-	$(base_dir)/scripts/check-tracegen.sh $< > $@
-
-tracegen: $(output_dir)/tracegen.result
-
-.PHONY: tracegen
 
 #######################################
 # Rules for building DRAMSim2 library #
