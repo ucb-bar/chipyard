@@ -93,42 +93,9 @@ $(SRAM_CONF): $(SRAM_GENERATOR_CONF)
 include $(base_dir)/vcs.mk
 SIM_CONF = $(OBJ_DIR)/sim-inputs.yml
 SIM_DEBUG_CONF = $(OBJ_DIR)/sim-debug-inputs.yml
+SIM_TIMING_CONF = $(OBJ_DIR)/sim-timing-inputs.yml
 
-.PHONY: $(SIM_CONF) $(SIM_DEBUG_CONF)
-# Update hammer top-level sim targets to include our generated sim configs
-redo-sim: $(SIM_CONF)
-redo-sim: override HAMMER_EXTRA_ARGS += -p $(SIM_CONF)
-redo-sim-debug: $(SIM_DEBUG_CONF) redo-sim
-redo-sim-debug: override HAMMER_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
-
-redo-sim-syn: $(SIM_CONF)
-redo-sim-syn: override HAMMER_EXTRA_ARGS += -p $(SIM_CONF)
-redo-sim-syn-debug: $(SIM_DEBUG_CONF) redo-sim-syn
-redo-sim-syn-debug: override HAMMER_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
-
-redo-sim-par: $(SIM_CONF)
-redo-sim-par: override HAMMER_EXTRA_ARGS += -p $(SIM_CONF)
-redo-sim-par-debug: $(SIM_DEBUG_CONF) redo-sim-par
-redo-sim-par-debug: override HAMMER_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
-
-sim: $(SIM_CONF)
-sim: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_CONF)
-sim-debug: $(SIM_DEBUG_CONF) sim
-sim-debug: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
-$(OBJ_DIR)/sim-rundir/sim-output-full.json: private override HAMMER_EXTRA_ARGS += $(HAMMER_SIM_EXTRA_ARGS)
-
-sim-syn: $(SIM_CONF)
-sim-syn: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_CONF)
-sim-syn-debug: $(SIM_DEBUG_CONF) sim-syn
-sim-syn-debug: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
-$(OBJ_DIR)/sim-syn-rundir/sim-output-full.json: private override HAMMER_EXTRA_ARGS += $(HAMMER_SIM_EXTRA_ARGS)
-
-sim-par: $(SIM_CONF)
-sim-par: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_CONF)
-sim-par-debug: $(SIM_DEBUG_CONF) sim-par
-sim-par-debug: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
-$(OBJ_DIR)/sim-par-rundir/sim-output-full.json: private override HAMMER_EXTRA_ARGS += $(HAMMER_SIM_EXTRA_ARGS)
-
+include $(vlsi_dir)/sim.mk
 $(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
@@ -190,11 +157,36 @@ $(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_commo
 	done
 	echo "  ]" >> $@
 	echo "  execution_flags_meta: 'append'" >> $@
+	echo "sim.outputs.waveforms: ['$(sim_out_name).vpd']" >> $@
 
+$(SIM_TIMING_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
+	mkdir -p $(dir $@)
+	echo "sim.inputs:" > $@
+	echo "  defines: [" >> $@
+	echo "    'NTC']" >> $@
+	echo "  defines_meta: 'append'" >> $@
+	echo "  timing_annotated: 'true'" >> $@
 
+POWER_CONF = $(OBJ_DIR)/power-inputs.yml
+include $(vlsi_dir)/power.mk
+LOWER_VLSI_TOP = $(shell echo $(VLSI_TOP) | tr A-Z a-z)
 $(POWER_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
 	echo "power.inputs:" > $@
+	echo "  tb_dut: 'testHarness/$(LOWER_VLSI_TOP)'" >> $@
+	echo "  database: '$(OBJ_DIR)/par-rundir/$(VLSI_TOP)_FINAL'" >> $@
+	echo "  saifs: [" >> $@
+	echo "    '$(OBJ_DIR)/sim-par-rundir/$(notdir $(BINARY))/ucli.saif'" >> $@
+	echo "  ]" >> $@
+	echo "  waveforms: [" >> $@
+	echo "    '$(OBJ_DIR)/sim-par-rundir/$(notdir $(BINARY))/$(sim_out_name).vcd'" >> $@
+	echo "  ]" >> $@
+	echo "  start_times: [" >> $@
+	echo "    0" >> $@
+	echo "  ]" >> $@
+	echo "  end_times: [" >> $@
+	echo "    15000" >> $@ #timeout_cycles * clock_period
+	echo "  ]" >> $@
 
 #########################################################################################
 # synthesis input configuration
