@@ -2,6 +2,11 @@
 # CS152 Lab 3: Open-Ended Problem 2                                    #
 ########################################################################
 
+workdir := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
+workdir := $(workdir:/=)
+basedir := $(workdir)/../..
+
+
 CC := riscv64-unknown-elf-gcc
 OBJDUMP := riscv64-unknown-elf-objdump
 
@@ -23,5 +28,16 @@ baremetal.riscv: CFLAGS += -specs=htif_nano.specs
 .PHONY: clean
 clean:
 	rm -f -- *.riscv *.o *.dump
+
+# Autograder submission
+
+zip_obj := upload.zip
+zip_srcs := $(wildcard Makefile *.c *.h *.S)
+
+.PHONY: zip
+zip: $(zip_srcs)
+	rm -f -- $(zip_obj)
+	zip -j $(zip_obj) $^
+
 
 .SUFFIXES: # Disable built-in suffix rules
