@@ -47,8 +47,20 @@ include $(base_dir)/common.mk
 #########################################################################################
 VERILATOR := verilator --cc --exe
 
-CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -I$(dramsim_dir) -D__STDC_FORMAT_MACROS
-LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(dramsim_dir) -Wl,-rpath,$(dramsim_dir) -L$(sim_dir) -lfesvr -lpthread -ldramsim
+CXXFLAGS := \
+	$(CXXFLAGS) -O1 -std=c++11 \
+	-I$(RISCV)/include \
+	-I$(dramsim_dir) \
+	-D__STDC_FORMAT_MACROS
+
+LDFLAGS := \
+	$(LDFLAGS) \
+	-L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib \
+	-L$(dramsim_dir) -Wl,-rpath,$(dramsim_dir) \
+	-L$(sim_dir) \
+	-lfesvr \
+	-lpthread \
+	-ldramsim
 
 VERILATOR_CC_OPTS = \
 	-O3 \
@@ -87,7 +99,7 @@ VERILATOR_DEFINES = \
 	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
 	+define+STOP_COND=\$$c\(\"done_reset\"\)
 
-VERILATOR_OPTS = $(VERILATOR_CC_OPTS) $(VERILATOR_NONCC_OPTS) $(VERILATOR_DEFINES)
+VERILATOR_OPTS = $(VERILATOR_CC_OPTS) $(VERILATOR_NONCC_OPTS) $(VERILATOR_DEFINES) $(PROJECT_VERILATOR_FLAGS)
 
 #########################################################################################
 # verilator build paths and file names
