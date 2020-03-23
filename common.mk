@@ -6,10 +6,11 @@ SHELL=/bin/bash
 #########################################################################################
 # extra make variables/rules from subprojects
 #
-# EXTRA_GENERATOR_SOURCES - requirements needed for the main generator
-# EXTRA_SIM_FLAGS - simulation flags
-# EXTRA_VCS_FLAGS/EXTRA_VERILATOR_FLAGS - all simulator compile flags
-# EXTRA_SIM_SOURCES - requirements needed to build simulators
+# EXTRA_GENERATOR_REQS - requirements needed for the main generator
+# EXTRA_SIM_FLAGS - runtime simulation flags
+# EXTRA_SIM_CC_FLAGS - cc flags for simulators
+# EXTRA_SIM_SOURCES - simulation sources needed for simulator
+# EXTRA_SIM_REQS - requirements to build the simulator
 #########################################################################################
 include $(base_dir)/generators/ariane/ariane.mk
 include $(base_dir)/generators/tracegen/tracegen.mk
@@ -56,7 +57,7 @@ $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 	@echo "" > /dev/null
 
 # AG: must re-elaborate if ariane sources have changed... otherwise just run firrtl compile
-generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_SOURCES)
+generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_REQS)
 	echo $(EXTRA_GENERATOR_SOURCES)
 	mkdir -p $(build_dir)
 	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator $(build_dir) $(MODEL_PACKAGE) $(MODEL) $(CONFIG_PACKAGE) $(CONFIG)"

@@ -10,12 +10,12 @@ DROMAJO_LIB = $(DROMAJO_DIR)/lib$(DROMAJO_LIB_NAME).a
 DROMAJO_ROM = $(base_dir)/bootrom/bootrom.rv64.img
 
 DTS_FILE = $(build_dir)/$(long_name).dts
-DTB_FILE = $(build_dir)/$(long_name).dtb
+DROMAJO_DTB = $(build_dir)/$(long_name).dtb
 
 $(DTS_FILE) $(DROMAJO_PARAMS_FILE): $(FIRRTL_FILE)
 
-$(DTB_FILE): $(DTS_FILE)
-	dtc -I dts -O dtb -o $(DTB_FILE) $(DTS_FILE)
+$(DROMAJO_DTB): $(DTS_FILE)
+	dtc -I dts -O dtb -o $(DROMAJO_DTB) $(DTS_FILE)
 
 DROMAJO_SRCS = $(call lookup_srcs,$(DROMAJO_DIR),cc) $(call lookup_srcs,$(DROMAJO_DIR),h)
 
@@ -29,7 +29,7 @@ else
 DROMAJO_BIN = $(BINARY)
 endif
 
-DROMAJO_FLAGS = +drj_dtb=$(DTB_FILE) +drj_rom=$(DROMAJO_ROM) +drj_bin=$(DROMAJO_BIN)
+DROMAJO_FLAGS = +drj_dtb=$(DROMAJO_DTB) +drj_rom=$(DROMAJO_ROM) +drj_bin=$(DROMAJO_BIN)
 
 DROMAJO_PARAMS_FILE    = $(build_dir)/$(long_name).dromajo_params.h
 DROMAJO_PARAMS_SYMLINK = $(build_dir)/dromajo_params.h
@@ -44,11 +44,11 @@ $(DROMAJO_PARAMS_SYMLINK): $(DROMAJO_PARAMS_FILE)
 # simargs needed (i.e. like +drj_test=hello)
 EXTRA_SIM_FLAGS += $(DROMAJO_FLAGS)
 
-# extra vcs compile flags
-EXTRA_VCS_FLAGS += -CC "-I$(DROMAJO_DIR)" $(DROMAJO_LIB)
+# CC flags needed for all simulations
+EXTRA_SIM_CC_FLAGS += -I$(DROMAJO_DIR)
 
-# extra verilator compile flags
-EXTRA_VERILATOR_FLAGS += -CFLAGS "-I$(DROMAJO_DIR)" -LDFLAGS "-L$(DROMAJO_DIR) -Wl,-rpath,$(DROMAJO_DIR) -l$(DROMAJO_LIB_NAME)"
+# sourced needed for simulation
+EXTRA_SIM_SOURCES += $(DROMAJO_LIB)
 
-# extra simulation sources needed for VCS/Verilator compile
-EXTRA_SIM_SOURCES += $(DROMAJO_PARAMS_SYMLINK) $(DROMAJO_LIB)
+# requirements needed for simulation
+EXTRA_SIM_REQS += $(DROMAJO_PARAMS_SYMLINK) $(DROMAJO_LIB) $(DROMAJO_DTB)

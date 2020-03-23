@@ -50,7 +50,8 @@ VCS_CC_OPTS = \
 	-CC "-I$(dramsim_dir)" \
 	-CC "-std=c++11" \
 	$(dramsim_lib) \
-	$(RISCV)/lib/libfesvr.a
+	$(RISCV)/lib/libfesvr.a \
+	-CC "$(EXTRA_SIM_CC_FLAGS)"
 
 VCS_NONCC_OPTS = \
 	+lint=all,noVCDE,noONGS,noUI \
@@ -80,20 +81,22 @@ VCS_DEFINES = \
 	+define+RANDOMIZE_GARBAGE_ASSIGN \
 	+define+RANDOMIZE_INVALID_ASSIGN
 
-VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(VCS_DEFINES) $(EXTRA_VCS_FLAGS)
+VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(VCS_DEFINES) $(EXTRA_SIM_SOURCES)
 
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
-$(sim): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_SOURCES)
+$(sim): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
+	echo $(EXTRA_SIM_REQS)
 	echo $(EXTRA_SIM_SOURCES)
-	echo $(EXTRA_VCS_FLAGS)
+	echo $(EXTRA_SIM_CC_FLAGS)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	-debug_pp
 
-$(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_SOURCES)
+$(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
+	echo $(EXTRA_SIM_REQS)
 	echo $(EXTRA_SIM_SOURCES)
-	echo $(EXTRA_VCS_FLAGS)
+	echo $(EXTRA_SIM_CC_FLAGS)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	+define+DEBUG \
 	-debug_pp
