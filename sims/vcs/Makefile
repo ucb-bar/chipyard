@@ -80,20 +80,20 @@ VCS_DEFINES = \
 	+define+RANDOMIZE_GARBAGE_ASSIGN \
 	+define+RANDOMIZE_INVALID_ASSIGN
 
-VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(VCS_DEFINES) $(PROJECT_VCS_FLAGS)
+VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(VCS_DEFINES) $(EXTRA_VCS_FLAGS)
 
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
-$(sim): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(PROJECT_SIM_SOURCES)
-	echo $(PROJECT_SIM_SOURCES)
-	echo $(PROJECT_VCS_FLAGS)
+$(sim): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_SOURCES)
+	echo $(EXTRA_SIM_SOURCES)
+	echo $(EXTRA_VCS_FLAGS)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	-debug_pp
 
-$(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(PROJECT_SIM_SOURCES)
-	echo $(PROJECT_SIM_SOURCES)
-	echo $(PROJECT_VCS_FLAGS)
+$(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_SOURCES)
+	echo $(EXTRA_SIM_SOURCES)
+	echo $(EXTRA_VCS_FLAGS)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	+define+DEBUG \
 	-debug_pp
@@ -103,8 +103,8 @@ $(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(PROJECT_SIM_SOUR
 #########################################################################################
 .PRECIOUS: $(output_dir)/%.vpd %.vpd
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
-	echo $(PROJECT_SIM_FLAGS)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PROJECT_SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
+	echo $(EXTRA_SIM_FLAGS)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
 
 #########################################################################################
 # general cleanup rule

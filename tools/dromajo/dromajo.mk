@@ -1,5 +1,10 @@
+##############################################################
+# extra variables/targets ingested by the chipyard make system
+##############################################################
+
 DROMAJO_DIR = $(base_dir)/tools/dromajo/dromajo-src/src
-DROMAJO_LIB = $(DROMAJO_DIR)/libdromajo_cosim.a
+DROMAJO_LIB_NAME = dromajo_cosim
+DROMAJO_LIB = $(DROMAJO_DIR)/lib$(DROMAJO_LIB_NAME).a
 
 # Dromajo assumes using the default bootrom
 DROMAJO_ROM = $(base_dir)/bootrom/bootrom.rv64.img
@@ -17,6 +22,7 @@ DROMAJO_SRCS = $(call lookup_srcs,$(DROMAJO_DIR),cc) $(call lookup_srcs,$(DROMAJ
 $(DROMAJO_LIB): $(DROMAJO_SRCS)
 	$(MAKE) -C $(DROMAJO_DIR)
 
+# depending on where the simulation is done, use the auto-variable or the hardcoded defined one
 ifeq ($(BINARY),)
 DROMAJO_BIN = $(<)
 else
@@ -35,17 +41,14 @@ $(DROMAJO_PARAMS_SYMLINK): $(DROMAJO_PARAMS_FILE)
 # THE FOLLOWING MUST BE += operators
 ##################################################################
 
-# sourced used to run the generator
-PROJECT_GENERATOR_SOURCES +=
-
 # simargs needed (i.e. like +drj_test=hello)
-PROJECT_SIM_FLAGS += $(DROMAJO_FLAGS)
+EXTRA_SIM_FLAGS += $(DROMAJO_FLAGS)
 
 # extra vcs compile flags
-PROJECT_VCS_FLAGS += -CC "-I$(DROMAJO_DIR)" $(DROMAJO_LIB)
+EXTRA_VCS_FLAGS += -CC "-I$(DROMAJO_DIR)" $(DROMAJO_LIB)
 
 # extra verilator compile flags
-PROJECT_VERILATOR_FLAGS += -CFLAGS "-I$(DROMAJO_DIR)" -LDFLAGS "-L$(DROMAJO_DIR) -Wl,-rpath,$(DROMAJO_DIR)"
+EXTRA_VERILATOR_FLAGS += -CFLAGS "-I$(DROMAJO_DIR)" -LDFLAGS "-L$(DROMAJO_DIR) -Wl,-rpath,$(DROMAJO_DIR) -l$(DROMAJO_LIB_NAME)"
 
 # extra simulation sources needed for VCS/Verilator compile
-PROJECT_SIM_SOURCES += $(DROMAJO_PARAMS_SYMLINK) $(DROMAJO_LIB)
+EXTRA_SIM_SOURCES += $(DROMAJO_PARAMS_SYMLINK) $(DROMAJO_LIB)

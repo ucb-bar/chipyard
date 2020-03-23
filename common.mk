@@ -4,7 +4,12 @@
 SHELL=/bin/bash
 
 #########################################################################################
-# specific make variables/rules from subprojects
+# extra make variables/rules from subprojects
+#
+# EXTRA_GENERATOR_SOURCES - requirements needed for the main generator
+# EXTRA_SIM_FLAGS - simulation flags
+# EXTRA_VCS_FLAGS/EXTRA_VERILATOR_FLAGS - all simulator compile flags
+# EXTRA_SIM_SOURCES - requirements needed to build simulators
 #########################################################################################
 include $(base_dir)/generators/ariane/ariane.mk
 include $(base_dir)/generators/tracegen/tracegen.mk
@@ -51,8 +56,8 @@ $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 	@echo "" > /dev/null
 
 # AG: must re-elaborate if ariane sources have changed... otherwise just run firrtl compile
-generator_temp: $(SCALA_SOURCES) $(PROJECT_GENERATOR_SOURCES) $(sim_files)
-	echo $(PROJECT_GENERATOR_SOURCES)
+generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_SOURCES)
+	echo $(EXTRA_GENERATOR_SOURCES)
 	mkdir -p $(build_dir)
 	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator $(build_dir) $(MODEL_PACKAGE) $(MODEL) $(CONFIG_PACKAGE) $(CONFIG)"
 
@@ -112,22 +117,22 @@ verilog: $(sim_vsrcs)
 #########################################################################################
 .PHONY: run-binary run-binary-fast run-binary-debug run-fast
 run-binary: $(sim)
-	echo $(PROJECT_SIM_FLAGS)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PROJECT_SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	echo $(EXTRA_SIM_FLAGS)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 #########################################################################################
 # helper rules to run simulator as fast as possible
 #########################################################################################
 run-binary-fast: $(sim)
-	echo $(PROJECT_SIM_FLAGS)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PROJECT_SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
+	echo $(EXTRA_SIM_FLAGS)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
 
 #########################################################################################
 # helper rules to run simulator with as much debug info as possible
 #########################################################################################
 run-binary-debug: $(sim_debug)
-	echo $(PROJECT_SIM_FLAGS)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PROJECT_SIM_FLAGS) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	echo $(EXTRA_SIM_FLAGS)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
@@ -139,11 +144,12 @@ $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
 	ln -sf $< $@
 
 $(output_dir)/%.run: $(output_dir)/% $(sim)
-	echo $(PROJECT_SIM_FLAGS)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PROJECT_SIM_FLAGS) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
+	echo $(EXTRA_SIM_FLAGS)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(SIM_FLAGS) $(PROJECT_SIM_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
+	echo $(EXTRA_SIM_FLAGS)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
