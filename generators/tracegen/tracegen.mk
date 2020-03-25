@@ -9,7 +9,7 @@ $(AXE): $(wildcard $(AXE_DIR)/*.[ch]) $(AXE_DIR)/make.sh
 	cd $(AXE_DIR) && ./make.sh
 
 $(output_dir)/tracegen.out: $(sim)
-	mkdir -p $(output_dir) && $(sim) $(PERMISSIVE_ON) +dramsim +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) none </dev/null 2> $@
+	mkdir -p $(output_dir) && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) none </dev/null 2> $@
 
 $(output_dir)/tracegen.result: $(output_dir)/tracegen.out $(AXE)
 	$(base_dir)/scripts/check-tracegen.sh $< > $@
