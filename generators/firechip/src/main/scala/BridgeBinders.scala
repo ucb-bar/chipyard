@@ -29,19 +29,23 @@ import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder}
 import chipyard.HasChipyardTilesModuleImp
 
 class WithSerialBridge extends OverrideIOBinder({
-  (c, r, s, target: CanHavePeripherySerialModuleImp) => target.serial.map(s => SerialBridge(s)(target.p)).toSeq
+  (c, r, s, target: CanHavePeripherySerialModuleImp) =>
+    target.serial.map(s => SerialBridge(target.clock, s)(target.p)).toSeq
 })
 
 class WithNICBridge extends OverrideIOBinder({
-  (c, r, s, target: CanHavePeripheryIceNICModuleImp) => target.net.map(n => NICBridge(n)(target.p)).toSeq
+  (c, r, s, target: CanHavePeripheryIceNICModuleImp) =>
+    target.net.map(n => NICBridge(target.clock, n)(target.p)).toSeq
 })
 
 class WithUARTBridge extends OverrideIOBinder({
-  (c, r, s, target: HasPeripheryUARTModuleImp) => target.uart.map(u => UARTBridge(u)(target.p)).toSeq
+  (c, r, s, target: HasPeripheryUARTModuleImp) =>
+    target.uart.map(u => UARTBridge(target.clock, u)(target.p)).toSeq
 })
 
 class WithBlockDeviceBridge extends OverrideIOBinder({
-  (c, r, s, target: CanHavePeripheryBlockDeviceModuleImp) => target.bdev.map(b => BlockDevBridge(b, target.reset.toBool)(target.p)).toSeq
+  (c, r, s, target: CanHavePeripheryBlockDeviceModuleImp) =>
+    target.bdev.map(b => BlockDevBridge(target.clock, b, target.reset.toBool)(target.p)).toSeq
 })
 
 class WithFASEDBridge extends OverrideIOBinder({
@@ -52,7 +56,7 @@ class WithFASEDBridge extends OverrideIOBinder({
         val nastiKey = NastiParameters(axi4Bundle.r.bits.data.getWidth,
                                        axi4Bundle.ar.bits.addr.getWidth,
                                        axi4Bundle.ar.bits.id.getWidth)
-        FASEDBridge(axi4Bundle, t.reset.toBool,
+        FASEDBridge(t.clock, axi4Bundle, t.reset.toBool,
           CompleteConfig(p(firesim.configs.MemModelKey), nastiKey, Some(AXI4EdgeSummary(edge))))
       })
     }).toSeq
@@ -60,11 +64,16 @@ class WithFASEDBridge extends OverrideIOBinder({
 })
 
 class WithTracerVBridge extends OverrideIOBinder({
-  (c, r, s, target: CanHaveTraceIOModuleImp) => target.traceIO.map(t => TracerVBridge(t)(target.p)).toSeq
+  (c, r, s, target: CanHaveTraceIOModuleImp) => target.traceIO match {
+    case Some(t) => t.traces.map(tileTrace => TracerVBridge(tileTrace)(target.p))
+    case None    => Nil
+  }
 })
 
+
 class WithTraceGenBridge extends OverrideIOBinder({
-  (c, r, s, target: HasTraceGenTilesModuleImp) => Seq(GroundTestBridge(target.success)(target.p))
+  (c, r, s, target: HasTraceGenTilesModuleImp) =>
+    Seq(GroundTestBridge(target.clock, target.success)(target.p))
 })
 
 class WithFireSimMultiCycleRegfile extends ComposeIOBinder({
