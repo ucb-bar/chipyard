@@ -84,6 +84,7 @@ object AddIOCells {
     gpios.zipWithIndex.map({ case (gpio, i) =>
       gpio.pins.zipWithIndex.map({ case (pin, j) =>
         val g = IO(Analog(1.W))
+        g.suggestName("gpio_${i}_${j}")
         // TODO functionalize this?
         val iocell = IOCell.exampleGPIO()
         iocell.suggestName(s"iocell_gpio_${i}_${j}")
@@ -99,7 +100,9 @@ object AddIOCells {
 
   def uart(uartPins: Seq[UARTPortIO]): (Seq[UARTPortIO], Seq[Seq[IOCell]]) = {
     uartPins.zipWithIndex.map({ case (u, i) =>
-      IOCell.generateIOFromSignal(u, Some(s"iocell_uart_${i}"))
+      val (port, ios) = IOCell.generateIOFromSignal(u, Some(s"iocell_uart_${i}"))
+      port.suggestName("iocell_uart_${i}")
+      (port, ios)
     }).unzip
   }
 
@@ -108,11 +111,15 @@ object AddIOCells {
     val optTuple = debugOpt.map(d => IOCell.generateIOFromSignal(d, Some("iocell_debug")))
     val debugPortOpt: Option[DebugIO] = optTuple.map(_._1)
     val debugIOs: Seq[IOCell] = optTuple.map(_._2).toSeq.flatten
+    debugPortOpt.foreach(_.suggestName("debug"))
+    psdPort.suggestName("psd")
     (psdPort, debugPortOpt, psdIOs ++ debugIOs)
   }
 
   def serial(serial: SerialIO): (SerialIO, Seq[IOCell]) = {
-    IOCell.generateIOFromSignal(serial, Some("iocell_serial"))
+    val (port, ios) = IOCell.generateIOFromSignal(serial, Some("iocell_serial"))
+    port.suggestName("serial")
+    (port, ios)
   }
 }
 
@@ -186,6 +193,7 @@ class WithDontTouchPorts extends OverrideIOBinder({
 class WithTieOffInterrupts extends OverrideIOBinder({
   (system: HasExtInterruptsModuleImp) => {
     val (port, ioCells) = IOCell.generateIOFromSignal(system.interrupts, Some("iocell_interrupts"))
+    port.suggestName("interrupts")
     val harnessFn = (th: TestHarness) => { port := 0.U; Nil }
     Seq((Seq(port), ioCells, Some(harnessFn)))
   }
@@ -255,6 +263,7 @@ class WithSimSerial extends OverrideIOBinder({
 class WithTraceGenSuccessBinder extends OverrideIOBinder({
   (system: HasTraceGenTilesModuleImp) => {
     val (successPort, ioCells) = IOCell.generateIOFromSignal(system.success, Some("iocell_success"))
+    successPort.suggestName("success")
     val harnessFn = (th: TestHarness) => { when (successPort) { th.s := true.B }; Nil }
     Seq((Seq(successPort), ioCells, Some(harnessFn)))
   }
