@@ -186,7 +186,7 @@ class WithDontTouchPorts extends OverrideIOBinder({
 class WithTieOffInterrupts extends OverrideIOBinder({
   (system: HasExtInterruptsModuleImp) => {
     val (port, ioCells) = IOCell.generateIOFromSignal(system.interrupts, Some("iocell_interrupts"))
-    val harnessFn = (th: TestHarness) => { port := 0.U ; Nil }
+    val harnessFn = (th: TestHarness) => { port := 0.U; Nil }
     Seq((Seq(port), ioCells, Some(harnessFn)))
   }
 })
@@ -243,10 +243,11 @@ class WithTiedOffSerial extends OverrideIOBinder({
 class WithSimSerial extends OverrideIOBinder({
   (system: CanHavePeripherySerialModuleImp) => system.serial.map({ serial =>
     val (port, ioCells) = AddIOCells.serial(serial)
-    val harnessFn = { (th: TestHarness) => {
+    val harnessFn = (th: TestHarness) => {
       val ser_success = SerialAdapter.connectSimSerial(port, th.c, th.r)
       when (ser_success) { th.s := true.B }
-    }; Nil }
+      Nil
+    }
     Seq((Seq(port), ioCells, Some(harnessFn)))
   }).getOrElse(Nil)
 })
