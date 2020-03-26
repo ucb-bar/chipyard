@@ -8,7 +8,7 @@ import chisel3.experimental.annotate
 import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug.HasPeripheryDebugModuleImp
-import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPortModuleImp}
+import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPortModuleImp, CanHaveMasterAXI4MMIOPortModuleImp}
 import freechips.rocketchip.tile.{RocketTile}
 import sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
 
@@ -64,6 +64,23 @@ class WithFASEDBridge extends OverrideIOBinder({
             lastChannel))
       })
     }).toSeq
+  }
+})
+
+class WithFASEDMMIOBridge extends OverrideIOBinder({
+  (c, r, s, t: CanHaveMasterAXI4MMIOPortModuleImp) => {
+    implicit val p = t.p
+    (t.mmio_axi4 zip t.outer.mmioAXI4Node.in).map { case (io, (_, edge)) =>
+      val nastiKey = NastiParameters(io.r.bits.data.getWidth,
+                                     io.ar.bits.addr.getWidth,
+                                     io.ar.bits.id.getWidth)
+      FASEDBridge(io, t.reset.toBool,
+        CompleteConfig(
+          p(firesim.configs.MemModelKey),
+          nastiKey,
+          Some(AXI4EdgeSummary(edge)),
+          true))
+    }.toSeq
   }
 })
 
@@ -140,6 +157,7 @@ class WithDefaultFireSimBridges extends Config(
   new WithUARTBridge ++
   new WithBlockDeviceBridge ++
   new WithFASEDBridge ++
+  new WithFASEDMMIOBridge ++
   new WithFireSimMultiCycleRegfile ++
   new WithTracerVBridge
 )

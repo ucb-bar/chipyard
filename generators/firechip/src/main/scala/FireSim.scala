@@ -32,9 +32,12 @@ class FireSim(implicit val p: Parameters) extends RawModule {
     //
     // Apply each partial function to each DUT instance
     for ((target) <- targets) {
-      p(IOBinders).toSeq.sortBy(_._1).map { case (name, fn) =>
-        fn(clock, reset.asBool, false.B, target)
-      }
+      // This is so incredibly hacky, but we need to make sure
+      // the memory FASEDBridge always comes first
+      val iobinders = p(IOBinders).toSeq.sortBy { case (name, _) =>
+        (if (name.contains("AXI4Mem")) 0 else 1)
+      }.unzip._2
+      iobinders.map(fn => fn(clock, reset.asBool, false.B, target))
     }
   }
 }
