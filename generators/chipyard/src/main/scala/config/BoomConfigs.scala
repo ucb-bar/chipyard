@@ -7,7 +7,6 @@ import freechips.rocketchip.config.{Config}
 // ---------------------
 
 class SmallBoomConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++       // connect clock and reset to a ChipTop design
   new chipyard.iobinders.WithUARTAdapter ++                      // display UART with a SimUARTAdapter
   new chipyard.iobinders.WithTieOffInterrupts ++                 // tie off top-level interrupts
   new chipyard.iobinders.WithBlackBoxSimMem ++                   // drive the master AXI4 memory with a SimAXIMem
@@ -27,7 +26,6 @@ class SmallBoomConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)                    // "base" rocketchip system
 
 class MediumBoomConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -47,7 +45,6 @@ class MediumBoomConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class LargeBoomConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -67,7 +64,6 @@ class LargeBoomConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class MegaBoomConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -87,7 +83,6 @@ class MegaBoomConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class DualSmallBoomConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -107,7 +102,6 @@ class DualSmallBoomConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class SmallRV32BoomConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -129,7 +123,6 @@ class SmallRV32BoomConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class HwachaLargeBoomConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -150,7 +143,6 @@ class HwachaLargeBoomConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class LoopbackNICLargeBoomConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++

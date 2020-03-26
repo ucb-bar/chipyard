@@ -151,10 +151,3 @@ class WithControlCore extends Config((site, here, up) => {
   case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
 })
 
-/**
- * Config fragment to use ChipTop as the Top module (DUT) to build.
- * Use the BuildSystem key to override the system inside of ChipTop
- */
-class WithNoIOCells extends Config((site, here, up) => {
-  case BuildTop => (p: Parameters) => Module(new chipyard.chiptop.ChipTopNoIOCells()(p)).suggestName("top")
-})

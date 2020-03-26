@@ -10,15 +10,17 @@ import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.util.{AsyncResetReg, GeneratorApp}
 import freechips.rocketchip.devices.debug.{Debug, DebugIO, PSDIO}
 import chipyard.config.ConfigValName._
-
-import chipyard.iobinders.{IOBinders}
-import chipyard.chiptop.{ChipTop}
+import chipyard.iobinders.types.TestHarnessFunction
 
 // -------------------------------
 // BOOM and/or Rocket Test Harness
 // -------------------------------
 
-case object BuildTop extends Field[Parameters => Any]((p: Parameters) => Module(new ChipTop()(p)).suggestName("top"))
+case object BuildTop extends Field[Parameters => HasTestHarnessFunctions]((p: Parameters) => Module(new ChipTop()(p)).suggestName("top"))
+
+trait HasTestHarnessFunctions {
+  val harnessFunctions: Seq[TestHarnessFunction]
+}
 
 class TestHarness(implicit val p: Parameters) extends Module {
   val io = IO(new Bundle {
@@ -27,7 +29,16 @@ class TestHarness(implicit val p: Parameters) extends Module {
 
   val dut = p(BuildTop)(p)
   io.success := false.B
-  p(IOBinders).values.map(fn => fn(clock, reset.asBool, io.success, dut))
+  // resetOverride can be overridden via a harnessFunction
+  val resetOverride = Wire(Bool())
+  resetOverride := reset
+  dut.harnessFunctions.foreach(_(this))
+
+  // Aliases for clock, reset, and success
+  def c  = clock
+  def r  = reset.asBool
+  def ro = resetOverride
+  def s  = io.success
 }
 
 object TestHarnessUtils {

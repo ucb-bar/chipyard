@@ -7,7 +7,6 @@ import freechips.rocketchip.config.{Config}
 // --------------
 
 class RocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++       // connect clock and reset to a ChipTop design
   new chipyard.iobinders.WithUARTAdapter ++                      // display UART with a SimUARTAdapter
   new chipyard.iobinders.WithTieOffInterrupts ++                 // tie off top-level interrupts
   new chipyard.iobinders.WithBlackBoxSimMem ++                   // drive the master AXI4 memory with a SimAXIMem
@@ -26,7 +25,6 @@ class RocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)                    // "base" rocketchip system
 
 class HwachaRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -47,7 +45,6 @@ class HwachaRocketConfig extends Config(
 
 // DOC include start: GemminiRocketConfig
 class GemminiRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -68,7 +65,6 @@ class GemminiRocketConfig extends Config(
 // DOC include end: GemminiRocketConfig
 
 class RoccRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -89,7 +85,6 @@ class RoccRocketConfig extends Config(
 
 // DOC include start: JtagRocket
 class jtagRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -111,7 +106,6 @@ class jtagRocketConfig extends Config(
 
 // DOC include start: DmiRocket
 class dmiRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -131,7 +125,6 @@ class dmiRocketConfig extends Config(
 
 // DOC include start: GCDTLRocketConfig
 class GCDTLRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -153,7 +146,6 @@ class GCDTLRocketConfig extends Config(
 
 // DOC include start: GCDAXI4BlackBoxRocketConfig
 class GCDAXI4BlackBoxRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -174,7 +166,6 @@ class GCDAXI4BlackBoxRocketConfig extends Config(
 // DOC include end: GCDAXI4BlackBoxRocketConfig
 
 class SimBlockDeviceRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -195,7 +186,6 @@ class SimBlockDeviceRocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class BlockDeviceModelRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -217,7 +207,6 @@ class BlockDeviceModelRocketConfig extends Config(
 
 // DOC include start: GPIORocketConfig
 class GPIORocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -238,7 +227,6 @@ class GPIORocketConfig extends Config(
 // DOC include end: GPIORocketConfig
 
 class QuadRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -257,7 +245,6 @@ class QuadRocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class RV32RocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -276,7 +263,6 @@ class RV32RocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class GB1MemoryRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -297,7 +283,6 @@ class GB1MemoryRocketConfig extends Config(
 
 // DOC include start: Sha3Rocket
 class Sha3RocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -319,7 +304,6 @@ class Sha3RocketConfig extends Config(
 
 // DOC include start: InitZeroRocketConfig
 class InitZeroRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -340,7 +324,6 @@ class InitZeroRocketConfig extends Config(
 // DOC include end: InitZeroRocketConfig
 
 class LoopbackNICRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -362,7 +345,6 @@ class LoopbackNICRocketConfig extends Config(
 
 // DOC include start: scratchpadrocket
 class ScratchpadRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithTiedOffDebug ++
@@ -383,7 +365,6 @@ class ScratchpadRocketConfig extends Config(
 // DOC include end: scratchpadrocket
 
 class RingSystemBusRocketConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++

@@ -9,7 +9,6 @@ import freechips.rocketchip.config.{Config}
 // ---------------------
 
 class ArianeConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++       // connect clock and reset to a ChipTop design
   new chipyard.iobinders.WithUARTAdapter ++                      // display UART with a SimUARTAdapter
   new chipyard.iobinders.WithTieOffInterrupts ++                 // tie off top-level interrupts
   new chipyard.iobinders.WithSimAXIMem ++                        // drive the master AXI4 memory with a SimAXIMem
@@ -27,7 +26,6 @@ class ArianeConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)                    // "base" rocketchip system
 
 class dmiArianeConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithSimAXIMem ++

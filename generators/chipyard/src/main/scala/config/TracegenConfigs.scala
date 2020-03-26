@@ -4,7 +4,6 @@ import freechips.rocketchip.config.{Config}
 import freechips.rocketchip.rocket.{DCacheParams}
 
 class TraceGenConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTraceGenSuccessBinder ++
   new chipyard.config.WithTracegenTop ++
@@ -12,7 +11,6 @@ class TraceGenConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class NonBlockingTraceGenConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTraceGenSuccessBinder ++
   new chipyard.config.WithTracegenTop ++
@@ -20,7 +18,6 @@ class NonBlockingTraceGenConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class BoomTraceGenConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTraceGenSuccessBinder ++
   new chipyard.config.WithTracegenTop ++
@@ -29,7 +26,6 @@ class BoomTraceGenConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class NonBlockingTraceGenL2Config extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTraceGenSuccessBinder ++
   new chipyard.config.WithTracegenTop ++
@@ -38,7 +34,6 @@ class NonBlockingTraceGenL2Config extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 class NonBlockingTraceGenL2RingConfig extends Config(
-  new chipyard.iobinders.WithChipTopSimpleClockAndReset ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTraceGenSuccessBinder ++
   new chipyard.config.WithTracegenTop ++
