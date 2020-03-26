@@ -143,22 +143,22 @@ class WithUARTAdapter extends OverrideIOBinder({
 
 // TODO: Add a note about synthesizability of SimBlockDevice
 class WithSimBlockDevice extends OverrideIOBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp) => SimBlockDevice.connect(system.clock, system.reset.asBool, system.bdev)(system.p); Nil
+  (system: CanHavePeripheryBlockDeviceModuleImp) => system.connectSimBlockDevice(system.clock, system.reset.asBool); Nil
 })
 
 // TODO: Add a note about synthesizability of SimBlockDevice
 class WithBlockDeviceModel extends OverrideIOBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp) => BlockDeviceModel.connect(system.bdev)(system.p); Nil
+  (system: CanHavePeripheryBlockDeviceModuleImp) => system.connectBlockDeviceModel(); Nil
 })
 
 // TODO: Do we want to allow this to be synthesized (i.e. should this go in the test harness or in ChipTop)
 class WithLoopbackNIC extends OverrideIOBinder({
-  (system: CanHavePeripheryIceNICModuleImp) => NicLoopback.connect(system.net, system.p(NICKey)); Nil
+  (system: CanHavePeripheryIceNICModuleImp) => system.connectNicLoopback(); Nil
 })
 
 // TODO: Do we want to allow this to be synthesized (i.e. should this go in the test harness or in ChipTop)
 class WithSimNIC extends OverrideIOBinder({
-  (system: CanHavePeripheryIceNICModuleImp) => SimNetwork.connect(system.net, system.clock, system.reset.asBool); Nil
+  (system: CanHavePeripheryIceNICModuleImp) => system.connectSimNetwork(system.clock, system.reset.asBool); Nil
 })
 
 // DOC include start: WithSimAXIMem

@@ -36,11 +36,7 @@ ifeq ($(SUB_PROJECT),chipyard)
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
-ifneq (,$(findstring Chip,$(CONFIG)))
 	TOP               ?= ChipTop
-else
-	TOP               ?= Top
-endif
 endif
 # for Rocket-chip developers
 ifeq ($(SUB_PROJECT),rocketchip)
