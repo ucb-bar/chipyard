@@ -24,11 +24,12 @@ abstract class BaseChipTop()(implicit val p: Parameters) extends RawModule with 
 
   val system = withClockAndReset(systemClock, systemReset) { p(BuildSystem)(p) }
 
-  private val (_ports, _iocells, _harnessFunctions) = p(IOBinders).values.map(_(system)).flatten.unzip3
-
-  // We ignore _ports for now...
-  iocells ++= _iocells.flatten
-  harnessFunctions ++= _harnessFunctions.flatten
+  withClockAndReset(systemClock, systemReset) {
+    val (_ports, _iocells, _harnessFunctions) = p(IOBinders).values.map(_(system)).flatten.unzip3
+    // We ignore _ports for now...
+    iocells ++= _iocells.flatten
+    harnessFunctions ++= _harnessFunctions.flatten
+  }
 
 }
 
