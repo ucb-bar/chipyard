@@ -48,7 +48,8 @@ trait HasChipTopSimpleClockAndReset { this: BaseChipTop =>
     // Connect clock; it's not done implicitly with RawModule
     clock := th.c
     // Connect reset; it's not done implicitly with RawModule
-    reset := th.r
+    // Note that we need to use the overridden version of reset
+    reset := th.ro
     Nil
   } }
 
