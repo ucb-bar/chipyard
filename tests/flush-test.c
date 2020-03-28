@@ -1,9 +1,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <riscv-pk/encoding.h>
 
 #include "dramcache.h"
-#include "encoding.h"
 
 #define CACHE_START (1L << 32)
 #define SPAN_BYTES 64
