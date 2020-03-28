@@ -1,6 +1,9 @@
 #########################################################################################
 # verilator makefile
 #########################################################################################
+ifeq ($(shell which verilator),)
+$(error Did not find Verilator in PATH. Make sure all requirements are installed)
+endif
 
 #########################################################################################
 # general path variables
@@ -38,12 +41,11 @@ debug: $(sim_debug)
 # import other necessary rules and variables
 #########################################################################################
 include $(base_dir)/common.mk
-include $(sim_dir)/verilator.mk
 
 #########################################################################################
 # verilator binary and flags
 #########################################################################################
-VERILATOR := $(INSTALLED_VERILATOR) --cc --exe
+VERILATOR := verilator --cc --exe
 
 CXXFLAGS := $(CXXFLAGS) -O1 -std=c++11 -I$(RISCV)/include -I$(dramsim_dir) -D__STDC_FORMAT_MACROS
 LDFLAGS := $(LDFLAGS) -L$(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -L$(dramsim_dir) -Wl,-rpath,$(dramsim_dir) -L$(sim_dir) -lfesvr -lpthread -ldramsim
@@ -54,17 +56,38 @@ VERILATOR_CC_OPTS = \
 	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(build_dir)/verilator.h" \
 	-LDFLAGS "$(LDFLAGS)"
 
+# default flags added for ariane
+ARIANE_VERILATOR_FLAGS = \
+	--unroll-count 256 \
+	-Werror-PINMISSING \
+	-Werror-IMPLICIT \
+	-Wno-fatal \
+	-Wno-PINCONNECTEMPTY \
+	-Wno-ASSIGNDLY \
+	-Wno-DECLFILENAME \
+	-Wno-UNUSED \
+	-Wno-UNOPTFLAT \
+	-Wno-BLKANDNBLK \
+	-Wno-style \
+	-Wall
+
+# normal flags used for chipyard builds (that are incompatible with ariane)
+CHIPYARD_VERILATOR_FLAGS = \
+	--assert
+
 VERILATOR_NONCC_OPTS = \
 	--top-module $(VLOG_MODEL) \
-	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
-	+define+STOP_COND=\$$c\(\"done_reset\"\) \
-	--assert \
+	$(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; then echo "$(CHIPYARD_VERILATOR_FLAGS)"; else echo "$(ARIANE_VERILATOR_FLAGS)"; fi) \
 	--output-split 10000 \
 	--output-split-cfuncs 100 \
-	$(sim_vsrcs) \
-	-f $(sim_common_files)
+	-f $(sim_common_files) \
+	$(sim_vsrcs)
 
-VERILATOR_OPTS = $(VERILATOR_CC_OPTS) $(VERILATOR_NONCC_OPTS)
+VERILATOR_DEFINES = \
+	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
+	+define+STOP_COND=\$$c\(\"done_reset\"\)
+
+VERILATOR_OPTS = $(VERILATOR_CC_OPTS) $(VERILATOR_NONCC_OPTS) $(VERILATOR_DEFINES)
 
 #########################################################################################
 # verilator build paths and file names
@@ -81,14 +104,13 @@ model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
 #########################################################################################
 # build makefile fragment that builds the verilator sim rules
 #########################################################################################
-
-$(model_mk): $(sim_vsrcs) $(sim_common_files) $(INSTALLED_VERILATOR)
+$(model_mk): $(sim_vsrcs) $(sim_common_files)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name)
 	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim) -Mdir $(model_dir) -CFLAGS "-include $(model_header)"
 	touch $@
 
-$(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(INSTALLED_VERILATOR)
+$(model_mk_debug): $(sim_vsrcs) $(sim_common_files)
 	rm -rf $(build_dir)/$(long_name)
 	mkdir -p $(build_dir)/$(long_name).debug
 	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim_debug) --trace -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"

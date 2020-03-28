@@ -20,8 +20,8 @@ To integrate one of these devices in your SoC, you will need to define a custom 
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/ConfigFragments.scala
     :language: scala
-    :start-after: DOC include start: gpio mixin
-    :end-before: DOC include end: gpio mixin
+    :start-after: DOC include start: gpio config fragment
+    :end-before: DOC include end: gpio config fragment
 
 Additionally, if the device requires top-level IOs, you will need to define a config fragment to change the top-level configuration of your SoC.
 When adding a top-level IO, you should also be aware of whether it interacts with the test-harness.
@@ -31,7 +31,7 @@ This example instantiates a top-level module with include GPIO ports, and then t
 
 Finally, you add the relevant config fragment to the SoC config. For example:
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
     :language: scala
     :start-after: DOC include start: GPIORocketConfig
     :end-before: DOC include end: GPIORocketConfig

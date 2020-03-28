@@ -9,7 +9,7 @@ To add a Gemmini unit to an SoC, you should add the ``gemmini.DefaultGemminiConf
 
 The example Chipyard config includes the following example SoC configuration which includes Gemmini:
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
     :language: scala
     :start-after: DOC include start: GemminiRocketConfig
     :end-before: DOC include end: GemminiRocketConfig

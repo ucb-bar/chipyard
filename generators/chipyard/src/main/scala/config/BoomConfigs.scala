@@ -1,17 +1,15 @@
 package chipyard
 
-import chisel3._
-
 import freechips.rocketchip.config.{Config}
 
 // ---------------------
-// Heterogenous Configs
+// BOOM Configs
 // ---------------------
 
-class LargeBoomAndRocketConfig extends Config(
+class SmallBoomConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++                      // display UART with a SimUARTAdapter
   new chipyard.iobinders.WithTieOffInterrupts ++                 // tie off top-level interrupts
-  new chipyard.iobinders.WithBlackBoxSimMem ++                        // drive the master AXI4 memory with a SimAXIMem
+  new chipyard.iobinders.WithBlackBoxSimMem ++                   // drive the master AXI4 memory with a SimAXIMem
   new chipyard.iobinders.WithTiedOffDebug ++                     // tie off debug (since we are using SimSerial for testing)
   new chipyard.iobinders.WithSimSerial ++                        // drive TSI with SimSerial for testing
   new testchipip.WithTSI ++                                      // use testchipip serial offchip link
@@ -19,18 +17,15 @@ class LargeBoomAndRocketConfig extends Config(
   new chipyard.config.WithBootROM ++                             // use default bootrom
   new chipyard.config.WithUART ++                                // add a UART
   new chipyard.config.WithL2TLBs(1024) ++                        // use L2 TLBs
-  new boom.common.WithRenumberHarts ++                           // avoid hartid overlap
-  new boom.common.WithLargeBooms ++                              // 3-wide boom
-  new boom.common.WithNBoomCores(1) ++                           // single-core boom
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++           // no top-level MMIO master port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithNoSlavePort ++          // no top-level MMIO slave port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithInclusiveCache ++       // use Sifive L2 cache
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++ // no external interrupts
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new boom.common.WithSmallBooms ++                              // small boom config
+  new boom.common.WithNBoomCores(1) ++                           // single-core boom
   new freechips.rocketchip.system.BaseConfig)                    // "base" rocketchip system
 
-// DOC include start: BoomAndRocketWithHwacha
-class HwachaLargeBoomAndHwachaRocketConfig extends Config(
+class MediumBoomConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -41,132 +36,148 @@ class HwachaLargeBoomAndHwachaRocketConfig extends Config(
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
-  new hwacha.DefaultHwachaConfig ++                      // add hwacha to all harts
-  new boom.common.WithRenumberHarts ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new boom.common.WithMediumBooms ++                              // medium boom config
+  new boom.common.WithNBoomCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class LargeBoomConfig extends Config(
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new testchipip.WithTSI ++
+  new chipyard.config.WithNoGPIO ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new chipyard.config.WithL2TLBs(1024) ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new boom.common.WithLargeBooms ++                              // large boom config
+  new boom.common.WithNBoomCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class MegaBoomConfig extends Config(
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new testchipip.WithTSI ++
+  new chipyard.config.WithNoGPIO ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new chipyard.config.WithL2TLBs(1024) ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new boom.common.WithMegaBooms ++                              // mega boom config
+  new boom.common.WithNBoomCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class DualSmallBoomConfig extends Config(
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new testchipip.WithTSI ++
+  new chipyard.config.WithNoGPIO ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new chipyard.config.WithL2TLBs(1024) ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new boom.common.WithSmallBooms ++
+  new boom.common.WithNBoomCores(2) ++                         // 2 boom cores
+  new freechips.rocketchip.system.BaseConfig)
+
+class SmallRV32BoomConfig extends Config(
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new testchipip.WithTSI ++
+  new chipyard.config.WithNoGPIO ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new chipyard.config.WithL2TLBs(1024) ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new boom.common.WithoutBoomFPU ++                        // no fp
+  new boom.common.WithBoomRV32 ++                          // rv32 (32bit)
+  new boom.common.WithSmallBooms ++
+  new boom.common.WithNBoomCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class HwachaLargeBoomConfig extends Config(
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new testchipip.WithTSI ++
+  new chipyard.config.WithNoGPIO ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new chipyard.config.WithL2TLBs(1024) ++
+  new hwacha.DefaultHwachaConfig ++                         // use Hwacha vector accelerator
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new boom.common.WithLargeBooms ++
   new boom.common.WithNBoomCores(1) ++
-  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-  new freechips.rocketchip.subsystem.WithNoSlavePort ++
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++
-  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
-// DOC include end: BoomAndRocketWithHwacha
 
-class DualLargeBoomAndRocketConfig extends Config(
+class LoopbackNICLargeBoomConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
+  new chipyard.iobinders.WithLoopbackNIC ++                        // drive NIC IOs with loopback
   new testchipip.WithTSI ++
+  new icenet.WithIceNIC ++
   new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
-  new boom.common.WithRenumberHarts ++
-  new boom.common.WithLargeBooms ++
-  new boom.common.WithNBoomCores(2) ++                       // 2 boom cores
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new freechips.rocketchip.system.BaseConfig)
-
-// DOC include start: DualBoomAndRocketOneHwacha
-
-class LargeBoomAndHwachaRocketConfig extends Config(
-  new chipyard.iobinders.WithUARTAdapter ++
-  new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithBlackBoxSimMem ++
-  new chipyard.iobinders.WithTiedOffDebug ++
-  new chipyard.iobinders.WithSimSerial ++
-  new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
-  new chipyard.config.WithBootROM ++
-  new chipyard.config.WithUART ++
-  new chipyard.config.WithMultiRoCC ++                                  // support heterogeneous rocc
-  new chipyard.config.WithMultiRoCCHwacha(1) ++                         // put hwacha on hart-2 (rocket)
-  new chipyard.config.WithL2TLBs(1024) ++
-  new boom.common.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++
   new boom.common.WithNBoomCores(1) ++
-  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-  new freechips.rocketchip.subsystem.WithNoSlavePort ++
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++
-  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new freechips.rocketchip.system.BaseConfig)
-// DOC include end: DualBoomAndRocketOneHwacha
-
-
-
-class LargeBoomAndRV32RocketConfig extends Config(
-  new chipyard.iobinders.WithUARTAdapter ++
-  new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithBlackBoxSimMem ++
-  new chipyard.iobinders.WithTiedOffDebug ++
-  new chipyard.iobinders.WithSimSerial ++
-  new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
-  new chipyard.config.WithBootROM ++
-  new chipyard.config.WithUART ++
-  new chipyard.config.WithL2TLBs(1024) ++
-  new boom.common.WithRenumberHarts ++
-  new boom.common.WithLargeBooms ++
-  new boom.common.WithNBoomCores(1) ++
-  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-  new freechips.rocketchip.subsystem.WithNoSlavePort ++
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++
-  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new freechips.rocketchip.subsystem.WithRV32 ++           // set RocketTiles to be 32-bit
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+class BoomDRAMCacheConfig extends Config(
+  new chipyard.config.WithMemBenchKey ++
+  new chipyard.config.WithDRAMCacheKey(4, 8, 4) ++
+  new chipyard.config.WithDRAMCacheTop ++
+  new chipyard.config.WithPrefetchMiddleMan ++
+  new chipyard.config.WithStandardL2(4) ++
+  new LargeBoomConfig)
 
-// DOC include start: DualBoomAndRocket
-class DualLargeBoomAndDualRocketConfig extends Config(
-  new chipyard.iobinders.WithUARTAdapter ++
-  new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithBlackBoxSimMem ++
-  new chipyard.iobinders.WithTiedOffDebug ++
-  new chipyard.iobinders.WithSimSerial ++
-  new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
-  new chipyard.config.WithBootROM ++
-  new chipyard.config.WithUART ++
-  new chipyard.config.WithL2TLBs(1024) ++
-  new boom.common.WithRenumberHarts ++
-  new boom.common.WithLargeBooms ++
-  new boom.common.WithNBoomCores(2) ++                     // 2 boom cores
-  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-  new freechips.rocketchip.subsystem.WithNoSlavePort ++
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++
-  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(2) ++   // 2 rocket cores
-  new freechips.rocketchip.system.BaseConfig)
-// DOC include end: DualBoomAndRocket
-
-class LargeBoomAndRocketWithControlCoreConfig extends Config(
-  new chipyard.iobinders.WithUARTAdapter ++
-  new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithBlackBoxSimMem ++
-  new chipyard.iobinders.WithTiedOffDebug ++
-  new chipyard.iobinders.WithSimSerial ++
-  new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
-  new chipyard.config.WithBootROM ++
-  new chipyard.config.WithUART ++
-  new chipyard.config.WithControlCore ++  // add small control core to last hartid
-  new chipyard.config.WithL2TLBs(1024) ++
-  new boom.common.WithRenumberHarts ++
-  new boom.common.WithLargeBooms ++
-  new boom.common.WithNBoomCores(1) ++
-  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-  new freechips.rocketchip.subsystem.WithNoSlavePort ++
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++
-  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new freechips.rocketchip.system.BaseConfig)
-
+class BoomHwachaDRAMCacheConfig extends Config(
+  new chipyard.config.WithHwachaNVMTEntries(64) ++
+  new chipyard.config.WithHwachaConfPrec ++
+  new hwacha.WithNLanes(2) ++
+  new chipyard.config.WithMemBenchKey ++
+  new chipyard.config.WithDRAMCacheKey(4, 8, 4) ++
+  new chipyard.config.WithDRAMCacheTop ++
+  new chipyard.config.WithPrefetchMiddleMan ++
+  new chipyard.config.WithStandardL2(4) ++
+  new HwachaLargeBoomConfig)

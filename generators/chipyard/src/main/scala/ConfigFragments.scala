@@ -97,6 +97,18 @@ class WithDRAMCacheTop extends Config((site, here, up) => {
       new chipyard.DRAMCacheTop()(p)).suggestName("DRAMCacheTop").module)
 })
 
+class WithRenumberHarts(rocketFirst: Boolean = false) extends Config((site, here, up) => {
+  case RocketTilesKey => up(RocketTilesKey, site).zipWithIndex map { case (r, i) =>
+    r.copy(hartId = i + (if(rocketFirst) 0 else up(BoomTilesKey, site).length))
+  }
+  case BoomTilesKey => up(BoomTilesKey, site).zipWithIndex map { case (b, i) =>
+    b.copy(hartId = i + (if(rocketFirst) up(RocketTilesKey, site).length else 0))
+  }
+  case MaxHartIdBits => log2Up(up(BoomTilesKey, site).size + up(RocketTilesKey, site).size)
+})
+
+
+
 // ------------------
 // Multi-RoCC Support
 // ------------------
