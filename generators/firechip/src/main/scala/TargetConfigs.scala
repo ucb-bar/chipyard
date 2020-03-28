@@ -77,6 +77,11 @@ class WithNIC extends icenet.WithIceNIC(
   usePauser = true,
   ctrlQueueDepth = 64)
 
+class WithExtraBlockDevice extends Config((site, here, up) => {
+  case BlockDeviceKey =>
+    up(BlockDeviceKey, site) :+ BlockDeviceConfig(ctrlAddr = 0x10024000)
+})
+
 // Enables tracing on all cores
 class WithTraceIO extends Config((site, here, up) => {
   case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
@@ -223,6 +228,7 @@ class FireSimRemoteMemClientQuadCoreConfig extends Config(
 
 class FireSimHwachaRemoteMemClientConfig extends Config(
   new WithNIC ++
+  new WithExtraBlockDevice ++
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
