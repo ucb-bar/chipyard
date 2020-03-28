@@ -70,11 +70,11 @@ class WithGPIOTiedOff extends OverrideIOBinder({
 })
 
 class WithSimBlockDevice extends OverrideIOBinder({
-  (c, r, s, top: CanHavePeripheryBlockDeviceModuleImp) => top.connectSimBlockDevice(c, r); Nil
+  (c, r, s, top: CanHavePeripheryBlockDeviceModuleImp) => top.connectSimBlockDevices(c, r); Nil
 })
 
 class WithBlockDeviceModel extends OverrideIOBinder({
-  (c, r, s, top: CanHavePeripheryBlockDeviceModuleImp) => top.connectBlockDeviceModel(); Nil
+  (c, r, s, top: CanHavePeripheryBlockDeviceModuleImp) => top.connectBlockDeviceModels(); Nil
 })
 
 class WithLoopbackNIC extends OverrideIOBinder({

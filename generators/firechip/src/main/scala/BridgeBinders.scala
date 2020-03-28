@@ -49,7 +49,7 @@ class WithUARTBridge extends OverrideIOBinder({
 
 class WithBlockDeviceBridge extends OverrideIOBinder({
   (c, r, s, target: CanHavePeripheryBlockDeviceModuleImp) =>
-    target.bdev.map(b => BlockDevBridge(target.clock, b, target.reset.toBool)(target.p)).toSeq
+    target.bdev.map(b => BlockDevBridge(target.clock, b, target.reset.toBool)(b.p))
 })
 
 class WithFASEDBridge extends OverrideIOBinder({
