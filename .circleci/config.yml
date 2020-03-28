@@ -145,6 +145,17 @@ jobs:
                 name: Check that the tutorial-setup patches apply
                 command: |
                     scripts/tutorial-setup.sh
+    documentation-check:
+        executor: main-env
+        steps:
+            - checkout
+            - run:
+                name: Check that documentation builds with no warnings/errors
+                command: |
+                    sudo apt-get update -y
+                    sudo apt-get install -y python3-pip
+                    sudo pip3 install -r docs/requirements.txt
+                    make -C docs html
 
     install-riscv-toolchain:
         executor: main-env
@@ -356,6 +367,9 @@ workflows:
 
             # Attempt to apply the tutorial patches
             - tutorial-setup-check
+
+            # Check that documentation builds
+            - documentation-check
 
             # Build extra tests
             - build-extra-tests:

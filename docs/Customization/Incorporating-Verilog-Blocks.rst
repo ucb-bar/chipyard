@@ -57,7 +57,8 @@ and Verilog sources follow the prescribed directory layout.
         build.sbt
         src/main/
             scala/
-                GCD.scala
+                example/
+                    GCD.scala
             resources/
                 vsrc/
                     GCDMMIOBlackBox.v
@@ -88,7 +89,7 @@ as the bitwidth of the GCD calculation does in this example.
 
 **Chisel BlackBox Definition**
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/GCD.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala
     :start-after: DOC include start: GCD blackbox
     :end-before: DOC include end: GCD blackbox
@@ -103,7 +104,7 @@ peripheral-specific traits into a ``TLRegisterRouter``. The ``params``
 member and ``HasRegMap`` base trait should look familiar from the
 previous memory-mapped GCD device example.
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/GCD.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala
     :start-after: DOC include start: GCD instance regmap
     :end-before: DOC include end: GCD instance regmap
@@ -115,7 +116,7 @@ Defining a Chip with a BlackBox
 Since we've parameterized the GCD instantiation to choose between the
 Chisel and the Verilog module, creating a config is easy.
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
     :language: scala
     :start-after: DOC include start: GCDAXI4BlackBoxRocketConfig
     :end-before: DOC include end: GCDAXI4BlackBoxRocketConfig

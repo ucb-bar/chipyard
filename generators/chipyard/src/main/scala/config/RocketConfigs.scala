@@ -364,6 +364,7 @@ class ScratchpadRocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: scratchpadrocket
 
+// DOC include start: RingSystemBusRocket
 class RingSystemBusRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
@@ -382,3 +383,4 @@ class RingSystemBusRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
+// DOC include end: RingSystemBusRocket

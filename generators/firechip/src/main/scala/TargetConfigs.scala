@@ -84,13 +84,25 @@ class WithTraceIO extends Config((site, here, up) => {
 
 // Tweaks that are generally applied to all firesim configs
 class WithFireSimConfigTweaks extends Config(
-  new WithBootROM ++ // needed to support FireSim-as-top
-  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++ // 3.2 GHz
+  // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
+  new WithBootROM ++
+  // Optional*: Removing this will require target-software changes to properly capture UART output
+  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
+  // Required: Existing FAME-1 transform cannot handle black-box clock gates
   new WithoutClockGating ++
+  // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
+  new WithoutTLMonitors ++
+  // Optional: Adds IO to attach tracerV bridges
   new WithTraceIO ++
-  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++ // 16 GB
+  // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 32 GiB on F1)
+  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
+  // Required: Adds IO to attach SerialBridge. The SerialBridges is responsible
+  // for signalling simulation termination under simulation success. This fragment can
+  // be removed if you supply an auxiliary bridge that signals simulation termination
   new testchipip.WithTSI ++
+  // Optional: Removing this will require using an initramfs under linux
   new testchipip.WithBlockDevice ++
+  // Required*:
   new chipyard.config.WithUART
 )
 
