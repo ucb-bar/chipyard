@@ -7,8 +7,7 @@ import scala.collection.mutable.{ArrayBuffer}
 import freechips.rocketchip.config.{Parameters, Field}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import chipyard.config.ConfigValName._
-import chipyard.iobinders.{IOBinders}
-import chipyard.iobinders.types.{TestHarnessFunction}
+import chipyard.iobinders.{IOBinders, TestHarnessFunction, IOBinderTuple}
 
 import barstools.iocell.chisel._
 

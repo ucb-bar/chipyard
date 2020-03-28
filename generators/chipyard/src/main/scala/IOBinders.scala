@@ -1,4 +1,5 @@
-package chipyard.iobinders
+package chipyard
+package object iobinders {
 
 import chisel3._
 import chisel3.experimental.{Analog, IO}
@@ -7,7 +8,6 @@ import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.subsystem._
-// Note: Do not import freechips.rocketchip.system._ because it also has a TestHarness that conflicts with chipyard.TestHarness
 import freechips.rocketchip.util._
 
 import sifive.blocks.devices.gpio._
@@ -15,9 +15,7 @@ import sifive.blocks.devices.uart._
 
 import barstools.iocell.chisel._
 
-import chipyard.{TestHarness}
-// Note: Do not import testchipip._ because it also has a TestHarness that conflicts with chipyard.TestHarness
-import testchipip.{CanHavePeripherySerialModuleImp, SerialIO, SerialAdapter, CanHavePeripheryBlockDeviceModuleImp, SimBlockDevice, BlockDeviceModel, SimDRAM}
+import testchipip._
 import icenet.{CanHavePeripheryIceNICModuleImp, SimNetwork, NicLoopback, NICKey}
 import tracegen.{HasTraceGenTilesModuleImp}
 
@@ -37,11 +35,8 @@ import scala.reflect.{ClassTag}
 // the OverrideIOBinder or ComposeIOBinder macros
 
 
-object types {
-  type TestHarnessFunction = (TestHarness) => Seq[Any]
-  type IOBinderTuple = (Seq[Data], Seq[IOCell], Option[TestHarnessFunction])
-}
-import types._
+type TestHarnessFunction = (chipyard.TestHarness) => Seq[Any]
+type IOBinderTuple = (Seq[Data], Seq[IOCell], Option[TestHarnessFunction])
 
 // DOC include start: IOBinders
 case object IOBinders extends Field[Map[String, (Any) => Seq[IOBinderTuple]]](
@@ -123,7 +118,7 @@ object AddIOCells {
 class WithGPIOTiedOff extends OverrideIOBinder({
   (system: HasPeripheryGPIOModuleImp) => {
     val (ports2d, ioCells2d) = AddIOCells.gpio(system.gpio)
-    val harnessFn = (th: TestHarness) => { ports2d.flatten.foreach(_ <> AnalogConst(0)); Nil }
+    val harnessFn = (th: chipyard.TestHarness) => { ports2d.flatten.foreach(_ <> AnalogConst(0)); Nil }
     Seq((ports2d.flatten, ioCells2d.flatten, Some(harnessFn)))
   }
 })
@@ -131,7 +126,7 @@ class WithGPIOTiedOff extends OverrideIOBinder({
 class WithUARTAdapter extends OverrideIOBinder({
   (system: HasPeripheryUARTModuleImp) => {
     val (ports, ioCells2d) = AddIOCells.uart(system.uart)
-    val harnessFn = (th: TestHarness) => { UARTAdapter.connect(ports)(system.p); Nil }
+    val harnessFn = (th: chipyard.TestHarness) => { UARTAdapter.connect(ports)(system.p); Nil }
     Seq((ports, ioCells2d.flatten, Some(harnessFn)))
   }
 })
@@ -185,7 +180,7 @@ class WithTieOffInterrupts extends OverrideIOBinder({
   (system: HasExtInterruptsModuleImp) => {
     val (port, ioCells) = IOCell.generateIOFromSignal(system.interrupts, Some("iocell_interrupts"))
     port.suggestName("interrupts")
-    val harnessFn = (th: TestHarness) => { port := 0.U; Nil }
+    val harnessFn = (th: chipyard.TestHarness) => { port := 0.U; Nil }
     Seq((Seq(port), ioCells, Some(harnessFn)))
   }
 })
@@ -212,7 +207,7 @@ class WithTieOffL2FBusAXI extends OverrideIOBinder({
 class WithTiedOffDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
     val (psdPort, debugPortOpt, ioCells) = AddIOCells.debug(system.psd, system.debug)
-    val harnessFn = (th: TestHarness) => {
+    val harnessFn = (th: chipyard.TestHarness) => {
       Debug.tieoffDebug(debugPortOpt, psdPort)
       // tieoffDebug doesn't actually tie everything off :/
       debugPortOpt.foreach(_.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare }))
@@ -225,7 +220,7 @@ class WithTiedOffDebug extends OverrideIOBinder({
 class WithSimDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
     val (psdPort, debugPortOpt, ioCells) = AddIOCells.debug(system.psd, system.debug)
-    val harnessFn = (th: TestHarness) => {
+    val harnessFn = (th: chipyard.TestHarness) => {
       val dtm_success = Wire(Bool())
       Debug.connectDebug(debugPortOpt, psdPort, th.c, th.r, dtm_success)(system.p)
       when (dtm_success) { th.s := true.B }
@@ -239,7 +234,7 @@ class WithSimDebug extends OverrideIOBinder({
 class WithTiedOffSerial extends OverrideIOBinder({
   (system: CanHavePeripherySerialModuleImp) => system.serial.map({ serial =>
     val (port, ioCells) = AddIOCells.serial(serial)
-    val harnessFn = (th: TestHarness) => {
+    val harnessFn = (th: chipyard.TestHarness) => {
       SerialAdapter.tieoff(port)
       Nil
     }
@@ -250,7 +245,7 @@ class WithTiedOffSerial extends OverrideIOBinder({
 class WithSimSerial extends OverrideIOBinder({
   (system: CanHavePeripherySerialModuleImp) => system.serial.map({ serial =>
     val (port, ioCells) = AddIOCells.serial(serial)
-    val harnessFn = (th: TestHarness) => {
+    val harnessFn = (th: chipyard.TestHarness) => {
       val ser_success = SerialAdapter.connectSimSerial(port, th.c, th.r)
       when (ser_success) { th.s := true.B }
       Nil
@@ -263,8 +258,9 @@ class WithTraceGenSuccessBinder extends OverrideIOBinder({
   (system: HasTraceGenTilesModuleImp) => {
     val (successPort, ioCells) = IOCell.generateIOFromSignal(system.success, Some("iocell_success"))
     successPort.suggestName("success")
-    val harnessFn = (th: TestHarness) => { when (successPort) { th.s := true.B }; Nil }
+    val harnessFn = (th: chipyard.TestHarness) => { when (successPort) { th.s := true.B }; Nil }
     Seq((Seq(successPort), ioCells, Some(harnessFn)))
   }
 })
 
+}
