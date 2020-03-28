@@ -12,7 +12,7 @@ import chipyard.iobinders.types.{TestHarnessFunction}
 
 import barstools.iocell.chisel._
 
-case object BuildSystem extends Field[Parameters => SystemModule[System]]((p: Parameters) => Module(LazyModule(new DigitalTop()(p)).suggestName("system").module))
+case object BuildSystem extends Field[Parameters => RawModule]((p: Parameters) => Module(LazyModule(new DigitalTop()(p)).suggestName("system").module))
 
 abstract class BaseChipTop()(implicit val p: Parameters) extends RawModule with HasTestHarnessFunctions {
 
