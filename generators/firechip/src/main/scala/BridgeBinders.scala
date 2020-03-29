@@ -29,56 +29,55 @@ import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder}
 import chipyard.HasChipyardTilesModuleImp
 
 class WithSerialBridge extends OverrideIOBinder({
-  (c, r, s, target: CanHavePeripherySerialModuleImp) =>
-    target.serial.map(s => SerialBridge(target.clock, s)(target.p)).toSeq
+  (system: CanHavePeripherySerialModuleImp) =>
+    system.serial.foreach(s => SerialBridge(system.clock, s)(system.p)); Nil
 })
 
 class WithNICBridge extends OverrideIOBinder({
-  (c, r, s, target: CanHavePeripheryIceNICModuleImp) =>
-    target.net.map(n => NICBridge(target.clock, n)(target.p)).toSeq
+  (system: CanHavePeripheryIceNICModuleImp) =>
+    system.net.foreach(n => NICBridge(system.clock, n)(system.p)); Nil
 })
 
 class WithUARTBridge extends OverrideIOBinder({
-  (c, r, s, target: HasPeripheryUARTModuleImp) =>
-    target.uart.map(u => UARTBridge(target.clock, u)(target.p)).toSeq
+  (system: HasPeripheryUARTModuleImp) =>
+    system.uart.foreach(u => UARTBridge(system.clock, u)(system.p)); Nil
 })
 
 class WithBlockDeviceBridge extends OverrideIOBinder({
-  (c, r, s, target: CanHavePeripheryBlockDeviceModuleImp) =>
-    target.bdev.map(b => BlockDevBridge(target.clock, b, target.reset.toBool)(target.p)).toSeq
+  (system: CanHavePeripheryBlockDeviceModuleImp) =>
+    system.bdev.foreach(b => BlockDevBridge(system.clock, b, system.reset.toBool)(system.p)); Nil
 })
 
 class WithFASEDBridge extends OverrideIOBinder({
-  (c, r, s, t: CanHaveMasterAXI4MemPortModuleImp) => {
-    implicit val p = t.p
-    (t.mem_axi4 zip t.outer.memAXI4Node).flatMap({ case (io, node) =>
+  (system: CanHaveMasterAXI4MemPortModuleImp) => {
+    implicit val p = system.p
+    (system.mem_axi4 zip system.outer.memAXI4Node).flatMap({ case (io, node) =>
       (io zip node.in).map({ case (axi4Bundle, (_, edge)) =>
         val nastiKey = NastiParameters(axi4Bundle.r.bits.data.getWidth,
                                        axi4Bundle.ar.bits.addr.getWidth,
                                        axi4Bundle.ar.bits.id.getWidth)
-        FASEDBridge(t.clock, axi4Bundle, t.reset.toBool,
+        FASEDBridge(system.clock, axi4Bundle, system.reset.toBool,
           CompleteConfig(p(firesim.configs.MemModelKey), nastiKey, Some(AXI4EdgeSummary(edge))))
       })
-    }).toSeq
+    })
+    Nil
   }
 })
 
 class WithTracerVBridge extends OverrideIOBinder({
-  (c, r, s, target: CanHaveTraceIOModuleImp) => target.traceIO match {
-    case Some(t) => t.traces.map(tileTrace => TracerVBridge(tileTrace)(target.p))
-    case None    => Nil
-  }
+  (system: CanHaveTraceIOModuleImp) =>
+    system.traceIO.foreach(_.traces.map(tileTrace => TracerVBridge(tileTrace)(system.p))); Nil
 })
 
 
 class WithTraceGenBridge extends OverrideIOBinder({
-  (c, r, s, target: HasTraceGenTilesModuleImp) =>
-    Seq(GroundTestBridge(target.clock, target.success)(target.p))
+  (system: HasTraceGenTilesModuleImp) =>
+    GroundTestBridge(system.clock, system.success)(system.p); Nil
 })
 
 class WithFireSimMultiCycleRegfile extends ComposeIOBinder({
-  (c, r, s, target: HasChipyardTilesModuleImp) => {
-    target.outer.tiles.map {
+  (system: HasChipyardTilesModuleImp) => {
+    system.outer.tiles.map {
       case r: RocketTile => {
         annotate(MemModelAnnotation(r.module.core.rocketImpl.rf.rf))
         r.module.fpuOpt.foreach(fpu => annotate(MemModelAnnotation(fpu.fpuImpl.regfile)))

@@ -14,7 +14,7 @@ import boom.common.{BoomTilesKey, BoomCrossingKey}
 import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge, RationalClock}
 import firesim.configs._
 
-import chipyard.{BuildTop, Top, TopModule}
+import chipyard.{BuildTop, DigitalTop, DigitalTopModule}
 import chipyard.config.ConfigValName._
 import chipyard.iobinders.{IOBinders}
 
@@ -74,12 +74,12 @@ class FireSimQuadRocketMulticlockConfig extends Config(
   new FireSimQuadRocketConfig)
 
 // Top Definition
-class FiresimMulticlockTop(implicit p: Parameters) extends chipyard.Top
+class FiresimMulticlockTop(implicit p: Parameters) extends chipyard.DigitalTop
 {
   override lazy val module = new FiresimMulticlockTopModule(this)
 }
 
-class FiresimMulticlockTopModule[+L <: Top](l: L) extends chipyard.TopModule(l) with HasFireSimClockingImp
+class FiresimMulticlockTopModule[+L <: DigitalTop](l: L) extends chipyard.DigitalTopModule(l) with HasFireSimClockingImp
 
 // Harness Definition
 class FireSimMulticlockPOC(implicit val p: Parameters) extends RawModule {
