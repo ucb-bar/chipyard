@@ -235,6 +235,15 @@ class FireSimHwachaRemoteMemClientConfig extends Config(
   new WithRemoteMemClientBridge ++
   new chipyard.HwachaRemoteMemClientConfig)
 
+class FireSimBoomRemoteMemClientConfig extends Config(
+  new WithNIC ++
+  new WithExtraBlockDevice ++
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new WithRemoteMemClientBridge ++
+  new chipyard.BoomRemoteMemClientConfig)
+
 //********************************
 // DRAMCache configurations
 //********************************

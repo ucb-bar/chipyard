@@ -163,6 +163,14 @@ class LoopbackNICLargeBoomConfig extends Config(
   new boom.common.WithNBoomCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
+class BoomRemoteMemClientConfig extends Config(
+  new chipyard.config.WithMemBenchKey ++
+  new chipyard.config.WithRemoteMemClientKey ++
+  new chipyard.config.WithRemoteMemClientTop ++
+  new chipyard.config.WithStandardL2(4) ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
+  new LargeBoomConfig)
+
 class BoomDRAMCacheConfig extends Config(
   new chipyard.config.WithMemBenchKey ++
   new chipyard.config.WithDRAMCacheKey(4, 8, 4) ++
