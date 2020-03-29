@@ -46,10 +46,10 @@ trait HasChipTopSimpleClockAndReset { this: BaseChipTop =>
 
   harnessFunctions += { (th: TestHarness) => {
     // Connect clock; it's not done implicitly with RawModule
-    clock := th.c
+    clock := th.clock
     // Connect reset; it's not done implicitly with RawModule
-    // Note that we need to use the overridden version of reset
-    reset := th.ro
+    // Note that we need to use dutReset, not harnessReset
+    reset := th.dutReset
     Nil
   } }
 

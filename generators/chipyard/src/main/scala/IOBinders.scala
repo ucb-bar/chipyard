@@ -222,9 +222,9 @@ class WithSimDebug extends OverrideIOBinder({
     val (psdPort, debugPortOpt, ioCells) = AddIOCells.debug(system.psd, system.debug)
     val harnessFn = (th: chipyard.TestHarness) => {
       val dtm_success = Wire(Bool())
-      Debug.connectDebug(debugPortOpt, psdPort, th.c, th.r, dtm_success)(system.p)
-      when (dtm_success) { th.s := true.B }
-      th.ro := th.r | debugPortOpt.map { debug => AsyncResetReg(debug.ndreset).asBool }.getOrElse(false.B)
+      Debug.connectDebug(debugPortOpt, psdPort, th.clock, th.harnessReset, dtm_success)(system.p)
+      when (dtm_success) { th.success := true.B }
+      th.dutReset := th.harnessReset | debugPortOpt.map { debug => AsyncResetReg(debug.ndreset).asBool }.getOrElse(false.B)
       Nil
     }
     Seq((Seq(psdPort) ++ debugPortOpt.toSeq, ioCells, Some(harnessFn)))
@@ -246,8 +246,8 @@ class WithSimSerial extends OverrideIOBinder({
   (system: CanHavePeripherySerialModuleImp) => system.serial.map({ serial =>
     val (port, ioCells) = AddIOCells.serial(serial)
     val harnessFn = (th: chipyard.TestHarness) => {
-      val ser_success = SerialAdapter.connectSimSerial(port, th.c, th.r)
-      when (ser_success) { th.s := true.B }
+      val ser_success = SerialAdapter.connectSimSerial(port, th.clock, th.harnessReset)
+      when (ser_success) { th.success := true.B }
       Nil
     }
     Seq((Seq(port), ioCells, Some(harnessFn)))
@@ -258,7 +258,7 @@ class WithTraceGenSuccessBinder extends OverrideIOBinder({
   (system: HasTraceGenTilesModuleImp) => {
     val (successPort, ioCells) = IOCell.generateIOFromSignal(system.success, Some("iocell_success"))
     successPort.suggestName("success")
-    val harnessFn = (th: chipyard.TestHarness) => { when (successPort) { th.s := true.B }; Nil }
+    val harnessFn = (th: chipyard.TestHarness) => { when (successPort) { th.success := true.B }; Nil }
     Seq((Seq(successPort), ioCells, Some(harnessFn)))
   }
 })

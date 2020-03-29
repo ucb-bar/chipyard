@@ -24,15 +24,14 @@ class TestHarness(implicit val p: Parameters) extends Module {
 
   val dut = p(BuildTop)(p)
   io.success := false.B
-  // resetOverride can be overridden via a harnessFunction
-  val resetOverride = Wire(Bool())
-  resetOverride := reset
+  // dutReset can be overridden via a harnessFunction, but by default it is just reset
+  val dutReset = Wire(Bool())
+  dutReset := reset
+
   dut.harnessFunctions.foreach(_(this))
 
-  // Aliases for clock, reset, and success
-  def c  = clock
-  def r  = reset.asBool
-  def ro = resetOverride
-  def s  = io.success
+  def success = io.success
+  def harnessReset = this.reset.asBool
+
 }
 
