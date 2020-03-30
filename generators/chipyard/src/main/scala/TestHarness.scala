@@ -24,6 +24,7 @@ class TestHarness(implicit val p: Parameters) extends Module {
 
   val dut = p(BuildTop)(p)
   io.success := false.B
+
   // dutReset can be overridden via a harnessFunction, but by default it is just reset
   val dutReset = Wire(Bool())
   dutReset := reset

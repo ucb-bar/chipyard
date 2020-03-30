@@ -21,7 +21,7 @@ import hwacha.{Hwacha}
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 
-import chipyard.{BuildSystem}
+import chipyard.{BuildTop, BuildSystem, ChipTopCaughtReset}
 
 /**
  * TODO: Why do we need this?
@@ -151,3 +151,11 @@ class WithControlCore extends Config((site, here, up) => {
   case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
 })
 
+
+/**
+ * Config fragment to use ChipTopCaughtReset as the top module, which adds a reset synchronizer to
+ * the top-level reset, allowing it to be asynchronous with the clock.
+ */
+class WithChipTopCaughtReset extends Config((site, here, up) => {
+  case BuildTop => (p: Parameters) => Module(new ChipTopCaughtReset()(p).suggestName("top"))
+})

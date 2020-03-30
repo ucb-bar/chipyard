@@ -29,16 +29,21 @@ import scala.reflect.{ClassTag}
 // IO connection behavior for tops matching that trait. We use strings to enable
 // composition and overriding of IOBinders, much like how normal Keys in the config
 // system are used/ At elaboration, the testharness traverses this set of functions,
-// and functions which match the type of the Top are evaluated.
+// and functions which match the type of the DigitalTop are evaluated.
 
 // You can add your own binder by adding a new (key, fn) pair, typically by using
 // the OverrideIOBinder or ComposeIOBinder macros
 
 
+// DOC include start: IOBinders
+// This type describes a function callable on the TestHarness instance. Its return type is unused.
 type TestHarnessFunction = (chipyard.TestHarness) => Seq[Any]
+// IOBinders will return a Seq of this tuple, which contains three fields:
+//  1. A Seq containing all IO ports created by the IOBinder function
+//  2. A Seq containing all IO cell modules created by the IOBinder function
+//  3. An optional function to call inside the test harness (e.g. to connect the IOs)
 type IOBinderTuple = (Seq[Data], Seq[IOCell], Option[TestHarnessFunction])
 
-// DOC include start: IOBinders
 case object IOBinders extends Field[Map[String, (Any) => Seq[IOBinderTuple]]](
   Map[String, (Any) => Seq[IOBinderTuple]]().withDefaultValue((Any) => Nil)
 )
@@ -73,6 +78,12 @@ class ComposeIOBinder[T](fn: => (T) => Seq[IOBinderTuple])(implicit tag: ClassTa
 // DOC include end: IOBinders
 
 object AddIOCells {
+  /**
+   * Add IO cells to a SiFive GPIO devices and name the IO ports.
+   * @param gpios A Seq of GPIO port bundles
+   * @param genFn A callable function to generate a DigitalGPIOCell module to use
+   * @return Returns a tuple of (a 2D Seq of Analog IOs corresponding to individual GPIO pins; a 2D Seq of IOCell module references)
+   */
   def gpio(gpios: Seq[GPIOPortIO], genFn: () => DigitalGPIOCell = IOCell.exampleGPIO): (Seq[Seq[Analog]], Seq[Seq[IOCell]]) = {
     gpios.zipWithIndex.map({ case (gpio, i) =>
       gpio.pins.zipWithIndex.map({ case (pin, j) =>
@@ -90,6 +101,11 @@ object AddIOCells {
     }).unzip
   }
 
+  /**
+   * Add IO cells to a SiFive UART devices and name the IO ports.
+   * @param gpios A Seq of UART port bundles
+   * @return Returns a tuple of (A Seq of top-level UARTPortIO IOs; a 2D Seq of IOCell module references)
+   */
   def uart(uartPins: Seq[UARTPortIO]): (Seq[UARTPortIO], Seq[Seq[IOCell]]) = {
     uartPins.zipWithIndex.map({ case (u, i) =>
       val (port, ios) = IOCell.generateIOFromSignal(u, Some(s"iocell_uart_${i}"))
@@ -98,6 +114,12 @@ object AddIOCells {
     }).unzip
   }
 
+  /**
+   * Add IO cells to a debug module and name the IO ports.
+   * @param gpios A PSDIO bundle
+   * @param debugOpt An optional DebugIO bundle
+   * @return Returns a tuple3 of (Top-level PSDIO IO; Optional top-level DebugIO IO; a list of IOCell module references)
+   */
   def debug(psd: PSDIO, debugOpt: Option[DebugIO]): (PSDIO, Option[DebugIO], Seq[IOCell]) = {
     val (psdPort, psdIOs) = IOCell.generateIOFromSignal(psd, Some("iocell_psd"))
     val optTuple = debugOpt.map(d => IOCell.generateIOFromSignal(d, Some("iocell_debug")))
@@ -108,6 +130,11 @@ object AddIOCells {
     (psdPort, debugPortOpt, psdIOs ++ debugIOs)
   }
 
+  /**
+   * Add IO cells to a serial module and name the IO ports.
+   * @param serial A SerialIO bundle
+   * @return Returns a tuple of (Top-level SerialIO IO; a list of IOCell module references)
+   */
   def serial(serial: SerialIO): (SerialIO, Seq[IOCell]) = {
     val (port, ios) = IOCell.generateIOFromSignal(serial, Some("iocell_serial"))
     port.suggestName("serial")
