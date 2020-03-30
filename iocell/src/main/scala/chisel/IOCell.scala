@@ -91,8 +91,8 @@ object IOCell {
     outFn: () => DigitalOutIOCell = IOCell.genericOutput,
     anaFn: () => AnalogIOCell = IOCell.genericAnalog): Seq[IOCell] =
   {
-    coreSignal match {
-      case coreSignal: Analog => {
+    (coreSignal: T, padSignal: T) match {
+      case (coreSignal: Analog, padSignal: Analog) => {
         if (coreSignal.getWidth == 0) {
           Seq()
         } else {
@@ -104,7 +104,7 @@ object IOCell {
           Seq(iocell)
         }
       }
-      case coreSignal: Clock => {
+      case (coreSignal: Clock, padSignal: Clock) => {
         DataMirror.directionOf(coreSignal) match {
           case ActualDirection.Input => {
             val iocell = inFn()
@@ -125,7 +125,7 @@ object IOCell {
           case _ => throw new Exception("Unknown direction")
         }
       }
-      case coreSignal: Bits => {
+      case (coreSignal: Bits, padSignal: Bits) => {
         require(padSignal.getWidth == coreSignal.getWidth, "padSignal and coreSignal must be the same width")
         if (padSignal.getWidth == 0) {
           // This dummy assignment will prevent invalid firrtl from being emitted
@@ -137,8 +137,7 @@ object IOCell {
         } else {
           DataMirror.directionOf(coreSignal) match {
             case ActualDirection.Input => {
-              // this type cast is safe because we guarantee that padSignal and coreSignal are the same type (T), but the compiler is not smart enough to know that
-              val iocells = padSignal.asInstanceOf[Bits].asBools.zipWithIndex.map { case (w, i) =>
+              val iocells = padSignal.asBools.zipWithIndex.map { case (w, i) =>
                 val iocell = inFn()
                 name.foreach(n => iocell.suggestName(n + "_" + i))
                 iocell.io.pad := w
@@ -163,20 +162,16 @@ object IOCell {
           }
         }
       }
-      case coreSignal: Vec[Data] => {
-        // this type cast is safe because we guarantee that padSignal and coreSignal are the same type (T), but the compiler is not smart enough to know that
-        val padSignal2 = padSignal.asInstanceOf[Vec[Data]]
-        require(padSignal2.size == coreSignal.size, "size of Vec for padSignal and coreSignal must be the same")
-        coreSignal.zip(padSignal2).zipWithIndex.foldLeft(Seq.empty[IOCell]) { case (total, ((core, pad), i)) =>
+      case (coreSignal: Vec[Data], padSignal: Vec[Data]) => {
+        require(padSignal.size == coreSignal.size, "size of Vec for padSignal and coreSignal must be the same")
+        coreSignal.zip(padSignal).zipWithIndex.foldLeft(Seq.empty[IOCell]) { case (total, ((core, pad), i)) =>
           val ios = IOCell.generateFromSignal(core, pad, name.map(_ + "_" + i), inFn, outFn, anaFn)
           total ++ ios
         }
       }
-      case coreSignal: Record => {
-        // this type cast is safe because we guarantee that padSignal and coreSignal are the same type (T), but the compiler is not smart enough to know that
-        val padSignal2 = padSignal.asInstanceOf[Record]
+      case (coreSignal: Record, padSignal: Record) => {
         coreSignal.elements.foldLeft(Seq.empty[IOCell]) { case (total, (eltName, core)) =>
-          val pad = padSignal2.elements(eltName)
+          val pad = padSignal.elements(eltName)
           val ios = IOCell.generateFromSignal(core, pad, name.map(_ + "_" + eltName), inFn, outFn, anaFn)
           total ++ ios
         }
