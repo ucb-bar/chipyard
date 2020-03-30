@@ -84,7 +84,7 @@ object AddIOCells {
    * @param genFn A callable function to generate a DigitalGPIOCell module to use
    * @return Returns a tuple of (a 2D Seq of Analog IOs corresponding to individual GPIO pins; a 2D Seq of IOCell module references)
    */
-  def gpio(gpios: Seq[GPIOPortIO], genFn: () => DigitalGPIOCell = IOCell.exampleGPIO): (Seq[Seq[Analog]], Seq[Seq[IOCell]]) = {
+  def gpio(gpios: Seq[GPIOPortIO], genFn: () => DigitalGPIOCell = IOCell.genericGPIO): (Seq[Seq[Analog]], Seq[Seq[IOCell]]) = {
     gpios.zipWithIndex.map({ case (gpio, i) =>
       gpio.pins.zipWithIndex.map({ case (pin, j) =>
         val g = IO(Analog(1.W))
