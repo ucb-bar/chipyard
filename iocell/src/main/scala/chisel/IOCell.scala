@@ -49,37 +49,37 @@ abstract class DigitalOutIOCell extends IOCell {
   val io: DigitalOutIOCellBundle
 }
 
-class ExampleAnalogIOCell extends AnalogIOCell {
+class GenericAnalogIOCell extends AnalogIOCell {
   val io = IO(new AnalogIOCellBundle)
   addResource("/barstools/iocell/vsrc/IOCell.v")
 }
 
-class ExampleDigitalGPIOCell extends DigitalGPIOCell {
+class GenericDigitalGPIOCell extends DigitalGPIOCell {
   val io = IO(new DigitalGPIOCellBundle)
   addResource("/barstools/iocell/vsrc/IOCell.v")
 }
 
-class ExampleDigitalInIOCell extends DigitalInIOCell {
+class GenericDigitalInIOCell extends DigitalInIOCell {
   val io = IO(new DigitalInIOCellBundle)
   addResource("/barstools/iocell/vsrc/IOCell.v")
 }
 
-class ExampleDigitalOutIOCell extends DigitalOutIOCell {
+class GenericDigitalOutIOCell extends DigitalOutIOCell {
   val io = IO(new DigitalOutIOCellBundle)
   addResource("/barstools/iocell/vsrc/IOCell.v")
 }
 
 object IOCell {
 
-  def exampleAnalog() = Module(new ExampleAnalogIOCell)
-  def exampleGPIO() = Module(new ExampleDigitalGPIOCell)
-  def exampleInput() = Module(new ExampleDigitalInIOCell)
-  def exampleOutput() = Module(new ExampleDigitalOutIOCell)
+  def genericAnalog() = Module(new GenericAnalogIOCell)
+  def genericGPIO() = Module(new GenericDigitalGPIOCell)
+  def genericInput() = Module(new GenericDigitalInIOCell)
+  def genericOutput() = Module(new GenericDigitalOutIOCell)
 
   def generateIOFromSignal[T <: Data](coreSignal: T, name: Option[String] = None,
-    inFn: () => DigitalInIOCell = IOCell.exampleInput,
-    outFn: () => DigitalOutIOCell = IOCell.exampleOutput,
-    anaFn: () => AnalogIOCell = IOCell.exampleAnalog): (T, Seq[IOCell]) =
+    inFn: () => DigitalInIOCell = IOCell.genericInput,
+    outFn: () => DigitalOutIOCell = IOCell.genericOutput,
+    anaFn: () => AnalogIOCell = IOCell.genericAnalog): (T, Seq[IOCell]) =
   {
     val padSignal = IO(DataMirror.internal.chiselTypeClone[T](coreSignal))
     val iocells = IOCell.generateFromSignal(coreSignal, padSignal, name, inFn, outFn, anaFn)
@@ -87,9 +87,9 @@ object IOCell {
   }
 
   def generateFromSignal[T <: Data](coreSignal: T, padSignal: T, name: Option[String] = None,
-    inFn: () => DigitalInIOCell = IOCell.exampleInput,
-    outFn: () => DigitalOutIOCell = IOCell.exampleOutput,
-    anaFn: () => AnalogIOCell = IOCell.exampleAnalog): Seq[IOCell] =
+    inFn: () => DigitalInIOCell = IOCell.genericInput,
+    outFn: () => DigitalOutIOCell = IOCell.genericOutput,
+    anaFn: () => AnalogIOCell = IOCell.genericAnalog): Seq[IOCell] =
   {
     coreSignal match {
       case coreSignal: Analog => {
