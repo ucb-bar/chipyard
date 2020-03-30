@@ -75,7 +75,7 @@ trait HasChipTopSimpleClockAndReset { this: BaseChipTop =>
 trait HasChipTopSimpleClockAndCaughtReset { this: BaseChipTop =>
 
   val asyncResetCore = Wire(Input(Bool()))
-  systemReset := ResetCatchAndSync(systemClock, asyncReset)
+  systemReset := ResetCatchAndSync(systemClock, asyncResetCore)
 
   val (clock, systemClockIO) = IOCell.generateIOFromSignal(systemClock, Some("iocell_clock"))
   val (areset, asyncResetIO) = IOCell.generateIOFromSignal(asyncResetCore, Some("iocell_areset"))

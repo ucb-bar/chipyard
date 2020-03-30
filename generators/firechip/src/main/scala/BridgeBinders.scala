@@ -100,12 +100,12 @@ class WithFireSimMultiCycleRegfile extends ComposeIOBinder({
   }
 })
 
-class WithGPIOTiedOff extends OverrideIOBinder({
+class WithTiedOffSystemGPIO extends OverrideIOBinder({
   (system: HasPeripheryGPIOModuleImp) =>
     system.gpio.foreach(_.pins.foreach(_.i.ival := false.B)); Nil
 })
 
-class WithTiedOffDebug extends OverrideIOBinder({
+class WithTiedOffSystemDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
     Debug.tieoffDebug(system.debug, system.psd)
     // tieoffDebug doesn't actually tie everything off :/
@@ -114,7 +114,7 @@ class WithTiedOffDebug extends OverrideIOBinder({
   }
 })
 
-class WithTieOffInterrupts extends OverrideIOBinder({
+class WithTiedOffSystemInterrupts extends OverrideIOBinder({
   (system: HasExtInterruptsModuleImp) =>
     system.interrupts := 0.U; Nil
 })
@@ -122,9 +122,9 @@ class WithTieOffInterrupts extends OverrideIOBinder({
 
 // Shorthand to register all of the provided bridges above
 class WithDefaultFireSimBridges extends Config(
-  new WithGPIOTiedOff ++
-  new WithTiedOffDebug ++
-  new WithTieOffInterrupts ++
+  new WithTiedOffSystemGPIO ++
+  new WithTiedOffSystemDebug ++
+  new WithTiedOffSystemInterrupts ++
   new WithSerialBridge ++
   new WithNICBridge ++
   new WithUARTBridge ++
