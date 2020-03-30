@@ -7,10 +7,11 @@ import chisel3.experimental.annotate
 
 import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
-import freechips.rocketchip.devices.debug.HasPeripheryDebugModuleImp
-import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPortModuleImp}
+import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebugModuleImp}
+import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPortModuleImp, HasExtInterruptsModuleImp}
 import freechips.rocketchip.tile.{RocketTile}
 import sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
+import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp}
 
 import testchipip.{CanHavePeripherySerialModuleImp, CanHavePeripheryBlockDeviceModuleImp, CanHaveTraceIOModuleImp}
 import icenet.CanHavePeripheryIceNICModuleImp
@@ -99,13 +100,31 @@ class WithFireSimMultiCycleRegfile extends ComposeIOBinder({
   }
 })
 
+class WithGPIOTiedOff extends OverrideIOBinder({
+  (system: HasPeripheryGPIOModuleImp) =>
+    system.gpio.foreach(_.pins.foreach(_.i.ival := false.B)); Nil
+})
+
+class WithTiedOffDebug extends OverrideIOBinder({
+  (system: HasPeripheryDebugModuleImp) => {
+    Debug.tieoffDebug(system.debug, system.psd)
+    // tieoffDebug doesn't actually tie everything off :/
+    system.debug.foreach(_.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare }))
+    Nil
+  }
+})
+
+class WithTieOffInterrupts extends OverrideIOBinder({
+  (system: HasExtInterruptsModuleImp) =>
+    system.interrupts := 0.U; Nil
+})
 
 
 // Shorthand to register all of the provided bridges above
 class WithDefaultFireSimBridges extends Config(
-  new chipyard.iobinders.WithGPIOTiedOff ++
-  new chipyard.iobinders.WithTiedOffDebug ++
-  new chipyard.iobinders.WithTieOffInterrupts ++
+  new WithGPIOTiedOff ++
+  new WithTiedOffDebug ++
+  new WithTieOffInterrupts ++
   new WithSerialBridge ++
   new WithNICBridge ++
   new WithUARTBridge ++
