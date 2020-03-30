@@ -2,7 +2,7 @@
 
 `timescale 1ns/1ps
 
-module ExampleAnalogIOCell(
+module GenericAnalogIOCell(
     inout pad,
     inout core
 );
@@ -12,7 +12,7 @@ module ExampleAnalogIOCell(
 
 endmodule
 
-module ExampleDigitalGPIOCell(
+module GenericDigitalGPIOCell(
     inout pad,
     output i,
     input ie,
@@ -25,7 +25,7 @@ module ExampleDigitalGPIOCell(
 
 endmodule
 
-module ExampleDigitalInIOCell(
+module GenericDigitalInIOCell(
     input pad,
     output i,
     input ie
@@ -35,7 +35,7 @@ module ExampleDigitalInIOCell(
 
 endmodule
 
-module ExampleDigitalOutIOCell(
+module GenericDigitalOutIOCell(
     output pad,
     input o,
     output oe
