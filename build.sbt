@@ -204,5 +204,6 @@ lazy val firechip = conditionalDependsOn(project in file("generators/firechip"))
   .dependsOn(chipyard, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
-    testGrouping in Test := isolateAllTests( (definedTests in Test).value )
+    testGrouping in Test := isolateAllTests( (definedTests in Test).value ),
+    testOptions in Test += Tests.Argument("-oF")
   )
