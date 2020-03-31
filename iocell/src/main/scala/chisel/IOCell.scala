@@ -85,7 +85,7 @@ abstract class DigitalOutIOCell extends IOCell {
 // implementation of an IO cell. For building a real chip, it is important to implement
 // and use similar classes which wrap the foundry-specific IO cells.
 
-trait GenericIOCell extends HasBlackBoxResource {
+trait IsGenericIOCell extends HasBlackBoxResource {
   addResource("/barstools/iocell/vsrc/IOCell.v")
 }
 
@@ -196,7 +196,10 @@ object IOCell {
             case ActualDirection.Input => {
               val iocells = padSignal.asBools.zipWithIndex.map { case (sig, i) =>
                 val iocell = inFn()
-                name.foreach(n => iocell.suggestName(n + "_" + i))
+                // Note that we are relying on chisel deterministically naming this in the index order (which it does)
+                // This has the side-effect of naming index 0 with no _0 suffix, which is how chisel names other signals
+                // An alternative solution would be to suggestName(n + "_" + i)
+                name.foreach(n => iocell.suggestName(n))
                 iocell.io.pad := sig
                 iocell.io.ie := true.B
                 iocell
@@ -208,7 +211,10 @@ object IOCell {
             case ActualDirection.Output => {
               val iocells = coreSignal.asBools.zipWithIndex.map { case (sig, i) =>
                 val iocell = outFn()
-                name.foreach(n => iocell.suggestName(n + "_" + i))
+                // Note that we are relying on chisel deterministically naming this in the index order (which it does)
+                // This has the side-effect of naming index 0 with no _0 suffix, which is how chisel names other signals
+                // An alternative solution would be to suggestName(n + "_" + i)
+                name.foreach(n => iocell.suggestName(n))
                 iocell.io.o := sig
                 iocell.io.oe := true.B
                 iocell
