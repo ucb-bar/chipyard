@@ -6,11 +6,31 @@ import chisel3._
 import chisel3.util.{Cat, HasBlackBoxResource}
 import chisel3.experimental.{Analog, DataMirror, IO}
 
+// The following four IO cell bundle types are bare-minimum functional connections
+// for modeling 4 different IO cell scenarios. The intention is that the user
+// would create wrapper modules that extend these interfaces with additional
+// control signals. These are loosely similar to the sifive-blocks PinCtrl bundles
+// (https://github.com/sifive/sifive-blocks/blob/master/src/main/scala/devices/pinctrl/PinCtrl.scala),
+// but we want to avoid a dependency on an external libraries.
+
+/**
+ * The base IO bundle for an analog signal (typically something with no digital buffers inside)
+ *  pad: off-chip (external) connection
+ *  core: internal connection
+ */
 class AnalogIOCellBundle extends Bundle {
-  val pad = Analog(1.W)
-  val core = Analog(1.W)
+  val pad = Analog(1.W)   // Pad/bump signal (off-chip)
+  val core = Analog(1.W)  // core signal (on-chip)
 }
 
+/**
+ * The base IO bundle for a signal with runtime-controllable direction
+ *  pad: off-chip (external) connection
+ *  i: input to chip logic (output from IO cell)
+ *  ie: enable signal for i
+ *  o: output from chip logic (input to IO cell)
+ *  oe: enable signal for o
+ */
 class DigitalGPIOCellBundle extends Bundle {
   val pad = Analog(1.W)
   val i = Output(Bool())
@@ -19,19 +39,31 @@ class DigitalGPIOCellBundle extends Bundle {
   val oe = Input(Bool())
 }
 
+/**
+ * The base IO bundle for a digital output signal
+ *  pad: off-chip (external) connection
+ *  o: output from chip logic (input to IO cell)
+ *  oe: enable signal for o
+ */
 class DigitalOutIOCellBundle extends Bundle {
   val pad = Output(Bool())
   val o = Input(Bool())
   val oe = Input(Bool())
 }
 
+/**
+ * The base IO bundle for a digital input signal
+ *  pad: off-chip (external) connection
+ *  i: input to chip logic (output from IO cell)
+ *  ie: enable signal for i
+ */
 class DigitalInIOCellBundle extends Bundle {
   val pad = Input(Bool())
   val i = Output(Bool())
   val ie = Input(Bool())
 }
 
-abstract class IOCell extends BlackBox with HasBlackBoxResource
+abstract class IOCell extends BlackBox
 
 abstract class AnalogIOCell extends IOCell {
   val io: AnalogIOCellBundle
@@ -49,24 +81,28 @@ abstract class DigitalOutIOCell extends IOCell {
   val io: DigitalOutIOCellBundle
 }
 
-class GenericAnalogIOCell extends AnalogIOCell {
+// The following Generic IO cell black boxes have verilog models that mimic a very simple
+// implementation of an IO cell. For building a real chip, it is important to implement
+// and use similar classes which wrap the foundry-specific IO cells.
+
+trait GenericIOCell extends HasBlackBoxResource {
+  addResource("/barstools/iocell/vsrc/IOCell.v")
+}
+
+class GenericAnalogIOCell extends AnalogIOCell with IsGenericIOCell {
   val io = IO(new AnalogIOCellBundle)
-  addResource("/barstools/iocell/vsrc/IOCell.v")
 }
 
-class GenericDigitalGPIOCell extends DigitalGPIOCell {
+class GenericDigitalGPIOCell extends DigitalGPIOCell with IsGenericIOCell {
   val io = IO(new DigitalGPIOCellBundle)
-  addResource("/barstools/iocell/vsrc/IOCell.v")
 }
 
-class GenericDigitalInIOCell extends DigitalInIOCell {
+class GenericDigitalInIOCell extends DigitalInIOCell with IsGenericIOCell {
   val io = IO(new DigitalInIOCellBundle)
-  addResource("/barstools/iocell/vsrc/IOCell.v")
 }
 
-class GenericDigitalOutIOCell extends DigitalOutIOCell {
+class GenericDigitalOutIOCell extends DigitalOutIOCell with IsGenericIOCell {
   val io = IO(new DigitalOutIOCellBundle)
-  addResource("/barstools/iocell/vsrc/IOCell.v")
 }
 
 object IOCell {
@@ -76,6 +112,16 @@ object IOCell {
   def genericInput() = Module(new GenericDigitalInIOCell)
   def genericOutput() = Module(new GenericDigitalOutIOCell)
 
+  /**
+   * From within a RawModule or MultiIOModule context, generate new module IOs from a given
+   * signal and return the new IO and a Seq containing all generated IO cells.
+   * @param coreSignal The signal onto which to add IO cells
+   * @param name An optional name or name prefix to use for naming IO cells
+   * @param inFn A function to generate a DigitalInIOCell to use for input signals
+   * @param outFn A function to generate a DigitalOutIOCell to use for output signals
+   * @param anaFn A function to generate an AnalogIOCell to use for analog signals
+   * @return A tuple of (the generated IO data node, a Seq of all generated IO cell instances)
+   */
   def generateIOFromSignal[T <: Data](coreSignal: T, name: Option[String] = None,
     inFn: () => DigitalInIOCell = IOCell.genericInput,
     outFn: () => DigitalOutIOCell = IOCell.genericOutput,
@@ -86,6 +132,17 @@ object IOCell {
     (padSignal, iocells)
   }
 
+  /**
+   * Connect two identical signals together by adding IO cells between them and return a Seq
+   * containing all generated IO cells.
+   * @param coreSignal The core-side (internal) signal onto which to connect/add IO cells
+   * @param padSignal The pad-side (external) signal onto which to connect IO cells
+   * @param name An optional name or name prefix to use for naming IO cells
+   * @param inFn A function to generate a DigitalInIOCell to use for input signals
+   * @param outFn A function to generate a DigitalOutIOCell to use for output signals
+   * @param anaFn A function to generate an AnalogIOCell to use for analog signals
+   * @return A Seq of all generated IO cell instances
+   */
   def generateFromSignal[T <: Data](coreSignal: T, padSignal: T, name: Option[String] = None,
     inFn: () => DigitalInIOCell = IOCell.genericInput,
     outFn: () => DigitalOutIOCell = IOCell.genericOutput,
@@ -122,7 +179,7 @@ object IOCell {
             padSignal := iocell.io.pad.asClock
             Seq(iocell)
           }
-          case _ => throw new Exception("Unknown direction")
+          case _ => throw new Exception("Clock signal does not have a direction and cannot be matched to an IOCell")
         }
       }
       case (coreSignal: Bits, padSignal: Bits) => {
@@ -137,28 +194,30 @@ object IOCell {
         } else {
           DataMirror.directionOf(coreSignal) match {
             case ActualDirection.Input => {
-              val iocells = padSignal.asBools.zipWithIndex.map { case (w, i) =>
+              val iocells = padSignal.asBools.zipWithIndex.map { case (sig, i) =>
                 val iocell = inFn()
                 name.foreach(n => iocell.suggestName(n + "_" + i))
-                iocell.io.pad := w
+                iocell.io.pad := sig
                 iocell.io.ie := true.B
                 iocell
               }
+              // Note that the reverse here is because Cat(Seq(a,b,c,d)) yields abcd, but a is index 0 of the Seq
               coreSignal := Cat(iocells.map(_.io.i).reverse)
               iocells
             }
             case ActualDirection.Output => {
-              val iocells = coreSignal.asBools.zipWithIndex.map { case (w, i) =>
+              val iocells = coreSignal.asBools.zipWithIndex.map { case (sig, i) =>
                 val iocell = outFn()
                 name.foreach(n => iocell.suggestName(n + "_" + i))
-                iocell.io.o := w
+                iocell.io.o := sig
                 iocell.io.oe := true.B
                 iocell
               }
+              // Note that the reverse here is because Cat(Seq(a,b,c,d)) yields abcd, but a is index 0 of the Seq
               padSignal := Cat(iocells.map(_.io.pad).reverse)
               iocells
             }
-            case _ => throw new Exception("Unknown direction")
+            case _ => throw new Exception("Bits signal does not have a direction and cannot be matched to IOCell(s)")
           }
         }
       }
