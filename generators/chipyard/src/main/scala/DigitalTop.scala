@@ -11,7 +11,7 @@ import freechips.rocketchip.devices.tilelink._
 // BOOM and/or Rocket Top Level Systems
 // ------------------------------------
 
-// DOC include start: Top
+// DOC include start: DigitalTop
 class DigitalTop(implicit p: Parameters) extends System
   with testchipip.CanHaveTraceIO // Enables optionally adding trace IO
   with testchipip.CanHaveBackingScratchpad // Enables optionally adding a backing scratchpad
@@ -35,4 +35,4 @@ class DigitalTopModule[+L <: DigitalTop](l: L) extends SystemModule(l)
   with icenet.CanHavePeripheryIceNICModuleImp
   with chipyard.example.CanHavePeripheryGCDModuleImp
   with freechips.rocketchip.util.DontTouch
-// DOC include end: Top
+// DOC include end: DigitalTop
