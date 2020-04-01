@@ -24,7 +24,6 @@ import testchipip.WithRingSystemBus
 
 import firesim.bridges._
 import firesim.configs._
-import chipyard.{BuildTop}
 import chipyard.config.ConfigValName._
 
 class WithBootROM extends Config((site, here, up) => {

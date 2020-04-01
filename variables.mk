@@ -36,7 +36,7 @@ ifeq ($(SUB_PROJECT),chipyard)
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
-	TOP               ?= Top
+	TOP               ?= ChipTop
 endif
 # for Rocket-chip developers
 ifeq ($(SUB_PROJECT),rocketchip)

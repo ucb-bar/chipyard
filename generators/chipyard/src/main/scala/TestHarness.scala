@@ -1,23 +1,21 @@
 package chipyard
 
 import chisel3._
-import chisel3.experimental._
 
-import firrtl.transforms.{BlackBoxResourceAnno, BlackBoxSourceHelper}
-
-import freechips.rocketchip.diplomacy.LazyModule
+import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.config.{Field, Parameters}
-import freechips.rocketchip.util.GeneratorApp
-import freechips.rocketchip.devices.debug.{Debug}
-
+import chipyard.iobinders.{TestHarnessFunction}
 import chipyard.config.ConfigValName._
-import chipyard.iobinders.{IOBinders}
 
 // -------------------------------
 // BOOM and/or Rocket Test Harness
 // -------------------------------
 
-case object BuildTop extends Field[Parameters => Any]((p: Parameters) => Module(LazyModule(new Top()(p)).suggestName("top").module))
+case object BuildTop extends Field[Parameters => HasTestHarnessFunctions]((p: Parameters) => Module(new ChipTop()(p)))
+
+trait HasTestHarnessFunctions {
+  val harnessFunctions: Seq[TestHarnessFunction]
+}
 
 class TestHarness(implicit val p: Parameters) extends Module {
   val io = IO(new Bundle {
@@ -26,5 +24,15 @@ class TestHarness(implicit val p: Parameters) extends Module {
 
   val dut = p(BuildTop)(p)
   io.success := false.B
-  p(IOBinders).values.map(fn => fn(clock, reset.asBool, io.success, dut))
+
+  // dutReset can be overridden via a harnessFunction, but by default it is just reset
+  val dutReset = Wire(Bool())
+  dutReset := reset
+
+  dut.harnessFunctions.foreach(_(this))
+
+  def success = io.success
+  def harnessReset = this.reset.asBool
+
 }
+

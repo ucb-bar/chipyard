@@ -15,10 +15,10 @@ that writes zeros to the memory at a configured address.
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/InitZero.scala
     :language: scala
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/Top.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/DigitalTop.scala
     :language: scala
-    :start-after: DOC include start: Top
-    :end-before: DOC include end: Top
+    :start-after: DOC include start: DigitalTop
+    :end-before: DOC include end: DigitalTop
 
 We use ``TLHelper.makeClientNode`` to create a TileLink client node for us.
 We then connect the client node to the memory system through the front bus (fbus).
