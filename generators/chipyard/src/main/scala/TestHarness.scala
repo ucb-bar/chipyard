@@ -11,7 +11,7 @@ import chipyard.config.ConfigValName._
 // BOOM and/or Rocket Test Harness
 // -------------------------------
 
-case object BuildTop extends Field[Parameters => HasTestHarnessFunctions]((p: Parameters) => Module(new ChipTop()(p)).suggestName("top"))
+case object BuildTop extends Field[Parameters => HasTestHarnessFunctions]((p: Parameters) => Module(new ChipTop()(p)))
 
 trait HasTestHarnessFunctions {
   val harnessFunctions: Seq[TestHarnessFunction]

@@ -109,7 +109,7 @@ object AddIOCells {
   def uart(uartPins: Seq[UARTPortIO]): (Seq[UARTPortIO], Seq[Seq[IOCell]]) = {
     uartPins.zipWithIndex.map({ case (u, i) =>
       val (port, ios) = IOCell.generateIOFromSignal(u, Some(s"iocell_uart_${i}"))
-      port.suggestName("iocell_uart_${i}")
+      port.suggestName(s"uart_${i}")
       (port, ios)
     }).unzip
   }

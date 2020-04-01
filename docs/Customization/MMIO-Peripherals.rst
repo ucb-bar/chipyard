@@ -87,21 +87,21 @@ For peripherals which instantiate a concrete module, or which need to be connect
     :start-after: DOC include start: GCD imp trait
     :end-before: DOC include end: GCD imp trait
 
-Constructing the Top and Config
+Constructing the DigitalTop and Config
 -------------------------------
 
 Now we want to mix our traits into the system as a whole.
-This code is from ``generators/chipyard/src/main/scala/Top.scala``.
+This code is from ``generators/chipyard/src/main/scala/DigitalTop.scala``.
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/Top.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/DigitalTop.scala
     :language: scala
-    :start-after: DOC include start: Top
-    :end-before: DOC include end: Top
+    :start-after: DOC include start: DigitalTop
+    :end-before: DOC include end: DigitalTop
 
 Just as we need separate traits for ``LazyModule`` and module implementation, we need two classes to build the system.
-The ``Top`` class contains the set of traits which parameterize and define the ``Top``. Typically these traits will optionally add IOs or peripherals to the ``Top``.
-The ``Top`` class includes the pre-elaboration code and also a ``lazy val`` to produce the module implementation (hence ``LazyModule``).
-The ``TopModule`` class is the actual RTL that gets synthesized.
+The ``DigitalTop`` class contains the set of traits which parameterize and define the ``DigitalTop``. Typically these traits will optionally add IOs or peripherals to the ``DigitalTop``.
+The ``DigitalTop`` class includes the pre-elaboration code and also a ``lazy val`` to produce the module implementation (hence ``LazyModule``).
+The ``DigitalTopModule`` class is the actual RTL that gets synthesized.
 
 
 

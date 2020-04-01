@@ -155,6 +155,7 @@ class WithControlCore extends Config((site, here, up) => {
 /**
  * Config fragment to use ChipTopCaughtReset as the top module, which adds a reset synchronizer to
  * the top-level reset, allowing it to be asynchronous with the clock.
+ * NOTE: You must remember to set TOP=WithChipTopCaughtReset when building with this config
  */
 class WithChipTopCaughtReset extends Config((site, here, up) => {
   case BuildTop => (p: Parameters) => Module(new ChipTopCaughtReset()(p).suggestName("top"))

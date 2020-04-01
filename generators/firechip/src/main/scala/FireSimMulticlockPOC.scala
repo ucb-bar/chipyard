@@ -64,7 +64,7 @@ class WithSingleRationalTileDomain(multiplier: Int, divisor: Int) extends Config
 class HalfRateUncore extends WithSingleRationalTileDomain(2,1)
 
 class WithFiresimMulticlockTop extends Config((site, here, up) => {
-  case BuildSystem => (p: Parameters) => Module(LazyModule(new FiresimMulticlockTop()(p)).suggestName("Top").module)
+  case BuildSystem => (p: Parameters) => Module(LazyModule(new FiresimMulticlockTop()(p)).suggestName("system").module)
 })
 
 // Complete Config

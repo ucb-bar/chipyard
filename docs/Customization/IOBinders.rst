@@ -1,7 +1,7 @@
 IOBinders
 =========
 
-In Chipyard we use a special ``Parameters`` key, ``IOBinders`` to determine what modules to bind to the IOs of a ``Top`` in the ``TestHarness``.
+In Chipyard we use a special ``Parameters`` key, ``IOBinders`` to instantiate IO cells in the ``ChipTop`` layer and determine what modules to bind to the IOs of a ``ChipTop`` in the ``TestHarness``.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/IOBinders.scala
    :language: scala
@@ -9,11 +9,11 @@ In Chipyard we use a special ``Parameters`` key, ``IOBinders`` to determine what
    :end-before: DOC include end: IOBinders
 
 
-This special key solves the problem of duplicating test-harnesses for each different ``Top`` type.
+This special key solves the problem of duplicating test-harnesses for each different ``System`` type.
 
-You could just as well create a custom harness module that attaches IOs explicitly. Instead, the IOBinders key provides a map from Scala traits to attachment behaviors.
+You could just as well create a custom harness module that attaches IOs explicitly. Instead, the ``IOBinders`` key provides a map from Scala traits to attachment behaviors.
 
-For example, the ``WithSimAXIMemTiedOff`` IOBinder specifies that any ``Top`` which matches ``CanHaveMasterAXI4MemPortModuleImp`` will have a ``SimAXIMem`` connected.
+For example, the ``WithSimAXIMemTiedOff`` IOBinder specifies that any ``System`` which matches ``CanHaveMasterAXI4MemPortModuleImp`` will have a ``SimAXIMem`` connected.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/IOBinders.scala
    :language: scala

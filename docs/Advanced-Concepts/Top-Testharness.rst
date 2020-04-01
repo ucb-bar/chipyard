@@ -2,17 +2,28 @@ Tops, Test-Harnesses, and the Test-Driver
 ===========================================
 
 The three highest levels of hierarchy in a Chipyard
-SoC are the Top (DUT), ``TestHarness``, and the ``TestDriver``.
-The Top and ``TestHarness`` are both emitted by Chisel generators.
+SoC are the ``ChipTop`` (DUT), ``TestHarness``, and the ``TestDriver``.
+The ``ChipTop`` and ``TestHarness`` are both emitted by Chisel generators.
 The ``TestDriver`` serves as our testbench, and is a Verilog
 file in Rocket Chip.
 
 
-Top/DUT
+ChipTop/DUT
 -------------------------
 
-The top-level module of a Rocket Chip SoC is composed via cake-pattern.
-Specifically, "Tops" extend a ``System``, which extends a ``Subsystem``, which extends a ``BaseSubsystem``.
+ChipTop is the top-level module that instantiates the ``System`` submodule, usually an instance of the concrete class ``DigitalTop``.
+The vast majority of the design resides in the ``System``.
+Other components that exist inside the ``ChipTop`` layer are generally IO cells, clock receivers and multiplexers, reset synchronizers, and other analog IP that needs to exist outside of the ``System``.
+The ``IOBinders`` are responsible for instantiating the IO cells and defining the test harness collateral that connects to the top-level ports.
+Most of these types of devices can be instantiated using custom ``IOBinders``, so the provided ``ChipTop`` and ``ChipTopCaughtReset`` classes are sufficient.
+However, if needed, the ``BaseChipTop`` abstract class can be extended for building more custom ``ChipTop`` designs.
+
+
+System/DigitalTop
+-------------------------
+
+The system module of a Rocket Chip SoC is composed via cake-pattern.
+Specifically, ``DigitalTop`` extends a ``System``, which extends a ``Subsystem``, which extends a ``BaseSubsystem``.
 
 
 BaseSubsystem
