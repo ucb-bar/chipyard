@@ -88,7 +88,7 @@ For peripherals which instantiate a concrete module, or which need to be connect
     :end-before: DOC include end: GCD imp trait
 
 Constructing the DigitalTop and Config
--------------------------------
+--------------------------------------
 
 Now we want to mix our traits into the system as a whole.
 This code is from ``generators/chipyard/src/main/scala/DigitalTop.scala``.
