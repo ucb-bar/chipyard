@@ -86,7 +86,7 @@ class WithFireSimConfigTweaks extends Config(
   // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
   new WithoutTLMonitors ++
   // Optional: Adds IO to attach tracerV bridges
-  new WithTraceIO ++
+  new chipyard.config.WithTraceIO ++
   // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 32 GiB on F1)
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
   // Required: Adds IO to attach SerialBridge. The SerialBridges is responsible
