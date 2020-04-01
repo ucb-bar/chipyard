@@ -142,6 +142,7 @@ object AddIOCells {
   }
 }
 
+// DOC include start: WithGPIOTiedOff
 class WithGPIOTiedOff extends OverrideIOBinder({
   (system: HasPeripheryGPIOModuleImp) => {
     val (ports2d, ioCells2d) = AddIOCells.gpio(system.gpio)
@@ -149,6 +150,7 @@ class WithGPIOTiedOff extends OverrideIOBinder({
     Seq((ports2d.flatten, ioCells2d.flatten, Some(harnessFn)))
   }
 })
+// DOC include end: WithGPIOTiedOff
 
 class WithUARTAdapter extends OverrideIOBinder({
   (system: HasPeripheryUARTModuleImp) => {
