@@ -119,3 +119,6 @@
 [submodule "tools/DRAMSim2"]
 	path = tools/DRAMSim2
 	url = https://github.com/firesim/DRAMSim2.git
+[submodule "tools/dromajo/dromajo-src"]
+	path = tools/dromajo/dromajo-src
+	url = https://github.com/abejgonzalez/dromajo.git

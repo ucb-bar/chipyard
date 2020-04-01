@@ -186,5 +186,8 @@ class WithTraceGenSuccessBinder extends OverrideIOBinder({
 })
 
 class WithSimDromajoBridge extends OverrideIOBinder({
-  (c, r, s, target: CanHaveTraceIOModuleImp) => target.traceIO.map(t => SimDromajoBridge(t)(target.p)).toSeq
+  (c, r, s, target: CanHaveTraceIOModuleImp) => target.traceIO match {
+    case Some(t) => t.traces.map(tileTrace => SimDromajoBridge(tileTrace)(target.p))
+    case None    => Nil
+  }
 })

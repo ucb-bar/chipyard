@@ -180,7 +180,7 @@ class DromajoBoomConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new boom.common.WithMegaBooms ++
+  new boom.common.WithSmallBooms ++
   new boom.common.WithNBoomCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
