@@ -19,7 +19,7 @@ This scheme prevents the need to have two separate binder functions for each ``S
 When creating custom ``IOBinders`` it is important to use ``suggestName`` to name ports; otherwise Chisel will raise an exception trying to name the IOs.
 The example ``IOBinders`` demonstrate this.
 
-As an example, the ``WithGPIOTiedOff`` IOBinder creats IO cells for the GPIO module(s) instantiated in the ``System``, then punches out new ``Analog`` ports for each one.
+As an example, the ``WithGPIOTiedOff`` IOBinder creates IO cells for the GPIO module(s) instantiated in the ``System``, then punches out new ``Analog`` ports for each one.
 The test harness simply ties these off, but additional logic could be inserted to perform some kind of test in the ``TestHarness``.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/IOBinders.scala
