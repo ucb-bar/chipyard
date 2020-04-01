@@ -14,7 +14,7 @@ You could just as well create a custom harness module that attaches IOs explicit
 Instead, the ``IOBinders`` key provides a map from Scala traits to attachment behaviors.
 Each ``IOBinder`` returns a tuple of three values: the list of ``ChipTop`` ports created by the ``IOBinder``, the list of all IO cell modules instantiated by the ``IOBinder``, and an optional function to be called inside the test harness.
 This function is responsible for instantiating logic inside the ``TestHarness`` to appropriately drive the ``ChipTop`` IO ports created by the ``IOBinder``.
-Conveniently, because the ``IOBinder`` is generating the port, it may also use the port inside this function, which prevents the ``BaseChipTop`` code from ever needing to access the port ``val``.
+Conveniently, because the ``IOBinder`` is generating the port, it may also use the port inside this function, which prevents the ``BaseChipTop`` code from ever needing to access the port ``val``, thus having the ``IOBinder`` house all port specific code.
 This scheme prevents the need to have two separate binder functions for each ``System`` trait.
 When creating custom ``IOBinders`` it is important to use ``suggestName`` to name ports; otherwise Chisel will raise an exception trying to name the IOs.
 The example ``IOBinders`` demonstrate this.
