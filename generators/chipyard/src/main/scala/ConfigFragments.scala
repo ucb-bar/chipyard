@@ -153,6 +153,7 @@ class WithControlCore extends Config((site, here, up) => {
  */
 class WithChipTopCaughtReset extends Config((site, here, up) => {
   case BuildTop => (p: Parameters) => Module(new ChipTopCaughtReset()(p).suggestName("top"))
+})
 
 /**
  * Config fragment to add a NVDLA to the SoC.
