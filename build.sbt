@@ -129,7 +129,7 @@ lazy val iocell = (project in file("./tools/barstools/iocell/"))
 lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
   .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
-    gemmini, icenet, tracegen, ariane)
+    gemmini, icenet, tracegen, ariane, nvdla)
   .settings(commonSettings)
 
 lazy val tracegen = conditionalDependsOn(project in file("generators/tracegen"))
@@ -161,6 +161,10 @@ lazy val sha3 = (project in file("generators/sha3"))
 
 lazy val gemmini = (project in file("generators/gemmini"))
   .dependsOn(rocketchip, chisel_testers, testchipip)
+  .settings(commonSettings)
+
+lazy val nvdla = (project in file("generators/nvdla"))
+  .dependsOn(rocketchip)
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))

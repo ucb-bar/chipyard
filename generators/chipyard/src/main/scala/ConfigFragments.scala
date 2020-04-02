@@ -23,6 +23,8 @@ import sifive.blocks.devices.uart._
 
 import chipyard.{BuildTop, BuildSystem, ChipTopCaughtReset}
 
+import nvidia.blocks.dla._
+
 /**
  * TODO: Why do we need this?
  */
@@ -69,7 +71,6 @@ class WithTracegenSystem extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => Module(LazyModule(new tracegen.TraceGenSystem()(p)).suggestName("Top").module)
 })
 
-
 class WithRenumberHarts(rocketFirst: Boolean = false) extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey, site).zipWithIndex map { case (r, i) =>
     r.copy(hartId = i + (if(rocketFirst) 0 else up(BoomTilesKey, site).length))
@@ -79,12 +80,6 @@ class WithRenumberHarts(rocketFirst: Boolean = false) extends Config((site, here
   }
   case MaxHartIdBits => log2Up(up(BoomTilesKey, site).size + up(RocketTilesKey, site).size)
 })
-
-
-
-// ------------------
-// Multi-RoCC Support
-// ------------------
 
 /**
  * Map from a hartId to a particular RoCC accelerator
@@ -151,7 +146,6 @@ class WithControlCore extends Config((site, here, up) => {
   case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
 })
 
-
 /**
  * Config fragment to use ChipTopCaughtReset as the top module, which adds a reset synchronizer to
  * the top-level reset, allowing it to be asynchronous with the clock.
@@ -159,4 +153,12 @@ class WithControlCore extends Config((site, here, up) => {
  */
 class WithChipTopCaughtReset extends Config((site, here, up) => {
   case BuildTop => (p: Parameters) => Module(new ChipTopCaughtReset()(p).suggestName("top"))
+
+/**
+ * Config fragment to add a NVDLA to the SoC.
+ * Supports "small" and "large" configs only.
+ */
+class WithNVDLA(config: String) extends Config((site, here, up) => {
+  case NVDLAKey => Some(NVDLAParams(config = config, raddress = 0x10040000L))
+  case NVDLAFrontBusExtraBuffers => 0
 })

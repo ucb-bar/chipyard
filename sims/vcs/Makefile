@@ -55,7 +55,6 @@ VCS_CC_OPTS = \
 
 VCS_NONCC_OPTS = \
 	+lint=all,noVCDE,noONGS,noUI \
-	-error=PCWM-L \
 	-timescale=1ns/10ps \
 	-quiet \
 	-q \
@@ -64,6 +63,7 @@ VCS_NONCC_OPTS = \
 	+vcs+lic+wait \
 	+vc+list \
 	-error=noZMMCM \
+	-error=PCWM-L \
 	-assert svaext \
 	-sverilog \
 	+libext+.v \
