@@ -64,14 +64,14 @@ class WithFASEDBridge extends OverrideIOBinder({
   }
 })
 
-class WithTracerVBridge extends OverrideIOBinder({
+class WithTracerVBridge extends ComposeIOBinder({
   (c, r, s, target: CanHaveTraceIOModuleImp) => target.traceIO match {
     case Some(t) => t.traces.map(tileTrace => TracerVBridge(tileTrace)(target.p))
     case None    => Nil
   }
 })
 
-class WithDromajoBridge extends OverrideIOBinder({
+class WithDromajoBridge extends ComposeIOBinder({
   (c, r, s, target: CanHaveTraceIOModuleImp) => target.traceIO match {
     case Some(t) => t.traces.map(tileTrace => DromajoBridge(tileTrace)(target.p))
     case None    => Nil
@@ -120,5 +120,5 @@ class WithDefaultFireSimBridges extends Config(
   new WithBlockDeviceBridge ++
   new WithFASEDBridge ++
   new WithFireSimMultiCycleRegfile ++
-  new WithDromajoBridge
+  new WithTracerVBridge
 )
