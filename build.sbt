@@ -126,8 +126,16 @@ lazy val iocell = (project in file("./tools/barstools/iocell/"))
   .dependsOn(chisel)
   .settings(commonSettings)
 
+lazy val awl = (project in file("./generators/awl"))
+  .dependsOn(chisel, rocketchip)
+  .settings(commonSettings)
+
+lazy val rocket_awl = (project in file("./generators/awl/rocket"))
+  .dependsOn(awl, rocketchip)
+  .settings(commonSettings)
+
 lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
-  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell, rocket_awl,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     gemmini, icenet, tracegen, ariane)
   .settings(commonSettings)
