@@ -59,14 +59,11 @@ VCS_NONCC_OPTS = \
 	-quiet \
 	-q \
 	+rad \
-	+v2k \
 	+vcs+lic+wait \
 	+vc+list \
 	-error=noZMMCM \
-	-error=PCWM-L \
-	-assert svaext \
-	-sverilog \
-	+libext+.v \
+	-sverilog +systemverilogext+.sv+.svi+.svh+.svt -assert svaext +libext+.sv \
+	+v2k +verilog2001ext+.v95+.vt+.vp +libext+.v \
 	+incdir+$(build_dir) \
 	-f $(sim_common_files) \
 	$(sim_vsrcs)
