@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-#include "opendla_small.h"
+#include "nvdla.h"
 #include "mmio.h"
 #include <riscv-pk/encoding.h>
 

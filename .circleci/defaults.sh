@@ -57,3 +57,4 @@ mapping["firesim"]="DESIGN=FireSim TARGET_CONFIG=WithNIC_DDR3FRFCFSLLC4MB_FireSi
 mapping["fireboom"]="DESIGN=FireSim TARGET_CONFIG=WithNIC_DDR3FRFCFSLLC4MB_FireSimLargeBoomConfig PLATFORM_CONFIG=BaseF1Config"
 mapping["chipyard-ariane"]="SUB_PROJECT=chipyard CONFIG=ArianeConfig"
 mapping["fireariane"]="DESIGN=FireSim TARGET_CONFIG=WithNIC_DDR3FRFCFSLLC4MB_FireSimArianeConfig PLATFORM_CONFIG=BaseF1Config"
+mapping["chipyard-nvdla"]="SUB_PROJECT=chipyard CONFIG=SmallNVDLARocketConfig"

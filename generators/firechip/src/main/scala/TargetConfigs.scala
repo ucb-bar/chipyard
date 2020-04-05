@@ -184,18 +184,3 @@ class FireSimArianeConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.ArianeConfig)
-
-//**********************************************************************************
-//* NVDLA Configurations
-//*********************************************************************************/
-class FireSimLargeNVDLAConfig extends Config(
-  new WithDefaultFireSimBridges ++
-  new WithDefaultMemModel ++
-  new WithFireSimConfigTweaks ++
-  new chipyard.LargeNVDLARocketConfig)
-
-class FireSimSmallNVDLAConfig extends Config(
-  new WithDefaultFireSimBridges ++
-  new WithDefaultMemModel ++
-  new WithFireSimConfigTweaks ++
-  new chipyard.SmallNVDLARocketConfig)
