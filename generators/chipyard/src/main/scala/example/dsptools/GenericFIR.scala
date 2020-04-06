@@ -1,6 +1,6 @@
 //// See LICENSE for license details.
 //
-package example
+package chipyard.example
 
 import chisel3._
 import chisel3.{Bundle, Module}
@@ -8,7 +8,7 @@ import chisel3.util._
 import dspblocks._
 import dsptools.numbers._
 import freechips.rocketchip.amba.axi4stream._
-import freechips.rocketchip.config.{Parameters, Field}
+import freechips.rocketchip.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
@@ -213,3 +213,12 @@ trait CanHavePeripheryUIntTestFIR extends BaseSubsystem {
   }
 }
 // DOC include end: CanHavePeripheryUIntTestFIR chisel
+
+/**
+ * Mixin to add FIR to rocket config
+ */
+// DOC include start: WithTestFIR
+class WithUIntTestFIR extends Config((site, here, up) => {
+  case GenericFIRKey => Some(GenericFIRParams(depth = 8))
+})
+// DOC include end: WithTestFIR

@@ -240,20 +240,3 @@ class ScratchpadRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 
-class UIntStreamingPassthroughRocketConfig extends Config(
-  new WithUIntStreamingPassthrough ++     // use top with tilelink-controlled passthrough
-  new WithBootROM ++
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new freechips.rocketchip.system.BaseConfig
-)
-
-// DOC include start: FIRRocketConfig
-class UIntTestFIRRocketConfig extends Config (
-  new WithUIntTestFIR ++ // use top with tilelink-controlled FIR
-  new WithBootROM ++
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new freechips.rocketchip.system.BaseConfig
-)
-// DOC include end: FIRRocketConfig

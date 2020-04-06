@@ -1,6 +1,6 @@
 //// See LICENSE for license details.
 //
-package example
+package chipyard.example
 
 import chisel3._
 import chisel3.{Bundle, Module}
@@ -8,7 +8,7 @@ import chisel3.util._
 import dspblocks._
 import dsptools.numbers._
 import freechips.rocketchip.amba.axi4stream._
-import freechips.rocketchip.config.{Parameters, Field}
+import freechips.rocketchip.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
@@ -146,3 +146,11 @@ trait CanHavePeripheryUIntStreamingPassthrough { this: BaseSubsystem =>
     case None => None
   }
 }
+
+/**
+ * Mixin to add passthrough to rocket config
+ */
+class WithUIntStreamingPassthrough extends Config((site, here, up) => {
+  case StreamingPassthroughKey => Some(StreamingPassthroughParams(depth = 8))
+})
+
