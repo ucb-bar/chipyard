@@ -154,12 +154,3 @@ class WithControlCore extends Config((site, here, up) => {
 class WithChipTopCaughtReset extends Config((site, here, up) => {
   case BuildTop => (p: Parameters) => Module(new ChipTopCaughtReset()(p).suggestName("top"))
 })
-
-/**
- * Config fragment to add a NVDLA to the SoC.
- * Supports "small" and "large" configs only.
- */
-class WithNVDLA(config: String) extends Config((site, here, up) => {
-  case NVDLAKey => Some(NVDLAParams(config = config, raddress = 0x10040000L))
-  case NVDLAFrontBusExtraBuffers => 0
-})

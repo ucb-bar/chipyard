@@ -396,7 +396,7 @@ class SmallNVDLARocketConfig extends Config(
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
-  new chipyard.config.WithNVDLA("small") ++ // add a small NVDLA
+  new nvidia.blocks.dla.WithNVDLA("small") ++ // add a small NVDLA
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
@@ -415,7 +415,7 @@ class LargeNVDLARocketConfig extends Config(
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
-  new chipyard.config.WithNVDLA("large") ++ // add a large NVDLA
+  new nvidia.blocks.dla.WithNVDLA("large", true) ++ // add a large NVDLA with synth. rams
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
