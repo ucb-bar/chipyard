@@ -122,8 +122,12 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip, sifive_blocks)
   .settings(commonSettings)
 
+lazy val iocell = (project in file("./tools/barstools/iocell/"))
+  .dependsOn(chisel)
+  .settings(commonSettings)
+
 lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
-  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities,
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsptools`,
     gemmini, icenet, tracegen, ariane)
@@ -205,5 +209,6 @@ lazy val firechip = conditionalDependsOn(project in file("generators/firechip"))
   .dependsOn(chipyard, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
-    testGrouping in Test := isolateAllTests( (definedTests in Test).value )
+    testGrouping in Test := isolateAllTests( (definedTests in Test).value ),
+    testOptions in Test += Tests.Argument("-oF")
   )

@@ -77,10 +77,10 @@ It is used in the Rocket Chip SoC library and Chipyard framework in merging mult
 This example shows the Chipyard default top that composes multiple traits together into a fully-featured SoC with many optional components.
 
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/Top.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/DigitalTop.scala
     :language: scala
-    :start-after: DOC include start: Top
-    :end-before: DOC include end: Top
+    :start-after: DOC include start: DigitalTop
+    :end-before: DOC include end: DigitalTop
 
 
 There are two "cakes" or mixins here. One for the lazy module (ex. ``CanHavePeripherySerial``) and one for the lazy module
@@ -88,8 +88,8 @@ implementation (ex. ``CanHavePeripherySerialModuleImp`` where ``Imp`` refers to 
 all the logical connections between generators and exchanges configuration information among them, while the
 lazy module implementation performs the actual Chisel RTL elaboration.
 
-In the ``Top`` example class, the "outer" ``Top`` instantiates the "inner"
-``TopModule`` as a lazy module implementation. This delays immediate elaboration
+In the ``DigitalTop`` example class, the "outer" ``DigitalTop`` instantiates the "inner"
+``DigitalTopModule`` as a lazy module implementation. This delays immediate elaboration
 of the module until all logical connections are determined and all configuration information is exchanged.
 The ``System`` outer base class, as well as the
 ``CanHavePeriphery<X>`` outer traits contain code to perform high-level logical
@@ -102,8 +102,9 @@ For example, the ``CanHavePeripherySerialModuleImp`` trait optionally physically
 the ``SerialAdapter`` module, and instantiates queues.
 
 In the test harness, the SoC is elaborated with
-``val dut = Module(LazyModule(Top))``.
-After elaboration, the result will be a ``Top`` module, which contains a
+``val dut = p(BuildTop)(p)``.
+
+After elaboration, the system submodule of ``ChipTop`` will be a ``DigitalTop`` module, which contains a
 ``SerialAdapter`` module (among others), if the config specified for that block to be instantiated.
 
 From a high level, classes which extend ``LazyModule`` *must* reference

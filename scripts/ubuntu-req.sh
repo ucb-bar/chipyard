@@ -10,7 +10,7 @@ curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89
 sudo apt-get update
 sudo apt-get install -y sbt
 sudo apt-get install -y texinfo gengetopt
-sudo apt-get install -y libxpat1-dev libusb-dev libncurses5-dev cmake
+sudo apt-get install -y libexpat1-dev libusb-dev libncurses5-dev cmake
 # deps for poky
 sudo apt-get install -y python3.6 patch diffstat texi2html texinfo subversion chrpath git wget
 # deps for qemu
