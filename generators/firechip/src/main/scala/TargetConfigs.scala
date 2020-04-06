@@ -75,8 +75,9 @@ class WithTraceIO extends Config((site, here, up) => {
   case TracePortKey => Some(TracePortParams())
 })
 
-class WithNVDLALarge extends chipyard.config.WithNVDLA("large")
-class WithNVDLASmall extends chipyard.config.WithNVDLA("small")
+// Adds a small/large NVDLA to the system
+class WithNVDLALarge extends nvidia.blocks.dla.WithNVDLA("large")
+class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
 // Tweaks that are generally applied to all firesim configs
 class WithFireSimConfigTweaks extends Config(
