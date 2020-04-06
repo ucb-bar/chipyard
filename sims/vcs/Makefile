@@ -62,6 +62,7 @@ VCS_NONCC_OPTS = \
 	+vcs+lic+wait \
 	+vc+list \
 	-error=noZMMCM \
+	-error=PCWM-L \
 	-sverilog +systemverilogext+.sv+.svi+.svh+.svt -assert svaext +libext+.sv \
 	+v2k +verilog2001ext+.v95+.vt+.vp +libext+.v \
 	+incdir+$(build_dir) \
