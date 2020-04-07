@@ -23,8 +23,6 @@ import sifive.blocks.devices.uart._
 
 import chipyard.{BuildTop, BuildSystem, ChipTopCaughtReset}
 
-import nvidia.blocks.dla._
-
 /**
  * TODO: Why do we need this?
  */
