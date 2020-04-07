@@ -9,7 +9,7 @@ import freechips.rocketchip.diplomacy.{LazyModule}
 
 import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge}
 
-import chipyard.{BuildTop}
+import chipyard.{BuildSystem}
 import chipyard.iobinders.{IOBinders}
 
 // Determines the number of times to instantiate the DUT in the harness.
@@ -34,14 +34,14 @@ class FireSim(implicit val p: Parameters) extends RawModule {
   val reset = WireInit(false.B)
   withClockAndReset(clock, reset) {
     // Instantiate multiple instances of the DUT to implement supernode
-    val targets = Seq.fill(p(NumNodes))(p(BuildTop)(p))
+    val targets = Seq.fill(p(NumNodes))(p(BuildSystem)(p))
     val peekPokeBridge = PeekPokeBridge(clock, reset)
     // A Seq of partial functions that will instantiate the right bridge only
     // if that Mixin trait is present in the target's class instance
     //
     // Apply each partial function to each DUT instance
-    for (target <- targets) {
-      p(IOBinders).values.map(fn => fn(clock, reset.asBool, false.B, target))
+    for ((target) <- targets) {
+      p(IOBinders).values.map(_(target))
       NodeIdx.increment()
     }
   }

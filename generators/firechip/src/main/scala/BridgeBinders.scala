@@ -7,10 +7,11 @@ import chisel3.experimental.annotate
 
 import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
-import freechips.rocketchip.devices.debug.HasPeripheryDebugModuleImp
-import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPortModuleImp}
+import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebugModuleImp}
+import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPortModuleImp, HasExtInterruptsModuleImp}
 import freechips.rocketchip.tile.{RocketTile}
 import sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
+import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp}
 
 import testchipip.{CanHavePeripherySerialModuleImp, CanHavePeripheryBlockDeviceModuleImp, CanHaveTraceIOModuleImp}
 import icenet.CanHavePeripheryIceNICModuleImp
@@ -30,75 +31,63 @@ import chipyard.HasChipyardTilesModuleImp
 
 object MainMemoryConsts {
   val regionNamePrefix = "MainMemory"
-  def globalName(): String = s"${regionNamePrefix}_${NodeIdx()}"
+  def globalName = s"${regionNamePrefix}_${NodeIdx()}"
 }
 
 class WithSerialBridge extends OverrideIOBinder({
-  (c, r, s, target: CanHavePeripherySerialModuleImp) =>
-    target.serial.map(s => SerialBridge(target.clock, s, MainMemoryConsts.globalName)(target.p)).toSeq
+  (system: CanHavePeripherySerialModuleImp) =>
+    system.serial.foreach(s => SerialBridge(system.clock, s, MainMemoryConsts.globalName)(system.p)); Nil
 })
 
 class WithNICBridge extends OverrideIOBinder({
-  (c, r, s, target: CanHavePeripheryIceNICModuleImp) =>
-    target.net.map(n => NICBridge(target.clock, n)(target.p)).toSeq
+  (system: CanHavePeripheryIceNICModuleImp) =>
+    system.net.foreach(n => NICBridge(system.clock, n)(system.p)); Nil
 })
 
 class WithUARTBridge extends OverrideIOBinder({
-  (c, r, s, target: HasPeripheryUARTModuleImp) =>
-    target.uart.map(u => UARTBridge(target.clock, u)(target.p)).toSeq
+  (system: HasPeripheryUARTModuleImp) =>
+    system.uart.foreach(u => UARTBridge(system.clock, u)(system.p)); Nil
 })
 
 class WithBlockDeviceBridge extends OverrideIOBinder({
-  (c, r, s, target: CanHavePeripheryBlockDeviceModuleImp) =>
-    target.bdev.map(b => BlockDevBridge(target.clock, b, target.reset.toBool)(target.p)).toSeq
+  (system: CanHavePeripheryBlockDeviceModuleImp) =>
+    system.bdev.foreach(b => BlockDevBridge(system.clock, b, system.reset.toBool)(system.p)); Nil
 })
 
-// Assign a unique name to each target memory space, consisting of one or more
-// memory channels. In the multi-node case, serial widgets can then disambiguate
-// each memory region using this string instead of relying on the assumption
-// the target has a single memory channel.
-object MemoryRegionNames {
-  var idx = -1
-  def getName(): String = {
-    idx += 1
-    s"memory_${idx}"
-  }
-}
 
-class WithFASEDBridge extends OverrideIOBinder ({
-  (c, r, s, t: CanHaveMasterAXI4MemPortModuleImp) => {
-    implicit val p = t.p
-    (t.mem_axi4 zip t.outer.memAXI4Node).flatMap({ case (io, node) =>
+class WithFASEDBridge extends OverrideIOBinder({
+  (system: CanHaveMasterAXI4MemPortModuleImp) => {
+    implicit val p = system.p
+    (system.mem_axi4 zip system.outer.memAXI4Node).flatMap({ case (io, node) =>
       (io zip node.in).map({ case (axi4Bundle, (_, edge)) =>
         val nastiKey = NastiParameters(axi4Bundle.r.bits.data.getWidth,
                                        axi4Bundle.ar.bits.addr.getWidth,
                                        axi4Bundle.ar.bits.id.getWidth)
-        FASEDBridge(t.clock, axi4Bundle, t.reset.toBool,
+        FASEDBridge(system.clock, axi4Bundle, system.reset.toBool,
           CompleteConfig(p(firesim.configs.MemModelKey),
                          nastiKey,
                          Some(AXI4EdgeSummary(edge)),
                          Some(MainMemoryConsts.globalName)))
       })
-    }).toSeq
+    })
+    Nil
   }
 })
 
 class WithTracerVBridge extends OverrideIOBinder({
-  (c, r, s, target: CanHaveTraceIOModuleImp) => target.traceIO match {
-    case Some(t) => t.traces.map(tileTrace => TracerVBridge(tileTrace)(target.p))
-    case None    => Nil
-  }
+  (system: CanHaveTraceIOModuleImp) =>
+    system.traceIO.foreach(_.traces.map(tileTrace => TracerVBridge(tileTrace)(system.p))); Nil
 })
 
 
 class WithTraceGenBridge extends OverrideIOBinder({
-  (c, r, s, target: HasTraceGenTilesModuleImp) =>
-    Seq(GroundTestBridge(target.clock, target.success)(target.p))
+  (system: HasTraceGenTilesModuleImp) =>
+    GroundTestBridge(system.clock, system.success)(system.p); Nil
 })
 
 class WithFireSimMultiCycleRegfile extends ComposeIOBinder({
-  (c, r, s, target: HasChipyardTilesModuleImp) => {
-    target.outer.tiles.map {
+  (system: HasChipyardTilesModuleImp) => {
+    system.outer.tiles.map {
       case r: RocketTile => {
         annotate(MemModelAnnotation(r.module.core.rocketImpl.rf.rf))
         r.module.fpuOpt.foreach(fpu => annotate(MemModelAnnotation(fpu.fpuImpl.regfile)))
@@ -120,13 +109,31 @@ class WithFireSimMultiCycleRegfile extends ComposeIOBinder({
   }
 })
 
+class WithTiedOffSystemGPIO extends OverrideIOBinder({
+  (system: HasPeripheryGPIOModuleImp) =>
+    system.gpio.foreach(_.pins.foreach(_.i.ival := false.B)); Nil
+})
+
+class WithTiedOffSystemDebug extends OverrideIOBinder({
+  (system: HasPeripheryDebugModuleImp) => {
+    Debug.tieoffDebug(system.debug, system.psd)
+    // tieoffDebug doesn't actually tie everything off :/
+    system.debug.foreach(_.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare }))
+    Nil
+  }
+})
+
+class WithTiedOffSystemInterrupts extends OverrideIOBinder({
+  (system: HasExtInterruptsModuleImp) =>
+    system.interrupts := 0.U; Nil
+})
 
 
 // Shorthand to register all of the provided bridges above
 class WithDefaultFireSimBridges extends Config(
-  new chipyard.iobinders.WithGPIOTiedOff ++
-  new chipyard.iobinders.WithTiedOffDebug ++
-  new chipyard.iobinders.WithTieOffInterrupts ++
+  new WithTiedOffSystemGPIO ++
+  new WithTiedOffSystemDebug ++
+  new WithTiedOffSystemInterrupts ++
   new WithSerialBridge ++
   new WithNICBridge ++
   new WithUARTBridge ++

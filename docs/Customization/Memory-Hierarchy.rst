@@ -38,6 +38,20 @@ Note that these configurations fully remove the L2 cache and mbus.
 This configuration fully removes the L2 cache and memory bus by setting the
 number of channels and number of banks to 0.
 
+The System Bus
+--------------
+
+The system bus is the TileLink network that sits between the tiles and the L2
+agents and MMIO peripherals. Ordinarily, it is a fully-connected crossbar,
+but TestChipIP provides a version that uses a ring network instead. This can
+be useful when taping out larger systems. To use  the ring network system
+bus, simply add the ``WithRingSystemBus`` config fragment to your configuration.
+
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
+    :language: scala
+    :start-after: DOC include start: RingSystemBusRocket
+    :end-before: DOC include end: RingSystemBusRocket
+
 The SiFive L2 Cache
 -------------------
 
