@@ -20,12 +20,13 @@ import firesim.util.{GeneratorArgs, HasTargetAgnosticUtilites, HasFireSimGenerat
 
 import scala.util.Try
 
-import utilities.TestSuiteHelper
+import chipyard.TestSuiteHelper
 
 trait HasTestSuites {
   def addTestSuites(targetName: String, params: Parameters) {
     TestSuiteHelper.addRocketTestSuites(params)
     TestSuiteHelper.addBoomTestSuites(params)
+    TestSuiteHelper.addArianeTestSuites(params)
     TestGeneration.addSuite(FastBlockdevTests)
     TestGeneration.addSuite(SlowBlockdevTests)
     if (!targetName.contains("NoNIC"))
@@ -61,7 +62,7 @@ object FireSimGenerator extends App with IsFireSimGeneratorLike {
   override lazy val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
   lazy val generatorArgs = GeneratorArgs(args)
   lazy val genDir = new File(names.targetDir)
-  // The only reason this is not generateFirrtl; generateAnno is that we need to use a different 
+  // The only reason this is not generateFirrtl; generateAnno is that we need to use a different
   // JsonProtocol to properly write out the annotations. Fix once the generated are unified
   elaborate
   generateTestSuiteMakefrags

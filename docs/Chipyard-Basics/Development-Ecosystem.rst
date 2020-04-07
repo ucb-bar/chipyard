@@ -16,7 +16,7 @@ Chisel is an embedded language within Scala that provides a set of libraries to 
 FIRRTL on the other hand is a compiler for hardware which allows the user to run FIRRTL passes that can do dead code elimination, circuit analysis, connectivity checks, and much more!
 These two tools in combination allow quick design space exploration and development of new RTL.
 
-Generators
+RTL Generators
 -------------------------------------------
 
 Within this repository, all of the Chisel RTL is written as generators.

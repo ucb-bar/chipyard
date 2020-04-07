@@ -45,3 +45,4 @@ We recommend reading all these pages in order. Hit next to get started!
    Memory-Hierarchy
    Boot-Process
    Firrtl-Transforms
+   IOBinders

@@ -20,6 +20,8 @@ lazy val commonSettings = Seq(
   libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.0",
   libraryDependencies += "org.scala-lang.modules" % "scala-jline" % "2.12.1",
   libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.10",
+  libraryDependencies += "org.typelevel" %% "spire" % "0.16.2",
+  libraryDependencies += "org.scalanlp" %% "breeze" % "1.0",
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
   allDependencies := allDependencies.value.filterNot(_.organization == "edu.berkeley.cs"),
@@ -122,16 +124,22 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip, sifive_blocks)
   .settings(commonSettings)
 
-lazy val example = conditionalDependsOn(project in file("generators/example"))
-  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, sha3, gemmini, icenet, dsptools, `rocket-dsptools`)
+lazy val iocell = (project in file("./tools/barstools/iocell/"))
+  .dependsOn(chisel)
+  .settings(commonSettings)
+
+lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
+    sha3, // On separate line to allow for cleaner tutorial-setup patches
+    dsptools, `rocket-dsptools`,
+    gemmini, icenet, tracegen, ariane)
   .settings(commonSettings)
 
 lazy val tracegen = conditionalDependsOn(project in file("generators/tracegen"))
-  .dependsOn(rocketchip, sifive_cache, boom)
+  .dependsOn(rocketchip, sifive_cache, boom, utilities)
   .settings(commonSettings)
 
 lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))
-  .dependsOn(rocketchip, boom)
   .settings(commonSettings)
 
 lazy val icenet = (project in file("generators/icenet"))
@@ -146,6 +154,10 @@ lazy val boom = (project in file("generators/boom"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
+lazy val ariane = (project in file("generators/ariane"))
+  .dependsOn(rocketchip)
+  .settings(commonSettings)
+
 lazy val sha3 = (project in file("generators/sha3"))
   .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
   .settings(commonSettings)
@@ -155,7 +167,7 @@ lazy val gemmini = (project in file("generators/gemmini"))
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
-  .dependsOn(chisel_testers, example)
+  .dependsOn(chisel_testers, chipyard)
   .settings(commonSettings)
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
@@ -166,19 +178,17 @@ lazy val barstoolsMacros = (project in file("./tools/barstools/macros/"))
   .enablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonSettings)
 
-lazy val dsptools = (project in file("./tools/dsptools"))
+lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
   .dependsOn(chisel, chisel_testers)
   .settings(
       commonSettings,
       libraryDependencies ++= Seq(
-        "org.typelevel" %% "spire" % "0.14.1",
-        "org.scalanlp" %% "breeze" % "0.13.2",
-        "junit" % "junit" % "4.12" % "test",
-        "org.scalatest" %% "scalatest" % "3.0.5" % "test",
-        "org.scalacheck" %% "scalacheck" % "1.14.0" % "test"
+        "junit" % "junit" % "4.13" % "test",
+        "org.scalatest" %% "scalatest" % "3.0.8",
+        "org.scalacheck" %% "scalacheck" % "1.14.3" % "test"
   ))
 
-lazy val `rocket-dsptools` = (project in file("./tools/dsptools/rocket"))
+lazy val `rocket-dsptools` = freshProject("rocket-dsptools", file("./tools/dsptools/rocket"))
   .dependsOn(rocketchip, dsptools)
   .settings(commonSettings)
 
@@ -195,10 +205,10 @@ lazy val sifive_cache = (project in file("generators/sifive-cache")).settings(
 lazy val midas      = ProjectRef(firesimDir, "midas")
 lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 
-lazy val firechip = (project in file("generators/firechip"))
-  .dependsOn(boom, hwacha, example, icenet, testchipip, sifive_blocks, sifive_cache, sha3, utilities, tracegen, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
+lazy val firechip = conditionalDependsOn(project in file("generators/firechip"))
+  .dependsOn(chipyard, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
-    testGrouping in Test := isolateAllTests( (definedTests in Test).value )
+    testGrouping in Test := isolateAllTests( (definedTests in Test).value ),
+    testOptions in Test += Tests.Argument("-oF")
   )
-

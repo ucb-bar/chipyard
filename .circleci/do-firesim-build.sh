@@ -15,24 +15,28 @@ trap clean EXIT
 
 cd $LOCAL_CHIPYARD_DIR
 ./scripts/init-submodules-no-riscv-tools.sh
+cd $LOCAL_CHIPYARD_DIR/sims/firesim/sim/firesim-lib/src/main/cc/lib
+git submodule update --init elfutils libdwarf
+cd $LOCAL_CHIPYARD_DIR/sims/firesim
+./scripts/build-libelf.sh
+./scripts/build-libdwarf.sh
+cd $LOCAL_CHIPYARD_DIR
+
 
 # set stricthostkeychecking to no (must happen before rsync)
 run "echo \"Ping $SERVER\""
 
 clean
 
-# copy over riscv/esp-tools, verilator, and chipyard to remote
+# copy over riscv/esp-tools, and chipyard to remote
 run "mkdir -p $REMOTE_CHIPYARD_DIR"
-run "mkdir -p $REMOTE_VERILATOR_DIR"
 copy $LOCAL_CHIPYARD_DIR/ $SERVER:$REMOTE_CHIPYARD_DIR
-copy $LOCAL_VERILATOR_DIR/ $SERVER:$REMOTE_VERILATOR_DIR
 
 run "cp -r ~/.ivy2 $REMOTE_WORK_DIR"
 run "cp -r ~/.sbt  $REMOTE_WORK_DIR"
 
 TOOLS_DIR=$REMOTE_RISCV_DIR
 LD_LIB_DIR=$REMOTE_RISCV_DIR/lib
-VERILATOR_BIN_DIR=$REMOTE_VERILATOR_DIR/install/bin
 
 if [ $1 = "hwacha" ] || [ $1 = "gemmini" ]; then
     TOOLS_DIR=$REMOTE_ESP_DIR
@@ -47,9 +51,11 @@ fi
 # Build MIDAS-level verilator sim
 FIRESIM_VARS="${mapping[$1]}"
 run "export FIRESIM_ENV_SOURCED=1; make -C $REMOTE_FIRESIM_DIR clean"
-run "export RISCV=\"$TOOLS_DIR\"; export LD_LIBRARY_PATH=\"$LD_LIB_DIR\"; \
-     export PATH=\"$VERILATOR_BIN_DIR:\$PATH\"; export FIRESIM_ENV_SOURCED=1; \
-     export VERILATOR_ROOT=$REMOTE_VERILATOR_DIR/install/share/verilator; \
+run "export RISCV=\"$TOOLS_DIR\"; \
+     export LD_LIBRARY_PATH=\"$LD_LIB_DIR\"; \
+     export PATH=\"$REMOTE_VERILATOR_DIR/bin:\$PATH\"; \
+     export VERILATOR_ROOT=\"$REMOTE_VERILATOR_DIR\"; \
+     export FIRESIM_ENV_SOURCED=1; \
      make -C $REMOTE_FIRESIM_DIR JAVA_ARGS=\"$REMOTE_JAVA_ARGS\" $FIRESIM_VARS verilator"
 run "rm -rf $REMOTE_CHIPYARD_DIR/project"
 
