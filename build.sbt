@@ -166,6 +166,7 @@ lazy val gemmini = (project in file("generators/gemmini"))
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
   .dependsOn(chisel_testers, chipyard)
   .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq("io.github.daviddenton" %% "handlebars-scala-fork" % "2.3.0"))
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
   .settings(commonSettings)

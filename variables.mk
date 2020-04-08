@@ -38,43 +38,18 @@ ifeq ($(SUB_PROJECT),chipyard)
 	TB                ?= TestDriver
 	TOP               ?= ChipTop
 endif
-# for Rocket-chip developers
-ifeq ($(SUB_PROJECT),rocketchip)
-	SBT_PROJECT       ?= rocketchip
-	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= freechips.rocketchip.system
-	CONFIG            ?= DefaultConfig
-	CONFIG_PACKAGE    ?= freechips.rocketchip.system
-	GENERATOR_PACKAGE ?= freechips.rocketchip.system
-	TB                ?= TestDriver
-	TOP               ?= ExampleRocketSystem
-endif
 # for Hwacha developers
 ifeq ($(SUB_PROJECT),hwacha)
-	SBT_PROJECT       ?= hwacha
+	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= freechips.rocketchip.system
 	CONFIG            ?= HwachaConfig
 	CONFIG_PACKAGE    ?= hwacha
-	GENERATOR_PACKAGE ?= hwacha
+	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
 	TOP               ?= ExampleRocketSystem
 endif
-# Stand-in firechip variables:
-# TODO: need a seperate generator and test harnesses for each target
-#ifeq ($(SUB_PROJECT),firechip)
-#	SBT_PROJECT       ?= $(SUB_PROJECT)
-#	MODEL             ?= TestHarness
-#	VLOG_MODEL        ?= TestHarness
-#	MODEL_PACKAGE     ?= freechips.rocketchip.system
-#	CONFIG            ?= FireSimRocketChipConfig
-#	CONFIG_PACKAGE    ?= firesim.firesim
-#	GENERATOR_PACKAGE ?= firesim.firesim
-#	TB                ?= TestDriver
-#	TOP               ?= FireSimNoNIC
-#endif
 
 #########################################################################################
 # path to rocket-chip and testchipip
@@ -87,11 +62,6 @@ CHIPYARD_FIRRTL_DIR = $(base_dir)/tools/firrtl
 # names of various files needed to compile and run things
 #########################################################################################
 long_name = $(MODEL_PACKAGE).$(MODEL).$(CONFIG)
-
-# match the long_name to what the specific generator will output
-ifeq ($(GENERATOR_PACKAGE),freechips.rocketchip.system)
-	long_name=$(CONFIG_PACKAGE).$(CONFIG)
-endif
 ifeq ($(GENERATOR_PACKAGE),hwacha)
 	long_name=$(MODEL_PACKAGE).$(CONFIG)
 endif
