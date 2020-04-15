@@ -23,3 +23,5 @@ To build baremetal RISC-V programs to run in simulation, we use the riscv64-unkn
     Hello, World!
 
 For more examples, look at the `tests/ directory <https://github.com/ucb-bar/chipyard/tree/master/tests>`_ in the chipyard repository.
+
+For more information about the libgloss port, take a look at `its README <https://github.com/ucb-bar/libgloss-htif/blob/master/README.md>`_.
