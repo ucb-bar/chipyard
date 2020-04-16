@@ -206,6 +206,7 @@ class WithMemBladeKey(spanBytes: Option[Int] = None) extends Config(
 class WithRemoteMemClientKey(spanBytes: Int = 1024) extends Config((site, here, up) => {
   case RemoteMemClientKey => RemoteMemClientConfig(
     spanBytes = spanBytes,
+    nMemXacts = 12,
     nRMemXacts = 32768 / spanBytes)
 })
 
