@@ -32,7 +32,7 @@ ifeq ($(SUB_PROJECT),chipyard)
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= $(SBT_PROJECT)
-	CONFIG            ?= RocketConfig
+	CONFIG            ?= Lab5MSIDualRocketConfig
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
