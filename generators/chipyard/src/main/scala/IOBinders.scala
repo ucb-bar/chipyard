@@ -8,6 +8,7 @@ import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.subsystem._
+import freechips.rocketchip.system.{SimAXIMem}
 import freechips.rocketchip.util._
 
 import sifive.blocks.devices.gpio._
@@ -117,17 +118,28 @@ object AddIOCells {
   /**
    * Add IO cells to a debug module and name the IO ports.
    * @param gpios A PSDIO bundle
+   * @param resetctrlOpt An optional ResetCtrlIO bundle
    * @param debugOpt An optional DebugIO bundle
    * @return Returns a tuple3 of (Top-level PSDIO IO; Optional top-level DebugIO IO; a list of IOCell module references)
    */
-  def debug(psd: PSDIO, debugOpt: Option[DebugIO]): (PSDIO, Option[DebugIO], Seq[IOCell]) = {
-    val (psdPort, psdIOs) = IOCell.generateIOFromSignal(psd, Some("iocell_psd"))
-    val optTuple = debugOpt.map(d => IOCell.generateIOFromSignal(d, Some("iocell_debug")))
-    val debugPortOpt: Option[DebugIO] = optTuple.map(_._1)
-    val debugIOs: Seq[IOCell] = optTuple.map(_._2).toSeq.flatten
+  def debug(psd: PSDIO, resetctrlOpt: Option[ResetCtrlIO], debugOpt: Option[DebugIO])(implicit p: Parameters):
+      (PSDIO, Option[ResetCtrlIO], Option[DebugIO], Seq[IOCell]) = {
+    val (psdPort, psdIOs) = IOCell.generateIOFromSignal(
+      psd, Some("iocell_psd"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
+    val debugTuple = debugOpt.map(d =>
+      IOCell.generateIOFromSignal(d, Some("iocell_debug"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync))
+    val debugPortOpt: Option[DebugIO] = debugTuple.map(_._1)
+    val debugIOs: Seq[IOCell] = debugTuple.map(_._2).toSeq.flatten
     debugPortOpt.foreach(_.suggestName("debug"))
+
+    val resetctrlTuple = resetctrlOpt.map(d =>
+      IOCell.generateIOFromSignal(d, Some("iocell_resetctrl"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync))
+    val resetctrlPortOpt: Option[ResetCtrlIO] = resetctrlTuple.map(_._1)
+    val resetctrlIOs: Seq[IOCell] = resetctrlTuple.map(_._2).toSeq.flatten
+    resetctrlPortOpt.foreach(_.suggestName("resetctrl"))
+
     psdPort.suggestName("psd")
-    (psdPort, debugPortOpt, psdIOs ++ debugIOs)
+    (psdPort, resetctrlPortOpt, debugPortOpt, psdIOs ++ debugIOs ++ resetctrlIOs)
   }
 
   /**
@@ -176,29 +188,32 @@ class WithSimNIC extends OverrideIOBinder({
   (system: CanHavePeripheryIceNICModuleImp) => system.connectSimNetwork(system.clock, system.reset.asBool); Nil
 })
 
+// Note: The parameters instance is accessible only through the BaseSubsystem
+// or some parent class (IsAttachable, BareSubsystem -> LazyModule). The
+// self-type requirement in CanHaveMasterAXI4MemPort is insufficient to make it
+// accessible to the IOBinder
 // DOC include start: WithSimAXIMem
 class WithSimAXIMem extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPortModuleImp) => system.connectSimAXIMem(); Nil
+  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => SimAXIMem.connectMem(system)(system.p); Nil
 })
 // DOC include end: WithSimAXIMem
 
 class WithBlackBoxSimMem extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPortModuleImp) => {
-    (system.mem_axi4 zip system.outer.memAXI4Node).foreach { case (io, node) =>
+  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => {
+    (system.mem_axi4 zip system.memAXI4Node.in).foreach { case (io, (_, edge)) =>
       val memSize = system.p(ExtMem).get.master.size
       val lineSize = system.p(CacheBlockBytes)
-      (io zip node.in).foreach { case (axi4, (_, edge)) =>
-        val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
-        mem.io.axi <> axi4
-        mem.io.clock := system.clock
-        mem.io.reset := system.reset
-      }
-    }; Nil
+      val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
+      mem.io.axi <> io
+      mem.io.clock := system.module.clock
+      mem.io.reset := system.module.reset
+    }
+    Nil
   }
 })
 
 class WithSimAXIMMIO extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MMIOPortModuleImp) => system.connectSimAXIMMIO(); Nil
+  (system: CanHaveMasterAXI4MMIOPort with BaseSubsystem) => SimAXIMem.connectMMIO(system)(system.p); Nil
 })
 
 class WithDontTouchPorts extends OverrideIOBinder({
@@ -215,7 +230,7 @@ class WithTieOffInterrupts extends OverrideIOBinder({
 })
 
 class WithTieOffL2FBusAXI extends OverrideIOBinder({
-  (system: CanHaveSlaveAXI4PortModuleImp) => {
+  (system: CanHaveSlaveAXI4Port with BaseSubsystem) => {
     system.l2_frontend_bus_axi4.foreach(axi => {
       axi.tieoff()
       experimental.DataMirror.directionOf(axi.ar.ready) match {
@@ -235,23 +250,28 @@ class WithTieOffL2FBusAXI extends OverrideIOBinder({
 
 class WithTiedOffDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
-    val (psdPort, debugPortOpt, ioCells) = AddIOCells.debug(system.psd, system.debug)
+    val (psdPort, resetctrlOpt, debugPortOpt, ioCells) =
+      AddIOCells.debug(system.psd, system.resetctrl, system.debug)(system.p)
     val harnessFn = (th: chipyard.TestHarness) => {
-      Debug.tieoffDebug(debugPortOpt, psdPort)
+      Debug.tieoffDebug(debugPortOpt, resetctrlOpt, Some(psdPort))(system.p)
       // tieoffDebug doesn't actually tie everything off :/
-      debugPortOpt.foreach(_.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare }))
+      debugPortOpt.foreach { d =>
+        d.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare })
+        d.dmactiveAck := DontCare
+      }
       Nil
     }
-    Seq((Seq(psdPort) ++ debugPortOpt.toSeq, ioCells, Some(harnessFn)))
+    Seq((Seq(psdPort) ++ resetctrlOpt ++ debugPortOpt.toSeq, Nil, Some(harnessFn)))
   }
 })
 
 class WithSimDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
-    val (psdPort, debugPortOpt, ioCells) = AddIOCells.debug(system.psd, system.debug)
+    val (psdPort, resetctrlPortOpt, debugPortOpt, ioCells) =
+      AddIOCells.debug(system.psd, system.resetctrl, system.debug)(system.p)
     val harnessFn = (th: chipyard.TestHarness) => {
       val dtm_success = Wire(Bool())
-      Debug.connectDebug(debugPortOpt, psdPort, th.clock, th.harnessReset, dtm_success)(system.p)
+      Debug.connectDebug(debugPortOpt, resetctrlPortOpt, psdPort, th.clock, th.harnessReset, dtm_success)(system.p)
       when (dtm_success) { th.success := true.B }
       th.dutReset := th.harnessReset | debugPortOpt.map { debug => AsyncResetReg(debug.ndreset).asBool }.getOrElse(false.B)
       Nil

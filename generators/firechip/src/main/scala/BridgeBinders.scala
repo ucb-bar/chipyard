@@ -8,7 +8,7 @@ import chisel3.experimental.annotate
 import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebugModuleImp}
-import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPortModuleImp, HasExtInterruptsModuleImp}
+import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPort, HasExtInterruptsModuleImp, BaseSubsystem}
 import freechips.rocketchip.tile.{RocketTile}
 import sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
 import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp}
@@ -56,19 +56,17 @@ class WithBlockDeviceBridge extends OverrideIOBinder({
 
 
 class WithFASEDBridge extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPortModuleImp) => {
+  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => {
     implicit val p = system.p
-    (system.mem_axi4 zip system.outer.memAXI4Node).flatMap({ case (io, node) =>
-      (io zip node.in).map({ case (axi4Bundle, (_, edge)) =>
-        val nastiKey = NastiParameters(axi4Bundle.r.bits.data.getWidth,
-                                       axi4Bundle.ar.bits.addr.getWidth,
-                                       axi4Bundle.ar.bits.id.getWidth)
-        FASEDBridge(system.clock, axi4Bundle, system.reset.toBool,
-          CompleteConfig(p(firesim.configs.MemModelKey),
-                         nastiKey,
-                         Some(AXI4EdgeSummary(edge)),
-                         Some(MainMemoryConsts.globalName)))
-      })
+    (system.mem_axi4 zip system.memAXI4Node.in).foreach({ case (axi4, (_, edge)) =>
+      val nastiKey = NastiParameters(axi4.r.bits.data.getWidth,
+                                     axi4.ar.bits.addr.getWidth,
+                                     axi4.ar.bits.id.getWidth)
+      FASEDBridge(system.module.clock, axi4, system.module.reset.toBool,
+        CompleteConfig(p(firesim.configs.MemModelKey),
+                       nastiKey,
+                       Some(AXI4EdgeSummary(edge)),
+                       Some(MainMemoryConsts.globalName)))
     })
     Nil
   }
@@ -116,9 +114,12 @@ class WithTiedOffSystemGPIO extends OverrideIOBinder({
 
 class WithTiedOffSystemDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
-    Debug.tieoffDebug(system.debug, system.psd)
+    Debug.tieoffDebug(system.debug, system.resetctrl, Some(system.psd))(system.p)
     // tieoffDebug doesn't actually tie everything off :/
-    system.debug.foreach(_.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare }))
+    system.debug.foreach { d => 
+      d.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare })
+      d.dmactiveAck := DontCare
+    }
     Nil
   }
 })
