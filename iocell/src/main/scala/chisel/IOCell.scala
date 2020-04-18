@@ -120,15 +120,19 @@ object IOCell {
    * @param inFn A function to generate a DigitalInIOCell to use for input signals
    * @param outFn A function to generate a DigitalOutIOCell to use for output signals
    * @param anaFn A function to generate an AnalogIOCell to use for analog signals
+   * @param abstractResetAsAsync When set, will coerce abstract resets to
+   *        AsyncReset, and otherwise to Bool (sync reset)
    * @return A tuple of (the generated IO data node, a Seq of all generated IO cell instances)
    */
   def generateIOFromSignal[T <: Data](coreSignal: T, name: Option[String] = None,
     inFn: () => DigitalInIOCell = IOCell.genericInput,
     outFn: () => DigitalOutIOCell = IOCell.genericOutput,
-    anaFn: () => AnalogIOCell = IOCell.genericAnalog): (T, Seq[IOCell]) =
+    anaFn: () => AnalogIOCell = IOCell.genericAnalog,
+    abstractResetAsAsync: Boolean = false): (T, Seq[IOCell]) =
   {
     val padSignal = IO(DataMirror.internal.chiselTypeClone[T](coreSignal))
-    val iocells = IOCell.generateFromSignal(coreSignal, padSignal, name, inFn, outFn, anaFn)
+    val resetFn = if (abstractResetAsAsync) toAsyncReset else toSyncReset
+    val iocells = IOCell.generateFromSignal(coreSignal, padSignal, name, inFn, outFn, anaFn, resetFn)
     (padSignal, iocells)
   }
 
@@ -143,12 +147,47 @@ object IOCell {
    * @param anaFn A function to generate an AnalogIOCell to use for analog signals
    * @return A Seq of all generated IO cell instances
    */
-  def generateFromSignal[T <: Data](coreSignal: T, padSignal: T, name: Option[String] = None,
+  val toSyncReset: (Reset) => Bool = _.toBool
+  val toAsyncReset: (Reset) => AsyncReset = _.asAsyncReset
+  def generateFromSignal[T <: Data, R <: Reset](
+    coreSignal: T,
+    padSignal: T,
+    name: Option[String] = None,
     inFn: () => DigitalInIOCell = IOCell.genericInput,
     outFn: () => DigitalOutIOCell = IOCell.genericOutput,
-    anaFn: () => AnalogIOCell = IOCell.genericAnalog): Seq[IOCell] =
+    anaFn: () => AnalogIOCell = IOCell.genericAnalog,
+    concretizeResetFn : (Reset) => R = toSyncReset): Seq[IOCell] =
   {
-    (coreSignal: T, padSignal: T) match {
+    def genCell[T <: Data](
+        castToBool: (T) => Bool,
+        castFromBool: (Bool) => T)(
+        coreSignal: T,
+        padSignal: T): Seq[IOCell] = {
+      DataMirror.directionOf(coreSignal) match {
+        case ActualDirection.Input => {
+          val iocell = inFn()
+          name.foreach(n => iocell.suggestName(n))
+          coreSignal := castFromBool(iocell.io.i)
+          iocell.io.ie := true.B
+          iocell.io.pad := castToBool(padSignal)
+          Seq(iocell)
+        }
+        case ActualDirection.Output => {
+          val iocell = outFn()
+          name.foreach(n => iocell.suggestName(n))
+          iocell.io.o := castToBool(coreSignal)
+          iocell.io.oe := true.B
+          padSignal := castFromBool(iocell.io.pad)
+          Seq(iocell)
+        }
+        case _ => throw new Exception(s"Signal does not have a direction and cannot be matched to an IOCell")
+      }
+    }
+    def genCellForClock = genCell[Clock](_.asUInt.asBool, _.asClock) _
+    def genCellForAsyncReset = genCell[AsyncReset](_.asBool, _.asAsyncReset) _
+    def genCellForAbstractReset = genCell[Reset](_.asBool, concretizeResetFn) _
+
+    (coreSignal, padSignal) match {
       case (coreSignal: Analog, padSignal: Analog) => {
         if (coreSignal.getWidth == 0) {
           Seq()
@@ -161,27 +200,9 @@ object IOCell {
           Seq(iocell)
         }
       }
-      case (coreSignal: Clock, padSignal: Clock) => {
-        DataMirror.directionOf(coreSignal) match {
-          case ActualDirection.Input => {
-            val iocell = inFn()
-            name.foreach(n => iocell.suggestName(n))
-            coreSignal := iocell.io.i.asClock
-            iocell.io.ie := true.B
-            iocell.io.pad := padSignal.asUInt.asBool
-            Seq(iocell)
-          }
-          case ActualDirection.Output => {
-            val iocell = outFn()
-            name.foreach(n => iocell.suggestName(n))
-            iocell.io.o := coreSignal.asUInt.asBool
-            iocell.io.oe := true.B
-            padSignal := iocell.io.pad.asClock
-            Seq(iocell)
-          }
-          case _ => throw new Exception("Clock signal does not have a direction and cannot be matched to an IOCell")
-        }
-      }
+      case (coreSignal: Clock, padSignal: Clock) => genCellForClock(coreSignal, padSignal)
+      case (coreSignal: AsyncReset, padSignal: AsyncReset) => genCellForAsyncReset(coreSignal, padSignal)
+      case (coreSignal: Reset, padSignal: Reset) => genCellForAbstractReset(coreSignal, padSignal)
       case (coreSignal: Bits, padSignal: Bits) => {
         require(padSignal.getWidth == coreSignal.getWidth, "padSignal and coreSignal must be the same width")
         if (padSignal.getWidth == 0) {
@@ -227,7 +248,7 @@ object IOCell {
           }
         }
       }
-      case (coreSignal: Vec[Data], padSignal: Vec[Data]) => {
+      case (coreSignal: Vec[_], padSignal: Vec[_]) => {
         require(padSignal.size == coreSignal.size, "size of Vec for padSignal and coreSignal must be the same")
         coreSignal.zip(padSignal).zipWithIndex.foldLeft(Seq.empty[IOCell]) { case (total, ((core, pad), i)) =>
           val ios = IOCell.generateFromSignal(core, pad, name.map(_ + "_" + i), inFn, outFn, anaFn)
