@@ -358,11 +358,6 @@ workflows:
     build-and-test-chipyard-integration:
         jobs:
             - ci-approval:
-                filters:
-                  branches:
-                    ignore:
-                      - master
-                      - dev
                 type: approval
 
             # Make the toolchains
