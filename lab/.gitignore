@@ -1,0 +1,6 @@
+*.o
+*.riscv
+*.dump
+*.out
+*.log
+*.zip
