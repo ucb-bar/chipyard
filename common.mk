@@ -156,6 +156,30 @@ ifneq ($(filter run% %.run %.out %.vpd %.vcd,$(MAKECMDGOALS)),)
 -include $(build_dir)/$(long_name).d
 endif
 
+#########################################################################################
+# CS152 Lab 5 benchmark rules
+#########################################################################################
+lab5_tests := \
+	mt-vvadd-naive.riscv \
+	mt-vvadd-opt.riscv \
+	mt-matmul-naive.riscv \
+	mt-matmul-opt.riscv
+
+.PHONY: $(addprefix $(base_dir)/lab/,$(lab5_tests))
+$(addprefix $(base_dir)/lab/,$(lab5_tests)):
+	$(MAKE) -C $(dir $@) $(notdir $@).dump
+
+$(addprefix $(output_dir)/,$(lab5_tests)): $(output_dir)/%: $(base_dir)/lab/%
+	mkdir -p $(output_dir)
+	ln -sf $< $@
+
+define lab5_bmarks
+.PHONY: $(1) $(1)-debug
+$(1): $$(output_dir)/$(2).out
+$(1)-debug: $$(output_dir)/$(2).vpd
+endef
+$(foreach x,$(lab5_tests),$(eval $(call lab5_bmarks,run-$(basename $(x)),$(x))))
+
 #######################################
 # Rules for building DRAMSim2 library #
 #######################################
