@@ -20,6 +20,8 @@ lazy val commonSettings = Seq(
   libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.0",
   libraryDependencies += "org.scala-lang.modules" % "scala-jline" % "2.12.1",
   libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.10",
+  libraryDependencies += "org.typelevel" %% "spire" % "0.16.2",
+  libraryDependencies += "org.scalanlp" %% "breeze" % "1.0",
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
   allDependencies := allDependencies.value.filterNot(_.organization == "edu.berkeley.cs"),
@@ -129,6 +131,7 @@ lazy val iocell = (project in file("./tools/barstools/iocell/"))
 lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
   .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
+    dsptools, `rocket-dsptools`,
     gemmini, icenet, tracegen, ariane)
   .settings(commonSettings)
 
@@ -175,19 +178,17 @@ lazy val barstoolsMacros = (project in file("./tools/barstools/macros/"))
   .enablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonSettings)
 
-lazy val dsptools = (project in file("./tools/dsptools"))
+lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
   .dependsOn(chisel, chisel_testers)
   .settings(
       commonSettings,
       libraryDependencies ++= Seq(
-        "org.typelevel" %% "spire" % "0.14.1",
-        "org.scalanlp" %% "breeze" % "0.13.2",
-        "junit" % "junit" % "4.12" % "test",
-        "org.scalatest" %% "scalatest" % "3.0.5" % "test",
-        "org.scalacheck" %% "scalacheck" % "1.14.0" % "test"
+        "junit" % "junit" % "4.13" % "test",
+        "org.scalatest" %% "scalatest" % "3.0.8",
+        "org.scalacheck" %% "scalacheck" % "1.14.3" % "test"
   ))
 
-lazy val `rocket-dsptools` = (project in file("./tools/dsptools/rocket"))
+lazy val `rocket-dsptools` = freshProject("rocket-dsptools", file("./tools/dsptools/rocket"))
   .dependsOn(rocketchip, dsptools)
   .settings(commonSettings)
 

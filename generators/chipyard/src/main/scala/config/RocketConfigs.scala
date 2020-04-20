@@ -384,3 +384,15 @@ class RingSystemBusRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: RingSystemBusRocket
+
+class UIntStreamingPassthroughRocketConfig extends Config(
+  new chipyard.example.WithUIntStreamingPassthrough ++     // use top with tilelink-controlled passthrough
+  new RocketConfig
+)
+
+// DOC include start: FIRRocketConfig
+class UIntTestFIRRocketConfig extends Config (
+  new chipyard.example.WithUIntTestFIR ++ // use top with tilelink-controlled FIR
+  new RocketConfig
+)
+// DOC include end: FIRRocketConfig
