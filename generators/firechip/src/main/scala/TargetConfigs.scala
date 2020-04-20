@@ -26,7 +26,6 @@ import testchipip.WithRingSystemBus
 
 import firesim.bridges._
 import firesim.configs._
-import chipyard.{BuildTop}
 import chipyard.config.ConfigValName._
 
 class WithBootROM extends Config((site, here, up) => {
@@ -44,7 +43,7 @@ class WithBootROM extends Config((site, here, up) => {
 })
 
 class WithPeripheryBusFrequency(freq: BigInt) extends Config((site, here, up) => {
-  case PeripheryBusKey => up(PeripheryBusKey).copy(frequency=freq)
+  case PeripheryBusKey => up(PeripheryBusKey).copy(dtsFrequency = Some(freq))
 })
 
 

@@ -338,6 +338,7 @@ jobs:
         steps:
             - run-tests:
                 project-key: "chipyard-ariane"
+                timeout: "30m"
 
 # Order and dependencies of jobs to run
 workflows:
@@ -356,20 +357,35 @@ workflows:
 
     build-and-test-chipyard-integration:
         jobs:
+            - ci-approval:
+                type: approval
+
             # Make the toolchains
-            - install-riscv-toolchain
+            - install-riscv-toolchain:
+                requires:
+                    - ci-approval
 
-            - install-esp-toolchain
+            - install-esp-toolchain:
+                requires:
+                    - ci-approval
 
-            - install-verilator
+            - install-verilator:
+                requires:
+                    - ci-approval
 
-            - commit-on-master-check
+            - commit-on-master-check:
+                requires:
+                    - ci-approval
 
             # Attempt to apply the tutorial patches
-            - tutorial-setup-check
+            - tutorial-setup-check:
+                requires:
+                    - ci-approval
 
             # Check that documentation builds
-            - documentation-check
+            - documentation-check:
+                requires:
+                    - ci-approval
 
             # Build extra tests
             - build-extra-tests:

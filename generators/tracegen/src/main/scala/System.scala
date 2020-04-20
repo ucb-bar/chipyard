@@ -49,4 +49,3 @@ class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
 class TraceGenSystemModuleImp(outer: TraceGenSystem)
   extends BaseSubsystemModuleImp(outer)
   with HasTraceGenTilesModuleImp
-  with CanHaveMasterAXI4MemPortModuleImp

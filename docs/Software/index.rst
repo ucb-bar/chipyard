@@ -19,3 +19,4 @@ challenging to modify.
 
    FireMarshal
    Spike
+   Baremetal

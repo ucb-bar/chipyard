@@ -36,29 +36,17 @@ ifeq ($(SUB_PROJECT),chipyard)
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
-	TOP               ?= Top
-endif
-# for Rocket-chip developers
-ifeq ($(SUB_PROJECT),rocketchip)
-	SBT_PROJECT       ?= rocketchip
-	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= freechips.rocketchip.system
-	CONFIG            ?= DefaultConfig
-	CONFIG_PACKAGE    ?= freechips.rocketchip.system
-	GENERATOR_PACKAGE ?= freechips.rocketchip.system
-	TB                ?= TestDriver
-	TOP               ?= ExampleRocketSystem
+	TOP               ?= ChipTop
 endif
 # for Hwacha developers
 ifeq ($(SUB_PROJECT),hwacha)
-	SBT_PROJECT       ?= hwacha
+	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
 	MODEL_PACKAGE     ?= freechips.rocketchip.system
 	CONFIG            ?= HwachaConfig
 	CONFIG_PACKAGE    ?= hwacha
-	GENERATOR_PACKAGE ?= hwacha
+	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
 	TOP               ?= ExampleRocketSystem
 endif
@@ -144,11 +132,6 @@ CHIPYARD_FIRRTL_DIR = $(base_dir)/tools/firrtl
 # names of various files needed to compile and run things
 #########################################################################################
 long_name = $(MODEL_PACKAGE).$(MODEL).$(CONFIG)
-
-# match the long_name to what the specific generator will output
-ifeq ($(GENERATOR_PACKAGE),freechips.rocketchip.system)
-	long_name=$(CONFIG_PACKAGE).$(CONFIG)
-endif
 ifeq ($(GENERATOR_PACKAGE),hwacha)
 	long_name=$(MODEL_PACKAGE).$(CONFIG)
 endif
@@ -200,7 +183,7 @@ output_dir=$(sim_dir)/output/$(long_name)
 # helper variables to run binaries
 #########################################################################################
 BINARY ?=
-SIM_FLAGS ?=
+override SIM_FLAGS += +dramsim +max-cycles=$(timeout_cycles)
 VERBOSE_FLAGS ?= +verbose
 sim_out_name = $(subst $() $(),_,$(notdir $(basename $(BINARY))).$(long_name))
 

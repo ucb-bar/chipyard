@@ -5,7 +5,7 @@ index a633066..3df8b74 100644
 @@ -124,7 +124,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
  
  lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
-   .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities,
+   .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
 -    sha3, // On separate line to allow for cleaner tutorial-setup patches
 +//    sha3, // On separate line to allow for cleaner tutorial-setup patches
      gemmini, icenet, tracegen, ariane)
