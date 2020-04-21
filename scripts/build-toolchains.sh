@@ -130,6 +130,9 @@ SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv64-unknow
 
 SRCDIR="$(pwd)/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv64-softmmu
 
+# make Dromajo
+make -C $CHIPYARD_DIR/tools/dromajo/dromajo-src/src
+
 cd "$RDIR"
 
 # create specific env.sh

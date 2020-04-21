@@ -11,8 +11,8 @@ import freechips.rocketchip.devices.tilelink._
 // BOOM and/or Rocket Top Level Systems
 // ------------------------------------
 
-// DOC include start: Top
-class Top(implicit p: Parameters) extends System
+// DOC include start: DigitalTop
+class DigitalTop(implicit p: Parameters) extends System
   with testchipip.CanHaveTraceIO // Enables optionally adding trace IO
   with testchipip.CanHaveBackingScratchpad // Enables optionally adding a backing scratchpad
   with testchipip.CanHavePeripheryBlockDevice // Enables optionally adding the block device
@@ -23,10 +23,10 @@ class Top(implicit p: Parameters) extends System
   with chipyard.example.CanHavePeripheryInitZero // Enables optionally adding the initzero example widget
   with chipyard.example.CanHavePeripheryGCD // Enables optionally adding the GCD example widget
 {
-  override lazy val module = new TopModule(this)
+  override lazy val module = new DigitalTopModule(this)
 }
 
-class TopModule[+L <: Top](l: L) extends SystemModule(l)
+class DigitalTopModule[+L <: DigitalTop](l: L) extends SystemModule(l)
   with testchipip.CanHaveTraceIOModuleImp
   with testchipip.CanHavePeripheryBlockDeviceModuleImp
   with testchipip.CanHavePeripherySerialModuleImp
@@ -35,4 +35,4 @@ class TopModule[+L <: Top](l: L) extends SystemModule(l)
   with icenet.CanHavePeripheryIceNICModuleImp
   with chipyard.example.CanHavePeripheryGCDModuleImp
   with freechips.rocketchip.util.DontTouch
-// DOC include end: Top
+// DOC include end: DigitalTop

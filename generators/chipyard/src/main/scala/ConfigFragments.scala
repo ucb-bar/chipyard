@@ -21,7 +21,7 @@ import hwacha.{Hwacha}
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 
-import chipyard.{BuildTop}
+import chipyard.{BuildTop, BuildSystem}
 
 /**
  * TODO: Why do we need this?
@@ -65,8 +65,8 @@ class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
   ))
 })
 
-class WithTracegenTop extends Config((site, here, up) => {
-  case BuildTop => (p: Parameters) => Module(LazyModule(new tracegen.TraceGenSystem()(p)).suggestName("Top").module)
+class WithTracegenSystem extends Config((site, here, up) => {
+  case BuildSystem => (p: Parameters) => LazyModule(new tracegen.TraceGenSystem()(p))
 })
 
 

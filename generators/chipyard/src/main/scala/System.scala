@@ -38,8 +38,5 @@ class System(implicit p: Parameters) extends Subsystem
 class SystemModule[+L <: System](_outer: L) extends SubsystemModuleImp(_outer)
   with HasRTCModuleImp
   with HasExtInterruptsModuleImp
-  with CanHaveMasterAXI4MemPortModuleImp
-  with CanHaveMasterAXI4MMIOPortModuleImp
-  with CanHaveSlaveAXI4PortModuleImp
   with HasPeripheryBootROMModuleImp
   with DontTouch

@@ -165,7 +165,15 @@ class BoomLSUShim(implicit p: Parameters) extends BoomModule()(p)
   io.lsu.rob_pnr_idx := rob_tail
   io.lsu.commit_load_at_rob_head := false.B
 
-  io.lsu.brupdate := (0.U).asTypeOf(new boom.exu.BrUpdateInfo)
+  io.lsu.brupdate.b1 := (0.U).asTypeOf(new boom.exu.BrUpdateMasks)
+  io.lsu.brupdate.b2.uop := DontCare
+  io.lsu.brupdate.b2.mispredict := false.B
+  io.lsu.brupdate.b2.taken := false.B
+  io.lsu.brupdate.b2.cfi_type := 0.U
+  io.lsu.brupdate.b2.pc_sel := 0.U
+  io.lsu.brupdate.b2.jalr_target := 0.U
+  io.lsu.brupdate.b2.target_offset := 0.S(2.W)
+
   io.lsu.rob_head_idx := rob_head
 
 

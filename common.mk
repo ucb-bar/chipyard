@@ -21,7 +21,7 @@ include $(base_dir)/tools/dromajo/dromajo.mk
 #########################################################################################
 lookup_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.$(2)" -print 2> /dev/null)
 
-SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim)
+SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools/iocell)
 SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
 VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE_DIRS),v)
 
@@ -59,7 +59,11 @@ $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 # AG: must re-elaborate if ariane sources have changed... otherwise just run firrtl compile
 generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
-	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator $(build_dir) $(MODEL_PACKAGE) $(MODEL) $(CONFIG_PACKAGE) $(CONFIG)"
+	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator \
+		--target-dir $(build_dir) \
+		--name $(long_name) \
+		--top-module $(MODEL_PACKAGE).$(MODEL) \
+		--legacy-configs $(CONFIG_PACKAGE).$(CONFIG)"
 
 .PHONY: firrtl
 firrtl: $(FIRRTL_FILE)

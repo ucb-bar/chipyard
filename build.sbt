@@ -122,8 +122,12 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip, sifive_blocks)
   .settings(commonSettings)
 
+lazy val iocell = (project in file("./tools/barstools/iocell/"))
+  .dependsOn(chisel)
+  .settings(commonSettings)
+
 lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
-  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities,
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     gemmini, icenet, tracegen, ariane)
   .settings(commonSettings)
@@ -162,6 +166,7 @@ lazy val gemmini = (project in file("generators/gemmini"))
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
   .dependsOn(chisel_testers, chipyard)
   .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq("io.github.daviddenton" %% "handlebars-scala-fork" % "2.3.0"))
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
   .settings(commonSettings)
