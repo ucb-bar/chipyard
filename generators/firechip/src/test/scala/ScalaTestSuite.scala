@@ -137,7 +137,7 @@ abstract class FireSimTestSuite(
 }
 
 class RocketF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimQuadRocketConfig", "WithSynthAsserts_BaseF1Config")
-class BoomF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimBoomConfig", "BaseF1Config")
+class BoomF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimLargeBoomConfig", "BaseF1Config")
 class RocketNICF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimRocketConfig", "BaseF1Config") {
   runSuite("verilator")(NICLoopbackTests)
 }
