@@ -36,11 +36,12 @@ TESTCHIPIP_CLASSES ?= "$(TESTCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/class
 #########################################################################################
 FIRRTL_JAR := $(base_dir)/lib/firrtl.jar
 
-$(FIRRTL_JAR): $(call lookup_scala_srcs, $(CHIPYARD_FIRRTL_DIR)/src/main/scala)
+$(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl.jar: $(call lookup_scala_srcs, $(CHIPYARD_FIRRTL_DIR)/src/main/scala)
 	$(MAKE) -C $(CHIPYARD_FIRRTL_DIR) SBT="$(SBT)" root_dir=$(CHIPYARD_FIRRTL_DIR) build-scala
+
+$(FIRRTL_JAR): $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl.jar
 	mkdir -p $(@D)
-	cp -p $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl.jar $@
-	touch $@
+	cp -a $< $@
 
 #########################################################################################
 # create list of simulation file inputs
