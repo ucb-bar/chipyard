@@ -52,57 +52,57 @@ ifeq ($(SUB_PROJECT),hwacha)
 endif
 # for TestChipIP developers
 ifeq ($(SUB_PROJECT),testchipip)
-	SBT_PROJECT       ?= testchipip
+	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= testchipip
+	MODEL_PACKAGE     ?= freechips.rocketchip.unittest
 	CONFIG            ?= TestChipUnitTestConfig
 	CONFIG_PACKAGE    ?= testchipip
-	GENERATOR_PACKAGE ?= testchipip
+	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
 	TOP               ?= UnitTestSuite
 endif
 ifeq ($(SUB_PROJECT),icenet)
-	SBT_PROJECT       ?= icenet
+	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= icenet
+	MODEL_PACKAGE     ?= freechips.rocketchip.unittest
 	CONFIG            ?= IceNetUnitTestConfig
 	CONFIG_PACKAGE    ?= icenet
-	GENERATOR_PACKAGE ?= icenet
+	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
 	TOP               ?= UnitTestSuite
 endif
 ifeq ($(SUB_PROJECT),memblade.prefetcher)
-	SBT_PROJECT       ?= memory_blade
+	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= memblade.prefetcher
+	MODEL_PACKAGE     ?= freechips.rocketchip.unittest
 	CONFIG            ?= PrefetcherUnitTestConfig
 	CONFIG_PACKAGE    ?= memblade.prefetcher
-	GENERATOR_PACKAGE ?= memblade.prefetcher
+	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
 	TOP               ?= UnitTestSuite
 endif
 ifeq ($(SUB_PROJECT),memblade.cache)
-	SBT_PROJECT       ?= memory_blade
+	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= memblade.cache
+	MODEL_PACKAGE     ?= freechips.rocketchip.unittest
 	CONFIG            ?= DRAMCacheUnitTestConfig
 	CONFIG_PACKAGE    ?= memblade.cache
-	GENERATOR_PACKAGE ?= memblade.cache
+	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
 	TOP               ?= UnitTestSuite
 endif
 ifeq ($(SUB_PROJECT),memblade.manager)
-	SBT_PROJECT       ?= memory_blade
+	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= memblade.manager
+	MODEL_PACKAGE     ?= freechips.rocketchip.unittest
 	CONFIG            ?= MemBladeUnitTestConfig
 	CONFIG_PACKAGE    ?= memblade.manager
-	GENERATOR_PACKAGE ?= memblade.manager
+	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
 	TOP               ?= UnitTestSuite
 endif
