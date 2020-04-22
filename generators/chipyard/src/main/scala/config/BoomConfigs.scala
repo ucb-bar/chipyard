@@ -166,7 +166,7 @@ class LoopbackNICLargeBoomConfig extends Config(
 class BoomRemoteMemClientConfig extends Config(
   new chipyard.config.WithMemBenchKey ++
   new chipyard.config.WithRemoteMemClientKey ++
-  new chipyard.config.WithRemoteMemClientTop ++
+  new chipyard.config.WithRemoteMemClientSystem ++
   new chipyard.config.WithStandardL2(4) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
   new LargeBoomConfig)
@@ -174,7 +174,7 @@ class BoomRemoteMemClientConfig extends Config(
 class BoomDRAMCacheConfig extends Config(
   new chipyard.config.WithMemBenchKey ++
   new chipyard.config.WithDRAMCacheKey(4, 8, 4) ++
-  new chipyard.config.WithDRAMCacheTop ++
+  new chipyard.config.WithDRAMCacheSystem ++
   new chipyard.config.WithPrefetchMiddleMan ++
   new chipyard.config.WithStandardL2(4) ++
   new LargeBoomConfig)
@@ -185,7 +185,7 @@ class BoomHwachaDRAMCacheConfig extends Config(
   new hwacha.WithNLanes(2) ++
   new chipyard.config.WithMemBenchKey ++
   new chipyard.config.WithDRAMCacheKey(4, 8, 4) ++
-  new chipyard.config.WithDRAMCacheTop ++
+  new chipyard.config.WithDRAMCacheSystem ++
   new chipyard.config.WithPrefetchMiddleMan ++
   new chipyard.config.WithStandardL2(4) ++
   new HwachaLargeBoomConfig)

@@ -79,22 +79,19 @@ class WithTracegenSystem extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => LazyModule(new tracegen.TraceGenSystem()(p))
 })
 
-class WithMemBladeTop extends Config((site, here, up) => {
-  case BuildTop => (p: Parameters) =>
-    Module(LazyModule(
-      new chipyard.MemBladeTop()(p)).suggestName("MemBladeTop").module)
+class WithMemBladeSystem extends Config((site, here, up) => {
+  case BuildSystem => (p: Parameters) =>
+    LazyModule(new chipyard.MemBladeTop()(p))
 })
 
-class WithRemoteMemClientTop extends Config((site, here, up) => {
-  case BuildTop => (p: Parameters) =>
-    Module(LazyModule(
-      new chipyard.RemoteMemClientTop()(p)).suggestName("RemoteMemClientTop").module)
+class WithRemoteMemClientSystem extends Config((site, here, up) => {
+  case BuildSystem => (p: Parameters) =>
+    LazyModule(new chipyard.RemoteMemClientTop()(p))
 })
 
-class WithDRAMCacheTop extends Config((site, here, up) => {
-  case BuildTop => (p: Parameters) =>
-    Module(LazyModule(
-      new chipyard.DRAMCacheTop()(p)).suggestName("DRAMCacheTop").module)
+class WithDRAMCacheSystem extends Config((site, here, up) => {
+  case BuildSystem => (p: Parameters) =>
+    LazyModule(new chipyard.DRAMCacheTop()(p))
 })
 
 class WithRenumberHarts(rocketFirst: Boolean = false) extends Config((site, here, up) => {

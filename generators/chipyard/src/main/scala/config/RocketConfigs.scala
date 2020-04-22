@@ -366,7 +366,7 @@ class ScratchpadRocketConfig extends Config(
 
 class MemBladeConfig extends Config(
   new chipyard.config.WithMemBladeKey ++
-  new chipyard.config.WithMemBladeTop ++
+  new chipyard.config.WithMemBladeSystem ++
   new freechips.rocketchip.subsystem.WithNTrackersPerBank(4) ++
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
@@ -379,7 +379,7 @@ class MemBlade1024Config extends Config(
 class RemoteMemClientConfig extends Config(
   new chipyard.config.WithMemBenchKey ++
   new chipyard.config.WithRemoteMemClientKey ++
-  new chipyard.config.WithRemoteMemClientTop ++
+  new chipyard.config.WithRemoteMemClientSystem ++
   new chipyard.config.WithStandardL2 ++
   new RocketConfig)
 
@@ -389,7 +389,7 @@ class HwachaRemoteMemClientConfig extends Config(
   new chipyard.config.WithHwachaConfPrec ++
   new chipyard.config.WithMemBenchKey ++
   new chipyard.config.WithRemoteMemClientKey ++
-  new chipyard.config.WithRemoteMemClientTop ++
+  new chipyard.config.WithRemoteMemClientSystem ++
   new chipyard.config.WithStandardL2(4) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
   new HwachaRocketConfig)
@@ -397,7 +397,7 @@ class HwachaRemoteMemClientConfig extends Config(
 class DRAMCacheConfig extends Config(
   new chipyard.config.WithMemBenchKey ++
   new chipyard.config.WithDRAMCacheKey(4, 8) ++
-  new chipyard.config.WithDRAMCacheTop ++
+  new chipyard.config.WithDRAMCacheSystem ++
   new chipyard.config.WithPrefetchMiddleMan ++
   new chipyard.config.WithStandardL2 ++
   new RocketConfig)
@@ -408,7 +408,7 @@ class HwachaDRAMCacheConfig extends Config(
   new chipyard.config.WithHwachaConfPrec ++
   new chipyard.config.WithMemBenchKey ++
   new chipyard.config.WithDRAMCacheKey(4, 8, 4) ++
-  new chipyard.config.WithDRAMCacheTop ++
+  new chipyard.config.WithDRAMCacheSystem ++
   new chipyard.config.WithPrefetchMiddleMan ++
   new chipyard.config.WithStandardL2(4, 6) ++
   new HwachaRocketConfig)
