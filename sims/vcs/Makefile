@@ -56,7 +56,7 @@ VCS_CC_OPTS = \
 VCS_NONCC_OPTS = \
 	+lint=all,noVCDE,noONGS,noUI \
 	-error=PCWM-L \
-	-timescale=1ns/10ps \
+	-timescale=1ns/1ps \
 	-quiet \
 	-q \
 	+rad \
