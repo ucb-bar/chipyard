@@ -102,7 +102,7 @@ JAVA_ARGS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M
 SCALA_VERSION=2.12.10
 SCALA_VERSION_MAJOR=$(basename $(SCALA_VERSION))
 
-SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar ++$(SCALA_VERSION)
+SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
 
 #########################################################################################
 # output directory for tests
