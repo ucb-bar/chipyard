@@ -143,7 +143,7 @@ class WithDRAMCacheBridge extends OverrideIOBinder({
           p(firesim.configs.MemModelKey),
           nastiKey,
           Some(AXI4EdgeSummary(edge)),
-          Some("dram-cache-mem")))
+          Some("dram_cache_mem")))
     })
     NICBridge(system.clock, system.net)
     Nil
