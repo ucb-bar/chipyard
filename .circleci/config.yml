@@ -279,6 +279,7 @@ jobs:
         steps:
             - run-tests:
                 project-key: "chipyard-hetero"
+                timeout: "15m"
     chipyard-boom-run-tests:
         executor: main-env
         steps:
