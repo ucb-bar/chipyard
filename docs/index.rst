@@ -37,6 +37,20 @@ Start by fetching Chipyard's sources. Run:
 
 This will initialize and checkout all of the necessary git submodules.
 
+Installing Dependencies
+-------------------------------------------
+Installing the recommended dependencies on Ubuntu/Debian-based platforms:
+
+.. code-block:: shell
+
+    ./scripts/ubuntu-req.sh
+    
+Installing the recommended dependencies on CentOS-based platforms:
+
+.. code-block:: shell
+
+   ./scripts/centos-req.sh
+
 Installing the RISC-V Tools
 -------------------------------------------
 
