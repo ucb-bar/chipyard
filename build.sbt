@@ -170,6 +170,7 @@ lazy val nvdla = (project in file("generators/nvdla"))
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
   .dependsOn(chisel_testers, chipyard)
   .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq("io.github.daviddenton" %% "handlebars-scala-fork" % "2.3.0"))
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
   .settings(commonSettings)

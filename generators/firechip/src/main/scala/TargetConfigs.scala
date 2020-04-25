@@ -41,7 +41,7 @@ class WithBootROM extends Config((site, here, up) => {
 })
 
 class WithPeripheryBusFrequency(freq: BigInt) extends Config((site, here, up) => {
-  case PeripheryBusKey => up(PeripheryBusKey).copy(frequency=freq)
+  case PeripheryBusKey => up(PeripheryBusKey).copy(dtsFrequency = Some(freq))
 })
 
 class WithPerfCounters extends Config((site, here, up) => {

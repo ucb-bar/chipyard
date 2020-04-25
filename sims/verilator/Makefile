@@ -116,14 +116,14 @@ model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
 # build makefile fragment that builds the verilator sim rules
 #########################################################################################
 $(model_mk): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
-	rm -rf $(build_dir)/$(long_name)
-	mkdir -p $(build_dir)/$(long_name)
+	rm -rf $(model_dir)
+	mkdir -p $(model_dir)
 	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim) -Mdir $(model_dir) -CFLAGS "-include $(model_header)"
 	touch $@
 
 $(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
-	rm -rf $(build_dir)/$(long_name)
-	mkdir -p $(build_dir)/$(long_name).debug
+	rm -rf $(model_dir_debug)
+	mkdir -p $(model_dir_debug)
 	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim_debug) --trace -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
 	touch $@
 
