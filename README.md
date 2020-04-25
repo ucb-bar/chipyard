@@ -10,7 +10,7 @@ To get started using Chipyard, see the documentation on the Chipyard documentati
 
 Chipyard is an open source framework for agile development of Chisel-based systems-on-chip.
 It will allow you to leverage the Chisel HDL, Rocket Chip SoC generator, and other [Berkeley][berkeley] projects to produce a [RISC-V][riscv] SoC with everything from MMIO-mapped peripherals to custom accelerators.
-Chipyard contains processor cores ([Rocket][rocket-chip], [BOOM][boom], [Ariane][ariane]), accelerators ([Hwacha][hwacha], [Gemmini][gemmini]), memory systems, and additional peripherals and tooling to help create a full featured SoC.
+Chipyard contains processor cores ([Rocket][rocket-chip], [BOOM][boom], [Ariane][ariane]), accelerators ([Hwacha][hwacha], [Gemmini][gemmini], [NVDLA][nvdla]), memory systems, and additional peripherals and tooling to help create a full featured SoC.
 Chipyard supports multiple concurrent flows of agile hardware development, including software RTL simulation, FPGA-accelerated simulation ([FireSim][firesim]), automated VLSI flows ([Hammer][hammer]), and software workload generation for bare-metal and Linux-based systems ([FireMarshal][firemarshal]).
 Chipyard is actively developed in the [Berkeley Architecture Research Group][ucb-bar] in the [Electrical Engineering and Computer Sciences Department][eecs] at the [University of California, Berkeley][berkeley].
 
@@ -65,3 +65,4 @@ These publications cover many of the internal components used in Chipyard. Howev
 [firemarshal]: https://github.com/firesim/FireMarshal/
 [ariane]: https://github.com/pulp-platform/ariane/
 [gemmini]: https://github.com/ucb-bar/gemmini
+[nvdla]: https://nvdla.org/
