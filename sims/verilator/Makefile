@@ -145,6 +145,12 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	vcd2vpd $@.vcd $@ > /dev/null &
 	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
 
+$(output_dir)/none.vpd: $(sim_debug)
+	mkdir -p $(output_dir)
+	rm -f $@.vcd && mkfifo $@.vcd
+	vcd2vpd $@.vcd $@ > /dev/null &
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) none </dev/null 2> >(spike-dasm > $(output_dir)/none.out) | tee $(output_dir)/none.log)
+
 #########################################################################################
 # general cleanup rule
 #########################################################################################
