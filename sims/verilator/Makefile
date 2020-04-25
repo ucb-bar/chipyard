@@ -72,7 +72,6 @@ ARIANE_VERILATOR_FLAGS = \
 	--unroll-count 256 \
 	-Werror-PINMISSING \
 	-Werror-IMPLICIT \
-	-Wno-fatal \
 	-Wno-PINCONNECTEMPTY \
 	-Wno-ASSIGNDLY \
 	-Wno-DECLFILENAME \
@@ -84,6 +83,7 @@ ARIANE_VERILATOR_FLAGS = \
 
 # normal flags used for chipyard builds (that are incompatible with ariane)
 CHIPYARD_VERILATOR_FLAGS = \
+	-Wno-fatal \
 	--assert
 
 VERILATOR_NONCC_OPTS = \
@@ -91,6 +91,7 @@ VERILATOR_NONCC_OPTS = \
 	$(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; then echo "$(CHIPYARD_VERILATOR_FLAGS)"; else echo "$(ARIANE_VERILATOR_FLAGS)"; fi) \
 	--output-split 10000 \
 	--output-split-cfuncs 100 \
+	--max-num-width 1048576 \
 	-f $(sim_common_files) \
 	$(sim_vsrcs)
 
