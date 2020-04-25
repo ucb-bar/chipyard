@@ -65,4 +65,4 @@ These publications cover many of the internal components used in Chipyard. Howev
 [firemarshal]: https://github.com/firesim/FireMarshal/
 [ariane]: https://github.com/pulp-platform/ariane/
 [gemmini]: https://github.com/ucb-bar/gemmini
-[nvdla]: https://nvdla.org/
+[nvdla]: http://nvdla.org/
