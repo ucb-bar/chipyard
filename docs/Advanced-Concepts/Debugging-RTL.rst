@@ -29,6 +29,7 @@ test on ``helloworld.riscv``, use
 .. code-block:: shell
 
    make CONFIG=CustomConfig run-binary-debug BINARY=helloworld.riscv
+
 VCS and Verilator also support many additional flags. For example, specifying
 the ``+vpdfilesize`` flag in VCS will treat the output file as a circular
 buffer, saving disk space for long-running simulations. Refer to the VCS
@@ -89,7 +90,8 @@ Dromajo Co-simulation for BOOM designs
 --------------------------------------
 Dromajo co-simulation is setup to work when two config. fragments are added to a BOOM config.
 First, a ``chipyard.config.WithTraceIO`` config. fragment must be added so that BOOM's traceport is enabled.
-Second, a ``chipyard.iobinders.WithSimDromajoBridge`` config. fragment must be added to connect the Dromajo co-simulator to the traceport.
+Second, a ``chipyard.iobinders.WithSimDromajoBridge`` config. fragment must be added to
+connect the Dromajo co-simulator to the traceport.
 Once both config. fragments are added Dromajo should be enabled.
 
 To build/run Dromajo with a BOOM design, run your configuration the following make commands:
@@ -104,6 +106,8 @@ To build/run Dromajo with a BOOM design, run your configuration the following ma
     make CONFIG=DromajoBoomConfig ENABLE_DROMAJO=1 BINARY=<YOUR-BIN> run-binary
 
 .. warning:: Dromajo currently only works in single-core BOOM systems without accelerators.
+
+.. warning:: Dromajo currently only works in VCS simulation and FireSim.
 
 Firesim Debugging
 ---------------------------
