@@ -9,7 +9,7 @@ import chisel3.internal.firrtl.{Circuit, Port}
 
 import freechips.rocketchip.diplomacy.{ValName, AutoBundle}
 import freechips.rocketchip.devices.debug.DebugIO
-import midas.rocketchip.util.{HasGeneratorUtilities, ParsedInputNames, ElaborationArtefacts}
+import freechips.rocketchip.util.{ElaborationArtefacts}
 import freechips.rocketchip.system.DefaultTestSuites._
 import freechips.rocketchip.system.{TestGeneration, RegressionTestSuite}
 import freechips.rocketchip.config.Parameters
@@ -54,6 +54,7 @@ trait IsFireSimGeneratorLike extends HasFireSimGeneratorUtilities with HasTestSu
 
   // Output miscellaneous files produced as a side-effect of elaboration
   def generateArtefacts {
+    // generate RC's artefacts
     ElaborationArtefacts.files.foreach { case (extension, contents) =>
       writeOutputFile(s"${longName}.${extension}", contents ())
     }
