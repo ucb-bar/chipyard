@@ -141,6 +141,9 @@ class BoomF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimL
 class RocketNICF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimRocketConfig", "BaseF1Config") {
   runSuite("verilator")(NICLoopbackTests)
 }
+class ArianeF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimArianeConfig", "BaseF1Config") {
+  runSuite("verilator")(NICLoopbackTests)
+}
 // Disabled until RAM optimizations re-enabled in multiclock
 //class RamModelRocketF1Tests extends FireSimTestSuite("FireSim", "FireSimDualRocketConfig", "BaseF1Config_MCRams")
 //class RamModelBoomF1Tests extends FireSimTestSuite("FireSim", "FireSimBoomConfig", "BaseF1Config_MCRams")
