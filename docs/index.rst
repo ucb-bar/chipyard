@@ -11,7 +11,7 @@ Welcome to Chipyard's documentation!
 Chipyard is a framework for designing and evaluating full-system hardware using agile teams.
 It is composed of a collection of tools and libraries designed to provide an integration between open-source and commercial tools for the development of systems-on-chip.
 
-.. IMPORTANT:: **New to Chipyard?** Jump to the :ref:`Initial Repository Setup` page for more info.
+.. IMPORTANT:: **New to Chipyard?** Jump to the :ref:`Initial Repository Setup` page for setup instructions.
 
 Getting Help
 ------------
