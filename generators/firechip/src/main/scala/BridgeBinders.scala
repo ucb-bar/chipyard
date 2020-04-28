@@ -13,7 +13,7 @@ import freechips.rocketchip.tile.{RocketTile}
 import sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
 import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp}
 
-import testchipip.{CanHavePeripherySerialModuleImp, CanHavePeripheryBlockDeviceModuleImp, CanHaveTraceIOModuleImp}
+import testchipip.{CanHavePeripherySerialModuleImp, CanHavePeripheryBlockDeviceModuleImp}
 import icenet.CanHavePeripheryIceNICModuleImp
 
 import junctions.{NastiKey, NastiParameters}
@@ -31,7 +31,8 @@ import memblade.manager.HasPeripheryMemBladeModuleImpValidOnly
 import boom.common.{BoomTile}
 
 import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder}
-import chipyard.HasChipyardTilesModuleImp
+import chipyard.{HasChipyardTilesModuleImp}
+import testchipip.{CanHaveTraceIOModuleImp}
 
 object MainMemoryConsts {
   val regionNamePrefix = "MainMemory"
@@ -97,6 +98,17 @@ class WithFASEDMMIOBridge extends OverrideIOBinder({
 class WithTracerVBridge extends OverrideIOBinder({
   (system: CanHaveTraceIOModuleImp) =>
     system.traceIO.foreach(_.traces.map(tileTrace => TracerVBridge(tileTrace)(system.p))); Nil
+})
+
+
+
+class WithDromajoBridge extends ComposeIOBinder({
+  (system: CanHaveTraceIOModuleImp) => {
+    system.traceIO match {
+      case Some(t) => t.traces.map(tileTrace => DromajoBridge(tileTrace)(system.p))
+    }
+    Nil
+  }
 })
 
 

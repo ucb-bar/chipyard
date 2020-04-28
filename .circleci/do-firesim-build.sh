@@ -22,6 +22,7 @@ cd $LOCAL_CHIPYARD_DIR/sims/firesim
 ./scripts/build-libdwarf.sh
 cd $LOCAL_CHIPYARD_DIR
 
+make -C $LOCAL_CHIPYARD_DIR/tools/dromajo/dromajo-src/src
 
 # set stricthostkeychecking to no (must happen before rsync)
 run "echo \"Ping $SERVER\""

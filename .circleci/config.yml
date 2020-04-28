@@ -357,35 +357,20 @@ workflows:
 
     build-and-test-chipyard-integration:
         jobs:
-            - ci-approval:
-                type: approval
-
             # Make the toolchains
-            - install-riscv-toolchain:
-                requires:
-                    - ci-approval
+            - install-riscv-toolchain
 
-            - install-esp-toolchain:
-                requires:
-                    - ci-approval
+            - install-esp-toolchain
 
-            - install-verilator:
-                requires:
-                    - ci-approval
+            - install-verilator
 
-            - commit-on-master-check:
-                requires:
-                    - ci-approval
+            - commit-on-master-check
 
             # Attempt to apply the tutorial patches
-            - tutorial-setup-check:
-                requires:
-                    - ci-approval
+            - tutorial-setup-check
 
             # Check that documentation builds
-            - documentation-check:
-                requires:
-                    - ci-approval
+            - documentation-check
 
             # Build extra tests
             - build-extra-tests:

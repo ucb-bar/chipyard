@@ -17,6 +17,8 @@ import freechips.rocketchip.util.{AsyncResetReg}
 
 import boom.common.{BoomTilesKey}
 
+import ariane.{ArianeTilesKey}
+
 import icenet.IceNetConsts._
 import testchipip._
 
@@ -297,4 +299,10 @@ class WithHwachaNVMTEntries(nVMT: Int) extends Config((site, here, up) => {
 class WithHwachaConfPrec extends Config((site, here, up) => {
   case hwacha.HwachaConfPrec => true
   case hwacha.HwachaMaxVLen => up(hwacha.HwachaMaxVLen) * 4
+})
+
+class WithTraceIO extends Config((site, here, up) => {
+  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
+  case ArianeTilesKey => up(ArianeTilesKey) map (tile => tile.copy(trace = true))
+  case TracePortKey => Some(TracePortParams())
 })

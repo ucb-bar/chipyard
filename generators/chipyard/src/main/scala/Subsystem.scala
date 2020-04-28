@@ -104,4 +104,27 @@ class SubsystemModuleImp[+L <: Subsystem](_outer: L) extends BaseSubsystemModule
 
   // create file with boom params
   ElaborationArtefacts.add("""core.config""", outer.tiles.map(x => x.module.toString).mkString("\n"))
+
+  // Generate C header with relevant information for Dromajo
+  // THIS IS INCLUDED IN THE `dromajo_params.h` header file
+  var dromajoParams: String = ""
+  val bootromParams = p(BootROMParams)
+  val extMemParams = p(ExtMem).get
+  val clintParams = p(CLINTKey).get
+  val plicParams = p(PLICKey).get
+  dromajoParams += "#ifndef DROMAJO_PARAMS_H"
+  dromajoParams += "\n#define DROMAJO_PARAMS_H"
+  dromajoParams += "\n\n" + "#define DROMAJO_RESET_VECTOR " + "\"" + "0x" + f"${bootromParams.hang}%X" + "\""
+  dromajoParams += "\n" + "#define DROMAJO_MMIO_START " + "\"" + "0x" + f"${bootromParams.address + bootromParams.size}%X" + "\""
+  dromajoParams += "\n" + "#define DROMAJO_MMIO_END " + "\"" + "0x" + f"${extMemParams.master.base}%X" + "\""
+  dromajoParams += "\n" + "#define DROMAJO_PLIC_BASE " + "\"" + "0x" + f"${plicParams.baseAddress}%X" + "\""
+  dromajoParams += "\n" + "#define DROMAJO_PLIC_SIZE " + "\"" + "0x" + f"${PLICConsts.size(plicParams.maxHarts)}%X" + "\""
+  dromajoParams += "\n" + "#define DROMAJO_CLINT_BASE " + "\"" + "0x" + f"${clintParams.baseAddress}%X" + "\""
+  dromajoParams += "\n" + "#define DROMAJO_CLINT_SIZE " + "\"" + "0x" + f"${CLINTConsts.size}%X" + "\""
+  // dromajo memory is in MiB chunks
+  dromajoParams += "\n" + "#define DROMAJO_MEM_SIZE " + "\"" + "0x" + f"${extMemParams.master.size >> 20}%X" + "\""
+  dromajoParams += "\n\n#endif"
+
+  ElaborationArtefacts.add("""dromajo_params.h""", dromajoParams)
+
 }

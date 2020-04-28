@@ -79,6 +79,7 @@ class FiresimMulticlockTop(implicit p: Parameters) extends chipyard.DigitalTop
   override lazy val module = new FiresimMulticlockTopModule(this)
 }
 
+
 class FiresimMulticlockTopModule[+L <: DigitalTop](l: L) extends chipyard.DigitalTopModule(l) with HasFireSimClockingImp
 
 // Harness Definition

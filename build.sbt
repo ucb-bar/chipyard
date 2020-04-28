@@ -147,7 +147,7 @@ lazy val hwacha = (project in file("generators/hwacha"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
-lazy val boom = (project in file("generators/boom"))
+lazy val boom = conditionalDependsOn(project in file("generators/boom"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
