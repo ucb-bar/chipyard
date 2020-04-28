@@ -57,3 +57,5 @@ mapping["tracegen-boom"]="SUB_PROJECT=chipyard CONFIG=BoomTraceGenConfig TOP=Tra
 mapping["firesim"]="SCALA_TEST=firesim.firesim.RocketNICF1Tests"
 mapping["firesim-multiclock"]="SCALA_TEST=firesim.firesim.RocketMulticlockF1Tests"
 mapping["fireboom"]="SCALA_TEST=firesim.firesim.BoomF1Tests"
+mapping["icenet"]="SUB_PROJECT=icenet"
+mapping["testchipip"]="SUB_PROJECT=testchipip"
