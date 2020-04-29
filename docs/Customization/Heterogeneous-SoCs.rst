@@ -40,13 +40,13 @@ The config fragment to add to your system would look something like the followin
         val boomTile1 = BoomTileParams(...) // params for boom core 1
         val boomTile2 = BoomTileParams(...) // params for boom core 2
         val boomTile3 = BoomTileParams(...) // params for boom core 3
-        boomTile0 ++ boomTile1 ++ boomTile2 ++ boomTile3
+        Seq(boomTile0, boomTile1, boomTile2, boomTile3)
       }
 
       case RocketTilesKey => {
         val rocketTile0 = RocketTileParams(...) // params for rocket core 0
         val rocketTile1 = RocketTileParams(...) // params for rocket core 1
-        rocketTile0 ++ rocketTile1
+        Seq(rocketTile0, rocketTile1)
       }
     })
 
