@@ -168,12 +168,12 @@ class BoomRemoteMemClientConfig extends Config(
   new chipyard.config.WithRemoteMemClientKey ++
   new chipyard.config.WithRemoteMemClientSystem ++
   new chipyard.config.WithStandardL2(4) ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
   new LargeBoomConfig)
 
 class BoomDRAMCacheConfig extends Config(
   new chipyard.config.WithMemBenchKey ++
-  new chipyard.config.WithDRAMCacheKey(4, 8, 4) ++
+  new chipyard.config.WithDRAMCacheKey(2, 8, 8) ++
   new chipyard.config.WithDRAMCacheSystem ++
   new chipyard.config.WithPrefetchMiddleMan ++
   new chipyard.config.WithStandardL2(4) ++
@@ -184,7 +184,7 @@ class BoomHwachaDRAMCacheConfig extends Config(
   new chipyard.config.WithHwachaConfPrec ++
   new hwacha.WithNLanes(2) ++
   new chipyard.config.WithMemBenchKey ++
-  new chipyard.config.WithDRAMCacheKey(4, 8, 4) ++
+  new chipyard.config.WithDRAMCacheKey(2, 8, 8) ++
   new chipyard.config.WithDRAMCacheSystem ++
   new chipyard.config.WithPrefetchMiddleMan ++
   new chipyard.config.WithStandardL2(4) ++
