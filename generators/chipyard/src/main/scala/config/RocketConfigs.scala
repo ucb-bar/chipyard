@@ -369,7 +369,7 @@ class MemBladeConfig extends Config(
   new chipyard.config.WithMemBladeSystem ++
   new freechips.rocketchip.subsystem.WithNTrackersPerBank(4) ++
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
   new RocketConfig)
 
 class MemBlade1024Config extends Config(
@@ -391,7 +391,7 @@ class HwachaRemoteMemClientConfig extends Config(
   new chipyard.config.WithRemoteMemClientKey ++
   new chipyard.config.WithRemoteMemClientSystem ++
   new chipyard.config.WithStandardL2(4) ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
   new HwachaRocketConfig)
 
 class DRAMCacheConfig extends Config(
