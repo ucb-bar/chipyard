@@ -22,6 +22,8 @@ class DigitalTop(implicit p: Parameters) extends System
   with icenet.CanHavePeripheryIceNIC // Enables optionally adding the IceNIC for FireSim
   with chipyard.example.CanHavePeripheryInitZero // Enables optionally adding the initzero example widget
   with chipyard.example.CanHavePeripheryGCD // Enables optionally adding the GCD example widget
+  with chipyard.example.CanHavePeripheryUIntTestFIR // Enables optionally adding the FIR example widget
+  with chipyard.example.CanHavePeripheryUIntStreamingPassthrough // Enables optionally adding the passthrough example widget
 {
   override lazy val module = new DigitalTopModule(this)
 }

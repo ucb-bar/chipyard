@@ -3,7 +3,7 @@
 package chipyard.example
 
 import chisel3._
-import chisel3.{Bundle, Module}
+import chisel3.experimental.FixedPoint
 import chisel3.util._
 import dspblocks._
 import dsptools.numbers._
@@ -80,9 +80,9 @@ class GenericFIR[T<:Data:Ring](genIn:T, genOut:T, coeffs: Seq[T]) extends Module
   // Connect adjacent cells
   // Note that .tail() returns a collection that consists of all
   // elements in the inital collection minus the first one.
-  // This means that we zip together directCells[0, n] and 
+  // This means that we zip together directCells[0, n] and
   // directCells[1, n]. However, since zip ignores unmatched elements,
-  // the resulting zip is (directCells[0], directCells[1]) ... 
+  // the resulting zip is (directCells[0], directCells[1]) ...
   // (directCells[n-1], directCells[n])
   for ((current, next) <- directCells.zip(directCells.tail)) {
     next.in.bits := current.out.bits
@@ -108,22 +108,22 @@ class GenericFIR[T<:Data:Ring](genIn:T, genOut:T, coeffs: Seq[T]) extends Module
 //
 // DOC include start: GenericFIRDirectCell chisel
 class GenericFIRDirectCell[T<:Data:Ring](genIn: T, genOut: T) extends Module {
-	val io = IO(GenericFIRCellIO(genIn, genOut))
-	
+  val io = IO(GenericFIRCellIO(genIn, genOut))
+
   // Registers to delay the input and the valid to propagate with calculations
   val hasNewData = RegInit(0.U)
   val inputReg = Reg(genIn.cloneType)
 
   // Passthrough ready
   io.in.ready := io.out.ready
-	
+
   // When a new transaction is ready on the input, we will have new data to output
   // next cycle. Take this data in
   when (io.in.fire()) {
     hasNewData := 1.U
-	  inputReg := io.in.bits.data
+    inputReg := io.in.bits.data
   }
-	  
+
   // We should output data when our cell has new data to output and is ready to
   // recieve new data. This insures that every cell in the chain passes its data
   // on at the same time
@@ -133,7 +133,7 @@ class GenericFIRDirectCell[T<:Data:Ring](genIn: T, genOut: T) extends Module {
   // Compute carry
   // This uses the ring implementation for + and *, i.e.
   // (a * b) maps to (Ring[T].prod(a, b)) for whicever T you use
-  io.out.bits.carry := inputReg * io.coeff + io.in.bits.carry 
+  io.out.bits.carry := inputReg * io.coeff + io.in.bits.carry
 }
 // DOC include end: GenericFIRDirectCell chisel
 
@@ -204,8 +204,12 @@ class TLGenericFIRChain[T<:Data:Ring] (genIn: T, genOut: T, coeffs: Seq[T], para
 trait CanHavePeripheryUIntTestFIR extends BaseSubsystem {
   val fir = p(GenericFIRKey) match {
     case Some(params) => {
-      val fir = LazyModule(new TLGenericFIRChain(UInt(8.W), UInt(12.W), Seq(1.U, 2.U, 3.U), params))
-      
+      val fir = LazyModule(new TLGenericFIRChain(
+        genIn = FixedPoint(8.W, 3.BP),
+        genOut = FixedPoint(8.W, 3.BP),
+        coeffs = Seq(1.F(0.BP), 2.F(0.BP), 3.F(0.BP)),
+        params = params))
+
       pbus.toVariableWidthSlave(Some("firWrite")) { fir.writeQueue.mem.get }
       pbus.toVariableWidthSlave(Some("firRead")) { fir.readQueue.mem.get }
     }
