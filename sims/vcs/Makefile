@@ -44,51 +44,64 @@ VCS = vcs -full64
 VCS_CC_OPTS = \
 	-CC "-I$(VCS_HOME)/include" \
 	-CC "-I$(RISCV)/include" \
+	-CC "-I$(dramsim_dir)" \
 	-CC "-std=c++11" \
-	$(RISCV)/lib/libfesvr.a
+	$(dramsim_lib) \
+	$(RISCV)/lib/libfesvr.a \
+	-CC "$(EXTRA_SIM_CC_FLAGS)"
 
 VCS_NONCC_OPTS = \
 	+lint=all,noVCDE,noONGS,noUI \
 	-error=PCWM-L \
-	-timescale=1ns/10ps \
+	-timescale=1ns/1ps \
 	-quiet \
 	-q \
 	+rad \
 	+v2k \
 	+vcs+lic+wait \
 	+vc+list \
-	-f $(sim_common_files) \
+	-error=noZMMCM \
+	-assert svaext \
 	-sverilog \
+	+libext+.v \
 	+incdir+$(build_dir) \
+	-f $(sim_common_files) \
+	$(sim_vsrcs)
+
+VCS_DEFINES = \
+	+define+VCS \
 	+define+CLOCK_PERIOD=1.0 \
-	$(sim_vsrcs) \
 	+define+PRINTF_COND=$(TB).printf_cond \
 	+define+STOP_COND=!$(TB).reset \
 	+define+RANDOMIZE_MEM_INIT \
 	+define+RANDOMIZE_REG_INIT \
 	+define+RANDOMIZE_GARBAGE_ASSIGN \
-	+define+RANDOMIZE_INVALID_ASSIGN \
-	+libext+.v
+	+define+RANDOMIZE_INVALID_ASSIGN
 
-VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS)
+VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(VCS_DEFINES) $(EXTRA_SIM_SOURCES)
 
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
-$(sim): $(sim_vsrcs) $(sim_common_files)
+$(sim): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
 	-debug_pp
 
-$(sim_debug) : $(sim_vsrcs) $(sim_common_files)
+$(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
 	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
-	+define+DEBUG -debug_pp
+	+define+DEBUG \
+	-debug_pp
 
 #########################################################################################
 # create a vcs vpd rule
 #########################################################################################
 .PRECIOUS: $(output_dir)/%.vpd %.vpd
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
+
+$(output_dir)/none.vpd: $(sim_debug)
+	mkdir -p $(output_dir)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) none </dev/null 2> >(spike-dasm > $(output_dir)/none.out) | tee $(output_dir)/none.log)
 
 #########################################################################################
 # general cleanup rule

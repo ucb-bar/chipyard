@@ -49,16 +49,18 @@ Simulating The Default Example
 To compile the example design, run ``make`` in the selected verilator or VCS directory.
 This will elaborate the ``RocketConfig`` in the example project.
 
-An executable called ``simulator-example-RocketConfig`` will be produced.
+.. Note:: The elaboration of ``RocketConfig`` requires about 6.5 GB of main memory. Otherwise the process will fail with ``make: *** [firrtl_temp] Error 137`` which is most likely related to limited resources. Other configurations might require even more main memory.
+
+An executable called ``simulator-chipyard-RocketConfig`` will be produced.
 This executable is a simulator that has been compiled based on the design that was built.
 You can then use this executable to run any compatible RV64 code.
 For instance, to run one of the riscv-tools assembly tests.
 
 .. code-block:: shell
 
-    ./simulator-example-RocketConfig $RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
+    ./simulator-chipyard-RocketConfig $RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
 
-.. Note:: In a VCS simulator, the simulator name will be ``simv-example-RocketConfig`` instead of ``simulator-example-RocketConfig``.
+.. Note:: In a VCS simulator, the simulator name will be ``simv-chipyard-RocketConfig`` instead of ``simulator-chipyard-RocketConfig``.
 
 Alternatively, we can run a pre-packaged suite of RISC-V assembly or benchmark tests, by adding the make target ``run-asm-tests`` or ``run-bmark-tests``.
 For example:
@@ -93,7 +95,7 @@ The ``MODEL`` and ``VLOG_MODEL`` are the top-level class names of the design. No
 
 The ``MODEL_PACKAGE`` is the Scala package (in the Scala code that says ``package ...``) that holds the ``MODEL`` class.
 
-The ``CONFIG`` is the name of the class used for the parameter Config while the ``CONFIG_PACKAGE`` is the Scala package it resides in.
+The ``CONFIG`` is the name of the class used for the parameter config while the ``CONFIG_PACKAGE`` is the Scala package it resides in.
 
 The ``GENERATOR_PACKAGE`` is the Scala package that holds the Generator class that elaborates the design.
 

@@ -122,16 +122,21 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip, sifive_blocks)
   .settings(commonSettings)
 
-lazy val example = conditionalDependsOn(project in file("generators/example"))
-  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, sha3, gemmini, icenet)
+lazy val iocell = (project in file("./tools/barstools/iocell/"))
+  .dependsOn(chisel)
+  .settings(commonSettings)
+
+lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
+  .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
+    sha3, // On separate line to allow for cleaner tutorial-setup patches
+    gemmini, icenet, tracegen, ariane)
   .settings(commonSettings)
 
 lazy val tracegen = conditionalDependsOn(project in file("generators/tracegen"))
-  .dependsOn(rocketchip, sifive_cache, boom)
+  .dependsOn(rocketchip, sifive_cache, boom, utilities)
   .settings(commonSettings)
 
 lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))
-  .dependsOn(rocketchip, boom)
   .settings(commonSettings)
 
 lazy val icenet = (project in file("generators/icenet"))
@@ -146,6 +151,10 @@ lazy val boom = (project in file("generators/boom"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
+lazy val ariane = (project in file("generators/ariane"))
+  .dependsOn(rocketchip)
+  .settings(commonSettings)
+
 lazy val sha3 = (project in file("generators/sha3"))
   .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
   .settings(commonSettings)
@@ -155,8 +164,9 @@ lazy val gemmini = (project in file("generators/gemmini"))
   .settings(commonSettings)
 
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
-  .dependsOn(chisel_testers, example)
+  .dependsOn(chisel_testers, chipyard)
   .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq("io.github.daviddenton" %% "handlebars-scala-fork" % "2.3.0"))
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
   .settings(commonSettings)
@@ -195,10 +205,10 @@ lazy val sifive_cache = (project in file("generators/sifive-cache")).settings(
 lazy val midas      = ProjectRef(firesimDir, "midas")
 lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 
-lazy val firechip = (project in file("generators/firechip"))
-  .dependsOn(boom, hwacha, example, icenet, testchipip, sifive_blocks, sifive_cache, sha3, utilities, tracegen, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
+lazy val firechip = conditionalDependsOn(project in file("generators/firechip"))
+  .dependsOn(chipyard, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
-    testGrouping in Test := isolateAllTests( (definedTests in Test).value )
+    testGrouping in Test := isolateAllTests( (definedTests in Test).value ),
+    testOptions in Test += Tests.Argument("-oF")
   )
-

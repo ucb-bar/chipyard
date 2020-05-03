@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 sudo yum groupinstall -y "Development tools"
 sudo yum install -y gmp-devel mpfr-devel libmpc-devel zlib-devel vim git java java-devel
 curl https://bintray.com/sbt/rpm/rpm | sudo tee /etc/yum.repos.d/bintray-sbt-rpm.repo
@@ -16,3 +18,9 @@ sudo yum install -y centos-release-scl
 sudo yum install -y devtoolset-8-make
 # install DTC
 sudo yum install -y dtc
+
+# install verilator
+git clone http://git.veripool.org/git/verilator
+cd verilator
+git checkout v4.028
+autoconf && ./configure && make -j16 && sudo make install

@@ -9,7 +9,7 @@ import chisel3.internal.firrtl.{Circuit, Port}
 
 import freechips.rocketchip.diplomacy.{ValName, AutoBundle}
 import freechips.rocketchip.devices.debug.DebugIO
-import freechips.rocketchip.util.{HasGeneratorUtilities, ParsedInputNames, ElaborationArtefacts}
+import freechips.rocketchip.util.{ElaborationArtefacts}
 import freechips.rocketchip.system.DefaultTestSuites._
 import freechips.rocketchip.system.{TestGeneration, RegressionTestSuite}
 import freechips.rocketchip.config.Parameters
@@ -20,12 +20,15 @@ import firesim.util.{GeneratorArgs, HasTargetAgnosticUtilites, HasFireSimGenerat
 
 import scala.util.Try
 
-import utilities.TestSuiteHelper
+import chipyard.TestSuiteHelper
 
 trait HasTestSuites {
   def addTestSuites(targetName: String, params: Parameters) {
-    TestSuiteHelper.addRocketTestSuites(params)
-    TestSuiteHelper.addBoomTestSuites(params)
+    val suiteHelper = new TestSuiteHelper
+    suiteHelper.addRocketTestSuites(params)
+    suiteHelper.addBoomTestSuites(params)
+    suiteHelper.addArianeTestSuites(params)
+    TestGeneration.addSuites(suiteHelper.suites.values.toSeq)
     TestGeneration.addSuite(FastBlockdevTests)
     TestGeneration.addSuite(SlowBlockdevTests)
     if (!targetName.contains("NoNIC"))
@@ -46,11 +49,12 @@ trait IsFireSimGeneratorLike extends HasFireSimGeneratorUtilities with HasTestSu
   /** Output software test Makefrags, which provide targets for integration testing. */
   def generateTestSuiteMakefrags {
     addTestSuites(names.topModuleClass, targetParams)
-    writeOutputFile(s"$longName.d", TestGeneration.generateMakefrag) // Subsystem-specific test suites
+    writeOutputFile(s"$longName.d", TestGeneration.generateMakeFrag) // Subsystem-specific test suites
   }
 
   // Output miscellaneous files produced as a side-effect of elaboration
   def generateArtefacts {
+    // generate RC's artefacts
     ElaborationArtefacts.files.foreach { case (extension, contents) =>
       writeOutputFile(s"${longName}.${extension}", contents ())
     }
@@ -61,18 +65,9 @@ object FireSimGenerator extends App with IsFireSimGeneratorLike {
   override lazy val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
   lazy val generatorArgs = GeneratorArgs(args)
   lazy val genDir = new File(names.targetDir)
-  // The only reason this is not generateFirrtl; generateAnno is that we need to use a different 
+  // The only reason this is not generateFirrtl; generateAnno is that we need to use a different
   // JsonProtocol to properly write out the annotations. Fix once the generated are unified
   elaborate
-  generateTestSuiteMakefrags
-  generateArtefacts
-}
-
-// For now, provide a separate generator app when not specifically building for FireSim
-object Generator extends freechips.rocketchip.util.GeneratorApp with HasTestSuites {
-  override lazy val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
-  generateFirrtl
-  generateAnno
   generateTestSuiteMakefrags
   generateArtefacts
 }

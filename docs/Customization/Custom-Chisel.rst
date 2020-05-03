@@ -52,8 +52,8 @@ Then add ``yourproject`` to the Chipyard top-level build.sbt file.
 
 You can then import the classes defined in the submodule in a new project if
 you add it as a dependency. For instance, if you want to use this code in
-the ``example`` project, change the final line in build.sbt to the following.
+the ``chipyard`` project, change the final line in build.sbt to the following.
 
 .. code-block:: scala
 
-    lazy val example = (project in file(".")).settings(commonSettings).dependsOn(testchipip, yourproject)
+    lazy val chipyard = (project in file(".")).settings(commonSettings).dependsOn(testchipip, yourproject)

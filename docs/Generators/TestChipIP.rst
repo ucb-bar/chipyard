@@ -3,7 +3,8 @@ Test Chip IP
 
 Chipyard includes a Test Chip IP library which provides various hardware
 widgets that may be useful when designing SoCs. This includes a :ref:`Serial Adapter`,
-:ref:`Block Device Controller`, :ref:`TileLink SERDES`, :ref:`TileLink Switcher`, and :ref:`UART Adapter`.
+:ref:`Block Device Controller`, :ref:`TileLink SERDES`, :ref:`TileLink Switcher`,
+:ref:`TileLink Ring Network`, and :ref:`UART Adapter`.
 
 Serial Adapter
 --------------
@@ -22,9 +23,7 @@ The block device controller provides a generic interface for secondary storage.
 This device is primarily used in FireSim to interface with a block device
 software simulation model. The default Linux configuration in `firesim-software <https://github.com/firesim/firesim-software>`_
 
-To add a block device to your design, add ``HasPeripheryBlockDevice`` to your
-lazy module and ``HasPeripheryBlockDeviceModuleImp`` to the implementation.
-Then add the ``WithBlockDevice`` config mixin to your configuration.
+To add a block device to your design, add the ``WithBlockDevice`` config fragment to your configuration.
 
 
 TileLink SERDES
@@ -62,6 +61,19 @@ the select signal once TileLink messages have begun sending.
 For an example of how to use the switcher, take a look at the ``SwitcherTest``
 unit test in the `Test Chip IP unit tests <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/Unittests.scala>`_.
 
+TileLink Ring Network
+---------------------
+
+TestChipIP provides a TLRingNetwork generator that has a similar interface
+to the TLXbar provided by RocketChip, but uses ring networks internally rather
+than crossbars. This can be useful for chips with very wide TileLink networks
+(many cores and L2 banks) that can sacrifice cross-section bandwidth to relieve
+wire routing congestion. Documentation on how to use the ring network can be
+found in :ref:`The System Bus`. The implementation itself can be found 
+`here <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/Ring.scala>`_,
+and may serve as an example of how to implement your own TileLink network with
+a different topology.
+
 UART Adapter
 ------------
 
@@ -71,5 +83,4 @@ during Linux boot). In addition to working with ``stdin/stdout`` of the host, it
 output a UART log to a particular file using ``+uartlog=<NAME_OF_FILE>`` during simulation.
 
 By default, this UART Adapter is added to all systems within Chipyard by adding the
-``CanHavePeripheryUARTWithAdapter`` and ``CanHavePeripheryUARTWithAdapterImp`` traits to the ``Top`` system.
-These traits add a SiFive UART to the system as well as add the UART Adapter to the TestHarness.
+``WithUART`` and ``WithUARTAdapter`` configs.

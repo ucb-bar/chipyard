@@ -23,16 +23,21 @@ In Ubuntu/Debian-based platforms (Ubuntu), we recommend installing the following
 
 .. Note:: When running on an Amazon Web Services EC2 FPGA-development instance (for FireSim), FireSim includes a machine setup script that will install all of the aforementioned dependencies (and some additional ones).
 
-Checking out the sources
-------------------------
+Setting up the Chipyard Repo
+-------------------------------------------
 
-After cloning this repo, you will need to initialize all of the submodules.
+Start by fetching Chipyard's sources. Run:
 
 .. code-block:: shell
 
     git clone https://github.com/ucb-bar/chipyard.git
     cd chipyard
     ./scripts/init-submodules-no-riscv-tools.sh
+
+This will initialize and checkout all of the necessary git submodules.
+
+When updating Chipyard to a new version, you will also want to rerun this script to update the submodules.
+Using git directly will try to initialize all submodules; this is not recommended unless you expressly desire this behavior.
 
 .. _build-toolchains:
 
@@ -43,15 +48,41 @@ The `toolchains` directory contains toolchains that include a cross-compiler too
 Currently there are two toolchains, one for normal RISC-V programs, and another for Hwacha (``esp-tools``).
 For custom installations, Each tool within the toolchains contains individual installation procedures within its README file.
 To get a basic installation (which is the only thing needed for most Chipyard use-cases), just the following steps are necessary.
+This will take about 20-30 minutes. You can expedite the process by setting a ``make`` environment variable to use parallel cores: ``export MAKEFLAGS=-j8``.
 
 .. code-block:: shell
 
     ./scripts/build-toolchains.sh riscv-tools # for a normal risc-v toolchain
 
-    # OR
-
-    ./scripts/build-toolchains.sh esp-tools # for a modified risc-v toolchain with Hwacha vector instructions
+.. Note:: If you are planning to use the Hwacha vector unit, or other RoCC-based accelerators, you should build the esp-tools toolchain by adding the ``esp-tools`` argument to the script above.
+  If you are running on an Amazon Web Services EC2 instance, intending to use FireSim, you can also use the ``--ec2fast`` flag for an expedited installation of a pre-compiled toolchain.
 
 Once the script is run, a ``env.sh`` file is emitted that sets the ``PATH``, ``RISCV``, and ``LD_LIBRARY_PATH`` environment variables.
-You can put this in your ``.bashrc`` or equivalent environment setup file to get the proper variables.
+You can put this in your ``.bashrc`` or equivalent environment setup file to get the proper variables, or directly include it in your current environment:
+
+.. code-block:: shell
+
+    source ./env.sh
+
 These variables need to be set for the ``make`` system to work properly.
+
+What's Next?
+-------------------------------------------
+
+This depends on what you are planning to do with Chipyard.
+
+* If you intend to run a simulation of one of the vanilla Chipyard examples, go to :ref:`sw-rtl-sim-intro` and follow the instructions.
+
+* If you intend to run a simulation of a custom Chipyard SoC Configuration, go to :ref:`Simulating A Custom Project` and follow the instructions.
+
+* If you intend to run a full-system FireSim simulation, go to :ref:`firesim-sim-intro` and follow the instructions.
+
+* If you intend to add a new accelerator, go to :ref:`customization` and follow the instructions.
+
+* If you want to learn about the structure of Chipyard, go to :ref:`chipyard-components`.
+
+* If you intend to change the generators (BOOM, Rocket, etc) themselves, see :ref:`generator-index`.
+
+* If you intend to run a tutorial VLSI flow using one of the Chipyard examples, go to :ref:`tutorial` and follow the instructions.
+
+* If you intend to build a chip using one of the vanilla Chipyard examples, go to :ref:`build-a-chip` and follow the instructions.
