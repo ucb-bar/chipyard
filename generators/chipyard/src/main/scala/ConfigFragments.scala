@@ -244,7 +244,7 @@ class WithDRAMCacheExtentTableInit(suffix: Int = 0x0300) extends Config(
       extentTableInit = Seq.tabulate(16) { i => (suffix, i + 1) })
   })
 
-class WithMemBenchKey(nWorkers: Int = 1, nXacts: Int = 64)
+class WithMemBenchKey(nWorkers: Int = 1, nXacts: Int = 32)
     extends Config((site, here, up) => {
   case MemBenchKey => MemBenchParams(
     nWorkers = nWorkers,
