@@ -33,6 +33,7 @@ class TutorialStarterConfig extends Config(
   new chipyard.config.WithBootROM ++         // Use the Chipyard BootROM
   new chipyard.config.WithRenumberHarts ++   // WithRenumberHarts fixes hartids heterogeneous designs, if design is not heterogeneous, this is a no-op
   new chipyard.config.WithUART ++            // Add a UART
+  new chipyard.config.WithNoSPIFlash ++      // no SPI flash controller
 
   // CUSTOMIZE THE CORE
   // Uncomment out one (or multiple) of the lines below, and choose
@@ -69,6 +70,7 @@ class TutorialMMIOConfig extends Config(
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithRenumberHarts ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSPIFlash ++
 
   // Attach either a TileLink or AXI4 version of GCD
   // Uncomment one of the below lines
@@ -97,6 +99,7 @@ class TutorialSha3Config extends Config(
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithRenumberHarts ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSPIFlash ++
 
   // Uncomment this line once you added SHA3 to the build.sbt, and cloned the SHA3 repo
   // new sha3.WithSha3Accel ++
@@ -123,6 +126,7 @@ class TutorialSha3BlackBoxConfig extends Config(
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithRenumberHarts ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSPIFlash ++
 
   // Uncomment these lines once SHA3 is integrated
   // new sha3.WithSha3BlackBox ++ // Specify we want the Black-box verilog version of Sha3 Ctrl

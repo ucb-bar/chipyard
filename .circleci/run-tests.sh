@@ -62,6 +62,10 @@ case $1 in
         (cd $LOCAL_CHIPYARD_DIR/generators/sha3/software && ./build.sh)
         $LOCAL_SIM_DIR/simulator-chipyard-Sha3RocketConfig $LOCAL_CHIPYARD_DIR/generators/sha3/software/benchmarks/bare/sha3-rocc.riscv
         ;;
+    chipyard-spiflash)
+        make -C $LOCAL_CHIPYARD_DIR/tests
+        make -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflash.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary
+        ;;
     tracegen)
         run_tracegen ${mapping[$1]}
         ;;

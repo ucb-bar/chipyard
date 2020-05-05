@@ -1,10 +1,10 @@
 diff --git a/generators/chipyard/src/main/scala/config/RocketConfigs.scala b/generators/chipyard/src/main/scala/config/RocketConfigs.scala
-index bc1dab6..1d84129 100644
+index 197ef49..5e1aa1d 100644
 --- a/generators/chipyard/src/main/scala/config/RocketConfigs.scala
 +++ b/generators/chipyard/src/main/scala/config/RocketConfigs.scala
-@@ -293,7 +293,7 @@ class Sha3RocketConfig extends Config(
-   new chipyard.config.WithBootROM ++
+@@ -328,7 +328,7 @@ class Sha3RocketConfig extends Config(
    new chipyard.config.WithUART ++
+   new chipyard.config.WithNoSPIFlash ++
    new chipyard.config.WithL2TLBs(1024) ++
 -  new sha3.WithSha3Accel ++                                // add SHA3 rocc accelerator
 +//  new sha3.WithSha3Accel ++                                // add SHA3 rocc accelerator

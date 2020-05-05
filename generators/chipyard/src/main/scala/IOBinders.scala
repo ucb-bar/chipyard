@@ -13,6 +13,7 @@ import freechips.rocketchip.util._
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
+import sifive.blocks.devices.spi._
 
 import barstools.iocell.chisel._
 
@@ -88,10 +89,8 @@ object AddIOCells {
   def gpio(gpios: Seq[GPIOPortIO], genFn: () => DigitalGPIOCell = IOCell.genericGPIO): (Seq[Seq[Analog]], Seq[Seq[IOCell]]) = {
     gpios.zipWithIndex.map({ case (gpio, i) =>
       gpio.pins.zipWithIndex.map({ case (pin, j) =>
-        val g = IO(Analog(1.W))
-        g.suggestName("gpio_${i}_${j}")
-        val iocell = genFn()
-        iocell.suggestName(s"iocell_gpio_${i}_${j}")
+        val g = IO(Analog(1.W)).suggestName("gpio_${i}_${j}")
+        val iocell = genFn().suggestName(s"iocell_gpio_${i}_${j}")
         iocell.io.o := pin.o.oval
         iocell.io.oe := pin.o.oe
         iocell.io.ie := pin.o.ie
@@ -112,6 +111,37 @@ object AddIOCells {
       val (port, ios) = IOCell.generateIOFromSignal(u, Some(s"iocell_uart_${i}"))
       port.suggestName(s"uart_${i}")
       (port, ios)
+    }).unzip
+  }
+
+  /**
+   * Add IO cells to a SiFive SPI devices and name the IO ports.
+   * @param spiPins A Seq of SPI port bundles
+   * @param basename The base name for this port (defaults to "spi")
+   * @param genFn A callable function to generate a DigitalGPIOCell module to use
+   * @return Returns a tuple of (A Seq of top-level SPIChipIO IOs; a 2D Seq of IOCell module references)
+   */
+  def spi(spiPins: Seq[SPIPortIO], basename: String = "spi", genFn: () => DigitalGPIOCell = IOCell.genericGPIO): (Seq[SPIChipIO], Seq[Seq[IOCell]]) = {
+    spiPins.zipWithIndex.map({ case (s, i) =>
+      val port = IO(new SPIChipIO(s.c.csWidth)).suggestName(s"${basename}_${i}")
+      val iocellBase = s"iocell_${basename}_${i}"
+
+      // SCK and CS are unidirectional outputs
+      val sckIOs = IOCell.generateFromSignal(s.sck, port.sck, Some(s"${iocellBase}_sck"))
+      val csIOs = IOCell.generateFromSignal(s.cs, port.cs, Some(s"${iocellBase}_cs"))
+
+      // DQ are bidirectional, so then need special treatment
+      val dqIOs = s.dq.zip(port.dq).zipWithIndex.map { case ((pin, ana), j) =>
+        val iocell = genFn().suggestName(s"${iocellBase}_dq_${j}")
+        iocell.io.o := pin.o
+        iocell.io.oe := pin.oe
+        iocell.io.ie := true.B
+        pin.i := iocell.io.i
+        iocell.io.pad <> ana
+        iocell
+      }
+
+      (port, dqIOs ++ csIOs ++ sckIOs)
     }).unzip
   }
 
@@ -168,6 +198,14 @@ class WithUARTAdapter extends OverrideIOBinder({
   (system: HasPeripheryUARTModuleImp) => {
     val (ports, ioCells2d) = AddIOCells.uart(system.uart)
     val harnessFn = (th: chipyard.TestHarness) => { UARTAdapter.connect(ports)(system.p); Nil }
+    Seq((ports, ioCells2d.flatten, Some(harnessFn)))
+  }
+})
+
+class WithSimSPIFlashModel extends OverrideIOBinder({
+  (system: HasPeripherySPIFlashModuleImp) => {
+    val (ports, ioCells2d) = AddIOCells.spi(system.qspi, "qspi")
+    val harnessFn = (th: chipyard.TestHarness) => { SimSPIFlashModel.connect(ports, th.reset)(system.p); Nil }
     Seq((ports, ioCells2d.flatten, Some(harnessFn)))
   }
 })

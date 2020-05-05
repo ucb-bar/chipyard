@@ -262,6 +262,11 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "testchipip"
+    prepare-chipyard-spiflash:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-spiflash"
     chipyard-rocket-run-tests:
         executor: main-env
         steps:
@@ -300,6 +305,11 @@ jobs:
             - run-tests:
                 tools-version: "esp-tools"
                 project-key: "chipyard-gemmini"
+    chipyard-spiflash-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-spiflash"
     tracegen-run-tests:
         executor: main-env
         steps:
@@ -463,6 +473,11 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
+            - prepare-chipyard-spiflash:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
             # Run the respective tests
 
             # Run midasexamples test
@@ -506,6 +521,10 @@ workflows:
             - tracegen-boom-run-tests:
                 requires:
                     - prepare-tracegen-boom
+
+            - chipyard-spiflash-run-tests:
+                requires:
+                    - prepare-chipyard-spiflash
 
             # Run the firesim tests
             - firesim-run-tests:

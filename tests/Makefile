@@ -5,12 +5,15 @@ LDFLAGS= -static
 
 include libgloss.mk
 
-PROGRAMS = pwm blkdev accum charcount nic-loopback big-blkdev pingd
+PROGRAMS = pwm blkdev accum charcount nic-loopback big-blkdev pingd spiflash
+
+spiflash.img: spiflash.py
+	python3 $<
 
 .DEFAULT_GOAL := default
 
 .PHONY: default
-default: $(addsuffix .riscv,$(PROGRAMS))
+default: $(addsuffix .riscv,$(PROGRAMS)) spiflash.img
 
 .PHONY: dumps
 dumps: $(addsuffix .dump,$(PROGRAMS))

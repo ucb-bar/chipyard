@@ -20,6 +20,7 @@ import hwacha.{Hwacha}
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
+import sifive.blocks.devices.spi._
 
 import chipyard.{BuildTop, BuildSystem}
 
@@ -52,12 +53,21 @@ class WithUART extends Config((site, here, up) => {
     UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256))
 })
 
+class WithSPIFlash extends Config((site, here, up) => {
+  case PeripherySPIFlashKey => Seq(
+    SPIFlashParams(rAddress = 0x10040000, fAddress = 0x20000000, fSize = 0x10000000)) // Note: this matches freedom
+})
+
 class WithNoGPIO extends Config((site, here, up) => {
   case PeripheryGPIOKey => Nil
 })
 
 class WithNoUART extends Config((site, here, up) => {
   case PeripheryUARTKey => Nil
+})
+
+class WithNoSPIFlash extends Config((site, here, up) => {
+  case PeripherySPIFlashKey => Nil
 })
 
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {

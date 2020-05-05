@@ -16,6 +16,7 @@ class LargeBoomAndRocketConfig extends Config(
   new chipyard.config.WithNoGPIO ++                              // no top-level GPIO pins (overrides default set in sifive-blocks)
   new chipyard.config.WithBootROM ++                             // use default bootrom
   new chipyard.config.WithUART ++                                // add a UART
+  new chipyard.config.WithNoSPIFlash ++                          // no SPI flash controller
   new chipyard.config.WithL2TLBs(1024) ++                        // use L2 TLBs
   new chipyard.config.WithRenumberHarts ++                       // avoid hartid overlap
   new boom.common.WithLargeBooms ++                              // 3-wide boom
@@ -38,6 +39,7 @@ class HwachaLargeBoomAndHwachaRocketConfig extends Config(
   new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSPIFlash ++
   new chipyard.config.WithL2TLBs(1024) ++
   new hwacha.DefaultHwachaConfig ++                      // add hwacha to all harts
   new chipyard.config.WithRenumberHarts ++
@@ -61,6 +63,7 @@ class DualLargeBoomAndRocketConfig extends Config(
   new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSPIFlash ++
   new chipyard.config.WithL2TLBs(1024) ++
   new chipyard.config.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++
@@ -84,6 +87,7 @@ class LargeBoomAndHwachaRocketConfig extends Config(
   new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSPIFlash ++
   new chipyard.config.WithMultiRoCC ++                                  // support heterogeneous rocc
   new chipyard.config.WithMultiRoCCHwacha(1) ++                         // put hwacha on hart-2 (rocket)
   new chipyard.config.WithL2TLBs(1024) ++
@@ -110,6 +114,7 @@ class LargeBoomAndRV32RocketConfig extends Config(
   new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSPIFlash ++
   new chipyard.config.WithL2TLBs(1024) ++
   new chipyard.config.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++
@@ -134,6 +139,7 @@ class DualLargeBoomAndDualRocketConfig extends Config(
   new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSPIFlash ++
   new chipyard.config.WithL2TLBs(1024) ++
   new chipyard.config.WithRenumberHarts ++
   new boom.common.WithLargeBooms ++
@@ -156,6 +162,7 @@ class LargeBoomAndRocketWithControlCoreConfig extends Config(
   new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSPIFlash ++
   new chipyard.config.WithControlCore ++  // add small control core to last hartid
   new chipyard.config.WithL2TLBs(1024) ++
   new chipyard.config.WithRenumberHarts ++
