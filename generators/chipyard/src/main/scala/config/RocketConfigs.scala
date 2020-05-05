@@ -21,6 +21,7 @@ class RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++       // use Sifive L2 cache
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++ // no external interrupts
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++  // hierarchical buses including mbus+l2
   new freechips.rocketchip.system.BaseConfig)                    // "base" rocketchip system
 
 class HwachaRocketConfig extends Config(
@@ -39,6 +40,7 @@ class HwachaRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
 // DOC include start: GemminiRocketConfig
@@ -58,6 +60,7 @@ class GemminiRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: GemminiRocketConfig
 
@@ -77,6 +80,7 @@ class RoccRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRoccExample ++    // use example RoCC-based accelerator
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
 // DOC include start: JtagRocket
@@ -96,6 +100,7 @@ class jtagRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: JtagRocket
 
@@ -114,6 +119,7 @@ class dmiRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: DmiRocket
 
@@ -134,6 +140,7 @@ class GCDTLRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: GCDTLRocketConfig
 
@@ -154,6 +161,7 @@ class GCDAXI4BlackBoxRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: GCDAXI4BlackBoxRocketConfig
 
@@ -174,6 +182,7 @@ class SimBlockDeviceRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
 class BlockDeviceModelRocketConfig extends Config(
@@ -193,6 +202,7 @@ class BlockDeviceModelRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
 // DOC include start: GPIORocketConfig
@@ -213,6 +223,7 @@ class GPIORocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: GPIORocketConfig
 
@@ -231,6 +242,7 @@ class QuadRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(4) ++   // quad-core (4 RocketTiles)
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
 class RV32RocketConfig extends Config(
@@ -248,6 +260,7 @@ class RV32RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRV32 ++           // set RocketTiles to be 32-bit
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
 class GB1MemoryRocketConfig extends Config(
@@ -266,6 +279,7 @@ class GB1MemoryRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
 // DOC include start: Sha3Rocket
@@ -285,6 +299,7 @@ class Sha3RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: Sha3Rocket
 
@@ -305,6 +320,7 @@ class InitZeroRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: InitZeroRocketConfig
 
@@ -325,6 +341,7 @@ class LoopbackNICRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
 // DOC include start: scratchpadrocket
@@ -344,6 +361,7 @@ class ScratchpadRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: scratchpadrocket
 
@@ -364,5 +382,6 @@ class RingSystemBusRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: RingSystemBusRocket

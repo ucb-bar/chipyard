@@ -22,6 +22,7 @@ class ArianeConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++       // use Sifive L2 cache
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++ // no external interrupts
   new ariane.WithNArianeCores(1) ++                              // single Ariane core
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++  // hierarchical buses including mbus+l2
   new freechips.rocketchip.system.BaseConfig)                    // "base" rocketchip system
 
 class dmiArianeConfig extends Config(
@@ -37,4 +38,5 @@ class dmiArianeConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new ariane.WithNArianeCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)

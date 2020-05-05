@@ -24,6 +24,7 @@ class LargeBoomAndRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++       // use Sifive L2 cache
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++ // no external interrupts
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++  // hierarchical buses including mbus+l2
   new freechips.rocketchip.system.BaseConfig)                    // "base" rocketchip system
 
 // DOC include start: BoomAndRocketWithHwacha
@@ -46,6 +47,7 @@ class HwachaLargeBoomAndHwachaRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: BoomAndRocketWithHwacha
 
@@ -67,6 +69,7 @@ class DualLargeBoomAndRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
 // DOC include start: DualBoomAndRocketOneHwacha
@@ -91,6 +94,7 @@ class LargeBoomAndHwachaRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: DualBoomAndRocketOneHwacha
 
@@ -115,6 +119,7 @@ class LargeBoomAndRV32RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithRV32 ++           // set RocketTiles to be 32-bit
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
 
@@ -137,6 +142,7 @@ class DualLargeBoomAndDualRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++   // 2 rocket cores
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: DualBoomAndRocket
 
@@ -159,5 +165,6 @@ class LargeBoomAndRocketWithControlCoreConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 

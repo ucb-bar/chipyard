@@ -50,6 +50,7 @@ class TutorialStarterConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++  // hierarchical buses including mbus+l2
   // BaseConfig configures "bare" rocketchip system
   new freechips.rocketchip.system.BaseConfig
 )
@@ -79,6 +80,7 @@ class TutorialMMIOConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig
 )
 
@@ -104,6 +106,7 @@ class TutorialSha3Config extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig
 )
 
@@ -130,5 +133,6 @@ class TutorialSha3BlackBoxConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig
 )
