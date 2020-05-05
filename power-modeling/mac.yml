@@ -1,0 +1,172 @@
+# Technology Setup
+# Technology used is ASAP7
+vlsi.core.technology: asap7
+# Specify dir with ASAP7 tarball
+technology.asap7.tarball_dir: "/home/ff/ee241/spring20-labs/"
+
+vlsi.core.max_threads: 12
+
+# File inputs
+synthesis.inputs:
+  input_files: ["MACTB.v"]
+  top_module: "MACArray"
+
+# General Hammer Inputs
+
+# Hammer will auto-generate a CPF for simple power designs; see hammer/src/hammer-vlsi/defaults.yml for more info
+vlsi.inputs.power_spec_mode: "auto"
+vlsi.inputs.power_spec_type: "cpf"
+
+# Specify clock signals
+vlsi.inputs.clocks: [
+  {name: "clock", period: "2ns", uncertainty: "0.01ns"}
+]
+
+# Generate Make include to aid in flow 
+vlsi.core.build_system: make
+
+par.inputs.top_module: ""
+# Power Straps
+par.power_straps_mode: generate
+par.generate_power_straps_method: by_tracks
+par.blockage_spacing: 2.0
+par.generate_power_straps_options:
+  by_tracks:
+    strap_layers:
+      - M3
+      - M4
+      - M5
+      - M6
+      - M7
+      - M8
+      - M9
+    pin_layers:
+      - M9
+    track_width: 7 # minimum allowed for M2 & M3
+    track_spacing: 0
+    track_spacing_M3: 1 # to avoid M2 shorts at higher density
+    track_start: 10
+    power_utilization: 0.05
+    power_utilization_M8: 1.0
+    power_utilization_M9: 1.0
+
+# Placement Constraints
+# For ASAP7, all numbers must be 4x larger than final GDS
+vlsi.inputs.placement_constraints:
+  - path: "MACArray"
+    type: toplevel
+    x: 0
+    y: 0
+    width: 30
+    height: 30
+    margins:
+      left: 0
+      right: 0
+      top: 0
+      bottom: 0
+  - path: "MACArray/place_obs_bottom" # This is an ASAP7 necessary hack
+    type: obstruction
+    obs_types: ["place"]
+    x: 0
+    y: 0
+    width: 30
+    height: 1.08 # 1 core site tall, necessary to avoid shorts
+
+# Pin placement constraints
+vlsi.inputs.pin_mode: generated
+vlsi.inputs.pin.generate_mode: semi_auto
+vlsi.inputs.pin.assignments: [
+  {pins: "*", layers: ["M5", "M7"], side: "bottom"}
+]
+
+# SRAM Compiler compiler options
+vlsi.core.sram_generator_tool: "sram_compiler"
+# You should specify a location for the SRAM generator in the tech plugin
+vlsi.core.sram_generator_tool_path: []
+vlsi.core.sram_generator_tool_path_meta: "append"
+
+# Tool options. Replace with your tool plugin of choice.
+# Genus options
+vlsi.core.synthesis_tool: "genus"
+vlsi.core.synthesis_tool_path: ["../vlsi/hammer-cadence-plugins/synthesis"]
+vlsi.core.synthesis_tool_path_meta: "append"
+synthesis.genus:
+  genus_bin: "${cadence.cadence_home}/GENUS${synthesis.genus.version}/bin/genus"
+  version: "181"
+# Innovus options
+vlsi.core.par_tool: "innovus"
+vlsi.core.par_tool_path: ["../vlsi/hammer-cadence-plugins/par"]
+vlsi.core.par_tool_path_meta: "append"
+par.innovus:
+  innovus_bin: "${cadence.cadence_home}/INNOVUS${par.innovus.version}/bin/innovus"
+  version: "181"
+  design_flow_effort: "express"
+par.inputs.gds_merge: true
+# Calibre options
+mentor.mentor_home: "/share/instsww/mgc/calibre2017"
+vlsi.core.drc_tool: "calibre"
+vlsi.core.drc_tool_path: ["../vlsi/hammer-mentor-plugins/drc"]
+vlsi.core.lvs_tool: "calibre"
+vlsi.core.lvs_tool_path: ["../vlsi/hammer-mentor-plugins/lvs"]
+drc.calibre.version: "2016.4_38.25"
+drc.calibre:
+  calibre_drc_bin: "${mentor.mentor_home}/aoi_cal_${lvs.calibre.version}/bin/calibre"
+  calibre_drc_bin_meta: lazysubst
+  calibredrv_bin: "${mentor.mentor_home}/aoi_cal_${lvs.calibre.version}/bin/calibredrv"
+  calibredrv_bin_meta: lazysubst
+  v2lvs_bin: "${mentor.mentor_home}/aoi_cal_${lvs.calibre.version}/bin/v2lvs"
+lvs.calibre.version: "2016.4_38.25"
+lvs.calibre:
+  calibre_lvs_bin: "${mentor.mentor_home}/aoi_cal_${lvs.calibre.version}/bin/calibre"
+  calibre_lvs_bin_meta: lazysubst
+  calibredrv_bin: "${mentor.mentor_home}/aoi_cal_${lvs.calibre.version}/bin/calibredrv"
+  calibredrv_bin_meta: lazysubst
+  v2lvs_bin: "${mentor.mentor_home}/aoi_cal_${lvs.calibre.version}/bin/v2lvs"
+  v2lvs_bin_meta: lazysubst
+vlsi.core.sim_tool: "vcs" 
+vlsi.core.sim_tool_path: ["../vlsi/hammer-synopsys-plugins/sim"] 
+vlsi.core.sim_tool_path_meta: "append" 
+sim.vcs:
+  version: "P-2019.06"
+  vcs_bin: "/share/instsww/synopsys-new/vcs/${sim.vcs.version}/bin/vcs"
+  vcs_bin_meta: lazysubst
+  vcs_home: "/share/instsww/synopsys-new/vcs/${sim.vcs.version}"
+  vcs_home_meta: lazysubst
+# Voltus options
+vlsi.core.power_tool: "voltus"
+vlsi.core.power_tool_path: ["../vlsi/hammer-cadence-plugins/power"]
+vlsi.core.power_tool_path_meta: "append"
+power.voltus:
+  voltus_bin: "${cadence.cadence_home}/SSV${power.voltus.version}/bin/voltus"
+  version: "181"
+power.inputs:
+  database: "mac-build/syn-rundir"
+  spef_files: [""]
+  start_times: [0]
+  end_times: [1000]
+  top_module: "MACArray"
+  waveforms: ["mac-build/sim-rundir/vcdplus.vpd"]
+  saifs: [""]
+
+sim.inputs.top_module: "MACTBTop"
+sim.inputs.tb_dut: "MACTBTop.MACTB.MACArray"
+sim.inputs.tb_name: "MACTBTop"
+
+sim.inputs.input_files_meta: "append"
+sim.inputs.input_files:
+  - "/scratch/ee290-2-aav/chipyard/power-modeling/MACTB.v"
+  - "/scratch/ee290-2-aav/chipyard/power-modeling/MACTBTop.v"
+
+sim.inputs:
+  timescale: "1ns/10ps"
+  options:
+    - "-notice"
+    - "-line"
+    - "-debug_pp"
+    - "+v2k"
+    - "+lint=all,noVCDE"
+    - "+incdir+/home/ff/ee241/install/vclib"
+    - "+define+CLOCK_PERIOD=0.5"
+
+  execute_sim: true
+  execution_flags: ["+verbose=1"]
