@@ -13,7 +13,6 @@ class SmallBoomConfig extends Config(
   new chipyard.iobinders.WithTiedOffDebug ++                     // tie off debug (since we are using SimSerial for testing)
   new chipyard.iobinders.WithSimSerial ++                        // drive TSI with SimSerial for testing
   new testchipip.WithTSI ++                                      // use testchipip serial offchip link
-  new chipyard.config.WithNoGPIO ++                              // no top-level GPIO pins (overrides default set in sifive-blocks)
   new chipyard.config.WithBootROM ++                             // use default bootrom
   new chipyard.config.WithUART ++                                // add a UART
   new chipyard.config.WithL2TLBs(1024) ++                        // use L2 TLBs
@@ -32,7 +31,6 @@ class MediumBoomConfig extends Config(
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
@@ -51,7 +49,6 @@ class LargeBoomConfig extends Config(
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
@@ -70,7 +67,6 @@ class MegaBoomConfig extends Config(
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
@@ -89,7 +85,6 @@ class DualSmallBoomConfig extends Config(
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
@@ -108,7 +103,6 @@ class SmallRV32BoomConfig extends Config(
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
@@ -129,7 +123,6 @@ class HwachaLargeBoomConfig extends Config(
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
@@ -151,7 +144,6 @@ class LoopbackNICLargeBoomConfig extends Config(
   new chipyard.iobinders.WithLoopbackNIC ++                        // drive NIC IOs with loopback
   new testchipip.WithTSI ++
   new icenet.WithIceNIC ++
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++

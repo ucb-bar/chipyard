@@ -15,7 +15,6 @@ class ArianeConfig extends Config(
   new chipyard.iobinders.WithTiedOffDebug ++                     // tie off debug (since we are using SimSerial for testing)
   new chipyard.iobinders.WithSimSerial ++                        // drive TSI with SimSerial for testing
   new testchipip.WithTSI ++                                      // use testchipip serial offchip link
-  new chipyard.config.WithNoGPIO ++                              // no top-level GPIO pins (overrides default set in sifive-blocks)
   new chipyard.config.WithBootROM ++                             // use default bootrom
   new chipyard.config.WithUART ++                                // add a UART
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++           // no top-level MMIO master port (overrides default set in rocketchip)
@@ -31,7 +30,6 @@ class dmiArianeConfig extends Config(
   new chipyard.iobinders.WithSimAXIMem ++
   new chipyard.iobinders.WithTiedOffSerial ++
   new chipyard.iobinders.WithSimDebug ++               // add SimDebug and use it to drive simulation
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++

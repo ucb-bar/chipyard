@@ -52,14 +52,6 @@ class WithUART extends Config((site, here, up) => {
     UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256))
 })
 
-class WithNoGPIO extends Config((site, here, up) => {
-  case PeripheryGPIOKey => Nil
-})
-
-class WithNoUART extends Config((site, here, up) => {
-  case PeripheryUARTKey => Nil
-})
-
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey) map (tile => tile.copy(
     core = tile.core.copy(nL2TLBEntries = entries)
