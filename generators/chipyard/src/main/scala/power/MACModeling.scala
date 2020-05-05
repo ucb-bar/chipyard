@@ -41,8 +41,6 @@ class MACArray[T <: Data:Arithmetic](config: MACConfig[T], numMACs: Int) extends
   }
 }
 
-//class MACDriver[T <: Data:Arithmetic](config: MACConfig[T], numMacs: Int) extends RawModule {
-
 class MACDriver[T <: Data:Arithmetic](config: MACConfig[T], numMACs: Int) extends Module {
   val io = IO(new Bundle {
     val macIOs = Vec(numMACs, Flipped(MACIO(config)))
@@ -52,21 +50,21 @@ class MACDriver[T <: Data:Arithmetic](config: MACConfig[T], numMACs: Int) extend
     low + random.nextInt( (high - low) + 1 )
   }
 
-    // Assuming WS dataflow MAC patterns
-    val (cntval, cntwrap) = Counter(true.B, 16) // only change B every 16 cycles
-    val aVals = LFSR(config.aType.getWidth, seed=Some(randomInRange(1, math.pow(2,config.aType.getWidth).toInt - 1)))
-    val bVals = LFSR(config.bType.getWidth, increment=cntwrap, seed=Some(randomInRange(1, math.pow(2,config.bType.getWidth).toInt - 1)))
-    val cVals = LFSR(config.cType.getWidth, seed=Some(randomInRange(1, math.pow(2,config.cType.getWidth).toInt - 1)))
-    val sparsitylfsr = LFSR(8)
-    io.macIOs.zipWithIndex.foreach { case (mac, idx) =>
-      val sparsity: Float = (idx + 1) / numMACs
-      mac.a := Mux(sparsitylfsr < (sparsity*math.pow(2,8)).toInt.U, 0.U, aVals).asTypeOf(config.aType)
-      mac.b := bVals.asTypeOf(config.bType)
-      mac.c := cVals.asTypeOf(config.cType)
-      dontTouch(mac.a)
-      dontTouch(mac.b)
-      dontTouch(mac.c)
-      dontTouch(mac.out)
+  // Assuming WS dataflow MAC patterns
+  val (cntval, cntwrap) = Counter(true.B, 16) // only change B every 16 cycles
+  val aVals = LFSR(config.aType.getWidth, seed=Some(randomInRange(1, math.pow(2,config.aType.getWidth).toInt - 1)))
+  val bVals = LFSR(config.bType.getWidth, increment=cntwrap, seed=Some(randomInRange(1, math.pow(2,config.bType.getWidth).toInt - 1)))
+  val cVals = LFSR(config.cType.getWidth, seed=Some(randomInRange(1, math.pow(2,config.cType.getWidth).toInt - 1)))
+  val sparsitylfsr = LFSR(8)
+  io.macIOs.zipWithIndex.foreach { case (mac, idx) =>
+    val sparsity: Float = (idx + 1) / numMACs
+    mac.a := Mux(sparsitylfsr < (sparsity*math.pow(2,8)).toInt.U, 0.U, aVals).asTypeOf(config.aType)
+    mac.b := bVals.asTypeOf(config.bType)
+    mac.c := cVals.asTypeOf(config.cType)
+    dontTouch(mac.a)
+    dontTouch(mac.b)
+    dontTouch(mac.c)
+    dontTouch(mac.out)
   }
 }
 
@@ -82,5 +80,15 @@ class MACTB[T <: Data:Arithmetic](config: MACConfig[T]) extends RawModule {
 }
 
 object MACModeling extends App {
-  val vlog = chisel3.Driver.execute(args, () => new MACTB(WSMACConfig()))
+  val targetDir = args(0)
+  val aBits = args(1).toInt
+  val bBits = args(2).toInt
+  val cBits = args(3).toInt
+  val vlog = chisel3.Driver.execute(Array("--target-dir", targetDir), () => new MAC(
+    new MACConfig(
+      SInt(aBits.W),
+      SInt(bBits.W),
+      SInt(cBits.W)
+    )
+  ))
 }
