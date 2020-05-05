@@ -54,13 +54,13 @@ class MACDriver[T <: Data:Arithmetic](config: MACConfig[T], numMACs: Int) extend
 
     // Assuming WS dataflow MAC patterns
     val (cntval, cntwrap) = Counter(true.B, 16) // only change B every 16 cycles
-    val aVals = LFSR(config.aType.getWidth, seed=Some(randomInRange(1, (2^config.aType.getWidth) - 1)))
-    val bVals = LFSR(config.bType.getWidth, increment=cntwrap, seed=Some(randomInRange(1, (2^config.bType.getWidth) - 1)))
-    val cVals = LFSR(config.cType.getWidth, seed=Some(randomInRange(1, (2^config.cType.getWidth) - 1)))
+    val aVals = LFSR(config.aType.getWidth, seed=Some(randomInRange(1, math.pow(2,config.aType.getWidth).toInt - 1)))
+    val bVals = LFSR(config.bType.getWidth, increment=cntwrap, seed=Some(randomInRange(1, math.pow(2,config.bType.getWidth).toInt - 1)))
+    val cVals = LFSR(config.cType.getWidth, seed=Some(randomInRange(1, math.pow(2,config.cType.getWidth).toInt - 1)))
     val sparsitylfsr = LFSR(8)
     io.macIOs.zipWithIndex.foreach { case (mac, idx) =>
       val sparsity: Float = (idx + 1) / numMACs
-      mac.a := Mux(sparsitylfsr < (sparsity/(2^8)).toInt.U, 0.U, aVals).asTypeOf(config.aType)
+      mac.a := Mux(sparsitylfsr < (sparsity*math.pow(2,8)).toInt.U, 0.U, aVals).asTypeOf(config.aType)
       mac.b := bVals.asTypeOf(config.bType)
       mac.c := cVals.asTypeOf(config.cType)
       dontTouch(mac.a)
