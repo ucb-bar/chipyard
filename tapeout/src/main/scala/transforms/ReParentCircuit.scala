@@ -7,18 +7,26 @@ import firrtl.ir._
 import firrtl.passes.Pass
 import firrtl.annotations._
 
-class ReParentCircuit(newTopName: String) extends Transform {
+case class ReParentCircuitAnnotation(target: ModuleTarget)
+    extends SingleTargetAnnotation[ModuleTarget] {
+  def duplicate(n: ModuleTarget) = this.copy(n)
+}
+
+class ReParentCircuit extends Transform {
   def inputForm = HighForm
   def outputForm = HighForm
 
-  def run(c: Circuit, newTopName: String): (Circuit, RenameMap) = {
-    val myRenames = RenameMap()
-    myRenames.record(CircuitTarget(c.main), CircuitTarget(newTopName))
-    (Circuit(c.info, c.modules, newTopName),  myRenames)
-  }
-
   def execute(state: CircuitState): CircuitState = {
-    val (ret, renames) = run(state.circuit, newTopName)
-    state.copy(circuit = ret, renames = Some(renames))
+    val c = state.circuit
+    val newTopName = state.annotations.collectFirst {
+      case ReParentCircuitAnnotation(tgt) => tgt.module
+    }
+    val newCircuit = c.copy(main = newTopName.getOrElse(c.main))
+    val mainRename = newTopName.map { s =>
+      val rmap = RenameMap()
+      rmap.record(CircuitTarget(c.main), CircuitTarget(s))
+      rmap
+    }
+    state.copy(circuit = newCircuit, renames = mainRename)
   }
 }

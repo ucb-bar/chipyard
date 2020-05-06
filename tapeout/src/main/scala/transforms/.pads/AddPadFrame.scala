@@ -112,8 +112,8 @@ class AddPadFrame(
             // Normal verilog in/out can be mapped to uint, sint, or clocktype, so need cast
             case _ => 
               val padBBType = UIntType(getWidth(p.port.tpe))
-              val padInRef = WSubField(padRef, DigitalPad.inName, padBBType, UNKNOWNGENDER)
-              val padOutRef = WSubField(padRef, DigitalPad.outName, padBBType, UNKNOWNGENDER)
+              val padInRef = WSubField(padRef, DigitalPad.inName, padBBType, UnknownFlow)
+              val padOutRef = WSubField(padRef, DigitalPad.outName, padBBType, UnknownFlow)
               val (rhsPadIn, lhsPadOut) = p.portDirection match {
                 case Input => (extRef, intRef)
                 case Output => (intRef, extRef)

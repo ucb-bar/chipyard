@@ -11,7 +11,7 @@ import firrtl.annotations.AnnotationYamlProtocol._
 import firrtl.passes.memlib.ReplSeqMemAnnotation
 import firrtl.transforms.BlackBoxResourceFileNameAnno
 import net.jcazevedo.moultingyaml._
-import com.typesafe.scalalogging.LazyLogging
+import logger.LazyLogging
 
 trait HasTapeoutOptions { self: ExecutionOptionsManager with HasFirrtlOptions =>
   var tapeoutOptions = TapeoutOptions()
@@ -161,36 +161,27 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
   // FIRRTL options
   lazy val annoFiles = firrtlOptions.annotationFileNames
 
-  lazy val topTransforms: Seq[Transform] = {
-    Seq(
-      new ReParentCircuit(synTop.get),
-      new RemoveUnusedModules
-    )
-  }
+  val topTransforms = Seq(
+    new ReParentCircuit,
+    new RemoveUnusedModules
+  )
+
+  lazy val rootCircuitTarget = CircuitTarget(harnessTop.get)
+
+  lazy val topAnnos = synTop.map(st => ReParentCircuitAnnotation(rootCircuitTarget.module(st))) ++
+    tapeoutOptions.topDotfOut.map(BlackBoxResourceFileNameAnno(_))
 
   lazy val topOptions = firrtlOptions.copy(
     customTransforms = firrtlOptions.customTransforms ++ topTransforms,
-    annotations = firrtlOptions.annotations ++ tapeoutOptions.topDotfOut.map(BlackBoxResourceFileNameAnno(_))
+    annotations = firrtlOptions.annotations ++ topAnnos
   )
 
-  class AvoidExtModuleCollisions(mustLink: Seq[ExtModule]) extends Transform {
-    def inputForm = HighForm
-    def outputForm = HighForm
-    def execute(state: CircuitState): CircuitState = {
-      state.copy(circuit = state.circuit.copy(modules = state.circuit.modules ++ mustLink))
-    }
-  }
-
-  private def harnessTransforms(topExtModules: Seq[ExtModule]): Seq[Transform] = {
-    // XXX this is a hack, we really should be checking the masters to see if they are ExtModules
-    val externals = Set(harnessTop.get, synTop.get, "SimSerial", "SimDTM")
-    Seq(
-      new ConvertToExtMod((m) => m.name == synTop.get),
-      new RemoveUnusedModules,
-      new AvoidExtModuleCollisions(topExtModules),
-      new RenameModulesAndInstances((old) => if (externals contains old) old else (old + "_in" + harnessTop.get))
-    )
-  }
+  val harnessTransforms = Seq(
+    new ConvertToExtMod,
+    new RemoveUnusedModules,
+    new AvoidExtModuleCollisions,
+    new AddSuffixToModuleNames
+  )
 
   // Dump firrtl and annotation files
   protected def dump(res: FirrtlExecutionSuccess, firFile: Option[String], annoFile: Option[String]): Unit = {
@@ -230,17 +221,26 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
     // Execute top and get list of ExtModules to avoid collisions
     val topExtModules = executeTop()
 
+    val externals = Seq("SimSerial", "SimDTM") ++ harnessTop ++ synTop
+
+    val harnessAnnos =
+      tapeoutOptions.harnessDotfOut.map(BlackBoxResourceFileNameAnno(_)).toSeq ++
+      externals.map(ext => KeepNameAnnotation(rootCircuitTarget.module(ext))) ++
+      harnessTop.map(ht => ModuleNameSuffixAnnotation(rootCircuitTarget, s"_in${ht}")) ++
+      synTop.map(st => ConvertToExtModAnnotation(rootCircuitTarget.module(st))) :+
+      LinkExtModulesAnnotation(topExtModules)
+
     // For harness run, change some firrtlOptions (below) for harness phase
     // customTransforms: setup harness transforms, add AvoidExtModuleCollisions
     // outputFileNameOverride: change to harnessOutput
     // conf file must change to harnessConf by mapping annotations
     optionsManager.firrtlOptions = firrtlOptions.copy(
-      customTransforms = firrtlOptions.customTransforms ++ harnessTransforms(topExtModules),
+      customTransforms = firrtlOptions.customTransforms ++ harnessTransforms,
       outputFileNameOverride = tapeoutOptions.harnessOutput.get,
       annotations = firrtlOptions.annotations.map({
         case ReplSeqMemAnnotation(i, o) => ReplSeqMemAnnotation(i, tapeoutOptions.harnessConf.get)
         case a => a
-      }) ++ tapeoutOptions.harnessDotfOut.map(BlackBoxResourceFileNameAnno(_))
+      }) ++ harnessAnnos
     )
     val harnessResult = firrtl.Driver.execute(optionsManager)
     harnessResult match {

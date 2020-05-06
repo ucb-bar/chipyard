@@ -7,16 +7,19 @@ import firrtl.annotations._
 import firrtl.ir._
 import firrtl.passes.Pass
 
+case class ConvertToExtModAnnotation(target: ModuleTarget)
+    extends SingleTargetAnnotation[ModuleTarget] {
+  def duplicate(n: ModuleTarget) = this.copy(n)
+}
+
 // Converts some modules to external modules, based on a given function.  If
 // that function returns "true" then the module is converted into an ExtModule,
 // otherwise it's left alone.
-class ConvertToExtMod(classify: (Module) => Boolean) extends Transform {
+class ConvertToExtMod extends Transform {
   def inputForm = HighForm
   def outputForm = HighForm
 
-
-  def run(state: CircuitState): (Circuit, RenameMap) = {
-
+  def run(state: CircuitState, makeExt: Set[String]): (Circuit, RenameMap) = {
     val renames = RenameMap()
     val c = state.circuit
     renames.setCircuit(c.main)
@@ -30,7 +33,7 @@ class ConvertToExtMod(classify: (Module) => Boolean) extends Transform {
             case x => x.foreachStmt(findDeadNames)
           }
         }
-        if (classify(m)) {
+        if (makeExt(m.name)) {
           m.foreachStmt(findDeadNames)
           removing.foreach { name =>
             renames.record(ReferenceTarget(c.main, m.name, Nil, name, Nil), Nil)
@@ -44,7 +47,9 @@ class ConvertToExtMod(classify: (Module) => Boolean) extends Transform {
   }
 
   def execute(state: CircuitState): CircuitState = {
-    val (ret, renames) = run(state)
-    state.copy(circuit = ret, renames = Some(renames))
+    val makeExt = state.annotations.collect({ case ConvertToExtModAnnotation(tgt) => tgt.module }).toSet
+    val newAnnos = state.annotations.filterNot(_.isInstanceOf[ConvertToExtModAnnotation])
+    val (ret, renames) = run(state, makeExt)
+    state.copy(circuit = ret, annotations = newAnnos, renames = Some(renames))
   }
 }

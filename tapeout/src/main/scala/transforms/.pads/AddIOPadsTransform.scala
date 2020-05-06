@@ -39,7 +39,7 @@ class AddIOPadsTransform extends Transform with SeqTransformBased {
         PadPlacementFile.generate(techLoc, targetDir, padFrameName, portPads, supplyPads)
         transformList ++= Seq(
           Legalize,
-          ResolveGenders,
+          ResolveFlows,
           // Types really need to be known...
           InferTypes,
           new AddPadFrame(x.topModName, padFrameName, topInternalName, portPads, supplyPads),
@@ -48,7 +48,7 @@ class AddIOPadsTransform extends Transform with SeqTransformBased {
           InferTypes,
           Uniquify,
           ResolveKinds,
-          ResolveGenders
+          ResolveFlows
         )
         // Expects BlackBox helper to be run after to inline pad Verilog!
         val ret = runTransforms(state)
