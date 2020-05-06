@@ -1,0 +1,8 @@
+power.inputs:
+  database: "mac-build/syn-rundir"
+  spef_files: [""]
+  start_times: [0]
+  end_times: [1000]
+  top_module: "MACArray"
+  waveforms: ["mac-build/sim-rundir/vcdplus.vpd"]
+  saifs: [""]

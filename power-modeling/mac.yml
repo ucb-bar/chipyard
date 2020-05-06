@@ -8,8 +8,8 @@ vlsi.core.max_threads: 12
 
 # File inputs
 synthesis.inputs:
-  input_files: ["MACTB.v"]
-  top_module: "MACArray"
+  input_files: ["/scratch/ee290-2-aav/chipyard/power-modeling/generated-src/8_8_19/MAC.v"]
+  top_module: "MAC"
 
 # General Hammer Inputs
 
@@ -19,13 +19,13 @@ vlsi.inputs.power_spec_type: "cpf"
 
 # Specify clock signals
 vlsi.inputs.clocks: [
-  {name: "clock", period: "2ns", uncertainty: "0.01ns"}
+  {name: "clock", period: "1ns", uncertainty: "0.01ns"}
 ]
 
-# Generate Make include to aid in flow 
+# Generate Make include to aid in flow
 vlsi.core.build_system: make
 
-par.inputs.top_module: ""
+par.inputs.top_module: "MAC"
 # Power Straps
 par.power_straps_mode: generate
 par.generate_power_straps_method: by_tracks
@@ -53,7 +53,7 @@ par.generate_power_straps_options:
 # Placement Constraints
 # For ASAP7, all numbers must be 4x larger than final GDS
 vlsi.inputs.placement_constraints:
-  - path: "MACArray"
+  - path: "MAC"
     type: toplevel
     x: 0
     y: 0
@@ -64,7 +64,7 @@ vlsi.inputs.placement_constraints:
       right: 0
       top: 0
       bottom: 0
-  - path: "MACArray/place_obs_bottom" # This is an ASAP7 necessary hack
+  - path: "MAC/place_obs_bottom" # This is an ASAP7 necessary hack
     type: obstruction
     obs_types: ["place"]
     x: 0
@@ -123,9 +123,9 @@ lvs.calibre:
   calibredrv_bin_meta: lazysubst
   v2lvs_bin: "${mentor.mentor_home}/aoi_cal_${lvs.calibre.version}/bin/v2lvs"
   v2lvs_bin_meta: lazysubst
-vlsi.core.sim_tool: "vcs" 
-vlsi.core.sim_tool_path: ["../vlsi/hammer-synopsys-plugins/sim"] 
-vlsi.core.sim_tool_path_meta: "append" 
+vlsi.core.sim_tool: "vcs"
+vlsi.core.sim_tool_path: ["../vlsi/hammer-synopsys-plugins/sim"]
+vlsi.core.sim_tool_path_meta: "append"
 sim.vcs:
   version: "P-2019.06"
   vcs_bin: "/share/instsww/synopsys-new/vcs/${sim.vcs.version}/bin/vcs"
@@ -139,34 +139,3 @@ vlsi.core.power_tool_path_meta: "append"
 power.voltus:
   voltus_bin: "${cadence.cadence_home}/SSV${power.voltus.version}/bin/voltus"
   version: "181"
-power.inputs:
-  database: "mac-build/syn-rundir"
-  spef_files: [""]
-  start_times: [0]
-  end_times: [1000]
-  top_module: "MACArray"
-  waveforms: ["mac-build/sim-rundir/vcdplus.vpd"]
-  saifs: [""]
-
-sim.inputs.top_module: "MACTBTop"
-sim.inputs.tb_dut: "MACTBTop.MACTB.MACArray"
-sim.inputs.tb_name: "MACTBTop"
-
-sim.inputs.input_files_meta: "append"
-sim.inputs.input_files:
-  - "/scratch/ee290-2-aav/chipyard/power-modeling/MACTB.v"
-  - "/scratch/ee290-2-aav/chipyard/power-modeling/MACTBTop.v"
-
-sim.inputs:
-  timescale: "1ns/10ps"
-  options:
-    - "-notice"
-    - "-line"
-    - "-debug_pp"
-    - "+v2k"
-    - "+lint=all,noVCDE"
-    - "+incdir+/home/ff/ee241/install/vclib"
-    - "+define+CLOCK_PERIOD=0.5"
-
-  execute_sim: true
-  execution_flags: ["+verbose=1"]

@@ -1,0 +1,22 @@
+sim.inputs.top_module: "MACTB"
+sim.inputs.tb_dut: "MACTB.mac"
+sim.inputs.tb_name: "MACTB"
+
+sim.inputs.input_files_meta: "append"
+sim.inputs.input_files:
+  - "/scratch/ee290-2-aav/chipyard/power-modeling/generated-src/8_8_19/MAC.v"
+  - "/scratch/ee290-2-aav/chipyard/power-modeling/MACTB.v"
+
+sim.inputs:
+  timescale: "1ns/10ps"
+  options:
+    - "-notice"
+    - "-line"
+    - "-debug_pp"
+    - "-sverilog"
+    - "+lint=all,noVCDE"
+    - "+define+CLOCK_HALF_PERIOD=0.5"
+  level: "rtl"
+
+  execute_sim: true
+  execution_flags: ["+verbose=1", "+density=1"]
