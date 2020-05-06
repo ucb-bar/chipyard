@@ -289,8 +289,8 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
      * address bits into account. */
     if (mem.src.depth > lib.src.depth) {
       mem.src.ports foreach { port =>
-        val high = ceilLog2(mem.src.depth)
-        val low = ceilLog2(lib.src.depth)
+        val high = MacroCompilerMath.ceilLog2(mem.src.depth)
+        val low = MacroCompilerMath.ceilLog2(lib.src.depth)
         val ref = WRef(port.address.name)
         val nodeName = s"${ref.name}_sel"
         val tpe = UIntType(IntWidth(high-low))
@@ -738,7 +738,7 @@ class MacroCompiler extends Compiler {
 
   def transforms: Seq[Transform] =
     Seq(new MacroCompilerTransform) ++
-      getLoweringTransforms(firrtl.HighForm, firrtl.LowForm) ++
+      getLoweringTransforms(firrtl.ChirrtlForm, firrtl.LowForm) ++
       Seq(new MacroCompilerOptimizations)
 }
 
@@ -834,36 +834,24 @@ object MacroCompiler extends App {
             )
           ))
         )
-        // Append a NoDCEAnnotation to avoid dead code elimination removing the non-parent SRAMs
-        val state = CircuitState(circuit, HighForm, annotations :+ NoDCEAnnotation)
 
-        // Run the compiler.
-        val result = new MacroCompiler().compileAndEmit(state)
+        // The actual MacroCompilerTransform basically just generates an input circuit
+        val macroCompilerInput = CircuitState(circuit, HighForm, annotations)
+        val macroCompiled = (new MacroCompilerTransform).execute(macroCompilerInput)
 
-        // Write output FIRRTL file.
-        params.get(Firrtl) match {
-          case Some(firrtlFile: String) => {
-            val fileWriter = new FileWriter(new File(firrtlFile))
-            fileWriter.write(result.circuit.serialize)
-            fileWriter.close()
-          }
-          case None =>
+
+        // Since the MacroCompiler defines its own CLI, reconcile this with FIRRTL options
+        val firOptions = new ExecutionOptionsManager("macrocompiler") with HasFirrtlOptions {
+          firrtlOptions = FirrtlExecutionOptions(
+            outputFileNameOverride = params.get(Verilog).getOrElse(""),
+            noDCE = true,
+            firrtlSource = Some(macroCompiled.circuit.serialize)
+          )
         }
 
-        // Write output Verilog file.
-        params.get(Verilog) match {
-          case Some(verilogFile: String) => {
-            // Open the writer for the output Verilog file.
-            val verilogWriter = new FileWriter(new File(verilogFile))
+        // Run FIRRTL compiler
+        Driver.execute(firOptions)
 
-            // Extract Verilog circuit and write it.
-            verilogWriter.write(result.getEmittedCircuit.value)
-
-            // Close the writer.
-            verilogWriter.close()
-          }
-          case None =>
-        }
         params.get(HammerIR) match {
           case Some(hammerIRFile: String) => {
             val lines = Source.fromFile(hammerIRFile).getLines().toList
