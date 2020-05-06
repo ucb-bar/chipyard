@@ -1,8 +1,10 @@
+sim.outputs.waveforms: ["mac-build/sim-par-rundir/vcd.vcd"]
 power.inputs:
-  database: "mac-build/syn-rundir"
+  tb_dut: "MACTB/mac"
+  database: "mac-build/8_8_19/par-rundir/MAC_FINAL"
   spef_files: [""]
   start_times: [0]
   end_times: [1000]
-  top_module: "MACArray"
-  waveforms: ["mac-build/sim-rundir/vcdplus.vpd"]
+  top_module: "MACTB"
+  waveforms: ["mac-build/8_8_19/sim-par-rundir/vcdplus.vpd"]
   saifs: [""]

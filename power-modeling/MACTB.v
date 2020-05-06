@@ -23,16 +23,16 @@ module MACTB();
     end
     */
     $vcdpluson;
-    @(posedge clock); #(0.01);
+    @(posedge clock); #(0.05);
     reset = 1;
-    @(posedge clock); #(0.01);
+    @(posedge clock); #(0.05);
     reset = 0;
     repeat (100) begin
       b <= $urandom();
       repeat (16) begin // model weight stationary b argument
         a <= $urandom();
         c <= $urandom();
-        @(posedge clock); #(0.01);
+        @(posedge clock); #(0.05);
       end
     end
     $vcdplusoff;
