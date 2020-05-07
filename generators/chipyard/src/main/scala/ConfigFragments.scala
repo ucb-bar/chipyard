@@ -53,7 +53,11 @@ class WithUART extends Config((site, here, up) => {
 })
 
 class WithNoGPIO extends Config((site, here, up) => {
-  case PeripheryGPIOKey => Seq()
+  case PeripheryGPIOKey => Nil
+})
+
+class WithNoUART extends Config((site, here, up) => {
+  case PeripheryUARTKey => Nil
 })
 
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {

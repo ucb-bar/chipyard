@@ -247,23 +247,21 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "tracegen-boom"
-    prepare-firesim:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "firesim"
-                build-script: "do-firesim-build.sh"
-    prepare-fireboom:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "fireboom"
-                build-script: "do-firesim-build.sh"
     prepare-chipyard-ariane:
         executor: main-env
         steps:
             - prepare-rtl:
                 project-key: "chipyard-ariane"
+    prepare-icenet:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "icenet"
+    prepare-testchipip:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "testchipip"
     chipyard-rocket-run-tests:
         executor: main-env
         steps:
@@ -279,6 +277,7 @@ jobs:
         steps:
             - run-tests:
                 project-key: "chipyard-hetero"
+                timeout: "15m"
     chipyard-boom-run-tests:
         executor: main-env
         steps:
@@ -317,15 +316,24 @@ jobs:
             - run-tests:
                 extra-cache-restore: "extra-tests"
                 project-key: "firesim"
-                run-script: "run-firesim-tests.sh"
+                run-script: "run-firesim-scala-tests.sh"
+                timeout: "20m"
     fireboom-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 extra-cache-restore: "extra-tests"
                 project-key: "fireboom"
-                run-script: "run-firesim-tests.sh"
-                timeout: "30m"
+                run-script: "run-firesim-scala-tests.sh"
+                timeout: "45m"
+    firesim-multiclock-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                extra-cache-restore: "extra-tests"
+                project-key: "firesim-multiclock"
+                run-script: "run-firesim-scala-tests.sh"
+                timeout: "20m"
     midasexamples-run-tests:
         executor: main-env
         steps:
@@ -338,6 +346,18 @@ jobs:
         steps:
             - run-tests:
                 project-key: "chipyard-ariane"
+                timeout: "30m"
+    icenet-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "icenet"
+                timeout: "30m"
+    testchipip-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "testchipip"
                 timeout: "30m"
 
 # Order and dependencies of jobs to run
@@ -428,17 +448,17 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-firesim:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
-            - prepare-fireboom:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
             - prepare-chipyard-ariane:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-icenet:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-testchipip:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
@@ -490,14 +510,28 @@ workflows:
             # Run the firesim tests
             - firesim-run-tests:
                 requires:
-                    - prepare-firesim
+                    - install-riscv-toolchain
+                    - install-verilator
                     - build-extra-tests
-
+            - firesim-multiclock-run-tests:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+                    - build-extra-tests
             - fireboom-run-tests:
                 requires:
-                    - prepare-fireboom
+                    - install-riscv-toolchain
+                    - install-verilator
                     - build-extra-tests
 
             - chipyard-ariane-run-tests:
                 requires:
                     - prepare-chipyard-ariane
+
+            - icenet-run-tests:
+                requires:
+                    - prepare-icenet
+
+            - testchipip-run-tests:
+                requires:
+                    - prepare-testchipip

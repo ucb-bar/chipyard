@@ -56,7 +56,7 @@ VCS_CC_OPTS = \
 VCS_NONCC_OPTS = \
 	+lint=all,noVCDE,noONGS,noUI \
 	-error=PCWM-L \
-	-timescale=1ns/10ps \
+	-timescale=1ns/1ps \
 	-quiet \
 	-q \
 	+rad \
@@ -101,6 +101,10 @@ $(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
 .PRECIOUS: $(output_dir)/%.vpd %.vpd
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
+
+$(output_dir)/none.vpd: $(sim_debug)
+	mkdir -p $(output_dir)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) none </dev/null 2> >(spike-dasm > $(output_dir)/none.out) | tee $(output_dir)/none.log)
 
 #########################################################################################
 # general cleanup rule

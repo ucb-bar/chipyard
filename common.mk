@@ -136,6 +136,12 @@ run-binary-debug: $(sim_debug)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
+run-none: $(output_dir)/none.out
+
+run-none-fast: $(output_dir)/none.run
+
+run-none-debug: $(output_dir)/none.vpd
+
 #########################################################################################
 # run assembly/benchmarks rules
 #########################################################################################
@@ -148,6 +154,14 @@ $(output_dir)/%.run: $(output_dir)/% $(sim)
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
 	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
+
+$(output_dir)/none.run: $(sim)
+	mkdir -p $(output_dir)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
+
+$(output_dir)/none.out: $(sim)
+	mkdir -p $(output_dir)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) none </dev/null 2> >(spike-dasm > $@) | tee $(output_dir)/none.log)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
