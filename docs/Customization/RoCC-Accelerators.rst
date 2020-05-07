@@ -68,3 +68,25 @@ For instance, if we wanted to add the previously defined accelerator and route c
 
 To add RoCC instructions in your program, use the RoCC C macros provided in ``tests/rocc.h``. You can find examples in the files ``tests/accum.c`` and ``charcount.c``.
 
+Links to Information on RoCC
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`A document by UCSD, with a verilog focus`_
+
+.. _A document by UCSD, with a verilog focus: https://docs.google.com/document/d/1CH2ep4YcL_ojsa3BVHEW-uwcKh1FlFTjH_kg5v8bxVw/edit/
+
+`CS250 Class Material 1.`_
+
+.. _CS250 Class Material 1. : http://www-inst.eecs.berkeley.edu/~cs250/sp16/disc/Disc02.pdf
+
+`CS250 Class Material 2.`_
+
+.. _CS250 Class Material 2. : http://www-inst.eecs.berkeley.edu/~cs250/sp16/disc/Disc05.pdf
+
+`CS250 Class Material 3.`_
+
+.. _CS250 Class Material 3. : http://www-inst.eecs.berkeley.edu/~cs250/sp16/assignments/lab4.pdf
+
+`CS250 Class Material 4.`_
+
+.. _CS250 Class Material 4. : http://www-inst.eecs.berkeley.edu/~cs250/fa13/handouts/lab3-sumaccel.pdf
