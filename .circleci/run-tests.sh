@@ -62,9 +62,14 @@ case $1 in
         (cd $LOCAL_CHIPYARD_DIR/generators/sha3/software && ./build.sh)
         $LOCAL_SIM_DIR/simulator-chipyard-Sha3RocketConfig $LOCAL_CHIPYARD_DIR/generators/sha3/software/benchmarks/bare/sha3-rocc.riscv
         ;;
-    chipyard-spiflash)
+    chipyard-spiflashread)
         make -C $LOCAL_CHIPYARD_DIR/tests
-        make -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflash.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary
+        make -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashread.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary
+        ;;
+    chipyard-spiflashwrite)
+        make -C $LOCAL_CHIPYARD_DIR/tests
+        make -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashwrite.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary
+        [[ "`xxd $LOCAL_CHIPYARD_DIR/tests/spiflash.img  | grep 1337\ 00ff\ aa55\ face | wc -l`" == "6" ]] || false
         ;;
     tracegen)
         run_tracegen ${mapping[$1]}

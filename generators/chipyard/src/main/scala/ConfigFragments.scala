@@ -53,9 +53,10 @@ class WithUART extends Config((site, here, up) => {
     UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256))
 })
 
-class WithSPIFlash extends Config((site, here, up) => {
+class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) => {
+  // Note: the default size matches freedom with the addresses below
   case PeripherySPIFlashKey => Seq(
-    SPIFlashParams(rAddress = 0x10040000, fAddress = 0x20000000, fSize = 0x10000000)) // Note: this matches freedom
+    SPIFlashParams(rAddress = 0x10040000, fAddress = 0x20000000, fSize = size))
 })
 
 class WithNoGPIO extends Config((site, here, up) => {

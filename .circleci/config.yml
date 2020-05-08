@@ -262,11 +262,16 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "testchipip"
-    prepare-chipyard-spiflash:
+    prepare-chipyard-spiflashwrite:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "chipyard-spiflash"
+                project-key: "chipyard-spiflashwrite"
+    prepare-chipyard-spiflashread:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-spiflashread"
     chipyard-rocket-run-tests:
         executor: main-env
         steps:
@@ -305,11 +310,16 @@ jobs:
             - run-tests:
                 tools-version: "esp-tools"
                 project-key: "chipyard-gemmini"
-    chipyard-spiflash-run-tests:
+    chipyard-spiflashwrite-run-tests:
         executor: main-env
         steps:
             - run-tests:
-                project-key: "chipyard-spiflash"
+                project-key: "chipyard-spiflashwrite"
+    chipyard-spiflashread-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-spiflashread"
     tracegen-run-tests:
         executor: main-env
         steps:
@@ -473,7 +483,12 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-chipyard-spiflash:
+            - prepare-chipyard-spiflashwrite:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-spiflashread:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
@@ -522,9 +537,13 @@ workflows:
                 requires:
                     - prepare-tracegen-boom
 
-            - chipyard-spiflash-run-tests:
+            - chipyard-spiflashwrite-run-tests:
                 requires:
-                    - prepare-chipyard-spiflash
+                    - prepare-chipyard-spiflashwrite
+
+            - chipyard-spiflashread-run-tests:
+                requires:
+                    - prepare-chipyard-spiflashread
 
             # Run the firesim tests
             - firesim-run-tests:

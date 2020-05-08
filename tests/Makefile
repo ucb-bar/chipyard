@@ -5,7 +5,7 @@ LDFLAGS= -static
 
 include libgloss.mk
 
-PROGRAMS = pwm blkdev accum charcount nic-loopback big-blkdev pingd spiflash
+PROGRAMS = pwm blkdev accum charcount nic-loopback big-blkdev pingd spiflashread spiflashwrite
 
 spiflash.img: spiflash.py
 	python3 $<
@@ -21,7 +21,7 @@ dumps: $(addsuffix .dump,$(PROGRAMS))
 %.o: %.S
 	$(GCC) $(CFLAGS) -D__ASSEMBLY__=1 -c $< -o $@
 
-%.o: %.c mmio.h
+%.o: %.c mmio.h spiflash.h
 	$(GCC) $(CFLAGS) -c $< -o $@
 
 %.riscv: %.o $(libgloss)

@@ -89,6 +89,6 @@ SPI Flash Model
 ---------------
 
 The SPI flash model is a devices that models a simple SPI flash device. It currently
-only supports single read and quad read instructions. The memory is backed by a
-file which is provided using ``+spiflash#=<NAME_OF_FILE>`` where ``#`` is the SPI
-flash ID (usually ``0``).
+only supports single read, quad read, single write, and quad write instructions. The
+memory is backed by a file which is provided using ``+spiflash#=<NAME_OF_FILE>``,
+where ``#`` is the SPI flash ID (usually ``0``).

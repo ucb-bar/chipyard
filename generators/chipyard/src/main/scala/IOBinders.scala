@@ -202,10 +202,10 @@ class WithUARTAdapter extends OverrideIOBinder({
   }
 })
 
-class WithSimSPIFlashModel extends OverrideIOBinder({
+class WithSimSPIFlashModel(rdOnly: Boolean = true) extends OverrideIOBinder({
   (system: HasPeripherySPIFlashModuleImp) => {
     val (ports, ioCells2d) = AddIOCells.spi(system.qspi, "qspi")
-    val harnessFn = (th: chipyard.TestHarness) => { SimSPIFlashModel.connect(ports, th.reset)(system.p); Nil }
+    val harnessFn = (th: chipyard.TestHarness) => { SimSPIFlashModel.connect(ports, th.reset, rdOnly)(system.p); Nil }
     Seq((ports, ioCells2d.flatten, Some(harnessFn)))
   }
 })
