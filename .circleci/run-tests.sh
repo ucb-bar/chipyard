@@ -69,7 +69,7 @@ case $1 in
     chipyard-spiflashwrite)
         make -C $LOCAL_CHIPYARD_DIR/tests
         make -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashwrite.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary
-        [[ "`xxd $LOCAL_CHIPYARD_DIR/tests/spiflash.img  | grep 1337\ 00ff\ aa55\ face | wc -l`" == "6" ]] || false
+        [[ "`hexdump -C $LOCAL_CHIPYARD_DIR/tests/spiflash.img  | grep 13\ 37\ 00\ ff\ aa\ 55\ fa\ ce | wc -l`" == "6" ]] || false
         ;;
     tracegen)
         run_tracegen ${mapping[$1]}
