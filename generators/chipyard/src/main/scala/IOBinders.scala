@@ -256,8 +256,9 @@ class WithTiedOffDebug extends OverrideIOBinder({
       Debug.tieoffDebug(debugPortOpt, resetctrlOpt, Some(psdPort))(system.p)
       // tieoffDebug doesn't actually tie everything off :/
       debugPortOpt.foreach { d =>
-        d.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare })
+        d.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare; cdmi.dmiClock := th.clock })
         d.dmactiveAck := DontCare
+        d.clock := th.clock
       }
       Nil
     }
