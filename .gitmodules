@@ -124,4 +124,4 @@
 	url = https://github.com/ucb-bar/nvdla-wrapper.git
 [submodule "software/nvdla-workload"]
 	path = software/nvdla-workload
-	url = git@github.com:ucb-bar/nvdla-workload.git
+	url = https://github.com/ucb-bar/nvdla-workload.git
