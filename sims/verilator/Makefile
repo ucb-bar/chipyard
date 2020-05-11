@@ -87,8 +87,9 @@ CHIPYARD_VERILATOR_FLAGS = \
 	--assert
 
 # Use --timescale to approximate timescale behavior of pre-4.034
+TIMESCALE_OPTS := $(shell verilator --version | perl -lne 'if (/(\d.\d+)/ && $$1 >= 4.034) { print "--timescale 1ns/1ps"; }')
 VERILATOR_NONCC_OPTS = \
-	--timescale 1ns/1ps \
+	$(TIMESCALE_OPTS) \
 	--top-module $(VLOG_MODEL) \
 	$(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; then echo "$(CHIPYARD_VERILATOR_FLAGS)"; else echo "$(ARIANE_VERILATOR_FLAGS)"; fi) \
 	--output-split 10000 \
