@@ -290,7 +290,7 @@ class WithPrefetchMiddleMan extends Config((site, here, up) => {
       maxTimeout = (1 << 30) - 1,
       lookAhead = nMSHRs-1)
   }
-  case MiddleManLatency => 30
+  case MiddleManLatency => 15
 })
 
 class WithHwachaNVMTEntries(nVMT: Int) extends Config((site, here, up) => {
