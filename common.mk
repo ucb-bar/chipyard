@@ -61,6 +61,8 @@ generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_REQS)
 	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator \
 		--target-dir $(build_dir) \
 		--name $(long_name) \
+		$(foreach x,$(FLOORPLAN_ASPECTS), --with-aspect $(x)) \
+		--floorplan-ir-file $(FLOORPLAN_FPIR) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
 		--legacy-configs $(CONFIG_PACKAGE).$(CONFIG)"
 

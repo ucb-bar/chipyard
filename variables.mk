@@ -107,6 +107,12 @@ HARNESS_SMEMS_FILE ?= $(build_dir)/$(long_name).harness.mems.v
 HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
 HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
 
+FLOORPLAN_FPIR ?= $(build_dir)/$(long_name).fpir
+FLOORPLAN_FILE ?= $(build_dir)/$(long_name).floorplan.yml
+FLOORPLAN_ASPECTS += \
+	chipyard.floorplan.RocketFloorplan
+
+
 # files that contain lists of files needed for VCS or Verilator simulation
 sim_files              ?= $(build_dir)/sim_files.f
 sim_top_blackboxes     ?= $(build_dir)/firrtl_black_box_resource_files.top.f
