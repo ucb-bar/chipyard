@@ -836,7 +836,7 @@ object MacroCompiler extends App {
         )
 
         // The actual MacroCompilerTransform basically just generates an input circuit
-        val macroCompilerInput = CircuitState(circuit, HighForm, annotations)
+        val macroCompilerInput = CircuitState(circuit, MidForm, annotations)
         val macroCompiled = (new MacroCompilerTransform).execute(macroCompilerInput)
 
 
