@@ -341,6 +341,7 @@ jobs:
             - run:
                 name: Run midasexamples tests
                 command: .circleci/run-midasexamples-tests.sh
+                no_output_timeout: 20m
     chipyard-ariane-run-tests:
         executor: main-env
         steps:
