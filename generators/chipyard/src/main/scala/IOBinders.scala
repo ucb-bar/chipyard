@@ -89,7 +89,7 @@ object AddIOCells {
   def gpio(gpios: Seq[GPIOPortIO], genFn: () => DigitalGPIOCell = IOCell.genericGPIO): (Seq[Seq[Analog]], Seq[Seq[IOCell]]) = {
     gpios.zipWithIndex.map({ case (gpio, i) =>
       gpio.pins.zipWithIndex.map({ case (pin, j) =>
-        val g = IO(Analog(1.W)).suggestName("gpio_${i}_${j}")
+        val g = IO(Analog(1.W)).suggestName(s"gpio_${i}_${j}")
         val iocell = genFn().suggestName(s"iocell_gpio_${i}_${j}")
         iocell.io.o := pin.o.oval
         iocell.io.oe := pin.o.oe
