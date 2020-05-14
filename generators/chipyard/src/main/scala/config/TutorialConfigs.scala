@@ -29,11 +29,9 @@ class TutorialStarterConfig extends Config(
   // Config fragments below this line affect hardware generation
   // of the Top
   new testchipip.WithTSI ++                  // Add a TSI (Test Serial Interface)  widget to bring-up the core
-  new chipyard.config.WithNoGPIO ++          // Disable GPIOs.
   new chipyard.config.WithBootROM ++         // Use the Chipyard BootROM
   new chipyard.config.WithRenumberHarts ++   // WithRenumberHarts fixes hartids heterogeneous designs, if design is not heterogeneous, this is a no-op
   new chipyard.config.WithUART ++            // Add a UART
-  new chipyard.config.WithNoSPIFlash ++      // no SPI flash controller
 
   // CUSTOMIZE THE CORE
   // Uncomment out one (or multiple) of the lines below, and choose
@@ -52,6 +50,7 @@ class TutorialStarterConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++  // hierarchical buses including mbus+l2
   // BaseConfig configures "bare" rocketchip system
   new freechips.rocketchip.system.BaseConfig
 )
@@ -66,11 +65,9 @@ class TutorialMMIOConfig extends Config(
   new chipyard.iobinders.WithSimSerial ++
 
   new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithRenumberHarts ++
   new chipyard.config.WithUART ++
-  new chipyard.config.WithNoSPIFlash ++
 
   // Attach either a TileLink or AXI4 version of GCD
   // Uncomment one of the below lines
@@ -83,6 +80,7 @@ class TutorialMMIOConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig
 )
 
@@ -95,11 +93,9 @@ class TutorialSha3Config extends Config(
   new chipyard.iobinders.WithSimSerial ++
 
   new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithRenumberHarts ++
   new chipyard.config.WithUART ++
-  new chipyard.config.WithNoSPIFlash ++
 
   // Uncomment this line once you added SHA3 to the build.sbt, and cloned the SHA3 repo
   // new sha3.WithSha3Accel ++
@@ -110,6 +106,7 @@ class TutorialSha3Config extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig
 )
 
@@ -122,11 +119,9 @@ class TutorialSha3BlackBoxConfig extends Config(
   new chipyard.iobinders.WithSimSerial ++
 
   new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithRenumberHarts ++
   new chipyard.config.WithUART ++
-  new chipyard.config.WithNoSPIFlash ++
 
   // Uncomment these lines once SHA3 is integrated
   // new sha3.WithSha3BlackBox ++ // Specify we want the Black-box verilog version of Sha3 Ctrl
@@ -138,5 +133,6 @@ class TutorialSha3BlackBoxConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig
 )

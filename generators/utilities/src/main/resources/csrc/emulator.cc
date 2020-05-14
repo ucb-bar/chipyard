@@ -287,7 +287,7 @@ done_processing:
   tile->clock = 0;
   tile->eval();
   // reset for several cycles to handle pipelined reset
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 100; i++) {
     tile->reset = 1;
     tile->clock = 0;
     tile->eval();

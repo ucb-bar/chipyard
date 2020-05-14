@@ -7,7 +7,7 @@ import scala.collection.mutable
 
 import firrtl.AnnotationSeq
 import firrtl.annotations.{Annotation, NoTargetAnnotation}
-import firrtl.options.{Phase, PreservesAll, StageOptions, Unserializable}
+import firrtl.options.{Phase, PreservesAll, StageOptions, Unserializable, Dependency}
 import firrtl.options.Viewer.view
 import freechips.rocketchip.stage.RocketChipOptions
 import freechips.rocketchip.stage.phases.{RocketTestSuiteAnnotation}
@@ -24,8 +24,8 @@ case class CustomMakefragSnippet(val toMakefrag: String) extends NoTargetAnnotat
 class GenerateTestSuiteMakefrags extends Phase with PreservesAll[Phase] with HasRocketChipStageUtils {
 
   // Our annotations tend not to be serializable, but are not marked as such.
-  override val prerequisites = Seq(classOf[freechips.rocketchip.stage.phases.GenerateFirrtlAnnos],
-                                   classOf[chipyard.stage.phases.AddDefaultTests])
+  override val prerequisites = Seq(Dependency[freechips.rocketchip.stage.phases.GenerateFirrtlAnnos],
+                                   Dependency[chipyard.stage.phases.AddDefaultTests])
 
   override def transform(annotations: AnnotationSeq): AnnotationSeq = {
     val targetDir = view[StageOptions](annotations).targetDir

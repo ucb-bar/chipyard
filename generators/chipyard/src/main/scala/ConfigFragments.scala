@@ -59,18 +59,6 @@ class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) =>
     SPIFlashParams(rAddress = 0x10040000, fAddress = 0x20000000, fSize = size))
 })
 
-class WithNoGPIO extends Config((site, here, up) => {
-  case PeripheryGPIOKey => Nil
-})
-
-class WithNoUART extends Config((site, here, up) => {
-  case PeripheryUARTKey => Nil
-})
-
-class WithNoSPIFlash extends Config((site, here, up) => {
-  case PeripherySPIFlashKey => Nil
-})
-
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey) map (tile => tile.copy(
     core = tile.core.copy(nL2TLBEntries = entries)

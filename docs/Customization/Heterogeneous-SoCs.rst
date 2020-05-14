@@ -56,7 +56,6 @@ Then you could use this new config fragment like the following.
 
     class SixCoreConfig extends Config(
       new WithTSI ++
-      new WithNoGPIO ++
       new WithBootROM ++
       new WithUART ++
       new freechips.rocketchip.subsystem.WithNoMMIOPort ++
