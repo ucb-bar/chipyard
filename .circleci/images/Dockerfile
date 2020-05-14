@@ -164,7 +164,7 @@ RUN apt-get install -y \
 # Install verilator
 RUN git clone http://git.veripool.org/git/verilator \
     && cd verilator \
-    && git checkout v4.028 \
+    && git checkout v4.034 \
     && autoconf && ./configure && make && make install
 
 # Update PATH for Java tools

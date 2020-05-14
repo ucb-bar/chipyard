@@ -17,8 +17,9 @@ include $(base_dir)/generators/tracegen/tracegen.mk
 include $(base_dir)/generators/nvdla/nvdla.mk
 
 #########################################################################################
-# variables to get all *.scala files
+# Prerequisite lists
 #########################################################################################
+# Returns a list of files in directory $1 with file extension $2.
 lookup_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.$(2)" -print 2> /dev/null)
 
 SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools/iocell)
@@ -37,7 +38,7 @@ TESTCHIPIP_CLASSES ?= "$(TESTCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/class
 #########################################################################################
 FIRRTL_JAR := $(base_dir)/lib/firrtl.jar
 
-$(FIRRTL_JAR): $(call lookup_scala_srcs, $(CHIPYARD_FIRRTL_DIR)/src/main/scala)
+$(FIRRTL_JAR): $(call lookup_srcs,$(CHIPYARD_FIRRTL_DIR),scala)
 	$(MAKE) -C $(CHIPYARD_FIRRTL_DIR) SBT="$(SBT)" root_dir=$(CHIPYARD_FIRRTL_DIR) build-scala
 	mkdir -p $(@D)
 	cp -p $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl.jar $@
@@ -46,7 +47,7 @@ $(FIRRTL_JAR): $(call lookup_scala_srcs, $(CHIPYARD_FIRRTL_DIR)/src/main/scala)
 #########################################################################################
 # create list of simulation file inputs
 #########################################################################################
-$(sim_files): $(call lookup_scala_srcs,$(base_dir)/generators/utilities/src/main/scala) $(FIRRTL_JAR)
+$(sim_files): $(call lookup_srcs,$(base_dir)/generators/utilities/src/main/scala,scala) $(FIRRTL_JAR)
 	cd $(base_dir) && $(SBT) "project utilities" "runMain utilities.GenerateSimFiles -td $(build_dir) -sim $(sim_name)"
 
 #########################################################################################
@@ -137,6 +138,12 @@ run-binary-debug: $(sim_debug)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
+run-none: $(output_dir)/none.out
+
+run-none-fast: $(output_dir)/none.run
+
+run-none-debug: $(output_dir)/none.vpd
+
 #########################################################################################
 # run assembly/benchmarks rules
 #########################################################################################
@@ -149,6 +156,14 @@ $(output_dir)/%.run: $(output_dir)/% $(sim)
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
 	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
+
+$(output_dir)/none.run: $(sim)
+	mkdir -p $(output_dir)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
+
+$(output_dir)/none.out: $(sim)
+	mkdir -p $(output_dir)
+	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) none </dev/null 2> >(spike-dasm > $@) | tee $(output_dir)/none.log)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator

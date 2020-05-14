@@ -15,7 +15,6 @@ class ArianeConfig extends Config(
   new chipyard.iobinders.WithTiedOffDebug ++                     // tie off debug (since we are using SimSerial for testing)
   new chipyard.iobinders.WithSimSerial ++                        // drive TSI with SimSerial for testing
   new testchipip.WithTSI ++                                      // use testchipip serial offchip link
-  new chipyard.config.WithNoGPIO ++                              // no top-level GPIO pins (overrides default set in sifive-blocks)
   new chipyard.config.WithBootROM ++                             // use default bootrom
   new chipyard.config.WithUART ++                                // add a UART
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++           // no top-level MMIO master port (overrides default set in rocketchip)
@@ -23,6 +22,7 @@ class ArianeConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++       // use Sifive L2 cache
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++ // no external interrupts
   new ariane.WithNArianeCores(1) ++                              // single Ariane core
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++  // hierarchical buses including mbus+l2
   new freechips.rocketchip.system.BaseConfig)                    // "base" rocketchip system
 
 class dmiArianeConfig extends Config(
@@ -31,7 +31,6 @@ class dmiArianeConfig extends Config(
   new chipyard.iobinders.WithSimAXIMem ++
   new chipyard.iobinders.WithTiedOffSerial ++
   new chipyard.iobinders.WithSimDebug ++               // add SimDebug and use it to drive simulation
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
@@ -39,4 +38,5 @@ class dmiArianeConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new ariane.WithNArianeCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)

@@ -41,7 +41,6 @@ trait HasTraceGenTilesModuleImp extends LazyModuleImp {
 
 class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
     with HasTraceGenTiles
-    with HasHierarchicalBusTopology
     with CanHaveMasterAXI4MemPort {
   override lazy val module = new TraceGenSystemModuleImp(this)
 }
