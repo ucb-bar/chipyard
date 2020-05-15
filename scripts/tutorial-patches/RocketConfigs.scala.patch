@@ -1,5 +1,5 @@
 diff --git a/generators/chipyard/src/main/scala/config/RocketConfigs.scala b/generators/chipyard/src/main/scala/config/RocketConfigs.scala
-index c3403c6..2e20413 100644
+index f29c580..0bd36ca 100644
 --- a/generators/chipyard/src/main/scala/config/RocketConfigs.scala
 +++ b/generators/chipyard/src/main/scala/config/RocketConfigs.scala
 @@ -333,7 +333,7 @@ class Sha3RocketConfig extends Config(
