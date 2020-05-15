@@ -172,7 +172,6 @@ class DromajoBoomConfig extends Config(
   new chipyard.iobinders.WithSimDromajoBridge ++                 // attach Dromajo
   new testchipip.WithTSI ++
   new chipyard.config.WithTraceIO ++                             // enable the traceio
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
