@@ -59,11 +59,6 @@ git submodule update --init generators/sha3
 git config --unset submodule.sims/firesim.update
 # Minimal non-recursive clone to initialize sbt dependencies
 git submodule update --init sims/firesim
-(
-    cd sims/firesim
-    # Initialize dependencies for MIDAS-level RTL simulation
-    git submodule update --init sim/midas
-)
 git config submodule.sims/firesim.update none
 
 # Only shallow clone needed for basic SW tests
