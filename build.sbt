@@ -2,7 +2,7 @@ import Tests._
 
 // This gives us a nicer handle  to the root project instead of using the
 // implicit one
-lazy val chipyardRoot = RootProject(file("."))
+lazy val chipyardRoot = Project("chipyardRoot", file("."))
 
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",

@@ -1,8 +1,8 @@
 diff --git a/generators/chipyard/src/main/scala/config/RocketConfigs.scala b/generators/chipyard/src/main/scala/config/RocketConfigs.scala
-index c091d16..a1ed9d6 100644
+index c3403c6..2e20413 100644
 --- a/generators/chipyard/src/main/scala/config/RocketConfigs.scala
 +++ b/generators/chipyard/src/main/scala/config/RocketConfigs.scala
-@@ -293,7 +293,7 @@ class Sha3RocketConfig extends Config(
+@@ -333,7 +333,7 @@ class Sha3RocketConfig extends Config(
    new chipyard.config.WithBootROM ++
    new chipyard.config.WithUART ++
    new chipyard.config.WithL2TLBs(1024) ++

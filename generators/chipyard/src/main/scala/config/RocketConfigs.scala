@@ -165,6 +165,46 @@ class GCDAXI4BlackBoxRocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: GCDAXI4BlackBoxRocketConfig
 
+class LargeSPIFlashROMRocketConfig extends Config(
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new chipyard.iobinders.WithSimSPIFlashModel(true) ++      // add the SPI flash model in the harness (read-only)
+  new testchipip.WithTSI ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new chipyard.config.WithSPIFlash ++                       // add the SPI flash controller
+  new chipyard.config.WithL2TLBs(1024) ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class SmallSPIFlashRocketConfig extends Config(
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new chipyard.iobinders.WithSimSPIFlashModel(false) ++     // add the SPI flash model in the harness (writeable)
+  new testchipip.WithTSI ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new chipyard.config.WithSPIFlash(0x100000) ++             // add the SPI flash controller (1 MiB)
+  new chipyard.config.WithL2TLBs(1024) ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  new freechips.rocketchip.system.BaseConfig)
+
 class SimBlockDeviceRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++

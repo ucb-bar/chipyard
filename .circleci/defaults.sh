@@ -52,6 +52,8 @@ mapping["chipyard-blkdev"]="SUB_PROJECT=chipyard CONFIG=SimBlockDeviceRocketConf
 mapping["chipyard-hwacha"]="SUB_PROJECT=chipyard CONFIG=HwachaRocketConfig"
 mapping["chipyard-gemmini"]="SUB_PROJECT=chipyard CONFIG=GemminiRocketConfig"
 mapping["chipyard-ariane"]="SUB_PROJECT=chipyard CONFIG=ArianeConfig"
+mapping["chipyard-spiflashread"]="SUB_PROJECT=chipyard CONFIG=LargeSPIFlashROMRocketConfig"
+mapping["chipyard-spiflashwrite"]="SUB_PROJECT=chipyard CONFIG=SmallSPIFlashRocketConfig"
 mapping["tracegen"]="SUB_PROJECT=chipyard CONFIG=NonBlockingTraceGenL2Config TOP=TraceGenSystem"
 mapping["tracegen-boom"]="SUB_PROJECT=chipyard CONFIG=BoomTraceGenConfig TOP=TraceGenSystem"
 mapping["chipyard-nvdla"]="SUB_PROJECT=chipyard CONFIG=SmallNVDLARocketConfig"

@@ -38,8 +38,8 @@ extern remote_bitbang_t * jtag;
 extern int dramsim;
 
 static uint64_t trace_count = 0;
-bool verbose;
-bool done_reset;
+bool verbose = false;
+bool done_reset = false;
 
 void handle_sigterm(int sig)
 {
@@ -282,6 +282,10 @@ done_processing:
   signal(SIGTERM, handle_sigterm);
 
   bool dump;
+  // start reset off low so a rising edge triggers async reset
+  tile->reset = 0;
+  tile->clock = 0;
+  tile->eval();
   // reset for several cycles to handle pipelined reset
   for (int i = 0; i < 100; i++) {
     tile->reset = 1;
