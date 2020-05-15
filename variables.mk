@@ -50,6 +50,30 @@ ifeq ($(SUB_PROJECT),hwacha)
 	TB                ?= TestDriver
 	TOP               ?= ExampleRocketSystem
 endif
+# For TestChipIP developers
+ifeq ($(SUB_PROJECT),testchipip)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= TestHarness
+	MODEL_PACKAGE     ?= chipyard.unittest
+	CONFIG            ?= TestChipUnitTestConfig
+	CONFIG_PACKAGE    ?= testchipip
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= TestDriver
+	TOP               ?= UnitTestSuite
+endif
+# For IceNet developers
+ifeq ($(SUB_PROJECT),icenet)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= TestHarness
+	MODEL_PACKAGE     ?= chipyard.unittest
+	CONFIG            ?= IceNetUnitTestConfig
+	CONFIG_PACKAGE    ?= icenet
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= TestDriver
+	TOP               ?= UnitTestSuite
+endif
 
 #########################################################################################
 # path to rocket-chip and testchipip
@@ -102,7 +126,7 @@ JAVA_ARGS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M
 SCALA_VERSION=2.12.10
 SCALA_VERSION_MAJOR=$(basename $(SCALA_VERSION))
 
-SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar ++$(SCALA_VERSION)
+SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
 
 #########################################################################################
 # output directory for tests

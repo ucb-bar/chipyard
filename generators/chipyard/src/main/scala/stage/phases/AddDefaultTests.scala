@@ -10,7 +10,7 @@ import chipsalliance.rocketchip.config.Parameters
 import chisel3.stage.phases.Elaborate
 import firrtl.AnnotationSeq
 import firrtl.annotations.{Annotation, NoTargetAnnotation}
-import firrtl.options.{Phase, PreservesAll}
+import firrtl.options.{Phase, PreservesAll, Dependency}
 import firrtl.options.Viewer.view
 import freechips.rocketchip.stage.RocketChipOptions
 import freechips.rocketchip.stage.phases.{RocketTestSuiteAnnotation}
@@ -23,9 +23,9 @@ class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipS
   // Make sure we run both after RocketChip's version of this phase, and Rocket Chip's annotation emission phase
   // because the RocketTestSuiteAnnotation is not serializable (but is not marked as such). 
   override val prerequisites = Seq(
-    classOf[freechips.rocketchip.stage.phases.GenerateFirrtlAnnos],
-    classOf[freechips.rocketchip.stage.phases.AddDefaultTests])
-  override val dependents = Seq(classOf[freechips.rocketchip.stage.phases.GenerateTestSuiteMakefrags])
+    Dependency[freechips.rocketchip.stage.phases.GenerateFirrtlAnnos],
+    Dependency[freechips.rocketchip.stage.phases.AddDefaultTests])
+  override val dependents = Seq(Dependency[freechips.rocketchip.stage.phases.GenerateTestSuiteMakefrags])
 
   private def addTestSuiteAnnotations(implicit p: Parameters): Seq[Annotation] = {
     val annotations = mutable.ArrayBuffer[Annotation]()

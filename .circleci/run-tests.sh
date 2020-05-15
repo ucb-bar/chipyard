@@ -71,6 +71,12 @@ case $1 in
     chipyard-ariane)
         make run-binary-fast -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
         ;;
+    icenet)
+        make run-none-fast -C $LOCAL_SIM_DIR ${mapping[$1]}
+        ;;
+    testchipip)
+        make run-none-fast -C $LOCAL_SIM_DIR ${mapping[$1]}
+        ;;
     *)
         echo "No set of tests for $1. Did you spell it right?"
         exit 1

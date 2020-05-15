@@ -104,7 +104,7 @@ object AddIOCells {
 
   /**
    * Add IO cells to a SiFive UART devices and name the IO ports.
-   * @param gpios A Seq of UART port bundles
+   * @param uartPins A Seq of UART port bundles
    * @return Returns a tuple of (A Seq of top-level UARTPortIO IOs; a 2D Seq of IOCell module references)
    */
   def uart(uartPins: Seq[UARTPortIO]): (Seq[UARTPortIO], Seq[Seq[IOCell]]) = {
@@ -117,7 +117,7 @@ object AddIOCells {
 
   /**
    * Add IO cells to a debug module and name the IO ports.
-   * @param gpios A PSDIO bundle
+   * @param psd A PSDIO bundle
    * @param resetctrlOpt An optional ResetCtrlIO bundle
    * @param debugOpt An optional DebugIO bundle
    * @return Returns a tuple3 of (Top-level PSDIO IO; Optional top-level DebugIO IO; a list of IOCell module references)
@@ -256,8 +256,9 @@ class WithTiedOffDebug extends OverrideIOBinder({
       Debug.tieoffDebug(debugPortOpt, resetctrlOpt, Some(psdPort))(system.p)
       // tieoffDebug doesn't actually tie everything off :/
       debugPortOpt.foreach { d =>
-        d.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare })
+        d.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare; cdmi.dmiClock := th.clock })
         d.dmactiveAck := DontCare
+        d.clock := th.clock
       }
       Nil
     }
@@ -320,4 +321,4 @@ class WithSimDromajoBridge extends ComposeIOBinder({
 })
 
 
-}
+} /* end package object */
