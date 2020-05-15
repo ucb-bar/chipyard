@@ -12,7 +12,7 @@ parameters:
 executors:
     main-env:
         docker:
-            - image: ucbbar/chipyard-image:1.0.0
+            - image: ucbbar/chipyard-image:1.0.1
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 
@@ -262,6 +262,16 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "testchipip"
+    prepare-chipyard-spiflashwrite:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-spiflashwrite"
+    prepare-chipyard-spiflashread:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-spiflashread"
     chipyard-rocket-run-tests:
         executor: main-env
         steps:
@@ -300,6 +310,16 @@ jobs:
             - run-tests:
                 tools-version: "esp-tools"
                 project-key: "chipyard-gemmini"
+    chipyard-spiflashwrite-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-spiflashwrite"
+    chipyard-spiflashread-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-spiflashread"
     tracegen-run-tests:
         executor: main-env
         steps:
@@ -464,6 +484,16 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
+            - prepare-chipyard-spiflashwrite:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-spiflashread:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
             # Run the respective tests
 
             # Run midasexamples test
@@ -507,6 +537,14 @@ workflows:
             - tracegen-boom-run-tests:
                 requires:
                     - prepare-tracegen-boom
+
+            - chipyard-spiflashwrite-run-tests:
+                requires:
+                    - prepare-chipyard-spiflashwrite
+
+            - chipyard-spiflashread-run-tests:
+                requires:
+                    - prepare-chipyard-spiflashread
 
             # Run the firesim tests
             - firesim-run-tests:
