@@ -72,7 +72,6 @@ class WithTracegenSystem extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => LazyModule(new tracegen.TraceGenSystem()(p))
 })
 
-
 class WithRenumberHarts(rocketFirst: Boolean = false) extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey, site).zipWithIndex map { case (r, i) =>
     r.copy(hartId = i + (if(rocketFirst) 0 else up(BoomTilesKey, site).length))
@@ -82,12 +81,6 @@ class WithRenumberHarts(rocketFirst: Boolean = false) extends Config((site, here
   }
   case MaxHartIdBits => log2Up(up(BoomTilesKey, site).size + up(RocketTilesKey, site).size)
 })
-
-
-
-// ------------------
-// Multi-RoCC Support
-// ------------------
 
 /**
  * Map from a hartId to a particular RoCC accelerator

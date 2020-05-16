@@ -55,18 +55,16 @@ VCS_CC_OPTS = \
 
 VCS_NONCC_OPTS = \
 	+lint=all,noVCDE,noONGS,noUI \
-	-error=PCWM-L \
 	-timescale=1ns/1ps \
 	-quiet \
 	-q \
 	+rad \
-	+v2k \
 	+vcs+lic+wait \
 	+vc+list \
 	-error=noZMMCM \
-	-assert svaext \
-	-sverilog \
-	+libext+.v \
+	-error=PCWM-L \
+	-sverilog +systemverilogext+.sv+.svi+.svh+.svt -assert svaext +libext+.sv \
+	+v2k +verilog2001ext+.v95+.vt+.vp +libext+.v \
 	+incdir+$(build_dir) \
 	-f $(sim_common_files) \
 	$(sim_vsrcs)

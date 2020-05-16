@@ -262,6 +262,11 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "testchipip"
+    prepare-chipyard-nvdla:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-nvdla"
     prepare-chipyard-spiflashwrite:
         executor: main-env
         steps:
@@ -368,6 +373,11 @@ jobs:
             - run-tests:
                 project-key: "chipyard-ariane"
                 timeout: "30m"
+    chipyard-nvdla-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-nvdla"
     icenet-run-tests:
         executor: main-env
         steps:
@@ -484,6 +494,11 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
+            - prepare-chipyard-nvdla:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
             - prepare-chipyard-spiflashwrite:
                 requires:
                     - install-riscv-toolchain
@@ -567,6 +582,9 @@ workflows:
                 requires:
                     - prepare-chipyard-ariane
 
+            - chipyard-nvdla-run-tests:
+                requires:
+                    - prepare-chipyard-nvdla
             - icenet-run-tests:
                 requires:
                     - prepare-icenet

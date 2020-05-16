@@ -56,6 +56,7 @@ mapping["chipyard-spiflashread"]="SUB_PROJECT=chipyard CONFIG=LargeSPIFlashROMRo
 mapping["chipyard-spiflashwrite"]="SUB_PROJECT=chipyard CONFIG=SmallSPIFlashRocketConfig"
 mapping["tracegen"]="SUB_PROJECT=chipyard CONFIG=NonBlockingTraceGenL2Config TOP=TraceGenSystem"
 mapping["tracegen-boom"]="SUB_PROJECT=chipyard CONFIG=BoomTraceGenConfig TOP=TraceGenSystem"
+mapping["chipyard-nvdla"]="SUB_PROJECT=chipyard CONFIG=SmallNVDLARocketConfig"
 mapping["firesim"]="SCALA_TEST=firesim.firesim.RocketNICF1Tests"
 mapping["firesim-multiclock"]="SCALA_TEST=firesim.firesim.RocketMulticlockF1Tests"
 mapping["fireboom"]="SCALA_TEST=firesim.firesim.BoomF1Tests"

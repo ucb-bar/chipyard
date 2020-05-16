@@ -80,6 +80,10 @@ case $1 in
     chipyard-ariane)
         make run-binary-fast -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
         ;;
+    chipyard-nvdla)
+        make -C $LOCAL_CHIPYARD_DIR/tests
+        make -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv run-binary
+        ;;
     icenet)
         make run-none-fast -C $LOCAL_SIM_DIR ${mapping[$1]}
         ;;

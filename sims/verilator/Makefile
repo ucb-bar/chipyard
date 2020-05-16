@@ -72,7 +72,6 @@ ARIANE_VERILATOR_FLAGS = \
 	--unroll-count 256 \
 	-Werror-PINMISSING \
 	-Werror-IMPLICIT \
-	-Wno-fatal \
 	-Wno-PINCONNECTEMPTY \
 	-Wno-ASSIGNDLY \
 	-Wno-DECLFILENAME \
@@ -91,9 +90,11 @@ TIMESCALE_OPTS := $(shell verilator --version | perl -lne 'if (/(\d.\d+)/ && $$1
 VERILATOR_NONCC_OPTS = \
 	$(TIMESCALE_OPTS) \
 	--top-module $(VLOG_MODEL) \
+	-Wno-fatal \
 	$(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; then echo "$(CHIPYARD_VERILATOR_FLAGS)"; else echo "$(ARIANE_VERILATOR_FLAGS)"; fi) \
 	--output-split 10000 \
 	--output-split-cfuncs 100 \
+	--max-num-width 1048576 \
 	-f $(sim_common_files) \
 	$(sim_vsrcs)
 
