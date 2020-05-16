@@ -75,7 +75,7 @@ abstract class FireSimTestSuite(
         case _: BenchmarkTestSuite | _: BlockdevTestSuite | _: NICTestSuite => ".riscv"
         case _ => ""
       }
-      val results = suite.names.toSeq sliding (N, N) map { t => 
+      val results = suite.names.toSeq sliding (N, N) map { t =>
         val subresults = t map (name =>
           Future(name -> invokeMlSimulator(backend, s"$name$postfix", debug)))
         Await result (Future sequence subresults, Duration.Inf)
@@ -130,6 +130,7 @@ abstract class FireSimTestSuite(
   mkdirs
   elaborate
   generateTestSuiteMakefrags
+  generateArtefacts
   runTest("verilator", "rv64ui-p-simple", false, Seq(s"""EXTRA_SIM_ARGS=+trace-humanreadable0"""))
   //diffTracelog("rv64ui-p-simple.out")
   runSuite("verilator")(benchmarks)

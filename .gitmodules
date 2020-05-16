@@ -125,3 +125,6 @@
 [submodule "software/nvdla-workload"]
 	path = software/nvdla-workload
 	url = https://github.com/ucb-bar/nvdla-workload.git
+[submodule "tools/dromajo/dromajo-src"]
+	path = tools/dromajo/dromajo-src
+	url = https://github.com/abejgonzalez/dromajo.git

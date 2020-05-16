@@ -45,6 +45,7 @@ class FireSim(implicit val p: Parameters) extends RawModule {
       }))
       (lazyModule, Module(lazyModule.module))
     }
+
     val peekPokeBridge = PeekPokeBridge(clock, reset)
     // A Seq of partial functions that will instantiate the right bridge only
     // if that Mixin trait is present in the target's LazyModule class instance

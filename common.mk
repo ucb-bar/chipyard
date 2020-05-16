@@ -15,6 +15,7 @@ SHELL=/bin/bash
 include $(base_dir)/generators/ariane/ariane.mk
 include $(base_dir)/generators/tracegen/tracegen.mk
 include $(base_dir)/generators/nvdla/nvdla.mk
+include $(base_dir)/tools/dromajo/dromajo.mk
 
 #########################################################################################
 # Prerequisite lists

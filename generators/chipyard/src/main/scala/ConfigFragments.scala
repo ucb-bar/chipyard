@@ -13,7 +13,7 @@ import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams
 import freechips.rocketchip.util.{AsyncResetReg}
 
 import boom.common.{BoomTilesKey}
-
+import ariane.{ArianeTilesKey}
 import testchipip._
 
 import hwacha.{Hwacha}
@@ -145,4 +145,10 @@ class WithControlCore extends Config((site, here, up) => {
       hartId = up(RocketTilesKey, site).size + up(BoomTilesKey, site).size
     )
   case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
+})
+
+class WithTraceIO extends Config((site, here, up) => {
+  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
+  case ArianeTilesKey => up(ArianeTilesKey) map (tile => tile.copy(trace = true))
+  case TracePortKey => Some(TracePortParams())
 })
