@@ -24,6 +24,8 @@ import freechips.rocketchip.amba.axi4._
 import boom.common.{BoomTile, BoomTilesKey, BoomCrossingKey, BoomTileParams}
 import ariane.{ArianeTile, ArianeTilesKey, ArianeCrossingKey, ArianeTileParams}
 
+import testchipip.{DromajoHelper}
+
 trait HasChipyardTiles extends HasTiles
   with CanHavePeripheryPLIC
   with CanHavePeripheryCLINT
@@ -106,27 +108,6 @@ class SubsystemModuleImp[+L <: Subsystem](_outer: L) extends BaseSubsystemModule
   ElaborationArtefacts.add("""core.config""", outer.tiles.map(x => x.module.toString).mkString("\n"))
 
   // Generate C header with relevant information for Dromajo
-  // THIS IS INCLUDED IN THE `dromajo_params.h` header file
-  var dromajoParams: String = ""
-  dromajoParams += "#ifndef DROMAJO_PARAMS_H"
-  dromajoParams += "\n#define DROMAJO_PARAMS_H"
-  dromajoParams += "\n\n" + "#define DROMAJO_RESET_VECTOR " + "\"" + "0x" + f"${p(BootROMParams).hang}%X" + "\""
-  dromajoParams += "\n" + "#define DROMAJO_MMIO_START " + "\"" + "0x" + f"${p(BootROMParams).address + p(BootROMParams).size}%X" + "\""
-  p(ExtMem) map { eP =>
-    dromajoParams += "\n" + "#define DROMAJO_MMIO_END " + "\"" + "0x" + f"${eP.master.base}%X" + "\""
-    // dromajo memory is in MiB chunks
-    dromajoParams += "\n" + "#define DROMAJO_MEM_SIZE " + "\"" + "0x" + f"${eP.master.size >> 20}%X" + "\""
-  }
-  p(PLICKey) map { pP =>
-    dromajoParams += "\n" + "#define DROMAJO_PLIC_BASE " + "\"" + "0x" + f"${pP.baseAddress}%X" + "\""
-    dromajoParams += "\n" + "#define DROMAJO_PLIC_SIZE " + "\"" + "0x" + f"${PLICConsts.size(pP.maxHarts)}%X" + "\""
-  }
-  p(CLINTKey) map { cP =>
-    dromajoParams += "\n" + "#define DROMAJO_CLINT_BASE " + "\"" + "0x" + f"${cP.baseAddress}%X" + "\""
-    dromajoParams += "\n" + "#define DROMAJO_CLINT_SIZE " + "\"" + "0x" + f"${CLINTConsts.size}%X" + "\""
-  }
-  dromajoParams += "\n\n#endif"
-
-  ElaborationArtefacts.add("""dromajo_params.h""", dromajoParams)
-
+  // This is included in the `dromajo_params.h` header file
+  DromajoHelper.addArtefacts
 }
