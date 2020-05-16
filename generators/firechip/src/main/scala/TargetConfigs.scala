@@ -73,13 +73,6 @@ class WithNIC extends icenet.WithIceNIC(inBufFlits = 8192, ctrlQueueDepth = 64)
 
 
 
-// Enables tracing on all cores
-class WithTraceIO extends Config((site, here, up) => {
-  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
-  case ArianeTilesKey => up(ArianeTilesKey) map (tile => tile.copy(trace = true))
-  case TracePortKey => Some(TracePortParams())
-})
-
 
 // Tweaks that are generally applied to all firesim configs
 class WithFireSimConfigTweaks extends Config(
@@ -92,7 +85,7 @@ class WithFireSimConfigTweaks extends Config(
   // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
   new WithoutTLMonitors ++
   // Optional: Adds IO to attach tracerV bridges
-  new WithTraceIO ++
+  new chipyard.config.WithTraceIO ++
   // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 32 GiB on F1)
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
   // Required: Adds IO to attach SerialBridge. The SerialBridges is responsible
@@ -142,7 +135,6 @@ class FireSimLargeBoomConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.LargeBoomConfig)
-
 
 //********************************************************************
 // Heterogeneous config, base off chipyard's LargeBoomAndRocketConfig

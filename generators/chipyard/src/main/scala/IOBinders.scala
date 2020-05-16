@@ -351,4 +351,12 @@ class WithTraceGenSuccessBinder extends OverrideIOBinder({
   }
 })
 
+class WithSimDromajoBridge extends ComposeIOBinder({
+   (system: CanHaveTraceIOModuleImp) => {
+     system.traceIO match { case Some(t) => t.traces.map(tileTrace => SimDromajoBridge(tileTrace)(system.p)) }
+     Nil
+   }
+})
+
+
 } /* end package object */
