@@ -12,38 +12,27 @@ import freechips.rocketchip.system.{RocketTestSuite, BenchmarkTestSuite}
 import freechips.rocketchip.system.TestGeneration._
 import freechips.rocketchip.system.DefaultTestSuites._
 
-import firesim.util.GeneratorArgs
-
 abstract class FireSimTestSuite(
     topModuleClass: String,
     targetConfigs: String,
     platformConfigs: String,
     N: Int = 8
-  ) extends firesim.TestSuiteCommon with IsFireSimGeneratorLike {
+  ) extends firesim.TestSuiteCommon {
   import scala.concurrent.duration._
   import ExecutionContext.Implicits.global
 
-  val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
+  val topModuleProject = "firesim.firesim"
 
-  lazy val generatorArgs = GeneratorArgs(
-    midasFlowKind = "midas",
-    targetDir = "generated-src",
-    topModuleProject = "firesim.firesim",
-    topModuleClass = topModuleClass,
-    targetConfigProject = "firesim.firesim",
-    targetConfigs = targetConfigs ++ "_WithScalaTestFeatures",
-    platformConfigProject = "firesim.firesim",
-    platformConfigs = platformConfigs)
-
-  // From HasFireSimGeneratorUtilities
-  // For the firesim utilities to use the same directory as the test suite
-  override lazy val testDir = genDir
+  val chipyardLongName = topModuleProject + "." + topModuleClass + "." + targetConfigs
 
   // From TestSuiteCommon
-  val targetTuple = generatorArgs.tupleName
-  val commonMakeArgs = Seq(s"DESIGN=${generatorArgs.topModuleClass}",
-                           s"TARGET_CONFIG=${generatorArgs.targetConfigs}",
-                           s"PLATFORM_CONFIG=${generatorArgs.platformConfigs}")
+  val targetTuple = s"$topModuleClass-$targetConfigs-$platformConfigs"
+  val commonMakeArgs = Seq(s"DESIGN=${topModuleClass}",
+                           s"TARGET_CONFIG=${targetConfigs}",
+                           s"PLATFORM_CONFIG=${platformConfigs}")
+
+  override lazy val genDir  = new File(firesimDir, s"generated-src/${chipyardLongName}")
+
 
   def invokeMlSimulator(backend: String, name: String, debug: Boolean, additionalArgs: Seq[String] = Nil) = {
     make((Seq(s"${outDir.getAbsolutePath}/${name}.%s".format(if (debug) "vpd" else "out"),
@@ -127,20 +116,16 @@ abstract class FireSimTestSuite(
   }
 
   clean
-  mkdirs
-  elaborate
-  generateTestSuiteMakefrags
-  generateArtefacts
   runTest("verilator", "rv64ui-p-simple", false, Seq(s"""EXTRA_SIM_ARGS=+trace-humanreadable0"""))
   //diffTracelog("rv64ui-p-simple.out")
   runSuite("verilator")(benchmarks)
-  runSuite("verilator")(FastBlockdevTests)
+  //runSuite("verilator")(FastBlockdevTests)
 }
 
 class RocketF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimQuadRocketConfig", "WithSynthAsserts_BaseF1Config")
 class BoomF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimLargeBoomConfig", "BaseF1Config")
 class RocketNICF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimRocketConfig", "BaseF1Config") {
-  runSuite("verilator")(NICLoopbackTests)
+  //runSuite("verilator")(NICLoopbackTests)
 }
 //class ArianeF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimArianeConfig", "BaseF1Config") {
 //  runSuite("verilator")(NICLoopbackTests)
