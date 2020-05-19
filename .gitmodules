@@ -128,3 +128,6 @@
 [submodule "tools/dromajo/dromajo-src"]
 	path = tools/dromajo/dromajo-src
 	url = https://github.com/riscv-boom/dromajo.git
+[submodule "tools/verif"]
+	path = tools/verif
+	url = https://github.com/TsaiAnson/verif.git
