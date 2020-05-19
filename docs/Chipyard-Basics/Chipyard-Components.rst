@@ -80,7 +80,7 @@ Tools
   A Chisel library for writing custom signal processing hardware, as well as integrating custom signal processing hardware into an SoC (especially a Rocket-based SoC).
 
 **Dromajo**
-  A RV64GC emulator primarily used for co-simulation and was originally developed by Esperanto Technology.
+  A RV64GC emulator primarily used for co-simulation and was originally developed by Esperanto Technologies.
   See :ref:`Dromajo` for more information.
 
 Toolchains

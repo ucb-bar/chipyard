@@ -127,4 +127,4 @@
 	url = https://github.com/ucb-bar/nvdla-workload.git
 [submodule "tools/dromajo/dromajo-src"]
 	path = tools/dromajo/dromajo-src
-	url = https://github.com/abejgonzalez/dromajo.git
+	url = https://github.com/riscv-boom/dromajo.git
