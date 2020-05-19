@@ -6,6 +6,7 @@ import java.io.File
 import scala.concurrent.{Future, Await, ExecutionContext}
 import scala.sys.process.{stringSeqToProcess, ProcessLogger}
 import scala.io.Source
+import org.scalatest.Suites
 
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.system.{RocketTestSuite, BenchmarkTestSuite}
@@ -50,12 +51,6 @@ abstract class FireSimTestSuite(
     }
   }
 
-  //def runReplay(backend: String, replayBackend: String, name: String) = {
-  //  val dir = (new File(outDir, backend)).getAbsolutePath
-  //  (Seq("make", s"replay-$replayBackend",
-  //       s"SAMPLE=${dir}/${name}.sample", s"output_dir=$dir") ++ makeArgs).!
-  //}
-
   def runSuite(backend: String, debug: Boolean = false)(suite: RocketTestSuite) {
     // compile emulators
     behavior of s"${suite.makeTargetName} running on $backend"
@@ -72,20 +67,6 @@ abstract class FireSimTestSuite(
       results.flatten foreach { case (name, exitcode) =>
         it should s"pass $name" in { assert(exitcode == 0) }
       }
-      //replayBackends foreach { replayBackend =>
-      //  if (platformParams(midas.EnableSnapshot) && isCmdAvailable("vcs")) {
-      //    assert((Seq("make", s"vcs-$replayBackend") ++ makeArgs).! == 0) // compile vcs
-      //    suite.names foreach { name =>
-      //      it should s"replay $name in $replayBackend" in {
-      //        assert(runReplay(backend, replayBackend, s"$name$postfix") == 0)
-      //      }
-      //    }
-      //  } else {
-      //    suite.names foreach { name =>
-      //      ignore should s"replay $name in $backend"
-      //    }
-      //  }
-      //}
     } else {
       ignore should s"pass $backend"
     }
@@ -117,61 +98,23 @@ abstract class FireSimTestSuite(
 
   clean
   runTest("verilator", "rv64ui-p-simple", false, Seq(s"""EXTRA_SIM_ARGS=+trace-humanreadable0"""))
-  //diffTracelog("rv64ui-p-simple.out")
   runSuite("verilator")(benchmarks)
-  //runSuite("verilator")(FastBlockdevTests)
 }
 
 class RocketF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimQuadRocketConfig", "WithSynthAsserts_BaseF1Config")
 class BoomF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimLargeBoomConfig", "BaseF1Config")
-class RocketNICF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimRocketConfig", "BaseF1Config") {
-  //runSuite("verilator")(NICLoopbackTests)
-}
-//class ArianeF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimArianeConfig", "BaseF1Config") {
-//  runSuite("verilator")(NICLoopbackTests)
-//}
-// Disabled until RAM optimizations re-enabled in multiclock
-//class RamModelRocketF1Tests extends FireSimTestSuite("FireSim", "FireSimDualRocketConfig", "BaseF1Config_MCRams")
-//class RamModelBoomF1Tests extends FireSimTestSuite("FireSim", "FireSimBoomConfig", "BaseF1Config_MCRams")
-
+class RocketNICF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimRocketConfig", "BaseF1Config")
 // Multiclock tests
 class RocketMulticlockF1Tests extends FireSimTestSuite(
   "FireSimMulticlockPOC",
   "FireSimQuadRocketMulticlockConfig",
   "WithSynthAsserts_BaseF1Config")
 
-// Jerry broke these -- damn it Jerry.
-//abstract class FireSimTraceGenTest(targetConfig: String, platformConfig: String)
-//    extends firesim.TestSuiteCommon with IsFireSimGeneratorLike {
-//  val longName = names.topModuleProject + "." + names.topModuleClass + "." + names.configs
-//
-//  lazy val generatorArgs = GeneratorArgs(
-//    midasFlowKind = "midas",
-//    targetDir = "generated-src",
-//    topModuleProject = "firesim.firesim",
-//    topModuleClass = "FireSimTraceGen",
-//    targetConfigProject = "firesim.firesim",
-//    targetConfigs = targetConfig ++ "_WithScalaTestFeatures",
-//    platformConfigProject = "firesim.firesim",
-//    platformConfigs = platformConfig)
-//
-//  // From HasFireSimGeneratorUtilities
-//  // For the firesim utilities to use the same directory as the test suite
-//  override lazy val testDir = genDir
-//
-//  // From TestSuiteCommon
-//  val targetTuple = generatorArgs.tupleName
-//  val commonMakeArgs = Seq(s"DESIGN=${generatorArgs.topModuleClass}",
-//                           s"TARGET_CONFIG=${generatorArgs.targetConfigs}",
-//                           s"PLATFORM_CONFIG=${generatorArgs.platformConfigs}")
-//
-//  it should "pass" in {
-//    assert(make("fsim-tracegen") == 0)
-//  }
-//}
-//
-//class FireSimLLCTraceGenTest extends FireSimTraceGenTest(
-//  "DDR3FRFCFSLLC4MB_FireSimTraceGenConfig", "BaseF1Config")
-//
-//class FireSimL2TraceGenTest extends FireSimTraceGenTest(
-//  "DDR3FRFCFS_FireSimTraceGenL2Config", "BaseF1Config")
+class ArianeF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimArianeConfig", "BaseF1Config")
+
+// This test suite only mirrors what is run in CI. CI invokes each test individually, using a testOnly call.
+class CITests extends Suites(
+  new RocketF1Tests,
+  new BoomF1Tests,
+  new RocketNICF1Tests,
+  new RocketMulticlockF1Tests)
