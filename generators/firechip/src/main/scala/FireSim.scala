@@ -29,6 +29,7 @@ object NodeIdx {
 }
 
 class FireSim(implicit val p: Parameters) extends RawModule {
+  freechips.rocketchip.util.property.cover.setPropLib(new midas.passes.FireSimPropertyLibrary())
   val clockBridge = Module(new RationalClockBridge)
   val clock = clockBridge.io.clocks.head
   val reset = WireInit(false.B)

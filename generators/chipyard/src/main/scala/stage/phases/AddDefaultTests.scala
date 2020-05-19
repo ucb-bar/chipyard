@@ -16,6 +16,7 @@ import freechips.rocketchip.stage.RocketChipOptions
 import freechips.rocketchip.stage.phases.{RocketTestSuiteAnnotation}
 import freechips.rocketchip.system.{RocketTestSuite, TestGeneration}
 import freechips.rocketchip.util.HasRocketChipStageUtils
+import freechips.rocketchip.tile.XLen
 
 import chipyard.TestSuiteHelper
 
@@ -30,9 +31,13 @@ class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipS
   private def addTestSuiteAnnotations(implicit p: Parameters): Seq[Annotation] = {
     val annotations = mutable.ArrayBuffer[Annotation]()
     val suiteHelper = new TestSuiteHelper
-    suiteHelper.addRocketTestSuites
-    suiteHelper.addBoomTestSuites
-    suiteHelper.addArianeTestSuites
+    // Use Xlen as a proxy for detecting if we are a processor-like target
+    // The underlying test suites expect this field to be defined
+    if (p.lift(XLen).nonEmpty) {
+      suiteHelper.addRocketTestSuites
+      suiteHelper.addBoomTestSuites
+      suiteHelper.addArianeTestSuites
+    }
 
     // if hwacha parameter exists then generate its tests
     // TODO: find a more elegant way to do this. either through
