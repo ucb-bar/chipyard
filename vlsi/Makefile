@@ -67,8 +67,8 @@ include $(base_dir)/common.mk
 #########################################################################################
 # srams
 #########################################################################################
-SRAM_GENERATOR_CONF = $(build_dir)/sram_generator-input.yml
-SRAM_CONF=$(build_dir)/sram_generator-output.json
+SRAM_GENERATOR_CONF = $(OBJ_DIR)/sram_generator-input.yml
+SRAM_CONF=$(OBJ_DIR)/sram_generator-output.json
 
 ## SRAM Generator
 .PHONY: sram_generator srams
