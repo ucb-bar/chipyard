@@ -107,7 +107,7 @@ If you would still like to try to perform an in-place manual version upgrade (**
 
 * Generated scripts and source files (for example, ``env.sh``)
 
-* Target software state (Linux kernel binaries, Linux Images) within FireMarshal
+* Re-generating/deleting target software state (Linux kernel binaries, Linux images) within FireMarshal
 
 
 This is by no means a comprehensive list of potential stale state within Chipyard. Hence, as mentioned earlier, the recommended method for a Chipyard version upgrade is a fresh clone (or a merge, and then a fresh clone).
