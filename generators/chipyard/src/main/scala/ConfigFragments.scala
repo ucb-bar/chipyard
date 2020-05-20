@@ -3,7 +3,7 @@ package chipyard.config
 import chisel3._
 import chisel3.util.{log2Up}
 
-import freechips.rocketchip.config.{Field, Parameters, Config}
+import freechips.rocketchip.config.{Field, Parameters, Config, View}
 import freechips.rocketchip.subsystem.{SystemBusKey, RocketTilesKey, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, CacheBlockBytes}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
@@ -13,7 +13,6 @@ import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams
 import freechips.rocketchip.util.{AsyncResetReg}
 
 import boom.common.{BoomTilesKey}
-import ariane.{ArianeTilesKey}
 import testchipip._
 
 import hwacha.{Hwacha}
@@ -23,6 +22,7 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 
 import chipyard.{BuildTop, BuildSystem}
+import chipyard.{CoreRegistrar, CoreRegisterEntryBase}
 
 /**
  * TODO: Why do we need this?
@@ -147,8 +147,21 @@ class WithControlCore extends Config((site, here, up) => {
   case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
 })
 
+trait TraceIOMatch {
+  this: CoreRegisterEntryBase =>
+  val matchTile: (View, View, View) => PartialFunction[Field[Seq[TileParams]],Any] = ((site, here, up) => {
+    // TODO: XXX What's the "tile" here?
+    case tilesKey => up(tilesKey) map (tile => tile.copy(trace = true))
+  })
+}
+
 class WithTraceIO extends Config((site, here, up) => {
-  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
-  case ArianeTilesKey => up(ArianeTilesKey) map (tile => tile.copy(trace = true))
-  case TracePortKey => Some(TracePortParams())
+  val coreMatch = (coreList: List[CoreRegisterEntryBase]) => coreList match {
+    case coreEntry :: tail => coreEntry.matchTile(site, here, up) orElse coreMatch(tail)
+    case Nil => {
+      case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
+      case TracePortKey => Some(TracePortParams())
+    }
+  }
+  coreMatch(CoreRegistrar.cores)
 })

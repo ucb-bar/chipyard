@@ -22,7 +22,6 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.amba.axi4._
 
 import boom.common.{BoomTile, BoomTilesKey, BoomCrossingKey, BoomTileParams}
-import ariane.{ArianeTile, ArianeTilesKey, ArianeCrossingKey, ArianeTileParams}
 
 import testchipip.{DromajoHelper}
 
@@ -36,14 +35,17 @@ trait HasChipyardTiles extends HasTiles
 
   protected val rocketTileParams = p(RocketTilesKey)
   protected val boomTileParams = p(BoomTilesKey)
-  protected val arianeTileParams = p(ArianeTilesKey)
+  protected val coreTileParams = CoreRegistrar.cores map (coreType => p(coreType.tilesKey))
 
   // crossing can either be per tile or global (aka only 1 crossing specified)
   private val rocketCrossings = perTileOrGlobalSetting(p(RocketCrossingKey), rocketTileParams.size)
   private val boomCrossings = perTileOrGlobalSetting(p(BoomCrossingKey), boomTileParams.size)
-  private val arianeCrossings = perTileOrGlobalSetting(p(ArianeCrossingKey), arianeTileParams.size)
+  private val coreCrossings = (CoreRegistrar.cores zip coreTileParams) map ((coreType, tileParams) =>
+    perTileOrGlobalSetting(p(coreType.crossingKey), tileParams.size))
 
-  val allTilesInfo = (rocketTileParams ++ boomTileParams ++ arianeTileParams) zip (rocketCrossings ++ boomCrossings ++ arianeCrossings)
+  // TODO: XXX The "tiles" below scan for hartId but it is not in CoreParams. Should that be added in later 
+  // revision, or I have to use reflection to get that parameter?
+  val allTilesInfo = (rocketTileParams ++ boomTileParams ++ coreTileParams) zip (rocketCrossings ++ boomCrossings ++ coreCrossings)
 
   // Make a tile and wire its nodes into the system,
   // according to the specified type of clock crossing.
@@ -55,17 +57,22 @@ trait HasChipyardTiles extends HasTiles
   val tiles = allTilesInfo.sortWith(_._1.hartId < _._1.hartId).map {
     case (param, crossing) => {
 
-      val tile = param match {
-        case r: RocketTileParams => {
-          LazyModule(new RocketTile(r, crossing, PriorityMuxHartIdFromSeq(rocketTileParams), logicalTreeNode))
-        }
-        case b: BoomTileParams => {
-          LazyModule(new BoomTile(b, crossing, PriorityMuxHartIdFromSeq(boomTileParams), logicalTreeNode))
-        }
-        case a: ArianeTileParams => {
-          LazyModule(new ArianeTile(a, crossing, PriorityMuxHartIdFromSeq(arianeTileParams), logicalTreeNode))
+      val tileMatch = coreAndtileParamsList => {
+        case (coreType, tileParams) :: tail => (param => {
+          case a: coreType.TileParams => {
+            LazyModule(new coreType.Tile(a, crossing, PriorityMuxHartIdFromSeq(tileParams), logicalTreeNode))
+          }
+        }) orElse tileMatch(tail)
+        case Nil => param => {
+          case r: RocketTileParams => {
+            LazyModule(new RocketTile(r, crossing, PriorityMuxHartIdFromSeq(rocketTileParams), logicalTreeNode))
+          }
+          case b: BoomTileParams => {
+            LazyModule(new BoomTile(b, crossing, PriorityMuxHartIdFromSeq(boomTileParams), logicalTreeNode))
+          }
         }
       }
+      val tile = tileMatch(CoreRegistrar.cores zip coreTileParams)
       connectMasterPortsToSBus(tile, crossing)
       connectSlavePortsToCBus(tile, crossing)
       connectInterrupts(tile, debugOpt, clintOpt, plicOpt)
