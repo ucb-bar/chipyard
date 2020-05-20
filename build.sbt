@@ -202,7 +202,7 @@ lazy val sifive_cache = (project in file("generators/sifive-cache")).settings(
   ).dependsOn(rocketchip)
 
 lazy val memory_blade = (project in file("generators/memory-blade"))
-  .dependsOn(rocketchip, icenet, testchipip)
+  .dependsOn(rocketchip, icenet, testchipip, sifive_cache)
   .settings(commonSettings)
 
 // Library components of FireSim

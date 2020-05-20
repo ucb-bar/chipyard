@@ -231,6 +231,7 @@ class WithDRAMCacheKey(
     wbQueue = WritebackDepths(1, 1),
     memInQueue = MemoryQueueParams(0, 0, 2, 2, 2, 2),
     memOutQueue = MemoryQueueParams(2, 2, 2, 2, 2, 2),
+    buildCacheBank = BuildBankFunction.scheduler,
     buildChannelOutNetwork = OutNetwork.ring,
     writebackArbTopology = NetworkTopology.Ring,
     remChannelArbTopology = NetworkTopology.Ring,
