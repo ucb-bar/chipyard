@@ -97,7 +97,7 @@ Chipyard is a complex framework that depends on a mix of build systems and scrip
 For this reason, upgrading between Chipyard versions is **not** as trivial as just running ``git submodule update -recursive``. This will result in recursive cloning of large submodules that are not necessarily used within your specific Chipyard environments. Furthermore, it will not resolve the status of stale state generated files which may not be compatible between release versions.
 
 
-If you are an advanced git user, an alternative approach to a fresh repository clone may be to run ``git clean -dfx``, and then run the standard Chipyard setup sequence. This approach is dangerous, and **not-recommended** for users who are not deeply familiar with get, since it "blows up" the repository state and removes all untracked and modified files without warning. Hence, if you were working on custom un-commited changes, you would lose them.
+If you are an advanced git user, an alternative approach to a fresh repository clone may be to run ``git clean -dfx``, and then run the standard Chipyard setup sequence. This approach is dangerous, and **not-recommended** for users who are not deeply familiar with git, since it "blows up" the repository state and removes all untracked and modified files without warning. Hence, if you were working on custom un-committed changes, you would lose them.
 
 If you would still like to try to perform an in-place manual version upgrade (**not-recommended**), we recommend at least trying to resolve stale state in the following areas:
 
