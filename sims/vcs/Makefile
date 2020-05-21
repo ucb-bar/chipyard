@@ -51,7 +51,7 @@ VCS_CC_OPTS = \
 	-CC "-std=c++11" \
 	$(dramsim_lib) \
 	$(RISCV)/lib/libfesvr.a \
-	-CC "$(EXTRA_SIM_CC_FLAGS)"
+	-CC "$(EXTRA_SIM_CFLAGS)"
 
 VCS_NONCC_OPTS = \
 	+lint=all,noVCDE,noONGS,noUI \
