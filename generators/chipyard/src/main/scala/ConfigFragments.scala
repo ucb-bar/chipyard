@@ -147,21 +147,14 @@ class WithControlCore extends Config((site, here, up) => {
   case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
 })
 
-trait TraceIOMatch {
-  this: CoreRegisterEntryBase =>
-  val matchTile: (View, View, View) => PartialFunction[Field[Seq[TileParams]],Any] = ((site, here, up) => {
-    // TODO: XXX What's the "tile" here?
-    case tilesKey => up(tilesKey) map (tile => tile.copy(trace = true))
-  })
-}
-
 class WithTraceIO extends Config((site, here, up) => {
-  val coreMatch = (coreList: List[CoreRegisterEntryBase]) => coreList match {
-    case coreEntry :: tail => coreEntry.matchTile(site, here, up) orElse coreMatch(tail)
-    case Nil => {
-      case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
-      case TracePortKey => Some(TracePortParams())
+  val coreMatch: List[CoreRegisterEntryBase] => PartialFunction[Any,Any] =
+    coreList => coreList match {
+      case coreEntry :: tail => coreEntry.enableTileTrace(site, here, up) orElse coreMatch(tail)
+      case Nil => {
+        case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
+        case TracePortKey => Some(TracePortParams())
+      }
     }
-  }
   coreMatch(CoreRegistrar.cores)
 })
