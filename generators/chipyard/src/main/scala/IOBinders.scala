@@ -18,7 +18,9 @@ import barstools.iocell.chisel._
 
 import testchipip._
 import icenet.{CanHavePeripheryIceNICModuleImp, SimNetwork, NicLoopback, NICKey}
+import icenet.IceNetConsts.NET_IF_BYTES
 import tracegen.{HasTraceGenTilesModuleImp}
+import memblade.cache.{HasPeripheryDRAMCacheModuleImp, DRAMCacheKey}
 
 import scala.reflect.{ClassTag}
 
@@ -309,6 +311,20 @@ class WithTraceGenSuccessBinder extends OverrideIOBinder({
     successPort.suggestName("success")
     val harnessFn = (th: chipyard.TestHarness) => { when (successPort) { th.success := true.B }; Nil }
     Seq((Seq(successPort), ioCells, Some(harnessFn)))
+  }
+})
+
+class WithDRAMCacheBinder extends OverrideIOBinder({
+  (system: HasPeripheryDRAMCacheModuleImp) => {
+    val dcKey = system.p(DRAMCacheKey)
+    val nTrackers = dcKey.nChannels * dcKey.nBanksPerChannel * dcKey.nTrackersPerBank
+    val spanBeats = dcKey.spanBytes / NET_IF_BYTES
+    system.connectBlackBoxSimCacheMem()
+    system.connectTestMemBlade(
+      latency = 20,
+      qDepth = nTrackers * (4 + spanBeats),
+      blackBoxMem = true)
+    Nil
   }
 })
 

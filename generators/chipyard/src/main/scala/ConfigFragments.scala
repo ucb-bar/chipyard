@@ -81,6 +81,11 @@ class WithTracegenSystem extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => LazyModule(new tracegen.TraceGenSystem()(p))
 })
 
+class WithDRAMCacheTracegenSystem extends Config((site, here, up) => {
+  case BuildSystem => (p: Parameters) =>
+    LazyModule(new tracegen.DRAMCacheTraceGenSystem()(p))
+})
+
 class WithMemBladeSystem extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) =>
     LazyModule(new chipyard.MemBladeTop()(p))
@@ -239,10 +244,11 @@ class WithDRAMCacheKey(
     lruReplacement = false)
 })
 
-class WithDRAMCacheExtentTableInit(suffix: Int = 0x0300) extends Config(
+class WithDRAMCacheExtentTableInit(
+    suffix: Int = 0x0300, extentOffset: Int = 0) extends Config(
   (site, here, up) => {
     case DRAMCacheKey => up(DRAMCacheKey).copy(
-      extentTableInit = Seq.tabulate(16) { i => (suffix, i + 1) })
+      extentTableInit = Seq.tabulate(16) { i => (suffix, i + extentOffset) })
   })
 
 class WithMemBenchKey(nWorkers: Int = 1, nXacts: Int = 32)

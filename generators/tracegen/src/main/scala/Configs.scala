@@ -9,6 +9,7 @@ import freechips.rocketchip.system.BaseConfig
 import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.tile.{MaxHartIdBits, XLen}
 import scala.math.{max, min}
+import memblade.cache.DRAMCacheKey
 
 class WithTraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
     extends Config((site, here, up) => {
@@ -85,4 +86,36 @@ class WithL2TraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
     numGens = params.size)
   }
   case MaxHartIdBits => if (params.size == 1) 1 else log2Ceil(params.size)
+})
+
+class WithDRAMCacheTraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
+    extends Config((site, here, up) => {
+  case TraceGenKey => params.map { dcp => TraceGenParams(
+    dcache = Some(dcp),
+    wordBits = site(XLen),
+    addrBits = 48,
+    addrBag = {
+      val sbp = site(SystemBusKey)
+      val dramp = site(DRAMCacheKey)
+      val nSets = max(dramp.nSets, dcp.nSets)
+      val nWays = max(dramp.nWays, dcp.nWays)
+      val blockOffset = sbp.blockOffset
+      val nBeats = min(2, sbp.blockBeats)
+      val beatBytes = sbp.beatBytes
+      List.tabulate(nWays + 1) { i =>
+        val wayBase = (i * nSets) << blockOffset
+        val mcOffset = dramp.nMetaCacheRows << blockOffset
+        val beats = Seq.tabulate(nBeats) { j =>
+          BigInt(wayBase + (j * beatBytes))
+        }
+        if (mcOffset > 0)
+          beats ++ beats.map(_ + mcOffset)
+        else
+          beats
+      }.flatten
+    },
+    maxRequests = nReqs,
+    memStart = site(DRAMCacheKey).baseAddr,
+    numGens = params.size)
+  }
 })

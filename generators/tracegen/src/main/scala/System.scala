@@ -2,9 +2,10 @@ package tracegen
 
 import chisel3._
 import freechips.rocketchip.config.{Field, Parameters}
-import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, BufferParams}
+import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, BufferParams, ValName}
 import freechips.rocketchip.groundtest.{DebugCombiner, TraceGenParams}
 import freechips.rocketchip.subsystem._
+import freechips.rocketchip.interrupts.{IntSinkNode, IntSinkPortSimple}
 
 case object BoomTraceGenKey extends Field[Seq[TraceGenParams]](Nil)
 case object TraceGenKey extends Field[Seq[TraceGenParams]](Nil)
@@ -22,6 +23,9 @@ trait HasTraceGenTiles { this: BaseSubsystem =>
   tiles.foreach { t =>
     sbus.fromTile(None, buffer = BufferParams.default) { t.masterNode }
   }
+
+  implicit val valName = ValName(this.name)
+  IntSinkNode(IntSinkPortSimple()) :=* ibus.toPLIC
 }
 
 trait HasTraceGenTilesModuleImp extends LazyModuleImp {
@@ -49,3 +53,16 @@ class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
 class TraceGenSystemModuleImp(outer: TraceGenSystem)
   extends BaseSubsystemModuleImp(outer)
   with HasTraceGenTilesModuleImp
+
+class DRAMCacheTraceGenSystem(implicit p: Parameters) extends BaseSubsystem
+    with HasTraceGenTiles
+    with HasHierarchicalBusTopology
+    with CanHaveMasterAXI4MemPort
+    with memblade.cache.HasPeripheryDRAMCache {
+  override lazy val module = new DRAMCacheTraceGenSystemModuleImp(this)
+}
+
+class DRAMCacheTraceGenSystemModuleImp(outer: DRAMCacheTraceGenSystem)
+  extends BaseSubsystemModuleImp(outer)
+  with HasTraceGenTilesModuleImp
+  with memblade.cache.HasPeripheryDRAMCacheModuleImp
