@@ -106,41 +106,28 @@ $(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_file
 	done
 	echo "  input_files_meta: 'append'" >> $@
 	echo "  timescale: '1ns/10ps'" >> $@
-	echo "  options: [" >> $@
-	echo "    '$(RISCV)/lib/libfesvr.a'," >> $@
-	echo "    '+lint=all,noVCDE,noONGS,noUI'," >> $@
-	echo "    '-error=PCWM-L'," >> $@
-	echo "    '-quiet'," >> $@
-	echo "    '-q'," >> $@
-	echo "    '+rad'," >> $@
-	echo "    '+v2k'," >> $@
-	echo "    '+vcs+lic+wait'," >> $@
-	echo "    '+vc+list'," >> $@
-	echo "    '-f $(sim_common_files)'," >> $@
-	echo "    '-sverilog'," >> $@
-	echo "    '-debug_pp']" >> $@
+	echo "  options:" >> $@
+	for x in $(VCS_NONCC_OPTS); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
 	echo "  options_meta: 'append'" >> $@
-	echo "  defines: [" >> $@
-	echo "    'CLOCK_PERIOD=1.0'," >> $@
-	echo "    'PRINTF_COND=$(TB).printf_cond'," >> $@
-	echo "    'STOP_COND=!$(TB).reset'," >> $@
-	echo "    'RANDOMIZE_MEM_INIT'," >> $@
-	echo "    'RANDOMIZE_REG_INIT'," >> $@
-	echo "    'RANDOMIZE_GARBAGE_ASSIGN'," >> $@
-	echo "    'RANDOMIZE_INVALID_ASSIGN']" >> $@
+	echo "  defines:" >> $@
+	for x in $(VCS_DEFINE_OPTS); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
 	echo "  defines_meta: 'append'" >> $@
-	echo "  compiler_opts: [" >> $@
-	echo "    '-I$(RISCV)/include'," >> $@
-	echo "    '-std=c++11']" >> $@
+	echo "  compiler_opts:" >> $@
+	for x in $(filter-out -CC,$(VCS_CC_OPTS)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
 	echo "  compiler_opts_meta: 'append'" >> $@
 	echo "  execution_flags_prepend: ['$(PERMISSIVE_ON)']" >> $@
 	echo "  execution_flags_append: ['$(PERMISSIVE_OFF)']" >> $@
-	echo "  execution_flags: [" >> $@
-	echo "    '+max-cycles=$(timeout_cycles)'," >> $@
+	echo "  execution_flags:" >> $@
+	echo "    - '+max-cycles=$(timeout_cycles)'" >> $@
 	for x in $(SIM_FLAGS); do \
-	  echo '    "'$$x'",' >> $@; \
+	  echo '    - "'$$x'"' >> $@; \
 	done
-	echo "  ]" >> $@
 	echo "  execution_flags_meta: 'append'" >> $@
 	echo "  benchmarks: ['$(BINARY)']" >> $@
 	echo "  tb_dut: 'testHarness.top'" >> $@
@@ -148,22 +135,19 @@ $(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_file
 $(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
-	echo "  defines: [" >> $@
-	echo "    'DEBUG']" >> $@
+	echo "  defines: ['DEBUG']" >> $@
 	echo "  defines_meta: 'append'" >> $@
-	echo "  execution_flags: [" >> $@
+	echo "  execution_flags:" >> $@
 	for x in $(VERBOSE_FLAGS) $(WAVEFORM_FLAG); do \
-	  echo '    "'$$x'",' >> $@; \
+	  echo '    - "'$$x'"' >> $@; \
 	done
-	echo "  ]" >> $@
 	echo "  execution_flags_meta: 'append'" >> $@
 	echo "sim.outputs.waveforms: ['$(sim_out_name).vpd']" >> $@
 
 $(SIM_TIMING_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
-	echo "  defines: [" >> $@
-	echo "    'NTC']" >> $@
+	echo "  defines: ['NTC']" >> $@
 	echo "  defines_meta: 'append'" >> $@
 	echo "  timing_annotated: 'true'" >> $@
 
@@ -179,13 +163,11 @@ $(POWER_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_fi
 	echo "    '$(OBJ_DIR)/sim-par-rundir/$(notdir $(BINARY))/ucli.saif'" >> $@
 	echo "  ]" >> $@
 	echo "  waveforms: [" >> $@
-	echo "    '$(OBJ_DIR)/sim-par-rundir/$(notdir $(BINARY))/$(sim_out_name).vcd'" >> $@
+	#echo "    '$(OBJ_DIR)/sim-par-rundir/$(notdir $(BINARY))/$(sim_out_name).vcd'" >> $@
 	echo "  ]" >> $@
-	echo "  start_times: [" >> $@
-	echo "    0" >> $@
-	echo "  ]" >> $@
+	echo "  start_times: ['0ns']" >> $@
 	echo "  end_times: [" >> $@
-	echo "    15000" >> $@ #timeout_cycles * clock_period
+	echo "    '`bc <<< $(timeout_cycles)*$(CLOCK_PERIOD)`ns'" >> $@
 	echo "  ]" >> $@
 
 #########################################################################################

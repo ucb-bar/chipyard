@@ -41,36 +41,7 @@ include $(base_dir)/common.mk
 #########################################################################################
 VCS = vcs -full64
 
-VCS_CC_OPTS = \
-	-CC "-I$(VCS_HOME)/include" \
-	-CC "-I$(RISCV)/include" \
-	-CC "-std=c++11" \
-	$(RISCV)/lib/libfesvr.a
-
-VCS_NONCC_OPTS = \
-	+lint=all,noVCDE,noONGS,noUI \
-	-error=PCWM-L \
-	-timescale=1ns/10ps \
-	-quiet \
-	-q \
-	+rad \
-	+v2k \
-	+vcs+lic+wait \
-	+vc+list \
-	-f $(sim_common_files) \
-	-sverilog \
-	+incdir+$(build_dir) \
-	+define+CLOCK_PERIOD=1.0 \
-	$(sim_vsrcs) \
-	+define+PRINTF_COND=$(TB).printf_cond \
-	+define+STOP_COND=!$(TB).reset \
-	+define+RANDOMIZE_MEM_INIT \
-	+define+RANDOMIZE_REG_INIT \
-	+define+RANDOMIZE_GARBAGE_ASSIGN \
-	+define+RANDOMIZE_INVALID_ASSIGN \
-	+libext+.v
-
-VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS)
+VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(VCS_DEFINE_OPTS)
 
 #########################################################################################
 # vcs simulator rules
