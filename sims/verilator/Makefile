@@ -243,7 +243,7 @@ clean:
 	rm -rf $(gen_dir) $(sim_prefix)-*
 
 clean-vl8:
-	rm -rf $(model_dir) $(sim)
+	rm -rf $(model_dir) $(build_dir)/*.printf.v $(sim)
 
 clean-vl8-debug:
-	rm -rf $(model_dir_debug) $(sim_debug)
+	rm -rf $(model_dir_debug) $(build_dir)/*.printf.v $(sim_debug)

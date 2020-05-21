@@ -138,3 +138,16 @@ An open-source vcd-capable waveform viewer is `GTKWave <http://gtkwave.sourcefor
 For a VCS simulation, this will generate a vpd file (this is a proprietary waveform representation format used by Synopsys) that can be loaded to vpd-supported waveform viewers.
 If you have Synopsys licenses, we recommend using the DVE waveform viewer.
 
+.. _sw-sim-verilator-opts:
+
+Additional Verilator Options
+-------------------------------
+When building the verilator simulator there are several additional options:
+
+.. code-block:: shell
+
+   make VL8_THREADS=8 ENABLE_PRINTF_PATTERN='<python-regex>'
+
+The ``VL8_THREADS=<num>`` option enables the compiled verilator simulator to use ``<num>`` parallel threads. on a multi-socket machine, you will want to make sure all threads are on the same socket by using ``numactl``. You can also just use the ``numa_prefix`` wrapper, which is a simple wrapper around ``numactl`` that runs your verilated simulator like this: ``$(numa_prefix) ./simulator-<name> <simulator-args>``.
+
+The ``ENABLE_PRINTF_PATTERN`` option selectively enables hardware printf's based on a text match of the format string. For example, if you wanted to enable the rocket-core's instruction log, and nothing else, you could run ``make VL8_THREADS=8 ENABLE_PRINTF_PATTERN='.*DASM\(%x\)'``. Don't forget to start the line with a ``.*``, since the pattern matches start at the beginning of the line.
