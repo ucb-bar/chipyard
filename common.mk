@@ -7,11 +7,19 @@ SHELL=/bin/bash
 # extra make variables/rules from subprojects
 #
 # EXTRA_GENERATOR_REQS - requirements needed for the main generator
-# EXTRA_SIM_FLAGS - runtime simulation flags
-# EXTRA_SIM_CC_FLAGS - cc flags for simulators
-# EXTRA_SIM_SOURCES - simulation sources needed for simulator
-# EXTRA_SIM_REQS - requirements to build the simulator
+# EXTRA_SIM_FLAGS      - runtime simulation flags
+# EXTRA_SIM_CFLAGS     - CFLAGS for building simulators
+# EXTRA_SIM_CXXFLAGS   - CXXFLAGS for building simulators
+# EXTRA_SIM_LDFLAGS    - LDFLAGS for building simulators
+# EXTRA_SIM_SOURCES    - simulation sources needed for simulator
+# EXTRA_SIM_REQS			 - requirements to build the simulator
 #########################################################################################
+EXTRA_SIM_FLAGS    ?=
+EXTRA_SIM_CXXFLAGS ?=
+EXTRA_SIM_CFLAGS   ?=
+EXTRA_SIM_LDFLAGS  ?=
+EXTRA_SIM_SOURCES  ?=
+
 include $(base_dir)/generators/ariane/ariane.mk
 include $(base_dir)/generators/tracegen/tracegen.mk
 include $(base_dir)/generators/nvdla/nvdla.mk

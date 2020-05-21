@@ -1,11 +1,15 @@
 // See LICENSE.SiFive for license details.
 // See LICENSE.Berkeley for license details.
 
-#include "verilated.h"
 #if VM_TRACE
 #include <memory>
+#if CY_FST_TRACE
+#include "verilated_fst_c.h"
+#else
+#include "verilated.h"
 #include "verilated_vcd_c.h"
-#endif
+#endif // CY_FST_TRACE
+#endif // VM_TRACE
 #include <fesvr/dtm.h>
 #include <fesvr/tsi.h>
 #include "remote_bitbang.h"
@@ -16,6 +20,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <getopt.h>
+// enable verilator multithreading
+#include <vpi_user.h>
 
 // For option parsing, which is split across this file, Verilog, and
 // FESVR's HTIF, a few external files must be pulled in. The list of
@@ -51,9 +57,14 @@ double sc_time_stamp()
   return trace_count;
 }
 
-extern "C" int vpi_get_vlog_info(void* arg)
+// enable verilator multithreading
+static int htif_argc;
+static char **htif_argv = NULL;
+extern "C" int vpi_get_vlog_info(s_vpi_vlog_info *vlog_info_s)
 {
-  return 0;
+  vlog_info_s->argc = htif_argc;
+  vlog_info_s->argv = htif_argv;
+  return 1;
 }
 
 static void usage(const char * program_name)
@@ -119,10 +130,10 @@ int main(int argc, char** argv)
   // Port numbers are 16 bit unsigned integers. 
   uint16_t rbb_port = 0;
 #if VM_TRACE
+  const char* vcdfile_name = NULL; 
   FILE * vcdfile = NULL;
   uint64_t start = 0;
 #endif
-  char ** htif_argv = NULL;
   int verilog_plusargs_legal = 1;
 
   dramsim = 0;
@@ -162,6 +173,7 @@ int main(int argc, char** argv)
       case 'D': dramsim = 1;                break;
 #if VM_TRACE
       case 'v': {
+        vcdfile_name = optarg;
         vcdfile = strcmp(optarg, "-") == 0 ? stdout : fopen(optarg, "w");
         if (!vcdfile) {
           std::cerr << "Unable to open " << optarg << " for VCD write\n";
@@ -250,7 +262,7 @@ done_processing:
     usage(argv[0]);
     return 1;
   }
-  int htif_argc = 1 + argc - optind;
+  htif_argc = 1 + argc - optind;
   htif_argv = (char **) malloc((htif_argc) * sizeof (char *));
   htif_argv[0] = argv[0];
   for (int i = 1; optind < argc;) htif_argv[i++] = argv[optind++];
@@ -267,25 +279,25 @@ done_processing:
 
 #if VM_TRACE
   Verilated::traceEverOn(true); // Verilator must compute traced signals
+#if CY_FST_TRACE
+  std::unique_ptr<VerilatedFstC> tfp(new VerilatedFstC);
+  if (vcdfile_name) {
+    tile->trace(tfp.get(), 99);  // Trace 99 levels of hierarchy
+    tfp->open(vcdfile_name);
+  }
+#else
   std::unique_ptr<VerilatedVcdFILE> vcdfd(new VerilatedVcdFILE(vcdfile));
   std::unique_ptr<VerilatedVcdC> tfp(new VerilatedVcdC(vcdfd.get()));
   if (vcdfile) {
     tile->trace(tfp.get(), 99);  // Trace 99 levels of hierarchy
     tfp->open("");
   }
-#endif
-
-  jtag = new remote_bitbang_t(rbb_port);
-  dtm = new dtm_t(htif_argc, htif_argv);
-  tsi = new tsi_t(htif_argc, htif_argv);
+#endif // CY_FST_TRACE
+#endif // VM_TRACE
 
   signal(SIGTERM, handle_sigterm);
 
   bool dump;
-  // start reset off low so a rising edge triggers async reset
-  tile->reset = 0;
-  tile->clock = 0;
-  tile->eval();
   // reset for several cycles to handle pipelined reset
   for (int i = 0; i < 100; i++) {
     tile->reset = 1;
@@ -307,8 +319,7 @@ done_processing:
   tile->reset = 0;
   done_reset = true;
 
-  while (!dtm->done() && !jtag->done() && !tsi->done() &&
-         !tile->io_success && trace_count < max_cycles) {
+  do {
     tile->clock = 0;
     tile->eval();
 #if VM_TRACE
@@ -325,6 +336,13 @@ done_processing:
 #endif
     trace_count++;
   }
+  // verilator multithreading. need to do 1 loop before checking if
+  // tsi exists, since tsi is created by verilated thread on the first 
+  // serial_tick. 
+  while ((!dtm || !dtm->done()) && 
+         (!jtag || !jtag->done()) && 
+         (!tsi || !tsi->done()) &&
+         !tile->io_success && trace_count < max_cycles);
 
 #if VM_TRACE
   if (tfp)
@@ -333,17 +351,17 @@ done_processing:
     fclose(vcdfile);
 #endif
 
-  if (dtm->exit_code())
+  if (dtm && dtm->exit_code())
   {
     fprintf(stderr, "*** FAILED *** via dtm (code = %d, seed %d) after %ld cycles\n", dtm->exit_code(), random_seed, trace_count);
     ret = dtm->exit_code();
   }
-  else if (tsi->exit_code())
+  else if (tsi && tsi->exit_code())
   {
     fprintf(stderr, "*** FAILED *** (code = %d, seed %d) after %ld cycles\n", tsi->exit_code(), random_seed, trace_count);
     ret = tsi->exit_code();
   }
-  else if (jtag->exit_code())
+  else if (jtag && jtag->exit_code())
   {
     fprintf(stderr, "*** FAILED *** via jtag (code = %d, seed %d) after %ld cycles\n", jtag->exit_code(), random_seed, trace_count);
     ret = jtag->exit_code();

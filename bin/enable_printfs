@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+#=============================================================================
+# this enables the PRINTF_COND around points of interest
+#=============================================================================
+
+import sys
+import re
+from textwrap import dedent as dd
+
+#=============================================================================
+# subroutines
+#=============================================================================
+def print_usage():
+  print(dd("""
+    enable_printfs <in_file> <out_file> [pattern1] [pattern2] ...
+    -------------------------------------------------------------
+    Selectively enables verbose printf() in your verilog. Right
+    now, you either get no verbose logging, or 100% verbose logging, but many
+    times, you might want to just enable logging in a specific module. THIS
+    SCRIPT IS A TEMPORARY HACK: post-processes the verilog file to remove the
+    `ifdef PRINTF_COND wrappers around the specific printf()s you care about.
+    You must manually specify python-compatible regex patterns on the cmdline
+    to match() the strings in the printf you care about. Multiple patterns are
+    treated as logical OR, not AND.
+  """))
+  exit(1)
+
+#=============================================================================
+if __name__ == "__main__":
+  if len(sys.argv) < 3:
+    print_usage()
+
+  # parse inputs
+  in_file = sys.argv[1]
+  out_file = sys.argv[2]
+  trigger = re.compile(".*`ifdef PRINTF_COND.*")
+  targets = []
+  for idx in range(3, len(sys.argv)):
+    if len(sys.argv[idx]) > 0:
+      targets.append(re.compile(sys.argv[idx]))
+
+  # read input lines
+  in_lines = []
+  with open(in_file, "r") as f:
+    in_lines = f.readlines()
+
+  # enable PRINTF_COND lines around points of interest
+  enables = 0
+  out_lines = []
+  idx = 0
+  idx_end = len(in_lines)
+  while(idx < idx_end):
+    if trigger.match(in_lines[idx]):
+      matches_target = False
+      for target in targets:
+        if target.match(in_lines[idx+4]):
+          matches_target = True
+          break
+      if matches_target:
+        enables += 1
+        out_lines += in_lines[idx+3:idx+6]
+      else:
+        out_lines += in_lines[idx:idx+9]
+      idx += 9
+    else:
+      out_lines.append(in_lines[idx])
+      idx += 1
+
+  # write to output file
+  with open(out_file, "w") as f:
+    f.writelines(out_lines)
+
+  print("INFO: enabled {} printfs in {}".format(enables, out_file))
+
