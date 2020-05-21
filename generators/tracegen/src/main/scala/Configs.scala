@@ -10,6 +10,7 @@ import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.tile.{MaxHartIdBits, XLen}
 import scala.math.{max, min}
 import memblade.cache.DRAMCacheKey
+import icenet.IceNetConsts._
 
 class WithTraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
     extends Config((site, here, up) => {
@@ -95,23 +96,25 @@ class WithDRAMCacheTraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
     wordBits = site(XLen),
     addrBits = 48,
     addrBag = {
-      val sbp = site(SystemBusKey)
       val dramp = site(DRAMCacheKey)
       val nSets = max(dramp.nSets, dcp.nSets)
       val nWays = max(dramp.nWays, dcp.nWays)
-      val blockOffset = sbp.blockOffset
-      val nBeats = min(2, sbp.blockBeats)
-      val beatBytes = sbp.beatBytes
+      val nBanks = dramp.nChannels * dramp.nBanksPerChannel
+      val blockOffset = log2Ceil(dramp.spanBytes)
+      val beatBytes = NET_IF_BYTES
+      val nBeats = min(2, dramp.spanBytes / beatBytes)
       List.tabulate(nWays + 1) { i =>
-        val wayBase = (i * nSets) << blockOffset
-        val mcOffset = dramp.nMetaCacheRows << blockOffset
-        val beats = Seq.tabulate(nBeats) { j =>
-          BigInt(wayBase + (j * beatBytes))
-        }
-        if (mcOffset > 0)
-          beats ++ beats.map(_ + mcOffset)
-        else
-          beats
+        List.tabulate(nBanks) { j =>
+          val spanBase = (i * nSets + j) << blockOffset
+          val mcOffset = dramp.nMetaCacheRows << blockOffset
+          val beats = Seq.tabulate(nBeats) { k =>
+            BigInt(spanBase + (k * beatBytes))
+          }
+          if (mcOffset > nBanks)
+            beats ++ beats.map(_ + mcOffset)
+          else
+            beats
+        }.flatten
       }.flatten
     },
     maxRequests = nReqs,
