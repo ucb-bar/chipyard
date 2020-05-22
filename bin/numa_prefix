@@ -2,7 +2,7 @@
 
 #============================================================================
 # really simple script, which just prints out the numactl cmd to 
-# prefix before your actual command. it detemines this based on free memory
+# prefix before your actual command. it determines this based on free memory
 # size attached to every node.
 #============================================================================
 
@@ -47,4 +47,3 @@ if(length($path) > 0) {
     die("malformed head line: $head_line\n");
   }
 }
-
