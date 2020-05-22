@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <getopt.h>
-// enable verilator multithreading
+// needed for s_vpi_vlog_info, which is needed for multithreading
 #include <vpi_user.h>
 
 // For option parsing, which is split across this file, Verilog, and
@@ -57,7 +57,9 @@ double sc_time_stamp()
   return trace_count;
 }
 
-// enable verilator multithreading
+// need to pull htif_argc/htif_argv out here so the thread that calls tick()
+// for the HTIF device can initialize properly with the cmdline args. this
+// was pulled out here for multithreading to work
 static int htif_argc;
 static char **htif_argv = NULL;
 extern "C" int vpi_get_vlog_info(s_vpi_vlog_info *vlog_info_s)
@@ -298,6 +300,10 @@ done_processing:
   signal(SIGTERM, handle_sigterm);
 
   bool dump;
+  // start reset off low so a rising edge triggers async reset
+  tile->reset = 0;
+  tile->clock = 0;
+  tile->eval();
   // reset for several cycles to handle pipelined reset
   for (int i = 0; i < 100; i++) {
     tile->reset = 1;
@@ -336,7 +342,7 @@ done_processing:
 #endif
     trace_count++;
   }
-  // verilator multithreading. need to do 1 loop before checking if
+  // for verilator multithreading. need to do 1 loop before checking if
   // tsi exists, since tsi is created by verilated thread on the first 
   // serial_tick. 
   while ((!dtm || !dtm->done()) && 

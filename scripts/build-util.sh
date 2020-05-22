@@ -15,7 +15,7 @@ case ${ncpu} in
 esac
 
 # Allow user to override MAKE
-[ -n "${MAKE+x}" ] || MAKE=$(command -v gnumake || command -v gmake || command -v make)
+[ -n "${MAKE:+x}" ] || MAKE=$(command -v gnumake || command -v gmake || command -v make)
 readonly MAKE
 
 

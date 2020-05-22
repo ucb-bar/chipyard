@@ -12,13 +12,14 @@ SHELL=/bin/bash
 # EXTRA_SIM_CXXFLAGS   - CXXFLAGS for building simulators
 # EXTRA_SIM_LDFLAGS    - LDFLAGS for building simulators
 # EXTRA_SIM_SOURCES    - simulation sources needed for simulator
-# EXTRA_SIM_REQS			 - requirements to build the simulator
+# EXTRA_SIM_REQS       - requirements to build the simulator
 #########################################################################################
 EXTRA_SIM_FLAGS    ?=
 EXTRA_SIM_CXXFLAGS ?=
 EXTRA_SIM_CFLAGS   ?=
 EXTRA_SIM_LDFLAGS  ?=
 EXTRA_SIM_SOURCES  ?=
+EXTRA_SIM_REQS     ?=
 
 include $(base_dir)/generators/ariane/ariane.mk
 include $(base_dir)/generators/tracegen/tracegen.mk

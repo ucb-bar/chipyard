@@ -146,8 +146,8 @@ When building the verilator simulator there are several additional options:
 
 .. code-block:: shell
 
-   make VL8_THREADS=8 ENABLE_PRINTF_PATTERN='<python-regex>'
+   make VERILATOR_THREADS=8 ENABLE_PRINTF_PATTERN='<python-regex>'
 
-The ``VL8_THREADS=<num>`` option enables the compiled verilator simulator to use ``<num>`` parallel threads. on a multi-socket machine, you will want to make sure all threads are on the same socket by using ``numactl``. You can also just use the ``numa_prefix`` wrapper, which is a simple wrapper around ``numactl`` that runs your verilated simulator like this: ``$(numa_prefix) ./simulator-<name> <simulator-args>``.
+The ``VERILATOR_THREADS=<num>`` option enables the compiled verilator simulator to use ``<num>`` parallel threads. on a multi-socket machine, you will want to make sure all threads are on the same socket by using ``numactl``. You can also just use the ``numa_prefix`` wrapper, which is a simple wrapper around ``numactl`` that runs your verilated simulator like this: ``$(numa_prefix) ./simulator-<name> <simulator-args>``.
 
-The ``ENABLE_PRINTF_PATTERN`` option selectively enables hardware printf's based on a text match of the format string. For example, if you wanted to enable the rocket-core's instruction log, and nothing else, you could run ``make VL8_THREADS=8 ENABLE_PRINTF_PATTERN='.*DASM\(%x\)'``. Don't forget to start the line with a ``.*``, since the pattern matches start at the beginning of the line.
+The ``ENABLE_PRINTF_PATTERN`` option selectively enables hardware printf's based on a text match of the format string. For example, if you wanted to enable the rocket-core's instruction log, and nothing else, you could run ``make VERILATOR_THREADS=8 ENABLE_PRINTF_PATTERN='.*DASM\(%x\)'``. Don't forget to start the line with a ``.*``, since the pattern matches start at the beginning of the line.
