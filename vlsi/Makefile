@@ -112,7 +112,7 @@ $(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_file
 	done
 	echo "  options_meta: 'append'" >> $@
 	echo "  defines:" >> $@
-	for x in $(VCS_DEFINE_OPTS); do \
+	for x in $(subst +define+,,$(VCS_DEFINE_OPTS)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  defines_meta: 'append'" >> $@
