@@ -60,7 +60,7 @@ sim_vsrcs_printf := $(sim_vsrcs:.v=.printf.v)
 #============================================================================
 # verilator/cxx binary and flags
 #============================================================================
-# can't use -Wall, firrtl spits out 1000's of warnings that flag as erros
+# can't use -Wall, firrtl spits out 1000's of warnings that flag as errors
 #VERILATOR := verilator --cc --exe -Wall
 VERILATOR := verilator --cc --exe
 
