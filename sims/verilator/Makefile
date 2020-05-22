@@ -1,14 +1,14 @@
 #============================================================================
 # Extra make variables:
 #
-# ENABLE_PRINTF_PATTERN	- python regex. any printf() with text that matches
-#													this regex will be force enabled in sim output
-#													default is no selectively enabled printf's
-# VL8_PROFILE						- 'none' if no verilator profiling (default)
-#												  'all' if full verilator runtime profiling
-#												  'threads' if runtime thread profiling only
-# VL8_THREADS						- how many threads the simulator will use (default 1)
-# VL8_FST_MODE					- enable FST waveform instead of VCD
+# ENABLE_PRINTF_PATTERN - python regex. any printf() with text that matches
+#                         this regex will be force enabled in sim output
+#                         default is no selectively enabled printf's
+# VL8_PROFILE           - 'none' if no verilator profiling (default)
+#                         'all' if full verilator runtime profiling
+#                         'threads' if runtime thread profiling only
+# VL8_THREADS           - how many threads the simulator will use (default 1)
+# VL8_FST_MODE          - enable FST waveform instead of VCD
 #============================================================================
 
 
@@ -16,8 +16,7 @@
 # verilator makefile
 #============================================================================
 ifeq ($(shell which verilator),)
-	$(error Did not find Verilator in PATH. \
-					Make sure all requirements are installed)
+	$(error Did not find Verilator in PATH. Make sure all requirements are installed)
 endif
 
 #============================================================================
@@ -71,9 +70,9 @@ VERILATOR := verilator --cc --exe
 VL8_PROFILE ?= none
 RUNTIME_PROFILING_CFLAGS := $(if $(filter $(VL8_PROFILE),all),-g -pg,)
 RUNTIME_PROFILING_VFLAGS := $(if $(filter $(VL8_PROFILE),all),\
-															--prof-threads --prof-cfuncs,\
-															$(if $(filter $(VL8_PROFILE),threads),\
-																--prof-threads,))
+                              --prof-threads --prof-cfuncs,\
+                              $(if $(filter $(VL8_PROFILE),threads),\
+                                --prof-threads,))
 
 VL8_THREADS ?= 1
 RUNTIME_THREADS := --threads $(VL8_THREADS) --threads-dpi all
@@ -86,21 +85,21 @@ TRACING_CFLAGS := $(if $(filter $(VL8_FST_MODE),0),,-DCY_FST_TRACE)
 # verilation configuration/optimization
 #----------------------------------------------------------------------------
 VMODE := -O3 --x-assign fast --x-initial fast --noassert \
-					--output-split 10000 --output-split-cfuncs 10000
+          --output-split 10000 --output-split-cfuncs 10000
 
 # default flags added for ariane
 ARIANE_VERILATOR_FLAGS = \
-	--unroll-count 256 \
-	-Werror-PINMISSING \
-	-Werror-IMPLICIT \
-	-Wno-PINCONNECTEMPTY \
-	-Wno-ASSIGNDLY \
-	-Wno-DECLFILENAME \
-	-Wno-UNUSED \
-	-Wno-UNOPTFLAT \
-	-Wno-BLKANDNBLK \
-	-Wno-style \
-	-Wall
+  --unroll-count 256 \
+  -Werror-PINMISSING \
+  -Werror-IMPLICIT \
+  -Wno-PINCONNECTEMPTY \
+  -Wno-ASSIGNDLY \
+  -Wno-DECLFILENAME \
+  -Wno-UNUSED \
+  -Wno-UNOPTFLAT \
+  -Wno-BLKANDNBLK \
+  -Wno-style \
+  -Wall
 
 # normal flags used for chipyard builds (that are incompatible with ariane)
 #CHIPYARD_VERILATOR_FLAGS := --assert
@@ -108,24 +107,24 @@ CHIPYARD_VERILATOR_FLAGS :=
 
 # options dependent on whether ariane or chipyard is used
 PLATFORM_OPTS := $(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; \
-									 then echo "$(CHIPYARD_VERILATOR_FLAGS)"; \
-									 else echo "$(ARIANE_VERILATOR_FLAGS)"; fi)
+                   then echo "$(CHIPYARD_VERILATOR_FLAGS)"; \
+                   else echo "$(ARIANE_VERILATOR_FLAGS)"; fi)
 
 # Use --timescale to approximate timescale behavior of pre-4.034
 TIMESCALE_OPTS := $(shell verilator --version | perl -lne \
-	'if (/(\d.\d+)/ && $$1 >= 4.034) { print "--timescale 1ns/1ps"; }')
+  'if (/(\d.\d+)/ && $$1 >= 4.034) { print "--timescale 1ns/1ps"; }')
 
 VERILATOR_NONCC_OPTS := \
-	$(RUNTIME_PROFILING_VFLAGS) \
-	$(RUNTIME_THREADS) \
-	$(VMODE) \
-	$(PLATFORM_OPTS) \
-	$(TIMESCALE_OPTS) \
-	--top-module $(VLOG_MODEL) \
-	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
-	+define+STOP_COND=\$$c\(\"done_reset\"\) \
-	$(sim_vsrcs_printf) \
-	-f $(sim_common_files)
+  $(RUNTIME_PROFILING_VFLAGS) \
+  $(RUNTIME_THREADS) \
+  $(VMODE) \
+  $(PLATFORM_OPTS) \
+  $(TIMESCALE_OPTS) \
+  --top-module $(VLOG_MODEL) \
+  +define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
+  +define+STOP_COND=\$$c\(\"done_reset\"\) \
+  $(sim_vsrcs_printf) \
+  -f $(sim_common_files)
 
 #----------------------------------------------------------------------------
 # gcc configuration/optimization
@@ -135,31 +134,31 @@ VERILATOR_NONCC_OPTS := \
 CMODE := -O3 -fbranch-probabilities -march=native
 
 VL8_CXXFLAGS := \
-	$(RUNTIME_PROFILING_CFLAGS) \
-	$(TRACING_CFLAGS) \
-	$(CMODE) \
-	-std=c++11 \
-	-D__STDC_FORMAT_MACROS \
-	-DTEST_HARNESS=V$(VLOG_MODEL) \
-	-DVERILATOR \
-	-I$(RISCV)/include \
-	-I$(dramsim_dir) \
-	-I$(build_dir) \
-	-include $(build_dir)/$(long_name).plusArgs \
-	-include $(build_dir)/verilator.h \
-	$(EXTRA_SIM_CXXFLAGS)
+  $(RUNTIME_PROFILING_CFLAGS) \
+  $(TRACING_CFLAGS) \
+  $(CMODE) \
+  -std=c++11 \
+  -D__STDC_FORMAT_MACROS \
+  -DTEST_HARNESS=V$(VLOG_MODEL) \
+  -DVERILATOR \
+  -I$(RISCV)/include \
+  -I$(dramsim_dir) \
+  -I$(build_dir) \
+  -include $(build_dir)/$(long_name).plusArgs \
+  -include $(build_dir)/verilator.h \
+  $(EXTRA_SIM_CXXFLAGS)
 
-VL8_LDFLAGS :=	\
-	$(RUNTIME_PROFILING_CFLAGS) \
-	$(CMODE) \
-	-L$(RISCV)/lib \
-	-Wl,-rpath,$(RISCV)/lib \
-	-L$(sim_dir) \
-	-L$(dramsim_dir) \
-	-lfesvr \
-	-lpthread \
-	-ldramsim \
-	$(EXTRA_SIM_LDFLAGS)
+VL8_LDFLAGS :=  \
+  $(RUNTIME_PROFILING_CFLAGS) \
+  $(CMODE) \
+  -L$(RISCV)/lib \
+  -Wl,-rpath,$(RISCV)/lib \
+  -L$(sim_dir) \
+  -L$(dramsim_dir) \
+  -lfesvr \
+  -lpthread \
+  -ldramsim \
+  $(EXTRA_SIM_LDFLAGS)
 
 VERILATOR_CC_OPTS := -CFLAGS "$(VL8_CXXFLAGS)" -LDFLAGS "$(VL8_LDFLAGS)"
 
