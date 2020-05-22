@@ -86,16 +86,19 @@ TRACING_CFLAGS := $(if $(filter $(VERILATOR_FST_MODE),0),,-DCY_FST_TRACE)
 #----------------------------------------------------------------------------
 # verilation configuration/optimization
 #----------------------------------------------------------------------------
+# we initially had --noassert for performance, but several modules use 
+# assertions, including dramsim, so we enable --assert by default
 VMODE := \
 	-O3 \
 	--x-assign fast \
 	--x-initial fast \
-	--noassert \
+	--assert \
   --output-split 10000 \
 	--output-split-cfuncs 10000
 
-# default flags added for ariane
-ARIANE_VERILATOR_FLAGS = \
+# default flags added for ariane (-Wno-fatal needed for -Wall to not cause
+# a crash, since 1000s of warnings are generated)
+ARIANE_VERILATOR_FLAGS := \
 	--unroll-count 256 \
 	-Werror-PINMISSING \
 	-Werror-IMPLICIT \
@@ -106,13 +109,15 @@ ARIANE_VERILATOR_FLAGS = \
 	-Wno-UNOPTFLAT \
 	-Wno-BLKANDNBLK \
 	-Wno-style \
+	-Wno-fatal \
 	-Wall
 
 # normal flags used for chipyard builds (that are incompatible with ariane)
 CHIPYARD_VERILATOR_FLAGS := 
 
 # options dependent on whether ariane or chipyard is used
-PLATFORM_OPTS := $(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; \
+# NOTE: defer the evaluation of this until it is used!
+PLATFORM_OPTS = $(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; \
                    then echo "$(CHIPYARD_VERILATOR_FLAGS)"; \
                    else echo "$(ARIANE_VERILATOR_FLAGS)"; fi)
 
@@ -124,7 +129,7 @@ PREPROC_DEFINES := \
 	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
 	+define+STOP_COND=\$$c\(\"done_reset\"\) 
 
-VERILATOR_NONCC_OPTS := \
+VERILATOR_NONCC_OPTS = \
 	$(RUNTIME_PROFILING_VFLAGS) \
 	$(RUNTIME_THREADS) \
 	$(VMODE) \
@@ -141,7 +146,7 @@ VERILATOR_NONCC_OPTS := \
 # -flto slows down compilation on small-memory and breaks on firesim-manager
 CMODE := -O3 -fbranch-probabilities -march=native
 
-VERILATOR_CXXFLAGS := \
+VERILATOR_CXXFLAGS = \
 	$(RUNTIME_PROFILING_CFLAGS) \
 	$(TRACING_CFLAGS) \
 	$(CMODE) \
@@ -156,7 +161,7 @@ VERILATOR_CXXFLAGS := \
 	-include $(build_dir)/verilator.h \
 	$(EXTRA_SIM_CXXFLAGS)
 
-VERILATOR_LDFLAGS :=	\
+VERILATOR_LDFLAGS =	\
 	$(RUNTIME_PROFILING_CFLAGS) \
 	$(CMODE) \
 	-L$(RISCV)/lib \
@@ -168,14 +173,14 @@ VERILATOR_LDFLAGS :=	\
 	-ldramsim \
 	$(EXTRA_SIM_LDFLAGS)
 
-VERILATOR_CC_OPTS := \
+VERILATOR_CC_OPTS = \
 	-CFLAGS "$(VERILATOR_CXXFLAGS)" \
 	-LDFLAGS "$(VERILATOR_LDFLAGS)"
 
 #----------------------------------------------------------------------------
 # full verilator+gcc opts
 #----------------------------------------------------------------------------
-VERILATOR_OPTS := $(VERILATOR_CC_OPTS) $(VERILATOR_NONCC_OPTS)
+VERILATOR_OPTS = $(VERILATOR_CC_OPTS) $(VERILATOR_NONCC_OPTS)
 
 #############################################################################
 # verilator build paths and file names
