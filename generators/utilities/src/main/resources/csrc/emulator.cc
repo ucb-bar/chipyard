@@ -283,18 +283,14 @@ done_processing:
   Verilated::traceEverOn(true); // Verilator must compute traced signals
 #if CY_FST_TRACE
   std::unique_ptr<VerilatedFstC> tfp(new VerilatedFstC);
+#else
+  std::unique_ptr<VerilatedVcdFILE> vcdfd(new VerilatedVcdFILE(vcdfile));
+  std::unique_ptr<VerilatedVcdC> tfp(new VerilatedVcdC(vcdfd.get()));
+#endif // CY_FST_TRACE
   if (vcdfile_name) {
     tile->trace(tfp.get(), 99);  // Trace 99 levels of hierarchy
     tfp->open(vcdfile_name);
   }
-#else
-  std::unique_ptr<VerilatedVcdFILE> vcdfd(new VerilatedVcdFILE(vcdfile));
-  std::unique_ptr<VerilatedVcdC> tfp(new VerilatedVcdC(vcdfd.get()));
-  if (vcdfile) {
-    tile->trace(tfp.get(), 99);  // Trace 99 levels of hierarchy
-    tfp->open("");
-  }
-#endif // CY_FST_TRACE
 #endif // VM_TRACE
 
   signal(SIGTERM, handle_sigterm);
