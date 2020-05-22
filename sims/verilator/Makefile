@@ -260,12 +260,12 @@ $(output_dir)/none.vpd: $(sim_debug)
 #############################################################################
 # general cleanup rule
 #############################################################################
-.PHONY: clean clean-verilator clean-verilator-debug
+.PHONY: clean clean-sim clean-sim-debug
 clean:
 	rm -rf $(gen_dir) $(sim_prefix)-*
 
-clean-verilator:
+clean-sim:
 	rm -rf $(model_dir) $(build_dir)/*.printf.v $(sim)
 
-clean-verilator-debug:
+clean-sim-debug:
 	rm -rf $(model_dir_debug) $(build_dir)/*.printf.v $(sim_debug)
