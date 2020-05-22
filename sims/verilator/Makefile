@@ -43,6 +43,12 @@ sim_prefix = simulator
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
+# verilator doesn't use +permissive, but common.mk expects the simulator's
+# Makefile to set these to be consistent with VCS
+PERMISSIVE_ON=
+PERMISSIVE_OFF=
+
+# common.mk, expects the simulator's Makefile to set this
 WAVEFORM_FLAG=-v$(sim_out_name).vcd
 
 .PHONY: default debug
@@ -80,7 +86,8 @@ VERILATOR_THREADS ?= 1
 RUNTIME_THREADS := --threads $(VERILATOR_THREADS) --threads-dpi all
 
 VERILATOR_FST_MODE ?= 0
-TRACING_OPTS := $(if $(filter $(VERILATOR_FST_MODE),0),--trace,--trace-fst-thread)
+TRACING_OPTS := $(if $(filter $(VERILATOR_FST_MODE),0),\
+                  --trace,--trace-fst-thread)
 TRACING_CFLAGS := $(if $(filter $(VERILATOR_FST_MODE),0),,-DCY_FST_TRACE)
 
 #----------------------------------------------------------------------------
@@ -93,37 +100,38 @@ VMODE := \
 	--x-assign fast \
 	--x-initial fast \
 	--assert \
-  --output-split 10000 \
+	--output-split 10000 \
 	--output-split-cfuncs 10000
 
 # default flags added for ariane (-Wno-fatal needed for -Wall to not cause
 # a crash, since 1000s of warnings are generated)
-ARIANE_VERILATOR_FLAGS := \
+VERILOG_IP_VERILATOR_FLAGS := \
 	--unroll-count 256 \
-	-Werror-PINMISSING \
-	-Werror-IMPLICIT \
 	-Wno-PINCONNECTEMPTY \
 	-Wno-ASSIGNDLY \
 	-Wno-DECLFILENAME \
 	-Wno-UNUSED \
 	-Wno-UNOPTFLAT \
 	-Wno-BLKANDNBLK \
-	-Wno-style \
-	-Wno-fatal \
-	-Wall
+	-Wno-fatal
 
 # normal flags used for chipyard builds (that are incompatible with ariane)
 CHIPYARD_VERILATOR_FLAGS := 
 
-# options dependent on whether ariane or chipyard is used
+# options dependent on whether ariane/NVDLA or chipyard is used
 # NOTE: defer the evaluation of this until it is used!
-PLATFORM_OPTS = $(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; \
-                   then echo "$(CHIPYARD_VERILATOR_FLAGS)"; \
-                   else echo "$(ARIANE_VERILATOR_FLAGS)"; fi)
+PLATFORM_OPTS = $(shell \
+	if grep -qiP "module\s+(Ariane|NVDLA)" $(build_dir)/*.*v; \
+	then echo "$(VERILOG_IP_VERILATOR_FLAGS)"; \
+	else echo "$(CHIPYARD_VERILATOR_FLAGS)"; fi)
 
 # Use --timescale to approximate timescale behavior of pre-4.034
-TIMESCALE_OPTS := $(shell verilator --version | perl -lne \
+TIMESCALE_OPTS = $(shell verilator --version | perl -lne \
 	'if (/(\d.\d+)/ && $$1 >= 4.034) { print "--timescale 1ns/1ps"; }')
+
+# see: https://github.com/ucb-bar/riscv-mini/issues/31
+MAX_WIDTH_OPTS = $(shell verilator --version | perl -lne \
+	'if (/(\d.\d+)/ && $$1 > 4.016) { print "--max-num-width 1000000"; }')
 
 PREPROC_DEFINES := \
 	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
@@ -135,6 +143,7 @@ VERILATOR_NONCC_OPTS = \
 	$(VMODE) \
 	$(PLATFORM_OPTS) \
 	$(TIMESCALE_OPTS) \
+	$(MAX_WIDTH_OPTS) \
 	$(PREPROC_DEFINES) \
 	--top-module $(VLOG_MODEL) \
 	$(sim_vsrcs_printf) \
