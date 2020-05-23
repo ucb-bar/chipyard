@@ -370,7 +370,20 @@ class MemBladeConfig extends Config(
   new freechips.rocketchip.subsystem.WithNTrackersPerBank(4) ++
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
-  new RocketConfig)
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new testchipip.WithTSI ++
+  new chipyard.config.WithNoGPIO ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.system.BaseConfig)
 
 class MemBlade1024Config extends Config(
   new chipyard.config.WithMemBladeKey(Some(1024)) ++
