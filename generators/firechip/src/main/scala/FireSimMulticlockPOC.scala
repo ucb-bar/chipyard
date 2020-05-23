@@ -64,7 +64,7 @@ class WithSingleRationalTileDomain(multiplier: Int, divisor: Int) extends Config
 class HalfRateUncore extends WithSingleRationalTileDomain(2,1)
 
 class WithFiresimMulticlockTop extends Config((site, here, up) => {
-  case BuildSystem => (p: Parameters) => Module(LazyModule(new FiresimMulticlockTop()(p)).suggestName("system").module)
+  case BuildSystem => (p: Parameters) => LazyModule(new FiresimMulticlockTop()(p)).suggestName("system")
 })
 
 // Complete Config
@@ -79,25 +79,30 @@ class FiresimMulticlockTop(implicit p: Parameters) extends chipyard.DigitalTop
   override lazy val module = new FiresimMulticlockTopModule(this)
 }
 
+
 class FiresimMulticlockTopModule[+L <: DigitalTop](l: L) extends chipyard.DigitalTopModule(l) with HasFireSimClockingImp
 
 // Harness Definition
 class FireSimMulticlockPOC(implicit val p: Parameters) extends RawModule {
+  freechips.rocketchip.util.property.cover.setPropLib(new midas.passes.FireSimPropertyLibrary())
   val clockBridge = Module(new RationalClockBridge(p(FireSimClockKey).additionalClocks:_*))
   val refClock = clockBridge.io.clocks.head
   val reset = WireInit(false.B)
   withClockAndReset(refClock, reset) {
     // Instantiate multiple instances of the DUT to implement supernode
-    val targets = Seq.fill(p(NumNodes))(p(BuildSystem)(p))
+    val targets = Seq.fill(p(NumNodes)) {
+      val lazyModule = p(BuildSystem)(p)
+      (lazyModule, Module(lazyModule.module))
+    }
     val peekPokeBridge = PeekPokeBridge(refClock, reset)
     // A Seq of partial functions that will instantiate the right bridge only
     // if that Mixin trait is present in the target's class instance
     //
     // Apply each partial function to each DUT instance
-    for ((target) <- targets) {
-      p(IOBinders).values.map(_(target))
+    for ((lazyModule, module) <- targets) {
+      p(IOBinders).values.foreach(f => f(lazyModule) ++ f(module))
     }
-    targets.collect({ case t: HasAdditionalClocks => t.clocks := clockBridge.io.clocks })
+    targets.collect({ case (_, t: HasAdditionalClocks) => t.clocks := clockBridge.io.clocks })
   }
 }
 

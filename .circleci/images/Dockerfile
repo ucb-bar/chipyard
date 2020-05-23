@@ -13,6 +13,8 @@ RUN apt-get update \
                git \
                gnupg \
                gzip \
+               libfl2 \
+               libfl-dev \
                locales \
                mercurial \
                netcat \
@@ -24,7 +26,12 @@ RUN apt-get update \
                unzip \
                wget \
                xvfb \
-               zip
+               xxd \
+               zip \
+               ccache \
+               libgoogle-perftools-dev \
+               numactl \
+               zlib1g
 
 # Set timezone to UTC by default
 RUN ln -sf /usr/share/zoneinfo/Etc/UTC /etc/localtime
@@ -127,33 +134,45 @@ RUN apt-get install -y --no-install-recommends openjfx
 RUN apt-get install -y build-essential
 
 # Add RISCV toolchain necessary dependencies
+RUN apt-get update
 RUN apt-get install -y \
             autoconf \
             automake \
             autotools-dev \
             babeltrace \
             bc \
-            bison \
             curl \
             device-tree-compiler \
             expat \
             flex \
             gawk \
             gperf \
+            g++ \
             libexpat-dev \
             libgmp-dev \
             libmpc-dev \
             libmpfr-dev \
             libtool \
             libusb-1.0-0-dev \
+            make \
             patchutils \
             pkg-config \
             python \
-            python-pexpect \
+            python-pexpect-doc \
             python3 \
             texinfo \
             zlib1g-dev \
             rsync
+
+# Use specific bison version to bypass Verilator 4.034 issues
+# TODO: When Verilator is bumped, use apt to get newest bison
+RUN wget https://ftp.gnu.org/gnu/bison/bison-3.5.4.tar.gz \
+    && tar -xvf bison-3.5.4.tar.gz \
+    && cd bison-3.5.4 \
+    && ./configure && make && make install
+
+# Check bison version is 3.5.4
+RUN bison --version
 
 # Add minimal QEMU dependencies
 RUN apt-get install -y \
@@ -164,7 +183,8 @@ RUN apt-get install -y \
 # Install verilator
 RUN git clone http://git.veripool.org/git/verilator \
     && cd verilator \
-    && git checkout v4.028 \
+    && git pull \
+    && git checkout v4.034 \
     && autoconf && ./configure && make && make install
 
 # Update PATH for Java tools

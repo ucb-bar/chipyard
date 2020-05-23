@@ -29,19 +29,31 @@ object NodeIdx {
 }
 
 class FireSim(implicit val p: Parameters) extends RawModule {
+  freechips.rocketchip.util.property.cover.setPropLib(new midas.passes.FireSimPropertyLibrary())
   val clockBridge = Module(new RationalClockBridge)
   val clock = clockBridge.io.clocks.head
   val reset = WireInit(false.B)
   withClockAndReset(clock, reset) {
     // Instantiate multiple instances of the DUT to implement supernode
-    val targets = Seq.fill(p(NumNodes))(p(BuildSystem)(p))
+    val targets = Seq.fill(p(NumNodes)) {
+      // It's not a RC bump without some hacks...
+      // Copy the AsyncClockGroupsKey to generate a fresh node on each
+      // instantiation of the dut, otherwise the initial instance will be
+      // reused across each node
+      import freechips.rocketchip.subsystem.AsyncClockGroupsKey
+      val lazyModule = p(BuildSystem)(p.alterPartial({
+        case AsyncClockGroupsKey => p(AsyncClockGroupsKey).copy
+      }))
+      (lazyModule, Module(lazyModule.module))
+    }
+
     val peekPokeBridge = PeekPokeBridge(clock, reset)
     // A Seq of partial functions that will instantiate the right bridge only
-    // if that Mixin trait is present in the target's class instance
+    // if that Mixin trait is present in the target's LazyModule class instance
     //
     // Apply each partial function to each DUT instance
-    for ((target) <- targets) {
-      p(IOBinders).values.map(_(target))
+    for ((lazyModule, module) <- targets) {
+      p(IOBinders).values.foreach(f => f(lazyModule) ++ f(module))
       NodeIdx.increment()
     }
   }

@@ -72,7 +72,6 @@ ARIANE_VERILATOR_FLAGS = \
 	--unroll-count 256 \
 	-Werror-PINMISSING \
 	-Werror-IMPLICIT \
-	-Wno-fatal \
 	-Wno-PINCONNECTEMPTY \
 	-Wno-ASSIGNDLY \
 	-Wno-DECLFILENAME \
@@ -86,11 +85,16 @@ ARIANE_VERILATOR_FLAGS = \
 CHIPYARD_VERILATOR_FLAGS = \
 	--assert
 
+# Use --timescale to approximate timescale behavior of pre-4.034
+TIMESCALE_OPTS := $(shell verilator --version | perl -lne 'if (/(\d.\d+)/ && $$1 >= 4.034) { print "--timescale 1ns/1ps"; }')
 VERILATOR_NONCC_OPTS = \
+	$(TIMESCALE_OPTS) \
 	--top-module $(VLOG_MODEL) \
+	-Wno-fatal \
 	$(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; then echo "$(CHIPYARD_VERILATOR_FLAGS)"; else echo "$(ARIANE_VERILATOR_FLAGS)"; fi) \
 	--output-split 10000 \
 	--output-split-cfuncs 100 \
+	--max-num-width 1048576 \
 	-f $(sim_common_files) \
 	$(sim_vsrcs)
 
@@ -116,14 +120,14 @@ model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
 # build makefile fragment that builds the verilator sim rules
 #########################################################################################
 $(model_mk): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
-	rm -rf $(build_dir)/$(long_name)
-	mkdir -p $(build_dir)/$(long_name)
+	rm -rf $(model_dir)
+	mkdir -p $(model_dir)
 	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim) -Mdir $(model_dir) -CFLAGS "-include $(model_header)"
 	touch $@
 
 $(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
-	rm -rf $(build_dir)/$(long_name)
-	mkdir -p $(build_dir)/$(long_name).debug
+	rm -rf $(model_dir_debug)
+	mkdir -p $(model_dir_debug)
 	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim_debug) --trace -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
 	touch $@
 
@@ -144,6 +148,12 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd
 	vcd2vpd $@.vcd $@ > /dev/null &
 	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
+
+$(output_dir)/none.vpd: $(sim_debug)
+	mkdir -p $(output_dir)
+	rm -f $@.vcd && mkfifo $@.vcd
+	vcd2vpd $@.vcd $@ > /dev/null &
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) none </dev/null 2> >(spike-dasm > $(output_dir)/none.out) | tee $(output_dir)/none.log)
 
 #########################################################################################
 # general cleanup rule

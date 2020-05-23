@@ -2,7 +2,7 @@ import Tests._
 
 // This gives us a nicer handle  to the root project instead of using the
 // implicit one
-lazy val chipyardRoot = RootProject(file("."))
+lazy val chipyardRoot = Project("chipyardRoot", file("."))
 
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
@@ -132,7 +132,7 @@ lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
   .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsptools`,
-    gemmini, icenet, tracegen, ariane)
+    gemmini, icenet, tracegen, ariane, nvdla)
   .settings(commonSettings)
 
 lazy val tracegen = conditionalDependsOn(project in file("generators/tracegen"))
@@ -150,7 +150,7 @@ lazy val hwacha = (project in file("generators/hwacha"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
-lazy val boom = (project in file("generators/boom"))
+lazy val boom = conditionalDependsOn(project in file("generators/boom"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
@@ -166,9 +166,14 @@ lazy val gemmini = (project in file("generators/gemmini"))
   .dependsOn(rocketchip, chisel_testers, testchipip)
   .settings(commonSettings)
 
+lazy val nvdla = (project in file("generators/nvdla"))
+  .dependsOn(rocketchip)
+  .settings(commonSettings)
+
 lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
   .dependsOn(chisel_testers, chipyard)
   .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq("io.github.daviddenton" %% "handlebars-scala-fork" % "2.3.0"))
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
   .settings(commonSettings)

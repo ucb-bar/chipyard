@@ -49,6 +49,8 @@ Simulating The Default Example
 To compile the example design, run ``make`` in the selected verilator or VCS directory.
 This will elaborate the ``RocketConfig`` in the example project.
 
+.. Note:: The elaboration of ``RocketConfig`` requires about 6.5 GB of main memory. Otherwise the process will fail with ``make: *** [firrtl_temp] Error 137`` which is most likely related to limited resources. Other configurations might require even more main memory.
+
 An executable called ``simulator-chipyard-RocketConfig`` will be produced.
 This executable is a simulator that has been compiled based on the design that was built.
 You can then use this executable to run any compatible RV64 code.

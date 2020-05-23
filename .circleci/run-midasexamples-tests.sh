@@ -12,6 +12,10 @@ trap clean EXIT
 
 cd $LOCAL_CHIPYARD_DIR
 ./scripts/init-submodules-no-riscv-tools.sh
+
+# build libdromajo_cosim
+make -C $LOCAL_CHIPYARD_DIR/tools/dromajo/dromajo-src/src
+
 cd sims/firesim/sim/midas
 
 # set stricthostkeychecking to no (must happen before rsync)

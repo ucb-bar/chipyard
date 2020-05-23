@@ -24,6 +24,8 @@ import freechips.rocketchip.amba.axi4._
 import boom.common.{BoomTile, BoomTilesKey, BoomCrossingKey, BoomTileParams}
 import ariane.{ArianeTile, ArianeTilesKey, ArianeCrossingKey, ArianeTileParams}
 
+import testchipip.{DromajoHelper}
+
 trait HasChipyardTiles extends HasTiles
   with CanHavePeripheryPLIC
   with CanHavePeripheryCLINT
@@ -52,26 +54,20 @@ trait HasChipyardTiles extends HasTiles
   // TODO: investigate why
   val tiles = allTilesInfo.sortWith(_._1.hartId < _._1.hartId).map {
     case (param, crossing) => {
-      val (tile, rocketLogicalTree) = param match {
+
+      val tile = param match {
         case r: RocketTileParams => {
-          val t = LazyModule(new RocketTile(r, crossing, PriorityMuxHartIdFromSeq(rocketTileParams), logicalTreeNode))
-          (t, t.rocketLogicalTree)
+          LazyModule(new RocketTile(r, crossing, PriorityMuxHartIdFromSeq(rocketTileParams), logicalTreeNode))
         }
         case b: BoomTileParams => {
-          val t = LazyModule(new BoomTile(b, crossing, PriorityMuxHartIdFromSeq(boomTileParams), logicalTreeNode))
-          (t, t.rocketLogicalTree) // TODO FIX rocketLogicalTree is not a member of the superclass, both child classes define it separately
+          LazyModule(new BoomTile(b, crossing, PriorityMuxHartIdFromSeq(boomTileParams), logicalTreeNode))
         }
         case a: ArianeTileParams => {
-          val t = LazyModule(new ArianeTile(a, crossing, PriorityMuxHartIdFromSeq(arianeTileParams), logicalTreeNode))
-          (t, t.rocketLogicalTree) // TODO FIX rocketLogicalTree is not a member of the superclass, both child classes define it separately
+          LazyModule(new ArianeTile(a, crossing, PriorityMuxHartIdFromSeq(arianeTileParams), logicalTreeNode))
         }
       }
       connectMasterPortsToSBus(tile, crossing)
       connectSlavePortsToCBus(tile, crossing)
-
-      def treeNode: RocketTileLogicalTreeNode = new RocketTileLogicalTreeNode(rocketLogicalTree.getOMInterruptTargets)
-      LogicalModuleTree.add(logicalTreeNode, rocketLogicalTree)
-
       connectInterrupts(tile, debugOpt, clintOpt, plicOpt)
 
       tile
@@ -110,4 +106,8 @@ class SubsystemModuleImp[+L <: Subsystem](_outer: L) extends BaseSubsystemModule
 
   // create file with boom params
   ElaborationArtefacts.add("""core.config""", outer.tiles.map(x => x.module.toString).mkString("\n"))
+
+  // Generate C header with relevant information for Dromajo
+  // This is included in the `dromajo_params.h` header file
+  DromajoHelper.addArtefacts
 }

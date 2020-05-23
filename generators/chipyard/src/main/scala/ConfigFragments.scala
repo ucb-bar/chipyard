@@ -13,15 +13,16 @@ import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams
 import freechips.rocketchip.util.{AsyncResetReg}
 
 import boom.common.{BoomTilesKey}
-
+import ariane.{ArianeTilesKey}
 import testchipip._
 
 import hwacha.{Hwacha}
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
+import sifive.blocks.devices.spi._
 
-import chipyard.{BuildTop, BuildSystem, ChipTopCaughtReset}
+import chipyard.{BuildTop, BuildSystem}
 
 /**
  * TODO: Why do we need this?
@@ -52,8 +53,10 @@ class WithUART extends Config((site, here, up) => {
     UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256))
 })
 
-class WithNoGPIO extends Config((site, here, up) => {
-  case PeripheryGPIOKey => Seq()
+class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) => {
+  // Note: the default size matches freedom with the addresses below
+  case PeripherySPIFlashKey => Seq(
+    SPIFlashParams(rAddress = 0x10040000, fAddress = 0x20000000, fSize = size))
 })
 
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
@@ -66,9 +69,8 @@ class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
 })
 
 class WithTracegenSystem extends Config((site, here, up) => {
-  case BuildSystem => (p: Parameters) => Module(LazyModule(new tracegen.TraceGenSystem()(p)).suggestName("Top").module)
+  case BuildSystem => (p: Parameters) => LazyModule(new tracegen.TraceGenSystem()(p))
 })
-
 
 class WithRenumberHarts(rocketFirst: Boolean = false) extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey, site).zipWithIndex map { case (r, i) =>
@@ -79,12 +81,6 @@ class WithRenumberHarts(rocketFirst: Boolean = false) extends Config((site, here
   }
   case MaxHartIdBits => log2Up(up(BoomTilesKey, site).size + up(RocketTilesKey, site).size)
 })
-
-
-
-// ------------------
-// Multi-RoCC Support
-// ------------------
 
 /**
  * Map from a hartId to a particular RoCC accelerator
@@ -151,12 +147,8 @@ class WithControlCore extends Config((site, here, up) => {
   case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
 })
 
-
-/**
- * Config fragment to use ChipTopCaughtReset as the top module, which adds a reset synchronizer to
- * the top-level reset, allowing it to be asynchronous with the clock.
- * NOTE: You must remember to set TOP=WithChipTopCaughtReset when building with this config
- */
-class WithChipTopCaughtReset extends Config((site, here, up) => {
-  case BuildTop => (p: Parameters) => Module(new ChipTopCaughtReset()(p).suggestName("top"))
+class WithTraceIO extends Config((site, here, up) => {
+  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
+  case ArianeTilesKey => up(ArianeTilesKey) map (tile => tile.copy(trace = true))
+  case TracePortKey => Some(TracePortParams())
 })

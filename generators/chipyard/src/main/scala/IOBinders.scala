@@ -8,10 +8,12 @@ import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.subsystem._
+import freechips.rocketchip.system.{SimAXIMem}
 import freechips.rocketchip.util._
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
+import sifive.blocks.devices.spi._
 
 import barstools.iocell.chisel._
 
@@ -87,10 +89,8 @@ object AddIOCells {
   def gpio(gpios: Seq[GPIOPortIO], genFn: () => DigitalGPIOCell = IOCell.genericGPIO): (Seq[Seq[Analog]], Seq[Seq[IOCell]]) = {
     gpios.zipWithIndex.map({ case (gpio, i) =>
       gpio.pins.zipWithIndex.map({ case (pin, j) =>
-        val g = IO(Analog(1.W))
-        g.suggestName("gpio_${i}_${j}")
-        val iocell = genFn()
-        iocell.suggestName(s"iocell_gpio_${i}_${j}")
+        val g = IO(Analog(1.W)).suggestName(s"gpio_${i}_${j}")
+        val iocell = genFn().suggestName(s"iocell_gpio_${i}_${j}")
         iocell.io.o := pin.o.oval
         iocell.io.oe := pin.o.oe
         iocell.io.ie := pin.o.ie
@@ -103,7 +103,7 @@ object AddIOCells {
 
   /**
    * Add IO cells to a SiFive UART devices and name the IO ports.
-   * @param gpios A Seq of UART port bundles
+   * @param uartPins A Seq of UART port bundles
    * @return Returns a tuple of (A Seq of top-level UARTPortIO IOs; a 2D Seq of IOCell module references)
    */
   def uart(uartPins: Seq[UARTPortIO]): (Seq[UARTPortIO], Seq[Seq[IOCell]]) = {
@@ -115,19 +115,61 @@ object AddIOCells {
   }
 
   /**
+   * Add IO cells to a SiFive SPI devices and name the IO ports.
+   * @param spiPins A Seq of SPI port bundles
+   * @param basename The base name for this port (defaults to "spi")
+   * @param genFn A callable function to generate a DigitalGPIOCell module to use
+   * @return Returns a tuple of (A Seq of top-level SPIChipIO IOs; a 2D Seq of IOCell module references)
+   */
+  def spi(spiPins: Seq[SPIPortIO], basename: String = "spi", genFn: () => DigitalGPIOCell = IOCell.genericGPIO): (Seq[SPIChipIO], Seq[Seq[IOCell]]) = {
+    spiPins.zipWithIndex.map({ case (s, i) =>
+      val port = IO(new SPIChipIO(s.c.csWidth)).suggestName(s"${basename}_${i}")
+      val iocellBase = s"iocell_${basename}_${i}"
+
+      // SCK and CS are unidirectional outputs
+      val sckIOs = IOCell.generateFromSignal(s.sck, port.sck, Some(s"${iocellBase}_sck"))
+      val csIOs = IOCell.generateFromSignal(s.cs, port.cs, Some(s"${iocellBase}_cs"))
+
+      // DQ are bidirectional, so then need special treatment
+      val dqIOs = s.dq.zip(port.dq).zipWithIndex.map { case ((pin, ana), j) =>
+        val iocell = genFn().suggestName(s"${iocellBase}_dq_${j}")
+        iocell.io.o := pin.o
+        iocell.io.oe := pin.oe
+        iocell.io.ie := true.B
+        pin.i := iocell.io.i
+        iocell.io.pad <> ana
+        iocell
+      }
+
+      (port, dqIOs ++ csIOs ++ sckIOs)
+    }).unzip
+  }
+
+  /**
    * Add IO cells to a debug module and name the IO ports.
-   * @param gpios A PSDIO bundle
+   * @param psd A PSDIO bundle
+   * @param resetctrlOpt An optional ResetCtrlIO bundle
    * @param debugOpt An optional DebugIO bundle
    * @return Returns a tuple3 of (Top-level PSDIO IO; Optional top-level DebugIO IO; a list of IOCell module references)
    */
-  def debug(psd: PSDIO, debugOpt: Option[DebugIO]): (PSDIO, Option[DebugIO], Seq[IOCell]) = {
-    val (psdPort, psdIOs) = IOCell.generateIOFromSignal(psd, Some("iocell_psd"))
-    val optTuple = debugOpt.map(d => IOCell.generateIOFromSignal(d, Some("iocell_debug")))
-    val debugPortOpt: Option[DebugIO] = optTuple.map(_._1)
-    val debugIOs: Seq[IOCell] = optTuple.map(_._2).toSeq.flatten
+  def debug(psd: PSDIO, resetctrlOpt: Option[ResetCtrlIO], debugOpt: Option[DebugIO])(implicit p: Parameters):
+      (PSDIO, Option[ResetCtrlIO], Option[DebugIO], Seq[IOCell]) = {
+    val (psdPort, psdIOs) = IOCell.generateIOFromSignal(
+      psd, Some("iocell_psd"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
+    val debugTuple = debugOpt.map(d =>
+      IOCell.generateIOFromSignal(d, Some("iocell_debug"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync))
+    val debugPortOpt: Option[DebugIO] = debugTuple.map(_._1)
+    val debugIOs: Seq[IOCell] = debugTuple.map(_._2).toSeq.flatten
     debugPortOpt.foreach(_.suggestName("debug"))
+
+    val resetctrlTuple = resetctrlOpt.map(d =>
+      IOCell.generateIOFromSignal(d, Some("iocell_resetctrl"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync))
+    val resetctrlPortOpt: Option[ResetCtrlIO] = resetctrlTuple.map(_._1)
+    val resetctrlIOs: Seq[IOCell] = resetctrlTuple.map(_._2).toSeq.flatten
+    resetctrlPortOpt.foreach(_.suggestName("resetctrl"))
+
     psdPort.suggestName("psd")
-    (psdPort, debugPortOpt, psdIOs ++ debugIOs)
+    (psdPort, resetctrlPortOpt, debugPortOpt, psdIOs ++ debugIOs ++ resetctrlIOs)
   }
 
   /**
@@ -160,6 +202,14 @@ class WithUARTAdapter extends OverrideIOBinder({
   }
 })
 
+class WithSimSPIFlashModel(rdOnly: Boolean = true) extends OverrideIOBinder({
+  (system: HasPeripherySPIFlashModuleImp) => {
+    val (ports, ioCells2d) = AddIOCells.spi(system.qspi, "qspi")
+    val harnessFn = (th: chipyard.TestHarness) => { SimSPIFlashModel.connect(ports, th.reset, rdOnly)(system.p); Nil }
+    Seq((ports, ioCells2d.flatten, Some(harnessFn)))
+  }
+})
+
 class WithSimBlockDevice extends OverrideIOBinder({
   (system: CanHavePeripheryBlockDeviceModuleImp) => system.connectSimBlockDevice(system.clock, system.reset.asBool); Nil
 })
@@ -176,29 +226,32 @@ class WithSimNIC extends OverrideIOBinder({
   (system: CanHavePeripheryIceNICModuleImp) => system.connectSimNetwork(system.clock, system.reset.asBool); Nil
 })
 
+// Note: The parameters instance is accessible only through the BaseSubsystem
+// or some parent class (IsAttachable, BareSubsystem -> LazyModule). The
+// self-type requirement in CanHaveMasterAXI4MemPort is insufficient to make it
+// accessible to the IOBinder
 // DOC include start: WithSimAXIMem
 class WithSimAXIMem extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPortModuleImp) => system.connectSimAXIMem(); Nil
+  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => SimAXIMem.connectMem(system)(system.p); Nil
 })
 // DOC include end: WithSimAXIMem
 
 class WithBlackBoxSimMem extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPortModuleImp) => {
-    (system.mem_axi4 zip system.outer.memAXI4Node).foreach { case (io, node) =>
+  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => {
+    (system.mem_axi4 zip system.memAXI4Node.in).foreach { case (io, (_, edge)) =>
       val memSize = system.p(ExtMem).get.master.size
       val lineSize = system.p(CacheBlockBytes)
-      (io zip node.in).foreach { case (axi4, (_, edge)) =>
-        val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
-        mem.io.axi <> axi4
-        mem.io.clock := system.clock
-        mem.io.reset := system.reset
-      }
-    }; Nil
+      val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
+      mem.io.axi <> io
+      mem.io.clock := system.module.clock
+      mem.io.reset := system.module.reset
+    }
+    Nil
   }
 })
 
 class WithSimAXIMMIO extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MMIOPortModuleImp) => system.connectSimAXIMMIO(); Nil
+  (system: CanHaveMasterAXI4MMIOPort with BaseSubsystem) => SimAXIMem.connectMMIO(system)(system.p); Nil
 })
 
 class WithDontTouchPorts extends OverrideIOBinder({
@@ -215,7 +268,7 @@ class WithTieOffInterrupts extends OverrideIOBinder({
 })
 
 class WithTieOffL2FBusAXI extends OverrideIOBinder({
-  (system: CanHaveSlaveAXI4PortModuleImp) => {
+  (system: CanHaveSlaveAXI4Port with BaseSubsystem) => {
     system.l2_frontend_bus_axi4.foreach(axi => {
       axi.tieoff()
       experimental.DataMirror.directionOf(axi.ar.ready) match {
@@ -235,23 +288,29 @@ class WithTieOffL2FBusAXI extends OverrideIOBinder({
 
 class WithTiedOffDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
-    val (psdPort, debugPortOpt, ioCells) = AddIOCells.debug(system.psd, system.debug)
+    val (psdPort, resetctrlOpt, debugPortOpt, ioCells) =
+      AddIOCells.debug(system.psd, system.resetctrl, system.debug)(system.p)
     val harnessFn = (th: chipyard.TestHarness) => {
-      Debug.tieoffDebug(debugPortOpt, psdPort)
+      Debug.tieoffDebug(debugPortOpt, resetctrlOpt, Some(psdPort))(system.p)
       // tieoffDebug doesn't actually tie everything off :/
-      debugPortOpt.foreach(_.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare }))
+      debugPortOpt.foreach { d =>
+        d.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare; cdmi.dmiClock := th.clock })
+        d.dmactiveAck := DontCare
+        d.clock := th.clock
+      }
       Nil
     }
-    Seq((Seq(psdPort) ++ debugPortOpt.toSeq, ioCells, Some(harnessFn)))
+    Seq((Seq(psdPort) ++ resetctrlOpt ++ debugPortOpt.toSeq, Nil, Some(harnessFn)))
   }
 })
 
 class WithSimDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
-    val (psdPort, debugPortOpt, ioCells) = AddIOCells.debug(system.psd, system.debug)
+    val (psdPort, resetctrlPortOpt, debugPortOpt, ioCells) =
+      AddIOCells.debug(system.psd, system.resetctrl, system.debug)(system.p)
     val harnessFn = (th: chipyard.TestHarness) => {
       val dtm_success = Wire(Bool())
-      Debug.connectDebug(debugPortOpt, psdPort, th.clock, th.harnessReset, dtm_success)(system.p)
+      Debug.connectDebug(debugPortOpt, resetctrlPortOpt, psdPort, th.clock, th.harnessReset, dtm_success)(system.p)
       when (dtm_success) { th.success := true.B }
       th.dutReset := th.harnessReset | debugPortOpt.map { debug => AsyncResetReg(debug.ndreset).asBool }.getOrElse(false.B)
       Nil
@@ -292,4 +351,12 @@ class WithTraceGenSuccessBinder extends OverrideIOBinder({
   }
 })
 
-}
+class WithSimDromajoBridge extends ComposeIOBinder({
+   (system: CanHaveTraceIOModuleImp) => {
+     system.traceIO match { case Some(t) => t.traces.map(tileTrace => SimDromajoBridge(tileTrace)(system.p)) }
+     Nil
+   }
+})
+
+
+} /* end package object */
