@@ -4,23 +4,43 @@
 SHELL=/bin/bash
 
 #########################################################################################
-# extra make variables/rules from subprojects
-#
-# EXTRA_GENERATOR_REQS - requirements needed for the main generator
-# EXTRA_SIM_FLAGS      - runtime simulation flags
-# EXTRA_SIM_CFLAGS     - CFLAGS for building simulators
-# EXTRA_SIM_CXXFLAGS   - CXXFLAGS for building simulators
-# EXTRA_SIM_LDFLAGS    - LDFLAGS for building simulators
-# EXTRA_SIM_SOURCES    - simulation sources needed for simulator
-# EXTRA_SIM_REQS       - requirements to build the simulator
+# specify user-interface variables
 #########################################################################################
-EXTRA_SIM_FLAGS    ?=
+HELP_COMPILATION_VARIABLES += \
+"   EXTRA_GENERATOR_REQS   = requirements needed for the main generator" \
+"   EXTRA_SIM_CFLAGS       = CFLAGS for building simulators" \
+"   EXTRA_SIM_CXXFLAGS     = CXXFLAGS for building simulators" \
+"   EXTRA_SIM_LDFLAGS      = LDFLAGS for building simulators" \
+"   EXTRA_SIM_SOURCES      = simulation sources needed for simulator" \
+"   EXTRA_SIM_REQS         = requirements to build the simulator"
+
 EXTRA_SIM_CXXFLAGS ?=
 EXTRA_SIM_CFLAGS   ?=
 EXTRA_SIM_LDFLAGS  ?=
 EXTRA_SIM_SOURCES  ?=
 EXTRA_SIM_REQS     ?=
 
+#----------------------------------------------------------------------------
+HELP_SIMULATION_VARIABLES += \
+"   EXTRA_SIM_FLAGS        = runtime simulation flags (passed within +permissive)" \
+"   NUMACTL                = set to '1' to wrap simulator in the appropriate numactl command"
+
+EXTRA_SIM_FLAGS ?=
+NUMACTL         ?= 0
+
+NUMA_PREFIX = $(if $(filter $(NUMACTL),0),,$(shell numa_prefix))
+
+#----------------------------------------------------------------------------
+HELP_COMMANDS += \
+"   run-binary             = run [./$(shell basename $(sim))] and output instructions" \
+"   run-binary-fast        = run [./$(shell basename $(sim))] and don't output instructions" \
+"   run-binary-debug       = run [./$(shell basename $(sim_debug))] and output instructions and waveform" \
+"   run-binary-debug-fast  = run [./$(shell basename $(sim_debug))] and don't output instructions or waveform" \
+"   verilog                = generate intermediate verilogs from chisel elaboration and firrtl passes"
+
+#########################################################################################
+# include additional subproject make fragments
+#########################################################################################
 include $(base_dir)/generators/ariane/ariane.mk
 include $(base_dir)/generators/tracegen/tracegen.mk
 include $(base_dir)/generators/nvdla/nvdla.mk
@@ -137,21 +157,58 @@ verilog: $(sim_vsrcs)
 #########################################################################################
 # helper rules to run simulations
 #########################################################################################
-.PHONY: run-binary run-binary-fast run-binary-debug run-fast
+.PHONY: run-binary run-binary-fast 
+.PHONY: run-binary-debug run-binary-debug-fast 
+.PHONY: run-fast
+
+# run normal binary with hardware-logged insn dissassembly
 run-binary: $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) \
+			$(PERMISSIVE_ON) \
+			$(SIM_FLAGS) \
+			$(EXTRA_SIM_FLAGS) \
+			$(VERBOSE_FLAGS) \
+			$(PERMISSIVE_OFF) \
+			$(BINARY) \
+			</dev/null \
+			2> >(spike-dasm > $(sim_out_name).out) \
+		| tee $(sim_out_name).log)
 
-#########################################################################################
-# helper rules to run simulator as fast as possible
-#########################################################################################
+# run simulator as fast as possible (no insn disassembly)
 run-binary-fast: $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) \
+			$(PERMISSIVE_ON) \
+			$(SIM_FLAGS) \
+			$(EXTRA_SIM_FLAGS) \
+			$(PERMISSIVE_OFF) \
+			$(BINARY) \
+			</dev/null \
+		| tee $(sim_out_name).log)
 
-#########################################################################################
-# helper rules to run simulator with as much debug info as possible
-#########################################################################################
+# run simulator with as much debug info as possible
 run-binary-debug: $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) \
+			$(PERMISSIVE_ON) \
+			$(SIM_FLAGS) \
+			$(EXTRA_SIM_FLAGS) \
+			$(VERBOSE_FLAGS) \
+			$(WAVEFORM_FLAG) \
+			$(PERMISSIVE_OFF) \
+			$(BINARY) \
+			</dev/null \
+			2> >(spike-dasm > $(sim_out_name).out) \
+		| tee $(sim_out_name).log)
+
+# run debug simulator as fast as possible (no insn disassembly or waveform)
+run-binary-debug-fast: $(sim_debug)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) \
+			$(PERMISSIVE_ON) \
+			$(SIM_FLAGS) \
+			$(EXTRA_SIM_FLAGS) \
+			$(PERMISSIVE_OFF) \
+			$(BINARY) \
+			</dev/null \
+		| tee $(sim_out_name).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 

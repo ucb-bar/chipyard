@@ -1,24 +1,13 @@
 #############################################################################
-# Extra verilator-specific Makefile variables:
-#
-# ENABLE_PRINTF_PATTERN - python regex. any printf() with text that matches
-#                         this regex will be force enabled in sim output
-#                         default is no selectively enabled printf's
-# VERILATOR_PROFILE     - 'none' if no verilator profiling (default)
-#                         'all' if full verilator runtime profiling
-#                         'threads' if runtime thread profiling only
-# VERILATOR_THREADS     - how many threads the simulator will use (default 1)
-# VERILATOR_FST_MODE    - enable FST waveform instead of VCD. only makes sense
-#                         if debug simulator is built
-#############################################################################
-
-
-#############################################################################
 # verilator makefile
 #############################################################################
 ifeq ($(shell which verilator),)
 $(error Did not find Verilator in PATH. Make sure all requirements are installed)
 endif
+
+.PHONY: default debug compile compile-debug
+default: compile
+debug: compile-debug
 
 #############################################################################
 # general path variables
@@ -51,14 +40,33 @@ PERMISSIVE_OFF=
 # common.mk, expects the simulator's Makefile to set this
 WAVEFORM_FLAG=-v$(sim_out_name).vcd
 
-.PHONY: default debug
-default: $(sim)
-debug: $(sim_debug)
-
 #############################################################################
 # import other necessary rules and variables
 #############################################################################
 include $(base_dir)/common.mk
+
+# declare the compile targets here since sim/sim_debug are defined
+compile: $(sim)
+compile-debug: $(sim_debug)
+
+#############################################################################
+# verilator-specific user-interface variables and commands
+#############################################################################
+HELP_COMPILATION_VARIABLES += \
+"   ENABLE_PRINTF_PATTERN  = python regex. any printf() with text that matches this regex will be " \
+"                            force enabled in sim output default is no selectively enabled printf's" \
+"   VERILATOR_PROFILE      = 'none' if no verilator profiling (default)" \
+"                            'all' if full verilator runtime profiling" \
+"                            'threads' if runtime thread profiling only" \
+"   VERILATOR_THREADS      = how many threads the simulator will use (default 1)" \
+"   VERILATOR_FST_MODE     = enable FST waveform instead of VCD. use with debug build"
+
+HELP_COMMANDS += \
+"   compile|default        = compiles non-debug simulator [./$(shell basename $(sim))]" \
+"   compile-debug|debug    = compiles debug simulator [./$(shell basename $(sim_debug))]" \
+"   clean                  = remove all debug/non-debug simulators and intermediate files" \
+"   clean-sim              = removes non-debug simulator and verilator-generated files" \
+"   clean-sim-debug        = removes debug simulator and verilator-generated files"
 
 #############################################################################
 # selectively enabling printfs
@@ -245,10 +253,12 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd
 	vcd2vpd $@.vcd $@ > /dev/null &
 	(set -o pipefail && $(sim_debug) \
+			$(PERMISSIVE_ON) \
 			$(SIM_FLAGS) \
 			$(EXTRA_SIM_FLAGS) \
 			$(VERBOSE_FLAGS) \
 			-v$@.vcd $< \
+			$(PERMISSIVE_OFF) \
 			</dev/null \
 			2> >(spike-dasm > $<.out) \
 		| tee $<.log)
@@ -258,10 +268,12 @@ $(output_dir)/none.vpd: $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd
 	vcd2vpd $@.vcd $@ > /dev/null &
 	(set -o pipefail && $(sim_debug) \
+			$(PERMISSIVE_ON) \
 			$(SIM_FLAGS) \
 			$(EXTRA_SIM_FLAGS) \
 			$(VERBOSE_FLAGS) \
 			-v$@.vcd none \
+			$(PERMISSIVE_OFF) \
 			</dev/null \
 			2> >(spike-dasm > $(output_dir)/none.out) \
 		| tee $(output_dir)/none.log)
@@ -278,3 +290,10 @@ clean-sim:
 
 clean-sim-debug:
 	rm -rf $(model_dir_debug) $(build_dir)/*.printf.v $(sim_debug)
+
+#############################################################################
+# print help text
+#############################################################################
+.PHONY: help
+help:
+	@for line in $(HELP_LINES); do echo "$$line"; done

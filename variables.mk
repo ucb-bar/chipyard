@@ -1,23 +1,45 @@
 #########################################################################################
 # makefile variables shared across multiple makefiles
+# - to use the help text, your Makefile should have a 'help' target that just 
+#   prints all the HELP_LINES
 #########################################################################################
+HELP_COMPILATION_VARIABLES =
+HELP_PROJECT_VARIABLES = \
+"   SUB_PROJECT            = use the specific subproject default variables [$(SUB_PROJECT)]" \
+"   SBT_PROJECT            = the SBT project that you should find the classes/packages in [$(SBT_PROJECT)]" \
+"   MODEL                  = the top level module of the project in Chisel (normally the harness) [$(MODEL)]" \
+"   VLOG_MODEL             = the top level module of the project in Firrtl/Verilog (normally the harness) [$(VLOG_MODEL)]" \
+"   MODEL_PACKAGE          = the scala package to find the MODEL in [$(MODEL_PACKAGE)]" \
+"   CONFIG                 = the configuration class to give the parameters for the project [$(CONFIG)]" \
+"   CONFIG_PACKAGE         = the scala package to find the CONFIG class [$(CONFIG_PACKAGE)]" \
+"   GENERATOR_PACKAGE      = the scala package to find the Generator class in [$(GENERATOR_PACKAGE)]" \
+"   TB                     = wrapper over the TestHarness needed to simulate in a verilog simulator [$(TB)]" \
+"   TOP                    = top level module of the project (normally the module instantiated by the harness) [$(TOP)]"
 
-#########################################################################################
-# variables to invoke the generator
-# descriptions:
-#   SBT_PROJECT = the SBT project that you should find the classes/packages in
-#   MODEL = the top level module of the project in Chisel (normally the harness)
-#   VLOG_MODEL = the top level module of the project in Firrtl/Verilog (normally the harness)
-#   MODEL_PACKAGE = the scala package to find the MODEL in
-#   CONFIG = the configuration class to give the parameters for the project
-#   CONFIG_PACKAGE = the scala package to find the CONFIG class
-#   GENERATOR_PACKAGE = the scala package to find the Generator class in
-#   TB = wrapper over the TestHarness needed to simulate in a verilog simulator
-#   TOP = top level module of the project (normally the module instantiated by the harness)
-#
-# project specific:
-# 	SUB_PROJECT = use the specific subproject default variables
-#########################################################################################
+HELP_SIMULATION_VARIABLES = \
+"   BINARY                 = riscv binary that the simulator will run" \
+"   VERBOSE_FLAGS          = flags used when doing verbose simulation [$(VERBOSE_FLAGS)]"
+
+HELP_COMMANDS = \
+"   help                   = display this help"
+
+HELP_LINES = "" \
+	" design specifier variables:" \
+	" ---------------------------" \
+	$(HELP_PROJECT_VARIABLES) \
+	"" \
+	" compilation variables:" \
+	" ----------------------" \
+	$(HELP_COMPILATION_VARIABLES) \
+	"" \
+	" simulation variables:" \
+	" ---------------------" \
+	$(HELP_SIMULATION_VARIABLES) \
+	"" \
+	" general commands:" \
+	" -----------------" \
+	$(HELP_COMMANDS) \
+	""
 
 #########################################################################################
 # subproject overrides
