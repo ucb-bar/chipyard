@@ -190,7 +190,7 @@ $(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 	echo "synthesis.inputs:" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
-	for x in $(VLSI_RTL) `cat $(VLSI_BB)`; do \
+	for x in $(VLSI_RTL) $(filter-out %SimDRAM.v,$(filter-out %.cc,$(shell cat $(VLSI_BB)))); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 
