@@ -40,8 +40,7 @@ For a proprietry VCS simulation, enter the ``sims/vcs`` directory
     # Enter VCS directory
     cd sims/vcs
 
-
-.. _sim-default:
+.. _sw-sim-help:
 
 Simulating The Default Example
 -------------------------------
@@ -75,6 +74,22 @@ For example:
 
 
 .. _sw-sim-custom:
+
+Makefile Variables and Commands
+-------------------------------
+You can get a list of useful Makefile variables and commands available from the Verilator or VCS directories. simply run ``make help``:
+
+.. code-block:: shell
+
+    # Enter Verilator directory
+    cd sims/verilator
+    make help
+
+    # Enter VCS directory
+    cd sims/vcs
+    make help
+
+.. _sim-default:
 
 Simulating A Custom Project
 -------------------------------

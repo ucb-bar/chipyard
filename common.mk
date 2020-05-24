@@ -14,11 +14,12 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_SOURCES      = simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS         = requirements to build the simulator"
 
-EXTRA_SIM_CXXFLAGS ?=
-EXTRA_SIM_CFLAGS   ?=
-EXTRA_SIM_LDFLAGS  ?=
-EXTRA_SIM_SOURCES  ?=
-EXTRA_SIM_REQS     ?=
+EXTRA_GENERATOR_REQS ?=
+EXTRA_SIM_CXXFLAGS   ?=
+EXTRA_SIM_CFLAGS     ?=
+EXTRA_SIM_LDFLAGS    ?=
+EXTRA_SIM_SOURCES    ?=
+EXTRA_SIM_REQS       ?=
 
 #----------------------------------------------------------------------------
 HELP_SIMULATION_VARIABLES += \
