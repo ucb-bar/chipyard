@@ -139,7 +139,7 @@ TIMESCALE_OPTS = $(shell verilator --version | perl -lne \
 
 # see: https://github.com/ucb-bar/riscv-mini/issues/31
 MAX_WIDTH_OPTS = $(shell verilator --version | perl -lne \
-	'if (/(\d.\d+)/ && $$1 > 4.016) { print "--max-num-width 1000000"; }')
+	'if (/(\d.\d+)/ && $$1 > 4.016) { print "--max-num-width 1048576"; }')
 
 PREPROC_DEFINES := \
 	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
