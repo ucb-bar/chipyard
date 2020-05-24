@@ -28,8 +28,8 @@ sim_prefix = simulator
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
-PERMISSIVE_ON=
-PERMISSIVE_OFF=
+PERMISSIVE_ON=+permissive
+PERMISSIVE_OFF=+permissive-off
 
 WAVEFORM_FLAG=-v$(sim_out_name).vcd
 
