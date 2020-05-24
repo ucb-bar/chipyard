@@ -12,6 +12,10 @@ trap clean EXIT
 
 cd $LOCAL_CHIPYARD_DIR
 ./scripts/init-submodules-no-riscv-tools.sh
+
+# build libdromajo_cosim
+make -C $LOCAL_CHIPYARD_DIR/tools/dromajo/dromajo-src/src
+
 cd sims/firesim/sim/midas
 
 # set stricthostkeychecking to no (must happen before rsync)
@@ -19,13 +23,11 @@ run "echo \"Ping $SERVER\""
 
 clean
 
-# copy over riscv-tools, verilator, and chipyard to remote
+# copy over riscv-tools, and chipyard to remote
 run "mkdir -p $REMOTE_CHIPYARD_DIR"
-run "mkdir -p $REMOTE_VERILATOR_DIR"
 run "mkdir -p $REMOTE_RISCV_DIR"
 
 copy $LOCAL_CHIPYARD_DIR/ $SERVER:$REMOTE_CHIPYARD_DIR
-copy $LOCAL_VERILATOR_DIR/ $SERVER:$REMOTE_VERILATOR_DIR
 copy $LOCAL_RISCV_DIR/ $SERVER:$REMOTE_RISCV_DIR
 
 # Copy ivy2 and sbt directories
@@ -35,12 +37,13 @@ run "cp -r ~/.sbt  $REMOTE_WORK_DIR"
 
 TOOLS_DIR=$REMOTE_RISCV_DIR
 LD_LIB_DIR=$REMOTE_RISCV_DIR/lib
-VERILATOR_BIN_DIR=$REMOTE_VERILATOR_DIR/install/bin
 
 # Run midasexamples test
 
 run "export FIRESIM_ENV_SOURCED=1; make -C $REMOTE_FIRESIM_DIR clean"
-run "export RISCV=\"$TOOLS_DIR\"; export LD_LIBRARY_PATH=\"$LD_LIB_DIR\"; \
-     export PATH=\"$VERILATOR_BIN_DIR:\$PATH\"; export FIRESIM_ENV_SOURCED=1; \
-     export VERILATOR_ROOT=$REMOTE_VERILATOR_DIR/install/share/verilator; \
+run "export RISCV=\"$TOOLS_DIR\"; \
+     export LD_LIBRARY_PATH=\"$LD_LIB_DIR\"; \
+     export FIRESIM_ENV_SOURCED=1; \
+     export PATH=\"$REMOTE_VERILATOR_DIR/bin:\$PATH\"; \
+     export VERILATOR_ROOT=\"$REMOTE_VERILATOR_DIR\"; \
      make -C $REMOTE_FIRESIM_DIR JAVA_ARGS=\"$REMOTE_JAVA_ARGS\" TARGET_PROJECT=midasexamples test"

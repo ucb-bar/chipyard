@@ -169,7 +169,7 @@ transactions.
  - ``minSize: Int`` - Minimum size of transfers supported by all outward managers.
  - ``maxSize: Int`` - Maximum size of transfers supported after the Fragmenter is applied.
  - ``alwaysMin: Boolean`` - (optional) Fragment all requests down to minSize (else fragment to maximum supported by manager). (default: false)
- - ``earlyAck: EarlyAck.T`` - (optional) Should a multibeat Put be acknowledged on the first beat or last beat? 
+ - ``earlyAck: EarlyAck.T`` - (optional) Should a multibeat Put be acknowledged on the first beat or last beat?
    Possible values (default: ``EarlyAck.None``):
 
     - ``EarlyAck.AllPuts`` - always acknowledge on first beat.
@@ -270,7 +270,7 @@ the client to see a particular width.
 
 **Example Usage:**
 
-.. code-block::
+.. code-block:: scala
 
     // Assume the manager node sets beatBytes to 8
     // With WidthWidget, client sees beatBytes of 4
@@ -398,11 +398,11 @@ package, not the ``freechips.rocketchip.tilelink`` package like the others.
  - ``size: Int`` - The size of the memory in bytes
  - ``contentsDelayed: => Seq[Byte]`` - A function which, when called generates
    the byte contents of the ROM.
- - ``executable: Boolean`` - (optional) Specify whether the CPU can fetch 
+ - ``executable: Boolean`` - (optional) Specify whether the CPU can fetch
    instructions from the ROM (default: ``true``).
- - ``beatBytes: Int`` - (optional) The width of the interface in bytes. 
+ - ``beatBytes: Int`` - (optional) The width of the interface in bytes.
    (default: 4).
- - ``resources: Seq[Resource]`` - (optional) Sequence of resources to add to 
+ - ``resources: Seq[Resource]`` - (optional) Sequence of resources to add to
    the device tree.
 
 **Example Usage:**
@@ -429,13 +429,13 @@ The TLRAM and AXI4RAM widgets provide read-write memories implemented as SRAMs.
 **Arguments:**
 
  - ``address: AddressSet`` - The address range that this RAM will cover.
- - ``cacheable: Boolean`` - (optional) Can the contents of this RAM be cached. 
+ - ``cacheable: Boolean`` - (optional) Can the contents of this RAM be cached.
    (default: ``true``)
- - ``executable: Boolean`` - (optional) Can the contents of this RAM be fetched 
+ - ``executable: Boolean`` - (optional) Can the contents of this RAM be fetched
    as instructions. (default: ``true``)
- - ``beatBytes: Int`` - (optional) Width of the TL/AXI4 interface in bytes. 
+ - ``beatBytes: Int`` - (optional) Width of the TL/AXI4 interface in bytes.
    (default: 4)
- - ``atomics: Boolean`` - (optional, TileLink only) Does the RAM support 
+ - ``atomics: Boolean`` - (optional, TileLink only) Does the RAM support
    atomic operations? (default: ``false``)
 
 **Example Usage:**

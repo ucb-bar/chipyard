@@ -2,7 +2,7 @@ Advanced Concepts
 ================================
 
 The following sections are advanced topics about how to Chipyard works, how to use Chipyard, and special features of the framework.
-They expect you to know about Chisel, Parameters, Configs, etc.
+They expect you to know about Chisel, Parameters, configs, etc.
 
 .. toctree::
    :maxdepth: 2
@@ -11,6 +11,7 @@ They expect you to know about Chisel, Parameters, Configs, etc.
    Top-Testharness
    Chip-Communication
    Debugging-RTL
+   Debugging-BOOM
    Resources
    CDEs
 

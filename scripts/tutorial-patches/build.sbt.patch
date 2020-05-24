@@ -1,0 +1,26 @@
+diff --git a/build.sbt b/build.sbt
+index 0c4581f..ff0597c 100644
+--- a/build.sbt
++++ b/build.sbt
+@@ -128,7 +128,7 @@ lazy val iocell = (project in file("./tools/barstools/iocell/"))
+ 
+ lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
+   .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
+-    sha3, // On separate line to allow for cleaner tutorial-setup patches
++//    sha3, // On separate line to allow for cleaner tutorial-setup patches
+     gemmini, icenet, tracegen, ariane, nvdla)
+   .settings(commonSettings)
+ 
+@@ -155,9 +155,9 @@ lazy val ariane = (project in file("generators/ariane"))
+   .dependsOn(rocketchip)
+   .settings(commonSettings)
+ 
+-lazy val sha3 = (project in file("generators/sha3"))
+-  .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
+-  .settings(commonSettings)
++//lazy val sha3 = (project in file("generators/sha3"))
++//  .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
++//  .settings(commonSettings)
+ 
+ lazy val gemmini = (project in file("generators/gemmini"))
+   .dependsOn(rocketchip, chisel_testers, testchipip)

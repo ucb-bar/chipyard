@@ -1,4 +1,4 @@
-Tools
+Development Tools
 ==============================
 
 The Chipyard framework relays heavily on a set of Scala-based tools.
@@ -14,4 +14,4 @@ The following pages will introduce them, and how we can use them in order to gen
    Chisel-Testers
    Dsptools
    Barstools
-
+   Dromajo

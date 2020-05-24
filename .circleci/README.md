@@ -16,9 +16,8 @@ For example:
     - prepare-rocketchip:
         requires:
             - install-riscv-toolchain
-            - install-verilator
 
-This specifies that the `prepare-rocketchip` job needs the `install-riscv-toolchain` and `install-verilator` steps to run before it can run.
+This specifies that the `prepare-rocketchip` job needs the `install-riscv-toolchain` steps to run before it can run.
 
 All jobs in the CI workflow are specified at the top of `config.yml`
 They specify a docker image to use (in this case a riscv-boom image since that is already available and works nicely) and an environment.
@@ -36,7 +35,6 @@ This directory contains all the collateral for the Chipyard CI to work.
 The following is included:
 
     `build-toolchains.sh` # build either riscv-tools or esp-tools
-    `build-verilator.sh`  # build verilator (remotely)
     `create-hash.sh`      # create hashes of riscv-tools/esp-tools so circleci caching can work
     `do-rtl-build.sh`     # use verilator to build a sim executable (remotely)
     `config.yml`          # main circleci config script to enumerate jobs/workflows
@@ -48,11 +46,10 @@ How things are setup for Chipyard
 The steps for CI to run are as follows.
 1st, build the toolchains in parallel (note: `esp-tools` is currently not used in the run).
 The docker image sets up the `PATH` and `RISCV` variable so that `riscv-tools` is the default (currently the `env.sh` script that is created at tool build is unused).
-2nd, install verilator using the `*.mk` to cache unique versions of verilator (mainly for if verilator is bumped).
-3rd, create the simulator binary.
+2nd, create the simulator binary.
 This requires the `riscv-tools` for `fesvr` and `verilator` to be able to build the binary.
 This stores all collateral for the tests (srcs, generated-srcs, sim binary, etc) to run "out of the gate" in the next job (make needs everything or else it will run again).
-4th, finally run the tests that were wanted.
+3rd, finally run the desired tests.
 
 Other CI Setup
 --------------

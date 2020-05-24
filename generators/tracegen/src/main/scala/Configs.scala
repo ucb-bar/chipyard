@@ -60,19 +60,6 @@ class WithBoomTraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
   case MaxHartIdBits => log2Ceil(params.size + up(TraceGenKey, site).length) max 1
 })
 
-
-class TraceGenConfig extends Config(
-  new WithTraceGen(List.fill(2) { DCacheParams(nMSHRs = 0, nSets = 16, nWays = 2) }) ++
-  new BaseConfig)
-
-class NonBlockingTraceGenConfig extends Config(
-  new WithTraceGen(List.fill(2) { DCacheParams(nMSHRs = 2, nSets = 16, nWays = 2) }) ++
-  new BaseConfig)
-
-class BoomTraceGenConfig extends Config(
-  new WithBoomTraceGen(List.fill(2) { DCacheParams(nMSHRs = 8, nSets = 16, nWays = 2) }) ++
-  new BaseConfig)
-
 class WithL2TraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
     extends Config((site, here, up) => {
   case TraceGenKey => params.map { dcp => TraceGenParams(
@@ -100,7 +87,3 @@ class WithL2TraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
   case MaxHartIdBits => if (params.size == 1) 1 else log2Ceil(params.size)
 })
 
-class NonBlockingTraceGenL2Config extends Config(
-  new WithL2TraceGen(List.fill(2)(DCacheParams(nMSHRs = 2, nSets = 16, nWays = 4))) ++
-  new WithInclusiveCache ++
-  new BaseConfig)
