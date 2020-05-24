@@ -18,7 +18,7 @@ import icenet.CanHavePeripheryIceNICModuleImp
 
 import junctions.{NastiKey, NastiParameters}
 import midas.models.{FASEDBridge, AXI4EdgeSummary, CompleteConfig}
-import midas.targetutils.{MemModelAnnotation}
+import midas.targetutils.{FAMEModelAnnotation, MemModelAnnotation, EnableModelMultiThreadingAnnotation}
 import firesim.bridges._
 import firesim.configs.MemModelKey
 import tracegen.HasTraceGenTilesModuleImp
@@ -111,6 +111,20 @@ class WithFireSimMultiCycleRegfile extends ComposeIOBinder({
         }
       }
       case a: ArianeTile => Nil
+    }
+    Nil
+  }
+})
+
+class WithFAME5 extends ComposeIOBinder({
+  (system: HasChipyardTilesModuleImp) => {
+    system.outer.tiles.map {
+      case r: RocketTile =>
+        annotate(FAMEModelAnnotation(r.module))
+        annotate(EnableModelMultiThreadingAnnotation(r.module))
+      case b: BoomTile =>
+        annotate(FAMEModelAnnotation(b.module.core))
+        annotate(EnableModelMultiThreadingAnnotation(b.module))
     }
     Nil
   }

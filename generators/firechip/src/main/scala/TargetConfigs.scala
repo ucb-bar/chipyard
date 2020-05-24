@@ -178,3 +178,14 @@ class FireSimArianeConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.ArianeConfig)
+
+//**************************
+//* FAME5 + mem optimization
+//**************************
+class FAME5MemOptConfig extends Config(
+  new WithFAME5 ++
+  new boom.common.WithNBoomCores(16) ++
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.LargeBoomConfig)
