@@ -23,6 +23,7 @@ import sifive.blocks.devices.spi._
 
 import chipyard.{BuildTop, BuildSystem}
 import chipyard.{CoreRegistrar, CoreRegisterEntryBase}
+import chipyard.hlist
 
 /**
  * TODO: Why do we need this?
@@ -146,6 +147,12 @@ class WithControlCore extends Config((site, here, up) => {
     )
   case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
 })
+
+class WithTraceIOHMap extends ConfigHMap {
+  override def apply[I](v: I) = (site, here, up) => {
+    
+  }
+}
 
 class WithTraceIO extends Config((site, here, up) => {
   val coreMatch: List[CoreRegisterEntryBase] => PartialFunction[Any,Any] =
