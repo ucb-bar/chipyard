@@ -18,16 +18,16 @@ A ``DspChain`` is one example of how to assemble ``DspBlocks``, in which case th
  
 This project has example designs that integrate a ``DspBlock`` to a rocketchip-based SoC as an MMIO peripheral. The custom ``DspBlock`` has a ``ReadQueue`` before it and a ``WriteQueue`` after it, which allow memory mapped access to the streaming interfaces so the rocket core can interact with the ``DspBlock``.  This section will primarily focus on designing Tilelink-based peripherals. However, through the resources provided in Dsptools, one could also define an AXI4-based peripheral by following similar steps. Furthermore, the examples here are simple, but can be extended to implement more complex accelerators, for example an `OFDM baseband <https://github.com/grebe/ofdm>`_ or a `spectrometer <https://github.com/ucb-art/craft2-chip>`_.
 
-For this example, we will show you how to connect a simple FIR filter created using Dsptools as an MMIO peripheral. The full code can be found in ``generators/example/src/main/scala/dsptools/GenericFIR.scala``. That being said, one could substitute any module with a ready valid interface in the place of the FIR and achieve the same results. As long as the read and valid signals of the module are attached to those of a corresponding ``DSPBlock`` wrapper, and that wrapper is placed in a chain with a ``ReadQueue`` and a ``WriteQueue``, following the general outline establised by these steps will allow you to interact with that block as a memory mapped IO.
+For this example, we will show you how to connect a simple FIR filter created using Dsptools as an MMIO peripheral. The full code can be found in ``generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala``. That being said, one could substitute any module with a ready valid interface in the place of the FIR and achieve the same results. As long as the read and valid signals of the module are attached to those of a corresponding ``DSPBlock`` wrapper, and that wrapper is placed in a chain with a ``ReadQueue`` and a ``WriteQueue``, following the general outline establised by these steps will allow you to interact with that block as a memory mapped IO.
 
 The module ``GenericFIR`` is the overall wrapper of our FIR module. This module links together a variable number of ``GenericFIRDirectCell`` submodules, each of which performs the computations for one coefficient in a FIR direct form architecture. It is important to note that both modules are type generic, which means that they can be instantiated for any datatype that implements ``Ring`` operations per the specifications on ``T``.
 
-.. literalinclude:: ../../generators/example/src/main/scala/dsptools/GenericFIR.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala
     :language: scala
     :start-after: DOC include start: GenericFIR chisel
     :end-before: DOC include end: GenericFIR chisel
 
-.. literalinclude:: ../../generators/example/src/main/scala/dsptools/GenericFIR.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala
     :language: scala
     :start-after: DOC include start: GenericFIRDirectCell chisel
     :end-before: DOC include end: GenericFIRDirectCell chisel
@@ -42,7 +42,7 @@ The first step in attaching the FIR filter as a MMIO peripheral is to create an 
 3. Cast the module input data to the input type of ``GenericFIR`` (``GenericFIRBundle``) and attach.
 4. Cast the output of ``GenericFIR`` to ``UInt`` and attach to the module output.
 
-.. literalinclude:: ../../generators/example/src/main/scala/dsptools/GenericFIR.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala
     :language: scala
     :start-after: DOC include start: GenericFIRBlock chisel
     :end-before: DOC include end: GenericFIRBlock chisel
@@ -51,14 +51,14 @@ Connecting by TileLink
 ----------------------
 With these classes implemented, you can begin to construct the chain by extending ``GenericFIRBlock`` while using the ``TLDspBlock`` trait via mixin. 
 
-.. literalinclude:: ../../generators/example/src/main/scala/dsptools/GenericFIR.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala
     :language: scala
     :start-after: DOC include start: TLGenericFIRBlock chisel
     :end-before: DOC include end: TLGenericFIRBlock chisel
 
-We can then construct the final chain by utilizing the ``TLWriteQueue`` and ``TLReadeQueue`` modules found in ``generators/example/src/main/scala/dsptools/DspBlocks.scala``. Inside our chain, we construct an instance of each queue as well as our ``TLGenericFIRBlock``. We then take the ``steamnode`` from each module and wire them all together to link the chain.
+We can then construct the final chain by utilizing the ``TLWriteQueue`` and ``TLReadeQueue`` modules found in ``generators/chipyard/src/main/scala/example/dsptools/DspBlocks.scala``. Inside our chain, we construct an instance of each queue as well as our ``TLGenericFIRBlock``. We then take the ``steamnode`` from each module and wire them all together to link the chain.
 
-.. literalinclude:: ../../generators/example/src/main/scala/dsptools/GenericFIR.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala
     :language: scala
     :start-after: DOC include start: TLGenericFIRChain chisel
     :end-before: DOC include end: TLGenericFIRChain chisel
@@ -67,7 +67,7 @@ Top Level Traits
 ----------------
 As in the previous MMIO example, we use a cake pattern to hook up our module to our SoC.
 
-.. literalinclude:: ../../generators/example/src/main/scala/dsptools/GenericFIR.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala
     :language: scala
     :start-after: DOC include start: CanHavePeripheryFIR chisel
     :end-before: DOC include end: CanHavePeripheryFIR chisel
@@ -79,21 +79,21 @@ Our module does not need to be connected to concrete IOs or wires, so we do not 
 Constructing the Top and Config
 -------------------------------
 
-Once again following the path of the previous MMIO example, we now want to mix our traits into the system as a whole. The code is from ``generators/example/src/main/scala/Top.scala``
+Once again following the path of the previous MMIO example, we now want to mix our traits into the system as a whole. The code is from ``generators/chipyard/src/main/scala/DigitalTop.scala``
 
-.. literalinclude:: ../../generators/example/src/main/scala/Top.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/DigitalTop.scala
     :language: scala
     :start-after: DOC include start: Top
     :end-before: DOC include end: Top
 
-Finally, we create the configuration class in ``generators/example/src/main/scala/RocketConfigs.scala`` that uses the ``WithFIR`` mixin defined in ``generators/example/src/main/scala/ConfigMixins.scala``.
+Finally, we create the configuration class in ``generators/chipyard/src/main/scala/config/RocketConfigs.scala`` that uses the ``WithFIR`` mixin defined in ``generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala``.
 
-.. literalinclude:: ../../generators/example/src/main/scala/ConfigMixins.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala
     :language: scala
     :start-after: DOC include start: WithFIR
     :end-before: DOC include end: WithFIR
 
-.. literalinclude:: ../../generators/example/src/main/scala/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
     :language: scala
     :start-after: DOC include start: FIRRocketConfig
     :end-before: DOC include end: FIRRocketConfig
