@@ -174,7 +174,7 @@ abstract class GenericFIRBlock[D, U, EO, EI, B<:Data, T<:Data:Ring]
 }
 // DOC include end: GenericFIRBlock chisel
 
-// DOC include start: TLGenericFIRBLock chisel
+// DOC include start: TLGenericFIRBlock chisel
 class TLGenericFIRBlock[T<:Data:Ring]
 (
   val genIn: T,
