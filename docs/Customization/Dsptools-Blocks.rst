@@ -83,8 +83,8 @@ Once again following the path of the previous MMIO example, we now want to mix o
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/DigitalTop.scala
     :language: scala
-    :start-after: DOC include start: Top
-    :end-before: DOC include end: Top
+    :start-after: DOC include start: DigitalTop
+    :end-before: DOC include end: DigitalTop
 
 Finally, we create the configuration class in ``generators/chipyard/src/main/scala/config/RocketConfigs.scala`` that uses the ``WithFIR`` mixin defined in ``generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala``.
 
