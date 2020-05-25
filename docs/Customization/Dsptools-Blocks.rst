@@ -48,7 +48,7 @@ The first step in attaching the FIR filter as a MMIO peripheral is to create an 
     :end-before: DOC include end: GenericFIRBlock chisel
 
 Connecting DspBlock by TileLink
-----------------------
+-------------------------------
 With these classes implemented, you can begin to construct the chain by extending ``GenericFIRBlock`` while using the ``TLDspBlock`` trait via mixin. 
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala
