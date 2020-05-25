@@ -133,7 +133,7 @@ class TLStreamingPassthroughChain[T<:Data:Ring](params: StreamingPassthroughPara
   lazy val module = new LazyModuleImp(this)
 }
 
-trait CanHavePeripheryUIntStreamingPassthrough { this: BaseSubsystem =>
+trait CanHavePeripheryStreamingPassthrough { this: BaseSubsystem =>
   val passthrough = p(StreamingPassthroughKey) match {
     case Some(params) => {
       val passthrough = LazyModule(new TLStreamingPassthroughChain(params, UInt(32.W)))
@@ -150,7 +150,7 @@ trait CanHavePeripheryUIntStreamingPassthrough { this: BaseSubsystem =>
 /**
  * Mixin to add passthrough to rocket config
  */
-class WithUIntStreamingPassthrough extends Config((site, here, up) => {
+class WithStreamingPassthrough extends Config((site, here, up) => {
   case StreamingPassthroughKey => Some(StreamingPassthroughParams(depth = 8))
 })
 

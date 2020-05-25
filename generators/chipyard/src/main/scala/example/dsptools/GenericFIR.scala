@@ -200,8 +200,8 @@ class TLGenericFIRChain[T<:Data:Ring] (genIn: T, genOut: T, coeffs: Seq[T], para
 }
 // DOC include end: TLGenericFIRChain chisel
 
-// DOC include start: CanHavePeripheryUIntTestFIR chisel
-trait CanHavePeripheryUIntTestFIR extends BaseSubsystem {
+// DOC include start: CanHavePeripheryFIR chisel
+trait CanHavePeripheryFIR extends BaseSubsystem {
   val fir = p(GenericFIRKey) match {
     case Some(params) => {
       val fir = LazyModule(new TLGenericFIRChain(
@@ -216,13 +216,13 @@ trait CanHavePeripheryUIntTestFIR extends BaseSubsystem {
     case None => None
   }
 }
-// DOC include end: CanHavePeripheryUIntTestFIR chisel
+// DOC include end: CanHavePeripheryFIR chisel
 
 /**
  * Mixin to add FIR to rocket config
  */
-// DOC include start: WithTestFIR
-class WithUIntTestFIR extends Config((site, here, up) => {
+// DOC include start: WithFIR
+class WithFIR extends Config((site, here, up) => {
   case GenericFIRKey => Some(GenericFIRParams(depth = 8))
 })
-// DOC include end: WithTestFIR
+// DOC include end: WithFIR
