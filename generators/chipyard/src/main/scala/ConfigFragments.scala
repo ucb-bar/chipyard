@@ -148,20 +148,8 @@ class WithControlCore extends Config((site, here, up) => {
   case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
 })
 
-class WithTraceIOHMap extends ConfigHMap {
-  override def apply[I](v: I) = (site, here, up) => {
-    
-  }
-}
-
-class WithTraceIO extends Config((site, here, up) => {
-  val coreMatch: List[CoreRegisterEntryBase] => PartialFunction[Any,Any] =
-    coreList => coreList match {
-      case coreEntry :: tail => coreEntry.enableTileTrace(site, here, up) orElse coreMatch(tail)
-      case Nil => {
-        case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
-        case TracePortKey => Some(TracePortParams())
-      }
-    }
-  coreMatch(CoreRegistrar.cores)
-})
+class WithTraceIO extends Config((site, here, up) =>
+  GenericConfig(Map("trace" -> true)) (site, here, up) orElse {
+    case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
+    case TracePortKey => Some(TracePortParams())
+  })

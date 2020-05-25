@@ -147,7 +147,7 @@ class TestSuiteHelper
   */
   def addThirdPartyTestSuites[TileParams <: CoreParams](tilesKey: Field[Seq[TileParams]])(implicit p: Parameters) = {
     val xlen = p(XLen)
-    p(tilesKey).find(_.hartId == 0).map { tileParams =>
+    p(tilesKey).asInstanceOf[Seq[CoreParams]].find(_.hartId == 0).map { tileParams =>
       val coreParams = tileParams.core
       val vm = coreParams.useVM
       val env = if (vm) List("p","v") else List("p")
