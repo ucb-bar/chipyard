@@ -98,8 +98,8 @@ Finally, we create the configuration class in ``generators/chipyard/src/main/sca
     :start-after: DOC include start: FIRRocketConfig
     :end-before: DOC include end: FIRRocketConfig
 
-Testing
--------
+FIR Testing
+-----------
 
 We can now test that the FIR is working. The test program is found in ``tests/fir.c``.
 
