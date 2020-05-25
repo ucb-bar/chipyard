@@ -119,12 +119,12 @@ class WithFireSimMultiCycleRegfile extends ComposeIOBinder({
 class WithFAME5 extends ComposeIOBinder({
   (system: HasChipyardTilesModuleImp) => {
     system.outer.tiles.map {
+      case b: BoomTile =>
+        annotate(FAMEModelAnnotation(b.module))
+        annotate(EnableModelMultiThreadingAnnotation(b.module))
       case r: RocketTile =>
         annotate(FAMEModelAnnotation(r.module))
         annotate(EnableModelMultiThreadingAnnotation(r.module))
-      case b: BoomTile =>
-        annotate(FAMEModelAnnotation(b.module.core))
-        annotate(EnableModelMultiThreadingAnnotation(b.module))
     }
     Nil
   }
