@@ -384,14 +384,35 @@ class LoopbackNICRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
-// DOC include start: scratchpadrocket
-class ScratchpadRocketConfig extends Config(
+// DOC include start: l1scratchpadrocket
+class L1ScratchpadSmallRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
-  new testchipip.WithBackingScratchpad ++              // add backing scratchpad
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(0) ++ // remove offchip mem port
+  new freechips.rocketchip.subsystem.WithNBanks(0) ++
+  new freechips.rocketchip.subsystem.WithNoMemPort ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithScratchpadsOnly ++    // use rocket l1 scratchpad
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithNSmallCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  new freechips.rocketchip.system.BaseConfig)
+// DOC include end: l1scratchpadrocket
+
+// DOC include start: mbusscratchpadrocket
+class MbusScratchpadRocketConfig extends Config(
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new testchipip.WithTSI ++
+  new testchipip.WithBackingScratchpad ++                   // add mbus backing scratchpad
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
@@ -403,7 +424,7 @@ class ScratchpadRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
-// DOC include end: scratchpadrocket
+// DOC include end: mbusscratchpadrocket
 
 // DOC include start: RingSystemBusRocket
 class RingSystemBusRocketConfig extends Config(
