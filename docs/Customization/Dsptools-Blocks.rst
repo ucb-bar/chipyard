@@ -13,7 +13,7 @@ Dsptools Blocks
 ===============
 A ``DspBlock`` is the basic unit of signal processing functionality that can be integrated into an SoC.
 It has a AXI4-stream interface and an optional memory interface.
-The idea idea is that these ``DspBlocks`` can be easily designed, unit tested, and assembled lego-style to build complex functionality.
+The idea is that these ``DspBlocks`` can be easily designed, unit tested, and assembled lego-style to build complex functionality.
 A ``DspChain`` is one example of how to assemble ``DspBlocks``, in which case the streaming interfaces are connected serially into a pipeline, and a bus is instatiated and connected to every block with a memory interface.
  
 This project has example designs that integrate a ``DspBlock`` to a rocketchip-based SoC as an MMIO peripheral. The custom ``DspBlock`` has a ``ReadQueue`` before it and a ``WriteQueue`` after it, which allow memory mapped access to the streaming interfaces so the rocket core can interact with the ``DspBlock``.  This section will primarily focus on designing Tilelink-based peripherals. However, through the resources provided in Dsptools, one could also define an AXI4-based peripheral by following similar steps. Furthermore, the examples here are simple, but can be extended to implement more complex accelerators, for example an `OFDM baseband <https://github.com/grebe/ofdm>`_ or a `spectrometer <https://github.com/ucb-art/craft2-chip>`_.
