@@ -46,6 +46,8 @@ LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 declare -A mapping
 mapping["chipyard-rocket"]="SUB_PROJECT=chipyard"
 mapping["chipyard-sha3"]="SUB_PROJECT=chipyard CONFIG=Sha3RocketConfig"
+mapping["chipyard-fir"]="SUB_PROJECT=chipyard CONFIG=FIRRocketConfig"
+mapping["chipyard-passthrough"]="SUB_PROJECT=chipyard CONFIG=StreamingPassthroughRocketConfig"
 mapping["chipyard-hetero"]="SUB_PROJECT=chipyard CONFIG=LargeBoomAndRocketConfig"
 mapping["chipyard-boom"]="SUB_PROJECT=chipyard CONFIG=SmallBoomConfig"
 mapping["chipyard-blkdev"]="SUB_PROJECT=chipyard CONFIG=SimBlockDeviceRocketConfig"

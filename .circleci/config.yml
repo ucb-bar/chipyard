@@ -204,6 +204,16 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "chipyard-sha3"
+    prepare-chipyard-fir:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-fir"
+    prepare-chipyard-passthrough:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-passthrough"
     prepare-chipyard-hetero:
         executor: main-env
         steps:
@@ -287,6 +297,16 @@ jobs:
         steps:
             - run-tests:
                 project-key: "chipyard-sha3"
+    chipyard-fir-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-fir"
+    chipyard-passthrough-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-passthrough"
     chipyard-hetero-run-tests:
         executor: main-env
         steps:
@@ -439,6 +459,16 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
+            - prepare-chipyard-fir:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-passthrough:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
             - prepare-chipyard-hetero:
                 requires:
                     - install-riscv-toolchain
@@ -524,6 +554,14 @@ workflows:
             - chipyard-sha3-run-tests:
                 requires:
                     - prepare-chipyard-sha3
+
+            - chipyard-fir-run-tests:
+                requires:
+                    - prepare-chipyard-fir
+
+            - chipyard-passthrough-run-tests:
+                requires:
+                    - prepare-chipyard-passthrough
 
             - chipyard-hetero-run-tests:
                 requires:

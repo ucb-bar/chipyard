@@ -62,6 +62,14 @@ case $1 in
         (cd $LOCAL_CHIPYARD_DIR/generators/sha3/software && ./build.sh)
         $LOCAL_SIM_DIR/simulator-chipyard-Sha3RocketConfig $LOCAL_CHIPYARD_DIR/generators/sha3/software/benchmarks/bare/sha3-rocc.riscv
         ;;
+    chipyard-passthrough)
+        make -C $LOCAL_CHIPYARD_DIR/tests
+        $LOCAL_SIM_DIR/simulator-chipyard-StreamingPassthroughRocketConfig $LOCAL_CHIPYARD_DIR/tests/passthrough.riscv
+        ;;
+    chipyard-fir)
+        make -C $LOCAL_CHIPYARD_DIR/tests
+        $LOCAL_SIM_DIR/simulator-chipyard-FIRRocketConfig $LOCAL_CHIPYARD_DIR/tests/fir.riscv
+        ;;
     chipyard-spiflashread)
         make -C $LOCAL_CHIPYARD_DIR/tests
         make -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashread.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary
