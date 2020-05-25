@@ -35,18 +35,25 @@ trait HasChipyardTiles extends HasTiles
 
   protected val rocketTileParams = p(RocketTilesKey)
   protected val boomTileParams = p(BoomTilesKey)
-  protected val coreTileParams = CoreRegistrar.cores map (coreType => p(coreType.tilesKey))
 
   // crossing can either be per tile or global (aka only 1 crossing specified)
   private val rocketCrossings = perTileOrGlobalSetting(p(RocketCrossingKey), rocketTileParams.size)
   private val boomCrossings = perTileOrGlobalSetting(p(BoomCrossingKey), boomTileParams.size)
-  private val coreCrossings = (CoreRegistrar.cores zip coreTileParams) map (_ match {
-    case (coreType, tileParams) => perTileOrGlobalSetting(p(coreType.crossingKey), tileParams.size)
-  })
 
-  // TODO: XXX The "tiles" below scan for hartId but it is not in CoreParams. Should that be added in later 
+  private val rocketTilesInfo = (rocketTileParams zip rocketCrossings) map ((param, crossing) => (
+    param,
+    crossing,
+    LazyModule(new RocketTile(param, crossing, PriorityMuxHartIdFromSeq(rocketTileParams), logicalTreeNode))
+  ))
+  private val boomTilesInfo = (boomTileParams zip boomCrossings) map ((param, crossing) => (
+    param,
+    crossing,
+    LazyModule(new RocketTile(param, crossing, PriorityMuxHartIdFromSeq(boomCrossings), logicalTreeNode))
+  ))
+
+  // TODO: XXX The "tiles" below scan for hartId but it is not in CoreParams. Should that be added in later
   // revision, or I have to use reflection to get that parameter?
-  val allTilesInfo = (rocketTileParams ++ boomTileParams ++ coreTileParams.flatten) zip (rocketCrossings ++ boomCrossings ++ coreCrossings.flatten)
+  val allTilesInfo = rocketTilesInfo ++ boomTilesInfo ++ (CoreManager.cores map _.instantiateTile(perTileOrGlobalSetting _))
 
   // Make a tile and wire its nodes into the system,
   // according to the specified type of clock crossing.
@@ -56,19 +63,7 @@ trait HasChipyardTiles extends HasTiles
   // There is something weird with registering tile-local interrupt controllers to the CLINT.
   // TODO: investigate why
   val tiles = allTilesInfo.sortWith(_._1.hartId < _._1.hartId).map {
-    case (param, crossing) => {
-
-      val tile = param match {
-        case r: RocketTileParams => {
-          LazyModule(new RocketTile(r, crossing, PriorityMuxHartIdFromSeq(rocketTileParams), logicalTreeNode))
-        }
-        case b: BoomTileParams => {
-          LazyModule(new BoomTile(b, crossing, PriorityMuxHartIdFromSeq(boomTileParams), logicalTreeNode))
-        }
-        case _ => LazyModule(
-          (CoreRegistrar.cores collect (core => core.instantiateTile(param, crossing, paramList, logicalTreeNode, p)).unlift()) (0)
-        )
-      }
+    case (param, crossing, tile) => {
       connectMasterPortsToSBus(tile, crossing)
       connectSlavePortsToCBus(tile, crossing)
       connectInterrupts(tile, debugOpt, clintOpt, plicOpt)
@@ -76,7 +71,6 @@ trait HasChipyardTiles extends HasTiles
       tile
     }
   }
-
 
   def coreMonitorBundles = tiles.map {
     case r: RocketTile => r.module.core.rocketImpl.coreMonitorBundle

@@ -17,9 +17,8 @@ import ariane.{ArianeTile, ArianeTilesKey, ArianeCrossingKey, ArianeTileParams}
 // Third-party core entries
 sealed trait CoreEntryBase {
   def updateWithFilter(view: View, p: Any => View): (Map[String, Any] => PartialFunction[Any, Seq[AnyRef]])
-
-  def instantiateTile(param: TileParams, crossing: RocketCrossingParams,
-    logicalTreeNode: LogicalTreeNode, p: Parameters): Option[BaseTile]
+  def instantiateTile(crossingLookup: (Seq[RocketCrossingParams], Int) => ClockCrossingType)
+    (implicit logicalTreeNode: LogicalTreeNode, p: Parameters): (CoreParams, ClockCrossingType, BaseTile)
 }
 
 class CoreEntry[TileParamsT <: CoreParams, TileT <: BaseTile](
@@ -48,18 +47,16 @@ class CoreEntry[TileParamsT <: CoreParams, TileT <: BaseTile](
       (tile => properties => copyTileParam(tile, properties))
   }
 
-  def instantiateTile(param: TileParams, crossing: RocketCrossingParams,
-    logicalTreeNode: LogicalTreeNode, p: Parameters): Option[BaseTile] = param match {
-    case a: TileParams => Some(tileCtr.newInstance(a, crossing, PriorityMuxHartIdFromSeq(p(tilesKey)), logicalTreeNode, p))
-    case _ => None
+  def instantiateTile(crossingLookup: (Seq[RocketCrossingParams], Int) => ClockCrossingType)
+    (implicit logicalTreeNode: LogicalTreeNode, p: Parameters) = {
+    val tileParams = p(tk)
+    val crossings = crossingLookup(p(ck), tileParams.size)
+    (tileParams zip crossings) map ((param, crossing) => (
+      param,
+      crossing,
+      LazyModule(tileCtr(param, crossing, PriorityMuxHartIdFromSeq(tileParams), logicalTreeNode))
+    ))
   }
-}
-
-object CoreManager {
-  val cores: List[CoreEntryBase] = List(
-    // ADD YOUR CORE DEFINITION HERE
-    new CoreEntry[ArianeTileParams, ArianeTile](ArianeTilesKey, ArianeCrossingKey)
-  )
 }
 
 // Core Generic Config - change properties in the given map
@@ -73,4 +70,11 @@ class GenericConfig(properties: Map[String, Any], filterFunc: Any => Bool) {
 object GenericConfig {
   def apply(properties: Map[String, Any], filterFunc: Any => Bool = (_ => true)) =
     new GenericConfig(properties, filterFunc).configFunc
+}
+
+object CoreManager {
+  val cores: List[CoreEntryBase] = List(
+    // ADD YOUR CORE DEFINITION HERE
+    new CoreEntry[ArianeTileParams, ArianeTile](ArianeTilesKey, ArianeCrossingKey)
+  )
 }
