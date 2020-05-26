@@ -188,30 +188,27 @@ GenericFIRBlock[TLClientPortParameters, TLManagerPortParameters, TLEdgeOut, TLEd
 
 // DOC include start: TLGenericFIRChain chisel
 class TLGenericFIRChain[T<:Data:Ring] (genIn: T, genOut: T, coeffs: Seq[T], params: GenericFIRParams)(implicit p: Parameters)
-  extends LazyModule {
-  val writeQueue = LazyModule(new TLWriteQueue(params.depth, AddressSet(params.writeAddress, 0xff)))
-  val fir = LazyModule(new TLGenericFIRBlock(genIn, genOut, coeffs))
-  val readQueue = LazyModule(new TLReadQueue(params.depth, AddressSet(params.readAddress, 0xff)))
-
-  // connect streamNodes of queues and FIR
-  readQueue.streamNode := fir.streamNode := writeQueue.streamNode
-
-  lazy val module = new LazyModuleImp(this)
-}
+  extends TLChain(Seq(
+    TLWriteQueue(params.depth, AddressSet(params.writeAddress, 0xff))(_),
+    { implicit p: Parameters =>
+      val fir = LazyModule(new TLGenericFIRBlock(genIn, genOut, coeffs))
+      fir
+    },
+    TLReadQueue(params.depth, AddressSet(params.readAddress, 0xff))(_)
+  ))
 // DOC include end: TLGenericFIRChain chisel
 
 // DOC include start: CanHavePeripheryFIR chisel
-trait CanHavePeripheryFIR extends BaseSubsystem {
-  val fir = p(GenericFIRKey) match {
+trait CanHavePeripheryStreamingFIR extends BaseSubsystem {
+  val streamingFIR = p(GenericFIRKey) match {
     case Some(params) => {
-      val fir = LazyModule(new TLGenericFIRChain(
+      val streamingFIR = LazyModule(new TLGenericFIRChain(
         genIn = FixedPoint(8.W, 3.BP),
         genOut = FixedPoint(8.W, 3.BP),
         coeffs = Seq(1.F(0.BP), 2.F(0.BP), 3.F(0.BP)),
         params = params))
-
-      pbus.toVariableWidthSlave(Some("firWrite")) { fir.writeQueue.mem.get }
-      pbus.toVariableWidthSlave(Some("firRead")) { fir.readQueue.mem.get }
+      pbus.toVariableWidthSlave(Some("streamingFIR")) { streamingFIR.mem.get := TLFIFOFixer() }
+      Some(streamingFIR)
     }
     case None => None
   }
@@ -222,7 +219,7 @@ trait CanHavePeripheryFIR extends BaseSubsystem {
  * Mixin to add FIR to rocket config
  */
 // DOC include start: WithFIR
-class WithFIR extends Config((site, here, up) => {
+class WithStreamingFIR extends Config((site, here, up) => {
   case GenericFIRKey => Some(GenericFIRParams(depth = 8))
 })
 // DOC include end: WithFIR

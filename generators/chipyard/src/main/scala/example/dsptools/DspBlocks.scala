@@ -18,11 +18,11 @@ import freechips.rocketchip.subsystem._
   * @param streamParameters parameters for the stream node
   * @param p
   */
-abstract class WriteQueue
+abstract class WriteQueue[D, U, E, O, B <: Data]
 (
-  val depth: Int = 8,
+  val depth: Int,
   val streamParameters: AXI4StreamMasterParameters = AXI4StreamMasterParameters()
-)(implicit p: Parameters) extends LazyModule with HasCSR {
+)(implicit p: Parameters) extends DspBlock[D, U, E, O, B] with HasCSR {
   // stream node, output only
   val streamNode = AXI4StreamMasterNode(streamParameters)
 
@@ -58,12 +58,10 @@ abstract class WriteQueue
   * @param beatBytes beatBytes of TL interface
   * @param p
   */
-class TLWriteQueue
-(
-  depth: Int = 8,
-  csrAddress: AddressSet = AddressSet(0x2000, 0xff),
-  beatBytes: Int = 8,
-)(implicit p: Parameters) extends WriteQueue(depth) with TLHasCSR {
+class TLWriteQueue (depth: Int, csrAddress: AddressSet, beatBytes: Int)
+(implicit p: Parameters) extends WriteQueue[
+  TLClientPortParameters, TLManagerPortParameters, TLEdgeOut, TLEdgeIn, TLBundle
+](depth) with TLHasCSR {
   val devname = "tlQueueIn"
   val devcompat = Seq("ucb-art", "dsptools")
   val device = new SimpleDevice(devname, devcompat) {
@@ -76,6 +74,17 @@ class TLWriteQueue
   override val mem = Some(TLRegisterNode(address = Seq(csrAddress), device = device, beatBytes = beatBytes))
 }
 
+object TLWriteQueue {
+  def apply(
+    depth: Int = 8,
+    csrAddress: AddressSet = AddressSet(0x2000, 0xff),
+    beatBytes: Int = 8,
+  )(implicit p: Parameters) = {
+    val writeQueue = LazyModule(new TLWriteQueue(depth = depth, csrAddress = csrAddress, beatBytes = beatBytes))
+    writeQueue
+  }
+}
+
 /**
   * The streaming interface adds elements into the queue.
   * The memory interface can read elements out of the queue.
@@ -83,11 +92,11 @@ class TLWriteQueue
   * @param streamParameters parameters for the stream node
   * @param p
   */
-abstract class ReadQueue
+abstract class ReadQueue[D, U, E, O, B <: Data]
 (
-  val depth: Int = 8,
+  val depth: Int,
   val streamParameters: AXI4StreamSlaveParameters = AXI4StreamSlaveParameters()
-)(implicit p: Parameters) extends LazyModule with HasCSR {
+)(implicit p: Parameters) extends DspBlock[D, U, E, O, B] with HasCSR {
   val streamNode = AXI4StreamSlaveNode(streamParameters)
 
   lazy val module = new LazyModuleImp(this) {
@@ -126,12 +135,10 @@ abstract class ReadQueue
   * @param beatBytes beatBytes of TL interface
   * @param p
   */
-class TLReadQueue
-(
-  depth: Int = 8,
-  csrAddress: AddressSet = AddressSet(0x2100, 0xff),
-  beatBytes: Int = 8
-)(implicit p: Parameters) extends ReadQueue(depth) with TLHasCSR {
+class TLReadQueue( depth: Int, csrAddress: AddressSet, beatBytes: Int)
+(implicit p: Parameters) extends ReadQueue[
+  TLClientPortParameters, TLManagerPortParameters, TLEdgeOut, TLEdgeIn, TLBundle
+](depth) with TLHasCSR {
   val devname = "tlQueueOut"
   val devcompat = Seq("ucb-art", "dsptools")
   val device = new SimpleDevice(devname, devcompat) {
@@ -142,5 +149,14 @@ class TLReadQueue
   }
   // make diplomatic TL node for regmap
   override val mem = Some(TLRegisterNode(address = Seq(csrAddress), device = device, beatBytes = beatBytes))
+}
 
+object TLReadQueue {
+  def apply(
+    depth: Int = 8,
+    csrAddress: AddressSet = AddressSet(0x2100, 0xff),
+    beatBytes: Int = 8)(implicit p: Parameters) = {
+    val readQueue = LazyModule(new TLReadQueue(depth = depth, csrAddress = csrAddress, beatBytes = beatBytes))
+    readQueue
+  }
 }

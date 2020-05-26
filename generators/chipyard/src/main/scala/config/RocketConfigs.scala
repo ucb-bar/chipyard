@@ -427,7 +427,7 @@ class RingSystemBusRocketConfig extends Config(
 // DOC include end: RingSystemBusRocket
 
 class StreamingPassthroughRocketConfig extends Config(
-  new chipyard.example.WithStreamingPassthrough ++ // use top with tilelink-controlled passthrough
+  new chipyard.example.WithStreamingPassthrough ++ // use top with tilelink-controlled streaming passthrough
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -445,9 +445,9 @@ class StreamingPassthroughRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
-// DOC include start: FIRRocketConfig
-class FIRRocketConfig extends Config (
-  new chipyard.example.WithFIR ++ // use top with tilelink-controlled FIR
+// DOC include start: StreamingFIRRocketConfig
+class StreamingFIRRocketConfig extends Config (
+  new chipyard.example.WithStreamingFIR ++ // use top with tilelink-controlled streaming FIR
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++

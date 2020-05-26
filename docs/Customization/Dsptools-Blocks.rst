@@ -15,8 +15,8 @@ A ``DspBlock`` is the basic unit of signal processing functionality that can be 
 It has a AXI4-stream interface and an optional memory interface.
 The idea is that these ``DspBlocks`` can be easily designed, unit tested, and assembled lego-style to build complex functionality.
 A ``DspChain`` is one example of how to assemble ``DspBlocks``, in which case the streaming interfaces are connected serially into a pipeline, and a bus is instatiated and connected to every block with a memory interface.
- 
-This project has example designs that integrate a ``DspBlock`` to a rocketchip-based SoC as an MMIO peripheral. The custom ``DspBlock`` has a ``ReadQueue`` before it and a ``WriteQueue`` after it, which allow memory mapped access to the streaming interfaces so the rocket core can interact with the ``DspBlock``.  This section will primarily focus on designing Tilelink-based peripherals. However, through the resources provided in Dsptools, one could also define an AXI4-based peripheral by following similar steps. Furthermore, the examples here are simple, but can be extended to implement more complex accelerators, for example an `OFDM baseband <https://github.com/grebe/ofdm>`_ or a `spectrometer <https://github.com/ucb-art/craft2-chip>`_.
+
+Chipyard has example designs that integrate a ``DspBlock`` to a rocketchip-based SoC as an MMIO peripheral. The custom ``DspBlock`` has a ``ReadQueue`` before it and a ``WriteQueue`` after it, which allow memory mapped access to the streaming interfaces so the rocket core can interact with the ``DspBlock``.  This section will primarily focus on designing Tilelink-based peripherals. However, through the resources provided in Dsptools, one could also define an AXI4-based peripheral by following similar steps. Furthermore, the examples here are simple, but can be extended to implement more complex accelerators, for example an `OFDM baseband <https://github.com/grebe/ofdm>`_ or a `spectrometer <https://github.com/ucb-art/craft2-chip>`_.
 
 For this example, we will show you how to connect a simple FIR filter created using Dsptools as an MMIO peripheral. The full code can be found in ``generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala``. That being said, one could substitute any module with a ready valid interface in the place of the FIR and achieve the same results. As long as the read and valid signals of the module are attached to those of a corresponding ``DSPBlock`` wrapper, and that wrapper is placed in a chain with a ``ReadQueue`` and a ``WriteQueue``, following the general outline establised by these steps will allow you to interact with that block as a memory mapped IO.
 
@@ -49,7 +49,7 @@ The first step in attaching the FIR filter as a MMIO peripheral is to create an 
 
 Connecting DspBlock by TileLink
 -------------------------------
-With these classes implemented, you can begin to construct the chain by extending ``GenericFIRBlock`` while using the ``TLDspBlock`` trait via mixin. 
+With these classes implemented, you can begin to construct the chain by extending ``GenericFIRBlock`` while using the ``TLDspBlock`` trait via mixin.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala
     :language: scala
@@ -69,8 +69,8 @@ As in the previous MMIO example, we use a cake pattern to hook up our module to 
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala
     :language: scala
-    :start-after: DOC include start: CanHavePeripheryFIR chisel
-    :end-before: DOC include end: CanHavePeripheryFIR chisel
+    :start-after: DOC include start: CanHavePeripheryStreamingFIR chisel
+    :end-before: DOC include end: CanHavePeripheryStreamingFIR chisel
 
 Note that this is the point at which we decide the datatype for our FIR.
 
@@ -90,29 +90,29 @@ Finally, we create the configuration class in ``generators/chipyard/src/main/sca
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala
     :language: scala
-    :start-after: DOC include start: WithFIR
-    :end-before: DOC include end: WithFIR
+    :start-after: DOC include start: WithStreamingFIR
+    :end-before: DOC include end: WithStreamingFIR
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
     :language: scala
-    :start-after: DOC include start: FIRRocketConfig
-    :end-before: DOC include end: FIRRocketConfig
+    :start-after: DOC include start: StreamingFIRRocketConfig
+    :end-before: DOC include end: StreamingFIRRocketConfig
 
 FIR Testing
 -----------
 
-We can now test that the FIR is working. The test program is found in ``tests/fir.c``.
+We can now test that the FIR is working. The test program is found in ``tests/streaming-fir.c``.
 
-.. literalinclude:: ../../tests/fir.c
+.. literalinclude:: ../../tests/streaming-fir.c
     :language: c
 
 The test feed a series of values into the fir and compares the output to a golden model of computation. The base of the module's MMIO write region is at 0x2000 and the base of the read region is at 0x2100 by default.
 
-Compiling this program with ``make`` produces a ``fir.riscv`` executable.
+Compiling this program with ``make`` produces a ``streaming-fir.riscv`` executable.
 
 Now we can run our simulation.
 
 .. code-block:: shell
 
     cd sims/verilator
-    make CONFIG=GCDTLRocketConfig BINARY=../../tests/fir.riscv run-binary
+    make CONFIG=StreamingFIRRocketConfig BINARY=../../tests/streaming-fir.riscv run-binary

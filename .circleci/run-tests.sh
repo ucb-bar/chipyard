@@ -62,13 +62,13 @@ case $1 in
         (cd $LOCAL_CHIPYARD_DIR/generators/sha3/software && ./build.sh)
         $LOCAL_SIM_DIR/simulator-chipyard-Sha3RocketConfig $LOCAL_CHIPYARD_DIR/generators/sha3/software/benchmarks/bare/sha3-rocc.riscv
         ;;
-    chipyard-passthrough)
+    chipyard-streaming-passthrough)
         make -C $LOCAL_CHIPYARD_DIR/tests
-        $LOCAL_SIM_DIR/simulator-chipyard-StreamingPassthroughRocketConfig $LOCAL_CHIPYARD_DIR/tests/passthrough.riscv
+        $LOCAL_SIM_DIR/simulator-chipyard-StreamingPassthroughRocketConfig $LOCAL_CHIPYARD_DIR/tests/streaming-passthrough.riscv
         ;;
-    chipyard-fir)
+    chipyard-streaming-fir)
         make -C $LOCAL_CHIPYARD_DIR/tests
-        $LOCAL_SIM_DIR/simulator-chipyard-FIRRocketConfig $LOCAL_CHIPYARD_DIR/tests/fir.riscv
+        $LOCAL_SIM_DIR/simulator-chipyard-StreamingFIRRocketConfig $LOCAL_CHIPYARD_DIR/tests/streaming-fir.riscv
         ;;
     chipyard-spiflashread)
         make -C $LOCAL_CHIPYARD_DIR/tests

@@ -121,27 +121,21 @@ with TLDspBlock
   * @tparam T Type parameter for passthrough, i.e. FixedPoint or DspReal
   */
 class TLStreamingPassthroughChain[T<:Data:Ring](params: StreamingPassthroughParams, proto: T)(implicit p: Parameters)
-  extends LazyModule {
-  // instantiate lazy modules
-  val writeQueue = LazyModule(new TLWriteQueue(params.depth, AddressSet(params.writeAddress, 0xff)))
-  val passthrough = LazyModule(new TLStreamingPassthroughBlock(proto))
-  val readQueue = LazyModule(new TLReadQueue(params.depth, AddressSet(params.readAddress, 0xff)))
-
-  // connect streamNodes of queues and passthrough
-  readQueue.streamNode := passthrough.streamNode := writeQueue.streamNode
-
-  lazy val module = new LazyModuleImp(this)
-}
+  extends TLChain(Seq(
+    TLWriteQueue(params.depth, AddressSet(params.writeAddress, 0xff))(_),
+    { implicit p: Parameters => {
+      val streamingPassthrough = LazyModule(new TLStreamingPassthroughBlock(proto))
+      streamingPassthrough
+    }},
+    TLReadQueue(params.depth, AddressSet(params.readAddress, 0xff))(_)
+  ))
 
 trait CanHavePeripheryStreamingPassthrough { this: BaseSubsystem =>
   val passthrough = p(StreamingPassthroughKey) match {
     case Some(params) => {
-      val passthrough = LazyModule(new TLStreamingPassthroughChain(params, UInt(32.W)))
-
-      pbus.toVariableWidthSlave(Some("passthroughWrite")) { passthrough.writeQueue.mem.get }
-      pbus.toVariableWidthSlave(Some("passthroughRead")) { passthrough.readQueue.mem.get }
-      
-      Some(passthrough)
+      val streamingPassthroughChain = LazyModule(new TLStreamingPassthroughChain(params, UInt(32.W)))
+      pbus.toVariableWidthSlave(Some("streamingPassthrough")) { streamingPassthroughChain.mem.get := TLFIFOFixer() }
+      Some(streamingPassthroughChain)
     }
     case None => None
   }
