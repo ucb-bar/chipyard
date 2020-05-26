@@ -9,6 +9,7 @@ import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.{SimAXIMem}
+import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4EdgeParameters}
 import freechips.rocketchip.util._
 
 import sifive.blocks.devices.gpio._
@@ -182,6 +183,20 @@ object AddIOCells {
     port.suggestName("serial")
     (port, ios)
   }
+
+  def axi4(io: Seq[AXI4Bundle], node: AXI4SlaveNode): Seq[(AXI4Bundle, AXI4EdgeParameters, Seq[IOCell])] = {
+    io.zip(node.in).map{ case (mem_axi4, (_, edge)) => {
+      val (port, ios) = IOCell.generateIOFromSignal(mem_axi4, Some("iocell_mem_axi4"))
+      port.suggestName("mem_axi4")
+      (port, edge, ios)
+    }}
+  }
+
+  def blockDev(bdev: BlockDeviceIO): (BlockDeviceIO, Seq[IOCell]) = {
+    val (port, ios) = IOCell.generateIOFromSignal(bdev, Some("iocell_bdev"))
+    port.suggestName("bdev")
+    (port, ios)
+  }
 }
 
 // DOC include start: WithGPIOTiedOff
@@ -211,11 +226,25 @@ class WithSimSPIFlashModel(rdOnly: Boolean = true) extends OverrideIOBinder({
 })
 
 class WithSimBlockDevice extends OverrideIOBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp) => system.connectSimBlockDevice(system.clock, system.reset.asBool); Nil
+  (system: CanHavePeripheryBlockDeviceModuleImp) => system.bdev.map { bdev =>
+    val (port, ios) = AddIOCells.blockDev(bdev)
+    val harnessFn = (th: chipyard.TestHarness) => {
+      SimBlockDevice.connect(th.clock, th.reset.asBool, Some(port))(system.p)
+      Nil
+    }
+    Seq((Seq(port), ios, Some(harnessFn)))
+  }.getOrElse(Nil)
 })
 
 class WithBlockDeviceModel extends OverrideIOBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp) => system.connectBlockDeviceModel(); Nil
+  (system: CanHavePeripheryBlockDeviceModuleImp) => system.bdev.map { bdev =>
+    val (port, ios) = AddIOCells.blockDev(bdev)
+    val harnessFn = (th: chipyard.TestHarness) => {
+      BlockDeviceModel.connect(Some(port))(system.p)
+      Nil
+    }
+    Seq((Seq(port), ios, Some(harnessFn)))
+  }.getOrElse(Nil)
 })
 
 class WithLoopbackNIC extends OverrideIOBinder({
@@ -232,21 +261,38 @@ class WithSimNIC extends OverrideIOBinder({
 // accessible to the IOBinder
 // DOC include start: WithSimAXIMem
 class WithSimAXIMem extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => SimAXIMem.connectMem(system)(system.p); Nil
+  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => {
+    val peiTuples = AddIOCells.axi4(system.mem_axi4, system.memAXI4Node)
+    // TODO: we are inlining the connectMem method of SimAXIMem because
+    //   it takes in a dut rather than seq of axi4 ports
+    val harnessFn = (th: chipyard.TestHarness) => {
+      peiTuples.map { case (port, edge, ios) =>
+        val mem = LazyModule(new SimAXIMem(edge, size = system.p(ExtMem).get.master.size)(system.p))
+        Module(mem.module).suggestName("mem")
+        mem.io_axi4.head <> port
+        }
+      Nil
+    }
+    Seq((peiTuples.map(_._1), peiTuples.flatMap(_._3), Some(harnessFn)))
+  }
 })
 // DOC include end: WithSimAXIMem
 
 class WithBlackBoxSimMem extends OverrideIOBinder({
   (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => {
-    (system.mem_axi4 zip system.memAXI4Node.in).foreach { case (io, (_, edge)) =>
-      val memSize = system.p(ExtMem).get.master.size
-      val lineSize = system.p(CacheBlockBytes)
-      val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
-      mem.io.axi <> io
-      mem.io.clock := system.module.clock
-      mem.io.reset := system.module.reset
+    val peiTuples = AddIOCells.axi4(system.mem_axi4, system.memAXI4Node)
+    val harnessFn = (th: chipyard.TestHarness) => {
+      peiTuples.map { case (port, edge, ios) =>
+        val memSize = system.p(ExtMem).get.master.size
+        val lineSize = system.p(CacheBlockBytes)
+        val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
+        mem.io.axi <> port
+        mem.io.clock := th.clock
+        mem.io.reset := th.reset
+      }
+      Nil
     }
-    Nil
+    Seq((peiTuples.map(_._1), peiTuples.flatMap(_._3), Some(harnessFn)))
   }
 })
 
