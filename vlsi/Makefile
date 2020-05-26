@@ -179,6 +179,7 @@ ifeq ($(CUSTOM_VLOG), )
 	GENERATED_CONFS += $(if $(filter $(tech_name), asap7), , $(SRAM_CONF))
 endif
 
+#TODO: remove filter-out once PR#572 is merged
 $(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
