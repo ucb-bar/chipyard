@@ -17,7 +17,7 @@ import freechips.rocketchip.stage.phases.{RocketTestSuiteAnnotation}
 import freechips.rocketchip.system.{RocketTestSuite, TestGeneration}
 import freechips.rocketchip.util.HasRocketChipStageUtils
 
-import chipyard.{TestSuiteHelper, CoreRegistrar}
+import chipyard.{TestSuiteHelper, CoreManager}
 
 class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipStageUtils {
   // Make sure we run both after RocketChip's version of this phase, and Rocket Chip's annotation emission phase
@@ -32,7 +32,7 @@ class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipS
     val suiteHelper = new TestSuiteHelper
     suiteHelper.addRocketTestSuites
     suiteHelper.addBoomTestSuites
-    CoreRegistrar.cores map suiteHelper.addThirdPartyTestSuites(_.tilesKey)
+    CoreManager.cores map (core => suiteHelper.addThirdPartyTestSuites(core.tileParamsLookup))
 
     // if hwacha parameter exists then generate its tests
     // TODO: find a more elegant way to do this. either through

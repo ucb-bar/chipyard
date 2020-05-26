@@ -40,20 +40,23 @@ trait HasChipyardTiles extends HasTiles
   private val rocketCrossings = perTileOrGlobalSetting(p(RocketCrossingKey), rocketTileParams.size)
   private val boomCrossings = perTileOrGlobalSetting(p(BoomCrossingKey), boomTileParams.size)
 
-  private val rocketTilesInfo = (rocketTileParams zip rocketCrossings) map ((param, crossing) => (
-    param,
-    crossing,
-    LazyModule(new RocketTile(param, crossing, PriorityMuxHartIdFromSeq(rocketTileParams), logicalTreeNode))
-  ))
-  private val boomTilesInfo = (boomTileParams zip boomCrossings) map ((param, crossing) => (
-    param,
-    crossing,
-    LazyModule(new RocketTile(param, crossing, PriorityMuxHartIdFromSeq(boomCrossings), logicalTreeNode))
-  ))
+  private val rocketTilesInfo = (rocketTileParams zip rocketCrossings) map {
+    case (param, crossing) => (
+      param,
+      crossing,
+      LazyModule(new RocketTile(param, crossing, PriorityMuxHartIdFromSeq(rocketTileParams), logicalTreeNode))
+    )
+  }
+  private val boomTilesInfo = (boomTileParams zip boomCrossings) map {
+    case (param, crossing) => (
+      param,
+      crossing,
+      LazyModule(new BoomTile(param, crossing, PriorityMuxHartIdFromSeq(boomTileParams), logicalTreeNode))
+    )
+  }
 
-  // TODO: XXX The "tiles" below scan for hartId but it is not in CoreParams. Should that be added in later
-  // revision, or I have to use reflection to get that parameter?
-  val allTilesInfo = rocketTilesInfo ++ boomTilesInfo ++ (CoreManager.cores map _.instantiateTile(perTileOrGlobalSetting _))
+  val allTilesInfo = rocketTilesInfo ++ boomTilesInfo ++
+    (CoreManager.cores flatMap (core => core.instantiateTile(perTileOrGlobalSetting _, logicalTreeNode)))
 
   // Make a tile and wire its nodes into the system,
   // according to the specified type of clock crossing.

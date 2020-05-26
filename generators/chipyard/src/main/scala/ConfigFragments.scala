@@ -22,8 +22,7 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 
 import chipyard.{BuildTop, BuildSystem}
-import chipyard.{CoreRegistrar, CoreRegisterEntryBase}
-import chipyard.hlist
+import chipyard.GenericConfig
 
 /**
  * TODO: Why do we need this?

@@ -3,7 +3,7 @@ package chipyard
 import scala.collection.mutable.{LinkedHashSet}
 
 import freechips.rocketchip.subsystem.{RocketTilesKey}
-import freechips.rocketchip.tile.{XLen, CoreParams}
+import freechips.rocketchip.tile.{XLen, TileParams}
 import freechips.rocketchip.config.{Parameters, Field}
 import freechips.rocketchip.system.{TestGeneration, RegressionTestSuite, RocketTestSuite}
 
@@ -145,9 +145,9 @@ class TestSuiteHelper
   /**
   * Add third-party core (including Ariane) tests (asm, bmark, regression)
   */
-  def addThirdPartyTestSuites[TileParams <: CoreParams](tilesKey: Field[Seq[TileParams]])(implicit p: Parameters) = {
+  def addThirdPartyTestSuites(tiles: Seq[TileParams])(implicit p: Parameters) = {
     val xlen = p(XLen)
-    p(tilesKey).asInstanceOf[Seq[CoreParams]].find(_.hartId == 0).map { tileParams =>
+    tiles.find(_.hartId == 0).map { tileParams =>
       val coreParams = tileParams.core
       val vm = coreParams.useVM
       val env = if (vm) List("p","v") else List("p")

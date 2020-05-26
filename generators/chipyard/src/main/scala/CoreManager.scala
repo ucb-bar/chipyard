@@ -7,7 +7,7 @@ import chisel3._
 
 import freechips.rocketchip.config.{Parameters, Config, Field, View}
 import freechips.rocketchip.subsystem.{SystemBusKey, RocketTilesKey, RocketCrossingParams}
-import freechips.rocketchip.diplomacy.LazyModule
+import freechips.rocketchip.diplomacy.{LazyModule, ClockCrossingType, ValName}
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree.LogicalTreeNode
 import freechips.rocketchip.rocket._
 import freechips.rocketchip.tile._
@@ -16,59 +16,64 @@ import ariane.{ArianeTile, ArianeTilesKey, ArianeCrossingKey, ArianeTileParams}
 
 // Third-party core entries
 sealed trait CoreEntryBase {
-  def updateWithFilter(view: View, p: Any => View): (Map[String, Any] => PartialFunction[Any, Seq[AnyRef]])
-  def instantiateTile(crossingLookup: (Seq[RocketCrossingParams], Int) => ClockCrossingType)
-    (implicit logicalTreeNode: LogicalTreeNode, p: Parameters): (CoreParams, ClockCrossingType, BaseTile)
+  def tileParamsLookup(implicit p: Parameters): Seq[TileParams]
+  def updateWithFilter(view: View, p: Any => Boolean): PartialFunction[Any, Map[String, Any] => Any]
+  def instantiateTile(crossingLookup: (Seq[RocketCrossingParams], Int) => Seq[RocketCrossingParams], logicalTreeNode: LogicalTreeNode)
+    (implicit p: Parameters, valName: ValName): Seq[(TileParams, RocketCrossingParams, BaseTile)]
 }
 
-class CoreEntry[TileParamsT <: CoreParams, TileT <: BaseTile](
+class CoreEntry[TileParamsT <: TileParams with Product: TypeTag, TileT <: BaseTile : TypeTag](
   tk: Field[Seq[TileParamsT]],
   ck: Field[Seq[RocketCrossingParams]]
 ) extends CoreEntryBase {
   private val mirror = runtimeMirror(getClass.getClassLoader)
   private val paramClass = mirror.runtimeClass(typeOf[TileParamsT].typeSymbol.asClass)
-  private val paramNames = Map((paramClass.getDeclaredFields map _.getName).zipWithIndex)
+  private val paramNames = (paramClass.getDeclaredFields map (f => f.getName)).zipWithIndex.toMap
   private val paramCtr = paramClass.getConstructors.head
 
   private val tileClass = mirror.runtimeClass(typeOf[TileT].typeSymbol.asClass)
   private val tileCtr = paramClass.getConstructors.head
 
   // copy() function in
-  def copyTileParam(tileParam: AnyRef, properties: Map[String, Any]) = {
-    val values = foo.productIterator.toList
-    val indexedProperties = properties map (key => (paramNames(key), properties(key)))
+  def copyTileParam(tileParam: TileParamsT, properties: Map[String, Any]) = {
+    val values = tileParam.productIterator.toList
+    val indexedProperties = properties map { case (key, value) => (paramNames(key), value) }
     val newValues = (0 until values.size) map
-      (i => if (indexedProperties contains i) indexedProperties(i) else values(i))
+      (i => (if (indexedProperties contains i) indexedProperties(i) else values(i)).asInstanceOf[AnyRef])
     paramCtr.newInstance(newValues:_*)
   }
 
-  def updateWithFilter(view: View, p: Any => View) = {
-    case key if (key == tk && p(tk)) => view(tk) map
-      (tile => properties => copyTileParam(tile, properties))
+  def tileParamsLookup(implicit p: Parameters) = p(tk)
+
+  def updateWithFilter(view: View, p: Any => Boolean): PartialFunction[Any, Map[String, Any] => Any] = {
+    case key if (key == tk && p(tk)) => properties => view(tk) map
+      (tile => copyTileParam(tile, properties))
   }
 
-  def instantiateTile(crossingLookup: (Seq[RocketCrossingParams], Int) => ClockCrossingType)
-    (implicit logicalTreeNode: LogicalTreeNode, p: Parameters) = {
+  def instantiateTile(crossingLookup: (Seq[RocketCrossingParams], Int) => Seq[RocketCrossingParams], logicalTreeNode: LogicalTreeNode)
+    (implicit p: Parameters, valName: ValName) = {
     val tileParams = p(tk)
     val crossings = crossingLookup(p(ck), tileParams.size)
-    (tileParams zip crossings) map ((param, crossing) => (
-      param,
-      crossing,
-      LazyModule(tileCtr(param, crossing, PriorityMuxHartIdFromSeq(tileParams), logicalTreeNode))
-    ))
+    (tileParams zip crossings) map {
+      case (param, crossing) => (
+        param,
+        crossing,
+        LazyModule(tileCtr.newInstance(param, crossing, PriorityMuxHartIdFromSeq(tileParams), logicalTreeNode).asInstanceOf[TileT])
+      )
+    }
   }
 }
 
 // Core Generic Config - change properties in the given map
-class GenericConfig(properties: Map[String, Any], filterFunc: Any => Bool) {
-  val configFunc: (View, View, View) => PartialFunction[Any, Any] = ((site, here, up) => key => {
-    val tiles = CoreManager.cores flatMap _.updateWithFilter(up, filterFunc).lift(key)
-    if (tiles.size == 0) None else Some(tiles map _(properties))
-  }).unlift
+class GenericConfig(properties: Map[String, Any], filterFunc: Any => Boolean) {
+  val configFunc: (View, View, View) => PartialFunction[Any, Any] = (site, here, up) => scala.Function.unlift((key: Any) => {
+    val tiles = CoreManager.cores flatMap (core => core.updateWithFilter(up, filterFunc).lift(key))
+    if (tiles.size == 0) None else Some(tiles map (tile => tile(properties)))
+  })
 }
 
 object GenericConfig {
-  def apply(properties: Map[String, Any], filterFunc: Any => Bool = (_ => true)) =
+  def apply(properties: Map[String, Any], filterFunc: Any => Boolean = (_ => true)) =
     new GenericConfig(properties, filterFunc).configFunc
 }
 
