@@ -136,6 +136,8 @@ output_dir=$(sim_dir)/output/$(long_name)
 #########################################################################################
 # helper variables to run binaries
 #########################################################################################
+PERMISSIVE_ON=+permissive
+PERMISSIVE_OFF=+permissive-off
 BINARY ?=
 override SIM_FLAGS += +dramsim +max-cycles=$(timeout_cycles)
 VERBOSE_FLAGS ?= +verbose
