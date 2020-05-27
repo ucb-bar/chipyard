@@ -198,7 +198,7 @@ class TLGenericFIRChain[T<:Data:Ring] (genIn: T, genOut: T, coeffs: Seq[T], para
   ))
 // DOC include end: TLGenericFIRChain chisel
 
-// DOC include start: CanHavePeripheryFIR chisel
+// DOC include start: CanHavePeripheryStreamingFIR chisel
 trait CanHavePeripheryStreamingFIR extends BaseSubsystem {
   val streamingFIR = p(GenericFIRKey) match {
     case Some(params) => {
@@ -213,13 +213,13 @@ trait CanHavePeripheryStreamingFIR extends BaseSubsystem {
     case None => None
   }
 }
-// DOC include end: CanHavePeripheryFIR chisel
+// DOC include end: CanHavePeripheryStreamingFIR chisel
 
 /**
  * Mixin to add FIR to rocket config
  */
-// DOC include start: WithFIR
+// DOC include start: WithStreamingFIR
 class WithStreamingFIR extends Config((site, here, up) => {
   case GenericFIRKey => Some(GenericFIRParams(depth = 8))
 })
-// DOC include end: WithFIR
+// DOC include end: WithStreamingFIR
