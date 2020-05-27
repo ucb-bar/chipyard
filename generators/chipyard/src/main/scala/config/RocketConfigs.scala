@@ -464,7 +464,7 @@ class StreamingFIRRocketConfig extends Config (
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
-// DOC include end: FIRRocketConfig
+// DOC include end: StreamingFIRRocketConfig
 
 class SmallNVDLARocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
