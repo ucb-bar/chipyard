@@ -124,7 +124,6 @@ $(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_file
 	echo "  execution_flags_prepend: ['$(PERMISSIVE_ON)']" >> $@
 	echo "  execution_flags_append: ['$(PERMISSIVE_OFF)']" >> $@
 	echo "  execution_flags:" >> $@
-	echo "    - '+max-cycles=$(timeout_cycles)'" >> $@
 	for x in $(SIM_FLAGS); do \
 	  echo '    - "'$$x'"' >> $@; \
 	done

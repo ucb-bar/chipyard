@@ -1,6 +1,3 @@
-PERMISSIVE_ON=+permissive
-PERMISSIVE_OFF=+permissive-off
-
 WAVEFORM_FLAG=+vcdplusfile=$(sim_out_name).vpd
 
 CLOCK_PERIOD ?= 1.0
