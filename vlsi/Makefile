@@ -178,7 +178,6 @@ ifeq ($(CUSTOM_VLOG), )
 	GENERATED_CONFS += $(if $(filter $(tech_name), asap7), , $(SRAM_CONF))
 endif
 
-#TODO: remove filter-out once PR#572 is merged
 $(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
@@ -190,7 +189,7 @@ $(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 	echo "synthesis.inputs:" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
-	for x in $(VLSI_RTL) $(filter-out %SimDRAM.v,$(filter-out %.cc,$(shell cat $(VLSI_BB)))); do \
+	for x in $(VLSI_RTL) $(shell cat $(VLSI_BB)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 
