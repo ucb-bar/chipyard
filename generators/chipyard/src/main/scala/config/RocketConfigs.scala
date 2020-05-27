@@ -208,7 +208,7 @@ class SmallSPIFlashRocketConfig extends Config(
 class SimAXIRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithSimAXIMem ++                       // drive the master AXI4 memory with a SimAXIMem
+  new chipyard.iobinders.WithSimAXIMem ++                       // drive the master AXI4 memory with a SimAXIMem, a 1-cycle magic memory
   new chipyard.iobinders.WithTiedOffDebug ++
   new chipyard.iobinders.WithSimSerial ++
   new testchipip.WithTSI ++
