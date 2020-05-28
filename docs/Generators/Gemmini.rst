@@ -57,9 +57,9 @@ The ISA includes configuration instructions, data movement instructions (from ma
 Since Gemmini instructions are not exposed through the GNU binutils assembler, several C macros are provided in order to construct the instruction encodings to call these instructions.
 
 The Gemmini generator includes a C matrix multiplication library which wraps the calls to the custom Gemmini instructions.
-The ``software`` directory of the generator includes the aforementioned library and macros, as well as bare-metal tests, and some FireMarshal workloads to run the tests in a Linux environment. In particular, the matrix multiplication C library can be found in the ``software/gemmini-rocc-tests/include/gemmini.h`` file.
+The ``software`` directory of the generator (within the generator repository in ``generators/gemmini/software``) includes the aforementioned library and macros, as well as bare-metal tests, and some FireMarshal workloads to run the tests in a Linux environment. In particular, the matrix multiplication C library can be found in the ``generators/gemmini/software/gemmini-rocc-tests/include/gemmini.h`` file.
 
-The Gemmini generator generates a C header file based on the generator parameters. This header files gets compiled together with the matrix multiplication library to tune library performance. The generated header file can be found under ``software/gemmini-rocc-tests/include/gemmini_params.h``
+The Gemmini generator generates a C header file based on the generator parameters. This header files gets compiled together with the matrix multiplication library to tune library performance. The generated header file can be found under ``generators/gemmini/software/gemmini-rocc-tests/include/gemmini_params.h``
 
 Gemmini can also be used to run ONNX-specified neural-networks through a port of Microsoft's ONNX-Runtime framework. The port is included as the `onnxruntime-riscv<https://github.com/pranav-prakash/onnxruntime-riscv>`__ repository submoduled in the `software` directory. The port is under development, and usage documentation can be found `within its repository <https://github.com/pranav-prakash/onnxruntime-riscv/blob/systolic/systolic_runner/docs>`__.
 
