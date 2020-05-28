@@ -465,6 +465,46 @@ class RingSystemBusRocketConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 // DOC include end: RingSystemBusRocket
 
+class StreamingPassthroughRocketConfig extends Config(
+  new chipyard.example.WithStreamingPassthrough ++ // use top with tilelink-controlled streaming passthrough
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new testchipip.WithTSI ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new chipyard.config.WithL2TLBs(1024) ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  new freechips.rocketchip.system.BaseConfig)
+
+// DOC include start: StreamingFIRRocketConfig
+class StreamingFIRRocketConfig extends Config (
+  new chipyard.example.WithStreamingFIR ++ // use top with tilelink-controlled streaming FIR
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new testchipip.WithTSI ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new chipyard.config.WithL2TLBs(1024) ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  new freechips.rocketchip.system.BaseConfig)
+// DOC include end: StreamingFIRRocketConfig
+
 class SmallNVDLARocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
