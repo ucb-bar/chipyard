@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# clean directories that are older than 30 days
+# clean directories that are older than 14 days
 # argument is used as the directory to look in
 
 age () {
@@ -20,7 +20,7 @@ age () {
 
 for d in $1/*/ ; do
 	DIR_AGE="$(age $d)"
-	if [ $DIR_AGE -ge 30 ]; then
+	if [ $DIR_AGE -ge 14 ]; then
 		echo "Deleting $d since is it $DIR_AGE old"
 		rm -rf $d
 	else
