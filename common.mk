@@ -189,3 +189,10 @@ dramsim_lib = $(dramsim_dir)/libdramsim.a
 
 $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
+
+#########################################################################################
+# Implicit rule handling
+#########################################################################################
+# Disable all suffix rules to improve Make performance on systems running older
+# versions of Make
+.SUFFIXES:
