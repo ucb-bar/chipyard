@@ -60,7 +60,7 @@ git submodule update --init generators/sha3
 
 # Non-recursive clone to exclude gemmini-software
 git submodule update --init generators/gemmini
-git submodule update --init --recursive generators/gemmini/software/gemmini-rocc-tests
+git -C generators/gemmini/ submodule update --init --recursive software/gemmini-rocc-tests
 
 git config --unset submodule.sims/firesim.update
 # Minimal non-recursive clone to initialize sbt dependencies
