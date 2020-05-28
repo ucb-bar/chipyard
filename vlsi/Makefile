@@ -67,8 +67,8 @@ include $(base_dir)/common.mk
 #########################################################################################
 # srams
 #########################################################################################
-SRAM_GENERATOR_CONF = $(build_dir)/sram_generator-input.yml
-SRAM_CONF=$(build_dir)/sram_generator-output.json
+SRAM_GENERATOR_CONF = $(OBJ_DIR)/sram_generator-input.yml
+SRAM_CONF=$(OBJ_DIR)/sram_generator-output.json
 
 ## SRAM Generator
 .PHONY: sram_generator srams
@@ -88,6 +88,88 @@ $(SRAM_CONF): $(SRAM_GENERATOR_CONF)
 	cd $(vlsi_dir) && cp output.json $@
 
 #########################################################################################
+# simulation input configuration
+#########################################################################################
+include $(base_dir)/vcs.mk
+SIM_CONF = $(OBJ_DIR)/sim-inputs.yml
+SIM_DEBUG_CONF = $(OBJ_DIR)/sim-debug-inputs.yml
+SIM_TIMING_CONF = $(OBJ_DIR)/sim-timing-inputs.yml
+
+include $(vlsi_dir)/sim.mk
+$(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
+	mkdir -p $(dir $@)
+	echo "sim.inputs:" > $@
+	echo "  top_module: $(VLSI_TOP)" >> $@
+	echo "  input_files:" >> $@
+	for x in $(HARNESS_FILE) $(HARNESS_SMEMS_FILE); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  input_files_meta: 'append'" >> $@
+	echo "  timescale: '1ns/10ps'" >> $@
+	echo "  options:" >> $@
+	for x in $(VCS_NONCC_OPTS); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  options_meta: 'append'" >> $@
+	echo "  defines:" >> $@
+	for x in $(subst +define+,,$(VCS_DEFINE_OPTS)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  defines_meta: 'append'" >> $@
+	echo "  compiler_opts:" >> $@
+	for x in $(filter-out -CC,$(VCS_CC_OPTS)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  compiler_opts_meta: 'append'" >> $@
+	echo "  execution_flags_prepend: ['$(PERMISSIVE_ON)']" >> $@
+	echo "  execution_flags_append: ['$(PERMISSIVE_OFF)']" >> $@
+	echo "  execution_flags:" >> $@
+	for x in $(SIM_FLAGS); do \
+	  echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  execution_flags_meta: 'append'" >> $@
+	echo "  benchmarks: ['$(BINARY)']" >> $@
+	echo "  tb_dut: 'testHarness.top'" >> $@
+
+$(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
+	mkdir -p $(dir $@)
+	echo "sim.inputs:" > $@
+	echo "  defines: ['DEBUG']" >> $@
+	echo "  defines_meta: 'append'" >> $@
+	echo "  execution_flags:" >> $@
+	for x in $(VERBOSE_FLAGS) $(WAVEFORM_FLAG); do \
+	  echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  execution_flags_meta: 'append'" >> $@
+	echo "sim.outputs.waveforms: ['$(sim_out_name).vpd']" >> $@
+
+$(SIM_TIMING_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
+	mkdir -p $(dir $@)
+	echo "sim.inputs:" > $@
+	echo "  defines: ['NTC']" >> $@
+	echo "  defines_meta: 'append'" >> $@
+	echo "  timing_annotated: 'true'" >> $@
+
+POWER_CONF = $(OBJ_DIR)/power-inputs.yml
+include $(vlsi_dir)/power.mk
+LOWER_VLSI_TOP = $(shell echo $(VLSI_TOP) | tr A-Z a-z)
+$(POWER_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
+	mkdir -p $(dir $@)
+	echo "power.inputs:" > $@
+	echo "  tb_dut: 'testHarness/$(LOWER_VLSI_TOP)'" >> $@
+	echo "  database: '$(OBJ_DIR)/par-rundir/$(VLSI_TOP)_FINAL'" >> $@
+	echo "  saifs: [" >> $@
+	echo "    '$(OBJ_DIR)/sim-par-rundir/$(notdir $(BINARY))/ucli.saif'" >> $@
+	echo "  ]" >> $@
+	echo "  waveforms: [" >> $@
+	#echo "    '$(OBJ_DIR)/sim-par-rundir/$(notdir $(BINARY))/$(sim_out_name).vcd'" >> $@
+	echo "  ]" >> $@
+	echo "  start_times: ['0ns']" >> $@
+	echo "  end_times: [" >> $@
+	echo "    '`bc <<< $(timeout_cycles)*$(CLOCK_PERIOD)`ns'" >> $@
+	echo "  ]" >> $@
+
+#########################################################################################
 # synthesis input configuration
 #########################################################################################
 SYN_CONF = $(OBJ_DIR)/inputs.yml
@@ -98,10 +180,16 @@ endif
 
 $(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 	mkdir -p $(dir $@)
-	echo "synthesis.inputs:" > $@
+	echo "sim.inputs:" > $@
+	echo "  input_files:" >> $@
+	for x in $(VLSI_RTL); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  input_files_meta: 'append'" >> $@
+	echo "synthesis.inputs:" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
-	for x in $(VLSI_RTL) `cat $(VLSI_BB)`; do \
+	for x in $(VLSI_RTL) $(shell cat $(VLSI_BB)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 
@@ -124,4 +212,4 @@ $(OBJ_DIR)/hammer.d: $(HAMMER_D_DEPS)
 #########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(VLSI_OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(gen_dir)
+	rm -rf $(VLSI_OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(gen_dir) $(SIM_CONF) $(SIM_DEBUG_CONF) $(SIM_TIMING_CONF) $(POWER_CONF)
