@@ -73,6 +73,10 @@ class WithNVDLALarge extends nvidia.blocks.dla.WithNVDLA("large")
 class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
 
+// Alias WithoutTLMonitors into this package so that it can be used in config strings
+class WithoutTLMonitors extends freechips.rocketchip.subsystem.WithoutTLMonitors
+
+
 // Tweaks that are generally applied to all firesim configs
 class WithFireSimConfigTweaks extends Config(
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
