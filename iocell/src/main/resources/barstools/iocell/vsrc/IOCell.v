@@ -38,7 +38,7 @@ endmodule
 module GenericDigitalOutIOCell(
     output pad,
     input o,
-    output oe
+    input oe
 );
 
     assign pad = oe ? o : 1'bz;
