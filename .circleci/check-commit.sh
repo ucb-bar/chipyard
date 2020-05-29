@@ -48,7 +48,7 @@ search () {
     done
 }
 
-submodules=("boom" "hwacha" "icenet" "sha3" "rocket-chip" "sifive-blocks" "sifive-cache" "testchipip" "gemmini")
+submodules=("ariane" "boom" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "sifive-blocks" "sifive-cache" "testchipip")
 dir="generators"
 if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
 then
@@ -80,12 +80,12 @@ dir="toolchains"
 branches=("master")
 search
 
-submodules=("spec2017" "coremark")
+submodules=("coremark" "firemarshal" "nvdla-workload" "spec2017")
 dir="software"
 branches=("master")
 search
 
-submodules=("axe" "barstools" "torture" "dsptools" "chisel-testers" "treadle" "firrtl-interpreter")
+submodules=("DRAMSim2" "axe" "barstools" "chisel-testers" "dsptools" "firrtl-interpreter" "torture" "treadle")
 dir="tools"
 if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
 then
@@ -93,6 +93,11 @@ then
 else
     branches=("master" "dev")
 fi
+search
+
+submodules=("dromajo-src")
+dir="tools/dromajo"
+branches=("master")
 search
 
 submodules=("firesim")
