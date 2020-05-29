@@ -6,7 +6,7 @@ version: 2.1
 parameters:
     tools-cache-version:
         type: string
-        default: "v4"
+        default: "v5"
 
 # default execution env.s
 executors:
@@ -204,6 +204,16 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "chipyard-sha3"
+    prepare-chipyard-streaming-fir:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-streaming-fir"
+    prepare-chipyard-streaming-passthrough:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-streaming-passthrough"
     prepare-chipyard-hetero:
         executor: main-env
         steps:
@@ -287,6 +297,16 @@ jobs:
         steps:
             - run-tests:
                 project-key: "chipyard-sha3"
+    chipyard-streaming-fir-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-streaming-fir"
+    chipyard-streaming-passthrough-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-streaming-passthrough"
     chipyard-hetero-run-tests:
         executor: main-env
         steps:
@@ -439,6 +459,16 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
+            - prepare-chipyard-streaming-fir:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-streaming-passthrough:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
             - prepare-chipyard-hetero:
                 requires:
                     - install-riscv-toolchain
@@ -524,6 +554,14 @@ workflows:
             - chipyard-sha3-run-tests:
                 requires:
                     - prepare-chipyard-sha3
+
+            - chipyard-streaming-fir-run-tests:
+                requires:
+                    - prepare-chipyard-streaming-fir
+
+            - chipyard-streaming-passthrough-run-tests:
+                requires:
+                    - prepare-chipyard-streaming-passthrough
 
             - chipyard-hetero-run-tests:
                 requires:

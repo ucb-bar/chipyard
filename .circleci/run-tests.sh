@@ -10,11 +10,11 @@ SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
 run_bmark () {
-    make run-bmark-tests-fast -j$NPROC -C $LOCAL_SIM_DIR $@
+    make run-bmark-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $@
 }
 
 run_asm () {
-    make run-asm-tests-fast -j$NPROC -C $LOCAL_SIM_DIR $@
+    make run-asm-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $@
 }
 
 run_both () {
@@ -45,7 +45,7 @@ case $1 in
         export RISCV=$LOCAL_ESP_DIR
         export LD_LIBRARY_PATH=$LOCAL_ESP_DIR/lib
         export PATH=$RISCV/bin:$PATH
-        make run-rv64uv-p-asm-tests -j$NPROC -C $LOCAL_SIM_DIR ${mapping[$1]}
+        make run-rv64uv-p-asm-tests -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR ${mapping[$1]}
         ;;
     chipyard-gemmini)
         export RISCV=$LOCAL_ESP_DIR
@@ -61,6 +61,14 @@ case $1 in
     chipyard-sha3)
         (cd $LOCAL_CHIPYARD_DIR/generators/sha3/software && ./build.sh)
         $LOCAL_SIM_DIR/simulator-chipyard-Sha3RocketConfig $LOCAL_CHIPYARD_DIR/generators/sha3/software/benchmarks/bare/sha3-rocc.riscv
+        ;;
+    chipyard-streaming-passthrough)
+        make -C $LOCAL_CHIPYARD_DIR/tests
+        $LOCAL_SIM_DIR/simulator-chipyard-StreamingPassthroughRocketConfig $LOCAL_CHIPYARD_DIR/tests/streaming-passthrough.riscv
+        ;;
+    chipyard-streaming-fir)
+        make -C $LOCAL_CHIPYARD_DIR/tests
+        $LOCAL_SIM_DIR/simulator-chipyard-StreamingFIRRocketConfig $LOCAL_CHIPYARD_DIR/tests/streaming-fir.riscv
         ;;
     chipyard-spiflashread)
         make -C $LOCAL_CHIPYARD_DIR/tests

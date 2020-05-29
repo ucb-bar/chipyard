@@ -25,10 +25,7 @@ sim_prefix = simv
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
-PERMISSIVE_ON=+permissive
-PERMISSIVE_OFF=+permissive-off
-
-WAVEFORM_FLAG=+vcdplusfile=$(sim_out_name).vpd
+include $(base_dir)/vcs.mk
 
 .PHONY: default debug
 default: $(sim)
@@ -44,42 +41,7 @@ include $(base_dir)/common.mk
 #########################################################################################
 VCS = vcs -full64
 
-VCS_CC_OPTS = \
-	-CC "-I$(VCS_HOME)/include" \
-	-CC "-I$(RISCV)/include" \
-	-CC "-I$(dramsim_dir)" \
-	-CC "-std=c++11" \
-	$(dramsim_lib) \
-	$(RISCV)/lib/libfesvr.a \
-	-CC "$(EXTRA_SIM_CC_FLAGS)"
-
-VCS_NONCC_OPTS = \
-	+lint=all,noVCDE,noONGS,noUI \
-	-timescale=1ns/1ps \
-	-quiet \
-	-q \
-	+rad \
-	+vcs+lic+wait \
-	+vc+list \
-	-error=noZMMCM \
-	-error=PCWM-L \
-	-sverilog +systemverilogext+.sv+.svi+.svh+.svt -assert svaext +libext+.sv \
-	+v2k +verilog2001ext+.v95+.vt+.vp +libext+.v \
-	+incdir+$(build_dir) \
-	-f $(sim_common_files) \
-	$(sim_vsrcs)
-
-VCS_DEFINES = \
-	+define+VCS \
-	+define+CLOCK_PERIOD=1.0 \
-	+define+PRINTF_COND=$(TB).printf_cond \
-	+define+STOP_COND=!$(TB).reset \
-	+define+RANDOMIZE_MEM_INIT \
-	+define+RANDOMIZE_REG_INIT \
-	+define+RANDOMIZE_GARBAGE_ASSIGN \
-	+define+RANDOMIZE_INVALID_ASSIGN
-
-VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(VCS_DEFINES) $(EXTRA_SIM_SOURCES)
+VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(VCS_DEFINE_OPTS) $(EXTRA_SIM_SOURCES)
 
 #########################################################################################
 # vcs simulator rules
