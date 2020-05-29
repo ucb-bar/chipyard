@@ -32,6 +32,7 @@ ENV_YML            ?= $(vlsi_dir)/env.yml
 INPUT_CONFS        ?= example.yml
 HAMMER_EXEC        ?= ./example-vlsi
 VLSI_TOP           ?= $(TOP)
+VLSI_HARNESS_DUT_NAME ?= dut
 VLSI_OBJ_DIR       ?= $(vlsi_dir)/build
 ifneq ($(CUSTOM_VLOG), )
 	OBJ_DIR        ?= $(VLSI_OBJ_DIR)/custom-$(VLSI_TOP)
@@ -96,7 +97,7 @@ SIM_DEBUG_CONF = $(OBJ_DIR)/sim-debug-inputs.yml
 SIM_TIMING_CONF = $(OBJ_DIR)/sim-timing-inputs.yml
 
 include $(vlsi_dir)/sim.mk
-$(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
+$(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files) $(dramsim_lib)
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
@@ -117,7 +118,7 @@ $(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_file
 	done
 	echo "  defines_meta: 'append'" >> $@
 	echo "  compiler_opts:" >> $@
-	for x in $(filter-out -CC,$(VCS_CC_OPTS)); do \
+	for x in $(filter-out "",$(filter-out -CC,$(VCS_CC_OPTS))); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  compiler_opts_meta: 'append'" >> $@
@@ -129,7 +130,7 @@ $(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_file
 	done
 	echo "  execution_flags_meta: 'append'" >> $@
 	echo "  benchmarks: ['$(BINARY)']" >> $@
-	echo "  tb_dut: 'testHarness.top'" >> $@
+	echo "  tb_dut: 'testHarness.$(VLSI_HARNESS_DUT_NAME)'" >> $@
 
 $(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
@@ -152,11 +153,10 @@ $(SIM_TIMING_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_comm
 
 POWER_CONF = $(OBJ_DIR)/power-inputs.yml
 include $(vlsi_dir)/power.mk
-LOWER_VLSI_TOP = $(shell echo $(VLSI_TOP) | tr A-Z a-z)
 $(POWER_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
 	echo "power.inputs:" > $@
-	echo "  tb_dut: 'testHarness/$(LOWER_VLSI_TOP)'" >> $@
+	echo "  tb_dut: 'testHarness/$(VLSI_HARNESS_DUT_NAME)'" >> $@
 	echo "  database: '$(OBJ_DIR)/par-rundir/$(VLSI_TOP)_FINAL'" >> $@
 	echo "  saifs: [" >> $@
 	echo "    '$(OBJ_DIR)/sim-par-rundir/$(notdir $(BINARY))/ucli.saif'" >> $@
