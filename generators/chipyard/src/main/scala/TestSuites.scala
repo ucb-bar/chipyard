@@ -63,9 +63,9 @@ class TestSuiteHelper
   def addSuites(s: Seq[RocketTestSuite]) { s.foreach(addSuite) }
 
   /**
-  * Add third-party core (including Ariane) tests (asm, bmark, regression)
+  * Add generic tests (asm, bmark, regression) for all cores.
   */
-  def addThirdPartyTestSuites(tiles: Seq[TileParams])(implicit p: Parameters) = {
+  def addGenericTestSuites(tiles: Seq[TileParams])(implicit p: Parameters) = {
     val xlen = p(XLen)
     tiles.find(_.hartId == 0).map { tileParams =>
       val coreParams = tileParams.core

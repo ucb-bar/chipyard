@@ -22,7 +22,7 @@ import chipyard.{TestSuiteHelper, CoreManager}
 
 class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipStageUtils {
   // Make sure we run both after RocketChip's version of this phase, and Rocket Chip's annotation emission phase
-  // because the RocketTestSuiteAnnotation is not serializable (but is not marked as such). 
+  // because the RocketTestSuiteAnnotation is not serializable (but is not marked as such).
   override val prerequisites = Seq(
     Dependency[freechips.rocketchip.stage.phases.GenerateFirrtlAnnos],
     Dependency[freechips.rocketchip.stage.phases.AddDefaultTests])
@@ -34,7 +34,7 @@ class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipS
     // Use Xlen as a proxy for detecting if we are a processor-like target
     // The underlying test suites expect this field to be defined
     if (p.lift(XLen).nonEmpty)
-      CoreManager.cores map (core => suiteHelper.addThirdPartyTestSuites(core.tileParamsLookup))
+      CoreManager.cores map (core => suiteHelper.addGenericTestSuites(core.tileParamsLookup))
 
     // if hwacha parameter exists then generate its tests
     // TODO: find a more elegant way to do this. either through

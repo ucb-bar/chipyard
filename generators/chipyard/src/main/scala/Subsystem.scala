@@ -33,7 +33,8 @@ trait HasChipyardTiles extends HasTiles
 
   val module: HasChipyardTilesModuleImp
 
-  val allTilesInfo: Seq[(TileParams, RocketCrossingParams, BaseTile)] = 
+  // Generate tiles info from the list of cores in CoreManager
+  val allTilesInfo: Seq[(TileParams, RocketCrossingParams, BaseTile)] =
     (CoreManager.cores flatMap (core => core.instantiateTile(perTileOrGlobalSetting _, logicalTreeNode)))
 
   // Make a tile and wire its nodes into the system,
