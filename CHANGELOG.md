@@ -24,7 +24,7 @@ A more detailed account of everything included is included in the dev to master 
 * Add support for Hammer Sim (#512,#581,#580,#582)
 
 ### Changed
-* Bump FireSim to version 1.10 (#574)
+* Bump FireSim to version 1.10 (#574,#586)
 * Bump BOOM to version 3.0 (#523, #574,#580)
 * Bump Gemmini to version 0.3 (#575, #579)
 * Bump SPEC17 workload (#504, #574)
@@ -52,6 +52,7 @@ A more detailed account of everything included is included in the dev to master 
 * Working IceNet + TestChipIP Unit Tests (#525)
 * Don't initialize non-existent Midas submodule (#552)
 * Verilator now supports +permissive similar to VCS (#565)
+* Fix direction of IOCell OE (#586)
 
 ### Deprecated
 * N/A
