@@ -2,6 +2,64 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.3.0] - 2020-05-31
+
+A more detailed account of everything included is included in the dev to master PR for this release: https://github.com/ucb-bar/chipyard/pull/500
+
+### Added
+* A new Top-level module, ChipTop, has been created. ChipTop instantiates a "system" module specified by BuildSystem. (#480)
+* A new BuildSystem key has been added, which by default builds DigitalTop (#480)
+* The IOBinders API has changed. IOBinders are now called inside of ChipTop and return a tuple3 of (IO ports, IO cells, harness functions). The harness functions are now called inside the TestHarness (this is analogous to the previous IOBinder functions). (#480)
+* IO cell models have been included in ChipTop. These can be replaced with real IO cells for tapeout, or used as-is for simulation. (#480)
+* CI now checks documentation changes (#485)
+* Support FireSim multi-clock (#468)
+* Allows make variables to be injected into build system (#499)
+* Various documentation/comment updates (#511,#517,#518,#537,#533,#542,#570,#569)
+* DSPTools documentation and example (#457, #568)
+* Support for no UART configs (#536)
+* Assemble firrtl-test.jar (#551)
+* Add SPI flash configurations (#546)
+* Add Dromajo + FireSim Dromajo simulation support (#523, #553, #560)
+* NVDLA integration (#505, #559, #580)
+* Add support for Hammer Sim (#512,#581,#580,#582)
+
+### Changed
+* Bump FireSim to version 1.10 (#574)
+* Bump BOOM to version 3.0 (#523, #574,#580)
+* Bump Gemmini to version 0.3 (#575, #579)
+* Bump SPEC17 workload (#504, #574)
+* Bump Hwacha for fixes (#580)
+* Bump SHA3 for Linux 5.7rc3 support (#580)
+* Bump Rocket Chip to commit 1872f5d (including stage/phase compilation) (#503,#544)
+* Bump FireMarshal to version 1.9.0 (#574)
+* Chisel 3.3 and FIRRTL 1.3 (#503,#544)
+* BuildTop now builds a ChipTop dut module in the TestHarness by default (#480)
+* The default for the TOP make variable is now ChipTop (was Top) (#480)
+* Top has been renamed to DigitalTop (#480)
+* Bump libgloss (#508, #516, #580)
+* The default version of Verilator has changed to v4.034 (#547). Since this release adds enhanced support for Verilog timescales, the build detects if Verilator v4.034 or newer is visible in the build environment and sets default timescale flags appropriately.
+* Use Scalatests for FireSim CI (#528)
+* Cleanup Ariane pre-processing (#505)
+* Modify Issue Template to be more explicit (#557)
+* FireChip uses Chipyard generator (#554)
+* Have all non-synthesizeable constructs in test harness (#572)
+
+### Fixed
+* Aligned esp-tools spike with Gemmini (#509)
+* Fix debug rule in Verilator (#513)
+* Clean up SBT HTTP warnings (#526,#549)
+* Artefacts dropped in FireSim (#534)
+* Working IceNet + TestChipIP Unit Tests (#525)
+* Don't initialize non-existent Midas submodule (#552)
+* Verilator now supports +permissive similar to VCS (#565)
+
+### Deprecated
+* N/A
+
+### Removed
+* N/A
+
+
 ## [1.2.0] - 2020-03-14
 
 A more detailed account of everything included is included in the dev to master PR for this release: https://github.com/ucb-bar/chipyard/pull/418
@@ -59,7 +117,7 @@ A more detailed account of everything included is included in the dev to master 
 * FireSim release 1.8.0
 * FireMarshal release 1.8.0
 * BOOM release 2.2.3 (PR #397)
-* baremetal software toolchains, using libgloss and newlib instead of in-house syscalls. 
+* baremetal software toolchains, using libgloss and newlib instead of in-house syscalls.
 * Add toolchain specific `env.sh` (PR #304)
 * `run-binary`-like interface now dumps `.log` (stdout) and `.out` (stderr) files (PR #308)
 * Split the VLSI build dir on type of design (PR #331)
