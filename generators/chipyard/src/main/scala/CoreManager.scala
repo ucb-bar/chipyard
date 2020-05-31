@@ -6,12 +6,13 @@ import scala.reflect.runtime.universe._
 import chisel3._
 
 import freechips.rocketchip.config.{Parameters, Config, Field, View}
-import freechips.rocketchip.subsystem.{SystemBusKey, RocketTilesKey, RocketCrossingParams}
+import freechips.rocketchip.subsystem.{SystemBusKey, RocketTilesKey, RocketCrossingParams, RocketCrossingKey}
 import freechips.rocketchip.diplomacy.{LazyModule, ClockCrossingType, ValName}
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree.LogicalTreeNode
 import freechips.rocketchip.rocket._
 import freechips.rocketchip.tile._
 
+import boom.common.{BoomTile, BoomTilesKey, BoomCrossingKey, BoomTileParams}
 import ariane.{ArianeTile, ArianeTilesKey, ArianeCrossingKey, ArianeTileParams}
 import chipsalliance.rocketchip.config.Parameters
 
@@ -34,7 +35,7 @@ class CoreEntry[TileParamsT <: TileParams with Product: TypeTag, TileT <: BaseTi
   private val paramCtr = paramClass.getConstructors.head
 
   private val tileClass = mirror.runtimeClass(typeOf[TileT].typeSymbol.asClass)
-  private val tileCtr = tileClass.getConstructors.head
+  private val tileCtr = tileClass.getConstructors.filter(ctr => ctr.getParameterTypes()(4) == classOf[Parameters]).head
 
   // Reflective version of copy()
   def copyTileParam(tileParam: TileParamsT, properties: Map[String, Any]) = {
@@ -82,6 +83,8 @@ object GenericConfig {
 object CoreManager {
   val cores: List[CoreEntryBase] = List(
     // ADD YOUR CORE DEFINITION HERE
+    new CoreEntry[RocketTileParams, RocketTile](RocketTilesKey, RocketCrossingKey),
+    new CoreEntry[BoomTileParams, BoomTile](BoomTilesKey, BoomCrossingKey),
     new CoreEntry[ArianeTileParams, ArianeTile](ArianeTilesKey, ArianeCrossingKey)
   )
 }

@@ -148,7 +148,9 @@ class WithControlCore extends Config((site, here, up) => {
 })
 
 class WithTraceIO extends Config((site, here, up) =>
-  GenericConfig(Map("trace" -> true)) (site, here, up) orElse {
-    case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
+  GenericConfig(Map("trace" -> true), {
+    case RocketTilesKey => false
+    case _ => true
+  }) (site, here, up) orElse {
     case TracePortKey => Some(TracePortParams())
   })

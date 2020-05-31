@@ -33,11 +33,8 @@ class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipS
     val suiteHelper = new TestSuiteHelper
     // Use Xlen as a proxy for detecting if we are a processor-like target
     // The underlying test suites expect this field to be defined
-    if (p.lift(XLen).nonEmpty) {
-      suiteHelper.addRocketTestSuites
-      suiteHelper.addBoomTestSuites
+    if (p.lift(XLen).nonEmpty)
       CoreManager.cores map (core => suiteHelper.addThirdPartyTestSuites(core.tileParamsLookup))
-    }
 
     // if hwacha parameter exists then generate its tests
     // TODO: find a more elegant way to do this. either through

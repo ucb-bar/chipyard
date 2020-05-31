@@ -33,29 +33,7 @@ trait HasChipyardTiles extends HasTiles
 
   val module: HasChipyardTilesModuleImp
 
-  protected val rocketTileParams = p(RocketTilesKey)
-  protected val boomTileParams = p(BoomTilesKey)
-
-  // crossing can either be per tile or global (aka only 1 crossing specified)
-  private val rocketCrossings = perTileOrGlobalSetting(p(RocketCrossingKey), rocketTileParams.size)
-  private val boomCrossings = perTileOrGlobalSetting(p(BoomCrossingKey), boomTileParams.size)
-
-  private val rocketTilesInfo = (rocketTileParams zip rocketCrossings) map {
-    case (param, crossing) => (
-      param,
-      crossing,
-      LazyModule(new RocketTile(param, crossing, PriorityMuxHartIdFromSeq(rocketTileParams), logicalTreeNode))
-    )
-  }
-  private val boomTilesInfo = (boomTileParams zip boomCrossings) map {
-    case (param, crossing) => (
-      param,
-      crossing,
-      LazyModule(new BoomTile(param, crossing, PriorityMuxHartIdFromSeq(boomTileParams), logicalTreeNode))
-    )
-  }
-
-  val allTilesInfo = rocketTilesInfo ++ boomTilesInfo ++
+  val allTilesInfo: Seq[(TileParams, RocketCrossingParams, BaseTile)] = 
     (CoreManager.cores flatMap (core => core.instantiateTile(perTileOrGlobalSetting _, logicalTreeNode)))
 
   // Make a tile and wire its nodes into the system,
