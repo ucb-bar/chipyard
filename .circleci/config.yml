@@ -379,14 +379,6 @@ jobs:
                 project-key: "firesim-multiclock"
                 run-script: "run-firesim-scala-tests.sh"
                 timeout: "20m"
-    midasexamples-run-tests:
-        executor: main-env
-        steps:
-            - setup-tools
-            - run:
-                name: Run midasexamples tests
-                command: .circleci/run-midasexamples-tests.sh
-                no_output_timeout: 20m
     chipyard-ariane-run-tests:
         executor: main-env
         steps:
@@ -540,11 +532,6 @@ workflows:
                     - install-verilator
 
             # Run the respective tests
-
-            # Run midasexamples test
-            - midasexamples-run-tests:
-                requires:
-                    - install-riscv-toolchain
 
             # Run the example tests
             - chipyard-rocket-run-tests:
