@@ -29,7 +29,6 @@ class TutorialStarterConfig extends Config(
   // Config fragments below this line affect hardware generation
   // of the Top
   new testchipip.WithTSI ++                  // Add a TSI (Test Serial Interface)  widget to bring-up the core
-  new chipyard.config.WithNoGPIO ++          // Disable GPIOs.
   new chipyard.config.WithBootROM ++         // Use the Chipyard BootROM
   new chipyard.config.WithRenumberHarts ++   // WithRenumberHarts fixes hartids heterogeneous designs, if design is not heterogeneous, this is a no-op
   new chipyard.config.WithUART ++            // Add a UART
@@ -51,6 +50,7 @@ class TutorialStarterConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++  // hierarchical buses including mbus+l2
   // BaseConfig configures "bare" rocketchip system
   new freechips.rocketchip.system.BaseConfig
 )
@@ -65,7 +65,6 @@ class TutorialMMIOConfig extends Config(
   new chipyard.iobinders.WithSimSerial ++
 
   new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithRenumberHarts ++
   new chipyard.config.WithUART ++
@@ -81,6 +80,7 @@ class TutorialMMIOConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig
 )
 
@@ -93,7 +93,6 @@ class TutorialSha3Config extends Config(
   new chipyard.iobinders.WithSimSerial ++
 
   new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithRenumberHarts ++
   new chipyard.config.WithUART ++
@@ -107,6 +106,7 @@ class TutorialSha3Config extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig
 )
 
@@ -119,7 +119,6 @@ class TutorialSha3BlackBoxConfig extends Config(
   new chipyard.iobinders.WithSimSerial ++
 
   new testchipip.WithTSI ++
-  new chipyard.config.WithNoGPIO ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithRenumberHarts ++
   new chipyard.config.WithUART ++
@@ -134,5 +133,6 @@ class TutorialSha3BlackBoxConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig
 )

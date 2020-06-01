@@ -78,7 +78,7 @@ Configuration
 To add IceNIC to your design, add ``HasPeripheryIceNIC`` to your lazy module
 and ``HasPeripheryIceNICModuleImp`` to the module implementation. If you
 are confused about the distinction between lazy module and module
-implementation, refer to :ref:`Cake Pattern`.
+implementation, refer to :ref:`Cake Pattern / Mixin`.
 
 Then add the ``WithIceNIC`` config fragment to your configuration. This will
 define ``NICKey``, which IceNIC uses to determine its parameters. The config fragment

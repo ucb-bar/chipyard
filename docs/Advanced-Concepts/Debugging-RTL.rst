@@ -88,7 +88,7 @@ directory.
 
 Firesim Debugging
 ---------------------------
-Chisel printfs, asserts, and waveform generation are also available in FireSim
+Chisel printfs, asserts, Dromajo co-simulation, and waveform generation are also available in FireSim
 FPGA-accelerated simulation. See the FireSim
 `documentation <https://docs.fires.im/en/latest/>`__ for more detail.
 

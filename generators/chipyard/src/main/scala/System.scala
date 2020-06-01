@@ -22,7 +22,6 @@ import freechips.rocketchip.util.{DontTouch}
  * Base top with periphery devices and ports, and a BOOM + Rocket subsystem
  */
 class System(implicit p: Parameters) extends Subsystem
-  with HasHierarchicalBusTopology
   with HasAsyncExtInterrupts
   with CanHaveMasterAXI4MemPort
   with CanHaveMasterAXI4MMIOPort
@@ -38,8 +37,5 @@ class System(implicit p: Parameters) extends Subsystem
 class SystemModule[+L <: System](_outer: L) extends SubsystemModuleImp(_outer)
   with HasRTCModuleImp
   with HasExtInterruptsModuleImp
-  with CanHaveMasterAXI4MemPortModuleImp
-  with CanHaveMasterAXI4MMIOPortModuleImp
-  with CanHaveSlaveAXI4PortModuleImp
   with HasPeripheryBootROMModuleImp
   with DontTouch

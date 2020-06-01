@@ -11,7 +11,9 @@ These guides will walk you through customization of your system-on-chip:
 
 - Adding custom MMIO widgets to the Chipyard memory system by Tilelink or AXI4, with custom Top-level IOs
 
-- Standard practices for using keys, traits, and configs to parameterize your design
+- Adding custom Dsptools based blocks as MMIO widgets.
+
+- Standard practices for using Keys, Traits, and Configs to parameterize your design
 
 - Customizing the memory hierarchy
 
@@ -36,6 +38,7 @@ We recommend reading all these pages in order. Hit next to get started!
    RoCC-or-MMIO
    RoCC-Accelerators
    MMIO-Peripherals
+   Dsptools-Blocks
    Keys-Traits-Configs
    DMA-Devices
    Incorporating-Verilog-Blocks

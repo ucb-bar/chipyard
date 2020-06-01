@@ -6,13 +6,13 @@ version: 2.1
 parameters:
     tools-cache-version:
         type: string
-        default: "v4"
+        default: "v5"
 
 # default execution env.s
 executors:
     main-env:
         docker:
-            - image: ucbbar/chipyard-image:1.0.0
+            - image: ucbbar/chipyard-image:1.0.1
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 
@@ -145,6 +145,17 @@ jobs:
                 name: Check that the tutorial-setup patches apply
                 command: |
                     scripts/tutorial-setup.sh
+    documentation-check:
+        executor: main-env
+        steps:
+            - checkout
+            - run:
+                name: Check that documentation builds with no warnings/errors
+                command: |
+                    sudo apt-get update -y
+                    sudo apt-get install -y python3-pip
+                    sudo pip3 install -r docs/requirements.txt
+                    make -C docs html
 
     install-riscv-toolchain:
         executor: main-env
@@ -193,6 +204,16 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "chipyard-sha3"
+    prepare-chipyard-streaming-fir:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-streaming-fir"
+    prepare-chipyard-streaming-passthrough:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-streaming-passthrough"
     prepare-chipyard-hetero:
         executor: main-env
         steps:
@@ -236,23 +257,36 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "tracegen-boom"
-    prepare-firesim:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "firesim"
-                build-script: "do-firesim-build.sh"
-    prepare-fireboom:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "fireboom"
-                build-script: "do-firesim-build.sh"
     prepare-chipyard-ariane:
         executor: main-env
         steps:
             - prepare-rtl:
                 project-key: "chipyard-ariane"
+    prepare-icenet:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "icenet"
+    prepare-testchipip:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "testchipip"
+    prepare-chipyard-nvdla:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-nvdla"
+    prepare-chipyard-spiflashwrite:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-spiflashwrite"
+    prepare-chipyard-spiflashread:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-spiflashread"
     chipyard-rocket-run-tests:
         executor: main-env
         steps:
@@ -263,11 +297,22 @@ jobs:
         steps:
             - run-tests:
                 project-key: "chipyard-sha3"
+    chipyard-streaming-fir-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-streaming-fir"
+    chipyard-streaming-passthrough-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-streaming-passthrough"
     chipyard-hetero-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 project-key: "chipyard-hetero"
+                timeout: "15m"
     chipyard-boom-run-tests:
         executor: main-env
         steps:
@@ -290,6 +335,16 @@ jobs:
             - run-tests:
                 tools-version: "esp-tools"
                 project-key: "chipyard-gemmini"
+    chipyard-spiflashwrite-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-spiflashwrite"
+    chipyard-spiflashread-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-spiflashread"
     tracegen-run-tests:
         executor: main-env
         steps:
@@ -306,27 +361,47 @@ jobs:
             - run-tests:
                 extra-cache-restore: "extra-tests"
                 project-key: "firesim"
-                run-script: "run-firesim-tests.sh"
+                run-script: "run-firesim-scala-tests.sh"
+                timeout: "20m"
     fireboom-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 extra-cache-restore: "extra-tests"
                 project-key: "fireboom"
-                run-script: "run-firesim-tests.sh"
-                timeout: "30m"
-    midasexamples-run-tests:
+                run-script: "run-firesim-scala-tests.sh"
+                timeout: "45m"
+    firesim-multiclock-run-tests:
         executor: main-env
         steps:
-            - setup-tools
-            - run:
-                name: Run midasexamples tests
-                command: .circleci/run-midasexamples-tests.sh
+            - run-tests:
+                extra-cache-restore: "extra-tests"
+                project-key: "firesim-multiclock"
+                run-script: "run-firesim-scala-tests.sh"
+                timeout: "20m"
     chipyard-ariane-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 project-key: "chipyard-ariane"
+                timeout: "30m"
+    chipyard-nvdla-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-nvdla"
+    icenet-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "icenet"
+                timeout: "30m"
+    testchipip-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "testchipip"
+                timeout: "30m"
 
 # Order and dependencies of jobs to run
 workflows:
@@ -357,6 +432,9 @@ workflows:
             # Attempt to apply the tutorial patches
             - tutorial-setup-check
 
+            # Check that documentation builds
+            - documentation-check
+
             # Build extra tests
             - build-extra-tests:
                 requires:
@@ -369,6 +447,16 @@ workflows:
                     - install-verilator
 
             - prepare-chipyard-sha3:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-streaming-fir:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-streaming-passthrough:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
@@ -413,27 +501,37 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-firesim:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
-            - prepare-fireboom:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
             - prepare-chipyard-ariane:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
 
-            # Run the respective tests
-
-            # Run midasexamples test
-            - midasexamples-run-tests:
+            - prepare-icenet:
                 requires:
                     - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-testchipip:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-nvdla:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-spiflashwrite:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-spiflashread:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            # Run the respective tests
 
             # Run the example tests
             - chipyard-rocket-run-tests:
@@ -443,6 +541,14 @@ workflows:
             - chipyard-sha3-run-tests:
                 requires:
                     - prepare-chipyard-sha3
+
+            - chipyard-streaming-fir-run-tests:
+                requires:
+                    - prepare-chipyard-streaming-fir
+
+            - chipyard-streaming-passthrough-run-tests:
+                requires:
+                    - prepare-chipyard-streaming-passthrough
 
             - chipyard-hetero-run-tests:
                 requires:
@@ -472,17 +578,42 @@ workflows:
                 requires:
                     - prepare-tracegen-boom
 
+            - chipyard-spiflashwrite-run-tests:
+                requires:
+                    - prepare-chipyard-spiflashwrite
+
+            - chipyard-spiflashread-run-tests:
+                requires:
+                    - prepare-chipyard-spiflashread
+
             # Run the firesim tests
             - firesim-run-tests:
                 requires:
-                    - prepare-firesim
+                    - install-riscv-toolchain
+                    - install-verilator
                     - build-extra-tests
-
+            - firesim-multiclock-run-tests:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+                    - build-extra-tests
             - fireboom-run-tests:
                 requires:
-                    - prepare-fireboom
+                    - install-riscv-toolchain
+                    - install-verilator
                     - build-extra-tests
 
             - chipyard-ariane-run-tests:
                 requires:
                     - prepare-chipyard-ariane
+
+            - chipyard-nvdla-run-tests:
+                requires:
+                    - prepare-chipyard-nvdla
+            - icenet-run-tests:
+                requires:
+                    - prepare-icenet
+
+            - testchipip-run-tests:
+                requires:
+                    - prepare-testchipip

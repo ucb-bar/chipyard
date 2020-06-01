@@ -31,12 +31,26 @@ Note that these configurations fully remove the L2 cache and mbus.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
     :language: scala
-    :start-after: DOC include start: scratchpadrocket
-    :end-before: DOC include end: scratchpadrocket
+    :start-after: DOC include start: l1scratchpadrocket
+    :end-before: DOC include end: l1scratchpadrocket
 
 
 This configuration fully removes the L2 cache and memory bus by setting the
 number of channels and number of banks to 0.
+
+The System Bus
+--------------
+
+The system bus is the TileLink network that sits between the tiles and the L2
+agents and MMIO peripherals. Ordinarily, it is a fully-connected crossbar,
+but TestChipIP provides a version that uses a ring network instead. This can
+be useful when taping out larger systems. To use  the ring network system
+bus, simply add the ``WithRingSystemBus`` config fragment to your configuration.
+
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
+    :language: scala
+    :start-after: DOC include start: RingSystemBusRocket
+    :end-before: DOC include end: RingSystemBusRocket
 
 The SiFive L2 Cache
 -------------------
@@ -80,10 +94,19 @@ number of DRAM channels is restricted to powers of two.
 
     new freechips.rocketchip.subsystem.WithNMemoryChannels(2)
 
-
 In VCS and Verilator simulation, the DRAM is simulated using the
 ``SimAXIMem`` module, which simply attaches a single-cycle SRAM to each
 memory channel.
+
+Instead of connecting to off-chip DRAM, you can instead connect a scratchpad
+and remove the off-chip link. This is done by adding a fragment like
+``testchipip.WithBackingScratchpad`` to your configuration and removing the
+memory port with ``freechips.rocketchip.subsystem.WithNoMemPort``.
+
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
+    :language: scala
+    :start-after: DOC include start: mbusscratchpadrocket
+    :end-before: DOC include end: mbusscratchpadrocket
 
 If you want a more realistic memory simulation, you can use FireSim, which
 can simulate the timing of DDR3 controllers. More documentation on FireSim

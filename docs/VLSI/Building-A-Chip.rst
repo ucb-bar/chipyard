@@ -45,8 +45,8 @@ It is possible to write this IR directly, or to generate it using simple python 
 While we certainly look forward to having a more featureful toolkit, we have built many chips to date in this way.
 
 
-Running the VLSI flow
----------------------
+Running the VLSI tool flow
+--------------------------
 
 For the full documentation on how to use the VLSI tool flow, see the `Hammer Documentation <https://hammer-vlsi.readthedocs.io/>`__.
 For an example of how to use the VLSI in the context of Chipyard, see :ref:`ASAP7 Tutorial`.
