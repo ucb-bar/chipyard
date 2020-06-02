@@ -22,7 +22,7 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 
 import chipyard.{BuildTop, BuildSystem}
-import chipyard.GenericConfig
+import chipyard.GenericCoreConfig
 
 /**
  * TODO: Why do we need this?
@@ -147,10 +147,9 @@ class WithControlCore extends Config((site, here, up) => {
   case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
 })
 
-class WithTraceIO extends Config((site, here, up) =>
-  GenericConfig(Map("trace" -> true), {
-    case RocketTilesKey => false
-    case _ => true
-  }) (site, here, up) orElse {
+class WithTraceIO extends GenericCoreConfig(
+  properties = Map("trace" -> true),
+  specialCase = (site, here, up) => {
     case TracePortKey => Some(TracePortParams())
-  })
+  }
+)
