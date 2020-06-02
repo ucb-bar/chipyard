@@ -423,7 +423,7 @@ class HwachaDRAMCacheConfig extends Config(
   new chipyard.config.WithDRAMCacheKey(7, 8, 4) ++
   new chipyard.config.WithDRAMCacheSystem ++
   new chipyard.config.WithPrefetchMiddleMan ++
-  new chipyard.config.WithStandardL2(4, 3) ++
+  new chipyard.config.WithStandardL2(4, 6) ++
   new HwachaRocketConfig)
 
 // DOC include start: RingSystemBusRocket
