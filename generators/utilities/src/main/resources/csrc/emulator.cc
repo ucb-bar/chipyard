@@ -36,6 +36,8 @@ extern tsi_t* tsi;
 extern dtm_t* dtm;
 extern remote_bitbang_t * jtag;
 extern int dramsim;
+extern std::string loadmem;
+extern bool fastloadmem;
 
 static uint64_t trace_count = 0;
 bool verbose = false;
@@ -77,6 +79,9 @@ EMULATOR OPTIONS\n\
                            automatically.\n\
   -V, --verbose            Enable all Chisel printfs (cycle-by-cycle info)\n\
        +verbose\n\
+  -f, --fastloadmem        Enable memory initalization. The loadmem file must \n\
+       +fastloadmem        also be set for initialization to occur.\n\
+  -l, --loadmem=FILE       Load memory from FILE.\n\
 ", stdout);
 #if VM_TRACE == 0
   fputs("\
@@ -139,6 +144,8 @@ int main(int argc, char** argv)
       {"dramsim",         no_argument,       0, 'D' },
       {"permissive",      no_argument,       0, 'p' },
       {"permissive-off",  no_argument,       0, 'o' },
+      {"loadmem",         required_argument, 0, 'l' },
+      {"fastloadmem",     no_argument,       0, 'f' },
 #if VM_TRACE
       {"vcd",             required_argument, 0, 'v' },
       {"dump-start",      required_argument, 0, 'x' },
@@ -165,6 +172,8 @@ int main(int argc, char** argv)
       case 'D': dramsim = 1;                break;
       case 'p': opterr = 0;                 break;
       case 'o': opterr = 1;                 break;
+      case 'f': fastloadmem= true;          break;
+      case 'l': loadmem = optarg;           break;
 #if VM_TRACE
       case 'v': {
         vcdfile = strcmp(optarg, "-") == 0 ? stdout : fopen(optarg, "w");
@@ -204,6 +213,8 @@ int main(int argc, char** argv)
           c = 'p';
         else if (arg == "+permissive-off")
           c = 'o';
+	else if (arg == "+fastloadmem")
+	  c = 'f';
         // If we don't find a legacy '+' EMULATOR argument, it still could be
         // a VERILOG_PLUSARG and not an error.
         else if (verilog_plusargs_legal) {
