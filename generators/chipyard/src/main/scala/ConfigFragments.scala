@@ -59,14 +59,7 @@ class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) =>
     SPIFlashParams(rAddress = 0x10040000, fAddress = 0x20000000, fSize = size))
 })
 
-class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
-  case RocketTilesKey => up(RocketTilesKey) map (tile => tile.copy(
-    core = tile.core.copy(nL2TLBEntries = entries)
-  ))
-  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(
-    core = tile.core.copy(nL2TLBEntries = entries)
-  ))
-})
+class WithL2TLBs(entries: Int) extends GenericCoreConfig(Map("core" -> Map("nL2TLBEntries" -> entries)))
 
 class WithTracegenSystem extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => LazyModule(new tracegen.TraceGenSystem()(p))
@@ -148,7 +141,7 @@ class WithControlCore extends Config((site, here, up) => {
 })
 
 class WithTraceIO extends GenericCoreConfig(
-  properties = Map("trace" -> true),
+  newValues = Map("trace" -> true),
   specialCase = (site, here, up) => {
     case TracePortKey => Some(TracePortParams())
   }

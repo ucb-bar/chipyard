@@ -14,10 +14,10 @@ import freechips.rocketchip.tile._
 
 import boom.common.{BoomTile, BoomTilesKey, BoomCrossingKey, BoomTileParams}
 import ariane.{ArianeTile, ArianeTilesKey, ArianeCrossingKey, ArianeTileParams}
-import chipsalliance.rocketchip.config.Parameters
 
 // Base trait for all third-party core entries
 sealed trait CoreEntryBase {
+  val name: String
   def tileParamsLookup(implicit p: Parameters): Seq[TileParams]
   def updateWithFilter(view: View, p: Any => Boolean): PartialFunction[Any, Map[String, Any] => Any]
   def instantiateTile(crossingLookup: (Seq[RocketCrossingParams], Int) => Seq[RocketCrossingParams], logicalTreeNode: LogicalTreeNode)
@@ -26,36 +26,22 @@ sealed trait CoreEntryBase {
 
 // Implementation of third-party core entries
 class CoreEntry[TileParamsT <: TileParams with Product: TypeTag, TileT <: BaseTile : TypeTag](
+  val name: String,
   tilesKey: Field[Seq[TileParamsT]],
   crossingKey: Field[Seq[RocketCrossingParams]]
 ) extends CoreEntryBase {
-  // Use reflection to get the parameter's constructor
-  private val mirror = runtimeMirror(getClass.getClassLoader)
-  private val paramClass = mirror.runtimeClass(typeOf[TileParamsT].typeSymbol.asClass)
-  private val paramNames = (paramClass.getDeclaredFields map (f => f.getName)).zipWithIndex.toMap
-  private val paramCtor = paramClass.getConstructors.head
-
   // Use reflection to get the tile's constructor
+  private val mirror = runtimeMirror(getClass.getClassLoader)
   private val tileClass = mirror.runtimeClass(typeOf[TileT].typeSymbol.asClass)
   private val tileCtor = tileClass.getConstructors.filter(ctor => ctor.getParameterTypes()(4) == classOf[Parameters]).head
-
-  // Version of case class' copy() using reflection, where fields to be updated are passed by a map
-  def copyTileParam(tileParam: TileParamsT, properties: Map[String, Any]) = {
-    val values = tileParam.productIterator.toList
-    //val filteredProperties = properties filter { case (key, value) => paramNames contains key }
-    val indexedProperties = /*filteredProperties*/ properties map { case (key, value) => (paramNames(key), value) }
-    val newValues = (0 until values.size) map
-      (i => (if (indexedProperties contains i) indexedProperties(i) else values(i)).asInstanceOf[AnyRef])
-    paramCtor.newInstance(newValues:_*)
-  }
 
   // Tile parameter lookup using correct type
   def tileParamsLookup(implicit p: Parameters) = p(tilesKey)
 
   // If this core meet the requirement given by p, update parameter fields in the map
   def updateWithFilter(view: View, p: Any => Boolean): PartialFunction[Any, Map[String, Any] => Any] = {
-    case key if (key == tilesKey && p(tilesKey)) => properties => view(tilesKey) map
-      (tile => copyTileParam(tile, properties))
+    case key if (key == tilesKey && p(tilesKey)) => newValues => view(tilesKey) map
+      (tile => CopyParam(tile, newValues))
   }
 
   // Instantiate a tile and zip it with its parameter info, used by subsystem
@@ -73,27 +59,12 @@ class CoreEntry[TileParamsT <: TileParams with Product: TypeTag, TileT <: BaseTi
   }
 }
 
-// Generic Core Config - change properties in the given map
-class GenericCoreConfig(
-  // Parameter properties to be changed and their new values. Any field not in a core's parameters will be ignored.
-  properties: Map[String, Any],
-  // Function for filtering the list of TilesKey.
-  filterFunc: Any => Boolean = (_ => true),
-  // Handling special cases where partial function input is not a TilesKey.
-  specialCase: (View, View, View) => PartialFunction[Any, Any] = ((_, _, _) => Map.empty)  
-) extends Config((site, here, up) =>
-  scala.Function.unlift((key: Any) => {
-    val tiles = CoreManager.cores flatMap (core => core.updateWithFilter(up, filterFunc).lift(key))
-    if (tiles.size == 0) None else Some(tiles map (tile => tile(properties)))
-  }).orElse(specialCase(site, here, up))
-)
-
 // A list of all cores. 
 object CoreManager {
   val cores: List[CoreEntryBase] = List(
-    // TODO ADD YOUR CORE DEFINITION HERE
-    new CoreEntry[RocketTileParams, RocketTile](RocketTilesKey, RocketCrossingKey),
-    new CoreEntry[BoomTileParams, BoomTile](BoomTilesKey, BoomCrossingKey),
-    new CoreEntry[ArianeTileParams, ArianeTile](ArianeTilesKey, ArianeCrossingKey)
+    // TODO ADD YOUR CORE DEFINITION HERE; note that the 
+    new CoreEntry[RocketTileParams, RocketTile]("Rocket", RocketTilesKey, RocketCrossingKey),
+    new CoreEntry[BoomTileParams, BoomTile]("Boom", BoomTilesKey, BoomCrossingKey),
+    new CoreEntry[ArianeTileParams, ArianeTile]("Ariane", ArianeTilesKey, ArianeCrossingKey)
   )
 }
