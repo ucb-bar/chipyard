@@ -101,9 +101,6 @@ class CopyParam(paramExtracted: SubParameterBase) {
     }
     paramCtor.newInstance(newValueList:_*)
   }
-
-  // For debug purpose - print what's in the object
-  override def toString(): String = paramClass.getSimpleName + "(" + entries.toString + ")"
 }
 
 object CopyParam {
