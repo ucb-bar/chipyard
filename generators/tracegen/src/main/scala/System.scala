@@ -45,7 +45,6 @@ trait HasTraceGenTilesModuleImp extends LazyModuleImp {
 
 class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
     with HasTraceGenTiles
-    with HasHierarchicalBusTopology
     with CanHaveMasterAXI4MemPort {
   override lazy val module = new TraceGenSystemModuleImp(this)
 }
@@ -56,7 +55,6 @@ class TraceGenSystemModuleImp(outer: TraceGenSystem)
 
 class DRAMCacheTraceGenSystem(implicit p: Parameters) extends BaseSubsystem
     with HasTraceGenTiles
-    with HasHierarchicalBusTopology
     with CanHaveMasterAXI4MemPort
     with memblade.cache.HasPeripheryDRAMCache {
   override lazy val module = new DRAMCacheTraceGenSystemModuleImp(this)

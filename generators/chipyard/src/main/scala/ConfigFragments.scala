@@ -16,9 +16,7 @@ import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams
 import freechips.rocketchip.util.{AsyncResetReg}
 
 import boom.common.{BoomTilesKey}
-
 import ariane.{ArianeTilesKey}
-
 import icenet.IceNetConsts._
 import testchipip._
 
@@ -26,6 +24,7 @@ import hwacha.{Hwacha}
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
+import sifive.blocks.devices.spi._
 import sifive.blocks.inclusivecache.InclusiveCachePortParameters
 
 import memblade.manager.{MemBladeKey, MemBladeParams, MemBladeQueueParams}
@@ -64,8 +63,10 @@ class WithUART extends Config((site, here, up) => {
     UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256))
 })
 
-class WithNoGPIO extends Config((site, here, up) => {
-  case PeripheryGPIOKey => Seq()
+class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) => {
+  // Note: the default size matches freedom with the addresses below
+  case PeripherySPIFlashKey => Seq(
+    SPIFlashParams(rAddress = 0x10040000, fAddress = 0x20000000, fSize = size))
 })
 
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
@@ -110,12 +111,6 @@ class WithRenumberHarts(rocketFirst: Boolean = false) extends Config((site, here
   }
   case MaxHartIdBits => log2Up(up(BoomTilesKey, site).size + up(RocketTilesKey, site).size)
 })
-
-
-
-// ------------------
-// Multi-RoCC Support
-// ------------------
 
 /**
  * Map from a hartId to a particular RoCC accelerator
@@ -281,24 +276,6 @@ class WithStandardL2(
     nWays = 4,
     capacityKB = 256,
     outerLatencyCycles = nBeatsPerBlock * nTrackersPerBank))
-
-class WithPrefetchMiddleMan extends Config((site, here, up) => {
-  case PrefetchMiddleManKey => {
-    val l2key = site(BankedL2Key)
-    val ickey = site(InclusiveCacheKey)
-    val dckey = site(DRAMCacheKey)
-    val blockBeats = site(CacheBlockBytes) / site(SystemBusKey).beatBytes
-    val nMSHRs = (ickey.memCycles - 1) / blockBeats + 1
-    val nTrackers = dckey.nChannels * dckey.nBanksPerChannel * dckey.nTrackersPerBank
-    SequentialPrefetchConfig(
-      nWays = 4,
-      nBlocks = nTrackers / l2key.nBanks,
-      hitThreshold = 1,
-      maxTimeout = (1 << 30) - 1,
-      lookAhead = nMSHRs-1)
-  }
-  case MiddleManLatency => 15
-})
 
 class WithHwachaNVMTEntries(nVMT: Int) extends Config((site, here, up) => {
   case hwacha.HwachaNVMTEntries => nVMT

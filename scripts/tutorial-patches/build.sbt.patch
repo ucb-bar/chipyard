@@ -1,17 +1,17 @@
 diff --git a/build.sbt b/build.sbt
-index a633066..3df8b74 100644
+index 5d642c1..56f6fda 100644
 --- a/build.sbt
 +++ b/build.sbt
-@@ -124,7 +124,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
+@@ -130,7 +130,7 @@ lazy val iocell = (project in file("./tools/barstools/iocell/"))
  
  lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
    .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
 -    sha3, // On separate line to allow for cleaner tutorial-setup patches
 +//    sha3, // On separate line to allow for cleaner tutorial-setup patches
-     gemmini, icenet, tracegen, ariane)
+     dsptools, `rocket-dsptools`,
+     gemmini, icenet, tracegen, ariane, nvdla)
    .settings(commonSettings)
- 
-@@ -151,9 +151,9 @@ lazy val ariane = (project in file("generators/ariane"))
+@@ -158,9 +158,9 @@ lazy val ariane = (project in file("generators/ariane"))
    .dependsOn(rocketchip)
    .settings(commonSettings)
  

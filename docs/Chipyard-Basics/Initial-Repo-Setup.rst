@@ -23,16 +23,18 @@ In Ubuntu/Debian-based platforms (Ubuntu), we recommend installing the following
 
 .. Note:: When running on an Amazon Web Services EC2 FPGA-development instance (for FireSim), FireSim includes a machine setup script that will install all of the aforementioned dependencies (and some additional ones).
 
-Checking out the sources
-------------------------
+Setting up the Chipyard Repo
+-------------------------------------------
 
-After cloning this repo, you will need to initialize all of the submodules.
+Start by fetching Chipyard's sources. Run:
 
 .. code-block:: shell
 
     git clone https://github.com/ucb-bar/chipyard.git
     cd chipyard
     ./scripts/init-submodules-no-riscv-tools.sh
+
+This will initialize and checkout all of the necessary git submodules.
 
 When updating Chipyard to a new version, you will also want to rerun this script to update the submodules.
 Using git directly will try to initialize all submodules; this is not recommended unless you expressly desire this behavior.
@@ -46,15 +48,66 @@ The `toolchains` directory contains toolchains that include a cross-compiler too
 Currently there are two toolchains, one for normal RISC-V programs, and another for Hwacha (``esp-tools``).
 For custom installations, Each tool within the toolchains contains individual installation procedures within its README file.
 To get a basic installation (which is the only thing needed for most Chipyard use-cases), just the following steps are necessary.
+This will take about 20-30 minutes. You can expedite the process by setting a ``make`` environment variable to use parallel cores: ``export MAKEFLAGS=-j8``.
 
 .. code-block:: shell
 
     ./scripts/build-toolchains.sh riscv-tools # for a normal risc-v toolchain
 
-    # OR
-
-    ./scripts/build-toolchains.sh esp-tools # for a modified risc-v toolchain with Hwacha vector instructions
+.. Note:: If you are planning to use the Hwacha vector unit, or other RoCC-based accelerators, you should build the esp-tools toolchain by adding the ``esp-tools`` argument to the script above.
+  If you are running on an Amazon Web Services EC2 instance, intending to use FireSim, you can also use the ``--ec2fast`` flag for an expedited installation of a pre-compiled toolchain.
 
 Once the script is run, a ``env.sh`` file is emitted that sets the ``PATH``, ``RISCV``, and ``LD_LIBRARY_PATH`` environment variables.
-You can put this in your ``.bashrc`` or equivalent environment setup file to get the proper variables.
+You can put this in your ``.bashrc`` or equivalent environment setup file to get the proper variables, or directly include it in your current environment:
+
+.. code-block:: shell
+
+    source ./env.sh
+
 These variables need to be set for the ``make`` system to work properly.
+
+What's Next?
+-------------------------------------------
+
+This depends on what you are planning to do with Chipyard.
+
+* If you intend to run a simulation of one of the vanilla Chipyard examples, go to :ref:`sw-rtl-sim-intro` and follow the instructions.
+
+* If you intend to run a simulation of a custom Chipyard SoC Configuration, go to :ref:`Simulating A Custom Project` and follow the instructions.
+
+* If you intend to run a full-system FireSim simulation, go to :ref:`firesim-sim-intro` and follow the instructions.
+
+* If you intend to add a new accelerator, go to :ref:`customization` and follow the instructions.
+
+* If you want to learn about the structure of Chipyard, go to :ref:`chipyard-components`.
+
+* If you intend to change the generators (BOOM, Rocket, etc) themselves, see :ref:`generator-index`.
+
+* If you intend to run a tutorial VLSI flow using one of the Chipyard examples, go to :ref:`tutorial` and follow the instructions.
+
+* If you intend to build a chip using one of the vanilla Chipyard examples, go to :ref:`build-a-chip` and follow the instructions.
+
+Upgrading Chipyard Release Versions
+-------------------------------------------
+
+In order to upgrade between Chipyard versions, we recommend using a fresh clone of the repository (or your fork, with the new release merged into it).
+
+
+Chipyard is a complex framework that depends on a mix of build systems and scripts. Specifically, it relies on git submodules, on sbt build files, and on custom written bash scripts and generated files.
+For this reason, upgrading between Chipyard versions is **not** as trivial as just running ``git submodule update -recursive``. This will result in recursive cloning of large submodules that are not necessarily used within your specific Chipyard environments. Furthermore, it will not resolve the status of stale state generated files which may not be compatible between release versions.
+
+
+If you are an advanced git user, an alternative approach to a fresh repository clone may be to run ``git clean -dfx``, and then run the standard Chipyard setup sequence. This approach is dangerous, and **not-recommended** for users who are not deeply familiar with git, since it "blows up" the repository state and removes all untracked and modified files without warning. Hence, if you were working on custom un-committed changes, you would lose them.
+
+If you would still like to try to perform an in-place manual version upgrade (**not-recommended**), we recommend at least trying to resolve stale state in the following areas:
+
+* Delete stale ``target`` directories generated by sbt.
+
+* Delete jar collateral generated by FIRRTL (``lib/firrtl.jar``)
+
+* Re-generate generated scripts and source files (for example, ``env.sh``)
+
+* Re-generating/deleting target software state (Linux kernel binaries, Linux images) within FireMarshal
+
+
+This is by no means a comprehensive list of potential stale state within Chipyard. Hence, as mentioned earlier, the recommended method for a Chipyard version upgrade is a fresh clone (or a merge, and then a fresh clone).

@@ -9,10 +9,12 @@ import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.{SimAXIMem}
+import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4EdgeParameters}
 import freechips.rocketchip.util._
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
+import sifive.blocks.devices.spi._
 
 import barstools.iocell.chisel._
 
@@ -90,10 +92,8 @@ object AddIOCells {
   def gpio(gpios: Seq[GPIOPortIO], genFn: () => DigitalGPIOCell = IOCell.genericGPIO): (Seq[Seq[Analog]], Seq[Seq[IOCell]]) = {
     gpios.zipWithIndex.map({ case (gpio, i) =>
       gpio.pins.zipWithIndex.map({ case (pin, j) =>
-        val g = IO(Analog(1.W))
-        g.suggestName("gpio_${i}_${j}")
-        val iocell = genFn()
-        iocell.suggestName(s"iocell_gpio_${i}_${j}")
+        val g = IO(Analog(1.W)).suggestName(s"gpio_${i}_${j}")
+        val iocell = genFn().suggestName(s"iocell_gpio_${i}_${j}")
         iocell.io.o := pin.o.oval
         iocell.io.oe := pin.o.oe
         iocell.io.ie := pin.o.ie
@@ -106,7 +106,7 @@ object AddIOCells {
 
   /**
    * Add IO cells to a SiFive UART devices and name the IO ports.
-   * @param gpios A Seq of UART port bundles
+   * @param uartPins A Seq of UART port bundles
    * @return Returns a tuple of (A Seq of top-level UARTPortIO IOs; a 2D Seq of IOCell module references)
    */
   def uart(uartPins: Seq[UARTPortIO]): (Seq[UARTPortIO], Seq[Seq[IOCell]]) = {
@@ -118,8 +118,39 @@ object AddIOCells {
   }
 
   /**
+   * Add IO cells to a SiFive SPI devices and name the IO ports.
+   * @param spiPins A Seq of SPI port bundles
+   * @param basename The base name for this port (defaults to "spi")
+   * @param genFn A callable function to generate a DigitalGPIOCell module to use
+   * @return Returns a tuple of (A Seq of top-level SPIChipIO IOs; a 2D Seq of IOCell module references)
+   */
+  def spi(spiPins: Seq[SPIPortIO], basename: String = "spi", genFn: () => DigitalGPIOCell = IOCell.genericGPIO): (Seq[SPIChipIO], Seq[Seq[IOCell]]) = {
+    spiPins.zipWithIndex.map({ case (s, i) =>
+      val port = IO(new SPIChipIO(s.c.csWidth)).suggestName(s"${basename}_${i}")
+      val iocellBase = s"iocell_${basename}_${i}"
+
+      // SCK and CS are unidirectional outputs
+      val sckIOs = IOCell.generateFromSignal(s.sck, port.sck, Some(s"${iocellBase}_sck"))
+      val csIOs = IOCell.generateFromSignal(s.cs, port.cs, Some(s"${iocellBase}_cs"))
+
+      // DQ are bidirectional, so then need special treatment
+      val dqIOs = s.dq.zip(port.dq).zipWithIndex.map { case ((pin, ana), j) =>
+        val iocell = genFn().suggestName(s"${iocellBase}_dq_${j}")
+        iocell.io.o := pin.o
+        iocell.io.oe := pin.oe
+        iocell.io.ie := true.B
+        pin.i := iocell.io.i
+        iocell.io.pad <> ana
+        iocell
+      }
+
+      (port, dqIOs ++ csIOs ++ sckIOs)
+    }).unzip
+  }
+
+  /**
    * Add IO cells to a debug module and name the IO ports.
-   * @param gpios A PSDIO bundle
+   * @param psd A PSDIO bundle
    * @param resetctrlOpt An optional ResetCtrlIO bundle
    * @param debugOpt An optional DebugIO bundle
    * @return Returns a tuple3 of (Top-level PSDIO IO; Optional top-level DebugIO IO; a list of IOCell module references)
@@ -154,6 +185,20 @@ object AddIOCells {
     port.suggestName("serial")
     (port, ios)
   }
+
+  def axi4(io: Seq[AXI4Bundle], node: AXI4SlaveNode): Seq[(AXI4Bundle, AXI4EdgeParameters, Seq[IOCell])] = {
+    io.zip(node.in).map{ case (mem_axi4, (_, edge)) => {
+      val (port, ios) = IOCell.generateIOFromSignal(mem_axi4, Some("iocell_mem_axi4"))
+      port.suggestName("mem_axi4")
+      (port, edge, ios)
+    }}
+  }
+
+  def blockDev(bdev: BlockDeviceIO): (BlockDeviceIO, Seq[IOCell]) = {
+    val (port, ios) = IOCell.generateIOFromSignal(bdev, Some("iocell_bdev"))
+    port.suggestName("bdev")
+    (port, ios)
+  }
 }
 
 // DOC include start: WithGPIOTiedOff
@@ -174,12 +219,34 @@ class WithUARTAdapter extends OverrideIOBinder({
   }
 })
 
+class WithSimSPIFlashModel(rdOnly: Boolean = true) extends OverrideIOBinder({
+  (system: HasPeripherySPIFlashModuleImp) => {
+    val (ports, ioCells2d) = AddIOCells.spi(system.qspi, "qspi")
+    val harnessFn = (th: chipyard.TestHarness) => { SimSPIFlashModel.connect(ports, th.reset, rdOnly)(system.p); Nil }
+    Seq((ports, ioCells2d.flatten, Some(harnessFn)))
+  }
+})
+
 class WithSimBlockDevice extends OverrideIOBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp) => system.connectSimBlockDevice(system.clock, system.reset.asBool); Nil
+  (system: CanHavePeripheryBlockDeviceModuleImp) => system.bdev.map { bdev =>
+    val (port, ios) = AddIOCells.blockDev(bdev)
+    val harnessFn = (th: chipyard.TestHarness) => {
+      SimBlockDevice.connect(th.clock, th.reset.asBool, Some(port))(system.p)
+      Nil
+    }
+    Seq((Seq(port), ios, Some(harnessFn)))
+  }.getOrElse(Nil)
 })
 
 class WithBlockDeviceModel extends OverrideIOBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp) => system.connectBlockDeviceModel(); Nil
+  (system: CanHavePeripheryBlockDeviceModuleImp) => system.bdev.map { bdev =>
+    val (port, ios) = AddIOCells.blockDev(bdev)
+    val harnessFn = (th: chipyard.TestHarness) => {
+      BlockDeviceModel.connect(Some(port))(system.p)
+      Nil
+    }
+    Seq((Seq(port), ios, Some(harnessFn)))
+  }.getOrElse(Nil)
 })
 
 class WithLoopbackNIC extends OverrideIOBinder({
@@ -196,21 +263,38 @@ class WithSimNIC extends OverrideIOBinder({
 // accessible to the IOBinder
 // DOC include start: WithSimAXIMem
 class WithSimAXIMem extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => SimAXIMem.connectMem(system)(system.p); Nil
+  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => {
+    val peiTuples = AddIOCells.axi4(system.mem_axi4, system.memAXI4Node)
+    // TODO: we are inlining the connectMem method of SimAXIMem because
+    //   it takes in a dut rather than seq of axi4 ports
+    val harnessFn = (th: chipyard.TestHarness) => {
+      peiTuples.map { case (port, edge, ios) =>
+        val mem = LazyModule(new SimAXIMem(edge, size = system.p(ExtMem).get.master.size)(system.p))
+        Module(mem.module).suggestName("mem")
+        mem.io_axi4.head <> port
+        }
+      Nil
+    }
+    Seq((peiTuples.map(_._1), peiTuples.flatMap(_._3), Some(harnessFn)))
+  }
 })
 // DOC include end: WithSimAXIMem
 
 class WithBlackBoxSimMem extends OverrideIOBinder({
   (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => {
-    (system.mem_axi4 zip system.memAXI4Node.in).foreach { case (io, (_, edge)) =>
-      val memSize = system.p(ExtMem).get.master.size
-      val lineSize = system.p(CacheBlockBytes)
-      val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
-      mem.io.axi <> io
-      mem.io.clock := system.module.clock
-      mem.io.reset := system.module.reset
+    val peiTuples = AddIOCells.axi4(system.mem_axi4, system.memAXI4Node)
+    val harnessFn = (th: chipyard.TestHarness) => {
+      peiTuples.map { case (port, edge, ios) =>
+        val memSize = system.p(ExtMem).get.master.size
+        val lineSize = system.p(CacheBlockBytes)
+        val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
+        mem.io.axi <> port
+        mem.io.clock := th.clock
+        mem.io.reset := th.reset
+      }
+      Nil
     }
-    Nil
+    Seq((peiTuples.map(_._1), peiTuples.flatMap(_._3), Some(harnessFn)))
   }
 })
 
@@ -258,8 +342,9 @@ class WithTiedOffDebug extends OverrideIOBinder({
       Debug.tieoffDebug(debugPortOpt, resetctrlOpt, Some(psdPort))(system.p)
       // tieoffDebug doesn't actually tie everything off :/
       debugPortOpt.foreach { d =>
-        d.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare })
+        d.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare; cdmi.dmiClock := th.clock })
         d.dmactiveAck := DontCare
+        d.clock := th.clock
       }
       Nil
     }
@@ -336,4 +421,4 @@ class WithSimDromajoBridge extends ComposeIOBinder({
 })
 
 
-}
+} /* end package object */

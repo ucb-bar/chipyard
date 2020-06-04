@@ -19,9 +19,13 @@ class DigitalTop(implicit p: Parameters) extends System
   with testchipip.CanHavePeripherySerial // Enables optionally adding the TSI serial-adapter and port
   with sifive.blocks.devices.uart.HasPeripheryUART // Enables optionally adding the sifive UART
   with sifive.blocks.devices.gpio.HasPeripheryGPIO // Enables optionally adding the sifive GPIOs
+  with sifive.blocks.devices.spi.HasPeripherySPIFlash // Enables optionally adding the sifive SPI flash controller
   with icenet.CanHavePeripheryIceNIC // Enables optionally adding the IceNIC for FireSim
   with chipyard.example.CanHavePeripheryInitZero // Enables optionally adding the initzero example widget
   with chipyard.example.CanHavePeripheryGCD // Enables optionally adding the GCD example widget
+  with chipyard.example.CanHavePeripheryStreamingFIR // Enables optionally adding the DSPTools FIR example widget
+  with chipyard.example.CanHavePeripheryStreamingPassthrough // Enables optionally adding the DSPTools streaming-passthrough example widget
+  with nvidia.blocks.dla.CanHavePeripheryNVDLA // Enables optionally having an NVDLA
 {
   override lazy val module = new DigitalTopModule(this)
 }
@@ -32,6 +36,7 @@ class DigitalTopModule[+L <: DigitalTop](l: L) extends SystemModule(l)
   with testchipip.CanHavePeripherySerialModuleImp
   with sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
   with sifive.blocks.devices.gpio.HasPeripheryGPIOModuleImp
+  with sifive.blocks.devices.spi.HasPeripherySPIFlashModuleImp
   with icenet.CanHavePeripheryIceNICModuleImp
   with chipyard.example.CanHavePeripheryGCDModuleImp
   with freechips.rocketchip.util.DontTouch
@@ -72,13 +77,7 @@ class RemoteMemClientTopModule(outer: RemoteMemClientTop) extends SystemModule(o
   with sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
   with memblade.client.HasPeripheryRemoteMemClientModuleImpValidOnly
 
-class DRAMCacheTop(implicit p: Parameters) extends Subsystem
-  with memblade.prefetcher.HasMiddleManBusTopology
-  with freechips.rocketchip.subsystem.HasAsyncExtInterrupts
-  with freechips.rocketchip.subsystem.CanHaveMasterAXI4MemPort
-  with freechips.rocketchip.subsystem.CanHaveMasterAXI4MMIOPort
-  with freechips.rocketchip.subsystem.CanHaveSlaveAXI4Port
-  with freechips.rocketchip.devices.tilelink.HasPeripheryBootROM
+class DRAMCacheTop(implicit p: Parameters) extends System
   with testchipip.CanHaveTraceIO
   with testchipip.CanHavePeripheryBlockDevice
   with testchipip.CanHavePeripherySerial
@@ -89,11 +88,7 @@ class DRAMCacheTop(implicit p: Parameters) extends Subsystem
   override lazy val module = new DRAMCacheTopModule(this)
 }
 
-class DRAMCacheTopModule(outer: DRAMCacheTop) extends SubsystemModuleImp(outer)
-  with freechips.rocketchip.subsystem.HasRTCModuleImp
-  with freechips.rocketchip.subsystem.HasExtInterruptsModuleImp
-  with freechips.rocketchip.devices.tilelink.HasPeripheryBootROMModuleImp
-  with freechips.rocketchip.util.DontTouch
+class DRAMCacheTopModule(outer: DRAMCacheTop) extends SystemModule(outer)
   with testchipip.CanHaveTraceIOModuleImp
   with testchipip.CanHavePeripheryBlockDeviceModuleImp
   with testchipip.CanHavePeripherySerialModuleImp

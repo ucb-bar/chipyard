@@ -5,6 +5,11 @@ labels: question
 
 ---
 
+<!--
+    this type of issue is more for "how-tos", understanding chipyard, etc.
+    if you find an error or issue with chipyard, please use the "Bug Report Issue".
+-->
+
 <!-- have you looked at the Chipyard documentation? -->
 <!-- have you looked at the subproject documentation/githubs? -->
 <!-- for example: -->

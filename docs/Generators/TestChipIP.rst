@@ -84,3 +84,11 @@ output a UART log to a particular file using ``+uartlog=<NAME_OF_FILE>`` during 
 
 By default, this UART Adapter is added to all systems within Chipyard by adding the
 ``WithUART`` and ``WithUARTAdapter`` configs.
+
+SPI Flash Model
+---------------
+
+The SPI flash model is a device that models a simple SPI flash device. It currently
+only supports single read, quad read, single write, and quad write instructions. The
+memory is backed by a file which is provided using ``+spiflash#=<NAME_OF_FILE>``,
+where ``#`` is the SPI flash ID (usually ``0``).

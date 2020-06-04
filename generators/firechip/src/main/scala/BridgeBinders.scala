@@ -95,7 +95,7 @@ class WithFASEDMMIOBridge extends OverrideIOBinder({
   }
 })
 
-class WithTracerVBridge extends OverrideIOBinder({
+class WithTracerVBridge extends ComposeIOBinder({
   (system: CanHaveTraceIOModuleImp) =>
     system.traceIO.foreach(_.traces.map(tileTrace => TracerVBridge(tileTrace)(system.p))); Nil
 })
@@ -104,10 +104,7 @@ class WithTracerVBridge extends OverrideIOBinder({
 
 class WithDromajoBridge extends ComposeIOBinder({
   (system: CanHaveTraceIOModuleImp) => {
-    system.traceIO match {
-      case Some(t) => t.traces.map(tileTrace => DromajoBridge(tileTrace)(system.p))
-    }
-    Nil
+    system.traceIO.foreach(_.traces.map(tileTrace => DromajoBridge(tileTrace)(system.p))); Nil
   }
 })
 
@@ -176,7 +173,7 @@ class WithTiedOffSystemDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
     Debug.tieoffDebug(system.debug, system.resetctrl, Some(system.psd))(system.p)
     // tieoffDebug doesn't actually tie everything off :/
-    system.debug.foreach { d => 
+    system.debug.foreach { d =>
       d.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare })
       d.dmactiveAck := DontCare
     }

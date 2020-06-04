@@ -31,8 +31,8 @@ Note that these configurations fully remove the L2 cache and mbus.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
     :language: scala
-    :start-after: DOC include start: scratchpadrocket
-    :end-before: DOC include end: scratchpadrocket
+    :start-after: DOC include start: l1scratchpadrocket
+    :end-before: DOC include end: l1scratchpadrocket
 
 
 This configuration fully removes the L2 cache and memory bus by setting the
@@ -94,10 +94,19 @@ number of DRAM channels is restricted to powers of two.
 
     new freechips.rocketchip.subsystem.WithNMemoryChannels(2)
 
-
 In VCS and Verilator simulation, the DRAM is simulated using the
 ``SimAXIMem`` module, which simply attaches a single-cycle SRAM to each
 memory channel.
+
+Instead of connecting to off-chip DRAM, you can instead connect a scratchpad
+and remove the off-chip link. This is done by adding a fragment like
+``testchipip.WithBackingScratchpad`` to your configuration and removing the
+memory port with ``freechips.rocketchip.subsystem.WithNoMemPort``.
+
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
+    :language: scala
+    :start-after: DOC include start: mbusscratchpadrocket
+    :end-before: DOC include end: mbusscratchpadrocket
 
 If you want a more realistic memory simulation, you can use FireSim, which
 can simulate the timing of DDR3 controllers. More documentation on FireSim

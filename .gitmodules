@@ -122,6 +122,12 @@
 [submodule "tools/DRAMSim2"]
 	path = tools/DRAMSim2
 	url = https://github.com/firesim/DRAMSim2.git
+[submodule "generators/nvdla"]
+	path = generators/nvdla
+	url = https://github.com/ucb-bar/nvdla-wrapper.git
+[submodule "software/nvdla-workload"]
+	path = software/nvdla-workload
+	url = https://github.com/ucb-bar/nvdla-workload.git
 [submodule "tools/dromajo/dromajo-src"]
 	path = tools/dromajo/dromajo-src
-	url = https://github.com/abejgonzalez/dromajo.git
+	url = https://github.com/riscv-boom/dromajo.git

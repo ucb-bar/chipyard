@@ -46,13 +46,11 @@ class WithPeripheryBusFrequency(freq: BigInt) extends Config((site, here, up) =>
   case PeripheryBusKey => up(PeripheryBusKey).copy(dtsFrequency = Some(freq))
 })
 
-
 class WithPerfCounters extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey) map (tile => tile.copy(
     core = tile.core.copy(nPerfCounters = 29)
   ))
 })
-
 
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
 class WithoutClockGating extends Config((site, here, up) => {
@@ -64,7 +62,6 @@ class WithoutClockGating extends Config((site, here, up) => {
 class WithScalaTestFeatures extends Config((site, here, up) => {
   case TracePortKey => up(TracePortKey, site).map(_.copy(print = true))
 })
-
 
 // FASED Config Aliases. This to enable config generation via "_" concatenation
 // which requires that all config classes be defined in the same package
@@ -82,6 +79,10 @@ class WithTraceIO extends Config((site, here, up) => {
   case ArianeTilesKey => up(ArianeTilesKey) map (tile => tile.copy(trace = true))
   case TracePortKey => Some(TracePortParams())
 })
+
+// Adds a small/large NVDLA to the system
+class WithNVDLALarge extends nvidia.blocks.dla.WithNVDLA("large")
+class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
 
 // Tweaks that are generally applied to all firesim configs

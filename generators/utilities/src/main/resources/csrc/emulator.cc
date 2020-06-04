@@ -38,8 +38,8 @@ extern remote_bitbang_t * jtag;
 extern int dramsim;
 
 static uint64_t trace_count = 0;
-bool verbose;
-bool done_reset;
+bool verbose = false;
+bool done_reset = false;
 
 void handle_sigterm(int sig)
 {
@@ -126,27 +126,30 @@ int main(int argc, char** argv)
   int verilog_plusargs_legal = 1;
 
   dramsim = 0;
+  opterr = 1;
 
   while (1) {
     static struct option long_options[] = {
-      {"cycle-count", no_argument,       0, 'c' },
-      {"help",        no_argument,       0, 'h' },
-      {"max-cycles",  required_argument, 0, 'm' },
-      {"seed",        required_argument, 0, 's' },
-      {"rbb-port",    required_argument, 0, 'r' },
-      {"verbose",     no_argument,       0, 'V' },
-      {"dramsim",     no_argument,       0, 'D' },
+      {"cycle-count",     no_argument,       0, 'c' },
+      {"help",            no_argument,       0, 'h' },
+      {"max-cycles",      required_argument, 0, 'm' },
+      {"seed",            required_argument, 0, 's' },
+      {"rbb-port",        required_argument, 0, 'r' },
+      {"verbose",         no_argument,       0, 'V' },
+      {"dramsim",         no_argument,       0, 'D' },
+      {"permissive",      no_argument,       0, 'p' },
+      {"permissive-off",  no_argument,       0, 'o' },
 #if VM_TRACE
-      {"vcd",         required_argument, 0, 'v' },
-      {"dump-start",  required_argument, 0, 'x' },
+      {"vcd",             required_argument, 0, 'v' },
+      {"dump-start",      required_argument, 0, 'x' },
 #endif
       HTIF_LONG_OPTIONS
     };
     int option_index = 0;
 #if VM_TRACE
-    int c = getopt_long(argc, argv, "-chm:s:r:v:Vx:D", long_options, &option_index);
+    int c = getopt_long(argc, argv, "-chm:s:r:v:Vx:Dpo", long_options, &option_index);
 #else
-    int c = getopt_long(argc, argv, "-chm:s:r:VD", long_options, &option_index);
+    int c = getopt_long(argc, argv, "-chm:s:r:VDpo", long_options, &option_index);
 #endif
     if (c == -1) break;
  retry:
@@ -160,6 +163,8 @@ int main(int argc, char** argv)
       case 'r': rbb_port = atoi(optarg);    break;
       case 'V': verbose = true;             break;
       case 'D': dramsim = 1;                break;
+      case 'p': opterr = 0;                 break;
+      case 'o': opterr = 1;                 break;
 #if VM_TRACE
       case 'v': {
         vcdfile = strcmp(optarg, "-") == 0 ? stdout : fopen(optarg, "w");
@@ -195,6 +200,10 @@ int main(int argc, char** argv)
           c = 'c';
         else if (arg == "+dramsim")
           c = 'D';
+        else if (arg == "+permissive")
+          c = 'p';
+        else if (arg == "+permissive-off")
+          c = 'o';
         // If we don't find a legacy '+' EMULATOR argument, it still could be
         // a VERILOG_PLUSARG and not an error.
         else if (verilog_plusargs_legal) {
@@ -226,9 +235,13 @@ int main(int argc, char** argv)
             }
             htif_option++;
           }
-          std::cerr << argv[0] << ": invalid plus-arg (Verilog or HTIF) \""
-                    << arg << "\"\n";
-          c = '?';
+          if(opterr) {
+            std::cerr << argv[0] << ": invalid plus-arg (Verilog or HTIF) \""
+                      << arg << "\"\n";
+            c = '?';
+          } else {
+            c = 'p';
+          }
         }
         goto retry;
       }
@@ -282,8 +295,12 @@ done_processing:
   signal(SIGTERM, handle_sigterm);
 
   bool dump;
+  // start reset off low so a rising edge triggers async reset
+  tile->reset = 0;
+  tile->clock = 0;
+  tile->eval();
   // reset for several cycles to handle pipelined reset
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 100; i++) {
     tile->reset = 1;
     tile->clock = 0;
     tile->eval();
