@@ -58,7 +58,7 @@ A more detailed account of everything included is included in the dev to master 
 * N/A
 
 ### Removed
-* N/A
+* Removed MIDAS examples CI (until a better solution that is faster is found) (#589)
 
 
 ## [1.2.0] - 2020-03-14
