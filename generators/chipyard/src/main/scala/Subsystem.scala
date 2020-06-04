@@ -34,7 +34,9 @@ trait HasChipyardTiles extends HasTiles
   val module: HasChipyardTilesModuleImp
 
   // Generate tiles info from the list of cores in CoreManager
-  val allTilesInfo: Seq[(TileParams, RocketCrossingParams, BaseTile)] =
+  // Note: the 0-arity function is used to delay the construction of tiles to make sure that they are created
+  // in order
+  val allTilesInfo: Seq[(TileParams, RocketCrossingParams, () => BaseTile)] =
     (CoreManager.cores flatMap (core => core.instantiateTile(perTileOrGlobalSetting _, logicalTreeNode)))
 
   // Make a tile and wire its nodes into the system,
@@ -44,8 +46,11 @@ trait HasChipyardTiles extends HasTiles
   // This MUST be performed in order of hartid
   // There is something weird with registering tile-local interrupt controllers to the CLINT.
   // TODO: investigate why
+  require((allTilesInfo map (info => info._1.hartId)).max == allTilesInfo.size - 1)
   val tiles = allTilesInfo.sortWith(_._1.hartId < _._1.hartId).map {
-    case (param, crossing, tile) => {
+    case (param, crossing, tileCtor) => {
+      val tile = tileCtor()
+
       connectMasterPortsToSBus(tile, crossing)
       connectSlavePortsToCBus(tile, crossing)
       connectInterrupts(tile, debugOpt, clintOpt, plicOpt)

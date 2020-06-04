@@ -21,7 +21,7 @@ sealed trait CoreEntryBase {
   def tileParamsLookup(implicit p: Parameters): Seq[TileParams]
   def updateWithFilter(view: View, p: Any => Boolean): PartialFunction[Any, Map[String, Any] => Any]
   def instantiateTile(crossingLookup: (Seq[RocketCrossingParams], Int) => Seq[RocketCrossingParams], logicalTreeNode: LogicalTreeNode)
-    (implicit p: Parameters, valName: ValName): Seq[(TileParams, RocketCrossingParams, BaseTile)]
+    (implicit p: Parameters, valName: ValName): Seq[(TileParams, RocketCrossingParams, () => BaseTile)]
 }
 
 // Implementation of third-party core entries
@@ -53,7 +53,13 @@ class CoreEntry[TileParamsT <: TileParams with Product: TypeTag, TileT <: BaseTi
       case (param, crossing) => (
         param,
         crossing,
-        LazyModule(tileCtor.newInstance(param, crossing, PriorityMuxHartIdFromSeq(tileParams), logicalTreeNode, p.asInstanceOf[Parameters]).asInstanceOf[TileT])
+        (() => LazyModule(tileCtor.newInstance(
+          param,
+          crossing,
+          PriorityMuxHartIdFromSeq(tileParams),
+          logicalTreeNode,
+          p.asInstanceOf[Parameters]
+        ).asInstanceOf[TileT]))
       )
     }
   }
