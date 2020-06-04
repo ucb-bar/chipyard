@@ -175,11 +175,11 @@ class WithUARTAdapter extends OverrideIOBinder({
 })
 
 class WithSimBlockDevice extends OverrideIOBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp) => system.connectSimBlockDevices(system.clock, system.reset.asBool); Nil
+  (system: CanHavePeripheryBlockDeviceModuleImp) => system.connectSimBlockDevice(system.clock, system.reset.asBool); Nil
 })
 
 class WithBlockDeviceModel extends OverrideIOBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp) => system.connectBlockDeviceModels(); Nil
+  (system: CanHavePeripheryBlockDeviceModuleImp) => system.connectBlockDeviceModel(); Nil
 })
 
 class WithLoopbackNIC extends OverrideIOBinder({
