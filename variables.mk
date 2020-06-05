@@ -141,7 +141,7 @@ PERMISSIVE_OFF=+permissive-off
 BINARY ?=
 override SIM_FLAGS += +dramsim +max-cycles=$(timeout_cycles)
 VERBOSE_FLAGS ?= +verbose
-sim_out_name = $(subst $() $(),_,$(notdir $(basename $(BINARY))).$(long_name))
+sim_out_name = $(output_dir)/$(subst $() $(),_,$(notdir $(basename $(BINARY))))
 
 #########################################################################################
 # build output directory for compilation
