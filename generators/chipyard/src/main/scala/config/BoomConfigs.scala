@@ -194,7 +194,7 @@ class BoomRemoteMemClientConfig extends Config(
 
 class BoomDRAMCacheConfig extends Config(
   new chipyard.config.WithMemBenchKey ++
-  new chipyard.config.WithDRAMCacheKey(2, 8, 8) ++
+  new chipyard.config.WithDRAMCacheKey(8, 8, 2) ++
   new chipyard.config.WithDRAMCacheSystem ++
   new chipyard.config.WithStandardL2(4) ++
   new memblade.prefetcher.WithPrefetchMiddleManTopology ++
@@ -205,7 +205,7 @@ class BoomHwachaDRAMCacheConfig extends Config(
   new chipyard.config.WithHwachaConfPrec ++
   new hwacha.WithNLanes(2) ++
   new chipyard.config.WithMemBenchKey ++
-  new chipyard.config.WithDRAMCacheKey(2, 8, 8) ++
+  new chipyard.config.WithDRAMCacheKey(8, 8, 2) ++
   new chipyard.config.WithDRAMCacheSystem ++
   new chipyard.config.WithStandardL2(4) ++
   new memblade.prefetcher.WithPrefetchMiddleManTopology ++
