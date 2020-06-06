@@ -99,8 +99,6 @@ SIM_TIMING_CONF = $(OBJ_DIR)/sim-timing-inputs.yml
 include $(vlsi_dir)/sim.mk
 $(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files) $(dramsim_lib)
 	mkdir -p $(dir $@)
-	mkdir -p $(OBJ_DIR)/$(HAMMER_SIM_RUN_DIR)/$(notdir $(BINARY))
-	ln -sf $(base_dir)/generators/testchipip/src/main/resources/dramsim2_ini $(OBJ_DIR)/$(HAMMER_SIM_RUN_DIR)/$(notdir $(BINARY))/dramsim2_ini
 	echo "sim.inputs:" > $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
