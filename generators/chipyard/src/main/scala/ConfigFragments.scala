@@ -13,6 +13,7 @@ import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams
 import freechips.rocketchip.util.{AsyncResetReg}
 
 import boom.common.{BoomTilesKey}
+import ariane.ArianeTilesKey
 import testchipip._
 
 import hwacha.{Hwacha}
@@ -22,7 +23,8 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 
 import chipyard.{BuildTop, BuildSystem}
-import chipyard.GenericCoreConfig
+import chipyard.TilesKey
+import chipyard.TileSeq._
 
 /**
  * TODO: Why do we need this?
@@ -59,7 +61,11 @@ class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) =>
     SPIFlashParams(rAddress = 0x10040000, fAddress = 0x20000000, fSize = size))
 })
 
-class WithL2TLBs(entries: Int) extends GenericCoreConfig(Map("core" -> Map("nL2TLBEntries" -> entries)))
+class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
+  case TilesKey(tilesKey) => up(tilesKey) tileMap (tile => tile.copy(
+    core = tile.core.copy(nL2TLBEntries = entries)
+  ))
+})
 
 class WithTracegenSystem extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => LazyModule(new tracegen.TraceGenSystem()(p))
@@ -140,9 +146,8 @@ class WithControlCore extends Config((site, here, up) => {
   case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
 })
 
-class WithTraceIO extends GenericCoreConfig(
-  newValues = Map("trace" -> true),
-  specialCase = (site, here, up) => {
-    case TracePortKey => Some(TracePortParams())
-  }
-)
+class WithTraceIO extends Config((site, here, up) => {
+  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
+  case ArianeTilesKey => up(ArianeTilesKey) map (tile => tile.copy(trace = true))
+  case TracePortKey => Some(TracePortParams())
+})

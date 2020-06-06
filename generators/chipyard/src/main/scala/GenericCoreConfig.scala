@@ -15,116 +15,165 @@ import freechips.rocketchip.tile._
 import boom.common.{BoomTile, BoomTilesKey, BoomCrossingKey, BoomTileParams}
 import ariane.{ArianeTile, ArianeTilesKey, ArianeCrossingKey, ArianeTileParams}
 
-// Extractor object accompanied class
-// This is used to check the convertibility for those wrapped in Option, since Option's type is erased at runtime.
-trait SubParameterBase {
-  def toProduct: Product
-  def cast(p: Any): Any
-}
-final class SubParameter[T <: Product](param: T) extends SubParameterBase {
-  def toProduct: Product = param
-  def cast(p: Any) = p.asInstanceOf[T]
+// Case class to change common parameters visible in the base traits. Some fields in the base traits may not be configurable as a 
+// case class constructor parameter for some cores, and those field will be ignored when applied.
+case class GenericCoreParams(
+  val bootFreqHz: BigInt,
+  val useVM: Boolean,
+  val useUser: Boolean,
+  val useSupervisor: Boolean,
+  val useDebug: Boolean,
+  val useAtomics: Boolean,
+  val useAtomicsOnlyForIO: Boolean,
+  val useCompressed: Boolean,
+  override val useVector: Boolean,
+  val useSCIE: Boolean,
+  val useRVE: Boolean,
+  val mulDiv: Option[MulDivParams],
+  val fpu: Option[FPUParams],
+  val fetchWidth: Int,
+  val decodeWidth: Int,
+  val retireWidth: Int,
+  val instBits: Int,
+  val nLocalInterrupts: Int,
+  val nPMPs: Int,
+  val pmpGranularity: Int,
+  val nBreakpoints: Int,
+  val useBPWatch: Boolean,
+  val nPerfCounters: Int,
+  val haveBasicCounters: Boolean,
+  val haveFSDirty: Boolean,
+  val misaWritable: Boolean,
+  val haveCFlush: Boolean,
+  val nL2TLBEntries: Int,
+  val mtvecInit: Option[BigInt],
+  val mtvecWritable: Boolean,
+  // The original object
+  val _origin: CoreParams
+) extends CoreParams {
+  def this(coreParams: CoreParams) = this(
+    bootFreqHz = coreParams.bootFreqHz,
+    useVM = coreParams.useVM,
+    useUser = coreParams.useUser,
+    useSupervisor = coreParams.useSupervisor,
+    useDebug = coreParams.useDebug,
+    useAtomics = coreParams.useAtomics,
+    useAtomicsOnlyForIO = coreParams.useAtomicsOnlyForIO,
+    useCompressed = coreParams.useCompressed,
+    useVector = coreParams.useVector,
+    useSCIE = coreParams.useSCIE,
+    useRVE = coreParams.useRVE,
+    mulDiv = coreParams.mulDiv,
+    fpu = coreParams.fpu,
+    fetchWidth = coreParams.fetchWidth,
+    decodeWidth = coreParams.decodeWidth,
+    retireWidth = coreParams.retireWidth,
+    instBits = coreParams.instBits,
+    nLocalInterrupts = coreParams.nLocalInterrupts,
+    nPMPs = coreParams.nPMPs,
+    pmpGranularity = coreParams.pmpGranularity,
+    nBreakpoints = coreParams.nBreakpoints,
+    useBPWatch = coreParams.useBPWatch,
+    nPerfCounters = coreParams.nPerfCounters,
+    haveBasicCounters = coreParams.haveBasicCounters,
+    haveFSDirty = coreParams.haveFSDirty,
+    misaWritable = coreParams.misaWritable,
+    haveCFlush = coreParams.haveCFlush,
+    nL2TLBEntries = coreParams.nL2TLBEntries,
+    mtvecInit = coreParams.mtvecInit,
+    mtvecWritable = coreParams.mtvecWritable,
+
+    _origin = coreParams
+  )
+
+  // Reflection Info of this class
+  val fieldNames = (this.getClass.getDeclaredFields map (f => f.getName)).init
+
+  // Convert back to core-specific tile
+  def convert: CoreParams = {
+    // Reflection of target class
+    val paramClass = _origin.getClass
+    val paramNames = (paramClass.getDeclaredFields map (f => f.getName))
+    val paramCtor = paramClass.getConstructors.head
+
+    // Build a list of parameter in the original parameter class
+    val nameDict = paramNames.zipWithIndex.toMap
+    val indexList = fieldNames map (n => nameDict.get(n))
+    val fieldList = this.productIterator.toList.init
+    val fieldDict = ((indexList zip fieldList) collect { case (Some(i), v) => (i, v) }).toMap
+    val newValues = _origin.asInstanceOf[Product].productIterator.toList.zipWithIndex map 
+      { case (v, i) => (if (fieldDict contains i) fieldDict(i) else v).asInstanceOf[AnyRef] }
+
+    paramCtor.newInstance(newValues:_*).asInstanceOf[CoreParams]
+  }
+
+  // Implement abstract function as placeholder
+  def lrscCycles: Int = _origin.lrscCycles
 }
 
-// Extractor object that help identify the parameter case classes.
-// Add your customized nested parameter classes (or their commom base classes) here.
-object CustomizedSubParameter {
-  def unapply(param: Product): Option[Product] = param match {
-    // ADD YOUR NESTED PARAMETER CLASS HERE, in the format shown below in SubParameter
-    case _ => None
+case class GenericTileParams(
+  val core: GenericCoreParams,
+  val icache: Option[ICacheParams],
+  val dcache: Option[DCacheParams],
+  val btb: Option[BTBParams],
+  val hartId: Int,
+  val beuAddr: Option[BigInt],
+  val blockerCtrlAddr: Option[BigInt],
+  val name: Option[String],
+  // The original object
+  val _origin: TileParams
+) extends TileParams {
+  // Copy constructor to build the params
+  def this(tileParams: TileParams) = this(
+    core = new GenericCoreParams(tileParams.core),
+    icache = tileParams.icache,
+    dcache = tileParams.dcache,
+    btb = tileParams.btb,
+    hartId = tileParams.hartId,
+    beuAddr = tileParams.beuAddr,
+    blockerCtrlAddr = tileParams.blockerCtrlAddr,
+    name = tileParams.name,
+
+    _origin = tileParams
+  )
+
+  // Reflection Info of this class
+  val fieldNames = (this.getClass.getDeclaredFields map (f => f.getName)).init
+
+  // Convert back to core-specific tile
+  def convert: TileParams = {
+    // Reflection of target class
+    val paramClass = _origin.getClass
+    val paramNames = (paramClass.getDeclaredFields map (f => f.getName))
+    val paramCtor = paramClass.getConstructors.head
+
+    // Build a list of parameter in the original parameter class
+    val nameDict = paramNames.zipWithIndex.toMap
+    val indexList = fieldNames map (n => nameDict.get(n))
+    val fieldList = this.productIterator.toList.updated(0, core.convert).init
+    val fieldDict = ((indexList zip fieldList) collect { case (Some(i), v) => (i, v) }).toMap
+    val newValues = _origin.asInstanceOf[Product].productIterator.toList.zipWithIndex map 
+      { case (v, i) => (if (fieldDict contains i) fieldDict(i) else v).asInstanceOf[AnyRef] }
+
+    paramCtor.newInstance(newValues:_*).asInstanceOf[TileParams]
   }
 }
 
-// Standard nested 
-object SubParameter {
-  def unapply(param: Product): Option[SubParameterBase] = param match {
-    case p: TileParams => Some(new SubParameter(p))
-    case p: CoreParams => Some(new SubParameter(p))
-    case p: ICacheParams => Some(new SubParameter(p))
-    case p: DCacheParams => Some(new SubParameter(p))
-    case p: MulDivParams => Some(new SubParameter(p))
-    case p: FPUParams => Some(new SubParameter(p))
-    case p: BTBParams => Some(new SubParameter(p))
-    case p: BHTParams => Some(new SubParameter(p))
-    case CustomizedSubParameter(p) => Some(new SubParameter(p))
-    case _ => None
-  }
+// Extractor to capture TilesKey
+object TilesKey {
+  def unapply(key: Any): Option[Field[Seq[_]]] =
+    if ((CoreManager.cores filter (core => core.keyEqual(key))).size != 0) Some(key.asInstanceOf[Field[Seq[_]]]) else None
 }
 
-// Dynamic update helper for Parameter class. 
-class CopyParam(paramExtracted: SubParameterBase) {
-  // Constructor for corresponding TileParams
-  private val param: Product = paramExtracted.toProduct
-  private val paramClass = param.getClass
-  private val paramNames = (paramClass.getDeclaredFields map (f => f.getName))
-  private val paramCtor = paramClass.getConstructors.head
+class TileSeq(list: Seq[Any]) {
+  def tileMap(f: GenericTileParams => GenericTileParams): Seq[TileParams] = {
+    // If this is not an unpacked tile key, simply throw a type exception
+    // Static type checking is not possible when this class is used with TilesKey extractor
+    val tileList = list.asInstanceOf[Seq[TileParams]]
 
-  // Function to build value entry
-  private def buildEntry(value: Any): Any = value match {
-    case Some(v) => Some(buildEntry(v))
-    case SubParameter(p) => new CopyParam(p)
-    case v => v
-  }
-
-  // Value of the case class
-  private val entries = param.productIterator.toList map (v => buildEntry(v))
-
-  // Update one value entry
-  private def updateEntry(entry: Any, newValue: Any): Any = entry match {
-    case Some(e) => newValue match {
-      case Some(v) => Some(updateEntry(e, v))
-      case None => None
-    }
-    case e: CopyParam => newValue match {
-      case newValues: Map[String, Any] => e.update(newValues)
-      case v => paramExtracted.cast(v)
-    }
-    // Use cast() to check the type of the new value. Here I assume that all entries in the parameters class are simple values
-    // (like Int, BigInt and String), which are all final. This may breaks if a polymorphic type is added (unless it's a case
-    // class and registered above). 
-    case e => e.getClass.cast(newValue)
-  }
-
-  // Update the entire parameter object. 
-  def update(newValues: Map[String, Any]): Any = {
-    val filteredValues = newValues.filter({ case (key, value) => paramNames contains key })
-    val newValueList = entries.zipWithIndex map {
-      case (value, i) if newValues contains paramNames(i) => updateEntry(value, filteredValues(paramNames(i))).asInstanceOf[AnyRef]
-      case (value, i) => (value match {
-        case Some(v) => v match {
-          case copyParam: CopyParam => Some(copyParam.param)
-          case _ => Some(v)
-        }
-        case copyParam: CopyParam => copyParam.param
-        case _ => value
-      }).asInstanceOf[AnyRef]
-    }
-    paramCtor.newInstance(newValueList:_*)
+    tileList map (tileParams => f(new GenericTileParams(tileParams)).convert)
   }
 }
-
-object CopyParam {
-  def apply(param: Product, newValues: Map[String, Any]): Any = param match {
-    case SubParameter(p) => new CopyParam(p).update(newValues)
-    case _ => throw new Exception("param is not a known Parameter type: add your custom parameter class to GenericCoreConfig.scala to fix it")
-  }
+object TileSeq {
+  implicit def convertSeq(s: Seq[Any]) = new TileSeq(s)
 }
-
-// Change parameters for all registered cores in CoreManager.
-class GenericCoreConfig (
-  // Key-value pairs to be updated (keys are the name of fields). Any field not in a core's parameters will be ignored.
-  // If a field is a case class containing parameters (or an Option of that), you can use another Map containing the key-value pairs to 
-  // update that case class. Using a new case class instance as the value is also acceptable.
-  // If a field is an Option, you should wrap your new values with Some() or set it to None. This also applies when a new case 
-  // class instance is used for an Option field.
-  newValues: Map[String, Any],
-  // Function for filtering the list of TilesKey.
-  filterFunc: Any => Boolean = (_ => true),
-  // Handling special cases where partial function input is not a TilesKey.
-  specialCase: (View, View, View) => PartialFunction[Any, Any] = ((_, _, _) => Map.empty)  
-) extends Config((site, here, up) =>
-  scala.Function.unlift((key: Any) => {
-    val tiles = CoreManager.cores flatMap (core => core.updateWithFilter(up, filterFunc).lift(key))
-    if (tiles.size == 0) None else Some(tiles(0)(newValues))
-  }).orElse(specialCase(site, here, up))
-)

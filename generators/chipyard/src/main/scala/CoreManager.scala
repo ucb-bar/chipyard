@@ -18,8 +18,10 @@ import ariane.{ArianeTile, ArianeTilesKey, ArianeCrossingKey, ArianeTileParams}
 // Base trait for all third-party core entries
 sealed trait CoreEntryBase {
   val name: String
+
+  def keyEqual(key: Any): Boolean
   def tileParamsLookup(implicit p: Parameters): Seq[TileParams]
-  def updateWithFilter(view: View, p: Any => Boolean): PartialFunction[Any, Map[String, Any] => Any]
+
   def instantiateTile(crossingLookup: (Seq[RocketCrossingParams], Int) => Seq[RocketCrossingParams], logicalTreeNode: LogicalTreeNode)
     (implicit p: Parameters, valName: ValName): Seq[(TileParams, RocketCrossingParams, () => BaseTile)]
 }
@@ -35,14 +37,10 @@ class CoreEntry[TileParamsT <: TileParams with Product: TypeTag, TileT <: BaseTi
   private val tileClass = mirror.runtimeClass(typeOf[TileT].typeSymbol.asClass)
   private val tileCtor = tileClass.getConstructors.filter(ctor => ctor.getParameterTypes()(4) == classOf[Parameters]).head
 
+  def keyEqual(key: Any) = key == tilesKey
+
   // Tile parameter lookup using correct type
   def tileParamsLookup(implicit p: Parameters) = p(tilesKey)
-
-  // If this core meet the requirement given by p, update parameter fields in the map
-  def updateWithFilter(view: View, p: Any => Boolean): PartialFunction[Any, Map[String, Any] => Any] = {
-    case key if (key == tilesKey && p(tilesKey)) => newValues => view(tilesKey) map
-      (tile => CopyParam(tile, newValues))
-  }
 
   // Instantiate a tile and zip it with its parameter info, used by subsystem
   def instantiateTile(crossingLookup: (Seq[RocketCrossingParams], Int) => Seq[RocketCrossingParams], logicalTreeNode: LogicalTreeNode)
