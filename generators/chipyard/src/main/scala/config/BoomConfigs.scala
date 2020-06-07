@@ -211,7 +211,7 @@ class BoomHwachaDRAMCacheConfig extends Config(
   new memblade.prefetcher.WithPrefetchMiddleManTopology ++
   new HwachaLargeBoomConfig)
 
-class QuadLargeBoomConfig extends Config(
+class DualLargeBoomConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -227,6 +227,6 @@ class QuadLargeBoomConfig extends Config(
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new boom.common.WithLargeBooms ++
-  new boom.common.WithNBoomCores(4) ++
+  new boom.common.WithNBoomCores(2) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)

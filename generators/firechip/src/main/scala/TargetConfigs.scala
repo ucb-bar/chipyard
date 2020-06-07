@@ -147,11 +147,11 @@ class FireSimLargeBoomConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.LargeBoomConfig)
 
-class FireSimQuadLargeBoomConfig extends Config(
+class FireSimDualLargeBoomConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new chipyard.QuadLargeBoomConfig)
+  new chipyard.DualLargeBoomConfig)
 
 //********************************************************************
 // Heterogeneous config, base off chipyard's LargeBoomAndRocketConfig
