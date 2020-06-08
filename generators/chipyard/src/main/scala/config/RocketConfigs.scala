@@ -500,7 +500,7 @@ class HwachaDRAMCacheConfig extends Config(
   new chipyard.config.WithHwachaNVMTEntries(64) ++
   new chipyard.config.WithHwachaConfPrec ++
   new chipyard.config.WithMemBenchKey ++
-  new chipyard.config.WithDRAMCacheKey(14, 8, 2) ++
+  new chipyard.config.WithDRAMCacheKey(7, 16, 2) ++
   new chipyard.config.WithDRAMCacheSystem ++
   new chipyard.config.WithStandardL2(4, 6) ++
   new memblade.prefetcher.WithPrefetchMiddleManTopology ++

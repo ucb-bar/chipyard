@@ -232,7 +232,7 @@ class WithDRAMCacheKey(
     memInQueue = MemoryQueueParams(0, 0, 2, 2, 2, 2),
     memOutQueue = MemoryQueueParams(2, 2, 2, 2, 2, 2),
     buildCacheBank = BuildBankFunction.scheduler,
-    buildChannelOutNetwork = OutNetwork.ring,
+    buildChannelOutNetwork = OutNetwork.multilevel(8),
     writebackArbTopology = NetworkTopology.Ring,
     remChannelArbTopology = NetworkTopology.Ring,
     zeroMetadata = false,
