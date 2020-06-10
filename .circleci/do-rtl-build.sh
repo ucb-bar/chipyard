@@ -53,14 +53,18 @@ else
 fi
 
 # enter the verilator directory and build the specific config on remote server
-run "export RISCV=\"$TOOLS_DIR\""
-run "export LD_LIBRARY_PATH=\"$LD_LIB_DIR\""
-run "export PATH=\"$REMOTE_VERILATOR_DIR/bin:\$PATH\""
-run "export VERILATOR_ROOT=\"$REMOTE_VERILATOR_DIR\""
-run "export COURSIER_CACHE=\"$REMOTE_WORK_DIR/.coursier-cache\""
+run "export RISCV=\"$TOOLS_DIR\"; \
+     export LD_LIBRARY_PATH=\"$LD_LIB_DIR\"; \
+     export PATH=\"$REMOTE_VERILATOR_DIR/bin:\$PATH\"; \
+     export VERILATOR_ROOT=\"$REMOTE_VERILATOR_DIR\"; \
+     export COURSIER_CACHE=\"$REMOTE_WORK_DIR/.coursier-cache\"; \
+     make -C $REMOTE_SIM_DIR clean; \
+     make -j$REMOTE_MAKE_NPROC -C $REMOTE_SIM_DIR JAVA_ARGS=\"$REMOTE_JAVA_ARGS\" ${mapping[$1]}"
+run "rm -rf $REMOTE_CHIPYARD_DIR/project"
 
-run "make -C $REMOTE_SIM_DIR clean"
-run "make -j$REMOTE_MAKE_NPROC -C $REMOTE_SIM_DIR JAVA_ARGS=\"$REMOTE_JAVA_ARGS\" ${mapping[$1]}"
+# copy back the final build
+
+
 run "rm -rf $REMOTE_CHIPYARD_DIR/project"
 
 # copy back the final build
