@@ -3,6 +3,14 @@
 #########################################################################################
 SHELL=/bin/bash
 
+
+ifndef RISCV
+$(error RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
+else
+$(info Running with RISCV=$(RISCV))
+endif
+
+
 #########################################################################################
 # extra make variables/rules from subprojects
 #
