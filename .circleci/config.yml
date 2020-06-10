@@ -204,6 +204,16 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "chipyard-sha3"
+    prepare-chipyard-streaming-fir:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-streaming-fir"
+    prepare-chipyard-streaming-passthrough:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-streaming-passthrough"
     prepare-chipyard-hetero:
         executor: main-env
         steps:
@@ -287,6 +297,16 @@ jobs:
         steps:
             - run-tests:
                 project-key: "chipyard-sha3"
+    chipyard-streaming-fir-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-streaming-fir"
+    chipyard-streaming-passthrough-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-streaming-passthrough"
     chipyard-hetero-run-tests:
         executor: main-env
         steps:
@@ -359,14 +379,6 @@ jobs:
                 project-key: "firesim-multiclock"
                 run-script: "run-firesim-scala-tests.sh"
                 timeout: "20m"
-    midasexamples-run-tests:
-        executor: main-env
-        steps:
-            - setup-tools
-            - run:
-                name: Run midasexamples tests
-                command: .circleci/run-midasexamples-tests.sh
-                no_output_timeout: 20m
     chipyard-ariane-run-tests:
         executor: main-env
         steps:
@@ -435,6 +447,16 @@ workflows:
                     - install-verilator
 
             - prepare-chipyard-sha3:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-streaming-fir:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-streaming-passthrough:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
@@ -511,11 +533,6 @@ workflows:
 
             # Run the respective tests
 
-            # Run midasexamples test
-            - midasexamples-run-tests:
-                requires:
-                    - install-riscv-toolchain
-
             # Run the example tests
             - chipyard-rocket-run-tests:
                 requires:
@@ -524,6 +541,14 @@ workflows:
             - chipyard-sha3-run-tests:
                 requires:
                     - prepare-chipyard-sha3
+
+            - chipyard-streaming-fir-run-tests:
+                requires:
+                    - prepare-chipyard-streaming-fir
+
+            - chipyard-streaming-passthrough-run-tests:
+                requires:
+                    - prepare-chipyard-streaming-passthrough
 
             - chipyard-hetero-run-tests:
                 requires:
