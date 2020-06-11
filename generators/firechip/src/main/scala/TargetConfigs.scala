@@ -23,6 +23,7 @@ import icenet._
 import scala.math.max
 import ariane.ArianeTilesKey
 import testchipip.WithRingSystemBus
+import memblade.cache.DRAMCacheKey
 
 import firesim.bridges._
 import firesim.configs._
@@ -247,6 +248,10 @@ class FireSimBoomRemoteMemClientConfig extends Config(
 // DRAMCache configurations
 //********************************
 
+class WithNoMetadataCache extends Config((site, here, up) => {
+  case DRAMCacheKey => up(DRAMCacheKey).copy(nMetaCacheRows = 0)
+})
+
 class FireSimDRAMCacheConfig extends Config(
   new WithNIC ++
   new WithDRAMCacheBridge ++
@@ -274,6 +279,14 @@ class FireSimHwachaDRAMCacheConfig extends Config(
   new WithFireSimConfigTweaks ++
   new WithDRAMCacheBridge ++
   new chipyard.HwachaDRAMCacheConfig)
+
+class FireSimHwachaDRAMCache1024Config extends Config(
+  new WithNIC ++
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new WithDRAMCacheBridge ++
+  new chipyard.HwachaDRAMCache1024Config)
 
 class FireSimBoomDRAMCacheConfig extends Config(
   new WithNIC ++

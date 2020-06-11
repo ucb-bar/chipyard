@@ -34,6 +34,8 @@ import memblade.prefetcher._
 
 import chipyard.{BuildTop, BuildSystem}
 
+import scala.math.max
+
 /**
  * TODO: Why do we need this?
  */
@@ -212,31 +214,39 @@ class WithRemoteMemClientKey(spanBytes: Int = 1024) extends Config((site, here, 
 class WithDRAMCacheKey(
     nTrackersPerBank: Int,
     nBanksPerChannel: Int,
-    nChannels: Int = 1) extends Config((site, here, up) => {
-  case DRAMCacheKey => DRAMCacheConfig(
-    nSets = 1 << 21,
-    nWays = 7,
-    nMetaCacheRows = 256,
-    baseAddr = BigInt(1) << 37,
-    nTrackersPerBank = nTrackersPerBank,
-    nBanksPerChannel = nBanksPerChannel,
-    nChannels = nChannels,
-    nSecondaryRequests = 1,
-    spanBytes = site(CacheBlockBytes),
-    logAddrBits = 37,
-    outIdBits = 4,
-    nWritebackRemXacts = (nTrackersPerBank + 1) * nBanksPerChannel,
-    nWritebackSpans = nTrackersPerBank,
-    remAccessQueue = RemoteAccessDepths(1, 8, 1, 8),
-    wbQueue = WritebackDepths(1, 1),
-    memInQueue = MemoryQueueParams(0, 0, 2, 2, 2, 2),
-    memOutQueue = MemoryQueueParams(2, 2, 2, 2, 2, 2),
-    buildCacheBank = BuildBankFunction.scheduler,
-    buildChannelOutNetwork = OutNetwork.multilevel(8),
-    writebackArbTopology = NetworkTopology.Ring,
-    remChannelArbTopology = NetworkTopology.Ring,
-    zeroMetadata = false,
-    lruReplacement = false)
+    nChannels: Int = 1,
+    spanBytes: Option[Int] = None,
+    buildCacheBank: BuildBankFunction.T = BuildBankFunction.scheduler)
+      extends Config((site, here, up) => {
+  case DRAMCacheKey => {
+    val blockBytes = site(CacheBlockBytes)
+    val realSpanBytes = spanBytes.getOrElse(blockBytes)
+    val blocksPerSpan = realSpanBytes / blockBytes
+    DRAMCacheConfig(
+      nSets = 1 << 21,
+      nWays = 7,
+      nMetaCacheRows = 16384 / realSpanBytes,
+      baseAddr = BigInt(1) << 37,
+      nTrackersPerBank = nTrackersPerBank,
+      nBanksPerChannel = nBanksPerChannel,
+      nChannels = nChannels,
+      nSecondaryRequests = blocksPerSpan,
+      spanBytes = realSpanBytes,
+      logAddrBits = 37,
+      outIdBits = 4,
+      nWritebackRemXacts = (nTrackersPerBank + 1) * nBanksPerChannel,
+      nWritebackSpans = nTrackersPerBank,
+      remAccessQueue = RemoteAccessDepths(1, 8, 1, 8),
+      wbQueue = WritebackDepths(1, 1),
+      memInQueue = MemoryQueueParams(0, 0, 2, 2, max(2, blocksPerSpan), 2),
+      memOutQueue = MemoryQueueParams(2, 2, 2, 2, 2, 2),
+      buildCacheBank = buildCacheBank,
+      buildChannelOutNetwork = OutNetwork.multilevel(8),
+      writebackArbTopology = NetworkTopology.Ring,
+      remChannelArbTopology = NetworkTopology.Ring,
+      zeroMetadata = false,
+      lruReplacement = false)
+  }
 })
 
 class WithDRAMCacheExtentTableInit(

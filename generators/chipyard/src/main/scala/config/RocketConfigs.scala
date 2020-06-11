@@ -506,6 +506,11 @@ class HwachaDRAMCacheConfig extends Config(
   new memblade.prefetcher.WithPrefetchMiddleManTopology ++
   new HwachaRocketConfig)
 
+class HwachaDRAMCache1024Config extends Config(
+  new chipyard.config.WithDRAMCacheKey(
+    7, 1, 2, Some(1024), memblade.cache.BuildBankFunction.trackerFile) ++
+  new HwachaDRAMCacheConfig)
+
 // DOC include start: RingSystemBusRocket
 class RingSystemBusRocketConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
