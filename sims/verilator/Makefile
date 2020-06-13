@@ -87,6 +87,7 @@ TIMESCALE_OPTS := $(shell verilator --version | perl -lne 'if (/(\d.\d+)/ && $$1
 VERILATOR_NONCC_OPTS = \
 	$(TIMESCALE_OPTS) \
 	--top-module $(VLOG_MODEL) \
+	--vpi \
 	-Wno-fatal \
 	$(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; then echo "$(CHIPYARD_VERILATOR_FLAGS)"; else echo "$(ARIANE_VERILATOR_FLAGS)"; fi) \
 	--output-split 10000 \
@@ -145,12 +146,6 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd
 	vcd2vpd $@.vcd $@ > /dev/null &
 	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
-
-$(output_dir)/none.vpd: $(sim_debug)
-	mkdir -p $(output_dir)
-	rm -f $@.vcd && mkfifo $@.vcd
-	vcd2vpd $@.vcd $@ > /dev/null &
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) none </dev/null 2> >(spike-dasm > $(output_dir)/none.out) | tee $(output_dir)/none.log)
 
 #########################################################################################
 # general cleanup rule

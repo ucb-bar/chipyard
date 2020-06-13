@@ -139,9 +139,9 @@ output_dir=$(sim_dir)/output/$(long_name)
 PERMISSIVE_ON=+permissive
 PERMISSIVE_OFF=+permissive-off
 BINARY ?=
-override SIM_FLAGS += +dramsim +max-cycles=$(timeout_cycles)
+override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(timeout_cycles)
 VERBOSE_FLAGS ?= +verbose
-sim_out_name = $(subst $() $(),_,$(notdir $(basename $(BINARY))).$(long_name))
+sim_out_name = $(output_dir)/$(subst $() $(),_,$(notdir $(basename $(BINARY))))
 
 #########################################################################################
 # build output directory for compilation
