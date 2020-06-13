@@ -23,8 +23,7 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 
 import chipyard.{BuildTop, BuildSystem}
-import chipyard.TilesKey
-import chipyard.TileSeq._
+import chipyard.{GenericTilesKey, GenericTileConfig}
 
 /**
  * TODO: Why do we need this?
@@ -61,8 +60,8 @@ class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) =>
     SPIFlashParams(rAddress = 0x10040000, fAddress = 0x20000000, fSize = size))
 })
 
-class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
-  case TilesKey(tilesKey) => up(tilesKey) tileMap (tile => tile.copy(
+class WithL2TLBs(entries: Int) extends GenericTileConfig((site, here, up) => {
+  case GenericTilesKey(key) => up(GenericTilesKey(key)) map (tile => tile.copy(
     core = tile.core.copy(nL2TLBEntries = entries)
   ))
 })

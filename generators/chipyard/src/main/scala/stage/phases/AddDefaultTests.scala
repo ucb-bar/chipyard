@@ -19,6 +19,7 @@ import freechips.rocketchip.util.HasRocketChipStageUtils
 import freechips.rocketchip.tile.XLen
 
 import chipyard.{TestSuiteHelper, CoreManager}
+import chipyard.TestSuitesKey
 
 class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipStageUtils {
   // Make sure we run both after RocketChip's version of this phase, and Rocket Chip's annotation emission phase
@@ -33,15 +34,12 @@ class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipS
     val suiteHelper = new TestSuiteHelper
     // Use Xlen as a proxy for detecting if we are a processor-like target
     // The underlying test suites expect this field to be defined
-    if (p.lift(XLen).nonEmpty) {
-      val customizedSuite: Map[String, TestSuiteHelper => Unit] = Map(
-        // DEFINE CUSTOMIZED TEST HERE, using format ({Core name} -> _.{Test suite builder in TestSuiteHelper})
-      )
-      CoreManager.cores map (core => customizedSuite.get(core.name) match {
-        case Some(builder) => builder(suiteHelper)
-        case None => suiteHelper.addGenericTestSuites(core.tileParamsLookup)
-      })
-    }
+    if (p.lift(XLen).nonEmpty)
+      // If a custom test suite is set up, use the custom test suite
+      if (p.lift(TestSuitesKey).nonEmpty)
+        CoreManager.cores(p) map (core => p(TestSuitesKey).apply(core.tileParamsLookup, suiteHelper, p))
+      else
+        CoreManager.cores(p) map (core => suiteHelper.addGenericTestSuites(core.tileParamsLookup))
 
     // if hwacha parameter exists then generate its tests
     // TODO: find a more elegant way to do this. either through

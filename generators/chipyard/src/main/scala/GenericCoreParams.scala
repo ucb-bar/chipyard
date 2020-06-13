@@ -15,6 +15,36 @@ import freechips.rocketchip.tile._
 import boom.common.{BoomTile, BoomTilesKey, BoomCrossingKey, BoomTileParams}
 import ariane.{ArianeTile, ArianeTilesKey, ArianeCrossingKey, ArianeTileParams}
 
+// Trait for generic case class of base trait for copying
+trait ConcreteBaseTrait[Base] {
+  this: Product =>
+  val _origin: Base
+
+  // Convert back to core-specific tile
+  def convert: Base = {
+    // Reflection Info of this class
+    val fieldNames = (this.getClass.getDeclaredFields map (f => f.getName)).init
+
+    // Reflection of target class
+    val paramClass = _origin.getClass
+    val paramNames = (paramClass.getDeclaredFields map (f => f.getName))
+    val paramCtor = paramClass.getConstructors.head
+
+    // Build a list of parameter in the original parameter class
+    val nameDict = paramNames.zipWithIndex.toMap
+    val indexList = fieldNames map (n => nameDict.get(n))
+    val fieldList = this.productIterator.toList map {
+      case c: ConcreteBaseTrait[_] => c.convert
+      case v => v
+    }
+    val fieldDict = ((indexList zip fieldList) collect { case (Some(i), v) => (i, v) }).toMap
+    val newValues = _origin.asInstanceOf[Product].productIterator.toList.zipWithIndex map 
+      { case (v, i) => (if (fieldDict contains i) fieldDict(i) else v).asInstanceOf[AnyRef] }
+
+    paramCtor.newInstance(newValues:_*).asInstanceOf[Base]
+  }
+}
+
 // Case class to change common parameters visible in the base traits. Some fields in the base traits may not be configurable as a 
 // case class constructor parameter for some cores, and those field will be ignored when applied.
 case class GenericCoreParams(
@@ -50,7 +80,7 @@ case class GenericCoreParams(
   val mtvecWritable: Boolean,
   // The original object
   val _origin: CoreParams
-) extends CoreParams {
+) extends CoreParams with ConcreteBaseTrait[CoreParams] {
   def this(coreParams: CoreParams) = this(
     bootFreqHz = coreParams.bootFreqHz,
     useVM = coreParams.useVM,
@@ -86,27 +116,6 @@ case class GenericCoreParams(
     _origin = coreParams
   )
 
-  // Reflection Info of this class
-  val fieldNames = (this.getClass.getDeclaredFields map (f => f.getName)).init
-
-  // Convert back to core-specific tile
-  def convert: CoreParams = {
-    // Reflection of target class
-    val paramClass = _origin.getClass
-    val paramNames = (paramClass.getDeclaredFields map (f => f.getName))
-    val paramCtor = paramClass.getConstructors.head
-
-    // Build a list of parameter in the original parameter class
-    val nameDict = paramNames.zipWithIndex.toMap
-    val indexList = fieldNames map (n => nameDict.get(n))
-    val fieldList = this.productIterator.toList.init
-    val fieldDict = ((indexList zip fieldList) collect { case (Some(i), v) => (i, v) }).toMap
-    val newValues = _origin.asInstanceOf[Product].productIterator.toList.zipWithIndex map 
-      { case (v, i) => (if (fieldDict contains i) fieldDict(i) else v).asInstanceOf[AnyRef] }
-
-    paramCtor.newInstance(newValues:_*).asInstanceOf[CoreParams]
-  }
-
   // Implement abstract function as placeholder
   def lrscCycles: Int = _origin.lrscCycles
 }
@@ -121,8 +130,8 @@ case class GenericTileParams(
   val blockerCtrlAddr: Option[BigInt],
   val name: Option[String],
   // The original object
-  val _origin: TileParams
-) extends TileParams {
+  val _origin: TileParams,
+) extends TileParams with ConcreteBaseTrait[TileParams] {
   // Copy constructor to build the params
   def this(tileParams: TileParams) = this(
     core = new GenericCoreParams(tileParams.core),
@@ -136,44 +145,4 @@ case class GenericTileParams(
 
     _origin = tileParams
   )
-
-  // Reflection Info of this class
-  val fieldNames = (this.getClass.getDeclaredFields map (f => f.getName)).init
-
-  // Convert back to core-specific tile
-  def convert: TileParams = {
-    // Reflection of target class
-    val paramClass = _origin.getClass
-    val paramNames = (paramClass.getDeclaredFields map (f => f.getName))
-    val paramCtor = paramClass.getConstructors.head
-
-    // Build a list of parameter in the original parameter class
-    val nameDict = paramNames.zipWithIndex.toMap
-    val indexList = fieldNames map (n => nameDict.get(n))
-    val fieldList = this.productIterator.toList.updated(0, core.convert).init
-    val fieldDict = ((indexList zip fieldList) collect { case (Some(i), v) => (i, v) }).toMap
-    val newValues = _origin.asInstanceOf[Product].productIterator.toList.zipWithIndex map 
-      { case (v, i) => (if (fieldDict contains i) fieldDict(i) else v).asInstanceOf[AnyRef] }
-
-    paramCtor.newInstance(newValues:_*).asInstanceOf[TileParams]
-  }
-}
-
-// Extractor to capture TilesKey
-object TilesKey {
-  def unapply(key: Any): Option[Field[Seq[_]]] =
-    if ((CoreManager.cores filter (core => core.keyEqual(key))).size != 0) Some(key.asInstanceOf[Field[Seq[_]]]) else None
-}
-
-class TileSeq(list: Seq[Any]) {
-  def tileMap(f: GenericTileParams => GenericTileParams): Seq[TileParams] = {
-    // If this is not an unpacked tile key, simply throw a type exception
-    // Static type checking is not possible when this class is used with TilesKey extractor
-    val tileList = list.asInstanceOf[Seq[TileParams]]
-
-    tileList map (tileParams => f(new GenericTileParams(tileParams)).convert)
-  }
-}
-object TileSeq {
-  implicit def convertSeq(s: Seq[Any]) = new TileSeq(s)
 }

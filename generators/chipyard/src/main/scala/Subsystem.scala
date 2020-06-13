@@ -37,7 +37,7 @@ trait HasChipyardTiles extends HasTiles
   // Note: the 0-arity function is used to delay the construction of tiles to make sure that they are created
   // in order
   val allTilesInfo: Seq[(TileParams, RocketCrossingParams, () => BaseTile)] =
-    (CoreManager.cores flatMap (core => core.instantiateTile(perTileOrGlobalSetting _, logicalTreeNode)))
+    (CoreManager.cores(p) flatMap (core => core.instantiateTile(perTileOrGlobalSetting _, logicalTreeNode)))
 
   // Make a tile and wire its nodes into the system,
   // according to the specified type of clock crossing.
