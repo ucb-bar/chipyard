@@ -53,11 +53,6 @@ double sc_time_stamp()
   return trace_count;
 }
 
-extern "C" int vpi_get_vlog_info(void* arg)
-{
-  return 0;
-}
-
 static void usage(const char * program_name)
 {
   printf("Usage: %s [EMULATOR OPTION]... [VERILOG PLUSARG]... [HOST OPTION]... BINARY [TARGET OPTION]...\n",
@@ -130,7 +125,6 @@ int main(int argc, char** argv)
   char ** htif_argv = NULL;
   int verilog_plusargs_legal = 1;
 
-  dramsim = 0;
   opterr = 1;
 
   while (1) {
@@ -141,7 +135,6 @@ int main(int argc, char** argv)
       {"seed",            required_argument, 0, 's' },
       {"rbb-port",        required_argument, 0, 'r' },
       {"verbose",         no_argument,       0, 'V' },
-      {"dramsim",         no_argument,       0, 'D' },
       {"permissive",      no_argument,       0, 'p' },
       {"permissive-off",  no_argument,       0, 'o' },
       {"loadmem",         required_argument, 0, 'l' },
@@ -154,9 +147,9 @@ int main(int argc, char** argv)
     };
     int option_index = 0;
 #if VM_TRACE
-    int c = getopt_long(argc, argv, "-chm:s:r:v:Vx:Dpo", long_options, &option_index);
+    int c = getopt_long(argc, argv, "-chm:s:r:v:Vx:po", long_options, &option_index);
 #else
-    int c = getopt_long(argc, argv, "-chm:s:r:VDpo", long_options, &option_index);
+    int c = getopt_long(argc, argv, "-chm:s:r:Vpo", long_options, &option_index);
 #endif
     if (c == -1) break;
  retry:
@@ -169,7 +162,6 @@ int main(int argc, char** argv)
       case 's': random_seed = atoi(optarg); break;
       case 'r': rbb_port = atoi(optarg);    break;
       case 'V': verbose = true;             break;
-      case 'D': dramsim = 1;                break;
       case 'p': opterr = 0;                 break;
       case 'o': opterr = 1;                 break;
       case 'f': fastloadmem= true;          break;
@@ -207,8 +199,6 @@ int main(int argc, char** argv)
 #endif
         else if (arg.substr(0, 12) == "+cycle-count")
           c = 'c';
-        else if (arg == "+dramsim")
-          c = 'D';
         else if (arg == "+permissive")
           c = 'p';
         else if (arg == "+permissive-off")
