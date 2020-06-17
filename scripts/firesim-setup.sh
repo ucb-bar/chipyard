@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Sets up FireSim for use as a library within REBAR
+# Sets up FireSim for use as a library within Chipyard
 
 set -e
 set -o pipefail
