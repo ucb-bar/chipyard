@@ -91,7 +91,7 @@ class WithFireSimConfigTweaks extends Config(
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++
   // Optional*: Removing this will require target-software changes to properly capture UART output
-  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
+  new WithPeripheryBusFrequency(BigInt(3000000000L)) ++
   // Required: Existing FAME-1 transform cannot handle black-box clock gates
   new WithoutClockGating ++
   // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
