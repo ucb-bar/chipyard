@@ -1,0 +1,144 @@
+# Technology Setup
+# Technology used is nanagate45
+vlsi.core.technology: nangate45
+# Specify dir with ASAP7 tarball
+technology.nangate45.install_dir: "/k/work/OpenROAD-flow/tools/OpenROAD"
+
+vlsi.core.max_threads: 12
+
+# General Hammer Inputs
+
+# Hammer will auto-generate a CPF for simple power designs; see hammer/src/hammer-vlsi/defaults.yml for more info
+vlsi.inputs.power_spec_mode: "auto"
+vlsi.inputs.power_spec_type: "cpf"
+
+# Specify clock signals
+vlsi.inputs.clocks: [
+  {name: "clock", period: "5ns", uncertainty: "0.5ns"}
+]
+
+# Generate Make include to aid in flow 
+vlsi.core.build_system: make
+
+# Power Straps
+#par.power_straps_mode: generate
+#par.generate_power_straps_method: by_tracks
+#par.blockage_spacing: 2.0
+#par.generate_power_straps_options:
+#  by_tracks:
+#    strap_layers:
+#      - metal3
+#      - metal4
+#      - metal5
+#      - metal6
+#      - metal7
+#      - metal8
+#    pin_layers:
+#      - metal7
+#      - metal8
+#    track_width: 7 # minimum allowed for M2 & M3
+#    track_spacing: 0
+#    track_spacing_M3: 1 # to avoid M2 shorts at higher density
+#    track_start: 10
+#    power_utilization: 0.05
+#    power_utilization_M8: 1.0
+#    power_utilization_M9: 1.0
+
+# Placement Constraints
+# For ASAP7, all numbers must be 4x larger than final GDS
+vlsi.inputs.placement_constraints:
+  - path: "ChipTop"
+    type: toplevel
+    x: 0
+    y: 0
+    width: 1387.38 
+    height: 1199.1
+    margins: 
+      left: 0
+      right: 0
+      top: 0
+      bottom: 0
+#  - path: "Sha3AccelwBB/dco"
+#    type: hardmacro
+#    x: 108
+#    y: 108
+#    width: 128
+#    height: 128
+#    orientation: r0
+#    top_layer: M9
+#  - path: "Sha3AccelwBB/place_obs_bottom"
+#    type: obstruction
+#    obs_types: ["place"]
+#    x: 0
+#    y: 0
+#    width: 300
+#    height: 1.08 # 1 core site tall, necessary to avoid shorts
+
+# Pin placement constraints
+#vlsi.inputs.pin_mode: generated
+#vlsi.inputs.pin.generate_mode: semi_auto
+#vlsi.inputs.pin.assignments: [
+#  {pins: "*", layers: ["metal7", "metal8"]}
+#]
+
+# Paths to extra libraries
+#vlsi.technology.extra_libraries_meta: ["append", "deepsubst"]
+#vlsi.technology.extra_libraries:
+#  - library:
+#      nldm liberty file_deepsubst_meta: "local"
+#      nldm liberty file: "extra_libraries/example/ExampleDCO_PVT_0P63V_100C.lib"
+#      lef file_deepsubst_meta: "local"
+#      lef file: "extra_libraries/example/ExampleDCO.lef"
+#      gds file_deepsubst_meta: "local"
+#      gds file: "extra_libraries/example/ExampleDCO.gds"
+#      corner:
+#        nmos: "slow"
+#        pmos: "slow"
+#        temperature: "100 C"
+#      supplies:
+#        VDD: "0.63 V"
+#        GND: "0 V"
+#  - library:
+#      nldm liberty file_deepsubst_meta: "local"
+#      nldm liberty file: "extra_libraries/example/ExampleDCO_PVT_0P77V_0C.lib"
+#      lef file_deepsubst_meta: "local"
+#      lef file: "extra_libraries/example/ExampleDCO.lef"
+#      gds file_deepsubst_meta: "local"
+#      gds file: "extra_libraries/example/ExampleDCO.gds"
+#      corner:
+#        nmos: "fast"
+#        pmos: "fast"
+#        temperature: "0 C"
+#      supplies:
+#        VDD: "0.77 V"
+#        GND: "0 V"
+
+# Because the DCO is a dummy layout, we treat it as a physical-only cell
+#par.inputs.physical_only_cells_mode: append
+#par.inputs.physical_only_cells_list:
+#  - ExampleDCO
+
+# SRAM Compiler compiler options
+vlsi.core.sram_generator_tool: "sram_compiler"
+## You should specify a location for the SRAM generator in the tech plugin
+vlsi.core.sram_generator_tool_path: ["hammer/src/hammer-vlsi/technology/nangate45"]
+vlsi.core.sram_generator_tool_path_meta: "append"
+
+# Tool options. Replace with your tool plugin of choice.
+# yosys options
+vlsi.core.synthesis_tool: "yosys"
+vlsi.core.synthesis_tool_path: ["hammer/src/hammer-vlsi/synthesis/yosys"]
+vlsi.core.synthesis_tool_path_meta: "append"
+
+# Innovus options
+#vlsi.core.par_tool: "innovus"
+#vlsi.core.par_tool_path: ["hammer-cadence-plugins/par"]
+#vlsi.core.par_tool_path_meta: "append"
+#par.innovus.version: "181"
+#par.innovus.design_flow_effort: "standard"
+#par.inputs.gds_merge: true
+## Calibre options
+#vlsi.core.drc_tool: "calibre"
+#vlsi.core.drc_tool_path: ["hammer-mentor-plugins/drc"]
+#vlsi.core.lvs_tool: "calibre"
+#vlsi.core.lvs_tool_path: ["hammer-mentor-plugins/lvs"]

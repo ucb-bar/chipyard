@@ -19,18 +19,22 @@ include $(base_dir)/variables.mk
 #########################################################################################
 sim_name           ?= vcs # needed for GenerateSimFiles, but is unused
 tech_name          ?= asap7
-tech_dir           ?= $(if $(filter $(tech_name), asap7), $(vlsi_dir)/hammer/src/hammer-vlsi/technology/$(tech_name), $(vlsi_dir)/hammer-$(tech_name)-plugin/$(tech_name))
+tech_dir           ?= $(if $(filter $(tech_name),asap7 nangate45),\
+												$(vlsi_dir)/hammer/src/hammer-vlsi/technology/$(tech_name), \
+												$(vlsi_dir)/hammer-$(tech_name)-plugin/$(tech_name))
 SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
 SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
 SMEMS_HAMMER       ?= $(build_dir)/$(long_name).mems.hammer.json
-ifeq ($(tech_name),asap7)
-	MACROCOMPILER_MODE ?= --mode synflops
-else
-	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER)
-endif
+MACROCOMPILER_MODE ?= $(if $(filter $(tech_name),asap7),\
+												--mode synflops,\
+												-l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER) --mode strict)
 ENV_YML            ?= $(vlsi_dir)/env.yml
-INPUT_CONFS        ?= example.yml
-HAMMER_EXEC        ?= ./example-vlsi
+INPUT_CONFS        ?= $(if $(filter $(tech_name),nangate45),\
+												example-nangate45.yml,\
+												example.yml)
+HAMMER_EXEC        ?= $(if $(filter $(tech_name),nangate45),\
+												example-vlsi-nangate45,\
+												example-vlsi)
 VLSI_TOP           ?= $(TOP)
 VLSI_HARNESS_DUT_NAME ?= dut
 VLSI_OBJ_DIR       ?= $(vlsi_dir)/build
