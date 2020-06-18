@@ -10,7 +10,7 @@ import chisel3.internal.sourceinfo.{SourceInfo}
 
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.devices.tilelink._
-import freechips.rocketchip.devices.debug.{HasPeripheryDebug, HasPeripheryDebugModuleImp}
+import freechips.rocketchip.devices.debug.{HasPeripheryDebug, HasPeripheryDebugModuleImp, ExportDebug}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.diplomaticobjectmodel.model.{OMInterrupt}
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree.{RocketTileLogicalTreeNode, LogicalModuleTree}
@@ -24,7 +24,7 @@ import freechips.rocketchip.amba.axi4._
 import boom.common.{BoomTile, BoomTilesKey, BoomCrossingKey, BoomTileParams}
 import ariane.{ArianeTile, ArianeTilesKey, ArianeCrossingKey, ArianeTileParams}
 
-import testchipip.{DromajoHelper}
+import testchipip.{DromajoHelper, CanHavePeripherySerial, SerialKey}
 
 trait HasChipyardTiles extends HasTiles
   with CanHavePeripheryPLIC
@@ -87,8 +87,29 @@ trait HasChipyardTilesModuleImp extends HasTilesModuleImp
   val outer: HasChipyardTiles
 }
 
+trait CanHaveHTIF { this: BaseSubsystem =>
+  // Advertise HTIF if system can communicate with fesvr
+  if (this match {
+    case _: CanHavePeripherySerial if p(SerialKey) => true
+    case _: HasPeripheryDebug if p(ExportDebug).protocols.nonEmpty => true
+    case _ => false
+  }) {
+    ResourceBinding {
+      val htif = new Device {
+        def describe(resources: ResourceBindings): Description = {
+          val compat = resources("compat").map(_.value)
+          Description("htif", Map(
+            "compatible" -> compat))
+        }
+      }
+      Resource(htif, "compat").bind(ResourceString("ucb,htif0"))
+    }
+  }
+}
+
 class Subsystem(implicit p: Parameters) extends BaseSubsystem
   with HasChipyardTiles
+  with CanHaveHTIF
 {
   override lazy val module = new SubsystemModuleImp(this)
 
