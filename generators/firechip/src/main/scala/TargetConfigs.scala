@@ -13,13 +13,11 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import freechips.rocketchip.diplomacy.LazyModule
-import boom.common.BoomTilesKey
 import testchipip.{BlockDeviceKey, BlockDeviceConfig, SerialKey, TracePortKey, TracePortParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
-import tracegen.TraceGenKey
+
 import icenet._
-import ariane.ArianeTilesKey
 import testchipip.WithRingSystemBus
 
 import firesim.bridges._
@@ -42,12 +40,6 @@ class WithBootROM extends Config((site, here, up) => {
 
 class WithPeripheryBusFrequency(freq: BigInt) extends Config((site, here, up) => {
   case PeripheryBusKey => up(PeripheryBusKey).copy(dtsFrequency = Some(freq))
-})
-
-class WithPerfCounters extends Config((site, here, up) => {
-  case RocketTilesKey => up(RocketTilesKey) map (tile => tile.copy(
-    core = tile.core.copy(nPerfCounters = 29)
-  ))
 })
 
 // Disables clock-gating; doesn't play nice with our FAME-1 pass

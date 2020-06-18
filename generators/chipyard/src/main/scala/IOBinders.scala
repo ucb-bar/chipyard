@@ -11,6 +11,7 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.{SimAXIMem}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4EdgeParameters}
 import freechips.rocketchip.util._
+import freechips.rocketchip.groundtest.{GroundTestSubsystemModuleImp, GroundTestSubsystem}
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
@@ -20,7 +21,6 @@ import barstools.iocell.chisel._
 
 import testchipip._
 import icenet.{CanHavePeripheryIceNICModuleImp, SimNetwork, NicLoopback, NICKey}
-import tracegen.{HasTraceGenTilesModuleImp}
 
 import scala.reflect.{ClassTag}
 
@@ -389,7 +389,7 @@ class WithSimSerial extends OverrideIOBinder({
 })
 
 class WithTraceGenSuccessBinder extends OverrideIOBinder({
-  (system: HasTraceGenTilesModuleImp) => {
+  (system: GroundTestSubsystemModuleImp[GroundTestSubsystem]) => {
     val (successPort, ioCells) = IOCell.generateIOFromSignal(system.success, Some("iocell_success"))
     successPort.suggestName("success")
     val harnessFn = (th: chipyard.TestHarness) => { when (successPort) { th.success := true.B }; Nil }
