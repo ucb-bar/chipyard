@@ -1,0 +1,286 @@
+.. _custom_core:
+
+Adding a custom core
+====================
+
+You may want to add a custom RISC-V core to Chipyard generator. If the top module of your core is not in Chisel, 
+you will first need to create a Verilog blackbox for it. See ::ref:`_incorporating-verilog-blocks` for instructions.
+Once you have a top module in Chisel, you are ready to create integrate it with Chipyard. 
+
+.. note:: 
+
+    RoCC is not supported by custom core currently. Please use Rocket or Boom if you need to use RoCC.
+
+.. note:: 
+
+    Custom core doesn't support FireSim at this time. 
+
+Parameter Case Classes
+----------------------
+
+Chipyard will generate a core for every ``TileParams`` object it discovered in the current config.
+``TileParams`` is a trait containing the information needed to create a tile, and every custom core must implement
+their own version of ``TileParams``, as well as ``CoreParams`` which is passed as a field in ``TileParams``.
+
+``TileParams`` holds the parameters that are the same for every generated core, while ``CoreParams`` contains those
+that can vary from cores to cores. They must be implemented as case classes with fields that can be overridden by 
+other config fragments as the constructor parameters. See the appendix at the bottom of the page for a list of 
+variable to be implemented. You can also add custom fields to them, but standard fields should always be preferred. 
+
+Now you have your parameter classes, you will need config keys to hold them. There are two required keys:
+
+.. code-block:: scala
+
+    case object MyTilesKey extends Field[Seq[MyTileParams]](Nil)
+    case object MyCrossingKey extends Field[Seq[RocketCrossingParams]](List(RocketCrossingParams())) 
+
+``MyCrossingKey`` here is used to store information about the clock-crossing behavior of the core, and it is normally
+set to its default values. 
+
+``TileParams`` and ``CoreParams`` contains the following fields:
+
+.. code-block:: scala
+
+    trait TileParams {
+      val core: CoreParams                  // Core parameters (see below)
+      val icache: Option[ICacheParams]      // Not used if you use your own I1 cache
+      val dcache: Option[DCacheParams]      // Not used if you use your own D1 cache
+      val btb: Option[BTBParams]            // Not used if you use your own BTB / branch predictor
+      val hartId: Int                       // Hart ID: Must be unique within a design config
+      val beuAddr: Option[BigInt] 
+      val blockerCtrlAddr: Option[BigInt]
+      val name: Option[String]              // Name of the core
+    }
+
+    trait CoreParams {
+      val bootFreqHz: BigInt              // Frequency
+      val useVM: Boolean                  // Support virtual memory
+      val useUser: Boolean                // Support user mode
+      val useSupervisor: Boolean          // Support supervisor mode
+      val useDebug: Boolean               // Support RISC-V debug specs
+      val useAtomics: Boolean             // Support A extension
+      val useAtomicsOnlyForIO: Boolean    // Support A extension for memory-mapped IO (may be true even if useAtomics is false)
+      val useCompressed: Boolean          // Support C extension
+      val useVector: Boolean = false      // Support V extension
+      val useSCIE: Boolean
+      val useRVE: Boolean
+      val mulDiv: Option[MulDivParams]    // M extension and related setting (Only used by Rocket core, simply use its default value)
+      val fpu: Option[FPUParams]          // F and D extensions and related setting (see below)
+      val fetchWidth: Int                 // Max # of insts fetched every cycle
+      val decodeWidth: Int                // Max # of insts decoded every cycle
+      val retireWidth: Int                // Max # of insts retired every cycle
+      val instBits: Int                   // Instruction bits (if 32 bit and 64 bit are both supported, use 64)
+      val nLocalInterrupts: Int           // # of local interrupts (see SiFive interrupt cookbook)
+      val nPMPs: Int                      // # of Physical Memory Protection units
+      val pmpGranularity: Int             // Size of the smallest unit of region for PMP unit (must be power of 2)
+      val nBreakpoints: Int               // # of breakpoints supported (in RISC-V debug specs)
+      val useBPWatch: Boolean
+      val nPerfCounters: Int              // # of supported performance counters
+      val haveBasicCounters: Boolean      // Support basic counters defined in the RISC-V counter extension 
+      val haveFSDirty: Boolean
+      val misaWritable: Boolean           // Support writable misa CSR (like variable instruction bits)
+      val haveCFlush: Boolean
+      val nL2TLBEntries: Int              // # of L2 TLB entries
+      val mtvecInit: Option[BigInt]       // mtvec CSR (of V extension) initial value
+      val mtvecWritable: Boolean          // If mtvec CSR is writable
+
+      // Normally, you don't need to change these values (except lrscCycles) 
+      def customCSRs(implicit p: Parameters): CustomCSRs = new CustomCSRs
+
+      def hasSupervisorMode: Boolean = useSupervisor || useVM
+      def instBytes: Int = instBits / 8
+      def fetchBytes: Int = fetchWidth * instBytes
+      // This field is used only with the D1 cache of Rocket chip. Simply set it to the default value 80.
+      def lrscCycles: Int
+
+      def dcacheReqTagBits: Int = 6
+
+      def minFLen: Int = 32
+      def vLen: Int = 0
+      def sLen: Int = 0
+      def eLen(xLen: Int, fLen: Int): Int = xLen max fLen
+      def vMemDataBits: Int = 0
+    }
+
+    case class FPUParams(
+      minFLen: Int = 32,          // Minimum floating point length (no need to change) 
+      fLen: Int = 64,             // Maximum floating point length, use 32 if only single precision is supported
+      divSqrt: Boolean = true,    // Div/Sqrt operation supported
+      sfmaLatency: Int = 3,       // 
+      dfmaLatency: Int = 4
+    )
+
+Most of the fields here are originally designed for Rocket core and contains some architecture-specific details, but 
+many of them are general enough to be useful for other cores. It is strongly recommended to use these fields instead
+of creating your own custom fields when applicable.
+
+Tile Class
+----------
+
+In Chipyard, all connections with other components on SoC are defined a core's `Tile` class, while the implementation 
+of the actual hardware are in the implementation class. This structure allows Chipyard to use the Diplomacy framework
+to resolve paramters and connections before elaboration. 
+
+All tile classes implement ``BaseTile`` and will normally implement ``SinksExternalInterrupts`` and ``SourcesExternalNotifications``,
+which allow the tile to accept external interrupt. A typical tile has the following form:
+
+.. code-block:: scala
+
+    class MyTile(
+      val myParams: MyTileParams,
+      crossing: ClockCrossingType,
+      lookup: LookupByHartIdImpl,
+      q: Parameters,
+      logicalTreeNode: LogicalTreeNode)
+      extends BaseTile(myParams, crossing, lookup, q)
+      with SinksExternalInterrupts
+      with SourcesExternalNotifications
+    {
+
+      // Private constructor ensures altered LazyModule.p is used implicitly
+      def this(params: MyTileParams, crossing: RocketCrossingParams, lookup: LookupByHartIdImpl, logicalTreeNode: LogicalTreeNode)(implicit p: Parameters) =
+        this(params, crossing.crossingType, lookup, p, logicalTreeNode)
+
+      // Require TileLink nodes
+      val intOutwardNode = IntIdentityNode()
+      val masterNode = visibilityNode
+      val slaveNode = TLIdentityNode()
+
+      // Implementation class (See below)
+      override lazy val module = new MyTileModuleImp(this)
+
+      // Required entry of CPU device in the device tree for interrupt purpose
+      val cpuDevice: SimpleDevice = new SimpleDevice("cpu", Seq("my-organization,my-cpu", "riscv")) {
+        override def parent = Some(ResourceAnchors.cpus)
+        override def describe(resources: ResourceBindings): Description = {
+          val Description(name, mapping) = super.describe(resources)
+          Description(name, mapping ++
+                            cpuProperties ++
+                            nextLevelCacheProperty ++
+                            tileProperties)
+        }
+      }
+
+      ResourceBinding {
+        Resource(cpuDevice, "reg").bind(ResourceAddress(hartId))
+      }
+
+      // (Connection to bus, interrupt, etc.)
+    }
+
+TileLink Connection
+-------------------
+
+Chipyard use TileLink as its onboard bus protocol, and if your core doesn't use TileLink, you will need to convert them
+in the tile class. Below is an example of how to connect a core using AXI4 to the TileLink bus: 
+
+.. code-block:: scala
+
+    val memoryTap = TLIdentityNode() // Every bus connection should have their own tap node
+    (tlMasterXbar.node  // tlMasterXbar is the bus crossbar to be used when this core / tile is acting as a master; otherwise, use tlSlaveXBar
+      := memoryTap
+      := TLBuffer()
+      := TLFIFOFixer(TLFIFOFixer.all) // fix FIFO ordering
+      := TLWidthWidget(beatBytes) // reduce size of TL
+      := AXI4ToTL() // convert to TL
+      := AXI4UserYanker(Some(2)) // remove user field on AXI interface. need but in reality user intf. not needed
+      := AXI4Fragmenter() // deal with multi-beat xacts
+      := memAXI4Node) // The custom node, see below
+
+Remember, you may not need all of these intermediate widgets. See :::ref:`Diplomatic-Widgets` for the meaning of each intermediate
+widget. If you are using TileLink, then you only need the tap node and the TileLink node used by your components. Also, Chipyard
+support AHB, APB and AXIS, and most of the AXI4 widgets has equivalent widget for these bus protocol. See the reference page for
+more info. 
+
+``memAXI4Node`` is an AXI4 master node and is defined as following in our example:
+
+.. code-block:: scala
+
+    val memAXI4Node = AXI4MasterNode(
+    Seq(AXI4MasterPortParameters(
+      masters = Seq(AXI4MasterParameters(
+        name = portName,
+        id = IdRange(0, 1 << idBits))))))
+
+where ``portName`` and ``idBits`` are the parameter provides by the tile. Make sure to read :::ref:`node-tyoes` to check out what
+type of nodes Chipyard supports and their parameters!
+
+Also, by default, there are boundary buffers for both master and slave connections to the bus when they are leaving the tile, and you
+can override the following two functions to control how to buffer the bus requests/responses:
+
+.. code-block:: scala
+
+    protected def makeMasterBoundaryBuffers(implicit p: Parameters): TLBuffer
+    protected def makeSlaveBoundaryBuffers(implicit p: Parameters): TLBuffer
+
+Interrupt
+---------
+
+Chipyard allows a tile to either receive interrupts from other devices or initiate interrupts to notify other cores/devices. 
+In the tile that inherited ``SinksExternalInterrupts``, one can create a ``TileInterrupts`` object (a Chisel bundle) and 
+call ``decodeCoreInterrupts`` with the object as the argument. You can then read the interrupt bits from the object.
+The definition of ``TileInterrupts`` is 
+
+.. code-block:: scala
+
+    class TileInterrupts(implicit p: Parameters) extends CoreBundle()(p) {
+      val debug = Bool() // debug interrupt
+      val mtip = Bool() // Machine level timer interrupt
+      val msip = Bool() // Machine level software interrupt
+      val meip = Bool() // Machine level external interrupt 
+      val seip = usingSupervisor.option(Bool()) // Valid only if supervisor mode is supported
+      val lip = Vec(coreParams.nLocalInterrupts, Bool())  // Local interrupts
+    }
+
+This function should be in the implementation class since it involves hardware generation. 
+Also, the tile can also notify other cores or devices for some events by calling following functions (in implementation class):
+
+.. code-block:: scala
+
+    def reportHalt(could_halt: Option[Bool]) // Triggered when there is an unrecoverable hardware error (halt the machine)
+    def reportHalt(errors: Seq[CanHaveErrors]) // Varient for standard error bundle (used only by cache when there's an ECC error)
+    reportCease(could_cease: Option[Bool], quiescenceCycles: Int = 8) // Triggered when the core stop retiring instructions (like clock gating)
+    reportWFI(could_wfi: Option[Bool]) // Triggered when a WFI instruciton is executed
+
+Implementation Class
+--------------------
+
+The implementation class is of the following form:
+
+.. code-block:: scala
+
+    class MyTileModuleImp(outer: MyTile) extends BaseTileModuleImp(outer){
+      // annotate the parameters
+      Annotated.params(this, outer.tileParams)
+
+      // TODO: Create the top module of the core and connect it with the ports in "outer"
+    }
+
+In the body of this class, you can look up any parameters by calling ``p({key})``, where ``{key}`` is the config key of 
+the value you want to look up. For a list of available keys, see the appendix below.
+
+If you create an AXI4 node (or equivalents), you will need to connect them to your core. 
+
+Integrate the Core
+------------------
+
+To use your core in a set of config, you would need a config fragment that would create a ``TileParams`` object of your core in
+the current config. An example of such config will be like this:
+
+.. code-block:: scala
+
+    class WithNMyCores(n: Int) extends Config(
+      new RegisterCore(new CoreEntry[MyTileParams, MyTile]("MyCore", MyTilesKey, MyCrossingKey)) ++
+      new Config((site, here, up) => {
+        case MyTilesKey => {
+          List.tabulate(n)(i => MyTileParams(hartId = i))
+        }
+      })
+    )
+
+Where ``RegisterCore`` will register the core with chipyard so that it can be recognized by generic config. This is required for 
+all custom cores. You can also create other config fragments to change other parameters. 
+
+Now you have finished all the steps to prepare your cores for Chipyard! To generate the custom core, simply follow the instructions
+in :::ref:`_custom_chisel` to add your project to the build system, then create a config by following the steps in :::ref:`_hetero_socs_`.
+You can now run any desired workflow for the new config just as you do for the built-in cores. 
