@@ -1,7 +1,8 @@
 # Technology Setup
-# Technology used is nanagate45
 vlsi.core.technology: nangate45
+
 # Specify dir with ASAP7 tarball
+# TODO: figure out how to remove this, or override it within OpenROADTool
 technology.nangate45.install_dir: "/k/work/OpenROAD-flow/tools/OpenROAD"
 
 vlsi.core.max_threads: 12
