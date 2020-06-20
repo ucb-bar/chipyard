@@ -31,10 +31,8 @@ MACROCOMPILER_MODE ?= $(if $(filter $(tech_name),asap7),\
 ENV_YML            ?= $(vlsi_dir)/env.yml
 INPUT_CONFS        ?= $(if $(filter $(tech_name),nangate45),\
                         example-nangate45.yml,\
-                        example.yml)
-HAMMER_EXEC        ?= $(if $(filter $(tech_name),nangate45),\
-                        example-vlsi-nangate45,\
-                        example-vlsi)
+                        example-asap7.yml)
+HAMMER_EXEC        ?= example-vlsi
 VLSI_TOP           ?= $(TOP)
 VLSI_HARNESS_DUT_NAME ?= dut
 VLSI_OBJ_DIR       ?= $(vlsi_dir)/build
