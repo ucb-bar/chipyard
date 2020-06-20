@@ -11,10 +11,6 @@ Once you have a top module in Chisel, you are ready to create integrate it with 
 
     RoCC is not supported by custom core currently. Please use Rocket or Boom if you need to use RoCC.
 
-.. note:: 
-
-    Custom core doesn't support FireSim at this time. 
-
 Parameter Case Classes
 ----------------------
 
@@ -37,18 +33,19 @@ Now you have your parameter classes, you will need config keys to hold them. The
 ``MyCrossingKey`` here is used to store information about the clock-crossing behavior of the core, and it is normally
 set to its default values. 
 
-``TileParams`` and ``CoreParams`` contains the following fields:
+``TileParams`` and ``CoreParams`` contains the following fields (you may ignore any fields marked "Rocket specific" and 
+use their default values, although it is recommended to use them if you need a custom field with similar purposes) :
 
 .. code-block:: scala
 
     trait TileParams {
       val core: CoreParams                  // Core parameters (see below)
-      val icache: Option[ICacheParams]      // Not used if you use your own I1 cache
-      val dcache: Option[DCacheParams]      // Not used if you use your own D1 cache
-      val btb: Option[BTBParams]            // Not used if you use your own BTB / branch predictor
+      val icache: Option[ICacheParams]      // Rocket specific: I1 cache option
+      val dcache: Option[DCacheParams]      // Rocket specific: D1 cache option
+      val btb: Option[BTBParams]            // Rocket specific: BTB / branch predictor option
       val hartId: Int                       // Hart ID: Must be unique within a design config
-      val beuAddr: Option[BigInt] 
-      val blockerCtrlAddr: Option[BigInt]
+      val beuAddr: Option[BigInt]           // Rocket specific: Bus Error Unit for Rocket Core
+      val blockerCtrlAddr: Option[BigInt]   // Rocket specific: Bus Blocker for Rocket Core
       val name: Option[String]              // Name of the core
     }
 
@@ -62,9 +59,9 @@ set to its default values.
       val useAtomicsOnlyForIO: Boolean    // Support A extension for memory-mapped IO (may be true even if useAtomics is false)
       val useCompressed: Boolean          // Support C extension
       val useVector: Boolean = false      // Support V extension
-      val useSCIE: Boolean
-      val useRVE: Boolean
-      val mulDiv: Option[MulDivParams]    // M extension and related setting (Only used by Rocket core, simply use its default value)
+      val useSCIE: Boolean                // Support custom instructions (in custom-0 and custom-1)
+      val useRVE: Boolean                 // Use E base ISA
+      val mulDiv: Option[MulDivParams]    // *Rocket specific: M extension related setting (Use Some(MulDivParams()) to indicate M extension supported)
       val fpu: Option[FPUParams]          // F and D extensions and related setting (see below)
       val fetchWidth: Int                 // Max # of insts fetched every cycle
       val decodeWidth: Int                // Max # of insts decoded every cycle
@@ -73,13 +70,13 @@ set to its default values.
       val nLocalInterrupts: Int           // # of local interrupts (see SiFive interrupt cookbook)
       val nPMPs: Int                      // # of Physical Memory Protection units
       val pmpGranularity: Int             // Size of the smallest unit of region for PMP unit (must be power of 2)
-      val nBreakpoints: Int               // # of breakpoints supported (in RISC-V debug specs)
-      val useBPWatch: Boolean
+      val nBreakpoints: Int               // # of hardware breakpoints supported (in RISC-V debug specs)
+      val useBPWatch: Boolean             // Support hardware breakpoints
       val nPerfCounters: Int              // # of supported performance counters
       val haveBasicCounters: Boolean      // Support basic counters defined in the RISC-V counter extension 
-      val haveFSDirty: Boolean
+      val haveFSDirty: Boolean            // If true, the core will set FS field in mstatus CSR to dirty when appropriate
       val misaWritable: Boolean           // Support writable misa CSR (like variable instruction bits)
-      val haveCFlush: Boolean
+      val haveCFlush: Boolean             // Rocket specific: enables Rocket's custom instruction extension to flush the cache
       val nL2TLBEntries: Int              // # of L2 TLB entries
       val mtvecInit: Option[BigInt]       // mtvec CSR (of V extension) initial value
       val mtvecWritable: Boolean          // If mtvec CSR is writable
@@ -90,7 +87,7 @@ set to its default values.
       def hasSupervisorMode: Boolean = useSupervisor || useVM
       def instBytes: Int = instBits / 8
       def fetchBytes: Int = fetchWidth * instBytes
-      // This field is used only with the D1 cache of Rocket chip. Simply set it to the default value 80.
+      // Rocket specific: Longest possible latency of Rocket core D1 cache. Simply set it to the default value 80.
       def lrscCycles: Int
 
       def dcacheReqTagBits: Int = 6
@@ -106,8 +103,8 @@ set to its default values.
       minFLen: Int = 32,          // Minimum floating point length (no need to change) 
       fLen: Int = 64,             // Maximum floating point length, use 32 if only single precision is supported
       divSqrt: Boolean = true,    // Div/Sqrt operation supported
-      sfmaLatency: Int = 3,       // 
-      dfmaLatency: Int = 4
+      sfmaLatency: Int = 3,       // Rocket specific: Fused multiply-add pipeline latency (single precision)
+      dfmaLatency: Int = 4        // Rocket specific: Fused multiply-add pipeline latency (double precision)
     )
 
 Most of the fields here are originally designed for Rocket core and contains some architecture-specific details, but 
@@ -213,6 +210,8 @@ can override the following two functions to control how to buffer the bus reques
     protected def makeMasterBoundaryBuffers(implicit p: Parameters): TLBuffer
     protected def makeSlaveBoundaryBuffers(implicit p: Parameters): TLBuffer
 
+You can find more information on ``TLBuffer`` in :::ref:`Diplomatic-Widgets`.
+
 Interrupt
 ---------
 
@@ -240,7 +239,40 @@ Also, the tile can also notify other cores or devices for some events by calling
     def reportHalt(could_halt: Option[Bool]) // Triggered when there is an unrecoverable hardware error (halt the machine)
     def reportHalt(errors: Seq[CanHaveErrors]) // Varient for standard error bundle (used only by cache when there's an ECC error)
     reportCease(could_cease: Option[Bool], quiescenceCycles: Int = 8) // Triggered when the core stop retiring instructions (like clock gating)
-    reportWFI(could_wfi: Option[Bool]) // Triggered when a WFI instruciton is executed
+    reportWFI(could_wfi: Option[Bool]) // Triggered when a WFI instruction is executed
+
+Trace (Optional)
+----------------
+
+Chipyard provides a set of ports for instruction trace that conforms with related RISC-V standard.
+If you are using FireSim, it is recommended to implement these trace ports to enable FireSim to read trace. 
+
+There are one inbound node ``traceAuxSinkNode.bundle: TraceAux`` and two outbound nodes ``traceCoreSourceNode.bundle: TraceCoreInterface``
+and ``bpwatchSourceNode.bundle: Vec[BPWatch]``. Note that the length of ``bpwatchSourceNode`` is equal to the max number of 
+breakpoints (set by ``nBreakpoints`` in ``CoreParams``). Below is the definition of these types:
+
+.. code-block:: scala
+
+    // Control signal from the external tracer
+    class TraceAux extends Bundle {
+      val enable = Bool()   // Enable trace output
+      val stall = Bool()    // If true, the core should stall
+    }
+    // Check RISC-V Processor Trace spec V1.0 for more information of this interface
+    class TraceCoreInterface (val params: TraceCoreParams) extends Bundle {
+      val group = Vec(params.nGroups, new TraceCoreGroup(params))
+      val priv = UInt(4.W)
+      val tval = UInt(params.xlen.W)
+      val cause = UInt(params.xlen.W)
+    }
+    // Address Breakpoint and watchpoint info (n is the retire width)
+    class BPWatch (val n: Int) extends Bundle() {
+      val valid = Vec(n, Bool())    // Valid bit of the output
+      val rvalid = Vec(n, Bool())   // Break on read
+      val wvalid = Vec(n, Bool())   // Break on write
+      val ivalid = Vec(n, Bool())   // Break on execute
+      val action = UInt(3.W)        // Exception code (3 usually) 
+    }
 
 Implementation Class
 --------------------
@@ -260,6 +292,10 @@ In the body of this class, you can look up any parameters by calling ``p({key})`
 the value you want to look up. For a list of available keys, see the appendix below.
 
 If you create an AXI4 node (or equivalents), you will need to connect them to your core. 
+
+.. warning::
+
+    TODO: Documenting bus connection
 
 Integrate the Core
 ------------------
