@@ -16,6 +16,7 @@ import freechips.rocketchip.groundtest.{GroundTestSubsystemModuleImp, GroundTest
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
+import tracegen.{TraceGenSystemModuleImp}
 
 import barstools.iocell.chisel._
 
@@ -389,7 +390,7 @@ class WithSimSerial extends OverrideIOBinder({
 })
 
 class WithTraceGenSuccessBinder extends OverrideIOBinder({
-  (system: GroundTestSubsystemModuleImp[GroundTestSubsystem]) => {
+  (system: TraceGenSystemModuleImp) => {
     val (successPort, ioCells) = IOCell.generateIOFromSignal(system.success, Some("iocell_success"))
     successPort.suggestName("success")
     val harnessFn = (th: chipyard.TestHarness) => { when (successPort) { th.success := true.B }; Nil }

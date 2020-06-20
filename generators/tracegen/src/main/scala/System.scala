@@ -22,7 +22,10 @@ class TraceGenSystemModuleImp(outer: TraceGenSystem)
 
   outer.tiles.zipWithIndex.map { case(t, i) => t.module.constants.hartid := i.U }
 
-  val status = dontTouch(DebugCombiner(outer.tiles.collect { case t: GroundTestTile => t.module.status }))
+  val status = dontTouch(DebugCombiner(outer.tiles.collect {
+    case t: GroundTestTile => t.module.status
+    case t: BoomTraceGenTile => t.module.status
+  }))
   success := outer.tileCeaseSinkNode.in.head._1.asUInt.andR
 
 }

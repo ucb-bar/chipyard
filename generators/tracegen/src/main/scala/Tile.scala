@@ -3,7 +3,7 @@ package tracegen
 import chisel3._
 import chisel3.util._
 import freechips.rocketchip.config.Parameters
-import freechips.rocketchip.diplomacy.{LazyModule, SynchronousCrossing, ClockCrossingType}
+import freechips.rocketchip.diplomacy.{SimpleDevice, LazyModule, SynchronousCrossing, ClockCrossingType}
 import freechips.rocketchip.groundtest._
 import freechips.rocketchip.rocket._
 import freechips.rocketchip.rocket.constants.{MemoryOpConstants}
@@ -178,11 +178,14 @@ case class BoomTraceGenParams(
     numGens: Int,
     dcache: Option[DCacheParams] = Some(DCacheParams()),
     hartId: Int = 0
-) extends InstantiableTileParams[BoomTraceGenTile] with GroundTestTileParams
+) extends InstantiableTileParams[BoomTraceGenTile]
 {
   def instantiate(crossing: TileCrossingParamsLike, lookup: LookupByHartIdImpl)(implicit p: Parameters): BoomTraceGenTile = {
     new BoomTraceGenTile(this, crossing, lookup)
   }
+  val core = RocketCoreParams(nPMPs = 0) //TODO remove this
+  val btb = None
+  val icache = Some(ICacheParams())
   val beuAddr = None
   val blockerCtrlAddr = None
   val name = None
@@ -193,23 +196,32 @@ class BoomTraceGenTile private(
   val params: BoomTraceGenParams,
   crossing: ClockCrossingType,
   lookup: LookupByHartIdImpl,
-  q: Parameters) extends GroundTestTile(params, crossing, lookup, q)
+  q: Parameters) extends BaseTile(params, crossing, lookup, q)
+  with SinksExternalInterrupts
+  with SourcesExternalNotifications
 {
   def this(params: BoomTraceGenParams, crossing: TileCrossingParamsLike, lookup: LookupByHartIdImpl)(implicit p: Parameters) =
     this(params, crossing.crossingType, lookup, p)
+
+  val cpuDevice: SimpleDevice = new SimpleDevice("groundtest", Nil)
+  val intOutwardNode: IntOutwardNode = IntIdentityNode()
+  val slaveNode: TLInwardNode = TLIdentityNode()
 
   val boom_params = p.alterMap(Map(TileKey -> BoomTileParams(
     dcache=params.dcache,
     core=BoomCoreParams(nPMPs=0, numLdqEntries=32, numStqEntries=32, useVM=false))))
   val dcache = LazyModule(new BoomNonBlockingDCache(hartId)(boom_params))
 
-  val masterNode: TLOutwardNode = TLIdentityNode() := visibilityNode := dcacheOpt.map(_.node).getOrElse(TLTempNode())
+  val masterNode: TLOutwardNode = TLIdentityNode() := visibilityNode := dcache.node
 
   override lazy val module = new BoomTraceGenTileModuleImp(this)
 }
 
 class BoomTraceGenTileModuleImp(outer: BoomTraceGenTile)
-  extends GroundTestTileModuleImp(outer){
+  extends BaseTileModuleImp(outer){
+
+  val status = IO(new GroundTestStatus)
+  val halt_and_catch_fire = None
 
   val tracegen = Module(new TraceGenerator(outer.params.traceParams))
   tracegen.io.hartid := constants.hartid
