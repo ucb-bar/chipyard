@@ -125,6 +125,20 @@ class FireSimQuadRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.QuadRocketConfig)
 
+// Should fit on all supported hosts
+class FireSimSmallSystemConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithBootROM ++
+  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
+  new WithoutClockGating ++
+  new WithoutTLMonitors ++
+  new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++
+  new testchipip.WithTSI ++
+  new testchipip.WithBlockDevice ++
+  new chipyard.config.WithUART ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(nWays = 2, capacityKB = 64) ++
+  new chipyard.RocketConfig)
 
 //*****************************************************************
 // Boom config, base off chipyard's LargeBoomConfig
