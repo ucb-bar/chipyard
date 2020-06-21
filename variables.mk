@@ -125,8 +125,23 @@ JAVA_ARGS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M
 #########################################################################################
 SCALA_VERSION=2.12.10
 SCALA_VERSION_MAJOR=$(basename $(SCALA_VERSION))
-
 SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
+
+BLOOP ?= bloop
+BLOOP_CONFIG_DIR ?= $(base_dir)/.bloop
+
+SCALA_BUILDTOOL_DEPS ?= $(base_dir)/build.sbt
+
+ifdef ENABLE_BLOOP
+override SCALA_BUILDTOOL_DEPS += $(BLOOP_CONFIG_DIR)/TIMESTAMP
+define run_scala_main
+	cd $(base_dir) && bloop run $(shell echo $(1) | sed 's/{.*}//') --main $(2) -- $(3)
+endef
+else
+define run_scala_main
+	cd $(base_dir) && $(SBT) "project $(1)" "runMain $(2) $(3)"
+endef
+endif
 
 #########################################################################################
 # output directory for tests
