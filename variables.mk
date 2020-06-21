@@ -130,7 +130,7 @@ SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
 BLOOP ?= bloop
 BLOOP_CONFIG_DIR ?= $(base_dir)/.bloop
 
-SCALA_BUILDTOOL_DEPS ?= $(base_dir)/build.sbt
+SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
 ifdef ENABLE_BLOOP
 override SCALA_BUILDTOOL_DEPS += $(BLOOP_CONFIG_DIR)/TIMESTAMP

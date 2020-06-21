@@ -34,6 +34,8 @@ lookup_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.$(2)" -prin
 SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools/iocell)
 SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
 VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE_DIRS),v)
+# This assumes no SBT meta-build sources
+SBT_SOURCES = $(call lookup_srcs,$(base_dir),sbt)
 
 #########################################################################################
 # rocket and testchipip classes
