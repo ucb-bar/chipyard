@@ -38,13 +38,6 @@ VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE
 SBT_SOURCES = $(call lookup_srcs,$(base_dir),sbt)
 
 #########################################################################################
-# rocket and testchipip classes
-#########################################################################################
-# NB: target/ lives under source ----V , due to how we're handling midas dependency injection
-ROCKET_CLASSES ?= "$(ROCKETCHIP_DIR)/src/target/scala-$(SCALA_VERSION_MAJOR)/classes:$(ROCKETCHIP_DIR)/chisel3/target/scala-$(SCALA_VERSION_MAJOR)/*"
-TESTCHIPIP_CLASSES ?= "$(TESTCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/classes"
-
-#########################################################################################
 # jar creation variables and rules
 #########################################################################################
 FIRRTL_JAR := $(base_dir)/lib/firrtl.jar
@@ -66,7 +59,7 @@ $(FIRRTL_TEST_JAR): $(call lookup_srcs,$(CHIPYARD_FIRRTL_DIR),scala)
 #########################################################################################
 # Bloop Project Definitions
 #########################################################################################
-$(BLOOP_CONFIG_DIR)/TIMESTAMP: $(base_dir)/build.sbt
+$(BLOOP_CONFIG_DIR)/TIMESTAMP: $(SBT_SOURCES)
 	cd $(base_dir) && $(SBT) "project chipyardRoot" "bloopInstall"
 	touch $@
 
