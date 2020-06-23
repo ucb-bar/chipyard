@@ -143,3 +143,10 @@ class WithRocketDCacheScratchpad extends Config((site, here, up) => {
   }
 })
 
+// The default RocketChip BaseSubsystem drives its diplomatic clock graph
+// with the implicit clocks of Subsystem. Don't do that, instead we extend
+// the diplomacy graph upwards into the ChipTop, where we connect it to
+// our clock drivers
+class WithNoSubsystemDrivenClocks extends Config((site, here, up) => {
+  case SubsystemDriveAsyncClockGroupsKey => None
+})

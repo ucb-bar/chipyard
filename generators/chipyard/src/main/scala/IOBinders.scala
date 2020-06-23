@@ -201,14 +201,14 @@ object AddIOCells {
   }
 
   def axi4(io: Seq[AXI4Bundle], node: AXI4SlaveNode, name: String): Seq[(AXI4Bundle, AXI4EdgeParameters, Seq[IOCell])] = {
-    io.zip(node.in).zipWithIndex.map{ case ((mem_axi4, (_, edge)), i) => {
+    io.zip(node.edges.in).zipWithIndex.map{ case ((mem_axi4, edge), i) => {
       val (port, ios) = IOCell.generateIOFromSignal(mem_axi4, Some(s"iocell_${name}_axi4_slave_${i}"))
       port.suggestName(s"${name}_axi4_slave_${i}")
       (port, edge, ios)
     }}
   }
   def axi4(io: Seq[AXI4Bundle], node: AXI4MasterNode, name: String): Seq[(AXI4Bundle, AXI4EdgeParameters, Seq[IOCell])] = {
-    io.zip(node.out).zipWithIndex.map{ case ((mem_axi4, (_, edge)), i) => {
+    io.zip(node.edges.out).zipWithIndex.map{ case ((mem_axi4, edge), i) => {
       //val (port, ios) = IOCell.generateIOFromSignal(mem_axi4, Some(s"iocell_${name}_axi4_master_${i}"))
       val port = IO(Flipped(AXI4Bundle(edge.bundle)))
       val ios = IOCell.generateFromSignal(mem_axi4, port, Some(s"iocell_${name}_axi4_master_${i}"))
