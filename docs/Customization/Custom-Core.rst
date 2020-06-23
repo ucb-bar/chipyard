@@ -199,8 +199,8 @@ more info.
         name = portName,
         id = IdRange(0, 1 << idBits))))))
 
-where ``portName`` and ``idBits`` are the parameter provides by the tile. Make sure to read :::ref:`node-tyoes` to check out what
-type of nodes Chipyard supports and their parameters!
+where ``portName`` and ``idBits`` (number of bits to represent a port ID) are the parameter provides by the tile.
+Make sure to read :::ref:`node-tyoes` to check out what type of nodes Chipyard supports and their parameters!
 
 Also, by default, there are boundary buffers for both master and slave connections to the bus when they are leaving the tile, and you
 can override the following two functions to control how to buffer the bus requests/responses:
@@ -291,11 +291,19 @@ The implementation class is of the following form:
 In the body of this class, you can look up any parameters by calling ``p({key})``, where ``{key}`` is the config key of 
 the value you want to look up. For a list of available keys, see the appendix below.
 
-If you create an AXI4 node (or equivalents), you will need to connect them to your core. 
+If you create an AXI4 node (or equivalents), you will need to connect them to your core. You can connect a port like this:
 
-.. warning::
+.. code-block:: scala
 
-    TODO: Documenting bus connection
+    outer.myAXI4Node.out foreach { case (out, edgeOut) =>
+      // Connect your module IO port to "out"
+      // The type of "out" here is AXI4Bundle, which is defined in generators/rocket-chip/src/main/scala/amba/axi4/Bundles.scala
+      // Please refer to this file for the definition of the ports.
+      // If you are using APB, check APBBundle in generators/rocket-chip/src/main/scala/amba/apb/Bundles.scala
+      // If you are using AHB, check AHBSlaveBundle or AHBMasterBundle in generators/rocket-chip/src/main/scala/amba/ahb/Bundles.scala
+      // (choose one depends on the type of AHB node you create)
+      // If you are using AXIS, check AXISBundle and AXISBundleBits in generators/rocket-chip/src/main/scala/amba/axis/Bundles.scala
+    }
 
 Integrate the Core
 ------------------
@@ -320,3 +328,83 @@ all custom cores. You can also create other config fragments to change other par
 Now you have finished all the steps to prepare your cores for Chipyard! To generate the custom core, simply follow the instructions
 in :::ref:`_custom_chisel` to add your project to the build system, then create a config by following the steps in :::ref:`_hetero_socs_`.
 You can now run any desired workflow for the new config just as you do for the built-in cores. 
+
+Appendix: Common Config Keys
+----------------------------
+
+Chipyard provide a set of keys to store standard parameters. Below are some of the most common key used in core integration. 
+(Note that internal fields are hidden)
+
+.. code-block:: scala
+
+    // keys
+    // Parameters exposed to the top-level design, set based on external requirements, etc. See RISC-V debug specs for more info.
+    case object DebugModuleKey extends Field[Option[DebugModuleParams]](Some(DebugModuleParams()))
+    case object BootROMParams extends Field[BootROMParams]                  // See chipyard boot process tutorial
+    case object CLINTKey extends Field[Option[CLINTParams]](None)           // Core Local Interrupter setting (See SiFive Interrupt Cookbook) 
+    case object PLICKey extends Field[Option[PLICParams]](None)             // Platform Level Interrupt Controller setting (See SiFive Interrupt Cookbook) 
+    case object CacheBlockBytes extends Field[Int](64)                      // # of bytes in a cache block
+    case object BroadcastKey extends Field(BroadcastParams())               // L2 Cache broadcast setting
+    case object BankedL2Key extends Field(BankedL2Params())                 // L2 Cache memory setting
+    case object PgLevels extends Field[Int](2)                              // Page Level of virtual memory
+    case object ASIdBits extends Field[Int](0)                              // Max # of bits for Address Space Identifer (See specs)
+    case object ExtMem extends Field[Option[MemoryPortParams]](None)        // External DRAM setting
+    case object ExtBus extends Field[Option[MasterPortParams]](None)        // External (off-chip) output bus setting
+    case object ExtIn extends Field[Option[SlavePortParams]](None)          // External (off-chip) input bus setting
+    case object MaxHartIdBits extends Field[Int]                            // Max # of bits used to represent a Hart ID
+    case object XLen extends Field[Int]                                     // Instruction bits (32 or 64)
+    case object BuildRoCC extends Field[Seq[Parameters => LazyRoCC]](Nil)   // See custom ROCC tutorial
+
+    // Values
+    case class DebugModuleParams (
+      nDMIAddrSize  : Int = 7,                  // Size of the Debug Bus Address
+      nProgramBufferWords: Int = 16,            // Number of 32-bit words for Program Buffer
+      nAbstractDataWords : Int = 4,             // Number of 32-bit words for Abstract Commands
+      nScratch : Int = 1,                       // Number of scratch memories used
+      hasBusMaster : Boolean = false,           // Whether or not a bus master should be included
+      clockGate : Boolean = true,               // Use clock gating
+      maxSupportedSBAccess : Int = 32,          // Maximum transaction size supported by System Bus Access logic.
+      supportQuickAccess : Boolean = false,     // Whether or not to support the quick access command.
+      supportHartArray   : Boolean = true,      // Whether or not to implement the hart array register (if >1 hart).
+      nHaltGroups        : Int = 1,             // Number of halt groups (group of harts that are halted together)
+      nExtTriggers       : Int = 0,             // Number of extra triggers
+      hasHartResets      : Boolean = false,     // Whether harts can be reseted with debugging system
+      hasImplicitEbreak  : Boolean = false,     // There is an additional RO program buffer word containing an ebreak
+      hasAuthentication  : Boolean = false,     // Has authentication (to prevent unauthorized users to use debugging system)
+      crossingHasSafeReset : Boolean = true     // Include "safe" logic in Async Crossings so that only one side needs to be reset.
+    )
+    case class CLINTParams(
+      baseAddress: BigInt = 0x02000000,     // Default interrupt handler base address for CLINT
+      intStages: Int = 0                    // # of cycles (stages) interrupts are delayed 
+    )
+    case class PLICParams(
+      baseAddress: BigInt = 0xC000000,          // Default interrupt handler base address for PLIC
+      maxPriorities: Int = 7,                   // Maximum allowed interrupt priority (cannot be over 7)
+      intStages: Int = 0,                       // # of cycles (stages) interrupts are delayed
+      maxHarts: Int = PLICConsts.maxMaxHarts    // Maximum number or hart / core connected to it
+    )
+    case class BroadcastParams(
+      nTrackers:  Int     = 4,        // # of broadcast tracker 
+      bufferless: Boolean = false     // Bufferless broadcast
+    )
+    case class BankedL2Params(
+      nBanks: Int = 1      // Number of banks in L2 cache
+    )
+    case class MasterPortParams(
+      base: BigInt,                   // Base memory address for this port
+      size: BigInt,                   // Size of this external memory
+      beatBytes: Int,                 // Interface width in bytes
+      idBits: Int,                    // # of bits in the port ID
+      maxXferBytes: Int = 256,        // Maximum bytes in one transfer transaction
+      executable: Boolean = true      // If the data from this port can be executed as instruciton 
+    )
+    /** Specifies the width of external slave ports */
+    case class SlavePortParams(
+      beatBytes: Int,     // Interface width in bytes
+      idBits: Int,        // # of bits in the port ID
+      sourceBits: Int     // # of bits in the source address
+    )
+    case class MemoryPortParams(
+      master: MasterPortParams, // The memory port setting
+      nMemoryChannels: Int      // Number of memory channel
+    )
