@@ -2,13 +2,13 @@ package chipyard
 
 import scala.collection.mutable.{LinkedHashSet}
 
-import freechips.rocketchip.config.{Parameters, Config, Field, View}
-import freechips.rocketchip.subsystem.{RocketTilesKey}
-import freechips.rocketchip.tile.{XLen, TileParams}
-import freechips.rocketchip.config.{Parameters, Field}
+import freechips.rocketchip.subsystem._
+import freechips.rocketchip.tile.{XLen}
+import freechips.rocketchip.config.{Parameters}
 import freechips.rocketchip.system.{TestGeneration, RegressionTestSuite, RocketTestSuite}
 
-import boom.common.{BoomTilesKey}
+import boom.common.{BoomTileAttachParams}
+import ariane.{ArianeTileAttachParams}
 
 /**
  * A set of pre-chosen regression tests
@@ -83,17 +83,16 @@ class TestSuiteHelper
           if (cfg.fLen >= 64)
             addSuites(env.map(rv64ud))
         }
-      }
-      if (coreParams.useAtomics) {
-        if (tileParams.dcache.flatMap(_.scratch).isEmpty)
-          addSuites(env.map(if (xlen == 64) rv64ua else rv32ua))
-        else
-          addSuites(env.map(if (xlen == 64) rv64uaSansLRSC else rv32uaSansLRSC))
-      }
-      if (coreParams.useCompressed) addSuites(env.map(if (xlen == 64) rv64uc else rv32uc))
-      val (rvi, rvu) =
-        if (xlen == 64) ((if (vm) rv64i else rv64pi), rv64u)
-        else            ((if (vm) rv32i else rv32pi), rv32u)
+        if (coreParams.useAtomics) {
+          if (tileParams.dcache.flatMap(_.scratch).isEmpty)
+            addSuites(env.map(if (xlen == 64) rv64ua else rv32ua))
+          else
+            addSuites(env.map(if (xlen == 64) rv64uaSansLRSC else rv32uaSansLRSC))
+        }
+        if (coreParams.useCompressed) addSuites(env.map(if (xlen == 64) rv64uc else rv32uc))
+        val (rvi, rvu) =
+          if (xlen == 64) ((if (vm) rv64i else rv64pi), rv64u)
+          else            ((if (vm) rv32i else rv32pi), rv32u)
 
       addSuites(rvi.map(_("p")))
       addSuites(rvu.map(_("p")))
@@ -117,3 +116,4 @@ case object TestSuitesKey extends Field[(Seq[TileParams], TestSuiteHelper, Param
 class WithTestSuite(suiteFactory: (Seq[TileParams], TestSuiteHelper, Parameters) => Unit) extends Config((site, here, up) => {
   case TestSuitesKey => suiteFactory
 })
+

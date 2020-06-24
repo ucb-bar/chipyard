@@ -10,7 +10,7 @@ import chisel3.internal.sourceinfo.{SourceInfo}
 
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.devices.tilelink._
-import freechips.rocketchip.devices.debug.{HasPeripheryDebug, HasPeripheryDebugModuleImp}
+import freechips.rocketchip.devices.debug.{HasPeripheryDebug, HasPeripheryDebugModuleImp, ExportDebug}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.diplomaticobjectmodel.model.{OMInterrupt}
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree.{RocketTileLogicalTreeNode, LogicalModuleTree}
@@ -21,77 +21,60 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.amba.axi4._
 
-import boom.common.{BoomTile, BoomTilesKey, BoomCrossingKey, BoomTileParams}
+import boom.common.{BoomTile}
 
-import testchipip.{DromajoHelper}
 
-trait HasChipyardTiles extends HasTiles
-  with CanHavePeripheryPLIC
-  with CanHavePeripheryCLINT
-  with HasPeripheryDebug
-{ this: BaseSubsystem =>
+import testchipip.{DromajoHelper, CanHavePeripherySerial, SerialKey}
 
-  val module: HasChipyardTilesModuleImp
 
-  // Generate tiles info from the list of cores in CoreManager
-  // Note: the 0-arity function is used to delay the construction of tiles to make sure that they are created
-  // in order
-  val allTilesInfo: Seq[(TileParams, RocketCrossingParams, () => BaseTile)] =
-    (CoreManager.cores(p) flatMap (core => core.instantiateTile(perTileOrGlobalSetting _, logicalTreeNode)))
-
-  // Make a tile and wire its nodes into the system,
-  // according to the specified type of clock crossing.
-  // Note that we also inject new nodes into the tile itself,
-  // also based on the crossing type.
-  // This MUST be performed in order of hartid
-  // There is something weird with registering tile-local interrupt controllers to the CLINT.
-  // TODO: investigate why
-  require((allTilesInfo map (info => info._1.hartId)).max == allTilesInfo.size - 1)
-  val tiles = allTilesInfo.sortWith(_._1.hartId < _._1.hartId).map {
-    case (param, crossing, tileCtor) => {
-      val tile = tileCtor()
-
-      connectMasterPortsToSBus(tile, crossing)
-      connectSlavePortsToCBus(tile, crossing)
-      connectInterrupts(tile, debugOpt, clintOpt, plicOpt)
-
-      tile
+trait CanHaveHTIF { this: BaseSubsystem =>
+  // Advertise HTIF if system can communicate with fesvr
+  if (this match {
+    case _: CanHavePeripherySerial if p(SerialKey) => true
+    case _: HasPeripheryDebug if p(ExportDebug).protocols.nonEmpty => true
+    case _ => false
+  }) {
+    ResourceBinding {
+      val htif = new Device {
+        def describe(resources: ResourceBindings): Description = {
+          val compat = resources("compat").map(_.value)
+          Description("htif", Map(
+            "compatible" -> compat))
+        }
+      }
+      Resource(htif, "compat").bind(ResourceString("ucb,htif0"))
     }
   }
+}
 
+
+class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
+  with HasTiles
+  with CanHaveHTIF
+{
   def coreMonitorBundles = tiles.map {
     case r: RocketTile => r.module.core.rocketImpl.coreMonitorBundle
     case b: BoomTile => b.module.core.coreMonitorBundle
   }.toList
+  override lazy val module = new ChipyardSubsystemModuleImp(this)
 }
 
-trait HasChipyardTilesModuleImp extends HasTilesModuleImp
-  with HasPeripheryDebugModuleImp
-{
-  val outer: HasChipyardTiles
-}
 
-class Subsystem(implicit p: Parameters) extends BaseSubsystem
-  with HasChipyardTiles
-{
-  override lazy val module = new SubsystemModuleImp(this)
-
-  def getOMInterruptDevice(resourceBindingsMap: ResourceBindingsMap): Seq[OMInterrupt] = Nil
-}
-
-class SubsystemModuleImp[+L <: Subsystem](_outer: L) extends BaseSubsystemModuleImp(_outer)
+class ChipyardSubsystemModuleImp[+L <: ChipyardSubsystem](_outer: L) extends BaseSubsystemModuleImp(_outer)
   with HasResetVectorWire
-  with HasChipyardTilesModuleImp
+  with HasTilesModuleImp
 {
-  tile_inputs.zip(outer.hartIdList).foreach { case(wire, i) =>
-    wire.hartid := i.U
+
+  for (i <- 0 until outer.tiles.size) {
+    val wire = tile_inputs(i)
+    wire.hartid := outer.hartIdList(i).U
     wire.reset_vector := global_reset_vector
   }
 
-  // create file with boom params
+  // create file with core params
   ElaborationArtefacts.add("""core.config""", outer.tiles.map(x => x.module.toString).mkString("\n"))
-
   // Generate C header with relevant information for Dromajo
   // This is included in the `dromajo_params.h` header file
-  DromajoHelper.addArtefacts
+  DromajoHelper.addArtefacts()
 }
+
