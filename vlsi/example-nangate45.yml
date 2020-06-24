@@ -67,6 +67,7 @@ vlsi.core.par_tool: "openroad"
 vlsi.core.par_tool_path: ["hammer/src/hammer-vlsi/par"]
 vlsi.core.par_tool_path_meta: "append"
 
-## OpenROAD-drc options (no lvs)
-#vlsi.core.drc_tool: "openroad"
-#vlsi.core.drc_tool_path: ["hammer-mentor-plugins/drc"]
+# OpenROAD-drc options (no lvs)
+vlsi.core.drc_tool: "openroad"
+vlsi.core.drc_tool_path: ["hammer/src/hammer-vlsi/drc"]
+vlsi.core.drc_tool_path_meta: "append"
