@@ -30,15 +30,13 @@ class TutorialStarterConfig extends Config(
   // of the Top
   new testchipip.WithTSI ++                  // Add a TSI (Test Serial Interface)  widget to bring-up the core
   new chipyard.config.WithBootROM ++         // Use the Chipyard BootROM
-  new chipyard.config.WithRenumberHarts ++   // WithRenumberHarts fixes hartids heterogeneous designs, if design is not heterogeneous, this is a no-op
   new chipyard.config.WithUART ++            // Add a UART
 
   // CUSTOMIZE THE CORE
   // Uncomment out one (or multiple) of the lines below, and choose
   // how many cores you want.
-  // new freechips.rocketchip.subsystem.WithNBigCores(1) ++ // Specify we want some number of Rocket cores
-  // new boom.common.WithSmallBooms ++                      // Specify all BOOM cores should be Small-sized (NOTE: other options are Medium/Large/Mega)
-  // new boom.common.WithNBoomCores(1) ++                   // Specify we want some number of BOOM cores
+  // new freechips.rocketchip.subsystem.WithNBigCores(1) ++    // Specify we want some number of Rocket cores
+  // new boom.common.WithNSmallBooms(1) ++                     // Specify we want some number of BOOM cores
 
   // CUSTOMIZE the L2
   // Uncomment this line, and specify a size if you want to have a L2
@@ -66,7 +64,6 @@ class TutorialMMIOConfig extends Config(
 
   new testchipip.WithTSI ++
   new chipyard.config.WithBootROM ++
-  new chipyard.config.WithRenumberHarts ++
   new chipyard.config.WithUART ++
 
   // Attach either a TileLink or AXI4 version of GCD
@@ -94,7 +91,6 @@ class TutorialSha3Config extends Config(
 
   new testchipip.WithTSI ++
   new chipyard.config.WithBootROM ++
-  new chipyard.config.WithRenumberHarts ++
   new chipyard.config.WithUART ++
 
   // Uncomment this line once you added SHA3 to the build.sbt, and cloned the SHA3 repo
@@ -120,7 +116,6 @@ class TutorialSha3BlackBoxConfig extends Config(
 
   new testchipip.WithTSI ++
   new chipyard.config.WithBootROM ++
-  new chipyard.config.WithRenumberHarts ++
   new chipyard.config.WithUART ++
 
   // Uncomment these lines once SHA3 is integrated

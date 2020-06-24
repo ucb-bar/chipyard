@@ -9,10 +9,10 @@ import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, RationalCrossi
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.util.{ResetCatchAndSync}
 
-import boom.common.{BoomTilesKey, BoomCrossingKey}
-
 import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge, RationalClock}
 import firesim.configs._
+
+import boom.common.{WithRationalBoomTiles}
 
 import chipyard.{BuildSystem, DigitalTop, DigitalTopModule}
 import chipyard.config.ConfigValName._
@@ -51,15 +51,13 @@ trait HasFireSimClockingImp extends HasAdditionalClocks {
 }
 
 // Config Fragment
-class WithSingleRationalTileDomain(multiplier: Int, divisor: Int) extends Config((site, here, up) => {
-  case FireSimClockKey => FireSimClockParameters(Seq(RationalClock("TileDomain", multiplier, divisor)))
-  case RocketCrossingKey => up(RocketCrossingKey, site) map { r =>
-    r.copy(crossingType = RationalCrossing())
-  }
-  case BoomCrossingKey => up(BoomCrossingKey, site) map { r =>
-    r.copy(crossingType = RationalCrossing())
-  }
-})
+class WithSingleRationalTileDomain(multiplier: Int, divisor: Int) extends Config(
+  new WithRationalRocketTiles ++
+  new WithRationalBoomTiles ++
+  new Config((site, here, up) => {
+    case FireSimClockKey => FireSimClockParameters(Seq(RationalClock("TileDomain", multiplier, divisor)))
+  })
+)
 
 class HalfRateUncore extends WithSingleRationalTileDomain(2,1)
 

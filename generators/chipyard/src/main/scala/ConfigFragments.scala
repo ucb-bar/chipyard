@@ -4,19 +4,22 @@ import chisel3._
 import chisel3.util.{log2Up}
 
 import freechips.rocketchip.config.{Field, Parameters, Config}
-import freechips.rocketchip.subsystem.{SystemBusKey, RocketTilesKey, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, CacheBlockBytes}
+import freechips.rocketchip.subsystem._
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.{Debug}
-import freechips.rocketchip.tile.{XLen, BuildRoCC, TileKey, LazyRoCC, RocketTileParams, MaxHartIdBits}
+import freechips.rocketchip.groundtest.{GroundTestSubsystem}
+import freechips.rocketchip.tile._
 import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams}
 import freechips.rocketchip.util.{AsyncResetReg}
 
-import boom.common.{BoomTilesKey}
-import ariane.{ArianeTilesKey}
 import testchipip._
+import tracegen.{TraceGenSystem}
 
 import hwacha.{Hwacha}
+
+import boom.common.{BoomTileAttachParams}
+import ariane.{ArianeTileAttachParams}
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
@@ -60,26 +63,17 @@ class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) =>
 })
 
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
-  case RocketTilesKey => up(RocketTilesKey) map (tile => tile.copy(
-    core = tile.core.copy(nL2TLBEntries = entries)
-  ))
-  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(
-    core = tile.core.copy(nL2TLBEntries = entries)
-  ))
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nL2TLBEntries = entries)))
+    case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nL2TLBEntries = entries)))
+    case other => other
+  }
 })
 
 class WithTracegenSystem extends Config((site, here, up) => {
-  case BuildSystem => (p: Parameters) => LazyModule(new tracegen.TraceGenSystem()(p))
-})
-
-class WithRenumberHarts(rocketFirst: Boolean = false) extends Config((site, here, up) => {
-  case RocketTilesKey => up(RocketTilesKey, site).zipWithIndex map { case (r, i) =>
-    r.copy(hartId = i + (if(rocketFirst) 0 else up(BoomTilesKey, site).length))
-  }
-  case BoomTilesKey => up(BoomTilesKey, site).zipWithIndex map { case (b, i) =>
-    b.copy(hartId = i + (if(rocketFirst) up(RocketTilesKey, site).length else 0))
-  }
-  case MaxHartIdBits => log2Up(up(BoomTilesKey, site).size + up(RocketTilesKey, site).size)
+  case BuildSystem => (p: Parameters) => LazyModule(new TraceGenSystem()(p))
 })
 
 /**
@@ -107,7 +101,6 @@ class WithMultiRoCC extends Config((site, here, up) => {
  */
 class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
   case MultiRoCCKey => {
-    require(harts.max <= ((up(RocketTilesKey, site).length + up(BoomTilesKey, site).length) - 1))
     up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
       (i -> Seq((p: Parameters) => {
         LazyModule(new Hwacha()(p)).suggestName("hwacha")
@@ -117,38 +110,23 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
 })
 
 
-/**
- * Config fragment to add a small Rocket core to the system as a "control" core.
- * Used as an example of a PMU core.
- */
-class WithControlCore extends Config((site, here, up) => {
-  case RocketTilesKey => up(RocketTilesKey, site) :+
-    RocketTileParams(
-      core = RocketCoreParams(
-        useVM = false,
-        fpu = None,
-        mulDiv = Some(MulDivParams(mulUnroll = 8))),
-      btb = None,
-      dcache = Some(DCacheParams(
-        rowBits = site(SystemBusKey).beatBits,
-        nSets = 64,
-        nWays = 1,
-        nTLBEntries = 4,
-        nMSHRs = 0,
-        blockBytes = site(CacheBlockBytes))),
-      icache = Some(ICacheParams(
-        rowBits = site(SystemBusKey).beatBits,
-        nSets = 64,
-        nWays = 1,
-        nTLBEntries = 4,
-        blockBytes = site(CacheBlockBytes))),
-      hartId = up(RocketTilesKey, site).size + up(BoomTilesKey, site).size
-    )
-  case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
+class WithTraceIO extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      trace = true))
+    case tp: ArianeTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      trace = true))
+    case other => other
+  }
+  case TracePortKey => Some(TracePortParams())
 })
 
-class WithTraceIO extends Config((site, here, up) => {
-  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
-  case ArianeTilesKey => up(ArianeTilesKey) map (tile => tile.copy(trace = true))
-  case TracePortKey => Some(TracePortParams())
+class WithNPerfCounters(n: Int = 29) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nPerfCounters = n)))
+    case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nPerfCounters = n)))
+    case other => other
+  }
 })
