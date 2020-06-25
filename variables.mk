@@ -129,13 +129,22 @@ SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
 
 BLOOP ?= bloop
 BLOOP_CONFIG_DIR ?= $(base_dir)/.bloop
+# This mirrors the bloop default. Set to a system-unique port in a multi-user environment
+BLOOP_NAILGUN_PORT ?= 8212
 
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
 ifdef ENABLE_BLOOP
 override SCALA_BUILDTOOL_DEPS += $(BLOOP_CONFIG_DIR)/TIMESTAMP
+# Two notes about the bloop invocation:
+# 1) the sed removes a leading {file:<path>} that sometimes needs to be
+#    provided to SBT when a project but not for bloop.
+# 2) Generally, one could could pass '--' to indicate all remaining arguments are
+# 	 destined for the scala Main, however a bug in Bloop's argument parsing causes the
+#    --nailgun-port argument to be lost in this case. Workaround this by prefixing
+#    every main-destined argument with "--args"
 define run_scala_main
-	cd $(base_dir) && bloop run $(shell echo $(1) | sed 's/{.*}//') --main $(2) -- $(3)
+	cd $(base_dir) && bloop --nailgun-port $(BLOOP_NAILGUN_PORT) run $(shell echo $(1) | sed 's/{.*}//') --main $(2)  $(addprefix --args ,$3)
 endef
 else
 define run_scala_main
