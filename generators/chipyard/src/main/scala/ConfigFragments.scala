@@ -26,7 +26,7 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 
 import chipyard.{BuildTop, BuildSystem}
-import chipyard.{GenericTilesKey, GenericTileConfig}
+import chipyard.GenericCanAttachTile
 
 /**
  * TODO: Why do we need this?
@@ -65,11 +65,8 @@ class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) =>
 
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
-    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
-      core = tp.tileParams.core.copy(nL2TLBEntries = entries)))
-    case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
-      core = tp.tileParams.core.copy(nL2TLBEntries = entries)))
-    case other => other
+    case GenericCanAttachTile(tp) => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nL2TLBEntries = entries))).convert
   }
 })
 
@@ -110,7 +107,6 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
   }
 })
 
-
 class WithTraceIO extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
@@ -124,10 +120,7 @@ class WithTraceIO extends Config((site, here, up) => {
 
 class WithNPerfCounters(n: Int = 29) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
-    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
-      core = tp.tileParams.core.copy(nPerfCounters = n)))
-    case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
-      core = tp.tileParams.core.copy(nPerfCounters = n)))
-    case other => other
+    case GenericCanAttachTile(tp) => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nPerfCounters = n))).convert
   }
 })

@@ -6,14 +6,11 @@ import scala.reflect.runtime.universe._
 import chisel3._
 
 import freechips.rocketchip.config.{Parameters, Config, Field, View}
-import freechips.rocketchip.subsystem.{SystemBusKey, RocketTilesKey, RocketCrossingParams, RocketCrossingKey}
+import freechips.rocketchip.subsystem._
 import freechips.rocketchip.diplomacy.{LazyModule, ClockCrossingType, ValName}
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree.LogicalTreeNode
 import freechips.rocketchip.rocket._
 import freechips.rocketchip.tile._
-
-import boom.common.{BoomTile, BoomTilesKey, BoomCrossingKey, BoomTileParams}
-import ariane.{ArianeTile, ArianeTilesKey, ArianeCrossingKey, ArianeTileParams}
 
 // Trait for generic case class of base trait for copying
 trait ConcreteBaseTrait[Base] {
@@ -145,4 +142,36 @@ case class GenericTileParams(
 
     _origin = tileParams
   )
+}
+
+case class GenericTileCrossingParamsLike(
+  val crossingType: ClockCrossingType,
+  val master: TilePortParamsLike,
+  val slave: TilePortParamsLike,
+  val _origin: TileCrossingParamsLike
+) extends TileCrossingParamsLike with ConcreteBaseTrait[TileCrossingParamsLike] {
+  def this(crossing: TileCrossingParamsLike) = this(
+    crossingType = crossing.crossingType,
+    master = crossing.master,
+    slave = crossing.slave,
+    _origin = crossing
+  )
+}
+
+case class GenericCanAttachTileImpl(
+  val tileParams: GenericTileParams,
+  val crossingParams: TileCrossingParamsLike,
+  val lookup: LookupByHartIdImpl,
+  val _origin: CanAttachTile,
+) extends ConcreteBaseTrait[CanAttachTile] {
+  def this(param: CanAttachTile) = this(
+    tileParams = new GenericTileParams(param.tileParams),
+    crossingParams = new GenericTileCrossingParamsLike(param.crossingParams),
+    lookup = param.lookup,
+    _origin = param
+  )
+}
+
+object GenericCanAttachTile {
+  def unapply(tile: CanAttachTile) = Some(new GenericCanAttachTileImpl(tile))
 }

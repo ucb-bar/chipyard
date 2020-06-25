@@ -15,10 +15,11 @@ import firrtl.options.Viewer.view
 import freechips.rocketchip.stage.RocketChipOptions
 import freechips.rocketchip.stage.phases.{RocketTestSuiteAnnotation}
 import freechips.rocketchip.system.{RocketTestSuite, TestGeneration}
+import freechips.rocketchip.subsystem.{TilesLocated, InSubsystem}
 import freechips.rocketchip.util.HasRocketChipStageUtils
 import freechips.rocketchip.tile.XLen
 
-import chipyard.{TestSuiteHelper, CoreManager}
+import chipyard.TestSuiteHelper
 import chipyard.TestSuitesKey
 
 class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipStageUtils {
@@ -34,12 +35,13 @@ class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipS
     val suiteHelper = new TestSuiteHelper
     // Use Xlen as a proxy for detecting if we are a processor-like target
     // The underlying test suites expect this field to be defined
+    val tileParams = p(TilesLocated(InSubsystem)) map (tp => tp.tileParams)
     if (p.lift(XLen).nonEmpty)
       // If a custom test suite is set up, use the custom test suite
       if (p.lift(TestSuitesKey).nonEmpty)
-        CoreManager.cores(p) map (core => p(TestSuitesKey).apply(core.tileParamsLookup, suiteHelper, p))
+        p(TestSuitesKey).apply(tileParams, suiteHelper, p)
       else
-        CoreManager.cores(p) map (core => suiteHelper.addGenericTestSuites(core.tileParamsLookup))
+        suiteHelper.addGenericTestSuites(tileParams)
 
     // if hwacha parameter exists then generate its tests
     // TODO: find a more elegant way to do this. either through
