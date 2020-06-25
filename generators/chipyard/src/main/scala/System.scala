@@ -21,20 +21,20 @@ import freechips.rocketchip.util.{DontTouch}
 /**
  * Base top with periphery devices and ports, and a BOOM + Rocket subsystem
  */
-class System(implicit p: Parameters) extends Subsystem
+class ChipyardSystem(implicit p: Parameters) extends ChipyardSubsystem
   with HasAsyncExtInterrupts
   with CanHaveMasterAXI4MemPort
   with CanHaveMasterAXI4MMIOPort
   with CanHaveSlaveAXI4Port
   with HasPeripheryBootROM
 {
-  override lazy val module = new SystemModule(this)
+  override lazy val module = new ChipyardSystemModule(this)
 }
 
 /**
  * Base top module implementation with periphery devices and ports, and a BOOM + Rocket subsystem
  */
-class SystemModule[+L <: System](_outer: L) extends SubsystemModuleImp(_outer)
+class ChipyardSystemModule[+L <: ChipyardSystem](_outer: L) extends ChipyardSubsystemModuleImp(_outer)
   with HasRTCModuleImp
   with HasExtInterruptsModuleImp
   with HasPeripheryBootROMModuleImp

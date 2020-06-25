@@ -20,8 +20,7 @@ class SmallBoomConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoSlavePort ++          // no top-level MMIO slave port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithInclusiveCache ++       // use Sifive L2 cache
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++ // no external interrupts
-  new boom.common.WithSmallBooms ++                              // small boom config
-  new boom.common.WithNBoomCores(1) ++                           // single-core boom
+  new boom.common.WithNSmallBooms(1) ++                          // small boom config
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++  // hierarchical buses including mbus+l2
   new freechips.rocketchip.system.BaseConfig)                    // "base" rocketchip system
 
@@ -39,8 +38,7 @@ class MediumBoomConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new boom.common.WithMediumBooms ++                              // medium boom config
-  new boom.common.WithNBoomCores(1) ++
+  new boom.common.WithNMediumBooms(1) ++                             // medium boom config
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
@@ -58,8 +56,7 @@ class LargeBoomConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new boom.common.WithLargeBooms ++                              // large boom config
-  new boom.common.WithNBoomCores(1) ++
+  new boom.common.WithNLargeBooms(1) ++                          // large boom config
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
@@ -77,8 +74,7 @@ class MegaBoomConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new boom.common.WithMegaBooms ++                              // mega boom config
-  new boom.common.WithNBoomCores(1) ++
+  new boom.common.WithNMegaBooms(1) ++                        // mega boom config
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
@@ -96,29 +92,7 @@ class DualSmallBoomConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new boom.common.WithSmallBooms ++
-  new boom.common.WithNBoomCores(2) ++                         // 2 boom cores
-  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
-  new freechips.rocketchip.system.BaseConfig)
-
-class SmallRV32BoomConfig extends Config(
-  new chipyard.iobinders.WithUARTAdapter ++
-  new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithBlackBoxSimMem ++
-  new chipyard.iobinders.WithTiedOffDebug ++
-  new chipyard.iobinders.WithSimSerial ++
-  new testchipip.WithTSI ++
-  new chipyard.config.WithBootROM ++
-  new chipyard.config.WithUART ++
-  new chipyard.config.WithL2TLBs(1024) ++
-  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-  new freechips.rocketchip.subsystem.WithNoSlavePort ++
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++
-  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new boom.common.WithoutBoomFPU ++                        // no fp
-  new boom.common.WithBoomRV32 ++                          // rv32 (32bit)
-  new boom.common.WithSmallBooms ++
-  new boom.common.WithNBoomCores(1) ++
+  new boom.common.WithNSmallBooms(2) ++                         // 2 boom cores
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
@@ -137,8 +111,7 @@ class HwachaLargeBoomConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new boom.common.WithLargeBooms ++
-  new boom.common.WithNBoomCores(1) ++
+  new boom.common.WithNLargeBooms(1) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
@@ -158,8 +131,7 @@ class LoopbackNICLargeBoomConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new boom.common.WithLargeBooms ++
-  new boom.common.WithNBoomCores(1) ++
+  new boom.common.WithNLargeBooms(1) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
@@ -179,8 +151,7 @@ class DromajoBoomConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new boom.common.WithSmallBooms ++
-  new boom.common.WithNBoomCores(1) ++
+  new boom.common.WithNSmallBooms(1) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
 
