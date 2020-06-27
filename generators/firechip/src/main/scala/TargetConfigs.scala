@@ -125,7 +125,8 @@ class FireSimQuadRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.QuadRocketConfig)
 
-// Should fit on all supported hosts
+// A stripped down configuration that should fit on all supported hosts.
+// Flat to avoid having to reorganize the config class hierarchy to remove certain features 
 class FireSimSmallSystemConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
