@@ -36,6 +36,7 @@ class HwachaLargeBoomAndHwachaRocketConfig extends Config(
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
+  new chipyard.config.WithHwachaTest ++
   new hwacha.DefaultHwachaConfig ++                      // add hwacha to all harts
   new boom.common.WithNLargeBooms(1) ++
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++

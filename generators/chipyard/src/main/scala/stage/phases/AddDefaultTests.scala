@@ -38,24 +38,8 @@ class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipS
     val tileParams = p(TilesLocated(InSubsystem)) map (tp => tp.tileParams)
     if (p.lift(XLen).nonEmpty)
       // If a custom test suite is set up, use the custom test suite
-      if (p.lift(TestSuitesKey).nonEmpty)
-        p(TestSuitesKey).apply(tileParams, suiteHelper, p)
-      else
-        suiteHelper.addGenericTestSuites(tileParams)
+      annotations += CustomMakefragSnippet(p(TestSuitesKey).apply(tileParams, suiteHelper, p))
 
-    // if hwacha parameter exists then generate its tests
-    // TODO: find a more elegant way to do this. either through
-    // trying to disambiguate BuildRoCC, having a AccelParamsKey,
-    // or having the Accelerator/Tile add its own tests
-    import hwacha.HwachaTestSuites._
-    if (Try(p(hwacha.HwachaNLanes)).getOrElse(0) > 0) {
-      suiteHelper.addSuites(rv64uv.map(_("p")))
-      suiteHelper.addSuites(rv64uv.map(_("vp")))
-      suiteHelper.addSuite(rv64sv("p"))
-      suiteHelper.addSuite(hwachaBmarks)
-      annotations += CustomMakefragSnippet(
-        "SRC_EXTENSION = $(base_dir)/hwacha/$(src_path)/*.scala" + "\nDISASM_EXTENSION = --extension=hwacha")
-    }
     RocketTestSuiteAnnotation(suiteHelper.suites.values.toSeq) +: annotations
   }
 

@@ -107,13 +107,8 @@ class TestSuiteHelper
 /**
  * Config key of custom test suite.
  */
-case object TestSuitesKey extends Field[(Seq[TileParams], TestSuiteHelper, Parameters) => Unit]((tiles, helper, p) => helper.addGenericTestSuites(tiles)(p))
-
-/**
-  * Config fragment to add custom test suite factory function.
-  *
-  * @param suiteFactory Test suite factory function. It takes a list of TileParams to be instantiated and the test suite helper.
-  */
-class WithTestSuite(suiteFactory: (Seq[TileParams], TestSuiteHelper, Parameters) => Unit) extends Config((site, here, up) => {
-  case TestSuitesKey => suiteFactory
+case object TestSuitesKey extends Field[(Seq[TileParams], TestSuiteHelper, Parameters) => String]((tiles, helper, p) => {
+  helper.addGenericTestSuites(tiles)(p)
+  // Return an empty string as makefile additional snippets
+  ""
 })
