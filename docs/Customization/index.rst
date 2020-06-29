@@ -37,6 +37,7 @@ We recommend reading all these pages in order. Hit next to get started!
 
    Heterogeneous-SoCs
    Custom-Chisel
+   Custom-Core
    RoCC-or-MMIO
    RoCC-Accelerators
    MMIO-Peripherals

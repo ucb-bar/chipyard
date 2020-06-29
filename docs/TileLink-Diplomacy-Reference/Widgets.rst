@@ -1,3 +1,5 @@
+.. _diplomatic_widgets:
+
 Diplomatic Widgets
 ==================
 

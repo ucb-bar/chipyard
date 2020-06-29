@@ -4,7 +4,7 @@ Adding a custom core
 ====================
 
 You may want to add a custom RISC-V core to Chipyard generator. If the top module of your core is not in Chisel, 
-you will first need to create a Verilog blackbox for it. See ::ref:`_incorporating-verilog-blocks` for instructions.
+you will first need to create a Verilog blackbox for it. See :ref:`incorporating-verilog-blocks` for instructions.
 Once you have a top module in Chisel, you are ready to create integrate it with Chipyard. 
 
 .. note:: 
@@ -184,7 +184,7 @@ in the tile class. Below is an example of how to connect a core using AXI4 to th
       := AXI4Fragmenter() // deal with multi-beat xacts
       := memAXI4Node) // The custom node, see below
 
-Remember, you may not need all of these intermediate widgets. See :::ref:`Diplomatic-Widgets` for the meaning of each intermediate
+Remember, you may not need all of these intermediate widgets. See :ref:`diplomatic_widgets` for the meaning of each intermediate
 widget. If you are using TileLink, then you only need the tap node and the TileLink node used by your components. Also, Chipyard
 support AHB, APB and AXIS, and most of the AXI4 widgets has equivalent widget for these bus protocol. See the reference page for
 more info. 
@@ -200,7 +200,7 @@ more info.
         id = IdRange(0, 1 << idBits))))))
 
 where ``portName`` and ``idBits`` (number of bits to represent a port ID) are the parameter provides by the tile.
-Make sure to read :::ref:`node-tyoes` to check out what type of nodes Chipyard supports and their parameters!
+Make sure to read :ref:`node_types` to check out what type of nodes Chipyard supports and their parameters!
 
 Also, by default, there are boundary buffers for both master and slave connections to the bus when they are leaving the tile, and you
 can override the following two functions to control how to buffer the bus requests/responses:
@@ -210,7 +210,7 @@ can override the following two functions to control how to buffer the bus reques
     protected def makeMasterBoundaryBuffers(implicit p: Parameters): TLBuffer
     protected def makeSlaveBoundaryBuffers(implicit p: Parameters): TLBuffer
 
-You can find more information on ``TLBuffer`` in :::ref:`Diplomatic-Widgets`.
+You can find more information on ``TLBuffer`` in :ref:`diplomatic_widgets`.
 
 Interrupt
 ---------
@@ -313,20 +313,14 @@ the current config. An example of such config will be like this:
 
 .. code-block:: scala
 
-    class WithNMyCores(n: Int) extends Config(
-      new RegisterCore(new CoreEntry[MyTileParams, MyTile]("MyCore", MyTilesKey, MyCrossingKey)) ++
-      new Config((site, here, up) => {
-        case MyTilesKey => {
-          List.tabulate(n)(i => MyTileParams(hartId = i))
-        }
-      })
-    )
-
-Where ``RegisterCore`` will register the core with chipyard so that it can be recognized by generic config. This is required for 
-all custom cores. You can also create other config fragments to change other parameters. 
+    class WithNMyCores(n: Int) extends Config((site, here, up) => {
+      case MyTilesKey => {
+        List.tabulate(n)(i => MyTileParams(hartId = i))
+      }
+    })
 
 Now you have finished all the steps to prepare your cores for Chipyard! To generate the custom core, simply follow the instructions
-in :::ref:`_custom_chisel` to add your project to the build system, then create a config by following the steps in :::ref:`_hetero_socs_`.
+in :ref:`custom_chisel` to add your project to the build system, then create a config by following the steps in :ref:`hetero_socs_`.
 You can now run any desired workflow for the new config just as you do for the built-in cores. 
 
 Appendix: Common Config Keys
