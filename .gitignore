@@ -10,10 +10,6 @@ target
 *#
 *~
 .idea
-.bloop
-.metals
-project/metals.sbt
-.vscode
 .DS_Store
 env.sh
 riscv-tools-install
