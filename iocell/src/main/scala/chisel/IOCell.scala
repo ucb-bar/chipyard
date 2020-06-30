@@ -202,7 +202,6 @@ object IOCell {
       }
       case (coreSignal: Clock, padSignal: Clock) => genCellForClock(coreSignal, padSignal)
       case (coreSignal: AsyncReset, padSignal: AsyncReset) => genCellForAsyncReset(coreSignal, padSignal)
-      case (coreSignal: Reset, padSignal: Reset) => genCellForAbstractReset(coreSignal, padSignal)
       case (coreSignal: Bits, padSignal: Bits) => {
         require(padSignal.getWidth == coreSignal.getWidth, "padSignal and coreSignal must be the same width")
         if (padSignal.getWidth == 0) {
@@ -248,6 +247,7 @@ object IOCell {
           }
         }
       }
+      case (coreSignal: Reset, padSignal: Reset) => genCellForAbstractReset(coreSignal, padSignal)
       case (coreSignal: Vec[_], padSignal: Vec[_]) => {
         require(padSignal.size == coreSignal.size, "size of Vec for padSignal and coreSignal must be the same")
         coreSignal.zip(padSignal).zipWithIndex.foldLeft(Seq.empty[IOCell]) { case (total, ((core, pad), i)) =>
