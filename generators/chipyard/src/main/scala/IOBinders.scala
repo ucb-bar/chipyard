@@ -5,7 +5,7 @@ import chisel3._
 import chisel3.experimental.{Analog, IO}
 
 import freechips.rocketchip.config.{Field, Config, Parameters}
-import freechips.rocketchip.diplomacy.{LazyModule}
+import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.{SimAXIMem}
@@ -48,17 +48,32 @@ type TestHarnessFunction = (chipyard.TestHarness) => Seq[Any]
 //  3. An optional function to call inside the test harness (e.g. to connect the IOs)
 type IOBinderTuple = (Seq[Data], Seq[IOCell], Option[TestHarnessFunction])
 
-case object IOBinders extends Field[Map[String, (Any, Parameters) => Seq[IOBinderTuple]]](
-  Map[String, (Any, Parameters) => Seq[IOBinderTuple]]().withDefaultValue((Any, Parameters) => Nil)
+case object IOBinders extends Field[Map[String, (Any) => Seq[IOBinderTuple]]](
+  Map[String, (Any) => Seq[IOBinderTuple]]().withDefaultValue((Any) => Nil)
 )
+
+// Note: The parameters instance is accessible only through LazyModule
+// or LazyModuleImpLike. The self-type requirement in traits like
+// CanHaveMasterAXI4MemPort is insufficient to make it accessible to the IOBinder
+// As a result, IOBinders only work on Modules which inherit LazyModule or
+// or LazyModuleImpLike
+object GetSystemParameters {
+  def apply(s: Any): Parameters = {
+    s match {
+      case s: LazyModule => s.p
+      case s: LazyModuleImpLike => s.p
+      case _ => throw new Exception(s"Trying to get Parameters from a system that is not LazyModule or LazyModuleImpLike")
+    }
+  }
+}
 
 // This macro overrides previous matches on some Top mixin. This is useful for
 // binders which drive IO, since those typically cannot be composed
-class OverrideIOBinder[T](fn: => (T, Parameters) => Seq[IOBinderTuple])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+class OverrideIOBinder[T](fn: => (T) => Seq[IOBinderTuple])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
   case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString ->
-      ((t: Any, p: Parameters) => {
+      ((t: Any) => {
         t match {
-          case system: T => fn(system, p)
+          case system: T => fn(system)
           case _ => Nil
         }
       })
@@ -67,12 +82,12 @@ class OverrideIOBinder[T](fn: => (T, Parameters) => Seq[IOBinderTuple])(implicit
 
 // This macro composes with previous matches on some Top mixin. This is useful for
 // annotation-like binders, since those can typically be composed
-class ComposeIOBinder[T](fn: => (T, Parameters) => Seq[IOBinderTuple])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+class ComposeIOBinder[T](fn: => (T) => Seq[IOBinderTuple])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
   case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString ->
-      ((t: Any, p: Parameters) => {
+      ((t: Any) => {
         t match {
-          case system: T => (up(IOBinders, site)(tag.runtimeClass.toString)(system, p)
-            ++ fn(system, p))
+          case system: T => (up(IOBinders, site)(tag.runtimeClass.toString)(system)
+            ++ fn(system))
           case _ => Nil
         }
       })
@@ -211,7 +226,7 @@ object AddIOCells {
 
 // DOC include start: WithGPIOTiedOff
 class WithGPIOTiedOff extends OverrideIOBinder({
-  (system: HasPeripheryGPIOModuleImp, p) => {
+  (system: HasPeripheryGPIOModuleImp) => {
     val (ports2d, ioCells2d) = AddIOCells.gpio(system.gpio)
     val harnessFn = (th: chipyard.TestHarness) => { ports2d.flatten.foreach(_ <> AnalogConst(0)); Nil }
     Seq((ports2d.flatten, ioCells2d.flatten, Some(harnessFn)))
@@ -220,7 +235,7 @@ class WithGPIOTiedOff extends OverrideIOBinder({
 // DOC include end: WithGPIOTiedOff
 
 class WithUARTAdapter extends OverrideIOBinder({
-  (system: HasPeripheryUARTModuleImp, p) => {
+  (system: HasPeripheryUARTModuleImp) => {
     val (ports, ioCells2d) = AddIOCells.uart(system.uart)
     val harnessFn = (th: chipyard.TestHarness) => { UARTAdapter.connect(ports)(system.p); Nil }
     Seq((ports, ioCells2d.flatten, Some(harnessFn)))
@@ -228,7 +243,7 @@ class WithUARTAdapter extends OverrideIOBinder({
 })
 
 class WithSimSPIFlashModel(rdOnly: Boolean = true) extends OverrideIOBinder({
-  (system: HasPeripherySPIFlashModuleImp, p) => {
+  (system: HasPeripherySPIFlashModuleImp) => {
     val (ports, ioCells2d) = AddIOCells.spi(system.qspi, "qspi")
     val harnessFn = (th: chipyard.TestHarness) => { SimSPIFlashModel.connect(ports, th.reset, rdOnly)(system.p); Nil }
     Seq((ports, ioCells2d.flatten, Some(harnessFn)))
@@ -236,7 +251,7 @@ class WithSimSPIFlashModel(rdOnly: Boolean = true) extends OverrideIOBinder({
 })
 
 class WithSimBlockDevice extends OverrideIOBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp, p) => system.bdev.map { bdev =>
+  (system: CanHavePeripheryBlockDeviceModuleImp) => system.bdev.map { bdev =>
     val (port, ios) = AddIOCells.blockDev(bdev)
     val harnessFn = (th: chipyard.TestHarness) => {
       SimBlockDevice.connect(th.clock, th.reset.asBool, Some(port))(system.p)
@@ -247,7 +262,7 @@ class WithSimBlockDevice extends OverrideIOBinder({
 })
 
 class WithBlockDeviceModel extends OverrideIOBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp, p) => system.bdev.map { bdev =>
+  (system: CanHavePeripheryBlockDeviceModuleImp) => system.bdev.map { bdev =>
     val (port, ios) = AddIOCells.blockDev(bdev)
     val harnessFn = (th: chipyard.TestHarness) => {
       BlockDeviceModel.connect(Some(port))(system.p)
@@ -258,26 +273,23 @@ class WithBlockDeviceModel extends OverrideIOBinder({
 })
 
 class WithLoopbackNIC extends OverrideIOBinder({
-  (system: CanHavePeripheryIceNICModuleImp, p) => system.connectNicLoopback(); Nil
+  (system: CanHavePeripheryIceNICModuleImp) => system.connectNicLoopback(); Nil
 })
 
 class WithSimNIC extends OverrideIOBinder({
-  (system: CanHavePeripheryIceNICModuleImp, p) => system.connectSimNetwork(system.clock, system.reset.asBool); Nil
+  (system: CanHavePeripheryIceNICModuleImp) => system.connectSimNetwork(system.clock, system.reset.asBool); Nil
 })
 
-// Note: The parameters instance is accessible only through the BaseSubsystem
-// or some parent class (IsAttachable, BareSubsystem -> LazyModule). The
-// self-type requirement in CanHaveMasterAXI4MemPort is insufficient to make it
-// accessible to the IOBinder
 // DOC include start: WithSimAXIMem
 class WithSimAXIMem extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPort, p) => {
+  (system: CanHaveMasterAXI4MemPort) => {
+    implicit val p: Parameters = GetSystemParameters(system)
     val peiTuples = AddIOCells.axi4(system.mem_axi4, system.memAXI4Node, "mem")
     // TODO: we are inlining the connectMem method of SimAXIMem because
     //   it takes in a dut rather than seq of axi4 ports
     val harnessFn = (th: chipyard.TestHarness) => {
       peiTuples.map { case (port, edge, ios) =>
-        val mem = LazyModule(new SimAXIMem(edge, size = p(ExtMem).get.master.size)(p))
+        val mem = LazyModule(new SimAXIMem(edge, size = p(ExtMem).get.master.size))
         Module(mem.module).suggestName("mem")
         mem.io_axi4.head <> port
       }
@@ -289,7 +301,8 @@ class WithSimAXIMem extends OverrideIOBinder({
 // DOC include end: WithSimAXIMem
 
 class WithBlackBoxSimMem extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPort, p) => {
+  (system: CanHaveMasterAXI4MemPort) => {
+    implicit val p: Parameters = GetSystemParameters(system)
     val peiTuples = AddIOCells.axi4(system.mem_axi4, system.memAXI4Node, "mem")
     val harnessFn = (th: chipyard.TestHarness) => {
       peiTuples.map { case (port, edge, ios) =>
@@ -307,11 +320,12 @@ class WithBlackBoxSimMem extends OverrideIOBinder({
 })
 
 class WithSimAXIMMIO extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MMIOPort, p) => {
+  (system: CanHaveMasterAXI4MMIOPort) => {
+    implicit val p: Parameters = GetSystemParameters(system)
     val peiTuples = AddIOCells.axi4(system.mmio_axi4, system.mmioAXI4Node, "mmio_mem")
     val harnessFn = (th: chipyard.TestHarness) => {
       peiTuples.zipWithIndex.map { case ((port, edge, ios), i) =>
-        val mmio_mem = LazyModule(new SimAXIMem(edge, size = 4096)(p))
+        val mmio_mem = LazyModule(new SimAXIMem(edge, size = 4096))
         Module(mmio_mem.module).suggestName(s"mmio_mem_${i}")
         mmio_mem.io_axi4.head <> port
       }
@@ -322,11 +336,11 @@ class WithSimAXIMMIO extends OverrideIOBinder({
 })
 
 class WithDontTouchPorts extends OverrideIOBinder({
-  (system: DontTouch, p) => system.dontTouchPorts(); Nil
+  (system: DontTouch) => system.dontTouchPorts(); Nil
 })
 
 class WithTieOffInterrupts extends OverrideIOBinder({
-  (system: HasExtInterruptsModuleImp, p) => {
+  (system: HasExtInterruptsModuleImp) => {
     val (port, ioCells) = IOCell.generateIOFromSignal(system.interrupts, Some("iocell_interrupts"))
     port.suggestName("interrupts")
     val harnessFn = (th: chipyard.TestHarness) => { port := 0.U; Nil }
@@ -335,7 +349,7 @@ class WithTieOffInterrupts extends OverrideIOBinder({
 })
 
 class WithTieOffL2FBusAXI extends OverrideIOBinder({
-  (system: CanHaveSlaveAXI4Port, p) => {
+  (system: CanHaveSlaveAXI4Port) => {
     val peiTuples = AddIOCells.axi4(system.l2_frontend_bus_axi4, system.l2FrontendAXI4Node, "l2_fbus")
     val harnessFn = (th: chipyard.TestHarness) => {
       peiTuples.zipWithIndex.map { case ((port, edge, ios), i) =>
@@ -349,7 +363,7 @@ class WithTieOffL2FBusAXI extends OverrideIOBinder({
 })
 
 class WithTiedOffDebug extends OverrideIOBinder({
-  (system: HasPeripheryDebugModuleImp, p) => {
+  (system: HasPeripheryDebugModuleImp) => {
     val (psdPort, resetctrlOpt, debugPortOpt, ioCells) =
       AddIOCells.debug(system.psd, system.resetctrl, system.debug)(system.p)
     val harnessFn = (th: chipyard.TestHarness) => {
@@ -367,7 +381,7 @@ class WithTiedOffDebug extends OverrideIOBinder({
 })
 
 class WithSimDebug extends OverrideIOBinder({
-  (system: HasPeripheryDebugModuleImp, p) => {
+  (system: HasPeripheryDebugModuleImp) => {
     val (psdPort, resetctrlPortOpt, debugPortOpt, ioCells) =
       AddIOCells.debug(system.psd, system.resetctrl, system.debug)(system.p)
     val harnessFn = (th: chipyard.TestHarness) => {
@@ -382,7 +396,7 @@ class WithSimDebug extends OverrideIOBinder({
 })
 
 class WithTiedOffSerial extends OverrideIOBinder({
-  (system: CanHavePeripherySerialModuleImp, p) => system.serial.map({ serial =>
+  (system: CanHavePeripherySerialModuleImp) => system.serial.map({ serial =>
     val (port, ioCells) = AddIOCells.serial(serial)
     val harnessFn = (th: chipyard.TestHarness) => {
       SerialAdapter.tieoff(port)
@@ -393,7 +407,7 @@ class WithTiedOffSerial extends OverrideIOBinder({
 })
 
 class WithSimSerial extends OverrideIOBinder({
-  (system: CanHavePeripherySerialModuleImp, p) => system.serial.map({ serial =>
+  (system: CanHavePeripherySerialModuleImp) => system.serial.map({ serial =>
     val (port, ioCells) = AddIOCells.serial(serial)
     val harnessFn = (th: chipyard.TestHarness) => {
       val ser_success = SerialAdapter.connectSimSerial(port, th.clock, th.harnessReset)
@@ -405,7 +419,7 @@ class WithSimSerial extends OverrideIOBinder({
 })
 
 class WithTraceGenSuccessBinder extends OverrideIOBinder({
-  (system: TraceGenSystemModuleImp, p) => {
+  (system: TraceGenSystemModuleImp) => {
     val (successPort, ioCells) = IOCell.generateIOFromSignal(system.success, Some("iocell_success"))
     successPort.suggestName("success")
     val harnessFn = (th: chipyard.TestHarness) => { when (successPort) { th.success := true.B }; Nil }
@@ -414,7 +428,7 @@ class WithTraceGenSuccessBinder extends OverrideIOBinder({
 })
 
 class WithSimDromajoBridge extends ComposeIOBinder({
-   (system: CanHaveTraceIOModuleImp, p) => {
+   (system: CanHaveTraceIOModuleImp) => {
      system.traceIO match { case Some(t) => t.traces.map(tileTrace => SimDromajoBridge(tileTrace)(system.p)) }
      Nil
    }
