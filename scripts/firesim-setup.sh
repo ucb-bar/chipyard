@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Sets up FireSim for use as a library within REBAR
+# Sets up FireSim for use as a library within Chipyard
 
 set -e
 set -o pipefail
@@ -12,7 +12,6 @@ cd "${scripts_dir}/.."
 
 # Reenable the FireSim submodule
 git config --unset submodule.sims/firesim.update || true
-git submodule update --init sims/firesim
 cd sims/firesim
 ./build-setup.sh "$@" --library
 cd "$RDIR"

@@ -12,7 +12,7 @@ import freechips.rocketchip.devices.tilelink._
 // ------------------------------------
 
 // DOC include start: DigitalTop
-class DigitalTop(implicit p: Parameters) extends System
+class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with testchipip.CanHaveTraceIO // Enables optionally adding trace IO
   with testchipip.CanHaveBackingScratchpad // Enables optionally adding a backing scratchpad
   with testchipip.CanHavePeripheryBlockDevice // Enables optionally adding the block device
@@ -30,7 +30,7 @@ class DigitalTop(implicit p: Parameters) extends System
   override lazy val module = new DigitalTopModule(this)
 }
 
-class DigitalTopModule[+L <: DigitalTop](l: L) extends SystemModule(l)
+class DigitalTopModule[+L <: DigitalTop](l: L) extends ChipyardSystemModule(l)
   with testchipip.CanHaveTraceIOModuleImp
   with testchipip.CanHavePeripheryBlockDeviceModuleImp
   with testchipip.CanHavePeripherySerialModuleImp

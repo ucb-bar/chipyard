@@ -13,15 +13,12 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.BootROMParams
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
-import boom.common.BoomTilesKey
 import testchipip.{BlockDeviceKey, BlockDeviceConfig, TracePortKey, TracePortParams, MemBenchKey, MemBenchParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import sifive.blocks.inclusivecache.InclusiveCachePortParameters
 import scala.math.{min, max}
-import tracegen.TraceGenKey
+
 import icenet._
-import scala.math.max
-import ariane.ArianeTilesKey
 import testchipip.WithRingSystemBus
 import memblade.cache.DRAMCacheKey
 
@@ -47,12 +44,6 @@ class WithPeripheryBusFrequency(freq: BigInt) extends Config((site, here, up) =>
   case PeripheryBusKey => up(PeripheryBusKey).copy(dtsFrequency = Some(freq))
 })
 
-class WithPerfCounters extends Config((site, here, up) => {
-  case RocketTilesKey => up(RocketTilesKey) map (tile => tile.copy(
-    core = tile.core.copy(nPerfCounters = 29)
-  ))
-})
-
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
 class WithoutClockGating extends Config((site, here, up) => {
   case DebugModuleKey => up(DebugModuleKey, site).map(_.copy(clockGate = false))
@@ -73,13 +64,6 @@ class WithNIC extends icenet.WithIceNIC(
   inBufFlits = 8192,
   usePauser = true,
   ctrlQueueDepth = 64)
-
-// Enables tracing on all cores
-class WithTraceIO extends Config((site, here, up) => {
-  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
-  case ArianeTilesKey => up(ArianeTilesKey) map (tile => tile.copy(trace = true))
-  case TracePortKey => Some(TracePortParams())
-})
 
 // Adds a small/large NVDLA to the system
 class WithNVDLALarge extends nvidia.blocks.dla.WithNVDLA("large")

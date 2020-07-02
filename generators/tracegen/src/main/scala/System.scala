@@ -3,64 +3,39 @@ package tracegen
 import chisel3._
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, BufferParams, ValName}
-import freechips.rocketchip.groundtest.{DebugCombiner, TraceGenParams}
+import freechips.rocketchip.groundtest.{DebugCombiner, TraceGenParams, GroundTestTile}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.interrupts.{IntSinkNode, IntSinkPortSimple}
 
-case object BoomTraceGenKey extends Field[Seq[TraceGenParams]](Nil)
-case object TraceGenKey extends Field[Seq[TraceGenParams]](Nil)
-
-trait HasTraceGenTiles { this: BaseSubsystem =>
-  val rocket_tiles = p(TraceGenKey).zipWithIndex.map { case (params, i) =>
-    LazyModule(new TraceGenTile(i, params, p))
-  }
-  val boom_tiles = p(BoomTraceGenKey).zipWithIndex.map { case (params, i) =>
-    LazyModule(new BoomTraceGenTile(i, params, p))
-  }
-
-  val tiles = rocket_tiles ++ boom_tiles
-
-  tiles.foreach { t =>
-    sbus.fromTile(None, buffer = BufferParams.default) { t.masterNode }
-  }
-
-  implicit val valName = ValName(this.name)
-  IntSinkNode(IntSinkPortSimple()) :=* ibus.toPLIC
-}
-
-trait HasTraceGenTilesModuleImp extends LazyModuleImp {
-  val outer: HasTraceGenTiles
-  val success = IO(Output(Bool()))
-
-  outer.tiles.zipWithIndex.map { case(t, i) =>
-    t.module.constants.hartid := i.U
-  }
-
-  val status = DebugCombiner(
-    outer.rocket_tiles.map(_.module.status) ++
-    outer.boom_tiles.map(_.module.status)
-  )
-  success := status.finished
-}
-
 class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
-    with HasTraceGenTiles
+    with HasTiles
     with CanHaveMasterAXI4MemPort {
+
+  def coreMonitorBundles = Nil
   override lazy val module = new TraceGenSystemModuleImp(this)
 }
 
-class TraceGenSystemModuleImp(outer: TraceGenSystem)
+class TraceGenSystemModuleImp[+T <: TraceGenSystem](outer: T)
   extends BaseSubsystemModuleImp(outer)
-  with HasTraceGenTilesModuleImp
+{
+  val success = IO(Output(Bool()))
 
-class DRAMCacheTraceGenSystem(implicit p: Parameters) extends BaseSubsystem
-    with HasTraceGenTiles
-    with CanHaveMasterAXI4MemPort
+  outer.tiles.zipWithIndex.map { case(t, i) => t.module.constants.hartid := i.U }
+
+  val status = dontTouch(DebugCombiner(outer.tiles.collect {
+    case t: GroundTestTile => t.module.status
+    case t: BoomTraceGenTile => t.module.status
+  }))
+  success := outer.tileCeaseSinkNode.in.head._1.asUInt.andR
+
+}
+
+class DRAMCacheTraceGenSystem(implicit p: Parameters) extends TraceGenSystem
     with memblade.cache.HasPeripheryDRAMCache {
+
   override lazy val module = new DRAMCacheTraceGenSystemModuleImp(this)
 }
 
 class DRAMCacheTraceGenSystemModuleImp(outer: DRAMCacheTraceGenSystem)
-  extends BaseSubsystemModuleImp(outer)
-  with HasTraceGenTilesModuleImp
+  extends TraceGenSystemModuleImp(outer)
   with memblade.cache.HasPeripheryDRAMCacheModuleImp

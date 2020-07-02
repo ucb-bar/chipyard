@@ -11,17 +11,18 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.{SimAXIMem}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4EdgeParameters}
 import freechips.rocketchip.util._
+import freechips.rocketchip.groundtest.{GroundTestSubsystemModuleImp, GroundTestSubsystem}
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
+import tracegen.{TraceGenSystemModuleImp}
 
 import barstools.iocell.chisel._
 
 import testchipip._
 import icenet.{CanHavePeripheryIceNICModuleImp, SimNetwork, NicLoopback, NICKey}
 import icenet.IceNetConsts.NET_IF_BYTES
-import tracegen.{HasTraceGenTilesModuleImp}
 import memblade.cache.{HasPeripheryDRAMCacheModuleImp, DRAMCacheKey}
 
 import scala.reflect.{ClassTag}
@@ -187,9 +188,9 @@ object AddIOCells {
   }
 
   def axi4(io: Seq[AXI4Bundle], node: AXI4SlaveNode): Seq[(AXI4Bundle, AXI4EdgeParameters, Seq[IOCell])] = {
-    io.zip(node.in).map{ case (mem_axi4, (_, edge)) => {
-      val (port, ios) = IOCell.generateIOFromSignal(mem_axi4, Some("iocell_mem_axi4"))
-      port.suggestName("mem_axi4")
+    io.zip(node.in).zipWithIndex.map{ case ((mem_axi4, (_, edge)), i) => {
+      val (port, ios) = IOCell.generateIOFromSignal(mem_axi4, Some(s"iocell_mem_axi4_${i}"))
+      port.suggestName(s"mem_axi4_${i}")
       (port, edge, ios)
     }}
   }
@@ -391,7 +392,7 @@ class WithSimSerial extends OverrideIOBinder({
 })
 
 class WithTraceGenSuccessBinder extends OverrideIOBinder({
-  (system: HasTraceGenTilesModuleImp) => {
+  (system: TraceGenSystemModuleImp) => {
     val (successPort, ioCells) = IOCell.generateIOFromSignal(system.success, Some("iocell_success"))
     successPort.suggestName("success")
     val harnessFn = (th: chipyard.TestHarness) => { when (successPort) { th.success := true.B }; Nil }
