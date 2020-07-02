@@ -46,18 +46,3 @@ class NonBlockingTraceGenL2RingConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.groundtest.GroundTestBaseConfig)
-
-class DRAMCacheTraceGenConfig extends Config(
-  new chipyard.iobinders.WithBlackBoxSimMem ++
-  new chipyard.iobinders.WithTraceGenSuccessBinder ++
-  new chipyard.iobinders.WithDRAMCacheBinder ++
-  new chipyard.config.WithDRAMCacheTracegenSystem ++
-  new tracegen.WithDRAMCacheTraceGen(
-    List.fill(2)(DCacheParams(nMSHRs = 2, nSets = 16, nWays = 4))) ++
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++
-  new chipyard.config.WithDRAMCacheExtentTableInit ++
-  new chipyard.config.WithDRAMCacheKey(4, 4) ++
-  new chipyard.config.WithMemBladeKey ++
-  new icenet.WithIceNIC ++
-  new freechips.rocketchip.subsystem.WithExtMemSize(2L << 30) ++
-  new freechips.rocketchip.groundtest.GroundTestBaseConfig)

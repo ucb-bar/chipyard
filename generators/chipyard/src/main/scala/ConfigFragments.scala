@@ -85,11 +85,6 @@ class WithTracegenSystem extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => LazyModule(new TraceGenSystem()(p))
 })
 
-class WithDRAMCacheTracegenSystem extends Config((site, here, up) => {
-  case BuildSystem => (p: Parameters) =>
-    LazyModule(new tracegen.DRAMCacheTraceGenSystem()(p))
-})
-
 class WithMemBladeSystem extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) =>
     LazyModule(new chipyard.MemBladeTop()(p))

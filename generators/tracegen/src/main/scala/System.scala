@@ -15,7 +15,7 @@ class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
   override lazy val module = new TraceGenSystemModuleImp(this)
 }
 
-class TraceGenSystemModuleImp[+T <: TraceGenSystem](outer: T)
+class TraceGenSystemModuleImp(outer: TraceGenSystem)
   extends BaseSubsystemModuleImp(outer)
 {
   val success = IO(Output(Bool()))
@@ -27,15 +27,4 @@ class TraceGenSystemModuleImp[+T <: TraceGenSystem](outer: T)
     case t: BoomTraceGenTile => t.module.status
   }))
   success := outer.tileCeaseSinkNode.in.head._1.asUInt.andR
-
 }
-
-class DRAMCacheTraceGenSystem(implicit p: Parameters) extends TraceGenSystem
-    with memblade.cache.HasPeripheryDRAMCache {
-
-  override lazy val module = new DRAMCacheTraceGenSystemModuleImp(this)
-}
-
-class DRAMCacheTraceGenSystemModuleImp(outer: DRAMCacheTraceGenSystem)
-  extends TraceGenSystemModuleImp(outer)
-  with memblade.cache.HasPeripheryDRAMCacheModuleImp

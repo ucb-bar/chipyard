@@ -9,7 +9,6 @@ import freechips.rocketchip.system.BaseConfig
 import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.tile.{MaxHartIdBits, XLen}
 import scala.math.{max, min}
-import memblade.cache.DRAMCacheKey
 import icenet.IceNetConsts._
 
 class WithTraceGen(
@@ -125,49 +124,6 @@ class WithL2TraceGen(
           numGens = params.size),
         crossingParams = RocketCrossingParams()
       )
-    } ++ prev
-  }
-})
-
-class WithDRAMCacheTraceGen(params: Seq[DCacheParams], nReqs: Int = 8192)
-    extends Config((site, here, up) => {
-  case TilesLocated(InSubsystem) => {
-    val prev = up(TilesLocated(InSubsystem), site)
-    val idOffset = prev.size
-
-    params.zipWithIndex.map { case (dcp, i) =>
-      TraceGenTileAttachParams(
-        tileParams = TraceGenParams(
-          hartId = i + idOffset,
-          dcache = Some(dcp),
-          wordBits = site(XLen),
-          addrBits = 48,
-          addrBag = {
-            val dramp = site(DRAMCacheKey)
-            val nSets = max(dramp.nSets, dcp.nSets)
-            val nWays = max(dramp.nWays, dcp.nWays)
-            val nBanks = dramp.nChannels * dramp.nBanksPerChannel
-            val blockOffset = log2Ceil(dramp.spanBytes)
-            val beatBytes = NET_IF_BYTES
-            val nBeats = min(2, dramp.spanBytes / beatBytes)
-            List.tabulate(nWays + 1) { i =>
-              List.tabulate(nBanks) { j =>
-                val spanBase = (i * nSets + j) << blockOffset
-                val mcOffset = dramp.nMetaCacheRows << blockOffset
-                val beats = Seq.tabulate(nBeats) { k =>
-                  BigInt(spanBase + (k * beatBytes))
-                }
-                if (mcOffset > nBanks)
-                  beats ++ beats.map(_ + mcOffset)
-                else
-                  beats
-              }.flatten
-            }.flatten
-          },
-          maxRequests = nReqs,
-          memStart = site(DRAMCacheKey).baseAddr,
-          numGens = params.size),
-        crossingParams = RocketCrossingParams())
     } ++ prev
   }
 })
