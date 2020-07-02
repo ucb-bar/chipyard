@@ -42,7 +42,7 @@ class DigitalTopModule[+L <: DigitalTop](l: L) extends ChipyardSystemModule(l)
   with freechips.rocketchip.util.DontTouch
 // DOC include end: DigitalTop
 
-class MemBladeTop(implicit p: Parameters) extends System
+class MemBladeTop(implicit p: Parameters) extends ChipyardSystem
   with testchipip.CanHaveTraceIO
   with testchipip.CanHavePeripheryBlockDevice
   with testchipip.CanHavePeripherySerial
@@ -52,14 +52,14 @@ class MemBladeTop(implicit p: Parameters) extends System
   override lazy val module = new MemBladeTopModule(this)
 }
 
-class MemBladeTopModule(outer: MemBladeTop) extends SystemModule(outer)
+class MemBladeTopModule(outer: MemBladeTop) extends ChipyardSystemModule(outer)
   with testchipip.CanHaveTraceIOModuleImp
   with testchipip.CanHavePeripheryBlockDeviceModuleImp
   with testchipip.CanHavePeripherySerialModuleImp
   with sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
   with memblade.manager.HasPeripheryMemBladeModuleImpValidOnly
 
-class RemoteMemClientTop(implicit p: Parameters) extends System
+class RemoteMemClientTop(implicit p: Parameters) extends ChipyardSystem
   with testchipip.CanHaveTraceIO
   with testchipip.CanHavePeripheryBlockDevice
   with testchipip.CanHavePeripherySerial
@@ -70,14 +70,14 @@ class RemoteMemClientTop(implicit p: Parameters) extends System
   override lazy val module = new RemoteMemClientTopModule(this)
 }
 
-class RemoteMemClientTopModule(outer: RemoteMemClientTop) extends SystemModule(outer)
+class RemoteMemClientTopModule(outer: RemoteMemClientTop) extends ChipyardSystemModule(outer)
   with testchipip.CanHaveTraceIOModuleImp
   with testchipip.CanHavePeripheryBlockDeviceModuleImp
   with testchipip.CanHavePeripherySerialModuleImp
   with sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
   with memblade.client.HasPeripheryRemoteMemClientModuleImpValidOnly
 
-class DRAMCacheTop(implicit p: Parameters) extends System
+class DRAMCacheTop(implicit p: Parameters) extends ChipyardSystem
   with testchipip.CanHaveTraceIO
   with testchipip.CanHavePeripheryBlockDevice
   with testchipip.CanHavePeripherySerial
@@ -88,7 +88,7 @@ class DRAMCacheTop(implicit p: Parameters) extends System
   override lazy val module = new DRAMCacheTopModule(this)
 }
 
-class DRAMCacheTopModule(outer: DRAMCacheTop) extends SystemModule(outer)
+class DRAMCacheTopModule(outer: DRAMCacheTop) extends ChipyardSystemModule(outer)
   with testchipip.CanHaveTraceIOModuleImp
   with testchipip.CanHavePeripheryBlockDeviceModuleImp
   with testchipip.CanHavePeripherySerialModuleImp

@@ -197,7 +197,6 @@ class DualLargeBoomConfig extends Config(
   new chipyard.config.WithStandardL2(4) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new boom.common.WithLargeBooms ++
-  new boom.common.WithNBoomCores(2) ++
+  new boom.common.WithNLargeBooms(2) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
