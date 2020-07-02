@@ -7,34 +7,32 @@ You may want to add a custom RISC-V core to Chipyard generator. If the top modul
 you will first need to create a Verilog blackbox for it. See :ref:`incorporating-verilog-blocks` for instructions.
 Once you have a top module in Chisel, you are ready to create integrate it with Chipyard. 
 
+``generators/ariane/src/main/scala/ArianeTile.scala`` and ``generators/boom/src/main/scala/common/tile.scala`` 
+provide two examples of how to integrate a core.
+
 .. note:: 
 
-    RoCC is not supported by custom core currently. Please use Rocket or Boom if you need to use RoCC.
+    RoCC is not supported by custom core currently. Please use Rocket or Boom as the RoCC base core if you need to use RoCC.
 
 Parameter Case Classes
 ----------------------
 
-Chipyard will generate a core for every ``TileParams`` object it discovered in the current config.
-``TileParams`` is a trait containing the information needed to create a tile, and every custom core must implement
-their own version of ``TileParams``, as well as ``CoreParams`` which is passed as a field in ``TileParams``.
+Chipyard will generate a core for every ``InstantiableTileParams`` object it discovered in the current config.
+This object is derived from``TileParams``, a trait containing the information needed to create a tile. All cores must have
+their own implementation of ``InstantiableTileParams``, as well as ``CoreParams`` which is passed as a field in ``TileParams``.
 
-``TileParams`` holds the parameters that are the same for every generated core, while ``CoreParams`` contains those
-that can vary from cores to cores. They must be implemented as case classes with fields that can be overridden by 
+``TileParams`` holds the parameters for the tile, which are the same for every generated core, while ``CoreParams`` 
+contains the parameters for individual cores. They must be implemented as case classes with fields that can be overridden by 
 other config fragments as the constructor parameters. See the appendix at the bottom of the page for a list of 
 variable to be implemented. You can also add custom fields to them, but standard fields should always be preferred. 
 
-Now you have your parameter classes, you will need config keys to hold them. There are two required keys:
+``InstantiableTileParams[TileType]`` holds the constructor of ``TileType`` on top of the fields of ``TileParams``.
+All custom cores will also need to implement ``instantiate()`` in their tile parameter class to return a new instance
+of the tile class ``TileType``. 
 
-.. code-block:: scala
-
-    case object MyTilesKey extends Field[Seq[MyTileParams]](Nil)
-    case object MyCrossingKey extends Field[Seq[RocketCrossingParams]](List(RocketCrossingParams())) 
-
-``MyCrossingKey`` here is used to store information about the clock-crossing behavior of the core, and it is normally
-set to its default values. 
-
-``TileParams`` and ``CoreParams`` contains the following fields (you may ignore any fields marked "Rocket specific" and 
-use their default values, although it is recommended to use them if you need a custom field with similar purposes) :
+``TileParams``, ``InstantiableTileParams[TileType]`` and ``CoreParams`` contains the following fields (you may ignore 
+any fields marked "Rocket specific" and use their default values, although it is recommended to use them if you 
+need a custom field with similar purposes):
 
 .. code-block:: scala
 
@@ -47,6 +45,11 @@ use their default values, although it is recommended to use them if you need a c
       val beuAddr: Option[BigInt]           // Rocket specific: Bus Error Unit for Rocket Core
       val blockerCtrlAddr: Option[BigInt]   // Rocket specific: Bus Blocker for Rocket Core
       val name: Option[String]              // Name of the core
+    }
+
+    abstract class InstantiableTileParams[TileType <: BaseTile] extends TileParams {
+      def instantiate(crossing: TileCrossingParamsLike, lookup: LookupByHartIdImpl)
+                    (implicit p: Parameters): TileType
     }
 
     trait CoreParams {
@@ -87,7 +90,7 @@ use their default values, although it is recommended to use them if you need a c
       def hasSupervisorMode: Boolean = useSupervisor || useVM
       def instBytes: Int = instBits / 8
       def fetchBytes: Int = fetchWidth * instBytes
-      // Rocket specific: Longest possible latency of Rocket core D1 cache. Simply set it to the default value 80.
+      // Rocket specific: Longest possible latency of Rocket core D1 cache. Simply set it to the default value 80 if you don't use it.
       def lrscCycles: Int
 
       def dcacheReqTagBits: Int = 6
@@ -109,14 +112,23 @@ use their default values, although it is recommended to use them if you need a c
 
 Most of the fields here are originally designed for Rocket core and contains some architecture-specific details, but 
 many of them are general enough to be useful for other cores. It is strongly recommended to use these fields instead
-of creating your own custom fields when applicable.
+of creating your own custom fields when applicable. 
+
+.. note::
+
+    Implementations may choose to ignore some fields here or use them in a non-standard way, but using an inaccurate
+    value may break Chipyard components that rely on them (e.g. inaccurate indication of supported ISA extension will
+    result in incorrect test suite being generated) as well as any custom module that use them. ALWAYS document any
+    fields you ignore or with altered usage in your core implementation, and if you are implementing other devices that
+    would look up these config values, also document them. "Rocket specific" values are generally safe to ignore, but 
+    you should document them if you use them.
 
 Tile Class
 ----------
 
-In Chipyard, all connections with other components on SoC are defined a core's `Tile` class, while the implementation 
-of the actual hardware are in the implementation class. This structure allows Chipyard to use the Diplomacy framework
-to resolve paramters and connections before elaboration. 
+In Chipyard, all Tiles are diplomatically instantiated. In the first phase, diplomatic nodes which specify Tile-to-System
+interconnects are evaluated, while in the second "Module Implementation" phase, hardware is elaborated. 
+See :ref:`tilelink_and_diplomacy` for more details.
 
 All tile classes implement ``BaseTile`` and will normally implement ``SinksExternalInterrupts`` and ``SourcesExternalNotifications``,
 which allow the tile to accept external interrupt. A typical tile has the following form:
@@ -169,7 +181,8 @@ TileLink Connection
 -------------------
 
 Chipyard use TileLink as its onboard bus protocol, and if your core doesn't use TileLink, you will need to convert them
-in the tile class. Below is an example of how to connect a core using AXI4 to the TileLink bus: 
+in the tile class. Below is an example of how to connect a core using AXI4 to the TileLink bus with converters provided by
+Chipyards: 
 
 .. code-block:: scala
 
@@ -185,9 +198,12 @@ in the tile class. Below is an example of how to connect a core using AXI4 to th
       := memAXI4Node) // The custom node, see below
 
 Remember, you may not need all of these intermediate widgets. See :ref:`diplomatic_widgets` for the meaning of each intermediate
-widget. If you are using TileLink, then you only need the tap node and the TileLink node used by your components. Also, Chipyard
-support AHB, APB and AXIS, and most of the AXI4 widgets has equivalent widget for these bus protocol. See the reference page for
-more info. 
+widget. If you are using TileLink, then you only need the tap node and the TileLink node used by your components. Chipyard also
+provides converters for AHB, APB and AXIS, and most of the AXI4 widgets has equivalent widget for these bus protocol; see the 
+source files in ``generators/rocket-chip/src/main/scala/amba`` for more info. 
+
+If you are using other bus protocol, you may implement your own converters, using the files in ``generators/rocket-chip/src/main/scala/amba``
+as the template, but it is not recommended unless you are familiar with TileLink. 
 
 ``memAXI4Node`` is an AXI4 master node and is defined as following in our example:
 
@@ -232,7 +248,8 @@ The definition of ``TileInterrupts`` is
     }
 
 This function should be in the implementation class since it involves hardware generation. 
-Also, the tile can also notify other cores or devices for some events by calling following functions (in implementation class):
+Also, the tile can also notify other cores or devices for some events by calling following functions in ``SourcesExternalNotifications``
+from the implementation class:
 
 .. code-block:: scala
 
@@ -240,39 +257,6 @@ Also, the tile can also notify other cores or devices for some events by calling
     def reportHalt(errors: Seq[CanHaveErrors]) // Varient for standard error bundle (used only by cache when there's an ECC error)
     reportCease(could_cease: Option[Bool], quiescenceCycles: Int = 8) // Triggered when the core stop retiring instructions (like clock gating)
     reportWFI(could_wfi: Option[Bool]) // Triggered when a WFI instruction is executed
-
-Trace (Optional)
-----------------
-
-Chipyard provides a set of ports for instruction trace that conforms with related RISC-V standard.
-If you are using FireSim, it is recommended to implement these trace ports to enable FireSim to read trace. 
-
-There are one inbound node ``traceAuxSinkNode.bundle: TraceAux`` and two outbound nodes ``traceCoreSourceNode.bundle: TraceCoreInterface``
-and ``bpwatchSourceNode.bundle: Vec[BPWatch]``. Note that the length of ``bpwatchSourceNode`` is equal to the max number of 
-breakpoints (set by ``nBreakpoints`` in ``CoreParams``). Below is the definition of these types:
-
-.. code-block:: scala
-
-    // Control signal from the external tracer
-    class TraceAux extends Bundle {
-      val enable = Bool()   // Enable trace output
-      val stall = Bool()    // If true, the core should stall
-    }
-    // Check RISC-V Processor Trace spec V1.0 for more information of this interface
-    class TraceCoreInterface (val params: TraceCoreParams) extends Bundle {
-      val group = Vec(params.nGroups, new TraceCoreGroup(params))
-      val priv = UInt(4.W)
-      val tval = UInt(params.xlen.W)
-      val cause = UInt(params.xlen.W)
-    }
-    // Address Breakpoint and watchpoint info (n is the retire width)
-    class BPWatch (val n: Int) extends Bundle() {
-      val valid = Vec(n, Bool())    // Valid bit of the output
-      val rvalid = Vec(n, Bool())   // Break on read
-      val wvalid = Vec(n, Bool())   // Break on write
-      val ivalid = Vec(n, Bool())   // Break on execute
-      val action = UInt(3.W)        // Exception code (3 usually) 
-    }
 
 Implementation Class
 --------------------
@@ -313,11 +297,12 @@ the current config. An example of such config will be like this:
 
 .. code-block:: scala
 
-    class WithNMyCores(n: Int) extends Config((site, here, up) => {
-      case MyTilesKey => {
-        List.tabulate(n)(i => MyTileParams(hartId = i))
-      }
+    class WithNMyCores(n: Int, hartidOffset: Int) extends Config((site, here, up) => {
+      case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem)) :++ List.tabulate(n)(i => MyTileParams(hartId = i + hartidOffset))
     })
+
+Chipyard looks up the tile parameters in the field ``TilesLocated(InSubsystem)``, whose type is a list of ``InstantiableTileParams``.
+This config fragment simply appends new tile parameters to the end of this list. 
 
 Now you have finished all the steps to prepare your cores for Chipyard! To generate the custom core, simply follow the instructions
 in :ref:`custom_chisel` to add your project to the build system, then create a config by following the steps in :ref:`hetero_socs_`.
