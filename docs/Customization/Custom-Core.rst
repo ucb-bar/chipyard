@@ -3,21 +3,24 @@
 Adding a custom core
 ====================
 
-You may want to add a custom RISC-V core to Chipyard generator. If the top module of your core is not in Chisel, 
-you will first need to create a Verilog blackbox for it. See :ref:`incorporating-verilog-blocks` for instructions.
-Once you have a top module in Chisel, you are ready to create integrate it with Chipyard. 
-
-``generators/ariane/src/main/scala/ArianeTile.scala`` and ``generators/boom/src/main/scala/common/tile.scala`` 
-provide two examples of how to integrate a core.
+You may want to integrate a custom RISC-V core into the Chipyard framework. This documentation page provides a step-to-step
+instruction on how to achieve this.
 
 .. note:: 
 
-    RoCC is not supported by custom core currently. Please use Rocket or Boom as the RoCC base core if you need to use RoCC.
+    RoCC is currently not supported by cores other than Rocket and BOOM. Please use Rocket or BOOM as the RoCC base core if you need to use RoCC.
 
-Parameter Case Classes
-----------------------
 
-Chipyard will generate a core for every ``InstantiableTileParams`` object it discovered in the current config.
+Wrap Verilog Module with Blackbox (Optional)
+--------------------------------------------
+
+Since Chipyard uses Scala and Chisel, if the top module of your core is not in Chisel, you will first need to create a Verilog
+blackbox for it so that it can be processed by Chipyard. See :ref:`incorporating-verilog-blocks` for instructions.
+
+Create Parameter Case Classes
+-----------------------------
+
+Chipyard will generate a core for every ``InstantiableTileParams`` object it discovered in the ``TilesLocated(InSubsystem)`` key.
 This object is derived from``TileParams``, a trait containing the information needed to create a tile. All cores must have
 their own implementation of ``InstantiableTileParams``, as well as ``CoreParams`` which is passed as a field in ``TileParams``.
 
@@ -41,7 +44,7 @@ need a custom field with similar purposes):
       val icache: Option[ICacheParams]      // Rocket specific: I1 cache option
       val dcache: Option[DCacheParams]      // Rocket specific: D1 cache option
       val btb: Option[BTBParams]            // Rocket specific: BTB / branch predictor option
-      val hartId: Int                       // Hart ID: Must be unique within a design config
+      val hartId: Int                       // Hart ID: Must be unique within a design config (This MUST be a case class parameter)
       val beuAddr: Option[BigInt]           // Rocket specific: Bus Error Unit for Rocket Core
       val blockerCtrlAddr: Option[BigInt]   // Rocket specific: Bus Blocker for Rocket Core
       val name: Option[String]              // Name of the core
@@ -110,110 +113,64 @@ need a custom field with similar purposes):
       dfmaLatency: Int = 4        // Rocket specific: Fused multiply-add pipeline latency (double precision)
     )
 
-Most of the fields here are originally designed for Rocket core and contains some architecture-specific details, but 
+Most of the fields here are originally designed for the Rocket core and thus contain some implementation-specific details, but 
 many of them are general enough to be useful for other cores. It is strongly recommended to use these fields instead
 of creating your own custom fields when applicable. 
+
+You will also need a ``CanAttachTile`` class to add the tile config into the config system, with the following format:
+
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
+    :language: scala
+    :lines: 61-67
 
 .. note::
 
     Implementations may choose to ignore some fields here or use them in a non-standard way, but using an inaccurate
-    value may break Chipyard components that rely on them (e.g. inaccurate indication of supported ISA extension will
-    result in incorrect test suite being generated) as well as any custom module that use them. ALWAYS document any
+    value may break Chipyard components that rely on them (e.g. an inaccurate indication of supported ISA extension will
+    result in an incorrect test suite being generated) as well as any custom modules that use them. ALWAYS document any
     fields you ignore or with altered usage in your core implementation, and if you are implementing other devices that
     would look up these config values, also document them. "Rocket specific" values are generally safe to ignore, but 
     you should document them if you use them.
 
-Tile Class
-----------
+Create Tile Class
+-----------------
 
 In Chipyard, all Tiles are diplomatically instantiated. In the first phase, diplomatic nodes which specify Tile-to-System
 interconnects are evaluated, while in the second "Module Implementation" phase, hardware is elaborated. 
-See :ref:`tilelink_and_diplomacy` for more details.
+See :ref:`tilelink_and_diplomacy` for more details. In this step, you will need to implement a tile class for your core.
 
 All tile classes implement ``BaseTile`` and will normally implement ``SinksExternalInterrupts`` and ``SourcesExternalNotifications``,
 which allow the tile to accept external interrupt. A typical tile has the following form:
 
-.. code-block:: scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
+    :language: scala
+    :lines: 87-125, 143
 
-    class MyTile(
-      val myParams: MyTileParams,
-      crossing: ClockCrossingType,
-      lookup: LookupByHartIdImpl,
-      q: Parameters,
-      logicalTreeNode: LogicalTreeNode)
-      extends BaseTile(myParams, crossing, lookup, q)
-      with SinksExternalInterrupts
-      with SourcesExternalNotifications
-    {
+Connect TileLink Buses
+----------------------
 
-      // Private constructor ensures altered LazyModule.p is used implicitly
-      def this(params: MyTileParams, crossing: RocketCrossingParams, lookup: LookupByHartIdImpl, logicalTreeNode: LogicalTreeNode)(implicit p: Parameters) =
-        this(params, crossing.crossingType, lookup, p, logicalTreeNode)
-
-      // Require TileLink nodes
-      val intOutwardNode = IntIdentityNode()
-      val masterNode = visibilityNode
-      val slaveNode = TLIdentityNode()
-
-      // Implementation class (See below)
-      override lazy val module = new MyTileModuleImp(this)
-
-      // Required entry of CPU device in the device tree for interrupt purpose
-      val cpuDevice: SimpleDevice = new SimpleDevice("cpu", Seq("my-organization,my-cpu", "riscv")) {
-        override def parent = Some(ResourceAnchors.cpus)
-        override def describe(resources: ResourceBindings): Description = {
-          val Description(name, mapping) = super.describe(resources)
-          Description(name, mapping ++
-                            cpuProperties ++
-                            nextLevelCacheProperty ++
-                            tileProperties)
-        }
-      }
-
-      ResourceBinding {
-        Resource(cpuDevice, "reg").bind(ResourceAddress(hartId))
-      }
-
-      // (Connection to bus, interrupt, etc.)
-    }
-
-TileLink Connection
--------------------
-
-Chipyard use TileLink as its onboard bus protocol, and if your core doesn't use TileLink, you will need to convert them
+Chipyard use TileLink as its onboard bus protocol. If your core doesn't use TileLink, you will need to insert converters 
+between the core's memory protocol and TileLink in the Tile module.
 in the tile class. Below is an example of how to connect a core using AXI4 to the TileLink bus with converters provided by
-Chipyards: 
+Rocket chip: 
 
-.. code-block:: scala
-
-    val memoryTap = TLIdentityNode() // Every bus connection should have their own tap node
-    (tlMasterXbar.node  // tlMasterXbar is the bus crossbar to be used when this core / tile is acting as a master; otherwise, use tlSlaveXBar
-      := memoryTap
-      := TLBuffer()
-      := TLFIFOFixer(TLFIFOFixer.all) // fix FIFO ordering
-      := TLWidthWidget(beatBytes) // reduce size of TL
-      := AXI4ToTL() // convert to TL
-      := AXI4UserYanker(Some(2)) // remove user field on AXI interface. need but in reality user intf. not needed
-      := AXI4Fragmenter() // deal with multi-beat xacts
-      := memAXI4Node) // The custom node, see below
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
+    :language: scala
+    :lines: 133-142
 
 Remember, you may not need all of these intermediate widgets. See :ref:`diplomatic_widgets` for the meaning of each intermediate
 widget. If you are using TileLink, then you only need the tap node and the TileLink node used by your components. Chipyard also
 provides converters for AHB, APB and AXIS, and most of the AXI4 widgets has equivalent widget for these bus protocol; see the 
 source files in ``generators/rocket-chip/src/main/scala/amba`` for more info. 
 
-If you are using other bus protocol, you may implement your own converters, using the files in ``generators/rocket-chip/src/main/scala/amba``
+If you are using some other bus protocol, you may implement your own converters, using the files in ``generators/rocket-chip/src/main/scala/amba``
 as the template, but it is not recommended unless you are familiar with TileLink. 
 
 ``memAXI4Node`` is an AXI4 master node and is defined as following in our example:
 
-.. code-block:: scala
-
-    val memAXI4Node = AXI4MasterNode(
-    Seq(AXI4MasterPortParameters(
-      masters = Seq(AXI4MasterParameters(
-        name = portName,
-        id = IdRange(0, 1 << idBits))))))
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
+    :language: scala
+    :lines: 126-132
 
 where ``portName`` and ``idBits`` (number of bits to represent a port ID) are the parameter provides by the tile.
 Make sure to read :ref:`node_types` to check out what type of nodes Chipyard supports and their parameters!
@@ -228,8 +185,8 @@ can override the following two functions to control how to buffer the bus reques
 
 You can find more information on ``TLBuffer`` in :ref:`diplomatic_widgets`.
 
-Interrupt
----------
+Connect Interrupt
+-----------------
 
 Chipyard allows a tile to either receive interrupts from other devices or initiate interrupts to notify other cores/devices. 
 In the tile that inherited ``SinksExternalInterrupts``, one can create a ``TileInterrupts`` object (a Chisel bundle) and 
@@ -258,48 +215,33 @@ from the implementation class:
     reportCease(could_cease: Option[Bool], quiescenceCycles: Int = 8) // Triggered when the core stop retiring instructions (like clock gating)
     reportWFI(could_wfi: Option[Bool]) // Triggered when a WFI instruction is executed
 
-Implementation Class
---------------------
+Create Implementation Class
+---------------------------
 
-The implementation class is of the following form:
+The implementation class for your core is of the following form:
 
-.. code-block:: scala
-
-    class MyTileModuleImp(outer: MyTile) extends BaseTileModuleImp(outer){
-      // annotate the parameters
-      Annotated.params(this, outer.tileParams)
-
-      // TODO: Create the top module of the core and connect it with the ports in "outer"
-    }
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
+    :language: scala
+    :lines: 145-149, 160
 
 In the body of this class, you can look up any parameters by calling ``p({key})``, where ``{key}`` is the config key of 
-the value you want to look up. For a list of available keys, see the appendix below.
+the value you want to look up. For a list of frequently used keys, see the appendix below.
 
 If you create an AXI4 node (or equivalents), you will need to connect them to your core. You can connect a port like this:
 
-.. code-block:: scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
+    :language: scala
+    :lines: 151-159
 
-    outer.myAXI4Node.out foreach { case (out, edgeOut) =>
-      // Connect your module IO port to "out"
-      // The type of "out" here is AXI4Bundle, which is defined in generators/rocket-chip/src/main/scala/amba/axi4/Bundles.scala
-      // Please refer to this file for the definition of the ports.
-      // If you are using APB, check APBBundle in generators/rocket-chip/src/main/scala/amba/apb/Bundles.scala
-      // If you are using AHB, check AHBSlaveBundle or AHBMasterBundle in generators/rocket-chip/src/main/scala/amba/ahb/Bundles.scala
-      // (choose one depends on the type of AHB node you create)
-      // If you are using AXIS, check AXISBundle and AXISBundleBits in generators/rocket-chip/src/main/scala/amba/axis/Bundles.scala
-    }
+Create Config Fragments to Integrate the Core
+---------------------------------------------
 
-Integrate the Core
-------------------
-
-To use your core in a set of config, you would need a config fragment that would create a ``TileParams`` object of your core in
+To use your core in a Chipyard config, you would need a config fragment that would create a ``TileParams`` object of your core in
 the current config. An example of such config will be like this:
 
-.. code-block:: scala
-
-    class WithNMyCores(n: Int, hartidOffset: Int) extends Config((site, here, up) => {
-      case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem)) :++ List.tabulate(n)(i => MyTileParams(hartId = i + hartidOffset))
-    })
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
+    :language: scala
+    :lines: 162-179
 
 Chipyard looks up the tile parameters in the field ``TilesLocated(InSubsystem)``, whose type is a list of ``InstantiableTileParams``.
 This config fragment simply appends new tile parameters to the end of this list. 
@@ -307,6 +249,9 @@ This config fragment simply appends new tile parameters to the end of this list.
 Now you have finished all the steps to prepare your cores for Chipyard! To generate the custom core, simply follow the instructions
 in :ref:`custom_chisel` to add your project to the build system, then create a config by following the steps in :ref:`hetero_socs_`.
 You can now run any desired workflow for the new config just as you do for the built-in cores. 
+
+If you would like to see how an actual core are integrated into Chipyard, ``generators/ariane/src/main/scala/ArianeTile.scala`` 
+provides a concrete example of integrating a third party Verilog core Ariane. 
 
 Appendix: Common Config Keys
 ----------------------------
