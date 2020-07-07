@@ -25,7 +25,7 @@ import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 
-import chipyard.{BuildTop, BuildSystem}
+import chipyard.{BuildTop, BuildSystem, TestSuitesKey, TestSuiteHelper}
 
 /**
  * TODO: Why do we need this?
@@ -99,16 +99,18 @@ class WithMultiRoCC extends Config((site, here, up) => {
  *
  * @param harts harts to specify which will get a Hwacha
  */
-class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
-  case MultiRoCCKey => {
-    up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
-      (i -> Seq((p: Parameters) => {
-        LazyModule(new Hwacha()(p)).suggestName("hwacha")
-      }))
+class WithMultiRoCCHwacha(harts: Int*) extends Config(
+  new chipyard.config.WithHwachaTest ++
+  new Config((site, here, up) => {
+    case MultiRoCCKey => {
+      up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
+        (i -> Seq((p: Parameters) => {
+          LazyModule(new Hwacha()(p)).suggestName("hwacha")
+        }))
+      }
     }
-  }
-})
-
+  })
+)
 
 class WithTraceIO extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
@@ -128,5 +130,17 @@ class WithNPerfCounters(n: Int = 29) extends Config((site, here, up) => {
     case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
       core = tp.tileParams.core.copy(nPerfCounters = n)))
     case other => other
+  }
+})
+
+class WithHwachaTest extends Config((site, here, up) => {
+  case TestSuitesKey => (tileParams: Seq[TileParams], suiteHelper: TestSuiteHelper, p: Parameters) => {
+    up(TestSuitesKey).apply(tileParams, suiteHelper, p)
+    import hwacha.HwachaTestSuites._
+    suiteHelper.addSuites(rv64uv.map(_("p")))
+    suiteHelper.addSuites(rv64uv.map(_("vp")))
+    suiteHelper.addSuite(rv64sv("p"))
+    suiteHelper.addSuite(hwachaBmarks)
+    "SRC_EXTENSION = $(base_dir)/hwacha/$(src_path)/*.scala" + "\nDISASM_EXTENSION = --extension=hwacha"
   }
 })

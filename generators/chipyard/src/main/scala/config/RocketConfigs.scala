@@ -34,6 +34,7 @@ class HwachaRocketConfig extends Config(
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
+  new chipyard.config.WithHwachaTest ++
   new hwacha.DefaultHwachaConfig ++                        // use Hwacha vector accelerator
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
