@@ -39,7 +39,9 @@ If used for research, please cite Chipyard by the following publication:
   journal={IEEE Micro},
   title={Chipyard: Integrated Design, Simulation, and Implementation Framework for Custom SoCs},
   year={2020},
-  pages={},
+  volume={40},
+  number={4},
+  pages={10-21},
   doi={10.1109/MM.2020.2996616},
   ISSN={1937-4143},
 }
