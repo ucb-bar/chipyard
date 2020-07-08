@@ -5,18 +5,12 @@ import chisel3._
 import scala.collection.mutable.{ArrayBuffer}
 
 import freechips.rocketchip.prci._
-import freechips.rocketchip.subsystem.{BaseSubsystem}
+import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey}
 import freechips.rocketchip.config.{Parameters, Field}
-import freechips.rocketchip.diplomacy.{OutwardNodeHandle, InModuleBody}
-import freechips.rocketchip.util.{ResetCatchAndSync}
-import chipyard.config.ConfigValName._
+import freechips.rocketchip.diplomacy.{OutwardNodeHandle, InModuleBody, LazyModule}
+import freechips.rocketchip.util.{ResetCatchAndSync, Pow2ClockDivider}
 
 import barstools.iocell.chisel._
-
-import ChipyardClockDrivers._
-
-case object ChipyardClockKey extends Field[ClockInstantiationFn](simpleTestHarnessClock)
-
 
 /**
   * Chipyard provides three baseline, top-level reset schemes, set using the
@@ -75,7 +69,7 @@ object GenerateReset {
     }
     reset_io.suggestName("reset")
     chiptop.iocells ++= resetIOCell
-    chiptop.harnessFunctions += ((th: TestHarness) => {
+    chiptop.harnessFunctions += ((th: HasHarnessUtils) => {
       reset_io := th.dutReset
       Nil
     })
@@ -83,33 +77,89 @@ object GenerateReset {
   }
 }
 
-object ChipyardClockDrivers {
-  type ClockInstantiationFn = ChipTop => OutwardNodeHandle[ClockGroupSourceParameters, ClockGroupSinkParameters, ClockGroupEdgeParameters, ClockGroupBundle]
 
+case object ChipyardClockKey extends Field[ChipTop => Unit](ClockDrivers.harnessClock)
+
+
+
+object ClockDrivers {
   // A simple clock provider, for testing. All clocks in system are aggregated into one,
   // and are driven by directly punching out to the TestHarness clock
-  val simpleTestHarnessClock: ClockInstantiationFn = { chiptop =>
+  val harnessClock: ChipTop => Unit = { chiptop =>
     implicit val p = chiptop.p
     val simpleClockGroupSourceNode = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
+    val clockAggregator = LazyModule(new ClockGroupAggregator("clocks"))
+
+    // Aggregate all 3 possible clock groups with the clockAggregator
+    chiptop.systemClockGroup.node := clockAggregator.node
+    if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) {
+      chiptop.lSystem match { case l: BaseSubsystem => l.asyncClockGroupsNode := clockAggregator.node }
+    }
+    chiptop.lSystem match {
+      case l: ChipyardSubsystem => l.tileClockGroupNode := clockAggregator.node
+      case _ =>
+    }
+
+
+    clockAggregator.node := simpleClockGroupSourceNode
     InModuleBody {
       // this needs directionality so generateIOFromSignal works
       val clock_wire = Wire(Input(Clock()))
       val reset_wire = GenerateReset(chiptop, clock_wire)
       val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, Some("iocell_clock"))
       chiptop.iocells ++= clockIOCell
-
       clock_io.suggestName("clock")
 
       simpleClockGroupSourceNode.out.unzip._1.flatMap(_.member).map { o =>
         o.clock := clock_wire
         o.reset := reset_wire
       }
-
-      chiptop.harnessFunctions += ((th: TestHarness) => {
-        clock_io := th.clock
+      chiptop.harnessFunctions += ((th: HasHarnessUtils) => {
+        clock_io := th.harnessClock
         Nil
       })
     }
-    ClockGroupAggregator() := simpleClockGroupSourceNode
+  }
+
+  val harnessMultiClock: ChipTop => Unit = { chiptop =>
+    implicit val p = chiptop.p
+    val simpleClockGroupSourceNode = ClockGroupSourceNode(Seq(ClockGroupSourceParameters(), ClockGroupSourceParameters()))
+    val uncoreClockAggregator = LazyModule(new ClockGroupAggregator("uncore_clocks"))
+
+    // Aggregate only the uncoreclocks
+    chiptop.systemClockGroup.node := uncoreClockAggregator.node
+    if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) {
+      chiptop.lSystem match { case l: BaseSubsystem => l.asyncClockGroupsNode := uncoreClockAggregator.node }
+    }
+
+    uncoreClockAggregator.node := simpleClockGroupSourceNode
+    chiptop.lSystem match {
+      case l: ChipyardSubsystem => l.tileClockGroupNode := simpleClockGroupSourceNode
+      case _ => throw new Exception("MultiClock assumes ChipyardSystem")
+    }
+
+    InModuleBody {
+      // this needs directionality so generateIOFromSignal works
+      val clock_wire = Wire(Input(Clock()))
+      val reset_wire = GenerateReset(chiptop, clock_wire)
+      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, Some("iocell_clock"))
+      chiptop.iocells ++= clockIOCell
+      clock_io.suggestName("clock")
+      val div_clock = Pow2ClockDivider(clock_wire, 2)
+
+      simpleClockGroupSourceNode.out(0)._1.member.map { o =>
+        o.clock := div_clock
+        o.reset := ResetCatchAndSync(div_clock, reset_wire.asBool)
+      }
+      simpleClockGroupSourceNode.out(1)._1.member.map { o =>
+        o.clock := clock_wire
+        o.reset := reset_wire
+      }
+      chiptop.harnessFunctions += ((th: HasHarnessUtils) => {
+        clock_io := th.harnessClock
+        Nil
+      })
+    }
+
   }
 }

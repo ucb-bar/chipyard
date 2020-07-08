@@ -9,12 +9,11 @@ import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGr
 import freechips.rocketchip.config.{Parameters, Field}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, LazyRawModuleImp, LazyModuleImpLike}
 import freechips.rocketchip.util.{ResetCatchAndSync}
-import chipyard.config.ConfigValName._
 import chipyard.iobinders.{IOBinders, TestHarnessFunction, IOBinderTuple}
 
 import barstools.iocell.chisel._
 
-case object BuildSystem extends Field[Parameters => LazyModule]((p: Parameters) => LazyModule(new DigitalTop()(p)))
+case object BuildSystem extends Field[Parameters => LazyModule]((p: Parameters) => new DigitalTop()(p))
 
 
 /**
@@ -31,23 +30,15 @@ class ChipTop(implicit p: Parameters) extends LazyModule with HasTestHarnessFunc
   val harnessFunctions = ArrayBuffer.empty[TestHarnessFunction]
 
   // The system module specified by BuildSystem
-  val lSystem = p(BuildSystem)(p).suggestName("system")
+  val lSystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
 
   // The systemClockSinkNode provides the implicit clock and reset for the System
-  private val systemClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters()))
+  val systemClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters()))
+  val systemClockGroup = LazyModule(new ClockGroup("system_clock"))
+  systemClockSinkNode := systemClockGroup.node
 
-  // clockGroupNode provides a single node which aggregates all clock groups in the design
-  val clockGroupNode = ClockGroupIdentityNode()
-
-  // If the specified system has diplomatic clocks, connect it to our clockGroupNode
-  if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) {
-    lSystem match { case l: BaseSubsystem => l.asyncClockGroupsNode :*= clockGroupNode }
-  }
-  // Connect the system implicit clock node to the clockGroupNode
-  systemClockSinkNode := ClockGroup() := clockGroupNode
-
-  // Drive the entire diplomatic clock network using this configured Key
-  clockGroupNode :*=* p(ChipyardClockKey)(this)
+  // Generate Clocks and Reset
+  p(ChipyardClockKey)(this)
 
   // NOTE: Making this a LazyRawModule is moderately dangerous, as anonymous children
   // of ChipTop (ex: ClockGroup) do not receive clock or reset.

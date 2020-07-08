@@ -106,8 +106,8 @@ class BoomF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimL
 class RocketNICF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimRocketConfig", "BaseF1Config")
 // Multiclock tests
 class RocketMulticlockF1Tests extends FireSimTestSuite(
-  "FireSimMulticlockPOC",
-  "FireSimQuadRocketMulticlockConfig",
+  "FireSim",
+  "FireSimMulticlockRocketConfig",
   "WithSynthAsserts_BaseF1Config")
 
 class ArianeF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimArianeConfig", "BaseF1Config")

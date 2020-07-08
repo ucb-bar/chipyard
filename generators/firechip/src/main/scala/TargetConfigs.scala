@@ -22,7 +22,6 @@ import testchipip.WithRingSystemBus
 
 import firesim.bridges._
 import firesim.configs._
-import chipyard.config.ConfigValName._
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMParams => {
@@ -67,6 +66,8 @@ class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
 // Tweaks that are generally applied to all firesim configs
 class WithFireSimConfigTweaks extends Config(
+  // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
+  new WithFireSimSimpleClocks ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++
   // Optional*: Removing this will require target-software changes to properly capture UART output
@@ -170,3 +171,12 @@ class FireSimArianeConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.ArianeConfig)
+
+
+class FireSimMulticlockRocketConfig extends Config(
+  new WithFireSimRationalTileDomain(2, 1) ++
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.MultiClockRocketConfig)
+
