@@ -58,6 +58,7 @@ case class MyCoreParams(
   val retireWidth: Int = 2
 }
 
+// DOC include start: CanAttachTile
 case class MyTileAttachParams(
   tileParams: MyTileParams,
   crossingParams: RocketCrossingParams
@@ -65,6 +66,7 @@ case class MyTileAttachParams(
   type TileType = MyTile
   val lookup = PriorityMuxHartIdFromSeq(Seq(tileParams))
 }
+// DOC include end: CanAttachTile
 
 case class MyTileParams(
   name: Option[String] = Some("my_tile"),
@@ -84,6 +86,7 @@ case class MyTileParams(
   }
 }
 
+// DOC include start: Tile class
 class MyTile(
   val myParams: MyTileParams,
   crossing: ClockCrossingType,
@@ -123,6 +126,10 @@ class MyTile(
   }
 
   // (Connection to bus, interrupt, etc.)
+// }
+  // DOC include end: Tile class
+  
+  // DOC include start: AXI4 node
   // # of bits used in TileLink ID for master node. 4 bits can support 16 master nodes, but you can have a longer ID if you need more. 
   val idBits = 4
   val memAXI4Node = AXI4MasterNode(
@@ -131,6 +138,9 @@ class MyTile(
         name = "myPortName",
         id = IdRange(0, 1 << idBits))))))
   val memoryTap = TLIdentityNode() // Every bus connection should have their own tap node
+  // DOC include end: AXI4 node
+
+  // DOC include start: AXI4 convert
   (tlMasterXbar.node  // tlMasterXbar is the bus crossbar to be used when this core / tile is acting as a master; otherwise, use tlSlaveXBar
     := memoryTap
     := TLBuffer()
@@ -140,14 +150,20 @@ class MyTile(
     := AXI4UserYanker(Some(2)) // remove user field on AXI interface. need but in reality user intf. not needed
     := AXI4Fragmenter() // deal with multi-beat xacts
     := memAXI4Node) // The custom node, see below
+  // DOC include end: AXI4 convert
+
 }
 
+// DOC include start: Implementation class
 class MyTileModuleImp(outer: MyTile) extends BaseTileModuleImp(outer){
   // annotate the parameters
   Annotated.params(this, outer.myParams)
 
-  // TODO: Create the top module of the core and connect it with the ports in "outer"
+  // TODO: Create the top module of the core and connect it with the ports in "outer" }
+//}
+  // DOC include end: Implementation class
 
+  // DOC include start: AXI4 connect
   outer.memAXI4Node.out foreach { case (out, edgeOut) =>
     // Connect your module IO port to "out"
     // The type of "out" here is AXI4Bundle, which is defined in generators/rocket-chip/src/main/scala/amba/axi4/Bundles.scala
@@ -157,8 +173,11 @@ class MyTileModuleImp(outer: MyTile) extends BaseTileModuleImp(outer){
     // (choose one depends on the type of AHB node you create)
     // If you are using AXIS, check AXISBundle and AXISBundleBits in generators/rocket-chip/src/main/scala/amba/axis/Bundles.scala
   }
+  // DOC include end: AXI4 connect
+
 }
 
+// DOC include start: Config fragment
 class WithNMyCores(n: Int = 1, overrideIdOffset: Option[Int] = None) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => {
     // Calculate the next available hart ID (since hart ID cannot be duplicated)
@@ -177,3 +196,4 @@ class WithNMyCores(n: Int = 1, overrideIdOffset: Option[Int] = None) extends Con
   // The # of instruction bits. Use maximum # of bits if your core supports both 32 and 64 bits.
   case XLen => 64
 })
+// DOC include end: Config fragment

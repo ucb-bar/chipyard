@@ -121,7 +121,8 @@ You will also need a ``CanAttachTile`` class to add the tile config into the con
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
     :language: scala
-    :lines: 61-67
+    :start-after: DOC include start: CanAttachTile
+    :end-before: DOC include end: CanAttachTile
 
 .. note::
 
@@ -137,14 +138,17 @@ Create Tile Class
 
 In Chipyard, all Tiles are diplomatically instantiated. In the first phase, diplomatic nodes which specify Tile-to-System
 interconnects are evaluated, while in the second "Module Implementation" phase, hardware is elaborated. 
-See :ref:`tilelink_and_diplomacy` for more details. In this step, you will need to implement a tile class for your core.
+See :ref:`tilelink_and_diplomacy` for more details. In this step, you will need to implement a tile class for your core,
+which specifies the constraints on the core's parameters and the connections with other diplomatic nodes. This class
+usually contains Diplomacy/TileLink code only, and Chisel RTL code should not go here.
 
 All tile classes implement ``BaseTile`` and will normally implement ``SinksExternalInterrupts`` and ``SourcesExternalNotifications``,
 which allow the tile to accept external interrupt. A typical tile has the following form:
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
     :language: scala
-    :lines: 87-125, 143
+    :start-after: DOC include start: Tile class
+    :end-before: DOC include end: Tile class
 
 Connect TileLink Buses
 ----------------------
@@ -156,7 +160,8 @@ Rocket chip:
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
     :language: scala
-    :lines: 133-142
+    :start-after: DOC include start: AXI4 convert
+    :end-before: DOC include end: AXI4 convert
 
 Remember, you may not need all of these intermediate widgets. See :ref:`diplomatic_widgets` for the meaning of each intermediate
 widget. If you are using TileLink, then you only need the tap node and the TileLink node used by your components. Chipyard also
@@ -170,7 +175,8 @@ as the template, but it is not recommended unless you are familiar with TileLink
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
     :language: scala
-    :lines: 126-132
+    :start-after: DOC include start: AXI4 node
+    :end-before: DOC include end: AXI4 node
 
 where ``portName`` and ``idBits`` (number of bits to represent a port ID) are the parameter provides by the tile.
 Make sure to read :ref:`node_types` to check out what type of nodes Chipyard supports and their parameters!
@@ -185,12 +191,36 @@ can override the following two functions to control how to buffer the bus reques
 
 You can find more information on ``TLBuffer`` in :ref:`diplomatic_widgets`.
 
+Create Implementation Class
+---------------------------
+
+The implementation class contains the parameterized, actual hardware that depends on the values resolved by the Diplomacy
+framework according to the info provided in the Tile class. This class will normally contains Chisel RTL codes, and if your
+core is in Verilog, you will need to put the black box class you created in the first step here and connect it with the buses
+and other components. No Diplomacy/TileLink code should be in this class; you should only connect the IO signals in TileLink
+interfaces or other diplomatically defined components, which are located in the tile class. 
+
+The implementation class for your core is of the following form:
+
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
+    :language: scala
+    :start-after: DOC include start: Implementation class
+    :end-before: DOC include end: Implementation class
+
+If you create an AXI4 node (or equivalents), you will need to connect them to your core. You can connect a port like this:
+
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
+    :language: scala
+    :start-after: DOC include start: AXI4 connect
+    :end-before: DOC include end: AXI4 connect
+
 Connect Interrupt
 -----------------
 
 Chipyard allows a tile to either receive interrupts from other devices or initiate interrupts to notify other cores/devices. 
 In the tile that inherited ``SinksExternalInterrupts``, one can create a ``TileInterrupts`` object (a Chisel bundle) and 
-call ``decodeCoreInterrupts`` with the object as the argument. You can then read the interrupt bits from the object.
+call ``decodeCoreInterrupts`` with the object as the argument. Note that you should call this function in the implementation
+class since it returns a Chisel bundle used by RTL code. You can then read the interrupt bits from the object.
 The definition of ``TileInterrupts`` is 
 
 .. code-block:: scala
@@ -204,7 +234,6 @@ The definition of ``TileInterrupts`` is
       val lip = Vec(coreParams.nLocalInterrupts, Bool())  // Local interrupts
     }
 
-This function should be in the implementation class since it involves hardware generation. 
 Also, the tile can also notify other cores or devices for some events by calling following functions in ``SourcesExternalNotifications``
 from the implementation class:
 
@@ -215,21 +244,6 @@ from the implementation class:
     reportCease(could_cease: Option[Bool], quiescenceCycles: Int = 8) // Triggered when the core stop retiring instructions (like clock gating)
     reportWFI(could_wfi: Option[Bool]) // Triggered when a WFI instruction is executed
 
-Create Implementation Class
----------------------------
-
-The implementation class for your core is of the following form:
-
-.. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
-    :language: scala
-    :lines: 145-149, 160
-
-If you create an AXI4 node (or equivalents), you will need to connect them to your core. You can connect a port like this:
-
-.. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
-    :language: scala
-    :lines: 151-159
-
 Create Config Fragments to Integrate the Core
 ---------------------------------------------
 
@@ -238,7 +252,8 @@ the current config. An example of such config will be like this:
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
     :language: scala
-    :lines: 162-179
+    :start-after: DOC include start: Config fragment
+    :end-before: DOC include end: Config fragment
 
 Chipyard looks up the tile parameters in the field ``TilesLocated(InSubsystem)``, whose type is a list of ``InstantiableTileParams``.
 This config fragment simply appends new tile parameters to the end of this list. 
@@ -247,5 +262,6 @@ Now you have finished all the steps to prepare your cores for Chipyard! To gener
 in :ref:`custom_chisel` to add your project to the build system, then create a config by following the steps in :ref:`hetero_socs_`.
 You can now run any desired workflow for the new config just as you do for the built-in cores. 
 
-If you would like to see how an actual core are integrated into Chipyard, ``generators/ariane/src/main/scala/ArianeTile.scala`` 
-provides a concrete example of integrating a third party Verilog core Ariane. 
+If you would like to see an example of a complete third-party Verilog core integrated into Chipyard, ``generators/ariane/src/main/scala/ArianeTile.scala``
+provides a concrete example of the Ariane core. Note that this particular example includes additional nuances with respect to the interaction of the AXI
+interface with the memory coherency system. 
