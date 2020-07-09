@@ -27,6 +27,7 @@ class DualSmallBoomConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class HwachaLargeBoomConfig extends Config(
+  new chipyard.config.WithHwachaTest ++
   new hwacha.DefaultHwachaConfig ++                              // use Hwacha vector accelerator
   new boom.common.WithNLargeBooms(1) ++
   new chipyard.config.AbstractConfig)
