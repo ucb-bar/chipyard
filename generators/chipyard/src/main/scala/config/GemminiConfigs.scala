@@ -1,13 +1,59 @@
 
 package chipyard
 
-import freechips.rocketchip.config.{Config}
+import chisel3._
+import freechips.rocketchip.config.{Config, Parameters}
+import freechips.rocketchip.diplomacy.{LazyModule, ValName}
+import freechips.rocketchip.subsystem._
+import freechips.rocketchip.tile.{BuildRoCC, OpcodeSet}
+
+
+object ContentionConfigs{
+  import gemmini.GemminiConfigs.{defaultConfig => base}
+  val baseConfig = base.copy(headerFileName = "gemmini_params_contention_base.h")
+  val smallerSPConfig = base.copy(sp_capacity = gemmini.CapacityInKilobytes(128), headerFileName = "gemmini_params_contention_smaller_sp.h")
+  val biggerSPConfig = base.copy(sp_capacity = gemmini.CapacityInKilobytes(512), headerFileName = "gemmini_params_contention_bigger_sp.h")
+}
+
+class GemminiContentionBaseConfig extends Config((site, here, up) => {
+  case BuildRoCC => Seq(
+      (p: Parameters) => {
+        implicit val q = p
+        implicit val v = implicitly[ValName]
+        LazyModule(new gemmini.Gemmini(OpcodeSet.custom3, ContentionConfigs.baseConfig))
+    }
+  )
+  case SystemBusKey => up(SystemBusKey).copy(beatBytes = 16)
+})
+
+class GemminiContentionSmallerSPConfig extends Config((site, here, up) => {
+  case BuildRoCC => Seq(
+      (p: Parameters) => {
+        implicit val q = p
+        implicit val v = implicitly[ValName]
+        LazyModule(new gemmini.Gemmini(OpcodeSet.custom3, ContentionConfigs.smallerSPConfig))
+    }
+  )
+  case SystemBusKey => up(SystemBusKey).copy(beatBytes = 16)
+})
+
+class GemminiContentionBiggerSPConfig extends Config((site, here, up) => {
+  case BuildRoCC => Seq(
+      (p: Parameters) => {
+        implicit val q = p
+        implicit val v = implicitly[ValName]
+        LazyModule(new gemmini.Gemmini(OpcodeSet.custom3, ContentionConfigs.biggerSPConfig))
+    }
+  )
+  case SystemBusKey => up(SystemBusKey).copy(beatBytes = 16)
+})
+
 
 // --------------
 // Gemmini Configs
 // --------------
 
-class GemminiBaseConfig extends Config(
+class GemminiContentionSingleBaseConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -17,7 +63,7 @@ class GemminiBaseConfig extends Config(
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
-  new gemmini.DefaultGemminiConfig ++                        // use Gemmini systolic array GEMM accelerator
+  new GemminiContentionBaseConfig ++                        // use Gemmini systolic array GEMM accelerator
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=1024) ++
@@ -27,7 +73,7 @@ class GemminiBaseConfig extends Config(
   new freechips.rocketchip.system.BaseConfig)
 
 
-class GemminiDualBaseConfig extends Config(
+class GemminiContentionDualBaseConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithTieOffInterrupts ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
@@ -37,10 +83,87 @@ class GemminiDualBaseConfig extends Config(
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
   new chipyard.config.WithL2TLBs(1024) ++
-  new gemmini.DefaultGemminiConfig ++                        // use Gemmini systolic array GEMM accelerator
+  new GemminiContentionBaseConfig ++                        // use Gemmini systolic array GEMM accelerator
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=1024) ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  new freechips.rocketchip.system.BaseConfig)
+
+
+class GemminiContentionDualBiggerL2SmallerSPConfig extends Config(
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new testchipip.WithTSI ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new chipyard.config.WithL2TLBs(1024) ++
+  new GemminiContentionSmallerSPConfig ++                 // use Gemmini systolic array GEMM accelerator
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=2048) ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class GemminiContentionDualSmallerL2BiggerSPConfig extends Config(
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new testchipip.WithTSI ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new chipyard.config.WithL2TLBs(1024) ++
+  new GemminiContentionBiggerSPConfig ++                 // use Gemmini systolic array GEMM accelerator
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=512) ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class GemminiContentionDualBaseL2BiggerSPConfig extends Config(
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new testchipip.WithTSI ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new chipyard.config.WithL2TLBs(1024) ++
+  new GemminiContentionBiggerSPConfig ++                 // use Gemmini systolic array GEMM accelerator
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=1024) ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  new freechips.rocketchip.system.BaseConfig)
+
+class GemminiContentionDualBiggerL2BiggerSPConfig extends Config(
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithBlackBoxSimMem ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new testchipip.WithTSI ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new chipyard.config.WithL2TLBs(1024) ++
+  new GemminiContentionBiggerSPConfig ++                 // use Gemmini systolic array GEMM accelerator
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=2048) ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
