@@ -28,7 +28,7 @@ sim_prefix = simulator
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
-WAVEFORM_FLAG=-v$(sim_out_name).vcd
+WAVEFORM_FLAG=-v $(sim_out_name).vcd
 
 .PHONY: default debug
 default: $(sim)
@@ -59,7 +59,7 @@ LDFLAGS := \
 VERILATOR_CC_OPTS = \
 	-O3 \
 	-CFLAGS "$(CXXFLAGS) -DTEST_HARNESS=V$(VLOG_MODEL) -DVERILATOR" \
-	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(build_dir)/verilator.h" \
+	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(build_dir)/verilator.h -include $(build_dir)/$(long_name).consts.h" \
 	-LDFLAGS "$(LDFLAGS)" \
 	$(RISCV)/lib/libfesvr.a \
 	$(dramsim_lib)

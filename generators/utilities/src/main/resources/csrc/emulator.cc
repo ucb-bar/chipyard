@@ -7,7 +7,6 @@
 #include "verilated_vcd_c.h"
 #endif
 #include <fesvr/dtm.h>
-#include <fesvr/tsi.h>
 #include "remote_bitbang.h"
 #include <iostream>
 #include <fcntl.h>
@@ -16,6 +15,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <getopt.h>
+#include "serial.h"
 
 // For option parsing, which is split across this file, Verilog, and
 // FESVR's HTIF, a few external files must be pulled in. The list of
@@ -32,7 +32,7 @@
 //   variables:
 //     - static const char * verilog_plusargs
 
-extern tsi_t* tsi;
+extern chipyard_tsi_t* tsi;
 extern dtm_t* dtm;
 extern remote_bitbang_t * jtag;
 
@@ -116,7 +116,6 @@ int main(int argc, char** argv)
   FILE * vcdfile = NULL;
   uint64_t start = 0;
 #endif
-  char ** htif_argv = NULL;
   int verilog_plusargs_legal = 1;
 
   opterr = 1;
@@ -252,10 +251,6 @@ done_processing:
     usage(argv[0]);
     return 1;
   }
-  int htif_argc = 1 + argc - optind;
-  htif_argv = (char **) malloc((htif_argc) * sizeof (char *));
-  htif_argv[0] = argv[0];
-  for (int i = 1; optind < argc;) htif_argv[i++] = argv[optind++];
 
   if (verbose)
     fprintf(stderr, "using random seed %u\n", random_seed);
@@ -278,8 +273,10 @@ done_processing:
 #endif
 
   jtag = new remote_bitbang_t(rbb_port);
-  dtm = new dtm_t(htif_argc, htif_argv);
-  tsi = new tsi_t(htif_argc, htif_argv);
+  dtm = new dtm_t(argc, argv);
+  tsi = new chipyard_tsi_t(argc, argv,
+          NUM_CHANNELS, MEM_SIZE,
+          WORD_BYTES, LINE_BYTES, ID_BITS);
 
   signal(SIGTERM, handle_sigterm);
 
@@ -364,6 +361,5 @@ done_processing:
   if (tsi) delete tsi;
   if (jtag) delete jtag;
   if (tile) delete tile;
-  if (htif_argv) free(htif_argv);
   return ret;
 }

@@ -31,6 +31,7 @@ class ChipyardStage extends ChiselStage with PreservesAll[Phase] {
     Dependency[freechips.rocketchip.stage.phases.AddDefaultTests],
     Dependency[chipyard.stage.phases.AddDefaultTests],
     Dependency[chipyard.stage.phases.GenerateTestSuiteMakefrags],
+    Dependency[chipyard.stage.phases.GenerateConstsHeader],
     Dependency[freechips.rocketchip.stage.phases.GenerateArtefacts],
   )
 }

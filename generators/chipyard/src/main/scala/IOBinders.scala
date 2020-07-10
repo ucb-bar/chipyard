@@ -305,10 +305,12 @@ class WithBlackBoxSimMem extends OverrideIOBinder({
     implicit val p: Parameters = GetSystemParameters(system)
     val peiTuples = AddIOCells.axi4(system.mem_axi4, system.memAXI4Node, "mem")
     val harnessFn = (th: chipyard.TestHarness) => {
-      peiTuples.map { case (port, edge, ios) =>
+      peiTuples.zipWithIndex.map { case ((port, edge, ios), id) =>
         val memSize = p(ExtMem).get.master.size
         val lineSize = p(CacheBlockBytes)
-        val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
+        val mem = Module(new SimDRAM(
+          id, peiTuples.size,
+          memSize, lineSize, edge.bundle))
         mem.io.axi <> port
         mem.io.clock := th.clock
         mem.io.reset := th.reset
@@ -408,6 +410,7 @@ class WithTiedOffSerial extends OverrideIOBinder({
 
 class WithSimSerial extends OverrideIOBinder({
   (system: CanHavePeripherySerialModuleImp) => system.serial.map({ serial =>
+    implicit val p: Parameters = GetSystemParameters(system)
     val (port, ioCells) = AddIOCells.serial(serial)
     val harnessFn = (th: chipyard.TestHarness) => {
       val ser_success = SerialAdapter.connectSimSerial(port, th.clock, th.harnessReset)
