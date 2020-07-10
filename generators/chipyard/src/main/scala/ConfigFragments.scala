@@ -133,6 +133,18 @@ class WithNPerfCounters(n: Int = 29) extends Config((site, here, up) => {
   }
 })
 
+class WithRocketICacheScratchpad extends Config((site, here, up) => {
+  case RocketTilesKey => up(RocketTilesKey, site) map { r =>
+    r.copy(icache = r.icache.map(_.copy(itimAddr = Some(0x100000 + r.hartId * 0x10000))))
+  }
+})
+
+class WithRocketDCacheScratchpad extends Config((site, here, up) => {
+  case RocketTilesKey => up(RocketTilesKey, site) map { r =>
+    r.copy(dcache = r.dcache.map(_.copy(nSets = 32, nWays = 1, scratch = Some(0x200000 + r.hartId * 0x10000))))
+  }
+})
+
 class WithHwachaTest extends Config((site, here, up) => {
   case TestSuitesKey => (tileParams: Seq[TileParams], suiteHelper: TestSuiteHelper, p: Parameters) => {
     up(TestSuitesKey).apply(tileParams, suiteHelper, p)
