@@ -3,8 +3,8 @@
 Adding a custom core
 ====================
 
-You may want to integrate a custom RISC-V core into the Chipyard framework. This documentation page provides a step-to-step
-instruction on how to achieve this.
+You may want to integrate a custom RISC-V core into the Chipyard framework. This documentation page provides step-by-step
+instructions on how to achieve this.
 
 .. note:: 
 
@@ -24,18 +24,18 @@ Chipyard will generate a core for every ``InstantiableTileParams`` object it dis
 This object is derived from``TileParams``, a trait containing the information needed to create a tile. All cores must have
 their own implementation of ``InstantiableTileParams``, as well as ``CoreParams`` which is passed as a field in ``TileParams``.
 
-``TileParams`` holds the parameters for the tile, which are the same for every generated core, while ``CoreParams`` 
-contains the parameters for individual cores. They must be implemented as case classes with fields that can be overridden by 
+``TileParams`` holds the parameters for the tile, which include parameters for all components in the tile (e.g.
+core, cache, MMU, etc.), while ``CoreParams`` contains parameters specific to the core on the tile. 
+They must be implemented as case classes with fields that can be overridden by 
 other config fragments as the constructor parameters. See the appendix at the bottom of the page for a list of 
 variable to be implemented. You can also add custom fields to them, but standard fields should always be preferred. 
 
-``InstantiableTileParams[TileType]`` holds the constructor of ``TileType`` on top of the fields of ``TileParams``.
+``InstantiableTileParams[TileType]`` holds the constructor of ``TileType`` on top of the fields of ``TileParams``, 
+where ``TileType`` is the tile class (see the next section).
 All custom cores will also need to implement ``instantiate()`` in their tile parameter class to return a new instance
 of the tile class ``TileType``. 
 
-``TileParams``, ``InstantiableTileParams[TileType]`` and ``CoreParams`` contains the following fields (you may ignore 
-any fields marked "Rocket specific" and use their default values, although it is recommended to use them if you 
-need a custom field with similar purposes):
+``TileParams``, ``InstantiableTileParams[TileType]`` and ``CoreParams`` contains the following fields:
 
 .. code-block:: scala
 
@@ -113,9 +113,11 @@ need a custom field with similar purposes):
       dfmaLatency: Int = 4        // Rocket specific: Fused multiply-add pipeline latency (double precision)
     )
 
-Most of the fields here are originally designed for the Rocket core and thus contain some implementation-specific details, but 
-many of them are general enough to be useful for other cores. It is strongly recommended to use these fields instead
-of creating your own custom fields when applicable. 
+Most of the fields here (marked "Rocket spcific") are originally designed for the Rocket core and thus contain some 
+implementation-specific details, but many of them are general enough to be useful for other cores. You may ignore 
+any fields marked "Rocket specific" and use their default values; however, if you need to store additional information
+with meaning or usage similar to these "Rocket specific" fields, it is recommended to use these fields instead of 
+creating your own custom fields.
 
 You will also need a ``CanAttachTile`` class to add the tile config into the config system, with the following format:
 
@@ -123,6 +125,9 @@ You will also need a ``CanAttachTile`` class to add the tile config into the con
     :language: scala
     :start-after: DOC include start: CanAttachTile
     :end-before: DOC include end: CanAttachTile
+
+During elaboration, Chipyard will look for subclasses of ``CanAttachTile`` in the config system and instantiate a tile
+from the parameters in this class for every such class it found.
 
 .. note::
 
@@ -153,8 +158,8 @@ which allow the tile to accept external interrupt. A typical tile has the follow
 Connect TileLink Buses
 ----------------------
 
-Chipyard use TileLink as its onboard bus protocol. If your core doesn't use TileLink, you will need to insert converters 
-between the core's memory protocol and TileLink in the Tile module.
+Chipyard uses TileLink as its onboard bus protocol. If your core doesn't use TileLink, you will need to insert converters 
+between the core's memory protocol and TileLink within the Tile module.
 in the tile class. Below is an example of how to connect a core using AXI4 to the TileLink bus with converters provided by
 Rocket chip: 
 
@@ -195,8 +200,8 @@ Create Implementation Class
 ---------------------------
 
 The implementation class contains the parameterized, actual hardware that depends on the values resolved by the Diplomacy
-framework according to the info provided in the Tile class. This class will normally contains Chisel RTL codes, and if your
-core is in Verilog, you will need to put the black box class you created in the first step here and connect it with the buses
+framework according to the info provided in the Tile class. This class will normally contains Chisel RTL code. If your
+core is in Verilog, you will need to instantiate the black box class that wraps your Verilog implementation and connect it with the buses
 and other components. No Diplomacy/TileLink code should be in this class; you should only connect the IO signals in TileLink
 interfaces or other diplomatically defined components, which are located in the tile class. 
 
@@ -247,7 +252,7 @@ from the implementation class:
 Create Config Fragments to Integrate the Core
 ---------------------------------------------
 
-To use your core in a Chipyard config, you would need a config fragment that would create a ``TileParams`` object of your core in
+To use your core in a Chipyard config, you will need a config fragment that will create a ``TileParams`` object of your core in
 the current config. An example of such config will be like this:
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
@@ -260,7 +265,7 @@ This config fragment simply appends new tile parameters to the end of this list.
 
 Now you have finished all the steps to prepare your cores for Chipyard! To generate the custom core, simply follow the instructions
 in :ref:`custom_chisel` to add your project to the build system, then create a config by following the steps in :ref:`hetero_socs_`.
-You can now run any desired workflow for the new config just as you do for the built-in cores. 
+You can now run most desired workflows for the new config just as you would for the built-in cores (depending on the functionality your core supports). 
 
 If you would like to see an example of a complete third-party Verilog core integrated into Chipyard, ``generators/ariane/src/main/scala/ArianeTile.scala``
 provides a concrete example of the Ariane core. Note that this particular example includes additional nuances with respect to the interaction of the AXI

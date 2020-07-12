@@ -125,7 +125,7 @@ class MyTile(
     Resource(cpuDevice, "reg").bind(ResourceAddress(hartId))
   }
 
-  // (Connection to bus, interrupt, etc.)
+  // TODO: Create TileLink nodes and connections here.
 // }
   // DOC include end: Tile class
   
@@ -159,7 +159,7 @@ class MyTileModuleImp(outer: MyTile) extends BaseTileModuleImp(outer){
   // annotate the parameters
   Annotated.params(this, outer.myParams)
 
-  // TODO: Create the top module of the core and connect it with the ports in "outer" }
+  // TODO: Create the top module of the core and connect it with the ports in "outer"
 //}
   // DOC include end: Implementation class
 
