@@ -24,7 +24,7 @@ import firesim.configs.MemModelKey
 import tracegen.{TraceGenSystemModuleImp}
 import ariane.ArianeTile
 
-import memblade.cache.{HasDRAMCacheNoNICModuleImp, HasPeripheryDRAMCacheModuleImpValidOnly}
+import memblade.cache.{HasPeripheryDRAMCacheModuleImpValidOnly}
 import memblade.client.HasPeripheryRemoteMemClientModuleImpValidOnly
 import memblade.manager.HasPeripheryMemBladeModuleImpValidOnly
 
