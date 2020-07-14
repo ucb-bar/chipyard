@@ -163,6 +163,31 @@ class MyTileModuleImp(outer: MyTile) extends BaseTileModuleImp(outer){
 //}
   // DOC include end: Implementation class
 
+  // DOC include start: connect interrupt
+  // For example, our core support debug interrupt and machine-level interrupt, and suppose the following two signals
+  // are the interrupt inputs to the core. (DO NOT COPY this code - if your core treat each type of interrupt differently,
+  // you need to connect them to different interrupt ports of your core)
+  val debug_i = Wire(Bool())
+  val mtip_i = Wire(Bool())
+  // We create a bundle here and decode the interrupt.
+  val int_bundle = new TileInterrupts()
+  outer.decodeCoreInterrupts(int_bundle)
+  debug_i := int_bundle.debug
+  mtip_i := int_bundle.meip & int_bundle.msip & int_bundle.mtip
+  // DOC include end: connect interrupt
+
+  // DOC include start: raise interrupt
+  // This is a demo. You should call these function according to your core
+  // Suppose that the following signal is from the decoder indicating a WFI instruction is received.
+  val wfi_o = Wire(Bool())
+  outer.reportWFI(Some(wfi_o))
+  // Suppose that the following signal indicate an unreconverable hardware error.
+  val halt_o = Wire(Bool())
+  outer.reportHalt(Some(halt_o))
+  // Suppose that our core never stall for a long time / stop retiring. Use None to indicate that this interrupt never fires.
+  outer.reportCease(None)
+  // DOC include end: raise interrupt
+
   // DOC include start: AXI4 connect
   outer.memAXI4Node.out foreach { case (out, edgeOut) =>
     // Connect your module IO port to "out"

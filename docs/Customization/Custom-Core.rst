@@ -224,9 +224,9 @@ Connect Interrupt
 
 Chipyard allows a tile to either receive interrupts from other devices or initiate interrupts to notify other cores/devices. 
 In the tile that inherited ``SinksExternalInterrupts``, one can create a ``TileInterrupts`` object (a Chisel bundle) and 
-call ``decodeCoreInterrupts`` with the object as the argument. Note that you should call this function in the implementation
-class since it returns a Chisel bundle used by RTL code. You can then read the interrupt bits from the resulting object.
-The definition of ``TileInterrupts`` is 
+call ``decodeCoreInterrupts()`` with the object as the argument. Note that you should call this function in the implementation
+class since it returns a Chisel bundle used by RTL code. You can then read the interrupt bits from the ``TileInterrupts`` bundle
+we create above. The definition of ``TileInterrupts`` is 
 
 .. code-block:: scala
 
@@ -239,15 +239,29 @@ The definition of ``TileInterrupts`` is
       val lip = Vec(coreParams.nLocalInterrupts, Bool())  // Local interrupts
     }
 
+Here is an example on how to connect these signals in the implementation class:
+
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
+    :language: scala
+    :start-after: DOC include start: connect interrupt
+    :end-before: DOC include end: connect interrupt
+
 Also, the tile can also notify other cores or devices for some events by calling following functions in ``SourcesExternalNotifications``
 from the implementation class:
 
 .. code-block:: scala
 
     def reportHalt(could_halt: Option[Bool]) // Triggered when there is an unrecoverable hardware error (halt the machine)
-    def reportHalt(errors: Seq[CanHaveErrors]) // Varient for standard error bundle (used only by cache when there's an ECC error)
-    reportCease(could_cease: Option[Bool], quiescenceCycles: Int = 8) // Triggered when the core stop retiring instructions (like clock gating)
-    reportWFI(could_wfi: Option[Bool]) // Triggered when a WFI instruction is executed
+    def reportHalt(errors: Seq[CanHaveErrors]) // Varient for standard error bundle (Rocket specific: used only by cache when there's an ECC error)
+    def reportCease(could_cease: Option[Bool], quiescenceCycles: Int = 8) // Triggered when the core stop retiring instructions (like clock gating)
+    def reportWFI(could_wfi: Option[Bool]) // Triggered when a WFI instruction is executed
+
+Here is an example on how to use these functions to raise interrupt.
+
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/TutorialTile.scala
+    :language: scala
+    :start-after: DOC include start: raise interrupt
+    :end-before: DOC include end: raise interrupt
 
 Create Config Fragments to Integrate the Core
 ---------------------------------------------
