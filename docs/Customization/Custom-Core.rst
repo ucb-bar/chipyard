@@ -39,6 +39,7 @@ of the tile class ``TileType``.
 
 .. code-block:: scala
 
+    // The two classes below can be found in https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/BaseTile.scala.
     trait TileParams {
       val core: CoreParams                  // Core parameters (see below)
       val icache: Option[ICacheParams]      // Rocket specific: I1 cache option
@@ -55,6 +56,7 @@ of the tile class ``TileType``.
                     (implicit p: Parameters): TileType
     }
 
+    // This class can be found in https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/Core.scala.
     trait CoreParams {
       val bootFreqHz: BigInt              // Frequency
       val useVM: Boolean                  // Support virtual memory
@@ -105,6 +107,7 @@ of the tile class ``TileType``.
       def vMemDataBits: Int = 0
     }
 
+    // This class can be found in https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/FPU.scala. 
     case class FPUParams(
       minFLen: Int = 32,          // Minimum floating point length (no need to change) 
       fLen: Int = 64,             // Maximum floating point length, use 32 if only single precision is supported
@@ -191,6 +194,9 @@ can override the following two functions to control how to buffer the bus reques
 
 .. code-block:: scala
 
+    // This two functions can be found in https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/BaseTile.scala,
+    // in the class "BaseTile".
+    // By default, their value is "TLBuffer(BufferParams.none)".
     protected def makeMasterBoundaryBuffers(implicit p: Parameters): TLBuffer
     protected def makeSlaveBoundaryBuffers(implicit p: Parameters): TLBuffer
 
@@ -230,6 +236,7 @@ we create above. The definition of ``TileInterrupts`` is
 
 .. code-block:: scala
 
+    // This class can be found in https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/Interrupts.scala.
     class TileInterrupts(implicit p: Parameters) extends CoreBundle()(p) {
       val debug = Bool() // debug interrupt
       val mtip = Bool() // Machine level timer interrupt
@@ -251,6 +258,8 @@ from the implementation class:
 
 .. code-block:: scala
 
+    // These functions can be found in https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/Interrupts.scala, 
+    // in the trait "SourcesExternalNotifications". 
     def reportHalt(could_halt: Option[Bool]) // Triggered when there is an unrecoverable hardware error (halt the machine)
     def reportHalt(errors: Seq[CanHaveErrors]) // Varient for standard error bundle (Rocket specific: used only by cache when there's an ECC error)
     def reportCease(could_cease: Option[Bool], quiescenceCycles: Int = 8) // Triggered when the core stop retiring instructions (like clock gating)
