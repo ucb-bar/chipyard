@@ -5,11 +5,11 @@ import chisel3._
 import chisel3.experimental.{Analog, IO}
 
 import freechips.rocketchip.config.{Field, Config, Parameters}
-import freechips.rocketchip.diplomacy.{LazyModule}
+import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.{SimAXIMem}
-import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4EdgeParameters}
+import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
 import freechips.rocketchip.util._
 import freechips.rocketchip.groundtest.{GroundTestSubsystemModuleImp, GroundTestSubsystem}
 
@@ -51,6 +51,21 @@ type IOBinderTuple = (Seq[Data], Seq[IOCell], Option[TestHarnessFunction])
 case object IOBinders extends Field[Map[String, (Any) => Seq[IOBinderTuple]]](
   Map[String, (Any) => Seq[IOBinderTuple]]().withDefaultValue((Any) => Nil)
 )
+
+// Note: The parameters instance is accessible only through LazyModule
+// or LazyModuleImpLike. The self-type requirement in traits like
+// CanHaveMasterAXI4MemPort is insufficient to make it accessible to the IOBinder
+// As a result, IOBinders only work on Modules which inherit LazyModule or
+// or LazyModuleImpLike
+object GetSystemParameters {
+  def apply(s: Any): Parameters = {
+    s match {
+      case s: LazyModule => s.p
+      case s: LazyModuleImpLike => s.p
+      case _ => throw new Exception(s"Trying to get Parameters from a system that is not LazyModule or LazyModuleImpLike")
+    }
+  }
+}
 
 // This macro overrides previous matches on some Top mixin. This is useful for
 // binders which drive IO, since those typically cannot be composed
@@ -185,10 +200,19 @@ object AddIOCells {
     (port, ios)
   }
 
-  def axi4(io: Seq[AXI4Bundle], node: AXI4SlaveNode): Seq[(AXI4Bundle, AXI4EdgeParameters, Seq[IOCell])] = {
+  def axi4(io: Seq[AXI4Bundle], node: AXI4SlaveNode, name: String): Seq[(AXI4Bundle, AXI4EdgeParameters, Seq[IOCell])] = {
     io.zip(node.in).zipWithIndex.map{ case ((mem_axi4, (_, edge)), i) => {
-      val (port, ios) = IOCell.generateIOFromSignal(mem_axi4, Some(s"iocell_mem_axi4_${i}"))
-      port.suggestName(s"mem_axi4_${i}")
+      val (port, ios) = IOCell.generateIOFromSignal(mem_axi4, Some(s"iocell_${name}_axi4_slave_${i}"))
+      port.suggestName(s"${name}_axi4_slave_${i}")
+      (port, edge, ios)
+    }}
+  }
+  def axi4(io: Seq[AXI4Bundle], node: AXI4MasterNode, name: String): Seq[(AXI4Bundle, AXI4EdgeParameters, Seq[IOCell])] = {
+    io.zip(node.out).zipWithIndex.map{ case ((mem_axi4, (_, edge)), i) => {
+      //val (port, ios) = IOCell.generateIOFromSignal(mem_axi4, Some(s"iocell_${name}_axi4_master_${i}"))
+      val port = IO(Flipped(AXI4Bundle(edge.bundle)))
+      val ios = IOCell.generateFromSignal(mem_axi4, port, Some(s"iocell_${name}_axi4_master_${i}"))
+      port.suggestName(s"${name}_axi4_master_${i}")
       (port, edge, ios)
     }}
   }
@@ -256,22 +280,19 @@ class WithSimNIC extends OverrideIOBinder({
   (system: CanHavePeripheryIceNICModuleImp) => system.connectSimNetwork(system.clock, system.reset.asBool); Nil
 })
 
-// Note: The parameters instance is accessible only through the BaseSubsystem
-// or some parent class (IsAttachable, BareSubsystem -> LazyModule). The
-// self-type requirement in CanHaveMasterAXI4MemPort is insufficient to make it
-// accessible to the IOBinder
 // DOC include start: WithSimAXIMem
 class WithSimAXIMem extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => {
-    val peiTuples = AddIOCells.axi4(system.mem_axi4, system.memAXI4Node)
+  (system: CanHaveMasterAXI4MemPort) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    val peiTuples = AddIOCells.axi4(system.mem_axi4, system.memAXI4Node, "mem")
     // TODO: we are inlining the connectMem method of SimAXIMem because
     //   it takes in a dut rather than seq of axi4 ports
     val harnessFn = (th: chipyard.TestHarness) => {
       peiTuples.map { case (port, edge, ios) =>
-        val mem = LazyModule(new SimAXIMem(edge, size = system.p(ExtMem).get.master.size)(system.p))
+        val mem = LazyModule(new SimAXIMem(edge, size = p(ExtMem).get.master.size))
         Module(mem.module).suggestName("mem")
         mem.io_axi4.head <> port
-        }
+      }
       Nil
     }
     Seq((peiTuples.map(_._1), peiTuples.flatMap(_._3), Some(harnessFn)))
@@ -280,12 +301,13 @@ class WithSimAXIMem extends OverrideIOBinder({
 // DOC include end: WithSimAXIMem
 
 class WithBlackBoxSimMem extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => {
-    val peiTuples = AddIOCells.axi4(system.mem_axi4, system.memAXI4Node)
+  (system: CanHaveMasterAXI4MemPort) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    val peiTuples = AddIOCells.axi4(system.mem_axi4, system.memAXI4Node, "mem")
     val harnessFn = (th: chipyard.TestHarness) => {
       peiTuples.map { case (port, edge, ios) =>
-        val memSize = system.p(ExtMem).get.master.size
-        val lineSize = system.p(CacheBlockBytes)
+        val memSize = p(ExtMem).get.master.size
+        val lineSize = p(CacheBlockBytes)
         val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
         mem.io.axi <> port
         mem.io.clock := th.clock
@@ -298,7 +320,19 @@ class WithBlackBoxSimMem extends OverrideIOBinder({
 })
 
 class WithSimAXIMMIO extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MMIOPort with BaseSubsystem) => SimAXIMem.connectMMIO(system)(system.p); Nil
+  (system: CanHaveMasterAXI4MMIOPort) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    val peiTuples = AddIOCells.axi4(system.mmio_axi4, system.mmioAXI4Node, "mmio_mem")
+    val harnessFn = (th: chipyard.TestHarness) => {
+      peiTuples.zipWithIndex.map { case ((port, edge, ios), i) =>
+        val mmio_mem = LazyModule(new SimAXIMem(edge, size = 4096))
+        Module(mmio_mem.module).suggestName(s"mmio_mem_${i}")
+        mmio_mem.io_axi4.head <> port
+      }
+      Nil
+    }
+    Seq((peiTuples.map(_._1), peiTuples.flatMap(_._3), Some(harnessFn)))
+  }
 })
 
 class WithDontTouchPorts extends OverrideIOBinder({
@@ -315,21 +349,16 @@ class WithTieOffInterrupts extends OverrideIOBinder({
 })
 
 class WithTieOffL2FBusAXI extends OverrideIOBinder({
-  (system: CanHaveSlaveAXI4Port with BaseSubsystem) => {
-    system.l2_frontend_bus_axi4.foreach(axi => {
-      axi.tieoff()
-      experimental.DataMirror.directionOf(axi.ar.ready) match {
-        case ActualDirection.Input =>
-          axi.r.bits := DontCare
-          axi.b.bits := DontCare
-        case ActualDirection.Output =>
-          axi.aw.bits := DontCare
-          axi.ar.bits := DontCare
-          axi.w.bits := DontCare
-        case _ => throw new Exception("Unknown AXI port direction")
+  (system: CanHaveSlaveAXI4Port) => {
+    val peiTuples = AddIOCells.axi4(system.l2_frontend_bus_axi4, system.l2FrontendAXI4Node, "l2_fbus")
+    val harnessFn = (th: chipyard.TestHarness) => {
+      peiTuples.zipWithIndex.map { case ((port, edge, ios), i) =>
+        port := DontCare // tieoff doesn't completely tie-off, for some reason
+        port.tieoff()
       }
-    })
-    Nil
+      Nil
+    }
+    Seq((peiTuples.map(_._1), peiTuples.flatMap(_._3), Some(harnessFn)))
   }
 })
 
