@@ -126,7 +126,6 @@ class MyTile(
   }
 
   // TODO: Create TileLink nodes and connections here.
-// }
   // DOC include end: Tile class
   
   // DOC include start: AXI4 node
@@ -160,7 +159,20 @@ class MyTileModuleImp(outer: MyTile) extends BaseTileModuleImp(outer){
   Annotated.params(this, outer.myParams)
 
   // TODO: Create the top module of the core and connect it with the ports in "outer"
-//}
+
+  // If your core is in Verilog (assume your blackbox is called "MyCoreBlackbox"), instantiate it here like 
+  //   val core = Module(new MyCoreBlackbox(params...)) 
+  // (as described in the blackbox tutorial) and connect appropriate signals. See the blackbox tutorial
+  // (link on the top of the page) for more info.
+  // You can look at https://github.com/ucb-bar/ariane-wrapper/blob/master/src/main/scala/ArianeTile.scala
+  // for a Verilog example.
+
+  // If your core is in Chisel, you can simply instantiate the top module here like other Chisel module
+  // and connect appropriate signal. You can even implement this class as your top module.
+  // See https://github.com/riscv-boom/riscv-boom/blob/master/src/main/scala/common/tile.scala and
+  // https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/RocketTile.scala for 
+  // Chisel example.
+
   // DOC include end: Implementation class
 
   // DOC include start: connect interrupt
