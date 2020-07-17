@@ -30,7 +30,7 @@ import memblade.manager.HasPeripheryMemBladeModuleImpValidOnly
 
 import boom.common.{BoomTile}
 
-import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder}
+import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters}
 import testchipip.{CanHaveTraceIOModuleImp}
 
 object MainMemoryConsts {
@@ -60,17 +60,20 @@ class WithBlockDeviceBridge extends OverrideIOBinder({
 
 
 class WithFASEDBridge extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => {
-    implicit val p = system.p
+  (system: CanHaveMasterAXI4MemPort) => {
+    implicit val p: Parameters = GetSystemParameters(system)
     (system.mem_axi4 zip system.memAXI4Node.in).foreach({ case (axi4, (_, edge)) =>
       val nastiKey = NastiParameters(axi4.r.bits.data.getWidth,
                                      axi4.ar.bits.addr.getWidth,
                                      axi4.ar.bits.id.getWidth)
-      FASEDBridge(system.module.clock, axi4, system.module.reset.toBool,
-        CompleteConfig(p(firesim.configs.MemModelKey),
-                       nastiKey,
-                       Some(AXI4EdgeSummary(edge)),
-                       Some(MainMemoryConsts.globalName)))
+      system match {
+        case s: BaseSubsystem => FASEDBridge(s.module.clock, axi4, s.module.reset.toBool,
+          CompleteConfig(p(firesim.configs.MemModelKey),
+                         nastiKey,
+                         Some(AXI4EdgeSummary(edge)),
+                         Some(MainMemoryConsts.globalName)))
+        case _ => throw new Exception("Attempting to attach FASED Bridge to misconfigured design")
+      }
     })
     Nil
   }

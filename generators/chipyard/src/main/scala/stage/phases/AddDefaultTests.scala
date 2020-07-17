@@ -15,14 +15,16 @@ import firrtl.options.Viewer.view
 import freechips.rocketchip.stage.RocketChipOptions
 import freechips.rocketchip.stage.phases.{RocketTestSuiteAnnotation}
 import freechips.rocketchip.system.{RocketTestSuite, TestGeneration}
+import freechips.rocketchip.subsystem.{TilesLocated, InSubsystem}
 import freechips.rocketchip.util.HasRocketChipStageUtils
 import freechips.rocketchip.tile.XLen
 
 import chipyard.TestSuiteHelper
+import chipyard.TestSuitesKey
 
 class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipStageUtils {
   // Make sure we run both after RocketChip's version of this phase, and Rocket Chip's annotation emission phase
-  // because the RocketTestSuiteAnnotation is not serializable (but is not marked as such). 
+  // because the RocketTestSuiteAnnotation is not serializable (but is not marked as such).
   override val prerequisites = Seq(
     Dependency[freechips.rocketchip.stage.phases.GenerateFirrtlAnnos],
     Dependency[freechips.rocketchip.stage.phases.AddDefaultTests])
@@ -33,25 +35,11 @@ class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipS
     val suiteHelper = new TestSuiteHelper
     // Use Xlen as a proxy for detecting if we are a processor-like target
     // The underlying test suites expect this field to be defined
-    if (p.lift(XLen).nonEmpty) {
-      suiteHelper.addRocketTestSuites
-      suiteHelper.addBoomTestSuites
-      suiteHelper.addArianeTestSuites
-    }
+    val tileParams = p(TilesLocated(InSubsystem)) map (tp => tp.tileParams)
+    if (p.lift(XLen).nonEmpty)
+      // If a custom test suite is set up, use the custom test suite
+      annotations += CustomMakefragSnippet(p(TestSuitesKey).apply(tileParams, suiteHelper, p))
 
-    // if hwacha parameter exists then generate its tests
-    // TODO: find a more elegant way to do this. either through
-    // trying to disambiguate BuildRoCC, having a AccelParamsKey,
-    // or having the Accelerator/Tile add its own tests
-    import hwacha.HwachaTestSuites._
-    if (Try(p(hwacha.HwachaNLanes)).getOrElse(0) > 0) {
-      suiteHelper.addSuites(rv64uv.map(_("p")))
-      suiteHelper.addSuites(rv64uv.map(_("vp")))
-      suiteHelper.addSuite(rv64sv("p"))
-      suiteHelper.addSuite(hwachaBmarks)
-      annotations += CustomMakefragSnippet(
-        "SRC_EXTENSION = $(base_dir)/hwacha/$(src_path)/*.scala" + "\nDISASM_EXTENSION = --extension=hwacha")
-    }
     RocketTestSuiteAnnotation(suiteHelper.suites.values.toSeq) +: annotations
   }
 

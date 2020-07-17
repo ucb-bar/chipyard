@@ -32,7 +32,7 @@ import memblade.client.{RemoteMemClientKey, RemoteMemClientConfig}
 import memblade.cache._
 import memblade.prefetcher._
 
-import chipyard.{BuildTop, BuildSystem}
+import chipyard.{BuildTop, BuildSystem, TestSuitesKey, TestSuiteHelper}
 
 import scala.math.max
 
@@ -60,9 +60,9 @@ class WithGPIO extends Config((site, here, up) => {
 })
 // DOC include end: gpio config fragment
 
-class WithUART extends Config((site, here, up) => {
+class WithUART(baudrate: BigInt = 115200) extends Config((site, here, up) => {
   case PeripheryUARTKey => Seq(
-    UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256))
+    UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256, initBaudRate = baudrate))
 })
 
 class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) => {
@@ -123,15 +123,18 @@ class WithMultiRoCC extends Config((site, here, up) => {
  *
  * @param harts harts to specify which will get a Hwacha
  */
-class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
-  case MultiRoCCKey => {
-    up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
-      (i -> Seq((p: Parameters) => {
-        LazyModule(new Hwacha()(p)).suggestName("hwacha")
-      }))
+class WithMultiRoCCHwacha(harts: Int*) extends Config(
+  new chipyard.config.WithHwachaTest ++
+  new Config((site, here, up) => {
+    case MultiRoCCKey => {
+      up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
+        (i -> Seq((p: Parameters) => {
+          LazyModule(new Hwacha()(p)).suggestName("hwacha")
+        }))
+      }
     }
-  }
-})
+  })
+)
 
 class WithMemBladeKey(spanBytes: Option[Int] = None) extends Config(
   (site, here, up) => {
@@ -260,5 +263,29 @@ class WithNPerfCounters(n: Int = 29) extends Config((site, here, up) => {
     case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
       core = tp.tileParams.core.copy(nPerfCounters = n)))
     case other => other
+  }
+})
+
+class WithRocketICacheScratchpad extends Config((site, here, up) => {
+  case RocketTilesKey => up(RocketTilesKey, site) map { r =>
+    r.copy(icache = r.icache.map(_.copy(itimAddr = Some(0x100000 + r.hartId * 0x10000))))
+  }
+})
+
+class WithRocketDCacheScratchpad extends Config((site, here, up) => {
+  case RocketTilesKey => up(RocketTilesKey, site) map { r =>
+    r.copy(dcache = r.dcache.map(_.copy(nSets = 32, nWays = 1, scratch = Some(0x200000 + r.hartId * 0x10000))))
+  }
+})
+
+class WithHwachaTest extends Config((site, here, up) => {
+  case TestSuitesKey => (tileParams: Seq[TileParams], suiteHelper: TestSuiteHelper, p: Parameters) => {
+    up(TestSuitesKey).apply(tileParams, suiteHelper, p)
+    import hwacha.HwachaTestSuites._
+    suiteHelper.addSuites(rv64uv.map(_("p")))
+    suiteHelper.addSuites(rv64uv.map(_("vp")))
+    suiteHelper.addSuite(rv64sv("p"))
+    suiteHelper.addSuite(hwachaBmarks)
+    "SRC_EXTENSION = $(base_dir)/hwacha/$(src_path)/*.scala" + "\nDISASM_EXTENSION = --extension=hwacha"
   }
 })
