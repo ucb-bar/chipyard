@@ -30,6 +30,13 @@ sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
 WAVEFORM_FLAG=-v$(sim_out_name).vcd
 
+# If verilator seed unspecified, verilator uses srand as random seed
+ifdef RANDOM_SEED
+SEED_FLAG=+verilator+seed+I$(RANDOM_SEED)
+else
+SEED_FLAG=
+endif
+
 .PHONY: default debug
 default: $(sim)
 debug: $(sim_debug)
@@ -145,7 +152,7 @@ $(sim_debug): $(model_mk_debug) $(dramsim_lib)
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd
 	vcd2vpd $@.vcd $@ > /dev/null &
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
 
 #########################################################################################
 # general cleanup rule
