@@ -76,6 +76,15 @@ class BoomHwachaDRAMCacheConfig extends Config(
   new boom.common.WithNLargeBooms(1) ++
   new chipyard.config.AbstractConfig)
 
+class DualBoomDRAMCacheConfig extends Config(
+  new chipyard.config.WithMemBenchKey ++
+  new chipyard.config.WithDRAMCacheKey(8, 8, 2) ++
+  new chipyard.config.WithDRAMCacheSystem ++
+  new chipyard.config.WithStandardL2(4) ++
+  new memblade.prefetcher.WithPrefetchMiddleManTopology ++
+  new boom.common.WithNLargeBooms(2) ++
+  new chipyard.config.AbstractConfig)
+
 class DualLargeBoomConfig extends Config(
   new chipyard.config.WithStandardL2(4) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
