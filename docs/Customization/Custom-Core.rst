@@ -35,11 +35,14 @@ where ``TileType`` is the tile class (see the next section).
 All custom cores will also need to implement ``instantiate()`` in their tile parameter class to return a new instance
 of the tile class ``TileType``. 
 
-``TileParams``, ``InstantiableTileParams[TileType]`` and ``CoreParams`` contains the following fields:
+``TileParams`` (in the file `BaseTile.scala <https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/BaseTile.scala>`_) ,
+``InstantiableTileParams`` (in the file `BaseTile.scala <https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/BaseTile.scala>`_),
+``CoreParams`` (in the file `Core.scala <https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/Core.scala>`_),
+and ``FPUParams`` (in the file `FPU.scala <https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/FPU.scala>`_)
+contains the following fields:
 
 .. code-block:: scala
 
-    // The two classes below can be found in https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/BaseTile.scala.
     trait TileParams {
       val core: CoreParams                  // Core parameters (see below)
       val icache: Option[ICacheParams]      // Rocket specific: I1 cache option
@@ -56,7 +59,6 @@ of the tile class ``TileType``.
                     (implicit p: Parameters): TileType
     }
 
-    // This class can be found in https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/Core.scala.
     trait CoreParams {
       val bootFreqHz: BigInt              // Frequency
       val useVM: Boolean                  // Support virtual memory
@@ -106,8 +108,7 @@ of the tile class ``TileType``.
       def eLen(xLen: Int, fLen: Int): Int = xLen max fLen
       def vMemDataBits: Int = 0
     }
-
-    // This class can be found in https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/FPU.scala. 
+ 
     case class FPUParams(
       minFLen: Int = 32,          // Minimum floating point length (no need to change) 
       fLen: Int = 64,             // Maximum floating point length, use 32 if only single precision is supported
@@ -191,11 +192,11 @@ Make sure to read :ref:`node_types` to check out what type of nodes Chipyard sup
 
 Also, by default, there are boundary buffers for both master and slave connections to the bus when they are leaving the tile, and you
 can override the following two functions to control how to buffer the bus requests/responses:
+(You can find the definition of these two functions in the class ``BaseTile`` in the file
+`BaseTile.scala <https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/BaseTile.scala>`_)
 
 .. code-block:: scala
 
-    // This two functions can be found in https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/BaseTile.scala,
-    // in the class "BaseTile".
     // By default, their value is "TLBuffer(BufferParams.none)".
     protected def makeMasterBoundaryBuffers(implicit p: Parameters): TLBuffer
     protected def makeSlaveBoundaryBuffers(implicit p: Parameters): TLBuffer
@@ -232,11 +233,11 @@ Chipyard allows a tile to either receive interrupts from other devices or initia
 In the tile that inherited ``SinksExternalInterrupts``, one can create a ``TileInterrupts`` object (a Chisel bundle) and 
 call ``decodeCoreInterrupts()`` with the object as the argument. Note that you should call this function in the implementation
 class since it returns a Chisel bundle used by RTL code. You can then read the interrupt bits from the ``TileInterrupts`` bundle
-we create above. The definition of ``TileInterrupts`` is 
+we create above. The definition of ``TileInterrupts`` 
+(in the file `Interrupts.scala <https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/Interrupts.scala>`_) is 
 
 .. code-block:: scala
 
-    // This class can be found in https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/Interrupts.scala.
     class TileInterrupts(implicit p: Parameters) extends CoreBundle()(p) {
       val debug = Bool() // debug interrupt
       val mtip = Bool() // Machine level timer interrupt
@@ -255,11 +256,11 @@ Here is an example on how to connect these signals in the implementation class:
 
 Also, the tile can also notify other cores or devices for some events by calling following functions in ``SourcesExternalNotifications``
 from the implementation class:
+(These functions can be found in in the trait ``SourcesExternalNotifications`` in the file 
+`Interrupts.scala <https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/Interrupts.scala>`_)
 
 .. code-block:: scala
 
-    // These functions can be found in https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/Interrupts.scala, 
-    // in the trait "SourcesExternalNotifications". 
     def reportHalt(could_halt: Option[Bool]) // Triggered when there is an unrecoverable hardware error (halt the machine)
     def reportHalt(errors: Seq[CanHaveErrors]) // Varient for standard error bundle (Rocket specific: used only by cache when there's an ECC error)
     def reportCease(could_cease: Option[Bool], quiescenceCycles: Int = 8) // Triggered when the core stop retiring instructions (like clock gating)
