@@ -10,6 +10,11 @@ instructions on how to achieve this.
 
     RoCC is currently not supported by cores other than Rocket and BOOM. Please use Rocket or BOOM as the RoCC base core if you need to use RoCC.
 
+.. note::
+
+    This page contains links to the files that contains important definitions in the Rocket chip repository, which is maintained separately 
+    from Chipyard. If you find any discrepency between the code on this page and the code in the source file, please report it through 
+    GitHub issues!
 
 Wrap Verilog Module with Blackbox (Optional)
 --------------------------------------------
