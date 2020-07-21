@@ -19,7 +19,6 @@ class LargeBoomConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class MegaBoomConfig extends Config(
-  new boom.common.WithBoomBranchPrintf ++
   new boom.common.WithNMegaBooms(1) ++                           // mega boom config
   new chipyard.config.AbstractConfig)
 
@@ -28,6 +27,7 @@ class DualSmallBoomConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class HwachaLargeBoomConfig extends Config(
+  new chipyard.config.WithHwachaTest ++
   new hwacha.DefaultHwachaConfig ++                              // use Hwacha vector accelerator
   new boom.common.WithNLargeBooms(1) ++
   new chipyard.config.AbstractConfig)
@@ -43,4 +43,3 @@ class DromajoBoomConfig extends Config(
   new chipyard.config.WithTraceIO ++                             // enable the traceio
   new boom.common.WithNSmallBooms(1) ++
   new chipyard.config.AbstractConfig)
-

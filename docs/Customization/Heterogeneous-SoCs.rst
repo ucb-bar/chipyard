@@ -1,3 +1,5 @@
+.. _hetero_socs_:
+
 Heterogeneous SoCs
 ===============================
 

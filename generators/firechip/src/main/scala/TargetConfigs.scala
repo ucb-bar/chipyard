@@ -70,7 +70,8 @@ class WithFireSimConfigTweaks extends Config(
   new WithFireSimSimpleClocks ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++
-  // Optional*: Removing this will require target-software changes to properly capture UART output
+  // Optional*: Removing this will require adjusting the UART baud rate and
+  // potential target-software changes to properly capture UART output
   new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
   // Required: Existing FAME-1 transform cannot handle black-box clock gates
   new WithoutClockGating ++
@@ -86,8 +87,8 @@ class WithFireSimConfigTweaks extends Config(
   new testchipip.WithTSI ++
   // Optional: Removing this will require using an initramfs under linux
   new testchipip.WithBlockDevice ++
-  // Required*:
-  new chipyard.config.WithUART
+  // Required*: Scale default baud rate with periphery bus frequency
+  new chipyard.config.WithUART(BigInt(3686400L))
 )
 
 /*******************************************************************************
@@ -118,6 +119,21 @@ class FireSimQuadRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.QuadRocketConfig)
 
+// A stripped down configuration that should fit on all supported hosts.
+// Flat to avoid having to reorganize the config class hierarchy to remove certain features 
+class FireSimSmallSystemConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithBootROM ++
+  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
+  new WithoutClockGating ++
+  new WithoutTLMonitors ++
+  new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++
+  new testchipip.WithTSI ++
+  new testchipip.WithBlockDevice ++
+  new chipyard.config.WithUART ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(nWays = 2, capacityKB = 64) ++
+  new chipyard.RocketConfig)
 
 //*****************************************************************
 // Boom config, base off chipyard's LargeBoomConfig

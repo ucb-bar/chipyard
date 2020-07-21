@@ -1,3 +1,5 @@
+.. _node_types:
+
 TileLink Node Types
 ===================
 
