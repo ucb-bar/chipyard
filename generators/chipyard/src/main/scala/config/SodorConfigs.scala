@@ -5,16 +5,20 @@ import chisel3._
 import freechips.rocketchip.config.{Config}
 
 class SodorConfig extends Config(
-  new chipyard.iobinders.WithUARTAdapter ++                      // display UART with a SimUARTAdapter
-  new chipyard.iobinders.WithTieOffInterrupts ++                 // tie off top-level interrupts
-  new chipyard.iobinders.WithTiedOffDebug ++                     // tie off debug (since we are using SimSerial for testing)
-  new chipyard.iobinders.WithSimSerial ++                        // drive TSI with SimSerial for testing
-  new testchipip.WithTSI ++                                      // use testchipip serial offchip link
-  new chipyard.config.WithBootROM ++                             // use default bootrom
-  new chipyard.config.WithUART ++                                // add a UART
-  new freechips.rocketchip.subsystem.WithNoMMIOPort ++           // no top-level MMIO master port (overrides default set in rocketchip)
-  new freechips.rocketchip.subsystem.WithNoSlavePort ++          // no top-level MMIO slave port (overrides default set in rocketchip)
-  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++ // no external interrupts
-  new sodor.common.WithNSodorCores(1) ++                         // single Ariane core
-  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++  // hierarchical buses including mbus+l2
-  new freechips.rocketchip.system.BaseConfig)                    // "base" rocketchip system
+  new chipyard.iobinders.WithUARTAdapter ++
+  new chipyard.iobinders.WithTieOffInterrupts ++
+  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimSerial ++
+  new testchipip.WithTSI ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithUART ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(0) ++ // remove offchip mem port
+  new freechips.rocketchip.subsystem.WithNBanks(0) ++
+  new freechips.rocketchip.subsystem.WithNoMemPort ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithScratchpadsOnly ++    // use rocket l1 scratchpad
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new sodor.common.WithNSodorCores(1) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  new freechips.rocketchip.system.BaseConfig)
