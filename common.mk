@@ -46,12 +46,12 @@ FIRRTL_TEST_JAR := $(base_dir)/test_lib/firrtl-test.jar
 $(FIRRTL_JAR): $(call lookup_srcs,$(CHIPYARD_FIRRTL_DIR),scala)
 	$(MAKE) -C $(CHIPYARD_FIRRTL_DIR) SBT="$(SBT)" root_dir=$(CHIPYARD_FIRRTL_DIR) build-scala
 	mkdir -p $(@D)
-	cp -a $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl.jar $@
+	cp $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl.jar $@
 
 $(FIRRTL_TEST_JAR): $(call lookup_srcs,$(CHIPYARD_FIRRTL_DIR),scala)
 	cd $(CHIPYARD_FIRRTL_DIR) && $(SBT) "test:assembly"
 	mkdir -p $(@D)
-	cp -a $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl-test.jar $@
+	cp $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl-test.jar $@
 
 
 #########################################################################################
