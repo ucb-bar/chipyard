@@ -32,10 +32,8 @@ class ChipTop(implicit p: Parameters) extends LazyModule with HasTestHarnessFunc
   // The system module specified by BuildSystem
   val lSystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
 
-  // The systemClockSinkNode provides the implicit clock and reset for the System
-  val systemClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters()))
-  val systemClockGroup = LazyModule(new ClockGroup("system_clock"))
-  systemClockSinkNode := systemClockGroup.node
+  // The implicitClockSinkNode provides the implicit clock and reset for the System
+  val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters()))
 
   // Generate Clocks and Reset
   p(ChipyardClockKey)(this)
@@ -46,12 +44,13 @@ class ChipTop(implicit p: Parameters) extends LazyModule with HasTestHarnessFunc
   // anyways, they probably need to be explicitly clocked.
   lazy val module: LazyModuleImpLike = new LazyRawModuleImp(this) {
     // These become the implicit clock and reset to the System
-    val system_clock = systemClockSinkNode.in.head._1.clock
-    val system_reset = systemClockSinkNode.in.head._1.reset
+    val implicit_clock = implicitClockSinkNode.in.head._1.clock
+    val implicit_reset = implicitClockSinkNode.in.head._1.reset
+
 
     // The implicit clock and reset for the system is also, by convention, used for all the IOBinders
     // TODO: This may not be the right thing to do in all cases
-    withClockAndReset(system_clock, system_reset) {
+    withClockAndReset(implicit_clock, implicit_reset) {
       val (_ports, _iocells, _harnessFunctions) = p(IOBinders).values.flatMap(f => f(lSystem) ++ f(lSystem.module)).unzip3
       // We ignore _ports for now...
       iocells ++= _iocells.flatten
@@ -60,8 +59,8 @@ class ChipTop(implicit p: Parameters) extends LazyModule with HasTestHarnessFunc
 
     // Connect the implicit clock/reset, if present
     lSystem.module match { case l: LazyModuleImp => {
-      l.clock := system_clock
-      l.reset := system_reset
+      l.clock := implicit_clock
+      l.reset := implicit_reset
     }}
   }
 }

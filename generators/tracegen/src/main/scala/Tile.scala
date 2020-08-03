@@ -3,7 +3,7 @@ package tracegen
 import chisel3._
 import chisel3.util._
 import freechips.rocketchip.config.Parameters
-import freechips.rocketchip.diplomacy.{SimpleDevice, LazyModule, SynchronousCrossing, ClockCrossingType}
+import freechips.rocketchip.diplomacy.{SimpleDevice, LazyModule, SynchronousCrossing, ClockCrossingType, BundleBridgeSource}
 import freechips.rocketchip.groundtest._
 import freechips.rocketchip.rocket._
 import freechips.rocketchip.rocket.constants.{MemoryOpConstants}
@@ -206,11 +206,13 @@ class BoomTraceGenTile private(
   val cpuDevice: SimpleDevice = new SimpleDevice("groundtest", Nil)
   val intOutwardNode: IntOutwardNode = IntIdentityNode()
   val slaveNode: TLInwardNode = TLIdentityNode()
+  val statusNode = BundleBridgeSource(() => new GroundTestStatus)
 
   val boom_params = p.alterMap(Map(TileKey -> BoomTileParams(
     dcache=params.dcache,
     core=BoomCoreParams(nPMPs=0, numLdqEntries=32, numStqEntries=32, useVM=false))))
-  val dcache = LazyModule(new BoomNonBlockingDCache(hartId)(boom_params))
+  val dcache = LazyModule(new BoomNonBlockingDCache(staticIdForMetadataUseOnly)(boom_params))
+
 
   val masterNode: TLOutwardNode = TLIdentityNode() := visibilityNode := dcache.node
 
@@ -220,11 +222,11 @@ class BoomTraceGenTile private(
 class BoomTraceGenTileModuleImp(outer: BoomTraceGenTile)
   extends BaseTileModuleImp(outer){
 
-  val status = IO(new GroundTestStatus)
+  val status = outer.statusNode.bundle
   val halt_and_catch_fire = None
 
   val tracegen = Module(new TraceGenerator(outer.params.traceParams))
-  tracegen.io.hartid := constants.hartid
+  tracegen.io.hartid := outer.hartIdSinkNode.bundle
 
   val ptw = Module(new DummyPTW(1))
   val lsu = Module(new LSU()(outer.boom_params, outer.dcache.module.edge))

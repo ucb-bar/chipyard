@@ -6,12 +6,13 @@ import chisel3.util.{log2Up}
 import freechips.rocketchip.config.{Field, Parameters, Config}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
-import freechips.rocketchip.devices.tilelink.BootROMParams
+import freechips.rocketchip.devices.tilelink.{BootROMLocated}
 import freechips.rocketchip.devices.debug.{Debug}
 import freechips.rocketchip.groundtest.{GroundTestSubsystem}
 import freechips.rocketchip.tile._
 import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams}
 import freechips.rocketchip.util.{AsyncResetReg}
+import freechips.rocketchip.prci._
 
 import testchipip._
 import tracegen.{TraceGenSystem}
@@ -33,8 +34,7 @@ import chipyard.{BuildTop, BuildSystem, ClockDrivers, ChipyardClockKey, TestSuit
 // -----------------------
 
 class WithBootROM extends Config((site, here, up) => {
-  case BootROMParams => BootROMParams(
-    contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img")
+  case BootROMLocated(x) => up(BootROMLocated(x), site).map(_.copy(contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img"))
 })
 
 // DOC include start: gpio config fragment
@@ -159,6 +159,6 @@ class WithNoSubsystemDrivenClocks extends Config((site, here, up) => {
   case SubsystemDriveAsyncClockGroupsKey => None
 })
 
-class WithTileMultiClock extends Config((site, here, up) => {
-  case ChipyardClockKey => ClockDrivers.harnessMultiClock
+class WithTileDividedClock extends Config((site, here, up) => {
+  case ChipyardClockKey => ClockDrivers.harnessDividedClock
 })

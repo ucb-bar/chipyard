@@ -10,7 +10,7 @@ import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.devices.tilelink.BootROMParams
+import freechips.rocketchip.devices.tilelink.{BootROMLocated, BootROMParams}
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import freechips.rocketchip.diplomacy.LazyModule
 import testchipip.{BlockDeviceKey, BlockDeviceConfig, SerialKey, TracePortKey, TracePortParams}
@@ -24,16 +24,16 @@ import firesim.bridges._
 import firesim.configs._
 
 class WithBootROM extends Config((site, here, up) => {
-  case BootROMParams => {
+  case BootROMLocated(x) => {
     val chipyardBootROM = new File(s"./generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
     val firesimBootROM = new File(s"./target-rtl/chipyard/generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
 
-     val bootROMPath = if (chipyardBootROM.exists()) {
+    val bootROMPath = if (chipyardBootROM.exists()) {
       chipyardBootROM.getAbsolutePath()
     } else {
       firesimBootROM.getAbsolutePath()
     }
-    BootROMParams(contentFileName = bootROMPath)
+    up(BootROMLocated(x), site).map(_.copy(contentFileName = bootROMPath))
   }
 })
 
@@ -188,11 +188,13 @@ class FireSimArianeConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.ArianeConfig)
 
-
+//**********************************************************************************
+//* Multiclock Configurations
+//*********************************************************************************/
 class FireSimMulticlockRocketConfig extends Config(
   new WithFireSimRationalTileDomain(2, 1) ++
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new chipyard.MultiClockRocketConfig)
+  new chipyard.DividedClockRocketConfig)
 

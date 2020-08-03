@@ -83,59 +83,65 @@ case object ChipyardClockKey extends Field[ChipTop => Unit](ClockDrivers.harness
 
 
 object ClockDrivers {
-  // A simple clock provider, for testing. All clocks in system are aggregated into one,
-  // and are driven by directly punching out to the TestHarness clock
+  // A simple clock provider, for testing
   val harnessClock: ChipTop => Unit = { chiptop =>
     implicit val p = chiptop.p
-    val simpleClockGroupSourceNode = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
-    val clockAggregator = LazyModule(new ClockGroupAggregator("clocks"))
 
-    // Aggregate all 3 possible clock groups with the clockAggregator
-    chiptop.systemClockGroup.node := clockAggregator.node
-    if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) {
-      chiptop.lSystem match { case l: BaseSubsystem => l.asyncClockGroupsNode := clockAggregator.node }
+    val implicitClockSourceNode = ClockSourceNode(Seq(ClockSourceParameters()))
+    chiptop.implicitClockSinkNode := implicitClockSourceNode
+
+    // Drive the diplomaticclock graph of the DigitalTop (if present)
+    val simpleClockGroupSourceNode = chiptop.lSystem match {
+      case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) => {
+        val n = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
+        l.asyncClockGroupsNode := n
+        Some(n)
+      }
+      case _ => None
     }
-    chiptop.lSystem match {
-      case l: ChipyardSubsystem => l.tileClockGroupNode := clockAggregator.node
-      case _ =>
-    }
 
-
-    clockAggregator.node := simpleClockGroupSourceNode
     InModuleBody {
-      // this needs directionality so generateIOFromSignal works
+      //this needs directionality so generateIOFromSignal works
       val clock_wire = Wire(Input(Clock()))
       val reset_wire = GenerateReset(chiptop, clock_wire)
       val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, Some("iocell_clock"))
       chiptop.iocells ++= clockIOCell
       clock_io.suggestName("clock")
 
-      simpleClockGroupSourceNode.out.unzip._1.flatMap(_.member).map { o =>
+      implicitClockSourceNode.out.unzip._1.map { o =>
         o.clock := clock_wire
         o.reset := reset_wire
       }
+
+      simpleClockGroupSourceNode.map { n => n.out.unzip._1.map { out: ClockGroupBundle =>
+        out.member.data.foreach { o =>
+          o.clock := clock_wire
+          o.reset := reset_wire
+        }
+      }}
+
       chiptop.harnessFunctions += ((th: HasHarnessUtils) => {
         clock_io := th.harnessClock
         Nil
       })
     }
+
   }
 
-  val harnessMultiClock: ChipTop => Unit = { chiptop =>
+
+  val harnessDividedClock: ChipTop => Unit = { chiptop =>
     implicit val p = chiptop.p
-    val simpleClockGroupSourceNode = ClockGroupSourceNode(Seq(ClockGroupSourceParameters(), ClockGroupSourceParameters()))
-    val uncoreClockAggregator = LazyModule(new ClockGroupAggregator("uncore_clocks"))
 
-    // Aggregate only the uncoreclocks
-    chiptop.systemClockGroup.node := uncoreClockAggregator.node
-    if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) {
-      chiptop.lSystem match { case l: BaseSubsystem => l.asyncClockGroupsNode := uncoreClockAggregator.node }
-    }
+    val implicitClockSourceNode = ClockSourceNode(Seq(ClockSourceParameters()))
+    chiptop.implicitClockSinkNode := implicitClockSourceNode
 
-    uncoreClockAggregator.node := simpleClockGroupSourceNode
-    chiptop.lSystem match {
-      case l: ChipyardSubsystem => l.tileClockGroupNode := simpleClockGroupSourceNode
-      case _ => throw new Exception("MultiClock assumes ChipyardSystem")
+    val simpleClockGroupSourceNode = chiptop.lSystem match {
+      case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) => {
+        val n = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
+        l.asyncClockGroupsNode := n
+        Some(n)
+      }
+      case _ => throw new Exception("Harness multiclock assumes BaseSubsystem")
     }
 
     InModuleBody {
@@ -147,14 +153,19 @@ object ClockDrivers {
       clock_io.suggestName("clock")
       val div_clock = Pow2ClockDivider(clock_wire, 2)
 
-      simpleClockGroupSourceNode.out(0)._1.member.map { o =>
+      implicitClockSourceNode.out.unzip._1.map { o =>
         o.clock := div_clock
-        o.reset := ResetCatchAndSync(div_clock, reset_wire.asBool)
-      }
-      simpleClockGroupSourceNode.out(1)._1.member.map { o =>
-        o.clock := clock_wire
         o.reset := reset_wire
       }
+
+      simpleClockGroupSourceNode.map { n => n.out.unzip._1.map { out: ClockGroupBundle =>
+        out.member.elements.map { case (name, data) =>
+          // This is mega hacks, how are you actually supposed to do this?
+          data.clock := (if (name.contains("core")) clock_wire else div_clock)
+          data.reset := reset_wire
+        }
+      }}
+
       chiptop.harnessFunctions += ((th: HasHarnessUtils) => {
         clock_io := th.harnessClock
         Nil

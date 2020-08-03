@@ -45,25 +45,35 @@ object NodeIdx {
 class WithFireSimSimpleClocks extends Config((site, here, up) => {
   case ChipyardClockKey => { chiptop: ChipTop =>
     implicit val p = chiptop.p
-    val simpleClockGroupSourceNode = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
-    val clockAggregator = LazyModule(new ClockGroupAggregator("clocks"))
 
-    // Aggregate all 3 possible clock groups with the clockAggregator
-    chiptop.systemClockGroup.node := clockAggregator.node
-    if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) {
-      chiptop.lSystem match { case l: BaseSubsystem => l.asyncClockGroupsNode := clockAggregator.node }
+    val implicitClockSourceNode = ClockSourceNode(Seq(ClockSourceParameters()))
+    chiptop.implicitClockSinkNode := implicitClockSourceNode
+
+    // Drive the diplomaticclock graph of the DigitalTop (if present)
+    val simpleClockGroupSourceNode = chiptop.lSystem match {
+      case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) => {
+        val n = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
+        l.asyncClockGroupsNode := n
+        Some(n)
+      }
+      case _ => None
     }
-    chiptop.lSystem match { case l: ChipyardSubsystem => l.tileClockGroupNode := clockAggregator.node }
 
-    clockAggregator.node := simpleClockGroupSourceNode
     InModuleBody {
-      val clock      = IO(Input(Clock())).suggestName("clock")
-      val reset      = IO(Input(Reset())).suggestName("reset")
+      val clock = IO(Input(Clock())).suggestName("clock")
+      val reset = IO(Input(Reset())).suggestName("reset")
 
-      simpleClockGroupSourceNode.out.unzip._1.flatMap(_.member).map { o =>
+      implicitClockSourceNode.out.unzip._1.map { o =>
         o.clock := clock
         o.reset := reset
       }
+
+      simpleClockGroupSourceNode.map { n => n.out.unzip._1.map { out: ClockGroupBundle =>
+        out.member.data.foreach { o =>
+          o.clock := clock
+          o.reset := reset
+        }
+      }}
 
       chiptop.harnessFunctions += ((th: HasHarnessUtils) => {
         clock := th.harnessClock
@@ -78,19 +88,18 @@ class WithFireSimRationalTileDomain(multiplier: Int, divisor: Int) extends Confi
   case FireSimClockKey => FireSimClockParameters(Seq(RationalClock("TileDomain", multiplier, divisor)))
   case ChipyardClockKey => { chiptop: ChipTop =>
     implicit val p = chiptop.p
-    val simpleClockGroupSourceNode = ClockGroupSourceNode(Seq(ClockGroupSourceParameters(), ClockGroupSourceParameters()))
-    val uncoreClockAggregator = LazyModule(new ClockGroupAggregator("uncore_clocks"))
 
-    // Aggregate only the uncoreclocks
-    chiptop.systemClockGroup.node := uncoreClockAggregator.node
-    if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) {
-      chiptop.lSystem match { case l: BaseSubsystem => l.asyncClockGroupsNode := uncoreClockAggregator.node }
-    }
+    val implicitClockSourceNode = ClockSourceNode(Seq(ClockSourceParameters()))
+    chiptop.implicitClockSinkNode := implicitClockSourceNode
 
-    uncoreClockAggregator.node := simpleClockGroupSourceNode
-    chiptop.lSystem match {
-      case l: ChipyardSubsystem => l.tileClockGroupNode := simpleClockGroupSourceNode
-      case _ => throw new Exception("MultiClock assumes ChipyardSystem")
+    // Drive the diplomaticclock graph of the DigitalTop (if present)
+    val simpleClockGroupSourceNode = chiptop.lSystem match {
+      case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) => {
+        val n = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
+        l.asyncClockGroupsNode := n
+        Some(n)
+      }
+      case _ => None
     }
 
     InModuleBody {
@@ -98,15 +107,23 @@ class WithFireSimRationalTileDomain(multiplier: Int, divisor: Int) extends Confi
       val tile_clock   = IO(Input(Clock())).suggestName("tile_clock")
       val reset        = IO(Input(Reset())).suggestName("reset")
 
-      simpleClockGroupSourceNode.out(0)._1.member.map { o =>
+      implicitClockSourceNode.out.unzip._1.map { o =>
         o.clock := uncore_clock
         o.reset := reset
       }
 
-      simpleClockGroupSourceNode.out(1)._1.member.map { o =>
-        o.clock := tile_clock
-        o.reset := ResetCatchAndSync(tile_clock, reset.asBool)
-      }
+      simpleClockGroupSourceNode.map { n => n.out.unzip._1.map { out: ClockGroupBundle =>
+        out.member.elements.map { case (name, data) =>
+          // This is mega hacks, how are you actually supposed to do this?
+          if (name.contains("core")) {
+            data.clock := tile_clock
+            data.reset := ResetCatchAndSync(tile_clock, reset.asBool)
+          } else {
+            data.clock := uncore_clock
+            data.clock := reset
+          }
+        }
+      }}
 
       chiptop.harnessFunctions += ((th: HasHarnessUtils) => {
         uncore_clock := th.harnessClock

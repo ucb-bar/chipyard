@@ -28,7 +28,7 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessUtil
     val success = Output(Bool())
   })
 
-  val ldut = LazyModule(p(BuildTop)(p)).suggestName("ChipTop")
+  val ldut = LazyModule(p(BuildTop)(p)).suggestName("chiptop")
   val dut = Module(ldut.module)
   io.success := false.B
 

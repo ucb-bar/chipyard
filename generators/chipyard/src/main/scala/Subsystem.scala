@@ -35,32 +35,16 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
     case b: BoomTile => b.module.core.coreMonitorBundle
   }.toList
 
-  val tileClockSinkNode = ClockSinkNode(List(ClockSinkParameters()))
-  val tileClockGroup = LazyModule(new ClockGroup("tile_clock"))
-  val tileClockGroupNode = tileClockGroup.node
-  tileClockSinkNode := tileClockGroupNode
-
   override lazy val module = new ChipyardSubsystemModuleImp(this)
 }
 
 class ChipyardSubsystemModuleImp[+L <: ChipyardSubsystem](_outer: L) extends BaseSubsystemModuleImp(_outer)
-  with HasResetVectorWire
   with HasTilesModuleImp
 {
-  for (i <- 0 until outer.tiles.size) {
-    val wire = tile_inputs(i)
-    wire.hartid := outer.hartIdList(i).U
-    wire.reset_vector := global_reset_vector
-
-
-    outer.tiles(i).module.clock := outer.tileClockSinkNode.in.head._1.clock
-    outer.tiles(i).module.reset := outer.tileClockSinkNode.in.head._1.reset
-  }
-
   // create file with core params
   ElaborationArtefacts.add("""core.config""", outer.tiles.map(x => x.module.toString).mkString("\n"))
   // Generate C header with relevant information for Dromajo
   // This is included in the `dromajo_params.h` header file
-  DromajoHelper.addArtefacts()
+  DromajoHelper.addArtefacts(InSubsystem)
 }
 

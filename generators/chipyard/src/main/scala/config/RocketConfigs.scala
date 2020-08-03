@@ -187,8 +187,15 @@ class MMIORocketConfig extends Config(
 
 // NOTE: This config doesn't work yet because SimWidgets in the TestHarness
 // always get the TestHarness clock. The Tiles and Uncore receive the correct clocks
-class MultiClockRocketConfig extends Config(
-  new chipyard.config.WithTileMultiClock ++                       // Put the Tile on its own clock domain
+class DividedClockRocketConfig extends Config(
+  new chipyard.config.WithTileDividedClock ++                       // Put the Tile on its own clock domain
   new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+
+class TestClockRocketConfig extends Config(
+  //new chipyard.config.WithTileMultiClock ++                       // Put the Tile on its own clock domain
+  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(8, 3) ++   // Add rational crossings between RocketTile and uncore
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
