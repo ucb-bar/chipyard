@@ -1,5 +1,13 @@
 WAVEFORM_FLAG=+vcdplusfile=$(sim_out_name).vpd
 
+# If ntb_random_seed unspecified, vcs uses 1 as constant seed.
+# Set ntb_random_seed_automatic to actually get a random seed
+ifdef RANDOM_SEED
+SEED_FLAG=+ntb_random_seed=$(RANDOM_SEED)
+else
+SEED_FLAG=+ntb_random_seed_automatic
+endif
+
 CLOCK_PERIOD ?= 1.0
 RESET_DELAY ?= 777.7
 
