@@ -210,7 +210,7 @@ class BoomTraceGenTile private(
 
   val boom_params = p.alterMap(Map(TileKey -> BoomTileParams(
     dcache=params.dcache,
-    core=BoomCoreParams(nPMPs=0, numLdqEntries=32, numStqEntries=32, useVM=false))))
+    core=BoomCoreParams(nPMPs=0, numLdqEntries=16, numStqEntries=16, useVM=false))))
   val dcache = LazyModule(new BoomNonBlockingDCache(staticIdForMetadataUseOnly)(boom_params))
 
 

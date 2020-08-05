@@ -120,7 +120,7 @@ class WithFireSimRationalTileDomain(multiplier: Int, divisor: Int) extends Confi
             data.reset := ResetCatchAndSync(tile_clock, reset.asBool)
           } else {
             data.clock := uncore_clock
-            data.clock := reset
+            data.reset := reset
           }
         }
       }}
