@@ -161,9 +161,7 @@ run-fast: run-asm-tests-fast run-bmark-tests-fast
 # helper rules to run simulator with fast loadmem via hex files
 #########################################################################################
 $(binary_hex): $(output_dir) $(BINARY)
-	hex_bytes=$(shell readelf --segments --wide $(BINARY) | grep LOAD | tail -n 1 | tr -s [:space:] | cut -f4,6 -d' ' | tr -d x | tr [:lower:] [:upper:] | tr ' ' + | sed 's/0000000008/ibase=16;/' | bc);\
-	power_2_bytes=`python -c "import math; print int(pow(2,math.ceil(math.log($$hex_bytes)/math.log(2))))"`;\
-	elf2hex 64 $$power_2_bytes $(BINARY) $(shell echo "ibase=16;$(LOADMEM_ADDR)" | bc) > $(binary_hex)
+	$(base_dir)/scripts/smartelf2hex.sh $(BINARY) > $(binary_hex)
 
 run-binary-hex: $(output_dir) $(sim) $(binary_hex)
 run-binary-hex: run-binary

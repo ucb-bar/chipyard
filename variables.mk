@@ -173,6 +173,7 @@ override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
 endif
 VERBOSE_FLAGS ?= +verbose
 sim_out_name = $(output_dir)/$(subst $() $(),_,$(notdir $(basename $(BINARY))))
+binary_hex= $(sim_out_name).loadmem_hex
 
 #########################################################################################
 # build output directory for compilation
