@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+#
+# NOTE: this ExampleDriver works for asap7 and nangate45. the custom hooks are
+# only used for asap7 though.
+
 import os
 
 import hammer_vlsi
@@ -7,21 +11,24 @@ from hammer_vlsi import CLIDriver, HammerToolHookAction
 from typing import Dict, Callable, Optional, List
 
 def example_place_tap_cells(x: hammer_vlsi.HammerTool) -> bool:
-    x.append('''
+    if x.get_setting("vlsi.core.technology") == "asap7":
+        x.append('''
 # TODO
 # Place custom TCL here
 ''')
     return True
 
 def example_add_fillers(x: hammer_vlsi.HammerTool) -> bool:
-    x.append('''
+    if x.get_setting("vlsi.core.technology") == "asap7":
+        x.append('''
 # TODO
 # Place custom TCL here
 ''')
     return True
 
 def example_tool_settings(x: hammer_vlsi.HammerTool) -> bool:
-    x.append('''
+    if x.get_setting("vlsi.core.technology") == "asap7":
+        x.append('''
 # TODO
 # Place custom TCL here
 set_db route_design_bottom_routing_layer 2
@@ -34,7 +41,8 @@ def scale_final_gds(x: hammer_vlsi.HammerTool) -> bool:
     Scale the final GDS by a factor of 4
     hammer/src/hammer-vlsi/technology/asap7/__init__.py implements scale_gds_script
     """
-    x.append('''
+    if x.get_setting("vlsi.core.technology") == "asap7":
+        x.append('''
 # Write script out to a temporary file and execute it
 set fp [open "{script_file}" "w"]
 puts -nonewline $fp "{script_text}"
