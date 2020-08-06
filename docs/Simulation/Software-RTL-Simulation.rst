@@ -150,6 +150,12 @@ The ``.hex`` file should be a text file with a hexadecimal number on each line.
 
 Each line uses little-endian order, so this file would produce the bytes "ef be ad de 01 23". ``LOADMEM_ADDR`` specifies which address in memory (in hexadecimal) to write the first byte to. The default is 0x81000000.
 
+A special target that facilitates automatically generating a hex file for an entire elf RISC-V exectuable and then running the simulator with the appropriate flags is also available.
+
+.. code-block:: shell
+
+    make run-binary-hex BINARY=test.riscv
+
 Generating Waveforms
 -----------------------
 
