@@ -127,6 +127,18 @@ ifeq ($(SUB_PROJECT),constellation)
 	TB                ?= TestDriver
 	TOP               ?= NoC
 endif
+# For Brainiac developers
+ifeq ($(SUB_PROJECT),brainiac)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
+	MODEL_PACKAGE     ?= chipyard.unittest
+	CONFIG            ?= BrainiacUnitTestConfig
+	CONFIG_PACKAGE    ?= brainiac.unittest
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= TestDriver
+	TOP               ?= UnitTestSuite
+endif
 
 
 #########################################################################################

@@ -61,6 +61,9 @@
 [submodule "generators/testchipip"]
 	path = generators/testchipip
 	url = https://github.com/ucb-bar/testchipip.git
+[submodule "generators/brainiac"]
+	path = generators/brainiac
+	url = git@github.com:a0u/brainiac.git
 [submodule "sims/firesim"]
 	path = sims/firesim
 	url = https://github.com/firesim/firesim.git
