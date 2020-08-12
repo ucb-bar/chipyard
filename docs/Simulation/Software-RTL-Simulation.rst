@@ -62,6 +62,12 @@ For instance, to run one of the riscv-tools assembly tests.
 
 .. Note:: In a VCS simulator, the simulator name will be ``simv-chipyard-RocketConfig`` instead of ``simulator-chipyard-RocketConfig``.
 
+The makefiles have a ``run-binary`` rule that simplifies running the simulation executable. It adds many of the common command line options for you and redirects the output to a file.
+
+.. code-block:: shell
+
+    make run-binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
+
 Alternatively, we can run a pre-packaged suite of RISC-V assembly or benchmark tests, by adding the make target ``run-asm-tests`` or ``run-bmark-tests``.
 For example:
 
@@ -126,6 +132,29 @@ All ``make`` targets that can be applied to the default example, can also be app
 Finally, in the ``generated-src/<...>-<package>-<config>/`` directory resides all of the collateral and Verilog source files for the build/simulation.
 Specifically, the SoC top-level (``TOP``) Verilog file is denoted with ``*.top.v`` while the ``TestHarness`` file is denoted with ``*.harness.v``.
 
+Fast Memory Loading
+-------------------
+
+The simulator loads the program binary over a simulated serial line. This can be quite slow if there is a lot of static data, so the simulator also allows data to be loaded from a file directly into the DRAM model.
+
+.. code-block:: shell
+
+    make run-binary BINARY=test.riscv LOADMEM=testdata.hex LOADMEM_ADDR=81000000
+
+The ``.hex`` file should be a text file with a hexadecimal number on each line.
+
+.. code-block:: text
+
+    deadbeef
+    0123
+
+Each line uses little-endian order, so this file would produce the bytes "ef be ad de 01 23". ``LOADMEM_ADDR`` specifies which address in memory (in hexadecimal) to write the first byte to. The default is 0x81000000.
+
+A special target that facilitates automatically generating a hex file for an entire elf RISC-V exectuable and then running the simulator with the appropriate flags is also available.
+
+.. code-block:: shell
+
+    make run-binary-hex BINARY=test.riscv
 
 Generating Waveforms
 -----------------------

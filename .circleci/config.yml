@@ -287,6 +287,11 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "chipyard-spiflashread"
+    prepare-chipyard-mmios:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-mmios"
     chipyard-rocket-run-tests:
         executor: main-env
         steps:
@@ -530,6 +535,10 @@ workflows:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
+
+            - prepare-chipyard-mmios:
+                requires:
+                    - install-riscv-toolchain
 
             # Run the respective tests
 

@@ -152,6 +152,8 @@ define run_scala_main
 endef
 endif
 
+FIRRTL_LOGLEVEL ?= error
+
 #########################################################################################
 # output directory for tests
 #########################################################################################
@@ -163,9 +165,15 @@ output_dir=$(sim_dir)/output/$(long_name)
 PERMISSIVE_ON=+permissive
 PERMISSIVE_OFF=+permissive-off
 BINARY ?=
+LOADMEM ?=
+LOADMEM_ADDR ?= 81000000
 override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(timeout_cycles)
+ifneq ($(LOADMEM),)
+override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
+endif
 VERBOSE_FLAGS ?= +verbose
 sim_out_name = $(output_dir)/$(subst $() $(),_,$(notdir $(basename $(BINARY))))
+binary_hex= $(sim_out_name).loadmem_hex
 
 #########################################################################################
 # build output directory for compilation
