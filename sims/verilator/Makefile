@@ -28,7 +28,7 @@ sim_prefix = simulator
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
-WAVEFORM_FLAG=-v$(sim_out_name).vcd
+WAVEFORM_FLAG=-v $(sim_out_name).vcd
 
 # If verilator seed unspecified, verilator uses srand as random seed
 ifdef RANDOM_SEED
