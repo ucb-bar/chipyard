@@ -22,7 +22,7 @@ include $(base_dir)/variables.mk
 sim_name = verilator
 
 #########################################################################################
-# vcs simulator types and rules
+# verilator simulator types and rules
 #########################################################################################
 sim_prefix = simulator
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
@@ -47,67 +47,141 @@ debug: $(sim_debug)
 include $(base_dir)/common.mk
 
 #########################################################################################
-# verilator binary and flags
+# verilator-specific user-interface variables and commands
+#########################################################################################
+HELP_COMPILATION_VARIABLES += \
+"   VERILATOR_PROFILE      = 'none' if no verilator profiling (default)" \
+"                            'all' if full verilator runtime profiling" \
+"                            'threads' if runtime thread profiling only" \
+"   VERILATOR_FST_MODE     = enable FST waveform instead of VCD. use with debug build"
+
+HELP_COMMANDS += \
+"   default                = compiles non-debug simulator [./$(shell basename $(sim))]" \
+"   debug                  = compiles debug simulator [./$(shell basename $(sim_debug))]" \
+"   clean                  = remove all debug/non-debug simulators and intermediate files" \
+"   clean-sim              = removes non-debug simulator and verilator-generated files" \
+"   clean-sim-debug        = removes debug simulator and verilator-generated files"
+
+#########################################################################################
+# verilator/cxx binary and flags
 #########################################################################################
 VERILATOR := verilator --cc --exe
 
-CXXFLAGS := \
-	$(CXXFLAGS) -O1 -std=c++11 \
-	-I$(RISCV)/include \
-	-I$(dramsim_dir) \
-	-D__STDC_FORMAT_MACROS \
-	$(EXTRA_SIM_CC_FLAGS)
+#----------------------------------------------------------------------------------------
+# user configs
+#----------------------------------------------------------------------------------------
+VERILATOR_PROFILE ?= none
+RUNTIME_PROFILING_CFLAGS := $(if $(filter $(VERILATOR_PROFILE),all),-g -pg,)
+RUNTIME_PROFILING_VFLAGS := $(if $(filter $(VERILATOR_PROFILE),all),\
+                              --prof-threads --prof-cfuncs,\
+                              $(if $(filter $(VERILATOR_PROFILE),threads),\
+								--prof-threads,))
 
-LDFLAGS := \
-	$(LDFLAGS) \
-	-L$(sim_dir) \
-	-lpthread
+VERILATOR_FST_MODE ?= 0
+TRACING_OPTS := $(if $(filter $(VERILATOR_FST_MODE),0),\
+	                  --trace,--trace-fst --trace-threads 1)
+TRACING_CFLAGS := $(if $(filter $(VERILATOR_FST_MODE),0),,-DCY_FST_TRACE)
 
-VERILATOR_CC_OPTS = \
+#----------------------------------------------------------------------------------------
+# verilation configuration/optimization
+#----------------------------------------------------------------------------------------
+# we initially had --noassert for performance, but several modules use
+# assertions, including dramsim, so we enable --assert by default
+VMODE := \
 	-O3 \
-	-CFLAGS "$(CXXFLAGS) -DTEST_HARNESS=V$(VLOG_MODEL) -DVERILATOR" \
-	-CFLAGS "-I$(build_dir) -include $(build_dir)/$(long_name).plusArgs -include $(build_dir)/verilator.h" \
-	-LDFLAGS "$(LDFLAGS)" \
-	$(RISCV)/lib/libfesvr.a \
-	$(dramsim_lib)
+	--x-assign fast \
+	--x-initial fast \
+	--assert \
+	--output-split 10000 \
+	--output-split-cfuncs 10000
 
-# default flags added for ariane
-ARIANE_VERILATOR_FLAGS = \
+# default flags added for ariane (-Wno-fatal needed for -Wall to not cause
+# a crash, since 1000s of warnings are generated)
+VERILOG_IP_VERILATOR_FLAGS := \
 	--unroll-count 256 \
-	-Werror-PINMISSING \
-	-Werror-IMPLICIT \
 	-Wno-PINCONNECTEMPTY \
 	-Wno-ASSIGNDLY \
 	-Wno-DECLFILENAME \
 	-Wno-UNUSED \
 	-Wno-UNOPTFLAT \
 	-Wno-BLKANDNBLK \
-	-Wno-style \
-	-Wall
+	-Wno-fatal
 
-# normal flags used for chipyard builds (that are incompatible with ariane)
-CHIPYARD_VERILATOR_FLAGS = \
-	--assert
+# normal flags used for chipyard builds (that are incompatible with vlog ip aka ariane)
+CHIPYARD_VERILATOR_FLAGS :=
+
+# options dependent on whether ariane/NVDLA or chipyard is used
+# NOTE: defer the evaluation of this until it is used!
+PLATFORM_OPTS = $(shell \
+	if grep -qiP "module\s+(Ariane|NVDLA)" $(build_dir)/*.*v; \
+	then echo "$(VERILOG_IP_VERILATOR_FLAGS)"; \
+	else echo "$(CHIPYARD_VERILATOR_FLAGS)"; fi)
 
 # Use --timescale to approximate timescale behavior of pre-4.034
 TIMESCALE_OPTS := $(shell verilator --version | perl -lne 'if (/(\d.\d+)/ && $$1 >= 4.034) { print "--timescale 1ns/1ps"; }')
-VERILATOR_NONCC_OPTS = \
-	$(TIMESCALE_OPTS) \
-	--top-module $(VLOG_MODEL) \
-	--vpi \
-	-Wno-fatal \
-	$(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; then echo "$(CHIPYARD_VERILATOR_FLAGS)"; else echo "$(ARIANE_VERILATOR_FLAGS)"; fi) \
-	--output-split 10000 \
-	--output-split-cfuncs 100 \
-	--max-num-width 1048576 \
-	-f $(sim_common_files) \
-	$(sim_vsrcs)
 
-VERILATOR_DEFINES = \
+# see: https://github.com/ucb-bar/riscv-mini/issues/31
+MAX_WIDTH_OPTS = $(shell verilator --version | perl -lne 'if (/(\d.\d+)/ && $$1 > 4.016) { print "--max-num-width 1048576"; }')
+
+PREPROC_DEFINES := \
 	+define+PRINTF_COND=\$$c\(\"verbose\",\"\&\&\"\,\"done_reset\"\) \
 	+define+STOP_COND=\$$c\(\"done_reset\"\)
 
-VERILATOR_OPTS = $(VERILATOR_CC_OPTS) $(VERILATOR_NONCC_OPTS) $(VERILATOR_DEFINES) $(EXTRA_SIM_SOURCES)
+VERILATOR_NONCC_OPTS = \
+	$(RUNTIME_PROFILING_VFLAGS) \
+	$(VMODE) \
+	$(PLATFORM_OPTS) \
+	$(TIMESCALE_OPTS) \
+	$(MAX_WIDTH_OPTS) \
+	$(PREPROC_DEFINES) \
+	--top-module $(VLOG_MODEL) \
+	--vpi \
+	-f $(sim_common_files) \
+	$(sim_vsrcs)
+
+#----------------------------------------------------------------------------------------
+# gcc configuration/optimization
+#----------------------------------------------------------------------------------------
+# -flto slows down compilation on small-memory and breaks on firesim-manager
+CMODE := -O3 -fbranch-probabilities -march=native
+
+VERILATOR_CXXFLAGS = \
+	$(CXXFLAGS) \
+	$(RUNTIME_PROFILING_CFLAGS) \
+	$(TRACING_CFLAGS) \
+	$(CMODE) \
+	-std=c++11 \
+	-D__STDC_FORMAT_MACROS \
+	-DTEST_HARNESS=V$(VLOG_MODEL) \
+	-DVERILATOR \
+	-I$(RISCV)/include \
+	-I$(dramsim_dir) \
+	-I$(build_dir) \
+	-include $(build_dir)/$(long_name).plusArgs \
+	-include $(build_dir)/verilator.h \
+	$(EXTRA_SIM_CXXFLAGS)
+
+VERILATOR_LDFLAGS =	\
+	$(LDFLAGS) \
+	$(RUNTIME_PROFILING_CFLAGS) \
+	$(CMODE) \
+	-L$(RISCV)/lib \
+	-Wl,-rpath,$(RISCV)/lib \
+	-L$(sim_dir) \
+	-L$(dramsim_dir) \
+	-lfesvr \
+	-lpthread \
+	-ldramsim \
+	$(EXTRA_SIM_LDFLAGS)
+
+VERILATOR_CC_OPTS = \
+	-CFLAGS "$(VERILATOR_CXXFLAGS)" \
+	-LDFLAGS "$(VERILATOR_LDFLAGS)"
+
+#----------------------------------------------------------------------------------------
+# full verilator+gcc opts
+#----------------------------------------------------------------------------------------
+VERILATOR_OPTS = $(VERILATOR_CC_OPTS) $(VERILATOR_NONCC_OPTS)
 
 #########################################################################################
 # verilator build paths and file names
@@ -127,13 +201,13 @@ model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
 $(model_mk): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir)
 	mkdir -p $(model_dir)
-	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim) -Mdir $(model_dir) -CFLAGS "-include $(model_header)"
+	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim) -Mdir $(model_dir) -CFLAGS "-include $(model_header)"
 	touch $@
 
 $(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir_debug)
 	mkdir -p $(model_dir_debug)
-	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim_debug) --trace -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
+	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim_debug) --trace -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
 	touch $@
 
 #########################################################################################
@@ -155,8 +229,21 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
 
 #########################################################################################
-# general cleanup rule
+# general cleanup rules
 #########################################################################################
-.PHONY: clean
+.PHONY: clean clean-sim clean-sim-debug
 clean:
 	rm -rf $(gen_dir) $(sim_prefix)-*
+
+clean-sim:
+	rm -rf $(model_dir) $(sim)
+
+clean-sim-debug:
+	rm -rf $(model_dir_debug) $(sim_debug)
+
+#########################################################################################
+# print help text
+#########################################################################################
+.PHONY: help
+help:
+	@for line in $(HELP_LINES); do echo "$$line"; done
