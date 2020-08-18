@@ -6,6 +6,7 @@ target
 *.stamp
 *.vcd
 *.swp
+*.swo
 *.log
 *#
 *~
