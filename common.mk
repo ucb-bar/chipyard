@@ -14,7 +14,6 @@ endif
 #########################################################################################
 HELP_COMPILATION_VARIABLES += \
 "   EXTRA_GENERATOR_REQS   = requirements needed for the main generator" \
-"   EXTRA_SIM_CFLAGS       = CFLAGS for building simulators" \
 "   EXTRA_SIM_CXXFLAGS     = CXXFLAGS for building simulators" \
 "   EXTRA_SIM_LDFLAGS      = LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES      = simulation sources needed for simulator" \
@@ -22,7 +21,6 @@ HELP_COMPILATION_VARIABLES += \
 
 EXTRA_GENERATOR_REQS ?=
 EXTRA_SIM_CXXFLAGS   ?=
-EXTRA_SIM_CFLAGS     ?=
 EXTRA_SIM_LDFLAGS    ?=
 EXTRA_SIM_SOURCES    ?=
 EXTRA_SIM_REQS       ?=

@@ -157,7 +157,6 @@ VERILATOR_CXXFLAGS = \
 VERILATOR_LDFLAGS =	\
 	$(LDFLAGS) \
 	$(RUNTIME_PROFILING_CFLAGS) \
-	$(CMODE) \
 	-L$(RISCV)/lib \
 	-Wl,-rpath,$(RISCV)/lib \
 	-L$(sim_dir) \

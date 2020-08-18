@@ -49,7 +49,6 @@ ifdef ENABLE_DROMAJO
 EXTRA_SIM_FLAGS += $(DROMAJO_FLAGS)
 
 # CC flags needed for all simulations
-EXTRA_SIM_CFLAGS += -I$(DROMAJO_DIR)
 EXTRA_SIM_CXXFLAGS += -I$(DROMAJO_DIR)
 
 # sourced needed for simulation

@@ -115,12 +115,16 @@ $(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_file
 	done
 	echo "  options_meta: 'append'" >> $@
 	echo "  defines:" >> $@
-	for x in $(subst +define+,,$(VCS_DEFINE_OPTS)); do \
+	for x in $(subst +define+,,$(PREPROC_DEFINES)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  defines_meta: 'append'" >> $@
-	echo "  compiler_opts:" >> $@
-	for x in $(filter-out "",$(filter-out -CC,$(VCS_CC_OPTS))); do \
+	echo "  compiler_cc_opts:" >> $@
+	for x in $(filter-out "",$(VCS_CXXFLAGS)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  compiler_ld_opts:" >> $@
+	for x in $(filter-out "",$(VCS_LDFLAGS)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  compiler_opts_meta: 'append'" >> $@
