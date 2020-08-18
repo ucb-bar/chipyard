@@ -55,13 +55,6 @@ HELP_COMPILATION_VARIABLES += \
 "                            'threads' if runtime thread profiling only" \
 "   VERILATOR_FST_MODE     = enable FST waveform instead of VCD. use with debug build"
 
-HELP_COMMANDS += \
-"   default                = compiles non-debug simulator [./$(shell basename $(sim))]" \
-"   debug                  = compiles debug simulator [./$(shell basename $(sim_debug))]" \
-"   clean                  = remove all debug/non-debug simulators and intermediate files" \
-"   clean-sim              = removes non-debug simulator and verilator-generated files" \
-"   clean-sim-debug        = removes debug simulator and verilator-generated files"
-
 #########################################################################################
 # verilator/cxx binary and flags
 #########################################################################################

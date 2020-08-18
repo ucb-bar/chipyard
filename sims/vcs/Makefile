@@ -37,17 +37,6 @@ debug: $(sim_debug)
 include $(base_dir)/common.mk
 
 #########################################################################################
-# verilator-specific user-interface variables and commands
-#########################################################################################
-HELP_COMPILATION_VARIABLES +=
-HELP_COMMANDS += \
-"   default                = compiles non-debug simulator [./$(shell basename $(sim))]" \
-"   debug                  = compiles debug simulator [./$(shell basename $(sim_debug))]" \
-"   clean                  = remove all debug/non-debug simulators and intermediate files" \
-"   clean-sim              = removes non-debug simulator and verilator-generated files" \
-"   clean-sim-debug        = removes debug simulator and verilator-generated files"
-
-#########################################################################################
 # vcs binary and arguments
 #########################################################################################
 VCS = vcs -full64

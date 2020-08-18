@@ -20,8 +20,14 @@ HELP_SIMULATION_VARIABLES = \
 "   BINARY                 = riscv binary that the simulator will run" \
 "   VERBOSE_FLAGS          = flags used when doing verbose simulation [$(VERBOSE_FLAGS)]"
 
+# include default simulation rules
 HELP_COMMANDS = \
-"   help                   = display this help"
+"   help                   = display this help" \
+"   default                = compiles non-debug simulator [./$(shell basename $(sim))]" \
+"   debug                  = compiles debug simulator [./$(shell basename $(sim_debug))]" \
+"   clean                  = remove all debug/non-debug simulators and intermediate files" \
+"   clean-sim              = removes non-debug simulator and simulator-generated files" \
+"   clean-sim-debug        = removes debug simulator and simulator-generated files"
 
 HELP_LINES = "" \
 	" design specifier variables:" \
