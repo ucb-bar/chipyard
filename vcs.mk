@@ -11,12 +11,6 @@ endif
 CLOCK_PERIOD ?= 1.0
 RESET_DELAY ?= 777.7
 
-VCS_CC_OPTS = \
-	-CC "-I$(RISCV)/include" \
-	-CC "-I$(dramsim_dir)" \
-	-CC "-std=c++11" \
-	-CC "$(EXTRA_SIM_CC_FLAGS)"
-
 #----------------------------------------------------------------------------------------
 # gcc configuration/optimization
 #----------------------------------------------------------------------------------------
