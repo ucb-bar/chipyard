@@ -43,7 +43,7 @@ HELP_LINES = "" \
 	$(HELP_SIMULATION_VARIABLES) \
 	"" \
 	" some useful general commands:" \
-	" -----------------" \
+	" -----------------------------" \
 	$(HELP_COMMANDS) \
 	""
 
