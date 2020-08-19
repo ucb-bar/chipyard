@@ -136,7 +136,7 @@ VERILATOR_NONCC_OPTS = \
 # gcc configuration/optimization
 #----------------------------------------------------------------------------------------
 # -flto slows down compilation on small-memory and breaks on firesim-manager
-CMODE := -O3 -fbranch-probabilities -march=native
+CMODE := -O3
 
 VERILATOR_CXXFLAGS = \
 	$(CXXFLAGS) \
