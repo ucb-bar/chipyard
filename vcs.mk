@@ -35,9 +35,11 @@ VCS_LDFLAGS =	\
 	-ldramsim \
 	$(EXTRA_SIM_LDFLAGS)
 
+# vcs requires LDFLAGS to not include library names (i.e. -l needs to be separate)
 VCS_CC_OPTS = \
 	-CFLAGS "$(VCS_CXXFLAGS)" \
-	-LDFLAGS "$(VCS_LDFLAGS)"
+	-LDFLAGS "$(filter-out -l%,$(VCS_LDFLAGS))" \
+	$(filter -l%,$(VCS_LDFLAGS))
 
 VCS_NONCC_OPTS = \
 	-notice \
