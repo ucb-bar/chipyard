@@ -123,11 +123,12 @@ $(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_file
 	for x in $(filter-out "",$(VCS_CXXFLAGS)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
+	echo "  compiler_cc_opts_meta: 'append'" >> $@
 	echo "  compiler_ld_opts:" >> $@
 	for x in $(filter-out "",$(VCS_LDFLAGS)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
-	echo "  compiler_opts_meta: 'append'" >> $@
+	echo "  compiler_ls_opts_meta: 'append'" >> $@
 	echo "  execution_flags_prepend: ['$(PERMISSIVE_ON)']" >> $@
 	echo "  execution_flags_append: ['$(PERMISSIVE_OFF)']" >> $@
 	echo "  execution_flags:" >> $@
