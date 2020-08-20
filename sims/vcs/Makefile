@@ -72,10 +72,3 @@ clean-sim:
 
 clean-sim-debug:
 	rm -rf csrc/ $(sim_debug) ucli.key vc_hdrs.h
-
-#########################################################################################
-# print help text
-#########################################################################################
-.PHONY: help
-help:
-	@for line in $(HELP_LINES); do echo "$$line"; done

@@ -232,10 +232,3 @@ clean-sim:
 
 clean-sim-debug:
 	rm -rf $(model_dir_debug) $(sim_debug)
-
-#########################################################################################
-# print help text
-#########################################################################################
-.PHONY: help
-help:
-	@for line in $(HELP_LINES); do echo "$$line"; done

@@ -13,11 +13,11 @@ endif
 # specify user-interface variables
 #########################################################################################
 HELP_COMPILATION_VARIABLES += \
-"   EXTRA_GENERATOR_REQS   = requirements needed for the main generator" \
-"   EXTRA_SIM_CXXFLAGS     = CXXFLAGS for building simulators" \
-"   EXTRA_SIM_LDFLAGS      = LDFLAGS for building simulators" \
-"   EXTRA_SIM_SOURCES      = simulation sources needed for simulator" \
-"   EXTRA_SIM_REQS         = requirements to build the simulator"
+"   EXTRA_GENERATOR_REQS   = additional make requirements needed for the main generator" \
+"   EXTRA_SIM_CXXFLAGS     = additional CXXFLAGS for building simulators" \
+"   EXTRA_SIM_LDFLAGS      = additional LDFLAGS for building simulators" \
+"   EXTRA_SIM_SOURCES      = additional simulation sources needed for simulator" \
+"   EXTRA_SIM_REQS         = additional make requirements to build the simulator"
 
 EXTRA_GENERATOR_REQS ?=
 EXTRA_SIM_CXXFLAGS   ?=
@@ -27,7 +27,7 @@ EXTRA_SIM_REQS       ?=
 
 #----------------------------------------------------------------------------
 HELP_SIMULATION_VARIABLES += \
-"   EXTRA_SIM_FLAGS        = runtime simulation flags (passed within +permissive)"
+"   EXTRA_SIM_FLAGS        = additional runtime simulation flags (passed within +permissive)"
 
 EXTRA_SIM_FLAGS ?=
 
@@ -36,7 +36,8 @@ HELP_COMMANDS += \
 "   run-binary             = run [./$(shell basename $(sim))] and log instructions to file" \
 "   run-binary-fast        = run [./$(shell basename $(sim))] and don't log instructions" \
 "   run-binary-debug       = run [./$(shell basename $(sim_debug))] and log instructions and waveform to files" \
-"   verilog                = generate intermediate verilog files from chisel elaboration and firrtl passes"
+"   verilog                = generate intermediate verilog files from chisel elaboration and firrtl passes" \
+"   run-tests              = run all assembly and benchmark tests"
 
 #########################################################################################
 # include additional subproject make fragments
@@ -231,6 +232,13 @@ dramsim_lib = $(dramsim_dir)/libdramsim.a
 
 $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
+
+#########################################################################################
+# print help text
+#########################################################################################
+.PHONY: help
+help:
+	@for line in $(HELP_LINES); do echo "$$line"; done
 
 #########################################################################################
 # Implicit rule handling

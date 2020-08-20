@@ -17,7 +17,7 @@ HELP_PROJECT_VARIABLES = \
 "   TOP                    = top level module of the project (normally the module instantiated by the harness) [$(TOP)]"
 
 HELP_SIMULATION_VARIABLES = \
-"   BINARY                 = riscv binary that the simulator will run" \
+"   BINARY                 = riscv elf binary that the simulator will run when using the run-binary* targets" \
 "   VERBOSE_FLAGS          = flags used when doing verbose simulation [$(VERBOSE_FLAGS)]"
 
 # include default simulation rules
