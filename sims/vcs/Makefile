@@ -65,7 +65,7 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 #########################################################################################
 .PHONY: clean clean-sim clean-sim-debug
 clean:
-	rm -rf $(gen_dir) $(sim_prefix)-*
+	rm -rf $(gen_dir) csrc $(sim_prefix)-* ucli.key vc_hdrs.h
 
 clean-sim:
 	rm -rf csrc/ $(sim) ucli.key vc_hdrs.h
