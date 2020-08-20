@@ -161,9 +161,7 @@ verilog: $(sim_vsrcs)
 #########################################################################################
 # helper rules to run simulations
 #########################################################################################
-.PHONY: run-binary run-binary-fast
-.PHONY: run-binary-debug
-.PHONY: run-fast
+.PHONY: run-binary run-binary-fast run-binary-debug run-fast
 
 # run normal binary with hardware-logged insn dissassembly
 run-binary: $(output_dir) $(sim)
