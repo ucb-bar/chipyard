@@ -13,7 +13,7 @@ HELP_PROJECT_VARIABLES = \
 "   CONFIG                 = the configuration class to give the parameters for the project [$(CONFIG)]" \
 "   CONFIG_PACKAGE         = the scala package to find the CONFIG class [$(CONFIG_PACKAGE)]" \
 "   GENERATOR_PACKAGE      = the scala package to find the Generator class in [$(GENERATOR_PACKAGE)]" \
-"   TB                     = wrapper over the TestHarness needed to simulate in a verilog simulator [$(TB)]" \
+"   TB                     = testbench wrapper over the TestHarness needed to simulate in a verilog simulator [$(TB)]" \
 "   TOP                    = top level module of the project (normally the module instantiated by the harness) [$(TOP)]"
 
 HELP_SIMULATION_VARIABLES = \
