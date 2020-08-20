@@ -84,15 +84,12 @@ VERILATOR_OPT_FLAGS := \
 	-O3 \
 	--x-assign fast \
 	--x-initial fast \
-	--assert \
 	--output-split 10000 \
 	--output-split-cfuncs 10000
 
 # default flags added for external IP (ariane/NVDLA)
 VERILOG_IP_VERILATOR_FLAGS := \
 	--unroll-count 256 \
-	-Werror-PINMISSING \
-	-Werror-IMPLICIT \
 	-Wno-PINCONNECTEMPTY \
 	-Wno-ASSIGNDLY \
 	-Wno-DECLFILENAME \
@@ -102,8 +99,9 @@ VERILOG_IP_VERILATOR_FLAGS := \
 	-Wno-style \
 	-Wall
 
-# normal flags used for chipyard builds (that are incompatible with vlog ip aka ariane)
-CHIPYARD_VERILATOR_FLAGS :=
+# normal flags used for chipyard builds (that are incompatible with vlog ip aka ariane/NVDLA)
+CHIPYARD_VERILATOR_FLAGS := \
+	--assert
 
 # options dependent on whether external IP (ariane/NVDLA) or just chipyard is used
 # NOTE: defer the evaluation of this until it is used!
@@ -126,6 +124,7 @@ VERILATOR_NONCC_OPTS = \
 	$(RUNTIME_PROFILING_VFLAGS) \
 	$(VERILATOR_OPT_FLAGS) \
 	$(PLATFORM_OPTS) \
+	-Wno-fatal \
 	$(TIMESCALE_OPTS) \
 	$(MAX_WIDTH_OPTS) \
 	$(PREPROC_DEFINES) \
