@@ -88,8 +88,7 @@ VERILATOR_OPT_FLAGS := \
 	--output-split 10000 \
 	--output-split-cfuncs 10000
 
-# default flags added for ariane (-Wno-fatal needed for -Wall to not cause
-# a crash, since 1000s of warnings are generated)
+# default flags added for external IP (ariane/NVDLA)
 VERILOG_IP_VERILATOR_FLAGS := \
 	--unroll-count 256 \
 	-Werror-PINMISSING \
@@ -100,12 +99,13 @@ VERILOG_IP_VERILATOR_FLAGS := \
 	-Wno-UNUSED \
 	-Wno-UNOPTFLAT \
 	-Wno-BLKANDNBLK \
-	-Wno-fatal
+	-Wno-style \
+	-Wall
 
 # normal flags used for chipyard builds (that are incompatible with vlog ip aka ariane)
 CHIPYARD_VERILATOR_FLAGS :=
 
-# options dependent on whether ariane/NVDLA or chipyard is used
+# options dependent on whether external IP (ariane/NVDLA) or just chipyard is used
 # NOTE: defer the evaluation of this until it is used!
 PLATFORM_OPTS = $(shell \
 	if grep -qiP "module\s+(Ariane|NVDLA)" $(build_dir)/*.*v; \
