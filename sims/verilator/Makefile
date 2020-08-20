@@ -80,7 +80,7 @@ TRACING_CFLAGS := $(if $(filter $(VERILATOR_FST_MODE),0),,-DCY_FST_TRACE)
 #----------------------------------------------------------------------------------------
 # we initially had --noassert for performance, but several modules use
 # assertions, including dramsim, so we enable --assert by default
-VMODE := \
+VERILATOR_OPT_FLAGS := \
 	-O3 \
 	--x-assign fast \
 	--x-initial fast \
@@ -92,6 +92,8 @@ VMODE := \
 # a crash, since 1000s of warnings are generated)
 VERILOG_IP_VERILATOR_FLAGS := \
 	--unroll-count 256 \
+	-Werror-PINMISSING \
+	-Werror-IMPLICIT \
 	-Wno-PINCONNECTEMPTY \
 	-Wno-ASSIGNDLY \
 	-Wno-DECLFILENAME \
@@ -122,7 +124,7 @@ PREPROC_DEFINES := \
 
 VERILATOR_NONCC_OPTS = \
 	$(RUNTIME_PROFILING_VFLAGS) \
-	$(VMODE) \
+	$(VERILATOR_OPT_FLAGS) \
 	$(PLATFORM_OPTS) \
 	$(TIMESCALE_OPTS) \
 	$(MAX_WIDTH_OPTS) \
@@ -136,13 +138,13 @@ VERILATOR_NONCC_OPTS = \
 # gcc configuration/optimization
 #----------------------------------------------------------------------------------------
 # -flto slows down compilation on small-memory and breaks on firesim-manager
-CMODE := -O3
+CXX_OPT_FLAGS := -O3
 
 VERILATOR_CXXFLAGS = \
 	$(CXXFLAGS) \
 	$(RUNTIME_PROFILING_CFLAGS) \
 	$(TRACING_CFLAGS) \
-	$(CMODE) \
+	$(CXX_OPT_FLAGS) \
 	-std=c++11 \
 	-D__STDC_FORMAT_MACROS \
 	-DTEST_HARNESS=V$(VLOG_MODEL) \

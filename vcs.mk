@@ -15,11 +15,11 @@ RESET_DELAY ?= 777.7
 # gcc configuration/optimization
 #----------------------------------------------------------------------------------------
 # -flto slows down compilation on small-memory and breaks on firesim-manager
-CMODE := -O3 -fbranch-probabilities -march=native
+CXX_OPT_FLAGS := -O3 -fbranch-probabilities -march=native
 
 VCS_CXXFLAGS = \
 	$(CXXFLAGS) \
-	$(CMODE) \
+	$(CXX_OPT_FLAGS) \
 	-I$(RISCV)/include \
 	-I$(dramsim_dir) \
 	-std=c++11 \
