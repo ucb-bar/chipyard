@@ -53,6 +53,7 @@ HELP_COMPILATION_VARIABLES += \
 "   VERILATOR_PROFILE      = 'none' if no verilator profiling (default)" \
 "                            'all' if full verilator runtime profiling" \
 "                            'threads' if runtime thread profiling only" \
+"   VERILATOR_THREADS      = how many threads the simulator will use (default 1)" \
 "   VERILATOR_FST_MODE     = enable FST waveform instead of VCD. use with debug build"
 
 #########################################################################################

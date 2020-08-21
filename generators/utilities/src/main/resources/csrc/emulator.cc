@@ -20,8 +20,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <getopt.h>
-// needed for s_vpi_vlog_info, which is needed for multithreading
-#include <vpi_user.h>
 
 // For option parsing, which is split across this file, Verilog, and
 // FESVR's HTIF, a few external files must be pulled in. The list of
@@ -54,18 +52,6 @@ void handle_sigterm(int sig)
 double sc_time_stamp()
 {
   return trace_count;
-}
-
-// need to pull htif_argc/htif_argv out here so the thread that calls tick()
-// for the HTIF device can initialize properly with the cmdline args. this
-// was pulled out here for multithreading to work
-static int htif_argc;
-static char **htif_argv = NULL;
-extern "C" int vpi_get_vlog_info(s_vpi_vlog_info *vlog_info_s)
-{
-  vlog_info_s->argc = htif_argc;
-  vlog_info_s->argv = htif_argv;
-  return 1;
 }
 
 static void usage(const char * program_name)
@@ -271,10 +257,6 @@ done_processing:
     usage(argv[0]);
     return 1;
   }
-
-  // set argc/v in vpi_get_vlog_info
-  htif_argc = argc;
-  htif_argv = argv;
 
   if (verbose)
     fprintf(stderr, "using random seed %u\n", random_seed);
