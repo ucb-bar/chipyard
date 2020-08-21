@@ -53,7 +53,15 @@ HELP_COMPILATION_VARIABLES += \
 "   VERILATOR_PROFILE      = 'none' if no verilator profiling (default)" \
 "                            'all' if full verilator runtime profiling" \
 "                            'threads' if runtime thread profiling only" \
+"   ENABLE_PRINTF_PATTERN  = python regex. any printf() with text that matches this regex will be " \
+"                            force enabled in sim output default is no selectively enabled printf's" \
 "   VERILATOR_FST_MODE     = enable FST waveform instead of VCD. use with debug build"
+
+#########################################################################################
+# selectively enabling printfs
+#########################################################################################
+ENABLE_PRINTF_PATTERN ?=
+sim_vsrcs_printf := $(sim_vsrcs:.v=.printf.v)
 
 #########################################################################################
 # verilator/cxx binary and flags
@@ -189,18 +197,25 @@ model_mk = $(model_dir)/V$(VLOG_MODEL).mk
 model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
 
 #########################################################################################
+# selectively enable verbose logging
+#########################################################################################
+# see GNU Make static patterns
+$(sim_vsrcs_printf) : %.printf.v : %.v
+	$(base_dir)/scripts/enable_printfs $< $@ "$(ENABLE_PRINTF_PATTERN)"
+
+#########################################################################################
 # build makefile fragment that builds the verilator sim rules
 #########################################################################################
-$(model_mk): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
+$(model_mk): $(sim_vsrcs_printf) $(sim_common_files) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir)
 	mkdir -p $(model_dir)
 	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim) -Mdir $(model_dir) -CFLAGS "-include $(model_header)"
 	touch $@
 
-$(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
+$(model_mk_debug): $(sim_vsrcs_printf) $(sim_common_files) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir_debug)
 	mkdir -p $(model_dir_debug)
-	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim_debug) --trace -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
+	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim_debug) $(TRACING_OPTS) -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
 	touch $@
 
 #########################################################################################
@@ -229,7 +244,8 @@ clean:
 	rm -rf $(gen_dir) $(sim_prefix)-*
 
 clean-sim:
-	rm -rf $(model_dir) $(sim)
+	rm -rf $(model_dir) $(sim) $(sim_vsrcs_printf)
 
 clean-sim-debug:
-	rm -rf $(model_dir_debug) $(sim_debug)
+	rm -rf $(model_dir_debug) $(sim_debug) $(sim_vsrcs_printf)
+
