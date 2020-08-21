@@ -41,16 +41,16 @@ include $(base_dir)/common.mk
 #########################################################################################
 VCS = vcs -full64
 
-VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(VCS_DEFINE_OPTS) $(EXTRA_SIM_SOURCES)
+VCS_OPTS = $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(PREPROC_DEFINES)
 
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
 $(sim): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
-	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@
+	rm -rf csrc && $(VCS) $(VCS_OPTS) $(EXTRA_SIM_SOURCES) -o $@
 
 $(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
-	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
+	rm -rf csrc && $(VCS) $(VCS_OPTS) $(EXTRA_SIM_SOURCES) -o $@ \
 	+define+DEBUG
 
 #########################################################################################
@@ -61,8 +61,14 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
 
 #########################################################################################
-# general cleanup rule
+# general cleanup rules
 #########################################################################################
-.PHONY: clean
+.PHONY: clean clean-sim clean-sim-debug
 clean:
 	rm -rf $(gen_dir) csrc $(sim_prefix)-* ucli.key vc_hdrs.h
+
+clean-sim:
+	rm -rf csrc/ $(sim) ucli.key vc_hdrs.h
+
+clean-sim-debug:
+	rm -rf csrc/ $(sim_debug) ucli.key vc_hdrs.h
