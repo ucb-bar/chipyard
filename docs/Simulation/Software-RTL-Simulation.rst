@@ -191,8 +191,9 @@ When building the verilator simulator there are some additional options:
 
 .. code-block:: shell
 
-   make VERILATOR_THREADS=8
+   make VERILATOR_THREADS=8 NUMACTL=1
 
 The ``VERILATOR_THREADS=<num>`` option enables the compiled Verilator simulator to use ``<num>`` parallel threads.
-On a multi-socket machine, you will want to make sure all threads are on the same socket by using ``numactl``.
-You can also just use the ``numa_prefix`` wrapper, which is a simple wrapper around ``numactl`` that runs your verilated simulator like this: ``$(numa_prefix) ./simulator-<name> <simulator-args>``.
+On a multi-socket machine, you will want to make sure all threads are on the same socket by using ``NUMACTL=1`` to enable ``numactl``.
+By enabling this, you will use CHipyard's ``numa_prefix`` wrapper, which is a simple wrapper around ``numactl`` that runs your verilated simulator like this: ``$(numa_prefix) ./simulator-<name> <simulator-args>``.
+Note that both these flags are mutually exclusive, you can use either independently (though it makes sense to use ``NUMACTL`` just with ``VERILATOR_THREADS=8`` during a Verilator simulation).
