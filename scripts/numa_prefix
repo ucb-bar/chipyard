@@ -1,0 +1,67 @@
+#!/usr/bin/env perl
+
+#============================================================================
+# - really simple script, which just prints out the numactl cmd to
+#   prefix before your actual command. it determines this based on free
+#   memory size attached to every node.
+# - when you run this on a machine without `numactl`, the output is empty,
+#   so `$(numa_prefix) <cmd> <args>` turns in to `<cmd> <args>`.
+# - when the machine has `numactl` installed, regardless of the socket-count
+#   on the machine, the resulting command is:
+#   `numactl -m <socket> -C <core-id list> -- <cmd> <args>`
+# - example output from `numactl -H` on a 2 socket machine:
+#     available: 2 nodes (0-1)
+#     node 0 cpus: 0 2 4 6 8 10 12 14 16 18 20 22
+#     node 0 size: 131026 MB
+#     node 0 free: 7934 MB
+#     node 1 cpus: 1 3 5 7 9 11 13 15 17 19 21 23
+#     node 1 size: 65536 MB
+#     node 1 free: 429 MB
+#     node distances:
+#     node   0   1
+#       0:  10  20
+#       1:  20  10
+#============================================================================
+
+use strict;
+use warnings;
+
+my $path = `which numactl`;
+if(length($path) > 0) {
+  my ($head_line, @rest) = map {chomp; $_} `numactl -H`;
+
+  if($head_line =~ /available: (\d+) nodes/) {
+    my $node_count     = $1;
+    my $best_node_id   = undef
+    my $best_cpus      = undef;
+    my $best_free_size = undef;
+
+		# loop through available nodes, selecting the node with the most free mem
+    foreach my $num (1..$node_count) {
+      my $cpus_line     = shift(@rest);
+      my $mem_size_line = shift(@rest);
+      my $mem_free_line = shift(@rest);
+
+      if($cpus_line =~ /node (\d+) cpus: (\d.*\d)$/) {
+        my ($node_id, $cpus) = ($1, $2);
+        $cpus =~ s/\s+/,/g;
+
+        if($mem_free_line =~ /node $node_id free: (\d+) \S+$/) {
+          my $free_size = $1;
+          if(!defined($best_free_size) || ($free_size > $best_free_size)) {
+            $best_node_id   = $node_id;
+            $best_cpus      = $cpus;
+            $best_free_size = $free_size;
+          }
+        } else {
+          die("malformed mem-free line: $mem_free_line\n");
+        }
+      } else {
+        die("malformed cpus line: $cpus_line\n");
+      }
+    }
+    print("numactl -m $best_node_id -C $best_cpus --");
+  } else {
+    die("malformed head line: $head_line\n");
+  }
+}

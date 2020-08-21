@@ -70,6 +70,9 @@ RUNTIME_PROFILING_VFLAGS := $(if $(filter $(VERILATOR_PROFILE),all),\
                               $(if $(filter $(VERILATOR_PROFILE),threads),\
 								--prof-threads,))
 
+VERILATOR_THREADS ?= 1
+RUNTIME_THREADS := --threads $(VERILATOR_THREADS) --threads-dpi all
+
 VERILATOR_FST_MODE ?= 0
 TRACING_OPTS := $(if $(filter $(VERILATOR_FST_MODE),0),\
 	                  --trace,--trace-fst --trace-threads 1)
@@ -122,6 +125,7 @@ PREPROC_DEFINES := \
 
 VERILATOR_NONCC_OPTS = \
 	$(RUNTIME_PROFILING_VFLAGS) \
+	$(RUNTIME_THREADS) \
 	$(VERILATOR_OPT_FLAGS) \
 	$(PLATFORM_OPTS) \
 	-Wno-fatal \
@@ -157,7 +161,6 @@ VERILATOR_CXXFLAGS = \
 
 VERILATOR_LDFLAGS =	\
 	$(LDFLAGS) \
-	$(RUNTIME_PROFILING_CFLAGS) \
 	-L$(RISCV)/lib \
 	-Wl,-rpath,$(RISCV)/lib \
 	-L$(sim_dir) \
@@ -219,7 +222,7 @@ $(sim_debug): $(model_mk_debug) $(dramsim_lib)
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd
 	vcd2vpd $@.vcd $@ > /dev/null &
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
 
 #########################################################################################
 # general cleanup rules
