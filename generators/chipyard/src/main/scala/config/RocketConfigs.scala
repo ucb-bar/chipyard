@@ -182,4 +182,11 @@ class DividedClockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
-
+// Multiclock Sketch
+class ForcedClockRocketConfig extends Config(
+  new chipyard.config.WithForcedTileFrequency(200) ++
+  new chipyard.config.WithIdealizedPLL ++                       // Put the Tile on its own clock domain
+  //new chipyard.config.WithTileDividedClock ++                       // Put the Tile on its own clock domain
+  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)

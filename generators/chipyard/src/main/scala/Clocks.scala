@@ -12,6 +12,8 @@ import freechips.rocketchip.util.{ResetCatchAndSync, Pow2ClockDivider}
 
 import barstools.iocell.chisel._
 
+import chipyard.clocking.{IdealizedPLL, ClockGroupDealiaser}
+
 /**
   * Chipyard provides three baseline, top-level reset schemes, set using the
   * [[GlobalResetSchemeKey]] in a Parameters instance. These are:
@@ -173,6 +175,40 @@ object ClockingSchemeGenerators {
         Nil
       })
     }
+  }
 
+  val idealizedPLL: ChipTop => Unit = { chiptop =>
+    implicit val p = chiptop.p
+
+    // Requires existence of undriven asyncClockGroups in subsystem
+    val systemAsyncClockGroup = chiptop.lSystem match {
+      case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) =>
+        l.asyncClockGroupsNode
+    }
+
+    val aggregator = ClockGroupAggregator()
+    chiptop.implicitClockSinkNode := ClockGroup() := aggregator
+    systemAsyncClockGroup := aggregator
+
+    val referenceClockSource =  ClockSourceNode(Seq(ClockSourceParameters()))
+    aggregator := ClockGroupDealiaser() := IdealizedPLL() := referenceClockSource
+
+    InModuleBody {
+
+      val clock_wire = Wire(Input(Clock()))
+      val reset_wire = GenerateReset(chiptop, clock_wire)
+      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, Some("iocell_clock"))
+      chiptop.iocells ++= clockIOCell
+      clock_io.suggestName("clock")
+
+      referenceClockSource.out.unzip._1.map { o =>
+        o.clock := clock_wire
+        o.reset := reset_wire
+      }
+
+      chiptop.harnessFunctions += ((th: HasHarnessUtils) => {
+        clock_io := th.harnessClock
+        Nil })
+    }
   }
 }

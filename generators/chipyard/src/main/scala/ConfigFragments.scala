@@ -28,7 +28,11 @@ import sifive.blocks.devices.spi._
 
 import chipyard.{BuildTop, BuildSystem, ClockingSchemeGenerators, ClockingSchemeKey, TestSuitesKey, TestSuiteHelper}
 
-
+// Imports for multiclock sketch
+import boom.common.{BoomTile, BoomTileParams}
+import ariane.{ArianeTile, ArianeTileParams}
+import chipyard.{GenericallyAttachableTile, GenericCrossingParams}
+import chipyard.clocking.{ClockNodeInjectionUtils }
 // -----------------------
 // Common Config Fragments
 // -----------------------
@@ -169,4 +173,25 @@ class WithDMIDTM extends Config((site, here, up) => {
 
 class WithNoDebug extends Config((site, here, up) => {
   case DebugModuleKey => None
+})
+
+
+// Multiclock sketch
+class WithForcedTileFrequency(fMHz: Double) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) =>
+    val genericAttachParams = up(TilesLocated(InSubsystem), site) map {
+      case b: BoomTileAttachParams => GenericallyAttachableTile[BoomTile](
+        b.tileParams, GenericCrossingParams(b.crossingParams), b.lookup)
+      case r: RocketTileAttachParams => GenericallyAttachableTile[RocketTile](
+        r.tileParams, GenericCrossingParams(r.crossingParams), r.lookup)
+      case a: ArianeTileAttachParams => GenericallyAttachableTile[ArianeTile](
+        a.tileParams, GenericCrossingParams(a.crossingParams), a.lookup)
+      case g: GenericallyAttachableTile[_] => g
+    }
+   genericAttachParams.map(p => p.copy(crossingParams = p.crossingParams.copy(
+     injectClockNodeFunc = ClockNodeInjectionUtils.forceTakeFrequency(fMHz))))
+})
+
+class WithIdealizedPLL extends Config((site, here, up) => {
+  case ChipyardClockKey => ClockDrivers.idealizedPLL
 })
