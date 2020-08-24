@@ -27,9 +27,13 @@ EXTRA_SIM_REQS       ?=
 
 #----------------------------------------------------------------------------
 HELP_SIMULATION_VARIABLES += \
-"   EXTRA_SIM_FLAGS        = additional runtime simulation flags (passed within +permissive)"
+"   EXTRA_SIM_FLAGS        = additional runtime simulation flags (passed within +permissive)" \
+"   NUMACTL                = set to '1' to wrap simulator in the appropriate numactl command"
 
 EXTRA_SIM_FLAGS ?=
+NUMACTL         ?= 0
+
+NUMA_PREFIX = $(if $(filter $(NUMACTL),0),,$(shell $(base_dir)/scripts/numa_prefix))
 
 #----------------------------------------------------------------------------
 HELP_COMMANDS += \
@@ -165,15 +169,15 @@ verilog: $(sim_vsrcs)
 
 # run normal binary with hardware-logged insn dissassembly
 run-binary: $(output_dir) $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 # run simulator as fast as possible (no insn disassembly)
 run-binary-fast: $(output_dir) $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
 
 # run simulator with as much debug info as possible
 run-binary-debug: $(output_dir) $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
@@ -209,10 +213,10 @@ $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/% $(output_d
 	ln -sf $< $@
 
 $(output_dir)/%.run: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator

@@ -53,6 +53,7 @@ HELP_COMPILATION_VARIABLES += \
 "   VERILATOR_PROFILE      = 'none' if no verilator profiling (default)" \
 "                            'all' if full verilator runtime profiling" \
 "                            'threads' if runtime thread profiling only" \
+"   VERILATOR_THREADS      = how many threads the simulator will use (default 1)" \
 "   VERILATOR_FST_MODE     = enable FST waveform instead of VCD. use with debug build"
 
 #########################################################################################
@@ -69,6 +70,9 @@ RUNTIME_PROFILING_VFLAGS := $(if $(filter $(VERILATOR_PROFILE),all),\
                               --prof-threads --prof-cfuncs,\
                               $(if $(filter $(VERILATOR_PROFILE),threads),\
 								--prof-threads,))
+
+VERILATOR_THREADS ?= 1
+RUNTIME_THREADS := --threads $(VERILATOR_THREADS) --threads-dpi all
 
 VERILATOR_FST_MODE ?= 0
 TRACING_OPTS := $(if $(filter $(VERILATOR_FST_MODE),0),\
@@ -122,6 +126,7 @@ PREPROC_DEFINES := \
 
 VERILATOR_NONCC_OPTS = \
 	$(RUNTIME_PROFILING_VFLAGS) \
+	$(RUNTIME_THREADS) \
 	$(VERILATOR_OPT_FLAGS) \
 	$(PLATFORM_OPTS) \
 	-Wno-fatal \
@@ -157,7 +162,6 @@ VERILATOR_CXXFLAGS = \
 
 VERILATOR_LDFLAGS =	\
 	$(LDFLAGS) \
-	$(RUNTIME_PROFILING_CFLAGS) \
 	-L$(RISCV)/lib \
 	-Wl,-rpath,$(RISCV)/lib \
 	-L$(sim_dir) \
@@ -200,7 +204,7 @@ $(model_mk): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
 $(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir_debug)
 	mkdir -p $(model_dir_debug)
-	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim_debug) --trace -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
+	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim_debug) $(TRACING_OPTS) -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
 	touch $@
 
 #########################################################################################
@@ -219,7 +223,7 @@ $(sim_debug): $(model_mk_debug) $(dramsim_lib)
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 	rm -f $@.vcd && mkfifo $@.vcd
 	vcd2vpd $@.vcd $@ > /dev/null &
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) -v$@.vcd $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
 
 #########################################################################################
 # general cleanup rules
