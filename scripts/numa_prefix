@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/env python
 
 #============================================================================
 # - really simple script, which just prints out the numactl cmd to
@@ -23,45 +23,54 @@
 #       1:  20  10
 #============================================================================
 
-use strict;
-use warnings;
+import subprocess
+import re
+import sys
 
-my $path = `which numactl`;
-if(length($path) > 0) {
-  my ($head_line, @rest) = map {chomp; $_} `numactl -H`;
+which_proc = subprocess.Popen(["which", "numactl"], stdout=subprocess.PIPE)
+out, err = which_proc.communicate()
 
-  if($head_line =~ /available: (\d+) nodes/) {
-    my $node_count     = $1;
-    my $best_node_id   = undef
-    my $best_cpus      = undef;
-    my $best_free_size = undef;
+if out != "":
+    numactl_proc = subprocess.Popen(["numactl", "-H"], stdout=subprocess.PIPE)
+    out, err = numactl_proc.communicate()
 
-		# loop through available nodes, selecting the node with the most free mem
-    foreach my $num (1..$node_count) {
-      my $cpus_line     = shift(@rest);
-      my $mem_size_line = shift(@rest);
-      my $mem_free_line = shift(@rest);
+    lines = out.split("\n")
+    line_idx = 0
 
-      if($cpus_line =~ /node (\d+) cpus: (\d.*\d)$/) {
-        my ($node_id, $cpus) = ($1, $2);
-        $cpus =~ s/\s+/,/g;
+    head_line = lines[line_idx]
+    line_idx += 1
+    node_match = re.match(r"^ *available: +(\d+) nodes", head_line)
+    if node_match:
+        avail_nodes = node_match.group(1)
+        best_node_id = ""
+        best_cpus = ""
+        best_free_size = 0
 
-        if($mem_free_line =~ /node $node_id free: (\d+) \S+$/) {
-          my $free_size = $1;
-          if(!defined($best_free_size) || ($free_size > $best_free_size)) {
-            $best_node_id   = $node_id;
-            $best_cpus      = $cpus;
-            $best_free_size = $free_size;
-          }
-        } else {
-          die("malformed mem-free line: $mem_free_line\n");
-        }
-      } else {
-        die("malformed cpus line: $cpus_line\n");
-      }
-    }
-    print("numactl -m $best_node_id -C $best_cpus --");
-  } else {
-    die("malformed head line: $head_line\n");
-  }
-}
+        # loop through available nodes, selecting the node with the most free mem
+        for i in avail_nodes:
+            cpu_line      = lines[line_idx]
+            mem_size_line = lines[line_idx + 1]
+            mem_free_line = lines[line_idx + 2]
+            line_idx += 3
+
+            cpu_match = re.match(r"^ *node (\d+) cpus: (\d.*\d)$", cpu_line)
+            if cpu_match:
+                node_id = cpu_match.group(1)
+                cpus = cpu_match.group(2).replace(" ", ",")
+
+                mem_free_match = re.match(r"^ *node " + node_id + " free: (\d+) \S+$", mem_free_line)
+                if mem_free_match:
+                    free_size = mem_free_match.group(1)
+                    if int(free_size) > int(best_free_size):
+                        best_node_id = node_id
+                        best_cpus = cpus
+                        best_free_size = free_size
+                else:
+                    sys.exit("[ERROR] Malformed mem free line: " + mem_free_line)
+
+            else:
+                sys.exit("[ERROR] Malformed cpus line: " + cpu_line)
+
+        sys.stdout.write("numactl -m " + best_node_id + " -C " + best_cpus + " --")
+    else:
+        sys.exit("[ERROR] Malformed head line: " + head_line)
