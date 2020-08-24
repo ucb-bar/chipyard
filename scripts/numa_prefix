@@ -49,7 +49,7 @@ if out != "":
         # loop through available nodes, selecting the node with the most free mem
         for i in avail_nodes:
             cpu_line      = lines[line_idx]
-            mem_size_line = lines[line_idx + 1]
+            # mem. size unused. skip and use mem. free
             mem_free_line = lines[line_idx + 2]
             line_idx += 3
 
