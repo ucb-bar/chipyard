@@ -14,25 +14,10 @@ RESET_DELAY ?= 777.7
 #----------------------------------------------------------------------------------------
 # gcc configuration/optimization
 #----------------------------------------------------------------------------------------
-CXX_OPT_FLAGS := -O3
+include $(base_dir)/sims/common-sim-flags.mk
 
-VCS_CXXFLAGS = \
-	$(CXXFLAGS) \
-	$(CXX_OPT_FLAGS) \
-	-I$(RISCV)/include \
-	-I$(dramsim_dir) \
-	-std=c++11 \
-	$(EXTRA_SIM_CXXFLAGS)
-
-VCS_LDFLAGS =	\
-	$(LDFLAGS) \
-	-L$(RISCV)/lib \
-	-Wl,-rpath,$(RISCV)/lib \
-	-L$(sim_dir) \
-	-L$(dramsim_dir) \
-	-lfesvr \
-	-ldramsim \
-	$(EXTRA_SIM_LDFLAGS)
+VCS_CXXFLAGS = $(SIM_CXXFLAGS)
+VCS_LDFLAGS = $(SIM_LDFLAGS)
 
 # vcs requires LDFLAGS to not include library names (i.e. -l needs to be separate)
 VCS_CC_OPTS = \

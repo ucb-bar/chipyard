@@ -141,35 +141,19 @@ VERILATOR_NONCC_OPTS = \
 #----------------------------------------------------------------------------------------
 # gcc configuration/optimization
 #----------------------------------------------------------------------------------------
-# -flto slows down compilation on small-memory and breaks on firesim-manager
-CXX_OPT_FLAGS := -O3
+include $(base_dir)/sims/common-sim-flags.mk
 
 VERILATOR_CXXFLAGS = \
-	$(CXXFLAGS) \
+	$(SIM_CXXFLAGS) \
 	$(RUNTIME_PROFILING_CFLAGS) \
 	$(TRACING_CFLAGS) \
-	$(CXX_OPT_FLAGS) \
-	-std=c++11 \
 	-D__STDC_FORMAT_MACROS \
 	-DTEST_HARNESS=V$(VLOG_MODEL) \
 	-DVERILATOR \
-	-I$(RISCV)/include \
-	-I$(dramsim_dir) \
-	-I$(build_dir) \
 	-include $(build_dir)/$(long_name).plusArgs \
-	-include $(build_dir)/verilator.h \
-	$(EXTRA_SIM_CXXFLAGS)
+	-include $(build_dir)/verilator.h
 
-VERILATOR_LDFLAGS =	\
-	$(LDFLAGS) \
-	-L$(RISCV)/lib \
-	-Wl,-rpath,$(RISCV)/lib \
-	-L$(sim_dir) \
-	-L$(dramsim_dir) \
-	-lfesvr \
-	-lpthread \
-	-ldramsim \
-	$(EXTRA_SIM_LDFLAGS)
+VERILATOR_LDFLAGS = $(SIM_LDFLAGS)
 
 VERILATOR_CC_OPTS = \
 	-CFLAGS "$(VERILATOR_CXXFLAGS)" \
