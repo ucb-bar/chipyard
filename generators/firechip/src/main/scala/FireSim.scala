@@ -13,7 +13,7 @@ import freechips.rocketchip.util.{ResetCatchAndSync}
 
 import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge, RationalClock}
 
-import chipyard.{BuildSystem, BuildTop, HasHarnessUtils, ChipyardSubsystem, ChipyardClockKey, ChipTop}
+import chipyard.{BuildSystem, BuildTop, HasHarnessSignalReferences, ChipyardSubsystem, ClockingSchemeKey, ChipTop}
 import chipyard.iobinders.{IOBinders}
 
 // Determines the number of times to instantiate the DUT in the harness.
@@ -43,7 +43,7 @@ object NodeIdx {
 }
 
 class WithFireSimSimpleClocks extends Config((site, here, up) => {
-  case ChipyardClockKey => { chiptop: ChipTop =>
+  case ClockingSchemeKey => { chiptop: ChipTop =>
     implicit val p = chiptop.p
 
     val implicitClockSourceNode = ClockSourceNode(Seq(ClockSourceParameters()))
@@ -75,7 +75,7 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
         }
       }}
 
-      chiptop.harnessFunctions += ((th: HasHarnessUtils) => {
+      chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
         clock := th.harnessClock
         reset := th.harnessReset
         Nil
@@ -86,7 +86,7 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
 
 class WithFireSimRationalTileDomain(multiplier: Int, divisor: Int) extends Config((site, here, up) => {
   case FireSimClockKey => FireSimClockParameters(Seq(RationalClock("TileDomain", multiplier, divisor)))
-  case ChipyardClockKey => { chiptop: ChipTop =>
+  case ClockingSchemeKey => { chiptop: ChipTop =>
     implicit val p = chiptop.p
 
     val implicitClockSourceNode = ClockSourceNode(Seq(ClockSourceParameters()))
@@ -125,7 +125,7 @@ class WithFireSimRationalTileDomain(multiplier: Int, divisor: Int) extends Confi
         }
       }}
 
-      chiptop.harnessFunctions += ((th: HasHarnessUtils) => {
+      chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
         uncore_clock := th.harnessClock
         reset        := th.harnessReset
         th match {
@@ -138,15 +138,15 @@ class WithFireSimRationalTileDomain(multiplier: Int, divisor: Int) extends Confi
   }
 })
 
-class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessUtils {
+class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSignalReferences {
   freechips.rocketchip.util.property.cover.setPropLib(new midas.passes.FireSimPropertyLibrary())
   val clockBridge = Module(new RationalClockBridge(p(FireSimClockKey).additionalClocks:_*))
   val harnessClock = clockBridge.io.clocks.head // This is the reference clock
   val additionalClocks = clockBridge.io.clocks.tail
   val harnessReset = WireInit(false.B)
   val peekPokeBridge = PeekPokeBridge(harnessClock, harnessReset)
-  val dutReset = false.B // unused (if used, its a bug)
-  val success = false.B // unused (if used, its a bug)
+  def dutReset = { require(false, "dutReset should not be used in Firesim"); false.B }
+  def success = { require(false, "success should not be used in Firesim"); false.B }
 
   // Instantiate multiple instances of the DUT to implement supernode
   for (i <- 0 until p(NumNodes)) {

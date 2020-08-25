@@ -26,7 +26,7 @@ import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 
-import chipyard.{BuildTop, BuildSystem, ClockDrivers, ChipyardClockKey, TestSuitesKey, TestSuiteHelper}
+import chipyard.{BuildTop, BuildSystem, ClockingSchemeGenerators, ClockingSchemeKey, TestSuitesKey, TestSuiteHelper}
 
 
 // -----------------------
@@ -98,7 +98,7 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config(
     case MultiRoCCKey => {
       up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
         (i -> Seq((p: Parameters) => {
-          val hwacha = LazyModule(new Hwacha()(p)).suggestName("hwacha")
+          val hwacha = LazyModule(new Hwacha()(p))
           hwacha
         }))
       }
@@ -160,5 +160,6 @@ class WithNoSubsystemDrivenClocks extends Config((site, here, up) => {
 })
 
 class WithTileDividedClock extends Config((site, here, up) => {
-  case ChipyardClockKey => ClockDrivers.harnessDividedClock
+  case ClockingSchemeKey => ClockingSchemeGenerators.harnessDividedClock
 })
+

@@ -19,7 +19,7 @@ case object BuildSystem extends Field[Parameters => LazyModule]((p: Parameters) 
 /**
  * The base class used for building chips. This constructor instantiates a module specified by the BuildSystem parameter,
  * named "system", which is an instance of DigitalTop by default. The diplomatic clocks of System, as well as its implicit clock,
- * is aggregated into the clockGroupNode. The parameterized functions controlled by ChipyardClockKey and GlobalResetSchemeKey
+ * is aggregated into the clockGroupNode. The parameterized functions controlled by ClockingSchemeKey and GlobalResetSchemeKey
  * drive clock and reset generation
  */
 
@@ -36,7 +36,7 @@ class ChipTop(implicit p: Parameters) extends LazyModule with HasTestHarnessFunc
   val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters()))
 
   // Generate Clocks and Reset
-  p(ChipyardClockKey)(this)
+  p(ClockingSchemeKey)(this)
 
   // NOTE: Making this a LazyRawModule is moderately dangerous, as anonymous children
   // of ChipTop (ex: ClockGroup) do not receive clock or reset.

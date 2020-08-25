@@ -194,8 +194,3 @@ class DividedClockRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 
-class TestClockRocketConfig extends Config(
-  //new chipyard.config.WithTileMultiClock ++                       // Put the Tile on its own clock domain
-  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(8, 3) ++   // Add rational crossings between RocketTile and uncore
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)

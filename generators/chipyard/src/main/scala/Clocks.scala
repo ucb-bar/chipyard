@@ -69,7 +69,7 @@ object GenerateReset {
     }
     reset_io.suggestName("reset")
     chiptop.iocells ++= resetIOCell
-    chiptop.harnessFunctions += ((th: HasHarnessUtils) => {
+    chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
       reset_io := th.dutReset
       Nil
     })
@@ -78,11 +78,11 @@ object GenerateReset {
 }
 
 
-case object ChipyardClockKey extends Field[ChipTop => Unit](ClockDrivers.harnessClock)
+case object ClockingSchemeKey extends Field[ChipTop => Unit](ClockingSchemeGenerators.harnessClock)
 
 
 
-object ClockDrivers {
+object ClockingSchemeGenerators {
   // A simple clock provider, for testing
   val harnessClock: ChipTop => Unit = { chiptop =>
     implicit val p = chiptop.p
@@ -120,7 +120,7 @@ object ClockDrivers {
         }
       }}
 
-      chiptop.harnessFunctions += ((th: HasHarnessUtils) => {
+      chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
         clock_io := th.harnessClock
         Nil
       })
@@ -131,6 +131,8 @@ object ClockDrivers {
 
   val harnessDividedClock: ChipTop => Unit = { chiptop =>
     implicit val p = chiptop.p
+
+    require(false, "Divided clock is broken until we fix passing onchip clocks to TestHarness objects")
 
     val implicitClockSourceNode = ClockSourceNode(Seq(ClockSourceParameters()))
     chiptop.implicitClockSinkNode := implicitClockSourceNode
@@ -166,7 +168,7 @@ object ClockDrivers {
         }
       }}
 
-      chiptop.harnessFunctions += ((th: HasHarnessUtils) => {
+      chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
         clock_io := th.harnessClock
         Nil
       })

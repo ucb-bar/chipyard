@@ -16,14 +16,14 @@ trait HasTestHarnessFunctions {
   val harnessFunctions: Seq[TestHarnessFunction]
 }
 
-trait HasHarnessUtils {
-  val harnessClock: Clock
-  val harnessReset: Reset
-  val dutReset: Reset
-  val success: Bool
+trait HasHarnessSignalReferences {
+  def harnessClock: Clock
+  def harnessReset: Reset
+  def dutReset: Reset
+  def success: Bool
 }
 
-class TestHarness(implicit val p: Parameters) extends Module with HasHarnessUtils {
+class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSignalReferences {
   val io = IO(new Bundle {
     val success = Output(Bool())
   })

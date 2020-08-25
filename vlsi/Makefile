@@ -34,7 +34,7 @@ INPUT_CONFS        ?= $(if $(filter $(tech_name),nangate45),\
                         example-asap7.yml)
 HAMMER_EXEC        ?= example-vlsi
 VLSI_TOP           ?= $(TOP)
-VLSI_HARNESS_DUT_NAME ?= dut
+VLSI_HARNESS_DUT_NAME ?= chiptop
 VLSI_OBJ_DIR       ?= $(vlsi_dir)/build
 ifneq ($(CUSTOM_VLOG),)
 	OBJ_DIR          ?= $(VLSI_OBJ_DIR)/custom-$(VLSI_TOP)
