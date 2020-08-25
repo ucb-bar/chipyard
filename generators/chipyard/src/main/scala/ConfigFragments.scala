@@ -19,7 +19,7 @@ import tracegen.{TraceGenSystem}
 import hwacha.{Hwacha}
 
 import boom.common.{BoomTileAttachParams}
-import ariane.{ArianeTileAttachParams}
+import cva6.{Cva6TileAttachParams}
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
@@ -116,7 +116,7 @@ class WithTraceIO extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
       trace = true))
-    case tp: ArianeTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+    case tp: Cva6TileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
       trace = true))
     case other => other
   }

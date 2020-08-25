@@ -8,7 +8,7 @@ import freechips.rocketchip.config.{Parameters, Field, Config}
 import freechips.rocketchip.system.{TestGeneration, RegressionTestSuite, RocketTestSuite}
 
 import boom.common.{BoomTileAttachParams}
-import ariane.{ArianeTileAttachParams}
+import cva6.{Cva6TileAttachParams}
 
 /**
  * A set of pre-chosen regression tests

@@ -179,10 +179,10 @@ class SupernodeFireSimRocketConfig extends Config(
   new FireSimRocketConfig)
 
 //**********************************************************************************
-//* Ariane Configurations
+//* CVA6 Configurations
 //*********************************************************************************/
-class FireSimArianeConfig extends Config(
+class FireSimCva6Config extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new chipyard.ArianeConfig)
+  new chipyard.Cva6Config)

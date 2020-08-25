@@ -27,6 +27,6 @@ so changes to the generators themselves will automatically be used when building
    TestChipIP
    SiFive-Generators
    SHA3
-   Ariane
+   CVA6
    NVDLA
 

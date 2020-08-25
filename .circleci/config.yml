@@ -257,11 +257,11 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "tracegen-boom"
-    prepare-chipyard-ariane:
+    prepare-chipyard-cva6:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "chipyard-ariane"
+                project-key: "chipyard-cva6"
     prepare-icenet:
         executor: main-env
         steps:
@@ -384,11 +384,11 @@ jobs:
                 project-key: "firesim-multiclock"
                 run-script: "run-firesim-scala-tests.sh"
                 timeout: "20m"
-    chipyard-ariane-run-tests:
+    chipyard-cva6-run-tests:
         executor: main-env
         steps:
             - run-tests:
-                project-key: "chipyard-ariane"
+                project-key: "chipyard-cva6"
                 timeout: "30m"
     chipyard-nvdla-run-tests:
         executor: main-env
@@ -506,7 +506,7 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-chipyard-ariane:
+            - prepare-chipyard-cva6:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
@@ -612,9 +612,9 @@ workflows:
                     - install-verilator
                     - build-extra-tests
 
-            - chipyard-ariane-run-tests:
+            - chipyard-cva6-run-tests:
                 requires:
-                    - prepare-chipyard-ariane
+                    - prepare-chipyard-cva6
 
             - chipyard-nvdla-run-tests:
                 requires:

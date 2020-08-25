@@ -71,8 +71,8 @@ VERILATOR_CC_OPTS = \
 	$(RISCV)/lib/libfesvr.a \
 	$(dramsim_lib)
 
-# default flags added for ariane
-ARIANE_VERILATOR_FLAGS = \
+# default flags added for cva6
+CVA6_VERILATOR_FLAGS = \
 	--unroll-count 256 \
 	-Werror-PINMISSING \
 	-Werror-IMPLICIT \
@@ -85,7 +85,7 @@ ARIANE_VERILATOR_FLAGS = \
 	-Wno-style \
 	-Wall
 
-# normal flags used for chipyard builds (that are incompatible with ariane)
+# normal flags used for chipyard builds (that are incompatible with CVA6)
 CHIPYARD_VERILATOR_FLAGS = \
 	--assert
 
@@ -96,7 +96,7 @@ VERILATOR_NONCC_OPTS = \
 	--top-module $(VLOG_MODEL) \
 	--vpi \
 	-Wno-fatal \
-	$(shell if ! grep -iq "module.*ariane" $(build_dir)/*.*v; then echo "$(CHIPYARD_VERILATOR_FLAGS)"; else echo "$(ARIANE_VERILATOR_FLAGS)"; fi) \
+	$(shell if ! grep -iq "module.*cva6" $(build_dir)/*.*v; then echo "$(CHIPYARD_VERILATOR_FLAGS)"; else echo "$(CVA6_VERILATOR_FLAGS)"; fi) \
 	--output-split 10000 \
 	--output-split-cfuncs 100 \
 	--max-num-width 1048576 \

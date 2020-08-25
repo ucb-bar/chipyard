@@ -296,6 +296,6 @@ Now you have finished all the steps to prepare your cores for Chipyard! To gener
 in :ref:`custom_chisel` to add your project to the build system, then create a config by following the steps in :ref:`hetero_socs_`.
 You can now run most desired workflows for the new config just as you would for the built-in cores (depending on the functionality your core supports). 
 
-If you would like to see an example of a complete third-party Verilog core integrated into Chipyard, ``generators/ariane/src/main/scala/ArianeTile.scala``
-provides a concrete example of the Ariane core. Note that this particular example includes additional nuances with respect to the interaction of the AXI
+If you would like to see an example of a complete third-party Verilog core integrated into Chipyard, ``generators/cva6/src/main/scala/Cva6Tile.scala``
+provides a concrete example of the CVA6 core. Note that this particular example includes additional nuances with respect to the interaction of the AXI
 interface with the memory coherency system. 

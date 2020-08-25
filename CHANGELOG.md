@@ -39,7 +39,7 @@ A more detailed account of everything included is included in the dev to master 
 * Bump libgloss (#508, #516, #580)
 * The default version of Verilator has changed to v4.034 (#547). Since this release adds enhanced support for Verilog timescales, the build detects if Verilator v4.034 or newer is visible in the build environment and sets default timescale flags appropriately.
 * Use Scalatests for FireSim CI (#528)
-* Cleanup Ariane pre-processing (#505)
+* Cleanup CVA6 pre-processing (#505)
 * Modify Issue Template to be more explicit (#557)
 * FireChip uses Chipyard generator (#554)
 * Have all non-synthesizeable constructs in test harness (#572)
@@ -67,7 +67,7 @@ A more detailed account of everything included is included in the dev to master 
 
 ### Added
 * Ring Topology System Bus NoC (#461)
-* Integration of the Ariane core into Chipyard (#448)
+* Integration of the CVA6 core into Chipyard (#448)
 * FireMarshal now generates an extra copy of linux kernel with dwarf debugging info for use in FirePerf (#427)
 * Add option to use blackboxed SimDRAM instead of SimAXIMem (#449)
 * Log `init-submodules` script (#433)

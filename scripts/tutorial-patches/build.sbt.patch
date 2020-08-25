@@ -9,9 +9,9 @@ index 5d642c1..56f6fda 100644
 -    sha3, // On separate line to allow for cleaner tutorial-setup patches
 +//    sha3, // On separate line to allow for cleaner tutorial-setup patches
      dsptools, `rocket-dsptools`,
-     gemmini, icenet, tracegen, ariane, nvdla)
+     gemmini, icenet, tracegen, cva6, nvdla)
    .settings(commonSettings)
-@@ -158,9 +158,9 @@ lazy val ariane = (project in file("generators/ariane"))
+@@ -158,9 +158,9 @@ lazy val cva6 = (project in file("generators/cva6"))
    .dependsOn(rocketchip)
    .settings(commonSettings)
  

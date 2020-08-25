@@ -16,7 +16,7 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.amba.axi4._
 
-// Example parameter class copied from Ariane, not included in documentation but for compile check only
+// Example parameter class copied from CVA6, not included in documentation but for compile check only
 // If you are here for documentation, DO NOT copy MyCoreParams and MyTileParams directly - always figure
 // out what parameters you need before you write the parameter class
 case class MyCoreParams(
