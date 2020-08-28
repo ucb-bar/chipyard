@@ -7,6 +7,7 @@ import chisel3.experimental.{Analog, IO}
 import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
 import freechips.rocketchip.devices.debug._
+import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.{SimAXIMem}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
@@ -163,30 +164,65 @@ object AddIOCells {
   }
 
   /**
-   * Add IO cells to a debug module and name the IO ports.
-   * @param psd A PSDIO bundle
+   * Add IO cells to a debug module and name the IO ports, for debug IO which must go off-chip
+   * For on-chip debug IO, drive them appropriately
+   * @param system A BaseSubsystem that might have a debug module
    * @param resetctrlOpt An optional ResetCtrlIO bundle
    * @param debugOpt An optional DebugIO bundle
-   * @return Returns a tuple3 of (Top-level PSDIO IO; Optional top-level DebugIO IO; a list of IOCell module references)
+   * @return Returns a tuple2 of (Generated debug io ports, Generated IOCells)
    */
-  def debug(psd: PSDIO, resetctrlOpt: Option[ResetCtrlIO], debugOpt: Option[DebugIO])(implicit p: Parameters):
-      (PSDIO, Option[ResetCtrlIO], Option[DebugIO], Seq[IOCell]) = {
-    val (psdPort, psdIOs) = IOCell.generateIOFromSignal(
-      psd, Some("iocell_psd"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
-    val debugTuple = debugOpt.map(d =>
-      IOCell.generateIOFromSignal(d, Some("iocell_debug"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync))
-    val debugPortOpt: Option[DebugIO] = debugTuple.map(_._1)
-    val debugIOs: Seq[IOCell] = debugTuple.map(_._2).toSeq.flatten
-    debugPortOpt.foreach(_.suggestName("debug"))
+  def debug(system: HasPeripheryDebugModuleImp)(implicit p: Parameters): (Seq[Bundle], Seq[IOCell]) = {
+    system.debug.map { debug =>
 
-    val resetctrlTuple = resetctrlOpt.map(d =>
-      IOCell.generateIOFromSignal(d, Some("iocell_resetctrl"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync))
-    val resetctrlPortOpt: Option[ResetCtrlIO] = resetctrlTuple.map(_._1)
-    val resetctrlIOs: Seq[IOCell] = resetctrlTuple.map(_._2).toSeq.flatten
-    resetctrlPortOpt.foreach(_.suggestName("resetctrl"))
+      // We never use the PSDIO, so tie it off on-chip
+      system.psd.psd.foreach { _ <> 0.U.asTypeOf(new PSDTestMode) }
 
-    psdPort.suggestName("psd")
-    (psdPort, resetctrlPortOpt, debugPortOpt, psdIOs ++ debugIOs ++ resetctrlIOs)
+      // Set resetCtrlOpt with the system reset
+      system.resetctrl.map { rcio => rcio.hartIsInReset.map { _ := system.reset.asBool } }
+
+      system.debug.map { d =>
+        // Tie off extTrigger
+        d.extTrigger.foreach { t =>
+          t.in.req := false.B
+          t.out.ack := t.out.req
+        }
+
+        // Tie off disableDebug
+        d.disableDebug.foreach { d => d := false.B }
+
+        // Drive JTAG on-chip IOs
+        d.systemjtag.map { j =>
+          j.reset := system.reset
+          j.mfr_id := system.p(JtagDTMKey).idcodeManufId.U(11.W)
+          j.part_number := system.p(JtagDTMKey).idcodePartNum.U(16.W)
+          j.version := system.p(JtagDTMKey).idcodeVersion.U(4.W)
+        }
+      }
+
+
+      // Connect DebugClockAndReset to system implicit clock. TODO this should use the clock of the bus the debug module is attached to
+      Debug.connectDebugClockAndReset(Some(debug), system.clock)(system.p)
+
+      // Add IOCells for the DMI/JTAG/APB ports
+
+      val dmiTuple = debug.clockeddmi.map { d =>
+        IOCell.generateIOFromSignal(d, Some("iocell_dmi"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
+      }
+      dmiTuple.map(_._1).foreach(_.suggestName("dmi"))
+
+      val jtagTuple = debug.systemjtag.map { j =>
+        IOCell.generateIOFromSignal(j.jtag, Some("iocell_jtag"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
+      }
+      jtagTuple.map(_._1).foreach(_.suggestName("jtag"))
+
+      val apbTuple = debug.apb.map { a =>
+        IOCell.generateIOFromSignal(a, Some("iocell_apb"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
+      }
+      apbTuple.map(_._1).foreach(_.suggestName("apb"))
+
+      val allTuples = (dmiTuple ++ jtagTuple ++ apbTuple).toSeq
+      (allTuples.map(_._1).toSeq, allTuples.flatMap(_._2).toSeq)
+    }.getOrElse((Nil, Nil))
   }
 
   /**
@@ -364,40 +400,53 @@ class WithTieOffL2FBusAXI extends OverrideIOBinder({
   }
 })
 
-// TODO we need to rethink what "Tie-off-debug" means. The current system punches out
-// excessive IOs.
-class WithTiedOffDebug extends OverrideIOBinder({
+class WithSimDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
-    val (psdPort, resetctrlOpt, debugPortOpt, ioCells) =
-      AddIOCells.debug(system.psd, system.resetctrl, system.debug)(system.p)
+    val (ports, iocells) = AddIOCells.debug(system)(system.p)
     val harnessFn = (th: HasHarnessSignalReferences) => {
-      Debug.tieoffDebug(debugPortOpt, resetctrlOpt, Some(psdPort))(system.p)
-      // tieoffDebug doesn't actually tie everything off :/
-      debugPortOpt.foreach { d =>
-        d.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare; cdmi.dmiClock := th.harnessClock })
-        d.dmactiveAck := DontCare
-        d.clock := th.harnessClock // TODO fix: This should be driven from within the chip
+      val dtm_success = Wire(Bool())
+      when (dtm_success) { th.success := true.B }
+      ports.map {
+        case d: ClockedDMIIO =>
+          val dtm = Module(new SimDTM()(system.p)).connect(th.harnessClock, th.harnessReset.asBool, d, dtm_success)
+        case j: JTAGIO =>
+          val jtag = Module(new SimJTAG(tickDelay=3)).connect(j, th.harnessClock, th.harnessReset.asBool, ~(th.harnessReset.asBool), dtm_success)
+        case _ =>
+          require(false, "We only support DMI or JTAG simulated debug connections")
       }
       Nil
     }
-    Seq((Seq(psdPort) ++ resetctrlOpt ++ debugPortOpt.toSeq, Nil, Some(harnessFn)))
+    Seq((ports, iocells, Some(harnessFn)))
   }
 })
 
-// TODO we need to rethink what this does. The current system punches out excessive IOs.
-// Some of the debug clock/reset should be driven from on-chip
-class WithSimDebug extends OverrideIOBinder({
+class WithTiedOffDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
-    val (psdPort, resetctrlPortOpt, debugPortOpt, ioCells) =
-      AddIOCells.debug(system.psd, system.resetctrl, system.debug)(system.p)
+    val (ports, iocells) = AddIOCells.debug(system)(system.p)
     val harnessFn = (th: HasHarnessSignalReferences) => {
-      val dtm_success = Wire(Bool())
-      Debug.connectDebug(debugPortOpt, resetctrlPortOpt, psdPort, th.harnessClock, th.harnessReset.asBool, dtm_success)(system.p)
-      when (dtm_success) { th.success := true.B }
-      th.dutReset := th.harnessReset.asBool | debugPortOpt.map { debug => AsyncResetReg(debug.ndreset).asBool }.getOrElse(false.B)
+      ports.map {
+        case d: ClockedDMIIO =>
+          d.dmi.req.valid := false.B
+          d.dmi.req.bits  := DontCare
+          d.dmi.resp.ready := true.B
+          d.dmiClock := th.harnessClock
+          d.dmiReset := th.harnessReset
+        case j: JTAGIO =>
+          j.TCK := true.B.asClock
+          j.TMS := true.B
+          j.TDI := true.B
+          j.TRSTn.foreach { r => r := true.B }
+        case a: ClockedAPBBundle =>
+          a.tieoff()
+          a.clock := false.B.asClock
+          a.reset := true.B.asAsyncReset
+          a.psel := false.B
+          a.penable := false.B
+        case _ => require(false)
+      }
       Nil
     }
-    Seq((Seq(psdPort) ++ debugPortOpt.toSeq, ioCells, Some(harnessFn)))
+    Seq((ports, iocells, Some(harnessFn)))
   }
 })
 
