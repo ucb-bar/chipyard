@@ -26,8 +26,10 @@ class ChipyardSystem(implicit p: Parameters) extends ChipyardSubsystem
   with CanHaveMasterAXI4MemPort
   with CanHaveMasterAXI4MMIOPort
   with CanHaveSlaveAXI4Port
-  with HasPeripheryBootROM
 {
+
+  val bootROM  = p(BootROMLocated(location)).map { BootROM.attach(_, this, CBUS) }
+  val maskROMs = p(MaskROMLocated(location)).map { MaskROM.attach(_, this, CBUS) }
   override lazy val module = new ChipyardSystemModule(this)
 }
 
@@ -37,5 +39,4 @@ class ChipyardSystem(implicit p: Parameters) extends ChipyardSubsystem
 class ChipyardSystemModule[+L <: ChipyardSystem](_outer: L) extends ChipyardSubsystemModuleImp(_outer)
   with HasRTCModuleImp
   with HasExtInterruptsModuleImp
-  with HasPeripheryBootROMModuleImp
   with DontTouch

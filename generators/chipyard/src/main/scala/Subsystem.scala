@@ -8,6 +8,7 @@ package chipyard
 import chisel3._
 import chisel3.internal.sourceinfo.{SourceInfo}
 
+import freechips.rocketchip.prci._
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.devices.debug.{HasPeripheryDebug, HasPeripheryDebugModuleImp, ExportDebug}
@@ -25,7 +26,6 @@ import boom.common.{BoomTile}
 
 
 import testchipip.{DromajoHelper, CanHavePeripherySerial, SerialKey}
-
 
 trait CanHaveHTIF { this: BaseSubsystem =>
   // Advertise HTIF if system can communicate with fesvr
@@ -47,7 +47,6 @@ trait CanHaveHTIF { this: BaseSubsystem =>
   }
 }
 
-
 class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
   with HasTiles
   with CanHaveHTIF
@@ -56,25 +55,17 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
     case r: RocketTile => r.module.core.rocketImpl.coreMonitorBundle
     case b: BoomTile => b.module.core.coreMonitorBundle
   }.toList
+
   override lazy val module = new ChipyardSubsystemModuleImp(this)
 }
 
-
 class ChipyardSubsystemModuleImp[+L <: ChipyardSubsystem](_outer: L) extends BaseSubsystemModuleImp(_outer)
-  with HasResetVectorWire
   with HasTilesModuleImp
 {
-
-  for (i <- 0 until outer.tiles.size) {
-    val wire = tile_inputs(i)
-    wire.hartid := outer.hartIdList(i).U
-    wire.reset_vector := global_reset_vector
-  }
-
   // create file with core params
   ElaborationArtefacts.add("""core.config""", outer.tiles.map(x => x.module.toString).mkString("\n"))
   // Generate C header with relevant information for Dromajo
   // This is included in the `dromajo_params.h` header file
-  DromajoHelper.addArtefacts()
+  DromajoHelper.addArtefacts(InSubsystem)
 }
 
