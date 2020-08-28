@@ -167,8 +167,6 @@ object AddIOCells {
    * Add IO cells to a debug module and name the IO ports, for debug IO which must go off-chip
    * For on-chip debug IO, drive them appropriately
    * @param system A BaseSubsystem that might have a debug module
-   * @param resetctrlOpt An optional ResetCtrlIO bundle
-   * @param debugOpt An optional DebugIO bundle
    * @return Returns a tuple2 of (Generated debug io ports, Generated IOCells)
    */
   def debug(system: HasPeripheryDebugModuleImp)(implicit p: Parameters): (Seq[Bundle], Seq[IOCell]) = {
