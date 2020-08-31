@@ -2,6 +2,7 @@ package chipyard
 package object iobinders {
 
 import chisel3._
+import chisel3.util.experimental.{BoringUtils}
 import chisel3.experimental.{Analog, IO}
 
 import freechips.rocketchip.config.{Field, Config, Parameters}
@@ -171,12 +172,19 @@ object AddIOCells {
    */
   def debug(system: HasPeripheryDebugModuleImp)(implicit p: Parameters): (Seq[Bundle], Seq[IOCell]) = {
     system.debug.map { debug =>
+      val tlbus = system.outer.asInstanceOf[BaseSubsystem].locateTLBusWrapper(p(ExportDebug).slaveWhere)
+      val debug_clock = Wire(Clock()).suggestName("debug_clock")
+      val debug_reset = Wire(Reset()).suggestName("debug_reset")
+      debug_clock := false.B.asClock
+      debug_reset := false.B
+      BoringUtils.bore(tlbus.module.clock, Seq(debug_clock))
+      BoringUtils.bore(tlbus.module.reset, Seq(debug_reset))
 
       // We never use the PSDIO, so tie it off on-chip
       system.psd.psd.foreach { _ <> 0.U.asTypeOf(new PSDTestMode) }
 
       // Set resetCtrlOpt with the system reset
-      system.resetctrl.map { rcio => rcio.hartIsInReset.map { _ := system.reset.asBool } }
+      system.resetctrl.map { rcio => rcio.hartIsInReset.map { _ := debug_reset.asBool } }
 
       system.debug.map { d =>
         // Tie off extTrigger
@@ -190,7 +198,7 @@ object AddIOCells {
 
         // Drive JTAG on-chip IOs
         d.systemjtag.map { j =>
-          j.reset := system.reset
+          j.reset := debug_reset
           j.mfr_id := system.p(JtagDTMKey).idcodeManufId.U(11.W)
           j.part_number := system.p(JtagDTMKey).idcodePartNum.U(16.W)
           j.version := system.p(JtagDTMKey).idcodeVersion.U(4.W)
@@ -199,7 +207,9 @@ object AddIOCells {
 
 
       // Connect DebugClockAndReset to system implicit clock. TODO this should use the clock of the bus the debug module is attached to
-      Debug.connectDebugClockAndReset(Some(debug), system.clock)(system.p)
+
+
+      Debug.connectDebugClockAndReset(Some(debug), debug_clock)(system.p)
 
       // Add IOCells for the DMI/JTAG/APB ports
 
