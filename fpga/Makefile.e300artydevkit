@@ -1,0 +1,23 @@
+# See LICENSE for license details.
+base_dir=$(abspath ..)
+BUILD_DIR := $(base_dir)/fpga/builds/e300artydevkit
+FPGA_DIR := $(base_dir)/fpga/fpga-shells/xilinx
+MODEL := E300ArtyDevKitFPGAChip
+PROJECT := sifive.freedom.everywhere.e300artydevkit
+export CONFIG_PROJECT := sifive.freedom.everywhere.e300artydevkit
+export CONFIG := E300ArtyDevKitConfig
+export BOARD := arty
+export BOOTROM_DIR := $(base_dir)/fpga/bootrom/xip
+
+rocketchip_dir := $(base_dir)/generators/rocket-chip
+sifiveblocks_dir := $(base_dir)/generators/sifive-blocks
+VSRCS := \
+	$(rocketchip_dir)/src/main/resources/vsrc/AsyncResetReg.v \
+	$(rocketchip_dir)/src/main/resources/vsrc/plusarg_reader.v \
+	$(rocketchip_dir)/src/main/resources/vsrc/EICG_wrapper.v \
+	$(sifiveblocks_dir)/vsrc/SRLatch.v \
+	$(FPGA_DIR)/common/vsrc/PowerOnResetFPGAOnly.v \
+	$(BUILD_DIR)/$(CONFIG_PROJECT).$(CONFIG).rom.v \
+	$(BUILD_DIR)/$(CONFIG_PROJECT).$(CONFIG).v
+
+include common.mk
