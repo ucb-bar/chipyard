@@ -39,6 +39,8 @@ git config submodule.vlsi/hammer-cadence-plugins.update none
 git config submodule.vlsi/hammer-synopsys-plugins.update none
 git config submodule.vlsi/hammer-mentor-plugins.update none
 git config submodule.software/firemarshal.update none
+# Disable updates to the local FPGA tools
+git config submodule.fpga/fpga-shells.update none
 git submodule update --init --recursive #--jobs 8
 
 # Un-ignore toolchain submodules
