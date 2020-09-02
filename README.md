@@ -39,7 +39,9 @@ If used for research, please cite Chipyard by the following publication:
   journal={IEEE Micro},
   title={Chipyard: Integrated Design, Simulation, and Implementation Framework for Custom SoCs},
   year={2020},
-  pages={},
+  volume={40},
+  number={4},
+  pages={10-21},
   doi={10.1109/MM.2020.2996616},
   ISSN={1937-4143},
 }
@@ -76,7 +78,7 @@ These additional publications cover many of the internal components used in Chip
 [berkeley]: https://berkeley.edu
 [riscv]: https://riscv.org/
 [rocket-chip]: https://github.com/freechipsproject/rocket-chip
-[boom]: https://github.com/ucb-bar/riscv-boom
+[boom]: https://github.com/riscv-boom/riscv-boom
 [firemarshal]: https://github.com/firesim/FireMarshal/
 [ariane]: https://github.com/pulp-platform/ariane/
 [gemmini]: https://github.com/ucb-bar/gemmini

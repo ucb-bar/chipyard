@@ -12,6 +12,10 @@ class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
     with CanHaveMasterAXI4MemPort {
 
   def coreMonitorBundles = Nil
+  val tileStatusNodes = tiles.collect {
+    case t: GroundTestTile => t.statusNode.makeSink()
+    case t: BoomTraceGenTile => t.statusNode.makeSink()
+  }
   override lazy val module = new TraceGenSystemModuleImp(this)
 }
 
@@ -20,11 +24,7 @@ class TraceGenSystemModuleImp(outer: TraceGenSystem)
 {
   val success = IO(Output(Bool()))
 
-  outer.tiles.zipWithIndex.map { case(t, i) => t.module.constants.hartid := i.U }
+  val status = dontTouch(DebugCombiner(outer.tileStatusNodes.map(_.bundle)))
 
-  val status = dontTouch(DebugCombiner(outer.tiles.collect {
-    case t: GroundTestTile => t.module.status
-    case t: BoomTraceGenTile => t.module.status
-  }))
   success := outer.tileCeaseSinkNode.in.head._1.asUInt.andR
 }

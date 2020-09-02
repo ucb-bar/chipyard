@@ -82,7 +82,12 @@ search
 
 submodules=("coremark" "firemarshal" "nvdla-workload" "spec2017")
 dir="software"
-branches=("master")
+if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
+then
+    branches=("master")
+else
+    branches=("master" "dev")
+fi
 search
 
 submodules=("DRAMSim2" "axe" "barstools" "chisel-testers" "dsptools" "firrtl-interpreter" "torture" "treadle")

@@ -3,22 +3,49 @@
 #########################################################################################
 SHELL=/bin/bash
 
-
 ifndef RISCV
 $(error RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
 else
 $(info Running with RISCV=$(RISCV))
 endif
 
+#########################################################################################
+# specify user-interface variables
+#########################################################################################
+HELP_COMPILATION_VARIABLES += \
+"   EXTRA_GENERATOR_REQS   = additional make requirements needed for the main generator" \
+"   EXTRA_SIM_CXXFLAGS     = additional CXXFLAGS for building simulators" \
+"   EXTRA_SIM_LDFLAGS      = additional LDFLAGS for building simulators" \
+"   EXTRA_SIM_SOURCES      = additional simulation sources needed for simulator" \
+"   EXTRA_SIM_REQS         = additional make requirements to build the simulator"
+
+EXTRA_GENERATOR_REQS ?=
+EXTRA_SIM_CXXFLAGS   ?=
+EXTRA_SIM_LDFLAGS    ?=
+EXTRA_SIM_SOURCES    ?=
+EXTRA_SIM_REQS       ?=
+
+#----------------------------------------------------------------------------
+HELP_SIMULATION_VARIABLES += \
+"   EXTRA_SIM_FLAGS        = additional runtime simulation flags (passed within +permissive)" \
+"   NUMACTL                = set to '1' to wrap simulator in the appropriate numactl command"
+
+EXTRA_SIM_FLAGS ?=
+NUMACTL         ?= 0
+
+NUMA_PREFIX = $(if $(filter $(NUMACTL),0),,$(shell $(base_dir)/scripts/numa_prefix))
+
+#----------------------------------------------------------------------------
+HELP_COMMANDS += \
+"   run-binary             = run [./$(shell basename $(sim))] and log instructions to file" \
+"   run-binary-fast        = run [./$(shell basename $(sim))] and don't log instructions" \
+"   run-binary-debug       = run [./$(shell basename $(sim_debug))] and log instructions and waveform to files" \
+"   verilog                = generate intermediate verilog files from chisel elaboration and firrtl passes" \
+"   run-tests              = run all assembly and benchmark tests"
 
 #########################################################################################
-# extra make variables/rules from subprojects
-#
-# EXTRA_GENERATOR_REQS - requirements needed for the main generator
-# EXTRA_SIM_FLAGS - runtime simulation flags
-# EXTRA_SIM_CC_FLAGS - cc flags for simulators
-# EXTRA_SIM_SOURCES - simulation sources needed for simulator
-# EXTRA_SIM_REQS - requirements to build the simulator
+# include additional subproject make fragments
+# see HELP_COMPILATION_VARIABLES
 #########################################################################################
 include $(base_dir)/generators/ariane/ariane.mk
 include $(base_dir)/generators/tracegen/tracegen.mk
@@ -52,7 +79,6 @@ $(FIRRTL_TEST_JAR): $(call lookup_srcs,$(CHIPYARD_FIRRTL_DIR),scala)
 	cd $(CHIPYARD_FIRRTL_DIR) && $(SBT) "test:assembly"
 	mkdir -p $(@D)
 	cp $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl-test.jar $@
-
 
 #########################################################################################
 # Bloop Project Definitions
@@ -138,22 +164,42 @@ verilog: $(sim_vsrcs)
 # helper rules to run simulations
 #########################################################################################
 .PHONY: run-binary run-binary-fast run-binary-debug run-fast
+
+# run normal binary with hardware-logged insn dissassembly
 run-binary: $(output_dir) $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
-#########################################################################################
-# helper rules to run simulator as fast as possible
-#########################################################################################
+# run simulator as fast as possible (no insn disassembly)
 run-binary-fast: $(output_dir) $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
 
-#########################################################################################
-# helper rules to run simulator with as much debug info as possible
-#########################################################################################
+# run simulator with as much debug info as possible
 run-binary-debug: $(output_dir) $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
+
+#########################################################################################
+# helper rules to run simulator with fast loadmem via hex files
+#########################################################################################
+$(binary_hex): $(output_dir) $(BINARY)
+	$(base_dir)/scripts/smartelf2hex.sh $(BINARY) > $(binary_hex)
+
+run-binary-hex: $(output_dir) $(sim) $(binary_hex)
+run-binary-hex: run-binary
+run-binary-hex: override LOADMEM_ADDR = 80000000
+run-binary-hex: override LOADMEM = $(binary_hex)
+run-binary-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
+run-binary-debug-hex: $(output_dir) $(sim) $(binary_hex)
+run-binary-debug-hex: run-binary-debug
+run-binary-debug-hex: override LOADMEM_ADDR = 80000000
+run-binary-debug-hex: override LOADMEM = $(binary_hex)
+run-binary-debug-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
+run-binary-fast-hex: $(output_dir) $(sim) $(binary_hex)
+run-binary-fast-hex: run-binary-fast
+run-binary-fast-hex: override LOADMEM_ADDR = 80000000
+run-binary-fast-hex: override LOADMEM = $(binary_hex)
+run-binary-fast-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
 
 #########################################################################################
 # run assembly/benchmarks rules
@@ -165,10 +211,10 @@ $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/% $(output_d
 	ln -sf $< $@
 
 $(output_dir)/%.run: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
@@ -186,6 +232,13 @@ dramsim_lib = $(dramsim_dir)/libdramsim.a
 
 $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
+
+#########################################################################################
+# print help text
+#########################################################################################
+.PHONY: help
+help:
+	@for line in $(HELP_LINES); do echo "$$line"; done
 
 #########################################################################################
 # Implicit rule handling

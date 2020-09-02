@@ -6,12 +6,13 @@ import chisel3.util.{log2Up}
 import freechips.rocketchip.config.{Field, Parameters, Config}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
-import freechips.rocketchip.devices.tilelink.BootROMParams
+import freechips.rocketchip.devices.tilelink.{BootROMLocated}
 import freechips.rocketchip.devices.debug.{Debug}
 import freechips.rocketchip.groundtest.{GroundTestSubsystem}
 import freechips.rocketchip.tile._
 import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams}
 import freechips.rocketchip.util.{AsyncResetReg}
+import freechips.rocketchip.prci._
 
 import icenet.IceNetConsts._
 import testchipip._
@@ -32,25 +33,16 @@ import memblade.client.{RemoteMemClientKey, RemoteMemClientConfig}
 import memblade.cache._
 import memblade.prefetcher._
 
-import chipyard.{BuildTop, BuildSystem, TestSuitesKey, TestSuiteHelper}
+import chipyard.{BuildTop, BuildSystem, ClockingSchemeGenerators, ClockingSchemeKey, TestSuitesKey, TestSuiteHelper}
 
 import scala.math.max
-
-/**
- * TODO: Why do we need this?
- */
-object ConfigValName {
-  implicit val valName = ValName("TestHarness")
-}
-import ConfigValName._
 
 // -----------------------
 // Common Config Fragments
 // -----------------------
 
 class WithBootROM extends Config((site, here, up) => {
-  case BootROMParams => BootROMParams(
-    contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img")
+  case BootROMLocated(x) => up(BootROMLocated(x), site).map(_.copy(contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img"))
 })
 
 // DOC include start: gpio config fragment
@@ -82,7 +74,7 @@ class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
 })
 
 class WithTracegenSystem extends Config((site, here, up) => {
-  case BuildSystem => (p: Parameters) => LazyModule(new TraceGenSystem()(p))
+  case BuildSystem => (p: Parameters) => new TraceGenSystem()(p)
 })
 
 class WithMemBladeSystem extends Config((site, here, up) => {
@@ -129,7 +121,8 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config(
     case MultiRoCCKey => {
       up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
         (i -> Seq((p: Parameters) => {
-          LazyModule(new Hwacha()(p)).suggestName("hwacha")
+          val hwacha = LazyModule(new Hwacha()(p))
+          hwacha
         }))
       }
     }
@@ -289,3 +282,16 @@ class WithHwachaTest extends Config((site, here, up) => {
     "SRC_EXTENSION = $(base_dir)/hwacha/$(src_path)/*.scala" + "\nDISASM_EXTENSION = --extension=hwacha"
   }
 })
+
+// The default RocketChip BaseSubsystem drives its diplomatic clock graph
+// with the implicit clocks of Subsystem. Don't do that, instead we extend
+// the diplomacy graph upwards into the ChipTop, where we connect it to
+// our clock drivers
+class WithNoSubsystemDrivenClocks extends Config((site, here, up) => {
+  case SubsystemDriveAsyncClockGroupsKey => None
+})
+
+class WithTileDividedClock extends Config((site, here, up) => {
+  case ClockingSchemeKey => ClockingSchemeGenerators.harnessDividedClock
+})
+

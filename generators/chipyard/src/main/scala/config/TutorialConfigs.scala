@@ -31,6 +31,7 @@ class TutorialStarterConfig extends Config(
   new testchipip.WithTSI ++                  // Add a TSI (Test Serial Interface)  widget to bring-up the core
   new chipyard.config.WithBootROM ++         // Use the Chipyard BootROM
   new chipyard.config.WithUART ++            // Add a UART
+  new chipyard.config.WithNoSubsystemDrivenClocks ++ // Don't drive the subsystem clocks from within the subsystem
 
   // CUSTOMIZE THE CORE
   // Uncomment out one (or multiple) of the lines below, and choose
@@ -65,6 +66,7 @@ class TutorialMMIOConfig extends Config(
   new testchipip.WithTSI ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSubsystemDrivenClocks ++
 
   // Attach either a TileLink or AXI4 version of GCD
   // Uncomment one of the below lines
@@ -92,6 +94,7 @@ class TutorialSha3Config extends Config(
   new testchipip.WithTSI ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSubsystemDrivenClocks ++
 
   // Uncomment this line once you added SHA3 to the build.sbt, and cloned the SHA3 repo
   // new sha3.WithSha3Accel ++
@@ -117,6 +120,7 @@ class TutorialSha3BlackBoxConfig extends Config(
   new testchipip.WithTSI ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSubsystemDrivenClocks ++
 
   // Uncomment these lines once SHA3 is integrated
   // new sha3.WithSha3BlackBox ++ // Specify we want the Black-box verilog version of Sha3 Ctrl

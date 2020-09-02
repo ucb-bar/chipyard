@@ -5,33 +5,41 @@ import chisel3._
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.config.{Field, Parameters}
 import chipyard.iobinders.{TestHarnessFunction}
-import chipyard.config.ConfigValName._
 
 // -------------------------------
-// BOOM and/or Rocket Test Harness
+// Chipyard Test Harness
 // -------------------------------
 
-case object BuildTop extends Field[Parameters => HasTestHarnessFunctions]((p: Parameters) => Module(new ChipTop()(p)))
+case object BuildTop extends Field[Parameters => LazyModule with HasTestHarnessFunctions]((p: Parameters) => new ChipTop()(p))
 
 trait HasTestHarnessFunctions {
   val harnessFunctions: Seq[TestHarnessFunction]
 }
 
-class TestHarness(implicit val p: Parameters) extends Module {
+trait HasHarnessSignalReferences {
+  def harnessClock: Clock
+  def harnessReset: Reset
+  def dutReset: Reset
+  def success: Bool
+}
+
+class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSignalReferences {
   val io = IO(new Bundle {
     val success = Output(Bool())
   })
 
-  val dut = p(BuildTop)(p)
+  val ldut = LazyModule(p(BuildTop)(p)).suggestName("chiptop")
+  val dut = Module(ldut.module)
   io.success := false.B
+
+  val harnessClock = clock
+  val harnessReset = WireInit(reset)
+  val success = io.success
 
   // dutReset assignment can be overridden via a harnessFunction, but by default it is just reset
   val dutReset = WireDefault(if (p(GlobalResetSchemeKey).pinIsAsync) reset.asAsyncReset else reset)
 
-  dut.harnessFunctions.foreach(_(this))
-
-  def success = io.success
-  def harnessReset = this.reset.asBool
+  ldut.harnessFunctions.foreach(_(this))
 
 }
 

@@ -62,7 +62,7 @@ class WithBlockDeviceBridge extends OverrideIOBinder({
 class WithFASEDBridge extends OverrideIOBinder({
   (system: CanHaveMasterAXI4MemPort) => {
     implicit val p: Parameters = GetSystemParameters(system)
-    (system.mem_axi4 zip system.memAXI4Node.in).foreach({ case (axi4, (_, edge)) =>
+    (system.mem_axi4 zip system.memAXI4Node.edges.in).foreach({ case (axi4, edge) =>
       val nastiKey = NastiParameters(axi4.r.bits.data.getWidth,
                                      axi4.ar.bits.addr.getWidth,
                                      axi4.ar.bits.id.getWidth)

@@ -10,7 +10,7 @@ import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.devices.tilelink.BootROMParams
+import freechips.rocketchip.devices.tilelink.{BootROMLocated, BootROMParams}
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import testchipip.{BlockDeviceKey, BlockDeviceConfig, TracePortKey, TracePortParams, MemBenchKey, MemBenchParams}
@@ -24,10 +24,9 @@ import memblade.cache.DRAMCacheKey
 
 import firesim.bridges._
 import firesim.configs._
-import chipyard.config.ConfigValName._
 
 class WithBootROM extends Config((site, here, up) => {
-  case BootROMParams => {
+  case BootROMLocated(x) => {
     val chipyardBootROM = new File(s"./generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
     val firesimBootROM = new File(s"./target-rtl/chipyard/generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
 
@@ -36,7 +35,7 @@ class WithBootROM extends Config((site, here, up) => {
     } else {
       firesimBootROM.getAbsolutePath()
     }
-    BootROMParams(contentFileName = bootROMPath)
+    up(BootROMLocated(x), site).map(_.copy(contentFileName = bootROMPath))
   }
 })
 
@@ -72,6 +71,8 @@ class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
 // Tweaks that are generally applied to all firesim configs
 class WithFireSimConfigTweaks extends Config(
+  // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
+  new WithFireSimSimpleClocks ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++
   // Optional*: Removing this will require adjusting the UART baud rate and
@@ -320,3 +321,14 @@ class FireSimArianeConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.ArianeConfig)
+
+//**********************************************************************************
+//* Multiclock Configurations
+//*********************************************************************************/
+class FireSimMulticlockRocketConfig extends Config(
+  new WithFireSimRationalTileDomain(2, 1) ++
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.DividedClockRocketConfig)
+
