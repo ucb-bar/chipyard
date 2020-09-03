@@ -16,14 +16,14 @@ import freechips.rocketchip.groundtest.{GroundTestSubsystemModuleImp, GroundTest
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
-import tracegen.{TraceGenSystemModuleImp}
+import tracegen.{TraceGenSystemModuleImp, DRAMCacheTraceGenSystemModuleImp}
 
 import barstools.iocell.chisel._
 
 import testchipip._
 import icenet.{CanHavePeripheryIceNICModuleImp, SimNetwork, NicLoopback, NICKey}
 import icenet.IceNetConsts.NET_IF_BYTES
-import memblade.cache.{HasPeripheryDRAMCacheModuleImp, DRAMCacheKey}
+import memblade.cache.{HasPeripheryDRAMCacheModuleImpBase, DRAMCacheKey}
 
 import scala.reflect.{ClassTag}
 
@@ -435,17 +435,48 @@ class WithTraceGenSuccessBinder extends OverrideIOBinder({
   }
 })
 
+class WithDRAMCacheTraceGenSuccessBinder extends OverrideIOBinder({
+  (system: DRAMCacheTraceGenSystemModuleImp) => {
+    val (successPort, ioCells) = IOCell.generateIOFromSignal(system.success, Some("iocell_success"))
+    successPort.suggestName("success")
+    val harnessFn = (th: HasHarnessSignalReferences) => { when (successPort) { th.success := true.B }; Nil }
+    Seq((Seq(successPort), ioCells, Some(harnessFn)))
+  }
+})
+
 class WithDRAMCacheBinder extends OverrideIOBinder({
-  (system: HasPeripheryDRAMCacheModuleImp) => {
+  (system: HasPeripheryDRAMCacheModuleImpBase) => {
     val dcKey = system.p(DRAMCacheKey)
     val nTrackers = dcKey.nChannels * dcKey.nBanksPerChannel * dcKey.nTrackersPerBank
     val spanBeats = dcKey.spanBytes / NET_IF_BYTES
-    system.connectBlackBoxSimCacheMem()
-    system.connectTestMemBlade(
+    val (mb_axi4, mb_axi4_node) = system.connectTestMemBlade(
       latency = 20,
-      qDepth = nTrackers * (4 + spanBeats),
-      blackBoxMem = true)
-    Nil
+      qDepth = nTrackers * (4 + spanBeats))
+    implicit val p: Parameters = GetSystemParameters(system)
+    val peiTuples =
+      AddIOCells.axi4(system.cache_axi4, system.outer.outAXI4Node, "cache_mem") ++
+      AddIOCells.axi4(mb_axi4, mb_axi4_node, "memblade_mem")
+
+    val cacheConf = p(DRAMCacheKey)
+    val spanBytes = cacheConf.spanBytes
+    val setBytes = spanBytes * (1 + cacheConf.nWays)
+    val cacheMemSize = BigInt(cacheConf.nSets) * setBytes
+    val mbMemSize = p(ExtMem).get.master.size
+
+    val memSizes =
+      system.cache_axi4.map(x => cacheMemSize) ++ mb_axi4.map(x => mbMemSize)
+    val lineSize = p(CacheBlockBytes)
+
+    val harnessFn = (th: HasHarnessSignalReferences) => {
+      peiTuples.zip(memSizes).map { case ((port, edge, ios), memSize) =>
+        val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
+        mem.io.axi <> port
+        mem.io.clock := th.harnessClock
+        mem.io.reset := th.harnessReset
+      }
+      Nil
+    }
+    Seq((peiTuples.map(_._1), peiTuples.flatMap(_._3), Some(harnessFn)))
   }
 })
 

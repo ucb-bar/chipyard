@@ -264,4 +264,11 @@ class DividedClockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
+class WithDRAMCacheBinderSet extends Config(
+  new chipyard.config.WithMemBladeKey ++
+  new icenet.WithIceNIC(inBufFlits = 8192, usePauser = true, ctrlQueueDepth = 64) ++
+  new chipyard.iobinders.WithDRAMCacheBinder)
 
+class FullDRAMCacheConfig extends Config(
+  new WithDRAMCacheBinderSet ++
+  new DRAMCacheConfig)

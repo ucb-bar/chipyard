@@ -10,6 +10,7 @@ import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.tile.{MaxHartIdBits, XLen}
 import scala.math.{max, min}
 import icenet.IceNetConsts._
+import memblade.cache.DRAMCacheKey
 
 class WithTraceGen(
   n: Int = 2,
@@ -124,6 +125,44 @@ class WithL2TraceGen(
           numGens = params.size),
         crossingParams = RocketCrossingParams()
       )
+    } ++ prev
+  }
+})
+
+class WithDRAMCacheTraceGen(n: Int = 2)(
+    params: Seq[DCacheParams] = List.fill(n) { DCacheParams(nSets = 16, nWays = 1) },
+    nReqs: Int = 8192) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => {
+    val prev = up(TilesLocated(InSubsystem), site)
+    val cacheConf = site(DRAMCacheKey)
+    val sbusConf = site(SystemBusKey)
+    val idOffset = prev.size
+    val memOffset = cacheConf.baseAddr
+
+    params.zipWithIndex.map { case (dcp, i) =>
+      TraceGenTileAttachParams(
+        tileParams = TraceGenParams(
+          hartId = i + idOffset,
+          dcache = Some(dcp),
+          wordBits = site(XLen),
+          addrBits = 48,
+          addrBag = {
+            val nSets = cacheConf.nSets
+            val nWays = cacheConf.nWays + 1
+            val spanBytes = cacheConf.spanBytes
+            val beatBytes = sbusConf.beatBytes
+            val nBeats = 2
+
+            List.tabulate(2 * nWays) { i =>
+              Seq.tabulate(nBeats) { j =>
+                BigInt((j * beatBytes) + (i * nSets * spanBytes))
+              }
+            }.flatten
+          },
+          maxRequests = nReqs,
+          memStart = memOffset,
+          numGens = params.size),
+        crossingParams = RocketCrossingParams())
     } ++ prev
   }
 })

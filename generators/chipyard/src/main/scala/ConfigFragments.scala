@@ -16,7 +16,7 @@ import freechips.rocketchip.prci._
 
 import icenet.IceNetConsts._
 import testchipip._
-import tracegen.{TraceGenSystem}
+import tracegen.{TraceGenSystem, DRAMCacheTraceGenSystem}
 
 import hwacha.{Hwacha}
 
@@ -78,18 +78,19 @@ class WithTracegenSystem extends Config((site, here, up) => {
 })
 
 class WithMemBladeSystem extends Config((site, here, up) => {
-  case BuildSystem => (p: Parameters) =>
-    LazyModule(new chipyard.MemBladeTop()(p))
+  case BuildSystem => (p: Parameters) => new chipyard.MemBladeTop()(p)
 })
 
 class WithRemoteMemClientSystem extends Config((site, here, up) => {
-  case BuildSystem => (p: Parameters) =>
-    LazyModule(new chipyard.RemoteMemClientTop()(p))
+  case BuildSystem => (p: Parameters) => new chipyard.RemoteMemClientTop()(p)
 })
 
 class WithDRAMCacheSystem extends Config((site, here, up) => {
-  case BuildSystem => (p: Parameters) =>
-    LazyModule(new chipyard.DRAMCacheTop()(p))
+  case BuildSystem => (p: Parameters) => new chipyard.DRAMCacheTop()(p)
+})
+
+class WithDRAMCacheTracegenSystem extends Config((site, here, up) => {
+  case BuildSystem => (p: Parameters) => new tracegen.DRAMCacheTraceGenSystem()(p)
 })
 
 /**

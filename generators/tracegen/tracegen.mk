@@ -11,8 +11,14 @@ $(AXE): $(wildcard $(AXE_DIR)/*.[ch]) $(AXE_DIR)/make.sh
 $(output_dir)/tracegen.out: $(sim)
 	mkdir -p $(output_dir) && $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) none </dev/null 2> $@
 
+$(output_dir)/tracegen.vpd: $(sim_debug)
+	mkdir -p $(output_dir) && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) +vcdplusfile=$(output_dir)/tracegen.vpd none </dev/null 2> $@
+
 $(output_dir)/tracegen.result: $(output_dir)/tracegen.out $(AXE)
 	$(base_dir)/scripts/check-tracegen.sh $< > $@
 
-.PHONY: tracegen
+.PHONY: tracegen tracegen-debug
+
 tracegen: $(output_dir)/tracegen.result
+
+tracegen-debug: $(output_dir)/tracegen.vpd
