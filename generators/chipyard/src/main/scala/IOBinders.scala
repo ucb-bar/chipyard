@@ -167,6 +167,7 @@ object AddIOCells {
   /**
    * Add IO cells to a debug module and name the IO ports, for debug IO which must go off-chip
    * For on-chip debug IO, drive them appropriately
+   * Mostly copied from rocket-chip/src/main/scala/devices/debug/Periphery.scala
    * @param system A BaseSubsystem that might have a debug module
    * @return Returns a tuple2 of (Generated debug io ports, Generated IOCells)
    */
@@ -175,27 +176,22 @@ object AddIOCells {
       val tlbus = system.outer.asInstanceOf[BaseSubsystem].locateTLBusWrapper(p(ExportDebug).slaveWhere)
       val debug_clock = Wire(Clock()).suggestName("debug_clock")
       val debug_reset = Wire(Reset()).suggestName("debug_reset")
-      debug_clock := false.B.asClock
-      debug_reset := false.B
+      debug_clock := false.B.asClock // must provide default assignment to avoid firrtl unassigned error
+      debug_reset := false.B // must provide default assignment to avoid firrtl unassigned error
       BoringUtils.bore(tlbus.module.clock, Seq(debug_clock))
       BoringUtils.bore(tlbus.module.reset, Seq(debug_reset))
 
       // We never use the PSDIO, so tie it off on-chip
       system.psd.psd.foreach { _ <> 0.U.asTypeOf(new PSDTestMode) }
-
-      // Set resetCtrlOpt with the system reset
       system.resetctrl.map { rcio => rcio.hartIsInReset.map { _ := debug_reset.asBool } }
-
       system.debug.map { d =>
         // Tie off extTrigger
         d.extTrigger.foreach { t =>
           t.in.req := false.B
           t.out.ack := t.out.req
         }
-
         // Tie off disableDebug
         d.disableDebug.foreach { d => d := false.B }
-
         // Drive JTAG on-chip IOs
         d.systemjtag.map { j =>
           j.reset := debug_reset
@@ -204,15 +200,9 @@ object AddIOCells {
           j.version := system.p(JtagDTMKey).idcodeVersion.U(4.W)
         }
       }
-
-
-      // Connect DebugClockAndReset to system implicit clock. TODO this should use the clock of the bus the debug module is attached to
-
-
       Debug.connectDebugClockAndReset(Some(debug), debug_clock)(system.p)
 
       // Add IOCells for the DMI/JTAG/APB ports
-
       val dmiTuple = debug.clockeddmi.map { d =>
         IOCell.generateIOFromSignal(d, Some("iocell_dmi"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
       }
@@ -412,7 +402,7 @@ class WithSimDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
     val (ports, iocells) = AddIOCells.debug(system)(system.p)
     val harnessFn = (th: HasHarnessSignalReferences) => {
-      val dtm_success = Wire(Bool())
+      val dtm_success = WireInit(false.B)
       when (dtm_success) { th.success := true.B }
       ports.map {
         case d: ClockedDMIIO =>
@@ -437,8 +427,8 @@ class WithTiedOffDebug extends OverrideIOBinder({
           d.dmi.req.valid := false.B
           d.dmi.req.bits  := DontCare
           d.dmi.resp.ready := true.B
-          d.dmiClock := th.harnessClock
-          d.dmiReset := th.harnessReset
+          d.dmiClock := false.B.asClock
+          d.dmiReset := true.B
         case j: JTAGIO =>
           j.TCK := true.B.asClock
           j.TMS := true.B

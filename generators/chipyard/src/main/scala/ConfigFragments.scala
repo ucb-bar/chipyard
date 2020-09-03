@@ -7,7 +7,7 @@ import freechips.rocketchip.config.{Field, Parameters, Config}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.diplomacy.{LazyModule, ValName}
 import freechips.rocketchip.devices.tilelink.{BootROMLocated}
-import freechips.rocketchip.devices.debug.{Debug}
+import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI}
 import freechips.rocketchip.groundtest.{GroundTestSubsystem}
 import freechips.rocketchip.tile._
 import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams}
@@ -163,3 +163,10 @@ class WithTileDividedClock extends Config((site, here, up) => {
   case ClockingSchemeKey => ClockingSchemeGenerators.harnessDividedClock
 })
 
+class WithDMIDTM extends Config((site, here, up) => {
+  case ExportDebug => up(ExportDebug, site).copy(protocols = Set(DMI))
+})
+
+class WithNoDebug extends Config((site, here, up) => {
+  case DebugModuleKey => None
+})
