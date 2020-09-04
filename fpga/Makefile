@@ -35,8 +35,8 @@ BOARD ?= arty
 # misc. directories
 #########################################################################################
 bootrom_dir := $(base_dir)/fpga/bootrom/xip
-fpga_common_script_dir := $(FPGA_DIR)/common/tcl
 fpga_dir := $(base_dir)/fpga/fpga-shells/xilinx
+fpga_common_script_dir := $(fpga_dir)/common/tcl
 
 #########################################################################################
 # import other necessary rules and variables
