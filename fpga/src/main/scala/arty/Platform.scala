@@ -51,6 +51,7 @@ class E300ArtyDevKitPlatformIO(implicit val p: Parameters) extends Bundle {
 //-------------------------------------------------------------------------
 
 class E300ArtyDevKitPlatform(implicit val p: Parameters) extends Module {
+  //val sys = Module(LazyModule(new E300ArtyDevKitSystem).module) This can be DigitalTop?
   val sys = Module(LazyModule(new E300ArtyDevKitSystem).module)
   val io = new E300ArtyDevKitPlatformIO
 
