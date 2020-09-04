@@ -1,19 +1,22 @@
 package chipyard
 
 import chisel3._
-
+import scala.collection.mutable.{ArrayBuffer}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.config.{Field, Parameters}
-import chipyard.iobinders.{TestHarnessFunction}
+
+import chipyard.harness.{ApplyHarnessBinders, HarnessBinders}
 
 // -------------------------------
 // Chipyard Test Harness
 // -------------------------------
 
-case object BuildTop extends Field[Parameters => LazyModule with HasTestHarnessFunctions]((p: Parameters) => new ChipTop()(p))
+case object BuildTop extends Field[Parameters => LazyModule]((p: Parameters) => new ChipTop()(p))
 
 trait HasTestHarnessFunctions {
-  val harnessFunctions: Seq[TestHarnessFunction]
+  val lazySystem: LazyModule
+  val harnessFunctions = ArrayBuffer.empty[HasHarnessSignalReferences => Seq[Any]]
+  val portMap = scala.collection.mutable.Map[String, Seq[Data]]()
 }
 
 trait HasHarnessSignalReferences {
@@ -39,7 +42,9 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
   // dutReset assignment can be overridden via a harnessFunction, but by default it is just reset
   val dutReset = WireDefault(if (p(GlobalResetSchemeKey).pinIsAsync) reset.asAsyncReset else reset)
 
-  ldut.harnessFunctions.foreach(_(this))
-
+  ldut match { case d: HasTestHarnessFunctions =>
+    d.harnessFunctions.foreach(_(this))
+    ApplyHarnessBinders(this, d.lazySystem, p(HarnessBinders), d.portMap.toMap)
+  }
 }
 

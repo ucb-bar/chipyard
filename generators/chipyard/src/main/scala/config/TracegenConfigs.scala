@@ -4,8 +4,10 @@ import freechips.rocketchip.config.{Config}
 import freechips.rocketchip.rocket.{DCacheParams}
 
 class TraceGenConfig extends Config(
-  new chipyard.iobinders.WithBlackBoxSimMem ++
-  new chipyard.iobinders.WithTraceGenSuccessBinder ++
+  new chipyard.harness.WithBlackBoxSimMem ++
+  new chipyard.harness.WithTraceGenSuccess ++
+  new chipyard.iobinders.WithAXI4MemPunchthrough ++
+  new chipyard.iobinders.WithTraceGenSuccessPunchthrough ++
   new chipyard.config.WithTracegenSystem ++
   new chipyard.config.WithNoSubsystemDrivenClocks ++
   new tracegen.WithTraceGen()(List.fill(2) { DCacheParams(nMSHRs = 0, nSets = 16, nWays = 2) }) ++
@@ -13,8 +15,10 @@ class TraceGenConfig extends Config(
   new freechips.rocketchip.groundtest.GroundTestBaseConfig)
 
 class NonBlockingTraceGenConfig extends Config(
-  new chipyard.iobinders.WithBlackBoxSimMem ++
-  new chipyard.iobinders.WithTraceGenSuccessBinder ++
+  new chipyard.harness.WithBlackBoxSimMem ++
+  new chipyard.harness.WithTraceGenSuccess ++
+  new chipyard.iobinders.WithAXI4MemPunchthrough ++
+  new chipyard.iobinders.WithTraceGenSuccessPunchthrough ++
   new chipyard.config.WithTracegenSystem ++
   new chipyard.config.WithNoSubsystemDrivenClocks ++
   new tracegen.WithTraceGen()(List.fill(2) { DCacheParams(nMSHRs = 2, nSets = 16, nWays = 2) }) ++
@@ -22,8 +26,10 @@ class NonBlockingTraceGenConfig extends Config(
   new freechips.rocketchip.groundtest.GroundTestBaseConfig)
 
 class BoomTraceGenConfig extends Config(
-  new chipyard.iobinders.WithBlackBoxSimMem ++
-  new chipyard.iobinders.WithTraceGenSuccessBinder ++
+  new chipyard.harness.WithBlackBoxSimMem ++
+  new chipyard.harness.WithTraceGenSuccess ++
+  new chipyard.iobinders.WithAXI4MemPunchthrough ++
+  new chipyard.iobinders.WithTraceGenSuccessPunchthrough ++
   new chipyard.config.WithTracegenSystem ++
   new chipyard.config.WithNoSubsystemDrivenClocks ++
   new tracegen.WithBoomTraceGen()(List.fill(2) { DCacheParams(nMSHRs = 8, nSets = 16, nWays = 2) }) ++
@@ -32,8 +38,10 @@ class BoomTraceGenConfig extends Config(
   new freechips.rocketchip.groundtest.GroundTestBaseConfig)
 
 class NonBlockingTraceGenL2Config extends Config(
-  new chipyard.iobinders.WithBlackBoxSimMem ++
-  new chipyard.iobinders.WithTraceGenSuccessBinder ++
+  new chipyard.harness.WithBlackBoxSimMem ++
+  new chipyard.harness.WithTraceGenSuccess ++
+  new chipyard.iobinders.WithAXI4MemPunchthrough ++
+  new chipyard.iobinders.WithTraceGenSuccessPunchthrough ++
   new chipyard.config.WithTracegenSystem ++
   new chipyard.config.WithNoSubsystemDrivenClocks ++
   new tracegen.WithL2TraceGen()(List.fill(2)(DCacheParams(nMSHRs = 2, nSets = 16, nWays = 4))) ++
@@ -42,8 +50,10 @@ class NonBlockingTraceGenL2Config extends Config(
   new freechips.rocketchip.groundtest.GroundTestBaseConfig)
 
 class NonBlockingTraceGenL2RingConfig extends Config(
-  new chipyard.iobinders.WithBlackBoxSimMem ++
-  new chipyard.iobinders.WithTraceGenSuccessBinder ++
+  new chipyard.harness.WithBlackBoxSimMem ++
+  new chipyard.harness.WithTraceGenSuccess ++
+  new chipyard.iobinders.WithAXI4MemPunchthrough ++
+  new chipyard.iobinders.WithTraceGenSuccessPunchthrough ++
   new chipyard.config.WithTracegenSystem ++
   new chipyard.config.WithNoSubsystemDrivenClocks ++
   new tracegen.WithL2TraceGen()(List.fill(2)(DCacheParams(nMSHRs = 2, nSets = 16, nWays = 4))) ++

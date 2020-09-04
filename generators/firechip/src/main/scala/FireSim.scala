@@ -13,8 +13,9 @@ import freechips.rocketchip.util.{ResetCatchAndSync}
 
 import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge, RationalClock}
 
-import chipyard.{BuildSystem, BuildTop, HasHarnessSignalReferences, ChipyardSubsystem, ClockingSchemeKey, ChipTop}
-import chipyard.iobinders.{IOBinders}
+import chipyard._
+import chipyard.harness._
+import chipyard.iobinders._
 
 // Determines the number of times to instantiate the DUT in the harness.
 // Subsumes legacy supernode support
@@ -50,7 +51,7 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
     chiptop.implicitClockSinkNode := implicitClockSourceNode
 
     // Drive the diplomaticclock graph of the DigitalTop (if present)
-    val simpleClockGroupSourceNode = chiptop.lSystem match {
+    val simpleClockGroupSourceNode = chiptop.lazySystem match {
       case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) => {
         val n = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
         l.asyncClockGroupsNode := n
@@ -93,7 +94,7 @@ class WithFireSimRationalTileDomain(multiplier: Int, divisor: Int) extends Confi
     chiptop.implicitClockSinkNode := implicitClockSourceNode
 
     // Drive the diplomaticclock graph of the DigitalTop (if present)
-    val simpleClockGroupSourceNode = chiptop.lSystem match {
+    val simpleClockGroupSourceNode = chiptop.lazySystem match {
       case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) => {
         val n = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
         l.asyncClockGroupsNode := n
@@ -159,8 +160,13 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSigna
       case AsyncClockGroupsKey => p(AsyncClockGroupsKey).copy
     })))
     val module = Module(lazyModule.module)
-    require(lazyModule.harnessFunctions.size == 1, "There should only be 1 harness function to connect clock+reset")
-    lazyModule.harnessFunctions.foreach(_(this))
+    lazyModule match { case d: HasTestHarnessFunctions =>
+      require(d.harnessFunctions.size == 1, "There should only be 1 harness function to connect clock+reset")
+      d.harnessFunctions.foreach(_(this))
+      ApplyHarnessBinders(this, d.lazySystem, p(HarnessBinders), d.portMap.toMap)
+    }
+    
+
     NodeIdx.increment()
   }
 }

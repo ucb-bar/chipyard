@@ -25,7 +25,7 @@ class GemminiRocketConfig extends Config(
 
 // DOC include start: DmiRocket
 class dmiRocketConfig extends Config(
-  new chipyard.iobinders.WithTiedOffSerial ++          // don't use serial to drive the chip, since we use DMI instead
+  new chipyard.harness.WithTiedOffSerial ++          // don't use serial to drive the chip, since we use DMI instead
   new chipyard.config.WithDMIDTM ++                    // have debug module expose a clocked DMI port
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
@@ -46,37 +46,36 @@ class GCDAXI4BlackBoxRocketConfig extends Config(
 // DOC include end: GCDAXI4BlackBoxRocketConfig
 
 class LargeSPIFlashROMRocketConfig extends Config(
-  new chipyard.iobinders.WithSimSPIFlashModel(true) ++      // add the SPI flash model in the harness (read-only)
+  new chipyard.harness.WithSimSPIFlashModel(true) ++      // add the SPI flash model in the harness (read-only)
   new chipyard.config.WithSPIFlash ++                       // add the SPI flash controller
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class SmallSPIFlashRocketConfig extends Config(
-  new chipyard.iobinders.WithSimSPIFlashModel(false) ++     // add the SPI flash model in the harness (writeable)
+  new chipyard.harness.WithSimSPIFlashModel(false) ++     // add the SPI flash model in the harness (writeable)
   new chipyard.config.WithSPIFlash(0x100000) ++             // add the SPI flash controller (1 MiB)
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class SimAXIRocketConfig extends Config(
-  new chipyard.iobinders.WithSimAXIMem ++                   // drive the master AXI4 memory with a SimAXIMem, a 1-cycle magic memory, instead of default SimDRAM
+  new chipyard.harness.WithSimAXIMem ++                   // drive the master AXI4 memory with a SimAXIMem, a 1-cycle magic memory, instead of default SimDRAM
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class SimBlockDeviceRocketConfig extends Config(
-  new chipyard.iobinders.WithSimBlockDevice ++             // drive block-device IOs with SimBlockDevice
+  new chipyard.harness.WithSimBlockDevice ++             // drive block-device IOs with SimBlockDevice
   new testchipip.WithBlockDevice ++                        // add block-device module to peripherybus
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class BlockDeviceModelRocketConfig extends Config(
-  new chipyard.iobinders.WithBlockDeviceModel ++           // drive block-device IOs with a BlockDeviceModel
+  new chipyard.harness.WithBlockDeviceModel ++           // drive block-device IOs with a BlockDeviceModel
   new testchipip.WithBlockDevice ++                        // add block-device module to periphery bus
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 // DOC include start: GPIORocketConfig
 class GPIORocketConfig extends Config(
-  new chipyard.iobinders.WithGPIOTiedOff ++                // tie off GPIO inputs into the top
   new chipyard.config.WithGPIO ++                          // add GPIOs to the peripherybus
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
@@ -111,7 +110,7 @@ class InitZeroRocketConfig extends Config(
 // DOC include end: InitZeroRocketConfig
 
 class LoopbackNICRocketConfig extends Config(
-  new chipyard.iobinders.WithLoopbackNIC ++                        // drive NIC IOs with loopback
+  new chipyard.harness.WithLoopbackNIC ++                        // drive NIC IOs with loopback
   new icenet.WithIceNIC ++                                         // add an IceNIC
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
@@ -170,8 +169,6 @@ class LargeNVDLARocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class MMIORocketConfig extends Config(
-  new chipyard.iobinders.WithTieOffL2FBusAXI ++ // Tie-off the incoming MMIO port
-  new chipyard.iobinders.WithSimAXIMMIO ++ // Attach a simulated memory to the outwards MMIO port
   new freechips.rocketchip.subsystem.WithDefaultMMIOPort ++ // add default external master port
   new freechips.rocketchip.subsystem.WithDefaultSlavePort ++ // add default external slave port
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++

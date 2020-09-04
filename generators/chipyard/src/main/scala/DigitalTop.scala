@@ -33,7 +33,6 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
 class DigitalTopModule[+L <: DigitalTop](l: L) extends ChipyardSystemModule(l)
   with testchipip.CanHaveTraceIOModuleImp
   with testchipip.CanHavePeripheryBlockDeviceModuleImp
-  with testchipip.CanHavePeripherySerialModuleImp
   with sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
   with sifive.blocks.devices.gpio.HasPeripheryGPIOModuleImp
   with sifive.blocks.devices.spi.HasPeripherySPIFlashModuleImp

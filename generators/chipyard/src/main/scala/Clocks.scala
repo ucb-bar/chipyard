@@ -91,7 +91,7 @@ object ClockingSchemeGenerators {
     chiptop.implicitClockSinkNode := implicitClockSourceNode
 
     // Drive the diplomaticclock graph of the DigitalTop (if present)
-    val simpleClockGroupSourceNode = chiptop.lSystem match {
+    val simpleClockGroupSourceNode = chiptop.lazySystem match {
       case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) => {
         val n = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
         l.asyncClockGroupsNode := n
@@ -120,6 +120,7 @@ object ClockingSchemeGenerators {
         }
       }}
 
+
       chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
         clock_io := th.harnessClock
         Nil
@@ -137,7 +138,7 @@ object ClockingSchemeGenerators {
     val implicitClockSourceNode = ClockSourceNode(Seq(ClockSourceParameters()))
     chiptop.implicitClockSinkNode := implicitClockSourceNode
 
-    val simpleClockGroupSourceNode = chiptop.lSystem match {
+    val simpleClockGroupSourceNode = chiptop.lazySystem match {
       case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) => {
         val n = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
         l.asyncClockGroupsNode := n

@@ -9,7 +9,7 @@ import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGr
 import freechips.rocketchip.config.{Parameters, Field}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, LazyRawModuleImp, LazyModuleImpLike}
 import freechips.rocketchip.util.{ResetCatchAndSync}
-import chipyard.iobinders.{IOBinders, TestHarnessFunction, IOBinderTuple}
+import chipyard.iobinders._
 
 import barstools.iocell.chisel._
 
@@ -26,11 +26,9 @@ case object BuildSystem extends Field[Parameters => LazyModule]((p: Parameters) 
 class ChipTop(implicit p: Parameters) extends LazyModule with HasTestHarnessFunctions {
   // A publicly accessible list of IO cells (useful for a floorplanning tool, for example)
   val iocells = ArrayBuffer.empty[IOCell]
-  // A list of functions to call in the test harness
-  val harnessFunctions = ArrayBuffer.empty[TestHarnessFunction]
 
   // The system module specified by BuildSystem
-  val lSystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
+  val lazySystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
 
   // The implicitClockSinkNode provides the implicit clock and reset for the System
   val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters()))
@@ -50,15 +48,13 @@ class ChipTop(implicit p: Parameters) extends LazyModule with HasTestHarnessFunc
 
     // The implicit clock and reset for the system is also, by convention, used for all the IOBinders
     // TODO: This may not be the right thing to do in all cases
-    withClockAndReset(implicit_clock, implicit_reset) {
-      val (_ports, _iocells, _harnessFunctions) = p(IOBinders).values.flatMap(f => f(lSystem) ++ f(lSystem.module)).unzip3
-      // We ignore _ports for now...
-      iocells ++= _iocells.flatten
-      harnessFunctions ++= _harnessFunctions.flatten
-    }
+    val (_ports, _iocells, _portMap) = ApplyIOBinders(lazySystem, p(IOBinders))
+    // We ignore _ports for now...
+    iocells ++= _iocells
+    portMap ++= _portMap
 
     // Connect the implicit clock/reset, if present
-    lSystem.module match { case l: LazyModuleImp => {
+    lazySystem.module match { case l: LazyModuleImp => {
       l.clock := implicit_clock
       l.reset := implicit_reset
     }}
