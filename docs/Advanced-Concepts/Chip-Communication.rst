@@ -130,7 +130,8 @@ Using the JTAG Interface
 ------------------------
 
 The main way to use JTAG with a Rocket Chip based system is to instantiate the Debug Transfer Module (DTM)
-and configure it to use a JTAG interface. The default Chipyard designs configure the DTM to use JTAG. you may attach OpenOCD and GDB to any of the default JTAG-enabled designs.
+and configure it to use a JTAG interface. The default Chipyard designs instantiate the DTM and configure it
+to use JTAG. You may attach OpenOCD and GDB to any of the default JTAG-enabled designs.
 
 Debugging with JTAG
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

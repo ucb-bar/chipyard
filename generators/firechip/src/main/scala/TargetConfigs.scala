@@ -88,7 +88,9 @@ class WithFireSimConfigTweaks extends Config(
   // Optional: Removing this will require using an initramfs under linux
   new testchipip.WithBlockDevice ++
   // Required*: Scale default baud rate with periphery bus frequency
-  new chipyard.config.WithUART(BigInt(3686400L))
+  new chipyard.config.WithUART(BigInt(3686400L)) ++
+  // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
+  new chipyard.config.WithNoDebug
 )
 
 /*******************************************************************************
