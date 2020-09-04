@@ -1,12 +1,17 @@
 # RISCV environment variable must be set
+# needs the following variables
+# LONG_NAME
+# BUILD_DIR
+# ROCKETCHIP_DIR
+# ROMCONF
 
 CC=$(RISCV)/bin/riscv64-unknown-elf-gcc
 OBJCOPY=$(RISCV)/bin/riscv64-unknown-elf-objcopy
 CFLAGS=-march=rv32imac -mabi=ilp32 -O2 -std=gnu11 -Wall -I. -nostartfiles -fno-common -g
 LFLAGS=-static -nostdlib
 
-dtb := $(BUILD_DIR)/$(CONFIG_PROJECT).$(CONFIG).dtb
-$(dtb): $(BUILD_DIR)/$(CONFIG_PROJECT).$(CONFIG).dts
+dtb := $(BUILD_DIR)/$(LONG_NAME).dtb
+$(dtb): $(BUILD_DIR)/$(LONG_NAME).dts
 	dtc -I dts -O dtb -o $@ $<
 
 .PHONY: dtb
@@ -35,11 +40,11 @@ hex: $(hex)
 
 romgen := $(BUILD_DIR)/rom.v
 $(romgen): $(hex)
-	$(rocketchip_dir)/scripts/vlsi_rom_gen $(ROMCONF) $< > $@
+	$(ROCKETCHIP_DIR)/scripts/vlsi_rom_gen $(ROMCONF) $< > $@
 
 .PHONY: romgen
 romgen: $(romgen)
 
 .PHONY: clean
 clean::
-	rm -rf $(hex) $(elf) 
+	rm -rf $(hex) $(elf)

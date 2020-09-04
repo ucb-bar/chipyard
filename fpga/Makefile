@@ -8,27 +8,35 @@
 base_dir=$(abspath ..)
 sim_dir=$(abspath .)
 
+# do not generate simulation files
+sim_name := none
+
 #########################################################################################
 # include shared variables
 #########################################################################################
 include $(base_dir)/variables.mk
 
-export SUB_PROJECT=fpga
-export SBT_PROJECT=freedomPlatforms
-export MODEL=E300ArtyDevKitFPGAChip
-export VLOG_MODEL=E300ArtyDevKitFPGAChip
-export MODEL_PACKAGE=sifive.freedom.everywhere.e300artydevkit
-export CONFIG=E300ArtyDevKitConfig
-export CONFIG_PACKAGE=sifive.freedom.everywhere.e300artydevkit
-export GENERATOR_PACKAGE=chipyard
-export TB=none
-export TOP=E300ArtyDevKitPlatform
-export BOARD=arty
+# default variables to build the arty example
+SUB_PROJECT       := fpga
+SBT_PROJECT       := freedomPlatforms
+MODEL             := E300ArtyDevKitFPGAChip
+VLOG_MODEL        := E300ArtyDevKitFPGAChip
+MODEL_PACKAGE     := sifive.freedom.everywhere.e300artydevkit
+CONFIG            := E300ArtyDevKitConfig
+CONFIG_PACKAGE    := sifive.freedom.everywhere.e300artydevkit
+GENERATOR_PACKAGE := chipyard
+TB                := none # unused
+TOP               := E300ArtyDevKitPlatform
 
-export bootrom_dir := $(base_dir)/fpga/bootrom/xip
-fpga_dir=$(base_dir)/fpga/fpga-shells/xilinx
+# setup the board to use
+BOARD ?= arty
 
-sim_name = verilator # unused
+#########################################################################################
+# misc. directories
+#########################################################################################
+bootrom_dir := $(base_dir)/fpga/bootrom/xip
+fpga_common_script_dir := $(FPGA_DIR)/common/tcl
+fpga_dir := $(base_dir)/fpga/fpga-shells/xilinx
 
 #########################################################################################
 # import other necessary rules and variables
@@ -38,8 +46,23 @@ include $(base_dir)/common.mk
 #########################################################################################
 # copy from other directory
 #########################################################################################
-romgen := $(build_dir)/$(CONFIG_PROJECT).$(CONFIG).rom.v
-$(romgen): $(verilog)
+all_vsrcs := \
+	$(sim_vsrcs) \
+	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v \
+	$(fpga_dir)/common/vsrc/PowerOnResetFPGAOnly.v \
+	$(build_dir)/$(long_name).rom.v
+
+#########################################################################################
+# build rom for the fpga
+#########################################################################################
+# needed for bootrom makefile
+export BUILD_DIR=$(build_dir)
+export ROCKETCHIP_DIR
+export LONG_NAME=$(long_name)
+export ROMCONF=$(build_dir)/$(long_name).rom.conf
+
+romgen := $(build_dir)/$(long_name).rom.v
+$(romgen): $(sim_vsrcs)
 ifneq ($(bootrom_dir),"")
 	$(MAKE) -C $(bootrom_dir) romgen
 	mv $(build_dir)/rom.v $@
@@ -48,9 +71,14 @@ endif
 .PHONY: romgen
 romgen: $(romgen)
 
-f := $(build_dir)/$(CONFIG_PROJECT).$(CONFIG).vsrcs.F
-$(f):
-	echo $(VSRCS) > $@
+#########################################################################################
+# vivado rules
+#########################################################################################
+# combine all sources into single .F
+f := $(build_dir)/$(long_name).vsrcs.F
+$(f): $(sim_common_files) $(all_vsrcs)
+	$(foreach file,$(all_vsrcs),echo "$(file)" >> $@;)
+	cat $(sim_common_files) >> $@
 
 bit := $(build_dir)/obj/$(MODEL).bit
 $(bit): $(romgen) $(f)
@@ -63,6 +91,8 @@ $(bit): $(romgen) $(f)
 		-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
 		-board "$(BOARD)"
 
+.PHONY: bit
+bit: $(bit)
 
 # Build .mcs
 mcs := $(build_dir)/obj/$(MODEL).mcs
@@ -72,6 +102,9 @@ $(mcs): $(bit)
 .PHONY: mcs
 mcs: $(mcs)
 
+#########################################################################################
+# mircosemi rules
+#########################################################################################
 # Build Libero project
 prjx := $(build_dir)/libero/$(MODEL).prjx
 $(prjx): $(verilog)
@@ -79,7 +112,6 @@ $(prjx): $(verilog)
 
 .PHONY: prjx
 prjx: $(prjx)
-
 
 #########################################################################################
 # general cleanup rules
@@ -90,4 +122,3 @@ clean:
 ifneq ($(bootrom_dir),"")
 	$(MAKE) -C $(bootrom_dir) clean
 endif
-	$(MAKE) -C $(FPGA_DIR) clean
