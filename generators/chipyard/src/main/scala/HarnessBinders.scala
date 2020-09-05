@@ -66,12 +66,14 @@ class WithGPIOTiedOff extends OverrideHarnessBinder({
   }
 })
 
+// DOC include start: WithUARTAdapter
 class WithUARTAdapter extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
     UARTAdapter.connect(ports.map(_.asInstanceOf[UARTPortIO]))(system.p)
     Nil
   }
 })
+// DOC include end: WithUARTAdapter
 
 class WithSimSPIFlashModel(rdOnly: Boolean = true) extends OverrideHarnessBinder({
   (system: HasPeripherySPIFlashModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {

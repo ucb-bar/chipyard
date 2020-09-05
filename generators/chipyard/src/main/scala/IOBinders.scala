@@ -40,13 +40,6 @@ import scala.reflect.{ClassTag}
 
 // You can add your own binder by adding a new (key, fn) pair, typically by using
 // the OverrideIOBinder or ComposeIOBinder macros
-
-
-// DOC include start: IOBinders
-// This type describes a function callable on the TestHarness instance. Its return type is unused.
-
-
-
 case object IOBinders extends Field[Map[String, (Any) => (Seq[Data], Seq[IOCell])]](
   Map[String, (Any) => (Seq[Data], Seq[IOCell])]().withDefaultValue((Any) => (Nil, Nil))
 )
@@ -58,7 +51,6 @@ object ApplyIOBinders {
     (r.flatMap(_._1._1), r.flatMap(_._1._2), r.map { t => t._2 -> t._1._1 })
   }
 }
-
 
 // Note: The parameters instance is accessible only through LazyModule
 // or LazyModuleImpLike. The self-type requirement in traits like
@@ -116,8 +108,6 @@ object BoreHelper {
   }
 }
 
-// DOC include end: IOBinders
-
 
 case object IOCellKey extends Field[IOCellTypeParams](GenericIOCellParams())
 
@@ -140,7 +130,7 @@ class WithGPIOCells extends OverrideIOBinder({
   }
 })
 
-
+// DOC include start: WithUARTIOCells
 class WithUARTIOCells extends OverrideIOBinder({
   (system: HasPeripheryUARTModuleImp) => {
     val (ports, cells2d) = system.uart.zipWithIndex.map({ case (u, i) =>
@@ -151,6 +141,7 @@ class WithUARTIOCells extends OverrideIOBinder({
     (ports, cells2d.flatten)
   }
 })
+// DOC include end: WithUARTIOCells
 
 class WithSPIIOCells extends OverrideIOBinder({
   (system: HasPeripherySPIFlashModuleImp) => {
