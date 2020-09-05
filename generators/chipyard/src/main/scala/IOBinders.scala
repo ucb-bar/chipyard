@@ -270,8 +270,8 @@ class WithAXI4MemPunchthrough extends OverrideIOBinder({
     } else {
       None
     }
-    val ports = system.mem_axi4.map({ m =>
-      val p = IO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m)).suggestName("axi4_mem")
+    val ports = system.mem_axi4.zipWithIndex.map({ case (m, i) =>
+      val p = IO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m)).suggestName(s"axi4_mem_${i}")
       p <> m
       p
     })
@@ -286,8 +286,8 @@ class WithAXI4MMIOPunchthrough extends OverrideIOBinder({
     } else {
       None
     }
-    val ports = system.mmio_axi4.map({ m =>
-      val p = IO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m)).suggestName("axi4_mmio")
+    val ports = system.mmio_axi4.zipWithIndex.map({ case (m, i) =>
+      val p = IO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m)).suggestName(s"axi4_mmio_${i}")
       p <> m
       p
     })
@@ -297,11 +297,11 @@ class WithAXI4MMIOPunchthrough extends OverrideIOBinder({
 
 class WithL2FBusAXI4Punchthrough extends OverrideIOBinder({
   (system: CanHaveSlaveAXI4Port) => {
-    val port = system.l2_frontend_bus_axi4.map { m =>
-      val p = IO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m)).suggestName("axi4_fbus")
-      p <> m
+    val port = system.l2_frontend_bus_axi4.zipWithIndex.map({ case (m, i) =>
+      val p = IO(Flipped(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_fbus_${i}")
+      m <> p
       p
-    }
+    })
     (port, Nil)
   }
 })

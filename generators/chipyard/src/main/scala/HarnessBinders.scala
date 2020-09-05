@@ -240,7 +240,10 @@ class WithTiedOffDebug extends OverrideHarnessBinder({
 
 class WithTiedOffSerial extends OverrideHarnessBinder({
   (system: CanHavePeripherySerial, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    ports.map { case p: SerialIO => SerialAdapter.tieoff(Some(p)) }
+    ports.map {
+      case p: SerialIO => SerialAdapter.tieoff(Some(p))
+      case _ =>
+    }
     Nil
   }
 })
