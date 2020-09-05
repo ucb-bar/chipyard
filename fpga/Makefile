@@ -31,6 +31,9 @@ TOP               := E300ArtyDevKitPlatform
 # setup the board to use
 BOARD ?= arty
 
+.PHONY: default
+default: $(mcs)
+
 #########################################################################################
 # misc. directories
 #########################################################################################
@@ -53,44 +56,33 @@ all_vsrcs := \
 #########################################################################################
 # vivado rules
 #########################################################################################
-# combine all sources into single .F
-f := $(build_dir)/$(long_name).vsrcs.F
-$(f): $(sim_common_files) $(all_vsrcs)
+# combine all sources into single .f
+synth_list_f := $(build_dir)/$(long_name).vsrcs.f
+$(synth_list_f): $(sim_common_files) $(all_vsrcs)
 	$(foreach file,$(all_vsrcs),echo "$(file)" >> $@;)
 	cat $(sim_common_files) >> $@
 
-bit := $(build_dir)/obj/$(MODEL).bit
-$(bit): $(romgen) $(f)
+BIT_FILE := $(build_dir)/obj/$(MODEL).bit
+$(BIT_FILE): $(synth_list_f)
 	cd $(build_dir); vivado \
 		-nojournal -mode batch \
 		-source $(fpga_common_script_dir)/vivado.tcl \
 		-tclargs \
 		-top-module "$(MODEL)" \
-		-F "$(f)" \
+		-F "$(synth_list_f)" \
 		-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
 		-board "$(BOARD)"
 
 .PHONY: bit
-bit: $(bit)
+bit: $(BIT_FILE)
 
 # Build .mcs
-mcs := $(build_dir)/obj/$(MODEL).mcs
-$(mcs): $(bit)
+MCS_FILE := $(build_dir)/obj/$(MODEL).mcs
+$(MCS_FILE): $(BIT_FILE)
 	cd $(build_dir); vivado -nojournal -mode batch -source $(fpga_common_script_dir)/write_cfgmem.tcl -tclargs $(BOARD) $@ $<
 
 .PHONY: mcs
-mcs: $(mcs)
-
-#########################################################################################
-# mircosemi rules
-#########################################################################################
-# Build Libero project
-prjx := $(build_dir)/libero/$(MODEL).prjx
-$(prjx): $(verilog)
-	cd $(build_dir); libero SCRIPT:$(fpga_common_script_dir)/libero.tcl SCRIPT_ARGS:"$(build_dir) $(MODEL) $(PROJECT) $(CONFIG) $(BOARD)"
-
-.PHONY: prjx
-prjx: $(prjx)
+mcs: $(MCS_FILE)
 
 #########################################################################################
 # general cleanup rules
