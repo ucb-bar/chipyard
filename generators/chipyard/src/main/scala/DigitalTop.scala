@@ -13,6 +13,10 @@ import freechips.rocketchip.devices.tilelink._
 
 // DOC include start: DigitalTop
 class DigitalTop(implicit p: Parameters) extends ChipyardSystem
+  with sifive.blocks.devices.mockaon.HasPeripheryMockAON
+  with sifive.blocks.devices.spi.HasPeripherySPI
+  with sifive.blocks.devices.pwm.HasPeripheryPWM
+  with sifive.blocks.devices.i2c.HasPeripheryI2C
   with testchipip.CanHaveTraceIO // Enables optionally adding trace IO
   with testchipip.CanHaveBackingScratchpad // Enables optionally adding a backing scratchpad
   with testchipip.CanHavePeripheryBlockDevice // Enables optionally adding the block device
@@ -31,6 +35,10 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
 }
 
 class DigitalTopModule[+L <: DigitalTop](l: L) extends ChipyardSystemModule(l)
+  with sifive.blocks.devices.mockaon.HasPeripheryMockAONModuleImp
+  with sifive.blocks.devices.spi.HasPeripherySPIModuleImp
+  with sifive.blocks.devices.pwm.HasPeripheryPWMModuleImp
+  with sifive.blocks.devices.i2c.HasPeripheryI2CModuleImp
   with testchipip.CanHaveTraceIOModuleImp
   with testchipip.CanHavePeripheryBlockDeviceModuleImp
   with testchipip.CanHavePeripherySerialModuleImp

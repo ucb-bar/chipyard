@@ -21,9 +21,9 @@ SUB_PROJECT       := fpga
 SBT_PROJECT       := freedomPlatforms
 MODEL             := E300ArtyDevKitFPGAChip
 VLOG_MODEL        := E300ArtyDevKitFPGAChip
-MODEL_PACKAGE     := sifive.freedom.everywhere.e300artydevkit
+MODEL_PACKAGE     := chipyard.fpga
 CONFIG            := E300ArtyDevKitConfig
-CONFIG_PACKAGE    := sifive.freedom.everywhere.e300artydevkit
+CONFIG_PACKAGE    := chipyard.fpga
 GENERATOR_PACKAGE := chipyard
 TB                := none # unused
 TOP               := E300ArtyDevKitPlatform
@@ -34,7 +34,6 @@ BOARD ?= arty
 #########################################################################################
 # misc. directories
 #########################################################################################
-bootrom_dir := $(base_dir)/fpga/bootrom/xip
 fpga_dir := $(base_dir)/fpga/fpga-shells/xilinx
 fpga_common_script_dir := $(fpga_dir)/common/tcl
 
@@ -49,27 +48,7 @@ include $(base_dir)/common.mk
 all_vsrcs := \
 	$(sim_vsrcs) \
 	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v \
-	$(fpga_dir)/common/vsrc/PowerOnResetFPGAOnly.v \
-	$(build_dir)/$(long_name).rom.v
-
-#########################################################################################
-# build rom for the fpga
-#########################################################################################
-# needed for bootrom makefile
-export BUILD_DIR=$(build_dir)
-export ROCKETCHIP_DIR
-export LONG_NAME=$(long_name)
-export ROMCONF=$(build_dir)/$(long_name).rom.conf
-
-romgen := $(build_dir)/$(long_name).rom.v
-$(romgen): $(sim_vsrcs)
-ifneq ($(bootrom_dir),"")
-	$(MAKE) -C $(bootrom_dir) romgen
-	mv $(build_dir)/rom.v $@
-endif
-
-.PHONY: romgen
-romgen: $(romgen)
+	$(fpga_dir)/common/vsrc/PowerOnResetFPGAOnly.v
 
 #########################################################################################
 # vivado rules
@@ -119,6 +98,3 @@ prjx: $(prjx)
 .PHONY: clean
 clean:
 	rm -rf $(gen_dir)
-ifneq ($(bootrom_dir),"")
-	$(MAKE) -C $(bootrom_dir) clean
-endif
