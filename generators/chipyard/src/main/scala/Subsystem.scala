@@ -31,7 +31,7 @@ trait CanHaveHTIF { this: BaseSubsystem =>
   // Advertise HTIF if system can communicate with fesvr
   if (this match {
     case _: CanHavePeripherySerial if p(SerialKey) => true
-    case _: HasPeripheryDebug if p(ExportDebug).protocols.nonEmpty => true
+    case _: HasPeripheryDebug if p(ExportDebug).dmi => true
     case _ => false
   }) {
     ResourceBinding {
