@@ -6,7 +6,7 @@ version: 2.1
 parameters:
     tools-cache-version:
         type: string
-        default: "v5"
+        default: "v6"
 
 # default execution env.s
 executors:
@@ -199,6 +199,11 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "chipyard-rocket"
+    prepare-chipyard-dmirocket:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-dmirocket"
     prepare-chipyard-sha3:
         executor: main-env
         steps:
@@ -225,11 +230,6 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "chipyard-boom"
-    prepare-rocketchip:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "rocketchip"
     prepare-chipyard-blkdev:
         executor: main-env
         steps:
@@ -297,6 +297,11 @@ jobs:
         steps:
             - run-tests:
                 project-key: "chipyard-rocket"
+    chipyard-dmirocket-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-dmirocket"
     chipyard-sha3-run-tests:
         executor: main-env
         steps:
@@ -323,11 +328,6 @@ jobs:
         steps:
             - run-tests:
                 project-key: "chipyard-boom"
-    rocketchip-run-tests:
-        executor: main-env
-        steps:
-            - run-tests:
-                project-key: "rocketchip"
     chipyard-hwacha-run-tests:
         executor: main-env
         steps:
@@ -451,6 +451,11 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
+            - prepare-chipyard-dmirocket:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
             - prepare-chipyard-sha3:
                 requires:
                     - install-riscv-toolchain
@@ -472,11 +477,6 @@ workflows:
                     - install-verilator
 
             - prepare-chipyard-boom:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
-            - prepare-rocketchip:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
@@ -547,6 +547,10 @@ workflows:
                 requires:
                     - prepare-chipyard-rocket
 
+            - chipyard-dmirocket-run-tests:
+                requires:
+                    - prepare-chipyard-dmirocket
+
             - chipyard-sha3-run-tests:
                 requires:
                     - prepare-chipyard-sha3
@@ -566,10 +570,6 @@ workflows:
             - chipyard-boom-run-tests:
                 requires:
                     - prepare-chipyard-boom
-
-            - rocketchip-run-tests:
-                requires:
-                    - prepare-rocketchip
 
             - chipyard-hwacha-run-tests:
                 requires:

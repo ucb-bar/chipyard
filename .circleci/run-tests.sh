@@ -32,6 +32,9 @@ case $1 in
     chipyard-rocket)
         run_bmark ${mapping[$1]}
         ;;
+    chipyard-dmirocket)
+        run_bmark ${mapping[$1]}
+        ;;
     chipyard-boom)
         run_bmark ${mapping[$1]}
         ;;

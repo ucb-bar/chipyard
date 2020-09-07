@@ -23,7 +23,7 @@ class TutorialStarterConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++       // Connect a SimUART adapter to display UART on stdout
   new chipyard.iobinders.WithBlackBoxSimMem ++    // Connect simulated external memory
   new chipyard.iobinders.WithTieOffInterrupts ++  // Do not simulate external interrupts
-  new chipyard.iobinders.WithTiedOffDebug ++      // Disconnect the debug module, since we use TSI for bring-up
+  new chipyard.iobinders.WithSimDebug ++          // Connect SimJTAG (or SimDTM) widgets to debug ios
   new chipyard.iobinders.WithSimSerial ++         // Connect external SimSerial widget to drive TSI
 
   // Config fragments below this line affect hardware generation
@@ -31,6 +31,7 @@ class TutorialStarterConfig extends Config(
   new testchipip.WithTSI ++                  // Add a TSI (Test Serial Interface)  widget to bring-up the core
   new chipyard.config.WithBootROM ++         // Use the Chipyard BootROM
   new chipyard.config.WithUART ++            // Add a UART
+  new chipyard.config.WithNoSubsystemDrivenClocks ++ // Don't drive the subsystem clocks from within the subsystem
 
   // CUSTOMIZE THE CORE
   // Uncomment out one (or multiple) of the lines below, and choose
@@ -42,13 +43,19 @@ class TutorialStarterConfig extends Config(
   // Uncomment this line, and specify a size if you want to have a L2
   // new freechips.rocketchip.subsystem.WithInclusiveCache(nBanks=1, nWays=4, capacityKB=128) ++
 
+  // Set the debug module to expose an external JTAG port
+  new freechips.rocketchip.subsystem.WithJtagDTM ++
+
   // For simpler designs, we want to minimize IOs on
   // our Top. These config fragments remove unnecessary
   // ports
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++  // hierarchical buses including mbus+l2
+
+  // Use the standard hierarchical bus topology including mbus+l2
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+
   // BaseConfig configures "bare" rocketchip system
   new freechips.rocketchip.system.BaseConfig
 )
@@ -59,12 +66,13 @@ class TutorialMMIOConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimDebug ++
   new chipyard.iobinders.WithSimSerial ++
 
   new testchipip.WithTSI ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSubsystemDrivenClocks ++
 
   // Attach either a TileLink or AXI4 version of GCD
   // Uncomment one of the below lines
@@ -74,6 +82,7 @@ class TutorialMMIOConfig extends Config(
   // For this demonstration we assume the base system is a single-core Rocket, for fast elaboration
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithJtagDTM ++
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
@@ -86,18 +95,20 @@ class TutorialSha3Config extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimDebug ++
   new chipyard.iobinders.WithSimSerial ++
 
   new testchipip.WithTSI ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSubsystemDrivenClocks ++
 
   // Uncomment this line once you added SHA3 to the build.sbt, and cloned the SHA3 repo
   // new sha3.WithSha3Accel ++
 
   // For this demonstration we assume the base system is a single-core Rocket, for fast elaboration
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithJtagDTM ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
@@ -111,12 +122,13 @@ class TutorialSha3BlackBoxConfig extends Config(
   new chipyard.iobinders.WithUARTAdapter ++
   new chipyard.iobinders.WithBlackBoxSimMem ++
   new chipyard.iobinders.WithTieOffInterrupts ++
-  new chipyard.iobinders.WithTiedOffDebug ++
+  new chipyard.iobinders.WithSimDebug ++
   new chipyard.iobinders.WithSimSerial ++
 
   new testchipip.WithTSI ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithUART ++
+  new chipyard.config.WithNoSubsystemDrivenClocks ++
 
   // Uncomment these lines once SHA3 is integrated
   // new sha3.WithSha3BlackBox ++ // Specify we want the Black-box verilog version of Sha3 Ctrl
@@ -124,6 +136,7 @@ class TutorialSha3BlackBoxConfig extends Config(
 
   // For this demonstration we assume the base system is a single-core Rocket, for fast elaboration
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithJtagDTM ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++

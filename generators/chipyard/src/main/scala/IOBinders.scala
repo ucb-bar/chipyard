@@ -2,11 +2,13 @@ package chipyard
 package object iobinders {
 
 import chisel3._
+import chisel3.util.experimental.{BoringUtils}
 import chisel3.experimental.{Analog, IO}
 
 import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
 import freechips.rocketchip.devices.debug._
+import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.{SimAXIMem}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
@@ -41,7 +43,7 @@ import scala.reflect.{ClassTag}
 
 // DOC include start: IOBinders
 // This type describes a function callable on the TestHarness instance. Its return type is unused.
-type TestHarnessFunction = (chipyard.TestHarness) => Seq[Any]
+type TestHarnessFunction = (chipyard.HasHarnessSignalReferences) => Seq[Any]
 // IOBinders will return a Seq of this tuple, which contains three fields:
 //  1. A Seq containing all IO ports created by the IOBinder function
 //  2. A Seq containing all IO cell modules created by the IOBinder function
@@ -163,30 +165,62 @@ object AddIOCells {
   }
 
   /**
-   * Add IO cells to a debug module and name the IO ports.
-   * @param psd A PSDIO bundle
-   * @param resetctrlOpt An optional ResetCtrlIO bundle
-   * @param debugOpt An optional DebugIO bundle
-   * @return Returns a tuple3 of (Top-level PSDIO IO; Optional top-level DebugIO IO; a list of IOCell module references)
+   * Add IO cells to a debug module and name the IO ports, for debug IO which must go off-chip
+   * For on-chip debug IO, drive them appropriately
+   * Mostly copied from rocket-chip/src/main/scala/devices/debug/Periphery.scala
+   * @param system A BaseSubsystem that might have a debug module
+   * @return Returns a tuple2 of (Generated debug io ports, Generated IOCells)
    */
-  def debug(psd: PSDIO, resetctrlOpt: Option[ResetCtrlIO], debugOpt: Option[DebugIO])(implicit p: Parameters):
-      (PSDIO, Option[ResetCtrlIO], Option[DebugIO], Seq[IOCell]) = {
-    val (psdPort, psdIOs) = IOCell.generateIOFromSignal(
-      psd, Some("iocell_psd"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
-    val debugTuple = debugOpt.map(d =>
-      IOCell.generateIOFromSignal(d, Some("iocell_debug"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync))
-    val debugPortOpt: Option[DebugIO] = debugTuple.map(_._1)
-    val debugIOs: Seq[IOCell] = debugTuple.map(_._2).toSeq.flatten
-    debugPortOpt.foreach(_.suggestName("debug"))
+  def debug(system: HasPeripheryDebugModuleImp)(implicit p: Parameters): (Seq[Bundle], Seq[IOCell]) = {
+    system.debug.map { debug =>
+      val tlbus = system.outer.asInstanceOf[BaseSubsystem].locateTLBusWrapper(p(ExportDebug).slaveWhere)
+      val debug_clock = Wire(Clock()).suggestName("debug_clock")
+      val debug_reset = Wire(Reset()).suggestName("debug_reset")
+      debug_clock := false.B.asClock // must provide default assignment to avoid firrtl unassigned error
+      debug_reset := false.B // must provide default assignment to avoid firrtl unassigned error
+      BoringUtils.bore(tlbus.module.clock, Seq(debug_clock))
+      BoringUtils.bore(tlbus.module.reset, Seq(debug_reset))
 
-    val resetctrlTuple = resetctrlOpt.map(d =>
-      IOCell.generateIOFromSignal(d, Some("iocell_resetctrl"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync))
-    val resetctrlPortOpt: Option[ResetCtrlIO] = resetctrlTuple.map(_._1)
-    val resetctrlIOs: Seq[IOCell] = resetctrlTuple.map(_._2).toSeq.flatten
-    resetctrlPortOpt.foreach(_.suggestName("resetctrl"))
+      // We never use the PSDIO, so tie it off on-chip
+      system.psd.psd.foreach { _ <> 0.U.asTypeOf(new PSDTestMode) }
+      system.resetctrl.map { rcio => rcio.hartIsInReset.map { _ := debug_reset.asBool } }
+      system.debug.map { d =>
+        // Tie off extTrigger
+        d.extTrigger.foreach { t =>
+          t.in.req := false.B
+          t.out.ack := t.out.req
+        }
+        // Tie off disableDebug
+        d.disableDebug.foreach { d => d := false.B }
+        // Drive JTAG on-chip IOs
+        d.systemjtag.map { j =>
+          j.reset := debug_reset
+          j.mfr_id := system.p(JtagDTMKey).idcodeManufId.U(11.W)
+          j.part_number := system.p(JtagDTMKey).idcodePartNum.U(16.W)
+          j.version := system.p(JtagDTMKey).idcodeVersion.U(4.W)
+        }
+      }
+      Debug.connectDebugClockAndReset(Some(debug), debug_clock)(system.p)
 
-    psdPort.suggestName("psd")
-    (psdPort, resetctrlPortOpt, debugPortOpt, psdIOs ++ debugIOs ++ resetctrlIOs)
+      // Add IOCells for the DMI/JTAG/APB ports
+      val dmiTuple = debug.clockeddmi.map { d =>
+        IOCell.generateIOFromSignal(d, Some("iocell_dmi"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
+      }
+      dmiTuple.map(_._1).foreach(_.suggestName("dmi"))
+
+      val jtagTuple = debug.systemjtag.map { j =>
+        IOCell.generateIOFromSignal(j.jtag, Some("iocell_jtag"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
+      }
+      jtagTuple.map(_._1).foreach(_.suggestName("jtag"))
+
+      val apbTuple = debug.apb.map { a =>
+        IOCell.generateIOFromSignal(a, Some("iocell_apb"), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
+      }
+      apbTuple.map(_._1).foreach(_.suggestName("apb"))
+
+      val allTuples = (dmiTuple ++ jtagTuple ++ apbTuple).toSeq
+      (allTuples.map(_._1).toSeq, allTuples.flatMap(_._2).toSeq)
+    }.getOrElse((Nil, Nil))
   }
 
   /**
@@ -201,14 +235,14 @@ object AddIOCells {
   }
 
   def axi4(io: Seq[AXI4Bundle], node: AXI4SlaveNode, name: String): Seq[(AXI4Bundle, AXI4EdgeParameters, Seq[IOCell])] = {
-    io.zip(node.in).zipWithIndex.map{ case ((mem_axi4, (_, edge)), i) => {
+    io.zip(node.edges.in).zipWithIndex.map{ case ((mem_axi4, edge), i) => {
       val (port, ios) = IOCell.generateIOFromSignal(mem_axi4, Some(s"iocell_${name}_axi4_slave_${i}"))
       port.suggestName(s"${name}_axi4_slave_${i}")
       (port, edge, ios)
     }}
   }
   def axi4(io: Seq[AXI4Bundle], node: AXI4MasterNode, name: String): Seq[(AXI4Bundle, AXI4EdgeParameters, Seq[IOCell])] = {
-    io.zip(node.out).zipWithIndex.map{ case ((mem_axi4, (_, edge)), i) => {
+    io.zip(node.edges.out).zipWithIndex.map{ case ((mem_axi4, edge), i) => {
       //val (port, ios) = IOCell.generateIOFromSignal(mem_axi4, Some(s"iocell_${name}_axi4_master_${i}"))
       val port = IO(Flipped(AXI4Bundle(edge.bundle)))
       val ios = IOCell.generateFromSignal(mem_axi4, port, Some(s"iocell_${name}_axi4_master_${i}"))
@@ -228,7 +262,7 @@ object AddIOCells {
 class WithGPIOTiedOff extends OverrideIOBinder({
   (system: HasPeripheryGPIOModuleImp) => {
     val (ports2d, ioCells2d) = AddIOCells.gpio(system.gpio)
-    val harnessFn = (th: chipyard.TestHarness) => { ports2d.flatten.foreach(_ <> AnalogConst(0)); Nil }
+    val harnessFn = (th: HasHarnessSignalReferences) => { ports2d.flatten.foreach(_ <> AnalogConst(0)); Nil }
     Seq((ports2d.flatten, ioCells2d.flatten, Some(harnessFn)))
   }
 })
@@ -237,7 +271,7 @@ class WithGPIOTiedOff extends OverrideIOBinder({
 class WithUARTAdapter extends OverrideIOBinder({
   (system: HasPeripheryUARTModuleImp) => {
     val (ports, ioCells2d) = AddIOCells.uart(system.uart)
-    val harnessFn = (th: chipyard.TestHarness) => { UARTAdapter.connect(ports)(system.p); Nil }
+    val harnessFn = (th: HasHarnessSignalReferences) => { UARTAdapter.connect(ports)(system.p); Nil }
     Seq((ports, ioCells2d.flatten, Some(harnessFn)))
   }
 })
@@ -245,7 +279,7 @@ class WithUARTAdapter extends OverrideIOBinder({
 class WithSimSPIFlashModel(rdOnly: Boolean = true) extends OverrideIOBinder({
   (system: HasPeripherySPIFlashModuleImp) => {
     val (ports, ioCells2d) = AddIOCells.spi(system.qspi, "qspi")
-    val harnessFn = (th: chipyard.TestHarness) => { SimSPIFlashModel.connect(ports, th.reset, rdOnly)(system.p); Nil }
+    val harnessFn = (th: HasHarnessSignalReferences) => { SimSPIFlashModel.connect(ports, th.harnessReset, rdOnly)(system.p); Nil }
     Seq((ports, ioCells2d.flatten, Some(harnessFn)))
   }
 })
@@ -253,8 +287,9 @@ class WithSimSPIFlashModel(rdOnly: Boolean = true) extends OverrideIOBinder({
 class WithSimBlockDevice extends OverrideIOBinder({
   (system: CanHavePeripheryBlockDeviceModuleImp) => system.bdev.map { bdev =>
     val (port, ios) = AddIOCells.blockDev(bdev)
-    val harnessFn = (th: chipyard.TestHarness) => {
-      SimBlockDevice.connect(th.clock, th.reset.asBool, Some(port))(system.p)
+    val harnessFn = (th: HasHarnessSignalReferences) => {
+      // TODO: Using harness clock/reset will be incorrect when systemClock =/= harnessClock
+      SimBlockDevice.connect(th.harnessClock, th.harnessReset.asBool, Some(port))(system.p)
       Nil
     }
     Seq((Seq(port), ios, Some(harnessFn)))
@@ -264,7 +299,7 @@ class WithSimBlockDevice extends OverrideIOBinder({
 class WithBlockDeviceModel extends OverrideIOBinder({
   (system: CanHavePeripheryBlockDeviceModuleImp) => system.bdev.map { bdev =>
     val (port, ios) = AddIOCells.blockDev(bdev)
-    val harnessFn = (th: chipyard.TestHarness) => {
+    val harnessFn = (th: HasHarnessSignalReferences) => {
       BlockDeviceModel.connect(Some(port))(system.p)
       Nil
     }
@@ -287,7 +322,7 @@ class WithSimAXIMem extends OverrideIOBinder({
     val peiTuples = AddIOCells.axi4(system.mem_axi4, system.memAXI4Node, "mem")
     // TODO: we are inlining the connectMem method of SimAXIMem because
     //   it takes in a dut rather than seq of axi4 ports
-    val harnessFn = (th: chipyard.TestHarness) => {
+    val harnessFn = (th: HasHarnessSignalReferences) => {
       peiTuples.map { case (port, edge, ios) =>
         val mem = LazyModule(new SimAXIMem(edge, size = p(ExtMem).get.master.size))
         Module(mem.module).suggestName("mem")
@@ -304,14 +339,15 @@ class WithBlackBoxSimMem extends OverrideIOBinder({
   (system: CanHaveMasterAXI4MemPort) => {
     implicit val p: Parameters = GetSystemParameters(system)
     val peiTuples = AddIOCells.axi4(system.mem_axi4, system.memAXI4Node, "mem")
-    val harnessFn = (th: chipyard.TestHarness) => {
+    val harnessFn = (th: HasHarnessSignalReferences) => {
       peiTuples.map { case (port, edge, ios) =>
         val memSize = p(ExtMem).get.master.size
         val lineSize = p(CacheBlockBytes)
         val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
         mem.io.axi <> port
-        mem.io.clock := th.clock
-        mem.io.reset := th.reset
+        // TODO: Using harness clock/reset will be incorrect when systemClock =/= harnessClock
+        mem.io.clock := th.harnessClock
+        mem.io.reset := th.harnessReset
       }
       Nil
     }
@@ -323,7 +359,7 @@ class WithSimAXIMMIO extends OverrideIOBinder({
   (system: CanHaveMasterAXI4MMIOPort) => {
     implicit val p: Parameters = GetSystemParameters(system)
     val peiTuples = AddIOCells.axi4(system.mmio_axi4, system.mmioAXI4Node, "mmio_mem")
-    val harnessFn = (th: chipyard.TestHarness) => {
+    val harnessFn = (th: HasHarnessSignalReferences) => {
       peiTuples.zipWithIndex.map { case ((port, edge, ios), i) =>
         val mmio_mem = LazyModule(new SimAXIMem(edge, size = 4096))
         Module(mmio_mem.module).suggestName(s"mmio_mem_${i}")
@@ -343,7 +379,7 @@ class WithTieOffInterrupts extends OverrideIOBinder({
   (system: HasExtInterruptsModuleImp) => {
     val (port, ioCells) = IOCell.generateIOFromSignal(system.interrupts, Some("iocell_interrupts"))
     port.suggestName("interrupts")
-    val harnessFn = (th: chipyard.TestHarness) => { port := 0.U; Nil }
+    val harnessFn = (th: HasHarnessSignalReferences) => { port := 0.U; Nil }
     Seq((Seq(port), ioCells, Some(harnessFn)))
   }
 })
@@ -351,7 +387,7 @@ class WithTieOffInterrupts extends OverrideIOBinder({
 class WithTieOffL2FBusAXI extends OverrideIOBinder({
   (system: CanHaveSlaveAXI4Port) => {
     val peiTuples = AddIOCells.axi4(system.l2_frontend_bus_axi4, system.l2FrontendAXI4Node, "l2_fbus")
-    val harnessFn = (th: chipyard.TestHarness) => {
+    val harnessFn = (th: HasHarnessSignalReferences) => {
       peiTuples.zipWithIndex.map { case ((port, edge, ios), i) =>
         port := DontCare // tieoff doesn't completely tie-off, for some reason
         port.tieoff()
@@ -362,43 +398,60 @@ class WithTieOffL2FBusAXI extends OverrideIOBinder({
   }
 })
 
-class WithTiedOffDebug extends OverrideIOBinder({
+class WithSimDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
-    val (psdPort, resetctrlOpt, debugPortOpt, ioCells) =
-      AddIOCells.debug(system.psd, system.resetctrl, system.debug)(system.p)
-    val harnessFn = (th: chipyard.TestHarness) => {
-      Debug.tieoffDebug(debugPortOpt, resetctrlOpt, Some(psdPort))(system.p)
-      // tieoffDebug doesn't actually tie everything off :/
-      debugPortOpt.foreach { d =>
-        d.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare; cdmi.dmiClock := th.clock })
-        d.dmactiveAck := DontCare
-        d.clock := th.clock
+    val (ports, iocells) = AddIOCells.debug(system)(system.p)
+    val harnessFn = (th: HasHarnessSignalReferences) => {
+      val dtm_success = WireInit(false.B)
+      when (dtm_success) { th.success := true.B }
+      ports.map {
+        case d: ClockedDMIIO =>
+          val dtm = Module(new SimDTM()(system.p)).connect(th.harnessClock, th.harnessReset.asBool, d, dtm_success)
+        case j: JTAGIO =>
+          val jtag = Module(new SimJTAG(tickDelay=3)).connect(j, th.harnessClock, th.harnessReset.asBool, ~(th.harnessReset.asBool), dtm_success)
+        case _ =>
+          require(false, "We only support DMI or JTAG simulated debug connections")
       }
       Nil
     }
-    Seq((Seq(psdPort) ++ resetctrlOpt ++ debugPortOpt.toSeq, Nil, Some(harnessFn)))
+    Seq((ports, iocells, Some(harnessFn)))
   }
 })
 
-class WithSimDebug extends OverrideIOBinder({
+class WithTiedOffDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
-    val (psdPort, resetctrlPortOpt, debugPortOpt, ioCells) =
-      AddIOCells.debug(system.psd, system.resetctrl, system.debug)(system.p)
-    val harnessFn = (th: chipyard.TestHarness) => {
-      val dtm_success = Wire(Bool())
-      Debug.connectDebug(debugPortOpt, resetctrlPortOpt, psdPort, th.clock, th.harnessReset, dtm_success)(system.p)
-      when (dtm_success) { th.success := true.B }
-      th.dutReset := th.harnessReset | debugPortOpt.map { debug => AsyncResetReg(debug.ndreset).asBool }.getOrElse(false.B)
+    val (ports, iocells) = AddIOCells.debug(system)(system.p)
+    val harnessFn = (th: HasHarnessSignalReferences) => {
+      ports.map {
+        case d: ClockedDMIIO =>
+          d.dmi.req.valid := false.B
+          d.dmi.req.bits  := DontCare
+          d.dmi.resp.ready := true.B
+          d.dmiClock := false.B.asClock
+          d.dmiReset := true.B
+        case j: JTAGIO =>
+          j.TCK := true.B.asClock
+          j.TMS := true.B
+          j.TDI := true.B
+          j.TRSTn.foreach { r => r := true.B }
+        case a: ClockedAPBBundle =>
+          a.tieoff()
+          a.clock := false.B.asClock
+          a.reset := true.B.asAsyncReset
+          a.psel := false.B
+          a.penable := false.B
+        case _ => require(false)
+      }
       Nil
     }
-    Seq((Seq(psdPort) ++ debugPortOpt.toSeq, ioCells, Some(harnessFn)))
+    Seq((ports, iocells, Some(harnessFn)))
   }
 })
 
 class WithTiedOffSerial extends OverrideIOBinder({
   (system: CanHavePeripherySerialModuleImp) => system.serial.map({ serial =>
     val (port, ioCells) = AddIOCells.serial(serial)
-    val harnessFn = (th: chipyard.TestHarness) => {
+    val harnessFn = (th: HasHarnessSignalReferences) => {
       SerialAdapter.tieoff(port)
       Nil
     }
@@ -409,8 +462,8 @@ class WithTiedOffSerial extends OverrideIOBinder({
 class WithSimSerial extends OverrideIOBinder({
   (system: CanHavePeripherySerialModuleImp) => system.serial.map({ serial =>
     val (port, ioCells) = AddIOCells.serial(serial)
-    val harnessFn = (th: chipyard.TestHarness) => {
-      val ser_success = SerialAdapter.connectSimSerial(port, th.clock, th.harnessReset)
+    val harnessFn = (th: HasHarnessSignalReferences) => {
+      val ser_success = SerialAdapter.connectSimSerial(port, th.harnessClock, th.harnessReset)
       when (ser_success) { th.success := true.B }
       Nil
     }
@@ -422,7 +475,7 @@ class WithTraceGenSuccessBinder extends OverrideIOBinder({
   (system: TraceGenSystemModuleImp) => {
     val (successPort, ioCells) = IOCell.generateIOFromSignal(system.success, Some("iocell_success"))
     successPort.suggestName("success")
-    val harnessFn = (th: chipyard.TestHarness) => { when (successPort) { th.success := true.B }; Nil }
+    val harnessFn = (th: HasHarnessSignalReferences) => { when (successPort) { th.success := true.B }; Nil }
     Seq((Seq(successPort), ioCells, Some(harnessFn)))
   }
 })

@@ -40,8 +40,7 @@ For a proprietry VCS simulation, enter the ``sims/vcs`` directory
     # Enter VCS directory
     cd sims/vcs
 
-
-.. _sim-default:
+.. _sw-sim-help:
 
 Simulating The Default Example
 -------------------------------
@@ -81,6 +80,22 @@ For example:
 
 
 .. _sw-sim-custom:
+
+Makefile Variables and Commands
+-------------------------------
+You can get a list of useful Makefile variables and commands available from the Verilator or VCS directories. simply run ``make help``:
+
+.. code-block:: shell
+
+    # Enter Verilator directory
+    cd sims/verilator
+    make help
+
+    # Enter VCS directory
+    cd sims/vcs
+    make help
+
+.. _sim-default:
 
 Simulating A Custom Project
 -------------------------------
@@ -167,3 +182,18 @@ An open-source vcd-capable waveform viewer is `GTKWave <http://gtkwave.sourcefor
 For a VCS simulation, this will generate a vpd file (this is a proprietary waveform representation format used by Synopsys) that can be loaded to vpd-supported waveform viewers.
 If you have Synopsys licenses, we recommend using the DVE waveform viewer.
 
+.. _sw-sim-verilator-opts:
+
+Additional Verilator Options
+-------------------------------
+
+When building the verilator simulator there are some additional options:
+
+.. code-block:: shell
+
+   make VERILATOR_THREADS=8 NUMACTL=1
+
+The ``VERILATOR_THREADS=<num>`` option enables the compiled Verilator simulator to use ``<num>`` parallel threads.
+On a multi-socket machine, you will want to make sure all threads are on the same socket by using ``NUMACTL=1`` to enable ``numactl``.
+By enabling this, you will use Chipyard's ``numa_prefix`` wrapper, which is a simple wrapper around ``numactl`` that runs your verilated simulator like this: ``$(numa_prefix) ./simulator-<name> <simulator-args>``.
+Note that both these flags are mutually exclusive, you can use either independently (though it makes sense to use ``NUMACTL`` just with ``VERILATOR_THREADS=8`` during a Verilator simulation).

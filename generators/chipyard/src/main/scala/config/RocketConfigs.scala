@@ -23,18 +23,10 @@ class GemminiRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: GemminiRocketConfig
 
-// DOC include start: JtagRocket
-class jtagRocketConfig extends Config(
-  new chipyard.iobinders.WithSimDebug ++                   // add SimDebug, in addition to default SimSerial
-  new freechips.rocketchip.subsystem.WithJtagDTM ++        // sets DTM communication interface to JTAG
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-// DOC include end: JtagRocket
-
 // DOC include start: DmiRocket
 class dmiRocketConfig extends Config(
-  new chipyard.iobinders.WithTiedOffSerial ++          // tie-off serial, override default add SimSerial
-  new chipyard.iobinders.WithSimDebug ++               // add SimDebug, override default tie-off debug
+  new chipyard.iobinders.WithTiedOffSerial ++          // don't use serial to drive the chip, since we use DMI instead
+  new chipyard.config.WithDMIDTM ++                    // have debug module expose a clocked DMI port
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: DmiRocket
@@ -184,3 +176,13 @@ class MMIORocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithDefaultSlavePort ++ // add default external slave port
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
+
+// NOTE: This config doesn't work yet because SimWidgets in the TestHarness
+// always get the TestHarness clock. The Tiles and Uncore receive the correct clocks
+class DividedClockRocketConfig extends Config(
+  new chipyard.config.WithTileDividedClock ++                       // Put the Tile on its own clock domain
+  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+

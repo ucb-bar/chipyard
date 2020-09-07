@@ -130,38 +130,8 @@ Using the JTAG Interface
 ------------------------
 
 The main way to use JTAG with a Rocket Chip based system is to instantiate the Debug Transfer Module (DTM)
-and configure it to use a JTAG interface (by default the DTM is setup to use the DMI interface mentioned above).
-
-Creating a DTM+JTAG Config
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-First, a DTM config must be created for the system that you want to create.
-This step is similar to the DMI simulation section within the :ref:`Starting the TSI or DMI Simulation` section.
-The configuration is very similar to a DMI-based configuration. The main difference
-is the addition of the ``WithJtagDTM`` config fragment that configures the instantiated DTM to use the JTAG protocol as the
-bringup method.
-
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
-    :language: scala
-    :start-after: DOC include start: JtagRocket
-    :end-before: DOC include end: JtagRocket
-
-Building a DTM+JTAG Simulator
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-After creating the config, call the ``make`` command like the following to build a simulator for your RTL:
-
-.. code-block:: bash
-
-    cd sims/verilator
-    # or
-    cd sims/vcs
-
-    make CONFIG=jtagRocketConfig
-
-In this example, the simulation will use the config that you previously specified, as well as set
-the other parameters that are needed to satisfy the build system. After that point, you
-should have a JTAG enabled simulator that you can attach to using OpenOCD and GDB!
+and configure it to use a JTAG interface. The default Chipyard designs instantiate the DTM and configure it
+to use JTAG. You may attach OpenOCD and GDB to any of the default JTAG-enabled designs.
 
 Debugging with JTAG
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
