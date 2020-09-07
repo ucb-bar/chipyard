@@ -1,5 +1,5 @@
 // See LICENSE for license details.
-package chipyard.fpga
+package chipyard.fpga.arty
 
 import freechips.rocketchip.config._
 import freechips.rocketchip.subsystem._
@@ -47,6 +47,7 @@ class E300DevKitExtra extends Config((site, here, up) => {
 })
 
 class E300ArtyDevKitConfig extends Config(
+  new WithE300Connections ++
   new E300DevKitExtra ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithL2TLBs(1024) ++
