@@ -1,4 +1,4 @@
-package chipyard.fpga.arty
+package chipyard.fpga.arty.e300
 
 import chisel3._
 import chisel3.experimental.{attach, IO}

@@ -1,5 +1,5 @@
 // See LICENSE for license details.
-package chipyard.fpga.arty
+package chipyard.fpga.arty.e300
 
 import freechips.rocketchip.config._
 import freechips.rocketchip.subsystem._
@@ -15,6 +15,8 @@ import sifive.blocks.devices.pwm._
 import sifive.blocks.devices.spi._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.i2c._
+
+import chipyard.{BuildSystem}
 
 class E300DevKitExtra extends Config((site, here, up) => {
   case PeripheryGPIOKey => List(
@@ -46,7 +48,12 @@ class E300DevKitExtra extends Config((site, here, up) => {
     debugIdleCycles = 5)
 })
 
+class WithE300System extends Config((site, here, up) => {
+  case BuildSystem => (p: Parameters) => new E300DigitalTop()(p)
+})
+
 class E300ArtyDevKitConfig extends Config(
+  new WithE300System ++
   new WithE300Connections ++
   new E300DevKitExtra ++
   new chipyard.config.WithBootROM ++

@@ -13,10 +13,6 @@ import freechips.rocketchip.devices.tilelink._
 
 // DOC include start: DigitalTop
 class DigitalTop(implicit p: Parameters) extends ChipyardSystem
-  with sifive.blocks.devices.mockaon.HasPeripheryMockAON
-  with sifive.blocks.devices.spi.HasPeripherySPI
-  with sifive.blocks.devices.pwm.HasPeripheryPWM
-  with sifive.blocks.devices.i2c.HasPeripheryI2C
   with testchipip.CanHaveTraceIO // Enables optionally adding trace IO
   with testchipip.CanHaveBackingScratchpad // Enables optionally adding a backing scratchpad
   with testchipip.CanHavePeripheryBlockDevice // Enables optionally adding the block device
@@ -24,6 +20,9 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with sifive.blocks.devices.uart.HasPeripheryUART // Enables optionally adding the sifive UART
   with sifive.blocks.devices.gpio.HasPeripheryGPIO // Enables optionally adding the sifive GPIOs
   with sifive.blocks.devices.spi.HasPeripherySPIFlash // Enables optionally adding the sifive SPI flash controller
+  with sifive.blocks.devices.spi.HasPeripherySPI // Enables optionally adding the sifive SPI
+  with sifive.blocks.devices.pwm.HasPeripheryPWM // Enables optionally adding the sifive PWM
+  with sifive.blocks.devices.i2c.HasPeripheryI2C // Enables optionally adding the sifive I2C
   with icenet.CanHavePeripheryIceNIC // Enables optionally adding the IceNIC for FireSim
   with chipyard.example.CanHavePeripheryInitZero // Enables optionally adding the initzero example widget
   with chipyard.example.CanHavePeripheryGCD // Enables optionally adding the GCD example widget
@@ -35,16 +34,15 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
 }
 
 class DigitalTopModule[+L <: DigitalTop](l: L) extends ChipyardSystemModule(l)
-  with sifive.blocks.devices.mockaon.HasPeripheryMockAONModuleImp
-  with sifive.blocks.devices.spi.HasPeripherySPIModuleImp
-  with sifive.blocks.devices.pwm.HasPeripheryPWMModuleImp
-  with sifive.blocks.devices.i2c.HasPeripheryI2CModuleImp
   with testchipip.CanHaveTraceIOModuleImp
   with testchipip.CanHavePeripheryBlockDeviceModuleImp
   with testchipip.CanHavePeripherySerialModuleImp
   with sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
   with sifive.blocks.devices.gpio.HasPeripheryGPIOModuleImp
   with sifive.blocks.devices.spi.HasPeripherySPIFlashModuleImp
+  with sifive.blocks.devices.spi.HasPeripherySPIModuleImp
+  with sifive.blocks.devices.pwm.HasPeripheryPWMModuleImp
+  with sifive.blocks.devices.i2c.HasPeripheryI2CModuleImp
   with icenet.CanHavePeripheryIceNICModuleImp
   with chipyard.example.CanHavePeripheryGCDModuleImp
   with freechips.rocketchip.util.DontTouch
