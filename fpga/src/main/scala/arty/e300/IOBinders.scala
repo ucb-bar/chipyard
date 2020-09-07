@@ -33,9 +33,14 @@ class WithE300Connections extends OverrideIOBinder({
     with HasPeripherySPIFlashModuleImp
     with HasPeripheryMockAONModuleImp
     with HasPeripheryI2CModuleImp) => {
-    // match the E300 connections using a "Chipyard"-like structure
 
     implicit val p: Parameters = GetSystemParameters(system)
+
+    //-----------------------------------------------------------------------
+    //-----------------------------------------------------------------------
+    // E300DigitalTop <-> ChipTop connections
+    //-----------------------------------------------------------------------
+    //-----------------------------------------------------------------------
 
     object PinGen {
       def apply(): BasePin = {
@@ -51,8 +56,6 @@ class WithE300Connections extends OverrideIOBinder({
     val io_jtag_reset = IO(Input(Bool())).suggestName("jtag_reset")
     val io_ndreset    = IO(Output(Bool())).suggestName("ndreset")
 
-    // TODO: Fix
-    // add iocells (or none)
     // This needs to be de-asserted synchronously to the coreClk.
     val async_corerst = system.aon.rsts.corerst
     // Add in debug-controlled reset.
@@ -175,6 +178,11 @@ class WithE300Connections extends OverrideIOBinder({
     // and thus there is no .fromPort method.
     io_aon <> system.aon.pins
 
+    //-----------------------------------------------------------------------
+    //-----------------------------------------------------------------------
+    // Harness Function (ArtyHarness <-> ChipTop)
+    //-----------------------------------------------------------------------
+    //-----------------------------------------------------------------------
     val harnessFn = (baseTh: HasHarnessSignalReferences) => {
       baseTh match { case th: ArtyShell =>
 
