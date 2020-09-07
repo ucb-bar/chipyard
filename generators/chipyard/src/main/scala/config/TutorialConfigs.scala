@@ -48,7 +48,7 @@ class TutorialMMIOConfig extends Config(
   new chipyard.config.AbstractConfig
 )
 
-// // Tutorial Phase 3: Integrate a SHA3 RoCC accelerator
+// Tutorial Phase 3: Integrate a SHA3 RoCC accelerator
 class TutorialSha3Config extends Config(
   // Uncomment this line once you added SHA3 to the build.sbt, and cloned the SHA3 repo
   // new sha3.WithSha3Accel ++

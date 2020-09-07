@@ -31,8 +31,8 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
     val success = Output(Bool())
   })
 
-  val ldut = LazyModule(p(BuildTop)(p)).suggestName("chiptop")
-  val dut = Module(ldut.module)
+  val lazyDut = LazyModule(p(BuildTop)(p)).suggestName("chiptop")
+  val dut = Module(lazyDut.module)
   io.success := false.B
 
   val harnessClock = clock
@@ -42,7 +42,7 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
   // dutReset assignment can be overridden via a harnessFunction, but by default it is just reset
   val dutReset = WireDefault(if (p(GlobalResetSchemeKey).pinIsAsync) reset.asAsyncReset else reset)
 
-  ldut match { case d: HasTestHarnessFunctions =>
+  lazyDut match { case d: HasTestHarnessFunctions =>
     d.harnessFunctions.foreach(_(this))
     ApplyHarnessBinders(this, d.lazySystem, p(HarnessBinders), d.portMap.toMap)
   }
