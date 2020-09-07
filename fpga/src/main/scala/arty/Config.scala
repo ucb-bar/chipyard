@@ -1,5 +1,5 @@
 // See LICENSE for license details.
-package sifive.freedom.everywhere.e300artydevkit
+package chipyard.fpga
 
 import freechips.rocketchip.config._
 import freechips.rocketchip.subsystem._
@@ -16,16 +16,7 @@ import sifive.blocks.devices.spi._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.i2c._
 
-// Default FreedomEConfig
-class DefaultFreedomEConfig extends Config (
-  new WithNBreakpoints(2)        ++
-  new WithNExtTopInterrupts(0)   ++
-  new WithJtagDTM                ++
-  new TinyConfig
-)
-
-// Freedom E300 Arty Dev Kit Peripherals
-class E300DevKitPeripherals extends Config((site, here, up) => {
+class E300DevKitExtra extends Config((site, here, up) => {
   case PeripheryGPIOKey => List(
     GPIOParams(address = 0x10012000, width = 32, includeIOF = true))
   case PeripheryPWMKey => List(
@@ -47,19 +38,27 @@ class E300DevKitPeripherals extends Config((site, here, up) => {
     I2CParams(address = 0x10016000))
   case PeripheryMockAONKey =>
     MockAONParams(address = 0x10000000)
-  case PeripheryMaskROMKey => List(
-    MaskROMParams(address = 0x10000, name = "BootROM"))
+  case DTSTimebase => BigInt(32768)
+  case JtagDTMKey => new JtagDTMConfig (
+    idcodeVersion = 2,
+    idcodePartNum = 0x000,
+    idcodeManufId = 0x489,
+    debugIdleCycles = 5)
 })
 
-// Freedom E300 Arty Dev Kit Peripherals
 class E300ArtyDevKitConfig extends Config(
-  new E300DevKitPeripherals    ++
-  new DefaultFreedomEConfig().alter((site,here,up) => {
-    case DTSTimebase => BigInt(32768)
-    case JtagDTMKey => new JtagDTMConfig (
-      idcodeVersion = 2,
-      idcodePartNum = 0x000,
-      idcodeManufId = 0x489,
-      debugIdleCycles = 5)
-  })
-)
+  new E300DevKitExtra ++
+  new chipyard.config.WithBootROM ++
+  new chipyard.config.WithL2TLBs(1024) ++
+  new freechips.rocketchip.subsystem.With1TinyCore ++
+  new freechips.rocketchip.subsystem.WithNBanks(0) ++
+  new freechips.rocketchip.subsystem.WithNoMemPort ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(0) ++
+  new freechips.rocketchip.subsystem.WithNBreakpoints(2) ++
+  new freechips.rocketchip.subsystem.WithJtagDTM ++
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
+  new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++
+  new freechips.rocketchip.system.BaseConfig)

@@ -11,6 +11,7 @@ case class GenerateSimConfig(
 sealed trait Simulator
 object VerilatorSimulator extends Simulator
 object VCSSimulator extends Simulator
+object NotSimulator extends Simulator
 
 trait HasGenerateSimConfig {
   val parser = new scopt.OptionParser[GenerateSimConfig]("GenerateSimFiles") {
@@ -22,15 +23,16 @@ trait HasGenerateSimConfig {
       .action((x, c) => x match {
         case "verilator" => c.copy(simulator = VerilatorSimulator)
         case "vcs" => c.copy(simulator = VCSSimulator)
+        case "none" => c.copy(simulator = NotSimulator)
         case _ => throw new Exception(s"Unrecognized simulator $x")
       })
-      .text("Name of simulator to generate files for (verilator, vcs)")
+      .text("Name of simulator to generate files for (verilator, vcs, none)")
 
     opt[String]("target-dir")
       .abbr("td")
       .valueName("<target-directory>")
       .action((x, c) => c.copy(targetDir = x))
-      .text("Target director to put files")
+      .text("Target directory to put files")
 
     opt[String]("dotFName")
       .abbr("df")
@@ -50,6 +52,7 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
         case VerilatorSimulator => s"-FI ${fname}"
         // vcs pulls headers in with +incdir, doesn't have anything like verilator.h
         case VCSSimulator => ""
+        case _ => ""
       }
     } else { // do nothing otherwise
       fname
@@ -82,26 +85,31 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
     out.close()
   }
   def resources(sim: Simulator): Seq[String] = Seq(
-    "/testchipip/csrc/SimSerial.cc",
-    "/testchipip/csrc/SimDRAM.cc",
-    "/testchipip/csrc/mm.h",
-    "/testchipip/csrc/mm.cc",
-    "/testchipip/csrc/mm_dramsim2.h",
-    "/testchipip/csrc/mm_dramsim2.cc",
-    "/csrc/SimDTM.cc",
-    "/csrc/SimJTAG.cc",
-    "/csrc/remote_bitbang.h",
-    "/csrc/remote_bitbang.cc",
     "/vsrc/EICG_wrapper.v",
-  ) ++ (sim match { // simulator specific files to include
-    case VerilatorSimulator => Seq(
-      "/csrc/emulator.cc",
-      "/csrc/verilator.h",
-    )
-    case VCSSimulator => Seq(
-      "/vsrc/TestDriver.v",
-    )
-  })
+    ) ++ (sim match {
+      case NotSimulator => Seq()
+      case _ => Seq(
+        "/testchipip/csrc/SimSerial.cc",
+        "/testchipip/csrc/SimDRAM.cc",
+        "/testchipip/csrc/mm.h",
+        "/testchipip/csrc/mm.cc",
+        "/testchipip/csrc/mm_dramsim2.h",
+        "/testchipip/csrc/mm_dramsim2.cc",
+        "/csrc/SimDTM.cc",
+        "/csrc/SimJTAG.cc",
+        "/csrc/remote_bitbang.h",
+        "/csrc/remote_bitbang.cc",
+      )
+    }) ++ (sim match { // simulator specific files to include
+      case VerilatorSimulator => Seq(
+        "/csrc/emulator.cc",
+        "/csrc/verilator.h",
+      )
+      case VCSSimulator => Seq(
+        "/vsrc/TestDriver.v",
+      )
+      case _ => Seq()
+    })
 
   def writeBootrom(): Unit = {
     firrtl.FileUtils.makeDirectory("./bootrom/")

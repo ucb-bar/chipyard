@@ -1,5 +1,5 @@
 // See LICENSE for license details.
-package sifive.freedom.everywhere.e300artydevkit
+package chipyard.fpga
 
 import Chisel._
 
@@ -19,6 +19,8 @@ import sifive.blocks.devices.spi._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.i2c._
 import sifive.blocks.devices.pinctrl._
+
+import chipyard.{DigitalTop}
 
 //-------------------------------------------------------------------------
 // PinGen
@@ -51,7 +53,7 @@ class E300ArtyDevKitPlatformIO(implicit val p: Parameters) extends Bundle {
 //-------------------------------------------------------------------------
 
 class E300ArtyDevKitPlatform(implicit val p: Parameters) extends Module {
-  val sys = Module(LazyModule(new E300ArtyDevKitSystem).module)
+  val sys = Module(LazyModule(new DigitalTop).module)
   val io = new E300ArtyDevKitPlatformIO
 
   // This needs to be de-asserted synchronously to the coreClk.

@@ -1,5 +1,5 @@
 // See LICENSE for license details.
-package sifive.freedom.everywhere.e300artydevkit
+package chipyard.fpga
 
 import Chisel._
 import chisel3.core.{attach}
