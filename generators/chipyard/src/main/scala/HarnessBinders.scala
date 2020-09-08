@@ -69,7 +69,7 @@ class WithGPIOTiedOff extends OverrideHarnessBinder({
 // DOC include start: WithUARTAdapter
 class WithUARTAdapter extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    UARTAdapter.connect(ports.map(_.asInstanceOf[UARTPortIO]))(system.p)
+    UARTAdapter.connect(ports.map({case p: UARTPortIO => p}))(system.p)
     Nil
   }
 })
@@ -77,7 +77,7 @@ class WithUARTAdapter extends OverrideHarnessBinder({
 
 class WithSimSPIFlashModel(rdOnly: Boolean = true) extends OverrideHarnessBinder({
   (system: HasPeripherySPIFlashModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    SimSPIFlashModel.connect(ports.map(_.asInstanceOf[SPIChipIO]), th.harnessReset, rdOnly)(system.p)
+    SimSPIFlashModel.connect(ports.map({case p: SPIChipIO => p}), th.harnessReset, rdOnly)(system.p)
     Nil
   }
 })
@@ -132,8 +132,11 @@ class WithSimAXIMem extends OverrideHarnessBinder({
   (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
     val clock = WireInit(false.B.asClock)
-    ports.filter(_.isInstanceOf[Clock]).map { case p: Clock => clock := p }
-    val axi4_ports = ports.filter(_.isInstanceOf[AXI4Bundle])
+    ports.map {
+      case p: Clock => clock := p
+      case _ =>
+    }
+    val axi4_ports = ports.collect { case p: AXI4Bundle => p }
     (axi4_ports zip system.memAXI4Node.edges.in).map { case (port: AXI4Bundle, edge) =>
       val mem = LazyModule(new SimAXIMem(edge, size=p(ExtMem).get.master.size)(p))
       withClockAndReset(clock, th.harnessReset) {
@@ -149,7 +152,10 @@ class WithBlackBoxSimMem extends OverrideHarnessBinder({
   (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
     val clock = WireInit(false.B.asClock)
-    ports.filter(_.isInstanceOf[Clock]).map { case p: Clock => clock := p }
+    ports.map {
+      case p: Clock => clock := p
+      case _ =>
+    }
     val axi4_ports = ports.collect { case p: AXI4Bundle => p }
     (axi4_ports zip system.memAXI4Node.edges.in).map { case (port: AXI4Bundle, edge) =>
       val memSize = p(ExtMem).get.master.size
@@ -167,11 +173,15 @@ class WithSimAXIMMIO extends OverrideHarnessBinder({
   (system: CanHaveMasterAXI4MMIOPort, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
     val clock = WireInit(false.B.asClock)
-    ports.filter(_.isInstanceOf[Clock]).map { case p: Clock => clock := p }
-    (ports zip system.mmioAXI4Node.edges.in).zipWithIndex.map { case ((port: AXI4Bundle, edge), i) =>
-      val mmio_mem = LazyModule(new SimAXIMem(edge, size = 4096)(p))
+    ports.map {
+       case p: Clock => clock := p
+       case _ =>
+    }
+    val axi4_ports = ports.collect { case p: AXI4Bundle => p }
+    (axi4_ports zip system.mmioAXI4Node.edges.in).map { case (port: AXI4Bundle, edge) =>
+      val mmio_mem = LazyModule(new SimAXIMem(edge, size = p(ExtBus).get.size)(p))
       withClockAndReset(clock, th.harnessReset) {
-        Module(mmio_mem.module).suggestName(s"mmio_mem_${i}")
+        Module(mmio_mem.module).suggestName("mmio_mem")
       }
       mmio_mem.io_axi4.head <> port
     }
@@ -188,9 +198,11 @@ class WithTieOffInterrupts extends OverrideHarnessBinder({
 
 class WithTieOffL2FBusAXI extends OverrideHarnessBinder({
   (system: CanHaveSlaveAXI4Port, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    ports.map { case p: AXI4Bundle =>
-      p := DontCare
-      p.tieoff()
+    ports.map {
+      case p: AXI4Bundle =>
+        p := DontCare
+        p.tieoff()
+      case c: Clock =>
     }
     Nil
   }

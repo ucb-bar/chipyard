@@ -47,8 +47,13 @@ case object IOBinders extends Field[Map[String, (Any) => (Seq[Data], Seq[IOCell]
 object ApplyIOBinders {
   def apply(sys: LazyModule, map: Map[String, (Any) => (Seq[Data], Seq[IOCell])]):
       (Iterable[Data], Iterable[IOCell], Map[String, Seq[Data]]) = {
-    val r = map.map({ case (s,f) => (f(sys), s) }) ++ map.map({ case (s,f) => (f(sys.module), s) })
-    (r.flatMap(_._1._1), r.flatMap(_._1._2), r.map { t => t._2 -> t._1._1 })
+    val lzy = map.map({ case (s,f) => s -> f(sys) })
+    val imp = map.map({ case (s,f) => s -> f(sys.module) })
+
+    val ports: Iterable[Data] = lzy.values.map(_._1).flatten ++ imp.values.map(_._1).flatten
+    val cells: Iterable[IOCell] = lzy.values.map(_._2).flatten ++ imp.values.map(_._2).flatten
+    val portMap: Map[String, Seq[Data]] = map.keys.map(k => k -> (lzy(k)._1 ++ imp(k)._1)).toMap
+    (ports, cells, portMap)
   }
 }
 
@@ -287,13 +292,18 @@ class WithAXI4MMIOPunchthrough extends OverrideIOBinder({
 })
 
 class WithL2FBusAXI4Punchthrough extends OverrideIOBinder({
-  (system: CanHaveSlaveAXI4Port) => {
-    val port = system.l2_frontend_bus_axi4.zipWithIndex.map({ case (m, i) =>
+   (system: CanHaveSlaveAXI4Port) => {
+    val clock = if (!system.l2_frontend_bus_axi4.isEmpty) {
+      Some(BoreHelper("axi4_fbus_clock", system.asInstanceOf[BaseSubsystem].fbus.module.clock))
+    } else {
+      None
+    }
+    val ports = system.l2_frontend_bus_axi4.zipWithIndex.map({ case (m, i) =>
       val p = IO(Flipped(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_fbus_${i}")
       m <> p
       p
     })
-    (port, Nil)
+    (ports ++ clock, Nil)
   }
 })
 
