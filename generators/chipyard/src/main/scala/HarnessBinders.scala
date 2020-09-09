@@ -1,6 +1,7 @@
 package chipyard.harness
 
 import chisel3._
+import chisel3.experimental.{Analog}
 
 import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
@@ -19,6 +20,7 @@ import barstools.iocell.chisel._
 import testchipip._
 
 import chipyard.HasHarnessSignalReferences
+import chipyard.iobinders.ClockedIO
 
 import tracegen.{TraceGenSystemModuleImp}
 import icenet.{CanHavePeripheryIceNICModuleImp, SimNetwork, NicLoopback, NICKey, NICIOvonly}
@@ -33,26 +35,29 @@ case object HarnessBinders extends Field[Map[String, (Any, HasHarnessSignalRefer
 object ApplyHarnessBinders {
   def apply(th: HasHarnessSignalReferences, sys: LazyModule, map: Map[String, (Any, HasHarnessSignalReferences, Seq[Data]) => Seq[Any]], portMap: Map[String, Seq[Data]]) = {
     val pm = portMap.withDefaultValue(Nil)
-    map.map { case (s, f) => f(sys, th, pm(s)) ++ f(sys.module, th, pm(s)) }
+    map.map { case (s, f) => f(sys, th, pm(s)) ++ f(sys.module, th, pm(s))
+    }
   }
 }
 
-class OverrideHarnessBinder[T](fn: => (T, HasHarnessSignalReferences, Seq[Data]) => Seq[Any])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+class OverrideHarnessBinder[T, S <: Data](fn: => (T, HasHarnessSignalReferences, Seq[S]) => Seq[Any])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
   case HarnessBinders => up(HarnessBinders, site) + (tag.runtimeClass.toString ->
       ((t: Any, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
+        val pts = ports.map(_.asInstanceOf[S])
         t match {
-          case system: T => fn(system, th, ports)
+          case system: T => fn(system, th, pts)
           case _ => Nil
         }
       })
   )
 })
 
-class ComposeHarnessBinder[T](fn: => (T, HasHarnessSignalReferences, Seq[Data]) => Seq[Any])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+class ComposeHarnessBinder[T, S <: Data](fn: => (T, HasHarnessSignalReferences, Seq[S]) => Seq[Any])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
   case HarnessBinders => up(HarnessBinders, site) + (tag.runtimeClass.toString ->
       ((t: Any, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
+        val pts = ports.map(_.asInstanceOf[S])
         t match {
-          case system: T => up(HarnessBinders, site)(tag.runtimeClass.toString)(system, th, ports) ++ fn(system, th, ports)
+          case system: T => up(HarnessBinders, site)(tag.runtimeClass.toString)(system, th, pts) ++ fn(system, th, pts)
           case _ => Nil
         }
       })
@@ -60,109 +65,83 @@ class ComposeHarnessBinder[T](fn: => (T, HasHarnessSignalReferences, Seq[Data]) 
 })
 
 class WithGPIOTiedOff extends OverrideHarnessBinder({
-  (system: HasPeripheryGPIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    ports.map { case p: GPIOPortIO => p <> AnalogConst(0) }
+  (system: HasPeripheryGPIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[Analog]) => {
+    ports.foreach { _ <> AnalogConst(0) }
     Nil
   }
 })
 
 // DOC include start: WithUARTAdapter
 class WithUARTAdapter extends OverrideHarnessBinder({
-  (system: HasPeripheryUARTModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    UARTAdapter.connect(ports.map({case p: UARTPortIO => p}))(system.p)
+  (system: HasPeripheryUARTModuleImp, th: HasHarnessSignalReferences, ports: Seq[UARTPortIO]) => {
+    UARTAdapter.connect(ports)(system.p)
     Nil
   }
 })
 // DOC include end: WithUARTAdapter
 
 class WithSimSPIFlashModel(rdOnly: Boolean = true) extends OverrideHarnessBinder({
-  (system: HasPeripherySPIFlashModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    SimSPIFlashModel.connect(ports.map({case p: SPIChipIO => p}), th.harnessReset, rdOnly)(system.p)
+  (system: HasPeripherySPIFlashModuleImp, th: HasHarnessSignalReferences, ports: Seq[SPIChipIO]) => {
+    SimSPIFlashModel.connect(ports, th.harnessReset, rdOnly)(system.p)
     Nil
   }
 })
 
 class WithSimBlockDevice extends OverrideHarnessBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    val clock = WireInit(false.B.asClock)
-    ports.map {
-      case p: BlockDeviceIO => SimBlockDevice.connect(clock, th.harnessReset.asBool, Some(p))(system.p)
-      case c: Clock => clock := c
-    }
+  (system: CanHavePeripheryBlockDeviceModuleImp, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
+    ports.map { p => SimBlockDevice.connect(p.clock, th.harnessReset.asBool, Some(p.bits))(system.p) }
     Nil
   }
 })
 
 class WithBlockDeviceModel extends OverrideHarnessBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    val clock = WireInit(false.B.asClock)
-    ports.map {
-      case p: BlockDeviceIO => withClockAndReset(clock, th.harnessReset) { BlockDeviceModel.connect(Some(p))(system.p) }
-      case c: Clock => clock := c
-    }
+  (system: CanHavePeripheryBlockDeviceModuleImp, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
+    ports.map { p => withClockAndReset(p.clock, th.harnessReset) { BlockDeviceModel.connect(Some(p.bits))(system.p) } }
     Nil
   }
 })
 
 class WithLoopbackNIC extends OverrideHarnessBinder({
-  (system: CanHavePeripheryIceNICModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    val clock = WireInit(false.B.asClock)
-    ports.map {
-      case p: NICIOvonly => withClockAndReset(clock, th.harnessReset) {
-        NicLoopback.connect(Some(p), system.p(NICKey))
+  (system: CanHavePeripheryIceNICModuleImp, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[NICIOvonly]]) => {
+    ports.map { p =>
+      withClockAndReset(p.clock, th.harnessReset) {
+        NicLoopback.connect(Some(p.bits), system.p(NICKey))
       }
-      case c: Clock => clock := c
     }
     Nil
   }
 })
 
 class WithSimNetwork extends OverrideHarnessBinder({
-  (system: CanHavePeripheryIceNICModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    val clock = WireInit(false.B.asClock)
-    ports.map {
-      case p: NICIOvonly => SimNetwork.connect(Some(p), clock, th.harnessReset.asBool)
-      case c: Clock => clock := c
-    }
+  (system: CanHavePeripheryIceNICModuleImp, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[NICIOvonly]]) => {
+    ports.map { p => SimNetwork.connect(Some(p.bits), p.clock, th.harnessReset.asBool) }
     Nil
   }
 })
 
 class WithSimAXIMem extends OverrideHarnessBinder({
-  (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
+  (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
-    val clock = WireInit(false.B.asClock)
-    ports.map {
-      case p: Clock => clock := p
-      case _ =>
-    }
-    val axi4_ports = ports.collect { case p: AXI4Bundle => p }
-    (axi4_ports zip system.memAXI4Node.edges.in).map { case (port: AXI4Bundle, edge) =>
+    (ports zip system.memAXI4Node.edges.in).map { case (port, edge) =>
       val mem = LazyModule(new SimAXIMem(edge, size=p(ExtMem).get.master.size)(p))
-      withClockAndReset(clock, th.harnessReset) {
+      withClockAndReset(port.clock, th.harnessReset) {
         Module(mem.module).suggestName("mem")
       }
-      mem.io_axi4.head <> port
+      mem.io_axi4.head <> port.bits
     }
     Nil
   }
 })
 
 class WithBlackBoxSimMem extends OverrideHarnessBinder({
-  (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
+  (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
-    val clock = WireInit(false.B.asClock)
-    ports.map {
-      case p: Clock => clock := p
-      case _ =>
-    }
-    val axi4_ports = ports.collect { case p: AXI4Bundle => p }
-    (axi4_ports zip system.memAXI4Node.edges.in).map { case (port: AXI4Bundle, edge) =>
+    (ports zip system.memAXI4Node.edges.in).map { case (port, edge) =>
       val memSize = p(ExtMem).get.master.size
       val lineSize = p(CacheBlockBytes)
       val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle)).suggestName("simdram")
-      mem.io.axi <> port
-      mem.io.clock := clock
+      mem.io.axi <> port.bits
+      mem.io.clock := port.clock
       mem.io.reset := th.harnessReset
     }
     Nil
@@ -170,57 +149,44 @@ class WithBlackBoxSimMem extends OverrideHarnessBinder({
 })
 
 class WithSimAXIMMIO extends OverrideHarnessBinder({
-  (system: CanHaveMasterAXI4MMIOPort, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
+  (system: CanHaveMasterAXI4MMIOPort, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
-    val clock = WireInit(false.B.asClock)
-    ports.map {
-       case p: Clock => clock := p
-       case _ =>
-    }
-    val axi4_ports = ports.collect { case p: AXI4Bundle => p }
-    (axi4_ports zip system.mmioAXI4Node.edges.in).map { case (port: AXI4Bundle, edge) =>
+    (ports zip system.mmioAXI4Node.edges.in).map { case (port, edge) =>
       val mmio_mem = LazyModule(new SimAXIMem(edge, size = p(ExtBus).get.size)(p))
-      withClockAndReset(clock, th.harnessReset) {
+      withClockAndReset(port.clock, th.harnessReset) {
         Module(mmio_mem.module).suggestName("mmio_mem")
       }
-      mmio_mem.io_axi4.head <> port
+      mmio_mem.io_axi4.head <> port.bits
     }
     Nil
   }
 })
 
 class WithTieOffInterrupts extends OverrideHarnessBinder({
-  (system: HasExtInterruptsModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    ports.map { case p: UInt =>  p := 0.U }
+  (system: HasExtInterruptsModuleImp, th: HasHarnessSignalReferences, ports: Seq[UInt]) => {
+    ports.foreach { _ := 0.U }
     Nil
   }
 })
 
 class WithTieOffL2FBusAXI extends OverrideHarnessBinder({
-  (system: CanHaveSlaveAXI4Port, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    ports.map {
-      case p: AXI4Bundle =>
-        p := DontCare
-        p.tieoff()
-      case c: Clock =>
-    }
+  (system: CanHaveSlaveAXI4Port, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
+    ports.foreach({ p => p := DontCare; p.bits.tieoff() })
     Nil
   }
 })
 
 class WithSimDebug extends OverrideHarnessBinder({
   (system: HasPeripheryDebugModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    if (!ports.isEmpty) {
-      val dtm_success = Wire(Bool())
-      when (dtm_success) { th.success := true.B }
-      ports.map {
-        case d: ClockedDMIIO =>
-          val dtm = Module(new SimDTM()(system.p)).connect(th.harnessClock, th.harnessReset.asBool, d, dtm_success)
-        case j: JTAGIO =>
-          val jtag = Module(new SimJTAG(tickDelay=3)).connect(j, th.harnessClock, th.harnessReset.asBool, ~(th.harnessReset.asBool), dtm_success)
-        case _ =>
-          require(false, "We only support DMI or JTAG simulated debug connections")
-      }
+    ports.map {
+      case d: ClockedDMIIO =>
+        val dtm_success = WireInit(false.B)
+        when (dtm_success) { th.success := true.B }
+        val dtm = Module(new SimDTM()(system.p)).connect(th.harnessClock, th.harnessReset.asBool, d, dtm_success)
+      case j: JTAGIO =>
+        val dtm_success = WireInit(false.B)
+        when (dtm_success) { th.success := true.B }
+        val jtag = Module(new SimJTAG(tickDelay=3)).connect(j, th.harnessClock, th.harnessReset.asBool, ~(th.harnessReset.asBool), dtm_success)
     }
     Nil
   }
@@ -229,63 +195,56 @@ class WithSimDebug extends OverrideHarnessBinder({
 class WithTiedOffDebug extends OverrideHarnessBinder({
   (system: HasPeripheryDebugModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
     ports.map {
+      case j: JTAGIO =>
+        j.TCK := true.B.asClock
+        j.TMS := true.B
+        j.TDI := true.B
+        j.TRSTn.foreach { r => r := true.B }
       case d: ClockedDMIIO =>
         d.dmi.req.valid := false.B
         d.dmi.req.bits  := DontCare
         d.dmi.resp.ready := true.B
         d.dmiClock := false.B.asClock
         d.dmiReset := true.B
-      case j: JTAGIO =>
-        j.TCK := true.B.asClock
-        j.TMS := true.B
-        j.TDI := true.B
-        j.TRSTn.foreach { r => r := true.B }
       case a: ClockedAPBBundle =>
         a.tieoff()
         a.clock := false.B.asClock
         a.reset := true.B.asAsyncReset
         a.psel := false.B
         a.penable := false.B
-      case _ => require(false)
     }
     Nil
   }
 })
 
+
 class WithTiedOffSerial extends OverrideHarnessBinder({
-  (system: CanHavePeripherySerial, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    ports.map {
-      case p: SerialIO => SerialAdapter.tieoff(Some(p))
-      case _ =>
-    }
+  (system: CanHavePeripherySerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+    ports.map { p => SerialAdapter.tieoff(Some(p.bits)) }
     Nil
   }
 })
 
 class WithSimSerial extends OverrideHarnessBinder({
-  (system: CanHavePeripherySerial, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    val serial_clock = WireInit(false.B.asClock)
-    ports.map {
-      case p: SerialIO =>
-        val ser_success = SerialAdapter.connectSimSerial(p, serial_clock, th.harnessReset)
-        when (ser_success) { th.success := true.B }
-      case c: Clock =>
-        serial_clock := c
+  (system: CanHavePeripherySerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+    ports.map { p =>
+      val ser_success = SerialAdapter.connectSimSerial(p.bits, p.clock, th.harnessReset)
+      when (ser_success) { th.success := true.B }
     }
     Nil
   }
 })
 
 class WithTraceGenSuccess extends OverrideHarnessBinder({
-  (system: TraceGenSystemModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    ports.map { case p: Bool => when (p) { th.success := true.B } }
+  (system: TraceGenSystemModuleImp, th: HasHarnessSignalReferences, ports: Seq[Bool]) => {
+    ports.map { p => when (p) { th.success := true.B } }
     Nil
   }
 })
 
 class WithSimDromajoBridge extends ComposeHarnessBinder({
-  (system: CanHaveTraceIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    ports.map { case p: TraceOutputTop => p.traces.map(tileTrace => SimDromajoBridge(tileTrace)(system.p)) }
+  (system: CanHaveTraceIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[TraceOutputTop]) => {
+    ports.map { p => p.traces.map(tileTrace => SimDromajoBridge(tileTrace)(system.p)) }
     Nil
   }
 })

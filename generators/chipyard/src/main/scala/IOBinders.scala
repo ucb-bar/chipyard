@@ -74,7 +74,7 @@ object GetSystemParameters {
 
 // This macro overrides previous matches on some Top mixin. This is useful for
 // binders which drive IO, since those typically cannot be composed
-class OverrideIOBinder[T](fn: => (T) => (Seq[Data], Seq[IOCell]))(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+class OverrideIOBinder[T, S <: Data](fn: => (T) => (Seq[S], Seq[IOCell]))(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
   case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString ->
       ((t: Any) => {
         t match {
@@ -87,7 +87,7 @@ class OverrideIOBinder[T](fn: => (T) => (Seq[Data], Seq[IOCell]))(implicit tag: 
 
 // This macro composes with previous matches on some Top mixin. This is useful for
 // annotation-like binders, since those can typically be composed
-class ComposeIOBinder[T](fn: => (T) => (Seq[Data], Seq[IOCell]))(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+class ComposeIOBinder[T, S <: Data](fn: => (T) => (Seq[S], Seq[IOCell]))(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
   case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString ->
       ((t: Any) => {
         t match {
@@ -116,6 +116,11 @@ object BoreHelper {
 
 case object IOCellKey extends Field[IOCellTypeParams](GenericIOCellParams())
 
+class ClockedIO[T <: Data](gen: T) extends Bundle {
+  val clock = Output(Clock())
+  val bits = gen
+  override def cloneType: this.type = (new ClockedIO(DataMirror.internal.chiselTypeClone[T](gen))).asInstanceOf[this.type]
+}
 
 class WithGPIOCells extends OverrideIOBinder({
   (system: HasPeripheryGPIOModuleImp) => {
@@ -131,14 +136,15 @@ class WithGPIOCells extends OverrideIOBinder({
         (g, iocell)
       }).unzip
     }).unzip
-    (ports2d.flatten, cells2d.flatten)
+    val ports: Seq[Analog] = ports2d.flatten
+    (ports, cells2d.flatten)
   }
 })
 
 // DOC include start: WithUARTIOCells
 class WithUARTIOCells extends OverrideIOBinder({
   (system: HasPeripheryUARTModuleImp) => {
-    val (ports, cells2d) = system.uart.zipWithIndex.map({ case (u, i) =>
+    val (ports: Seq[UARTPortIO], cells2d) = system.uart.zipWithIndex.map({ case (u, i) =>
       val (port, ios) = IOCell.generateIOFromSignal(u, Some(s"iocell_uart_${i}"), system.p(IOCellKey))
       port.suggestName(s"uart_${i}")
       (port, ios)
@@ -150,7 +156,7 @@ class WithUARTIOCells extends OverrideIOBinder({
 
 class WithSPIIOCells extends OverrideIOBinder({
   (system: HasPeripherySPIFlashModuleImp) => {
-    val (ports, cells2d) = system.qspi.zipWithIndex.map({ case (s, i) =>
+    val (ports: Seq[SPIChipIO], cells2d) = system.qspi.zipWithIndex.map({ case (s, i) =>
       val port = IO(new SPIChipIO(s.c.csWidth)).suggestName(s"spi_${i}")
       val iocellBase = s"iocell_spi_${i}"
 
@@ -178,7 +184,7 @@ class WithSPIIOCells extends OverrideIOBinder({
 class WithExtInterruptIOCells extends OverrideIOBinder({
   (system: HasExtInterruptsModuleImp) => {
     if (system.outer.nExtInterrupts > 0) {
-      val (port, cells) = IOCell.generateIOFromSignal(system.interrupts, Some("iocell_interrupts"), system.p(IOCellKey))
+      val (port: UInt, cells) = IOCell.generateIOFromSignal(system.interrupts, Some("iocell_interrupts"), system.p(IOCellKey))
       port.suggestName("ext_interrupts")
       (Seq(port), cells)
     } else {
@@ -246,94 +252,79 @@ class WithDebugIOCells extends OverrideIOBinder({
 class WithSerialIOCells extends OverrideIOBinder({
   (system: CanHavePeripherySerial) => system.serial.map({ s =>
     val sys = system.asInstanceOf[BaseSubsystem]
-    val (port, cells) = IOCell.generateIOFromSignal(s, Some("iocell_serial"), sys.p(IOCellKey))
-    val serial_clock = Wire(Output(Clock())).suggestName("chiptop_serial_clock")
-    serial_clock := false.B.asClock // necessary for BoringUtils to work properly
-    dontTouch(serial_clock)
-    BoringUtils.bore(sys.fbus.module.clock, Seq(serial_clock))
-    val (serial_clock_io, serial_clock_cell) = IOCell.generateIOFromSignal(serial_clock, Some("serial_clock"), sys.p(IOCellKey))
-    serial_clock_io.suggestName("serial_clock")
+    val clocked_serial = Wire(new ClockedIO(DataMirror.internal.chiselTypeClone[SerialIO](s))).suggestName("serial_wire")
+    clocked_serial.clock := BoreHelper("serial_clock", sys.fbus.module.clock)
+    clocked_serial.bits <> s
+    val (port, cells) = IOCell.generateIOFromSignal(clocked_serial, Some("serial"), sys.p(IOCellKey))
     port.suggestName("serial")
-    (Seq(port, serial_clock_io), cells ++ serial_clock_cell)
+    (Seq(port), cells)
   }).getOrElse((Nil, Nil))
 })
 
 
 class WithAXI4MemPunchthrough extends OverrideIOBinder({
   (system: CanHaveMasterAXI4MemPort) => {
-    val clock = if (!system.mem_axi4.isEmpty) {
-      Some(BoreHelper("axi4_mem_clock", system.asInstanceOf[BaseSubsystem].mbus.module.clock))
-    } else {
-      None
-    }
-    val ports = system.mem_axi4.zipWithIndex.map({ case (m, i) =>
-      val p = IO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m)).suggestName(s"axi4_mem_${i}")
-      p <> m
+    val ports: Seq[ClockedIO[AXI4Bundle]] = system.mem_axi4.zipWithIndex.map({ case (m, i) =>
+      val p = IO(new ClockedIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mem_${i}")
+      p.bits <> m
+      p.clock := BoreHelper("axi4_mem_clock", system.asInstanceOf[BaseSubsystem].mbus.module.clock)
       p
     })
-    (ports ++ clock, Nil)
+    (ports, Nil)
   }
 })
 
 class WithAXI4MMIOPunchthrough extends OverrideIOBinder({
   (system: CanHaveMasterAXI4MMIOPort) => {
-    val clock = if (!system.mmio_axi4.isEmpty) {
-      Some(BoreHelper("axi4_mmio_clock", system.asInstanceOf[BaseSubsystem].mbus.module.clock))
-    } else {
-      None
-    }
-    val ports = system.mmio_axi4.zipWithIndex.map({ case (m, i) =>
-      val p = IO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m)).suggestName(s"axi4_mmio_${i}")
-      p <> m
+    val ports: Seq[ClockedIO[AXI4Bundle]] = system.mmio_axi4.zipWithIndex.map({ case (m, i) =>
+      val p = IO(new ClockedIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mmio_${i}")
+      p.bits <> m
+      p.clock := BoreHelper("axi4_mmio_clock", system.asInstanceOf[BaseSubsystem].mbus.module.clock)
       p
     })
-    (ports ++ clock, Nil)
+    (ports, Nil)
   }
 })
 
 class WithL2FBusAXI4Punchthrough extends OverrideIOBinder({
    (system: CanHaveSlaveAXI4Port) => {
-    val clock = if (!system.l2_frontend_bus_axi4.isEmpty) {
-      Some(BoreHelper("axi4_fbus_clock", system.asInstanceOf[BaseSubsystem].fbus.module.clock))
-    } else {
-      None
-    }
-    val ports = system.l2_frontend_bus_axi4.zipWithIndex.map({ case (m, i) =>
-      val p = IO(Flipped(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_fbus_${i}")
-      m <> p
+    val ports: Seq[ClockedIO[AXI4Bundle]] = system.l2_frontend_bus_axi4.zipWithIndex.map({ case (m, i) =>
+      val p = IO(new ClockedIO(Flipped(DataMirror.internal.chiselTypeClone[AXI4Bundle](m)))).suggestName(s"axi4_fbus_${i}")
+      m <> p.bits
+      p.clock := BoreHelper("axi4_fbus_clock", system.asInstanceOf[BaseSubsystem].fbus.module.clock)
       p
     })
-    (ports ++ clock, Nil)
+    (ports, Nil)
   }
 })
 
 class WithBlockDeviceIOPunchthrough extends OverrideIOBinder({
   (system: CanHavePeripheryBlockDeviceModuleImp) => {
-    val ports = system.bdev.map({ bdev =>
-      val p = IO(new BlockDeviceIO()(system.p)).suggestName("blockdev")
-      val clock = BoreHelper("blkdev_clk", system.outer.controller.get.module.clock)
-      p <> bdev
-      Seq(p, clock)
-    }).getOrElse(Nil)
+    val ports: Seq[ClockedIO[BlockDeviceIO]] = system.bdev.map({ bdev =>
+      val p = IO(new ClockedIO(new BlockDeviceIO()(system.p))).suggestName("blockdev")
+      p.clock := BoreHelper("blkdev_clk", system.outer.controller.get.module.clock)
+      p.bits <> bdev
+      p
+    }).toSeq
     (ports, Nil)
   }
 })
 
 class WithNICIOPunchthrough extends OverrideIOBinder({
   (system: CanHavePeripheryIceNICModuleImp) => {
-    val port = system.net.map({ n =>
-      val p = IO(new NICIOvonly).suggestName("nic")
-      val clock = BoreHelper("nic_clk", system.outer.icenicOpt.get.module.clock)
-      p <> n
-      Seq(p, clock)
-    }).getOrElse(Nil)
-    (port.toSeq, Nil)
+    val ports: Seq[ClockedIO[NICIOvonly]] = system.net.map({ n =>
+      val p = IO(new ClockedIO(new NICIOvonly)).suggestName("nic")
+      p.clock := BoreHelper("nic_clk", system.outer.icenicOpt.get.module.clock)
+      p.bits <> n
+      p
+    }).toSeq
+    (ports, Nil)
   }
 })
 
 class WithTraceGenSuccessPunchthrough extends OverrideIOBinder({
   (system: TraceGenSystemModuleImp) => {
-    val success = IO(Output(Bool())).suggestName("success")
+    val success: Bool = IO(Output(Bool())).suggestName("success")
     success := system.success
     (Seq(success), Nil)
   }
@@ -341,7 +332,7 @@ class WithTraceGenSuccessPunchthrough extends OverrideIOBinder({
 
 class WithTraceIOPunchthrough extends OverrideIOBinder({
   (system: CanHaveTraceIOModuleImp) => {
-    val ports = system.traceIO.map { t =>
+    val ports: Option[TraceOutputTop] = system.traceIO.map { t =>
       val trace = IO(DataMirror.internal.chiselTypeClone[TraceOutputTop](t)).suggestName("trace")
       trace <> t
       trace
