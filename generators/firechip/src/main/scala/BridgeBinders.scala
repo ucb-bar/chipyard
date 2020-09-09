@@ -79,24 +79,6 @@ class WithFASEDBridge extends OverrideIOBinder({
   }
 })
 
-class WithFASEDMMIOBridge extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MMIOPort with BaseSubsystem) => {
-    implicit val p = system.p
-    (system.mmio_axi4 zip system.mmioAXI4Node.in).foreach { case (io, (_, edge)) =>
-      val nastiKey = NastiParameters(io.r.bits.data.getWidth,
-                                     io.ar.bits.addr.getWidth,
-                                     io.ar.bits.id.getWidth)
-      FASEDBridge(system.module.clock, io, system.module.reset.toBool,
-        CompleteConfig(
-          p(firesim.configs.MemModelKey),
-          nastiKey,
-          Some(AXI4EdgeSummary(edge)),
-          Some(MainMemoryConsts.globalName)))
-    }
-    Nil
-  }
-})
-
 class WithTracerVBridge extends ComposeIOBinder({
   (system: CanHaveTraceIOModuleImp) =>
     system.traceIO.foreach(_.traces.map(tileTrace => TracerVBridge(tileTrace)(system.p))); Nil
@@ -145,7 +127,7 @@ class WithDRAMCacheBridge extends OverrideIOBinder({
     implicit val p = system.p
     val io = system.cache_axi4
     val node = system.outer.outAXI4Node
-    val axiBridges = (io zip node.in).foreach({ case (axi4Bundle, (_, edge)) =>
+    val axiBridges = (io zip node.edges.in).foreach({ case (axi4Bundle, edge) =>
       val nastiKey = NastiParameters(axi4Bundle.r.bits.data.getWidth,
                                      axi4Bundle.ar.bits.addr.getWidth,
                                      axi4Bundle.ar.bits.id.getWidth)
@@ -203,7 +185,6 @@ class WithDefaultFireSimBridges extends Config(
   new WithUARTBridge ++
   new WithBlockDeviceBridge ++
   new WithFASEDBridge ++
-  new WithFASEDMMIOBridge ++
   new WithFireSimMultiCycleRegfile ++
   new WithTracerVBridge
 )
