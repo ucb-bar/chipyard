@@ -19,11 +19,11 @@ include $(base_dir)/variables.mk
 # default variables to build the arty example
 SUB_PROJECT       := fpga
 SBT_PROJECT       := fpga_platforms
-MODEL             := ArtyFPGATestHarness
-VLOG_MODEL        := ArtyFPGATestHarness
-MODEL_PACKAGE     := chipyard.fpga.arty
-CONFIG            := E300ArtyDevKitConfig
-CONFIG_PACKAGE    := chipyard.fpga.arty.e300
+MODEL             := VCU118FPGATestHarness
+VLOG_MODEL        := VCU118FPGATestHarness
+MODEL_PACKAGE     := chipyard.fpga.vcu118
+CONFIG            := FakeBringupConfig
+CONFIG_PACKAGE    := chipyard.fpga.vcu118
 GENERATOR_PACKAGE := chipyard
 TB                := none # unused
 TOP               := ChipTop

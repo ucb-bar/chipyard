@@ -218,7 +218,7 @@ lazy val firechip = conditionalDependsOn(project in file("generators/firechip"))
     testOptions in Test += Tests.Argument("-oF")
   )
 lazy val fpga_shells = (project in file("./fpga/fpga-shells"))
-  .dependsOn(rocketchip, sifive_blocks)
+  .dependsOn(rocketchip, sifive_blocks, chipyard)
   .settings(commonSettings)
 
 lazy val fpga_platforms = (project in file("./fpga"))

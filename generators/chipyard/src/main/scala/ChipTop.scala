@@ -55,6 +55,7 @@ class ChipTop(implicit p: Parameters) extends LazyModule with HasTestHarnessFunc
       // We ignore _ports for now...
       iocells ++= _iocells.flatten
       harnessFunctions ++= _harnessFunctions.flatten
+      println(s"ChipTop: sz:${harnessFunctions.size}")
     }
 
     // Connect the implicit clock/reset, if present
