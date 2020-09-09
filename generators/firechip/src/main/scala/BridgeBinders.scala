@@ -26,7 +26,7 @@ import ariane.ArianeTile
 
 import boom.common.{BoomTile}
 import barstools.iocell.chisel._
-import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters, IOCellKey}
+import chipyard.iobinders.{ClockedIO, IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters, IOCellKey}
 import chipyard.{HasHarnessSignalReferences}
 import chipyard.harness._
 
@@ -56,57 +56,44 @@ class WithFireSimIOCellModels extends Config((site, here, up) => {
 })
 
 class WithSerialBridge extends OverrideHarnessBinder({
-  (system: CanHavePeripherySerial, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    val clock = ports.collectFirst({case c: Clock => c})
-    val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
-    ports.filter(_.isInstanceOf[SerialIO]).map {
-      case s: SerialIO => withClockAndReset(clock.get, th.harnessReset) {
-        SerialBridge(clock.get, s, MainMemoryConsts.globalName)(p)
+  (system: CanHavePeripherySerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+    ports.map { p =>
+      withClockAndReset(p.clock, th.harnessReset) {
+        SerialBridge(p.clock, p.bits, MainMemoryConsts.globalName)(GetSystemParameters(system))
       }
-      case _ =>
     }
     Nil
   }
 })
 
 class WithNICBridge extends OverrideHarnessBinder({
-  (system: CanHavePeripheryIceNICModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    val clock = ports.collectFirst({case c: Clock => c})
-    ports.map {
-      case p: NICIOvonly => withClockAndReset(clock.get, th.harnessReset) { NICBridge(clock.get, p)(system.p) }
-      case _ =>
-    }
+  (system: CanHavePeripheryIceNICModuleImp, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[NICIOvonly]]) => {
+    ports.map { p => withClockAndReset(p.clock, th.harnessReset) { NICBridge(p.clock, p.bits)(system.p) } }
     Nil
   }
 })
 
 class WithUARTBridge extends OverrideHarnessBinder({
-  (system: HasPeripheryUARTModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) =>
-    ports.map { case p: UARTPortIO => UARTBridge(th.harnessClock, p)(system.p) }; Nil
+  (system: HasPeripheryUARTModuleImp, th: HasHarnessSignalReferences, ports: Seq[UARTPortIO]) =>
+    ports.map { p => UARTBridge(th.harnessClock, p)(system.p) }; Nil
 })
 
 class WithBlockDeviceBridge extends OverrideHarnessBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    val clock = ports.collectFirst({case c: Clock => c})
-    ports.map {
-      case p: BlockDeviceIO => BlockDevBridge(clock.get, p, th.harnessReset.toBool)(system.p)
-      case _ =>
-    }
+  (system: CanHavePeripheryBlockDeviceModuleImp, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
+    ports.map { p => BlockDevBridge(p.clock, p.bits, th.harnessReset.toBool)(system.p) }
     Nil
   }
 })
 
 class WithFASEDBridge extends OverrideHarnessBinder({
-  (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
+  (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
-    val clock = ports.collectFirst({case c: Clock => c})
-    val axi4_ports = ports.collect { case p: AXI4Bundle => p }
-    (axi4_ports zip system.memAXI4Node.edges.in).map { case (axi4: AXI4Bundle, edge) =>
-      val nastiKey = NastiParameters(axi4.r.bits.data.getWidth,
-                                     axi4.ar.bits.addr.getWidth,
-                                     axi4.ar.bits.id.getWidth)
+    (ports zip system.memAXI4Node.edges.in).map { case (axi4, edge) =>
+      val nastiKey = NastiParameters(axi4.bits.r.bits.data.getWidth,
+                                     axi4.bits.ar.bits.addr.getWidth,
+                                     axi4.bits.ar.bits.id.getWidth)
       system match {
-        case s: BaseSubsystem => FASEDBridge(clock.get, axi4, th.harnessReset.asBool,
+        case s: BaseSubsystem => FASEDBridge(axi4.clock, axi4.bits, th.harnessReset.asBool,
           CompleteConfig(p(firesim.configs.MemModelKey),
                          nastiKey,
                          Some(AXI4EdgeSummary(edge)),
@@ -119,22 +106,25 @@ class WithFASEDBridge extends OverrideHarnessBinder({
 })
 
 class WithTracerVBridge extends ComposeHarnessBinder({
-  (system: CanHaveTraceIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-    ports.map { case p: TraceOutputTop => p.traces.map(tileTrace =>
-      withClockAndReset(tileTrace.clock, tileTrace.reset) { TracerVBridge(tileTrace)(system.p) }
-    )}
+  (system: CanHaveTraceIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[TraceOutputTop]) => {
+    ports.map { p =>
+      p.traces.map(
+        tileTrace => withClockAndReset(tileTrace.clock, tileTrace.reset) { TracerVBridge(tileTrace)(system.p) }
+      )
+    }
+    Nil
   }
 })
 
 class WithDromajoBridge extends ComposeHarnessBinder({
-  (system: CanHaveTraceIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) =>
-    ports.map { case p: TraceOutputTop => p.traces.map(tileTrace => DromajoBridge(tileTrace)(system.p)) }; Nil
+  (system: CanHaveTraceIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[TraceOutputTop]) =>
+    ports.map { p => p.traces.map(tileTrace => DromajoBridge(tileTrace)(system.p)) }; Nil
 })
 
 
 class WithTraceGenBridge extends OverrideHarnessBinder({
-  (system: TraceGenSystemModuleImp, th: HasHarnessSignalReferences, ports: Seq[Data]) =>
-    ports.map { case p: Bool => GroundTestBridge(th.harnessClock, p)(system.p) }; Nil
+  (system: TraceGenSystemModuleImp, th: HasHarnessSignalReferences, ports: Seq[Bool]) =>
+    ports.map { p => GroundTestBridge(th.harnessClock, p)(system.p) }; Nil
 })
 
 class WithFireSimMultiCycleRegfile extends ComposeIOBinder({

@@ -35,15 +35,15 @@ case object HarnessBinders extends Field[Map[String, (Any, HasHarnessSignalRefer
 object ApplyHarnessBinders {
   def apply(th: HasHarnessSignalReferences, sys: LazyModule, map: Map[String, (Any, HasHarnessSignalReferences, Seq[Data]) => Seq[Any]], portMap: Map[String, Seq[Data]]) = {
     val pm = portMap.withDefaultValue(Nil)
-    map.map { case (s, f) => f(sys, th, pm(s)) ++ f(sys.module, th, pm(s))
-    }
+    map.map { case (s, f) => f(sys, th, pm(s)) ++ f(sys.module, th, pm(s)) }
   }
 }
 
-class OverrideHarnessBinder[T, S <: Data](fn: => (T, HasHarnessSignalReferences, Seq[S]) => Seq[Any])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+class OverrideHarnessBinder[T, S <: Data](fn: => (T, HasHarnessSignalReferences, Seq[S]) => Seq[Any])(implicit tag: ClassTag[T], ptag: ClassTag[S]) extends Config((site, here, up) => {
   case HarnessBinders => up(HarnessBinders, site) + (tag.runtimeClass.toString ->
       ((t: Any, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-        val pts = ports.map(_.asInstanceOf[S])
+        val pts = ports.collect({case p: S => p})
+        require (pts.length == ports.length, s"Port type mismatch between IOBinder and HarnessBinder: ${ptag}")
         t match {
           case system: T => fn(system, th, pts)
           case _ => Nil
@@ -52,10 +52,11 @@ class OverrideHarnessBinder[T, S <: Data](fn: => (T, HasHarnessSignalReferences,
   )
 })
 
-class ComposeHarnessBinder[T, S <: Data](fn: => (T, HasHarnessSignalReferences, Seq[S]) => Seq[Any])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+class ComposeHarnessBinder[T, S <: Data](fn: => (T, HasHarnessSignalReferences, Seq[S]) => Seq[Any])(implicit tag: ClassTag[T], ptag: ClassTag[S]) extends Config((site, here, up) => {
   case HarnessBinders => up(HarnessBinders, site) + (tag.runtimeClass.toString ->
       ((t: Any, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-        val pts = ports.map(_.asInstanceOf[S])
+        val pts = ports.collect({case p: S => p})
+        require (pts.length == ports.length, s"Port type mismatch between IOBinder and HarnessBinder: ${ptag}")
         t match {
           case system: T => up(HarnessBinders, site)(tag.runtimeClass.toString)(system, th, pts) ++ fn(system, th, pts)
           case _ => Nil
