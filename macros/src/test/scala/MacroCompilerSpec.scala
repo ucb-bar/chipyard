@@ -1,9 +1,10 @@
+// See LICENSE for license details.
+
 package barstools.macros
 
 import firrtl.ir.{Circuit, NoInfo}
 import firrtl.passes.RemoveEmpty
 import firrtl.Parser.parse
-import firrtl.Utils.ceilLog2
 import java.io.{File, StringWriter}
 
 import mdf.macrolib.SRAMMacro

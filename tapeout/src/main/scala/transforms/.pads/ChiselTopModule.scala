@@ -1,9 +1,11 @@
+// See LICENSE for license details.
+
 package barstools.tapeout.transforms.pads
 
 import chisel3._
-import barstools.tapeout.transforms.clkgen._
 import chisel3.experimental._
-import firrtl.transforms.DedupModules
+import firrtl.Transform
+import firrtl.annotations.Annotation
 
 // TODO: Move out of pads
 
@@ -20,29 +22,12 @@ abstract class TopModule(
     coreHeight: Int = 0,
     usePads: Boolean = true,
     override_clock: Option[Clock] = None,
-    override_reset: Option[Bool] = None) extends Module with IsClkModule {
+    override_reset: Option[Bool] = None) extends Module {
 
     override_clock.foreach(clock := _)
     override_reset.foreach(reset := _)
 
-  override def annotateClkPort(p: Element, anno: ClkPortAnnotation): Unit = {
-    DataMirror.directionOf(p) match {
-      case chisel3.core.ActualDirection.Input =>
-        require(anno.tag.nonEmpty, "Top Module input clks must be clk sinks")
-        require(anno.tag.get.src.nonEmpty,
-          "Top module input clks must have clk period, etc. specified")
-      case _ =>
-        throw new Exception("Clk port direction must be specified!")
-    }
-    p match {
-      case _: chisel3.core.Clock =>
-      case _ => throw new Exception("Clock port must be of type Clock")
-    }
-    annotate(TargetClkPortAnnoC(p, anno))
-  }
-
-  override def annotateDerivedClks(m: Module, anno: ClkModAnnotation): Unit =
-    throw new Exception("Top module cannot be pure clock module!")
+  private val mySelf = this
 
   // Annotate module as top module (that requires pad transform)
   // Specify the yaml file that indicates how pads are templated,
@@ -55,7 +40,38 @@ abstract class TopModule(
       coreHeight = coreHeight,
       supplyAnnos = supplyAnnos
     )
-    annotate(TargetModulePadAnnoC(this, modulePadAnnotation))
+    //TODO: PORT-1.4: Remove commented code
+    //    annotate(TargetModulePadAnnoC(this, modulePadAnnotation))
+    annotate(new ChiselAnnotation with RunFirrtlTransform {
+      override def toFirrtl: Annotation = {
+        TargetModulePadAnnoF(mySelf.toNamed, modulePadAnnotation)
+      }
+      def transformClass: Class[_ <: Transform] = classOf[AddIOPadsTransform]
+    })
+  }
+
+  private def extractElementNames(signal: Data): Seq[String] = {
+    val names = signal match {
+      case elt: Record =>
+        elt.elements.map { case (key, value) => extractElementNames(value).map(x => key + "_" + x) }.toSeq.flatten
+      case elt: Vec[_] =>
+        elt.zipWithIndex.map { case (elt, i) => extractElementNames(elt).map(x => i + "_" + x) }.toSeq.flatten
+      case elt: Element => Seq("")
+      case elt => throw new Exception(s"Cannot extractElementNames for type ${elt.getClass}")
+    }
+    names.map(s => s.stripSuffix("_"))
+  }
+
+  // TODO: Replace!
+  def extractElements(signal: Data): Seq[Element] = {
+    signal match {
+      case elt: Record =>
+        elt.elements.map { case (key, value) => extractElements(value) }.toSeq.flatten
+      case elt: Vec[_] =>
+        elt.map { elt => extractElements(elt) }.toSeq.flatten
+      case elt: Element => Seq(elt)
+      case elt => throw new Exception(s"Cannot extractElements for type ${elt.getClass}")
+    }
   }
 
   // Annotate IO with side + pad name

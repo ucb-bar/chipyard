@@ -1,10 +1,10 @@
+// See LICENSE for license details.
+
 package barstools.tapeout.transforms.pads
 
 import firrtl.annotations._
 import chisel3.experimental._
 import chisel3._
-import barstools.tapeout.transforms._
-import firrtl._
 
 import net.jcazevedo.moultingyaml._
 
@@ -23,26 +23,32 @@ abstract class FirrtlPadTransformAnnotation {
 abstract class IOAnnotation {
   def serialize: String
 }
+
 case class IOPadAnnotation(padSide: String, padName: String) extends IOAnnotation {
   import PadAnnotationsYaml._
   def serialize: String = this.toYaml.prettyPrint
   def getPadSide: PadSide = HasPadAnnotation.getSide(padSide)
 }
+
 case class NoIOPadAnnotation(noPad: String = "") extends IOAnnotation {
   import PadAnnotationsYaml._
   def serialize: String = this.toYaml.prettyPrint
-  def field = "noPad:"
+  def field: String = "noPad:"
 }
+
 // Firrtl version
-case class TargetIOPadAnnoF(target: ComponentName, anno: IOAnnotation) extends FirrtlPadTransformAnnotation with SingleTargetAnnotation[ComponentName] {
+case class TargetIOPadAnnoF(target: ComponentName, anno: IOAnnotation)
+  extends FirrtlPadTransformAnnotation with SingleTargetAnnotation[ComponentName] {
+
   def duplicate(n: ComponentName): TargetIOPadAnnoF = this.copy(target = n)
-  def getAnno = Annotation(target, classOf[AddIOPadsTransform], anno.serialize)
-  def targetName = target.name
+  def targetName: String = target.name
 }
+
+//TODO: PORT-1.4: Remove commented code
 // Chisel version
-case class TargetIOPadAnnoC(target: Element, anno: IOAnnotation) extends ChiselAnnotation {
-  def toFirrtl = TargetIOPadAnnoF(target.toNamed, anno)
-}
+//case class TargetIOPadAnnoC(target: Element, anno: IOAnnotation) extends ChiselAnnotation {
+//  def toFirrtl = TargetIOPadAnnoF(target.toNamed, anno)
+//}
 
 // A bunch of supply pads (designated by name, # on each chip side) can be associated with the top module
 case class SupplyAnnotation(
@@ -51,6 +57,7 @@ case class SupplyAnnotation(
     rightSide: Int = 0,
     topSide: Int = 0,
     bottomSide: Int = 0)
+
 // The chip top should have a default pad side, a pad template file, and supply annotations
 case class ModulePadAnnotation(
     defaultPadSide: String = Top.serialize,
@@ -63,16 +70,15 @@ case class ModulePadAnnotation(
   require(supplyPadNames.distinct.length == supplyPadNames.length, "Supply pads should only be specified once!")
   def getDefaultPadSide: PadSide = HasPadAnnotation.getSide(defaultPadSide)
 }
+
 // Firrtl version
-case class TargetModulePadAnnoF(target: ModuleName, anno: ModulePadAnnotation) extends FirrtlPadTransformAnnotation with SingleTargetAnnotation[ModuleName] {
+case class TargetModulePadAnnoF(target: ModuleName, anno: ModulePadAnnotation)
+  extends FirrtlPadTransformAnnotation with SingleTargetAnnotation[ModuleName] {
+
   def duplicate(n: ModuleName): TargetModulePadAnnoF = this.copy(target = n)
-  def getAnno = Annotation(target, classOf[AddIOPadsTransform], anno.serialize)
-  def targetName = target.name
+  def targetName: String = target.name
 }
-// Chisel version
-case class TargetModulePadAnnoC(target: Module, anno: ModulePadAnnotation) extends ChiselAnnotation {
-  def toFirrtl = TargetModulePadAnnoF(target.toNamed, anno)
-}
+
 
 case class CollectedAnnos(
     componentAnnos: Seq[TargetIOPadAnnoF],
@@ -95,16 +101,34 @@ object HasPadAnnotation {
     case _ => throw new Exception(s" $a not a valid pad side annotation!")
   }
 
+  //TODO: PORT-1.4: Remove commented code
+//  def unapply(a: Annotation): Option[FirrtlPadTransformAnnotation] = a match {
+//    case Annotation(f, t, s) if t == classOf[AddIOPadsTransform] => f match {
+//      case m: ModuleName =>
+//        Some(TargetModulePadAnnoF(m, s.parseYaml.convertTo[ModulePadAnnotation]))
+//      case c: ComponentName if s.contains(NoIOPadAnnotation().field) =>
+//        Some(TargetIOPadAnnoF(c, s.parseYaml.convertTo[NoIOPadAnnotation]))
+//      case c: ComponentName =>
+//        Some(TargetIOPadAnnoF(c, s.parseYaml.convertTo[IOPadAnnotation]))
+//      case _ => throw new Exception("Annotation only valid on module or component")
+//    }
+//    case _ => None
+//  }
+
+  //scalastyle:off cyclomatic.complexity
   def unapply(a: Annotation): Option[FirrtlPadTransformAnnotation] = a match {
-    case Annotation(f, t, s) if t == classOf[AddIOPadsTransform] => f match {
-      case m: ModuleName =>
-        Some(TargetModulePadAnnoF(m, s.parseYaml.convertTo[ModulePadAnnotation]))
-      case c: ComponentName if s.contains(NoIOPadAnnotation().field) =>
-        Some(TargetIOPadAnnoF(c, s.parseYaml.convertTo[NoIOPadAnnotation]))
-      case c: ComponentName =>
-        Some(TargetIOPadAnnoF(c, s.parseYaml.convertTo[IOPadAnnotation]))
-      case _ => throw new Exception("Annotation only valid on module or component")
-    }
+    case hasTransform: RunFirrtlTransform if hasTransform.transformClass == classOf[AddIOPadsTransform] =>
+      hasTransform match {
+        case hasTarget: SingleTargetAnnotation[_] =>
+          hasTarget.target match {
+            case m: ModuleName =>
+              Some(TargetModulePadAnnoF(m, s.parseYaml.convertTo[ModulePadAnnotation]))
+          hasTarget match {
+            case _ => None
+          }
+
+
+      }
     case _ => None
   }
 
@@ -113,8 +137,9 @@ object HasPadAnnotation {
     val padAnnos = annos.map(x => unapply(x)).flatten
     val targets = padAnnos.map(x => x.targetName)
     require(targets.distinct.length == targets.length, "Only 1 pad related annotation is allowed per component/module")
-    if (padAnnos.length == 0) None
-    else {
+    if (padAnnos.length == 0) {
+      None
+    } else {
       val moduleAnnosTemp = padAnnos.filter {
         case TargetModulePadAnnoF(_, _) => true
         case _ => false
