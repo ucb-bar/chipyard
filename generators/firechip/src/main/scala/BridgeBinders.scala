@@ -14,7 +14,7 @@ import freechips.rocketchip.tile.{RocketTile}
 import sifive.blocks.devices.uart._
 
 import testchipip._
-import icenet.{CanHavePeripheryIceNICModuleImp, SimNetwork, NicLoopback, NICKey, NICIOvonly}
+import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 
 import junctions.{NastiKey, NastiParameters}
 import midas.models.{FASEDBridge, AXI4EdgeSummary, CompleteConfig}
@@ -26,7 +26,7 @@ import ariane.ArianeTile
 
 import boom.common.{BoomTile}
 import barstools.iocell.chisel._
-import chipyard.iobinders.{ClockedIO, IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters, IOCellKey}
+import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters, IOCellKey}
 import chipyard.{HasHarnessSignalReferences}
 import chipyard.harness._
 
@@ -67,8 +67,9 @@ class WithSerialBridge extends OverrideHarnessBinder({
 })
 
 class WithNICBridge extends OverrideHarnessBinder({
-  (system: CanHavePeripheryIceNICModuleImp, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[NICIOvonly]]) => {
-    ports.map { p => withClockAndReset(p.clock, th.harnessReset) { NICBridge(p.clock, p.bits)(system.p) } }
+  (system: CanHavePeripheryIceNIC, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[NICIOvonly]]) => {
+    val p: Parameters = GetSystemParameters(system)
+    ports.map { n => withClockAndReset(n.clock, th.harnessReset) { NICBridge(n.clock, n.bits)(p) } }
     Nil
   }
 })
@@ -79,8 +80,9 @@ class WithUARTBridge extends OverrideHarnessBinder({
 })
 
 class WithBlockDeviceBridge extends OverrideHarnessBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
-    ports.map { p => BlockDevBridge(p.clock, p.bits, th.harnessReset.toBool)(system.p) }
+  (system: CanHavePeripheryBlockDevice, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    ports.map { b => BlockDevBridge(b.clock, b.bits, th.harnessReset.toBool) }
     Nil
   }
 })

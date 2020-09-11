@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util.experimental.{BoringUtils}
 import chisel3.experimental.{Analog, IO, DataMirror}
 
-import freechips.rocketchip.config.{Field, Config, Parameters}
+import freechips.rocketchip.config._
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag.{JTAGIO}
@@ -22,7 +22,7 @@ import tracegen.{TraceGenSystemModuleImp}
 import barstools.iocell.chisel._
 
 import testchipip._
-import icenet.{CanHavePeripheryIceNICModuleImp, SimNetwork, NicLoopback, NICKey, NICIOvonly}
+import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 
 import chipyard.GlobalResetSchemeKey
 
@@ -43,15 +43,15 @@ import scala.reflect.{ClassTag}
 case object IOBinders extends Field[Map[String, (Any) => (Seq[Data], Seq[IOCell])]](
   Map[String, (Any) => (Seq[Data], Seq[IOCell])]().withDefaultValue((Any) => (Nil, Nil))
 )
-
 object ApplyIOBinders {
   def apply(sys: LazyModule, map: Map[String, (Any) => (Seq[Data], Seq[IOCell])]):
       (Iterable[Data], Iterable[IOCell], Map[String, Seq[Data]]) = {
     val lzy = map.map({ case (s,f) => s -> f(sys) })
     val imp = map.map({ case (s,f) => s -> f(sys.module) })
+    val unzipped = (lzy.values ++ imp.values).unzip
 
-    val ports: Iterable[Data] = lzy.values.map(_._1).flatten ++ imp.values.map(_._1).flatten
-    val cells: Iterable[IOCell] = lzy.values.map(_._2).flatten ++ imp.values.map(_._2).flatten
+    val ports: Iterable[Data] = unzipped._1.flatten
+    val cells: Iterable[IOCell] = unzipped._2.flatten
     val portMap: Map[String, Seq[Data]] = map.keys.map(k => k -> (lzy(k)._1 ++ imp(k)._1)).toMap
     (ports, cells, portMap)
   }
@@ -72,13 +72,17 @@ object GetSystemParameters {
   }
 }
 
+class IOBinder(f: (View, View, View) => PartialFunction[Any, Any]) extends Config(f)
+
 // This macro overrides previous matches on some Top mixin. This is useful for
 // binders which drive IO, since those typically cannot be composed
-class OverrideIOBinder[T, S <: Data](fn: => (T) => (Seq[S], Seq[IOCell]))(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+class OverrideIOBinder[T, S <: Data](fn: => (T) => (Seq[S], Seq[IOCell]))(implicit tag: ClassTag[T]) extends IOBinder((site, here, up) => {
   case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString ->
       ((t: Any) => {
         t match {
-          case system: T => fn(system)
+          case system: T =>
+            val (ports, cells) = fn(system)
+            (ports, cells)
           case _ => (Nil, Nil)
         }
       })
@@ -87,14 +91,16 @@ class OverrideIOBinder[T, S <: Data](fn: => (T) => (Seq[S], Seq[IOCell]))(implic
 
 // This macro composes with previous matches on some Top mixin. This is useful for
 // annotation-like binders, since those can typically be composed
-class ComposeIOBinder[T, S <: Data](fn: => (T) => (Seq[S], Seq[IOCell]))(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+class ComposeIOBinder[T, S <: Data](fn: => (T) => (Seq[S], Seq[IOCell]))(implicit tag: ClassTag[T]) extends IOBinder((site, here, up) => {
   case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString ->
       ((t: Any) => {
         t match {
           case system: T =>
             val r = up(IOBinders, site)(tag.runtimeClass.toString)(system)
             val h = fn(system)
-            (r._1 ++ h._1, r._2 ++ h._2)
+            val ports = r._1 ++ h._1
+            val cells = r._2 ++ h._2
+            (ports, cells)
           case _ => (Nil, Nil)
         }
       })
@@ -116,11 +122,6 @@ object BoreHelper {
 
 case object IOCellKey extends Field[IOCellTypeParams](GenericIOCellParams())
 
-class ClockedIO[T <: Data](gen: T) extends Bundle {
-  val clock = Output(Clock())
-  val bits = gen
-  override def cloneType: this.type = (new ClockedIO(DataMirror.internal.chiselTypeClone[T](gen))).asInstanceOf[this.type]
-}
 
 class WithGPIOCells extends OverrideIOBinder({
   (system: HasPeripheryGPIOModuleImp) => {
@@ -252,10 +253,7 @@ class WithDebugIOCells extends OverrideIOBinder({
 class WithSerialIOCells extends OverrideIOBinder({
   (system: CanHavePeripherySerial) => system.serial.map({ s =>
     val sys = system.asInstanceOf[BaseSubsystem]
-    val clocked_serial = Wire(new ClockedIO(DataMirror.internal.chiselTypeClone[SerialIO](s))).suggestName("serial_wire")
-    clocked_serial.clock := BoreHelper("serial_clock", sys.fbus.module.clock)
-    clocked_serial.bits <> s
-    val (port, cells) = IOCell.generateIOFromSignal(clocked_serial, Some("serial"), sys.p(IOCellKey))
+    val (port, cells) = IOCell.generateIOFromSignal(s.getWrappedValue, Some("serial"), sys.p(IOCellKey))
     port.suggestName("serial")
     (Seq(port), cells)
   }).getOrElse((Nil, Nil))
@@ -299,11 +297,10 @@ class WithL2FBusAXI4Punchthrough extends OverrideIOBinder({
 })
 
 class WithBlockDeviceIOPunchthrough extends OverrideIOBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp) => {
+  (system: CanHavePeripheryBlockDevice) => {
     val ports: Seq[ClockedIO[BlockDeviceIO]] = system.bdev.map({ bdev =>
-      val p = IO(new ClockedIO(new BlockDeviceIO()(system.p))).suggestName("blockdev")
-      p.clock := BoreHelper("blkdev_clk", system.outer.controller.get.module.clock)
-      p.bits <> bdev
+      val p = IO(new ClockedIO(new BlockDeviceIO()(GetSystemParameters(system)))).suggestName("blockdev")
+      p <> bdev
       p
     }).toSeq
     (ports, Nil)
@@ -311,11 +308,10 @@ class WithBlockDeviceIOPunchthrough extends OverrideIOBinder({
 })
 
 class WithNICIOPunchthrough extends OverrideIOBinder({
-  (system: CanHavePeripheryIceNICModuleImp) => {
-    val ports: Seq[ClockedIO[NICIOvonly]] = system.net.map({ n =>
+  (system: CanHavePeripheryIceNIC) => {
+    val ports: Seq[ClockedIO[NICIOvonly]] = system.icenicOpt.map({ n =>
       val p = IO(new ClockedIO(new NICIOvonly)).suggestName("nic")
-      p.clock := BoreHelper("nic_clk", system.outer.icenicOpt.get.module.clock)
-      p.bits <> n
+      p <> n
       p
     }).toSeq
     (ports, Nil)

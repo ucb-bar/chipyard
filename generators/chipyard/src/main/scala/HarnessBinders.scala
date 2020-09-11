@@ -20,10 +20,10 @@ import barstools.iocell.chisel._
 import testchipip._
 
 import chipyard.HasHarnessSignalReferences
-import chipyard.iobinders.ClockedIO
+import chipyard.iobinders.GetSystemParameters
 
 import tracegen.{TraceGenSystemModuleImp}
-import icenet.{CanHavePeripheryIceNICModuleImp, SimNetwork, NicLoopback, NICKey, NICIOvonly}
+import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 
 import scala.reflect.{ClassTag}
 
@@ -89,24 +89,27 @@ class WithSimSPIFlashModel(rdOnly: Boolean = true) extends OverrideHarnessBinder
 })
 
 class WithSimBlockDevice extends OverrideHarnessBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
-    ports.map { p => SimBlockDevice.connect(p.clock, th.harnessReset.asBool, Some(p.bits))(system.p) }
+  (system: CanHavePeripheryBlockDevice, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    ports.map { b => SimBlockDevice.connect(b.clock, th.harnessReset.asBool, Some(b.bits)) }
     Nil
   }
 })
 
 class WithBlockDeviceModel extends OverrideHarnessBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
-    ports.map { p => withClockAndReset(p.clock, th.harnessReset) { BlockDeviceModel.connect(Some(p.bits))(system.p) } }
+  (system: CanHavePeripheryBlockDevice, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    ports.map { b => withClockAndReset(b.clock, th.harnessReset) { BlockDeviceModel.connect(Some(b.bits)) } }
     Nil
   }
 })
 
 class WithLoopbackNIC extends OverrideHarnessBinder({
-  (system: CanHavePeripheryIceNICModuleImp, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[NICIOvonly]]) => {
-    ports.map { p =>
-      withClockAndReset(p.clock, th.harnessReset) {
-        NicLoopback.connect(Some(p.bits), system.p(NICKey))
+  (system: CanHavePeripheryIceNIC, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[NICIOvonly]]) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    ports.map { n =>
+      withClockAndReset(n.clock, th.harnessReset) {
+        NicLoopback.connect(Some(n.bits), p(NICKey))
       }
     }
     Nil
@@ -114,8 +117,9 @@ class WithLoopbackNIC extends OverrideHarnessBinder({
 })
 
 class WithSimNetwork extends OverrideHarnessBinder({
-  (system: CanHavePeripheryIceNICModuleImp, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[NICIOvonly]]) => {
-    ports.map { p => SimNetwork.connect(Some(p.bits), p.clock, th.harnessReset.asBool) }
+  (system: CanHavePeripheryIceNIC, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[NICIOvonly]]) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    ports.map { n => SimNetwork.connect(Some(n.bits), n.clock, th.harnessReset.asBool) }
     Nil
   }
 })
