@@ -5,32 +5,23 @@ import chisel3.experimental.{Analog, IO}
 
 import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp}
 import freechips.rocketchip.config.{Parameters}
-import freechips.rocketchip.diplomacy.{InModuleBody}
+import freechips.rocketchip.diplomacy.{InModuleBody, BundleBridgeSource}
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.ip.xilinx._
 import sifive.fpgashells.shell._
 import sifive.fpgashells.clocks._
 
-import chipyard.{BuildTop, HasHarnessSignalReferences, HasTestHarnessFunctions}
+import sifive.blocks.devices.uart._
 
-class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118Shell with HasHarnessSignalReferences {
-  val pllResetAsReset = InModuleBody{ Wire(Reset()) }
+class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118Shell {
 
-  InModuleBody {
-    pllResetAsReset := pllReset
-  }
+  require(p(PeripheryUARTKey).size >= 1)
 
-  lazy val harnessClock = this.module.sysclk
-  lazy val harnessReset = pllResetAsReset.getWrappedValue
-  val success = false.B
-  lazy val dutReset = pllResetAsReset.getWrappedValue
-
-  // must be after HasHarnessSignalReferences assignments
-  println(s"DEBUG: ----- sz:${topDesign.harnessFunctions.size}")
-  topDesign match { case d: HasTestHarnessFunctions =>
-    println(s"DEBUG: ----- sz:${d.harnessFunctions.size}")
-    d.harnessFunctions.foreach(_(this))
+  designParameters(UARTOverlayKey).foreach { uok =>
+    topDesign match { case td: HasPlatformIO =>
+      io_uart_bb))
+    }
   }
 }
 

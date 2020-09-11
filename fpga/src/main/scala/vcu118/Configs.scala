@@ -21,8 +21,7 @@ import sifive.fpgashells.shell.{DesignKey}
 import chipyard.{BuildTop}
 
 class WithChipyardBuildTop extends Config((site, here, up) => {
-  //case DesignKey => { (p:Parameters) => p(BuildTop)(p) }
-  case DesignKey => {(p: Parameters) => new chipyard.ChipTop()(p) }
+  case DesignKey => {(p: Parameters) => new VCU118Platform()(p) }
 })
 
 class WithBringupUARTs extends Config((site, here, up) => {
@@ -32,7 +31,6 @@ class WithBringupUARTs extends Config((site, here, up) => {
 })
 
 class FakeBringupConfig extends Config(
-  new WithUARTConnection1 ++
   new WithBringupUARTs ++
   new WithChipyardBuildTop ++
   new chipyard.config.WithBootROM ++
@@ -47,5 +45,5 @@ class FakeBringupConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.system.BaseConfig)
