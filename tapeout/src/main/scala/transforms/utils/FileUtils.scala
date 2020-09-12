@@ -1,9 +1,11 @@
+// See LICENSE for license details.
+
 package barstools.tapeout.transforms
 
+import chisel3.experimental.{ChiselAnnotation, annotate}
 import firrtl._
 import firrtl.annotations._
-import firrtl.passes._
-import firrtl.ir._
+import firrtl.transforms.BlackBoxTargetDirAnno
 
 object WriteConfig {
   def apply(dir: String, file: String, contents: String): Unit = {
@@ -17,8 +19,7 @@ object GetTargetDir {
   def apply(state: CircuitState): String = {
     val annos = state.annotations
     val destDir = annos.map {
-      case Annotation(f, t, s) if t == classOf[firrtl.transforms.BlackBoxTargetDirAnno] =>
-        Some(s)
+      case BlackBoxTargetDirAnno(s) => Some(s)
       case _ => None
     }.flatten
     val loc = {
@@ -31,27 +32,39 @@ object GetTargetDir {
   }
 }
 
-// Fake transform just to track Technology information directory
-object TechnologyLocation {
-  def apply(dir: String): Annotation = {
-    Annotation(CircuitName("All"), classOf[TechnologyLocation], dir)
+trait HasSetTechnologyLocation {
+  self: chisel3.Module =>
+
+  def setTechnologyLocation(dir: String) {
+    annotate(new ChiselAnnotation {
+      override def toFirrtl: Annotation = {
+        TechnologyLocationAnnotation(dir)
+      }
+    })
   }
 }
-class TechnologyLocation extends Transform {
-  def inputForm: CircuitForm = LowForm
-  def outputForm: CircuitForm = LowForm
-  def execute(state: CircuitState) = throw new Exception("Technology Location transform execution doesn't work!")
+
+case class TechnologyLocationAnnotation(dir: String) extends SingleTargetAnnotation[CircuitName] {
+  val target: CircuitName = CircuitName("All")
+  override def duplicate(n: CircuitName): Annotation = TechnologyLocationAnnotation(dir)
+}
+
+class TechnologyLocation extends Transform with DependencyAPIMigration {
+  def execute(state: CircuitState): CircuitState = {
+    throw new Exception("Technology Location transform execution doesn't work!")
+  }
+
   def get(state: CircuitState): String = {
     val annos = state.annotations
-    val dir = annos.map {
-      case Annotation(f, t, s) if t == classOf[TechnologyLocation] => Some(s)
+    val dir = annos.flatMap {
+      case TechnologyLocationAnnotation(dir) => Some(dir)
       case _ => None
-    }.flatten
+    }
     dir.length match {
       case 0 => ""
       case 1 =>
         val targetDir = new java.io.File(dir.head)
-        if(!targetDir.exists()) throw new Exception("Technology yaml directory doesn't exist!")
+        if(!targetDir.exists()) throw new Exception(s"Technology yaml directory $targetDir doesn't exist!")
         dir.head
       case _ => throw new Exception("Only 1 tech directory annotation allowed!")
     }

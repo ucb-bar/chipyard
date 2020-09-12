@@ -2,27 +2,17 @@
 
 package barstools.tapeout.transforms.retime
 
-import chisel3.internal.InstanceId
-import firrtl.PrimOps.Not
-import firrtl.annotations.{Annotation, CircuitName, ModuleName, Named, ComponentName}
-import firrtl.ir.{Input, UIntType, IntWidth, Module, Port, DefNode, NoInfo, Reference, DoPrim, Block, Circuit}
-import firrtl.passes.Pass
-import firrtl.{CircuitForm, CircuitState, LowForm, Transform}
+import chisel3.experimental.RunFirrtlTransform
+import firrtl.annotations._
+import firrtl.{CircuitState, DependencyAPIMigration, Transform}
 
-object RetimeAnnotation {
-  def apply(target: ModuleName): Annotation = Annotation(target, classOf[RetimeTransform], "retime")
-  def unapply(a: Annotation): Option[Named] = a match {
-    case Annotation(m, t, "retime") if t == classOf[RetimeTransform] => Some(m)
-    case _ => None
-  }
+case class RetimeAnnotation(target: Named) extends SingleTargetAnnotation[Named] {
+  override def duplicate(n: Named): Annotation = RetimeAnnotation(n)
 }
 
-class RetimeTransform extends Transform {
-  override def inputForm: CircuitForm = LowForm
-  override def outputForm: CircuitForm = LowForm
-
+class RetimeTransform extends Transform with DependencyAPIMigration {
   override def execute(state: CircuitState): CircuitState = {
-    getMyAnnotations(state) match {
+    state.annotations.filter(_.isInstanceOf[RetimeAnnotation]) match {
       case Nil => state
       case seq => seq.foreach {
         case RetimeAnnotation(ModuleName(module, CircuitName(_))) =>
@@ -39,8 +29,10 @@ class RetimeTransform extends Transform {
 
 trait RetimeLib {
   self: chisel3.Module =>
+
   def retime[T <: chisel3.internal.LegacyModule](module: T): Unit = {
-    chisel3.experimental.annotate(new chisel3.experimental.ChiselAnnotation{
+    chisel3.experimental.annotate(new chisel3.experimental.ChiselAnnotation with RunFirrtlTransform {
+      def transformClass: Class[_ <: Transform] = classOf[RetimeTransform]
       def toFirrtl: Annotation = RetimeAnnotation(module.toNamed)
     })
   }

@@ -3,9 +3,6 @@
 package barstools.tapeout.transforms.pads
 
 import firrtl.annotations._
-import chisel3.experimental._
-import chisel3._
-
 import net.jcazevedo.moultingyaml._
 
 object PadAnnotationsYaml extends DefaultYamlProtocol {
@@ -13,6 +10,17 @@ object PadAnnotationsYaml extends DefaultYamlProtocol {
   implicit val _noiopad = yamlFormat1(NoIOPadAnnotation)
   implicit val _supplyanno = yamlFormat5(SupplyAnnotation)
   implicit val _modulepadanno = yamlFormat4(ModulePadAnnotation)
+
+  // Putting these serialize methods here seems to fix warnings about missing implicits for the toYaml
+  def serialize(noIOPad: NoIOPadAnnotation): String = {
+    noIOPad.toYaml.prettyPrint
+  }
+  def serialize(ioPadAnnotation: IOPadAnnotation): String = {
+    ioPadAnnotation.toYaml.prettyPrint
+  }
+  def serialize(modulePadAnnotation: ModulePadAnnotation): String = {
+    modulePadAnnotation.toYaml.prettyPrint
+  }
 }
 
 abstract class FirrtlPadTransformAnnotation {
@@ -25,14 +33,12 @@ abstract class IOAnnotation {
 }
 
 case class IOPadAnnotation(padSide: String, padName: String) extends IOAnnotation {
-  import PadAnnotationsYaml._
-  def serialize: String = this.toYaml.prettyPrint
+  def serialize: String = PadAnnotationsYaml.serialize(this)
   def getPadSide: PadSide = HasPadAnnotation.getSide(padSide)
 }
 
 case class NoIOPadAnnotation(noPad: String = "") extends IOAnnotation {
-  import PadAnnotationsYaml._
-  def serialize: String = this.toYaml.prettyPrint
+  def serialize: String = PadAnnotationsYaml.serialize(this)
   def field: String = "noPad:"
 }
 
@@ -43,12 +49,6 @@ case class TargetIOPadAnnoF(target: ComponentName, anno: IOAnnotation)
   def duplicate(n: ComponentName): TargetIOPadAnnoF = this.copy(target = n)
   def targetName: String = target.name
 }
-
-//TODO: PORT-1.4: Remove commented code
-// Chisel version
-//case class TargetIOPadAnnoC(target: Element, anno: IOAnnotation) extends ChiselAnnotation {
-//  def toFirrtl = TargetIOPadAnnoF(target.toNamed, anno)
-//}
 
 // A bunch of supply pads (designated by name, # on each chip side) can be associated with the top module
 case class SupplyAnnotation(
@@ -64,9 +64,9 @@ case class ModulePadAnnotation(
     coreWidth: Int = 0,
     coreHeight: Int = 0,
     supplyAnnos: Seq[SupplyAnnotation] = Seq.empty) {
-  import PadAnnotationsYaml._
-  def serialize: String = this.toYaml.prettyPrint
-  val supplyPadNames = supplyAnnos.map(_.padName)
+
+  def serialize: String = PadAnnotationsYaml.serialize(this)
+  def supplyPadNames: Seq[String] = supplyAnnos.map(_.padName)
   require(supplyPadNames.distinct.length == supplyPadNames.length, "Supply pads should only be specified once!")
   def getDefaultPadSide: PadSide = HasPadAnnotation.getSide(defaultPadSide)
 }
@@ -91,7 +91,6 @@ case class CollectedAnnos(
 }
 
 object HasPadAnnotation {
-  import PadAnnotationsYaml._
 
   def getSide(a: String): PadSide = a match {
     case i if i == Left.serialize => Left
@@ -115,26 +114,13 @@ object HasPadAnnotation {
 //    case _ => None
 //  }
 
-  //scalastyle:off cyclomatic.complexity
-  def unapply(a: Annotation): Option[FirrtlPadTransformAnnotation] = a match {
-    case hasTransform: RunFirrtlTransform if hasTransform.transformClass == classOf[AddIOPadsTransform] =>
-      hasTransform match {
-        case hasTarget: SingleTargetAnnotation[_] =>
-          hasTarget.target match {
-            case m: ModuleName =>
-              Some(TargetModulePadAnnoF(m, s.parseYaml.convertTo[ModulePadAnnotation]))
-          hasTarget match {
-            case _ => None
-          }
-
-
-      }
-    case _ => None
-  }
-
   def apply(annos: Seq[Annotation]): Option[CollectedAnnos] = {
     // Get all pad-related annotations (config files, pad sides, pad names, etc.)
-    val padAnnos = annos.map(x => unapply(x)).flatten
+    val padAnnos = annos.flatMap {
+      case a: TargetModulePadAnnoF => Some(a)
+      case a: TargetIOPadAnnoF => Some(a)
+      case _ => None
+    }
     val targets = padAnnos.map(x => x.targetName)
     require(targets.distinct.length == targets.length, "Only 1 pad related annotation is allowed per component/module")
     if (padAnnos.length == 0) {

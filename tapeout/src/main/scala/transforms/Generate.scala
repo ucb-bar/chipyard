@@ -1,16 +1,11 @@
 package barstools.tapeout.transforms
 
 import firrtl._
-import firrtl.ir._
 import firrtl.annotations._
-import firrtl.stage.FirrtlCircuitAnnotation
-import firrtl.passes.Pass
-
-import java.io.File
-import firrtl.annotations.AnnotationYamlProtocol._
+import firrtl.ir._
 import firrtl.passes.memlib.ReplSeqMemAnnotation
+import firrtl.stage.FirrtlCircuitAnnotation
 import firrtl.transforms.BlackBoxResourceFileNameAnno
-import net.jcazevedo.moultingyaml._
 import logger.LazyLogging
 
 trait HasTapeoutOptions { self: ExecutionOptionsManager with HasFirrtlOptions =>

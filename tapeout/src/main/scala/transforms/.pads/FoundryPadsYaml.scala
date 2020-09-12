@@ -1,3 +1,5 @@
+// See LICENSE for license details.
+
 package barstools.tapeout.transforms.pads
 
 import net.jcazevedo.moultingyaml._
@@ -85,8 +87,9 @@ object FoundryPadsYaml extends DefaultYamlProtocol {
   implicit val _pad = yamlFormat6(FoundryPad)
   def parse(techDir: String): Seq[FoundryPad] = {
     val file = techDir + exampleResource
-    if(techDir != "" && !(new java.io.File(file)).exists())
-      throw new Exception("Technology directory must contain FoundryPads.yaml!")
+    if(techDir != "" && !(new java.io.File(file)).exists()) {
+      throw new Exception(s"Technology directory $techDir must contain FoundryPads.yaml!")
+    }
     val out = (new YamlFileReader(exampleResource)).parse[FoundryPad](if (techDir == "") "" else file)
     val padNames = out.map(x => x.correctedName)
     require(padNames.distinct.length == padNames.length, "Pad names must be unique!")

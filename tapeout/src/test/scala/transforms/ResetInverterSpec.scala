@@ -3,7 +3,7 @@
 package barstools.tapeout.transforms
 
 import chisel3._
-import firrtl._
+import chisel3.stage.ChiselStage
 import org.scalatest.{FreeSpec, Matchers}
 
 class ExampleModuleNeedsResetInverted extends Module with ResetInverter {
@@ -19,22 +19,15 @@ class ExampleModuleNeedsResetInverted extends Module with ResetInverter {
 }
 
 class ResetNSpec extends FreeSpec with Matchers {
-
   "Inverting reset needs to be done throughout module" in {
-    val optionsManager = new ExecutionOptionsManager("dsptools") with HasChiselExecutionOptions with HasFirrtlOptions {
-      firrtlOptions = firrtlOptions.copy(compilerName = "low", customTransforms = List(new ResetInverterTransform)),
-    }
-    chisel3.Driver.execute(optionsManager, () => new ExampleModuleNeedsResetInverted) match {
-      case ChiselExecutionSuccess(_, chirrtl, Some(FirrtlExecutionSuccess(_, firrtl))) =>
-        chirrtl should include ("input reset :")
-        chirrtl should not include "input reset_n :"
-        chirrtl should not include "node reset = not(reset_n)"
+    val chirrtl = (new ChiselStage).emitChirrtl(new ExampleModuleNeedsResetInverted, Array())
+    chirrtl should include("input reset :")
+    (chirrtl should not).include("input reset_n :")
+    (chirrtl should not).include("node reset = not(reset_n)")
 
-        firrtl should include ("input reset_n :")
-        firrtl should include ("node reset = not(reset_n)")
-        firrtl should not include "input reset :"
-      case _ =>
-        // bad
-    }
+    val firrtl = (new ChiselStage).emitFirrtl(new ExampleModuleNeedsResetInverted, Array("-X", "low"))
+    firrtl should include("input reset_n :")
+    firrtl should include("node reset = not(reset_n)")
+    (firrtl should not).include("input reset :")
   }
 }

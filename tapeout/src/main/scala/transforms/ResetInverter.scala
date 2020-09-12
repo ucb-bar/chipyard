@@ -2,19 +2,15 @@
 
 package barstools.tapeout.transforms
 
-import chisel3.internal.InstanceId
+import chisel3.experimental.RunFirrtlTransform
 import firrtl.PrimOps.Not
-import firrtl.annotations.{Annotation, CircuitName, ModuleName, Named}
-import firrtl.ir.{Input, UIntType, IntWidth, Module, Port, DefNode, NoInfo, Reference, DoPrim, Block, Circuit}
+import firrtl.annotations.{Annotation, CircuitName, ModuleName, SingleTargetAnnotation}
+import firrtl.ir._
 import firrtl.passes.Pass
-import firrtl.{CircuitForm, CircuitState, LowForm, Transform}
+import firrtl.{CircuitState, DependencyAPIMigration, Transform}
 
-object ResetInverterAnnotation {
-  def apply(target: ModuleName): Annotation = Annotation(target, classOf[ResetInverterTransform], "invert")
-  def unapply(a: Annotation): Option[Named] = a match {
-    case Annotation(m, t, "invert") if t == classOf[ResetInverterTransform] => Some(m)
-    case _ => None
-  }
+case class ResetInverterAnnotation(target: ModuleName) extends SingleTargetAnnotation[ModuleName] {
+  override def duplicate(n: ModuleName): Annotation = ResetInverterAnnotation(n)
 }
 
 object ResetN extends Pass {
@@ -42,12 +38,9 @@ object ResetN extends Pass {
   }
 }
 
-class ResetInverterTransform extends Transform {
-  override def inputForm: CircuitForm = LowForm
-  override def outputForm: CircuitForm = LowForm
-
+class ResetInverterTransform extends Transform with DependencyAPIMigration {
   override def execute(state: CircuitState): CircuitState = {
-    getMyAnnotations(state) match {
+    state.annotations.filter(_.isInstanceOf[ResetInverterAnnotation]) match {
       case Nil => state
       case Seq(ResetInverterAnnotation(ModuleName(state.circuit.main, CircuitName(_)))) =>
         state.copy(circuit = ResetN.run(state.circuit))
@@ -60,7 +53,8 @@ class ResetInverterTransform extends Transform {
 trait ResetInverter {
   self: chisel3.Module =>
   def invert[T <: chisel3.internal.LegacyModule](module: T): Unit = {
-    chisel3.experimental.annotate(new chisel3.experimental.ChiselAnnotation{
+    chisel3.experimental.annotate(new chisel3.experimental.ChiselAnnotation with RunFirrtlTransform {
+      def transformClass: Class[_ <: Transform] = classOf[ResetInverterTransform]
       def toFirrtl: Annotation = ResetInverterAnnotation(module.toNamed)
     })
   }

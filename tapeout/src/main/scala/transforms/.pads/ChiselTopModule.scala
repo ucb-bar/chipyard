@@ -77,7 +77,12 @@ abstract class TopModule(
   // Annotate IO with side + pad name
   def annotatePad(sig: Element, side: PadSide = defaultPadSide, name: String = ""): Unit = if (usePads) {
     val anno = IOPadAnnotation(side.serialize, name)
-    annotate(TargetIOPadAnnoC(sig, anno))
+    annotate(new ChiselAnnotation with RunFirrtlTransform {
+      override def toFirrtl: Annotation = {
+        TargetIOPadAnnoF(sig.toTarget, anno)
+      }
+      def transformClass: Class[_ <: Transform] = classOf[AddIOPadsTransform]
+    })
   }
   def annotatePad(sig: Aggregate, name: String): Unit = annotatePad(sig, side = defaultPadSide, name)
   def annotatePad(sig: Aggregate, side: PadSide): Unit = annotatePad(sig, side, name = "")
@@ -86,7 +91,16 @@ abstract class TopModule(
 
   // There may be cases where pads were inserted elsewhere. If that's the case, allow certain IO to
   // not have pads auto added. Note that annotatePad and noPad are mutually exclusive!
-  def noPad(sig: Element): Unit = if (usePads) annotate(TargetIOPadAnnoC(sig, NoIOPadAnnotation()))
+  def noPad(sig: Element): Unit = {
+    if (usePads) {
+      annotate(new ChiselAnnotation with RunFirrtlTransform {
+        override def toFirrtl: Annotation = {
+          TargetIOPadAnnoF(sig.toTarget, NoIOPadAnnotation())
+        }
+        def transformClass: Class[_ <: Transform] = classOf[AddIOPadsTransform]
+      })
+    }
+  }
   def noPad(sig: Aggregate): Unit = extractElements(sig) foreach { x => noPad(x) }
 
   // Since this is a super class, this should be the first thing that gets run

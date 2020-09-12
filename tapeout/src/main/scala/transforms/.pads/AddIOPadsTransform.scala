@@ -3,24 +3,19 @@
 package barstools.tapeout.transforms.pads
 
 import firrtl._
-import firrtl.annotations._
 import firrtl.passes._
-import firrtl.ir._
 import barstools.tapeout.transforms._
 
 import scala.collection.mutable
 
 // Main Add IO Pad transform operates on low Firrtl
-class AddIOPadsTransform extends Transform with SeqTransformBased {
-
-  override def inputForm: CircuitForm = LowForm
-  override def outputForm: CircuitForm = LowForm
+class AddIOPadsTransform extends Transform with SeqTransformBased with DependencyAPIMigration {
 
   val transformList = new mutable.ArrayBuffer[Transform]
   def transforms: Seq[Transform] = transformList
 
   override def execute(state: CircuitState): CircuitState = {
-    val collectedAnnos = HasPadAnnotation(getMyAnnotations(state))
+    val collectedAnnos = HasPadAnnotation(state.annotations)
     collectedAnnos match {
       // Transform not used
       case None => state

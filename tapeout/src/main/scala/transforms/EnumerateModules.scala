@@ -20,10 +20,10 @@ class EnumerateModulesPass(enumerate: (Module) => Unit) extends Pass {
   }
 }
 
-class EnumerateModules(enumerate: (Module) => Unit) extends Transform with SeqTransformBased {
-  def inputForm = LowForm
-  def outputForm = LowForm
-  def transforms = Seq(new EnumerateModulesPass(enumerate))
+class EnumerateModules(enumerate: (Module) => Unit)
+  extends Transform with SeqTransformBased with DependencyAPIMigration {
+
+  def transforms: Seq[Transform] = Seq(new EnumerateModulesPass(enumerate))
 
   def execute(state: CircuitState): CircuitState = {
     val ret = runTransforms(state)
