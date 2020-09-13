@@ -17,6 +17,7 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.i2c._
 
 import sifive.fpgashells.shell.{DesignKey}
+import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD}
 
 import chipyard.{BuildTop}
 
@@ -24,14 +25,20 @@ class WithChipyardBuildTop extends Config((site, here, up) => {
   case DesignKey => {(p: Parameters) => new VCU118Platform()(p) }
 })
 
-class WithBringupUARTs extends Config((site, here, up) => {
+class WithBringupPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(
     UARTParams(address = BigInt(0x64000000L)),
     UARTParams(address = BigInt(0x64003000L)))
+  case PeripherySPIKey => List(
+    SPIParams(rAddress = BigInt(0x64001000L)),
+    SPIParams(rAddress = BigInt(0x64004000L)))
+  case PeripheryI2CKey => List(
+    I2CParams(address = BigInt(0x64005000L)))
+  case VCU118ShellPMOD => "SDIO"
 })
 
 class FakeBringupConfig extends Config(
-  new WithBringupUARTs ++
+  new WithBringupPeripherals ++
   new WithChipyardBuildTop ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithL2TLBs(1024) ++

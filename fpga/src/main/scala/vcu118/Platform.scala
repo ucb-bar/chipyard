@@ -10,31 +10,46 @@ import freechips.rocketchip.config.{Parameters}
 import chipyard.{BuildSystem}
 
 import sifive.blocks.devices.uart._
+import sifive.blocks.devices.spi._
+import sifive.blocks.devices.i2c._
 
-trait HasPlatformIO {
-  val io_uart_bb: BundleBridgeSource[UARTPortIO]
+trait HasVCU118PlatformIO {
+  val io_uart: Seq[UARTPortIO]
+  val io_spi: Seq[SPIPortIO]
+  val io_i2c: Seq[I2CPort]
 }
 
-class VCU118Platform(override implicit val p: Parameters) extends LazyModule
-  with HasPlatformIO {
+class VCU118Platform(override implicit val p: Parameters) extends LazyModule {
 
   val lazySystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
-
-  // BundleBridgeSource is a was for Diplomacy to connect something from very deep in the design
-  // to somewhere much, much higher. For ex. tunneling trace from the tile to the very top level.
-  val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(p(PeripheryUARTKey)(0))))
 
   override lazy val module = new VCU118PlatformModule(this)
 }
 
-class VCU118PlatformModule[+L <: VCU118Platform](_outer: L) extends LazyModuleImp(_outer) {
+class VCU118PlatformModule[+L <: VCU118Platform](_outer: L) extends LazyModuleImp(_outer)
+  with HasVCU118PlatformIO {
 
-  _outer.lazySystem.module match { case sys: HasPeripheryUARTModuleImp =>
-    // create UART pins in Platform
-    //val io_uart_pins_temp = p(PeripheryUARTKey).zipWithIndex map { case (c, i) => IO(new UARTPortIO(c)).suggestName(s"uart_$i") }
-
-   //(io_uart_pins_temp zip sys.uart) map { case (p, r) => p <> r }
-   _outer.io_uart_bb.bundle <> sys.uart(0)
+  val io_uart = _outer.lazySystem.module match { case sys: HasPeripheryUARTModuleImp =>
+    val io_uart_pins_temp = p(PeripheryUARTKey).zipWithIndex.map { case (p, i) => IO(new UARTPortIO(p)).suggestName(s"uart_$i") }
+    (io_uart_pins_temp zip sys.uart).map { case (io, sysio) =>
+      io <> sysio
+    }
+    io_uart_pins_temp
   }
 
+  val io_spi = _outer.lazySystem.module match { case sys: HasPeripherySPIModuleImp =>
+    val io_spi_pins_temp = p(PeripherySPIKey).zipWithIndex.map { case (p, i) => IO(new SPIPortIO(p)).suggestName(s"spi_$i") }
+    (io_spi_pins_temp zip sys.spi).map { case (io, sysio) =>
+      io <> sysio
+    }
+    io_spi_pins_temp
+  }
+
+  val io_i2c = _outer.lazySystem.module match { case sys: HasPeripheryI2CModuleImp =>
+    val io_i2c_pins_temp = p(PeripheryI2CKey).zipWithIndex.map { case (p, i) => IO(new I2CPort).suggestName(s"i2c_$i") }
+    (io_i2c_pins_temp zip sys.i2c).map { case (io, sysio) =>
+      io <> sysio
+    }
+    io_i2c_pins_temp
+  }
 }
