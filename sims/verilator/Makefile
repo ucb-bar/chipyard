@@ -27,6 +27,7 @@ sim_name = verilator
 sim_prefix = simulator
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
+sim_verif = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-verif
 
 WAVEFORM_FLAG=-v$(sim_out_name).vcd
 
@@ -37,9 +38,10 @@ else
 SEED_FLAG=
 endif
 
-.PHONY: default debug
+.PHONY: default debug verif
 default: $(sim)
 debug: $(sim_debug)
+verif: $(sim_verif)
 
 #########################################################################################
 # import other necessary rules and variables
@@ -169,12 +171,15 @@ VERILATOR_OPTS = $(VERILATOR_CC_OPTS) $(VERILATOR_NONCC_OPTS)
 #########################################################################################
 model_dir = $(build_dir)/$(long_name)
 model_dir_debug = $(build_dir)/$(long_name).debug
+model_dir_verif = $(build_dir)/$(long_name).verif
 
 model_header = $(model_dir)/V$(VLOG_MODEL).h
 model_header_debug = $(model_dir_debug)/V$(VLOG_MODEL).h
+model_header_verif = $(model_dir_verif)/V$(VLOG_MODEL).h
 
 model_mk = $(model_dir)/V$(VLOG_MODEL).mk
 model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
+model_mk_verif = $(model_dir_verif)/V$(VLOG_MODEL).mk
 
 #########################################################################################
 # build makefile fragment that builds the verilator sim rules
@@ -191,6 +196,12 @@ $(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
 	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim_debug) $(TRACING_OPTS) -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
 	touch $@
 
+$(model_mk_verif): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
+	rm -rf $(model_dir_verif)
+	mkdir -p $(model_dir_verif)
+	$(VERILATOR) $(VERILATOR_OPTS) -o $(sim_verif) --trace --coverage --trace-coverage -Mdir $(model_dir_verif) -CFLAGS "-include $(model_header_verif)"
+	touch $@
+
 #########################################################################################
 # invoke make to make verilator sim rules
 #########################################################################################
@@ -199,6 +210,9 @@ $(sim): $(model_mk) $(dramsim_lib)
 
 $(sim_debug): $(model_mk_debug) $(dramsim_lib)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir_debug) -f V$(VLOG_MODEL).mk
+
+$(sim_verif): $(model_mk_verif) $(dramsim_lib)
+	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir_verif) -f V$(VLOG_MODEL).mk
 
 #########################################################################################
 # create a verilator vpd rule
