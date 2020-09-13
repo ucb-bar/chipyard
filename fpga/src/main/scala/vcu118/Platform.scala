@@ -12,11 +12,13 @@ import chipyard.{BuildSystem}
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 import sifive.blocks.devices.i2c._
+import sifive.blocks.devices.gpio._
 
 trait HasVCU118PlatformIO {
   val io_uart: Seq[UARTPortIO]
   val io_spi: Seq[SPIPortIO]
   val io_i2c: Seq[I2CPort]
+  val io_gpio: Seq[GPIOPortIO]
 }
 
 class VCU118Platform(override implicit val p: Parameters) extends LazyModule {
@@ -51,5 +53,13 @@ class VCU118PlatformModule[+L <: VCU118Platform](_outer: L) extends LazyModuleIm
       io <> sysio
     }
     io_i2c_pins_temp
+  }
+
+  val io_gpio = _outer.lazySystem.module match { case sys: HasPeripheryGPIOModuleImp =>
+    val io_gpio_pins_temp = p(PeripheryGPIOKey).zipWithIndex.map { case (p, i) => IO(new GPIOPortIO(p)).suggestName(s"gpio_$i") }
+    (io_gpio_pins_temp zip sys.gpio).map { case (io, sysio) =>
+      io <> sysio
+    }
+    io_gpio_pins_temp
   }
 }

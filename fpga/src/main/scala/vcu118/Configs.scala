@@ -1,6 +1,8 @@
 // See LICENSE for license details.
 package chipyard.fpga.vcu118
 
+import math.min
+
 import freechips.rocketchip.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.debug._
@@ -9,7 +11,6 @@ import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase}
 import freechips.rocketchip.system._
 import freechips.rocketchip.tile._
 
-import sifive.blocks.devices.mockaon._
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.pwm._
 import sifive.blocks.devices.spi._
@@ -20,6 +21,7 @@ import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD}
 
 import chipyard.{BuildTop}
+import chipyard.fpga.vcu118.bringup.{BringupGPIOs}
 
 class WithChipyardBuildTop extends Config((site, here, up) => {
   case DesignKey => {(p: Parameters) => new VCU118Platform()(p) }
@@ -32,9 +34,22 @@ class WithBringupPeripherals extends Config((site, here, up) => {
   case PeripherySPIKey => List(
     SPIParams(rAddress = BigInt(0x64001000L)),
     SPIParams(rAddress = BigInt(0x64004000L)))
+  case VCU118ShellPMOD => "SDIO"
   case PeripheryI2CKey => List(
     I2CParams(address = BigInt(0x64005000L)))
-  case VCU118ShellPMOD => "SDIO"
+  case PeripheryGPIOKey => {
+    if (BringupGPIOs.width > 0) {
+      require(BringupGPIOs.width <= 64) // currently only support 64 GPIOs (change addrs to get more)
+      val gpioAddrs = Seq(BigInt(0x64002000), BigInt(0x64007000))
+      val maxGPIOSupport = 32 // max gpios supported by SiFive driver (split by 32)
+      List.tabulate(((BringupGPIOs.width - 1)/maxGPIOSupport) + 1)(n => {
+        GPIOParams(address = gpioAddrs(n), width = min(BringupGPIOs.width - maxGPIOSupport*n, maxGPIOSupport))
+      })
+    }
+    else {
+      List.empty[GPIOParams]
+    }
+  }
 })
 
 class FakeBringupConfig extends Config(
