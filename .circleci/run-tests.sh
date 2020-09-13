@@ -35,6 +35,9 @@ case $1 in
     chipyard-dmirocket)
         run_bmark ${mapping[$1]}
         ;;
+    chipyard-tlserial)
+        run_bmark ${mapping[$1]}
+        ;;
     chipyard-boom)
         run_bmark ${mapping[$1]}
         ;;

@@ -84,7 +84,7 @@ class WithFireSimConfigTweaks extends Config(
   // Required: Adds IO to attach SerialBridge. The SerialBridges is responsible
   // for signalling simulation termination under simulation success. This fragment can
   // be removed if you supply an auxiliary bridge that signals simulation termination
-  new testchipip.WithTSI ++
+  new testchipip.WithSerialTSI ++
   // Optional: Removing this will require using an initramfs under linux
   new testchipip.WithBlockDevice ++
   // Required*: Scale default baud rate with periphery bus frequency
@@ -131,7 +131,7 @@ class FireSimSmallSystemConfig extends Config(
   new WithoutClockGating ++
   new WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++
-  new testchipip.WithTSI ++
+  new testchipip.WithSerialTSI ++
   new testchipip.WithBlockDevice ++
   new chipyard.config.WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nWays = 2, capacityKB = 64) ++

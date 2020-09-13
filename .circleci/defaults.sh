@@ -49,6 +49,7 @@ LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 declare -A mapping
 mapping["chipyard-rocket"]=""
 mapping["chipyard-dmirocket"]=" CONFIG=dmiRocketConfig"
+mapping["chipyard-tlserial"]=" CONFIG=TLSerialRocketConfig"
 mapping["chipyard-sha3"]=" CONFIG=Sha3RocketConfig"
 mapping["chipyard-streaming-fir"]=" CONFIG=StreamingFIRRocketConfig"
 mapping["chipyard-streaming-passthrough"]=" CONFIG=StreamingPassthroughRocketConfig"

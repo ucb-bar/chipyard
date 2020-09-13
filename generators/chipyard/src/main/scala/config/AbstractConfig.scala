@@ -15,7 +15,7 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithUARTAdapter ++                       // add UART adapter to display UART on stdout, if uart is present
   new chipyard.harness.WithBlackBoxSimMem ++                    // add SimDRAM DRAM model for axi4 backing memory, if axi4 mem is enabled
   new chipyard.harness.WithSimDebug ++                          // add SimJTAG or SimDTM adapters if debug module is enabled
-  new chipyard.harness.WithSimSerial ++                         // add SimSerial adapter for HTIF, if serial port is present
+  new chipyard.harness.WithSimTSISerial ++                      // add SimSerial adapter for HTIF, if serial port is present
   new chipyard.harness.WithGPIOTiedOff ++                       // tie-off chiptop GPIOs, if GPIOs are present
   new chipyard.harness.WithSimSPIFlashModel ++                  // add simulated SPI flash memory, if SPI is enabled
   new chipyard.harness.WithSimAXIMMIO ++                        // add SimAXIMem for axi4 mmio port, if enabled
@@ -29,7 +29,8 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithL2FBusAXI4Punchthrough ++
   new chipyard.iobinders.WithBlockDeviceIOPunchthrough ++
   new chipyard.iobinders.WithNICIOPunchthrough ++
-  new chipyard.iobinders.WithSerialIOCells ++
+  new chipyard.iobinders.WithSerialTSIIOCells ++
+  new chipyard.iobinders.WithSerialTLIOCells ++
   new chipyard.iobinders.WithDebugIOCells ++
   new chipyard.iobinders.WithUARTIOCells ++
   new chipyard.iobinders.WithGPIOCells ++
@@ -39,7 +40,7 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithExtInterruptIOCells ++
 
 
-  new testchipip.WithTSI ++                                      // use testchipip serial offchip link
+  new testchipip.WithSerialTSI ++                                // use testchipip serial offchip link
   new chipyard.config.WithBootROM ++                             // use default bootrom
   new chipyard.config.WithUART ++                                // add a UART
   new chipyard.config.WithL2TLBs(1024) ++                        // use L2 TLBs

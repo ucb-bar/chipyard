@@ -204,6 +204,11 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "chipyard-dmirocket"
+    prepare-chipyard-tlserial:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-tlserial"
     prepare-chipyard-sha3:
         executor: main-env
         steps:
@@ -302,6 +307,11 @@ jobs:
         steps:
             - run-tests:
                 project-key: "chipyard-dmirocket"
+    chipyard-tlserial-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-tlserial"
     chipyard-sha3-run-tests:
         executor: main-env
         steps:
@@ -456,6 +466,11 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
+            - prepare-chipyard-tlserial:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
             - prepare-chipyard-sha3:
                 requires:
                     - install-riscv-toolchain
@@ -550,6 +565,10 @@ workflows:
             - chipyard-dmirocket-run-tests:
                 requires:
                     - prepare-chipyard-dmirocket
+
+            - chipyard-tlserial-run-tests:
+                requires:
+                    - prepare-chipyard-tlserial
 
             - chipyard-sha3-run-tests:
                 requires:

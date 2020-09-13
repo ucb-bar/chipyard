@@ -56,7 +56,7 @@ class WithFireSimIOCellModels extends Config((site, here, up) => {
 })
 
 class WithSerialBridge extends OverrideHarnessBinder({
-  (system: CanHavePeripherySerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+  (system: CanHavePeripheryTSISerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     ports.map { p =>
       withClockAndReset(p.clock, th.harnessReset) {
         SerialBridge(p.clock, p.bits, MainMemoryConsts.globalName)(GetSystemParameters(system))

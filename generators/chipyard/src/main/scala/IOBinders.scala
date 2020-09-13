@@ -250,11 +250,20 @@ class WithDebugIOCells extends OverrideIOBinder({
   }
 })
 
-class WithSerialIOCells extends OverrideIOBinder({
-  (system: CanHavePeripherySerial) => system.serial.map({ s =>
+class WithSerialTSIIOCells extends OverrideIOBinder({
+  (system: CanHavePeripheryTSISerial) => system.serial_tsi.map({ s =>
     val sys = system.asInstanceOf[BaseSubsystem]
-    val (port, cells) = IOCell.generateIOFromSignal(s.getWrappedValue, Some("serial"), sys.p(IOCellKey))
-    port.suggestName("serial")
+    val (port, cells) = IOCell.generateIOFromSignal(s.getWrappedValue, Some("serial_tsi"), sys.p(IOCellKey))
+    port.suggestName("serial_tsi")
+    (Seq(port), cells)
+  }).getOrElse((Nil, Nil))
+})
+
+class WithSerialTLIOCells extends OverrideIOBinder({
+  (system: CanHavePeripheryTLSerial) => system.serial_tl.map({ s =>
+    val sys = system.asInstanceOf[BaseSubsystem]
+    val (port, cells) = IOCell.generateIOFromSignal(s.getWrappedValue, Some("serial_tl"), sys.p(IOCellKey))
+    port.suggestName("serial_tl")
     (Seq(port), cells)
   }).getOrElse((Nil, Nil))
 })
