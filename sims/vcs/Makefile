@@ -24,12 +24,14 @@ sim_name = vcs
 sim_prefix = simv
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
+sim_verif = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-verif
 
 include $(base_dir)/vcs.mk
 
 .PHONY: default debug
 default: $(sim)
 debug: $(sim_debug)
+verif: $(sim_verif)
 
 #########################################################################################
 # import other necessary rules and variables
@@ -60,6 +62,12 @@ $(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir_debug)
 	$(VCS) $(VCS_OPTS) $(EXTRA_SIM_SOURCES) -o $@ -Mdir=$(model_dir_debug)  \
 	+define+DEBUG
+
+$(sim_verif): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
+	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
+	+define+DEBUG \
+	-debug_pp \
+    -cm line
 
 #########################################################################################
 # create a vcs vpd rule
