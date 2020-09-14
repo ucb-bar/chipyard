@@ -8,13 +8,32 @@ import firrtl._
 import firrtl.ir._
 import barstools.tapeout.transforms._
 
+trait HasFoundryPadFields {
+  val tpe:          String
+  val name:         String
+  val width:        Int
+  val height:       Int
+  val supplySetNum: Option[Int]
+  val verilog:      String
+}
+
+case class FoundryPadFields(
+  tpe:          String,
+  name:         String,
+  width:        Int,
+  height:       Int,
+  supplySetNum: Option[Int],
+  verilog:      String)
+    extends HasFoundryPadFields
+
 case class FoundryPad(
-    tpe: String,
-    name: String,
-    width: Int,
-    height: Int,
-    supplySetNum: Option[Int],
-    verilog: String) {
+  tpe:          String,
+  name:         String,
+  width:        Int,
+  height:       Int,
+  supplySetNum: Option[Int],
+  verilog:      String)
+    extends HasFoundryPadFields {
 
   def padInstName = "PAD"
 
@@ -38,8 +57,10 @@ case class FoundryPad(
       // Supply pads don't have IO
       require(!verilog.contains("{{#if isInput}}"), "Supply pad template must not contain '{{#if isInput}}'")
       require(
-        verilog.contains(s"${padInstName}["), "All supply pad templates should have instance arrays" +
-        " called ${padInstName}[n:0], where n = ${getSupplySetNum-1}")
+        verilog.contains(s"${padInstName}["),
+        "All supply pad templates should have instance arrays" +
+          " called ${padInstName}[n:0], where n = ${getSupplySetNum-1}"
+      )
       require(supplySetNum.nonEmpty, "# of grouped supply pads 'supplySetNum' should be specified!")
       SupplyPad
     case _ => throw new Exception("Illegal pad type in config!")
@@ -53,14 +74,14 @@ case class FoundryPad(
   private[barstools] val correctedName = name.replace(" ", "_")
 
   case class TemplateParams(
-      // isInput only used with digital pads
-      isInput: Boolean,
-      isHorizontal: Boolean) {
+    // isInput only used with digital pads
+    isInput:      Boolean,
+    isHorizontal: Boolean) {
 
     private val orient = if (isHorizontal) Horizontal.serialize else Vertical.serialize
     private val dir = padType match {
-      case AnalogPad => "inout"
-      case SupplyPad => "none"
+      case AnalogPad  => "inout"
+      case SupplyPad  => "none"
       case DigitalPad => if (isInput) Input.serialize else Output.serialize
     }
     val name = {
@@ -84,13 +105,23 @@ case class FoundryPad(
 
 object FoundryPadsYaml extends DefaultYamlProtocol {
   val exampleResource = "/FoundryPads.yaml"
-  implicit val _pad = yamlFormat6(FoundryPad)
+  implicit val _pad = yamlFormat6(FoundryPadFields)
   def parse(techDir: String): Seq[FoundryPad] = {
     val file = techDir + exampleResource
-    if(techDir != "" && !(new java.io.File(file)).exists()) {
+    if (techDir != "" && !(new java.io.File(file)).exists()) {
       throw new Exception(s"Technology directory $techDir must contain FoundryPads.yaml!")
     }
-    val out = (new YamlFileReader(exampleResource)).parse[FoundryPad](if (techDir == "") "" else file)
+    val fieldsArray = (new YamlFileReader(exampleResource)).parse[FoundryPadFields](if (techDir == "") "" else file)
+    val out = fieldsArray.map { fields =>
+      FoundryPad(
+        tpe = fields.tpe,
+        name = fields.name,
+        width = fields.width,
+        height = fields.height,
+        supplySetNum = fields.supplySetNum,
+        verilog = fields.verilog
+      )
+    }
     val padNames = out.map(x => x.correctedName)
     require(padNames.distinct.length == padNames.length, "Pad names must be unique!")
     out

@@ -8,6 +8,7 @@ import barstools.tapeout.transforms.HasSetTechnologyLocation
 import chisel3._
 import chisel3.experimental._
 import chisel3.iotesters._
+import chisel3.stage.ChiselStage
 import chisel3.util.HasBlackBoxInline
 import firrtl._
 import org.scalatest.{FlatSpec, Matchers}
@@ -255,20 +256,11 @@ class IOPadSpec extends FlatSpec with Matchers {
   }
    */
   it should "create proper IO pads + black box in verilog" in {
-    val optionsManager = new ExecutionOptionsManager("barstools") with HasChiselExecutionOptions with HasFirrtlOptions {
-      firrtlOptions = firrtlOptions.copy(
-        compilerName = "verilog"
-      )
-      commonOptions = commonOptions.copy(targetDirName = "test_run_dir/PadsVerilog")
-      //commonOptions = commonOptions.copy(globalLogLevel = logger.LogLevel.Info)
-    }
-    val success = chisel3.Driver.execute(optionsManager, () => new ExampleTopModuleWithBB) match {
-      case ChiselExecutionSuccess(_, chirrtl, Some(FirrtlExecutionSuccess(_, verilog))) =>
-        true
-      case _ => false
-    }
-    success should be(true)
-    val dir = optionsManager.commonOptions.targetDirName
+    val dir = "test_run_dir/PadsVerilog"
+    (new ChiselStage).emitFirrtl(
+      new ExampleTopModuleWithBB,
+      Array("-td", dir, "-X", "verilog")
+    )
     checkOutputs(dir)
   }
 
