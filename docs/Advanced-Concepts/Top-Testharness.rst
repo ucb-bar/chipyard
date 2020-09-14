@@ -14,9 +14,9 @@ ChipTop/DUT
 ``ChipTop`` is the top-level module that instantiates the ``System`` submodule, usually an instance of the concrete class ``DigitalTop``.
 The vast majority of the design resides in the ``System``.
 Other components that exist inside the ``ChipTop`` layer are generally IO cells, clock receivers and multiplexers, reset synchronizers, and other analog IP that needs to exist outside of the ``System``.
-The ``IOBinders`` are responsible for instantiating the IO cells and defining the test harness collateral that connects to the top-level ports.
-Most of these types of devices can be instantiated using custom ``IOBinders``, so the provided ``ChipTop`` and ``ChipTopCaughtReset`` classes are sufficient.
-However, if needed, the ``BaseChipTop`` abstract class can be extended for building more custom ``ChipTop`` designs.
+The ``IOBinders`` are responsible for instantiating the IO cells for ``ChipTop`` IO that correspond to IO of the ``System``.
+The ``HarnessBinders`` are responsible for instantiating test harness collateral that connects to the ``ChipTop`` ports.
+Most types of devices and testing collateral can be instantiated using custom ``IOBinders`` and ``HarnessBinders``.
 
 
 System/DigitalTop
