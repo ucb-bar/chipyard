@@ -262,6 +262,11 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "chipyard-ariane"
+    prepare-chipyard-sodor:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-sodor"
     prepare-icenet:
         executor: main-env
         steps:
@@ -390,6 +395,12 @@ jobs:
             - run-tests:
                 project-key: "chipyard-ariane"
                 timeout: "30m"
+    chipyard-sodor-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-sodor"
+                timeout: "20m"
     chipyard-nvdla-run-tests:
         executor: main-env
         steps:
@@ -511,6 +522,11 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
+            - prepare-chipyard-sodor:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
             - prepare-icenet:
                 requires:
                     - install-riscv-toolchain
@@ -615,6 +631,10 @@ workflows:
             - chipyard-ariane-run-tests:
                 requires:
                     - prepare-chipyard-ariane
+
+            - chipyard-sodor-run-tests:
+                requires:
+                    - prepare-chipyard-sodor
 
             - chipyard-nvdla-run-tests:
                 requires:
