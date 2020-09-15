@@ -223,47 +223,23 @@ class WithTiedOffDebug extends OverrideHarnessBinder({
 })
 
 
-class WithTiedOffTSISerial extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTSISerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
-    ports.map { p => SerialAdapter.tieoff(Some(p.bits)) }
-    Nil
-  }
-})
-
-class WithSimTSISerial extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTSISerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
-    ports.map { p =>
-      val ser_success = SerialAdapter.connectSimSerial(p.bits, p.clock, th.harnessReset)
-      when (ser_success) { th.success := true.B }
-    }
-    Nil
-  }
-})
-
-class WithSimTLSerial(withHarnessSerialAdapter: Boolean = false) extends OverrideHarnessBinder({
+class WithSerialAdapterTiedOff extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
-      withClockAndReset(port.clock, th.harnessReset) {
-        val lRam = LazyModule(new SerialRAM(
-          p(SerialTLKey).get.width,
-          p(SerialTLKey).get.memParams.master.size,
-          p(SerialTLKey).get.memParams.master.base,
-          managerEdge = system.serdesser.get.managerNode.edges.in(0),
-          clientEdge = system.serdesser.get.clientNode.edges.out(0)
-        ))
-        val ram = Module(lRam.module)
-        ram.io.ser <> port.bits
+      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, port, th.harnessReset)
+      SerialAdapter.tieoff(ram.module.io.tsi_ser)
+    })
+  }
+})
 
-        require(lRam.serdesser.module.mergedParams == system.serdesser.get.module.mergedParams,
-          "Mismatch between chip-side diplomatic params and testram diplomatic params")
-        if (withHarnessSerialAdapter) {
-          val success = SerialAdapter.connectSimSerial(Some(ram.io.tsi_ser), port.clock, th.harnessReset.asBool)
-          when (success) { th.success := true.B }
-        } else {
-          SerialAdapter.tieoff(Some(ram.io.tsi_ser))
-        }
-      }
+class WithSimSerial extends OverrideHarnessBinder({
+  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    ports.map({ port =>
+      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, port, th.harnessReset)
+      val success = SerialAdapter.connectSimSerial(ram.module.io.tsi_ser, port.clock, th.harnessReset.asBool)
+      when (success) { th.success := true.B }
     })
   }
 })

@@ -25,12 +25,12 @@ import freechips.rocketchip.amba.axi4._
 import boom.common.{BoomTile}
 
 
-import testchipip.{DromajoHelper, CanHavePeripheryTSISerial, SerialTSIKey}
+import testchipip.{DromajoHelper, CanHavePeripheryTLSerial, SerialTLKey}
 
 trait CanHaveHTIF { this: BaseSubsystem =>
   // Advertise HTIF if system can communicate with fesvr
   if (this match {
-    case _: CanHavePeripheryTSISerial if p(SerialTSIKey).nonEmpty => true
+    case _: CanHavePeripheryTKSerial if p(SerialTLKey).nonEmpty => true
     case _: HasPeripheryDebug if p(ExportDebug).dmi => true
     case _ => false
   }) {
