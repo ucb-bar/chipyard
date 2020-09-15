@@ -66,19 +66,19 @@ class DigitalInIOCellBundle extends Bundle {
 trait IOCell extends BaseModule
 
 trait AnalogIOCell extends IOCell {
-  val io = IO(new AnalogIOCellBundle)
+  val io: AnalogIOCellBundle
 }
 
 trait DigitalGPIOCell extends IOCell {
-  val io = IO(new DigitalGPIOCellBundle)
+  val io: DigitalGPIOCellBundle
 }
 
 trait DigitalInIOCell extends IOCell {
-  val io = IO(new DigitalInIOCellBundle)
+  val io: DigitalInIOCellBundle
 }
 
 trait DigitalOutIOCell extends IOCell {
-  val io = IO(new DigitalOutIOCellBundle)
+  val io: DigitalOutIOCellBundle
 }
 
 // The following Generic IO cell black boxes have verilog models that mimic a very simple
@@ -89,10 +89,19 @@ abstract class GenericIOCell extends BlackBox with HasBlackBoxResource {
   addResource("/barstools/iocell/vsrc/IOCell.v")
 }
 
-class GenericAnalogIOCell extends GenericIOCell with AnalogIOCell
-class GenericDigitalGPIOCell extends GenericIOCell with DigitalGPIOCell
-class GenericDigitalInIOCell extends GenericIOCell with DigitalInIOCell
-class GenericDigitalOutIOCell extends GenericIOCell with DigitalOutIOCell
+class GenericAnalogIOCell extends GenericIOCell with AnalogIOCell {
+  val io = IO(new AnalogIOCellBundle)
+}
+class GenericDigitalGPIOCell extends GenericIOCell with DigitalGPIOCell {
+  val io = IO(new DigitalGPIOCellBundle)
+}
+class GenericDigitalInIOCell extends GenericIOCell with DigitalInIOCell {
+  val io = IO(new DigitalInIOCellBundle)
+}
+class GenericDigitalOutIOCell extends GenericIOCell with DigitalOutIOCell {
+  val io = IO(new DigitalOutIOCellBundle)
+}
+
 
 trait IOCellTypeParams {
   def analog(): AnalogIOCell
