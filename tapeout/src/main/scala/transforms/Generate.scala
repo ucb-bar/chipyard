@@ -221,7 +221,7 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
     // Execute top and get list of ExtModules to avoid collisions
     val topExtModules = executeTop()
 
-    val externals = Seq("SimSerial", "SimDTM") ++ harnessTop ++ synTop
+    val externals = Seq("SimSerial", "SimDTM", "plusarg_reader") ++ harnessTop ++ synTop
 
     val harnessAnnos =
       tapeoutOptions.harnessDotfOut.map(BlackBoxResourceFileNameAnno(_)).toSeq ++
