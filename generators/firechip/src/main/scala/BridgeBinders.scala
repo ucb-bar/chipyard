@@ -39,10 +39,20 @@ trait Unsupported {
   require(false, "We do not support this IOCell type")
 }
 
-class FireSimAnalogIOCell extends RawModule with AnalogIOCell with Unsupported
-class FireSimDigitalGPIOCell extends RawModule with DigitalGPIOCell with Unsupported
-class FireSimDigitalInIOCell extends RawModule with DigitalInIOCell { io.i := io.pad }
-class FireSimDigitalOutIOCell extends RawModule with DigitalOutIOCell { io.pad := io.o }
+class FireSimAnalogIOCell extends RawModule with AnalogIOCell with Unsupported {
+  val io = IO(new AnalogIOCellBundle)
+}
+class FireSimDigitalGPIOCell extends RawModule with DigitalGPIOCell with Unsupported {
+  val io = IO(new DigitalGPIOCellBundle)
+}
+class FireSimDigitalInIOCell extends RawModule with DigitalInIOCell {
+  val io = IO(new DigitalInIOCellBundle)
+  io.i := io.pad
+}
+class FireSimDigitalOutIOCell extends RawModule with DigitalOutIOCell {
+  val io = IO(new DigitalOutIOCellBundle)
+  io.pad := io.o
+}
 
 case class FireSimIOCellParams() extends IOCellTypeParams {
   def analog() = Module(new FireSimAnalogIOCell)
