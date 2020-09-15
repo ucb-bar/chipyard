@@ -1,11 +1,12 @@
 package chipyard.fpga.vcu118
 
 import chisel3._
-import chisel3.experimental.{Analog, IO}
+import chisel3.experimental.{Analog, IO, DataMirror}
 
-import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp}
-import freechips.rocketchip.diplomacy.{InModuleBody, BundleBridgeSource}
+import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, LazyScope, InModuleBody, BundleBridgeSource, ValName}
 import freechips.rocketchip.config.{Parameters}
+import freechips.rocketchip.util.{HeterogeneousBag}
+import freechips.rocketchip.tilelink.{TLBundle}
 
 import chipyard.{BuildSystem}
 
@@ -19,9 +20,10 @@ trait HasVCU118PlatformIO {
   val io_spi: Seq[SPIPortIO]
   val io_i2c: Seq[I2CPort]
   val io_gpio: Seq[GPIOPortIO]
+  val io_tl_mem: HeterogeneousBag[TLBundle]
 }
 
-class VCU118Platform(override implicit val p: Parameters) extends LazyModule {
+class VCU118Platform(override implicit val p: Parameters) extends LazyModule with LazyScope {
 
   val lazySystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
 
@@ -61,5 +63,11 @@ class VCU118PlatformModule[+L <: VCU118Platform](_outer: L) extends LazyModuleIm
       io <> sysio
     }
     io_gpio_pins_temp
+  }
+
+  val io_tl_mem = _outer.lazySystem match { case sys: chipyard.CanHaveMasterTLMemPort =>
+    val io_tl_mem_pins_temp = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](sys.mem_tl)).suggestName("tl_slave")
+    io_tl_mem_pins_temp <> sys.mem_tl
+    io_tl_mem_pins_temp
   }
 }

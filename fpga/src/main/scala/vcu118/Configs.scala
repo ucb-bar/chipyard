@@ -7,7 +7,7 @@ import freechips.rocketchip.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.devices.tilelink._
-import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase}
+import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet}
 import freechips.rocketchip.system._
 import freechips.rocketchip.tile._
 
@@ -52,20 +52,35 @@ class WithBringupPeripherals extends Config((site, here, up) => {
   }
 })
 
+class SmallModifications extends Config((site, here, up) => {
+  case SystemBusKey => up(SystemBusKey).copy(
+    errorDevice = Some(DevNullParams(
+      Seq(AddressSet(0x3000, 0xfff)),
+      maxAtomic=site(XLen)/8,
+      maxTransfer=128,
+      region = RegionType.TRACKED)))
+  case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency =
+    Some(BigDecimal(site(DUTFrequencyKey)*1000000).setScale(0, BigDecimal.RoundingMode.HALF_UP).toBigInt),
+    errorDevice = None)
+  case DTSTimebase => BigInt(1000000)
+  case JtagDTMKey => new JtagDTMConfig(
+    idcodeVersion = 2,      // 1 was legacy (FE310-G000, Acai).
+    idcodePartNum = 0x000,  // Decided to simplify.
+    idcodeManufId = 0x489,  // As Assigned by JEDEC to SiFive. Only used in wrappers / test harnesses.
+    debugIdleCycles = 5)    // Reasonable guess for synchronization
+})
+
+
 class FakeBringupConfig extends Config(
   new WithBringupPeripherals ++
   new WithChipyardBuildTop ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithL2TLBs(1024) ++
-  new freechips.rocketchip.subsystem.With1TinyCore ++
-  new freechips.rocketchip.subsystem.WithNBanks(0) ++
-  new freechips.rocketchip.subsystem.WithNoMemPort ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(0) ++
-  new freechips.rocketchip.subsystem.WithNBreakpoints(2) ++
-  new freechips.rocketchip.subsystem.WithJtagDTM ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)

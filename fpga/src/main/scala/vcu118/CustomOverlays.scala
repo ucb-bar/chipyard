@@ -12,10 +12,11 @@ import sifive.fpgashells.shell.xilinx._
 
 import sifive.blocks.devices.gpio._
 
+
 import chipyard.fpga.vcu118.{FMCPMap}
 
 /* Connect the I2C to certain FMC pins */
-class BringupI2CVCU118PlacedOverlay(val shell: VCU118Shell, name: String, val designInput: I2CDesignInput, val shellInput: I2CShellInput)
+class BringupI2CVCU118PlacedOverlay(val shell: VCU118ShellBasicOverlays, name: String, val designInput: I2CDesignInput, val shellInput: I2CShellInput)
   extends I2CXilinxPlacedOverlay(name, designInput, shellInput)
 {
   shell { InModuleBody {
@@ -32,14 +33,14 @@ class BringupI2CVCU118PlacedOverlay(val shell: VCU118Shell, name: String, val de
   } }
 }
 
-class BringupI2CVCU118ShellPlacer(val shell: VCU118Shell, val shellInput: I2CShellInput)(implicit val valName: ValName)
-  extends I2CShellPlacer[VCU118Shell]
+class BringupI2CVCU118ShellPlacer(val shell: VCU118ShellBasicOverlays, val shellInput: I2CShellInput)(implicit val valName: ValName)
+  extends I2CShellPlacer[VCU118ShellBasicOverlays]
 {
   def place(designInput: I2CDesignInput) = new BringupI2CVCU118PlacedOverlay(shell, valName.name, designInput, shellInput)
 }
 
 /* Connect the UART to certain FMC pins */
-class BringupUARTVCU118PlacedOverlay(val shell: VCU118Shell, name: String, val designInput: UARTDesignInput, val shellInput: UARTShellInput)
+class BringupUARTVCU118PlacedOverlay(val shell: VCU118ShellBasicOverlays, name: String, val designInput: UARTDesignInput, val shellInput: UARTShellInput)
   extends UARTXilinxPlacedOverlay(name, designInput, shellInput, true)
 {
   shell { InModuleBody {
@@ -61,13 +62,13 @@ class BringupUARTVCU118PlacedOverlay(val shell: VCU118Shell, name: String, val d
   } }
 }
 
-class BringupUARTVCU118ShellPlacer(shell: VCU118Shell, val shellInput: UARTShellInput)(implicit val valName: ValName)
-  extends UARTShellPlacer[VCU118Shell] {
+class BringupUARTVCU118ShellPlacer(shell: VCU118ShellBasicOverlays, val shellInput: UARTShellInput)(implicit val valName: ValName)
+  extends UARTShellPlacer[VCU118ShellBasicOverlays] {
   def place(designInput: UARTDesignInput) = new BringupUARTVCU118PlacedOverlay(shell, valName.name, designInput, shellInput)
 }
 
 /* Connect SPI to ADI device */
-class BringupSPIVCU118PlacedOverlay(val shell: VCU118Shell, name: String, val designInput: SPIDesignInput, val shellInput: SPIShellInput)
+class BringupSPIVCU118PlacedOverlay(val shell: VCU118ShellBasicOverlays, name: String, val designInput: SPIDesignInput, val shellInput: SPIShellInput)
    extends SDIOXilinxPlacedOverlay(name, designInput, shellInput)
 {
   shell { InModuleBody {
@@ -89,8 +90,8 @@ class BringupSPIVCU118PlacedOverlay(val shell: VCU118Shell, name: String, val de
   } }
 }
 
-class BringupSPIVCU118ShellPlacer(shell: VCU118Shell, val shellInput: SPIShellInput)(implicit val valName: ValName)
-  extends SPIShellPlacer[VCU118Shell] {
+class BringupSPIVCU118ShellPlacer(shell: VCU118ShellBasicOverlays, val shellInput: SPIShellInput)(implicit val valName: ValName)
+  extends SPIShellPlacer[VCU118ShellBasicOverlays] {
   def place(designInput: SPIDesignInput) = new BringupSPIVCU118PlacedOverlay(shell, valName.name, designInput, shellInput)
 }
 
@@ -123,7 +124,7 @@ abstract class GPIOXilinxPlacedOverlay(name: String, di: GPIODesignInput, si: GP
   } }
 }
 
-class BringupGPIOVCU118PlacedOverlay(val shell: VCU118Shell, name: String, val designInput: GPIODesignInput, val shellInput: GPIOShellInput, gpioNames: Seq[String])
+class BringupGPIOVCU118PlacedOverlay(val shell: VCU118ShellBasicOverlays, name: String, val designInput: GPIODesignInput, val shellInput: GPIOShellInput, gpioNames: Seq[String])
    extends GPIOXilinxPlacedOverlay(name, designInput, shellInput)
 {
   shell { InModuleBody {
@@ -143,8 +144,8 @@ class BringupGPIOVCU118PlacedOverlay(val shell: VCU118Shell, name: String, val d
   } }
 }
 
-class BringupGPIOVCU118ShellPlacer(shell: VCU118Shell, val shellInput: GPIOShellInput, gpioNames: Seq[String])(implicit val valName: ValName)
-  extends GPIOShellPlacer[VCU118Shell] {
+class BringupGPIOVCU118ShellPlacer(shell: VCU118ShellBasicOverlays, val shellInput: GPIOShellInput, gpioNames: Seq[String])(implicit val valName: ValName)
+  extends GPIOShellPlacer[VCU118ShellBasicOverlays] {
   def place(designInput: GPIODesignInput) = new BringupGPIOVCU118PlacedOverlay(shell, valName.name, designInput, shellInput, gpioNames)
 }
 
