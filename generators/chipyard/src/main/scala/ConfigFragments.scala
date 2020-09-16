@@ -193,5 +193,5 @@ class WithForcedTileFrequency(fMHz: Double) extends Config((site, here, up) => {
 })
 
 class WithIdealizedPLL extends Config((site, here, up) => {
-  case ChipyardClockKey => ClockDrivers.idealizedPLL
+  case ClockingSchemeKey => ClockingSchemeGenerators.idealizedPLL
 })

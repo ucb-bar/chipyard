@@ -179,7 +179,7 @@ object ClockingSchemeGenerators {
     implicit val p = chiptop.p
 
     // Requires existence of undriven asyncClockGroups in subsystem
-    val systemAsyncClockGroup = chiptop.lSystem match {
+    val systemAsyncClockGroup = chiptop.lazySystem match {
       case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) =>
         l.asyncClockGroupsNode
     }
@@ -204,7 +204,7 @@ object ClockingSchemeGenerators {
         o.reset := reset_wire
       }
 
-      chiptop.harnessFunctions += ((th: HasHarnessUtils) => {
+      chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
         clock_io := th.harnessClock
         Nil })
     }
