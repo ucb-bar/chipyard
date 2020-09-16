@@ -30,7 +30,7 @@ import testchipip.{DromajoHelper, CanHavePeripheryTLSerial, SerialTLKey}
 trait CanHaveHTIF { this: BaseSubsystem =>
   // Advertise HTIF if system can communicate with fesvr
   if (this match {
-    case _: CanHavePeripheryTKSerial if p(SerialTLKey).nonEmpty => true
+    case _: CanHavePeripheryTLSerial if p(SerialTLKey).nonEmpty => true
     case _: HasPeripheryDebug if p(ExportDebug).dmi => true
     case _ => false
   }) {
