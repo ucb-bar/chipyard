@@ -134,8 +134,6 @@ object ClockingSchemeGenerators {
   val harnessDividedClock: ChipTop => Unit = { chiptop =>
     implicit val p = chiptop.p
 
-    require(false, "Divided clock is broken until we fix passing onchip clocks to TestHarness objects")
-
     val implicitClockSourceNode = ClockSourceNode(Seq(ClockSourceParameters()))
     chiptop.implicitClockSinkNode := implicitClockSourceNode
 
