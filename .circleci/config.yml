@@ -73,7 +73,7 @@ commands:
             tools-version:
                 type: string
                 default: "riscv-tools"
-            project-key:
+            group-key:
                 type: string
             timeout:
                 type: string
@@ -85,11 +85,11 @@ commands:
             - setup-tools:
                 tools-version: "<< parameters.tools-version >>"
             - run:
-                name: Building << parameters.project-key >> subproject using Verilator
-                command: .circleci/<< parameters.build-script >> << parameters.project-key >>
+                name: Building << parameters.group-key >> subproject using Verilator
+                command: .circleci/<< parameters.build-script >> << parameters.group-key >>
                 no_output_timeout: << parameters.timeout >>
             - save_cache:
-                key: << parameters.project-key >>-{{ .Branch }}-{{ .Revision }}
+                key: << parameters.group-key >>-{{ .Branch }}-{{ .Revision }}
                 paths:
                     - "/home/riscvuser/project"
 
@@ -192,28 +192,28 @@ jobs:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "group-cores"
+                group-key: "group-cores"
     prepare-chipyard-peripherals:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "group-peripherals"
+                group-key: "group-peripherals"
     prepare-chipyard-accels:
         executor: main-env
         steps:
             - prepare-rtl:
                 tools-version: "esp-tools"
-                project-key: "group-accels"
+                group-key: "group-accels"
     prepare-chipyard-tracegen:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "group-tracegen"
+                group-key: "group-tracegen"
     prepare-chipyard-other:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "group-other"
+                group-key: "group-other"
 
     chipyard-rocket-run-tests:
         executor: main-env
