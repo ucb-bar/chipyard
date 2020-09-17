@@ -12,7 +12,7 @@ import freechips.rocketchip.util.{ResetCatchAndSync, Pow2ClockDivider}
 
 import barstools.iocell.chisel._
 
-import chipyard.clocking.{IdealizedPLL, ClockGroupDealiaser, ClockGroupNamePrefixer, ClockGroupFrequencySpecifier}
+import chipyard.clocking.{IdealizedPLL, ClockGroupNamePrefixer, ClockGroupFrequencySpecifier}
 
 /**
   * Chipyard provides three baseline, top-level reset schemes, set using the
