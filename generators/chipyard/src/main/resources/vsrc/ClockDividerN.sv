@@ -2,7 +2,7 @@
 
 /**
   * An unsynthesizable divide-by-N clock divider.
-  * Duty cycle is 100 * (ceil(DIV / 2)) / 2.
+  * Duty cycle is 100 * (ceil(DIV / 2)) / DIV.
   */
 
 module ClockDividerN #(parameter DIV)(output logic clk_out = 1'b0, input clk_in);
