@@ -35,7 +35,7 @@ case $1 in
     chipyard-dmirocket)
         run_bmark ${mapping[$1]}
         ;;
-    chipyard-tlserial)
+    chipyard-lbwif)
         run_bmark ${mapping[$1]}
         ;;
     chipyard-boom)
@@ -92,7 +92,7 @@ case $1 in
         run_tracegen ${mapping[$1]}
         ;;
     chipyard-ariane)
-        make run-binary-fast -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
+        make run-binary-fast -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/multiply.riscv
         ;;
     chipyard-nvdla)
         make -C $LOCAL_CHIPYARD_DIR/tests
