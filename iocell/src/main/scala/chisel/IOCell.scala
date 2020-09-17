@@ -127,13 +127,13 @@ object IOCell {
    *        AsyncReset, and otherwise to Bool (sync reset)
    * @return A tuple of (the generated IO data node, a Seq of all generated IO cell instances)
    */
-  def generateIOFromSignal[T <: Data](coreSignal: T, name: Option[String] = None,
+  def generateIOFromSignal[T <: Data](coreSignal: T, name: String,
     typeParams: IOCellTypeParams = GenericIOCellParams(),
     abstractResetAsAsync: Boolean = false): (T, Seq[IOCell]) =
   {
-    val padSignal = IO(DataMirror.internal.chiselTypeClone[T](coreSignal))
+    val padSignal = IO(DataMirror.internal.chiselTypeClone[T](coreSignal)).suggestName(name)
     val resetFn = if (abstractResetAsAsync) toAsyncReset else toSyncReset
-    val iocells = IOCell.generateFromSignal(coreSignal, padSignal, name, typeParams, resetFn)
+    val iocells = IOCell.generateFromSignal(coreSignal, padSignal, Some(s"iocell_$name"), typeParams, resetFn)
     (padSignal, iocells)
   }
 
