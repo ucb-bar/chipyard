@@ -6,13 +6,13 @@ import scala.collection.mutable.{ArrayBuffer}
 
 import freechips.rocketchip.prci._
 import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey}
-import freechips.rocketchip.config.{Parameters, Field}
+import freechips.rocketchip.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy.{OutwardNodeHandle, InModuleBody, LazyModule}
 import freechips.rocketchip.util.{ResetCatchAndSync, Pow2ClockDivider}
 
 import barstools.iocell.chisel._
 
-import chipyard.clocking.{IdealizedPLL, ClockGroupDealiaser}
+import chipyard.clocking.{IdealizedPLL, ClockGroupDealiaser, ClockGroupNamePrefixer, ClockGroupFrequencySpecifier}
 
 /**
   * Chipyard provides three baseline, top-level reset schemes, set using the
@@ -80,101 +80,26 @@ object GenerateReset {
 }
 
 
-case object ClockingSchemeKey extends Field[ChipTop => Unit](ClockingSchemeGenerators.harnessClock)
+case object ClockingSchemeKey extends Field[ChipTop => Unit](ClockingSchemeGenerators.idealizedPLL)
+/**
+  * This is a dictionary of clock name to clock frequency in MHz. Names
+  * correspond to the IO coming off digital top. If the map is undefined for the given name,
+  * it will return a default value -- DFU.
+  */
+case object ClockFrequencyAssignment extends Field[Seq[(String) => Option[Double]]](Seq.empty)
+case object DefaultClockFrequencyKey extends Field[Double](100.0)
 
+class ClockNameMatchesAssignment(name: String, fMHz: Double) extends Config((site, here, up) => {
+  case ClockFrequencyAssignment => up(ClockFrequencyAssignment, site) ++
+    Seq((cName: String) => if (cName == name) Some(fMHz) else None)
+})
 
+class ClockNameContainsAssignment(name: String, fMHz: Double) extends Config((site, here, up) => {
+  case ClockFrequencyAssignment => up(ClockFrequencyAssignment, site) ++
+    Seq((cName: String) => if (cName.contains(name)) Some(fMHz) else None)
+})
 
 object ClockingSchemeGenerators {
-  // A simple clock provider, for testing
-  val harnessClock: ChipTop => Unit = { chiptop =>
-    implicit val p = chiptop.p
-
-    val implicitClockSourceNode = ClockSourceNode(Seq(ClockSourceParameters()))
-    chiptop.implicitClockSinkNode := implicitClockSourceNode
-
-    // Drive the diplomaticclock graph of the DigitalTop (if present)
-    val simpleClockGroupSourceNode = chiptop.lazySystem match {
-      case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) => {
-        val n = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
-        l.asyncClockGroupsNode := n
-        Some(n)
-      }
-      case _ => None
-    }
-
-    InModuleBody {
-      //this needs directionality so generateIOFromSignal works
-      val clock_wire = Wire(Input(Clock()))
-      val reset_wire = GenerateReset(chiptop, clock_wire)
-      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, Some("iocell_clock"))
-      chiptop.iocells ++= clockIOCell
-      clock_io.suggestName("clock")
-
-      implicitClockSourceNode.out.unzip._1.map { o =>
-        o.clock := clock_wire
-        o.reset := reset_wire
-      }
-
-      simpleClockGroupSourceNode.map { n => n.out.unzip._1.map { out: ClockGroupBundle =>
-        out.member.data.foreach { o =>
-          o.clock := clock_wire
-          o.reset := reset_wire
-        }
-      }}
-
-      chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
-        clock_io := th.harnessClock
-        Nil
-      })
-    }
-
-  }
-
-
-  val harnessDividedClock: ChipTop => Unit = { chiptop =>
-    implicit val p = chiptop.p
-
-    val implicitClockSourceNode = ClockSourceNode(Seq(ClockSourceParameters()))
-    chiptop.implicitClockSinkNode := implicitClockSourceNode
-
-    val simpleClockGroupSourceNode = chiptop.lazySystem match {
-      case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) => {
-        val n = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
-        l.asyncClockGroupsNode := n
-        Some(n)
-      }
-      case _ => throw new Exception("Harness multiclock assumes BaseSubsystem")
-    }
-
-    InModuleBody {
-      // this needs directionality so generateIOFromSignal works
-      val clock_wire = Wire(Input(Clock()))
-      val reset_wire = GenerateReset(chiptop, clock_wire)
-      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, Some("iocell_clock"))
-      chiptop.iocells ++= clockIOCell
-      clock_io.suggestName("clock")
-      val div_clock = Pow2ClockDivider(clock_wire, 2)
-
-      implicitClockSourceNode.out.unzip._1.map { o =>
-        o.clock := div_clock
-        o.reset := reset_wire
-      }
-
-      simpleClockGroupSourceNode.map { n => n.out.unzip._1.map { out: ClockGroupBundle =>
-        out.member.elements.map { case (name, data) =>
-          // This is mega hacks, how are you actually supposed to do this?
-          data.clock := (if (name.contains("core")) clock_wire else div_clock)
-          data.reset := reset_wire
-        }
-      }}
-
-      chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
-        clock_io := th.harnessClock
-        Nil
-      })
-    }
-  }
-
   val idealizedPLL: ChipTop => Unit = { chiptop =>
     implicit val p = chiptop.p
 
@@ -184,15 +109,18 @@ object ClockingSchemeGenerators {
         l.asyncClockGroupsNode
     }
 
-    val aggregator = ClockGroupAggregator()
+    val aggregator = LazyModule(new ClockGroupAggregator("allClocks")).node
     chiptop.implicitClockSinkNode := ClockGroup() := aggregator
-    systemAsyncClockGroup := aggregator
+    systemAsyncClockGroup := ClockGroupNamePrefixer() := aggregator
 
     val referenceClockSource =  ClockSourceNode(Seq(ClockSourceParameters()))
-    aggregator := ClockGroupDealiaser() := IdealizedPLL() := referenceClockSource
+    (aggregator
+      := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignment), p(DefaultClockFrequencyKey))
+      := IdealizedPLL()
+      := referenceClockSource)
+
 
     InModuleBody {
-
       val clock_wire = Wire(Input(Clock()))
       val reset_wire = GenerateReset(chiptop, clock_wire)
       val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, Some("iocell_clock"))

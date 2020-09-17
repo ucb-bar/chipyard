@@ -8,6 +8,9 @@ import freechips.rocketchip.prci._
 
 import scala.collection.mutable
 
+/**
+  * TODO: figure out how much division is acceptable in our simulators and redefine this.
+  */
 object FrequencyUtils {
   def computeReferenceFrequencyMHz(
     requestedOutputs: Seq[ClockParameters],
@@ -33,16 +36,26 @@ case class IdealizedPLLNode(pllName: String)(implicit valName: ValName)
       take = Some(FrequencyUtils.computeReferenceFrequencyMHz(u.head.members.flatMap(_.take)))) }
   )
 
+/**
+  * Generates a digttal-divider-only PLL model that verilator can simulate.
+  * Inspects all take-specified frequencies in the output ClockGroup, calculates a
+  * fast reference clock (roughly LCM(requested frequencies)) which is passed up the
+  * diplomatic graph, and then generates dividers for each unique requested
+  * frequency.
+  */
+
 class IdealizedPLL(pllName: String)(implicit p: Parameters, valName: ValName) extends LazyModule {
   val node = IdealizedPLLNode(pllName)
 
   lazy val module = new LazyRawModuleImp(this) {
-    require(node.out.size == 1, "Must use a ClockGroupAggregator")
+    require(node.out.size == 1, "Idealized PLL expects to generate a single output clock group. Use a ClockGroupAggregator")
     val (refClock, ClockEdgeParameters(_, refSinkParam, _, _)) = node.in.head
     val (outClocks, ClockGroupEdgeParameters(_, outSinkParams,  _, _)) = node.out.head
 
     val referenceFreq = refSinkParam.take.get.freqMHz
-    val requestedFreqs = outSinkParams.members.map(m => m.name -> m.take)
+    println(s"Idealized PLL Frequency Summary")
+    println(s"-------------------------------")
+    println(s"  Requested Reference Frequency: ${referenceFreq} MHz")
 
     val dividedClocks = mutable.HashMap[Int, Clock]()
     def instantiateDivider(div: Int): Clock = {
@@ -57,8 +70,9 @@ class IdealizedPLL(pllName: String)(implicit p: Parameters, valName: ValName) ex
       val requested = sinkP.take.get.freqMHz
       val div = Math.round(referenceFreq / requested).toInt
       val actual = referenceFreq / div.toDouble
-      println(s"Clock ${sinkBName}, requested freq: ${requested} MHz. Actual freq: ${actual} MHz via division of ${div}")
+      println(s"  Output Clock ${sinkBName}: Requested: ${requested} MHz, Actual: ${actual} MHz (division of ${div})")
       sinkB.clock := dividedClocks.getOrElse(div, instantiateDivider(div))
+      sinkB.reset := refClock.reset
     }
   }
 }
