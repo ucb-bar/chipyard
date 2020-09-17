@@ -82,20 +82,21 @@ object GenerateReset {
 
 case object ClockingSchemeKey extends Field[ChipTop => Unit](ClockingSchemeGenerators.idealizedPLL)
 /**
-  * This is a dictionary of clock name to clock frequency in MHz. Names
-  * correspond to the IO coming off digital top. If the map is undefined for the given name,
-  * it will return a default value -- DFU.
+  * This is a Seq of assignment functions, that accept a clock name and return an optional frequency.
+  * Functions that appear later in this seq have higher precedence that earlier ones.
+  * If no function returns a non-empty value, the value specified in
+  * [[DefaultClockFrequencyKey]] will be used -- DFU.
   */
-case object ClockFrequencyAssignment extends Field[Seq[(String) => Option[Double]]](Seq.empty)
+case object ClockFrequencyAssignersKey extends Field[Seq[(String) => Option[Double]]](Seq.empty)
 case object DefaultClockFrequencyKey extends Field[Double](100.0)
 
 class ClockNameMatchesAssignment(name: String, fMHz: Double) extends Config((site, here, up) => {
-  case ClockFrequencyAssignment => up(ClockFrequencyAssignment, site) ++
+  case ClockFrequencyAssignersKey => up(ClockFrequencyAssignersKey, site) ++
     Seq((cName: String) => if (cName == name) Some(fMHz) else None)
 })
 
 class ClockNameContainsAssignment(name: String, fMHz: Double) extends Config((site, here, up) => {
-  case ClockFrequencyAssignment => up(ClockFrequencyAssignment, site) ++
+  case ClockFrequencyAssignersKey => up(ClockFrequencyAssignersKey, site) ++
     Seq((cName: String) => if (cName.contains(name)) Some(fMHz) else None)
 })
 
@@ -115,7 +116,7 @@ object ClockingSchemeGenerators {
 
     val referenceClockSource =  ClockSourceNode(Seq(ClockSourceParameters()))
     (aggregator
-      := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignment), p(DefaultClockFrequencyKey))
+      := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
       := IdealizedPLL()
       := referenceClockSource)
 
