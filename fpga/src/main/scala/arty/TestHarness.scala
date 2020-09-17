@@ -26,7 +26,7 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
   val harnessClock = clock_32MHz
   val harnessReset = hReset
   val success = false.B
-  val dutReset = hReset
+  val dutReset = reset_core
 
   // must be after HasHarnessSignalReferences assignments
   ldut.harnessFunctions.foreach(_(this))

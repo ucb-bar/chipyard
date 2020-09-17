@@ -56,10 +56,8 @@ class WithE300Connections extends OverrideIOBinder({
     val io_jtag_reset = IO(Input(Bool())).suggestName("jtag_reset")
     val io_ndreset    = IO(Output(Bool())).suggestName("ndreset")
 
-    // This needs to be de-asserted synchronously to the coreClk.
-    val async_corerst = system.aon.rsts.corerst
-    // Add in debug-controlled reset.
-    system.reset := ResetCatchAndSync(system.clock, async_corerst, 20)
+    val io_async_corerst = IO(Input(Bool())).suggestName("core_reset")
+    system.reset := ResetCatchAndSync(system.clock, io_async_corerst, 20)
     Debug.connectDebugClockAndReset(system.debug, system.clock)
 
     //-----------------------------------------------------------------------
@@ -185,6 +183,8 @@ class WithE300Connections extends OverrideIOBinder({
     //-----------------------------------------------------------------------
     val harnessFn = (baseTh: HasHarnessSignalReferences) => {
       baseTh match { case th: ArtyShell =>
+
+        io_async_corerst := th.reset_core
 
         //-----------------------------------------------------------------------
         // Clock divider
