@@ -259,6 +259,13 @@ jobs:
             - run-tests:
                 group-key: "group-peripherals"
                 project-key: "chipyard-spiflashread"
+    chipyard-lbwif-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-peripherals"
+                project-key: "chipyard-lbwif"
+
     chipyard-sha3-run-tests:
         executor: main-env
         steps:
@@ -428,6 +435,9 @@ workflows:
                 requires:
                     - prepare-chipyard-peripherals
             - chipyard-spiflashread-run-tests:
+                requires:
+                    - prepare-chipyard-peripherals
+            - chipyard-lbwif-run-tests:
                 requires:
                     - prepare-chipyard-peripherals
 

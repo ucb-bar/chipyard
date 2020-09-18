@@ -223,20 +223,24 @@ class WithTiedOffDebug extends OverrideHarnessBinder({
 })
 
 
-class WithTiedOffSerial extends OverrideHarnessBinder({
-  (system: CanHavePeripherySerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
-    ports.map { p => SerialAdapter.tieoff(Some(p.bits)) }
-    Nil
+class WithSerialAdapterTiedOff extends OverrideHarnessBinder({
+  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    ports.map({ port =>
+      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, port, th.harnessReset)
+      SerialAdapter.tieoff(ram.module.io.tsi_ser)
+    })
   }
 })
 
 class WithSimSerial extends OverrideHarnessBinder({
-  (system: CanHavePeripherySerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
-    ports.map { p =>
-      val ser_success = SerialAdapter.connectSimSerial(p.bits, p.clock, th.harnessReset)
-      when (ser_success) { th.success := true.B }
-    }
-    Nil
+  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    ports.map({ port =>
+      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, port, th.harnessReset)
+      val success = SerialAdapter.connectSimSerial(ram.module.io.tsi_ser, port.clock, th.harnessReset.asBool)
+      when (success) { th.success := true.B }
+    })
   }
 })
 
