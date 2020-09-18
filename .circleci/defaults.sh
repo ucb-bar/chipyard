@@ -69,4 +69,8 @@ mapping["firesim-multiclock"]="SCALA_TEST=firesim.firesim.RocketMulticlockF1Test
 mapping["fireboom"]="SCALA_TEST=firesim.firesim.BoomF1Tests"
 mapping["icenet"]="SUB_PROJECT=icenet"
 mapping["testchipip"]="SUB_PROJECT=testchipip"
-
+mapping["chipyard-sodor-stage1"]="SUB_PROJEET=Sodor1StageConfig"
+mapping["chipyard-sodor-stage2"]="SUB_PROJEET=Sodor2StageConfig"
+mapping["chipyard-sodor-stage3"]="SUB_PROJEET=Sodor3StageSinglePortConfig"
+mapping["chipyard-sodor-stage5"]="SUB_PROJEET=Sodor5StageConfig"
+mapping["chipyard-sodor-ucode"]="SUB_PROJEET=SodorUCodeConfig"

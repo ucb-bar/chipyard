@@ -262,11 +262,31 @@ jobs:
         steps:
             - prepare-rtl:
                 project-key: "chipyard-ariane"
-    prepare-chipyard-sodor:
+    prepare-chipyard-sodor-stage1:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "chipyard-sodor"
+                project-key: "chipyard-sodor-stage1"
+    prepare-chipyard-sodor-stage2:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-sodor-stage2"
+    prepare-chipyard-sodor-stage3:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-sodor-stage3"
+    prepare-chipyard-sodor-stage5:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-sodor-stage5"
+    prepare-chipyard-sodor-ucode:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                project-key: "chipyard-sodor-ucode"
     prepare-icenet:
         executor: main-env
         steps:
@@ -395,11 +415,35 @@ jobs:
             - run-tests:
                 project-key: "chipyard-ariane"
                 timeout: "30m"
-    chipyard-sodor-run-tests:
+    chipyard-sodor-stage1-run-tests:
         executor: main-env
         steps:
             - run-tests:
-                project-key: "chipyard-sodor"
+                project-key: "chipyard-sodor-stage1"
+                timeout: "20m"
+    chipyard-sodor-stage2-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-sodor-stage2"
+                timeout: "20m"
+    chipyard-sodor-stage3-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-sodor-stage3"
+                timeout: "20m"
+    chipyard-sodor-stage5-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-sodor-stage5"
+                timeout: "20m"
+    chipyard-sodor-ucode-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                project-key: "chipyard-sodor-ucode"
                 timeout: "20m"
     chipyard-nvdla-run-tests:
         executor: main-env
@@ -522,7 +566,27 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
 
-            - prepare-chipyard-sodor:
+            - prepare-chipyard-sodor-stage1:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-sodor-stage2:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator    
+                    
+            - prepare-chipyard-sodor-stage3:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-sodor-stage5:
+                requires:
+                    - install-riscv-toolchain
+                    - install-verilator
+
+            - prepare-chipyard-sodor-ucode:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
@@ -632,9 +696,25 @@ workflows:
                 requires:
                     - prepare-chipyard-ariane
 
-            - chipyard-sodor-run-tests:
+            - chipyard-sodor-stage1-run-tests:
                 requires:
-                    - prepare-chipyard-sodor
+                    - prepare-chipyard-sodor-stage1
+            
+            - chipyard-sodor-stage2-run-tests:
+                requires:
+                    - prepare-chipyard-sodor-stage2
+
+            - chipyard-sodor-stage3-run-tests:
+                requires:
+                    - prepare-chipyard-sodor-stage3
+
+            - chipyard-sodor-stage5-run-tests:
+                requires:
+                    - prepare-chipyard-sodor-stage5
+
+            - chipyard-sodor-ucode-run-tests:
+                requires:
+                    - prepare-chipyard-sodor-ucode
 
             - chipyard-nvdla-run-tests:
                 requires:
