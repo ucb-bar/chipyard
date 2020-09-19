@@ -66,10 +66,11 @@ class WithFireSimIOCellModels extends Config((site, here, up) => {
 })
 
 class WithSerialBridge extends OverrideHarnessBinder({
-  (system: CanHavePeripherySerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     ports.map { p =>
+      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, p, th.harnessReset)
       withClockAndReset(p.clock, th.harnessReset) {
-        SerialBridge(p.clock, p.bits, MainMemoryConsts.globalName)(GetSystemParameters(system))
+        SerialBridge(p.clock, ram.module.io.tsi_ser, MainMemoryConsts.globalName)(GetSystemParameters(system))
       }
     }
     Nil
