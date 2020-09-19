@@ -94,19 +94,7 @@ case $1 in
     chipyard-ariane)
         make run-binary-fast -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/multiply.riscv
         ;;
-    chipyard-sodor-stage1)
-        run_asm ${mapping[$1]}
-        ;;
-    chipyard-sodor-stage2)
-        run_asm ${mapping[$1]}
-        ;;
-    chipyard-sodor-stage3)
-        run_asm ${mapping[$1]}
-        ;;
-    chipyard-sodor-stage5)
-        run_asm ${mapping[$1]}
-        ;;
-    chipyard-sodor-ucode)
+    chipyard-sodor)
         run_asm ${mapping[$1]}
         ;;
     chipyard-nvdla)

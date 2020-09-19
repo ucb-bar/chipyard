@@ -241,40 +241,12 @@ jobs:
                 group-key: "group-cores"
                 project-key: "chipyard-ariane"
                 timeout: "30m"
-    chipyard-sodor-stage1-run-tests:
+    chipyard-sodor-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 group-key: "group-cores"
-                project-key: "chipyard-sodor-stage1"
-                timeout: "30m"
-    chipyard-sodor-stage2-run-tests:
-        executor: main-env
-        steps:
-            - run-tests:
-                group-key: "group-cores"
-                project-key: "chipyard-sodor-stage2"
-                timeout: "30m"
-    chipyard-sodor-stage3-run-tests:
-        executor: main-env
-        steps:
-            - run-tests:
-                group-key: "group-cores"
-                project-key: "chipyard-sodor-stage3"
-                timeout: "30m"
-    chipyard-sodor-stage5-run-tests:
-        executor: main-env
-        steps:
-            - run-tests:
-                group-key: "group-cores"
-                project-key: "chipyard-sodor-stage5"
-                timeout: "30m"
-    chipyard-sodor-ucode-run-tests:
-        executor: main-env
-        steps:
-            - run-tests:
-                group-key: "group-cores"
-                project-key: "chipyard-sodor-ucode"
+                project-key: "chipyard-sodor"
                 timeout: "30m"
     chipyard-dmirocket-run-tests:
         executor: main-env
@@ -462,22 +434,9 @@ workflows:
             - chipyard-ariane-run-tests:
                 requires:
                     - prepare-chipyard-cores
-            - chipyard-sodor-stage1-run-tests:
+            - chipyard-sodor-run-tests:
                 requires:
                     - prepare-chipyard-cores
-            - chipyard-sodor-stage2-run-tests:
-                requires:
-                    - prepare-chipyard-cores
-            - chipyard-sodor-stage3-run-tests:
-                requires:
-                    - prepare-chipyard-cores
-            - chipyard-sodor-stage5-run-tests:
-                requires:
-                    - prepare-chipyard-cores
-            - chipyard-sodor-ucode-run-tests:
-                requires:
-                    - prepare-chipyard-cores
-
             - chipyard-dmirocket-run-tests:
                 requires:
                     - prepare-chipyard-peripherals
