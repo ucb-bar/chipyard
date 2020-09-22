@@ -11,4 +11,6 @@ entry_dec=`bc <<< "ibase=16;$entry_hex"`
 length_hex=`echo "$segments" | grep LOAD | tail -n 1 | tr -s [:space:] | cut -f4,6 -d' '`
 length_dec=`echo $length_hex | tr -d x | tr [:lower:] [:upper:] | tr ' ' + | sed 's/^/ibase=16;/' | sed "s/$/-$entry_hex/" | bc`
 power_2_length=`echo "x=l($length_dec)/l(2); scale=0; 2^((x+1)/1)" | bc -l`
-elf2hex 64 $power_2_length $binary $entry_dec
+width=64
+depth=$((power_2_length / width))
+elf2hex $width $depth $binary $entry_dec
