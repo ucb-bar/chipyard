@@ -57,7 +57,12 @@ object ClockGroupFrequencySpecifier {
       val clockFreq = assigners.foldLeft(defaultFreq)(
         (currentFreq, candidateFunc) => candidateFunc(clock.name.get).getOrElse(currentFreq))
 
-      clock.copy(take = clock.take.map(_.copy(freqMHz = clockFreq)).orElse(Some(ClockParameters(clockFreq))))
+      clock.copy(take = clock.take match {
+        case Some(cp) =>
+          println(s"Clock ${clock.name.get}: using diplomatically specified frequency of ${cp.freqMHz}.")
+          Some(cp)
+        case None => Some(ClockParameters(clockFreq))
+      })
     }
 
     LazyModule(new ClockGroupParameterModifier(sinkFn = { s => s.copy(members = s.members.map(lookupFrequencyForName)) })).node
