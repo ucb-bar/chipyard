@@ -60,16 +60,15 @@ object GenerateReset {
     val reset_wire = Wire(Input(Reset()))
     val (reset_io, resetIOCell) = p(GlobalResetSchemeKey) match {
       case GlobalResetSynchronous =>
-        IOCell.generateIOFromSignal(reset_wire, Some("iocell_reset"))
+        IOCell.generateIOFromSignal(reset_wire, "reset")
       case GlobalResetAsynchronousFull =>
-        IOCell.generateIOFromSignal(reset_wire, Some("iocell_reset"), abstractResetAsAsync = true)
+        IOCell.generateIOFromSignal(reset_wire, "reset", abstractResetAsAsync = true)
       case GlobalResetAsynchronous => {
         val async_reset_wire = Wire(Input(AsyncReset()))
         reset_wire := ResetCatchAndSync(clock, async_reset_wire.asBool())
-        IOCell.generateIOFromSignal(async_reset_wire, Some("iocell_reset"), abstractResetAsAsync = true)
+        IOCell.generateIOFromSignal(async_reset_wire, "reset", abstractResetAsAsync = true)
       }
     }
-    reset_io.suggestName("reset")
     chiptop.iocells ++= resetIOCell
     chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
       reset_io := th.dutReset
@@ -124,9 +123,8 @@ object ClockingSchemeGenerators {
     InModuleBody {
       val clock_wire = Wire(Input(Clock()))
       val reset_wire = GenerateReset(chiptop, clock_wire)
-      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, Some("iocell_clock"))
+      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock")
       chiptop.iocells ++= clockIOCell
-      clock_io.suggestName("clock")
 
       referenceClockSource.out.unzip._1.map { o =>
         o.clock := clock_wire

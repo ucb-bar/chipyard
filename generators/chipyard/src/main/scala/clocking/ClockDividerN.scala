@@ -1,4 +1,4 @@
-// See LICENSE.SiFive for license details.
+// See LICENSE for license details.
 
 package chipyard.clocking
 

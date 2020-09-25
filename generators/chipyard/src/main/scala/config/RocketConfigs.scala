@@ -25,7 +25,7 @@ class GemminiRocketConfig extends Config(
 
 // DOC include start: DmiRocket
 class dmiRocketConfig extends Config(
-  new chipyard.harness.WithTiedOffSerial ++                      // don't use serial to drive the chip, since we use DMI instead
+  new chipyard.harness.WithSerialAdapterTiedOff ++               // don't attach an external SimSerial
   new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
@@ -177,5 +177,11 @@ class MMIORocketConfig extends Config(
 class DividedClockRocketConfig extends Config(
   new chipyard.config.WithTileFrequency(200.0) ++
   new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class LBWIFRocketConfig extends Config(
+  new testchipip.WithSerialTLMem(isMainMemory=true) ++      // set lbwif memory base to DRAM_BASE, use as main memory
+  new freechips.rocketchip.subsystem.WithNoMemPort ++       // remove AXI4 backing memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
