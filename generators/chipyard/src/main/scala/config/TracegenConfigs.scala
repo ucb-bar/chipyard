@@ -10,6 +10,7 @@ class AbstractTraceGenConfig extends Config(
   new chipyard.iobinders.WithTraceGenSuccessPunchthrough ++
   new chipyard.config.WithTracegenSystem ++
   new chipyard.config.WithNoSubsystemDrivenClocks ++
+  new chipyard.config.WithPeripheryBusFrequencyAsDefault ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.groundtest.GroundTestBaseConfig)
 
