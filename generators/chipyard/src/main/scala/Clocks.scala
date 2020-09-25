@@ -88,7 +88,7 @@ case object ClockingSchemeKey extends Field[ChipTop => Unit](ClockingSchemeGener
   * [[DefaultClockFrequencyKey]] will be used -- DFU.
   */
 case object ClockFrequencyAssignersKey extends Field[Seq[(String) => Option[Double]]](Seq.empty)
-case object DefaultClockFrequencyKey extends Field[Double](100.0)
+case object DefaultClockFrequencyKey extends Field[Double]()
 
 class ClockNameMatchesAssignment(name: String, fMHz: Double) extends Config((site, here, up) => {
   case ClockFrequencyAssignersKey => up(ClockFrequencyAssignersKey, site) ++

@@ -169,4 +169,10 @@ class WithNoDebug extends Config((site, here, up) => {
   case DebugModuleKey => None
 
 })
+
 class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("core", fMHz)
+
+class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {
+  case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
+})
+
