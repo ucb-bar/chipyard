@@ -7,6 +7,7 @@ import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.prci._
 
 import scala.collection.mutable
+import scala.collection.immutable.ListMap
 
 /**
   * TODO: figure out how much division is acceptable in our simulators and redefine this.
@@ -21,6 +22,23 @@ object FrequencyUtils {
     val refFreq = freqs.reduce((a, b) => a * b / a.gcd(b)).toDouble / (1000 * 1000)
     assert((refFreq / freqs.min.toDouble) < maximumAllowableDivisor.toDouble)
     ClockParameters(refFreq)
+  }
+}
+
+class SimplePllConfiguration(val sinks: Seq[ClockSinkParameters]) {
+  val referenceFreqMHz = FrequencyUtils.computeReferenceFrequencyMHz(sinks.flatMap(_.take)).freqMHz
+  val sinkDividerMap = ListMap((sinks.map({s => (s, Math.round(referenceFreqMHz / s.take.get.freqMHz).toInt) })):_*)
+
+  def prettyPrint(pllName: String) {
+    val preamble = s"""
+    |${pllName} Frequency Summary
+    |  Input Reference Frequency: ${referenceFreqMHz} MHz\n""".stripMargin
+    val outputSummaries = sinkDividerMap.map { case (sink, division) =>
+      val requested = sink.take.get.freqMHz
+      val actual = referenceFreqMHz / division.toDouble
+      s"  Output clock ${sink.name.get}, requested: ${requested} MHz, actual: ${actual} MHz (division of ${division})"
+    }
+    println(preamble + outputSummaries.mkString("\n"))
   }
 }
 
@@ -53,9 +71,8 @@ class IdealizedPLL(pllName: String)(implicit p: Parameters, valName: ValName) ex
     val (outClocks, ClockGroupEdgeParameters(_, outSinkParams,  _, _)) = node.out.head
 
     val referenceFreq = refSinkParam.take.get.freqMHz
-    println(s"Idealized PLL Frequency Summary")
-    println(s"-------------------------------")
-    println(s"  Requested Reference Frequency: ${referenceFreq} MHz")
+    val pllConfig = new SimplePllConfiguration(outSinkParams.members)
+    pllConfig.prettyPrint(pllName)
 
     val dividedClocks = mutable.HashMap[Int, Clock]()
     def instantiateDivider(div: Int): Clock = {
@@ -67,10 +84,7 @@ class IdealizedPLL(pllName: String)(implicit p: Parameters, valName: ValName) ex
     }
 
     for (((sinkBName, sinkB), sinkP) <- outClocks.member.elements.zip(outSinkParams.members)) {
-      val requested = sinkP.take.get.freqMHz
-      val div = Math.round(referenceFreq / requested).toInt
-      val actual = referenceFreq / div.toDouble
-      println(s"  Output Clock ${sinkBName}: Requested: ${requested} MHz, Actual: ${actual} MHz (division of ${div})")
+      val div = pllConfig.sinkDividerMap(sinkP)
       sinkB.clock := dividedClocks.getOrElse(div, instantiateDivider(div))
       sinkB.reset := refClock.reset
     }

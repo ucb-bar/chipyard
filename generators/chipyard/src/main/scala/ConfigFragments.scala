@@ -26,7 +26,7 @@ import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 
-import chipyard.{BuildTop, BuildSystem, ClockingSchemeGenerators, ClockingSchemeKey, TestSuitesKey, TestSuiteHelper, ClockNameContainsAssignment}
+import chipyard._
 
 // Imports for multiclock sketch
 import boom.common.{BoomTile, BoomTileParams}
