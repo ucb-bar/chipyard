@@ -68,9 +68,7 @@ class WithFireSimIOCellModels extends Config((site, here, up) => {
 class WithSerialBridge extends OverrideHarnessBinder({
   (system: CanHavePeripherySerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     ports.map { p =>
-      withClockAndReset(p.clock, th.harnessReset) {
-        SerialBridge(p.clock, p.bits, MainMemoryConsts.globalName)(GetSystemParameters(system))
-      }
+      SerialBridge(p.clock, p.bits, MainMemoryConsts.globalName)(GetSystemParameters(system))
     }
     Nil
   }
@@ -79,7 +77,7 @@ class WithSerialBridge extends OverrideHarnessBinder({
 class WithNICBridge extends OverrideHarnessBinder({
   (system: CanHavePeripheryIceNIC, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[NICIOvonly]]) => {
     val p: Parameters = GetSystemParameters(system)
-    ports.map { n => withClockAndReset(n.clock, th.harnessReset) { NICBridge(n.clock, n.bits)(p) } }
+    ports.map { n => NICBridge(n.clock, n.bits)(p) }
     Nil
   }
 })
@@ -119,11 +117,7 @@ class WithFASEDBridge extends OverrideHarnessBinder({
 
 class WithTracerVBridge extends ComposeHarnessBinder({
   (system: CanHaveTraceIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[TraceOutputTop]) => {
-    ports.map { p =>
-      p.traces.map(
-        tileTrace => withClockAndReset(tileTrace.clock, tileTrace.reset) { TracerVBridge(tileTrace)(system.p) }
-      )
-    }
+    ports.map { p => p.traces.map(tileTrace => TracerVBridge(tileTrace)(system.p)) }
     Nil
   }
 })

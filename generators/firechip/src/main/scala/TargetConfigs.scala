@@ -194,7 +194,7 @@ class FireSimArianeConfig extends Config(
 //* Multiclock Configurations
 //*********************************************************************************/
 class FireSimMulticlockRocketConfig extends Config(
-  new WithFireSimRationalTileDomain(2, 1) ++
+  new chipyard.config.WithTileFrequency(6400.0) ++ //lol
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
