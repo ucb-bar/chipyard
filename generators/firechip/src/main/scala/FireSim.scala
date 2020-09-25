@@ -68,8 +68,8 @@ class ClockBridgeInstantiator {
 
       val clockBridge = Module(new RationalClockBridge(distinct))
       val cbVecTuples = distinct.zip(clockBridge.io.clocks)
-      val outputWire = Wire(RecordMap(allClocks.map { c => (c.name, Clock()) }:_*))
-      for (parameter <- allClocks) {
+      val outputWire = Wire(RecordMap(simplified.map { c => (c.name, Clock()) }:_*))
+      for (parameter <- simplified) {
         val (_, cbClockField) = cbVecTuples.find(_._1.equalFrequency(parameter)).get
         outputWire(parameter.name).get := cbClockField
       }
