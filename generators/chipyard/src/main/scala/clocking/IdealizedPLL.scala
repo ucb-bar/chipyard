@@ -55,7 +55,7 @@ case class IdealizedPLLNode(pllName: String)(implicit valName: ValName)
   )
 
 /**
-  * Generates a digttal-divider-only PLL model that verilator can simulate.
+  * Generates a digital-divider-only PLL model that verilator can simulate.
   * Inspects all take-specified frequencies in the output ClockGroup, calculates a
   * fast reference clock (roughly LCM(requested frequencies)) which is passed up the
   * diplomatic graph, and then generates dividers for each unique requested

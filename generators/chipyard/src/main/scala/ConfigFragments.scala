@@ -28,9 +28,6 @@ import sifive.blocks.devices.spi._
 
 import chipyard._
 
-// Imports for multiclock sketch
-import boom.common.{BoomTile, BoomTileParams}
-import ariane.{ArianeTile, ArianeTileParams}
 // -----------------------
 // Common Config Fragments
 // -----------------------
@@ -167,7 +164,6 @@ class WithDMIDTM extends Config((site, here, up) => {
 
 class WithNoDebug extends Config((site, here, up) => {
   case DebugModuleKey => None
-
 })
 
 class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("core", fMHz)
