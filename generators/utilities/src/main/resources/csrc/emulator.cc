@@ -163,7 +163,6 @@ int main(int argc, char** argv)
 #if VM_TRACE
       case 'v': {
         vcdfile_name = optarg;
-        // printf("%s\n", vcdfile_name);
         vcdfile = strcmp(optarg, "-") == 0 ? stdout : fopen(optarg, "w");
         if (!vcdfile) {
           std::cerr << "Unable to open " << optarg << " for VCD write\n";
