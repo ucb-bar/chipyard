@@ -10,10 +10,10 @@ import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.devices.tilelink.BootROMParams
+import freechips.rocketchip.devices.tilelink.{BootROMLocated, BootROMParams}
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import freechips.rocketchip.diplomacy.LazyModule
-import testchipip.{BlockDeviceKey, BlockDeviceConfig, SerialKey, TracePortKey, TracePortParams}
+import testchipip.{BlockDeviceKey, BlockDeviceConfig, TracePortKey, TracePortParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 
@@ -22,19 +22,18 @@ import testchipip.WithRingSystemBus
 
 import firesim.bridges._
 import firesim.configs._
-import chipyard.config.ConfigValName._
 
 class WithBootROM extends Config((site, here, up) => {
-  case BootROMParams => {
+  case BootROMLocated(x) => {
     val chipyardBootROM = new File(s"./generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
     val firesimBootROM = new File(s"./target-rtl/chipyard/generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
 
-     val bootROMPath = if (chipyardBootROM.exists()) {
+    val bootROMPath = if (chipyardBootROM.exists()) {
       chipyardBootROM.getAbsolutePath()
     } else {
       firesimBootROM.getAbsolutePath()
     }
-    BootROMParams(contentFileName = bootROMPath)
+    up(BootROMLocated(x), site).map(_.copy(contentFileName = bootROMPath))
   }
 })
 
@@ -67,6 +66,8 @@ class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
 // Tweaks that are generally applied to all firesim configs
 class WithFireSimConfigTweaks extends Config(
+  // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
+  new WithFireSimSimpleClocks ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++
   // Optional*: Removing this will require adjusting the UART baud rate and
@@ -83,11 +84,13 @@ class WithFireSimConfigTweaks extends Config(
   // Required: Adds IO to attach SerialBridge. The SerialBridges is responsible
   // for signalling simulation termination under simulation success. This fragment can
   // be removed if you supply an auxiliary bridge that signals simulation termination
-  new testchipip.WithTSI ++
+  new testchipip.WithDefaultSerialTL ++
   // Optional: Removing this will require using an initramfs under linux
   new testchipip.WithBlockDevice ++
   // Required*: Scale default baud rate with periphery bus frequency
-  new chipyard.config.WithUART(BigInt(3686400L))
+  new chipyard.config.WithUART(BigInt(3686400L)) ++
+  // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
+  new chipyard.config.WithNoDebug
 )
 
 /*******************************************************************************
@@ -128,7 +131,7 @@ class FireSimSmallSystemConfig extends Config(
   new WithoutClockGating ++
   new WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++
-  new testchipip.WithTSI ++
+  new testchipip.WithDefaultSerialTL ++
   new testchipip.WithBlockDevice ++
   new chipyard.config.WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nWays = 2, capacityKB = 64) ++
@@ -186,3 +189,14 @@ class FireSimArianeConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.ArianeConfig)
+
+//**********************************************************************************
+//* Multiclock Configurations
+//*********************************************************************************/
+class FireSimMulticlockRocketConfig extends Config(
+  new WithFireSimRationalTileDomain(2, 1) ++
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.DividedClockRocketConfig)
+

@@ -12,29 +12,21 @@ class RocketConfig extends Config(
 
 class HwachaRocketConfig extends Config(
   new chipyard.config.WithHwachaTest ++
-  new hwacha.DefaultHwachaConfig ++                        // use Hwacha vector accelerator
+  new hwacha.DefaultHwachaConfig ++                              // use Hwacha vector accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 // DOC include start: GemminiRocketConfig
 class GemminiRocketConfig extends Config(
-  new gemmini.DefaultGemminiConfig ++                        // use Gemmini systolic array GEMM accelerator
+  new gemmini.DefaultGemminiConfig ++                            // use Gemmini systolic array GEMM accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: GemminiRocketConfig
 
-// DOC include start: JtagRocket
-class jtagRocketConfig extends Config(
-  new chipyard.iobinders.WithSimDebug ++                   // add SimDebug, in addition to default SimSerial
-  new freechips.rocketchip.subsystem.WithJtagDTM ++        // sets DTM communication interface to JTAG
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-// DOC include end: JtagRocket
-
 // DOC include start: DmiRocket
 class dmiRocketConfig extends Config(
-  new chipyard.iobinders.WithTiedOffSerial ++          // tie-off serial, override default add SimSerial
-  new chipyard.iobinders.WithSimDebug ++               // add SimDebug, override default tie-off debug
+  new chipyard.harness.WithSerialAdapterTiedOff ++               // don't attach an external SimSerial
+  new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: DmiRocket
@@ -48,54 +40,53 @@ class GCDTLRocketConfig extends Config(
 
 // DOC include start: GCDAXI4BlackBoxRocketConfig
 class GCDAXI4BlackBoxRocketConfig extends Config(
-  new chipyard.example.WithGCD(useAXI4=true, useBlackBox=true) ++          // Use GCD blackboxed verilog, connect by AXI4->Tilelink
+  new chipyard.example.WithGCD(useAXI4=true, useBlackBox=true) ++            // Use GCD blackboxed verilog, connect by AXI4->Tilelink
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: GCDAXI4BlackBoxRocketConfig
 
 class LargeSPIFlashROMRocketConfig extends Config(
-  new chipyard.iobinders.WithSimSPIFlashModel(true) ++      // add the SPI flash model in the harness (read-only)
+  new chipyard.harness.WithSimSPIFlashModel(true) ++        // add the SPI flash model in the harness (read-only)
   new chipyard.config.WithSPIFlash ++                       // add the SPI flash controller
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class SmallSPIFlashRocketConfig extends Config(
-  new chipyard.iobinders.WithSimSPIFlashModel(false) ++     // add the SPI flash model in the harness (writeable)
+  new chipyard.harness.WithSimSPIFlashModel(false) ++       // add the SPI flash model in the harness (writeable)
   new chipyard.config.WithSPIFlash(0x100000) ++             // add the SPI flash controller (1 MiB)
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class SimAXIRocketConfig extends Config(
-  new chipyard.iobinders.WithSimAXIMem ++                   // drive the master AXI4 memory with a SimAXIMem, a 1-cycle magic memory, instead of default SimDRAM
+  new chipyard.harness.WithSimAXIMem ++                     // drive the master AXI4 memory with a SimAXIMem, a 1-cycle magic memory, instead of default SimDRAM
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class SimBlockDeviceRocketConfig extends Config(
-  new chipyard.iobinders.WithSimBlockDevice ++             // drive block-device IOs with SimBlockDevice
-  new testchipip.WithBlockDevice ++                        // add block-device module to peripherybus
+  new chipyard.harness.WithSimBlockDevice ++                // drive block-device IOs with SimBlockDevice
+  new testchipip.WithBlockDevice ++                         // add block-device module to peripherybus
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class BlockDeviceModelRocketConfig extends Config(
-  new chipyard.iobinders.WithBlockDeviceModel ++           // drive block-device IOs with a BlockDeviceModel
-  new testchipip.WithBlockDevice ++                        // add block-device module to periphery bus
+  new chipyard.harness.WithBlockDeviceModel ++              // drive block-device IOs with a BlockDeviceModel
+  new testchipip.WithBlockDevice ++                         // add block-device module to periphery bus
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 // DOC include start: GPIORocketConfig
 class GPIORocketConfig extends Config(
-  new chipyard.iobinders.WithGPIOTiedOff ++                // tie off GPIO inputs into the top
-  new chipyard.config.WithGPIO ++                          // add GPIOs to the peripherybus
+  new chipyard.config.WithGPIO ++                           // add GPIOs to the peripherybus
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: GPIORocketConfig
 
 class QuadRocketConfig extends Config(
-  new freechips.rocketchip.subsystem.WithNBigCores(4) ++   // quad-core (4 RocketTiles)
+  new freechips.rocketchip.subsystem.WithNBigCores(4) ++    // quad-core (4 RocketTiles)
   new chipyard.config.AbstractConfig)
 
 class RV32RocketConfig extends Config(
-  new freechips.rocketchip.subsystem.WithRV32 ++           // set RocketTiles to be 32-bit
+  new freechips.rocketchip.subsystem.WithRV32 ++            // set RocketTiles to be 32-bit
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
@@ -113,14 +104,14 @@ class Sha3RocketConfig extends Config(
 
 // DOC include start: InitZeroRocketConfig
 class InitZeroRocketConfig extends Config(
-  new chipyard.example.WithInitZero(0x88000000L, 0x1000L) ++                // add InitZero
+  new chipyard.example.WithInitZero(0x88000000L, 0x1000L) ++   // add InitZero
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: InitZeroRocketConfig
 
 class LoopbackNICRocketConfig extends Config(
-  new chipyard.iobinders.WithLoopbackNIC ++                        // drive NIC IOs with loopback
-  new icenet.WithIceNIC ++                                         // add an IceNIC
+  new chipyard.harness.WithLoopbackNIC ++                      // drive NIC IOs with loopback
+  new icenet.WithIceNIC ++                                     // add an IceNIC
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
@@ -135,8 +126,8 @@ class ScratchpadOnlyRocketConfig extends Config(
 // DOC include end: l1scratchpadrocket
 
 class L1ScratchpadRocketConfig extends Config(
-  new chipyard.config.WithRocketICacheScratchpad ++   // use rocket ICache scratchpad
-  new chipyard.config.WithRocketDCacheScratchpad ++   // use rocket DCache scratchpad
+  new chipyard.config.WithRocketICacheScratchpad ++         // use rocket ICache scratchpad
+  new chipyard.config.WithRocketDCacheScratchpad ++         // use rocket DCache scratchpad
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
@@ -150,37 +141,49 @@ class MbusScratchpadRocketConfig extends Config(
 
 // DOC include start: RingSystemBusRocket
 class RingSystemBusRocketConfig extends Config(
-  new testchipip.WithRingSystemBus ++ // Ring-topology system bus
+  new testchipip.WithRingSystemBus ++                       // Ring-topology system bus
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: RingSystemBusRocket
 
 class StreamingPassthroughRocketConfig extends Config(
-  new chipyard.example.WithStreamingPassthrough ++ // use top with tilelink-controlled streaming passthrough
+  new chipyard.example.WithStreamingPassthrough ++          // use top with tilelink-controlled streaming passthrough
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 // DOC include start: StreamingFIRRocketConfig
 class StreamingFIRRocketConfig extends Config (
-  new chipyard.example.WithStreamingFIR ++ // use top with tilelink-controlled streaming FIR
+  new chipyard.example.WithStreamingFIR ++                  // use top with tilelink-controlled streaming FIR
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: StreamingFIRRocketConfig
 
 class SmallNVDLARocketConfig extends Config(
-  new nvidia.blocks.dla.WithNVDLA("small") ++ // add a small NVDLA
+  new nvidia.blocks.dla.WithNVDLA("small") ++               // add a small NVDLA
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class LargeNVDLARocketConfig extends Config(
-  new nvidia.blocks.dla.WithNVDLA("large", true) ++ // add a large NVDLA with synth. rams
+  new nvidia.blocks.dla.WithNVDLA("large", true) ++         // add a large NVDLA with synth. rams
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class MMIORocketConfig extends Config(
-  new chipyard.iobinders.WithTieOffL2FBusAXI ++ // Tie-off the incoming MMIO port
-  new chipyard.iobinders.WithSimAXIMMIO ++ // Attach a simulated memory to the outwards MMIO port
-  new freechips.rocketchip.subsystem.WithDefaultMMIOPort ++ // add default external master port
+  new freechips.rocketchip.subsystem.WithDefaultMMIOPort ++  // add default external master port
   new freechips.rocketchip.subsystem.WithDefaultSlavePort ++ // add default external slave port
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+// NOTE: This config doesn't work yet because SimWidgets in the TestHarness
+// always get the TestHarness clock. The Tiles and Uncore receive the correct clocks
+class DividedClockRocketConfig extends Config(
+  new chipyard.config.WithTileDividedClock ++                     // Put the Tile on its own clock domain
+  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class LBWIFRocketConfig extends Config(
+  new testchipip.WithSerialTLMem(isMainMemory=true) ++      // set lbwif memory base to DRAM_BASE, use as main memory
+  new freechips.rocketchip.subsystem.WithNoMemPort ++       // remove AXI4 backing memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)

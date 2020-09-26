@@ -33,13 +33,13 @@ class HwachaLargeBoomConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class LoopbackNICLargeBoomConfig extends Config(
-  new chipyard.iobinders.WithLoopbackNIC ++                      // drive NIC IOs with loopback
+  new chipyard.harness.WithLoopbackNIC ++                        // drive NIC IOs with loopback
   new icenet.WithIceNIC ++                                       // build a NIC
   new boom.common.WithNLargeBooms(1) ++
   new chipyard.config.AbstractConfig)
 
 class DromajoBoomConfig extends Config(
-  new chipyard.iobinders.WithSimDromajoBridge ++                 // attach Dromajo
+  new chipyard.harness.WithSimDromajoBridge ++                   // attach Dromajo
   new chipyard.config.WithTraceIO ++                             // enable the traceio
   new boom.common.WithNSmallBooms(1) ++
   new chipyard.config.AbstractConfig)
