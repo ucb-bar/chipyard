@@ -163,6 +163,7 @@ int main(int argc, char** argv)
 #if VM_TRACE
       case 'v': {
         vcdfile_name = optarg;
+        // printf("%s\n", vcdfile_name);
         vcdfile = strcmp(optarg, "-") == 0 ? stdout : fopen(optarg, "w");
         if (!vcdfile) {
           std::cerr << "Unable to open " << optarg << " for VCD write\n";
@@ -258,6 +259,11 @@ done_processing:
     return 1;
   }
 
+  int htif_argc = 1 + argc - optind;
+  htif_argv = (char **) malloc((htif_argc) * sizeof (char *));
+  htif_argv[0] = argv[0];
+  for (int i = 1; optind < argc;) htif_argv[i++] = argv[optind++];
+
   if (verbose)
     fprintf(stderr, "using random seed %u\n", random_seed);
 
@@ -265,7 +271,7 @@ done_processing:
   srand48(random_seed);
 
   Verilated::randReset(2);
-  Verilated::commandArgs(argc, argv);
+  Verilated::commandArgs(htif_argc, htif_argv);
   TEST_HARNESS *tile = new TEST_HARNESS;
 
 #if VM_TRACE
@@ -374,5 +380,6 @@ done_processing:
   if (tsi) delete tsi;
   if (jtag) delete jtag;
   if (tile) delete tile;
+  if (htif_argv) free(htif_argv);
   return ret;
 }
