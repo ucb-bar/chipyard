@@ -259,7 +259,7 @@ done_processing:
   }
 
   int htif_argc = 1 + argc - optind;
-  htif_argv = (char **) malloc((htif_argc) * sizeof (char *));
+  char** htif_argv = (char **) malloc((htif_argc) * sizeof (char *));
   htif_argv[0] = argv[0];
   for (int i = 1; optind < argc;) htif_argv[i++] = argv[optind++];
 
