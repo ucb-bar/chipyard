@@ -24,7 +24,8 @@ object ResetN extends Pass {
       "Can only invert reset on a module with reset!")
     // Rename "reset" to "reset_n"
     val portsx = mod.ports map {
-      case Port(info, "reset", Input, Bool) => Port(info, "reset_n", Input, Bool)
+      case Port(info, "reset", Input, Bool) =>
+        Port(info, "reset_n", Input, Bool)
       case other => other
     }
     val newReset = DefNode(NoInfo, "reset", DoPrim(Not, Seq(Reference("reset_n", Bool)), Seq.empty, Bool))

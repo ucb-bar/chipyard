@@ -19,13 +19,15 @@ class ExampleModuleNeedsResetInverted extends Module with ResetInverter {
 }
 
 class ResetNSpec extends FreeSpec with Matchers {
-  "Inverting reset needs to be done throughout module" in {
-    val chirrtl = (new ChiselStage).emitChirrtl(new ExampleModuleNeedsResetInverted, Array())
+  "Inverting reset needs to be done throughout module in Chirrtl" in {
+    val chirrtl = (new ChiselStage).emitChirrtl(new ExampleModuleNeedsResetInverted, Array("--no-run-firrtl"))
     chirrtl should include("input reset :")
     (chirrtl should not).include("input reset_n :")
     (chirrtl should not).include("node reset = not(reset_n)")
+  }
 
-    val firrtl = (new ChiselStage).emitFirrtl(new ExampleModuleNeedsResetInverted, Array("-X", "low"))
+  "Inverting reset needs to be done throughout module when generating firrtl" in {
+    val firrtl = (new ChiselStage).emitFirrtl(new ExampleModuleNeedsResetInverted)
     firrtl should include("input reset_n :")
     firrtl should include("node reset = not(reset_n)")
     (firrtl should not).include("input reset :")
