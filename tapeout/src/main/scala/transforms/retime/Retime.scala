@@ -4,6 +4,8 @@ package barstools.tapeout.transforms.retime
 
 import chisel3.experimental.RunFirrtlTransform
 import firrtl.annotations._
+import firrtl.stage.Forms
+import firrtl.stage.TransformManager.TransformDependency
 import firrtl.{CircuitState, DependencyAPIMigration, Transform}
 
 case class RetimeAnnotation(target: Named) extends SingleTargetAnnotation[Named] {
@@ -11,6 +13,10 @@ case class RetimeAnnotation(target: Named) extends SingleTargetAnnotation[Named]
 }
 
 class RetimeTransform extends Transform with DependencyAPIMigration {
+
+  override def prerequisites: Seq[TransformDependency] = Forms.LowForm
+  override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
+
   override def execute(state: CircuitState): CircuitState = {
     state.annotations.filter(_.isInstanceOf[RetimeAnnotation]) match {
       case Nil => state

@@ -6,6 +6,8 @@ import firrtl._
 import firrtl.ir._
 import firrtl.annotations._
 import firrtl.Mappers._
+import firrtl.stage.Forms
+import firrtl.stage.TransformManager.TransformDependency
 
 case class KeepNameAnnotation(target: ModuleTarget)
     extends SingleTargetAnnotation[ModuleTarget] {
@@ -22,6 +24,9 @@ case class ModuleNameSuffixAnnotation(target: CircuitTarget, suffix: String)
 // allow FIRRTL to be linked together using "cat" and ExtModules don't get
 // emitted, this should be safe.
 class AddSuffixToModuleNames extends Transform with DependencyAPIMigration {
+
+  override def prerequisites: Seq[TransformDependency] = Forms.LowForm
+  override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
 
   def processAnnos(annos: AnnotationSeq): (AnnotationSeq, (String) => String) = {
     val whitelist = annos.collect({ case KeepNameAnnotation(tgt) => tgt.module }).toSet

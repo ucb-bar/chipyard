@@ -7,6 +7,8 @@ import firrtl.PrimOps.Not
 import firrtl.annotations.{Annotation, CircuitName, ModuleName, SingleTargetAnnotation}
 import firrtl.ir._
 import firrtl.passes.Pass
+import firrtl.stage.Forms
+import firrtl.stage.TransformManager.TransformDependency
 import firrtl.{CircuitState, DependencyAPIMigration, Transform}
 
 case class ResetInverterAnnotation(target: ModuleName) extends SingleTargetAnnotation[ModuleName] {
@@ -39,6 +41,10 @@ object ResetN extends Pass {
 }
 
 class ResetInverterTransform extends Transform with DependencyAPIMigration {
+
+  override def prerequisites: Seq[TransformDependency] = Forms.LowForm
+  override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
+
   override def execute(state: CircuitState): CircuitState = {
     state.annotations.filter(_.isInstanceOf[ResetInverterAnnotation]) match {
       case Nil => state

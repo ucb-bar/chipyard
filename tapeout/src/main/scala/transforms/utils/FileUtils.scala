@@ -5,6 +5,8 @@ package barstools.tapeout.transforms
 import chisel3.experimental.{ChiselAnnotation, annotate}
 import firrtl._
 import firrtl.annotations._
+import firrtl.stage.Forms
+import firrtl.stage.TransformManager.TransformDependency
 import firrtl.transforms.BlackBoxTargetDirAnno
 
 object WriteConfig {
@@ -50,6 +52,10 @@ case class TechnologyLocationAnnotation(dir: String) extends SingleTargetAnnotat
 }
 
 class TechnologyLocation extends Transform with DependencyAPIMigration {
+
+  override def prerequisites: Seq[TransformDependency] = Forms.LowForm
+  override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
+
   def execute(state: CircuitState): CircuitState = {
     throw new Exception("Technology Location transform execution doesn't work!")
   }

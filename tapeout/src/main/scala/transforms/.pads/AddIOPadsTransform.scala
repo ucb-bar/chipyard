@@ -5,11 +5,17 @@ package barstools.tapeout.transforms.pads
 import firrtl._
 import firrtl.passes._
 import barstools.tapeout.transforms._
+import firrtl.options.Dependency
+import firrtl.stage.Forms
+import firrtl.stage.TransformManager.TransformDependency
 
 import scala.collection.mutable
 
 // Main Add IO Pad transform operates on low Firrtl
 class AddIOPadsTransform extends Transform with SeqTransformBased with DependencyAPIMigration {
+
+  override def prerequisites: Seq[TransformDependency] = Forms.LowForm
+  override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
 
   val transformList = new mutable.ArrayBuffer[Transform]
   def transforms: Seq[Transform] = transformList
