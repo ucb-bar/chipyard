@@ -5,13 +5,13 @@ import chisel3.util.{log2Up}
 
 import freechips.rocketchip.config.{Field, Parameters, Config}
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.diplomacy.{LazyModule, ValName}
+import freechips.rocketchip.diplomacy.{LazyModule, ValName, RationalCrossing}
 import freechips.rocketchip.devices.tilelink.{BootROMLocated}
 import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI}
 import freechips.rocketchip.groundtest.{GroundTestSubsystem}
 import freechips.rocketchip.tile._
 import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams}
-import freechips.rocketchip.util.{AsyncResetReg}
+import freechips.rocketchip.util.{AsyncResetReg, Symmetric}
 import freechips.rocketchip.prci._
 
 import testchipip._
@@ -167,8 +167,17 @@ class WithNoDebug extends Config((site, here, up) => {
 })
 
 class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("core", fMHz)
+class WithDRAMControllerFrequency(fMHz: Double) extends ClockNameContainsAssignment("dram_controller", fMHz)
 
 class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {
   case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
+})
+
+class WithRationalDRAMController extends Config((site, here, up) => {
+  // NB: Symmetric to avoid assumptions abotu MBUS vs DRAM frequency
+  // TODO: There's some unsettling assertion behavior when using FastToSlow
+  // consistent with the assertions not being reversed to consider SlowToFast
+  // on channels being driven by the controller.
+  case DRAMCrossingTypeKey => RationalCrossing(Symmetric)
 })
 

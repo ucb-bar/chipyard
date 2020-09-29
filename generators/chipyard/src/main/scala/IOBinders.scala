@@ -24,7 +24,7 @@ import barstools.iocell.chisel._
 import testchipip._
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 
-import chipyard.GlobalResetSchemeKey
+import chipyard.{GlobalResetSchemeKey, CanHaveFlexiblyClockedMasterAXI4MemPort}
 
 import scala.reflect.{ClassTag}
 
@@ -256,11 +256,10 @@ class WithSerialTLIOCells extends OverrideIOBinder({
 
 
 class WithAXI4MemPunchthrough extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPort) => {
-    val ports: Seq[ClockedIO[AXI4Bundle]] = system.mem_axi4.zipWithIndex.map({ case (m, i) =>
-      val p = IO(new ClockedIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mem_${i}")
-      p.bits <> m
-      p.clock := BoreHelper("axi4_mem_clock", system.asInstanceOf[BaseSubsystem].mbus.module.clock)
+  (system: CanHaveFlexiblyClockedMasterAXI4MemPort) => {
+    val ports: Seq[ClockedAndResetIO[AXI4Bundle]] = system.mem_axi4.zipWithIndex.map({ case (m, i) =>
+      val p = IO(m.cloneType).suggestName(s"axi4_mem_${i}")
+      p <> m
       p
     })
     (ports, Nil)

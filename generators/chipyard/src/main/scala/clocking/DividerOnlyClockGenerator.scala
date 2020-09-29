@@ -5,7 +5,7 @@ import chisel3._
 import freechips.rocketchip.config.{Parameters}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.prci._
-import freechips.rocketchip.util.ElaborationArtefacts
+import freechips.rocketchip.util.{ElaborationArtefacts, ResetCatchAndSync}
 
 import scala.collection.mutable
 import scala.collection.immutable.ListMap
@@ -87,7 +87,13 @@ class DividerOnlyClockGenerator(pllName: String)(implicit p: Parameters, valName
     for (((sinkBName, sinkB), sinkP) <- outClocks.member.elements.zip(outSinkParams.members)) {
       val div = pllConfig.sinkDividerMap(sinkP)
       sinkB.clock := dividedClocks.getOrElse(div, instantiateDivider(div))
-      sinkB.reset := refClock.reset
+      if (sinkBName.contains("dram")) {
+        sinkB.reset := refClock.reset
+      } else if (sinkBName.contains("core")) {
+        sinkB.reset := ResetCatchAndSync(sinkB.clock, refClock.reset.asBool, sync=4)
+      } else {
+        sinkB.reset := ResetCatchAndSync(sinkB.clock, refClock.reset.asBool, sync=2)
+      }
     }
   }
 }

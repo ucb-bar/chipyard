@@ -23,8 +23,8 @@ import freechips.rocketchip.util.{DontTouch}
  */
 class ChipyardSystem(implicit p: Parameters) extends ChipyardSubsystem
   with HasAsyncExtInterrupts
-  with CanHaveMasterAXI4MemPort
   with CanHaveMasterAXI4MMIOPort
+  with CanHaveFlexiblyClockedMasterAXI4MemPort
   with CanHaveSlaveAXI4Port
 {
 

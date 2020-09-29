@@ -176,7 +176,9 @@ class MMIORocketConfig extends Config(
 
 class DividedClockRocketConfig extends Config(
   new chipyard.config.WithTileFrequency(200.0) ++
+  new chipyard.config.WithDRAMControllerFrequency(50.0) ++
   new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new chipyard.config.WithRationalDRAMController ++   // Add async crossings between mbus and DRAM controllers
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 

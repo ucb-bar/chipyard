@@ -125,11 +125,11 @@ class WithSimNetwork extends OverrideHarnessBinder({
 })
 
 class WithSimAXIMem extends OverrideHarnessBinder({
-  (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
+  (system: chipyard.CanHaveFlexiblyClockedMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
     (ports zip system.memAXI4Node.edges.in).map { case (port, edge) =>
       val mem = LazyModule(new SimAXIMem(edge, size=p(ExtMem).get.master.size)(p))
-      withClockAndReset(port.clock, th.harnessReset) {
+      withClockAndReset(port.clock, port.reset) {
         Module(mem.module).suggestName("mem")
       }
       mem.io_axi4.head <> port.bits
@@ -139,7 +139,7 @@ class WithSimAXIMem extends OverrideHarnessBinder({
 })
 
 class WithBlackBoxSimMem extends OverrideHarnessBinder({
-  (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
+  (system: chipyard.CanHaveFlexiblyClockedMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
     (ports zip system.memAXI4Node.edges.in).map { case (port, edge) =>
       val memSize = p(ExtMem).get.master.size
@@ -147,7 +147,7 @@ class WithBlackBoxSimMem extends OverrideHarnessBinder({
       val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle)).suggestName("simdram")
       mem.io.axi <> port.bits
       mem.io.clock := port.clock
-      mem.io.reset := th.harnessReset
+      mem.io.reset := port.reset
     }
     Nil
   }
