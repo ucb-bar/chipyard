@@ -218,7 +218,7 @@ lazy val firechip = conditionalDependsOn(project in file("generators/firechip"))
     testOptions in Test += Tests.Argument("-oF")
   )
 
-lazy val verif = (project in file("./verif/"))
+lazy val verif = (project in file("./tools/verif/"))
   .dependsOn(rocketchip, dsptools, `rocket-dsptools`)
-  .settings(commonSettings)
+  .settings(commonSettings, libraryDependencies += "edu.berkeley.cs" %% "chiseltest" % "0.3-SNAPSHOT")
 
