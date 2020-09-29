@@ -54,6 +54,7 @@ case class TechnologyLocationAnnotation(dir: String) extends SingleTargetAnnotat
 class TechnologyLocation extends Transform with DependencyAPIMigration {
 
   override def prerequisites: Seq[TransformDependency] = Forms.LowForm
+  override def optionalPrerequisites: Seq[TransformDependency] = Forms.LowFormOptimized
   override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
 
   def execute(state: CircuitState): CircuitState = {

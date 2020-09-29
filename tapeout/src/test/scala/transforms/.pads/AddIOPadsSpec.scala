@@ -257,9 +257,10 @@ class IOPadSpec extends FlatSpec with Matchers {
    */
   it should "create proper IO pads + black box in verilog" in {
     val dir = "test_run_dir/PadsVerilog"
-    (new ChiselStage).emitFirrtl(
+    (new ChiselStage).emitVerilog(
       new ExampleTopModuleWithBB,
-      Array("-td", dir, "-X", "verilog")
+//      Array("-td", dir, "-X", "verilog")
+      Array("-td", dir)
     )
     checkOutputs(dir)
   }

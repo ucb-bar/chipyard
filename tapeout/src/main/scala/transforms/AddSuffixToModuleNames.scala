@@ -26,6 +26,7 @@ case class ModuleNameSuffixAnnotation(target: CircuitTarget, suffix: String)
 class AddSuffixToModuleNames extends Transform with DependencyAPIMigration {
 
   override def prerequisites: Seq[TransformDependency] = Forms.LowForm
+  override def optionalPrerequisites: Seq[TransformDependency] = Forms.LowFormOptimized
   override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
 
   def processAnnos(annos: AnnotationSeq): (AnnotationSeq, (String) => String) = {

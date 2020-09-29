@@ -1,20 +1,46 @@
+// See LICENSE for license details.
+
 package barstools.tapeout.transforms.pads
 
+import barstools.tapeout.transforms._
 import net.jcazevedo.moultingyaml._
 
-import firrtl._
-import firrtl.ir._
-import barstools.tapeout.transforms._
+/** This is a hack to get around weird problem with yaml parser
+ * that without this gives PadPlacement defines additional fields
+ *
+ */
+trait HasPadPlacementFields {
+  def file: String
+  def left: String
+  def top: String
+  def right: String
+  def bottom: String
+  def instanceArray: String
+  def padLine: String
+  def template: String
+}
+
+case class PadPlacementFields(
+  file: String,
+  left: String,
+  top: String,
+  right: String,
+  bottom: String,
+  instanceArray: String,
+  padLine: String,
+  template: String
+) extends HasPadPlacementFields
 
 case class PadPlacement(
-    file: String,
-    left: String,
-    top: String,
-    right: String,
-    bottom: String,
-    instanceArray: String,
-    padLine: String,
-    template: String) {
+  file: String,
+  left: String,
+  top: String,
+  right: String,
+  bottom: String,
+  instanceArray: String,
+  padLine: String,
+  template: String
+) extends HasPadPlacementFields {
 
   require(instanceArray contains "{{signal}}", "Instance Array Template should contain {{signal}}")
   require(instanceArray contains "{{idx}}", "Instance Array Template should contain {{idx}}")
@@ -33,8 +59,8 @@ case class PadPlacement(
     case Bottom => bottom
   }
 
-  import com.gilt.handlebars.scala.binding.dynamic._
   import com.gilt.handlebars.scala.Handlebars
+  import com.gilt.handlebars.scala.binding.dynamic._
 
   private val instanceArrayTemplate = Handlebars(instanceArray.stripMargin)
   private val padLineTemplate = Handlebars(padLine.stripMargin)
@@ -52,10 +78,26 @@ case class PadPlacementParams(leftPads: String, rightPads: String, topPads: Stri
 
 object PadPlacementFile extends DefaultYamlProtocol {
   val exampleResource = "/PadPlacement.yaml"
-  implicit val _pad = yamlFormat8(PadPlacement)
-  def parse(file: String = ""): PadPlacement = {
-    (new YamlFileReader(exampleResource)).parse[PadPlacement](file).head
+  implicit val _pad = yamlFormat8(PadPlacementFields)
+
+  def main(args: Array[String]): Unit = {
+    println(parse("RealTech/PadPlacement.yaml"))
   }
+
+  def parse(file: String = ""): PadPlacement = {
+    val fields = (new YamlFileReader(exampleResource)).parse[PadPlacementFields](file).head
+    PadPlacement(
+      file = fields.file,
+      left = fields.left,
+      top = fields.top,
+      right = fields.right,
+      bottom = fields.bottom,
+      instanceArray = fields.instanceArray,
+      padLine = fields.padLine,
+      template = fields.template
+    )
+  }
+
   def generate(
       techDir: String, 
       targetDir: String, 

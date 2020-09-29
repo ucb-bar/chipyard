@@ -44,6 +44,7 @@ object ResetN extends Pass {
 class ResetInverterTransform extends Transform with DependencyAPIMigration {
 
   override def prerequisites: Seq[TransformDependency] = Forms.LowForm
+  override def optionalPrerequisites: Seq[TransformDependency] = Forms.LowFormOptimized
   override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
 
   override def execute(state: CircuitState): CircuitState = {

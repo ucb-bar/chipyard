@@ -15,6 +15,7 @@ import scala.collection.mutable
 class AddIOPadsTransform extends Transform with SeqTransformBased with DependencyAPIMigration {
 
   override def prerequisites: Seq[TransformDependency] = Forms.LowForm
+  override def optionalPrerequisites: Seq[TransformDependency] = Forms.LowFormOptimized
   override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
 
   val transformList = new mutable.ArrayBuffer[Transform]
