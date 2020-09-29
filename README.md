@@ -78,7 +78,7 @@ These additional publications cover many of the internal components used in Chip
 [berkeley]: https://berkeley.edu
 [riscv]: https://riscv.org/
 [rocket-chip]: https://github.com/freechipsproject/rocket-chip
-[boom]: https://github.com/ucb-bar/riscv-boom
+[boom]: https://github.com/riscv-boom/riscv-boom
 [firemarshal]: https://github.com/firesim/FireMarshal/
 [ariane]: https://github.com/pulp-platform/ariane/
 [gemmini]: https://github.com/ucb-bar/gemmini

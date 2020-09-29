@@ -1,3 +1,5 @@
+.. _tilelink_and_diplomacy:
+
 TileLink and Diplomacy Reference
 ================================
 

@@ -1,11 +1,15 @@
 // See LICENSE.SiFive for license details.
 // See LICENSE.Berkeley for license details.
 
-#include "verilated.h"
 #if VM_TRACE
 #include <memory>
+#if CY_FST_TRACE
+#include "verilated_fst_c.h"
+#else
+#include "verilated.h"
 #include "verilated_vcd_c.h"
-#endif
+#endif // CY_FST_TRACE
+#endif // VM_TRACE
 #include <fesvr/dtm.h>
 #include <fesvr/tsi.h>
 #include "remote_bitbang.h"
@@ -35,7 +39,6 @@
 extern tsi_t* tsi;
 extern dtm_t* dtm;
 extern remote_bitbang_t * jtag;
-extern int dramsim;
 
 static uint64_t trace_count = 0;
 bool verbose = false;
@@ -49,11 +52,6 @@ void handle_sigterm(int sig)
 double sc_time_stamp()
 {
   return trace_count;
-}
-
-extern "C" int vpi_get_vlog_info(void* arg)
-{
-  return 0;
 }
 
 static void usage(const char * program_name)
@@ -116,16 +114,15 @@ int main(int argc, char** argv)
   uint64_t max_cycles = -1;
   int ret = 0;
   bool print_cycles = false;
-  // Port numbers are 16 bit unsigned integers. 
+  // Port numbers are 16 bit unsigned integers.
   uint16_t rbb_port = 0;
 #if VM_TRACE
+  const char* vcdfile_name = NULL;
   FILE * vcdfile = NULL;
   uint64_t start = 0;
 #endif
-  char ** htif_argv = NULL;
   int verilog_plusargs_legal = 1;
 
-  dramsim = 0;
   opterr = 1;
 
   while (1) {
@@ -136,7 +133,6 @@ int main(int argc, char** argv)
       {"seed",            required_argument, 0, 's' },
       {"rbb-port",        required_argument, 0, 'r' },
       {"verbose",         no_argument,       0, 'V' },
-      {"dramsim",         no_argument,       0, 'D' },
       {"permissive",      no_argument,       0, 'p' },
       {"permissive-off",  no_argument,       0, 'o' },
 #if VM_TRACE
@@ -147,9 +143,9 @@ int main(int argc, char** argv)
     };
     int option_index = 0;
 #if VM_TRACE
-    int c = getopt_long(argc, argv, "-chm:s:r:v:Vx:Dpo", long_options, &option_index);
+    int c = getopt_long(argc, argv, "-chm:s:r:v:Vx:po", long_options, &option_index);
 #else
-    int c = getopt_long(argc, argv, "-chm:s:r:VDpo", long_options, &option_index);
+    int c = getopt_long(argc, argv, "-chm:s:r:Vpo", long_options, &option_index);
 #endif
     if (c == -1) break;
  retry:
@@ -162,11 +158,11 @@ int main(int argc, char** argv)
       case 's': random_seed = atoi(optarg); break;
       case 'r': rbb_port = atoi(optarg);    break;
       case 'V': verbose = true;             break;
-      case 'D': dramsim = 1;                break;
       case 'p': opterr = 0;                 break;
       case 'o': opterr = 1;                 break;
 #if VM_TRACE
       case 'v': {
+        vcdfile_name = optarg;
         vcdfile = strcmp(optarg, "-") == 0 ? stdout : fopen(optarg, "w");
         if (!vcdfile) {
           std::cerr << "Unable to open " << optarg << " for VCD write\n";
@@ -198,8 +194,6 @@ int main(int argc, char** argv)
 #endif
         else if (arg.substr(0, 12) == "+cycle-count")
           c = 'c';
-        else if (arg == "+dramsim")
-          c = 'D';
         else if (arg == "+permissive")
           c = 'p';
         else if (arg == "+permissive-off")
@@ -263,10 +257,6 @@ done_processing:
     usage(argv[0]);
     return 1;
   }
-  int htif_argc = 1 + argc - optind;
-  htif_argv = (char **) malloc((htif_argc) * sizeof (char *));
-  htif_argv[0] = argv[0];
-  for (int i = 1; optind < argc;) htif_argv[i++] = argv[optind++];
 
   if (verbose)
     fprintf(stderr, "using random seed %u\n", random_seed);
@@ -280,17 +270,20 @@ done_processing:
 
 #if VM_TRACE
   Verilated::traceEverOn(true); // Verilator must compute traced signals
+#if CY_FST_TRACE
+  std::unique_ptr<VerilatedFstC> tfp(new VerilatedFstC);
+#else
   std::unique_ptr<VerilatedVcdFILE> vcdfd(new VerilatedVcdFILE(vcdfile));
   std::unique_ptr<VerilatedVcdC> tfp(new VerilatedVcdC(vcdfd.get()));
-  if (vcdfile) {
+#endif // CY_FST_TRACE
+  if (vcdfile_name) {
     tile->trace(tfp.get(), 99);  // Trace 99 levels of hierarchy
-    tfp->open("");
+    tfp->open(vcdfile_name);
   }
-#endif
+#endif // VM_TRACE
 
+  // RocketChip currently only supports RBB port 0, so this needs to stay here
   jtag = new remote_bitbang_t(rbb_port);
-  dtm = new dtm_t(htif_argc, htif_argv);
-  tsi = new tsi_t(htif_argc, htif_argv);
 
   signal(SIGTERM, handle_sigterm);
 
@@ -320,8 +313,7 @@ done_processing:
   tile->reset = 0;
   done_reset = true;
 
-  while (!dtm->done() && !jtag->done() && !tsi->done() &&
-         !tile->io_success && trace_count < max_cycles) {
+  do {
     tile->clock = 0;
     tile->eval();
 #if VM_TRACE
@@ -338,6 +330,13 @@ done_processing:
 #endif
     trace_count++;
   }
+  // for verilator multithreading. need to do 1 loop before checking if
+  // tsi exists, since tsi is created by verilated thread on the first
+  // serial_tick.
+  while ((!dtm || !dtm->done()) &&
+         (!jtag || !jtag->done()) &&
+         (!tsi || !tsi->done()) &&
+         !tile->io_success && trace_count < max_cycles);
 
 #if VM_TRACE
   if (tfp)
@@ -346,17 +345,17 @@ done_processing:
     fclose(vcdfile);
 #endif
 
-  if (dtm->exit_code())
+  if (dtm && dtm->exit_code())
   {
     fprintf(stderr, "*** FAILED *** via dtm (code = %d, seed %d) after %ld cycles\n", dtm->exit_code(), random_seed, trace_count);
     ret = dtm->exit_code();
   }
-  else if (tsi->exit_code())
+  else if (tsi && tsi->exit_code())
   {
     fprintf(stderr, "*** FAILED *** (code = %d, seed %d) after %ld cycles\n", tsi->exit_code(), random_seed, trace_count);
     ret = tsi->exit_code();
   }
-  else if (jtag->exit_code())
+  else if (jtag && jtag->exit_code())
   {
     fprintf(stderr, "*** FAILED *** via jtag (code = %d, seed %d) after %ld cycles\n", jtag->exit_code(), random_seed, trace_count);
     ret = jtag->exit_code();
@@ -375,6 +374,5 @@ done_processing:
   if (tsi) delete tsi;
   if (jtag) delete jtag;
   if (tile) delete tile;
-  if (htif_argv) free(htif_argv);
   return ret;
 }

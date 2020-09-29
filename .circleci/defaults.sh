@@ -45,25 +45,38 @@ LOCAL_CHIPYARD_DIR=$LOCAL_CHECKOUT_DIR
 LOCAL_SIM_DIR=$LOCAL_CHIPYARD_DIR/sims/verilator
 LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 
+# key value store to get the build groups
+declare -A grouping
+grouping["group-cores"]="chipyard-ariane chipyard-rocket chipyard-hetero chipyard-boom"
+grouping["group-peripherals"]="chipyard-dmirocket chipyard-blkdev chipyard-spiflashread chipyard-spiflashwrite chipyard-mmios chipyard-lbwif"
+grouping["group-accels"]="chipyard-nvdla chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-streaming-fir chipyard-streaming-passthrough"
+grouping["group-tracegen"]="tracegen tracegen-boom"
+grouping["group-other"]="icenet testchipip"
+
 # key value store to get the build strings
 declare -A mapping
-mapping["chipyard-rocket"]="SUB_PROJECT=chipyard"
-mapping["chipyard-sha3"]="SUB_PROJECT=chipyard CONFIG=Sha3RocketConfig"
-mapping["chipyard-streaming-fir"]="SUB_PROJECT=chipyard CONFIG=StreamingFIRRocketConfig"
-mapping["chipyard-streaming-passthrough"]="SUB_PROJECT=chipyard CONFIG=StreamingPassthroughRocketConfig"
-mapping["chipyard-hetero"]="SUB_PROJECT=chipyard CONFIG=LargeBoomAndRocketConfig"
-mapping["chipyard-boom"]="SUB_PROJECT=chipyard CONFIG=SmallBoomConfig"
-mapping["chipyard-blkdev"]="SUB_PROJECT=chipyard CONFIG=SimBlockDeviceRocketConfig"
-mapping["chipyard-hwacha"]="SUB_PROJECT=chipyard CONFIG=HwachaRocketConfig"
-mapping["chipyard-gemmini"]="SUB_PROJECT=chipyard CONFIG=GemminiRocketConfig"
-mapping["chipyard-ariane"]="SUB_PROJECT=chipyard CONFIG=ArianeConfig"
-mapping["chipyard-spiflashread"]="SUB_PROJECT=chipyard CONFIG=LargeSPIFlashROMRocketConfig"
-mapping["chipyard-spiflashwrite"]="SUB_PROJECT=chipyard CONFIG=SmallSPIFlashRocketConfig"
-mapping["tracegen"]="SUB_PROJECT=chipyard CONFIG=NonBlockingTraceGenL2Config TOP=TraceGenSystem"
-mapping["tracegen-boom"]="SUB_PROJECT=chipyard CONFIG=BoomTraceGenConfig TOP=TraceGenSystem"
-mapping["chipyard-nvdla"]="SUB_PROJECT=chipyard CONFIG=SmallNVDLARocketConfig"
+mapping["chipyard-rocket"]=""
+mapping["chipyard-dmirocket"]=" CONFIG=dmiRocketConfig"
+mapping["chipyard-lbwif"]=" CONFIG=LBWIFRocketConfig"
+mapping["chipyard-sha3"]=" CONFIG=Sha3RocketConfig"
+mapping["chipyard-streaming-fir"]=" CONFIG=StreamingFIRRocketConfig"
+mapping["chipyard-streaming-passthrough"]=" CONFIG=StreamingPassthroughRocketConfig"
+mapping["chipyard-hetero"]=" CONFIG=LargeBoomAndRocketConfig"
+mapping["chipyard-boom"]=" CONFIG=SmallBoomConfig"
+mapping["chipyard-blkdev"]=" CONFIG=SimBlockDeviceRocketConfig"
+mapping["chipyard-hwacha"]=" CONFIG=HwachaRocketConfig"
+mapping["chipyard-gemmini"]=" CONFIG=GemminiRocketConfig"
+mapping["chipyard-ariane"]=" CONFIG=ArianeConfig"
+mapping["chipyard-spiflashread"]=" CONFIG=LargeSPIFlashROMRocketConfig"
+mapping["chipyard-spiflashwrite"]=" CONFIG=SmallSPIFlashRocketConfig"
+mapping["chipyard-mmios"]=" CONFIG=MMIORocketConfig verilog"
+mapping["tracegen"]=" CONFIG=NonBlockingTraceGenL2Config"
+mapping["tracegen-boom"]=" CONFIG=BoomTraceGenConfig"
+mapping["chipyard-nvdla"]=" CONFIG=SmallNVDLARocketConfig"
+
 mapping["firesim"]="SCALA_TEST=firesim.firesim.RocketNICF1Tests"
 mapping["firesim-multiclock"]="SCALA_TEST=firesim.firesim.RocketMulticlockF1Tests"
 mapping["fireboom"]="SCALA_TEST=firesim.firesim.BoomF1Tests"
 mapping["icenet"]="SUB_PROJECT=icenet"
 mapping["testchipip"]="SUB_PROJECT=testchipip"
+
