@@ -5,6 +5,7 @@ import chisel3._
 import freechips.rocketchip.config.{Parameters}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.prci._
+import freechips.rocketchip.util.ElaborationArtefacts
 
 import scala.collection.mutable
 import scala.collection.immutable.ListMap
@@ -25,21 +26,22 @@ object FrequencyUtils {
   }
 }
 
-class SimplePllConfiguration(val sinks: Seq[ClockSinkParameters]) {
+class SimplePllConfiguration(pllName: String, val sinks: Seq[ClockSinkParameters]) {
   val referenceFreqMHz = FrequencyUtils.computeReferenceFrequencyMHz(sinks.flatMap(_.take)).freqMHz
   val sinkDividerMap = ListMap((sinks.map({s => (s, Math.round(referenceFreqMHz / s.take.get.freqMHz).toInt) })):_*)
 
-  def prettyPrint(pllName: String) {
-    val preamble = s"""
+  private val preamble = s"""
     |${pllName} Frequency Summary
     |  Input Reference Frequency: ${referenceFreqMHz} MHz\n""".stripMargin
-    val outputSummaries = sinkDividerMap.map { case (sink, division) =>
+  private val outputSummaries = sinkDividerMap.map { case (sink, division) =>
       val requested = sink.take.get.freqMHz
       val actual = referenceFreqMHz / division.toDouble
       s"  Output clock ${sink.name.get}, requested: ${requested} MHz, actual: ${actual} MHz (division of ${division})"
     }
-    println(preamble + outputSummaries.mkString("\n"))
-  }
+
+   val summaryString =  preamble + outputSummaries.mkString("\n")
+   ElaborationArtefacts.add(s"${pllName}.freq-summary", summaryString)
+   println(summaryString)
 }
 
 case class IdealizedPLLNode(pllName: String)(implicit valName: ValName)
@@ -71,8 +73,7 @@ class IdealizedPLL(pllName: String)(implicit p: Parameters, valName: ValName) ex
     val (outClocks, ClockGroupEdgeParameters(_, outSinkParams,  _, _)) = node.out.head
 
     val referenceFreq = refSinkParam.take.get.freqMHz
-    val pllConfig = new SimplePllConfiguration(outSinkParams.members)
-    pllConfig.prettyPrint(pllName)
+    val pllConfig = new SimplePllConfiguration(pllName, outSinkParams.members)
 
     val dividedClocks = mutable.HashMap[Int, Clock]()
     def instantiateDivider(div: Int): Clock = {

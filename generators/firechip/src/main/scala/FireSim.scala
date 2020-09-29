@@ -124,8 +124,7 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
         }
       }
 
-      val pllConfig = new SimplePllConfiguration(clockGroupEdge.sink.members)
-      pllConfig.prettyPrint("FireSim RationalClockBridge")
+      val pllConfig = new SimplePllConfiguration("FireSim RationalClockBridge", clockGroupEdge.sink.members)
       val rationalClockSpecs = for ((sinkP, division) <- pllConfig.sinkDividerMap) yield {
         RationalClock(sinkP.name.get, 1, division)
       }
