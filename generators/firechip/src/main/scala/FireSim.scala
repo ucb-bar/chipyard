@@ -16,7 +16,7 @@ import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge, RationalClock
 import chipyard._
 import chipyard.harness._
 import chipyard.iobinders._
-import chipyard.clocking.{FrequencyUtils, ClockGroupNamePrefixer, ClockGroupFrequencySpecifier, SimplePllConfiguration}
+import chipyard.clocking._
 
 // Determines the number of times to instantiate the DUT in the harness.
 // Subsumes legacy supernode support
@@ -101,6 +101,7 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
     val inputClockSource = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
 
     (aggregator
+      := ClockGroupResetSynchronizer()
       := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
       := inputClockSource)
 
@@ -113,15 +114,7 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
 
       (clockGroupBundle.member.data zip input_clocks.data).foreach { case (clockBundle, inputClock) =>
         clockBundle.clock := inputClock
-      }
-
-      // Assign resets. The synchronization scheme is still WIP.
-      for ((name, clockBundle) <- clockGroupBundle.member.elements) {
-        if (name.contains("core")) {
-            clockBundle.reset := ResetCatchAndSync(clockBundle.clock, reset.asBool)
-        } else {
-            clockBundle.reset := reset
-        }
+        clockBundle.reset := reset
       }
 
       val pllConfig = new SimplePllConfiguration("FireSim RationalClockBridge", clockGroupEdge.sink.members)

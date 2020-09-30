@@ -62,6 +62,10 @@ case class DividerOnlyClockGeneratorNode(pllName: String)(implicit valName: ValN
   * fast reference clock (roughly LCM(requested frequencies)) which is passed up the
   * diplomatic graph, and then generates dividers for each unique requested
   * frequency.
+  *
+  * Output resets are not synchronized to generated clocks and should be
+  * synchronized by the user in a manner they see fit.
+  *
   */
 
 class DividerOnlyClockGenerator(pllName: String)(implicit p: Parameters, valName: ValName) extends LazyModule {
@@ -87,13 +91,8 @@ class DividerOnlyClockGenerator(pllName: String)(implicit p: Parameters, valName
     for (((sinkBName, sinkB), sinkP) <- outClocks.member.elements.zip(outSinkParams.members)) {
       val div = pllConfig.sinkDividerMap(sinkP)
       sinkB.clock := dividedClocks.getOrElse(div, instantiateDivider(div))
-      if (sinkBName.contains("dram")) {
-        sinkB.reset := refClock.reset
-      } else if (sinkBName.contains("core")) {
-        sinkB.reset := ResetCatchAndSync(sinkB.clock, refClock.reset.asBool, sync=4)
-      } else {
-        sinkB.reset := ResetCatchAndSync(sinkB.clock, refClock.reset.asBool, sync=2)
-      }
+      // Reset handling and synchronization is expected to be handled by a downstream node
+      sinkB.reset := refClock.reset
     }
   }
 }
