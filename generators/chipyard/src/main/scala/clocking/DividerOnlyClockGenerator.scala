@@ -26,12 +26,12 @@ object FrequencyUtils {
   }
 }
 
-class SimplePllConfiguration(pllName: String, val sinks: Seq[ClockSinkParameters]) {
+class SimplePllConfiguration(name: String, val sinks: Seq[ClockSinkParameters]) {
   val referenceFreqMHz = FrequencyUtils.computeReferenceFrequencyMHz(sinks.flatMap(_.take)).freqMHz
   val sinkDividerMap = ListMap((sinks.map({s => (s, Math.round(referenceFreqMHz / s.take.get.freqMHz).toInt) })):_*)
 
   private val preamble = s"""
-    |${pllName} Frequency Summary
+    |${name} Frequency Summary
     |  Input Reference Frequency: ${referenceFreqMHz} MHz\n""".stripMargin
   private val outputSummaries = sinkDividerMap.map { case (sink, division) =>
       val requested = sink.take.get.freqMHz
@@ -40,11 +40,11 @@ class SimplePllConfiguration(pllName: String, val sinks: Seq[ClockSinkParameters
     }
 
    val summaryString =  preamble + outputSummaries.mkString("\n")
-   ElaborationArtefacts.add(s"${pllName}.freq-summary", summaryString)
+   ElaborationArtefacts.add(s"${name}.freq-summary", summaryString)
    println(summaryString)
 }
 
-case class IdealizedPLLNode(pllName: String)(implicit valName: ValName)
+case class DividerOnlyClockGeneratorNode(pllName: String)(implicit valName: ValName)
   extends MixedNexusNode(ClockImp, ClockGroupImp)(
     dFn = { _ => ClockGroupSourceParameters() },
     uFn = { u =>
@@ -64,8 +64,8 @@ case class IdealizedPLLNode(pllName: String)(implicit valName: ValName)
   * frequency.
   */
 
-class IdealizedPLL(pllName: String)(implicit p: Parameters, valName: ValName) extends LazyModule {
-  val node = IdealizedPLLNode(pllName)
+class DividerOnlyClockGenerator(pllName: String)(implicit p: Parameters, valName: ValName) extends LazyModule {
+  val node = DividerOnlyClockGeneratorNode(pllName)
 
   lazy val module = new LazyRawModuleImp(this) {
     require(node.out.size == 1, "Idealized PLL expects to generate a single output clock group. Use a ClockGroupAggregator")
@@ -92,6 +92,6 @@ class IdealizedPLL(pllName: String)(implicit p: Parameters, valName: ValName) ex
   }
 }
 
-object IdealizedPLL {
-  def apply()(implicit p: Parameters, valName: ValName) = LazyModule(new IdealizedPLL(valName.name)).node
+object DividerOnlyClockGenerator {
+  def apply()(implicit p: Parameters, valName: ValName) = LazyModule(new DividerOnlyClockGenerator(valName.name)).node
 }

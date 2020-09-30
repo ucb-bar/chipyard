@@ -12,7 +12,7 @@ import freechips.rocketchip.util.{ResetCatchAndSync, Pow2ClockDivider}
 
 import barstools.iocell.chisel._
 
-import chipyard.clocking.{IdealizedPLL, ClockGroupNamePrefixer, ClockGroupFrequencySpecifier}
+import chipyard.clocking.{DividerOnlyClockGenerator, ClockGroupNamePrefixer, ClockGroupFrequencySpecifier}
 
 /**
   * Chipyard provides three baseline, top-level reset schemes, set using the
@@ -79,12 +79,12 @@ object GenerateReset {
 }
 
 
-case object ClockingSchemeKey extends Field[ChipTop => Unit](ClockingSchemeGenerators.idealizedPLL)
-/**
+case object ClockingSchemeKey extends Field[ChipTop => Unit](ClockingSchemeGenerators.dividerOnlyClockGenerator)
+/*
   * This is a Seq of assignment functions, that accept a clock name and return an optional frequency.
   * Functions that appear later in this seq have higher precedence that earlier ones.
   * If no function returns a non-empty value, the value specified in
-  * [[DefaultClockFrequencyKey]] will be used -- DFU.
+  * [[DefaultClockFrequencyKey]] will be used.
   */
 case object ClockFrequencyAssignersKey extends Field[Seq[(String) => Option[Double]]](Seq.empty)
 case object DefaultClockFrequencyKey extends Field[Double]()
@@ -100,7 +100,7 @@ class ClockNameContainsAssignment(name: String, fMHz: Double) extends Config((si
 })
 
 object ClockingSchemeGenerators {
-  val idealizedPLL: ChipTop => Unit = { chiptop =>
+  val dividerOnlyClockGenerator: ChipTop => Unit = { chiptop =>
     implicit val p = chiptop.p
 
     // Requires existence of undriven asyncClockGroups in subsystem
@@ -116,7 +116,7 @@ object ClockingSchemeGenerators {
     val referenceClockSource =  ClockSourceNode(Seq(ClockSourceParameters()))
     (aggregator
       := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
-      := IdealizedPLL()
+      := DividerOnlyClockGenerator()
       := referenceClockSource)
 
 
