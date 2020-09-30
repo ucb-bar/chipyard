@@ -5,7 +5,7 @@ import chisel3.util.{log2Up}
 
 import freechips.rocketchip.config.{Field, Parameters, Config}
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.diplomacy.{LazyModule, ValName, RationalCrossing}
+import freechips.rocketchip.diplomacy.{LazyModule, ValName, RationalCrossing, AsynchronousCrossing}
 import freechips.rocketchip.devices.tilelink.{BootROMLocated}
 import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI}
 import freechips.rocketchip.groundtest.{GroundTestSubsystem}
@@ -173,7 +173,7 @@ class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {
   case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
 })
 
-class WithRationalDRAMController extends Config((site, here, up) => {
+class WithRationalDRAMControllerXing extends Config((site, here, up) => {
   // NB: Symmetric to avoid assumptions abotu MBUS vs DRAM frequency
   // TODO: There's some unsettling assertion behavior when using FastToSlow
   // consistent with the assertions not being reversed to consider SlowToFast
@@ -181,3 +181,6 @@ class WithRationalDRAMController extends Config((site, here, up) => {
   case DRAMCrossingTypeKey => RationalCrossing(Symmetric)
 })
 
+class WithAsyncDRAMControllerXing extends Config((site, here, up) => {
+  case DRAMCrossingTypeKey => AsynchronousCrossing
+})
