@@ -8,11 +8,11 @@ import freechips.rocketchip.prci._
 import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey}
 import freechips.rocketchip.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy.{OutwardNodeHandle, InModuleBody, LazyModule}
-import freechips.rocketchip.util.{ResetCatchAndSync, Pow2ClockDivider}
+import freechips.rocketchip.util.{ResetCatchAndSync}
 
 import barstools.iocell.chisel._
 
-import chipyard.clocking.{DividerOnlyClockGenerator, ClockGroupNamePrefixer, ClockGroupFrequencySpecifier}
+import chipyard.clocking._
 
 /**
   * Chipyard provides three baseline, top-level reset schemes, set using the
@@ -116,6 +116,7 @@ object ClockingSchemeGenerators {
     val referenceClockSource =  ClockSourceNode(Seq(ClockSourceParameters()))
     (aggregator
       := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
+      := ClockGroupResetSynchronizer()
       := DividerOnlyClockGenerator()
       := referenceClockSource)
 
