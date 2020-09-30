@@ -18,7 +18,7 @@ import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvon
 
 import junctions.{NastiKey, NastiParameters}
 import midas.models.{FASEDBridge, AXI4EdgeSummary, CompleteConfig}
-import midas.targetutils.{MemModelAnnotation}
+import midas.targetutils.{FAMEModelAnnotation, MemModelAnnotation, EnableModelMultiThreadingAnnotation}
 import firesim.bridges._
 import firesim.configs.MemModelKey
 import tracegen.{TraceGenSystemModuleImp}
@@ -156,6 +156,20 @@ class WithFireSimMultiCycleRegfile extends ComposeIOBinder({
   }
 })
 
+class WithFireSimFAME5 extends ComposeIOBinder({
+  (system: HasTilesModuleImp) => {
+    system.outer.tiles.map {
+      case b: BoomTile =>
+        annotate(FAMEModelAnnotation(b.module))
+        annotate(EnableModelMultiThreadingAnnotation(b.module))
+      case r: RocketTile =>
+        annotate(FAMEModelAnnotation(r.module))
+        annotate(EnableModelMultiThreadingAnnotation(r.module))
+    }
+    (Nil, Nil)
+  }
+})
+
 // Shorthand to register all of the provided bridges above
 class WithDefaultFireSimBridges extends Config(
   new WithSerialBridge ++
@@ -164,6 +178,7 @@ class WithDefaultFireSimBridges extends Config(
   new WithBlockDeviceBridge ++
   new WithFASEDBridge ++
   new WithFireSimMultiCycleRegfile ++
+  new WithFireSimFAME5 ++
   new WithTracerVBridge ++
   new WithFireSimIOCellModels
 )
