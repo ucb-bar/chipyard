@@ -31,9 +31,11 @@ trait CanHaveFlexiblyClockedMasterAXI4MemPort { this: BaseSubsystem =>
     case _: RationalCrossing =>
       mbus.clockNode
     case _: AsynchronousCrossing =>
-      val dramClockGroup = ClockGroup()
-      dramClockGroup := asyncClockGroupsNode
-      dramClockGroup
+      // TODO: determine how we wish to handle the asyncClockGroup
+      //val dramClockGroup = ClockGroup()
+      //dramClockGroup := asyncClockGroupsNode
+      //dramClockGroup
+      mbus.clockNode
   })
 
   val memAXI4Node = AXI4SlaveNode(memPortParamsOpt.map({ case MemoryPortParams(memPortParams, nMemoryChannels) =>

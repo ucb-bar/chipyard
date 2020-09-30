@@ -182,5 +182,5 @@ class WithRationalDRAMControllerXing extends Config((site, here, up) => {
 })
 
 class WithAsyncDRAMControllerXing extends Config((site, here, up) => {
-  case DRAMCrossingTypeKey => AsynchronousCrossing
+  case DRAMCrossingTypeKey => AsynchronousCrossing()
 })
