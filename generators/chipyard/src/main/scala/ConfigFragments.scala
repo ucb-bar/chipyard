@@ -167,15 +167,17 @@ class WithDRAMCacheKey(
     nBanksPerChannel: Int,
     nChannels: Int = 1,
     spanBytes: Option[Int] = None,
-    buildCacheBank: BuildBankFunction.T = BuildBankFunction.scheduler)
+    buildCacheBank: BuildBankFunction.T = BuildBankFunction.scheduler,
+    nSets: Int = 1 << 21,
+    nWays: Int = 7)
       extends Config((site, here, up) => {
   case DRAMCacheKey => {
     val blockBytes = site(CacheBlockBytes)
     val realSpanBytes = spanBytes.getOrElse(blockBytes)
     val blocksPerSpan = realSpanBytes / blockBytes
     DRAMCacheConfig(
-      nSets = 1 << 21,
-      nWays = 7,
+      nSets = nSets,
+      nWays = nWays,
       nMetaCacheRows = 16384 / realSpanBytes,
       baseAddr = BigInt(1) << 37,
       nTrackersPerBank = nTrackersPerBank,
@@ -192,7 +194,7 @@ class WithDRAMCacheKey(
       memInQueue = MemoryQueueParams(0, 0, 2, 2, max(2, blocksPerSpan), 2),
       memOutQueue = MemoryQueueParams(2, 2, 2, 2, 2, 2),
       buildCacheBank = buildCacheBank,
-      buildChannelOutNetwork = OutNetwork.multilevel(8),
+      buildChannelOutNetwork = OutNetwork.ring,
       writebackArbTopology = NetworkTopology.Ring,
       remChannelArbTopology = NetworkTopology.Ring,
       zeroMetadata = false,
@@ -296,3 +298,15 @@ class WithTileDividedClock extends Config((site, here, up) => {
   case ClockingSchemeKey => ClockingSchemeGenerators.harnessDividedClock
 })
 
+class WithNBoomMSHRs(nMSHRs: Int) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => {
+    up(TilesLocated(InSubsystem)).map {
+      case boomParams: BoomTileAttachParams =>
+        boomParams.copy(
+          tileParams = boomParams.tileParams.copy(
+            dcache = boomParams.tileParams.dcache.map(
+              _.copy(nMSHRs = nMSHRs))))
+      case other => other
+    }
+  }
+})

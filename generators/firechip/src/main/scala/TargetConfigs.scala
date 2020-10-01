@@ -305,6 +305,14 @@ class FireSimDualBoomDRAMCacheConfig extends Config(
   new WithDRAMCacheBridge ++
   new chipyard.DualBoomDRAMCacheConfig)
 
+class FireSimDualBoomSmallDRAMCacheConfig extends Config(
+  new WithNIC ++
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new WithDRAMCacheBridge ++
+  new chipyard.DualBoomSmallDRAMCacheConfig)
+
 class FireSimBoomHwachaDRAMCacheConfig extends Config(
   new WithNIC ++
   new WithDefaultFireSimBridges ++

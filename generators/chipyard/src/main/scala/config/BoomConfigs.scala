@@ -85,8 +85,19 @@ class DualBoomDRAMCacheConfig extends Config(
   new boom.common.WithNLargeBooms(2) ++
   new chipyard.config.AbstractConfig)
 
+class DualBoomSmallDRAMCacheConfig extends Config(
+  new chipyard.config.WithMemBenchKey ++
+  new chipyard.config.WithDRAMCacheKey(8, 8, 2, nSets = 1 << 17) ++
+  new chipyard.config.WithDRAMCacheSystem ++
+  new chipyard.config.WithStandardL2(4, 6) ++
+  new memblade.prefetcher.WithPrefetchMiddleManTopology ++
+  new chipyard.config.WithNBoomMSHRs(12) ++
+  new boom.common.WithNLargeBooms(2) ++
+  new chipyard.config.AbstractConfig)
+
 class DualLargeBoomConfig extends Config(
   new chipyard.config.WithStandardL2(4) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
+  new chipyard.config.WithNBoomMSHRs(12) ++
   new boom.common.WithNLargeBooms(2) ++
   new chipyard.config.AbstractConfig)
