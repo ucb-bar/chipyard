@@ -27,7 +27,7 @@ import ariane.ArianeTile
 import boom.common.{BoomTile}
 import barstools.iocell.chisel._
 import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters, IOCellKey}
-import chipyard.{HasHarnessSignalReferences}
+import chipyard.{HasHarnessSignalReferences, CanHaveFlexiblyClockedMasterAXI4MemPort}
 import chipyard.harness._
 
 object MainMemoryConsts {
@@ -97,14 +97,14 @@ class WithBlockDeviceBridge extends OverrideHarnessBinder({
 })
 
 class WithFASEDBridge extends OverrideHarnessBinder({
-  (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
+  (system: CanHaveFlexiblyClockedMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
     (ports zip system.memAXI4Node.edges.in).map { case (axi4, edge) =>
       val nastiKey = NastiParameters(axi4.bits.r.bits.data.getWidth,
                                      axi4.bits.ar.bits.addr.getWidth,
                                      axi4.bits.ar.bits.id.getWidth)
       system match {
-        case s: BaseSubsystem => FASEDBridge(axi4.clock, axi4.bits, th.harnessReset.asBool,
+        case s: BaseSubsystem => FASEDBridge(axi4.clock, axi4.bits, axi4.reset.asBool,
           CompleteConfig(p(firesim.configs.MemModelKey),
                          nastiKey,
                          Some(AXI4EdgeSummary(edge)),
