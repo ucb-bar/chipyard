@@ -26,8 +26,7 @@ import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 
-import chipyard.{BuildTop, BuildSystem, ClockingSchemeGenerators, ClockingSchemeKey, TestSuitesKey, TestSuiteHelper}
-
+import chipyard._
 
 // -----------------------
 // Common Config Fragments
@@ -159,10 +158,6 @@ class WithNoSubsystemDrivenClocks extends Config((site, here, up) => {
   case SubsystemDriveAsyncClockGroupsKey => None
 })
 
-class WithTileDividedClock extends Config((site, here, up) => {
-  case ClockingSchemeKey => ClockingSchemeGenerators.harnessDividedClock
-})
-
 class WithDMIDTM extends Config((site, here, up) => {
   case ExportDebug => up(ExportDebug, site).copy(protocols = Set(DMI))
 })
@@ -170,3 +165,10 @@ class WithDMIDTM extends Config((site, here, up) => {
 class WithNoDebug extends Config((site, here, up) => {
   case DebugModuleKey => None
 })
+
+class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("core", fMHz)
+
+class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {
+  case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
+})
+

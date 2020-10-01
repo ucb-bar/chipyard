@@ -8,14 +8,15 @@ import chisel3.experimental.{IO}
 import freechips.rocketchip.prci._
 import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey}
 import freechips.rocketchip.config.{Field, Config, Parameters}
-import freechips.rocketchip.diplomacy.{LazyModule, InModuleBody}
-import freechips.rocketchip.util.{ResetCatchAndSync}
+import freechips.rocketchip.diplomacy.{LazyModule, InModuleBody, ValName}
+import freechips.rocketchip.util.{ResetCatchAndSync, RecordMap}
 
 import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge, RationalClock}
 
 import chipyard._
 import chipyard.harness._
 import chipyard.iobinders._
+import chipyard.clocking.{FrequencyUtils, ClockGroupNamePrefixer, ClockGroupFrequencySpecifier, SimplePllConfiguration}
 
 // Determines the number of times to instantiate the DUT in the harness.
 // Subsumes legacy supernode support
@@ -25,16 +26,6 @@ class WithNumNodes(n: Int) extends Config((pname, site, here) => {
   case NumNodes => n
 })
 
-// Note, the main prerequisite for supporting an additional clock domain in a
-// FireSim simulation is to supply an additional clock parameter
-// (RationalClock) to the clock bridge (RationalClockBridge). The bridge
-// produces a vector of clocks, based on the provided parameter list, which you
-// may use freely without further modifications to your target design.
-case class FireSimClockParameters(additionalClocks: Seq[RationalClock]) {
-  def numClocks(): Int = additionalClocks.size + 1
-}
-case object FireSimClockKey extends Field[FireSimClockParameters](FireSimClockParameters(Seq()))
-
 // Hacky: Set before each node is generated. Ideally we'd give IO binders
 // accesses to the the Harness's parameters instance. We could then alter that.
 object NodeIdx {
@@ -43,107 +34,113 @@ object NodeIdx {
   def apply(): Int = idx
 }
 
+
+/**
+  * Under FireSim's current multiclock implementation there can be only a
+  * single clock bridge. This requires, therefore, that it  be instantiated in
+  * the harness and reused across all supernode instances. This class attempts to 
+  * memoize its instantiation such that it can be referenced from within a ClockScheme function.
+  */
+class ClockBridgeInstantiator {
+  private var _clockRecord: Option[RecordMap[Clock]] = None
+
+  def getClockRecord: RecordMap[Clock] = _clockRecord.get
+
+  def getClockRecordOrInstantiate(allClocks: Seq[RationalClock], baseClockName: String): RecordMap[Clock] = {
+    if (_clockRecord.isEmpty) {
+      require(allClocks.exists(_.name == baseClockName),
+        s"Provided base-clock name, ${baseClockName}, does not match a defined clock. Available clocks:\n " +
+        allClocks.map(_.name).mkString("\n "))
+
+      val baseClock = allClocks.find(_.name == baseClockName).get
+      val simplified = allClocks.map { c =>
+        c.copy(multiplier = c.multiplier * baseClock.divisor, divisor = c.divisor * baseClock.multiplier)
+         .simplify
+      }
+
+    /**
+      * Removes clocks that have the same frequency before instantiating the
+      * clock bridge to avoid unnecessary BUFGCE use.
+      */
+      val distinct = simplified.foldLeft(Seq(RationalClock(baseClockName, 1, 1))) { case (list, candidate) =>
+        if (list.exists { clock => clock.equalFrequency(candidate) }) list else list :+ candidate
+      }
+
+      val clockBridge = Module(new RationalClockBridge(distinct))
+      val cbVecTuples = distinct.zip(clockBridge.io.clocks)
+      val outputWire = Wire(RecordMap(simplified.map { c => (c.name, Clock()) }:_*))
+      for (parameter <- simplified) {
+        val (_, cbClockField) = cbVecTuples.find(_._1.equalFrequency(parameter)).get
+        outputWire(parameter.name).get := cbClockField
+      }
+      _clockRecord = Some(outputWire)
+    }
+    getClockRecord
+  }
+}
+
+case object ClockBridgeInstantiatorKey extends Field[ClockBridgeInstantiator](new ClockBridgeInstantiator)
+case object FireSimBaseClockNameKey extends Field[String]("implicit_clock")
+
 class WithFireSimSimpleClocks extends Config((site, here, up) => {
   case ClockingSchemeKey => { chiptop: ChipTop =>
     implicit val p = chiptop.p
+    // Figure out what provides this in the chipyard scheme
+    implicit val valName = ValName("FireSimClocking")
 
-    val implicitClockSourceNode = ClockSourceNode(Seq(ClockSourceParameters()))
-    chiptop.implicitClockSinkNode := implicitClockSourceNode
-
-    // Drive the diplomaticclock graph of the DigitalTop (if present)
-    val simpleClockGroupSourceNode = chiptop.lazySystem match {
-      case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) => {
-        val n = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
-        l.asyncClockGroupsNode := n
-        Some(n)
-      }
-      case _ => None
+    // Requires existence of undriven asyncClockGroups in subsystem
+    val systemAsyncClockGroup = chiptop.lazySystem match {
+      case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) =>
+        l.asyncClockGroupsNode
     }
 
+    val aggregator = LazyModule(new ClockGroupAggregator("allClocks")).node
+    (chiptop.implicitClockSinkNode := ClockGroup() := aggregator)
+    (systemAsyncClockGroup := ClockGroupNamePrefixer() := aggregator)
+
+    val inputClockSource = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
+
+    (aggregator
+      := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
+      := inputClockSource)
+
+
     InModuleBody {
-      val clock = IO(Input(Clock())).suggestName("clock")
+      val (clockGroupBundle, clockGroupEdge) = inputClockSource.out.head
+      val input_clocks = IO(Input(RecordMap((clockGroupEdge.sink.members.map { m => (m.name.get, Clock()) }):_* )))
+        .suggestName("clocks")
       val reset = IO(Input(Reset())).suggestName("reset")
 
-      implicitClockSourceNode.out.unzip._1.map { o =>
-        o.clock := clock
-        o.reset := reset
+      (clockGroupBundle.member.data zip input_clocks.data).foreach { case (clockBundle, inputClock) =>
+        clockBundle.clock := inputClock
       }
 
-      simpleClockGroupSourceNode.map { n => n.out.unzip._1.map { out: ClockGroupBundle =>
-        out.member.data.foreach { o =>
-          o.clock := clock
-          o.reset := reset
+      // Assign resets. The synchronization scheme is still WIP.
+      for ((name, clockBundle) <- clockGroupBundle.member.elements) {
+        if (name.contains("core")) {
+            clockBundle.reset := ResetCatchAndSync(clockBundle.clock, reset.asBool)
+        } else {
+            clockBundle.reset := reset
         }
-      }}
+      }
+
+      val pllConfig = new SimplePllConfiguration("FireSim RationalClockBridge", clockGroupEdge.sink.members)
+      val rationalClockSpecs = for ((sinkP, division) <- pllConfig.sinkDividerMap) yield {
+        RationalClock(sinkP.name.get, 1, division)
+      }
 
       chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
-        clock := th.harnessClock
         reset := th.harnessReset
-        Nil
-      })
-    }
-  }
-})
-
-class WithFireSimRationalTileDomain(multiplier: Int, divisor: Int) extends Config((site, here, up) => {
-  case FireSimClockKey => FireSimClockParameters(Seq(RationalClock("TileDomain", multiplier, divisor)))
-  case ClockingSchemeKey => { chiptop: ChipTop =>
-    implicit val p = chiptop.p
-
-    val implicitClockSourceNode = ClockSourceNode(Seq(ClockSourceParameters()))
-    chiptop.implicitClockSinkNode := implicitClockSourceNode
-
-    // Drive the diplomaticclock graph of the DigitalTop (if present)
-    val simpleClockGroupSourceNode = chiptop.lazySystem match {
-      case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) => {
-        val n = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
-        l.asyncClockGroupsNode := n
-        Some(n)
-      }
-      case _ => None
-    }
-
-    InModuleBody {
-      val uncore_clock = IO(Input(Clock())).suggestName("uncore_clock")
-      val tile_clock   = IO(Input(Clock())).suggestName("tile_clock")
-      val reset        = IO(Input(Reset())).suggestName("reset")
-
-      implicitClockSourceNode.out.unzip._1.map { o =>
-        o.clock := uncore_clock
-        o.reset := reset
-      }
-
-      simpleClockGroupSourceNode.map { n => n.out.unzip._1.map { out: ClockGroupBundle =>
-        out.member.elements.map { case (name, data) =>
-          // This is mega hacks, how are you actually supposed to do this?
-          if (name.contains("core")) {
-            data.clock := tile_clock
-            data.reset := ResetCatchAndSync(tile_clock, reset.asBool)
-          } else {
-            data.clock := uncore_clock
-            data.reset := reset
-          }
-        }
-      }}
-
-      chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
-        uncore_clock := th.harnessClock
-        reset        := th.harnessReset
-        th match {
-          case f: FireSim => tile_clock := f.additionalClocks(0)
-          case _ => throw new Exception("FireSimMultiClock must be used with FireSim")
-        }
-        Nil
-      })
+        input_clocks := p(ClockBridgeInstantiatorKey)
+          .getClockRecordOrInstantiate(rationalClockSpecs.toSeq, p(FireSimBaseClockNameKey))
+        Nil })
     }
   }
 })
 
 class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSignalReferences {
   freechips.rocketchip.util.property.cover.setPropLib(new midas.passes.FireSimPropertyLibrary())
-  val clockBridge = Module(new RationalClockBridge(p(FireSimClockKey).additionalClocks:_*))
-  val harnessClock = clockBridge.io.clocks.head // This is the reference clock
-  val additionalClocks = clockBridge.io.clocks.tail
+  val harnessClock = Wire(Clock())
   val harnessReset = WireInit(false.B)
   val peekPokeBridge = PeekPokeBridge(harnessClock, harnessReset)
   def dutReset = { require(false, "dutReset should not be used in Firesim"); false.B }
@@ -165,8 +162,7 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSigna
       d.harnessFunctions.foreach(_(this))
       ApplyHarnessBinders(this, d.lazySystem, p(HarnessBinders), d.portMap.toMap)
     }
-    
-
     NodeIdx.increment()
   }
+  harnessClock := p(ClockBridgeInstantiatorKey).getClockRecord("implicit_clock").get
 }

@@ -31,7 +31,7 @@ class ChipTop(implicit p: Parameters) extends LazyModule with HasTestHarnessFunc
   val lazySystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
 
   // The implicitClockSinkNode provides the implicit clock and reset for the System
-  val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters()))
+  val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
 
   // Generate Clocks and Reset
   p(ClockingSchemeKey)(this)
