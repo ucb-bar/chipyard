@@ -9,7 +9,7 @@ import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebugModuleImp}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle}
-import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPort, HasExtInterruptsModuleImp, BaseSubsystem, HasTilesModuleImp}
+import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPort, HasExtInterruptsModuleImp, BaseSubsystem, HasTilesModuleImp, ExtMem}
 import freechips.rocketchip.tile.{RocketTile}
 import sifive.blocks.devices.uart._
 
@@ -67,9 +67,10 @@ class WithFireSimIOCellModels extends Config((site, here, up) => {
 
 class WithSerialBridge extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
-    ports.map { p =>
-      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, p, th.harnessReset)
-      SerialBridge(p.clock, ram.module.io.tsi_ser, MainMemoryConsts.globalName)(GetSystemParameters(system))
+    ports.map { port =>
+      implicit val p = GetSystemParameters(system)
+      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, port, th.harnessReset)
+      SerialBridge(port.clock, ram.module.io.tsi_ser, p(ExtMem).map(_ => MainMemoryConsts.globalName))
     }
     Nil
   }
