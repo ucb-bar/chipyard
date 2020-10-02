@@ -241,6 +241,13 @@ jobs:
                 group-key: "group-cores"
                 project-key: "chipyard-ariane"
                 timeout: "30m"
+    chipyard-sodor-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-cores"
+                project-key: "chipyard-sodor"
+                timeout: "30m"
     chipyard-dmirocket-run-tests:
         executor: main-env
         steps:
@@ -427,7 +434,9 @@ workflows:
             - chipyard-ariane-run-tests:
                 requires:
                     - prepare-chipyard-cores
-
+            - chipyard-sodor-run-tests:
+                requires:
+                    - prepare-chipyard-cores
             - chipyard-dmirocket-run-tests:
                 requires:
                     - prepare-chipyard-peripherals
