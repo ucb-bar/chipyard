@@ -92,8 +92,8 @@ class TestSuiteHelper
       }
       if (coreParams.useCompressed) addSuites(env.map(if (xlen == 64) rv64uc else rv32uc))
       val (rvi, rvu) =
-        if (xlen == 64) ((if (vm) rv64i else rv64pi), rv64u)
-        else            ((if (vm) rv32i else rv32pi), rv32u)
+        if (xlen == 64) ((if (vm) rv64i else rv64pi), (if (coreParams.mulDiv.isDefined) rv64u else List(rv64ui)))
+        else            ((if (vm) rv32i else rv32pi), (if (coreParams.mulDiv.isDefined) rv32u else List(rv32ui)))
 
       addSuites(rvi.map(_("p")))
       addSuites(rvu.map(_("p")))
