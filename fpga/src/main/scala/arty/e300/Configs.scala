@@ -9,7 +9,6 @@ import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase}
 import freechips.rocketchip.system._
 import freechips.rocketchip.tile._
 
-import sifive.blocks.devices.mockaon._
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.pwm._
 import sifive.blocks.devices.spi._
@@ -38,8 +37,6 @@ class E300DevKitExtra extends Config((site, here, up) => {
     UARTParams(address = 0x10023000))
   case PeripheryI2CKey => List(
     I2CParams(address = 0x10016000))
-  case PeripheryMockAONKey =>
-    MockAONParams(address = 0x10000000)
   case DTSTimebase => BigInt(32768)
   case JtagDTMKey => new JtagDTMConfig (
     idcodeVersion = 2,

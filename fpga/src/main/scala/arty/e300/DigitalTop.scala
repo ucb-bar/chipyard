@@ -14,10 +14,8 @@ import chipyard.{DigitalTop, DigitalTopModule}
 // ------------------------------------
 
 class E300DigitalTop(implicit p: Parameters) extends DigitalTop
-  with sifive.blocks.devices.mockaon.HasPeripheryMockAON
 {
   override lazy val module = new E300DigitalTopModule(this)
 }
 
 class E300DigitalTopModule[+L <: E300DigitalTop](l: L) extends DigitalTopModule(l)
-  with sifive.blocks.devices.mockaon.HasPeripheryMockAONModuleImp

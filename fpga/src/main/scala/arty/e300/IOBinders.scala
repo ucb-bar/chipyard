@@ -12,7 +12,6 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 import sifive.blocks.devices.pwm._
 import sifive.blocks.devices.i2c._
-import sifive.blocks.devices.mockaon._
 import sifive.blocks.devices.jtag._
 import sifive.blocks.devices.pinctrl._
 
@@ -31,7 +30,6 @@ class WithE300Connections extends OverrideIOBinder({
     with HasPeripheryDebugModuleImp
     with HasPeripheryPWMModuleImp
     with HasPeripherySPIFlashModuleImp
-    with HasPeripheryMockAONModuleImp
     with HasPeripheryI2CModuleImp) => {
 
     implicit val p: Parameters = GetSystemParameters(system)
@@ -52,7 +50,6 @@ class WithE300Connections extends OverrideIOBinder({
     val io_jtag = IO(new JTAGPins(() => PinGen(), false)).suggestName("jtag")
     val io_gpio = IO(new GPIOPins(() => PinGen(), p(PeripheryGPIOKey)(0))).suggestName("gpio")
     val io_qspi = IO(new SPIPins(() => PinGen(), p(PeripherySPIFlashKey)(0))).suggestName("qspi")
-    val io_aon = IO(new MockAONWrapperPins()).suggestName("aon")
     val io_jtag_reset = IO(Input(Bool())).suggestName("jtag_reset")
     val io_ndreset    = IO(Output(Bool())).suggestName("ndreset")
 
@@ -174,7 +171,6 @@ class WithE300Connections extends OverrideIOBinder({
     // AON Pads -- direct connection is OK because
     // EnhancedPin is hard-coded in MockAONPads
     // and thus there is no .fromPort method.
-    io_aon <> system.aon.pins
 
     //-----------------------------------------------------------------------
     //-----------------------------------------------------------------------
@@ -322,12 +318,6 @@ class WithE300Connections extends OverrideIOBinder({
           IOBUF(th.btn_1, io_gpio.pins(30))
           IOBUF(th.btn_2, io_gpio.pins(31))
 
-          val iobuf_btn_3 = Module(new IOBUF())
-          iobuf_btn_3.io.I := ~io_aon.pmu.dwakeup_n.o.oval
-          iobuf_btn_3.io.T := ~io_aon.pmu.dwakeup_n.o.oe
-          attach(th.btn_3, iobuf_btn_3.io.IO)
-          io_aon.pmu.dwakeup_n.i.ival := ~iobuf_btn_3.io.O & io_aon.pmu.dwakeup_n.o.ie
-
           // UART1 RX/TX pins are assigned to PMOD_D connector pins 0/1
           IOBUF(th.ja_0, io_gpio.pins(25)) // UART1 TX
           IOBUF(th.ja_1, io_gpio.pins(24)) // UART1 RX
@@ -343,16 +333,12 @@ class WithE300Connections extends OverrideIOBinder({
           // Use the LEDs for some more useful debugging things
           IOBUF(th.led_0, th.ck_rst)
           IOBUF(th.led_1, th.SRST_n)
-          IOBUF(th.led_2, io_aon.pmu.dwakeup_n.i.ival)
           IOBUF(th.led_3, io_gpio.pins(14))
 
           //---------------------------------------------------------------------
           // Unconnected inputs
           //---------------------------------------------------------------------
 
-          io_aon.erst_n.i.ival       := ~th.reset_periph
-          io_aon.lfextclk.i.ival     := slow_clock
-          io_aon.pmu.vddpaden.i.ival := 1.U
         }
 
         Nil
