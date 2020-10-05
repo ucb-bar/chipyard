@@ -258,10 +258,11 @@ done_processing:
     return 1;
   }
 
-  int htif_argc = 1 + argc - optind;
-  char** htif_argv = (char **) malloc((htif_argc) * sizeof (char *));
+  int htif_argc = 1;
+  char** htif_argv = new char*[argc];
   htif_argv[0] = argv[0];
-  for (int i = 1; optind < argc;) htif_argv[i++] = argv[optind++];
+  for (int i = 1; i < argc; i++)
+    if (argv[i][0] != '-') htif_argv[htif_argc++] = argv[i];
 
   if (verbose)
     fprintf(stderr, "using random seed %u\n", random_seed);
@@ -379,6 +380,6 @@ done_processing:
   if (tsi) delete tsi;
   if (jtag) delete jtag;
   if (tile) delete tile;
-  if (htif_argv) free(htif_argv);
+  if (htif_argv) delete[] htif_argv;
   return ret;
 }
