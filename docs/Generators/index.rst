@@ -29,4 +29,5 @@ so changes to the generators themselves will automatically be used when building
    SHA3
    Ariane
    NVDLA
+   Sodor
 

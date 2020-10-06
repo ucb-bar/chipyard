@@ -13,7 +13,7 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.{BootROMLocated, BootROMParams}
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import freechips.rocketchip.diplomacy.LazyModule
-import testchipip.{BlockDeviceKey, BlockDeviceConfig, SerialKey, TracePortKey, TracePortParams}
+import testchipip.{BlockDeviceKey, BlockDeviceConfig, TracePortKey, TracePortParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 
@@ -84,11 +84,13 @@ class WithFireSimConfigTweaks extends Config(
   // Required: Adds IO to attach SerialBridge. The SerialBridges is responsible
   // for signalling simulation termination under simulation success. This fragment can
   // be removed if you supply an auxiliary bridge that signals simulation termination
-  new testchipip.WithTSI ++
+  new testchipip.WithDefaultSerialTL ++
   // Optional: Removing this will require using an initramfs under linux
   new testchipip.WithBlockDevice ++
   // Required*: Scale default baud rate with periphery bus frequency
-  new chipyard.config.WithUART(BigInt(3686400L))
+  new chipyard.config.WithUART(BigInt(3686400L)) ++
+  // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
+  new chipyard.config.WithNoDebug
 )
 
 /*******************************************************************************
@@ -129,7 +131,7 @@ class FireSimSmallSystemConfig extends Config(
   new WithoutClockGating ++
   new WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++
-  new testchipip.WithTSI ++
+  new testchipip.WithDefaultSerialTL ++
   new testchipip.WithBlockDevice ++
   new chipyard.config.WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nWays = 2, capacityKB = 64) ++
@@ -192,7 +194,7 @@ class FireSimArianeConfig extends Config(
 //* Multiclock Configurations
 //*********************************************************************************/
 class FireSimMulticlockRocketConfig extends Config(
-  new WithFireSimRationalTileDomain(2, 1) ++
+  new chipyard.config.WithTileFrequency(6400.0) ++ //lol
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
