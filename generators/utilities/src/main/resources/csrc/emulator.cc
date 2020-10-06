@@ -123,6 +123,10 @@ int main(int argc, char** argv)
 #endif
   int verilog_plusargs_legal = 1;
 
+  int verilated_argc = 1;
+  char** verilated_argv = new char*[argc];
+  verilated_argv[0] = argv[0];
+
   opterr = 1;
 
   while (1) {
@@ -195,9 +199,15 @@ int main(int argc, char** argv)
         else if (arg.substr(0, 12) == "+cycle-count")
           c = 'c';
         else if (arg == "+permissive")
+        {
           c = 'p';
+          verilated_argv[verilated_argc++] = optarg;
+        }
         else if (arg == "+permissive-off")
+        {
           c = 'o';
+          verilated_argv[verilated_argc++] = optarg;
+        }
         // If we don't find a legacy '+' EMULATOR argument, it still could be
         // a VERILOG_PLUSARG and not an error.
         else if (verilog_plusargs_legal) {
@@ -213,6 +223,7 @@ int main(int argc, char** argv)
             verilog_plusargs_legal = 0;
           } else {
             c = 'P';
+            verilated_argv[verilated_argc++] = optarg;
           }
           goto retry;
         }
@@ -235,6 +246,7 @@ int main(int argc, char** argv)
             c = '?';
           } else {
             c = 'p';
+            verilated_argv[verilated_argc++] = optarg;
           }
         }
         goto retry;
@@ -258,11 +270,8 @@ done_processing:
     return 1;
   }
 
-  int htif_argc = 1;
-  char** htif_argv = new char*[argc];
-  htif_argv[0] = argv[0];
-  for (int i = 1; i < argc; i++)
-    if (argv[i][0] != '-') htif_argv[htif_argc++] = argv[i];
+  // Copy the binary file name into the verilator argument stack
+  while (optind < argc) verilated_argv[verilated_argc++] = argv[optind++];
 
   if (verbose)
     fprintf(stderr, "using random seed %u\n", random_seed);
@@ -271,7 +280,7 @@ done_processing:
   srand48(random_seed);
 
   Verilated::randReset(2);
-  Verilated::commandArgs(htif_argc, htif_argv);
+  Verilated::commandArgs(verilated_argc, verilated_argv);
   TEST_HARNESS *tile = new TEST_HARNESS;
 
 #if VM_TRACE
@@ -380,6 +389,6 @@ done_processing:
   if (tsi) delete tsi;
   if (jtag) delete jtag;
   if (tile) delete tile;
-  if (htif_argv) delete[] htif_argv;
+  if (verilated_argv) delete[] verilated_argv;
   return ret;
 }
