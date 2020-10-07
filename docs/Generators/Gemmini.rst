@@ -5,7 +5,7 @@ The Gemmini project is developing a systolic-array based matrix multiplication u
 
 Gemmini is implemented as a RoCC accelerator with non-standard RISC-V custom instructions. The Gemmini unit uses the RoCC port of a Rocket or BOOM `tile`, and by default connects to the memory system through the System Bus (i.e., directly to the L2 cache).
 
-To add a Gemmini unit to an SoC, you should add the ``gemmini.DefaultGemminiConfig`` config fragment to the SoC configurations. To change the configuration of the Gemmini accelerator unit, you can write a custom configuration to replace the ``DefaultGemminiConfig``, which you can view under `generators/gemmini/src/main/scala/configs.scala <https://github.com/ucb-bar/gemmini/blob/master/src/main/scala/gemmini/configs.scala>`__ to see the possible configuration parameters.
+To add a Gemmini unit to an SoC, you should add the ``gemmini.DefaultGemminiConfig`` config fragment to the SoC configurations. To change the configuration of the Gemmini accelerator unit, you can write a custom configuration to replace the ``DefaultGemminiConfig``, which you can view under `generators/gemmini/src/main/scala/configs.scala <https://github.com/ucb-bar/gemmini/blob/master/src/main/scala/gemmini/Configs.scala>`__ to see the possible configuration parameters.
 
 The example Chipyard config includes the following example SoC configuration which includes Gemmini:
 
