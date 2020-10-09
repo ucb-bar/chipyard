@@ -108,14 +108,23 @@ class ComposeIOBinder[T, S <: Data](fn: => (T) => (Seq[S], Seq[IOCell]))(implici
 })
 
 object BoreHelper {
-  def apply(name: String, source: Clock): Clock = {
-    val clock_io = IO(Output(Clock())).suggestName(name)
-    val clock_wire = Wire(Clock()).suggestName(s"chiptop_${name}")
-    dontTouch(clock_wire)
-    clock_wire := false.B.asClock // necessary for BoringUtils to work properly
-    BoringUtils.bore(source, Seq(clock_wire))
-    clock_io := clock_wire
-    clock_io
+  def apply[T <: Data](name: String, source: T): T = {
+    val (io, wire) = source match {
+      case c: Clock =>
+        val wire =  Wire(Clock())
+        wire := false.B.asClock
+        (IO(Output(Clock())), wire)
+      case r: Reset =>
+        val wire =  Wire(Reset())
+        wire := false.B
+        (IO(Output(Reset())), wire)
+    }
+    io.suggestName(name)
+    wire.suggestName(s"chiptop_${name}")
+    dontTouch(wire)
+    BoringUtils.bore(source, Seq(wire))
+    io := wire
+    io.asInstanceOf[source.type]
   }
 }
 
@@ -257,10 +266,11 @@ class WithSerialTLIOCells extends OverrideIOBinder({
 
 class WithAXI4MemPunchthrough extends OverrideIOBinder({
   (system: CanHaveMasterAXI4MemPort) => {
-    val ports: Seq[ClockedIO[AXI4Bundle]] = system.mem_axi4.zipWithIndex.map({ case (m, i) =>
-      val p = IO(new ClockedIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mem_${i}")
+    val ports: Seq[ClockedAndResetIO[AXI4Bundle]] = system.mem_axi4.zipWithIndex.map({ case (m, i) =>
+      val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mem_${i}")
       p.bits <> m
       p.clock := BoreHelper("axi4_mem_clock", system.asInstanceOf[BaseSubsystem].mbus.module.clock)
+      p.reset := BoreHelper("axi4_mem_reset", system.asInstanceOf[BaseSubsystem].mbus.module.reset)
       p
     })
     (ports, Nil)

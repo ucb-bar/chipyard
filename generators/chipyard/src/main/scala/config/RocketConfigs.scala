@@ -178,6 +178,8 @@ class DividedClockRocketConfig extends Config(
   new chipyard.config.WithTileFrequency(200.0) ++
   new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.WithMemoryBusFrequency(50 * 1000 * 1000) ++
+  new chipyard.WithAsynchrousMemoryBusCrossing ++
   new chipyard.config.AbstractConfig)
 
 class LBWIFRocketConfig extends Config(
