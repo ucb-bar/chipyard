@@ -30,44 +30,44 @@ import scala.reflect.{ClassTag}
 
 import sifive.fpgashells.ip.xilinx.{IBUFG, IOBUF, PULLUP, PowerOnResetFPGAOnly}
 
-
-
 class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
-  (system: HasPeripheryDebugModuleImp, th: ArtyFPGATestHarness, ports: Seq[Data]) => {
-    ports.map {
-      case d: ClockedDMIIO =>
-        // Want to error here.
-      case j: JTAGIO =>
-        //val dtm_success = WireInit(false.B)
-        //when (dtm_success) { th.success := true.B }
-        //val jtag = Module(new SimJTAG(tickDelay=3)).connect(j, th.harnessClock, th.harnessReset.asBool, ~(th.harnessReset.asBool), dtm_success)
+  (system: HasPeripheryDebugModuleImp, th: HasHarnessSignalReferences, ports: Seq[JTAGIO]) => {
+  // (system: HasPeripheryDebugModuleImp, th: ArtyFPGATestHarness, ports: Seq[Data]) => {
+    // ports.map {
+    //   case d: ClockedDMIIO =>
+    //     // Want to error here.
+    //   case j: JTAGIO =>
+    //     //val dtm_success = WireInit(false.B)
+    //     //when (dtm_success) { th.success := true.B }
+    //     //val jtag = Module(new SimJTAG(tickDelay=3)).connect(j, th.harnessClock, th.harnessReset.asBool, ~(th.harnessReset.asBool), dtm_success)
 
-        j.TCK.i.ival := IBUFG(IOBUF(th.jd_2).asClock).asUInt
+    //     j.TCK.i.ival := IBUFG(IOBUF(th.jd_2).asClock).asUInt
 
-        IOBUF(th.jd_5, j.TMS)
-        PULLUP(th.jd_5)
+    //     IOBUF(th.jd_5, j.TMS)
+    //     PULLUP(th.jd_5)
 
-        IOBUF(th.jd_4, j.TDI)
-        PULLUP(th.jd_4)
+    //     IOBUF(th.jd_4, j.TDI)
+    //     PULLUP(th.jd_4)
 
-        IOBUF(th.jd_0, j.TDO)
+    //     IOBUF(th.jd_0, j.TDO)
 
-        // mimic putting a pullup on this line (part of reset vote)
-        th.SRST_n := IOBUF(th.jd_6)
-        PULLUP(th.jd_6)
+    //     // mimic putting a pullup on this line (part of reset vote)
+    //     th.SRST_n := IOBUF(th.jd_6)
+    //     PULLUP(th.jd_6)
 
-        IOBUF(th.jd_1, j.TRSTn)
-        PULLUP(th.jd_1)
-    }
+    //     IOBUF(th.jd_1, j.TRSTn)
+    //     PULLUP(th.jd_1)
+    // }
     Nil
   }
 })
 
 class WithArtyUARTHarnessBinder extends OverrideHarnessBinder({
-  (system: HasPeripheryUARTModuleImp, th: ArtyFPGATestHarness, ports: Seq[UARTPortIO]) => {
-    //UARTAdapter.connect(ports)(system.p)
-    IOBUF(th.ck_io(2),  ports.txd)
-    IOBUF(th.ck_io(3),  ports.rxd)
+  (system: HasPeripheryUARTModuleImp, th: HasHarnessSignalReferences, ports: Seq[UARTPortIO]) => {
+  // (system: HasPeripheryUARTModuleImp, th: ArtyFPGATestHarness, ports: Seq[UARTPortIO]) => {
+    // UARTAdapter.connect(ports)(system.p)
+    // IOBUF(th.ck_io(2),  ports.txd)
+    // IOBUF(th.ck_io(3),  ports.rxd)
     Nil
   }
 })
