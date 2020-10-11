@@ -6,21 +6,8 @@ import scala.collection.mutable.{ArrayBuffer}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.config.{Field, Parameters}
 import sifive.fpgashells.shell.xilinx.artyshell.{ArtyShell}
-import chipyard.{BuildTop, HasHarnessSignalReferences}
+import chipyard.{BuildTop, HasHarnessSignalReferences, HasTestHarnessFunctions}
 import chipyard.harness.{ApplyHarnessBinders, HarnessBinders}
-
-trait HasTestHarnessFunctions {
-  val lazySystem: LazyModule
-  val harnessFunctions = ArrayBuffer.empty[HasHarnessSignalReferences => Seq[Any]]
-  val portMap = scala.collection.mutable.Map[String, Seq[Data]]()
-}
-
-trait HasHarnessSignalReferences {
-  def harnessClock: Clock
-  def harnessReset: Reset
-  def dutReset: Reset
-  def success: Bool
-}
 
 class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell with HasHarnessSignalReferences {
 

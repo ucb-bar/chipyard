@@ -52,10 +52,10 @@ class WithE300System extends Config((site, here, up) => {
 
 class E300ArtyDevKitConfig extends Config(
   new WithE300System ++
-  new chipyard.iobinders.WithDebugIOCells ++
-  new chipyard.iobinders.WithUARTIOCells ++
   new WithArtyJTAGHarnessBinder ++
   new WithArtyUARTHarnessBinder ++
+  new chipyard.iobinders.WithDebugIOCells ++
+  new chipyard.iobinders.WithUARTIOCells ++
   new E300DevKitExtra ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithL2TLBs(1024) ++

@@ -31,7 +31,7 @@ import scala.reflect.{ClassTag}
 import sifive.fpgashells.ip.xilinx.{IBUFG, IOBUF, PULLUP, PowerOnResetFPGAOnly}
 
 class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
-  (system: HasPeripheryDebugModuleImp, th: HasHarnessSignalReferences, ports: Seq[JTAGIO]) => {
+  (system: HasPeripheryDebugModuleImp, th: ArtyFPGATestHarness, ports: Seq[JTAGIO]) => {
   // (system: HasPeripheryDebugModuleImp, th: ArtyFPGATestHarness, ports: Seq[Data]) => {
     // ports.map {
     //   case d: ClockedDMIIO =>
@@ -63,7 +63,7 @@ class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
 })
 
 class WithArtyUARTHarnessBinder extends OverrideHarnessBinder({
-  (system: HasPeripheryUARTModuleImp, th: HasHarnessSignalReferences, ports: Seq[UARTPortIO]) => {
+  (system: HasPeripheryUARTModuleImp, th: ArtyFPGATestHarness, ports: Seq[UARTPortIO]) => {
   // (system: HasPeripheryUARTModuleImp, th: ArtyFPGATestHarness, ports: Seq[UARTPortIO]) => {
     // UARTAdapter.connect(ports)(system.p)
     // IOBUF(th.ck_io(2),  ports.txd)
