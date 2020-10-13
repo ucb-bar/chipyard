@@ -12,11 +12,14 @@ to verify functionality.
 Setting up Dromajo Co-simulation
 --------------------------------------
 
-Dromajo co-simulation is setup to work when two config fragments are added to a BOOM config.
-First, a ``chipyard.config.WithTraceIO`` config fragment must be added so that BOOM's traceport is enabled.
-Second, a ``chipyard.iobinders.WithSimDromajoBridge`` config fragment must be added to
-connect the Dromajo co-simulator to the traceport.
-Once both config fragments are added Dromajo should be enabled.
+Dromajo co-simulation is setup to work when three config fragments are added to a BOOM config.
+
+ * A ``chipyard.config.WithTraceIO`` config fragment must be added so that BOOM's traceport is enabled.
+ * A ``chipyard.iobinders.WithTraceIOPunchthrough`` config fragment must be added to add the ``TraceIO`` to the ``ChipTop``
+ * A ``chipyard.harness.WithSimDromajoBridge`` config fragment must be added to instantiate a Dromajo cosimulator in the ``TestHarness`` and connect it to the ``ChipTop``'s ``TraceIO``
+
+
+Once all config fragments are added Dromajo should be enabled.
 
 To build/run Dromajo with a BOOM design, run your configuration the following make commands:
 

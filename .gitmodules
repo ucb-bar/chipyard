@@ -128,6 +128,9 @@
 [submodule "tools/dromajo/dromajo-src"]
 	path = tools/dromajo/dromajo-src
 	url = https://github.com/riscv-boom/dromajo.git
+[submodule "generators/riscv-sodor"]
+	path = generators/riscv-sodor
+	url = https://github.com/ucb-bar/riscv-sodor.git
 [submodule "fpga/fpga-shells"]
 	path = fpga/fpga-shells
 	url = git@github.com:sifive/fpga-shells.git

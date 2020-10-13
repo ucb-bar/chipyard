@@ -13,7 +13,7 @@ class ArianeConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class dmiArianeConfig extends Config(
-  new chipyard.iobinders.WithTiedOffSerial ++          // Tie off the serial port, override default instantiation of SimSerial
-  new chipyard.iobinders.WithSimDebug ++               // add SimDebug and use it to drive simulation, override default tie-off debug
+  new chipyard.harness.WithSerialAdapterTiedOff ++     // Tie off the serial port, override default instantiation of SimSerial
+  new chipyard.config.WithDMIDTM ++                    // have debug module expose a clocked DMI port
   new ariane.WithNArianeCores(1) ++                    // single Ariane core
   new chipyard.config.AbstractConfig)

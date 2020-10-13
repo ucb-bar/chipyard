@@ -62,7 +62,8 @@ SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstoo
 SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
 VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE_DIRS),v)
 # This assumes no SBT meta-build sources
-SBT_SOURCES = $(call lookup_srcs,$(base_dir),sbt)
+SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools)
+SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt
 
 #########################################################################################
 # jar creation variables and rules
