@@ -3,7 +3,7 @@ package chipyard.fpga.vcu118
 import chisel3._
 import chisel3.experimental.{Analog, IO, DataMirror}
 
-import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, LazyScope, InModuleBody, BundleBridgeSource, ValName}
+import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.config.{Parameters}
 import freechips.rocketchip.util.{HeterogeneousBag}
 import freechips.rocketchip.tilelink.{TLBundle}
@@ -23,9 +23,17 @@ trait HasVCU118PlatformIO {
   val io_tl_mem: HeterogeneousBag[TLBundle]
 }
 
-class VCU118Platform(override implicit val p: Parameters) extends LazyModule with LazyScope {
+class VCU118Platform(override implicit val p: Parameters) extends LazyModule with LazyScope with BindingScope {
 
   val lazySystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
+
+  // add MMC to the DTS
+  lazySystem match { case lsys: HasPeripherySPI =>
+    val mmcDev = new MMCDevice(lsys.tlspi.head.device, 1)
+    ResourceBinding {
+      Resource(mmcDev, "reg").bind(ResourceAddress(0))
+    }
+  }
 
   override lazy val module = new VCU118PlatformModule(this)
 }
