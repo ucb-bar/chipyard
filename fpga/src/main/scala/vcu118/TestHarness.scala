@@ -6,6 +6,7 @@ import chisel3.experimental.{Analog, IO}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.config.{Parameters, Field}
 import freechips.rocketchip.subsystem.{ExtMem, BaseSubsystem}
+import freechips.rocketchip.tilelink._
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.ip.xilinx._
@@ -155,16 +156,24 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends Chipyar
 
   /*** Experimental DDR ***/
 
-  //val ddrPlaced = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtMem).get.master.base, dutWrangler.node, harnessSysPLL))
+  val ddrWrangler = LazyModule(new ResetWrangler)
+  val ddrPlaced = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtMem).get.master.base, ddrWrangler.node, harnessSysPLL))
 
-  //topDesign match { case lazyDut: VCU118Platform =>
-  //  lazyDut.lazySystem match { case lazyDutWBus: BaseSubsystem =>
-  //    lazyDutWBus {
-  //      InModuleBody {
-  //        ddrPlaced.overlayOutput.ddr := lazyDutWBus.mbus.toDRAMController(Some("xilinxvcu118mig"))()
-  //      }
-  //    }
-  //  }
-  //}
+  // connect 1 mem. channel to the FPGA DDR
+  val inParams = topDesign match { case td: VCU118Platform =>
+    td.lazySystem match { case lsys: chipyard.CanHaveMasterTLMemPort =>
+      lsys.memTLNode.edges.in(0)
+    }
+  }
+  val ddrClient = TLClientNode(Seq(inParams.master))
+  InModuleBody {
+    topDesign.module match { case dutMod: HasVCU118PlatformIO =>
+      val bundles = ddrClient.out.map(_._1)
+      val ddrClientBundle = Wire(new freechips.rocketchip.util.HeterogeneousBag(bundles.map(_.cloneType)))
+      bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
+      ddrClientBundle <> dutMod.io_tl_mem
+    }
+  }
+  ddrPlaced.overlayOutput.ddr := ddrClient
 }
 
