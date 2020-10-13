@@ -44,7 +44,7 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
 
   lazyDut match { case d: HasTestHarnessFunctions =>
     d.harnessFunctions.foreach(_(this))
-    ApplyHarnessBinders(this, d.lazySystem, p(HarnessBinders), d.portMap.toMap)
+    ApplyHarnessBinders(this, d.lazySystem, d.portMap.toMap)
   }
 }
 
