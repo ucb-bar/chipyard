@@ -26,7 +26,7 @@ CONFIG            := FakeBringupConfig
 CONFIG_PACKAGE    := chipyard.fpga.vcu118
 GENERATOR_PACKAGE := chipyard
 TB                := none # unused
-TOP               := VCU118Platform
+TOP               := ChipTop
 
 # setup the board to use
 BOARD ?= arty

@@ -73,11 +73,11 @@ class FakeBringupConfig extends Config(
   new WithBringupUART ++
   //new WithBringupSPI ++
   //new WithBringupI2C ++
-  new WithBringupGPIO ++
-  new chipyard.iobinders.WithUARTIOCells ++
+  //new WithBringupGPIO ++
+  new WithUARTIOPassthrough ++
   //new WithSPICells ++
   //new WithI2CCells ++
-  new chipyard.iobinders.WithGPIOCells ++
+  //new chipyard.iobinders.WithGPIOCells ++
   //new WithBringupDDR ++
   new WithBringupPeripherals ++
   new chipyard.config.WithNoSubsystemDrivenClocks ++
