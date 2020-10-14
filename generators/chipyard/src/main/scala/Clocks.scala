@@ -5,12 +5,13 @@ import chisel3._
 import scala.collection.mutable.{ArrayBuffer}
 
 import freechips.rocketchip.prci._
-import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey}
+import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey, InstantiatesTiles}
 import freechips.rocketchip.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy.{OutwardNodeHandle, InModuleBody, LazyModule}
 import freechips.rocketchip.util.{ResetCatchAndSync}
 
 import barstools.iocell.chisel._
+import testchipip.{TLTileResetCtrl}
 
 import chipyard.clocking._
 
@@ -109,9 +110,20 @@ object ClockingSchemeGenerators {
         l.asyncClockGroupsNode
     }
 
+    // Add a control register for each tile's reset
+    val resetSetter = chiptop.lazySystem match {
+      case sys: BaseSubsystem with InstantiatesTiles => TLTileResetCtrl(sys)
+      case _ => ClockGroupEphemeralNode()
+    }
+
     val aggregator = LazyModule(new ClockGroupAggregator("allClocks")).node
-    chiptop.implicitClockSinkNode := ClockGroup() := aggregator
-    systemAsyncClockGroup :*= ClockGroupNamePrefixer() :*= aggregator
+    (chiptop.implicitClockSinkNode
+      := ClockGroup()
+      := aggregator)
+    (systemAsyncClockGroup
+      :*= resetSetter
+      :*= ClockGroupNamePrefixer()
+      :*= aggregator)
 
     val referenceClockSource =  ClockSourceNode(Seq(ClockSourceParameters()))
     (aggregator
