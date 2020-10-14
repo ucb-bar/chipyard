@@ -72,32 +72,40 @@ object GetSystemParameters {
   }
 }
 
-class IOBinder[T, S <: Data](composer: (Any => (Seq[Data], Seq[IOCell])) => T => (Seq[Data], Seq[IOCell]))(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+class IOBinder(f: (View, View, View) => PartialFunction[Any, Any]) extends Config(f)
+
+// This macro overrides previous matches on some Top mixin. This is useful for
+// binders which drive IO, since those typically cannot be composed
+class OverrideIOBinder[T, S <: Data](fn: => (T) => (Seq[S], Seq[IOCell]))(implicit tag: ClassTag[T]) extends IOBinder((site, here, up) => {
   case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString ->
       ((t: Any) => {
-        val upfn = up(IOBinders, site)(tag.runtimeClass.toString)
         t match {
-          case system: T => composer(upfn)(system)
+          case system: T =>
+            val (ports, cells) = fn(system)
+            (ports, cells)
           case _ => (Nil, Nil)
         }
       })
   )
 })
 
-
-// This macro overrides previous matches on some Top mixin. This is useful for
-// binders which drive IO, since those typically cannot be composed
-class OverrideIOBinder[T, S <: Data](fn: => (T) => (Seq[S], Seq[IOCell]))(implicit tag: ClassTag[T]) extends IOBinder[T, S](upfn => fn)
-
-
 // This macro composes with previous matches on some Top mixin. This is useful for
 // annotation-like binders, since those can typically be composed
-class ComposeIOBinder[T, S <: Data](fn: => (T) => (Seq[S], Seq[IOCell]))(implicit tag: ClassTag[T]) extends IOBinder[T, S](upfn => t => {
-  val r = upfn(t)
-  val h = fn(t)
-  (r._1 ++ h._1, r._2 ++ h._2)
+class ComposeIOBinder[T, S <: Data](fn: => (T) => (Seq[S], Seq[IOCell]))(implicit tag: ClassTag[T]) extends IOBinder((site, here, up) => {
+  case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString ->
+      ((t: Any) => {
+        t match {
+          case system: T =>
+            val r = up(IOBinders, site)(tag.runtimeClass.toString)(system)
+            val h = fn(system)
+            val ports = r._1 ++ h._1
+            val cells = r._2 ++ h._2
+            (ports, cells)
+          case _ => (Nil, Nil)
+        }
+      })
+  )
 })
-
 
 object BoreHelper {
   def apply(name: String, source: Clock): Clock = {
