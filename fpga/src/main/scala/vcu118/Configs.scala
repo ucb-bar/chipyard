@@ -23,20 +23,18 @@ import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD}
 import chipyard.{BuildTop}
 import chipyard.fpga.vcu118.bringup.{BringupGPIOs}
 
-class WithChipyardBuildTop extends Config((site, here, up) => {
-  case DesignKey => {(p: Parameters) => new VCU118Platform()(p) }
-})
+import chipyard.harness._
 
 class WithBringupPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(
     UARTParams(address = BigInt(0x64000000L)),
     UARTParams(address = BigInt(0x64003000L)))
-  case PeripherySPIKey => List(
-    SPIParams(rAddress = BigInt(0x64001000L)),
-    SPIParams(rAddress = BigInt(0x64004000L)))
-  case VCU118ShellPMOD => "SDIO"
-  case PeripheryI2CKey => List(
-    I2CParams(address = BigInt(0x64005000L)))
+//  case PeripherySPIKey => List(
+//    SPIParams(rAddress = BigInt(0x64001000L)),
+//    SPIParams(rAddress = BigInt(0x64004000L)))
+//  case VCU118ShellPMOD => "SDIO"
+//  case PeripheryI2CKey => List(
+//    I2CParams(address = BigInt(0x64005000L)))
   case PeripheryGPIOKey => {
     if (BringupGPIOs.width > 0) {
       require(BringupGPIOs.width <= 64) // currently only support 64 GPIOs (change addrs to get more)
@@ -72,8 +70,18 @@ class SmallModifications extends Config((site, here, up) => {
 
 
 class FakeBringupConfig extends Config(
+  new WithBringupUART ++
+  //new WithBringupSPI ++
+  //new WithBringupI2C ++
+  new WithBringupGPIO ++
+  new chipyard.iobinders.WithUARTIOCells ++
+  //new WithSPICells ++
+  //new WithI2CCells ++
+  new chipyard.iobinders.WithGPIOCells ++
+  //new WithBringupDDR ++
   new WithBringupPeripherals ++
-  new WithChipyardBuildTop ++
+  new chipyard.config.WithNoSubsystemDrivenClocks ++
+  new chipyard.config.WithPeripheryBusFrequencyAsDefault ++
   new chipyard.config.WithBootROM ++
   new chipyard.config.WithL2TLBs(1024) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++

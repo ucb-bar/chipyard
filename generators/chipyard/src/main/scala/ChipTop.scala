@@ -7,7 +7,7 @@ import scala.collection.mutable.{ArrayBuffer}
 import freechips.rocketchip.prci.{ClockGroupIdentityNode, ClockSinkParameters, ClockSinkNode, ClockGroup}
 import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey}
 import freechips.rocketchip.config.{Parameters, Field}
-import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, LazyRawModuleImp, LazyModuleImpLike}
+import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, LazyRawModuleImp, LazyModuleImpLike, BindingScope}
 import freechips.rocketchip.util.{ResetCatchAndSync}
 import chipyard.iobinders._
 
@@ -23,7 +23,7 @@ case object BuildSystem extends Field[Parameters => LazyModule]((p: Parameters) 
  * drive clock and reset generation
  */
 
-class ChipTop(implicit p: Parameters) extends LazyModule with HasTestHarnessFunctions {
+class ChipTop(implicit p: Parameters) extends LazyModule with HasTestHarnessFunctions with BindingScope {
   // A publicly accessible list of IO cells (useful for a floorplanning tool, for example)
   val iocells = ArrayBuffer.empty[IOCell]
 
