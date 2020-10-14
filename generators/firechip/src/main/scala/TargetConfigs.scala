@@ -131,7 +131,7 @@ class FireSimSmallSystemConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithBootROM ++
-  new chipyard.WithPeripheryBusFrequency(3200.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
   new WithoutClockGating ++
   new WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++
