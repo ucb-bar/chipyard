@@ -112,6 +112,8 @@ object BoreHelper {
     val (io, wire) = source match {
       case c: Clock =>
         val wire =  Wire(Clock())
+        // Provide a dummy assignment to prevent FIRRTL invalid assignment
+        // errors prior to running the wiring pass
         wire := false.B.asClock
         (IO(Output(Clock())), wire)
       case r: Reset =>
@@ -269,8 +271,9 @@ class WithAXI4MemPunchthrough extends OverrideIOBinder({
     val ports: Seq[ClockedAndResetIO[AXI4Bundle]] = system.mem_axi4.zipWithIndex.map({ case (m, i) =>
       val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mem_${i}")
       p.bits <> m
-      p.clock := BoreHelper("axi4_mem_clock", system.asInstanceOf[BaseSubsystem].mbus.module.clock)
-      p.reset := BoreHelper("axi4_mem_reset", system.asInstanceOf[BaseSubsystem].mbus.module.reset)
+      val mbus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(MBUS)
+      p.clock := BoreHelper("axi4_mem_clock",  mbus.module.clock)
+      p.reset := BoreHelper("axi4_mem_reset", mbus.module.reset)
       p
     })
     (ports, Nil)

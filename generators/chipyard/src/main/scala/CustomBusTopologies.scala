@@ -16,12 +16,14 @@ import freechips.rocketchip.subsystem._
 /**
   * Keys that serve as a means to define crossing types from a Parameters instance
   */
-case object SubsystemCrossingParamsKey extends Field[SubsystemCrossingParams](SubsystemCrossingParams())
-case object MemoryBusCrossingTypeKey extends Field[ClockCrossingType](NoCrossing)
+case object SbusToMbusXTypeKey extends Field[ClockCrossingType](NoCrossing)
+case object SbusToCbusXTypeKey extends Field[ClockCrossingType](NoCrossing)
+case object CbusToPbusXTypeKey extends Field[ClockCrossingType](SynchronousCrossing())
+case object FbusToSbusXTypeKey extends Field[ClockCrossingType](SynchronousCrossing())
 
 // Biancolin: This, modified from Henry's email
 /** Parameterization of a topology containing a banked coherence manager and a bus for attaching memory devices. */
-case class CoherentBusTopologyParams(
+case class CoherentMulticlockBusTopologyParams(
   sbus: SystemBusParams, // TODO remove this after better width propagation
   mbus: MemoryBusParams,
   l2: BankedL2Params,
@@ -41,60 +43,20 @@ case class CoherentBusTopologyParams(
 
 // For subsystem/Configs.scala
 
-class WithCoherentBusTopology extends Config((site, here, up) => {
+class WithMulticlockCoherentBusTopology extends Config((site, here, up) => {
   case TLNetworkTopologyLocated(InSubsystem) => List(
     JustOneBusTopologyParams(sbus = site(SystemBusKey)),
     HierarchicalBusTopologyParams(
       pbus = site(PeripheryBusKey),
       fbus = site(FrontBusKey),
       cbus = site(ControlBusKey),
-      xTypes = SubsystemCrossingParams()),
-    CoherentBusTopologyParams(
+      xTypes = SubsystemCrossingParams(
+        sbusToCbusXType = site(SbusToCbusXTypeKey),
+        cbusToPbusXType = site(CbusToPbusXTypeKey),
+        fbusToSbusXType = site(FbusToSbusXTypeKey))),
+    CoherentMulticlockBusTopologyParams(
       sbus = site(SystemBusKey),
       mbus = site(MemoryBusKey),
       l2 = site(BankedL2Key),
-      sbusToMbusXType = site(MemoryBusCrossingTypeKey)))
+      sbusToMbusXType = site(SbusToMbusXTypeKey)))
 })
-
-/**
-  * Mixins to specify crossing types between the 5 traditional TL buses
-  *
-  * Note: these presuppose the legacy connections between buses and set
-  * parameters in SubsystemCrossingParams; they may not be resuable in custom
-  * topologies (but you can specify the desired crossings in your topology).
-  *
-  * @param xType The clock crossing type
-  *
-  */
-class WithMemoryBusCrossingType(xType: ClockCrossingType) extends Config((site, here, up) => {
-    case MemoryBusCrossingTypeKey => xType
-})
-
-class WithFrontBusCrossingType(xType: ClockCrossingType) extends Config((site, here, up) => {
-    case SubsystemCrossingParamsKey => up(SubsystemCrossingParamsKey, site)
-      .copy(fbusToSbusXType = xType)
-})
-
-class WithControlBusCrossingType(xType: ClockCrossingType) extends Config((site, here, up) => {
-    case SubsystemCrossingParamsKey => up(SubsystemCrossingParamsKey, site)
-      .copy(sbusToCbusXType = xType)
-})
-
-class WithPeripheryBusCrossingType(xType: ClockCrossingType) extends Config((site, here, up) => {
-    case SubsystemCrossingParamsKey => up(SubsystemCrossingParamsKey, site)
-      .copy(cbusToPbusXType = xType)
-})
-
-/**
-  * Mixins to set the dtsFrequency field of BusParams -- these will percolate it'st way
-  * through the diplomatic clock graph to the clock sources.
-  */
-class WithPeripheryBusFrequency(freq: BigInt) extends Config((site, here, up) => {
-  case PeripheryBusKey => up(PeripheryBusKey).copy(dtsFrequency = Some(freq))
-})
-class WithMemoryBusFrequency(freq: BigInt) extends Config((site, here, up) => {
-  case MemoryBusKey => up(MemoryBusKey).copy(dtsFrequency = Some(freq))
-})
-
-class WithRationalMemoryBusCrossing extends WithMemoryBusCrossingType(RationalCrossing(Symmetric))
-class WithAsynchrousMemoryBusCrossing extends WithMemoryBusCrossingType(AsynchronousCrossing())

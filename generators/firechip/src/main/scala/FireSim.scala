@@ -96,7 +96,7 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
 
     val aggregator = LazyModule(new ClockGroupAggregator("allClocks")).node
     (chiptop.implicitClockSinkNode := ClockGroup() := aggregator)
-    (systemAsyncClockGroup := ClockGroupNamePrefixer() := aggregator)
+    (systemAsyncClockGroup :*= ClockGroupNamePrefixer() :*= aggregator)
 
     val inputClockSource = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
 
