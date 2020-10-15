@@ -12,10 +12,10 @@ private[stage] object UnderscoreDelimitedConfigsAnnotation extends HasShellOptio
     new ShellOption[String](
       longOption = "legacy-configs",
       toAnnotationSeq = a => {
-        val split = a.split('.')
-        val packageName = split.init.mkString(".")
+        val split = a.split(':')
+        val packageName = split.head
         val configs     = split.last.split("_")
-        Seq(new ConfigsAnnotation(configs map { config => s"${packageName}.${config}" } ))
+        Seq(new ConfigsAnnotation(configs map { config => if (config contains ".") s"${config}" else s"${packageName}.${config}" } ))
       },
       helpText = "A string of underscore-delimited configs (configs have decreasing precendence from left to right).",
       shortOption = Some("LC")
