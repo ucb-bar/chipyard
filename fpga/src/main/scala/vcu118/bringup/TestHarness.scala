@@ -1,4 +1,4 @@
-package chipyard.fpga.vcu118
+package chipyard.fpga.vcu118.bringup
 
 import chisel3._
 import chisel3.experimental.{Analog, IO}
@@ -18,13 +18,12 @@ import sifive.blocks.devices.spi._
 import sifive.blocks.devices.i2c._
 import sifive.blocks.devices.gpio._
 
-import chipyard.fpga.vcu118.bringup.{BringupGPIOs, BringupUARTVCU118ShellPlacer, BringupSPIVCU118ShellPlacer, BringupI2CVCU118ShellPlacer, BringupGPIOVCU118ShellPlacer}
 import chipyard.harness._
-import chipyard.{HasHarnessSignalReferences, HasTestHarnessFunctions, BuildTop}
+import chipyard.{HasHarnessSignalReferences, HasTestHarnessFunctions, BuildTop, CanHaveMasterTLMemPort, ChipTop}
 
 case object DUTFrequencyKey extends Field[Double](100.0)
 
-class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118ShellBasicOverlays {
+class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118ShellBasicOverlays {
 
   def dp = designParameters
 
@@ -81,6 +80,8 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
 
   /*** UART ***/
 
+  require(dp(PeripheryUARTKey).size == 2)
+
   // 1st UART goes to the VCU118 dedicated UART
 
   // BundleBridgeSource is a was for Diplomacy to connect something from very deep in the design
@@ -95,6 +96,29 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
   val io_uart_bb_2 = BundleBridgeSource(() => (new UARTPortIO(dp(PeripheryUARTKey).last)))
   dp(UARTOverlayKey).last.place(UARTDesignInput(io_uart_bb_2))
 
+  /*** SPI ***/
+
+  require(dp(PeripherySPIKey).size == 2)
+
+  // 1st SPI goes to the VCU118 SDIO port
+
+  val io_spi_bb = BundleBridgeSource(() => (new SPIPortIO(dp(PeripherySPIKey).head)))
+  val sdio_placed = dp(SPIOverlayKey).head.place(SPIDesignInput(dp(PeripherySPIKey).head, io_spi_bb))
+
+  // 2nd SPI goes to the ADI port
+
+  val adi = Overlay(SPIOverlayKey, new BringupSPIVCU118ShellPlacer(this, SPIShellInput()))
+
+  val io_spi_bb_2 = BundleBridgeSource(() => (new SPIPortIO(dp(PeripherySPIKey).last)))
+  val adi_placed = dp(SPIOverlayKey).last.place(SPIDesignInput(dp(PeripherySPIKey).last, io_spi_bb_2))
+
+  /*** I2C ***/
+
+  val i2c = Overlay(I2COverlayKey, new BringupI2CVCU118ShellPlacer(this, I2CShellInput()))
+
+  val io_i2c_bb = BundleBridgeSource(() => (new I2CPort))
+  dp(I2COverlayKey).head.place(I2CDesignInput(io_i2c_bb))
+
   /*** GPIO ***/
 
   val gpio = Seq.tabulate(dp(PeripheryGPIOKey).size)(i => {
@@ -108,11 +132,25 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
     placer.place(GPIODesignInput(params, io_gpio_bb(i)))
   }
 
+  /*** DDR ***/
+
+  val ddrWrangler = LazyModule(new ResetWrangler)
+  val ddrPlaced = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtMem).get.master.base, ddrWrangler.node, harnessSysPLL))
+
+  // connect 1 mem. channel to the FPGA DDR
+  val inParams = topDesign match { case td: ChipTop =>
+    td.lazySystem match { case lsys: CanHaveMasterTLMemPort =>
+      lsys.memTLNode.edges.in(0)
+    }
+  }
+  val ddrClient = TLClientNode(Seq(inParams.master))
+  ddrPlaced.overlayOutput.ddr := ddrClient
+
   // module implementation
-  override lazy val module = new VCU118FPGATestHarnessImp(this)
+  override lazy val module = new BringupVCU118FPGATestHarnessImp(this)
 }
 
-class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessSignalReferences {
+class BringupVCU118FPGATestHarnessImp(_outer: BringupVCU118FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessSignalReferences {
 
   val outer = _outer
 

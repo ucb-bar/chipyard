@@ -1,5 +1,4 @@
-// See LICENSE for license details.
-package chipyard.fpga.vcu118
+package chipyard.fpga.vcu118.bringup
 
 import math.min
 
@@ -29,12 +28,12 @@ class WithBringupPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(
     UARTParams(address = BigInt(0x64000000L)),
     UARTParams(address = BigInt(0x64003000L)))
-//  case PeripherySPIKey => List(
-//    SPIParams(rAddress = BigInt(0x64001000L)),
-//    SPIParams(rAddress = BigInt(0x64004000L)))
-//  case VCU118ShellPMOD => "SDIO"
-//  case PeripheryI2CKey => List(
-//    I2CParams(address = BigInt(0x64005000L)))
+  case PeripherySPIKey => List(
+    SPIParams(rAddress = BigInt(0x64001000L)),
+    SPIParams(rAddress = BigInt(0x64004000L)))
+  case VCU118ShellPMOD => "SDIO"
+  case PeripheryI2CKey => List(
+    I2CParams(address = BigInt(0x64005000L)))
   case PeripheryGPIOKey => {
     if (BringupGPIOs.width > 0) {
       require(BringupGPIOs.width <= 64) // currently only support 64 GPIOs (change addrs to get more)
@@ -71,14 +70,16 @@ class SmallModifications extends Config((site, here, up) => {
 
 class FakeBringupConfig extends Config(
   new WithBringupUART ++
-  //new WithBringupSPI ++
-  //new WithBringupI2C ++
-  //new WithBringupGPIO ++
+  new WithBringupSPI ++
+  new WithBringupI2C ++
+  new WithBringupGPIO ++
+  new WithBringupDDR ++
   new WithUARTIOPassthrough ++
-  //new WithSPICells ++
-  //new WithI2CCells ++
-  //new chipyard.iobinders.WithGPIOCells ++
-  //new WithBringupDDR ++
+  new WithSPIIOPassthrough ++
+  //new WithMMCSPIDTS ++
+  new WithI2CIOPassthrough ++
+  new WithGPIOIOPassthrough ++
+  new WithTLIOPassthrough ++
   new WithBringupPeripherals ++
   new chipyard.config.WithNoSubsystemDrivenClocks ++
   new chipyard.config.WithPeripheryBusFrequencyAsDefault ++
