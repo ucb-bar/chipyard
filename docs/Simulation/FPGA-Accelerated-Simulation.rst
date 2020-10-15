@@ -46,7 +46,20 @@ and proceed with the rest of the tutorial.
 
 Running your Design in FireSim
 ------------------------------
-Converting a Chipyard config (one in ``chipyard/src/main/scala`` to run in FireSim is simple. We are using the same target (top) RTL, and only need to specify a new set of connection behaviors for the IOs of that module. Simply create a matching config within ``generators/firechip/src/main/scala/TargetConfigs`` that inherits your config defined in ``chipyard``.
+Converting a Chipyard config (one in ``chipyard/src/main/scala`` to run in FireSim is simple, and can be done either throught the traditional configuration system or through FireSim's build recipes scheme. 
+
+A FireSim simulation requires 3 additional config fragments:
+
+* ``WithFireSimConfigTweaks`` modifies your design to better fit the FireSim usage model. For example, FireSim designs typically include a UART. Technically, adding this in is optional, but *strongly* recommended.
+* ``WithDefaultMemModel`` sets the external memory model in the FireSim simulation. See the FireSim documentation for details. This config fragment is currently included by default within ``WithFireSimConfigTweaks``, so it isn't neccessary to add in separately, but it is required if you choose not to use ``WithFireSimConfigTweaks``.
+* ``WithDefaultFireSimBridges`` sets the ``IOBinders`` key to use FireSim's Bridge system, which can drive target IOs with software bridge models running on the simulation host. See the FireSim documentation for details.
+
+
+The simplest method to add this config fragments to your custom Chipyard config is through FireSim's build recipe scheme.
+After your FireSim environment is setup, you will define your custom build recipe in ``sims/firesim/deploy/deploy/config_build_recipes.ini``. By prepending the FireSim config fragments (separated by ``_``) to your Chipyard configuration, these config fragments will be added to you custom configuration as if they were listed in a custom Chisel custom config class definition. For example, if you would like to convert the Chipyard LargeBoomConfig to a FireSim simulation with a DDR3 memory model, the appropriate FireSim ``TARGET_CONFIG`` would be ``DDR3FRFCFSLLC4MB_WithDefaultFireSimBridges_WithFireSimConfigTweaks_chipyard.LargeBoomConfig``. Note that the FireSim config fragments are part of the ``firesim.firsim`` scala package, and therefore there do not need to be prefixed with the full class name, and opposed to the Chipyard config fragments which need to be prefixed with the chipyard package name.
+
+An alternative method to prepending the FireSim config fragments in the FireSim build recipe is to create a new "permanent" FireChip custom configuration, which includes the FireSim config fragments.
+We are using the same target (top) RTL, and only need to specify a new set of connection behaviors for the IOs of that module. Simply create a matching config within ``generators/firechip/src/main/scala/TargetConfigs`` that inherits your config defined in ``chipyard``.
 
 
 .. literalinclude:: ../../generators/firechip/src/main/scala/TargetConfigs.scala
@@ -54,9 +67,4 @@ Converting a Chipyard config (one in ``chipyard/src/main/scala`` to run in FireS
     :start-after: DOC include start: firesimconfig
     :end-before: DOC include end: firesimconfig
 
-
-Only 3 additional config fragments are needed.
-
-* ``WithFireSimConfigTweaks`` modifies your design to better fit the FireSim usage model. For example, FireSim designs typically include a UART. Technically, adding this in is optional, but *strongly* recommended.
-* ``WithDefaultMemModel`` sets the external memory model in the FireSim simulation. See the FireSim documentation for details.
-* ``WithDefaultFireSimBridges`` sets the ``IOBinders`` key to use FireSim's Bridge system, which can drive target IOs with software bridge models running on the simulation host. See the FireSim documentation for details.
+While this option seems to require the maintainance of additiona configuraiton code, it has the benefit of allowing for the inclusion of more complex config fragments which also accept custom arguments (for example, ``WithDefaultMemModel`` can take an optional argument``)
