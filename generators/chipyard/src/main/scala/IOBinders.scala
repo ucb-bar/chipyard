@@ -282,10 +282,12 @@ class WithAXI4MemPunchthrough extends OverrideIOBinder({
 
 class WithAXI4MMIOPunchthrough extends OverrideIOBinder({
   (system: CanHaveMasterAXI4MMIOPort) => {
-    val ports: Seq[ClockedIO[AXI4Bundle]] = system.mmio_axi4.zipWithIndex.map({ case (m, i) =>
-      val p = IO(new ClockedIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mmio_${i}")
+    val ports: Seq[ClockedAndResetIO[AXI4Bundle]] = system.mmio_axi4.zipWithIndex.map({ case (m, i) =>
+      val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mmio_${i}")
       p.bits <> m
-      p.clock := BoreHelper("axi4_mmio_clock", system.asInstanceOf[BaseSubsystem].mbus.module.clock)
+      val mbus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(MBUS)
+      p.clock := BoreHelper("axi4_mmio_clock",  mbus.module.clock)
+      p.reset := BoreHelper("axi4_mmio_reset", mbus.module.reset)
       p
     })
     (ports, Nil)
