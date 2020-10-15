@@ -6,7 +6,7 @@ import freechips.rocketchip.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.devices.tilelink._
-import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet}
+import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet, ResourceBinding, Resource, ResourceAddress}
 import freechips.rocketchip.system._
 import freechips.rocketchip.tile._
 
@@ -20,7 +20,6 @@ import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD}
 
 import chipyard.{BuildTop}
-import chipyard.fpga.vcu118.bringup.{BringupGPIOs}
 
 import chipyard.harness._
 
@@ -29,7 +28,12 @@ class WithBringupPeripherals extends Config((site, here, up) => {
     UARTParams(address = BigInt(0x64000000L)),
     UARTParams(address = BigInt(0x64003000L)))
   case PeripherySPIKey => List(
-    SPIParams(rAddress = BigInt(0x64001000L)),
+    SPIParams(rAddress = BigInt(0x64001000L),
+              injectFunc = Some((spi: TLSPI) => {
+                ResourceBinding {
+                  Resource(new MMCDevice(spi.device, 1), "reg").bind(ResourceAddress(0))
+                }
+              })),
     SPIParams(rAddress = BigInt(0x64004000L)))
   case VCU118ShellPMOD => "SDIO"
   case PeripheryI2CKey => List(

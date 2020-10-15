@@ -59,18 +59,6 @@ class WithSPIIOPassthrough extends OverrideIOBinder({
   }
 })
 
-//class WithMMCSPIDTS extends OverrideIOBinder({
-//  (system: HasPeripherySPI) => {
-//
-//    val mmcDev = new MMCDevice(system.tlspi.head.device, 1)
-//    ResourceBinding {
-//      Resource(mmcDev, "reg").bind(ResourceAddress(0))
-//    }
-//
-//    (Nil, Nil)
-//  }
-//})
-
 class WithI2CIOPassthrough extends OverrideIOBinder({
   (system: HasPeripheryI2CModuleImp) => {
     val io_i2c_pins_temp = system.i2c.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"i2c_$i") }
