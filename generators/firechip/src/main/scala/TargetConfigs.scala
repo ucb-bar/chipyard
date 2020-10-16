@@ -62,6 +62,8 @@ class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
 // Tweaks that are generally applied to all firesim configs
 class WithFireSimConfigTweaks extends Config(
+  // Required: Bake in the default FASED memory model
+  new WithDefaultMemModel ++
   // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
   new WithFireSimSimpleClocks ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
