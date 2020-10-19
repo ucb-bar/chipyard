@@ -18,7 +18,7 @@ import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvon
 
 import junctions.{NastiKey, NastiParameters}
 import midas.models.{FASEDBridge, AXI4EdgeSummary, CompleteConfig}
-import midas.targetutils.{FAMEModelAnnotation, MemModelAnnotation, EnableModelMultiThreadingAnnotation}
+import midas.targetutils.{MemModelAnnotation, EnableModelMultiThreadingAnnotation}
 import firesim.bridges._
 import firesim.configs.MemModelKey
 import tracegen.{TraceGenSystemModuleImp}
@@ -98,14 +98,14 @@ class WithBlockDeviceBridge extends OverrideHarnessBinder({
 })
 
 class WithFASEDBridge extends OverrideHarnessBinder({
-  (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
+  (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
     (ports zip system.memAXI4Node.edges.in).map { case (axi4, edge) =>
       val nastiKey = NastiParameters(axi4.bits.r.bits.data.getWidth,
                                      axi4.bits.ar.bits.addr.getWidth,
                                      axi4.bits.ar.bits.id.getWidth)
       system match {
-        case s: BaseSubsystem => FASEDBridge(axi4.clock, axi4.bits, th.harnessReset.asBool,
+        case s: BaseSubsystem => FASEDBridge(axi4.clock, axi4.bits, axi4.reset.asBool,
           CompleteConfig(p(firesim.configs.MemModelKey),
                          nastiKey,
                          Some(AXI4EdgeSummary(edge)),
@@ -161,10 +161,8 @@ class WithFireSimFAME5 extends ComposeIOBinder({
   (system: HasTilesModuleImp) => {
     system.outer.tiles.map {
       case b: BoomTile =>
-        annotate(FAMEModelAnnotation(b.module))
         annotate(EnableModelMultiThreadingAnnotation(b.module))
       case r: RocketTile =>
-        annotate(FAMEModelAnnotation(r.module))
         annotate(EnableModelMultiThreadingAnnotation(r.module))
     }
     (Nil, Nil)
