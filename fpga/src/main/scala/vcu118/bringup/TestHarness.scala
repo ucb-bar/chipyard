@@ -181,6 +181,9 @@ class BringupVCU118FPGATestHarnessImp(_outer: BringupVCU118FPGATestHarness) exte
   val dutReset = harnessReset
   val success = false.B
 
+  childClock := harnessClock
+  childReset := harnessReset
+
   // harness binders are non-lazy
   _outer.topDesign match { case d: HasTestHarnessFunctions =>
     d.harnessFunctions.foreach(_(this))

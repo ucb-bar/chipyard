@@ -1,6 +1,7 @@
 package chipyard.fpga.vcu118.bringup
 
 import math.min
+import sys.process._
 
 import freechips.rocketchip.config._
 import freechips.rocketchip.subsystem._
@@ -54,6 +55,7 @@ class WithBringupPeripherals extends Config((site, here, up) => {
 })
 
 class SmallModifications extends Config((site, here, up) => {
+  case DebugModuleKey => None // disable debug module
   case SystemBusKey => up(SystemBusKey).copy(
     errorDevice = Some(DevNullParams(
       Seq(AddressSet(0x3000, 0xfff)),
@@ -61,18 +63,24 @@ class SmallModifications extends Config((site, here, up) => {
       maxTransfer=128,
       region = RegionType.TRACKED)))
   case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency =
-    Some(BigDecimal(site(DUTFrequencyKey)*1000000).setScale(0, BigDecimal.RoundingMode.HALF_UP).toBigInt),
+    Some(BigDecimal(site(DUTFrequencyKey)*1000000).setScale(0, BigDecimal.RoundingMode.HALF_UP).toBigInt))
+  case ControlBusKey => up(ControlBusKey, site).copy(
     errorDevice = None)
   case DTSTimebase => BigInt(1000000)
-  case JtagDTMKey => new JtagDTMConfig(
-    idcodeVersion = 2,      // 1 was legacy (FE310-G000, Acai).
-    idcodePartNum = 0x000,  // Decided to simplify.
-    idcodeManufId = 0x489,  // As Assigned by JEDEC to SiFive. Only used in wrappers / test harnesses.
-    debugIdleCycles = 5)    // Reasonable guess for synchronization
 })
 
+class WithBootROM extends Config((site, here, up) => {
+  case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
+    // invoke makefile for sdboot
+    val freqMHz = site(DUTFrequencyKey).toInt * 1000000
+    val make = s"make -C fpga/src/main/resources/vcu118/sdboot PBUS_CLK=${freqMHz} bin"
+    require (make.! == 0, "Failed to build bootrom")
+    p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vcu118/sdboot/build/sdboot.bin")
+  }
+})
 
 class FakeBringupConfig extends Config(
+  new SmallModifications ++
   new WithBringupUART ++
   new WithBringupSPI ++
   new WithBringupI2C ++
@@ -80,14 +88,14 @@ class FakeBringupConfig extends Config(
   new WithBringupDDR ++
   new WithUARTIOPassthrough ++
   new WithSPIIOPassthrough ++
-  //new WithMMCSPIDTS ++
   new WithI2CIOPassthrough ++
   new WithGPIOIOPassthrough ++
   new WithTLIOPassthrough ++
   new WithBringupPeripherals ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new chipyard.config.WithNoSubsystemDrivenClocks ++
   new chipyard.config.WithPeripheryBusFrequencyAsDefault ++
-  new chipyard.config.WithBootROM ++
+  new WithBootROM ++ // use local bootrom
   new chipyard.config.WithL2TLBs(1024) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++

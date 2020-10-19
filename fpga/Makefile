@@ -29,7 +29,7 @@ TB                := none # unused
 TOP               := ChipTop
 
 # setup the board to use
-BOARD ?= arty
+BOARD ?= vcu118
 
 .PHONY: default
 default: $(mcs)

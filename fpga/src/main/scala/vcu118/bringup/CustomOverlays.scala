@@ -138,8 +138,7 @@ class BringupGPIOVCU118PlacedOverlay(val shell: VCU118ShellBasicOverlays, name: 
     packagePinsWithIOStdWithPackageIOs foreach { case (pin, iostd, io) => {
       shell.xdc.addPackagePin(io, pin)
       shell.xdc.addIOStandard(io, iostd)
-      // TODO: no drive strength found
-      //if (iostd == "LVCMOS12") { shell.xdc.addDriveStrength(io, "8") }
+      if (iostd == "LVCMOS12") { shell.xdc.addDriveStrength(io, "8") }
     } }
   } }
 }
