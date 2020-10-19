@@ -38,12 +38,13 @@ object ApplyHarnessBinders {
   }
 }
 
-class HarnessBinder[T, S <: HasHarnessSignalReferences, U <: Data](composer: ((T, S, Seq[U]) => Seq[Any]) => (T, S, Seq[U]) => Seq[Any])(implicit tag: ClassTag[T], thtag: ClassTag[S], ptag: ClassTag[U]) extends Config((site, here, up) => {
-  case HarnessBinders => up(HarnessBinders, site) + (tag.runtimeClass.toString ->
+// The ClassTags here are necessary to overcome issues arising from type erasure
+class HarnessBinder[T, S <: HasHarnessSignalReferences, U <: Data](composer: ((T, S, Seq[U]) => Seq[Any]) => (T, S, Seq[U]) => Seq[Any])(implicit systemTag: ClassTag[T], harnessTag: ClassTag[S], portTag: ClassTag[U]) extends Config((site, here, up) => {
+  case HarnessBinders => up(HarnessBinders, site) + (systemTag.runtimeClass.toString ->
       ((t: Any, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
         val pts = ports.collect({case p: U => p})
-        require (pts.length == ports.length, s"Port type mismatch between IOBinder and HarnessBinder: ${ptag}")
-        val upfn = up(HarnessBinders, site)(tag.runtimeClass.toString)
+        require (pts.length == ports.length, s"Port type mismatch between IOBinder and HarnessBinder: ${portTag}")
+        val upfn = up(HarnessBinders, site)(systemTag.runtimeClass.toString)
         th match {
           case th: S =>
             t match {
