@@ -126,11 +126,11 @@ class WithSimNetwork extends OverrideHarnessBinder({
 })
 
 class WithSimAXIMem extends OverrideHarnessBinder({
-  (system: CanHaveMasterAXI4MemPort, th: BaseModule with HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
+  (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
     (ports zip system.memAXI4Node.edges.in).map { case (port, edge) =>
       val mem = LazyModule(new SimAXIMem(edge, size=p(ExtMem).get.master.size)(p))
-      withClockAndReset(port.clock, th.harnessReset) {
+      withClockAndReset(port.clock, port.reset) {
         Module(mem.module).suggestName("mem")
       }
       mem.io_axi4.head <> port.bits
@@ -140,7 +140,7 @@ class WithSimAXIMem extends OverrideHarnessBinder({
 })
 
 class WithBlackBoxSimMem extends OverrideHarnessBinder({
-  (system: CanHaveMasterAXI4MemPort, th: BaseModule with HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
+  (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
     (ports zip system.memAXI4Node.edges.in).map { case (port, edge) =>
       val memSize = p(ExtMem).get.master.size
@@ -148,18 +148,18 @@ class WithBlackBoxSimMem extends OverrideHarnessBinder({
       val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle)).suggestName("simdram")
       mem.io.axi <> port.bits
       mem.io.clock := port.clock
-      mem.io.reset := th.harnessReset
+      mem.io.reset := port.reset
     }
     Nil
   }
 })
 
 class WithSimAXIMMIO extends OverrideHarnessBinder({
-  (system: CanHaveMasterAXI4MMIOPort, th: BaseModule with HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
+  (system: CanHaveMasterAXI4MMIOPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
     (ports zip system.mmioAXI4Node.edges.in).map { case (port, edge) =>
       val mmio_mem = LazyModule(new SimAXIMem(edge, size = p(ExtBus).get.size)(p))
-      withClockAndReset(port.clock, th.harnessReset) {
+      withClockAndReset(port.clock, port.reset) {
         Module(mmio_mem.module).suggestName("mmio_mem")
       }
       mmio_mem.io_axi4.head <> port.bits

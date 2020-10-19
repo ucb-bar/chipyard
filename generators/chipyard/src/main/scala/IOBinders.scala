@@ -30,7 +30,7 @@ import scala.reflect.{ClassTag}
 
 object IOBinderTypes {
   type IOBinderTuple = (Seq[Data], Seq[IOCell])
-  type IOBinderFunction = (Boolean, =>Any) => ModuleValue[IOBinderTuple]
+  type IOBinderFunction = (Boolean, => Any) => ModuleValue[IOBinderTuple]
 }
 import IOBinderTypes._
 
@@ -99,7 +99,6 @@ class ConcreteIOBinder[T](composes: Boolean, fn: T => IOBinderTuple)(implicit ta
     }
   }}): IOBinderFunction)
 )
-
 
 class LazyIOBinder[T](composes: Boolean, fn: T => ModuleValue[IOBinderTuple])(implicit tag: ClassTag[T]) extends IOBinder[T](
   up => (if (composes) up else Nil) ++ Seq(((isLazy, t) => {
@@ -268,14 +267,16 @@ class WithAXI4MemPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveMasterAXI4MemPort) => {
     implicit val p: Parameters = GetSystemParameters(system)
     val clockSinkNode = p(ExtMem).map(_ => ClockSinkNode(Seq(ClockSinkParameters())))
-    clockSinkNode.map(_ := system.asInstanceOf[BaseSubsystem].mbus.fixedClockNode)
+    val mbus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(MBUS)
+    clockSinkNode.map(_ := mbus.fixedClockNode)
     def clockBundle = clockSinkNode.get.in.head._1
 
     InModuleBody {
-      val ports: Seq[ClockedIO[AXI4Bundle]] = system.mem_axi4.zipWithIndex.map({ case (m, i) =>
-        val p = IO(new ClockedIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mem_${i}")
+      val ports: Seq[ClockedAndResetIO[AXI4Bundle]] = system.mem_axi4.zipWithIndex.map({ case (m, i) =>
+        val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mem_${i}")
         p.bits <> m
         p.clock := clockBundle.clock
+        p.reset := clockBundle.reset
         p
       })
       (ports, Nil)
@@ -287,14 +288,16 @@ class WithAXI4MMIOPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveMasterAXI4MMIOPort) => {
     implicit val p: Parameters = GetSystemParameters(system)
     val clockSinkNode = p(ExtBus).map(_ => ClockSinkNode(Seq(ClockSinkParameters())))
-    clockSinkNode.map(_ := system.asInstanceOf[BaseSubsystem].mbus.fixedClockNode)
+    val mbus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(MBUS)
+    clockSinkNode.map(_ := mbus.fixedClockNode)
     def clockBundle = clockSinkNode.get.in.head._1
 
     InModuleBody {
-      val ports: Seq[ClockedIO[AXI4Bundle]] = system.mmio_axi4.zipWithIndex.map({ case (m, i) =>
-        val p = IO(new ClockedIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mmio_${i}")
+      val ports: Seq[ClockedAndResetIO[AXI4Bundle]] = system.mmio_axi4.zipWithIndex.map({ case (m, i) =>
+        val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mmio_${i}")
         p.bits <> m
         p.clock := clockBundle.clock
+        p.reset := clockBundle.reset
         p
       })
       (ports, Nil)
