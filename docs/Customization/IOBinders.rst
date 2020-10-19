@@ -4,7 +4,7 @@ IOBinders and HarnessBinders
 In Chipyard we use special ``Parameters`` keys, ``IOBinders`` and ``HarnessBinders`` to bridge the gap between digital system IOs and TestHarness collateral.
 
 IOBinders
-=========
+---------
 
 The ``IOBinder`` functions are responsible for instantiating IO cells and IOPorts in the ``ChipTop`` layer.
 
@@ -19,7 +19,7 @@ For example, the ``WithUARTIOCells`` IOBinder will, for any ``System`` that migh
    :end-before: DOC include end: WithUARTIOCells
 
 HarnessBinders
-==============
+--------------
 
 The ``HarnessBinder`` functions determine what modules to bind to the IOs of a ``ChipTop`` in the ``TestHarness``. The ``HarnessBinder`` interface is designed to be reused across various simulation/implementation modes, enabling decoupling of the target design from simulation and testing concerns.
 

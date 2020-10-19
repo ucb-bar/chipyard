@@ -267,8 +267,7 @@ class WithAXI4MemPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveMasterAXI4MemPort) => {
     implicit val p: Parameters = GetSystemParameters(system)
     val clockSinkNode = p(ExtMem).map(_ => ClockSinkNode(Seq(ClockSinkParameters())))
-    val mbus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(MBUS)
-    clockSinkNode.map(_ := mbus.fixedClockNode)
+    clockSinkNode.map(_ := system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(MBUS).fixedClockNode)
     def clockBundle = clockSinkNode.get.in.head._1
 
     InModuleBody {
@@ -288,8 +287,7 @@ class WithAXI4MMIOPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveMasterAXI4MMIOPort) => {
     implicit val p: Parameters = GetSystemParameters(system)
     val clockSinkNode = p(ExtBus).map(_ => ClockSinkNode(Seq(ClockSinkParameters())))
-    val mbus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(MBUS)
-    clockSinkNode.map(_ := mbus.fixedClockNode)
+    clockSinkNode.map(_ := system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(MBUS).fixedClockNode)
     def clockBundle = clockSinkNode.get.in.head._1
 
     InModuleBody {
