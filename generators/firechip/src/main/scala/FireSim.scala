@@ -16,7 +16,7 @@ import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge, RationalClock
 import chipyard._
 import chipyard.harness._
 import chipyard.iobinders._
-import chipyard.clocking.{FrequencyUtils, ClockGroupNamePrefixer, ClockGroupFrequencySpecifier, SimplePllConfiguration}
+import chipyard.clocking._
 
 // Determines the number of times to instantiate the DUT in the harness.
 // Subsumes legacy supernode support
@@ -96,11 +96,12 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
 
     val aggregator = LazyModule(new ClockGroupAggregator("allClocks")).node
     (chiptop.implicitClockSinkNode := ClockGroup() := aggregator)
-    (systemAsyncClockGroup := ClockGroupNamePrefixer() := aggregator)
+    (systemAsyncClockGroup :*= ClockGroupNamePrefixer() :*= aggregator)
 
     val inputClockSource = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
 
     (aggregator
+      := ClockGroupResetSynchronizer()
       := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
       := inputClockSource)
 
@@ -113,15 +114,7 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
 
       (clockGroupBundle.member.data zip input_clocks.data).foreach { case (clockBundle, inputClock) =>
         clockBundle.clock := inputClock
-      }
-
-      // Assign resets. The synchronization scheme is still WIP.
-      for ((name, clockBundle) <- clockGroupBundle.member.elements) {
-        if (name.contains("core")) {
-            clockBundle.reset := ResetCatchAndSync(clockBundle.clock, reset.asBool)
-        } else {
-            clockBundle.reset := reset
-        }
+        clockBundle.reset := reset
       }
 
       val pllConfig = new SimplePllConfiguration("FireSim RationalClockBridge", clockGroupEdge.sink.members)
@@ -160,7 +153,9 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSigna
     lazyModule match { case d: HasTestHarnessFunctions =>
       require(d.harnessFunctions.size == 1, "There should only be 1 harness function to connect clock+reset")
       d.harnessFunctions.foreach(_(this))
-      ApplyHarnessBinders(this, d.lazySystem, p(HarnessBinders), d.portMap.toMap)
+    }
+    lazyModule match { case d: HasIOBinders =>
+      ApplyHarnessBinders(this, d.lazySystem, d.portMap)
     }
     NodeIdx.increment()
   }

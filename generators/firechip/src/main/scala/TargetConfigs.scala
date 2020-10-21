@@ -37,10 +37,6 @@ class WithBootROM extends Config((site, here, up) => {
   }
 })
 
-class WithPeripheryBusFrequency(freq: BigInt) extends Config((site, here, up) => {
-  case PeripheryBusKey => up(PeripheryBusKey).copy(dtsFrequency = Some(freq))
-})
-
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
 class WithoutClockGating extends Config((site, here, up) => {
   case DebugModuleKey => up(DebugModuleKey, site).map(_.copy(clockGate = false))
@@ -66,13 +62,23 @@ class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
 // Tweaks that are generally applied to all firesim configs
 class WithFireSimConfigTweaks extends Config(
+  // Required: Bake in the default FASED memory model
+  new WithDefaultMemModel ++
   // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
   new WithFireSimSimpleClocks ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++
   // Optional*: Removing this will require adjusting the UART baud rate and
   // potential target-software changes to properly capture UART output
-  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
+  new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
+  // Optional: These three configs put the DRAM memory system in it's own clock domian.
+  // Removing the first config will result in the FASED timing model running
+  // at the pbus freq (above, 3.2 GHz), which is outside the range of valid DDR3 speedgrades.
+  // 1 GHz matches the FASED default, using some other frequency will require
+  // runnings the FASED runtime configuration generator to generate faithful DDR3 timing values.
+  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
+  new chipyard.config.WithAsynchrousMemoryBusCrossing ++
+  new testchipip.WithAsynchronousSerialSlaveCrossing ++
   // Required: Existing FAME-1 transform cannot handle black-box clock gates
   new WithoutClockGating ++
   // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
@@ -127,7 +133,7 @@ class FireSimSmallSystemConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithBootROM ++
-  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
+  new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
   new WithoutClockGating ++
   new WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++

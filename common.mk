@@ -110,7 +110,7 @@ generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_REQS)
 		--target-dir $(build_dir) \
 		--name $(long_name) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
-		--legacy-configs $(CONFIG_PACKAGE).$(CONFIG))
+		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG))
 
 .PHONY: firrtl
 firrtl: $(FIRRTL_FILE)
