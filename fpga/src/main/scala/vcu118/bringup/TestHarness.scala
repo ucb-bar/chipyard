@@ -134,8 +134,7 @@ class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends 
 
   /*** DDR ***/
 
-  val ddrWrangler = LazyModule(new ResetWrangler)
-  val ddrPlaced = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtMem).get.master.base, ddrWrangler.node, harnessSysPLL))
+  val ddrPlaced = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtMem).get.master.base, dutWrangler.node, harnessSysPLL))
 
   // connect 1 mem. channel to the FPGA DDR
   val inParams = topDesign match { case td: ChipTop =>

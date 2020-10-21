@@ -76,6 +76,16 @@ $(BIT_FILE): $(synth_list_f)
 .PHONY: bit
 bit: $(BIT_FILE)
 
+.PHONY: debug-bitstream
+debug-bitstream: $(build_dir)/obj/post_synth.dcp
+	cd $(build_dir); vivado \
+		-nojournal -mode batch \
+		-source $(sim_dir)/scripts/run_impl_bitstream.tcl \
+		-tclargs \
+		$(build_dir)/obj/post_synth.dcp \
+		xcvu9p-flga2104-2l-e \
+		$(build_dir)/obj/debug_output
+
 # Build .mcs
 MCS_FILE := $(build_dir)/obj/$(MODEL).mcs
 $(MCS_FILE): $(BIT_FILE)
