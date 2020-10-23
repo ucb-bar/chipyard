@@ -656,7 +656,7 @@ class MacroCompilerTransform extends Transform {
   def inputForm = MidForm
   def outputForm = MidForm
 
-  def execute(state: CircuitState) = state.annotations match {
+  def execute(state: CircuitState) = state.annotations.collect { case a: MacroCompilerAnnotation => a } match {
     case Seq(anno: MacroCompilerAnnotation) =>
       val MacroCompilerAnnotation.Params(memFile, memFileFormat, libFile, hammerIR, costMetric, mode, useCompiler, forceCompile, forceSynflops) = anno.params
       if (mode == MacroCompilerAnnotation.FallbackSynflops) {
