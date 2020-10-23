@@ -5,6 +5,8 @@ package barstools.tapeout.transforms
 import firrtl._
 import firrtl.ir._
 import firrtl.passes.Pass
+import firrtl.stage.Forms
+import firrtl.stage.TransformManager.TransformDependency
 
 class EnumerateModulesPass(enumerate: (Module) => Unit) extends Pass {
 
@@ -20,10 +22,14 @@ class EnumerateModulesPass(enumerate: (Module) => Unit) extends Pass {
   }
 }
 
-class EnumerateModules(enumerate: (Module) => Unit) extends Transform with SeqTransformBased {
-  def inputForm = LowForm
-  def outputForm = LowForm
-  def transforms = Seq(new EnumerateModulesPass(enumerate))
+class EnumerateModules(enumerate: (Module) => Unit)
+  extends Transform with SeqTransformBased with DependencyAPIMigration {
+
+  override def prerequisites: Seq[TransformDependency] = Forms.LowForm
+  override def optionalPrerequisites: Seq[TransformDependency] = Forms.LowFormOptimized
+  override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
+
+  def transforms: Seq[Transform] = Seq(new EnumerateModulesPass(enumerate))
 
   def execute(state: CircuitState): CircuitState = {
     val ret = runTransforms(state)

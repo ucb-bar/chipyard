@@ -1,8 +1,8 @@
 // See LICENSE for license details.
 
 val defaultVersions = Map(
-  "chisel3" -> "3.4.0",
-  "chisel-iotesters" -> "1.5.0"
+  "chisel3" -> "3.4-SNAPSHOT",
+  "chisel-iotesters" -> "1.5-SNAPSHOT"
 )
 
 lazy val commonSettings = Seq(
