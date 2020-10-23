@@ -18,6 +18,7 @@ import testchipip._
 import tracegen.{TraceGenSystem}
 
 import hwacha.{Hwacha}
+import gemmini.{Gemmini, GemminiConfigs}
 
 import boom.common.{BoomTileAttachParams}
 import ariane.{ArianeTileAttachParams}
@@ -104,6 +105,16 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config(
     }
   })
 )
+
+class WithMultiRoCCGemmini(harts: Int*) extends Config((site, here, up) => {
+  case MultiRoCCKey => up(MultiRoCCKey, site) ++ harts.distinct.map { i =>
+    (i -> Seq((p: Parameters) => {
+      implicit val q = p
+      val gemmini = LazyModule(new Gemmini(OpcodeSet.custom3, GemminiConfigs.defaultConfig))
+      gemmini
+    }))
+  }
+})
 
 class WithTraceIO extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
