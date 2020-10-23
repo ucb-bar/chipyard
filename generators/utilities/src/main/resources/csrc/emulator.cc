@@ -223,7 +223,6 @@ int main(int argc, char** argv)
             verilog_plusargs_legal = 0;
           } else {
             c = 'P';
-            verilated_argv[verilated_argc++] = optarg;
           }
           goto retry;
         }
@@ -245,13 +244,14 @@ int main(int argc, char** argv)
                       << arg << "\"\n";
             c = '?';
           } else {
-            c = 'p';
-            verilated_argv[verilated_argc++] = optarg;
+            c = 'P';
           }
         }
         goto retry;
       }
-      case 'P': break; // Nothing to do here, Verilog PlusArg
+      case 'P': 
+        verilated_argv[verilated_argc++] = optarg;
+        break; // Nothing to do here, Verilog PlusArg
       // Realize that we've hit HTIF (HOST) arguments or error out
       default:
         if (c >= HTIF_LONG_OPTIONS_OPTIND) {
