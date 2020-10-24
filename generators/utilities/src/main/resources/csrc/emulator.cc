@@ -123,6 +123,10 @@ int main(int argc, char** argv)
 #endif
   int verilog_plusargs_legal = 1;
 
+  int verilated_argc = 1;
+  char** verilated_argv = new char*[argc];
+  verilated_argv[0] = argv[0];
+
   opterr = 1;
 
   while (1) {
@@ -195,9 +199,15 @@ int main(int argc, char** argv)
         else if (arg.substr(0, 12) == "+cycle-count")
           c = 'c';
         else if (arg == "+permissive")
+        {
           c = 'p';
+          verilated_argv[verilated_argc++] = optarg;
+        }
         else if (arg == "+permissive-off")
+        {
           c = 'o';
+          verilated_argv[verilated_argc++] = optarg;
+        }
         // If we don't find a legacy '+' EMULATOR argument, it still could be
         // a VERILOG_PLUSARG and not an error.
         else if (verilog_plusargs_legal) {
@@ -234,12 +244,14 @@ int main(int argc, char** argv)
                       << arg << "\"\n";
             c = '?';
           } else {
-            c = 'p';
+            c = 'P';
           }
         }
         goto retry;
       }
-      case 'P': break; // Nothing to do here, Verilog PlusArg
+      case 'P': // Verilog PlusArg, add to the argument list for verilator environment
+        verilated_argv[verilated_argc++] = optarg;
+        break;
       // Realize that we've hit HTIF (HOST) arguments or error out
       default:
         if (c >= HTIF_LONG_OPTIONS_OPTIND) {
@@ -258,6 +270,9 @@ done_processing:
     return 1;
   }
 
+  // Copy remaining HTIF arguments (if any) and the binary file name into the verilator argument stack
+  while (optind < argc) verilated_argv[verilated_argc++] = argv[optind++];
+
   if (verbose)
     fprintf(stderr, "using random seed %u\n", random_seed);
 
@@ -265,7 +280,7 @@ done_processing:
   srand48(random_seed);
 
   Verilated::randReset(2);
-  Verilated::commandArgs(argc, argv);
+  Verilated::commandArgs(verilated_argc, verilated_argv);
   TEST_HARNESS *tile = new TEST_HARNESS;
 
 #if VM_TRACE
@@ -374,5 +389,6 @@ done_processing:
   if (tsi) delete tsi;
   if (jtag) delete jtag;
   if (tile) delete tile;
+  if (verilated_argv) delete[] verilated_argv;
   return ret;
 }
