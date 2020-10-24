@@ -249,9 +249,9 @@ int main(int argc, char** argv)
         }
         goto retry;
       }
-      case 'P': 
+      case 'P': // Verilog PlusArg, add to the argument list for verilator environment
         verilated_argv[verilated_argc++] = optarg;
-        break; // Nothing to do here, Verilog PlusArg
+        break;
       // Realize that we've hit HTIF (HOST) arguments or error out
       default:
         if (c >= HTIF_LONG_OPTIONS_OPTIND) {
@@ -270,7 +270,7 @@ done_processing:
     return 1;
   }
 
-  // Copy the binary file name into the verilator argument stack
+  // Copy remaining HTIF arguments (if any) and the binary file name into the verilator argument stack
   while (optind < argc) verilated_argv[verilated_argc++] = argv[optind++];
 
   if (verbose)
