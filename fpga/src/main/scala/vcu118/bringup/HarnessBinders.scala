@@ -3,33 +3,21 @@ package chipyard.fpga.vcu118.bringup
 import chisel3._
 import chisel3.experimental.{Analog, IO, BaseModule}
 
-import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.config.{Parameters, Field}
-import freechips.rocketchip.subsystem.{ExtMem, BaseSubsystem}
-import freechips.rocketchip.tilelink._
-import freechips.rocketchip.util._
+import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp, UARTPortIO}
+import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
+import sifive.blocks.devices.i2c.{HasPeripheryI2CModuleImp, I2CPort}
+import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp, GPIOPortIO}
 
-import sifive.fpgashells.shell.xilinx._
-import sifive.fpgashells.ip.xilinx._
-import sifive.fpgashells.shell._
-import sifive.fpgashells.clocks._
-
-import sifive.blocks.devices.uart._
-import sifive.blocks.devices.spi._
-import sifive.blocks.devices.i2c._
-import sifive.blocks.devices.gpio._
-
-import chipyard.{CanHaveMasterTLMemPort, HasHarnessSignalReferences}
-import chipyard.harness._
+import chipyard.{HasHarnessSignalReferences}
+import chipyard.harness.{ComposeHarnessBinder, OverrideHarnessBinder}
 
 /*** UART ***/
-class WithBringupUART extends OverrideHarnessBinder({
+class WithBringupUART extends ComposeHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[UARTPortIO]) => {
     th match { case vcu118th: BringupVCU118FPGATestHarnessImp => {
       require(ports.size == 2)
 
-      vcu118th.outer.io_uart_bb.bundle <> ports.head
-      vcu118th.outer.io_uart_bb_2.bundle <> ports.last
+      vcu118th.bringupOuter.io_fmc_uart_bb.bundle <> ports.last
     } }
 
     Nil
@@ -37,13 +25,12 @@ class WithBringupUART extends OverrideHarnessBinder({
 })
 
 /*** SPI ***/
-class WithBringupSPI extends OverrideHarnessBinder({
+class WithBringupSPI extends ComposeHarnessBinder({
   (system: HasPeripherySPI, th: BaseModule with HasHarnessSignalReferences, ports: Seq[SPIPortIO]) => {
     th match { case vcu118th: BringupVCU118FPGATestHarnessImp => {
       require(ports.size == 2)
 
-      vcu118th.outer.io_spi_bb.bundle <> ports.head
-      vcu118th.outer.io_spi_bb_2.bundle <> ports.last
+      vcu118th.bringupOuter.io_adi_spi_bb.bundle <> ports.last
     } }
 
     Nil
@@ -56,7 +43,7 @@ class WithBringupI2C extends OverrideHarnessBinder({
     th match { case vcu118th: BringupVCU118FPGATestHarnessImp => {
       require(ports.size == 1)
 
-      vcu118th.outer.io_i2c_bb.bundle <> ports.head
+      vcu118th.bringupOuter.io_i2c_bb.bundle <> ports.head
     } }
 
     Nil
@@ -67,25 +54,9 @@ class WithBringupI2C extends OverrideHarnessBinder({
 class WithBringupGPIO extends OverrideHarnessBinder({
   (system: HasPeripheryGPIOModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[GPIOPortIO]) => {
     th match { case vcu118th: BringupVCU118FPGATestHarnessImp => {
-      (vcu118th.outer.io_gpio_bb zip ports).map { case (bb_io, dut_io) =>
+      (vcu118th.bringupOuter.io_gpio_bb zip ports).map { case (bb_io, dut_io) =>
         bb_io.bundle <> dut_io
       }
-    } }
-
-    Nil
-  }
-})
-
-/*** Experimental DDR ***/
-class WithBringupDDR extends OverrideHarnessBinder({
-  (system: CanHaveMasterTLMemPort, th: BaseModule with HasHarnessSignalReferences, ports: Seq[HeterogeneousBag[TLBundle]]) => {
-    th match { case vcu118th: BringupVCU118FPGATestHarnessImp => {
-      require(ports.size == 1)
-
-      val bundles = vcu118th.outer.ddrClient.out.map(_._1)
-      val ddrClientBundle = Wire(new freechips.rocketchip.util.HeterogeneousBag(bundles.map(_.cloneType)))
-      bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
-      ddrClientBundle <> ports.head
     } }
 
     Nil

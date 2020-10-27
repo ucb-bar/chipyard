@@ -1,43 +1,12 @@
 package chipyard.fpga.vcu118.bringup
 
 import chisel3._
-import chisel3.util.experimental.{BoringUtils}
-import chisel3.experimental.{Analog, IO, DataMirror}
+import chisel3.experimental.{IO, DataMirror}
 
-import freechips.rocketchip.config._
-import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike, ResourceBinding, Resource, ResourceAddress, InModuleBody}
-import freechips.rocketchip.devices.debug._
-import freechips.rocketchip.jtag.{JTAGIO}
-import freechips.rocketchip.subsystem._
-import freechips.rocketchip.system.{SimAXIMem}
-import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
-import freechips.rocketchip.util._
-import freechips.rocketchip.groundtest.{GroundTestSubsystemModuleImp, GroundTestSubsystem}
-import freechips.rocketchip.tilelink.{TLBundle}
+import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp}
+import sifive.blocks.devices.i2c.{HasPeripheryI2CModuleImp}
 
-import sifive.blocks.devices.gpio._
-import sifive.blocks.devices.uart._
-import sifive.blocks.devices.spi._
-import sifive.blocks.devices.i2c._
-import tracegen.{TraceGenSystemModuleImp}
-
-import barstools.iocell.chisel._
-
-import testchipip._
-import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
-
-import chipyard.{GlobalResetSchemeKey, CanHaveMasterTLMemPort}
-import chipyard.iobinders.{OverrideIOBinder, OverrideLazyIOBinder}
-
-class WithUARTIOPassthrough extends OverrideIOBinder({
-  (system: HasPeripheryUARTModuleImp) => {
-    val io_uart_pins_temp = system.uart.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"uart_$i") }
-    (io_uart_pins_temp zip system.uart).map { case (io, sysio) =>
-      io <> sysio
-    }
-    (io_uart_pins_temp, Nil)
-  }
-})
+import chipyard.iobinders.{OverrideIOBinder}
 
 class WithGPIOIOPassthrough extends OverrideIOBinder({
   (system: HasPeripheryGPIOModuleImp) => {
@@ -49,25 +18,6 @@ class WithGPIOIOPassthrough extends OverrideIOBinder({
   }
 })
 
-class WithSPIIOPassthrough  extends OverrideLazyIOBinder({
-  (system: HasPeripherySPI) => {
-    // attach resource to 1st SPI
-    ResourceBinding {
-      Resource(new MMCDevice(system.tlSpiNodes.head.device, 1), "reg").bind(ResourceAddress(0))
-    }
-
-    InModuleBody {
-      system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripherySPIModuleImp => {
-        val io_spi_pins_temp = system.spi.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"spi_$i") }
-        (io_spi_pins_temp zip system.spi).map { case (io, sysio) =>
-          io <> sysio
-        }
-        (io_spi_pins_temp, Nil)
-      } }
-    }
-  }
-})
-
 class WithI2CIOPassthrough extends OverrideIOBinder({
   (system: HasPeripheryI2CModuleImp) => {
     val io_i2c_pins_temp = system.i2c.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"i2c_$i") }
@@ -75,13 +25,5 @@ class WithI2CIOPassthrough extends OverrideIOBinder({
       io <> sysio
     }
     (io_i2c_pins_temp, Nil)
-  }
-})
-
-class WithTLIOPassthrough extends OverrideIOBinder({
-  (system: CanHaveMasterTLMemPort) => {
-    val io_tl_mem_pins_temp = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](system.mem_tl)).suggestName("tl_slave")
-    io_tl_mem_pins_temp <> system.mem_tl
-    (Seq(io_tl_mem_pins_temp), Nil)
   }
 })

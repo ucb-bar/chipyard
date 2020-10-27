@@ -4,14 +4,10 @@ import chisel3._
 import chisel3.experimental.{attach}
 
 import freechips.rocketchip.diplomacy._
-import chipsalliance.rocketchip.config.{Parameters, Field}
 
 import sifive.fpgashells.shell._
 import sifive.fpgashells.ip.xilinx._
 import sifive.fpgashells.shell.xilinx._
-
-import sifive.blocks.devices.gpio._
-
 
 import chipyard.fpga.vcu118.{FMCPMap}
 
