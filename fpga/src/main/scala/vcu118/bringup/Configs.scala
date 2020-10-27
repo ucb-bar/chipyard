@@ -18,7 +18,7 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.i2c._
 
 import sifive.fpgashells.shell.{DesignKey}
-import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD}
+import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
 
 import chipyard.{BuildTop}
 
@@ -29,12 +29,7 @@ class WithBringupPeripherals extends Config((site, here, up) => {
     UARTParams(address = BigInt(0x64000000L)),
     UARTParams(address = BigInt(0x64003000L)))
   case PeripherySPIKey => List(
-    SPIParams(rAddress = BigInt(0x64001000L),
-              injectFunc = Some((spi: TLSPI) => {
-                ResourceBinding {
-                  Resource(new MMCDevice(spi.device, 1), "reg").bind(ResourceAddress(0))
-                }
-              })),
+    SPIParams(rAddress = BigInt(0x64001000L)),
     SPIParams(rAddress = BigInt(0x64004000L)))
   case VCU118ShellPMOD => "SDIO"
   case PeripheryI2CKey => List(
@@ -56,6 +51,7 @@ class WithBringupPeripherals extends Config((site, here, up) => {
 
 class SmallModifications extends Config((site, here, up) => {
   case DebugModuleKey => None // disable debug module
+  case ExportDebug => up(ExportDebug).copy(protocols = Set(JTAG)) // don't generate HTIF DTS
   case SystemBusKey => up(SystemBusKey).copy(
     errorDevice = Some(DevNullParams(
       Seq(AddressSet(0x3000, 0xfff)),
@@ -79,6 +75,10 @@ class WithBootROM extends Config((site, here, up) => {
   }
 })
 
+class WithExtMemSetToDDR extends Config((site, here, up) => {
+  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VCU118DDRSize))))
+})
+
 class FakeBringupConfig extends Config(
   new SmallModifications ++
   new WithBringupUART ++
@@ -92,6 +92,7 @@ class FakeBringupConfig extends Config(
   new WithGPIOIOPassthrough ++
   new WithTLIOPassthrough ++
   new WithBringupPeripherals ++
+  new WithExtMemSetToDDR ++ // set the external mem port size properly
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new chipyard.config.WithNoSubsystemDrivenClocks ++
   new chipyard.config.WithPeripheryBusFrequencyAsDefault ++
@@ -100,8 +101,8 @@ class FakeBringupConfig extends Config(
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++
   new freechips.rocketchip.subsystem.WithNoSlavePort ++
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  //new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  new chipyard.WithMulticlockCoherentBusTopology ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new freechips.rocketchip.system.BaseConfig)

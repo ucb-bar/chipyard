@@ -23,8 +23,8 @@ case object BuildSystem extends Field[Parameters => LazyModule]((p: Parameters) 
  * drive clock and reset generation
  */
 
-class ChipTop(implicit p: Parameters) extends LazyModule
-    with HasTestHarnessFunctions with HasIOBinders with BindingScope {
+class ChipTop(implicit p: Parameters) extends LazyModule with BindingScope
+    with HasTestHarnessFunctions with HasIOBinders {
   // The system module specified by BuildSystem
   lazy val lazySystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
 

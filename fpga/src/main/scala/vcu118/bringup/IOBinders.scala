@@ -5,7 +5,7 @@ import chisel3.util.experimental.{BoringUtils}
 import chisel3.experimental.{Analog, IO, DataMirror}
 
 import freechips.rocketchip.config._
-import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike, ResourceBinding, Resource, ResourceAddress}
+import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike, ResourceBinding, Resource, ResourceAddress, InModuleBody}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem._
@@ -27,7 +27,7 @@ import testchipip._
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 
 import chipyard.{GlobalResetSchemeKey, CanHaveMasterTLMemPort}
-import chipyard.iobinders.{OverrideIOBinder}
+import chipyard.iobinders.{OverrideIOBinder, OverrideLazyIOBinder}
 
 class WithUARTIOPassthrough extends OverrideIOBinder({
   (system: HasPeripheryUARTModuleImp) => {
@@ -49,13 +49,22 @@ class WithGPIOIOPassthrough extends OverrideIOBinder({
   }
 })
 
-class WithSPIIOPassthrough extends OverrideIOBinder({
-  (system: HasPeripherySPIModuleImp) => {
-    val io_spi_pins_temp = system.spi.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"spi_$i") }
-    (io_spi_pins_temp zip system.spi).map { case (io, sysio) =>
-      io <> sysio
+class WithSPIIOPassthrough  extends OverrideLazyIOBinder({
+  (system: HasPeripherySPI) => {
+    // attach resource to 1st SPI
+    ResourceBinding {
+      Resource(new MMCDevice(system.tlSpiNodes.head.device, 1), "reg").bind(ResourceAddress(0))
     }
-    (io_spi_pins_temp, Nil)
+
+    InModuleBody {
+      system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripherySPIModuleImp => {
+        val io_spi_pins_temp = system.spi.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"spi_$i") }
+        (io_spi_pins_temp zip system.spi).map { case (io, sysio) =>
+          io <> sysio
+        }
+        (io_spi_pins_temp, Nil)
+      } }
+    }
   }
 })
 

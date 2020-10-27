@@ -20,6 +20,7 @@ import sifive.blocks.devices.gpio._
 
 import chipyard.harness._
 import chipyard.{HasHarnessSignalReferences, HasTestHarnessFunctions, BuildTop, CanHaveMasterTLMemPort, ChipTop}
+import chipyard.iobinders.{HasIOBinders}
 
 case object DUTFrequencyKey extends Field[Double](100.0)
 
@@ -186,6 +187,8 @@ class BringupVCU118FPGATestHarnessImp(_outer: BringupVCU118FPGATestHarness) exte
   // harness binders are non-lazy
   _outer.topDesign match { case d: HasTestHarnessFunctions =>
     d.harnessFunctions.foreach(_(this))
-    ApplyHarnessBinders(this, d.lazySystem, p(HarnessBinders), d.portMap.toMap)
+  }
+  _outer.topDesign match { case d: HasIOBinders =>
+    ApplyHarnessBinders(this, d.lazySystem, d.portMap)
   }
 }

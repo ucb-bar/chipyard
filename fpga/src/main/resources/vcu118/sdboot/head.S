@@ -16,5 +16,6 @@ _prog_start:
   li s1, PAYLOAD_DEST
   jr s1
 
-  .section .rodata
+  .section .dtb
+  .align 3
 dtb:
