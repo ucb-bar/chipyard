@@ -28,14 +28,12 @@ object GenerateReset {
     val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(async_reset_wire, "reset",
       abstractResetAsAsync = true)
 
-    val reset_wire = ResetCatchAndSync(clock, async_reset_wire.asBool())
-
     chiptop.iocells ++= resetIOCell
     chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
       reset_io := th.dutReset
       Nil
     })
-    reset_wire
+    async_reset_wire
   }
 }
 
