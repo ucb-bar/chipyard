@@ -24,8 +24,6 @@ import barstools.iocell.chisel._
 import testchipip._
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 
-import chipyard.GlobalResetSchemeKey
-
 import scala.reflect.{ClassTag}
 
 // System for instantiating binders based
@@ -157,7 +155,7 @@ class WithGPIOCells extends OverrideIOBinder({
 class WithUARTIOCells extends OverrideIOBinder({
   (system: HasPeripheryUARTModuleImp) => {
     val (ports: Seq[UARTPortIO], cells2d) = system.uart.zipWithIndex.map({ case (u, i) =>
-      val (port, ios) = IOCell.generateIOFromSignal(u, s"uart_${i}", system.p(IOCellKey))
+      val (port, ios) = IOCell.generateIOFromSignal(u, s"uart_${i}", system.p(IOCellKey), abstractResetAsAsync = true)
       (port, ios)
     }).unzip
     (ports, cells2d.flatten)
@@ -173,8 +171,8 @@ class WithSPIIOCells extends OverrideIOBinder({
       val iocellBase = s"iocell_${name}"
 
       // SCK and CS are unidirectional outputs
-      val sckIOs = IOCell.generateFromSignal(s.sck, port.sck, Some(s"${iocellBase}_sck"), system.p(IOCellKey))
-      val csIOs = IOCell.generateFromSignal(s.cs, port.cs, Some(s"${iocellBase}_cs"), system.p(IOCellKey))
+      val sckIOs = IOCell.generateFromSignal(s.sck, port.sck, Some(s"${iocellBase}_sck"), system.p(IOCellKey), IOCell.toAsyncReset)
+      val csIOs = IOCell.generateFromSignal(s.cs, port.cs, Some(s"${iocellBase}_cs"), system.p(IOCellKey), IOCell.toAsyncReset)
 
       // DQ are bidirectional, so then need special treatment
       val dqIOs = s.dq.zip(port.dq).zipWithIndex.map { case ((pin, ana), j) =>
@@ -196,7 +194,7 @@ class WithSPIIOCells extends OverrideIOBinder({
 class WithExtInterruptIOCells extends OverrideIOBinder({
   (system: HasExtInterruptsModuleImp) => {
     if (system.outer.nExtInterrupts > 0) {
-      val (port: UInt, cells) = IOCell.generateIOFromSignal(system.interrupts, "ext_interrupts", system.p(IOCellKey))
+      val (port: UInt, cells) = IOCell.generateIOFromSignal(system.interrupts, "ext_interrupts", system.p(IOCellKey), abstractResetAsAsync = true)
       (Seq(port), cells)
     } else {
       (Nil, Nil)
@@ -240,15 +238,15 @@ class WithDebugIOCells extends OverrideIOBinder({
 
       // Add IOCells for the DMI/JTAG/APB ports
       val dmiTuple = debug.clockeddmi.map { d =>
-        IOCell.generateIOFromSignal(d, "dmi", p(IOCellKey), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
+        IOCell.generateIOFromSignal(d, "dmi", p(IOCellKey), abstractResetAsAsync = true)
       }
 
       val jtagTuple = debug.systemjtag.map { j =>
-        IOCell.generateIOFromSignal(j.jtag, "jtag", p(IOCellKey), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
+        IOCell.generateIOFromSignal(j.jtag, "jtag", p(IOCellKey), abstractResetAsAsync = true)
       }
 
       val apbTuple = debug.apb.map { a =>
-        IOCell.generateIOFromSignal(a, "apb", p(IOCellKey), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
+        IOCell.generateIOFromSignal(a, "apb", p(IOCellKey), abstractResetAsAsync = true)
       }
 
       val allTuples = (dmiTuple ++ jtagTuple ++ apbTuple).toSeq
@@ -260,7 +258,7 @@ class WithDebugIOCells extends OverrideIOBinder({
 class WithSerialTLIOCells extends OverrideIOBinder({
   (system: CanHavePeripheryTLSerial) => system.serial_tl.map({ s =>
     val sys = system.asInstanceOf[BaseSubsystem]
-    val (port, cells) = IOCell.generateIOFromSignal(s.getWrappedValue, "serial_tl", sys.p(IOCellKey))
+    val (port, cells) = IOCell.generateIOFromSignal(s.getWrappedValue, "serial_tl", sys.p(IOCellKey), abstractResetAsAsync = true)
     (Seq(port), cells)
   }).getOrElse((Nil, Nil))
 })
