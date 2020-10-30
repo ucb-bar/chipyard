@@ -5,7 +5,7 @@
   * Duty cycle is 100 * (ceil(DIV / 2)) / DIV.
   */
 
-module ClockDividerN #(parameter DIV)(output logic clk_out = 1'b0, input clk_in);
+module ClockDividerN #(parameter DIV = 1)(output logic clk_out = 1'b0, input clk_in);
 
     localparam CWIDTH = $clog2(DIV);
     localparam LOW_CYCLES = DIV / 2;
