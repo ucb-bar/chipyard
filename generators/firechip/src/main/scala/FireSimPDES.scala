@@ -56,7 +56,55 @@ object PDESClockingSchemes {
 
     val clockAndReset = InModuleBody { referenceClockSource.makeIOs() }
 
-  // PDES: This is the only piece that differs
+    chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
+      val (_, edge) = referenceClockSource.out.head
+      val refPeriod = BigInt(Math.round(1e6 / edge.sink.take.get.freqMHz).toLong)
+      val clockSource = Module(new midas.widgets.BlackBoxClockSourceBridge(refPeriod))
+      clockAndReset.head.clock := clockSource.io.clockOut
+      clockAndReset.head.reset := th.harnessReset
+      th.harnessClock := clockSource.io.clockOut
+      Nil })
+  }
+
+  val tileClockMuxing: ChipTop => Unit = { chiptop =>
+    implicit val p = chiptop.p
+
+    // Requires existence of undriven asyncClockGroups in subsystem
+    val systemAsyncClockGroup = chiptop.lazySystem match {
+      case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) =>
+        l.asyncClockGroupsNode
+    }
+
+    // Add a control register for each tile's reset
+    val resetSetter = chiptop.lazySystem match {
+      case sys: BaseSubsystem with InstantiatesTiles => TLTileResetCtrl(sys)
+      case _ => ClockGroupEphemeralNode()
+    }
+
+    val tileClockMuxes = chiptop.lazySystem match {
+      case sys: BaseSubsystem with InstantiatesTiles => TLTileClockMuxes(sys)
+      case _ => ClockGroupEphemeralNode()
+    }
+    val aggregator = LazyModule(new ClockGroupAggregator("allClocks")).node
+    (chiptop.implicitClockSinkNode
+      := ClockGroup()
+      := aggregator)
+    (systemAsyncClockGroup
+      :*= resetSetter
+      :*= ClockGroupNamePrefixer()
+      :*= aggregator)
+
+    val referenceClockSource =  ClockSourceNode(Seq(ClockSourceParameters()))
+    (aggregator
+      := tileClockMuxes
+      := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
+      := ClockGroupResetSynchronizer()
+      := DividerOnlyClockGenerator()
+      := referenceClockSource)
+
+
+    val clockAndReset = InModuleBody { referenceClockSource.makeIOs() }
+
     chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
       val (_, edge) = referenceClockSource.out.head
       val refPeriod = BigInt(Math.round(1e6 / edge.sink.take.get.freqMHz).toLong)
@@ -70,6 +118,10 @@ object PDESClockingSchemes {
 
 class WithChipyardLikeClocking extends Config((site, here, up) => {
   case ClockingSchemeKey => PDESClockingSchemes.dividerOnlyClockGenerator
+})
+
+class WithTileClockMuxes extends Config((site, here, up) => {
+  case ClockingSchemeKey => PDESClockingSchemes.tileClockMuxing
 })
 
 

@@ -218,3 +218,13 @@ class ChipyardLikeRocketConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.DividedClockRocketConfig)
+
+class ClockMuxRocketConfig extends Config(
+  new WithTileClockMuxes ++
+  // Use a division we can currently support in the divider models
+  new chipyard.config.WithMemoryBusFrequency(3200.00) ++
+  new chipyard.config.WithTileFrequency(6400.0) ++ //lol
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.DividedClockRocketConfig)
