@@ -20,8 +20,10 @@ object FrequencyUtils {
     require(requestedOutputs.nonEmpty)
     require(!requestedOutputs.contains(0.0))
     val freqs = requestedOutputs.map(f => BigInt(Math.round(f.freqMHz * 1000 * 1000)))
+
     val refFreq = freqs.reduce((a, b) => a * b / a.gcd(b)).toDouble / (1000 * 1000)
     assert((refFreq / freqs.min.toDouble) < maximumAllowableDivisor.toDouble)
+    assert((refFreq / freqs.min.toDouble) > 0)
     ClockParameters(refFreq)
   }
 }

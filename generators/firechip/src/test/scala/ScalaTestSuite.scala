@@ -110,6 +110,11 @@ class RocketMulticlockF1Tests extends FireSimTestSuite(
   "FireSimMulticlockRocketConfig",
   "WithSynthAsserts_BaseF1Config")
 
+class PDESChipyardLikeClockingTests extends FireSimTestSuite(
+  "FireSimPDES",
+  "ChipyardLikeRocketConfig",
+  "WithSynthAsserts_BaseF1Config")
+
 class ArianeF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimArianeConfig", "BaseF1Config")
 
 // This test suite only mirrors what is run in CI. CI invokes each test individually, using a testOnly call.

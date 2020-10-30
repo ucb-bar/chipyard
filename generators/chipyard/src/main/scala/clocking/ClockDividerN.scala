@@ -12,6 +12,7 @@ class ClockDividerN(div: Int) extends BlackBox(Map("DIV" -> div)) with HasBlackB
     val clk_in  = Input(Clock())
   })
   addResource("/vsrc/ClockDividerN.sv")
+  midas.widgets.BridgeableClockDivider(this, io.clk_in, io.clk_out, div)
 }
 
 object ClockDivideByN {

@@ -206,3 +206,15 @@ class FireSimMulticlockRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.DividedClockRocketConfig)
 
+/**
+  * PDES Configurations
+  */
+class ChipyardLikeRocketConfig extends Config(
+  new WithChipyardLikeClocking ++
+  // Use a division we can currently support in the divider models
+  new chipyard.config.WithMemoryBusFrequency(1600.0) ++
+  new chipyard.config.WithTileFrequency(3200.0) ++ //lol
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.DividedClockRocketConfig)
