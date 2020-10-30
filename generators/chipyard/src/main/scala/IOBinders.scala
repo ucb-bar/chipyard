@@ -308,9 +308,12 @@ class WithL2FBusAXI4Punchthrough extends OverrideIOBinder({
 
 class WithBlockDeviceIOPunchthrough extends OverrideIOBinder({
   (system: CanHavePeripheryBlockDevice) => {
-    val ports: Seq[ClockedIO[BlockDeviceIO]] = system.bdev.map({ bdev =>
-      val p = IO(new ClockedIO(new BlockDeviceIO()(GetSystemParameters(system)))).suggestName("blockdev")
-      p <> bdev
+    val ports: Seq[ClockedAndResetIO[BlockDeviceIO]] = system.bdev.map({ bdev =>
+      val p = IO(new ClockedAndResetIO(new BlockDeviceIO()(GetSystemParameters(system)))).suggestName("blockdev")
+      p.bits <> bdev.bits
+      p.clock := bdev.clock
+      val pbus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(PBUS)
+      p.reset := BoreHelper("blockdev_reset", pbus.module.reset)
       p
     }).toSeq
     (ports, Nil)

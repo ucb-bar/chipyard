@@ -90,9 +90,9 @@ class WithUARTBridge extends OverrideHarnessBinder({
 })
 
 class WithBlockDeviceBridge extends OverrideHarnessBinder({
-  (system: CanHavePeripheryBlockDevice, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
+  (system: CanHavePeripheryBlockDevice, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[BlockDeviceIO]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
-    ports.map { b => BlockDevBridge(b.clock, b.bits, th.harnessReset.toBool) }
+    ports.map { b => BlockDevBridge(b.clock, b.bits, b.reset.toBool) }
     Nil
   }
 })

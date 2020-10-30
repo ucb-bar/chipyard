@@ -89,17 +89,17 @@ class WithSimSPIFlashModel(rdOnly: Boolean = true) extends OverrideHarnessBinder
 })
 
 class WithSimBlockDevice extends OverrideHarnessBinder({
-  (system: CanHavePeripheryBlockDevice, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
+  (system: CanHavePeripheryBlockDevice, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[BlockDeviceIO]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
-    ports.map { b => SimBlockDevice.connect(b.clock, th.harnessReset.asBool, Some(b.bits)) }
+    ports.map { b => SimBlockDevice.connect(b.clock, b.reset.asBool, Some(b.bits)) }
     Nil
   }
 })
 
 class WithBlockDeviceModel extends OverrideHarnessBinder({
-  (system: CanHavePeripheryBlockDevice, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
+  (system: CanHavePeripheryBlockDevice, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[BlockDeviceIO]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
-    ports.map { b => withClockAndReset(b.clock, th.harnessReset) { BlockDeviceModel.connect(Some(b.bits)) } }
+    ports.map { b => withClockAndReset(b.clock, b.reset) { BlockDeviceModel.connect(Some(b.bits)) } }
     Nil
   }
 })
