@@ -16,12 +16,13 @@ import scala.collection.immutable.ListMap
 object FrequencyUtils {
   def computeReferenceFrequencyMHz(
     requestedOutputs: Seq[ClockParameters],
-    maximumAllowableDivisor: Int = 0xFFFF): ClockParameters = {
+    maximumAllowableFreqMHz: Double = 8000.0): ClockParameters = {
     require(requestedOutputs.nonEmpty)
     require(!requestedOutputs.contains(0.0))
     val freqs = requestedOutputs.map(f => BigInt(Math.round(f.freqMHz * 1000 * 1000)))
     val refFreq = freqs.reduce((a, b) => a * b / a.gcd(b)).toDouble / (1000 * 1000)
-    assert((refFreq / freqs.min.toDouble) < maximumAllowableDivisor.toDouble)
+    assert(refFreq < maximumAllowableFreqMHz,
+      s"Reference frequency ${refFreq} exceeds maximum allowable value of ${maximumAllowableFreqMHz} MHz")
     ClockParameters(refFreq)
   }
 }
