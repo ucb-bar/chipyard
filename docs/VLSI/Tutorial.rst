@@ -30,7 +30,7 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
   * Verilog wrapper around the accelerator and dummy hard macro.
 
-* example.yml
+* example-asap7.yml
 
   * Hammer IR for this tutorial.
 
