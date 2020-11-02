@@ -38,8 +38,7 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
   val harnessReset = WireInit(reset)
   val success = io.success
 
-  // dutReset assignment can be overridden via a harnessFunction, but by default it is just reset
-  val dutReset = WireDefault(if (p(GlobalResetSchemeKey).pinIsAsync) reset.asAsyncReset else reset)
+  val dutReset = reset.asAsyncReset
 
   lazyDut match { case d: HasTestHarnessFunctions =>
     d.harnessFunctions.foreach(_(this))
