@@ -23,12 +23,10 @@ case object BuildSystem extends Field[Parameters => LazyModule]((p: Parameters) 
  * drive clock and reset generation
  */
 
-class ChipTop(implicit p: Parameters) extends LazyModule with HasTestHarnessFunctions {
-  // A publicly accessible list of IO cells (useful for a floorplanning tool, for example)
-  val iocells = ArrayBuffer.empty[IOCell]
-
+class ChipTop(implicit p: Parameters) extends LazyModule
+    with HasTestHarnessFunctions with HasIOBinders {
   // The system module specified by BuildSystem
-  val lazySystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
+  lazy val lazySystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
 
   // The implicitClockSinkNode provides the implicit clock and reset for the System
   val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
@@ -44,13 +42,6 @@ class ChipTop(implicit p: Parameters) extends LazyModule with HasTestHarnessFunc
     // These become the implicit clock and reset to the System
     val implicit_clock = implicitClockSinkNode.in.head._1.clock
     val implicit_reset = implicitClockSinkNode.in.head._1.reset
-
-
-    // Note: IOBinders cannot rely on the implicit clock/reset, as this is a LazyRawModuleImp
-    val (_ports, _iocells, _portMap) = ApplyIOBinders(lazySystem, p(IOBinders))
-    // We ignore _ports for now...
-    iocells ++= _iocells
-    portMap ++= _portMap
 
     // Connect the implicit clock/reset, if present
     lazySystem.module match { case l: LazyModuleImp => {
