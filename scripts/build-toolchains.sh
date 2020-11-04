@@ -20,6 +20,7 @@ usage() {
     echo "Options"
     echo "   --prefix PREFIX : Install destination. If unset, defaults to $(pwd)/riscv-tools-install"
     echo "                     or $(pwd)/esp-tools-install"
+    echo "   --ignore-qemu   : Ignore installing QEMU"
     echo "   --help -h       : Display this message"
     exit "$1"
 }
@@ -34,6 +35,7 @@ die() {
 
 TOOLCHAIN="riscv-tools"
 EC2FASTINSTALL="false"
+IGNOREQEMU="false"
 RISCV=""
 
 # getopts does not support long options, and is inflexible
@@ -45,6 +47,9 @@ do
         -p | --prefix )
             shift
             RISCV=$(realpath $1) ;;
+        --ignore-qemu )
+            shift
+            IGNOREQEMU="true" ;;
         riscv-tools | esp-tools)
             TOOLCHAIN=$1 ;;
         ec2fast )
@@ -109,7 +114,7 @@ else
         *) false ;;
         esac; ) || die 'obsolete make version; need GNU make 4.x or later'
 
-    module_prepare riscv-gnu-toolchain qemu
+    module_prepare riscv-gnu-toolchain
     module_build riscv-gnu-toolchain --prefix="${RISCV}" --with-cmodel=medany
     echo '==>  Building GNU/Linux toolchain'
     module_make riscv-gnu-toolchain linux
@@ -128,7 +133,9 @@ module_all riscv-tests --prefix="${RISCV}/riscv64-unknown-elf"
 
 SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv64-unknown-elf" --host=riscv64-unknown-elf
 
+if [ "${IGNOREQEMU}" = false ] ; then
 SRCDIR="$(pwd)/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv64-softmmu
+fi
 
 # make Dromajo
 git submodule update --init $CHIPYARD_DIR/tools/dromajo/dromajo-src
