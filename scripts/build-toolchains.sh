@@ -35,7 +35,7 @@ die() {
 
 TOOLCHAIN="riscv-tools"
 EC2FASTINSTALL="false"
-IGNOREQEMU="false"
+IGNOREQEMU=""
 RISCV=""
 
 # getopts does not support long options, and is inflexible
@@ -133,7 +133,7 @@ module_all riscv-tests --prefix="${RISCV}/riscv64-unknown-elf"
 
 SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv64-unknown-elf" --host=riscv64-unknown-elf
 
-if [ "${IGNOREQEMU}" = false ] ; then
+if [ -z "$IGNOREQEMU" ] ; then
 SRCDIR="$(pwd)/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv64-softmmu
 fi
 
