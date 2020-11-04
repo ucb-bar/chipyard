@@ -91,7 +91,7 @@ VERILATOR_OPT_FLAGS := \
 	--output-split 10000 \
 	--output-split-cfuncs 100
 
-# default flags added for external IP (ariane/NVDLA)
+# default flags added for external IP (cva6/NVDLA)
 VERILOG_IP_VERILATOR_FLAGS := \
 	--unroll-count 256 \
 	-Wno-PINCONNECTEMPTY \
@@ -103,14 +103,14 @@ VERILOG_IP_VERILATOR_FLAGS := \
 	-Wno-style \
 	-Wall
 
-# normal flags used for chipyard builds (that are incompatible with vlog ip aka ariane/NVDLA)
+# normal flags used for chipyard builds (that are incompatible with vlog ip aka cva6/NVDLA)
 CHIPYARD_VERILATOR_FLAGS := \
 	--assert
 
-# options dependent on whether external IP (ariane/NVDLA) or just chipyard is used
+# options dependent on whether external IP (cva6/NVDLA) or just chipyard is used
 # NOTE: defer the evaluation of this until it is used!
 PLATFORM_OPTS = $(shell \
-	if grep -qiP "module\s+(Ariane|NVDLA)" $(build_dir)/*.*v; \
+	if grep -qiP "module\s+(CVA6|NVDLA)" $(build_dir)/*.*v; \
 	then echo "$(VERILOG_IP_VERILATOR_FLAGS)"; \
 	else echo "$(CHIPYARD_VERILATOR_FLAGS)"; fi)
 

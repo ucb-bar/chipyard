@@ -20,9 +20,9 @@ Processor Cores
   An out-of-order RISC-V core.
   See :ref:`Berkeley Out-of-Order Machine (BOOM)` for more information.
 
-**Ariane Core**
+**CVA6 Core**
   An in-order RISC-V core written in System Verilog.
-  See :ref:`Ariane Core` for more information.
+  See :ref:`CVA6 Core` for more information.
 
 Accelerators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
