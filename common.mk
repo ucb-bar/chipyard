@@ -58,7 +58,7 @@ include $(base_dir)/tools/dromajo/dromajo.mk
 # Returns a list of files in directory $1 with file extension $2.
 lookup_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.$(2)" -print 2> /dev/null)
 
-SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools/iocell)
+SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools/iocell fpga)
 SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
 VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE_DIRS),v)
 # This assumes no SBT meta-build sources
