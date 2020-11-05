@@ -115,7 +115,7 @@
 	url = https://github.com/firesim/FireMarshal.git
 [submodule "generators/cva6"]
 	path = generators/cva6
-	url = git@github.com:ucb-bar/cva6-wrapper.git
+	url = https://github.com/ucb-bar/cva6-wrapper.git
 [submodule "tools/DRAMSim2"]
 	path = tools/DRAMSim2
 	url = https://github.com/firesim/DRAMSim2.git
