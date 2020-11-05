@@ -19,8 +19,6 @@ class WithBringupUART extends ComposeHarnessBinder({
 
       vcu118th.bringupOuter.io_fmc_uart_bb.bundle <> ports.last
     } }
-
-    Nil
   }
 })
 
@@ -32,8 +30,6 @@ class WithBringupSPI extends ComposeHarnessBinder({
 
       vcu118th.bringupOuter.io_adi_spi_bb.bundle <> ports.last
     } }
-
-    Nil
   }
 })
 
@@ -45,8 +41,6 @@ class WithBringupI2C extends OverrideHarnessBinder({
 
       vcu118th.bringupOuter.io_i2c_bb.bundle <> ports.head
     } }
-
-    Nil
   }
 })
 
@@ -58,7 +52,5 @@ class WithBringupGPIO extends OverrideHarnessBinder({
         bb_io.bundle <> dut_io
       }
     } }
-
-    Nil
   }
 })

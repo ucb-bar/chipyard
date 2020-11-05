@@ -2,7 +2,7 @@ package chipyard.fpga.vcu118.bringup
 
 import math.min
 
-import freechips.rocketchip.config.{Config}
+import freechips.rocketchip.config.{Config, Parameters}
 import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet, ResourceBinding, Resource, ResourceAddress}
 
 import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOParams}
@@ -12,6 +12,8 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
+
+import chipyard.{BuildSystem}
 
 import chipyard.fpga.vcu118.{RocketVCU118Config, BoomVCU118Config}
 
@@ -34,6 +36,10 @@ class WithBringupPeripherals extends Config((site, here, up) => {
   }
 })
 
+class WithBringupVCU118System extends Config((site, here, up) => {
+  case BuildSystem => (p: Parameters) => new BringupVCU118DigitalTop()(p) // use the VCU118-extended bringup digital top
+})
+
 class WithBringupAdditions extends Config(
   new WithBringupUART ++
   new WithBringupSPI ++
@@ -41,7 +47,8 @@ class WithBringupAdditions extends Config(
   new WithBringupGPIO ++
   new WithI2CIOPassthrough ++
   new WithGPIOIOPassthrough ++
-  new WithBringupPeripherals)
+  new WithBringupPeripherals ++
+  new WithBringupVCU118System)
 
 class RocketBringupConfig extends Config(
   new WithBringupPeripherals ++

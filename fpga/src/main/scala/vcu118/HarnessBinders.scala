@@ -9,7 +9,7 @@ import freechips.rocketchip.tilelink.{TLBundle}
 import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp, UARTPortIO}
 import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
 
-import chipyard.{CanHaveMasterTLMemPort, HasHarnessSignalReferences}
+import chipyard.{HasHarnessSignalReferences}
 import chipyard.harness.{OverrideHarnessBinder}
 
 /*** UART ***/
@@ -18,8 +18,6 @@ class WithUART extends OverrideHarnessBinder({
     th match { case vcu118th: VCU118FPGATestHarnessImp => {
       vcu118th.vcu118Outer.io_uart_bb.bundle <> ports.head
     } }
-
-    Nil
   }
 })
 
@@ -29,8 +27,6 @@ class WithSPISDCard extends OverrideHarnessBinder({
     th match { case vcu118th: VCU118FPGATestHarnessImp => {
       vcu118th.vcu118Outer.io_spi_bb.bundle <> ports.head
     } }
-
-    Nil
   }
 })
 
@@ -45,7 +41,5 @@ class WithDDRMem extends OverrideHarnessBinder({
       bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
       ddrClientBundle <> ports.head
     } }
-
-    Nil
   }
 })

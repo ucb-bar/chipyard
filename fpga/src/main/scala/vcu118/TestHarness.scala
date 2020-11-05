@@ -15,10 +15,9 @@ import sifive.fpgashells.clocks._
 
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
-import sifive.blocks.devices.i2c._
 import sifive.blocks.devices.gpio._
 
-import chipyard.{HasHarnessSignalReferences, HasTestHarnessFunctions, BuildTop, CanHaveMasterTLMemPort, ChipTop}
+import chipyard.{HasHarnessSignalReferences, HasTestHarnessFunctions, BuildTop, ChipTop}
 import chipyard.iobinders.{HasIOBinders}
 import chipyard.harness.{ApplyHarnessBinders}
 
@@ -125,10 +124,13 @@ class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawMod
 
   _outer.pllReset := (reset_ibuf.io.O || powerOnReset || ereset)
 
-  // cy stuff
+  // reset setup
+  val hReset = Wire(Reset())
+  hReset := _outer.dutClock.in.head._1.reset
+
   val harnessClock = _outer.dutClock.in.head._1.clock
-  val harnessReset = WireInit(_outer.dutClock.in.head._1.reset)
-  val dutReset = harnessReset
+  val harnessReset = WireInit(hReset)
+  val dutReset = hReset.asAsyncReset
   val success = false.B
 
   childClock := harnessClock

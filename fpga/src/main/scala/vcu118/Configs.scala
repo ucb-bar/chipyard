@@ -2,7 +2,7 @@ package chipyard.fpga.vcu118
 
 import sys.process._
 
-import freechips.rocketchip.config.{Config}
+import freechips.rocketchip.config.{Config, Parameters}
 import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem}
 import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
 import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
@@ -15,6 +15,8 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
 
+import chipyard.{BuildSystem}
+
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
   case PeripherySPIKey => List(SPIParams(rAddress = BigInt(0x64001000L)))
@@ -22,6 +24,7 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
 })
 
 class WithSystemModifications extends Config((site, here, up) => {
+  case BuildSystem => (p: Parameters) => new VCU118DigitalTop()(p) // use the VCU118-extended digital top
   case DebugModuleKey => None // disable debug module
   case ExportDebug => up(ExportDebug).copy(protocols = Set(JTAG)) // don't generate HTIF DTS
   case SystemBusKey => up(SystemBusKey).copy(

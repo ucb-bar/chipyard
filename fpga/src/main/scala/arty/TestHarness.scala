@@ -7,11 +7,12 @@ import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.config.{Field, Parameters}
 import sifive.fpgashells.shell.xilinx.artyshell.{ArtyShell}
 import chipyard.{BuildTop, HasHarnessSignalReferences, HasTestHarnessFunctions}
+import chipyard.iobinders.{HasIOBinders}
 import chipyard.harness.{ApplyHarnessBinders, HarnessBinders}
 
 class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell with HasHarnessSignalReferences {
 
-  val ldut = LazyModule(p(BuildTop)(p)).suggestName("chiptop")
+  val lazyDut = LazyModule(p(BuildTop)(p)).suggestName("chiptop")
 
   // turn IO clock into Reset type
   val hReset = Wire(Reset())
@@ -19,17 +20,20 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
 
   // default to 32MHz clock
   withClockAndReset(clock_32MHz, hReset) {
-    val dut = Module(ldut.module)
+    val dut = Module(lazyDut.module)
   }
 
   val harnessClock = clock_32MHz
   val harnessReset = hReset
   val success = false.B
+
   val dutReset = reset_core
 
-  // must be after HasHarnessSignalReferences assignments
-  ldut match { case d: HasTestHarnessFunctions =>
+  lazyDut match { case d: HasTestHarnessFunctions =>
     d.harnessFunctions.foreach(_(this))
-    ApplyHarnessBinders(this, d.lazySystem, p(HarnessBinders), d.portMap.toMap)
   }
+  lazyDut match { case d: HasIOBinders =>
+    ApplyHarnessBinders(this, d.lazySystem, d.portMap)
+  }
+
 }

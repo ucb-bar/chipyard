@@ -58,7 +58,6 @@ class WithArtyJTAGHarnessBinder extends chipyard.harness.OverrideHarnessBinder({
     //     IOBUF(th.jd_1, j.TRSTn)
     //     PULLUP(th.jd_1)
     // }
-    Nil
   }
 })
 
@@ -68,6 +67,5 @@ class WithArtyUARTHarnessBinder extends chipyard.harness.OverrideHarnessBinder({
     // UARTAdapter.connect(ports)(system.p)
     // IOBUF(th.ck_io(2),  ports.txd)
     // IOBUF(th.ck_io(3),  ports.rxd)
-    Nil
   }
 })
