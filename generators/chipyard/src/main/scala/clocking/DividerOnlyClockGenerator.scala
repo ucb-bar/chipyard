@@ -14,20 +14,65 @@ import scala.collection.immutable.ListMap
   * TODO: figure out how much division is acceptable in our simulators and redefine this.
   */
 object FrequencyUtils {
-  def computeReferenceFrequencyMHz(
+  /**
+    * Adds up the squared error between the generated clocks (refClock / [integer] divider)
+    * and the requested frequencies.
+    *
+    * @param refMHz The candidate reference clock
+    * @param desiredFreqMHz A list of the requested output frequencies
+    */
+  def squaredError(refMHz: Double, desiredFreqMHz: List[Double], sum: Double = 0.0): Double = desiredFreqMHz match {
+    case Nil => sum
+    case desired :: xs =>
+      val divider = Math.round(refMHz / desired)
+      val termError = ((refMHz / divider) - desired) / desired
+      squaredError(refMHz, xs, sum + termError * termError)
+  }
+
+  /**
+    * Picks a candidate reference frequency by doing a brute-force search over
+    * multiples of the fastest requested clock. Choose the smallest multiple that
+    * has an RMS error (across all output frequencies) that is:
+    * 1) zero or failing that,
+    * 2) is within the relativeThreshold of the best or is less than the absoluteThreshold
+    *
+    * @param requestedOutputs The desired output frequencies in MHz
+    * @param maximumAllowableFreqMHz The maximum allowable reference in MHz
+    * @param relativeThreshold See above
+    * @param absoluteThreshold See above
+    */
+  def computeReferenceAsMultipleOfFastestClock(
     requestedOutputs: Seq[ClockParameters],
-    maximumAllowableDivisor: Int = 0xFFFF): ClockParameters = {
+    maximumAllowableFreqMHz: Double,
+    relativeThreshold: Double = 1.10,
+    absoluteThreshold: Double = 0.01): ClockParameters = {
+
     require(requestedOutputs.nonEmpty)
     require(!requestedOutputs.contains(0.0))
-    val freqs = requestedOutputs.map(f => BigInt(Math.round(f.freqMHz * 1000 * 1000)))
-    val refFreq = freqs.reduce((a, b) => a * b / a.gcd(b)).toDouble / (1000 * 1000)
-    assert((refFreq / freqs.min.toDouble) < maximumAllowableDivisor.toDouble)
-    ClockParameters(refFreq)
+    val requestedFreqs = requestedOutputs.map(_.freqMHz)
+    val fastestFreq = requestedFreqs.max
+    require(fastestFreq < maximumAllowableFreqMHz)
+
+    val candidateFreqs =
+      Seq.tabulate(Math.ceil(maximumAllowableFreqMHz / fastestFreq).toInt)(i => (i + 1) * fastestFreq)
+    val errorTuples = candidateFreqs.map { f =>
+      f -> Math.sqrt(squaredError(f, requestedFreqs.toList) / requestedFreqs.size)
+    }
+    val minError = errorTuples.map(_._2).min
+    val viableFreqs = errorTuples.collect {
+      case (f, error) if (error <= minError * relativeThreshold) || (minError > 0 && error < absoluteThreshold) => f
+    }
+    ClockParameters(viableFreqs.min)
   }
 }
 
-class SimplePllConfiguration(name: String, val sinks: Seq[ClockSinkParameters]) {
-  val referenceFreqMHz = FrequencyUtils.computeReferenceFrequencyMHz(sinks.flatMap(_.take)).freqMHz
+class SimplePllConfiguration(
+    name: String,
+    val sinks: Seq[ClockSinkParameters],
+    maximumAllowableFreqMHz: Double = 16000.0 ) {
+  val referenceFreqMHz = FrequencyUtils.computeReferenceAsMultipleOfFastestClock(
+    sinks.flatMap(_.take),
+    maximumAllowableFreqMHz).freqMHz
   val sinkDividerMap = ListMap((sinks.map({s => (s, Math.round(referenceFreqMHz / s.take.get.freqMHz).toInt) })):_*)
 
   private val preamble = s"""
@@ -40,8 +85,10 @@ class SimplePllConfiguration(name: String, val sinks: Seq[ClockSinkParameters]) 
     }
 
    val summaryString =  preamble + outputSummaries.mkString("\n")
-   ElaborationArtefacts.add(s"${name}.freq-summary", summaryString)
-   println(summaryString)
+   def emitSummaries(): Unit = {
+     ElaborationArtefacts.add(s"${name}.freq-summary", summaryString)
+     println(summaryString)
+   }
 }
 
 case class DividerOnlyClockGeneratorNode(pllName: String)(implicit valName: ValName)
@@ -53,7 +100,7 @@ case class DividerOnlyClockGeneratorNode(pllName: String)(implicit valName: ValN
       "All output clocks in group must set their take parameters. Use a ClockGroupDealiaser")
     ClockSinkParameters(
       name = Some(s"${pllName}_reference_input"),
-      take = Some(FrequencyUtils.computeReferenceFrequencyMHz(u.head.members.flatMap(_.take)))) }
+      take = Some(ClockParameters(new SimplePllConfiguration(pllName, u.head.members).referenceFreqMHz))) }
   )
 
 /**
@@ -78,6 +125,7 @@ class DividerOnlyClockGenerator(pllName: String)(implicit p: Parameters, valName
 
     val referenceFreq = refSinkParam.take.get.freqMHz
     val pllConfig = new SimplePllConfiguration(pllName, outSinkParams.members)
+    pllConfig.emitSummaries()
 
     val dividedClocks = mutable.HashMap[Int, Clock]()
     def instantiateDivider(div: Int): Clock = {
