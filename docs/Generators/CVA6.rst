@@ -1,7 +1,7 @@
 CVA6 Core
 ====================================
 
-`CVA6 <https://github.com/openhwgroup/cva6>`__ is a 6-stage in-order scalar processor core, originally developed at ETH-Zurich by F. Zaruba and L. Benini.
+`CVA6 <https://github.com/openhwgroup/cva6>`__ (previously called Ariane) is a 6-stage in-order scalar processor core, originally developed at ETH-Zurich by F. Zaruba and L. Benini.
 The `CVA6 core` is wrapped in an `CVA6 tile` so it can be used as a component within the `Rocket Chip SoC generator`.
 The core by itself exposes an AXI interface, interrupt ports, and other misc. ports that are connected from within the tile to TileLink buses and other parameterization signals.
 

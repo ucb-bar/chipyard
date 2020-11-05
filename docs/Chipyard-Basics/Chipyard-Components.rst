@@ -21,7 +21,7 @@ Processor Cores
   See :ref:`Berkeley Out-of-Order Machine (BOOM)` for more information.
 
 **CVA6 Core**
-  An in-order RISC-V core written in System Verilog.
+  An in-order RISC-V core written in System Verilog. Previously called Ariane.
   See :ref:`CVA6 Core` for more information.
 
 Accelerators
