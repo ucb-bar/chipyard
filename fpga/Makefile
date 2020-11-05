@@ -48,7 +48,7 @@ ifeq ($(SUB_PROJECT),arty)
 	MODEL             ?= ArtyFPGATestHarness
 	VLOG_MODEL        ?= ArtyFPGATestHarness
 	MODEL_PACKAGE     ?= chipyard.fpga.arty
-	CONFIG            ?= E300ArtyDevKitConfig
+	CONFIG            ?= TinyRocketArtyConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty
 	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= none # unused
