@@ -1,4 +1,4 @@
-// See LICENSE for license details.
+// See LICENSE.Sifive for license details.
 #include <platform.h>
 #include <smp.h>
 #include "common.h"

@@ -1,4 +1,4 @@
-// See LICENSE for license details.
+// See LICENSE.Sifive for license details.
 #ifndef _SDBOOT_KPRINTF_H
 #define _SDBOOT_KPRINTF_H
 

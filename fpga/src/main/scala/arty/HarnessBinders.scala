@@ -16,6 +16,8 @@ import chipyard.harness.{ComposeHarnessBinder, OverrideHarnessBinder}
 
 class WithArtyResetHarnessBinder extends ComposeHarnessBinder({
   (system: HasPeripheryDebugModuleImp, th: ArtyFPGATestHarness, ports: Seq[Bool]) => {
+    require(ports.size == 2)
+
     withClockAndReset(th.clock_32MHz, th.ck_rst) {
       // Debug module reset
       th.dut_ndreset := ports(0)

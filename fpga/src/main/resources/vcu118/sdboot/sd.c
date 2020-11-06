@@ -1,4 +1,4 @@
-// See LICENSE for license details.
+// See LICENSE.Sifive for license details.
 #include <stdint.h>
 
 #include <platform.h>

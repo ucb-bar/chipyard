@@ -1,4 +1,4 @@
-// See LICENSE for license details.
+// See LICENSE.Sifive for license details.
 
 #ifndef _SIFIVE_GPIO_H
 #define _SIFIVE_GPIO_H

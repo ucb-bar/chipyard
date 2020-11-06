@@ -1,4 +1,4 @@
-// See LICENSE for license details.
+// See LICENSE.Sifive for license details.
 #ifndef _RISCV_TEST_DEFAULTS_H
 #define _RISCV_TEST_DEFAULTS_H
 

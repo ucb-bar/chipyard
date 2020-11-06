@@ -1,3 +1,4 @@
+// See LICENSE.Sifive for license details.
 #ifndef _SDBOOT_COMMON_H
 #define _SDBOOT_COMMON_H
 

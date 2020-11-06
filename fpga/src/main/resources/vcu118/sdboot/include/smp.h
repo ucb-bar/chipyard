@@ -1,3 +1,4 @@
+// See LICENSE.Sifive for license details.
 #ifndef SIFIVE_SMP
 #define SIFIVE_SMP
 #include "platform.h"
@@ -14,7 +15,7 @@
 #define NONSMP_HART 0
 #endif
 
-/* If your test cannot handle multiple-threads, use this: 
+/* If your test cannot handle multiple-threads, use this:
  *   smp_disable(reg1)
  */
 #define smp_disable(reg1, reg2)			 \

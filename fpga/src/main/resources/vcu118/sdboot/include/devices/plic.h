@@ -1,4 +1,4 @@
-// See LICENSE for license details.
+// See LICENSE.Sifive for license details.
 
 #ifndef PLIC_H
 #define PLIC_H

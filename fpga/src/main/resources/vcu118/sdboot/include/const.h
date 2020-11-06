@@ -1,4 +1,4 @@
-// See LICENSE for license details.
+// See LICENSE.Sifive for license details.
 /* Derived from <linux/const.h> */
 
 #ifndef _SIFIVE_CONST_H

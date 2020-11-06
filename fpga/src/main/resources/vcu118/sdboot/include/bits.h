@@ -1,4 +1,4 @@
-// See LICENSE for license details.
+// See LICENSE.Sifive for license details.
 #ifndef _RISCV_BITS_H
 #define _RISCV_BITS_H
 
