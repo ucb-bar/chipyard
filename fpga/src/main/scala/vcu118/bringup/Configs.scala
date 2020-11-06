@@ -4,6 +4,8 @@ import math.min
 
 import freechips.rocketchip.config.{Config, Parameters}
 import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet, ResourceBinding, Resource, ResourceAddress}
+import freechips.rocketchip.tilelink._
+import freechips.rocketchip.diplomacy._
 
 import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOParams}
 import sifive.blocks.devices.i2c.{PeripheryI2CKey, I2CParams}
@@ -12,6 +14,8 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
+
+import testchipip.{PeripheryTSIHostKey, TSIHostParams, TSIHostSerdesParams}
 
 import chipyard.{BuildSystem}
 
@@ -34,6 +38,30 @@ class WithBringupPeripherals extends Config((site, here, up) => {
       List.empty[GPIOParams]
     }
   }
+  case PeripheryTSIHostKey => List(
+    TSIHostParams(
+      serialIfWidth = 4,
+      mmioBaseAddress = BigInt(0x64006000),
+      mmioSourceId = 1 << 13, // manager source
+      serdesParams = TSIHostSerdesParams(
+        clientPortParams = TLMasterPortParameters.v1(
+          clients = Seq(TLMasterParameters.v1(
+            name = "tl-tsi-host-serdes",
+            sourceId = IdRange(0, (1 << 13))))),
+        managerPortParams = TLSlavePortParameters.v1(
+          managers = Seq(TLSlaveParameters.v1(
+            address = Seq(AddressSet(0, BigInt("FFFFFFFF", 16))),
+            regionType = RegionType.UNCACHED,
+            executable = true,
+            supportsGet        = TransferSizes(1, 64),
+            supportsPutFull    = TransferSizes(1, 64),
+            supportsPutPartial = TransferSizes(1, 64),
+            supportsAcquireT   = TransferSizes(1, 64),
+            supportsAcquireB   = TransferSizes(1, 64),
+            supportsArithmetic = TransferSizes(1, 64),
+            supportsLogical    = TransferSizes(1, 64))),
+          endSinkId = 1 << 6, // manager sink
+          beatBytes = 8))))
 })
 
 class WithBringupVCU118System extends Config((site, here, up) => {
@@ -45,6 +73,7 @@ class WithBringupAdditions extends Config(
   new WithBringupSPI ++
   new WithBringupI2C ++
   new WithBringupGPIO ++
+  new WithTSITLIOPassthrough ++
   new WithI2CIOPassthrough ++
   new WithGPIOIOPassthrough ++
   new WithBringupPeripherals ++

@@ -144,4 +144,58 @@ class BringupGPIOVCU118ShellPlacer(shell: VCU118ShellBasicOverlays, val shellInp
   def place(designInput: GPIODesignInput) = new BringupGPIOVCU118PlacedOverlay(shell, valName.name, designInput, shellInput, gpioNames)
 }
 
-
+//case class TSIShellInput()
+//case class TSIDesignInput(
+//
+//  )(
+//  implicit val p: Parameters)extends DDRDesignInput
+//
+//abstract class TSIOverlay(val params: TSIOverlayParams)
+//  extends IOOverlay[TLTSIWithDDRIO, TLTSIHostWidget]
+//{
+//  implicit val p = params.p
+//
+//  // instantiate the tsi host widget and setup necessary connections
+//  val (tlTsiHost, tlTsiMemNode) = TLTSIHostWidget.attach(TSIHostWidgetAttachParams(params.tsiHostParams, params.controlBus))
+//  val tlTsiHostIONodeSink = tlTsiHost.ioNode.makeSink
+//
+//  // instantiate the DDR
+//  val size = p(TSIMigDDRSize)
+//  val migParams = XilinxVCU118MIGParams(address = AddressSet.misaligned(params.tsiHostParams.targetBaseAddress, size))
+//  val mig = LazyModule(new XilinxVCU118MIG(migParams))
+//  val tsiIONode = BundleBridgeSource(() => new TSIHostWidgetIO(params.tsiHostParams.serialIfWidth))
+//  val topTSIIONode = shell { tsiIONode.makeSink() }
+//  val ddrIONode = BundleBridgeSource(() => mig.module.io.cloneType)
+//  val topDDRIONode = shell { ddrIONode.makeSink() }
+//  val ddrUI     = shell { ClockSourceNode(freqMHz = 200) }
+//  val areset    = shell { ClockSinkNode(Seq(ClockSinkParameters())) }
+//  areset := params.ddrParams.wrangler := ddrUI
+//  val asyncSink = LazyModule(new TLAsyncCrossingSink)
+//  val migClockReset = BundleBridgeSource(() => new Bundle {
+//  val clock = Output(Clock())
+//  val reset = Output(Bool())
+//  })
+//  val migClockResetTop = shell { migClockReset.makeSink() }
+//
+//  // connect them
+//  (mig.node := TLFragmenter(32,64,holdFirstDeny=true) := TLCacheCork() := TLSinkSetter(1 << 1) := TLSourceShrinker(1 << 4) := tlTsiMemNode)
+//
+//  def designOutput = tlTsiHost
+//  def ioFactory = new TLTSIWithDDRIO(params.tsiHostParams.serialIfWidth, size) // top level io of the shell
+//
+//  InModuleBody {
+//    val (t, _) = tsiIONode.out(0)
+//    val tsi = tlTsiHostIONodeSink.bundle
+//    tsi.serial_clock := t.serial_clock
+//    tsi.serial.in.bits := t.serial.in.bits
+//    tsi.serial.in.valid := t.serial.in.valid
+//    tsi.serial.out.ready := t.serial.out.ready
+//    t.serial.out.bits := tsi.serial.out.bits
+//    t.serial.out.valid := tsi.serial.out.valid
+//    t.serial.in.ready := tsi.serial.in.ready
+//    ddrIONode.bundle <> mig.module.io
+//    asyncSink.module.clock := migClockReset.bundle.clock
+//    asyncSink.module.reset := migClockReset.bundle.reset
+//  }
+//}
+//
