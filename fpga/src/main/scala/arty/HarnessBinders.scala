@@ -59,7 +59,7 @@ class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
   }
 })
 
-class WithArtyUARTHarnessBinder extends chipyard.harness.OverrideHarnessBinder({
+class WithArtyUARTHarnessBinder extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: ArtyFPGATestHarness, ports: Seq[UARTPortIO]) => {
     withClockAndReset(th.clock_32MHz, th.ck_rst) {
       IOBUF(th.uart_txd_in,  ports.head.txd)

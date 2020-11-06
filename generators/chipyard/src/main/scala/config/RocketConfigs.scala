@@ -10,6 +10,10 @@ class RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
 
+class TinyRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.With1TinyCore ++            // single tiny rocket-core
+  new chipyard.config.AbstractConfig)
+
 class HwachaRocketConfig extends Config(
   new chipyard.config.WithHwachaTest ++
   new hwacha.DefaultHwachaConfig ++                              // use Hwacha vector accelerator
