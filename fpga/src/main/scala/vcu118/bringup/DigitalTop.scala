@@ -10,7 +10,6 @@ import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 
 import chipyard.fpga.vcu118.{VCU118DigitalTop, VCU118DigitalTopModule}
-
 // ------------------------------------
 // BringupVCU118 DigitalTop
 // ------------------------------------
@@ -24,4 +23,3 @@ class BringupVCU118DigitalTop(implicit p: Parameters) extends VCU118DigitalTop
 
 class BringupVCU118DigitalTopModule[+L <: BringupVCU118DigitalTop](l: L) extends VCU118DigitalTopModule(l)
   with sifive.blocks.devices.i2c.HasPeripheryI2CModuleImp
-  with testchipip.HasPeripheryTSIHostWidgetModuleImp

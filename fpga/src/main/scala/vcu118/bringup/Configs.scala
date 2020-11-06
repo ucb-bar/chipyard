@@ -73,6 +73,7 @@ class WithBringupAdditions extends Config(
   new WithBringupSPI ++
   new WithBringupI2C ++
   new WithBringupGPIO ++
+  new WithBringupTSIHost ++
   new WithTSITLIOPassthrough ++
   new WithI2CIOPassthrough ++
   new WithGPIOIOPassthrough ++

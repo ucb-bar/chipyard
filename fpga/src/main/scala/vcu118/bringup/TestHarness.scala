@@ -17,7 +17,11 @@ import sifive.blocks.devices.spi._
 import sifive.blocks.devices.i2c._
 import sifive.blocks.devices.gpio._
 
+import testchipip.{HasPeripheryTSIHostWidget, PeripheryTSIHostKey, TSIHostWidgetIO, TLSinkSetter}
+
 import chipyard.fpga.vcu118.{VCU118FPGATestHarness, VCU118FPGATestHarnessImp}
+
+import chipyard.{ChipTop}
 
 class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118FPGATestHarness {
 
@@ -62,6 +66,28 @@ class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends 
   (dp(GPIOOverlayKey) zip dp(PeripheryGPIOKey)).zipWithIndex.map { case ((placer, params), i) =>
     placer.place(GPIODesignInput(params, io_gpio_bb(i)))
   }
+
+  /*** TSI Host Widget ***/
+  require(dp(PeripheryTSIHostKey).size == 1)
+
+  val tsi_host = Overlay(TSIHostOverlayKey, new BringupTSIHostVCU118ShellPlacer(this, TSIHostShellInput()))
+
+  val io_tsi_serial_bb = BundleBridgeSource(() => (new TSIHostWidgetIO(dp(PeripheryTSIHostKey).head.serialIfWidth)))
+  val tsiDdrPlaced = dp(TSIHostOverlayKey).head.place(TSIHostDesignInput(dutWrangler.node, harnessSysPLL, dp(PeripheryTSIHostKey).head, io_tsi_serial_bb))
+
+  // connect 1 mem. channel to the FPGA DDR
+  val inTsiParams = topDesign match { case td: ChipTop =>
+    td.lazySystem match { case lsys: HasPeripheryTSIHostWidget =>
+      lsys.tsiMemTLNodes.head.edges.in(0)
+    }
+  }
+  val tsiDdrClient = TLClientNode(Seq(inTsiParams.master))
+  (tsiDdrPlaced.overlayOutput.ddr
+    := TLFragmenter(8,64,holdFirstDeny=true)
+    := TLCacheCork()
+    := TLAtomicAutomata(passthrough=false)
+    := TLSinkSetter(64)
+    := tsiDdrClient)
 
   // module implementation
   override lazy val module = new BringupVCU118FPGATestHarnessImp(this)
