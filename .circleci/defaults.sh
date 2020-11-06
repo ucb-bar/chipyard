@@ -47,7 +47,7 @@ LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 
 # key value store to get the build groups
 declare -A grouping
-grouping["group-cores"]="chipyard-ariane chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop"
+grouping["group-cores"]="chipyard-cva6 chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop"
 grouping["group-peripherals"]="chipyard-dmirocket chipyard-blkdev chipyard-spiflashread chipyard-spiflashwrite chipyard-mmios chipyard-lbwif"
 grouping["group-accels"]="chipyard-nvdla chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-streaming-fir chipyard-streaming-passthrough"
 grouping["group-tracegen"]="tracegen tracegen-boom"
@@ -67,7 +67,7 @@ mapping["chipyard-boom"]=" CONFIG=SmallBoomConfig"
 mapping["chipyard-blkdev"]=" CONFIG=SimBlockDeviceRocketConfig"
 mapping["chipyard-hwacha"]=" CONFIG=HwachaRocketConfig"
 mapping["chipyard-gemmini"]=" CONFIG=GemminiRocketConfig"
-mapping["chipyard-ariane"]=" CONFIG=ArianeConfig"
+mapping["chipyard-cva6"]=" CONFIG=CVA6Config"
 mapping["chipyard-spiflashread"]=" CONFIG=LargeSPIFlashROMRocketConfig"
 mapping["chipyard-spiflashwrite"]=" CONFIG=SmallSPIFlashRocketConfig"
 mapping["chipyard-mmios"]=" CONFIG=MMIORocketConfig verilog"

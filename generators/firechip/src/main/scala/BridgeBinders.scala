@@ -22,7 +22,7 @@ import midas.targetutils.{MemModelAnnotation, EnableModelMultiThreadingAnnotatio
 import firesim.bridges._
 import firesim.configs.MemModelKey
 import tracegen.{TraceGenSystemModuleImp}
-import ariane.ArianeTile
+import cva6.CVA6Tile
 
 import boom.common.{BoomTile}
 import barstools.iocell.chisel._

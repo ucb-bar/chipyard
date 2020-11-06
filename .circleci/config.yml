@@ -234,12 +234,12 @@ jobs:
             - run-tests:
                 group-key: "group-cores"
                 project-key: "chipyard-boom"
-    chipyard-ariane-run-tests:
+    chipyard-cva6-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 group-key: "group-cores"
-                project-key: "chipyard-ariane"
+                project-key: "chipyard-cva6"
                 timeout: "30m"
     chipyard-sodor-run-tests:
         executor: main-env
@@ -431,7 +431,7 @@ workflows:
             - chipyard-boom-run-tests:
                 requires:
                     - prepare-chipyard-cores
-            - chipyard-ariane-run-tests:
+            - chipyard-cva6-run-tests:
                 requires:
                     - prepare-chipyard-cores
             - chipyard-sodor-run-tests:
