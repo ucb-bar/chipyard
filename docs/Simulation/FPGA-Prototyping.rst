@@ -109,3 +109,19 @@ This example extends the default test harness and creates new ``Overlays`` to co
 .. Note:: Remember that since whenever a new test harness is created (or the config. changes, or the config. packages changes, or...), you need to modify the make invocation.
     For example, ``make SUB_PROJECT=vcu118 CONFIG=MyNewVCU118Config CONFIG_PACKAGE=this.is.my.scala.package bit``.
     See :ref:`Making a Bitstream` for information on the various make variables.
+
+Debugging with ILAs
+~~~~~~~~~~~~~~~~~~~
+
+Adding an ILA can be added to the design for debugging relevant signals.
+First, open up the post synthesis checkpoint located in the build directory for your design in Vivado (it should be labeled ``post_synth.dcp``).
+Then using Vivado, add ILAs (and other debugging tools) for your design (search online for more information on how to add an ILA).
+After the changes are made, save the checkpoint and run the make invocation with the ``debug-bitstream`` target:
+be done by modifying the post synthesis checkpoint, saving it, and running ``make ... debug-bitstream``.
+For example, running the bitstream build for an added ILA for a BOOM config.:
+
+.. code-block:: shell
+
+    make SUB_PROJECT=vcu118 CONFIG=BoomVCU118Config debug-bitstream
+
+For more extensive debugging tools for FPGA simulations including printf synthesis, assert synthesis, instruction traces, ILAs, out-of-band profiling, co-simulation, and more, please refer to the :ref:`FireSim` platform.
