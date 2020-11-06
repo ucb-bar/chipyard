@@ -2,16 +2,21 @@ FPGA Prototyping
 ==============================
 
 FPGA Prototyping
------------------------
+----------------
 
-Chipyard supports FPGA prototyping for local FPGAs supported under ``fpga-shells`` <LINK>.
-This include popular FPGAs such as the Xilinx VCU118 and the Xilinx Arty board.
+Chipyard supports FPGA prototyping for local FPGAs supported by `fpga-shells <https://github.com/sifive/fpga-shells>`__.
+This includes popular FPGAs such as the Xilinx VCU118 and the Xilinx Arty board.
 FPGA prototyping allows RTL-level simulation at orders-of-magnitude faster speeds than software RTL simulators at the cost of slower compile times.
 
-Setup
------
+.. Note:: While ``fpga-shells`` also supports Xilinx VC707 and some MicroSemi PolarFire boards, currently only the VCU118 and Arty boards are explicitly supported in Chipyard.
+    However, using the VCU118/Arty examples would be useful to see how to implement VC707/PolarFire support.
 
-All FPGA related collateral is located in the ``fpga`` top-level Chipyard folder.
+Sources and Submodule Setup
+---------------------------
+
+All FPGA related collateral and sources are located in the ``fpga`` top-level Chipyard folder.
+This includes ``fpga-shells`` and the ``src`` folders that hold both Scala, TCL and other collateral.
+However, the ``fpga-shells`` repository is not initialized by default.
 To initialize the ``fpga-shells`` repository, run the included submodule script:
 
 .. code-block:: shell
@@ -22,8 +27,8 @@ To initialize the ``fpga-shells`` repository, run the included submodule script:
 Making a Bitstream
 ------------------
 
-Making a bitstream for any FPGA is similar to building RTL for a software RTL simulation.
-Similar to the :ref:`Simulating A Custom Project` section in the :ref:`Software RTL Simulation` section you can run the following command in the ``fpga`` directory.
+Making a bitstream for any FPGA target is similar to building RTL for a software RTL simulation.
+Similar to a software RTL simulation (:ref:`Simulating A Custom Project`), you can run the following command in the ``fpga`` directory to build a bitstream:
 
 .. code-block:: shell
 
@@ -35,12 +40,16 @@ Similar to the :ref:`Simulating A Custom Project` section in the :ref:`Software 
 
 By default a couple of ``SUB_PROJECT``'s are already defined for use, including ``vcu118`` and ``arty``.
 These default ``SUB_PROJECT``'s setup the necessary test harnesses, packages, and more.
+Like a software RTL simulation make invocation, all of the make variables can be overridden with user specific values (i.e. include the ``SUB_PROJECT`` with a ``CONFIG`` and ``CONFIG_PACKAGE`` override).
 In most cases, you will just need to run a command with a ``SUB_PROJECT`` and an overridden ``CONFIG`` to point to.
 For example, building the BOOM configuration on the VCU118:
 
 .. code-block:: shell
 
-    make SUB_PROJECT=vcu118 CONFIG=BoomVCU118Config
+    make SUB_PROJECT=vcu118 CONFIG=BoomVCU118Config bit
+
+That command will build the RTL and generate a bitstream using Vivado.
+However, like a software RTL simulation, you can also run the intermediate make steps to just generate Verilog or FIRRTL.
 
 Running a Design on Arty
 ------------------------
@@ -51,24 +60,24 @@ Running a Design on VCU118
 Basic Design
 ~~~~~~~~~~~~
 
-The default VCU118 design is setup to run RISC-V Linux from an SDCard while piping the terminal over UART.
-To change the design, you can create your own configuration and add the ``AbstractVCU118Config`` located in ``fpga/src/main/scala/vcu118/Configs.scala``.
-Adding this config. fragment will enable and connect the UART, SPI SDCard, and DDR backing memory.
-Notice that the majority of config. fragments in ``AbstractVCU118Config`` are shared with a normal Chipyard config.
+The default VCU118 FPGA target design is setup to have UART, a SPI SDCard, and DDR backing memory.
+This allows it to run RISC-V Linux from an SDCard while piping the terminal over UART to the host machine (the machine connected to the VCU118).
+To extend this design, you can create your own Chipyard configuration and add the ``WithVCU118Tweaks`` located in ``fpga/src/main/scala/vcu118/Configs.scala``.
+Adding this config. fragment will enable and connect the UART, SPI SDCard, and DDR backing memory to your Chipyard design/config.
 
 .. literalinclude:: ../../fpga/src/main/scala/vcu118/Configs.scala
     :language: scala
     :start-after: DOC include start: AbstractVCU118 and Rocket
     :end-before: DOC include end: AbstractVCU118 and Rocket
 
-fpga-shells / Overlays / HarnessBinders
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Brief Implementation Description + More Complicated Designs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To make meaningful VCU118 changes (adding new IOs, connecting to different VCU118 ports, etc), the ``VCU118TestHarness`` must change.
-The ``VCU118TestHarness`` uses ``fpga-shells`` to add ``Overlays`` that connect to the VCU118 external IOs.
-``fpga/src/main/scala/vcu118/TestHarness.scala`` shows an example of using these ``Overlays``.
-First ``Overlays`` must be "placed" which adds them to the design.
-For example, the following shows a UART overlay being placed into the design.
+The basis for a VCU118 design revolves around creating a special test harness to connect the external IOs to your Chipyard design.
+This is done with the ``VCU118TestHarness`` in the basic default VCU118 FPGA target.
+The ``VCU118TestHarness`` (located in ``fpga/src/main/scala/vcu118/TestHarness.scala``) uses ``Overlays`` that connect to the VCU118 external IOs.
+Generally, the ``Overlays`` take an IO from the ``ChipTop`` (labeled as ``topDesign`` in the file) when "placed" and connect it to the external IO and generate necessary Vivado collateral.
+For example, the following shows a UART ``Overlay`` being "placed" into the design with a IO input called ``io_uart_bb``.
 
 .. literalinclude:: ../../fpga/src/main/scala/vcu118/TestHarness.scala
     :language: scala
@@ -76,12 +85,27 @@ For example, the following shows a UART overlay being placed into the design.
     :end-before: DOC include end: UartOverlay
 
 Here the ``UARTOverlayKey`` is referenced and used to "place" the necessary connections (and collateral) to connect to the UART.
-The ``UARTDesignInput`` is used to pass in the UART signals used to connect to the external UART IO.
-This is similar to all the other ``Overlays``.
+The ``UARTDesignInput`` is used to pass in the UART IO from the ``ChipTop``/``topDesign`` to the ``Overlay``.
+Note that the ``BundleBridgeSource`` can be viewed as a glorified wire (that is defined in the ``LazyModule`` scope).
+This pattern is similar for all other ``Overlays`` in the test harness.
 They must be "placed" and given a set of inputs (IOs, parameters).
+The main exception to this pattern is the ``Overlay`` used to generate the clock(s) for the FPGA.
 
-Once you add the wanted ``Overlays`` and place them into a new ``TestHarness``, you can add a new set of harness/io binders to connect to them.
-This is shown in ``fpga/src/main/scala/vcu118/HarnessBinders.scala``.
-For more information on harness and IO binders, refer to :ref:`IOBinders and HarnessBinders`.
+.. literalinclude:: ../../fpga/src/main/scala/vcu118/TestHarness.scala
+    :language: scala
+    :start-after: DOC include start: ClockOverlay
+    :end-before: DOC include end: ClockOverlay
+
+Without going into too much detail, the clocks overlay is placed in the harness and a PLL node (``harnessSysPLL``) generates the necessary clocks specified by ``ClockSinkNodes``.
+For ease of use, you can change the ``FPGAFrequencyKey`` to change the default clock frequency of the FPGA design.
+
+After the harness is created, the ``BundleBridgeSource``'s must be connected to the ``ChipTop`` IOs.
+This is done with harness binders and io binders (see ``fpga/src/main/scala/vcu118/HarnessBinders.scala`` and ``fpga/src/main/scala/vcu118/IOBinders.scala``).
+For more information on harness binders and io binders, refer to :ref:`IOBinders and HarnessBinders`.
 
 An example of a more complicated design using new ``Overlays`` can be viewed in ``fpga/src/main/scala/vcu118/bringup/``.
+This example extends the default test harness and creates new ``Overlays`` to connect to the FMC port.
+
+.. Note:: Remember that since whenever a new test harness is created (or the config. changes, or the config. packages changes, or...), you need to modify the make invocation.
+    For example, ``make SUB_PROJECT=vcu118 CONFIG=MyNewVCU118Config CONFIG_PACKAGE=this.is.my.scala.package bit``.
+    See :ref:`Making a Bitstream` for information on the various make variables.

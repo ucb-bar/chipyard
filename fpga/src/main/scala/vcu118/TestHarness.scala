@@ -41,6 +41,7 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
 
   val topDesign = LazyModule(p(BuildTop)(dp))
 
+// DOC include start: ClockOverlay
   // place all clocks in the shell
   dp(ClockInputOverlayKey).foreach { _.place(ClockInputDesignInput()) }
 
@@ -59,6 +60,7 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
   val dutWrangler = LazyModule(new ResetWrangler)
   val dutGroup = ClockGroup()
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL
+// DOC include end: ClockOverlay
 
   // connect ref clock to dummy sink node
   ref_clock.get() match {
