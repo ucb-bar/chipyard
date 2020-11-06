@@ -68,5 +68,5 @@ class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends 
 }
 
 class BringupVCU118FPGATestHarnessImp(_outer: BringupVCU118FPGATestHarness) extends VCU118FPGATestHarnessImp(_outer) {
-  val bringupOuter = _outer
+  lazy val bringupOuter = _outer
 }

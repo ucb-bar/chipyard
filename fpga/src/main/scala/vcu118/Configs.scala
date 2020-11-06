@@ -15,6 +15,8 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
 
+import testchipip.{SerialTLKey}
+
 import chipyard.{BuildSystem}
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
@@ -45,10 +47,11 @@ class WithSystemModifications extends Config((site, here, up) => {
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vcu118/sdboot/build/sdboot.bin")
   }
-  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VCU118DDRSize))))
+  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VCU118DDRSize)))) // set extmem to DDR size
+  case SerialTLKey => None // remove serialized tl port
 })
 
-class AbstractVCU118Config extends Config(
+class WithVCU118Tweaks extends Config(
   new WithUART ++
   new WithSPISDCard ++
   new WithDDRMem ++
@@ -56,27 +59,18 @@ class AbstractVCU118Config extends Config(
   new WithSPIIOPassthrough ++
   new WithTLIOPassthrough ++
   new WithDefaultPeripherals ++
-  new WithSystemModifications ++ // remove debug module, setup busses, use sdboot bootrom, setup ext. mem. size
+  new WithSystemModifications ++ // remove debug module, setup busses, use sdboot bootrom, setup ext. mem. size, use new dig. top
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new chipyard.config.WithNoSubsystemDrivenClocks ++
-  new chipyard.config.WithPeripheryBusFrequencyAsDefault ++
-  new chipyard.config.WithL2TLBs(1024) ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++
-  new freechips.rocketchip.subsystem.WithNoMMIOPort ++
-  new freechips.rocketchip.subsystem.WithNoSlavePort ++
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++
-  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++
-  new chipyard.WithMulticlockCoherentBusTopology ++
-  new freechips.rocketchip.system.BaseConfig)
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(1))
 
 class RocketVCU118Config extends Config(
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new AbstractVCU118Config)
+  new WithVCU118Tweaks ++
+  new chipyard.RocketConfig)
 
 class BoomVCU118Config extends Config(
   new WithFPGAFrequency(75) ++
-  new boom.common.WithNLargeBooms(1) ++
-  new AbstractVCU118Config)
+  new WithVCU118Tweaks ++
+  new chipyard.MegaBoomConfig)
 
 class WithFPGAFrequency(MHz: Double) extends Config((site, here, up) => {
   case FPGAFrequencyKey => MHz

@@ -15,7 +15,7 @@ import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
 
 import chipyard.{BuildSystem}
 
-import chipyard.fpga.vcu118.{RocketVCU118Config, BoomVCU118Config}
+import chipyard.fpga.vcu118.{WithVCU118Tweaks, WithFPGAFrequency}
 
 class WithBringupPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => up(PeripheryUARTKey, site) ++ List(UARTParams(address = BigInt(0x64003000L)))
@@ -51,9 +51,12 @@ class WithBringupAdditions extends Config(
   new WithBringupVCU118System)
 
 class RocketBringupConfig extends Config(
-  new WithBringupPeripherals ++
-  new RocketVCU118Config)
+  new WithBringupAdditions ++
+  new WithVCU118Tweaks ++
+  new chipyard.RocketConfig)
 
 class BoomBringupConfig extends Config(
-  new WithBringupPeripherals ++
-  new BoomVCU118Config)
+  new WithFPGAFrequency(75) ++
+  new WithBringupAdditions ++
+  new WithVCU118Tweaks ++
+  new chipyard.MegaBoomConfig)
