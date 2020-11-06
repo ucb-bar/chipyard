@@ -1,16 +1,18 @@
 Simulation
 =======================
 
-Chipyard supports two classes of simulation:
+Chipyard supports three classes of simulation:
 
-#. Software RTL simulation using commercial or open-source (Verilator) RTL simulators 
+#. Software RTL simulation using commercial or open-source (Verilator) RTL simulators
 #. FPGA-accelerated full-system simulation using FireSim
+#. FPGA prototyping on ``fpga-shells`` platforms
 
 Software RTL simulators of Chipyard designs run at O(1 KHz), but compile
-quickly and provide full waveforms. Conversly, FPGA-accelerated simulators run
+quickly and provide full waveforms. Conversely, FPGA-accelerated simulators and FPGA prototyping run
 at O(100 MHz), making them appropriate for booting an operating system and
 running a complete workload, but have multi-hour compile times and poorer debug
-visability.
+visibility. However, FPGA-accelerated simulators differ from FPGA prototyping by providing deterministic
+cycle-accurate results.
 
 Click next to see how to run a simulation.
 
@@ -20,4 +22,5 @@ Click next to see how to run a simulation.
 
    Software-RTL-Simulation
    FPGA-Accelerated-Simulation
+   FPGA-Prototyping
 

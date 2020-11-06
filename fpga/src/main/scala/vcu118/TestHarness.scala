@@ -70,10 +70,12 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
 
   /*** UART ***/
 
+// DOC include start: UartOverlay
   // 1st UART goes to the VCU118 dedicated UART
 
   val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(dp(PeripheryUARTKey).head)))
   dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
+// DOC include end: UartOverlay
 
   /*** SPI ***/
 

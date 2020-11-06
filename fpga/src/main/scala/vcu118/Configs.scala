@@ -48,6 +48,7 @@ class WithSystemModifications extends Config((site, here, up) => {
   case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VCU118DDRSize))))
 })
 
+// DOC include start: AbstractVCU118 and Rocket
 class AbstractVCU118Config extends Config(
   new WithUART ++
   new WithSPISDCard ++
@@ -72,6 +73,7 @@ class AbstractVCU118Config extends Config(
 class RocketVCU118Config extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new AbstractVCU118Config)
+// DOC include end: AbstractVCU118 and Rocket
 
 class BoomVCU118Config extends Config(
   new WithFPGAFrequency(75) ++
