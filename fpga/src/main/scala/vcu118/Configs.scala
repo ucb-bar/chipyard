@@ -51,6 +51,7 @@ class WithSystemModifications extends Config((site, here, up) => {
   case SerialTLKey => None // remove serialized tl port
 })
 
+// DOC include start: AbstractVCU118 and Rocket
 class WithVCU118Tweaks extends Config(
   new WithUART ++
   new WithSPISDCard ++
@@ -66,6 +67,7 @@ class WithVCU118Tweaks extends Config(
 class RocketVCU118Config extends Config(
   new WithVCU118Tweaks ++
   new chipyard.RocketConfig)
+// DOC include end: AbstractVCU118 and Rocket
 
 class BoomVCU118Config extends Config(
   new WithFPGAFrequency(75) ++

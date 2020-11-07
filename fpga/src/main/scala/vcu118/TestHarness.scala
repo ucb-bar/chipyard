@@ -41,6 +41,7 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
 
   val topDesign = LazyModule(p(BuildTop)(dp))
 
+// DOC include start: ClockOverlay
   // place all clocks in the shell
   require(dp(ClockInputOverlayKey).size >= 1)
   val sysClkNode = dp(ClockInputOverlayKey)(0).place(ClockInputDesignInput()).overlayOutput.node
@@ -56,13 +57,16 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
   val dutWrangler = LazyModule(new ResetWrangler)
   val dutGroup = ClockGroup()
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL
+// DOC include end: ClockOverlay
 
   /*** UART ***/
 
+// DOC include start: UartOverlay
   // 1st UART goes to the VCU118 dedicated UART
 
   val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(dp(PeripheryUARTKey).head)))
   dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
+// DOC include end: UartOverlay
 
   /*** SPI ***/
 
