@@ -5,7 +5,7 @@ import chisel3.experimental.{attach}
 
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.config.{Parameters, Field}
-import freechips.rocketchip.tilelink.{TLInwardNode}
+import freechips.rocketchip.tilelink.{TLInwardNode, TLAsyncCrossingSink}
 
 import sifive.fpgashells.shell._
 import sifive.fpgashells.ip.xilinx._
@@ -176,7 +176,7 @@ abstract class TSIHostPlacedOverlay[IO <: Data](val name: String, val di: TSIHos
 }
 
 case object TSIHostVCU118DDRSize extends Field[BigInt](0x40000000L * 2) // 2GB
-class TSIHostVCU118PlacedOverlay(val shell: VCU118ShellBasicOverlays, name: String, val designInput: TSIHostDesignInput, val shellInput: TSIHostShellInput)
+class TSIHostVCU118PlacedOverlay(val shell: BringupVCU118FPGATestHarness, name: String, val designInput: TSIHostDesignInput, val shellInput: TSIHostShellInput)
   extends TSIHostPlacedOverlay[TSIHostWithDDRIO](name, designInput, shellInput)
 {
   val size = p(TSIHostVCU118DDRSize)
@@ -190,6 +190,14 @@ class TSIHostVCU118PlacedOverlay(val shell: VCU118ShellBasicOverlays, name: Stri
   val areset    = shell { ClockSinkNode(Seq(ClockSinkParameters())) }
   areset := designInput.wrangler := ddrUI
 
+  // since this uses a separate clk/rst need to put an async crossing
+  val asyncSink = LazyModule(new TLAsyncCrossingSink())
+  val migClkRstNode = BundleBridgeSource(() => new Bundle {
+    val clock = Output(Clock())
+    val reset = Output(Bool())
+  })
+  val topMigClkRstIONode = shell { migClkRstNode.makeSink() }
+
   // connect the TSI serial
   val tlTsiSerialSink = di.node.makeSink()
   val tsiIoNode = BundleBridgeSource(() => new TSIHostWidgetIO(di.tsiHostParams.serialIfWidth))
@@ -201,6 +209,10 @@ class TSIHostVCU118PlacedOverlay(val shell: VCU118ShellBasicOverlays, name: Stri
   InModuleBody {
     // connect MIG
     ioNode.bundle <> mig.module.io
+
+    // setup async crossing
+    asyncSink.module.clock := migClkRstNode.bundle.clock
+    asyncSink.module.reset := migClkRstNode.bundle.reset
 
     // connect TSI serial
     val tsiSourcePort = tsiIoNode.bundle
@@ -216,10 +228,15 @@ class TSIHostVCU118PlacedOverlay(val shell: VCU118ShellBasicOverlays, name: Stri
 
   // connect the DDR port
   shell { InModuleBody {
-    require (shell.sys_clock.get.isDefined, "Use of DDRVCU118Overlay depends on SysClockVCU118Overlay")
-    val (sys, _) = shell.sys_clock.get.get.overlayOutput.node.out(0)
+    require (shell.sys_clock2.get.isDefined, "Use of TSIHostVCU118Overlay depends on SysClock2VCU118Overlay")
+    val (sys, _) = shell.sys_clock2.get.get.overlayOutput.node.out(0)
     val (ui, _) = ddrUI.out(0)
     val (ar, _) = areset.in(0)
+
+    // connect the async fifo sink to sys_clock2
+    topMigClkRstIONode.bundle.clock := sys.clock
+    topMigClkRstIONode.bundle.reset := sys.reset
+
     val ddrPort = topIONode.bundle.port
     io.ddr <> ddrPort
     ui.clock := ddrPort.c0_ddr4_ui_clk
@@ -250,7 +267,7 @@ class TSIHostVCU118PlacedOverlay(val shell: VCU118ShellBasicOverlays, name: Stri
   shell.sdc.addGroup(pins = Seq(mig.island.module.blackbox.io.c0_ddr4_ui_clk))
 }
 
-class BringupTSIHostVCU118PlacedOverlay(override val shell: VCU118ShellBasicOverlays, override val name: String, override val designInput: TSIHostDesignInput, override val shellInput: TSIHostShellInput)
+class BringupTSIHostVCU118PlacedOverlay(override val shell: BringupVCU118FPGATestHarness, override val name: String, override val designInput: TSIHostDesignInput, override val shellInput: TSIHostShellInput)
   extends TSIHostVCU118PlacedOverlay(shell, name, designInput, shellInput)
 {
   // connect the TSI port
@@ -293,7 +310,25 @@ class BringupTSIHostVCU118PlacedOverlay(override val shell: VCU118ShellBasicOver
   } }
 }
 
-class BringupTSIHostVCU118ShellPlacer(shell: VCU118ShellBasicOverlays, val shellInput: TSIHostShellInput)(implicit val valName: ValName)
-  extends TSIHostShellPlacer[VCU118ShellBasicOverlays] {
+class BringupTSIHostVCU118ShellPlacer(shell: BringupVCU118FPGATestHarness, val shellInput: TSIHostShellInput)(implicit val valName: ValName)
+  extends TSIHostShellPlacer[BringupVCU118FPGATestHarness] {
   def place(designInput: TSIHostDesignInput) = new BringupTSIHostVCU118PlacedOverlay(shell, valName.name, designInput, shellInput)
+}
+
+class SysClock2VCU118PlacedOverlay(val shell: VCU118ShellBasicOverlays, name: String, val designInput: ClockInputDesignInput, val shellInput: ClockInputShellInput)
+  extends LVDSClockInputXilinxPlacedOverlay(name, designInput, shellInput)
+{
+  val node = shell { ClockSourceNode(freqMHz = 250, jitterPS = 50)(ValName(name)) }
+
+  shell { InModuleBody {
+    shell.xdc.addPackagePin(io.p, "AW26")
+    shell.xdc.addPackagePin(io.n, "AW27")
+    shell.xdc.addIOStandard(io.p, "DIFF_SSTL12")
+    shell.xdc.addIOStandard(io.n, "DIFF_SSTL12")
+  } }
+}
+class SysClock2VCU118ShellPlacer(shell: VCU118ShellBasicOverlays, val shellInput: ClockInputShellInput)(implicit val valName: ValName)
+  extends ClockInputShellPlacer[VCU118ShellBasicOverlays]
+{
+    def place(designInput: ClockInputDesignInput) = new SysClock2VCU118PlacedOverlay(shell, valName.name, designInput, shellInput)
 }
