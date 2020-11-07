@@ -42,31 +42,20 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
   val topDesign = LazyModule(p(BuildTop)(dp))
 
   // place all clocks in the shell
-  dp(ClockInputOverlayKey).foreach { _.place(ClockInputDesignInput()) }
+  require(dp(ClockInputOverlayKey).size >= 1)
+  val sysClkNode = dp(ClockInputOverlayKey)(0).place(ClockInputDesignInput()).overlayOutput.node
 
   /*** Connect/Generate clocks ***/
 
   // connect to the PLL that will generate multiple clocks
   val harnessSysPLL = dp(PLLFactoryKey)()
-  sys_clock.get() match {
-    case Some(x : SysClockVCU118PlacedOverlay) => {
-      harnessSysPLL := x.node
-    }
-  }
+  harnessSysPLL := sysClkNode
 
   // create and connect to the dutClock
   val dutClock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
   val dutWrangler = LazyModule(new ResetWrangler)
   val dutGroup = ClockGroup()
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL
-
-  // connect ref clock to dummy sink node
-  ref_clock.get() match {
-    case Some(x : RefClockVCU118PlacedOverlay) => {
-      val sink = ClockSinkNode(Seq(ClockSinkParameters()))
-      sink := x.node
-    }
-  }
 
   /*** UART ***/
 
@@ -84,7 +73,7 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
 
   /*** DDR ***/
 
-  val ddrPlaced = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtMem).get.master.base, dutWrangler.node, harnessSysPLL))
+  val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtMem).get.master.base, dutWrangler.node, harnessSysPLL)).overlayOutput.ddr
 
   // connect 1 mem. channel to the FPGA DDR
   val inParams = topDesign match { case td: ChipTop =>
@@ -93,7 +82,7 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
     }
   }
   val ddrClient = TLClientNode(Seq(inParams.master))
-  ddrPlaced.overlayOutput.ddr := ddrClient
+  ddrNode := ddrClient
 
   // module implementation
   override lazy val module = new VCU118FPGATestHarnessImp(this)
@@ -107,12 +96,10 @@ class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawMod
   _outer.xdc.addPackagePin(reset, "L19")
   _outer.xdc.addIOStandard(reset, "LVCMOS12")
 
-  val reset_ibuf = Module(new IBUF)
-  reset_ibuf.io.I := reset
+  val resetIBUF = Module(new IBUF)
+  resetIBUF.io.I := reset
 
-  val sysclk: Clock = _outer.sys_clock.get() match {
-    case Some(x: SysClockVCU118PlacedOverlay) => x.clock
-  }
+  val sysclk: Clock = _outer.sysClkNode.out.head._1.clock
 
   val powerOnReset: Bool = PowerOnResetFPGAOnly(sysclk)
   _outer.sdc.addAsyncPath(Seq(powerOnReset))
@@ -122,7 +109,7 @@ class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawMod
     case _ => false.B
   }
 
-  _outer.pllReset := (reset_ibuf.io.O || powerOnReset || ereset)
+  _outer.pllReset := (resetIBUF.io.O || powerOnReset || ereset)
 
   // reset setup
   val hReset = Wire(Reset())
