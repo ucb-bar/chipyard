@@ -72,10 +72,10 @@ class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends 
 
   // use the 2nd system clock for the 2nd DDR
   val sys_clock2 = Overlay(ClockInputOverlayKey, new SysClock2VCU118ShellPlacer(this, ClockInputShellInput()))
-  val sys_clk2_placed = dp(ClockInputOverlayKey).last.place(ClockInputDesignInput())
+  val sysClk2Node = dp(ClockInputOverlayKey).last.place(ClockInputDesignInput()).overlayOutput.node
 
   val ddr2PLL = dp(PLLFactoryKey)()
-  ddr2PLL := sys_clk2_placed.overlayOutput.node
+  ddr2PLL := sysClk2Node
 
   val ddrClock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
   val ddrWrangler = LazyModule(new ResetWrangler)
@@ -85,7 +85,7 @@ class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends 
   val tsi_host = Overlay(TSIHostOverlayKey, new BringupTSIHostVCU118ShellPlacer(this, TSIHostShellInput()))
 
   val io_tsi_serial_bb = BundleBridgeSource(() => (new TSIHostWidgetIO(dp(PeripheryTSIHostKey).head.serialIfWidth)))
-  val tsiDdrPlaced = dp(TSIHostOverlayKey).head.place(TSIHostDesignInput(ddrWrangler.node, ddr2PLL, dp(PeripheryTSIHostKey).head, io_tsi_serial_bb))
+  val tsiDdrNode = dp(TSIHostOverlayKey).head.place(TSIHostDesignInput(ddrWrangler.node, ddr2PLL, dp(PeripheryTSIHostKey).head, io_tsi_serial_bb)).overlayOutput.ddr
 
   // connect 1 mem. channel to the FPGA DDR
   val inTsiParams = topDesign match { case td: ChipTop =>
@@ -94,7 +94,7 @@ class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends 
     }
   }
   val tsiDdrClient = TLClientNode(Seq(inTsiParams.master))
-  (tsiDdrPlaced.overlayOutput.ddr
+  (tsiDdrNode
     := TLFragmenter(8,64,holdFirstDeny=true)
     := TLCacheCork()
     := TLAtomicAutomata(passthrough=false)
