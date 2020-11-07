@@ -54,6 +54,21 @@ However, like a software RTL simulation, you can also run the intermediate make 
 Running a Design on Arty
 ------------------------
 
+Basic Design
+~~~~~~~~~~~~
+
+The default Arty FPGA target design is setup to have JTAG, UART, SPI, and I2C available over the board's GPIO pins. The pin mappings of these interfaces are identical to those described in the `SiFive Freedom E310 Arty Getting Started Guide <https://static.dev.sifive.com/SiFive-E310-arty-gettingstarted-v1.0.6.pdf>`__.
+The JTAG interface allows a user to connect to the core over OpenOCD, run bare-metal applications, and debug using gdb.
+To extend this design, you can create your own Chipyard configuration and add the ``WithArtyTweaks`` located in ``fpga/src/main/scala/arty/Configs.scala``.
+Adding this config. fragment will enable and connect the JTAG, UART, SPI, and I2C interfaces to your Chipyard design/config.
+
+.. literalinclude:: ../../fpga/src/main/scala/arty/Configs.scala
+    :language: scala
+    :start-after: DOC include start: AbstractArty and Rocket
+    :end-before: DOC include end: AbstractArty and Rocket
+
+Future peripherals to be supported include the Arty's SPI Flash EEPROM.
+
 Running a Design on VCU118
 --------------------------
 
