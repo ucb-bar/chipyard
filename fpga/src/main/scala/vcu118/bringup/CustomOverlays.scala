@@ -261,7 +261,7 @@ class TSIHostVCU118PlacedOverlay(val shell: BringupVCU118FPGATestHarness, name: 
       "BF30", "AY34", "AU29", "AP31", "BE35", "BE39", "BA35", "AW37", // dqs_t[0->7]
       "BE32", "BB31", "AV33", "AR32", "BC34", "BE40", "AY37", "AV35") // dm_dbi_n[0->7]
 
-    (IOPin.of(io) zip allddrpins) foreach { case (io, pin) => shell.xdc.addPackagePin(io, pin) }
+    (IOPin.of(io.ddr) zip allddrpins) foreach { case (io, pin) => shell.xdc.addPackagePin(io, pin) }
   } }
 
   shell.sdc.addGroup(pins = Seq(mig.island.module.blackbox.io.c0_ddr4_ui_clk))
