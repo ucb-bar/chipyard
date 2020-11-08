@@ -201,8 +201,6 @@ class FireSimCVA6Config extends Config(
 //*********************************************************************************/
 class FireSimMulticlockRocketConfig extends Config(
   new chipyard.config.WithTileFrequency(6400.0) ++ //lol
-  new WithDefaultFireSimBridges ++
-  new WithDefaultMemModel ++
-  new WithFireSimConfigTweaks ++
-  new chipyard.DividedClockRocketConfig)
+  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new FireSimRocketConfig)
 
