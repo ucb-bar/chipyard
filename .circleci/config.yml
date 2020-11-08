@@ -248,6 +248,12 @@ jobs:
                 group-key: "group-cores"
                 project-key: "chipyard-sodor"
                 timeout: "30m"
+    chipyard-multiclock-rocket-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-cores"
+                project-key: "chipyard-multiclock-rocket"
     chipyard-dmirocket-run-tests:
         executor: main-env
         steps:
