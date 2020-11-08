@@ -42,7 +42,7 @@ case class CoherentMulticlockBusTopologyParams(
 )
 
 // This differs from upstream only in that it does not use the legacy crossTo
-// and crossFrom functions to ensure driveClockFromMaster = None
+// and crossFrom functions, and it ensures driveClockFromMaster = None
 case class HierarchicalMulticlockBusTopologyParams(
   pbus: PeripheryBusParams,
   fbus: FrontBusParams,
