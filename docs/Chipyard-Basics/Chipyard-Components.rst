@@ -124,12 +124,14 @@ Sims
   In order to use FireSim, the repository must be cloned and executed on AWS instances.
   See :ref:`FireSim` for more information.
 
+Prototyping
+-------------------------------------------
+
 **FPGA Prototyping**
   FPGA prototyping is supported in Chipyard using SiFive's ``fpga-shells``.
-  Some examples of FPGA's supported are Arty and VCU118.
-  For more accurate and deterministic simulation results, please consider using the :ref:`FireSim` platform.
-  See :ref:`FPGA Prototyping` for more information.
-
+  Some examples of FPGAs supported are the Arty and VCU118 boards.
+  To instead do an fast and deterministic simulation with plenty of debugging tools, please consider using the :ref:`FireSim` platform.
+  See :ref:`Prototyping Flow` for more information on FPGA prototypes.
 
 VLSI
 -------------------------------------------
