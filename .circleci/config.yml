@@ -361,6 +361,12 @@ jobs:
                 project-key: "firesim-multiclock"
                 run-script: "run-firesim-scala-tests.sh"
                 timeout: "20m"
+    prepare-chipyard-fpga:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                group-key: "group-fpga"
+                build-script: "do-fpga-rtl-build.sh"
 
 # Order and dependencies of jobs to run
 workflows:
@@ -500,4 +506,8 @@ workflows:
                     - install-verilator
                     - build-extra-tests
 
+            # Prepare the fpga builds (just Verilog)
+            - prepare-chipyard-fpga:
+                requires:
+                    - install-riscv-toolchain
 
