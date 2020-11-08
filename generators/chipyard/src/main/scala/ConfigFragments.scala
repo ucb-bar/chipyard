@@ -242,16 +242,19 @@ class WithFbusToSbusCrossingType(xType: ClockCrossingType) extends Config((site,
   * up the diplomatic graph to the clock sources.
   */
 class WithPeripheryBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
-  case PeripheryBusKey => up(PeripheryBusKey).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+  case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
 })
 class WithMemoryBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
-  case MemoryBusKey => up(MemoryBusKey).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+  case MemoryBusKey => up(MemoryBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
 })
 class WithSystemBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
-  case SystemBusKey => up(SystemBusKey).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+  case SystemBusKey => up(SystemBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+})
+class WithFrontBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
+  case FrontBusKey => up(FrontBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
 })
 class WithControlBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
-  case ControlBusKey => up(ControlBusKey).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+  case ControlBusKey => up(ControlBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
 })
 
 class WithRationalMemoryBusCrossing extends WithSbusToMbusCrossingType(RationalCrossing(Symmetric))
