@@ -19,7 +19,7 @@ import sifive.blocks.devices.gpio._
 
 import testchipip.{HasPeripheryTSIHostWidget, PeripheryTSIHostKey, TSIHostWidgetIO, TLSinkSetter}
 
-import chipyard.fpga.vcu118.{VCU118FPGATestHarness, VCU118FPGATestHarnessImp}
+import chipyard.fpga.vcu118.{VCU118FPGATestHarness, VCU118FPGATestHarnessImp, DDR2VCU118ShellPlacer, SysClock2VCU118ShellPlacer}
 
 import chipyard.{ChipTop}
 
@@ -71,21 +71,22 @@ class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends 
   require(dp(PeripheryTSIHostKey).size == 1)
 
   // use the 2nd system clock for the 2nd DDR
-  val sys_clock2 = Overlay(ClockInputOverlayKey, new SysClock2VCU118ShellPlacer(this, ClockInputShellInput()))
   val sysClk2Node = dp(ClockInputOverlayKey).last.place(ClockInputDesignInput()).overlayOutput.node
 
   val ddr2PLL = dp(PLLFactoryKey)()
   ddr2PLL := sysClk2Node
 
-  val ddrClock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
-  val ddrWrangler = LazyModule(new ResetWrangler)
-  val ddrGroup = ClockGroup()
-  ddrClock := ddrWrangler.node := ddrGroup := ddr2PLL
+  val ddr2Clock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
+  val ddr2Wrangler = LazyModule(new ResetWrangler)
+  val ddr2Group = ClockGroup()
+  ddr2Clock := ddr2Wrangler.node := ddr2Group := ddr2PLL
 
   val tsi_host = Overlay(TSIHostOverlayKey, new BringupTSIHostVCU118ShellPlacer(this, TSIHostShellInput()))
 
+  val ddr2Node = dp(DDROverlayKey).last.place(DDRDesignInput(dp(PeripheryTSIHostKey).head.targetBaseAddress, ddr2Wrangler.node, ddr2PLL)).overlayOutput.ddr
+
   val io_tsi_serial_bb = BundleBridgeSource(() => (new TSIHostWidgetIO(dp(PeripheryTSIHostKey).head.serialIfWidth)))
-  val tsiDdrNode = dp(TSIHostOverlayKey).head.place(TSIHostDesignInput(ddrWrangler.node, ddr2PLL, dp(PeripheryTSIHostKey).head, io_tsi_serial_bb)).overlayOutput.ddr
+  dp(TSIHostOverlayKey).head.place(TSIHostDesignInput(dp(PeripheryTSIHostKey).head.serialIfWidth, io_tsi_serial_bb))
 
   // connect 1 mem. channel to the FPGA DDR
   val inTsiParams = topDesign match { case td: ChipTop =>
@@ -94,7 +95,7 @@ class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends 
     }
   }
   val tsiDdrClient = TLClientNode(Seq(inTsiParams.master))
-  (tsiDdrNode
+  (ddr2Node
     := TLFragmenter(8,64,holdFirstDeny=true)
     := TLCacheCork()
     := TLAtomicAutomata(passthrough=false)

@@ -19,7 +19,7 @@ import testchipip.{PeripheryTSIHostKey, TSIHostParams, TSIHostSerdesParams}
 
 import chipyard.{BuildSystem}
 
-import chipyard.fpga.vcu118.{WithVCU118Tweaks, WithFPGAFrequency}
+import chipyard.fpga.vcu118.{WithVCU118Tweaks, WithFPGAFrequency, VCU118DDR2Size}
 
 class WithBringupPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => up(PeripheryUARTKey, site) ++ List(UARTParams(address = BigInt(0x64003000L)))
@@ -38,6 +38,7 @@ class WithBringupPeripherals extends Config((site, here, up) => {
       List.empty[GPIOParams]
     }
   }
+  case TSIClockMaxFrequency => 100
   case PeripheryTSIHostKey => List(
     TSIHostParams(
       serialIfWidth = 4,
@@ -50,7 +51,7 @@ class WithBringupPeripherals extends Config((site, here, up) => {
             sourceId = IdRange(0, (1 << 13))))),
         managerPortParams = TLSlavePortParameters.v1(
           managers = Seq(TLSlaveParameters.v1(
-            address = Seq(AddressSet(0, BigInt("FFFFFFFF", 16))),
+            address = Seq(AddressSet(0, site(VCU118DDR2Size) - 1)),
             regionType = RegionType.UNCACHED,
             executable = true,
             supportsGet        = TransferSizes(1, 64),
