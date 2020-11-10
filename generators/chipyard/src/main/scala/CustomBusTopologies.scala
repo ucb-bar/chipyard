@@ -36,9 +36,27 @@ case class CoherentMulticlockBusTopologyParams(
     (SBUS, L2,   TLBusWrapperConnection(xType = NoCrossing, driveClockFromMaster = Some(true), nodeBinding = BIND_STAR)()),
     (L2,  MBUS,  TLBusWrapperConnection.crossTo(
       xType = sbusToMbusXType,
-      driveClockFromMaster = Some(true),
+      driveClockFromMaster = None,
       nodeBinding = BIND_QUERY))
   )
+)
+
+// This differs from upstream only in that it does not use the legacy crossTo
+// and crossFrom functions, and it ensures driveClockFromMaster = None
+case class HierarchicalMulticlockBusTopologyParams(
+  pbus: PeripheryBusParams,
+  fbus: FrontBusParams,
+  cbus: PeripheryBusParams,
+  xTypes: SubsystemCrossingParams
+) extends TLBusWrapperTopology(
+  instantiations = List(
+    (PBUS, pbus),
+    (FBUS, fbus),
+    (CBUS, cbus)),
+  connections = List(
+    (SBUS, CBUS, TLBusWrapperConnection(xType = xTypes.sbusToCbusXType, nodeBinding = BIND_STAR)()),
+    (CBUS, PBUS, TLBusWrapperConnection(xType = xTypes.cbusToPbusXType, nodeBinding = BIND_STAR)()),
+    (FBUS, SBUS, TLBusWrapperConnection(xType = xTypes.fbusToSbusXType, nodeBinding = BIND_QUERY, flipRendering = true)()))
 )
 
 // For subsystem/Configs.scala
@@ -46,7 +64,7 @@ case class CoherentMulticlockBusTopologyParams(
 class WithMulticlockCoherentBusTopology extends Config((site, here, up) => {
   case TLNetworkTopologyLocated(InSubsystem) => List(
     JustOneBusTopologyParams(sbus = site(SystemBusKey)),
-    HierarchicalBusTopologyParams(
+    HierarchicalMulticlockBusTopologyParams(
       pbus = site(PeripheryBusKey),
       fbus = site(FrontBusKey),
       cbus = site(ControlBusKey),

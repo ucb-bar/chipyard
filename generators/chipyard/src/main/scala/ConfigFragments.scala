@@ -1,5 +1,6 @@
 package chipyard.config
 
+import scala.util.matching.Regex
 import chisel3._
 import chisel3.util.{log2Up}
 
@@ -11,6 +12,7 @@ import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, D
 import freechips.rocketchip.groundtest.{GroundTestSubsystem}
 import freechips.rocketchip.tile._
 import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams}
+import freechips.rocketchip.tilelink.{HasTLBusParams}
 import freechips.rocketchip.util.{AsyncResetReg, Symmetric}
 import freechips.rocketchip.prci._
 
@@ -183,6 +185,34 @@ class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {
   case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
 })
 
+class WithSystemBusFrequencyAsDefault extends Config((site, here, up) => {
+  case DefaultClockFrequencyKey => (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
+})
+
+class BusFrequencyAssignment[T <: HasTLBusParams](re: Regex, key: Field[T]) extends Config((site, here, up) => {
+  case ClockFrequencyAssignersKey => up(ClockFrequencyAssignersKey, site) ++
+    Seq((cName: String) => site(key).dtsFrequency.flatMap { f =>
+      re.findFirstIn(cName).map {_ => (f / (1000 * 1000)).toDouble }
+    })
+})
+
+/**
+  * Provides a diplomatic frequency for all clock sinks with an unspecified
+  * frequency bound to each bus.
+  *
+  * For example, the L2 cache, when bound to the sbus, receives a separate
+  * clock that appears as "subsystem_sbus_<num>".  This fragment ensures that
+  * clock requests the same frequency as the sbus itself.
+  */
+
+class WithInheritBusFrequencyAssignments extends Config(
+  new BusFrequencyAssignment("subsystem_sbus_\\d+".r, SystemBusKey) ++
+  new BusFrequencyAssignment("subsystem_pbus_\\d+".r, PeripheryBusKey) ++
+  new BusFrequencyAssignment("subsystem_cbus_\\d+".r, ControlBusKey) ++
+  new BusFrequencyAssignment("subsystem_fbus_\\d+".r, FrontBusKey) ++
+  new BusFrequencyAssignment("subsystem_mbus_\\d+".r, MemoryBusKey)
+)
+
 /**
   * Mixins to specify crossing types between the 5 traditional TL buses
   *
@@ -212,16 +242,19 @@ class WithFbusToSbusCrossingType(xType: ClockCrossingType) extends Config((site,
   * up the diplomatic graph to the clock sources.
   */
 class WithPeripheryBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
-  case PeripheryBusKey => up(PeripheryBusKey).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+  case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
 })
 class WithMemoryBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
-  case MemoryBusKey => up(MemoryBusKey).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+  case MemoryBusKey => up(MemoryBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
 })
 class WithSystemBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
-  case SystemBusKey => up(SystemBusKey).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+  case SystemBusKey => up(SystemBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+})
+class WithFrontBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
+  case FrontBusKey => up(FrontBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
 })
 class WithControlBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
-  case ControlBusKey => up(ControlBusKey).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+  case ControlBusKey => up(ControlBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
 })
 
 class WithRationalMemoryBusCrossing extends WithSbusToMbusCrossingType(RationalCrossing(Symmetric))
