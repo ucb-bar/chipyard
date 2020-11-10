@@ -23,19 +23,6 @@ import testchipip.WithRingSystemBus
 import firesim.bridges._
 import firesim.configs._
 
-class WithBootROM extends Config((site, here, up) => {
-  case BootROMLocated(x) => {
-    val chipyardBootROM = new File(s"./generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
-    val firesimBootROM = new File(s"./target-rtl/chipyard/generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
-
-    val bootROMPath = if (chipyardBootROM.exists()) {
-      chipyardBootROM.getAbsolutePath()
-    } else {
-      firesimBootROM.getAbsolutePath()
-    }
-    up(BootROMLocated(x), site).map(_.copy(contentFileName = bootROMPath))
-  }
-})
 
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
 class WithoutClockGating extends Config((site, here, up) => {
@@ -66,8 +53,6 @@ class WithFireSimConfigTweaks extends Config(
   new WithDefaultMemModel ++
   // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
   new WithFireSimSimpleClocks ++
-  // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
-  new WithBootROM ++
   // Optional*: Removing this will require adjusting the UART baud rate and
   // potential target-software changes to properly capture UART output
   new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
