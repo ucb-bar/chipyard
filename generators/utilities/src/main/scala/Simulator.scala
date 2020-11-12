@@ -11,7 +11,7 @@ case class GenerateSimConfig(
 sealed trait Simulator
 object VerilatorSimulator extends Simulator
 object VCSSimulator extends Simulator
-object NotSimulator extends Simulator
+object NoSimulator extends Simulator
 
 trait HasGenerateSimConfig {
   val parser = new scopt.OptionParser[GenerateSimConfig]("GenerateSimFiles") {
@@ -23,7 +23,7 @@ trait HasGenerateSimConfig {
       .action((x, c) => x match {
         case "verilator" => c.copy(simulator = VerilatorSimulator)
         case "vcs" => c.copy(simulator = VCSSimulator)
-        case "none" => c.copy(simulator = NotSimulator)
+        case "none" => c.copy(simulator = NoSimulator)
         case _ => throw new Exception(s"Unrecognized simulator $x")
       })
       .text("Name of simulator to generate files for (verilator, vcs, none)")
@@ -52,7 +52,7 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
         case VerilatorSimulator => s"-FI ${fname}"
         // vcs pulls headers in with +incdir, doesn't have anything like verilator.h
         case VCSSimulator => ""
-        case _ => ""
+        case NoSimulator => ""
       }
     } else { // do nothing otherwise
       fname
@@ -99,7 +99,7 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
     "/csrc/remote_bitbang.cc",
     "/vsrc/EICG_wrapper.v",
     ) ++ (sim match {
-      case NotSimulator => Seq()
+      case NoSimulator => Seq()
       case _ => Seq(
         "/testchipip/csrc/SimSerial.cc",
         "/testchipip/csrc/SimDRAM.cc",
@@ -120,7 +120,7 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
       case VCSSimulator => Seq(
         "/vsrc/TestDriver.v",
       )
-      case _ => Seq()
+      case NoSimulator => Seq()
     })
 
   def writeBootrom(): Unit = {
