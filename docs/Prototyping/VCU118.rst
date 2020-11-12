@@ -4,10 +4,10 @@ Running a Design on VCU118
 Basic Design
 ------------
 
-The default VCU118 FPGA target design is setup to have UART, a SPI SDCard, and DDR backing memory.
+The default Xilinx VCU118 harness is setup to have UART, a SPI SDCard, and DDR backing memory.
 This allows it to run RISC-V Linux from an SDCard while piping the terminal over UART to the host machine (the machine connected to the VCU118).
 To extend this design, you can create your own Chipyard configuration and add the ``WithVCU118Tweaks`` located in ``fpga/src/main/scala/vcu118/Configs.scala``.
-Adding this config. fragment will enable and connect the UART, SPI SDCard, and DDR backing memory to your Chipyard design/config.
+Adding this config fragment will enable and connect the UART, SPI SDCard, and DDR backing memory to your Chipyard design/config.
 
 .. literalinclude:: ../../fpga/src/main/scala/vcu118/Configs.scala
     :language: scala
@@ -50,6 +50,6 @@ For more information on harness binders and io binders, refer to :ref:`IOBinders
 An example of a more complicated design using new ``Overlays`` can be viewed in ``fpga/src/main/scala/vcu118/bringup/``.
 This example extends the default test harness and creates new ``Overlays`` to connect to the FMC port.
 
-.. Note:: Remember that since whenever a new test harness is created (or the config. changes, or the config. packages changes, or...), you need to modify the make invocation.
-    For example, ``make SUB_PROJECT=vcu118 CONFIG=MyNewVCU118Config CONFIG_PACKAGE=this.is.my.scala.package bit``.
+.. Note:: Remember that since whenever a new test harness is created (or the config changes, or the config packages changes, or...), you need to modify the make invocation.
+    For example, ``make SUB_PROJECT=vcu118 CONFIG=MyNewVCU118Config CONFIG_PACKAGE=this.is.my.scala.package bitstream``.
     See :ref:`Making a Bitstream` for information on the various make variables.

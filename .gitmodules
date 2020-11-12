@@ -133,4 +133,4 @@
 	url = https://github.com/ucb-bar/riscv-sodor.git
 [submodule "fpga/fpga-shells"]
 	path = fpga/fpga-shells
-	url = git@github.com:abejgonzalez/fpga-shells.git
+	url = https://github.com/abejgonzalez/fpga-shells.git
