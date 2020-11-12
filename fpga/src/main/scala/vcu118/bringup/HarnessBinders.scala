@@ -27,17 +27,6 @@ class WithBringupUART extends ComposeHarnessBinder({
   }
 })
 
-/*** SPI ***/
-class WithBringupSPI extends ComposeHarnessBinder({
-  (system: HasPeripherySPI, th: BaseModule with HasHarnessSignalReferences, ports: Seq[SPIPortIO]) => {
-    th match { case vcu118th: BringupVCU118FPGATestHarnessImp => {
-      require(ports.size == 2)
-
-      vcu118th.bringupOuter.io_adi_spi_bb.bundle <> ports.last
-    } }
-  }
-})
-
 /*** I2C ***/
 class WithBringupI2C extends OverrideHarnessBinder({
   (system: HasPeripheryI2CModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[I2CPort]) => {
@@ -79,5 +68,3 @@ class WithBringupTSIHost extends OverrideHarnessBinder({
     } }
   }
 })
-
-

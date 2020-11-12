@@ -36,17 +36,6 @@ class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends 
   val io_fmc_uart_bb = BundleBridgeSource(() => (new UARTPortIO(dp(PeripheryUARTKey).last)))
   dp(UARTOverlayKey).last.place(UARTDesignInput(io_fmc_uart_bb))
 
-  /*** SPI ***/
-
-  require(dp(PeripherySPIKey).size == 2)
-
-  // 2nd SPI goes to the ADI port
-
-  val adi = Overlay(SPIOverlayKey, new BringupSPIVCU118ShellPlacer(this, SPIShellInput()))
-
-  val io_adi_spi_bb = BundleBridgeSource(() => (new SPIPortIO(dp(PeripherySPIKey).last)))
-  dp(SPIOverlayKey).last.place(SPIDesignInput(dp(PeripherySPIKey).last, io_adi_spi_bb))
-
   /*** I2C ***/
 
   val i2c = Overlay(I2COverlayKey, new BringupI2CVCU118ShellPlacer(this, I2CShellInput()))

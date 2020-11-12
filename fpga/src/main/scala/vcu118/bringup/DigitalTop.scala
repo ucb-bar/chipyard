@@ -10,8 +10,9 @@ import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 
 import chipyard.fpga.vcu118.{VCU118DigitalTop, VCU118DigitalTopModule}
+
 // ------------------------------------
-// BringupVCU118 DigitalTop
+// Bringup VCU118 DigitalTop
 // ------------------------------------
 
 class BringupVCU118DigitalTop(implicit p: Parameters) extends VCU118DigitalTop

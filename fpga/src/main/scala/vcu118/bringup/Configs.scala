@@ -9,7 +9,6 @@ import freechips.rocketchip.diplomacy._
 
 import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOParams}
 import sifive.blocks.devices.i2c.{PeripheryI2CKey, I2CParams}
-import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 
 import sifive.fpgashells.shell.{DesignKey}
@@ -23,7 +22,6 @@ import chipyard.fpga.vcu118.{WithVCU118Tweaks, WithFPGAFrequency, VCU118DDR2Size
 
 class WithBringupPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => up(PeripheryUARTKey, site) ++ List(UARTParams(address = BigInt(0x64003000L)))
-  case PeripherySPIKey => up(PeripherySPIKey, site) ++ List(SPIParams(rAddress = BigInt(0x64004000L)))
   case PeripheryI2CKey => List(I2CParams(address = BigInt(0x64005000L)))
   case PeripheryGPIOKey => {
     if (BringupGPIOs.width > 0) {
@@ -38,12 +36,13 @@ class WithBringupPeripherals extends Config((site, here, up) => {
       List.empty[GPIOParams]
     }
   }
-  case TSIClockMaxFrequency => 100
+  case TSIClockMaxFrequencyKey => 100
   case PeripheryTSIHostKey => List(
     TSIHostParams(
       serialIfWidth = 4,
       mmioBaseAddress = BigInt(0x64006000),
       mmioSourceId = 1 << 13, // manager source
+      targetSize = site(VCU118DDR2Size),
       serdesParams = TSIHostSerdesParams(
         clientPortParams = TLMasterPortParameters.v1(
           clients = Seq(TLMasterParameters.v1(
@@ -51,7 +50,7 @@ class WithBringupPeripherals extends Config((site, here, up) => {
             sourceId = IdRange(0, (1 << 13))))),
         managerPortParams = TLSlavePortParameters.v1(
           managers = Seq(TLSlaveParameters.v1(
-            address = Seq(AddressSet(0, site(VCU118DDR2Size) - 1)),
+            address = Seq(AddressSet(0, BigInt("FFFFFFFF", 16))), // access everything on chip
             regionType = RegionType.UNCACHED,
             executable = true,
             supportsGet        = TransferSizes(1, 64),
@@ -71,7 +70,6 @@ class WithBringupVCU118System extends Config((site, here, up) => {
 
 class WithBringupAdditions extends Config(
   new WithBringupUART ++
-  new WithBringupSPI ++
   new WithBringupI2C ++
   new WithBringupGPIO ++
   new WithBringupTSIHost ++
@@ -87,7 +85,7 @@ class RocketBringupConfig extends Config(
   new chipyard.RocketConfig)
 
 class BoomBringupConfig extends Config(
-  new WithFPGAFrequency(75) ++
+  new WithFPGAFrequency(70) ++
   new WithBringupAdditions ++
   new WithVCU118Tweaks ++
   new chipyard.MegaBoomConfig)

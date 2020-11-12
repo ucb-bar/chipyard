@@ -28,7 +28,6 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
 class WithSystemModifications extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => new VCU118DigitalTop()(p) // use the VCU118-extended digital top
   case DebugModuleKey => None // disable debug module
-  case ExportDebug => up(ExportDebug).copy(protocols = Set(JTAG)) // don't generate HTIF DTS
   case SystemBusKey => up(SystemBusKey).copy(
     errorDevice = Some(DevNullParams(
       Seq(AddressSet(0x3000, 0xfff)),

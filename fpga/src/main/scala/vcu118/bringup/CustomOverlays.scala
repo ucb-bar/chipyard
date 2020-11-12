@@ -69,46 +69,7 @@ class BringupUARTVCU118ShellPlacer(shell: VCU118ShellBasicOverlays, val shellInp
   def place(designInput: UARTDesignInput) = new BringupUARTVCU118PlacedOverlay(shell, valName.name, designInput, shellInput)
 }
 
-/* Connect SPI to ADI device */
-class BringupSPIVCU118PlacedOverlay(val shell: VCU118ShellBasicOverlays, name: String, val designInput: SPIDesignInput, val shellInput: SPIShellInput)
-   extends SDIOXilinxPlacedOverlay(name, designInput, shellInput)
-{
-  shell { InModuleBody {
-    val packagePinsWithPackageIOs = Seq((FMCPMap("H37"), IOPin(io.spi_clk)),
-                                        (FMCPMap("H19"), IOPin(io.spi_cs)),
-                                        (FMCPMap("H17"), IOPin(io.spi_dat(0))),
-                                        (FMCPMap("H28"), IOPin(io.spi_dat(1))),
-                                        (FMCPMap("H29"), IOPin(io.spi_dat(2))),
-                                        (FMCPMap("H16"), IOPin(io.spi_dat(3))))
-
-    packagePinsWithPackageIOs foreach { case (pin, io) => {
-      shell.xdc.addPackagePin(io, pin)
-      shell.xdc.addIOStandard(io, "LVCMOS18")
-    } }
-    packagePinsWithPackageIOs drop 1 foreach { case (pin, io) => {
-      shell.xdc.addPullup(io)
-      shell.xdc.addIOB(io)
-    } }
-  } }
-}
-
-class BringupSPIVCU118ShellPlacer(shell: VCU118ShellBasicOverlays, val shellInput: SPIShellInput)(implicit val valName: ValName)
-  extends SPIShellPlacer[VCU118ShellBasicOverlays] {
-  def place(designInput: SPIDesignInput) = new BringupSPIVCU118PlacedOverlay(shell, valName.name, designInput, shellInput)
-}
-
-// TODO: Move this to a different location
-// SPI device description for ADI part
-class ADISPIDevice(spi: Device, maxMHz: Double = 1) extends SimpleDevice("clkgen", Seq("analog,adi9516-4")) {
-  override def parent = Some(spi)
-  override def describe(resources: ResourceBindings): Description = {
-    val Description(name, mapping) = super.describe(resources)
-    val extra = Map("spi-max-frequency" -> Seq(ResourceInt(maxMHz * 1000000)))
-    Description(name, mapping ++ extra)
-  }
-}
-
-/* Connect GPIOs to FMC */
+/* Connect GPIOs to FPGA I/Os */
 abstract class GPIOXilinxPlacedOverlay(name: String, di: GPIODesignInput, si: GPIOShellInput)
   extends GPIOPlacedOverlay(name, di, si)
 {
@@ -192,7 +153,7 @@ class TSIHostVCU118PlacedOverlay(val shell: BringupVCU118FPGATestHarness, name: 
   }
 }
 
-case object TSIClockMaxFrequency extends Field[Int](50) // in MHz
+case object TSIClockMaxFrequencyKey extends Field[Int](50) // in MHz
 class BringupTSIHostVCU118PlacedOverlay(override val shell: BringupVCU118FPGATestHarness, override val name: String, override val designInput: TSIHostDesignInput, override val shellInput: TSIHostShellInput)
   extends TSIHostVCU118PlacedOverlay(shell, name, designInput, shellInput)
 {
@@ -230,7 +191,7 @@ class BringupTSIHostVCU118PlacedOverlay(override val shell: BringupVCU118FPGATes
       shell.xdc.addIOB(io)
     } }
 
-    shell.sdc.addClock("TSI_CLK", clkIo, p(TSIClockMaxFrequency))
+    shell.sdc.addClock("TSI_CLK", clkIo, p(TSIClockMaxFrequencyKey))
     shell.sdc.addGroup(pins = Seq(clkIo))
     shell.xdc.clockDedicatedRouteFalse(clkIo)
   } }
