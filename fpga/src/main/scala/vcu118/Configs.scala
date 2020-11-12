@@ -28,16 +28,7 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
 class WithSystemModifications extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => new VCU118DigitalTop()(p) // use the VCU118-extended digital top
   case DebugModuleKey => None // disable debug module
-  case SystemBusKey => up(SystemBusKey).copy(
-    errorDevice = Some(DevNullParams(
-      Seq(AddressSet(0x3000, 0xfff)),
-      maxAtomic=site(XLen)/8,
-      maxTransfer=128,
-      region = RegionType.TRACKED)))
-  case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency =
-    Some(BigDecimal(site(FPGAFrequencyKey)*1000000).setScale(0, BigDecimal.RoundingMode.HALF_UP).toBigInt))
-  case ControlBusKey => up(ControlBusKey, site).copy(
-    errorDevice = None)
+  case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency = Some(site(FPGAFrequencyKey).toInt*1000000))
   case DTSTimebase => BigInt(1000000)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for sdboot

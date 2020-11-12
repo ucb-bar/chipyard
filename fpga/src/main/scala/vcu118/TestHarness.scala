@@ -41,7 +41,7 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
   val sys_clock2 = Overlay(ClockInputOverlayKey, new SysClock2VCU118ShellPlacer(this, ClockInputShellInput()))
   val ddr2       = Overlay(DDROverlayKey, new DDR2VCU118ShellPlacer(this, DDRShellInput()))
 
-  val topDesign = LazyModule(p(BuildTop)(dp))
+  val topDesign = LazyModule(p(BuildTop)(dp)).suggestName("chiptop")
 
 // DOC include start: ClockOverlay
   // place all clocks in the shell

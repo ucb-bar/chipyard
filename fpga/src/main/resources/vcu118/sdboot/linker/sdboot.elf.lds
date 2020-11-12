@@ -47,7 +47,7 @@ SECTIONS
 
   .rodata ALIGN((ADDR(.sdata) + SIZEOF(.sdata)), 8) : AT(ALIGN((LOADADDR(.sdata) + SIZEOF(.sdata)), 8)) ALIGN_WITH_INPUT {
     *(.rodata .rodata.* .gnu.linkonce.r.*)
-    *(.dtb)
+    *(.dtb) /* Must be last if this code is added to RC's BootROM */
   } >bootrom_mem  :data
 
   PROVIDE(_data = ADDR(.rodata));

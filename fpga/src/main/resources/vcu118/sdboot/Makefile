@@ -10,7 +10,10 @@ CFLAGS+= -fno-common -g -DENTROPY=0 -mabi=lp64 -DNONSMP_HART=0
 CFLAGS+= -I $(ROOT_DIR)/include -I.
 LFLAGS=-static -nostdlib -L $(ROOT_DIR)/linker -T sdboot.elf.lds
 
-#PBUS_CLK passed in
+PBUS_CLK ?= 1000000 # default to 1MHz but really should be overridden
+
+default: elf bin dump
+
 elf := $(BUILD_DIR)/sdboot.elf
 $(elf): head.S kprintf.c sd.c
 	mkdir -p $(BUILD_DIR)

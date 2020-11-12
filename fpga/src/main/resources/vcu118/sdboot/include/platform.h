@@ -1,10 +1,9 @@
 // See LICENSE for license details.
 
-#ifndef _EAGLE_PLATFORM_H
-#define _EAGLE_PLATFORM_H
+#ifndef _CHIPYARD_PLATFORM_H
+#define _CHIPYARD_PLATFORM_H
 
 #include "const.h"
-#include "riscv_test_defaults.h"
 #include "devices/clint.h"
 #include "devices/gpio.h"
 #include "devices/plic.h"
@@ -105,4 +104,4 @@
 // Misc
 
 
-#endif /* _SIFIVE_PLATFORM_H */
+#endif /* _CHIPYARD_PLATFORM_H */
