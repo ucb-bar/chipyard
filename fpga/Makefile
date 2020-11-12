@@ -103,8 +103,8 @@ $(BIT_FILE): $(synth_list_f)
 		-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
 		-board "$(BOARD)"
 
-.PHONY: bit
-bit: $(BIT_FILE)
+.PHONY: bitstream
+bitstream: $(BIT_FILE)
 
 .PHONY: debug-bitstream
 debug-bitstream: $(build_dir)/obj/post_synth.dcp
@@ -115,14 +115,6 @@ debug-bitstream: $(build_dir)/obj/post_synth.dcp
 		$(build_dir)/obj/post_synth.dcp \
 		xcvu9p-flga2104-2l-e \
 		$(build_dir)/obj/debug_output
-
-# Build .mcs
-MCS_FILE := $(build_dir)/obj/$(MODEL).mcs
-$(MCS_FILE): $(BIT_FILE)
-	cd $(build_dir); vivado -nojournal -mode batch -source $(fpga_common_script_dir)/write_cfgmem.tcl -tclargs $(BOARD) $@ $<
-
-.PHONY: mcs
-mcs: $(MCS_FILE)
 
 #########################################################################################
 # general cleanup rules
