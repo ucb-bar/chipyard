@@ -1,7 +1,11 @@
 #!/bin/bash
 
 # create the different verilator builds
-# argument is the make command string
+# usage:
+#   do-rtl-build.sh <make command string> sim
+#     run rtl build for simulations and copy back results
+#   do-rtl-build.sh <make command string> fpga
+#     run rtl build for fpga and don't copy back results
 
 # turn echo on and error on earliest command
 set -ex
@@ -50,9 +54,19 @@ else
     copy $LOCAL_RISCV_DIR/ $SERVER:$REMOTE_RISCV_DIR
 fi
 
+# choose what make dir to use
+case $2 in
+    "sim")
+        REMOTE_MAKE_DIR=$REMOTE_SIM_DIR
+        ;;
+    "fpga")
+        REMOTE_MAKE_DIR=$REMOTE_FPGA_DIR
+        ;;
+esac
+
 # enter the verilator directory and build the specific config on remote server
 run "export RISCV=\"$TOOLS_DIR\"; \
-     make -C $REMOTE_SIM_DIR clean;"
+     make -C $REMOTE_MAKE_DIR clean;"
 
 read -a keys <<< ${grouping[$1]}
 
@@ -63,11 +77,14 @@ do
          export PATH=\"$REMOTE_VERILATOR_DIR/bin:\$PATH\"; \
          export VERILATOR_ROOT=\"$REMOTE_VERILATOR_DIR\"; \
          export COURSIER_CACHE=\"$REMOTE_WORK_DIR/.coursier-cache\"; \
-         make -j$REMOTE_MAKE_NPROC -C $REMOTE_SIM_DIR FIRRTL_LOGLEVEL=info JAVA_ARGS=\"$REMOTE_JAVA_ARGS\" ${mapping[$key]}"
+         make -j$REMOTE_MAKE_NPROC -C $REMOTE_MAKE_DIR FIRRTL_LOGLEVEL=info JAVA_ARGS=\"$REMOTE_JAVA_ARGS\" ${mapping[$key]}"
 done
 
 run "rm -rf $REMOTE_CHIPYARD_DIR/project"
 
-# copy back the final build
-mkdir -p $LOCAL_CHIPYARD_DIR
-copy $SERVER:$REMOTE_CHIPYARD_DIR/ $LOCAL_CHIPYARD_DIR
+# choose to copy back results
+if [ $2 = "sim" ]; then
+    # copy back the final build
+    mkdir -p $LOCAL_CHIPYARD_DIR
+    copy $SERVER:$REMOTE_CHIPYARD_DIR/ $LOCAL_CHIPYARD_DIR
+fi

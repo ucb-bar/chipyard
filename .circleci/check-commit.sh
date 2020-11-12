@@ -122,12 +122,7 @@ search
 
 submodules=("fpga-shells")
 dir="fpga"
-if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
-then
-    branches=("master")
-else
-    branches=("master" "dev")
-fi
+branches=("master")
 search
 
 # turn off verbose printing to make this easier to read
