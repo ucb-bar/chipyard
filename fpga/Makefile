@@ -27,6 +27,7 @@ ifeq ($(SUB_PROJECT),vcu118)
 	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= vcu118
+	FPGA_BRAND        ?= xilinx
 endif
 
 ifeq ($(SUB_PROJECT),bringup)
@@ -40,6 +41,7 @@ ifeq ($(SUB_PROJECT),bringup)
 	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= vcu118
+	FPGA_BRAND        ?= xilinx
 endif
 
 ifeq ($(SUB_PROJECT),arty)
@@ -54,6 +56,7 @@ ifeq ($(SUB_PROJECT),arty)
 	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= arty
+	FPGA_BRAND        ?= xilinx
 endif
 
 include $(base_dir)/variables.mk
@@ -67,7 +70,7 @@ default: $(mcs)
 #########################################################################################
 # misc. directories
 #########################################################################################
-fpga_dir := $(base_dir)/fpga/fpga-shells/xilinx
+fpga_dir := $(base_dir)/fpga/fpga-shells/$(FPGA_BRAND)
 fpga_common_script_dir := $(fpga_dir)/common/tcl
 
 #########################################################################################
@@ -98,10 +101,10 @@ $(BIT_FILE): $(synth_list_f)
 		-nojournal -mode batch \
 		-source $(fpga_common_script_dir)/vivado.tcl \
 		-tclargs \
-		-top-module "$(MODEL)" \
-		-F "$(synth_list_f)" \
-		-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
-		-board "$(BOARD)"
+			-top-module "$(MODEL)" \
+			-F "$(synth_list_f)" \
+			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
+			-board "$(BOARD)"
 
 .PHONY: bitstream
 bitstream: $(BIT_FILE)
@@ -112,9 +115,10 @@ debug-bitstream: $(build_dir)/obj/post_synth.dcp
 		-nojournal -mode batch \
 		-source $(sim_dir)/scripts/run_impl_bitstream.tcl \
 		-tclargs \
-		$(build_dir)/obj/post_synth.dcp \
-		xcvu9p-flga2104-2l-e \
-		$(build_dir)/obj/debug_output
+			$(build_dir)/obj/post_synth.dcp \
+			$(BOARD) \
+			$(build_dir)/debug_obj \
+			$(fpga_common_script_dir)
 
 #########################################################################################
 # general cleanup rules

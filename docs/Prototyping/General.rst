@@ -60,7 +60,7 @@ ILA (integrated logic analyzers) can be added to certain designs for debugging r
 First, open up the post synthesis checkpoint located in the build directory for your design in Vivado (it should be labeled ``post_synth.dcp``).
 Then using Vivado, add ILAs (and other debugging tools) for your design (search online for more information on how to add an ILA).
 This can be done by modifying the post synthesis checkpoint, saving it, and running ``make ... debug-bitstream``.
-This will create a new bitstream called ``debug_output`` in the same location as the normal bitstream (``generated-src/<LONG_NAME>/obj``).
+This will create a new bitstream called ``top.bit`` in a folder named ``generated-src/<LONG_NAME>/debug_obj/``.
 For example, running the bitstream build for an added ILA for a BOOM config.:
 
 .. code-block:: shell
