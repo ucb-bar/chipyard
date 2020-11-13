@@ -31,7 +31,7 @@ lazy val macros = (project in file("macros"))
   .settings(commonSettings)
   .settings(Seq(
     libraryDependencies ++= Seq(
-      "edu.berkeley.cs" %% "firrtl-interpreter" % "1.2-SNAPSHOT" % Test
+      "edu.berkeley.cs" %% "firrtl-interpreter" % "1.4.0" % Test
     ),
     mainClass := Some("barstools.macros.MacroCompiler")
   ))

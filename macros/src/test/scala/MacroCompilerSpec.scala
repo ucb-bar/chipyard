@@ -5,6 +5,7 @@ package barstools.macros
 import firrtl.ir.{Circuit, NoInfo}
 import firrtl.passes.RemoveEmpty
 import firrtl.Parser.parse
+
 import java.io.{File, StringWriter}
 
 import mdf.macrolib.SRAMMacro

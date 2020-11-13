@@ -23,6 +23,14 @@ import Utils._
 
 case class MacroCompilerException(msg: String) extends Exception(msg)
 
+// TODO The parameters could be unpacked here instead of keeping it in a serialized form
+case class MacroCompilerAnnotation(content: String) extends NoTargetAnnotation {
+  import MacroCompilerAnnotation.Params
+
+  def params: Params = MacroCompilerUtil.objFromString(content).asInstanceOf[Params]
+}
+
+
 /**
  * The MacroCompilerAnnotation to trigger the macro compiler.
  * Note that this annotation does NOT actually target any modules for
@@ -32,7 +40,6 @@ case class MacroCompilerException(msg: String) extends Exception(msg)
  * To use, simply annotate the entire circuit itself with this annotation and
  * include [[MacroCompilerTransform]].
  *
- * TODO: make this into a "true" annotation?
  */
 object MacroCompilerAnnotation {
   /** Macro compiler mode. */
@@ -92,16 +99,9 @@ object MacroCompilerAnnotation {
    * @param c Top-level circuit name (see class description)
    * @param p Parameters (see above).
    */
-  def apply(c: String, p: Params): Annotation =
-    Annotation(CircuitName(c), classOf[MacroCompilerTransform], MacroCompilerUtil.objToString(p))
+  def apply(c: String, p: Params): MacroCompilerAnnotation =
+    MacroCompilerAnnotation(MacroCompilerUtil.objToString(p))
 
-  def unapply(a: Annotation) = a match {
-    case Annotation(CircuitName(c), t, serialized) if t == classOf[MacroCompilerTransform] => {
-      val p: Params = MacroCompilerUtil.objFromString(serialized).asInstanceOf[Params]
-      Some(c, p)
-    }
-    case _ => None
-  }
 }
 
 class MacroCompilerPass(mems: Option[Seq[Macro]],
@@ -656,9 +656,9 @@ class MacroCompilerTransform extends Transform {
   def inputForm = MidForm
   def outputForm = MidForm
 
-  def execute(state: CircuitState) = getMyAnnotations(state) match {
-    case Seq(MacroCompilerAnnotation(state.circuit.main,
-    MacroCompilerAnnotation.Params(memFile, memFileFormat, libFile, hammerIR, costMetric, mode, useCompiler, forceCompile, forceSynflops))) =>
+  def execute(state: CircuitState) = state.annotations.collect { case a: MacroCompilerAnnotation => a } match {
+    case Seq(anno: MacroCompilerAnnotation) =>
+      val MacroCompilerAnnotation.Params(memFile, memFileFormat, libFile, hammerIR, costMetric, mode, useCompiler, forceCompile, forceSynflops) = anno.params
       if (mode == MacroCompilerAnnotation.FallbackSynflops) {
         throw new UnsupportedOperationException("Not implemented yet")
       }
