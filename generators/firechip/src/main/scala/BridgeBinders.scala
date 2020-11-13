@@ -173,6 +173,13 @@ class WithFireSimFAME5 extends ComposeIOBinder({
   }
 })
 
+class WithSkinTempModel extends OverrideIOBinder({
+  (system: chipyard.clocking.CanHaveTemperatureSensor) => {
+    system.tempSensorOpt.foreach { _ := 32.U }
+  }
+  (Nil, Nil)
+})
+
 // Shorthand to register all of the provided bridges above
 class WithDefaultFireSimBridges extends Config(
   new WithSerialBridge ++

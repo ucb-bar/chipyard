@@ -224,7 +224,9 @@ class ClockMuxRocketConfig extends Config(
   // Use a division we can currently support in the divider models
   new chipyard.config.WithMemoryBusFrequency(3200.00) ++
   new chipyard.config.WithTileFrequency(6400.0) ++ //lol
+  new chipyard.config.WithTemperatureSensor ++
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
+  new WithSkinTempModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.DividedClockRocketConfig)

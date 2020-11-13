@@ -68,6 +68,10 @@ class WithTracegenSystem extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => new TraceGenSystem()(p)
 })
 
+class WithTemperatureSensor extends Config((site, here, up) => {
+  case clocking.TemperatureSensorParams => Some(clocking.TemperatureSensorParams())
+})
+
 /**
  * Map from a hartId to a particular RoCC accelerator
  */

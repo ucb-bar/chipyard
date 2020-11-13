@@ -26,6 +26,7 @@ class ChipyardSystem(implicit p: Parameters) extends ChipyardSubsystem
   with CanHaveMasterAXI4MemPort
   with CanHaveMasterAXI4MMIOPort
   with CanHaveSlaveAXI4Port
+  with chipyard.clocking.CanHaveTemperatureSensor
 {
 
   val bootROM  = p(BootROMLocated(location)).map { BootROM.attach(_, this, CBUS) }
