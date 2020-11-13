@@ -42,7 +42,7 @@ report_drc -file [file join $rptdir post_place_drc.rpt]
 
 # route
 route_design
-write_checkpoint -force [filel join $wrkdir post_route]
+write_checkpoint -force [file join $wrkdir post_route]
 report_timing_summary -file [file join $rptdir post_route_timing_summary.rpt]
 report_timing -sort_by group -max_paths 100 -path_type summary -file [file join $rptdir post_route_timing.rpt]
 report_clock_utilization -file [file join $rptdir post_route_clock_utilization.rpt]
