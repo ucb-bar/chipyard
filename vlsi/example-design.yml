@@ -10,5 +10,29 @@ vlsi.inputs.power_spec_type: "cpf"
 
 # Specify clock signals
 vlsi.inputs.clocks: [
-  {name: "clock", period: "1ns", uncertainty: "0.1ns"}
+  {name: "clock", period: "2ns", uncertainty: "0.1ns"}
 ]
+
+# Specify pin properties
+# Default pin placement can be set by the tool
+# Default pin layer assignments can be found in some tech plug-ins
+vlsi.inputs.pin_mode: generated
+vlsi.inputs.pin.generate_mode: semi_auto
+
+# Specify the floorplan
+# Default floor plan can be set by the tool
+# The path name should match the VLSI_TOP makefile parameter if it is set
+par.innovus.floorplan_mode: "auto"
+vlsi.inputs.placement_constraints:
+#  - path: "ChipTop"
+  - path: "Gemmini"
+    type: toplevel
+    x: 0
+    y: 0
+    width: 300
+    height: 300
+    margins:
+      left: 0
+      right: 0
+      top: 0
+      bottom: 0
