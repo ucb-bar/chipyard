@@ -69,7 +69,7 @@ class VCU118ChipyardSystemModule[+L <: VCU118ChipyardSystem](_outer: L) extends 
 // VCU118 Mem Port Mixin
 // ------------------------------------
 
-/** Adds a TileLink port to the system intended to master an MMIO device bus */
+/** Adds a port to the system intended to master an TL DRAM controller. */
 trait CanHaveMasterTLMemPort { this: BaseSubsystem =>
   private val memPortParamsOpt = p(ExtMem)
   private val portName = "tl_mem"
