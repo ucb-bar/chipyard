@@ -22,7 +22,7 @@ For example, for an imaginary process technology called tsmintel3:
 .. code-block:: shell
 
     cd vlsi
-    git@my-secure-server.berkeley.edu:tsmintel3/hammer-tsmintel3-plugin.git
+    git clone git@my-secure-server.berkeley.edu:tsmintel3/hammer-tsmintel3-plugin.git
 
 
 Next, we define the Hammer environment into the shell:
@@ -34,19 +34,21 @@ Next, we define the Hammer environment into the shell:
     source $HAMMER_HOME/sourceme.sh
 
 
+.. Note:: Some VLSI EDA tools are supported only on RHEL-based operating systems. We recommend using Chipyard on RHEL7 and above. However, many VLSI server still have old operating systems such as RHEL6, which have software packages older than the basic chipyard requirements. In order to build Chipyard on RHEL6, you will likely need to build from source gcc, git, gmake, make, dtc, cc, bison, libexpat and liby.
+
 Setting up the Hammer Configuration Files
 --------------------------------------------
 
-The first configuration files that needs to be set up is the Hammer environment configuration files ``env.yml``. In this file you need to set the paths to the EDA tools and license servers you will be using. You do not have to fill all the fields in this configuration file, you need to fill the paths only for the tools that you will be using.
+The first configuration file that needs to be set up is the Hammer environment configuration file ``env.yml``. In this file you need to set the paths to the EDA tools and license servers you will be using. You do not have to fill all the fields in this configuration file, you need to fill the paths only for the tools that you will be using.
 If you are working within a shared server farm environment with an LSF cluster setup (for example, the Berkeley Wireless Research Center), please note the additional possible environment configuration listed in the :ref:`Advanced Environment Setup` segment of this documentation page. 
 
 Hammer relies on YAML-based configuration files. While these configuration can be consolidated within a single files (as is the case in the ASAP7 tutorial :ref:`tutorial` and the ``nangate45``
 OpenRoad example), the generally applicable way to work with an arbitrary process technology or tools plugins would be to use three configuration files, matching the three Hammer concerns - tools, tech, and design. 
 The ``vlsi`` directory includes three such example configuration files matching the three concerns: ``example-tools.yml``, ``example-tech.yml``, and ``example-design.yml``.
 
-The ``example-tools.yml`` file configures which EDA tools hammer will use. This example files uses Cadence Innovus, Genus and Calibre (which are likely the tools you will use if you're working in the Berkeley Wireless Research Center).
+The ``example-tools.yml`` file configures which EDA tools hammer will use. This example files uses Cadence Innovus, Genus and Calibre (which are likely the tools you will use if you're working in the Berkeley Wireless Research Center). Note that tool versions are highly sensitive to the process-technology in-use. Hence, tool versions that work with one process technology may not work with another (for example, ASAP7 will not work with an Innovus version newer than 18.1, while other proprietary process technologies will likely require newer versions such as 19.1).
 
-The ``example-design.yml`` file contrain basic build system information (how many cores/threads to use, etc.), as well as configuration that are specific to the design we are working on such as clock signal, power modes, and additional contraints that we will add later on.
+The ``example-design.yml`` file contrain basic build system information (how many cores/threads to use, etc.), as well as configuration that are specific to the design we are working on such as clock signal name and frequency, power modes, floorplan, and additional contraints that we will add later on.
 
 Finally, the ``example-tech`` file is a template file for a process technology plugin configuration. We will copy this file, and replace its fields with the appropriate process technology details for the tech plugin that we have access to. For example, for the ``asap7`` tech plugin we will replace the <tech_name> field with "asap7", the Node size "N" with "7", and the path to the process technology files installation directory.
 
@@ -85,7 +87,7 @@ Synthesis
 ^^^^^^^^^
 
 In order to run synthesis, we run ``make syn`` with the matching Make variables. 
-Post-synthesis logs and collateral will be saved in ``build/syn-rundir``. The raw QoR data wil be found in ``build/syn-rundir/reports``.
+Post-synthesis logs and collateral will be saved in ``build/<config-name>/syn-rundir``. The raw QoR data (area, timing, gate counts, etc.) will be found in ``build/<config-name>/syn-rundir/reports``.
 
 Hence, if we want to monolitically synthesize the entire SoC, the relevant command would be
 .. code-block:: shell
@@ -97,6 +99,84 @@ In a more typical scenario of working on a single module, for example the Gemmin
 
     make syn CONFIG=GemminiRocketConfig VLSI_TOP=Gemmini tech_name=tsmintel3 INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
 
+
+It is worth checking the final-qor.rpt report to make sure that the synthesized design meets timing before moving to the place-and-route step.
+
+Place-and-Route
+^^^^^^^^^^^^^^^
+In order to run place-and-route, we run ``make par`` with the matching Make variables.
+Post-PnR logs and collateral will be saved in ``build/<config-name>/par-rundir``. Specifically, the resulting GDSII file will be in that directory with the suffix ``*.gds``. and timing reports can be found in ``build/<config-name>/par-rundir/timingReports``.
+Place-and-route is requires more design details in contrast to synthesis. For example, place-and-route requires some basic floorplanning constraints. The default ``example-design.yml`` configuration file template allows the tool (specifically, the Cadence Innovus tool) to use it's automatic floorplanning capability within the top level of the design (``ChipTop``). However, if we choose to place-and-route a specific block which is not the SoC top level, we need to change the top-level path name to match the ``VLSI_TOP`` make parameter we are using.
+
+Hence, if we want to monolitically place-and-route the entire SoC with the default tech plug-in parameters for power-straps and corners, the relevant command would be
+.. code-block:: shell
+
+    make par CONFIG=<chipyard_config_name> tech_name=<tech_name> INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
+
+In a more typical scenario of working on a single module, for example the Gemmini accelerator within the GemminiRocketConfig Chipyard SoC configuration,
+
+.. code-block:: shell
+  vlsi.inputs.placement_constraints:
+    - path: "Gemmini"
+      type: toplevel
+      x: 0
+      y: 0
+      width: 300
+      height: 300
+      margins:
+        left: 0
+        right: 0
+        top: 0
+        bottom: 0
+
+The relevant ``make`` command would then be
+.. code-block:: shell
+
+    make par CONFIG=GemminiRocketConfig VLSI_TOP=Gemmini tech_name=tsmintel3 INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
+
+
+Place-and-route generally requires more fine-grained input specifications regarding power nets, clock nets, pin assignments and floorplanning. While the template configuration files provide defaults for automatic tool defaults, these will usually result in very bad QoR, and therefore it is recommended to specify better-informed floorplans, pin assignments and power nets. For more information about cutomizing theses parameters, please refer to the :ref:`Customizing Your VLSI Flow in Hammer` sections or to the Hammer documentation. 
+Additionally, some Hammer process technology plugins do not provide sufficient default values for requires settings such as power nets and pin assignments (for example, ASAP7). In those cases, these contraint will need to be specified manually in the top-level configuration yml files, as is the case in the ``example-asap7.yml`` configuration file.
+
+Place-and-route tools are very sensitive to process technologes (significantly more sensitive than synthesis tools), and different process technologies may work only on specific tool versions. It is recommended to check what is the appropriate tool version for the specific process technology you are working with.
+
+
+.. Note:: If you edit the yml configuration files in between synthesis and place-and-route, the `make par` command will automatically re-run synthesis. If you would like to avoid that and are confident that your configuration file changes do not affect synthesis results, you may use the `make redo-par` instead.
+
+
+
+Power Estimation
+^^^^^^^^^^^^^^^^^^^^
+
+
+
+Signoff
+^^^^^^^^^
+
+During chip tapeout, you will need to perform sign-off check to make sure the generated GDSII can be fabricated as intended. This is done using dedicated signoff tools that perform design rule checking (DRC) and layout versus schematic (LVS) verification. 
+In most cases, placed-and-routed designs will not pass DRC and LVS on first attempts due to nuanced design rules and silent failures of the place-and-route tools. Passing DRC and LVS will often requires adding manual placement constraints to "force" the EDA tools into certain patterns. 
+If you have placed-and-routed a design with the goal of getting area and power estimates, DRC and LVS are not strictly neccessary and the results will likely be quite similar. If you are intending to tapeout and fabricate a chip, DRC and LVS are mandatory and will likely requires multiple-iterations of refining manual placement constraints.
+
+
+Since signoff checks are required only for a complete chip tapeout, they are currently not fully automated in Hammer, and often require some additional manual inclusion of custom Makefiles associated with specific process technologies. However, the general steps from running signoff within Hammer (under the assumption of a fully automated tech plug-in) are Make commands similar to the previous steps.
+
+In order to run DRC, the relevant ``make`` command is ``make drc``. As in the previous stages, the make command should be accompanied by the relevant configuration Make variables:
+
+.. code-block:: shell
+
+    make drc CONFIG=GemminiRocketConfig VLSI_TOP=Gemmini tech_name=tsmintel3 INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
+
+
+DRC does not emit autmated reports, but rather scripts that enable opening the DRC error database within the appropriate tool. These generated scripts can be called from ``./build/<config-name>/drc-rundir/generated-scripts/view_drc``.
+
+
+In order to run LVS, the relevant ``make`` command is ``make lvs``. As in the previous stages, the make command should be accompanied by the relevant configuration Make variables:
+ 
+.. code-block:: shell
+
+    make lvs CONFIG=GemminiRocketConfig VLSI_TOP=Gemmini tech_name=tsmintel3 INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
+
+LVS does not emit autmated reports, but rather scripts that enable opening the LVS error database within the appropriate tool. These generated scripts can be called from ``./build/<config-name>/lvs-rundir/generated-scripts/view_lvs``.
 
 
 Customizing Your VLSI Flow in Hammer
@@ -122,6 +202,16 @@ If you have access to a shared LSF cluster and you would like Hammer to submit i
         settings_meta: "append"
 
 
-example-vlsi
-^^^^^^^^^^^^
-This is the entry script with placeholders for hooks. In the ``ExampleDriver`` class, a list of hooks is passed in the ``get_extra_par_hooks``. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in this example. Refer to the Hammer documentation on hooks for a detailed description of how these are injected into the VLSI flow.
+Specifying a Custom Floorplan
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+Composing a Hierarchical Design
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+Customizing Generated Tcl Scripts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The ``example-vlsi`` python script is the Hammer entry script with placeholders for hooks. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in the ``example-vlsi`` entry script example. In this particular example, a list of hooks is paased in the ``get_extra_par_hooks`` function in the ``ExampleDriver`` class. Refer to the Hammer documentation on hooks for a detailed description of how these are injected into the VLSI flow.
