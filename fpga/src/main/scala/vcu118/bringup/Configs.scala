@@ -85,7 +85,7 @@ class RocketBringupConfig extends Config(
   new chipyard.RocketConfig)
 
 class BoomBringupConfig extends Config(
-  new WithFPGAFrequency(70) ++
+  new WithFPGAFrequency(50) ++
   new WithBringupAdditions ++
   new WithVCU118Tweaks ++
   new chipyard.MegaBoomConfig)
