@@ -54,9 +54,9 @@ case class HierarchicalMulticlockBusTopologyParams(
     (FBUS, fbus),
     (CBUS, cbus)),
   connections = List(
-    (SBUS, CBUS, TLBusWrapperConnection(xType = xTypes.sbusToCbusXType, nodeBinding = BIND_STAR)()),
-    (CBUS, PBUS, TLBusWrapperConnection(xType = xTypes.cbusToPbusXType, nodeBinding = BIND_STAR)()),
-    (FBUS, SBUS, TLBusWrapperConnection(xType = xTypes.fbusToSbusXType, nodeBinding = BIND_QUERY, flipRendering = true)()))
+    (SBUS, CBUS, TLBusWrapperConnection.  crossTo(xType = xTypes.sbusToCbusXType, driveClockFromMaster = None)),
+    (CBUS, PBUS, TLBusWrapperConnection.  crossTo(xType = xTypes.cbusToPbusXType, driveClockFromMaster = None)),
+    (FBUS, SBUS, TLBusWrapperConnection.crossFrom(xType = xTypes.fbusToSbusXType, driveClockFromMaster = None)))
 )
 
 // For subsystem/Configs.scala
