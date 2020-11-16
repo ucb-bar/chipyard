@@ -14,7 +14,7 @@ lazy val commonSettings = Seq(
     case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
     case _ => MergeStrategy.first}},
   scalacOptions ++= Seq("-deprecation","-unchecked","-Xsource:2.11"),
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test",
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.0" % "test",
   libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.1",
   libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
   libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.0",
@@ -77,11 +77,7 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
   } toSeq
 
 // Subproject definitions begin
-//
-// FIRRTL is handled as an unmanaged dependency. Make will build the firrtl jar
-// before launching sbt if any of the firrtl source files has been updated
-// The jar is dropped in chipyard's lib/ directory, which is used as the unmanagedBase
-// for all subprojects
+
 lazy val chisel  = (project in file("tools/chisel3"))
 
 lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))

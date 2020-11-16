@@ -66,24 +66,6 @@ SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools)
 SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt
 
 #########################################################################################
-# jar creation variables and rules
-#########################################################################################
-FIRRTL_JAR := $(base_dir)/lib/firrtl.jar
-FIRRTL_TEST_JAR := $(base_dir)/test_lib/firrtl-test.jar
-
-$(FIRRTL_JAR): $(call lookup_srcs,$(CHIPYARD_FIRRTL_DIR),scala)
-	$(MAKE) -C $(CHIPYARD_FIRRTL_DIR) SBT="$(SBT)" root_dir=$(CHIPYARD_FIRRTL_DIR) build-scala
-	mkdir -p $(@D)
-	cp -p $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl.jar $@
-	touch $@
-
-$(FIRRTL_TEST_JAR): $(call lookup_srcs,$(CHIPYARD_FIRRTL_DIR),scala)
-	cd $(CHIPYARD_FIRRTL_DIR) && $(SBT) "test:assembly"
-	mkdir -p $(@D)
-	cp -p $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl-test.jar $@
-	touch $@
-
-#########################################################################################
 # Bloop Project Definitions
 #########################################################################################
 $(BLOOP_CONFIG_DIR)/TIMESTAMP: $(SBT_SOURCES)
@@ -93,7 +75,7 @@ $(BLOOP_CONFIG_DIR)/TIMESTAMP: $(SBT_SOURCES)
 #########################################################################################
 # create list of simulation file inputs
 #########################################################################################
-$(sim_files): $(call lookup_srcs,$(base_dir)/generators/utilities/src/main/scala,scala) $(FIRRTL_JAR) $(SCALA_BUILDTOOL_DEPS)
+$(sim_files): $(call lookup_srcs,$(base_dir)/generators/utilities/src/main/scala,scala) $(SCALA_BUILDTOOL_DEPS)
 	$(call run_scala_main,utilities,utilities.GenerateSimFiles,-td $(build_dir) -sim $(sim_name))
 
 #########################################################################################
