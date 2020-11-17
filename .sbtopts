@@ -1,2 +1,2 @@
 -Dsbt.sourcemode=true
--Dsbt.workspace=$PWD
+-Dsbt.workspace=$PWD/tools
