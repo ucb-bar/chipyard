@@ -128,7 +128,7 @@ class FireSimQuadRocketConfig extends Config(
   new chipyard.QuadRocketConfig)
 
 // A stripped down configuration that should fit on all supported hosts.
-// Flat to avoid having to reorganize the config class hierarchy to remove certain features 
+// Flat to avoid having to reorganize the config class hierarchy to remove certain features
 class FireSimSmallSystemConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
@@ -188,21 +188,19 @@ class SupernodeFireSimRocketConfig extends Config(
   new FireSimRocketConfig)
 
 //**********************************************************************************
-//* Ariane Configurations
+//* CVA6 Configurations
 //*********************************************************************************/
-class FireSimArianeConfig extends Config(
+class FireSimCVA6Config extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new chipyard.ArianeConfig)
+  new chipyard.CVA6Config)
 
 //**********************************************************************************
 //* Multiclock Configurations
 //*********************************************************************************/
 class FireSimMulticlockRocketConfig extends Config(
   new chipyard.config.WithTileFrequency(6400.0) ++ //lol
-  new WithDefaultFireSimBridges ++
-  new WithDefaultMemModel ++
-  new WithFireSimConfigTweaks ++
-  new chipyard.DividedClockRocketConfig)
+  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new FireSimRocketConfig)
 

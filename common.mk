@@ -47,7 +47,7 @@ HELP_COMMANDS += \
 # include additional subproject make fragments
 # see HELP_COMPILATION_VARIABLES
 #########################################################################################
-include $(base_dir)/generators/ariane/ariane.mk
+include $(base_dir)/generators/cva6/cva6.mk
 include $(base_dir)/generators/tracegen/tracegen.mk
 include $(base_dir)/generators/nvdla/nvdla.mk
 include $(base_dir)/tools/dromajo/dromajo.mk
@@ -103,7 +103,7 @@ $(sim_files): $(call lookup_srcs,$(base_dir)/generators/utilities/src/main/scala
 $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 	@echo "" > /dev/null
 
-# AG: must re-elaborate if ariane sources have changed... otherwise just run firrtl compile
+# AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
 generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\

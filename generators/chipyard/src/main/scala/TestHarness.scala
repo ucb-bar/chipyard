@@ -6,6 +6,7 @@ import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.config.{Field, Parameters}
 
 import chipyard.harness.{ApplyHarnessBinders, HarnessBinders}
+import chipyard.iobinders.HasIOBinders
 
 // -------------------------------
 // Chipyard Test Harness
@@ -14,9 +15,7 @@ import chipyard.harness.{ApplyHarnessBinders, HarnessBinders}
 case object BuildTop extends Field[Parameters => LazyModule]((p: Parameters) => new ChipTop()(p))
 
 trait HasTestHarnessFunctions {
-  val lazySystem: LazyModule
   val harnessFunctions = ArrayBuffer.empty[HasHarnessSignalReferences => Seq[Any]]
-  val portMap = scala.collection.mutable.Map[String, Seq[Data]]()
 }
 
 trait HasHarnessSignalReferences {
@@ -39,12 +38,13 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
   val harnessReset = WireInit(reset)
   val success = io.success
 
-  // dutReset assignment can be overridden via a harnessFunction, but by default it is just reset
-  val dutReset = WireDefault(if (p(GlobalResetSchemeKey).pinIsAsync) reset.asAsyncReset else reset)
+  val dutReset = reset.asAsyncReset
 
   lazyDut match { case d: HasTestHarnessFunctions =>
     d.harnessFunctions.foreach(_(this))
-    ApplyHarnessBinders(this, d.lazySystem, p(HarnessBinders), d.portMap.toMap)
+  }
+  lazyDut match { case d: HasIOBinders =>
+    ApplyHarnessBinders(this, d.lazySystem, d.portMap)
   }
 }
 

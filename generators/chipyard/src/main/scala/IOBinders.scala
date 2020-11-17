@@ -1,17 +1,17 @@
 package chipyard.iobinders
 
 import chisel3._
-import chisel3.util.experimental.{BoringUtils}
 import chisel3.experimental.{Analog, IO, DataMirror}
 
 import freechips.rocketchip.config._
-import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
+import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.{SimAXIMem}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
 import freechips.rocketchip.util._
+import freechips.rocketchip.prci.{ClockSinkNode, ClockSinkParameters}
 import freechips.rocketchip.groundtest.{GroundTestSubsystemModuleImp, GroundTestSubsystem}
 
 import sifive.blocks.devices.gpio._
@@ -24,9 +24,13 @@ import barstools.iocell.chisel._
 import testchipip._
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 
-import chipyard.GlobalResetSchemeKey
-
 import scala.reflect.{ClassTag}
+
+object IOBinderTypes {
+  type IOBinderTuple = (Seq[Data], Seq[IOCell])
+  type IOBinderFunction = (Boolean, => Any) => ModuleValue[IOBinderTuple]
+}
+import IOBinderTypes._
 
 // System for instantiating binders based
 // on the scala type of the Target (_not_ its IO). This avoids needing to
@@ -40,21 +44,30 @@ import scala.reflect.{ClassTag}
 
 // You can add your own binder by adding a new (key, fn) pair, typically by using
 // the OverrideIOBinder or ComposeIOBinder macros
-case object IOBinders extends Field[Map[String, (Any) => (Seq[Data], Seq[IOCell])]](
-  Map[String, (Any) => (Seq[Data], Seq[IOCell])]().withDefaultValue((Any) => (Nil, Nil))
+case object IOBinders extends Field[Map[String, Seq[IOBinderFunction]]](
+  Map[String, Seq[IOBinderFunction]]().withDefaultValue(Nil)
 )
-object ApplyIOBinders {
-  def apply(sys: LazyModule, map: Map[String, (Any) => (Seq[Data], Seq[IOCell])]):
-      (Iterable[Data], Iterable[IOCell], Map[String, Seq[Data]]) = {
-    val lzy = map.map({ case (s,f) => s -> f(sys) })
-    val imp = map.map({ case (s,f) => s -> f(sys.module) })
-    val unzipped = (lzy.values ++ imp.values).unzip
 
-    val ports: Iterable[Data] = unzipped._1.flatten
-    val cells: Iterable[IOCell] = unzipped._2.flatten
-    val portMap: Map[String, Seq[Data]] = map.keys.map(k => k -> (lzy(k)._1 ++ imp(k)._1)).toMap
-    (ports, cells, portMap)
-  }
+abstract trait HasIOBinders { this: LazyModule =>
+  val lazySystem: LazyModule
+  private val iobinders = p(IOBinders)
+  // Note: IOBinders cannot rely on the implicit clock/reset, as they may be called from the
+  // context of a LazyRawModuleImp
+  private val lzy = iobinders.map({ case (s,fns) => s -> fns.map(f => f(true, lazySystem)) })
+  private val imp = iobinders.map({ case (s,fns) => s -> fns.map(f => f(false, lazySystem.module)) })
+
+  private lazy val lzyFlattened: Map[String, IOBinderTuple] = lzy.map({
+    case (s,ms) => s -> (ms.map(_._1).flatten, ms.map(_._2).flatten)
+  })
+  private lazy val impFlattened: Map[String, IOBinderTuple] = imp.map({
+    case (s,ms) => s -> (ms.map(_._1).flatten, ms.map(_._2).flatten)
+  })
+
+  // A publicly accessible list of IO cells (useful for a floorplanning tool, for example)
+  lazy val iocells = (lzyFlattened.values ++ impFlattened.values).unzip._2.flatten.toBuffer
+
+  // A mapping between stringified DigitalSystem traits and their corresponding ChipTop ports
+  lazy val portMap = iobinders.keys.map(k => k -> (lzyFlattened(k)._1 ++ impFlattened(k)._1)).toMap
 }
 
 // Note: The parameters instance is accessible only through LazyModule
@@ -72,63 +85,45 @@ object GetSystemParameters {
   }
 }
 
-class IOBinder(f: (View, View, View) => PartialFunction[Any, Any]) extends Config(f)
-
-// This macro overrides previous matches on some Top mixin. This is useful for
-// binders which drive IO, since those typically cannot be composed
-class OverrideIOBinder[T, S <: Data](fn: => (T) => (Seq[S], Seq[IOCell]))(implicit tag: ClassTag[T]) extends IOBinder((site, here, up) => {
-  case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString ->
-      ((t: Any) => {
-        t match {
-          case system: T =>
-            val (ports, cells) = fn(system)
-            (ports, cells)
-          case _ => (Nil, Nil)
-        }
-      })
-  )
+class IOBinder[T](composer: Seq[IOBinderFunction] => Seq[IOBinderFunction])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
+  case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString -> composer(up(IOBinders, site)(tag.runtimeClass.toString)))
 })
 
-// This macro composes with previous matches on some Top mixin. This is useful for
-// annotation-like binders, since those can typically be composed
-class ComposeIOBinder[T, S <: Data](fn: => (T) => (Seq[S], Seq[IOCell]))(implicit tag: ClassTag[T]) extends IOBinder((site, here, up) => {
-  case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString ->
-      ((t: Any) => {
-        t match {
-          case system: T =>
-            val r = up(IOBinders, site)(tag.runtimeClass.toString)(system)
-            val h = fn(system)
-            val ports = r._1 ++ h._1
-            val cells = r._2 ++ h._2
-            (ports, cells)
-          case _ => (Nil, Nil)
-        }
-      })
-  )
-})
-
-object BoreHelper {
-  def apply[T <: Data](name: String, source: T): T = {
-    val (io, wire) = source match {
-      case c: Clock =>
-        val wire =  Wire(Clock())
-        // Provide a dummy assignment to prevent FIRRTL invalid assignment
-        // errors prior to running the wiring pass
-        wire := false.B.asClock
-        (IO(Output(Clock())), wire)
-      case r: Reset =>
-        val wire =  Wire(Reset())
-        wire := false.B
-        (IO(Output(Reset())), wire)
+class ConcreteIOBinder[T](composes: Boolean, fn: T => IOBinderTuple)(implicit tag: ClassTag[T]) extends IOBinder[T](
+  up => (if (composes) up else Nil) ++ Seq(((_, t) => { InModuleBody {
+    t match {
+      case system: T => fn(system)
+      case _ => (Nil, Nil)
     }
-    io.suggestName(name)
-    wire.suggestName(s"chiptop_${name}")
-    dontTouch(wire)
-    BoringUtils.bore(source, Seq(wire))
-    io := wire
-    io.asInstanceOf[source.type]
-  }
-}
+  }}): IOBinderFunction)
+)
+
+class LazyIOBinder[T](composes: Boolean, fn: T => ModuleValue[IOBinderTuple])(implicit tag: ClassTag[T]) extends IOBinder[T](
+  up => (if (composes) up else Nil) ++ Seq(((isLazy, t) => {
+    val empty = new ModuleValue[IOBinderTuple] {
+      def getWrappedValue: IOBinderTuple = (Nil, Nil)
+    }
+    if (isLazy) {
+      t match {
+        case system: T => fn(system)
+        case _ => empty
+      }
+    } else {
+      empty
+    }
+  }): IOBinderFunction)
+)
+
+// The "Override" binders override any previous IOBinders (lazy or concrete) defined on the same trait.
+// The "Compose" binders do not override previously defined IOBinders on the same trait
+// The default IOBinders evaluate only in the concrete "ModuleImp" phase of elaboration
+// The "Lazy" IOBinders evaluate in the LazyModule phase, but can also generate hardware through InModuleBody
+
+class OverrideIOBinder[T](fn: T => IOBinderTuple)(implicit tag: ClassTag[T]) extends ConcreteIOBinder[T](false, fn)
+class ComposeIOBinder[T](fn: T => IOBinderTuple)(implicit tag: ClassTag[T]) extends ConcreteIOBinder[T](true, fn)
+
+class OverrideLazyIOBinder[T](fn: T => ModuleValue[IOBinderTuple])(implicit tag: ClassTag[T]) extends LazyIOBinder[T](false, fn)
+class ComposeLazyIOBinder[T](fn: T => ModuleValue[IOBinderTuple])(implicit tag: ClassTag[T]) extends LazyIOBinder[T](true, fn)
 
 
 case object IOCellKey extends Field[IOCellTypeParams](GenericIOCellParams())
@@ -157,7 +152,7 @@ class WithGPIOCells extends OverrideIOBinder({
 class WithUARTIOCells extends OverrideIOBinder({
   (system: HasPeripheryUARTModuleImp) => {
     val (ports: Seq[UARTPortIO], cells2d) = system.uart.zipWithIndex.map({ case (u, i) =>
-      val (port, ios) = IOCell.generateIOFromSignal(u, s"uart_${i}", system.p(IOCellKey))
+      val (port, ios) = IOCell.generateIOFromSignal(u, s"uart_${i}", system.p(IOCellKey), abstractResetAsAsync = true)
       (port, ios)
     }).unzip
     (ports, cells2d.flatten)
@@ -173,8 +168,8 @@ class WithSPIIOCells extends OverrideIOBinder({
       val iocellBase = s"iocell_${name}"
 
       // SCK and CS are unidirectional outputs
-      val sckIOs = IOCell.generateFromSignal(s.sck, port.sck, Some(s"${iocellBase}_sck"), system.p(IOCellKey))
-      val csIOs = IOCell.generateFromSignal(s.cs, port.cs, Some(s"${iocellBase}_cs"), system.p(IOCellKey))
+      val sckIOs = IOCell.generateFromSignal(s.sck, port.sck, Some(s"${iocellBase}_sck"), system.p(IOCellKey), IOCell.toAsyncReset)
+      val csIOs = IOCell.generateFromSignal(s.cs, port.cs, Some(s"${iocellBase}_cs"), system.p(IOCellKey), IOCell.toAsyncReset)
 
       // DQ are bidirectional, so then need special treatment
       val dqIOs = s.dq.zip(port.dq).zipWithIndex.map { case ((pin, ana), j) =>
@@ -196,7 +191,7 @@ class WithSPIIOCells extends OverrideIOBinder({
 class WithExtInterruptIOCells extends OverrideIOBinder({
   (system: HasExtInterruptsModuleImp) => {
     if (system.outer.nExtInterrupts > 0) {
-      val (port: UInt, cells) = IOCell.generateIOFromSignal(system.interrupts, "ext_interrupts", system.p(IOCellKey))
+      val (port: UInt, cells) = IOCell.generateIOFromSignal(system.interrupts, "ext_interrupts", system.p(IOCellKey), abstractResetAsAsync = true)
       (Seq(port), cells)
     } else {
       (Nil, Nil)
@@ -205,104 +200,123 @@ class WithExtInterruptIOCells extends OverrideIOBinder({
 })
 
 
-class WithDebugIOCells extends OverrideIOBinder({
-  (system: HasPeripheryDebugModuleImp) => {
-    system.debug.map({ debug =>
-      val p = system.p
-      val tlbus = system.outer.asInstanceOf[BaseSubsystem].locateTLBusWrapper(p(ExportDebug).slaveWhere)
-      val debug_clock = Wire(Clock()).suggestName("debug_clock")
-      val debug_reset = Wire(Reset()).suggestName("debug_reset")
-      debug_clock := false.B.asClock // must provide default assignment to avoid firrtl unassigned error
-      debug_reset := false.B // must provide default assignment to avoid firrtl unassigned error
-      BoringUtils.bore(tlbus.module.clock, Seq(debug_clock))
-      BoringUtils.bore(tlbus.module.reset, Seq(debug_reset))
+class WithDebugIOCells extends OverrideLazyIOBinder({
+  (system: HasPeripheryDebug) => {
+    implicit val p = GetSystemParameters(system)
+    val tlbus = system.asInstanceOf[BaseSubsystem].locateTLBusWrapper(p(ExportDebug).slaveWhere)
+    val clockSinkNode = system.debugOpt.map(_ => ClockSinkNode(Seq(ClockSinkParameters())))
+    clockSinkNode.map(_ := tlbus.fixedClockNode)
+    def clockBundle = clockSinkNode.get.in.head._1
 
-      // We never use the PSDIO, so tie it off on-chip
-      system.psd.psd.foreach { _ <> 0.U.asTypeOf(new PSDTestMode) }
-      system.resetctrl.map { rcio => rcio.hartIsInReset.map { _ := debug_reset.asBool } }
-      system.debug.map { d =>
-        // Tie off extTrigger
-        d.extTrigger.foreach { t =>
-          t.in.req := false.B
-          t.out.ack := t.out.req
+
+    InModuleBody { system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripheryDebugModuleImp => {
+      system.debug.map({ debug =>
+        // We never use the PSDIO, so tie it off on-chip
+        system.psd.psd.foreach { _ <> 0.U.asTypeOf(new PSDTestMode) }
+        system.resetctrl.map { rcio => rcio.hartIsInReset.map { _ := clockBundle.reset.asBool } }
+        system.debug.map { d =>
+          // Tie off extTrigger
+          d.extTrigger.foreach { t =>
+            t.in.req := false.B
+            t.out.ack := t.out.req
+          }
+          // Tie off disableDebug
+          d.disableDebug.foreach { d => d := false.B }
+          // Drive JTAG on-chip IOs
+          d.systemjtag.map { j =>
+            j.reset := clockBundle.reset
+            j.mfr_id := p(JtagDTMKey).idcodeManufId.U(11.W)
+            j.part_number := p(JtagDTMKey).idcodePartNum.U(16.W)
+            j.version := p(JtagDTMKey).idcodeVersion.U(4.W)
+          }
         }
-        // Tie off disableDebug
-        d.disableDebug.foreach { d => d := false.B }
-        // Drive JTAG on-chip IOs
-        d.systemjtag.map { j =>
-          j.reset := debug_reset
-          j.mfr_id := system.p(JtagDTMKey).idcodeManufId.U(11.W)
-          j.part_number := system.p(JtagDTMKey).idcodePartNum.U(16.W)
-          j.version := system.p(JtagDTMKey).idcodeVersion.U(4.W)
+        Debug.connectDebugClockAndReset(Some(debug), clockBundle.clock)
+
+        // Add IOCells for the DMI/JTAG/APB ports
+        val dmiTuple = debug.clockeddmi.map { d =>
+          IOCell.generateIOFromSignal(d, "dmi", p(IOCellKey), abstractResetAsAsync = true)
         }
-      }
-      Debug.connectDebugClockAndReset(Some(debug), debug_clock)(system.p)
 
-      // Add IOCells for the DMI/JTAG/APB ports
-      val dmiTuple = debug.clockeddmi.map { d =>
-        IOCell.generateIOFromSignal(d, "dmi", p(IOCellKey), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
-      }
+        val jtagTuple = debug.systemjtag.map { j =>
+          IOCell.generateIOFromSignal(j.jtag, "jtag", p(IOCellKey), abstractResetAsAsync = true)
+        }
 
-      val jtagTuple = debug.systemjtag.map { j =>
-        IOCell.generateIOFromSignal(j.jtag, "jtag", p(IOCellKey), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
-      }
+        val apbTuple = debug.apb.map { a =>
+          IOCell.generateIOFromSignal(a, "apb", p(IOCellKey), abstractResetAsAsync = true)
+        }
 
-      val apbTuple = debug.apb.map { a =>
-        IOCell.generateIOFromSignal(a, "apb", p(IOCellKey), abstractResetAsAsync = p(GlobalResetSchemeKey).pinIsAsync)
-      }
-
-      val allTuples = (dmiTuple ++ jtagTuple ++ apbTuple).toSeq
-      (allTuples.map(_._1).toSeq, allTuples.flatMap(_._2).toSeq)
-    }).getOrElse((Nil, Nil))
+        val allTuples = (dmiTuple ++ jtagTuple ++ apbTuple).toSeq
+        (allTuples.map(_._1).toSeq, allTuples.flatMap(_._2).toSeq)
+      }).getOrElse((Nil, Nil))
+    }}}
   }
 })
 
 class WithSerialTLIOCells extends OverrideIOBinder({
   (system: CanHavePeripheryTLSerial) => system.serial_tl.map({ s =>
     val sys = system.asInstanceOf[BaseSubsystem]
-    val (port, cells) = IOCell.generateIOFromSignal(s.getWrappedValue, "serial_tl", sys.p(IOCellKey))
+    val (port, cells) = IOCell.generateIOFromSignal(s.getWrappedValue, "serial_tl", sys.p(IOCellKey), abstractResetAsAsync = true)
     (Seq(port), cells)
   }).getOrElse((Nil, Nil))
 })
 
 
-class WithAXI4MemPunchthrough extends OverrideIOBinder({
+class WithAXI4MemPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveMasterAXI4MemPort) => {
-    val ports: Seq[ClockedAndResetIO[AXI4Bundle]] = system.mem_axi4.zipWithIndex.map({ case (m, i) =>
-      val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mem_${i}")
-      p.bits <> m
-      val mbus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(MBUS)
-      p.clock := BoreHelper("axi4_mem_clock",  mbus.module.clock)
-      p.reset := BoreHelper("axi4_mem_reset", mbus.module.reset)
-      p
-    })
-    (ports, Nil)
+    implicit val p: Parameters = GetSystemParameters(system)
+    val clockSinkNode = p(ExtMem).map(_ => ClockSinkNode(Seq(ClockSinkParameters())))
+    clockSinkNode.map(_ := system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(MBUS).fixedClockNode)
+    def clockBundle = clockSinkNode.get.in.head._1
+
+    InModuleBody {
+      val ports: Seq[ClockedAndResetIO[AXI4Bundle]] = system.mem_axi4.zipWithIndex.map({ case (m, i) =>
+        val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mem_${i}")
+        p.bits <> m
+        p.clock := clockBundle.clock
+        p.reset := clockBundle.reset
+        p
+      })
+      (ports, Nil)
+    }
   }
 })
 
-class WithAXI4MMIOPunchthrough extends OverrideIOBinder({
+class WithAXI4MMIOPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveMasterAXI4MMIOPort) => {
-    val ports: Seq[ClockedAndResetIO[AXI4Bundle]] = system.mmio_axi4.zipWithIndex.map({ case (m, i) =>
-      val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mmio_${i}")
-      p.bits <> m
-      val mbus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(MBUS)
-      p.clock := BoreHelper("axi4_mmio_clock",  mbus.module.clock)
-      p.reset := BoreHelper("axi4_mmio_reset", mbus.module.reset)
-      p
-    })
-    (ports, Nil)
+    implicit val p: Parameters = GetSystemParameters(system)
+    val clockSinkNode = p(ExtBus).map(_ => ClockSinkNode(Seq(ClockSinkParameters())))
+    clockSinkNode.map(_ := system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(MBUS).fixedClockNode)
+    def clockBundle = clockSinkNode.get.in.head._1
+
+    InModuleBody {
+      val ports: Seq[ClockedAndResetIO[AXI4Bundle]] = system.mmio_axi4.zipWithIndex.map({ case (m, i) =>
+        val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mmio_${i}")
+        p.bits <> m
+        p.clock := clockBundle.clock
+        p.reset := clockBundle.reset
+        p
+      })
+      (ports, Nil)
+    }
   }
 })
 
-class WithL2FBusAXI4Punchthrough extends OverrideIOBinder({
-   (system: CanHaveSlaveAXI4Port) => {
-    val ports: Seq[ClockedIO[AXI4Bundle]] = system.l2_frontend_bus_axi4.zipWithIndex.map({ case (m, i) =>
-      val p = IO(new ClockedIO(Flipped(DataMirror.internal.chiselTypeClone[AXI4Bundle](m)))).suggestName(s"axi4_fbus_${i}")
-      m <> p.bits
-      p.clock := BoreHelper("axi4_fbus_clock", system.asInstanceOf[BaseSubsystem].fbus.module.clock)
-      p
-    })
-    (ports, Nil)
+class WithL2FBusAXI4Punchthrough extends OverrideLazyIOBinder({
+  (system: CanHaveSlaveAXI4Port) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    val clockSinkNode = p(ExtIn).map(_ => ClockSinkNode(Seq(ClockSinkParameters())))
+    clockSinkNode.map(_ := system.asInstanceOf[BaseSubsystem].fbus.fixedClockNode)
+    def clockBundle = clockSinkNode.get.in.head._1
+
+    InModuleBody {
+      val ports: Seq[ClockedIO[AXI4Bundle]] = system.l2_frontend_bus_axi4.zipWithIndex.map({ case (m, i) =>
+        val p = IO(new ClockedIO(Flipped(DataMirror.internal.chiselTypeClone[AXI4Bundle](m)))).suggestName(s"axi4_fbus_${i}")
+        m <> p.bits
+        p.clock := clockBundle.clock
+        p
+      })
+      (ports, Nil)
+    }
   }
 })
 

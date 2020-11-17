@@ -16,40 +16,6 @@ import testchipip.{TLTileResetCtrl}
 import chipyard.clocking._
 
 /**
-  * Chipyard provides three baseline, top-level reset schemes, set using the
-  * [[GlobalResetSchemeKey]] in a Parameters instance. These are:
-  *
-  * 1) Synchronous: The input coming to the chip is synchronous to the provided
-  *    clocks and will be used without modification as a synchronous reset.
-  *    This is safe only for use in FireSim and SW simulation.
-  *
-  * 2) Asynchronous: The input reset is asynchronous to the input clock, but it
-  *    is caught and synchronized to that clock before it is dissemenated.
-  *    Thus, downsteam modules will be emitted with synchronously reset state
-  *    elements.
-  *
-  * 3) Asynchronous Full: The input reset is asynchronous to the input clock,
-  *    and is used globally as an async reset. Downstream modules will be emitted
-  *    with asynchronously reset state elements.
-  *
-  */
-sealed trait GlobalResetScheme {
-  def pinIsAsync: Boolean
-}
-sealed trait HasAsyncInput { self: GlobalResetScheme =>
-  def pinIsAsync = true
-}
-
-sealed trait HasSyncInput { self: GlobalResetScheme =>
-  def pinIsAsync = false
-}
-
-case object GlobalResetSynchronous extends GlobalResetScheme with HasSyncInput
-case object GlobalResetAsynchronous extends GlobalResetScheme with HasAsyncInput
-case object GlobalResetAsynchronousFull extends GlobalResetScheme with HasAsyncInput
-case object GlobalResetSchemeKey extends Field[GlobalResetScheme](GlobalResetSynchronous)
-
-/**
  * A simple reset implementation that punches out reset ports
  * for standard Module classes. Three basic reset schemes
  * are provided. See [[GlobalResetScheme]].
@@ -58,24 +24,16 @@ object GenerateReset {
   def apply(chiptop: ChipTop, clock: Clock): Reset = {
     implicit val p = chiptop.p
     // this needs directionality so generateIOFromSignal works
-    val reset_wire = Wire(Input(Reset()))
-    val (reset_io, resetIOCell) = p(GlobalResetSchemeKey) match {
-      case GlobalResetSynchronous =>
-        IOCell.generateIOFromSignal(reset_wire, "reset")
-      case GlobalResetAsynchronousFull =>
-        IOCell.generateIOFromSignal(reset_wire, "reset", abstractResetAsAsync = true)
-      case GlobalResetAsynchronous => {
-        val async_reset_wire = Wire(Input(AsyncReset()))
-        reset_wire := ResetCatchAndSync(clock, async_reset_wire.asBool())
-        IOCell.generateIOFromSignal(async_reset_wire, "reset", abstractResetAsAsync = true)
-      }
-    }
+    val async_reset_wire = Wire(Input(AsyncReset()))
+    val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(async_reset_wire, "reset",
+      abstractResetAsAsync = true)
+
     chiptop.iocells ++= resetIOCell
     chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
       reset_io := th.dutReset
       Nil
     })
-    reset_wire
+    async_reset_wire
   }
 }
 
