@@ -79,14 +79,7 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
 // Subproject definitions begin
 
 // This needs to stay in sync with the chisel3 and firrtl git submodules
-val chiselVersion = "3.4.0"
-
-lazy val chiselRef = ProjectRef(workspaceDirectory / "chisel3", "chisel")
-lazy val chiselLib = "edu.berkeley.cs" %% "chisel3" % chiselVersion
-// While not built from source, *must* be in sync with the chisel3 git submodule
-// Building from source requires extending sbt-sriracha or a similar plugin and
-//   keeping scalaVersion in sync with chisel3 to the minor version
-lazy val chiselPluginLib = "edu.berkeley.cs" % "chisel3-plugin" % chiselVersion cross CrossVersion.full
+lazy val chisel  = (project in file("tools/chisel3"))
 
 lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))
   .settings(commonSettings)
@@ -95,9 +88,7 @@ lazy val treadle = (project in file("tools/treadle"))
   .settings(commonSettings)
 
 lazy val chisel_testers = (project in file("tools/chisel-testers"))
-  .sourceDependency(chiselRef, chiselLib)
-  .dependsOn(firrtl_interpreter, treadle)
-  .settings(addCompilerPlugin(chiselPluginLib))
+  .dependsOn(firrtl_interpreter, treadle, chisel)
   .settings(
       commonSettings,
       libraryDependencies ++= Seq(
@@ -123,18 +114,20 @@ lazy val rocketConfig = (project in rocketChipDir / "api-config-chipsalliance/bu
   .settings(commonSettings)
 
 lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
-  .sourceDependency(chiselRef, chiselLib)
-  .dependsOn(hardfloat, rocketMacros, rocketConfig)
-  .settings(addCompilerPlugin(chiselPluginLib))
+  .dependsOn(hardfloat, rocketMacros, rocketConfig, chisel)
   .settings(commonSettings)
+  .settings( // Settings for scalafix
+    semanticdbEnabled := true,
+    semanticdbVersion := scalafixSemanticdb.revision,
+    scalacOptions += "-Ywarn-unused-import"
+  )
 
 lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip, sifive_blocks)
   .settings(commonSettings)
 
 lazy val iocell = (project in file("./tools/barstools/iocell/"))
-  .sourceDependency(chiselRef, chiselLib)
-  .settings(addCompilerPlugin(chiselPluginLib))
+  .dependsOn(chisel)
   .settings(commonSettings)
 
 lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
@@ -197,9 +190,7 @@ lazy val barstoolsMacros = (project in file("./tools/barstools/macros/"))
   .settings(commonSettings)
 
 lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
-  .sourceDependency(chiselRef, chiselLib)
   .dependsOn(chisel_testers)
-  .settings(addCompilerPlugin(chiselPluginLib))
   .settings(
       commonSettings,
       libraryDependencies ++= Seq(
