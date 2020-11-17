@@ -151,6 +151,11 @@ class WithRocketDCacheScratchpad extends Config((site, here, up) => {
   }
 })
 
+// Replaces the L2 with a broadcast manager for maintaining coherence
+class WithBroadcastManager extends Config((site, here, up) => {
+  case BankedL2Key => up(BankedL2Key, site).copy(coherenceManager = CoherenceManagerWrapper.broadcastManager)
+})
+
 class WithHwachaTest extends Config((site, here, up) => {
   case TestSuitesKey => (tileParams: Seq[TileParams], suiteHelper: TestSuiteHelper, p: Parameters) => {
     up(TestSuitesKey).apply(tileParams, suiteHelper, p)
