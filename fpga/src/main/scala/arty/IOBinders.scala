@@ -8,7 +8,7 @@ import freechips.rocketchip.devices.debug._
 
 import chipyard.iobinders.{ComposeIOBinder}
 
-class WithResetPassthrough extends ComposeIOBinder({
+class WithDebugResetPassthrough extends ComposeIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
     // Debug module reset
     val io_ndreset: Bool = IO(Output(Bool())).suggestName("ndreset")
