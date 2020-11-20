@@ -1,12 +1,12 @@
 import Tests._
 
-// This gives us a nicer handle  to the root project instead of using the
+// This gives us a nicer handle to the root project instead of using the
 // implicit one
 lazy val chipyardRoot = Project("chipyardRoot", file("."))
 
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
-  version := "1.0",
+  version := "1.3",
   scalaVersion := "2.12.10",
   traceLevel := 15,
   test in assembly := {},
@@ -14,17 +14,19 @@ lazy val commonSettings = Seq(
     case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
     case _ => MergeStrategy.first}},
   scalacOptions ++= Seq("-deprecation","-unchecked","-Xsource:2.11"),
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.2" % "test",
-  libraryDependencies += "org.scalatestplus" %% "scalacheck-1-14" % "3.1.1.1" % "test",
-  libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.10",
-  libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-  libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.1",
-  libraryDependencies += "org.scala-lang.modules" % "scala-jline" % "2.12.1",
-  libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.10",
-  libraryDependencies += "org.typelevel" %% "spire" % "0.16.2",
-  libraryDependencies += "org.scalanlp" %% "breeze" % "1.0",
-  libraryDependencies += "org.json4s" %% "json4s-native" % "3.6.10",
-  libraryDependencies += "junit" % "junit" % "4.13",
+  libraryDependencies ++= Seq(
+    "org.scalatest" %% "scalatest" % "3.2.2" % "test",
+    "org.scalatestplus" %% "scalacheck-1-14" % "3.1.1.1" % "test",
+    "org.json4s" %% "json4s-jackson" % "3.6.10",
+    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+    "com.github.scopt" %% "scopt" % "3.7.1",
+    "org.scala-lang.modules" % "scala-jline" % "2.12.1",
+    "com.typesafe.play" %% "play-json" % "2.6.10",
+    "org.typelevel" %% "spire" % "0.16.2",
+    "org.scalanlp" %% "breeze" % "1.0",
+    "org.json4s" %% "json4s-native" % "3.6.10",
+    "junit" % "junit" % "4.13"
+  ),
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
   allDependencies := allDependencies.value.filterNot(_.organization == "edu.berkeley.cs"),
