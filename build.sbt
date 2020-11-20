@@ -14,14 +14,11 @@ lazy val commonSettings = Seq(
     case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
     case _ => MergeStrategy.first}},
   scalacOptions ++= Seq("-deprecation","-unchecked","-Xsource:2.11"),
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.0" % "test",
-  libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.1",
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.2" % "test",
+  libraryDependencies += "org.scalatestplus" %% "scalacheck-1-14" % "3.1.1.1" % "test",
+  libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.10",
   libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-  libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.0",
-  libraryDependencies += "org.scala-lang.modules" % "scala-jline" % "2.12.1",
-  libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.10",
   libraryDependencies += "org.typelevel" %% "spire" % "0.16.2",
-  libraryDependencies += "org.scalanlp" %% "breeze" % "1.0",
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
   allDependencies := allDependencies.value.filterNot(_.organization == "edu.berkeley.cs"),
@@ -72,9 +69,9 @@ def freshProject(name: String, dir: File): Project = {
 // Fork each scala test for now, to work around persistent mutable state
 // in Rocket-Chip based generators
 def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
-      val options = ForkOptions()
-      new Group(test.name, Seq(test), SubProcess(options))
-  } toSeq
+  val options = ForkOptions()
+  new Group(test.name, Seq(test), SubProcess(options))
+} toSeq
 
 // Subproject definitions begin
 
@@ -82,22 +79,32 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
 lazy val chisel  = (project in file("tools/chisel3"))
 
 lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))
-  .settings(commonSettings)
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      "org.scala-lang.modules" % "scala-jline" % "2.12.1",
+  ))
 
 lazy val treadle = (project in file("tools/treadle"))
-  .settings(commonSettings)
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      "org.scala-lang.modules" % "scala-jline" % "2.12.1",
+      "com.github.scopt" %% "scopt" % "3.7.1",
+      "org.json4s" %% "json4s-native" % "3.6.10"
+  ))
 
 lazy val chisel_testers = (project in file("tools/chisel-testers"))
   .dependsOn(firrtl_interpreter, treadle, chisel)
   .settings(
-      commonSettings,
-      libraryDependencies ++= Seq(
-        "junit" % "junit" % "4.12",
-        "org.scalatest" %% "scalatest" % "3.0.5",
-        "org.scalacheck" %% "scalacheck" % "1.14.0",
-        "com.github.scopt" %% "scopt" % "3.7.0"
-      )
-    )
+    commonSettings,
+    libraryDependencies ++= Seq(
+      "junit" % "junit" % "4.13",
+      "org.scalatest" %% "scalatest" % "3.2.2",
+      "org.scalatestplus" %% "scalacheck-1-14" % "3.1.1.1",
+      "org.scalacheck" %% "scalacheck" % "1.14.3",
+      "com.github.scopt" %% "scopt" % "3.7.1"
+  ))
 
 // Contains annotations & firrtl passes you may wish to use in rocket-chip without
 // introducing a circular dependency between RC and MIDAS
@@ -170,7 +177,11 @@ lazy val sha3 = (project in file("generators/sha3"))
 
 lazy val gemmini = (project in file("generators/gemmini"))
   .dependsOn(rocketchip, chisel_testers, testchipip)
-  .settings(commonSettings)
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      "org.scalanlp" %% "breeze" % "0.13.2"
+  ))
 
 lazy val nvdla = (project in file("generators/nvdla"))
   .dependsOn(rocketchip)
@@ -182,26 +193,37 @@ lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeo
   .settings(libraryDependencies ++= Seq("io.github.daviddenton" %% "handlebars-scala-fork" % "2.3.0"))
 
 lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
-  .settings(commonSettings)
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      "com.typesafe.play" %% "play-json" % "2.6.10"
+  ))
 
 lazy val barstoolsMacros = (project in file("./tools/barstools/macros/"))
   .dependsOn(firrtl_interpreter, mdf, rocketchip)
   .enablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonSettings)
 
+val dsptoolsDependencies = Seq(
+  "org.scalanlp" %% "breeze" % "1.0",
+  "junit" % "junit" % "4.13" % "test",
+  "org.scalatest" %% "scalatest" % "3.2.2",
+  "org.scalacheck" %% "scalacheck" % "1.14.3" % "test"
+)
+
 lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
   .dependsOn(chisel_testers)
   .settings(
-      commonSettings,
-      libraryDependencies ++= Seq(
-        "junit" % "junit" % "4.13" % "test",
-        "org.scalatest" %% "scalatest" % "3.0.8",
-        "org.scalacheck" %% "scalacheck" % "1.14.3" % "test"
-  ))
+    commonSettings,
+    libraryDependencies ++= dsptoolsDependencies
+  )
 
 lazy val `rocket-dsptools` = freshProject("rocket-dsptools", file("./tools/dsptools/rocket"))
   .dependsOn(rocketchip, dsptools)
-  .settings(commonSettings)
+  .settings(
+    commonSettings,
+    libraryDependencies ++= dsptoolsDependencies
+  )
 
 lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
   .dependsOn(rocketchip)

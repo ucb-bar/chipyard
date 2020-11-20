@@ -43,6 +43,8 @@ case class MyCoreParams(
   val pmpGranularity: Int = 4 // copied from Rocket
   val nBreakpoints: Int = 0 // TODO: Check
   val useBPWatch: Boolean = false
+  val mcontextWidth: Int = 0
+  val scontextWidth: Int = 0
   val nPerfCounters: Int = 29
   val haveBasicCounters: Boolean = true
   val haveFSDirty: Boolean = false
