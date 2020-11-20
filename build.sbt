@@ -83,19 +83,27 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
 
 // Subproject definitions begin
 
+val chiselVersion = "3.4.0"
 lazy val chisel = (project in file("tools/chisel3"))
+lazy val chiselLib = "edu.berkeley.cs" %% "chisel3" % chiselVersion
+// While not built from source, *must* be in sync with the chisel3 git submodule
+// Building from source requires extending sbt-sriracha or a similar plugin and
+//   keeping scalaVersion in sync with chisel3 to the minor version
+lazy val chiselPluginLib = "edu.berkeley.cs" % "chisel3-plugin" % chiselVersion cross CrossVersion.full
 
-lazy val firrtl = ProjectRef(workspaceDirectory / "firrtl", "firrtl")
+lazy val firrtlRef = ProjectRef(workspaceDirectory / "firrtl", "firrtl")
 
 lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))
-  .dependsOn(firrtl)
+  .dependsOn(firrtlRef)
   .settings(commonSettings)
 
 lazy val treadle = (project in file("tools/treadle"))
   .settings(commonSettings)
 
 lazy val chisel_testers = (project in file("tools/chisel-testers"))
-  .dependsOn(chisel, firrtl_interpreter, treadle)
+  .sourceDependency(chisel, chiselLib)
+  .settings(addCompilerPlugin(chiselPluginLib))
+  .dependsOn(firrtl_interpreter, treadle)
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
@@ -122,7 +130,9 @@ lazy val rocketConfig = (project in rocketChipDir / "api-config-chipsalliance/bu
   .settings(commonSettings)
 
 lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
-  .dependsOn(chisel, hardfloat, rocketMacros, rocketConfig)
+  .sourceDependency(chisel, chiselLib)
+  .settings(addCompilerPlugin(chiselPluginLib))
+  .dependsOn(hardfloat, rocketMacros, rocketConfig)
   .settings(commonSettings)
   .settings( // Settings for scalafix
     semanticdbEnabled := true,
@@ -135,7 +145,8 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(commonSettings)
 
 lazy val iocell = (project in file("./tools/barstools/iocell/"))
-  .dependsOn(chisel)
+  .sourceDependency(chisel, chiselLib)
+  .settings(addCompilerPlugin(chiselPluginLib))
   .settings(commonSettings)
 
 lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))

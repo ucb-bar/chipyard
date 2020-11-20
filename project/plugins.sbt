@@ -19,4 +19,4 @@ addSbtPlugin("ch.epfl.scala" % "sbt-bloop" % "1.4.1")
 addSbtPlugin("com.eed3si9n" % "sbt-sriracha" % "0.1.0")
 addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.2.5" )
 
-libraryDependencies += "com.github.os72" % "protoc-jar" % "3.5.1.1"
+libraryDependencies += "com.github.os72" % "protoc-jar" % "3.11.4"
