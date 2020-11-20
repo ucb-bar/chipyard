@@ -81,9 +81,12 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
 
 // Subproject definitions begin
 
-lazy val chisel  = (project in file("tools/chisel3"))
+lazy val chisel = (project in file("tools/chisel3"))
+
+lazy val firrtl = ProjectRef(workspaceDirectory / "firrtl", "firrtl")
 
 lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))
+  .dependsOn(firrtl)
   .settings(commonSettings)
 
 lazy val treadle = (project in file("tools/treadle"))
@@ -107,7 +110,8 @@ lazy val midasTargetUtils = ProjectRef(firesimDir, "targetutils")
 
  // Rocket-chip dependencies (subsumes making RC a RootProject)
 lazy val hardfloat  = (project in rocketChipDir / "hardfloat")
-  .settings(commonSettings).dependsOn(midasTargetUtils)
+  .dependsOn(midasTargetUtils)
+  .settings(commonSettings)
 
 lazy val rocketMacros  = (project in rocketChipDir / "macros")
   .settings(commonSettings)
