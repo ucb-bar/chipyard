@@ -160,7 +160,7 @@ endif
 
 SCALA_VERSION=2.12.10
 SCALA_VERSION_MAJOR=$(basename $(SCALA_VERSION))
-SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
+SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS) --client
 
 BLOOP ?= bloop
 BLOOP_CONFIG_DIR ?= $(base_dir)/.bloop

@@ -27,7 +27,8 @@ lazy val commonSettings = Seq(
     "org.json4s" %% "json4s-native" % "3.6.10",
     "junit" % "junit" % "4.13",
     "org.apache.commons" % "commons-text" % "1.8",
-    "net.jcazevedo" %% "moultingyaml" % "0.4.2"
+    "net.jcazevedo" %% "moultingyaml" % "0.4.2",
+    "org.antlr" % "antlr4-runtime" % "4.7.1"
   ),
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
@@ -45,19 +46,6 @@ lazy val firesimDir = if (firesimAsLibrary) {
   file("sims/firesim/sim/")
 } else {
   file("../../sim")
-}
-
-// Checks for -DROCKET_USE_MAVEN.
-// If it's there, use a maven dependency.
-// Else, depend on subprojects in git submodules.
-def conditionalDependsOn(prj: Project): Project = {
-  if (sys.props.contains("ROCKET_USE_MAVEN")) {
-    prj.settings(Seq(
-      libraryDependencies += "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHOT",
-    ))
-  } else {
-    prj.dependsOn(testchipip)
-  }
 }
 
 /**
@@ -93,20 +81,21 @@ lazy val chiselLib = "edu.berkeley.cs" %% "chisel3" % chiselVersion
 //   keeping scalaVersion in sync with chisel3 to the minor version
 lazy val chiselPluginLib = "edu.berkeley.cs" % "chisel3-plugin" % chiselVersion cross CrossVersion.full
 
-lazy val firrtlRef = ProjectRef(workspaceDirectory / "firrtl", "firrtl")
+lazy val firrtlRef = ProjectRef(file("tools/firrtl"), "firrtl")
+lazy val firrtlLib = "edu.berkeley.cs" %% "firrtl" % "1.4-SNAPSHOT"
 
 lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))
-  .dependsOn(firrtlRef)
+  .sourceDependency(firrtlRef, firrtlLib)
   .settings(commonSettings)
 
 lazy val treadle = (project in file("tools/treadle"))
-  .dependsOn(firrtlRef)
+  .sourceDependency(firrtlRef, firrtlLib)
   .settings(commonSettings)
 
 lazy val chisel_testers = (project in file("tools/chisel-testers"))
   .sourceDependency(chisel, chiselLib)
   .settings(addCompilerPlugin(chiselPluginLib))
-  .dependsOn(firrtl_interpreter, treadle, firrtlRef)
+  .dependsOn(firrtl_interpreter, treadle)
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
@@ -146,24 +135,28 @@ lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
 lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip, sifive_blocks)
   .settings(commonSettings)
+lazy val testchipipLib = "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHOT"
 
 lazy val iocell = (project in file("./tools/barstools/iocell/"))
   .sourceDependency(chisel, chiselLib)
   .settings(addCompilerPlugin(chiselPluginLib))
   .settings(commonSettings)
 
-lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
+lazy val chipyard = (project in file("generators/chipyard"))
+  .sourceDependency(testchipip, testchipipLib)
   .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsptools`,
     gemmini, icenet, tracegen, cva6, nvdla, sodor)
   .settings(commonSettings)
 
-lazy val tracegen = conditionalDependsOn(project in file("generators/tracegen"))
+lazy val tracegen = (project in file("generators/tracegen"))
+  .sourceDependency(testchipip, testchipipLib)
   .dependsOn(rocketchip, sifive_cache, boom, utilities)
   .settings(commonSettings)
 
-lazy val utilities = conditionalDependsOn(project in file("generators/utilities"))
+lazy val utilities = (project in file("generators/utilities"))
+  .sourceDependency(testchipip, testchipipLib)
   .settings(commonSettings)
 
 lazy val icenet = (project in file("generators/icenet"))
@@ -174,7 +167,8 @@ lazy val hwacha = (project in file("generators/hwacha"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
-lazy val boom = conditionalDependsOn(project in file("generators/boom"))
+lazy val boom = (project in file("generators/boom"))
+  .sourceDependency(testchipip, testchipipLib)
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
@@ -198,8 +192,8 @@ lazy val nvdla = (project in file("generators/nvdla"))
   .dependsOn(rocketchip)
   .settings(commonSettings)
 
-lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
-  .dependsOn(chisel_testers, chipyard)
+lazy val tapeout = (project in file("./tools/barstools/tapeout/"))
+  .dependsOn(chisel_testers, chipyard) // must depend on chipyard to get scala resources
   .settings(commonSettings)
   .settings(libraryDependencies ++= Seq("io.github.daviddenton" %% "handlebars-scala-fork" % "2.3.0"))
 
@@ -238,7 +232,8 @@ lazy val sifive_cache = (project in file("generators/sifive-cache")).settings(
 lazy val midas      = ProjectRef(firesimDir, "midas")
 lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 
-lazy val firechip = conditionalDependsOn(project in file("generators/firechip"))
+lazy val firechip = (project in file("generators/firechip"))
+  .sourceDependency(testchipip, testchipipLib)
   .dependsOn(chipyard, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
