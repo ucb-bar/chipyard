@@ -151,15 +151,16 @@ JAVA_ARGS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M
 #########################################################################################
 # default sbt launch command
 #########################################################################################
-SCALA_VERSION=2.12.10
-SCALA_VERSION_MAJOR=$(basename $(SCALA_VERSION))
-SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
 # Running with sbt-launch.jar doesn't read .sbtopts by default
 # # Set if the file exists (if it exists, we're building chisel3 and firrtl from source)
 sbtopts_file := $(base_dir)/.sbtopts
 ifneq (,$(wildcard $(sbtopts_file)))
 	SBT_OPTS ?= $(shell cat $(sbtopts_file))
 endif
+
+SCALA_VERSION=2.12.10
+SCALA_VERSION_MAJOR=$(basename $(SCALA_VERSION))
+SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
 
 BLOOP ?= bloop
 BLOOP_CONFIG_DIR ?= $(base_dir)/.bloop
@@ -182,7 +183,7 @@ define run_scala_main
 endef
 else
 define run_scala_main
-	cd $(base_dir) && $(SBT) $(SBT_OPTS) "project $(1)" "runMain $(2) $(3)"
+	cd $(base_dir) && $(SBT) "project $(1)" "runMain $(2) $(3)"
 endef
 endif
 
