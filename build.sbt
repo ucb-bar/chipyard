@@ -25,7 +25,9 @@ lazy val commonSettings = Seq(
     "org.typelevel" %% "spire" % "0.16.2",
     "org.scalanlp" %% "breeze" % "1.0",
     "org.json4s" %% "json4s-native" % "3.6.10",
-    "junit" % "junit" % "4.13"
+    "junit" % "junit" % "4.13",
+    "org.apache.commons" % "commons-text" % "1.8",
+    "net.jcazevedo" %% "moultingyaml" % "0.4.2"
   ),
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
@@ -98,12 +100,13 @@ lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))
   .settings(commonSettings)
 
 lazy val treadle = (project in file("tools/treadle"))
+  .dependsOn(firrtlRef)
   .settings(commonSettings)
 
 lazy val chisel_testers = (project in file("tools/chisel-testers"))
   .sourceDependency(chisel, chiselLib)
   .settings(addCompilerPlugin(chiselPluginLib))
-  .dependsOn(firrtl_interpreter, treadle)
+  .dependsOn(firrtl_interpreter, treadle, firrtlRef)
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
