@@ -17,7 +17,7 @@ import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
 
 import testchipip.{SerialTLKey}
 
-import chipyard.{BuildSystem}
+import chipyard.{BuildSystem, ExtTLMem}
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
@@ -26,7 +26,6 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
 })
 
 class WithSystemModifications extends Config((site, here, up) => {
-  case BuildSystem => (p: Parameters) => new VCU118DigitalTop()(p) // use the VCU118-extended digital top
   case DebugModuleKey => None // disable debug module
   case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency = Some(site(FPGAFrequencyKey).toInt*1000000))
   case DTSTimebase => BigInt(1000000)
@@ -41,6 +40,11 @@ class WithSystemModifications extends Config((site, here, up) => {
   case SerialTLKey => None // remove serialized tl port
 })
 
+class WithTLBackingMemory extends Config((site, here, up) => {
+  case ExtMem => None // disable AXI backing memory
+  case ExtTLMem => up(ExtMem, site) // enable TL backing memory
+})
+
 // DOC include start: AbstractVCU118 and Rocket
 class WithVCU118Tweaks extends Config(
   new WithUART ++
@@ -50,6 +54,7 @@ class WithVCU118Tweaks extends Config(
   new WithSPIIOPassthrough ++
   new WithTLIOPassthrough ++
   new WithDefaultPeripherals ++
+  new WithTLBackingMemory ++ // use TL backing memory
   new WithSystemModifications ++ // remove debug module, setup busses, use sdboot bootrom, setup ext. mem. size, use new dig. top
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1))

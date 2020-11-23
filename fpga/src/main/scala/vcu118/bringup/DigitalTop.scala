@@ -9,18 +9,18 @@ import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 
-import chipyard.fpga.vcu118.{VCU118DigitalTop, VCU118DigitalTopModule}
+import chipyard.{DigitalTop, DigitalTopModule}
 
 // ------------------------------------
 // Bringup VCU118 DigitalTop
 // ------------------------------------
 
-class BringupVCU118DigitalTop(implicit p: Parameters) extends VCU118DigitalTop
+class BringupVCU118DigitalTop(implicit p: Parameters) extends DigitalTop
   with sifive.blocks.devices.i2c.HasPeripheryI2C
   with testchipip.HasPeripheryTSIHostWidget
 {
   override lazy val module = new BringupVCU118DigitalTopModule(this)
 }
 
-class BringupVCU118DigitalTopModule[+L <: BringupVCU118DigitalTop](l: L) extends VCU118DigitalTopModule(l)
+class BringupVCU118DigitalTopModule[+L <: BringupVCU118DigitalTop](l: L) extends DigitalTopModule(l)
   with sifive.blocks.devices.i2c.HasPeripheryI2CModuleImp

@@ -17,7 +17,7 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 import sifive.blocks.devices.gpio._
 
-import chipyard.{HasHarnessSignalReferences, HasTestHarnessFunctions, BuildTop, ChipTop}
+import chipyard.{HasHarnessSignalReferences, HasTestHarnessFunctions, BuildTop, ChipTop, ExtTLMem, CanHaveMasterTLMemPort}
 import chipyard.iobinders.{HasIOBinders}
 import chipyard.harness.{ApplyHarnessBinders}
 
@@ -79,7 +79,7 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
 
   /*** DDR ***/
 
-  val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtMem).get.master.base, dutWrangler.node, harnessSysPLL)).overlayOutput.ddr
+  val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)).overlayOutput.ddr
 
   // connect 1 mem. channel to the FPGA DDR
   val inParams = topDesign match { case td: ChipTop =>

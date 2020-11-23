@@ -11,6 +11,7 @@ import freechips.rocketchip.tilelink.{TLBundle}
 import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp}
 import sifive.blocks.devices.spi.{HasPeripherySPI, HasPeripherySPIModuleImp, MMCDevice}
 
+import chipyard.{CanHaveMasterTLMemPort}
 import chipyard.iobinders.{OverrideIOBinder, OverrideLazyIOBinder}
 
 class WithUARTIOPassthrough extends OverrideIOBinder({

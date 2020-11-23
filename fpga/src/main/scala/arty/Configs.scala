@@ -31,7 +31,7 @@ class WithArtyTweaks extends Config(
   new WithArtyJTAGHarnessBinder ++
   new WithArtyUARTHarnessBinder ++
   new WithArtyResetHarnessBinder ++
-  new WithResetPassthrough ++
+  new WithDebugResetPassthrough ++
   new WithDefaultPeripherals ++
   new freechips.rocketchip.subsystem.WithNBanks(0) ++ // remove L2$
   new freechips.rocketchip.subsystem.WithNoMemPort ++ // remove backing memory

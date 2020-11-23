@@ -9,7 +9,7 @@ import freechips.rocketchip.tilelink.{TLBundle}
 import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp, UARTPortIO}
 import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
 
-import chipyard.{HasHarnessSignalReferences}
+import chipyard.{HasHarnessSignalReferences, CanHaveMasterTLMemPort}
 import chipyard.harness.{OverrideHarnessBinder}
 
 /*** UART ***/
