@@ -165,6 +165,12 @@ class FireSimGemminiContentionDualBaseConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.GemminiContentionDualBaseConfig)
 
+class FireSimGemminiContentionDualBaseBankedL2Config extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.GemminiContentionDualBaseBankedL2Config)
+
 class FireSimGemminiContentionDualBiggerL2SmallerSPConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
@@ -188,6 +194,12 @@ class FireSimGemminiContentionDualBiggerL2BiggerSPConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.GemminiContentionDualBiggerL2BiggerSPConfig)
+
+class FireSimGemminiContentionDualBiggerL2BaseSPConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.GemminiContentionDualBiggerL2BaseSPConfig)
 
 //******************************************************************
 // Configuration with Ring topology SystemBus
