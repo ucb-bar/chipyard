@@ -33,10 +33,7 @@ class WithArtyTweaks extends Config(
   new WithArtyResetHarnessBinder ++
   new WithDebugResetPassthrough ++
   new WithDefaultPeripherals ++
-  new freechips.rocketchip.subsystem.WithNBanks(0) ++ // remove L2$
-  new freechips.rocketchip.subsystem.WithNoMemPort ++ // remove backing memory
-  new freechips.rocketchip.subsystem.WithNBreakpoints(2) ++
-  new freechips.rocketchip.subsystem.WithIncoherentBusTopology)
+  new freechips.rocketchip.subsystem.WithNBreakpoints(2))
 
 class TinyRocketArtyConfig extends Config(
   new WithArtyTweaks ++

@@ -26,7 +26,6 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
 })
 
 class WithSystemModifications extends Config((site, here, up) => {
-  case DebugModuleKey => None // disable debug module
   case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency = Some(site(FPGAFrequencyKey).toInt*1000000))
   case DTSTimebase => BigInt(1000000)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
@@ -55,7 +54,8 @@ class WithVCU118Tweaks extends Config(
   new WithTLIOPassthrough ++
   new WithDefaultPeripherals ++
   new WithTLBackingMemory ++ // use TL backing memory
-  new WithSystemModifications ++ // remove debug module, setup busses, use sdboot bootrom, setup ext. mem. size, use new dig. top
+  new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
+  new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1))
 
