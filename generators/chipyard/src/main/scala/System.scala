@@ -51,6 +51,10 @@ case object ExtTLMem extends Field[Option[MemoryPortParams]](None)
 
 /** Adds a port to the system intended to master an TL DRAM controller. */
 trait CanHaveMasterTLMemPort { this: BaseSubsystem =>
+
+  require(!(p(ExtTLMem).nonEmpty && p(ExtMem).nonEmpty),
+    "Can only have 1 backing memory port. Use ExtTLMem for a TL memory port or ExtMem for an AXI memory port.")
+
   private val memPortParamsOpt = p(ExtTLMem)
   private val portName = "tl_mem"
   private val device = new MemoryDevice

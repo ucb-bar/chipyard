@@ -181,6 +181,11 @@ class WithTLSerialLocation(masterWhere: TLBusWrapperLocation, slaveWhere: TLBusW
   case SerialTLAttachKey => up(SerialTLAttachKey, site).copy(masterWhere = masterWhere, slaveWhere = slaveWhere)
 })
 
+class WithTLBackingMemory extends Config((site, here, up) => {
+  case ExtMem => None // disable AXI backing memory
+  case ExtTLMem => up(ExtMem, site) // enable TL backing memory
+})
+
 class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("core", fMHz)
 
 class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {

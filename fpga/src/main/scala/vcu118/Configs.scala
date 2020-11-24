@@ -39,11 +39,6 @@ class WithSystemModifications extends Config((site, here, up) => {
   case SerialTLKey => None // remove serialized tl port
 })
 
-class WithTLBackingMemory extends Config((site, here, up) => {
-  case ExtMem => None // disable AXI backing memory
-  case ExtTLMem => up(ExtMem, site) // enable TL backing memory
-})
-
 // DOC include start: AbstractVCU118 and Rocket
 class WithVCU118Tweaks extends Config(
   new WithUART ++
@@ -53,7 +48,7 @@ class WithVCU118Tweaks extends Config(
   new WithSPIIOPassthrough ++
   new WithTLIOPassthrough ++
   new WithDefaultPeripherals ++
-  new WithTLBackingMemory ++ // use TL backing memory
+  new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
   new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
