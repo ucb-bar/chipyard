@@ -5,7 +5,7 @@ import firrtl.annotations._
 import firrtl.ir._
 import firrtl.passes.memlib.ReplSeqMemAnnotation
 import firrtl.stage.FirrtlCircuitAnnotation
-import firrtl.transforms.BlackBoxResourceFileNameAnno
+import firrtl.transforms.{BlackBoxResourceFileNameAnno, DedupModules}
 import logger.LazyLogging
 
 trait HasTapeoutOptions { self: ExecutionOptionsManager with HasFirrtlOptions =>
@@ -156,6 +156,7 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
   // FIRRTL options
   lazy val annoFiles = firrtlOptions.annotationFileNames
 
+  // order is determined by DependencyAPIMigration
   val topTransforms = Seq(
     new ReParentCircuit,
     new RemoveUnusedModules
@@ -171,6 +172,7 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
     annotations = firrtlOptions.annotations ++ topAnnos
   )
 
+  // order is determined by DependencyAPIMigration
   val harnessTransforms = Seq(
     new ConvertToExtMod,
     new RemoveUnusedModules,
@@ -216,11 +218,8 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
     // Execute top and get list of ExtModules to avoid collisions
     val topExtModules = executeTop()
 
-    val externals = Seq("SimSerial", "SimDTM", "plusarg_reader") ++ harnessTop ++ synTop
-
     val harnessAnnos =
       tapeoutOptions.harnessDotfOut.map(BlackBoxResourceFileNameAnno(_)).toSeq ++
-      externals.map(ext => KeepNameAnnotation(rootCircuitTarget.module(ext))) ++
       harnessTop.map(ht => ModuleNameSuffixAnnotation(rootCircuitTarget, s"_in${ht}")) ++
       synTop.map(st => ConvertToExtModAnnotation(rootCircuitTarget.module(st))) :+
       LinkExtModulesAnnotation(topExtModules)

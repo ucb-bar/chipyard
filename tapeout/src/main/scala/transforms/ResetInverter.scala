@@ -46,6 +46,7 @@ class ResetInverterTransform extends Transform with DependencyAPIMigration {
   override def prerequisites: Seq[TransformDependency] = Forms.LowForm
   override def optionalPrerequisites: Seq[TransformDependency] = Forms.LowFormOptimized
   override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
+  override def invalidates(a: Transform): Boolean = false
 
   override def execute(state: CircuitState): CircuitState = {
     state.annotations.filter(_.isInstanceOf[ResetInverterAnnotation]) match {

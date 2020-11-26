@@ -3,9 +3,12 @@
 package barstools.tapeout.transforms
 
 import firrtl._
-import firrtl.annotations._
 import firrtl.ir._
-import firrtl.passes.Pass
+import firrtl.annotations.{ModuleTarget, SingleTargetAnnotation, ReferenceTarget}
+import firrtl.stage.TransformManager.{TransformDependency}
+import firrtl.stage.{Forms}
+import firrtl.options.{Dependency}
+import firrtl.passes.memlib.{ReplSeqMem}
 
 case class ConvertToExtModAnnotation(target: ModuleTarget)
     extends SingleTargetAnnotation[ModuleTarget] {
@@ -15,9 +18,14 @@ case class ConvertToExtModAnnotation(target: ModuleTarget)
 // Converts some modules to external modules, based on a given function.  If
 // that function returns "true" then the module is converted into an ExtModule,
 // otherwise it's left alone.
-class ConvertToExtMod extends Transform {
-  def inputForm = HighForm
-  def outputForm = HighForm
+class ConvertToExtMod extends Transform with DependencyAPIMigration {
+
+  override def prerequisites: Seq[TransformDependency] = Forms.HighForm
+  override def optionalPrerequisites: Seq[TransformDependency] = Seq.empty
+  override def optionalPrerequisiteOf: Seq[TransformDependency] = {
+    Forms.HighEmitters ++ Seq(Dependency[RemoveUnusedModules], Dependency[ReplSeqMem])
+  }
+  override def invalidates(a: Transform): Boolean = false
 
   def run(state: CircuitState, makeExt: Set[String]): (Circuit, RenameMap) = {
     val renames = RenameMap()

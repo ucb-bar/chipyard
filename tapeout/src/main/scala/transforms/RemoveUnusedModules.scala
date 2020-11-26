@@ -4,15 +4,22 @@ package barstools.tapeout.transforms
 
 import firrtl._
 import firrtl.ir._
-import firrtl.passes.Pass
-import firrtl.annotations._
-import firrtl.transforms.DontTouchAnnotation
+import firrtl.annotations.{ModuleTarget}
+import firrtl.stage.TransformManager.{TransformDependency}
+import firrtl.options.{Dependency}
+import firrtl.stage.{Forms}
+import firrtl.passes.memlib.{ReplSeqMem}
 
 // Removes all the unused modules in a circuit by recursing through every
 // instance (starting at the main module)
-class RemoveUnusedModules extends Transform {
-  def inputForm = HighForm
-  def outputForm = HighForm
+class RemoveUnusedModules extends Transform with DependencyAPIMigration {
+
+  override def prerequisites: Seq[TransformDependency] = Forms.HighForm
+  override def optionalPrerequisites: Seq[TransformDependency] = Seq.empty
+  override def optionalPrerequisiteOf: Seq[TransformDependency] = {
+    Forms.HighEmitters :+ Dependency[ReplSeqMem]
+  }
+  override def invalidates(a: Transform): Boolean = false
 
   def execute(state: CircuitState): CircuitState = {
     val modulesByName = state.circuit.modules.map{
@@ -25,19 +32,17 @@ class RemoveUnusedModules extends Transform {
         case Some(m) => {
           def someStatements(statement: Statement): Seq[Statement] =
             statement match {
-              case b: Block => 
+              case b: Block =>
                 b.stmts.map{ someStatements(_) }
                   .foldLeft(Seq[Statement]())(_ ++ _)
               case when: Conditionally =>
                 someStatements(when.conseq) ++ someStatements(when.alt)
               case i: DefInstance => Seq(i)
-              case w: WDefInstance => Seq(w)
               case _ => Seq()
             }
 
             someStatements(m.body).map{
               case s: DefInstance => Set(s.module) | getUsedModules(modulesByName(s.module))
-              case s: WDefInstance => Set(s.module) | getUsedModules(modulesByName(s.module))
               case _ => Set[String]()
             }.foldLeft(Set(m.name))(_ | _)
           }
@@ -52,7 +57,9 @@ class RemoveUnusedModules extends Transform {
 
     val renames = state.renames.getOrElse(RenameMap())
 
-    state.circuit.modules.filterNot { usedModuleSet contains _.name } foreach { x => renames.record(ModuleTarget(state.circuit.main, x.name), Nil) }
+    state.circuit.modules.filterNot { usedModuleSet contains _.name } foreach { x =>
+      renames.record(ModuleTarget(state.circuit.main, x.name), Nil)
+    }
 
     val newCircuit = Circuit(state.circuit.info, usedModuleSeq, state.circuit.main)
     state.copy(circuit = newCircuit, renames = Some(renames))

@@ -28,6 +28,7 @@ class EnumerateModules(enumerate: (Module) => Unit)
   override def prerequisites: Seq[TransformDependency] = Forms.LowForm
   override def optionalPrerequisites: Seq[TransformDependency] = Forms.LowFormOptimized
   override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
+  override def invalidates(a: Transform): Boolean = false
 
   def transforms: Seq[Transform] = Seq(new EnumerateModulesPass(enumerate))
 

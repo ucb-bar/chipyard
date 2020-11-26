@@ -4,17 +4,24 @@ package barstools.tapeout.transforms
 
 import firrtl._
 import firrtl.ir._
-import firrtl.passes.Pass
 import firrtl.annotations._
+import firrtl.options.{Dependency}
+import firrtl.stage.TransformManager.{TransformDependency}
+import firrtl.stage.{Forms}
 
 case class ReParentCircuitAnnotation(target: ModuleTarget)
     extends SingleTargetAnnotation[ModuleTarget] {
   def duplicate(n: ModuleTarget) = this.copy(n)
 }
 
-class ReParentCircuit extends Transform {
-  def inputForm = HighForm
-  def outputForm = HighForm
+class ReParentCircuit extends Transform with DependencyAPIMigration {
+
+  override def prerequisites: Seq[TransformDependency] = Forms.HighForm
+  override def optionalPrerequisites: Seq[TransformDependency] = Seq.empty
+  override def optionalPrerequisiteOf: Seq[TransformDependency] = {
+    Forms.HighEmitters :+ Dependency[RemoveUnusedModules]
+  }
+  override def invalidates(a: Transform): Boolean = false
 
   def execute(state: CircuitState): CircuitState = {
     val c = state.circuit
