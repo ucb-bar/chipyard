@@ -8,6 +8,7 @@ import firrtl.annotations.{NoTargetAnnotation}
 import firrtl.options.{Dependency}
 import firrtl.stage.TransformManager.{TransformDependency}
 import firrtl.stage.{Forms}
+import firrtl.passes.memlib.{ReplSeqMem}
 
 case class LinkExtModulesAnnotation(mustLink: Seq[ExtModule]) extends NoTargetAnnotation
 
@@ -15,7 +16,9 @@ class AvoidExtModuleCollisions extends Transform with DependencyAPIMigration {
 
   override def prerequisites: Seq[TransformDependency] = Forms.HighForm
   override def optionalPrerequisites: Seq[TransformDependency] = Seq(Dependency[RemoveUnusedModules])
-  override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.HighEmitters
+  override def optionalPrerequisiteOf: Seq[TransformDependency] = {
+    Forms.HighEmitters :+ Dependency[ReplSeqMem]
+  }
   override def invalidates(a: Transform): Boolean = false
 
   def execute(state: CircuitState): CircuitState = {
