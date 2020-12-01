@@ -41,25 +41,11 @@ RUN apt-get update && \
                jq \
                openjdk-11-jdk \
                maven \
-               #sbt \#
                ant \
                gradle 
                
 #ADDED
 RUN apt-get install -y apt-utils
-               
-#ADDED: get sbt
-#RUN apt-get install default-jdk -y && \
-#    wget www.scala-lang.org/files/archive/scala-2.13.0.deb && \
-#    dpkg -i scala*.deb && \
-#    echo "deb https://dl.bintray.com/sbt/debian /" | tee -a   /#etc/apt/sources.list.d/sbt.list && \
-#    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 #--recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823 && \
-#    apt-get install sbt -y && \
-#    sbt test
-RUN echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list && \
-    curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add && \
-    sudo apt-get update && \
-    sudo apt-get install sbt
     
 # Set timezone to UTC by default
 RUN ln -sf /usr/share/zoneinfo/Etc/UTC /etc/localtime
@@ -228,13 +214,6 @@ ENV PATH="$RISCV/bin:$PATH"
 WORKDIR $HOME
 USER riscvuser
 
-# smoke test with path
-RUN mvn -version \
-    && ant -version \
-    && gradle -version \
-    && sbt sbtVersion \
-    && verilator --version
-
 # remove extra folders
 # RUN rm -rf project/
 
@@ -259,23 +238,34 @@ RUN git clone https://github.com/ucb-bar/chipyard.git && \
 RUN sudo DEBIAN_FRONTEND=noninteractive apt-get install keyboard-configuration && \
     sudo DEBIAN_FRONTEND=noninteractive apt-get install -y console-setup
 
-
+# Install dependencies from ubuntu-req.sh
 RUN cd chipyard && \
     ./scripts/ubuntu-req.sh 1>/dev/null
+    
+# smoke test with path
+RUN mvn -version \
+    && ant -version \
+    && gradle -version \
+    && sbt sbtVersion \
+    && verilator --version
 
 # Install riscv-tools
 RUN cd chipyard && \
         export MAKEFLAGS=-"j $(nproc)" && \./scripts/build-toolchains.sh riscv-tools 1>/dev/null
         
+# Install esp-tools
+RUN cd chipyard && \
+        export MAKEFLAGS=-"j $(nproc)" && \
+        ./scripts/build-toolchains.sh esp-tools 1>/dev/null
+        
 #ENTRYPOINT ["sh", "-c", "-l", "cd chipyard && . ./env.sh && #\"$@\"", "-s"]
 
-WORKDIR $HOME/chipyard
-COPY ./entrypoint.sh entrypoint.sh
-#USER root
+#WORKDIR $HOME/chipyard
+#COPY entrypoint.sh /home/riscvuser/chipyard/entrypoint.sh
+#RUN sudo chown riscvuser entrypoint.sh
 #RUN chmod +x entrypoint.sh
-#USER riscvuser
 #WORKDIR $HOME
-#ENTRYPOINT ["sh", "/home/riscvuser/chipyard/entrypoint.sh"]
+ENTRYPOINT ["/home/riscvuser/chipyard/scripts/entrypoint.sh"]
 
 #env_file: ./env.sh
 
@@ -284,11 +274,6 @@ COPY ./entrypoint.sh entrypoint.sh
 #RUN cd chipyard && \
     #git submodule update --init --recursive /home/#riscvuser/chipyard/toolchains/riscv-tools/riscv-#isa-sim
 #    git submodule update --init --recursive /home/riscvuser/#chipyard/toolchains/riscv-tools/riscv-gnu-toolchain
-
-# Install esp-tools
-#RUN cd chipyard && \
-#        export MAKEFLAGS=-"j $(nproc)" && \
-#        ./scripts/build-toolchains.sh esp-tools 1>/dev/null
 
 
 # END IMAGE CUSTOMIZATIONS
