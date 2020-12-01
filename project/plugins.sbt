@@ -1,7 +1,3 @@
-resolvers += Resolver.url("scalasbt", new URL("https://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases")) (Resolver.ivyStylePatterns)
-resolvers += Classpaths.sbtPluginReleases
-resolvers += "jgit-repo" at "https://download.eclipse.org/jgit/maven"
-
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.2")
 addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.6.2")
 addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.3.1")
@@ -18,5 +14,3 @@ addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.6.1")
 addSbtPlugin("ch.epfl.scala" % "sbt-bloop" % "1.4.1")
 addSbtPlugin("com.eed3si9n" % "sbt-sriracha" % "0.1.0")
 addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.2.5" )
-
-libraryDependencies += "com.github.os72" % "protoc-jar" % "3.11.4"
