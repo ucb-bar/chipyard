@@ -39,16 +39,16 @@ Next, we define the Hammer environment into the shell:
 Setting up the Hammer Configuration Files
 --------------------------------------------
 
-The first configuration file that needs to be set up is the Hammer environment configuration file ``env.yml``. In this file you need to set the paths to the EDA tools and license servers you will be using. You do not have to fill all the fields in this configuration file, you need to fill the paths only for the tools that you will be using.
+The first configuration file that needs to be set up is the Hammer environment configuration file ``env.yml``. In this file you need to set the paths to the EDA tools and license servers you will be using. You do not have to fill all the fields in this configuration file, you only need to fill in the paths for the tools that you will be using.
 If you are working within a shared server farm environment with an LSF cluster setup (for example, the Berkeley Wireless Research Center), please note the additional possible environment configuration listed in the :ref:`Advanced Environment Setup` segment of this documentation page. 
 
 Hammer relies on YAML-based configuration files. While these configuration can be consolidated within a single files (as is the case in the ASAP7 tutorial :ref:`tutorial` and the ``nangate45``
-OpenRoad example), the generally applicable way to work with an arbitrary process technology or tools plugins would be to use three configuration files, matching the three Hammer concerns - tools, tech, and design. 
+OpenRoad example), the generally suggested way to work with an arbitrary process technology or tools plugins would be to use three configuration files, matching the three Hammer concerns - tools, tech, and design. 
 The ``vlsi`` directory includes three such example configuration files matching the three concerns: ``example-tools.yml``, ``example-tech.yml``, and ``example-design.yml``.
 
-The ``example-tools.yml`` file configures which EDA tools hammer will use. This example files uses Cadence Innovus, Genus and Calibre (which are likely the tools you will use if you're working in the Berkeley Wireless Research Center). Note that tool versions are highly sensitive to the process-technology in-use. Hence, tool versions that work with one process technology may not work with another (for example, ASAP7 will not work with an Innovus version newer than 18.1, while other proprietary process technologies will likely require newer versions such as 19.1).
+The ``example-tools.yml`` file configures which EDA tools hammer will use. This example files uses Cadence Innovus, Genus and Mentor Calibre (which are likely the tools you will use if you're working in the Berkeley Wireless Research Center). Note that tool versions are highly sensitive to the process-technology in-use. Hence, tool versions that work with one process technology may not work with another (for example, ASAP7 will not work with an Innovus version newer than 18.1, while other proprietary process technologies will likely require newer versions such as 19.1).
 
-The ``example-design.yml`` file contrain basic build system information (how many cores/threads to use, etc.), as well as configuration that are specific to the design we are working on such as clock signal name and frequency, power modes, floorplan, and additional contraints that we will add later on.
+The ``example-design.yml`` file contains basic build system information (how many cores/threads to use, etc.), as well as configurations that are specific to the design we are working on such as clock signal name and frequency, power modes, floorplan, and additional constraints that we will add later on.
 
 Finally, the ``example-tech`` file is a template file for a process technology plugin configuration. We will copy this file, and replace its fields with the appropriate process technology details for the tech plugin that we have access to. For example, for the ``asap7`` tech plugin we will replace the <tech_name> field with "asap7", the Node size "N" with "7", and the path to the process technology files installation directory.
 
@@ -68,7 +68,7 @@ By default, the MacroCopmiler will attempt to map memories into the SRAM options
 
 We call the ``make buildfile`` command while also specifying the name of the process technology we are working with (same ``tech_name`` for the configuration files and plugin name) and the configuration files we created. Note, in the ASAP7 tutorial ((:ref:`tutorial`)) these configuration files are merged into a single file called ``example-asap7.yml``.
 
-Hence, if we want to monolitically place and route the entire SoC, the relevant command would be
+Hence, if we want to monolithically place and route the entire SoC, the relevant command would be
 .. code-block:: shell
 
     make buildfile CONFIG=<chipyard_config_name> tech_name=<tech_name> INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
@@ -81,7 +81,7 @@ In a more typical scenario of working on a single module, for example the Gemmin
 Running the VLSI Flow
 ---------------------
 
-Running a basic VLSI flow using the Hammer default configurations is fairly simple, and consists of simpele ``Make`` command with the previously mentioned Make variables.
+Running a basic VLSI flow using the Hammer default configurations is fairly simple, and consists of simple ``make`` command with the previously mentioned Make variables.
 
 Synthesis
 ^^^^^^^^^
@@ -89,7 +89,7 @@ Synthesis
 In order to run synthesis, we run ``make syn`` with the matching Make variables. 
 Post-synthesis logs and collateral will be saved in ``build/<config-name>/syn-rundir``. The raw QoR data (area, timing, gate counts, etc.) will be found in ``build/<config-name>/syn-rundir/reports``.
 
-Hence, if we want to monolitically synthesize the entire SoC, the relevant command would be
+Hence, if we want to monolithically synthesize the entire SoC, the relevant command would be
 .. code-block:: shell
 
     make syn CONFIG=<chipyard_config_name> tech_name=<tech_name> INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
@@ -136,7 +136,7 @@ The relevant ``make`` command would then be
 
 
 Place-and-route generally requires more fine-grained input specifications regarding power nets, clock nets, pin assignments and floorplanning. While the template configuration files provide defaults for automatic tool defaults, these will usually result in very bad QoR, and therefore it is recommended to specify better-informed floorplans, pin assignments and power nets. For more information about cutomizing theses parameters, please refer to the :ref:`Customizing Your VLSI Flow in Hammer` sections or to the Hammer documentation. 
-Additionally, some Hammer process technology plugins do not provide sufficient default values for requires settings such as power nets and pin assignments (for example, ASAP7). In those cases, these contraint will need to be specified manually in the top-level configuration yml files, as is the case in the ``example-asap7.yml`` configuration file.
+Additionally, some Hammer process technology plugins do not provide sufficient default values for requires settings such as power nets and pin assignments (for example, ASAP7). In those cases, these constraints will need to be specified manually in the top-level configuration yml files, as is the case in the ``example-asap7.yml`` configuration file.
 
 Place-and-route tools are very sensitive to process technologes (significantly more sensitive than synthesis tools), and different process technologies may work only on specific tool versions. It is recommended to check what is the appropriate tool version for the specific process technology you are working with.
 
@@ -167,7 +167,7 @@ In order to run DRC, the relevant ``make`` command is ``make drc``. As in the pr
     make drc CONFIG=GemminiRocketConfig VLSI_TOP=Gemmini tech_name=tsmintel3 INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
 
 
-DRC does not emit autmated reports, but rather scripts that enable opening the DRC error database within the appropriate tool. These generated scripts can be called from ``./build/<config-name>/drc-rundir/generated-scripts/view_drc``.
+DRC does not emit easily audited reports, as the rule names violated can be quite esoteric. It is often more productive to rather use the scripts generated by Hammer to open the DRC error database within the appropriate tool. These generated scripts can be called from ``./build/<config-name>/drc-rundir/generated-scripts/view_drc``.
 
 
 In order to run LVS, the relevant ``make`` command is ``make lvs``. As in the previous stages, the make command should be accompanied by the relevant configuration Make variables:
@@ -176,7 +176,7 @@ In order to run LVS, the relevant ``make`` command is ``make lvs``. As in the pr
 
     make lvs CONFIG=GemminiRocketConfig VLSI_TOP=Gemmini tech_name=tsmintel3 INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
 
-LVS does not emit autmated reports, but rather scripts that enable opening the LVS error database within the appropriate tool. These generated scripts can be called from ``./build/<config-name>/lvs-rundir/generated-scripts/view_lvs``.
+LVS does not emit easily audited reports, as the violations are often cryptic when seen textually. As a result it is often more productive to visually see the LVS issues using the generated scripts that enable opening the LVS error database within the appropriate tool. These generated scripts can be called from ``./build/<config-name>/lvs-rundir/generated-scripts/view_lvs``.
 
 
 Customizing Your VLSI Flow in Hammer
