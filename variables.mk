@@ -161,8 +161,6 @@ SBT_THIN_CLIENT_TIMESTAMP = $(base_dir)/SBT_TIMESTAMP
 ifdef ENABLE_SBT_THIN_CLIENT
 override SCALA_BUILDTOOL_DEPS += $(SBT_THIN_CLIENT_TIMESTAMP)
 # enabling speeds up sbt loading
-# however if build.sbt changes are done you need to
-#   "shutdown" the server (shutdown-sbt target) to reload build.sbt changes
 SBT_CLIENT_FLAG = --client
 endif
 
