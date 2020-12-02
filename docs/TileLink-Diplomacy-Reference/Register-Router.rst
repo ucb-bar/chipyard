@@ -46,7 +46,7 @@ objects with an offset. If you do, the registers are read or written in parallel
 when the offset is accessed. The registers are in little endian order, so the
 first register in the list corresponds to the least significant bits in the
 value written. In this example, if the CPU wrote to offset 0x0E with the value
-0xAB, ``smallReg0`` will get the value 0xB and ``smallReg1`` would get 0xA.
+0xAB, ``tinyReg0`` will get the value 0xB and ``tinyReg1`` would get 0xA.
 
 Decoupled Interfaces
 --------------------
@@ -100,7 +100,7 @@ a read.
 
 The functions here are essentially the same as a decoupled interface.
 The read function gets passed the ``ready`` signal and returns the
-``valid`` and ``bits`` signals. The write function gets passed ``valid` and
+``valid`` and ``bits`` signals. The write function gets passed ``valid`` and
 ``bits`` and returns ``ready``.
 
 You can also pass functions that decouple the read/write request and response.
@@ -117,7 +117,7 @@ is ready to take requests when this is false and is sending a response when
 this is true.
 
 In this variant, both read and write take an input valid and return an
-output ready. The only different is that bits is an input for read and an
+output ready. The only difference is that bits is an input for read and an
 output for write.
 
 In order to use this variant, you need to set ``concurrency`` to a value
