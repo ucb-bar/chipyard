@@ -46,7 +46,7 @@ objects with an offset. If you do, the registers are read or written in parallel
 when the offset is accessed. The registers are in little endian order, so the
 first register in the list corresponds to the least significant bits in the
 value written. In this example, if the CPU wrote to offset 0x0E with the value
-0xAB, ``smallReg0`` will get the value 0xB and ``smallReg1`` would get 0xA.
+0xAB, ``tinyReg0`` will get the value 0xB and ``tinyReg1`` would get 0xA.
 
 Decoupled Interfaces
 --------------------
