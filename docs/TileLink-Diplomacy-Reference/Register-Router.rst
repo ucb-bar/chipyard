@@ -117,7 +117,7 @@ is ready to take requests when this is false and is sending a response when
 this is true.
 
 In this variant, both read and write take an input valid and return an
-output ready. The only different is that bits is an input for read and an
+output ready. The only difference is that bits is an input for read and an
 output for write.
 
 In order to use this variant, you need to set ``concurrency`` to a value
