@@ -154,7 +154,12 @@ JAVA_OPTS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M
 # by default build chisel3/firrtl and other subprojects from source
 override SBT_OPTS += -Dsbt.sourcemode=true -Dsbt.workspace=$(base_dir)/tools
 
+SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
+
+SBT_THIN_CLIENT_TIMESTAMP = $(base_dir)/SBT_TIMESTAMP
+
 ifdef ENABLE_SBT_THIN_CLIENT
+override SCALA_BUILDTOOL_DEPS += $(SBT_THIN_CLIENT_TIMESTAMP)
 # enabling speeds up sbt loading
 # however if build.sbt changes are done you need to
 #   "shutdown" the server (shutdown-sbt target) to reload build.sbt changes
@@ -167,8 +172,6 @@ BLOOP ?= bloop
 BLOOP_CONFIG_DIR ?= $(base_dir)/.bloop
 # This mirrors the bloop default. Set to a system-unique port in a multi-user environment
 BLOOP_NAILGUN_PORT ?= 8212
-
-SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
 ifdef ENABLE_BLOOP
 override SCALA_BUILDTOOL_DEPS += $(BLOOP_CONFIG_DIR)/TIMESTAMP

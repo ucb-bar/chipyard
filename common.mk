@@ -69,8 +69,19 @@ SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $
 # Bloop Project Definitions
 #########################################################################################
 $(BLOOP_CONFIG_DIR)/TIMESTAMP: $(SBT_SOURCES)
-	cd $(base_dir) && $(SBT) "project chipyardRoot" "bloopInstall"
+	cd $(base_dir) && $(SBT) ";project chipyardRoot; bloopInstall"
 	touch $@
+
+#########################################################################################
+# SBT Server Setup (needed to rebuild project correctly)
+#########################################################################################
+$(SBT_THIN_CLIENT_TIMESTAMP): $(SBT_SOURCES)
+ifneq (,$(wildcard $(SBT_THIN_CLIENT_TIMESTAMP)))
+	cd $(base_dir) && $(SBT) "reload"
+	touch $@
+else
+	touch $@
+endif
 
 #########################################################################################
 # create list of simulation file inputs
@@ -226,9 +237,10 @@ $(dramsim_lib):
 launch-sbt:
 	cd $(base_dir) && $(SBT)
 
-.PHONY: launch-sbt
+.PHONY: shutdown-sbt
 shutdown-sbt:
-	cd $(base_dir) && $(SBT) shutdown
+	cd $(base_dir) && $(SBT) "shutdown"
+	rm -rf $(SBT_THIN_CLIENT_TIMESTAMP)
 
 #########################################################################################
 # print help text

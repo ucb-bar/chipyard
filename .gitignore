@@ -21,3 +21,4 @@ env-riscv-tools.sh
 env-esp-tools.sh
 .bloop/
 .bsp/
+*_TIMESTAMP
