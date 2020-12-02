@@ -66,13 +66,6 @@ SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools)
 SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
 
 #########################################################################################
-# Bloop Project Definitions
-#########################################################################################
-$(BLOOP_CONFIG_DIR)/TIMESTAMP: $(SBT_SOURCES)
-	cd $(base_dir) && $(SBT) ";project chipyardRoot; bloopInstall"
-	touch $@
-
-#########################################################################################
 # SBT Server Setup (needed to rebuild project correctly)
 #########################################################################################
 $(SBT_THIN_CLIENT_TIMESTAMP): $(SBT_SOURCES)
