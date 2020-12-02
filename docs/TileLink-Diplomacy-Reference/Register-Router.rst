@@ -100,7 +100,7 @@ a read.
 
 The functions here are essentially the same as a decoupled interface.
 The read function gets passed the ``ready`` signal and returns the
-``valid`` and ``bits`` signals. The write function gets passed ``valid` and
+``valid`` and ``bits`` signals. The write function gets passed ``valid`` and
 ``bits`` and returns ``ready``.
 
 You can also pass functions that decouple the read/write request and response.
