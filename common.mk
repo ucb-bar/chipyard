@@ -63,7 +63,7 @@ SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
 VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE_DIRS),v)
 # This assumes no SBT meta-build sources
 SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools)
-SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt
+SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
 
 #########################################################################################
 # Bloop Project Definitions
@@ -209,7 +209,7 @@ ifneq ($(filter run% %.run %.out %.vpd %.vcd,$(MAKECMDGOALS)),)
 endif
 
 #######################################
-# Rules for building DRAMSim2 library #
+# Rules for building DRAMSim2 library
 #######################################
 
 dramsim_dir = $(base_dir)/tools/DRAMSim2
@@ -218,13 +218,17 @@ dramsim_lib = $(dramsim_dir)/libdramsim.a
 $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
 
-#######################################
-# Helper to run SBT                   #
-#######################################
+################################################
+# Helper to run SBT or shutdown the SBT server
+################################################
 
 .PHONY: launch-sbt
 launch-sbt:
 	cd $(base_dir) && $(SBT)
+
+.PHONY: launch-sbt
+shutdown-sbt:
+	cd $(base_dir) && $(SBT) shutdown
 
 #########################################################################################
 # print help text

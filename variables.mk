@@ -146,21 +146,22 @@ sim_common_files       ?= $(build_dir)/sim_files.common.f
 # java arguments used in sbt
 #########################################################################################
 JAVA_HEAP_SIZE ?= 8G
-JAVA_ARGS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M
+JAVA_OPTS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M
 
 #########################################################################################
 # default sbt launch command
 #########################################################################################
-# Running with sbt-launch.jar doesn't read .sbtopts by default
-# # Set if the file exists (if it exists, we're building chisel3 and firrtl from source)
-sbtopts_file := $(base_dir)/.sbtopts
-ifneq (,$(wildcard $(sbtopts_file)))
-	SBT_OPTS ?= $(shell cat $(sbtopts_file))
+# by default build chisel3/firrtl and other subprojects from source
+override SBT_OPTS += -Dsbt.sourcemode=true -Dsbt.workspace=$(base_dir)/tools
+
+ifdef ENABLE_SBT_THIN_CLIENT
+# enabling speeds up sbt loading
+# however if build.sbt changes are done you need to
+#   "shutdown" the server (shutdown-sbt target) to reload build.sbt changes
+SBT_CLIENT_FLAG = --client
 endif
 
-SCALA_VERSION=2.12.10
-SCALA_VERSION_MAJOR=$(basename $(SCALA_VERSION))
-SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
+SBT ?= java $(JAVA_OPTS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS) $(SBT_CLIENT_FLAG)
 
 BLOOP ?= bloop
 BLOOP_CONFIG_DIR ?= $(base_dir)/.bloop
@@ -183,7 +184,7 @@ define run_scala_main
 endef
 else
 define run_scala_main
-	cd $(base_dir) && $(SBT) "project $(1)" "runMain $(2) $(3)"
+	cd $(base_dir) && $(SBT) ";project $(1); runMain $(2) $(3)"
 endef
 endif
 

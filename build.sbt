@@ -81,7 +81,7 @@ lazy val chiselLibDeps = (chiselRef / Keys.libraryDependencies)
 //   keeping scalaVersion in sync with chisel3 to the minor version
 lazy val chiselPluginLib = "edu.berkeley.cs" % "chisel3-plugin" % chiselVersion cross CrossVersion.full
 
-val firrtlVersion = "1.4-SNAPSHOT"
+val firrtlVersion = "1.4.+"
 lazy val firrtlRef = ProjectRef(workspaceDirectory / "firrtl", "firrtl")
 lazy val firrtlLib = "edu.berkeley.cs" %% "firrtl" % firrtlVersion
 //lazy val firrtlLibDeps = (firrtlRef / Keys.libraryDependencies) // TODO: Won't work because of antlr plugin
