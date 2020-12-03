@@ -1,5 +1,8 @@
 import Tests._
 
+// Ignore linting for traceLevel
+Global / excludeLintKeys += traceLevel
+
 // This gives us a nicer handle to the root project instead of using the
 // implicit one
 lazy val chipyardRoot = Project("chipyardRoot", file("."))
