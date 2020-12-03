@@ -262,8 +262,8 @@ RUN cd chipyard && \
 
 #WORKDIR $HOME/chipyard
 #COPY entrypoint.sh /home/riscvuser/chipyard/entrypoint.sh
-#RUN sudo chown riscvuser entrypoint.sh
-#RUN chmod +x entrypoint.sh
+RUN sudo chown riscvuser /home/riscvuser/chipyard/scripts/entrypoint.sh
+RUN chmod +x /home/riscvuser/chipyard/scripts/entrypoint.sh
 #WORKDIR $HOME
 ENTRYPOINT ["/home/riscvuser/chipyard/scripts/entrypoint.sh"]
 
