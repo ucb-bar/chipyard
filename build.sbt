@@ -1,8 +1,5 @@
 import Tests._
 
-// Ignore linting for traceLevel
-Global / excludeLintKeys += traceLevel
-
 // This gives us a nicer handle to the root project instead of using the
 // implicit one
 lazy val chipyardRoot = Project("chipyardRoot", file("."))
@@ -11,7 +8,6 @@ lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
   version := "1.3",
   scalaVersion := "2.12.10",
-  traceLevel := 15,
   test in assembly := {},
   assemblyMergeStrategy in assembly := { _ match {
     case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
