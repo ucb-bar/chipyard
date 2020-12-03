@@ -156,7 +156,7 @@ override SBT_OPTS += -Dsbt.sourcemode=true -Dsbt.workspace=$(base_dir)/tools
 
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
-SBT_THIN_CLIENT_TIMESTAMP = $(base_dir)/SBT_TIMESTAMP
+SBT_THIN_CLIENT_TIMESTAMP = $(base_dir)/project/target/active.json
 
 ifdef ENABLE_SBT_THIN_CLIENT
 override SCALA_BUILDTOOL_DEPS += $(SBT_THIN_CLIENT_TIMESTAMP)
@@ -165,6 +165,7 @@ SBT_CLIENT_FLAG = --client
 endif
 
 SBT ?= java $(JAVA_OPTS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS) $(SBT_CLIENT_FLAG)
+SBT_NON_THIN ?= $(subst $(SBT_CLIENT_FLAG),,$(SBT))
 
 define run_scala_main
 	cd $(base_dir) && $(SBT) ";project $(1); runMain $(2) $(3)"

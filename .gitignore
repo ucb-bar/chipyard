@@ -20,4 +20,3 @@ tags
 env-riscv-tools.sh
 env-esp-tools.sh
 .bsp/
-*_TIMESTAMP

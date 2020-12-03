@@ -66,14 +66,14 @@ SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools)
 SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
 
 #########################################################################################
-# SBT Server Setup (needed to rebuild project correctly)
+# SBT Server Setup (start server / rebuild proj. defs. if SBT_SOURCES change)
 #########################################################################################
 $(SBT_THIN_CLIENT_TIMESTAMP): $(SBT_SOURCES)
 ifneq (,$(wildcard $(SBT_THIN_CLIENT_TIMESTAMP)))
 	cd $(base_dir) && $(SBT) "reload"
 	touch $@
 else
-	touch $@
+	cd $(base_dir) && $(SBT) "exit"
 endif
 
 #########################################################################################
@@ -223,17 +223,22 @@ $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
 
 ################################################
-# Helper to run SBT or shutdown the SBT server
+# Helper to run SBT or manage the SBT server
 ################################################
 
+SBT_COMMAND ?= shell
 .PHONY: launch-sbt
 launch-sbt:
-	cd $(base_dir) && $(SBT)
+	cd $(base_dir) && $(SBT_NON_THIN) "$(SBT_COMMAND)"
 
-.PHONY: shutdown-sbt
-shutdown-sbt:
+.PHONY: shutdown-sbt-server
+shutdown-sbt-server:
 	cd $(base_dir) && $(SBT) "shutdown"
 	rm -rf $(SBT_THIN_CLIENT_TIMESTAMP)
+
+.PHONY: start-sbt-server
+start-sbt-server:
+	cd $(base_dir) && $(SBT) "exit"
 
 #########################################################################################
 # print help text
