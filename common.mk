@@ -17,7 +17,8 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_CXXFLAGS     = additional CXXFLAGS for building simulators" \
 "   EXTRA_SIM_LDFLAGS      = additional LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES      = additional simulation sources needed for simulator" \
-"   EXTRA_SIM_REQS         = additional make requirements to build the simulator"
+"   EXTRA_SIM_REQS         = additional make requirements to build the simulator" \
+"   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client"
 
 EXTRA_GENERATOR_REQS ?=
 EXTRA_SIM_CXXFLAGS   ?=
@@ -41,7 +42,9 @@ HELP_COMMANDS += \
 "   run-binary-fast        = run [./$(shell basename $(sim))] and don't log instructions" \
 "   run-binary-debug       = run [./$(shell basename $(sim_debug))] and log instructions and waveform to files" \
 "   verilog                = generate intermediate verilog files from chisel elaboration and firrtl passes" \
-"   run-tests              = run all assembly and benchmark tests"
+"   firrtl                 = generate intermediate firrtl files from chisel elaboration" \
+"   run-tests              = run all assembly and benchmark tests" \
+"   launch-sbt             = start sbt terminal"
 
 #########################################################################################
 # include additional subproject make fragments

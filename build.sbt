@@ -13,7 +13,7 @@ lazy val commonSettings = Seq(
     case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
     case _ => MergeStrategy.first}},
   scalacOptions ++= Seq("-deprecation","-unchecked","-Xsource:2.11"),
-  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full), // TODO: Needed for just Rocket?
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
   allDependencies := {
     // drop dependencies (org, name)
@@ -71,6 +71,7 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
 
 // -- Rocket Chip --
 
+// This needs to stay in sync with the chisel3 and firrtl git submodules
 val chiselVersion = "3.4.0"
 lazy val chiselRef = ProjectRef(workspaceDirectory / "chisel3", "chisel")
 lazy val chiselLib = "edu.berkeley.cs" %% "chisel3" % chiselVersion
@@ -83,16 +84,10 @@ lazy val chiselPluginLib = "edu.berkeley.cs" % "chisel3-plugin" % chiselVersion 
 val firrtlVersion = "1.4.+"
 lazy val firrtlRef = ProjectRef(workspaceDirectory / "firrtl", "firrtl")
 lazy val firrtlLib = "edu.berkeley.cs" %% "firrtl" % firrtlVersion
-//lazy val firrtlLibDeps = (firrtlRef / Keys.libraryDependencies) // TODO: Won't work because of antlr plugin
-lazy val firrtlLibDeps = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.0" % "test",
-  "org.scalatestplus" %% "scalacheck-1-14" % "3.1.3.0" % "test",
-  "com.github.scopt" %% "scopt" % "3.7.1",
-  "net.jcazevedo" %% "moultingyaml" % "0.4.2",
-  "org.json4s" %% "json4s-native" % "3.6.9",
-  "org.apache.commons" % "commons-text" % "1.8",
-  "org.antlr" % "antlr4-runtime" % "4.7.1"
-)
+val firrtlLibDeps = settingKey[Seq[sbt.librarymanagement.ModuleID]]("FIRRTL Library Dependencies sans antlr4")
+Global / firrtlLibDeps := {
+  (firrtlRef / Keys.libraryDependencies).value.filterNot(_.name == "antlr4")
+}
 
  // Rocket-chip dependencies (subsumes making RC a RootProject)
 lazy val hardfloat  = (project in rocketChipDir / "hardfloat")
@@ -153,14 +148,14 @@ lazy val rocketLibDeps = (rocketchip / Keys.libraryDependencies)
 
 lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))
   .sourceDependency(firrtlRef, firrtlLib)
-  .settings(libraryDependencies ++= firrtlLibDeps)
   .settings(commonSettings)
+  .settings(libraryDependencies ++= (Global / firrtlLibDeps).value)
 lazy val firrtlInterpreterLibDeps = (firrtl_interpreter / Keys.libraryDependencies)
 
 lazy val treadle = (project in file("tools/treadle"))
   .sourceDependency(firrtlRef, firrtlLib)
-  .settings(libraryDependencies ++= firrtlLibDeps)
   .settings(commonSettings)
+  .settings(libraryDependencies ++= (Global / firrtlLibDeps).value)
 lazy val treadleLibDeps = (treadle / Keys.libraryDependencies)
 
 lazy val chisel_testers = (project in file("tools/chisel-testers"))
