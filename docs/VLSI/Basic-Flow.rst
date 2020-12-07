@@ -3,7 +3,7 @@
 Using Hammer To Place and Route a Custom Block
 =================================================
 
-.. IMPORTANT:: In order to use the Hammer VLSI flow, you need access to Hammer tools and technology plugins. You can obtain these by emailing hammer-plugins-access@lists.berkeley.edu with a request for which plugin(s) you would like access to. 
+.. IMPORTANT:: In order to use the Hammer VLSI flow, you need access to Hammer tools and technology plugins. You can obtain these by emailing hammer-plugins-access@lists.berkeley.edu with a request for which plugin(s) you would like access to. Make sure your email includes your github ID and proof (through affiliation or otherwise) that you have licensed access to relevant tools.
 
 Initialize the Hammer Plug-ins
 ----------------------------------
