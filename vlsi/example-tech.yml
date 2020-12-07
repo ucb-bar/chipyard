@@ -3,8 +3,5 @@ vlsi.core.technology: <tech_name>
 vlsi.core.technology_path: ["hammer-<tech_name>-plugin"]
 vlsi.core.technology_path_meta: append
 
-# tech node measured in nm (required because of licensing)
-vlsi.core.node: <N>
-
 # technology files installation directory
 technology.<tech_name>.install_dir: "</path/to/technology/pdk/>"
