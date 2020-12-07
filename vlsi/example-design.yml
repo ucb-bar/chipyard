@@ -24,8 +24,7 @@ vlsi.inputs.pin.generate_mode: semi_auto
 # The path name should match the VLSI_TOP makefile parameter if it is set
 par.innovus.floorplan_mode: "auto"
 vlsi.inputs.placement_constraints:
-#  - path: "ChipTop"
-  - path: "Gemmini"
+  - path: "ChipTop"
     type: toplevel
     x: 0
     y: 0

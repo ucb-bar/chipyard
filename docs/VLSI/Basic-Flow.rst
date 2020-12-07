@@ -34,7 +34,7 @@ Next, we define the Hammer environment into the shell:
     source $HAMMER_HOME/sourceme.sh
 
 
-.. Note:: Some VLSI EDA tools are supported only on RHEL-based operating systems. We recommend using Chipyard on RHEL7 and above. However, many VLSI server still have old operating systems such as RHEL6, which have software packages older than the basic chipyard requirements. In order to build Chipyard on RHEL6, you will likely need to build from source gcc, git, gmake, make, dtc, cc, bison, libexpat and liby.
+.. Note:: Some VLSI EDA tools are supported only on RHEL-based operating systems. We recommend using Chipyard on RHEL7 and above. However, many VLSI server still have old operating systems such as RHEL6, which have software packages older than the basic chipyard requirements. In order to build Chipyard on RHEL6, you will likely need to use tool packages such as devtoolset (for example, devtoolset-8) and/or build from source gcc, git, gmake, make, dtc, cc, bison, libexpat and liby.
 
 Setting up the Hammer Configuration Files
 --------------------------------------------
@@ -52,7 +52,7 @@ The ``example-design.yml`` file contains basic build system information (how man
 
 Finally, the ``example-tech`` file is a template file for a process technology plugin configuration. We will copy this file, and replace its fields with the appropriate process technology details for the tech plugin that we have access to. For example, for the ``asap7`` tech plugin we will replace the <tech_name> field with "asap7", the Node size "N" with "7", and the path to the process technology files installation directory.
 
-We recommend copying these example configuration files and customizing them with a different name, so you can have different configuration files for different process technologies and designs.
+We recommend copying these example configuration files and customizing them with a different name, so you can have different configuration files for different process technologies and designs (e.g. create tech-tsmintel3.yml from example-tech.yml)
 
 
 Building the Design
@@ -64,7 +64,7 @@ As in the rest of the Chipyard flows, we specify our SoC configuration using the
 However, unlike the rest of the Chipyard flows, in the case of physical design we might be interested in working in a hierarchical fashion and therefore we would like to work on a single module.
 Therefore, we can also specify a ``VLSI_TOP`` make variable with the same of a specific Verilog module (which should also match the name of the equivalent Chisel module) which we would like to work on.
 The makefile will automatically call tools such as Barstools and the MacroCopmiler (:ref:`barstools`) in order to make the generated Verilog more VLSI friendly. 
-By default, the MacroCopmiler will attempt to map memories into the SRAM options within the Hammer technology plugin. However, if you are wokring with a new process technology are prefer to work with flipflop arrays, you can configure the MacroCompiler using the ``MACROCOMPILER_MODE`` make variable. For example, the ASAP7 process technology does not have associated SRAMs, and therefore the ASAP7 Hammer tutorial (:ref:`tutorial`) uses the ``MACROCOMPILER_MODE='--mode synflops'`` option.
+By default, the MacroCopmiler will attempt to map memories into the SRAM options within the Hammer technology plugin. However, if you are wokring with a new process technology are prefer to work with flipflop arrays, you can configure the MacroCompiler using the ``MACROCOMPILER_MODE`` make variable. For example, the ASAP7 process technology does not have associated SRAMs, and therefore the ASAP7 Hammer tutorial (:ref:`tutorial`) uses the ``MACROCOMPILER_MODE='--mode synflops'`` option (Note that synthesizing a design with only flipflops is very slow and will often may not meet constraints).
 
 We call the ``make buildfile`` command while also specifying the name of the process technology we are working with (same ``tech_name`` for the configuration files and plugin name) and the configuration files we created. Note, in the ASAP7 tutorial ((:ref:`tutorial`)) these configuration files are merged into a single file called ``example-asap7.yml``.
 
@@ -134,7 +134,7 @@ The relevant ``make`` command would then be
 
     make par CONFIG=GemminiRocketConfig VLSI_TOP=Gemmini tech_name=tsmintel3 INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
 
-
+Note that the width and height specification can vary widely between different modulesi and level of the module hierarchy. Make sure to set sane width and height values.
 Place-and-route generally requires more fine-grained input specifications regarding power nets, clock nets, pin assignments and floorplanning. While the template configuration files provide defaults for automatic tool defaults, these will usually result in very bad QoR, and therefore it is recommended to specify better-informed floorplans, pin assignments and power nets. For more information about cutomizing theses parameters, please refer to the :ref:`Customizing Your VLSI Flow in Hammer` sections or to the Hammer documentation. 
 Additionally, some Hammer process technology plugins do not provide sufficient default values for requires settings such as power nets and pin assignments (for example, ASAP7). In those cases, these constraints will need to be specified manually in the top-level configuration yml files, as is the case in the ``example-asap7.yml`` configuration file.
 
@@ -147,16 +147,24 @@ Place-and-route tools are very sensitive to process technologes (significantly m
 
 Power Estimation
 ^^^^^^^^^^^^^^^^^^^^
+Power estimation in Hammer can be performed in one of two stages: post-synthesis (post-syn) or post-place-and-route (post-par). The most accurate power estimation is post-par, and it includes finer grained details of the places instances and wire lengths.
+Post-par power estimation can be based on static average signal toggles rates (also known as "static power estimation"), or based on simulation-extracted signal toggle data (also known as "dynamic power estimation").
 
+In order to run post-par power estimation, make sure that a power estimation tool (such as Cadence Voltus) has been defined in your ``example-tools.yml`` file.
+Simulation-exacted power estimation often requires a dedicated testharness for the block under evalution (DUT). While the Hammer flow supports such configurations (further details can be found in the Hammer documentation), Chipyard's integrated flows support an automated full digital SoC simulation-extracted post-par power estimation through the integration of software RTL simulation flows with the Hammer VLSI flow. As such, full digital SoC simulation-extracted power estimation can be performed by specifying a simple binary executable with the associated ``make`` command.
+
+.. code-block:: shell
+
+    make power-par BINARY=/path/to/baremetal/binary/rv64ui-p-addi.riscv CONFIG=<chipyard_config_name> tech_name=tsmintel3 INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
 
 
 Signoff
 ^^^^^^^^^
 
 During chip tapeout, you will need to perform sign-off check to make sure the generated GDSII can be fabricated as intended. This is done using dedicated signoff tools that perform design rule checking (DRC) and layout versus schematic (LVS) verification. 
-In most cases, placed-and-routed designs will not pass DRC and LVS on first attempts due to nuanced design rules and silent failures of the place-and-route tools. Passing DRC and LVS will often requires adding manual placement constraints to "force" the EDA tools into certain patterns. 
+In most cases, placed-and-routed designs will not pass DRC and LVS on first attempts due to nuanced design rules and subtle/silent failures of the place-and-route tools. Passing DRC and LVS will often requires adding manual placement constraints to "force" the EDA tools into certain patterns. 
 If you have placed-and-routed a design with the goal of getting area and power estimates, DRC and LVS are not strictly neccessary and the results will likely be quite similar. If you are intending to tapeout and fabricate a chip, DRC and LVS are mandatory and will likely requires multiple-iterations of refining manual placement constraints.
-
+Having a large number of DRC/LVS violations can have a significant impact on the runtime of the place-and-route procedure (since the tools will try to fix each of them several times). A large number of DRC/LVS violations may also be an indication that the design is not necessarily realistic for this particular process technology, which may have power/area implications. 
 
 Since signoff checks are required only for a complete chip tapeout, they are currently not fully automated in Hammer, and often require some additional manual inclusion of custom Makefiles associated with specific process technologies. However, the general steps from running signoff within Hammer (under the assumption of a fully automated tech plug-in) are Make commands similar to the previous steps.
 
@@ -214,4 +222,4 @@ Composing a Hierarchical Design
 
 Customizing Generated Tcl Scripts
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The ``example-vlsi`` python script is the Hammer entry script with placeholders for hooks. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in the ``example-vlsi`` entry script example. In this particular example, a list of hooks is paased in the ``get_extra_par_hooks`` function in the ``ExampleDriver`` class. Refer to the Hammer documentation on hooks for a detailed description of how these are injected into the VLSI flow.
+The ``example-vlsi`` python script is the Hammer entry script with placeholders for hooks. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in the ``example-vlsi`` entry script example. In this particular example, a list of hooks is paased in the ``get_extra_par_hooks`` function in the ``ExampleDriver`` class. Refer to the `Hammer documentation on hooks <https://hammer-vlsi.readthedocs.io/en/latest/Hammer-Use/Hooks.html>`__ for a detailed description of how these are injected into the VLSI flow.
