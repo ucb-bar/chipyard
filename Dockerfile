@@ -145,7 +145,7 @@ RUN apt-get update
 RUN apt-get install -y --no-install-recommends openjfx
 
 # Add build-essential
-RUN apt-get install -y build-essential
+#RUN apt-get install -y build-essential
 
 # Add RISCV toolchain necessary dependencies
 RUN apt-get update
@@ -156,9 +156,7 @@ RUN apt-get install -y \
             babeltrace \
             bc \
             curl \
-            device-tree-compiler \
             expat \
-            flex \
             gawk \
             gperf \
             g++ \
@@ -175,7 +173,6 @@ RUN apt-get install -y \
             texinfo \
             zlib1g-dev \
             rsync \ 
-            bison \ 
             verilator
 
 
@@ -251,7 +248,8 @@ RUN mvn -version \
 
 # Install riscv-tools
 RUN cd chipyard && \
-        export MAKEFLAGS=-"j $(nproc)" && \./scripts/build-toolchains.sh riscv-tools 1>/dev/null
+        export MAKEFLAGS=-"j $(nproc)" && \
+        ./scripts/build-toolchains.sh riscv-tools 1>/dev/null
         
 # Install esp-tools
 RUN cd chipyard && \
@@ -260,11 +258,6 @@ RUN cd chipyard && \
         
 #ENTRYPOINT ["sh", "-c", "-l", "cd chipyard && . ./env.sh && #\"$@\"", "-s"]
 
-#WORKDIR $HOME/chipyard
-#COPY entrypoint.sh /home/riscvuser/chipyard/entrypoint.sh
-RUN sudo chown riscvuser /home/riscvuser/chipyard/scripts/entrypoint.sh
-RUN chmod +x /home/riscvuser/chipyard/scripts/entrypoint.sh
-#WORKDIR $HOME
 ENTRYPOINT ["/home/riscvuser/chipyard/scripts/entrypoint.sh"]
 
 #env_file: ./env.sh
