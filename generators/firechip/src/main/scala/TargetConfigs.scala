@@ -204,3 +204,14 @@ class FireSimMulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
   new FireSimRocketConfig)
 
+class WithBoomTileFrequency(fMHz: Double) extends chipyard.ClockNameContainsAssignment("boom", fMHz)
+
+class FireSimNewBeagleConfig extends Config(
+  new WithBoomTileFrequency(3200.0 / 3) ++
+  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++
+  new boom.common.WithRationalBoomTiles ++
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.NewBeagleConfig)
+
