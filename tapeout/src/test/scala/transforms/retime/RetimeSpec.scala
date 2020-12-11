@@ -2,10 +2,11 @@
 
 package barstools.tapeout.transforms.retime.test
 
-import barstools.tapeout.transforms.retime._
 import chisel3._
-import chisel3.stage.ChiselStage
-import firrtl._
+import chisel3.stage.{ChiselStage, ChiselGeneratorAnnotation}
+import firrtl.{EmittedFirrtlCircuitAnnotation, EmittedFirrtlModuleAnnotation}
+import barstools.tapeout.transforms.retime.RetimeLib
+import firrtl.FileUtils
 import logger.Logger
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -18,20 +19,33 @@ class RetimeSpec extends FlatSpec with Matchers {
     val genClassName = gen.getClass.getName
     name + genClassName.hashCode.abs
   }
+  def getLowFirrtl[T <: RawModule](gen: () => T, extraArgs: Array[String] = Array.empty): String = {
+    // generate low firrtl
+    (new ChiselStage).execute(
+      Array("-X", "low") ++ extraArgs,
+      Seq(ChiselGeneratorAnnotation(gen))
+    ).collect {
+      case EmittedFirrtlCircuitAnnotation(a) => a
+      case EmittedFirrtlModuleAnnotation(a)  => a
+    }.map(_.value)
+    .mkString("")
+  }
+
 
   behavior of "retime library"
 
   it should "pass simple retime module annotation" in {
-    val gen = () => new RetimeModule()
+    val gen = () => new RetimeModule
     val dir = uniqueDirName(gen, "RetimeModule")
 
     Logger.makeScope(Seq.empty) {
       val captor = new Logger.OutputCaptor
       Logger.setOutput(captor.printStream)
-      val firrtl = (new ChiselStage).emitFirrtl(
-        new RetimeModule(),
-        Array("-td", s"test_run_dir/$dir", "-foaf", s"test_run_dir/$dir/final", "--log-level", "info")
-      )
+
+      // generate low firrtl
+      val firrtl = getLowFirrtl(gen,
+        Array("-td", s"test_run_dir/$dir", "-foaf", s"test_run_dir/$dir/final", "--log-level", "info"))
+
       firrtl.nonEmpty should be(true)
       //Make sure we got the RetimeTransform scheduled
       captor.getOutputAsString should include ("barstools.tapeout.transforms.retime.RetimeTransform")
@@ -45,16 +59,17 @@ class RetimeSpec extends FlatSpec with Matchers {
   }
 
   it should "pass simple retime instance annotation" in {
-    val gen = () => new RetimeInstance()
+    val gen = () => new RetimeInstance
     val dir = uniqueDirName(gen, "RetimeInstance")
 
     Logger.makeScope(Seq.empty) {
       val captor = new Logger.OutputCaptor
       Logger.setOutput(captor.printStream)
-      val firrtl = (new ChiselStage).emitFirrtl(
-        new RetimeInstance(),
-        Array("-td", s"test_run_dir/$dir", "-foaf", s"test_run_dir/$dir/final", "--log-level", "info")
-      )
+
+      // generate low firrtl
+      val firrtl = getLowFirrtl(gen,
+        Array("-td", s"test_run_dir/$dir", "-foaf", s"test_run_dir/$dir/final", "--log-level", "info"))
+
       firrtl.nonEmpty should be(true)
       //Make sure we got the RetimeTransform scheduled
       captor.getOutputAsString should include ("barstools.tapeout.transforms.retime.RetimeTransform")
