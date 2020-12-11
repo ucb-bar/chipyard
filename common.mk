@@ -237,7 +237,6 @@ launch-sbt:
 .PHONY: shutdown-sbt-server
 shutdown-sbt-server:
 	cd $(base_dir) && $(SBT) "shutdown"
-	rm -rf $(SBT_THIN_CLIENT_TIMESTAMP)
 
 .PHONY: start-sbt-server
 start-sbt-server:
