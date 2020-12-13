@@ -16,7 +16,7 @@ lazy val commonSettings = Seq(
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
   allDependencies := {
-    // drop dependencies (org, name)
+    // drop specific maven dependencies in subprojects in favor of Chipyard's version
     val dropDeps = Seq(
       ("edu.berkeley.cs", "firrtl"),
       ("edu.berkeley.cs", "chisel3"),
@@ -86,6 +86,7 @@ lazy val firrtlRef = ProjectRef(workspaceDirectory / "firrtl", "firrtl")
 lazy val firrtlLib = "edu.berkeley.cs" %% "firrtl" % firrtlVersion
 val firrtlLibDeps = settingKey[Seq[sbt.librarymanagement.ModuleID]]("FIRRTL Library Dependencies sans antlr4")
 Global / firrtlLibDeps := {
+  // drop antlr4 compile dep. but keep antlr4-runtime dep. (compile needs the plugin to be setup)
   (firrtlRef / Keys.libraryDependencies).value.filterNot(_.name == "antlr4")
 }
 
@@ -144,7 +145,7 @@ lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
   )
 lazy val rocketLibDeps = (rocketchip / Keys.libraryDependencies)
 
-// -- "Problematic" Projects --
+// -- Chipyard-managed External Projects --
 
 lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))
   .sourceDependency(firrtlRef, firrtlLib)
@@ -168,7 +169,7 @@ lazy val chisel_testers = (project in file("tools/chisel-testers"))
   .settings(commonSettings)
 lazy val chiselTestersLibDeps = (chisel_testers / Keys.libraryDependencies)
 
-// -- UCB-controlled Projects --
+// -- Normal Projects --
 
 // Contains annotations & firrtl passes you may wish to use in rocket-chip without
 // introducing a circular dependency between RC and MIDAS
