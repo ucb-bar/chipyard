@@ -1,9 +1,11 @@
+// See LICENSE for license details.
+
 package barstools.macros
 
 import firrtl.ir.{Circuit, NoInfo}
 import firrtl.passes.RemoveEmpty
 import firrtl.Parser.parse
-import firrtl.Utils.ceilLog2
+
 import java.io.{File, StringWriter}
 
 import mdf.macrolib.SRAMMacro
@@ -247,10 +249,10 @@ trait HasSimpleTestGenerator {
     val v = s"${generatorType}${extraTagPrefixed}.v"
 
     lazy val mem_name = "target_memory"
-    val mem_addr_width = ceilLog2(memDepth)
+    val mem_addr_width = MacroCompilerMath.ceilLog2(memDepth)
 
     lazy val lib_name = "awesome_lib_mem"
-    val lib_addr_width = ceilLog2(libDepth)
+    val lib_addr_width = MacroCompilerMath.ceilLog2(libDepth)
 
     // Override these to change the port prefixes if needed.
     def libPortPrefix: String = "lib"

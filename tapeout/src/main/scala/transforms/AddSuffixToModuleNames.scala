@@ -4,9 +4,10 @@ package barstools.tapeout.transforms
 
 import firrtl._
 import firrtl.ir._
-import firrtl.annotations._
 import firrtl.Mappers._
-
+import firrtl.annotations.{ModuleTarget, SingleTargetAnnotation, CircuitTarget}
+import firrtl.stage.TransformManager.{TransformDependency}
+import firrtl.stage.{Forms}
 
 case class KeepNameAnnotation(target: ModuleTarget)
     extends SingleTargetAnnotation[ModuleTarget] {
@@ -18,30 +19,36 @@ case class ModuleNameSuffixAnnotation(target: CircuitTarget, suffix: String)
   def duplicate(n: CircuitTarget) = this.copy(target = n)
 }
 
-// This doesn't rename ExtModules under the assumption that they're some
-// Verilog black box and therefore can't be renamed.  Since the point is to
-// allow FIRRTL to be linked together using "cat" and ExtModules don't get
-// emitted, this should be safe.
-class AddSuffixToModuleNames extends Transform {
-  def inputForm = LowForm
-  def outputForm = LowForm
+class AddSuffixToModuleNames extends Transform with DependencyAPIMigration {
 
-  def processAnnos(annos: AnnotationSeq): (AnnotationSeq, (String) => String) = {
-    val whitelist = annos.collect({ case KeepNameAnnotation(tgt) => tgt.module }).toSet
-    val newAnnos = annos.filterNot(_.isInstanceOf[ModuleNameSuffixAnnotation])
-    val suffixes = annos.collect({ case ModuleNameSuffixAnnotation(_, suffix) => suffix })
+  override def prerequisites: Seq[TransformDependency] = Forms.LowForm
+  override def optionalPrerequisites: Seq[TransformDependency] = Forms.LowFormOptimized
+  override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
+  override def invalidates(a: Transform): Boolean = false
+
+  def determineRenamerandAnnos(state: CircuitState): (AnnotationSeq, (String) => String) = {
+    // remove determine suffix annotation
+    val newAnnos = state.annotations.filterNot(_.isInstanceOf[ModuleNameSuffixAnnotation])
+    val suffixes = state.annotations.collect({ case ModuleNameSuffixAnnotation(_, suffix) => suffix })
     require(suffixes.length <= 1)
-
     val suffix = suffixes.headOption.getOrElse("")
-    val renamer = { name: String => if (whitelist(name)) name else name + suffix }
+
+    // skip renaming ExtModules and top-level module
+    val excludeSet = state.circuit.modules.flatMap {
+      case e: ExtModule => Some(e.name)
+      case m if (m.name == state.circuit.main) => Some(m.name)
+      case _ => None
+    }.toSet
+
+    val renamer = { (name: String) => if (excludeSet(name)) name else name + suffix }
+
     (newAnnos, renamer)
   }
 
   def renameInstanceModules(renamer: (String) => String)(stmt: Statement): Statement = {
     stmt match {
       case m: DefInstance => new DefInstance(m.info, m.name, renamer(m.module))
-      case m: WDefInstance => new WDefInstance(m.info, m.name, renamer(m.module), m.tpe)
-      case s => s map renameInstanceModules(renamer)
+      case s => s.map(renameInstanceModules(renamer)) // if is statement, recurse
     }
   }
 
@@ -58,7 +65,7 @@ class AddSuffixToModuleNames extends Transform {
   }
 
   def execute(state: CircuitState): CircuitState = {
-    val (newAnnos, renamer) = processAnnos(state.annotations)
+    val (newAnnos, renamer) = determineRenamerandAnnos(state)
     val (ret, renames) = run(state, renamer)
     state.copy(circuit = ret, annotations = newAnnos, renames = Some(renames))
   }

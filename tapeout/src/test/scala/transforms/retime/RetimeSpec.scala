@@ -3,12 +3,12 @@
 package barstools.tapeout.transforms.retime.test
 
 import chisel3._
-import firrtl._
+import chisel3.stage.{ChiselStage, ChiselGeneratorAnnotation}
+import firrtl.{EmittedFirrtlCircuitAnnotation, EmittedFirrtlModuleAnnotation}
+import barstools.tapeout.transforms.retime.RetimeLib
+import firrtl.FileUtils
+import logger.Logger
 import org.scalatest.{FlatSpec, Matchers}
-import chisel3.experimental._
-import chisel3.util.HasBlackBoxInline
-import chisel3.iotesters._
-import barstools.tapeout.transforms.retime._
 
 class RetimeSpec extends FlatSpec with Matchers {
   def normalized(s: String): String = {
@@ -19,26 +19,67 @@ class RetimeSpec extends FlatSpec with Matchers {
     val genClassName = gen.getClass.getName
     name + genClassName.hashCode.abs
   }
+  def getLowFirrtl[T <: RawModule](gen: () => T, extraArgs: Array[String] = Array.empty): String = {
+    // generate low firrtl
+    (new ChiselStage).execute(
+      Array("-X", "low") ++ extraArgs,
+      Seq(ChiselGeneratorAnnotation(gen))
+    ).collect {
+      case EmittedFirrtlCircuitAnnotation(a) => a
+      case EmittedFirrtlModuleAnnotation(a)  => a
+    }.map(_.value)
+    .mkString("")
+  }
+
 
   behavior of "retime library"
 
   it should "pass simple retime module annotation" in {
-    val gen = () => new RetimeModule()
+    val gen = () => new RetimeModule
     val dir = uniqueDirName(gen, "RetimeModule")
-    chisel3.Driver.execute(Array("-td", s"test_run_dir/$dir", "-foaf", s"test_run_dir/$dir/final"), gen) shouldBe a [ChiselExecutionSuccess]
 
-    val lines = io.Source.fromFile(s"test_run_dir/$dir/test_run_dir/$dir/final.anno.json").getLines().map(normalized).mkString("\n")
-    lines should include("barstools.tapeout.transforms.retime.RetimeTransform")
+    Logger.makeScope(Seq.empty) {
+      val captor = new Logger.OutputCaptor
+      Logger.setOutput(captor.printStream)
+
+      // generate low firrtl
+      val firrtl = getLowFirrtl(gen,
+        Array("-td", s"test_run_dir/$dir", "-foaf", s"test_run_dir/$dir/final", "--log-level", "info"))
+
+      firrtl.nonEmpty should be(true)
+      //Make sure we got the RetimeTransform scheduled
+      captor.getOutputAsString should include ("barstools.tapeout.transforms.retime.RetimeTransform")
+    }
+
+    val lines = FileUtils.getLines(s"test_run_dir/$dir/test_run_dir/$dir/final.anno.json")
+      .map(normalized)
+      .mkString("\n")
+    lines should include("barstools.tapeout.transforms.retime.RetimeAnnotation")
+    lines should include(""""target":"RetimeModule.RetimeModule"""")
   }
 
-  // TODO(azidar): need to fix/add instance annotations
-  ignore should "pass simple retime instance annotation" in {
-    val gen = () => new RetimeInstance()
+  it should "pass simple retime instance annotation" in {
+    val gen = () => new RetimeInstance
     val dir = uniqueDirName(gen, "RetimeInstance")
-    chisel3.Driver.execute(Array("-td", s"test_run_dir/$dir", "-foaf", s"test_run_dir/$dir/final.anno"), gen) shouldBe a [ChiselExecutionSuccess]
 
-    val lines = io.Source.fromFile(s"test_run_dir/$dir/final.anno").getLines().map(normalized).toSeq
-    lines should contain ("Annotation(ComponentName(instance, ModuleName(RetimeInstance,CircuitName(RetimeInstance))),class barstools.tapeout.transforms.retime.RetimeTransform,retime)")
+    Logger.makeScope(Seq.empty) {
+      val captor = new Logger.OutputCaptor
+      Logger.setOutput(captor.printStream)
+
+      // generate low firrtl
+      val firrtl = getLowFirrtl(gen,
+        Array("-td", s"test_run_dir/$dir", "-foaf", s"test_run_dir/$dir/final", "--log-level", "info"))
+
+      firrtl.nonEmpty should be(true)
+      //Make sure we got the RetimeTransform scheduled
+      captor.getOutputAsString should include ("barstools.tapeout.transforms.retime.RetimeTransform")
+    }
+
+    val lines = FileUtils.getLines(s"test_run_dir/$dir/test_run_dir/$dir/final.anno.json")
+      .map(normalized)
+      .mkString("\n")
+    lines should include("barstools.tapeout.transforms.retime.RetimeAnnotation")
+    lines should include(""""target":"RetimeInstance.MyModule"""")
   }
 }
 
