@@ -44,7 +44,7 @@ abstract class FireSimTestSuite(
   def runTest(backend: String, name: String, debug: Boolean, additionalArgs: Seq[String] = Nil) = {
     compileMlSimulator(backend, debug)
     if (isCmdAvailable(backend)) {
-      it should s"pass in ML simualtion on ${backend}" in {
+      it should s"pass in ML simulation on ${backend}" in {
         assert(invokeMlSimulator(backend, name, debug, additionalArgs) == 0)
       }
     }
