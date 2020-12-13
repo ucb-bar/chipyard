@@ -46,7 +46,7 @@ Hammer relies on YAML-based configuration files. While these configuration can b
 OpenRoad example), the generally suggested way to work with an arbitrary process technology or tools plugins would be to use three configuration files, matching the three Hammer concerns - tools, tech, and design. 
 The ``vlsi`` directory includes three such example configuration files matching the three concerns: ``example-tools.yml``, ``example-tech.yml``, and ``example-design.yml``.
 
-The ``example-tools.yml`` file configures which EDA tools hammer will use. This example files uses Cadence Innovus, Genus and Mentor Calibre (which are likely the tools you will use if you're working in the Berkeley Wireless Research Center). Note that tool versions are highly sensitive to the process-technology in-use. Hence, tool versions that work with one process technology may not work with another (for example, ASAP7 will not work with an Innovus version newer than 18.1, while other proprietary process technologies will likely require newer versions such as 19.1).
+The ``example-tools.yml`` file configures which EDA tools hammer will use. This example file uses Cadence Innovus, Genus and Voltus, Synopsys VCS, and Mentor Calibre (which are likely the tools you will use if you're working in the Berkeley Wireless Research Center). Note that tool versions are highly sensitive to the process-technology in-use. Hence, tool versions that work with one process technology may not work with another (for example, ASAP7 will not work with an Innovus version newer than 18.1, while other proprietary process technologies will likely require newer versions such as 19.1).
 
 The ``example-design.yml`` file contains basic build system information (how many cores/threads to use, etc.), as well as configurations that are specific to the design we are working on such as clock signal name and frequency, power modes, floorplan, and additional constraints that we will add later on.
 
@@ -150,12 +150,19 @@ Power Estimation
 Power estimation in Hammer can be performed in one of two stages: post-synthesis (post-syn) or post-place-and-route (post-par). The most accurate power estimation is post-par, and it includes finer grained details of the places instances and wire lengths.
 Post-par power estimation can be based on static average signal toggles rates (also known as "static power estimation"), or based on simulation-extracted signal toggle data (also known as "dynamic power estimation").
 
-In order to run post-par power estimation, make sure that a power estimation tool (such as Cadence Voltus) has been defined in your ``example-tools.yml`` file.
+.. Warning:: In order to run post-par power estimation, make sure that a power estimation tool (such as Cadence Voltus) has been defined in your ``example-tools.yml`` file. Make sure that the power estimation tool (for example, Cadence Voltus) version matches the physical design tool (for example, Cadence Innovus) version, otherwise you will encounter a database mismatch error.
+
 Simulation-exacted power estimation often requires a dedicated testharness for the block under evalution (DUT). While the Hammer flow supports such configurations (further details can be found in the Hammer documentation), Chipyard's integrated flows support an automated full digital SoC simulation-extracted post-par power estimation through the integration of software RTL simulation flows with the Hammer VLSI flow. As such, full digital SoC simulation-extracted power estimation can be performed by specifying a simple binary executable with the associated ``make`` command.
 
 .. code-block:: shell
 
     make power-par BINARY=/path/to/baremetal/binary/rv64ui-p-addi.riscv CONFIG=<chipyard_config_name> tech_name=tsmintel3 INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
+
+
+The simulation-extracted power estimation flow implicitly uses Hammer's gate-level simulation flow (in order to generate the ``saif`` activity data file). This gate-level simulation flow can also be run independantly from the power estimation flow using the ``make sim-par`` command.
+
+
+.. Note:: The gate-level simulation flow (and there the simulation-extracted power-estimation) is currently integrated only with the Synopsys VCS simulation (Verilator does not support gate-level simulation. Support for Cadence Incisive is work-in-progress)
 
 
 Signoff
