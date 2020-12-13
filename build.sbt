@@ -219,6 +219,7 @@ lazy val firechip = conditionalDependsOn(project in file("generators/firechip"))
   )
 
 lazy val verif = (project in file("./tools/verif"))
-  .dependsOn(chisel, rocketchip, dsptools, `rocket-dsptools`)
-  .settings(commonSettings, allDependencies ++= Seq("edu.berkeley.cs" %% "chiseltest" % "0.2.0"))
-
+  .dependsOn(chipyard, chisel, rocketchip, dsptools, `rocket-dsptools`, gemmini)
+  .settings(commonSettings, allDependencies ++= Seq(
+    "edu.berkeley.cs" %% "chiseltest" % "0.3-SNAPSHOT",
+    "com.google.protobuf" % "protobuf-java" % "3.11.0"))
