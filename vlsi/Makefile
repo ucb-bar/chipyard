@@ -29,9 +29,9 @@ SMEMS_HAMMER       ?= $(build_dir)/$(long_name).mems.hammer.json
 ifeq ($(tech_name),asap7)
 	MACROCOMPILER_MODE ?= --mode synflops
 else ifdef USE_COMPILER
-	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) --use-compiler -hir $(SMEMS_HAMMER) --mode strict)
+	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) --use-compiler -hir $(SMEMS_HAMMER) --mode strict
 else
-	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER) --mode strict)
+	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER) --mode strict
 endif	
 
 ENV_YML            ?= $(vlsi_dir)/env.yml
