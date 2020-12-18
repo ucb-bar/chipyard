@@ -13,14 +13,6 @@ import freechips.rocketchip.subsystem._
 
 // For subsystem/BusTopology.scala
 
-/**
-  * Keys that serve as a means to define crossing types from a Parameters instance
-  */
-case object SbusToMbusXTypeKey extends Field[ClockCrossingType](NoCrossing)
-case object SbusToCbusXTypeKey extends Field[ClockCrossingType](NoCrossing)
-case object CbusToPbusXTypeKey extends Field[ClockCrossingType](SynchronousCrossing())
-case object FbusToSbusXTypeKey extends Field[ClockCrossingType](SynchronousCrossing())
-
 // Biancolin: This, modified from Henry's email
 /** Parameterization of a topology containing a banked coherence manager and a bus for attaching memory devices. */
 case class CoherentMulticlockBusTopologyParams(
