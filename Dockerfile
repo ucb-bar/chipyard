@@ -9,43 +9,32 @@ MAINTAINER jacobgadikian@gmail.com
 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199
 RUN apt-get update && \
     apt-get upgrade -y && \
-    mkdir -p /usr/share/man/man1 && \
     apt-get install -y \
                curl \
                git \
-               sudo \
-               tar \
-               apt-utils
+               sudo
+
+# Stopping docker keyboard-config from disrupting ubuntu-req.sh
+RUN sudo DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration && \
+   sudo DEBIAN_FRONTEND=noninteractive apt-get install -y console-setup
 
 RUN groupadd --gid 3434 riscvuser \
     && useradd --uid 3434 --gid riscvuser --shell /bin/bash --create-home riscvuser \
     && echo 'riscvuser ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-riscvuser \
     && echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
 
-# Add HOME environment variable
-ENV HOME="/home/riscvuser"
-
-# Update PATH for RISCV toolchain (note: hardcoded for CircleCI)
-ENV RISCV="$HOME/riscv-tools-install"
-ENV LD_LIBRARY_PATH="$RISCV/lib"
-ENV PATH="$RISCV/bin:$PATH"
-
-WORKDIR $HOME
+WORKDIR /home/riscvuser
 USER riscvuser
 
 # Install Chipyard
 RUN git clone https://github.com/ucb-bar/chipyard.git && \
         cd chipyard && \
-        export MAKEFLAGS=-"j $(nproc)" && \
-        ./scripts/init-submodules-no-riscv-tools.sh 1>/dev/null
-
-# Stopping docker keyboard-config from disrupting ubuntu-req.sh
-RUN sudo DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration && \
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y console-setup
+        ./scripts/ubuntu-req.sh 1>/dev/null
 
 # Install dependencies from ubuntu-req.sh
 RUN cd chipyard && \
-    ./scripts/ubuntu-req.sh 1>/dev/null
+        export MAKEFLAGS=-"j $(nproc)" && \
+        ./scripts/init-submodules-no-riscv-tools.sh 1>/dev/null
 
 # Install riscv-tools
 RUN cd chipyard && \
