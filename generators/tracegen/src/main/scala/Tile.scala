@@ -13,6 +13,7 @@ import freechips.rocketchip.interrupts._
 import freechips.rocketchip.subsystem._
 import boom.lsu.{BoomNonBlockingDCache, LSU, LSUCoreIO}
 import boom.common.{BoomTileParams, MicroOp, BoomCoreParams, BoomModule}
+import freechips.rocketchip.prci.ClockSinkParameters
 
 
 class BoomLSUShim(implicit p: Parameters) extends BoomModule()(p)
@@ -190,6 +191,7 @@ case class BoomTraceGenParams(
   val blockerCtrlAddr = None
   val name = None
   val traceParams = TraceGenParams(wordBits, addrBits, addrBag, maxRequests, memStart, numGens, dcache, hartId)
+  val clockSinkParams: ClockSinkParameters = ClockSinkParameters()
 }
 
 class BoomTraceGenTile private(
