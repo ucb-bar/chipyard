@@ -313,6 +313,7 @@ lazy val firechip = (project in file("generators/firechip"))
   )
 lazy val fpga_shells = (project in file("./fpga/fpga-shells"))
   .dependsOn(rocketchip, sifive_blocks)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
 lazy val fpga_platforms = (project in file("./fpga"))
