@@ -15,7 +15,7 @@ To initialize the ``fpga-shells`` submodule repository, run the included initial
     ./scripts/init-fpga.sh
 
 Generating a Bitstream
-------------------
+----------------------
 
 Generating a bitstream for any FPGA target using Vivado is similar to building RTL for a software RTL simulation.
 Similar to a software RTL simulation (:ref:`Simulating A Custom Project`), you can run the following command in the ``fpga`` directory to build a bitstream using Vivado:

@@ -1,8 +1,8 @@
 Running a Design on Arty
 ========================
 
-Basic Design
-------------
+Basic Arty Design
+-----------------
 
 The default Xilinx Arty 35T harness is setup to have JTAG available over the board's PMOD pins, and UART available over its FTDI serial USB adapter. The pin mappings for JTAG signals are identical to those described in the `SiFive Freedom E310 Arty 35T Getting Started Guide <https://static.dev.sifive.com/SiFive-E310-arty-gettingstarted-v1.0.6.pdf>`__.
 The JTAG interface allows a user to connect to the core via OpenOCD, run bare-metal applications, and debug these applications with gdb. UART allows a user to communicate with the core over a USB connection and serial console running on a PC.
