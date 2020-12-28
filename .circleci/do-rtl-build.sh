@@ -19,6 +19,7 @@ trap clean EXIT
 
 cd $LOCAL_CHIPYARD_DIR
 ./scripts/init-submodules-no-riscv-tools.sh
+./scripts/init-fpga.sh
 
 # set stricthostkeychecking to no (must happen before rsync)
 run "echo \"Ping $SERVER\""
