@@ -11,7 +11,7 @@ case ${MYGIT} in
 [1-9]*) ;;
 *) echo 'warning: unknown git version' ;;
 esac
-MINGIT="1.7.8"
+MINGIT="1.8.5"
 if [ "$MINGIT" != "$(echo -e "$MINGIT\n$MYGIT" | sort -V | head -n1)" ]; then
   echo "This script requires git version $MINGIT or greater. Exiting."
   false

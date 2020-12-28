@@ -56,6 +56,23 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
     case b: BoomTile => b.module.core.coreMonitorBundle
   }.toList
 
+
+  // Relying on [[TLBusWrapperConnection]].driveClockFromMaster for
+  // bus-couplings that are not asynchronous strips the bus name from the sink
+  // ClockGroup. This makes it impossible to determine which clocks are driven
+  // by which bus based on the member names, which is problematic when there is
+  // a rational crossing between two buses. Instead, provide all bus clocks
+  // directly from the asyncClockGroupsNode in the subsystem to ensure bus
+  // names are always preserved in the top-level clock names.
+  //
+  // For example, using a RationalCrossing between the Sbus and Cbus, and
+  // driveClockFromMaster = Some(true) results in all cbus-attached device and
+  // bus clocks to be given names of the form "subsystem_sbus_[0-9]*".
+  // Conversly, if an async crossing is used, they instead receive names of the
+  // form "subsystem_cbus_[0-9]*". The assignment below provides the latter names in all cases.
+  Seq(PBUS, FBUS, MBUS, CBUS).foreach { loc =>
+    tlBusWrapperLocationMap.lift(loc).foreach { _.clockGroupNode := asyncClockGroupsNode }
+  }
   override lazy val module = new ChipyardSubsystemModuleImp(this)
 }
 

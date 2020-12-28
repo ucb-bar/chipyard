@@ -34,8 +34,9 @@ REMOTE_CHIPYARD_DIR=$REMOTE_WORK_DIR/chipyard
 REMOTE_SIM_DIR=$REMOTE_CHIPYARD_DIR/sims/verilator
 REMOTE_FIRESIM_DIR=$REMOTE_CHIPYARD_DIR/sims/firesim/sim
 REMOTE_FPGA_DIR=$REMOTE_CHIPYARD_DIR/fpga
+REMOTE_JAVA_OPTS="-Xmx10G -Xss8M"
 # Disable the supershell to greatly improve the readability of SBT output when captured by Circle CI
-REMOTE_JAVA_ARGS="-Xmx9G -Xss8M -Dsbt.ivy.home=$REMOTE_WORK_DIR/.ivy2 -Dsbt.supershell=false -Dsbt.global.base=$REMOTE_WORK_DIR/.sbt -Dsbt.boot.directory=$REMOTE_WORK_DIR/.sbt/boot"
+REMOTE_SBT_OPTS="-Dsbt.ivy.home=$REMOTE_WORK_DIR/.ivy2 -Dsbt.supershell=false -Dsbt.global.base=$REMOTE_WORK_DIR/.sbt -Dsbt.boot.directory=$REMOTE_WORK_DIR/.sbt/boot"
 REMOTE_VERILATOR_DIR=$REMOTE_PREFIX-$CIRCLE_SHA1-verilator-install
 
 # local variables (aka within the docker container)
@@ -48,7 +49,7 @@ LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 
 # key value store to get the build groups
 declare -A grouping
-grouping["group-cores"]="chipyard-ariane chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop"
+grouping["group-cores"]="chipyard-cva6 chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket"
 grouping["group-peripherals"]="chipyard-dmirocket chipyard-blkdev chipyard-spiflashread chipyard-spiflashwrite chipyard-mmios chipyard-lbwif"
 grouping["group-accels"]="chipyard-nvdla chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-streaming-fir chipyard-streaming-passthrough"
 grouping["group-tracegen"]="tracegen tracegen-boom"
@@ -69,7 +70,7 @@ mapping["chipyard-boom"]=" CONFIG=SmallBoomConfig"
 mapping["chipyard-blkdev"]=" CONFIG=SimBlockDeviceRocketConfig"
 mapping["chipyard-hwacha"]=" CONFIG=HwachaRocketConfig"
 mapping["chipyard-gemmini"]=" CONFIG=GemminiRocketConfig"
-mapping["chipyard-ariane"]=" CONFIG=ArianeConfig"
+mapping["chipyard-cva6"]=" CONFIG=CVA6Config"
 mapping["chipyard-spiflashread"]=" CONFIG=LargeSPIFlashROMRocketConfig"
 mapping["chipyard-spiflashwrite"]=" CONFIG=SmallSPIFlashRocketConfig"
 mapping["chipyard-mmios"]=" CONFIG=MMIORocketConfig verilog"
@@ -77,6 +78,7 @@ mapping["tracegen"]=" CONFIG=NonBlockingTraceGenL2Config"
 mapping["tracegen-boom"]=" CONFIG=BoomTraceGenConfig"
 mapping["chipyard-nvdla"]=" CONFIG=SmallNVDLARocketConfig"
 mapping["chipyard-sodor"]=" CONFIG=Sodor5StageConfig"
+mapping["chipyard-multiclock-rocket"]=" CONFIG=MulticlockRocketConfig"
 
 mapping["firesim"]="SCALA_TEST=firesim.firesim.RocketNICF1Tests"
 mapping["firesim-multiclock"]="SCALA_TEST=firesim.firesim.RocketMulticlockF1Tests"

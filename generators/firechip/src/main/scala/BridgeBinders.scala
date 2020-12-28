@@ -4,12 +4,13 @@ package firesim.firesim
 
 import chisel3._
 import chisel3.experimental.annotate
+import chisel3.util.experimental.BoringUtils
 
 import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebugModuleImp}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle}
-import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPort, HasExtInterruptsModuleImp, BaseSubsystem, HasTilesModuleImp, ExtMem}
+import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile.{RocketTile}
 import sifive.blocks.devices.uart._
 
@@ -22,7 +23,7 @@ import midas.targetutils.{MemModelAnnotation, EnableModelMultiThreadingAnnotatio
 import firesim.bridges._
 import firesim.configs.MemModelKey
 import tracegen.{TraceGenSystemModuleImp}
-import ariane.ArianeTile
+import cva6.CVA6Tile
 
 import boom.common.{BoomTile}
 import barstools.iocell.chisel._
@@ -86,7 +87,12 @@ class WithNICBridge extends OverrideHarnessBinder({
 
 class WithUARTBridge extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: FireSim, ports: Seq[UARTPortIO]) =>
-    ports.map { p => UARTBridge(th.harnessClock, p)(system.p) }; Nil
+    val uartSyncClock = Wire(Clock())
+    uartSyncClock := false.B.asClock
+    val pbusClockNode = system.outer.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(PBUS).fixedClockNode
+    val pbusClock = pbusClockNode.in.head._1.clock
+    BoringUtils.bore(pbusClock, Seq(uartSyncClock))
+    ports.map { p => UARTBridge(uartSyncClock, p)(system.p) }; Nil
 })
 
 class WithBlockDeviceBridge extends OverrideHarnessBinder({
