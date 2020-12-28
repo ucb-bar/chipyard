@@ -15,7 +15,7 @@ class TinyRocketConfig extends Config(
   new chipyard.config.WithTLSerialLocation(
     freechips.rocketchip.subsystem.FBUS,
     freechips.rocketchip.subsystem.PBUS) ++                       // attach TL serial adapter to f/p busses
-  new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++ // use incoherent bus topology
+  new chipyard.WithMulticlockIncoherentBusTopology ++             // use incoherent bus topology
   new freechips.rocketchip.subsystem.WithNBanks(0) ++             // remove L2$
   new freechips.rocketchip.subsystem.WithNoMemPort ++             // remove backing memory
   new freechips.rocketchip.subsystem.With1TinyCore ++             // single tiny rocket-core
@@ -189,7 +189,7 @@ class MMIORocketConfig extends Config(
 class MulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   // Frequency specifications
-  new chipyard.config.WithTileFrequency(1600.0) ++       // Matches the maximum frequency of U540 
+  new chipyard.config.WithTileFrequency(1600.0) ++       // Matches the maximum frequency of U540
   new chipyard.config.WithSystemBusFrequency(800.0) ++   // Ditto
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++  // 2x the U540 freq (appropriate for a 128b Mbus)
   new chipyard.config.WithPeripheryBusFrequency(100) ++  // Retains the default pbus frequency
