@@ -56,6 +56,7 @@ run "export RISCV=\"$TOOLS_DIR\"; \
 
 read -a keys <<< ${grouping[$1]}
 
+# need to set the PATH to use the new verilator (with the new verilator root)
 for key in "${keys[@]}"
 do
     run "export RISCV=\"$TOOLS_DIR\"; \
