@@ -128,19 +128,25 @@ search
 # turn off verbose printing to make this easier to read
 set +x
 
-# print all result strings
+# print 0's
 for str in "${all_names[@]}";
 do
-    echo "$str"
+    if [ 0 = $(echo "$str" | awk '{print$3}') ]; then
+        echo "$str"
+    fi
 done
 
-# check if there was a non-zero return code
+echo ""
+
+# check if there was a non-zero return code and print 1's
+EXIT=0
 for str in "${all_names[@]}";
 do
     if [ ! 0 = $(echo "$str" | awk '{print$3}') ]; then
-        exit 1
+        echo "$str"
+        EXIT=1
     fi
 done
 
 echo "Done checking all submodules"
-
+exit $EXIT
