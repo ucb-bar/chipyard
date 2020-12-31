@@ -49,6 +49,7 @@ commands:
             - add_ssh_keys:
                 fingerprints:
                     - "3e:c3:02:5b:ed:64:8c:b7:b0:04:43:bc:83:43:73:1e"
+                    - "32:d6:89:d2:97:fa:db:de:a8:2d:2a:f2:70:dd:80:89"
             - checkout
 
     setup-tools:
@@ -234,13 +235,26 @@ jobs:
             - run-tests:
                 group-key: "group-cores"
                 project-key: "chipyard-boom"
-    chipyard-ariane-run-tests:
+    chipyard-cva6-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 group-key: "group-cores"
-                project-key: "chipyard-ariane"
+                project-key: "chipyard-cva6"
                 timeout: "30m"
+    chipyard-sodor-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-cores"
+                project-key: "chipyard-sodor"
+                timeout: "30m"
+    chipyard-multiclock-rocket-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-cores"
+                project-key: "chipyard-multiclock-rocket"
     chipyard-dmirocket-run-tests:
         executor: main-env
         steps:
@@ -424,10 +438,12 @@ workflows:
             - chipyard-boom-run-tests:
                 requires:
                     - prepare-chipyard-cores
-            - chipyard-ariane-run-tests:
+            - chipyard-cva6-run-tests:
                 requires:
                     - prepare-chipyard-cores
-
+            - chipyard-sodor-run-tests:
+                requires:
+                    - prepare-chipyard-cores
             - chipyard-dmirocket-run-tests:
                 requires:
                     - prepare-chipyard-peripherals

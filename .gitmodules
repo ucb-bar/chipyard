@@ -113,9 +113,9 @@
 [submodule "software/firemarshal"]
 	path = software/firemarshal
 	url = https://github.com/firesim/FireMarshal.git
-[submodule "generators/ariane"]
-	path = generators/ariane
-	url = https://github.com/ucb-bar/ariane-wrapper.git
+[submodule "generators/cva6"]
+	path = generators/cva6
+	url = https://github.com/ucb-bar/cva6-wrapper.git
 [submodule "tools/DRAMSim2"]
 	path = tools/DRAMSim2
 	url = https://github.com/firesim/DRAMSim2.git
@@ -131,3 +131,6 @@
 [submodule "tools/verif"]
 	path = tools/verif
 	url = https://github.com/TsaiAnson/verif.git
+[submodule "generators/riscv-sodor"]
+	path = generators/riscv-sodor
+	url = https://github.com/ucb-bar/riscv-sodor.git

@@ -1,33 +1,35 @@
 package chipyard.config
 
+import scala.util.matching.Regex
 import chisel3._
 import chisel3.util.{log2Up}
 
 import freechips.rocketchip.config.{Field, Parameters, Config}
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.diplomacy.{LazyModule, ValName}
+import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.devices.tilelink.{BootROMLocated}
 import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI}
 import freechips.rocketchip.groundtest.{GroundTestSubsystem}
 import freechips.rocketchip.tile._
 import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams}
-import freechips.rocketchip.util.{AsyncResetReg}
+import freechips.rocketchip.tilelink.{HasTLBusParams}
+import freechips.rocketchip.util.{AsyncResetReg, Symmetric}
 import freechips.rocketchip.prci._
 
 import testchipip._
 import tracegen.{TraceGenSystem}
 
 import hwacha.{Hwacha}
+import gemmini.{Gemmini, GemminiConfigs}
 
 import boom.common.{BoomTileAttachParams}
-import ariane.{ArianeTileAttachParams}
+import cva6.{CVA6TileAttachParams}
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 
-import chipyard.{BuildTop, BuildSystem, ClockingSchemeGenerators, ClockingSchemeKey, TestSuitesKey, TestSuiteHelper}
-
+import chipyard._
 
 // -----------------------
 // Common Config Fragments
@@ -106,11 +108,21 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config(
   })
 )
 
+class WithMultiRoCCGemmini(harts: Int*) extends Config((site, here, up) => {
+  case MultiRoCCKey => up(MultiRoCCKey, site) ++ harts.distinct.map { i =>
+    (i -> Seq((p: Parameters) => {
+      implicit val q = p
+      val gemmini = LazyModule(new Gemmini(OpcodeSet.custom3, GemminiConfigs.defaultConfig))
+      gemmini
+    }))
+  }
+})
+
 class WithTraceIO extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
       trace = true))
-    case tp: ArianeTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+    case tp: CVA6TileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
       trace = true))
     case other => other
   }
@@ -139,6 +151,11 @@ class WithRocketDCacheScratchpad extends Config((site, here, up) => {
   }
 })
 
+// Replaces the L2 with a broadcast manager for maintaining coherence
+class WithBroadcastManager extends Config((site, here, up) => {
+  case BankedL2Key => up(BankedL2Key, site).copy(coherenceManager = CoherenceManagerWrapper.broadcastManager)
+})
+
 class WithHwachaTest extends Config((site, here, up) => {
   case TestSuitesKey => (tileParams: Seq[TileParams], suiteHelper: TestSuiteHelper, p: Parameters) => {
     up(TestSuitesKey).apply(tileParams, suiteHelper, p)
@@ -159,10 +176,6 @@ class WithNoSubsystemDrivenClocks extends Config((site, here, up) => {
   case SubsystemDriveAsyncClockGroupsKey => None
 })
 
-class WithTileDividedClock extends Config((site, here, up) => {
-  case ClockingSchemeKey => ClockingSchemeGenerators.harnessDividedClock
-})
-
 class WithDMIDTM extends Config((site, here, up) => {
   case ExportDebug => up(ExportDebug, site).copy(protocols = Set(DMI))
 })
@@ -170,3 +183,84 @@ class WithDMIDTM extends Config((site, here, up) => {
 class WithNoDebug extends Config((site, here, up) => {
   case DebugModuleKey => None
 })
+
+class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("core", fMHz)
+
+class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {
+  case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
+})
+
+class WithSystemBusFrequencyAsDefault extends Config((site, here, up) => {
+  case DefaultClockFrequencyKey => (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
+})
+
+class BusFrequencyAssignment[T <: HasTLBusParams](re: Regex, key: Field[T]) extends Config((site, here, up) => {
+  case ClockFrequencyAssignersKey => up(ClockFrequencyAssignersKey, site) ++
+    Seq((cName: String) => site(key).dtsFrequency.flatMap { f =>
+      re.findFirstIn(cName).map {_ => (f / (1000 * 1000)).toDouble }
+    })
+})
+
+/**
+  * Provides a diplomatic frequency for all clock sinks with an unspecified
+  * frequency bound to each bus.
+  *
+  * For example, the L2 cache, when bound to the sbus, receives a separate
+  * clock that appears as "subsystem_sbus_<num>".  This fragment ensures that
+  * clock requests the same frequency as the sbus itself.
+  */
+
+class WithInheritBusFrequencyAssignments extends Config(
+  new BusFrequencyAssignment("subsystem_sbus_\\d+".r, SystemBusKey) ++
+  new BusFrequencyAssignment("subsystem_pbus_\\d+".r, PeripheryBusKey) ++
+  new BusFrequencyAssignment("subsystem_cbus_\\d+".r, ControlBusKey) ++
+  new BusFrequencyAssignment("subsystem_fbus_\\d+".r, FrontBusKey) ++
+  new BusFrequencyAssignment("subsystem_mbus_\\d+".r, MemoryBusKey)
+)
+
+/**
+  * Mixins to specify crossing types between the 5 traditional TL buses
+  *
+  * Note: these presuppose the legacy connections between buses and set
+  * parameters in SubsystemCrossingParams; they may not be resuable in custom
+  * topologies (but you can specify the desired crossings in your topology).
+  *
+  * @param xType The clock crossing type
+  *
+  */
+
+class WithSbusToMbusCrossingType(xType: ClockCrossingType) extends Config((site, here, up) => {
+    case SbusToMbusXTypeKey => xType
+})
+class WithSbusToCbusCrossingType(xType: ClockCrossingType) extends Config((site, here, up) => {
+    case SbusToCbusXTypeKey => xType
+})
+class WithCbusToPbusCrossingType(xType: ClockCrossingType) extends Config((site, here, up) => {
+    case CbusToPbusXTypeKey => xType
+})
+class WithFbusToSbusCrossingType(xType: ClockCrossingType) extends Config((site, here, up) => {
+    case FbusToSbusXTypeKey => xType
+})
+
+/**
+  * Mixins to set the dtsFrequency field of BusParams -- these will percolate its way
+  * up the diplomatic graph to the clock sources.
+  */
+class WithPeripheryBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
+  case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+})
+class WithMemoryBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
+  case MemoryBusKey => up(MemoryBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+})
+class WithSystemBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
+  case SystemBusKey => up(SystemBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+})
+class WithFrontBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
+  case FrontBusKey => up(FrontBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+})
+class WithControlBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
+  case ControlBusKey => up(ControlBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+})
+
+class WithRationalMemoryBusCrossing extends WithSbusToMbusCrossingType(RationalCrossing(Symmetric))
+class WithAsynchrousMemoryBusCrossing extends WithSbusToMbusCrossingType(AsynchronousCrossing())

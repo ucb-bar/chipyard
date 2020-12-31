@@ -20,6 +20,7 @@ usage() {
     echo "Options"
     echo "   --prefix PREFIX : Install destination. If unset, defaults to $(pwd)/riscv-tools-install"
     echo "                     or $(pwd)/esp-tools-install"
+    echo "   --ignore-qemu   : Ignore installing QEMU"
     echo "   --help -h       : Display this message"
     exit "$1"
 }
@@ -34,6 +35,7 @@ die() {
 
 TOOLCHAIN="riscv-tools"
 EC2FASTINSTALL="false"
+IGNOREQEMU=""
 RISCV=""
 
 # getopts does not support long options, and is inflexible
@@ -45,6 +47,9 @@ do
         -p | --prefix )
             shift
             RISCV=$(realpath $1) ;;
+        --ignore-qemu )
+            shift
+            IGNOREQEMU="true" ;;
         riscv-tools | esp-tools)
             TOOLCHAIN=$1 ;;
         ec2fast )
@@ -102,12 +107,16 @@ if [ "${EC2FASTINSTALL}" = true ] ; then
     git submodule deinit "${module}" || :
 
 else
-    "${MAKE}" --version | (
-        read -r makever
-        case ${makever} in
-        'GNU Make '[4-9]\.*|'GNU Make '[1-9][0-9]) ;;
-        *) false ;;
-        esac; ) || die 'obsolete make version; need GNU make 4.x or later'
+    MAKE_VER=$("${MAKE}" --version) || true
+    case ${MAKE_VER} in
+        'GNU Make '[4-9]\.*)
+            ;;
+        'GNU Make '[1-9][0-9])
+            ;;
+        *)
+            die 'obsolete make version; need GNU make 4.x or later'
+            ;;
+    esac
 
     module_prepare riscv-gnu-toolchain qemu
     module_build riscv-gnu-toolchain --prefix="${RISCV}" --with-cmodel=medany
@@ -126,9 +135,11 @@ module_all riscv-tests --prefix="${RISCV}/riscv64-unknown-elf"
 
 # Common tools (not in any particular toolchain dir)
 
-SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv64-unknown-elf" --host=riscv64-unknown-elf
+CC= CXX= SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv64-unknown-elf" --host=riscv64-unknown-elf
 
+if [ -z "$IGNOREQEMU" ] ; then
 SRCDIR="$(pwd)/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv64-softmmu
+fi
 
 # make Dromajo
 git submodule update --init $CHIPYARD_DIR/tools/dromajo/dromajo-src

@@ -1,6 +1,7 @@
 package chipyard
 
 import freechips.rocketchip.config.{Config}
+import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 
 // --------------
 // Rocket Configs
@@ -117,6 +118,7 @@ class LoopbackNICRocketConfig extends Config(
 
 // DOC include start: l1scratchpadrocket
 class ScratchpadOnlyRocketConfig extends Config(
+  new testchipip.WithSerialPBusMem ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(0) ++ // remove offchip mem port
   new freechips.rocketchip.subsystem.WithNBanks(0) ++
   new freechips.rocketchip.subsystem.WithNoMemPort ++
@@ -174,12 +176,19 @@ class MMIORocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
-// NOTE: This config doesn't work yet because SimWidgets in the TestHarness
-// always get the TestHarness clock. The Tiles and Uncore receive the correct clocks
-class DividedClockRocketConfig extends Config(
-  new chipyard.config.WithTileDividedClock ++                     // Put the Tile on its own clock domain
-  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+class MulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  // Frequency specifications
+  new chipyard.config.WithTileFrequency(1600.0) ++       // Matches the maximum frequency of U540 
+  new chipyard.config.WithSystemBusFrequency(800.0) ++   // Ditto
+  new chipyard.config.WithMemoryBusFrequency(1000.0) ++  // 2x the U540 freq (appropriate for a 128b Mbus)
+  new chipyard.config.WithPeripheryBusFrequency(100) ++  // Retains the default pbus frequency
+  new chipyard.config.WithSystemBusFrequencyAsDefault ++ // All unspecified clock frequencies, notably the implicit clock, will use the sbus freq (800 MHz)
+  //  Crossing specifications
+  new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
+  new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
+  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
   new chipyard.config.AbstractConfig)
 
 class LBWIFRocketConfig extends Config(

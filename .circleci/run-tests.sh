@@ -91,8 +91,11 @@ case $1 in
     tracegen-boom)
         run_tracegen ${mapping[$1]}
         ;;
-    chipyard-ariane)
+    chipyard-cva6)
         make run-binary-fast -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/multiply.riscv
+        ;;
+    chipyard-sodor)
+        run_asm ${mapping[$1]}
         ;;
     chipyard-nvdla)
         make -C $LOCAL_CHIPYARD_DIR/tests
