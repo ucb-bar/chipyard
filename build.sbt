@@ -312,18 +312,6 @@ lazy val firechip = (project in file("generators/firechip"))
     testOptions in Test += Tests.Argument("-oF")
   )
 
-lazy val chisel_testers2 = (project in file("tools/chisel-testers2"))
-  .dependsOn(chisel, firrtl_interpreter, treadle)
-  .settings(
-      commonSettings,
-      libraryDependencies ++= Seq(
-        "junit" % "junit" % "4.12",
-        "org.scalatest" %% "scalatest" % "3.0.5",
-        "org.scalacheck" %% "scalacheck" % "1.14.0",
-        "com.github.scopt" %% "scopt" % "3.7.0"
-      )
-    )
-
 val directoryLayout = Seq(
   scalaSource in Compile := baseDirectory.value / "src",
   javaSource in Compile := baseDirectory.value / "src",

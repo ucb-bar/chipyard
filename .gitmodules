@@ -134,6 +134,3 @@
 [submodule "generators/riscv-sodor"]
 	path = generators/riscv-sodor
 	url = https://github.com/ucb-bar/riscv-sodor.git
-[submodule "tools/chisel-testers2"]
-	path = tools/chisel-testers2
-	url = https://github.com/ucb-bar/chisel-testers2.git
