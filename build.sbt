@@ -312,8 +312,54 @@ lazy val firechip = (project in file("generators/firechip"))
     testOptions in Test += Tests.Argument("-oF")
   )
 
-lazy val verif = (project in file("./tools/verif"))
-  .dependsOn(chipyard, chisel, rocketchip, dsptools, `rocket-dsptools`, gemmini)
-  .settings(commonSettings, allDependencies ++= Seq(
-    "edu.berkeley.cs" %% "chiseltest" % "0.3-SNAPSHOT",
-    "com.google.protobuf" % "protobuf-java" % "3.11.0"))
+lazy val chisel_testers2 = (project in file("tools/chisel-testers2"))
+  .dependsOn(chisel, firrtl_interpreter, treadle)
+  .settings(
+      commonSettings,
+      libraryDependencies ++= Seq(
+        "junit" % "junit" % "4.12",
+        "org.scalatest" %% "scalatest" % "3.0.5",
+        "org.scalacheck" %% "scalacheck" % "1.14.0",
+        "com.github.scopt" %% "scopt" % "3.7.0"
+      )
+    )
+
+val directoryLayout = Seq(
+  scalaSource in Compile := baseDirectory.value / "src",
+  javaSource in Compile := baseDirectory.value / "src",
+  resourceDirectory in Compile := baseDirectory.value / "src" / "resources",
+  scalaSource in Test := baseDirectory.value / "test",
+  resourceDirectory in Test := baseDirectory.value / "test" / "resources",
+)
+
+val verifSettings = Seq(
+  resolvers ++= Seq(
+    Resolver.sonatypeRepo("snapshots"),
+    Resolver.sonatypeRepo("releases"),
+    Resolver.mavenLocal
+  ),
+  scalacOptions := Seq("-deprecation", "-unchecked", "-Xsource:2.11", "-language:reflectiveCalls"),
+  libraryDependencies += "edu.berkeley.cs" %% "chiseltest" % "0.3.1",
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.+" % "test"
+)
+
+lazy val verifCore = (project in file("./tools/verif/core"))
+  .settings(directoryLayout)
+  .sourceDependency(chiselRef, chiselLib)
+  .settings(commonSettings)
+  .settings(verifSettings)
+
+lazy val verifTL = (project in file("./tools/verif/tilelink"))
+  .settings(directoryLayout)
+  .sourceDependency(chiselRef, chiselLib)
+  .dependsOn(rocketchip, chipyard, dsptools, `rocket-dsptools`, verifCore)
+  .settings(commonSettings)
+  .settings(verifSettings)
+
+lazy val verifGemmini = (project in file("./tools/verif/cosim"))
+  .settings(directoryLayout)
+  .sourceDependency(chiselRef, chiselLib)
+  .dependsOn(rocketchip, chipyard, dsptools, `rocket-dsptools`, gemmini, verifCore)
+  .settings(commonSettings)
+  .settings(verifSettings)
+
