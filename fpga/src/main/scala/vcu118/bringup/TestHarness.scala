@@ -72,10 +72,10 @@ class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends 
 
   val tsi_host = Overlay(TSIHostOverlayKey, new BringupTSIHostVCU118ShellPlacer(this, TSIHostShellInput()))
 
-  val ddr2Node = dp(DDROverlayKey).last.place(DDRDesignInput(dp(PeripheryTSIHostKey).head.targetBaseAddress, ddr2Wrangler.node, ddr2PLL)).overlayOutput.ddr
+  val ddr2Node = dp(DDROverlayKey).last.place(DDRDesignInput(dp(PeripheryTSIHostKey).head.targetMasterPortParams.base, ddr2Wrangler.node, ddr2PLL)).overlayOutput.ddr
 
-  val io_tsi_serial_bb = BundleBridgeSource(() => (new TSIHostWidgetIO(dp(PeripheryTSIHostKey).head.serialIfWidth)))
-  dp(TSIHostOverlayKey).head.place(TSIHostDesignInput(dp(PeripheryTSIHostKey).head.serialIfWidth, io_tsi_serial_bb))
+  val io_tsi_serial_bb = BundleBridgeSource(() => (new TSIHostWidgetIO(dp(PeripheryTSIHostKey).head.offchipSerialIfWidth)))
+  dp(TSIHostOverlayKey).head.place(TSIHostDesignInput(dp(PeripheryTSIHostKey).head.offchipSerialIfWidth, io_tsi_serial_bb))
 
   // connect 1 mem. channel to the FPGA DDR
   val inTsiParams = topDesign match { case td: ChipTop =>

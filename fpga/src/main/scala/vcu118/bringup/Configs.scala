@@ -6,6 +6,7 @@ import freechips.rocketchip.config.{Config, Parameters}
 import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet, ResourceBinding, Resource, ResourceAddress}
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.diplomacy._
+import freechips.rocketchip.subsystem.{MasterPortParams}
 
 import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOParams}
 import sifive.blocks.devices.i2c.{PeripheryI2CKey, I2CParams}
@@ -39,10 +40,9 @@ class WithBringupPeripherals extends Config((site, here, up) => {
   case TSIClockMaxFrequencyKey => 100
   case PeripheryTSIHostKey => List(
     TSIHostParams(
-      serialIfWidth = 4,
+      offchipSerialIfWidth = 4,
       mmioBaseAddress = BigInt(0x64006000),
       mmioSourceId = 1 << 13, // manager source
-      targetSize = site(VCU118DDR2Size),
       serdesParams = TSIHostSerdesParams(
         clientPortParams = TLMasterPortParameters.v1(
           clients = Seq(TLMasterParameters.v1(
@@ -61,7 +61,13 @@ class WithBringupPeripherals extends Config((site, here, up) => {
             supportsArithmetic = TransferSizes(1, 64),
             supportsLogical    = TransferSizes(1, 64))),
           endSinkId = 1 << 6, // manager sink
-          beatBytes = 8))))
+          beatBytes = 8)),
+      targetMasterPortParams = MasterPortParams(
+        base = BigInt("80000000", 16),
+        size = site(VCU118DDR2Size),
+        beatBytes = 8, // comes from test chip
+        idBits = 4) // comes from VCU118 idBits in XilinxVCU118MIG
+      ))
 })
 
 class WithBringupVCU118System extends Config((site, here, up) => {
