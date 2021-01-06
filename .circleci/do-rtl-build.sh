@@ -21,18 +21,26 @@ run "echo \"Ping $SERVER\""
 
 clean
 
-# copy over riscv/esp-tools, verilator, and chipyard to remote
+# copy over riscv/esp-tools, and chipyard to remote
 run "mkdir -p $REMOTE_CHIPYARD_DIR"
-run "mkdir -p $REMOTE_VERILATOR_DIR"
 copy $LOCAL_CHIPYARD_DIR/ $SERVER:$REMOTE_CHIPYARD_DIR
-copy $LOCAL_VERILATOR_DIR/ $SERVER:$REMOTE_VERILATOR_DIR
 
 run "cp -r ~/.ivy2 $REMOTE_WORK_DIR"
 run "cp -r ~/.sbt  $REMOTE_WORK_DIR"
 
 TOOLS_DIR=$REMOTE_RISCV_DIR
 LD_LIB_DIR=$REMOTE_RISCV_DIR/lib
-if [ $1 = "hwacha" ] || [ $1 = "gemmini" ]; then
+
+if [ $1 = "group-accels" ]; then
+    export RISCV=$LOCAL_ESP_DIR
+    export LD_LIBRARY_PATH=$LOCAL_ESP_DIR/lib
+    export PATH=$RISCV/bin:$PATH
+    GEMMINI_SOFTWARE_DIR=$LOCAL_SIM_DIR/../../generators/gemmini/software/gemmini-rocc-tests
+    cd $LOCAL_SIM_DIR/../../generators/gemmini/software
+    git submodule update --init --recursive gemmini-rocc-tests
+    cd gemmini-rocc-tests
+    ./build.sh
+
     TOOLS_DIR=$REMOTE_ESP_DIR
     LD_LIB_DIR=$REMOTE_ESP_DIR/lib
     run "mkdir -p $REMOTE_ESP_DIR"
@@ -43,10 +51,22 @@ else
 fi
 
 # enter the verilator directory and build the specific config on remote server
-run "make -C $REMOTE_SIM_DIR clean"
-run "export RISCV=\"$TOOLS_DIR\"; export LD_LIBRARY_PATH=\"$LD_LIB_DIR\"; \
-     export VERILATOR_ROOT=$REMOTE_VERILATOR_DIR/install/share/verilator; \
-     make -j$NPROC -C $REMOTE_SIM_DIR VERILATOR_INSTALL_DIR=$REMOTE_VERILATOR_DIR JAVA_ARGS=\"$REMOTE_JAVA_ARGS\" ${mapping[$1]}"
+run "export RISCV=\"$TOOLS_DIR\"; \
+     make -C $REMOTE_SIM_DIR clean;"
+
+read -a keys <<< ${grouping[$1]}
+
+# need to set the PATH to use the new verilator (with the new verilator root)
+for key in "${keys[@]}"
+do
+    run "export RISCV=\"$TOOLS_DIR\"; \
+         export LD_LIBRARY_PATH=\"$LD_LIB_DIR\"; \
+         export PATH=\"$REMOTE_VERILATOR_DIR/bin:\$PATH\"; \
+         export VERILATOR_ROOT=\"$REMOTE_VERILATOR_DIR\"; \
+         export COURSIER_CACHE=\"$REMOTE_WORK_DIR/.coursier-cache\"; \
+         make -j$REMOTE_MAKE_NPROC -C $REMOTE_SIM_DIR FIRRTL_LOGLEVEL=info JAVA_OPTS=\"$REMOTE_JAVA_OPTS\" SBT_OPTS=\"$REMOTE_SBT_OPTS\" ${mapping[$key]}"
+done
+
 run "rm -rf $REMOTE_CHIPYARD_DIR/project"
 
 # copy back the final build

@@ -110,3 +110,24 @@
 [submodule "generators/gemmini"]
 	path = generators/gemmini
 	url = https://github.com/ucb-bar/gemmini
+[submodule "software/firemarshal"]
+	path = software/firemarshal
+	url = https://github.com/firesim/FireMarshal.git
+[submodule "generators/cva6"]
+	path = generators/cva6
+	url = https://github.com/ucb-bar/cva6-wrapper.git
+[submodule "tools/DRAMSim2"]
+	path = tools/DRAMSim2
+	url = https://github.com/firesim/DRAMSim2.git
+[submodule "generators/nvdla"]
+	path = generators/nvdla
+	url = https://github.com/ucb-bar/nvdla-wrapper.git
+[submodule "software/nvdla-workload"]
+	path = software/nvdla-workload
+	url = https://github.com/ucb-bar/nvdla-workload.git
+[submodule "tools/dromajo/dromajo-src"]
+	path = tools/dromajo/dromajo-src
+	url = https://github.com/riscv-boom/dromajo.git
+[submodule "generators/riscv-sodor"]
+	path = generators/riscv-sodor
+	url = https://github.com/ucb-bar/riscv-sodor.git

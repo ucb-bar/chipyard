@@ -44,47 +44,27 @@ familiar with FireSim, please return to the `FireSim Docs
 <https://docs.fires.im/en/latest/Initial-Setup/Setting-up-your-Manager-Instance.html#completing-setup-using-the-manager>`__,
 and proceed with the rest of the tutorial.
 
-Current Limitations:
-++++++++++++++++++++
+Running your Design in FireSim
+------------------------------
+Converting a Chipyard config (one in ``chipyard/src/main/scala`` to run in FireSim is simple, and can be done either through the traditional configuration system or through FireSim's build-recipes scheme. 
 
-FireSim integration in Chipyard is still a work in progress. Presently, you
-cannot build a FireSim simulator from any generator project in Chipyard except ``firechip``,
-which properly invokes MIDAS on the target RTL.
+A FireSim simulation requires 3 additional config fragments:
 
-In the interim, workaround this limitation by importing Config and Module
-classes from other generator projects into FireChip. For example, assuming you Chipyard
-config looks as following:
-
-.. code-block:: scala
-
-  class CustomConfig extends Config(
-    new WithInclusiveCache ++
-    new myproject.MyCustomConfig ++
-    new DefaultRocketConfig
-  )
-
-Then the equivalent FireChip config (in ``generators/firechip/src/main/scala/TargetConfigs.scala``) based on ``FireSimRocketChipConfig``
-will look as follows:
-
-.. code-block:: scala
-
-  class FireSimCustomConfig extends Config(
-    new WithBootROM ++
-    new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
-    new WithExtMemSize(0x400000000L) ++ // 16GB
-    new WithoutTLMonitors ++
-    new WithUARTKey ++
-    new WithNICKey ++
-    new WithBlockDevice ++
-    new WithRocketL2TLBs(1024) ++
-    new WithPerfCounters ++
-    new WithoutClockGating ++
-    new WithInclusiveCache ++
-    new myproject.MyCustomConfig ++
-    new freechips.rocketchip.system.DefaultConfig)
+* ``WithFireSimConfigTweaks`` modifies your design to better fit the FireSim usage model. This is composed of multiple smaller config fragments. For example, the removal of clock-gating (using the ``WithoutClockGating`` config fragment) which is required for correct functioning of the compiler. This config fragment also includes other config fragments such as the inclusion of UART in the design, which although may technically be optional,is *strongly* recommended.
+* ``WithDefaultMemModel`` provides a default configuration for FASED memory models in the FireSim simulation. See the FireSim documentation for details. This config fragment is currently included by default within ``WithFireSimConfigTweaks``, so it isn't neccessary to add in separately, but it is required if you choose not to use ``WithFireSimConfigTweaks``.
+* ``WithDefaultFireSimBridges`` sets the ``IOBinders`` key to use FireSim's Bridge system, which can drive target IOs with software bridge models running on the simulation host. See the FireSim documentation for details.
 
 
-You should then be able to refer to those classes or an alias of them in your ``DESIGN`` or ``TARGET_CONFIG``
-variables. Note that if your target machine has I/O not provided in the default
-FireChip targets (see ``generators/firechip/src/main/scala/Targets.scala``) you may need
-to write a custom bridge.
+The simplest method to add this config fragments to your custom Chipyard config is through FireSim's build recipe scheme.
+After your FireSim environment is setup, you will define your custom build recipe in ``sims/firesim/deploy/deploy/config_build_recipes.ini``. By prepending the FireSim config fragments (separated by ``_``) to your Chipyard configuration, these config fragments will be added to your custom configuration as if they were listed in a custom Chisel config class definition. For example, if you would like to convert the Chipyard ``LargeBoomConfig`` to a FireSim simulation with a DDR3 memory model, the appropriate FireSim ``TARGET_CONFIG`` would be ``DDR3FRFCFSLLC4MB_WithDefaultFireSimBridges_WithFireSimConfigTweaks_chipyard.LargeBoomConfig``. Note that the FireSim config fragments are part of the ``firesim.firesim`` scala package and therefore there do not need to be prefixed with the full package name as opposed to the Chipyard config fragments which need to be prefixed with the chipyard package name.
+
+An alternative method to prepending the FireSim config fragments in the FireSim build recipe is to create a new "permanent" FireChip custom configuration, which includes the FireSim config fragments.
+We are using the same target (top) RTL, and only need to specify a new set of connection behaviors for the IOs of that module. Simply create a matching config within ``generators/firechip/src/main/scala/TargetConfigs`` that inherits your config defined in ``chipyard``.
+
+
+.. literalinclude:: ../../generators/firechip/src/main/scala/TargetConfigs.scala
+    :language: scala
+    :start-after: DOC include start: firesimconfig
+    :end-before: DOC include end: firesimconfig
+
+While this option seems to require the maintenance of additional configuration code, it has the benefit of allowing for the inclusion of more complex config fragments which also accept custom arguments (for example, ``WithDefaultMemModel`` can take an optional argument``)

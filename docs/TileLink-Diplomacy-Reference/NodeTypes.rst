@@ -1,3 +1,5 @@
+.. _node_types:
+
 TileLink Node Types
 ===================
 
@@ -17,7 +19,7 @@ The L1 caches and DMA devices in RocketChip/Chipyard have client nodes.
 You can add a TileLink client node to your LazyModule using the TLHelper
 object from testchipip like so:
 
-.. literalinclude:: ../../generators/example/src/main/scala/NodeTypes.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/NodeTypes.scala
     :language: scala
     :start-after: DOC include start: MyClient
     :end-before: DOC include end: MyClient
@@ -66,7 +68,7 @@ TileLink managers take requests from clients on the A channel and send
 responses back on the D channel. You can create a manager node using the
 TLHelper like so:
 
-.. literalinclude:: ../../generators/example/src/main/scala/NodeTypes.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/NodeTypes.scala
     :language: scala
     :start-after: DOC include start: MyManager
     :end-before: DOC include end: MyManager
@@ -146,7 +148,7 @@ to the outputs unchanged. This node is mainly used to combine multiple
 nodes into a single node with multiple edges. For instance, say we have two
 client lazy modules, each with their own client node.
 
-.. literalinclude:: ../../generators/example/src/main/scala/NodeTypes.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/NodeTypes.scala
     :language: scala
     :start-after: DOC include start: MyClient1+MyClient2
     :end-before: DOC include end: MyClient1+MyClient2
@@ -154,21 +156,21 @@ client lazy modules, each with their own client node.
 Now we instantiate these two clients in another lazy module and expose their
 nodes as a single node.
 
-.. literalinclude:: ../../generators/example/src/main/scala/NodeTypes.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/NodeTypes.scala
     :language: scala
     :start-after: DOC include start: MyClientGroup
     :end-before: DOC include end: MyClientGroup
 
 We can also do the same for managers.
 
-.. literalinclude:: ../../generators/example/src/main/scala/NodeTypes.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/NodeTypes.scala
     :language: scala
     :start-after: DOC include start: MyManagerGroup
     :end-before: DOC include end: MyManagerGroup
 
 If we want to connect the client and manager groups together, we can now do this.
 
-.. literalinclude:: ../../generators/example/src/main/scala/NodeTypes.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/NodeTypes.scala
     :language: scala
     :start-after: DOC include start: MyClientManagerComplex
     :end-before: DOC include end: MyClientManagerComplex

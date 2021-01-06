@@ -7,9 +7,13 @@ These guides will walk you through customization of your system-on-chip:
 
 - How to include your custom Chisel sources in the Chipyard build system
 
+- Adding custom core
+
 - Adding custom RoCC accelerators to an existing Chipyard core (BOOM or Rocket)
 
 - Adding custom MMIO widgets to the Chipyard memory system by Tilelink or AXI4, with custom Top-level IOs
+
+- Adding custom Dsptools based blocks as MMIO widgets.
 
 - Standard practices for using Keys, Traits, and Configs to parameterize your design
 
@@ -33,12 +37,15 @@ We recommend reading all these pages in order. Hit next to get started!
 
    Heterogeneous-SoCs
    Custom-Chisel
+   Custom-Core
    RoCC-or-MMIO
    RoCC-Accelerators
    MMIO-Peripherals
+   Dsptools-Blocks
    Keys-Traits-Configs
    DMA-Devices
    Incorporating-Verilog-Blocks
    Memory-Hierarchy
    Boot-Process
    Firrtl-Transforms
+   IOBinders

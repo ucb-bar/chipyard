@@ -40,8 +40,7 @@ For a proprietry VCS simulation, enter the ``sims/vcs`` directory
     # Enter VCS directory
     cd sims/vcs
 
-
-.. _sim-default:
+.. _sw-sim-help:
 
 Simulating The Default Example
 -------------------------------
@@ -49,16 +48,24 @@ Simulating The Default Example
 To compile the example design, run ``make`` in the selected verilator or VCS directory.
 This will elaborate the ``RocketConfig`` in the example project.
 
-An executable called ``simulator-example-RocketConfig`` will be produced.
+.. Note:: The elaboration of ``RocketConfig`` requires about 6.5 GB of main memory. Otherwise the process will fail with ``make: *** [firrtl_temp] Error 137`` which is most likely related to limited resources. Other configurations might require even more main memory.
+
+An executable called ``simulator-chipyard-RocketConfig`` will be produced.
 This executable is a simulator that has been compiled based on the design that was built.
 You can then use this executable to run any compatible RV64 code.
 For instance, to run one of the riscv-tools assembly tests.
 
 .. code-block:: shell
 
-    ./simulator-example-RocketConfig $RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
+    ./simulator-chipyard-RocketConfig $RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
 
-.. Note:: In a VCS simulator, the simulator name will be ``simv-example-RocketConfig`` instead of ``simulator-example-RocketConfig``.
+.. Note:: In a VCS simulator, the simulator name will be ``simv-chipyard-RocketConfig`` instead of ``simulator-chipyard-RocketConfig``.
+
+The makefiles have a ``run-binary`` rule that simplifies running the simulation executable. It adds many of the common command line options for you and redirects the output to a file.
+
+.. code-block:: shell
+
+    make run-binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
 
 Alternatively, we can run a pre-packaged suite of RISC-V assembly or benchmark tests, by adding the make target ``run-asm-tests`` or ``run-bmark-tests``.
 For example:
@@ -73,6 +80,22 @@ For example:
 
 
 .. _sw-sim-custom:
+
+Makefile Variables and Commands
+-------------------------------
+You can get a list of useful Makefile variables and commands available from the Verilator or VCS directories. simply run ``make help``:
+
+.. code-block:: shell
+
+    # Enter Verilator directory
+    cd sims/verilator
+    make help
+
+    # Enter VCS directory
+    cd sims/vcs
+    make help
+
+.. _sim-default:
 
 Simulating A Custom Project
 -------------------------------
@@ -93,7 +116,7 @@ The ``MODEL`` and ``VLOG_MODEL`` are the top-level class names of the design. No
 
 The ``MODEL_PACKAGE`` is the Scala package (in the Scala code that says ``package ...``) that holds the ``MODEL`` class.
 
-The ``CONFIG`` is the name of the class used for the parameter Config while the ``CONFIG_PACKAGE`` is the Scala package it resides in.
+The ``CONFIG`` is the name of the class used for the parameter config while the ``CONFIG_PACKAGE`` is the Scala package it resides in.
 
 The ``GENERATOR_PACKAGE`` is the Scala package that holds the Generator class that elaborates the design.
 
@@ -124,6 +147,29 @@ All ``make`` targets that can be applied to the default example, can also be app
 Finally, in the ``generated-src/<...>-<package>-<config>/`` directory resides all of the collateral and Verilog source files for the build/simulation.
 Specifically, the SoC top-level (``TOP``) Verilog file is denoted with ``*.top.v`` while the ``TestHarness`` file is denoted with ``*.harness.v``.
 
+Fast Memory Loading
+-------------------
+
+The simulator loads the program binary over a simulated serial line. This can be quite slow if there is a lot of static data, so the simulator also allows data to be loaded from a file directly into the DRAM model.
+
+.. code-block:: shell
+
+    make run-binary BINARY=test.riscv LOADMEM=testdata.hex LOADMEM_ADDR=81000000
+
+The ``.hex`` file should be a text file with a hexadecimal number on each line.
+
+.. code-block:: text
+
+    deadbeef
+    0123
+
+Each line uses little-endian order, so this file would produce the bytes "ef be ad de 01 23". ``LOADMEM_ADDR`` specifies which address in memory (in hexadecimal) to write the first byte to. The default is 0x81000000.
+
+A special target that facilitates automatically generating a hex file for an entire elf RISC-V exectuable and then running the simulator with the appropriate flags is also available.
+
+.. code-block:: shell
+
+    make run-binary-hex BINARY=test.riscv
 
 Generating Waveforms
 -----------------------
@@ -136,3 +182,18 @@ An open-source vcd-capable waveform viewer is `GTKWave <http://gtkwave.sourcefor
 For a VCS simulation, this will generate a vpd file (this is a proprietary waveform representation format used by Synopsys) that can be loaded to vpd-supported waveform viewers.
 If you have Synopsys licenses, we recommend using the DVE waveform viewer.
 
+.. _sw-sim-verilator-opts:
+
+Additional Verilator Options
+-------------------------------
+
+When building the verilator simulator there are some additional options:
+
+.. code-block:: shell
+
+   make VERILATOR_THREADS=8 NUMACTL=1
+
+The ``VERILATOR_THREADS=<num>`` option enables the compiled Verilator simulator to use ``<num>`` parallel threads.
+On a multi-socket machine, you will want to make sure all threads are on the same socket by using ``NUMACTL=1`` to enable ``numactl``.
+By enabling this, you will use Chipyard's ``numa_prefix`` wrapper, which is a simple wrapper around ``numactl`` that runs your verilated simulator like this: ``$(numa_prefix) ./simulator-<name> <simulator-args>``.
+Note that both these flags are mutually exclusive, you can use either independently (though it makes sense to use ``NUMACTL`` just with ``VERILATOR_THREADS=8`` during a Verilator simulation).

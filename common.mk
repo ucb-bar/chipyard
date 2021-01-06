@@ -3,37 +3,87 @@
 #########################################################################################
 SHELL=/bin/bash
 
-#########################################################################################
-# variables to get all *.scala files
-#########################################################################################
-lookup_scala_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.scala" -print 2> /dev/null)
-
-SOURCE_DIRS=$(addprefix $(base_dir)/,generators sims/firesim/sim)
-SCALA_SOURCES=$(call lookup_scala_srcs,$(SOURCE_DIRS))
+ifndef RISCV
+$(error RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
+else
+$(info Running with RISCV=$(RISCV))
+endif
 
 #########################################################################################
-# rocket and testchipip classes
+# specify user-interface variables
 #########################################################################################
-# NB: target/ lives under source ----V , due to how we're handling midas dependency injection
-ROCKET_CLASSES ?= "$(ROCKETCHIP_DIR)/src/target/scala-$(SCALA_VERSION_MAJOR)/classes:$(ROCKETCHIP_DIR)/chisel3/target/scala-$(SCALA_VERSION_MAJOR)/*"
-TESTCHIPIP_CLASSES ?= "$(TESTCHIP_DIR)/target/scala-$(SCALA_VERSION_MAJOR)/classes"
+HELP_COMPILATION_VARIABLES += \
+"   EXTRA_GENERATOR_REQS   = additional make requirements needed for the main generator" \
+"   EXTRA_SIM_CXXFLAGS     = additional CXXFLAGS for building simulators" \
+"   EXTRA_SIM_LDFLAGS      = additional LDFLAGS for building simulators" \
+"   EXTRA_SIM_SOURCES      = additional simulation sources needed for simulator" \
+"   EXTRA_SIM_REQS         = additional make requirements to build the simulator" \
+"   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client"
+
+EXTRA_GENERATOR_REQS ?=
+EXTRA_SIM_CXXFLAGS   ?=
+EXTRA_SIM_LDFLAGS    ?=
+EXTRA_SIM_SOURCES    ?=
+EXTRA_SIM_REQS       ?=
+
+#----------------------------------------------------------------------------
+HELP_SIMULATION_VARIABLES += \
+"   EXTRA_SIM_FLAGS        = additional runtime simulation flags (passed within +permissive)" \
+"   NUMACTL                = set to '1' to wrap simulator in the appropriate numactl command"
+
+EXTRA_SIM_FLAGS ?=
+NUMACTL         ?= 0
+
+NUMA_PREFIX = $(if $(filter $(NUMACTL),0),,$(shell $(base_dir)/scripts/numa_prefix))
+
+#----------------------------------------------------------------------------
+HELP_COMMANDS += \
+"   run-binary             = run [./$(shell basename $(sim))] and log instructions to file" \
+"   run-binary-fast        = run [./$(shell basename $(sim))] and don't log instructions" \
+"   run-binary-debug       = run [./$(shell basename $(sim_debug))] and log instructions and waveform to files" \
+"   verilog                = generate intermediate verilog files from chisel elaboration and firrtl passes" \
+"   firrtl                 = generate intermediate firrtl files from chisel elaboration" \
+"   run-tests              = run all assembly and benchmark tests" \
+"   launch-sbt             = start sbt terminal"
 
 #########################################################################################
-# jar creation variables and rules
+# include additional subproject make fragments
+# see HELP_COMPILATION_VARIABLES
 #########################################################################################
-FIRRTL_JAR := $(base_dir)/lib/firrtl.jar
+include $(base_dir)/generators/cva6/cva6.mk
+include $(base_dir)/generators/tracegen/tracegen.mk
+include $(base_dir)/generators/nvdla/nvdla.mk
+include $(base_dir)/tools/dromajo/dromajo.mk
 
-$(FIRRTL_JAR): $(call lookup_scala_srcs, $(CHIPYARD_FIRRTL_DIR)/src/main/scala)
-	$(MAKE) -C $(CHIPYARD_FIRRTL_DIR) SBT="$(SBT)" root_dir=$(CHIPYARD_FIRRTL_DIR) build-scala
-	mkdir -p $(@D)
-	cp -p $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl.jar $@
+#########################################################################################
+# Prerequisite lists
+#########################################################################################
+# Returns a list of files in directory $1 with file extension $2.
+lookup_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.$(2)" -print 2> /dev/null)
+
+SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools/iocell)
+SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
+VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE_DIRS),v)
+# This assumes no SBT meta-build sources
+SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools)
+SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
+
+#########################################################################################
+# SBT Server Setup (start server / rebuild proj. defs. if SBT_SOURCES change)
+#########################################################################################
+$(SBT_THIN_CLIENT_TIMESTAMP): $(SBT_SOURCES)
+ifneq (,$(wildcard $(SBT_THIN_CLIENT_TIMESTAMP)))
+	cd $(base_dir) && $(SBT) "reload"
 	touch $@
+else
+	cd $(base_dir) && $(SBT) "exit"
+endif
 
 #########################################################################################
 # create list of simulation file inputs
 #########################################################################################
-$(sim_files): $(call lookup_scala_srcs,$(base_dir)/generators/utilities/src/main/scala) $(FIRRTL_JAR)
-	cd $(base_dir) && $(SBT) "project utilities" "runMain utilities.GenerateSimFiles -td $(build_dir) -sim $(sim_name)"
+$(sim_files): $(call lookup_srcs,$(base_dir)/generators/utilities/src/main/scala,scala) $(SCALA_BUILDTOOL_DEPS)
+	$(call run_scala_main,utilities,utilities.GenerateSimFiles,-td $(build_dir) -sim $(sim_name))
 
 #########################################################################################
 # create firrtl file rule and variables
@@ -42,9 +92,14 @@ $(sim_files): $(call lookup_scala_srcs,$(base_dir)/generators/utilities/src/main
 $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 	@echo "" > /dev/null
 
-generator_temp: $(SCALA_SOURCES) $(sim_files)
+# AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
+generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
-	cd $(base_dir) && $(SBT) "project $(SBT_PROJECT)" "runMain $(GENERATOR_PACKAGE).Generator $(build_dir) $(MODEL_PACKAGE) $(MODEL) $(CONFIG_PACKAGE) $(CONFIG)"
+	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
+		--target-dir $(build_dir) \
+		--name $(long_name) \
+		--top-module $(MODEL_PACKAGE).$(MODEL) \
+		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG))
 
 .PHONY: firrtl
 firrtl: $(FIRRTL_FILE)
@@ -64,8 +119,8 @@ HARNESS_TARGETS = $(HARNESS_FILE) $(HARNESS_SMEMS_CONF) $(HARNESS_ANNO) $(HARNES
 $(TOP_TARGETS) $(HARNESS_TARGETS): firrtl_temp
 	@echo "" > /dev/null
 
-firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(base_dir)/generators/gemmini/src/main/resources/vsrc/MeshBlackBox.v
-	cd $(base_dir) && $(SBT) "project tapeout" "runMain barstools.tapeout.transforms.GenerateTopAndHarness -o $(TOP_FILE) -tho $(HARNESS_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(VLOG_MODEL) -faf $(ANNO_FILE) -tsaof $(TOP_ANNO) -tdf $(sim_top_blackboxes) -tsf $(TOP_FIR) -thaof $(HARNESS_ANNO) -hdf $(sim_harness_blackboxes) -thf $(HARNESS_FIR) $(REPL_SEQ_MEM) $(HARNESS_CONF_FLAGS) -td $(build_dir)" && touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
+firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
+	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTopAndHarness,-o $(TOP_FILE) -tho $(HARNESS_FILE) -i $(FIRRTL_FILE) --syn-top $(TOP) --harness-top $(VLOG_MODEL) -faf $(ANNO_FILE) -tsaof $(TOP_ANNO) -tdf $(sim_top_blackboxes) -tsf $(TOP_FIR) -thaof $(HARNESS_ANNO) -hdf $(sim_harness_blackboxes) -thf $(HARNESS_FIR) $(REPL_SEQ_MEM) $(HARNESS_CONF_FLAGS) -td $(build_dir) -ll $(FIRRTL_LOGLEVEL)) && touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
 # DOC include end: FirrtlCompiler
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
@@ -75,7 +130,7 @@ $(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR): top_macro_temp
 	@echo "" > /dev/null
 
 top_macro_temp: $(TOP_SMEMS_CONF)
-	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE)"
+	$(call run_scala_main,barstoolsMacros,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE))
 
 HARNESS_MACROCOMPILER_MODE = --mode synflops
 .INTERMEDIATE: harness_macro_temp
@@ -83,13 +138,13 @@ $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): harness_macro_temp
 	@echo "" > /dev/null
 
 harness_macro_temp: $(HARNESS_SMEMS_CONF) | top_macro_temp
-	cd $(base_dir) && $(SBT) "project barstoolsMacros" "runMain barstools.macros.MacroCompiler -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE)"
+	$(call run_scala_main,barstoolsMacros,barstools.macros.MacroCompiler, -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE))
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
 ########################################################################################
 $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes)
-	awk '{print $1;}' $^ | sort -u | grep -v '.*\.h$$' > $@
+	awk '{print $1;}' $^ | sort -u | grep -v '.*\.\(svh\|h\)$$' > $@
 
 #########################################################################################
 # helper rule to just make verilog files
@@ -101,35 +156,57 @@ verilog: $(sim_vsrcs)
 # helper rules to run simulations
 #########################################################################################
 .PHONY: run-binary run-binary-fast run-binary-debug run-fast
-run-binary: $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
-#########################################################################################
-# helper rules to run simulator as fast as possible
-#########################################################################################
-run-binary-fast: $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $(BINARY) | tee $(sim_out_name).log)
+# run normal binary with hardware-logged insn dissassembly
+run-binary: $(output_dir) $(sim)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
-#########################################################################################
-# helper rules to run simulator with as much debug info as possible
-#########################################################################################
-run-binary-debug: $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+# run simulator as fast as possible (no insn disassembly)
+run-binary-fast: $(output_dir) $(sim)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
+
+# run simulator with as much debug info as possible
+run-binary-debug: $(output_dir) $(sim_debug)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
 #########################################################################################
+# helper rules to run simulator with fast loadmem via hex files
+#########################################################################################
+$(binary_hex): $(output_dir) $(BINARY)
+	$(base_dir)/scripts/smartelf2hex.sh $(BINARY) > $(binary_hex)
+
+run-binary-hex: $(output_dir) $(sim) $(binary_hex)
+run-binary-hex: run-binary
+run-binary-hex: override LOADMEM_ADDR = 80000000
+run-binary-hex: override LOADMEM = $(binary_hex)
+run-binary-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
+run-binary-debug-hex: $(output_dir) $(sim) $(binary_hex)
+run-binary-debug-hex: run-binary-debug
+run-binary-debug-hex: override LOADMEM_ADDR = 80000000
+run-binary-debug-hex: override LOADMEM = $(binary_hex)
+run-binary-debug-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
+run-binary-fast-hex: $(output_dir) $(sim) $(binary_hex)
+run-binary-fast-hex: run-binary-fast
+run-binary-fast-hex: override LOADMEM_ADDR = 80000000
+run-binary-fast-hex: override LOADMEM = $(binary_hex)
+run-binary-fast-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
+
+#########################################################################################
 # run assembly/benchmarks rules
 #########################################################################################
-$(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/%
-	mkdir -p $(output_dir)
+$(output_dir):
+	mkdir -p $@
+
+$(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/% $(output_dir)
 	ln -sf $< $@
 
 $(output_dir)/%.run: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(SIM_FLAGS) $(PERMISSIVE_OFF) $< | tee $<.log) && touch $@
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	(set -o pipefail && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< 2> >(spike-dasm > $@) | tee $<.log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
@@ -138,22 +215,43 @@ ifneq ($(filter run% %.run %.out %.vpd %.vcd,$(MAKECMDGOALS)),)
 -include $(build_dir)/$(long_name).d
 endif
 
-#################################################
-# Rules for running and checking tracegen tests #
-#################################################
+#######################################
+# Rules for building DRAMSim2 library
+#######################################
 
-AXE_DIR=$(base_dir)/tools/axe/src
-AXE=$(AXE_DIR)/axe
+dramsim_dir = $(base_dir)/tools/DRAMSim2
+dramsim_lib = $(dramsim_dir)/libdramsim.a
 
-$(AXE): $(wildcard $(AXE_DIR)/*.[ch]) $(AXE_DIR)/make.sh
-	cd $(AXE_DIR) && ./make.sh
+$(dramsim_lib):
+	$(MAKE) -C $(dramsim_dir) $(notdir $@)
 
-$(output_dir)/tracegen.out: $(sim)
-	mkdir -p $(output_dir) && $(sim) $(PERMISSIVE_ON) +max-cycles=$(timeout_cycles) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) none 2> $@
+################################################
+# Helper to run SBT or manage the SBT server
+################################################
 
-$(output_dir)/tracegen.result: $(output_dir)/tracegen.out $(AXE)
-	$(base_dir)/scripts/check-tracegen.sh $< > $@
+SBT_COMMAND ?= shell
+.PHONY: launch-sbt
+launch-sbt:
+	cd $(base_dir) && $(SBT_NON_THIN) "$(SBT_COMMAND)"
 
-tracegen: $(output_dir)/tracegen.result
+.PHONY: shutdown-sbt-server
+shutdown-sbt-server:
+	cd $(base_dir) && $(SBT) "shutdown"
 
-.PHONY: tracegen
+.PHONY: start-sbt-server
+start-sbt-server:
+	cd $(base_dir) && $(SBT) "exit"
+
+#########################################################################################
+# print help text
+#########################################################################################
+.PHONY: help
+help:
+	@for line in $(HELP_LINES); do echo "$$line"; done
+
+#########################################################################################
+# Implicit rule handling
+#########################################################################################
+# Disable all suffix rules to improve Make performance on systems running older
+# versions of Make
+.SUFFIXES:

@@ -1,0 +1,73 @@
+#----------------------
+# Technology Setup
+#----------------------
+
+vlsi.core.technology: nangate45
+
+# the nangate45.tech.json can't reference the $OPENROAD environment variable,
+# so we need to set the install dir here. 
+# TODO: figure out how to remove this, or override it within OpenROADTool
+technology.nangate45.install_dir: "/k/work/OpenROAD-flow/tools/OpenROAD"
+
+vlsi.core.max_threads: 12
+
+#----------------------
+# General Hammer Inputs
+#----------------------
+
+# Hammer will auto-generate a CPF for simple power designs; 
+# see hammer/src/hammer-vlsi/defaults.yml for more info
+vlsi.inputs.power_spec_mode: "auto"
+vlsi.inputs.power_spec_type: "cpf"
+
+# Specify clock signals
+vlsi.inputs.clocks: [
+  {name: "clock", period: "5ns", uncertainty: "0.5ns"}
+]
+
+# Generate Make include to aid in flow 
+vlsi.core.build_system: make
+
+#----------------------
+# Placement Constraints
+#----------------------
+
+# For nangate45, size should be multiple of (0.19,1.4) placement grid
+vlsi.inputs.placement_constraints:
+  - path: "ChipTop"
+    type: toplevel
+    x: 0
+    y: 0
+    width: 3334.72
+    height: 3798.2
+    margins: 
+      left: 0
+      right: 0
+      top: 0
+      bottom: 0
+
+# SRAM Compiler compiler options
+vlsi.core.sram_generator_tool: "sram_compiler"
+## You should specify a location for the SRAM generator in the tech plugin
+vlsi.core.sram_generator_tool_path: [
+  "hammer/src/hammer-vlsi/technology/nangate45"]
+vlsi.core.sram_generator_tool_path_meta: "append"
+
+#----------------------
+# Tool options. Replace with your tool plugin of choice.
+#----------------------
+
+# OpenROAD-yosys options
+vlsi.core.synthesis_tool: "yosys"
+vlsi.core.synthesis_tool_path: ["hammer/src/hammer-vlsi/synthesis/yosys"]
+vlsi.core.synthesis_tool_path_meta: "append"
+
+# OpenROAD-par options
+vlsi.core.par_tool: "openroad"
+vlsi.core.par_tool_path: ["hammer/src/hammer-vlsi/par"]
+vlsi.core.par_tool_path_meta: "append"
+
+# OpenROAD-drc options (no lvs)
+vlsi.core.drc_tool: "openroad"
+vlsi.core.drc_tool_path: ["hammer/src/hammer-vlsi/drc"]
+vlsi.core.drc_tool_path_meta: "append"

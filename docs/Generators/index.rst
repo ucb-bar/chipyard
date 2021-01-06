@@ -1,6 +1,6 @@
 .. _generator-index:
 
-Generators
+Included RTL Generators
 ============================
 
 A Generator can be thought of as a generalized RTL design, written using a mix of meta-programming and standard RTL.
@@ -27,4 +27,7 @@ so changes to the generators themselves will automatically be used when building
    TestChipIP
    SiFive-Generators
    SHA3
+   CVA6
+   NVDLA
+   Sodor
 

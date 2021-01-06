@@ -20,6 +20,10 @@ Processor Cores
   An out-of-order RISC-V core.
   See :ref:`Berkeley Out-of-Order Machine (BOOM)` for more information.
 
+**CVA6 Core**
+  An in-order RISC-V core written in System Verilog. Previously called Ariane.
+  See :ref:`CVA6 Core` for more information.
+
 Accelerators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -29,9 +33,9 @@ Accelerators
   Hwacha integrates with a Rocket or BOOM core using the RoCC (Rocket Custom Co-processor) interface.
   See :ref:`Hwacha` for more information.
 
-.. Fixed Function Accelerators:
-   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   TBD
+**Gemmini**
+  A matrix-multiply accelerator targeting neural-networks
+
 **SHA3**
   A fixed-function accelerator for the SHA3 hash function. This simple accelerator is used as a demonstration for some of the
   Chipyard integration flows using the RoCC interface.
@@ -74,6 +78,10 @@ Tools
 
 **Dsptools**
   A Chisel library for writing custom signal processing hardware, as well as integrating custom signal processing hardware into an SoC (especially a Rocket-based SoC).
+
+**Dromajo**
+  A RV64GC emulator primarily used for co-simulation and was originally developed by Esperanto Technologies.
+  See :ref:`Dromajo` for more information.
 
 Toolchains
 -------------------------------------------
