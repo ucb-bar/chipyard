@@ -21,7 +21,7 @@
 	url = https://github.com/riscv-boom/riscv-boom.git
 [submodule "generators/sifive-blocks"]
 	path = generators/sifive-blocks
-	url = https://github.com/abejgonzalez/sifive-blocks.git
+	url = https://github.com/sifive/sifive-blocks.git
 [submodule "generators/hwacha"]
 	path = generators/hwacha
 	url = https://github.com/ucb-bar/hwacha.git
