@@ -10,7 +10,7 @@ Transforming the RTL
 --------------------
 
 Building a chip requires specializing the generic verilog emitted by FIRRTL to adhere to the constraints imposed by the technology used for fabrication.
-This includes mapping Chisel memories to available technology macros such as SRAMs, mapping the input and output of your chip to connect to technology IO cells, see :ref:`Barstools`.
+This includes mapping Chisel memories to available technology macros such as SRAMs, mapping the input and output of your chip to connect to technology IO cells, see :ref:`Tools/Barstools:Barstools`.
 In addition to these required transformations, it may also be beneficial to transform the RTL to make it more amenable to hierarchical physical design easier.
 This often includes modifying the logical hierarchy to match the physical hierarchy through grouping components together or flattening components into a single larger module.
 
@@ -49,6 +49,6 @@ Running the VLSI tool flow
 --------------------------
 
 For the full documentation on how to use the VLSI tool flow, see the `Hammer Documentation <https://hammer-vlsi.readthedocs.io/>`__.
-For an example of how to use the VLSI in the context of Chipyard, see :ref:`ASAP7 Tutorial`.
+For an example of how to use the VLSI in the context of Chipyard, see :ref:`VLSI/Tutorial:ASAP7 Tutorial`.
 
 

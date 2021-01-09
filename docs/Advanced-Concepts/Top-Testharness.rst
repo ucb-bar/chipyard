@@ -58,7 +58,7 @@ Tops
 
 A SoC Top then extends the ``System`` class with traits for custom components.
 In Chipyard, this includes things like adding a NIC, UART, and GPIO as well as setting up the hardware for the bringup method.
-Please refer to :ref:`Communicating with the DUT` for more information on these bringup methods.
+Please refer to :ref:`Advanced-Concepts/Chip-Communication:Communicating with the DUT` for more information on these bringup methods.
 
 TestHarness
 -------------------------

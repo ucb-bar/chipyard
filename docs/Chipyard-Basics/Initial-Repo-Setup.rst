@@ -73,7 +73,7 @@ This depends on what you are planning to do with Chipyard.
 
 * If you intend to run a simulation of one of the vanilla Chipyard examples, go to :ref:`sw-rtl-sim-intro` and follow the instructions.
 
-* If you intend to run a simulation of a custom Chipyard SoC Configuration, go to :ref:`Simulating A Custom Project` and follow the instructions.
+* If you intend to run a simulation of a custom Chipyard SoC Configuration, go to :ref:`Simulation/Software-RTL-Simulation:Simulating A Custom Project` and follow the instructions.
 
 * If you intend to run a full-system FireSim simulation, go to :ref:`firesim-sim-intro` and follow the instructions.
 

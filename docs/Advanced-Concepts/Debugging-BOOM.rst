@@ -1,8 +1,8 @@
 Debugging BOOM
 ======================
 
-In addition to the default debugging techniques specified in :ref:`Debugging RTL`,
-single-core BOOM designs can utilize the Dromajo co-simulator (see :ref:`Dromajo`)
+In addition to the default debugging techniques specified in :ref:`Advanced-Concepts/Debugging-RTL:Debugging RTL`,
+single-core BOOM designs can utilize the Dromajo co-simulator (see :ref:`Tools/Dromajo:Dromajo`)
 to verify functionality.
 
 .. warning:: Dromajo currently only works in single-core BOOM systems without accelerators.

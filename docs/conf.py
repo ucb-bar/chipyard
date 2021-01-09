@@ -190,3 +190,6 @@ texinfo_documents = [
 intersphinx_mapping = {'python' : ('https://docs.python.org/', None),
                        'boom' : ('https://docs.boom-core.org/en/latest/', None),
                         'firesim' : ('http://docs.fires.im/en/latest/', None) }
+
+# resolve label conflict between documents
+autosectionlabel_prefix_document = True

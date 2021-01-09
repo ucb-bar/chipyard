@@ -32,7 +32,7 @@ The default value is 4 bytes. The ``concurrency`` argument is the size of the
 internal queue for TileLink requests. By default, this value is 0, which means
 there will be no queue. This value must be greater than 0 if you wish to
 decoupled requests and responses for register accesses. This is discussed
-in :ref:`Using Functions`.
+in :ref:`TileLink-Diplomacy-Reference/Register-Router:Using Functions`.
 
 The main way to interact with the node is to call the ``regmap`` method, which
 takes a sequence of pairs. The first element of the pair is an offset from the
@@ -128,7 +128,7 @@ Register Routers for Other Protocols
 
 One useful feature of the register router interface is that you can easily
 change the protocol being used. For instance, in the first example in
-:ref:`Basic Usage`, you could simply change the ``TLRegisterNode`` to
+:ref:`TileLink-Diplomacy-Reference/Register-Router:Basic Usage`, you could simply change the ``TLRegisterNode`` to
 and ``AXI4RegisterNode``.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/RegisterNodeExample.scala

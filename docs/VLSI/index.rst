@@ -10,5 +10,6 @@ In particular, we aim to support the Hammer physical design generator flow.
 
    Building-A-Chip
    Hammer
+   Basic-Flow
    Tutorial
    Advanced-Usage

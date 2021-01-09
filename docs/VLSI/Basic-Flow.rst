@@ -40,7 +40,7 @@ Setting up the Hammer Configuration Files
 --------------------------------------------
 
 The first configuration file that needs to be set up is the Hammer environment configuration file ``env.yml``. In this file you need to set the paths to the EDA tools and license servers you will be using. You do not have to fill all the fields in this configuration file, you only need to fill in the paths for the tools that you will be using.
-If you are working within a shared server farm environment with an LSF cluster setup (for example, the Berkeley Wireless Research Center), please note the additional possible environment configuration listed in the :ref:`Advanced Environment Setup` segment of this documentation page. 
+If you are working within a shared server farm environment with an LSF cluster setup (for example, the Berkeley Wireless Research Center), please note the additional possible environment configuration listed in the :ref:`VLSI/Basic-Flow:Advanced Environment Setup` segment of this documentation page. 
 
 Hammer relies on YAML-based configuration files. While these configuration can be consolidated within a single files (as is the case in the ASAP7 tutorial :ref:`tutorial` and the ``nangate45``
 OpenRoad example), the generally suggested way to work with an arbitrary process technology or tools plugins would be to use three configuration files, matching the three Hammer concerns - tools, tech, and design. 
@@ -63,7 +63,7 @@ We will do so by calling ``make buildfile`` with appropriate Chipyard configurat
 As in the rest of the Chipyard flows, we specify our SoC configuration using the ``CONFIG`` make variable. 
 However, unlike the rest of the Chipyard flows, in the case of physical design we might be interested in working in a hierarchical fashion and therefore we would like to work on a single module.
 Therefore, we can also specify a ``VLSI_TOP`` make variable with the same of a specific Verilog module (which should also match the name of the equivalent Chisel module) which we would like to work on.
-The makefile will automatically call tools such as Barstools and the MacroCopmiler (:ref:`barstools`) in order to make the generated Verilog more VLSI friendly. 
+The makefile will automatically call tools such as Barstools and the MacroCopmiler (:ref:`Tools/Barstools:barstools`) in order to make the generated Verilog more VLSI friendly. 
 By default, the MacroCopmiler will attempt to map memories into the SRAM options within the Hammer technology plugin. However, if you are wokring with a new process technology are prefer to work with flipflop arrays, you can configure the MacroCompiler using the ``MACROCOMPILER_MODE`` make variable. For example, the ASAP7 process technology does not have associated SRAMs, and therefore the ASAP7 Hammer tutorial (:ref:`tutorial`) uses the ``MACROCOMPILER_MODE='--mode synflops'`` option (Note that synthesizing a design with only flipflops is very slow and will often may not meet constraints).
 
 We call the ``make buildfile`` command while also specifying the name of the process technology we are working with (same ``tech_name`` for the configuration files and plugin name) and the configuration files we created. Note, in the ASAP7 tutorial ((:ref:`tutorial`)) these configuration files are merged into a single file called ``example-asap7.yml``.
@@ -116,6 +116,7 @@ Hence, if we want to monolitically place-and-route the entire SoC with the defau
 In a more typical scenario of working on a single module, for example the Gemmini accelerator within the GemminiRocketConfig Chipyard SoC configuration,
 
 .. code-block:: shell
+
   vlsi.inputs.placement_constraints:
     - path: "Gemmini"
       type: toplevel
@@ -135,7 +136,7 @@ The relevant ``make`` command would then be
     make par CONFIG=GemminiRocketConfig VLSI_TOP=Gemmini tech_name=tsmintel3 INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
 
 Note that the width and height specification can vary widely between different modulesi and level of the module hierarchy. Make sure to set sane width and height values.
-Place-and-route generally requires more fine-grained input specifications regarding power nets, clock nets, pin assignments and floorplanning. While the template configuration files provide defaults for automatic tool defaults, these will usually result in very bad QoR, and therefore it is recommended to specify better-informed floorplans, pin assignments and power nets. For more information about cutomizing theses parameters, please refer to the :ref:`Customizing Your VLSI Flow in Hammer` sections or to the Hammer documentation. 
+Place-and-route generally requires more fine-grained input specifications regarding power nets, clock nets, pin assignments and floorplanning. While the template configuration files provide defaults for automatic tool defaults, these will usually result in very bad QoR, and therefore it is recommended to specify better-informed floorplans, pin assignments and power nets. For more information about cutomizing theses parameters, please refer to the :ref:`VLSI/Basic-Flow:Customizing Your VLSI Flow in Hammer` sections or to the Hammer documentation. 
 Additionally, some Hammer process technology plugins do not provide sufficient default values for requires settings such as power nets and pin assignments (for example, ASAP7). In those cases, these constraints will need to be specified manually in the top-level configuration yml files, as is the case in the ``example-asap7.yml`` configuration file.
 
 Place-and-route tools are very sensitive to process technologes (significantly more sensitive than synthesis tools), and different process technologies may work only on specific tool versions. It is recommended to check what is the appropriate tool version for the specific process technology you are working with.
