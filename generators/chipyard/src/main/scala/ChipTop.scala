@@ -7,7 +7,7 @@ import scala.collection.mutable.{ArrayBuffer}
 import freechips.rocketchip.prci.{ClockGroupIdentityNode, ClockSinkParameters, ClockSinkNode, ClockGroup}
 import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey}
 import freechips.rocketchip.config.{Parameters, Field}
-import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, LazyRawModuleImp, LazyModuleImpLike}
+import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, LazyRawModuleImp, LazyModuleImpLike, BindingScope}
 import freechips.rocketchip.util.{ResetCatchAndSync}
 import chipyard.iobinders._
 
@@ -23,7 +23,7 @@ case object BuildSystem extends Field[Parameters => LazyModule]((p: Parameters) 
  * drive clock and reset generation
  */
 
-class ChipTop(implicit p: Parameters) extends LazyModule
+class ChipTop(implicit p: Parameters) extends LazyModule with BindingScope
     with HasTestHarnessFunctions with HasIOBinders {
   // The system module specified by BuildSystem
   lazy val lazySystem = LazyModule(p(BuildSystem)(p)).suggestName("system")

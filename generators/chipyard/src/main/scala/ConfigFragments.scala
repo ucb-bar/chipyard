@@ -151,6 +151,11 @@ class WithRocketDCacheScratchpad extends Config((site, here, up) => {
   }
 })
 
+// Replaces the L2 with a broadcast manager for maintaining coherence
+class WithBroadcastManager extends Config((site, here, up) => {
+  case BankedL2Key => up(BankedL2Key, site).copy(coherenceManager = CoherenceManagerWrapper.broadcastManager)
+})
+
 class WithHwachaTest extends Config((site, here, up) => {
   case TestSuitesKey => (tileParams: Seq[TileParams], suiteHelper: TestSuiteHelper, p: Parameters) => {
     up(TestSuitesKey).apply(tileParams, suiteHelper, p)
@@ -177,6 +182,15 @@ class WithDMIDTM extends Config((site, here, up) => {
 
 class WithNoDebug extends Config((site, here, up) => {
   case DebugModuleKey => None
+})
+
+class WithTLSerialLocation(masterWhere: TLBusWrapperLocation, slaveWhere: TLBusWrapperLocation) extends Config((site, here, up) => {
+  case SerialTLAttachKey => up(SerialTLAttachKey, site).copy(masterWhere = masterWhere, slaveWhere = slaveWhere)
+})
+
+class WithTLBackingMemory extends Config((site, here, up) => {
+  case ExtMem => None // disable AXI backing memory
+  case ExtTLMem => up(ExtMem, site) // enable TL backing memory
 })
 
 class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("core", fMHz)

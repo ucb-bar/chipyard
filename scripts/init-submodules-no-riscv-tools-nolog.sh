@@ -11,7 +11,7 @@ case ${MYGIT} in
 [1-9]*) ;;
 *) echo 'warning: unknown git version' ;;
 esac
-MINGIT="1.7.8"
+MINGIT="1.8.5"
 if [ "$MINGIT" != "$(echo -e "$MINGIT\n$MYGIT" | sort -V | head -n1)" ]; then
   echo "This script requires git version $MINGIT or greater. Exiting."
   false
@@ -39,6 +39,8 @@ git config submodule.vlsi/hammer-cadence-plugins.update none
 git config submodule.vlsi/hammer-synopsys-plugins.update none
 git config submodule.vlsi/hammer-mentor-plugins.update none
 git config submodule.software/firemarshal.update none
+# Disable update to fpga-shells
+git config submodule.fpga/fpga-shells.update none
 git submodule update --init --recursive #--jobs 8
 
 # Un-ignore toolchain submodules

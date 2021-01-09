@@ -45,6 +45,8 @@ Table of Contents
 
    TileLink-Diplomacy-Reference/index
 
+   Prototyping/index
+
 
 Indices and tables
 ==================
