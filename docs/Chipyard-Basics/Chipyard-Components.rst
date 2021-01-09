@@ -130,8 +130,8 @@ Prototyping
 **FPGA Prototyping**
   FPGA prototyping is supported in Chipyard using SiFive's ``fpga-shells``.
   Some examples of FPGAs supported are the Xilinx Arty 35T and VCU118 boards.
-  For a fast and deterministic simulation with plenty of debugging tools, please consider using the :ref:`FireSim` platform.
-  See :ref:`Prototyping Flow` for more information on FPGA prototypes.
+  For a fast and deterministic simulation with plenty of debugging tools, please consider using the :ref:`Simulation/FPGA-Accelerated-Simulation:FireSim` platform.
+  See :ref:`Prototyping/index:Prototyping Flow` for more information on FPGA prototypes.
 
 VLSI
 -------------------------------------------
