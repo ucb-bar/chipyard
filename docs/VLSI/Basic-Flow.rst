@@ -218,14 +218,89 @@ If you have access to a shared LSF cluster and you would like Hammer to submit i
         settings_meta: "append"
 
 
-Specifying a Custom Floorplan
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
 
 Composing a Hierarchical Design
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+For large designs, a monolithic VLSI flow may take the EDA tools a very long time to process and optimize, to the extent that it may not be feasable sometimes. 
+Hammer supports a hierarchical physical design flow, which decomposes the design into several specified sub-components and runs the flow on each sub-components separetly. Hammer is then able to assemble these blocks together into a top-level design. This hierarchical approach speeds up the VLSI flow for large designs, especially designs in which there may me multiple instantiations of the same sub-components(since the sub-component can simply be replicated in the layout).
+While hierarchical physical design can be performed in multiple ways (top-down, bottom-up, abutment etc.), Hammer currently supports only the bottom-up approach.
+The bottom-up approach traverses a tree representing the hierarchy starting from the leaves and towards the direction of the root (the "top level"), and runs the physical design flow on each node of the hierarchy tree using the previously layed-out children nodes.
+As nodes get closer to the root (or "top level") of the hierarchy, largers sections of the design get layed-out.
+
+The Hammer hierarchical flow relies on a manually-specified descrition of the desired heirarchy tree. The specification of the heirarchy tree is defined based on the instance names in the generated Verilog, which sometime make this specification challenging due to inconsisent instance names. Additionally, the specification of the heirarchy tree is intertwined with the manual specification of a floorplan for the design.
+
+For example, if we choose to specifiy the previously mentioned ``GemminiRocketConfig`` configuration in a hierarchical fashion in which the Gemmini accelerator and the last-level cache are run separetly from the top-level SoC, we would replace the floorplan example in ``example-design.yml`` from the :ref:`VLSI/Basic-Flow:Place-and-Route` section with the following specification:
+
+.. code-block:: shell
+
+    vlsi.inputs.hiearchical.top_module: "ChipTop"
+    vlsi.inputs.hierarchical.mode: manual"
+    vlsi.inputs.manual_modules:
+      - ChipTop:
+        - RocketTile
+        - InclusiveCache
+      - RocketTile:
+        - Gemmini
+    vlsi.manual_placement_constraints:
+      - ChipTop
+        - path: "ChipTop"
+          type: toplevel
+          x: 0
+          y: 0
+          width: 500
+          height: 500
+          margins:
+            left: 0
+            right: 0
+            top: 0
+            bottom: 0
+      - RocketTile
+        - path: "chiptop.system.tile_prci_domain.tile"
+          type: hierarchical
+          master: ChipTop
+          x: 0
+          y: 0
+          width: 250
+          height: 250
+          margins:
+            left: 0
+            right: 0
+            top: 0
+            bottom: 0
+      - Gemmini
+        - path: "chiptop.system.tile_prci_domain.tile.gemmini"
+          type: hierarchical
+          master: RocketTile
+          x: 0
+          y: 0
+          width: 200
+          height: 200
+          margins:
+            left: 0
+            right: 0
+            top: 0
+            bottom: 0
+      - InclusiveCache
+        - path: "chiptop.system.subsystem_l2_wrapper.l2"
+          type: hierarchical
+          master: ChipTop
+          x: 0
+          y: 0
+          width: 100
+          height: 100
+          margins:
+            left: 0
+            right: 0
+            top: 0
+            bottom: 0
+
+
+In this specification, ``vlsi.inputs.hierarchical.mode`` indicates the manual specification of the heirarchy tree (which is the only mode currently supported by Hammer), ``vlsi.inputs.hiearchical.top_module`` sets the root of the hierarchical tree, ``vlsi.inputs.hierarchical.manual_modules`` enumerates the tree of hierarchical modules, and ``vlsi.inputs.hierarchical.manual_placement_constraints`` enumerates the floorplan for each module.
+
+
+.. Specifying a Custom Floorplan
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Customizing Generated Tcl Scripts
