@@ -311,3 +311,11 @@ lazy val firechip = (project in file("generators/firechip"))
     testGrouping in Test := isolateAllTests( (definedTests in Test).value ),
     testOptions in Test += Tests.Argument("-oF")
   )
+lazy val fpga_shells = (project in file("./fpga/fpga-shells"))
+  .dependsOn(rocketchip, sifive_blocks)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+lazy val fpga_platforms = (project in file("./fpga"))
+  .dependsOn(chipyard, fpga_shells)
+  .settings(commonSettings)

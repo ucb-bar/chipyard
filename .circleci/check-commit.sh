@@ -120,6 +120,10 @@ dir="vlsi"
 branches=("master")
 search
 
+submodules=("fpga-shells")
+dir="fpga"
+branches=("master")
+search
 
 # turn off verbose printing to make this easier to read
 set +x

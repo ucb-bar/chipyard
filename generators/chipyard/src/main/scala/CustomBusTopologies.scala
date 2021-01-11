@@ -70,3 +70,13 @@ class WithMulticlockCoherentBusTopology extends Config((site, here, up) => {
       l2 = site(BankedL2Key),
       sbusToMbusXType = site(SbusToMbusXTypeKey)))
 })
+
+class WithMulticlockIncoherentBusTopology extends Config((site, here, up) => {
+  case TLNetworkTopologyLocated(InSubsystem) => List(
+    JustOneBusTopologyParams(sbus = site(SystemBusKey)),
+    HierarchicalMulticlockBusTopologyParams(
+      pbus = site(PeripheryBusKey),
+      fbus = site(FrontBusKey),
+      cbus = site(ControlBusKey),
+      xTypes = SubsystemCrossingParams()))
+})

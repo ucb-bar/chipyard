@@ -106,12 +106,12 @@ Software
 Sims
 -------------------------------------------
 
-**verilator (Verilator wrapper)**
+**Verilator**
   Verilator is an open source Verilog simulator.
   The ``verilator`` directory provides wrappers which construct Verilator-based simulators from relevant generated RTL, allowing for execution of test RISC-V programs on the simulator (including vcd waveform files).
   See :ref:`Verilator (Open-Source)` for more information.
 
-**vcs (VCS wrapper)**
+**VCS**
   VCS is a proprietary Verilog simulator.
   Assuming the user has valid VCS licenses and installations, the ``vcs`` directory provides wrappers which construct VCS-based simulators from relevant generated RTL, allowing for execution of test RISC-V programs on the simulator (including vcd/vpd waveform files).
   See :ref:`Synopsys VCS (License Required)` for more information.
@@ -123,6 +123,15 @@ Sims
   The use of the elastic public cloud enable FireSim to scale simulations up to thousands of nodes.
   In order to use FireSim, the repository must be cloned and executed on AWS instances.
   See :ref:`FireSim` for more information.
+
+Prototyping
+-------------------------------------------
+
+**FPGA Prototyping**
+  FPGA prototyping is supported in Chipyard using SiFive's ``fpga-shells``.
+  Some examples of FPGAs supported are the Xilinx Arty 35T and VCU118 boards.
+  For a fast and deterministic simulation with plenty of debugging tools, please consider using the :ref:`FireSim` platform.
+  See :ref:`Prototyping Flow` for more information on FPGA prototypes.
 
 VLSI
 -------------------------------------------

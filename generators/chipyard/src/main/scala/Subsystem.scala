@@ -11,7 +11,7 @@ import chisel3.internal.sourceinfo.{SourceInfo}
 import freechips.rocketchip.prci._
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.devices.tilelink._
-import freechips.rocketchip.devices.debug.{HasPeripheryDebug, HasPeripheryDebugModuleImp, ExportDebug}
+import freechips.rocketchip.devices.debug.{HasPeripheryDebug, HasPeripheryDebugModuleImp, ExportDebug, DebugModuleKey}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.diplomaticobjectmodel.model.{OMInterrupt}
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree.{RocketTileLogicalTreeNode, LogicalModuleTree}
@@ -31,7 +31,7 @@ trait CanHaveHTIF { this: BaseSubsystem =>
   // Advertise HTIF if system can communicate with fesvr
   if (this match {
     case _: CanHavePeripheryTLSerial if p(SerialTLKey).nonEmpty => true
-    case _: HasPeripheryDebug if p(ExportDebug).dmi => true
+    case _: HasPeripheryDebug if (!p(DebugModuleKey).isEmpty && p(ExportDebug).dmi) => true
     case _ => false
   }) {
     ResourceBinding {
