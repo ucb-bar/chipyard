@@ -38,7 +38,7 @@ ENV_YML            ?= $(vlsi_dir)/env.yml
 INPUT_CONFS        ?= $(if $(filter $(tech_name),nangate45),\
                         example-nangate45.yml,\
                         example-asap7.yml)
-HAMMER_EXEC        ?= example-vlsi
+HAMMER_EXEC        ?= ./example-vlsi
 VLSI_TOP           ?= $(TOP)
 VLSI_HARNESS_DUT_NAME ?= chiptop
 VLSI_OBJ_DIR       ?= $(vlsi_dir)/build

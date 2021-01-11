@@ -59,7 +59,7 @@ TileLink messages.
 
 The ``edge`` object represents the edge of the Diplomacy graph. It contains
 some useful helper functions which will be documented in
-:ref:`TileLink Edge Object Methods`.
+:ref:`TileLink-Diplomacy-Reference/EdgeFunctions:TileLink Edge Object Methods`.
 
 Manager Node
 ------------
@@ -116,7 +116,7 @@ most MMIO peripherals should set it to.
 
 The next six arguments start with ``support`` and determine the different
 A channel message types that the manager can accept. The definitions of the
-message types are explained in :ref:`TileLink Edge Object Methods`.
+message types are explained in :ref:`TileLink-Diplomacy-Reference/EdgeFunctions:TileLink Edge Object Methods`.
 The ``TransferSizes`` case class specifies the range of logical sizes (in bytes)
 that the manager can accept for the particular message type. This is an inclusive
 range and all logical sizes must be powers of two. So in this case, the manager
@@ -137,7 +137,7 @@ to handle TileLink requests, it is usually much easier to use a register node.
 This type of node provides a ``regmap`` method that allows you to specify
 control/status registers and automatically generates the logic to handle the
 TileLink protocol. More information about how to use register nodes can be
-found in :ref:`Register Router`.
+found in :ref:`TileLink-Diplomacy-Reference/Register-Router:Register Router`.
 
 Identity Node
 -------------
@@ -176,7 +176,7 @@ If we want to connect the client and manager groups together, we can now do this
     :end-before: DOC include end: MyClientManagerComplex
 
 The meaning of the ``:=*`` operator is explained in more detail in the
-:ref:`Diplomacy Connectors` section. In summary, it connects two nodes together
+:ref:`TileLink-Diplomacy-Reference/Diplomacy-Connectors:Diplomacy Connectors` section. In summary, it connects two nodes together
 using multiple edges. The edges in the identity node are assigned in order,
 so in this case ``client1.node`` will eventually connect to ``manager1.node``
 and ``client2.node`` will connect to ``manager2.node``.
@@ -192,7 +192,7 @@ produces the same number of outputs. However, unlike the identity node, the
 adapter node does not simply pass the connections through unchanged.
 It can change the logical and physical interfaces between input and output and
 rewrite messages going through. RocketChip provides a library of adapters,
-which are catalogued in :ref:`Diplomatic Widgets`.
+which are catalogued in :ref:`TileLink-Diplomacy-Reference/Widgets:Diplomatic Widgets`.
 
 You will rarely need to create an adapter node yourself, but the invocation is
 as follows.

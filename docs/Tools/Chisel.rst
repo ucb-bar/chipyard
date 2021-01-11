@@ -13,7 +13,7 @@ The Chisel generator starts elaboration using the module and configuration class
 This is where the Chisel "library functions" are called with the parameters given and Chisel tries to construct a circuit based on the Chisel code.
 If a runtime error happens here, Chisel is stating that it cannot "build" your circuit due to "violations" between your code and the Chisel "library".
 However, if that passes, the output of the generator gives you an FIRRTL file and other misc collateral!
-See :ref:`FIRRTL` for more information on how to get a FIRRTL file to Verilog.
+See :ref:`Tools/FIRRTL:FIRRTL` for more information on how to get a FIRRTL file to Verilog.
 
 For an interactive tutorial on how to use Chisel and get started please visit the `Chisel Bootcamp <https://github.com/freechipsproject/chisel-bootcamp>`__.
 Otherwise, for all things Chisel related including API documentation, news, etc, visit their `website <https://chisel-lang.org/>`__.

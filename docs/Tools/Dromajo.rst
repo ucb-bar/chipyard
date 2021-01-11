@@ -19,4 +19,4 @@ An example of a divergence and Dromajo's printout is shown below.
 Dromajo shows the divergence compared to simulation (PC, inst, inst-bits, write data, etc) and also provides the register state on failure.
 It is useful to catch bugs that affect architectural state before a simulation hangs or crashes.
 
-To use Dromajo with BOOM, refer to :ref:`Debugging RTL` section on Dromajo.
+To use Dromajo with BOOM, refer to :ref:`Advanced-Concepts/Debugging-RTL:Debugging RTL` section on Dromajo.

@@ -18,7 +18,7 @@ Generating a Bitstream
 ----------------------
 
 Generating a bitstream for any FPGA target using Vivado is similar to building RTL for a software RTL simulation.
-Similar to a software RTL simulation (:ref:`Simulating A Custom Project`), you can run the following command in the ``fpga`` directory to build a bitstream using Vivado:
+Similar to a software RTL simulation (:ref:`Simulation/Software-RTL-Simulation:Simulating A Custom Project`), you can run the following command in the ``fpga`` directory to build a bitstream using Vivado:
 
 .. code-block:: shell
 
@@ -67,4 +67,4 @@ For example, running the bitstream build for an added ILA for a BOOM config.:
 
     make SUB_PROJECT=vcu118 CONFIG=BoomVCU118Config debug-bitstream
 
-.. IMPORTANT:: For more extensive debugging tools for FPGA simulations including printf synthesis, assert synthesis, instruction traces, ILAs, out-of-band profiling, co-simulation, and more, please refer to the :ref:`FireSim` platform.
+.. IMPORTANT:: For more extensive debugging tools for FPGA simulations including printf synthesis, assert synthesis, instruction traces, ILAs, out-of-band profiling, co-simulation, and more, please refer to the :ref:`Simulation/FPGA-Accelerated-Simulation:FireSim` platform.
