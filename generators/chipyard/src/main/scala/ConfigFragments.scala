@@ -141,7 +141,7 @@ class WithNPerfCounters(n: Int = 29) extends Config((site, here, up) => {
 
 class WithRocketICacheScratchpad extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey, site) map { r =>
-    r.copy(icache = r.icache.map(_.copy(itimAddr = Some(0x100000 + r.hartId * 0x10000))))
+    r.copy(icache = r.icache.map(_.copy(itimAddr = Some(0x300000 + r.hartId * 0x10000))))
   }
 })
 
