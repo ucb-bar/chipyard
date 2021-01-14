@@ -1,12 +1,11 @@
 ### Note: This DockerFile is adapted from https://github.com/ucb-bar/chipyard/blob/master/.circleci/images/Dockerfile which was adapted from: https://github.com/CircleCI-Public/example-images/openjdk
-# This is a full chipyard setup, which will be built manually on-demand in the Tendermint Hardware Project at https://gitlab.com/virgohardware/core/
+# This is a full chipyard setup
 
 FROM ubuntu:18.04
 
-MAINTAINER jacobgadikian@gmail.com
+MAINTAINER https://groups.google.com/forum/#!forum/chipyard
 
-# man directory is missing in some base images
-# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199
+# Install dependencies for ubuntu-req.sh
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y \
@@ -18,6 +17,7 @@ RUN apt-get update && \
 RUN sudo DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration && \
    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y console-setup
 
+# Adds a new user called riscvuser
 RUN groupadd --gid 3434 riscvuser \
     && useradd --uid 3434 --gid riscvuser --shell /bin/bash --create-home riscvuser \
     && echo 'riscvuser ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-riscvuser \
@@ -31,7 +31,7 @@ RUN git clone https://github.com/ucb-bar/chipyard.git && \
         cd chipyard && \
         ./scripts/ubuntu-req.sh 1>/dev/null
 
-# Install dependencies from ubuntu-req.sh
+# Run ubuntu-req.sh to install necessary dependencies
 RUN cd chipyard && \
         export MAKEFLAGS=-"j $(nproc)" && \
         ./scripts/init-submodules-no-riscv-tools.sh 1>/dev/null
@@ -46,7 +46,7 @@ RUN cd chipyard && \
         export MAKEFLAGS=-"j $(nproc)" && \
         ./scripts/build-toolchains.sh esp-tools 1>/dev/null
 
-ENTRYPOINT ["/home/riscvuser/chipyard/scripts/entrypoint.sh"]
+ENTRYPOINT ["chipyard/scripts/entrypoint.sh"]
 
 # END IMAGE CUSTOMIZATIONS
 
