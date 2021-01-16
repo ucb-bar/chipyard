@@ -83,6 +83,7 @@ endif
 # create list of simulation file inputs
 #########################################################################################
 $(sim_files): $(call lookup_srcs,$(base_dir)/generators/utilities/src/main/scala,scala) $(SCALA_BUILDTOOL_DEPS)
+	mkdir -p $(base_dir)/.java_temp
 	$(call run_scala_main,utilities,utilities.GenerateSimFiles,-td $(build_dir) -sim $(sim_name))
 
 #########################################################################################
@@ -94,7 +95,7 @@ $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
 generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_REQS)
-	mkdir -p $(build_dir) $(base_dir)/.java_temp
+	mkdir -p $(build_dir)
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
 		--name $(long_name) \
