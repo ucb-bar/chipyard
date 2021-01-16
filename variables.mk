@@ -146,7 +146,8 @@ sim_common_files       ?= $(build_dir)/sim_files.common.f
 # java arguments used in sbt
 #########################################################################################
 JAVA_HEAP_SIZE ?= 8G
-JAVA_OPTS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M
+# tmpdir added to avoid clashing /tmp/protocjar.webcache among multiple users
+JAVA_OPTS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M -Djava.io.tmpdir=$(base_dir)/.java_temp
 
 #########################################################################################
 # default sbt launch command
@@ -217,5 +218,5 @@ sim_vsrcs = \
 #########################################################################################
 # assembly/benchmark variables
 #########################################################################################
-timeout_cycles = 10000000
+timeout_cycles = 100000000
 bmark_timeout_cycles = 100000000

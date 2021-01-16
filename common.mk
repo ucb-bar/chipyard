@@ -94,7 +94,7 @@ $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
 generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_REQS)
-	mkdir -p $(build_dir)
+	mkdir -p $(build_dir) $(base_dir)/.java_temp
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
 		--name $(long_name) \
