@@ -200,10 +200,11 @@ transactions.
 AXI4Fragmenter
 --------------
 
-The AXI4Fragmenter is similar to the :ref:`TileLink-Diplomacy-Reference/Widgets:TLFragmenter`, except it can only
-break multi-beat AXI4 transactions into single-beat transactions. This
-effectively serves as an AXI4 to AXI4-Lite converter. The constructor for this
-widget does not take any arguments.
+The AXI4Fragmenter is similar to the :ref:`TileLink-Diplomacy-Reference/Widgets:TLFragmenter`.
+The AXI4Fragmenter slices all AXI accesses into simple power-of-two sized and aligned transfers
+of the largest size supported by the manager. This makes it suitable as a first stage transformation
+to apply before an AXI4=>TL bridge. It also makes it suitable for placing after TL=>AXI4 bridge
+driving an AXI-lite slave.
 
 **Example Usage:**
 
