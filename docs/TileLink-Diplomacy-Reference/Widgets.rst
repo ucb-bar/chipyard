@@ -1,3 +1,5 @@
+.. _diplomatic_widgets:
+
 Diplomatic Widgets
 ==================
 
@@ -79,7 +81,7 @@ The arguments for the five-argument constructor are
 AXI4Buffer
 ----------
 
-Similar to the :ref:`TLBuffer`, but for AXI4. It also takes ``BufferParams`` objects
+Similar to the :ref:`TileLink-Diplomacy-Reference/Widgets:TLBuffer`, but for AXI4. It also takes ``BufferParams`` objects
 as arguments.
 
 **Arguments:**
@@ -198,10 +200,11 @@ transactions.
 AXI4Fragmenter
 --------------
 
-The AXI4Fragmenter is similar to the :ref:`TLFragmenter`, except it can only
-break multi-beat AXI4 transactions into single-beat transactions. This
-effectively serves as an AXI4 to AXI4-Lite converter. The constructor for this
-widget does not take any arguments.
+The AXI4Fragmenter is similar to the :ref:`TileLink-Diplomacy-Reference/Widgets:TLFragmenter`.
+The AXI4Fragmenter slices all AXI accesses into simple power-of-two sized and aligned transfers
+of the largest size supported by the manager. This makes it suitable as a first stage transformation
+to apply before an AXI4=>TL bridge. It also makes it suitable for placing after TL=>AXI4 bridge
+driving an AXI-lite slave.
 
 **Example Usage:**
 
@@ -235,7 +238,7 @@ you will want to use a TLSourceShrinker.
 AXI4IdIndexer
 -------------
 
-The AXI4 equivalent of :ref:`TLSourceShrinker`. This limits the number of
+The AXI4 equivalent of :ref:`TileLink-Diplomacy-Reference/Widgets:TLSourceShrinker`. This limits the number of
 AWID/ARID bits in the slave AXI4 interface. Useful for connecting to external
 or black box AXI4 ports.
 
@@ -255,7 +258,7 @@ or black box AXI4 ports.
 
 The AXI4IdIndexer will create a ``user`` field on the slave interface, as it
 stores the ID of the master requests in this field. If connecting to an AXI4
-interface that doesn't have a ``user`` field, you'll need to use the :ref:`AXI4UserYanker`.
+interface that doesn't have a ``user`` field, you'll need to use the :ref:`TileLink-Diplomacy-Reference/Widgets:AXI4UserYanker`.
 
 TLWidthWidget
 -------------
@@ -299,7 +302,7 @@ The possible values of ``policy`` are:
    ordering guaranteed
  - ``TLFIFOFixer.allVolatile`` - All managers that have a RegionType of
    ``VOLATILE``, ``PUT_EFFECTS``, or ``GET_EFFECTS`` will have ordering
-   guaranteed (see :ref:`Manager Node` for explanation of region types).
+   guaranteed (see :ref:`TileLink-Diplomacy-Reference/NodeTypes:Manager Node` for explanation of region types).
 
 TLXbar and AXI4Xbar
 -------------------
@@ -375,14 +378,14 @@ override the default arguments of the constructors for these widgets.
         AXI4Fragmenter() :=
         axi4master.node
 
-You will need to add an :ref:`AXI4Deinterleaver` after the TLToAXI4 converter
+You will need to add an :ref:`TileLink-Diplomacy-Reference/Widgets:AXI4Deinterleaver` after the TLToAXI4 converter
 because it cannot deal with interleaved read responses. The TLToAXI4 converter
 also uses the AXI4 user field to store some information, so you will need an
-:ref:`AXI4UserYanker` if you want to connect to an AXI4 port without user
+:ref:`TileLink-Diplomacy-Reference/Widgets:AXI4UserYanker` if you want to connect to an AXI4 port without user
 fields.
 
 Before you connect an AXI4 port to the AXI4ToTL widget, you will need to
-add an :ref:`AXI4Fragmenter` and :ref:`AXI4UserYanker` because the converter cannot
+add an :ref:`TileLink-Diplomacy-Reference/Widgets:AXI4Fragmenter` and :ref:`TileLink-Diplomacy-Reference/Widgets:AXI4UserYanker` because the converter cannot
 deal with multi-beat transactions or user fields.
 
 TLROM

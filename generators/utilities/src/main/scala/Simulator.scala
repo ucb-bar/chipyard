@@ -5,7 +5,7 @@ import java.io.File
 case class GenerateSimConfig(
   targetDir: String = ".",
   dotFName: String = "sim_files.f",
-  simulator: Simulator = VerilatorSimulator,
+  simulator: Option[Simulator] = Some(VerilatorSimulator)
 )
 
 sealed trait Simulator
@@ -20,17 +20,18 @@ trait HasGenerateSimConfig {
       .abbr("sim")
       .valueName("<simulator-name>")
       .action((x, c) => x match {
-        case "verilator" => c.copy(simulator = VerilatorSimulator)
-        case "vcs" => c.copy(simulator = VCSSimulator)
+        case "verilator" => c.copy(simulator = Some(VerilatorSimulator))
+        case "vcs" => c.copy(simulator = Some(VCSSimulator))
+        case "none" => c.copy(simulator = None)
         case _ => throw new Exception(s"Unrecognized simulator $x")
       })
-      .text("Name of simulator to generate files for (verilator, vcs)")
+      .text("Name of simulator to generate files for (verilator, vcs, none)")
 
     opt[String]("target-dir")
       .abbr("td")
       .valueName("<target-directory>")
       .action((x, c) => c.copy(targetDir = x))
-      .text("Target director to put files")
+      .text("Target directory to put files")
 
     opt[String]("dotFName")
       .abbr("df")
@@ -47,9 +48,10 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
     if (fname.takeRight(2) == ".h") {
       cfg.simulator match {
         // verilator needs to explicitly include verilator.h, so use the -FI option
-        case VerilatorSimulator => s"-FI ${fname}"
+        case Some(VerilatorSimulator) => s"-FI ${fname}"
         // vcs pulls headers in with +incdir, doesn't have anything like verilator.h
-        case VCSSimulator => ""
+        case Some(VCSSimulator) => ""
+        case None => ""
       }
     } else { // do nothing otherwise
       fname
@@ -81,8 +83,10 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
     out.write(text)
     out.close()
   }
-  def resources(sim: Simulator): Seq[String] = Seq(
+  def resources(sim: Option[Simulator]): Seq[String] = Seq(
     "/testchipip/csrc/SimSerial.cc",
+    "/testchipip/csrc/testchip_tsi.cc",
+    "/testchipip/csrc/testchip_tsi.h",
     "/testchipip/csrc/SimDRAM.cc",
     "/testchipip/csrc/mm.h",
     "/testchipip/csrc/mm.cc",
@@ -93,15 +97,30 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
     "/csrc/remote_bitbang.h",
     "/csrc/remote_bitbang.cc",
     "/vsrc/EICG_wrapper.v",
-  ) ++ (sim match { // simulator specific files to include
-    case VerilatorSimulator => Seq(
-      "/csrc/emulator.cc",
-      "/csrc/verilator.h",
-    )
-    case VCSSimulator => Seq(
-      "/vsrc/TestDriver.v",
-    )
-  })
+    ) ++ (sim match {
+      case None => Seq()
+      case _ => Seq(
+        "/testchipip/csrc/SimSerial.cc",
+        "/testchipip/csrc/SimDRAM.cc",
+        "/testchipip/csrc/mm.h",
+        "/testchipip/csrc/mm.cc",
+        "/testchipip/csrc/mm_dramsim2.h",
+        "/testchipip/csrc/mm_dramsim2.cc",
+        "/csrc/SimDTM.cc",
+        "/csrc/SimJTAG.cc",
+        "/csrc/remote_bitbang.h",
+        "/csrc/remote_bitbang.cc",
+      )
+    }) ++ (sim match { // simulator specific files to include
+      case Some(VerilatorSimulator) => Seq(
+        "/csrc/emulator.cc",
+        "/csrc/verilator.h",
+      )
+      case Some(VCSSimulator) => Seq(
+        "/vsrc/TestDriver.v",
+      )
+      case None => Seq()
+    })
 
   def writeBootrom(): Unit = {
     firrtl.FileUtils.makeDirectory("./bootrom/")

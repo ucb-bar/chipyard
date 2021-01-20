@@ -1,37 +1,50 @@
 package chipyard
 
 import chisel3._
-
+import scala.collection.mutable.{ArrayBuffer}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.config.{Field, Parameters}
-import chipyard.iobinders.{TestHarnessFunction}
-import chipyard.config.ConfigValName._
+
+import chipyard.harness.{ApplyHarnessBinders, HarnessBinders}
+import chipyard.iobinders.HasIOBinders
 
 // -------------------------------
-// BOOM and/or Rocket Test Harness
+// Chipyard Test Harness
 // -------------------------------
 
-case object BuildTop extends Field[Parameters => HasTestHarnessFunctions]((p: Parameters) => Module(new ChipTop()(p)))
+case object BuildTop extends Field[Parameters => LazyModule]((p: Parameters) => new ChipTop()(p))
 
 trait HasTestHarnessFunctions {
-  val harnessFunctions: Seq[TestHarnessFunction]
+  val harnessFunctions = ArrayBuffer.empty[HasHarnessSignalReferences => Seq[Any]]
 }
 
-class TestHarness(implicit val p: Parameters) extends Module {
+trait HasHarnessSignalReferences {
+  def harnessClock: Clock
+  def harnessReset: Reset
+  def dutReset: Reset
+  def success: Bool
+}
+
+class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSignalReferences {
   val io = IO(new Bundle {
     val success = Output(Bool())
   })
 
-  val dut = p(BuildTop)(p)
+  val lazyDut = LazyModule(p(BuildTop)(p)).suggestName("chiptop")
+  val dut = Module(lazyDut.module)
   io.success := false.B
 
-  // dutReset assignment can be overridden via a harnessFunction, but by default it is just reset
-  val dutReset = WireDefault(if (p(GlobalResetSchemeKey).pinIsAsync) reset.asAsyncReset else reset)
+  val harnessClock = clock
+  val harnessReset = WireInit(reset)
+  val success = io.success
 
-  dut.harnessFunctions.foreach(_(this))
+  val dutReset = reset.asAsyncReset
 
-  def success = io.success
-  def harnessReset = this.reset.asBool
-
+  lazyDut match { case d: HasTestHarnessFunctions =>
+    d.harnessFunctions.foreach(_(this))
+  }
+  lazyDut match { case d: HasIOBinders =>
+    ApplyHarnessBinders(this, d.lazySystem, d.portMap)
+  }
 }
 

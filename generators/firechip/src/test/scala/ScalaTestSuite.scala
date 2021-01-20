@@ -42,10 +42,9 @@ abstract class FireSimTestSuite(
   }
 
   def runTest(backend: String, name: String, debug: Boolean, additionalArgs: Seq[String] = Nil) = {
-    behavior of s"${name} running on ${backend} in MIDAS-level simulation"
     compileMlSimulator(backend, debug)
     if (isCmdAvailable(backend)) {
-      it should s"pass" in {
+      it should s"pass in ML simulation on ${backend}" in {
         assert(invokeMlSimulator(backend, name, debug, additionalArgs) == 0)
       }
     }
@@ -59,13 +58,15 @@ abstract class FireSimTestSuite(
         case _: BenchmarkTestSuite | _: BlockdevTestSuite | _: NICTestSuite => ".riscv"
         case _ => ""
       }
-      val results = suite.names.toSeq sliding (N, N) map { t =>
-        val subresults = t map (name =>
-          Future(name -> invokeMlSimulator(backend, s"$name$postfix", debug)))
-        Await result (Future sequence subresults, Duration.Inf)
-      }
-      results.flatten foreach { case (name, exitcode) =>
-        it should s"pass $name" in { assert(exitcode == 0) }
+      it should s"pass all tests in ${suite.makeTargetName}" in {
+        val results = suite.names.toSeq sliding (N, N) map { t =>
+          val subresults = t map (name =>
+            Future(name -> invokeMlSimulator(backend, s"$name$postfix", debug)))
+          Await result (Future sequence subresults, Duration.Inf)
+        }
+        results.flatten foreach { case (name, exitcode) =>
+          assert(exitcode == 0, "Failed $name")
+        }
       }
     } else {
       ignore should s"pass $backend"
@@ -96,7 +97,9 @@ abstract class FireSimTestSuite(
     }
   }
 
-  clean
+  mkdirs
+  behavior of s"Tuple: ${targetTuple}"
+  elaborateAndCompile()
   runTest("verilator", "rv64ui-p-simple", false, Seq(s"""EXTRA_SIM_ARGS=+trace-humanreadable0"""))
   runSuite("verilator")(benchmarks)
 }
@@ -106,11 +109,11 @@ class BoomF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimL
 class RocketNICF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimRocketConfig", "BaseF1Config")
 // Multiclock tests
 class RocketMulticlockF1Tests extends FireSimTestSuite(
-  "FireSimMulticlockPOC",
-  "FireSimQuadRocketMulticlockConfig",
+  "FireSim",
+  "FireSimMulticlockRocketConfig",
   "WithSynthAsserts_BaseF1Config")
 
-class ArianeF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimArianeConfig", "BaseF1Config")
+class CVA6F1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimCVA6Config", "BaseF1Config")
 
 // This test suite only mirrors what is run in CI. CI invokes each test individually, using a testOnly call.
 class CITests extends Suites(

@@ -1,44 +1,42 @@
 package chipyard.config
 
+import scala.util.matching.Regex
 import chisel3._
 import chisel3.util.{log2Up}
 
 import freechips.rocketchip.config.{Field, Parameters, Config}
-import freechips.rocketchip.subsystem.{SystemBusKey, RocketTilesKey, WithRoccExample, WithNMemoryChannels, WithNBigCores, WithRV32, CacheBlockBytes}
-import freechips.rocketchip.diplomacy.{LazyModule, ValName}
-import freechips.rocketchip.devices.tilelink.BootROMParams
-import freechips.rocketchip.devices.debug.{Debug}
-import freechips.rocketchip.tile.{XLen, BuildRoCC, TileKey, LazyRoCC, RocketTileParams, MaxHartIdBits}
+import freechips.rocketchip.subsystem._
+import freechips.rocketchip.diplomacy._
+import freechips.rocketchip.devices.tilelink.{BootROMLocated}
+import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI}
+import freechips.rocketchip.groundtest.{GroundTestSubsystem}
+import freechips.rocketchip.tile._
 import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams}
-import freechips.rocketchip.util.{AsyncResetReg}
+import freechips.rocketchip.tilelink.{HasTLBusParams}
+import freechips.rocketchip.util.{AsyncResetReg, Symmetric}
+import freechips.rocketchip.prci._
 
-import boom.common.{BoomTilesKey}
-import ariane.{ArianeTilesKey}
 import testchipip._
+import tracegen.{TraceGenSystem}
 
 import hwacha.{Hwacha}
+import gemmini.{Gemmini, GemminiConfigs}
+
+import boom.common.{BoomTileAttachParams}
+import cva6.{CVA6TileAttachParams}
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 
-import chipyard.{BuildTop, BuildSystem}
-
-/**
- * TODO: Why do we need this?
- */
-object ConfigValName {
-  implicit val valName = ValName("TestHarness")
-}
-import ConfigValName._
+import chipyard._
 
 // -----------------------
 // Common Config Fragments
 // -----------------------
 
 class WithBootROM extends Config((site, here, up) => {
-  case BootROMParams => BootROMParams(
-    contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img")
+  case BootROMLocated(x) => up(BootROMLocated(x), site).map(_.copy(contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img"))
 })
 
 // DOC include start: gpio config fragment
@@ -48,9 +46,9 @@ class WithGPIO extends Config((site, here, up) => {
 })
 // DOC include end: gpio config fragment
 
-class WithUART extends Config((site, here, up) => {
+class WithUART(baudrate: BigInt = 115200) extends Config((site, here, up) => {
   case PeripheryUARTKey => Seq(
-    UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256))
+    UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256, initBaudRate = baudrate))
 })
 
 class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) => {
@@ -60,26 +58,17 @@ class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) =>
 })
 
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
-  case RocketTilesKey => up(RocketTilesKey) map (tile => tile.copy(
-    core = tile.core.copy(nL2TLBEntries = entries)
-  ))
-  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(
-    core = tile.core.copy(nL2TLBEntries = entries)
-  ))
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nL2TLBEntries = entries)))
+    case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nL2TLBEntries = entries)))
+    case other => other
+  }
 })
 
 class WithTracegenSystem extends Config((site, here, up) => {
-  case BuildSystem => (p: Parameters) => LazyModule(new tracegen.TraceGenSystem()(p))
-})
-
-class WithRenumberHarts(rocketFirst: Boolean = false) extends Config((site, here, up) => {
-  case RocketTilesKey => up(RocketTilesKey, site).zipWithIndex map { case (r, i) =>
-    r.copy(hartId = i + (if(rocketFirst) 0 else up(BoomTilesKey, site).length))
-  }
-  case BoomTilesKey => up(BoomTilesKey, site).zipWithIndex map { case (b, i) =>
-    b.copy(hartId = i + (if(rocketFirst) up(RocketTilesKey, site).length else 0))
-  }
-  case MaxHartIdBits => log2Up(up(BoomTilesKey, site).size + up(RocketTilesKey, site).size)
+  case BuildSystem => (p: Parameters) => new TraceGenSystem()(p)
 })
 
 /**
@@ -105,50 +94,182 @@ class WithMultiRoCC extends Config((site, here, up) => {
  *
  * @param harts harts to specify which will get a Hwacha
  */
-class WithMultiRoCCHwacha(harts: Int*) extends Config((site, here, up) => {
-  case MultiRoCCKey => {
-    require(harts.max <= ((up(RocketTilesKey, site).length + up(BoomTilesKey, site).length) - 1))
-    up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
-      (i -> Seq((p: Parameters) => {
-        LazyModule(new Hwacha()(p)).suggestName("hwacha")
-      }))
+class WithMultiRoCCHwacha(harts: Int*) extends Config(
+  new chipyard.config.WithHwachaTest ++
+  new Config((site, here, up) => {
+    case MultiRoCCKey => {
+      up(MultiRoCCKey, site) ++ harts.distinct.map{ i =>
+        (i -> Seq((p: Parameters) => {
+          val hwacha = LazyModule(new Hwacha()(p))
+          hwacha
+        }))
+      }
     }
+  })
+)
+
+class WithMultiRoCCGemmini(harts: Int*) extends Config((site, here, up) => {
+  case MultiRoCCKey => up(MultiRoCCKey, site) ++ harts.distinct.map { i =>
+    (i -> Seq((p: Parameters) => {
+      implicit val q = p
+      val gemmini = LazyModule(new Gemmini(OpcodeSet.custom3, GemminiConfigs.defaultConfig))
+      gemmini
+    }))
   }
 })
 
-
-/**
- * Config fragment to add a small Rocket core to the system as a "control" core.
- * Used as an example of a PMU core.
- */
-class WithControlCore extends Config((site, here, up) => {
-  case RocketTilesKey => up(RocketTilesKey, site) :+
-    RocketTileParams(
-      core = RocketCoreParams(
-        useVM = false,
-        fpu = None,
-        mulDiv = Some(MulDivParams(mulUnroll = 8))),
-      btb = None,
-      dcache = Some(DCacheParams(
-        rowBits = site(SystemBusKey).beatBits,
-        nSets = 64,
-        nWays = 1,
-        nTLBEntries = 4,
-        nMSHRs = 0,
-        blockBytes = site(CacheBlockBytes))),
-      icache = Some(ICacheParams(
-        rowBits = site(SystemBusKey).beatBits,
-        nSets = 64,
-        nWays = 1,
-        nTLBEntries = 4,
-        blockBytes = site(CacheBlockBytes))),
-      hartId = up(RocketTilesKey, site).size + up(BoomTilesKey, site).size
-    )
-  case MaxHartIdBits => log2Up(up(RocketTilesKey, site).size + up(BoomTilesKey, site).size + 1)
-})
-
 class WithTraceIO extends Config((site, here, up) => {
-  case BoomTilesKey => up(BoomTilesKey) map (tile => tile.copy(trace = true))
-  case ArianeTilesKey => up(ArianeTilesKey) map (tile => tile.copy(trace = true))
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      trace = true))
+    case tp: CVA6TileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      trace = true))
+    case other => other
+  }
   case TracePortKey => Some(TracePortParams())
 })
+
+class WithNPerfCounters(n: Int = 29) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nPerfCounters = n)))
+    case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nPerfCounters = n)))
+    case other => other
+  }
+})
+
+class WithRocketICacheScratchpad extends Config((site, here, up) => {
+  case RocketTilesKey => up(RocketTilesKey, site) map { r =>
+    r.copy(icache = r.icache.map(_.copy(itimAddr = Some(0x300000 + r.hartId * 0x10000))))
+  }
+})
+
+class WithRocketDCacheScratchpad extends Config((site, here, up) => {
+  case RocketTilesKey => up(RocketTilesKey, site) map { r =>
+    r.copy(dcache = r.dcache.map(_.copy(nSets = 32, nWays = 1, scratch = Some(0x200000 + r.hartId * 0x10000))))
+  }
+})
+
+// Replaces the L2 with a broadcast manager for maintaining coherence
+class WithBroadcastManager extends Config((site, here, up) => {
+  case BankedL2Key => up(BankedL2Key, site).copy(coherenceManager = CoherenceManagerWrapper.broadcastManager)
+})
+
+class WithHwachaTest extends Config((site, here, up) => {
+  case TestSuitesKey => (tileParams: Seq[TileParams], suiteHelper: TestSuiteHelper, p: Parameters) => {
+    up(TestSuitesKey).apply(tileParams, suiteHelper, p)
+    import hwacha.HwachaTestSuites._
+    suiteHelper.addSuites(rv64uv.map(_("p")))
+    suiteHelper.addSuites(rv64uv.map(_("vp")))
+    suiteHelper.addSuite(rv64sv("p"))
+    suiteHelper.addSuite(hwachaBmarks)
+    "SRC_EXTENSION = $(base_dir)/hwacha/$(src_path)/*.scala" + "\nDISASM_EXTENSION = --extension=hwacha"
+  }
+})
+
+// The default RocketChip BaseSubsystem drives its diplomatic clock graph
+// with the implicit clocks of Subsystem. Don't do that, instead we extend
+// the diplomacy graph upwards into the ChipTop, where we connect it to
+// our clock drivers
+class WithNoSubsystemDrivenClocks extends Config((site, here, up) => {
+  case SubsystemDriveAsyncClockGroupsKey => None
+})
+
+class WithDMIDTM extends Config((site, here, up) => {
+  case ExportDebug => up(ExportDebug, site).copy(protocols = Set(DMI))
+})
+
+class WithNoDebug extends Config((site, here, up) => {
+  case DebugModuleKey => None
+})
+
+class WithTLSerialLocation(masterWhere: TLBusWrapperLocation, slaveWhere: TLBusWrapperLocation) extends Config((site, here, up) => {
+  case SerialTLAttachKey => up(SerialTLAttachKey, site).copy(masterWhere = masterWhere, slaveWhere = slaveWhere)
+})
+
+class WithTLBackingMemory extends Config((site, here, up) => {
+  case ExtMem => None // disable AXI backing memory
+  case ExtTLMem => up(ExtMem, site) // enable TL backing memory
+})
+
+class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("core", fMHz)
+
+class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {
+  case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
+})
+
+class WithSystemBusFrequencyAsDefault extends Config((site, here, up) => {
+  case DefaultClockFrequencyKey => (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
+})
+
+class BusFrequencyAssignment[T <: HasTLBusParams](re: Regex, key: Field[T]) extends Config((site, here, up) => {
+  case ClockFrequencyAssignersKey => up(ClockFrequencyAssignersKey, site) ++
+    Seq((cName: String) => site(key).dtsFrequency.flatMap { f =>
+      re.findFirstIn(cName).map {_ => (f / (1000 * 1000)).toDouble }
+    })
+})
+
+/**
+  * Provides a diplomatic frequency for all clock sinks with an unspecified
+  * frequency bound to each bus.
+  *
+  * For example, the L2 cache, when bound to the sbus, receives a separate
+  * clock that appears as "subsystem_sbus_<num>".  This fragment ensures that
+  * clock requests the same frequency as the sbus itself.
+  */
+
+class WithInheritBusFrequencyAssignments extends Config(
+  new BusFrequencyAssignment("subsystem_sbus_\\d+".r, SystemBusKey) ++
+  new BusFrequencyAssignment("subsystem_pbus_\\d+".r, PeripheryBusKey) ++
+  new BusFrequencyAssignment("subsystem_cbus_\\d+".r, ControlBusKey) ++
+  new BusFrequencyAssignment("subsystem_fbus_\\d+".r, FrontBusKey) ++
+  new BusFrequencyAssignment("subsystem_mbus_\\d+".r, MemoryBusKey)
+)
+
+/**
+  * Mixins to specify crossing types between the 5 traditional TL buses
+  *
+  * Note: these presuppose the legacy connections between buses and set
+  * parameters in SubsystemCrossingParams; they may not be resuable in custom
+  * topologies (but you can specify the desired crossings in your topology).
+  *
+  * @param xType The clock crossing type
+  *
+  */
+
+class WithSbusToMbusCrossingType(xType: ClockCrossingType) extends Config((site, here, up) => {
+    case SbusToMbusXTypeKey => xType
+})
+class WithSbusToCbusCrossingType(xType: ClockCrossingType) extends Config((site, here, up) => {
+    case SbusToCbusXTypeKey => xType
+})
+class WithCbusToPbusCrossingType(xType: ClockCrossingType) extends Config((site, here, up) => {
+    case CbusToPbusXTypeKey => xType
+})
+class WithFbusToSbusCrossingType(xType: ClockCrossingType) extends Config((site, here, up) => {
+    case FbusToSbusXTypeKey => xType
+})
+
+/**
+  * Mixins to set the dtsFrequency field of BusParams -- these will percolate its way
+  * up the diplomatic graph to the clock sources.
+  */
+class WithPeripheryBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
+  case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+})
+class WithMemoryBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
+  case MemoryBusKey => up(MemoryBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+})
+class WithSystemBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
+  case SystemBusKey => up(SystemBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+})
+class WithFrontBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
+  case FrontBusKey => up(FrontBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+})
+class WithControlBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
+  case ControlBusKey => up(ControlBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+})
+
+class WithRationalMemoryBusCrossing extends WithSbusToMbusCrossingType(RationalCrossing(Symmetric))
+class WithAsynchrousMemoryBusCrossing extends WithSbusToMbusCrossingType(AsynchronousCrossing())

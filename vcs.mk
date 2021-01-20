@@ -1,17 +1,33 @@
 WAVEFORM_FLAG=+vcdplusfile=$(sim_out_name).vpd
 
+# If ntb_random_seed unspecified, vcs uses 1 as constant seed.
+# Set ntb_random_seed_automatic to actually get a random seed
+ifdef RANDOM_SEED
+SEED_FLAG=+ntb_random_seed=$(RANDOM_SEED)
+else
+SEED_FLAG=+ntb_random_seed_automatic
+endif
+
 CLOCK_PERIOD ?= 1.0
 RESET_DELAY ?= 777.7
 
+#----------------------------------------------------------------------------------------
+# gcc configuration/optimization
+#----------------------------------------------------------------------------------------
+include $(base_dir)/sims/common-sim-flags.mk
+
+VCS_CXXFLAGS = $(SIM_CXXFLAGS)
+VCS_LDFLAGS = $(SIM_LDFLAGS)
+
+# vcs requires LDFLAGS to not include library names (i.e. -l needs to be separate)
 VCS_CC_OPTS = \
-	-CC "-I$(RISCV)/include" \
-	-CC "-I$(dramsim_dir)" \
-	-CC "-std=c++11" \
-	-CC "$(EXTRA_SIM_CC_FLAGS)"
+	-CFLAGS "$(VCS_CXXFLAGS)" \
+	-LDFLAGS "$(filter-out -l%,$(VCS_LDFLAGS))" \
+	$(filter -l%,$(VCS_LDFLAGS))
 
 VCS_NONCC_OPTS = \
-	$(dramsim_lib) \
-	$(RISCV)/lib/libfesvr.a \
+	-notice \
+	-line \
 	+lint=all,noVCDE,noONGS,noUI \
 	-error=PCWM-L \
 	-error=noZMMCM \
@@ -19,7 +35,6 @@ VCS_NONCC_OPTS = \
 	-quiet \
 	-q \
 	+rad \
-	+v2k \
 	+vcs+lic+wait \
 	+vc+list \
 	-f $(sim_common_files) \
@@ -27,10 +42,9 @@ VCS_NONCC_OPTS = \
 	+v2k +verilog2001ext+.v95+.vt+.vp +libext+.v \
 	-debug_pp \
 	+incdir+$(build_dir) \
-	$(sim_vsrcs) \
-	+libext+.v
+	$(sim_vsrcs)
 
-VCS_DEFINE_OPTS = \
+PREPROC_DEFINES = \
 	+define+VCS \
 	+define+CLOCK_PERIOD=$(CLOCK_PERIOD) \
 	+define+RESET_DELAY=$(RESET_DELAY) \

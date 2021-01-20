@@ -10,44 +10,31 @@ import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.devices.tilelink.BootROMParams
+import freechips.rocketchip.devices.tilelink.{BootROMLocated, BootROMParams}
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import freechips.rocketchip.diplomacy.LazyModule
-import boom.common.BoomTilesKey
-import testchipip.{BlockDeviceKey, BlockDeviceConfig, SerialKey, TracePortKey, TracePortParams}
+import testchipip.{BlockDeviceKey, BlockDeviceConfig, TracePortKey, TracePortParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
-import tracegen.TraceGenKey
+
 import icenet._
-import ariane.ArianeTilesKey
 import testchipip.WithRingSystemBus
 
 import firesim.bridges._
 import firesim.configs._
-import chipyard.config.ConfigValName._
 
 class WithBootROM extends Config((site, here, up) => {
-  case BootROMParams => {
+  case BootROMLocated(x) => {
     val chipyardBootROM = new File(s"./generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
     val firesimBootROM = new File(s"./target-rtl/chipyard/generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
 
-     val bootROMPath = if (chipyardBootROM.exists()) {
+    val bootROMPath = if (chipyardBootROM.exists()) {
       chipyardBootROM.getAbsolutePath()
     } else {
       firesimBootROM.getAbsolutePath()
     }
-    BootROMParams(contentFileName = bootROMPath)
+    up(BootROMLocated(x), site).map(_.copy(contentFileName = bootROMPath))
   }
-})
-
-class WithPeripheryBusFrequency(freq: BigInt) extends Config((site, here, up) => {
-  case PeripheryBusKey => up(PeripheryBusKey).copy(dtsFrequency = Some(freq))
-})
-
-class WithPerfCounters extends Config((site, here, up) => {
-  case RocketTilesKey => up(RocketTilesKey) map (tile => tile.copy(
-    core = tile.core.copy(nPerfCounters = 29)
-  ))
 })
 
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
@@ -75,10 +62,23 @@ class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
 // Tweaks that are generally applied to all firesim configs
 class WithFireSimConfigTweaks extends Config(
+  // Required: Bake in the default FASED memory model
+  new WithDefaultMemModel ++
+  // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
+  new WithFireSimSimpleClocks ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++
-  // Optional*: Removing this will require target-software changes to properly capture UART output
-  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
+  // Optional*: Removing this will require adjusting the UART baud rate and
+  // potential target-software changes to properly capture UART output
+  new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
+  // Optional: These three configs put the DRAM memory system in it's own clock domian.
+  // Removing the first config will result in the FASED timing model running
+  // at the pbus freq (above, 3.2 GHz), which is outside the range of valid DDR3 speedgrades.
+  // 1 GHz matches the FASED default, using some other frequency will require
+  // runnings the FASED runtime configuration generator to generate faithful DDR3 timing values.
+  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
+  new chipyard.config.WithAsynchrousMemoryBusCrossing ++
+  new testchipip.WithAsynchronousSerialSlaveCrossing ++
   // Required: Existing FAME-1 transform cannot handle black-box clock gates
   new WithoutClockGating ++
   // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
@@ -90,11 +90,13 @@ class WithFireSimConfigTweaks extends Config(
   // Required: Adds IO to attach SerialBridge. The SerialBridges is responsible
   // for signalling simulation termination under simulation success. This fragment can
   // be removed if you supply an auxiliary bridge that signals simulation termination
-  new testchipip.WithTSI ++
+  new testchipip.WithDefaultSerialTL ++
   // Optional: Removing this will require using an initramfs under linux
   new testchipip.WithBlockDevice ++
-  // Required*:
-  new chipyard.config.WithUART
+  // Required*: Scale default baud rate with periphery bus frequency
+  new chipyard.config.WithUART(BigInt(3686400L)) ++
+  // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
+  new chipyard.config.WithNoDebug
 )
 
 /*******************************************************************************
@@ -125,6 +127,21 @@ class FireSimQuadRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.QuadRocketConfig)
 
+// A stripped down configuration that should fit on all supported hosts.
+// Flat to avoid having to reorganize the config class hierarchy to remove certain features
+class FireSimSmallSystemConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithBootROM ++
+  new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
+  new WithoutClockGating ++
+  new WithoutTLMonitors ++
+  new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++
+  new testchipip.WithDefaultSerialTL ++
+  new testchipip.WithBlockDevice ++
+  new chipyard.config.WithUART ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(nWays = 2, capacityKB = 64) ++
+  new chipyard.RocketConfig)
 
 //*****************************************************************
 // Boom config, base off chipyard's LargeBoomConfig
@@ -171,10 +188,30 @@ class SupernodeFireSimRocketConfig extends Config(
   new FireSimRocketConfig)
 
 //**********************************************************************************
-//* Ariane Configurations
+//* CVA6 Configurations
 //*********************************************************************************/
-class FireSimArianeConfig extends Config(
+class FireSimCVA6Config extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new chipyard.ArianeConfig)
+  new chipyard.CVA6Config)
+
+//**********************************************************************************
+//* Multiclock Configurations
+//*********************************************************************************/
+class FireSimMulticlockRocketConfig extends Config(
+  new chipyard.config.WithTileFrequency(6400.0) ++ //lol
+  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new FireSimRocketConfig)
+
+//**********************************************************************************
+// System with 16 LargeBOOMs that can be simulated with Golden Gate optimizations
+// - Requires MTModels and MCRams mixins as prefixes to the platform config
+// - May require larger build instances or JVM memory footprints
+//*********************************************************************************/
+class FireSim16LargeBoomConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new boom.common.WithNLargeBooms(16) ++
+  new chipyard.config.AbstractConfig)

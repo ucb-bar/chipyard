@@ -32,6 +32,12 @@ case $1 in
     chipyard-rocket)
         run_bmark ${mapping[$1]}
         ;;
+    chipyard-dmirocket)
+        run_bmark ${mapping[$1]}
+        ;;
+    chipyard-lbwif)
+        run_bmark ${mapping[$1]}
+        ;;
     chipyard-boom)
         run_bmark ${mapping[$1]}
         ;;
@@ -85,18 +91,21 @@ case $1 in
     tracegen-boom)
         run_tracegen ${mapping[$1]}
         ;;
-    chipyard-ariane)
-        make run-binary-fast -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
+    chipyard-cva6)
+        make run-binary-fast -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/multiply.riscv
+        ;;
+    chipyard-sodor)
+        run_asm ${mapping[$1]}
         ;;
     chipyard-nvdla)
         make -C $LOCAL_CHIPYARD_DIR/tests
         make -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv run-binary
         ;;
     icenet)
-        make run-none-fast -C $LOCAL_SIM_DIR ${mapping[$1]}
+        make run-binary-fast BINARY=none -C $LOCAL_SIM_DIR ${mapping[$1]}
         ;;
     testchipip)
-        make run-none-fast -C $LOCAL_SIM_DIR ${mapping[$1]}
+        make run-binary-fast BINARY=none -C $LOCAL_SIM_DIR ${mapping[$1]}
         ;;
     *)
         echo "No set of tests for $1. Did you spell it right?"

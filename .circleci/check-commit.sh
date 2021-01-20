@@ -48,7 +48,7 @@ search () {
     done
 }
 
-submodules=("ariane" "boom" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "sifive-blocks" "sifive-cache" "testchipip")
+submodules=("cva6" "boom" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "sifive-blocks" "sifive-cache" "testchipip" "riscv-sodor")
 dir="generators"
 if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
 then
@@ -82,7 +82,12 @@ search
 
 submodules=("coremark" "firemarshal" "nvdla-workload" "spec2017")
 dir="software"
-branches=("master")
+if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
+then
+    branches=("master")
+else
+    branches=("master" "dev")
+fi
 search
 
 submodules=("DRAMSim2" "axe" "barstools" "chisel-testers" "dsptools" "firrtl-interpreter" "torture" "treadle")
@@ -115,23 +120,33 @@ dir="vlsi"
 branches=("master")
 search
 
+submodules=("fpga-shells")
+dir="fpga"
+branches=("master")
+search
 
 # turn off verbose printing to make this easier to read
 set +x
 
-# print all result strings
+# print 0's
 for str in "${all_names[@]}";
 do
-    echo "$str"
+    if [ 0 = $(echo "$str" | awk '{print$3}') ]; then
+        echo "$str"
+    fi
 done
 
-# check if there was a non-zero return code
+echo ""
+
+# check if there was a non-zero return code and print 1's
+EXIT=0
 for str in "${all_names[@]}";
 do
     if [ ! 0 = $(echo "$str" | awk '{print$3}') ]; then
-        exit 1
+        echo "$str"
+        EXIT=1
     fi
 done
 
 echo "Done checking all submodules"
-
+exit $EXIT

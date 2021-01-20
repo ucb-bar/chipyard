@@ -4,96 +4,145 @@ package firesim.firesim
 
 import chisel3._
 import chisel3.experimental.annotate
+import chisel3.util.experimental.BoringUtils
 
 import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebugModuleImp}
-import freechips.rocketchip.subsystem.{CanHaveMasterAXI4MemPort, HasExtInterruptsModuleImp, BaseSubsystem}
+import freechips.rocketchip.amba.axi4.{AXI4Bundle}
+import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile.{RocketTile}
-import sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
-import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp}
+import sifive.blocks.devices.uart._
 
-import testchipip.{CanHavePeripherySerialModuleImp, CanHavePeripheryBlockDeviceModuleImp}
-import icenet.CanHavePeripheryIceNICModuleImp
+import testchipip._
+import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 
 import junctions.{NastiKey, NastiParameters}
 import midas.models.{FASEDBridge, AXI4EdgeSummary, CompleteConfig}
-import midas.targetutils.{MemModelAnnotation}
+import midas.targetutils.{MemModelAnnotation, EnableModelMultiThreadingAnnotation}
 import firesim.bridges._
 import firesim.configs.MemModelKey
-import tracegen.HasTraceGenTilesModuleImp
-import ariane.ArianeTile
+import tracegen.{TraceGenSystemModuleImp}
+import cva6.CVA6Tile
 
 import boom.common.{BoomTile}
-
-import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder}
-import chipyard.{HasChipyardTilesModuleImp}
-import testchipip.{CanHaveTraceIOModuleImp}
+import barstools.iocell.chisel._
+import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters, IOCellKey}
+import chipyard.{HasHarnessSignalReferences}
+import chipyard.harness._
 
 object MainMemoryConsts {
   val regionNamePrefix = "MainMemory"
   def globalName = s"${regionNamePrefix}_${NodeIdx()}"
 }
 
-class WithSerialBridge extends OverrideIOBinder({
-  (system: CanHavePeripherySerialModuleImp) =>
-    system.serial.foreach(s => SerialBridge(system.clock, s, MainMemoryConsts.globalName)(system.p)); Nil
+trait Unsupported {
+  require(false, "We do not support this IOCell type")
+}
+
+class FireSimAnalogIOCell extends RawModule with AnalogIOCell with Unsupported {
+  val io = IO(new AnalogIOCellBundle)
+}
+class FireSimDigitalGPIOCell extends RawModule with DigitalGPIOCell with Unsupported {
+  val io = IO(new DigitalGPIOCellBundle)
+}
+class FireSimDigitalInIOCell extends RawModule with DigitalInIOCell {
+  val io = IO(new DigitalInIOCellBundle)
+  io.i := io.pad
+}
+class FireSimDigitalOutIOCell extends RawModule with DigitalOutIOCell {
+  val io = IO(new DigitalOutIOCellBundle)
+  io.pad := io.o
+}
+
+case class FireSimIOCellParams() extends IOCellTypeParams {
+  def analog() = Module(new FireSimAnalogIOCell)
+  def gpio()   = Module(new FireSimDigitalGPIOCell)
+  def input()  = Module(new FireSimDigitalInIOCell)
+  def output() = Module(new FireSimDigitalOutIOCell)
+}
+
+class WithFireSimIOCellModels extends Config((site, here, up) => {
+  case IOCellKey => FireSimIOCellParams()
 })
 
-class WithNICBridge extends OverrideIOBinder({
-  (system: CanHavePeripheryIceNICModuleImp) =>
-    system.net.foreach(n => NICBridge(system.clock, n)(system.p)); Nil
-})
-
-class WithUARTBridge extends OverrideIOBinder({
-  (system: HasPeripheryUARTModuleImp) =>
-    system.uart.foreach(u => UARTBridge(system.clock, u)(system.p)); Nil
-})
-
-class WithBlockDeviceBridge extends OverrideIOBinder({
-  (system: CanHavePeripheryBlockDeviceModuleImp) =>
-    system.bdev.foreach(b => BlockDevBridge(system.clock, b, system.reset.toBool)(system.p)); Nil
-})
-
-
-class WithFASEDBridge extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => {
-    implicit val p = system.p
-    (system.mem_axi4 zip system.memAXI4Node.in).foreach({ case (axi4, (_, edge)) =>
-      val nastiKey = NastiParameters(axi4.r.bits.data.getWidth,
-                                     axi4.ar.bits.addr.getWidth,
-                                     axi4.ar.bits.id.getWidth)
-      FASEDBridge(system.module.clock, axi4, system.module.reset.toBool,
-        CompleteConfig(p(firesim.configs.MemModelKey),
-                       nastiKey,
-                       Some(AXI4EdgeSummary(edge)),
-                       Some(MainMemoryConsts.globalName)))
-    })
+class WithSerialBridge extends OverrideHarnessBinder({
+  (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[ClockedIO[SerialIO]]) => {
+    ports.map { port =>
+      implicit val p = GetSystemParameters(system)
+      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, port, th.harnessReset)
+      SerialBridge(port.clock, ram.module.io.tsi_ser, p(ExtMem).map(_ => MainMemoryConsts.globalName))
+    }
     Nil
   }
 })
 
-class WithTracerVBridge extends ComposeIOBinder({
-  (system: CanHaveTraceIOModuleImp) =>
-    system.traceIO.foreach(_.traces.map(tileTrace => TracerVBridge(tileTrace)(system.p))); Nil
-})
-
-
-
-class WithDromajoBridge extends ComposeIOBinder({
-  (system: CanHaveTraceIOModuleImp) => {
-    system.traceIO.foreach(_.traces.map(tileTrace => DromajoBridge(tileTrace)(system.p))); Nil
+class WithNICBridge extends OverrideHarnessBinder({
+  (system: CanHavePeripheryIceNIC, th: FireSim, ports: Seq[ClockedIO[NICIOvonly]]) => {
+    val p: Parameters = GetSystemParameters(system)
+    ports.map { n => NICBridge(n.clock, n.bits)(p) }
+    Nil
   }
 })
 
+class WithUARTBridge extends OverrideHarnessBinder({
+  (system: HasPeripheryUARTModuleImp, th: FireSim, ports: Seq[UARTPortIO]) =>
+    val uartSyncClock = Wire(Clock())
+    uartSyncClock := false.B.asClock
+    val pbusClockNode = system.outer.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(PBUS).fixedClockNode
+    val pbusClock = pbusClockNode.in.head._1.clock
+    BoringUtils.bore(pbusClock, Seq(uartSyncClock))
+    ports.map { p => UARTBridge(uartSyncClock, p)(system.p) }; Nil
+})
 
-class WithTraceGenBridge extends OverrideIOBinder({
-  (system: HasTraceGenTilesModuleImp) =>
-    GroundTestBridge(system.clock, system.success)(system.p); Nil
+class WithBlockDeviceBridge extends OverrideHarnessBinder({
+  (system: CanHavePeripheryBlockDevice, th: FireSim, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    ports.map { b => BlockDevBridge(b.clock, b.bits, th.harnessReset.toBool) }
+    Nil
+  }
+})
+
+class WithFASEDBridge extends OverrideHarnessBinder({
+  (system: CanHaveMasterAXI4MemPort, th: FireSim, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    (ports zip system.memAXI4Node.edges.in).map { case (axi4, edge) =>
+      val nastiKey = NastiParameters(axi4.bits.r.bits.data.getWidth,
+                                     axi4.bits.ar.bits.addr.getWidth,
+                                     axi4.bits.ar.bits.id.getWidth)
+      system match {
+        case s: BaseSubsystem => FASEDBridge(axi4.clock, axi4.bits, axi4.reset.asBool,
+          CompleteConfig(p(firesim.configs.MemModelKey),
+                         nastiKey,
+                         Some(AXI4EdgeSummary(edge)),
+                         Some(MainMemoryConsts.globalName)))
+        case _ => throw new Exception("Attempting to attach FASED Bridge to misconfigured design")
+      }
+    }
+    Nil
+  }
+})
+
+class WithTracerVBridge extends ComposeHarnessBinder({
+  (system: CanHaveTraceIOModuleImp, th: FireSim, ports: Seq[TraceOutputTop]) => {
+    ports.map { p => p.traces.map(tileTrace => TracerVBridge(tileTrace)(system.p)) }
+    Nil
+  }
+})
+
+class WithDromajoBridge extends ComposeHarnessBinder({
+  (system: CanHaveTraceIOModuleImp, th: FireSim, ports: Seq[TraceOutputTop]) =>
+    ports.map { p => p.traces.map(tileTrace => DromajoBridge(tileTrace)(system.p)) }; Nil
+})
+
+
+class WithTraceGenBridge extends OverrideHarnessBinder({
+  (system: TraceGenSystemModuleImp, th: FireSim, ports: Seq[Bool]) =>
+    ports.map { p => GroundTestBridge(th.harnessClock, p)(system.p) }; Nil
 })
 
 class WithFireSimMultiCycleRegfile extends ComposeIOBinder({
-  (system: HasChipyardTilesModuleImp) => {
+  (system: HasTilesModuleImp) => {
     system.outer.tiles.map {
       case r: RocketTile => {
         annotate(MemModelAnnotation(r.module.core.rocketImpl.rf.rf))
@@ -103,52 +152,38 @@ class WithFireSimMultiCycleRegfile extends ComposeIOBinder({
         val core = b.module.core
         core.iregfile match {
           case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
-          case _ => Nil
         }
         if (core.fp_pipeline != null) core.fp_pipeline.fregfile match {
           case frf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(frf.regfile))
-          case _ => Nil
         }
       }
-      case a: ArianeTile => Nil
+      case _ =>
     }
-    Nil
+    (Nil, Nil)
   }
 })
 
-class WithTiedOffSystemGPIO extends OverrideIOBinder({
-  (system: HasPeripheryGPIOModuleImp) =>
-    system.gpio.foreach(_.pins.foreach(_.i.ival := false.B)); Nil
-})
-
-class WithTiedOffSystemDebug extends OverrideIOBinder({
-  (system: HasPeripheryDebugModuleImp) => {
-    Debug.tieoffDebug(system.debug, system.resetctrl, Some(system.psd))(system.p)
-    // tieoffDebug doesn't actually tie everything off :/
-    system.debug.foreach { d =>
-      d.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare })
-      d.dmactiveAck := DontCare
+class WithFireSimFAME5 extends ComposeIOBinder({
+  (system: HasTilesModuleImp) => {
+    system.outer.tiles.map {
+      case b: BoomTile =>
+        annotate(EnableModelMultiThreadingAnnotation(b.module))
+      case r: RocketTile =>
+        annotate(EnableModelMultiThreadingAnnotation(r.module))
     }
-    Nil
+    (Nil, Nil)
   }
 })
-
-class WithTiedOffSystemInterrupts extends OverrideIOBinder({
-  (system: HasExtInterruptsModuleImp) =>
-    system.interrupts := 0.U; Nil
-})
-
 
 // Shorthand to register all of the provided bridges above
 class WithDefaultFireSimBridges extends Config(
-  new WithTiedOffSystemGPIO ++
-  new WithTiedOffSystemDebug ++
-  new WithTiedOffSystemInterrupts ++
   new WithSerialBridge ++
   new WithNICBridge ++
   new WithUARTBridge ++
   new WithBlockDeviceBridge ++
   new WithFASEDBridge ++
   new WithFireSimMultiCycleRegfile ++
-  new WithTracerVBridge
+  new WithFireSimFAME5 ++
+  new WithTracerVBridge ++
+  new WithFireSimIOCellModels
 )

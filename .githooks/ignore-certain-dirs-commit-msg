@@ -8,9 +8,9 @@ fi
 changes=( `git diff --name-only --cached` )
 
 # Load the patterns we want to skip into an array
-mapfile -t blacklist < .ciignore
+mapfile -t blocklist < .ciignore
 
-for i in "${blacklist[@]}"
+for i in "${blocklist[@]}"
 do
 	# Remove the current pattern from the list of changes
 	changes=( ${changes[@]/$i/} )
