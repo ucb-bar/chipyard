@@ -27,19 +27,22 @@ A more detailed account of everything included is included in the dev to master 
 * Helper `make` targets to launch SBT console (`sbt`) and shutdown/start thin server (<start/shutdown>-sbt-server) (#719)
 * Allow users to override `CC` and `CXX` for `build-toolchains.sh` (#739)
 * Support VCU118/Arty local FPGA prototypes through `fpga-shells` (#747)
-* To highlight the resource-optimizing platform configurations added to FireSim in firesim/firesim#636, a 16-core LargeBOOM configuration has been added to FireChip (#756)
+* A 16-core LargeBOOM configuration has been added to FireChip to highlight the resource-optimizing platform configurations added to FireSim in firesim/firesim#636 (#756)
 
 ### Changed
+* Bump Chisel to 3.4.1.x (#742, #719, #751)
+* Bump RocketChip to a7b016e (#742, #719)
+* Bump FireSim to 1.11
+* Bump Gemmini to v0.5
+* Bump to SBT 1.4.4 (#719)
 * Split IOBinders into IOBinders and HarnessBinders | punch out clocks to harness for simwidgets and bridges (#670, #674)
 * Have FireSim build recipes use Chipyard configs rather than FireChip configs (#695)
 * FireMarshal boot default to OpenSBI rather than BBL (#633)
 * Override default baud rate for FireChip (#625)
 * DTM only supports HTIF in DMI mode (#672)
 * Unify HTIF implementation between Chipyard and Firesim (#683)
-* Update to Chisel 3.4.1.x (and other bumps) (#742, #719, #751)
 * Renamed Ariane to CVA6 (#710)
 * `build.sbt` refactoring/fixes for RC/Chisel/Firrtl bump (#719)
-* Bump to SBT 1.4.4 (#719)
 * Use `; x; y; z;` syntax to run multiple SBT commands (#719)
 * CI Improvements: Cleanup `check-commit` printout. Don't transfer `.git` folders. (#750)
 
@@ -58,7 +61,6 @@ A more detailed account of everything included is included in the dev to master 
 ### Removed
 * Support for synchronous ChipTop reset (#703)
 * Split `JAVA_ARGS` into `JAVA_OPTS` and `SBT_OPTS` (#719)
-* Removed bloop support (#719)
 
 
 ## [1.3.0] - 2020-05-31
