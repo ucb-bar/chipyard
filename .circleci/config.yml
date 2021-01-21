@@ -12,7 +12,7 @@ parameters:
 executors:
     main-env:
         docker:
-            - image: ucbbar/chipyard-image:1.0.1
+            - image: schwarzem/chipyard-test:1.0.0
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 
@@ -505,5 +505,3 @@ workflows:
                     - install-riscv-toolchain
                     - install-verilator
                     - build-extra-tests
-
-
