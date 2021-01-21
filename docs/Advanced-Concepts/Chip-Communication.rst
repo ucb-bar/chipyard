@@ -54,7 +54,7 @@ sends the TSI command recieved by the simulation stub into the DUT which then co
 command into a TileLink request. This conversion is done by the ``SerialAdapter`` module
 (located in the ``generators/testchipip`` project). In simulation, FESVR
 resets the DUT, writes into memory the test program, and indicates to the DUT to start the program
-through an interrupt (see :ref:`Chipyard Boot Process`). Using TSI is currently the fastest
+through an interrupt (see :ref:`customization/Boot-Process:Chipyard Boot Process`). Using TSI is currently the fastest
 mechanism to communicate with the DUT in simulation.
 
 In the case of a chip tapeout bringup, TSI commands can be sent over a custom communication
@@ -96,7 +96,7 @@ Starting the TSI or DMI Simulation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 All default Chipyard configurations use TSI to communicate between the simulation and the simulated SoC/DUT. Hence, when running a
-software RTL simulation, as is indicated in the :ref:`Software RTL Simulation` section, you are in-fact using TSI to communicate with the DUT. As a
+software RTL simulation, as is indicated in the :ref:`simulation/Software-RTL-Simulation:Software RTL Simulation` section, you are in-fact using TSI to communicate with the DUT. As a
 reminder, to run a software RTL simulation, run:
 
 .. code-block:: bash

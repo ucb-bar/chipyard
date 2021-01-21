@@ -146,39 +146,30 @@ sim_common_files       ?= $(build_dir)/sim_files.common.f
 # java arguments used in sbt
 #########################################################################################
 JAVA_HEAP_SIZE ?= 8G
-JAVA_ARGS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M
+JAVA_OPTS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M
 
 #########################################################################################
 # default sbt launch command
 #########################################################################################
-SCALA_VERSION=2.12.10
-SCALA_VERSION_MAJOR=$(basename $(SCALA_VERSION))
-SBT ?= java $(JAVA_ARGS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
-
-BLOOP ?= bloop
-BLOOP_CONFIG_DIR ?= $(base_dir)/.bloop
-# This mirrors the bloop default. Set to a system-unique port in a multi-user environment
-BLOOP_NAILGUN_PORT ?= 8212
+# by default build chisel3/firrtl and other subprojects from source
+override SBT_OPTS += -Dsbt.sourcemode=true -Dsbt.workspace=$(base_dir)/tools
 
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
-ifdef ENABLE_BLOOP
-override SCALA_BUILDTOOL_DEPS += $(BLOOP_CONFIG_DIR)/TIMESTAMP
-# Two notes about the bloop invocation:
-# 1) the sed removes a leading {file:<path>} that sometimes needs to be
-#    provided to SBT when a project but not for bloop.
-# 2) Generally, one could could pass '--' to indicate all remaining arguments are
-#    destined for the scala Main, however a bug in Bloop's argument parsing causes the
-#    --nailgun-port argument to be lost in this case. Workaround this by prefixing
-#    every main-destined argument with "--args"
-define run_scala_main
-	cd $(base_dir) && bloop --nailgun-port $(BLOOP_NAILGUN_PORT) run $(shell echo $(1) | sed 's/{.*}//') --main $(2)  $(addprefix --args ,$3)
-endef
-else
-define run_scala_main
-	cd $(base_dir) && $(SBT) "project $(1)" "runMain $(2) $(3)"
-endef
+SBT_THIN_CLIENT_TIMESTAMP = $(base_dir)/project/target/active.json
+
+ifdef ENABLE_SBT_THIN_CLIENT
+override SCALA_BUILDTOOL_DEPS += $(SBT_THIN_CLIENT_TIMESTAMP)
+# enabling speeds up sbt loading
+SBT_CLIENT_FLAG = --client
 endif
+
+SBT ?= java $(JAVA_OPTS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS) $(SBT_CLIENT_FLAG)
+SBT_NON_THIN ?= $(subst $(SBT_CLIENT_FLAG),,$(SBT))
+
+define run_scala_main
+	cd $(base_dir) && $(SBT) ";project $(1); runMain $(2) $(3)"
+endef
 
 FIRRTL_LOGLEVEL ?= error
 

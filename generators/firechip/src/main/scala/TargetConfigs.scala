@@ -204,3 +204,14 @@ class FireSimMulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
   new FireSimRocketConfig)
 
+//**********************************************************************************
+// System with 16 LargeBOOMs that can be simulated with Golden Gate optimizations
+// - Requires MTModels and MCRams mixins as prefixes to the platform config
+// - May require larger build instances or JVM memory footprints
+//*********************************************************************************/
+class FireSim16LargeBoomConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new boom.common.WithNLargeBooms(16) ++
+  new chipyard.config.AbstractConfig)

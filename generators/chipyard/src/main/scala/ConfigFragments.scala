@@ -141,7 +141,7 @@ class WithNPerfCounters(n: Int = 29) extends Config((site, here, up) => {
 
 class WithRocketICacheScratchpad extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey, site) map { r =>
-    r.copy(icache = r.icache.map(_.copy(itimAddr = Some(0x100000 + r.hartId * 0x10000))))
+    r.copy(icache = r.icache.map(_.copy(itimAddr = Some(0x300000 + r.hartId * 0x10000))))
   }
 })
 
@@ -149,6 +149,11 @@ class WithRocketDCacheScratchpad extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey, site) map { r =>
     r.copy(dcache = r.dcache.map(_.copy(nSets = 32, nWays = 1, scratch = Some(0x200000 + r.hartId * 0x10000))))
   }
+})
+
+// Replaces the L2 with a broadcast manager for maintaining coherence
+class WithBroadcastManager extends Config((site, here, up) => {
+  case BankedL2Key => up(BankedL2Key, site).copy(coherenceManager = CoherenceManagerWrapper.broadcastManager)
 })
 
 class WithHwachaTest extends Config((site, here, up) => {
@@ -177,6 +182,15 @@ class WithDMIDTM extends Config((site, here, up) => {
 
 class WithNoDebug extends Config((site, here, up) => {
   case DebugModuleKey => None
+})
+
+class WithTLSerialLocation(masterWhere: TLBusWrapperLocation, slaveWhere: TLBusWrapperLocation) extends Config((site, here, up) => {
+  case SerialTLAttachKey => up(SerialTLAttachKey, site).copy(masterWhere = masterWhere, slaveWhere = slaveWhere)
+})
+
+class WithTLBackingMemory extends Config((site, here, up) => {
+  case ExtMem => None // disable AXI backing memory
+  case ExtTLMem => up(ExtMem, site) // enable TL backing memory
 })
 
 class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("core", fMHz)
