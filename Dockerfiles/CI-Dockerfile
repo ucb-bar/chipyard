@@ -27,6 +27,11 @@ RUN groupadd --gid 3434 riscvuser \
 WORKDIR /home/riscvuser
 USER riscvuser
 
+# Update PATH for RISCV toolchain (note: hardcoded for CircleCI)
+ENV RISCV="/home/riscvuser/riscv-tools-install"
+ENV LD_LIBRARY_PATH="$RISCV/lib"
+ENV PATH="$RISCV/bin:$PATH"
+
 # Install Chipyard
 RUN git clone https://github.com/ucb-bar/chipyard.git && \
         cd chipyard && \
