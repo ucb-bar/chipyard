@@ -20,43 +20,41 @@ fi
 DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 CHIPYARD_DIR="$(dirname "$DIR")"
 
-# Ignore toolchain submodules
 cd "$CHIPYARD_DIR"
-for name in toolchains/*-tools/*/ ; do
-    git config submodule."${name%/}".update none
-done
-git config submodule.toolchains/libgloss.update none
-git config submodule.toolchains/qemu.update none
 
-# Don't automatically initialize generators with big submodules (e.g. linux source)
-git config submodule.generators/sha3.update none
-git config submodule.generators/gemmini.update none
+(
+    # Blocklist of submodules to initially skip:
+    # - Toolchain submodules
+    # - Generators with huge submodules (e.g., linux sources)
+    # - FireSim until explicitly requested
+    # - Hammer tool plugins
+    git_submodule_exclude() {
+        # Call the given subcommand (shell function) on each submodule
+        # path to temporarily exclude during the recursive update
+        for name in \
+            toolchains/*-tools/*/ \
+            toolchains/libgloss \
+            toolchains/qemu \
+            generators/sha3 \
+            generators/gemmini \
+            sims/firesim \
+            vlsi/hammer-cadence-plugins \
+            vlsi/hammer-synopsys-plugins \
+            vlsi/hammer-mentor-plugins \
+            software/firemarshal \
+            fpga/fpga-shells
+        do
+            "$1" "${name%/}"
+        done
+    }
 
-# Disable updates to the FireSim submodule until explicitly requested
-git config submodule.sims/firesim.update none
-# Disable updates to the hammer tool plugins repos
-git config submodule.vlsi/hammer-cadence-plugins.update none
-git config submodule.vlsi/hammer-synopsys-plugins.update none
-git config submodule.vlsi/hammer-mentor-plugins.update none
-git config submodule.software/firemarshal.update none
-# Disable update to fpga-shells
-git config submodule.fpga/fpga-shells.update none
-git submodule update --init --recursive #--jobs 8
+    _skip() { git config --local "submodule.${1}.update" none ; }
+    _unskip() { git config --local --unset-all "submodule.${1}.update" || : ; }
 
-# Un-ignore toolchain submodules
-for name in toolchains/*-tools/*/ ; do
-    git config --unset submodule."${name%/}".update
-done
-git config --unset submodule.toolchains/libgloss.update
-git config --unset submodule.toolchains/qemu.update
-
-git config --unset submodule.vlsi/hammer-cadence-plugins.update
-git config --unset submodule.vlsi/hammer-synopsys-plugins.update
-git config --unset submodule.vlsi/hammer-mentor-plugins.update
-
-git config --unset submodule.generators/sha3.update
-git config --unset submodule.generators/gemmini.update
-git config --unset submodule.software/firemarshal.update
+    trap 'git_submodule_exclude _unskip' EXIT INT TERM
+    git_submodule_exclude _skip
+    git submodule update --init --recursive #--jobs 8
+)
 
 # Non-recursive clone to exclude riscv-linux
 git submodule update --init generators/sha3
@@ -65,10 +63,9 @@ git submodule update --init generators/sha3
 git submodule update --init generators/gemmini
 git -C generators/gemmini/ submodule update --init --recursive software/gemmini-rocc-tests
 
-git config --unset submodule.sims/firesim.update
 # Minimal non-recursive clone to initialize sbt dependencies
 git submodule update --init sims/firesim
-git config submodule.sims/firesim.update none
+git config --local submodule.sims/firesim.update none
 
 # Only shallow clone needed for basic SW tests
 git submodule update --init software/firemarshal
