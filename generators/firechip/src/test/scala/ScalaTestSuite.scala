@@ -33,7 +33,8 @@ abstract class FireSimTestSuite(
                            s"PLATFORM_CONFIG=${platformConfigs}")
 
   override lazy val genDir  = new File(firesimDir, s"generated-src/${chipyardLongName}")
-
+  // Used in FireSim CI only
+  override def ciPrereqTarget: Seq[String] = Seq("verilator")
 
   def invokeMlSimulator(backend: String, name: String, debug: Boolean, additionalArgs: Seq[String] = Nil) = {
     make((Seq(s"${outDir.getAbsolutePath}/${name}.%s".format(if (debug) "vpd" else "out"),
