@@ -11,7 +11,7 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.{SimAXIMem}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
 import freechips.rocketchip.util._
-import freechips.rocketchip.prci.{ClockSinkNode, ClockSinkParameters}
+import freechips.rocketchip.prci.{ClockSinkNode, ClockSinkParameters, ClockParameters, ClockGroup}
 import freechips.rocketchip.groundtest.{GroundTestSubsystemModuleImp, GroundTestSubsystem}
 
 import sifive.blocks.devices.gpio._
@@ -260,6 +260,34 @@ class WithSerialTLIOCells extends OverrideIOBinder({
   }).getOrElse((Nil, Nil))
 })
 
+class WithSerialTLAndOffchipClockPunchthrough extends OverrideLazyIOBinder({
+  (system: CanHavePeripheryTLSerial) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+
+    val serial_clked_tl = system.serial_tl
+    val sys = system.asInstanceOf[BaseSubsystem]
+
+    val externalDRAMClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(take = Some(ClockParameters(freqMHz = 100)))))
+    (externalDRAMClockSinkNode
+      := ClockGroup()(p, ValName("OffchipClocking"))
+      := sys.asyncClockGroupsNode)
+    def clockBundle = externalDRAMClockSinkNode.in.head._1
+
+    InModuleBody {
+      // 1st clock+reset is for offchip, 2nd clock (attached to serial io is the serial clock)
+      val port: Option[ClockedAndResetIO[ClockedIO[SerialIO]]] = serial_clked_tl.map({ s_io =>
+        val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[ClockedIO[SerialIO]](s_io))).suggestName(s"serial_tl_offchip_clk")
+        p.bits <> s_io
+        p.clock := clockBundle.clock
+        p.reset := clockBundle.reset
+        p
+      })
+
+      // return the ports and no IO cells
+      (Seq(port.get), Nil)
+    }
+  }
+})
 
 class WithAXI4MemPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveMasterAXI4MemPort) => {

@@ -137,6 +137,29 @@ class WithSimAXIMem extends OverrideHarnessBinder({
   }
 })
 
+class WithOffchipNetwork extends OverrideHarnessBinder({
+  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[ClockedIO[SerialIO]]]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+
+    ports.map({ port =>
+      val offchipNetwork = SerialAdapter.connectOffChipNetwork(system.serdesser.get, port, th.harnessReset)
+      val success = SerialAdapter.connectSimSerial(offchipNetwork.module.io.tsi_ser, port.bits.clock, th.harnessReset.asBool)
+      when (success) { th.success := true.B }
+
+      // connect SimAxiMem
+      (offchipNetwork.mem_axi4 zip offchipNetwork.memAXI4Node.edges.in).map { case (off_port, edge) =>
+        val memSize = p(SerialTLKey).get.memParams.size
+        val lineSize = p(CacheBlockBytes)
+        val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle)).suggestName("simdram")
+        mem.io.axi <> off_port
+        // use the clk from the ClockAndResetIO
+        mem.io.clock := port.clock
+        mem.io.reset := port.reset
+      }
+    })
+  }
+})
+
 class WithBlackBoxSimMem extends OverrideHarnessBinder({
   (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)

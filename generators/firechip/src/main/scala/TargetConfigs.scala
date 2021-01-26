@@ -215,3 +215,39 @@ class FireSim16LargeBoomConfig extends Config(
   new WithFireSimConfigTweaks ++
   new boom.common.WithNLargeBooms(16) ++
   new chipyard.config.AbstractConfig)
+
+class FireSimNewBeagleConfig extends Config(
+  // normal bridges + new offchip bridge
+  new WithNICBridge ++
+  new WithUARTBridge ++
+  new WithBlockDeviceBridge ++
+  new WithOffchipNetworkSerialAXIBridge ++
+  new WithFireSimMultiCycleRegfile ++
+  new WithFireSimFAME5 ++
+  new WithTracerVBridge ++
+  new WithFireSimIOCellModels ++
+
+  // new tweaks
+  // Required: Bake in the default FASED memory model
+  new WithDefaultMemModel ++
+  // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
+  new WithFireSimSimpleClocks ++
+  // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
+  new WithBootROM ++
+  // Required: Existing FAME-1 transform cannot handle black-box clock gates
+  new WithoutClockGating ++
+  // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
+  new WithoutTLMonitors ++
+  // Optional: Adds IO to attach tracerV bridges
+  new chipyard.config.WithTraceIO ++
+  // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 32 GiB on F1)
+  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
+  // Optional: Removing this will require using an initramfs under linux
+  new testchipip.WithBlockDevice ++
+  // Required*: Scale default baud rate with periphery bus frequency
+  new chipyard.config.WithUART(BigInt(19200L)) ++
+  // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
+  new chipyard.config.WithNoDebug
+)
+  new chipyard.NewBeagleConfig
+)

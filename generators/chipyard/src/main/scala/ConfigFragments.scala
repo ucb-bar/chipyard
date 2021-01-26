@@ -193,7 +193,23 @@ class WithTLBackingMemory extends Config((site, here, up) => {
   case ExtTLMem => up(ExtMem, site) // enable TL backing memory
 })
 
-class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("core", fMHz)
+class WithOffchipBackingMemory extends Config((site, here, up) => {
+  case ExtMem => None
+  case SerialTLKey => Some(SerialTLParams(
+    memParams = {
+      val memPortParams = up(ExtMem, site).get
+
+      require(memPortParams.nMemoryChannels == 1)
+
+      memPortParams.master
+    },
+    width = 4,
+    isMemoryDevice = true
+  ))
+})
+
+class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("tile", fMHz)
+class WithSpecificTileFrequency(hartId: Int, fMHz: Double) extends chipyard.ClockNameContainsAssignment(s"tile_$hartId", fMHz)
 
 class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {
   case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
