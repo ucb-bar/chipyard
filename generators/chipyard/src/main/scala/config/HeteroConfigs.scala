@@ -267,6 +267,30 @@ class WithMiniRocketCore(n: Int, overrideIdOffset: Option[Int] = None) extends C
   }
 })
 
+class NewBeagleNoAccelConfig extends Config(
+  // setup clocks (BH - 500/3, RS/Uncore - 500, FBUS - 50)
+  new chipyard.config.WithSpecificTileFrequency(0, 500 / 3) ++
+  new chipyard.config.WithSpecificTileFrequency(1, 500) ++
+  //new chipyard.config.WithTileFrequency(500 / 3) ++
+  new chipyard.config.WithFrontBusFrequency(500 / 10) ++
+  new chipyard.config.WithPeripheryBusFrequencyAsDefault ++
+  new chipyard.config.WithPeripheryBusFrequency(500) ++
+
+  // crossings
+  new boom.common.WithRationalBoomTiles(SlowToFast) ++ // expect BH to be SLOWER
+  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++ // expect RS to be FASTER
+  new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
+  new WithFbusToSbusCrossingType(AsynchronousCrossing()) ++
+
+  // tiles
+  new WithMiniRocketCore(1, Some(1)) ++
+  new WithBeagleBOOMs(1, Some(0)) ++
+
+  // l2
+  new freechips.rocketchip.subsystem.WithInclusiveCache(nBanks = 4, capacityKB = 1024) ++
+
+  new chipyard.config.AbstractOffChipConfig)
+
 class NewBeagleConfig extends Config(
   // setup clocks (BH - 500/3, RS/Uncore - 500, FBUS - 50)
   new chipyard.config.WithSpecificTileFrequency(0, 500 / 3) ++
