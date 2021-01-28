@@ -1,4 +1,4 @@
-### Note: This DockerFile is adapted from https://github.com/ucb-bar/chipyard/blob/master/.circleci/images/Dockerfile which was adapted from: https://github.com/CircleCI-Public/example-images/openjdk
+### Note: This DockerFile is adapted from: https://github.com/CircleCI-Public/example-images/openjdk
 # This is a chipyard setup for CI, no toolchains are initialized
 
 FROM ubuntu:18.04
@@ -32,7 +32,7 @@ ENV RISCV="/home/riscvuser/riscv-tools-install"
 ENV LD_LIBRARY_PATH="$RISCV/lib"
 ENV PATH="$RISCV/bin:$PATH"
 
-# Install Chipyard
+# Install Chipyard and run ubuntu-req.sh to install necessary dependencies
 RUN git clone https://github.com/ucb-bar/chipyard.git && \
         cd chipyard && \
         git checkout $CHIPYARD_HASH && \
