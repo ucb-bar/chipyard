@@ -57,7 +57,7 @@ RUN cd chipyard && \
         ./scripts/build-toolchains.sh riscv-tools 1>/dev/null
 
 # Install esp-tools
- RUN cd chipyard && \
+RUN cd chipyard && \
         export MAKEFLAGS=-"j $(nproc)" && \
         ./scripts/build-toolchains.sh esp-tools 1>/dev/null
 
