@@ -17,8 +17,8 @@ import chipyard.clocking._
 
 /**
  * A simple reset implementation that punches out reset ports
- * for standard Module classes. Three basic reset schemes
- * are provided. See [[GlobalResetScheme]].
+ * for standard Module classes. The ChipTop reset pin is Async.
+ * Synchronization is performed in the ClockGroupResetSynchronizer
  */
 object GenerateReset {
   def apply(chiptop: ChipTop, clock: Clock): Reset = {
