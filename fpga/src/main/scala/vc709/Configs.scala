@@ -18,10 +18,11 @@ import sifive.fpgashells.shell.xilinx.{VC709ShellPMOD, VC709DDRSize}
 import testchipip.{SerialTLKey}
 
 import chipyard.{BuildSystem, ExtTLMem}
-import chipyard.fpga.vcu118.{WithUARTIOPassthrough, WithSPIIOPassthrough, WithTLIOPassthrough}
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
+  // case PeripherySPIKey => List(SPIParams(rAddress = BigInt(0x64001000L)))
+  // case VC709ShellPMOD => "SDIO"
 })
 
 class WithSystemModifications extends Config((site, here, up) => {

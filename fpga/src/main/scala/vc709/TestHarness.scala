@@ -39,7 +39,7 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
   // val edge      = Overlay(PCIeOverlayKey, new PCIeVC709EdgeShellPlacer(this, PCIeShellInput()))
   
   val uart      = Seq.tabulate(1)(i => Overlay(UARTOverlayKey, new UARTVC709ShellPlacer(this, UARTShellInput(index = 0))))
-  val jtag      = Overlay(JTAGDebugOverlayKey, new JTAGDebugVC709ShellPlacer(this, JTAGDebugShellInput()))
+  // val jtag      = Overlay(JTAGDebugOverlayKey, new JTAGDebugVC709ShellPlacer(this, JTAGDebugShellInput()))
   val pcie      = Overlay(PCIeOverlayKey, new PCIeVC709ShellPlacer(this, PCIeShellInput()))
   val ddr1      = Overlay(DDROverlayKey, new DualDDR3VC709ShellPlacer(this, DDRShellInput()))
 
@@ -105,10 +105,10 @@ class VC709FPGATestHarnessImp(_outer: VC709FPGATestHarness) extends LazyRawModul
   val powerOnReset: Bool = PowerOnResetFPGAOnly(sysclk)
   _outer.sdc.addAsyncPath(Seq(powerOnReset))
 
-  // val ereset: Bool = _outer.chiplink.get() match {
-    // case Some(x: ChipLinkVC709PlacedOverlay) => !x.ereset_n
-    // case _ => false.B
-  // }
+  val ereset: Bool = _outer.chiplink.get() match {
+    case Some(x: ChipLinkVC709PlacedOverlay) => !x.ereset_n
+    case _ => false.B
+  }
 
   _outer.pllReset := (resetIBUF.io.O || powerOnReset || false.B)
 
