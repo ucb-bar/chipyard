@@ -19,6 +19,8 @@ import testchipip.{SerialTLKey}
 
 import chipyard.{BuildSystem, ExtTLMem}
 
+import chipyard.fpga.vcu118.{WithUARTIOPassthrough, WithTLIOPassthrough}
+
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
   // case PeripherySPIKey => List(SPIParams(rAddress = BigInt(0x64001000L)))
