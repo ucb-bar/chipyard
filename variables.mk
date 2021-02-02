@@ -164,7 +164,7 @@ override SCALA_BUILDTOOL_DEPS += $(SBT_THIN_CLIENT_TIMESTAMP)
 SBT_CLIENT_FLAG = --client
 endif
 
-SBT ?= java $(JAVA_OPTS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS) $(SBT_CLIENT_FLAG)
+SBT ?= java $(JAVA_OPTS) $(SBT_OPTS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_CLIENT_FLAG)
 SBT_NON_THIN ?= $(subst $(SBT_CLIENT_FLAG),,$(SBT))
 
 define run_scala_main
