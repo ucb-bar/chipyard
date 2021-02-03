@@ -85,6 +85,7 @@ default: $(mcs)
 # misc. directories
 #########################################################################################
 fpga_dir := $(base_dir)/fpga/fpga-shells/$(FPGA_BRAND)
+fpga_board_script_dir := $(fpga_dir)/$(BOARD)/tcl
 fpga_common_script_dir := $(fpga_dir)/common/tcl
 
 #########################################################################################
@@ -133,6 +134,16 @@ debug-bitstream: $(build_dir)/obj/post_synth.dcp
 			$(BOARD) \
 			$(build_dir)/debug_obj \
 			$(fpga_common_script_dir)
+
+MCS_FILE := $(build_dir)/obj/$(MODEL).mcs
+$(MCS_FILE): $(BIT_FILE)
+	cd $(build_dir); vivado \
+		-nojournal -mode batch \
+		-source $(fpga_common_script_dir)/write_cfgmem.tcl \
+		-tclargs $(BOARD) $@ $^ \
+
+.PHONY: mcs
+mcs: $(MCS_FILE)
 
 #########################################################################################
 # general cleanup rules
