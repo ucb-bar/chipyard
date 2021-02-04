@@ -20,10 +20,9 @@ object ResetN extends Pass {
   // Only works on Modules with a Bool port named reset
   def invertReset(mod: Module): Module = {
     // Check that it actually has reset
-    require(mod.ports.exists(p => p.name == "reset" && p.tpe == Bool),
-      "Can only invert reset on a module with reset!")
+    require(mod.ports.exists(p => p.name == "reset" && p.tpe == Bool), "Can only invert reset on a module with reset!")
     // Rename "reset" to "reset_n"
-    val portsx = mod.ports map {
+    val portsx = mod.ports.map {
       case Port(info, "reset", Input, Bool) =>
         Port(info, "reset_n", Input, Bool)
       case other => other
@@ -34,7 +33,7 @@ object ResetN extends Pass {
   }
 
   def run(c: Circuit): Circuit = {
-    c.copy(modules = c.modules map {
+    c.copy(modules = c.modules.map {
       case mod: Module if mod.name == c.main => invertReset(mod)
       case other => other
     })
@@ -43,8 +42,8 @@ object ResetN extends Pass {
 
 class ResetInverterTransform extends Transform with DependencyAPIMigration {
 
-  override def prerequisites: Seq[TransformDependency] = Forms.LowForm
-  override def optionalPrerequisites: Seq[TransformDependency] = Forms.LowFormOptimized
+  override def prerequisites:          Seq[TransformDependency] = Forms.LowForm
+  override def optionalPrerequisites:  Seq[TransformDependency] = Forms.LowFormOptimized
   override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
   override def invalidates(a: Transform): Boolean = false
 
@@ -64,7 +63,7 @@ trait ResetInverter {
   def invert[T <: chisel3.internal.LegacyModule](module: T): Unit = {
     chisel3.experimental.annotate(new chisel3.experimental.ChiselAnnotation with RunFirrtlTransform {
       def transformClass: Class[_ <: Transform] = classOf[ResetInverterTransform]
-      def toFirrtl: Annotation = ResetInverterAnnotation(module.toNamed)
+      def toFirrtl:       Annotation = ResetInverterAnnotation(module.toNamed)
     })
   }
 }

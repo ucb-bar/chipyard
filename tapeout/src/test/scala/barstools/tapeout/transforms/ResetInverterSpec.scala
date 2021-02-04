@@ -29,14 +29,17 @@ class ResetNSpec extends FreeSpec with Matchers {
 
   "Inverting reset needs to be done throughout module when generating firrtl" in {
     // generate low-firrtl
-    val firrtl = (new ChiselStage).execute(
-      Array("-X", "low"),
-      Seq(ChiselGeneratorAnnotation(() => new ExampleModuleNeedsResetInverted))
-    ).collect {
-      case EmittedFirrtlCircuitAnnotation(a) => a
-      case EmittedFirrtlModuleAnnotation(a)  => a
-    }.map(_.value)
-    .mkString("")
+    val firrtl = (new ChiselStage)
+      .execute(
+        Array("-X", "low"),
+        Seq(ChiselGeneratorAnnotation(() => new ExampleModuleNeedsResetInverted))
+      )
+      .collect {
+        case EmittedFirrtlCircuitAnnotation(a) => a
+        case EmittedFirrtlModuleAnnotation(a)  => a
+      }
+      .map(_.value)
+      .mkString("")
 
     firrtl should include("input reset_n :")
     firrtl should include("node reset = not(reset_n)")

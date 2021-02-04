@@ -14,7 +14,7 @@ import firrtl.stage.TransformManager.TransformDependency
 // instance (starting at the main module)
 class RemoveUnusedModules extends Transform with DependencyAPIMigration {
 
-  override def prerequisites: Seq[TransformDependency] = Forms.HighForm
+  override def prerequisites:         Seq[TransformDependency] = Forms.HighForm
   override def optionalPrerequisites: Seq[TransformDependency] = Seq.empty
   override def optionalPrerequisiteOf: Seq[TransformDependency] = {
     Forms.HighEmitters :+ Dependency[ReplSeqMem]
@@ -22,8 +22,8 @@ class RemoveUnusedModules extends Transform with DependencyAPIMigration {
   override def invalidates(a: Transform): Boolean = false
 
   def execute(state: CircuitState): CircuitState = {
-    val modulesByName = state.circuit.modules.map{
-      case m: Module => (m.name, Some(m))
+    val modulesByName = state.circuit.modules.map {
+      case m: Module    => (m.name, Some(m))
       case m: ExtModule => (m.name, None)
     }.toMap
 
@@ -33,7 +33,7 @@ class RemoveUnusedModules extends Transform with DependencyAPIMigration {
           def someStatements(statement: Statement): Seq[Statement] =
             statement match {
               case b: Block =>
-                b.stmts.map{ someStatements(_) }
+                b.stmts.map { someStatements(_) }
                   .foldLeft(Seq[Statement]())(_ ++ _)
               case when: Conditionally =>
                 someStatements(when.conseq) ++ someStatements(when.alt)
@@ -41,11 +41,11 @@ class RemoveUnusedModules extends Transform with DependencyAPIMigration {
               case _ => Seq()
             }
 
-            someStatements(m.body).map{
-              case s: DefInstance => Set(s.module) | getUsedModules(modulesByName(s.module))
-              case _ => Set[String]()
-            }.foldLeft(Set(m.name))(_ | _)
-          }
+          someStatements(m.body).map {
+            case s: DefInstance => Set(s.module) | getUsedModules(modulesByName(s.module))
+            case _ => Set[String]()
+          }.foldLeft(Set(m.name))(_ | _)
+        }
 
         case None => Set.empty[String]
       }
@@ -57,7 +57,7 @@ class RemoveUnusedModules extends Transform with DependencyAPIMigration {
 
     val renames = state.renames.getOrElse(RenameMap())
 
-    state.circuit.modules.filterNot { usedModuleSet contains _.name } foreach { x =>
+    state.circuit.modules.filterNot { usedModuleSet contains _.name }.foreach { x =>
       renames.record(ModuleTarget(state.circuit.main, x.name), Nil)
     }
 

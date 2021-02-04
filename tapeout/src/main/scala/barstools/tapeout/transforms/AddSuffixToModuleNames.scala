@@ -9,8 +9,7 @@ import firrtl.ir._
 import firrtl.stage.Forms
 import firrtl.stage.TransformManager.TransformDependency
 
-case class KeepNameAnnotation(target: ModuleTarget)
-    extends SingleTargetAnnotation[ModuleTarget] {
+case class KeepNameAnnotation(target: ModuleTarget) extends SingleTargetAnnotation[ModuleTarget] {
   def duplicate(n: ModuleTarget) = this.copy(n)
 }
 
@@ -21,8 +20,8 @@ case class ModuleNameSuffixAnnotation(target: CircuitTarget, suffix: String)
 
 class AddSuffixToModuleNames extends Transform with DependencyAPIMigration {
 
-  override def prerequisites: Seq[TransformDependency] = Forms.LowForm
-  override def optionalPrerequisites: Seq[TransformDependency] = Forms.LowFormOptimized
+  override def prerequisites:          Seq[TransformDependency] = Forms.LowForm
+  override def optionalPrerequisites:  Seq[TransformDependency] = Forms.LowFormOptimized
   override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
   override def invalidates(a: Transform): Boolean = false
 
@@ -37,7 +36,7 @@ class AddSuffixToModuleNames extends Transform with DependencyAPIMigration {
     val excludeSet = state.circuit.modules.flatMap {
       case e: ExtModule => Some(e.name)
       case m if (m.name == state.circuit.main) => Some(m.name)
-      case _ => None
+      case _                                   => None
     }.toSet
 
     val renamer = { (name: String) => if (excludeSet(name)) name else name + suffix }

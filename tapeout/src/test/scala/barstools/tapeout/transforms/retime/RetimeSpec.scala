@@ -19,18 +19,20 @@ class RetimeSpec extends FlatSpec with Matchers {
   }
   def getLowFirrtl[T <: RawModule](gen: () => T, extraArgs: Array[String] = Array.empty): String = {
     // generate low firrtl
-    (new ChiselStage).execute(
-      Array("-X", "low") ++ extraArgs,
-      Seq(ChiselGeneratorAnnotation(gen))
-    ).collect {
-      case EmittedFirrtlCircuitAnnotation(a) => a
-      case EmittedFirrtlModuleAnnotation(a)  => a
-    }.map(_.value)
-    .mkString("")
+    (new ChiselStage)
+      .execute(
+        Array("-X", "low") ++ extraArgs,
+        Seq(ChiselGeneratorAnnotation(gen))
+      )
+      .collect {
+        case EmittedFirrtlCircuitAnnotation(a) => a
+        case EmittedFirrtlModuleAnnotation(a)  => a
+      }
+      .map(_.value)
+      .mkString("")
   }
 
-
-  behavior of "retime library"
+  behavior.of("retime library")
 
   it should "pass simple retime module annotation" in {
     val gen = () => new RetimeModule
@@ -41,15 +43,18 @@ class RetimeSpec extends FlatSpec with Matchers {
       Logger.setOutput(captor.printStream)
 
       // generate low firrtl
-      val firrtl = getLowFirrtl(gen,
-        Array("-td", s"test_run_dir/$dir", "-foaf", s"test_run_dir/$dir/final", "--log-level", "info"))
+      val firrtl = getLowFirrtl(
+        gen,
+        Array("-td", s"test_run_dir/$dir", "-foaf", s"test_run_dir/$dir/final", "--log-level", "info")
+      )
 
       firrtl.nonEmpty should be(true)
       //Make sure we got the RetimeTransform scheduled
-      captor.getOutputAsString should include ("barstools.tapeout.transforms.retime.RetimeTransform")
+      captor.getOutputAsString should include("barstools.tapeout.transforms.retime.RetimeTransform")
     }
 
-    val lines = FileUtils.getLines(s"test_run_dir/$dir/test_run_dir/$dir/final.anno.json")
+    val lines = FileUtils
+      .getLines(s"test_run_dir/$dir/test_run_dir/$dir/final.anno.json")
       .map(normalized)
       .mkString("\n")
     lines should include("barstools.tapeout.transforms.retime.RetimeAnnotation")
@@ -65,15 +70,18 @@ class RetimeSpec extends FlatSpec with Matchers {
       Logger.setOutput(captor.printStream)
 
       // generate low firrtl
-      val firrtl = getLowFirrtl(gen,
-        Array("-td", s"test_run_dir/$dir", "-foaf", s"test_run_dir/$dir/final", "--log-level", "info"))
+      val firrtl = getLowFirrtl(
+        gen,
+        Array("-td", s"test_run_dir/$dir", "-foaf", s"test_run_dir/$dir/final", "--log-level", "info")
+      )
 
       firrtl.nonEmpty should be(true)
       //Make sure we got the RetimeTransform scheduled
-      captor.getOutputAsString should include ("barstools.tapeout.transforms.retime.RetimeTransform")
+      captor.getOutputAsString should include("barstools.tapeout.transforms.retime.RetimeTransform")
     }
 
-    val lines = FileUtils.getLines(s"test_run_dir/$dir/test_run_dir/$dir/final.anno.json")
+    val lines = FileUtils
+      .getLines(s"test_run_dir/$dir/test_run_dir/$dir/final.anno.json")
       .map(normalized)
       .mkString("\n")
     lines should include("barstools.tapeout.transforms.retime.RetimeAnnotation")

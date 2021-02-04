@@ -10,8 +10,7 @@ import firrtl.passes.memlib.ReplSeqMem
 import firrtl.stage.Forms
 import firrtl.stage.TransformManager.TransformDependency
 
-case class ConvertToExtModAnnotation(target: ModuleTarget)
-    extends SingleTargetAnnotation[ModuleTarget] {
+case class ConvertToExtModAnnotation(target: ModuleTarget) extends SingleTargetAnnotation[ModuleTarget] {
   def duplicate(n: ModuleTarget) = this.copy(n)
 }
 
@@ -20,7 +19,7 @@ case class ConvertToExtModAnnotation(target: ModuleTarget)
 // otherwise it's left alone.
 class ConvertToExtMod extends Transform with DependencyAPIMigration {
 
-  override def prerequisites: Seq[TransformDependency] = Forms.HighForm
+  override def prerequisites:         Seq[TransformDependency] = Forms.HighForm
   override def optionalPrerequisites: Seq[TransformDependency] = Seq.empty
   override def optionalPrerequisiteOf: Seq[TransformDependency] = {
     Forms.HighEmitters ++ Seq(Dependency[RemoveUnusedModules], Dependency[ReplSeqMem])

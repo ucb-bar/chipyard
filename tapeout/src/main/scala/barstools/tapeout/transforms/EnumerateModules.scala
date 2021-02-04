@@ -23,10 +23,12 @@ class EnumerateModulesPass(enumerate: (Module) => Unit) extends Pass {
 }
 
 class EnumerateModules(enumerate: (Module) => Unit)
-  extends Transform with SeqTransformBased with DependencyAPIMigration {
+    extends Transform
+    with SeqTransformBased
+    with DependencyAPIMigration {
 
-  override def prerequisites: Seq[TransformDependency] = Forms.LowForm
-  override def optionalPrerequisites: Seq[TransformDependency] = Forms.LowFormOptimized
+  override def prerequisites:          Seq[TransformDependency] = Forms.LowForm
+  override def optionalPrerequisites:  Seq[TransformDependency] = Forms.LowFormOptimized
   override def optionalPrerequisiteOf: Seq[TransformDependency] = Forms.LowEmitters
   override def invalidates(a: Transform): Boolean = false
 

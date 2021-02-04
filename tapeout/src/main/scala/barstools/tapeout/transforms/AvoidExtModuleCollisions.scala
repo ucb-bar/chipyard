@@ -14,7 +14,7 @@ case class LinkExtModulesAnnotation(mustLink: Seq[ExtModule]) extends NoTargetAn
 
 class AvoidExtModuleCollisions extends Transform with DependencyAPIMigration {
 
-  override def prerequisites: Seq[TransformDependency] = Forms.HighForm
+  override def prerequisites:         Seq[TransformDependency] = Forms.HighForm
   override def optionalPrerequisites: Seq[TransformDependency] = Seq(Dependency[RemoveUnusedModules])
   override def optionalPrerequisiteOf: Seq[TransformDependency] = {
     Forms.HighEmitters :+ Dependency[ReplSeqMem]
@@ -24,10 +24,9 @@ class AvoidExtModuleCollisions extends Transform with DependencyAPIMigration {
   def execute(state: CircuitState): CircuitState = {
     val mustLink = state.annotations.flatMap {
       case LinkExtModulesAnnotation(mustLink) => mustLink
-      case _ => Nil
+      case _                                  => Nil
     }
     val newAnnos = state.annotations.filterNot(_.isInstanceOf[LinkExtModulesAnnotation])
     state.copy(circuit = state.circuit.copy(modules = state.circuit.modules ++ mustLink), annotations = newAnnos)
   }
 }
-

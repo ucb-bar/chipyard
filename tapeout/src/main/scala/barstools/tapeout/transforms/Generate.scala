@@ -13,130 +13,150 @@ trait HasTapeoutOptions { self: ExecutionOptionsManager with HasFirrtlOptions =>
 
   parser.note("tapeout options")
 
-  parser.opt[String]("harness-o")
+  parser
+    .opt[String]("harness-o")
     .abbr("tho")
     .valueName("<harness-output>")
     .foreach { x =>
       tapeoutOptions = tapeoutOptions.copy(
         harnessOutput = Some(x)
       )
-    }.text {
+    }
+    .text {
       "use this to generate a harness at <harness-output>"
     }
 
-  parser.opt[String]("syn-top")
+  parser
+    .opt[String]("syn-top")
     .abbr("tst")
     .valueName("<syn-top>")
     .foreach { x =>
       tapeoutOptions = tapeoutOptions.copy(
         synTop = Some(x)
       )
-    }.text {
+    }
+    .text {
       "use this to set synTop"
     }
 
-  parser.opt[String]("top-fir")
+  parser
+    .opt[String]("top-fir")
     .abbr("tsf")
     .valueName("<top-fir>")
     .foreach { x =>
       tapeoutOptions = tapeoutOptions.copy(
         topFir = Some(x)
       )
-    }.text {
+    }
+    .text {
       "use this to set topFir"
     }
 
-  parser.opt[String]("top-anno-out")
+  parser
+    .opt[String]("top-anno-out")
     .abbr("tsaof")
     .valueName("<top-anno-out>")
     .foreach { x =>
       tapeoutOptions = tapeoutOptions.copy(
         topAnnoOut = Some(x)
       )
-    }.text {
+    }
+    .text {
       "use this to set topAnnoOut"
     }
 
-  parser.opt[String]("top-dotf-out")
+  parser
+    .opt[String]("top-dotf-out")
     .abbr("tdf")
     .valueName("<top-dotf-out>")
     .foreach { x =>
       tapeoutOptions = tapeoutOptions.copy(
         topDotfOut = Some(x)
       )
-    }.text {
+    }
+    .text {
       "use this to set the filename for the top resource .f file"
     }
 
-  parser.opt[String]("harness-top")
+  parser
+    .opt[String]("harness-top")
     .abbr("tht")
     .valueName("<harness-top>")
     .foreach { x =>
       tapeoutOptions = tapeoutOptions.copy(
         harnessTop = Some(x)
       )
-    }.text {
+    }
+    .text {
       "use this to set harnessTop"
     }
 
-  parser.opt[String]("harness-fir")
+  parser
+    .opt[String]("harness-fir")
     .abbr("thf")
     .valueName("<harness-fir>")
     .foreach { x =>
       tapeoutOptions = tapeoutOptions.copy(
         harnessFir = Some(x)
       )
-    }.text {
+    }
+    .text {
       "use this to set harnessFir"
     }
 
-  parser.opt[String]("harness-anno-out")
+  parser
+    .opt[String]("harness-anno-out")
     .abbr("thaof")
     .valueName("<harness-anno-out>")
     .foreach { x =>
       tapeoutOptions = tapeoutOptions.copy(
         harnessAnnoOut = Some(x)
       )
-    }.text {
+    }
+    .text {
       "use this to set harnessAnnoOut"
     }
 
-  parser.opt[String]("harness-dotf-out")
+  parser
+    .opt[String]("harness-dotf-out")
     .abbr("hdf")
     .valueName("<harness-dotf-out>")
     .foreach { x =>
       tapeoutOptions = tapeoutOptions.copy(
         harnessDotfOut = Some(x)
       )
-    }.text {
+    }
+    .text {
       "use this to set the filename for the harness resource .f file"
     }
 
-  parser.opt[String]("harness-conf")
+  parser
+    .opt[String]("harness-conf")
     .abbr("thconf")
-    .valueName ("<harness-conf-file>")
+    .valueName("<harness-conf-file>")
     .foreach { x =>
       tapeoutOptions = tapeoutOptions.copy(
         harnessConf = Some(x)
       )
-    }.text {
+    }
+    .text {
       "use this to set the harness conf file location"
     }
 
 }
 
 case class TapeoutOptions(
-  harnessOutput: Option[String] = None,
-  synTop: Option[String] = None,
-  topFir: Option[String] = None,
-  topAnnoOut: Option[String] = None,
-  topDotfOut: Option[String] = None,
-  harnessTop: Option[String] = None,
-  harnessFir: Option[String] = None,
+  harnessOutput:  Option[String] = None,
+  synTop:         Option[String] = None,
+  topFir:         Option[String] = None,
+  topAnnoOut:     Option[String] = None,
+  topDotfOut:     Option[String] = None,
+  harnessTop:     Option[String] = None,
+  harnessFir:     Option[String] = None,
   harnessAnnoOut: Option[String] = None,
   harnessDotfOut: Option[String] = None,
-  harnessConf: Option[String] = None
-) extends LazyLogging
+  harnessConf:    Option[String] = None)
+    extends LazyLogging
 
 // Requires two phases, one to collect modules below synTop in the hierarchy
 // and a second to remove those modules to generate the test harness
@@ -190,9 +210,9 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
     annoFile.foreach { annoPath =>
       val outputFile = new java.io.PrintWriter(annoPath)
       outputFile.write(JsonProtocol.serialize(res.circuitState.annotations.filter(_ match {
-        case da: DeletedAnnotation => false
-        case ec: EmittedComponent => false
-        case ea: EmittedAnnotation[_] => false
+        case da:  DeletedAnnotation       => false
+        case ec:  EmittedComponent        => false
+        case ea:  EmittedAnnotation[_]    => false
         case fca: FirrtlCircuitAnnotation => false
         case _ => true
       })))
@@ -207,7 +227,7 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
     result match {
       case x: FirrtlExecutionSuccess =>
         dump(x, tapeoutOptions.topFir, tapeoutOptions.topAnnoOut)
-        x.circuitState.circuit.modules.collect{ case e: ExtModule => e }
+        x.circuitState.circuit.modules.collect { case e: ExtModule => e }
       case x =>
         throw new Exception(s"executeTop failed while executing FIRRTL!\n${x}")
     }
@@ -220,9 +240,9 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
 
     val harnessAnnos =
       tapeoutOptions.harnessDotfOut.map(BlackBoxResourceFileNameAnno(_)).toSeq ++
-      harnessTop.map(ht => ModuleNameSuffixAnnotation(rootCircuitTarget, s"_in${ht}")) ++
-      synTop.map(st => ConvertToExtModAnnotation(rootCircuitTarget.module(st))) :+
-      LinkExtModulesAnnotation(topExtModules)
+        harnessTop.map(ht => ModuleNameSuffixAnnotation(rootCircuitTarget, s"_in${ht}")) ++
+        synTop.map(st => ConvertToExtModAnnotation(rootCircuitTarget.module(st))) :+
+        LinkExtModulesAnnotation(topExtModules)
 
     // For harness run, change some firrtlOptions (below) for harness phase
     // customTransforms: setup harness transforms, add AvoidExtModuleCollisions
@@ -233,7 +253,7 @@ sealed trait GenerateTopAndHarnessApp extends LazyLogging { this: App =>
       outputFileNameOverride = tapeoutOptions.harnessOutput.get,
       annotations = firrtlOptions.annotations.map({
         case ReplSeqMemAnnotation(i, o) => ReplSeqMemAnnotation(i, tapeoutOptions.harnessConf.get)
-        case a => a
+        case a                          => a
       }) ++ harnessAnnos
     )
     val harnessResult = firrtl.Driver.execute(optionsManager)
