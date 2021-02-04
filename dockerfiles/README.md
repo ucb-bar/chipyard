@@ -8,7 +8,7 @@ Build and Deploy the Container
 ------------------------------
 
     sudo docker build --target base . # to build the image for the CI
-    sudo docker build --target base --build-args CHIPYARD_HASH=<COMMIT_HASH> . # to build the image for the CI from a specific chipyard commit
+    sudo docker build --target base --build-arg CHIPYARD_HASH=<COMMIT_HASH> . # to build the image for the CI from a specific chipyard commit
     sudo docker build --target base-with-tools . # to build the full image
     sudo docker tag <IMAGE_ID> <PATH_NAME>:tag . # to tag the image after the build (ex. 0.0.3)
     sudo docker login # login into the account to push to
