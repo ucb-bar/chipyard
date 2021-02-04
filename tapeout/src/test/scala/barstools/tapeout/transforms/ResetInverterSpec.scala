@@ -5,7 +5,8 @@ package barstools.tapeout.transforms
 import chisel3._
 import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 import firrtl.{EmittedFirrtlCircuitAnnotation, EmittedFirrtlModuleAnnotation}
-import org.scalatest.{FreeSpec, Matchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
 class ExampleModuleNeedsResetInverted extends Module with ResetInverter {
   val io = IO(new Bundle {
@@ -19,7 +20,7 @@ class ExampleModuleNeedsResetInverted extends Module with ResetInverter {
   invert(this)
 }
 
-class ResetNSpec extends FreeSpec with Matchers {
+class ResetNSpec extends AnyFreeSpec with Matchers {
   "Inverting reset needs to be done throughout module in Chirrtl" in {
     val chirrtl = (new ChiselStage).emitChirrtl(new ExampleModuleNeedsResetInverted)
     chirrtl should include("input reset :")

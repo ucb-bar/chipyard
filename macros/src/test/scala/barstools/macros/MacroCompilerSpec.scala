@@ -6,10 +6,12 @@ import firrtl.Parser.parse
 import firrtl.ir.{Circuit, NoInfo}
 import firrtl.passes.RemoveEmpty
 import mdf.macrolib.SRAMMacro
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import java.io.File
 
-abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalatest.Matchers {
+abstract class MacroCompilerSpec extends AnyFlatSpec with Matchers {
   import scala.language.implicitConversions
   implicit def String2SomeString(i: String): Option[String] = Some(i)
   val testDir: String = "test_run_dir/macros"

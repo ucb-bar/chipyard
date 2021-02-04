@@ -13,9 +13,8 @@ lazy val commonSettings = Seq(
   libraryDependencies ++= Seq("chisel3","chisel-iotesters").map {
     dep: String => "edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", defaultVersions(dep))
   },
-  libraryDependencies in Test ++= Seq(
-    "org.scalatest" %% "scalatest" % "2.2.5" % "test",
-    "org.scalacheck" %% "scalacheck" % "1.12.4" % "test"
+  libraryDependencies ++= Seq(
+    "org.scalatest" %% "scalatest" % "3.2.2" % "test",
   ),
   resolvers ++= Seq(
     Resolver.sonatypeRepo("snapshots"),
@@ -31,9 +30,6 @@ lazy val macros = (project in file("macros"))
   .dependsOn(mdf)
   .settings(commonSettings)
   .settings(
-    libraryDependencies ++= Seq(
-      "edu.berkeley.cs" %% "firrtl-interpreter" % "1.4.+" % Test
-    ),
     mainClass := Some("barstools.macros.MacroCompiler")
   )
   .enablePlugins(sbtassembly.AssemblyPlugin)

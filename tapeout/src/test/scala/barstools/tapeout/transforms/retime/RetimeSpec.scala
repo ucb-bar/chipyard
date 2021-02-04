@@ -6,9 +6,10 @@ import chisel3._
 import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 import firrtl.{EmittedFirrtlCircuitAnnotation, EmittedFirrtlModuleAnnotation, FileUtils}
 import logger.Logger
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class RetimeSpec extends FlatSpec with Matchers {
+class RetimeSpec extends AnyFlatSpec with Matchers {
   def normalized(s: String): String = {
     require(!s.contains("\n"))
     s.replaceAll("\\s+", " ").trim
