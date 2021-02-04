@@ -1,7 +1,5 @@
 package barstools.macros
 
-import mdf.macrolib._
-
 // Test the depth splitting aspect of the memory compiler.
 // This file is for simple tests: one read-write port, powers of two sizes, etc.
 // For example, implementing a 4096x32 memory using four 1024x32 memories.

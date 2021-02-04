@@ -2,11 +2,11 @@
 
 package barstools.macros
 
+import barstools.macros.Utils._
+import firrtl.Utils._
 import firrtl._
 import firrtl.ir._
-import firrtl.Utils._
-import firrtl.passes.MemPortUtils.{memPortField, memType}
-import Utils._
+import firrtl.passes.MemPortUtils.memPortField
 
 class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pass {
   val extraMods = scala.collection.mutable.ArrayBuffer.empty[Module]

@@ -1,7 +1,5 @@
 package barstools.macros
 
-import mdf.macrolib._
-
 // Test the ability of the compiler to deal with various mask combinations.
 
 trait MasksTestSettings {

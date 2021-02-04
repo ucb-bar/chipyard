@@ -3,12 +3,12 @@
 package barstools.tapeout.transforms
 
 import firrtl._
+import firrtl.annotations.ModuleTarget
 import firrtl.ir._
-import firrtl.annotations.{ModuleTarget}
-import firrtl.stage.TransformManager.{TransformDependency}
-import firrtl.options.{Dependency}
-import firrtl.stage.{Forms}
-import firrtl.passes.memlib.{ReplSeqMem}
+import firrtl.options.Dependency
+import firrtl.passes.memlib.ReplSeqMem
+import firrtl.stage.Forms
+import firrtl.stage.TransformManager.TransformDependency
 
 // Removes all the unused modules in a circuit by recursing through every
 // instance (starting at the main module)

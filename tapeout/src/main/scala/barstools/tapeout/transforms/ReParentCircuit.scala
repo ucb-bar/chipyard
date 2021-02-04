@@ -3,11 +3,10 @@
 package barstools.tapeout.transforms
 
 import firrtl._
-import firrtl.ir._
 import firrtl.annotations._
-import firrtl.options.{Dependency}
-import firrtl.stage.TransformManager.{TransformDependency}
-import firrtl.stage.{Forms}
+import firrtl.options.Dependency
+import firrtl.stage.Forms
+import firrtl.stage.TransformManager.TransformDependency
 
 case class ReParentCircuitAnnotation(target: ModuleTarget)
     extends SingleTargetAnnotation[ModuleTarget] {

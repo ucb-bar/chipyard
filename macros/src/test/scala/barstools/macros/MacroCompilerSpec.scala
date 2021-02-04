@@ -2,13 +2,12 @@
 
 package barstools.macros
 
+import firrtl.Parser.parse
 import firrtl.ir.{Circuit, NoInfo}
 import firrtl.passes.RemoveEmpty
-import firrtl.Parser.parse
-
-import java.io.{File, StringWriter}
-
 import mdf.macrolib.SRAMMacro
+
+import java.io.File
 
 abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalatest.Matchers {
   import scala.language.implicitConversions
@@ -122,6 +121,7 @@ abstract class MacroCompilerSpec extends org.scalatest.FlatSpec with org.scalate
 // A collection of standard SRAM generators.
 trait HasSRAMGenerator {
   import mdf.macrolib._
+
   import scala.language.implicitConversions
   implicit def Int2SomeInt(i: Int): Option[Int] = Some(i)
   implicit def BigInt2SomeBigInt(i: BigInt): Option[BigInt] = Some(i)

@@ -3,7 +3,7 @@
 package barstools.tapeout.transforms
 
 import chisel3._
-import chisel3.stage.{ChiselStage, ChiselGeneratorAnnotation}
+import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 import firrtl.{EmittedFirrtlCircuitAnnotation, EmittedFirrtlModuleAnnotation}
 import org.scalatest.{FreeSpec, Matchers}
 

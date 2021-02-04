@@ -1,7 +1,5 @@
 package barstools.macros
 
-import mdf.macrolib._
-
 class SRAMCompiler extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
   val compiler = generateSRAMCompiler("awesome", "A")
   val verilog = s"v-SRAMCompiler.v"

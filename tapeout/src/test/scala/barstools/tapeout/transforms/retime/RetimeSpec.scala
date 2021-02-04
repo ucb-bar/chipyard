@@ -1,12 +1,10 @@
 // See LICENSE for license details.
 
-package barstools.tapeout.transforms.retime.test
+package barstools.tapeout.transforms.retime
 
 import chisel3._
-import chisel3.stage.{ChiselStage, ChiselGeneratorAnnotation}
-import firrtl.{EmittedFirrtlCircuitAnnotation, EmittedFirrtlModuleAnnotation}
-import barstools.tapeout.transforms.retime.RetimeLib
-import firrtl.FileUtils
+import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
+import firrtl.{EmittedFirrtlCircuitAnnotation, EmittedFirrtlModuleAnnotation, FileUtils}
 import logger.Logger
 import org.scalatest.{FlatSpec, Matchers}
 

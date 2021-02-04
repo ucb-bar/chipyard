@@ -2,14 +2,12 @@
 
 package barstools.macros
 
-import firrtl._
-import firrtl.ir._
-import firrtl.PrimOps
-import firrtl.passes.memlib.{MemConf, MemPort, ReadPort, WritePort, ReadWritePort, MaskedWritePort, MaskedReadWritePort}
 import firrtl.Utils.BoolType
-import mdf.macrolib.{Constant, MacroPort, SRAMMacro}
-import mdf.macrolib.{PolarizedPort, PortPolarity, ActiveLow, ActiveHigh, NegativeEdge, PositiveEdge, MacroExtraPort}
-import java.io.File
+import firrtl.ir._
+import firrtl.passes.memlib._
+import firrtl.{PrimOps, _}
+import mdf.macrolib.{Input => _, Output => _, _}
+
 import scala.language.implicitConversions
 
 object MacroCompilerMath {

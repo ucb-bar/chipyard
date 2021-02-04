@@ -67,8 +67,9 @@ object OldMetric extends CostMetric with CostMetricCompanion {
  */
 class ExternalMetric(path: String) extends CostMetric {
   import mdf.macrolib.Utils.writeMacroToPath
+
   import java.io._
-  import scala.language.postfixOps // for !! postfix op
+  import scala.language.postfixOps
   import sys.process._
 
   override def cost(mem: Macro, lib: Macro): Option[Double] = {

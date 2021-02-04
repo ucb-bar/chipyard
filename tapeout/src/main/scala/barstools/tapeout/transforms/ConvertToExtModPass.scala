@@ -3,12 +3,12 @@
 package barstools.tapeout.transforms
 
 import firrtl._
+import firrtl.annotations.{ModuleTarget, ReferenceTarget, SingleTargetAnnotation}
 import firrtl.ir._
-import firrtl.annotations.{ModuleTarget, SingleTargetAnnotation, ReferenceTarget}
-import firrtl.stage.TransformManager.{TransformDependency}
-import firrtl.stage.{Forms}
-import firrtl.options.{Dependency}
-import firrtl.passes.memlib.{ReplSeqMem}
+import firrtl.options.Dependency
+import firrtl.passes.memlib.ReplSeqMem
+import firrtl.stage.Forms
+import firrtl.stage.TransformManager.TransformDependency
 
 case class ConvertToExtModAnnotation(target: ModuleTarget)
     extends SingleTargetAnnotation[ModuleTarget] {

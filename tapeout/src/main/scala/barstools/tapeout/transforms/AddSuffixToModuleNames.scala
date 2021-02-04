@@ -2,12 +2,12 @@
 
 package barstools.tapeout.transforms
 
-import firrtl._
-import firrtl.ir._
 import firrtl.Mappers._
-import firrtl.annotations.{ModuleTarget, SingleTargetAnnotation, CircuitTarget}
-import firrtl.stage.TransformManager.{TransformDependency}
-import firrtl.stage.{Forms}
+import firrtl._
+import firrtl.annotations.{CircuitTarget, ModuleTarget, SingleTargetAnnotation}
+import firrtl.ir._
+import firrtl.stage.Forms
+import firrtl.stage.TransformManager.TransformDependency
 
 case class KeepNameAnnotation(target: ModuleTarget)
     extends SingleTargetAnnotation[ModuleTarget] {

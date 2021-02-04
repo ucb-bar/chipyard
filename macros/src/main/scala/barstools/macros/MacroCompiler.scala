@@ -8,18 +8,17 @@
 
 package barstools.macros
 
-import firrtl._
-import firrtl.ir._
-import firrtl.PrimOps
+import barstools.macros.Utils._
+import firrtl.CompilerUtils.getLoweringTransforms
 import firrtl.Utils._
 import firrtl.annotations._
-import firrtl.transforms.{NoDCEAnnotation}
-import firrtl.CompilerUtils.getLoweringTransforms
-import mdf.macrolib.{PolarizedPort, PortPolarity, SRAMMacro, SRAMGroup, SRAMCompiler}
-import scala.collection.mutable.{ArrayBuffer, HashMap}
+import firrtl.ir._
+import firrtl.{PrimOps, _}
+import mdf.macrolib._
+
 import java.io.{File, FileWriter}
-import scala.io.{Source}
-import Utils._
+import scala.collection.mutable.{ArrayBuffer, HashMap}
+import scala.io.Source
 
 case class MacroCompilerException(msg: String) extends Exception(msg)
 

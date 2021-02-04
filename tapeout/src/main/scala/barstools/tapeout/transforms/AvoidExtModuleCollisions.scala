@@ -3,12 +3,12 @@
 package barstools.tapeout.transforms
 
 import firrtl._
+import firrtl.annotations.NoTargetAnnotation
 import firrtl.ir._
-import firrtl.annotations.{NoTargetAnnotation}
-import firrtl.options.{Dependency}
-import firrtl.stage.TransformManager.{TransformDependency}
-import firrtl.stage.{Forms}
-import firrtl.passes.memlib.{ReplSeqMem}
+import firrtl.options.Dependency
+import firrtl.passes.memlib.ReplSeqMem
+import firrtl.stage.Forms
+import firrtl.stage.TransformManager.TransformDependency
 
 case class LinkExtModulesAnnotation(mustLink: Seq[ExtModule]) extends NoTargetAnnotation
 
