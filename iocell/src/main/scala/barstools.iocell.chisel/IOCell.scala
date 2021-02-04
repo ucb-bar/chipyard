@@ -4,7 +4,7 @@ package barstools.iocell.chisel
 
 import chisel3._
 import chisel3.util.{Cat, HasBlackBoxResource}
-import chisel3.experimental.{Analog, DataMirror, IO, BaseModule}
+import chisel3.experimental.{Analog, BaseModule, DataMirror, IO}
 
 // The following four IO cell bundle types are bare-minimum functional connections
 // for modeling 4 different IO cell scenarios. The intention is that the user
@@ -13,24 +13,22 @@ import chisel3.experimental.{Analog, DataMirror, IO, BaseModule}
 // (https://github.com/sifive/sifive-blocks/blob/master/src/main/scala/devices/pinctrl/PinCtrl.scala),
 // but we want to avoid a dependency on an external libraries.
 
-/**
- * The base IO bundle for an analog signal (typically something with no digital buffers inside)
- *  pad: off-chip (external) connection
- *  core: internal connection
- */
+/** The base IO bundle for an analog signal (typically something with no digital buffers inside)
+  *  pad: off-chip (external) connection
+  *  core: internal connection
+  */
 class AnalogIOCellBundle extends Bundle {
-  val pad = Analog(1.W)   // Pad/bump signal (off-chip)
-  val core = Analog(1.W)  // core signal (on-chip)
+  val pad = Analog(1.W) // Pad/bump signal (off-chip)
+  val core = Analog(1.W) // core signal (on-chip)
 }
 
-/**
- * The base IO bundle for a signal with runtime-controllable direction
- *  pad: off-chip (external) connection
- *  i: input to chip logic (output from IO cell)
- *  ie: enable signal for i
- *  o: output from chip logic (input to IO cell)
- *  oe: enable signal for o
- */
+/** The base IO bundle for a signal with runtime-controllable direction
+  *  pad: off-chip (external) connection
+  *  i: input to chip logic (output from IO cell)
+  *  ie: enable signal for i
+  *  o: output from chip logic (input to IO cell)
+  *  oe: enable signal for o
+  */
 class DigitalGPIOCellBundle extends Bundle {
   val pad = Analog(1.W)
   val i = Output(Bool())
@@ -39,24 +37,22 @@ class DigitalGPIOCellBundle extends Bundle {
   val oe = Input(Bool())
 }
 
-/**
- * The base IO bundle for a digital output signal
- *  pad: off-chip (external) connection
- *  o: output from chip logic (input to IO cell)
- *  oe: enable signal for o
- */
+/** The base IO bundle for a digital output signal
+  *  pad: off-chip (external) connection
+  *  o: output from chip logic (input to IO cell)
+  *  oe: enable signal for o
+  */
 class DigitalOutIOCellBundle extends Bundle {
   val pad = Output(Bool())
   val o = Input(Bool())
   val oe = Input(Bool())
 }
 
-/**
- * The base IO bundle for a digital input signal
- *  pad: off-chip (external) connection
- *  i: input to chip logic (output from IO cell)
- *  ie: enable signal for i
- */
+/** The base IO bundle for a digital input signal
+  *  pad: off-chip (external) connection
+  *  i: input to chip logic (output from IO cell)
+  *  ie: enable signal for i
+  */
 class DigitalInIOCellBundle extends Bundle {
   val pad = Input(Bool())
   val i = Output(Bool())
@@ -102,11 +98,10 @@ class GenericDigitalOutIOCell extends GenericIOCell with DigitalOutIOCell {
   val io = IO(new DigitalOutIOCellBundle)
 }
 
-
 trait IOCellTypeParams {
   def analog(): AnalogIOCell
-  def gpio(): DigitalGPIOCell
-  def input(): DigitalInIOCell
+  def gpio():   DigitalGPIOCell
+  def input():  DigitalInIOCell
   def output(): DigitalOutIOCell
 }
 
@@ -118,47 +113,49 @@ case class GenericIOCellParams() extends IOCellTypeParams {
 }
 
 object IOCell {
-  /**
-   * From within a RawModule or MultiIOModule context, generate new module IOs from a given
-   * signal and return the new IO and a Seq containing all generated IO cells.
-   * @param coreSignal The signal onto which to add IO cells
-   * @param name An optional name or name prefix to use for naming IO cells
-   * @param abstractResetAsAsync When set, will coerce abstract resets to
-   *        AsyncReset, and otherwise to Bool (sync reset)
-   * @return A tuple of (the generated IO data node, a Seq of all generated IO cell instances)
-   */
-  def generateIOFromSignal[T <: Data](coreSignal: T, name: String,
-    typeParams: IOCellTypeParams = GenericIOCellParams(),
-    abstractResetAsAsync: Boolean = false): (T, Seq[IOCell]) =
-  {
+
+  /** From within a RawModule or MultiIOModule context, generate new module IOs from a given
+    * signal and return the new IO and a Seq containing all generated IO cells.
+    * @param coreSignal The signal onto which to add IO cells
+    * @param name An optional name or name prefix to use for naming IO cells
+    * @param abstractResetAsAsync When set, will coerce abstract resets to
+    *        AsyncReset, and otherwise to Bool (sync reset)
+    * @return A tuple of (the generated IO data node, a Seq of all generated IO cell instances)
+    */
+  def generateIOFromSignal[T <: Data](
+    coreSignal:           T,
+    name:                 String,
+    typeParams:           IOCellTypeParams = GenericIOCellParams(),
+    abstractResetAsAsync: Boolean = false
+  ): (T, Seq[IOCell]) = {
     val padSignal = IO(DataMirror.internal.chiselTypeClone[T](coreSignal)).suggestName(name)
     val resetFn = if (abstractResetAsAsync) toAsyncReset else toSyncReset
     val iocells = IOCell.generateFromSignal(coreSignal, padSignal, Some(s"iocell_$name"), typeParams, resetFn)
     (padSignal, iocells)
   }
 
-  /**
-   * Connect two identical signals together by adding IO cells between them and return a Seq
-   * containing all generated IO cells.
-   * @param coreSignal The core-side (internal) signal onto which to connect/add IO cells
-   * @param padSignal The pad-side (external) signal onto which to connect IO cells
-   * @param name An optional name or name prefix to use for naming IO cells
-   * @return A Seq of all generated IO cell instances
-   */
-  val toSyncReset: (Reset) => Bool = _.toBool
+  /** Connect two identical signals together by adding IO cells between them and return a Seq
+    * containing all generated IO cells.
+    * @param coreSignal The core-side (internal) signal onto which to connect/add IO cells
+    * @param padSignal The pad-side (external) signal onto which to connect IO cells
+    * @param name An optional name or name prefix to use for naming IO cells
+    * @return A Seq of all generated IO cell instances
+    */
+  val toSyncReset:  (Reset) => Bool = _.toBool
   val toAsyncReset: (Reset) => AsyncReset = _.asAsyncReset
   def generateFromSignal[T <: Data, R <: Reset](
-    coreSignal: T,
-    padSignal: T,
-    name: Option[String] = None,
-    typeParams: IOCellTypeParams = GenericIOCellParams(),
-    concretizeResetFn : (Reset) => R = toSyncReset): Seq[IOCell] =
-  {
+    coreSignal:        T,
+    padSignal:         T,
+    name:              Option[String] = None,
+    typeParams:        IOCellTypeParams = GenericIOCellParams(),
+    concretizeResetFn: (Reset) => R = toSyncReset
+  ): Seq[IOCell] = {
     def genCell[T <: Data](
-        castToBool: (T) => Bool,
-        castFromBool: (Bool) => T)(
-        coreSignal: T,
-        padSignal: T): Seq[IOCell] = {
+      castToBool:   (T) => Bool,
+      castFromBool: (Bool) => T
+    )(coreSignal:   T,
+      padSignal:    T
+    ): Seq[IOCell] = {
       DataMirror.directionOf(coreSignal) match {
         case ActualDirection.Input => {
           val iocell = typeParams.input()
@@ -188,7 +185,10 @@ object IOCell {
         if (coreSignal.getWidth == 0) {
           Seq()
         } else {
-          require(coreSignal.getWidth == 1, "Analogs wider than 1 bit are not supported because we can't bit-select Analogs (https://github.com/freechipsproject/chisel3/issues/536)")
+          require(
+            coreSignal.getWidth == 1,
+            "Analogs wider than 1 bit are not supported because we can't bit-select Analogs (https://github.com/freechipsproject/chisel3/issues/536)"
+          )
           val iocell = typeParams.analog()
           name.foreach(n => iocell.suggestName(n))
           iocell.io.core <> coreSignal
@@ -204,7 +204,7 @@ object IOCell {
           // This dummy assignment will prevent invalid firrtl from being emitted
           DataMirror.directionOf(coreSignal) match {
             case ActualDirection.Input => coreSignal := 0.U
-            case _ => {}
+            case _                     => {}
           }
           Seq()
         } else {
