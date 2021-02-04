@@ -1,10 +1,10 @@
-### Note: This DockerFile is adapted from https://github.com/ucb-bar/chipyard/blob/master/.circleci/images/Dockerfile which was adapted from: https://github.com/CircleCI-Public/example-images/openjdk
 # This is a full chipyard setup
 
 # BUILD BASE FOR CI
 
 FROM ubuntu:18.04 as base
-ARG CHIPYARD_HASH
+# Default branch dev for experimental version
+ARG CHIPYARD_HASH=dev
 
 MAINTAINER https://groups.google.com/forum/#!forum/chipyard
 
