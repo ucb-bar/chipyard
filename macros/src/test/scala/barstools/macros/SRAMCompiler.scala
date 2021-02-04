@@ -13,8 +13,7 @@ class SRAMCompiler extends MacroCompilerSpec with HasSRAMGenerator with HasSimpl
 
   writeToLib(lib, Seq(compiler))
 
-
   writeToMem(mem, Seq(generateSRAM("mymem", "X", 8, 16)))
 
-  compileExecuteAndTest(mem, Some(lib), verilog, output=output, false, true)
+  compileExecuteAndTest(mem, Some(lib), verilog, output = output, false, true)
 }

@@ -4,13 +4,13 @@ package barstools.macros
 
 trait HasSynFlopsTestGenerator extends HasSimpleTestGenerator {
   this: MacroCompilerSpec with HasSRAMGenerator =>
-    def generateFlops: String = {
-s"""
+  def generateFlops: String = {
+    s"""
     inst mem_0_0 of split_${lib_name}
     mem_0_0.${libPortPrefix}_clk <= ${libPortPrefix}_clk
     mem_0_0.${libPortPrefix}_addr <= ${libPortPrefix}_addr
-    node ${libPortPrefix}_dout_0_0 = bits(mem_0_0.${libPortPrefix}_dout, ${libWidth-1}, 0)
-    mem_0_0.${libPortPrefix}_din <= bits(${libPortPrefix}_din, ${libWidth-1}, 0)
+    node ${libPortPrefix}_dout_0_0 = bits(mem_0_0.${libPortPrefix}_dout, ${libWidth - 1}, 0)
+    mem_0_0.${libPortPrefix}_din <= bits(${libPortPrefix}_din, ${libWidth - 1}, 0)
     mem_0_0.${libPortPrefix}_write_en <= and(and(and(${libPortPrefix}_write_en, UInt<1>("h1")), UInt<1>("h1")), UInt<1>("h1"))
     node ${libPortPrefix}_dout_0 = ${libPortPrefix}_dout_0_0
     ${libPortPrefix}_dout <= mux(UInt<1>("h1"), ${libPortPrefix}_dout_0, UInt<${libWidth}>("h0"))
@@ -37,49 +37,66 @@ s"""
     ${libPortPrefix}_dout <= ram.RW_0.rdata
     ram.RW_0.wdata <= ${libPortPrefix}_din
 """
-    }
+  }
 
-    // If there is no lib, put the flops definition into the body.
-    abstract override def generateBody = {
-      if (this.isInstanceOf[HasNoLibTestGenerator]) generateFlops else super.generateBody
-    }
+  // If there is no lib, put the flops definition into the body.
+  abstract override def generateBody = {
+    if (this.isInstanceOf[HasNoLibTestGenerator]) generateFlops else super.generateBody
+  }
 
-    // If there is no lib, don't generate a footer, since the flops definition
-    // will be in the body.
-    override def generateFooter = {
-      if (this.isInstanceOf[HasNoLibTestGenerator]) "" else
-s"""
+  // If there is no lib, don't generate a footer, since the flops definition
+  // will be in the body.
+  override def generateFooter = {
+    if (this.isInstanceOf[HasNoLibTestGenerator]) ""
+    else
+      s"""
   module ${lib_name} :
 ${generateFooterPorts}
 
 ${generateFlops}
 """
-    }
+  }
 
 }
 
-class Synflops2048x8_noLib extends MacroCompilerSpec with HasSRAMGenerator with HasNoLibTestGenerator with HasSynFlopsTestGenerator {
+class Synflops2048x8_noLib
+    extends MacroCompilerSpec
+    with HasSRAMGenerator
+    with HasNoLibTestGenerator
+    with HasSynFlopsTestGenerator {
   override lazy val memDepth = BigInt(2048)
   override lazy val memWidth = 8
 
   compileExecuteAndTest(mem, None, v, output, true)
 }
 
-class Synflops2048x16_noLib extends MacroCompilerSpec with HasSRAMGenerator with HasNoLibTestGenerator with HasSynFlopsTestGenerator {
+class Synflops2048x16_noLib
+    extends MacroCompilerSpec
+    with HasSRAMGenerator
+    with HasNoLibTestGenerator
+    with HasSynFlopsTestGenerator {
   override lazy val memDepth = BigInt(2048)
   override lazy val memWidth = 16
 
   compileExecuteAndTest(mem, None, v, output, true)
 }
 
-class Synflops8192x16_noLib extends MacroCompilerSpec with HasSRAMGenerator with HasNoLibTestGenerator with HasSynFlopsTestGenerator {
+class Synflops8192x16_noLib
+    extends MacroCompilerSpec
+    with HasSRAMGenerator
+    with HasNoLibTestGenerator
+    with HasSynFlopsTestGenerator {
   override lazy val memDepth = BigInt(8192)
   override lazy val memWidth = 16
 
   compileExecuteAndTest(mem, None, v, output, true)
 }
 
-class Synflops2048x16_depth_Lib extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator with HasSynFlopsTestGenerator {
+class Synflops2048x16_depth_Lib
+    extends MacroCompilerSpec
+    with HasSRAMGenerator
+    with HasSimpleDepthTestGenerator
+    with HasSynFlopsTestGenerator {
   override lazy val memDepth = BigInt(2048)
   override lazy val libDepth = BigInt(1024)
   override lazy val width = 16
@@ -87,7 +104,11 @@ class Synflops2048x16_depth_Lib extends MacroCompilerSpec with HasSRAMGenerator 
   compileExecuteAndTest(mem, lib, v, output, true)
 }
 
-class Synflops2048x64_width_Lib extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator with HasSynFlopsTestGenerator {
+class Synflops2048x64_width_Lib
+    extends MacroCompilerSpec
+    with HasSRAMGenerator
+    with HasSimpleWidthTestGenerator
+    with HasSynFlopsTestGenerator {
   override lazy val memWidth = 64
   override lazy val libWidth = 8
   override lazy val depth = BigInt(1024)
@@ -95,7 +116,11 @@ class Synflops2048x64_width_Lib extends MacroCompilerSpec with HasSRAMGenerator 
   compileExecuteAndTest(mem, lib, v, output, true)
 }
 
-class Synflops_SplitPorts_Read_Write extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator with HasSynFlopsTestGenerator {
+class Synflops_SplitPorts_Read_Write
+    extends MacroCompilerSpec
+    with HasSRAMGenerator
+    with HasSimpleDepthTestGenerator
+    with HasSynFlopsTestGenerator {
   import mdf.macrolib._
 
   override lazy val memDepth = BigInt(2048)
@@ -103,29 +128,29 @@ class Synflops_SplitPorts_Read_Write extends MacroCompilerSpec with HasSRAMGener
   override lazy val width = 8
 
   override def generateLibSRAM = SRAMMacro(
-    name=lib_name,
-    width=width,
-    depth=libDepth,
-    family="1r1w",
-    ports=Seq(
+    name = lib_name,
+    width = width,
+    depth = libDepth,
+    family = "1r1w",
+    ports = Seq(
       generateReadPort("innerA", width, libDepth),
       generateWritePort("innerB", width, libDepth)
     )
   )
 
   override def generateMemSRAM = SRAMMacro(
-    name=mem_name,
-    width=width,
-    depth=memDepth,
-    family="1r1w",
-    ports=Seq(
+    name = mem_name,
+    width = width,
+    depth = memDepth,
+    family = "1r1w",
+    ports = Seq(
       generateReadPort("outerB", width, memDepth),
       generateWritePort("outerA", width, memDepth)
     )
   )
 
   override def generateHeader =
-"""
+    """
 circuit target_memory :
   module target_memory :
     input outerB_addr : UInt<11>
@@ -138,7 +163,7 @@ circuit target_memory :
 """
 
   override def generateBody =
-"""
+    """
     node outerB_addr_sel = bits(outerB_addr, 10, 10)
     reg outerB_addr_sel_reg : UInt<1>, outerB_clk with :
       reset => (UInt<1>("h0"), outerB_addr_sel_reg)
@@ -166,7 +191,7 @@ circuit target_memory :
 """
 
   override def generateFooterPorts =
-"""
+    """
     input innerA_addr : UInt<10>
     input innerA_clk : Clock
     output innerA_dout : UInt<8>
@@ -177,7 +202,7 @@ circuit target_memory :
 """
 
   override def generateFlops =
-"""
+    """
     inst mem_0_0 of split_awesome_lib_mem
     mem_0_0.innerB_clk <= innerB_clk
     mem_0_0.innerB_addr <= innerB_addr
@@ -222,7 +247,11 @@ circuit target_memory :
   }
 }
 
-class Synflops_SplitPorts_MaskedMem_Read_MaskedWrite extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator with HasSynFlopsTestGenerator {
+class Synflops_SplitPorts_MaskedMem_Read_MaskedWrite
+    extends MacroCompilerSpec
+    with HasSRAMGenerator
+    with HasSimpleDepthTestGenerator
+    with HasSynFlopsTestGenerator {
   import mdf.macrolib._
 
   override lazy val memDepth = BigInt(2048)
@@ -232,29 +261,29 @@ class Synflops_SplitPorts_MaskedMem_Read_MaskedWrite extends MacroCompilerSpec w
   override lazy val libMaskGran = Some(1)
 
   override def generateLibSRAM = SRAMMacro(
-    name=lib_name,
-    width=width,
-    depth=libDepth,
-    family="1r1w",
-    ports=Seq(
+    name = lib_name,
+    width = width,
+    depth = libDepth,
+    family = "1r1w",
+    ports = Seq(
       generateReadPort("innerA", width, libDepth),
       generateWritePort("innerB", width, libDepth, libMaskGran)
     )
   )
 
   override def generateMemSRAM = SRAMMacro(
-    name=mem_name,
-    width=width,
-    depth=memDepth,
-    family="1r1w",
-    ports=Seq(
+    name = mem_name,
+    width = width,
+    depth = memDepth,
+    family = "1r1w",
+    ports = Seq(
       generateReadPort("outerB", width, memDepth),
       generateWritePort("outerA", width, memDepth, memMaskGran)
     )
   )
 
   override def generateHeader =
-"""
+    """
 circuit target_memory :
   module target_memory :
     input outerB_addr : UInt<11>
@@ -268,7 +297,7 @@ circuit target_memory :
 """
 
   override def generateBody =
-"""
+    """
     node outerB_addr_sel = bits(outerB_addr, 10, 10)
     reg outerB_addr_sel_reg : UInt<1>, outerB_clk with :
       reset => (UInt<1>("h0"), outerB_addr_sel_reg)
@@ -298,7 +327,7 @@ circuit target_memory :
 """
 
   override def generateFooterPorts =
-"""
+    """
     input innerA_addr : UInt<10>
     input innerA_clk : Clock
     output innerA_dout : UInt<8>
@@ -310,7 +339,7 @@ circuit target_memory :
 """
 
   override def generateFlops =
-"""
+    """
     inst mem_0_0 of split_awesome_lib_mem
     inst mem_0_1 of split_awesome_lib_mem
     inst mem_0_2 of split_awesome_lib_mem

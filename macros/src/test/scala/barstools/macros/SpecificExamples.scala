@@ -29,8 +29,8 @@ class WriteEnableTest extends MacroCompilerSpec with HasSRAMGenerator {
 
   override val libPrefix = "macros/src/test/resources"
 
-  val memSRAMs = mdf.macrolib.Utils.readMDFFromString(
-"""
+  val memSRAMs = mdf.macrolib.Utils
+    .readMDFFromString("""
 [ {
   "type" : "sram",
   "name" : "cc_banks_0_ext",
@@ -58,7 +58,7 @@ class WriteEnableTest extends MacroCompilerSpec with HasSRAMGenerator {
   writeToMem(mem, memSRAMs)
 
   val output =
-"""
+    """
 circuit cc_banks_0_ext :
   module cc_banks_0_ext :
     input RW0_addr : UInt<12>
@@ -99,8 +99,8 @@ class MaskPortTest extends MacroCompilerSpec with HasSRAMGenerator {
 
   override val libPrefix = "macros/src/test/resources"
 
-  val memSRAMs = mdf.macrolib.Utils.readMDFFromString(
-"""
+  val memSRAMs = mdf.macrolib.Utils
+    .readMDFFromString("""
 [ {
   "type" : "sram",
   "name" : "cc_dir_ext",
@@ -131,7 +131,7 @@ class MaskPortTest extends MacroCompilerSpec with HasSRAMGenerator {
   writeToMem(mem, memSRAMs)
 
   val output =
-"""
+    """
 circuit cc_dir_ext :
   module cc_dir_ext :
     input RW0_addr : UInt<9>
@@ -183,8 +183,8 @@ class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
 
   override val libPrefix = "macros/src/test/resources"
 
-  val memSRAMs = mdf.macrolib.Utils.readMDFFromString(
-"""
+  val memSRAMs = mdf.macrolib.Utils
+    .readMDFFromString("""
 [ {
   "type" : "sram",
   "name" : "_T_182_ext",
@@ -354,7 +354,7 @@ class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
   writeToMem(mem, memSRAMs)
 
   val output = // TODO: check correctness...
-"""
+    """
 circuit smem_0_ext :
   module _T_182_ext :
     input R0_addr : UInt<6>
@@ -1350,14 +1350,14 @@ circuit smem_0_ext :
 
 class SmallTagArrayTest extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleTestGenerator {
   // Test that mapping a smaller memory using a larger lib can still work.
-  override def memWidth: Int = 26
-  override def memDepth: BigInt = BigInt(2)
-  override def memMaskGran: Option[Int] = Some(26)
+  override def memWidth:      Int = 26
+  override def memDepth:      BigInt = BigInt(2)
+  override def memMaskGran:   Option[Int] = Some(26)
   override def memPortPrefix: String = ""
 
-  override def libWidth: Int = 32
-  override def libDepth: BigInt = BigInt(64)
-  override def libMaskGran: Option[Int] = Some(1)
+  override def libWidth:      Int = 32
+  override def libDepth:      BigInt = BigInt(64)
+  override def libMaskGran:   Option[Int] = Some(1)
   override def libPortPrefix: String = ""
 
   override def extraPorts: Seq[MacroExtraPort] = Seq(
@@ -1388,73 +1388,73 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
 
   val libSRAMs = Seq(
     SRAMMacro(
-      name="SRAM1RW1024x8",
-      depth=1024,
-      width=8,
-      family="1rw",
-      ports=Seq(
+      name = "SRAM1RW1024x8",
+      depth = 1024,
+      width = 8,
+      family = "1rw",
+      ports = Seq(
         generateReadWritePort("", 8, BigInt(1024))
       )
     ),
     SRAMMacro(
-      name="SRAM1RW512x32",
-      depth=512,
-      width=32,
-      family="1rw",
-      ports=Seq(
+      name = "SRAM1RW512x32",
+      depth = 512,
+      width = 32,
+      family = "1rw",
+      ports = Seq(
         generateReadWritePort("", 32, BigInt(512))
       )
     ),
     SRAMMacro(
-      name="SRAM1RW64x128",
-      depth=64,
-      width=128,
-      family="1rw",
-      ports=Seq(
+      name = "SRAM1RW64x128",
+      depth = 64,
+      width = 128,
+      family = "1rw",
+      ports = Seq(
         generateReadWritePort("", 128, BigInt(64))
       )
     ),
     SRAMMacro(
-      name="SRAM1RW64x32",
-      depth=64,
-      width=32,
-      family="1rw",
-      ports=Seq(
+      name = "SRAM1RW64x32",
+      depth = 64,
+      width = 32,
+      family = "1rw",
+      ports = Seq(
         generateReadWritePort("", 32, BigInt(64))
       )
     ),
     SRAMMacro(
-      name="SRAM1RW64x8",
-      depth=64,
-      width=8,
-      family="1rw",
-      ports=Seq(
+      name = "SRAM1RW64x8",
+      depth = 64,
+      width = 8,
+      family = "1rw",
+      ports = Seq(
         generateReadWritePort("", 8, BigInt(64))
       )
     ),
     SRAMMacro(
-      name="SRAM1RW512x8",
-      depth=512,
-      width=8,
-      family="1rw",
-      ports=Seq(
+      name = "SRAM1RW512x8",
+      depth = 512,
+      width = 8,
+      family = "1rw",
+      ports = Seq(
         generateReadWritePort("", 8, BigInt(512))
       )
     ),
     SRAMMacro(
-      name="SRAM2RW64x32",
-      depth=64,
-      width=32,
-      family="1r1w",
-      ports=Seq(
+      name = "SRAM2RW64x32",
+      depth = 64,
+      width = 32,
+      family = "1r1w",
+      ports = Seq(
         generateReadPort("portA", 32, BigInt(64)),
         generateWritePort("portB", 32, BigInt(64))
       )
     )
   )
 
-  val memSRAMs = mdf.macrolib.Utils.readMDFFromString(
-"""
+  val memSRAMs = mdf.macrolib.Utils
+    .readMDFFromString("""
 [
   {
     "type": "sram",
@@ -1537,7 +1537,7 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
   writeToMem(mem, memSRAMs)
 
   val output = // TODO: check correctness...
-"""
+    """
 circuit T_2172_ext :
   module tag_array_ext :
     input RW0_addr : UInt<6>

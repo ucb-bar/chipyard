@@ -6,33 +6,36 @@ package barstools.macros
 
 trait HasSimpleDepthTestGenerator extends HasSimpleTestGenerator {
   this: MacroCompilerSpec with HasSRAMGenerator =>
-    def width: Int
+  def width: Int
 
-    override lazy val memWidth = width
-    override lazy val libWidth = width
+  override lazy val memWidth = width
+  override lazy val libWidth = width
 
-    // Generate a depth-splitting body.
-    override def generateBody(): String = {
-      val output = new StringBuilder
+  // Generate a depth-splitting body.
+  override def generateBody(): String = {
+    val output = new StringBuilder
 
-      if (selectBits > 0) {
-        output.append (
-s"""
+    if (selectBits > 0) {
+      output.append(
+        s"""
     node ${memPortPrefix}_addr_sel = bits(${memPortPrefix}_addr, ${mem_addr_width - 1}, $lib_addr_width)
     reg ${memPortPrefix}_addr_sel_reg : UInt<${selectBits}>, ${memPortPrefix}_clk with :
       reset => (UInt<1>("h0"), ${memPortPrefix}_addr_sel_reg)
     ${memPortPrefix}_addr_sel_reg <= mux(UInt<1>("h1"), ${memPortPrefix}_addr_sel, ${memPortPrefix}_addr_sel_reg)
 """
-        )
-      }
+      )
+    }
 
-      for (i <- 0 to depthInstances - 1) {
-        val maskStatement = generateMaskStatement(0, i)
-        val enableIdentifier = if (selectBits > 0) s"""eq(${memPortPrefix}_addr_sel, UInt<${selectBits}>("h${i.toHexString}"))""" else "UInt<1>(\"h1\")"
-        val chipEnable = s"""UInt<1>("h1")"""
-        val writeEnable = if (memMaskGran.isEmpty) s"and(${memPortPrefix}_write_en, ${chipEnable})" else s"${memPortPrefix}_write_en"
-        output.append(
-  s"""
+    for (i <- 0 to depthInstances - 1) {
+      val maskStatement = generateMaskStatement(0, i)
+      val enableIdentifier =
+        if (selectBits > 0) s"""eq(${memPortPrefix}_addr_sel, UInt<${selectBits}>("h${i.toHexString}"))"""
+        else "UInt<1>(\"h1\")"
+      val chipEnable = s"""UInt<1>("h1")"""
+      val writeEnable =
+        if (memMaskGran.isEmpty) s"and(${memPortPrefix}_write_en, ${chipEnable})" else s"${memPortPrefix}_write_en"
+      output.append(
+        s"""
     inst mem_${i}_0 of ${lib_name}
     mem_${i}_0.${libPortPrefix}_clk <= ${memPortPrefix}_clk
     mem_${i}_0.${libPortPrefix}_addr <= ${memPortPrefix}_addr
@@ -42,26 +45,29 @@ s"""
     mem_${i}_0.${libPortPrefix}_write_en <= and(and(${writeEnable}, UInt<1>("h1")), ${enableIdentifier})
     node ${memPortPrefix}_dout_${i} = ${memPortPrefix}_dout_${i}_0
   """
+      )
+    }
+    def generate_outer_dout_tree(i: Int, depthInstances: Int): String = {
+      if (i > depthInstances - 1) {
+        s"""UInt<${libWidth}>("h0")"""
+      } else {
+        s"""mux(eq(${memPortPrefix}_addr_sel_reg, UInt<%d>("h%s")), ${memPortPrefix}_dout_%d, %s)""".format(
+          selectBits,
+          i.toHexString,
+          i,
+          generate_outer_dout_tree(i + 1, depthInstances)
         )
       }
-      def generate_outer_dout_tree(i:Int, depthInstances: Int): String = {
-        if (i > depthInstances - 1) {
-          s"""UInt<${libWidth}>("h0")"""
-        } else {
-          s"""mux(eq(${memPortPrefix}_addr_sel_reg, UInt<%d>("h%s")), ${memPortPrefix}_dout_%d, %s)""".format(
-            selectBits, i.toHexString, i, generate_outer_dout_tree(i + 1, depthInstances)
-          )
-        }
-      }
-      output append s"  ${memPortPrefix}_dout <= "
-      if (selectBits > 0) {
-        output append generate_outer_dout_tree(0, depthInstances)
-      } else {
-        output append s"""mux(UInt<1>("h1"), ${memPortPrefix}_dout_0, UInt<${libWidth}>("h0"))"""
-      }
-
-      output.toString
     }
+    output.append(s"  ${memPortPrefix}_dout <= ")
+    if (selectBits > 0) {
+      output.append(generate_outer_dout_tree(0, depthInstances))
+    } else {
+      output.append(s"""mux(UInt<1>("h1"), ${memPortPrefix}_dout_0, UInt<${libWidth}>("h0"))""")
+    }
+
+    output.toString
+  }
 }
 
 // Try different widths
@@ -154,7 +160,10 @@ class SplitDepth2048x8_mrw_lib8 extends MacroCompilerSpec with HasSRAMGenerator 
 }
 
 // Non-bit level mask
-class SplitDepth2048x64_mrw_mem32_lib8 extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
+class SplitDepth2048x64_mrw_mem32_lib8
+    extends MacroCompilerSpec
+    with HasSRAMGenerator
+    with HasSimpleDepthTestGenerator {
   override lazy val width = 64
   override lazy val memDepth = BigInt(2048)
   override lazy val libDepth = BigInt(1024)
@@ -165,7 +174,10 @@ class SplitDepth2048x64_mrw_mem32_lib8 extends MacroCompilerSpec with HasSRAMGen
 }
 
 // Bit level mask
-class SplitDepth2048x32_mrw_mem16_lib1 extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleDepthTestGenerator {
+class SplitDepth2048x32_mrw_mem16_lib1
+    extends MacroCompilerSpec
+    with HasSRAMGenerator
+    with HasSimpleDepthTestGenerator {
   override lazy val width = 32
   override lazy val memDepth = BigInt(2048)
   override lazy val libDepth = BigInt(1024)
@@ -213,7 +225,7 @@ class SplitDepth2048x32_mrw_mem3_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val memMaskGran = Some(3)
   override lazy val libMaskGran = Some(1)
 
-  it should "be enabled when non-power of two masks are supported" is (pending)
+  (it should "be enabled when non-power of two masks are supported").is(pending)
   //compileExecuteAndTest(mem, lib, v, output)
 }
 
@@ -224,7 +236,7 @@ class SplitDepth2048x32_mrw_mem7_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val memMaskGran = Some(7)
   override lazy val libMaskGran = Some(1)
 
-  it should "be enabled when non-power of two masks are supported" is (pending)
+  (it should "be enabled when non-power of two masks are supported").is(pending)
   //compileExecuteAndTest(mem, lib, v, output)
 }
 
@@ -235,7 +247,7 @@ class SplitDepth2048x32_mrw_mem9_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val memMaskGran = Some(9)
   override lazy val libMaskGran = Some(1)
 
-  it should "be enabled when non-power of two masks are supported" is (pending)
+  (it should "be enabled when non-power of two masks are supported").is(pending)
   //compileExecuteAndTest(mem, lib, v, output)
 }
 
@@ -247,12 +259,12 @@ class SplitDepth2048x8_extraPort extends MacroCompilerSpec with HasSRAMGenerator
   override lazy val memDepth = BigInt(2048)
   override lazy val libDepth = BigInt(1024)
   override lazy val extraPorts = List(
-    MacroExtraPort(name="extra_port", width=8, portType=Constant, value=0xff)
+    MacroExtraPort(name = "extra_port", width = 8, portType = Constant, value = 0xff)
   )
   override lazy val extraTag = "extraPort"
 
   override def generateOutput(): String =
-"""
+    """
 circuit target_memory :
   module target_memory :
     input outer_addr : UInt<11>
@@ -317,22 +329,22 @@ class SplitDepth_SplitPortsNonMasked extends MacroCompilerSpec with HasSRAMGener
     val v = "split_depth-r-w-split-lib-split-mem.v"
 
     val libMacro = SRAMMacro(
-      name="awesome_lib_mem",
-      width=width,
-      depth=libDepth,
-      family="1r1w",
-      ports=Seq(
+      name = "awesome_lib_mem",
+      width = width,
+      depth = libDepth,
+      family = "1r1w",
+      ports = Seq(
         generateReadPort("innerA", width, libDepth),
         generateWritePort("innerB", width, libDepth)
       )
     )
 
     val memMacro = SRAMMacro(
-      name="target_memory",
-      width=width,
-      depth=memDepth,
-      family="1r1w",
-      ports=Seq(
+      name = "target_memory",
+      width = width,
+      depth = memDepth,
+      family = "1r1w",
+      ports = Seq(
         generateReadPort("outerB", width, memDepth),
         generateWritePort("outerA", width, memDepth)
       )
@@ -342,7 +354,7 @@ class SplitDepth_SplitPortsNonMasked extends MacroCompilerSpec with HasSRAMGener
     writeToLib(lib, Seq(libMacro))
 
     val output =
-"""
+      """
 circuit target_memory :
   module target_memory :
     input outerB_addr : UInt<11>
@@ -404,11 +416,11 @@ circuit target_memory :
     val v = "split_depth-r-w-regular-lib-split-mem.v"
 
     val memMacro = SRAMMacro(
-      name="target_memory",
-      width=width,
-      depth=memDepth,
-      family="1r1w",
-      ports=Seq(
+      name = "target_memory",
+      width = width,
+      depth = memDepth,
+      family = "1r1w",
+      ports = Seq(
         generateReadPort("outerB", width, memDepth),
         generateWritePort("outerA", width, memDepth)
       )
@@ -418,7 +430,7 @@ circuit target_memory :
     writeToLib(lib, Seq(generateSRAM("awesome_lib_mem", "lib", width, libDepth)))
 
     val output =
-"""
+      """
 TODO
 """
 
@@ -437,11 +449,11 @@ TODO
     val v = "split_depth-r-w-split-lib-regular-mem.v"
 
     val libMacro = SRAMMacro(
-      name="awesome_lib_mem",
-      width=width,
-      depth=libDepth,
-      family="1rw",
-      ports=Seq(
+      name = "awesome_lib_mem",
+      width = width,
+      depth = libDepth,
+      family = "1rw",
+      ports = Seq(
         generateReadPort("innerA", width, libDepth),
         generateWritePort("innerB", width, libDepth)
       )
@@ -451,7 +463,7 @@ TODO
     writeToLib(lib, Seq(libMacro))
 
     val output =
-"""
+      """
 TODO
 """
 
@@ -478,22 +490,22 @@ class SplitDepth_SplitPortsMasked extends MacroCompilerSpec with HasSRAMGenerato
     val v = "split_depth-r-mw-split-lib-split-mem.v"
 
     val libMacro = SRAMMacro(
-      name="awesome_lib_mem",
-      width=width,
-      depth=libDepth,
-      family="1r1w",
-      ports=Seq(
+      name = "awesome_lib_mem",
+      width = width,
+      depth = libDepth,
+      family = "1r1w",
+      ports = Seq(
         generateReadPort("innerA", width, libDepth),
         generateWritePort("innerB", width, libDepth, libMaskGran)
       )
     )
 
     val memMacro = SRAMMacro(
-      name="target_memory",
-      width=width,
-      depth=memDepth,
-      family="1r1w",
-      ports=Seq(
+      name = "target_memory",
+      width = width,
+      depth = memDepth,
+      family = "1r1w",
+      ports = Seq(
         generateReadPort("outerB", width, memDepth),
         generateWritePort("outerA", width, memDepth, memMaskGran)
       )
@@ -503,7 +515,7 @@ class SplitDepth_SplitPortsMasked extends MacroCompilerSpec with HasSRAMGenerato
     writeToLib(lib, Seq(libMacro))
 
     val output =
-"""
+      """
 circuit target_memory :
   module target_memory :
     input outerB_addr : UInt<11>
@@ -569,11 +581,11 @@ circuit target_memory :
     val v = "split_depth-r-mw-regular-lib-split-mem.v"
 
     val memMacro = SRAMMacro(
-      name="target_memory",
-      width=width,
-      depth=memDepth,
-      family="1r1w",
-      ports=Seq(
+      name = "target_memory",
+      width = width,
+      depth = memDepth,
+      family = "1r1w",
+      ports = Seq(
         generateReadPort("outerB", width, memDepth),
         generateWritePort("outerA", width, memDepth, memMaskGran)
       )
@@ -583,7 +595,7 @@ circuit target_memory :
     writeToLib(lib, Seq(generateSRAM("awesome_lib_mem", "lib", width, libDepth, libMaskGran)))
 
     val output =
-"""
+      """
 TODO
 """
 
@@ -602,11 +614,11 @@ TODO
     val v = "split_depth-r-mw-split-lib-regular-mem.v"
 
     val libMacro = SRAMMacro(
-      name="awesome_lib_mem",
-      width=width,
-      depth=libDepth,
-      family="1rw",
-      ports=Seq(
+      name = "awesome_lib_mem",
+      width = width,
+      depth = libDepth,
+      family = "1rw",
+      ports = Seq(
         generateReadPort("innerA", width, libDepth),
         generateWritePort("innerB", width, libDepth, libMaskGran)
       )
@@ -616,7 +628,7 @@ TODO
     writeToLib(lib, Seq(libMacro))
 
     val output =
-"""
+      """
 TODO
 """
 

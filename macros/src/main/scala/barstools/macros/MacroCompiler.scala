@@ -1,10 +1,9 @@
 // See LICENSE for license details.
 
-/**
- * Terminology note:
- * mem - target memory to compile, in design (e.g. Mem() in rocket)
- * lib - technology SRAM(s) to use to compile mem
- */
+/** Terminology note:
+  * mem - target memory to compile, in design (e.g. Mem() in rocket)
+  * lib - technology SRAM(s) to use to compile mem
+  */
 
 package barstools.macros
 
@@ -29,56 +28,75 @@ case class MacroCompilerAnnotation(content: String) extends NoTargetAnnotation {
   def params: Params = MacroCompilerUtil.objFromString(content).asInstanceOf[Params]
 }
 
-
-/**
- * The MacroCompilerAnnotation to trigger the macro compiler.
- * Note that this annotation does NOT actually target any modules for
- * compilation. It simply holds all the settings for the memory compiler. The
- * actual selection of which memories to compile is set in the Params.
- *
- * To use, simply annotate the entire circuit itself with this annotation and
- * include [[MacroCompilerTransform]].
- *
- */
+/** The MacroCompilerAnnotation to trigger the macro compiler.
+  * Note that this annotation does NOT actually target any modules for
+  * compilation. It simply holds all the settings for the memory compiler. The
+  * actual selection of which memories to compile is set in the Params.
+  *
+  * To use, simply annotate the entire circuit itself with this annotation and
+  * include [[MacroCompilerTransform]].
+  */
 object MacroCompilerAnnotation {
+
   /** Macro compiler mode. */
   sealed trait CompilerMode
+
   /** Strict mode - must compile all memories or error out. */
   case object Strict extends CompilerMode
+
   /** Synflops mode - compile all memories with synflops (do not map to lib at all). */
   case object Synflops extends CompilerMode
+
   /** CompileAndSynflops mode - compile all memories and create mock versions of the target libs with synflops. */
   case object CompileAndSynflops extends CompilerMode
-  /** FallbackSynflops - compile all memories to SRAM when possible and fall back to synflops if a memory fails. **/
+
+  /** FallbackSynflops - compile all memories to SRAM when possible and fall back to synflops if a memory fails. * */
   case object FallbackSynflops extends CompilerMode
-  /** CompileAvailable - compile what is possible and do nothing with uncompiled memories. **/
+
+  /** CompileAvailable - compile what is possible and do nothing with uncompiled memories. * */
   case object CompileAvailable extends CompilerMode
 
-  /**
-   * The default mode for the macro compiler.
-   * TODO: Maybe set the default to FallbackSynflops (typical for
-   * vlsi_mem_gen-like scripts) once it's implemented?
-   */
+  /** The default mode for the macro compiler.
+    * TODO: Maybe set the default to FallbackSynflops (typical for
+    * vlsi_mem_gen-like scripts) once it's implemented?
+    */
   val Default = CompileAvailable
 
   // Options as list of (CompilerMode, command-line name, description)
   val options: Seq[(CompilerMode, String, String)] = Seq(
     (Default, "default", "Select the default option from below."),
     (Strict, "strict", "Compile all memories to library or return an error."),
-    (Synflops, "synflops", "Produces synthesizable flop-based memories for all memories (do not map to lib at all); likely useful for simulation purposes."),
-    (CompileAndSynflops, "compileandsynflops", "Compile all memories and create mock versions of the target libs with synflops; likely also useful for simulation purposes."),
-    (FallbackSynflops, "fallbacksynflops", "Compile all memories to library when possible and fall back to synthesizable flop-based memories when library synth is not possible."),
-    (CompileAvailable, "compileavailable", "Compile all memories to library when possible and do nothing in case of errors. (default)")
+    (
+      Synflops,
+      "synflops",
+      "Produces synthesizable flop-based memories for all memories (do not map to lib at all); likely useful for simulation purposes."
+    ),
+    (
+      CompileAndSynflops,
+      "compileandsynflops",
+      "Compile all memories and create mock versions of the target libs with synflops; likely also useful for simulation purposes."
+    ),
+    (
+      FallbackSynflops,
+      "fallbacksynflops",
+      "Compile all memories to library when possible and fall back to synthesizable flop-based memories when library synth is not possible."
+    ),
+    (
+      CompileAvailable,
+      "compileavailable",
+      "Compile all memories to library when possible and do nothing in case of errors. (default)"
+    )
   )
 
   /** Helper function to select a compiler mode. */
-  def stringToCompilerMode(str: String): CompilerMode = options.collectFirst { case (mode, cmd, _) if cmd == str => mode } match {
+  def stringToCompilerMode(str: String): CompilerMode = options.collectFirst {
+    case (mode, cmd, _) if cmd == str => mode
+  } match {
     case Some(x) => x
-    case None => throw new IllegalArgumentException("No such compiler mode " + str)
+    case None    => throw new IllegalArgumentException("No such compiler mode " + str)
   }
 
-  /**
-    * Parameters associated to this MacroCompilerAnnotation.
+  /** Parameters associated to this MacroCompilerAnnotation.
     *
     * @param mem           Path to memory lib
     * @param memFormat     Type of memory lib (Some("conf"), Some("mdf"), or None (defaults to mdf))
@@ -89,26 +107,34 @@ object MacroCompilerAnnotation {
     * @param forceCompile  Set of memories to force compiling to lib regardless of the mode
     * @param forceSynflops Set of memories to force compiling as flops regardless of the mode
     */
-   case class Params(mem: String, memFormat: Option[String], lib: Option[String], hammerIR: Option[String],
-                    costMetric: CostMetric, mode: CompilerMode, useCompiler: Boolean,
-                    forceCompile: Set[String], forceSynflops: Set[String])
+  case class Params(
+    mem:           String,
+    memFormat:     Option[String],
+    lib:           Option[String],
+    hammerIR:      Option[String],
+    costMetric:    CostMetric,
+    mode:          CompilerMode,
+    useCompiler:   Boolean,
+    forceCompile:  Set[String],
+    forceSynflops: Set[String])
 
-  /**
-   * Create a MacroCompilerAnnotation.
-   * @param c Top-level circuit name (see class description)
-   * @param p Parameters (see above).
-   */
+  /** Create a MacroCompilerAnnotation.
+    * @param c Top-level circuit name (see class description)
+    * @param p Parameters (see above).
+    */
   def apply(c: String, p: Params): MacroCompilerAnnotation =
     MacroCompilerAnnotation(MacroCompilerUtil.objToString(p))
 
 }
 
-class MacroCompilerPass(mems: Option[Seq[Macro]],
-                        libs: Option[Seq[Macro]],
-                        compilers: Option[SRAMCompiler],
-                        hammerIR: Option[String],
-                        costMetric: CostMetric = CostMetric.default,
-                        mode: MacroCompilerAnnotation.CompilerMode = MacroCompilerAnnotation.Default) extends firrtl.passes.Pass {
+class MacroCompilerPass(
+  mems:       Option[Seq[Macro]],
+  libs:       Option[Seq[Macro]],
+  compilers:  Option[SRAMCompiler],
+  hammerIR:   Option[String],
+  costMetric: CostMetric = CostMetric.default,
+  mode:       MacroCompilerAnnotation.CompilerMode = MacroCompilerAnnotation.Default)
+    extends firrtl.passes.Pass {
   // Helper function to check the legality of bitPairs.
   // e.g. ((0,21), (22,43)) is legal
   // ((0,21), (22,21)) is illegal and will throw an assert
@@ -120,8 +146,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
     })
   }
 
-  /**
-    * Calculate bit pairs.
+  /** Calculate bit pairs.
     * This is a list of submemories by width.
     * The tuples are (lsb, msb) inclusive.
     * Example: (0, 7) and (8, 15) might be a split for a width=16 memory into two width=8 target memories.
@@ -132,7 +157,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
     * @return Bit pairs or empty list if there was an error.
     */
   private def calculateBitPairs(mem: Macro, lib: Macro): Seq[(BigInt, BigInt)] = {
-    val pairedPorts = mem.sortedPorts zip lib.sortedPorts
+    val pairedPorts = mem.sortedPorts.zip(lib.sortedPorts)
 
     val bitPairs = ArrayBuffer[(BigInt, BigInt)]()
     var currentLSB: BigInt = 0
@@ -203,7 +228,9 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
                 splitMemory(memMask.get)
               } else {
                 // e.g. mem mask = 13, lib width = 8
-                System.err.println(s"Unmasked target memory: unaligned mem maskGran $p with lib (${lib.src.name}) width ${libPort.src.width.get} not supported")
+                System.err.println(
+                  s"Unmasked target memory: unaligned mem maskGran $p with lib (${lib.src.name}) width ${libPort.src.width.get} not supported"
+                )
                 return Seq()
               }
             }
@@ -266,9 +293,11 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
   }
 
   def compile(mem: Macro, lib: Macro): Option[(Module, Macro)] = {
-    assert(mem.sortedPorts.lengthCompare(lib.sortedPorts.length) == 0,
-      "mem and lib should have an equal number of ports")
-    val pairedPorts = mem.sortedPorts zip lib.sortedPorts
+    assert(
+      mem.sortedPorts.lengthCompare(lib.sortedPorts.length) == 0,
+      "mem and lib should have an equal number of ports"
+    )
+    val pairedPorts = mem.sortedPorts.zip(lib.sortedPorts)
 
     // Width mapping. See calculateBitPairs.
     val bitPairs: Seq[(BigInt, BigInt)] = calculateBitPairs(mem, lib)
@@ -287,14 +316,14 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
     /* Palmer: If we've got a parallel memory then we've got to take the
      * address bits into account. */
     if (mem.src.depth > lib.src.depth) {
-      mem.src.ports foreach { port =>
+      mem.src.ports.foreach { port =>
         val high = MacroCompilerMath.ceilLog2(mem.src.depth)
         val low = MacroCompilerMath.ceilLog2(lib.src.depth)
         val ref = WRef(port.address.name)
         val nodeName = s"${ref.name}_sel"
-        val tpe = UIntType(IntWidth(high-low))
+        val tpe = UIntType(IntWidth(high - low))
         selects(ref.name) = WRef(nodeName, tpe)
-        stmts += DefNode(NoInfo, nodeName, bits(ref, high-1, low))
+        stmts += DefNode(NoInfo, nodeName, bits(ref, high - 1, low))
         // Donggyu: output selection should be piped
         if (port.output.isDefined) {
           val regName = s"${ref.name}_sel_reg"
@@ -303,7 +332,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
               and(WRef(ce.name, BoolType), WRef(re.name, BoolType))
             case (Some(ce), None) => WRef(ce.name, BoolType)
             case (None, Some(re)) => WRef(re.name, BoolType)
-            case (None, None) => one
+            case (None, None)     => one
           }
           selectRegs(ref.name) = WRef(regName, tpe)
           stmts += DefRegister(NoInfo, regName, tpe, WRef(port.clock.get.name), zero, WRef(regName))
@@ -317,18 +346,18 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
         // Create the instance.
         stmts += WDefInstance(NoInfo, name, lib.src.name, lib.tpe)
         // Connect extra ports of the lib.
-        stmts ++= lib.extraPorts map { case (portName, portValue) =>
+        stmts ++= lib.extraPorts.map { case (portName, portValue) =>
           Connect(NoInfo, WSubField(WRef(name), portName), portValue)
         }
       }
       for ((memPort, libPort) <- pairedPorts) {
-        val addrMatch = selects get memPort.src.address.name match {
+        val addrMatch = selects.get(memPort.src.address.name) match {
           case None => one
           case Some(addr) =>
             val index = UIntLiteral(i, IntWidth(bitWidth(addr.tpe)))
             DoPrim(PrimOps.Eq, Seq(addr, index), Nil, index.tpe)
         }
-        val addrMatchReg = selectRegs get memPort.src.address.name match {
+        val addrMatchReg = selectRegs.get(memPort.src.address.name) match {
           case None => one
           case Some(reg) =>
             val index = UIntLiteral(i, IntWidth(bitWidth(reg.tpe)))
@@ -341,29 +370,22 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
         for (((low, high), j) <- bitPairs.zipWithIndex) {
           val inst = WRef(s"mem_${i}_${j}", lib.tpe)
 
-          def connectPorts2(mem: Expression,
-                           lib: String,
-                           polarity: Option[PortPolarity]): Statement =
+          def connectPorts2(mem: Expression, lib: String, polarity: Option[PortPolarity]): Statement =
             Connect(NoInfo, WSubField(inst, lib), portToExpression(mem, polarity))
-          def connectPorts(mem: Expression,
-                           lib: String,
-                           polarity: PortPolarity): Statement =
+          def connectPorts(mem: Expression, lib: String, polarity: PortPolarity): Statement =
             connectPorts2(mem, lib, Some(polarity))
 
           // Clock port mapping
           /* Palmer: FIXME: I don't handle memories with read/write clocks yet. */
           /* Colin not all libPorts have clocks but all memPorts do*/
           libPort.src.clock.foreach { cPort =>
-            stmts += connectPorts(WRef(memPort.src.clock.get.name),
-                                       cPort.name,
-                                       cPort.polarity) }
+            stmts += connectPorts(WRef(memPort.src.clock.get.name), cPort.name, cPort.polarity)
+          }
 
           // Adress port mapping
           /* Palmer: The address port to a memory is just the low-order bits of
            * the top address. */
-          stmts += connectPorts(WRef(memPort.src.address.name),
-                                libPort.src.address.name,
-                                libPort.src.address.polarity)
+          stmts += connectPorts(WRef(memPort.src.address.name), libPort.src.address.name, libPort.src.address.polarity)
 
           // Output port mapping
           (memPort.src.output, libPort.src.output) match {
@@ -373,20 +395,20 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
                * done after generating all the memories.  This saves up the
                * output statements for later. */
               val name = s"${mem}_${i}_${j}" // This name is the output from the instance (mem vs ${mem}).
-              val exp = portToExpression(bits(WSubField(inst, lib), high-low, 0), Some(lib_polarity))
+              val exp = portToExpression(bits(WSubField(inst, lib), high - low, 0), Some(lib_polarity))
               stmts += DefNode(NoInfo, name, exp)
               cats += WRef(name)
             case (None, Some(lib)) =>
-              /* Palmer: If the inner memory has an output port but the outer
-               * one doesn't then it's safe to just leave the outer
-               * port floating. */
+            /* Palmer: If the inner memory has an output port but the outer
+             * one doesn't then it's safe to just leave the outer
+             * port floating. */
             case (None, None) =>
-              /* Palmer: If there's no output ports at all (ie, read-only
-               * port on the memory) then just don't worry about it,
-               * there's nothing to do. */
+            /* Palmer: If there's no output ports at all (ie, read-only
+             * port on the memory) then just don't worry about it,
+             * there's nothing to do. */
             case (Some(PolarizedPort(mem, _)), None) =>
-              System.err println "WARNING: Unable to match output ports on memory"
-              System.err println s"  outer output port: ${mem}"
+              System.err.println("WARNING: Unable to match output ports on memory")
+              System.err.println(s"  outer output port: ${mem}")
               return None
           }
 
@@ -396,7 +418,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
               /* Palmer: The input port to a memory just needs to happen in parallel,
                * this does a part select to narrow the memory down. */
               stmts += connectPorts(bits(WRef(mem), high, low), lib, lib_polarity)
-              case (None, Some(lib)) =>
+            case (None, Some(lib)) =>
               /* Palmer: If the inner memory has an input port but the other
                * one doesn't then it's safe to just leave the inner
                * port floating.  This should be handled by the
@@ -405,12 +427,12 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
               //Firrtl cares about dangling inputs now tie it off
               stmts += IsInvalid(NoInfo, WSubField(inst, lib.name))
             case (None, None) =>
-              /* Palmer: If there's no input ports at all (ie, read-only
-               * port on the memory) then just don't worry about it,
-               * there's nothing to do. */
+            /* Palmer: If there's no input ports at all (ie, read-only
+             * port on the memory) then just don't worry about it,
+             * there's nothing to do. */
             case (Some(PolarizedPort(mem, _)), None) =>
-              System.err println "WARNING: Unable to match input ports on memory"
-              System.err println s"  outer input port: ${mem}"
+              System.err.println("WARNING: Unable to match input ports on memory")
+              System.err.println(s"  outer input port: ${mem}")
               return None
           }
 
@@ -429,26 +451,33 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
                 // Example: if we have a lib whose maskGran is 8 but our mem's maskGran is 4.
                 // The other case is if we're using a larger lib than mem.
                 val usingLessThanLibMaskGran = (memPort.src.maskGran.get < libPort.src.effectiveMaskGran)
-                val effectiveLibWidth = if (usingLessThanLibMaskGran)
-                  memPort.src.maskGran.get
-                else
-                  libPort.src.width.get
+                val effectiveLibWidth =
+                  if (usingLessThanLibMaskGran)
+                    memPort.src.maskGran.get
+                  else
+                    libPort.src.width.get
 
-                cat(((0 until libPort.src.width.get by libPort.src.effectiveMaskGran) map (i => {
-                  if (usingLessThanLibMaskGran && i >= effectiveLibWidth) {
-                    // If the memMaskGran is smaller than the lib's gran, then
-                    // zero out the upper bits.
-                    zero
-                  } else {
-                    if ((low + i) >= memPort.src.width.get) {
-                      // If our bit is larger than the whole width of the mem, just zero out the upper bits.
-                      zero
-                    } else {
-                      // Pick the appropriate bit from the mem mask.
-                      bits(WRef(mem), (low + i) / memPort.src.effectiveMaskGran)
-                    }
-                  }
-                })).reverse)
+                cat(
+                  (
+                    (0 until libPort.src.width.get by libPort.src.effectiveMaskGran)
+                      .map(i => {
+                        if (usingLessThanLibMaskGran && i >= effectiveLibWidth) {
+                          // If the memMaskGran is smaller than the lib's gran, then
+                          // zero out the upper bits.
+                          zero
+                        } else {
+                          if ((low + i) >= memPort.src.width.get) {
+                            // If our bit is larger than the whole width of the mem, just zero out the upper bits.
+                            zero
+                          } else {
+                            // Pick the appropriate bit from the mem mask.
+                            bits(WRef(mem), (low + i) / memPort.src.effectiveMaskGran)
+                          }
+                        }
+                      })
+                    )
+                    .reverse
+                )
               }
             case None =>
               /* If there is a lib mask port but no mem mask port, just turn on
@@ -482,7 +511,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
           // Chip enable port mapping
           val memChipEnable = memPort.src.chipEnable match {
             case Some(PolarizedPort(mem, _)) => WRef(mem)
-            case None      => one
+            case None                        => one
           }
 
           // Read enable port mapping
@@ -501,7 +530,11 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
            * implement the outer memory's collection of ports using what
            * the inner memory has availiable. */
           ((libPort.src.maskPort, libPort.src.writeEnable, libPort.src.chipEnable): @unchecked) match {
-            case (Some(PolarizedPort(mask, mask_polarity)), Some(PolarizedPort(we, we_polarity)), Some(PolarizedPort(en, en_polarity))) =>
+            case (
+                  Some(PolarizedPort(mask, mask_polarity)),
+                  Some(PolarizedPort(we, we_polarity)),
+                  Some(PolarizedPort(en, en_polarity))
+                ) =>
               /* Palmer: This is the simple option: every port exists. */
               stmts += connectPorts(memMask, mask, mask_polarity)
               stmts += connectPorts(andAddrMatch(memWriteEnable), we, we_polarity)
@@ -509,8 +542,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
             case (Some(PolarizedPort(mask, mask_polarity)), Some(PolarizedPort(we, we_polarity)), None) =>
               /* Palmer: If we don't have a chip enable but do have mask ports. */
               stmts += connectPorts(memMask, mask, mask_polarity)
-              stmts += connectPorts(andAddrMatch(and(memWriteEnable, memChipEnable)),
-                                    we, we_polarity)
+              stmts += connectPorts(andAddrMatch(and(memWriteEnable, memChipEnable)), we, we_polarity)
             case (None, Some(PolarizedPort(we, we_polarity)), chipEnable) =>
               if (bitWidth(memMask.tpe) == 1) {
                 /* Palmer: If we're expected to provide mask ports without a
@@ -518,13 +550,15 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
                  * write enable port instead of the mask port. */
                 chipEnable match {
                   case Some(PolarizedPort(en, en_polarity)) => {
-                    stmts += connectPorts(andAddrMatch(and(memWriteEnable, memMask)),
-                                      we, we_polarity)
+                    stmts += connectPorts(andAddrMatch(and(memWriteEnable, memMask)), we, we_polarity)
                     stmts += connectPorts(andAddrMatch(memChipEnable), en, en_polarity)
                   }
                   case _ => {
-                    stmts += connectPorts(andAddrMatch(and(and(memWriteEnable, memChipEnable), memMask)),
-                                      we, we_polarity)
+                    stmts += connectPorts(
+                      andAddrMatch(and(and(memWriteEnable, memChipEnable), memMask)),
+                      we,
+                      we_polarity
+                    )
                   }
                 }
               } else {
@@ -532,8 +566,8 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
                 return None
               }
             case (None, None, None) =>
-              // No write ports to match up (this may be a read-only port).
-              // This isn't necessarily an error condition.
+            // No write ports to match up (this may be a read-only port).
+            // This isn't necessarily an error condition.
           }
         }
         // Cat macro outputs for selection
@@ -541,7 +575,7 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
           case Some(PolarizedPort(mem, _)) if cats.nonEmpty =>
             val name = s"${mem}_${i}"
             stmts += DefNode(NoInfo, name, cat(cats.toSeq.reverse))
-            (outputs getOrElseUpdate (mem, ArrayBuffer[(Expression, Expression)]())) +=
+            (outputs.getOrElseUpdate(mem, ArrayBuffer[(Expression, Expression)]())) +=
               (addrMatchReg -> WRef(name))
           case _ =>
         }
@@ -549,15 +583,17 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
     }
     // Connect mem outputs
     val zeroOutputValue: Expression = UIntLiteral(0, IntWidth(mem.src.width))
-    mem.src.ports foreach { port =>
+    mem.src.ports.foreach { port =>
       port.output match {
-        case Some(PolarizedPort(mem, _)) => outputs get mem match {
-          case Some(select) =>
-            val output = (select foldRight (zeroOutputValue)) {
-              case ((cond, tval), fval) => Mux(cond, tval, fval, fval.tpe) }
-            stmts += Connect(NoInfo, WRef(mem), output)
-          case None =>
-        }
+        case Some(PolarizedPort(mem, _)) =>
+          outputs.get(mem) match {
+            case Some(select) =>
+              val output = (select.foldRight(zeroOutputValue)) { case ((cond, tval), fval) =>
+                Mux(cond, tval, fval, fval.tpe)
+              }
+              stmts += Connect(NoInfo, WRef(mem), output)
+            case None =>
+          }
         case None =>
       }
     }
@@ -572,79 +608,84 @@ class MacroCompilerPass(mems: Option[Seq[Macro]],
         // Try to compile each of the memories in mems.
         // The 'state' is c.modules, which is a list of all the firrtl modules
         // in the 'circuit'.
-        (mems foldLeft c.modules){ (modules, mem) =>
-
-        val sram = mem.src
-        def groupMatchesMask(group: SRAMGroup, mem:SRAMMacro): Boolean = {
-          val memMask = mem.ports map (_.maskGran) find (_.isDefined) map (_.get)
-          val libMask = group.ports map (_.maskGran) find (_.isDefined) map (_.get)
-          (memMask, libMask) match {
-            case (None, _) => true
-            case (Some(_), None) => false
-            case (Some(m), Some(l)) => l <= m //Ignore memories that don't have nice mask
+        (mems.foldLeft(c.modules)) { (modules, mem) =>
+          val sram = mem.src
+          def groupMatchesMask(group: SRAMGroup, mem: SRAMMacro): Boolean = {
+            val memMask = mem.ports.map(_.maskGran).find(_.isDefined).map(_.get)
+            val libMask = group.ports.map(_.maskGran).find(_.isDefined).map(_.get)
+            (memMask, libMask) match {
+              case (None, _)          => true
+              case (Some(_), None)    => false
+              case (Some(m), Some(l)) => l <= m //Ignore memories that don't have nice mask
+            }
           }
-        }
-        // Add compiler memories that might map well to libs
-        val compLibs = compilers match {
-          case Some(SRAMCompiler(_, groups)) => {
-            groups.filter(g => g.family == sram.family && groupMatchesMask(g, sram)).map( g => {
-              for(w <- g.width; d <- g.depth if((sram.width % w == 0) && (sram.depth % d == 0)))
-                yield Seq(new Macro(buildSRAMMacro(g, d, w, g.vt.head)))
-            } )
+          // Add compiler memories that might map well to libs
+          val compLibs = compilers match {
+            case Some(SRAMCompiler(_, groups)) => {
+              groups
+                .filter(g => g.family == sram.family && groupMatchesMask(g, sram))
+                .map(g => {
+                  for {
+                    w <- g.width
+                    d <- g.depth if ((sram.width % w == 0) && (sram.depth % d == 0))
+                  } yield Seq(new Macro(buildSRAMMacro(g, d, w, g.vt.head)))
+                })
+            }
+            case None => Seq()
           }
-          case None => Seq()
-        }
-        val fullLibs = libs ++ compLibs.flatten.flatten
+          val fullLibs = libs ++ compLibs.flatten.flatten
 
-        // Try to compile mem against each lib in libs, keeping track of the
-        // best compiled version, external lib used, and cost.
-        val (best, cost) = (fullLibs foldLeft (None: Option[(Module, Macro)], Double.MaxValue)){
-          case ((best, cost), lib) if mem.src.ports.size != lib.src.ports.size =>
-            /* Palmer: FIXME: This just assumes the Chisel and vendor ports are in the same
-             * order, but I'm starting with what actually gets generated. */
-            System.err println s"INFO: unable to compile ${mem.src.name} using ${lib.src.name} port count must match"
-            (best, cost)
-          case ((best, cost), lib) =>
-            // Run the cost function to evaluate this potential compile.
-            costMetric.cost(mem, lib) match {
-              case Some(newCost) => {
-                //System.err.println(s"Cost of ${lib.src.name} for ${mem.src.name}: ${newCost}")
-                // Try compiling
-                compile(mem, lib) match {
-                  // If it was successful and the new cost is lower
-                  case Some(p) if (newCost < cost) => (Some(p), newCost)
-                  case _ => (best, cost)
+          // Try to compile mem against each lib in libs, keeping track of the
+          // best compiled version, external lib used, and cost.
+          val (best, cost) = (fullLibs.foldLeft(None: Option[(Module, Macro)], Double.MaxValue)) {
+            case ((best, cost), lib) if mem.src.ports.size != lib.src.ports.size =>
+              /* Palmer: FIXME: This just assumes the Chisel and vendor ports are in the same
+               * order, but I'm starting with what actually gets generated. */
+              System.err.println(s"INFO: unable to compile ${mem.src.name} using ${lib.src.name} port count must match")
+              (best, cost)
+            case ((best, cost), lib) =>
+              // Run the cost function to evaluate this potential compile.
+              costMetric.cost(mem, lib) match {
+                case Some(newCost) => {
+                  //System.err.println(s"Cost of ${lib.src.name} for ${mem.src.name}: ${newCost}")
+                  // Try compiling
+                  compile(mem, lib) match {
+                    // If it was successful and the new cost is lower
+                    case Some(p) if (newCost < cost) => (Some(p), newCost)
+                    case _                           => (best, cost)
+                  }
                 }
+                case _ => (best, cost) // Cost function rejected this combination.
               }
-              case _ => (best, cost) // Cost function rejected this combination.
-            }
-        }
-
-        // If we were able to compile anything, then replace the original module
-        // in the modules list with a compiled version, as well as the extmodule
-        // stub for the lib.
-        best match {
-          case None => {
-            if (mode == MacroCompilerAnnotation.Strict)
-              throw new MacroCompilerException(s"Target memory ${mem.src.name} could not be compiled and strict mode is activated - aborting.")
-            else
-              modules
           }
-          case Some((mod, bb)) =>
-            hammerIR match {
-              case Some(f) => {
-                val hammerIRWriter = new FileWriter(new File(f), !firstLib)
-                if(firstLib) hammerIRWriter.write("[\n")
-                hammerIRWriter.write(bb.src.toJSON().toString())
-                hammerIRWriter.write("\n,\n")
-                hammerIRWriter.close()
-                firstLib = false
-              }
-              case None =>
+
+          // If we were able to compile anything, then replace the original module
+          // in the modules list with a compiled version, as well as the extmodule
+          // stub for the lib.
+          best match {
+            case None => {
+              if (mode == MacroCompilerAnnotation.Strict)
+                throw new MacroCompilerException(
+                  s"Target memory ${mem.src.name} could not be compiled and strict mode is activated - aborting."
+                )
+              else
+                modules
             }
-            (modules filterNot (m => m.name == mod.name || m.name == bb.blackbox.name)) ++ Seq(mod, bb.blackbox)
+            case Some((mod, bb)) =>
+              hammerIR match {
+                case Some(f) => {
+                  val hammerIRWriter = new FileWriter(new File(f), !firstLib)
+                  if (firstLib) hammerIRWriter.write("[\n")
+                  hammerIRWriter.write(bb.src.toJSON().toString())
+                  hammerIRWriter.write("\n,\n")
+                  hammerIRWriter.close()
+                  firstLib = false
+                }
+                case None =>
+              }
+              (modules.filterNot(m => m.name == mod.name || m.name == bb.blackbox.name)) ++ Seq(mod, bb.blackbox)
+          }
         }
-      }
       case _ => c.modules
     }
     c.copy(modules = modules)
@@ -657,37 +698,45 @@ class MacroCompilerTransform extends Transform {
 
   def execute(state: CircuitState) = state.annotations.collect { case a: MacroCompilerAnnotation => a } match {
     case Seq(anno: MacroCompilerAnnotation) =>
-      val MacroCompilerAnnotation.Params(memFile, memFileFormat, libFile, hammerIR, costMetric, mode, useCompiler, forceCompile, forceSynflops) = anno.params
+      val MacroCompilerAnnotation.Params(
+        memFile,
+        memFileFormat,
+        libFile,
+        hammerIR,
+        costMetric,
+        mode,
+        useCompiler,
+        forceCompile,
+        forceSynflops
+      ) = anno.params
       if (mode == MacroCompilerAnnotation.FallbackSynflops) {
         throw new UnsupportedOperationException("Not implemented yet")
       }
 
       // Check that we don't have any modules both forced to compile and synflops.
-      assert((forceCompile intersect forceSynflops).isEmpty, "Cannot have modules both forced to compile and synflops")
+      assert((forceCompile.intersect(forceSynflops)).isEmpty, "Cannot have modules both forced to compile and synflops")
 
       // Read, eliminate None, get only SRAM, make firrtl macro
       val mems: Option[Seq[Macro]] = (memFileFormat match {
         case Some("conf") => Utils.readConfFromPath(Some(memFile))
-        case _ => mdf.macrolib.Utils.readMDFFromPath(Some(memFile))
+        case _            => mdf.macrolib.Utils.readMDFFromPath(Some(memFile))
       }) match {
-        case Some(x:Seq[mdf.macrolib.Macro]) =>
-          Some(Utils.filterForSRAM(Some(x)) getOrElse(List()) map {new Macro(_)})
+        case Some(x: Seq[mdf.macrolib.Macro]) =>
+          Some(Utils.filterForSRAM(Some(x)).getOrElse(List()).map { new Macro(_) })
         case _ => None
       }
       val libs: Option[Seq[Macro]] = mdf.macrolib.Utils.readMDFFromPath(libFile) match {
-        case Some(x:Seq[mdf.macrolib.Macro]) =>
-          Some(Utils.filterForSRAM(Some(x)) getOrElse(List()) map {new Macro(_)})
+        case Some(x: Seq[mdf.macrolib.Macro]) =>
+          Some(Utils.filterForSRAM(Some(x)).getOrElse(List()).map { new Macro(_) })
         case _ => None
       }
       val compilers: Option[mdf.macrolib.SRAMCompiler] = mdf.macrolib.Utils.readMDFFromPath(libFile) match {
-        case Some(x:Seq[mdf.macrolib.Macro]) =>
-          if(useCompiler){
+        case Some(x: Seq[mdf.macrolib.Macro]) =>
+          if (useCompiler) {
             findSRAMCompiler(Some(x))
-          }
-          else None
+          } else None
         case _ => None
       }
-
 
       // Helper function to turn a set of mem names into a Seq[Macro].
       def setToSeqMacro(names: Set[String]): Seq[Macro] = {
@@ -706,12 +755,16 @@ class MacroCompilerTransform extends Transform {
 
       val transforms = Seq(
         new MacroCompilerPass(memCompile, libs, compilers, hammerIR, costMetric, mode),
-        new SynFlopsPass(true, memSynflops ++ (if (mode == MacroCompilerAnnotation.CompileAndSynflops) {
-          libs.get
-        } else {
-          Seq.empty
-        })))
-      (transforms foldLeft state) ((s, xform) => xform runTransform s).copy(form = outputForm)
+        new SynFlopsPass(
+          true,
+          memSynflops ++ (if (mode == MacroCompilerAnnotation.CompileAndSynflops) {
+                            libs.get
+                          } else {
+                            Seq.empty
+                          })
+        )
+      )
+      (transforms.foldLeft(state))((s, xform) => xform.runTransform(s)).copy(form = outputForm)
     case _ => state
   }
 }
@@ -729,7 +782,8 @@ class MacroCompilerOptimizations extends SeqTransform {
     new firrtl.transforms.ConstantPropagation,
     passes.Legalize,
     passes.SplitExpressions,
-    passes.CommonSubexpressionElimination)
+    passes.CommonSubexpressionElimination
+  )
 }
 
 class MacroCompiler extends Compiler {
@@ -756,8 +810,9 @@ object MacroCompiler extends App {
   type MacroParamMap = Map[MacroParam, String]
   type CostParamMap = Map[String, String]
   type ForcedMemories = (Set[String], Set[String])
-  val modeOptions: Seq[String] = MacroCompilerAnnotation.options
-    .map { case (_, cmd, description) => s"    $cmd: $description" }
+  val modeOptions: Seq[String] = MacroCompilerAnnotation.options.map { case (_, cmd, description) =>
+    s"    $cmd: $description"
+  }
   val usage: String = (Seq(
     "Options:",
     "  -n, --macro-conf: The set of macros to compile in firrtl-generated conf format (exclusive with -m)",
@@ -772,16 +827,20 @@ object MacroCompiler extends App {
     "  --force-compile [mem]: Force the given memory to be compiled to target libs regardless of the mode",
     "  --force-synflops [mem]: Force the given memory to be compiled via synflops regardless of the mode",
     "  --mode:"
-  ) ++ modeOptions) mkString "\n"
+  ) ++ modeOptions).mkString("\n")
 
-  def parseArgs(map: MacroParamMap, costMap: CostParamMap, forcedMemories: ForcedMemories,
-                args: List[String]): (MacroParamMap, CostParamMap, ForcedMemories) =
+  def parseArgs(
+    map:            MacroParamMap,
+    costMap:        CostParamMap,
+    forcedMemories: ForcedMemories,
+    args:           List[String]
+  ): (MacroParamMap, CostParamMap, ForcedMemories) =
     args match {
       case Nil => (map, costMap, forcedMemories)
       case ("-n" | "--macro-conf") :: value :: tail =>
-        parseArgs(map + (Macros  -> value) + (MacrosFormat -> "conf"), costMap, forcedMemories, tail)
+        parseArgs(map + (Macros -> value) + (MacrosFormat -> "conf"), costMap, forcedMemories, tail)
       case ("-m" | "--macro-mdf") :: value :: tail =>
-        parseArgs(map + (Macros  -> value) + (MacrosFormat -> "mdf"), costMap, forcedMemories, tail)
+        parseArgs(map + (Macros -> value) + (MacrosFormat -> "mdf"), costMap, forcedMemories, tail)
       case ("-l" | "--library") :: value :: tail =>
         parseArgs(map + (Library -> value), costMap, forcedMemories, tail)
       case ("-u" | "--use-compiler") :: tail =>
@@ -809,11 +868,17 @@ object MacroCompiler extends App {
     }
 
   def run(args: List[String]) {
-    val (params, costParams, forcedMemories) = parseArgs(Map[MacroParam, String](), Map[String, String](), (Set.empty, Set.empty), args)
+    val (params, costParams, forcedMemories) =
+      parseArgs(Map[MacroParam, String](), Map[String, String](), (Set.empty, Set.empty), args)
     try {
       val macros = params.get(MacrosFormat) match {
-        case Some("conf") => Utils.filterForSRAM(Utils.readConfFromPath(params.get(Macros))).get map (x => (new Macro(x)).blackbox)
-        case _ => Utils.filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(params.get(Macros))).get map (x => (new Macro(x)).blackbox)
+        case Some("conf") =>
+          Utils.filterForSRAM(Utils.readConfFromPath(params.get(Macros))).get.map(x => (new Macro(x)).blackbox)
+        case _ =>
+          Utils
+            .filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(params.get(Macros)))
+            .get
+            .map(x => (new Macro(x)).blackbox)
       }
 
       if (macros.nonEmpty) {
@@ -821,23 +886,27 @@ object MacroCompiler extends App {
         // determined as the firrtl "top-level module".
         val circuit = Circuit(NoInfo, macros, macros.last.name)
         val annotations = AnnotationSeq(
-          Seq(MacroCompilerAnnotation(
-            circuit.main,
-            MacroCompilerAnnotation.Params(
-              params.get(Macros).get, params.get(MacrosFormat), params.get(Library),
-              params.get(HammerIR),
-              CostMetric.getCostMetric(params.getOrElse(CostFunc, "default"), costParams),
-              MacroCompilerAnnotation.stringToCompilerMode(params.getOrElse(Mode, "default")),
-              params.contains(UseCompiler),
-              forceCompile = forcedMemories._1, forceSynflops = forcedMemories._2
+          Seq(
+            MacroCompilerAnnotation(
+              circuit.main,
+              MacroCompilerAnnotation.Params(
+                params.get(Macros).get,
+                params.get(MacrosFormat),
+                params.get(Library),
+                params.get(HammerIR),
+                CostMetric.getCostMetric(params.getOrElse(CostFunc, "default"), costParams),
+                MacroCompilerAnnotation.stringToCompilerMode(params.getOrElse(Mode, "default")),
+                params.contains(UseCompiler),
+                forceCompile = forcedMemories._1,
+                forceSynflops = forcedMemories._2
+              )
             )
-          ))
+          )
         )
 
         // The actual MacroCompilerTransform basically just generates an input circuit
         val macroCompilerInput = CircuitState(circuit, MidForm, annotations)
         val macroCompiled = (new MacroCompilerTransform).execute(macroCompilerInput)
-
 
         // Since the MacroCompiler defines its own CLI, reconcile this with FIRRTL options
         val firOptions = new ExecutionOptionsManager("macrocompiler") with HasFirrtlOptions {
@@ -864,7 +933,7 @@ object MacroCompiler extends App {
         }
       } else {
         // Warn user
-        System.err println "WARNING: Empty *.mems.conf file. No memories generated."
+        System.err.println("WARNING: Empty *.mems.conf file. No memories generated.")
 
         // Emit empty verilog file if no macros found
         params.get(Verilog) match {

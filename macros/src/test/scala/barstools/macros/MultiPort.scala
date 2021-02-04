@@ -13,42 +13,70 @@ class SplitWidth_2rw extends MacroCompilerSpec with HasSRAMGenerator with HasSim
 
   override def generateMemSRAM() = {
     SRAMMacro(
-      name=mem_name,
-      width=memWidth,
-      depth=memDepth,
-      family="2rw",
-      ports=Seq(generateTestPort(
-        "portA", memWidth, Some(memDepth), maskGran=memMaskGran,
-        write=true, writeEnable=true,
-        read=true, readEnable=true
-      ), generateTestPort(
-        "portB", memWidth, Some(memDepth), maskGran=memMaskGran,
-        write=true, writeEnable=true,
-        read=true, readEnable=true
-      ))
+      name = mem_name,
+      width = memWidth,
+      depth = memDepth,
+      family = "2rw",
+      ports = Seq(
+        generateTestPort(
+          "portA",
+          memWidth,
+          Some(memDepth),
+          maskGran = memMaskGran,
+          write = true,
+          writeEnable = true,
+          read = true,
+          readEnable = true
+        ),
+        generateTestPort(
+          "portB",
+          memWidth,
+          Some(memDepth),
+          maskGran = memMaskGran,
+          write = true,
+          writeEnable = true,
+          read = true,
+          readEnable = true
+        )
+      )
     )
   }
 
   override def generateLibSRAM() = {
     SRAMMacro(
-      name=lib_name,
-      width=libWidth,
-      depth=libDepth,
-      family="2rw",
-      ports=Seq(generateTestPort(
-        "portA", libWidth, libDepth,
-        write=true, writeEnable=true,
-        read=true, readEnable=true
-      ), generateTestPort(
-        "portB", libWidth, libDepth,
-        write=true, writeEnable=true,
-        read=true, readEnable=true
-      ))
+      name = lib_name,
+      width = libWidth,
+      depth = libDepth,
+      family = "2rw",
+      ports = Seq(
+        generateTestPort(
+          "portA",
+          libWidth,
+          libDepth,
+          write = true,
+          writeEnable = true,
+          read = true,
+          readEnable = true
+        ),
+        generateTestPort(
+          "portB",
+          libWidth,
+          libDepth,
+          write = true,
+          writeEnable = true,
+          read = true,
+          readEnable = true
+        )
+      )
     )
   }
 
   override def generateHeaderPorts() = {
-    generateReadWriteHeaderPort("portA", true, Some(memMaskBits)) + "\n" + generateReadWriteHeaderPort("portB", true, Some(memMaskBits))
+    generateReadWriteHeaderPort("portA", true, Some(memMaskBits)) + "\n" + generateReadWriteHeaderPort(
+      "portB",
+      true,
+      Some(memMaskBits)
+    )
   }
 
   override def generateFooterPorts() = {
@@ -56,7 +84,7 @@ class SplitWidth_2rw extends MacroCompilerSpec with HasSRAMGenerator with HasSim
   }
 
   override def generateBody() =
-"""
+    """
     inst mem_0_0 of awesome_lib_mem
     inst mem_0_1 of awesome_lib_mem
     inst mem_0_2 of awesome_lib_mem
@@ -128,56 +156,112 @@ class SplitWidth_1r_1w extends MacroCompilerSpec with HasSRAMGenerator with HasS
 
   override def generateMemSRAM() = {
     SRAMMacro(
-      name=mem_name,
-      width=memWidth,
-      depth=memDepth,
-      family="1r1w",
-      ports=Seq(generateTestPort(
-        "portA", memWidth, Some(memDepth), maskGran=memMaskGran,
-        write=false, writeEnable=false,
-        read=true, readEnable=true
-      ), generateTestPort(
-        "portB", memWidth, Some(memDepth), maskGran=memMaskGran,
-        write=true, writeEnable=true,
-        read=false, readEnable=false
-      ))
+      name = mem_name,
+      width = memWidth,
+      depth = memDepth,
+      family = "1r1w",
+      ports = Seq(
+        generateTestPort(
+          "portA",
+          memWidth,
+          Some(memDepth),
+          maskGran = memMaskGran,
+          write = false,
+          writeEnable = false,
+          read = true,
+          readEnable = true
+        ),
+        generateTestPort(
+          "portB",
+          memWidth,
+          Some(memDepth),
+          maskGran = memMaskGran,
+          write = true,
+          writeEnable = true,
+          read = false,
+          readEnable = false
+        )
+      )
     )
   }
 
   override def generateLibSRAM() = {
     SRAMMacro(
-      name=lib_name,
-      width=libWidth,
-      depth=libDepth,
-      family="1r1w",
-      ports=Seq(generateTestPort(
-        "portA", libWidth, libDepth,
-        write=false, writeEnable=false,
-        read=true, readEnable=true
-      ), generateTestPort(
-        "portB", libWidth, libDepth,
-        write=true, writeEnable=true,
-        read=false, readEnable=false
-      ))
+      name = lib_name,
+      width = libWidth,
+      depth = libDepth,
+      family = "1r1w",
+      ports = Seq(
+        generateTestPort(
+          "portA",
+          libWidth,
+          libDepth,
+          write = false,
+          writeEnable = false,
+          read = true,
+          readEnable = true
+        ),
+        generateTestPort(
+          "portB",
+          libWidth,
+          libDepth,
+          write = true,
+          writeEnable = true,
+          read = false,
+          readEnable = false
+        )
+      )
     )
   }
 
   override def generateHeaderPorts() = {
-    generatePort("portA", mem_addr_width, memWidth,
-        write=false, writeEnable=false, read=true, readEnable=true, Some(memMaskBits)) + "\n" +
-    generatePort("portB", mem_addr_width, memWidth,
-        write=true, writeEnable=true, read=false, readEnable=false, Some(memMaskBits))
+    generatePort(
+      "portA",
+      mem_addr_width,
+      memWidth,
+      write = false,
+      writeEnable = false,
+      read = true,
+      readEnable = true,
+      Some(memMaskBits)
+    ) + "\n" +
+      generatePort(
+        "portB",
+        mem_addr_width,
+        memWidth,
+        write = true,
+        writeEnable = true,
+        read = false,
+        readEnable = false,
+        Some(memMaskBits)
+      )
   }
 
   override def generateFooterPorts() = {
-    generatePort("portA", lib_addr_width, libWidth,
-        write=false, writeEnable=false, read=true, readEnable=true, None) + "\n" +
-    generatePort("portB", lib_addr_width, libWidth,
-        write=true, writeEnable=true, read=false, readEnable=false, None)
+    generatePort(
+      "portA",
+      lib_addr_width,
+      libWidth,
+      write = false,
+      writeEnable = false,
+      read = true,
+      readEnable = true,
+      None
+    ) + "\n" +
+      generatePort(
+        "portB",
+        lib_addr_width,
+        libWidth,
+        write = true,
+        writeEnable = true,
+        read = false,
+        readEnable = false,
+        None
+      )
   }
 
   override def generateBody() =
-"""
+    """
     inst mem_0_0 of awesome_lib_mem
     inst mem_0_1 of awesome_lib_mem
     inst mem_0_2 of awesome_lib_mem
@@ -234,42 +318,70 @@ class SplitWidth_2rw_differentMasks extends MacroCompilerSpec with HasSRAMGenera
   override def generateMemSRAM() = {
     println(memMaskGranB)
     SRAMMacro(
-      name=mem_name,
-      width=memWidth,
-      depth=memDepth,
-      family="2rw",
-      ports=Seq(generateTestPort(
-        "portA", memWidth, Some(memDepth), maskGran=memMaskGran,
-        write=true, writeEnable=true,
-        read=true, readEnable=true
-      ), generateTestPort(
-        "portB", memWidth, Some(memDepth), maskGran=Some(memMaskGranB),
-        write=true, writeEnable=true,
-        read=true, readEnable=true
-      ))
+      name = mem_name,
+      width = memWidth,
+      depth = memDepth,
+      family = "2rw",
+      ports = Seq(
+        generateTestPort(
+          "portA",
+          memWidth,
+          Some(memDepth),
+          maskGran = memMaskGran,
+          write = true,
+          writeEnable = true,
+          read = true,
+          readEnable = true
+        ),
+        generateTestPort(
+          "portB",
+          memWidth,
+          Some(memDepth),
+          maskGran = Some(memMaskGranB),
+          write = true,
+          writeEnable = true,
+          read = true,
+          readEnable = true
+        )
+      )
     )
   }
 
   override def generateLibSRAM() = {
     SRAMMacro(
-      name=lib_name,
-      width=libWidth,
-      depth=libDepth,
-      family="2rw",
-      ports=Seq(generateTestPort(
-        "portA", libWidth, libDepth,
-        write=true, writeEnable=true,
-        read=true, readEnable=true
-      ), generateTestPort(
-        "portB", libWidth, libDepth,
-        write=true, writeEnable=true,
-        read=true, readEnable=true
-      ))
+      name = lib_name,
+      width = libWidth,
+      depth = libDepth,
+      family = "2rw",
+      ports = Seq(
+        generateTestPort(
+          "portA",
+          libWidth,
+          libDepth,
+          write = true,
+          writeEnable = true,
+          read = true,
+          readEnable = true
+        ),
+        generateTestPort(
+          "portB",
+          libWidth,
+          libDepth,
+          write = true,
+          writeEnable = true,
+          read = true,
+          readEnable = true
+        )
+      )
     )
   }
 
   override def generateHeaderPorts() = {
-    generateReadWriteHeaderPort("portA", true, Some(memMaskBits)) + "\n" + generateReadWriteHeaderPort("portB", true, Some(memWidth / memMaskGranB))
+    generateReadWriteHeaderPort("portA", true, Some(memMaskBits)) + "\n" + generateReadWriteHeaderPort(
+      "portB",
+      true,
+      Some(memWidth / memMaskGranB)
+    )
   }
 
   override def generateFooterPorts() = {
@@ -277,7 +389,7 @@ class SplitWidth_2rw_differentMasks extends MacroCompilerSpec with HasSRAMGenera
   }
 
   override def generateBody() =
-"""
+    """
     inst mem_0_0 of awesome_lib_mem
     inst mem_0_1 of awesome_lib_mem
     inst mem_0_2 of awesome_lib_mem

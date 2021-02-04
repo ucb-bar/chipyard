@@ -4,10 +4,9 @@ import mdf.macrolib._
 
 /** Tests to check that the cost function mechanism is working properly. */
 
-/**
- * A test metric that simply favours memories with smaller widths, to test that
- * the metric is chosen properly.
- */
+/** A test metric that simply favours memories with smaller widths, to test that
+  * the metric is chosen properly.
+  */
 object TestMinWidthMetric extends CostMetric with CostMetricCompanion {
   // Smaller width = lower cost = favoured
   override def cost(mem: Macro, lib: Macro): Option[Double] = Some(lib.src.width)
@@ -30,29 +29,29 @@ class SelectCostMetric extends MacroCompilerSpec with HasSRAMGenerator {
 
   val libSRAMs = Seq(
     SRAMMacro(
-      name="SRAM_WIDTH_128",
-      depth=BigInt(1024),
-      width=128,
-      family="1rw",
-      ports=Seq(
+      name = "SRAM_WIDTH_128",
+      depth = BigInt(1024),
+      width = 128,
+      family = "1rw",
+      ports = Seq(
         generateReadWritePort("", 128, BigInt(1024))
       )
     ),
     SRAMMacro(
-      name="SRAM_WIDTH_64",
-      depth=BigInt(1024),
-      width=64,
-      family="1rw",
-      ports=Seq(
+      name = "SRAM_WIDTH_64",
+      depth = BigInt(1024),
+      width = 64,
+      family = "1rw",
+      ports = Seq(
         generateReadWritePort("", 64, BigInt(1024))
       )
     ),
     SRAMMacro(
-      name="SRAM_WIDTH_32",
-      depth=BigInt(1024),
-      width=32,
-      family="1rw",
-      ports=Seq(
+      name = "SRAM_WIDTH_32",
+      depth = BigInt(1024),
+      width = 32,
+      family = "1rw",
+      ports = Seq(
         generateReadWritePort("", 32, BigInt(1024))
       )
     )
@@ -65,7 +64,7 @@ class SelectCostMetric extends MacroCompilerSpec with HasSRAMGenerator {
 
   // Check that the min width SRAM was chosen, even though it is less efficient.
   val output =
-"""
+    """
 circuit target_memory :
   module target_memory :
     input addr : UInt<10>
