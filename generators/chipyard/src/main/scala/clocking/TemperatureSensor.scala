@@ -27,7 +27,7 @@ trait CanHaveTemperatureSensor { self: BaseSubsystem =>
     val tlbus = locateTLBusWrapper(params.slaveWhere)
     val sensor = LazyModule(new TemperatureSensor(params))
     sensor.clockNode := tlbus.fixedClockNode
-    tlbus.toFixedWidthSingleBeatSlave(params.widthBytes, Some("temp-sense"))(sensor.node)
+    tlbus.toFixedWidthSingleBeatSlave(params.widthBytes, Some("tempsense0"))(sensor.node)
     val tempIn = BundleBridgeSource(Some(() => UInt(params.tempWidth.W)))
     sensor.tempIn := tempIn
     InModuleBody { tempIn.makeIO() }
@@ -40,7 +40,7 @@ class TemperatureSensor(val params: TemperatureSensorParams)(implicit p: Paramet
   val tempIn = BundleBridgeSink(Some(() => UInt(params.tempWidth.W)))
   InModuleBody {
     val temp = RegNext(tempIn.bundle)
-    node.regmap(0 -> Seq(RegField.r(params.widthBytes, RegReadFn(temp))))
+    node.regmap(0 -> Seq(RegField.r(params.tempWidth, RegReadFn(temp))))
     tempIn
   }
 }

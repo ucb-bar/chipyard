@@ -30,6 +30,7 @@ import barstools.iocell.chisel._
 import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters, IOCellKey}
 import chipyard.{HasHarnessSignalReferences}
 import chipyard.harness._
+import chipyard.clocking._
 
 object MainMemoryConsts {
   val regionNamePrefix = "MainMemory"
@@ -174,8 +175,32 @@ class WithFireSimFAME5 extends ComposeIOBinder({
 })
 
 class WithSkinTempModel extends OverrideIOBinder({
-  (system: chipyard.clocking.CanHaveTemperatureSensor) => {
-    system.tempSensorOpt.foreach { _ := 32.U }
+  (system: chipyard.clocking.CanHaveTemperatureSensor with CanHaveTraceIO) => {
+    val p: Parameters = GetSystemParameters(system)
+    val trace = system.module.traceIO.get.traces.head
+    val tempWidth = system.tempSensorOpt.get.getWidth
+    val (cycleCount, insnRetired) = withClockAndReset(trace.clock, trace.reset) {
+      val cycleCount  = RegInit(0.U(32.W))
+      cycleCount := cycleCount + 1.U
+      val insnRetired = RegInit(0.U(32.W))
+      insnRetired := insnRetired + trace.insns.map(_.valid.asUInt).reduce(_ + _)
+      (cycleCount, insnRetired)
+    }
+
+    val tlbus = system.asInstanceOf[BaseSubsystem].locateTLBusWrapper(p(TemperatureSensorParams).get.slaveWhere)
+    val tempClock = Wire(Clock())
+    tempClock := false.B.asClock
+    BoringUtils.bore(tlbus.module.clock, Seq(tempClock))
+    val tempReset = Wire(Bool())
+    tempReset := false.B
+    BoringUtils.bore(tlbus.module.reset, Seq(tempReset))
+
+    val temperatureBridge = Module(new CoreTemperatureBridge(tempWidth))
+    temperatureBridge.io.clock := tempClock
+    temperatureBridge.io.reset := tempReset
+    temperatureBridge.io.tileCycleCount := cycleCount
+    temperatureBridge.io.instructionsRetired := insnRetired
+    system.tempSensorOpt.foreach { _ := temperatureBridge.io.temperature }
   }
   (Nil, Nil)
 })
