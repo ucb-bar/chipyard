@@ -13,13 +13,14 @@ import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 
 import sifive.fpgashells.shell.{DesignKey}
-import sifive.fpgashells.shell.xilinx.{VC709ShellPMOD, VC709DDRSize}
+import sifive.fpgashells.shell.xilinx.{VC709DDR3Size}
 
 import testchipip.{SerialTLKey}
 
-import chipyard.{BuildSystem, ExtTLMem}
+import chipyard.{BuildSystem, ExtTLMem} 
 
-import chipyard.fpga.vcu118.{WithUARTIOPassthrough, WithTLIOPassthrough}
+import chipyard.fpga.vcu118.{WithUARTIOPassthrough, WithTLIOPassthrough, WithFPGAFrequency}
+
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
@@ -37,7 +38,7 @@ class WithSystemModifications extends Config((site, here, up) => {
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vc709/uartboot/build/bootrom.bin")
   }
-  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC709DDRSize)))) // set extmem to DDR size
+  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC709DDR3Size)))) // set extmem to DDR size
   case SerialTLKey => None // remove serialized tl port
 })
 
@@ -62,16 +63,4 @@ class RocketVC709Config extends Config(
 class BoomVC709Config extends Config(
   new WithFPGAFrequency(50) ++
   new WithVC709Tweaks ++
-  new chipyard.MegaBoomConfig)
-
-class WithFPGAFrequency(MHz: Double) extends Config((site, here, up) => {
-  case FPGAFrequencyKey => MHz
-})
-
-class WithFPGAFreq25MHz extends WithFPGAFrequency(25)
-class WithFPGAFreq50MHz extends WithFPGAFrequency(50)
-class WithFPGAFreq75MHz extends WithFPGAFrequency(75)
-class WithFPGAFreq100MHz extends WithFPGAFrequency(100)
-class WithFPGAFreq25MHz extends WithDevKitFrequency(125)
-class WithFPGAFreq150MHz extends WithDevKitFrequency(150)
-class WithFPGAFreq200MHz extends WithDevKitFrequency(200)
+  new chipyard.DualSmallBoomConfig)

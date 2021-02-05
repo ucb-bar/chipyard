@@ -23,25 +23,17 @@ import chipyard.harness.{ApplyHarnessBinders}
 
 case object FPGAFrequencyKey extends Field[Double](100.0)
 
-class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709Shell {
+class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709ShellBasicOverlays {
 
   def dp = designParameters
 
-// Now we removed jtag, cjtag, pcie-fmc, pcie-edge
-  // val pmod_is_sdio  = p(VC709ShellPMOD) == "SDIO"
-  // val jtag_location = Some(if (pmod_is_sdio) "FMC_J2" else "PMOD_J52")
-
   // Order matters; ddr depends on sys_clock
-  // val jtag      = Overlay(JTAGDebugOverlayKey, new JTAGDebugVC709ShellPlacer(this, JTAGDebugShellInput(location = jtag_location)))
   // val cjtag     = Overlay(cJTAGDebugOverlayKey, new cJTAGDebugVC709ShellPlacer(this, cJTAGDebugShellInput()))
   // val jtagBScan = Overlay(JTAGDebugBScanOverlayKey, new JTAGDebugBScanVC709ShellPlacer(this, JTAGDebugBScanShellInput()))
   // val fmc       = Overlay(PCIeOverlayKey, new PCIeVC709FMCShellPlacer(this, PCIeShellInput()))
   // val edge      = Overlay(PCIeOverlayKey, new PCIeVC709EdgeShellPlacer(this, PCIeShellInput()))
-  
-  val uart      = Seq.tabulate(1)(i => Overlay(UARTOverlayKey, new UARTVC709ShellPlacer(this, UARTShellInput(index = 0))))
-  // val jtag      = Overlay(JTAGDebugOverlayKey, new JTAGDebugVC709ShellPlacer(this, JTAGDebugShellInput()))
-  val pcie      = Overlay(PCIeOverlayKey, new PCIeVC709ShellPlacer(this, PCIeShellInput()))
-  val ddr1      = Overlay(DDROverlayKey, new DualDDR3VC709ShellPlacer(this, DDRShellInput()))
+  // val mem_clock = Overlay(ClockInputOverlayKey, new MemClockVC709ShellPlacer(this, ClockInputShellInput()))
+  // val ddr1      = Overlay(DDROverlayKey, new DualDDR3VC709ShellPlacer(this, DDRShellInput()))
 
   val topDesign = LazyModule(p(BuildTop)(dp)).suggestName("chiptop")
 
@@ -66,24 +58,48 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
   /*** UART ***/
 
 // DOC include start: UartOverlay
-  // 1st UART goes to the VC709 dedicated UART
-
-  val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(dp(PeripheryUARTKey).head)))
-  dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
+  // All UART goes to the VC709 dedicated UART
+  val io_uart_bb_s = (dp(UARTOverlayKey) zip dp(PeripheryUARTKey)).map {
+    case (uartOverlayKey, peripheryUARTKey) => 
+      val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(peripheryUARTKey)))
+      uartOverlayKey.place(UARTDesignInput(io_uart_bb))
+      io_uart_bb
+  }
 // DOC include end: UartOverlay
 
   /*** DDR ***/
-
-  val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)).overlayOutput.ddr
-
-  // connect 1 mem. channel to the FPGA DDR
-  val inParams = topDesign match { case td: ChipTop =>
-    td.lazySystem match { case lsys: CanHaveMasterTLMemPort =>
-      lsys.memTLNode.edges.in(0)
+// DOC include start: DDR3Overlay
+  val ddrDesignInput = DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)
+  // connect all mem. channels to the FPGA DDR
+  val (ddrNodes, ddrClients) = topDesign match {
+    case td: ChipTop => td.lazySystem match {
+      case lsys: CanHaveMasterTLMemPort => {
+        (dp(DDROverlayKey) zip lsys.memTLNode.edges.in).map { case (ddrOverlayKey, inParams) => 
+          val ddrNode = ddrOverlayKey.place(ddrDesignInput).overlayOutput.ddr
+          val ddrClient = TLClientNode(Seq(inParams.master))
+          ddrNode := ddrClient
+          (ddrNode, ddrClient)
+        }.unzip
+      }
     }
   }
-  val ddrClient = TLClientNode(Seq(inParams.master))
-  ddrNode := ddrClient
+  println("ddrNodes: " + ddrNodes.toString())
+  println("ddrClients: " + ddrClients.toString())
+// DOC include end: DDR3Overlay
+
+  /*** PCIe ***/
+  // hook the first PCIe the board has
+  // dp(PCIeOverlayKey) foreach { case key => {
+      // val pcies = key.place(PCIeDesignInput(wrangler=dutWrangler.node, corePLL=harnessSysPLL)).overlayOutput
+      // pcies match { case (pcieNode, pcieInt) => {
+        // val pciename = Some(s"pcie_$i")
+        // sbus.fromMaster(pciename) { pcieNode }
+        // sbus.toFixedWidthSlave(pciename) { pcieNode }
+        // ibus.fromSync := pcieInt
+        // println(pciename)
+      // } }
+    // }
+  // }
 
   // module implementation
   override lazy val module = new VC709FPGATestHarnessImp(this)
@@ -91,7 +107,7 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
 
 class VC709FPGATestHarnessImp(_outer: VC709FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessSignalReferences {
 
-  val VC709Outer = _outer
+  val vc709Outer = _outer
 
   val reset = IO(Input(Bool()))
   _outer.xdc.addPackagePin(reset, "AV40")
