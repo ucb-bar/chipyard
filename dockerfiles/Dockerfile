@@ -40,6 +40,8 @@ RUN git clone https://github.com/ucb-bar/chipyard.git && \
         git checkout $CHIPYARD_HASH && \
         ./scripts/ubuntu-req.sh 1>/dev/null
 
+CMD ["/bin/sh"]
+
 
 # BUILD IMAGE WITH TOOLCHAINS
 
@@ -65,5 +67,3 @@ RUN cd chipyard && \
 ENTRYPOINT ["chipyard/scripts/entrypoint.sh"]
 
 # END IMAGE CUSTOMIZATIONS
-
-CMD ["/bin/sh"]
