@@ -15,8 +15,9 @@ import freechips.rocketchip.interrupts._
 import freechips.rocketchip.util._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.amba.axi4._
+import freechips.rocketchip.prci.ClockSinkParameters
 
-// Example parameter class copied from Ariane, not included in documentation but for compile check only
+// Example parameter class copied from CVA6, not included in documentation but for compile check only
 // If you are here for documentation, DO NOT copy MyCoreParams and MyTileParams directly - always figure
 // out what parameters you need before you write the parameter class
 case class MyCoreParams(
@@ -39,16 +40,20 @@ case class MyCoreParams(
   val mulDiv: Option[MulDivParams] = Some(MulDivParams()) // copied from Rocket
   val fpu: Option[FPUParams] = Some(FPUParams()) // copied fma latencies from Rocket
   val nLocalInterrupts: Int = 0
+  val useNMI: Boolean = false
   val nPMPs: Int = 0 // TODO: Check
   val pmpGranularity: Int = 4 // copied from Rocket
   val nBreakpoints: Int = 0 // TODO: Check
   val useBPWatch: Boolean = false
+  val mcontextWidth: Int = 0
+  val scontextWidth: Int = 0
   val nPerfCounters: Int = 29
   val haveBasicCounters: Boolean = true
   val haveFSDirty: Boolean = false
   val misaWritable: Boolean = false
   val haveCFlush: Boolean = false
   val nL2TLBEntries: Int = 512 // copied from Rocket
+  val nL2TLBWays: Int = 1
   val mtvecInit: Option[BigInt] = Some(BigInt(0)) // copied from Rocket
   val mtvecWritable: Boolean = true // copied from Rocket
   val instBits: Int = if (useCompressed) 16 else 32
@@ -81,6 +86,7 @@ case class MyTileParams(
   val boundaryBuffers: Boolean = false
   val dcache: Option[DCacheParams] = Some(DCacheParams())
   val icache: Option[ICacheParams] = Some(ICacheParams())
+  val clockSinkParams: ClockSinkParameters = ClockSinkParameters()
   def instantiate(crossing: TileCrossingParamsLike, lookup: LookupByHartIdImpl)(implicit p: Parameters): MyTile = {
     new MyTile(this, crossing, lookup)
   }
@@ -127,9 +133,9 @@ class MyTile(
 
   // TODO: Create TileLink nodes and connections here.
   // DOC include end: Tile class
-  
+
   // DOC include start: AXI4 node
-  // # of bits used in TileLink ID for master node. 4 bits can support 16 master nodes, but you can have a longer ID if you need more. 
+  // # of bits used in TileLink ID for master node. 4 bits can support 16 master nodes, but you can have a longer ID if you need more.
   val idBits = 4
   val memAXI4Node = AXI4MasterNode(
     Seq(AXI4MasterPortParameters(
@@ -160,17 +166,17 @@ class MyTileModuleImp(outer: MyTile) extends BaseTileModuleImp(outer){
 
   // TODO: Create the top module of the core and connect it with the ports in "outer"
 
-  // If your core is in Verilog (assume your blackbox is called "MyCoreBlackbox"), instantiate it here like 
-  //   val core = Module(new MyCoreBlackbox(params...)) 
+  // If your core is in Verilog (assume your blackbox is called "MyCoreBlackbox"), instantiate it here like
+  //   val core = Module(new MyCoreBlackbox(params...))
   // (as described in the blackbox tutorial) and connect appropriate signals. See the blackbox tutorial
   // (link on the top of the page) for more info.
-  // You can look at https://github.com/ucb-bar/ariane-wrapper/blob/master/src/main/scala/ArianeTile.scala
+  // You can look at https://github.com/ucb-bar/cva6-wrapper/blob/master/src/main/scala/CVA6Tile.scala
   // for a Verilog example.
 
   // If your core is in Chisel, you can simply instantiate the top module here like other Chisel module
   // and connect appropriate signal. You can even implement this class as your top module.
   // See https://github.com/riscv-boom/riscv-boom/blob/master/src/main/scala/common/tile.scala and
-  // https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/RocketTile.scala for 
+  // https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/tile/RocketTile.scala for
   // Chisel example.
 
   // DOC include end: Implementation class

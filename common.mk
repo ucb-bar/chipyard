@@ -17,7 +17,8 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_CXXFLAGS     = additional CXXFLAGS for building simulators" \
 "   EXTRA_SIM_LDFLAGS      = additional LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES      = additional simulation sources needed for simulator" \
-"   EXTRA_SIM_REQS         = additional make requirements to build the simulator"
+"   EXTRA_SIM_REQS         = additional make requirements to build the simulator" \
+"   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client"
 
 EXTRA_GENERATOR_REQS ?=
 EXTRA_SIM_CXXFLAGS   ?=
@@ -41,13 +42,15 @@ HELP_COMMANDS += \
 "   run-binary-fast        = run [./$(shell basename $(sim))] and don't log instructions" \
 "   run-binary-debug       = run [./$(shell basename $(sim_debug))] and log instructions and waveform to files" \
 "   verilog                = generate intermediate verilog files from chisel elaboration and firrtl passes" \
-"   run-tests              = run all assembly and benchmark tests"
+"   firrtl                 = generate intermediate firrtl files from chisel elaboration" \
+"   run-tests              = run all assembly and benchmark tests" \
+"   launch-sbt             = start sbt terminal"
 
 #########################################################################################
 # include additional subproject make fragments
 # see HELP_COMPILATION_VARIABLES
 #########################################################################################
-include $(base_dir)/generators/ariane/ariane.mk
+include $(base_dir)/generators/cva6/cva6.mk
 include $(base_dir)/generators/tracegen/tracegen.mk
 include $(base_dir)/generators/nvdla/nvdla.mk
 include $(base_dir)/tools/dromajo/dromajo.mk
@@ -58,42 +61,28 @@ include $(base_dir)/tools/dromajo/dromajo.mk
 # Returns a list of files in directory $1 with file extension $2.
 lookup_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.$(2)" -print 2> /dev/null)
 
-SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools/iocell)
+SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools/iocell fpga/fpga-shells fpga/src)
 SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
 VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE_DIRS),v)
 # This assumes no SBT meta-build sources
 SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools)
-SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt
+SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
 
 #########################################################################################
-# jar creation variables and rules
+# SBT Server Setup (start server / rebuild proj. defs. if SBT_SOURCES change)
 #########################################################################################
-FIRRTL_JAR := $(base_dir)/lib/firrtl.jar
-FIRRTL_TEST_JAR := $(base_dir)/test_lib/firrtl-test.jar
-
-$(FIRRTL_JAR): $(call lookup_srcs,$(CHIPYARD_FIRRTL_DIR),scala)
-	$(MAKE) -C $(CHIPYARD_FIRRTL_DIR) SBT="$(SBT)" root_dir=$(CHIPYARD_FIRRTL_DIR) build-scala
-	mkdir -p $(@D)
-	cp -p $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl.jar $@
+$(SBT_THIN_CLIENT_TIMESTAMP): $(SBT_SOURCES)
+ifneq (,$(wildcard $(SBT_THIN_CLIENT_TIMESTAMP)))
+	cd $(base_dir) && $(SBT) "reload"
 	touch $@
-
-$(FIRRTL_TEST_JAR): $(call lookup_srcs,$(CHIPYARD_FIRRTL_DIR),scala)
-	cd $(CHIPYARD_FIRRTL_DIR) && $(SBT) "test:assembly"
-	mkdir -p $(@D)
-	cp -p $(CHIPYARD_FIRRTL_DIR)/utils/bin/firrtl-test.jar $@
-	touch $@
-
-#########################################################################################
-# Bloop Project Definitions
-#########################################################################################
-$(BLOOP_CONFIG_DIR)/TIMESTAMP: $(SBT_SOURCES)
-	cd $(base_dir) && $(SBT) "project chipyardRoot" "bloopInstall"
-	touch $@
+else
+	cd $(base_dir) && $(SBT) "exit"
+endif
 
 #########################################################################################
 # create list of simulation file inputs
 #########################################################################################
-$(sim_files): $(call lookup_srcs,$(base_dir)/generators/utilities/src/main/scala,scala) $(FIRRTL_JAR) $(SCALA_BUILDTOOL_DEPS)
+$(sim_files): $(call lookup_srcs,$(base_dir)/generators/utilities/src/main/scala,scala) $(SCALA_BUILDTOOL_DEPS)
 	$(call run_scala_main,utilities,utilities.GenerateSimFiles,-td $(build_dir) -sim $(sim_name))
 
 #########################################################################################
@@ -103,7 +92,7 @@ $(sim_files): $(call lookup_srcs,$(base_dir)/generators/utilities/src/main/scala
 $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 	@echo "" > /dev/null
 
-# AG: must re-elaborate if ariane sources have changed... otherwise just run firrtl compile
+# AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
 generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
@@ -227,7 +216,7 @@ ifneq ($(filter run% %.run %.out %.vpd %.vcd,$(MAKECMDGOALS)),)
 endif
 
 #######################################
-# Rules for building DRAMSim2 library #
+# Rules for building DRAMSim2 library
 #######################################
 
 dramsim_dir = $(base_dir)/tools/DRAMSim2
@@ -235,6 +224,23 @@ dramsim_lib = $(dramsim_dir)/libdramsim.a
 
 $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
+
+################################################
+# Helper to run SBT or manage the SBT server
+################################################
+
+SBT_COMMAND ?= shell
+.PHONY: launch-sbt
+launch-sbt:
+	cd $(base_dir) && $(SBT_NON_THIN) "$(SBT_COMMAND)"
+
+.PHONY: shutdown-sbt-server
+shutdown-sbt-server:
+	cd $(base_dir) && $(SBT) "shutdown"
+
+.PHONY: start-sbt-server
+start-sbt-server:
+	cd $(base_dir) && $(SBT) "exit"
 
 #########################################################################################
 # print help text

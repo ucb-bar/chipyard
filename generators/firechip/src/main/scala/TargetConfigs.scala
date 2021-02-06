@@ -12,7 +12,7 @@ import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.{BootROMLocated, BootROMParams}
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
-import freechips.rocketchip.diplomacy.LazyModule
+import freechips.rocketchip.diplomacy.{LazyModule, AsynchronousCrossing}
 import testchipip.{BlockDeviceKey, BlockDeviceConfig, TracePortKey, TracePortParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
@@ -128,7 +128,7 @@ class FireSimQuadRocketConfig extends Config(
   new chipyard.QuadRocketConfig)
 
 // A stripped down configuration that should fit on all supported hosts.
-// Flat to avoid having to reorganize the config class hierarchy to remove certain features 
+// Flat to avoid having to reorganize the config class hierarchy to remove certain features
 class FireSimSmallSystemConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
@@ -188,23 +188,33 @@ class SupernodeFireSimRocketConfig extends Config(
   new FireSimRocketConfig)
 
 //**********************************************************************************
-//* Ariane Configurations
+//* CVA6 Configurations
 //*********************************************************************************/
-class FireSimArianeConfig extends Config(
+class FireSimCVA6Config extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new chipyard.ArianeConfig)
+  new chipyard.CVA6Config)
 
 //**********************************************************************************
 //* Multiclock Configurations
 //*********************************************************************************/
 class FireSimMulticlockRocketConfig extends Config(
   new chipyard.config.WithTileFrequency(6400.0) ++ //lol
+  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new FireSimRocketConfig)
+
+//**********************************************************************************
+// System with 16 LargeBOOMs that can be simulated with Golden Gate optimizations
+// - Requires MTModels and MCRams mixins as prefixes to the platform config
+// - May require larger build instances or JVM memory footprints
+//*********************************************************************************/
+class FireSim16LargeBoomConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new chipyard.DividedClockRocketConfig)
+  new boom.common.WithNLargeBooms(16) ++
+  new chipyard.config.AbstractConfig)
 
 /**
   * PDES Configurations
@@ -214,17 +224,23 @@ class ChipyardLikeRocketConfig extends Config(
   // Use a division we can currently support in the divider models
   new chipyard.config.WithMemoryBusFrequency(1600.0) ++
   new chipyard.config.WithTileFrequency(3200.0) ++ //lol
+  new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
+  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new chipyard.DividedClockRocketConfig)
+  new chipyard.RocketConfig)
 
 class ClockMuxRocketConfig extends Config(
   new WithTileClockMuxes ++
   // Use a division we can currently support in the divider models
   new chipyard.config.WithMemoryBusFrequency(3200.00) ++
   new chipyard.config.WithTileFrequency(6400.0) ++ //lol
+  new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
+  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new chipyard.DividedClockRocketConfig)
+  new chipyard.RocketConfig)

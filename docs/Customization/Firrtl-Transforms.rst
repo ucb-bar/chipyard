@@ -5,7 +5,7 @@ Adding a Firrtl Transform
 
 Similar to how LLVM IR passes can perform transformations and optimizations on software, FIRRTL transforms can
 modify Chisel-elaborated RTL.
-As mentioned in Section :ref:`firrtl`, transforms are modifications that happen on the FIRRTL IR that can modify a circuit.
+As mentioned in Section :ref:`Tools/FIRRTL:firrtl`, transforms are modifications that happen on the FIRRTL IR that can modify a circuit.
 Transforms are a powerful tool to take in the FIRRTL IR that is emitted from Chisel and run analysis or convert the circuit into a new form.
 
 Where to add transforms
@@ -24,7 +24,7 @@ If you look inside of the `tools/barstools/tapeout/src/main/scala/transforms/Gen
 you can see that FIRRTL is invoked twice, once for the "Top" and once for the "Harness". If you want to add transforms to just modify the DUT, you can add them to ``topTransforms``.
 Otherwise, if you want to add transforms to just modify the test harness, you can add them to ``harnessTransforms``.
 
-For more information on Barstools, please visit the :ref:`Barstools` section.
+For more information on Barstools, please visit the :ref:`Tools/Barstools:Barstools` section.
 
 Examples of transforms
 ----------------------

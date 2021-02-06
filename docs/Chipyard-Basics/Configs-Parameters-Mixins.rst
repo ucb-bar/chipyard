@@ -17,7 +17,7 @@ Configs
 A *config* is a collection of multiple generator parameters being set to specific values.
 Configs are additive, can override each other, and can be composed of other configs (sometimes referred to as config fragments).
 The naming convention for an additive config or config fragment is ``With<YourConfigName>``, while the naming convention for a non-additive config will be ``<YourConfig>``.
-Configs can take arguments which will in-turn set parameters in the design or reference other parameters in the design (see :ref:`Parameters`).
+Configs can take arguments which will in-turn set parameters in the design or reference other parameters in the design (see :ref:`Chipyard-Basics/Configs-Parameters-Mixins:Parameters`).
 
 This example shows a basic config fragment class that takes in zero arguments and instead uses hardcoded values to set the RTL design parameters.
 In this example, ``MyAcceleratorConfig`` is a Scala case class that defines a set of variables that the generator can use when referencing the ``MyAcceleratorKey`` in the design.
@@ -121,7 +121,7 @@ This is shown in the ``Top`` class where things such as ``CanHavePeripherySerial
 Additional References
 ---------------------------
 
-Another description of traits/mixins and config fragments is given in :ref:`Keys, Traits, and Configs`.
+Another description of traits/mixins and config fragments is given in :ref:`Customization/Keys-Traits-Configs:Keys, Traits, and Configs`.
 Additionally, a brief explanation of some of these topics (with slightly different naming) is given in the following video: https://www.youtube.com/watch?v=Eko86PGEoDY.
 
 .. Note:: Chipyard uses the name "config fragments" over "config mixins" to avoid confusion between a mixin applying to a config or to the system ``Top`` (even though both are technically Scala mixins).

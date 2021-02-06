@@ -1,26 +1,30 @@
 diff --git a/build.sbt b/build.sbt
-index 5d642c1..56f6fda 100644
+index e80b2a5..b1989d9 100644
 --- a/build.sbt
 +++ b/build.sbt
-@@ -130,7 +130,7 @@ lazy val iocell = (project in file("./tools/barstools/iocell/"))
- 
- lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
-   .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
+@@ -184,7 +184,7 @@ lazy val testchipipLib = "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHO
+ lazy val chipyard = (project in file("generators/chipyard"))
+   .sourceDependency(testchipip, testchipipLib)
+   .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
 -    sha3, // On separate line to allow for cleaner tutorial-setup patches
 +//    sha3, // On separate line to allow for cleaner tutorial-setup patches
      dsptools, `rocket-dsptools`,
-     gemmini, icenet, tracegen, ariane, nvdla, sodor)
-   .settings(commonSettings)
-@@ -158,9 +158,9 @@ lazy val ariane = (project in file("generators/ariane"))
-   .dependsOn(rocketchip)
+     gemmini, icenet, tracegen, cva6, nvdla, sodor)
+   .settings(libraryDependencies ++= rocketLibDeps.value)
+@@ -227,11 +227,11 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
+   .settings(libraryDependencies ++= rocketLibDeps.value)
    .settings(commonSettings)
  
 -lazy val sha3 = (project in file("generators/sha3"))
 -  .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
+-  .settings(libraryDependencies ++= rocketLibDeps.value)
+-  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
 -  .settings(commonSettings)
 +//lazy val sha3 = (project in file("generators/sha3"))
 +//  .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
++//  .settings(libraryDependencies ++= rocketLibDeps.value)
++//  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
 +//  .settings(commonSettings)
  
  lazy val gemmini = (project in file("generators/gemmini"))
-   .dependsOn(rocketchip, chisel_testers, testchipip)
+   .sourceDependency(testchipip, testchipipLib)

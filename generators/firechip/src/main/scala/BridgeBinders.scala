@@ -23,7 +23,7 @@ import midas.targetutils.{MemModelAnnotation, EnableModelMultiThreadingAnnotatio
 import firesim.bridges._
 import firesim.configs.MemModelKey
 import tracegen.{TraceGenSystemModuleImp}
-import ariane.ArianeTile
+import cva6.CVA6Tile
 
 import boom.common.{BoomTile}
 import barstools.iocell.chisel._
@@ -67,7 +67,7 @@ class WithFireSimIOCellModels extends Config((site, here, up) => {
 })
 
 class WithSerialBridge extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+  (system: CanHavePeripheryTLSerial, th: RawModule with HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     ports.map { port =>
       implicit val p = GetSystemParameters(system)
       val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, port, th.harnessReset)
@@ -78,7 +78,7 @@ class WithSerialBridge extends OverrideHarnessBinder({
 })
 
 class WithNICBridge extends OverrideHarnessBinder({
-  (system: CanHavePeripheryIceNIC, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[NICIOvonly]]) => {
+  (system: CanHavePeripheryIceNIC, th: RawModule with HasHarnessSignalReferences, ports: Seq[ClockedIO[NICIOvonly]]) => {
     val p: Parameters = GetSystemParameters(system)
     ports.map { n => NICBridge(n.clock, n.bits)(p) }
     Nil
@@ -86,15 +86,17 @@ class WithNICBridge extends OverrideHarnessBinder({
 })
 
 class WithUARTBridge extends OverrideHarnessBinder({
-  (system: HasPeripheryUARTModuleImp, th: HasHarnessSignalReferences, ports: Seq[UARTPortIO]) =>
+  (system: HasPeripheryUARTModuleImp, th: RawModule with HasHarnessSignalReferences, ports: Seq[UARTPortIO]) =>
     val uartSyncClock = Wire(Clock())
     uartSyncClock := false.B.asClock
-    BoringUtils.bore(system.clock, Seq(uartSyncClock))
+    val pbusClockNode = system.outer.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(PBUS).fixedClockNode
+    val pbusClock = pbusClockNode.in.head._1.clock
+    BoringUtils.bore(pbusClock, Seq(uartSyncClock))
     ports.map { p => UARTBridge(uartSyncClock, p)(system.p) }; Nil
 })
 
 class WithBlockDeviceBridge extends OverrideHarnessBinder({
-  (system: CanHavePeripheryBlockDevice, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[BlockDeviceIO]]) => {
+  (system: CanHavePeripheryBlockDevice, th: RawModule with HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[BlockDeviceIO]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
     ports.map { b => BlockDevBridge(b.clock, b.bits, b.reset.toBool) }
     Nil
@@ -102,7 +104,7 @@ class WithBlockDeviceBridge extends OverrideHarnessBinder({
 })
 
 class WithFASEDBridge extends OverrideHarnessBinder({
-  (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
+  (system: CanHaveMasterAXI4MemPort, th: RawModule with HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
     (ports zip system.memAXI4Node.edges.in).map { case (axi4, edge) =>
       val nastiKey = NastiParameters(axi4.bits.r.bits.data.getWidth,
@@ -122,20 +124,20 @@ class WithFASEDBridge extends OverrideHarnessBinder({
 })
 
 class WithTracerVBridge extends ComposeHarnessBinder({
-  (system: CanHaveTraceIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[TraceOutputTop]) => {
+  (system: CanHaveTraceIOModuleImp, th: RawModule with HasHarnessSignalReferences, ports: Seq[TraceOutputTop]) => {
     ports.map { p => p.traces.map(tileTrace => TracerVBridge(tileTrace)(system.p)) }
     Nil
   }
 })
 
 class WithDromajoBridge extends ComposeHarnessBinder({
-  (system: CanHaveTraceIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[TraceOutputTop]) =>
+  (system: CanHaveTraceIOModuleImp, th: RawModule with HasHarnessSignalReferences, ports: Seq[TraceOutputTop]) =>
     ports.map { p => p.traces.map(tileTrace => DromajoBridge(tileTrace)(system.p)) }; Nil
 })
 
 
 class WithTraceGenBridge extends OverrideHarnessBinder({
-  (system: TraceGenSystemModuleImp, th: HasHarnessSignalReferences, ports: Seq[Bool]) =>
+  (system: TraceGenSystemModuleImp, th: RawModule with HasHarnessSignalReferences, ports: Seq[Bool]) =>
     ports.map { p => GroundTestBridge(th.harnessClock, p)(system.p) }; Nil
 })
 

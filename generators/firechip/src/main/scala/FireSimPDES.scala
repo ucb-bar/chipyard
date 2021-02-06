@@ -147,7 +147,9 @@ class FireSimPDES(implicit val p: Parameters) extends RawModule with HasHarnessS
     lazyModule match { case d: HasTestHarnessFunctions =>
       require(d.harnessFunctions.size == 1, "There should only be 1 harness function to connect clock+reset")
       d.harnessFunctions.foreach(_(this))
-      ApplyHarnessBinders(this, d.lazySystem, p(HarnessBinders), d.portMap.toMap)
+    }
+    lazyModule match { case d: HasIOBinders =>
+      ApplyHarnessBinders(this, d.lazySystem, d.portMap)
     }
     NodeIdx.increment()
   }

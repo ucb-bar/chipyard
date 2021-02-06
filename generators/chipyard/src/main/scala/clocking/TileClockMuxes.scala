@@ -52,7 +52,7 @@ class TLTileClockMuxes(w: Int, params: TileClockMuxParams, tile_prci_domains: Se
 
 
     val tileMap = tile_prci_domains.zipWithIndex.map({ case (d, i) =>
-        d.clockSinkNode.portParams(0).name.get -> clock_select_regs(i)
+        d.tile_reset_domain.clockNode.portParams(0).name.get -> clock_select_regs(i)
     })
 
     tileClockMuxNode.in.head._1.member.elements foreach println

@@ -30,7 +30,7 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
   * Verilog wrapper around the accelerator and dummy hard macro.
 
-* example.yml
+* example-asap7.yml
 
   * Hammer IR for this tutorial.
 
@@ -77,7 +77,7 @@ Pull the Hammer environment into the shell:
     source $HAMMER_HOME/sourceme.sh
 
 Building the Design
--------------------
+--------------------
 To elaborate the ``Sha3RocketConfig`` (Rocket Chip w/ the accelerator) and set up all prerequisites for the build system to push just the accelerator + hard macro through the flow:
 
 .. code-block:: shell
