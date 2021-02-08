@@ -8,10 +8,11 @@
 package barstools.macros
 
 import barstools.macros.Utils._
-import firrtl.CompilerUtils.getLoweringTransforms
 import firrtl.Utils._
 import firrtl.annotations._
 import firrtl.ir._
+import firrtl.stage.{FirrtlSourceAnnotation, FirrtlStage, Forms, OutputFileAnnotation, RunFirrtlTransformAnnotation}
+import firrtl.transforms.NoDCEAnnotation
 import firrtl.{PrimOps, _}
 import mdf.macrolib._
 
@@ -692,9 +693,11 @@ class MacroCompilerPass(
   }
 }
 
-class MacroCompilerTransform extends Transform {
-  def inputForm = MidForm
-  def outputForm = MidForm
+class MacroCompilerTransform extends Transform with DependencyAPIMigration {
+  override def prerequisites = Forms.LowForm
+  override def optionalPrerequisites = Forms.LowFormOptimized
+  override def optionalPrerequisiteOf = Forms.LowEmitters
+  override def invalidates(a: Transform) = false
 
   def execute(state: CircuitState) = state.annotations.collect { case a: MacroCompilerAnnotation => a } match {
     case Seq(anno: MacroCompilerAnnotation) =>
@@ -764,16 +767,16 @@ class MacroCompilerTransform extends Transform {
                           })
         )
       )
-      (transforms.foldLeft(state))((s, xform) => xform.runTransform(s)).copy(form = outputForm)
+      (transforms.foldLeft(state))((s, xform) => xform.runTransform(s))
     case _ => state
   }
 }
 
-// FIXME: Use firrtl.LowerFirrtlOptimizations
-class MacroCompilerOptimizations extends SeqTransform {
-  def inputForm: CircuitForm = LowForm
-
-  def outputForm: CircuitForm = LowForm
+class MacroCompilerOptimizations extends SeqTransform with DependencyAPIMigration {
+  override def prerequisites = Forms.LowForm
+  override def optionalPrerequisites = Forms.LowFormOptimized
+  override def optionalPrerequisiteOf = Forms.LowEmitters
+  override def invalidates(a: Transform) = false
 
   def transforms: Seq[Transform] = Seq(
     passes.RemoveValidIf,
@@ -784,15 +787,6 @@ class MacroCompilerOptimizations extends SeqTransform {
     passes.SplitExpressions,
     passes.CommonSubexpressionElimination
   )
-}
-
-class MacroCompiler extends Compiler {
-  def emitter: Emitter = new VerilogEmitter
-
-  def transforms: Seq[Transform] =
-    Seq(new MacroCompilerTransform) ++
-      getLoweringTransforms(firrtl.ChirrtlForm, firrtl.LowForm) ++
-      Seq(new MacroCompilerOptimizations)
 }
 
 object MacroCompiler extends App {
@@ -890,7 +884,7 @@ object MacroCompiler extends App {
             MacroCompilerAnnotation(
               circuit.main,
               MacroCompilerAnnotation.Params(
-                params.get(Macros).get,
+                params(Macros),
                 params.get(MacrosFormat),
                 params.get(Library),
                 params.get(HammerIR),
@@ -905,20 +899,20 @@ object MacroCompiler extends App {
         )
 
         // The actual MacroCompilerTransform basically just generates an input circuit
-        val macroCompilerInput = CircuitState(circuit, MidForm, annotations)
+        val macroCompilerInput = CircuitState(circuit, annotations)
         val macroCompiled = (new MacroCompilerTransform).execute(macroCompilerInput)
 
-        // Since the MacroCompiler defines its own CLI, reconcile this with FIRRTL options
-        val firOptions = new ExecutionOptionsManager("macrocompiler") with HasFirrtlOptions {
-          firrtlOptions = FirrtlExecutionOptions(
-            outputFileNameOverride = params.get(Verilog).getOrElse(""),
-            noDCE = true,
-            firrtlSource = Some(macroCompiled.circuit.serialize)
-          )
-        }
-
         // Run FIRRTL compiler
-        Driver.execute(firOptions)
+        (new FirrtlStage).execute(
+          Array.empty,
+          Seq(
+            OutputFileAnnotation(params.getOrElse(Verilog, "")),
+            RunFirrtlTransformAnnotation(new VerilogEmitter),
+            EmitCircuitAnnotation(classOf[VerilogEmitter]),
+            NoDCEAnnotation,
+            FirrtlSourceAnnotation(macroCompiled.circuit.serialize)
+          )
+        )
 
         params.get(HammerIR) match {
           case Some(hammerIRFile: String) => {
@@ -947,8 +941,11 @@ object MacroCompiler extends App {
       }
     } catch {
       case e: java.util.NoSuchElementException =>
-        e.printStackTrace()
-        println(usage)
+        if (args.isEmpty) {
+          println("Command line arguments must be specified")
+        } else {
+          e.printStackTrace()
+        }
         e.printStackTrace()
         sys.exit(1)
       case e: MacroCompilerException =>

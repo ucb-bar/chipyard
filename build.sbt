@@ -7,7 +7,7 @@ val defaultVersions = Map(
 
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
-  version := "0.1-SNAPSHOT",
+  version := "0.4-SNAPSHOT",
   scalaVersion := "2.12.10",
   scalacOptions := Seq("-deprecation", "-feature", "-language:reflectiveCalls", "-Xsource:2.11"),
   libraryDependencies ++= Seq("chisel3","chisel-iotesters").map {

@@ -186,7 +186,7 @@ object CostMetric {
     *                         the metric.
     */
   def registerCostMetric(createFuncHelper: CostMetricCompanion): Unit = {
-    costMetricCreators.update(createFuncHelper.name, createFuncHelper)
+    costMetricCreators.update(createFuncHelper.name(), createFuncHelper)
   }
 
   /** Select a cost metric from string. */
@@ -196,7 +196,7 @@ object CostMetric {
     } else if (!costMetricCreators.contains(m)) {
       throw new IllegalArgumentException("Invalid cost metric " + m)
     } else {
-      costMetricCreators.get(m).get.construct(params)
+      costMetricCreators(m).construct(params)
     }
   }
 }
