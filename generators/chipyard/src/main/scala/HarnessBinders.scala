@@ -143,7 +143,8 @@ class WithBlackBoxSimMem extends OverrideHarnessBinder({
     (ports zip system.memAXI4Node.edges.in).map { case (port, edge) =>
       val memSize = p(ExtMem).get.master.size
       val lineSize = p(CacheBlockBytes)
-      val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle)).suggestName("simdram")
+      val clockFreq = p(MemoryBusKey).dtsFrequency.get
+      val mem = Module(new SimDRAM(memSize, lineSize, clockFreq, edge.bundle)).suggestName("simdram")
       mem.io.axi <> port.bits
       mem.io.clock := port.clock
       mem.io.reset := port.reset
