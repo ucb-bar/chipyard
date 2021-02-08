@@ -1,10 +1,9 @@
-# This is a full chipyard setup
+### This is a full chipyard setup
 
 # BUILD BASE FOR CI
 
 FROM ubuntu:18.04 as base
-# Default branch dev for experimental version
-ARG CHIPYARD_HASH=dev
+ARG CHIPYARD_HASH
 
 MAINTAINER https://groups.google.com/forum/#!forum/chipyard
 
@@ -40,8 +39,6 @@ RUN git clone https://github.com/ucb-bar/chipyard.git && \
         git checkout $CHIPYARD_HASH && \
         ./scripts/ubuntu-req.sh 1>/dev/null
 
-CMD ["/bin/sh"]
-
 
 # BUILD IMAGE WITH TOOLCHAINS
 
@@ -67,3 +64,5 @@ RUN cd chipyard && \
 ENTRYPOINT ["chipyard/scripts/entrypoint.sh"]
 
 # END IMAGE CUSTOMIZATIONS
+
+CMD ["/bin/sh"]
