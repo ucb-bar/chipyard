@@ -1,6 +1,7 @@
-package barstools.tapeout.transforms
+package barstools.tapeout.transforms.utils
 
 import net.jcazevedo.moultingyaml._
+
 import java.io.File
 
 class YamlFileReader(resource: String) {
