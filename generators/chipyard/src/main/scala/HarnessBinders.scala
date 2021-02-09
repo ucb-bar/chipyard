@@ -159,11 +159,11 @@ class WithBlackBoxSimMem(additionalLatency: Int = 0) extends OverrideHarnessBind
       }
       if (additionalLatency > 0) {
         withClockAndReset (port.clock, port.reset) {
-          mem.io.axi.aw <> ShiftQueue(Decoupled(port.bits.aw), additionalLatency)
-          mem.io.axi.w  <> ShiftQueue(Decoupled(port.bits.w ), additionalLatency)
-          port.bits.b   <> ShiftQueue(Decoupled(mem.io.axi.b), additionalLatency)
-          mem.io.axi.ar <> ShiftQueue(Decoupled(port.bits.ar), additionalLatency)
-          port.bits.r   <> ShiftQueue(Decoupled(mem.io.axi.r), additionalLatency)
+          mem.io.axi.aw <> (0 until additionalLatency).foldLeft(Decoupled(port.bits.aw))((t, _) => Queue(t, 1, pipe=true))
+          mem.io.axi.w  <> (0 until additionalLatency).foldLeft(Decoupled(port.bits.w ))((t, _) => Queue(t, 1, pipe=true))
+          port.bits.b   <> (0 until additionalLatency).foldLeft(Decoupled(mem.io.axi.b))((t, _) => Queue(t, 1, pipe=true))
+          mem.io.axi.ar <> (0 until additionalLatency).foldLeft(Decoupled(port.bits.ar))((t, _) => Queue(t, 1, pipe=true))
+          port.bits.r   <> (0 until additionalLatency).foldLeft(Decoupled(mem.io.axi.r))((t, _) => Queue(t, 1, pipe=true))
         }
       }
       mem.io.clock := port.clock
