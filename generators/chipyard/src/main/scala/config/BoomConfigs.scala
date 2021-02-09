@@ -18,6 +18,11 @@ class LargeBoomConfig extends Config(
   new boom.common.WithNLargeBooms(1) ++                          // large boom config
   new chipyard.config.AbstractConfig)
 
+class BPDBoomConfig extends Config(
+  new boom.common.WithBoom2BPD ++
+  new boom.common.WithNLargeBooms(1) ++                          // large boom with the 2BPD rather than TAGE 
+  new chipyard.config.AbstractConfig)
+
 class MegaBoomConfig extends Config(
   new boom.common.WithNMegaBooms(1) ++                           // mega boom config
   new chipyard.config.AbstractConfig)
