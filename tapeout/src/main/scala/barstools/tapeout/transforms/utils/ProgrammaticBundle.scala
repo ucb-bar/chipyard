@@ -1,6 +1,7 @@
-package barstools.tapeout.transforms
+package barstools.tapeout.transforms.utils
 
 import chisel3._
+
 import scala.collection.immutable.ListMap
 
 class CustomBundle[T <: Data](elts: (String, T)*) extends Record {

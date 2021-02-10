@@ -1,8 +1,8 @@
 // See LICENSE for license details.
 
-package barstools.tapeout.transforms
+package barstools.tapeout.transforms.utils
 
-import chisel3.experimental.{annotate, ChiselAnnotation}
+import chisel3.experimental.{ChiselAnnotation, annotate}
 import firrtl._
 import firrtl.annotations._
 import firrtl.stage.Forms
