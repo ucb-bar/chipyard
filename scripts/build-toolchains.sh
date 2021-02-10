@@ -48,7 +48,6 @@ do
             shift
             RISCV=$(realpath $1) ;;
         --ignore-qemu )
-            shift
             IGNOREQEMU="true" ;;
         riscv-tools | esp-tools)
             TOOLCHAIN=$1 ;;
