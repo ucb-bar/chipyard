@@ -31,12 +31,17 @@ class LargeBoomAndHwachaRocketConfig extends Config(
 // DOC include end: DualBoomAndRocketOneHwacha
 
 
-// DOC include start: DualBoomAndRocket
 class DualLargeBoomAndDualRocketConfig extends Config(
   new boom.common.WithNLargeBooms(2) ++                   // add 2 boom cores
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++  // add 2 rocket cores
   new chipyard.config.AbstractConfig)
-// DOC include end: DualBoomAndRocket
+
+// DOC include start: DualBoomAndSingleRocket
+class DualLargeBoomAndSingleRocketConfig extends Config(
+  new boom.common.WithNLargeBooms(2) ++                   // add 2 boom cores
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++  // add 1 rocket core
+  new chipyard.config.AbstractConfig)
+// DOC include end: DualBoomAndSingleRocket
 
 class LargeBoomAndRocketWithControlCoreConfig extends Config(
   new freechips.rocketchip.subsystem.WithNSmallCores(1) ++ // Add a small "control" core

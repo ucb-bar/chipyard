@@ -17,8 +17,8 @@ The following example shows a dual core BOOM with a single core Rocket.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/config/HeteroConfigs.scala
     :language: scala
-    :start-after: DOC include start: DualBoomAndRocket
-    :end-before: DOC include end: DualBoomAndRocket
+    :start-after: DOC include start: DualBoomAndSingleRocket
+    :end-before: DOC include end: DualBoomAndSingleRocket
 
 
 Adding Hwachas
