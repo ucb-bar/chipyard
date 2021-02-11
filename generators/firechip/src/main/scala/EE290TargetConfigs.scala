@@ -1,39 +1,38 @@
 package firesim.firesim
 
-import freechips.rocketchip.config.{Parameters, Config}
-import freechips.rocketchip.subsystem._
+import freechips.rocketchip.config.{Config}
 
 import firesim.bridges._
 import firesim.configs._
-
 
 //**********************************************************************************
 //* EE290-2 FireSim Gemmini Configurations
 //*********************************************************************************/
 
-class FireSimGemminiEE290Lab2RocketConfig extends Config(
-  new WithInclusiveCache ++
-  new gemmini.GemminiEE290Lab2Config ++
-  new WithNBigCores(1) ++
-  new FireSimRocketChipConfig)
-
-
-class FireSimGemminiEE290Lab2BigSPRocketConfig extends Config(
-  new WithInclusiveCache ++
-  new gemmini.GemminiEE290Lab2LargeSPConfig ++
-  new WithNBigCores(1) ++
-  new FireSimRocketChipConfig)
+// Rocket-based
 
 class FireSimGemminiEE290Lab3RocketConfig extends Config(
-  new WithInclusiveCache ++
-  new gemmini.GemminiEE290Lab3Config ++
-  new WithNBigCores(1) ++
-  new FireSimRocketChipConfig)
-
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.GemminiEE290Lab3RocketConfig)
 
 class FireSimGemminiEE290Lab3SmallSPRocketConfig extends Config(
-  new WithInclusiveCache ++
-  new gemmini.GemminiEE290Lab3SmallSPConfig ++
-  new WithNBigCores(1) ++
-  new FireSimRocketChipConfig)
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.GemminiEE290Lab3SmallSPRocketConfig)
 
+// BOOM-based
+
+class FireSimGemminiEE290Lab3BoomConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.GemminiEE290Lab3BoomConfig)
+
+class FireSimGemminiEE290Lab3SmallSPBoomConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.GemminiEE290Lab3SmallSPBoomConfig)
