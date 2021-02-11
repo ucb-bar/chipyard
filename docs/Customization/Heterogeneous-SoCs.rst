@@ -48,7 +48,7 @@ An example is shown below with two BOOM cores, and one Rocket tile with a RoCC a
     :start-after: DOC include start: DualBoomAndRocketOneHwacha
     :end-before: DOC include end: DualBoomAndRocketOneHwacha
 
-The ``WithMultiRoCCHwacha`` config fragment assigns a Hwacha accelerator to a particular ``hartId`` (in this case, the ``hartId`` of ``2`` corresponds to the Rocket core).
+The ``WithMultiRoCCHwacha`` config fragment assigns a Hwacha accelerator to a particular ``hartId`` (in this case, the ``hartId`` of ``0`` corresponds to the Rocket core).
 Finally, the ``WithMultiRoCC`` config fragment is called.
 This config fragment sets the ``BuildRoCC`` key to use the ``MultiRoCCKey`` instead of the default.
 This must be used after all the RoCC parameters are set because it needs to override the ``BuildRoCC`` parameter.
