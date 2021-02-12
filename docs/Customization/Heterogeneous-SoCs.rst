@@ -17,8 +17,8 @@ The following example shows a dual core BOOM with a single core Rocket.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/config/HeteroConfigs.scala
     :language: scala
-    :start-after: DOC include start: DualBoomAndRocket
-    :end-before: DOC include end: DualBoomAndRocket
+    :start-after: DOC include start: DualBoomAndSingleRocket
+    :end-before: DOC include end: DualBoomAndSingleRocket
 
 
 Adding Hwachas
@@ -48,7 +48,7 @@ An example is shown below with two BOOM cores, and one Rocket tile with a RoCC a
     :start-after: DOC include start: DualBoomAndRocketOneHwacha
     :end-before: DOC include end: DualBoomAndRocketOneHwacha
 
-The ``WithMultiRoCCHwacha`` config fragment assigns a Hwacha accelerator to a particular ``hartId`` (in this case, the ``hartId`` of ``2`` corresponds to the Rocket core).
+The ``WithMultiRoCCHwacha`` config fragment assigns a Hwacha accelerator to a particular ``hartId`` (in this case, the ``hartId`` of ``0`` corresponds to the Rocket core).
 Finally, the ``WithMultiRoCC`` config fragment is called.
 This config fragment sets the ``BuildRoCC`` key to use the ``MultiRoCCKey`` instead of the default.
 This must be used after all the RoCC parameters are set because it needs to override the ``BuildRoCC`` parameter.
@@ -56,6 +56,29 @@ If this is used earlier in the configuration sequence, then MultiRoCC does not w
 
 This config fragment can be changed to put more accelerators on more cores by changing the arguments to cover more ``hartId``'s (i.e. ``WithMultiRoCCHwacha(0,1,3,6,...)``).
 
+Since config fragments are applied from right-to-left (or bottom-to-top as they are formatted here), the right-most config fragment specifying a core (which is ``freechips.rocketchip.subsystem.WithNBigCores`` in the example above) gets the first hart ID.
+Consider this config:
+
+.. code-block:: scala
+
+    class RocketThenBoomHartIdTestConfig extends Config(
+      new boom.common.WithNLargeBooms(2) ++
+      new freechips.rocketchip.subsystem.WithNBigCores(3) ++
+      new chipyard.config.AbstractConfig)
+
+This specifies an SoC with three Rocket cores and two BOOM cores.
+The Rocket cores would have hart IDs 0, 1, and 2, while the BOOM cores would have hard IDs 3 and 4.
+On the other hand, consider this config which reverses the order of those two fragments:
+
+.. code-block:: scala
+
+    class BoomThenRocketHartIdTestConfig extends Config(
+      new freechips.rocketchip.subsystem.WithNBigCores(3) ++
+      new boom.common.WithNLargeBooms(2) ++
+      new chipyard.config.AbstractConfig)
+
+This also specifies an SoC with three Rocket cores and two BOOM cores, but because the BOOM config fragment is evaluated before the Rocket config fragment, the hart IDs are reversed.
+The BOOM cores would have hart IDs 0 and 1, while the Rocket cores would have hard IDs 2, 3, and 4.
 
 .. [1] Note, in this section "core" and "tile" are used interchangeably but there is subtle distinction between a "core" and "tile" ("tile" contains a "core", L1D/I$, PTW).
     For many places in the documentation, we usually use "core" to mean "tile" (doesn't make a large difference but worth the mention).
