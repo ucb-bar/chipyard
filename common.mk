@@ -83,7 +83,6 @@ endif
 # create list of simulation file inputs
 #########################################################################################
 $(sim_files): $(call lookup_srcs,$(base_dir)/generators/utilities/src/main/scala,scala) $(SCALA_BUILDTOOL_DEPS)
-	mkdir -p $(base_dir)/.java_temp
 	$(call run_scala_main,utilities,utilities.GenerateSimFiles,-td $(build_dir) -sim $(sim_name))
 
 #########################################################################################
