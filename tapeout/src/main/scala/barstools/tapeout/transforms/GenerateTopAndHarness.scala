@@ -38,14 +38,6 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
   val topAnnos = synTop.map(st => ReParentCircuitAnnotation(rootCircuitTarget.module(st))) ++
     topDotfOut.map(BlackBoxResourceFileNameAnno)
 
-  // order is determined by DependencyAPIMigration
-  val harnessTransforms = Seq(
-    new ConvertToExtMod,
-    new RemoveUnusedModules,
-    new AvoidExtModuleCollisions,
-    new AddSuffixToModuleNames
-  )
-
   // Dump firrtl and annotation files
   protected def dump(
                       circuit: Circuit,
@@ -88,6 +80,7 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
     // Execute top and get list of ExtModules to avoid collisions
     val topExtModules = executeTop()
 
+    // order is determined by DependencyAPIMigration
     val harnessAnnos =
       harnessDotfOut.map(BlackBoxResourceFileNameAnno).toSeq ++
         harnessTop.map(ht => ModuleNameSuffixAnnotation(rootCircuitTarget, s"_in${ht}")) ++
