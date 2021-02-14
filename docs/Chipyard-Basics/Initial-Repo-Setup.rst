@@ -66,6 +66,22 @@ You can put this in your ``.bashrc`` or equivalent environment setup file to get
 
 These variables need to be set for the ``make`` system to work properly.
 
+Pre-built Docker Image
+-------------------------------------------
+
+An alternative to setting up the Chipyard repository locally is to pull the pre-built Docker image from Docker Hub. The image comes with all necessary dependencies and toolchains installed.
+First pull the Docker image. Run:
+
+.. code-block:: shell
+
+    sudo docker pull ucbbar/chipyard-image
+
+To run the Docker container in an interactive shell, run:
+
+.. code-block:: shell
+
+    sudo docker run -it ucbbar/chipyard-image bash
+
 What's Next?
 -------------------------------------------
 
