@@ -112,7 +112,7 @@ commands:
                 default: "run-tests.sh"
             timeout:
                 type: string
-                default: "15m"
+                default: "20m"
         steps:
             - setup-tools:
                 tools-version: "<< parameters.tools-version >>"
