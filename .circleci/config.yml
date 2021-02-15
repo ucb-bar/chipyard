@@ -231,7 +231,7 @@ jobs:
             - run-tests:
                 group-key: "group-cores"
                 project-key: "chipyard-hetero"
-                timeout: "15m"
+                timeout: "20m"
     chipyard-boom-run-tests:
         executor: main-env
         steps:
