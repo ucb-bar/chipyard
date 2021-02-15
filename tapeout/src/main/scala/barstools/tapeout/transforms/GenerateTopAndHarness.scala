@@ -98,7 +98,9 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
     // outputFileNameOverride: change to harnessOutput
     // conf file must change to harnessConf by mapping annotations
 
-    val generatorAnnotations = annotations.map {
+    val generatorAnnotations = annotations
+      .filterNot(_.isInstanceOf[OutputFileAnnotation])
+      .map {
       case ReplSeqMemAnnotation(i, _) => ReplSeqMemAnnotation(i, harnessConf.get)
       case HarnessOutputAnnotation(s) => OutputFileAnnotation(s)
       case anno => anno
