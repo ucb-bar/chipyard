@@ -69,12 +69,12 @@ These variables need to be set for the ``make`` system to work properly.
 Pre-built Docker Image
 -------------------------------------------
 
-An alternative to setting up the Chipyard repository locally is to pull the pre-built Docker image from Docker Hub. The image comes with all necessary dependencies and toolchains installed.
-First pull the Docker image. Run:
+An alternative to setting up the Chipyard repository locally is to pull the pre-built Docker image from Docker Hub. The image comes with all dependencies installed, chipyard cloned, and toolchains initialized. Each image comes with a tag that corresponds to the version of Chipyard cloned/set-up in that image. Not including a tag during the pull will pull the image with the latest version of chipyard.
+First, pull the Docker image. Run:
 
 .. code-block:: shell
 
-    sudo docker pull ucbbar/chipyard-image
+    sudo docker pull ucbbar/chipyard-image:<TAG>
 
 To run the Docker container in an interactive shell, run:
 
