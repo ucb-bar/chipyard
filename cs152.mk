@@ -19,3 +19,6 @@ JAVA_OPTS += \
 	-Dsbt.ivy.home=$(base_dir)/.ivy2 \
 	-Dsbt.global.base=$(base_dir)/.sbt \
 	-Dsbt.boot.directory=$(base_dir)/.sbt/boot/
+
+CCACHE_DIR := $(base_dir)/.ccache
+export CCACHE_DIR

@@ -22,3 +22,4 @@ env-esp-tools.sh
 .bsp/
 .ivy2/
 .sbt/
+.ccache/
