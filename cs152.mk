@@ -13,3 +13,9 @@ $(sim_csrcs): $(build_dir)/%: $(rocketchip_csrc_dir)/% $(sim_vsrcs)
 	cp $< $@
 
 EXTRA_SIM_REQS += $(sim_csrcs)
+
+# Local ivy2 and sbt caches
+JAVA_OPTS += \
+	-Dsbt.ivy.home=$(base_dir)/.ivy2 \
+	-Dsbt.global.base=$(base_dir)/.sbt \
+	-Dsbt.boot.directory=$(base_dir)/.sbt/boot/
