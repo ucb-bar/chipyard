@@ -65,7 +65,10 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
 
   // Top Generation
   def executeTop(): Seq[ExtModule] = {
-    val annos = new FirrtlStage().execute(Array.empty, annotations)
+    val annos = new FirrtlStage().execute(Array.empty, annotations ++ Seq(
+      RunFirrtlTransformAnnotation(Dependency[ReParentCircuit]),
+      RunFirrtlTransformAnnotation(Dependency[RemoveUnusedModules])
+    ))
     annos.collectFirst { case FirrtlCircuitAnnotation(circuit) => circuit } match {
       case Some(circuit) =>
         dump(circuit, annos, topFir, topAnnoOut)
