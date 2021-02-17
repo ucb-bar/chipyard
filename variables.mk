@@ -152,7 +152,7 @@ JAVA_OPTS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M -Djava.io.tmpdir=
 # default sbt launch command
 #########################################################################################
 # by default build chisel3/firrtl and other subprojects from source
-override SBT_OPTS += -Dsbt.sourcemode=true -Dsbt.workspace=$(base_dir)/tools
+override SBT_OPTS += -Dsbt.sourcemode=true -Dsbt.workspace=$(base_dir)/tools -Dsbt.ivy.home=$(base_dir)/.ivy2 -Dsbt.global.base=$(base_dir)/.sbt -Dsbt.boot.directory=$(base_dir)/.sbt/boot/
 
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
@@ -217,5 +217,5 @@ sim_vsrcs = \
 #########################################################################################
 # assembly/benchmark variables
 #########################################################################################
-timeout_cycles = 10000000
+timeout_cycles = 100000000
 bmark_timeout_cycles = 100000000
