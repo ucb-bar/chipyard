@@ -22,3 +22,13 @@ JAVA_OPTS += \
 
 CCACHE_DIR := $(base_dir)/.ccache
 export CCACHE_DIR
+
+########################################################################
+# run benchmarks rules
+########################################################################
+
+pk := $(RISCV)/riscv64-unknown-elf/bin/pk
+
+run-pk: run-binary-hex $(pk)
+run-pk-debug: run-binary-debug-hex $(pk)
+run-pk run-pk-debug: BINARY = $(pk) $(PAYLOAD)
