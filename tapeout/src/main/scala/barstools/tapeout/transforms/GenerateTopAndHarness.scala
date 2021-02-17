@@ -27,12 +27,6 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
     case _ => None
   }.toList
 
-  // order is determined by DependencyAPIMigration
-  val topTransforms = Seq(
-    new ReParentCircuit,
-    new RemoveUnusedModules
-  )
-
   lazy val rootCircuitTarget = CircuitTarget(harnessTop.get)
 
   val topAnnos = synTop.map(st => ReParentCircuitAnnotation(rootCircuitTarget.module(st))) ++
@@ -65,10 +59,14 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
 
   // Top Generation
   def executeTop(): Seq[ExtModule] = {
-    val annos = new FirrtlStage().execute(Array.empty, annotations ++ Seq(
-      RunFirrtlTransformAnnotation(Dependency[ReParentCircuit]),
-      RunFirrtlTransformAnnotation(Dependency[RemoveUnusedModules])
-    ))
+    val annos = new FirrtlStage().execute(
+      Array.empty,
+      annotations ++ Seq(
+        RunFirrtlTransformAnnotation(Dependency[ReParentCircuit]),
+        RunFirrtlTransformAnnotation(Dependency[RemoveUnusedModules])
+      ) ++
+        topAnnos
+    )
     annos.collectFirst { case FirrtlCircuitAnnotation(circuit) => circuit } match {
       case Some(circuit) =>
         dump(circuit, annos, topFir, topAnnoOut)
