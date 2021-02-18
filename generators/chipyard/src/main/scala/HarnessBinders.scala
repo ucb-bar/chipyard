@@ -1,7 +1,8 @@
 package chipyard.harness
 
 import chisel3._
-import chisel3.experimental.{Analog, BaseModule}
+import chisel3.util._
+import chisel3.experimental.{Analog, BaseModule, DataMirror, Direction}
 
 import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
@@ -10,6 +11,7 @@ import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.system.{SimAXIMem}
 import freechips.rocketchip.subsystem._
+import freechips.rocketchip.util._
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
@@ -137,14 +139,33 @@ class WithSimAXIMem extends OverrideHarnessBinder({
   }
 })
 
-class WithBlackBoxSimMem extends OverrideHarnessBinder({
+class WithBlackBoxSimMem(additionalLatency: Int = 0) extends OverrideHarnessBinder({
   (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
     (ports zip system.memAXI4Node.edges.in).map { case (port, edge) =>
       val memSize = p(ExtMem).get.master.size
       val lineSize = p(CacheBlockBytes)
-      val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle)).suggestName("simdram")
+      val clockFreq = p(MemoryBusKey).dtsFrequency.get
+      val mem = Module(new SimDRAM(memSize, lineSize, clockFreq, edge.bundle)).suggestName("simdram")
       mem.io.axi <> port.bits
+      // Bug in Chisel implementation. See https://github.com/chipsalliance/chisel3/pull/1781
+      def Decoupled[T <: Data](irr: IrrevocableIO[T]): DecoupledIO[T] = {
+        require(DataMirror.directionOf(irr.bits) == Direction.Output, "Only safe to cast produced Irrevocable bits to Decoupled.")
+        val d = Wire(new DecoupledIO(chiselTypeOf(irr.bits)))
+        d.bits := irr.bits
+        d.valid := irr.valid
+        irr.ready := d.ready
+        d
+      }
+      if (additionalLatency > 0) {
+        withClockAndReset (port.clock, port.reset) {
+          mem.io.axi.aw <> (0 until additionalLatency).foldLeft(Decoupled(port.bits.aw))((t, _) => Queue(t, 1, pipe=true))
+          mem.io.axi.w  <> (0 until additionalLatency).foldLeft(Decoupled(port.bits.w ))((t, _) => Queue(t, 1, pipe=true))
+          port.bits.b   <> (0 until additionalLatency).foldLeft(Decoupled(mem.io.axi.b))((t, _) => Queue(t, 1, pipe=true))
+          mem.io.axi.ar <> (0 until additionalLatency).foldLeft(Decoupled(port.bits.ar))((t, _) => Queue(t, 1, pipe=true))
+          port.bits.r   <> (0 until additionalLatency).foldLeft(Decoupled(mem.io.axi.r))((t, _) => Queue(t, 1, pipe=true))
+        }
+      }
       mem.io.clock := port.clock
       mem.io.reset := port.reset
     }
