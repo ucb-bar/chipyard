@@ -9,15 +9,13 @@ MAINTAINER https://groups.google.com/forum/#!forum/chipyard
 
 # Install dependencies for ubuntu-req.sh
 RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
                curl \
                git \
-               sudo
-
-# Stopping docker keyboard-config from disrupting ubuntu-req.sh
-RUN sudo DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration && \
-   sudo DEBIAN_FRONTEND=noninteractive apt-get install -y console-setup
+               sudo \
+               ca-certificates \
+               keyboard-configuration \
+               console-setup
 
 # Adds a new user called riscvuser
 RUN groupadd --gid 3434 riscvuser \
@@ -37,7 +35,8 @@ ENV PATH="$RISCV/bin:$PATH"
 RUN git clone https://github.com/ucb-bar/chipyard.git && \
         cd chipyard && \
         git checkout $CHIPYARD_HASH && \
-        ./scripts/ubuntu-req.sh 1>/dev/null
+        ./scripts/ubuntu-req.sh 1>/dev/null && \
+        sudo rm -rf /var/lib/apt/lists/*
 
 
 # BUILD IMAGE WITH TOOLCHAINS
