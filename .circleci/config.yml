@@ -12,7 +12,7 @@ parameters:
 executors:
     main-env:
         docker:
-            - image: ucbbar/chipyard-ci-image:84cfc73
+            - image: ucbbar/chipyard-ci-image:9c650dea
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 
@@ -112,7 +112,7 @@ commands:
                 default: "run-tests.sh"
             timeout:
                 type: string
-                default: "20m"
+                default: "25m"
         steps:
             - setup-tools:
                 tools-version: "<< parameters.tools-version >>"
