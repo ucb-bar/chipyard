@@ -124,6 +124,10 @@ object DefaultMetric extends CostMetric with CostMetricCompanion {
         else (mem.src.width/p)*m //Waste the extra maskbits
       }
     }
+    val maskPenalty = (memMask, libMask) match {
+      case (None, Some(m)) => 0.001
+      case (_, _) => 0
+    }
     val depthCost = math.ceil(mem.src.depth.toDouble / lib.src.depth.toDouble)
     val widthCost = math.ceil(memWidth.toDouble / lib.src.width.toDouble)
     val bitsCost = (lib.src.depth * lib.src.width).toDouble
@@ -132,7 +136,7 @@ object DefaultMetric extends CostMetric with CostMetricCompanion {
     val bitsWasted = depthCost*widthCost*bitsCost - requestedBits
     val wastedConst = 0.05 // 0 means waste as few bits with no regard for instance count
     val costPerInst = wastedConst*depthCost*widthCost
-    Some(1.0*bitsWasted/requestedBits+costPerInst)
+    Some(1.0*bitsWasted/requestedBits+costPerInst + maskPenalty)
   }
 
   override def commandLineParams = Map()
