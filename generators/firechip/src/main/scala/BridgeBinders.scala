@@ -170,6 +170,7 @@ class WithFireSimFAME5 extends ComposeIOBinder({
         annotate(EnableModelMultiThreadingAnnotation(b.module))
       case r: RocketTile =>
         annotate(EnableModelMultiThreadingAnnotation(r.module))
+      case _ => Nil
     }
     (Nil, Nil)
   }
