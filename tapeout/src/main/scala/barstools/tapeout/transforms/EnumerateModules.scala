@@ -35,7 +35,6 @@ class EnumerateModules(enumerate: (Module) => Unit)
   def transforms: Seq[Transform] = Seq(new EnumerateModulesPass(enumerate))
 
   def execute(state: CircuitState): CircuitState = {
-    val ret = runTransforms(state)
-    CircuitState(ret.circuit, outputForm, ret.annotations, ret.renames)
+    runTransforms(state)
   }
 }
