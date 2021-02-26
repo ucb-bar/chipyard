@@ -34,6 +34,12 @@ class GemminiRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: GemminiRocketConfig
 
+class FPGemminiRocketConfig extends Config(
+  new gemmini.GemminiFP32DefaultConfig ++                         // use FP32Gemmini systolic array GEMM accelerator
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+
 // DOC include start: DmiRocket
 class dmiRocketConfig extends Config(
   new chipyard.harness.WithSerialAdapterTiedOff ++               // don't attach an external SimSerial
