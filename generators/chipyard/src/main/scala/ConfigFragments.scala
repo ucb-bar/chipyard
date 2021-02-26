@@ -20,7 +20,7 @@ import testchipip._
 import tracegen.{TraceGenSystem}
 
 import hwacha.{Hwacha}
-import gemmini.{Gemmini, GemminiConfigs}
+import gemmini._
 
 import boom.common.{BoomTileAttachParams}
 import cva6.{CVA6TileAttachParams}
@@ -108,11 +108,12 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config(
   })
 )
 
-class WithMultiRoCCGemmini(harts: Int*) extends Config((site, here, up) => {
+class WithMultiRoCCGemmini[T <: Data : Arithmetic, U <: Data, V <: Data](
+  harts: Int*)(gemminiConfig: GemminiArrayConfig[T,U,V] = GemminiConfigs.defaultConfig) extends Config((site, here, up) => {
   case MultiRoCCKey => up(MultiRoCCKey, site) ++ harts.distinct.map { i =>
     (i -> Seq((p: Parameters) => {
       implicit val q = p
-      val gemmini = LazyModule(new Gemmini(OpcodeSet.custom3, GemminiConfigs.defaultConfig))
+      val gemmini = LazyModule(new Gemmini(gemminiConfig))
       gemmini
     }))
   }
