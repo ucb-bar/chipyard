@@ -75,15 +75,18 @@ object ClockingSchemeGenerators {
     }
 
     val aggregator = LazyModule(new ClockGroupAggregator("allClocks")).node
+    // provides the implicit clock to the system
     (chiptop.implicitClockSinkNode
       := ClockGroup()
       := aggregator)
+    // provides the system clock (ex. the bus clocks)
     (systemAsyncClockGroup
       :*= resetSetter
       :*= ClockGroupNamePrefixer()
       :*= aggregator)
 
     val referenceClockSource =  ClockSourceNode(Seq(ClockSourceParameters()))
+    // provides all the divided clocks (from the top-level clock)
     (aggregator
       := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
       := ClockGroupResetSynchronizer()
