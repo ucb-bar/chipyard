@@ -103,6 +103,34 @@ class WithBlockDeviceBridge extends OverrideHarnessBinder({
   }
 })
 
+class WithOffchipNetworkSerialAXIBridge extends OverrideHarnessBinder({
+  (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[ClockedAndResetIO[ClockedIO[SerialIO]]]) => {
+    implicit val p = GetSystemParameters(system)
+
+    ports.map({ port =>
+      val offchipNetwork = SerialAdapter.connectOffChipNetwork(system.serdesser.get, port, th.harnessReset)
+      SerialBridge(port.bits.clock, offchipNetwork.module.io.tsi_ser, p(ExtMem).map(_ => MainMemoryConsts.globalName))
+
+      // connect SimAxiMem
+      (offchipNetwork.mem_axi4 zip offchipNetwork.memAXI4Node.edges.in).map { case (axi4, edge) =>
+        val nastiKey = NastiParameters(axi4.r.bits.data.getWidth,
+                                      axi4.ar.bits.addr.getWidth,
+                                      axi4.ar.bits.id.getWidth)
+        system match {
+          case s: BaseSubsystem => FASEDBridge(port.clock, axi4, port.reset.asBool,
+            CompleteConfig(p(firesim.configs.MemModelKey),
+                          nastiKey,
+                          Some(AXI4EdgeSummary(edge)),
+                          Some(MainMemoryConsts.globalName)))
+          case _ => throw new Exception("Attempting to attach FASED Bridge to misconfigured design")
+        }
+      }
+    })
+
+    Nil
+  }
+})
+
 class WithFASEDBridge extends OverrideHarnessBinder({
   (system: CanHaveMasterAXI4MemPort, th: FireSim, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     implicit val p: Parameters = GetSystemParameters(system)

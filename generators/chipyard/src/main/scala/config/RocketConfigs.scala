@@ -1,7 +1,8 @@
 package chipyard
 
 import freechips.rocketchip.config.{Config}
-import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
+import freechips.rocketchip.diplomacy.{AsynchronousCrossing, RationalCrossing}
+import freechips.rocketchip.util.{SlowToFast}
 
 // --------------
 // Rocket Configs
@@ -212,3 +213,52 @@ class LBWIFRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMemPort ++       // remove AXI4 backing memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
+
+// DEBUG: To check if UART works (with everything default but serdes slow and ramp up to 1GHz)
+class DebugOffchipConfig extends Config(
+  new testchipip.WithSerialTLWidth(32) ++
+  new testchipip.WithAsynchronousSerialSlaveCrossing ++ // SerDes <-async-> mbus. Remember SerDes master tied to fbus
+  new chipyard.config.WithFbusToSbusCrossingType(RationalCrossing(SlowToFast)) ++ // fbus slow -> sbus fast
+  new chipyard.config.WithFrontBusFrequency(3200 / 4) ++ // controls SerDes freq.
+
+  new chipyard.config.WithPeripheryBusFrequencyAsDefault ++ // everything default to 3.2GHz
+  new chipyard.config.WithPeripheryBusFrequency(3200) ++
+  new chipyard.config.WithMemoryBusFrequency(3200) ++
+
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++  // add 1 rocket cores
+  new chipyard.config.AbstractOffChipConfig) // new offchip network where AXI is in harness
+
+// have pbus=3.2GHz,/1, but others are different (fbus=/4, other=/2)
+class DebugOffchip2Config extends Config(
+  new chipyard.config.WithCbusToPbusCrossingType(RationalCrossing(SlowToFast)) ++
+  new chipyard.config.WithFbusToSbusCrossingType(RationalCrossing(SlowToFast)) ++
+
+  new chipyard.config.WithSystemBusFrequencyAsDefault ++
+  new chipyard.config.WithSystemBusFrequency(3200 / 2) ++
+
+  new chipyard.config.WithFrontBusFrequency(3200 / 4) ++
+  new chipyard.config.WithPeripheryBusFrequency(3200) ++
+  new chipyard.config.WithMemoryBusFrequency(3200) ++
+
+  new chipyard.config.WithFbusToSbusCrossingType(RationalCrossing(SlowToFast)) ++ // fbus slow -> sbus fast
+  new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
+
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++  // add 1 rocket cores
+  new chipyard.config.AbstractOffChipConfig)
+
+// fbus=/2, other=/1
+class DebugOffchip3Config extends Config(
+  new chipyard.config.WithFbusToSbusCrossingType(RationalCrossing(SlowToFast)) ++
+
+  new chipyard.config.WithSystemBusFrequencyAsDefault ++
+  new chipyard.config.WithSystemBusFrequency(4000) ++
+  new chipyard.config.WithPeripheryBusFrequency(4000) ++
+  new chipyard.config.WithMemoryBusFrequency(4000) ++
+
+  new chipyard.config.WithFrontBusFrequency(4000 / 2) ++
+
+  new chipyard.config.WithFbusToSbusCrossingType(RationalCrossing(SlowToFast)) ++ // fbus slow -> sbus fast
+  new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
+
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++  // add 1 rocket cores
+  new chipyard.config.AbstractOffChipConfig)
