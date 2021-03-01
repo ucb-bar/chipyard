@@ -84,6 +84,17 @@ class WithMultiRoCC extends Config((site, here, up) => {
 })
 
 /**
+ * Assigns what was previously in the BuildRoCC key to specific harts with MultiRoCCKey
+ * Must be paired with WithMultiRoCC
+ */
+class WithMultiRoCCFromBuildRoCC(harts: Int*) extends Config((site, here, up) => {
+  case BuildRoCC => Nil
+  case MultiRoCCKey => up(MultiRoCCKey, site) ++ harts.distinct.map { i =>
+    (i -> up(BuildRoCC, site))
+  }
+})
+
+/**
  * Config fragment to add Hwachas to cores based on hart
  *
  * For ex:
