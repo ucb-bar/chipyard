@@ -18,6 +18,7 @@ sudo yum install -y centos-release-scl
 sudo yum install -y devtoolset-8-make
 # install DTC
 sudo yum install -y dtc
+sudo yum install -y python
 
 # install verilator
 git clone http://git.veripool.org/git/verilator

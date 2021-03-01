@@ -19,6 +19,7 @@ sudo apt-get install -y libgtk-3-dev gettext
 sudo apt-get install -y python3-pip python3.6-dev rsync libguestfs-tools expat ctags
 # install DTC
 sudo apt-get install -y device-tree-compiler
+sudo apt-get install -y python
 
 # install verilator
 git clone http://git.veripool.org/git/verilator
