@@ -204,6 +204,14 @@ class FireSimMulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
   new FireSimRocketConfig)
 
+class FireSimMulticlockAXIOverSerialConfig extends Config(
+  new WithAXIOverSerialTLCombinedBridges ++ // use combined bridge to connect to axi mem over serial
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaksWithoutClocking ++ // don't inherit firesim clocking
+  new chipyard.MulticlockAXIOverSerialConfig
+)
+
 //**********************************************************************************
 // System with 16 LargeBOOMs that can be simulated with Golden Gate optimizations
 // - Requires MTModels and MCRams mixins as prefixes to the platform config
@@ -216,34 +224,3 @@ class FireSim16LargeBoomConfig extends Config(
   new boom.common.WithNLargeBooms(16) ++
   new chipyard.config.AbstractConfig)
 
-// unsure if this needs to scale
-//new chipyard.config.WithUART((pbusFreqMHz / 100) * BigInt(115200L)) ++
-
-//class FireSimDebugOffchipConfig extends Config(
-//  new WithTracerV ++
-//  new WithOffchipAXINoClksSetup(3200) ++
-//  new chipyard.DebugOffchipConfig
-//)
-
-//class FireSimDebugOffchip2Config extends Config(
-//  new WithTracerV ++
-//  new WithOffchipAXINoClksSetup(3200) ++
-//  new chipyard.DebugOffchip2Config
-//)
-
-class FireSimDebugOffchip2Config extends Config(
-  new chipyard.config.WithUART((4000 / 100) * BigInt(115200L)) ++
-  new WithAXIOverSerialTLCombinedBridges ++ // use combined bridge to connect to axi mem over serial
-  new WithDefaultFireSimBridges ++
-  new WithDefaultMemModel ++
-  new WithFireSimConfigTweaksWithoutClocking ++ // don't inherit firesim clocking
-  new chipyard.DebugOffchip3Config
-)
-
-class FireSimDebugOffchip3Config extends Config(
-  new WithAXIOverSerialTLCombinedBridges ++ // use combined bridge to connect to axi mem over serial
-  new WithDefaultFireSimBridges ++
-  new WithDefaultMemModel ++
-  new WithFireSimConfigTweaksWithoutClocking ++ // don't inherit firesim clocking
-  new chipyard.DebugOffchip3Config
-)
