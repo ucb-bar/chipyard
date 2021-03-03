@@ -109,7 +109,8 @@ class WithOffchipNetworkSerialAXIBridge extends OverrideHarnessBinder({
 
     ports.map({ port =>
       val offchipNetwork = SerialAdapter.connectOffChipNetwork(system.serdesser.get, port, th.harnessReset)
-      SerialBridge(port.bits.clock, offchipNetwork.module.io.tsi_ser, p(ExtMem).map(_ => MainMemoryConsts.globalName))
+      SerialBridge(port.bits.clock, offchipNetwork.module.io.tsi_ser, p(SerialTLKey).map(v => MainMemoryConsts.globalName))
+      p(SerialTLKey).map(v => require(v.isMemoryDevice))
 
       // connect SimAxiMem
       (offchipNetwork.mem_axi4 zip offchipNetwork.memAXI4Node.edges.in).map { case (axi4, edge) =>

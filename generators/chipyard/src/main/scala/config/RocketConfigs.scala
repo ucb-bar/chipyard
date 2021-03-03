@@ -216,7 +216,7 @@ class LBWIFRocketConfig extends Config(
 
 // DEBUG: To check if UART works (with everything default but serdes slow and ramp up to 1GHz)
 class DebugOffchipConfig extends Config(
-  new testchipip.WithSerialTLWidth(32) ++
+  new testchipip.WithSerialTLWidth(64) ++
   new testchipip.WithAsynchronousSerialSlaveCrossing ++ // SerDes <-async-> mbus. Remember SerDes master tied to fbus
   new chipyard.config.WithFbusToSbusCrossingType(RationalCrossing(SlowToFast)) ++ // fbus slow -> sbus fast
   new chipyard.config.WithFrontBusFrequency(3200 / 4) ++ // controls SerDes freq.

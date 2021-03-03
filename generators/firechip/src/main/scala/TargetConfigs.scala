@@ -251,22 +251,30 @@ class WithOffchipAXINoClksSetup(pbusFreqMHz: BigInt = 3200) extends Config(
   // OLD: pbus @ 3200MHz, HW baud @ 3686400L AKA 115200 * 32
   // OLD: Linux @ 115200, SBI @ 115200
   // scale down to 100MHz before multipling up
-  new chipyard.config.WithUART((pbusFreqMHz / 100) * BigInt(115200L)) ++
+  //new chipyard.config.WithUART((pbusFreqMHz / 100) * BigInt(115200L)) ++
+  new chipyard.config.WithUART(BigInt(3686400L)) ++
   // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
   new chipyard.config.WithNoDebug
 )
 
+class WithTracerV extends Config(
+  new WithTracerVBridge ++
+  new chipyard.config.WithTraceIO)
+
 class FireSimDebugOffchipConfig extends Config(
+  new WithTracerV ++
   new WithOffchipAXINoClksSetup(3200) ++
   new chipyard.DebugOffchipConfig
 )
 
 class FireSimDebugOffchip2Config extends Config(
+  new WithTracerV ++
   new WithOffchipAXINoClksSetup(3200) ++
   new chipyard.DebugOffchip2Config
 )
 
 class FireSimDebugOffchip3Config extends Config(
+  new WithTracerV ++
   new WithOffchipAXINoClksSetup(4000) ++
   new chipyard.DebugOffchip3Config
 )
