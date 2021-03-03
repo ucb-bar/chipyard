@@ -74,10 +74,6 @@ class WithFireSimConfigTweaksWithoutClocking extends Config(
   new chipyard.config.WithTraceIO ++
   // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 32 GiB on F1)
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
-  // Required: Adds IO to attach SerialBridge. The SerialBridges is responsible
-  // for signalling simulation termination under simulation success. This fragment can
-  // be removed if you supply an auxiliary bridge that signals simulation termination
-  new testchipip.WithDefaultSerialTL ++
   // Optional: Removing this will require using an initramfs under linux
   new testchipip.WithBlockDevice ++
   // Required*: Scale default baud rate with periphery bus frequency
@@ -220,23 +216,29 @@ class FireSim16LargeBoomConfig extends Config(
   new boom.common.WithNLargeBooms(16) ++
   new chipyard.config.AbstractConfig)
 
-class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
-class WithOffchipAXINoClksSetup(pbusFreqMHz: BigInt = 3200) extends Config(
-  //new chipyard.config.WithUART((pbusFreqMHz / 100) * BigInt(115200L)) ++
-  new chipyard.config.WithUART(BigInt(3686400L)) ++
-)
+// unsure if this needs to scale
+//new chipyard.config.WithUART((pbusFreqMHz / 100) * BigInt(115200L)) ++
 
 //class FireSimDebugOffchipConfig extends Config(
 //  new WithTracerV ++
 //  new WithOffchipAXINoClksSetup(3200) ++
 //  new chipyard.DebugOffchipConfig
 //)
-//
+
 //class FireSimDebugOffchip2Config extends Config(
 //  new WithTracerV ++
 //  new WithOffchipAXINoClksSetup(3200) ++
 //  new chipyard.DebugOffchip2Config
 //)
+
+class FireSimDebugOffchip2Config extends Config(
+  new chipyard.config.WithUART((4000 / 100) * BigInt(115200L)) ++
+  new WithAXIOverSerialTLCombinedBridges ++ // use combined bridge to connect to axi mem over serial
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaksWithoutClocking ++ // don't inherit firesim clocking
+  new chipyard.DebugOffchip3Config
+)
 
 class FireSimDebugOffchip3Config extends Config(
   new WithAXIOverSerialTLCombinedBridges ++ // use combined bridge to connect to axi mem over serial

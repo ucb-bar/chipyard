@@ -98,13 +98,13 @@ class WithUARTBridge extends OverrideHarnessBinder({
 class WithBlockDeviceBridge extends OverrideHarnessBinder({
   (system: CanHavePeripheryBlockDevice, th: FireSim, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
-    ports.map { b => BlockDevBridge(b.clock, b.bits, th.harnessReset.toBool) }
+    ports.map { b => BlockDevBridge(b.clock, b.bits, th.harnessReset.asBool) }
     Nil
   }
 })
 
 class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[SerialAndPassthroughClockResetIO]]]) => {
+  (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[SerialAndPassthroughClockResetIO]) => {
     implicit val p = GetSystemParameters(system)
 
     p(SerialTLKey).map({ sVal =>
@@ -113,7 +113,7 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
 
       ports.map({ port =>
         val offchipNetwork = SerialAdapter.connectHarnessMultiClockAXIRAM(system.serdesser.get, port, th.harnessReset)
-        SerialBridge(port.clocked_serial.clock, offchipNetwork.module.io.tsi_ser, MainMemoryConsts.globalName)
+        SerialBridge(port.clocked_serial.clock, offchipNetwork.module.io.tsi_ser, Some(MainMemoryConsts.globalName))
 
         // connect SimAxiMem
         (offchipNetwork.mem_axi4 zip offchipNetwork.memAXI4Node.edges.in).map { case (axi4, edge) =>
