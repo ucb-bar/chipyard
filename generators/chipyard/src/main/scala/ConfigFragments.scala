@@ -204,7 +204,7 @@ class WithTLBackingMemory extends Config((site, here, up) => {
   case ExtTLMem => up(ExtMem, site) // enable TL backing memory
 })
 
-class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("core", fMHz)
+class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("tile", fMHz)
 
 class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {
   case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
