@@ -103,29 +103,33 @@ class WithBlockDeviceBridge extends OverrideHarnessBinder({
   }
 })
 
-class WithOffchipNetworkSerialAXIBridge extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[ClockedAndResetIO[ClockedIO[SerialIO]]]) => {
+class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
+  (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[SerialAndPassthroughClockResetIO]]]) => {
     implicit val p = GetSystemParameters(system)
 
-    ports.map({ port =>
-      val offchipNetwork = SerialAdapter.connectOffChipNetwork(system.serdesser.get, port, th.harnessReset)
-      SerialBridge(port.bits.clock, offchipNetwork.module.io.tsi_ser, p(SerialTLKey).map(v => MainMemoryConsts.globalName))
-      p(SerialTLKey).map(v => require(v.isMemoryDevice))
+    p(SerialTLKey).map({ sVal =>
+      // require having memory over the serdes link
+      require(sVal.isMemoryDevice)
 
-      // connect SimAxiMem
-      (offchipNetwork.mem_axi4 zip offchipNetwork.memAXI4Node.edges.in).map { case (axi4, edge) =>
-        val nastiKey = NastiParameters(axi4.r.bits.data.getWidth,
-                                      axi4.ar.bits.addr.getWidth,
-                                      axi4.ar.bits.id.getWidth)
-        system match {
-          case s: BaseSubsystem => FASEDBridge(port.clock, axi4, port.reset.asBool,
-            CompleteConfig(p(firesim.configs.MemModelKey),
-                          nastiKey,
-                          Some(AXI4EdgeSummary(edge)),
-                          Some(MainMemoryConsts.globalName)))
-          case _ => throw new Exception("Attempting to attach FASED Bridge to misconfigured design")
+      ports.map({ port =>
+        val offchipNetwork = SerialAdapter.connectHarnessMultiClockAXIRAM(system.serdesser.get, port, th.harnessReset)
+        SerialBridge(port.clocked_serial.clock, offchipNetwork.module.io.tsi_ser, MainMemoryConsts.globalName)
+
+        // connect SimAxiMem
+        (offchipNetwork.mem_axi4 zip offchipNetwork.memAXI4Node.edges.in).map { case (axi4, edge) =>
+          val nastiKey = NastiParameters(axi4.r.bits.data.getWidth,
+                                        axi4.ar.bits.addr.getWidth,
+                                        axi4.ar.bits.id.getWidth)
+          system match {
+            case s: BaseSubsystem => FASEDBridge(port.passthrough_clock_reset.clock, axi4, port.passthrough_clock_reset.reset.asBool,
+              CompleteConfig(p(firesim.configs.MemModelKey),
+                            nastiKey,
+                            Some(AXI4EdgeSummary(edge)),
+                            Some(MainMemoryConsts.globalName)))
+            case _ => throw new Exception("Attempting to attach FASED Bridge to misconfigured design")
+          }
         }
-      }
+      })
     })
 
     Nil

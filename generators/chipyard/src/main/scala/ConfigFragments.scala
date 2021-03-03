@@ -193,19 +193,16 @@ class WithTLBackingMemory extends Config((site, here, up) => {
   case ExtTLMem => up(ExtMem, site) // enable TL backing memory
 })
 
-class WithOffchipBackingMemory extends Config((site, here, up) => {
+class WithSerialTLBackingMemory extends Config((site, here, up) => {
   case ExtMem => None
-  case SerialTLKey => Some(SerialTLParams(
+  case SerialTLKey => up(SerialTLKey, site).map { k => k.copy(
     memParams = {
       val memPortParams = up(ExtMem, site).get
-
       require(memPortParams.nMemoryChannels == 1)
-
       memPortParams.master
     },
-    width = 4,
     isMemoryDevice = true
-  ))
+  )}
 })
 
 class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("tile", fMHz)

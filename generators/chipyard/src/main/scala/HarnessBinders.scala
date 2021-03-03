@@ -139,25 +139,30 @@ class WithSimAXIMem extends OverrideHarnessBinder({
   }
 })
 
-class WithOffchipNetwork(offchipFreqMHz: Double = 1000) extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[ClockedIO[SerialIO]]]) => {
+class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
+  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[SerialAndPassthroughClockResetIO]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
 
-    ports.map({ port =>
-      val offchipNetwork = SerialAdapter.connectOffChipNetwork(system.serdesser.get, port, th.harnessReset)
-      val success = SerialAdapter.connectSimSerial(offchipNetwork.module.io.tsi_ser, port.bits.clock, th.harnessReset.asBool)
-      when (success) { th.success := true.B }
+    p(SerialTLKey).map({ sVal =>
+      require(sVal.axiDomainClockFreqMHz.isDefined)
+      val freqRequested = sVal.axiDomainClockFreqMHz.get
 
-      // connect SimAxiMem
-      (offchipNetwork.mem_axi4 zip offchipNetwork.memAXI4Node.edges.in).map { case (off_port, edge) =>
-        val memSize = p(SerialTLKey).get.memParams.size
-        val lineSize = p(CacheBlockBytes)
-        val mem = Module(new SimDRAM(memSize, lineSize, offchipFreqMHz.toInt*1000000, edge.bundle)).suggestName("simdram")
-        mem.io.axi <> off_port
-        // use the clk from the ClockAndResetIO
-        mem.io.clock := port.clock
-        mem.io.reset := port.reset
-      }
+      ports.map({ port =>
+        val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(system.serdesser.get, port, th.harnessReset)
+        val success = SerialAdapter.connectSimSerial(harnessMultiClockAXIRAM.module.io.tsi_ser, port.clocked_serial.clock, th.harnessReset.asBool)
+        when (success) { th.success := true.B }
+
+        // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
+        (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memAXI4Node.edges.in).map { case (axi_port, edge) =>
+          val memSize = sVal.memParams.size
+          val lineSize = p(CacheBlockBytes)
+          val mem = Module(new SimDRAM(memSize, lineSize, (freqRequested.toInt)*1000000, edge.bundle)).suggestName("simdram")
+          mem.io.axi <> axi_port
+          // use the clk from the ClockAndResetIO
+          mem.io.clock := port.passthrough_clock_reset.clock
+          mem.io.reset := port.passthrough_clock_reset.reset
+        }
+      })
     })
   }
 })

@@ -260,33 +260,35 @@ class WithSerialTLIOCells extends OverrideIOBinder({
   }).getOrElse((Nil, Nil))
 })
 
-class WithSerialTLAndOffchipClockPunchthrough(offchipFreqMHz: Double = 1000) extends OverrideLazyIOBinder({
-  (system: CanHavePeripheryTLSerial) => {
+class WithSerialTLAndPassthroughClockPunchthrough extends OverrideLazyIOBinder({
+  (system: CanHavePeripheryTLSerial) => system.serial_tl.map({ s =>
     implicit val p: Parameters = GetSystemParameters(system)
 
-    val serial_clked_tl = system.serial_tl
     val sys = system.asInstanceOf[BaseSubsystem]
 
-    val externalDRAMClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(take = Some(ClockParameters(freqMHz = offchipFreqMHz)))))
-    (externalDRAMClockSinkNode
-      := ClockGroup()(p, ValName("OffchipClocking"))
+    require(p(SerialTLKey).isDefined)
+    val sVal = p(SerialTLKey).get
+
+    require(sVal.axiDomainClockFreqMHz.isDefined)
+    val freqRequested = sVal.axiDomainClockFreqMHz.get
+
+    // request clock to pass along
+    val externalAXIDomainClkSinkNode = ClockSinkNode(Seq(ClockSinkParameters(take = Some(ClockParameters(freqMHz = freqRequested)))))
+    (externalAXIDomainClkSinkNode
+      := ClockGroup()(p, ValName("axi_mem_clock_domain"))
       := sys.asyncClockGroupsNode)
-    def clockBundle = externalDRAMClockSinkNode.in.head._1
+    def clockBundle = externalAXIDomainClkSinkNode.in.head._1
 
     InModuleBody {
       // 1st clock+reset is for offchip, 2nd clock (attached to serial io is the serial clock)
-      val port: Option[ClockedAndResetIO[ClockedIO[SerialIO]]] = serial_clked_tl.map({ s_io =>
-        val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[ClockedIO[SerialIO]](s_io))).suggestName(s"serial_tl_offchip_clk")
-        p.bits <> s_io
-        p.clock := clockBundle.clock
-        p.reset := clockBundle.reset
-        p
-      })
+      val port = IO(new SerialAndPassthroughClockResetIO(sVal.width)).suggestName(s"serial_tl_passthrough_clk")
+      port.clocked_serial <> s
+      port.passthrough_clock_reset <> clockBundle
 
       // return the ports and no IO cells
-      (Seq(port.get), Nil)
+      (Seq(port), Nil)
     }
-  }
+  }).getOrElse(InModuleBody{(Nil, Nil)}).asInstanceOf[ModuleValue[IOBinderTuple]]
 })
 
 class WithAXI4MemPunchthrough extends OverrideLazyIOBinder({

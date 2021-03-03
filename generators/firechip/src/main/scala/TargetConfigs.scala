@@ -59,26 +59,13 @@ class WithNIC extends icenet.WithIceNIC(inBufFlits = 8192, ctrlQueueDepth = 64)
 class WithNVDLALarge extends nvidia.blocks.dla.WithNVDLA("large")
 class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
-
-// Tweaks that are generally applied to all firesim configs
-class WithFireSimConfigTweaks extends Config(
+class WithFireSimConfigTweaksWithoutClocking extends Config(
   // Required: Bake in the default FASED memory model
   new WithDefaultMemModel ++
   // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
   new WithFireSimSimpleClocks ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++
-  // Optional*: Removing this will require adjusting the UART baud rate and
-  // potential target-software changes to properly capture UART output
-  new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
-  // Optional: These three configs put the DRAM memory system in it's own clock domian.
-  // Removing the first config will result in the FASED timing model running
-  // at the pbus freq (above, 3.2 GHz), which is outside the range of valid DDR3 speedgrades.
-  // 1 GHz matches the FASED default, using some other frequency will require
-  // runnings the FASED runtime configuration generator to generate faithful DDR3 timing values.
-  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
-  new chipyard.config.WithAsynchrousMemoryBusCrossing ++
-  new testchipip.WithAsynchronousSerialSlaveCrossing ++
   // Required: Existing FAME-1 transform cannot handle black-box clock gates
   new WithoutClockGating ++
   // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
@@ -97,6 +84,23 @@ class WithFireSimConfigTweaks extends Config(
   new chipyard.config.WithUART(BigInt(3686400L)) ++
   // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
   new chipyard.config.WithNoDebug
+)
+
+// Tweaks that are generally applied to all firesim configs
+class WithFireSimConfigTweaks extends Config(
+  // Optional*: Removing this will require adjusting the UART baud rate and
+  // potential target-software changes to properly capture UART output
+  new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
+  // Optional: These three configs put the DRAM memory system in it's own clock domian.
+  // Removing the first config will result in the FASED timing model running
+  // at the pbus freq (above, 3.2 GHz), which is outside the range of valid DDR3 speedgrades.
+  // 1 GHz matches the FASED default, using some other frequency will require
+  // runnings the FASED runtime configuration generator to generate faithful DDR3 timing values.
+  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
+  new chipyard.config.WithAsynchrousMemoryBusCrossing ++
+  new testchipip.WithAsynchronousSerialSlaveCrossing ++
+  // Tweaks that are independent from multi-clock
+  new WithFireSimConfigTweaksWithoutClocking
 )
 
 /*******************************************************************************
@@ -216,65 +220,28 @@ class FireSim16LargeBoomConfig extends Config(
   new boom.common.WithNLargeBooms(16) ++
   new chipyard.config.AbstractConfig)
 
+class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
 class WithOffchipAXINoClksSetup(pbusFreqMHz: BigInt = 3200) extends Config(
-  // normal bridges + new offchip bridge
-  new WithNICBridge ++
-  new WithUARTBridge ++
-  new WithBlockDeviceBridge ++
-  new WithOffchipNetworkSerialAXIBridge ++ // NEW BRIDGE COMBINING SERIAL/AXI
-  new WithFireSimMultiCycleRegfile ++
-  new WithFireSimFAME5 ++
-  //new WithTracerVBridge ++
-  new WithFireSimIOCellModels ++
-
-  // new tweaks
-  // Required: Bake in the default FASED memory model
-  new WithDefaultMemModel ++
-  // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
-  new WithFireSimSimpleClocks ++
-  // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
-  new WithBootROM ++
-  // Required: Existing FAME-1 transform cannot handle black-box clock gates
-  new WithoutClockGating ++
-  // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
-  new WithoutTLMonitors ++
-  // Optional: Adds IO to attach tracerV bridges
-  //new chipyard.config.WithTraceIO ++
-  // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 32 GiB on F1)
-  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
-  // Optional: Removing this will require using an initramfs under linux
-  new testchipip.WithBlockDevice ++
-  // Required*: Scale default baud rate with periphery bus frequency
-  // Rough math...
-  // NEW:
-  //   pbus @ 500MHz.... baud @ 576000 = 115200 * 5 (somehow the default was 100M)
-  // OLD: pbus @ 3200MHz, HW baud @ 3686400L AKA 115200 * 32
-  // OLD: Linux @ 115200, SBI @ 115200
-  // scale down to 100MHz before multipling up
   //new chipyard.config.WithUART((pbusFreqMHz / 100) * BigInt(115200L)) ++
   new chipyard.config.WithUART(BigInt(3686400L)) ++
-  // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
-  new chipyard.config.WithNoDebug
 )
 
-class WithTracerV extends Config(
-  new WithTracerVBridge ++
-  new chipyard.config.WithTraceIO)
-
-class FireSimDebugOffchipConfig extends Config(
-  new WithTracerV ++
-  new WithOffchipAXINoClksSetup(3200) ++
-  new chipyard.DebugOffchipConfig
-)
-
-class FireSimDebugOffchip2Config extends Config(
-  new WithTracerV ++
-  new WithOffchipAXINoClksSetup(3200) ++
-  new chipyard.DebugOffchip2Config
-)
+//class FireSimDebugOffchipConfig extends Config(
+//  new WithTracerV ++
+//  new WithOffchipAXINoClksSetup(3200) ++
+//  new chipyard.DebugOffchipConfig
+//)
+//
+//class FireSimDebugOffchip2Config extends Config(
+//  new WithTracerV ++
+//  new WithOffchipAXINoClksSetup(3200) ++
+//  new chipyard.DebugOffchip2Config
+//)
 
 class FireSimDebugOffchip3Config extends Config(
-  new WithTracerV ++
-  new WithOffchipAXINoClksSetup(4000) ++
+  new WithAXIOverSerialTLCombinedBridges ++ // use combined bridge to connect to axi mem over serial
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaksWithoutClocking ++ // don't inherit firesim clocking
   new chipyard.DebugOffchip3Config
 )
