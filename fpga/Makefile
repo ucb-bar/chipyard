@@ -64,7 +64,7 @@ ifeq ($(SUB_PROJECT),vc709)
 	MODEL             ?= VC709FPGATestHarness
 	VLOG_MODEL        ?= VC709FPGATestHarness
 	MODEL_PACKAGE     ?= chipyard.fpga.vc709
-	CONFIG            ?= BoomVC709Config
+	CONFIG            ?= RocketVC709Config
 	CONFIG_PACKAGE    ?= chipyard.fpga.vc709
 	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= none # unused

@@ -7,6 +7,7 @@ import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tilelink._
+import freechips.rocketchip.interrupts._
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.ip.xilinx._
@@ -17,7 +18,7 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 import sifive.blocks.devices.gpio._
 
-import chipyard.{HasHarnessSignalReferences, HasTestHarnessFunctions, BuildTop, ChipTop, ExtTLMem, CanHaveMasterTLMemPort}
+import chipyard.{HasHarnessSignalReferences, HasTestHarnessFunctions, BuildTop, ChipTop, DigitalTop, ChipyardSystem, ExtTLMem, CanHaveMasterTLMemPort}
 import chipyard.iobinders.{HasIOBinders}
 import chipyard.harness.{ApplyHarnessBinders}
 
@@ -28,31 +29,36 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
   def dp = designParameters
 
   // Order matters; ddr depends on sys_clock
-  // val cjtag     = Overlay(cJTAGDebugOverlayKey, new cJTAGDebugVC709ShellPlacer(this, cJTAGDebugShellInput()))
-  // val jtagBScan = Overlay(JTAGDebugBScanOverlayKey, new JTAGDebugBScanVC709ShellPlacer(this, JTAGDebugBScanShellInput()))
-  // val fmc       = Overlay(PCIeOverlayKey, new PCIeVC709FMCShellPlacer(this, PCIeShellInput()))
-  // val edge      = Overlay(PCIeOverlayKey, new PCIeVC709EdgeShellPlacer(this, PCIeShellInput()))
-  // val mem_clock = Overlay(ClockInputOverlayKey, new MemClockVC709ShellPlacer(this, ClockInputShellInput()))
-  // val ddr1      = Overlay(DDROverlayKey, new DualDDR3VC709ShellPlacer(this, DDRShellInput()))
+  val mem_clock = Overlay(ClockInputOverlayKey, new MemClockVC709ShellPlacer(this, ClockInputShellInput()))
+  val ddr1      = Overlay(DDROverlayKey, new DualDDR3VC709ShellPlacer(this, DDRShellInput()))
 
   val topDesign = LazyModule(p(BuildTop)(dp)).suggestName("chiptop")
 
 // DOC include start: ClockOverlay
-  // place all clocks in the shell
-  require(dp(ClockInputOverlayKey).size >= 1)
-  val sysClkNode = dp(ClockInputOverlayKey)(0).place(ClockInputDesignInput()).overlayOutput.node
-
+  require(dp(ClockInputOverlayKey).size > 0, "There must be at least one sysclk.")
   /*** Connect/Generate clocks ***/
+  // place all clocks in the shell, and connect to the PLL that will generate
+  //  multiple clocks, finally create and connect to the clockSinkNode
 
-  // connect to the PLL that will generate multiple clocks
+  /*** The first clock goes to the system and the first DDR ***/
+  val sysClkNode = dp(ClockInputOverlayKey).head.place(ClockInputDesignInput()).overlayOutput.node
   val harnessSysPLL = dp(PLLFactoryKey)()
-  harnessSysPLL := sysClkNode
-
-  // create and connect to the dutClock
   val dutClock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
   val dutWrangler = LazyModule(new ResetWrangler)
   val dutGroup = ClockGroup()
-  dutClock := dutWrangler.node := dutGroup := harnessSysPLL
+
+  // ClockSinkNode <-- ResetWrangler <-- ClockGroup <-- PLL <-- ClockSourceNode
+  dutClock := dutWrangler.node := dutGroup := harnessSysPLL := sysClkNode
+
+  /*** The second clock goes to the second DDR ***/
+  val memClkNode = dp(ClockInputOverlayKey).last.place(ClockInputDesignInput()).overlayOutput.node
+  val harnessMemPLL = dp(PLLFactoryKey)()
+  val memClock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
+  val memWrangler = LazyModule(new ResetWrangler)
+  val memGroup = ClockGroup()
+
+  // ClockSinkNode <-- ResetWrangler <-- ClockGroup <-- PLL <-- ClockSourceNode
+  memClock := memWrangler.node := memGroup := harnessMemPLL := memClkNode
 // DOC include end: ClockOverlay
 
   /*** UART ***/
@@ -69,36 +75,31 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
 
   /*** DDR ***/
 // DOC include start: DDR3Overlay
-  val ddrDesignInput = DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)
-  // connect all mem. channels to the FPGA DDR
-  val (ddrNodes, ddrClients) = topDesign match {
-    case td: ChipTop => td.lazySystem match {
-      case lsys: CanHaveMasterTLMemPort => {
-        (dp(DDROverlayKey) zip lsys.memTLNode.edges.in).map { case (ddrOverlayKey, inParams) => 
-          val ddrNode = ddrOverlayKey.place(ddrDesignInput).overlayOutput.ddr
-          val ddrClient = TLClientNode(Seq(inParams.master))
-          ddrNode := ddrClient
-          (ddrNode, ddrClient)
-        }.unzip
+
+  // The first DDR3 uses sys_clock, while the second DDR3 uses mem_clock
+  var ddrDesignInputs = Seq(
+    DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL),
+    DDRDesignInput(dp(ExtTLMem).get.master.base, memWrangler.node, harnessMemPLL)
+  )
+  val ddrNodes = (dp(DDROverlayKey) zip ddrDesignInputs).map { case (ddrOverlayKey, ddrDesignInput) =>
+      ddrOverlayKey.place(ddrDesignInput).overlayOutput.ddr
+  }
+
+  // DDRNode <--- TLClientNode[Master] ---> in-edge ---> TLNode[Slave]
+  val ddrClients = topDesign match { case td: ChipTop =>
+    td.lazySystem match { case lsys: CanHaveMasterTLMemPort => 
+      (ddrNodes zip lsys.memTLNode.edges.in).map { case (node, edge) =>
+        val ddrClient = TLClientNode(Seq(edge.master))
+        node := ddrClient
+        ddrClient
       }
     }
   }
-  println("ddrNodes: " + ddrNodes.toString())
-  println("ddrClients: " + ddrClients.toString())
 // DOC include end: DDR3Overlay
 
-  /*** PCIe ***/
-  // hook the first PCIe the board has
-  // dp(PCIeOverlayKey) foreach { case key => {
-      // val pcies = key.place(PCIeDesignInput(wrangler=dutWrangler.node, corePLL=harnessSysPLL)).overlayOutput
-      // pcies match { case (pcieNode, pcieInt) => {
-        // val pciename = Some(s"pcie_$i")
-        // sbus.fromMaster(pciename) { pcieNode }
-        // sbus.toFixedWidthSlave(pciename) { pcieNode }
-        // ibus.fromSync := pcieInt
-        // println(pciename)
-      // } }
-    // }
+  // println("#PCIeOverlayKey = " + p(PCIeOverlayKey).size)
+  // val pcies = p(PCIeOverlayKey).zipWithIndex.map { case (key, i) => 
+  //   key.place(PCIeDesignInput(wrangler=dutWrangler.node, corePLL=harnessSysPLL)).overlayOutput
   // }
 
   // module implementation

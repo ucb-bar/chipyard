@@ -1,4 +1,4 @@
-// See LICENSE for license details.
+// See LICENSE.Sifive for license details.
 #include <platform.h>
 #include <smp.h>
 #include "common.h"
@@ -8,14 +8,14 @@
   .globl _prog_start
 _prog_start:
   smp_pause(s1, s2)
-  li sp, (PAYLOAD_DEST + 0x7fff000)
+  li sp, (PAYLOAD_DEST + 0xffff000)
   call main
   smp_resume(s1, s2)
-  csrr a0, mhartid
-  la a1, dtb
+  csrr a0, mhartid // hartid for next level bootloader
+  la a1, dtb // dtb address for next level bootloader
   li s1, PAYLOAD_DEST
   jr s1
 
-  .section .rodata
+  .section .dtb
+  .align 3
 dtb:
-  .incbin DEVICE_TREE

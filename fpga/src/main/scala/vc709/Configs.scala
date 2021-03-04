@@ -53,7 +53,7 @@ class WithVC709Tweaks extends Config(
   new WithSystemModifications ++ // setup busses, use uart bootrom, setup ext. mem. size
   new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(1))
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(2))
 
 class RocketVC709Config extends Config(
   new WithVC709Tweaks ++
