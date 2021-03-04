@@ -11,7 +11,7 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.{SimAXIMem}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
 import freechips.rocketchip.util._
-import freechips.rocketchip.prci.{ClockSinkNode, ClockSinkParameters, ClockParameters, ClockGroup}
+import freechips.rocketchip.prci.{ClockSinkNode, ClockSinkParameters, ClockParameters, ClockGroup, ClockBundle, ClockBundleParameters}
 import freechips.rocketchip.groundtest.{GroundTestSubsystemModuleImp, GroundTestSubsystem}
 
 import sifive.blocks.devices.gpio._
@@ -261,7 +261,7 @@ class WithSerialTLIOCells extends OverrideIOBinder({
 })
 
 class WithSerialTLAndPassthroughClockPunchthrough extends OverrideLazyIOBinder({
-  (system: CanHavePeripheryTLSerial) => system.serial_tl.map({ s =>
+  (system: CanHavePeripheryTLSerial) => system.serial_tl.map({ serial_io =>
     implicit val p: Parameters = GetSystemParameters(system)
 
     val sys = system.asInstanceOf[BaseSubsystem]
@@ -269,20 +269,32 @@ class WithSerialTLAndPassthroughClockPunchthrough extends OverrideLazyIOBinder({
     require(p(SerialTLKey).isDefined)
     val sVal = p(SerialTLKey).get
 
-    require(sVal.axiDomainClockFreqMHz.isDefined)
-    val freqRequested = sVal.axiDomainClockFreqMHz.get
+    // currently only the harness AXI port supports a passthrough clock
+    require(sVal.axiMemOverSerialTLParams.isDefined)
+    val axiDomainParams = sVal.axiMemOverSerialTLParams.get
 
-    // request clock to pass along
-    val externalAXIDomainClkSinkNode = ClockSinkNode(Seq(ClockSinkParameters(take = Some(ClockParameters(freqMHz = freqRequested)))))
-    (externalAXIDomainClkSinkNode
-      := ClockGroup()(p, ValName("axi_mem_clock_domain"))
-      := sys.asyncClockGroupsNode)
-    def clockBundle = externalAXIDomainClkSinkNode.in.head._1
+    val clockSinkNode = axiDomainParams.axiClockParams.map({ clkParams =>
+      // request clock to pass along
+      val node = ClockSinkNode(Seq(ClockSinkParameters(take = Some(ClockParameters(freqMHz = clkParams.clockFreqMHz)))))
+      (node
+        := ClockGroup()(p, ValName("mem_over_serialtl_domain"))
+        := sys.asyncClockGroupsNode)
+      node
+    })
+
+    def clockBundle = clockSinkNode match {
+      case Some(node) => node.in.head._1
+      case None => {
+        val dontCareClockBundle = new ClockBundle(ClockBundleParameters())
+        dontCareClockBundle.clock := DontCare
+        dontCareClockBundle.reset := DontCare
+        dontCareClockBundle
+      }
+    }
 
     InModuleBody {
-      // 1st clock+reset is for offchip, 2nd clock (attached to serial io is the serial clock)
       val port = IO(new SerialAndPassthroughClockResetIO(sVal.width)).suggestName(s"serial_tl_passthrough_clk")
-      port.clocked_serial <> s
+      port.clocked_serial <> serial_io
       port.passthrough_clock_reset <> clockBundle
 
       // return the ports and no IO cells

@@ -144,8 +144,19 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
 
     p(SerialTLKey).map({ sVal =>
-      require(sVal.axiDomainClockFreqMHz.isDefined)
-      val freqRequested = sVal.axiDomainClockFreqMHz.get
+      // currently only the harness AXI port supports a passthrough clock
+      require(sVal.axiMemOverSerialTLParams.isDefined)
+      val axiDomainParams = sVal.axiMemOverSerialTLParams.get
+
+      val memFreq = axiDomainParams.axiClockParams match {
+        case Some(clkParams) => {
+          BigInt(clkParams.clockFreqMHz.toInt)*1000000
+        }
+        case None => {
+          // get freq. from what the master bus specifies
+          system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(p(SerialTLAttachKey).masterWhere).dtsFrequency.get
+        }
+      }
 
       ports.map({ port =>
         val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(system.serdesser.get, port, th.harnessReset)
@@ -153,14 +164,13 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
         when (success) { th.success := true.B }
 
         // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
-        (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memAXI4Node.edges.in).map { case (axi_port, edge) =>
+        (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi_port, edge) =>
           val memSize = sVal.memParams.size
           val lineSize = p(CacheBlockBytes)
-          val mem = Module(new SimDRAM(memSize, lineSize, (freqRequested.toInt)*1000000, edge.bundle)).suggestName("simdram")
-          mem.io.axi <> axi_port
-          // use the clk from the ClockAndResetIO
-          mem.io.clock := port.passthrough_clock_reset.clock
-          mem.io.reset := port.passthrough_clock_reset.reset
+          val mem = Module(new SimDRAM(memSize, lineSize, memFreq, edge.bundle)).suggestName("simdram")
+          mem.io.axi <> axi_port.bits
+          mem.io.clock := axi_port.clock
+          mem.io.reset := axi_port.reset
         }
       })
     })
