@@ -228,11 +228,7 @@ class MulticlockAXIOverSerialConfig extends Config(
   new testchipip.WithAsynchronousSerialSlaveCrossing ++
 
   new chipyard.harness.WithSimAXIMemOverSerialTL ++ // add SimDRAM DRAM model for axi4 backing memory over the SerDes link, if axi4 mem is enabled
-  new chipyard.iobinders.WithSerialTLAndPassthroughClockPunchthrough ++ // add new clock for axi domain over serdes and passthrough ios
   new chipyard.config.WithSerialTLBackingMemory ++ // remove axi4 mem port in favor of SerialTL memory
-  new testchipip.WithBlockDeviceLocations(
-    freechips.rocketchip.subsystem.PBUS,
-    freechips.rocketchip.subsystem.PBUS) ++ // put block device fully on PBUS to avoid clock crossings
 
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)

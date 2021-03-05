@@ -21,7 +21,7 @@ import barstools.iocell.chisel._
 
 import testchipip._
 
-import chipyard.HasHarnessSignalReferences
+import chipyard.{HasHarnessSignalReferences, HarnessClockInstantiatorKey}
 import chipyard.iobinders.GetSystemParameters
 
 import tracegen.{TraceGenSystemModuleImp}
@@ -83,7 +83,9 @@ class WithGPIOTiedOff extends OverrideHarnessBinder({
 // DOC include start: WithUARTAdapter
 class WithUARTAdapter extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: HasHarnessSignalReferences, ports: Seq[UARTPortIO]) => {
-    UARTAdapter.connect(ports)(system.p)
+    withClockAndReset(th.harnessClock, th.harnessReset) {
+      UARTAdapter.connect(ports)(system.p)
+    }
   }
 })
 // DOC include end: WithUARTAdapter
@@ -140,7 +142,7 @@ class WithSimAXIMem extends OverrideHarnessBinder({
 })
 
 class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[SerialAndPassthroughClockResetIO]) => {
+  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
 
     p(SerialTLKey).map({ sVal =>
@@ -148,26 +150,28 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
       require(sVal.axiMemOverSerialTLParams.isDefined)
       val axiDomainParams = sVal.axiMemOverSerialTLParams.get
 
-      val memFreq = axiDomainParams.axiClockParams match {
-        case Some(clkParams) => {
-          BigInt(clkParams.clockFreqMHz.toInt)*1000000
-        }
+      val memFreq: Double = axiDomainParams.axiClockParams match {
+        case Some(clkParams) => clkParams.clockFreqMHz * 1000000
         case None => {
-          // get freq. from what the master bus specifies
-          system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(p(SerialTLAttachKey).masterWhere).dtsFrequency.get
+          // get freq. from what the master of the serial link specifies
+          system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(p(SerialTLAttachKey).masterWhere).dtsFrequency.get.toDouble
         }
       }
 
       ports.map({ port =>
-        val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(system.serdesser.get, port, th.harnessReset)
-        val success = SerialAdapter.connectSimSerial(harnessMultiClockAXIRAM.module.io.tsi_ser, port.clocked_serial.clock, th.harnessReset.asBool)
+        val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(
+          system.serdesser.get,
+          port,
+          p(HarnessClockInstantiatorKey).getClockBundleWire("mem_over_serial_tl_clock", memFreq),
+          th.harnessReset)
+        val success = SerialAdapter.connectSimSerial(harnessMultiClockAXIRAM.module.io.tsi_ser, port.clock, th.harnessReset.asBool)
         when (success) { th.success := true.B }
 
         // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
         (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi_port, edge) =>
           val memSize = sVal.memParams.size
           val lineSize = p(CacheBlockBytes)
-          val mem = Module(new SimDRAM(memSize, lineSize, memFreq, edge.bundle)).suggestName("simdram")
+          val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toInt), edge.bundle)).suggestName("simdram")
           mem.io.axi <> axi_port.bits
           mem.io.clock := axi_port.clock
           mem.io.reset := axi_port.reset

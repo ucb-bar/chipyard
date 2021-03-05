@@ -57,6 +57,7 @@ class HarnessClockInstantiator {
       divider.io.clk_out
     }
 
+    // TODO: on the implicit clock just create a passthrough (don't instantiate a divider + reset catch)
     // connect wires to clock source
     for (sinkParams <- sinks) {
       val div = pllConfig.sinkDividerMap(sinkParams)
