@@ -47,6 +47,12 @@ case object ClockingSchemeKey extends Field[ChipTop => Unit](ClockingSchemeGener
   */
 case object ClockFrequencyAssignersKey extends Field[Seq[(String) => Option[Double]]](Seq.empty)
 case object DefaultClockFrequencyKey extends Field[Double]()
+case object ReferenceClockTrackerKey extends Field[ReferenceClockTracker](new ReferenceClockTracker)
+class ReferenceClockTracker {
+  private var _refFreqMHz: Option[Double] = None
+  def set(freqMHz: Double): Unit = { _refFreqMHz = Some(freqMHz) }
+  def get: Option[Double] = { _refFreqMHz }
+}
 
 class ClockNameMatchesAssignment(name: String, fMHz: Double) extends Config((site, here, up) => {
   case ClockFrequencyAssignersKey => up(ClockFrequencyAssignersKey, site) ++
@@ -86,19 +92,21 @@ object ClockingSchemeGenerators {
       :*= aggregator)
 
     val referenceClockSource =  ClockSourceNode(Seq(ClockSourceParameters()))
+    val dividerOnlyClkGenerator = DividerOnlyClockGenerator()
     // provides all the divided clocks (from the top-level clock)
     (aggregator
       := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
       := ClockGroupResetSynchronizer()
-      := DividerOnlyClockGenerator()
+      := dividerOnlyClkGenerator.node
       := referenceClockSource)
-
 
     InModuleBody {
       val clock_wire = Wire(Input(Clock()))
       val reset_wire = GenerateReset(chiptop, clock_wire)
       val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock")
       chiptop.iocells ++= clockIOCell
+
+      p(ReferenceClockTrackerKey).set(dividerOnlyClkGenerator.module.referenceFreq)
 
       referenceClockSource.out.unzip._1.map { o =>
         o.clock := clock_wire

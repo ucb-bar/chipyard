@@ -146,5 +146,5 @@ class DividerOnlyClockGenerator(pllName: String)(implicit p: Parameters, valName
 }
 
 object DividerOnlyClockGenerator {
-  def apply()(implicit p: Parameters, valName: ValName) = LazyModule(new DividerOnlyClockGenerator(valName.name)).node
+  def apply()(implicit p: Parameters, valName: ValName) = LazyModule(new DividerOnlyClockGenerator(valName.name))
 }

@@ -28,7 +28,7 @@ class ChipTop(implicit p: Parameters) extends LazyModule with BindingScope
   // The system module specified by BuildSystem
   lazy val lazySystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
 
-  // The implicitClockSinkNode provides the implicit clock and reset for the System
+  // The implicitClockSinkNode provides the implicit clock and reset for the system (connected by clocking scheme)
   val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
 
   // Generate Clocks and Reset
