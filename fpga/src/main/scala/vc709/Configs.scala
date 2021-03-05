@@ -61,6 +61,6 @@ class RocketVC709Config extends Config(
 // DOC include end: AbstractVC709 and Rocket
 
 class BoomVC709Config extends Config(
-  new WithFPGAFrequency(50) ++
+  new WithFPGAFrequency(25) ++
   new WithVC709Tweaks ++
   new chipyard.DualSmallBoomConfig)
