@@ -57,13 +57,19 @@ class HarnessClockInstantiator {
       divider.io.clk_out
     }
 
-    // TODO: on the implicit clock just create a passthrough (don't instantiate a divider + reset catch)
     // connect wires to clock source
     for (sinkParams <- sinks) {
-      val div = pllConfig.sinkDividerMap(sinkParams)
-      val divClock = dividedClocks.getOrElse(div, instantiateDivider(div))
+      // bypass the reference freq. (don't create a divider + reset sync)
+      val (divClock, divReset) = if (sinkParams.take.get.freqMHz != pllConfig.referenceFreqMHz) {
+        val div = pllConfig.sinkDividerMap(sinkParams)
+        val divClock = dividedClocks.getOrElse(div, instantiateDivider(div))
+        (divClock, ResetCatchAndSync(divClock, refClock.reset.asBool))
+      } else {
+        (refClock.clock, refClock.reset)
+      }
+
       _clockMap(sinkParams.name.get)._2.clock := divClock
-      _clockMap(sinkParams.name.get)._2.reset := ResetCatchAndSync(divClock, refClock.reset.asBool)
+      _clockMap(sinkParams.name.get)._2.reset := divReset
     }
   }
 }

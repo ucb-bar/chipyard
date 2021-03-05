@@ -1,8 +1,7 @@
 package chipyard
 
 import freechips.rocketchip.config.{Config}
-import freechips.rocketchip.diplomacy.{AsynchronousCrossing, RationalCrossing}
-import freechips.rocketchip.util.{SlowToFast}
+import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 
 // --------------
 // Rocket Configs
@@ -215,20 +214,22 @@ class LBWIFRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class MulticlockAXIOverSerialConfig extends Config(
-  new chipyard.config.WithFbusToSbusCrossingType(RationalCrossing(SlowToFast)) ++
-
   new chipyard.config.WithSystemBusFrequencyAsDefault ++
-  new chipyard.config.WithSystemBusFrequency(4000) ++
-  new chipyard.config.WithPeripheryBusFrequency(4000) ++
-  new chipyard.config.WithMemoryBusFrequency(4000) ++
+  new chipyard.config.WithSystemBusFrequency(500) ++
+  new chipyard.config.WithPeripheryBusFrequency(500) ++
+  new chipyard.config.WithMemoryBusFrequency(500) ++
+  new chipyard.config.WithFrontBusFrequency(50) ++
+  new chipyard.config.WithTileFrequency(1000, Some(1)) ++
+  new chipyard.config.WithTileFrequency(250, Some(0)) ++
 
-  new chipyard.config.WithFrontBusFrequency(4000 / 2) ++
-
-  new chipyard.config.WithFbusToSbusCrossingType(RationalCrossing(SlowToFast)) ++
+  new chipyard.config.WithFbusToSbusCrossingType(AsynchronousCrossing()) ++
   new testchipip.WithAsynchronousSerialSlaveCrossing ++
+  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(
+    AsynchronousCrossing().depth,
+    AsynchronousCrossing().sourceSync) ++
 
   new chipyard.harness.WithSimAXIMemOverSerialTL ++ // add SimDRAM DRAM model for axi4 backing memory over the SerDes link, if axi4 mem is enabled
   new chipyard.config.WithSerialTLBackingMemory ++ // remove axi4 mem port in favor of SerialTL memory
 
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   new chipyard.config.AbstractConfig)

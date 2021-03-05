@@ -205,8 +205,13 @@ class WithSerialTLBackingMemory extends Config((site, here, up) => {
   )}
 })
 
-class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("tile", fMHz)
-class WithSpecificTileFrequency(hartId: Int, fMHz: Double) extends chipyard.ClockNameContainsAssignment(s"tile_$hartId", fMHz)
+class WithTileFrequency(fMHz: Double, hartId: Option[Int] = None) extends ClockNameContainsAssignment({
+    hartId match {
+      case Some(id) => s"tile_$id"
+      case None => "tile"
+    }
+  },
+  fMHz)
 
 class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {
   case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
