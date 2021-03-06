@@ -15,6 +15,9 @@ import barstools.iocell.chisel._
 
 case object BuildSystem extends Field[Parameters => LazyModule]((p: Parameters) => new DigitalTop()(p))
 
+trait HasReferenceClockFreq {
+  var refClockFreqMHz: Option[Double] = None
+}
 
 /**
  * The base class used for building chips. This constructor instantiates a module specified by the BuildSystem parameter,
@@ -24,7 +27,7 @@ case object BuildSystem extends Field[Parameters => LazyModule]((p: Parameters) 
  */
 
 class ChipTop(implicit p: Parameters) extends LazyModule with BindingScope
-    with HasTestHarnessFunctions with HasIOBinders {
+    with HasTestHarnessFunctions with HasReferenceClockFreq with HasIOBinders {
   // The system module specified by BuildSystem
   lazy val lazySystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
 

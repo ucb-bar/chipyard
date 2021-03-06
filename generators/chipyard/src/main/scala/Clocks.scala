@@ -47,12 +47,6 @@ case object ClockingSchemeKey extends Field[ChipTop => Unit](ClockingSchemeGener
   */
 case object ClockFrequencyAssignersKey extends Field[Seq[(String) => Option[Double]]](Seq.empty)
 case object DefaultClockFrequencyKey extends Field[Double]()
-case object ReferenceClockTrackerKey extends Field[ReferenceClockTracker](new ReferenceClockTracker)
-class ReferenceClockTracker {
-  private var _refFreqMHz: Option[Double] = None
-  def set(freqMHz: Double): Unit = { _refFreqMHz = Some(freqMHz) }
-  def get: Option[Double] = { _refFreqMHz }
-}
 
 class ClockNameMatchesAssignment(name: String, fMHz: Double) extends Config((site, here, up) => {
   case ClockFrequencyAssignersKey => up(ClockFrequencyAssignersKey, site) ++
@@ -106,7 +100,8 @@ object ClockingSchemeGenerators {
       val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock")
       chiptop.iocells ++= clockIOCell
 
-      p(ReferenceClockTrackerKey).set(dividerOnlyClkGenerator.module.referenceFreq)
+      // set the reference clock used
+      chiptop.refClockFreqMHz = Some(dividerOnlyClkGenerator.module.referenceFreq)
 
       referenceClockSource.out.unzip._1.map { o =>
         o.clock := clock_wire

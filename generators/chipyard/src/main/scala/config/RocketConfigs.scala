@@ -215,11 +215,11 @@ class LBWIFRocketConfig extends Config(
 
 class MulticlockAXIOverSerialConfig extends Config(
   new chipyard.config.WithSystemBusFrequencyAsDefault ++
-  new chipyard.config.WithSystemBusFrequency(500) ++
-  new chipyard.config.WithPeripheryBusFrequency(500) ++
-  new chipyard.config.WithMemoryBusFrequency(500) ++
+  new chipyard.config.WithSystemBusFrequency(250) ++
+  new chipyard.config.WithPeripheryBusFrequency(250) ++
+  new chipyard.config.WithMemoryBusFrequency(250) ++
   new chipyard.config.WithFrontBusFrequency(50) ++
-  new chipyard.config.WithTileFrequency(1000, Some(1)) ++
+  new chipyard.config.WithTileFrequency(500, Some(1)) ++
   new chipyard.config.WithTileFrequency(250, Some(0)) ++
 
   new chipyard.config.WithFbusToSbusCrossingType(AsynchronousCrossing()) ++
