@@ -95,7 +95,7 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
     case d: HasReferenceClockFreq => d.refClockFreqMHz.getOrElse(p(DefaultClockFrequencyKey))
     case _ => p(DefaultClockFrequencyKey)
   }
-  val refClkBundle = p(HarnessClockInstantiatorKey).getClockBundleWire("chiptop_reference_clock", freqMHz * (1000 * 1000))
+  val refClkBundle = p(HarnessClockInstantiatorKey).getClockBundleWire("buildtop_reference_clock", freqMHz * (1000 * 1000))
 
   harnessClock := refClkBundle.clock
   harnessReset := WireInit(refClkBundle.reset)

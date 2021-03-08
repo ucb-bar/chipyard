@@ -12,6 +12,8 @@ import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebugModuleImp}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile.{RocketTile}
+import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
+import freechips.rocketchip.util.{ResetCatchAndSync}
 import sifive.blocks.devices.uart._
 
 import testchipip._
@@ -104,24 +106,43 @@ class WithBlockDeviceBridge extends OverrideHarnessBinder({
 })
 
 class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[SerialAndPassthroughClockResetIO]) => {
+  (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = GetSystemParameters(system)
 
     p(SerialTLKey).map({ sVal =>
-      // require having memory over the serdes link
+      // currently only the harness AXI port supports a passthrough clock
+      require(sVal.axiMemOverSerialTLParams.isDefined)
+      val axiDomainParams = sVal.axiMemOverSerialTLParams.get
       require(sVal.isMemoryDevice)
 
+      val memFreq: Double = axiDomainParams.axiClockParams match {
+        case Some(clkParams) => clkParams.clockFreqMHz * 1000000
+        case None => {
+          // get freq. from what the master of the serial link specifies
+          system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(p(SerialTLAttachKey).masterWhere).dtsFrequency.get.toDouble
+        }
+      }
+
       ports.map({ port =>
-        val offchipNetwork = SerialAdapter.connectHarnessMultiClockAXIRAM(system.serdesser.get, port, th.harnessReset)
-        SerialBridge(port.clocked_serial.clock, offchipNetwork.module.io.tsi_ser, Some(MainMemoryConsts.globalName))
+        val axiClock = p(ClockBridgeInstantiatorKey).getClock("mem_over_serial_tl_clock", memFreq)
+        val axiClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
+        axiClockBundle.clock := axiClock
+        axiClockBundle.reset := ResetCatchAndSync(axiClock, th.harnessReset.asBool)
+
+        val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(
+          system.serdesser.get,
+          port,
+          axiClockBundle,
+          th.harnessReset)
+        SerialBridge(port.clock, harnessMultiClockAXIRAM.module.io.tsi_ser, Some(MainMemoryConsts.globalName))
 
         // connect SimAxiMem
-        (offchipNetwork.mem_axi4 zip offchipNetwork.memAXI4Node.edges.in).map { case (axi4, edge) =>
-          val nastiKey = NastiParameters(axi4.r.bits.data.getWidth,
-                                        axi4.ar.bits.addr.getWidth,
-                                        axi4.ar.bits.id.getWidth)
+        (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi4, edge) =>
+          val nastiKey = NastiParameters(axi4.bits.r.bits.data.getWidth,
+                                        axi4.bits.ar.bits.addr.getWidth,
+                                        axi4.bits.ar.bits.id.getWidth)
           system match {
-            case s: BaseSubsystem => FASEDBridge(port.passthrough_clock_reset.clock, axi4, port.passthrough_clock_reset.reset.asBool,
+            case s: BaseSubsystem => FASEDBridge(axi4.clock, axi4.bits, axi4.reset.asBool,
               CompleteConfig(p(firesim.configs.MemModelKey),
                             nastiKey,
                             Some(AXI4EdgeSummary(edge)),

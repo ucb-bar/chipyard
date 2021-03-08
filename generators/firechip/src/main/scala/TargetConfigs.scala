@@ -59,7 +59,7 @@ class WithNIC extends icenet.WithIceNIC(inBufFlits = 8192, ctrlQueueDepth = 64)
 class WithNVDLALarge extends nvidia.blocks.dla.WithNVDLA("large")
 class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
-class WithFireSimConfigTweaksWithoutClocking extends Config(
+class WithFireSimDesignTweaks extends Config(
   // Required: Bake in the default FASED memory model
   new WithDefaultMemModel ++
   // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
@@ -96,7 +96,7 @@ class WithFireSimConfigTweaks extends Config(
   new chipyard.config.WithAsynchrousMemoryBusCrossing ++
   new testchipip.WithAsynchronousSerialSlaveCrossing ++
   // Tweaks that are independent from multi-clock
-  new WithFireSimConfigTweaksWithoutClocking
+  new WithFireSimDesignTweaks
 )
 
 /*******************************************************************************
@@ -207,8 +207,9 @@ class FireSimMulticlockRocketConfig extends Config(
 class FireSimMulticlockAXIOverSerialConfig extends Config(
   new WithAXIOverSerialTLCombinedBridges ++ // use combined bridge to connect to axi mem over serial
   new WithDefaultFireSimBridges ++
+  new testchipip.WithBlockDevice(false) ++ // disable blockdev
   new WithDefaultMemModel ++
-  new WithFireSimConfigTweaksWithoutClocking ++ // don't inherit firesim clocking
+  new WithFireSimDesignTweaks ++ // don't inherit firesim clocking
   new chipyard.MulticlockAXIOverSerialConfig
 )
 

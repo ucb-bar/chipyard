@@ -89,6 +89,7 @@ class SimplePllConfiguration(
      ElaborationArtefacts.add(s"${name}.freq-summary", summaryString)
      println(summaryString)
    }
+   def referenceSinkParams(): ClockSinkParameters = sinkDividerMap.find(_._2 == 1).get._1
 }
 
 case class DividerOnlyClockGeneratorNode(pllName: String)(implicit valName: ValName)
