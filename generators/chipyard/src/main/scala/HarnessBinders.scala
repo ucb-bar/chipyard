@@ -160,7 +160,7 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
         val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(
           system.serdesser.get,
           port,
-          p(HarnessClockInstantiatorKey).getClockBundleWire("mem_over_serial_tl_clock", memFreq),
+          p(HarnessClockInstantiatorKey).getClockBundle("mem_over_serial_tl_clock", memFreq),
           th.harnessReset)
         val success = SerialAdapter.connectSimSerial(harnessMultiClockAXIRAM.module.io.tsi_ser, port.clock, th.harnessReset.asBool)
         when (success) { th.success := true.B }

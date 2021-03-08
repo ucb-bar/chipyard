@@ -49,7 +49,7 @@ class ClockBridgeInstantiator {
   // Assumes that the supernode implementation results in duplicated clocks
   //   (i.e. only 1 set of clocks is generated for all BuildTop designs)
   private var _ratClockMap: HashMap[String, (RationalClock, Clock)] = HashMap.empty
-  private var _ratRefName: Option[String] = None
+  private var _ratRefTuple: Option[(String, Double)] = None
 
   /**
    * Request a clock at a particular frequency
@@ -70,11 +70,15 @@ class ClockBridgeInstantiator {
    * @param allClocks Seq. of RationalClocks that want a clock
    *
    * @param baseClockName Name of domain that the allClocks is rational to
+   *
+   * @param baseFreqRequested Freq. for the reference domain in Hz
    */
-  def getClockRecordMap(allClocks: Seq[RationalClock], baseClockName: String): RecordMap[Clock] = {
+  def getClockRecordMap(allClocks: Seq[RationalClock], baseClockName: String, baseFreqRequested: Double): RecordMap[Clock] = {
+    require(!_ratRefTuple.isDefined, "Can only request one RecordMap of Clocks")
+
     val ratClockRecordMapWire = Wire(RecordMap(allClocks.map { c => (c.name, Clock()) }:_*))
 
-    _ratRefName = Some(baseClockName)
+    _ratRefTuple = Some((baseClockName, baseFreqRequested))
     for (clock <- allClocks) {
       val clkWire = Wire(new Clock)
       _ratClockMap(clock.name) = (clock, clkWire)
@@ -87,9 +91,14 @@ class ClockBridgeInstantiator {
   /**
    * Connect all clocks requested to ClockBridge
    */
-  def instantiateFireSimDividerPLL: Unit = {
+  def instantiateFireSimClockBridge: Unit = {
+    require(_ratRefTuple.isDefined, "Must have rational clocks to assign to")
+    require(_ratClockMap.exists(_._1 == _ratRefTuple.get._1),
+      s"Provided base-clock name for rational clocks, ${_ratRefTuple.get._1}, doesn't match a name within specified rational clocks." +
+      "Available clocks:\n " + _ratClockMap.map(_._1).mkString("\n "))
+
     // Simplify the RationalClocks ratio's
-    val refRatClock = _ratClockMap.find(_._1 == _ratRefName.get).get._2._1
+    val refRatClock = _ratClockMap.find(_._1 == _ratRefTuple.get._1).get._2._1
     val simpleRatClocks = _ratClockMap.map { t =>
       val ratClock = t._2._1
       ratClock.copy(
@@ -99,8 +108,8 @@ class ClockBridgeInstantiator {
 
     // Determine all the clock dividers (harness + rational clocks)
     //   Note: Requires that the BuildTop reference frequency is requested with proper freq.
-    val refRatClockFreq = _harnessClockMap.find(_._1 == _ratRefName.get).get._2._1
-    val refRatSinkParams = ClockSinkParameters(take=Some(ClockParameters(freqMHz=refRatClockFreq / (1000 * 1000))),name=Some(_ratRefName.get))
+    val refRatClockFreq = _ratRefTuple.get._2
+    val refRatSinkParams = ClockSinkParameters(take=Some(ClockParameters(freqMHz=refRatClockFreq / (1000 * 1000))),name=Some(_ratRefTuple.get._1))
     val harSinkParams = _harnessClockMap.map { case (name, (freq, bundle)) =>
       ClockSinkParameters(take=Some(ClockParameters(freqMHz=freq / (1000 * 1000))),name=Some(name))
     }.toSeq
@@ -191,7 +200,7 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
       chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
         reset := th.harnessReset
         input_clocks := p(ClockBridgeInstantiatorKey)
-          .getClockRecordMap(rationalClockSpecs.toSeq, p(FireSimBaseClockNameKey))
+          .getClockRecordMap(rationalClockSpecs.toSeq, p(FireSimBaseClockNameKey), pllConfig.referenceFreqMHz * (1000 * 1000))
         Nil })
     }
   }
@@ -199,6 +208,7 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
 
 class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSignalReferences {
   freechips.rocketchip.util.property.cover.setPropLib(new midas.passes.FireSimPropertyLibrary())
+
   val harnessClock = Wire(Clock())
   val harnessReset = WireInit(false.B)
   val peekPokeBridge = PeekPokeBridge(harnessClock, harnessReset)
@@ -236,7 +246,7 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSigna
     NodeIdx.increment()
   }
 
-  harnessClock := p(ClockBridgeInstantiatorKey).getClock(p(FireSimBaseClockNameKey), btFreqMHz.get * (1000 * 1000))
+  harnessClock := p(ClockBridgeInstantiatorKey).getClock("buildtop_reference_clock", btFreqMHz.get * (1000 * 1000))
 
-  p(ClockBridgeInstantiatorKey).instantiateFireSimDividerPLL
+  p(ClockBridgeInstantiatorKey).instantiateFireSimClockBridge
 }
