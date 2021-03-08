@@ -8,50 +8,44 @@ import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
+import freechips.rocketchip.interrupts._
 
 import chipyard.{DigitalTop, DigitalTopModule}
+
+import sifive.fpgashells.shell._
+import sifive.fpgashells.clocks._
 
 // ------------------------------------
 // VC709 DigitalTop
 // ------------------------------------
 
 class VC709DigitalTop()(implicit p: Parameters) extends DigitalTop
-  // with sifive.blocks.devices.i2c.HasPeripheryI2C
-  // with testchipip.HasPeripheryTSIHostWidget
 {
+  def dp = p
 
-  /*** PCIe ***/
-  // println("#PCIeOverlayKey = " + p(PCIeOverlayKey).size)
-  // topDesign match { case td: ChipTop =>
-  //   td.lazySystem match { case lsys: BaseSubsystem =>
-  //     println("BaseSubsystem: " + lsys.toString())
-  //     p(PCIeOverlayKey).zipWithIndex.map { case (key, i) => 
-  //       val overlayOutput = key.place(PCIeDesignInput(wrangler=dutWrangler.node, corePLL=harnessSysPLL)).overlayOutput
-  //       val (pcieNode: TLNode, intNode: IntOutwardNode) = (overlayOutput.pcieNode, overlayOutput.intNode)
-  //       val (slaveTLNode: TLIdentityNode, masterTLNode: TLAsyncSinkNode) = (pcieNode.inward, pcieNode.outward)
-  //       lsys.fbus match { case fbus: FrontBus =>
-  //         fbus.coupleFrom(s"master_named_pcie${i}"){ bus =>
-  //           (bus
-  //             :=* TLFIFOFixer(TLFIFOFixer.all)
-  //             :=* masterTLNode)
-  //         }
-  //       }
-  //       lsys.pbus match { case pbus: PeripheryBus =>
-  //         pbus.coupleTo(s"slave_named_pcie${i}"){ bus =>
-  //           println("pbus: " + bus.toString())
-  //           (slaveTLNode
-  //             :*= TLWidthWidget(pbus.beatBytes)
-  //             :*= bus)
-  //         }
-  //       }
-  //       lsys.ibus match { case ibus: InterruptBusWrapper =>
-  //         ibus.fromSync := intNode
-  //       }
-  //     }
-  //   }
-  // }
+  /*** The second clock goes to the second DDR ***/
+  val memClkNode = dp(ClockInputOverlayKey).last.place(ClockInputDesignInput()).overlayOutput.node
+  val harnessMemPLL = dp(PLLFactoryKey)()
+  val memClock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
+  val memWrangler = LazyModule(new ResetWrangler)
+  val memGroup = ClockGroup()
+
+  // ClockSinkNode <-- ResetWrangler <-- ClockGroup <-- PLL <-- ClockSourceNode
+  memClock := memWrangler.node := memGroup := harnessMemPLL := memClkNode
+
+
+  /*** PCIe dutWrangler.node, harnessSysPLL ***/
+  println("#PCIeOverlayKey = " + p(PCIeOverlayKey).size)
+  p(PCIeOverlayKey).zipWithIndex.map { case (key, i) => 
+    val overlayOutput = key.place(PCIeDesignInput(wrangler=memWrangler.node, corePLL=harnessMemPLL)).overlayOutput
+    val (pcieNode: TLNode, intNode: IntOutwardNode) = (overlayOutput.pcieNode, overlayOutput.intNode)
+    val (slaveTLNode: TLIdentityNode, masterTLNode: TLAsyncSinkNode) = (pcieNode.inward, pcieNode.outward)
+    fbus.coupleFrom(s"master_named_pcie${i}"){ _ :=* TLFIFOFixer(TLFIFOFixer.all) :=* masterTLNode }
+    pbus.coupleTo(s"slave_named_pcie${i}"){ slaveTLNode :*= TLWidthWidget(pbus.beatBytes) :*= _ }
+    ibus.fromSync := intNode
+  }
+
   override lazy val module = new VC709DigitalTopModule(this)
 }
 
 class VC709DigitalTopModule[+L <: VC709DigitalTop](l: L) extends DigitalTopModule(l)
-  // with sifive.blocks.devices.i2c.HasPeripheryI2CModuleImp

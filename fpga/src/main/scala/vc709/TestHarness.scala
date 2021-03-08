@@ -36,6 +36,7 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
 
 // DOC include start: ClockOverlay
   require(dp(ClockInputOverlayKey).size > 0, "There must be at least one sysclk.")
+  println("#ClockInputOverlayKey = " + dp(ClockInputOverlayKey).size)
   /*** Connect/Generate clocks ***/
   // place all clocks in the shell, and connect to the PLL that will generate
   //  multiple clocks, finally create and connect to the clockSinkNode
@@ -49,16 +50,11 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
 
   // ClockSinkNode <-- ResetWrangler <-- ClockGroup <-- PLL <-- ClockSourceNode
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL := sysClkNode
-
-  /*** The second clock goes to the second DDR ***/
-  val memClkNode = dp(ClockInputOverlayKey).last.place(ClockInputDesignInput()).overlayOutput.node
-  val harnessMemPLL = dp(PLLFactoryKey)()
-  val memClock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
-  val memWrangler = LazyModule(new ResetWrangler)
-  val memGroup = ClockGroup()
-
-  // ClockSinkNode <-- ResetWrangler <-- ClockGroup <-- PLL <-- ClockSourceNode
-  memClock := memWrangler.node := memGroup := harnessMemPLL := memClkNode
+  val (memWrangler, harnessMemPLL) = topDesign match { case td: ChipTop =>
+    td.lazySystem match { case lsys: VC709DigitalTop =>
+      (lsys.memWrangler, lsys.harnessMemPLL)
+    } 
+  }
 // DOC include end: ClockOverlay
 
   /*** UART ***/
@@ -96,11 +92,6 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
     }
   }
 // DOC include end: DDR3Overlay
-
-  // println("#PCIeOverlayKey = " + p(PCIeOverlayKey).size)
-  // val pcies = p(PCIeOverlayKey).zipWithIndex.map { case (key, i) => 
-  //   key.place(PCIeDesignInput(wrangler=dutWrangler.node, corePLL=harnessSysPLL)).overlayOutput
-  // }
 
   // module implementation
   override lazy val module = new VC709FPGATestHarnessImp(this)

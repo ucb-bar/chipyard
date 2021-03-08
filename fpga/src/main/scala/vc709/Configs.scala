@@ -17,7 +17,7 @@ import sifive.fpgashells.shell.xilinx.{VC709DDR3Size}
 
 import testchipip.{SerialTLKey}
 
-import chipyard.{BuildSystem, ExtTLMem} 
+import chipyard.{BuildTop, BuildSystem, ExtTLMem} 
 
 import chipyard.fpga.vcu118.{WithUARTIOPassthrough, WithTLIOPassthrough, WithFPGAFrequency}
 
@@ -55,12 +55,18 @@ class WithVC709Tweaks extends Config(
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2))
 
+class WithVC709System extends Config((site, here, up) => {
+  case BuildSystem => (p: Parameters) => new VC709DigitalTop()(p)
+})
+
 class RocketVC709Config extends Config(
+  new WithVC709System ++
   new WithVC709Tweaks ++
   new chipyard.RocketConfig)
 // DOC include end: AbstractVC709 and Rocket
 
 class BoomVC709Config extends Config(
   new WithFPGAFrequency(25) ++
+  new WithVC709System ++
   new WithVC709Tweaks ++
   new chipyard.DualSmallBoomConfig)
