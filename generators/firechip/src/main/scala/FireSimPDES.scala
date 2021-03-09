@@ -11,7 +11,7 @@ import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, InModuleBody, ValName}
 import freechips.rocketchip.util.{ResetCatchAndSync, RecordMap}
 
-import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge, RationalClock}
+import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge, RationalClock, ClockSourceParams}
 
 import testchipip.{TLTileResetCtrl}
 
@@ -59,7 +59,7 @@ object PDESClockingSchemes {
     chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
       val (_, edge) = referenceClockSource.out.head
       val refPeriod = BigInt(Math.round(1e6 / edge.sink.take.get.freqMHz).toLong)
-      val clockSource = Module(new midas.widgets.BlackBoxClockSourceBridge(refPeriod))
+      val clockSource = Module(new midas.widgets.BlackBoxClockSourceBridge(ClockSourceParams(refPeriod)))
       clockAndReset.head.clock := clockSource.io.clockOut
       clockAndReset.head.reset := th.harnessReset
       th.harnessClock := clockSource.io.clockOut
@@ -108,7 +108,7 @@ object PDESClockingSchemes {
     chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
       val (_, edge) = referenceClockSource.out.head
       val refPeriod = BigInt(Math.round(1e6 / edge.sink.take.get.freqMHz).toLong)
-      val clockSource = Module(new midas.widgets.BlackBoxClockSourceBridge(refPeriod))
+      val clockSource = Module(new midas.widgets.BlackBoxClockSourceBridge(ClockSourceParams(refPeriod)))
       clockAndReset.head.clock := clockSource.io.clockOut
       clockAndReset.head.reset := th.harnessReset
       th.harnessClock := clockSource.io.clockOut

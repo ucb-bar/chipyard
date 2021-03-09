@@ -12,6 +12,9 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.prci.{ClockSinkDomain, ClockGroupIdentityNode}
 
+case object ClockMuxStyleKey extends Field[midas.widgets.ClockMuxImplStyle](midas.widgets.MuxStyle.Mutex(3))
+//case object ClockMuxStyleKey extends Field[midas.widgets.ClockMuxImplStyle](midas.widgets.MuxStyle.Baseline)
+
 case class TileClockMuxParams(
   address: BigInt=0x101000,
   secondaryClockName: String = "subsystem_sbus_0",
@@ -75,7 +78,9 @@ class TLTileClockMuxes(w: Int, params: TileClockMuxParams, tile_prci_domains: Se
               clockMux.io.clocksIn(0),
               clockMux.io.clocksIn(1),
               clockMux.io.clockOut,
-              clockMux.io.sel)
+              clockMux.io.sel,
+              p(ClockMuxStyleKey)
+            )
           }
         }
       }
