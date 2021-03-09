@@ -151,6 +151,16 @@ class WithNPerfCounters(n: Int = 29) extends Config((site, here, up) => {
   }
 })
 
+class WithNPMPs(n: Int = 8) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nPMPs = n)))
+    case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nPMPs = n)))
+    case other => other
+  }
+})
+
 class WithRocketICacheScratchpad extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey, site) map { r =>
     r.copy(icache = r.icache.map(_.copy(itimAddr = Some(0x300000 + r.hartId * 0x10000))))
