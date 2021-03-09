@@ -148,7 +148,7 @@ Most, if not all, Chipyard configurations are tethered using TSI (over a serial 
 to external memory through an AXI port (backing AXI memory).
 The following image shows the DUT with these set of default signals:
 
-.. image:: ../_static/images/chip-bringup.png
+.. image:: ../_static/images/default-chipyard-config-communication.png
 
 In this setup, the serial-link is connected to the TSI/FESVR peripherals while the AXI port is connected
 to a simulated AXI memory.
@@ -157,7 +157,7 @@ one can send the memory transactions over the bi-directional serial-link (``TLSe
 interface to the DUT is the serial-link (which as comparatively less signals than an AXI port).
 This new setup (shown below) is a typical Chipyard test chip setup:
 
-.. image:: ../_static/images/chip-bringup.png
+.. image:: ../_static/images/bringup-chipyard-config-communication.png
 
 Simulation Setup
 ~~~~~~~~~~~~~~~~
@@ -167,7 +167,7 @@ would be used.
 The main difference is that the TileLink-to-AXI converters and simulated AXI memory resides on the other side of the
 serial-link.
 
-.. image:: ../_static/images/chip-bringup.png
+.. image:: ../_static/images/chip-bringup-simulation.png
 
 .. note::
     Here the simulated AXI memory and the converters can be in a different clock domain in the test harness
