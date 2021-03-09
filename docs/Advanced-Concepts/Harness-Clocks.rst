@@ -11,7 +11,7 @@ This is done by the ``HarnessClockInstantiator`` which allows you to request a c
 particular frequency.
 Take the following harness binder example:
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/HarnessBinders.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/HarnessBinders.scala
     :language: scala
     :start-after: DOC include start: HarnessClockInstantiatorEx
     :end-before: DOC include end: HarnessClockInstantiatorEx
