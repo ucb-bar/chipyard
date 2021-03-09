@@ -213,6 +213,7 @@ class LBWIFRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
+// DOC include start: MulticlockAXIOverSerialConfig
 class MulticlockAXIOverSerialConfig extends Config(
   new chipyard.config.WithSystemBusFrequencyAsDefault ++
   new chipyard.config.WithSystemBusFrequency(250) ++
@@ -233,3 +234,4 @@ class MulticlockAXIOverSerialConfig extends Config(
 
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   new chipyard.config.AbstractConfig)
+// DOC include end: MulticlockAXIOverSerialConfig
