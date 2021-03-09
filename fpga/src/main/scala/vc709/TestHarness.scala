@@ -30,7 +30,7 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
 
   // Order matters; ddr depends on sys_clock
   val mem_clock = Overlay(ClockInputOverlayKey, new MemClockVC709ShellPlacer(this, ClockInputShellInput()))
-  val ddr1      = Overlay(DDROverlayKey, new DualDDR3VC709ShellPlacer(this, DDRShellInput()))
+  // val ddr1      = Overlay(DDROverlayKey, new DDR3VC709ShellPlacer(this, DDRShellInput()))
 
   val topDesign = LazyModule(p(BuildTop)(dp)).suggestName("chiptop")
 
@@ -44,17 +44,22 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
   /*** The first clock goes to the system and the first DDR ***/
   val sysClkNode = dp(ClockInputOverlayKey).head.place(ClockInputDesignInput()).overlayOutput.node
   val harnessSysPLL = dp(PLLFactoryKey)()
-  val dutClock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
-  val dutWrangler = LazyModule(new ResetWrangler)
   val dutGroup = ClockGroup()
-
-  // ClockSinkNode <-- ResetWrangler <-- ClockGroup <-- PLL <-- ClockSourceNode
+  val dutWrangler = LazyModule(new ResetWrangler)
+  val dutClock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
+  // ClockSinkNode <-- ResetWrangler <-- ClockGroup <-- PLLNode <-- ClockSourceNode
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL := sysClkNode
-  val (memWrangler, harnessMemPLL) = topDesign match { case td: ChipTop =>
-    td.lazySystem match { case lsys: VC709DigitalTop =>
-      (lsys.memWrangler, lsys.harnessMemPLL)
-    } 
-  }
+
+  // val (sysClkNode, dutClock, dutWrangler, harnessSysPLL) = topDesign match { case td: ChipTop =>
+  //   td.lazySystem match { case lsys: VC709DigitalTop =>
+  //     (lsys.dutClock, lsys.dutWrangler, lsys.harnessSysPLL, lsys.sysClkNode)
+  //   }
+  // }
+  // val (memWrangler, harnessMemPLL) = topDesign match { case td: ChipTop =>
+  //   td.lazySystem match { case lsys: VC709DigitalTop =>
+  //     (lsys.memWrangler, lsys.harnessMemPLL)
+  //   } 
+  // }
 // DOC include end: ClockOverlay
 
   /*** UART ***/
@@ -73,11 +78,17 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
 // DOC include start: DDR3Overlay
 
   // The first DDR3 uses sys_clock, while the second DDR3 uses mem_clock
-  var ddrDesignInputs = Seq(
-    DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL),
-    DDRDesignInput(dp(ExtTLMem).get.master.base, memWrangler.node, harnessMemPLL)
-  )
-  val ddrNodes = (dp(DDROverlayKey) zip ddrDesignInputs).map { case (ddrOverlayKey, ddrDesignInput) =>
+  // var ddrDesignInputs = Seq(
+  //   DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL),
+  //   DDRDesignInput(dp(ExtTLMem).get.master.base, memWrangler.node, harnessMemPLL)
+  // )
+  // val ddrNodes = (dp(DDROverlayKey) zip ddrDesignInputs).map { case (ddrOverlayKey, ddrDesignInput) =>
+  //     ddrOverlayKey.place(ddrDesignInput).overlayOutput.ddr
+  // }
+
+  // All DDR3s use the same clock
+  var ddrDesignInput = DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)
+  val ddrNodes = dp(DDROverlayKey).zipWithIndex.map { case (ddrOverlayKey, i) =>
       ddrOverlayKey.place(ddrDesignInput).overlayOutput.ddr
   }
 

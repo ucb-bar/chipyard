@@ -53,7 +53,7 @@ class WithVC709Tweaks extends Config(
   new WithSystemModifications ++ // setup busses, use uart bootrom, setup ext. mem. size
   new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(2))
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(1))
 
 class WithVC709System extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => new VC709DigitalTop()(p)
@@ -66,7 +66,7 @@ class RocketVC709Config extends Config(
 // DOC include end: AbstractVC709 and Rocket
 
 class BoomVC709Config extends Config(
-  new WithFPGAFrequency(25) ++
+  new WithFPGAFrequency(10) ++
   new WithVC709System ++
   new WithVC709Tweaks ++
   new chipyard.DualSmallBoomConfig)
