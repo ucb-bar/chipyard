@@ -8,11 +8,11 @@ A diagram of IceNet's microarchitecture is shown below.
 
 .. image:: ../_static/images/nic-design.png
 
-There are four basic parts of the NIC: the :ref:`Controller`, which takes requests
-from and sends responses to the CPU; the :ref:`Send Path`, which reads data from
-memory and sends it out to the network; the :ref:`Receive Path`, which receives
+There are four basic parts of the NIC: the :ref:`Generators/IceNet:Controller`, which takes requests
+from and sends responses to the CPU; the :ref:`Generators/IceNet:Send Path`, which reads data from
+memory and sends it out to the network; the :ref:`Generators/IceNet:Receive Path`, which receives
 data from the network and writes it to memory; and, optionally,
-the :ref:`Pause Handler`, which generates Ethernet pause frames for the purpose
+the :ref:`Generators/IceNet:Pause Handler`, which generates Ethernet pause frames for the purpose
 of flow control.
 
 Controller
@@ -78,7 +78,7 @@ Configuration
 To add IceNIC to your design, add ``HasPeripheryIceNIC`` to your lazy module
 and ``HasPeripheryIceNICModuleImp`` to the module implementation. If you
 are confused about the distinction between lazy module and module
-implementation, refer to :ref:`Cake Pattern / Mixin`.
+implementation, refer to :ref:`Chipyard-Basics/Configs-Parameters-Mixins:Cake Pattern / Mixin`.
 
 Then add the ``WithIceNIC`` config fragment to your configuration. This will
 define ``NICKey``, which IceNIC uses to determine its parameters. The config fragment

@@ -11,7 +11,7 @@ import testchipip.TLHelper
 
 // DOC include start: MyClient
 class MyClient(implicit p: Parameters) extends LazyModule {
-  val node = TLHelper.makeClientNode(TLClientParameters(
+  val node = TLHelper.makeClientNode(TLMasterParameters.v1(
     name = "my-client",
     sourceId = IdRange(0, 4),
     requestFifo = true,
@@ -29,7 +29,7 @@ class MyClient(implicit p: Parameters) extends LazyModule {
 class MyManager(implicit p: Parameters) extends LazyModule {
   val device = new SimpleDevice("my-device", Seq("tutorial,my-device0"))
   val beatBytes = 8
-  val node = TLHelper.makeManagerNode(beatBytes, TLManagerParameters(
+  val node = TLHelper.makeManagerNode(beatBytes, TLSlaveParameters.v1(
     address = Seq(AddressSet(0x20000, 0xfff)),
     resources = device.reg,
     regionType = RegionType.UNCACHED,
@@ -83,7 +83,7 @@ class MyClientGroup(implicit p: Parameters) extends LazyModule {
 
 // DOC include start: MyManagerGroup
 class MyManager1(beatBytes: Int)(implicit p: Parameters) extends LazyModule {
-  val node = TLHelper.makeManagerNode(beatBytes, TLManagerParameters(
+  val node = TLHelper.makeManagerNode(beatBytes, TLSlaveParameters.v1(
     address = Seq(AddressSet(0x0, 0xfff))))
 
   lazy val module = new LazyModuleImp(this) {
@@ -92,7 +92,7 @@ class MyManager1(beatBytes: Int)(implicit p: Parameters) extends LazyModule {
 }
 
 class MyManager2(beatBytes: Int)(implicit p: Parameters) extends LazyModule {
-  val node = TLHelper.makeManagerNode(beatBytes, TLManagerParameters(
+  val node = TLHelper.makeManagerNode(beatBytes, TLSlaveParameters.v1(
     address = Seq(AddressSet(0x1000, 0xfff))))
 
   lazy val module = new LazyModuleImp(this) {

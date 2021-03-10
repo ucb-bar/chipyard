@@ -22,7 +22,7 @@ that writes zeros to the memory at a configured address.
 
 We use ``TLHelper.makeClientNode`` to create a TileLink client node for us.
 We then connect the client node to the memory system through the front bus (fbus).
-For more info on creating TileLink client nodes, take a look at :ref:`Client Node`.
+For more info on creating TileLink client nodes, take a look at :ref:`TileLink-Diplomacy-Reference/NodeTypes:Client Node`.
 
 Once we've created our top-level module including the DMA widget, we can create a configuration for it as we did before.
 

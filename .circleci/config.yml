@@ -49,6 +49,7 @@ commands:
             - add_ssh_keys:
                 fingerprints:
                     - "3e:c3:02:5b:ed:64:8c:b7:b0:04:43:bc:83:43:73:1e"
+                    - "32:d6:89:d2:97:fa:db:de:a8:2d:2a:f2:70:dd:80:89"
             - checkout
 
     setup-tools:
@@ -81,12 +82,15 @@ commands:
             build-script:
                 type: string
                 default: "do-rtl-build.sh"
+            build-type:
+                type: string
+                default: "sim"
         steps:
             - setup-tools:
                 tools-version: "<< parameters.tools-version >>"
             - run:
                 name: Building << parameters.group-key >> subproject using Verilator
-                command: .circleci/<< parameters.build-script >> << parameters.group-key >>
+                command: .circleci/<< parameters.build-script >> << parameters.group-key >> << parameters.build-type >>
                 no_output_timeout: << parameters.timeout >>
             - save_cache:
                 key: << parameters.group-key >>-{{ .Branch }}-{{ .Revision }}
@@ -234,12 +238,12 @@ jobs:
             - run-tests:
                 group-key: "group-cores"
                 project-key: "chipyard-boom"
-    chipyard-ariane-run-tests:
+    chipyard-cva6-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 group-key: "group-cores"
-                project-key: "chipyard-ariane"
+                project-key: "chipyard-cva6"
                 timeout: "30m"
     chipyard-sodor-run-tests:
         executor: main-env
@@ -248,6 +252,12 @@ jobs:
                 group-key: "group-cores"
                 project-key: "chipyard-sodor"
                 timeout: "30m"
+    chipyard-multiclock-rocket-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-cores"
+                project-key: "chipyard-multiclock-rocket"
     chipyard-dmirocket-run-tests:
         executor: main-env
         steps:
@@ -361,6 +371,12 @@ jobs:
                 project-key: "firesim-multiclock"
                 run-script: "run-firesim-scala-tests.sh"
                 timeout: "20m"
+    prepare-chipyard-fpga:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                group-key: "group-fpga"
+                build-type: "fpga"
 
 # Order and dependencies of jobs to run
 workflows:
@@ -431,7 +447,7 @@ workflows:
             - chipyard-boom-run-tests:
                 requires:
                     - prepare-chipyard-cores
-            - chipyard-ariane-run-tests:
+            - chipyard-cva6-run-tests:
                 requires:
                     - prepare-chipyard-cores
             - chipyard-sodor-run-tests:
@@ -500,4 +516,8 @@ workflows:
                     - install-verilator
                     - build-extra-tests
 
+            # Prepare the fpga builds (just Verilog)
+            - prepare-chipyard-fpga:
+                requires:
+                    - install-riscv-toolchain
 

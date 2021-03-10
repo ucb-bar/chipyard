@@ -118,6 +118,7 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
       }
 
       val pllConfig = new SimplePllConfiguration("FireSim RationalClockBridge", clockGroupEdge.sink.members)
+      pllConfig.emitSummaries
       val rationalClockSpecs = for ((sinkP, division) <- pllConfig.sinkDividerMap) yield {
         RationalClock(sinkP.name.get, 1, division)
       }
@@ -153,7 +154,9 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSigna
     lazyModule match { case d: HasTestHarnessFunctions =>
       require(d.harnessFunctions.size == 1, "There should only be 1 harness function to connect clock+reset")
       d.harnessFunctions.foreach(_(this))
-      ApplyHarnessBinders(this, d.lazySystem, p(HarnessBinders), d.portMap.toMap)
+    }
+    lazyModule match { case d: HasIOBinders =>
+      ApplyHarnessBinders(this, d.lazySystem, d.portMap)
     }
     NodeIdx.increment()
   }

@@ -13,7 +13,7 @@ if you use the ``WithNMedCores`` or ``WithNSmallCores`` configurations, you can
 configure 4 KiB direct-mapped caches for L1I and L1D.
 
 If you only want to change the size or associativity, there are config
-fragments for those too. See :ref:`Config Fragments` for how to add these to a custom ``Config``.
+fragments for those too. See :ref:`Customization/Keys-Traits-Configs:Config Fragments` for how to add these to a custom ``Config``.
 
 .. code-block:: scala
 
