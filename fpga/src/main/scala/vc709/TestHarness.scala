@@ -22,7 +22,7 @@ import chipyard.{HasHarnessSignalReferences, HasTestHarnessFunctions, BuildTop, 
 import chipyard.iobinders.{HasIOBinders}
 import chipyard.harness.{ApplyHarnessBinders}
 
-case object FPGAFrequencyKey extends Field[Double](100.0)
+case object FPGAFrequencyKey extends Field[Double](50.0)
 
 class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709ShellBasicOverlays {
 
@@ -30,11 +30,12 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
 
   // Order matters; ddr depends on sys_clock
   val mem_clock = Overlay(ClockInputOverlayKey, new MemClockVC709ShellPlacer(this, ClockInputShellInput()))
-  // val ddr1      = Overlay(DDROverlayKey, new DDR3VC709ShellPlacer(this, DDRShellInput()))
+  val ddr1      = Overlay(DDROverlayKey, new DDR3VC709ShellPlacer(this, DDRShellInput()))
 
   val topDesign = LazyModule(p(BuildTop)(dp)).suggestName("chiptop")
 
 // DOC include start: ClockOverlay
+
   require(dp(ClockInputOverlayKey).size > 0, "There must be at least one sysclk.")
   println("#ClockInputOverlayKey = " + dp(ClockInputOverlayKey).size)
   /*** Connect/Generate clocks ***/
@@ -50,21 +51,12 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
   // ClockSinkNode <-- ResetWrangler <-- ClockGroup <-- PLLNode <-- ClockSourceNode
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL := sysClkNode
 
-  // val (sysClkNode, dutClock, dutWrangler, harnessSysPLL) = topDesign match { case td: ChipTop =>
-  //   td.lazySystem match { case lsys: VC709DigitalTop =>
-  //     (lsys.dutClock, lsys.dutWrangler, lsys.harnessSysPLL, lsys.sysClkNode)
-  //   }
-  // }
-  // val (memWrangler, harnessMemPLL) = topDesign match { case td: ChipTop =>
-  //   td.lazySystem match { case lsys: VC709DigitalTop =>
-  //     (lsys.memWrangler, lsys.harnessMemPLL)
-  //   } 
-  // }
 // DOC include end: ClockOverlay
 
   /*** UART ***/
 
 // DOC include start: UartOverlay
+
   // All UART goes to the VC709 dedicated UART
   val io_uart_bb_s = (dp(UARTOverlayKey) zip dp(PeripheryUARTKey)).map {
     case (uartOverlayKey, peripheryUARTKey) => 
@@ -72,21 +64,15 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
       uartOverlayKey.place(UARTDesignInput(io_uart_bb))
       io_uart_bb
   }
+  
 // DOC include end: UartOverlay
 
   /*** DDR ***/
+
 // DOC include start: DDR3Overlay
 
-  // The first DDR3 uses sys_clock, while the second DDR3 uses mem_clock
-  // var ddrDesignInputs = Seq(
-  //   DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL),
-  //   DDRDesignInput(dp(ExtTLMem).get.master.base, memWrangler.node, harnessMemPLL)
-  // )
-  // val ddrNodes = (dp(DDROverlayKey) zip ddrDesignInputs).map { case (ddrOverlayKey, ddrDesignInput) =>
-  //     ddrOverlayKey.place(ddrDesignInput).overlayOutput.ddr
-  // }
-
   // All DDR3s use the same clock
+  println("#DDROverlayKey = " + dp(DDROverlayKey).size)
   var ddrDesignInput = DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)
   val ddrNodes = dp(DDROverlayKey).zipWithIndex.map { case (ddrOverlayKey, i) =>
       ddrOverlayKey.place(ddrDesignInput).overlayOutput.ddr
@@ -102,6 +88,7 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
       }
     }
   }
+
 // DOC include end: DDR3Overlay
 
   // module implementation

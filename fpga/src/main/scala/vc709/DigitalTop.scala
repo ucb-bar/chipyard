@@ -23,26 +23,26 @@ class VC709DigitalTop()(implicit p: Parameters) extends DigitalTop
 {
   def dp = p
 
-  // /*** The second clock goes to the second DDR ***/
-  // val memClkNode = dp(ClockInputOverlayKey).last.place(ClockInputDesignInput()).overlayOutput.node
-  // val harnessMemPLL = dp(PLLFactoryKey)()
-  // val memGroup = ClockGroup()
-  // val memWrangler = LazyModule(new ResetWrangler)
-  // val memClock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
+  /*** The second clock goes to the second DDR ***/
+  val memClkNode = dp(ClockInputOverlayKey).last.place(ClockInputDesignInput()).overlayOutput.node
+  val harnessMemPLL = dp(PLLFactoryKey)()
+  val memGroup = ClockGroup()
+  val memWrangler = LazyModule(new ResetWrangler)
+  val memClock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
   
-  // // ClockSinkNode <-- ResetWrangler <-- ClockGroup <-- PLLNode <-- ClockSourceNode
-  // memClock := memWrangler.node := memGroup := harnessMemPLL := memClkNode
+  // ClockSinkNode <-- ResetWrangler <-- ClockGroup <-- PLLNode <-- ClockSourceNode
+  memClock := memWrangler.node := memGroup := harnessMemPLL := memClkNode
 
-  // /*** PCIe dutWrangler.node, harnessSysPLL ***/
-  // println("#PCIeOverlayKey = " + p(PCIeOverlayKey).size)
-  // p(PCIeOverlayKey).zipWithIndex.map { case (key, i) => 
-  //   val overlayOutput = key.place(PCIeDesignInput(wrangler=memWrangler.node, corePLL=harnessMemPLL)).overlayOutput
-  //   val (pcieNode: TLNode, intNode: IntOutwardNode) = (overlayOutput.pcieNode, overlayOutput.intNode)
-  //   val (slaveTLNode: TLIdentityNode, masterTLNode: TLAsyncSinkNode) = (pcieNode.inward, pcieNode.outward)
-  //   fbus.coupleFrom(s"master_named_pcie${i}"){ _ :=* TLFIFOFixer(TLFIFOFixer.all) :=* masterTLNode }
-  //   pbus.coupleTo(s"slave_named_pcie${i}"){ slaveTLNode :*= TLWidthWidget(pbus.beatBytes) :*= _ }
-  //   ibus.fromSync := intNode
-  // }
+  /*** PCIe dutWrangler.node, harnessSysPLL ***/
+  println("#PCIeOverlayKey = " + p(PCIeOverlayKey).size)
+  p(PCIeOverlayKey).zipWithIndex.map { case (key, i) => 
+    val overlayOutput = key.place(PCIeDesignInput(wrangler=memWrangler.node, corePLL=harnessMemPLL)).overlayOutput
+    val (pcieNode: TLNode, intNode: IntOutwardNode) = (overlayOutput.pcieNode, overlayOutput.intNode)
+    val (slaveTLNode: TLIdentityNode, masterTLNode: TLAsyncSinkNode) = (pcieNode.inward, pcieNode.outward)
+    fbus.coupleFrom(s"master_named_pcie${i}"){ _ :=* TLFIFOFixer(TLFIFOFixer.all) :=* masterTLNode }
+    pbus.coupleTo(s"slave_named_pcie${i}"){ slaveTLNode :*= TLWidthWidget(pbus.beatBytes) :*= _ }
+    ibus.fromSync := intNode
+  }
 
   override lazy val module = new VC709DigitalTopModule(this)
 }
