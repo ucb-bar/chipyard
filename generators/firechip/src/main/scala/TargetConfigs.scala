@@ -59,14 +59,30 @@ class WithNIC extends icenet.WithIceNIC(inBufFlits = 8192, ctrlQueueDepth = 64)
 class WithNVDLALarge extends nvidia.blocks.dla.WithNVDLA("large")
 class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
-class WithNCores(n: Int) extends Config((site, here, up) => {
-    case RocketTilesKey => List.tabulate(n) { i => up(RocketTilesKey, site).head.copy(hartId = i) }
-})
+class RealisticFrequencies extends Config(
+  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
+  new chipyard.config.WithTileFrequency(1500.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(750.0) ++
+  new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing())
+)
 
-class C4 extends WithNCores(4)
-class C8 extends WithNCores(8)
-class C12 extends WithNCores(12)
-class C16 extends WithNCores(16)
+class WithNRocketCores(n: Int) extends Config(
+  new freechips.rocketchip.subsystem.WithNBigCores(n)
+)
+
+class C1 extends WithNRocketCores(1)
+class C4 extends WithNRocketCores(4)
+class C8 extends WithNRocketCores(8)
+class C12 extends WithNRocketCores(12)
+class C16 extends WithNRocketCores(16)
+
+class WithNBoomCores(n: Int) extends Config(
+  new boom.common.WithRationalBoomTiles ++
+  new boom.common.WithNLargeBooms(n))
+
+class BoomC2 extends WithNBoomCores(2)
+class BoomC4 extends WithNBoomCores(4)
+class BoomC8 extends WithNBoomCores(8)
 
 class BaselineDividers extends Config((site, here, up) => {
   case chipyard.clocking.ClockDividerStyleKey => midas.widgets.BaselineDivider
