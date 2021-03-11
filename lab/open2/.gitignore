@@ -1,0 +1,4 @@
+*.o
+*.riscv
+*.dump
+*.zip

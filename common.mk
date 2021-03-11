@@ -155,11 +155,16 @@ verilog: $(sim_vsrcs)
 #########################################################################################
 # helper rules to run simulations
 #########################################################################################
+
+# BOOM branch analysis script
+boom_bpd_count := 20
+boom_bpd_script := python3 $(base_dir)/generators/boom/util/branch-processor.py -v - $(boom_bpd_count)
+
 .PHONY: run-binary run-binary-fast run-binary-debug run-fast
 
 # run normal binary with hardware-logged insn dissassembly
 run-binary: $(output_dir) $(sim)
-	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm | $(boom_bpd_script) > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 # run simulator as fast as possible (no insn disassembly)
 run-binary-fast: $(output_dir) $(sim)
@@ -167,7 +172,7 @@ run-binary-fast: $(output_dir) $(sim)
 
 # run simulator with as much debug info as possible
 run-binary-debug: $(output_dir) $(sim_debug)
-	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm | $(boom_bpd_script) > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
@@ -193,6 +198,24 @@ run-binary-fast-hex: override LOADMEM_ADDR = 80000000
 run-binary-fast-hex: override LOADMEM = $(binary_hex)
 run-binary-fast-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
 
+pk_hex = $(base_dir)/pk-spectre.hex
+$(pk_hex): $(output_dir)
+	$(base_dir)/scripts/smartelf2hex.sh $(RISCV)/riscv64-unknown-elf/bin/pk-spectre > $(pk_hex)
+
+run-spectre-hex: $(output_dir) $(sim) $(pk_hex)
+run-spectre-hex: run-binary
+run-spectre-hex: override LOADMEM_ADDR = 80000000
+run-spectre-hex: override LOADMEM = $(pk_hex)
+run-spectre-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
+
+run-spectre-debug-hex: $(output_dir) $(sim) $(pk_hex)
+run-spectre-debug-hex: run-binary-debug
+run-spectre-debug-hex: override LOADMEM_ADDR = 80000000
+run-spectre-debug-hex: override LOADMEM = $(pk_hex)
+run-spectre-debug-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
+
+
+
 #########################################################################################
 # run assembly/benchmarks rules
 #########################################################################################
@@ -206,7 +229,7 @@ $(output_dir)/%.run: $(output_dir)/% $(sim)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
-	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm | $(boom_bpd_script) > $@) | tee $<.log)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
@@ -224,6 +247,7 @@ dramsim_lib = $(dramsim_dir)/libdramsim.a
 
 $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
+
 
 ################################################
 # Helper to run SBT or manage the SBT server
@@ -255,3 +279,27 @@ help:
 # Disable all suffix rules to improve Make performance on systems running older
 # versions of Make
 .SUFFIXES:
+
+
+###############
+# CS152 hacks #
+###############
+
+# FIXME: Update blackbox resources without rerunning Chisel elaboration
+boom_csrc_dir := $(base_dir)/generators/boom/src/main/resources/csrc
+boom_csrcs := $(wildcard $(boom_csrc_dir)/*_sw.cc)
+sim_csrcs := $(addprefix $(build_dir)/,$(notdir $(boom_csrcs)))
+
+$(sim_csrcs): $(build_dir)/%: $(boom_csrc_dir)/%
+	cp -p $< $@
+
+#############################
+# local ivy2 and sbt caches #
+#############################
+
+_JAVA_OPTIONS := \
+	-Dsbt.ivy.home=$(base_dir)/.ivy2 \
+	-Dsbt.global.base=$(base_dir)/.sbt \
+	-Dsbt.boot.directory=$(base_dir)/.sbt/boot/
+
+export _JAVA_OPTIONS
