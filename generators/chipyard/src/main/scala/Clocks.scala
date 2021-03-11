@@ -14,6 +14,7 @@ import barstools.iocell.chisel._
 import testchipip.{TLTileResetCtrl}
 
 import chipyard.clocking._
+import chipyard.iobinders._
 
 /**
  * A simple reset implementation that punches out reset ports
@@ -25,7 +26,7 @@ object GenerateReset {
     implicit val p = chiptop.p
     // this needs directionality so generateIOFromSignal works
     val async_reset_wire = Wire(Input(AsyncReset()))
-    val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(async_reset_wire, "reset",
+    val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(async_reset_wire, "reset", p(IOCellKey),
       abstractResetAsAsync = true)
 
     chiptop.iocells ++= resetIOCell
@@ -94,7 +95,7 @@ object ClockingSchemeGenerators {
     InModuleBody {
       val clock_wire = Wire(Input(Clock()))
       val reset_wire = GenerateReset(chiptop, clock_wire)
-      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock")
+      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
       chiptop.iocells ++= clockIOCell
 
       referenceClockSource.out.unzip._1.map { o =>
