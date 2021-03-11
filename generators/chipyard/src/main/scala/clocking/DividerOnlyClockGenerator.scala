@@ -51,7 +51,7 @@ object FrequencyUtils {
     require(!requestedOutputs.contains(0.0))
     val requestedFreqs = requestedOutputs.map(_.freqMHz)
     val fastestFreq = requestedFreqs.max
-    require(fastestFreq < maximumAllowableFreqMHz)
+    require(fastestFreq <= maximumAllowableFreqMHz)
 
     val candidateFreqs =
       Seq.tabulate(Math.ceil(maximumAllowableFreqMHz / fastestFreq).toInt)(i => (i + 1) * fastestFreq)
