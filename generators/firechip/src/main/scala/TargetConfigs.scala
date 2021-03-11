@@ -251,10 +251,11 @@ class FireSim16LargeBoomConfig extends Config(
 /**
   * PDES Configurations
   */
-class ChipyardLikeRocketConfig extends Config(
-  new WithChipyardLikeClocking ++
+
+class AbstractClockMuxConfig extends Config(
+  new WithTileClockMuxes ++
   // Use a division we can currently support in the divider models
-  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
+  new chipyard.config.WithMemoryBusFrequency(500.0) ++
   new chipyard.config.WithTileFrequency(1500.0) ++
   new chipyard.config.WithPeripheryBusFrequency(750.0) ++
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
@@ -263,13 +264,13 @@ class ChipyardLikeRocketConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new chipyard.RocketConfig)
+  new chipyard.config.AbstractConfig)
 
-class ClockMuxRocketConfig extends Config(
-  new WithTileClockMuxes ++
+class AbstractDividerOnlyConfig extends Config(
+  new WithChipyardLikeClocking ++
   // Use a division we can currently support in the divider models
-  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
-  new chipyard.config.WithTileFrequency(1500.0) ++ 
+  new chipyard.config.WithMemoryBusFrequency(500.0) ++
+  new chipyard.config.WithTileFrequency(1500.0) ++
   new chipyard.config.WithPeripheryBusFrequency(750.0) ++
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
   new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
@@ -277,4 +278,7 @@ class ClockMuxRocketConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new chipyard.RocketConfig)
+  new chipyard.config.AbstractConfig)
+
+class ChipyardLikeRocketConfig extends Config(new C1 ++ new AbstractDividerOnlyConfig)
+class ClockMuxRocketConfig extends Config(new C1 ++ new AbstractClockMuxConfig)
