@@ -54,5 +54,6 @@ class CS152SWPredBoomConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class CS152SmallBoomConfig extends Config(
+  new boom.common.WithSWBPD ++
   new boom.common.WithNCS152SmallBooms(1) ++
   new chipyard.config.AbstractConfig)
