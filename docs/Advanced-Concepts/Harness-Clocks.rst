@@ -3,18 +3,36 @@
 Creating Clocks in the Test Harness
 ===================================
 
-By default, all modules in the Test Harness, including those made by harness binders
-use the implicit clock and reset of the Test Harness.
-However, the test harness and harness binders, have the ability to generate a standalone
-clock and reset signal.
-This is done by the ``HarnessClockInstantiator`` which allows you to request a clock at a
-particular frequency.
-Take the following harness binder example:
+Chipyard currently allows the SoC design (everything under ``ChipTop``) to
+have independent clock domains through diplomacy.
+This implies that some reference clock enters the ``ChipTop`` and then is divided down into
+separate clock domains.
+From the perspective of the ``TestHarness`` module, the ``ChipTop`` clock and reset is
+provided from the harness clock and reset (called ``harnessClock`` and ``harnessReset``).
+In the default case, this ``harnessClock`` and ``harnessReset`` is directly wired to the
+clock and reset IO's of the ``TestHarness`` module.
+However, the ``TestHarness`` has the ability to generate a standalone clock and reset signal
+that is separate from the reference clock/reset of ``ChipTop``.
+This allows harness components (including harness binders) the ability to "request" a clock
+for a new clock domain.
+This is useful for simulating systems in which modules in the harness have independent clock domains
+from the DUT.
+
+Requests for a harness clock is done by the ``HarnessClockInstantiator`` class in ``generators/chipyard/src/main/scala/TestHarness.scala``.
+This class is accessed in harness components by referencing the Rocket Chip parameters key ``p(HarnessClockInstantiatorKey)``.
+Then you can request a clock and syncronized reset at a particular frequency by invoking the ``getClockBundle`` function.
+Take the following example:
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/HarnessBinders.scala
     :language: scala
     :start-after: DOC include start: HarnessClockInstantiatorEx
     :end-before: DOC include end: HarnessClockInstantiatorEx
 
-While the purpose of the binder isn't necessary here, you can see that the ``p(HarnessClockInstantiatorKey).getClockBundle``
-allows the binder to request a clock/reset bundle at a particular frequency.
+Here you can see the ``p(HarnessClockInstantiatorKey)`` is used to request a clock and reset at ``memFreq`` frequency.
+
+.. note::
+    In the case that the reference clock entering ``ChipTop`` is not the overall reference clock of the simulation
+    (i.e. not the clock/reset coming into the ``TestHarness`` module), the ``harnessClock`` and ``harnessReset`` can
+    differ from the implicit ``TestHarness`` clock and reset. For example, if the ``ChipTop`` reference is 500MHz but an
+    extra harness clock is requested at 1GHz, the ``TestHarness`` implicit clock/reset will be at 1GHz while the ``harnessClock``
+    and ``harnessReset`` will be at 500MHz.
