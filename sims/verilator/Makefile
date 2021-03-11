@@ -16,6 +16,9 @@ sim_dir=$(abspath .)
 #########################################################################################
 include $(base_dir)/variables.mk
 
+CCACHE_DIR := $(base_dir)/.ccache
+export CCACHE_DIR
+
 #########################################################################################
 # name of simulator (used to generate *.f arguments file)
 #########################################################################################
@@ -85,7 +88,7 @@ TRACING_CFLAGS := $(if $(filter $(VERILATOR_FST_MODE),0),,-DCY_FST_TRACE)
 # we initially had --noassert for performance, but several modules use
 # assertions, including dramsim, so we enable --assert by default
 VERILATOR_OPT_FLAGS ?= \
-	-O3 \
+	-O2 \
 	--x-assign fast \
 	--x-initial fast \
 	--output-split 10000 \
