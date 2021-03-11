@@ -54,10 +54,12 @@ model_dir_debug = $(build_dir)/$(long_name).debug
 #########################################################################################
 $(sim): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS) $(sim_csrcs)
 	rm -rf $(model_dir)
+	rm -rf $(sim).daidir/.vcs.timestamp
 	$(VCS) $(VCS_OPTS) $(EXTRA_SIM_SOURCES) -o $@ -Mdir=$(model_dir)
 
 $(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS) $(sim_csrcs)
 	rm -rf $(model_dir_debug)
+	rm -rf $(sim).daidir/.vcs.timestamp
 	$(VCS) $(VCS_OPTS) $(EXTRA_SIM_SOURCES) -o $@ -Mdir=$(model_dir_debug)  \
 	+define+DEBUG
 
