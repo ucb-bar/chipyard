@@ -16,6 +16,8 @@ jobs:
         run: echo =========CHIPYARD CI STARTED=================
       - name: fix permissions 1
         run: sudo chown -R riscvuser .
+      - name: Basics
+        run: whoami && echo pwd `pwd` && ls -la /github ~riscvuser
       - name: Checkout
         uses: actions/checkout@v2
       - name: fix permissions 2
