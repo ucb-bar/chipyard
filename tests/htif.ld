@@ -1,1 +1,0 @@
-../toolchains/libgloss/util/htif.ld

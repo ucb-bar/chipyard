@@ -1,0 +1,44 @@
+name: pactice-actions
+
+on: [push]
+
+jobs:
+  create-hashes:
+    name: create-hashes
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-image:1.0.1
+      options: --user riscvuser --entrypoint /bin/bash
+    strategy:
+      matrix:
+        chisel-version: [3.5.x]
+    env:
+      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+      LOCAL_CHIPYARD_DIR: /github/workspace/
+      CHICKSVAR: chick
+    steps:
+      - name: Banner
+        run: printf "===========Create Hashes\ncwd `pwd`\nuser `whoami`\n`echo homedir ~`\nHOME $HOME\n============="
+      - name: repo
+        run: echo PATH $PATH
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: show_defaults.sh
+        run: .github/scripts/show_defaults.sh
+#      - name: pwd2
+#        run: pwd && ls -al .circleci
+#      - name: current-env
+#        run: env | sort && whoami && groups
+#      - name: home-info
+#        run: printf "HOME:\n `file $HOME`\n`ls -l $HOME`\n"
+#      - name: create-hash.sh
+#      - name set-defaults
+#        run: source .github/scripts/defaults.sh
+#      - name: show-env
+#        run: env | sort
+      - name: run-create-hash
+        run: .github/scripts/create-hash.sh
+      - name: show-hashes
+        run: cat /home/riscvuser/riscv-tools.hash
+#      - name: verilator
+#        run: .circleci/install-verilator.sh
