@@ -49,7 +49,7 @@ echo "HOME IS $HOME"
 export LOCAL_CHECKOUT_DIR=$HOME/project
 export LOCAL_RISCV_DIR=$HOME/riscv-tools-install
 export LOCAL_ESP_DIR=$HOME/esp-tools-install
-export LOCAL_CHIPYARD_DIR=/github/workspace
+export LOCAL_CHIPYARD_DIR=/github/workflow
 export LOCAL_SIM_DIR=$LOCAL_CHIPYARD_DIR/sims/verilator
 export LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 
