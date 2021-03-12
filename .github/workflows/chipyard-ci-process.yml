@@ -12,6 +12,9 @@ jobs:
     env:
       JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
+      - name: Hello
+        run: echo =========CHIPYARD CI STARTED=================
+      - name: Checkout
       - uses: actions/checkout@v2
       - name: fix permissions
         run: sudo chown -R riscvuser .
@@ -20,102 +23,103 @@ jobs:
       - name: Checkout commits of each submodule
         run: .github/scripts/check-commit.sh
 
-  tutorial-set-up-check:
-    name: tutorial-set-up-check
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-image:1.0.1
-      options: --user riscvuser --entrypoint /bin/bash
-    env:
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
-    steps:
-      - uses: actions/checkout@v2
-      - name: fix permissions
-        run: sudo chown -R riscvuser .
-      - name: Check that the tutorial-setup patches apply
-        run: ./scripts/tutorial-setup.sh
-
-  documentation-check:
-    name: tutorial-set-up-check
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-image:1.0.1
-      options: --user riscvuser --entrypoint /bin/bash
-    env:
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
-    steps:
-      - uses: actions/checkout@v2
-      - name: fix permissions
-        run: sudo chown -R riscvuser .
-      - name: Check that documentation builds with no warnings/errors
-        run: |
-            sudo apt-get update -y
-            sudo apt-get install -y python3-pip
-            sudo pip3 install -r docs/requirements.txt
-            make -C docs html
-
-  install-riscv-toolchain:
-    name: install-riscv-toolchain
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-image:1.0.1
-      options: --user riscvuser --entrypoint /bin/bash
-    env:
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
-      TOOLS_CACHE_VERSION: "v6"
-    steps:
-      - uses: actions/checkout@v2
-      - name: fix permissions
-        run: sudo chown -R riscvuser .
-      - name: Create hash of toolchains
-        run: .github/scripts/create-hash.sh
-      - name: Check version
-        run: echo ======CACHE_VERSION===${{ env.TOOLS_CACHE_VERSION }}
-      - name: Cache toolchains
-        uses: actions/cache@v2
-        env:
-          cache_name: tool-chain-caches
-        with:
-          path: "/home/riscvuser/riscv-tools"
-          key: riscv-tools-installed-${{ env.TOOLS_CACHE_VERSION }}
-          restore: |
-            riscv-tools-installed-${{ env.TOOLS_CACHE_VERSION }}
-            riscv-tools-installed-
-      - name: building
-        run: .github/scripts/build-toolchains.sh riscv-tools
-
-  build-cache:
-    name: build-cache
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-image:1.0.1
-      options: --user riscvuser --entrypoint /bin/bash
-    env:
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
-      TOOLS_CACHE_VERSION: "v6"
-    steps:
-#      - name: install node
-#        run: yes | sudo apt install nodejs
-      - uses: actions/checkout@v2
-      - name: fix permissions
-        run: sudo chown -R riscvuser .
-      - name: set up cache
-        uses: actions/cache@v2
-        id: chickcache
-        env:
-          cache_name: practice_cache
-        with:
-          path: ./chickdir
-          key: chickdirkey
-          restore-keys: chickdirkey
-      - name: Stuff cache
-        if: steps.chickcache.outputs.cache-hit != 'true'
-        run: mkdir chickdir && echo hellochick > chickdir/chickfile
-      - name: x2
-        run: cat chickdir/chickfile
-
-
-
-
-
-
+#  tutorial-set-up-check:
+#    name: tutorial-set-up-check
+#    runs-on: ubuntu-latest
+#    container:
+#      image: ucbbar/chipyard-image:1.0.1
+#      options: --user riscvuser --entrypoint /bin/bash
+#    env:
+#      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: fix permissions
+#        run: sudo chown -R riscvuser .
+#      - name: Check that the tutorial-setup patches apply
+#        run: ./scripts/tutorial-setup.sh
+#
+#  documentation-check:
+#    name: tutorial-set-up-check
+#    runs-on: ubuntu-latest
+#    container:
+#      image: ucbbar/chipyard-image:1.0.1
+#      options: --user riscvuser --entrypoint /bin/bash
+#    env:
+#      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: fix permissions
+#        run: sudo chown -R riscvuser .
+#      - name: Check that documentation builds with no warnings/errors
+#        run: |
+#            sudo apt-get update -y
+#            sudo apt-get install -y python3-pip
+#            sudo pip3 install -r docs/requirements.txt
+#            make -C docs html
+#
+#  install-riscv-toolchain:
+#    name: install-riscv-toolchain
+#    runs-on: ubuntu-latest
+#    container:
+#      image: ucbbar/chipyard-image:1.0.1
+#      options: --user riscvuser --entrypoint /bin/bash
+#    env:
+#      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+#      TOOLS_CACHE_VERSION: "v6"
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: fix permissions
+#        run: sudo chown -R riscvuser .
+#      - name: Create hash of toolchains
+#        run: .github/scripts/create-hash.sh
+#      - name: Check version
+#        run: echo ======CACHE_VERSION===${{ env.TOOLS_CACHE_VERSION }}
+#      - name: Cache toolchains
+#        uses: actions/cache@v2
+#        env:
+#          cache_name: tool-chain-caches
+#        with:
+#          path: "/home/riscvuser/riscv-tools"
+#          key: riscv-tools-installed-${{ env.TOOLS_CACHE_VERSION }}
+#          restore: |
+#            riscv-tools-installed-${{ env.TOOLS_CACHE_VERSION }}
+#            riscv-tools-installed-
+#      - name: building
+#        run: .github/scripts/build-toolchains.sh riscv-tools
+#
+#  build-cache:
+#    name: build-cache
+#    runs-on: ubuntu-latest
+#    container:
+#      image: ucbbar/chipyard-image:1.0.1
+#      options: --user riscvuser --entrypoint /bin/bash
+#    env:
+#      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+#      TOOLS_CACHE_VERSION: "v6"
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: fix permissions
+#        run: sudo chown -R riscvuser .
+#      - uses: actions/setup-node@v2
+#        with:
+#          node-version: '14'
+##      - name: set up cache
+##        uses: actions/cache@v2
+##        id: chickcache
+##        env:
+##          cache_name: practice_cache
+##        with:
+##          path: ./chickdir
+##          key: chickdirkey
+##          restore-keys: chickdirkey
+##      - name: Stuff cache
+##        if: steps.chickcache.outputs.cache-hit != 'true'
+##        run: mkdir chickdir && echo hellochick > chickdir/chickfile
+##      - name: x2
+##        run: cat chickdir/chickfile
+#
+#
+#
+#
+#
+#
