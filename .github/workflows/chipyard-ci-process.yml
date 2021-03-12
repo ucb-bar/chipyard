@@ -14,9 +14,11 @@ jobs:
     steps:
       - name: Hello
         run: echo =========CHIPYARD CI STARTED=================
+      - name: fix permissions 1
+        run: sudo chown -R riscvuser .
       - name: Checkout
         uses: actions/checkout@v2
-      - name: fix permissions
+      - name: fix permissions 2
         run: sudo chown -R riscvuser .
       - name: Banner
         run: printf "===========Create Hashes\ncwd `pwd`\nuser `whoami`\n`echo homedir ~`\nHOME $HOME\n============="
