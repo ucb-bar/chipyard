@@ -30,14 +30,13 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
 
   // Order matters; ddr depends on sys_clock
   val mem_clock = Overlay(ClockInputOverlayKey, new MemClockVC709ShellPlacer(this, ClockInputShellInput()))
-  val ddr1      = Overlay(DDROverlayKey, new DDR3VC709ShellPlacer(this, DDRShellInput()))
+  // val ddr1      = Overlay(DDROverlayKey, new DDR3VC709ShellPlacer(this, DDRShellInput()))
 
   val topDesign = LazyModule(p(BuildTop)(dp)).suggestName("chiptop")
 
 // DOC include start: ClockOverlay
 
   require(dp(ClockInputOverlayKey).size > 0, "There must be at least one sysclk.")
-  println("#ClockInputOverlayKey = " + dp(ClockInputOverlayKey).size)
   /*** Connect/Generate clocks ***/
   // place all clocks in the shell, and connect to the PLL that will generate
   //  multiple clocks, finally create and connect to the clockSinkNode
@@ -51,6 +50,11 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
   // ClockSinkNode <-- ResetWrangler <-- ClockGroup <-- PLLNode <-- ClockSourceNode
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL := sysClkNode
 
+  val (memWrangler, harnessMemPLL) = topDesign match { case td: ChipTop =>
+    td.lazySystem match { case lsys: VC709DigitalTop =>
+      (lsys.memWrangler, lsys.harnessMemPLL)
+    }
+  }
 // DOC include end: ClockOverlay
 
   /*** UART ***/
@@ -72,18 +76,13 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
 // DOC include start: DDR3Overlay
 
   // All DDR3s use the same clock
-  println("#DDROverlayKey = " + dp(DDROverlayKey).size)
   var ddrDesignInput = DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)
-  val ddrNodes = dp(DDROverlayKey).zipWithIndex.map { case (ddrOverlayKey, i) =>
-      ddrOverlayKey.place(ddrDesignInput).overlayOutput.ddr
-  }
-
-  // DDRNode <--- TLClientNode[Master] ---> in-edge ---> TLNode[Slave]
   val ddrClients = topDesign match { case td: ChipTop =>
     td.lazySystem match { case lsys: CanHaveMasterTLMemPort => 
-      (ddrNodes zip lsys.memTLNode.edges.in).map { case (node, edge) =>
+      (dp(DDROverlayKey) zip lsys.memTLNode.edges.in).map { case (ddrOverlayKey, edge) =>
+        val ddtNode = ddrOverlayKey.place(ddrDesignInput).overlayOutput.ddr
         val ddrClient = TLClientNode(Seq(edge.master))
-        node := ddrClient
+        ddtNode := ddrClient
         ddrClient
       }
     }

@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <math.h>
 
-#include "./uartboot/include/serial.h"
+#include "../uartboot/include/serial.h"
 
 #define DEVICE "/dev/ttyUSB1"
 #define S_TIMEOUT 1

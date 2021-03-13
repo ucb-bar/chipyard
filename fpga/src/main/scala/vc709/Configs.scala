@@ -3,8 +3,8 @@ package chipyard.fpga.vc709
 import sys.process._
 
 import freechips.rocketchip.config.{Config, Parameters}
-import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem}
-import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
+import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem, WithJtagDTM}
+import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG, JtagDTMKey, JtagDTMConfig}
 import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
 import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet}
 import freechips.rocketchip.tile.{XLen}
@@ -24,13 +24,16 @@ import chipyard.fpga.vcu118.{WithUARTIOPassthrough, WithTLIOPassthrough, WithFPG
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
-  // case PeripherySPIKey => List(SPIParams(rAddress = BigInt(0x64001000L)))
-  // case VC709ShellPMOD => "SDIO"
 })
 
 class WithSystemModifications extends Config((site, here, up) => {
   case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency = Some(site(FPGAFrequencyKey).toInt*1000000))
   case DTSTimebase => BigInt(1000000)
+  // case JtagDTMKey => new JtagDTMConfig(
+  //   idcodeVersion = 2,
+  //   idcodePartNum = 0x000,
+  //   idcodeManufId = 0x489,
+  //   debugIdleCycles = 5)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for uart boot
     val freqMHz = site(FPGAFrequencyKey).toInt * 1000000
@@ -49,11 +52,12 @@ class WithVC709Tweaks extends Config(
   new WithUARTIOPassthrough ++
   new WithTLIOPassthrough ++
   new WithDefaultPeripherals ++
-  new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
+  new WithJtagDTM ++
   new WithSystemModifications ++ // setup busses, use uart bootrom, setup ext. mem. size
-  new chipyard.config.WithNoDebug ++ // remove debug module
+  new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
+  // new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(2))
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(1))
 
 class WithVC709System extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => new VC709DigitalTop()(p)
@@ -62,11 +66,15 @@ class WithVC709System extends Config((site, here, up) => {
 class RocketVC709Config extends Config(
   new WithVC709System ++
   new WithVC709Tweaks ++
-  new chipyard.RocketConfig)
+  new chipyard.QuadRocketConfig)
 // DOC include end: AbstractVC709 and Rocket
 
+class QuadSmallBoomConfig extends Config(
+  new boom.common.WithNSmallBooms(4) ++                          // 4 boom cores
+  new chipyard.config.AbstractConfig)
+
 class BoomVC709Config extends Config(
-  new WithFPGAFrequency(25) ++
+  new WithFPGAFrequency(50) ++
   new WithVC709System ++
   new WithVC709Tweaks ++
-  new chipyard.DualSmallBoomConfig)
+  new QuadSmallBoomConfig)

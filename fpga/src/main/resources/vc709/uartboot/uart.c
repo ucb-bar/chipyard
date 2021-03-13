@@ -1,11 +1,3 @@
-/*
- * @,@Author: ,: your name
- * @,@Date: ,: 1970-01-01 08:00:00
- * @,@LastEditTime: ,: 2021-01-24 11:27:59
- * @,@LastEditors: ,: Please set LastEditors
- * @,@Description: ,: In User Settings Edit
- * @,@FilePath: ,: /freedom/bootrom/sdboot/uart.c
- */
 // See LICENSE for license details.
 #include <stdint.h>
 
@@ -13,6 +5,7 @@
 #include "common.h"
 
 #define DEBUG
+
 #include "kprintf.h"
 
 #define is_num(c)       ((c>='0')&&(c<='9'))

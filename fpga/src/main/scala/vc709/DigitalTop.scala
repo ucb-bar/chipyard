@@ -20,6 +20,8 @@ import sifive.fpgashells.clocks._
 // ------------------------------------
 
 class VC709DigitalTop()(implicit p: Parameters) extends DigitalTop
+  with freechips.rocketchip.subsystem.CanHaveMasterTLMMIOPort
+  with freechips.rocketchip.subsystem.CanHaveSlaveTLPort
 {
   def dp = p
 
@@ -34,7 +36,6 @@ class VC709DigitalTop()(implicit p: Parameters) extends DigitalTop
   memClock := memWrangler.node := memGroup := harnessMemPLL := memClkNode
 
   /*** PCIe dutWrangler.node, harnessSysPLL ***/
-  println("#PCIeOverlayKey = " + p(PCIeOverlayKey).size)
   p(PCIeOverlayKey).zipWithIndex.map { case (key, i) => 
     val overlayOutput = key.place(PCIeDesignInput(wrangler=memWrangler.node, corePLL=harnessMemPLL)).overlayOutput
     val (pcieNode: TLNode, intNode: IntOutwardNode) = (overlayOutput.pcieNode, overlayOutput.intNode)
