@@ -238,30 +238,24 @@ class WithTiedOffDebug extends OverrideHarnessBinder({
 })
 
 
-class WithSerialAdapterTiedOff(asyncQueue: Boolean = false) extends OverrideHarnessBinder({
+class WithSerialAdapterTiedOff extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
-      val bits = if (asyncQueue) {
-        SerialAdapter.asyncQueue(port, th.harnessClock, th.harnessReset)
-      } else {
-        port.bits
+      val bits = SerialAdapter.asyncQueue(port, th.harnessClock, th.harnessReset)
+      withClockAndReset(th.harnessClock, th.harnessReset) {
+        val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.harnessReset)
+        SerialAdapter.tieoff(ram.module.io.tsi_ser)
       }
-      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.harnessReset)
-      SerialAdapter.tieoff(ram.module.io.tsi_ser)
     })
   }
 })
 
-class WithSimSerial(asyncQueue: Boolean = false) extends OverrideHarnessBinder({
+class WithSimSerial extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
-      val bits = if (asyncQueue) {
-        SerialAdapter.asyncQueue(port, th.harnessClock, th.harnessReset)
-      } else {
-        port.bits
-      }
+      val bits = SerialAdapter.asyncQueue(port, th.harnessClock, th.harnessReset)
       withClockAndReset(th.harnessClock, th.harnessReset) {
         val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.harnessReset)
         val success = SerialAdapter.connectSimSerial(ram.module.io.tsi_ser, th.harnessClock, th.harnessReset.asBool)
