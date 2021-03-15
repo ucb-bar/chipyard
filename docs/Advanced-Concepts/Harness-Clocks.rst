@@ -20,7 +20,7 @@ from the DUT.
 
 Requests for a harness clock is done by the ``HarnessClockInstantiator`` class in ``generators/chipyard/src/main/scala/TestHarness.scala``.
 This class is accessed in harness components by referencing the Rocket Chip parameters key ``p(HarnessClockInstantiatorKey)``.
-Then you can request a clock and syncronized reset at a particular frequency by invoking the ``getClockBundle`` function.
+Then you can request a clock and syncronized reset at a particular frequency by invoking the ``requestClockBundle`` function.
 Take the following example:
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/HarnessBinders.scala
