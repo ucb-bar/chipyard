@@ -71,7 +71,9 @@ class WithSerialBridge extends OverrideHarnessBinder({
     ports.map { port =>
       implicit val p = GetSystemParameters(system)
       val bits = SerialAdapter.asyncQueue(port, th.harnessClock, th.harnessReset)
-      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.harnessReset)
+      val ram = withClockAndReset(th.harnessClock, th.harnessReset) {
+        SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.harnessReset)
+      }
       SerialBridge(th.harnessClock, ram.module.io.tsi_ser, p(ExtMem).map(_ => MainMemoryConsts.globalName))
     }
     Nil
