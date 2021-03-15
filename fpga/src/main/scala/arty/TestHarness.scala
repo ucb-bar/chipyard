@@ -29,7 +29,7 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
 
   val harnessClock = clock_32MHz
   val harnessReset = hReset
-  val success = false.B
+  val success = IO(Output(Bool()))
 
   val dutReset = dReset
 
