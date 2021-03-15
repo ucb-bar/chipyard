@@ -86,7 +86,7 @@ object ClockingSchemeGenerators {
       :*= aggregator)
 
     val referenceClockSource =  ClockSourceNode(Seq(ClockSourceParameters()))
-    val dividerOnlyClkGenerator = DividerOnlyClockGenerator()
+    val dividerOnlyClkGenerator = LazyModule(new DividerOnlyClockGenerator("buildTopClockGenerator"))
     // provides all the divided clocks (from the top-level clock)
     (aggregator
       := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))

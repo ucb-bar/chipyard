@@ -59,6 +59,7 @@ class WithNIC extends icenet.WithIceNIC(inBufFlits = 8192, ctrlQueueDepth = 64)
 class WithNVDLALarge extends nvidia.blocks.dla.WithNVDLA("large")
 class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
+// Tweaks that are generally applied to all firesim configs (without default FireSim clocks)
 class WithFireSimDesignTweaks extends Config(
   // Required: Bake in the default FASED memory model
   new WithDefaultMemModel ++
@@ -82,7 +83,7 @@ class WithFireSimDesignTweaks extends Config(
   new chipyard.config.WithNoDebug
 )
 
-// Tweaks that are generally applied to all firesim configs
+// Tweaks that are generally applied to all firesim configs (with default FireSim clocks)
 class WithFireSimConfigTweaks extends Config(
   // Optional*: Removing this will require adjusting the UART baud rate and
   // potential target-software changes to properly capture UART output

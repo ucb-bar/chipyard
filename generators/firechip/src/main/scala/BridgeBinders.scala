@@ -110,21 +110,14 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
     implicit val p = GetSystemParameters(system)
 
     p(SerialTLKey).map({ sVal =>
-      // currently only the harness AXI port supports a passthrough clock
       require(sVal.axiMemOverSerialTLParams.isDefined)
       val axiDomainParams = sVal.axiMemOverSerialTLParams.get
       require(sVal.isMemoryDevice)
 
-      val memFreq: Double = axiDomainParams.axiClockParams match {
-        case Some(clkParams) => clkParams.clockFreqMHz * 1000000
-        case None => {
-          // get freq. from what the master of the serial link specifies
-          system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(p(SerialTLAttachKey).masterWhere).dtsFrequency.get.toDouble
-        }
-      }
+      val memFreq = axiDomainParams.getMemFrequency(system.asInstanceOf[HasTileLinkLocations])
 
       ports.map({ port =>
-        val axiClock = p(ClockBridgeInstantiatorKey).getClock("mem_over_serial_tl_clock", memFreq)
+        val axiClock = p(ClockBridgeInstantiatorKey).requestClock("mem_over_serial_tl_clock", memFreq)
         val axiClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
         axiClockBundle.clock := axiClock
         axiClockBundle.reset := ResetCatchAndSync(axiClock, th.harnessReset.asBool)

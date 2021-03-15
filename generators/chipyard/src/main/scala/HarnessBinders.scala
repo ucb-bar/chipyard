@@ -144,21 +144,15 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
 
     p(SerialTLKey).map({ sVal =>
-      // currently only the harness AXI port supports a passthrough clock
       require(sVal.axiMemOverSerialTLParams.isDefined)
       val axiDomainParams = sVal.axiMemOverSerialTLParams.get
+      require(sVal.isMemoryDevice)
 
-      val memFreq: Double = axiDomainParams.axiClockParams match {
-        case Some(clkParams) => clkParams.clockFreqMHz * 1000000
-        case None => {
-          // get freq. from what the master of the serial link specifies
-          system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(p(SerialTLAttachKey).masterWhere).dtsFrequency.get.toDouble
-        }
-      }
+      val memFreq = axiDomainParams.getMemFrequency(system.asInstanceOf[HasTileLinkLocations])
 
       ports.map({ port =>
 // DOC include start: HarnessClockInstantiatorEx
-        val memOverSerialTLClockBundle = p(HarnessClockInstantiatorKey).getClockBundle("mem_over_serial_tl_clock", memFreq)
+        val memOverSerialTLClockBundle = p(HarnessClockInstantiatorKey).requestClockBundle("mem_over_serial_tl_clock", memFreq)
         val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(
           system.serdesser.get,
           port,

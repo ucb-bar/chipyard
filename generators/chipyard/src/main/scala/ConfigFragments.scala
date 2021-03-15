@@ -217,6 +217,12 @@ class WithSerialTLBackingMemory extends Config((site, here, up) => {
   )}
 })
 
+/**
+  * Mixins to define either a specific tile frequency for a single hart or all harts
+  *
+  * @param fMHz Frequency in MHz of the tile or all tiles
+  * @param hartId Optional hartid to assign the frequency to (if unspecified default to all harts)
+  */
 class WithTileFrequency(fMHz: Double, hartId: Option[Int] = None) extends ClockNameContainsAssignment({
     hartId match {
       case Some(id) => s"tile_$id"

@@ -2,7 +2,7 @@ package chipyard
 
 import chisel3._
 
-import scala.collection.mutable.{ArrayBuffer, HashMap}
+import scala.collection.mutable.{ArrayBuffer, LinkedHashMap}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.util.{ResetCatchAndSync}
@@ -31,10 +31,10 @@ trait HasHarnessSignalReferences {
 }
 
 class HarnessClockInstantiator {
-  private var _clockMap: HashMap[String, (Double, ClockBundle)] = HashMap.empty
+  private val _clockMap: LinkedHashMap[String, (Double, ClockBundle)] = LinkedHashMap.empty
 
   // request a clock bundle at a particular frequency
-  def getClockBundle(name: String, freqRequested: Double): ClockBundle = {
+  def requestClockBundle(name: String, freqRequested: Double): ClockBundle = {
     val clockBundle = Wire(new ClockBundle(ClockBundleParameters()))
     _clockMap(name) = (freqRequested, clockBundle)
     clockBundle
@@ -49,7 +49,7 @@ class HarnessClockInstantiator {
     val pllConfig = new SimplePllConfiguration("harnessDividerOnlyClockGenerator", sinks)
     pllConfig.emitSummaries()
 
-    val dividedClocks = HashMap[Int, Clock]()
+    val dividedClocks = LinkedHashMap[Int, Clock]()
     def instantiateDivider(div: Int): Clock = {
       val divider = Module(new ClockDividerN(div))
       divider.suggestName(s"ClockDivideBy${div}")
@@ -86,16 +86,15 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
   val harnessReset = Wire(Reset())
 
   val lazyDut = LazyModule(p(BuildTop)(p)).suggestName("chiptop")
-  withClockAndReset(harnessClock, harnessReset) {
-    val dut = Module(lazyDut.module)
-  }
+  val dut = Module(lazyDut.module)
+
   io.success := false.B
 
   val freqMHz = lazyDut match {
     case d: HasReferenceClockFreq => d.refClockFreqMHz.getOrElse(p(DefaultClockFrequencyKey))
     case _ => p(DefaultClockFrequencyKey)
   }
-  val refClkBundle = p(HarnessClockInstantiatorKey).getClockBundle("buildtop_reference_clock", freqMHz * (1000 * 1000))
+  val refClkBundle = p(HarnessClockInstantiatorKey).requestClockBundle("buildtop_reference_clock", freqMHz * (1000 * 1000))
 
   harnessClock := refClkBundle.clock
   harnessReset := WireInit(refClkBundle.reset)
