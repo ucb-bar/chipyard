@@ -3,8 +3,8 @@ package chipyard.fpga.vc709
 import sys.process._
 
 import freechips.rocketchip.config.{Config, Parameters}
-import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem, WithJtagDTM}
-import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG, JtagDTMKey, JtagDTMConfig}
+import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem}
+import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
 import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
 import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet}
 import freechips.rocketchip.tile.{XLen}
@@ -29,11 +29,6 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
 class WithSystemModifications extends Config((site, here, up) => {
   case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency = Some(site(FPGAFrequencyKey).toInt*1000000))
   case DTSTimebase => BigInt(1000000)
-  // case JtagDTMKey => new JtagDTMConfig(
-  //   idcodeVersion = 2,
-  //   idcodePartNum = 0x000,
-  //   idcodeManufId = 0x489,
-  //   debugIdleCycles = 5)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for uart boot
     val freqMHz = site(FPGAFrequencyKey).toInt * 1000000
@@ -52,7 +47,6 @@ class WithVC709Tweaks extends Config(
   new WithUARTIOPassthrough ++
   new WithTLIOPassthrough ++
   new WithDefaultPeripherals ++
-  // new WithJtagDTM ++
   new WithSystemModifications ++ // setup busses, use uart bootrom, setup ext. mem. size
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new chipyard.config.WithNoDebug ++ // remove debug module
