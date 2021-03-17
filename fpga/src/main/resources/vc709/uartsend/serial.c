@@ -13,7 +13,7 @@
 
 #include "../uartboot/include/serial.h"
 
-#define DEVICE "/dev/ttyUSB1"
+#define DEVICE "/dev/ttyUSB0"
 #define S_TIMEOUT 1
 
 int serial_fd = 0;
@@ -274,18 +274,9 @@ int main(int argc, char *argv[])
         // ./serial tty, address, filename
         send_file(argv[2], argv[3]);
         printf("transfer finished.\n");
-    } else if (argc == 3) {
-        // read message
-        printf("reading message.\n");
-        readline(msg);
-        printf("%s\n", msg);
     } else {
         // ./serial tty
         write_cmd(UART_CMD_END);
-        while (1) {
-            readline(msg);
-            printf("%s", msg);
-        }
     }
 
     close(serial_fd);

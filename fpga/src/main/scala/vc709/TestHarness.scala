@@ -14,11 +14,11 @@ import sifive.fpgashells.ip.xilinx._
 import sifive.fpgashells.shell._
 import sifive.fpgashells.clocks._
 
+import sifive.blocks.devices.i2c._
 import sifive.blocks.devices.uart._
-import sifive.blocks.devices.spi._
 import sifive.blocks.devices.gpio._
 
-import chipyard.{HasHarnessSignalReferences, HasTestHarnessFunctions, BuildTop, ChipTop, DigitalTop, ChipyardSystem, ExtTLMem, CanHaveMasterTLMemPort}
+import chipyard.{HasHarnessSignalReferences, HasTestHarnessFunctions, BuildTop, ChipTop, ExtTLMem, CanHaveMasterTLMemPort}
 import chipyard.iobinders.{HasIOBinders}
 import chipyard.harness.{ApplyHarnessBinders}
 
@@ -57,15 +57,29 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
   }
 // DOC include end: ClockOverlay
 
+  /*** I2C ***/
+
+// DOC include start: I2COverlay
+
+  // All I2C goes to the VC709 dedicated I2C
+  val io_i2c_bb_s = dp(I2COverlayKey).zipWithIndex.map {
+    case (i2cOverlay, i) => 
+      val io_i2c_bb = BundleBridgeSource(() => (new I2CPort()))
+      i2cOverlay.place(I2CDesignInput(io_i2c_bb))
+      io_i2c_bb
+  }
+  
+// DOC include end: I2COverlay
+
   /*** UART ***/
 
 // DOC include start: UartOverlay
 
   // All UART goes to the VC709 dedicated UART
   val io_uart_bb_s = (dp(UARTOverlayKey) zip dp(PeripheryUARTKey)).map {
-    case (uartOverlayKey, peripheryUARTKey) => 
-      val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(peripheryUARTKey)))
-      uartOverlayKey.place(UARTDesignInput(io_uart_bb))
+    case (uartOverlay, uartParams) => 
+      val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(uartParams)))
+      uartOverlay.place(UARTDesignInput(io_uart_bb))
       io_uart_bb
   }
   
@@ -79,8 +93,8 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
   var ddrDesignInput = DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)
   val ddrClients = topDesign match { case td: ChipTop =>
     td.lazySystem match { case lsys: CanHaveMasterTLMemPort => 
-      (dp(DDROverlayKey) zip lsys.memTLNode.edges.in).map { case (ddrOverlayKey, edge) =>
-        val ddtNode = ddrOverlayKey.place(ddrDesignInput).overlayOutput.ddr
+      (dp(DDROverlayKey) zip lsys.memTLNode.edges.in).map { case (ddrOverlay, edge) =>
+        val ddtNode = ddrOverlay.place(ddrDesignInput).overlayOutput.ddr
         val ddrClient = TLClientNode(Seq(edge.master))
         ddtNode := ddrClient
         ddrClient

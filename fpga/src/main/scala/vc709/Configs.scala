@@ -9,20 +9,18 @@ import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
 import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet}
 import freechips.rocketchip.tile.{XLen}
 
-import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
+import sifive.blocks.devices.i2c.{PeripheryI2CKey, I2CParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 
 import sifive.fpgashells.shell.{DesignKey}
-import sifive.fpgashells.shell.xilinx.{VC709DDR3Size}
 
 import testchipip.{SerialTLKey}
 
 import chipyard.{BuildTop, BuildSystem, ExtTLMem} 
-
 import chipyard.fpga.vcu118.{WithUARTIOPassthrough, WithTLIOPassthrough, WithFPGAFrequency}
 
-
 class WithDefaultPeripherals extends Config((site, here, up) => {
+  case PeripheryI2CKey => List(I2CParams(address = BigInt(0x60000000L)))
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
 })
 
@@ -42,14 +40,17 @@ class WithSystemModifications extends Config((site, here, up) => {
 
 // DOC include start: AbstractVC709 and Rocket
 class WithVC709Tweaks extends Config(
+  new WithI2C ++
   new WithUART ++
   new WithDDRMem ++
+  new WithI2CIOPassthrough ++
   new WithUARTIOPassthrough ++
   new WithTLIOPassthrough ++
   new WithDefaultPeripherals ++
   new WithSystemModifications ++ // setup busses, use uart bootrom, setup ext. mem. size
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new chipyard.config.WithNoDebug ++ // remove debug module
+  new chipyard.example.WithGCD(useAXI4=false, useBlackBox=false) ++          // Use GCD Chisel, connect Tilelink
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1))
 

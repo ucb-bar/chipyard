@@ -14,7 +14,7 @@ $ export BoomVC709Config=chipyard.fpga.vc709.VC709FPGATestHarness.BoomVC709Confi
 Build Linux kernel
 ```
 $ make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- menuconfig
-$ make j8 ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu-
+$ make -j8 ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu-
 ```
 Convert *.dts files into *.dtb format.
 ```
@@ -42,4 +42,9 @@ Download `fw_payload.bin` to the board, then start up the kernel.
 ```
 $ sudo ./serial /dev/ttyUSB2 0x80000000 ../opensbi/build/platform/generic/firmware/fw_payload.bin
 $ sudo ./serial /dev/ttyUSB2
+```
+
+```
+$ make PLATFORM=generic CROSS_COMPILE=riscv64-unknown-linux-gnu- FW_PAYLOAD_PATH=../linux/arch/riscv/boot/Image install
+$ qemu-system-riscv64 -M virt -m 256M -nographic -bios opensbi/build/platform/generic/firmware/fw_jump.bin -kernel ./linux/arch/riscv/boot/Image -drive file=./rootfs.img,format=raw,id=hd0  -device virtio-blk-device,drive=hd0 -append "root=/dev/vda rw console=ttyS0"
 ```
