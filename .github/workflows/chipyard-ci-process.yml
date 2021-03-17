@@ -3,29 +3,33 @@ name: chipyard-ci-process
 on: [push]
 
 jobs:
-  commit-on-master-check:
-    name: commit-on-master-check
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-image:1.0.1
-      options: --user riscvuser --entrypoint /bin/bash
-    env:
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
-    steps:
-      - name: Hello
-        run: echo =========CHIPYARD CI STARTED=================
-      - name: fix permissions 1
-        run: sudo chown -R riscvuser .
-      - name: Basics
-        run: whoami && echo pwd `pwd` && ls -la /github ~riscvuser
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: fix permissions 2
-        run: sudo chown -R riscvuser .
-      - name: Banner
-        run: printf "===========Create Hashes\ncwd `pwd`\nuser `whoami`\n`echo homedir ~`\nHOME $HOME\n============="
-      - name: Checkout commits of each submodule
-        run: .github/scripts/check-commit.sh
+#  commit-on-master-check:
+#    name: commit-on-master-check
+#    runs-on: ubuntu-latest
+#    container:
+#      image: ucbbar/chipyard-image:1.0.1
+#      options: --user riscvuser --entrypoint /bin/bash
+#    env:
+#      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+#    steps:
+#      - name: Hello
+#        run: echo =========CHIPYARD CI STARTED=================
+#      - name: Dump GitHub context
+#        env:
+#         GITHUB_CONTEXT: ${{ toJSON(github) }}
+#        run: echo "$GITHUB_CONTEXT"
+#      - name: fix permissions 1
+#        run: sudo chown -R riscvuser .
+#      - name: Basics
+#        run: whoami && echo pwd `pwd` && ls -la /github ~riscvuser
+#      - name: Checkout
+#        uses: actions/checkout@v2
+#      - name: fix permissions 2
+#        run: sudo chown -R riscvuser .
+#      - name: Banner
+#        run: printf "===========Create Hashes\ncwd `pwd`\nuser `whoami`\n`echo homedir ~`\nHOME $HOME\n============="
+#      - name: Checkout commits of each submodule
+#        run: .github/scripts/check-commit.sh
 
 #  tutorial-set-up-check:
 #    name: tutorial-set-up-check
@@ -61,35 +65,44 @@ jobs:
 #            sudo pip3 install -r docs/requirements.txt
 #            make -C docs html
 #
-#  install-riscv-toolchain:
-#    name: install-riscv-toolchain
-#    runs-on: ubuntu-latest
-#    container:
-#      image: ucbbar/chipyard-image:1.0.1
-#      options: --user riscvuser --entrypoint /bin/bash
-#    env:
-#      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
-#      TOOLS_CACHE_VERSION: "v6"
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: fix permissions
-#        run: sudo chown -R riscvuser .
-#      - name: Create hash of toolchains
-#        run: .github/scripts/create-hash.sh
-#      - name: Check version
-#        run: echo ======CACHE_VERSION===${{ env.TOOLS_CACHE_VERSION }}
-#      - name: Cache toolchains
-#        uses: actions/cache@v2
-#        env:
-#          cache_name: tool-chain-caches
-#        with:
-#          path: "/home/riscvuser/riscv-tools"
-#          key: riscv-tools-installed-${{ env.TOOLS_CACHE_VERSION }}
-#          restore: |
-#            riscv-tools-installed-${{ env.TOOLS_CACHE_VERSION }}
-#            riscv-tools-installed-
-#      - name: building
-#        run: .github/scripts/build-toolchains.sh riscv-tools
+  install-riscv-toolchain:
+    name: install-riscv-toolchain
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-image:1.0.1
+      options: --user riscvuser --entrypoint /bin/bash
+    env:
+      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+      TOOLS_CACHE_VERSION: v6
+    steps:
+      - name: Hello
+        run: echo =========CHIPYARD CI STARTED=================
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: fix permissions 1
+        run: sudo chown -R riscvuser .
+      - name: Basics
+        run: whoami && echo pwd `pwd` && ls -la /github ~riscvuser
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: fix permissions 2
+        run: sudo chown -R riscvuser .
+      - name: Banner
+        run: echo ======CACHE_VERSION===${{ env.TOOLS_CACHE_VERSION }}
+      - name: Set cache dir if not present
+        run: mkdir -p "/home/riscvuser/riscv-tools"
+      - name: Cache Toolchains
+        uses: actions/cache@v2
+        with:
+          path: "/home/riscvuser/riscv-tools"
+          key: riscv-tools-installed-${{ env.TOOLS_CACHE_VERSION }}
+          restore: |
+            riscv-tools-installed-${{ env.TOOLS_CACHE_VERSION }}
+            riscv-tools-installed-
+      - name: building
+        run: .github/scripts/build-toolchains.sh riscv-tools
 #
 #  build-cache:
 #    name: build-cache
