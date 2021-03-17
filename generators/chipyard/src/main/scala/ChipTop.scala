@@ -16,7 +16,7 @@ import barstools.iocell.chisel._
 case object BuildSystem extends Field[Parameters => LazyModule]((p: Parameters) => new DigitalTop()(p))
 
 trait HasReferenceClockFreq {
-  var refClockFreqMHz: Option[Double] = None
+  def refClockFreqMHz: Double
 }
 
 /**
@@ -35,7 +35,8 @@ class ChipTop(implicit p: Parameters) extends LazyModule with BindingScope
   val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
 
   // Generate Clocks and Reset
-  p(ClockingSchemeKey)(this)
+  val mvRefClkFreq = p(ClockingSchemeKey)(this)
+  def refClockFreqMHz: Double = mvRefClkFreq.getWrappedValue
 
   // NOTE: Making this a LazyRawModule is moderately dangerous, as anonymous children
   // of ChipTop (ex: ClockGroup) do not receive clock or reset.

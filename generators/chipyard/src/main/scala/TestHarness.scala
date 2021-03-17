@@ -91,7 +91,7 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
   io.success := false.B
 
   val freqMHz = lazyDut match {
-    case d: HasReferenceClockFreq => d.refClockFreqMHz.getOrElse(p(DefaultClockFrequencyKey))
+    case d: HasReferenceClockFreq => d.refClockFreqMHz
     case _ => p(DefaultClockFrequencyKey)
   }
   val refClkBundle = p(HarnessClockInstantiatorKey).requestClockBundle("buildtop_reference_clock", freqMHz * (1000 * 1000))

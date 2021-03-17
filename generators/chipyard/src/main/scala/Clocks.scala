@@ -7,7 +7,7 @@ import scala.collection.mutable.{ArrayBuffer}
 import freechips.rocketchip.prci._
 import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey, InstantiatesTiles}
 import freechips.rocketchip.config.{Parameters, Field, Config}
-import freechips.rocketchip.diplomacy.{OutwardNodeHandle, InModuleBody, LazyModule}
+import freechips.rocketchip.diplomacy.{ModuleValue, OutwardNodeHandle, InModuleBody, LazyModule}
 import freechips.rocketchip.util.{ResetCatchAndSync}
 
 import barstools.iocell.chisel._
@@ -38,7 +38,7 @@ object GenerateReset {
 }
 
 
-case object ClockingSchemeKey extends Field[ChipTop => Unit](ClockingSchemeGenerators.dividerOnlyClockGenerator)
+case object ClockingSchemeKey extends Field[ChipTop => ModuleValue[Double]](ClockingSchemeGenerators.dividerOnlyClockGenerator)
 /*
   * This is a Seq of assignment functions, that accept a clock name and return an optional frequency.
   * Functions that appear later in this seq have higher precedence that earlier ones.
@@ -59,7 +59,7 @@ class ClockNameContainsAssignment(name: String, fMHz: Double) extends Config((si
 })
 
 object ClockingSchemeGenerators {
-  val dividerOnlyClockGenerator: ChipTop => Unit = { chiptop =>
+  val dividerOnlyClockGenerator: ChipTop => ModuleValue[Double] = { chiptop =>
     implicit val p = chiptop.p
 
     // Requires existence of undriven asyncClockGroups in subsystem
@@ -100,9 +100,6 @@ object ClockingSchemeGenerators {
       val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock")
       chiptop.iocells ++= clockIOCell
 
-      // set the reference clock used
-      chiptop.refClockFreqMHz = Some(dividerOnlyClkGenerator.module.referenceFreq)
-
       referenceClockSource.out.unzip._1.map { o =>
         o.clock := clock_wire
         o.reset := reset_wire
@@ -111,6 +108,9 @@ object ClockingSchemeGenerators {
       chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
         clock_io := th.harnessClock
         Nil })
+
+      // return the reference frequency
+      dividerOnlyClkGenerator.module.referenceFreq
     }
   }
 }

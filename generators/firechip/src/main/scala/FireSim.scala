@@ -194,14 +194,14 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
         RationalClock(sinkP.name.get, 1, division)
       }
 
-      // Set the reference frequency used
-      chiptop.refClockFreqMHz = Some(pllConfig.referenceFreqMHz)
-
       chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
         reset := th.harnessReset
         input_clocks := p(ClockBridgeInstantiatorKey)
           .requestClockRecordMap(rationalClockSpecs.toSeq, p(FireSimBaseClockNameKey), pllConfig.referenceFreqMHz * (1000 * 1000))
         Nil })
+
+      // return the reference frequency
+      pllConfig.referenceFreqMHz
     }
   }
 })
@@ -230,7 +230,7 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSigna
     val module = Module(lazyModule.module)
 
     btFreqMHz = Some(lazyModule match {
-      case d: HasReferenceClockFreq => d.refClockFreqMHz.getOrElse(p(DefaultClockFrequencyKey))
+      case d: HasReferenceClockFreq => d.refClockFreqMHz
       case _ => p(DefaultClockFrequencyKey)
     })
 
