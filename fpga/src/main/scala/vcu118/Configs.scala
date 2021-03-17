@@ -52,7 +52,7 @@ class WithVCU118Tweaks extends Config(
   new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
   new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(2))
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(1))
 
 class RocketVCU118Config extends Config(
   new WithVCU118Tweaks ++

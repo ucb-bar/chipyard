@@ -18,8 +18,9 @@ import chipyard.harness.{OverrideHarnessBinder}
 class WithI2C extends OverrideHarnessBinder({
   (system: HasPeripheryI2CModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[I2CPort]) => {
     th match { case vc709th: VC709FPGATestHarnessImp => {
-      val io_i2c_bb_s = vc709th.vc709Outer.io_i2c_bb_s
-      (io_i2c_bb_s zip ports).map { case (io_i2c_bb, port) => io_i2c_bb.bundle <> port }
+      require(ports.size == 1)
+
+      vc709th.vc709Outer.io_i2c_bb.bundle <> ports.head
     } }
   }
 })
@@ -28,8 +29,9 @@ class WithI2C extends OverrideHarnessBinder({
 class WithUART extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[UARTPortIO]) => {
     th match { case vc709th: VC709FPGATestHarnessImp => {
-      val io_uart_bb_s = vc709th.vc709Outer.io_uart_bb_s
-      (io_uart_bb_s zip ports).map { case (io_uart_bb, port) => io_uart_bb.bundle <> port }
+      require(ports.size == 1)
+
+      vc709th.vc709Outer.io_uart_bb.bundle <> ports.head
     } }
   }
 })

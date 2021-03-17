@@ -20,8 +20,8 @@ import chipyard.{BuildTop, BuildSystem, ExtTLMem}
 import chipyard.fpga.vcu118.{WithUARTIOPassthrough, WithTLIOPassthrough, WithFPGAFrequency}
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
-  case PeripheryI2CKey => List(I2CParams(address = BigInt(0x60000000L)))
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
+  case PeripheryI2CKey => List(I2CParams(address = BigInt(0x64005000L)))
 })
 
 class WithSystemModifications extends Config((site, here, up) => {

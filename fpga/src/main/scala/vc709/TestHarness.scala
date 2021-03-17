@@ -59,37 +59,24 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
 
   /*** I2C ***/
 
-// DOC include start: I2COverlay
-
-  // All I2C goes to the VC709 dedicated I2C
-  val io_i2c_bb_s = dp(I2COverlayKey).zipWithIndex.map {
-    case (i2cOverlay, i) => 
-      val io_i2c_bb = BundleBridgeSource(() => (new I2CPort()))
-      i2cOverlay.place(I2CDesignInput(io_i2c_bb))
-      io_i2c_bb
-  }
+  // 1st I2C goes to the VC709 dedicated I2C
+  val io_i2c_bb = BundleBridgeSource(() => (new I2CPort))
+  dp(I2COverlayKey).head.place(I2CDesignInput(io_i2c_bb))
   
-// DOC include end: I2COverlay
-
   /*** UART ***/
 
 // DOC include start: UartOverlay
+  // 1st UART goes to the VC709 dedicated UART
 
-  // All UART goes to the VC709 dedicated UART
-  val io_uart_bb_s = (dp(UARTOverlayKey) zip dp(PeripheryUARTKey)).map {
-    case (uartOverlay, uartParams) => 
-      val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(uartParams)))
-      uartOverlay.place(UARTDesignInput(io_uart_bb))
-      io_uart_bb
-  }
-  
+  val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(dp(PeripheryUARTKey).head)))
+  dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
 // DOC include end: UartOverlay
 
   /*** DDR ***/
 
 // DOC include start: DDR3Overlay
-
   // All DDR3s use the same clock
+  
   var ddrDesignInput = DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)
   val ddrClients = topDesign match { case td: ChipTop =>
     td.lazySystem match { case lsys: CanHaveMasterTLMemPort => 
@@ -101,7 +88,6 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
       }
     }
   }
-
 // DOC include end: DDR3Overlay
 
   // module implementation

@@ -22,8 +22,6 @@ import sifive.fpgashells.clocks._
 // DOC include start: VC709DigitalTop
 class VC709DigitalTop()(implicit p: Parameters) extends DigitalTop
   with sifive.blocks.devices.i2c.HasPeripheryI2C // Enables optionally adding the sifive I2C
-  with freechips.rocketchip.subsystem.CanHaveMasterTLMMIOPort
-  with freechips.rocketchip.subsystem.CanHaveSlaveTLPort
 {
   def dp = p
 
