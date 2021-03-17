@@ -76,7 +76,7 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
 
 // DOC include start: DDR3Overlay
   // All DDR3s use the same clock
-  
+
   var ddrDesignInput = DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)
   val ddrClients = topDesign match { case td: ChipTop =>
     td.lazySystem match { case lsys: CanHaveMasterTLMemPort => 
