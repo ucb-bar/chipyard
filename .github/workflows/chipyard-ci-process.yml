@@ -94,15 +94,19 @@ jobs:
       - name: Set cache dir if not present
         run: mkdir -p "/home/riscvuser/riscv-tools"
       - name: Cache Toolchains
+        id: cache-riscv-tools
         uses: actions/cache@v2
         with:
           path: "/home/riscvuser/riscv-tools"
           key: riscv-tools-installed-${{ env.TOOLS_CACHE_VERSION }}
-          restore: |
+          restore-keys: |
             riscv-tools-installed-${{ env.TOOLS_CACHE_VERSION }}
             riscv-tools-installed-
       - name: building
+        if: steps.cache-riscv-tools.outputs.cache-hit != 'true'
         run: .github/scripts/build-toolchains.sh riscv-tools
+      - name: Check riscv-tools
+        run: ls -ltr /home/riscvuser/riscv-tools
 #
 #  build-cache:
 #    name: build-cache
