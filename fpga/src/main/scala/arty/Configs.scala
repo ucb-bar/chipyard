@@ -10,6 +10,7 @@ import freechips.rocketchip.system._
 import freechips.rocketchip.tile._
 
 import sifive.blocks.devices.uart._
+import sifive.blocks.devices.spi._
 
 import testchipip.{SerialTLKey}
 
@@ -25,12 +26,19 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
     idcodeManufId = 0x489,
     debugIdleCycles = 5)
   case SerialTLKey => None // remove serialized tl port
+  case PeripherySPIFlashKey => List(
+    SPIFlashParams(
+      fAddress = 0x20000000,
+      rAddress = 0x10014000,
+      defaultSampleDel = 3))
 })
 // DOC include start: AbstractArty and Rocket
 class WithArtyTweaks extends Config(
   new WithArtyJTAGHarnessBinder ++
   new WithArtyUARTHarnessBinder ++
   new WithArtyResetHarnessBinder ++
+  new WithArtySPIFlashHarnessBinder ++
+  new WithSPIFlashIOPassthrough ++
   new WithDebugResetPassthrough ++
   new WithDefaultPeripherals ++
   new freechips.rocketchip.subsystem.WithNBreakpoints(2))

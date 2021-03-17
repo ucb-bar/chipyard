@@ -2,12 +2,16 @@ package chipyard.fpga.arty
 
 import chisel3._
 
+import freechips.rocketchip.config.{Parameters}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem._
 
+import chipyard.iobinders.GetSystemParameters
+
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.jtag._
+import sifive.blocks.devices.spi._
 import sifive.blocks.devices.pinctrl._
 
 import sifive.fpgashells.ip.xilinx.{IBUFG, IOBUF, PULLUP, PowerOnResetFPGAOnly}
@@ -32,7 +36,7 @@ class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
   (system: HasPeripheryDebug, th: ArtyFPGATestHarness, ports: Seq[Data]) => {
     ports.map {
       case j: JTAGIO =>
-        withClockAndReset(th.harnessClock, th.hReset) {
+        withClockAndReset(th.harnessClock, th.harnessReset) {
           val io_jtag = Wire(new JTAGPins(() => new BasePin(), false)).suggestName("jtag")
 
           JTAGPinsFromPort(io_jtag, j)
@@ -63,9 +67,36 @@ class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
 
 class WithArtyUARTHarnessBinder extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: ArtyFPGATestHarness, ports: Seq[UARTPortIO]) => {
-    withClockAndReset(th.clock_32MHz, th.ck_rst) {
+    withClockAndReset(th.harnessClock, th.harnessReset) {
       IOBUF(th.uart_txd_in,  ports.head.txd)
       ports.head.rxd := IOBUF(th.uart_rxd_out)
+    }
+  }
+})
+
+class WithArtySPIFlashHarnessBinder extends OverrideHarnessBinder({
+  (system: HasPeripherySPIFlashModuleImp, th: ArtyFPGATestHarness, ports: Seq[SPIPortIO]) => {
+    withClockAndReset(th.harnessClock, th.harnessReset) {
+      implicit val p: Parameters = GetSystemParameters(system)
+
+      val io_qspi = Wire(new SPIPins(() => new BasePin(), p(PeripherySPIFlashKey)(0))).suggestName("qspi")
+
+      SPIPinsFromPort(io_qspi, ports(0), clock = th.harnessClock, reset = th.hReset.asBool, syncStages = 3)
+
+      IOBUF(th.qspi_cs, io_qspi.cs(0))
+      IOBUF(th.qspi_sck, io_qspi.sck)
+      IOBUF(th.qspi_dq(0), io_qspi.dq(0))
+      IOBUF(th.qspi_dq(1), io_qspi.dq(1))
+      IOBUF(th.qspi_dq(2), io_qspi.dq(2))
+      IOBUF(th.qspi_dq(3), io_qspi.dq(3))
+
+      // ignore the po input
+      io_qspi.cs(0).i.po.map(_ := DontCare)
+      io_qspi.sck.i.po.map(_ := DontCare)
+      io_qspi.dq(0).i.po.map(_ := DontCare)
+      io_qspi.dq(1).i.po.map(_ := DontCare)
+      io_qspi.dq(2).i.po.map(_ := DontCare)
+      io_qspi.dq(3).i.po.map(_ := DontCare)
     }
   }
 })
