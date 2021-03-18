@@ -31,10 +31,14 @@ jobs:
           echo ===== df ========
           df -m
           echo ===== du . =========
-          du -s -m . /__w/chipyard/chipyard
+          df -m .
+          du -s -m .
+          echo ===== du /__w/chipyard/chipyard =========
+          df -m /__w/chipyard/chipyard
           du -s -m /__w/chipyard/chipyard
-          echo ===== du . =========
-          ls -ltr /__w/chipyard/chipyard
+          echo ===== du /home/riscvuser/riscv-tools =========
+          df -m  /home/riscvuser/riscv-tools
+          du -s -m /home/riscvuser/riscv-tools
           echo ========================
 
       - name: Banner
