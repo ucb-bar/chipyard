@@ -19,7 +19,7 @@ jobs:
         with:
           path: cache-dir
           key: cache-dir-${{ env.GITHUB_SHA }}
-          restore-keys: cache-dir-
+          restore-keys: cache-dir-${{ env.GITHUB_SHA }}
       - name: ls the repo
         run: ls -lt cache-dir
 
@@ -54,7 +54,7 @@ jobs:
         with:
           path: cache-dir
           key: cache-dir-${{ env.GITHUB_SHA }}
-          restore-keys: cache-dir-
+          restore-keys: cache-dir-${{ env.GITHUB_SHA }}
       - name: check fill
         run: ls -lt cache-dir
 
