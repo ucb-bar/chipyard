@@ -39,7 +39,7 @@ jobs:
       - name: fix permissions 1
         run: sudo chown -R riscvuser .
       - name: ls
-        run: cd /github/workspace/chipyard_repo && ls -ltr
+        run: cd /__w/chipyard/chipyard/chipyard_repo && ls -ltr
 
   uses-checkout2:
     name: uses-checkout2
@@ -54,7 +54,7 @@ jobs:
       - name: fix permissions 1
         run: sudo chown -R riscvuser .
       - name: ls
-        run: cd /github/workspace/chipyard_repo && ls -lta
+        run: /__w/chipyard/chipyard/chipyard_repo && ls -lta
 
 
 #  commit-on-master-check:
