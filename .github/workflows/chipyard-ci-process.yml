@@ -27,11 +27,17 @@ jobs:
       - name: fix permissions 2
         run: sudo chown -R riscvuser .
       - name: Check space
-        run: df -m && du -s -m .
+        run: |
+          echo = df ========
+          df -m
+          echo = du . /__w/chipyard/chipyard =========
+          du -s -m . /__w/chipyard/chipyard
+          echo ========================
+
       - name: Banner
         run: printf "===========Create Hashes\ncwd `pwd`\nuser `whoami`\n`echo homedir ~`\nHOME $HOME\n============="
-      - name: Checkout commits of each submodule
-        run: .github/scripts/check-commit.sh
+#      - name: Checkout commits of each submodule
+#        run: .github/scripts/check-commit.sh
 
 #  tutorial-set-up-check:
 #    name: tutorial-set-up-check
