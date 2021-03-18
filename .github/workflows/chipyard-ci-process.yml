@@ -21,10 +21,11 @@ jobs:
       - name: cache the repo
         uses: actions/cache@v2
         with:
-          path: /github/workspace/chipyard_repo
+          path: /__w/chipyard/chipyard/chipyard_repo
           key: current-repo-cache
           restore-keys: current-repo-cache
-
+      - name: ls the repo
+        run: cd /__w/chipyard/chipyard/chipyard_repo && ls -ltr
   uses-checkout1:
     name: uses-checkout1
     runs-on: ubuntu-latest
