@@ -33,12 +33,9 @@ jobs:
 #    env:
 #      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 #    steps:
-      - uses: actions/cache@v2
-        id: cache-111
-        with:
-          path: cache-dir
-          key: cache-dir-${{ env.GITHUB_SHA }}
-          restore-keys: cache-dir-
+      - name: fill file
+        if: steps.cache-111.outputs.cache-hit != 'true'
+        run: touch cache-dir/cache-me
       - name: check fill
         run: ls -lt cache-dir
 
@@ -54,8 +51,6 @@ jobs:
     steps:
       - name: check fill
         run: ls -lt cache-dir
-      - name: asdf
-        run: cd /adsfasdf
 
 #  commit-on-master-check:
 #    name: commit-on-master-check
