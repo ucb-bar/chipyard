@@ -28,6 +28,7 @@ jobs:
         run: sudo chown -R riscvuser .
       - name: Check space
         run: |
+          mkdir -p "/home/riscvuser/riscv-tools"
           echo ===== df ========
           df -m
           echo ===== du . =========
