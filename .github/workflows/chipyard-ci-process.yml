@@ -54,6 +54,8 @@ jobs:
     steps:
       - name: check fill
         run: ls -lt cache-dir
+      - name: asdf
+        run: cd /adsfasdf
 
 #  commit-on-master-check:
 #    name: commit-on-master-check
