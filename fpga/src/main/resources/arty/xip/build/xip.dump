@@ -1,0 +1,158 @@
+
+/home/dunn/chipyard-dev/fpga/src/main/resources/arty/xip//build/xip.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+00010054 <_start>:
+
+  .section .text.init
+  .option norvc
+  .globl _start
+_start:
+  csrr a0, mhartid
+   10054:	f1402573          	csrr	a0,mhartid
+  la a1, dtb
+   10058:	00000597          	auipc	a1,0x0
+   1005c:	01058593          	addi	a1,a1,16 # 10068 <_start+0x14>
+  li t0, XIP_TARGET_ADDR
+   10060:	204002b7          	lui	t0,0x20400
+  jr t0
+   10064:	00028067          	jr	t0 # 20400000 <__global_pointer$+0x203ee798>
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+   0:	2841                	jal	90 <_start-0xffc4>
+   2:	0000                	unimp
+   4:	7200                	flw	fs0,32(a2)
+   6:	7369                	lui	t1,0xffffa
+   8:	01007663          	bgeu	zero,a6,14 <_start-0x10040>
+   c:	001e                	c.slli	zero,0x7
+   e:	0000                	unimp
+  10:	7205                	lui	tp,0xfffe1
+  12:	3376                	fld	ft6,376(sp)
+  14:	6932                	flw	fs2,12(sp)
+  16:	7032                	flw	ft0,44(sp)
+  18:	5f30                	lw	a2,120(a4)
+  1a:	326d                	jal	fffff9c4 <__global_pointer$+0xfffee15c>
+  1c:	3070                	fld	fa2,224(s0)
+  1e:	615f 7032 5f30      	0x5f307032615f
+  24:	30703263          	0x30703263
+	...
+
+Disassembly of section .debug_aranges:
+
+00000000 <.debug_aranges>:
+   0:	001c                	0x1c
+   2:	0000                	unimp
+   4:	0002                	c.slli64	zero
+   6:	0000                	unimp
+   8:	0000                	unimp
+   a:	0004                	0x4
+   c:	0000                	unimp
+   e:	0000                	unimp
+  10:	0054                	addi	a3,sp,4
+  12:	0001                	nop
+  14:	0014                	0x14
+	...
+
+Disassembly of section .debug_info:
+
+00000000 <.debug_info>:
+   0:	0022                	c.slli	zero,0x8
+   2:	0000                	unimp
+   4:	0002                	c.slli64	zero
+   6:	0000                	unimp
+   8:	0000                	unimp
+   a:	0104                	addi	s1,sp,128
+   c:	0000                	unimp
+   e:	0000                	unimp
+  10:	0054                	addi	a3,sp,4
+  12:	0001                	nop
+  14:	0068                	addi	a0,sp,12
+  16:	0001                	nop
+  18:	0000                	unimp
+  1a:	0000                	unimp
+  1c:	0006                	c.slli	zero,0x1
+  1e:	0000                	unimp
+  20:	0000003f  	0x80010000003f
+
+Disassembly of section .debug_abbrev:
+
+00000000 <.debug_abbrev>:
+   0:	1101                	addi	sp,sp,-32
+   2:	1000                	addi	s0,sp,32
+   4:	1106                	slli	sp,sp,0x21
+   6:	1201                	addi	tp,tp,-32
+   8:	0301                	addi	t1,t1,0
+   a:	1b0e                	slli	s6,s6,0x23
+   c:	250e                	fld	fa0,192(sp)
+   e:	130e                	slli	t1,t1,0x23
+  10:	0005                	c.nop	1
+	...
+
+Disassembly of section .debug_line:
+
+00000000 <.debug_line>:
+   0:	0042                	c.slli	zero,0x10
+   2:	0000                	unimp
+   4:	001c0003          	lb	zero,1(s8)
+   8:	0000                	unimp
+   a:	0101                	addi	sp,sp,0
+   c:	000d0efb          	0xd0efb
+  10:	0101                	addi	sp,sp,0
+  12:	0101                	addi	sp,sp,0
+  14:	0000                	unimp
+  16:	0100                	addi	s0,sp,128
+  18:	0000                	unimp
+  1a:	0001                	nop
+  1c:	6978                	flw	fa4,84(a0)
+  1e:	2e70                	fld	fa2,216(a2)
+  20:	00000053          	fadd.s	ft0,ft0,ft0,rne
+  24:	0000                	unimp
+  26:	0500                	addi	s0,sp,640
+  28:	5402                	lw	s0,32(sp)
+  2a:	0100                	addi	s0,sp,128
+  2c:	1a00                	addi	s0,sp,304
+  2e:	04090103          	lb	sp,64(s2)
+  32:	0100                	addi	s0,sp,128
+  34:	08090103          	lb	sp,128(s2)
+  38:	0100                	addi	s0,sp,128
+  3a:	04090103          	lb	sp,64(s2)
+  3e:	0100                	addi	s0,sp,128
+  40:	0409                	addi	s0,s0,2
+  42:	0000                	unimp
+  44:	0101                	addi	sp,sp,0
+
+Disassembly of section .debug_str:
+
+00000000 <.debug_str>:
+   0:	6978                	flw	fa4,84(a0)
+   2:	2e70                	fld	fa2,216(a2)
+   4:	682f0053          	0x682f0053
+   8:	2f656d6f          	jal	s10,562fe <__global_pointer$+0x44a96>
+   c:	7564                	flw	fs1,108(a0)
+   e:	6e6e                	flw	ft8,216(sp)
+  10:	6968632f          	0x6968632f
+  14:	7970                	flw	fa2,116(a0)
+  16:	7261                	lui	tp,0xffff8
+  18:	2d64                	fld	fs1,216(a0)
+  1a:	6564                	flw	fs1,76(a0)
+  1c:	2f76                	fld	ft10,344(sp)
+  1e:	7066                	flw	ft0,120(sp)
+  20:	732f6167          	0x732f6167
+  24:	6372                	flw	ft6,28(sp)
+  26:	69616d2f          	0x69616d2f
+  2a:	2f6e                	fld	ft10,216(sp)
+  2c:	6572                	flw	fa0,28(sp)
+  2e:	72756f73          	csrrsi	t5,0x727,10
+  32:	2f736563          	bltu	t1,s7,31c <_start-0xfd38>
+  36:	7261                	lui	tp,0xffff8
+  38:	7974                	flw	fa3,116(a0)
+  3a:	7069782f          	0x7069782f
+  3e:	4700                	lw	s0,8(a4)
+  40:	554e                	lw	a0,240(sp)
+  42:	4120                	lw	s0,64(a0)
+  44:	2e322053          	0x2e322053
+  48:	          	snez	tp,zero
