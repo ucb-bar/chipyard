@@ -28,10 +28,13 @@ jobs:
         run: sudo chown -R riscvuser .
       - name: Check space
         run: |
-          echo = df ========
+          echo ===== df ========
           df -m
-          echo = du . /__w/chipyard/chipyard =========
+          echo ===== du . =========
           du -s -m . /__w/chipyard/chipyard
+          du -s -m /__w/chipyard/chipyard
+          echo ===== du . =========
+          ls -ltr /__w/chipyard/chipyard
           echo ========================
 
       - name: Banner
