@@ -43,7 +43,7 @@ class HarnessClockInstantiator {
   // connect all clock wires specified to a divider only PLL
   def instantiateHarnessDividerPLL(refClock: ClockBundle): Unit = {
     val sinks = _clockMap.map({ case (name, (freq, bundle)) =>
-      ClockSinkParameters(take=Some(ClockParameters(freqMHz=freq/1000000)),name=Some(name))
+      ClockSinkParameters(take=Some(ClockParameters(freqMHz=freq / (1000 * 1000))), name=Some(name))
     }).toSeq
 
     val pllConfig = new SimplePllConfiguration("harnessDividerOnlyClockGenerator", sinks)
