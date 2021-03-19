@@ -14,6 +14,7 @@ import barstools.iocell.chisel._
 import testchipip.{TLTileResetCtrl}
 
 import chipyard.clocking._
+import chipyard.iobinders._
 
 /**
  * A simple reset implementation that punches out reset ports
@@ -25,7 +26,7 @@ object GenerateReset {
     implicit val p = chiptop.p
     // this needs directionality so generateIOFromSignal works
     val async_reset_wire = Wire(Input(AsyncReset()))
-    val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(async_reset_wire, "reset",
+    val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(async_reset_wire, "reset", p(IOCellKey),
       abstractResetAsAsync = true)
 
     chiptop.iocells ++= resetIOCell
@@ -70,9 +71,10 @@ object ClockingSchemeGenerators {
 
     // Add a control register for each tile's reset
     val resetSetter = chiptop.lazySystem match {
-      case sys: BaseSubsystem with InstantiatesTiles => TLTileResetCtrl(sys)
-      case _ => ClockGroupEphemeralNode()
+      case sys: BaseSubsystem with InstantiatesTiles => Some(TLTileResetCtrl(sys))
+      case _ => None
     }
+    val resetSetterResetProvider = resetSetter.map(_.tileResetProviderNode).getOrElse(ClockGroupEphemeralNode())
 
     val aggregator = LazyModule(new ClockGroupAggregator("allClocks")).node
     // provides the implicit clock to the system
@@ -81,7 +83,6 @@ object ClockingSchemeGenerators {
       := aggregator)
     // provides the system clock (ex. the bus clocks)
     (systemAsyncClockGroup
-      :*= resetSetter
       :*= ClockGroupNamePrefixer()
       :*= aggregator)
 
@@ -91,17 +92,28 @@ object ClockingSchemeGenerators {
     (aggregator
       := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
       := ClockGroupResetSynchronizer()
+      := resetSetterResetProvider
       := dividerOnlyClkGenerator.node
       := referenceClockSource)
+
+    val asyncResetBroadcast = FixedClockBroadcast(None)
+    resetSetter.foreach(_.asyncResetSinkNode := asyncResetBroadcast)
+    val asyncResetSource = ClockSourceNode(Seq(ClockSourceParameters()))
+    asyncResetBroadcast := asyncResetSource
 
     InModuleBody {
       val clock_wire = Wire(Input(Clock()))
       val reset_wire = GenerateReset(chiptop, clock_wire)
-      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock")
+      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
       chiptop.iocells ++= clockIOCell
 
       referenceClockSource.out.unzip._1.map { o =>
         o.clock := clock_wire
+        o.reset := reset_wire
+      }
+
+      asyncResetSource.out.unzip._1.map { o =>
+        o.clock := false.B.asClock // async reset broadcast network does not provide a clock
         o.reset := reset_wire
       }
 

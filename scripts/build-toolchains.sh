@@ -21,6 +21,7 @@ usage() {
     echo "   --prefix PREFIX : Install destination. If unset, defaults to $(pwd)/riscv-tools-install"
     echo "                     or $(pwd)/esp-tools-install"
     echo "   --ignore-qemu   : Ignore installing QEMU"
+    echo "   --arch -a       : Architecture (e.g., rv64gc)"
     echo "   --help -h       : Display this message"
     exit "$1"
 }
@@ -37,6 +38,7 @@ TOOLCHAIN="riscv-tools"
 EC2FASTINSTALL="false"
 IGNOREQEMU=""
 RISCV=""
+ARCH=""
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
@@ -49,6 +51,9 @@ do
             RISCV=$(realpath $1) ;;
         --ignore-qemu )
             IGNOREQEMU="true" ;;
+	-a | --arch )
+	    shift
+	    ARCH=$1 ;;
         riscv-tools | esp-tools)
             TOOLCHAIN=$1 ;;
         ec2fast )
@@ -63,6 +68,15 @@ done
 if [ -z "$RISCV" ] ; then
       INSTALL_DIR="$TOOLCHAIN-install"
       RISCV="$(pwd)/$INSTALL_DIR"
+fi
+
+if [ -z "$ARCH" ] ; then
+    XLEN=64
+elif [[ "$ARCH" =~ ^rv(32|64)((i?m?a?f?d?|g?)c?)$ ]]; then
+    XLEN=${BASH_REMATCH[1]}
+else
+    error "invalid arch $ARCH"
+    usage 1
 fi
 
 echo "Installing toolchain to $RISCV"
@@ -118,7 +132,7 @@ else
     esac
 
     module_prepare riscv-gnu-toolchain qemu
-    module_build riscv-gnu-toolchain --prefix="${RISCV}" --with-cmodel=medany
+    module_build riscv-gnu-toolchain --prefix="${RISCV}" --with-cmodel=medany ${ARCH:+--with-arch=${ARCH}}
     echo '==>  Building GNU/Linux toolchain'
     module_make riscv-gnu-toolchain linux
 fi
@@ -129,15 +143,15 @@ echo '==>  Installing libfesvr static library'
 module_make riscv-isa-sim libfesvr.a
 cp -p "${SRCDIR}/riscv-isa-sim/build/libfesvr.a" "${RISCV}/lib/"
 
-CC= CXX= module_all riscv-pk --prefix="${RISCV}" --host=riscv64-unknown-elf
-module_all riscv-tests --prefix="${RISCV}/riscv64-unknown-elf"
+CC= CXX= module_all riscv-pk --prefix="${RISCV}" --host=riscv${XLEN}-unknown-elf
+module_all riscv-tests --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --with-xlen=${XLEN}
 
 # Common tools (not in any particular toolchain dir)
 
-CC= CXX= SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv64-unknown-elf" --host=riscv64-unknown-elf
+CC= CXX= SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --host=riscv${XLEN}-unknown-elf
 
 if [ -z "$IGNOREQEMU" ] ; then
-SRCDIR="$(pwd)/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv64-softmmu
+SRCDIR="$(pwd)/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv${XLEN}-softmmu
 fi
 
 # make Dromajo
