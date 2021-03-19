@@ -9,12 +9,14 @@ OBJDUMP=$(RISCV)/bin/riscv64-unknown-elf-objdump
 CFLAGS=-march=rv32imac -mabi=ilp32 -O2 -std=gnu11 -Wall -I. -nostartfiles -fno-common -g
 LFLAGS=-static -nostdlib
 
+PBUS_CLK ?= 1000000
+
 default: elf bin dump
 
 elf := $(BUILD_DIR)/xip.elf
 $(elf): xip.S
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) -DXIP_TARGET_ADDR=0x20400000 $(LFLAGS) -o $@ $<
+	$(CC) $(CFLAGS) -DTL_CLK="$(PBUS_CLK)UL" -DXIP_TARGET_ADDR=0x20400000 $(LFLAGS) -o $@ $<
 
 .PHONY: elf
 elf: $(elf)
