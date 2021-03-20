@@ -30,6 +30,28 @@ class MemClockVC709ShellPlacer(shell: VC709ShellBasicOverlays, val shellInput: C
     def place(designInput: ClockInputDesignInput) = new MemClockVC709PlacedOverlay(shell, valName.name, designInput, shellInput)
 }
 
+class GPIOVC709PlacedOverlay(val shell: VC709ShellBasicOverlays, name: String, val designInput: GPIODesignInput, val shellInput: GPIOShellInput, gpioNames: Seq[String])
+  extends GPIOXilinxPlacedOverlay(name, designInput, shellInput)
+{
+  shell { InModuleBody {
+      require(gpioNames.length == io.gpio.length)
+
+      val packagePinsWithIOStdWithPackageIOs = (gpioNames zip io.gpio).map { case (name, io) =>
+        val (pin, iostd) = GPIOs.pinMapping(name)
+        (pin, iostd, IOPin(io))
+      }
+
+      packagePinsWithIOStdWithPackageIOs foreach { case (pin, iostd, io) => {
+        shell.xdc.addPackagePin(io, pin)
+        shell.xdc.addIOStandard(io, iostd)
+      } }
+    } }
+}
+class GPIOVC709ShellPlacer(val shell: VC709ShellBasicOverlays, val shellInput: GPIOShellInput, gpioNames: Seq[String])(implicit val valName: ValName)
+  extends GPIOShellPlacer[VC709ShellBasicOverlays] {
+  def place(designInput: GPIODesignInput) = new GPIOVC709PlacedOverlay(shell, valName.name, designInput, shellInput, gpioNames)
+}
+
 case object VC709DDR3Size extends Field[BigInt](0x100000000L) // 4GB
 class DualDDR3VC709PlacedOverlay(val shell: VC709FPGATestHarness, name: String, val designInput: DDRDesignInput, val shellInput: DDRShellInput)
   extends DDR3XilinxPlacedOverlay(shell, name, designInput, shellInput)

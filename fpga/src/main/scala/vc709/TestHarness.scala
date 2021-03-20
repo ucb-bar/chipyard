@@ -29,6 +29,7 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
   def dp = designParameters
 
   // Order matters; ddr depends on sys_clock
+  val gpio = Overlay(GPIOOverlayKey, new GPIOVC709ShellPlacer(this, GPIOShellInput(), GPIOs.names))
   val mem_clock = Overlay(ClockInputOverlayKey, new MemClockVC709ShellPlacer(this, ClockInputShellInput()))
   // val ddr1      = Overlay(DDROverlayKey, new DDR3VC709ShellPlacer(this, DDRShellInput()))
 
@@ -71,6 +72,15 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
   val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(dp(PeripheryUARTKey).head)))
   dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
 // DOC include end: UartOverlay
+
+  /*** LEDs / GPIO ***/
+// DOC include start: GPIOOverlay
+  // 1st GPIO goes to the VC709 dedicated GPIO
+
+  val gpioParams = dp(PeripheryGPIOKey).head
+  val io_gpio_bb = BundleBridgeSource(() => (new GPIOPortIO(gpioParams)))
+  dp(GPIOOverlayKey).head.place(GPIODesignInput(gpioParams, io_gpio_bb))
+// DOC include end: GPIOOverlay
 
   /*** DDR ***/
 

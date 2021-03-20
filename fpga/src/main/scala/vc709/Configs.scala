@@ -3,30 +3,38 @@ package chipyard.fpga.vc709
 import sys.process._
 
 import freechips.rocketchip.config.{Config, Parameters}
-import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem}
-import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
-import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
+import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem, WithJtagDTM}
+import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG, JtagDTMKey, JtagDTMConfig}
+import freechips.rocketchip.devices.tilelink.{DevNullParams, BuiltInErrorDeviceParams, BootROMLocated}
 import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet}
 import freechips.rocketchip.tile.{XLen}
 
 import sifive.blocks.devices.i2c.{PeripheryI2CKey, I2CParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
+import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOParams}
 
 import sifive.fpgashells.shell.{DesignKey}
 
 import testchipip.{SerialTLKey}
 
-import chipyard.{BuildTop, BuildSystem, ExtTLMem} 
+import chipyard.{BuildTop, BuildSystem, ExtTLMem}
 import chipyard.fpga.vcu118.{WithUARTIOPassthrough, WithTLIOPassthrough, WithFPGAFrequency}
+import chipyard.fpga.vcu118.bringup.{WithI2CIOPassthrough, WithGPIOIOPassthrough}
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
+  case PeripheryGPIOKey => List(GPIOParams(address = BigInt(0x64002000L), width = 21))
   case PeripheryI2CKey => List(I2CParams(address = BigInt(0x64005000L)))
 })
 
 class WithSystemModifications extends Config((site, here, up) => {
   case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency = Some(site(FPGAFrequencyKey).toInt*1000000))
   case DTSTimebase => BigInt(1000000)
+  // case JtagDTMKey => new JtagDTMConfig (
+  //     idcodeVersion = 2,      // 1 was legacy (FE310-G000, Acai).
+  //     idcodePartNum = 0x000,  // Decided to simplify.
+  //     idcodeManufId = 0x489,  // As Assigned by JEDEC to SiFive. Only used in wrappers / test harnesses.
+  //     debugIdleCycles = 5)    // Reasonable guess for synchronization
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for uart boot
     val freqMHz = site(FPGAFrequencyKey).toInt * 1000000
@@ -40,17 +48,20 @@ class WithSystemModifications extends Config((site, here, up) => {
 
 // DOC include start: AbstractVC709 and Rocket
 class WithVC709Tweaks extends Config(
-  new WithI2C ++
   new WithUART ++
+  new WithI2C ++
+  new WithGPIO ++
   new WithDDRMem ++
-  new WithI2CIOPassthrough ++
   new WithUARTIOPassthrough ++
+  new WithI2CIOPassthrough ++
+  new WithGPIOIOPassthrough ++
   new WithTLIOPassthrough ++
   new WithDefaultPeripherals ++
   new WithSystemModifications ++ // setup busses, use uart bootrom, setup ext. mem. size
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new chipyard.config.WithNoDebug ++ // remove debug module
   new chipyard.example.WithGCD(useAXI4=false, useBlackBox=false) ++          // Use GCD Chisel, connect Tilelink
+  // new freechips.rocketchip.subsystem.WithJtagDTM ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1))
 
@@ -58,10 +69,14 @@ class WithVC709System extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => new VC709DigitalTop()(p)
 })
 
+class OctoRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithNBigCores(8) ++    // quad-core (4 RocketTiles)
+  new chipyard.config.AbstractConfig)
+
 class RocketVC709Config extends Config(
   new WithVC709System ++
   new WithVC709Tweaks ++
-  new chipyard.QuadRocketConfig)
+  new OctoRocketConfig)
 // DOC include end: AbstractVC709 and Rocket
 
 class QuadSmallBoomConfig extends Config(
