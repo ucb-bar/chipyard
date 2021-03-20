@@ -199,6 +199,13 @@ class WithExtInterruptIOCells extends OverrideIOBinder({
   }
 })
 
+// Rocketchip's JTAGIO exposes the oe signal, which doesn't go off-chip
+class JTAGChipIO extends Bundle {
+  val TCK = Input(Clock())
+  val TMS = Input(Bool())
+  val TDI = Input(Bool())
+  val TDO = Output(Bool())
+}
 
 class WithDebugIOCells extends OverrideLazyIOBinder({
   (system: HasPeripheryDebug) => {
@@ -238,7 +245,12 @@ class WithDebugIOCells extends OverrideLazyIOBinder({
         }
 
         val jtagTuple = debug.systemjtag.map { j =>
-          IOCell.generateIOFromSignal(j.jtag, "jtag", p(IOCellKey), abstractResetAsAsync = true)
+          val jtag_wire = Wire(new JTAGChipIO)
+          j.jtag.TCK := jtag_wire.TCK
+          j.jtag.TMS := jtag_wire.TMS
+          j.jtag.TDI := jtag_wire.TDI
+          jtag_wire.TDO := j.jtag.TDO.data
+          IOCell.generateIOFromSignal(jtag_wire, "jtag", p(IOCellKey), abstractResetAsAsync = true)
         }
 
         val apbTuple = debug.apb.map { a =>
