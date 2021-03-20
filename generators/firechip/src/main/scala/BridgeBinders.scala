@@ -72,8 +72,11 @@ class WithSerialBridge extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[ClockedIO[SerialIO]]) => {
     ports.map { port =>
       implicit val p = GetSystemParameters(system)
-      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, port, th.harnessReset)
-      SerialBridge(port.clock, ram.module.io.tsi_ser, p(ExtMem).map(_ => MainMemoryConsts.globalName))
+      val bits = SerialAdapter.asyncQueue(port, th.harnessClock, th.harnessReset)
+      val ram = withClockAndReset(th.harnessClock, th.harnessReset) {
+        SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.harnessReset)
+      }
+      SerialBridge(th.harnessClock, ram.module.io.tsi_ser, p(ExtMem).map(_ => MainMemoryConsts.globalName))
     }
     Nil
   }
@@ -122,12 +125,16 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
         axiClockBundle.clock := axiClock
         axiClockBundle.reset := ResetCatchAndSync(axiClock, th.harnessReset.asBool)
 
-        val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(
-          system.serdesser.get,
-          port,
-          axiClockBundle,
-          th.harnessReset)
-        SerialBridge(port.clock, harnessMultiClockAXIRAM.module.io.tsi_ser, Some(MainMemoryConsts.globalName))
+        val serial_bits = SerialAdapter.asyncQueue(port, th.harnessClock, th.harnessReset)
+
+        val harnessMultiClockAXIRAM = withClockAndReset(th.harnessClock, th.harnessReset) {
+          SerialAdapter.connectHarnessMultiClockAXIRAM(
+            system.serdesser.get,
+            port,
+            axiClockBundle,
+            th.harnessReset)
+        }
+        SerialBridge(th.harnessClock, harnessMultiClockAXIRAM.module.io.tsi_ser, Some(MainMemoryConsts.globalName))
 
         // connect SimAxiMem
         (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi4, edge) =>

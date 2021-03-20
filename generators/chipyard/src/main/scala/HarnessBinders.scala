@@ -152,24 +152,27 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
 
       ports.map({ port =>
 // DOC include start: HarnessClockInstantiatorEx
-        val memOverSerialTLClockBundle = p(HarnessClockInstantiatorKey).requestClockBundle("mem_over_serial_tl_clock", memFreq)
-        val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(
-          system.serdesser.get,
-          port,
-          memOverSerialTLClockBundle,
-          th.harnessReset)
+        withClockAndReset(th.harnessClock, th.harnessReset) {
+          val memOverSerialTLClockBundle = p(HarnessClockInstantiatorKey).requestClockBundle("mem_over_serial_tl_clock", memFreq)
+          val serial_bits = SerialAdapter.asyncQueue(port, th.harnessClock, th.harnessReset)
+          val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(
+            system.serdesser.get,
+            serial_bits,
+            memOverSerialTLClockBundle,
+            th.harnessReset)
 // DOC include end: HarnessClockInstantiatorEx
-        val success = SerialAdapter.connectSimSerial(harnessMultiClockAXIRAM.module.io.tsi_ser, port.clock, th.harnessReset.asBool)
-        when (success) { th.success := true.B }
+          val success = SerialAdapter.connectSimSerial(harnessMultiClockAXIRAM.module.io.tsi_ser, th.harnessClock, th.harnessReset.asBool)
+          when (success) { th.success := true.B }
 
-        // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
-        (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi_port, edge) =>
-          val memSize = sVal.memParams.size
-          val lineSize = p(CacheBlockBytes)
-          val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toInt), edge.bundle)).suggestName("simdram")
-          mem.io.axi <> axi_port.bits
-          mem.io.clock := axi_port.clock
-          mem.io.reset := axi_port.reset
+          // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
+          (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi_port, edge) =>
+            val memSize = sVal.memParams.size
+            val lineSize = p(CacheBlockBytes)
+            val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toInt), edge.bundle)).suggestName("simdram")
+            mem.io.axi <> axi_port.bits
+            mem.io.clock := axi_port.clock
+            mem.io.reset := axi_port.reset
+          }
         }
       })
     })
@@ -279,8 +282,11 @@ class WithSerialAdapterTiedOff extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
-      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, port, th.harnessReset)
-      SerialAdapter.tieoff(ram.module.io.tsi_ser)
+      val bits = SerialAdapter.asyncQueue(port, th.harnessClock, th.harnessReset)
+      withClockAndReset(th.harnessClock, th.harnessReset) {
+        val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.harnessReset)
+        SerialAdapter.tieoff(ram.module.io.tsi_ser)
+      }
     })
   }
 })
@@ -289,9 +295,12 @@ class WithSimSerial extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
-      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, port, th.harnessReset)
-      val success = SerialAdapter.connectSimSerial(ram.module.io.tsi_ser, port.clock, th.harnessReset.asBool)
-      when (success) { th.success := true.B }
+      val bits = SerialAdapter.asyncQueue(port, th.harnessClock, th.harnessReset)
+      withClockAndReset(th.harnessClock, th.harnessReset) {
+        val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.harnessReset)
+        val success = SerialAdapter.connectSimSerial(ram.module.io.tsi_ser, th.harnessClock, th.harnessReset.asBool)
+        when (success) { th.success := true.B }
+      }
     })
   }
 })
