@@ -130,7 +130,7 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
         val harnessMultiClockAXIRAM = withClockAndReset(th.harnessClock, th.harnessReset) {
           SerialAdapter.connectHarnessMultiClockAXIRAM(
             system.serdesser.get,
-            port,
+            serial_bits,
             axiClockBundle,
             th.harnessReset)
         }

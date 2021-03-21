@@ -95,7 +95,7 @@ class WithFireSimDefaultFrequencyTweaks extends Config(
   // runnings the FASED runtime configuration generator to generate faithful DDR3 timing values.
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++
   new chipyard.config.WithAsynchrousMemoryBusCrossing ++
-  new testchipip.WithAsynchronousSerialSlaveCrossing ++
+  new testchipip.WithAsynchronousSerialSlaveCrossing
 )
 
 // Tweaks that are generally applied to all firesim configs
