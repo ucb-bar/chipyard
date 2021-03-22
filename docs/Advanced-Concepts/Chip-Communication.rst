@@ -46,7 +46,7 @@ Using the Tethered Serial Interface (TSI)
 
 By default, Chipyard uses the Tethered Serial Interface (TSI) to communicate with the DUT.
 TSI protocol is an implementation of HTIF that is used to send commands to the RISC-V DUT.
-These TSI commands are simple R/W commands that are able to probe the DUT's memory space.
+These TSI commands are simple R/W commands that are able to access the DUT's memory space.
 During simulation, the host sends TSI commands to a simulation stub in the test harness called ``SimSerial``
 (C++ class) that resides in a ``SimSerial`` Verilog module (both are located in the ``generators/testchipip``
 project).
@@ -59,7 +59,7 @@ Once the serialized transaction is received on the chip, it is deserialized and 
 which handles the request.
 In simulation, FESVR resets the DUT, writes into memory the test program, and indicates to the DUT to start the program
 through an interrupt (see :ref:`customization/Boot-Process:Chipyard Boot Process`).
-Using TSI is currently the fastest mechanism to communicate with the DUT in simulation and is also used by FireSim.
+Using TSI is currently the fastest mechanism to communicate with the DUT in simulation (compared to DMI/JTAG) and is also used by FireSim.
 
 Using the Debug Module Interface (DMI)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -173,7 +173,7 @@ The following image shows the DUT with these set of default signals:
 
 In this setup, the serial-link is connected to the TSI/FESVR peripherals while the AXI port is connected
 to a simulated AXI memory.
-However, AXI ports tend to have many signals associated with them so instead of creating an AXI port off the DUT,
+However, AXI ports tend to have many signals, and thus wires, associated with them so instead of creating an AXI port off the DUT,
 one can send the memory transactions over the bi-directional serial-link (``TLSerdesser``) so that the main
 interface to the DUT is the serial-link (which has comparatively less signals than an AXI port).
 This new setup (shown below) is a typical Chipyard test chip setup:
@@ -216,7 +216,7 @@ This is done by the RISC-V soft-core running FESVR, sending TSI commands to a ``
 Once the commands are converted to serialized TileLink, then they can be sent over some medium to the DUT
 (like an FMC cable or a set of wires connecting FPGA outputs to the DUT board).
 Similar to simulation, if the chip requests offchip memory, it can then send the transaction back over the serial-link.
-Then the request can be serviced by the channel of FPGA DRAM.
+Then the request can be serviced by the FPGA DRAM.
 The following image shows this flow:
 
 .. image:: ../_static/images/chip-bringup.png

@@ -118,7 +118,7 @@ object ClockingSchemeGenerators {
       }
 
       chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
-        clock_io := th.harnessClock
+        clock_io := th.buildtopClock
         Nil })
 
       // return the reference frequency

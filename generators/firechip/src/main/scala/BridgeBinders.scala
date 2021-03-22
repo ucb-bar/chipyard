@@ -72,11 +72,11 @@ class WithSerialBridge extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[ClockedIO[SerialIO]]) => {
     ports.map { port =>
       implicit val p = GetSystemParameters(system)
-      val bits = SerialAdapter.asyncQueue(port, th.harnessClock, th.harnessReset)
-      val ram = withClockAndReset(th.harnessClock, th.harnessReset) {
-        SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.harnessReset)
+      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+      val ram = withClockAndReset(th.buildtopClock, th.buildtopReset) {
+        SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
       }
-      SerialBridge(th.harnessClock, ram.module.io.tsi_ser, p(ExtMem).map(_ => MainMemoryConsts.globalName))
+      SerialBridge(th.buildtopClock, ram.module.io.tsi_ser, p(ExtMem).map(_ => MainMemoryConsts.globalName))
     }
     Nil
   }
@@ -103,7 +103,7 @@ class WithUARTBridge extends OverrideHarnessBinder({
 class WithBlockDeviceBridge extends OverrideHarnessBinder({
   (system: CanHavePeripheryBlockDevice, th: FireSim, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
-    ports.map { b => BlockDevBridge(b.clock, b.bits, th.harnessReset.asBool) }
+    ports.map { b => BlockDevBridge(b.clock, b.bits, th.buildtopReset.asBool) }
     Nil
   }
 })
@@ -123,18 +123,18 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
         val axiClock = p(ClockBridgeInstantiatorKey).requestClock("mem_over_serial_tl_clock", memFreq)
         val axiClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
         axiClockBundle.clock := axiClock
-        axiClockBundle.reset := ResetCatchAndSync(axiClock, th.harnessReset.asBool)
+        axiClockBundle.reset := ResetCatchAndSync(axiClock, th.buildtopReset.asBool)
 
-        val serial_bits = SerialAdapter.asyncQueue(port, th.harnessClock, th.harnessReset)
+        val serial_bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
 
-        val harnessMultiClockAXIRAM = withClockAndReset(th.harnessClock, th.harnessReset) {
+        val harnessMultiClockAXIRAM = withClockAndReset(th.buildtopClock, th.buildtopReset) {
           SerialAdapter.connectHarnessMultiClockAXIRAM(
             system.serdesser.get,
             serial_bits,
             axiClockBundle,
-            th.harnessReset)
+            th.buildtopReset)
         }
-        SerialBridge(th.harnessClock, harnessMultiClockAXIRAM.module.io.tsi_ser, Some(MainMemoryConsts.globalName))
+        SerialBridge(th.buildtopClock, harnessMultiClockAXIRAM.module.io.tsi_ser, Some(MainMemoryConsts.globalName))
 
         // connect SimAxiMem
         (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi4, edge) =>
@@ -192,7 +192,7 @@ class WithDromajoBridge extends ComposeHarnessBinder({
 
 class WithTraceGenBridge extends OverrideHarnessBinder({
   (system: TraceGenSystemModuleImp, th: FireSim, ports: Seq[Bool]) =>
-    ports.map { p => GroundTestBridge(th.harnessClock, p)(system.p) }; Nil
+    ports.map { p => GroundTestBridge(th.buildtopClock, p)(system.p) }; Nil
 })
 
 class WithFireSimMultiCycleRegfile extends ComposeIOBinder({

@@ -8,8 +8,8 @@ have independent clock domains through diplomacy.
 This implies that some reference clock enters the ``ChipTop`` and then is divided down into
 separate clock domains.
 From the perspective of the ``TestHarness`` module, the ``ChipTop`` clock and reset is
-provided from the harness clock and reset (called ``harnessClock`` and ``harnessReset``).
-In the default case, this ``harnessClock`` and ``harnessReset`` is directly wired to the
+provided from a clock and reset called ``buildtopClock`` and ``buildtopReset``.
+In the default case, this ``buildtopClock`` and ``buildtopReset`` is directly wired to the
 clock and reset IO's of the ``TestHarness`` module.
 However, the ``TestHarness`` has the ability to generate a standalone clock and reset signal
 that is separate from the reference clock/reset of ``ChipTop``.
@@ -32,7 +32,7 @@ Here you can see the ``p(HarnessClockInstantiatorKey)`` is used to request a clo
 
 .. note::
     In the case that the reference clock entering ``ChipTop`` is not the overall reference clock of the simulation
-    (i.e. not the clock/reset coming into the ``TestHarness`` module), the ``harnessClock`` and ``harnessReset`` can
+    (i.e. the clock/reset coming into the ``TestHarness`` module), the ``buildtopClock`` and ``buildtopReset`` can
     differ from the implicit ``TestHarness`` clock and reset. For example, if the ``ChipTop`` reference is 500MHz but an
-    extra harness clock is requested at 1GHz, the ``TestHarness`` implicit clock/reset will be at 1GHz while the ``harnessClock``
-    and ``harnessReset`` will be at 500MHz.
+    extra harness clock is requested at 1GHz, the ``TestHarness`` implicit clock/reset will be at 1GHz while the ``buildtopClock``
+    and ``buildtopReset`` will be at 500MHz.

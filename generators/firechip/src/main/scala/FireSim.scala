@@ -195,7 +195,7 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
       }
 
       chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
-        reset := th.harnessReset
+        reset := th.buildtopReset
         input_clocks := p(ClockBridgeInstantiatorKey)
           .requestClockRecordMap(rationalClockSpecs.toSeq, p(FireSimBaseClockNameKey), pllConfig.referenceFreqMHz * (1000 * 1000))
         Nil })
@@ -209,9 +209,9 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
 class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSignalReferences {
   freechips.rocketchip.util.property.cover.setPropLib(new midas.passes.FireSimPropertyLibrary())
 
-  val harnessClock = Wire(Clock())
-  val harnessReset = WireInit(false.B)
-  val peekPokeBridge = PeekPokeBridge(harnessClock, harnessReset)
+  val buildtopClock = Wire(Clock())
+  val buildtopReset = WireInit(false.B)
+  val peekPokeBridge = PeekPokeBridge(buildtopClock, buildtopReset)
   def dutReset = { require(false, "dutReset should not be used in Firesim"); false.B }
   def success = { require(false, "success should not be used in Firesim"); false.B }
 
@@ -244,7 +244,7 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSigna
     NodeIdx.increment()
   }
 
-  harnessClock := p(ClockBridgeInstantiatorKey).requestClock("buildtop_reference_clock", btFreqMHz.get * (1000 * 1000))
+  buildtopClock := p(ClockBridgeInstantiatorKey).requestClock("buildtop_reference_clock", btFreqMHz.get * (1000 * 1000))
 
   p(ClockBridgeInstantiatorKey).instantiateFireSimClockBridge
 }

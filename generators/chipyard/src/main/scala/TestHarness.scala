@@ -24,8 +24,8 @@ trait HasTestHarnessFunctions {
 
 trait HasHarnessSignalReferences {
   // clock/reset of the chiptop reference clock (can be different than the implicit harness clock/reset)
-  def harnessClock: Clock
-  def harnessReset: Reset
+  def buildtopClock: Clock
+  def buildtopReset: Reset
   def dutReset: Reset
   def success: Bool
 }
@@ -82,8 +82,8 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
     val success = Output(Bool())
   })
 
-  val harnessClock = Wire(Clock())
-  val harnessReset = Wire(Reset())
+  val buildtopClock = Wire(Clock())
+  val buildtopReset = Wire(Reset())
 
   val lazyDut = LazyModule(p(BuildTop)(p)).suggestName("chiptop")
   val dut = Module(lazyDut.module)
@@ -96,8 +96,8 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
   }
   val refClkBundle = p(HarnessClockInstantiatorKey).requestClockBundle("buildtop_reference_clock", freqMHz * (1000 * 1000))
 
-  harnessClock := refClkBundle.clock
-  harnessReset := WireInit(refClkBundle.reset)
+  buildtopClock := refClkBundle.clock
+  buildtopReset := WireInit(refClkBundle.reset)
   val dutReset = refClkBundle.reset.asAsyncReset
 
   val success = io.success
