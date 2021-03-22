@@ -390,8 +390,8 @@ workflows:
             docker-context: .
             extra_build_args: "--build-arg CHIPYARD_HASH=${CHIPYARD_HASH}"
             image: ucbbar/chipyard-ci-image
-            path: dockerfiles
             no_output_timeout: 120m
+            path: dockerfiles
     # submodules-on-master:
     #     jobs:
     #         # Check to make sure submodule commits are on master branches
