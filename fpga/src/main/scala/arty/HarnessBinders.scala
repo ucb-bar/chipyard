@@ -22,12 +22,12 @@ class WithArtyResetHarnessBinder extends ComposeHarnessBinder({
   (system: HasPeripheryDebugModuleImp, th: ArtyFPGATestHarness, ports: Seq[Bool]) => {
     require(ports.size == 2)
 
-    withClockAndReset(th.clock_32MHz, th.ck_rst) {
+    withClockAndReset(th.harnessClock, th.harnessReset) {
       // Debug module reset
       th.dut_ndreset := ports(0)
 
       // JTAG reset
-      ports(1) := PowerOnResetFPGAOnly(th.clock_32MHz)
+      ports(1) := PowerOnResetFPGAOnly(th.harnessClock)
     }
   }
 })
@@ -68,8 +68,8 @@ class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
 class WithArtyUARTHarnessBinder extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: ArtyFPGATestHarness, ports: Seq[UARTPortIO]) => {
     withClockAndReset(th.harnessClock, th.harnessReset) {
-      IOBUF(th.uart_txd_in,  ports.head.txd)
-      ports.head.rxd := IOBUF(th.uart_rxd_out)
+      IOBUF(th.uart_rxd_out,  ports.head.txd)
+      ports.head.rxd := IOBUF(th.uart_txd_in)
     }
   }
 })
@@ -81,7 +81,7 @@ class WithArtySPIFlashHarnessBinder extends OverrideHarnessBinder({
 
       val io_qspi = Wire(new SPIPins(() => new BasePin(), p(PeripherySPIFlashKey)(0))).suggestName("qspi")
 
-      SPIPinsFromPort(io_qspi, ports(0), clock = th.harnessClock, reset = th.hReset.asBool, syncStages = 3)
+      SPIPinsFromPort(io_qspi, ports(0), clock = th.harnessClock, reset = th.harnessReset.asBool, syncStages = 3)
 
       IOBUF(th.qspi_cs, io_qspi.cs(0))
       IOBUF(th.qspi_sck, io_qspi.sck)
