@@ -9,9 +9,6 @@ parameters:
     tools-cache-version:
         type: string
         default: "v6"
-    commit_hash:
-        type: string
-        default: $CIRCLE_SHA1
 
 # default execution env.s
 executors:
@@ -20,6 +17,7 @@ executors:
             - image: ucbbar/chipyard-ci-image:9c650dea
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+            CHIPYARD_HASH: $CIRCLE_SHA1
 
 # re-usable commands
 commands:
@@ -390,7 +388,7 @@ workflows:
       jobs:
         - docker/publish:
             docker-context: .
-            extra-build-args: "--build-arg CHIPYARD_HASH=<< parameters.commit_hash >>"
+            extra-build-args: "--build-arg CHIPYARD_HASH=${CHIPYARD_HASH}"
             image: ucbbar/chipyard-ci-image
             path: dockerfiles
     # submodules-on-master:
