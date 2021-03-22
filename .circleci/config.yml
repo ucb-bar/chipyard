@@ -388,7 +388,7 @@ workflows:
       jobs:
         - docker/publish:
             docker-context: .
-            extra-build-args: "--build-arg CHIPYARD_HASH=${CHIPYARD_HASH}"
+            extra_build_args: "--build-arg CHIPYARD_HASH=${CHIPYARD_HASH}"
             image: ucbbar/chipyard-ci-image
             path: dockerfiles
     # submodules-on-master:
