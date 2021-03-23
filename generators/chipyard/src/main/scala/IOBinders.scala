@@ -272,7 +272,6 @@ class WithSerialTLIOCells extends OverrideIOBinder({
   }).getOrElse((Nil, Nil))
 })
 
-
 class WithAXI4MemPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveMasterAXI4MemPort) => {
     implicit val p: Parameters = GetSystemParameters(system)

@@ -59,15 +59,32 @@ class WithNIC extends icenet.WithIceNIC(inBufFlits = 8192, ctrlQueueDepth = 64)
 class WithNVDLALarge extends nvidia.blocks.dla.WithNVDLA("large")
 class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
-
-// Tweaks that are generally applied to all firesim configs
-class WithFireSimConfigTweaks extends Config(
+// Non-frequency tweaks that are generally applied to all firesim configs
+class WithFireSimDesignTweaks extends Config(
   // Required: Bake in the default FASED memory model
   new WithDefaultMemModel ++
   // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
   new WithFireSimSimpleClocks ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++
+  // Required: Existing FAME-1 transform cannot handle black-box clock gates
+  new WithoutClockGating ++
+  // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
+  new WithoutTLMonitors ++
+  // Optional: Adds IO to attach tracerV bridges
+  new chipyard.config.WithTraceIO ++
+  // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 32 GiB on F1)
+  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
+  // Optional: Removing this will require using an initramfs under linux
+  new testchipip.WithBlockDevice ++
+  // Required*: Scale default baud rate with periphery bus frequency
+  new chipyard.config.WithUART(BigInt(3686400L)) ++
+  // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
+  new chipyard.config.WithNoDebug
+)
+
+// Tweaks to modify target clock frequencies / crossings to firesim defaults
+class WithFireSimDefaultFrequencyTweaks extends Config(
   // Optional*: Removing this will require adjusting the UART baud rate and
   // potential target-software changes to properly capture UART output
   new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
@@ -78,25 +95,13 @@ class WithFireSimConfigTweaks extends Config(
   // runnings the FASED runtime configuration generator to generate faithful DDR3 timing values.
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++
   new chipyard.config.WithAsynchrousMemoryBusCrossing ++
-  new testchipip.WithAsynchronousSerialSlaveCrossing ++
-  // Required: Existing FAME-1 transform cannot handle black-box clock gates
-  new WithoutClockGating ++
-  // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
-  new WithoutTLMonitors ++
-  // Optional: Adds IO to attach tracerV bridges
-  new chipyard.config.WithTraceIO ++
-  // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 32 GiB on F1)
-  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
-  // Required: Adds IO to attach SerialBridge. The SerialBridges is responsible
-  // for signalling simulation termination under simulation success. This fragment can
-  // be removed if you supply an auxiliary bridge that signals simulation termination
-  new testchipip.WithDefaultSerialTL ++
-  // Optional: Removing this will require using an initramfs under linux
-  new testchipip.WithBlockDevice ++
-  // Required*: Scale default baud rate with periphery bus frequency
-  new chipyard.config.WithUART(BigInt(3686400L)) ++
-  // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
-  new chipyard.config.WithNoDebug
+  new testchipip.WithAsynchronousSerialSlaveCrossing
+)
+
+// Tweaks that are generally applied to all firesim configs
+class WithFireSimConfigTweaks extends Config(
+  new WithFireSimDefaultFrequencyTweaks ++
+  new WithFireSimDesignTweaks
 )
 
 /*******************************************************************************
@@ -204,6 +209,15 @@ class FireSimMulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
   new FireSimRocketConfig)
 
+class FireSimMulticlockAXIOverSerialConfig extends Config(
+  new WithAXIOverSerialTLCombinedBridges ++ // use combined bridge to connect to axi mem over serial
+  new WithDefaultFireSimBridges ++
+  new testchipip.WithBlockDevice(false) ++ // disable blockdev
+  new WithDefaultMemModel ++
+  new WithFireSimDesignTweaks ++ // don't inherit firesim clocking
+  new chipyard.MulticlockAXIOverSerialConfig
+)
+
 //**********************************************************************************
 // System with 16 LargeBOOMs that can be simulated with Golden Gate optimizations
 // - Requires MTModels and MCRams mixins as prefixes to the platform config
@@ -215,3 +229,4 @@ class FireSim16LargeBoomConfig extends Config(
   new WithFireSimConfigTweaks ++
   new boom.common.WithNLargeBooms(16) ++
   new chipyard.config.AbstractConfig)
+

@@ -215,7 +215,31 @@ class WithTLBackingMemory extends Config((site, here, up) => {
   case ExtTLMem => up(ExtMem, site) // enable TL backing memory
 })
 
-class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("tile", fMHz)
+class WithSerialTLBackingMemory extends Config((site, here, up) => {
+  case ExtMem => None
+  case SerialTLKey => up(SerialTLKey, site).map { k => k.copy(
+    memParams = {
+      val memPortParams = up(ExtMem, site).get
+      require(memPortParams.nMemoryChannels == 1)
+      memPortParams.master
+    },
+    isMemoryDevice = true
+  )}
+})
+
+/**
+  * Mixins to define either a specific tile frequency for a single hart or all harts
+  *
+  * @param fMHz Frequency in MHz of the tile or all tiles
+  * @param hartId Optional hartid to assign the frequency to (if unspecified default to all harts)
+  */
+class WithTileFrequency(fMHz: Double, hartId: Option[Int] = None) extends ClockNameContainsAssignment({
+    hartId match {
+      case Some(id) => s"tile_$id"
+      case None => "tile"
+    }
+  },
+  fMHz)
 
 class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {
   case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get / (1000 * 1000)).toDouble

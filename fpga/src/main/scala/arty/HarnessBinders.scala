@@ -33,13 +33,14 @@ class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
   (system: HasPeripheryDebug, th: ArtyFPGATestHarness, ports: Seq[Data]) => {
     ports.map {
       case j: JTAGChipIO =>
-        withClockAndReset(th.harnessClock, th.hReset) {
+        withClockAndReset(th.buildtopClock, th.hReset) {
           val jtag_wire = Wire(new JTAGIO)
           jtag_wire.TDO.data := j.TDO
           jtag_wire.TDO.driven := true.B
           j.TCK := jtag_wire.TCK
           j.TMS := jtag_wire.TMS
           j.TDI := jtag_wire.TDI
+
           val io_jtag = Wire(new JTAGPins(() => new BasePin(), false)).suggestName("jtag")
 
           JTAGPinsFromPort(io_jtag, jtag_wire)
