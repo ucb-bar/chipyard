@@ -51,7 +51,7 @@ object FrequencyUtils {
     require(!requestedOutputs.contains(0.0))
     val requestedFreqs = requestedOutputs.map(_.freqMHz)
     val fastestFreq = requestedFreqs.max
-    require(fastestFreq < maximumAllowableFreqMHz)
+    require(fastestFreq <= maximumAllowableFreqMHz)
 
     val candidateFreqs =
       Seq.tabulate(Math.ceil(maximumAllowableFreqMHz / fastestFreq).toInt)(i => (i + 1) * fastestFreq)
@@ -89,6 +89,7 @@ class SimplePllConfiguration(
      ElaborationArtefacts.add(s"${name}.freq-summary", summaryString)
      println(summaryString)
    }
+   def referenceSinkParams(): ClockSinkParameters = sinkDividerMap.find(_._2 == 1).get._1
 }
 
 case class DividerOnlyClockGeneratorNode(pllName: String)(implicit valName: ValName)
@@ -143,8 +144,4 @@ class DividerOnlyClockGenerator(pllName: String)(implicit p: Parameters, valName
       sinkB.reset := refClock.reset
     }
   }
-}
-
-object DividerOnlyClockGenerator {
-  def apply()(implicit p: Parameters, valName: ValName) = LazyModule(new DividerOnlyClockGenerator(valName.name)).node
 }

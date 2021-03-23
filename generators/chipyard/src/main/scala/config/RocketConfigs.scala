@@ -212,3 +212,26 @@ class LBWIFRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMemPort ++       // remove AXI4 backing memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
+
+// DOC include start: MulticlockAXIOverSerialConfig
+class MulticlockAXIOverSerialConfig extends Config(
+  new chipyard.config.WithSystemBusFrequencyAsDefault ++
+  new chipyard.config.WithSystemBusFrequency(250) ++
+  new chipyard.config.WithPeripheryBusFrequency(250) ++
+  new chipyard.config.WithMemoryBusFrequency(250) ++
+  new chipyard.config.WithFrontBusFrequency(50) ++
+  new chipyard.config.WithTileFrequency(500, Some(1)) ++
+  new chipyard.config.WithTileFrequency(250, Some(0)) ++
+
+  new chipyard.config.WithFbusToSbusCrossingType(AsynchronousCrossing()) ++
+  new testchipip.WithAsynchronousSerialSlaveCrossing ++
+  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(
+    AsynchronousCrossing().depth,
+    AsynchronousCrossing().sourceSync) ++
+
+  new chipyard.harness.WithSimAXIMemOverSerialTL ++ // add SimDRAM DRAM model for axi4 backing memory over the SerDes link, if axi4 mem is enabled
+  new chipyard.config.WithSerialTLBackingMemory ++ // remove axi4 mem port in favor of SerialTL memory
+
+  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
+  new chipyard.config.AbstractConfig)
+// DOC include end: MulticlockAXIOverSerialConfig

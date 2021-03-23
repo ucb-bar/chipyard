@@ -7,7 +7,7 @@ import scala.collection.mutable.{ArrayBuffer}
 import freechips.rocketchip.prci._
 import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey, InstantiatesTiles}
 import freechips.rocketchip.config.{Parameters, Field, Config}
-import freechips.rocketchip.diplomacy.{OutwardNodeHandle, InModuleBody, LazyModule}
+import freechips.rocketchip.diplomacy.{ModuleValue, OutwardNodeHandle, InModuleBody, LazyModule}
 import freechips.rocketchip.util.{ResetCatchAndSync}
 
 import barstools.iocell.chisel._
@@ -39,7 +39,7 @@ object GenerateReset {
 }
 
 
-case object ClockingSchemeKey extends Field[ChipTop => Unit](ClockingSchemeGenerators.dividerOnlyClockGenerator)
+case object ClockingSchemeKey extends Field[ChipTop => ModuleValue[Double]](ClockingSchemeGenerators.dividerOnlyClockGenerator)
 /*
   * This is a Seq of assignment functions, that accept a clock name and return an optional frequency.
   * Functions that appear later in this seq have higher precedence that earlier ones.
@@ -60,7 +60,7 @@ class ClockNameContainsAssignment(name: String, fMHz: Double) extends Config((si
 })
 
 object ClockingSchemeGenerators {
-  val dividerOnlyClockGenerator: ChipTop => Unit = { chiptop =>
+  val dividerOnlyClockGenerator: ChipTop => ModuleValue[Double] = { chiptop =>
     implicit val p = chiptop.p
 
     // Requires existence of undriven asyncClockGroups in subsystem
@@ -77,21 +77,24 @@ object ClockingSchemeGenerators {
     val resetSetterResetProvider = resetSetter.map(_.tileResetProviderNode).getOrElse(ClockGroupEphemeralNode())
 
     val aggregator = LazyModule(new ClockGroupAggregator("allClocks")).node
+    // provides the implicit clock to the system
     (chiptop.implicitClockSinkNode
       := ClockGroup()
       := aggregator)
+    // provides the system clock (ex. the bus clocks)
     (systemAsyncClockGroup
       :*= ClockGroupNamePrefixer()
       :*= aggregator)
 
     val referenceClockSource =  ClockSourceNode(Seq(ClockSourceParameters()))
+    val dividerOnlyClkGenerator = LazyModule(new DividerOnlyClockGenerator("buildTopClockGenerator"))
+    // provides all the divided clocks (from the top-level clock)
     (aggregator
       := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
       := ClockGroupResetSynchronizer()
       := resetSetterResetProvider
-      := DividerOnlyClockGenerator()
+      := dividerOnlyClkGenerator.node
       := referenceClockSource)
-
 
     val asyncResetBroadcast = FixedClockBroadcast(None)
     resetSetter.foreach(_.asyncResetSinkNode := asyncResetBroadcast)
@@ -115,8 +118,11 @@ object ClockingSchemeGenerators {
       }
 
       chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
-        clock_io := th.harnessClock
+        clock_io := th.buildtopClock
         Nil })
+
+      // return the reference frequency
+      dividerOnlyClkGenerator.module.referenceFreq
     }
   }
 }

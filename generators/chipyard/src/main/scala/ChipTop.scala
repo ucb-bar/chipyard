@@ -15,6 +15,9 @@ import barstools.iocell.chisel._
 
 case object BuildSystem extends Field[Parameters => LazyModule]((p: Parameters) => new DigitalTop()(p))
 
+trait HasReferenceClockFreq {
+  def refClockFreqMHz: Double
+}
 
 /**
  * The base class used for building chips. This constructor instantiates a module specified by the BuildSystem parameter,
@@ -24,15 +27,16 @@ case object BuildSystem extends Field[Parameters => LazyModule]((p: Parameters) 
  */
 
 class ChipTop(implicit p: Parameters) extends LazyModule with BindingScope
-    with HasTestHarnessFunctions with HasIOBinders {
+    with HasTestHarnessFunctions with HasReferenceClockFreq with HasIOBinders {
   // The system module specified by BuildSystem
   lazy val lazySystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
 
-  // The implicitClockSinkNode provides the implicit clock and reset for the System
+  // The implicitClockSinkNode provides the implicit clock and reset for the system (connected by clocking scheme)
   val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
 
   // Generate Clocks and Reset
-  p(ClockingSchemeKey)(this)
+  val mvRefClkFreq = p(ClockingSchemeKey)(this)
+  def refClockFreqMHz: Double = mvRefClkFreq.getWrappedValue
 
   // NOTE: Making this a LazyRawModule is moderately dangerous, as anonymous children
   // of ChipTop (ex: ClockGroup) do not receive clock or reset.

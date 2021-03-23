@@ -27,8 +27,8 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
     val dut = Module(lazyDut.module)
   }
 
-  val harnessClock = clock_32MHz
-  val harnessReset = hReset
+  val buildtopClock = clock_32MHz
+  val buildtopReset = hReset
   val success = false.B
 
   val dutReset = dReset

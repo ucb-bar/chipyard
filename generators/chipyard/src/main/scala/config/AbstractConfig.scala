@@ -54,4 +54,3 @@ class AbstractConfig extends Config(
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++ // no external interrupts
   new chipyard.WithMulticlockCoherentBusTopology ++              // hierarchical buses including mbus+l2
   new freechips.rocketchip.system.BaseConfig)                    // "base" rocketchip system
-
