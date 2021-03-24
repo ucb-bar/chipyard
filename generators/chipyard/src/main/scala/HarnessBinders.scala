@@ -22,7 +22,7 @@ import barstools.iocell.chisel._
 import testchipip._
 
 import chipyard.{HasHarnessSignalReferences, HarnessClockInstantiatorKey}
-import chipyard.iobinders.GetSystemParameters
+import chipyard.iobinders.{GetSystemParameters, JTAGChipIO}
 
 import tracegen.{TraceGenSystemModuleImp}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
@@ -245,10 +245,16 @@ class WithSimDebug extends OverrideHarnessBinder({
         val dtm_success = WireInit(false.B)
         when (dtm_success) { th.success := true.B }
         val dtm = Module(new SimDTM).connect(th.buildtopClock, th.buildtopReset.asBool, d, dtm_success)
-      case j: JTAGIO =>
+      case j: JTAGChipIO =>
         val dtm_success = WireInit(false.B)
         when (dtm_success) { th.success := true.B }
-        val jtag = Module(new SimJTAG(tickDelay=3)).connect(j, th.buildtopClock, th.buildtopReset.asBool, ~(th.buildtopReset.asBool), dtm_success)
+        val jtag_wire = Wire(new JTAGIO)
+        jtag_wire.TDO.data := j.TDO
+        jtag_wire.TDO.driven := true.B
+        j.TCK := jtag_wire.TCK
+        j.TMS := jtag_wire.TMS
+        j.TDI := jtag_wire.TDI
+        val jtag = Module(new SimJTAG(tickDelay=3)).connect(jtag_wire, th.buildtopClock, th.buildtopReset.asBool, ~(th.buildtopReset.asBool), dtm_success)
     }
   }
 })
@@ -256,11 +262,10 @@ class WithSimDebug extends OverrideHarnessBinder({
 class WithTiedOffDebug extends OverrideHarnessBinder({
   (system: HasPeripheryDebug, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
     ports.map {
-      case j: JTAGIO =>
+      case j: JTAGChipIO =>
         j.TCK := true.B.asClock
         j.TMS := true.B
         j.TDI := true.B
-        j.TRSTn.foreach { r => r := true.B }
       case d: ClockedDMIIO =>
         d.dmi.req.valid := false.B
         d.dmi.req.bits  := DontCare
