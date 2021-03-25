@@ -13,15 +13,15 @@ jobs:
       JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: step1
-        run: echo step1-${GIT_HUB_REF}
+        run: echo step1-${GITHUB_REF}
       - name: mkdir
         run: mkdir -p cache-dir
       - uses: actions/cache@v2
         id: cache-222
         with:
           path: cache-dir
-          key: cache-dir-${GIT_HUB_REF}
-          restore-keys: cache-dir-${GIT_HUB_REF}
+          key: cache-dir-${GITHUB_REF}
+          restore-keys: cache-dir-${GITHUB_REF}
       - name: ls the repo
         run: ls -lt cache-dir
 
@@ -52,13 +52,13 @@ jobs:
       JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: step1
-        run: echo step1-${GIT_HUB_REF}
+        run: echo step1-${GITHUB_REF}
       - uses: actions/cache@v2
         id: cache-222
         with:
           path: cache-dir
-          key: cache-dir-${GIT_HUB_REF}
-          restore-keys: cache-dir-${GIT_HUB_REF}
+          key: cache-dir-${GITHUB_REF}
+          restore-keys: cache-dir-${GITHUB_REF}
       - name: check fill
         run: ls -lt cache-dir
 
