@@ -30,11 +30,6 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
 class WithSystemModifications extends Config((site, here, up) => {
   case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency = Some(site(FPGAFrequencyKey).toInt*1000000))
   case DTSTimebase => BigInt(1000000)
-  // case JtagDTMKey => new JtagDTMConfig (
-  //     idcodeVersion = 2,      // 1 was legacy (FE310-G000, Acai).
-  //     idcodePartNum = 0x000,  // Decided to simplify.
-  //     idcodeManufId = 0x489,  // As Assigned by JEDEC to SiFive. Only used in wrappers / test harnesses.
-  //     debugIdleCycles = 5)    // Reasonable guess for synchronization
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for uart boot
     val freqMHz = site(FPGAFrequencyKey).toInt * 1000000
@@ -61,7 +56,6 @@ class WithVC709Tweaks extends Config(
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new chipyard.config.WithNoDebug ++ // remove debug module
   new chipyard.example.WithGCD(useAXI4=false, useBlackBox=false) ++          // Use GCD Chisel, connect Tilelink
-  // new freechips.rocketchip.subsystem.WithJtagDTM ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1))
 
@@ -70,7 +64,7 @@ class WithVC709System extends Config((site, here, up) => {
 })
 
 class OctoRocketConfig extends Config(
-  new freechips.rocketchip.subsystem.WithNBigCores(8) ++    // quad-core (4 RocketTiles)
+  new freechips.rocketchip.subsystem.WithNBigCores(8) ++        // Octo-core (4 RocketTiles)
   new chipyard.config.AbstractConfig)
 
 class RocketVC709Config extends Config(
