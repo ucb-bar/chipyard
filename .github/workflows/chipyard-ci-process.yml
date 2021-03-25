@@ -6,9 +6,9 @@ jobs:
   cache-test:
     name: cache-test
     runs-on: ubuntu-latest
-#    container:
-#      image: ucbbar/chipyard-image:1.0.1
-#      options: --user riscvuser --entrypoint /bin/bash
+    container:
+      image: ucbbar/chipyard-image:1.0.1
+      options: --user riscvuser --entrypoint /bin/bash
     env:
       JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
@@ -24,17 +24,6 @@ jobs:
           restore-keys: cache-dir-${GITHUB_REF}
       - name: ls the repo
         run: ls -lt cache-dir
-
-#  use-cache:
-#    name: use-cache
-#    needs: cache-test
-#    runs-on: ubuntu-latest
-##    container:
-##      image: ucbbar/chipyard-image:1.0.1
-##      options: --user riscvuser --entrypoint /bin/bash
-#    env:
-#      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
-#    steps:
       - name: fill file
         if: steps.cache-222.outputs.cache-hit != 'true'
         run: touch cache-dir/cache-me
@@ -45,9 +34,9 @@ jobs:
     name: use-cache
     needs: cache-test
     runs-on: ubuntu-latest
-#    container:
-#      image: ucbbar/chipyard-image:1.0.1
-#      options: --user riscvuser --entrypoint /bin/bash
+    container:
+      image: ucbbar/chipyard-image:1.0.1
+      options: --user riscvuser --entrypoint /bin/bash
     env:
       JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
