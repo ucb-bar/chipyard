@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: step1
         run: echo step1-${GITHUB_REF}
+      - name: fix permissions 1
+        run: sudo chown -R riscvuser .
       - name: mkdir
         run: mkdir -p cache-dir
       - uses: actions/cache@v2
