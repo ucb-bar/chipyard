@@ -6,19 +6,19 @@ jobs:
   cache-test:
     name: cache-test
     runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-image:1.0.1
-      options: --user root --entrypoint /bin/bash
+#    container:
+#      image: ucbbar/chipyard-image:1.0.1
+#      options: --user root --entrypoint /bin/bash
     env:
       JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: generate key
         id: genkey
-        run: echo "::set-output name=mix-test::$(pwd)\n"
+        run: echo "::set-output name=mixtest::$(pwd)\n"
       - name: step1
-        run: echo step1-${GITHUB_REF}
-      - name: fix permissions 1
-        run: sudo chown -R riscvuser .
+        run: echo step1-${{ steps.genkey.outputs.mixtest }}
+#      - name: fix permissions 1
+#        run: sudo chown -R riscvuser .
       - name: mkdir
         run: mkdir -p cache-dir
       - uses: actions/cache@v2
@@ -35,26 +35,26 @@ jobs:
       - name: check fill
         run: ls -lt cache-dir
 
-  use-cache:
-    name: use-cache
-    needs: cache-test
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-image:1.0.1
-      options: --user root --entrypoint /bin/bash
-    env:
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
-    steps:
-      - name: step1
-        run: echo step1-${GITHUB_REF}
-      - uses: actions/cache@v2
-        id: cache-222
-        with:
-          path: cache-dir
-          key: cache-dir-${GITHUB_REF}
-          restore-keys: cache-dir-${GITHUB_REF}
-      - name: check fill
-        run: ls -lt cache-dir
+#  use-cache:
+#    name: use-cache
+#    needs: cache-test
+#    runs-on: ubuntu-latest
+#    container:
+#      image: ucbbar/chipyard-image:1.0.1
+#      options: --user root --entrypoint /bin/bash
+#    env:
+#      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+#    steps:
+#      - name: step1
+#        run: echo step1-${GITHUB_REF}
+#      - uses: actions/cache@v2
+#        id: cache-222
+#        with:
+#          path: cache-dir
+#          key: cache-dir-${GITHUB_REF}
+#          restore-keys: cache-dir-${GITHUB_REF}
+#      - name: check fill
+#        run: ls -lt cache-dir
 
 #  commit-on-master-check:
 #    name: commit-on-master-check
