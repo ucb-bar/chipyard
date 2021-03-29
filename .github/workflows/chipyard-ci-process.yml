@@ -9,9 +9,9 @@ jobs:
   cache-test:
     name: cache-test
     runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-image:1.0.1
-      options: --user root --entrypoint /bin/bash
+#    container:
+#      image: ucbbar/chipyard-image:1.0.1
+#      options: --user root --entrypoint /bin/bash
     env:
       JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
@@ -20,7 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Generate Hashes
-        run: .github/scripts/create-hash.sh
+        run: pwd && ls -ltr && .github/scripts/create-hash.sh
       - name: Show hashes
         run: shasum riscv-tools.hash
       - name: generate key

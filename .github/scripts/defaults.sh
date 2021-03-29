@@ -30,7 +30,7 @@ VERILATOR_VERSION=v4.034
 CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
 CI_DIR=/scratch/circleci # on ferry machine
 
-export HOME=/github/workspace
+export HOME=`pwd`
 export REMOTE_PREFIX=$CI_DIR/$GITHUB_REPOSITORY-$CURRENT_BRANCH
 export REMOTE_WORK_DIR=$REMOTE_PREFIX-$GITHUB_SHA-$GITHUB_RUN_ID
 export REMOTE_RISCV_DIR=$REMOTE_WORK_DIR/riscv-tools-install
