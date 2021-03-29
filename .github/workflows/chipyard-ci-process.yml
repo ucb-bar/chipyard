@@ -2,38 +2,43 @@ name: chipyard-ci-process
 
 on: [push]
 
+env:
+  tools-cache-version: v6
+
 jobs:
   cache-test:
     name: cache-test
     runs-on: ubuntu-latest
-#    container:
-#      image: ucbbar/chipyard-image:1.0.1
-#      options: --user root --entrypoint /bin/bash
+    container:
+      image: ucbbar/chipyard-image:1.0.1
+      options: --user root --entrypoint /bin/bash
     env:
       JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
-      - name: generate key
-        id: genkey
-        run: echo "::set-output name=mixtest::$(pwd)\n"
-      - name: step1
-        run: echo step1-${{ steps.genkey.outputs.mixtest }}
 #      - name: fix permissions 1
 #        run: sudo chown -R riscvuser .
-      - name: mkdir
-        run: mkdir -p cache-dir
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Generate Hashes
+        run: .github/scripts/create-hash.sh
+      - name: Show hashes
+        run: shasum riscv-tools.hash
+      - name: generate key
+        id: genkey
+        run: echo "::set-output name=cache_dir::riscv-tools-installed-${{ env.tools-cache-version }}$(shasum riscv-tools.hash | cut -d' ' -f1)"
+      - name: show key
+        run: echo ${{ steps.genkey.outputs.cache_dir }}
       - uses: actions/cache@v2
-        id: cache-222
+        id: riscv-tools-cache
         with:
           path: cache-dir
-          key: cache-dir-${GITHUB_REF}
-          restore-keys: cache-dir-${GITHUB_REF}
-      - name: ls the repo
-        run: ls -lt cache-dir
-      - name: fill file
-        if: steps.cache-222.outputs.cache-hit != 'true'
-        run: touch cache-dir/cache-me
-      - name: check fill
-        run: ls -lt cache-dir
+          key: cache-dir-${{ steps.genkey.outputs.mixtest }}
+          restore-keys: cache-dir-${{ steps.genkey.outputs.mixtest }}
+      - name: build riscv tools if not cached
+        if: steps.riscv-tools-cache.outputs.cache-hit != 'true'
+        run: ./.github/scripts/build-toolchains.sh riscv
+#      - name: check fill
+#        run: ls -lt cache-dir
 
 #  use-cache:
 #    name: use-cache

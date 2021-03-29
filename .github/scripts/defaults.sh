@@ -27,10 +27,10 @@ VERILATOR_VERSION=v4.034
 
 # remote variables
 #TODO: (chick) figure out what the following two lines should really be
-CURRENT_BRANCH=`basename $GITHUB_REF`
+CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
 CI_DIR=/scratch/circleci # on ferry machine
 
-export HOME=/home/riscvuser
+export HOME=/github/workspace
 export REMOTE_PREFIX=$CI_DIR/$GITHUB_REPOSITORY-$CURRENT_BRANCH
 export REMOTE_WORK_DIR=$REMOTE_PREFIX-$GITHUB_SHA-$GITHUB_RUN_ID
 export REMOTE_RISCV_DIR=$REMOTE_WORK_DIR/riscv-tools-install
@@ -49,7 +49,7 @@ echo "HOME IS $HOME"
 export LOCAL_CHECKOUT_DIR=$HOME/project
 export LOCAL_RISCV_DIR=$HOME/riscv-tools-install
 export LOCAL_ESP_DIR=$HOME/esp-tools-install
-export LOCAL_CHIPYARD_DIR=/__w/chipyard/chipyard
+export LOCAL_CHIPYARD_DIR=/github/workspace
 export LOCAL_SIM_DIR=$LOCAL_CHIPYARD_DIR/sims/verilator
 export LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 
