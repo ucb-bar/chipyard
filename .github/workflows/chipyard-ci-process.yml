@@ -25,15 +25,15 @@ jobs:
         run: shasum riscv-tools.hash
       - name: generate key
         id: genkey
-        run: echo "::set-output name=cache_dir::riscv-tools-installed-${{ env.tools-cache-version }}$(shasum riscv-tools.hash | cut -d' ' -f1)"
+        run: echo "::set-output name=tools-cache-key::riscv-tools-installed-${{ env.tools-cache-version }}$(shasum riscv-tools.hash | cut -d' ' -f1)"
       - name: show key
-        run: echo ${{ steps.genkey.outputs.cache_dir }}
+        run: echo ${{ steps.genkey.outputs.tools-cache-key }}
       - uses: actions/cache@v2
         id: riscv-tools-cache
         with:
           path: cache-dir
-          key: cache-dir-${{ steps.genkey.outputs.mixtest }}
-          restore-keys: cache-dir-${{ steps.genkey.outputs.mixtest }}
+          key: cache-dir-${{ steps.genkey.outputs.tools-cache-key }}
+          restore-keys: cache-dir-${{ steps.genkey.outputs.tools-cache-key }}
       - name: build riscv tools if not cached
 #        if: steps.riscv-tools-cache.outputs.cache-hit != 'true'
         run: ./.github/scripts/build-toolchains.sh riscv-tools
