@@ -35,7 +35,7 @@ jobs:
           key: cache-dir-${{ steps.genkey.outputs.mixtest }}
           restore-keys: cache-dir-${{ steps.genkey.outputs.mixtest }}
       - name: build riscv tools if not cached
-        if: steps.riscv-tools-cache.outputs.cache-hit != 'true'
+#        if: steps.riscv-tools-cache.outputs.cache-hit != 'true'
         run: ./.github/scripts/build-toolchains.sh riscv
 #      - name: check fill
 #        run: ls -lt cache-dir
