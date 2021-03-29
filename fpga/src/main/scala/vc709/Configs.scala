@@ -52,8 +52,8 @@ class WithVC709Tweaks extends Config(
   new WithGPIOIOPassthrough ++
   new WithTLIOPassthrough ++
   new WithDefaultPeripherals ++
-  new WithSystemModifications ++ // setup busses, use uart bootrom, setup ext. mem. size
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
+  new WithSystemModifications ++ // setup busses, use uart bootrom, setup ext. mem. size
   new chipyard.config.WithNoDebug ++ // remove debug module
   new chipyard.example.WithGCD(useAXI4=false, useBlackBox=false) ++          // Use GCD Chisel, connect Tilelink
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
@@ -64,7 +64,7 @@ class WithVC709System extends Config((site, here, up) => {
 })
 
 class OctoRocketConfig extends Config(
-  new freechips.rocketchip.subsystem.WithNBigCores(8) ++        // Octo-core (4 RocketTiles)
+  new freechips.rocketchip.subsystem.WithNBigCores(8) ++        // Octo-core (8 RocketTiles)
   new chipyard.config.AbstractConfig)
 
 class RocketVC709Config extends Config(
