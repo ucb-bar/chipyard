@@ -24,7 +24,7 @@ A list of unique SRAM configurations is output to a ``.conf`` file by FIRRTL, wh
 Without this transform, FIRRTL will map all ``SeqMem`` s to flip-flop arrays with equivalent behavior, which may lead to a design that is difficult to route.
 
 The ``.conf`` file is consumed by a tool called MacroCompiler, which is part of the :ref:`Tools/Barstools:Barstools` scala package.
-MacroCompiler is also passed an ``.mdf`` file that describes the available list of technology SRAMs or the capabilities of the SRAM compiler, if one is provided by the foundry.
+MacroCompiler is also passed an ``.mdf`` file that describes the available list of technology SRAMs or the capabilities of the SRAM compiler, if one is provided by the foundry. You may wish to create a cache of your available SRAM macros either manually, or via a script. An reference script for creating a JSON of your SRAM macros is in the `asap7 technology library folder <https://github.com/ucb-bar/hammer/blob/8fd1486499b875d56f09b060f03a62775f0a6aa7/src/hammer-vlsi/technology/asap7/sram-cache-gen.py>`__; the expected JSON format is `here <https://github.com/ucb-bar/plsi-mdf/blob/4be9b173647c77f990a542f4eb5f69af01d77316/macro_format.json>`_.
 Typically a foundry SRAM compiler will be able to generate a set of different SRAMs collateral based on some requirements on size, aspect ratio, etc. (see :ref:`Tools/Barstools:SRAM MDF Fields`).
 Using a user-customizable cost function, MacroCompiler will select the SRAMs that are the best fit for each dimensionality in the ``.conf`` file.
 This may include over provisioning (e.g. using a 64x1024 SRAM for a requested 60x1024, if the latter is not available) or arraying.
