@@ -9,7 +9,7 @@ base_dir=$(abspath ..)
 sim_dir=$(abspath .)
 
 # do not generate simulation files
-sim_name := none
+sim_name := arty
 
 #########################################################################################
 # include shared variables
@@ -68,7 +68,7 @@ ifeq ($(SUB_PROJECT),artysim)
 	CONFIG            ?= TinyRocketArtySimConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty
 	GENERATOR_PACKAGE ?= chipyard
-	TB                ?= none # unused, for now
+	TB                ?= TestDriver
 	TOP               ?= ChipTop
 	BOARD             ?= arty
 	FPGA_BRAND        ?= xilinx
