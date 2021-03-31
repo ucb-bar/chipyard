@@ -1,11 +1,3 @@
-/*
- * @,@Author: ,: your name
- * @,@Date: ,: 1970-01-01 08:00:00
- * @,@LastEditTime: ,: 2021-01-23 21:51:27
- * @,@LastEditors: ,: your name
- * @,@Description: ,: In User Settings Edit
- * @,@FilePath: ,: /freedom/mnt/D/Ubuntu/projects/freedom/bootrom/sdboot/include/platform.h
- */
 // See LICENSE for license details.
 
 #ifndef _SIFIVE_PLATFORM_H

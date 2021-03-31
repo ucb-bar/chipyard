@@ -1,11 +1,3 @@
-/*
- * @,@Author: ,: your name
- * @,@Date: ,: 1970-01-01 08:00:00
- * @,@LastEditTime: ,: 2021-01-26 13:14:09
- * @,@LastEditors: ,: Please set LastEditors
- * @,@Description: ,: In User Settings Edit
- * @,@FilePath: ,: /freedom/mnt/D/Ubuntu/projects/freedom/bootrom/sdboot/include/devices/plic.h
- */
 // See LICENSE for license details.
 
 #ifndef PLIC_H

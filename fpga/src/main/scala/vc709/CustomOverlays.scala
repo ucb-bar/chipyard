@@ -52,7 +52,6 @@ class GPIOVC709ShellPlacer(val shell: VC709ShellBasicOverlays, val shellInput: G
   def place(designInput: GPIODesignInput) = new GPIOVC709PlacedOverlay(shell, valName.name, designInput, shellInput, gpioNames)
 }
 
-case object VC709DDR3Size extends Field[BigInt](0x100000000L) // 4GB
 class DualDDR3VC709PlacedOverlay(val shell: VC709FPGATestHarness, name: String, val designInput: DDRDesignInput, val shellInput: DDRShellInput)
   extends DDR3XilinxPlacedOverlay(shell, name, designInput, shellInput)
 {
@@ -91,8 +90,7 @@ class DualDDR3VC709PlacedOverlay(val shell: VC709FPGATestHarness, name: String, 
     port.aresetn := !ar.reset
   } }
 
-  shell.sdc.addGroup(clocks = Seq("clk_pll_i"))
-  // shell.sdc.addGroup(pins = Seq(mig.island.module.blackbox.io.ui_clk))
+  shell.sdc.addGroup(pins = Seq(mig.island.module.blackbox.io.ui_clk))
 }
 class DualDDR3VC709ShellPlacer(shell: VC709FPGATestHarness, val shellInput: DDRShellInput)(implicit val valName: ValName)
   extends DDRShellPlacer[VC709FPGATestHarness] {

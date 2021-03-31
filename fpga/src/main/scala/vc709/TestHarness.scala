@@ -29,8 +29,8 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
   def dp = designParameters
 
   // Order matters; ddr depends on sys_clock
-  val gpio = Overlay(GPIOOverlayKey, new GPIOVC709ShellPlacer(this, GPIOShellInput(), GPIOs.names))
   val mem_clock = Overlay(ClockInputOverlayKey, new MemClockVC709ShellPlacer(this, ClockInputShellInput()))
+  val gpio      = Overlay(GPIOOverlayKey, new GPIOVC709ShellPlacer(this, GPIOShellInput(), GPIOs.names))
   // val ddr1      = Overlay(DDROverlayKey, new DDR3VC709ShellPlacer(this, DDRShellInput()))
 
   val topDesign = LazyModule(p(BuildTop)(dp)).suggestName("chiptop")
@@ -48,14 +48,9 @@ class VC709FPGATestHarness(override implicit val p: Parameters) extends VC709She
   val dutGroup = ClockGroup()
   val dutWrangler = LazyModule(new ResetWrangler)
   val dutClock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
-  // ClockSinkNode <-- ResetWrangler <-- ClockGroup <-- PLLNode <-- ClockSourceNode
+
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL := sysClkNode
 
-  val (memWrangler, harnessMemPLL) = topDesign match { case td: ChipTop =>
-    td.lazySystem match { case lsys: VC709DigitalTop =>
-      (lsys.memWrangler, lsys.harnessMemPLL)
-    }
-  }
 // DOC include end: ClockOverlay
 
   /*** I2C ***/

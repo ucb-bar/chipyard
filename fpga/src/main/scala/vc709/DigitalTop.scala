@@ -26,6 +26,34 @@ object PinGen {
   }
 }
 
+trait HasXilinxVC709PCIe { this: BaseSubsystem =>
+  /*** The second clock goes to the PCIe ***/
+  val memClkNode = p(ClockInputOverlayKey).last.place(ClockInputDesignInput()).overlayOutput.node
+  val harnessMemPLL = p(PLLFactoryKey)()
+  val memGroup = ClockGroup()
+  val memWrangler = LazyModule(new ResetWrangler)
+  val memClock = ClockSinkNode(freqMHz = p(FPGAFrequencyKey))
+  
+  memClock := memWrangler.node := memGroup := harnessMemPLL := memClkNode
+
+  /*** Instantiate PCIe Module ***/
+  p(PCIeOverlayKey).zipWithIndex.map { case (key, i) => 
+    val overlayOutput = key.place(PCIeDesignInput(wrangler=memWrangler.node, corePLL=harnessMemPLL)).overlayOutput
+    val (pcieNode: TLNode, intNode: IntOutwardNode) = (overlayOutput.pcieNode, overlayOutput.intNode)
+    val (slaveTLNode: TLIdentityNode, masterTLNode: TLAsyncSinkNode) = (pcieNode.inward, pcieNode.outward)
+    fbus.coupleFrom(s"master_named_pcie${i}"){ _ :=* TLFIFOFixer(TLFIFOFixer.all) :=* masterTLNode }
+    pbus.coupleTo(s"slave_named_pcie${i}"){ slaveTLNode :*= TLWidthWidget(pbus.beatBytes) :*= _ }
+    ibus.fromSync := intNode
+  }
+}
+
+trait HasChosenNodeInDTS { this: BaseSubsystem =>
+  // Work-around for a kernel bug (command-line ignored if /chosen missing)
+  val chosen = new DeviceSnippet {
+    def describe() = Description("chosen", Map())
+  }
+}
+
 // ------------------------------------
 // VC709 DigitalTop
 // ------------------------------------
@@ -34,34 +62,9 @@ object PinGen {
 class VC709DigitalTop()(implicit p: Parameters) extends DigitalTop
   with sifive.blocks.devices.i2c.HasPeripheryI2C // Enables optionally adding the sifive I2C
   with freechips.rocketchip.devices.debug.HasPeripheryDebug
+  with HasXilinxVC709PCIe
+  with HasChosenNodeInDTS
 {
-  def dp = p
-
-  /*** The second clock goes to the second DDR ***/
-  val memClkNode = dp(ClockInputOverlayKey).last.place(ClockInputDesignInput()).overlayOutput.node
-  val harnessMemPLL = dp(PLLFactoryKey)()
-  val memGroup = ClockGroup()
-  val memWrangler = LazyModule(new ResetWrangler)
-  val memClock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
-  
-  // ClockSinkNode <-- ResetWrangler <-- ClockGroup <-- PLLNode <-- ClockSourceNode
-  memClock := memWrangler.node := memGroup := harnessMemPLL := memClkNode
-  
-  // Work-around for a kernel bug (command-line ignored if /chosen missing)
-  val chosen = new DeviceSnippet {
-    def describe() = Description("chosen", Map())
-  }
-
-  /*** PCIe dutWrangler.node, harnessSysPLL ***/
-  p(PCIeOverlayKey).zipWithIndex.map { case (key, i) => 
-    val overlayOutput = key.place(PCIeDesignInput(wrangler=memWrangler.node, corePLL=harnessMemPLL)).overlayOutput
-    val (pcieNode: TLNode, intNode: IntOutwardNode) = (overlayOutput.pcieNode, overlayOutput.intNode)
-    val (slaveTLNode: TLIdentityNode, masterTLNode: TLAsyncSinkNode) = (pcieNode.inward, pcieNode.outward)
-    fbus.coupleFrom(s"master_named_pcie${i}"){ _ :=* TLFIFOFixer(TLFIFOFixer.all) :=* TLBuffer() :=* masterTLNode }
-    pbus.coupleTo(s"slave_named_pcie${i}"){ slaveTLNode :*= TLWidthWidget(pbus.beatBytes) :*= _ }
-    ibus.fromSync := intNode
-  }
-
   override lazy val module = new VC709DigitalTopModule(this)
 }
 

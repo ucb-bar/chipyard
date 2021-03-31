@@ -3,9 +3,8 @@ package chipyard.fpga.vc709
 import sys.process._
 
 import freechips.rocketchip.config.{Config, Parameters}
-import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem, WithJtagDTM}
-import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG, JtagDTMKey, JtagDTMConfig}
-import freechips.rocketchip.devices.tilelink.{DevNullParams, BuiltInErrorDeviceParams, BootROMLocated}
+import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem}
+import freechips.rocketchip.devices.tilelink.{BootROMLocated}
 import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet}
 import freechips.rocketchip.tile.{XLen}
 
@@ -14,7 +13,7 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOParams}
 
 import sifive.fpgashells.shell.{DesignKey}
-
+import sifive.fpgashells.shell.xilinx.{VC709DDR3Size}
 import testchipip.{SerialTLKey}
 
 import chipyard.{BuildTop, BuildSystem, ExtTLMem}
@@ -22,7 +21,7 @@ import chipyard.fpga.vcu118.{WithUARTIOPassthrough, WithTLIOPassthrough, WithFPG
 import chipyard.fpga.vcu118.bringup.{WithI2CIOPassthrough, WithGPIOIOPassthrough}
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
-  case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
+  case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L), nTxEntries = 256, nRxEntries = 256))
   case PeripheryGPIOKey => List(GPIOParams(address = BigInt(0x64002000L), width = 21))
   case PeripheryI2CKey => List(I2CParams(address = BigInt(0x64005000L)))
 })
@@ -52,10 +51,9 @@ class WithVC709Tweaks extends Config(
   new WithGPIOIOPassthrough ++
   new WithTLIOPassthrough ++
   new WithDefaultPeripherals ++
-  new WithSystemModifications ++ // setup busses, use uart bootrom, setup ext. mem. size
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
+  new WithSystemModifications ++ // setup busses, use uart bootrom, setup ext. mem. size
   new chipyard.config.WithNoDebug ++ // remove debug module
-  new chipyard.example.WithGCD(useAXI4=false, useBlackBox=false) ++          // Use GCD Chisel, connect Tilelink
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1))
 
@@ -63,17 +61,13 @@ class WithVC709System extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => new VC709DigitalTop()(p)
 })
 
-class OctoRocketConfig extends Config(
-  new freechips.rocketchip.subsystem.WithNBigCores(8) ++        // Octo-core (4 RocketTiles)
-  new chipyard.config.AbstractConfig)
-
 class RocketVC709Config extends Config(
   new WithVC709System ++
   new WithVC709Tweaks ++
-  new OctoRocketConfig)
+  new chipyard.RocketConfig)
 // DOC include end: AbstractVC709 and Rocket
 
-class QuadSmallBoomConfig extends Config(
+class SmallLargeBoomConfig extends Config(
   new boom.common.WithNSmallBooms(4) ++                          // 4 boom cores
   new chipyard.config.AbstractConfig)
 
@@ -81,4 +75,4 @@ class BoomVC709Config extends Config(
   new WithFPGAFrequency(50) ++
   new WithVC709System ++
   new WithVC709Tweaks ++
-  new QuadSmallBoomConfig)
+  new SmallLargeBoomConfig)

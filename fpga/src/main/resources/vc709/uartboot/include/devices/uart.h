@@ -1,11 +1,3 @@
-/*
- * @,@Author: ,: your name
- * @,@Date: ,: 1970-01-01 08:00:00
- * @,@LastEditTime: ,: 2021-01-24 11:08:33
- * @,@LastEditors: ,: Please set LastEditors
- * @,@Description: ,: In User Settings Edit
- * @,@FilePath: ,: /freedom/bootrom/sdboot/include/devices/uart.h
- */
 // See LICENSE for license details.
 
 #ifndef _SIFIVE_UART_H
