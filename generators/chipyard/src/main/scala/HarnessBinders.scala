@@ -321,3 +321,9 @@ class WithSimDromajoBridge extends ComposeHarnessBinder({
     ports.map { p => p.traces.map(tileTrace => SimDromajoBridge(tileTrace)(system.p)) }
   }
 })
+
+class WithTieOffCustomBootPin extends OverrideHarnessBinder({
+  (system: CanHavePeripheryCustomBootPin, th: HasHarnessSignalReferences, ports: Seq[Bool]) => {
+    ports.foreach(_ := false.B)
+  }
+})
