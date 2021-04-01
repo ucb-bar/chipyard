@@ -123,7 +123,7 @@ object GenerateSimFiles extends App with HasGenerateSimConfig {
         "/vsrc/TestDriver.v",
       )
       case Some(ArtySimulator) => Seq(
-        "/arty/vsrc/TestDriver.v",
+        "/vsrc/ArtyTestDriver.v",
       )
       case None => Seq()
     })
