@@ -40,12 +40,15 @@ class WithSystemModifications extends Config((site, here, up) => {
 
 // DOC include start: AbstractVCU118 and Rocket
 class WithVCU118Tweaks extends Config(
+  // harness binders
   new WithUART ++
   new WithSPISDCard ++
   new WithDDRMem ++
+  // io binders
   new WithUARTIOPassthrough ++
   new WithSPIIOPassthrough ++
   new WithTLIOPassthrough ++
+  // other configuration
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
@@ -65,7 +68,10 @@ class BoomVCU118Config extends Config(
   new WithVCU118Tweaks ++
   new chipyard.MegaBoomConfig)
 
-class WithFPGAFrequency(fMHz: Double) extends chipyard.config.WithPeripheryBusFrequency(fMHz)
+class WithFPGAFrequency(fMHz: Double) extends Config(
+  new chipyard.config.WithPeripheryBusFrequency(fMHz) ++
+  new chipyard.config.WithMemoryBusFrequency(fMHz)
+)
 
 class WithFPGAFreq25MHz extends WithFPGAFrequency(25)
 class WithFPGAFreq50MHz extends WithFPGAFrequency(50)
