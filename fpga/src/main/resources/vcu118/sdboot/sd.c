@@ -171,11 +171,10 @@ static int copy(void)
 
 	dputs("CMD18");
 
-	kprintf("LOADING 0x%lxB PAYLOAD\r\n", PAYLOAD_SIZE_B);
+	kprintf("LOADING 0x%xB PAYLOAD\r\n", PAYLOAD_SIZE_B);
 	kprintf("LOADING  ");
 
-	// TODO: Can this be sped up?
-	// John Wright: Let's go slow until we get this working
+	// TODO: Speed up SPI freq. (breaks between these two values)
 	//REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 16666666UL);
 	REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
 	if (sd_cmd(0x52, BBL_PARTITION_START_SECTOR, 0xE1) != 0x00) {
