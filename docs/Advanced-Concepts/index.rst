@@ -14,4 +14,5 @@ They expect you to know about Chisel, Parameters, configs, etc.
    Debugging-BOOM
    Resources
    CDEs
+   Harness-Clocks
 

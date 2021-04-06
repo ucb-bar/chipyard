@@ -102,7 +102,7 @@ Separating the Top module from the TestHarness module
 
 Unlike the FireSim and Software simulation flows, a VLSI flow needs to separate the test harness and the chip (a.k.a. DUT) into separate files.
 This is necessary to facilitate post-synthesis and post-place-and-route simulation, as the module names in the RTL and gate-level verilog files would collide.
-Simulations after you the design goes through a VLSI flow will use the verilog netlist generated from the flow and will need an untouched test harness to drive it.
+Simulations, after your design goes through a VLSI flow, will use the verilog netlist generated from the flow and will need an untouched test harness to drive it.
 Separating these components into separate files makes this straightforward.
 Without the separation the file that included the test harness would also redefine the DUT which is often disallowed in simulation tools.
 To do this, there is a FIRRTL ``App`` in :ref:`Tools/Barstools:Barstools` called ``GenerateTopAndHarness``, which runs the appropriate transforms to elaborate the modules separately.

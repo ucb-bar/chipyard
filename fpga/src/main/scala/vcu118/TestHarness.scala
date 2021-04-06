@@ -121,13 +121,13 @@ class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawMod
   val hReset = Wire(Reset())
   hReset := _outer.dutClock.in.head._1.reset
 
-  val harnessClock = _outer.dutClock.in.head._1.clock
-  val harnessReset = WireInit(hReset)
+  val buildtopClock = _outer.dutClock.in.head._1.clock
+  val buildtopReset = WireInit(hReset)
   val dutReset = hReset.asAsyncReset
   val success = false.B
 
-  childClock := harnessClock
-  childReset := harnessReset
+  childClock := buildtopClock
+  childReset := buildtopReset
 
   // harness binders are non-lazy
   _outer.topDesign match { case d: HasTestHarnessFunctions =>

@@ -20,7 +20,7 @@ import testchipip._
 import tracegen.{TraceGenSystem}
 
 import hwacha.{Hwacha}
-import gemmini.{Gemmini, GemminiConfigs}
+import gemmini._
 
 import boom.common.{BoomTileAttachParams}
 import cva6.{CVA6TileAttachParams}
@@ -84,6 +84,17 @@ class WithMultiRoCC extends Config((site, here, up) => {
 })
 
 /**
+ * Assigns what was previously in the BuildRoCC key to specific harts with MultiRoCCKey
+ * Must be paired with WithMultiRoCC
+ */
+class WithMultiRoCCFromBuildRoCC(harts: Int*) extends Config((site, here, up) => {
+  case BuildRoCC => Nil
+  case MultiRoCCKey => up(MultiRoCCKey, site) ++ harts.distinct.map { i =>
+    (i -> up(BuildRoCC, site))
+  }
+})
+
+/**
  * Config fragment to add Hwachas to cores based on hart
  *
  * For ex:
@@ -108,11 +119,12 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config(
   })
 )
 
-class WithMultiRoCCGemmini(harts: Int*) extends Config((site, here, up) => {
+class WithMultiRoCCGemmini[T <: Data : Arithmetic, U <: Data, V <: Data](
+  harts: Int*)(gemminiConfig: GemminiArrayConfig[T,U,V] = GemminiConfigs.defaultConfig) extends Config((site, here, up) => {
   case MultiRoCCKey => up(MultiRoCCKey, site) ++ harts.distinct.map { i =>
     (i -> Seq((p: Parameters) => {
       implicit val q = p
-      val gemmini = LazyModule(new Gemmini(OpcodeSet.custom3, GemminiConfigs.defaultConfig))
+      val gemmini = LazyModule(new Gemmini(gemminiConfig))
       gemmini
     }))
   }
@@ -135,6 +147,16 @@ class WithNPerfCounters(n: Int = 29) extends Config((site, here, up) => {
       core = tp.tileParams.core.copy(nPerfCounters = n)))
     case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
       core = tp.tileParams.core.copy(nPerfCounters = n)))
+    case other => other
+  }
+})
+
+class WithNPMPs(n: Int = 8) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nPMPs = n)))
+    case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nPMPs = n)))
     case other => other
   }
 })
@@ -193,7 +215,31 @@ class WithTLBackingMemory extends Config((site, here, up) => {
   case ExtTLMem => up(ExtMem, site) // enable TL backing memory
 })
 
-class WithTileFrequency(fMHz: Double) extends ClockNameContainsAssignment("core", fMHz)
+class WithSerialTLBackingMemory extends Config((site, here, up) => {
+  case ExtMem => None
+  case SerialTLKey => up(SerialTLKey, site).map { k => k.copy(
+    memParams = {
+      val memPortParams = up(ExtMem, site).get
+      require(memPortParams.nMemoryChannels == 1)
+      memPortParams.master
+    },
+    isMemoryDevice = true
+  )}
+})
+
+/**
+  * Mixins to define either a specific tile frequency for a single hart or all harts
+  *
+  * @param fMHz Frequency in MHz of the tile or all tiles
+  * @param hartId Optional hartid to assign the frequency to (if unspecified default to all harts)
+  */
+class WithTileFrequency(fMHz: Double, hartId: Option[Int] = None) extends ClockNameContainsAssignment({
+    hartId match {
+      case Some(id) => s"tile_$id"
+      case None => "tile"
+    }
+  },
+  fMHz)
 
 class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {
   case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
