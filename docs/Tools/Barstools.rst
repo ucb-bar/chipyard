@@ -31,7 +31,7 @@ This may include over provisioning (e.g. using a 64x1024 SRAM for a requested 60
 Arraying can be done in both width and depth, as well as to solve masking constraints.
 For example, a 128x2048 array could be composed of four 64x1024 arrays, with two macros in parallel to create two 128x1024 virtual SRAMs which are combinationally muxed to add depth.
 If this macro requires byte-granularity write masking, but no technology SRAMs support masking, then the tool may choose to use thirty-two 8x1024 arrays in a similar configuration.
-You may wish to create a cache of your available SRAM macros either manually, or via a script. A reference script for creating a JSON of your SRAM macros is in the asap7 technology library` folder <https://github.com/ucb-bar/hammer/blob/8fd1486499b875d56f09b060f03a62775f0a6aa7/src/hammer-vlsi/technology/asap7/sram-cache-gen.py>`__.
+You may wish to create a cache of your available SRAM macros either manually, or via a script. A reference script for creating a JSON of your SRAM macros is in the `asap7 technology library folder <https://github.com/ucb-bar/hammer/blob/8fd1486499b875d56f09b060f03a62775f0a6aa7/src/hammer-vlsi/technology/asap7/sram-cache-gen.py>`__.
 For information on writing ``.mdf`` files, look at `MDF on github <https://github.com/ucb-bar/plsi-mdf>`__ and a brief description in :ref:`Tools/Barstools:SRAM MDF Fields` section.
 
 The output of MacroCompiler is a Verilog file containing modules that wrap the technology SRAMs into the specified interface names from the ``.conf``.
