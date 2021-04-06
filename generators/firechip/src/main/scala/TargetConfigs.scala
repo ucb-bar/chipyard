@@ -77,7 +77,7 @@ class WithFireSimDesignTweaks extends Config(
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
   // Optional: Removing this will require using an initramfs under linux
   new testchipip.WithBlockDevice ++
-  // Optional: Set a UART baudrate (this selection matches FireSim's historical value)
+  // Required*: Scale default baud rate with periphery bus frequency
   new chipyard.config.WithUART(BigInt(3686400L)) ++
   // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
   new chipyard.config.WithNoDebug
