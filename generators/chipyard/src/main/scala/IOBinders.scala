@@ -372,6 +372,13 @@ class WithTraceIOPunchthrough extends OverrideIOBinder({
   }
 })
 
+class WithCustomBootPin extends OverrideIOBinder({
+  (system: CanHavePeripheryCustomBootPin) => system.custom_boot_pin.map({ p =>
+    val sys = system.asInstanceOf[BaseSubsystem]
+    val (port, cells) = IOCell.generateIOFromSignal(p.getWrappedValue, "custom_boot", sys.p(IOCellKey), abstractResetAsAsync = true)
+    (Seq(port), cells)
+  }).getOrElse((Nil, Nil))
+})
 
 class WithDontTouchPorts extends OverrideIOBinder({
   (system: DontTouch) => system.dontTouchPorts(); (Nil, Nil)
