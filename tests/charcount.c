@@ -1,6 +1,6 @@
 #include "rocc.h"
 
-char string[64] = "The quick brown fox jumped over the lazy dog";
+char string[64] __attribute__ ((aligned (64))) = "The quick brown fox jumped over the lazy dog";
 
 static inline unsigned long count_chars(char *start, char needle)
 {
