@@ -69,12 +69,12 @@ The following steps describe how to build and run buildroot Linux on the prototy
 Building Linux with FireMarshal
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Since the prototype does not have a block device we build Linux with the rootfs built into the binary (otherwise known as "initramfs" or "nodisk" version of Linux).
+Since the prototype does not have a block device, we build Linux with the rootfs built into the binary (otherwise known as "initramfs" or "nodisk" version of Linux).
 To make building this type of Linux binary easy, we will use the FireMarshal platform (see :ref:`fire-marshal` for more information).
 
 1. Setup FireMarshal (see :ref:`fire-marshal` on the initial setup).
-2. By default FireMarshal is setup to work with FireSim.
-   Instead we want to target the prototype platform.
+2. By default, FireMarshal is setup to work with FireSim.
+   Instead, we want to target the prototype platform.
    This is done by switching the FireMarshal "board" from "firechip" to "prototype" using ``marshal-config.yaml``:
 
 .. code-block:: shell
@@ -83,8 +83,8 @@ To make building this type of Linux binary easy, we will use the FireMarshal pla
 
 .. Note:: Refer to the FireMarshal docs on more ways to set the board differently through environment variables and more.
 
-3. Next build the workload (a.k.a buildroot Linux) with nodisk with FireMarshal.
-   For the rest of these steps we will assume you are using the base ``br-base.json`` workload.
+3. Next, build the workload (a.k.a buildroot Linux) with nodisk with FireMarshal.
+   For the rest of these steps, we will assume you are using the base ``br-base.json`` workload.
    This workload has basic support for GPIO and SPI drivers but you can build off it in different workloads (refer to FireMarshal docs on workload inheritance).
 
 .. code-block:: shell
@@ -92,7 +92,7 @@ To make building this type of Linux binary easy, we will use the FireMarshal pla
     ./marshal -v -d build br-base.json # here the -d indicates --nodisk or initramfs
 
 .. Note:: Using the "board" FireMarshal functionality allows any child workload depending on ``br-base.json`` to use the "prototype" ``br-base.json`` rather than the FireChip version.
-   Thus you can re-use existing workloads that depend on ``br-base.json`` on the prototype platform by just changing the "board"!
+   Thus, you can re-use existing workloads that depend on ``br-base.json`` on the prototype platform by just changing the "board"!
 
 4. The last step to generate the proper binary is to flatten it.
    This is done by using FireMarshal's install feature and will produce a ``*-flat`` binary in the ``$PATH_TO_FIREMARSHAL/images`` directory (in our case ``br-base-bin-nodisk-flat``).
@@ -120,7 +120,8 @@ Additionally, these instructions assume you are using Linux with ``sudo`` privil
    Change the default partition alignment to `1` so you can write to sector `34`.
    Do this with the `l` command.
 
-3. Create the new GPT with `o`. Click yes on all the prompts.
+3. Create the new GPT with `o`.
+   Click yes on all the prompts.
 
 4. Create a 512MiB partition to store the Linux binary (this can be smaller but it must be larger than the size of the Linux binary).
    Use `n` and select sector 34, with size `+1048576` (corresponding to 512MiB).
