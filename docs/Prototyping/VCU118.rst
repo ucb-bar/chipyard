@@ -47,8 +47,8 @@ After the harness is created, the ``BundleBridgeSource``'s must be connected to 
 This is done with harness binders and io binders (see ``fpga/src/main/scala/vcu118/HarnessBinders.scala`` and ``fpga/src/main/scala/vcu118/IOBinders.scala``).
 For more information on harness binders and io binders, refer to :ref:`Customization/IOBinders:IOBinders and HarnessBinders`.
 
-Introduction to the Bringup Platform
-------------------------------------
+Introduction to the Bringup Design
+----------------------------------
 
 An example of a more complicated design used for Chipyard test chips can be viewed in ``fpga/src/main/scala/vcu118/bringup/``.
 This example extends the default test harness and creates new ``Overlays`` to connect to a DUT (connected to the FMC port).
@@ -58,3 +58,108 @@ The TSI Host Widget is used to interact with the DUT from the prototype over a S
 .. Note:: Remember that since whenever a new test harness is created (or the config changes, or the config packages changes, or...), you need to modify the make invocation.
     For example, ``make SUB_PROJECT=vcu118 CONFIG=MyNewVCU118Config CONFIG_PACKAGE=this.is.my.scala.package bitstream``.
     See :ref:`Prototyping/General:Generating a Bitstream` for information on the various make variables.
+
+Running Linux on VCU118 Designs
+-------------------------------
+
+As mentioned above, the default VCU118 harness is setup with a UART and a SPI SDCard.
+These are utilized to both interact with the DUT (with the UART) and load in Linux (with the SDCard).
+The following steps describe how to build and run buildroot Linux on the prototype platform.
+
+Building Linux with FireMarshal
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Since the prototype currently does not have a block device setup for it, we build Linux with the rootfs built into the binary (otherwise known as "initramfs" or "nodisk" version of Linux).
+To make building this type of Linux binary easy, we will use the FireMarshal platform (see :ref:`fire-marshal` for more information).
+
+1. Setup FireMarshal (see :ref:`fire-marshal` on the initial setup).
+2. By default, FireMarshal is setup to work with FireSim.
+   Instead, we want to target the prototype platform.
+   This is done by switching the FireMarshal "board" from "firechip" to "prototype" using ``marshal-config.yaml``:
+
+.. code-block:: shell
+
+    # this assumes you do not have a `marshal-config.yaml` file already setup
+    echo "board-dir : 'boards/prototype'" > $PATH_TO_FIREMARSHAL/marshal-config.yaml
+
+.. Note:: Refer to the FireMarshal docs on more ways to set the board differently through environment variables and more.
+
+3. Next, build the workload (a.k.a buildroot Linux) in FireMarshal with the ``nodisk`` option flag.
+   For the rest of these steps, we will assume you are using the base ``br-base.json`` workload.
+   This workload has basic support for GPIO and SPI drivers (in addition to the default UART driver) but you can build off it in different workloads (refer to FireMarshal docs on workload inheritance).
+
+.. code-block:: shell
+
+    ./marshal -v -d build br-base.json # here the -d indicates --nodisk or initramfs
+
+.. Note:: Using the "board" FireMarshal functionality allows any child workload depending on the ``br-base.json`` workload specification to target a "prototype" platform rather than FireChip platform.
+   Thus, you can re-use existing workloads that depend on ``br-base.json`` on the prototype platform by just changing the "board"!
+
+4. The last step to generate the proper binary is to flatten it.
+   This is done by using FireMarshal's ``install`` feature which will produce a ``*-flat`` binary in the ``$PATH_TO_FIREMARSHAL/images`` directory (in our case ``br-base-bin-nodisk-flat``) from the previously built Linux binary (``br-base-bin-nodisk``).
+
+.. code-block:: shell
+
+   ./marshal -v -d install -t prototype br-base.json
+
+Setting up the SDCard
+~~~~~~~~~~~~~~~~~~~~~
+
+These instructions assume that you have a spare uSDCard that can be loaded with Linux and other files using two partitions.
+The 1st partition will be used to store the Linux binary (created with FireMarshal or other means) while the 2nd partition will store a file system that can be accessed from the DUT.
+Additionally, these instructions assume you are using Linux with ``sudo`` privileges and ``gdisk``, but you can follow a similar set of steps on Mac (using ``gpt`` or another similar program).
+
+1. Wipe the GPT on the card using ``gdisk``.
+   Use the `z` command to zap everything.
+   For rest of these instructions, we assume the SDCard path is ``/dev/sdc`` (replace this with the path to your SDCard).
+
+.. code-block:: shell
+
+    sudo gdisk /dev/sdc
+
+2. The VCU118 bootrom assumes that the Linux binary to load into memory will be located on sector 34 of the SDCard.
+   Change the default partition alignment to `1` so you can write to sector `34`.
+   Do this with the `l` command.
+
+3. Create the new GPT with `o`.
+   Click yes on all the prompts.
+
+4. Create a 512MiB partition to store the Linux binary (this can be smaller but it must be larger than the size of the Linux binary).
+   Use `n` and select sector 34, with size `+1048576` (corresponding to 512MiB).
+   For the type, search for the `apfs` type and use the hex number given.
+
+5. Create a second partition to store any other files with the rest of the SDCard.
+   Use `n` and use the defaults for starting sector and overall size (expand the 2nd partition to the rest of the SDCard space).
+   For the type, search for the `hfs` and use the hex number given.
+
+6. Write the changes using `w`.
+
+7. Setup the filesystem on the 2nd partition.
+   Note that the ``/dev/sdc2`` points to the 2nd partition.
+   Use the following command:
+
+.. code-block:: shell
+
+    sudo mkfs.hfs -v "PrototypeData" /dev/sdc2
+
+Transfer and Run Linux from the SDCard
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After you have a Linux boot binary and the SDCard is setup properly (1st partition at sector 34), you can transfer the binary to the 1st SDCard partition.
+In this example, we generated a ``br-base-bin-nodisk-flat`` from FireMarshal and we will load it using ``dd``.
+Note that ``sdc1`` points to the 1st partition (remember to change the ``sdc`` to your own SDCard path).
+
+.. code-block:: shell
+
+    sudo dd if=$PATH_TO_FIREMARSHAL/br-base-bin-nodisk-flat of=/dev/sdc1
+
+If you want to add files to the 2nd partition, you can also do this now.
+
+After loading the SDCard with Linux and potentially other files, you can program the FPGA and plug in the SDCard.
+To interact with Linux via the UART console, you can connect to the serial port (in this case called ``ttyUSB1``) using something like ``screen``:
+
+.. code-block:: shell
+
+   screen -S FPGA_UART_CONSOLE /dev/ttyUSB1 115200
+
+Once connected, you should see the binary being loaded as well as Linux output (in some cases you might need to reset the DUT).

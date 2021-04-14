@@ -8,10 +8,12 @@
 #define DEBUG
 #include "kprintf.h"
 
-#define MAX_CORES 8
-
-// A sector is 512 bytes, so ((1 << 11) * 512) = 1 MiB
-#define PAYLOAD_SIZE	(16 << 11)
+// Total payload in B
+#define PAYLOAD_SIZE_B (30 << 20) // default: 30MiB
+// A sector is 512 bytes, so (1 << 11) * 512B = 1 MiB
+#define SECTOR_SIZE_B 512
+// Payload size in # of sectors
+#define PAYLOAD_SIZE (PAYLOAD_SIZE_B / SECTOR_SIZE_B)
 
 // The sector at which the BBL partition starts
 #define BBL_PARTITION_START_SECTOR 34
@@ -168,9 +170,11 @@ static int copy(void)
 	int rc = 0;
 
 	dputs("CMD18");
+
+	kprintf("LOADING 0x%xB PAYLOAD\r\n", PAYLOAD_SIZE_B);
 	kprintf("LOADING  ");
 
-    // John: Let's go slow until we get this working
+	// TODO: Speed up SPI freq. (breaks between these two values)
 	//REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 16666666UL);
 	REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
 	if (sd_cmd(0x52, BBL_PARTITION_START_SECTOR, 0xE1) != 0x00) {
@@ -182,7 +186,7 @@ static int copy(void)
 		long n;
 
 		crc = 0;
-		n = 512;
+		n = SECTOR_SIZE_B;
 		while (sd_dummy() != 0xFE);
 		do {
 			uint8_t x = sd_dummy();
