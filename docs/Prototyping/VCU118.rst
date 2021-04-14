@@ -47,8 +47,8 @@ After the harness is created, the ``BundleBridgeSource``'s must be connected to 
 This is done with harness binders and io binders (see ``fpga/src/main/scala/vcu118/HarnessBinders.scala`` and ``fpga/src/main/scala/vcu118/IOBinders.scala``).
 For more information on harness binders and io binders, refer to :ref:`Customization/IOBinders:IOBinders and HarnessBinders`.
 
-Introduction to the Bringup Platform
-------------------------------------
+Introduction to the Bringup Design
+----------------------------------
 
 An example of a more complicated design used for Chipyard test chips can be viewed in ``fpga/src/main/scala/vcu118/bringup/``.
 This example extends the default test harness and creates new ``Overlays`` to connect to a DUT (connected to the FMC port).
@@ -59,8 +59,8 @@ The TSI Host Widget is used to interact with the DUT from the prototype over a S
     For example, ``make SUB_PROJECT=vcu118 CONFIG=MyNewVCU118Config CONFIG_PACKAGE=this.is.my.scala.package bitstream``.
     See :ref:`Prototyping/General:Generating a Bitstream` for information on the various make variables.
 
-Running Linux with Basic and Bringup Platforms
-----------------------------------------------
+Running Linux on VCU118 Designs
+-------------------------------
 
 As mentioned above, the default VCU118 harness is setup with a UART and a SPI SDCard.
 These are utilized to both interact with the DUT (with the UART) and load in Linux (with the SDCard).
@@ -69,7 +69,7 @@ The following steps describe how to build and run buildroot Linux on the prototy
 Building Linux with FireMarshal
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Since the prototype does not have a block device, we build Linux with the rootfs built into the binary (otherwise known as "initramfs" or "nodisk" version of Linux).
+Since the prototype currently does not have a block device setup for it, we build Linux with the rootfs built into the binary (otherwise known as "initramfs" or "nodisk" version of Linux).
 To make building this type of Linux binary easy, we will use the FireMarshal platform (see :ref:`fire-marshal` for more information).
 
 1. Setup FireMarshal (see :ref:`fire-marshal` on the initial setup).
@@ -79,13 +79,14 @@ To make building this type of Linux binary easy, we will use the FireMarshal pla
 
 .. code-block:: shell
 
+    # this assumes you do not have a `marshal-config.yaml` file already setup
     echo "board-dir : 'boards/prototype'" > $PATH_TO_FIREMARSHAL/marshal-config.yaml
 
 .. Note:: Refer to the FireMarshal docs on more ways to set the board differently through environment variables and more.
 
 3. Next, build the workload (a.k.a buildroot Linux) with nodisk with FireMarshal.
    For the rest of these steps, we will assume you are using the base ``br-base.json`` workload.
-   This workload has basic support for GPIO and SPI drivers but you can build off it in different workloads (refer to FireMarshal docs on workload inheritance).
+   This workload has basic support for GPIO and SPI drivers (in addition to the default UART driver) but you can build off it in different workloads (refer to FireMarshal docs on workload inheritance).
 
 .. code-block:: shell
 
@@ -105,7 +106,7 @@ Setting up the SDCard
 ~~~~~~~~~~~~~~~~~~~~~
 
 These instructions assume that you have a spare uSDCard that can be loaded with Linux and other files using two partitions.
-The 1st partition will be used to store the Linux binary (created with FireMarshal or other means) while the 2nd partition will be used to store miscellaneous files.
+The 1st partition will be used to store the Linux binary (created with FireMarshal or other means) while the 2nd partition will store a file system that can be accessed from the DUT.
 Additionally, these instructions assume you are using Linux with ``sudo`` privileges and ``gdisk`` but you can follow a similar set of steps on Mac (using ``gpt`` or another similar program).
 
 1. Wipe the GPT on the card using ``gdisk``.
