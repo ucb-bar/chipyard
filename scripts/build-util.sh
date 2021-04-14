@@ -81,6 +81,7 @@ module_build() ( # <submodule> [configure-arg..]
         "${MAKE}"
         echo "==>  Installing ${name}"
         "${MAKE}" install
+        "${MAKE}" clean  # get rid of intermediate files
     } 2>&1 | tee build.log
 )
 
