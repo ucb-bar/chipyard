@@ -96,7 +96,7 @@ To make building this type of Linux binary easy, we will use the FireMarshal pla
    Thus, you can re-use existing workloads that depend on ``br-base.json`` on the prototype platform by just changing the "board"!
 
 4. The last step to generate the proper binary is to flatten it.
-   This is done by using FireMarshal's install feature and will produce a ``*-flat`` binary in the ``$PATH_TO_FIREMARSHAL/images`` directory (in our case ``br-base-bin-nodisk-flat``).
+   This is done by using FireMarshal's ``install`` feature which will produce a ``*-flat`` binary in the ``$PATH_TO_FIREMARSHAL/images`` directory (in our case ``br-base-bin-nodisk-flat``) from the previously built Linux binary (``br-base-bin-nodisk``).
 
 .. code-block:: shell
 
