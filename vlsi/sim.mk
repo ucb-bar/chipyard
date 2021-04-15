@@ -11,7 +11,7 @@ redo-sim-syn: override HAMMER_EXTRA_ARGS += -p $(SIM_CONF)
 redo-sim-syn: override HAMMER_SIM_RUN_DIR = sim-syn-rundir
 redo-sim-syn-debug: $(SIM_DEBUG_CONF) redo-sim-syn
 redo-sim-syn-debug: override HAMMER_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
-redo-sim-syn-timing-debug: $(SIM_TIMING_CONF) redo-sim-par-debug
+redo-sim-syn-timing-debug: $(SIM_TIMING_CONF) redo-sim-syn-debug
 redo-sim-syn-timing-debug: override HAMMER_EXTRA_ARGS += -p $(SIM_TIMING_CONF)
 
 redo-sim-par: $(SIM_CONF)
