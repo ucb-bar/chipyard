@@ -58,13 +58,13 @@ do
         -a | --arch )
             shift
             ARCH=$1 ;;
-              riscv-tools | esp-tools)
-                  TOOLCHAIN=$1 ;;
-              ec2fast )
-                  EC2FASTINSTALL="true" ;;
-              * )
-                  error "invalid option $1"
-                  usage 1 ;;
+        riscv-tools | esp-tools)
+            TOOLCHAIN=$1 ;;
+        ec2fast )
+            EC2FASTINSTALL="true" ;;
+        * )
+            error "invalid option $1"
+            usage 1 ;;
     esac
     shift
 done
