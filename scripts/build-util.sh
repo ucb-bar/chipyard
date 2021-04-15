@@ -49,17 +49,15 @@ module_make() ( # <submodule> <target..>
     cd "${SRCDIR}/${1}/build"
     shift
     "${MAKE}" "$@" | tee "build-${1:-make}.log"
+    if [ -n "$CLEANAFTERINSTALL" ] ; then
+      "${MAKE}" clean  # get rid of intermediate files
+    fi
 )
 
-module_build() ( # <submodule> [--clean-after-install] [configure-arg..]
+module_build() ( # <submodule> [configure-arg..]
     set -e -o pipefail
     name=$1
     shift
-    clean_after_install=false
-    if [ "$1" = "--clean-after-install" ] ; then
-      clean_after_install=true
-      shift
-    fi
 
     cd "${SRCDIR}/${name}"
 
@@ -86,7 +84,7 @@ module_build() ( # <submodule> [--clean-after-install] [configure-arg..]
         "${MAKE}"
         echo "==>  Installing ${name}"
         "${MAKE}" install
-        if [ "$clean_after_install" = "true" ] ; then
+        if [ -n "$CLEANAFTERINSTALL" ] ; then
           "${MAKE}" clean  # get rid of intermediate files
         fi
     } 2>&1 | tee build.log

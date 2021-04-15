@@ -39,7 +39,6 @@ EC2FASTINSTALL="false"
 IGNOREQEMU=""
 RISCV=""
 ARCH=""
-CLEANAFTERINSTALL=""
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
@@ -52,9 +51,6 @@ do
             RISCV=$(realpath $1) ;;
         --ignore-qemu )
             IGNOREQEMU="true" ;;
-        --clean-after-install )
-            shift
-            CLEANAFTERINSTALL="--clean-after-install" ;;
         -a | --arch )
             shift
             ARCH=$1 ;;
@@ -136,7 +132,7 @@ else
     esac
 
     module_prepare riscv-gnu-toolchain qemu
-    module_build riscv-gnu-toolchain $CLEANAFTERINSTALL --prefix="${RISCV}" --with-cmodel=medany ${ARCH:+--with-arch=${ARCH}}
+    module_build riscv-gnu-toolchain --prefix="${RISCV}" --with-cmodel=medany ${ARCH:+--with-arch=${ARCH}}
     echo '==>  Building GNU/Linux toolchain'
     module_make riscv-gnu-toolchain linux
 fi
