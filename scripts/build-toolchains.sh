@@ -18,11 +18,12 @@ usage() {
     echo "   ec2fast: if set, pulls in a pre-compiled RISC-V toolchain for an EC2 manager instance"
     echo ""
     echo "Options"
-    echo "   --prefix PREFIX : Install destination. If unset, defaults to $(pwd)/riscv-tools-install"
-    echo "                     or $(pwd)/esp-tools-install"
-    echo "   --ignore-qemu   : Ignore installing QEMU"
-    echo "   --arch -a       : Architecture (e.g., rv64gc)"
-    echo "   --help -h       : Display this message"
+    echo "   --prefix PREFIX       : Install destination. If unset, defaults to $(pwd)/riscv-tools-install"
+    echo "                           or $(pwd)/esp-tools-install"
+    echo "   --ignore-qemu         : Ignore installing QEMU"
+    echo "   --clean-after-install : Run make clean in calls to module_make and module_build"
+    echo "   --arch -a             : Architecture (e.g., rv64gc)"
+    echo "   --help -h             : Display this message"
     exit "$1"
 }
 
@@ -37,6 +38,7 @@ die() {
 TOOLCHAIN="riscv-tools"
 EC2FASTINSTALL="false"
 IGNOREQEMU=""
+CLEANAFTERINSTALL=""
 RISCV=""
 ARCH=""
 
@@ -54,6 +56,8 @@ do
         -a | --arch )
             shift
             ARCH=$1 ;;
+        --clean-after-install )
+            CLEANAFTERINSTALL="true" ;;
         riscv-tools | esp-tools)
             TOOLCHAIN=$1 ;;
         ec2fast )
