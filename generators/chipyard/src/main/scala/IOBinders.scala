@@ -231,7 +231,7 @@ class WithDebugIOCells extends OverrideLazyIOBinder({
           d.disableDebug.foreach { d => d := false.B }
           // Drive JTAG on-chip IOs
           d.systemjtag.map { j =>
-            j.reset := clockBundle.reset
+            j.reset := ResetCatchAndSync(j.jtag.TCK, clockBundle.reset.toBool)
             j.mfr_id := p(JtagDTMKey).idcodeManufId.U(11.W)
             j.part_number := p(JtagDTMKey).idcodePartNum.U(16.W)
             j.version := p(JtagDTMKey).idcodeVersion.U(4.W)
