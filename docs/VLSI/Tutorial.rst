@@ -50,11 +50,11 @@ Prerequisites
 -------------
 
 * Python 3.4+
-* numpy and gdspy packages
+* numpy and gdspy packages. gdspy must be version 1.4.
 * Genus, Innovus, and Calibre licenses
 * For ASAP7 specifically:
 
-  * Download the `ASAP7 PDK <http://asap.asu.edu/asap/>`__ tarball to a directory of choice but do not extract it. The tech plugin is configured to extract the PDK into a cache directory for you.
+  * Download the `ASAP7 PDK v1p5 <http://asap.asu.edu/asap/>`__ tarball to a directory of choice but do not extract it. The tech plugin is configured to extract the PDK into a cache directory for you.
   * If you have additional ASAP7 hard macros, their LEF & GDS need to be 4x upscaled @ 4000 DBU precision. They may live outside ``extra_libraries`` at your discretion.
   * Innovus version must be >= 15.2 or <= 18.1 (ISRs excluded).
 
