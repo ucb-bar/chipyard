@@ -3,11 +3,14 @@
 `ifndef RESET_DELAY
  `define RESET_DELAY 777.7
 `endif
+`ifndef CLOCK_PERIOD
+ `define CLOCK_PERIOD 1.0
+`endif
 `ifndef MODEL
- `define MODEL TestHarness
+ `define MODEL ArtyFPGATestHarness
 `endif
 
-module TestDriver;
+module ArtyTestDriver;
 
   reg clock = 1'b0;
   reg reset = 1'b1;
@@ -162,9 +165,9 @@ module TestDriver;
   end
 
   `MODEL testHarness(
-    .clock(clock),
-    .reset(reset),
-    .io_success(success)
+    .CLK100MHZ(clock),
+    .ck_rst(reset),
+    .success(success)
   );
 
 endmodule

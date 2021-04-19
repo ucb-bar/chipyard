@@ -68,7 +68,7 @@ ifeq ($(SUB_PROJECT),artysim)
 	CONFIG            ?= TinyRocketArtySimConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty
 	GENERATOR_PACKAGE ?= chipyard
-	TB                ?= TestDriver
+	TB                ?= ArtyTestDriver
 	TOP               ?= ChipTop
 	BOARD             ?= arty
 	FPGA_BRAND        ?= xilinx
