@@ -56,6 +56,7 @@ ifeq ($(SUB_PROJECT),arty)
 	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= arty
+	FPGA_FAMILY				?= kintex7
 	FPGA_BRAND        ?= xilinx
 endif
 
@@ -71,6 +72,7 @@ ifeq ($(SUB_PROJECT),artysim)
 	TB                ?= ArtyTestDriver
 	TOP               ?= ChipTop
 	BOARD             ?= arty
+	FPGA_FAMILY				?= kintex7
 	FPGA_BRAND        ?= xilinx
 endif
 
@@ -134,6 +136,45 @@ debug-bitstream: $(build_dir)/obj/post_synth.dcp
 			$(BOARD) \
 			$(build_dir)/debug_obj \
 			$(fpga_common_script_dir)
+
+#########################################################################################
+# sim rules
+#########################################################################################
+
+# hack until able to restructure fpga-shells .tcl scripts
+project-creation-script := $(fpga_common_script_dir)/create_project.tcl 
+$(project-creation-script): $(fpga_common_script_dir)/vivado.tcl
+	cd $(fpga_common_script_dir); sed -n '1,10p' vivado.tcl > create_project.tcl
+
+# generate the vivado project and add all sources
+vivado-project := $(build_dir)/$(MODEL).xpr
+$(vivado-project): $(project-creation-script) $(synth_list_f)
+	cd $(build_dir); vivado \
+		-nojournal -mode batch \
+		-source  $(project-creation-script) \
+		-tclargs \
+			-top-module "$(MODEL)" \
+			-F "$(synth_list_f)" \
+			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
+			-board "$(BOARD)"
+	# clean up the hacked project creation script
+	rm $(project-creation-script)
+
+# compile the vivado behavioral simulation libraries.
+# using the generated synopsys_sim.setup as the marker file.
+# probably a better way to do this, but works for now.
+compiled-simlibs := $(build_dir)/$(MODEL).cache/compile_simlib/synopsys_sim.setup
+$(compiled-simlibs): $(vivado-project) $(sim_dir)/scripts/compile_simlib.tcl
+	cd $(build_dir); vivado \
+		-nojournal -mode batch \
+		-source $(sim_dir)/scripts/compile_simlib.tcl \
+		-tclargs \
+			$(FPGA_FAMILY) \
+			$(build_dir) \
+			$(MODEL)
+
+.PHONY: sim-fpga
+sim-fpga: $(compiled-simlibs)
 
 #########################################################################################
 # general cleanup rules
