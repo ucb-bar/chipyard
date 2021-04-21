@@ -16,7 +16,7 @@ In CentOS-based platforms, we recommend installing the following dependencies:
 .. include:: /../scripts/centos-req.sh
    :code: bash
 
-In Ubuntu/Debian-based platforms (Ubuntu), we recommend installing the following dependencies:
+In Ubuntu/Debian-based platforms (Ubuntu), we recommend installing the following dependencies. These dependancies were written based on Ubuntu 16.04 LTS and 18.04 LTS - If they don't work for you, you can try out the Docker image (:ref:`Pre-built Docker Image`) before manually installing or removing dependancies:
 
 .. include:: /../scripts/ubuntu-req.sh
    :code: bash
