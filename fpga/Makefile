@@ -148,7 +148,7 @@ $(project-creation-script): $(fpga_common_script_dir)/vivado.tcl
 
 # generate the vivado project and add all sources
 vivado-project := $(build_dir)/$(MODEL).xpr
-$(vivado-project): $(project-creation-script) $(synth_list_f)
+$(vivado-project): $(synth_list_f) $(project-creation-script)
 	cd $(build_dir); vivado \
 		-nojournal -mode batch \
 		-source  $(project-creation-script) \
@@ -160,21 +160,22 @@ $(vivado-project): $(project-creation-script) $(synth_list_f)
 	# clean up the hacked project creation script
 	rm $(project-creation-script)
 
-# compile the vivado behavioral simulation libraries.
-# using the generated synopsys_sim.setup as the marker file.
-# probably a better way to do this, but works for now.
-compiled-simlibs := $(build_dir)/$(MODEL).cache/compile_simlib/synopsys_sim.setup
-$(compiled-simlibs): $(vivado-project) $(sim_dir)/scripts/compile_simlib.tcl
-	cd $(build_dir); vivado \
+# generate vcs collateral, including compiled vivado behavioral simulation libraries
+vivado-vcs-collateral := $(build_dir)/$(MODEL).cache/compile_simlib/synopsys_sim.setup
+$(vivado-vcs-collateral): $(sim_dir)/scripts/generate_vcs_collateral.tcl $(vivado-project)
+	cd $(build_dir); vivado $(vivado-project) \
 		-nojournal -mode batch \
-		-source $(sim_dir)/scripts/compile_simlib.tcl \
+		-source $(sim_dir)/scripts/generate_vcs_collateral.tcl \
 		-tclargs \
 			$(FPGA_FAMILY) \
 			$(build_dir) \
 			$(MODEL)
 
+include $(base_dir)/vcs.mk
+# todo: deduplication between this and sims/vcs/Makefile
+
 .PHONY: sim-fpga
-sim-fpga: $(compiled-simlibs)
+sim-fpga: $(vivado-vcs-collateral)
 
 #########################################################################################
 # general cleanup rules
