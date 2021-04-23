@@ -142,7 +142,7 @@ debug-bitstream: $(build_dir)/obj/post_synth.dcp
 #########################################################################################
 
 # hack until able to restructure fpga-shells .tcl scripts
-project-creation-script := $(fpga_common_script_dir)/create_project.tcl 
+project-creation-script := $(fpga_common_script_dir)/create_project.tcl
 $(project-creation-script): $(fpga_common_script_dir)/vivado.tcl
 	cd $(fpga_common_script_dir); sed -n '1,10p' vivado.tcl > create_project.tcl
 
@@ -160,7 +160,7 @@ $(vivado-project): $(synth_list_f) $(project-creation-script)
 	# clean up the hacked project creation script
 	rm $(project-creation-script)
 
-# generate vcs collateral, including compiled vivado behavioral simulation libraries
+# generate vcs collateral
 vivado-vcs-collateral := $(build_dir)/$(MODEL).cache/compile_simlib/synopsys_sim.setup
 $(vivado-vcs-collateral): $(sim_dir)/scripts/generate_vcs_collateral.tcl $(vivado-project)
 	cd $(build_dir); vivado $(vivado-project) \
@@ -172,7 +172,50 @@ $(vivado-vcs-collateral): $(sim_dir)/scripts/generate_vcs_collateral.tcl $(vivad
 			$(MODEL)
 
 include $(base_dir)/vcs.mk
-# todo: deduplication between this and sims/vcs/Makefile
+# todo: deduplication between this and other VCS sim makefiles
+
+# vcs-mx flow
+sim_name = vcs
+sim_prefix = simv
+sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
+
+fpga_sim_verilog_sources = $(build_dir)/fpga_sim_verilog_sources.f
+fpga_sim_vhdl_sources = $(build_dir)/fpga_sim_cc_sources.f
+fpga_sim_cc_sources = $(build_dir)/fpga_sim_cc_sources.f
+
+xilinx_lib = xil_defaultlib
+
+VCS = vcs -full64
+VLOGAN = vlogan -full64
+VHDLAN = vhdlan -full64
+SYSCAN = syscan -full64
+
+VLOGAN_OPTS = \
+	-notice \
+	-line \
+	+lint=all,noVCDE,noONGS,noUI \
+	-error=PCWM-L \
+	-error=noZMMCM \
+	-timescale=1ns/10ps \
+	-quiet \
+	-q \
+	+rad \
+	+vcs+lic+wait \
+	+vc+list \
+	-sverilog +systemverilogext+.sv+.svi+.svh+.svt -assert svaext +libext+.sv \
+	+v2k +verilog2001ext+.v95+.vt+.vp +libext+.v \
+	-debug_pp \
+	+incdir+$(build_dir) \
+	$(PREPROC_DEFINES)
+
+VHDLAN_OPTS = ""
+
+SYSCAN_OPTS = \
+	$(VCS_CC_OPTS )
+
+VCS_OPTS = ""
+
+$(sim): $(vivado-vcs-collateral) $(fpga_sim_verilog_sources) $(fpga_sim_vhdl_sources) $(fpga_sim_cc_sources)
 
 .PHONY: sim-fpga
 sim-fpga: $(vivado-vcs-collateral)
