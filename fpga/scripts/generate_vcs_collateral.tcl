@@ -17,10 +17,13 @@ export_simulation -force -simulator vcs -ip_user_files_dir $build_dir/$model.ip_
 set synopsys_libraries [open $build_dir/synopsys_sim.setup a]
 puts $synopsys_libraries "xil_defaultlib : vcs_lib/xil_defaultlib"
 close $synopsys_libraries
-#generate separate lists of verilog and vhdl sim sources
+#generate separate lists of verilog, vhdl, and cc sim sources
 set fpga_sim_verilog_sources [open $build_dir/fpga_sim_verilog_sources.f w]
 foreach source [get_files -compile_order sources -used_in simulation -filter {FILE_TYPE == Verilog}] {puts $fpga_sim_verilog_sources $source}
 close $fpga_sim_verilog_sources
 set fpga_sim_vhdl_sources [open $build_dir/fpga_sim_vhdl_sources.f w]
 foreach source [get_files -compile_order sources -used_in simulation -filter {FILE_TYPE == VHDL}] {puts $fpga_sim_vhdl_sources $source}
 close $fpga_sim_vhdl_sources
+set fpga_sim_cc_sources [open $build_dir/fpga_sim_cc_sources.f w]
+foreach source [get_files *.cc] {puts $fpga_sim_cc_sources $source}
+close $fpga_sim_cc_sources
