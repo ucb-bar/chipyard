@@ -2,6 +2,7 @@
 
 set -ex
 
+sudo apt-get install -y curl
 sudo apt-get install -y build-essential bison flex
 sudo apt-get install -y libgmp-dev libmpfr-dev libmpc-dev zlib1g-dev vim git default-jdk default-jre
 # install sbt: https://www.scala-sbt.org/release/docs/Installing-sbt-on-Linux.html#Ubuntu+and+other+Debian-based+distributions
