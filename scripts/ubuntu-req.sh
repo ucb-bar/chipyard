@@ -21,6 +21,7 @@ sudo apt-get install -y python3-pip python3.6-dev rsync libguestfs-tools expat c
 sudo apt-get install -y device-tree-compiler
 
 # install verilator
+sudo apt-get install -y autoconf
 git clone http://git.veripool.org/git/verilator
 cd verilator
 git checkout v4.034
