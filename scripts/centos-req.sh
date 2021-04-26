@@ -29,4 +29,4 @@ sudo yum install -y dtc
 git clone http://git.veripool.org/git/verilator
 cd verilator
 git checkout v4.034
-autoconf && ./configure && make -j16 && sudo make install
+autoconf && ./configure && make -j$(nproc) && sudo make install
