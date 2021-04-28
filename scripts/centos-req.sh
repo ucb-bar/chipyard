@@ -4,7 +4,13 @@ set -ex
 
 sudo yum groupinstall -y "Development tools"
 sudo yum install -y gmp-devel mpfr-devel libmpc-devel zlib-devel vim git java java-devel
-curl https://bintray.com/sbt/rpm/rpm | sudo tee /etc/yum.repos.d/bintray-sbt-rpm.repo
+
+# Install SBT https://www.scala-sbt.org/release/docs/Installing-sbt-on-Linux.html#Red+Hat+Enterprise+Linux+and+other+RPM-based+distributions
+# sudo rm -f /etc/yum.repos.d/bintray-rpm.repo
+# Use rm above if sbt installed from bintray before.
+curl -L https://www.scala-sbt.org/sbt-rpm.repo > sbt-rpm.repo
+sudo mv sbt-rpm.repo /etc/yum.repos.d/
+
 sudo yum install -y sbt texinfo gengetopt
 sudo yum install -y expat-devel libusb1-devel ncurses-devel cmake "perl(ExtUtils::MakeMaker)"
 # deps for poky
@@ -24,4 +30,4 @@ sudo yum install -y python
 git clone http://git.veripool.org/git/verilator
 cd verilator
 git checkout v4.034
-autoconf && ./configure && make -j16 && sudo make install
+autoconf && ./configure && make -j$(nproc) && sudo make install
