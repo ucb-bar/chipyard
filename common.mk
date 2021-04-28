@@ -59,7 +59,12 @@ include $(base_dir)/tools/dromajo/dromajo.mk
 # Prerequisite lists
 #########################################################################################
 # Returns a list of files in directory $1 with file extension $2.
-lookup_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.$(2)" -print 2> /dev/null)
+# If available, use 'fd' to find the list of files, which is faster than 'find'.
+ifeq ($(shell which fd),)
+	lookup_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.$(2)" -print 2> /dev/null)
+else
+	lookup_srcs = $(shell fd -L ".*\.$(2)" $(1))
+endif
 
 SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools/iocell fpga/fpga-shells fpga/src)
 SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
