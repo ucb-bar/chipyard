@@ -172,15 +172,12 @@ $(vivado-vcs-collateral): $(sim_dir)/scripts/generate_vcs_collateral.tcl $(vivad
 			$(MODEL)
 
 include $(base_dir)/vcs.mk
-# todo: deduplication between this and other VCS sim makefiles
 
-# vcs-mx flow
-sim_name = vcs
 sim_prefix = simv
-sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
+sim = $(build_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 
 fpga_sim_verilog_sources = $(build_dir)/fpga_sim_verilog_sources.f
-fpga_sim_vhdl_sources = $(build_dir)/fpga_sim_cc_sources.f
+fpga_sim_vhdl_sources = $(build_dir)/fpga_sim_vhdl_sources.f
 fpga_sim_cc_sources = $(build_dir)/fpga_sim_cc_sources.f
 
 xilinx_lib = xil_defaultlib
@@ -188,8 +185,8 @@ xilinx_lib = xil_defaultlib
 VCS = vcs -full64
 VLOGAN = vlogan -full64
 VHDLAN = vhdlan -full64
-SYSCAN = syscan -full64
 
+# todo: deduplication between this and other VCS sim makefile
 VLOGAN_OPTS = \
 	-notice \
 	-line \
@@ -208,17 +205,15 @@ VLOGAN_OPTS = \
 	+incdir+$(build_dir) \
 	$(PREPROC_DEFINES)
 
-VHDLAN_OPTS = ""
-
-SYSCAN_OPTS = \
-	$(VCS_CC_OPTS )
-
-VCS_OPTS = ""
-
-$(sim): $(vivado-vcs-collateral) $(fpga_sim_verilog_sources) $(fpga_sim_vhdl_sources) $(fpga_sim_cc_sources)
+# vcs-mx flow
+$(sim): $(vivado-vcs-collateral)
+	mkdir -p $(build_dir)/vcs_lib/xil_defaultlib
+	cd $(build_dir); $(VHDLAN) -work $(xilinx_lib) -f $(fpga_sim_vhdl_sources) -l vhdlan.log
+	cd $(build_dir); $(VLOGAN) $(VLOGAN_OPTS) -work $(xilinx_lib) -f $(fpga_sim_verilog_sources) -l vlogan.log
+	cd $(build_dir); $(VCS) $(VCS_CC_OPTS) $(xilinx_lib).$(TB) $(xilinx_lib).glbl -file $(fpga_sim_cc_sources) -o $@ -Mdir=$(build_dir)/$(long_name) -l vcs.log
 
 .PHONY: sim-fpga
-sim-fpga: $(vivado-vcs-collateral)
+sim-fpga: $(sim)
 
 #########################################################################################
 # general cleanup rules

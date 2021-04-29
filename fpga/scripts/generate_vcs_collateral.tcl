@@ -20,6 +20,9 @@ close $synopsys_libraries
 #generate separate lists of verilog, vhdl, and cc sim sources
 set fpga_sim_verilog_sources [open $build_dir/fpga_sim_verilog_sources.f w]
 foreach source [get_files -compile_order sources -used_in simulation -filter {FILE_TYPE == Verilog}] {puts $fpga_sim_verilog_sources $source}
+foreach source [get_files -compile_order sources -used_in simulation -filter {FILE_TYPE == SystemVerilog}] {puts $fpga_sim_verilog_sources $source}
+# add vivado's glbl.v
+puts $fpga_sim_verilog_sources $build_dir/export_sim/vcs/glbl.v
 close $fpga_sim_verilog_sources
 set fpga_sim_vhdl_sources [open $build_dir/fpga_sim_vhdl_sources.f w]
 foreach source [get_files -compile_order sources -used_in simulation -filter {FILE_TYPE == VHDL}] {puts $fpga_sim_vhdl_sources $source}
