@@ -170,6 +170,7 @@ SBT_NON_THIN ?= $(subst $(SBT_CLIENT_FLAG),,$(SBT))
 define run_scala_main
 	cd $(base_dir) && $(SBT) ";project $(1); runMain $(2) $(3)"
 endef
+run_main = cd $(base_dir) && java $(JAVA_ARGS) -cp $(FAT_JAR) $(2) $(3)
 
 FIRRTL_LOGLEVEL ?= error
 
