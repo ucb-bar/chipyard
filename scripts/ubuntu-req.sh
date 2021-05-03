@@ -12,11 +12,11 @@ sudo apt-get install -y sbt
 sudo apt-get install -y texinfo gengetopt
 sudo apt-get install -y libexpat1-dev libusb-dev libncurses5-dev cmake
 # deps for poky
-sudo apt-get install -y python3.6 patch diffstat texi2html texinfo subversion chrpath wget
+sudo apt-get install -y python3.8 patch diffstat texi2html texinfo subversion chrpath wget
 # deps for qemu
 sudo apt-get install -y libgtk-3-dev gettext
 # deps for firemarshal
-sudo apt-get install -y python3-pip python3.6-dev rsync libguestfs-tools expat ctags
+sudo apt-get install -y python3-pip python3.8-dev rsync libguestfs-tools expat ctags
 # install DTC
 sudo apt-get install -y device-tree-compiler
 sudo apt-get install -y python
