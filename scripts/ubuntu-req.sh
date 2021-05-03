@@ -2,10 +2,10 @@
 
 set -ex
 
-sudo apt-get install -y build-essential bison flex software-properties-common
+sudo apt-get install -y build-essential bison flex software-properties-common curl
 sudo apt-get install -y libgmp-dev libmpfr-dev libmpc-dev zlib1g-dev vim default-jdk default-jre
-# install sbt: https://www.scala-sbt.org/release/docs/Installing-sbt-on-Linux.html
-echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
+# install sbt: https://www.scala-sbt.org/release/docs/Installing-sbt-on-Linux.html#Ubuntu+and+other+Debian-based+distributions
+echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
 curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add
 sudo apt-get update
 sudo apt-get install -y sbt
@@ -26,6 +26,7 @@ sudo apt-get update
 sudo apt-get install git -y
 
 # install verilator
+sudo apt-get install -y autoconf
 git clone http://git.veripool.org/git/verilator
 cd verilator
 git checkout v4.034
