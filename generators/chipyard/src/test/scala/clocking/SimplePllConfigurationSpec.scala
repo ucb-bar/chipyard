@@ -3,7 +3,7 @@ package chipyard.clocking
 
 import freechips.rocketchip.prci._
 
-class SimplePllConfigurationSpec extends org.scalatest.FlatSpec {
+class SimplePllConfigurationSpec extends org.scalatest.flatspec.AnyFlatSpec {
 
     def genConf(freqMHz: Iterable[Double]): SimplePllConfiguration = new SimplePllConfiguration(
       "testPLL",
