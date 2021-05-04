@@ -155,7 +155,17 @@ module_all riscv-tests --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --with-xlen=
 CC= CXX= SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --host=riscv${XLEN}-unknown-elf
 
 if [ -z "$IGNOREQEMU" ] ; then
-SRCDIR="$(pwd)/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv${XLEN}-softmmu
+    echo "=>  Starting qemu build"
+    dir="$(pwd)/toolchains/qemu"
+    echo "==>   Initializing qemu submodule"
+    #since we don't want to use the global config we init passing rewrite config in to the command
+    git -c url.https://github.com/qemu.insteadOf=https://git.qemu.org/git submodule update --init --recursive "$dir"
+    echo "==>  Applying url-rewriting to avoid git.qemu.org"
+    # and once the clones exist, we recurse through them and set the rewrite
+    # in the local config so that any further commands by the user have the rewrite. uggh. git, why you so ugly?
+    git -C "$dir" config --local url.https://github.com/qemu.insteadOf https://git.qemu.org/git
+    git -C "$dir" submodule foreach --recursive 'git config --local url.https://github.com/qemu.insteadOf https://git.qemu.org/git'
+    SRCDIR="$(pwd)/toolchains" module_build qemu --prefix="${RISCV}" --target-list=riscv${XLEN}-softmmu
 fi
 
 # make Dromajo
