@@ -14,6 +14,9 @@ sim_name := none
 #########################################################################################
 # include shared variables
 #########################################################################################
+
+VIVADO_VERSION := $(shell vivado -version | head -1 | grep -o -P '(?<=\s).*(?=\s)')
+
 SUB_PROJECT ?= vcu118
 
 ifeq ($(SUB_PROJECT),vcu118)
