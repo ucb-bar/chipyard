@@ -9,7 +9,7 @@ base_dir=$(abspath ..)
 sim_dir=$(abspath .)
 
 # do not generate simulation files
-sim_name := arty
+sim_name := none
 
 #########################################################################################
 # include shared variables
@@ -56,7 +56,7 @@ ifeq ($(SUB_PROJECT),arty)
 	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= arty
-	FPGA_FAMILY				?= kintex7
+	FPGA_FAMILY       ?= kintex7
 	FPGA_BRAND        ?= xilinx
 endif
 
@@ -72,8 +72,9 @@ ifeq ($(SUB_PROJECT),artysim)
 	TB                ?= ArtyTestDriver
 	TOP               ?= ChipTop
 	BOARD             ?= arty
-	FPGA_FAMILY				?= kintex7
+	FPGA_FAMILY       ?= kintex7
 	FPGA_BRAND        ?= xilinx
+	sim_name          ?= arty
 endif
 
 include $(base_dir)/variables.mk

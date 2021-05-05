@@ -11,6 +11,8 @@ import freechips.rocketchip.tile._
 
 import sifive.blocks.devices.uart._
 
+import testchipip.{SerialTLKey}
+
 import chipyard.{BuildSystem}
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
@@ -22,6 +24,7 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
     idcodePartNum = 0x000,
     idcodeManufId = 0x489,
     debugIdleCycles = 5)
+  case SerialTLKey => None // remove serialized tl port
 })
 // DOC include start: AbstractArty and Rocket
 class WithArtyTweaks extends Config(
@@ -39,5 +42,6 @@ class TinyRocketArtyConfig extends Config(
 class TinyRocketArtySimConfig extends Config( // any additional IO needed for VCS sim go here.
   new TinyRocketArtyConfig ++
   new chipyard.harness.WithTiedOffDebug ++
-  new chipyard.harness.WithSimSerial)
+  new chipyard.harness.WithSimSerial ++
+  new testchipip.WithDefaultSerialTL)
 // DOC include end: AbstractArty and Rocket
