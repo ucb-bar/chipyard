@@ -74,7 +74,7 @@ ifeq ($(SUB_PROJECT),artysim)
 	BOARD             ?= arty
 	FPGA_FAMILY       ?= kintex7
 	FPGA_BRAND        ?= xilinx
-	sim_name          ?= arty
+	sim_name           = arty
 endif
 
 include $(base_dir)/variables.mk
