@@ -145,10 +145,7 @@ debug-bitstream: $(build_dir)/obj/post_synth.dcp
 # sim rules
 #########################################################################################
 
-# hack until able to restructure fpga-shells .tcl scripts
-project-creation-script := $(fpga_common_script_dir)/create_project.tcl
-$(project-creation-script): $(fpga_common_script_dir)/vivado.tcl
-	cd $(fpga_common_script_dir); sed -n '1,10p' vivado.tcl > create_project.tcl
+project-creation-script := $(sim_dir)/scripts/create_project.tcl
 
 # generate the vivado project and add all sources
 vivado-project := $(build_dir)/$(MODEL).xpr
@@ -161,8 +158,6 @@ $(vivado-project): $(synth_list_f) $(project-creation-script)
 			-F "$(synth_list_f)" \
 			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
 			-board "$(BOARD)"
-	# clean up the hacked project creation script
-	rm $(project-creation-script)
 
 # generate vcs collateral
 vivado-vcs-collateral := $(build_dir)/$(MODEL).cache/compile_simlib/synopsys_sim.setup
