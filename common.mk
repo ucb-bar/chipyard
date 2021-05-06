@@ -18,7 +18,7 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_LDFLAGS      = additional LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES      = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS         = additional make requirements to build the simulator" \
-"   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client"
+"   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client (works best with sbtn or sbt script)"
 
 EXTRA_GENERATOR_REQS ?=
 EXTRA_SIM_CXXFLAGS   ?=
