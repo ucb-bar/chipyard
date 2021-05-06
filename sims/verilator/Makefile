@@ -46,9 +46,21 @@ debug: $(sim_debug)
 #########################################################################################
 # simulaton requirements
 #########################################################################################
+# past emulator.cc and verilator.h, the other files may not be used in the simulation but
+# are needed for emulator.cc to compile
 SIM_FILE_REQS += \
 	$(CHIPYARD_RSRCS_DIR)/csrc/emulator.cc \
-	$(ROCKETCHIP_RSRCS_DIR)/csrc/verilator.h
+	$(ROCKETCHIP_RSRCS_DIR)/csrc/verilator.h \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/SimSerial.cc \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/SimDRAM.cc \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm.h \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm.cc \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm_dramsim2.h \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm_dramsim2.cc \
+	$(ROCKETCHIP_RSRCS_DIR)/csrc/SimDTM.cc \
+	$(ROCKETCHIP_RSRCS_DIR)/csrc/SimJTAG.cc \
+	$(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.h \
+	$(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.cc
 
 # copy files and add -FI for *.h files in *.f
 $(sim_files): $(SIM_FILE_REQS)
