@@ -247,12 +247,17 @@ SBT_COMMAND ?= shell
 launch-sbt:
 	cd $(base_dir) && $(SBT_NON_THIN) "$(SBT_COMMAND)"
 
+check-thin-client:
+ifeq (,$(ENABLE_SBT_THIN_CLIENT))
+	$(error ENABLE_SBT_THIN_CLIENT not set.)
+endif
+
 .PHONY: shutdown-sbt-server
-shutdown-sbt-server:
+shutdown-sbt-server: check-thin-client
 	cd $(base_dir) && $(SBT) "shutdown"
 
 .PHONY: start-sbt-server
-start-sbt-server:
+start-sbt-server: check-thin-client
 	cd $(base_dir) && $(SBT) "exit"
 
 #########################################################################################
