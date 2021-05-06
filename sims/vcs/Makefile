@@ -32,6 +32,22 @@ default: $(sim)
 debug: $(sim_debug)
 
 #########################################################################################
+# simulaton requirements
+#########################################################################################
+SIM_FILE_REQS += \
+	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
+
+# ignore *.h files since vcs has +incdir
+$(sim_files): $(SIM_FILE_REQS)
+	mkdir -p $(dir $(sim_files))
+	cp -f $^ $(build_dir)
+	$(foreach file,\
+		$^,\
+		$(if $(filter %.h,$(file)),\
+			,\
+			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
+
+#########################################################################################
 # import other necessary rules and variables
 #########################################################################################
 include $(base_dir)/common.mk
