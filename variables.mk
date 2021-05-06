@@ -152,7 +152,10 @@ JAVA_OPTS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M -Djava.io.tmpdir=
 # default sbt launch command
 #########################################################################################
 # by default build chisel3/firrtl and other subprojects from source
-override SBT_OPTS += -Dsbt.sourcemode=true -Dsbt.workspace=$(base_dir)/tools
+SBT_OPTS_FILE := $(base_dir)/.sbtopts
+ifneq (,$(wildcard $(SBT_OPTS_FILE)))
+override SBT_OPTS += $(subst $$PWD,$(base_dir),$(shell cat $(SBT_OPTS_FILE)))
+endif
 
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
