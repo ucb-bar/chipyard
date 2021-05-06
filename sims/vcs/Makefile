@@ -37,7 +37,7 @@ debug: $(sim_debug)
 SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
 
-# ignore *.h files since vcs has +incdir
+# copy files but ignore *.h files in *.f since vcs has +incdir+$(build_dir)
 $(sim_files): $(SIM_FILE_REQS)
 	mkdir -p $(dir $(sim_files))
 	cp -f $^ $(build_dir)

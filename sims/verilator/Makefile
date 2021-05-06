@@ -50,7 +50,7 @@ SIM_FILE_REQS += \
 	$(CHIPYARD_RSRCS_DIR)/csrc/emulator.cc \
 	$(ROCKETCHIP_RSRCS_DIR)/csrc/verilator.h
 
-# add -FI for *.h files
+# copy files and add -FI for *.h files in *.f
 $(sim_files): $(SIM_FILE_REQS)
 	mkdir -p $(dir $(sim_files))
 	cp -f $^ $(build_dir)
