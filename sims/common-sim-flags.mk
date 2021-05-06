@@ -32,8 +32,7 @@ SIM_FILE_REQS += \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm_dramsim2.h \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm_dramsim2.cc \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v \
-    $(ROCKETCHIP_RSRCS_DIR)/csrc/SimDTM.cc \
-    $(ROCKETCHIP_RSRCS_DIR)/csrc/SimJTAG.cc \
-    $(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.h \
-    $(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.cc
-
+	$(ROCKETCHIP_RSRCS_DIR)/csrc/SimDTM.cc \
+	$(ROCKETCHIP_RSRCS_DIR)/csrc/SimJTAG.cc \
+	$(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.h \
+	$(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.cc
