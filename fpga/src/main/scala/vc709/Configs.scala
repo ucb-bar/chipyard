@@ -21,7 +21,7 @@ import chipyard.fpga.vcu118.{WithUARTIOPassthrough, WithTLIOPassthrough, WithFPG
 import chipyard.fpga.vcu118.bringup.{WithI2CIOPassthrough, WithGPIOIOPassthrough}
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
-  case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L), nTxEntries = 256, nRxEntries = 256))
+  case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L), nTxEntries = 1024, nRxEntries = 1024))
   case PeripheryGPIOKey => List(GPIOParams(address = BigInt(0x64002000L), width = 21))
   case PeripheryI2CKey => List(I2CParams(address = BigInt(0x64005000L)))
 })
@@ -67,7 +67,7 @@ class RocketVC709Config extends Config(
   new chipyard.RocketConfig)
 // DOC include end: AbstractVC709 and Rocket
 
-class SmallLargeBoomConfig extends Config(
+class SmallBoomConfig extends Config(
   new boom.common.WithNSmallBooms(4) ++                          // 4 boom cores
   new chipyard.config.AbstractConfig)
 
@@ -75,4 +75,4 @@ class BoomVC709Config extends Config(
   new WithFPGAFrequency(50) ++
   new WithVC709System ++
   new WithVC709Tweaks ++
-  new SmallLargeBoomConfig)
+  new SmallBoomConfig)
