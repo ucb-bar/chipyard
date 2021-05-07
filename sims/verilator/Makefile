@@ -63,7 +63,7 @@ SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.cc
 
 # copy files and add -FI for *.h files in *.f
-$(sim_files): $(SIM_FILE_REQS)
+$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
 	mkdir -p $(dir $(sim_files))
 	cp -f $^ $(build_dir)
 	$(foreach file,\
