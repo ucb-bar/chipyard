@@ -52,6 +52,8 @@ SIM_FILE_REQS += \
 	$(CHIPYARD_RSRCS_DIR)/csrc/emulator.cc \
 	$(ROCKETCHIP_RSRCS_DIR)/csrc/verilator.h \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/SimSerial.cc \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/testchip_tsi.cc \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/testchip_tsi.h \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/SimDRAM.cc \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm.h \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm.cc \
