@@ -38,6 +38,17 @@ object NodeIdx {
 
 
 /**
+  * Specifies DUT clocks for the rational clock bridge
+  *
+  * @param allClocks Seq. of RationalClocks that want a clock
+  *
+  * @param baseClockName Name of domain that the allClocks is rational to
+  *
+  * @param baseFreqRequested Freq. for the reference domain in Hz
+  */
+case class BuildTopClockParameters(allClocks: Seq[RationalClock], baseClockName: String, baseFreqRequested: Double)
+
+/**
   * Under FireSim's current multiclock implementation there can be only a
   * single clock bridge. This requires, therefore, that it  be instantiated in
   * the harness and reused across all supernode instances. This class attempts to
@@ -48,8 +59,9 @@ class ClockBridgeInstantiator {
 
   // Assumes that the supernode implementation results in duplicated clocks
   //   (i.e. only 1 set of clocks is generated for all BuildTop designs)
-  private val _buildtopClockMap: LinkedHashMap[String, (RationalClock, Clock)] = LinkedHashMap.empty
-  private var _buildtopRefTuple: Option[(String, Double)] = None
+  private var _buildTopClockParams: Option[BuildTopClockParameters] = None
+  private val _buildTopClockMap: LinkedHashMap[String, (RationalClock, Clock)] = LinkedHashMap.empty
+  private var _buildTopClockRecord: Option[RecordMap[Clock]] = None
 
   /**
    * Request a clock at a particular frequency
@@ -65,41 +77,43 @@ class ClockBridgeInstantiator {
   }
 
   /**
-   * Get a RecordMap of clocks for a set of input RationalClocks
+   * Get a RecordMap of clocks for a set of input RationalClocks. Used to drive
+   * the design elaborated by buildtop
    *
-   * @param allClocks Seq. of RationalClocks that want a clock
-   *
-   * @param baseClockName Name of domain that the allClocks is rational to
-   *
-   * @param baseFreqRequested Freq. for the reference domain in Hz
+   * @param clockMapParameters Defines the set of required clocks
    */
-  def requestClockRecordMap(allClocks: Seq[RationalClock], baseClockName: String, baseFreqRequested: Double): RecordMap[Clock] = {
-    require(!_buildtopRefTuple.isDefined, "Can only request one RecordMap of Clocks")
+  def requestClockRecordMap(clockMapParameters: BuildTopClockParameters): RecordMap[Clock] = {
+    if (_buildTopClockParams.isDefined) {
+      require(_buildTopClockParams.get == clockMapParameters, "Must request same set of clocks on repeated invocations.")
+    } else {
+      val clockRecord = Wire(RecordMap(clockMapParameters.allClocks.map { c => (c.name, Clock()) }:_*))
+      // Build up the mutable structures describing the clocks for the dut
+      _buildTopClockParams = Some(clockMapParameters)
+      _buildTopClockRecord = Some(clockRecord)
 
-    val ratClockRecordMapWire = Wire(RecordMap(allClocks.map { c => (c.name, Clock()) }:_*))
-
-    _buildtopRefTuple = Some((baseClockName, baseFreqRequested))
-    for (clock <- allClocks) {
-      val clkWire = Wire(new Clock)
-      _buildtopClockMap(clock.name) = (clock, clkWire)
-      ratClockRecordMapWire(clock.name).get := clkWire
+      for (clock <- clockMapParameters.allClocks) {
+        val clockWire = Wire(new Clock)
+        _buildTopClockMap(clock.name) = (clock, clockWire)
+        clockRecord(clock.name).get := clockWire
+      }
     }
 
-    ratClockRecordMapWire
+    _buildTopClockRecord.get
   }
 
   /**
    * Connect all clocks requested to ClockBridge
    */
   def instantiateFireSimClockBridge: Unit = {
-    require(_buildtopRefTuple.isDefined, "Must have rational clocks to assign to")
-    require(_buildtopClockMap.exists(_._1 == _buildtopRefTuple.get._1),
-      s"Provided base-clock name for rational clocks, ${_buildtopRefTuple.get._1}, doesn't match a name within specified rational clocks." +
-      "Available clocks:\n " + _buildtopClockMap.map(_._1).mkString("\n "))
+    require(_buildTopClockParams.isDefined, "Must have rational clocks to assign to")
+    val BuildTopClockParameters(allClocks, refRatClockName, refRatClockFreq) = _buildTopClockParams.get
+    require(_buildTopClockMap.exists(_._1 == refRatClockName),
+      s"Provided base-clock name for rational clocks, ${refRatClockName}, doesn't match a name within specified rational clocks." +
+      "Available clocks:\n " + _buildTopClockMap.map(_._1).mkString("\n "))
 
     // Simplify the RationalClocks ratio's
-    val refRatClock = _buildtopClockMap.find(_._1 == _buildtopRefTuple.get._1).get._2._1
-    val simpleRatClocks = _buildtopClockMap.map { t =>
+    val refRatClock = _buildTopClockMap.find(_._1 == refRatClockName).get._2._1
+    val simpleRatClocks = _buildTopClockMap.map { t =>
       val ratClock = t._2._1
       ratClock.copy(
         multiplier = ratClock.multiplier * refRatClock.divisor,
@@ -108,8 +122,7 @@ class ClockBridgeInstantiator {
 
     // Determine all the clock dividers (harness + rational clocks)
     //   Note: Requires that the BuildTop reference frequency is requested with proper freq.
-    val refRatClockFreq = _buildtopRefTuple.get._2
-    val refRatSinkParams = ClockSinkParameters(take=Some(ClockParameters(freqMHz=refRatClockFreq / (1000 * 1000))),name=Some(_buildtopRefTuple.get._1))
+    val refRatSinkParams = ClockSinkParameters(take=Some(ClockParameters(freqMHz=refRatClockFreq / (1000 * 1000))),name=Some(refRatClockName))
     val harSinkParams = _harnessClockMap.map { case (name, (freq, bundle)) =>
       ClockSinkParameters(take=Some(ClockParameters(freqMHz=freq / (1000 * 1000))),name=Some(name))
     }.toSeq
@@ -144,7 +157,7 @@ class ClockBridgeInstantiator {
     // Connect all clocks (harness + BuildTop clocks)
     for (clock <- allAdjRatClks) {
       val (_, cbClockField) = cbVecTuples.find(_._1.equalFrequency(clock)).get
-      _buildtopClockMap.get(clock.name).map { case (_, clk) => clk := cbClockField }
+      _buildTopClockMap.get(clock.name).map { case (_, clk) => clk := cbClockField }
       _harnessClockMap.get(clock.name).map { case (_, clk) => clk := cbClockField }
     }
   }
@@ -197,7 +210,10 @@ class WithFireSimSimpleClocks extends Config((site, here, up) => {
       chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
         reset := th.buildtopReset
         input_clocks := p(ClockBridgeInstantiatorKey)
-          .requestClockRecordMap(rationalClockSpecs.toSeq, p(FireSimBaseClockNameKey), pllConfig.referenceFreqMHz * (1000 * 1000))
+          .requestClockRecordMap(BuildTopClockParameters(
+            rationalClockSpecs.toSeq,
+            p(FireSimBaseClockNameKey),
+            pllConfig.referenceFreqMHz * (1000 * 1000)))
         Nil })
 
       // return the reference frequency
