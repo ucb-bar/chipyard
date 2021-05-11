@@ -17,19 +17,7 @@ RUN apt-get update && \
                keyboard-configuration \
                console-setup
 
-# Adds a new user called riscvuser
-RUN groupadd --gid 3434 riscvuser \
-    && useradd --uid 3434 --gid riscvuser --shell /bin/bash --create-home riscvuser \
-    && echo 'riscvuser ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-riscvuser \
-    && echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
-
-WORKDIR /home/riscvuser
-USER riscvuser
-
-# Update PATH for RISCV toolchain (note: hardcoded for CircleCI)
-ENV RISCV="/home/riscvuser/riscv-tools-install"
-ENV LD_LIBRARY_PATH="$RISCV/lib"
-ENV PATH="$RISCV/bin:$PATH"
+WORKDIR /root
 
 # Install Chipyard and run ubuntu-req.sh to install necessary dependencies
 RUN git clone https://github.com/ucb-bar/chipyard.git && \
@@ -37,7 +25,6 @@ RUN git clone https://github.com/ucb-bar/chipyard.git && \
         git checkout $CHIPYARD_HASH && \
         ./scripts/ubuntu-req.sh 1>/dev/null && \
         sudo rm -rf /var/lib/apt/lists/*
-
 
 # BUILD IMAGE WITH TOOLCHAINS
 
