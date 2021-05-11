@@ -12,7 +12,7 @@ parameters:
 executors:
     main-env:
         docker:
-            - image: ucbbar/chipyard-ci-image:03650a
+            - image: ucbbar/chipyard-ci-image:03650a2
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 
