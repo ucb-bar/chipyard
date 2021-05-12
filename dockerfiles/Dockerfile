@@ -26,6 +26,11 @@ RUN git clone https://github.com/ucb-bar/chipyard.git && \
         ./scripts/ubuntu-req.sh 1>/dev/null && \
         sudo rm -rf /var/lib/apt/lists/*
 
+# Update PATH for RISCV toolchain (note: hardcoded for CircleCI)
+ENV RISCV="/root/riscv-tools-install"
+ENV LD_LIBRARY_PATH="$RISCV/lib"
+ENV PATH="$RISCV/bin:$PATH"
+
 # BUILD IMAGE WITH TOOLCHAINS
 
 # Use above build as base
