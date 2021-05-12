@@ -46,11 +46,12 @@ debug: $(sim_debug)
 #########################################################################################
 # simulaton requirements
 #########################################################################################
-# past emulator.cc and verilator.h, the other files may not be used in the simulation but
-# are needed for emulator.cc to compile
 SIM_FILE_REQS += \
 	$(CHIPYARD_RSRCS_DIR)/csrc/emulator.cc \
 	$(ROCKETCHIP_RSRCS_DIR)/csrc/verilator.h \
+
+# the following files are needed for emulator.cc to compile
+SIM_FILE_REQS += \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/SimSerial.cc \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/testchip_tsi.cc \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/testchip_tsi.h \
@@ -66,7 +67,6 @@ SIM_FILE_REQS += \
 
 # copy files and add -FI for *.h files in *.f
 $(sim_files): $(SIM_FILE_REQS) | $(build_dir)
-	mkdir -p $(dir $(sim_files))
 	cp -f $^ $(build_dir)
 	$(foreach file,\
 		$^,\

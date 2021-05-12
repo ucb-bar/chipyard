@@ -81,7 +81,6 @@ SIM_FILE_REQS += \
 
 # copy files but ignore *.h files in *.f (match vcs)
 $(sim_files): $(SIM_FILE_REQS) | $(build_dir)
-	mkdir -p $(dir $(sim_files))
 	cp -f $^ $(build_dir)
 	$(foreach file,\
 		$^,\
