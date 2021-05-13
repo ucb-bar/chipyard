@@ -30,6 +30,8 @@ sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
 WAVEFORM_FLAG=-v$(sim_out_name).vcd
 
+include $(base_dir)/sims/common-sim-flags.mk
+
 # If verilator seed unspecified, verilator uses srand as random seed
 ifdef RANDOM_SEED
 SEED_FLAG=+verilator+seed+I$(RANDOM_SEED)
@@ -40,6 +42,37 @@ endif
 .PHONY: default debug
 default: $(sim)
 debug: $(sim_debug)
+
+#########################################################################################
+# simulaton requirements
+#########################################################################################
+SIM_FILE_REQS += \
+	$(CHIPYARD_RSRCS_DIR)/csrc/emulator.cc \
+	$(ROCKETCHIP_RSRCS_DIR)/csrc/verilator.h \
+
+# the following files are needed for emulator.cc to compile
+SIM_FILE_REQS += \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/SimSerial.cc \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/testchip_tsi.cc \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/testchip_tsi.h \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/SimDRAM.cc \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm.h \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm.cc \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm_dramsim2.h \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm_dramsim2.cc \
+	$(ROCKETCHIP_RSRCS_DIR)/csrc/SimDTM.cc \
+	$(ROCKETCHIP_RSRCS_DIR)/csrc/SimJTAG.cc \
+	$(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.h \
+	$(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.cc
+
+# copy files and add -FI for *.h files in *.f
+$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
+	cp -f $^ $(build_dir)
+	$(foreach file,\
+		$^,\
+		$(if $(filter %.h,$(file)),\
+			echo "-FI $(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;,\
+			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
 
 #########################################################################################
 # import other necessary rules and variables
@@ -141,8 +174,6 @@ VERILATOR_NONCC_OPTS = \
 #----------------------------------------------------------------------------------------
 # gcc configuration/optimization
 #----------------------------------------------------------------------------------------
-include $(base_dir)/sims/common-sim-flags.mk
-
 VERILATOR_CXXFLAGS = \
 	$(SIM_CXXFLAGS) \
 	$(RUNTIME_PROFILING_CFLAGS) \

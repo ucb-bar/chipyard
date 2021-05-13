@@ -183,7 +183,7 @@ lazy val testchipipLib = "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHO
 
 lazy val chipyard = (project in file("generators/chipyard"))
   .sourceDependency(testchipip, testchipipLib)
-  .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
+  .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsptools`,
     gemmini, icenet, tracegen, cva6, nvdla, sodor)
@@ -192,12 +192,8 @@ lazy val chipyard = (project in file("generators/chipyard"))
 
 lazy val tracegen = (project in file("generators/tracegen"))
   .sourceDependency(testchipip, testchipipLib)
-  .dependsOn(rocketchip, sifive_cache, boom, utilities)
+  .dependsOn(rocketchip, sifive_cache, boom)
   .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val utilities = (project in file("generators/utilities"))
-  .sourceDependency(testchipip, testchipipLib)
   .settings(commonSettings)
 
 lazy val icenet = (project in file("generators/icenet"))

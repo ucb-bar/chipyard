@@ -20,7 +20,7 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_REQS         = additional make requirements to build the simulator" \
 "   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client (works best with sbtn or sbt script)"
 
-EXTRA_GENERATOR_REQS ?=
+EXTRA_GENERATOR_REQS ?= $(BOOTROM_TARGETS)
 EXTRA_SIM_CXXFLAGS   ?=
 EXTRA_SIM_LDFLAGS    ?=
 EXTRA_SIM_SOURCES    ?=
@@ -85,10 +85,13 @@ else
 endif
 
 #########################################################################################
-# create list of simulation file inputs
+# copy over bootrom files
 #########################################################################################
-$(sim_files): $(call lookup_srcs,$(base_dir)/generators/utilities/src/main/scala,scala) $(SCALA_BUILDTOOL_DEPS)
-	$(call run_scala_main,utilities,utilities.GenerateSimFiles,-td $(build_dir) -sim $(sim_name))
+$(build_dir):
+	mkdir -p $@
+
+$(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip/bootrom/bootrom.%.img | $(build_dir)
+	cp -f $< $@
 
 #########################################################################################
 # create firrtl file rule and variables
