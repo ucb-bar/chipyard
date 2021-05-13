@@ -6,13 +6,13 @@ version: 2.1
 parameters:
     tools-cache-version:
         type: string
-        default: "v8"
+        default: "v9"
 
 # default execution env.s
 executors:
     main-env:
         docker:
-            - image: ucbbar/chipyard-ci-image:c29770
+            - image: ucbbar/chipyard-ci-image:1d51bb90
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 
@@ -41,7 +41,7 @@ commands:
             - save_cache:
                 key: << parameters.tools-version >>-installed-<< pipeline.parameters.tools-cache-version >>-{{ checksum "../<< parameters.tools-version >>.hash" }}
                 paths:
-                    - "/home/riscvuser/<< parameters.tools-version >>-install"
+                    - "/root/<< parameters.tools-version >>-install"
 
     ssh-checkout:
         description: "Add SSH key and checkout code"
@@ -95,7 +95,7 @@ commands:
             - save_cache:
                 key: << parameters.group-key >>-{{ .Branch }}-{{ .Revision }}
                 paths:
-                    - "/home/riscvuser/project"
+                    - "/root/project"
 
     run-tests:
         description: "Run a set of tests"
@@ -190,7 +190,7 @@ jobs:
             - save_cache:
                 key: extra-tests-{{ .Branch }}-{{ .Revision }}
                 paths:
-                    - "/home/riscvuser/project/tests"
+                    - "/root/project/tests"
 
     prepare-chipyard-cores:
         executor: main-env
