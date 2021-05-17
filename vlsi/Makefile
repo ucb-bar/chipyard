@@ -41,11 +41,11 @@ INPUT_CONFS        ?= $(if $(filter $(tech_name),nangate45),\
 HAMMER_EXEC        ?= ./example-vlsi
 VLSI_TOP           ?= $(TOP)
 VLSI_HARNESS_DUT_NAME ?= chiptop
-VLSI_OBJ_DIR       ?= $(vlsi_dir)/build
+VLSI_OBJ_DIR       ?= build
 ifneq ($(CUSTOM_VLOG),)
-	OBJ_DIR          ?= $(VLSI_OBJ_DIR)/custom-$(VLSI_TOP)
+	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/custom-$(VLSI_TOP)
 else
-	OBJ_DIR          ?= $(VLSI_OBJ_DIR)/$(long_name)-$(VLSI_TOP)
+	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/$(long_name)-$(VLSI_TOP)
 endif
 
 #########################################################################################
