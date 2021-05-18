@@ -68,8 +68,10 @@ class WithFireSimConfigTweaks extends Config(
   new WithFireSimSimpleClocks ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++
-  // Optional*: Removing this will require adjusting the UART baud rate and
-  // potential target-software changes to properly capture UART output
+  // Optional: This sets the default frequency for all buses in the system to 3.2 GHz
+  // (since unspecified bus frequencies will use the pbus frequency)
+  // This frequency selection matches FireSim's legacy selection and is required
+  // to support 200Gb NIC performance. You may select a smaller value.
   new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
   // Optional: These three configs put the DRAM memory system in it's own clock domian.
   // Removing the first config will result in the FASED timing model running
@@ -93,7 +95,7 @@ class WithFireSimConfigTweaks extends Config(
   new testchipip.WithDefaultSerialTL ++
   // Optional: Removing this will require using an initramfs under linux
   new testchipip.WithBlockDevice ++
-  // Required*: Scale default baud rate with periphery bus frequency
+  // Optional: Set a UART baudrate (this selection matches FireSim's historical value)
   new chipyard.config.WithUART(BigInt(3686400L)) ++
   // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
   new chipyard.config.WithNoDebug
