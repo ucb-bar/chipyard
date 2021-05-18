@@ -27,7 +27,7 @@
 	url = https://github.com/ucb-bar/hwacha.git
 [submodule "sims/firesim"]
 	path = sims/firesim
-	url = https://github.com/firesim/firesim.git
+	url = https://github.com/ekiwi/firesim.git
 [submodule "generators/icenet"]
 	path = generators/icenet
 	url = https://github.com/firesim/icenet.git
@@ -134,3 +134,6 @@
 [submodule "fpga/fpga-shells"]
 	path = fpga/fpga-shells
 	url = https://github.com/sifive/fpga-shells.git
+[submodule "tools/coverage"]
+	path = tools/coverage
+	url = git@github.com:ekiwi/simulator-independent-coverage.git
