@@ -4,7 +4,7 @@ import java.io.File
 
 import chisel3._
 import chisel3.util.{log2Up}
-import freechips.rocketchip.config.{Parameters, Config}
+import freechips.rocketchip.config.{Parameters, Config, Field}
 import freechips.rocketchip.groundtest.TraceGenParams
 import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
@@ -22,6 +22,8 @@ import testchipip.WithRingSystemBus
 
 import firesim.bridges._
 import firesim.configs._
+
+case object CoverageCounterWidthKey extends Field[Int](16)
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMLocated(x) => {
@@ -59,6 +61,24 @@ class WithNIC extends icenet.WithIceNIC(inBufFlits = 8192, ctrlQueueDepth = 64)
 class WithNVDLALarge extends nvidia.blocks.dla.WithNVDLA("large")
 class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
+// Sets a specific scan chain width
+class CoverageCounterWidth(counterWidth: Int) extends Config((site, here, up) => {
+    case CoverageCounterWidthKey => counterWidth
+})
+
+// Aliases for ease-of-use from the manager
+class CCW1 extends CoverageCounterWidth(1)
+class CCW2 extends CoverageCounterWidth(2)
+class CCW3 extends CoverageCounterWidth(3)
+class CCW4 extends CoverageCounterWidth(4)
+class CCW6 extends CoverageCounterWidth(6)
+class CCW8 extends CoverageCounterWidth(8)
+class CCW12 extends CoverageCounterWidth(12)
+class CCW16 extends CoverageCounterWidth(16)
+class CCW24 extends CoverageCounterWidth(24)
+class CCW32 extends CoverageCounterWidth(32)
+class CCW48 extends CoverageCounterWidth(48)
+class CCW64 extends CoverageCounterWidth(64)
 
 // Tweaks that are generally applied to all firesim configs
 class WithFireSimConfigTweaks extends Config(
@@ -78,7 +98,7 @@ class WithFireSimConfigTweaks extends Config(
   // at the pbus freq (above, 3.2 GHz), which is outside the range of valid DDR3 speedgrades.
   // 1 GHz matches the FASED default, using some other frequency will require
   // runnings the FASED runtime configuration generator to generate faithful DDR3 timing values.
-  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
+  // new chipyard.config.WithMemoryBusFrequency(1000.0) ++
   new chipyard.config.WithAsynchrousMemoryBusCrossing ++
   new testchipip.WithAsynchronousSerialSlaveCrossing ++
   // Required: Existing FAME-1 transform cannot handle black-box clock gates

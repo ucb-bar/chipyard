@@ -4,6 +4,7 @@ package firesim.firesim
 
 import chisel3._
 import chisel3.experimental.{IO}
+import chisel3.experimental.{ChiselAnnotation, annotate}
 
 import freechips.rocketchip.prci._
 import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey}
@@ -161,4 +162,8 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSigna
     NodeIdx.increment()
   }
   harnessClock := p(ClockBridgeInstantiatorKey).getClockRecord("implicit_clock").get
+  annotate(new ChiselAnnotation {
+      def toFirrtl = coverage.midas.CoverageScanChainOptions(counterWidth = p(CoverageCounterWidthKey))
+      println(toFirrtl)
+  })
 }
