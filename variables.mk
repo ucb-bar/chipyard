@@ -106,9 +106,12 @@ endif
 #########################################################################################
 # path to rocket-chip and testchipip
 #########################################################################################
-ROCKETCHIP_DIR      = $(base_dir)/generators/rocket-chip
-TESTCHIP_DIR        = $(base_dir)/generators/testchipip
-CHIPYARD_FIRRTL_DIR = $(base_dir)/tools/firrtl
+ROCKETCHIP_DIR       = $(base_dir)/generators/rocket-chip
+ROCKETCHIP_RSRCS_DIR = $(ROCKETCHIP_DIR)/src/main/resources
+TESTCHIP_DIR         = $(base_dir)/generators/testchipip
+TESTCHIP_RSRCS_DIR   = $(TESTCHIP_DIR)/src/main/resources
+CHIPYARD_FIRRTL_DIR  = $(base_dir)/tools/firrtl
+CHIPYARD_RSRCS_DIR   = $(base_dir)/generators/chipyard/src/main/resources
 
 #########################################################################################
 # names of various files needed to compile and run things
@@ -135,7 +138,11 @@ HARNESS_SMEMS_FILE ?= $(build_dir)/$(long_name).harness.mems.v
 HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
 HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
 
+BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
+BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
+
 # files that contain lists of files needed for VCS or Verilator simulation
+SIM_FILE_REQS =
 sim_files              ?= $(build_dir)/sim_files.f
 sim_top_blackboxes     ?= $(build_dir)/firrtl_black_box_resource_files.top.f
 sim_harness_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
@@ -152,7 +159,10 @@ JAVA_OPTS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M -Djava.io.tmpdir=
 # default sbt launch command
 #########################################################################################
 # by default build chisel3/firrtl and other subprojects from source
-override SBT_OPTS += -Dsbt.sourcemode=true -Dsbt.workspace=$(base_dir)/tools
+SBT_OPTS_FILE := $(base_dir)/.sbtopts
+ifneq (,$(wildcard $(SBT_OPTS_FILE)))
+override SBT_OPTS += $(subst $$PWD,$(base_dir),$(shell cat $(SBT_OPTS_FILE)))
+endif
 
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
@@ -161,6 +171,7 @@ SBT_THIN_CLIENT_TIMESTAMP = $(base_dir)/project/target/active.json
 ifdef ENABLE_SBT_THIN_CLIENT
 override SCALA_BUILDTOOL_DEPS += $(SBT_THIN_CLIENT_TIMESTAMP)
 # enabling speeds up sbt loading
+# use with sbt script or sbtn to bypass error code issues
 SBT_CLIENT_FLAG = --client
 endif
 

@@ -222,4 +222,4 @@ The following image shows this flow:
 .. image:: ../_static/images/chip-bringup.png
 
 In fact, this exact type of bringup setup is what the following section discusses:
-:ref:`Prototyping/VCU118:Introduction to the Bringup Platform`.
+:ref:`Prototyping/VCU118:Introduction to the Bringup Design`.

@@ -17,7 +17,7 @@ import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
 
 import testchipip.{SerialTLKey}
 
-import chipyard.{BuildSystem, ExtTLMem}
+import chipyard.{BuildSystem, ExtTLMem, DefaultClockFrequencyKey}
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
@@ -26,11 +26,10 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
 })
 
 class WithSystemModifications extends Config((site, here, up) => {
-  case PeripheryBusKey => up(PeripheryBusKey, site).copy(dtsFrequency = Some(site(FPGAFrequencyKey).toInt*1000000))
-  case DTSTimebase => BigInt(1000000)
+  case DTSTimebase => BigInt((1e6).toLong)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for sdboot
-    val freqMHz = site(FPGAFrequencyKey).toInt * 1000000
+    val freqMHz = (site(DefaultClockFrequencyKey) * 1e6).toLong
     val make = s"make -C fpga/src/main/resources/vcu118/sdboot PBUS_CLK=${freqMHz} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vcu118/sdboot/build/sdboot.bin")
@@ -41,18 +40,23 @@ class WithSystemModifications extends Config((site, here, up) => {
 
 // DOC include start: AbstractVCU118 and Rocket
 class WithVCU118Tweaks extends Config(
+  // harness binders
   new WithUART ++
   new WithSPISDCard ++
   new WithDDRMem ++
+  // io binders
   new WithUARTIOPassthrough ++
   new WithSPIIOPassthrough ++
   new WithTLIOPassthrough ++
+  // other configuration
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
   new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(1))
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++
+  new WithFPGAFrequency(100) // default 100MHz freq
+)
 
 class RocketVCU118Config extends Config(
   new WithVCU118Tweaks ++
@@ -64,9 +68,10 @@ class BoomVCU118Config extends Config(
   new WithVCU118Tweaks ++
   new chipyard.MegaBoomConfig)
 
-class WithFPGAFrequency(MHz: Double) extends Config((site, here, up) => {
-  case FPGAFrequencyKey => MHz
-})
+class WithFPGAFrequency(fMHz: Double) extends Config(
+  new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.
+  new chipyard.config.WithMemoryBusFrequency(fMHz)
+)
 
 class WithFPGAFreq25MHz extends WithFPGAFrequency(25)
 class WithFPGAFreq50MHz extends WithFPGAFrequency(50)

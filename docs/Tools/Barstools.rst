@@ -31,6 +31,7 @@ This may include over provisioning (e.g. using a 64x1024 SRAM for a requested 60
 Arraying can be done in both width and depth, as well as to solve masking constraints.
 For example, a 128x2048 array could be composed of four 64x1024 arrays, with two macros in parallel to create two 128x1024 virtual SRAMs which are combinationally muxed to add depth.
 If this macro requires byte-granularity write masking, but no technology SRAMs support masking, then the tool may choose to use thirty-two 8x1024 arrays in a similar configuration.
+You may wish to create a cache of your available SRAM macros either manually, or via a script. A reference script for creating a JSON of your SRAM macros is in the `asap7 technology library folder <https://github.com/ucb-bar/hammer/blob/8fd1486499b875d56f09b060f03a62775f0a6aa7/src/hammer-vlsi/technology/asap7/sram-cache-gen.py>`__.
 For information on writing ``.mdf`` files, look at `MDF on github <https://github.com/ucb-bar/plsi-mdf>`__ and a brief description in :ref:`Tools/Barstools:SRAM MDF Fields` section.
 
 The output of MacroCompiler is a Verilog file containing modules that wrap the technology SRAMs into the specified interface names from the ``.conf``.
@@ -73,7 +74,6 @@ Likewise, the ``--force-compile [mem]`` option allows the user to force MacroCom
 
 SRAM MDF Fields
 +++++++++++++++
-
 Technology SRAM macros described in MDF can be defined at three levels of detail.
 A single instance can be defined with the `SRAMMacro` format.
 A group of instances that share the number and type of ports but vary in width and depth can be defined with the `SRAMGroup` format.
@@ -82,11 +82,13 @@ A set of groups of SRAMs that can be generated together from a single source lik
 At the most concrete level the `SRAMMAcro` defines a particular instance of an SRAM.
 That includes its functional attributes such as its width, depth, and number of access ports.
 These ports can be read, write, or read and write ports, and the instance can have any number.
-In order to correctly map to these functional ports to the physical instance each port is described in a list of sub-structures, in the parent instance's structure.
+In order to correctly map these functional ports to the physical instance, each port is described in a list of sub-structures, in the parent instance's structure.
 Each port is only required to have an address and data field, but can have many other optional fields.
-These optional fields include a clock, write enable, read enable, chip enable, mask.
+These optional fields include a clock, write enable, read enable, chip enable, mask and its granularity.
 The mask field can have a different granularity than the data field, e.g. it could be a bit mask or a byte mask.
 Each field must also specify its polarity, whether it is active high or active low.
+
+The specific JSON file format described above is `here <https://github.com/ucb-bar/plsi-mdf/blob/4be9b173647c77f990a542f4eb5f69af01d77316/macro_format.json>`_. A reference cache of SRAMs from the nangate45 technology library is `available here <https://github.com/ucb-bar/hammer/blob/8fd1486499b875d56f09b060f03a62775f0a6aa7/src/hammer-vlsi/technology/nangate45/sram-cache.json>`_.
 
 In addition to these functional descriptions of the SRAM there are also other fields that specify physical/implementation characteristics.
 These include the threshold voltage, the mux factor, as well as a list of extra non-functional ports.

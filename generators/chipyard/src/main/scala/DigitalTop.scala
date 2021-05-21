@@ -13,6 +13,8 @@ import freechips.rocketchip.devices.tilelink._
 
 // DOC include start: DigitalTop
 class DigitalTop(implicit p: Parameters) extends ChipyardSystem
+  with testchipip.CanHavePeripheryCustomBootPin // Enables optional custom boot pin
+  with testchipip.HasPeripheryBootAddrReg // Use programmable boot address register
   with testchipip.CanHaveTraceIO // Enables optionally adding trace IO
   with testchipip.CanHaveBackingScratchpad // Enables optionally adding a backing scratchpad
   with testchipip.CanHavePeripheryBlockDevice // Enables optionally adding the block device
