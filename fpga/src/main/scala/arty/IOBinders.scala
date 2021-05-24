@@ -6,7 +6,11 @@ import chisel3.experimental.{IO}
 import freechips.rocketchip.util._
 import freechips.rocketchip.devices.debug._
 
-import chipyard.iobinders.{ComposeIOBinder}
+import sifive.blocks.devices.spi._
+
+import barstools.iocell.chisel._
+
+import chipyard.iobinders.{ComposeIOBinder, OverrideIOBinder, IOCellKey}
 
 class WithDebugResetPassthrough extends ComposeIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
@@ -20,5 +24,15 @@ class WithDebugResetPassthrough extends ComposeIOBinder({
     sjtag.reset := io_sjtag_reset
 
     (Seq(io_ndreset, io_sjtag_reset), Nil)
+  }
+})
+
+class WithSPIFlashIOPassthrough  extends OverrideIOBinder({
+  (system: HasPeripherySPIFlashModuleImp) => {
+    val (ports: Seq[SPIPortIO], cells2d) = system.qspi.zipWithIndex.map({ case (u, i) =>
+      val (port, ios) = IOCell.generateIOFromSignal(u, s"qspi_${i}", system.p(IOCellKey), abstractResetAsAsync = true)
+      (port, ios)
+    }).unzip
+    (ports, cells2d.flatten)
   }
 })

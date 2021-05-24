@@ -120,6 +120,13 @@ debug-bitstream: $(build_dir)/obj/post_synth.dcp
 			$(build_dir)/debug_obj \
 			$(fpga_common_script_dir)
 
+mcs := $(build_dir)/obj/$(MODEL).mcs
+$(mcs): $(BIT_FILE)
+	cd $(build_dir); vivado -nojournal -mode batch -source $(fpga_common_script_dir)/write_cfgmem.tcl -tclargs $(BOARD) $@ $<
+
+.PHONY: mcs
+mcs: $(mcs)
+
 #########################################################################################
 # general cleanup rules
 #########################################################################################
