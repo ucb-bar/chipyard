@@ -207,6 +207,11 @@ class MulticlockRocketConfig extends Config(
   new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
   new chipyard.config.AbstractConfig)
 
+class TestChipMulticlockRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithTestChipBusFreqs ++
+  new chipyard.config.AbstractConfig)
+
 class LBWIFRocketConfig extends Config(
   new testchipip.WithSerialTLMem(isMainMemory=true) ++      // set lbwif memory base to DRAM_BASE, use as main memory
   new freechips.rocketchip.subsystem.WithNoMemPort ++       // remove AXI4 backing memory
