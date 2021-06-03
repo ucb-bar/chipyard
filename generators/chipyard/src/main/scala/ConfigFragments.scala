@@ -325,7 +325,7 @@ class WithTestChipBusFreqs extends Config(
   new chipyard.config.WithTileFrequency(1600.0) ++       // Matches the maximum frequency of U540
   new chipyard.config.WithSystemBusFrequency(800.0) ++   // Put the system bus at a lower freq, representative of ncore working at a lower frequency than the tiles. Same freq as U540
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++  // 2x the U540 freq (appropriate for a 128b Mbus)
-  new chipyard.config.WithPeripheryBusFrequency(100) ++  // Retains the default pbus frequency
+  new chipyard.config.WithPeripheryBusFrequency(800.0) ++  // Match the sbus and pbus frequency
   new chipyard.config.WithSystemBusFrequencyAsDefault ++ // All unspecified clock frequencies, notably the implicit clock, will use the sbus freq (800 MHz)
   //  Crossing specifications
   new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
