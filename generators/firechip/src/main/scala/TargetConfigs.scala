@@ -109,8 +109,6 @@ class WithFireSimConfigTweaks extends Config(
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++
   new chipyard.config.WithSystemBusFrequency(1000.0) ++
   new chipyard.config.WithSystemBusFrequencyAsDefault ++ // All unspecified clock frequencies, notably the implicit clock, will use the sbus freq (1000 MHz)
-  new chipyard.config.WithAsynchrousMemoryBusCrossing ++
-  new testchipip.WithAsynchronousSerialSlaveCrossing ++
   new WithFireSimDesignTweaks
 )
 
