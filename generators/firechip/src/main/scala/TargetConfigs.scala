@@ -105,8 +105,12 @@ class WithFireSimHighPerfClocking extends Config(
 class WithFireSimConfigTweaks extends Config(
   // 1 GHz matches the FASED default, using some other frequency will require
   // runnings the FASED runtime configuration generator to generate faithful DDR3 timing values.
+  new chipyard.config.WithPeripheryBusFrequency(1000.0) ++
+  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
   new chipyard.config.WithSystemBusFrequency(1000.0) ++
   new chipyard.config.WithSystemBusFrequencyAsDefault ++ // All unspecified clock frequencies, notably the implicit clock, will use the sbus freq (1000 MHz)
+  new chipyard.config.WithAsynchrousMemoryBusCrossing ++
+  new testchipip.WithAsynchronousSerialSlaveCrossing ++
   new WithFireSimDesignTweaks
 )
 
