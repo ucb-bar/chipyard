@@ -103,12 +103,14 @@ class WithFireSimHighPerfClocking extends Config(
 
 // Tweaks that are generally applied to all firesim configs setting a single clock domain at 1000 MHz
 class WithFireSimConfigTweaks extends Config(
-  // 1 GHz matches the FASED default, using some other frequency will require
-  // runnings the FASED runtime configuration generator to generate faithful DDR3 timing values.
-  new chipyard.config.WithPeripheryBusFrequency(1000.0) ++
-  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
+  // 1 GHz matches the FASED default (DRAM modeli realistically configured for that frequency)
+  // Using some other frequency will require runnings the FASED runtime configuration generator 
+  // to generate faithful DDR3 timing values.
   new chipyard.config.WithSystemBusFrequency(1000.0) ++
   new chipyard.config.WithSystemBusFrequencyAsDefault ++ // All unspecified clock frequencies, notably the implicit clock, will use the sbus freq (1000 MHz)
+  // Explicitly set PBUS + MBUS to 1000 MHz, since they will be driven to 100 MHz by default because of assignments in the Chisel
+  new chipyard.config.WithPeripheryBusFrequency(1000.0) ++
+  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
   new WithFireSimDesignTweaks
 )
 

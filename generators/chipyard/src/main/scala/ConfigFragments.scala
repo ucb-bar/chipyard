@@ -325,11 +325,12 @@ class WithTestChipBusFreqs extends Config(
   new chipyard.config.WithTileFrequency(1600.0) ++       // Matches the maximum frequency of U540
   new chipyard.config.WithSystemBusFrequency(800.0) ++   // Put the system bus at a lower freq, representative of ncore working at a lower frequency than the tiles. Same freq as U540
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++  // 2x the U540 freq (appropriate for a 128b Mbus)
-  new chipyard.config.WithPeripheryBusFrequency(100) ++  // Match the sbus and pbus frequency
+  new chipyard.config.WithPeripheryBusFrequency(800.0) ++  // Match the sbus and pbus frequency
   new chipyard.config.WithSystemBusFrequencyAsDefault ++ // All unspecified clock frequencies, notably the implicit clock, will use the sbus freq (800 MHz)
   //  Crossing specifications
   new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
-  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(4,4) ++   // Add Async crossings between RocketTile and uncore
+  new boom.common.WithAsynchronousBoomTiles ++ // Add Async crossings between BoomTile and uncore
   new testchipip.WithAsynchronousSerialSlaveCrossing // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
 )
