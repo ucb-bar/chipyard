@@ -150,6 +150,7 @@ Simulation
 Simulation with VCS is supported, and can be run at the RTL- or gate-level (post-synthesis and P&R). The simulation infrastructure as included here is intended for running RISC-V binaries on a Chipyard config. For example, for an RTL-level simulation:
 
 .. code-block:: shell
+
     make sim-rtl CONFIG=TinyRocketConfig BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
 
 Post-synthesis and post-P&R simulations use the ``sim-syn`` and ``sim-par`` targets, respectively.
@@ -163,6 +164,7 @@ Power/Rail Analysis
 Post-P&R power and rail (IR drop) analysis is supported with Voltus:
 
 .. code-block:: shell
+
     make power-par CONFIG=TinyRocketConfig
 
 If you append the ``BINARY`` variable to the command, it will use the activity file generated from a ``sim-<syn/par>-debug`` run and report dynamic power & IR drop from the toggles encoded in the waveform.
