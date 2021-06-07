@@ -52,7 +52,7 @@ endif
 # general rules
 #########################################################################################
 ALL_RTL = $(TOP_FILE) $(TOP_SMEMS_FILE)
-extra_v_includes = $(build_dir)/EICG_wrapper.v $(vlsi_dir)/example.v
+extra_v_includes = $(build_dir)/EICG_wrapper.v
 ifneq ($(CUSTOM_VLOG), )
 	VLSI_RTL = $(CUSTOM_VLOG)
 	VLSI_BB = /dev/null
@@ -162,6 +162,7 @@ endif
 
 $(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
+	mkdir -p $(output_dir)
 	echo "sim.inputs:" > $@
 	echo "  defines: ['DEBUG']" >> $@
 	echo "  defines_meta: 'append'" >> $@
