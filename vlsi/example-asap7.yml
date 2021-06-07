@@ -2,7 +2,8 @@
 # Technology used is ASAP7
 vlsi.core.technology: asap7
 # Specify dir with ASAP7 tarball
-technology.asap7.tarball_dir: ""
+#technology.asap7.tarball_dir: ""
+technology.asap7.tarball_dir: "/tools/B/asap7"
 
 vlsi.core.max_threads: 12
 
@@ -40,39 +41,72 @@ par.generate_power_straps_options:
     track_spacing: 0
     track_spacing_M3: 1 # to avoid M2 shorts at higher density
     track_start: 10
-    power_utilization: 0.05
+    power_utilization: 0.2
     power_utilization_M8: 1.0
     power_utilization_M9: 1.0
 
 # Placement Constraints
 # For ASAP7, all numbers must be 4x larger than final GDS
 vlsi.inputs.placement_constraints:
-  - path: "Sha3AccelwBB"
+  - path: "ChipTop"
     type: toplevel
     x: 0
     y: 0
-    width: 300
-    height: 300
+    width: 800
+    height: 500
     margins:
       left: 0
       right: 0
       top: 0
       bottom: 0
-  - path: "Sha3AccelwBB/dco"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_0"
     type: hardmacro
-    x: 108
-    y: 108
-    width: 128
-    height: 128
-    orientation: r0
-    top_layer: M9
-  - path: "Sha3AccelwBB/place_obs_bottom"
-    type: obstruction
-    obs_types: ["place"]
+    x: 550
+    y: 25
+    orientation: "r0"
+    top_layer: "M4"
+    master: "SRAM1RW4096x8"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_1"
+    type: hardmacro
+    x: 550
+    y: 270
+    orientation: "r0"
+    top_layer: "M4"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_2"
+    type: hardmacro
+    x: 675 
+    y: 25
+    orientation: "r0"
+    top_layer: "M4"
+    master: "SRAM1RW4096x8"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_3"
+    type: hardmacro
+    x: 675
+    y: 270
+    orientation: "r0"
+    top_layer: "M4"
+    master: "SRAM1RW4096x8"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/tag_array/tag_array_ext/mem_0_0"
+    type: hardmacro
+    x: 125
+    y: 150
+    orientation: "my"
+    top_layer: "M4"
+    master: "SRAM1RW64x21"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/data_arrays_0/data_arrays_0_0_ext/mem_0_0"
+    type: hardmacro
     x: 0
-    y: 0
-    width: 300
-    height: 1.08 # 1 core site tall, necessary to avoid shorts
+    y: 25
+    orientation: "my"
+    top_layer: "M4"
+    master: "SRAM1RW1024x32"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_0"
+    type: hardmacro
+    x: 0
+    y: 260
+    orientation: "my"
+    top_layer: "M4"
+    master: "SRAM1RW1024x37"
 
 # Pin placement constraints
 vlsi.inputs.pin_mode: generated
@@ -81,64 +115,37 @@ vlsi.inputs.pin.assignments: [
   {pins: "*", layers: ["M5", "M7"], side: "bottom"}
 ]
 
-# Paths to extra libraries
-vlsi.technology.extra_libraries_meta: ["append", "deepsubst"]
-vlsi.technology.extra_libraries:
-  - library:
-      nldm liberty file_deepsubst_meta: "local"
-      nldm liberty file: "extra_libraries/example/ExampleDCO_PVT_0P63V_100C.lib"
-      lef file_deepsubst_meta: "local"
-      lef file: "extra_libraries/example/ExampleDCO.lef"
-      gds file_deepsubst_meta: "local"
-      gds file: "extra_libraries/example/ExampleDCO.gds"
-      corner:
-        nmos: "slow"
-        pmos: "slow"
-        temperature: "100 C"
-      supplies:
-        VDD: "0.63 V"
-        GND: "0 V"
-  - library:
-      nldm liberty file_deepsubst_meta: "local"
-      nldm liberty file: "extra_libraries/example/ExampleDCO_PVT_0P77V_0C.lib"
-      lef file_deepsubst_meta: "local"
-      lef file: "extra_libraries/example/ExampleDCO.lef"
-      gds file_deepsubst_meta: "local"
-      gds file: "extra_libraries/example/ExampleDCO.gds"
-      corner:
-        nmos: "fast"
-        pmos: "fast"
-        temperature: "0 C"
-      supplies:
-        VDD: "0.77 V"
-        GND: "0 V"
-
-# Because the DCO is a dummy layout, we treat it as a physical-only cell
-par.inputs.physical_only_cells_mode: append
-par.inputs.physical_only_cells_list:
-  - ExampleDCO
-
 # SRAM Compiler compiler options
 vlsi.core.sram_generator_tool: "sram_compiler"
 # You should specify a location for the SRAM generator in the tech plugin
-vlsi.core.sram_generator_tool_path: []
+vlsi.core.sram_generator_tool_path: ["hammer/src/hammer-vlsi/technology/asap7"]
 vlsi.core.sram_generator_tool_path_meta: "append"
 
 # Tool options. Replace with your tool plugin of choice.
-# Genus options
-vlsi.core.synthesis_tool: "genus"
-vlsi.core.synthesis_tool_path: ["hammer-cadence-plugins/synthesis"]
-vlsi.core.synthesis_tool_path_meta: "append"
-synthesis.genus.version: "1813"
-# Innovus options
-vlsi.core.par_tool: "innovus"
-vlsi.core.par_tool_path: ["hammer-cadence-plugins/par"]
-vlsi.core.par_tool_path_meta: "append"
-par.innovus.version: "181"
-par.innovus.design_flow_effort: "standard"
-par.inputs.gds_merge: true
-# Calibre options
-vlsi.core.drc_tool: "calibre"
-vlsi.core.drc_tool_path: ["hammer-mentor-plugins/drc"]
-vlsi.core.lvs_tool: "calibre"
-vlsi.core.lvs_tool_path: ["hammer-mentor-plugins/lvs"]
+# VCS options
+#vlsi.core.sim_tool: "vcs"
+#vlsi.core.sim_tool_path: ["hammer-synopsys-plugins/sim"]
+#vlsi.core.sim_tool_path_meta: "append"
+#sim.vcs.version: "P-2019.06"
+## Genus options
+#vlsi.core.synthesis_tool: "genus"
+#vlsi.core.synthesis_tool_path: ["hammer-cadence-plugins/synthesis"]
+#vlsi.core.synthesis_tool_path_meta: "append"
+#synthesis.genus.version: "1813"
+## Innovus options
+#vlsi.core.par_tool: "innovus"
+#vlsi.core.par_tool_path: ["hammer-cadence-plugins/par"]
+#vlsi.core.par_tool_path_meta: "append"
+#par.innovus.version: "191"
+#par.innovus.design_flow_effort: "standard"
+#par.inputs.gds_merge: true
+## Voltus options
+#vlsi.core.power_tool: "voltus"
+#vlsi.core.power_tool_path: ["hammer-cadence-plugins/power"]
+#vlsi.core.power_tool_path_meta: "append"
+#power.voltus.version: "191"
+## Calibre options
+#vlsi.core.drc_tool: "calibre"
+#vlsi.core.drc_tool_path: ["hammer-mentor-plugins/drc"]
+#vlsi.core.lvs_tool: "calibre"
+#vlsi.core.lvs_tool_path: ["hammer-mentor-plugins/lvs"]

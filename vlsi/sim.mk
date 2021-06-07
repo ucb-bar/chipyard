@@ -31,7 +31,7 @@ redo-sim-par-$(VLSI_TOP): $(SIM_CONF)
 redo-sim-par: override HAMMER_EXTRA_ARGS += -p $(SIM_CONF)
 redo-sim-par-$(VLSI_TOP): override HAMMER_EXTRA_ARGS += -p $(SIM_CONF)
 redo-sim-par: override HAMMER_SIM_RUN_DIR = sim-par-rundir
-redo-sim-par-$(VLSI_TOP: override HAMMER_SIM_RUN_DIR = sim-par-$(VLSI_TOP)
+redo-sim-par-$(VLSI_TOP): override HAMMER_SIM_RUN_DIR = sim-par-$(VLSI_TOP)
 redo-sim-par-debug: $(SIM_DEBUG_CONF) redo-sim-par
 redo-sim-par-debug-$(VLSI_TOP): $(SIM_DEBUG_CONF) redo-sim-par-$(VLSI_TOP)
 redo-sim-par-debug: override HAMMER_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
