@@ -139,4 +139,4 @@
 	url = https://github.com/chipsalliance/api-config-chipsalliance.git
 [submodule "tools/rocket-dsp-utils"]
 	path = tools/rocket-dsp-utils
-	url = https://github.com/chick/rocket-dsp-utils
+	url = https://github.com/ucb-bar/rocket-dsp-utils
