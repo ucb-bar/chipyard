@@ -12,7 +12,7 @@ import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.{BootROMLocated, BootROMParams}
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
-import freechips.rocketchip.diplomacy.LazyModule
+import freechips.rocketchip.diplomacy.{LazyModule, AsynchronousCrossing}
 import testchipip.{BlockDeviceKey, BlockDeviceConfig, TracePortKey, TracePortParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
@@ -50,6 +50,7 @@ class WithScalaTestFeatures extends Config((site, here, up) => {
 
 // FASED Config Aliases. This to enable config generation via "_" concatenation
 // which requires that all config classes be defined in the same package
+class DDR3FCFS extends FCFS16GBQuadRank
 class DDR3FRFCFS extends FRFCFS16GBQuadRank
 class DDR3FRFCFSLLC4MB extends FRFCFS16GBQuadRankLLC4MB
 
@@ -83,12 +84,14 @@ class WithFireSimDesignTweaks extends Config(
   new chipyard.config.WithNoDebug
 )
 
-// Tweaks to modify target clock frequencies / crossings to firesim defaults
-class WithFireSimDefaultFrequencyTweaks extends Config(
-  // Optional*: Removing this will require adjusting the UART baud rate and
-  // potential target-software changes to properly capture UART output
+// Tweaks to modify target clock frequencies / crossings to legacy firesim defaults
+class WithFireSimHighPerfClocking extends Config(
+  // Optional: This sets the default frequency for all buses in the system to 3.2 GHz
+  // (since unspecified bus frequencies will use the pbus frequency)
+  // This frequency selection matches FireSim's legacy selection and is required
+  // to support 200Gb NIC performance. You may select a smaller value.
   new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
-  // Optional: These three configs put the DRAM memory system in it's own clock domian.
+  // Optional: These three configs put the DRAM memory system in it's own clock domain.
   // Removing the first config will result in the FASED timing model running
   // at the pbus freq (above, 3.2 GHz), which is outside the range of valid DDR3 speedgrades.
   // 1 GHz matches the FASED default, using some other frequency will require
@@ -98,9 +101,28 @@ class WithFireSimDefaultFrequencyTweaks extends Config(
   new testchipip.WithAsynchronousSerialSlaveCrossing
 )
 
-// Tweaks that are generally applied to all firesim configs
+// Tweaks that are generally applied to all firesim configs setting a single clock domain at 1000 MHz
 class WithFireSimConfigTweaks extends Config(
-  new WithFireSimDefaultFrequencyTweaks ++
+  // 1 GHz matches the FASED default (DRAM modeli realistically configured for that frequency)
+  // Using some other frequency will require runnings the FASED runtime configuration generator 
+  // to generate faithful DDR3 timing values.
+  new chipyard.config.WithSystemBusFrequency(1000.0) ++
+  new chipyard.config.WithSystemBusFrequencyAsDefault ++ // All unspecified clock frequencies, notably the implicit clock, will use the sbus freq (1000 MHz)
+  // Explicitly set PBUS + MBUS to 1000 MHz, since they will be driven to 100 MHz by default because of assignments in the Chisel
+  new chipyard.config.WithPeripheryBusFrequency(1000.0) ++
+  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
+  new WithFireSimDesignTweaks
+)
+
+// Tweak more representative of testchip configs
+class WithFireSimTestChipConfigTweaks extends Config(
+  new chipyard.config.WithTestChipBusFreqs ++
+  new WithFireSimDesignTweaks
+)
+
+// Tweaks for legacy FireSim configs.
+class WithFireSimHighPerfConfigTweaks extends Config(
+  new WithFireSimHighPerfClocking ++
   new WithFireSimDesignTweaks
 )
 
@@ -204,11 +226,6 @@ class FireSimCVA6Config extends Config(
 //**********************************************************************************
 //* Multiclock Configurations
 //*********************************************************************************/
-class FireSimMulticlockRocketConfig extends Config(
-  new chipyard.config.WithTileFrequency(6400.0) ++ //lol
-  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
-  new FireSimRocketConfig)
-
 class FireSimMulticlockAXIOverSerialConfig extends Config(
   new WithAXIOverSerialTLCombinedBridges ++ // use combined bridge to connect to axi mem over serial
   new WithDefaultFireSimBridges ++
