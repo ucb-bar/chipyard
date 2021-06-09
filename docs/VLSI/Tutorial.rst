@@ -54,7 +54,7 @@ Prerequisites
 * Genus, Innovus, and Calibre licenses
 * For ASAP7 specifically:
 
-  * Download the `ASAP7 PDK v1p5 <http://asap.asu.edu/asap/>`__ tarball to a directory of choice but do not extract it. The tech plugin is configured to extract the PDK into a cache directory for you. Note: v1p5 of the PDK is not publicly available, and you will need to contact the developers for it. The v1p7 version currently has too many bugs.
+  * Download the `ASAP7 PDK v1p5 <http://asap.asu.edu/asap/>`__ tarball to a directory of choice but do not extract it. The tech plugin is configured to extract the PDK into a cache directory for you. Note: v1p5 of the PDK is not publicly available, and you will need to contact the developers for it. The v1p7 version that is `publicly released <https://github.com/The-OpenROAD-Project/asap7>`__ currently has too many bugs to be integrated into our flow.
   * If you have additional ASAP7 hard macros, their LEF & GDS need to be 4x upscaled @ 4000 DBU precision. They may live outside ``extra_libraries`` at your discretion.
   * Innovus version must be >= 15.2 or <= 18.1 (ISRs excluded).
 
