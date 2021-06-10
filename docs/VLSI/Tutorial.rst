@@ -78,7 +78,7 @@ Pull the Hammer environment into the shell:
 
 Building the Design
 --------------------
-To elaborate the ``TinyRocketConfig`` and set up all prerequisites for the build system to push just the accelerator + hard macro through the flow:
+To elaborate the ``TinyRocketConfig`` and set up all prerequisites for the build system to push the design and SRAM macros through the flow:
 
 .. code-block:: shell
 
