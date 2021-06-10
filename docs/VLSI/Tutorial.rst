@@ -157,7 +157,7 @@ Post-synthesis and post-P&R simulations use the ``sim-syn`` and ``sim-par`` targ
 
 There are also ``-debug`` and ``-debug-timing``, which will instruct VCS to write a SAIF + VPD and do timing-annotated simulations, respectively. See the ``sim.mk`` file for all available targets.
 
-Note that for the ASAP7 example, gate-level simulations will timeout (the cause is being investigated).
+Note that for the ASAP7 example, gate-level simulations will currently timeout.
 
 Power/Rail Analysis
 ^^^^^^^^^^^^^^^^^^^
