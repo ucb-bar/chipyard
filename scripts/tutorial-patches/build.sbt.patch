@@ -8,7 +8,7 @@ index 3123c4b8..487fc428 100644
    .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
 -    sha3, // On separate line to allow for cleaner tutorial-setup patches
 +//    sha3, // On separate line to allow for cleaner tutorial-setup patches
-     dsptools, `rocket-dsptools`,
+     dsptools, `rocket-dsp-utils`,
      gemmini, icenet, tracegen, cva6, nvdla, sodor)
    .settings(libraryDependencies ++= rocketLibDeps.value)
 @@ -223,11 +223,11 @@ lazy val sodor = (project in file("generators/riscv-sodor"))

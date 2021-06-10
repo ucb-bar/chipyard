@@ -6,7 +6,7 @@ version: 2.1
 parameters:
     tools-cache-version:
         type: string
-        default: "v9"
+        default: "v10"
 
 # default execution env.s
 executors:
@@ -287,6 +287,7 @@ jobs:
         executor: main-env
         steps:
             - run-tests:
+                tools-version: "esp-tools"
                 group-key: "group-accels"
                 project-key: "chipyard-sha3"
     chipyard-streaming-fir-run-tests:
