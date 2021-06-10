@@ -63,17 +63,19 @@ We will do so by calling ``make buildfile`` with appropriate Chipyard configurat
 As in the rest of the Chipyard flows, we specify our SoC configuration using the ``CONFIG`` make variable. 
 However, unlike the rest of the Chipyard flows, in the case of physical design we might be interested in working in a hierarchical fashion and therefore we would like to work on a single module.
 Therefore, we can also specify a ``VLSI_TOP`` make variable with the same of a specific Verilog module (which should also match the name of the equivalent Chisel module) which we would like to work on.
-The makefile will automatically call tools such as Barstools and the MacroCopmiler (:ref:`Tools/Barstools:barstools`) in order to make the generated Verilog more VLSI friendly. 
-By default, the MacroCopmiler will attempt to map memories into the SRAM options within the Hammer technology plugin. However, if you are wokring with a new process technology are prefer to work with flipflop arrays, you can configure the MacroCompiler using the ``MACROCOMPILER_MODE`` make variable. For example, the ASAP7 process technology does not have associated SRAMs, and therefore the ASAP7 Hammer tutorial (:ref:`tutorial`) uses the ``MACROCOMPILER_MODE='--mode synflops'`` option (Note that synthesizing a design with only flipflops is very slow and will often may not meet constraints).
+The makefile will automatically call tools such as Barstools and the MacroCompiler (:ref:`Tools/Barstools:barstools`) in order to make the generated Verilog more VLSI friendly. 
+By default, the MacroCompiler will attempt to map memories into the SRAM options within the Hammer technology plugin. However, if you are working with a new process technology and prefer to work with flip-flop arrays, you can configure the MacroCompiler using the ``MACROCOMPILER_MODE`` make variable. For example, if your technology plugin does not have an SRAM compiler ready, you can use the ``MACROCOMPILER_MODE='--mode synflops'`` option (Note that synthesizing a design with only flipflops is very slow and will often may not meet constraints).
 
 We call the ``make buildfile`` command while also specifying the name of the process technology we are working with (same ``tech_name`` for the configuration files and plugin name) and the configuration files we created. Note, in the ASAP7 tutorial ((:ref:`tutorial`)) these configuration files are merged into a single file called ``example-asap7.yml``.
 
 Hence, if we want to monolithically place and route the entire SoC, the relevant command would be
+
 .. code-block:: shell
 
     make buildfile CONFIG=<chipyard_config_name> tech_name=<tech_name> INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
 
-In a more typical scenario of working on a single module, for example the Gemmini accelerator within the GemminiRocketConfig Chipyard SoC configuration, the relevant command would be
+In a more typical scenario of working on a single module, for example the Gemmini accelerator within the GemminiRocketConfig Chipyard SoC configuration, the relevant command would be:
+
 .. code-block:: shell
 
     make buildfile CONFIG=GemminiRocketConfig VLSI_TOP=Gemmini tech_name=tsmintel3 INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
@@ -89,12 +91,14 @@ Synthesis
 In order to run synthesis, we run ``make syn`` with the matching Make variables. 
 Post-synthesis logs and collateral will be saved in ``build/<config-name>/syn-rundir``. The raw QoR data (area, timing, gate counts, etc.) will be found in ``build/<config-name>/syn-rundir/reports``.
 
-Hence, if we want to monolithically synthesize the entire SoC, the relevant command would be
+Hence, if we want to monolithically synthesize the entire SoC, the relevant command would be:
+
 .. code-block:: shell
 
     make syn CONFIG=<chipyard_config_name> tech_name=<tech_name> INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
 
-In a more typical scenario of working on a single module, for example the Gemmini accelerator within the GemminiRocketConfig Chipyard SoC configuration, the relevant command would be
+In a more typical scenario of working on a single module, for example the Gemmini accelerator within the GemminiRocketConfig Chipyard SoC configuration, the relevant command would be:
+
 .. code-block:: shell
 
     make syn CONFIG=GemminiRocketConfig VLSI_TOP=Gemmini tech_name=tsmintel3 INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
@@ -108,7 +112,8 @@ In order to run place-and-route, we run ``make par`` with the matching Make vari
 Post-PnR logs and collateral will be saved in ``build/<config-name>/par-rundir``. Specifically, the resulting GDSII file will be in that directory with the suffix ``*.gds``. and timing reports can be found in ``build/<config-name>/par-rundir/timingReports``.
 Place-and-route is requires more design details in contrast to synthesis. For example, place-and-route requires some basic floorplanning constraints. The default ``example-design.yml`` configuration file template allows the tool (specifically, the Cadence Innovus tool) to use it's automatic floorplanning capability within the top level of the design (``ChipTop``). However, if we choose to place-and-route a specific block which is not the SoC top level, we need to change the top-level path name to match the ``VLSI_TOP`` make parameter we are using.
 
-Hence, if we want to monolitically place-and-route the entire SoC with the default tech plug-in parameters for power-straps and corners, the relevant command would be
+Hence, if we want to monolitically place-and-route the entire SoC with the default tech plug-in parameters for power-straps and corners, the relevant command would be:
+
 .. code-block:: shell
 
     make par CONFIG=<chipyard_config_name> tech_name=<tech_name> INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
@@ -130,7 +135,8 @@ In a more typical scenario of working on a single module, for example the Gemmin
         top: 0
         bottom: 0
 
-The relevant ``make`` command would then be
+The relevant ``make`` command would then be:
+
 .. code-block:: shell
 
     make par CONFIG=GemminiRocketConfig VLSI_TOP=Gemmini tech_name=tsmintel3 INPUT_CONFS="example-design.yml example-tools.yml example-tech.yml"
