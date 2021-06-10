@@ -143,7 +143,7 @@ To run DRC & LVS, and view the results in Calibre:
     ./build/lvs-rundir/generated-scripts/view-lvs
 
 Some DRC errors are expected from this PDK, as explained in the `ASAP7 plugin readme <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/technology/asap7>`__.
-Furthermore, the dummy SRAMs that are provided do not have any geometry inside, so will certainly cause DRC and LVS errors.
+Furthermore, the dummy SRAMs that are provided in this tutorial and PDK do not have any geometry inside, so will certainly cause DRC and LVS errors.
 
 Simulation
 ^^^^^^^^^^
