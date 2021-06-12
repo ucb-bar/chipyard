@@ -50,6 +50,7 @@ If used for research, please cite Chipyard by the following publication:
 * **Chipyard**
     * A. Amid, et al. *IEEE Micro'20* [PDF](https://ieeexplore.ieee.org/document/9099108).
     * A. Amid, et al. *DAC'20* [PDF](https://ieeexplore.ieee.org/document/9218756).
+    * A. Amid, et al. *ISCAS'21* [PDF](https://ieeexplore.ieee.org/abstract/document/9401515).
 
 These additional publications cover many of the internal components used in Chipyard. However, for the most up-to-date details, users should refer to the Chipyard docs.
 
@@ -57,6 +58,7 @@ These additional publications cover many of the internal components used in Chip
     * **Rocket Chip**: K. Asanovic, et al., *UCB EECS TR*. [PDF](http://www2.eecs.berkeley.edu/Pubs/TechRpts/2016/EECS-2016-17.pdf).
     * **BOOM**: C. Celio, et al., *Hot Chips 30*. [PDF](https://www.hotchips.org/hc30/1conf/1.03_Berkeley_BROOM_HC30.Berkeley.Celio.v02.pdf).
       * **SonicBOOM (BOOMv3)**: J. Zhao, et al., *CARRV'20*. [PDF](https://carrv.github.io/2020/papers/CARRV2020_paper_15_Zhao.pdf).
+      * **COBRA (BOOM Branch Prediction)**: J. Zhao, et al., *ISPASS'21*. [PDF](https://ieeexplore.ieee.org/document/9408173).
     * **Hwacha**: Y. Lee, et al., *ESSCIRC'14*. [PDF](http://hwacha.org/papers/riscv-esscirc2014.pdf).
     * **Gemmini**: H. Genc, et al., *arXiv*. [PDF](https://arxiv.org/pdf/1911.09925).
 * **Sims**
@@ -69,12 +71,13 @@ These additional publications cover many of the internal components used in Chip
     * **Chisel**: J. Bachrach, et al., *DAC'12*. [PDF](https://people.eecs.berkeley.edu/~krste/papers/chisel-dac2012.pdf).
     * **FIRRTL**: A. Izraelevitz, et al., *ICCAD'17*. [PDF](https://ieeexplore.ieee.org/document/8203780).
     * **Chisel DSP**: A. Wang, et al., *DAC'18*. [PDF](https://ieeexplore.ieee.org/document/8465790).
+    * **FireMarshal**: N. Pemberton, et al., *ISPASS'21*. [PDF](https://ieeexplore.ieee.org/document/9408192).
 * **VLSI**
     * **Hammer**: E. Wang, et al., *ISQED'20*. [PDF](https://www.isqed.org/English/Archives/2020/Technical_Sessions/113.html).
 
 
 
-[hwacha]:http://hwacha.org
+[hwacha]:https://www2.eecs.berkeley.edu/Pubs/TechRpts/2015/EECS-2015-262.pdf
 [hammer]:https://github.com/ucb-bar/hammer
 [firesim]:https://fires.im
 [ucb-bar]: http://bar.eecs.berkeley.edu
