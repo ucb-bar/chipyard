@@ -86,11 +86,11 @@ class WithFireSimDesignTweaks extends Config(
 
 // Tweaks to modify target clock frequencies / crossings to legacy firesim defaults
 class WithFireSimHighPerfClocking extends Config(
-  // Optional: This sets the default frequency for all buses in the system to 3.2 GHz
-  // (since unspecified bus frequencies will use the pbus frequency)
+  // This sets the default frequency for all buses in the system to 3.2 GHz
   // This frequency selection matches FireSim's legacy selection and is required
   // to support 200Gb NIC performance. You may select a smaller value.
   new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
+  new chipyard.config.WithPeripheryBusFrequencyAsDefault ++
   // Optional: These three configs put the DRAM memory system in it's own clock domain.
   // Removing the first config will result in the FASED timing model running
   // at the pbus freq (above, 3.2 GHz), which is outside the range of valid DDR3 speedgrades.
@@ -212,7 +212,10 @@ class FireSimRingSystemBusRocketConfig extends Config(
 class SupernodeFireSimRocketConfig extends Config(
   new WithNumNodes(4) ++
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 8L) ++ // 8 GB
-  new FireSimRocketConfig)
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimHighPerfConfigTweaks ++
+  new chipyard.RocketConfig)
 
 //**********************************************************************************
 //* CVA6 Configurations
