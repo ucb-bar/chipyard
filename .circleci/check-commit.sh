@@ -90,7 +90,7 @@ else
 fi
 search
 
-submodules=("DRAMSim2" "axe" "barstools" "chisel-testers" "dsptools" "firrtl-interpreter" "torture" "treadle")
+submodules=("DRAMSim2" "axe" "barstools" "chisel-testers" "dsptools" "rocket-dsp-utils" "firrtl-interpreter" "torture" "treadle")
 dir="tools"
 if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
 then

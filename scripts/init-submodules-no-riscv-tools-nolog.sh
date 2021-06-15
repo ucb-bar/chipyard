@@ -17,7 +17,9 @@ if [ "$MINGIT" != "$(echo -e "$MINGIT\n$MYGIT" | sort -V | head -n1)" ]; then
   false
 fi
 
-DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+# If BASH_SOURCE is undefined we may be running under zsh, in that case
+# provide a zsh-compatible alternative
+DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-${(%):-%x}}")")"
 CHIPYARD_DIR="$(dirname "$DIR")"
 
 cd "$CHIPYARD_DIR"

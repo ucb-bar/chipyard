@@ -6,13 +6,13 @@ version: 2.1
 parameters:
     tools-cache-version:
         type: string
-        default: "v6"
+        default: "v11"
 
 # default execution env.s
 executors:
     main-env:
         docker:
-            - image: ucbbar/chipyard-image:1.0.1
+            - image: ucbbar/chipyard-ci-image:1d51bb90
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 
@@ -41,7 +41,7 @@ commands:
             - save_cache:
                 key: << parameters.tools-version >>-installed-<< pipeline.parameters.tools-cache-version >>-{{ checksum "../<< parameters.tools-version >>.hash" }}
                 paths:
-                    - "/home/riscvuser/<< parameters.tools-version >>-install"
+                    - "/root/<< parameters.tools-version >>-install"
 
     ssh-checkout:
         description: "Add SSH key and checkout code"
@@ -95,7 +95,7 @@ commands:
             - save_cache:
                 key: << parameters.group-key >>-{{ .Branch }}-{{ .Revision }}
                 paths:
-                    - "/home/riscvuser/project"
+                    - "/root/project"
 
     run-tests:
         description: "Run a set of tests"
@@ -112,7 +112,7 @@ commands:
                 default: "run-tests.sh"
             timeout:
                 type: string
-                default: "10m"
+                default: "25m"
         steps:
             - setup-tools:
                 tools-version: "<< parameters.tools-version >>"
@@ -190,7 +190,7 @@ jobs:
             - save_cache:
                 key: extra-tests-{{ .Branch }}-{{ .Revision }}
                 paths:
-                    - "/home/riscvuser/project/tests"
+                    - "/root/project/tests"
 
     prepare-chipyard-cores:
         executor: main-env
@@ -231,7 +231,7 @@ jobs:
             - run-tests:
                 group-key: "group-cores"
                 project-key: "chipyard-hetero"
-                timeout: "15m"
+                timeout: "20m"
     chipyard-boom-run-tests:
         executor: main-env
         steps:
@@ -287,6 +287,7 @@ jobs:
         executor: main-env
         steps:
             - run-tests:
+                tools-version: "esp-tools"
                 group-key: "group-accels"
                 project-key: "chipyard-sha3"
     chipyard-streaming-fir-run-tests:
@@ -308,6 +309,7 @@ jobs:
                 tools-version: "esp-tools"
                 group-key: "group-accels"
                 project-key: "chipyard-hwacha"
+                timeout: "30m"
     chipyard-gemmini-run-tests:
         executor: main-env
         steps:
@@ -520,4 +522,3 @@ workflows:
             - prepare-chipyard-fpga:
                 requires:
                     - install-riscv-toolchain
-

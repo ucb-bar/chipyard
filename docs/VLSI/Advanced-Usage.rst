@@ -49,6 +49,28 @@ Say you need to update some power straps settings in ``example.yml`` and want to
 
    make redo-par HAMMER_REDO_ARGS='-p example.yml --only_step power_straps'
 
-RTL and Gate-level Simulation
------------------------------
-With the Synopsys plugin, RTL and gate-level simulation is supported using VCS. While this example does not implement any simulation, refer to Hammer's documentation for how to set it up for your design.
+RTL/Gate-level Simulation, Power Estimation
+-------------------------------------------
+With the Synopsys plugin, RTL and gate-level simulation is supported using VCS at the chip-level. Also, post-par power estimation with Voltus in the Cadence plugin is also supported. While the provided example does not implement any simulation, some Make targets are provided in the ``vlsi/`` directory. Here is a brief description:
+
+* ``sim-rtl``: RTL-level simulation
+
+  * ``sim-rtl-debug``: Also write a VPD waveform
+
+* ``sim-syn``: Post-synthesis gate-level simulation
+
+  * ``sim-syn-debug``: Also write a VPD waveform
+  * ``sim-syn-timing-debug``: Timing-annotated with VPD waveform
+
+* ``sim-par``: Post-par gate-level simulation
+
+  * ``sim-par-debug``: Also write a VPD waveform
+  * ``sim-par-timing-debug``: Timing-annotated with VPD waveform
+
+* ``power-par``: Post-par power estimation
+
+  * Note: this will run ``sim-par`` first
+
+* ``redo-`` can be appended to all above targets to break dependency tracking, like described above.
+
+The simulation configuration (e.g. binaries) can be edited for your design. See the Makefile and refer to Hammer's documentation for how to set up simulation parameters for your design.
