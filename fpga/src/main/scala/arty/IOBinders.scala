@@ -37,19 +37,3 @@ class WithSPIFlashIOPassthrough  extends OverrideIOBinder({
     (ports, cells2d.flatten)
   }
 })
-
-class WithGPIOPassthrough  extends OverrideIOBinder({
-  (system: HasPeripheryGPIOModuleImp) => {
-    val (ports: Seq[GPIOPortIO], cells2d) = system.gpio.zipWithIndex.map({ case (u, i) =>
-      val (port, ios) = IOCell.generateIOFromSignal(u, s"gpio_${i}", system.p(IOCellKey), abstractResetAsAsync = true)
-      (port, ios)
-    }).unzip
-    
-    system.iof.map ({ i =>
-      i.get.iof_0.map(pin => pin.default())
-      i.get.iof_1.map(pin => pin.default())
-      })
-    (ports, cells2d.flatten)
-    
-  }
-})
