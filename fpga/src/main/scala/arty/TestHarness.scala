@@ -4,6 +4,8 @@ import chisel3._
 
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.config.{Parameters}
+import sifive.blocks.devices.spi._
+import sifive.blocks.devices.gpio._
 
 import sifive.fpgashells.shell.xilinx.artyshell.{ArtyShell}
 

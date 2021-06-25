@@ -11,6 +11,7 @@ import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase}
 import freechips.rocketchip.system._
 import freechips.rocketchip.tile._
 
+import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 
@@ -40,6 +41,23 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/arty/xip/build/xip.bin")
   }
 })
+
+class ArtyGPIOPeripheral extends Config((site,here,up) => {
+    case PeripheryGPIOKey => List(
+    GPIOParams(
+      address = 0x10012000,
+      width = 32,
+      includeIOF = true)
+    )
+}
+)
+
+class WithArtyGPIO extends Config(
+  new WithArtyGPIOHarnessBinder ++
+  new WithGPIOPassthrough ++
+  new ArtyGPIOPeripheral
+)
+
 // DOC include start: AbstractArty and Rocket
 class WithArtyTweaks extends Config(
   new WithArtyJTAGHarnessBinder ++
@@ -54,4 +72,9 @@ class WithArtyTweaks extends Config(
 class TinyRocketArtyConfig extends Config(
   new WithArtyTweaks ++
   new chipyard.TinyRocketConfig)
+
+class ArtyWithGPIOConfig extends Config(
+  new WithArtyGPIO ++
+  new TinyRocketArtyConfig
+)
 // DOC include end: AbstractArty and Rocket

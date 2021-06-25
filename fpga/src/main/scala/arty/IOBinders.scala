@@ -7,6 +7,7 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.devices.debug._
 
 import sifive.blocks.devices.spi._
+import sifive.blocks.devices.gpio._
 
 import barstools.iocell.chisel._
 
@@ -34,5 +35,27 @@ class WithSPIFlashIOPassthrough  extends OverrideIOBinder({
       (port, ios)
     }).unzip
     (ports, cells2d.flatten)
+  }
+})
+
+class WithGPIOPassthrough  extends OverrideIOBinder({
+  (system: HasPeripheryGPIOModuleImp) => {
+    val (ports: Seq[GPIOPortIO], cells2d) = system.gpio.zipWithIndex.map({ case (u, i) =>
+      val (port, ios) = IOCell.generateIOFromSignal(u, s"gpio_${i}", system.p(IOCellKey), abstractResetAsAsync = true)
+      (port, ios)
+    }).unzip
+
+    
+
+    for(iof_0 <- system.iof(0).get.iof_0){
+      iof_0.default()
+    }
+    for(iof_1 <- system.iof(0).get.iof_1){
+      iof_1.default()
+    }
+    val iof_0 = system.iof(0).get.iof_0
+    val iof_1 = system.iof(0).get.iof_1
+    (ports, cells2d.flatten)
+    
   }
 })
