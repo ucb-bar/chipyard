@@ -42,24 +42,10 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
   }
 })
 
-class ArtyGPIOPeripheral extends Config((site,here,up) => {
-    case PeripheryGPIOKey => List(
-    GPIOParams(
-      address = 0x10012000,
-      width = 32,
-      includeIOF = true)
-    )
-}
-)
-
-class WithArtyGPIO extends Config(
-  new WithArtyGPIOHarnessBinder ++
-  new WithGPIOPassthrough ++
-  new ArtyGPIOPeripheral
-)
-
 // DOC include start: AbstractArty and Rocket
 class WithArtyTweaks extends Config(
+  new WithArtyGPIOHarnessBinder ++
+  new WithGPIOPassthrough ++
   new WithArtyJTAGHarnessBinder ++
   new WithArtyUARTHarnessBinder ++
   new WithArtyResetHarnessBinder ++
@@ -74,7 +60,9 @@ class TinyRocketArtyConfig extends Config(
   new chipyard.TinyRocketConfig)
 
 class ArtyWithGPIOConfig extends Config(
-  new WithArtyGPIO ++
+  new chipyard.config.WithGPIOIncludeIOF(true) ++
+  new chipyard.config.WithGPIOWidth(32) ++
+  new chipyard.config.WithGPIO ++
   new TinyRocketArtyConfig
 )
 // DOC include end: AbstractArty and Rocket
