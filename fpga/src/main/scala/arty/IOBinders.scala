@@ -44,17 +44,11 @@ class WithGPIOPassthrough  extends OverrideIOBinder({
       val (port, ios) = IOCell.generateIOFromSignal(u, s"gpio_${i}", system.p(IOCellKey), abstractResetAsAsync = true)
       (port, ios)
     }).unzip
-
     
-
-    for(iof_0 <- system.iof(0).get.iof_0){
-      iof_0.default()
-    }
-    for(iof_1 <- system.iof(0).get.iof_1){
-      iof_1.default()
-    }
-    val iof_0 = system.iof(0).get.iof_0
-    val iof_1 = system.iof(0).get.iof_1
+    system.iof.map ({ i =>
+      i.get.iof_0.map(pin => pin.default())
+      i.get.iof_1.map(pin => pin.default())
+      })
     (ports, cells2d.flatten)
     
   }
