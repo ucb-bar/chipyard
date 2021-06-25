@@ -22,7 +22,7 @@ jobs:
       - name: Current directory contents
         run: ls -l
       - name: Show Disk Space
-        run: df -g
+        run: df -m
       - name: Show environment
         run: env | sort
       - name: Checkout
