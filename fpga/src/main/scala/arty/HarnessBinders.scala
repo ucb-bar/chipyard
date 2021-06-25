@@ -106,9 +106,13 @@ class WithArtyGPIOHarnessBinder extends OverrideHarnessBinder({
     withClockAndReset(th.harnessClock, th.harnessReset) {
       implicit val p: Parameters = GetSystemParameters(system)
 
+    //This HarnessBinder was created under the assumption of a 32-pin GPIO Port
+    require((p(PeripheryGPIOKey)(0)).width == 32)
+
     val io_gpio = Wire(new GPIOPins(() => new BasePin(), p(PeripheryGPIOKey)(0))).suggestName("gpio")
     GPIOPinsFromPort(io_gpio, ports(0), clock = th.harnessClock, reset = th.harnessReset.asBool)
 
+    
     // Shield header row 0: PD2-PD7
     IOBUF(th.ck_io(2),  io_gpio.pins(18))
     IOBUF(th.ck_io(3),  io_gpio.pins(19)) // PWM1(1)
