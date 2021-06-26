@@ -6,7 +6,7 @@ env:
   tools-cache-version: v6
 
 jobs:
-  run-as-root:
+  get platform info:
     name: run as root
     runs-on: ubuntu-latest
     container:

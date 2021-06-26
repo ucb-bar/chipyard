@@ -20,4 +20,4 @@ jobs:
       - name: Init submodules
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: build riscv tools
-        run: ./scripts/build-toolchains.sh --clean-after-install riscv-tools
+        run: ./scripts/build-toolchains.sh riscv-tools
