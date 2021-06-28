@@ -105,7 +105,7 @@ jobs:
           restore-keys: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: build riscv tools if not cached
         if: steps.riscv-tools-cache.outputs.cache-hit != 'true'
-        run: ./.github/scripts/build-toolchains.sh --clean-after-install riscv-tools
+        run: ./.github/scripts/build-toolchains.sh riscv-tools
       - name: What is the filesystem picture
         if: ${{ failure() }}
         run: df -m
@@ -132,7 +132,7 @@ jobs:
           restore-keys: ${{ needs.make-keys.outputs.esptools-cache-key }}
       - name: build esp tools if not cached
         if: steps.esp-tools-cache.outputs.cache-hit != 'true'
-        run: ./.github/scripts/build-toolchains.sh --clean-after-install esp-tools
+        run: ./.github/scripts/build-toolchains.sh esp-tools
       - name: What is the filesystem picture
         if: ${{ failure() }}
         run: df -m
