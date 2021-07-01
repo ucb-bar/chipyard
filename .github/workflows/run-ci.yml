@@ -1,0 +1,26 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        scala: [ 2.12.14 ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v10
+      - name: Cache
+        uses: coursier/cache-action@v5
+      - name: Get submodules
+        run: git submodule update --init
+      - name: Test
+        run: sbt test
