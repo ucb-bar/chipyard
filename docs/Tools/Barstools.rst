@@ -23,15 +23,16 @@ An external module reference is a FIRRTL construct that enables a design to refe
 A list of unique SRAM configurations is output to a ``.conf`` file by FIRRTL, which is used to map technology SRAMs.
 Without this transform, FIRRTL will map all ``SeqMem`` s to flip-flop arrays with equivalent behavior, which may lead to a design that is difficult to route.
 
-The ``.conf`` file is consumed by a tool called MacroCompiler, which is part of the :ref:`Barstools` scala package.
+The ``.conf`` file is consumed by a tool called MacroCompiler, which is part of the :ref:`Tools/Barstools:Barstools` scala package.
 MacroCompiler is also passed an ``.mdf`` file that describes the available list of technology SRAMs or the capabilities of the SRAM compiler, if one is provided by the foundry.
-Typically a foundry SRAM compiler will be able to generate a set of different SRAMs collateral based on some requirements on size, aspect ratio, etc. (see :ref:`SRAM MDF Fields`).
+Typically a foundry SRAM compiler will be able to generate a set of different SRAMs collateral based on some requirements on size, aspect ratio, etc. (see :ref:`Tools/Barstools:SRAM MDF Fields`).
 Using a user-customizable cost function, MacroCompiler will select the SRAMs that are the best fit for each dimensionality in the ``.conf`` file.
 This may include over provisioning (e.g. using a 64x1024 SRAM for a requested 60x1024, if the latter is not available) or arraying.
 Arraying can be done in both width and depth, as well as to solve masking constraints.
 For example, a 128x2048 array could be composed of four 64x1024 arrays, with two macros in parallel to create two 128x1024 virtual SRAMs which are combinationally muxed to add depth.
 If this macro requires byte-granularity write masking, but no technology SRAMs support masking, then the tool may choose to use thirty-two 8x1024 arrays in a similar configuration.
-For information on writing ``.mdf`` files, look at `MDF on github <https://github.com/ucb-bar/plsi-mdf>`__ and a brief description in :ref:`SRAM MDF Fields` section.
+You may wish to create a cache of your available SRAM macros either manually, or via a script. A reference script for creating a JSON of your SRAM macros is in the `asap7 technology library folder <https://github.com/ucb-bar/hammer/blob/8fd1486499b875d56f09b060f03a62775f0a6aa7/src/hammer-vlsi/technology/asap7/sram-cache-gen.py>`__.
+For information on writing ``.mdf`` files, look at `MDF on github <https://github.com/ucb-bar/plsi-mdf>`__ and a brief description in :ref:`Tools/Barstools:SRAM MDF Fields` section.
 
 The output of MacroCompiler is a Verilog file containing modules that wrap the technology SRAMs into the specified interface names from the ``.conf``.
 If the technology supports an SRAM compiler, then MacroCompiler will also emit HammerIR that can be passed to Hammer to run the compiler itself and generate design collateral.
@@ -73,7 +74,6 @@ Likewise, the ``--force-compile [mem]`` option allows the user to force MacroCom
 
 SRAM MDF Fields
 +++++++++++++++
-
 Technology SRAM macros described in MDF can be defined at three levels of detail.
 A single instance can be defined with the `SRAMMacro` format.
 A group of instances that share the number and type of ports but vary in width and depth can be defined with the `SRAMGroup` format.
@@ -82,11 +82,13 @@ A set of groups of SRAMs that can be generated together from a single source lik
 At the most concrete level the `SRAMMAcro` defines a particular instance of an SRAM.
 That includes its functional attributes such as its width, depth, and number of access ports.
 These ports can be read, write, or read and write ports, and the instance can have any number.
-In order to correctly map to these functional ports to the physical instance each port is described in a list of sub-structures, in the parent instance's structure.
+In order to correctly map these functional ports to the physical instance, each port is described in a list of sub-structures, in the parent instance's structure.
 Each port is only required to have an address and data field, but can have many other optional fields.
-These optional fields include a clock, write enable, read enable, chip enable, mask.
+These optional fields include a clock, write enable, read enable, chip enable, mask and its granularity.
 The mask field can have a different granularity than the data field, e.g. it could be a bit mask or a byte mask.
 Each field must also specify its polarity, whether it is active high or active low.
+
+The specific JSON file format described above is `here <https://github.com/ucb-bar/plsi-mdf/blob/4be9b173647c77f990a542f4eb5f69af01d77316/macro_format.json>`_. A reference cache of SRAMs from the nangate45 technology library is `available here <https://github.com/ucb-bar/hammer/blob/8fd1486499b875d56f09b060f03a62775f0a6aa7/src/hammer-vlsi/technology/nangate45/sram-cache.json>`_.
 
 In addition to these functional descriptions of the SRAM there are also other fields that specify physical/implementation characteristics.
 These include the threshold voltage, the mux factor, as well as a list of extra non-functional ports.
@@ -100,10 +102,10 @@ Separating the Top module from the TestHarness module
 
 Unlike the FireSim and Software simulation flows, a VLSI flow needs to separate the test harness and the chip (a.k.a. DUT) into separate files.
 This is necessary to facilitate post-synthesis and post-place-and-route simulation, as the module names in the RTL and gate-level verilog files would collide.
-Simulations after you the design goes through a VLSI flow will use the verilog netlist generated from the flow and will need an untouched test harness to drive it.
+Simulations, after your design goes through a VLSI flow, will use the verilog netlist generated from the flow and will need an untouched test harness to drive it.
 Separating these components into separate files makes this straightforward.
 Without the separation the file that included the test harness would also redefine the DUT which is often disallowed in simulation tools.
-To do this, there is a FIRRTL ``App`` in :ref:`Barstools` called ``GenerateTopAndHarness``, which runs the appropriate transforms to elaborate the modules separately.
+To do this, there is a FIRRTL ``App`` in :ref:`Tools/Barstools:Barstools` called ``GenerateTopAndHarness``, which runs the appropriate transforms to elaborate the modules separately.
 This also renames modules in the test harness so that any modules that are instantiated in both the test harness and the chip are uniquified.
 
 .. Note:: For VLSI projects, this ``App`` is run instead of the normal FIRRTL ``App`` to elaborate Verilog.
@@ -131,5 +133,5 @@ This, unfortunately, breaks the process-agnostic RTL abstraction, so it is recom
 The simplest way to do this is to have a config fragment that when included updates instantiates the IO cells and connects them in the test harness.
 When simulating chip-specific designs, it is important to include the IO cells.
 The IO cell behavioral models will often assert if they are connected incorrectly, which is a useful runtime check.
-They also keep the IO interface at the chip and test harness boundary (see :ref:`Separating the Top module from the TestHarness module`) consistent after synthesis and place-and-route,
+They also keep the IO interface at the chip and test harness boundary (see :ref:`Tools/Barstools:Separating the Top module from the TestHarness module`) consistent after synthesis and place-and-route,
 which allows the RTL simulation test harness to be reused.

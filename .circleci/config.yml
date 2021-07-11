@@ -6,13 +6,13 @@ version: 2.1
 parameters:
     tools-cache-version:
         type: string
-        default: "v4"
+        default: "v12"
 
 # default execution env.s
 executors:
     main-env:
         docker:
-            - image: ucbbar/chipyard-image:1.0.0
+            - image: ucbbar/chipyard-ci-image:1d51bb90
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 
@@ -41,7 +41,7 @@ commands:
             - save_cache:
                 key: << parameters.tools-version >>-installed-<< pipeline.parameters.tools-cache-version >>-{{ checksum "../<< parameters.tools-version >>.hash" }}
                 paths:
-                    - "/home/riscvuser/<< parameters.tools-version >>-install"
+                    - "/root/<< parameters.tools-version >>-install"
 
     ssh-checkout:
         description: "Add SSH key and checkout code"
@@ -49,6 +49,7 @@ commands:
             - add_ssh_keys:
                 fingerprints:
                     - "3e:c3:02:5b:ed:64:8c:b7:b0:04:43:bc:83:43:73:1e"
+                    - "32:d6:89:d2:97:fa:db:de:a8:2d:2a:f2:70:dd:80:89"
             - checkout
 
     setup-tools:
@@ -73,7 +74,7 @@ commands:
             tools-version:
                 type: string
                 default: "riscv-tools"
-            project-key:
+            group-key:
                 type: string
             timeout:
                 type: string
@@ -81,17 +82,20 @@ commands:
             build-script:
                 type: string
                 default: "do-rtl-build.sh"
+            build-type:
+                type: string
+                default: "sim"
         steps:
             - setup-tools:
                 tools-version: "<< parameters.tools-version >>"
             - run:
-                name: Building << parameters.project-key >> subproject using Verilator
-                command: .circleci/<< parameters.build-script >> << parameters.project-key >>
+                name: Building << parameters.group-key >> subproject using Verilator
+                command: .circleci/<< parameters.build-script >> << parameters.group-key >> << parameters.build-type >>
                 no_output_timeout: << parameters.timeout >>
             - save_cache:
-                key: << parameters.project-key >>-{{ .Branch }}-{{ .Revision }}
+                key: << parameters.group-key >>-{{ .Branch }}-{{ .Revision }}
                 paths:
-                    - "/home/riscvuser/project"
+                    - "/root/project"
 
     run-tests:
         description: "Run a set of tests"
@@ -99,29 +103,22 @@ commands:
             tools-version:
                 type: string
                 default: "riscv-tools"
+            group-key:
+                type: string
             project-key:
                 type: string
-            extra-cache-restore:
-                type: string
-                default: ""
             run-script:
                 type: string
                 default: "run-tests.sh"
             timeout:
                 type: string
-                default: "10m"
+                default: "25m"
         steps:
             - setup-tools:
                 tools-version: "<< parameters.tools-version >>"
             - restore_cache:
                 keys:
-                    - << parameters.project-key >>-{{ .Branch }}-{{ .Revision }}
-            - when:
-                condition: << parameters.extra-cache-restore >>
-                steps:
-                    - restore_cache:
-                        keys:
-                            - << parameters.extra-cache-restore >>-{{ .Branch }}-{{ .Revision }}
+                    - << parameters.group-key >>-{{ .Branch }}-{{ .Revision }}
             - run:
                 name: Run << parameters.project-key >> subproject tests
                 command: .circleci/<< parameters.run-script >> << parameters.project-key >>
@@ -193,128 +190,170 @@ jobs:
             - save_cache:
                 key: extra-tests-{{ .Branch }}-{{ .Revision }}
                 paths:
-                    - "/home/riscvuser/project/tests"
-    prepare-chipyard-rocket:
+                    - "/root/project/tests"
+
+    prepare-chipyard-cores:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "chipyard-rocket"
-    prepare-chipyard-sha3:
+                group-key: "group-cores"
+    prepare-chipyard-peripherals:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "chipyard-sha3"
-    prepare-chipyard-hetero:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "chipyard-hetero"
-                timeout: "240m"
-    prepare-chipyard-boom:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "chipyard-boom"
-    prepare-rocketchip:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "rocketchip"
-    prepare-chipyard-blkdev:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "chipyard-blkdev"
-    prepare-chipyard-hwacha:
+                group-key: "group-peripherals"
+    prepare-chipyard-accels:
         executor: main-env
         steps:
             - prepare-rtl:
                 tools-version: "esp-tools"
-                project-key: "chipyard-hwacha"
-    prepare-chipyard-gemmini:
+                group-key: "group-accels"
+    prepare-chipyard-tracegen:
         executor: main-env
         steps:
             - prepare-rtl:
-                tools-version: "esp-tools"
-                project-key: "chipyard-gemmini"
-    prepare-tracegen:
+                group-key: "group-tracegen"
+    prepare-chipyard-other:
         executor: main-env
         steps:
             - prepare-rtl:
-                project-key: "tracegen"
-    prepare-tracegen-boom:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "tracegen-boom"
-    prepare-chipyard-ariane:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "chipyard-ariane"
-    prepare-icenet:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "icenet"
-    prepare-testchipip:
-        executor: main-env
-        steps:
-            - prepare-rtl:
-                project-key: "testchipip"
+                group-key: "group-other"
+
     chipyard-rocket-run-tests:
         executor: main-env
         steps:
             - run-tests:
+                group-key: "group-cores"
                 project-key: "chipyard-rocket"
-    chipyard-sha3-run-tests:
-        executor: main-env
-        steps:
-            - run-tests:
-                project-key: "chipyard-sha3"
     chipyard-hetero-run-tests:
         executor: main-env
         steps:
             - run-tests:
+                group-key: "group-cores"
                 project-key: "chipyard-hetero"
-                timeout: "15m"
+                timeout: "20m"
     chipyard-boom-run-tests:
         executor: main-env
         steps:
             - run-tests:
+                group-key: "group-cores"
                 project-key: "chipyard-boom"
-    rocketchip-run-tests:
+    chipyard-cva6-run-tests:
         executor: main-env
         steps:
             - run-tests:
-                project-key: "rocketchip"
+                group-key: "group-cores"
+                project-key: "chipyard-cva6"
+                timeout: "30m"
+    chipyard-sodor-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-cores"
+                project-key: "chipyard-sodor"
+                timeout: "30m"
+    chipyard-multiclock-rocket-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-cores"
+                project-key: "chipyard-multiclock-rocket"
+    chipyard-dmirocket-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-peripherals"
+                project-key: "chipyard-dmirocket"
+    chipyard-spiflashwrite-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-peripherals"
+                project-key: "chipyard-spiflashwrite"
+    chipyard-spiflashread-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-peripherals"
+                project-key: "chipyard-spiflashread"
+    chipyard-lbwif-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-peripherals"
+                project-key: "chipyard-lbwif"
+
+    chipyard-sha3-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                tools-version: "esp-tools"
+                group-key: "group-accels"
+                project-key: "chipyard-sha3"
+    chipyard-streaming-fir-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-accels"
+                project-key: "chipyard-streaming-fir"
+    chipyard-streaming-passthrough-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-accels"
+                project-key: "chipyard-streaming-passthrough"
     chipyard-hwacha-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 tools-version: "esp-tools"
+                group-key: "group-accels"
                 project-key: "chipyard-hwacha"
+                timeout: "30m"
     chipyard-gemmini-run-tests:
         executor: main-env
         steps:
             - run-tests:
                 tools-version: "esp-tools"
+                group-key: "group-accels"
                 project-key: "chipyard-gemmini"
+    chipyard-nvdla-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-accels"
+                project-key: "chipyard-nvdla"
     tracegen-run-tests:
         executor: main-env
         steps:
             - run-tests:
+                group-key: "group-tracegen"
                 project-key: "tracegen"
     tracegen-boom-run-tests:
         executor: main-env
         steps:
             - run-tests:
+                group-key: "group-tracegen"
                 project-key: "tracegen-boom"
+    icenet-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-other"
+                project-key: "icenet"
+                timeout: "30m"
+    testchipip-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-other"
+                project-key: "testchipip"
+                timeout: "30m"
     firesim-run-tests:
         executor: main-env
         steps:
             - run-tests:
-                extra-cache-restore: "extra-tests"
+                group-key: "extra-tests"
                 project-key: "firesim"
                 run-script: "run-firesim-scala-tests.sh"
                 timeout: "20m"
@@ -322,7 +361,7 @@ jobs:
         executor: main-env
         steps:
             - run-tests:
-                extra-cache-restore: "extra-tests"
+                group-key: "extra-tests"
                 project-key: "fireboom"
                 run-script: "run-firesim-scala-tests.sh"
                 timeout: "45m"
@@ -330,35 +369,16 @@ jobs:
         executor: main-env
         steps:
             - run-tests:
-                extra-cache-restore: "extra-tests"
+                group-key: "extra-tests"
                 project-key: "firesim-multiclock"
                 run-script: "run-firesim-scala-tests.sh"
                 timeout: "20m"
-    midasexamples-run-tests:
+    prepare-chipyard-fpga:
         executor: main-env
         steps:
-            - setup-tools
-            - run:
-                name: Run midasexamples tests
-                command: .circleci/run-midasexamples-tests.sh
-    chipyard-ariane-run-tests:
-        executor: main-env
-        steps:
-            - run-tests:
-                project-key: "chipyard-ariane"
-                timeout: "30m"
-    icenet-run-tests:
-        executor: main-env
-        steps:
-            - run-tests:
-                project-key: "icenet"
-                timeout: "30m"
-    testchipip-run-tests:
-        executor: main-env
-        steps:
-            - run-tests:
-                project-key: "testchipip"
-                timeout: "30m"
+            - prepare-rtl:
+                group-key: "group-fpga"
+                build-type: "fpga"
 
 # Order and dependencies of jobs to run
 workflows:
@@ -398,114 +418,88 @@ workflows:
                     - install-riscv-toolchain
 
             # Prepare the verilator builds
-            - prepare-chipyard-rocket:
+            - prepare-chipyard-cores:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
-
-            - prepare-chipyard-sha3:
+            - prepare-chipyard-peripherals:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
-
-            - prepare-chipyard-hetero:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
-            - prepare-chipyard-boom:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
-            - prepare-rocketchip:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
-            - prepare-chipyard-blkdev:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
-            - prepare-chipyard-hwacha:
+            - prepare-chipyard-accels:
                 requires:
                     - install-esp-toolchain
                     - install-verilator
-
-            - prepare-chipyard-gemmini:
-                requires:
-                    - install-esp-toolchain
-                    - install-verilator
-
-            - prepare-tracegen:
+            - prepare-chipyard-tracegen:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
-
-            - prepare-tracegen-boom:
+            - prepare-chipyard-other:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
-
-            - prepare-chipyard-ariane:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
-            - prepare-icenet:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
-            - prepare-testchipip:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-
-            # Run the respective tests
-
-            # Run midasexamples test
-            - midasexamples-run-tests:
-                requires:
-                    - install-riscv-toolchain
 
             # Run the example tests
             - chipyard-rocket-run-tests:
                 requires:
-                    - prepare-chipyard-rocket
+                    - prepare-chipyard-cores
+            - chipyard-hetero-run-tests:
+                requires:
+                    - prepare-chipyard-cores
+            - chipyard-boom-run-tests:
+                requires:
+                    - prepare-chipyard-cores
+            - chipyard-cva6-run-tests:
+                requires:
+                    - prepare-chipyard-cores
+            - chipyard-sodor-run-tests:
+                requires:
+                    - prepare-chipyard-cores
+            - chipyard-dmirocket-run-tests:
+                requires:
+                    - prepare-chipyard-peripherals
+            - chipyard-spiflashwrite-run-tests:
+                requires:
+                    - prepare-chipyard-peripherals
+            - chipyard-spiflashread-run-tests:
+                requires:
+                    - prepare-chipyard-peripherals
+            - chipyard-lbwif-run-tests:
+                requires:
+                    - prepare-chipyard-peripherals
 
             - chipyard-sha3-run-tests:
                 requires:
-                    - prepare-chipyard-sha3
-
-            - chipyard-hetero-run-tests:
+                    - prepare-chipyard-accels
+            - chipyard-streaming-fir-run-tests:
                 requires:
-                    - prepare-chipyard-hetero
-
-            - chipyard-boom-run-tests:
+                    - prepare-chipyard-accels
+            - chipyard-streaming-passthrough-run-tests:
                 requires:
-                    - prepare-chipyard-boom
-
-            - rocketchip-run-tests:
-                requires:
-                    - prepare-rocketchip
-
+                    - prepare-chipyard-accels
             - chipyard-hwacha-run-tests:
                 requires:
-                    - prepare-chipyard-hwacha
-
+                    - prepare-chipyard-accels
             - chipyard-gemmini-run-tests:
                 requires:
-                    - prepare-chipyard-gemmini
+                    - prepare-chipyard-accels
+            - chipyard-nvdla-run-tests:
+                requires:
+                    - prepare-chipyard-accels
 
             - tracegen-run-tests:
                 requires:
-                    - prepare-tracegen
-
+                    - prepare-chipyard-tracegen
             - tracegen-boom-run-tests:
                 requires:
-                    - prepare-tracegen-boom
+                    - prepare-chipyard-tracegen
+
+            - icenet-run-tests:
+                requires:
+                    - prepare-chipyard-other
+            - testchipip-run-tests:
+                requires:
+                    - prepare-chipyard-other
 
             # Run the firesim tests
             - firesim-run-tests:
@@ -524,14 +518,7 @@ workflows:
                     - install-verilator
                     - build-extra-tests
 
-            - chipyard-ariane-run-tests:
+            # Prepare the fpga builds (just Verilog)
+            - prepare-chipyard-fpga:
                 requires:
-                    - prepare-chipyard-ariane
-
-            - icenet-run-tests:
-                requires:
-                    - prepare-icenet
-
-            - testchipip-run-tests:
-                requires:
-                    - prepare-testchipip
+                    - install-riscv-toolchain

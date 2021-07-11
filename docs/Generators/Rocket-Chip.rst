@@ -30,7 +30,7 @@ The tiles connect to the ``SystemBus``, which connect it to the L2 cache banks.
 The L2 cache banks then connect to the ``MemoryBus``, which connects to the
 DRAM controller through a TileLink to AXI converter.
 
-To learn more about the memory hierarchy, see :ref:`Memory Hierarchy`.
+To learn more about the memory hierarchy, see :ref:`Customization/Memory-Hierarchy:Memory Hierarchy`.
 
 MMIO
 ----

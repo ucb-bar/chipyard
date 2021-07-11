@@ -22,6 +22,8 @@ cd $LOCAL_CHIPYARD_DIR/sims/firesim
 ./scripts/build-libdwarf.sh
 cd $LOCAL_CHIPYARD_DIR
 
+make -C $LOCAL_CHIPYARD_DIR/tools/dromajo/dromajo-src/src
+
 # set stricthostkeychecking to no (must happen before rsync)
 run "echo \"Ping $SERVER\""
 
@@ -46,4 +48,5 @@ run "export RISCV=\"$TOOLS_DIR\"; \
      export FIRESIM_ENV_SOURCED=1; \
      export PATH=\"$REMOTE_VERILATOR_DIR/bin:\$PATH\"; \
      export VERILATOR_ROOT=\"$REMOTE_VERILATOR_DIR\"; \
-     make -C $REMOTE_FIRESIM_DIR JAVA_ARGS=\"$REMOTE_JAVA_ARGS\" testOnly ${mapping[$1]}"
+     export COURSIER_CACHE=\"$REMOTE_WORK_DIR/.coursier-cache\"; \
+     make -C $REMOTE_FIRESIM_DIR JAVA_OPTS=\"$REMOTE_JAVA_OPTS\" SBT_OPTS=\"$REMOTE_SBT_OPTS\" testOnly ${mapping[$1]}"

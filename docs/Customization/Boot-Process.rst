@@ -34,7 +34,7 @@ FESVR is a program that runs on the host CPU and can read/write arbitrary
 parts of the target system memory using the Tethered Serial Interface (TSI).
 
 FESVR uses TSI to load a baremetal executable or second-stage bootloader into
-the SoC memory. In :ref:`Software RTL Simulation`, this will be the binary you
+the SoC memory. In :ref:`Simulation/Software-RTL-Simulation:Software RTL Simulation`, this will be the binary you
 pass to the simulator. Once it is finished loading the program, FESVR will
 write to the software interrupt register for CPU 0, which will bring CPU 0
 out of its WFI loop. Once it receives the interrupt, CPU 0 will write to

@@ -1,26 +1,30 @@
 diff --git a/build.sbt b/build.sbt
-index a633066..3df8b74 100644
+index 3123c4b8..487fc428 100644
 --- a/build.sbt
 +++ b/build.sbt
-@@ -124,7 +124,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
- 
- lazy val chipyard = conditionalDependsOn(project in file("generators/chipyard"))
-   .dependsOn(boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
+@@ -184,7 +184,7 @@ lazy val testchipipLib = "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHO
+ lazy val chipyard = (project in file("generators/chipyard"))
+   .sourceDependency(testchipip, testchipipLib)
+   .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
 -    sha3, // On separate line to allow for cleaner tutorial-setup patches
 +//    sha3, // On separate line to allow for cleaner tutorial-setup patches
-     gemmini, icenet, tracegen, ariane)
-   .settings(commonSettings)
- 
-@@ -151,9 +151,9 @@ lazy val ariane = (project in file("generators/ariane"))
-   .dependsOn(rocketchip)
+     dsptools, `rocket-dsp-utils`,
+     gemmini, icenet, tracegen, cva6, nvdla, sodor)
+   .settings(libraryDependencies ++= rocketLibDeps.value)
+@@ -223,11 +223,11 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
+   .settings(libraryDependencies ++= rocketLibDeps.value)
    .settings(commonSettings)
  
 -lazy val sha3 = (project in file("generators/sha3"))
 -  .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
+-  .settings(libraryDependencies ++= rocketLibDeps.value)
+-  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
 -  .settings(commonSettings)
 +//lazy val sha3 = (project in file("generators/sha3"))
 +//  .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
++//  .settings(libraryDependencies ++= rocketLibDeps.value)
++//  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
 +//  .settings(commonSettings)
  
  lazy val gemmini = (project in file("generators/gemmini"))
-   .dependsOn(rocketchip, chisel_testers, testchipip)
+   .sourceDependency(testchipip, testchipipLib)

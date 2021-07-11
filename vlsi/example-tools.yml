@@ -1,0 +1,33 @@
+# SRAM Compiler compiler options
+vlsi.core.sram_generator_tool: "sram_compiler"
+# You should specify a location for the SRAM generator in the tech plugin
+vlsi.core.sram_generator_tool_path: []
+vlsi.core.sram_generator_tool_path_meta: "append"
+
+# Tool options. Replace with your tool plugin of choice.
+# Genus options
+vlsi.core.synthesis_tool: "genus"
+vlsi.core.synthesis_tool_path: ["hammer-cadence-plugins/synthesis"]
+vlsi.core.synthesis_tool_path_meta: "append"
+synthesis.genus.version: "1813"
+# Innovus options
+vlsi.core.par_tool: "innovus"
+vlsi.core.par_tool_path: ["hammer-cadence-plugins/par"]
+vlsi.core.par_tool_path_meta: "append"
+par.innovus.version: "191_ISR3"
+par.innovus.design_flow_effort: "standard"
+par.inputs.gds_merge: true
+# Calibre options
+vlsi.core.drc_tool: "calibre"
+vlsi.core.drc_tool_path: ["hammer-mentor-plugins/drc"]
+vlsi.core.lvs_tool: "calibre"
+vlsi.core.lvs_tool_path: ["hammer-mentor-plugins/lvs"]
+# VCS options
+vlsi.core.sim_tool: "vcs"
+vlsi.core.sim_tool_path: ["hammer-synopsys-plugins/sim"]
+sim.vcs.version: "P-2019.06-SP2-5"
+# Voltus options
+vlsi.core.power_tool: "voltus"
+vlsi.core.power_tool_path: ["hammer-cadence-plugins/power"]
+vlsi.core.power_tool_path_meta: "append"
+power.voltus.version: "191_ISR3"

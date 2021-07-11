@@ -6,8 +6,10 @@
 set -e
 set -o pipefail
 
-RDIR=$(pwd)
-CHIPYARD_DIR="${CHIPYARD_DIR:-$(git rev-parse --show-toplevel)}"
+# If BASH_SOURCE is undefined, we may be running under zsh, in that case
+# provide a zsh-compatible alternative
+DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-${(%):-%x}}")")"
+CHIPYARD_DIR="$(dirname "$DIR")"
 
 usage() {
     echo "usage: ${0} [OPTIONS] [riscv-tools | esp-tools | ec2fast]"
@@ -18,9 +20,12 @@ usage() {
     echo "   ec2fast: if set, pulls in a pre-compiled RISC-V toolchain for an EC2 manager instance"
     echo ""
     echo "Options"
-    echo "   --prefix PREFIX : Install destination. If unset, defaults to $(pwd)/riscv-tools-install"
-    echo "                     or $(pwd)/esp-tools-install"
-    echo "   --help -h       : Display this message"
+    echo "   --prefix PREFIX       : Install destination. If unset, defaults to $(pwd)/riscv-tools-install"
+    echo "                           or $(pwd)/esp-tools-install"
+    echo "   --ignore-qemu         : Ignore installing QEMU"
+    echo "   --clean-after-install : Run make clean in calls to module_make and module_build"
+    echo "   --arch -a             : Architecture (e.g., rv64gc)"
+    echo "   --help -h             : Display this message"
     exit "$1"
 }
 
@@ -34,7 +39,10 @@ die() {
 
 TOOLCHAIN="riscv-tools"
 EC2FASTINSTALL="false"
+IGNOREQEMU=""
+CLEANAFTERINSTALL=""
 RISCV=""
+ARCH=""
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
@@ -45,6 +53,13 @@ do
         -p | --prefix )
             shift
             RISCV=$(realpath $1) ;;
+        --ignore-qemu )
+            IGNOREQEMU="true" ;;
+        -a | --arch )
+            shift
+            ARCH=$1 ;;
+        --clean-after-install )
+            CLEANAFTERINSTALL="true" ;;
         riscv-tools | esp-tools)
             TOOLCHAIN=$1 ;;
         ec2fast )
@@ -59,6 +74,15 @@ done
 if [ -z "$RISCV" ] ; then
       INSTALL_DIR="$TOOLCHAIN-install"
       RISCV="$(pwd)/$INSTALL_DIR"
+fi
+
+if [ -z "$ARCH" ] ; then
+    XLEN=64
+elif [[ "$ARCH" =~ ^rv(32|64)((i?m?a?f?d?|g?)c?)$ ]]; then
+    XLEN=${BASH_REMATCH[1]}
+else
+    error "invalid arch $ARCH"
+    usage 1
 fi
 
 echo "Installing toolchain to $RISCV"
@@ -102,15 +126,19 @@ if [ "${EC2FASTINSTALL}" = true ] ; then
     git submodule deinit "${module}" || :
 
 else
-    "${MAKE}" --version | (
-        read -r makever
-        case ${makever} in
-        'GNU Make '[4-9]\.*|'GNU Make '[1-9][0-9]) ;;
-        *) false ;;
-        esac; ) || die 'obsolete make version; need GNU make 4.x or later'
+    MAKE_VER=$("${MAKE}" --version) || true
+    case ${MAKE_VER} in
+        'GNU Make '[4-9]\.*)
+            ;;
+        'GNU Make '[1-9][0-9])
+            ;;
+        *)
+            die 'obsolete make version; need GNU make 4.x or later'
+            ;;
+    esac
 
     module_prepare riscv-gnu-toolchain qemu
-    module_build riscv-gnu-toolchain --prefix="${RISCV}" --with-cmodel=medany
+    module_build riscv-gnu-toolchain --prefix="${RISCV}" --with-cmodel=medany ${ARCH:+--with-arch=${ARCH}}
     echo '==>  Building GNU/Linux toolchain'
     module_make riscv-gnu-toolchain linux
 fi
@@ -121,25 +149,50 @@ echo '==>  Installing libfesvr static library'
 module_make riscv-isa-sim libfesvr.a
 cp -p "${SRCDIR}/riscv-isa-sim/build/libfesvr.a" "${RISCV}/lib/"
 
-CC= CXX= module_all riscv-pk --prefix="${RISCV}" --host=riscv64-unknown-elf
-module_all riscv-tests --prefix="${RISCV}/riscv64-unknown-elf"
+CC= CXX= module_all riscv-pk --prefix="${RISCV}" --host=riscv${XLEN}-unknown-elf
+module_all riscv-tests --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --with-xlen=${XLEN}
 
 # Common tools (not in any particular toolchain dir)
 
-SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv64-unknown-elf" --host=riscv64-unknown-elf
+CC= CXX= SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --host=riscv${XLEN}-unknown-elf
 
-SRCDIR="$(pwd)/toolchains" module_all qemu --prefix="${RISCV}" --target-list=riscv64-softmmu
+if [ -z "$IGNOREQEMU" ] ; then
+    echo "=>  Starting qemu build"
+    dir="$(pwd)/toolchains/qemu"
+    echo "==>   Initializing qemu submodule"
+    #since we don't want to use the global config we init passing rewrite config in to the command
+    git -c url.https://github.com/qemu.insteadOf=https://git.qemu.org/git submodule update --init --recursive "$dir"
+    echo "==>  Applying url-rewriting to avoid git.qemu.org"
+    # and once the clones exist, we recurse through them and set the rewrite
+    # in the local config so that any further commands by the user have the rewrite. uggh. git, why you so ugly?
+    git -C "$dir" config --local url.https://github.com/qemu.insteadOf https://git.qemu.org/git
+    git -C "$dir" submodule foreach --recursive 'git config --local url.https://github.com/qemu.insteadOf https://git.qemu.org/git'
 
-cd "$RDIR"
+    # check to see whether the rewrite rules are needed any more
+    # If you find git.qemu.org in any .gitmodules file below qemu, you still need them
+    # the /dev/null redirection in the submodule grepping is to quiet non-existance of further .gitmodules
+    ! grep -q 'git\.qemu\.org' "$dir/.gitmodules" && \
+    git -C "$dir" submodule foreach --quiet --recursive '! grep -q "git\.qemu\.org" .gitmodules 2>/dev/null' && \
+    echo "==>  PLEASE REMOVE qemu URL-REWRITING from scripts/build-toolchains.sh. It is no longer needed!" && exit 1
+
+    # now actually do the build
+    SRCDIR="$(pwd)/toolchains" module_build qemu --prefix="${RISCV}" --target-list=riscv${XLEN}-softmmu
+fi
+
+# make Dromajo
+git submodule update --init $CHIPYARD_DIR/tools/dromajo/dromajo-src
+make -C $CHIPYARD_DIR/tools/dromajo/dromajo-src/src
 
 # create specific env.sh
-{
-    echo "export CHIPYARD_TOOLCHAIN_SOURCED=1"
-    echo "export RISCV=$(printf '%q' "$RISCV")"
-    echo "export PATH=\${RISCV}/bin:\${PATH}"
-    echo "export LD_LIBRARY_PATH=\${RISCV}/lib\${LD_LIBRARY_PATH:+":\${LD_LIBRARY_PATH}"}"
-} > env-$TOOLCHAIN.sh
+cat > "$CHIPYARD_DIR/env-$TOOLCHAIN.sh" <<EOF
+# auto-generated by build-toolchains.sh
+export CHIPYARD_TOOLCHAIN_SOURCED=1
+export RISCV=$(printf '%q' "$RISCV")
+export PATH=\${RISCV}/bin:\${PATH}
+export LD_LIBRARY_PATH=\${RISCV}/lib\${LD_LIBRARY_PATH:+":\${LD_LIBRARY_PATH}"}
+EOF
 
 # create general env.sh
-echo "source \$( realpath \$(dirname "\${BASH_SOURCE[0]:-\${\(%\):-%x}}") )/env-$TOOLCHAIN.sh" >> env.sh
+echo "# line auto-generated by build-toolchains.sh" >> env.sh
+echo "source $(printf '%q' "$CHIPYARD_DIR/env-$TOOLCHAIN.sh")" >> env.sh
 echo "Toolchain Build Complete!"

@@ -6,6 +6,7 @@ target
 *.stamp
 *.vcd
 *.swp
+*.swo
 *.log
 *#
 *~
@@ -18,3 +19,4 @@ tags
 *~
 env-riscv-tools.sh
 env-esp-tools.sh
+.bsp/

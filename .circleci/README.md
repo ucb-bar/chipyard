@@ -34,11 +34,19 @@ Here the key is built from a string where the `checksum` portion converts the fi
 This directory contains all the collateral for the Chipyard CI to work.
 The following is included:
 
-    `build-toolchains.sh` # build either riscv-tools or esp-tools
-    `create-hash.sh`      # create hashes of riscv-tools/esp-tools so circleci caching can work
-    `do-rtl-build.sh`     # use verilator to build a sim executable (remotely)
-    `config.yml`          # main circleci config script to enumerate jobs/workflows
-    `defaults.sh`         # default variables used
+    `build-toolchains.sh`        # build either riscv-tools or esp-tools
+    `create-hash.sh`             # create hashes of riscv-tools/esp-tools so circleci caching can work
+    `do-rtl-build.sh`            # use verilator to build a sim executable (remotely)
+    `config.yml`                 # main circleci config script to enumerate jobs/workflows
+    `defaults.sh`                # default variables used
+    `check-commit.sh`            # check that submodule commits are valid
+    `build-extra-tests.sh`       # build default chipyard tests located in tests/
+    `clean-old-files.sh`         # clean up build server files
+    `do-fpga-rtl-build.sh`       # similar to `do-rtl-build` but using fpga/
+    `install-verilator.sh`       # install verilator on build server
+    `run-firesim-scala-tests.sh` # run firesim scala tests
+    `run-tests.sh                # run tests for a specific set of designs
+    `images/`                    # docker image used in CI
 
 How things are setup for Chipyard
 ---------------------------------

@@ -15,7 +15,7 @@ case ${ncpu} in
 esac
 
 # Allow user to override MAKE
-[ -n "${MAKE}" ] || MAKE=$(command -v gnumake || command -v gmake || command -v make)
+[ -n "${MAKE:+x}" ] || MAKE=$(command -v gnumake || command -v gmake || command -v make)
 readonly MAKE
 
 
@@ -49,6 +49,9 @@ module_make() ( # <submodule> <target..>
     cd "${SRCDIR}/${1}/build"
     shift
     "${MAKE}" "$@" | tee "build-${1:-make}.log"
+    if [ -n "$CLEANAFTERINSTALL" ] ; then
+      "${MAKE}" clean  # get rid of intermediate files
+    fi
 )
 
 module_build() ( # <submodule> [configure-arg..]
@@ -81,6 +84,9 @@ module_build() ( # <submodule> [configure-arg..]
         "${MAKE}"
         echo "==>  Installing ${name}"
         "${MAKE}" install
+        if [ -n "$CLEANAFTERINSTALL" ] ; then
+          "${MAKE}" clean  # get rid of intermediate files
+        fi
     } 2>&1 | tee build.log
 )
 

@@ -2,9 +2,9 @@ Test Chip IP
 ============
 
 Chipyard includes a Test Chip IP library which provides various hardware
-widgets that may be useful when designing SoCs. This includes a :ref:`Serial Adapter`,
-:ref:`Block Device Controller`, :ref:`TileLink SERDES`, :ref:`TileLink Switcher`,
-:ref:`TileLink Ring Network`, and :ref:`UART Adapter`.
+widgets that may be useful when designing SoCs. This includes a :ref:`Generators/TestChipIP:Serial Adapter`,
+:ref:`Generators/TestChipIP:Block Device Controller`, :ref:`Generators/TestChipIP:TileLink SERDES`, :ref:`Generators/TestChipIP:TileLink Switcher`,
+:ref:`Generators/TestChipIP:TileLink Ring Network`, and :ref:`Generators/TestChipIP:UART Adapter`.
 
 Serial Adapter
 --------------
@@ -14,7 +14,7 @@ processor. An instance of RISC-V frontend server running on the host CPU
 can send commands to the serial adapter to read and write data from the memory
 system. The frontend server uses this functionality to load the test program
 into memory and to poll for completion of the program. More information on
-this can be found in :ref:`Chipyard Boot Process`.
+this can be found in :ref:`Customization/Boot-Process:Chipyard Boot Process`.
 
 Block Device Controller
 -----------------------
@@ -69,7 +69,7 @@ to the TLXbar provided by RocketChip, but uses ring networks internally rather
 than crossbars. This can be useful for chips with very wide TileLink networks
 (many cores and L2 banks) that can sacrifice cross-section bandwidth to relieve
 wire routing congestion. Documentation on how to use the ring network can be
-found in :ref:`The System Bus`. The implementation itself can be found 
+found in :ref:`Customization/Memory-Hierarchy:The System Bus`. The implementation itself can be found 
 `here <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/Ring.scala>`_,
 and may serve as an example of how to implement your own TileLink network with
 a different topology.
@@ -84,3 +84,11 @@ output a UART log to a particular file using ``+uartlog=<NAME_OF_FILE>`` during 
 
 By default, this UART Adapter is added to all systems within Chipyard by adding the
 ``WithUART`` and ``WithUARTAdapter`` configs.
+
+SPI Flash Model
+---------------
+
+The SPI flash model is a device that models a simple SPI flash device. It currently
+only supports single read, quad read, single write, and quad write instructions. The
+memory is backed by a file which is provided using ``+spiflash#=<NAME_OF_FILE>``,
+where ``#`` is the SPI flash ID (usually ``0``).

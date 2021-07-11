@@ -11,6 +11,8 @@ They expect you to know about Chisel, Parameters, configs, etc.
    Top-Testharness
    Chip-Communication
    Debugging-RTL
+   Debugging-BOOM
    Resources
    CDEs
+   Harness-Clocks
 

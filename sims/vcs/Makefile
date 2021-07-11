@@ -25,14 +25,26 @@ sim_prefix = simv
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
-PERMISSIVE_ON=+permissive
-PERMISSIVE_OFF=+permissive-off
-
-WAVEFORM_FLAG=+vcdplusfile=$(sim_out_name).vpd
+include $(base_dir)/vcs.mk
 
 .PHONY: default debug
 default: $(sim)
 debug: $(sim_debug)
+
+#########################################################################################
+# simulaton requirements
+#########################################################################################
+SIM_FILE_REQS += \
+	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
+
+# copy files but ignore *.h files in *.f since vcs has +incdir+$(build_dir)
+$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
+	cp -f $^ $(build_dir)
+	$(foreach file,\
+		$^,\
+		$(if $(filter %.h,$(file)),\
+			,\
+			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
 
 #########################################################################################
 # import other necessary rules and variables
@@ -44,71 +56,42 @@ include $(base_dir)/common.mk
 #########################################################################################
 VCS = vcs -full64
 
-VCS_CC_OPTS = \
-	-CC "-I$(VCS_HOME)/include" \
-	-CC "-I$(RISCV)/include" \
-	-CC "-I$(dramsim_dir)" \
-	-CC "-std=c++11" \
-	$(dramsim_lib) \
-	$(RISCV)/lib/libfesvr.a \
-	-CC "$(EXTRA_SIM_CC_FLAGS)"
+VCS_OPTS = $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(PREPROC_DEFINES)
 
-VCS_NONCC_OPTS = \
-	+lint=all,noVCDE,noONGS,noUI \
-	-error=PCWM-L \
-	-timescale=1ns/1ps \
-	-quiet \
-	-q \
-	+rad \
-	+v2k \
-	+vcs+lic+wait \
-	+vc+list \
-	-error=noZMMCM \
-	-assert svaext \
-	-sverilog \
-	+libext+.v \
-	+incdir+$(build_dir) \
-	-f $(sim_common_files) \
-	$(sim_vsrcs)
-
-VCS_DEFINES = \
-	+define+VCS \
-	+define+CLOCK_PERIOD=1.0 \
-	+define+PRINTF_COND=$(TB).printf_cond \
-	+define+STOP_COND=!$(TB).reset \
-	+define+RANDOMIZE_MEM_INIT \
-	+define+RANDOMIZE_REG_INIT \
-	+define+RANDOMIZE_GARBAGE_ASSIGN \
-	+define+RANDOMIZE_INVALID_ASSIGN
-
-VCS_OPTS = -notice -line $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(VCS_DEFINES) $(EXTRA_SIM_SOURCES)
+#########################################################################################
+# vcs build paths
+#########################################################################################
+model_dir = $(build_dir)/$(long_name)
+model_dir_debug = $(build_dir)/$(long_name).debug
 
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
 $(sim): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
-	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
-	-debug_pp
+	rm -rf $(model_dir)
+	$(VCS) $(VCS_OPTS) $(EXTRA_SIM_SOURCES) -o $@ -Mdir=$(model_dir)
 
 $(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
-	rm -rf csrc && $(VCS) $(VCS_OPTS) -o $@ \
-	+define+DEBUG \
-	-debug_pp
+	rm -rf $(model_dir_debug)
+	$(VCS) $(VCS_OPTS) $(EXTRA_SIM_SOURCES) -o $@ -Mdir=$(model_dir_debug)  \
+	+define+DEBUG
 
 #########################################################################################
 # create a vcs vpd rule
 #########################################################################################
 .PRECIOUS: $(output_dir)/%.vpd %.vpd
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
-
-$(output_dir)/none.vpd: $(sim_debug)
-	mkdir -p $(output_dir)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) none </dev/null 2> >(spike-dasm > $(output_dir)/none.out) | tee $(output_dir)/none.log)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
 
 #########################################################################################
-# general cleanup rule
+# general cleanup rules
 #########################################################################################
-.PHONY: clean
+.PHONY: clean clean-sim clean-sim-debug
 clean:
-	rm -rf $(gen_dir) csrc $(sim_prefix)-* ucli.key vc_hdrs.h
+	rm -rf $(gen_dir) $(sim_prefix)-* ucli.key
+
+clean-sim:
+	rm -rf $(model_dir) $(build_dir)/vc_hdrs.h $(sim) $(sim).daidir ucli.key
+
+clean-sim-debug:
+	rm -rf $(model_dir_debug) $(build_dir)/vc_hdrs.h $(sim_debug) $(sim_debug).daidir ucli.key
