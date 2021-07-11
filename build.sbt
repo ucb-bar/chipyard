@@ -159,10 +159,6 @@ lazy val treadle = (project in file("tools/treadle"))
   .settings(libraryDependencies ++= (Global / firrtlLibDeps).value)
 lazy val treadleLibDeps = (treadle / Keys.libraryDependencies)
 
-lazy val barstoolsFloorplan = (project in file("./tools/barstools/floorplan/"))
-  .dependsOn(chisel)
-  .settings(commonSettings)
-
 lazy val chisel_testers = (project in file("tools/chisel-testers"))
   .sourceDependency(chiselRef, chiselLib)
   .settings(addCompilerPlugin(chiselPluginLib))
@@ -187,7 +183,7 @@ lazy val testchipipLib = "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHO
 
 lazy val chipyard = (project in file("generators/chipyard"))
   .sourceDependency(testchipip, testchipipLib)
-  .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell, barstoolsFloorplan,
+  .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell, floorplan,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsp-utils`,
     gemmini, icenet, tracegen, cva6, nvdla, sodor)
@@ -249,6 +245,16 @@ lazy val iocell = (project in file("./tools/barstools/iocell/"))
   .sourceDependency(chiselRef, chiselLib)
   .settings(addCompilerPlugin(chiselPluginLib))
   .settings(libraryDependencies ++= chiselLibDeps.value)
+  .settings(commonSettings)
+
+lazy val floorplan = (project in file("./tools/barstools/floorplan/"))
+  .sourceDependency(chiselRef, chiselLib)
+  .settings(addCompilerPlugin(chiselPluginLib))
+  .settings(libraryDependencies ++= chiselLibDeps.value)
+  .settings(libraryDependencies ++= Seq(
+      "org.json4s" %% "json4s-jackson" % "3.6.1",
+      "org.json4s" %% "json4s-native" % "3.6.1",
+  ))
   .settings(commonSettings)
 
 lazy val tapeout = (project in file("./tools/barstools/tapeout/"))
