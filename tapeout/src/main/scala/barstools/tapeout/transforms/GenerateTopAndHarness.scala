@@ -16,6 +16,7 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
   val synTop: Option[String] = annotations.collectFirst { case SynTopAnnotation(s) => s }
   val topFir: Option[String] = annotations.collectFirst { case TopFirAnnotation(s) => s }
   val topAnnoOut: Option[String] = annotations.collectFirst { case TopAnnoOutAnnotation(s) => s }
+  val harnessAnnoOut: Option[String] = annotations.collectFirst { case HarnessAnnoOutAnnotation(s) => s }
   val harnessTop: Option[String] = annotations.collectFirst { case HarnessTopAnnotation(h) => h }
   val harnessConf: Option[String] = annotations.collectFirst { case HarnessConfAnnotation(h) => h }
   val harnessOutput: Option[String] = annotations.collectFirst { case HarnessOutputAnnotation(h) => h }
@@ -110,7 +111,7 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
     val annos = new FirrtlStage().execute(Array.empty, generatorAnnotations)
     annos.collectFirst { case FirrtlCircuitAnnotation(circuit) => circuit } match {
       case Some(circuit) =>
-        dump(circuit, annos, topFir, topAnnoOut)
+        dump(circuit, annos, topFir, harnessAnnoOut)
       case _ =>
         throw new Exception(s"executeTop failed while executing FIRRTL!\n")
     }
