@@ -167,7 +167,7 @@ module ArtyTestDriver;
   `MODEL testHarness(
     .CLK100MHZ(clock),
     .ck_rst(reset),
-    .success(success)
+    .io_success(success)
   );
 
 endmodule

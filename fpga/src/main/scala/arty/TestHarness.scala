@@ -31,8 +31,11 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
 
   val harnessClock = clock_32MHz
   val harnessReset = hReset
-  val success = if (p(SerialTLKey).isEmpty) false.B else IO(Output(Bool()))
+  val success = Wire(Bool())
   val dutReset = dReset
+  val io_success = IO(Output(Bool()))
+  io_success := success
+  success := false.B
 
   // must be after HasHarnessSignalReferences assignments
   lazyDut match { case d: HasTestHarnessFunctions =>
