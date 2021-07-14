@@ -106,8 +106,8 @@ generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_REQS)
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
 		--name $(long_name) \
-		$(foreach x,$(FLOORPLAN_ASPECTS), --with-aspect $(x)) \
-		--floorplan-ir-file $(FLOORPLAN_FPIR) \
+		$(if $(FLOORPLAN_ASPECT), --with-aspect $(FLOORPLAN_ASPECT),) \
+		$(if $(FLOORPLAN_FPIR), --floorplan-ir-file $(FLOORPLAN_FPIR),) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
 		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG))
 

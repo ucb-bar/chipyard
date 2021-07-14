@@ -138,11 +138,6 @@ HARNESS_SMEMS_FILE ?= $(build_dir)/$(long_name).harness.mems.v
 HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
 HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
 
-FLOORPLAN_FPIR ?= $(build_dir)/$(long_name).fpir
-FLOORPLAN_FILE ?= $(build_dir)/$(long_name).floorplan.yml
-FLOORPLAN_ASPECTS += \
-	chipyard.floorplan.RocketFloorplan
-
 BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
 
