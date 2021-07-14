@@ -129,22 +129,22 @@ $(TOP_TARGETS) $(HARNESS_TARGETS): firrtl_temp
 
 firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTopAndHarness,\
-		-o $(TOP_FILE) \
-		-tho $(HARNESS_FILE) \
-		-i $(FIRRTL_FILE) \
+		--output-file $(TOP_FILE) \
+		--harness-o $(HARNESS_FILE) \
+		--input-file $(FIRRTL_FILE) \
 		--syn-top $(TOP) \
 		--harness-top $(VLOG_MODEL) \
-		-faf $(ANNO_FILE) \
-		-tsaof $(TOP_ANNO) \
-		-tdf $(sim_top_blackboxes) \
-		-tsf $(TOP_FIR) \
-		-thaof $(HARNESS_ANNO) \
-		-hdf $(sim_harness_blackboxes) \
-		-thf $(HARNESS_FIR) \
+		--annotation-file $(ANNO_FILE) \
+		--top-anno-out $(TOP_ANNO) \
+		--top-dotf-out $(sim_top_blackboxes) \
+		--top-fir $(TOP_FIR) \
+		--harness-anno-out $(HARNESS_ANNO) \
+		--harness-dotf-out $(sim_harness_blackboxes) \
+		--harness-fir $(HARNESS_FIR) \
 		$(REPL_SEQ_MEM) \
 		$(HARNESS_CONF_FLAGS) \
-		-td $(build_dir) \
-		-ll $(FIRRTL_LOGLEVEL))
+		--target-dir $(build_dir) \
+		--log-level $(FIRRTL_LOGLEVEL))
 	touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
 # DOC include end: FirrtlCompiler
 
