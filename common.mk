@@ -97,7 +97,7 @@ $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip
 # create firrtl file rule and variables
 #########################################################################################
 .INTERMEDIATE: generator_temp
-$(FIRRTL_FILE) $(ANNO_FILE): generator_temp
+$(FIRRTL_FILE) $(ANNO_FILE) $(FLOORPLAN_FPIR): generator_temp
 	@echo "" > /dev/null
 
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile

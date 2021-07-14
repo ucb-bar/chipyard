@@ -31,7 +31,7 @@ endif
 .PHONY: default verilog
 default: all
 
-all: drc lvs
+all: drc lvs floorplan
 
 verilog: $(ALL_RTL)
 
@@ -174,7 +174,7 @@ endif
 # synthesis input configuration
 #########################################################################################
 SYN_CONF = $(OBJ_DIR)/inputs.yml
-GENERATED_CONFS = $(SYN_CONF)
+GENERATED_CONFS = $(SYN_CONF) $(FLOORPLAN_CONF)
 ifeq ($(CUSTOM_VLOG), )
 	GENERATED_CONFS += $(SRAM_CONF)
 endif
@@ -193,6 +193,20 @@ $(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 	for x in $(VLSI_RTL) $(shell cat $(VLSI_BB)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
+
+#########################################################################################
+# floorplan generation
+#########################################################################################
+
+.PHONY: floorplan
+floorplan: $(FLOORPLAN_CONF)
+
+$(FLOORPLAN_CONF): $(FLOORPLAN_FPIR)
+	$(call run_scala_main,floorplan,barstools.floorplan.compiler.FloorplanCompiler,\
+		--input-file $(FLOORPLAN_FPIR)\
+		--output-file $(FLOORPLAN_CONF)\
+		--output-fpir \
+		--mem-inst-file $(SMEMS_INSTMAP))
 
 #########################################################################################
 # AUTO BUILD FLOW

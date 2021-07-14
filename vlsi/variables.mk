@@ -12,9 +12,9 @@ SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
 SMEMS_HAMMER       ?= $(build_dir)/$(long_name).top.mems.hammer.json
 SMEMS_INSTMAP      ?= $(build_dir)/$(long_name).top.mems.instmap.txt
 
-FLOORPLAN_FPIR     ?= $(build_dir)/$(long_name).top.fpir
-FLOORPLAN_FILE     ?= $(build_dir)/$(long_name).top.floorplan.yml
 FLOORPLAN_ASPECT   ?= chipyard.floorplan.RocketFloorplanAspect
+FLOORPLAN_FPIR     ?= $(build_dir)/$(long_name).top.fpir
+FLOORPLAN_CONF     ?= $(build_dir)/$(long_name).top.floorplan.yml
 
 ifdef USE_SRAM_COMPILER
 MACROCOMPILER_MODE ?= -l $(SMEMS_COMP) --use-compiler -hir $(SMEMS_HAMMER) -im $(SMEMS_INSTMAP) --mode strict
