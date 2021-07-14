@@ -18,7 +18,9 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_LDFLAGS      = additional LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES      = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS         = additional make requirements to build the simulator" \
-"   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client (works best with sbtn or sbt script)"
+"   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client (works best with sbtn or sbt script)" \
+"   EXTRA_CHISEL_OPTIONS   = additional options to pass to the Chisel compiler" \
+"   EXTRA_FIRRTL_OPTIONS   = additional options to pass to the FIRRTL compiler"
 
 EXTRA_GENERATOR_REQS ?= $(BOOTROM_TARGETS)
 EXTRA_SIM_CXXFLAGS   ?=
@@ -107,7 +109,8 @@ generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_REQS)
 		--target-dir $(build_dir) \
 		--name $(long_name) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
-		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG))
+		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG) \
+		$(EXTRA_CHISEL_OPTIONS))
 
 .PHONY: firrtl
 firrtl: $(FIRRTL_FILE)
@@ -144,7 +147,8 @@ firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 		$(REPL_SEQ_MEM) \
 		$(HARNESS_CONF_FLAGS) \
 		--target-dir $(build_dir) \
-		--log-level $(FIRRTL_LOGLEVEL))
+		--log-level $(FIRRTL_LOGLEVEL) \
+		$(EXTRA_FIRRTL_OPTIONS))
 	touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
 # DOC include end: FirrtlCompiler
 
