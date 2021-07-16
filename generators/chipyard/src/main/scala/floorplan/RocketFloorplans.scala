@@ -10,7 +10,8 @@ object RocketFloorplans {
     case tile: RocketTileModuleImp =>
       val context = Floorplan(tile)
       context.createDummy(Some("Dummy"))
-      tile.outer.frontend.icache.module.data_arrays.map(x => context.addMem(x._1))
+      val memArray = context.createMemArray(Some("l1_icache_data"))
+      tile.outer.frontend.icache.module.data_arrays.map(x => memArray.addMem(x._1))
       context.elements
   }
 }

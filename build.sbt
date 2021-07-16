@@ -258,7 +258,7 @@ lazy val floorplan = (project in file("./tools/barstools/floorplan/"))
   .settings(commonSettings)
 
 lazy val tapeout = (project in file("./tools/barstools/tapeout/"))
-  .dependsOn(chisel_testers, chipyard) // must depend on chipyard to get scala resources
+  .dependsOn(chisel_testers, floorplan, chipyard) // must depend on chipyard to get scala resources
   .settings(libraryDependencies ++= chiselTestersLibDeps.value)
   .settings(commonSettings)
 

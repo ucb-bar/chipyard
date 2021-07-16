@@ -42,16 +42,17 @@ class ChipTop(implicit p: Parameters) extends LazyModule with BindingScope
   // of ChipTop (ex: ClockGroup) do not receive clock or reset.
   // However. anonymous children of ChipTop should not need an implicit Clock or Reset
   // anyways, they probably need to be explicitly clocked.
-  lazy val module: LazyModuleImpLike = new LazyRawModuleImp(this) {
-    // These become the implicit clock and reset to the System
-    val implicit_clock = implicitClockSinkNode.in.head._1.clock
-    val implicit_reset = implicitClockSinkNode.in.head._1.reset
-
-    // Connect the implicit clock/reset, if present
-    lazySystem.module match { case l: LazyModuleImp => {
-      l.clock := implicit_clock
-      l.reset := implicit_reset
-    }}
-  }
+  lazy val module: LazyModuleImpLike = new ChipTopLazyRawModuleImp(this, implicitClockSinkNode)
 }
 
+class ChipTopLazyRawModuleImp(val outer: ChipTop, val implicitClockSinkNode: ClockSinkNode) extends LazyRawModuleImp(outer) {
+  // These become the implicit clock and reset to the System
+  val implicit_clock = implicitClockSinkNode.in.head._1.clock
+  val implicit_reset = implicitClockSinkNode.in.head._1.reset
+
+  // Connect the implicit clock/reset, if present
+  outer.lazySystem.module match { case l: LazyModuleImp => {
+    l.clock := implicit_clock
+    l.reset := implicit_reset
+  }}
+}
