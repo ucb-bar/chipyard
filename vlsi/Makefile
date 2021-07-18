@@ -205,6 +205,7 @@ $(FLOORPLAN_CONF): generator_temp $(FLOORPLAN_SBANNOS) $(FLOORPLAN_FPIR)
 	$(call run_scala_main,floorplan,barstools.floorplan.compiler.FloorplanCompiler,\
 		--input-file $(FLOORPLAN_FPIR)\
 		--output-file $(FLOORPLAN_CONF)\
+		--top-module $(TOP) \
 		--output-fpir \
 		$(foreach x,$(FLOORPLAN_SBANNOS), --sideband-anno-file $(x)) \
 		--mem-inst-file $(SMEMS_INSTMAP))
