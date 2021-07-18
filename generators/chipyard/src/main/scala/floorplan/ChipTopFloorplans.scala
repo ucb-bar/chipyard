@@ -9,16 +9,16 @@ import barstools.floorplan.chisel.{FloorplanAspect, Floorplan, FloorplanFunction
 object ChipTopFloorplans {
 
   def default: FloorplanFunction = {
-    case top: TestHarness =>
-      val context = Floorplan(top)
-      context.createDummy(Some("foo"))
-      context.elements
     case top: ChipTopLazyRawModuleImp =>
       val context = Floorplan(top)
-      top.outer.lazySystem match {
-        case t: DigitalTop =>
-          val tiles = t.tiles.map(x => context.addHier(x.module))
+      val tiles = top.outer.lazySystem match {
+        case t: DigitalTop => t.tiles.map(x => context.addHier(x.module))
+        case _ => throw new Exception("Unsupported BuildSystem type")
       }
+      val tileGrid = context.createElasticArray(tiles)
+      val topGrid = context.createElasticArray(2)
+      topGrid.placeElementAt(tileGrid, 1)
+      topGrid.placeElementAt(context.createSpacer(Some("Dummy")), 0)
       context.elements
   }
 

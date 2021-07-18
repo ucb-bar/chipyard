@@ -14,7 +14,7 @@ SMEMS_INSTMAP      ?= $(build_dir)/$(long_name).top.mems.instmap.txt
 
 FLOORPLAN_ASPECT   ?= chipyard.floorplan.$(TOP)FloorplanAspect
 FLOORPLAN_FPIR     ?= $(build_dir)/$(long_name).top.fpir
-FLOORPLAN_CONF     ?= $(build_dir)/$(long_name).top.fp.yml
+FLOORPLAN_CONF     ?= $(build_dir)/$(long_name).top.fp.json
 
 ifdef USE_SRAM_COMPILER
 MACROCOMPILER_MODE ?= -l $(SMEMS_COMP) --use-compiler -hir $(SMEMS_HAMMER) -im $(SMEMS_INSTMAP) --mode strict

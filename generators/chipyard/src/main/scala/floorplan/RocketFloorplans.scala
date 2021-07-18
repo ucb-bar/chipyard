@@ -9,7 +9,7 @@ object RocketFloorplans {
   def default: FloorplanFunction = {
     case tile: RocketTileModuleImp =>
       val context = Floorplan(tile)
-      context.createDummy(Some("Dummy"))
+      context.createSpacer(Some("Spacer"))
       val memArray = context.createMemArray(Some("l1_icache_data"))
       tile.outer.frontend.icache.module.data_arrays.map(x => memArray.addMem(x._1))
       context.elements

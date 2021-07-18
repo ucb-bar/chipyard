@@ -201,7 +201,7 @@ $(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 .PHONY: floorplan
 floorplan: $(FLOORPLAN_CONF)
 
-$(FLOORPLAN_CONF): $(FLOORPLAN_FPIR)
+$(FLOORPLAN_CONF): generator_temp
 	$(call run_scala_main,floorplan,barstools.floorplan.compiler.FloorplanCompiler,\
 		--input-file $(FLOORPLAN_FPIR)\
 		--output-file $(FLOORPLAN_CONF)\
