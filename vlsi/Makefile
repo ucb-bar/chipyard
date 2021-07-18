@@ -201,7 +201,7 @@ $(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 .PHONY: floorplan
 floorplan: $(FLOORPLAN_CONF)
 
-$(FLOORPLAN_CONF): generator_temp $(FLOORPLAN_SBANNOS)
+$(FLOORPLAN_CONF): generator_temp $(FLOORPLAN_SBANNOS) $(FLOORPLAN_FPIR)
 	$(call run_scala_main,floorplan,barstools.floorplan.compiler.FloorplanCompiler,\
 		--input-file $(FLOORPLAN_FPIR)\
 		--output-file $(FLOORPLAN_CONF)\
@@ -211,7 +211,7 @@ $(FLOORPLAN_CONF): generator_temp $(FLOORPLAN_SBANNOS)
 
 # TODO also should generate sideband annotations for rocket area, etc.
 # This just annotates all the SRAM instances
-$(FLOORPLAN_SBAMEM): generator_temp
+$(FLOORPLAN_SBAMEM): generator_temp $(SMEMS_INSTAMAP)
 	$(vlsi_dir)/gen_sb_annos.py $(tech_name) $(SMEMS_INSTMAP) > $@
 
 #########################################################################################

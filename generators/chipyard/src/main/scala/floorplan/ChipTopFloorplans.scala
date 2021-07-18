@@ -11,14 +11,13 @@ object ChipTopFloorplans {
   def default: FloorplanFunction = {
     case top: ChipTopLazyRawModuleImp =>
       val context = Floorplan(top)
+      val topGrid = context.setTopGroup(context.createElasticArray(2))
       val tiles = top.outer.lazySystem match {
         case t: DigitalTop => t.tiles.map(x => context.addHier(x.module))
         case _ => throw new Exception("Unsupported BuildSystem type")
       }
-      val tileGrid = context.createElasticArray(tiles)
-      val topGrid = context.createElasticArray(2)
-      topGrid.placeElementAt(tileGrid, 1)
-      topGrid.placeElementAt(context.createSpacer(Some("Dummy")), 0)
+      topGrid.placeAt(context.createElasticArray(tiles), 1)
+      topGrid.placeAt(context.createSpacer(Some("spacer")), 0)
       context.elements
   }
 
