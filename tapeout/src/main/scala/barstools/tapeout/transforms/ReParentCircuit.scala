@@ -7,6 +7,7 @@ import firrtl.annotations._
 import firrtl.options.Dependency
 import firrtl.stage.Forms
 import firrtl.stage.TransformManager.TransformDependency
+import firrtl.annotations.TargetToken.{Instance, OfModule}
 
 case class ReParentCircuitAnnotation(target: ModuleTarget) extends SingleTargetAnnotation[ModuleTarget] {
   def duplicate(n: ModuleTarget) = this.copy(n)
@@ -32,6 +33,35 @@ class ReParentCircuit extends Transform with DependencyAPIMigration {
       rmap.record(CircuitTarget(c.main), CircuitTarget(s))
       rmap
     }
-    state.copy(circuit = newCircuit, renames = mainRename)
+
+    val newAnnotations = newTopName.map({ topName =>
+      // Update InstanceTargets and ReferenceTargets
+      // Yes, these are identical functions, but the copy methods force separate implementations
+      def updateInstance(t: InstanceTarget): Option[InstanceTarget] = {
+        val idx = t.path.lastIndexWhere(_._2.value == topName)
+        if (idx == -1) Some(t.copy(circuit=topName)) else Some(t.copy(circuit=topName, module=topName, path=t.path.drop(idx+1)))
+      }
+      def updateReference(t: ReferenceTarget): Option[ReferenceTarget] = {
+        val idx = t.path.lastIndexWhere(_._2.value == topName)
+        if (idx == -1) Some(t.copy(circuit=topName)) else Some(t.copy(circuit=topName, module=topName, path=t.path.drop(idx+1)))
+      }
+
+      AnnotationSeq(state.annotations.toSeq.map({
+        case x: SingleTargetAnnotation[InstanceTarget] if x.target.isInstanceOf[InstanceTarget] =>
+          updateInstance(x.target).map(y => x.duplicate(y))
+        case x: SingleTargetAnnotation[ReferenceTarget] if x.target.isInstanceOf[ReferenceTarget] =>
+          updateReference(x.target).map(y => x.duplicate(y))
+        case x: MultiTargetAnnotation =>
+          val newTargets: Seq[Seq[Option[Target]]] = x.targets.map(_.map({
+            case y: InstanceTarget => updateInstance(y)
+            case y: ReferenceTarget => updateReference(y)
+            case y => Some(y)
+          }))
+          if (newTargets.flatten.forall(_.isDefined)) Some(x.duplicate(newTargets.map(_.map(_.get)))) else None
+        case x => Some(x)
+      }).filter(_.isDefined).map(_.get))
+    }).getOrElse(state.annotations)
+
+    state.copy(circuit = newCircuit, renames = mainRename, annotations = newAnnotations)
   }
 }
