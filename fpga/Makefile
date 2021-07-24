@@ -59,6 +59,21 @@ ifeq ($(SUB_PROJECT),arty)
 	FPGA_BRAND        ?= xilinx
 endif
 
+ifeq ($(SUB_PROJECT),arty_gpio)
+	# TODO: Fix with Arty
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= ArtyFPGATestHarness
+	VLOG_MODEL        ?= ArtyFPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.arty
+	CONFIG            ?= ArtyWithGPIOConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.arty
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
+	TOP               ?= ChipTop
+	BOARD             ?= arty
+	FPGA_BRAND        ?= xilinx
+endif
+
 include $(base_dir)/variables.mk
 
 # default variables to build the arty example
@@ -126,6 +141,13 @@ $(mcs): $(BIT_FILE)
 
 .PHONY: mcs
 mcs: $(mcs)
+
+
+
+
+.PHONY: bsp
+bsp: $(build_dir)/$(long_name).dts $(mcs)
+	cd $(base_dir)/fpga/scripts; ./generate_bsp.sh $(long_name)
 
 #########################################################################################
 # general cleanup rules

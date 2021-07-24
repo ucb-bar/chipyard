@@ -45,7 +45,7 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
 // DOC include start: AbstractArty and Rocket
 class WithArtyTweaks extends Config(
   new WithArtyGPIOHarnessBinder ++
-  new WithGPIOPassthrough ++
+  new chipyard.iobinders.WithGPIOIOCells ++
   new WithArtyJTAGHarnessBinder ++
   new WithArtyUARTHarnessBinder ++
   new WithArtyResetHarnessBinder ++
@@ -53,6 +53,7 @@ class WithArtyTweaks extends Config(
   new WithSPIFlashIOPassthrough ++
   new WithDebugResetPassthrough ++
   new WithDefaultPeripherals ++
+  new chipyard.config.WithPeripheryBusFrequency(32.0) ++
   new freechips.rocketchip.subsystem.WithNBreakpoints(2))
 
 class TinyRocketArtyConfig extends Config(
