@@ -16,6 +16,11 @@ if [[ -z "${FPGA_PATH}" ]]; then
 	exit 1;
 fi
 
+if [[ -z "${FREEDOM_SDK}" ]]; then
+	echo "FREEDOM_SDK Environment variable not set. Please set this to be the path to the Freedom E SDK directory"
+	exit 2;
+fi
+
 #Generated DTS Path
 GENERATED_DTS=${FPGA_PATH}/generated-src/${LONG_NAME}/${LONG_NAME}.dts
 MODIFIED_DTS=${FPGA_PATH}/generated-src/${LONG_NAME}/${LONG_NAME}_modified.dts
