@@ -207,10 +207,10 @@ $(FLOORPLAN_CONF): generator_temp $(FLOORPLAN_SBANNOS) $(FLOORPLAN_FPIR)
 		--output-file $(FLOORPLAN_CONF)\
 		--top-module $(TOP) \
 		--output-fpir \
-		$(foreach x,$(FLOORPLAN_SBANNOS), --sideband-anno-file $(x)) \
+		$(foreach x,$(FLOORPLAN_SBANNOS), --oob-anno-file $(x)) \
 		--mem-inst-file $(SMEMS_INSTMAP))
 
-# TODO also should generate sideband annotations for rocket area, etc.
+# TODO also should generate out-of-band annotations for rocket area, etc.
 # This just annotates all the SRAM instances
 $(FLOORPLAN_SBAMEM): generator_temp $(SMEMS_INSTAMAP)
 	$(vlsi_dir)/gen_sb_annos.py $(tech_name) $(SMEMS_INSTMAP) > $@
