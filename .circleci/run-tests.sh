@@ -65,8 +65,11 @@ case $1 in
         $LOCAL_SIM_DIR/simulator-chipyard-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal
         ;;
     chipyard-sha3)
+        export RISCV=$LOCAL_ESP_DIR
+        export LD_LIBRARY_PATH=$LOCAL_ESP_DIR/lib
+        export PATH=$RISCV/bin:$PATH
         (cd $LOCAL_CHIPYARD_DIR/generators/sha3/software && ./build.sh)
-        $LOCAL_SIM_DIR/simulator-chipyard-Sha3RocketConfig $LOCAL_CHIPYARD_DIR/generators/sha3/software/benchmarks/bare/sha3-rocc.riscv
+        $LOCAL_SIM_DIR/simulator-chipyard-Sha3RocketConfig $LOCAL_CHIPYARD_DIR/generators/sha3/software/tests/bare/sha3-rocc.riscv
         ;;
     chipyard-streaming-passthrough)
         make -C $LOCAL_CHIPYARD_DIR/tests

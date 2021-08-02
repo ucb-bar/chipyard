@@ -34,6 +34,12 @@ class GemminiRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: GemminiRocketConfig
 
+class FPGemminiRocketConfig extends Config(
+  new gemmini.GemminiFP32DefaultConfig ++                         // use FP32Gemmini systolic array GEMM accelerator
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+
 // DOC include start: DmiRocket
 class dmiRocketConfig extends Config(
   new chipyard.harness.WithSerialAdapterTiedOff ++               // don't attach an external SimSerial
@@ -201,8 +207,36 @@ class MulticlockRocketConfig extends Config(
   new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
   new chipyard.config.AbstractConfig)
 
+class TestChipMulticlockRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithTestChipBusFreqs ++
+  new chipyard.config.AbstractConfig)
+
 class LBWIFRocketConfig extends Config(
   new testchipip.WithSerialTLMem(isMainMemory=true) ++      // set lbwif memory base to DRAM_BASE, use as main memory
   new freechips.rocketchip.subsystem.WithNoMemPort ++       // remove AXI4 backing memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
+
+// DOC include start: MulticlockAXIOverSerialConfig
+class MulticlockAXIOverSerialConfig extends Config(
+  new chipyard.config.WithSystemBusFrequencyAsDefault ++
+  new chipyard.config.WithSystemBusFrequency(250) ++
+  new chipyard.config.WithPeripheryBusFrequency(250) ++
+  new chipyard.config.WithMemoryBusFrequency(250) ++
+  new chipyard.config.WithFrontBusFrequency(50) ++
+  new chipyard.config.WithTileFrequency(500, Some(1)) ++
+  new chipyard.config.WithTileFrequency(250, Some(0)) ++
+
+  new chipyard.config.WithFbusToSbusCrossingType(AsynchronousCrossing()) ++
+  new testchipip.WithAsynchronousSerialSlaveCrossing ++
+  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(
+    AsynchronousCrossing().depth,
+    AsynchronousCrossing().sourceSync) ++
+
+  new chipyard.harness.WithSimAXIMemOverSerialTL ++ // add SimDRAM DRAM model for axi4 backing memory over the SerDes link, if axi4 mem is enabled
+  new chipyard.config.WithSerialTLBackingMemory ++ // remove axi4 mem port in favor of SerialTL memory
+
+  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
+  new chipyard.config.AbstractConfig)
+// DOC include end: MulticlockAXIOverSerialConfig

@@ -16,7 +16,8 @@ In CentOS-based platforms, we recommend installing the following dependencies:
 .. include:: /../scripts/centos-req.sh
    :code: bash
 
-In Ubuntu/Debian-based platforms (Ubuntu), we recommend installing the following dependencies:
+In Ubuntu/Debian-based platforms (Ubuntu), we recommend installing the following dependencies.
+These dependencies were written based on Ubuntu 16.04 LTS and 18.04 LTS - If they don't work for you, you can try out the Docker image (:ref:`Chipyard-Basics/Initial-Repo-Setup:Pre-built Docker Image`) before manually installing or removing dependencies:
 
 .. include:: /../scripts/ubuntu-req.sh
    :code: bash
@@ -65,6 +66,22 @@ You can put this in your ``.bashrc`` or equivalent environment setup file to get
     source ./env.sh
 
 These variables need to be set for the ``make`` system to work properly.
+
+Pre-built Docker Image
+-------------------------------------------
+
+An alternative to setting up the Chipyard repository locally is to pull the pre-built Docker image from Docker Hub. The image comes with all dependencies installed, Chipyard cloned, and toolchains initialized. This image sets up baseline Chipyard (not including FireMarshal, FireSim, and Hammer initializations). Each image comes with a tag that corresponds to the version of Chipyard cloned/set-up in that image. Not including a tag during the pull will pull the image with the latest version of Chipyard.
+First, pull the Docker image. Run:
+
+.. code-block:: shell
+
+    sudo docker pull ucbbar/chipyard-image:<TAG>
+
+To run the Docker container in an interactive shell, run:
+
+.. code-block:: shell
+
+    sudo docker run -it ucbbar/chipyard-image bash
 
 What's Next?
 -------------------------------------------

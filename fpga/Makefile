@@ -89,6 +89,21 @@ fpga_board_script_dir := $(fpga_dir)/$(BOARD)/tcl
 fpga_common_script_dir := $(fpga_dir)/common/tcl
 
 #########################################################################################
+# setup misc. sim files
+#########################################################################################
+SIM_FILE_REQS += \
+	$(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v
+
+# copy files but ignore *.h files in *.f (match vcs)
+$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
+	cp -f $^ $(build_dir)
+	$(foreach file,\
+		$^,\
+		$(if $(filter %.h,$(file)),\
+			,\
+			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
+
+#########################################################################################
 # import other necessary rules and variables
 #########################################################################################
 include $(base_dir)/common.mk

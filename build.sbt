@@ -183,21 +183,17 @@ lazy val testchipipLib = "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHO
 
 lazy val chipyard = (project in file("generators/chipyard"))
   .sourceDependency(testchipip, testchipipLib)
-  .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, utilities, iocell,
+  .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
-    dsptools, `rocket-dsptools`,
+    dsptools, `rocket-dsp-utils`,
     gemmini, icenet, tracegen, cva6, nvdla, sodor)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
 lazy val tracegen = (project in file("generators/tracegen"))
   .sourceDependency(testchipip, testchipipLib)
-  .dependsOn(rocketchip, sifive_cache, boom, utilities)
+  .dependsOn(rocketchip, sifive_cache, boom)
   .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val utilities = (project in file("generators/utilities"))
-  .sourceDependency(testchipip, testchipipLib)
   .settings(commonSettings)
 
 lazy val icenet = (project in file("generators/icenet"))
@@ -282,8 +278,16 @@ lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
       "org.scalacheck" %% "scalacheck" % "1.14.3" % "test",
   ))
 
-lazy val `rocket-dsptools` = freshProject("rocket-dsptools", file("./tools/dsptools/rocket"))
-  .dependsOn(rocketchip, dsptools)
+lazy val `api-config-chipsalliance` = freshProject("api-config-chipsalliance", file("./tools/api-config-chipsalliance"))
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % "3.0.+" % "test",
+      "org.scalacheck" %% "scalacheck" % "1.14.3" % "test",
+    ))
+
+lazy val `rocket-dsp-utils` = freshProject("rocket-dsp-utils", file("./tools/rocket-dsp-utils"))
+  .dependsOn(rocketchip, `api-config-chipsalliance`, dsptools)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 

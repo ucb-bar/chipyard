@@ -199,6 +199,13 @@ class WithExtInterruptIOCells extends OverrideIOBinder({
   }
 })
 
+// Rocketchip's JTAGIO exposes the oe signal, which doesn't go off-chip
+class JTAGChipIO extends Bundle {
+  val TCK = Input(Clock())
+  val TMS = Input(Bool())
+  val TDI = Input(Bool())
+  val TDO = Output(Bool())
+}
 
 class WithDebugIOCells extends OverrideLazyIOBinder({
   (system: HasPeripheryDebug) => {
@@ -224,7 +231,7 @@ class WithDebugIOCells extends OverrideLazyIOBinder({
           d.disableDebug.foreach { d => d := false.B }
           // Drive JTAG on-chip IOs
           d.systemjtag.map { j =>
-            j.reset := clockBundle.reset
+            j.reset := ResetCatchAndSync(j.jtag.TCK, clockBundle.reset.asBool)
             j.mfr_id := p(JtagDTMKey).idcodeManufId.U(11.W)
             j.part_number := p(JtagDTMKey).idcodePartNum.U(16.W)
             j.version := p(JtagDTMKey).idcodeVersion.U(4.W)
@@ -238,7 +245,12 @@ class WithDebugIOCells extends OverrideLazyIOBinder({
         }
 
         val jtagTuple = debug.systemjtag.map { j =>
-          IOCell.generateIOFromSignal(j.jtag, "jtag", p(IOCellKey), abstractResetAsAsync = true)
+          val jtag_wire = Wire(new JTAGChipIO)
+          j.jtag.TCK := jtag_wire.TCK
+          j.jtag.TMS := jtag_wire.TMS
+          j.jtag.TDI := jtag_wire.TDI
+          jtag_wire.TDO := j.jtag.TDO.data
+          IOCell.generateIOFromSignal(jtag_wire, "jtag", p(IOCellKey), abstractResetAsAsync = true)
         }
 
         val apbTuple = debug.apb.map { a =>
@@ -259,7 +271,6 @@ class WithSerialTLIOCells extends OverrideIOBinder({
     (Seq(port), cells)
   }).getOrElse((Nil, Nil))
 })
-
 
 class WithAXI4MemPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveMasterAXI4MemPort) => {
@@ -361,6 +372,13 @@ class WithTraceIOPunchthrough extends OverrideIOBinder({
   }
 })
 
+class WithCustomBootPin extends OverrideIOBinder({
+  (system: CanHavePeripheryCustomBootPin) => system.custom_boot_pin.map({ p =>
+    val sys = system.asInstanceOf[BaseSubsystem]
+    val (port, cells) = IOCell.generateIOFromSignal(p.getWrappedValue, "custom_boot", sys.p(IOCellKey), abstractResetAsAsync = true)
+    (Seq(port), cells)
+  }).getOrElse((Nil, Nil))
+})
 
 class WithDontTouchPorts extends OverrideIOBinder({
   (system: DontTouch) => system.dontTouchPorts(); (Nil, Nil)

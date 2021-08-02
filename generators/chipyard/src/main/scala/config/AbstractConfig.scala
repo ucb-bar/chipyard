@@ -21,6 +21,7 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithSimAXIMMIO ++                        // add SimAXIMem for axi4 mmio port, if enabled
   new chipyard.harness.WithTieOffInterrupts ++                  // tie-off interrupt ports, if present
   new chipyard.harness.WithTieOffL2FBusAXI ++                   // tie-off external AXI4 master, if present
+  new chipyard.harness.WithTieOffCustomBootPin ++
 
   // The IOBinders instantiate ChipTop IOs to match desired digital IOs
   // IOCells are generated for "Chip-like" IOs, while simulation-only IOs are directly punched through
@@ -37,6 +38,7 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithSPIIOCells ++
   new chipyard.iobinders.WithTraceIOPunchthrough ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
+  new chipyard.iobinders.WithCustomBootPin ++
 
   new testchipip.WithDefaultSerialTL ++                          // use serialized tilelink port to external serialadapter/harnessRAM
   new chipyard.config.WithBootROM ++                             // use default bootrom
@@ -45,6 +47,8 @@ class AbstractConfig extends Config(
   new chipyard.config.WithNoSubsystemDrivenClocks ++             // drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks
   new chipyard.config.WithInheritBusFrequencyAssignments ++      // Unspecified clocks within a bus will receive the bus frequency if set
   new chipyard.config.WithPeripheryBusFrequencyAsDefault ++      // Unspecified frequencies with match the pbus frequency (which is always set)
+  new chipyard.config.WithMemoryBusFrequency(100.0) ++           // Default 100 MHz mbus
+  new chipyard.config.WithPeripheryBusFrequency(100.0) ++        // Default 100 MHz pbus
   new freechips.rocketchip.subsystem.WithJtagDTM ++              // set the debug module to expose a JTAG port
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++           // no top-level MMIO master port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithNoSlavePort ++          // no top-level MMIO slave port (overrides default set in rocketchip)
@@ -52,4 +56,3 @@ class AbstractConfig extends Config(
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++ // no external interrupts
   new chipyard.WithMulticlockCoherentBusTopology ++              // hierarchical buses including mbus+l2
   new freechips.rocketchip.system.BaseConfig)                    // "base" rocketchip system
-

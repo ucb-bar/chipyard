@@ -26,33 +26,33 @@ SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
 SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
 SMEMS_HAMMER       ?= $(build_dir)/$(long_name).mems.hammer.json
 
-ifeq ($(tech_name),asap7)
-	MACROCOMPILER_MODE ?= --mode synflops
-else ifdef USE_SRAM_COMPILER
+ifdef USE_SRAM_COMPILER
 	MACROCOMPILER_MODE ?= -l $(SMEMS_COMP) --use-compiler -hir $(SMEMS_HAMMER) --mode strict
 else
 	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER) --mode strict
 endif	
 
 ENV_YML            ?= $(vlsi_dir)/env.yml
-INPUT_CONFS        ?= $(if $(filter $(tech_name),nangate45),\
+INPUT_CONFS        ?= example-tools.yml \
+                      $(if $(filter $(tech_name),nangate45),\
                         example-nangate45.yml,\
                         example-asap7.yml)
 HAMMER_EXEC        ?= ./example-vlsi
 VLSI_TOP           ?= $(TOP)
 VLSI_HARNESS_DUT_NAME ?= chiptop
-VLSI_OBJ_DIR       ?= $(vlsi_dir)/build
+# If overriding, this should be relative to $(vlsi_dir)
+VLSI_OBJ_DIR       ?= build
 ifneq ($(CUSTOM_VLOG),)
-	OBJ_DIR          ?= $(VLSI_OBJ_DIR)/custom-$(VLSI_TOP)
+	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/custom-$(VLSI_TOP)
 else
-	OBJ_DIR          ?= $(VLSI_OBJ_DIR)/$(long_name)-$(VLSI_TOP)
+	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/$(long_name)-$(VLSI_TOP)
 endif
 
 #########################################################################################
 # general rules
 #########################################################################################
 ALL_RTL = $(TOP_FILE) $(TOP_SMEMS_FILE)
-extra_v_includes = $(build_dir)/EICG_wrapper.v $(vlsi_dir)/example.v
+extra_v_includes = $(build_dir)/EICG_wrapper.v
 ifneq ($(CUSTOM_VLOG), )
 	VLSI_RTL = $(CUSTOM_VLOG)
 	VLSI_BB = /dev/null
@@ -100,6 +100,19 @@ $(SRAM_CONF): $(SRAM_GENERATOR_CONF)
 # simulation input configuration
 #########################################################################################
 include $(base_dir)/vcs.mk
+
+SIM_FILE_REQS += \
+	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
+
+# copy files but ignore *.h files in *.f since vcs has +incdir+$(build_dir)
+$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
+	cp -f $^ $(build_dir)
+	$(foreach file,\
+		$^,\
+		$(if $(filter %.h,$(file)),\
+			,\
+			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
+
 SIM_CONF = $(OBJ_DIR)/sim-inputs.yml
 SIM_DEBUG_CONF = $(OBJ_DIR)/sim-debug-inputs.yml
 SIM_TIMING_CONF = $(OBJ_DIR)/sim-timing-inputs.yml
@@ -149,6 +162,7 @@ endif
 
 $(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
+	mkdir -p $(output_dir)
 	echo "sim.inputs:" > $@
 	echo "  defines: ['DEBUG']" >> $@
 	echo "  defines_meta: 'append'" >> $@
@@ -157,6 +171,9 @@ $(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_commo
 	  echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  execution_flags_meta: 'append'" >> $@
+	echo "  saif.mode: 'time'" >> $@
+	echo "  saif.start_time: '0ns'" >> $@
+	echo "  saif.end_time: '`bc <<< $(timeout_cycles)*$(CLOCK_PERIOD)`ns'" >> $@
 	echo "sim.outputs.waveforms: ['$(sim_out_name).vpd']" >> $@
 
 $(SIM_TIMING_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
@@ -192,7 +209,7 @@ endif
 SYN_CONF = $(OBJ_DIR)/inputs.yml
 GENERATED_CONFS = $(SYN_CONF)
 ifeq ($(CUSTOM_VLOG), )
-	GENERATED_CONFS += $(if $(filter $(tech_name), asap7), , $(SRAM_CONF))
+	GENERATED_CONFS += $(SRAM_CONF)
 endif
 
 $(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)

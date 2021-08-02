@@ -32,6 +32,21 @@ default: $(sim)
 debug: $(sim_debug)
 
 #########################################################################################
+# simulaton requirements
+#########################################################################################
+SIM_FILE_REQS += \
+	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
+
+# copy files but ignore *.h files in *.f since vcs has +incdir+$(build_dir)
+$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
+	cp -f $^ $(build_dir)
+	$(foreach file,\
+		$^,\
+		$(if $(filter %.h,$(file)),\
+			,\
+			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
+
+#########################################################################################
 # import other necessary rules and variables
 #########################################################################################
 include $(base_dir)/common.mk
@@ -66,7 +81,7 @@ $(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
 #########################################################################################
 .PRECIOUS: $(output_dir)/%.vpd %.vpd
 $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
+	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
 
 #########################################################################################
 # general cleanup rules
