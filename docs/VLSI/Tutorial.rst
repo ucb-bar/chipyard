@@ -44,7 +44,7 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
 * view_gds.py
 
-  * A convenience script to view a layout using gdstk or gdspy. Note that this will be very slow for large layouts (e.g. a Rocket core)!
+  * A convenience script to view a layout using gdstk or gdspy. Only use this for small layouts (i.e. smaller than the TinyRocketConfig example) since the gdstk-produced SVG will be too big and gdspy's GUI is very slow for large layouts!
 
 Prerequisites
 -------------

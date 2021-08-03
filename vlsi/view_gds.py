@@ -4,17 +4,16 @@ import sys, os, subprocess
 
 print('Loading GDS...')
 
-#try:
-#    # gdstk created SVG
-#    import gdstk
-#except ImportError:
-#    try:
-#        import gdspy
-#        import tkinter
-#    except ImportError:
-#        print('Bad gdspy (requires tkinter) installation!')
-#        sys.exit()
-import gdspy
+try:
+    # gdstk created SVG
+    import gdstk
+except ImportError:
+    try:
+        import gdspy
+        import tkinter
+    except ImportError:
+        print('Bad gdspy (requires tkinter) installation!')
+        sys.exit()
 
 if 'gdstk' in sys.modules:
     svg_file = os.path.splitext(str(sys.argv[1]))[0] + '.svg'
