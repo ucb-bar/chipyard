@@ -148,7 +148,7 @@ Additionally, some Hammer process technology plugins do not provide default valu
 Place-and-route tools are very sensitive to process technologes (significantly more sensitive than synthesis tools), and different process technologies may work only on specific tool versions. It is recommended to check what is the appropriate tool version for the specific process technology you are working with.
 
 
-.. Note:: If you edit the yml configuration files in between synthesis and place-and-route, the `make par` command will automatically re-run synthesis. If you would like to avoid that and are confident that your configuration file changes do not affect synthesis results, you may use the `make redo-par` instead with the variable ``HAMMER_EXTRA_ARGS='-p <your-changed.yml>'``.
+.. Note:: If you edit the yml configuration files in between synthesis and place-and-route, the ``make par`` command will automatically re-run synthesis. If you would like to avoid that and are confident that your configuration file changes do not affect synthesis results, you may use the ``make redo-par`` command instead with the variable ``HAMMER_EXTRA_ARGS='-p <your-changed.yml>'``.
 
 
 
