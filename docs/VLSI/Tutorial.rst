@@ -44,19 +44,18 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
 * view_gds.py
 
-  * A convenience script to view a layout using gdspy. Note that this will be very slow for large layouts (e.g. a Rocket core)!
+  * A convenience script to view a layout using gdstk or gdspy. Note that this will be very slow for large layouts (e.g. a Rocket core)!
 
 Prerequisites
 -------------
 
 * Python 3.4+
-* numpy and gdspy packages. gdspy must be version 1.4.
-* Genus, Innovus, and Calibre licenses
-* For ASAP7 specifically:
+* numpy and `gdstk <https://github.com/heitzmann/gdstk>`__ or `gdspy <https://github.com/heitzmann/gdspy>`__  packages. Note: gdspy must be version 1.4.
+* Genus, Innovus, Voltus, VCS, and Calibre licenses
+* For ASAP7 specifically (`README <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/technology/asap7>`__ for more details):
 
-  * Download the `ASAP7 PDK v1p5 <http://asap.asu.edu/asap/>`__ tarball to a directory of choice but do not extract it. The tech plugin is configured to extract the PDK into a cache directory for you. Note: v1p5 of the PDK is not publicly available, and you will need to contact the developers for it. The v1p7 version that is `publicly released <https://github.com/The-OpenROAD-Project/asap7>`__ currently has several critical issues which prevent it from being fully integrated into the Hammer flow.
-  * If you have additional ASAP7 hard macros, their LEF & GDS need to be 4x upscaled @ 4000 DBU precision. They may live outside ``extra_libraries`` at your discretion.
-  * Innovus version must be >= 15.2 or <= 18.1 (ISRs excluded).
+  * First, download the `ASAP7 v1p7 PDK <https://github.com/The-OpenROAD-Project/asap7>`__ (we recommend shallow-cloning or downloading an archive of the repository). Then, download the `encrypted Calibre decks tarball <http://asap.asu.edu/asap/>`__ tarball to a directory of choice (e.g. the root directory of the PDK) but do not extract it like the instructions say. The tech plugin is configured to extract the tarball into a cache directory for you. 
+  * If you have additional ASAP7 hard macros, their LEF & GDS need to be 4x upscaled @ 4000 DBU precision. 
 
 Initial Setup
 -------------
@@ -95,13 +94,11 @@ example-vlsi
 ^^^^^^^^^^^^
 This is the entry script with placeholders for hooks. In the ``ExampleDriver`` class, a list of hooks is passed in the ``get_extra_par_hooks``. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in this example. Refer to the Hammer documentation on hooks for a detailed description of how these are injected into the VLSI flow.
 
-The ``scale_final_gds`` hook is a particularly powerful hook. It dumps a Python script provided by the ASAP7 tech plugin, an executes it within the Innovus TCL interpreter, and should be inserted after ``write_design``. This hook is necessary because the ASAP7 PDK does place-and-route using 4x upscaled LEFs for Innovus licensing reasons, thereby requiring the cells created in the post-P&R GDS to be scaled down by a factor of 4.
-
-example.yml
+example-asap7.yml
 ^^^^^^^^^^^
 This contains the Hammer configuration for this example project. Example clock constraints, power straps definitions, placement constraints, and pin constraints are given. Additional configuration for the extra libraries and tools are at the bottom.
 
-First, set ``technology.asap7.tarball_dir`` to the absolute path to the directory where the downloaded the ASAP7 PDK tarball lives.
+First, set ``technology.asap7.tarball_dir`` to the absolute path to the directory where the downloaded the ASAP7 Calibre deck tarball lives. If it is not in the PDK's root directory, then also set ``technology.asap7.pdk_install_dir`` and ``technology.asap7.stdcell_install_dir``.
 
 Synthesis
 ^^^^^^^^^
@@ -127,7 +124,7 @@ Timing reports are found in ``build/par-rundir/timingReports``. They are gzipped
 
 .. code-block:: shell
 
-    python3 view_gds.py build/chipyard.TestHarness.TinyRocketConfig/par-rundir/ChipTop.gds
+    ./view_gds.py build/chipyard.TestHarness.TinyRocketConfig/par-rundir/ChipTop.gds
 
 By default, this script only shows the M2 thru M4 routing. Layers can be toggled in the layout viewer's side pane and ``view_gds.py`` has a mapping of layer numbers to layer names.
 
@@ -143,7 +140,7 @@ To run DRC & LVS, and view the results in Calibre:
     ./build/lvs-rundir/generated-scripts/view-lvs
 
 Some DRC errors are expected from this PDK, as explained in the `ASAP7 plugin readme <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/technology/asap7>`__.
-Furthermore, the dummy SRAMs that are provided in this tutorial and PDK do not have any geometry inside, so will certainly cause DRC and LVS errors.
+Furthermore, the dummy SRAMs that are provided in this tutorial and PDK do not have any geometry inside, so will certainly cause DRC errors.
 
 Simulation
 ^^^^^^^^^^
@@ -151,13 +148,11 @@ Simulation with VCS is supported, and can be run at the RTL- or gate-level (post
 
 .. code-block:: shell
 
-    make sim-rtl CONFIG=TinyRocketConfig BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
+    make sim-rtl CONFIG=TinyRocketConfig BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv32ui-p-simple
 
 Post-synthesis and post-P&R simulations use the ``sim-syn`` and ``sim-par`` targets, respectively.
 
-There are also ``-debug`` and ``-debug-timing``, which will instruct VCS to write a SAIF + VPD and do timing-annotated simulations, respectively. See the ``sim.mk`` file for all available targets.
-
-Note that for the ASAP7 example, gate-level simulations will currently timeout.
+You can also append ``-debug`` and ``-debug-timing`` to the above sim targets, which will instruct VCS to write a SAIF + VPD and do timing-annotated simulations, respectively. See the ``sim.mk`` file for all available targets.
 
 Power/Rail Analysis
 ^^^^^^^^^^^^^^^^^^^
@@ -169,4 +164,4 @@ Post-P&R power and rail (IR drop) analysis is supported with Voltus:
 
 If you append the ``BINARY`` variable to the command, it will use the activity file generated from a ``sim-<syn/par>-debug`` run and report dynamic power & IR drop from the toggles encoded in the waveform.
 
-Note that for ASAP7, to bypass gate-level simulation, you will need to run the power tool manually (see the generated commands in the generated ``hammer.d`` buildfile). Static and active (vectorless) power & IR drop will be reported.
+Note that power and rail analysis can also be run without gate-level simulation, but you will need to run the power tool manually (see the generated commands in the generated ``hammer.d`` buildfile). Only static and active (vectorless) power & IR drop will be reported.

@@ -46,11 +46,11 @@ Hammer relies on YAML-based configuration files. While these configuration can b
 OpenRoad example), the generally suggested way to work with an arbitrary process technology or tools plugins would be to use three configuration files, matching the three Hammer concerns - tools, tech, and design. 
 The ``vlsi`` directory includes three such example configuration files matching the three concerns: ``example-tools.yml``, ``example-tech.yml``, and ``example-design.yml``.
 
-The ``example-tools.yml`` file configures which EDA tools hammer will use. This example file uses Cadence Innovus, Genus and Voltus, Synopsys VCS, and Mentor Calibre (which are likely the tools you will use if you're working in the Berkeley Wireless Research Center). Note that tool versions are highly sensitive to the process-technology in-use. Hence, tool versions that work with one process technology may not work with another (for example, ASAP7 will not work with an Innovus version newer than 18.1, while other proprietary process technologies will likely require newer versions such as 19.1).
+The ``example-tools.yml`` file configures which EDA tools hammer will use. This example file uses Cadence Innovus, Genus and Voltus, Synopsys VCS, and Mentor Calibre (which are likely the tools you will use if you're working in the Berkeley Wireless Research Center). Note that tool versions are highly sensitive to the process-technology in-use. Hence, tool versions that work with one process technology may not work with another.
 
 The ``example-design.yml`` file contains basic build system information (how many cores/threads to use, etc.), as well as configurations that are specific to the design we are working on such as clock signal name and frequency, power modes, floorplan, and additional constraints that we will add later on.
 
-Finally, the ``example-tech`` file is a template file for a process technology plugin configuration. We will copy this file, and replace its fields with the appropriate process technology details for the tech plugin that we have access to. For example, for the ``asap7`` tech plugin we will replace the <tech_name> field with "asap7", the Node size "N" with "7", and the path to the process technology files installation directory.
+Finally, the ``example-tech.yml`` file is a template file for a process technology plugin configuration. We will copy this file, and replace its fields with the appropriate process technology details for the tech plugin that we have access to. For example, for the ``asap7`` tech plugin we will replace the <tech_name> field with "asap7", the Node size "N" with "7", and the path to the process technology files installation directory.
 
 We recommend copying these example configuration files and customizing them with a different name, so you can have different configuration files for different process technologies and designs (e.g. create tech-tsmintel3.yml from example-tech.yml)
 
@@ -143,12 +143,12 @@ The relevant ``make`` command would then be:
 
 Note that the width and height specification can vary widely between different modulesi and level of the module hierarchy. Make sure to set sane width and height values.
 Place-and-route generally requires more fine-grained input specifications regarding power nets, clock nets, pin assignments and floorplanning. While the template configuration files provide defaults for automatic tool defaults, these will usually result in very bad QoR, and therefore it is recommended to specify better-informed floorplans, pin assignments and power nets. For more information about cutomizing theses parameters, please refer to the :ref:`VLSI/Basic-Flow:Customizing Your VLSI Flow in Hammer` sections or to the Hammer documentation. 
-Additionally, some Hammer process technology plugins do not provide sufficient default values for requires settings such as power nets and pin assignments (for example, ASAP7). In those cases, these constraints will need to be specified manually in the top-level configuration yml files, as is the case in the ``example-asap7.yml`` configuration file.
+Additionally, some Hammer process technology plugins do not provide default values for required settings such as tool paths and pin assignments (for example, ASAP7). In those cases, these constraints will need to be specified manually in the top-level configuration yml files, as is the case in the ``example-asap7.yml`` configuration file.
 
 Place-and-route tools are very sensitive to process technologes (significantly more sensitive than synthesis tools), and different process technologies may work only on specific tool versions. It is recommended to check what is the appropriate tool version for the specific process technology you are working with.
 
 
-.. Note:: If you edit the yml configuration files in between synthesis and place-and-route, the `make par` command will automatically re-run synthesis. If you would like to avoid that and are confident that your configuration file changes do not affect synthesis results, you may use the `make redo-par` instead.
+.. Note:: If you edit the yml configuration files in between synthesis and place-and-route, the `make par` command will automatically re-run synthesis. If you would like to avoid that and are confident that your configuration file changes do not affect synthesis results, you may use the `make redo-par` instead with the variable ``HAMMER_EXTRA_ARGS='-p <your-changed.yml>'``.
 
 
 
@@ -311,4 +311,4 @@ In this specification, ``vlsi.inputs.hierarchical.mode`` indicates the manual sp
 
 Customizing Generated Tcl Scripts
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The ``example-vlsi`` python script is the Hammer entry script with placeholders for hooks. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in the ``example-vlsi`` entry script example. In this particular example, a list of hooks is paased in the ``get_extra_par_hooks`` function in the ``ExampleDriver`` class. Refer to the `Hammer documentation on hooks <https://hammer-vlsi.readthedocs.io/en/latest/Hammer-Use/Hooks.html>`__ for a detailed description of how these are injected into the VLSI flow.
+The ``example-vlsi`` python script is the Hammer entry script with placeholders for hooks. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in the ``example-vlsi`` entry script example. In this particular example, a list of hooks is passed in the ``get_extra_par_hooks`` function in the ``ExampleDriver`` class. Refer to the `Hammer documentation on hooks <https://hammer-vlsi.readthedocs.io/en/latest/Hammer-Use/Hooks.html>`__ for a detailed description of how these are injected into the VLSI flow.
