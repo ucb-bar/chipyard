@@ -95,7 +95,7 @@ example-vlsi
 This is the entry script with placeholders for hooks. In the ``ExampleDriver`` class, a list of hooks is passed in the ``get_extra_par_hooks``. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in this example. Refer to the Hammer documentation on hooks for a detailed description of how these are injected into the VLSI flow.
 
 example-asap7.yml
-^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 This contains the Hammer configuration for this example project. Example clock constraints, power straps definitions, placement constraints, and pin constraints are given. Additional configuration for the extra libraries and tools are at the bottom.
 
 First, set ``technology.asap7.tarball_dir`` to the absolute path to the directory where the downloaded the ASAP7 Calibre deck tarball lives. If it is not in the PDK's root directory, then also set ``technology.asap7.pdk_install_dir`` and ``technology.asap7.stdcell_install_dir``.
