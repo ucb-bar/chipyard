@@ -1,1 +1,0 @@
-enablePlugins(sbtassembly.AssemblyPlugin)

@@ -27,7 +27,7 @@ class WriteEnableTest extends MacroCompilerSpec with HasSRAMGenerator {
   val lib = s"lib-WriteEnableTest.json" // lib. of mems to create it
   val v = s"WriteEnableTest.json"
 
-  override val libPrefix = "macros/src/test/resources"
+  override val libPrefix = "tapeout/src/test/resources"
 
   val memSRAMs = mdf.macrolib.Utils
     .readMDFFromString("""
@@ -97,7 +97,7 @@ class MaskPortTest extends MacroCompilerSpec with HasSRAMGenerator {
   val lib = s"lib-MaskPortTest.json" // lib. of mems to create it
   val v = s"MaskPortTest.json"
 
-  override val libPrefix = "macros/src/test/resources"
+  override val libPrefix = "tapeout/src/test/resources"
 
   val memSRAMs = mdf.macrolib.Utils
     .readMDFFromString("""
@@ -181,7 +181,7 @@ class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
   val lib = s"lib-BOOMTest.json"
   val v = s"BOOMTest.v"
 
-  override val libPrefix = "macros/src/test/resources"
+  override val libPrefix = "tapeout/src/test/resources"
 
   val memSRAMs = mdf.macrolib.Utils
     .readMDFFromString("""

@@ -148,7 +148,7 @@ object IOCell {
     padSignal:         T,
     name:              Option[String] = None,
     typeParams:        IOCellTypeParams = GenericIOCellParams(),
-    concretizeResetFn: (Reset) => R = toSyncReset
+    concretizeResetFn: (Reset) => R = toSyncReset _
   ): Seq[IOCell] = {
     def genCell[T <: Data](
       castToBool:   (T) => Bool,

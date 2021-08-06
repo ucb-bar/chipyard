@@ -64,7 +64,7 @@ class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pa
       val readConnects = real_macro.readers.zipWithIndex.flatMap { case (r, i) =>
         val clock = portToExpression(r.src.clock.get)
         val address = portToExpression(r.src.address)
-        val enable = (r.src chipEnable, r.src readEnable) match {
+        val enable = (r.src.chipEnable, r.src.readEnable) match {
           case (Some(en_port), Some(re_port)) =>
             and(portToExpression(en_port), portToExpression(re_port))
           case (Some(en_port), None) => portToExpression(en_port)

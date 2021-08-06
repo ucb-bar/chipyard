@@ -62,7 +62,7 @@ class GenerateSpec extends AnyFreeSpec {
     FileUtils.makeDirectory(targetDir)
 
     val printWriter = new PrintWriter(new File(s"$targetDir/GenerateExampleTester.fir"))
-    printWriter.write((new ChiselStage()).emitFirrtl(new GenerateExampleTester))
+    printWriter.write((new ChiselStage()).emitFirrtl(new GenerateExampleTester, Array("--target-dir", targetDir)))
     printWriter.close()
 
     val blackBoxInverterText = """

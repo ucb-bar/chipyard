@@ -14,7 +14,8 @@ lazy val commonSettings = Seq(
     dep: String => "edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", defaultVersions(dep))
   },
   libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.2.2" % "test",
+    "com.typesafe.play" %% "play-json" % "2.9.2",
+    "org.scalatest" %% "scalatest" % "3.2.9" % "test",
   ),
   resolvers ++= Seq(
     Resolver.sonatypeRepo("snapshots"),
@@ -25,17 +26,10 @@ lazy val commonSettings = Seq(
 
 disablePlugins(sbtassembly.AssemblyPlugin)
 
-lazy val mdf = (project in file("mdf/scalalib"))
-lazy val macros = (project in file("macros"))
-  .dependsOn(mdf)
-  .settings(commonSettings)
-  .settings(
-    mainClass := Some("barstools.macros.MacroCompiler")
-  )
-  .enablePlugins(sbtassembly.AssemblyPlugin)
+enablePlugins(sbtassembly.AssemblyPlugin)
 
 lazy val tapeout = (project in file("tapeout"))
   .settings(commonSettings)
   .settings(scalacOptions in Test ++= Seq("-language:reflectiveCalls"))
 
-lazy val root = (project in file(".")).aggregate(macros, tapeout)
+lazy val root = (project in file(".")).aggregate(tapeout)
