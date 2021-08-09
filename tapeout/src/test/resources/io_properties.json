@@ -1,0 +1,663 @@
+[
+  {
+    "name": "My IOs",
+    "type": "io_properties",
+    "top": "EAGLE",
+    "ios": [
+      {
+        "name": "GND",
+        "type": "ground"
+      },
+      {
+        "name": "VDD0V8",
+        "type": "power"
+      },
+      {
+        "name": "VDD1V8",
+        "type": "power"
+      },
+      {
+        "name": "VDDC0",
+        "type": "power"
+      },
+      {
+        "name": "VDDC1",
+        "type": "power"
+      },
+      {
+        "name": "VDDC2",
+        "type": "power"
+      },
+      {
+        "name": "VDDC3",
+        "type": "power"
+      },
+      {
+        "name": "VDDA",
+        "type": "power"
+      },
+      {
+        "name": "VDDC0_SEL[1:0]",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "VDDC1_SEL[1:0]",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "VDDC2_SEL[1:0]",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "VDDC3_SEL[1:0]",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "VDDDC0_EN",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "VDDDC1_EN",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "VDDDC2_EN",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "VDDDC3_EN",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "CCLK0",
+        "type": "digital",
+        "direction": "input",
+        "termination": 50,
+        "termination_type": "single",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "CCLK1",
+        "type": "digital",
+        "direction": "input",
+        "termination": 50,
+        "termination_type": "single",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "CCLK2",
+        "type": "digital",
+        "direction": "input",
+        "termination": 50,
+        "termination_type": "single",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RESET",
+        "type": "digital",
+        "direction": "input",
+        "termination": "CMOS"
+      },
+      {
+        "name": "BOOT",
+        "type": "digital",
+        "direction": "input",
+        "termination": "CMOS"
+      },
+      {
+        "name": "I2C_SDA",
+        "type": "digital",
+        "direction": "inout",
+        "termination": "open-drain"
+      },
+      {
+        "name": "I2C_SCL",
+        "type": "digital",
+        "direction": "inout",
+        "termination": "open-drain"
+      },
+      {
+        "name": "SPI_SCLK",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "SPI_MOSI",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "SPI_MISO",
+        "type": "digital",
+        "direction": "input",
+        "termination": "CMOS"
+      },
+      {
+        "name": "SPI_SS_L",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "GPIO[1:0]",
+        "type": "digital",
+        "direction": "inout",
+        "termination": "CMOS"
+      },
+      {
+        "name": "UART_RX",
+        "type": "digital",
+        "direction": "input",
+        "termination": "CMOS"
+      },
+      {
+        "name": "UART_TX",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "SERIAL_IN_READY",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "SERIAL_IN_VALID",
+        "type": "digital",
+        "direction": "input",
+        "termination": "CMOS"
+      },
+      {
+        "name": "SERIAL_OUT_READY",
+        "type": "digital",
+        "direction": "input",
+        "termination": "CMOS"
+      },
+      {
+        "name": "SERIAL_OUT_VALID",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "SERIAL_OUT[3:0]",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "SERIAL_IN[3:0]",
+        "type": "digital",
+        "direction": "input",
+        "termination": "CMOS"
+      },
+      {
+        "name": "REFCLK0P",
+        "type": "analog",
+        "direction": "input",
+        "match": [
+          "REFCLK0N"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "REFCLK0N",
+        "type": "analog",
+        "direction": "input",
+        "match": [
+          "REFCLK0P"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "REFCLK1N",
+        "type": "analog",
+        "direction": "input",
+        "match": [
+          "REFCLK1P"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "REFCLK1P",
+        "type": "analog",
+        "direction": "input",
+        "match": [
+          "REFCLK1N"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "PLLREFCLKP",
+        "type": "analog",
+        "direction": "input",
+        "match": [
+          "PLLREFCLKP"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "PLLREFCLKN",
+        "type": "analog",
+        "direction": "input",
+        "match": [
+          "PLLREFCLKP"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "JTAG_TMS",
+        "type": "digital",
+        "direction": "input",
+        "termination": "CMOS"
+      },
+      {
+        "name": "JTAG_TCK",
+        "type": "digital",
+        "direction": "input",
+        "termination": "CMOS"
+      },
+      {
+        "name": "JTAG_TDI",
+        "type": "digital",
+        "direction": "input",
+        "termination": "CMOS"
+      },
+      {
+        "name": "JTAG_TDO",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "PLLCLK_OUT",
+        "type": "digital",
+        "direction": "output",
+        "termination": "CMOS"
+      },
+      {
+        "name": "TXP0",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXN0"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXN0",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXP0"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXP0",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "RXN0"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXN1",
+        "type": "analog",
+        "direction": "input",
+        "match": [
+          "RXP1"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXP1",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXN1"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXN1",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXP1"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXP1",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "RXN1"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXN1",
+        "type": "analog",
+        "direction": "input",
+        "match": [
+          "RXP1"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXP2",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXN2"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXN2",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXP2"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXP2",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "RXN2"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXN2",
+        "type": "analog",
+        "direction": "input",
+        "match": [
+          "RXP2"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXP3",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXN3"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXN3",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXP3"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXP3",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "RXN3"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXN3",
+        "type": "analog",
+        "direction": "input",
+        "match": [
+          "RXP3"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXP4",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXN4"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXN4",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXP4"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXP4",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "RXN4"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXN4",
+        "type": "analog",
+        "direction": "input",
+        "match": [
+          "RXP4"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXP5",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXN5"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXN5",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXP5"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXP5",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "RXN5"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXN5",
+        "type": "analog",
+        "direction": "input",
+        "match": [
+          "RXP5"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXP6",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXN6"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXN6",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXP6"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXP6",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "RXN6"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXN6",
+        "type": "analog",
+        "direction": "input",
+        "match": [
+          "RXP6"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXP7",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXN7"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "TXN7",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "TXP7"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXP7",
+        "type": "analog",
+        "direction": "output",
+        "match": [
+          "RXN7"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      },
+      {
+        "name": "RXN7",
+        "type": "analog",
+        "direction": "input",
+        "match": [
+          "RXP7"
+        ],
+        "termination": 100,
+        "termination_type": "differential",
+        "termination_reference": "GND"
+      }
+    ]
+  }
+]

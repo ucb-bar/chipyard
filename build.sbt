@@ -24,12 +24,16 @@ lazy val commonSettings = Seq(
   )
 )
 
-disablePlugins(sbtassembly.AssemblyPlugin)
-
-enablePlugins(sbtassembly.AssemblyPlugin)
+//disablePlugins(sbtassembly.AssemblyPlugin)
+//
+//enablePlugins(sbtassembly.AssemblyPlugin)
 
 lazy val tapeout = (project in file("tapeout"))
   .settings(commonSettings)
   .settings(scalacOptions in Test ++= Seq("-language:reflectiveCalls"))
+  .settings(
+    mainClass := Some("barstools.macros.MacroCompiler")
+  )
+  .enablePlugins(sbtassembly.AssemblyPlugin)
 
 lazy val root = (project in file(".")).aggregate(tapeout)
