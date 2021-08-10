@@ -253,6 +253,7 @@ lazy val floorplan = (project in file("./tools/barstools/floorplan/"))
   .settings(libraryDependencies ++= chiselLibDeps.value)
   .settings(libraryDependencies ++= Seq(
       "org.json4s" %% "json4s-jackson" % "3.6.1",
+      "org.json4s" %% "json4s-ext" % "3.6.1",
       "org.json4s" %% "json4s-native" % "3.6.1",
   ))
   .settings(commonSettings)

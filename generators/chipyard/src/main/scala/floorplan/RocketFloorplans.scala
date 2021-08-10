@@ -21,12 +21,12 @@ object RocketFloorplans {
         topGroup.placeAt(2, context.addHier(h.module))
       }
 
-      context.elements
+      context.commit()
     case hwacha: HwachaImp =>
       val context = Floorplan(hwacha)
       val topGroup = context.setTopGroup(context.createElasticArray(2))
       // Hwacha floorplan goes here
-      context.elements
+      context.commit()
   }
 }
 

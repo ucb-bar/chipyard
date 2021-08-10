@@ -18,7 +18,7 @@ object ChipTopFloorplans {
       }
       topGrid.placeAt(1, context.createElasticArray(tiles))
       topGrid.placeAt(0, context.createSpacer(Some("spacer")))
-      context.elements
+      context.commit()
   }
 
 }
