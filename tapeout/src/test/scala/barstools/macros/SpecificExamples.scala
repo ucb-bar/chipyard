@@ -27,7 +27,7 @@ class WriteEnableTest extends MacroCompilerSpec with HasSRAMGenerator {
   val lib = s"lib-WriteEnableTest.json" // lib. of mems to create it
   val v = s"WriteEnableTest.json"
 
-  override val libPrefix = "tapeout/src/test/resources"
+  override val libPrefix = "src/test/resources"
 
   val memSRAMs = mdf.macrolib.Utils
     .readMDFFromString("""
@@ -89,7 +89,9 @@ circuit cc_banks_0_ext :
     defname = fake_mem
 """
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class MaskPortTest extends MacroCompilerSpec with HasSRAMGenerator {
@@ -97,7 +99,7 @@ class MaskPortTest extends MacroCompilerSpec with HasSRAMGenerator {
   val lib = s"lib-MaskPortTest.json" // lib. of mems to create it
   val v = s"MaskPortTest.json"
 
-  override val libPrefix = "tapeout/src/test/resources"
+  override val libPrefix = "src/test/resources"
 
   val memSRAMs = mdf.macrolib.Utils
     .readMDFFromString("""
@@ -173,7 +175,9 @@ circuit cc_dir_ext :
     defname = fake_mem
 """
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, exectue, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
@@ -181,10 +185,9 @@ class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
   val lib = s"lib-BOOMTest.json"
   val v = s"BOOMTest.v"
 
-  override val libPrefix = "tapeout/src/test/resources"
+  override val libPrefix = "src/test/resources"
 
-  val memSRAMs = mdf.macrolib.Utils
-    .readMDFFromString("""
+  val memSRAMs = mdf.macrolib.Utils.readMDFFromString("""
 [ {
   "type" : "sram",
   "name" : "_T_182_ext",
@@ -1345,7 +1348,9 @@ circuit smem_0_ext :
     defname = my_sram_1rw_64x8
 """
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute and test the boom test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class SmallTagArrayTest extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleTestGenerator {
@@ -1378,7 +1383,9 @@ class SmallTagArrayTest extends MacroCompilerSpec with HasSRAMGenerator with Has
        |    dout <= mux(UInt<1>("h1"), dout_0, UInt<26>("h0"))
     """.stripMargin
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test, the small tag array test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {

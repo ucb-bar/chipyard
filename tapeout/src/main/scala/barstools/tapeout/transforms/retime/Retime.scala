@@ -39,7 +39,7 @@ class RetimeTransform extends Transform with DependencyAPIMigration {
 trait RetimeLib {
   self: chisel3.Module =>
 
-  def retime[T <: chisel3.internal.LegacyModule](module: T): Unit = {
+  def retime[T <: chisel3.Module](module: T): Unit = {
     chisel3.experimental.annotate(new chisel3.experimental.ChiselAnnotation with RunFirrtlTransform {
       def transformClass: Class[_ <: Transform] = classOf[RetimeTransform]
       def toFirrtl:       Annotation = RetimeAnnotation(module.toNamed)

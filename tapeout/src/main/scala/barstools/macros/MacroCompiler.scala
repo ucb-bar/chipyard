@@ -8,7 +8,7 @@
 package barstools.macros
 
 import barstools.macros.Utils._
-import firrtl.Utils._
+import firrtl.Utils.{BoolType, one, zero}
 import firrtl.annotations._
 import firrtl.ir._
 import firrtl.stage.{FirrtlSourceAnnotation, FirrtlStage, Forms, OutputFileAnnotation, RunFirrtlTransformAnnotation}
@@ -783,7 +783,6 @@ class MacroCompilerOptimizations extends SeqTransform with DependencyAPIMigratio
     new firrtl.transforms.ConstantPropagation,
     passes.memlib.VerilogMemDelays,
     new firrtl.transforms.ConstantPropagation,
-    passes.Legalize,
     passes.SplitExpressions,
     passes.CommonSubexpressionElimination
   )

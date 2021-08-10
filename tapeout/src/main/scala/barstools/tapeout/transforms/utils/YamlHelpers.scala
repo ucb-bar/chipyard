@@ -1,5 +1,6 @@
 package barstools.tapeout.transforms.utils
 
+import firrtl.FileUtils
 import net.jcazevedo.moultingyaml._
 
 import java.io.File
@@ -10,10 +11,10 @@ class YamlFileReader(resource: String) {
     val yamlString = file match {
       case f if f.isEmpty =>
         // Use example config if no file is provided
-        val stream = getClass.getResourceAsStream(resource)
-        io.Source.fromInputStream(stream).mkString
+        val stream = FileUtils.getTextResource(resource)
+        stream
       case f if new File(f).exists =>
-        scala.io.Source.fromFile(f).getLines.mkString("\n")
+        FileUtils.getText(f)
       case _ =>
         throw new Exception("No valid Yaml file found!")
     }

@@ -27,8 +27,7 @@ class GenerateTopSpec extends AnyFreeSpec with Matchers {
     val targetDir = "test_run_dir/generate_top_spec"
     FileUtils.makeDirectory(targetDir)
 
-    val stream = getClass.getResourceAsStream("/BlackBoxFloatTester.fir")
-    val input = scala.io.Source.fromInputStream(stream).getLines()
+    val input = FileUtils.getLinesResource("/BlackBoxFloatTester.fir")
     val printWriter = new PrintWriter(new File(s"$targetDir/BlackBoxFloatTester.fir"))
     printWriter.write(input.mkString("\n"))
     printWriter.close()

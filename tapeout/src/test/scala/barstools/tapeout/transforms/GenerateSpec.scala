@@ -7,6 +7,9 @@ import chisel3.experimental.ExtModule
 import chisel3.stage.ChiselStage
 import firrtl.FileUtils
 import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers.be
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 import java.io.{File, PrintWriter}
 
@@ -61,9 +64,7 @@ class GenerateSpec extends AnyFreeSpec {
     val targetDir = "test_run_dir/generate_spec_source"
     FileUtils.makeDirectory(targetDir)
 
-    val printWriter = new PrintWriter(new File(s"$targetDir/GenerateExampleTester.fir"))
-    printWriter.write((new ChiselStage()).emitFirrtl(new GenerateExampleTester, Array("--target-dir", targetDir)))
-    printWriter.close()
+    (new ChiselStage()).emitFirrtl(new GenerateExampleTester, Array("--target-dir", targetDir))
 
     val blackBoxInverterText = """
                                  |module BlackBoxInverter(
@@ -78,7 +79,7 @@ class GenerateSpec extends AnyFreeSpec {
     printWriter2.write(blackBoxInverterText)
     printWriter2.close()
 
-
+    new File(s"$targetDir/GenerateExampleTester.fir").exists() should be (true)
   }
 
   "generate top test" in {
@@ -89,5 +90,6 @@ class GenerateSpec extends AnyFreeSpec {
       "-i", s"$sourceDir/GenerateExampleTester.fir",
       "-o", s"$targetDir/GenerateExampleTester.v"
     ))
+    new File(s"$targetDir/GenerateExampleTester.v").exists() should be (true)
   }
 }

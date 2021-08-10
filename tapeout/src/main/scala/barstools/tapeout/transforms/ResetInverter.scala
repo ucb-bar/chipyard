@@ -60,7 +60,7 @@ class ResetInverterTransform extends Transform with DependencyAPIMigration {
 
 trait ResetInverter {
   self: chisel3.Module =>
-  def invert[T <: chisel3.internal.LegacyModule](module: T): Unit = {
+  def invert[T <: chisel3.Module](module: T): Unit = {
     chisel3.experimental.annotate(new chisel3.experimental.ChiselAnnotation with RunFirrtlTransform {
       def transformClass: Class[_ <: Transform] = classOf[ResetInverterTransform]
       def toFirrtl:       Annotation = ResetInverterAnnotation(module.toNamed)

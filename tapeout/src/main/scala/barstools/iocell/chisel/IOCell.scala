@@ -141,7 +141,7 @@ object IOCell {
     * @param name An optional name or name prefix to use for naming IO cells
     * @return A Seq of all generated IO cell instances
     */
-  val toSyncReset:  (Reset) => Bool = _.toBool
+  val toSyncReset:  (Reset) => Bool = _.asBool()
   val toAsyncReset: (Reset) => AsyncReset = _.asAsyncReset
   def generateFromSignal[T <: Data, R <: Reset](
     coreSignal:        T,

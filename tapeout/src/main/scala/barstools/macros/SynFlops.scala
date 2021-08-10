@@ -3,7 +3,7 @@
 package barstools.macros
 
 import barstools.macros.Utils._
-import firrtl.Utils._
+import firrtl.Utils.{zero, one}
 import firrtl._
 import firrtl.ir._
 import firrtl.passes.MemPortUtils.memPortField
@@ -27,7 +27,7 @@ class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pa
         case Some(gran) => (UIntType(IntWidth(gran)), gran.intValue)
       }
 
-      val maxDepth = min(lib.src.depth, 1 << 26)
+      val maxDepth = firrtl.Utils.min(lib.src.depth, 1 << 26)
       val numMems = lib.src.depth / maxDepth
 
       // Change macro to be mapped onto to look like the below mem

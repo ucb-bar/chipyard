@@ -1,6 +1,8 @@
 package mdf.macrolib
 
 import play.api.libs.json._
+
+import java.io.FileNotFoundException
 import scala.collection.mutable.ListBuffer
 import scala.language.implicitConversions
 
@@ -37,7 +39,14 @@ object Utils {
     path match {
       case None => None
       // Read file into string and parse
-      case Some(p) => Utils.readMDFFromString(scala.io.Source.fromFile(p).mkString)
+      case Some(p) =>
+        try {
+          Utils.readMDFFromString(scala.io.Source.fromFile(p).mkString)
+        } catch {
+          case f: FileNotFoundException =>
+            println(s"FILE NOT FOUND $p in dir ${os.pwd}")
+          throw f
+        }
     }
   }
 

@@ -27,7 +27,9 @@ class Masks_FourTypes_NonMaskedMem_NonMaskedLib
   override lazy val libWidth = 8
   override lazy val libMaskGran = None
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_FourTypes_NonMaskedMem_MaskedLib
@@ -40,7 +42,9 @@ class Masks_FourTypes_NonMaskedMem_MaskedLib
   override lazy val libWidth = 8
   override lazy val libMaskGran = Some(2)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_FourTypes_MaskedMem_NonMaskedLib
@@ -53,7 +57,9 @@ class Masks_FourTypes_MaskedMem_NonMaskedLib
   override lazy val libWidth = 8
   override lazy val libMaskGran = None
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_FourTypes_MaskedMem_NonMaskedLib_SmallerMaskGran
@@ -66,7 +72,9 @@ class Masks_FourTypes_MaskedMem_NonMaskedLib_SmallerMaskGran
   override lazy val libWidth = 8
   override lazy val libMaskGran = None
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_FourTypes_MaskedMem_MaskedLib
@@ -79,7 +87,9 @@ class Masks_FourTypes_MaskedMem_MaskedLib
   override lazy val libWidth = 16
   override lazy val libMaskGran = Some(4)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_FourTypes_MaskedMem_MaskedLib_SameMaskGran
@@ -92,7 +102,9 @@ class Masks_FourTypes_MaskedMem_MaskedLib_SameMaskGran
   override lazy val libWidth = 16
   override lazy val libMaskGran = Some(8)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_FourTypes_MaskedMem_MaskedLib_SmallerMaskGran
@@ -105,7 +117,9 @@ class Masks_FourTypes_MaskedMem_MaskedLib_SmallerMaskGran
   override lazy val libWidth = 32
   override lazy val libMaskGran = Some(8)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 // Bit-mask memories to non-masked libs whose width is larger than 1.
@@ -117,7 +131,9 @@ class Masks_BitMaskedMem_NonMaskedLib extends MacroCompilerSpec with HasSRAMGene
   override lazy val libWidth = 8
   override lazy val libMaskGran = None
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 // FPGA-style byte-masked memories.
@@ -131,7 +147,9 @@ class Masks_FPGAStyle_32_8
   override lazy val memMaskGran = Some(32)
   override lazy val libMaskGran = Some(8)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 // Simple powers of two with bit-masked lib.
@@ -145,7 +163,9 @@ class Masks_PowersOfTwo_8_1
   override lazy val memMaskGran = Some(8)
   override lazy val libMaskGran = Some(1)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_PowersOfTwo_16_1
@@ -157,7 +177,9 @@ class Masks_PowersOfTwo_16_1
   override lazy val memMaskGran = Some(16)
   override lazy val libMaskGran = Some(1)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_PowersOfTwo_32_1
@@ -169,7 +191,9 @@ class Masks_PowersOfTwo_32_1
   override lazy val memMaskGran = Some(32)
   override lazy val libMaskGran = Some(1)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_PowersOfTwo_64_1
@@ -181,7 +205,9 @@ class Masks_PowersOfTwo_64_1
   override lazy val memMaskGran = Some(64)
   override lazy val libMaskGran = Some(1)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 // Simple powers of two with non bit-masked lib.
@@ -195,7 +221,9 @@ class Masks_PowersOfTwo_32_4
   override lazy val memMaskGran = Some(32)
   override lazy val libMaskGran = Some(4)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_PowersOfTwo_32_8
@@ -207,7 +235,9 @@ class Masks_PowersOfTwo_32_8
   override lazy val memMaskGran = Some(32)
   override lazy val libMaskGran = Some(8)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_PowersOfTwo_8_8
@@ -219,7 +249,9 @@ class Masks_PowersOfTwo_8_8
   override lazy val memMaskGran = Some(8)
   override lazy val libMaskGran = Some(8)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 // Width as a multiple of the mask, bit-masked lib
@@ -233,7 +265,9 @@ class Masks_IntegerMaskMultiple_20_10
   override lazy val memMaskGran = Some(10)
   override lazy val libMaskGran = Some(1)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_IntegerMaskMultiple_21_7
@@ -258,7 +292,9 @@ class Masks_IntegerMaskMultiple_21_21
   override lazy val memMaskGran = Some(21)
   override lazy val libMaskGran = Some(1)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_IntegerMaskMultiple_84_21
@@ -270,7 +306,9 @@ class Masks_IntegerMaskMultiple_84_21
   override lazy val memMaskGran = Some(21)
   override lazy val libMaskGran = Some(1)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_IntegerMaskMultiple_92_23
@@ -282,7 +320,9 @@ class Masks_IntegerMaskMultiple_92_23
   override lazy val memMaskGran = Some(23)
   override lazy val libMaskGran = Some(1)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_IntegerMaskMultiple_117_13
@@ -294,7 +334,9 @@ class Masks_IntegerMaskMultiple_117_13
   override lazy val memMaskGran = Some(13)
   override lazy val libMaskGran = Some(1)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_IntegerMaskMultiple_160_20
@@ -306,7 +348,9 @@ class Masks_IntegerMaskMultiple_160_20
   override lazy val memMaskGran = Some(20)
   override lazy val libMaskGran = Some(1)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 class Masks_IntegerMaskMultiple_184_23
@@ -318,7 +362,9 @@ class Masks_IntegerMaskMultiple_184_23
   override lazy val memMaskGran = Some(23)
   override lazy val libMaskGran = Some(1)
 
-  compileExecuteAndTest(mem, lib, v, output)
+  it should "compile, execute, and test" in {
+    compileExecuteAndTest(mem, lib, v, output)
+  }
 }
 
 // Width as an non-integer multiple of the mask, bit-masked lib
