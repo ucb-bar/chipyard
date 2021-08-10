@@ -2,6 +2,7 @@
 
 package barstools.tapeout.transforms
 
+import chisel3.stage.ChiselStage
 import firrtl.FileUtils
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
@@ -11,9 +12,18 @@ import java.io.{ByteArrayOutputStream, File, PrintStream, PrintWriter}
 class GenerateTopSpec extends AnyFreeSpec with Matchers {
   "Generate top and harness" - {
     "should include the following transforms" in {
+      val targetDir = "test_run_dir/generate_top_and_harness"
+      FileUtils.makeDirectory(targetDir)
+      (new ChiselStage).emitChirrtl(new ExampleModuleNeedsResetInverted, Array("--target-dir", targetDir))
+
       val buffer = new ByteArrayOutputStream()
       Console.withOut(new PrintStream(buffer)) {
-        GenerateTopAndHarness.main(Array("-i", "ExampleModuleNeedsResetInverted.fir", "-ll", "info"))
+        GenerateTopAndHarness.main(
+          Array(
+            "-i", s"$targetDir/ExampleModuleNeedsResetInverted.fir",
+            "-ll", "info"
+          )
+        )
       }
       val output = buffer.toString
       output should include("barstools.tapeout.transforms.AddSuffixToModuleNames")

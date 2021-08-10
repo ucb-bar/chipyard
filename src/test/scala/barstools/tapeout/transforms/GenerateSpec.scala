@@ -8,7 +8,6 @@ import chisel3.stage.ChiselStage
 import firrtl.FileUtils
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers.be
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 import java.io.{File, PrintWriter}
@@ -60,34 +59,40 @@ class GenerateExampleTester extends MultiIOModule {
 }
 
 class GenerateSpec extends AnyFreeSpec {
-  "generate test data" in {
-    val targetDir = "test_run_dir/generate_spec_source"
+
+  def generateTestData(targetDir: String): Unit = {
     FileUtils.makeDirectory(targetDir)
 
-    (new ChiselStage()).emitFirrtl(new GenerateExampleTester, Array("--target-dir", targetDir))
+    new ChiselStage().emitFirrtl(new GenerateExampleTester, Array("--target-dir", targetDir))
 
-    val blackBoxInverterText = """
-                                 |module BlackBoxInverter(
-                                 |    input  [0:0] in,
-                                 |    output [0:0] out
-                                 |);
-                                 |  assign out = !in;
-                                 |endmodule
-                                 |""".stripMargin
+    val blackBoxInverterText =
+      """
+        |module BlackBoxInverter(
+        |    input  [0:0] in,
+        |    output [0:0] out
+        |);
+        |  assign out = !in;
+        |endmodule
+        |""".stripMargin
 
     val printWriter2 = new PrintWriter(new File(s"$targetDir/BlackBoxInverter.v"))
     printWriter2.write(blackBoxInverterText)
     printWriter2.close()
+  }
 
-    new File(s"$targetDir/GenerateExampleTester.fir").exists() should be (true)
+  "generate test data" in {
+    val targetDir = "test_run_dir/generate_spec_source"
+    generateTestData(targetDir)
+
+    new File(s"$targetDir/GenerateExampleTester.fir").exists() should be(true)
   }
 
   "generate top test" in {
-    val sourceDir = "test_run_dir/generate_spec_source"
     val targetDir = "test_run_dir/generate_spec"
+    generateTestData(targetDir)
 
     GenerateTop.main(Array(
-      "-i", s"$sourceDir/GenerateExampleTester.fir",
+      "-i", s"$targetDir/GenerateExampleTester.fir",
       "-o", s"$targetDir/GenerateExampleTester.v"
     ))
     new File(s"$targetDir/GenerateExampleTester.v").exists() should be (true)

@@ -316,7 +316,6 @@ class SplitWidth_2rw_differentMasks extends MacroCompilerSpec with HasSRAMGenera
   lazy val memMaskGranB = 8 // these generators are run at constructor time
 
   override def generateMemSRAM() = {
-    println(memMaskGranB)
     SRAMMacro(
       name = mem_name,
       width = memWidth,
