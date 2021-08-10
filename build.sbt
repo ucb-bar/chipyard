@@ -30,7 +30,7 @@ lazy val commonSettings = Seq(
 //
 //enablePlugins(sbtassembly.AssemblyPlugin)
 
-lazy val tapeout = (project in file("tapeout"))
+lazy val tapeout = (project in file("."))
   .settings(commonSettings)
   .settings(scalacOptions in Test ++= Seq("-language:reflectiveCalls"))
   .settings(fork := true)
@@ -39,4 +39,4 @@ lazy val tapeout = (project in file("tapeout"))
   )
   .enablePlugins(sbtassembly.AssemblyPlugin)
 
-lazy val root = (project in file(".")).aggregate(tapeout)
+//lazy val root = (project in file(".")).aggregate(tapeout)
