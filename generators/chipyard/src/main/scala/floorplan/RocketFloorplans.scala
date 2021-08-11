@@ -2,8 +2,10 @@
 package chipyard.floorplan
 
 import freechips.rocketchip.tile.{RocketTileModuleImp}
+import freechips.rocketchip.rocket.{HasHellaCache, DCache}
 import hwacha.{Hwacha, HwachaImp}
-import barstools.floorplan.chisel.{FloorplanAspect, Floorplan, FloorplanFunction}
+import barstools.floorplan.chisel.{FloorplanAspect, Floorplan, FloorplanFunction, Direction}
+import barstools.floorplan.{GreaterThanOrEqualTo}
 
 object RocketFloorplans {
 
@@ -11,10 +13,27 @@ object RocketFloorplans {
     case tile: RocketTileModuleImp =>
       val context = Floorplan(tile)
       val topGroup = context.setTopGroup(context.createElasticArray(3))
-      val memArray = topGroup.placeAt(0, context.createMemArray(Some("l1_icache_data")))
-      topGroup.placeAt(1, context.createSpacer(Some("spacer")))
-      tile.outer.frontend.icache.module.data_arrays.map(x => memArray.addMem(x._1))
-      // Add more SRAM arrays here
+      val cacheDataArray = topGroup.placeAt(0, context.createElasticArray(3, Direction.Horizontal))
+
+      val icacheData = cacheDataArray.placeAt(0, context.createMemArray(Some("l1_icache_data")))
+      tile.outer.frontend.icache.module.data_arrays.map(x => icacheData.addMem(x._1))
+
+      cacheDataArray.placeAt(1, context.createSpacer(
+        name = Some("cache_spacer"),
+        width = GreaterThanOrEqualTo(500)))
+
+      tile.outer match {
+        case x: HasHellaCache =>
+          val dcacheData = cacheDataArray.placeAt(2, context.createMemArray(Some("l1_dcache_data")))
+          x.dcache match {
+            case cache: DCache =>
+              cache.module.dcacheImpl.data.data_arrays.map(x => dcacheData.addMem(x._1))
+            case _ =>
+              ???
+          }
+        case _ =>
+          // Do nothing
+      }
 
       // Add optional accelerator placements
       val hwacha = tile.outer.roccs.collectFirst { case h: Hwacha =>
