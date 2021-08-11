@@ -211,7 +211,7 @@ $(FLOORPLAN_CONF): generator_temp $(FLOORPLAN_OOBANNOS) $(FLOORPLAN_FPIR)
 
 # TODO also should generate out-of-band annotations for rocket area, etc.
 # This just annotates all the SRAM instances
-$(FLOORPLAN_SBAMEM): generator_temp $(SMEMS_INSTAMAP)
+$(FLOORPLAN_OOBMEM): generator_temp $(SMEMS_INSTMAP)
 	$(vlsi_dir)/gen_oob_annos.py $(tech_name) $(SMEMS_INSTMAP) > $@
 
 #########################################################################################

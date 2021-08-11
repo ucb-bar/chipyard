@@ -10,7 +10,7 @@ object ChipTopFloorplans {
 
   def default: FloorplanFunction = {
     case top: ChipTopLazyRawModuleImp =>
-      val context = Floorplan(top, 1500.0, 3000.0)
+      val context = Floorplan(top, 1500.0, 1000.0)
       val topGrid = context.setTopGroup(context.createElasticArray(2))
       val tiles = top.outer.lazySystem match {
         case t: DigitalTop => t.tiles.map(x => context.addHier(x.module))
