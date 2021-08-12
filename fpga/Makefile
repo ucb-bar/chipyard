@@ -118,8 +118,8 @@ $(BIT_FILE): $(synth_list_f)
 		-tclargs \
 			-top-module "$(MODEL)" \
 			-F "$(synth_list_f)" \
-			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
-			-board "$(BOARD)"
+			-board "$(BOARD)" \
+			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')"
 
 .PHONY: bitstream
 bitstream: $(BIT_FILE)
