@@ -1,8 +1,8 @@
 // See LICENSE for license details.
 
 val defaultVersions = Map(
-  "chisel3" -> "3.4.+",
-  "chisel-iotesters" -> "1.5.+"
+  "chisel3" -> "3.5-SNAPSHOT",
+  "chisel-iotesters" -> "2.5-SNAPSHOT"
 )
 
 lazy val commonSettings = Seq(
@@ -14,7 +14,10 @@ lazy val commonSettings = Seq(
     dep: String => "edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", defaultVersions(dep))
   },
   libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.2.2" % "test",
+    "com.typesafe.play" %% "play-json" % "2.9.2",
+    "org.scalatest" %% "scalatest" % "3.2.9" % "test",
+    "org.apache.logging.log4j" % "log4j-api" % "2.11.2",
+    "org.apache.logging.log4j" % "log4j-core" % "2.11.2"
   ),
   resolvers ++= Seq(
     Resolver.sonatypeRepo("snapshots"),
@@ -23,19 +26,17 @@ lazy val commonSettings = Seq(
   )
 )
 
-disablePlugins(sbtassembly.AssemblyPlugin)
+//disablePlugins(sbtassembly.AssemblyPlugin)
+//
+//enablePlugins(sbtassembly.AssemblyPlugin)
 
-lazy val mdf = (project in file("mdf/scalalib"))
-lazy val macros = (project in file("macros"))
-  .dependsOn(mdf)
+lazy val tapeout = (project in file("."))
   .settings(commonSettings)
+  .settings(scalacOptions in Test ++= Seq("-language:reflectiveCalls"))
+  .settings(fork := true)
   .settings(
     mainClass := Some("barstools.macros.MacroCompiler")
   )
   .enablePlugins(sbtassembly.AssemblyPlugin)
 
-lazy val tapeout = (project in file("tapeout"))
-  .settings(commonSettings)
-  .settings(scalacOptions in Test ++= Seq("-language:reflectiveCalls"))
-
-lazy val root = (project in file(".")).aggregate(macros, tapeout)
+//lazy val root = (project in file(".")).aggregate(tapeout)
