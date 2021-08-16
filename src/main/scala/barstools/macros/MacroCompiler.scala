@@ -14,7 +14,7 @@ import firrtl.ir._
 import firrtl.stage.{FirrtlSourceAnnotation, FirrtlStage, Forms, OutputFileAnnotation, RunFirrtlTransformAnnotation}
 import firrtl.transforms.NoDCEAnnotation
 import firrtl.{PrimOps, _}
-import mdf.macrolib._
+import mdf.macrolib.{PolarizedPort, PortPolarity, SRAMCompiler, SRAMGroup, SRAMMacro}
 
 import java.io.{File, FileWriter}
 import scala.collection.mutable.{ArrayBuffer, HashMap}
@@ -109,15 +109,16 @@ object MacroCompilerAnnotation {
     * @param forceSynflops Set of memories to force compiling as flops regardless of the mode
     */
   case class Params(
-    mem:           String,
-    memFormat:     Option[String],
-    lib:           Option[String],
-    hammerIR:      Option[String],
-    costMetric:    CostMetric,
-    mode:          CompilerMode,
-    useCompiler:   Boolean,
-    forceCompile:  Set[String],
-    forceSynflops: Set[String])
+                     mem: String,
+                     memFormat: Option[String],
+                     lib: Option[String],
+                     hammerIR: Option[String],
+                     costMetric: CostMetric,
+                     mode: CompilerMode,
+                     useCompiler: Boolean,
+                     forceCompile: Set[String],
+                     forceSynflops: Set[String]
+                   ) extends Serializable
 
   /** Create a MacroCompilerAnnotation.
     * @param c Top-level circuit name (see class description)
@@ -721,16 +722,16 @@ class MacroCompilerTransform extends Transform with DependencyAPIMigration {
 
       // Read, eliminate None, get only SRAM, make firrtl macro
       val mems: Option[Seq[Macro]] = (memFileFormat match {
-        case Some("conf") => Utils.readConfFromPath(Some(memFile))
+        case Some("conf") => readConfFromPath(Some(memFile))
         case _            => mdf.macrolib.Utils.readMDFFromPath(Some(memFile))
       }) match {
         case Some(x: Seq[mdf.macrolib.Macro]) =>
-          Some(Utils.filterForSRAM(Some(x)).getOrElse(List()).map { new Macro(_) })
+          Some(filterForSRAM(Some(x)).getOrElse(List()).map { new Macro(_) })
         case _ => None
       }
       val libs: Option[Seq[Macro]] = mdf.macrolib.Utils.readMDFFromPath(libFile) match {
         case Some(x: Seq[mdf.macrolib.Macro]) =>
-          Some(Utils.filterForSRAM(Some(x)).getOrElse(List()).map { new Macro(_) })
+          Some(filterForSRAM(Some(x)).getOrElse(List()).map { new Macro(_) })
         case _ => None
       }
       val compilers: Option[mdf.macrolib.SRAMCompiler] = mdf.macrolib.Utils.readMDFFromPath(libFile) match {
@@ -866,10 +867,9 @@ object MacroCompiler extends App {
     try {
       val macros = params.get(MacrosFormat) match {
         case Some("conf") =>
-          Utils.filterForSRAM(Utils.readConfFromPath(params.get(Macros))).get.map(x => (new Macro(x)).blackbox)
+          filterForSRAM(readConfFromPath(params.get(Macros))).get.map(x => (new Macro(x)).blackbox)
         case _ =>
-          Utils
-            .filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(params.get(Macros)))
+          filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(params.get(Macros)))
             .get
             .map(x => (new Macro(x)).blackbox)
       }

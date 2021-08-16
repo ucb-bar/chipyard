@@ -1,6 +1,7 @@
 package barstools.macros
 
-import mdf.macrolib._
+import mdf.macrolib.SRAMMacro
+
 
 /** Tests to check that the cost function mechanism is working properly. */
 
