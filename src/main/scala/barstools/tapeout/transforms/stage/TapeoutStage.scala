@@ -178,4 +178,3 @@ class TapeoutStage(doHarness: Boolean) extends Stage {
     annotations
   }
 }
-

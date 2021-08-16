@@ -42,10 +42,10 @@ class ToBeMadeExternal extends MultiIOModule {
 class GenerateExampleTester extends MultiIOModule {
   val success = IO(Output(Bool()))
 
-  val  mod = Module(new GenerateExampleModule)
+  val mod = Module(new GenerateExampleModule)
   mod.in := 1.U
 
-  val  mod2 = Module(new ToBeMadeExternal)
+  val mod2 = Module(new ToBeMadeExternal)
   mod2.in := 1.U
 
   val reg = RegInit(0.U(8.W))
@@ -91,10 +91,14 @@ class GenerateSpec extends AnyFreeSpec {
     val targetDir = "test_run_dir/generate_spec"
     generateTestData(targetDir)
 
-    GenerateTop.main(Array(
-      "-i", s"$targetDir/GenerateExampleTester.fir",
-      "-o", s"$targetDir/GenerateExampleTester.v"
-    ))
-    new File(s"$targetDir/GenerateExampleTester.v").exists() should be (true)
+    GenerateTop.main(
+      Array(
+        "-i",
+        s"$targetDir/GenerateExampleTester.fir",
+        "-o",
+        s"$targetDir/GenerateExampleTester.v"
+      )
+    )
+    new File(s"$targetDir/GenerateExampleTester.v").exists() should be(true)
   }
 }

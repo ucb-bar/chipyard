@@ -187,7 +187,8 @@ class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
 
   override val libPrefix = "src/test/resources"
 
-  val memSRAMs = mdf.macrolib.Utils.readMDFFromString("""
+  val memSRAMs = mdf.macrolib.Utils
+    .readMDFFromString("""
 [ {
   "type" : "sram",
   "name" : "_T_182_ext",

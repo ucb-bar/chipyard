@@ -128,7 +128,7 @@ object DefaultMetric extends CostMetric with CostMetricCompanion {
     }
     val maskPenalty = (memMask, libMask) match {
       case (None, Some(m)) => 0.001
-      case (_, _) => 0
+      case (_, _)          => 0
     }
     val depthCost = math.ceil(mem.src.depth.toDouble / lib.src.depth.toDouble)
     val widthCost = math.ceil(memWidth.toDouble / lib.src.width.toDouble)

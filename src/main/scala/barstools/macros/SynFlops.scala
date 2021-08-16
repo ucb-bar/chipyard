@@ -3,7 +3,7 @@
 package barstools.macros
 
 import barstools.macros.Utils._
-import firrtl.Utils.{zero, one}
+import firrtl.Utils.{one, zero}
 import firrtl._
 import firrtl.ir._
 import firrtl.passes.MemPortUtils.memPortField

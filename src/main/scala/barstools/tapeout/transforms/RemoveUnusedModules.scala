@@ -23,7 +23,7 @@ class RemoveUnusedModules extends Transform with DependencyAPIMigration {
 
   def execute(state: CircuitState): CircuitState = {
     val modulesByName = state.circuit.modules.map {
-      case m: Module => (m.name, Some(m))
+      case m: Module    => (m.name, Some(m))
       case m: ExtModule => (m.name, None)
     }.toMap
 

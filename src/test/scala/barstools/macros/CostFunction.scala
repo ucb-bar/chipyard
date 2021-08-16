@@ -2,7 +2,6 @@ package barstools.macros
 
 import mdf.macrolib.SRAMMacro
 
-
 /** Tests to check that the cost function mechanism is working properly. */
 
 /** A test metric that simply favours memories with smaller widths, to test that

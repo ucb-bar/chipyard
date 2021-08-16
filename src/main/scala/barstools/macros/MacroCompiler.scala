@@ -8,7 +8,7 @@
 package barstools.macros
 
 import barstools.macros.Utils._
-import firrtl.Utils.{BoolType, one, zero}
+import firrtl.Utils.{one, zero, BoolType}
 import firrtl.annotations._
 import firrtl.ir._
 import firrtl.stage.{FirrtlSourceAnnotation, FirrtlStage, Forms, OutputFileAnnotation, RunFirrtlTransformAnnotation}
@@ -109,16 +109,16 @@ object MacroCompilerAnnotation {
     * @param forceSynflops Set of memories to force compiling as flops regardless of the mode
     */
   case class Params(
-                     mem: String,
-                     memFormat: Option[String],
-                     lib: Option[String],
-                     hammerIR: Option[String],
-                     costMetric: CostMetric,
-                     mode: CompilerMode,
-                     useCompiler: Boolean,
-                     forceCompile: Set[String],
-                     forceSynflops: Set[String]
-                   ) extends Serializable
+    mem:           String,
+    memFormat:     Option[String],
+    lib:           Option[String],
+    hammerIR:      Option[String],
+    costMetric:    CostMetric,
+    mode:          CompilerMode,
+    useCompiler:   Boolean,
+    forceCompile:  Set[String],
+    forceSynflops: Set[String])
+      extends Serializable
 
   /** Create a MacroCompilerAnnotation.
     * @param c Top-level circuit name (see class description)
@@ -869,8 +869,7 @@ object MacroCompiler extends App {
         case Some("conf") =>
           filterForSRAM(readConfFromPath(params.get(Macros))).get.map(x => (new Macro(x)).blackbox)
         case _ =>
-          filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(params.get(Macros)))
-            .get
+          filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(params.get(Macros))).get
             .map(x => (new Macro(x)).blackbox)
       }
 

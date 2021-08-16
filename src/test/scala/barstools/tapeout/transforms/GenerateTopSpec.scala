@@ -19,9 +19,12 @@ class GenerateTopSpec extends AnyFreeSpec with Matchers {
 
       GenerateTopAndHarness.main(
         Array(
-          "-i", s"$targetDir/ExampleModuleNeedsResetInverted.fir",
-          "-ll", "info",
-          "--log-file", transformListName
+          "-i",
+          s"$targetDir/ExampleModuleNeedsResetInverted.fir",
+          "-ll",
+          "info",
+          "--log-file",
+          transformListName
         )
       )
 
@@ -47,26 +50,45 @@ class GenerateTopSpec extends AnyFreeSpec with Matchers {
 
     GenerateTopAndHarness.main(
       Array(
-        "--target-dir", "test_run_dir/generate_top_spec",
-        "-i", s"$targetDir/BlackBoxFloatTester.fir",
-        "-o", "chipyard.unittest.TestHarness.IceNetUnitTestConfig.top.v",
-        "-tho", "chipyard.unittest.TestHarness.IceNetUnitTestConfig.harness.v",
-        "-i", "chipyard.unittest.TestHarness.IceNetUnitTestConfig.fir",
-        "--syn-top", "UnitTestSuite",
-        "--harness-top", "TestHarness",
-        "-faf", "chipyard.unittest.TestHarness.IceNetUnitTestConfig.anno.json",
-        "-tsaof", "chipyard.unittest.TestHarness.IceNetUnitTestConfig.top.anno.json",
-        "-tdf", "firrtl_black_box_resource_files.top.f",
-        "-tsf", "chipyard.unittest.TestHarness.IceNetUnitTestConfig.top.fir",
-        "-thaof", "chipyard.unittest.TestHarness.IceNetUnitTestConfig.harness.anno.json",
-        "-hdf", "firrtl_black_box_resource_files.harness.f",
-        "-thf", "chipyard.unittest.TestHarness.IceNetUnitTestConfig.harness.fir",
+        "--target-dir",
+        "test_run_dir/generate_top_spec",
+        "-i",
+        s"$targetDir/BlackBoxFloatTester.fir",
+        "-o",
+        "chipyard.unittest.TestHarness.IceNetUnitTestConfig.top.v",
+        "-tho",
+        "chipyard.unittest.TestHarness.IceNetUnitTestConfig.harness.v",
+        "-i",
+        "chipyard.unittest.TestHarness.IceNetUnitTestConfig.fir",
+        "--syn-top",
+        "UnitTestSuite",
+        "--harness-top",
+        "TestHarness",
+        "-faf",
+        "chipyard.unittest.TestHarness.IceNetUnitTestConfig.anno.json",
+        "-tsaof",
+        "chipyard.unittest.TestHarness.IceNetUnitTestConfig.top.anno.json",
+        "-tdf",
+        "firrtl_black_box_resource_files.top.f",
+        "-tsf",
+        "chipyard.unittest.TestHarness.IceNetUnitTestConfig.top.fir",
+        "-thaof",
+        "chipyard.unittest.TestHarness.IceNetUnitTestConfig.harness.anno.json",
+        "-hdf",
+        "firrtl_black_box_resource_files.harness.f",
+        "-thf",
+        "chipyard.unittest.TestHarness.IceNetUnitTestConfig.harness.fir",
         "--infer-rw",
-        "--repl-seq-mem", "-c:TestHarness:-o:chipyard.unittest.TestHarness.IceNetUnitTestConfig.top.mems.conf",
-        "-thconf", "chipyard.unittest.TestHarness.IceNetUnitTestConfig.harness.mems.conf",
-        "-td", "test_run_dir/from-ci",
-        "-ll", "info",
-        "--log-file", logOutputName
+        "--repl-seq-mem",
+        "-c:TestHarness:-o:chipyard.unittest.TestHarness.IceNetUnitTestConfig.top.mems.conf",
+        "-thconf",
+        "chipyard.unittest.TestHarness.IceNetUnitTestConfig.harness.mems.conf",
+        "-td",
+        "test_run_dir/from-ci",
+        "-ll",
+        "info",
+        "--log-file",
+        logOutputName
       )
     )
 

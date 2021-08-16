@@ -45,7 +45,7 @@ object Utils {
         } catch {
           case f: FileNotFoundException =>
             println(s"FILE NOT FOUND $p in dir ${os.pwd}")
-          throw f
+            throw f
         }
     }
   }

@@ -24,3 +24,16 @@ jobs:
         run: git submodule update --init
       - name: Test
         run: sbt test
+
+  doc:
+    name: Documentation and formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Formatting
+        run: sbt scalafmtCheckAll
+
+  all_test_passed:
+    name: "all tests passed"
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo Success

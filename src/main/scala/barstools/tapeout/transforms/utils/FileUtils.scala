@@ -2,7 +2,7 @@
 
 package barstools.tapeout.transforms.utils
 
-import chisel3.experimental.{ChiselAnnotation, annotate}
+import chisel3.experimental.{annotate, ChiselAnnotation}
 import firrtl._
 import firrtl.annotations._
 import firrtl.stage.Forms
