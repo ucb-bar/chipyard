@@ -1,7 +1,8 @@
 // See LICENSE for license details.
 package barstools.macros
 
-import mdf.macrolib._
+import firrtl.FileUtils
+import mdf.macrolib.{Constant, MacroExtraPort, SRAMMacro}
 
 // Specific one-off tests to run, not created by a generator.
 
@@ -17,7 +18,7 @@ class GenerateSomeVerilog extends MacroCompilerSpec with HasSRAMGenerator with H
   }
 
   it should "generate non-empty verilog" in {
-    val verilog = scala.io.Source.fromFile(vPrefix + "/" + v).getLines().mkString("\n")
+    val verilog = FileUtils.getText(vPrefix + "/" + v)
     verilog.isEmpty shouldBe false
   }
 }
@@ -29,7 +30,7 @@ class WriteEnableTest extends MacroCompilerSpec with HasSRAMGenerator {
 
   override val libPrefix = "src/test/resources"
 
-  val memSRAMs = mdf.macrolib.Utils
+  val memSRAMs: Seq[mdf.macrolib.Macro] = mdf.macrolib.Utils
     .readMDFFromString("""
 [ {
   "type" : "sram",
@@ -53,7 +54,7 @@ class WriteEnableTest extends MacroCompilerSpec with HasSRAMGenerator {
   } ],
   "family" : "1rw"
 } ]
-""").getOrElse(List())
+""").getOrElse(Seq())
 
   writeToMem(mem, memSRAMs)
 
@@ -101,7 +102,7 @@ class MaskPortTest extends MacroCompilerSpec with HasSRAMGenerator {
 
   override val libPrefix = "src/test/resources"
 
-  val memSRAMs = mdf.macrolib.Utils
+  val memSRAMs: Seq[mdf.macrolib.Macro] = mdf.macrolib.Utils
     .readMDFFromString("""
 [ {
   "type" : "sram",
@@ -175,7 +176,7 @@ circuit cc_dir_ext :
     defname = fake_mem
 """
 
-  it should "compile, exectue, and test" in {
+  it should "compile, execute, and test" in {
     compileExecuteAndTest(mem, lib, v, output)
   }
 }
@@ -187,7 +188,7 @@ class BOOMTest extends MacroCompilerSpec with HasSRAMGenerator {
 
   override val libPrefix = "src/test/resources"
 
-  val memSRAMs = mdf.macrolib.Utils
+  val memSRAMs: Seq[mdf.macrolib.Macro] = mdf.macrolib.Utils
     .readMDFFromString("""
 [ {
   "type" : "sram",
@@ -1461,7 +1462,7 @@ class RocketChipTest extends MacroCompilerSpec with HasSRAMGenerator {
     )
   )
 
-  val memSRAMs = mdf.macrolib.Utils
+  val memSRAMs: Seq[mdf.macrolib.Macro] = mdf.macrolib.Utils
     .readMDFFromString("""
 [
   {

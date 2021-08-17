@@ -1,7 +1,9 @@
 package barstools.macros
 
+import mdf.macrolib
+
 class SRAMCompiler extends MacroCompilerSpec with HasSRAMGenerator with HasSimpleWidthTestGenerator {
-  val compiler = generateSRAMCompiler("awesome", "A")
+  val compiler: macrolib.SRAMCompiler = generateSRAMCompiler("awesome", "A")
   val verilog = s"v-SRAMCompiler.v"
   override lazy val depth = BigInt(16)
   override lazy val memWidth = 8
@@ -15,5 +17,5 @@ class SRAMCompiler extends MacroCompilerSpec with HasSRAMGenerator with HasSimpl
 
   writeToMem(mem, Seq(generateSRAM("mymem", "X", 8, 16)))
 
-  compileExecuteAndTest(mem, Some(lib), verilog, output = output, false, true)
+  compileExecuteAndTest(mem, Some(lib), verilog, output = output, useCompiler = true)
 }

@@ -8,11 +8,13 @@ import firrtl._
 import firrtl.ir._
 import firrtl.passes.MemPortUtils.memPortField
 
+import scala.collection.mutable
+
 class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pass {
-  val extraMods = scala.collection.mutable.ArrayBuffer.empty[Module]
-  lazy val libMods = (libs.map { lib =>
+  val extraMods: mutable.ArrayBuffer[Module] = scala.collection.mutable.ArrayBuffer.empty[Module]
+  lazy val libMods: Map[String, Module] = libs.map { lib =>
     lib.src.name -> {
-      val (dataType, dataWidth) = (lib.src.ports.foldLeft(None: Option[BigInt]))((res, port) =>
+      val (dataType, dataWidth) = lib.src.ports.foldLeft(None: Option[BigInt])((res, port) =>
         (res, port.maskPort) match {
           case (_, None) =>
             res
@@ -28,7 +30,6 @@ class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pa
       }
 
       val maxDepth = firrtl.Utils.min(lib.src.depth, 1 << 26)
-      val numMems = lib.src.depth / maxDepth
 
       // Change macro to be mapped onto to look like the below mem
       // by changing its depth, and width
@@ -46,7 +47,7 @@ class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pa
           )
         )
       )
-      val mod_macro = (new MacroCompilerPass(None, None, None, None)).compile(lib, lib_macro)
+      val mod_macro = new MacroCompilerPass(None, None, None, None).compile(lib, lib_macro)
       val (real_mod, real_macro) = mod_macro.get
 
       val mem = DefMemory(
@@ -142,10 +143,10 @@ class SynFlopsPass(synflops: Boolean, libs: Seq[Macro]) extends firrtl.passes.Pa
       extraMods.append(real_macro.module(Block(mem +: (readConnects ++ writeConnects ++ readwriteConnects))))
       real_mod
     }
-  }).toMap
+  }.toMap
 
   def run(c: Circuit): Circuit = {
     if (!synflops) c
-    else c.copy(modules = (c.modules.map(m => libMods.getOrElse(m.name, m))) ++ extraMods)
+    else c.copy(modules = c.modules.map(m => libMods.getOrElse(m.name, m)) ++ extraMods)
   }
 }

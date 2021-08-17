@@ -7,23 +7,23 @@ trait HasSimpleWidthTestGenerator extends HasSimpleTestGenerator {
   this: MacroCompilerSpec with HasSRAMGenerator =>
   def depth: BigInt
 
-  override lazy val memDepth = depth
-  override lazy val libDepth = depth
+  override lazy val memDepth: BigInt = depth
+  override lazy val libDepth: BigInt = depth
 
   override def generateBody(): String = {
     val output = new StringBuilder
 
     // Generate mem_0_<i> lines for number of width instances.
     output.append(
-      ((0 to widthInstances - 1).map { i: Int =>
+      (0 until widthInstances).map { i: Int =>
         s"""
-    inst mem_0_${i} of ${lib_name}
+    inst mem_0_$i of $lib_name
 """
-      }).reduceLeft(_ + _)
+      }.reduceLeft(_ + _)
     )
 
     // Generate submemory connection blocks.
-    output.append((for (i <- 0 to widthInstances - 1) yield {
+    output.append((for (i <- 0 until widthInstances) yield {
       // Width of this submemory.
       val myMemWidth = if (i == widthInstances - 1) lastWidthBits else usableLibWidth
       // Base bit of this submemory.
@@ -37,34 +37,34 @@ trait HasSimpleWidthTestGenerator extends HasSimpleTestGenerator {
       // lib does not.
       val writeEnableBit = if (libMaskGran.isEmpty && memMaskGran.isDefined) {
         val outerMaskBit = myBaseBit / memMaskGran.get
-        s"bits(outer_mask, ${outerMaskBit}, ${outerMaskBit})"
+        s"bits(outer_mask, $outerMaskBit, $outerMaskBit)"
       } else """UInt<1>("h1")"""
       val chipEnable = s"""UInt<1>("h1")"""
       val writeEnableExpr =
-        if (libMaskGran.isEmpty) s"and(${memPortPrefix}_write_en, ${chipEnable})" else s"${memPortPrefix}_write_en"
+        if (libMaskGran.isEmpty) s"and(${memPortPrefix}_write_en, $chipEnable)" else s"${memPortPrefix}_write_en"
 
       s"""
-    mem_0_${i}.${libPortPrefix}_clk <= ${memPortPrefix}_clk
-    mem_0_${i}.${libPortPrefix}_addr <= ${memPortPrefix}_addr
-    node ${memPortPrefix}_dout_0_${i} = bits(mem_0_${i}.${libPortPrefix}_dout, ${myMemWidth - 1}, 0)
-    mem_0_${i}.${libPortPrefix}_din <= bits(${memPortPrefix}_din, ${myBaseBit + myMemWidth - 1}, ${myBaseBit})
-    ${maskStatement}
-    mem_0_${i}.${libPortPrefix}_write_en <= and(and(${writeEnableExpr}, ${writeEnableBit}), UInt<1>("h1"))
+    mem_0_$i.${libPortPrefix}_clk <= ${memPortPrefix}_clk
+    mem_0_$i.${libPortPrefix}_addr <= ${memPortPrefix}_addr
+    node ${memPortPrefix}_dout_0_$i = bits(mem_0_$i.${libPortPrefix}_dout, ${myMemWidth - 1}, 0)
+    mem_0_$i.${libPortPrefix}_din <= bits(${memPortPrefix}_din, ${myBaseBit + myMemWidth - 1}, $myBaseBit)
+    $maskStatement
+    mem_0_$i.${libPortPrefix}_write_en <= and(and($writeEnableExpr, $writeEnableBit), UInt<1>("h1"))
 """
     }).reduceLeft(_ + _))
 
     // Generate final output that concats together the sub-memories.
     // e.g. cat(outer_dout_0_2, cat(outer_dout_0_1, outer_dout_0_0))
     output.append {
-      val doutStatements = ((widthInstances - 1 to 0 by -1).map(i => s"${memPortPrefix}_dout_0_${i}"))
+      val doutStatements = (widthInstances - 1 to 0 by -1).map(i => s"${memPortPrefix}_dout_0_$i")
       val catStmt = doutStatements.init.foldRight(doutStatements.last)((l: String, r: String) => s"cat($l, $r)")
       s"""
-    node ${memPortPrefix}_dout_0 = ${catStmt}
+    node ${memPortPrefix}_dout_0 = $catStmt
 """
     }
 
     output.append(s"""
-    ${memPortPrefix}_dout <= mux(UInt<1>("h1"), ${memPortPrefix}_dout_0, UInt<${memWidth}>("h0"))
+    ${memPortPrefix}_dout <= mux(UInt<1>("h1"), ${memPortPrefix}_dout_0, UInt<$memWidth>("h0"))
 """)
     output.toString
   }
@@ -276,8 +276,8 @@ class SplitWidth1024x8_memGran_8_libGran_1_rw
   override lazy val depth = BigInt(1024)
   override lazy val memWidth = 8
   override lazy val libWidth = 8
-  override lazy val memMaskGran = Some(8)
-  override lazy val libMaskGran = Some(1)
+  override lazy val memMaskGran: Option[Int] = Some(8)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -289,8 +289,8 @@ class SplitWidth1024x16_memGran_8_libGran_1_rw
   override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
-  override lazy val memMaskGran = Some(8)
-  override lazy val libMaskGran = Some(1)
+  override lazy val memMaskGran: Option[Int] = Some(8)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -302,8 +302,8 @@ class SplitWidth1024x16_memGran_8_libGran_8_rw
   override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
-  override lazy val memMaskGran = Some(8)
-  override lazy val libMaskGran = Some(8)
+  override lazy val memMaskGran: Option[Int] = Some(8)
+  override lazy val libMaskGran: Option[Int] = Some(8)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -315,8 +315,8 @@ class SplitWidth1024x128_memGran_8_libGran_1_rw
   override lazy val depth = BigInt(1024)
   override lazy val memWidth = 128
   override lazy val libWidth = 32
-  override lazy val memMaskGran = Some(8)
-  override lazy val libMaskGran = Some(1)
+  override lazy val memMaskGran: Option[Int] = Some(8)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -328,8 +328,8 @@ class SplitWidth1024x16_memGran_4_libGran_1_rw
   override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
-  override lazy val memMaskGran = Some(4)
-  override lazy val libMaskGran = Some(1)
+  override lazy val memMaskGran: Option[Int] = Some(4)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -341,8 +341,8 @@ class SplitWidth1024x16_memGran_2_libGran_1_rw
   override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
-  override lazy val memMaskGran = Some(2)
-  override lazy val libMaskGran = Some(1)
+  override lazy val memMaskGran: Option[Int] = Some(2)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -354,8 +354,8 @@ class SplitWidth1024x16_memGran_16_libGran_1_rw
   override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
-  override lazy val memMaskGran = Some(16)
-  override lazy val libMaskGran = Some(1)
+  override lazy val memMaskGran: Option[Int] = Some(16)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -366,7 +366,7 @@ class SplitWidth1024x16_libGran_8_rw extends MacroCompilerSpec with HasSRAMGener
   override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
-  override lazy val libMaskGran = Some(8)
+  override lazy val libMaskGran: Option[Int] = Some(8)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -375,7 +375,7 @@ class SplitWidth1024x16_libGran_1_rw extends MacroCompilerSpec with HasSRAMGener
   override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
-  override lazy val libMaskGran = Some(1)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -389,8 +389,8 @@ class SplitWidth1024x16_memGran_8_libGran_2_rw
   override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
-  override lazy val memMaskGran = Some(8)
-  override lazy val libMaskGran = Some(2)
+  override lazy val memMaskGran: Option[Int] = Some(8)
+  override lazy val libMaskGran: Option[Int] = Some(2)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -404,8 +404,8 @@ class SplitWidth1024x16_memGran_9_libGran_1_rw
   override lazy val depth = BigInt(1024)
   override lazy val memWidth = 16
   override lazy val libWidth = 8
-  override lazy val memMaskGran = Some(9)
-  override lazy val libMaskGran = Some(1)
+  override lazy val memMaskGran: Option[Int] = Some(9)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   (it should "be enabled when non-power of two masks are supported").is(pending)
   //~ compile(mem, lib, v, false)
@@ -424,7 +424,7 @@ class SplitWidth1024x32_readEnable_Lib
   override lazy val memWidth = 32
   override lazy val libWidth = 8
 
-  override def generateLibSRAM() = {
+  override def generateLibSRAM(): SRAMMacro = {
     SRAMMacro(
       name = lib_name,
       width = libWidth,
@@ -492,7 +492,7 @@ class SplitWidth1024x32_readEnable_Mem
   override lazy val memWidth = 32
   override lazy val libWidth = 8
 
-  override def generateMemSRAM() = {
+  override def generateMemSRAM(): SRAMMacro = {
     SRAMMacro(
       name = mem_name,
       width = memWidth,
@@ -528,7 +528,7 @@ class SplitWidth1024x32_readEnable_LibMem
   override lazy val memWidth = 32
   override lazy val libWidth = 8
 
-  override def generateLibSRAM() = {
+  override def generateLibSRAM(): SRAMMacro = {
     SRAMMacro(
       name = lib_name,
       width = libWidth,
@@ -549,7 +549,7 @@ class SplitWidth1024x32_readEnable_LibMem
     )
   }
 
-  override def generateMemSRAM() = {
+  override def generateMemSRAM(): SRAMMacro = {
     SRAMMacro(
       name = mem_name,
       width = memWidth,
