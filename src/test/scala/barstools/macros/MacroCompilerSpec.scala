@@ -31,19 +31,18 @@ abstract class MacroCompilerSpec extends AnyFlatSpec with Matchers {
   private def costMetricCmdLine = {
     costMetric match {
       case None => Nil
-      case Some(m) => {
-        val name = m.name
-        val params = m.commandLineParams
+      case Some(m) =>
+        val name = m.name()
+        val params = m.commandLineParams()
         List("-c", name) ++ params.flatMap { case (key, value) => List("-cp", key, value) }
-      }
     }
   }
 
   private def args(mem: String, lib: Option[String], v: String, synflops: Boolean, useCompiler: Boolean) =
-    List("-m", mem.toString, "-v", v) ++
+    List("-m", mem, "-v", v) ++
       (lib match {
         case None    => Nil
-        case Some(l) => List("-l", l.toString)
+        case Some(l) => List("-l", l)
       }) ++
       costMetricCmdLine ++
       (if (synflops) List("--mode", "synflops") else Nil) ++
@@ -52,23 +51,23 @@ abstract class MacroCompilerSpec extends AnyFlatSpec with Matchers {
   // Run the full compiler as if from the command line interface.
   // Generates the Verilog; useful in testing since an error will throw an
   // exception.
-  def compile(mem: String, lib: String, v: String, synflops: Boolean) {
+  def compile(mem: String, lib: String, v: String, synflops: Boolean): Unit = {
     compile(mem, Some(lib), v, synflops)
   }
-  def compile(mem: String, lib: Option[String], v: String, synflops: Boolean, useCompiler: Boolean = false) {
-    var mem_full = concat(memPrefix, mem)
-    var lib_full = concat(libPrefix, lib)
-    var v_full = concat(vPrefix, v)
+  def compile(mem: String, lib: Option[String], v: String, synflops: Boolean, useCompiler: Boolean = false): Unit = {
+    val mem_full = concat(memPrefix, mem)
+    val lib_full = concat(libPrefix, lib)
+    val v_full = concat(vPrefix, v)
 
     MacroCompiler.run(args(mem_full, lib_full, v_full, synflops, useCompiler))
   }
 
   // Helper functions to write macro libraries to the given files.
-  def writeToLib(lib: String, libs: Seq[mdf.macrolib.Macro]) = {
+  def writeToLib(lib: String, libs: Seq[mdf.macrolib.Macro]): Boolean = {
     mdf.macrolib.Utils.writeMDFToPath(Some(concat(libPrefix, lib)), libs)
   }
 
-  def writeToMem(mem: String, mems: Seq[mdf.macrolib.Macro]) = {
+  def writeToMem(mem: String, mems: Seq[mdf.macrolib.Macro]): Boolean = {
     mdf.macrolib.Utils.writeMDFToPath(Some(concat(memPrefix, mem)), mems)
   }
 
@@ -89,16 +88,16 @@ abstract class MacroCompilerSpec extends AnyFlatSpec with Matchers {
   // Compare FIRRTL outputs after reparsing output with ScalaTest ("should be").
   def test(result: Circuit, output: String): Unit = {
     val gold = RemoveEmpty.run(parse(output))
-    (result.serialize) should be(gold.serialize)
+    result.serialize should be(gold.serialize)
   }
 
   // Execute the macro compiler and returns a Circuit containing the output of
   // the memory compiler.
   def execute(memFile: Option[String], libFile: Option[String], synflops: Boolean): Circuit =
-    execute(memFile, libFile, synflops, false)
+    execute(memFile, libFile, synflops, useCompiler = false)
   def execute(memFile: Option[String], libFile: Option[String], synflops: Boolean, useCompiler: Boolean): Circuit = {
-    var mem_full = concat(memPrefix, memFile)
-    var lib_full = concat(libPrefix, libFile)
+    val mem_full = concat(memPrefix, memFile)
+    val lib_full = concat(libPrefix, libFile)
 
     require(memFile.isDefined)
     val mems: Seq[Macro] = Utils.filterForSRAM(mdf.macrolib.Utils.readMDFFromPath(mem_full)).get.map(new Macro(_))
@@ -126,7 +125,7 @@ abstract class MacroCompilerSpec extends AnyFlatSpec with Matchers {
       new SynFlopsPass(synflops, libs.getOrElse(mems)),
       RemoveEmpty
     )
-    val result: Circuit = (passes.foldLeft(circuit))((c, pass) => pass.run(c))
+    val result: Circuit = passes.foldLeft(circuit)((c, pass) => pass.run(c))
     result
   }
 
@@ -171,7 +170,7 @@ trait HasSRAMGenerator {
       output = if (read) Some(PolarizedPort(name = realPrefix + "dout", polarity = ActiveHigh)) else None,
       input = if (write) Some(PolarizedPort(name = realPrefix + "din", polarity = ActiveHigh)) else None,
       maskPort = maskGran match {
-        case Some(x: Int) => Some(PolarizedPort(name = realPrefix + "mask", polarity = ActiveHigh))
+        case Some(_: Int) => Some(PolarizedPort(name = realPrefix + "mask", polarity = ActiveHigh))
         case _ => None
       },
       maskGran = maskGran,
@@ -208,16 +207,7 @@ trait HasSRAMGenerator {
     depth:    Option[BigInt],
     maskGran: Option[Int] = None
   ): MacroPort = {
-    generateTestPort(
-      prefix,
-      width,
-      depth,
-      maskGran = maskGran,
-      write = true,
-      writeEnable = true,
-      read = true,
-      readEnable = false
-    )
+    generateTestPort(prefix, width, depth, maskGran = maskGran, write = true, writeEnable = true, read = true)
   }
 
   // Generate a "simple" SRAM (active high/positive edge, 1 read-write port).
@@ -241,12 +231,11 @@ trait HasSRAMGenerator {
 
   // Generate a "simple" SRAM group (active high/positive edge, 1 read-write port).
   def generateSimpleSRAMGroup(
-    prefix:     String,
-    mux:        Int,
-    depth:      Range,
-    width:      Range,
-    maskGran:   Option[Int] = None,
-    extraPorts: Seq[MacroExtraPort] = List()
+    prefix:   String,
+    mux:      Int,
+    depth:    Range,
+    width:    Range,
+    maskGran: Option[Int] = None
   ): SRAMGroup = {
     SRAMGroup(
       Seq("mygroup_", "width", "x", "depth", "_", "VT"),
@@ -291,7 +280,7 @@ trait HasSimpleTestGenerator {
   def extraTag:    String = ""
 
   // "Effective" libMaskGran by considering write_enable.
-  val effectiveLibMaskGran = libMaskGran.getOrElse(libWidth)
+  val effectiveLibMaskGran: Int = libMaskGran.getOrElse(libWidth)
 
   // Override this in the sub-generator if you need a more specific name.
   // Defaults to using reflection to pull the name of the test using this
@@ -301,23 +290,23 @@ trait HasSimpleTestGenerator {
   //require (memDepth >= libDepth)
 
   // Convenience variables to check if a mask exists.
-  val memHasMask = memMaskGran != None
-  val libHasMask = libMaskGran != None
+  val memHasMask: Boolean = memMaskGran.isDefined
+  val libHasMask: Boolean = libMaskGran.isDefined
   // We need to figure out how many mask bits there are in the mem.
-  val memMaskBits = if (memHasMask) memWidth / memMaskGran.get else 0
-  val libMaskBits = if (libHasMask) libWidth / libMaskGran.get else 0
+  val memMaskBits: Int = if (memHasMask) memWidth / memMaskGran.get else 0
+  val libMaskBits: Int = if (libHasMask) libWidth / libMaskGran.get else 0
 
-  val extraTagPrefixed = if (extraTag == "") "" else ("-" + extraTag)
+  val extraTagPrefixed: String = if (extraTag == "") "" else "-" + extraTag
 
-  val mem = s"mem-${generatorType}${extraTagPrefixed}.json"
-  val lib = s"lib-${generatorType}${extraTagPrefixed}.json"
-  val v = s"${generatorType}${extraTagPrefixed}.v"
+  val mem = s"mem-$generatorType$extraTagPrefixed.json"
+  val lib = s"lib-$generatorType$extraTagPrefixed.json"
+  val v = s"$generatorType$extraTagPrefixed.v"
 
   lazy val mem_name = "target_memory"
-  val mem_addr_width = MacroCompilerMath.ceilLog2(memDepth)
+  val mem_addr_width: Int = MacroCompilerMath.ceilLog2(memDepth)
 
   lazy val lib_name = "awesome_lib_mem"
-  val lib_addr_width = MacroCompilerMath.ceilLog2(libDepth)
+  val lib_addr_width: Int = MacroCompilerMath.ceilLog2(libDepth)
 
   // Override these to change the port prefixes if needed.
   def libPortPrefix: String = "lib"
@@ -325,11 +314,11 @@ trait HasSimpleTestGenerator {
 
   // These generate "simple" SRAMs (1 masked read-write port) by default,
   // but can be overridden if need be.
-  def generateLibSRAM() = generateSRAM(lib_name, libPortPrefix, libWidth, libDepth, libMaskGran, extraPorts)
-  def generateMemSRAM() = generateSRAM(mem_name, memPortPrefix, memWidth, memDepth, memMaskGran)
+  def generateLibSRAM(): SRAMMacro = generateSRAM(lib_name, libPortPrefix, libWidth, libDepth, libMaskGran, extraPorts)
+  def generateMemSRAM(): SRAMMacro = generateSRAM(mem_name, memPortPrefix, memWidth, memDepth, memMaskGran)
 
-  def libSRAM = generateLibSRAM
-  def memSRAM = generateMemSRAM
+  def libSRAM: SRAMMacro = generateLibSRAM()
+  def memSRAM: SRAMMacro = generateMemSRAM()
 
   def libSRAMs: Seq[SRAMMacro] = Seq(libSRAM)
   def memSRAMs: Seq[SRAMMacro] = Seq(memSRAM)
@@ -340,18 +329,19 @@ trait HasSimpleTestGenerator {
   // For masks, width it's a bit tricky since we have to consider cases like
   // memMaskGran = 4 and libMaskGran = 8.
   // Consider the actually usable libWidth in cases like the above.
-  val usableLibWidth = if (memMaskGran.getOrElse(Int.MaxValue) < effectiveLibMaskGran) memMaskGran.get else libWidth
+  val usableLibWidth: Int =
+    if (memMaskGran.getOrElse(Int.MaxValue) < effectiveLibMaskGran) memMaskGran.get else libWidth
 
   // Number of lib instances needed to hold the mem, in both directions.
   // Round up (e.g. 1.5 instances = effectively 2 instances)
-  val depthInstances = math.ceil(memDepth.toFloat / libDepth.toFloat).toInt
-  val widthInstances = math.ceil(memWidth.toFloat / usableLibWidth).toInt
+  val depthInstances: Int = math.ceil(memDepth.toFloat / libDepth.toFloat).toInt
+  val widthInstances: Int = math.ceil(memWidth.toFloat / usableLibWidth).toInt
 
   // Number of width bits in the last width-direction memory.
   // e.g. if memWidth = 16 and libWidth = 8, this would be 8 since the last memory 0_1 has 8 bits of input width.
   // e.g. if memWidth = 9 and libWidth = 8, this would be 1 since the last memory 0_1 has 1 bit of input width.
-  lazy val lastWidthBits = if (memWidth % usableLibWidth == 0) usableLibWidth else (memWidth % usableLibWidth)
-  lazy val selectBits = mem_addr_width - lib_addr_width
+  lazy val lastWidthBits: Int = if (memWidth % usableLibWidth == 0) usableLibWidth else memWidth % usableLibWidth
+  lazy val selectBits:    Int = mem_addr_width - lib_addr_width
 
   /** Convenience function to generate a mask statement.
     * @param widthInst Width instance (mem_0_x)
@@ -369,25 +359,25 @@ trait HasSimpleTestGenerator {
       if (memMaskGran.isEmpty) {
         // If there is no memory mask, we should just turn all the lib mask
         // bits high.
-        s"""mem_${depthInst}_${widthInst}.lib_mask <= UInt<${libMaskBits}>("h${((1 << libMaskBits) - 1).toHexString}")"""
+        s"""mem_${depthInst}_$widthInst.lib_mask <= UInt<$libMaskBits>("h${((1 << libMaskBits) - 1).toHexString}")"""
       } else {
         // Calculate which bit of outer_mask contains the given bit.
         // e.g. if memMaskGran = 2, libMaskGran = 1 and libWidth = 4, then
         // calculateMaskBit({0, 1}) = 0 and calculateMaskBit({1, 2}) = 1
         def calculateMaskBit(bit: Int): Int = bit / memMaskGran.getOrElse(memWidth)
 
-        val bitsArr = ((libMaskBits - 1 to 0 by -1).map(x => {
+        val bitsArr = (libMaskBits - 1 to 0 by -1).map(x => {
           if (x * libMaskGran.get > myMemWidth) {
             // If we have extra mask bits leftover after the effective width,
             // disable those bits.
             """UInt<1>("h0")"""
           } else {
             val outerMaskBit = calculateMaskBit(x * libMaskGran.get + myBaseBit)
-            s"bits(outer_mask, ${outerMaskBit}, ${outerMaskBit})"
+            s"bits(outer_mask, $outerMaskBit, $outerMaskBit)"
           }
-        }))
+        })
         val maskVal = bitsArr.reduceRight((bit, rest) => s"cat($bit, $rest)")
-        s"mem_${depthInst}_${widthInst}.lib_mask <= ${maskVal}"
+        s"mem_${depthInst}_$widthInst.lib_mask <= $maskVal"
       }
     } else ""
   }
@@ -487,7 +477,7 @@ $extraPortsStr
     require(memSRAM.ports.size == 1, "Header generator only supports single RW port mem")
     generateReadWriteHeaderPort(
       memPortPrefix,
-      memSRAM.ports(0).readEnable.isDefined,
+      memSRAM.ports.head.readEnable.isDefined,
       if (memHasMask) Some(memMaskBits) else None
     )
   }
@@ -498,7 +488,7 @@ $extraPortsStr
     s"""
 circuit $mem_name :
   module $mem_name :
-${generateHeaderPorts}
+${generateHeaderPorts()}
   """
   }
 
@@ -507,7 +497,7 @@ ${generateHeaderPorts}
     require(libSRAM.ports.size == 1, "Footer generator only supports single RW port mem")
     generateReadWriteFooterPort(
       libPortPrefix,
-      libSRAM.ports(0).readEnable.isDefined,
+      libSRAM.ports.head.readEnable.isDefined,
       if (libHasMask) Some(libMaskBits) else None,
       extraPorts.map(p => (p.name, p.width))
     )
@@ -517,7 +507,7 @@ ${generateHeaderPorts}
   def generateFooter(): String = {
     s"""
   extmodule $lib_name :
-${generateFooterPorts}
+${generateFooterPorts()}
 
     defname = $lib_name
   """
@@ -529,13 +519,13 @@ ${generateFooterPorts}
   // Generate the entire output from header, body, and footer.
   def generateOutput(): String = {
     s"""
-${generateHeader}
-${generateBody}
-${generateFooter}
+${generateHeader()}
+${generateBody()}
+${generateFooter()}
       """
   }
 
-  val output = generateOutput()
+  val output: String = generateOutput()
 }
 
 // Use this trait for tests that invoke the memory compiler without lib.
@@ -545,12 +535,12 @@ trait HasNoLibTestGenerator extends HasSimpleTestGenerator {
   // If there isn't a lib, then the "lib" will become a FIRRTL "mem", which
   // in turn becomes synthesized flops.
   // Therefore, make "lib" width/depth equal to the mem.
-  override lazy val libDepth = memDepth
-  override lazy val libWidth = memWidth
-  override lazy val lib_name = mem_name
+  override lazy val libDepth: BigInt = memDepth
+  override lazy val libWidth: Int = memWidth
+  override lazy val lib_name: String = mem_name
   // Do the same for port names.
-  override lazy val libPortPrefix = memPortPrefix
+  override lazy val libPortPrefix: String = memPortPrefix
 
   // If there is no lib, don't generate a body.
-  override def generateBody = ""
+  override def generateBody() = ""
 }

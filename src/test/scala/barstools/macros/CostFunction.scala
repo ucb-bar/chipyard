@@ -11,9 +11,9 @@ object TestMinWidthMetric extends CostMetric with CostMetricCompanion {
   // Smaller width = lower cost = favoured
   override def cost(mem: Macro, lib: Macro): Option[Double] = Some(lib.src.width)
 
-  override def commandLineParams = Map()
-  override def name = "TestMinWidthMetric"
-  override def construct(m: Map[String, String]) = TestMinWidthMetric
+  override def commandLineParams() = Map()
+  override def name() = "TestMinWidthMetric"
+  override def construct(m: Map[String, String]): CostMetric = TestMinWidthMetric
 }
 
 /** Test that cost metric selection is working. */
@@ -25,7 +25,7 @@ class SelectCostMetric extends MacroCompilerSpec with HasSRAMGenerator {
   // Cost metrics must be registered for them to work with the command line.
   CostMetric.registerCostMetric(TestMinWidthMetric)
 
-  override val costMetric = Some(TestMinWidthMetric)
+  override val costMetric: Option[CostMetric] = Some(TestMinWidthMetric)
 
   val libSRAMs = Seq(
     SRAMMacro(

@@ -17,7 +17,7 @@ class BlackBoxInverter extends ExtModule {
   val out = IO(Output(Bool()))
 }
 
-class GenerateExampleModule extends MultiIOModule {
+class GenerateExampleModule extends Module {
   val in = IO(Input(Bool()))
   val out = IO(Output(Bool()))
 
@@ -30,7 +30,7 @@ class GenerateExampleModule extends MultiIOModule {
   out := reg
 }
 
-class ToBeMadeExternal extends MultiIOModule {
+class ToBeMadeExternal extends Module {
   val in = IO(Input(Bool()))
   val out = IO(Output(Bool()))
 
@@ -39,7 +39,7 @@ class ToBeMadeExternal extends MultiIOModule {
   out := reg
 }
 
-class GenerateExampleTester extends MultiIOModule {
+class GenerateExampleTester extends Module {
   val success = IO(Output(Bool()))
 
   val mod = Module(new GenerateExampleModule)

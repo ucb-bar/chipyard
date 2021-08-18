@@ -8,8 +8,8 @@ trait HasSimpleDepthTestGenerator extends HasSimpleTestGenerator {
   this: MacroCompilerSpec with HasSRAMGenerator =>
   def width: Int
 
-  override lazy val memWidth = width
-  override lazy val libWidth = width
+  override lazy val memWidth: Int = width
+  override lazy val libWidth: Int = width
 
   // Generate a depth-splitting body.
   override def generateBody(): String = {
@@ -19,37 +19,38 @@ trait HasSimpleDepthTestGenerator extends HasSimpleTestGenerator {
       output.append(
         s"""
     node ${memPortPrefix}_addr_sel = bits(${memPortPrefix}_addr, ${mem_addr_width - 1}, $lib_addr_width)
-    reg ${memPortPrefix}_addr_sel_reg : UInt<${selectBits}>, ${memPortPrefix}_clk with :
+    reg ${memPortPrefix}_addr_sel_reg : UInt<$selectBits>, ${memPortPrefix}_clk with :
       reset => (UInt<1>("h0"), ${memPortPrefix}_addr_sel_reg)
     ${memPortPrefix}_addr_sel_reg <= mux(UInt<1>("h1"), ${memPortPrefix}_addr_sel, ${memPortPrefix}_addr_sel_reg)
 """
       )
     }
 
-    for (i <- 0 to depthInstances - 1) {
+    for (i <- 0 until depthInstances) {
+
       val maskStatement = generateMaskStatement(0, i)
       val enableIdentifier =
-        if (selectBits > 0) s"""eq(${memPortPrefix}_addr_sel, UInt<${selectBits}>("h${i.toHexString}"))"""
+        if (selectBits > 0) s"""eq(${memPortPrefix}_addr_sel, UInt<$selectBits>("h${i.toHexString}"))"""
         else "UInt<1>(\"h1\")"
       val chipEnable = s"""UInt<1>("h1")"""
       val writeEnable =
-        if (memMaskGran.isEmpty) s"and(${memPortPrefix}_write_en, ${chipEnable})" else s"${memPortPrefix}_write_en"
+        if (memMaskGran.isEmpty) s"and(${memPortPrefix}_write_en, $chipEnable)" else s"${memPortPrefix}_write_en"
       output.append(
         s"""
-    inst mem_${i}_0 of ${lib_name}
+    inst mem_${i}_0 of $lib_name
     mem_${i}_0.${libPortPrefix}_clk <= ${memPortPrefix}_clk
     mem_${i}_0.${libPortPrefix}_addr <= ${memPortPrefix}_addr
     node ${memPortPrefix}_dout_${i}_0 = bits(mem_${i}_0.${libPortPrefix}_dout, ${width - 1}, 0)
     mem_${i}_0.${libPortPrefix}_din <= bits(${memPortPrefix}_din, ${width - 1}, 0)
-    ${maskStatement}
-    mem_${i}_0.${libPortPrefix}_write_en <= and(and(${writeEnable}, UInt<1>("h1")), ${enableIdentifier})
-    node ${memPortPrefix}_dout_${i} = ${memPortPrefix}_dout_${i}_0
+    $maskStatement
+    mem_${i}_0.${libPortPrefix}_write_en <= and(and($writeEnable, UInt<1>("h1")), $enableIdentifier)
+    node ${memPortPrefix}_dout_$i = ${memPortPrefix}_dout_${i}_0
   """
       )
     }
     def generate_outer_dout_tree(i: Int, depthInstances: Int): String = {
       if (i > depthInstances - 1) {
-        s"""UInt<${libWidth}>("h0")"""
+        s"""UInt<$libWidth>("h0")"""
       } else {
         s"""mux(eq(${memPortPrefix}_addr_sel_reg, UInt<%d>("h%s")), ${memPortPrefix}_dout_%d, %s)""".format(
           selectBits,
@@ -63,7 +64,7 @@ trait HasSimpleDepthTestGenerator extends HasSimpleTestGenerator {
     if (selectBits > 0) {
       output.append(generate_outer_dout_tree(0, depthInstances))
     } else {
-      output.append(s"""mux(UInt<1>("h1"), ${memPortPrefix}_dout_0, UInt<${libWidth}>("h0"))""")
+      output.append(s"""mux(UInt<1>("h1"), ${memPortPrefix}_dout_0, UInt<$libWidth>("h0"))""")
     }
 
     output.toString
@@ -143,8 +144,8 @@ class SplitDepth2048x32_mrw_lib32 extends MacroCompilerSpec with HasSRAMGenerato
   override lazy val width = 32
   override lazy val memDepth = BigInt(2048)
   override lazy val libDepth = BigInt(1024)
-  override lazy val memMaskGran = Some(32)
-  override lazy val libMaskGran = Some(32)
+  override lazy val memMaskGran: Option[Int] = Some(32)
+  override lazy val libMaskGran: Option[Int] = Some(32)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -153,8 +154,8 @@ class SplitDepth2048x8_mrw_lib8 extends MacroCompilerSpec with HasSRAMGenerator 
   override lazy val width = 8
   override lazy val memDepth = BigInt(2048)
   override lazy val libDepth = BigInt(1024)
-  override lazy val memMaskGran = Some(8)
-  override lazy val libMaskGran = Some(8)
+  override lazy val memMaskGran: Option[Int] = Some(8)
+  override lazy val libMaskGran: Option[Int] = Some(8)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -167,8 +168,8 @@ class SplitDepth2048x64_mrw_mem32_lib8
   override lazy val width = 64
   override lazy val memDepth = BigInt(2048)
   override lazy val libDepth = BigInt(1024)
-  override lazy val memMaskGran = Some(32)
-  override lazy val libMaskGran = Some(8)
+  override lazy val memMaskGran: Option[Int] = Some(32)
+  override lazy val libMaskGran: Option[Int] = Some(8)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -181,8 +182,8 @@ class SplitDepth2048x32_mrw_mem16_lib1
   override lazy val width = 32
   override lazy val memDepth = BigInt(2048)
   override lazy val libDepth = BigInt(1024)
-  override lazy val memMaskGran = Some(16)
-  override lazy val libMaskGran = Some(1)
+  override lazy val memMaskGran: Option[Int] = Some(16)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -191,8 +192,8 @@ class SplitDepth2048x32_mrw_mem8_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val width = 32
   override lazy val memDepth = BigInt(2048)
   override lazy val libDepth = BigInt(1024)
-  override lazy val memMaskGran = Some(8)
-  override lazy val libMaskGran = Some(1)
+  override lazy val memMaskGran: Option[Int] = Some(8)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -201,8 +202,8 @@ class SplitDepth2048x32_mrw_mem4_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val width = 32
   override lazy val memDepth = BigInt(2048)
   override lazy val libDepth = BigInt(1024)
-  override lazy val memMaskGran = Some(4)
-  override lazy val libMaskGran = Some(1)
+  override lazy val memMaskGran: Option[Int] = Some(4)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -211,8 +212,8 @@ class SplitDepth2048x32_mrw_mem2_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val width = 32
   override lazy val memDepth = BigInt(2048)
   override lazy val libDepth = BigInt(1024)
-  override lazy val memMaskGran = Some(2)
-  override lazy val libMaskGran = Some(1)
+  override lazy val memMaskGran: Option[Int] = Some(2)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   compileExecuteAndTest(mem, lib, v, output)
 }
@@ -222,8 +223,8 @@ class SplitDepth2048x32_mrw_mem3_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val width = 32
   override lazy val memDepth = BigInt(2048)
   override lazy val libDepth = BigInt(1024)
-  override lazy val memMaskGran = Some(3)
-  override lazy val libMaskGran = Some(1)
+  override lazy val memMaskGran: Option[Int] = Some(3)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   (it should "be enabled when non-power of two masks are supported").is(pending)
   //compileExecuteAndTest(mem, lib, v, output)
@@ -233,8 +234,8 @@ class SplitDepth2048x32_mrw_mem7_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val width = 32
   override lazy val memDepth = BigInt(2048)
   override lazy val libDepth = BigInt(1024)
-  override lazy val memMaskGran = Some(7)
-  override lazy val libMaskGran = Some(1)
+  override lazy val memMaskGran: Option[Int] = Some(7)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   (it should "be enabled when non-power of two masks are supported").is(pending)
   //compileExecuteAndTest(mem, lib, v, output)
@@ -244,8 +245,8 @@ class SplitDepth2048x32_mrw_mem9_lib1 extends MacroCompilerSpec with HasSRAMGene
   override lazy val width = 32
   override lazy val memDepth = BigInt(2048)
   override lazy val libDepth = BigInt(1024)
-  override lazy val memMaskGran = Some(9)
-  override lazy val libMaskGran = Some(1)
+  override lazy val memMaskGran: Option[Int] = Some(9)
+  override lazy val libMaskGran: Option[Int] = Some(1)
 
   (it should "be enabled when non-power of two masks are supported").is(pending)
   //compileExecuteAndTest(mem, lib, v, output)
@@ -318,8 +319,8 @@ class SplitDepth_SplitPortsNonMasked extends MacroCompilerSpec with HasSRAMGener
   lazy val memDepth = BigInt(2048)
   lazy val libDepth = BigInt(1024)
 
-  override val memPrefix = testDir
-  override val libPrefix = testDir
+  override val memPrefix: String = testDir
+  override val libPrefix: String = testDir
 
   import mdf.macrolib._
 
@@ -476,11 +477,11 @@ class SplitDepth_SplitPortsMasked extends MacroCompilerSpec with HasSRAMGenerato
   lazy val width = 8
   lazy val memDepth = BigInt(2048)
   lazy val libDepth = BigInt(1024)
-  lazy val memMaskGran = Some(8)
-  lazy val libMaskGran = Some(1)
+  lazy val memMaskGran: Option[Int] = Some(8)
+  lazy val libMaskGran: Option[Int] = Some(1)
 
-  override val memPrefix = testDir
-  override val libPrefix = testDir
+  override val memPrefix: String = testDir
+  override val libPrefix: String = testDir
 
   import mdf.macrolib._
 

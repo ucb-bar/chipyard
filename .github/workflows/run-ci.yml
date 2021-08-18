@@ -29,11 +29,16 @@ jobs:
     name: Documentation and formatting
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v10
       - name: Check Formatting
         run: sbt scalafmtCheckAll
 
   all_test_passed:
     name: "all tests passed"
     runs-on: ubuntu-latest
+    needs: [test, doc]
     steps:
       - run: echo Success

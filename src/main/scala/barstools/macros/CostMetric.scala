@@ -44,7 +44,7 @@ trait CostMetricCompanion {
 object OldMetric extends CostMetric with CostMetricCompanion {
   override def cost(mem: Macro, lib: Macro): Option[Double] = {
     /* Palmer: A quick cost function (that must be kept in sync with
-     * memory_cost()) that attempts to avoid compiling unncessary
+     * memory_cost()) that attempts to avoid compiling unnecessary
      * memories.  This is a lower bound on the cost of compiling a
      * memory: it assumes 100% bit-cell utilization when mapping. */
     // val cost = 100 * (mem.depth * mem.width) / (lib.depth * lib.width) +
@@ -52,9 +52,9 @@ object OldMetric extends CostMetric with CostMetricCompanion {
     ???
   }
 
-  override def commandLineParams = Map()
-  override def name = "OldMetric"
-  override def construct(m: Map[String, String]) = OldMetric
+  override def commandLineParams() = Map.empty[String, String]
+  override def name() = "OldMetric"
+  override def construct(m: Map[String, String]): CostMetric = OldMetric
 }
 
 /** An external cost function.
@@ -79,7 +79,7 @@ class ExternalMetric(path: String) extends CostMetric {
     writeMacroToPath(Some(libFile.getAbsolutePath), lib.src)
 
     // !! executes the given command
-    val result: String = (s"${path} ${memFile.getAbsolutePath} ${libFile.getAbsolutePath}" !!).trim
+    val result: String = (s"$path ${memFile.getAbsolutePath} ${libFile.getAbsolutePath}" !!).trim
 
     // Remove temporary files.
     memFile.delete()
@@ -88,19 +88,19 @@ class ExternalMetric(path: String) extends CostMetric {
     try {
       Some(result.toDouble)
     } catch {
-      case e: NumberFormatException => None
+      case _: NumberFormatException => None
     }
   }
 
-  override def commandLineParams = Map("path" -> path)
-  override def name = ExternalMetric.name
+  override def commandLineParams() = Map("path" -> path)
+  override def name(): String = ExternalMetric.name()
 }
 
 object ExternalMetric extends CostMetricCompanion {
-  override def name = "ExternalMetric"
+  override def name() = "ExternalMetric"
 
   /** Construct this cost metric from a command line mapping. */
-  override def construct(m: Map[String, String]) = {
+  override def construct(m: Map[String, String]): ExternalMetric = {
     val pathOption = m.get("path")
     pathOption match {
       case Some(path: String) => new ExternalMetric(path)
@@ -113,25 +113,24 @@ object ExternalMetric extends CostMetricCompanion {
 // TODO: write tests for this function to make sure it selects the right things
 object DefaultMetric extends CostMetric with CostMetricCompanion {
   override def cost(mem: Macro, lib: Macro): Option[Double] = {
-    val memMask = mem.src.ports.map(_.maskGran).find(_.isDefined).map(_.get)
-    val libMask = lib.src.ports.map(_.maskGran).find(_.isDefined).map(_.get)
+    val memMask = mem.src.ports.map(_.maskGran).find(_.isDefined).flatten
+    val libMask = lib.src.ports.map(_.maskGran).find(_.isDefined).flatten
     val memWidth = (memMask, libMask) match {
       case (None, _) => mem.src.width
       case (Some(p), None) =>
         (mem.src.width / p) * math.ceil(
           p.toDouble / lib.src.width
         ) * lib.src.width //We map the mask to distinct memories
-      case (Some(p), Some(m)) => {
-        if (m <= p) (mem.src.width / p) * math.ceil(p.toDouble / m) * m //Using multiple m's to create a p (integeraly)
+      case (Some(p), Some(m)) =>
+        if (m <= p) (mem.src.width / p) * math.ceil(p.toDouble / m) * m //Using multiple m's to create a p (integrally)
         else (mem.src.width / p) * m //Waste the extra maskbits
-      }
     }
     val maskPenalty = (memMask, libMask) match {
-      case (None, Some(m)) => 0.001
+      case (None, Some(_)) => 0.001
       case (_, _)          => 0
     }
     val depthCost = math.ceil(mem.src.depth.toDouble / lib.src.depth.toDouble)
-    val widthCost = math.ceil(memWidth.toDouble / lib.src.width.toDouble)
+    val widthCost = math.ceil(memWidth / lib.src.width.toDouble)
     val bitsCost = (lib.src.depth * lib.src.width).toDouble
     // Fraction of wasted bits plus const per mem
     val requestedBits = (mem.src.depth * mem.src.width).toDouble
@@ -141,9 +140,9 @@ object DefaultMetric extends CostMetric with CostMetricCompanion {
     Some(1.0 * bitsWasted / requestedBits + costPerInst + maskPenalty)
   }
 
-  override def commandLineParams = Map()
-  override def name = "DefaultMetric"
-  override def construct(m: Map[String, String]) = DefaultMetric
+  override def commandLineParams() = Map.empty[String, String]
+  override def name() = "DefaultMetric"
+  override def construct(m: Map[String, String]): CostMetric = DefaultMetric
 }
 
 object MacroCompilerUtil {
@@ -156,11 +155,11 @@ object MacroCompilerUtil {
     *  Used to pass structured values through as an annotation.
     */
   def objToString(o: Serializable): String = {
-    val baos: ByteArrayOutputStream = new ByteArrayOutputStream
-    val oos:  ObjectOutputStream = new ObjectOutputStream(baos)
-    oos.writeObject(o)
-    oos.close()
-    return Base64.getEncoder.encodeToString(baos.toByteArray)
+    val byteOutput:   ByteArrayOutputStream = new ByteArrayOutputStream
+    val objectOutput: ObjectOutputStream = new ObjectOutputStream(byteOutput)
+    objectOutput.writeObject(o)
+    objectOutput.close()
+    Base64.getEncoder.encodeToString(byteOutput.toByteArray)
   }
 
   /** Deserialize an arbitrary object from String. */
@@ -169,7 +168,7 @@ object MacroCompilerUtil {
     val ois: ObjectInputStream = new ObjectInputStream(new ByteArrayInputStream(data))
     val o = ois.readObject
     ois.close()
-    return o
+    o
   }
 }
 

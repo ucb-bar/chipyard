@@ -8,10 +8,10 @@ class SplitWidth_2rw extends MacroCompilerSpec with HasSRAMGenerator with HasSim
 
   override lazy val depth = BigInt(1024)
   override lazy val memWidth = 64
-  override lazy val memMaskGran = Some(16)
+  override lazy val memMaskGran: Option[Int] = Some(16)
   override lazy val libWidth = 16
 
-  override def generateMemSRAM() = {
+  override def generateMemSRAM(): SRAMMacro = {
     SRAMMacro(
       name = mem_name,
       width = memWidth,
@@ -42,7 +42,7 @@ class SplitWidth_2rw extends MacroCompilerSpec with HasSRAMGenerator with HasSim
     )
   }
 
-  override def generateLibSRAM() = {
+  override def generateLibSRAM(): SRAMMacro = {
     SRAMMacro(
       name = lib_name,
       width = libWidth,
@@ -71,16 +71,20 @@ class SplitWidth_2rw extends MacroCompilerSpec with HasSRAMGenerator with HasSim
     )
   }
 
-  override def generateHeaderPorts() = {
-    generateReadWriteHeaderPort("portA", true, Some(memMaskBits)) + "\n" + generateReadWriteHeaderPort(
+  override def generateHeaderPorts(): String = {
+    generateReadWriteHeaderPort("portA", readEnable = true, Some(memMaskBits)) + "\n" + generateReadWriteHeaderPort(
       "portB",
-      true,
+      readEnable = true,
       Some(memMaskBits)
     )
   }
 
-  override def generateFooterPorts() = {
-    generateReadWriteFooterPort("portA", true, None) + "\n" + generateReadWriteFooterPort("portB", true, None)
+  override def generateFooterPorts(): String = {
+    generateReadWriteFooterPort("portA", readEnable = true, None) + "\n" + generateReadWriteFooterPort(
+      "portB",
+      readEnable = true,
+      None
+    )
   }
 
   override def generateBody() =
@@ -151,10 +155,10 @@ class SplitWidth_1r_1w extends MacroCompilerSpec with HasSRAMGenerator with HasS
 
   override lazy val depth = BigInt(1024)
   override lazy val memWidth = 64
-  override lazy val memMaskGran = Some(16)
+  override lazy val memMaskGran: Option[Int] = Some(16)
   override lazy val libWidth = 16
 
-  override def generateMemSRAM() = {
+  override def generateMemSRAM(): SRAMMacro = {
     SRAMMacro(
       name = mem_name,
       width = memWidth,
@@ -167,7 +171,6 @@ class SplitWidth_1r_1w extends MacroCompilerSpec with HasSRAMGenerator with HasS
           Some(memDepth),
           maskGran = memMaskGran,
           write = false,
-          writeEnable = false,
           read = true,
           readEnable = true
         ),
@@ -178,14 +181,13 @@ class SplitWidth_1r_1w extends MacroCompilerSpec with HasSRAMGenerator with HasS
           maskGran = memMaskGran,
           write = true,
           writeEnable = true,
-          read = false,
-          readEnable = false
+          read = false
         )
       )
     )
   }
 
-  override def generateLibSRAM() = {
+  override def generateLibSRAM(): SRAMMacro = {
     SRAMMacro(
       name = lib_name,
       width = libWidth,
@@ -197,24 +199,15 @@ class SplitWidth_1r_1w extends MacroCompilerSpec with HasSRAMGenerator with HasS
           libWidth,
           libDepth,
           write = false,
-          writeEnable = false,
           read = true,
           readEnable = true
         ),
-        generateTestPort(
-          "portB",
-          libWidth,
-          libDepth,
-          write = true,
-          writeEnable = true,
-          read = false,
-          readEnable = false
-        )
+        generateTestPort("portB", libWidth, libDepth, write = true, writeEnable = true, read = false)
       )
     )
   }
 
-  override def generateHeaderPorts() = {
+  override def generateHeaderPorts(): String = {
     generatePort(
       "portA",
       mem_addr_width,
@@ -237,7 +230,7 @@ class SplitWidth_1r_1w extends MacroCompilerSpec with HasSRAMGenerator with HasS
       )
   }
 
-  override def generateFooterPorts() = {
+  override def generateFooterPorts(): String = {
     generatePort(
       "portA",
       lib_addr_width,
@@ -310,12 +303,12 @@ class SplitWidth_2rw_differentMasks extends MacroCompilerSpec with HasSRAMGenera
 
   override lazy val depth = BigInt(1024)
   override lazy val memWidth = 64
-  override lazy val memMaskGran = Some(16)
+  override lazy val memMaskGran: Option[Int] = Some(16)
   override lazy val libWidth = 16
 
   lazy val memMaskGranB = 8 // these generators are run at constructor time
 
-  override def generateMemSRAM() = {
+  override def generateMemSRAM(): SRAMMacro = {
     SRAMMacro(
       name = mem_name,
       width = memWidth,
@@ -346,7 +339,7 @@ class SplitWidth_2rw_differentMasks extends MacroCompilerSpec with HasSRAMGenera
     )
   }
 
-  override def generateLibSRAM() = {
+  override def generateLibSRAM(): SRAMMacro = {
     SRAMMacro(
       name = lib_name,
       width = libWidth,
@@ -375,16 +368,20 @@ class SplitWidth_2rw_differentMasks extends MacroCompilerSpec with HasSRAMGenera
     )
   }
 
-  override def generateHeaderPorts() = {
-    generateReadWriteHeaderPort("portA", true, Some(memMaskBits)) + "\n" + generateReadWriteHeaderPort(
+  override def generateHeaderPorts(): String = {
+    generateReadWriteHeaderPort("portA", readEnable = true, Some(memMaskBits)) + "\n" + generateReadWriteHeaderPort(
       "portB",
-      true,
+      readEnable = true,
       Some(memWidth / memMaskGranB)
     )
   }
 
-  override def generateFooterPorts() = {
-    generateReadWriteFooterPort("portA", true, None) + "\n" + generateReadWriteFooterPort("portB", true, None)
+  override def generateFooterPorts(): String = {
+    generateReadWriteFooterPort("portA", readEnable = true, None) + "\n" + generateReadWriteFooterPort(
+      "portB",
+      readEnable = true,
+      None
+    )
   }
 
   override def generateBody() =
