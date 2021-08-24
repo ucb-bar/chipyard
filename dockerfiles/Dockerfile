@@ -7,6 +7,8 @@ ARG CHIPYARD_HASH
 
 MAINTAINER https://groups.google.com/forum/#!forum/chipyard
 
+SHELL ["/bin/bash", "-c"] 
+
 # Install dependencies for ubuntu-req.sh
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -54,14 +56,16 @@ RUN cd chipyard && \
         ./scripts/build-toolchains.sh esp-tools 1>/dev/null
 
 
-# Set up FireMarshal
-SHELL ["/bin/bash", "-c"] 
+# Set up FireMarshal. Building and cleaning br-base.json builds the underlying
+# buildroot image (which takes a long time) but doesn't keep all the br-base
+# stuff around (since that's faster to rebuild).
 RUN cd chipyard && \
         source env.sh && \
         cd software/firemarshal && \
         ./init-submodules.sh && \
         pip3 install -r python-requirements.txt && \
-        marshal build br-base.json 
+        marshal build br-base.json && \
+        marshal clean br-base.json
         
 
 # Run script to set environment variables on entry
