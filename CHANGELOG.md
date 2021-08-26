@@ -2,6 +2,47 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.5.0] - 2021-06-13
+
+A more detailed account of everything included is included in the dev to master PR for this release: https://github.com/ucb-bar/chipyard/pull/773
+
+### Added
+* FireMarshal support for FPGA prototypes (#849)
+* Hammer update to include power estimation flows, rail analysis, hierarchical sim support, and improved ASAP7 plugin with dummy SRAMs (#886)
+* Docker image 
+* Support specifying architecture when building tools. (#802)
+* Add Config fragments: WithMultiRoCCFromBuildRoCC, PMP (#809, #821)
+* Add support for simulating an AXI memory interface over the default TL serial link (#812)
+* Add option to add async queues between chip-serialIO and harness serdes (#828)
+* Spike support for multiple extensions, and add sha3 spike model to esp-tools (#837, #897)
+* Default generator support for I2C and PWM (#885)
+
+### Changed
+* Gemmini bump to version 0.5
+* FireSim bump to version 1.12
+* FireMarshal bump to version 1.12
+* Changes default FireSim frequency from 3.2 GHz (dual clock domains) to 1 GHz (single clock domain)
+* Bump pygments from 2.2.0 to 2.7.4 in docs 
+* Hammer tutorial example is now a TinyRocketConfig (#886)
+* Sha3 Spike model moved from sha3 repo to esp-isa-sim
+
+### Fixed
+* Avoid permissions conflict on shared protocjar.webcache (#774)
+* Passing MBus clock frequency to SimDRAM (#790)
+* Fix parsing of --ignore-qemu option (#791)
+* FPGA Prototype - Support Adding Pullup R's to Bringup GPIOs (#806)
+* Use "tile" instead of "core" to assign frequencies in WithTileFrequency config. fragment (#807)
+* Fix IOCell generation for clock and reset to use IOCellKey (#824)
+* Fix TileResetCtrl to be ahead of reset synchronizers (#826)
+* Fix memory alignment in character count RoCC test (#853)
+* Synchronize JTAG reset to JTAG.TCK. (#859)
+* Updates to system requirements scripts (#874)
+* Rocket-dsp-utils integration and cleanup for dsptools (#888)
+
+### Removed
+* Dummy DCO collateral from Hammer tutorial example (#886)
+
+
 ## [1.4.0] - 2021-01-19
 
 A more detailed account of everything included is included in the dev to master PR for this release: https://github.com/ucb-bar/chipyard/pull/599

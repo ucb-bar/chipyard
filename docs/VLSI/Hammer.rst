@@ -43,6 +43,8 @@ The types of tools (by Hammer names) supported currently include:
 * drc
 * lvs
 * sram_generator
+* sim
+* power
 * pcb
 
 Several configuration variables are needed to configure your tool plugin of choice.

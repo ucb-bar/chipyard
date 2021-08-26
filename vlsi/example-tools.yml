@@ -26,7 +26,7 @@ vlsi.core.lvs_tool_path: ["hammer-mentor-plugins/lvs"]
 vlsi.core.sim_tool: "vcs"
 vlsi.core.sim_tool_path: ["hammer-synopsys-plugins/sim"]
 sim.vcs.version: "P-2019.06-SP2-5"
-# # Voltus options
+# Voltus options
 vlsi.core.power_tool: "voltus"
 vlsi.core.power_tool_path: ["hammer-cadence-plugins/power"]
 vlsi.core.power_tool_path_meta: "append"

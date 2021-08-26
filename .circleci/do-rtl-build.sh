@@ -21,6 +21,9 @@ cd $LOCAL_CHIPYARD_DIR
 ./scripts/init-submodules-no-riscv-tools.sh
 ./scripts/init-fpga.sh
 
+# replace the workspace dir with a local dir so you can copy around
+sed -i -E 's/(workspace=).*(\/tools)/\1$PWD\2/g' .sbtopts
+
 # set stricthostkeychecking to no (must happen before rsync)
 run "echo \"Ping $SERVER\""
 
