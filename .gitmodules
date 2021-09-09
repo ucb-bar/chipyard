@@ -134,3 +134,9 @@
 [submodule "fpga/fpga-shells"]
 	path = fpga/fpga-shells
 	url = https://github.com/sifive/fpga-shells.git
+[submodule "tools/api-config-chipsalliance"]
+	path = tools/api-config-chipsalliance
+	url = https://github.com/chipsalliance/api-config-chipsalliance.git
+[submodule "tools/rocket-dsp-utils"]
+	path = tools/rocket-dsp-utils
+	url = https://github.com/ucb-bar/rocket-dsp-utils

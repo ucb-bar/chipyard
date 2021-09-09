@@ -6,7 +6,9 @@
 set -e
 set -o pipefail
 
-DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+# If BASH_SOURCE is undefined, we may be running under zsh, in that case
+# provide a zsh-compatible alternative
+DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-${(%):-%x}}")")"
 CHIPYARD_DIR="$(dirname "$DIR")"
 
 usage() {
