@@ -178,7 +178,7 @@ transactions.
     - ``EarlyAck.PutFulls`` - acknowledge on first beat if PutFull, otherwise acknowledge on last beat.
     - ``EarlyAck.None`` - always acknowledge on last beat.
 
- - ``holdFirstDenied: Boolean`` - (optional) Allow the Fragmenter to unsafely combine multibeat Gets by taking the first denied for the whole burst. (default: false)
+ - ``holdFirstDeny: Boolean`` - (optional) Allow the Fragmenter to unsafely combine multibeat Gets by taking the first denied for the whole burst. (default: false)
 
 **Example Usage:**
 
