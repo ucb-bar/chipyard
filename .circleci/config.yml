@@ -252,6 +252,13 @@ jobs:
                 group-key: "group-cores"
                 project-key: "chipyard-sodor"
                 timeout: "30m"
+    chipyard-ibex-run-tests:
+        executor: main-env
+        steps:
+            - run-tests:
+                group-key: "group-cores"
+                project-key: "chipyard-ibex"
+                timeout: "30m"
     chipyard-multiclock-rocket-run-tests:
         executor: main-env
         steps:
@@ -453,6 +460,9 @@ workflows:
                 requires:
                     - prepare-chipyard-cores
             - chipyard-sodor-run-tests:
+                requires:
+                    - prepare-chipyard-cores
+            - chipyard-ibex-run-tests:
                 requires:
                     - prepare-chipyard-cores
             - chipyard-dmirocket-run-tests:
