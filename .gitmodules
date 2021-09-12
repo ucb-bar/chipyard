@@ -140,3 +140,6 @@
 [submodule "tools/rocket-dsp-utils"]
 	path = tools/rocket-dsp-utils
 	url = https://github.com/ucb-bar/rocket-dsp-utils
+[submodule "generators/ibex"]
+	path = generators/ibex
+	url = https://github.com/schwarz-em/ibex-wrapper
