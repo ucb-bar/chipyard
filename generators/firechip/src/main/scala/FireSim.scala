@@ -13,7 +13,7 @@ import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, InModuleBody, ValName}
 import freechips.rocketchip.util.{ResetCatchAndSync, RecordMap}
 
-import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge, RationalClock}
+import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge, RationalClock, ResetPulseBridge, ResetPulseBridgeParameters}
 
 import chipyard._
 import chipyard.harness._
@@ -227,7 +227,21 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSigna
 
   val buildtopClock = Wire(Clock())
   val buildtopReset = WireInit(false.B)
-  val peekPokeBridge = PeekPokeBridge(buildtopClock, buildtopReset)
+  // The peek-poke bridge must still be instantiated even though it's
+  // functionally unused. This will be removed in a future PR.
+  val dummy = WireInit(false.B)
+  val peekPokeBridge = PeekPokeBridge(buildtopClock, dummy)
+
+  val resetBridge = Module(new ResetPulseBridge(ResetPulseBridgeParameters()))
+  // In effect, the bridge counts the length of the reset in terms of this clock.
+  resetBridge.io.clock := buildtopClock
+  buildtopReset := resetBridge.io.reset
+  // Ensures FireSim-synthesized assertions and instrumentation is disabled
+  // while buildtopReset is asserted.  This ensures assertions do not fire at
+  // time zero in the event their local reset is delayed (typically because it
+  // has been pipelined)
+  midas.targetutils.GlobalResetCondition(buildtopReset)
+
   def dutReset = { require(false, "dutReset should not be used in Firesim"); false.B }
   def success = { require(false, "success should not be used in Firesim"); false.B }
 
