@@ -6,13 +6,13 @@ version: 2.1
 parameters:
     tools-cache-version:
         type: string
-        default: "v11"
+        default: "v12"
 
 # default execution env.s
 executors:
     main-env:
         docker:
-            - image: ucbbar/chipyard-ci-image:1d51bb90
+            - image: ucbbar/chipyard-ci-image:554b436
         environment:
             JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 

@@ -110,26 +110,26 @@ The 1st partition will be used to store the Linux binary (created with FireMarsh
 Additionally, these instructions assume you are using Linux with ``sudo`` privileges and ``gdisk``, but you can follow a similar set of steps on Mac (using ``gpt`` or another similar program).
 
 1. Wipe the GPT on the card using ``gdisk``.
-   Use the `z` command to zap everything.
+   Use the `z` command from the expert menu (opened with 'x', closed with 'm') to zap everything.
    For rest of these instructions, we assume the SDCard path is ``/dev/sdc`` (replace this with the path to your SDCard).
 
 .. code-block:: shell
 
     sudo gdisk /dev/sdc
 
-2. The VCU118 bootrom assumes that the Linux binary to load into memory will be located on sector 34 of the SDCard.
-   Change the default partition alignment to `1` so you can write to sector `34`.
-   Do this with the `l` command.
-
-3. Create the new GPT with `o`.
+2. Create the new GPT with `o`.
    Click yes on all the prompts.
 
+3. The VCU118 bootrom assumes that the Linux binary to load into memory will be located on sector 34 of the SDCard.
+   Change the default partition alignment to `1` so you can write to sector `34`.
+   Do this with the `l` command from the expert menu (opened with 'x', closed with 'm'). 
+
 4. Create a 512MiB partition to store the Linux binary (this can be smaller but it must be larger than the size of the Linux binary).
-   Use `n` and select sector 34, with size `+1048576` (corresponding to 512MiB).
+   Use `n`, partion number 1 and select sector 34, with size `+1048576` (corresponding to 512MiB).
    For the type, search for the `apfs` type and use the hex number given.
 
 5. Create a second partition to store any other files with the rest of the SDCard.
-   Use `n` and use the defaults for starting sector and overall size (expand the 2nd partition to the rest of the SDCard space).
+   Use `n` and use the defaults for partition number, starting sector and overall size (expand the 2nd partition to the rest of the SDCard space).
    For the type, search for the `hfs` and use the hex number given.
 
 6. Write the changes using `w`.
@@ -162,4 +162,4 @@ To interact with Linux via the UART console, you can connect to the serial port 
 
    screen -S FPGA_UART_CONSOLE /dev/ttyUSB1 115200
 
-Once connected, you should see the binary being loaded as well as Linux output (in some cases you might need to reset the DUT).
+Once connected, you should see the binary being loaded as well as Linux output (in some cases you might need to reset the DUT). Sign in as 'root' with password 'fpga'. 
