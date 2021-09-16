@@ -1,8 +1,10 @@
 pull_request_rules:
     - name: automatic merge on all ci success and review
       conditions:
-          - "check-success=ci/circleci: success"
+          - "check-success=success"
           - "#approved-reviews-by>=1"
+          - "#review-requested=0"
+          - "#changes-requested-reviews-by=0"
           - base=dev
           - label!="DO NOT MERGE"
       actions:
@@ -11,11 +13,16 @@ pull_request_rules:
               strict: smart
               strict_method: merge
 
-    - name: automatically merge on just docs ci success and review (just docs)
+    - name: automatically merge on just docs ci success and review (just docs/md files)
       conditions:
-          - check-success=ci/circleci: documentation-check
-          - -files~=^(!?docs/)
+          - or:
+              - and:
+                  - "check-success=ci/circleci: documentation-check"
+                  - -files~=^((?!docs\/).)*$
+              - -files~=^((?!\.md).)*$
           - "#approved-reviews-by>=1"
+          - "#review-requested=0"
+          - "#changes-requested-reviews-by=0"
           - base=dev
           - label!="DO NOT MERGE"
       actions:
@@ -26,7 +33,11 @@ pull_request_rules:
 
     - name: label docs changes
       conditions:
-          - -files~=^(!?docs/)
+          - or:
+              - and:
+                  - "check-success=ci/circleci: documentation-check"
+                  - -files~=^((?!docs\/).)*$
+              - -files~=^((?!\.md).)*$
       actions:
           label:
               add:
@@ -42,3 +53,4 @@ pull_request_rules:
           comment:
               message: |
                   Please change the base branch of the PR to dev
+
