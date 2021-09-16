@@ -380,6 +380,14 @@ jobs:
                 group-key: "group-fpga"
                 build-type: "fpga"
 
+    success:
+        executor: main-env
+        steps:
+            - run:
+                name: Completed CI!
+                command: |
+                    echo "Completed CI!"
+
 # Order and dependencies of jobs to run
 workflows:
     version: 2
@@ -522,3 +530,33 @@ workflows:
             - prepare-chipyard-fpga:
                 requires:
                     - install-riscv-toolchain
+
+            # Signal success
+            - success:
+                requires:
+                    - tutorial-setup-check
+                    - documentation-check
+                    - commit-on-master-check
+                    - chipyard-rocket-run-tests
+                    - chipyard-hetero-run-tests
+                    - chipyard-boom-run-tests
+                    - chipyard-cva6-run-tests
+                    - chipyard-sodor-run-tests
+                    - chipyard-dmirocket-run-tests
+                    - chipyard-spiflashwrite-run-tests
+                    - chipyard-spiflashread-run-tests
+                    - chipyard-lbwif-run-tests
+                    - chipyard-sha3-run-tests
+                    - chipyard-streaming-fir-run-tests
+                    - chipyard-streaming-passthrough-run-tests
+                    - chipyard-hwacha-run-tests
+                    - chipyard-gemmini-run-tests
+                    - chipyard-nvdla-run-tests
+                    - tracegen-run-tests
+                    - tracegen-boom-run-tests
+                    - icenet-run-tests
+                    - testchipip-run-tests
+                    - firesim-run-tests
+                    - firesim-multiclock-run-tests
+                    - fireboom-run-tests
+                    - prepare-chipyard-fpga

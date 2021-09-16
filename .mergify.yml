@@ -1,0 +1,44 @@
+pull_request_rules:
+    - name: automatic merge on all ci success and review
+      conditions:
+          - "check-success=ci/circleci: success"
+          - "#approved-reviews-by>=1"
+          - base=dev
+          - label!="DO NOT MERGE"
+      actions:
+          merge:
+              method: merge
+              strict: smart
+              strict_method: merge
+
+    - name: automatically merge on just docs ci success and review (just docs)
+      conditions:
+          - check-success=ci/circleci: documentation-check
+          - -files~=^(!?docs/)
+          - "#approved-reviews-by>=1"
+          - base=dev
+          - label!="DO NOT MERGE"
+      actions:
+          merge:
+              method: merge
+              strict: smart
+              strict_method: merge
+
+    - name: label docs changes
+      conditions:
+          - -files~=^(!?docs/)
+      actions:
+          label:
+              add:
+                - docs
+
+    - name: add comment to warn that base branch isn't dev (ignore backports and releases)
+      conditions:
+          - -base=dev
+          - -body~=Dev -> Master
+          - -title~=Dev -> Master
+          - label!="backport"
+      actions:
+          comment:
+              message: |
+                  Please change the base branch of the PR to dev
