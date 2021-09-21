@@ -46,10 +46,8 @@ class WithFPGASimSerial extends OverrideHarnessBinder({
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
       val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, port, th.reset_core)
-      //val success = SerialAdapter.connectSimSerial(ram.module.io.tsi_ser, port.clock, th.reset_core.asBool)
       ram.module.reset := th.reset_core
 
-    //def connectSimSerial(serial: Option[SerialIO], clock: Clock, reset: Reset): Bool = {
       val success = {
         val sim = Module(new SimSerial(ram.module.io.tsi_ser.w))
         sim.io.clock := port.clock
@@ -57,9 +55,7 @@ class WithFPGASimSerial extends OverrideHarnessBinder({
         sim.io.serial <> ram.module.io.tsi_ser
         sim.io.exit
       }
-    //}
 
-      //success.reset := th.reset_core.asBool
       when (success) { th.success := true.B }
     })
   }
