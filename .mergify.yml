@@ -1,7 +1,7 @@
 pull_request_rules:
     - name: automatic merge on all ci success and review
       conditions:
-          - "check-success=success"
+          - "check-success=ci/circleci: success"
           - "#approved-reviews-by>=1"
           - "#review-requested=0"
           - "#changes-requested-reviews-by=0"
