@@ -14,6 +14,19 @@ import sifive.fpgashells.ip.xilinx.{IBUFG, IOBUF, PULLUP, PowerOnResetFPGAOnly}
 
 import chipyard.harness.{ComposeHarnessBinder, OverrideHarnessBinder}
 
+import testchipip._
+
+import chisel3.util._
+import chisel3.experimental.IO
+import freechips.rocketchip.config.{Parameters, Field}
+import freechips.rocketchip.subsystem._
+import freechips.rocketchip.tilelink._
+import freechips.rocketchip.devices.debug.HasPeripheryDebug
+import freechips.rocketchip.diplomacy._
+import freechips.rocketchip.util._
+import freechips.rocketchip.prci.{ClockSinkDomain}
+import scala.math.min
+
 class WithArtyResetHarnessBinder extends ComposeHarnessBinder({
   (system: HasPeripheryDebugModuleImp, th: ArtyFPGATestHarness, ports: Seq[Bool]) => {
     require(ports.size == 2)
@@ -25,6 +38,30 @@ class WithArtyResetHarnessBinder extends ComposeHarnessBinder({
       // JTAG reset
       ports(1) := PowerOnResetFPGAOnly(th.clock_32MHz)
     }
+  }
+})
+
+class WithFPGASimSerial extends OverrideHarnessBinder({
+  (system: CanHavePeripheryTLSerial, th: ArtyFPGATestHarness, ports: Seq[ClockedIO[SerialIO]]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    ports.map({ port =>
+      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, port, th.reset_core)
+      //val success = SerialAdapter.connectSimSerial(ram.module.io.tsi_ser, port.clock, th.reset_core.asBool)
+      ram.module.reset := th.reset_core
+
+    //def connectSimSerial(serial: Option[SerialIO], clock: Clock, reset: Reset): Bool = {
+      val success = {
+        val sim = Module(new SimSerial(ram.module.io.tsi_ser.w))
+        sim.io.clock := port.clock
+        sim.io.reset := th.reset_core
+        sim.io.serial <> ram.module.io.tsi_ser
+        sim.io.exit
+      }
+    //}
+
+      //success.reset := th.reset_core.asBool
+      when (success) { th.success := true.B }
+    })
   }
 })
 
