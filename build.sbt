@@ -72,7 +72,7 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
 // -- Rocket Chip --
 
 // This needs to stay in sync with the chisel3 and firrtl git submodules
-val chiselVersion = "3.5.0-SNAPSHOT"
+val chiselVersion = "3.5-SNAPSHOT"
 lazy val chiselRef = ProjectRef(workspaceDirectory / "chisel3", "chisel")
 lazy val chiselLib = "edu.berkeley.cs" %% "chisel3" % chiselVersion
 lazy val chiselLibDeps = (chiselRef / Keys.libraryDependencies)
@@ -81,7 +81,7 @@ lazy val chiselLibDeps = (chiselRef / Keys.libraryDependencies)
 //   keeping scalaVersion in sync with chisel3 to the minor version
 lazy val chiselPluginLib = "edu.berkeley.cs" % "chisel3-plugin" % chiselVersion cross CrossVersion.full
 
-val firrtlVersion = "1.5.0-SNAPSHOT"
+val firrtlVersion = "1.5-SNAPSHOT"
 lazy val firrtlRef = ProjectRef(workspaceDirectory / "firrtl", "firrtl")
 lazy val firrtlLib = "edu.berkeley.cs" %% "firrtl" % firrtlVersion
 val firrtlLibDeps = settingKey[Seq[sbt.librarymanagement.ModuleID]]("FIRRTL Library Dependencies sans antlr4")
