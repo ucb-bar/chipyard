@@ -258,8 +258,9 @@ torture: $(output_dir) $(sim)
 	cp -r $(base_dir)/tools/torture/output $(output_dir)/torture
 	rm $(output_dir)/torture/Makefile
 
+NIGHT_OPTIONS :=
 torture-overnight: $(output_dir) $(sim)
-	$(MAKE) -C $(base_dir)/tools/torture R_SIM=$(sim) rnight
+	$(MAKE) -C $(base_dir)/tools/torture R_SIM=$(sim) OPTIONS=$(NIGHT_OPTIONS) rnight
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
