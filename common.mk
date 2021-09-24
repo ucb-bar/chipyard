@@ -46,8 +46,8 @@ HELP_COMMANDS += \
 "   verilog                = generate intermediate verilog files from chisel elaboration and firrtl passes" \
 "   firrtl                 = generate intermediate firrtl files from chisel elaboration" \
 "   run-tests              = run all assembly and benchmark tests" \
-"	torture				   = run torture on the RTL testbench" \
-"	torture-overnight	   = run torture overnight tests (set OPTIONS to pass test options)" \
+"   torture				   = run torture on the RTL testbench" \
+"   torture-overnight	   = run torture overnight tests (set OPTIONS to pass test options)" \
 "   launch-sbt             = start sbt terminal"
 
 #########################################################################################
@@ -58,6 +58,7 @@ include $(base_dir)/generators/cva6/cva6.mk
 include $(base_dir)/generators/tracegen/tracegen.mk
 include $(base_dir)/generators/nvdla/nvdla.mk
 include $(base_dir)/tools/dromajo/dromajo.mk
+include $(base_dir)/tools/torture/torture.mk
 
 #########################################################################################
 # Prerequisite lists
@@ -246,21 +247,6 @@ $(output_dir)/%.run: $(output_dir)/% $(sim)
 
 $(output_dir)/%.out: $(output_dir)/% $(sim)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
-
-#########################################################################################
-# run torture rules
-#########################################################################################
-.PHONY: torture torture-overnight
-
-torture: $(output_dir) $(sim)
-	$(MAKE) -C $(base_dir)/tools/torture/output clean
-	$(MAKE) -C $(base_dir)/tools/torture R_SIM=$(sim) gen rtest
-	cp -r $(base_dir)/tools/torture/output $(output_dir)/torture
-	rm $(output_dir)/torture/Makefile
-
-NIGHT_OPTIONS :=
-torture-overnight: $(output_dir) $(sim)
-	$(MAKE) -C $(base_dir)/tools/torture R_SIM=$(sim) OPTIONS=$(NIGHT_OPTIONS) rnight
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
