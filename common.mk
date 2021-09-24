@@ -46,8 +46,6 @@ HELP_COMMANDS += \
 "   verilog                = generate intermediate verilog files from chisel elaboration and firrtl passes" \
 "   firrtl                 = generate intermediate firrtl files from chisel elaboration" \
 "   run-tests              = run all assembly and benchmark tests" \
-"   torture				   = run torture on the RTL testbench" \
-"   torture-overnight	   = run torture overnight tests (set OPTIONS to pass test options)" \
 "   launch-sbt             = start sbt terminal"
 
 #########################################################################################
@@ -58,7 +56,7 @@ include $(base_dir)/generators/cva6/cva6.mk
 include $(base_dir)/generators/tracegen/tracegen.mk
 include $(base_dir)/generators/nvdla/nvdla.mk
 include $(base_dir)/tools/dromajo/dromajo.mk
-include $(base_dir)/tools/torture/torture.mk
+include $(base_dir)/tools/torture.mk
 
 #########################################################################################
 # Prerequisite lists
