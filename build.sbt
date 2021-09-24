@@ -145,6 +145,17 @@ lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
   )
 lazy val rocketLibDeps = (rocketchip / Keys.libraryDependencies)
 
+// Fred Mod
+lazy val chiseltest = (project in file("tools/chiseltest"))
+  .dependsOn(chiselRef, firrtl_interpreter, treadle)
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % "3.0.8",
+      "com.lihaoyi" %% "utest" % "latest.integration"
+    )
+  )
+
 // -- Chipyard-managed External Projects --
 
 lazy val firrtl_interpreter = (project in file("tools/firrtl-interpreter"))
@@ -232,6 +243,13 @@ lazy val sha3 = (project in file("generators/sha3"))
 lazy val gemmini = (project in file("generators/gemmini"))
   .sourceDependency(testchipip, testchipipLib)
   .dependsOn(rocketchip, chisel_testers)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
+  .settings(commonSettings)
+
+lazy val dla = (project in file("generators/dla"))
+  .sourceDependency(testchipip, testchipipLib)
+  .dependsOn(rocketchip, testchipip, icenet, chisel_testers)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(libraryDependencies ++= chiselTestersLibDeps.value)
   .settings(commonSettings)
