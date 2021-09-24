@@ -94,7 +94,7 @@ To run overnight test (repeated random tests), run
 
 .. code-block:: shell
 
-  make CONFIG=CustomConfig NIGHT_OPTIONS=<overnight options> torture-overnight
+  make CONFIG=CustomConfig TORTURE_ONIGHT_OPTIONS=<overnight options> torture-overnight
 
 You can find the overnight options in `overnight/src/main/scala/main.scala` in the torture repo.  
 
