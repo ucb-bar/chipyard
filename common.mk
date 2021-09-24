@@ -47,6 +47,7 @@ HELP_COMMANDS += \
 "   firrtl                 = generate intermediate firrtl files from chisel elaboration" \
 "   run-tests              = run all assembly and benchmark tests" \
 "	torture				   = run torture on the RTL testbench" \
+"	torture-overnight	   = run torture overnight tests (set OPTIONS to pass test options)" \
 "   launch-sbt             = start sbt terminal"
 
 #########################################################################################
@@ -258,10 +259,7 @@ torture: $(output_dir) $(sim)
 	rm $(output_dir)/torture/Makefile
 
 torture-overnight: $(output_dir) $(sim)
-	$(MAKE) -C $(base_dir)/tools/torture/output clean
-	$(MAKE) -C $(base_dir)/tools/torture R_SIM=$(sim) overnight
-	cp -r $(base_dir)/tools/torture/output $(output_dir)/torture
-	rm $(output_dir)/torture/Makefile
+	$(MAKE) -C $(base_dir)/tools/torture R_SIM=$(sim) rnight
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
