@@ -1,4 +1,4 @@
-package config
+package chipyard
 
 import chisel3._
 import chisel3.util._
@@ -64,9 +64,12 @@ class RoCCIceDMA(opcode: OpcodeSet, val regBufferNum: Int = 1024)(implicit p: Pa
     dmaReaderIO.req.bits.length := nbytes
     dmaReaderIO.req.bits.partial := false.B
     dmaReaderIO.out.ready := (i < len) && canRead  // assume out.ready is inputted as this statement
-    buffer(i) := dmaReaderIO.out.bits.data
+
+    // fixme
+//    buffer(i) := dmaReaderIO.out.bits.data
     //    debugIO.outdata := buffer(i)
     when(dmaReaderIO.out.fire()){
+      buffer(i) := dmaReaderIO.out.bits.data
       i := i + 1.U
     }
     dmaReaderIO.resp.ready := dmaReaderIO.resp.valid // for the resp, ALA I occur valid output, I assume received ready

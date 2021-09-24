@@ -1,2 +1,2 @@
 -Dsbt.sourcemode=true
--Dsbt.workspace=$PWD/tools
+-Dsbt.workspace=/home/zhongad/workspace/my_chipyard_1.5_git/tools

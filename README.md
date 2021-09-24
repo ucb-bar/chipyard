@@ -2,6 +2,18 @@
 
 # Chipyard Framework [![CircleCI](https://circleci.com/gh/ucb-bar/chipyard/tree/master.svg?style=svg)](https://circleci.com/gh/ucb-bar/chipyard/tree/master)
 
+## Heads up before getting started (by fred)
+
+Under the `generator/chipyard` could put:
+* cake-pattern mixins configs
+* chisel scala source file
+These files will be used to build vsim simulation (executable).
+
+Under the custom `generator/xx_accle` could put:
+* chisel scala source file
+* chisel test file in either chisel-tester or chisel-iotester
+These are for behavioral simulation for scala based tester like chisel-tester.
+
 ## Using Chipyard
 
 To get started using Chipyard, see the documentation on the Chipyard documentation site: https://chipyard.readthedocs.io/
