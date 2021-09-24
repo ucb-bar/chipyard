@@ -67,6 +67,27 @@ You can put this in your ``.bashrc`` or equivalent environment setup file to get
 
 These variables need to be set for the ``make`` system to work properly.
 
+Building Chipyard with an IDE
+------------------------
+
+The Chipyard Scala build uses the standard Scala build tool SBT.
+IDEs like [IntelliJ](https://www.jetbrains.com/idea/) and [VSCode](https://code.visualstudio.com/)
+are popular in the Scala community and work with Chipyard.
+To use one of these IDEs, there is one minor peculiarity of Chipyard build that must be addressed.
+
+If the file `.sbtopts` exists in the root of the repository, you need to expand the `$PWD` variable inside of the file to an absolute path pointing to the location of your Chipyard clone.
+You can do this in `bash` with:
+```bash
+sed -i "s|\$PWD|$PWD|" .sbtopts
+```
+
+_If the file `.sbtopts` does not exist, you do not need to do anything special._
+
+If `.sbtopts` does not exist or if you have expanded the `$PWD` variable inside of it, you can import Chipyard into your IDE of choice.
+
+For more information on what `.sbtopts` is for (when it exists), see [CONTRIBUTING.md](CONTRIBUTING.md#bumping-chisel).
+
+
 Pre-built Docker Image
 -------------------------------------------
 
