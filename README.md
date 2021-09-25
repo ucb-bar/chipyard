@@ -4,6 +4,10 @@
 
 ## Heads up before getting started (by fred)
 
+### SBT building failed
+Refer to the chipyard.install.rst, I listed out the modification for .sbtopts there
+
+### Source files hierarchy
 Under the `generator/chipyard` could put:
 * cake-pattern mixins configs
 * chisel scala source file
