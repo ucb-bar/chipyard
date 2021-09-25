@@ -15,4 +15,4 @@ torture: $(output_dir) $(sim)
 
 TORTURE_ONIGHT_OPTIONS :=
 torture-overnight: $(output_dir) $(sim)
-	$(MAKE) -C $(base_dir)/tools/torture R_SIM=$(sim) OPTIONS=$(TORTURE_ONIGHT_OPTIONS) rnight
+	$(MAKE) -C $(base_dir)/tools/torture R_SIM=$(sim) OPTIONS="$(TORTURE_ONIGHT_OPTIONS)" rnight
