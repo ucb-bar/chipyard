@@ -29,5 +29,5 @@ sudo apt-get install git -y
 sudo apt-get install -y autoconf
 git clone http://git.veripool.org/git/verilator
 cd verilator
-git checkout v4.212
+git checkout v4.034
 autoconf && ./configure && make -j$(nproc) && sudo make install
