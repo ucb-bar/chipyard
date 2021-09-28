@@ -400,22 +400,22 @@ workflows:
             # Make the toolchains
             - install-riscv-toolchain
 
-            - install-esp-toolchain
+              #            - install-esp-toolchain
 
             - install-verilator
 
-            - commit-on-master-check
+              #            - commit-on-master-check
 
-            # Attempt to apply the tutorial patches
-            - tutorial-setup-check
+              #            # Attempt to apply the tutorial patches
+              #            - tutorial-setup-check
 
-            # Check that documentation builds
-            - documentation-check
+              #            # Check that documentation builds
+              #            - documentation-check
 
-            # Build extra tests
-            - build-extra-tests:
-                requires:
-                    - install-riscv-toolchain
+              #            # Build extra tests
+              #            - build-extra-tests:
+              #                requires:
+              #                    - install-riscv-toolchain
 
             # Prepare the verilator builds
             - prepare-chipyard-cores:
