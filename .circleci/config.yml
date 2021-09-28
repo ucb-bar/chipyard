@@ -422,22 +422,22 @@ workflows:
                 requires:
                     - install-riscv-toolchain
                     - install-verilator
-            - prepare-chipyard-peripherals:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-            - prepare-chipyard-accels:
-                requires:
-                    - install-esp-toolchain
-                    - install-verilator
-            - prepare-chipyard-tracegen:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-            - prepare-chipyard-other:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
+                      #            - prepare-chipyard-peripherals:
+                      #                requires:
+                      #                    - install-riscv-toolchain
+                      #                    - install-verilator
+                      #            - prepare-chipyard-accels:
+                      #                requires:
+                      #                    - install-esp-toolchain
+                      #                    - install-verilator
+                      #            - prepare-chipyard-tracegen:
+                      #                requires:
+                      #                    - install-riscv-toolchain
+                      #                    - install-verilator
+                      #            - prepare-chipyard-other:
+                      #                requires:
+                      #                    - install-riscv-toolchain
+                      #                    - install-verilator
 
             # Run the example tests
             - chipyard-rocket-run-tests:
@@ -452,73 +452,73 @@ workflows:
             - chipyard-cva6-run-tests:
                 requires:
                     - prepare-chipyard-cores
-            - chipyard-sodor-run-tests:
-                requires:
-                    - prepare-chipyard-cores
-            - chipyard-dmirocket-run-tests:
-                requires:
-                    - prepare-chipyard-peripherals
-            - chipyard-spiflashwrite-run-tests:
-                requires:
-                    - prepare-chipyard-peripherals
-            - chipyard-spiflashread-run-tests:
-                requires:
-                    - prepare-chipyard-peripherals
-            - chipyard-lbwif-run-tests:
-                requires:
-                    - prepare-chipyard-peripherals
-
-            - chipyard-sha3-run-tests:
-                requires:
-                    - prepare-chipyard-accels
-            - chipyard-streaming-fir-run-tests:
-                requires:
-                    - prepare-chipyard-accels
-            - chipyard-streaming-passthrough-run-tests:
-                requires:
-                    - prepare-chipyard-accels
-            - chipyard-hwacha-run-tests:
-                requires:
-                    - prepare-chipyard-accels
-            - chipyard-gemmini-run-tests:
-                requires:
-                    - prepare-chipyard-accels
-            - chipyard-nvdla-run-tests:
-                requires:
-                    - prepare-chipyard-accels
-
-            - tracegen-run-tests:
-                requires:
-                    - prepare-chipyard-tracegen
-            - tracegen-boom-run-tests:
-                requires:
-                    - prepare-chipyard-tracegen
-
-            - icenet-run-tests:
-                requires:
-                    - prepare-chipyard-other
-            - testchipip-run-tests:
-                requires:
-                    - prepare-chipyard-other
-
-            # Run the firesim tests
-            - firesim-run-tests:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-                    - build-extra-tests
-            - firesim-multiclock-run-tests:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-                    - build-extra-tests
-            - fireboom-run-tests:
-                requires:
-                    - install-riscv-toolchain
-                    - install-verilator
-                    - build-extra-tests
-
-            # Prepare the fpga builds (just Verilog)
-            - prepare-chipyard-fpga:
-                requires:
-                    - install-riscv-toolchain
+                      #            - chipyard-sodor-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-cores
+                      #            - chipyard-dmirocket-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-peripherals
+                      #            - chipyard-spiflashwrite-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-peripherals
+                      #            - chipyard-spiflashread-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-peripherals
+                      #            - chipyard-lbwif-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-peripherals
+                      #
+                      #            - chipyard-sha3-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-accels
+                      #            - chipyard-streaming-fir-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-accels
+                      #            - chipyard-streaming-passthrough-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-accels
+                      #            - chipyard-hwacha-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-accels
+                      #            - chipyard-gemmini-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-accels
+                      #            - chipyard-nvdla-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-accels
+                      #
+                      #            - tracegen-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-tracegen
+                      #            - tracegen-boom-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-tracegen
+                      #
+                      #            - icenet-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-other
+                      #            - testchipip-run-tests:
+                      #                requires:
+                      #                    - prepare-chipyard-other
+                      #
+                      #            # Run the firesim tests
+                      #            - firesim-run-tests:
+                      #                requires:
+                      #                    - install-riscv-toolchain
+                      #                    - install-verilator
+                      #                    - build-extra-tests
+                      #            - firesim-multiclock-run-tests:
+                      #                requires:
+                      #                    - install-riscv-toolchain
+                      #                    - install-verilator
+                      #                    - build-extra-tests
+                      #            - fireboom-run-tests:
+                      #                requires:
+                      #                    - install-riscv-toolchain
+                      #                    - install-verilator
+                      #                    - build-extra-tests
+                      #
+                      #            # Prepare the fpga builds (just Verilog)
+                      #            - prepare-chipyard-fpga:
+                      #                requires:
+                      #                    - install-riscv-toolchain
