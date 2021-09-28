@@ -1,6 +1,6 @@
 HELP_COMMANDS += \
 "   torture                = run torture on the RTL testbench" \
-"   torture-overnight      = run torture overnight tests (set OPTIONS to pass test options)"
+"   torture-overnight      = run torture overnight tests (set TORTURE_ONIGHT_OPTIONS to pass test options)"
 
 #########################################################################################
 # run torture rules
