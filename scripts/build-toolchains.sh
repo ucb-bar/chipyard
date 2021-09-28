@@ -6,9 +6,16 @@
 set -e
 set -o pipefail
 
+# On macOS, use GNU readlink from 'coreutils' package in Homebrew/MacPorts
+if [ "$(uname -s)" = "Darwin" ] ; then
+    READLINK=greadlink
+else
+    READLINK=readlink
+fi
+
 # If BASH_SOURCE is undefined, we may be running under zsh, in that case
 # provide a zsh-compatible alternative
-DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-${(%):-%x}}")")"
+DIR="$(dirname "$($READLINK -f "${BASH_SOURCE[0]:-${(%):-%x}}")")"
 CHIPYARD_DIR="$(dirname "$DIR")"
 
 usage() {
