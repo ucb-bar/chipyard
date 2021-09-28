@@ -77,12 +77,12 @@ read -a keys <<< ${grouping[$1]}
 # need to set the PATH to use the new verilator (with the new verilator root)
 for key in "${keys[@]}"
 do
-    run "export RISCV=\"$TOOLS_DIR\"; \
+    time run "export RISCV=\"$TOOLS_DIR\"; \
          export LD_LIBRARY_PATH=\"$LD_LIB_DIR\"; \
          export PATH=\"$REMOTE_VERILATOR_DIR/bin:\$PATH\"; \
          export VERILATOR_ROOT=\"$REMOTE_VERILATOR_DIR\"; \
          export COURSIER_CACHE=\"$REMOTE_WORK_DIR/.coursier-cache\"; \
-         make -j$REMOTE_MAKE_NPROC -C $REMOTE_MAKE_DIR FIRRTL_LOGLEVEL=info JAVA_OPTS=\"$REMOTE_JAVA_OPTS\" SBT_OPTS=\"$REMOTE_SBT_OPTS\" ${mapping[$key]}"
+         make -j$REMOTE_MAKE_NPROC -C $REMOTE_MAKE_DIR JAVA_OPTS=\"$REMOTE_JAVA_OPTS\" SBT_OPTS=\"$REMOTE_SBT_OPTS\" ${mapping[$key]}"
 done
 
 run "rm -rf $REMOTE_CHIPYARD_DIR/project"

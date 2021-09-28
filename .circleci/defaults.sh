@@ -1,7 +1,7 @@
 #!/bin/bash
 
 copy () {
-    rsync -avzp -e 'ssh' --exclude '.git' $1 $2
+    rsync -azp -e 'ssh' --exclude '.git' $1 $2
 }
 
 run () {
