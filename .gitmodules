@@ -142,4 +142,4 @@
 	url = https://github.com/ucb-bar/rocket-dsp-utils
 [submodule "generators/ibex"]
 	path = generators/ibex
-	url = https://github.com/schwarz-em/ibex-wrapper
+	url = https://github.com/ucb-bar/ibex-wrapper
