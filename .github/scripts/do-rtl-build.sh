@@ -59,6 +59,7 @@ else
 fi
 
 # choose what make dir to use
+
 case $2 in
     "sim")
         REMOTE_MAKE_DIR=$REMOTE_SIM_DIR

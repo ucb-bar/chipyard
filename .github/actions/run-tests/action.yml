@@ -1,0 +1,30 @@
+name: run-tests
+description: 'Runs tests according to input parameters'
+
+inputs:
+  tools-version:
+    description: Which toolchain to build
+    required: false
+    default: 'riscv-tools'
+  group-key:
+    description: group key
+    required: true
+  project-key:
+    description: project key
+    required: true
+  run-script:
+    description: rtl build script to use
+    required: false
+    default: "run-tests.sh"
+
+runs:
+  using: "composite"
+  steps:
+    - name: run rtl build script cache of chipyard root should have been loaded by prepare-rtl
+      run: |
+        export RISCV="/__w/chipyard/chipyard/riscv-tools-install"
+        export LD_LIBRARY_PATH="$RISCV/lib"
+        export PATH="$RISCV/bin:$PATH"
+        ./.github/scripts/${{ inputs.run-script }} ${{ inputs.project-key }}
+      shell: bash
+
