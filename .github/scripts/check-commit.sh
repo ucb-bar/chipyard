@@ -9,6 +9,7 @@ set -ex
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
+# enter bhd repo
 cd $LOCAL_CHIPYARD_DIR
 
 # ignore the private vlsi submodules

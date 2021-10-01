@@ -10,7 +10,7 @@ SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
 # clean older directories (delete prior directories related to this branch also)
-run_script $LOCAL_CHIPYARD_DIR/.circleci/clean-old-files.sh $CI_DIR
+run_script $LOCAL_CHIPYARD_DIR/.github/scripts/clean-old-files.sh $CI_DIR
 run "rm -rf $REMOTE_PREFIX*"
 
 # set stricthostkeychecking to no (must happen before rsync)

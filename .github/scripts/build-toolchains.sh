@@ -15,7 +15,4 @@ if [ ! -d "$HOME/$1-install" ]; then
 
     # init all submodules including the tools
     CHIPYARD_DIR="$LOCAL_CHIPYARD_DIR" NPROC=$CI_MAKE_NPROC $LOCAL_CHIPYARD_DIR/scripts/build-toolchains.sh $1
-
-    # de-init the toolchain area to save on space (forced to ignore local changes)
-    git submodule deinit --force $LOCAL_CHIPYARD_DIR/toolchains/$1
 fi
