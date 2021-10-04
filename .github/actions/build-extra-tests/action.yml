@@ -1,5 +1,5 @@
 name: build-extra-tests
-description: 'Builds extra test required for some flows'
+description: 'Builds extra test required for FireSim tests'
 
 inputs:
   tools-version:

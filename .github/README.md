@@ -42,7 +42,7 @@ will generate the data to be cached. The caching of the generated data is implic
 >Note: GA cache documentation suggests using the yml level `if: steps.cache-primes.outputs.cache-hit != 'true'` to
 > determine whether to run the data generation command.
 > At the time of this writing the if construct has a bug and will not run correctly within a composite action. The use
-> of a bash based if is a hack found on stackoverflow
+> of a bash based if is a [hack found on stackoverflow](https://stackoverflow.com/questions/65473359/github-action-unable-to-add-if-condition-in-steps)
 ```yaml
     - uses: actions/cache@v2
       id: rtl-build-id
@@ -106,13 +106,8 @@ To get the CI to work correctly you need to create the following GH Repository S
 | BUILDDIR | the directory to use on the build server |
 | SERVERKEY | a private key to access the build server |
 
-The default.sh script defines the following,
-```bash
-CI_DIR = /path/to/where/you/want/to/store/remote/files
-```` 
-but in the future this should likely be a GH Secret too.
-
-The scripts also construct (repeatedly) a SERVER env using the above secrets 
+The main workflow also constructs and places in the environment a SERVER and a work directyory on that server env using the above secrets.
+The SERVER is constructed like this:
 ```bash
 SERVER = ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
 ```
@@ -134,4 +129,3 @@ This code is heavily based on the origin [CircleCI]() work. There a quite a few 
 - CCI allows a much larger cache. The entire CY directory with toolchains and RTL could be cached, with GA there is a 5Gb total cache limit
 - GA support more parallel jobs 20 vs 4
 - GA seems to allow much longer run times
-- 

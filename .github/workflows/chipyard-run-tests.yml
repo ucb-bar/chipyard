@@ -4,7 +4,11 @@ on: [push]
 
 env:
   tools-cache-version: v7
+  BUILDSERVER: ${{ secrets.BUILDSERVER }}
+  BUILDUSER: ${{ secrets.BUILDUSER }}
+  SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
   CI_DIR: ${{ secrets.BUILDDIR }}
+  JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 
 jobs:
   commit-on-master-check:
@@ -13,8 +17,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -27,8 +29,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -41,8 +41,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -62,8 +60,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.9.1
@@ -96,8 +92,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -116,8 +110,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -136,8 +128,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -167,11 +157,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -205,11 +190,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -239,11 +219,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -273,11 +248,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -307,11 +277,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -341,11 +306,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -375,11 +335,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -412,11 +367,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -441,7 +391,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-cores"
           project-key: "chipyard-rocket"
 
   chipyard-hetero-run-tests:
@@ -451,11 +400,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -480,7 +424,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-cores"
           project-key: "chipyard-hetero"
 
   chipyard-boom-run-tests:
@@ -490,11 +433,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -519,7 +457,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-cores"
           project-key: "chipyard-boom"
 
   chipyard-cva6-run-tests:
@@ -529,11 +466,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -558,7 +490,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-cores"
           project-key: "chipyard-cva6"
 
   chipyard-sodor-run-tests:
@@ -568,11 +499,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -597,7 +523,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-cores"
           project-key: "chipyard-sodor"
 
   chipyard-dmirocket-run-tests:
@@ -607,11 +532,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -636,7 +556,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-peripherals"
           project-key: "chipyard-dmirocket"
 
   chipyard-spiflashwrite-run-tests:
@@ -646,11 +565,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -675,7 +589,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-peripherals"
           project-key: "chipyard-spiflashwrite"
 
   chipyard-spiflashread-run-tests:
@@ -685,11 +598,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -714,7 +622,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-peripherals"
           project-key: "chipyard-spiflashread"
 
   chipyard-lbwif-run-tests:
@@ -724,11 +631,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -753,7 +655,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-peripherals"
           project-key: "chipyard-lbwif"
 
   chipyard-sha3-run-tests:
@@ -763,11 +664,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -792,7 +688,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-accels"
           project-key: "chipyard-sha3"
 
   chipyard-streaming-fir-run-tests:
@@ -802,11 +697,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -831,7 +721,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-accels"
           project-key: "chipyard-streaming-fir"
 
   chipyard-streaming-passthrough-run-tests:
@@ -841,11 +730,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -870,7 +754,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-accels"
           project-key: "chipyard-streaming-passthrough"
 
   chipyard-hwacha-run-tests:
@@ -880,11 +763,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -909,7 +787,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-accels"
           project-key: "chipyard-hwacha"
 
   chipyard-gemmini-run-tests:
@@ -919,11 +796,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -948,7 +820,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-accels"
           project-key: "chipyard-gemmini"
 
   chipyard-nvdla-run-tests:
@@ -958,11 +829,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -987,7 +853,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-accels"
           project-key: "chipyard-nvdla"
 
   tracegen-boom-run-tests:
@@ -997,11 +862,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -1026,7 +886,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-tracegen"
           project-key: "tracegen-boom"
 
   tracegen-run-tests:
@@ -1036,11 +895,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -1065,7 +919,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-tracegen"
           project-key: "tracegen"
 
   icenet-run-tests:
@@ -1075,11 +928,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -1104,7 +952,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-other"
           project-key: "icenet"
 
   testchipip-run-tests:
@@ -1114,11 +961,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -1143,7 +985,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-other"
           project-key: "testchipip"
 
   firesim-run-tests:
@@ -1153,11 +994,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -1182,7 +1018,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "extra-tests"
           project-key: "firesim"
           run-script: "run-firesim-scala-tests.sh"
 
@@ -1193,11 +1028,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -1222,7 +1052,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "extra-tests"
           project-key: "fireboom"
           run-script: "run-firesim-scala-tests.sh"
 
@@ -1233,11 +1062,6 @@ jobs:
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
-    env:
-      BUILDSERVER: ${{ secrets.BUILDSERVER }}
-      BUILDUSER: ${{ secrets.BUILDUSER }}
-      SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-      JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -1262,7 +1086,6 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "extra-tests"
           project-key: "firesim-multiclock"
           run-script: "run-firesim-scala-tests.sh"
 

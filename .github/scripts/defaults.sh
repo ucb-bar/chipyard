@@ -18,7 +18,7 @@ clean () {
 }
 
 # make parallelism
-CI_MAKE_NPROC=4
+CI_MAKE_NPROC=8
 # chosen based on a 24c system shared with 1 other project
 REMOTE_MAKE_NPROC=4
 
