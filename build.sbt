@@ -241,25 +241,21 @@ lazy val nvdla = (project in file("generators/nvdla"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val iocell = (project in file("./tools/barstools/iocell/"))
+lazy val iocell = Project(id = "iocell", base = file("./tools/barstools/") / "src")
+  .settings(
+    Compile / scalaSource := baseDirectory.value / "main" / "scala" / "barstools" / "iocell",
+    Compile / resourceDirectory := baseDirectory.value / "main" / "resources"
+  )
   .sourceDependency(chiselRef, chiselLib)
   .settings(addCompilerPlugin(chiselPluginLib))
   .settings(libraryDependencies ++= chiselLibDeps.value)
   .settings(commonSettings)
 
-lazy val tapeout = (project in file("./tools/barstools/tapeout/"))
-  .dependsOn(chisel_testers, chipyard) // must depend on chipyard to get scala resources
-  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
-  .settings(commonSettings)
-
-lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
-  .settings(commonSettings)
-
-lazy val barstoolsMacros = (project in file("./tools/barstools/macros/"))
+lazy val tapeout = (project in file("./tools/barstools/"))
   .sourceDependency(chiselRef, chiselLib)
   .settings(addCompilerPlugin(chiselPluginLib))
   .settings(libraryDependencies ++= chiselLibDeps.value)
-  .dependsOn(firrtl_interpreter, mdf, chisel_testers)
+  .dependsOn(firrtl_interpreter, chisel_testers, chipyard) // must depend on CY to get scala resources
   .settings(libraryDependencies ++= chiselTestersLibDeps.value)
   .settings(libraryDependencies ++= firrtlInterpreterLibDeps.value)
   .enablePlugins(sbtassembly.AssemblyPlugin)
