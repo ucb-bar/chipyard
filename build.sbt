@@ -201,22 +201,18 @@ lazy val nvdla = (project in file("generators/nvdla"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val iocell = (project in file("./tools/barstools/iocell/"))
+lazy val iocell = Project(id = "iocell", base = file("./tools/barstools/") / "src")
+  .settings(
+    Compile / scalaSource := baseDirectory.value / "main" / "scala" / "barstools" / "iocell",
+    Compile / resourceDirectory := baseDirectory.value / "main" / "resources"
+  )
   .settings(chiselSettings)
   .settings(commonSettings)
 
-lazy val tapeout = (project in file("./tools/barstools/tapeout/"))
-  .dependsOn(chipyard) // must depend on chipyard to get scala resources
+lazy val tapeout = (project in file("./tools/barstools/"))
+  .settings(chiselSettings)
   .settings(chiselTestSettings)
-  .settings(commonSettings)
-
-lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
-  .settings(commonSettings)
-
-lazy val barstoolsMacros = (project in file("./tools/barstools/macros/"))
-  .dependsOn(mdf)
   .enablePlugins(sbtassembly.AssemblyPlugin)
-  .settings(firrtlSettings)
   .settings(commonSettings)
 
 lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))

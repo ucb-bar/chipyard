@@ -162,7 +162,7 @@ $(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR): top_macro_temp
 	@echo "" > /dev/null
 
 top_macro_temp: $(TOP_SMEMS_CONF)
-	$(call run_scala_main,barstoolsMacros,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE))
+	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE))
 
 HARNESS_MACROCOMPILER_MODE = --mode synflops
 .INTERMEDIATE: harness_macro_temp
@@ -170,7 +170,7 @@ $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): harness_macro_temp
 	@echo "" > /dev/null
 
 harness_macro_temp: $(HARNESS_SMEMS_CONF) | top_macro_temp
-	$(call run_scala_main,barstoolsMacros,barstools.macros.MacroCompiler, -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE))
+	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler, -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE))
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
