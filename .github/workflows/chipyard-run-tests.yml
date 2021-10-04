@@ -75,11 +75,6 @@ jobs:
           echo "::set-output name=riscvtools-cache-key::riscv-tools-installed-${{ env.tools-cache-version }}-$(shasum riscv-tools.hash | cut -d' ' -f1)"
           echo "::set-output name=esptools-cache-key::esp-tools-installed-${{ env.tools-cache-version }}-$(shasum esp-tools.hash | cut -d' ' -f1)"
           echo "::set-output name=extra-tests-cache-key::extra-tests-${{ github.ref }}-${{ github.sha }}"
-      - name: Show key
-        run: |
-          echo "riscvtools key is " ${{ steps.genkey.outputs.riscvtools-cache-key }}
-          echo "esptools key is " ${{ steps.genkey.outputs.esptools-cache-key }}
-          echo "extra-tests key is " ${{ steps.genkey.outputs.extra-tests-cache-key }}
     outputs:
       riscvtools-cache-key: ${{ steps.genkey.outputs.riscvtools-cache-key }}
       esptools-cache-key: ${{ steps.genkey.outputs.esptools-cache-key }}
@@ -145,11 +140,7 @@ jobs:
           key: ${{ needs.make-keys.outputs.extra-tests-cache-key }}
           restore-keys: ${{ needs.make-keys.outputs.extra-tests-cache-key }}
       - name: Build extra tests if not cached
-        run: |
-          export RISCV="/__w/chipyard/chipyard/riscv-tools-install"
-          export LD_LIBRARY_PATH="$RISCV/lib"
-          export PATH="$RISCV/bin:$PATH"
-          .github/scripts/build-extra-tests.sh
+        run: .github/scripts/build-extra-tests.sh
 
   install-verilator:
     name: install-verilator
@@ -1102,6 +1093,7 @@ jobs:
             chipyard-gemmini-run-tests, chipyard-nvdla-run-tests,
             tracegen-boom-run-tests, tracegen-run-tests,
             icenet-run-tests, testchipip-run-tests,
+            prepare-chipyard-fpga,
             firesim-run-tests, fireboom-run-tests, firesim-multiclock-run-tests]
     runs-on: ubuntu-latest
     steps:
