@@ -140,7 +140,11 @@ jobs:
           key: ${{ needs.make-keys.outputs.extra-tests-cache-key }}
           restore-keys: ${{ needs.make-keys.outputs.extra-tests-cache-key }}
       - name: Build extra tests if not cached
-        run: .github/scripts/build-extra-tests.sh
+        run:  |
+          export RISCV="/__w/chipyard/chipyard/riscv-tools-install"
+          export LD_LIBRARY_PATH="$RISCV/lib"
+          export PATH="$RISCV/bin:$PATH"
+          .github/scripts/build-extra-tests.sh.github/scripts/build-extra-tests.sh
 
   install-verilator:
     name: install-verilator
