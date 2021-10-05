@@ -144,7 +144,7 @@ jobs:
           export RISCV="/__w/chipyard/chipyard/riscv-tools-install"
           export LD_LIBRARY_PATH="$RISCV/lib"
           export PATH="$RISCV/bin:$PATH"
-          .github/scripts/build-extra-tests.sh.github/scripts/build-extra-tests.sh
+          .github/scripts/build-extra-tests.sh
 
   install-verilator:
     name: install-verilator
