@@ -22,8 +22,8 @@ make target. For example:
 
    make CONFIG=CustomConfig debug
 
-The ``run-binary-debug`` rule will also automatically build a simulator,
-run it on a custom binary, and generate a waveform. For example, to run a
+The ``run-binary-debug`` rule uses the prebuilt simulator to run a custom binary
+and generate a waveform. For example, to run a
 test on ``helloworld.riscv``, use
 
 .. code-block:: shell
