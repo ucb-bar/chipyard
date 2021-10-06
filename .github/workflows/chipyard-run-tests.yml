@@ -3,7 +3,7 @@ name: chipyard-ci-process
 on: [push]
 
 env:
-  tools-cache-version: v7
+  tools-cache-version: v8
   BUILDSERVER: ${{ secrets.BUILDSERVER }}
   BUILDUSER: ${{ secrets.BUILDUSER }}
   SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
