@@ -192,14 +192,10 @@ ifeq (,$(BINARY))
 endif
 
 # run normal binary with hardware-logged insn dissassembly
-#TODO: maybe put this back, this is a test of minimum caching in CI
-#run-binary: $(output_dir) $(sim) check-binary
 run-binary: $(output_dir) check-binary
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 # run simulator as fast as possible (no insn disassembly)
-#TODO: maybe put this back, this is a test of minimum caching in CI
-#run-binary-fast: $(output_dir) $(sim) check-binary
 run-binary-fast: $(output_dir) check-binary
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
 
@@ -216,21 +212,18 @@ $(binary_hex): $(output_dir) $(BINARY)
 	$(base_dir)/scripts/smartelf2hex.sh $(BINARY) > $(binary_hex)
 
 run-binary-hex: check-binary
-#TODO: Restore this or figure out a better caching run-binary-hex: $(output_dir) $(sim) $(binary_hex)
 run-binary-hex: $(output_dir) $(sim) $(binary_hex)
 run-binary-hex: run-binary
 run-binary-hex: override LOADMEM_ADDR = 80000000
 run-binary-hex: override LOADMEM = $(binary_hex)
 run-binary-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
 run-binary-debug-hex: check-binary
-#TODO: Restore this or figure out a better caching run-binary-debug-hex: $(output_dir) $(sim) $(binary_hex)
 run-binary-debug-hex: $(output_dir) $(sim) $(binary_hex)
 run-binary-debug-hex: run-binary-debug
 run-binary-debug-hex: override LOADMEM_ADDR = 80000000
 run-binary-debug-hex: override LOADMEM = $(binary_hex)
 run-binary-debug-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
 run-binary-fast-hex: check-binary
-#TODO: put this back run-binary-fast-hex: $(output_dir) $(sim) $(binary_hex)
 run-binary-fast-hex: $(output_dir) $(binary_hex)
 run-binary-fast-hex: run-binary-fast
 run-binary-fast-hex: override LOADMEM_ADDR = 80000000
@@ -246,11 +239,9 @@ $(output_dir):
 $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/% $(output_dir)
 	ln -sf $< $@
 
-#$(output_dir)/%.run: $(output_dir)/% $(sim)
 $(output_dir)/%.run: $(output_dir)/%
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
 
-#$(output_dir)/%.out: $(output_dir)/% $(sim)
 $(output_dir)/%.out: $(output_dir)/%
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
 

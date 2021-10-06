@@ -15,7 +15,7 @@ runs:
   steps:
     - name: run rtl build script cache of chipyard root should have been loaded by prepare-rtl
       run: |
-        export RISCV="/__w/chipyard/chipyard/riscv-tools-install"
+        export RISCV="$GITHUB_WORKSPACE/riscv-tools-install"
         export LD_LIBRARY_PATH="$RISCV/lib"
         export PATH="$RISCV/bin:$PATH"
         ./.github/scripts/${{ inputs.run-script }} ${{ inputs.project-key }}
