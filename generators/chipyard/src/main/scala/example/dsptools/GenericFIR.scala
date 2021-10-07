@@ -26,7 +26,6 @@ class GenericFIRCellBundle[T<:Data:Ring](genIn:T, genOut:T) extends Bundle {
   val data: T = genIn.cloneType
   val carry: T = genOut.cloneType
 
-  override def cloneType: this.type = GenericFIRCellBundle(genIn, genOut).asInstanceOf[this.type]
 }
 object GenericFIRCellBundle {
   def apply[T<:Data:Ring](genIn:T, genOut:T): GenericFIRCellBundle[T] = new GenericFIRCellBundle(genIn, genOut)
@@ -44,7 +43,6 @@ object GenericFIRCellIO {
 class GenericFIRBundle[T<:Data:Ring](proto: T) extends Bundle {
   val data: T = proto.cloneType
 
-  override def cloneType: this.type = GenericFIRBundle(proto).asInstanceOf[this.type]
 }
 object GenericFIRBundle {
   def apply[T<:Data:Ring](proto: T): GenericFIRBundle[T] = new GenericFIRBundle(proto)
