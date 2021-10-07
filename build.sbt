@@ -260,8 +260,8 @@ lazy val firechip = (project in file("generators/firechip"))
   .dependsOn(chipyard, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
-    testGrouping in Test := isolateAllTests( (definedTests in Test).value ),
-    testOptions in Test += Tests.Argument("-oF")
+    Test / testGrouping := isolateAllTests( (Test / definedTests).value ),
+    Test / testOptions += Tests.Argument("-oF")
   )
 lazy val fpga_shells = (project in file("./fpga/fpga-shells"))
   .dependsOn(rocketchip, sifive_blocks)
