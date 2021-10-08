@@ -6,11 +6,11 @@ Website: https://gihub.com/gh/ucb-bar/chipyard/actions
 GitHub Actions Brief Explanation
 ---------------------------
 
-CI is executed by Github Actions (GA). GA is controlled by `.yml` files in the `.github/workflows/` directory. 
+CI is executed by Github Actions (GA). GA is controlled by `.yml` files in the `.github/workflows/` directory.
 In our case we have just one workflow named `chipyard-rocket-run-tests.yml`.
 It defines a number of `jobs` within it that do particular tasks.
 All jobs in the workflow must pass for the CI run to be successful.
-In general, a job is run in parallel with others unless it depends on some other job.  
+In general, a job is run in parallel with others unless it depends on some other job.
 The dependency of one job on the completion of another is specified via the `needs` field.
 
 For example:
@@ -36,7 +36,7 @@ we specify things over and over like docker image tag and checkout commands.
 One use of CA: our process relies on caching to avoid running time-consuming and intensive tasks more often than necessary.
 
 The following is an example of using the cache@v2 composite action. A step `uses: actions/cache@v2` which take as parameters the
-path that contains the data to be cached and a key. Paths can have multiple targets. 
+path that contains the data to be cached and a key. Paths can have multiple targets.
 The following step can look at the result of the cache operation, if there was cache miss, then we run the command that
 will generate the data to be cached. The caching of the generated data is implicit.
 >Note: GA cache documentation suggests using the yml level `if: steps.cache-primes.outputs.cache-hit != 'true'` to
@@ -116,11 +116,6 @@ Additionally, you need to add under the "PERMISSIONS" "SSH Permissions" section 
 After adding a private key, it will show a fingerprint that should be added under the jobs that need to be run.
 
 Note: On the remote server you need to have the `*.pub` key file added to the `authorized_keys` file.
-
-Additional Work
----------------
-- It would be nice to add the ability to re-run just parts of the workflow. [See Workflows Hacks](https://github.com/jaredpalmer/razzle/blob/f8305c26997bae8ef0f5dfa52540d842451b4090/.github/workflows/examples.yml)
-
 
 Notes on CIRCLE CI
 ------------------
