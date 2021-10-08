@@ -22,16 +22,18 @@ runs:
       shell: bash
 
     # brute force way to swap between riscv/esp-tools caches
-    - uses: actions/cache@v2
-      id: toolchain-build-riscv-tools
+    - name: Cache riscv-tools
       if: ${{ inputs.tools-version == "riscv-tools" }}
+      uses: actions/cache@v2
+      id: toolchain-build-riscv-tools
       with:
         path: ${{ inputs.tools-version }}-install
         key: ${{ steps.genkey.outputs.riscvtools-cache-key }}
 
-    - uses: actions/cache@v2
-      id: toolchain-build-esp-tools
+    - name: Cache esp-tools
       if: ${{ inputs.tools-version == "esp-tools" }}
+      uses: actions/cache@v2
+      id: toolchain-build-esp-tools
       with:
         path: ${{ inputs.tools-version }}-install
         key: ${{ steps.genkey.outputs.esptools-cache-key }}
