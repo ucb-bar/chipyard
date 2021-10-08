@@ -20,8 +20,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Check commits of each submodule
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
+      - uses: ./.github/actions/job-end
 
   tutorial-setup-check:
     name: tutorial-setup-check
@@ -32,8 +36,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Check that the tutorial-setup patches apply
+        if: steps.job-start.outputs.run_result != 'success'
         run: scripts/tutorial-setup.sh
+      - uses: ./.github/actions/job-end
 
   documentation-check:
     name: documentation-check
@@ -44,15 +52,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Check that documentation builds with no warnings/errors
+        if: steps.job-start.outputs.run_result != 'success'
         run: |
           sudo apt-get update -y
           sudo apt-get install -y python3-pip
           sudo pip3 install -r docs/requirements.txt
           make -C docs html
       - name: Show error log from sphinx if failed
-        if: ${{ failure() }}
+        if: (steps.job-start.outputs.run_result != 'success') && ${{ failure() }}
         run: cat /tmp/sphinx-err*.log
+      - uses: ./.github/actions/job-end
 
   make-keys:
     name: make-keys
@@ -67,14 +79,19 @@ jobs:
           access_token: ${{ github.token }}
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Generate hashes
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/create-hash.sh
       - name: Generate keys
+        if: steps.job-start.outputs.run_result != 'success'
         id: genkey
         run: |
           echo "::set-output name=riscvtools-cache-key::riscv-tools-installed-${{ env.tools-cache-version }}-$(shasum riscv-tools.hash | cut -d' ' -f1)"
           echo "::set-output name=esptools-cache-key::esp-tools-installed-${{ env.tools-cache-version }}-$(shasum esp-tools.hash | cut -d' ' -f1)"
           echo "::set-output name=extra-tests-cache-key::extra-tests-${{ github.ref }}-${{ github.sha }}"
+      - uses: ./.github/actions/job-end
     outputs:
       riscvtools-cache-key: ${{ steps.genkey.outputs.riscvtools-cache-key }}
       esptools-cache-key: ${{ steps.genkey.outputs.esptools-cache-key }}
@@ -90,13 +107,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
+      - uses: ./.github/actions/job-end
 
   install-esp-toolchain:
     needs: make-keys
@@ -108,13 +130,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Build ESP RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'esp-tools'
           cache-key: ${{ needs.make-keys.outputs.esptools-cache-key }}
+      - uses: ./.github/actions/job-end
 
   build-extra-tests:
     name: build-extra-tests
@@ -126,21 +153,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - uses: actions/cache@v2
+        if: steps.job-start.outputs.run_result != 'success'
         id: build-extra-tools-cache
         with:
           path: extra-tests-install
           key: ${{ needs.make-keys.outputs.extra-tests-cache-key }}
           restore-keys: ${{ needs.make-keys.outputs.extra-tests-cache-key }}
       - name: Build extra tests if not cached
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/build-extra-tests.sh
+      - uses: ./.github/actions/job-end
 
   install-verilator:
     name: install-verilator
@@ -151,13 +185,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Build verilator on remote
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/install-verilator.sh
+      - uses: ./.github/actions/job-end
 
   # Sentinel job to simplify how we specify which that basic setup is complete
   #
@@ -169,8 +208,12 @@ jobs:
             build-extra-tests]
     runs-on: ubuntu-latest
     steps:
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Set up complete
+        if: steps.job-start.outputs.run_result != 'success'
         run: echo Set up is complete!
+      - uses: ./.github/actions/job-end
 
   ##########################################################################
 
@@ -184,24 +227,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-cores"
+      - uses: ./.github/actions/job-end
 
   prepare-chipyard-peripherals:
     name: prepare-chipyard-peripherals
@@ -213,24 +264,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-peripherals"
+      - uses: ./.github/actions/job-end
 
   prepare-chipyard-accels:
     name: prepare-chipyard-accels
@@ -242,24 +301,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build ESP RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'esp-tools'
           cache-key: ${{ needs.make-keys.outputs.esptools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-accels"
+      - uses: ./.github/actions/job-end
 
   prepare-chipyard-tracegen:
     name: prepare-chipyard-tracegen
@@ -271,24 +338,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-tracegen"
+      - uses: ./.github/actions/job-end
 
   prepare-chipyard-other:
     name: prepare-chipyard-other
@@ -300,24 +375,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-other"
+      - uses: ./.github/actions/job-end
 
   prepare-chipyard-fpga:
     name: prepare-chipyard-fpga
@@ -329,25 +412,33 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-fpga"
           build-type: "fpga"
+      - uses: ./.github/actions/job-end
 
   ##########################################################################
 
@@ -361,28 +452,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-cores"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-rocket"
+      - uses: ./.github/actions/job-end
 
   chipyard-hetero-run-tests:
     name: chipyard-hetero-run-tests
@@ -394,28 +494,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-cores"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-hetero"
+      - uses: ./.github/actions/job-end
 
   chipyard-boom-run-tests:
     name: chipyard-boom-run-tests
@@ -427,28 +536,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-cores"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-boom"
+      - uses: ./.github/actions/job-end
 
   chipyard-cva6-run-tests:
     name: chipyard-cva6-run-tests
@@ -460,28 +578,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-cores"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-cva6"
+      - uses: ./.github/actions/job-end
 
   chipyard-sodor-run-tests:
     name: chipyard-sodor-run-tests
@@ -493,28 +620,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-cores"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-sodor"
+      - uses: ./.github/actions/job-end
 
   chipyard-dmirocket-run-tests:
     name: chipyard-dmirocket-run-tests
@@ -526,28 +662,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-peripherals"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-dmirocket"
+      - uses: ./.github/actions/job-end
 
   chipyard-spiflashwrite-run-tests:
     name: chipyard-spiflashwrite-run-tests
@@ -559,28 +704,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-peripherals"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-spiflashwrite"
+      - uses: ./.github/actions/job-end
 
   chipyard-spiflashread-run-tests:
     name: chipyard-spiflashread-run-tests
@@ -592,28 +746,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-peripherals"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-spiflashread"
+      - uses: ./.github/actions/job-end
 
   chipyard-lbwif-run-tests:
     name: chipyard-lbwif-run-tests
@@ -625,28 +788,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-peripherals"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-lbwif"
+      - uses: ./.github/actions/job-end
 
   chipyard-sha3-run-tests:
     name: chipyard-sha3-run-tests
@@ -658,28 +830,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build ESP RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'esp-tools'
           cache-key: ${{ needs.make-keys.outputs.esptools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-accels"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-sha3"
+      - uses: ./.github/actions/job-end
 
   chipyard-streaming-fir-run-tests:
     name: chipyard-streaming-fir-run-tests
@@ -691,28 +872,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-accels"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-streaming-fir"
+      - uses: ./.github/actions/job-end
 
   chipyard-streaming-passthrough-run-tests:
     name: chipyard-streaming-passthrough-run-tests
@@ -724,28 +914,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-accels"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-streaming-passthrough"
+      - uses: ./.github/actions/job-end
 
   chipyard-hwacha-run-tests:
     name: chipyard-hwacha-run-tests
@@ -757,28 +956,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build ESP RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'esp-tools'
           cache-key: ${{ needs.make-keys.outputs.esptools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-accels"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-hwacha"
+      - uses: ./.github/actions/job-end
 
   chipyard-gemmini-run-tests:
     name: chipyard-gemmini-run-tests
@@ -790,28 +998,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build ESP RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'esp-tools'
           cache-key: ${{ needs.make-keys.outputs.esptools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-accels"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-gemmini"
+      - uses: ./.github/actions/job-end
 
   chipyard-nvdla-run-tests:
     name: chipyard-nvdla-run-tests
@@ -823,28 +1040,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-accels"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "chipyard-nvdla"
+      - uses: ./.github/actions/job-end
 
   tracegen-boom-run-tests:
     name: tracegen-boom-run-tests
@@ -856,28 +1082,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-tracegen"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "tracegen-boom"
+      - uses: ./.github/actions/job-end
 
   tracegen-run-tests:
     name: tracegen-run-tests
@@ -889,28 +1124,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-tracegen"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "tracegen"
+      - uses: ./.github/actions/job-end
 
   icenet-run-tests:
     name: icenet-run-tests
@@ -922,28 +1166,38 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        if: steps.job-start.outputs.run_result != 'success'
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-other"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "icenet"
+      - uses: ./.github/actions/job-end
 
   testchipip-run-tests:
     name: testchipip-run-tests
@@ -955,28 +1209,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-other"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "testchipip"
+      - uses: ./.github/actions/job-end
 
   firesim-run-tests:
     name: firesim-run-tests
@@ -988,29 +1251,38 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "extra-tests"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "firesim"
           run-script: "run-firesim-scala-tests.sh"
+      - uses: ./.github/actions/job-end
 
   fireboom-run-tests:
     name: fireboom-run-tests
@@ -1022,29 +1294,38 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "extra-tests"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "fireboom"
           run-script: "run-firesim-scala-tests.sh"
+      - uses: ./.github/actions/job-end
 
   firesim-multiclock-run-tests:
     name: firesim-multiclock-run-tests
@@ -1056,29 +1337,38 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
       - name: Install SSH key
+        if: steps.job-start.outputs.run_result != 'success'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SERVERKEY }}
           known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Init submodules
+        if: steps.job-start.outputs.run_result != 'success'
         run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Check commits of each submodle
+        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
       - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
           cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "extra-tests"
       - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           project-key: "firesim-multiclock"
           run-script: "run-firesim-scala-tests.sh"
+      - uses: ./.github/actions/job-end
 
   # Sentinel job to simplify how we specify which checks need to pass in branch
   # protection and in Mergify
