@@ -73,9 +73,7 @@ jobs:
           sudo apt-get install -y python3-pip
           sudo pip3 install -r docs/requirements.txt
           make -C docs html
-      - name: Show error log from sphinx if failed
-        if: steps.job-start.outputs.run_result != 'success' && ${{ failure() }}
-        run: cat /tmp/sphinx-err*.log
+          cat /tmp/sphinx-err*.log 2>/dev/null
       - uses: ./.github/actions/job-end
 
   install-riscv-toolchain:
@@ -173,17 +171,13 @@ jobs:
   #
   # When adding new prep jobs, please add them to `needs` below
   setup-complete:
-    name: "setup complete"
+    name: setup-complete
     needs: [install-riscv-toolchain, install-esp-toolchain, install-verilator,
             build-extra-tests]
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Set up complete
-        if: steps.job-start.outputs.run_result != 'success'
         run: echo Set up is complete!
-      - uses: ./.github/actions/job-end
 
   ##########################################################################
 
