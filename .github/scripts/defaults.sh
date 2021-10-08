@@ -9,7 +9,9 @@ run () {
 }
 
 run_script () {
-    ssh -o "ServerAliveInterval=60" -o "StrictHostKeyChecking no" -t $SERVER 'bash -s' < $1 "$2"
+    SCRIPT=$1
+    shift
+    ssh -o "ServerAliveInterval=60" -o "StrictHostKeyChecking no" -t $SERVER 'bash -s' < $SCRIPT "$@"
 }
 
 clean () {
