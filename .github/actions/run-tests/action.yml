@@ -20,6 +20,10 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Init submodules (since only the RTL is cached)
+      run: ./scripts/init-submodules-no-riscv-tools.sh
+      shell: bash
+
     - name: Build toolchain
       uses: ./.github/actions/toolchain-build
       with:
