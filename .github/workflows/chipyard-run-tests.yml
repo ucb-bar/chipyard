@@ -11,6 +11,18 @@ env:
   JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
 
 jobs:
+  cancel-prior-workflows:
+    name: cancel-prior-workflows
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
   commit-on-master-check:
     name: commit-on-master-check
     runs-on: ubuntu-latest
@@ -62,7 +74,7 @@ jobs:
           sudo pip3 install -r docs/requirements.txt
           make -C docs html
       - name: Show error log from sphinx if failed
-        if: (steps.job-start.outputs.run_result != 'success') && ${{ failure() }}
+        if: steps.job-start.outputs.run_result != 'success' && ${{ failure() }}
         run: cat /tmp/sphinx-err*.log
       - uses: ./.github/actions/job-end
 
@@ -790,7 +802,8 @@ jobs:
   # When adding new top level jobs, please add them to `needs` below
   all_tests_passed:
     name: "all tests passed"
-    needs: [chipyard-rocket-run-tests, chipyard-hetero-run-tests, chipyard-boom-run-tests, chipyard-cva6-run-tests,
+    needs: [commit-on-master-check, tutorial-setup-check, documentation-check,
+            chipyard-rocket-run-tests, chipyard-hetero-run-tests, chipyard-boom-run-tests, chipyard-cva6-run-tests,
             chipyard-sodor-run-tests, chipyard-dmirocket-run-tests, chipyard-spiflashwrite-run-tests,
             chipyard-spiflashread-run-tests, chipyard-lbwif-run-tests, chipyard-sha3-run-tests,
             chipyard-streaming-fir-run-tests, chipyard-streaming-passthrough-run-tests, chipyard-hwacha-run-tests,
