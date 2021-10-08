@@ -152,6 +152,8 @@ jobs:
     name: install-verilator
     runs-on: self-hosted
     steps:
+      - name: Change directory owner to working user
+        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
@@ -183,13 +185,10 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Change directory owner to working user
+        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
       - uses: ./.github/actions/job-start
         id: job-start
       - name: Build RTL
@@ -207,13 +206,10 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Change directory owner to working user
+        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
       - uses: ./.github/actions/job-start
         id: job-start
       - name: Build RTL
@@ -231,13 +227,10 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Change directory owner to working user
+        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
       - uses: ./.github/actions/job-start
         id: job-start
       - name: Build RTL
@@ -256,13 +249,10 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Change directory owner to working user
+        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
       - uses: ./.github/actions/job-start
         id: job-start
       - name: Build RTL
@@ -280,13 +270,10 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Change directory owner to working user
+        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
       - uses: ./.github/actions/job-start
         id: job-start
       - name: Build RTL
@@ -304,13 +291,10 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Change directory owner to working user
+        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
       - uses: ./.github/actions/job-start
         id: job-start
       - name: Build RTL
@@ -714,6 +698,8 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Change directory owner to working user
+        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
@@ -735,6 +721,8 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Change directory owner to working user
+        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
@@ -756,6 +744,8 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Change directory owner to working user
+        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
