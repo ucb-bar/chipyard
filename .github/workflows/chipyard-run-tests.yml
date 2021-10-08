@@ -80,7 +80,7 @@ jobs:
 
   install-riscv-toolchain:
     name: install-riscv-toolchain
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
