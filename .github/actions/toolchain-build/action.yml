@@ -20,7 +20,7 @@ runs:
       id: toolchain-build-riscv-tools
       with:
         path: ${{ inputs.tools-version }}-install
-        key: riscv-tools-installed-${{ env.tools-cache-version }}-${{ hashFiles(riscv-tools.hash) }}
+        key: riscv-tools-installed-${{ env.tools-cache-version }}-${{ hashFiles(**/riscv-tools.hash) }}
 
     # brute force way to swap between riscv/esp-tools caches
     - name: Cache esp-tools
@@ -28,7 +28,7 @@ runs:
       id: toolchain-build-esp-tools
       with:
         path: ${{ inputs.tools-version }}-install
-        key: esp-tools-installed-${{ env.tools-cache-version }}-${{ hashFiles(esp-tools.hash) }}
+        key: esp-tools-installed-${{ env.tools-cache-version }}-${{ hashFiles(**/esp-tools.hash) }}
 
     - name: Build toolchain if not cached
       run: |
