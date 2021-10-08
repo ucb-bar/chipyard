@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# move verilator to the remote server
+# install verilator
 
 # turn echo on and error on earliest command
 set -ex
@@ -10,7 +10,6 @@ SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
 # clean older directories (delete prior directories related to this branch also)
-
 $SCRIPT_DIR/clean-old-files.sh $CI_DIR
 rm -rf $REMOTE_PREFIX*
 

@@ -10,33 +10,28 @@ set -ex
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
-# call clean on exit
-trap clean EXIT
-
 export RISCV="$REMOTE_RISCV_DIR"
 export LD_LIBRARY_PATH="$RISCV/lib"
 export PATH="$RISCV/bin:$PATH"
 
 # Directory locations for handling firesim-local installations of libelf/libdwarf
 # This would generally be handled by build-setup.sh/firesim-setup.sh
-firesim_sysroot=lib-install
-remote_firesim_sysroot=$REMOTE_FIRESIM_DIR/$firesim_sysroot
+REMOTE_FIRESIM_SYSROOT=$REMOTE_FIRESIM_DIR/lib-install
 
-cd $REMOTE_CHIPYARD_DIR
 ./scripts/init-submodules-no-riscv-tools.sh
 cd $REMOTE_CHIPYARD_DIR/sims/firesim/sim/firesim-lib/src/main/cc/lib
 git submodule update --init elfutils libdwarf
 cd $REMOTE_CHIPYARD_DIR/sims/firesim
-mkdir -p $remote_firesim_sysroot
-./scripts/build-libelf.sh $remote_firesim_sysroot
-./scripts/build-libdwarf.sh $remote_firesim_sysroot
+mkdir -p $REMOTE_FIRESIM_SYSROOT
+./scripts/build-libelf.sh $REMOTE_FIRESIM_SYSROOT
+./scripts/build-libdwarf.sh $REMOTE_FIRESIM_SYSROOT
 cd $REMOTE_CHIPYARD_DIR
 
 make -C $REMOTE_CHIPYARD_DIR/tools/dromajo/dromajo-src/src
 
 TOOLS_DIR=$REMOTE_RISCV_DIR
 
-LD_LIB_DIR=$remote_firesim_sysroot/lib:$REMOTE_RISCV_DIR/lib
+LD_LIB_DIR=$REMOTE_FIRESIM_SYSROOT/lib:$REMOTE_RISCV_DIR/lib
 
 # Run Firesim Scala Tests
 export RISCV=$TOOLS_DIR

@@ -12,7 +12,7 @@ inputs:
   build-script:
     description: rtl build script to use
     required: false
-    default: "do-rtl-build.sh"
+    default: "remote-do-rtl-build.sh"
   build-type:
     description: type of build
     required: false

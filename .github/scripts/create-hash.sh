@@ -15,6 +15,6 @@ for tools in 'riscv-tools' 'esp-tools' ; do
     git submodule status "toolchains/${tools}" 'toolchains/libgloss' 'toolchains/qemu' |
     while read -r line ; do
         echo "${line#[!0-9a-f]}"
-    done > "$GITHUB_WORKSPACE/${tools}.hash"
+    done > "${tools}.hash"
 done
-echo "Hashfile for riscv-tools and esp-tools created in $HOME"
+echo "Hashfile for riscv-tools and esp-tools created in $PWD"
