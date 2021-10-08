@@ -14,29 +14,21 @@ runs:
       run: .github/scripts/create-hash.sh
       shell: bash
 
-    - name: Generate keys
-      id: genkey
-      run: |
-        echo "::set-output name=riscvtools-cache-key::riscv-tools-installed-${{ env.tools-cache-version }}-$(shasum riscv-tools.hash | cut -d' ' -f1)"
-        echo "::set-output name=esptools-cache-key::esp-tools-installed-${{ env.tools-cache-version }}-$(shasum esp-tools.hash | cut -d' ' -f1)"
-      shell: bash
-
     # brute force way to swap between riscv/esp-tools caches
     - name: Cache riscv-tools
-      if: ${{ inputs.tools-version == "riscv-tools" }}
       uses: actions/cache@v2
       id: toolchain-build-riscv-tools
       with:
         path: ${{ inputs.tools-version }}-install
-        key: ${{ steps.genkey.outputs.riscvtools-cache-key }}
+        key: riscv-tools-installed-${{ env.tools-cache-version }}-${{ hashFiles(riscv-tools.hash) }}
 
+    # brute force way to swap between riscv/esp-tools caches
     - name: Cache esp-tools
-      if: ${{ inputs.tools-version == "esp-tools" }}
       uses: actions/cache@v2
       id: toolchain-build-esp-tools
       with:
         path: ${{ inputs.tools-version }}-install
-        key: ${{ steps.genkey.outputs.esptools-cache-key }}
+        key: esp-tools-installed-${{ env.tools-cache-version }}-${{ hashFiles(esp-tools.hash) }}
 
     - name: Build toolchain if not cached
       run: |
