@@ -2,13 +2,6 @@ name: run-tests
 description: 'Runs tests according to input parameters'
 
 inputs:
-<<<<<<< HEAD
-=======
-  tools-version:
-    description: Which toolchain to build
-    required: false
-    default: 'riscv-tools'
->>>>>>> 52c752ba... Move Chipyard CI to Github Actions
   group-key:
     description: group key
     required: true
@@ -23,7 +16,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-<<<<<<< HEAD
     - name: Init submodules (since only the RTL is cached)
       run: ./scripts/init-submodules-no-riscv-tools.sh
       shell: bash
@@ -37,13 +29,3 @@ runs:
     - name: Run RTL tests
       run: ./.github/scripts/${{ inputs.run-script }} ${{ inputs.project-key }}
       shell: bash
-=======
-    - name: run rtl build script cache of chipyard root should have been loaded by prepare-rtl
-      run: |
-        export RISCV="/__w/chipyard/chipyard/riscv-tools-install"
-        export LD_LIBRARY_PATH="$RISCV/lib"
-        export PATH="$RISCV/bin:$PATH"
-        ./.github/scripts/${{ inputs.run-script }} ${{ inputs.project-key }}
-      shell: bash
-
->>>>>>> 52c752ba... Move Chipyard CI to Github Actions

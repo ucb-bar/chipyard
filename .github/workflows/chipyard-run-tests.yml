@@ -20,6 +20,7 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
+<<<<<<< HEAD
   commit-on-master-check:
     name: commit-on-master-check
     runs-on: ubuntu-latest
@@ -137,6 +138,7 @@ jobs:
         run: .github/scripts/remote-install-verilator.sh
       - uses: ./.github/actions/job-end
 
+<<<<<<< HEAD
   # Sentinel job to simplify how we specify which that basic setup is complete
   #
   # When adding new prep jobs, please add them to `needs` below
