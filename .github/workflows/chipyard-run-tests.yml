@@ -151,11 +151,8 @@ jobs:
   install-verilator:
     name: install-verilator
     runs-on: self-hosted
+    needs: cancel-prior-workflows
     steps:
-      - name: TESTING
-        run: |
-            whoami
-            ls -al $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
@@ -183,17 +180,12 @@ jobs:
     name: prepare-chipyard-cores
     needs: setup-complete
     runs-on: self-hosted
-    container:
-      image: ucbbar/chipyard-ci-image:554b436
-      options: --entrypoint /bin/bash
     steps:
-      - name: Change directory owner to working user
-        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Build RTL
+      - name: Build RTL on self-hosted
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
@@ -204,17 +196,12 @@ jobs:
     name: prepare-chipyard-peripherals
     needs: setup-complete
     runs-on: self-hosted
-    container:
-      image: ucbbar/chipyard-ci-image:554b436
-      options: --entrypoint /bin/bash
     steps:
-      - name: Change directory owner to working user
-        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Build RTL
+      - name: Build RTL on self-hosted
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
@@ -225,17 +212,12 @@ jobs:
     name: prepare-chipyard-accels
     needs: setup-complete
     runs-on: self-hosted
-    container:
-      image: ucbbar/chipyard-ci-image:554b436
-      options: --entrypoint /bin/bash
     steps:
-      - name: Change directory owner to working user
-        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Build RTL
+      - name: Build RTL on self-hosted
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
@@ -247,17 +229,12 @@ jobs:
     name: prepare-chipyard-tracegen
     needs: setup-complete
     runs-on: self-hosted
-    container:
-      image: ucbbar/chipyard-ci-image:554b436
-      options: --entrypoint /bin/bash
     steps:
-      - name: Change directory owner to working user
-        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Build RTL
+      - name: Build RTL on self-hosted
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
@@ -268,17 +245,12 @@ jobs:
     name: prepare-chipyard-other
     needs: setup-complete
     runs-on: self-hosted
-    container:
-      image: ucbbar/chipyard-ci-image:554b436
-      options: --entrypoint /bin/bash
     steps:
-      - name: Change directory owner to working user
-        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Build RTL
+      - name: Build RTL on self-hosted
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
@@ -289,17 +261,12 @@ jobs:
     name: prepare-chipyard-fpga
     needs: setup-complete
     runs-on: self-hosted
-    container:
-      image: ucbbar/chipyard-ci-image:554b436
-      options: --entrypoint /bin/bash
     steps:
-      - name: Change directory owner to working user
-        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Build RTL
+      - name: Build RTL on self-hosted
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
@@ -696,17 +663,12 @@ jobs:
     name: firesim-run-tests
     needs: setup-complete
     runs-on: self-hosted
-    container:
-      image: ucbbar/chipyard-ci-image:554b436
-      options: --entrypoint /bin/bash
     steps:
-      - name: Change directory owner to working user
-        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Run tests
+      - name: Run tests on self-hosted
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
@@ -719,17 +681,12 @@ jobs:
     name: fireboom-run-tests
     needs: setup-complete
     runs-on: self-hosted
-    container:
-      image: ucbbar/chipyard-ci-image:554b436
-      options: --entrypoint /bin/bash
     steps:
-      - name: Change directory owner to working user
-        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Run tests
+      - name: Run tests on self-hosted
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
@@ -742,17 +699,12 @@ jobs:
     name: firesim-multiclock-run-tests
     needs: setup-complete
     runs-on: self-hosted
-    container:
-      image: ucbbar/chipyard-ci-image:554b436
-      options: --entrypoint /bin/bash
     steps:
-      - name: Change directory owner to working user
-        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Run tests
+      - name: Run tests on self-hosted
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
