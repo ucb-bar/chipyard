@@ -78,23 +78,23 @@ jobs:
           #        run: cat /tmp/sphinx-err*.log
           #      - uses: ./.github/actions/job-end
           #
-          #  install-riscv-toolchain:
-          #    name: install-riscv-toolchain
-          #    runs-on: ubuntu-latest
-          #    container:
-          #      image: ucbbar/chipyard-ci-image:554b436
-          #      options: --entrypoint /bin/bash
-          #    steps:
-          #      - name: Checkout
-          #        uses: actions/checkout@v2
-          #      - uses: ./.github/actions/job-start
-          #        id: job-start
-          #      - name: Build default RISC-V toolchain
-          #        if: steps.job-start.outputs.run_result != 'success'
-          #        uses: ./.github/actions/toolchain-build
-          #        with:
-          #          tools-version: 'riscv-tools'
-          #      - uses: ./.github/actions/job-end
+  install-riscv-toolchain:
+    name: install-riscv-toolchain
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Build default RISC-V toolchain
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/toolchain-build
+        with:
+          tools-version: 'riscv-tools'
+      - uses: ./.github/actions/job-end
           #
           #  install-esp-toolchain:
           #    name: install-esp-toolchain

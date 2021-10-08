@@ -8,13 +8,12 @@ REMOTE_MAKE_NPROC=4
 # verilator version
 VERILATOR_VERSION=v4.034
 
-# remote variables
-
+HOME=$GITHUB_WORKSPACE
 CURRENT_BRANCH=$(git branch --show-current)
 
+# remote variables
 # CI_DIR is defined externally based on the GH repository secret BUILDDIR
 
-HOME=`pwd`
 REMOTE_PREFIX=$CI_DIR/${GITHUB_REPOSITORY#*/}-$CURRENT_BRANCH
 REMOTE_WORK_DIR=$GITHUB_WORKSPACE
 REMOTE_RISCV_DIR=$GITHUB_WORKSPACE/riscv-tools-install
