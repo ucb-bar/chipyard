@@ -152,8 +152,10 @@ jobs:
     name: install-verilator
     runs-on: self-hosted
     steps:
-      - name: Change directory owner to working user
-        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+      - name: TESTING
+        run: |
+            whoami
+            ls -al $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
