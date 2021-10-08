@@ -1,0 +1,14 @@
+name: ssh-checkout
+description: "Checkout code and add SSH keys to access remote build server"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Install SSH key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SERVERKEY }}
+        known_hosts: ${{ secrets.BUILDSERVER }}

@@ -2,6 +2,13 @@ name: run-tests
 description: 'Runs tests according to input parameters'
 
 inputs:
+  tools-version:
+    description: Which toolchain to build
+    required: false
+    default: 'riscv-tools'
+  group-key:
+    description: group key
+    required: true
   project-key:
     description: project key
     required: true
@@ -13,8 +20,18 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: run rtl build script cache of chipyard root should have been loaded by prepare-rtl
-      run: |
-        ./.github/scripts/${{ inputs.run-script }} ${{ inputs.project-key }}
-      shell: bash
+    - name: Build toolchain
+      uses: ./.github/actions/toolchain-build
+      with:
+        tools-version: ${{ inputs.tools-version }}
 
+    # Note: You shouldn't need the other inputs since it shouldn't build RTL from scratch
+    - name: Build RTL
+      uses: ./.github/actions/toolchain-build
+      with:
+        tools-version: ${{ inputs.tools-version }}
+        group-key: ${{ inputs.group-key }}
+
+    - name: Run RTL tests
+      run: ./.github/scripts/${{ inputs.run-script }} ${{ inputs.project-key }}
+      shell: bash

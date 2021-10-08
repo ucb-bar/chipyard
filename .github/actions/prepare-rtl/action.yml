@@ -21,6 +21,11 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Build toolchain
+      uses: ./.github/actions/toolchain-build
+      with:
+        tools-version: ${{ inputs.tools-version }}
+
     - uses: actions/cache@v2
       id: rtl-build-id
       with:
@@ -29,13 +34,13 @@ runs:
           sims/firesim/sim
           generators/gemmini/software/gemmini-rocc-tests
         key: ${{ inputs.group-key }}-${{ github.ref }}-${{ github.sha }}
-    - name: run rtl build script if not cached
+
+    - name: Run RTL build if not cached
       run: |
         if [[ "${{ steps.rtl-build-id.outputs.cache-hit }}" != 'true' ]]; then
           echo "Cache miss on ${{ inputs.group-key }}-${{ github.ref }}-${{ github.sha }}"
           ./.github/scripts/${{ inputs.build-script }} ${{ inputs.group-key }} ${{ inputs.build-type }}
         else
-          echo "cache hit do not prepare rtl"
+          echo "Cache hit do not rebuild RTL for ${{ inputs.group-key }}"
         fi
       shell: bash
-

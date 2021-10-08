@@ -66,39 +66,7 @@ jobs:
         run: cat /tmp/sphinx-err*.log
       - uses: ./.github/actions/job-end
 
-  make-keys:
-    name: make-keys
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-ci-image:554b436
-      options: --entrypoint /bin/bash
-    steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.1
-        with:
-          access_token: ${{ github.token }}
-      - name: Checkout
-        uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
-      - name: Generate hashes
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/create-hash.sh
-      - name: Generate keys
-        if: steps.job-start.outputs.run_result != 'success'
-        id: genkey
-        run: |
-          echo "::set-output name=riscvtools-cache-key::riscv-tools-installed-${{ env.tools-cache-version }}-$(shasum riscv-tools.hash | cut -d' ' -f1)"
-          echo "::set-output name=esptools-cache-key::esp-tools-installed-${{ env.tools-cache-version }}-$(shasum esp-tools.hash | cut -d' ' -f1)"
-          echo "::set-output name=extra-tests-cache-key::extra-tests-${{ github.ref }}-${{ github.sha }}"
-      - uses: ./.github/actions/job-end
-    outputs:
-      riscvtools-cache-key: ${{ steps.genkey.outputs.riscvtools-cache-key }}
-      esptools-cache-key: ${{ steps.genkey.outputs.esptools-cache-key }}
-      extra-tests-cache-key: ${{ steps.genkey.outputs.extra-tests-cache-key }}
-
   install-riscv-toolchain:
-    needs: make-keys
     name: install-riscv-toolchain
     runs-on: ubuntu-latest
     container:
@@ -109,19 +77,14 @@ jobs:
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Build default RISC-V toolchain
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - uses: ./.github/actions/job-end
 
   install-esp-toolchain:
-    needs: make-keys
     name: install-esp-toolchain
     runs-on: ubuntu-latest
     container:
@@ -132,20 +95,16 @@ jobs:
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Build ESP RISC-V toolchain
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'esp-tools'
-          cache-key: ${{ needs.make-keys.outputs.esptools-cache-key }}
       - uses: ./.github/actions/job-end
 
   build-extra-tests:
     name: build-extra-tests
-    needs: [make-keys, install-riscv-toolchain]
+    needs: install-riscv-toolchain
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
@@ -155,23 +114,24 @@ jobs:
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
       - name: Build default RISC-V toolchain
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
         with:
           tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
+      - name: Generate keys
+        if: steps.job-start.outputs.run_result != 'success'
+        id: genkey
+        run: |
+          echo "::set-output name=extra-tests-cache-key::extra-tests-${{ github.ref }}-${{ github.sha }}"
       - uses: actions/cache@v2
         if: steps.job-start.outputs.run_result != 'success'
         id: build-extra-tools-cache
         with:
           path: extra-tests-install
-          key: ${{ needs.make-keys.outputs.extra-tests-cache-key }}
-          restore-keys: ${{ needs.make-keys.outputs.extra-tests-cache-key }}
-      - name: Build extra tests if not cached
+          key: ${{ steps.genkey.outputs.extra-tests-cache-key }}
+          restore-keys: ${{ steps.genkey.outputs.extra-tests-cache-key }}
+      - name: Build extra tests
         if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/build-extra-tests.sh
       - uses: ./.github/actions/job-end
@@ -183,16 +143,9 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
       - name: Build verilator on remote
         if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/install-verilator.sh
@@ -203,8 +156,7 @@ jobs:
   # When adding new prep jobs, please add them to `needs` below
   setup-complete:
     name: "setup complete"
-    needs: [commit-on-master-check, tutorial-setup-check, documentation-check,
-            install-riscv-toolchain, install-esp-toolchain, install-verilator,
+    needs: [install-riscv-toolchain, install-esp-toolchain, install-verilator,
             build-extra-tests]
     runs-on: ubuntu-latest
     steps:
@@ -219,34 +171,15 @@ jobs:
 
   prepare-chipyard-cores:
     name: prepare-chipyard-cores
-    needs: [make-keys, setup-complete]
+    needs: setup-complete
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
@@ -256,34 +189,15 @@ jobs:
 
   prepare-chipyard-peripherals:
     name: prepare-chipyard-peripherals
-    needs: [make-keys, setup-complete]
+    needs: setup-complete
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
@@ -293,71 +207,34 @@ jobs:
 
   prepare-chipyard-accels:
     name: prepare-chipyard-accels
-    needs: [make-keys, setup-complete]
+    needs: setup-complete
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build ESP RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'esp-tools'
-          cache-key: ${{ needs.make-keys.outputs.esptools-cache-key }}
       - name: Build RTL
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
+          tools-version: "esp-tools"
           group-key: "group-accels"
       - uses: ./.github/actions/job-end
 
   prepare-chipyard-tracegen:
     name: prepare-chipyard-tracegen
-    needs: [make-keys, setup-complete]
+    needs: setup-complete
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
@@ -367,34 +244,15 @@ jobs:
 
   prepare-chipyard-other:
     name: prepare-chipyard-other
-    needs: [make-keys, setup-complete]
+    needs: setup-complete
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
@@ -404,34 +262,15 @@ jobs:
 
   prepare-chipyard-fpga:
     name: prepare-chipyard-fpga
-    needs: [make-keys, setup-complete]
+    needs: setup-complete
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
       - name: Build RTL
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
@@ -444,928 +283,424 @@ jobs:
 
   chipyard-rocket-run-tests:
     name: chipyard-rocket-run-tests
-    needs: [make-keys, prepare-chipyard-cores]
+    needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-cores"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-cores"
           project-key: "chipyard-rocket"
       - uses: ./.github/actions/job-end
 
   chipyard-hetero-run-tests:
     name: chipyard-hetero-run-tests
-    needs: [make-keys, prepare-chipyard-cores]
+    needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-cores"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-cores"
           project-key: "chipyard-hetero"
       - uses: ./.github/actions/job-end
 
   chipyard-boom-run-tests:
     name: chipyard-boom-run-tests
-    needs: [make-keys, prepare-chipyard-cores]
+    needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-cores"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-cores"
           project-key: "chipyard-boom"
       - uses: ./.github/actions/job-end
 
   chipyard-cva6-run-tests:
     name: chipyard-cva6-run-tests
-    needs: [make-keys, prepare-chipyard-cores]
+    needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-cores"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-cores"
           project-key: "chipyard-cva6"
       - uses: ./.github/actions/job-end
 
   chipyard-sodor-run-tests:
     name: chipyard-sodor-run-tests
-    needs: [make-keys, prepare-chipyard-cores]
+    needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-cores"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-cores"
           project-key: "chipyard-sodor"
       - uses: ./.github/actions/job-end
 
   chipyard-dmirocket-run-tests:
     name: chipyard-dmirocket-run-tests
-    needs: [make-keys, prepare-chipyard-peripherals]
+    needs: prepare-chipyard-peripherals
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-peripherals"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-peripherals"
           project-key: "chipyard-dmirocket"
       - uses: ./.github/actions/job-end
 
   chipyard-spiflashwrite-run-tests:
     name: chipyard-spiflashwrite-run-tests
-    needs: [make-keys, prepare-chipyard-peripherals]
+    needs: prepare-chipyard-peripherals
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-peripherals"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-peripherals"
           project-key: "chipyard-spiflashwrite"
       - uses: ./.github/actions/job-end
 
   chipyard-spiflashread-run-tests:
     name: chipyard-spiflashread-run-tests
-    needs: [make-keys, prepare-chipyard-peripherals]
+    needs: prepare-chipyard-peripherals
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-peripherals"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-peripherals"
           project-key: "chipyard-spiflashread"
       - uses: ./.github/actions/job-end
 
   chipyard-lbwif-run-tests:
     name: chipyard-lbwif-run-tests
-    needs: [make-keys, prepare-chipyard-peripherals]
+    needs: prepare-chipyard-peripherals
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-peripherals"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-peripherals"
           project-key: "chipyard-lbwif"
       - uses: ./.github/actions/job-end
 
   chipyard-sha3-run-tests:
     name: chipyard-sha3-run-tests
-    needs: [make-keys, prepare-chipyard-accels]
+    needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build ESP RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'esp-tools'
-          cache-key: ${{ needs.make-keys.outputs.esptools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-accels"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          tools-version: "esp-tools"
+          group-key: "group-accels"
           project-key: "chipyard-sha3"
       - uses: ./.github/actions/job-end
 
   chipyard-streaming-fir-run-tests:
     name: chipyard-streaming-fir-run-tests
-    needs: [make-keys, prepare-chipyard-accels]
+    needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-accels"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-accels"
           project-key: "chipyard-streaming-fir"
       - uses: ./.github/actions/job-end
 
   chipyard-streaming-passthrough-run-tests:
     name: chipyard-streaming-passthrough-run-tests
-    needs: [make-keys, prepare-chipyard-accels]
+    needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-accels"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-accels"
           project-key: "chipyard-streaming-passthrough"
       - uses: ./.github/actions/job-end
 
   chipyard-hwacha-run-tests:
     name: chipyard-hwacha-run-tests
-    needs: [make-keys, prepare-chipyard-accels]
+    needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build ESP RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'esp-tools'
-          cache-key: ${{ needs.make-keys.outputs.esptools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-accels"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          tools-version: "esp-tools"
+          group-key: "group-accels"
           project-key: "chipyard-hwacha"
       - uses: ./.github/actions/job-end
 
   chipyard-gemmini-run-tests:
     name: chipyard-gemmini-run-tests
-    needs: [make-keys, prepare-chipyard-accels]
+    needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build ESP RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'esp-tools'
-          cache-key: ${{ needs.make-keys.outputs.esptools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-accels"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          tools-version: "esp-tools"
+          group-key: "group-accels"
           project-key: "chipyard-gemmini"
       - uses: ./.github/actions/job-end
 
   chipyard-nvdla-run-tests:
     name: chipyard-nvdla-run-tests
-    needs: [make-keys, prepare-chipyard-accels]
+    needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-accels"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-accels"
           project-key: "chipyard-nvdla"
       - uses: ./.github/actions/job-end
 
   tracegen-boom-run-tests:
     name: tracegen-boom-run-tests
-    needs: [make-keys, prepare-chipyard-tracegen]
+    needs: prepare-chipyard-tracegen
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-tracegen"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-tracegen"
           project-key: "tracegen-boom"
       - uses: ./.github/actions/job-end
 
   tracegen-run-tests:
     name: tracegen-run-tests
-    needs: [make-keys, prepare-chipyard-tracegen]
+    needs: prepare-chipyard-tracegen
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-tracegen"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-tracegen"
           project-key: "tracegen"
       - uses: ./.github/actions/job-end
 
   icenet-run-tests:
     name: icenet-run-tests
-    needs: [make-keys, prepare-chipyard-other]
+    needs: prepare-chipyard-other
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
-        if: steps.job-start.outputs.run_result != 'success'
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-other"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-other"
           project-key: "icenet"
       - uses: ./.github/actions/job-end
 
   testchipip-run-tests:
     name: testchipip-run-tests
-    needs: [make-keys, prepare-chipyard-other]
+    needs: prepare-chipyard-other
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-other"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "group-other"
           project-key: "testchipip"
       - uses: ./.github/actions/job-end
 
   firesim-run-tests:
     name: firesim-run-tests
-    needs: [make-keys, setup-complete]
+    needs: setup-complete
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "extra-tests"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "extra-tests"
           project-key: "firesim"
           run-script: "run-firesim-scala-tests.sh"
       - uses: ./.github/actions/job-end
 
   fireboom-run-tests:
     name: fireboom-run-tests
-    needs: [make-keys, setup-complete]
+    needs: setup-complete
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "extra-tests"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "extra-tests"
           project-key: "fireboom"
           run-script: "run-firesim-scala-tests.sh"
       - uses: ./.github/actions/job-end
 
   firesim-multiclock-run-tests:
     name: firesim-multiclock-run-tests
-    needs: [make-keys, setup-complete]
+    needs: setup-complete
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: ./.github/actions/ssh-checkout
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Install SSH key
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SERVERKEY }}
-          known_hosts: ${{ secrets.BUILDSERVER }}
-      - name: Init submodules
-        if: steps.job-start.outputs.run_result != 'success'
-        run: ./scripts/init-submodules-no-riscv-tools.sh
-      - name: Check commits of each submodle
-        if: steps.job-start.outputs.run_result != 'success'
-        run: .github/scripts/check-commit.sh
-      - name: Build default RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-          cache-key: ${{ needs.make-keys.outputs.riscvtools-cache-key }}
-      - name: Build RTL
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "extra-tests"
       - name: Run tests
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
+          group-key: "extra-tests"
           project-key: "firesim-multiclock"
           run-script: "run-firesim-scala-tests.sh"
       - uses: ./.github/actions/job-end
