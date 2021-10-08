@@ -9,6 +9,10 @@ set -ex
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
+export RISCV="$GITHUB_WORKSPACE/riscv-tools-install"
+export LD_LIBRARY_PATH="$RISCV/lib"
+export PATH="$RISCV/bin:$PATH"
+
 run_bmark () {
     make run-bmark-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $@
 }

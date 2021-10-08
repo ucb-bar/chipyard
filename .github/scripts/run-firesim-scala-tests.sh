@@ -13,6 +13,10 @@ source $SCRIPT_DIR/defaults.sh
 # call clean on exit
 trap clean EXIT
 
+export RISCV="$GITHUB_WORKSPACE/riscv-tools-install"
+export LD_LIBRARY_PATH="$RISCV/lib"
+export PATH="$RISCV/bin:$PATH"
+
 # Directory locations for handling firesim-local installations of libelf/libdwarf
 # This would generally be handled by build-setup.sh/firesim-setup.sh
 firesim_sysroot=lib-install
