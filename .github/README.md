@@ -73,14 +73,14 @@ The following is included in `.github/scripts/: directory
 
     `build-toolchains.sh`        # build either riscv-tools or esp-tools
     `create-hash.sh`             # create hashes of riscv-tools/esp-tools to use as hash keys
-    `do-rtl-build.sh`            # use verilator to build a sim executable (remotely)
+    `remote-do-rtl-build.sh`            # use verilator to build a sim executable (remotely)
     `defaults.sh`                # default variables used
     `check-commit.sh`            # check that submodule commits are valid
     `build-extra-tests.sh`       # build default chipyard tests located in tests/
     `clean-old-files.sh`         # clean up build server files
     `do-fpga-rtl-build.sh`       # similar to `do-rtl-build` but using fpga/
-    `install-verilator.sh`       # install verilator on build server
-    `run-firesim-scala-tests.sh` # run firesim scala tests
+    `remote-install-verilator.sh`       # install verilator on build server
+    `remote-run-firesim-scala-tests.sh` # run firesim scala tests
     `run-tests.sh                # run tests for a specific set of designs
 
 How things are set up for Chipyard
