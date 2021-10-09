@@ -2,10 +2,6 @@ name: prepare-rtl
 description: 'Builds RTL based on parameters, caches the entire chipyard root dir when done'
 
 inputs:
-  tools-version:
-    description: Which toolchain to build
-    required: false
-    default: 'riscv-tools'
   group-key:
     description: group key
     required: true
@@ -21,10 +17,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Build toolchain
+    - name: Build RISC-V toolchains
       uses: ./.github/actions/toolchain-build
-      with:
-        tools-version: ${{ inputs.tools-version }}
 
     - uses: actions/cache@v2
       id: rtl-build-id

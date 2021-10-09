@@ -1,11 +1,5 @@
 name: toolchain-build
-description: 'Builds or retrieves cache of the all toolchains'
-
-inputs:
-  tools-version:
-    description: Which toolchain to build
-    required: false
-    default: 'riscv-tools'
+description: 'Build/cache both toolchains'
 
 runs:
   using: "composite"
@@ -14,28 +8,22 @@ runs:
       run: .github/scripts/create-hash.sh
       shell: bash
 
-    # brute force way to swap between riscv/esp-tools caches
     - name: Cache riscv-tools
       uses: actions/cache@v2
-      id: toolchain-build-riscv-tools
       with:
-        path: ${{ inputs.tools-version }}-install
+        path: riscv-tools-install
         key: riscv-tools-installed-${{ env.tools-cache-version }}-${{ hashFiles('**/riscv-tools.hash') }}
 
-    # brute force way to swap between riscv/esp-tools caches
+    - name: Build RISC-V toolchain if not cached
+      run: ./.github/scripts/build-toolchains.sh riscv-tools
+      shell: bash
+
     - name: Cache esp-tools
       uses: actions/cache@v2
-      id: toolchain-build-esp-tools
       with:
-        path: ${{ inputs.tools-version }}-install
+        path: esp-tools-install
         key: esp-tools-installed-${{ env.tools-cache-version }}-${{ hashFiles('**/esp-tools.hash') }}
 
-    - name: Build toolchain if not cached
-      run: |
-        if [[ "${{ steps.toolchain-build-riscv-tools.outputs.cache-hit }}" != 'true' || "${{ steps.toolchain-build-esp-tools.outputs.cache-hit }}" != 'true' ]]; then
-          echo "Cache miss on ${{ inputs.tools-version }}-install. Build."
-          ./.github/scripts/build-toolchains.sh ${{ inputs.tools-version }}
-        else
-          echo "Cache hit do not rebuild toolchain ${{ inputs.tools-version }}."
-        fi
+    - name: Build ESP RISC-V toolchain if not cached
+      run: ./.github/scripts/build-toolchains.sh esp-tools
       shell: bash

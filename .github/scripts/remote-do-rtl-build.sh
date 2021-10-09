@@ -59,5 +59,3 @@ do
     export COURSIER_CACHE=$REMOTE_WORK_DIR/.coursier-cache
     make -j$REMOTE_MAKE_NPROC -C $REMOTE_MAKE_DIR FIRRTL_LOGLEVEL=info JAVA_OPTS="$REMOTE_JAVA_OPTS" SBT_OPTS="$REMOTE_SBT_OPTS" ${mapping[$key]}
 done
-
-rm -rf $REMOTE_CHIPYARD_DIR/project

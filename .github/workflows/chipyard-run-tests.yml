@@ -3,7 +3,7 @@ name: chipyard-ci-process
 on: [push]
 
 env:
-  tools-cache-version: v8
+  tools-cache-version: v13
   BUILDSERVER: ${{ secrets.BUILDSERVER }}
   BUILDUSER: ${{ secrets.BUILDUSER }}
   SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
@@ -75,8 +75,8 @@ jobs:
         run: cat /tmp/sphinx-err*.log
       - uses: ./.github/actions/job-end
 
-  install-riscv-toolchain:
-    name: install-riscv-toolchain
+  install-toolchains:
+    name: install-toolchains
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
@@ -86,34 +86,14 @@ jobs:
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Build default RISC-V toolchain
+      - name: Build RISC-V toolchains
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
-      - uses: ./.github/actions/job-end
-
-  install-esp-toolchain:
-    name: install-esp-toolchain
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-ci-image:554b436
-      options: --entrypoint /bin/bash
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
-      - name: Build ESP RISC-V toolchain
-        if: steps.job-start.outputs.run_result != 'success'
-        uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'esp-tools'
       - uses: ./.github/actions/job-end
 
   build-extra-tests:
     name: build-extra-tests
-    needs: install-riscv-toolchain
+    needs: install-toolchains
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
@@ -123,11 +103,9 @@ jobs:
         uses: actions/checkout@v2
       - uses: ./.github/actions/job-start
         id: job-start
-      - name: Build default RISC-V toolchain
+      - name: Build RISC-V toolchains
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
-        with:
-          tools-version: 'riscv-tools'
       - name: Generate keys
         if: steps.job-start.outputs.run_result != 'success'
         id: genkey
@@ -164,8 +142,7 @@ jobs:
   # When adding new prep jobs, please add them to `needs` below
   setup-complete:
     name: setup-complete
-    needs: [install-riscv-toolchain, install-esp-toolchain, install-verilator,
-            build-extra-tests]
+    needs: [install-toolchains, install-verilator, build-extra-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Set up complete
@@ -218,7 +195,6 @@ jobs:
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
-          tools-version: "esp-tools"
           group-key: "group-accels"
       - uses: ./.github/actions/job-end
 
@@ -469,7 +445,6 @@ jobs:
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
-          tools-version: "esp-tools"
           group-key: "group-accels"
           project-key: "chipyard-sha3"
       - uses: ./.github/actions/job-end
@@ -530,7 +505,6 @@ jobs:
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
-          tools-version: "esp-tools"
           group-key: "group-accels"
           project-key: "chipyard-hwacha"
       - uses: ./.github/actions/job-end
@@ -551,7 +525,6 @@ jobs:
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
-          tools-version: "esp-tools"
           group-key: "group-accels"
           project-key: "chipyard-gemmini"
       - uses: ./.github/actions/job-end
