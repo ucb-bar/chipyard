@@ -14,9 +14,6 @@ set -ex
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
-# call clean on exit
-trap clean EXIT
-
 cd $REMOTE_CHIPYARD_DIR
 ./scripts/init-submodules-no-riscv-tools.sh
 ./scripts/init-fpga.sh
