@@ -24,14 +24,9 @@ runs:
       run: ./scripts/init-submodules-no-riscv-tools.sh
       shell: bash
 
-    - name: Build toolchain
-      uses: ./.github/actions/toolchain-build
-      with:
-        tools-version: ${{ inputs.tools-version }}
-
     # Note: You shouldn't need the other inputs since it shouldn't build RTL from scratch
     - name: Build RTL
-      uses: ./.github/actions/toolchain-build
+      uses: ./.github/actions/prepare-rtl
       with:
         tools-version: ${{ inputs.tools-version }}
         group-key: ${{ inputs.group-key }}

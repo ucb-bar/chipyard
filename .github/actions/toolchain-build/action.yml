@@ -1,5 +1,5 @@
 name: toolchain-build
-description: 'Builds or retrieves cache of the selected toolchain'
+description: 'Builds or retrieves cache of the all toolchains'
 
 inputs:
   tools-version:

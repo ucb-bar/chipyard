@@ -25,11 +25,12 @@ if [ $1 = "group-accels" ]; then
     export RISCV=$REMOTE_ESP_DIR
     export LD_LIBRARY_PATH=$REMOTE_ESP_DIR/lib
     export PATH=$RISCV/bin:$PATH
-    GEMMINI_SOFTWARE_DIR=$REMOTE_CHIPYARD_DIR/generators/gemmini/software/gemmini-rocc-tests
-    cd $GEMMINI_SOFTWARE_DIR
+    pushd $REMOTE_CHIPYARD_DIR/generators/gemmini/software
     git submodule update --init --recursive gemmini-rocc-tests
-    cd gemmini-rocc-tests
+    pushd gemmini-rocc-tests
     ./build.sh
+    popd
+    popd
 fi
 
 # choose what make dir to use
