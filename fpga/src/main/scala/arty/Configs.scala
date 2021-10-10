@@ -40,9 +40,9 @@ class TinyRocketArtyConfig extends Config(
   new chipyard.TinyRocketConfig)
 
 class TinyRocketArtySimConfig extends Config( // any additional IO needed for VCS sim go here.
+  new WithFPGASimSerial ++
   new testchipip.WithDefaultSerialTL ++
   new chipyard.harness.WithSimSerial ++
   new chipyard.harness.WithTiedOffDebug ++
-  new TinyRocketArtyConfig ++
-  new WithFPGASimSerial)
+  new TinyRocketArtyConfig)
 // DOC include end: AbstractArty and Rocket
