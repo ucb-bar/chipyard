@@ -14,6 +14,10 @@ module ArtyTestDriver;
 
   reg clock = 1'b0;
   reg reset = 1'b1;
+  // the ArtyFPGATestHarness expects an active low reset, because the reset
+  // switch on the dev board is also active low. the rest of the TestDriver
+  // logic depends on active high reset. just give resetn to the test harness.
+  wire resetn = !reset;
 
   always #(`CLOCK_PERIOD/2.0) clock = ~clock;
   initial #(`RESET_DELAY) reset = 0;
@@ -166,7 +170,7 @@ module ArtyTestDriver;
 
   `MODEL testHarness(
     .CLK100MHZ(clock),
-    .ck_rst(reset),
+    .ck_rst(resetn),
     .io_success(success)
   );
 
