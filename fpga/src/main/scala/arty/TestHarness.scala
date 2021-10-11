@@ -29,6 +29,11 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
     val dut = Module(lazyDut.module)
   }
 
+  // set SRST_n (JTAG reset, active-low) to true unless overridden in the JTAG
+  // harness binder. This is necessary because the Xilinx reset IP depends on it
+  // in fpga-shells, and the simulation config does not include JTAG.
+  SRST_n := true.B
+
   val harnessClock = clock_32MHz
   val harnessReset = hReset
   val success = Wire(Bool())
