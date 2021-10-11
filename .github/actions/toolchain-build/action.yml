@@ -8,6 +8,15 @@ runs:
       run: .github/scripts/create-hash.sh
       shell: bash
 
+    - run: |
+        cat $GITHUB_WORKSPACE/riscv-tools.hash
+        ls -alh $GITHUB_WORKSPACE/riscv-tools.hash
+        cat $GITHUB_WORKSPACE/esp-tools.hash
+        ls -alh $GITHUB_WORKSPACE/esp-tools.hash
+        echo "${{ hashFiles('**/riscv-tools.hash') }}"
+        echo "${{ hashFiles('**/esp-tools.hash') }}"
+      shell: bash
+
     - name: Cache riscv-tools
       uses: actions/cache@v2
       with:
