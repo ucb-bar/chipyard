@@ -208,8 +208,8 @@ VLOGAN_OPTS = \
 $(sim): $(vivado-vcs-collateral)
 	mkdir -p $(build_dir)/vcs_lib/xil_defaultlib
 	cd $(build_dir); $(VHDLAN) -work $(xilinx_lib) -f $(fpga_sim_vhdl_sources) -l vhdlan.log
-	cd $(build_dir); $(VLOGAN) $(VLOGAN_OPTS) -work $(xilinx_lib) -f $(fpga_sim_verilog_sources) -l vlogan.log
-	cd $(build_dir); $(VCS) $(VCS_CC_OPTS) $(xilinx_lib).$(TB) $(xilinx_lib).glbl -file $(fpga_sim_cc_sources) -o $@ -Mdir=$(build_dir)/$(long_name) -l vcs.log
+	cd $(build_dir); $(VLOGAN) $(VLOGAN_OPTS) +define+DEBUG -work $(xilinx_lib) -f $(fpga_sim_verilog_sources) -l vlogan.log
+	cd $(build_dir); $(VCS) $(VCS_CC_OPTS) $(xilinx_lib).$(TB) $(xilinx_lib).glbl -file $(fpga_sim_cc_sources) -o $@ -Mdir=$(build_dir)/$(long_name) -l vcs.log -debug_access+all
 
 .PHONY: sim-fpga
 sim-fpga: $(sim)
