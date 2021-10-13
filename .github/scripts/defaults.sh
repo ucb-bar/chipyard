@@ -1,22 +1,5 @@
 #!/bin/bash
 
-copy () {
-    rsync -azp -e 'ssh' --exclude '.git' $1 $2
-}
-
-run () {
-    ssh -o "ServerAliveInterval=60" -o "StrictHostKeyChecking no" -t $SERVER $@
-}
-
-run_script () {
-    ssh -o "ServerAliveInterval=60" -o "StrictHostKeyChecking no" -t $SERVER 'bash -s' < $1 "$2"
-}
-
-clean () {
-    # remove remote work dir
-    run "rm -rf $REMOTE_WORK_DIR"
-}
-
 # make parallelism
 CI_MAKE_NPROC=8
 # chosen based on a 24c system shared with 1 other project
@@ -25,18 +8,17 @@ REMOTE_MAKE_NPROC=4
 # verilator version
 VERILATOR_VERSION=v4.034
 
-# remote variables
-
+HOME=$GITHUB_WORKSPACE
 CURRENT_BRANCH=$(git branch --show-current)
 
+# remote variables
 # CI_DIR is defined externally based on the GH repository secret BUILDDIR
 
-HOME=`pwd`
 REMOTE_PREFIX=$CI_DIR/${GITHUB_REPOSITORY#*/}-$CURRENT_BRANCH
-REMOTE_WORK_DIR=$REMOTE_PREFIX-$GITHUB_SHA-$GITHUB_JOB
-REMOTE_RISCV_DIR=$REMOTE_WORK_DIR/riscv-tools-install
-REMOTE_ESP_DIR=$REMOTE_WORK_DIR/esp-tools-install
-REMOTE_CHIPYARD_DIR=$REMOTE_WORK_DIR/chipyard
+REMOTE_WORK_DIR=$GITHUB_WORKSPACE
+REMOTE_RISCV_DIR=$GITHUB_WORKSPACE/riscv-tools-install
+REMOTE_ESP_DIR=$GITHUB_WORKSPACE/esp-tools-install
+REMOTE_CHIPYARD_DIR=$GITHUB_WORKSPACE
 REMOTE_SIM_DIR=$REMOTE_CHIPYARD_DIR/sims/verilator
 REMOTE_FIRESIM_DIR=$REMOTE_CHIPYARD_DIR/sims/firesim/sim
 REMOTE_FPGA_DIR=$REMOTE_CHIPYARD_DIR/fpga

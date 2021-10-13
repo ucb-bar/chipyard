@@ -2,6 +2,9 @@ name: run-tests
 description: 'Runs tests according to input parameters'
 
 inputs:
+  group-key:
+    description: group key
+    required: true
   project-key:
     description: project key
     required: true
@@ -13,11 +16,16 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: run rtl build script cache of chipyard root should have been loaded by prepare-rtl
-      run: |
-        export RISCV="$GITHUB_WORKSPACE/riscv-tools-install"
-        export LD_LIBRARY_PATH="$RISCV/lib"
-        export PATH="$RISCV/bin:$PATH"
-        ./.github/scripts/${{ inputs.run-script }} ${{ inputs.project-key }}
+    - name: Init submodules (since only the RTL is cached)
+      run: ./scripts/init-submodules-no-riscv-tools.sh
       shell: bash
 
+    # Note: You shouldn't need the other inputs since it shouldn't build RTL from scratch
+    - name: Build RTL
+      uses: ./.github/actions/prepare-rtl
+      with:
+        group-key: ${{ inputs.group-key }}
+
+    - name: Run RTL tests
+      run: ./.github/scripts/${{ inputs.run-script }} ${{ inputs.project-key }}
+      shell: bash
