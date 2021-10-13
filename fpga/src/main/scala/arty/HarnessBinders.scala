@@ -72,8 +72,8 @@ class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
 class WithArtyUARTHarnessBinder extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: ArtyFPGATestHarness, ports: Seq[UARTPortIO]) => {
     withClockAndReset(th.clock_32MHz, th.ck_rst) {
-      IOBUF(th.uart_txd_in,  ports.head.txd)
-      ports.head.rxd := IOBUF(th.uart_rxd_out)
+      IOBUF(th.uart_rxd_out,  ports.head.txd)
+      ports.head.rxd := IOBUF(th.uart_txd_in)
     }
   }
 })
