@@ -24,19 +24,22 @@ jobs:
     name: test1
     runs-on: ubuntu-latest
     steps:
+        - uses: actions/checkout@v2
         - run: |
-            mkdir -p $GITHUB_WORKSPACE
             echo "dummy" >> $GITHUB_WORKSPACE/temp.file
             echo "${{ hashFiles('**/temp.file') }}"
+            echo "${{ hashFiles('**/README.md') }}"
 
   test2:
     name: test2
     runs-on: self-hosted
     steps:
+        - uses: actions/checkout@v2
         - run: |
-            mkdir -p $GITHUB_WORKSPACE
             echo "dummy" >> $GITHUB_WORKSPACE/temp.file
             echo "${{ hashFiles('**/temp.file') }}"
+            echo "${{ hashFiles('**/README.md') }}"
+
 
   test3:
     name: test3
@@ -45,12 +48,11 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+        - uses: actions/checkout@v2
         - run: |
-            mkdir -p $GITHUB_WORKSPACE
             echo "dummy" >> $GITHUB_WORKSPACE/temp.file
             echo "${{ hashFiles('**/temp.file') }}"
-
-
+            echo "${{ hashFiles('**/README.md') }}"
 
 
           #  commit-on-master-check:
