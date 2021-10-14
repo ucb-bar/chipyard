@@ -107,11 +107,6 @@ abstract class FireSimTestSuite(
 class RocketF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimQuadRocketConfig", "WithSynthAsserts_BaseF1Config")
 class BoomF1Tests extends FireSimTestSuite("FireSim", "DDR3FRFCFSLLC4MB_FireSimLargeBoomConfig", "BaseF1Config")
 class RocketNICF1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimRocketConfig", "BaseF1Config")
-// Multiclock tests
-class RocketMulticlockF1Tests extends FireSimTestSuite(
-  "FireSim",
-  "FireSimMulticlockRocketConfig",
-  "WithSynthAsserts_BaseF1Config")
 
 class CVA6F1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_FireSimCVA6Config", "BaseF1Config")
 
@@ -119,5 +114,4 @@ class CVA6F1Tests extends FireSimTestSuite("FireSim", "WithNIC_DDR3FRFCFSLLC4MB_
 class CITests extends Suites(
   new RocketF1Tests,
   new BoomF1Tests,
-  new RocketNICF1Tests,
-  new RocketMulticlockF1Tests)
+  new RocketNICF1Tests)

@@ -94,14 +94,15 @@ class BringupGPIOVCU118PlacedOverlay(val shell: VCU118ShellBasicOverlays, name: 
     require(gpioNames.length == io.gpio.length)
 
     val packagePinsWithIOStdWithPackageIOs = (gpioNames zip io.gpio).map { case (name, io) =>
-      val (pin, iostd) = BringupGPIOs.pinMapping(name)
-      (pin, iostd, IOPin(io))
+      val (pin, iostd, pullupEnable) = BringupGPIOs.pinMapping(name)
+      (pin, iostd, pullupEnable, IOPin(io))
     }
 
-    packagePinsWithIOStdWithPackageIOs foreach { case (pin, iostd, io) => {
+    packagePinsWithIOStdWithPackageIOs foreach { case (pin, iostd, pullupEnable, io) => {
       shell.xdc.addPackagePin(io, pin)
       shell.xdc.addIOStandard(io, iostd)
       if (iostd == "LVCMOS12") { shell.xdc.addDriveStrength(io, "8") }
+      if (pullupEnable) { shell.xdc.addPullup(io) }
     } }
   } }
 }

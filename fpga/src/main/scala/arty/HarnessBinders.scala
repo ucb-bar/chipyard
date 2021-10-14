@@ -13,6 +13,7 @@ import sifive.blocks.devices.pinctrl._
 import sifive.fpgashells.ip.xilinx.{IBUFG, IOBUF, PULLUP, PowerOnResetFPGAOnly}
 
 import chipyard.harness.{ComposeHarnessBinder, OverrideHarnessBinder}
+import chipyard.iobinders.JTAGChipIO
 
 import testchipip._
 
@@ -45,18 +46,21 @@ class WithFPGASimSerial extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: ArtyFPGATestHarness, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
-      val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, port, th.reset_core)
-      ram.module.reset := th.reset_core
+      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+      withClockAndReset(th.buildtopClock, th.reset_core) {
+        val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.reset_core)
+        ram.module.reset := th.reset_core
 
-      val success = {
-        val sim = Module(new SimSerial(ram.module.io.tsi_ser.w))
-        sim.io.clock := port.clock
-        sim.io.reset := th.reset_core
-        sim.io.serial <> ram.module.io.tsi_ser
-        sim.io.exit
+        val success = {
+          val sim = Module(new SimSerial(ram.module.io.tsi_ser.w))
+          sim.io.clock := port.clock
+          sim.io.reset := th.reset_core
+          sim.io.serial <> ram.module.io.tsi_ser
+          sim.io.exit
+        }
+
+        when (success) { th.success := true.B }
       }
-
-      when (success) { th.success := true.B }
     })
   }
 })
@@ -64,11 +68,18 @@ class WithFPGASimSerial extends OverrideHarnessBinder({
 class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
   (system: HasPeripheryDebug, th: ArtyFPGATestHarness, ports: Seq[Data]) => {
     ports.map {
-      case j: JTAGIO =>
-        withClockAndReset(th.harnessClock, th.hReset) {
+      case j: JTAGChipIO =>
+        withClockAndReset(th.buildtopClock, th.hReset) {
+          val jtag_wire = Wire(new JTAGIO)
+          jtag_wire.TDO.data := j.TDO
+          jtag_wire.TDO.driven := true.B
+          j.TCK := jtag_wire.TCK
+          j.TMS := jtag_wire.TMS
+          j.TDI := jtag_wire.TDI
+
           val io_jtag = Wire(new JTAGPins(() => new BasePin(), false)).suggestName("jtag")
 
-          JTAGPinsFromPort(io_jtag, j)
+          JTAGPinsFromPort(io_jtag, jtag_wire)
 
           io_jtag.TCK.i.ival := IBUFG(IOBUF(th.jd_2).asClock).asBool
 
@@ -97,8 +108,8 @@ class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
 class WithArtyUARTHarnessBinder extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: ArtyFPGATestHarness, ports: Seq[UARTPortIO]) => {
     withClockAndReset(th.clock_32MHz, th.ck_rst) {
-      IOBUF(th.uart_txd_in,  ports.head.txd)
-      ports.head.rxd := IOBUF(th.uart_rxd_out)
+      IOBUF(th.uart_rxd_out,  ports.head.txd)
+      ports.head.rxd := IOBUF(th.uart_txd_in)
     }
   }
 })

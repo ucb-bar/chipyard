@@ -7,7 +7,7 @@ import freechips.rocketchip.config.{Parameters}
 
 import sifive.fpgashells.shell.xilinx.artyshell.{ArtyShell}
 
-import chipyard.{BuildTop, HasHarnessSignalReferences, HasTestHarnessFunctions}
+import chipyard.{BuildTop, HasHarnessSignalReferences}
 import chipyard.harness.{ApplyHarnessBinders}
 import chipyard.iobinders.{HasIOBinders}
 
@@ -34,8 +34,8 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
   // in fpga-shells, and the simulation config does not include JTAG.
   SRST_n := true.B
 
-  val harnessClock = clock_32MHz
-  val harnessReset = hReset
+  val buildtopClock = clock_32MHz
+  val buildtopReset = dReset
   val success = Wire(Bool())
   val dutReset = dReset
   val io_success = IO(Output(Bool()))
@@ -43,9 +43,6 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
   success := false.B
 
   // must be after HasHarnessSignalReferences assignments
-  lazyDut match { case d: HasTestHarnessFunctions =>
-    d.harnessFunctions.foreach(_(this))
-  }
   lazyDut match { case d: HasIOBinders =>
     ApplyHarnessBinders(this, d.lazySystem, d.portMap)
   }
