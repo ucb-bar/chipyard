@@ -7,7 +7,7 @@ GitHub Actions Brief Explanation
 ---------------------------
 
 CI is executed by Github Actions (GA). GA is controlled by `.yml` files in the `.github/workflows/` directory.
-In our case we have just one workflow named `chipyard-rocket-run-tests.yml`.
+In our case, we have just one workflow named `chipyard-run-tests.yml`.
 It defines a number of `jobs` within it that do particular tasks.
 All jobs in the workflow must pass for the CI run to be successful.
 In general, a job is run in parallel with others unless it depends on some other job.
@@ -120,7 +120,7 @@ Note: On the remote server you need to have the `*.pub` key file added to the `a
 Notes on CIRCLE CI
 ------------------
 This code is heavily based on the origin [CircleCI]() work. There a quite a few differences
-- CCI supports workflow level variables, in GA we must define thiing like `BUILDSERVER: ${{ secrets.BUILDSERVER }}` in every job
+- CCI supports workflow level variables, in GA we must define things like `BUILDSERVER: ${{ secrets.BUILDSERVER }}` in every job
 - CCI allows a much larger cache. The entire CY directory with toolchains and RTL could be cached, with GA there is a 5Gb total cache limit
 - GA support more parallel jobs 20 vs 4
 - GA seems to allow much longer run times
