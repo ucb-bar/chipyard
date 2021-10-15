@@ -32,7 +32,7 @@ class WithArtyResetHarnessBinder extends ComposeHarnessBinder({
   (system: HasPeripheryDebugModuleImp, th: ArtyFPGATestHarness, ports: Seq[Bool]) => {
     require(ports.size == 2)
 
-    withClockAndReset(th.clock_32MHz, th.ck_rst) {
+    withClockAndReset(th.clock_32MHz, th.hReset) {
       // Debug module reset
       th.dut_ndreset := ports(0)
 
@@ -47,14 +47,13 @@ class WithFPGASimSerial extends OverrideHarnessBinder({
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
       val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
-      withClockAndReset(th.buildtopClock, th.reset_core) {
-        val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.reset_core)
-        ram.module.reset := th.reset_core
+      withClockAndReset(th.buildtopClock, th.buildtopReset.asBool) {
+        val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset.asBool)
 
         val success = {
           val sim = Module(new SimSerial(ram.module.io.tsi_ser.w))
           sim.io.clock := port.clock
-          sim.io.reset := th.reset_core
+          sim.io.reset := th.buildtopReset.asBool
           sim.io.serial <> ram.module.io.tsi_ser
           sim.io.exit
         }
@@ -107,7 +106,7 @@ class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
 
 class WithArtyUARTHarnessBinder extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: ArtyFPGATestHarness, ports: Seq[UARTPortIO]) => {
-    withClockAndReset(th.clock_32MHz, th.ck_rst) {
+    withClockAndReset(th.clock_32MHz, th.hReset) {
       IOBUF(th.uart_rxd_out,  ports.head.txd)
       ports.head.rxd := IOBUF(th.uart_txd_in)
     }

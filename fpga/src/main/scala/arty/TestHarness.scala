@@ -24,22 +24,23 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
   val dReset = Wire(AsyncReset())
   dReset := reset_core.asAsyncReset
 
-  // default to 32MHz clock
+  // Default to 32MHz clock
   withClockAndReset(clock_32MHz, hReset) {
     val dut = Module(lazyDut.module)
   }
 
-  // set SRST_n (JTAG reset, active-low) to true unless overridden in the JTAG
+  // Set SRST_n (JTAG reset, active-low) to true unless overridden in the JTAG
   // harness binder. This is necessary because the Xilinx reset IP depends on it
   // in fpga-shells, and the simulation config does not include JTAG.
   SRST_n := true.B
 
   val buildtopClock = clock_32MHz
   val buildtopReset = dReset
-  val success = Wire(Bool())
   val dutReset = dReset
-  val io_success = IO(Output(Bool()))
-  io_success := success
+  val success = IO(Output(Bool()))
+
+  // This will be overridden by the WithFPGASimSerial harness binder to set
+  // success to the output of the sim serial module.
   success := false.B
 
   // must be after HasHarnessSignalReferences assignments
