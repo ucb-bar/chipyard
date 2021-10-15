@@ -44,6 +44,10 @@ class WithArtyResetHarnessBinder extends ComposeHarnessBinder({
 
 class WithFPGASimSerial extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: ArtyFPGATestHarness, ports: Seq[ClockedIO[SerialIO]]) => {
+    // This binder is the main difference between FPGA and Chipyard simulation.
+    // For FPGA sim, we want to wire the output of the Xilinx reset IP to 
+    // the sim ram and serial modules, rather than connect the harness reset
+    // directly.
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
       val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
