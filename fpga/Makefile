@@ -140,7 +140,7 @@ $(BIT_FILE): $(synth_list_f)
 		-tclargs \
 			-top-module "$(MODEL)" \
 			-F "$(synth_list_f)" \
-			-board "$(BOARD)" \			
+			-board "$(BOARD)" \
 			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')"
 
 .PHONY: bitstream
@@ -184,7 +184,8 @@ $(vivado-vcs-collateral): $(sim_dir)/scripts/generate_vcs_collateral.tcl $(vivad
 		-tclargs \
 			$(FPGA_FAMILY) \
 			$(build_dir) \
-			$(MODEL)
+			$(MODEL) \
+			$(TB)
 
 include $(base_dir)/vcs.mk
 
