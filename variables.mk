@@ -153,7 +153,7 @@ sim_common_files       ?= $(build_dir)/sim_files.common.f
 # java arguments used in sbt
 #########################################################################################
 JAVA_HEAP_SIZE ?= 8G
-JAVA_OPTS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M -Djava.io.tmpdir=$(base_dir)/.java_tmp
+export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M -Djava.io.tmpdir=$(base_dir)/.java_tmp
 
 #########################################################################################
 # default sbt launch command
@@ -175,7 +175,7 @@ override SCALA_BUILDTOOL_DEPS += $(SBT_THIN_CLIENT_TIMESTAMP)
 SBT_CLIENT_FLAG = --client
 endif
 
-SBT ?= java $(JAVA_OPTS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS) $(SBT_CLIENT_FLAG)
+SBT ?= java $(JAVA_TOOL_OPTIONS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS) $(SBT_CLIENT_FLAG)
 SBT_NON_THIN ?= $(subst $(SBT_CLIENT_FLAG),,$(SBT))
 
 define run_scala_main
