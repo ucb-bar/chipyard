@@ -59,4 +59,4 @@ run "export RISCV=\"$TOOLS_DIR\"; \
      export PATH=\"$REMOTE_VERILATOR_DIR/bin:\$PATH\"; \
      export VERILATOR_ROOT=\"$REMOTE_VERILATOR_DIR\"; \
      export COURSIER_CACHE=\"$REMOTE_WORK_DIR/.coursier-cache\"; \
-     make -C $REMOTE_FIRESIM_DIR JAVA_OPTS=\"$REMOTE_JAVA_OPTS\" SBT_OPTS=\"$REMOTE_SBT_OPTS\" testOnly ${mapping[$1]}"
+     make -C $REMOTE_FIRESIM_DIR JAVA_TOOL_OPTIONS=\"$REMOTE_JAVA_OPTS\" SBT_OPTS=\"$REMOTE_SBT_OPTS\" testOnly ${mapping[$1]}"
