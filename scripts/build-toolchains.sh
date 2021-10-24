@@ -18,6 +18,10 @@ fi
 DIR="$(dirname "$($READLINK -f "${BASH_SOURCE[0]:-${(%):-%x}}")")"
 CHIPYARD_DIR="$(dirname "$DIR")"
 
+# Allow user to override MAKE
+[ -n "${MAKE:+x}" ] || MAKE=$(command -v gnumake || command -v gmake || command -v make)
+readonly MAKE
+
 usage() {
     echo "usage: ${0} [OPTIONS] [riscv-tools | esp-tools | ec2fast]"
     echo ""
