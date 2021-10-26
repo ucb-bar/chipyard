@@ -22,8 +22,8 @@ make target. For example:
 
    make CONFIG=CustomConfig debug
 
-The ``run-binary-debug`` rule uses the prebuilt simulator to run a custom binary
-and generate a waveform. For example, to run a
+The ``run-binary-debug`` rule will also automatically build a simulator,
+run it on a custom binary, and generate a waveform. For example, to run a
 test on ``helloworld.riscv``, use
 
 .. code-block:: shell
@@ -83,8 +83,20 @@ Torture tests
 The RISC-V torture utility generates random RISC-V assembly streams, compiles them,
 runs them on both the Spike functional model and the SW simulator, and verifies
 identical program behavior. The torture utility can also be configured to run
-continuously for stress-testing. The torture utility exists within the ``utilities``
-directory.
+continuously for stress-testing. The torture utility exists within the ``tools``
+directory. To run torture tests, run ``make`` in the simulation directories:
+
+.. code-block:: shell
+
+  make CONFIG=CustomConfig torture
+
+To run overnight tests (repeated random tests), run
+
+.. code-block:: shell
+
+  make CONFIG=CustomConfig TORTURE_ONIGHT_OPTIONS=<overnight options> torture-overnight
+
+You can find the overnight options in `overnight/src/main/scala/main.scala` in the torture repo.  
 
 Firesim Debugging
 ---------------------------

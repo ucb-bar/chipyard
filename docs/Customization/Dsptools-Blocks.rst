@@ -120,7 +120,6 @@ Now we can run our simulation.
 .. code-block:: shell
 
     cd sims/verilator
-    make CONFIG=StreamingFIRRocketConfig
     make CONFIG=StreamingFIRRocketConfig BINARY=../../tests/streaming-fir.riscv run-binary
 
 .. [#] ``ReadQueue`` and ``WriteQueue`` are good illustrations of how to write a ``DspBlock`` and how they can be integrated into rocket, but in a real design a DMA engine would be preferred. ``ReadQueue`` will stall the processor if you try to read an empty queue, and ``WriteQueue`` will stall if you try to write to a full queue, which a DMA engine can more elegantly avoid. Furthermore, a DMA engine can do the work of moving data, freeing the processor to do other useful work (or sleep).

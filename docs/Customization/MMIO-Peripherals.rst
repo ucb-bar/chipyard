@@ -137,7 +137,6 @@ Now with all of that done, we can go ahead and run our simulation.
 .. code-block:: shell
 
     cd sims/verilator
-    make CONFIG=GCDTLRocketConfig
     make CONFIG=GCDTLRocketConfig BINARY=../../tests/gcd.riscv run-binary
 
 
