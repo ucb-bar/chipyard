@@ -193,10 +193,10 @@ ifeq (,$(BINARY))
 endif
 
 # allow you to override sim prereq
-ifeq(,$(BREAK_SIM_PREREQ))
+ifeq (,$(BREAK_SIM_PREREQ))
 SIM_PREREQ = $(sim)
 SIM_DEBUG_PREREQ = $(sim_debug)
-else
+endif
 
 # run normal binary with hardware-logged insn dissassembly
 run-binary: $(output_dir) $(SIM_PREREQ) check-binary
