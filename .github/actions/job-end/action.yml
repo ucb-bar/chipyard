@@ -1,0 +1,8 @@
+name: job-end
+description: "Save a job status"
+
+runs:
+  using: "composite"
+  steps:
+    - run: echo "success" > run_result
+      shell: bash

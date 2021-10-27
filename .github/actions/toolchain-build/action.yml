@@ -1,0 +1,51 @@
+name: toolchain-build
+description: 'Build/cache both toolchains'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Generate hashes
+      run: .github/scripts/create-hash.sh
+      shell: bash
+
+    # since "hashFiles" function differs on self-hosted vs GH-A machines
+    # make sure to cache the GH-A hashFiles result so that self-hosted can use it
+    - run: |
+        echo "${{ hashFiles('**/riscv-tools.hash') }}" > riscv-tools.hashFilesOutput
+        echo "${{ hashFiles('**/esp-tools.hash') }}" > esp-tools.hashFilesOutput
+      shell: bash
+
+    - name: Cache hashFiles outputs
+      uses: actions/cache@v2
+      with:
+        path: |
+          riscv-tools.hashFilesOutput
+          esp-tools.hashFilesOutput
+        key: hashFiles-${{ github.sha }}
+
+    - name: Generate cache keys based off hashFiles output
+      id: genkey
+      run: |
+        echo "::set-output name=riscv-tools-cache-key::$(cat riscv-tools.hashFilesOutput)"
+        echo "::set-output name=esp-tools-cache-key::$(cat esp-tools.hashFilesOutput)"
+      shell: bash
+
+    - name: Cache riscv-tools
+      uses: actions/cache@v2
+      with:
+        path: riscv-tools-install
+        key: riscv-tools-installed-${{ env.tools-cache-version }}-${{ steps.genkey.outputs.riscv-tools-cache-key }}
+
+    - name: Cache esp-tools
+      uses: actions/cache@v2
+      with:
+        path: esp-tools-install
+        key: esp-tools-installed-${{ env.tools-cache-version }}-${{ steps.genkey.outputs.esp-tools-cache-key }}
+
+    - name: Build RISC-V toolchain if not cached
+      run: ./.github/scripts/build-toolchains.sh riscv-tools
+      shell: bash
+
+    - name: Build ESP RISC-V toolchain if not cached
+      run: ./.github/scripts/build-toolchains.sh esp-tools
+      shell: bash
