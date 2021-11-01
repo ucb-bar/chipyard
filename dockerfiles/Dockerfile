@@ -67,6 +67,17 @@ RUN cd chipyard && \
         export MAKEFLAGS=-"j $(nproc)" && \
         ./scripts/build-toolchains.sh esp-tools 1>/dev/null
 
+# Patch pk to work with onnxruntime
+RUN cd chipyard/toolchains/esp-tools/riscv-pk && \
+	git remote add iiswc git@github.com:CobbledSteel/riscv-pk.git && \
+	git fetch && \
+	git checkout ort_pk_patch && \
+	mkdir -p build && \
+	cd bild && \
+	../configure --prefix=$RISCV --host=riscv64-unknown-elf && \
+	make && \
+	make install 
+
 # update gemmini's onnxruntime
 RUN cd chipyard && \
 	 git -C generators/gemmini/ submodule update --init --recursive software/onnxruntime-riscv
