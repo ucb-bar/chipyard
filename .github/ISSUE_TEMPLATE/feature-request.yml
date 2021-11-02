@@ -1,0 +1,27 @@
+name: Feature Request
+description: File a feature request
+labels: ["enhancement"]
+body:
+  - type: checkboxes
+    attributes:
+      label: Background Work
+      description: Yes, I searched the following areas for a prior feature/solution to this problem.
+      options:
+        - label: Yes, I searched the [mailing list](https://groups.google.com/forum/#!forum/chipyard)
+          required: true
+        - label: Yes, I searched the [documentation](https://chipyard.readthedocs.io/)
+          required: true
+
+  - type: textarea
+    attributes:
+      label: Feature Description
+      description: Description of feature wanted
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Motivating Example
+      description: A concise example demonstrating the feature.
+    validations:
+      required: true
