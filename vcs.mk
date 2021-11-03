@@ -50,6 +50,7 @@ PREPROC_DEFINES = \
 	+define+RESET_DELAY=$(RESET_DELAY) \
 	+define+PRINTF_COND=$(TB).printf_cond \
 	+define+STOP_COND=!$(TB).reset \
+	+define+MODEL=$(MODEL) \
 	+define+RANDOMIZE_MEM_INIT \
 	+define+RANDOMIZE_REG_INIT \
 	+define+RANDOMIZE_GARBAGE_ASSIGN \
