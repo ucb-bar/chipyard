@@ -176,16 +176,6 @@ class StreamingFIRRocketConfig extends Config (
   new chipyard.config.AbstractConfig)
 // DOC include end: StreamingFIRRocketConfig
 
-class SmallNVDLARocketConfig extends Config(
-  new nvidia.blocks.dla.WithNVDLA("small") ++               // add a small NVDLA
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class LargeNVDLARocketConfig extends Config(
-  new nvidia.blocks.dla.WithNVDLA("large", true) ++         // add a large NVDLA with synth. rams
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
 class MMIORocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithDefaultMMIOPort ++  // add default external master port
   new freechips.rocketchip.subsystem.WithDefaultSlavePort ++ // add default external slave port
