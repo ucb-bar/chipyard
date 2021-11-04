@@ -43,7 +43,7 @@ RUN 	git clone https://github.com/ucb-bar/chipyard.git && \
         sudo rm -rf /var/lib/apt/lists/*
 
 # Update PATH for RISCV toolchain (note: hardcoded for CircleCI)
-ENV RISCV="/root/riscv-tools-install"
+ENV RISCV="/root/chipyard/esp-tools-install"
 ENV LD_LIBRARY_PATH="$RISCV/lib"
 ENV PATH="$RISCV/bin:$PATH"
 
@@ -69,11 +69,11 @@ RUN cd chipyard && \
 
 # Patch pk to work with onnxruntime
 RUN cd chipyard/toolchains/esp-tools/riscv-pk && \
-	git remote add iiswc git@github.com:CobbledSteel/riscv-pk.git && \
-	git fetch && \
+	git remote add iiswc https://github.com/CobbledSteel/riscv-pk.git && \
+	git fetch iiswc && \
 	git checkout ort_pk_patch && \
 	mkdir -p build && \
-	cd bild && \
+	cd build && \
 	../configure --prefix=$RISCV --host=riscv64-unknown-elf && \
 	make && \
 	make install 
@@ -84,7 +84,7 @@ RUN cd chipyard && \
 
 # TODO UPDATE TO USE COMMIT WITH PEP8 FIX
 RUN cd chipyard/generators/gemmini/software/onnxruntime-riscv && \
-	git checkout 2021-05-12 && \
+	git checkout dev/fix-start-time && \
 	git submodule update --init --recursive
 
 RUN pip3 install flake8
