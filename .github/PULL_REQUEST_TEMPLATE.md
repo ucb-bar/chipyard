@@ -16,8 +16,6 @@
 
 <!-- must be filled out completely to be considered for merging -->
 **Contributor Checklist**:
-- [ ] Yes, I specified the "Type of Change"
-- [ ] Yes, I specified the "Impact"
 - [ ] Did you set `dev` as the base branch?
 - [ ] Did you delete any extraneous prints/debugging code?
 - [ ] (If applicable) Did you add documentation for the feature?
