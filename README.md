@@ -74,7 +74,9 @@ These additional publications cover many of the internal components used in Chip
 * **VLSI**
     * **Hammer**: E. Wang, et al., *ISQED'20*. [PDF](https://www.isqed.org/English/Archives/2020/Technical_Sessions/113.html).
 
+## Acknowledgements
 
+This work is supported by the NSF CCRI ENS Chipyard Award #201662.
 
 [hwacha]:https://www2.eecs.berkeley.edu/Pubs/TechRpts/2015/EECS-2015-262.pdf
 [hammer]:https://github.com/ucb-bar/hammer
