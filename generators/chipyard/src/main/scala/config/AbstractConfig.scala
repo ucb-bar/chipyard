@@ -42,6 +42,7 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithCustomBootPin ++
   new chipyard.iobinders.WithDividerOnlyClockGenerator ++
 
+  new testchipip.WithSerialTLWidth(32) ++                        // fatten the serialTL interface to improve testing performance
   new testchipip.WithDefaultSerialTL ++                          // use serialized tilelink port to external serialadapter/harnessRAM
   new chipyard.config.WithBootROM ++                             // use default bootrom
   new chipyard.config.WithUART ++                                // add a UART
