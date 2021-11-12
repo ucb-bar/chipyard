@@ -64,6 +64,8 @@ class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
 // Non-frequency tweaks that are generally applied to all firesim configs
 class WithFireSimDesignTweaks extends Config(
+  // Optional: reduce the width of the Serial TL interface
+  new testchipip.WithSerialTLWidth(4) ++
   // Required: Bake in the default FASED memory model
   new WithDefaultMemModel ++
   // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
