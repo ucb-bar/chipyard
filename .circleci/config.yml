@@ -316,7 +316,7 @@ jobs:
                 tools-version: "esp-tools"
                 group-key: "group-accels"
                 project-key: "chipyard-hwacha"
-                timeout: "30m"
+                timeout: "60m"
     chipyard-gemmini-run-tests:
         executor: main-env
         steps:
