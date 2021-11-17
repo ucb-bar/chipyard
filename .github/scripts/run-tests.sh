@@ -9,12 +9,18 @@ set -ex
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
+export RISCV="$GITHUB_WORKSPACE/riscv-tools-install"
+export LD_LIBRARY_PATH="$RISCV/lib"
+export PATH="$RISCV/bin:$PATH"
+
+DISABLE_SIM_PREREQ="BREAK_SIM_PREREQ=1"
+
 run_bmark () {
-    make run-bmark-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $@
+    make run-bmark-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $@
 }
 
 run_asm () {
-    make run-asm-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $@
+    make run-asm-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $@
 }
 
 run_both () {
@@ -23,11 +29,9 @@ run_both () {
 }
 
 run_tracegen () {
-    make tracegen -C $LOCAL_SIM_DIR $@
+    make tracegen -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $@
 }
 
-# TODO BUG: the run-binary command forces a rebuild of the simulator in CI
-#           instead, directly run the simulator binary
 case $1 in
     chipyard-rocket)
         run_bmark ${mapping[$1]}
@@ -51,7 +55,7 @@ case $1 in
         export RISCV=$LOCAL_ESP_DIR
         export LD_LIBRARY_PATH=$LOCAL_ESP_DIR/lib
         export PATH=$RISCV/bin:$PATH
-        make run-rv64uv-p-asm-tests -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR ${mapping[$1]}
+        make run-rv64uv-p-asm-tests -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}
         ;;
     chipyard-gemmini)
         export RISCV=$LOCAL_ESP_DIR
@@ -60,32 +64,32 @@ case $1 in
         GEMMINI_SOFTWARE_DIR=$LOCAL_SIM_DIR/../../generators/gemmini/software/gemmini-rocc-tests
         rm -rf $GEMMINI_SOFTWARE_DIR/riscv-tests
         cd $LOCAL_SIM_DIR
-        $LOCAL_SIM_DIR/simulator-chipyard-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/aligned-baremetal
-        $LOCAL_SIM_DIR/simulator-chipyard-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/raw_hazard-baremetal
-        $LOCAL_SIM_DIR/simulator-chipyard-GemminiRocketConfig $GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/aligned-baremetal
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/raw_hazard-baremetal
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal
         ;;
     chipyard-sha3)
         export RISCV=$LOCAL_ESP_DIR
         export LD_LIBRARY_PATH=$LOCAL_ESP_DIR/lib
         export PATH=$RISCV/bin:$PATH
         (cd $LOCAL_CHIPYARD_DIR/generators/sha3/software && ./build.sh)
-        $LOCAL_SIM_DIR/simulator-chipyard-Sha3RocketConfig $LOCAL_CHIPYARD_DIR/generators/sha3/software/tests/bare/sha3-rocc.riscv
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/generators/sha3/software/tests/bare/sha3-rocc.riscv
         ;;
     chipyard-streaming-passthrough)
         make -C $LOCAL_CHIPYARD_DIR/tests
-        $LOCAL_SIM_DIR/simulator-chipyard-StreamingPassthroughRocketConfig $LOCAL_CHIPYARD_DIR/tests/streaming-passthrough.riscv
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-passthrough.riscv
         ;;
     chipyard-streaming-fir)
         make -C $LOCAL_CHIPYARD_DIR/tests
-        $LOCAL_SIM_DIR/simulator-chipyard-StreamingFIRRocketConfig $LOCAL_CHIPYARD_DIR/tests/streaming-fir.riscv
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-fir.riscv
         ;;
     chipyard-spiflashread)
         make -C $LOCAL_CHIPYARD_DIR/tests
-        make -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashread.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashread.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary-fast
         ;;
     chipyard-spiflashwrite)
         make -C $LOCAL_CHIPYARD_DIR/tests
-        make -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashwrite.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashwrite.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary-fast
         [[ "`xxd $LOCAL_CHIPYARD_DIR/tests/spiflash.img  | grep 1337\ 00ff\ aa55\ face | wc -l`" == "6" ]] || false
         ;;
     tracegen)
@@ -95,20 +99,20 @@ case $1 in
         run_tracegen ${mapping[$1]}
         ;;
     chipyard-cva6)
-        make run-binary-fast -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/multiply.riscv
+        make run-binary-fast -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/multiply.riscv
         ;;
     chipyard-sodor)
         run_asm ${mapping[$1]}
         ;;
     chipyard-nvdla)
         make -C $LOCAL_CHIPYARD_DIR/tests
-        make -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv run-binary
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv run-binary-fast
         ;;
     icenet)
-        make run-binary-fast BINARY=none -C $LOCAL_SIM_DIR ${mapping[$1]}
+        make run-binary-fast BINARY=none -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}
         ;;
     testchipip)
-        make run-binary-fast BINARY=none -C $LOCAL_SIM_DIR ${mapping[$1]}
+        make run-binary-fast BINARY=none -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}
         ;;
     *)
         echo "No set of tests for $1. Did you spell it right?"

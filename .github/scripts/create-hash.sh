@@ -17,4 +17,4 @@ for tools in 'riscv-tools' 'esp-tools' ; do
         echo "${line#[!0-9a-f]}"
     done > "${tools}.hash"
 done
-echo "Hashfile for riscv-tools and esp-tools created in $HOME"
+echo "Hashfile for riscv-tools and esp-tools created in $PWD"
