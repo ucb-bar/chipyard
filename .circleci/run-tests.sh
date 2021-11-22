@@ -101,7 +101,7 @@ case $1 in
         run_asm ${mapping[$1]}
         ;;
     chipyard-ibex)
-        run_bmark ${mapping[$1]}
+        run_bmark ${mapping[$1]} #TODO: Find 32-bit test
         ;;
     chipyard-nvdla)
         make -C $LOCAL_CHIPYARD_DIR/tests
