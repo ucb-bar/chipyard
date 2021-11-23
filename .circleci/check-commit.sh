@@ -52,9 +52,9 @@ submodules=("cva6" "boom" "ibex" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chi
 dir="generators"
 if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
 then
-    branches=("master")
+    branches=("master" "main")
 else
-    branches=("master" "dev")
+    branches=("master" "main" "dev")
 fi
 search
 
