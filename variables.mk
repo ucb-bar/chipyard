@@ -169,10 +169,6 @@ SBT_OPTS_FILE := $(base_dir)/.sbtopts
 ifneq (,$(wildcard $(SBT_OPTS_FILE)))
 override SBT_OPTS += $(subst $$PWD,$(base_dir),$(shell cat $(SBT_OPTS_FILE)))
 endif
-# Workaround: Specify a firrtl version in system properties so that Treadle uses a
-# compatible version of FIRRTL and not 1.5-SNAPSHOT (which is the default
-# specified in it's build.sbt, and is not overridden by Chipyard's build.sbt)
-override SBT_OPTS += -DfirrtlVersion=1.4.1
 
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
