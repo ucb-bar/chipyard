@@ -101,6 +101,9 @@ case $1 in
     chipyard-cva6)
         make run-binary-fast -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/multiply.riscv
         ;;
+    chipyard-ibex)
+        run_bmark ${mapping[$1]} #TODO: Find 32-bit test
+        ;;
     chipyard-sodor)
         run_asm ${mapping[$1]}
         ;;

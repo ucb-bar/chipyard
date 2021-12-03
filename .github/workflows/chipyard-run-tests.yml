@@ -329,6 +329,26 @@ jobs:
           project-key: "chipyard-cva6"
       - uses: ./.github/actions/job-end
 
+  chipyard-ibex-run-tests:
+    name: chipyard-ibex-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-ibex"
+      - uses: ./.github/actions/job-end
+
   chipyard-sodor-run-tests:
     name: chipyard-sodor-run-tests
     needs: prepare-chipyard-cores
@@ -690,7 +710,7 @@ jobs:
   all_tests_passed:
     name: "all tests passed"
     needs: [commit-on-master-check, tutorial-setup-check, documentation-check,
-            chipyard-rocket-run-tests, chipyard-hetero-run-tests, chipyard-boom-run-tests, chipyard-cva6-run-tests,
+            chipyard-rocket-run-tests, chipyard-hetero-run-tests, chipyard-boom-run-tests, chipyard-cva6-run-tests, chipyard-ibex-run-tests,
             chipyard-sodor-run-tests, chipyard-dmirocket-run-tests, chipyard-spiflashwrite-run-tests,
             chipyard-spiflashread-run-tests, chipyard-lbwif-run-tests, chipyard-sha3-run-tests,
             chipyard-streaming-fir-run-tests, chipyard-streaming-passthrough-run-tests, chipyard-hwacha-run-tests,

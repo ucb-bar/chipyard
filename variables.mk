@@ -3,7 +3,13 @@
 # - to use the help text, your Makefile should have a 'help' target that just
 #   prints all the HELP_LINES
 #########################################################################################
-HELP_COMPILATION_VARIABLES =
+HELP_COMPILATION_VARIABLES = \
+"   JAVA_HEAP_SIZE    = if overridden, set the default java heap size (default is 8G)" \
+"   JAVA_TOOL_OPTIONS = if overridden, set underlying java tool options (default sets misc. sizes and tmp dir)" \
+"   SBT_OPTS          = if overridden, set underlying sbt options (default uses options in .sbtopts)" \
+"   SBT_BIN           = if overridden, used to invoke sbt (default is to invoke sbt by sbt-launch.jar)" \
+"   FIRRTL_LOGLEVEL   = if overridden, set firrtl log level (default is error)"
+
 HELP_PROJECT_VARIABLES = \
 "   SUB_PROJECT            = use the specific subproject default variables [$(SUB_PROJECT)]" \
 "   SBT_PROJECT            = the SBT project that you should find the classes/packages in [$(SBT_PROJECT)]" \
@@ -163,20 +169,26 @@ SBT_OPTS_FILE := $(base_dir)/.sbtopts
 ifneq (,$(wildcard $(SBT_OPTS_FILE)))
 override SBT_OPTS += $(subst $$PWD,$(base_dir),$(shell cat $(SBT_OPTS_FILE)))
 endif
+# Workaround: Specify a firrtl version in system properties so that Treadle uses a
+# compatible version of FIRRTL and not 1.5-SNAPSHOT (which is the default
+# specified in it's build.sbt, and is not overridden by Chipyard's build.sbt)
+override SBT_OPTS += -DfirrtlVersion=1.4.1
 
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
 SBT_THIN_CLIENT_TIMESTAMP = $(base_dir)/project/target/active.json
 
 ifdef ENABLE_SBT_THIN_CLIENT
-override SCALA_BUILDTOOL_DEPS += $(SBT_THIN_CLIENT_TIMESTAMP)
+SCALA_BUILDTOOL_DEPS += $(SBT_THIN_CLIENT_TIMESTAMP)
 # enabling speeds up sbt loading
 # use with sbt script or sbtn to bypass error code issues
 SBT_CLIENT_FLAG = --client
 endif
 
-SBT ?= java $(JAVA_TOOL_OPTIONS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS) $(SBT_CLIENT_FLAG)
-SBT_NON_THIN ?= $(subst $(SBT_CLIENT_FLAG),,$(SBT))
+# passes $(JAVA_TOOL_OPTIONS) from env to java
+SBT_BIN ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
+SBT = $(SBT_BIN) $(SBT_CLIENT_FLAG)
+SBT_NON_THIN = $(subst $(SBT_CLIENT_FLAG),,$(SBT))
 
 define run_scala_main
 	cd $(base_dir) && $(SBT) ";project $(1); runMain $(2) $(3)"

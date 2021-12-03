@@ -143,3 +143,6 @@
 [submodule "generators/constellation"]
 	path = generators/constellation
 	url = git@github.com:ucb-bar/constellation.git
+[submodule "generators/ibex"]
+	path = generators/ibex
+	url = https://github.com/ucb-bar/ibex-wrapper
