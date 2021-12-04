@@ -1,8 +1,8 @@
 diff --git a/build.sbt b/build.sbt
-index b1f7e004..f39c3712 100644
+index c38f5180..551aa8c0 100644
 --- a/build.sbt
 +++ b/build.sbt
-@@ -184,7 +184,7 @@ lazy val testchipipLib = "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHO
+@@ -169,7 +169,7 @@ lazy val testchipipLib = "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHO
  lazy val chipyard = (project in file("generators/chipyard"))
    .sourceDependency(testchipip, testchipipLib)
    .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
@@ -11,19 +11,17 @@ index b1f7e004..f39c3712 100644
      dsptools, `rocket-dsp-utils`,
      gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex)
    .settings(libraryDependencies ++= rocketLibDeps.value)
-@@ -228,11 +228,11 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
+@@ -213,10 +213,10 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
    .settings(libraryDependencies ++= rocketLibDeps.value)
    .settings(commonSettings)
  
 -lazy val sha3 = (project in file("generators/sha3"))
 -  .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
 -  .settings(libraryDependencies ++= rocketLibDeps.value)
--  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
 -  .settings(commonSettings)
 +//lazy val sha3 = (project in file("generators/sha3"))
 +//  .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
 +//  .settings(libraryDependencies ++= rocketLibDeps.value)
-+//  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
 +//  .settings(commonSettings)
  
  lazy val gemmini = (project in file("generators/gemmini"))
