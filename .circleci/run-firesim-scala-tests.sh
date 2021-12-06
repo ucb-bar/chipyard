@@ -29,9 +29,6 @@ mkdir -p $local_firesim_sysroot
 ./scripts/build-libdwarf.sh $local_firesim_sysroot
 cd $LOCAL_CHIPYARD_DIR
 
-# replace the workspace dir with a local dir so you can copy around
-sed -i -E 's/(workspace=).*(\/tools)/\1$PWD\2/g' .sbtopts
-
 make -C $LOCAL_CHIPYARD_DIR/tools/dromajo/dromajo-src/src
 
 # set stricthostkeychecking to no (must happen before rsync)

@@ -156,11 +156,9 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip, sifive_blocks)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
-lazy val testchipipLib = "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHOT"
 
 lazy val chipyard = (project in file("generators/chipyard"))
-  .sourceDependency(testchipip, testchipipLib)
-  .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
+  .dependsOn(testchipip, rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsp-utils`,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex)
@@ -168,14 +166,12 @@ lazy val chipyard = (project in file("generators/chipyard"))
   .settings(commonSettings)
 
 lazy val tracegen = (project in file("generators/tracegen"))
-  .sourceDependency(testchipip, testchipipLib)
-  .dependsOn(rocketchip, sifive_cache, boom)
+  .dependsOn(testchipip, rocketchip, sifive_cache, boom)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
 lazy val icenet = (project in file("generators/icenet"))
-  .sourceDependency(testchipip, testchipipLib)
-  .dependsOn(rocketchip)
+  .dependsOn(testchipip, rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -185,8 +181,7 @@ lazy val hwacha = (project in file("generators/hwacha"))
   .settings(commonSettings)
 
 lazy val boom = (project in file("generators/boom"))
-  .sourceDependency(testchipip, testchipipLib)
-  .dependsOn(rocketchip)
+  .dependsOn(testchipip, rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -211,8 +206,7 @@ lazy val sha3 = (project in file("generators/sha3"))
   .settings(commonSettings)
 
 lazy val gemmini = (project in file("generators/gemmini"))
-  .sourceDependency(testchipip, testchipipLib)
-  .dependsOn(rocketchip, chisel_testers)
+  .dependsOn(testchipip, rocketchip, chisel_testers)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -280,7 +274,6 @@ lazy val midas      = ProjectRef(firesimDir, "midas")
 lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 
 lazy val firechip = (project in file("generators/firechip"))
-  .sourceDependency(testchipip, testchipipLib)
   .dependsOn(chipyard, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
     commonSettings,
