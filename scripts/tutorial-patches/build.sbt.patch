@@ -1,17 +1,17 @@
 diff --git a/build.sbt b/build.sbt
-index c38f5180..551aa8c0 100644
+index a00d7361..fbdf2e53 100644
 --- a/build.sbt
 +++ b/build.sbt
-@@ -169,7 +169,7 @@ lazy val testchipipLib = "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHO
+@@ -161,7 +161,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
+ 
  lazy val chipyard = (project in file("generators/chipyard"))
-   .sourceDependency(testchipip, testchipipLib)
-   .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
+   .dependsOn(testchipip, rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
 -    sha3, // On separate line to allow for cleaner tutorial-setup patches
 +    //sha3, // On separate line to allow for cleaner tutorial-setup patches
      dsptools, `rocket-dsp-utils`,
      gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex)
    .settings(libraryDependencies ++= rocketLibDeps.value)
-@@ -213,10 +213,10 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
+@@ -202,10 +202,10 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
    .settings(libraryDependencies ++= rocketLibDeps.value)
    .settings(commonSettings)
  
@@ -25,4 +25,4 @@ index c38f5180..551aa8c0 100644
 +//  .settings(commonSettings)
  
  lazy val gemmini = (project in file("generators/gemmini"))
-   .sourceDependency(testchipip, testchipipLib)
+   .dependsOn(testchipip, rocketchip, chisel_testers)

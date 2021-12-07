@@ -70,6 +70,16 @@ val firrtlVersion = "1.4.1"
 
 lazy val firrtlSettings = Seq(libraryDependencies ++= Seq("edu.berkeley.cs" %% "firrtl" % firrtlVersion))
 
+// In some projects we override the default versions of Chisel and friends.
+// This map captures the expected defaults used by projects under Chipyard.
+lazy val chipyardMandatedVersions = Map(
+  "chisel-iotesters" -> "1.5.4",
+  "firrtl-interpreter" -> "1.4.4",
+  "treadle" -> "1.3.4",
+  "chisel3" -> chiselVersion,
+  "firrtl" -> firrtlVersion
+)
+
 // Subproject definitions begin
 
 // -- Rocket Chip --
@@ -129,14 +139,6 @@ lazy val rocketLibDeps = (rocketchip / Keys.libraryDependencies)
 
 // Because we're not using a release version of iotesters to work around a
 // scala test version problem, override it's libdeps to prevent using snapshots
-lazy val chipyardMandatedVersions = Map(
-  "chisel-iotesters" -> "1.5.4",
-  "firrtl-interpreter" -> "1.4.4",
-  "treadle" -> "1.3.4",
-  "chisel3" -> chiselVersion,
-  "firrtl" -> firrtlVersion
-)
-
 lazy val chisel_testers = (project in file("tools/chisel-testers"))
   .settings(chiselSettings)
   .settings(
