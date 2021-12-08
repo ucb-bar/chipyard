@@ -1,8 +1,8 @@
 diff --git a/build.sbt b/build.sbt
-index a00d7361..fbdf2e53 100644
+index 2187fe12..2319fc95 100644
 --- a/build.sbt
 +++ b/build.sbt
-@@ -161,7 +161,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
+@@ -162,7 +162,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
  
  lazy val chipyard = (project in file("generators/chipyard"))
    .dependsOn(testchipip, rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
@@ -11,7 +11,7 @@ index a00d7361..fbdf2e53 100644
      dsptools, `rocket-dsp-utils`,
      gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex)
    .settings(libraryDependencies ++= rocketLibDeps.value)
-@@ -202,10 +202,10 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
+@@ -203,10 +203,10 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
    .settings(libraryDependencies ++= rocketLibDeps.value)
    .settings(commonSettings)
  

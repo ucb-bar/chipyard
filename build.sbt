@@ -119,7 +119,8 @@ lazy val rocketConfig = (project in rocketChipDir / "api-config-chipsalliance/bu
 
 lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
   .dependsOn(hardfloat, rocketMacros, rocketConfig)
-  .settings(commonSettings, chiselSettings)
+  .settings(commonSettings)
+  .settings(chiselSettings)
   .settings(
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
