@@ -5,7 +5,7 @@ In preparation for Chisel 3.5, in Chipyard 1.5 Chisel, FIRRTL, the FIRRTL
 interpreter, and Treadle, were transitioned from being built-from-source to
 managed as published dependencies. Their submodules have been removed.
 Switching between published versions can be achieved by changing the versions
-specified in Chipyard's build.sbt.
+specified in Chipyard's ``build.sbt``.
 
 Lists of available artifacts can be using search.maven.org or mvnrepository.org:
 
@@ -21,7 +21,7 @@ Publishing Local Changes
 Under the new system, the simplest means to make custom source modifications to the packages
 above is to run ``sbt +publishLocal`` from within a locally modified clone of each
 of their respective repositories. This will post your custom variant
-to your local ivy2 repository, which can generally be found at ~/.ivy2.  See the `SBT
+to your local ivy2 repository, which can generally be found at ``~/.ivy2``.  See the `SBT
 documentation <https://www.scala-sbt.org/1.x/docs/Publishing.html#Publishing+locally>`_
 for more detail.
 
@@ -37,7 +37,7 @@ In practice, this will require the following steps:
    published dependencies. SBT will be clear about what it is publishing and
    where it is putting it. The ``+`` is generally necessary and ensures that
    all cross versions of the package are published.
-#. Update the Chisel or FIRRTL version in Chipyard's build.sbt to match the
+#. Update the Chisel or FIRRTL version in Chipyard's ``build.sbt`` to match the
    versions of your locally published packages.
 #. Use Chipyard as you would normally. Now when you call out to make in
    Chipyard you should see SBT resolving dependencies to the locally
