@@ -29,7 +29,7 @@ In practice, this will require the following steps:
 
 #. Check out and modify the desired projects.
 #. Take note of, or modify, the versions of each projects (in
-   their build.sbt). If you're cloning from master generally
+   their ``build.sbt``). If you're cloning from ``master`` generally
    these will have default versions of ``1.X-SNAPSHOT``, where ``X`` is
    not-yet-released next major version. You can modify the version string, to say ``1.X-<MYSUFFIX>``, to uniquely identify your
    change.
