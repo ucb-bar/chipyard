@@ -15,4 +15,5 @@ They expect you to know about Chisel, Parameters, configs, etc.
    Resources
    CDEs
    Harness-Clocks
+   Managing-Published-Scala-Dependencies
 
