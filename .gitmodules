@@ -134,3 +134,6 @@
 [submodule "generators/ibex"]
 	path = generators/ibex
 	url = https://github.com/ucb-bar/ibex-wrapper
+[submodule "generators/saturn"]
+	path = generators/saturn
+	url = git@github.com:ucb-bar/saturn.git
