@@ -137,3 +137,6 @@
 [submodule "generators/saturn"]
 	path = generators/saturn
 	url = git@github.com:ucb-bar/saturn.git
+[submodule "generators/pythia"]
+	path = generators/pythia
+	url = git@github.com:ucb-bar/pythia.git

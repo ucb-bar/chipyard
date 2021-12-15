@@ -43,6 +43,7 @@ class AbstractConfig extends Config(
 
   new testchipip.WithSerialTLWidth(32) ++                        // fatten the serialTL interface to improve testing performance
   new testchipip.WithDefaultSerialTL ++                          // use serialized tilelink port to external serialadapter/harnessRAM
+  new chipyard.config.WithTilePrefetchers ++                     // add prefetchers between tile and sbus
   new chipyard.config.WithBootROM ++                             // use default bootrom
   new chipyard.config.WithUART ++                                // add a UART
   new chipyard.config.WithL2TLBs(1024) ++                        // use L2 TLBs

@@ -22,9 +22,11 @@ import tracegen.{TraceGenSystem}
 
 import hwacha.{Hwacha}
 import gemmini._
-
+import sodor.common.{SodorTileAttachParams}
+import saturn.common.{SaturnTileAttachParams}
 import boom.common.{BoomTileAttachParams}
 import cva6.{CVA6TileAttachParams}
+import pythia.{TilePrefetchingMasterPortParams}
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
@@ -338,3 +340,16 @@ class WithTestChipBusFreqs extends Config(
   new boom.common.WithRationalBoomTiles ++ // Add rational crossings between BoomTile and uncore
   new testchipip.WithAsynchronousSerialSlaveCrossing // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
 )
+
+class WithTilePrefetchers extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: RocketTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
+      master = TilePrefetchingMasterPortParams(tp.crossingParams.master)))
+    case tp: BoomTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
+      master = TilePrefetchingMasterPortParams(tp.crossingParams.master)))
+    case tp: SodorTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
+      master = TilePrefetchingMasterPortParams(tp.crossingParams.master)))
+    case tp: SaturnTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
+      master = TilePrefetchingMasterPortParams(tp.crossingParams.master)))
+  }
+})
