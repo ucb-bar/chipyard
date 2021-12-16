@@ -344,12 +344,12 @@ class WithTestChipBusFreqs extends Config(
 class WithTilePrefetchers extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: RocketTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
-      master = TilePrefetchingMasterPortParams(tp.crossingParams.master)))
+      master = TilePrefetchingMasterPortParams(tp.tileParams.hartId, tp.crossingParams.master)))
     case tp: BoomTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
-      master = TilePrefetchingMasterPortParams(tp.crossingParams.master)))
+      master = TilePrefetchingMasterPortParams(tp.tileParams.hartId, tp.crossingParams.master)))
     case tp: SodorTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
-      master = TilePrefetchingMasterPortParams(tp.crossingParams.master)))
+      master = TilePrefetchingMasterPortParams(tp.tileParams.hartId, tp.crossingParams.master)))
     case tp: SaturnTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
-      master = TilePrefetchingMasterPortParams(tp.crossingParams.master)))
+      master = TilePrefetchingMasterPortParams(tp.tileParams.hartId, tp.crossingParams.master)))
   }
 })
