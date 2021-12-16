@@ -47,11 +47,13 @@ cd "$CHIPYARD_DIR"
             generators/sha3 \
             generators/gemmini \
             sims/firesim \
-            software/nvdla-workload
+            software/nvdla-workload \
+            software/coremark \
+            software/firemarshal \
+            software/spec2017 \
             vlsi/hammer-cadence-plugins \
             vlsi/hammer-synopsys-plugins \
             vlsi/hammer-mentor-plugins \
-            software/firemarshal \
             fpga/fpga-shells
         do
             "$1" "${name%/}"
