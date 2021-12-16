@@ -47,6 +47,7 @@ cd "$CHIPYARD_DIR"
             generators/sha3 \
             generators/gemmini \
             sims/firesim \
+            software/nvdla-workload
             vlsi/hammer-cadence-plugins \
             vlsi/hammer-synopsys-plugins \
             vlsi/hammer-mentor-plugins \
