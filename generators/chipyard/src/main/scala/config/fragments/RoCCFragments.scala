@@ -59,18 +59,6 @@ class WithMultiRoCCHwacha(harts: Int*) extends Config(
   })
 )
 
-class WithMultiRoCCGemmini[T <: Data : Arithmetic, U <: Data, V <: Data](
-  harts: Int*)(gemminiConfig: GemminiArrayConfig[T,U,V] = GemminiConfigs.defaultConfig) extends Config((site, here, up) => {
-  case MultiRoCCKey => up(MultiRoCCKey, site) ++ harts.distinct.map { i =>
-    (i -> Seq((p: Parameters) => {
-      implicit val q = p
-      val gemmini = LazyModule(new Gemmini(gemminiConfig))
-      gemmini
-    }))
-  }
-})
-
-
 class WithHwachaTest extends Config((site, here, up) => {
   case TestSuitesKey => (tileParams: Seq[TileParams], suiteHelper: TestSuiteHelper, p: Parameters) => {
     up(TestSuitesKey).apply(tileParams, suiteHelper, p)
@@ -83,3 +71,17 @@ class WithHwachaTest extends Config((site, here, up) => {
   }
 })
 
+/**
+  * The MultiRoCCGemmini fragment functions similarly to the
+  * WithMultiRoCCHwacha fragment defined above
+  */
+class WithMultiRoCCGemmini[T <: Data : Arithmetic, U <: Data, V <: Data](
+  harts: Int*)(gemminiConfig: GemminiArrayConfig[T,U,V] = GemminiConfigs.defaultConfig) extends Config((site, here, up) => {
+  case MultiRoCCKey => up(MultiRoCCKey, site) ++ harts.distinct.map { i =>
+    (i -> Seq((p: Parameters) => {
+      implicit val q = p
+      val gemmini = LazyModule(new Gemmini(gemminiConfig))
+      gemmini
+    }))
+  }
+})

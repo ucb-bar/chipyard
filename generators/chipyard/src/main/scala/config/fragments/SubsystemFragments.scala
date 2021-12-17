@@ -8,4 +8,3 @@ class WithBroadcastManager extends Config((site, here, up) => {
   case BankedL2Key => up(BankedL2Key, site).copy(coherenceManager = CoherenceManagerWrapper.broadcastManager)
 })
 
-
