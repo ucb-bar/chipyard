@@ -140,3 +140,6 @@
 [submodule "generators/pythia"]
 	path = generators/pythia
 	url = git@github.com:ucb-bar/pythia.git
+[submodule "generators/bar-cache"]
+	path = generators/bar-cache
+	url = git@github.com:ucb-bar/bar-cache.git
