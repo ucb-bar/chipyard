@@ -62,9 +62,8 @@ class BoomLSUShim(implicit p: Parameters) extends BoomModule()(p)
   tracegen_uop.ldq_idx      := io.lsu.dis_ldq_idx(0)
   tracegen_uop.stq_idx      := io.lsu.dis_stq_idx(0)
   tracegen_uop.is_amo       := isAMO(io.tracegen.req.bits.cmd) || io.tracegen.req.bits.cmd === M_XSC
-  tracegen_uop.ctrl.is_load := isRead(io.tracegen.req.bits.cmd) && !isWrite(io.tracegen.req.bits.cmd)
-  tracegen_uop.ctrl.is_sta  := isWrite(io.tracegen.req.bits.cmd)
-  tracegen_uop.ctrl.is_std  := isWrite(io.tracegen.req.bits.cmd)
+  tracegen_uop.uses_ldq     := isRead(io.tracegen.req.bits.cmd) && !isWrite(io.tracegen.req.bits.cmd)
+  tracegen_uop.uses_stq     := isWrite(io.tracegen.req.bits.cmd)
 
   io.lsu.dis_uops(0).valid         := io.tracegen.req.fire()
   io.lsu.dis_uops(0).bits          := tracegen_uop
@@ -84,15 +83,13 @@ class BoomLSUShim(implicit p: Parameters) extends BoomModule()(p)
     }
   }
 
-  io.lsu.fp_stdata.valid := false.B
-  io.lsu.fp_stdata.bits  := DontCare
+  io.lsu.dgen(1).valid := false.B
+  io.lsu.dgen(1).bits  := DontCare
 
 
 
   io.lsu.commit.valids(0) := (!rob_bsy(rob_head) && rob_head =/= rob_tail && rob_respd(rob_head))
   io.lsu.commit.uops(0)   := rob_uop(rob_head)
-  io.lsu.commit.rbk_valids(0) := false.B
-  io.lsu.commit.rollback := false.B
   io.lsu.commit.fflags := DontCare
   when (io.lsu.commit.valids(0)) {
     rob_head := WrapInc(rob_head, rob_sz)
@@ -104,41 +101,44 @@ class BoomLSUShim(implicit p: Parameters) extends BoomModule()(p)
   when (io.lsu.clr_unsafe(0).valid && rob(io.lsu.clr_unsafe(0).bits).cmd =/= M_XLR) {
     rob_bsy(io.lsu.clr_unsafe(0).bits) := false.B
   }
-  when (io.lsu.exe(0).iresp.valid) {
-    rob_bsy(io.lsu.exe(0).iresp.bits.uop.rob_idx) := false.B
+  when (io.lsu.iresp(0).valid) {
+    rob_bsy(io.lsu.iresp(0).bits.uop.rob_idx) := false.B
   }
 
 
   assert(!io.lsu.lxcpt.valid)
 
-  io.lsu.exe(0).req.valid     := RegNext(io.tracegen.req.fire())
-  io.lsu.exe(0).req.bits      := DontCare
-  io.lsu.exe(0).req.bits.uop  := RegNext(tracegen_uop)
-  io.lsu.exe(0).req.bits.addr := RegNext(io.tracegen.req.bits.addr)
-  io.lsu.exe(0).req.bits.data := RegNext(io.tracegen.req.bits.data)
 
-  io.tracegen.resp.valid     := io.lsu.exe(0).iresp.valid
+  io.lsu.agen(0).valid     := ShiftRegister(io.tracegen.req.fire(), 2)
+  io.lsu.agen(0).bits      := DontCare
+  io.lsu.agen(0).bits.uop  := ShiftRegister(tracegen_uop, 2)
+  io.lsu.agen(0).bits.data := ShiftRegister(io.tracegen.req.bits.addr, 2)
+
+  io.lsu.dgen(0).valid     := ShiftRegister(io.tracegen.req.fire() && tracegen_uop.uses_stq, 2)
+  io.lsu.dgen(0).bits      := DontCare
+  io.lsu.dgen(0).bits.uop  := ShiftRegister(tracegen_uop, 2)
+  io.lsu.dgen(0).bits.data := ShiftRegister(io.tracegen.req.bits.data, 2)
+
+
+  io.tracegen.resp.valid     := io.lsu.iresp(0).valid
   io.tracegen.resp.bits      := DontCare
-  io.tracegen.resp.bits.tag  := io.lsu.exe(0).iresp.bits.uop.uopc
-  io.tracegen.resp.bits.size := io.lsu.exe(0).iresp.bits.uop.mem_size
-  io.tracegen.resp.bits.data := io.lsu.exe(0).iresp.bits.data
+  io.tracegen.resp.bits.tag  := io.lsu.iresp(0).bits.uop.uopc
+  io.tracegen.resp.bits.size := io.lsu.iresp(0).bits.uop.mem_size
+  io.tracegen.resp.bits.data := io.lsu.iresp(0).bits.data
 
   val store_resp_idx = PriorityEncoder((0 until rob_sz) map {i =>
     !rob_respd(i) && isWrite(rob(i).cmd)
   })
   val can_do_store_resp = ~rob_respd(store_resp_idx) && isWrite(rob(store_resp_idx).cmd) && !isRead(rob(store_resp_idx).cmd)
-  when (can_do_store_resp && !io.lsu.exe(0).iresp.valid) {
+  when (can_do_store_resp && !io.lsu.iresp(0).valid) {
     rob_respd(store_resp_idx)     := true.B
     io.tracegen.resp.valid    := true.B
     io.tracegen.resp.bits.tag := rob(store_resp_idx).tag
   }
 
-  when (io.lsu.exe(0).iresp.valid) {
-    rob_respd(io.lsu.exe(0).iresp.bits.uop.rob_idx) := true.B
+  when (io.lsu.iresp(0).valid) {
+    rob_respd(io.lsu.iresp(0).bits.uop.rob_idx) := true.B
   }
-
-  io.lsu.exe(0).fresp.ready := true.B
-  io.lsu.exe(0).iresp.ready := true.B
 
 
   io.lsu.exception := false.B
@@ -158,6 +158,9 @@ class BoomLSUShim(implicit p: Parameters) extends BoomModule()(p)
 
   io.lsu.rob_head_idx := rob_head
 
+
+  io.lsu.mcontext := 0.U(1.W)
+  io.lsu.scontext := 0.U(1.W)
 
 }
 
