@@ -164,7 +164,12 @@ lazy val chipyard = (project in file("generators/chipyard"))
   .dependsOn(testchipip, rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsp-utils`,
-    gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex)
+    gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, FFTGenerator)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+lazy val FFTGenerator = (project in file("generators/FFTGenerator"))
+  .dependsOn(rocketchip, `rocket-dsp-utils`)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 

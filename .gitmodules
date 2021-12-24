@@ -131,3 +131,6 @@
 [submodule "generators/ibex"]
 	path = generators/ibex
 	url = https://github.com/ucb-bar/ibex-wrapper
+[submodule "generators/FFTGenerator"]
+	path = generators/FFTGenerator
+	url = git@github.com:AnimeshAgrawal/FFTGenerator.git

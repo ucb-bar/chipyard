@@ -21,6 +21,12 @@ class TinyRocketConfig extends Config(
   new freechips.rocketchip.subsystem.With1TinyCore ++             // single tiny rocket-core
   new chipyard.config.AbstractConfig)
 
+class RocketWithFFT extends Config(
+  new FFTGenerator.WithFFTNumPoints(8) ++
+  new FFTGenerator.WithFFTBaseAddr(0x2000) ++
+  new FFTGenerator.WithFFTGenerator ++
+  new RocketConfig)
+
 class HwachaRocketConfig extends Config(
   new chipyard.config.WithHwachaTest ++
   new hwacha.DefaultHwachaConfig ++                              // use Hwacha vector accelerator

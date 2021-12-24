@@ -32,6 +32,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with chipyard.example.CanHavePeripheryStreamingPassthrough // Enables optionally adding the DSPTools streaming-passthrough example widget
   with nvidia.blocks.dla.CanHavePeripheryNVDLA // Enables optionally having an NVDLA
   with chipyard.clocking.HasChipyardPRCI // Use Chipyard reset/clock distribution
+  with FFTGenerator.HasPeripheryFFT
 {
   override lazy val module = new DigitalTopModule(this)
 }
