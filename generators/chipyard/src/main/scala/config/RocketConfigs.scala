@@ -22,9 +22,9 @@ class TinyRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class RocketWithFFT extends Config(
-  new FFTGenerator.WithFFTNumPoints(8) ++
-  new FFTGenerator.WithFFTBaseAddr(0x2000) ++
-  new FFTGenerator.WithFFTGenerator ++
+  new fftgenerator.WithFFTNumPoints(8) ++
+  new fftgenerator.WithFFTBaseAddr(0x2000) ++
+  new fftgenerator.WithFFTGenerator ++
   new RocketConfig)
 
 class HwachaRocketConfig extends Config(
