@@ -1,5 +1,5 @@
 ifdef USE_FSDB
-WAVEFORM_FLAG=+fsdbfile=$(sim_out_name).fsdb
+WAVEFORM_FLAG=+fsdbfile=$(sim_out_name).fsdb -kdb -P ${VERDI_HOME}/share/PLI/VCS/LINUX64/novas.tab ${VERDI_HOME}/share/PLI/VCS/LINUX64/pli.a
 else
 WAVEFORM_FLAG=+vcdplusfile=$(sim_out_name).vpd
 endif
