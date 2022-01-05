@@ -1,4 +1,8 @@
+ifdef USE_FSDB
+WAVEFORM_FLAG=+fsdbfile=$(sim_out_name).fsdb
+else
 WAVEFORM_FLAG=+vcdplusfile=$(sim_out_name).vpd
+endif
 
 # If ntb_random_seed unspecified, vcs uses 1 as constant seed.
 # Set ntb_random_seed_automatic to actually get a random seed
@@ -41,11 +45,13 @@ VCS_NONCC_OPTS = \
 	-sverilog +systemverilogext+.sv+.svi+.svh+.svt -assert svaext +libext+.sv \
 	+v2k +verilog2001ext+.v95+.vt+.vp +libext+.v \
 	-debug_pp \
+	-debug_access+all \
 	+incdir+$(build_dir) \
 	$(sim_vsrcs)
 
 PREPROC_DEFINES = \
 	+define+VCS \
+	+define+FSDB \
 	+define+CLOCK_PERIOD=$(CLOCK_PERIOD) \
 	+define+RESET_DELAY=$(RESET_DELAY) \
 	+define+PRINTF_COND=$(TB).printf_cond \
