@@ -44,6 +44,8 @@ VCS_NONCC_OPTS = \
 	-f $(sim_common_files) \
 	-sverilog +systemverilogext+.sv+.svi+.svh+.svt -assert svaext +libext+.sv \
 	+v2k +verilog2001ext+.v95+.vt+.vp +libext+.v \
+	-kdb \
+	-lca \
 	-debug_pp \
 	-debug_access+all \
 	+incdir+$(build_dir) \
