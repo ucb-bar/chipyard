@@ -44,16 +44,12 @@ VCS_NONCC_OPTS = \
 	-f $(sim_common_files) \
 	-sverilog +systemverilogext+.sv+.svi+.svh+.svt -assert svaext +libext+.sv \
 	+v2k +verilog2001ext+.v95+.vt+.vp +libext+.v \
-	-kdb \
-	-lca \
 	-debug_pp \
-	-debug_access+all \
 	+incdir+$(build_dir) \
 	$(sim_vsrcs)
 
 PREPROC_DEFINES = \
 	+define+VCS \
-	+define+FSDB \
 	+define+CLOCK_PERIOD=$(CLOCK_PERIOD) \
 	+define+RESET_DELAY=$(RESET_DELAY) \
 	+define+PRINTF_COND=$(TB).printf_cond \
@@ -63,3 +59,7 @@ PREPROC_DEFINES = \
 	+define+RANDOMIZE_REG_INIT \
 	+define+RANDOMIZE_GARBAGE_ASSIGN \
 	+define+RANDOMIZE_INVALID_ASSIGN
+
+ifdef USE_FSDB
+PREPROC_DEFINES += +define+FSDB
+endif
