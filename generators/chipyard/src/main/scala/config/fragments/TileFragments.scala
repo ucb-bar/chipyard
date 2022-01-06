@@ -11,7 +11,7 @@ import boom.common.{BoomTileAttachParams}
 import cva6.{CVA6TileAttachParams}
 import sodor.common.{SodorTileAttachParams}
 import saturn.common.{SaturnTileAttachParams}
-import pythia.{TilePrefetchingMasterPortParams}
+import prefetchers.{TilePrefetchingMasterPortParams}
 
 import testchipip._
 
@@ -68,7 +68,7 @@ class WithRocketDCacheScratchpad extends Config((site, here, up) => {
   }
 })
 
-class WithTilePrefetchers extends Config((site, here, up) => {
+class WithTileToSBusPrefetchers extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: RocketTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
       master = TilePrefetchingMasterPortParams(tp.tileParams.hartId, tp.crossingParams.master)))

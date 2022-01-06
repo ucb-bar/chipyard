@@ -137,9 +137,9 @@
 [submodule "generators/saturn"]
 	path = generators/saturn
 	url = git@github.com:ucb-bar/saturn.git
-[submodule "generators/pythia"]
-	path = generators/pythia
-	url = git@github.com:ucb-bar/pythia.git
+[submodule "generators/bar-prefetchers"]
+	path = generators/bar-prefetchers
+	url = git@github.com:ucb-bar/bar-prefetchers.git
 [submodule "generators/bar-cache"]
 	path = generators/bar-cache
 	url = git@github.com:ucb-bar/bar-cache.git
