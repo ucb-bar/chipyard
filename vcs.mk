@@ -1,3 +1,9 @@
+HELP_COMPILATION_VARIABLES += \
+"   USE_FSDB               = set to '1' to build VCS simulator to emit FSDB instead of VPD."
+
+HELP_SIMULATION_VARIABLES += \
+"   USE_FSDB               = set to '1' to run VCS simulator emitting FSDB instead of VPD."
+
 ifdef USE_FSDB
 WAVEFORM_FLAG=+fsdbfile=$(sim_out_name).fsdb
 else
