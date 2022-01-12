@@ -49,9 +49,9 @@ Say you need to update some power straps settings in ``example.yml`` and want to
 
    make redo-par HAMMER_REDO_ARGS='-p example.yml --only_step power_straps'
 
-RTL/Gate-level Simulation, Power Estimation
--------------------------------------------
-With the Synopsys plugin, RTL and gate-level simulation is supported using VCS at the chip-level. Also, post-par power estimation with Voltus in the Cadence plugin is also supported. While the provided example does not implement any simulation, some Make targets are provided in the ``vlsi/`` directory. Here is a brief description:
+Hierarchical RTL/Gate-level Simulation, Power Estimation
+--------------------------------------------------------
+With the Synopsys plugin, hierarchical RTL and gate-level simulation is supported using VCS at the chip-level. Also, post-par power estimation with Voltus in the Cadence plugin is also supported. Special Make targets are provided in the ``vlsi/`` directory in ``sims.mk`` and ``power.mk``. Here is a brief description:
 
 * ``sim-rtl``: RTL-level simulation
 
@@ -73,4 +73,6 @@ With the Synopsys plugin, RTL and gate-level simulation is supported using VCS a
 
 * ``redo-`` can be appended to all above targets to break dependency tracking, like described above.
 
-The simulation configuration (e.g. binaries) can be edited for your design. See the Makefile and refer to Hammer's documentation for how to set up simulation parameters for your design.
+* ``-$(VLSI_TOP)`` suffixes denote simulations/power analysis on a submodule in a hierarchical flow. Note that you must provide the testbenches for these modules since the default testbench only simulates a Chipyard-based ``ChipTop`` DUT instance.
+
+The simulation configuration (e.g. binaries) can be edited for your design. See the ``Makefile`` and refer to Hammer's documentation for how to set up simulation parameters for your design.
