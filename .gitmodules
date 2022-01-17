@@ -128,9 +128,6 @@
 [submodule "tools/rocket-dsp-utils"]
 	path = tools/rocket-dsp-utils
 	url = https://github.com/ucb-bar/rocket-dsp-utils
-[submodule "generators/shuttle"]
-	path = generators/shuttle
-	url = git@github.com:ucb-bar/shuttle.git
 [submodule "generators/ibex"]
 	path = generators/ibex
 	url = https://github.com/ucb-bar/ibex-wrapper
