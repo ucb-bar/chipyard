@@ -135,6 +135,7 @@ $(TOP_TARGETS) $(HARNESS_TARGETS): firrtl_temp
 
 firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTopAndHarness,\
+		--allow-unrecognized-annotations \
 		--output-file $(TOP_FILE) \
 		--harness-o $(HARNESS_FILE) \
 		--input-file $(FIRRTL_FILE) \
