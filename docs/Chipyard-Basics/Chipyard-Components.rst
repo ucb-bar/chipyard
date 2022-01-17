@@ -24,6 +24,10 @@ Processor Cores
   An in-order RISC-V core written in System Verilog. Previously called Ariane.
   See :ref:`Generators/CVA6:CVA6 Core` for more information.
 
+**Ibex Core**
+  An in-order 32 bit RISC-V core written in System Verilog.
+  See :ref:`Generators/Ibex:Ibex Core` for more information.
+
 Accelerators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -143,6 +143,12 @@ class ScratchpadOnlyRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: l1scratchpadrocket
 
+class MMIOScratchpadOnlyRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithDefaultMMIOPort ++  // add default external master port
+  new freechips.rocketchip.subsystem.WithDefaultSlavePort ++ // add default external slave port
+  new ScratchpadOnlyRocketConfig
+)
+
 class L1ScratchpadRocketConfig extends Config(
   new chipyard.config.WithRocketICacheScratchpad ++         // use rocket ICache scratchpad
   new chipyard.config.WithRocketDCacheScratchpad ++         // use rocket DCache scratchpad

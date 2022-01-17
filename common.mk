@@ -18,7 +18,7 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_LDFLAGS      = additional LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES      = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS         = additional make requirements to build the simulator" \
-"   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client (works best with sbtn or sbt script)" \
+"   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
 "   EXTRA_CHISEL_OPTIONS   = additional options to pass to the Chisel compiler" \
 "   EXTRA_FIRRTL_OPTIONS   = additional options to pass to the FIRRTL compiler"
 
@@ -41,13 +41,14 @@ NUMA_PREFIX = $(if $(filter $(NUMACTL),0),,$(shell $(base_dir)/scripts/numa_pref
 
 #----------------------------------------------------------------------------
 HELP_COMMANDS += \
-"   run-binary             = run [./$(shell basename $(sim))] and log instructions to file" \
-"   run-binary-fast        = run [./$(shell basename $(sim))] and don't log instructions" \
-"   run-binary-debug       = run [./$(shell basename $(sim_debug))] and log instructions and waveform to files" \
-"   verilog                = generate intermediate verilog files from chisel elaboration and firrtl passes" \
-"   firrtl                 = generate intermediate firrtl files from chisel elaboration" \
-"   run-tests              = run all assembly and benchmark tests" \
-"   launch-sbt             = start sbt terminal"
+"   run-binary                  = run [./$(shell basename $(sim))] and log instructions to file" \
+"   run-binary-fast             = run [./$(shell basename $(sim))] and don't log instructions" \
+"   run-binary-debug            = run [./$(shell basename $(sim_debug))] and log instructions and waveform to files" \
+"   verilog                     = generate intermediate verilog files from chisel elaboration and firrtl passes" \
+"   firrtl                      = generate intermediate firrtl files from chisel elaboration" \
+"   run-tests                   = run all assembly and benchmark tests" \
+"   launch-sbt                  = start sbt terminal" \
+"   {shutdown,start}-sbt-server = shutdown or start sbt server if using ENABLE_SBT_THIN_CLIENT" \
 
 #########################################################################################
 # include additional subproject make fragments
@@ -64,7 +65,7 @@ include $(base_dir)/tools/torture.mk
 #########################################################################################
 # Returns a list of files in directory $1 with file extension $2.
 # If available, use 'fd' to find the list of files, which is faster than 'find'.
-ifeq ($(shell which fd),)
+ifeq ($(shell which fd 2> /dev/null),)
 	lookup_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.$(2)" -print 2> /dev/null)
 else
 	lookup_srcs = $(shell fd -L ".*\.$(2)" $(1))
@@ -105,7 +106,7 @@ $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 	@echo "" > /dev/null
 
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_REQS)
+generator_temp: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
@@ -256,7 +257,7 @@ $(output_dir)/%.out: $(output_dir)/% $(SIM_PREREQ)
 #########################################################################################
 # include build/project specific makefrags made from the generator
 #########################################################################################
-ifneq ($(filter run% %.run %.out %.vpd %.vcd,$(MAKECMDGOALS)),)
+ifneq ($(filter run% %.run %.out %.vpd %.vcd %.fsdb,$(MAKECMDGOALS)),)
 -include $(build_dir)/$(long_name).d
 endif
 
@@ -279,6 +280,7 @@ SBT_COMMAND ?= shell
 launch-sbt:
 	cd $(base_dir) && $(SBT_NON_THIN) "$(SBT_COMMAND)"
 
+.PHONY: check-thin-client
 check-thin-client:
 ifeq (,$(ENABLE_SBT_THIN_CLIENT))
 	$(error ENABLE_SBT_THIN_CLIENT not set.)
