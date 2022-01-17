@@ -66,10 +66,10 @@ class BoomLSUShim(implicit p: Parameters) extends BoomModule()(p)
   tracegen_uop.ctrl.is_sta  := isWrite(io.tracegen.req.bits.cmd)
   tracegen_uop.ctrl.is_std  := isWrite(io.tracegen.req.bits.cmd)
 
-  io.lsu.dis_uops(0).valid         := io.tracegen.req.fire()
+  io.lsu.dis_uops(0).valid         := io.tracegen.req.fire
   io.lsu.dis_uops(0).bits          := tracegen_uop
 
-  when (io.tracegen.req.fire()) {
+  when (io.tracegen.req.fire) {
     rob_tail := WrapInc(rob_tail, rob_sz)
     rob_bsy(rob_tail)   := true.B
     rob_uop(rob_tail)   := tracegen_uop
@@ -111,7 +111,7 @@ class BoomLSUShim(implicit p: Parameters) extends BoomModule()(p)
 
   assert(!io.lsu.lxcpt.valid)
 
-  io.lsu.exe(0).req.valid     := RegNext(io.tracegen.req.fire())
+  io.lsu.exe(0).req.valid     := RegNext(io.tracegen.req.fire)
   io.lsu.exe(0).req.bits      := DontCare
   io.lsu.exe(0).req.bits.uop  := RegNext(tracegen_uop)
   io.lsu.exe(0).req.bits.addr := RegNext(io.tracegen.req.bits.addr)

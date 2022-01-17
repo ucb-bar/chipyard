@@ -52,7 +52,7 @@ class InitZeroModuleImp(outer: InitZero) extends LazyModuleImp(outer) {
     state := s_resp
   }
 
-  when (mem.d.fire()) {
+  when (mem.d.fire) {
     state := Mux(bytesLeft === 0.U, s_done, s_write)
   }
 }

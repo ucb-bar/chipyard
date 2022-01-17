@@ -115,7 +115,7 @@ class GenericFIRDirectCell[T<:Data:Ring](genIn: T, genOut: T) extends Module {
 
   // When a new transaction is ready on the input, we will have new data to output
   // next cycle. Take this data in
-  when (io.in.fire()) {
+  when (io.in.fire) {
     hasNewData := 1.U
     inputReg := io.in.bits.data
   }
@@ -123,7 +123,7 @@ class GenericFIRDirectCell[T<:Data:Ring](genIn: T, genOut: T) extends Module {
   // We should output data when our cell has new data to output and is ready to
   // recieve new data. This insures that every cell in the chain passes its data
   // on at the same time
-  io.out.valid := hasNewData & io.in.fire()
+  io.out.valid := hasNewData & io.in.fire
   io.out.bits.data := inputReg
 
   // Compute carry
