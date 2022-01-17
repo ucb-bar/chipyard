@@ -8,8 +8,8 @@ lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
   version := "1.3",
   scalaVersion := "2.12.10",
-  test in assembly := {},
-  assemblyMergeStrategy in assembly := { _ match {
+  assembly / test := {},
+  assembly / assemblyMergeStrategy := { _ match {
     case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
     case _ => MergeStrategy.first}},
   scalacOptions ++= Seq("-deprecation","-unchecked","-Xsource:2.11"),
@@ -48,8 +48,8 @@ lazy val firesimDir = if (firesimAsLibrary) {
 def freshProject(name: String, dir: File): Project = {
   Project(id = name, base = dir / "src")
     .settings(
-      scalaSource in Compile := baseDirectory.value / "main" / "scala",
-      resourceDirectory in Compile := baseDirectory.value / "main" / "resources"
+      Compile / scalaSource := baseDirectory.value / "main" / "scala",
+      Compile / resourceDirectory := baseDirectory.value / "main" / "resources"
     )
 }
 
@@ -248,7 +248,7 @@ lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
 lazy val sifive_cache = (project in file("generators/sifive-cache"))
   .settings(
     commonSettings,
-    scalaSource in Compile := baseDirectory.value / "design/craft")
+    Compile / scalaSource := baseDirectory.value / "design/craft")
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
 
