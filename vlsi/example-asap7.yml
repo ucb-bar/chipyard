@@ -1,8 +1,11 @@
 # Technology Setup
 # Technology used is ASAP7
 vlsi.core.technology: asap7
-# Specify dir with ASAP7 tarball
-technology.asap7.tarball_dir: ""
+# Specify dir with ASAP7 Calibre deck tarball
+technology.asap7.tarball_dir: "/path/to/asap7"
+# Specify PDK and std cell install directories
+# technology.asap7.pdk_install_dir: "/path/to/asap7/asap7PDK_r1p7"
+# technology.asap7.stdcell_install_dir: "/path/to/asap7/asap7sc7p5t_27"
 
 vlsi.core.max_threads: 12
 
@@ -19,30 +22,6 @@ vlsi.inputs.clocks: [
 
 # Generate Make include to aid in flow 
 vlsi.core.build_system: make
-
-# Power Straps
-par.power_straps_mode: generate
-par.generate_power_straps_method: by_tracks
-par.blockage_spacing: 2.0
-par.generate_power_straps_options:
-  by_tracks:
-    strap_layers:
-      - M3
-      - M4
-      - M5
-      - M6
-      - M7
-      - M8
-      - M9
-    pin_layers:
-      - M9
-    track_width: 7 # minimum allowed for M2 & M3
-    track_spacing: 0
-    track_spacing_M3: 1 # to avoid M2 shorts at higher density
-    track_start: 10
-    power_utilization: 0.2
-    power_utilization_M8: 1.0
-    power_utilization_M9: 1.0
 
 # Placement Constraints
 # For ASAP7, all numbers must be 4x larger than final GDS
