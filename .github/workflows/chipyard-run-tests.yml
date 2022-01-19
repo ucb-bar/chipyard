@@ -1,6 +1,18 @@
 name: chipyard-ci-process
 
-on: [push]
+on:
+  # run ci when pushing to dev, master, and main only
+  push:
+    branches:
+      - dev
+      - master
+      - main
+  # run ci on pull requests targeting dev, master, main only
+  pull_request:
+    branches:
+      - dev
+      - master
+      - main
 
 env:
   tools-cache-version: v13
