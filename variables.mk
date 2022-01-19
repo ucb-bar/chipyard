@@ -169,6 +169,7 @@ SBT_OPTS_FILE := $(base_dir)/.sbtopts
 ifneq (,$(wildcard $(SBT_OPTS_FILE)))
 override SBT_OPTS += $(subst $$PWD,$(base_dir),$(shell cat $(SBT_OPTS_FILE)))
 endif
+override SBT_OPTS += -DfirrtlVersion=1.4.1
 
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
