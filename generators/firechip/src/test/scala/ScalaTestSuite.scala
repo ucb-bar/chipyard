@@ -65,7 +65,7 @@ abstract class FireSimTestSuite(
           Await result (Future sequence subresults, Duration.Inf)
         }
         results.flatten foreach { case (name, exitcode) =>
-          assert(exitcode == 0, "Failed $name")
+          assert(exitcode == 0, s"Failed $name")
         }
       }
     } else {
