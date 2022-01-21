@@ -6,7 +6,7 @@ lazy val chipyardRoot = Project("chipyardRoot", file("."))
 
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
-  version := "1.3",
+  version := "1.6",
   scalaVersion := "2.12.10",
   assembly / test := {},
   assembly / assemblyMergeStrategy := { _ match {
@@ -66,11 +66,11 @@ lazy val chiselSettings = Seq(
   libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % chiselVersion),
   addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % chiselVersion cross CrossVersion.full))
 
-val firrtlVersion = "1.5.0"
+val firrtlVersion = "1.5-SNAPSHOT"
 
 lazy val firrtlSettings = Seq(libraryDependencies ++= Seq("edu.berkeley.cs" %% "firrtl" % firrtlVersion))
 
-val chiselTestVersion = "2.5.0"
+val chiselTestVersion = "2.5-SNAPSHOT"
 
 lazy val chiselTestSettings = Seq(libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel-iotesters" % chiselTestVersion))
 
@@ -147,6 +147,7 @@ lazy val chipyard = (project in file("generators/chipyard"))
     dsptools, `rocket-dsp-utils`,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex)
   .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(chiselSettings)
   .settings(commonSettings)
 
 lazy val tracegen = (project in file("generators/tracegen"))
