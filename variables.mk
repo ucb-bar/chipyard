@@ -25,7 +25,9 @@ HELP_PROJECT_VARIABLES = \
 
 HELP_SIMULATION_VARIABLES = \
 "   BINARY                 = riscv elf binary that the simulator will run when using the run-binary* targets" \
-"   VERBOSE_FLAGS          = flags used when doing verbose simulation [$(VERBOSE_FLAGS)]"
+"   VERBOSE_FLAGS          = flags used when doing verbose simulation [$(VERBOSE_FLAGS)]" \
+"   timeout_cycles         = number of clock cycles before simulator times out, defaults to 10000000" \
+"   bmark_timeout_cycles   = number of clock cycles before benchmark simulator times out, defaults to 100000000"
 
 # include default simulation rules
 HELP_COMMANDS = \
