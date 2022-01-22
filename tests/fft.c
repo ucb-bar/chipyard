@@ -1,12 +1,14 @@
-#define FFT_WRITE_LANE  0x2000
-#define FFT_RD_LANE_BASE 0x2008
-// addr of read lane i is FFT_RD_LANE_BASE + i * 8
+/* This Test should be used with the fft generator config -- FFTRocketConfig. */
 
 #include <stdio.h>
 #include <inttypes.h>
 #include <math.h>
 
-// from test_pts.py
+#define FFT_WRITE_LANE  0x2000
+#define FFT_RD_LANE_BASE 0x2008
+// addr of read lane i is FFT_RD_LANE_BASE + i * 8
+
+// from generators/fft-generator/test_pts.py (in the fft-generator repo)
 // point size (and therefore integer width/uint32_t) determined by IOWidth from Tail.scala
 // point size is 2 * IOWidth since both real and imaginary components get IOWidth bits
 const uint32_t points[8] = {
@@ -24,8 +26,8 @@ const uint32_t expected_outputs[8] = {
   0x00000000, // read 0
   0x00000000, // read 1
   0x00000000, // read 2
-  0xffff0000, // read 3
-  0x00000000, // read 4 -- real portion is 0xff (very small negative number)
+  0xffff0000, // read 3 -- real portion is 0xff (very small negative number)
+  0x00000000, // read 4
   0x00000000, // read 5
   0x00000000, // read 6
   0x05a8fa57, // read 7 -- real: ~5.656 imaginary: ~-5.656
