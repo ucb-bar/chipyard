@@ -135,9 +135,9 @@ class LoopbackNICRocketConfig extends Config(
 // DOC include start: l1scratchpadrocket
 class ScratchpadOnlyRocketConfig extends Config(
   new testchipip.WithSerialPBusMem ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(0) ++ // remove offchip mem port
+  new chipyard.config.WithL2TLBs(0) ++
   new freechips.rocketchip.subsystem.WithNBanks(0) ++
-  new freechips.rocketchip.subsystem.WithNoMemPort ++
+  new freechips.rocketchip.subsystem.WithNoMemPort ++          // remove offchip mem port
   new freechips.rocketchip.subsystem.WithScratchpadsOnly ++    // use rocket l1 DCache scratchpad as base phys mem
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
