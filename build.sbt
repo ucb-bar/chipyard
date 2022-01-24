@@ -260,6 +260,7 @@ lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 lazy val firechip = (project in file("generators/firechip"))
   .dependsOn(chipyard, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
+    chiselSettings,
     commonSettings,
     Test / testGrouping := isolateAllTests( (Test / definedTests).value ),
     Test / testOptions += Tests.Argument("-oF")
