@@ -158,7 +158,7 @@ class BoomLSUShim(implicit p: Parameters) extends BoomModule()(p)
 
   io.lsu.rob_head_idx := rob_head
 
-
+  io.tracegen.ordered := ready_for_amo && io.lsu.fencei_rdy
 }
 
 case class BoomTraceGenTileAttachParams(
@@ -236,6 +236,7 @@ class BoomTraceGenTileModuleImp(outer: BoomTraceGenTile)
   ptw.io.requestors.head <> lsu.io.ptw
   outer.dcache.module.io.lsu <> lsu.io.dmem
   boom_shim.io.tracegen <> tracegen.io.mem
+  tracegen.io.fence_rdy := boom_shim.io.tracegen.ordered
   boom_shim.io.lsu <> lsu.io.core
 
   // Normally the PTW would use this port
