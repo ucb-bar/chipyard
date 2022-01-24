@@ -375,6 +375,26 @@ jobs:
           project-key: "chipyard-sodor"
       - uses: ./.github/actions/job-end
 
+  chipyard-fftgenerator-run-tests:
+    name: chipyard-fftgenerator-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-fftgenerator"
+      - uses: ./.github/actions/job-end
+
   chipyard-dmirocket-run-tests:
     name: chipyard-dmirocket-run-tests
     needs: prepare-chipyard-peripherals
