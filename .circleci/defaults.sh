@@ -81,6 +81,7 @@ mapping["chipyard-nvdla"]=" CONFIG=SmallNVDLARocketConfig"
 mapping["chipyard-sodor"]=" CONFIG=Sodor5StageConfig"
 mapping["chipyard-multiclock-rocket"]=" CONFIG=MulticlockRocketConfig"
 mapping["chipyard-nomem-scratchpad"]="  CONFIG=MMIOScratchpadOnlyRocketConfig"
+mapping["chipyard-fftgenerator"]=" CONFIG=FFTRocketConfig"
 
 mapping["firesim"]="SCALA_TEST=firesim.firesim.RocketNICF1Tests"
 mapping["firesim-multiclock"]="SCALA_TEST=firesim.firesim.RocketMulticlockF1Tests"
