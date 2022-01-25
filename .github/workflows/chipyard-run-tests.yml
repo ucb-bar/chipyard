@@ -737,7 +737,7 @@ jobs:
     name: "all tests passed"
     needs: [commit-on-master-check, tutorial-setup-check, documentation-check,
             chipyard-rocket-run-tests, chipyard-hetero-run-tests, chipyard-boom-run-tests, chipyard-cva6-run-tests, chipyard-ibex-run-tests,
-            chipyard-sodor-run-tests, chipyard-dmirocket-run-tests, chipyard-spiflashwrite-run-tests,
+            chipyard-sodor-run-tests, chipyard-dmirocket-run-tests, chipyard-spiflashwrite-run-tests, chipyard-fftgenerator-run-tests,
             chipyard-spiflashread-run-tests, chipyard-lbwif-run-tests, chipyard-sha3-run-tests,
             chipyard-streaming-fir-run-tests, chipyard-streaming-passthrough-run-tests, chipyard-hwacha-run-tests,
             chipyard-gemmini-run-tests, chipyard-nvdla-run-tests,
