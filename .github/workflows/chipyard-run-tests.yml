@@ -377,7 +377,7 @@ jobs:
 
   chipyard-fftgenerator-run-tests:
     name: chipyard-fftgenerator-run-tests
-    needs: prepare-chipyard-cores
+    needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
@@ -391,7 +391,7 @@ jobs:
         if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-cores"
+          group-key: "group-accels"
           project-key: "chipyard-fftgenerator"
       - uses: ./.github/actions/job-end
 
