@@ -17,7 +17,16 @@ if [ "$MINGIT" != "$(echo -e "$MINGIT\n$MYGIT" | sort -V | head -n1)" ]; then
   false
 fi
 
-DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+# On macOS, use GNU readlink from 'coreutils' package in Homebrew/MacPorts
+if [ "$(uname -s)" = "Darwin" ] ; then
+    READLINK=greadlink
+else
+    READLINK=readlink
+fi
+
+# If BASH_SOURCE is undefined we may be running under zsh, in that case
+# provide a zsh-compatible alternative
+DIR="$(dirname "$($READLINK -f "${BASH_SOURCE[0]:-${(%):-%x}}")")"
 CHIPYARD_DIR="$(dirname "$DIR")"
 
 cd "$CHIPYARD_DIR"
@@ -38,10 +47,13 @@ cd "$CHIPYARD_DIR"
             generators/sha3 \
             generators/gemmini \
             sims/firesim \
+            software/nvdla-workload \
+            software/coremark \
+            software/firemarshal \
+            software/spec2017 \
             vlsi/hammer-cadence-plugins \
             vlsi/hammer-synopsys-plugins \
             vlsi/hammer-mentor-plugins \
-            software/firemarshal \
             fpga/fpga-shells
         do
             "$1" "${name%/}"

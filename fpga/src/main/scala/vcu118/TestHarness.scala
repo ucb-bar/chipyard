@@ -17,11 +17,9 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 import sifive.blocks.devices.gpio._
 
-import chipyard.{HasHarnessSignalReferences, HasTestHarnessFunctions, BuildTop, ChipTop, ExtTLMem, CanHaveMasterTLMemPort}
+import chipyard.{HasHarnessSignalReferences, BuildTop, ChipTop, ExtTLMem, CanHaveMasterTLMemPort, DefaultClockFrequencyKey}
 import chipyard.iobinders.{HasIOBinders}
 import chipyard.harness.{ApplyHarnessBinders}
-
-case object FPGAFrequencyKey extends Field[Double](100.0)
 
 class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118ShellBasicOverlays {
 
@@ -55,7 +53,8 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
   harnessSysPLL := sysClkNode
 
   // create and connect to the dutClock
-  val dutClock = ClockSinkNode(freqMHz = dp(FPGAFrequencyKey))
+  println(s"VCU118 FPGA Base Clock Freq: ${dp(DefaultClockFrequencyKey)} MHz")
+  val dutClock = ClockSinkNode(freqMHz = dp(DefaultClockFrequencyKey))
   val dutWrangler = LazyModule(new ResetWrangler)
   val dutGroup = ClockGroup()
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL
@@ -121,19 +120,20 @@ class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawMod
   val hReset = Wire(Reset())
   hReset := _outer.dutClock.in.head._1.reset
 
-  val harnessClock = _outer.dutClock.in.head._1.clock
-  val harnessReset = WireInit(hReset)
+  val buildtopClock = _outer.dutClock.in.head._1.clock
+  val buildtopReset = WireInit(hReset)
   val dutReset = hReset.asAsyncReset
   val success = false.B
 
-  childClock := harnessClock
-  childReset := harnessReset
+  childClock := buildtopClock
+  childReset := buildtopReset
 
   // harness binders are non-lazy
-  _outer.topDesign match { case d: HasTestHarnessFunctions =>
-    d.harnessFunctions.foreach(_(this))
-  }
   _outer.topDesign match { case d: HasIOBinders =>
     ApplyHarnessBinders(this, d.lazySystem, d.portMap)
   }
+
+  // check the top-level reference clock is equal to the default
+  // non-exhaustive since you need all ChipTop clocks to equal the default
+  require(getRefClockFreq == p(DefaultClockFrequencyKey))
 }

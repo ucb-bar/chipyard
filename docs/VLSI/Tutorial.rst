@@ -9,7 +9,7 @@ Project Structure
 
 This example gives a suggested file structure and build system. The ``vlsi/`` folder will eventually contain the following files and folders:
 
-* Makefile
+* Makefile, sim.mk, power.mk
 
   * Integration of Hammer's build system into Chipyard and abstracts away some Hammer commands.
 
@@ -26,17 +26,13 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
   * Entry point to Hammer. Contains example placeholders for hooks.
 
-* example.v
-
-  * Verilog wrapper around the accelerator and dummy hard macro.
-
-* example-asap7.yml
+* example-asap7.yml, example-tools.yml
 
   * Hammer IR for this tutorial.
 
-* extra_libraries
+* example-design.yml, example-nangate45.yml, example-tech.yml
 
-  * Contains collateral for the dummy hard macro.
+  * Hammer IR not used for this tutorial but provided as templates.
 
 * generated-src
 
@@ -46,17 +42,20 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
   * Core, tool, tech repositories.
 
+* view_gds.py
+
+  * A convenience script to view a layout using gdstk or gdspy. Only use this for small layouts (i.e. smaller than the TinyRocketConfig example) since the gdstk-produced SVG will be too big and gdspy's GUI is very slow for large layouts!
+
 Prerequisites
 -------------
 
 * Python 3.4+
-* numpy and gdspy packages
-* Genus, Innovus, and Calibre licenses
-* For ASAP7 specifically:
+* numpy and `gdstk <https://github.com/heitzmann/gdstk>`__ or `gdspy <https://github.com/heitzmann/gdspy>`__  packages. Note: gdspy must be version 1.4.
+* Genus, Innovus, Voltus, VCS, and Calibre licenses
+* For ASAP7 specifically (`README <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/technology/asap7>`__ for more details):
 
-  * Download the `ASAP7 PDK <http://asap.asu.edu/asap/>`__ tarball to a directory of choice but do not extract it. The tech plugin is configured to extract the PDK into a cache directory for you.
-  * If you have additional ASAP7 hard macros, their LEF & GDS need to be 4x upscaled @ 4000 DBU precision. They may live outside ``extra_libraries`` at your discretion.
-  * Innovus version must be >= 15.2 or <= 18.1 (ISRs excluded).
+  * First, download the `ASAP7 v1p7 PDK <https://github.com/The-OpenROAD-Project/asap7>`__ (we recommend shallow-cloning or downloading an archive of the repository). Then, download the `encrypted Calibre decks tarball <http://asap.asu.edu/asap/>`__ tarball to a directory of choice (e.g. the root directory of the PDK) but do not extract it like the instructions say. The tech plugin is configured to extract the tarball into a cache directory for you. 
+  * If you have additional ASAP7 hard macros, their LEF & GDS need to be 4x upscaled @ 4000 DBU precision. 
 
 Initial Setup
 -------------
@@ -78,17 +77,13 @@ Pull the Hammer environment into the shell:
 
 Building the Design
 --------------------
-To elaborate the ``Sha3RocketConfig`` (Rocket Chip w/ the accelerator) and set up all prerequisites for the build system to push just the accelerator + hard macro through the flow:
+To elaborate the ``TinyRocketConfig`` and set up all prerequisites for the build system to push the design and SRAM macros through the flow:
 
 .. code-block:: shell
 
-    make buildfile MACROCOMPILER_MODE='--mode synflops' CONFIG=Sha3RocketConfig VLSI_TOP=Sha3AccelwBB
+    make buildfile CONFIG=TinyRocketConfig
 
-The ``MACROCOMPILER_MODE='--mode synflops'`` is needed because the ASAP7 process does not yet have a memory compiler, so flip-flop arrays are used instead. This will dramatically increase the synthesis runtime if your design has a lot of memory state (e.g. large caches). This change is automatically inferred by the makefile but is included here for completeness.
-
-The ``CONFIG=Sha3RocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a Rocket Chip with the Sha3Accel module.
-
-The ``VLSI_TOP=Sha3AccelwBB`` indicates that we are only interested in physical design of the accelerator block. If this variable is not set, the entire SoC will be pushed through physical design. Note that you should not set the ``TOP`` variable because it is used during Chisel elaboration.
+The ``CONFIG=TinyRocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a stripped-down Rocket Chip in the interest of minimizing tool runtime.
 
 For the curious, ``make buildfile`` generates a set of Make targets in ``build/hammer.d``. It needs to be re-run if environment variables are changed. It is recommended that you edit these variables directly in the Makefile rather than exporting them to your shell environment.
 
@@ -99,19 +94,17 @@ example-vlsi
 ^^^^^^^^^^^^
 This is the entry script with placeholders for hooks. In the ``ExampleDriver`` class, a list of hooks is passed in the ``get_extra_par_hooks``. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in this example. Refer to the Hammer documentation on hooks for a detailed description of how these are injected into the VLSI flow.
 
-The ``scale_final_gds`` hook is a particularly powerful hook. It dumps a Python script provided by the ASAP7 tech plugin, an executes it within the Innovus TCL interpreter, and should be inserted after ``write_design``. This hook is necessary because the ASAP7 PDK does place-and-route using 4x upscaled LEFs for Innovus licensing reasons, thereby requiring the cells created in the post-P&R GDS to be scaled down by a factor of 4.
-
-example.yml
-^^^^^^^^^^^
+example-asap7.yml
+^^^^^^^^^^^^^^^^^
 This contains the Hammer configuration for this example project. Example clock constraints, power straps definitions, placement constraints, and pin constraints are given. Additional configuration for the extra libraries and tools are at the bottom.
 
-First, set ``technology.asap7.tarball_dir`` to the absolute path of where the downloaded the ASAP7 PDK tarball lives.
+First, set ``technology.asap7.tarball_dir`` to the absolute path to the directory where the downloaded the ASAP7 Calibre deck tarball lives. If it is not in the PDK's root directory, then also set ``technology.asap7.pdk_install_dir`` and ``technology.asap7.stdcell_install_dir``.
 
 Synthesis
 ^^^^^^^^^
 .. code-block:: shell
 
-    make syn
+    make syn CONFIG=TinyRocketConfig
 
 Post-synthesis logs and collateral are in ``build/syn-rundir``. The raw QoR data is available at ``build/syn-rundir/reports``, and methods to extract this information for design space exploration are a WIP.
 
@@ -119,7 +112,7 @@ Place-and-Route
 ^^^^^^^^^^^^^^^
 .. code-block:: shell
 
-    make par
+    make par CONFIG=TinyRocketConfig
 
 After completion, the final database can be opened in an interactive Innovus session via ``./build/par-rundir/generated-scripts/open_chip``.
 
@@ -131,7 +124,7 @@ Timing reports are found in ``build/par-rundir/timingReports``. They are gzipped
 
 .. code-block:: shell
 
-    python3 view_gds.py build/par-rundir/Sha3AccelwBB.gds
+    ./view_gds.py build/chipyard.TestHarness.TinyRocketConfig/par-rundir/ChipTop.gds
 
 By default, this script only shows the M2 thru M4 routing. Layers can be toggled in the layout viewer's side pane and ``view_gds.py`` has a mapping of layer numbers to layer names.
 
@@ -141,9 +134,34 @@ To run DRC & LVS, and view the results in Calibre:
 
 .. code-block:: shell
 
-    make drc
+    make drc CONFIG=TinyRocketConfig
     ./build/drc-rundir/generated-scripts/view-drc
-    make lvs
+    make lvs CONFIG=TinyRocketConfig
     ./build/lvs-rundir/generated-scripts/view-lvs
 
 Some DRC errors are expected from this PDK, as explained in the `ASAP7 plugin readme <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/technology/asap7>`__.
+Furthermore, the dummy SRAMs that are provided in this tutorial and PDK do not have any geometry inside, so will certainly cause DRC errors.
+
+Simulation
+^^^^^^^^^^
+Simulation with VCS is supported, and can be run at the RTL- or gate-level (post-synthesis and P&R). The simulation infrastructure as included here is intended for running RISC-V binaries on a Chipyard config. For example, for an RTL-level simulation:
+
+.. code-block:: shell
+
+    make sim-rtl CONFIG=TinyRocketConfig BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv32ui-p-simple
+
+Post-synthesis and post-P&R simulations use the ``sim-syn`` and ``sim-par`` targets, respectively.
+
+You can also append ``-debug`` and ``-debug-timing`` to the above sim targets, which will instruct VCS to write a SAIF + VPD and do timing-annotated simulations, respectively. See the ``sim.mk`` file for all available targets.
+
+Power/Rail Analysis
+^^^^^^^^^^^^^^^^^^^
+Post-P&R power and rail (IR drop) analysis is supported with Voltus:
+
+.. code-block:: shell
+
+    make power-par CONFIG=TinyRocketConfig
+
+If you append the ``BINARY`` variable to the command, it will use the activity file generated from a ``sim-<syn/par>-debug`` run and report dynamic power & IR drop from the toggles encoded in the waveform.
+
+Note that power and rail analysis can also be run without gate-level simulation, but you will need to run the power tool manually (see the generated commands in the generated ``hammer.d`` buildfile). Only static and active (vectorless) power & IR drop will be reported.

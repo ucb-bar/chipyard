@@ -13,13 +13,20 @@ source $SCRIPT_DIR/defaults.sh
 # call clean on exit
 trap clean EXIT
 
+# Directory locations for handling firesim-local installations of libelf/libdwarf
+# This would generally be handled by build-setup.sh/firesim-setup.sh
+firesim_sysroot=lib-install
+local_firesim_sysroot=$LOCAL_FIRESIM_DIR/$firesim_sysroot
+remote_firesim_sysroot=$REMOTE_FIRESIM_DIR/$firesim_sysroot
+
 cd $LOCAL_CHIPYARD_DIR
 ./scripts/init-submodules-no-riscv-tools.sh
 cd $LOCAL_CHIPYARD_DIR/sims/firesim/sim/firesim-lib/src/main/cc/lib
 git submodule update --init elfutils libdwarf
 cd $LOCAL_CHIPYARD_DIR/sims/firesim
-./scripts/build-libelf.sh
-./scripts/build-libdwarf.sh
+mkdir -p $local_firesim_sysroot
+./scripts/build-libelf.sh $local_firesim_sysroot
+./scripts/build-libdwarf.sh $local_firesim_sysroot
 cd $LOCAL_CHIPYARD_DIR
 
 make -C $LOCAL_CHIPYARD_DIR/tools/dromajo/dromajo-src/src
@@ -39,8 +46,8 @@ run "cp -r ~/.ivy2 $REMOTE_WORK_DIR"
 run "cp -r ~/.sbt  $REMOTE_WORK_DIR"
 
 TOOLS_DIR=$REMOTE_RISCV_DIR
-LD_LIB_DIR=$REMOTE_RISCV_DIR/lib
 
+LD_LIB_DIR=$remote_firesim_sysroot/lib:$REMOTE_RISCV_DIR/lib
 
 # Run Firesim Scala Tests
 run "export RISCV=\"$TOOLS_DIR\"; \
@@ -49,4 +56,4 @@ run "export RISCV=\"$TOOLS_DIR\"; \
      export PATH=\"$REMOTE_VERILATOR_DIR/bin:\$PATH\"; \
      export VERILATOR_ROOT=\"$REMOTE_VERILATOR_DIR\"; \
      export COURSIER_CACHE=\"$REMOTE_WORK_DIR/.coursier-cache\"; \
-     make -C $REMOTE_FIRESIM_DIR JAVA_OPTS=\"$REMOTE_JAVA_OPTS\" SBT_OPTS=\"$REMOTE_SBT_OPTS\" testOnly ${mapping[$1]}"
+     make -C $REMOTE_FIRESIM_DIR JAVA_TOOL_OPTIONS=\"$REMOTE_JAVA_OPTS\" SBT_OPTS=\"$REMOTE_SBT_OPTS\" testOnly ${mapping[$1]}"

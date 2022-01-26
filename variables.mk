@@ -3,7 +3,14 @@
 # - to use the help text, your Makefile should have a 'help' target that just
 #   prints all the HELP_LINES
 #########################################################################################
-HELP_COMPILATION_VARIABLES =
+HELP_COMPILATION_VARIABLES = \
+"   JAVA_HEAP_SIZE    = if overridden, set the default java heap size (default is 8G)" \
+"   JAVA_TOOL_OPTIONS = if overridden, set underlying java tool options (default sets misc. sizes and tmp dir)" \
+"   SBT_OPTS          = set additional sbt command line options (these take the form -Dsbt.<option>=<setting>) " \
+"                       See https://www.scala-sbt.org/1.x/docs/Command-Line-Reference.html\#Command+Line+Options" \
+"   SBT_BIN           = if overridden, used to invoke sbt (default is to invoke sbt by sbt-launch.jar)" \
+"   FIRRTL_LOGLEVEL   = if overridden, set firrtl log level (default is error)"
+
 HELP_PROJECT_VARIABLES = \
 "   SUB_PROJECT            = use the specific subproject default variables [$(SUB_PROJECT)]" \
 "   SBT_PROJECT            = the SBT project that you should find the classes/packages in [$(SBT_PROJECT)]" \
@@ -18,7 +25,9 @@ HELP_PROJECT_VARIABLES = \
 
 HELP_SIMULATION_VARIABLES = \
 "   BINARY                 = riscv elf binary that the simulator will run when using the run-binary* targets" \
-"   VERBOSE_FLAGS          = flags used when doing verbose simulation [$(VERBOSE_FLAGS)]"
+"   VERBOSE_FLAGS          = flags used when doing verbose simulation [$(VERBOSE_FLAGS)]" \
+"   timeout_cycles         = number of clock cycles before simulator times out, defaults to 10000000" \
+"   bmark_timeout_cycles   = number of clock cycles before benchmark simulator times out, defaults to 100000000"
 
 # include default simulation rules
 HELP_COMMANDS = \
@@ -106,9 +115,12 @@ endif
 #########################################################################################
 # path to rocket-chip and testchipip
 #########################################################################################
-ROCKETCHIP_DIR      = $(base_dir)/generators/rocket-chip
-TESTCHIP_DIR        = $(base_dir)/generators/testchipip
-CHIPYARD_FIRRTL_DIR = $(base_dir)/tools/firrtl
+ROCKETCHIP_DIR       = $(base_dir)/generators/rocket-chip
+ROCKETCHIP_RSRCS_DIR = $(ROCKETCHIP_DIR)/src/main/resources
+TESTCHIP_DIR         = $(base_dir)/generators/testchipip
+TESTCHIP_RSRCS_DIR   = $(TESTCHIP_DIR)/src/main/resources
+CHIPYARD_FIRRTL_DIR  = $(base_dir)/tools/firrtl
+CHIPYARD_RSRCS_DIR   = $(base_dir)/generators/chipyard/src/main/resources
 
 #########################################################################################
 # names of various files needed to compile and run things
@@ -135,7 +147,11 @@ HARNESS_SMEMS_FILE ?= $(build_dir)/$(long_name).harness.mems.v
 HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
 HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
 
+BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
+BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
+
 # files that contain lists of files needed for VCS or Verilator simulation
+SIM_FILE_REQS =
 sim_files              ?= $(build_dir)/sim_files.f
 sim_top_blackboxes     ?= $(build_dir)/firrtl_black_box_resource_files.top.f
 sim_harness_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
@@ -146,26 +162,26 @@ sim_common_files       ?= $(build_dir)/sim_files.common.f
 # java arguments used in sbt
 #########################################################################################
 JAVA_HEAP_SIZE ?= 8G
-JAVA_OPTS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M
+export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -Djava.io.tmpdir=$(base_dir)/.java_tmp
 
 #########################################################################################
 # default sbt launch command
 #########################################################################################
-# by default build chisel3/firrtl and other subprojects from source
-override SBT_OPTS += -Dsbt.sourcemode=true -Dsbt.workspace=$(base_dir)/tools
-
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
 SBT_THIN_CLIENT_TIMESTAMP = $(base_dir)/project/target/active.json
 
 ifdef ENABLE_SBT_THIN_CLIENT
-override SCALA_BUILDTOOL_DEPS += $(SBT_THIN_CLIENT_TIMESTAMP)
+SCALA_BUILDTOOL_DEPS += $(SBT_THIN_CLIENT_TIMESTAMP)
 # enabling speeds up sbt loading
+# use with sbt script or sbtn to bypass error code issues
 SBT_CLIENT_FLAG = --client
 endif
 
-SBT ?= java $(JAVA_OPTS) -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS) $(SBT_CLIENT_FLAG)
-SBT_NON_THIN ?= $(subst $(SBT_CLIENT_FLAG),,$(SBT))
+# passes $(JAVA_TOOL_OPTIONS) from env to java
+SBT_BIN ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
+SBT = $(SBT_BIN) $(SBT_CLIENT_FLAG)
+SBT_NON_THIN = $(subst $(SBT_CLIENT_FLAG),,$(SBT))
 
 define run_scala_main
 	cd $(base_dir) && $(SBT) ";project $(1); runMain $(2) $(3)"

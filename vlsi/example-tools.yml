@@ -20,13 +20,15 @@ par.inputs.gds_merge: true
 # Calibre options
 vlsi.core.drc_tool: "calibre"
 vlsi.core.drc_tool_path: ["hammer-mentor-plugins/drc"]
+drc.calibre.version: "2017.3_38.30"
 vlsi.core.lvs_tool: "calibre"
 vlsi.core.lvs_tool_path: ["hammer-mentor-plugins/lvs"]
+lvs.calibre.version: "2017.3_38.30"
 # VCS options
 vlsi.core.sim_tool: "vcs"
 vlsi.core.sim_tool_path: ["hammer-synopsys-plugins/sim"]
 sim.vcs.version: "P-2019.06-SP2-5"
-# # Voltus options
+# Voltus options
 vlsi.core.power_tool: "voltus"
 vlsi.core.power_tool_path: ["hammer-cadence-plugins/power"]
 vlsi.core.power_tool_path_meta: "append"

@@ -17,6 +17,7 @@ import sifive.blocks.devices.pinctrl._
 import sifive.fpgashells.ip.xilinx.{IBUFG, IOBUF, PULLUP, PowerOnResetFPGAOnly}
 
 import chipyard.harness.{ComposeHarnessBinder, OverrideHarnessBinder}
+import chipyard.iobinders.JTAGChipIO
 
 class WithArtyResetHarnessBinder extends ComposeHarnessBinder({
   (system: HasPeripheryDebugModuleImp, th: ArtyFPGATestHarness, ports: Seq[Bool]) => {
@@ -35,11 +36,18 @@ class WithArtyResetHarnessBinder extends ComposeHarnessBinder({
 class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
   (system: HasPeripheryDebug, th: ArtyFPGATestHarness, ports: Seq[Data]) => {
     ports.map {
-      case j: JTAGIO =>
-        withClockAndReset(th.harnessClock, th.harnessReset) {
+      case j: JTAGChipIO =>
+        withClockAndReset(th.buildtopClock, th.hReset) {
+          val jtag_wire = Wire(new JTAGIO)
+          jtag_wire.TDO.data := j.TDO
+          jtag_wire.TDO.driven := true.B
+          j.TCK := jtag_wire.TCK
+          j.TMS := jtag_wire.TMS
+          j.TDI := jtag_wire.TDI
+
           val io_jtag = Wire(new JTAGPins(() => new BasePin(), false)).suggestName("jtag")
 
-          JTAGPinsFromPort(io_jtag, j)
+          JTAGPinsFromPort(io_jtag, jtag_wire)
 
           io_jtag.TCK.i.ival := IBUFG(IOBUF(th.jd_2).asClock).asBool
 
@@ -67,7 +75,7 @@ class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
 
 class WithArtyUARTHarnessBinder extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: ArtyFPGATestHarness, ports: Seq[UARTPortIO]) => {
-    withClockAndReset(th.harnessClock, th.harnessReset) {
+    withClockAndReset(th.clock_32MHz, th.ck_rst) {
       IOBUF(th.uart_rxd_out,  ports.head.txd)
       ports.head.rxd := IOBUF(th.uart_txd_in)
     }

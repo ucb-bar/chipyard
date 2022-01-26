@@ -7,12 +7,6 @@
 [submodule "barstools"]
 	path = tools/barstools
 	url = https://github.com/ucb-bar/barstools.git
-[submodule "tools/chisel3"]
-	path = tools/chisel3
-	url = https://github.com/freechipsproject/chisel3.git
-[submodule "tools/firrtl"]
-	path = tools/firrtl
-	url = https://github.com/freechipsproject/firrtl
 [submodule "tools/torture"]
 	path = tools/torture
 	url = https://github.com/ucb-bar/riscv-torture.git
@@ -77,15 +71,9 @@
 [submodule "tools/chisel-testers"]
 	path = tools/chisel-testers
 	url = https://github.com/freechipsproject/chisel-testers.git
-[submodule "tools/treadle"]
-	path = tools/treadle
-	url = https://github.com/freechipsproject/treadle.git
 [submodule "generators/sha3"]
 	path = generators/sha3
 	url = https://github.com/ucb-bar/sha3.git
-[submodule "tools/firrtl-interpreter"]
-	path = tools/firrtl-interpreter
-	url = https://github.com/freechipsproject/firrtl-interpreter.git
 [submodule "vlsi/hammer-cadence-plugins"]
 	path = vlsi/hammer-cadence-plugins
 	url = https://github.com/ucb-bar/hammer-cadence-plugins.git
@@ -134,3 +122,12 @@
 [submodule "fpga/fpga-shells"]
 	path = fpga/fpga-shells
 	url = https://github.com/sifive/fpga-shells.git
+[submodule "tools/api-config-chipsalliance"]
+	path = tools/api-config-chipsalliance
+	url = https://github.com/chipsalliance/api-config-chipsalliance.git
+[submodule "tools/rocket-dsp-utils"]
+	path = tools/rocket-dsp-utils
+	url = https://github.com/ucb-bar/rocket-dsp-utils
+[submodule "generators/ibex"]
+	path = generators/ibex
+	url = https://github.com/ucb-bar/ibex-wrapper

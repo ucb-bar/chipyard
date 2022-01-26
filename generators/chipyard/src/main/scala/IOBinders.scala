@@ -11,7 +11,7 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.{SimAXIMem}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
 import freechips.rocketchip.util._
-import freechips.rocketchip.prci.{ClockSinkNode, ClockSinkParameters}
+import freechips.rocketchip.prci._
 import freechips.rocketchip.groundtest.{GroundTestSubsystemModuleImp, GroundTestSubsystem}
 
 import sifive.blocks.devices.gpio._
@@ -23,6 +23,7 @@ import barstools.iocell.chisel._
 
 import testchipip._
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
+import chipyard.clocking.{HasChipyardPRCI, DividerOnlyClockGenerator}
 
 import scala.reflect.{ClassTag}
 
@@ -199,6 +200,13 @@ class WithExtInterruptIOCells extends OverrideIOBinder({
   }
 })
 
+// Rocketchip's JTAGIO exposes the oe signal, which doesn't go off-chip
+class JTAGChipIO extends Bundle {
+  val TCK = Input(Clock())
+  val TMS = Input(Bool())
+  val TDI = Input(Bool())
+  val TDO = Output(Bool())
+}
 
 class WithDebugIOCells extends OverrideLazyIOBinder({
   (system: HasPeripheryDebug) => {
@@ -224,7 +232,7 @@ class WithDebugIOCells extends OverrideLazyIOBinder({
           d.disableDebug.foreach { d => d := false.B }
           // Drive JTAG on-chip IOs
           d.systemjtag.map { j =>
-            j.reset := clockBundle.reset
+            j.reset := ResetCatchAndSync(j.jtag.TCK, clockBundle.reset.asBool)
             j.mfr_id := p(JtagDTMKey).idcodeManufId.U(11.W)
             j.part_number := p(JtagDTMKey).idcodePartNum.U(16.W)
             j.version := p(JtagDTMKey).idcodeVersion.U(4.W)
@@ -238,7 +246,12 @@ class WithDebugIOCells extends OverrideLazyIOBinder({
         }
 
         val jtagTuple = debug.systemjtag.map { j =>
-          IOCell.generateIOFromSignal(j.jtag, "jtag", p(IOCellKey), abstractResetAsAsync = true)
+          val jtag_wire = Wire(new JTAGChipIO)
+          j.jtag.TCK := jtag_wire.TCK
+          j.jtag.TMS := jtag_wire.TMS
+          j.jtag.TDI := jtag_wire.TDI
+          jtag_wire.TDO := j.jtag.TDO.data
+          IOCell.generateIOFromSignal(jtag_wire, "jtag", p(IOCellKey), abstractResetAsAsync = true)
         }
 
         val apbTuple = debug.apb.map { a =>
@@ -259,7 +272,6 @@ class WithSerialTLIOCells extends OverrideIOBinder({
     (Seq(port), cells)
   }).getOrElse((Nil, Nil))
 })
-
 
 class WithAXI4MemPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveMasterAXI4MemPort) => {
@@ -285,7 +297,7 @@ class WithAXI4MMIOPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveMasterAXI4MMIOPort) => {
     implicit val p: Parameters = GetSystemParameters(system)
     val clockSinkNode = p(ExtBus).map(_ => ClockSinkNode(Seq(ClockSinkParameters())))
-    clockSinkNode.map(_ := system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(MBUS).fixedClockNode)
+    clockSinkNode.map(_ := system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(SBUS).fixedClockNode)
     def clockBundle = clockSinkNode.get.in.head._1
 
     InModuleBody {
@@ -361,8 +373,57 @@ class WithTraceIOPunchthrough extends OverrideIOBinder({
   }
 })
 
+class WithCustomBootPin extends OverrideIOBinder({
+  (system: CanHavePeripheryCustomBootPin) => system.custom_boot_pin.map({ p =>
+    val sys = system.asInstanceOf[BaseSubsystem]
+    val (port, cells) = IOCell.generateIOFromSignal(p.getWrappedValue, "custom_boot", sys.p(IOCellKey), abstractResetAsAsync = true)
+    (Seq(port), cells)
+  }).getOrElse((Nil, Nil))
+})
 
 class WithDontTouchPorts extends OverrideIOBinder({
   (system: DontTouch) => system.dontTouchPorts(); (Nil, Nil)
 })
 
+class ClockWithFreq(val freqMHz: Double) extends Bundle {
+  val clock = Clock()
+}
+
+class WithDividerOnlyClockGenerator extends OverrideLazyIOBinder({
+  (system: HasChipyardPRCI) => {
+    // Connect the implicit clock
+    implicit val p = GetSystemParameters(system)
+    val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
+    system.connectImplicitClockSinkNode(implicitClockSinkNode)
+    InModuleBody {
+      val implicit_clock = implicitClockSinkNode.in.head._1.clock
+      val implicit_reset = implicitClockSinkNode.in.head._1.reset
+      system.asInstanceOf[BaseSubsystem].module match { case l: LazyModuleImp => {
+        l.clock := implicit_clock
+        l.reset := implicit_reset
+      }}
+    }
+
+    // Connect all other requested clocks
+    val referenceClockSource = ClockSourceNode(Seq(ClockSourceParameters()))
+    val dividerOnlyClockGen = LazyModule(new DividerOnlyClockGenerator("buildTopClockGenerator"))
+
+    (system.allClockGroupsNode
+      := dividerOnlyClockGen.node
+      := referenceClockSource)
+
+    InModuleBody {
+      val clock_wire = Wire(Input(new ClockWithFreq(dividerOnlyClockGen.module.referenceFreq)))
+      val reset_wire = Wire(Input(AsyncReset()))
+      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
+      val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(reset_wire, "reset", p(IOCellKey))
+
+      referenceClockSource.out.unzip._1.map { o =>
+        o.clock := clock_wire.clock
+        o.reset := reset_wire
+      }
+
+      (Seq(clock_io, reset_io), clockIOCell ++ resetIOCell)
+    }
+  }
+})
