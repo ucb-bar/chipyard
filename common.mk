@@ -18,7 +18,7 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_LDFLAGS      = additional LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES      = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS         = additional make requirements to build the simulator" \
-"   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client (works best with sbtn or sbt script)" \
+"   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
 "   EXTRA_CHISEL_OPTIONS   = additional options to pass to the Chisel compiler" \
 "   EXTRA_FIRRTL_OPTIONS   = additional options to pass to the FIRRTL compiler"
 
@@ -31,7 +31,8 @@ EXTRA_SIM_REQS       ?=
 #----------------------------------------------------------------------------
 HELP_SIMULATION_VARIABLES += \
 "   EXTRA_SIM_FLAGS        = additional runtime simulation flags (passed within +permissive)" \
-"   NUMACTL                = set to '1' to wrap simulator in the appropriate numactl command"
+"   NUMACTL                = set to '1' to wrap simulator in the appropriate numactl command" \
+"   BREAK_SIM_PREREQ       = when running a binary, doesn't rebuild RTL on source changes"
 
 EXTRA_SIM_FLAGS ?=
 NUMACTL         ?= 0
@@ -40,13 +41,14 @@ NUMA_PREFIX = $(if $(filter $(NUMACTL),0),,$(shell $(base_dir)/scripts/numa_pref
 
 #----------------------------------------------------------------------------
 HELP_COMMANDS += \
-"   run-binary             = run [./$(shell basename $(sim))] and log instructions to file" \
-"   run-binary-fast        = run [./$(shell basename $(sim))] and don't log instructions" \
-"   run-binary-debug       = run [./$(shell basename $(sim_debug))] and log instructions and waveform to files" \
-"   verilog                = generate intermediate verilog files from chisel elaboration and firrtl passes" \
-"   firrtl                 = generate intermediate firrtl files from chisel elaboration" \
-"   run-tests              = run all assembly and benchmark tests" \
-"   launch-sbt             = start sbt terminal"
+"   run-binary                  = run [./$(shell basename $(sim))] and log instructions to file" \
+"   run-binary-fast             = run [./$(shell basename $(sim))] and don't log instructions" \
+"   run-binary-debug            = run [./$(shell basename $(sim_debug))] and log instructions and waveform to files" \
+"   verilog                     = generate intermediate verilog files from chisel elaboration and firrtl passes" \
+"   firrtl                      = generate intermediate firrtl files from chisel elaboration" \
+"   run-tests                   = run all assembly and benchmark tests" \
+"   launch-sbt                  = start sbt terminal" \
+"   {shutdown,start}-sbt-server = shutdown or start sbt server if using ENABLE_SBT_THIN_CLIENT" \
 
 #########################################################################################
 # include additional subproject make fragments
@@ -63,7 +65,7 @@ include $(base_dir)/tools/torture.mk
 #########################################################################################
 # Returns a list of files in directory $1 with file extension $2.
 # If available, use 'fd' to find the list of files, which is faster than 'find'.
-ifeq ($(shell which fd),)
+ifeq ($(shell which fd 2> /dev/null),)
 	lookup_srcs = $(shell find -L $(1)/ -name target -prune -o -iname "*.$(2)" -print 2> /dev/null)
 else
 	lookup_srcs = $(shell fd -L ".*\.$(2)" $(1))
@@ -104,7 +106,7 @@ $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 	@echo "" > /dev/null
 
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-generator_temp: $(SCALA_SOURCES) $(sim_files) $(EXTRA_GENERATOR_REQS)
+generator_temp: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
@@ -192,16 +194,22 @@ ifeq (,$(BINARY))
 	$(error BINARY variable is not set. Set it to the simulation binary)
 endif
 
+# allow you to override sim prereq
+ifeq (,$(BREAK_SIM_PREREQ))
+SIM_PREREQ = $(sim)
+SIM_DEBUG_PREREQ = $(sim_debug)
+endif
+
 # run normal binary with hardware-logged insn dissassembly
-run-binary: $(output_dir) $(sim) check-binary
+run-binary: $(output_dir) $(SIM_PREREQ) check-binary
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 # run simulator as fast as possible (no insn disassembly)
-run-binary-fast: $(output_dir) $(sim) check-binary
+run-binary-fast: $(output_dir) $(SIM_PREREQ) check-binary
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
 
 # run simulator with as much debug info as possible
-run-binary-debug: $(output_dir) $(sim_debug) check-binary
+run-binary-debug: $(output_dir) $(SIM_DEBUG_PREREQ) check-binary
 	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
@@ -213,19 +221,19 @@ $(binary_hex): $(output_dir) $(BINARY)
 	$(base_dir)/scripts/smartelf2hex.sh $(BINARY) > $(binary_hex)
 
 run-binary-hex: check-binary
-run-binary-hex: $(output_dir) $(sim) $(binary_hex)
+run-binary-hex: $(output_dir) $(SIM_PREREQ) $(binary_hex)
 run-binary-hex: run-binary
 run-binary-hex: override LOADMEM_ADDR = 80000000
 run-binary-hex: override LOADMEM = $(binary_hex)
 run-binary-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
 run-binary-debug-hex: check-binary
-run-binary-debug-hex: $(output_dir) $(sim) $(binary_hex)
+run-binary-debug-hex: $(output_dir) $(SIM_DEBUG_REREQ) $(binary_hex)
 run-binary-debug-hex: run-binary-debug
 run-binary-debug-hex: override LOADMEM_ADDR = 80000000
 run-binary-debug-hex: override LOADMEM = $(binary_hex)
 run-binary-debug-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
 run-binary-fast-hex: check-binary
-run-binary-fast-hex: $(output_dir) $(sim) $(binary_hex)
+run-binary-fast-hex: $(output_dir) $(SIM_PREREQ) $(binary_hex)
 run-binary-fast-hex: run-binary-fast
 run-binary-fast-hex: override LOADMEM_ADDR = 80000000
 run-binary-fast-hex: override LOADMEM = $(binary_hex)
@@ -240,16 +248,16 @@ $(output_dir):
 $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/% $(output_dir)
 	ln -sf $< $@
 
-$(output_dir)/%.run: $(output_dir)/% $(sim)
+$(output_dir)/%.run: $(output_dir)/% $(SIM_PREREQ)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
 
-$(output_dir)/%.out: $(output_dir)/% $(sim)
+$(output_dir)/%.out: $(output_dir)/% $(SIM_PREREQ)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
 #########################################################################################
-ifneq ($(filter run% %.run %.out %.vpd %.vcd,$(MAKECMDGOALS)),)
+ifneq ($(filter run% %.run %.out %.vpd %.vcd %.fsdb,$(MAKECMDGOALS)),)
 -include $(build_dir)/$(long_name).d
 endif
 
@@ -272,6 +280,7 @@ SBT_COMMAND ?= shell
 launch-sbt:
 	cd $(base_dir) && $(SBT_NON_THIN) "$(SBT_COMMAND)"
 
+.PHONY: check-thin-client
 check-thin-client:
 ifeq (,$(ENABLE_SBT_THIN_CLIENT))
 	$(error ENABLE_SBT_THIN_CLIENT not set.)

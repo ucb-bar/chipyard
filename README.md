@@ -1,6 +1,12 @@
 ![CHIPYARD](https://github.com/ucb-bar/chipyard/raw/master/docs/_static/images/chipyard-logo-full.png)
 
-# Chipyard Framework [![CircleCI](https://circleci.com/gh/ucb-bar/chipyard/tree/master.svg?style=svg)](https://circleci.com/gh/ucb-bar/chipyard/tree/master)
+# Chipyard Framework [![Test](https://github.com/ucb-bar/chipyard/workflows/chipyard-ci-process/badge.svg?style=svg)](https://github.com/ucb-bar/chipyard/actions)
+
+## Quick Links
+
+* **DOCUMENTATION**: https://chipyard.readthedocs.io/
+* **USER QUESTION FORUM**: https://groups.google.com/forum/#!forum/chipyard
+* **BUGS AND FEATURE-REQUESTS**: https://github.com/ucb-bar/chipyard/issues
 
 ## Using Chipyard
 
@@ -17,13 +23,14 @@ Chipyard is actively developed in the [Berkeley Architecture Research Group][ucb
 ## Resources
 
 * Chipyard Documentation: https://chipyard.readthedocs.io/
-* Chipyard Basics slides: https://fires.im/micro19-slides-pdf/02_chipyard_basics.pdf
-* Chipyard Tutorial Exercise slides: https://fires.im/micro19-slides-pdf/03_building_custom_socs.pdf
+* Chipyard (x FireSim) Tutorial: https://fires.im/tutorial
+* Chipyard Basics slides: https://fires.im/micro21-slides-pdf/02_chipyard_basics.pdf
+* Chipyard Tutorial Exercise slides: https://fires.im/micro21-slides-pdf/03_building_custom_socs.pdf
 
 ## Need help?
 
 * Join the Chipyard Mailing List: https://groups.google.com/forum/#!forum/chipyard
-* If you find a bug, post an issue on this repo
+* If you find a bug or would like propose a feature, post an issue on this repo: https://github.com/ucb-bar/chipyard/issues
 
 ## Contributing
 
@@ -75,7 +82,9 @@ These additional publications cover many of the internal components used in Chip
 * **VLSI**
     * **Hammer**: E. Wang, et al., *ISQED'20*. [PDF](https://www.isqed.org/English/Archives/2020/Technical_Sessions/113.html).
 
+## Acknowledgements
 
+This work is supported by the NSF CCRI ENS Chipyard Award #201662.
 
 [hwacha]:https://www2.eecs.berkeley.edu/Pubs/TechRpts/2015/EECS-2015-262.pdf
 [hammer]:https://github.com/ucb-bar/hammer

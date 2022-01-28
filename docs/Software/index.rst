@@ -13,6 +13,15 @@ official RISC-V ISA reference implementation. Qemu is a high-performance
 functional simulator that can run nearly as fast as native code, but can be
 challenging to modify.
 
+To initialize additional software repositories, such as wrappers for Coremark,
+SPEC2017, and workloads for the NVDLA, run the following script. The
+submodules are located in the ``software`` directory.
+
+.. code-block:: shell
+
+    ./scripts/init-software.sh
+
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:

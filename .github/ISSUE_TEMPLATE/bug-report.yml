@@ -1,0 +1,74 @@
+name: Bug Report
+description: File a bug report
+labels: ["bug"]
+body:
+  - type: checkboxes
+    attributes:
+      label: Background Work
+      description: Yes, I searched the following areas for a prior solution.
+      options:
+        - label: Yes, I searched the [mailing list](https://groups.google.com/forum/#!forum/chipyard)
+          required: true
+        - label: Yes, I searched [prior issues](https://github.com/ucb-bar/chipyard/issues)
+          required: true
+        - label: Yes, I searched the [documentation](https://chipyard.readthedocs.io/)
+          required: true
+
+  - type: textarea
+    attributes:
+      label: Chipyard Version and Hash
+      description: Repository version for reproducibility
+      placeholder: Version + Hash
+      value: |
+        Release: 1.5.0
+        Hash: a6a6a6
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: OS Setup
+      description: OS setup for reproducibility
+      placeholder: OS information
+      value: |
+        Ex: Output of `uname -a` and `lsb_release -a`
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Other Setup
+      description: Any other setup relevant
+      placeholder: Other setup
+      value: |
+        Ex: Prior steps taken / Documentation Followed / etc...
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Current Behavior
+      description: A concise description of what you're experiencing.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: A concise description of what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Other Information
+      description: Other information needed to reproduce the issue.
+      placeholder: |
+        Detailed explanations
+        Stack traces
+        Log files. Tip - You can add images / log files by clicking this area to highlight it and then dragging files in
+        Related issues
+        Suggestions on fixes
+        Other links
+    validations:
+      required: false

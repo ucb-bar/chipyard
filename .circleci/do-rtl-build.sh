@@ -21,9 +21,6 @@ cd $LOCAL_CHIPYARD_DIR
 ./scripts/init-submodules-no-riscv-tools.sh
 ./scripts/init-fpga.sh
 
-# replace the workspace dir with a local dir so you can copy around
-sed -i -E 's/(workspace=).*(\/tools)/\1$PWD\2/g' .sbtopts
-
 # set stricthostkeychecking to no (must happen before rsync)
 run "echo \"Ping $SERVER\""
 
@@ -82,7 +79,7 @@ do
          export PATH=\"$REMOTE_VERILATOR_DIR/bin:\$PATH\"; \
          export VERILATOR_ROOT=\"$REMOTE_VERILATOR_DIR\"; \
          export COURSIER_CACHE=\"$REMOTE_WORK_DIR/.coursier-cache\"; \
-         make -j$REMOTE_MAKE_NPROC -C $REMOTE_MAKE_DIR FIRRTL_LOGLEVEL=info JAVA_OPTS=\"$REMOTE_JAVA_OPTS\" SBT_OPTS=\"$REMOTE_SBT_OPTS\" ${mapping[$key]}"
+         make -j$REMOTE_MAKE_NPROC -C $REMOTE_MAKE_DIR FIRRTL_LOGLEVEL=info JAVA_TOOL_OPTIONS=\"$REMOTE_JAVA_OPTS\" SBT_OPTS=\"$REMOTE_SBT_OPTS\" ${mapping[$key]}"
 done
 
 run "rm -rf $REMOTE_CHIPYARD_DIR/project"
