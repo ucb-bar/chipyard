@@ -152,7 +152,6 @@ lazy val chipyard = (project in file("generators/chipyard"))
 lazy val fft_generator = (project in file("generators/fft-generator"))
   .dependsOn(rocketchip, `rocket-dsp-utils`)
   .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(chiselSettings)
   .settings(commonSettings)
 
 lazy val tracegen = (project in file("generators/tracegen"))
@@ -222,8 +221,9 @@ lazy val tapeout = (project in file("./tools/barstools/"))
   .settings(commonSettings)
 
 lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
-  .settings(chiselTestSettings)
   .settings(
+    chiselSettings,
+    chiselTestSettings,
     commonSettings,
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.2.+" % "test",
