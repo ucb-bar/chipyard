@@ -29,6 +29,7 @@ so changes to the generators themselves will automatically be used when building
    SHA3
    CVA6
    Ibex
+   fft
    NVDLA
    Sodor
 
