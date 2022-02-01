@@ -100,6 +100,9 @@ case $1 in
     chipyard-sodor)
         run_asm ${mapping[$1]}
         ;;
+    chipyard-ibex)
+        run_bmark ${mapping[$1]} #TODO: Find 32-bit test
+        ;;
     chipyard-nvdla)
         make -C $LOCAL_CHIPYARD_DIR/tests
         make -C $LOCAL_SIM_DIR ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv run-binary

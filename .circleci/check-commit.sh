@@ -48,13 +48,13 @@ search () {
     done
 }
 
-submodules=("cva6" "boom" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "sifive-blocks" "sifive-cache" "testchipip" "riscv-sodor")
+submodules=("cva6" "boom" "ibex" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "sifive-blocks" "sifive-cache" "testchipip" "riscv-sodor")
 dir="generators"
 if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
 then
-    branches=("master")
+    branches=("master" "main")
 else
-    branches=("master" "dev")
+    branches=("master" "main" "dev")
 fi
 search
 

@@ -38,7 +38,7 @@ All with the same Hwacha parameters.
 Assigning Accelerators to Specific Tiles with MultiRoCC
 -------------------------------------------------------
 
-Located in ``generators/chipyard/src/main/scala/ConfigFragments.scala`` is a config fragment that provides support for adding RoCC accelerators to specific tiles in your SoC.
+Located in ``generators/chipyard/src/main/scala/config/fragments/RoCCFragments.scala`` is a config fragment that provides support for adding RoCC accelerators to specific tiles in your SoC.
 Named ``MultiRoCCKey``, this key allows you to attach RoCC accelerators based on the ``hartId`` of the tile.
 For example, using this allows you to create a 8 tile system with a RoCC accelerator on only a subset of the tiles.
 An example is shown below with two BOOM cores, and one Rocket tile with a RoCC accelerator (Hwacha) attached.

@@ -35,13 +35,13 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithDebugIOCells ++
   new chipyard.iobinders.WithUARTIOCells ++
   new chipyard.iobinders.WithGPIOCells ++
-  new chipyard.iobinders.WithUARTIOCells ++
   new chipyard.iobinders.WithSPIIOCells ++
   new chipyard.iobinders.WithTraceIOPunchthrough ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
   new chipyard.iobinders.WithCustomBootPin ++
   new chipyard.iobinders.WithDividerOnlyClockGenerator ++
 
+  new testchipip.WithSerialTLWidth(32) ++                        // fatten the serialTL interface to improve testing performance
   new testchipip.WithDefaultSerialTL ++                          // use serialized tilelink port to external serialadapter/harnessRAM
   new chipyard.config.WithBootROM ++                             // use default bootrom
   new chipyard.config.WithUART ++                                // add a UART
