@@ -58,7 +58,7 @@ class WithArty100TTweaks extends Config(
 )
 
 class RocketArty100TConfig extends Config(
-  new WithVCU118Tweaks ++
+  new WithArty100TTweaks ++
   new chipyard.RocketConfig)
 // DOC include end: AbstractVCU118 and Rocket
 

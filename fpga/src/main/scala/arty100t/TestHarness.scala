@@ -22,7 +22,9 @@ import chipyard.iobinders.{HasIOBinders}
 import chipyard.harness.{ApplyHarnessBinders}
 
 class Arty100TFPGATestHarness(override implicit val p: Parameters) extends Arty100TShellBasicOverlays {
-
+  // Complains if not defined here, because not in the fpga-shells abstract BasicOverlays class for Arty (unlike VCU118)
+  val pllReset = InModuleBody { Wire(Bool()) }
+  
   def dp = designParameters
   // Any reason to override the overlays as with the VCU118?
   val topDesign = LazyModule(p(BuildTop)(dp)).suggestName("chiptop")
@@ -84,7 +86,7 @@ class Arty100TFPGATestHarnessImp(_outer: Arty100TFPGATestHarness) extends LazyRa
   val arty100tOuter = _outer
 
   val reset = IO(Input(Bool()))
-  xdc.addBoardPin(reset, "reset")
+  _outer.xdc.addBoardPin(reset, "reset")
 
   val resetIBUF = Module(new IBUF)
   resetIBUF.io.I := reset
@@ -93,8 +95,6 @@ class Arty100TFPGATestHarnessImp(_outer: Arty100TFPGATestHarness) extends LazyRa
 
   val powerOnReset: Bool = PowerOnResetFPGAOnly(sysclk)
   _outer.sdc.addAsyncPath(Seq(powerOnReset))
-
-  }
 
   _outer.pllReset := (!resetIBUF.io.O) || powerOnReset
 
