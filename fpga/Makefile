@@ -68,7 +68,7 @@ ifeq ($(SUB_PROJECT),arty100t)
 	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= none # unused
 	TOP               ?= ChipTop
-	BOARD             ?= arty-a7-100
+	BOARD             ?= arty_a7_100
 	FPGA_BRAND        ?= xilinx
 endif
 

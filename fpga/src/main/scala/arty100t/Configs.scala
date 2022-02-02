@@ -37,7 +37,7 @@ class WithSystemModifications extends Config((site, here, up) => {
   case SerialTLKey => None // remove serialized tl port
 })
 
-// DOC include start: AbstractVCU118 and Rocket
+// DOC include start: AbstractArty100T and Rocket
 class WithArty100TTweaks extends Config(
   // harness binders
   new WithUART ++
@@ -58,9 +58,13 @@ class WithArty100TTweaks extends Config(
 )
 
 class RocketArty100TConfig extends Config(
+  // reduce L2 size to fit in 100T's BRAMs
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=256) ++
+  // with reduced cache size, closes timing at 50 MHz
+  new WithFPGAFrequency(50) ++
   new WithArty100TTweaks ++
   new chipyard.RocketConfig)
-// DOC include end: AbstractVCU118 and Rocket
+// DOC include end: AbstractArty100T and Rocket
 
 class BoomArty100TConfig extends Config(
   new WithFPGAFrequency(50) ++
