@@ -143,3 +143,7 @@
 [submodule "generators/bar-cache"]
 	path = generators/bar-cache
 	url = git@github.com:ucb-bar/bar-cache.git
+[submodule "generators/fft-generator"]
+	path = generators/fft-generator
+	url = https://github.com/ucb-bar/FFTGenerator.git
+

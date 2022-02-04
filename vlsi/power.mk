@@ -1,6 +1,6 @@
 .PHONY: $(POWER_CONF)
-power-par: $(POWER_CONF) sim-par
-power-par-$(VLSI_TOP): $(POWER_CONF) sim-par-$(VLSI_TOP)
+power-par: $(POWER_CONF) sim-par-debug
+power-par-$(VLSI_TOP): $(POWER_CONF) sim-par-debug-$(VLSI_TOP)
 power-par: override HAMMER_POWER_EXTRA_ARGS += -p $(POWER_CONF)
 power-par-$(VLSI_TOP): override HAMMER_POWER_EXTRA_ARGS += -p $(POWER_CONF)
 redo-power-par: $(POWER_CONF)
