@@ -158,7 +158,7 @@ $(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_file
 ifneq ($(BINARY), )
 	echo "  benchmarks: ['$(BINARY)']" >> $@
 endif
-	echo "  tb_dut: 'testHarness.$(VLSI_HARNESS_DUT_NAME)'" >> $@
+	echo "  tb_dut: 'TestDriver.testHarness.$(VLSI_HARNESS_DUT_NAME)'" >> $@
 
 $(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
@@ -200,11 +200,12 @@ $(POWER_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_fi
 	echo "  tb_dut: 'testHarness/$(VLSI_HARNESS_DUT_NAME)'" >> $@
 	echo "  database: '$(OBJ_DIR)/par-rundir/$(VLSI_TOP)_FINAL'" >> $@
 ifneq ($(BINARY), )
-	echo "  saifs: [" >> $@
-	echo "    '$(OBJ_DIR)/sim-par-rundir/$(notdir $(BINARY))/ucli.saif'" >> $@
-	echo "  ]" >> $@
 	echo "  waveforms: [" >> $@
-	#echo "    '$(OBJ_DIR)/sim-par-rundir/$(notdir $(BINARY))/$(sim_out_name).vcd'" >> $@
+ifdef USE_FSDB
+	echo "    '$(sim_out_name).fsdb'" >> $@
+else
+	echo "    '$(sim_out_name).vpd'" >> $@
+endif
 	echo "  ]" >> $@
 endif
 	echo "  start_times: ['0ns']" >> $@
