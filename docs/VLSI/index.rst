@@ -12,4 +12,5 @@ In particular, we aim to support the Hammer physical design generator flow.
    Hammer
    Basic-Flow
    Tutorial
+   Sky130-Tutorial
    Advanced-Usage
