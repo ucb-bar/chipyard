@@ -72,8 +72,8 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
     := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
     := ClockGroupCombiner()
     := ClockGroupResetSynchronizer()
-    := TileClockGater(prciParams.baseAddress + 0x00000, tlbus, prciParams.enableTileClockGating)
-    := TileResetSetter(prciParams.baseAddress + 0x10000, tlbus, tile_prci_domains.map(_.tile_reset_domain.clockNode.portParams(0).name.get), Nil)
+    := prci_ctrl_domain { TileClockGater(prciParams.baseAddress + 0x00000, tlbus, prciParams.enableTileClockGating) }
+    := prci_ctrl_domain { TileResetSetter(prciParams.baseAddress + 0x10000, tlbus, tile_prci_domains.map(_.tile_reset_domain.clockNode.portParams(0).name.get), Nil) }
     := allClockGroupsNode)
 }
 
