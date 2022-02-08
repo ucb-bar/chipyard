@@ -60,17 +60,17 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
   new Group(test.name, Seq(test), SubProcess(options))
 } toSeq
 
-val chiselVersion = "3.5-SNAPSHOT"
+val chiselVersion = "3.5.1"
 
 lazy val chiselSettings = Seq(
   libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % chiselVersion),
   addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % chiselVersion cross CrossVersion.full))
 
-val firrtlVersion = "1.5-SNAPSHOT"
+val firrtlVersion = "1.5.1"
 
 lazy val firrtlSettings = Seq(libraryDependencies ++= Seq("edu.berkeley.cs" %% "firrtl" % firrtlVersion))
 
-val chiselTestVersion = "2.5-SNAPSHOT"
+val chiselTestVersion = "2.5.1"
 
 lazy val chiselTestSettings = Seq(libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel-iotesters" % chiselTestVersion))
 
