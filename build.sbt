@@ -1,8 +1,8 @@
 // See LICENSE for license details.
 
 val defaultVersions = Map(
-  "chisel3" -> "3.5-SNAPSHOT",
-  "chisel-iotesters" -> "2.5-SNAPSHOT"
+  "chisel3" -> "3.5.1",
+  "chisel-iotesters" -> "2.5.1"
 )
 
 organization := "edu.berkeley.cs"
