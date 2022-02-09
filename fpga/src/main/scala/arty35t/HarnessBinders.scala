@@ -15,17 +15,56 @@ import sifive.fpgashells.ip.xilinx.{IBUFG, IOBUF, PULLUP, PowerOnResetFPGAOnly}
 import chipyard.harness.{ComposeHarnessBinder, OverrideHarnessBinder}
 import chipyard.iobinders.JTAGChipIO
 
+import testchipip._
+
+import chisel3.util._
+import chisel3.experimental.IO
+import freechips.rocketchip.config.{Parameters, Field}
+import freechips.rocketchip.subsystem._
+import freechips.rocketchip.tilelink._
+import freechips.rocketchip.devices.debug.HasPeripheryDebug
+import freechips.rocketchip.diplomacy._
+import freechips.rocketchip.util._
+import freechips.rocketchip.prci.{ClockSinkDomain}
+import scala.math.min
+
 class WithArtyResetHarnessBinder extends ComposeHarnessBinder({
   (system: HasPeripheryDebugModuleImp, th: ArtyFPGATestHarness, ports: Seq[Bool]) => {
     require(ports.size == 2)
 
-    withClockAndReset(th.clock_32MHz, th.ck_rst) {
+    withClockAndReset(th.clock_32MHz, th.hReset) {
       // Debug module reset
       th.dut_ndreset := ports(0)
 
       // JTAG reset
       ports(1) := PowerOnResetFPGAOnly(th.clock_32MHz)
     }
+  }
+})
+
+class WithFPGASimSerial extends OverrideHarnessBinder({
+  (system: CanHavePeripheryTLSerial, th: ArtyFPGATestHarness, ports: Seq[ClockedIO[SerialIO]]) => {
+    // This binder is the main difference between FPGA and Chipyard simulation.
+    // For FPGA sim, we want to wire the output of the Xilinx reset IP to 
+    // the sim ram and serial modules, rather than connect the harness reset
+    // directly.
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    ports.map({ port =>
+      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+      withClockAndReset(th.buildtopClock, th.buildtopReset.asBool) {
+        val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset.asBool)
+
+        val success = {
+          val sim = Module(new SimSerial(ram.module.io.tsi_ser.w))
+          sim.io.clock := port.clock
+          sim.io.reset := th.buildtopReset.asBool
+          sim.io.serial <> ram.module.io.tsi_ser
+          sim.io.exit
+        }
+
+        when (success) { th.success := true.B }
+      }
+    })
   }
 })
 
@@ -71,7 +110,7 @@ class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
 
 class WithArtyUARTHarnessBinder extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: ArtyFPGATestHarness, ports: Seq[UARTPortIO]) => {
-    withClockAndReset(th.clock_32MHz, th.ck_rst) {
+    withClockAndReset(th.clock_32MHz, th.hReset) {
       IOBUF(th.uart_rxd_out,  ports.head.txd)
       ports.head.rxd := IOBUF(th.uart_txd_in)
     }
