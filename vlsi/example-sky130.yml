@@ -1,0 +1,194 @@
+# Technology Setup
+# Technology used is Sky130
+vlsi.core.technology: sky130
+
+vlsi.core.max_threads: 12
+
+# Technology paths
+technology.sky130:
+  # sky130_pdk: "path-to-skywater-pdk/"
+  sky130_nda: "path-to-skywater-src-nda/"
+  sky130A: "path-to-sky130A/"
+  openram_lib: "path-to-sky130_sram_macros/" 
+
+# Mentor environment variables
+mentor.extra_env_vars:
+  - PDK_HOME: "path-to-skywater-src-nda/s8/V2.0.1"
+# General Hammer Inputs
+
+# Hammer will auto-generate a CPF for simple power designs; see hammer/src/hammer-vlsi/defaults.yml for more info
+vlsi.inputs.power_spec_mode: "auto"
+vlsi.inputs.power_spec_type: "cpf"
+
+# Specify clock signals
+vlsi.inputs.clocks: [
+  {name: "clock_clock", period: "20ns", uncertainty: "0.5ns"}
+]
+
+# Generate Make include to aid in flow 
+vlsi.core.build_system: make
+
+# Power Straps
+par.power_straps_mode: generate
+par.generate_power_straps_method: by_tracks
+par.blockage_spacing: 2.0
+par.generate_power_straps_options:
+  by_tracks:
+    strap_layers:
+      - met2
+      - met3
+      - met4
+      - met5
+    pin_layers:
+      - met5
+    track_width: 6
+    track_width_met5: 2
+    track_spacing: 1
+    track_start: 10
+    power_utilization: 0.2
+    power_utilization_met5: 1
+
+# Placement Constraints
+# For ASAP7, all numbers must be 4x larger than final GDS
+vlsi.inputs.placement_constraints:
+  - path: "ChipTop"
+    type: toplevel
+    x: 0
+    y: 0
+    # width: 800
+    # height: 500
+    width: 4000
+    height: 3000
+    margins:
+      left: 0
+      right: 0
+      top: 0
+      bottom: 0
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_0"
+    type: hardmacro
+    x: 30
+    y: 2190
+    orientation: r0
+    top_layer: "met4"
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_1_0"
+    type: hardmacro
+    x: 30
+    y: 1530
+    orientation: mx
+    top_layer: "met4"
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_2_0"
+    type: hardmacro
+    x: 30
+    y: 1030
+    orientation: mx
+    top_layer: "met4"
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_3_0"
+    type: hardmacro
+    x: 30 
+    y: 530
+    orientation: mx
+    top_layer: "met4"
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_4_0"
+    type: hardmacro
+    x: 30 
+    y: 30
+    orientation: mx
+    top_layer: "met4"
+    
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_5_0"
+    type: hardmacro
+    x: 1110 
+    y: 30
+    orientation: mx
+    top_layer: "met4"
+    
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_6_0"
+    type: hardmacro
+    x: 2150 
+    y: 30
+    orientation: mx
+    top_layer: "met4"
+    
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_7_0"
+    type: hardmacro
+    x: 2150 
+    y: 530
+    orientation: mx
+    top_layer: "met4"
+    
+
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/data_arrays_0/data_arrays_0_0_ext/mem_0_0"
+    type: hardmacro
+    x: 2150
+    y: 1550
+    orientation: mx
+    top_layer: "met4"
+    
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/data_arrays_0/data_arrays_0_0_ext/mem_1_0"
+    type: hardmacro
+    x: 2150
+    y: 1030
+    orientation: r0
+    top_layer: "met4"
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/tag_array/tag_array_ext/mem_0_0"
+    type: hardmacro
+    x: 2350
+    y: 2200
+    orientation: r0
+    top_layer: "met4"
+    
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_0"
+    type: hardmacro
+    x: 3100
+    y: 30
+    orientation: "r0"
+    top_layer: "met4"
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_1"
+    type: hardmacro
+    x: 3100
+    y: 530
+    orientation: "r0"
+    top_layer: "met4"
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_2"
+    type: hardmacro
+    x: 3100
+    y: 1030
+    orientation: "r0"
+    top_layer: "met4"
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_3"
+    type: hardmacro
+    x: 3100
+    y: 1530
+    orientation: "r0"
+    top_layer: "met4"
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_4"
+    type: hardmacro
+    x: 3100
+    y: 2190
+    orientation: "r0"
+    top_layer: "met4"
+
+# Pin placement constraints
+vlsi.inputs.pin_mode: generated
+vlsi.inputs.pin.generate_mode: semi_auto
+vlsi.inputs.pin.assignments: [
+  {pins: "*", layers: ["met2", "met4"], side: "bottom"}
+]
+
+# SRAM Compiler compiler options
+vlsi.core.sram_generator_tool: "sram_compiler"
+# You should specify a location for the SRAM generator in the tech plugin
+# vlsi.core.sram_generator_tool_path: ["hammer/src/hammer-vlsi/technology/sky130"]
+vlsi.core.sram_generator_tool_path: ["/tools/B/nayiri/test/hammer/src/hammer-vlsi/technology/sky130"]
+vlsi.core.sram_generator_tool_path_meta: "append"
