@@ -15,7 +15,7 @@ SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
 cd $REMOTE_CHIPYARD_DIR
-./scripts/init-submodules-no-riscv-tools.sh
+./scripts/init-submodules-no-riscv-tools.sh --skip-validate
 ./scripts/init-fpga.sh
 
 TOOLS_DIR=$REMOTE_RISCV_DIR
