@@ -25,8 +25,6 @@ case object GenericFIRKey extends Field[Option[GenericFIRParams]](None)
 class GenericFIRCellBundle[T<:Data:Ring](genIn:T, genOut:T) extends Bundle {
   val data: T = genIn.cloneType
   val carry: T = genOut.cloneType
-
-  override def cloneType: this.type = GenericFIRCellBundle(genIn, genOut).asInstanceOf[this.type]
 }
 object GenericFIRCellBundle {
   def apply[T<:Data:Ring](genIn:T, genOut:T): GenericFIRCellBundle[T] = new GenericFIRCellBundle(genIn, genOut)
@@ -43,8 +41,6 @@ object GenericFIRCellIO {
 
 class GenericFIRBundle[T<:Data:Ring](proto: T) extends Bundle {
   val data: T = proto.cloneType
-
-  override def cloneType: this.type = GenericFIRBundle(proto).asInstanceOf[this.type]
 }
 object GenericFIRBundle {
   def apply[T<:Data:Ring](proto: T): GenericFIRBundle[T] = new GenericFIRBundle(proto)
@@ -119,7 +115,7 @@ class GenericFIRDirectCell[T<:Data:Ring](genIn: T, genOut: T) extends Module {
 
   // When a new transaction is ready on the input, we will have new data to output
   // next cycle. Take this data in
-  when (io.in.fire()) {
+  when (io.in.fire) {
     hasNewData := 1.U
     inputReg := io.in.bits.data
   }
@@ -127,7 +123,7 @@ class GenericFIRDirectCell[T<:Data:Ring](genIn: T, genOut: T) extends Module {
   // We should output data when our cell has new data to output and is ready to
   // recieve new data. This insures that every cell in the chain passes its data
   // on at the same time
-  io.out.valid := hasNewData & io.in.fire()
+  io.out.valid := hasNewData & io.in.fire
   io.out.bits.data := inputReg
 
   // Compute carry

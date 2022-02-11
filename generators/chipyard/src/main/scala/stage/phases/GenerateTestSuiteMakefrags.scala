@@ -21,7 +21,7 @@ trait MakefragSnippet { self: Annotation =>
 case class CustomMakefragSnippet(val toMakefrag: String) extends NoTargetAnnotation with MakefragSnippet with Unserializable
 
 /** Generates a make script to run tests in [[RocketTestSuiteAnnotation]]. */
-class GenerateTestSuiteMakefrags extends Phase with PreservesAll[Phase] with HasRocketChipStageUtils {
+class GenerateTestSuiteMakefrags extends Phase with HasRocketChipStageUtils {
 
   // Our annotations tend not to be serializable, but are not marked as such.
   override val prerequisites = Seq(Dependency[freechips.rocketchip.stage.phases.GenerateFirrtlAnnos],
@@ -46,4 +46,6 @@ class GenerateTestSuiteMakefrags extends Phase with PreservesAll[Phase] with Has
     writeOutputFile(targetDir, fileName, TestGeneration.generateMakeFrag ++ makefragBuilder.toString)
     outputAnnotations
   }
+
+  override final def invalidates(a: Phase): Boolean = false
 }
