@@ -33,9 +33,12 @@ Start by fetching Chipyard's sources. Run:
 
     git clone https://github.com/ucb-bar/chipyard.git
     cd chipyard
+    # fancy way to checkout latest tag (for example resolves to "1.5.0" if that is the latest)                   │ 31 -------------------------------------------
+    git checkout $(git describe --tags $(git rev-list --tags --max-count=1))
     ./scripts/init-submodules-no-riscv-tools.sh
 
 This will initialize and checkout all of the necessary git submodules.
+This will also validate that you are on a tagged branch, otherwise it will prompt for confirmation.
 
 When updating Chipyard to a new version, you will also want to rerun this script to update the submodules.
 Using git directly will try to initialize all submodules; this is not recommended unless you expressly desire this behavior.
