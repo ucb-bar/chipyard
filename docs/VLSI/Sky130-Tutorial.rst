@@ -42,16 +42,11 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
   * Core, tool, tech repositories.
 
-* view_gds.py
-
-  * A convenience script to view a layout using gdspy. Note that this will be very slow for large layouts (e.g. a Rocket core)!
-
 Prerequisites
 -------------
 
 * Python 3.4+
 * numpy package
-* gdspy 1.4 package if using ``view_gds.py`` script
 * Genus, Innovus, and Calibre licenses
 * Sky130 PDK, install using `these directions  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__
 
@@ -79,7 +74,7 @@ To elaborate the ``TinyRocketConfig`` and set up all prerequisites for the build
 
 .. code-block:: shell
 
-    make buildfile CONFIG=TinyRocketConfig
+    make buildfile tech_name=sky130 CONFIG=TinyRocketConfig
 
 The ``CONFIG=TinyRocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a stripped-down Rocket Chip in the interest of minimizing tool runtime.
 
@@ -106,7 +101,7 @@ Synthesis
 ^^^^^^^^^
 .. code-block:: shell
 
-    make syn CONFIG=TinyRocketConfig
+    make syn tech_name=sky130 CONFIG=TinyRocketConfig
 
 Post-synthesis logs and collateral are in ``build/syn-rundir``. The raw QoR data is available at ``build/syn-rundir/reports``, and methods to extract this information for design space exploration are a WIP.
 
@@ -114,7 +109,7 @@ Place-and-Route
 ^^^^^^^^^^^^^^^
 .. code-block:: shell
 
-    make par CONFIG=TinyRocketConfig
+    make par tech_name=sky130 CONFIG=TinyRocketConfig
 
 After completion, the final database can be opened in an interactive Innovus session via ``./build/par-rundir/generated-scripts/open_chip``.
 
@@ -122,24 +117,16 @@ Intermediate database are written in ``build/par-rundir`` between each step of t
 
 Timing reports are found in ``build/par-rundir/timingReports``. They are gzipped text files.
 
-``gdspy`` can be used to `view the final layout <https://gdspy.readthedocs.io/en/stable/reference.html?highlight=scale#layoutviewer>`__, but it is somewhat crude and slow (wait a few minutes for it to load):
-
-.. code-block:: shell
-
-    python3 view_gds.py build/chipyard.TestHarness.TinyRocketConfig/par-rundir/ChipTop.gds
-
-By default, this script only shows the M2 thru M4 routing. Layers can be toggled in the layout viewer's side pane and ``view_gds.py`` has a mapping of layer numbers to layer names.
-
 DRC & LVS
 ^^^^^^^^^
 To run DRC & LVS, and view the results in Calibre:
 
 .. code-block:: shell
 
-    make drc CONFIG=TinyRocketConfig
-    ./build/drc-rundir/generated-scripts/view-drc
-    make lvs CONFIG=TinyRocketConfig
-    ./build/lvs-rundir/generated-scripts/view-lvs
+    make drc tech_name=sky130 CONFIG=TinyRocketConfig
+    ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/drc-rundir/generated-scripts/view_drc
+    make lvs tech_name=sky130 CONFIG=TinyRocketConfig
+    ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/lvs-rundir/generated-scripts/view_lvs
 
 Some DRC errors are expected from this PDK, especially with regards to the SRAMs, as explained in the 
 `Sky130 Hammer plugin README  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__.
@@ -163,7 +150,7 @@ Post-P&R power and rail (IR drop) analysis is supported with Voltus:
 
 .. code-block:: shell
 
-    make power-par CONFIG=TinyRocketConfig
+    make power-par tech_name=sky130 CONFIG=TinyRocketConfig
 
 If you append the ``BINARY`` variable to the command, it will use the activity file generated from a ``sim-<syn/par>-debug`` run and report dynamic power & IR drop from the toggles encoded in the waveform.
 
