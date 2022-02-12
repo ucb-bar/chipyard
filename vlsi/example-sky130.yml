@@ -7,13 +7,15 @@ vlsi.core.max_threads: 12
 # Technology paths
 technology.sky130:
   # sky130_pdk: "path-to-skywater-pdk/"
-  sky130_nda: "path-to-skywater-src-nda/"
-  sky130A: "path-to-sky130A/"
-  openram_lib: "path-to-sky130_sram_macros/" 
+  sky130_nda: "/tools/commercial/skywater/swtech130/skywater-src-nda"
+  sky130A: "/tools/commercial/skywater/swtech130/local/sky130A"
+  openram_lib: "/tools/commercial/skywater/swtech130/local/sky130_sram_macros"
+
 
 # Mentor environment variables
 mentor.extra_env_vars:
-  - PDK_HOME: "path-to-skywater-src-nda/s8/V2.0.1"
+  - PDK_HOME: "/tools/commercial/skywater/swtech130/skywater-src-nda/s8/V2.0.1"
+
 # General Hammer Inputs
 
 # Hammer will auto-generate a CPF for simple power designs; see hammer/src/hammer-vlsi/defaults.yml for more info
@@ -22,7 +24,7 @@ vlsi.inputs.power_spec_type: "cpf"
 
 # Specify clock signals
 vlsi.inputs.clocks: [
-  {name: "clock_clock", period: "20ns", uncertainty: "0.5ns"}
+  {name: "clock_clock", period: "200ns", uncertainty: "10ns"}
 ]
 
 # Generate Make include to aid in flow 
@@ -189,6 +191,5 @@ vlsi.inputs.pin.assignments: [
 # SRAM Compiler compiler options
 vlsi.core.sram_generator_tool: "sram_compiler"
 # You should specify a location for the SRAM generator in the tech plugin
-# vlsi.core.sram_generator_tool_path: ["hammer/src/hammer-vlsi/technology/sky130"]
-vlsi.core.sram_generator_tool_path: ["/tools/B/nayiri/test/hammer/src/hammer-vlsi/technology/sky130"]
+vlsi.core.sram_generator_tool_path: ["hammer/src/hammer-vlsi/technology/sky130"]
 vlsi.core.sram_generator_tool_path_meta: "append"
