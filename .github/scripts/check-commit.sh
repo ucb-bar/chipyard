@@ -24,7 +24,7 @@ search_submodule() {
     echo "Running check on submodule $submodule in $dir"
     # Initialize submodule and get the hashes
     git submodule update --init $dir/$submodule
-    (cd $dir/$submodule && git fetch origin)
+    git -C $dir/$submodule fetch --unshallow
 
     status=$(git submodule status)
     hash=$(echo "$status" | grep "$dir.*$submodule " | awk '{print$1}' | grep -o "[[:alnum:]]*")
@@ -51,7 +51,7 @@ search () {
 
 submodules=("cva6" "boom" "ibex" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "sifive-blocks" "sifive-cache" "testchipip" "riscv-sodor")
 dir="generators"
-if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
+if [ "$GITHUB_REF_NAME" == "master" ] || [ "$GITHUB_REF_NAME" == "dev" ]
 then
     branches=("master" "main")
 else
@@ -83,7 +83,7 @@ search
 
 submodules=("coremark" "firemarshal" "nvdla-workload" "spec2017")
 dir="software"
-if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
+if [ "$GITHUB_REF_NAME" == "master" ] || [ "$GITHUB_REF_NAME" == "dev" ]
 then
     branches=("master")
 else
@@ -93,7 +93,7 @@ search
 
 submodules=("DRAMSim2" "axe" "barstools" "chisel-testers" "dsptools" "rocket-dsp-utils" "torture")
 dir="tools"
-if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
+if [ "$GITHUB_REF_NAME" == "master" ] || [ "$GITHUB_REF_NAME" == "dev" ]
 then
     branches=("master")
 else
@@ -108,7 +108,7 @@ search
 
 submodules=("firesim")
 dir="sims"
-if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
+if [ "$GITHUB_REF_NAME" == "master" ] || [ "$GITHUB_REF_NAME" == "dev" ]
 then
     branches=("master")
 else
