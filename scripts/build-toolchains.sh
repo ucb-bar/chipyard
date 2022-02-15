@@ -171,20 +171,6 @@ if [ -z "$IGNOREQEMU" ] ; then
     echo "=>  Starting qemu build"
     dir="$(pwd)/toolchains/qemu"
     echo "==>   Initializing qemu submodule"
-    #since we don't want to use the global config we init passing rewrite config in to the command
-    git -c url.https://github.com/qemu.insteadOf=https://git.qemu.org/git submodule update --init --recursive "$dir"
-    echo "==>  Applying url-rewriting to avoid git.qemu.org"
-    # and once the clones exist, we recurse through them and set the rewrite
-    # in the local config so that any further commands by the user have the rewrite. uggh. git, why you so ugly?
-    git -C "$dir" config --local url.https://github.com/qemu.insteadOf https://git.qemu.org/git
-    git -C "$dir" submodule foreach --recursive 'git config --local url.https://github.com/qemu.insteadOf https://git.qemu.org/git'
-
-    # check to see whether the rewrite rules are needed any more
-    # If you find git.qemu.org in any .gitmodules file below qemu, you still need them
-    # the /dev/null redirection in the submodule grepping is to quiet non-existance of further .gitmodules
-    ! grep -q 'git\.qemu\.org' "$dir/.gitmodules" && \
-    git -C "$dir" submodule foreach --quiet --recursive '! grep -q "git\.qemu\.org" .gitmodules 2>/dev/null' && \
-    echo "==>  PLEASE REMOVE qemu URL-REWRITING from scripts/build-toolchains.sh. It is no longer needed!" && exit 1
 
     # now actually do the build
     SRCDIR="$(pwd)/toolchains" module_build qemu --prefix="${RISCV}" --target-list=riscv${XLEN}-softmmu --disable-werror
