@@ -22,7 +22,7 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
   * A template file for tool environment configuration. Fill in the install and license server paths for your environment.
 
-* example-vlsi
+* example-vlsi-sky130
 
   * Entry point to Hammer. Contains example placeholders for hooks.
 
@@ -83,8 +83,8 @@ For the curious, ``make buildfile`` generates a set of Make targets in ``build/h
 Running the VLSI Flow
 ---------------------
 
-example-vlsi
-^^^^^^^^^^^^
+example-vlsi-sky130
+^^^^^^^^^^^^^^^^^^^
 This is the entry script with placeholders for hooks. In the ``ExampleDriver`` class, a list of hooks is passed in the ``get_extra_par_hooks``. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in this example. Refer to the Hammer documentation on hooks for a detailed description of how these are injected into the VLSI flow.
 
 
@@ -130,7 +130,7 @@ To run DRC & LVS, and view the results in Calibre:
 
 Some DRC errors are expected from this PDK, especially with regards to the SRAMs, as explained in the 
 `Sky130 Hammer plugin README  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__.
-For this reason, the ``example-vlsi`` script black-boxes the SRAMs for DRC/LVS analysis. 
+For this reason, the ``example-vlsi-sky130`` script black-boxes the SRAMs for DRC/LVS analysis. 
 
 Simulation
 ^^^^^^^^^^
