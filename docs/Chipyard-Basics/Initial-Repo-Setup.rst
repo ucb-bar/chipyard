@@ -29,12 +29,13 @@ Setting up the Chipyard Repo
 
 Start by fetching Chipyard's sources. Run:
 
-.. code-block:: shell
+.. parsed-literal::
 
     git clone https://github.com/ucb-bar/chipyard.git
     cd chipyard
-    # fancy way to checkout latest tag (for example resolves to "1.5.0" if that is the latest)                   │ 31 -------------------------------------------
-    git checkout $(git describe --tags $(git rev-list --tags --max-count=1))
+    # checkout latest official chipyard release
+    # note: this may not be the latest release if the documentation version != "stable"
+    git checkout |version|
     ./scripts/init-submodules-no-riscv-tools.sh
 
 This will initialize and checkout all of the necessary git submodules.
