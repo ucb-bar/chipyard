@@ -1,11 +1,9 @@
 name: chipyard-ci-process
 
 on:
-  # run ci on pull requests targeting dev, master, main only (since the ci runs on the merge commit)
+  # run ci on pull requests targeting main only (since the ci runs on the merge commit)
   pull_request:
     branches:
-      - dev
-      - master
       - main
 
 env:
