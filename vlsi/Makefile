@@ -19,7 +19,7 @@ include $(base_dir)/variables.mk
 #########################################################################################
 sim_name           ?= vcs # needed for GenerateSimFiles, but is unused
 tech_name          ?= asap7
-tech_dir           ?= $(if $(filter $(tech_name),asap7 nangate45),\
+tech_dir           ?= $(if $(filter $(tech_name),sky130 asap7 nangate45),\
                         $(vlsi_dir)/hammer/src/hammer-vlsi/technology/$(tech_name), \
                         $(vlsi_dir)/hammer-$(tech_name)-plugin/$(tech_name))
 SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
@@ -36,8 +36,12 @@ ENV_YML            ?= $(vlsi_dir)/env.yml
 INPUT_CONFS        ?= example-tools.yml \
                       $(if $(filter $(tech_name),nangate45),\
                         example-nangate45.yml,\
-                        example-asap7.yml)
-HAMMER_EXEC        ?= ./example-vlsi
+                        $(if $(filter $(tech_name),asap7),\
+							example-asap7.yml,\
+							example-sky130.yml))
+HAMMER_EXEC        ?= $(if $(filter $(tech_name),sky130),\
+                        ./example-vlsi-sky130,\
+                        ./example-vlsi)
 VLSI_TOP           ?= $(TOP)
 VLSI_HARNESS_DUT_NAME ?= chiptop
 # If overriding, this should be relative to $(vlsi_dir)
