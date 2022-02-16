@@ -17,7 +17,7 @@ runs:
   using: "composite"
   steps:
     - name: Init submodules (since only the RTL is cached)
-      run: ./scripts/init-submodules-no-riscv-tools.sh
+      run: ./scripts/init-submodules-no-riscv-tools.sh --skip-validate
       shell: bash
 
     # Note: You shouldn't need the other inputs since it shouldn't build RTL from scratch
