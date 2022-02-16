@@ -32,35 +32,15 @@ def example_tool_settings(x: hammer_vlsi.HammerTool) -> bool:
         x.append('''
 # TODO
 # Place custom TCL here
+# only route in met1 to met4
 set_db route_design_bottom_routing_layer 2
 set_db route_design_top_routing_layer 5
 ''')
     return True
 
-def drc_blackbox_openram_srams(x: hammer_vlsi.HammerTool) -> bool:
-    if x.get_setting("vlsi.core.technology") == "sky130":
-        drc_box = ''
-        for name in SKY130Tech().openram_sram_names():
-            drc_box += f"\nEXCLUDE CELL {name}"
-        with open(x.drc_run_file, "a") as f:
-            f.write(drc_box)
-    return True
-
-def lvs_blackbox_openram_srams(x: hammer_vlsi.HammerTool) -> bool:
-    if x.get_setting("vlsi.core.technology") == "sky130":
-        lvs_box = ''
-        for name in SKY130Tech.openram_sram_names():
-            lvs_box += f"\nLVS BOX {name}"
-            lvs_box += f"\nLVS FILTER {name} OPEN "
-        with open(x.lvs_run_file, "a") as f:
-            f.write(lvs_box)
-    return True
-
-
 class ExampleDriver(CLIDriver):
     def get_extra_par_hooks(self) -> List[HammerToolHookAction]:
         extra_hooks = [
-
             # Default set of steps can be found in the CAD tool plugin's __init__.py
 
             # make_pre_insertion_hook will execute the custom hook before the specified step
@@ -77,20 +57,6 @@ class ExampleDriver(CLIDriver):
             hammer_vlsi.HammerTool.make_removal_hook("place_bumps"),
 
             # The target step in any of the above calls may be a default step or another one of your custom hooks
-        ]
-        return extra_hooks 
-    
-    def get_extra_drc_hooks(self) -> List[HammerToolHookAction]:
-        extra_hooks = [
-            # This is an example of a technology-supplied hook
-            hammer_vlsi.HammerTool.make_post_insertion_hook("generate_drc_run_file", drc_blackbox_openram_srams),
-        ]
-        return extra_hooks 
-
-    def get_extra_lvs_hooks(self) -> List[HammerToolHookAction]:
-        extra_hooks = [
-            # This is an example of a technology-supplied hook
-            hammer_vlsi.HammerTool.make_post_insertion_hook("generate_lvs_run_file", lvs_blackbox_openram_srams),
         ]
         return extra_hooks 
 
