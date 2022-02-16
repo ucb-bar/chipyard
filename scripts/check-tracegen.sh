@@ -13,7 +13,7 @@ AXE_SHRINK=${AXE_DIR}/src/axe-shrink.py
 PATH=$PATH:${AXE_DIR}/src
 
 grep '.*:.*#.*@' $1 > /tmp/clean-trace.txt
-"$TO_AXE" /tmp/clean-trace.txt > /tmp/trace.axe
+python2 "$TO_AXE" /tmp/clean-trace.txt > /tmp/trace.axe
 result=$("$AXE" check wmo /tmp/trace.axe)
 
 if [ "$result" != OK ]; then

@@ -13,7 +13,7 @@ import freechips.rocketchip.system.RocketChipStage
 import firrtl.options.{Phase, PhaseManager, PreservesAll, Shell, Stage, StageError, StageMain, Dependency}
 import firrtl.options.phases.DeletedWrapper
 
-class ChipyardStage extends ChiselStage with PreservesAll[Phase] {
+class ChipyardStage extends ChiselStage {
   override val shell = new Shell("chipyard") with ChipyardCli with RocketChipCli with ChiselCli with FirrtlCli
   override val targets: Seq[PhaseDependency] = Seq(
     Dependency[freechips.rocketchip.stage.phases.Checks],
@@ -33,4 +33,5 @@ class ChipyardStage extends ChiselStage with PreservesAll[Phase] {
     Dependency[chipyard.stage.phases.GenerateTestSuiteMakefrags],
     Dependency[freechips.rocketchip.stage.phases.GenerateArtefacts],
   )
+  override final def invalidates(a: Phase): Boolean = false
 }

@@ -13,5 +13,5 @@ cd "${scripts_dir}/.."
 # Reenable the FireSim submodule
 git config --unset submodule.sims/firesim.update || true
 cd sims/firesim
-./build-setup.sh "$@" --library
+./build-setup.sh "$@" --library --skip-validate
 cd "$RDIR"

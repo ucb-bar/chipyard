@@ -9,6 +9,7 @@ set -ex
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
+# enter bhd repo
 cd $LOCAL_CHIPYARD_DIR
 
 # ignore the private vlsi submodules
@@ -16,15 +17,16 @@ git config submodule.vlsi/hammer-cadence-plugins.update none
 git config submodule.vlsi/hammer-mentor-plugins.update none
 git config submodule.vlsi/hammer-synopsys-plugins.update none
 
-# initialize submodules and get the hashes
-git submodule update --init
-status=$(git submodule status)
-
 all_names=()
 
 
 search_submodule() {
     echo "Running check on submodule $submodule in $dir"
+    # Initialize submodule and get the hashes
+    git submodule update --init $dir/$submodule
+    git -C $dir/$submodule fetch --unshallow
+
+    status=$(git submodule status)
     hash=$(echo "$status" | grep "$dir.*$submodule " | awk '{print$1}' | grep -o "[[:alnum:]]*")
     for branch in "${branches[@]}"
     do
@@ -47,9 +49,9 @@ search () {
     done
 }
 
-submodules=("cva6" "ibex" "boom" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "sifive-blocks" "sifive-cache" "testchipip" "riscv-sodor")
+submodules=("cva6" "boom" "ibex" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "sifive-blocks" "sifive-cache" "testchipip" "riscv-sodor")
 dir="generators"
-if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
+if [ "$GITHUB_REF_NAME" == "master" ] || [ "$GITHUB_REF_NAME" == "dev" ]
 then
     branches=("master" "main")
 else
@@ -81,7 +83,7 @@ search
 
 submodules=("coremark" "firemarshal" "nvdla-workload" "spec2017")
 dir="software"
-if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
+if [ "$GITHUB_REF_NAME" == "master" ] || [ "$GITHUB_REF_NAME" == "dev" ]
 then
     branches=("master")
 else
@@ -91,7 +93,7 @@ search
 
 submodules=("DRAMSim2" "axe" "barstools" "chisel-testers" "dsptools" "rocket-dsp-utils" "torture")
 dir="tools"
-if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
+if [ "$GITHUB_REF_NAME" == "master" ] || [ "$GITHUB_REF_NAME" == "dev" ]
 then
     branches=("master")
 else
@@ -106,7 +108,7 @@ search
 
 submodules=("firesim")
 dir="sims"
-if [ "$CIRCLE_BRANCH" == "master" ] || [ "$CIRCLE_BRANCH" == "dev" ]
+if [ "$GITHUB_REF_NAME" == "master" ] || [ "$GITHUB_REF_NAME" == "dev" ]
 then
     branches=("master")
 else
