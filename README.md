@@ -1,6 +1,6 @@
 ![CHIPYARD](https://github.com/ucb-bar/chipyard/raw/master/docs/_static/images/chipyard-logo-full.png)
 
-# Chipyard Framework [![Test](https://github.com/ucb-bar/chipyard/workflows/chipyard-ci-process/badge.svg?style=svg)](https://github.com/ucb-bar/chipyard/actions)
+# Chipyard Framework [![Test](https://github.com/ucb-bar/chipyard/actions/workflows/chipyard-run-tests.yml/badge.svg)](https://github.com/ucb-bar/chipyard/actions)
 
 ## Quick Links
 
