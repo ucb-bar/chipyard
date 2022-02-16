@@ -9,36 +9,36 @@ Project Structure
 
 This example gives a suggested file structure and build system. The ``vlsi/`` folder will eventually contain the following files and folders:
 
-* Makefile, sim.mk, power.mk
+* ``Makefile``, ``sim.mk``, ``power.mk``
 
   * Integration of Hammer's build system into Chipyard and abstracts away some Hammer commands.
 
-* build
+* ``build``
 
   * Hammer output directory. Can be changed with the ``OBJ_DIR`` variable.
   * Will contain subdirectories such as ``syn-rundir`` and ``par-rundir`` and the ``inputs.yml`` denoting the top module and input Verilog files.
 
-* env.yml
+* ``env.yml``
 
   * A template file for tool environment configuration. Fill in the install and license server paths for your environment.
 
-* example-vlsi-sky130
+* ``example-vlsi-sky130``
 
   * Entry point to Hammer. Contains example placeholders for hooks.
 
-* example-sky130.yml, example-tools.yml
+* ``example-sky130.yml``, ``example-tools.yml``
 
   * Hammer IR for this tutorial.
 
-* example-design.yml, example-nangate45.yml, example-tech.yml
+* ``example-design.yml``, ``example-nangate45.yml``, ``example-tech.yml``
 
   * Hammer IR not used for this tutorial but provided as templates.
 
-* generated-src
+* ``generated-src``
 
   * All of the elaborated Chisel and FIRRTL.
 
-* hammer, hammer-<vendor>-plugins, hammer-<tech>-plugin
+* ``hammer``, ``hammer-<vendor>-plugins``, ``hammer-<tech>-plugin``
 
   * Core, tool, tech repositories.
 
@@ -47,7 +47,7 @@ Prerequisites
 
 * Python 3.4+
 * numpy package
-* Genus, Innovus, and Calibre licenses
+* Genus, Innovus, Voltus, VCS, and Calibre licenses
 * Sky130 PDK, install using `these directions  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__
 
 Initial Setup
@@ -92,8 +92,8 @@ example-sky130.yml
 ^^^^^^^^^^^^^^^^^^
 This contains the Hammer configuration for this example project. Example clock constraints, power straps definitions, placement constraints, and pin constraints are given. Additional configuration for the extra libraries and tools are at the bottom.
 
-First, set ``technology.sky130.sky130A`` to the absolute path to the ``sky130A`` directory containing the Sky130 PDK files. See the 
-`Sky130 Hammer plugin README  <https://github.com/ucb-bar/hammer/blob/sky130sram/src/hammer-vlsi/technology/sky130/README.md>`__
+First, set ``technology.sky130.sky130A/sky130_nda/openram_lib`` to the absolute path of the respective directories containing the Sky130 PDK and SRAM files. See the 
+`Sky130 Hammer plugin README <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__
 for details about the PDK setup.
 
 
@@ -103,7 +103,7 @@ Synthesis
 
     make syn tech_name=sky130 CONFIG=TinyRocketConfig
 
-Post-synthesis logs and collateral are in ``build/syn-rundir``. The raw QoR data is available at ``build/syn-rundir/reports``, and methods to extract this information for design space exploration are a WIP.
+Post-synthesis logs and collateral are in ``build/syn-rundir``. The raw quality of results data is available at ``build/syn-rundir/reports``, and methods to extract this information for design space exploration are a work in progress.
 
 Place-and-Route
 ^^^^^^^^^^^^^^^
