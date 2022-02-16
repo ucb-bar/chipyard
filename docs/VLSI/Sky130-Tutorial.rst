@@ -142,7 +142,7 @@ Simulation with VCS is supported, and can be run at the RTL- or gate-level (post
 
 Post-synthesis and post-P&R simulations use the ``sim-syn`` and ``sim-par`` make targets, respectively.
 
-Appending ``-debug`` and ``-debug-timing`` to these make targets will instruct VCS to write a SAIF + VPD and do timing-annotated simulations, respectively. See the ``sim.mk`` file for all available targets.
+Appending ``-debug`` and ``-debug-timing`` to these make targets will instruct VCS to write a SAIF + VPD (or FSDB if the ``USE_FSDB`` flag is set) and do timing-annotated simulations, respectively. See the ``sim.mk`` file for all available targets.
 
 Power/Rail Analysis
 ^^^^^^^^^^^^^^^^^^^
