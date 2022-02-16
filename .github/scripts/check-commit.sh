@@ -93,7 +93,7 @@ search
 
 submodules=("firesim")
 dir="sims"
-branches=("master" "dev")
+branches=("master" "main" "dev")
 search
 
 submodules=("hammer")
