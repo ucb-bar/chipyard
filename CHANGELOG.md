@@ -2,6 +2,61 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.6.0] - 2022-02-15
+
+A more detailed account of everything included is included in the dev to master PR for this release: https://github.com/ucb-bar/chipyard/pull/913
+
+### Added
+* Diplomatic IOBinder-like approach to setting up PRCI across different deployment targets (#900)
+* Default set of MMIO-controlled reset-setters and clock-gaters (#900)
+* Added simulation makefile options `torture` and `torture-overnight` for running Torture (#992)
+* FSDB waveform support (#1072, #1102)
+* Use GitHub Actions for CI (#1004, #999, #1090, #1092)
+* Add MAKE variable in `build-toolchains.sh` (#1021)
+* Cleanup GH issue and PR templates (#1029, #1032)
+* Add support for Ibex core (#979)
+* Add system bus width fragment (#1071)
+* Add support for FSDB waveform files (#1072, #1102)
+* Document simulator timeout settings (#1094)
+* Add FFT Generator (#1067)
+* Add waveforms for post-PNR and power (#1108)
+* Have PRCI control registers use clock of corresponding bus (#1109)
+* Add check to verify that user is running on tagged release (#1114)
+* Hammer tutorial in Sky130 (#1115)
+
+### Changed
+* Bump CVA6 (#909 )
+* Bump Hammer tutorial for ASAP7 r1p7 (#934)
+* Use Published Chisel, FIRRTL, Treadle, FIRRTLInterpreter packages instead of building from source. #1054
+* Change serialTL width to 32. Speeds up simulations (#1040)
+* Update how sbt flag is overridden (by using `SBT_BIN` variable) (#1041)
+* Use published dependencies for Chisel, FIRRTL, Treadle, and FIRRTLInterpreter (#1054)
+* Split `ConfigFragments.scala` into multiple files (with more organization) (#1061)
+* Avoid initializing nvdla software by default (#1063)
+* Update ASAP to 1.7 in Hammer (#934)
+* Shorten Gemmini docs and point to repo (#1078)
+* Bump Gemmini to 0.6.2 (#1083)
+* Use python2 for tracegen script (#1107)
+* Bump to Chisel/FIRRTL 3.5.1 (#1060, #1113)
+* Bump to FireMarshal 1.12.1 (#1116)
+* Bump to FireSim 1.13.0 (#1118 )
+
+### Fixed
+* Fix UART portmap for Arty (#968)
+* Support changing make variable `MODEL` from the cmdline (#1030)
+* Force FIRRTL to 1.4.1 (#1052)
+* Fix MMIO IOBinder (#1045)
+* Mask `fd` warning when running make (#1057)
+* Fix Sodor 5-stage hazard check (#1086)
+* Fix Sodor val io issue (#1089)
+* Fix BOOM reference in Readme (#1104)
+* Fix waveforms for post-P&R power analysis (#1108)
+
+### Removed
+* Remove duplicate `WithUARTIOCells` fragment (#1047)
+* Remove MaxPermSize in java variables (#1082)
+* Remove support for CircleCI (#1105)
+
 ## [1.5.0] - 2021-06-13
 
 A more detailed account of everything included is included in the dev to master PR for this release: https://github.com/ucb-bar/chipyard/pull/773
@@ -9,7 +64,7 @@ A more detailed account of everything included is included in the dev to master 
 ### Added
 * FireMarshal support for FPGA prototypes (#849)
 * Hammer update to include power estimation flows, rail analysis, hierarchical sim support, and improved ASAP7 plugin with dummy SRAMs (#886)
-* Docker image 
+* Docker image
 * Support specifying architecture when building tools. (#802)
 * Add Config fragments: WithMultiRoCCFromBuildRoCC, PMP (#809, #821)
 * Add support for simulating an AXI memory interface over the default TL serial link (#812)
@@ -22,7 +77,7 @@ A more detailed account of everything included is included in the dev to master 
 * FireSim bump to version 1.12
 * FireMarshal bump to version 1.12
 * Changes default FireSim frequency from 3.2 GHz (dual clock domains) to 1 GHz (single clock domain)
-* Bump pygments from 2.2.0 to 2.7.4 in docs 
+* Bump pygments from 2.2.0 to 2.7.4 in docs
 * Hammer tutorial example is now a TinyRocketConfig (#886)
 * Sha3 Spike model moved from sha3 repo to esp-isa-sim
 
