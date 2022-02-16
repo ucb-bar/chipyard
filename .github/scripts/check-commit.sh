@@ -51,12 +51,7 @@ search () {
 
 submodules=("cva6" "boom" "ibex" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "sifive-blocks" "sifive-cache" "testchipip" "riscv-sodor")
 dir="generators"
-if [ "$GITHUB_REF_NAME" == "master" ] || [ "$GITHUB_REF_NAME" == "dev" ]
-then
-    branches=("master" "main")
-else
-    branches=("master" "main" "dev")
-fi
+branches=("master" "main" "dev")
 search
 
 submodules=("riscv-gnu-toolchain" "riscv-isa-sim" "riscv-pk" "riscv-tests")
@@ -83,22 +78,12 @@ search
 
 submodules=("coremark" "firemarshal" "nvdla-workload" "spec2017")
 dir="software"
-if [ "$GITHUB_REF_NAME" == "master" ] || [ "$GITHUB_REF_NAME" == "dev" ]
-then
-    branches=("master")
-else
-    branches=("master" "dev")
-fi
+branches=("master" "dev")
 search
 
 submodules=("DRAMSim2" "axe" "barstools" "chisel-testers" "dsptools" "rocket-dsp-utils" "torture")
 dir="tools"
-if [ "$GITHUB_REF_NAME" == "master" ] || [ "$GITHUB_REF_NAME" == "dev" ]
-then
-    branches=("master")
-else
-    branches=("master" "dev")
-fi
+branches=("master" "dev")
 search
 
 submodules=("dromajo-src")
@@ -108,12 +93,7 @@ search
 
 submodules=("firesim")
 dir="sims"
-if [ "$GITHUB_REF_NAME" == "master" ] || [ "$GITHUB_REF_NAME" == "dev" ]
-then
-    branches=("master")
-else
-    branches=("master" "dev")
-fi
+branches=("master" "main" "dev")
 search
 
 submodules=("hammer")
