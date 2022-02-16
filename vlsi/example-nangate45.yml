@@ -22,7 +22,7 @@ vlsi.inputs.power_spec_type: "cpf"
 
 # Specify clock signals
 vlsi.inputs.clocks: [
-  {name: "clock", period: "5ns", uncertainty: "0.5ns"}
+  {name: "clock_clock", period: "5ns", uncertainty: "0.5ns"}
 ]
 
 # Generate Make include to aid in flow 

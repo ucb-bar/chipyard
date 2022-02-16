@@ -4,6 +4,34 @@
 set -e
 set -o pipefail
 
+SKIP_VALIDATE=false
+
+function usage
+{
+    echo "Usage: $0 [--skip-validate]"
+    echo "Initialize Chipyard submodules and setup initial env.sh script."
+    echo ""
+    echo "  --skip-validate    Skip prompt checking for tagged release"
+}
+
+while test $# -gt 0
+do
+   case "$1" in
+        --skip-validate)
+            SKIP_VALIDATE=true;
+            ;;
+        -h | -H | --help)
+            usage
+            exit 1
+            ;;
+        *) echo "ERROR: bad argument $1"
+            usage
+            exit 2
+            ;;
+    esac
+    shift
+done
+
 # Check that git version is at least 1.7.8
 MYGIT=$(git --version)
 MYGIT=${MYGIT#'git version '} # Strip prefix
@@ -17,9 +45,31 @@ if [ "$MINGIT" != "$(echo -e "$MINGIT\n$MYGIT" | sort -V | head -n1)" ]; then
   false
 fi
 
+# before doing anything verify that you are on a release branch/tag
+set +e
+tag=$(git describe --exact-match --tags)
+tag_ret_code=$?
+set -e
+if [ $tag_ret_code -ne 0 ]; then
+    if [ "$SKIP_VALIDATE" = false ]; then
+        read -p "WARNING: You are not on an official release of Chipyard."$'\n'"Type \"y\" to continue if this is intended, otherwise see https://chipyard.readthedocs.io/en/stable/Chipyard-Basics/Initial-Repo-Setup.html#setting-up-the-chipyard-repo: " validate
+        [[ $validate == [yY] ]] || exit 3
+        echo "Setting up non-official Chipyard release"
+    fi
+else
+    echo "Setting up official Chipyard release: $tag"
+fi
+
+# On macOS, use GNU readlink from 'coreutils' package in Homebrew/MacPorts
+if [ "$(uname -s)" = "Darwin" ] ; then
+    READLINK=greadlink
+else
+    READLINK=readlink
+fi
+
 # If BASH_SOURCE is undefined we may be running under zsh, in that case
 # provide a zsh-compatible alternative
-DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-${(%):-%x}}")")"
+DIR="$(dirname "$($READLINK -f "${BASH_SOURCE[0]:-${(%):-%x}}")")"
 CHIPYARD_DIR="$(dirname "$DIR")"
 
 cd "$CHIPYARD_DIR"
@@ -40,10 +90,13 @@ cd "$CHIPYARD_DIR"
             generators/sha3 \
             generators/gemmini \
             sims/firesim \
+            software/nvdla-workload \
+            software/coremark \
+            software/firemarshal \
+            software/spec2017 \
             vlsi/hammer-cadence-plugins \
             vlsi/hammer-synopsys-plugins \
             vlsi/hammer-mentor-plugins \
-            software/firemarshal \
             fpga/fpga-shells
         do
             "$1" "${name%/}"

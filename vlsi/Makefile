@@ -19,7 +19,7 @@ include $(base_dir)/variables.mk
 #########################################################################################
 sim_name           ?= vcs # needed for GenerateSimFiles, but is unused
 tech_name          ?= asap7
-tech_dir           ?= $(if $(filter $(tech_name),asap7 nangate45),\
+tech_dir           ?= $(if $(filter $(tech_name),sky130 asap7 nangate45),\
                         $(vlsi_dir)/hammer/src/hammer-vlsi/technology/$(tech_name), \
                         $(vlsi_dir)/hammer-$(tech_name)-plugin/$(tech_name))
 SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
@@ -36,8 +36,12 @@ ENV_YML            ?= $(vlsi_dir)/env.yml
 INPUT_CONFS        ?= example-tools.yml \
                       $(if $(filter $(tech_name),nangate45),\
                         example-nangate45.yml,\
-                        example-asap7.yml)
-HAMMER_EXEC        ?= ./example-vlsi
+                        $(if $(filter $(tech_name),asap7),\
+							example-asap7.yml,\
+							example-sky130.yml))
+HAMMER_EXEC        ?= $(if $(filter $(tech_name),sky130),\
+                        ./example-vlsi-sky130,\
+                        ./example-vlsi)
 VLSI_TOP           ?= $(TOP)
 VLSI_HARNESS_DUT_NAME ?= chiptop
 # If overriding, this should be relative to $(vlsi_dir)
@@ -158,7 +162,7 @@ $(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_file
 ifneq ($(BINARY), )
 	echo "  benchmarks: ['$(BINARY)']" >> $@
 endif
-	echo "  tb_dut: 'testHarness.$(VLSI_HARNESS_DUT_NAME)'" >> $@
+	echo "  tb_dut: 'TestDriver.testHarness.$(VLSI_HARNESS_DUT_NAME)'" >> $@
 
 $(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
@@ -174,7 +178,16 @@ $(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_commo
 	echo "  saif.mode: 'time'" >> $@
 	echo "  saif.start_time: '0ns'" >> $@
 	echo "  saif.end_time: '`bc <<< $(timeout_cycles)*$(CLOCK_PERIOD)`ns'" >> $@
+ifdef USE_FSDB
+	echo "  options:" >> $@
+	echo '    - "-debug_access+all"' >> $@
+	echo '    - "-kdb"' >> $@
+	echo '    - "-lca"' >> $@
+	echo "  options_meta: 'append'" >> $@
+	echo "sim.outputs.waveforms: ['$(sim_out_name).fsdb']" >> $@
+else
 	echo "sim.outputs.waveforms: ['$(sim_out_name).vpd']" >> $@
+endif
 
 $(SIM_TIMING_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
@@ -191,11 +204,12 @@ $(POWER_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_fi
 	echo "  tb_dut: 'testHarness/$(VLSI_HARNESS_DUT_NAME)'" >> $@
 	echo "  database: '$(OBJ_DIR)/par-rundir/$(VLSI_TOP)_FINAL'" >> $@
 ifneq ($(BINARY), )
-	echo "  saifs: [" >> $@
-	echo "    '$(OBJ_DIR)/sim-par-rundir/$(notdir $(BINARY))/ucli.saif'" >> $@
-	echo "  ]" >> $@
 	echo "  waveforms: [" >> $@
-	#echo "    '$(OBJ_DIR)/sim-par-rundir/$(notdir $(BINARY))/$(sim_out_name).vcd'" >> $@
+ifdef USE_FSDB
+	echo "    '$(sim_out_name).fsdb'" >> $@
+else
+	echo "    '$(sim_out_name).vpd'" >> $@
+endif
 	echo "  ]" >> $@
 endif
 	echo "  start_times: ['0ns']" >> $@

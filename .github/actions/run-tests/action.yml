@@ -1,0 +1,31 @@
+name: run-tests
+description: 'Runs tests according to input parameters'
+
+inputs:
+  group-key:
+    description: group key
+    required: true
+  project-key:
+    description: project key
+    required: true
+  run-script:
+    description: rtl build script to use
+    required: false
+    default: "run-tests.sh"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Init submodules (since only the RTL is cached)
+      run: ./scripts/init-submodules-no-riscv-tools.sh --skip-validate
+      shell: bash
+
+    # Note: You shouldn't need the other inputs since it shouldn't build RTL from scratch
+    - name: Build RTL
+      uses: ./.github/actions/prepare-rtl
+      with:
+        group-key: ${{ inputs.group-key }}
+
+    - name: Run RTL tests
+      run: ./.github/scripts/${{ inputs.run-script }} ${{ inputs.project-key }}
+      shell: bash

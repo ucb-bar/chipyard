@@ -26,8 +26,6 @@ case object StreamingPassthroughKey extends Field[Option[StreamingPassthroughPar
 
 class StreamingPassthroughBundle[T<:Data:Ring](proto: T) extends Bundle {
     val data: T = proto.cloneType
-
-    override def cloneType: this.type = StreamingPassthroughBundle(proto).asInstanceOf[this.type]
 }
 object StreamingPassthroughBundle {
     def apply[T<:Data:Ring](proto: T): StreamingPassthroughBundle[T] = new StreamingPassthroughBundle(proto)

@@ -22,7 +22,7 @@ import freechips.rocketchip.tile.XLen
 import chipyard.TestSuiteHelper
 import chipyard.TestSuitesKey
 
-class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipStageUtils {
+class AddDefaultTests extends Phase with HasRocketChipStageUtils {
   // Make sure we run both after RocketChip's version of this phase, and Rocket Chip's annotation emission phase
   // because the RocketTestSuiteAnnotation is not serializable (but is not marked as such).
   override val prerequisites = Seq(
@@ -52,4 +52,6 @@ class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipS
     implicit val p = getConfig(view[RocketChipOptions](annotations).configNames.get).toInstance
     addTestSuiteAnnotations ++ oAnnos
   }
+
+  override final def invalidates(a: Phase): Boolean = false
 }

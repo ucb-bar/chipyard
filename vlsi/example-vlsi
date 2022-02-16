@@ -36,29 +36,9 @@ set_db route_design_top_routing_layer 7
 ''')
     return True
 
-def scale_final_gds(x: hammer_vlsi.HammerTool) -> bool:
-    """
-    Scale the final GDS by a factor of 4
-    hammer/src/hammer-vlsi/technology/asap7/__init__.py implements scale_gds_script
-    """
-    if x.get_setting("vlsi.core.technology") == "asap7":
-        x.append('''
-# Write script out to a temporary file and execute it
-set fp [open "{script_file}" "w"]
-puts -nonewline $fp "{script_text}"
-close $fp
-
-# Innovus <19.1 appends some bad LD_LIBRARY_PATHS, so remove them before executing python
-set env(LD_LIBRARY_PATH) [join [lsearch -not -all -inline [split $env(LD_LIBRARY_PATH) ":"] "*INNOVUS*"] ":"]
-python3 {script_file}
-'''.format(script_text=x.technology.scale_gds_script(x.output_gds_filename), script_file=os.path.join(x.run_dir, "gds_scale.py")))
-    return True
-
-
 class ExampleDriver(CLIDriver):
     def get_extra_par_hooks(self) -> List[HammerToolHookAction]:
         extra_hooks = [
-
             # Default set of steps can be found in the CAD tool plugin's __init__.py
 
             # make_pre_insertion_hook will execute the custom hook before the specified step
@@ -66,7 +46,7 @@ class ExampleDriver(CLIDriver):
             # hammer_vlsi.HammerTool.make_pre_insertion_hook("route_design", example_add_fillers),
 
             # make_post_insertion_hook will execute the custom hook after the specified step
-            hammer_vlsi.HammerTool.make_post_insertion_hook("init_design", example_tool_settings),
+            # hammer_vlsi.HammerTool.make_post_insertion_hook("init_design", example_tool_settings),
 
             # make_replacement_hook will replace the specified step with a custom hook
             # hammer_vlsi.HammerTool.make_replacement_hook("place_tap_cells", example_place_tap_cells),
@@ -75,9 +55,6 @@ class ExampleDriver(CLIDriver):
             hammer_vlsi.HammerTool.make_removal_hook("place_bumps"),
 
             # The target step in any of the above calls may be a default step or another one of your custom hooks
-
-            # This is an example of a technology-supplied hook
-            hammer_vlsi.HammerTool.make_post_insertion_hook("write_design", scale_final_gds)
         ]
         return extra_hooks 
 

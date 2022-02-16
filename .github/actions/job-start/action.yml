@@ -1,0 +1,19 @@
+name: job-start
+description: "Setup a job status"
+outputs:
+  run_result:
+    value: ${{ steps.run_result.outputs.run_result }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Restore the previous run result
+      uses: actions/cache@v2
+      with:
+        path: run_result
+        key: ${{ github.run_id }}-${{ github.job }}
+        restore-keys: ${{ github.run_id }}-${{ github.job }}
+    - name: Set run_result to default or use cached value
+      id: run_result
+      run: echo "::set-output name=run_result::$(cat run_result 2>/dev/null || echo 'default')"
+      shell: bash

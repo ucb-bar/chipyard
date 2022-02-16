@@ -21,7 +21,8 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithSimAXIMMIO ++                        // add SimAXIMem for axi4 mmio port, if enabled
   new chipyard.harness.WithTieOffInterrupts ++                  // tie-off interrupt ports, if present
   new chipyard.harness.WithTieOffL2FBusAXI ++                   // tie-off external AXI4 master, if present
-  new chipyard.harness.WithTieOffCustomBootPin ++
+  new chipyard.harness.WithCustomBootPinPlusArg ++
+  new chipyard.harness.WithClockAndResetFromHarness ++
 
   // The IOBinders instantiate ChipTop IOs to match desired digital IOs
   // IOCells are generated for "Chip-like" IOs, while simulation-only IOs are directly punched through
@@ -34,12 +35,13 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithDebugIOCells ++
   new chipyard.iobinders.WithUARTIOCells ++
   new chipyard.iobinders.WithGPIOCells ++
-  new chipyard.iobinders.WithUARTIOCells ++
   new chipyard.iobinders.WithSPIIOCells ++
   new chipyard.iobinders.WithTraceIOPunchthrough ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
   new chipyard.iobinders.WithCustomBootPin ++
+  new chipyard.iobinders.WithDividerOnlyClockGenerator ++
 
+  new testchipip.WithSerialTLWidth(32) ++                        // fatten the serialTL interface to improve testing performance
   new testchipip.WithDefaultSerialTL ++                          // use serialized tilelink port to external serialadapter/harnessRAM
   new chipyard.config.WithBootROM ++                             // use default bootrom
   new chipyard.config.WithUART ++                                // add a UART

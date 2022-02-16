@@ -6,10 +6,21 @@
 set -e
 set -o pipefail
 
+# On macOS, use GNU readlink from 'coreutils' package in Homebrew/MacPorts
+if [ "$(uname -s)" = "Darwin" ] ; then
+    READLINK=greadlink
+else
+    READLINK=readlink
+fi
+
 # If BASH_SOURCE is undefined, we may be running under zsh, in that case
 # provide a zsh-compatible alternative
-DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-${(%):-%x}}")")"
+DIR="$(dirname "$($READLINK -f "${BASH_SOURCE[0]:-${(%):-%x}}")")"
 CHIPYARD_DIR="$(dirname "$DIR")"
+
+# Allow user to override MAKE
+[ -n "${MAKE:+x}" ] || MAKE=$(command -v gnumake || command -v gmake || command -v make)
+readonly MAKE
 
 usage() {
     echo "usage: ${0} [OPTIONS] [riscv-tools | esp-tools | ec2fast]"
@@ -176,7 +187,7 @@ if [ -z "$IGNOREQEMU" ] ; then
     echo "==>  PLEASE REMOVE qemu URL-REWRITING from scripts/build-toolchains.sh. It is no longer needed!" && exit 1
 
     # now actually do the build
-    SRCDIR="$(pwd)/toolchains" module_build qemu --prefix="${RISCV}" --target-list=riscv${XLEN}-softmmu
+    SRCDIR="$(pwd)/toolchains" module_build qemu --prefix="${RISCV}" --target-list=riscv${XLEN}-softmmu --disable-werror
 fi
 
 # make Dromajo

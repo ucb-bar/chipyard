@@ -28,6 +28,8 @@ so changes to the generators themselves will automatically be used when building
    SiFive-Generators
    SHA3
    CVA6
+   Ibex
+   fft
    NVDLA
    Sodor
 

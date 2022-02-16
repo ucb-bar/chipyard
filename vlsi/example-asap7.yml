@@ -1,0 +1,100 @@
+# Technology Setup
+# Technology used is ASAP7
+vlsi.core.technology: asap7
+# Specify dir with ASAP7 Calibre deck tarball
+technology.asap7.tarball_dir: "/path/to/asap7"
+# Specify PDK and std cell install directories
+# technology.asap7.pdk_install_dir: "/path/to/asap7/asap7PDK_r1p7"
+# technology.asap7.stdcell_install_dir: "/path/to/asap7/asap7sc7p5t_27"
+
+vlsi.core.max_threads: 12
+
+# General Hammer Inputs
+
+# Hammer will auto-generate a CPF for simple power designs; see hammer/src/hammer-vlsi/defaults.yml for more info
+vlsi.inputs.power_spec_mode: "auto"
+vlsi.inputs.power_spec_type: "cpf"
+
+# Specify clock signals
+vlsi.inputs.clocks: [
+  {name: "clock_clock", period: "1ns", uncertainty: "0.1ns"}
+]
+
+# Generate Make include to aid in flow 
+vlsi.core.build_system: make
+
+# Placement Constraints
+# For ASAP7, all numbers must be 4x larger than final GDS
+vlsi.inputs.placement_constraints:
+  - path: "ChipTop"
+    type: toplevel
+    x: 0
+    y: 0
+    width: 800
+    height: 500
+    margins:
+      left: 0
+      right: 0
+      top: 0
+      bottom: 0
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_0"
+    type: hardmacro
+    x: 550
+    y: 25
+    orientation: "r0"
+    top_layer: "M4"
+    master: "SRAM1RW4096x8"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_1"
+    type: hardmacro
+    x: 550
+    y: 270
+    orientation: "r0"
+    top_layer: "M4"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_2"
+    type: hardmacro
+    x: 675 
+    y: 25
+    orientation: "r0"
+    top_layer: "M4"
+    master: "SRAM1RW4096x8"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_3"
+    type: hardmacro
+    x: 675
+    y: 270
+    orientation: "r0"
+    top_layer: "M4"
+    master: "SRAM1RW4096x8"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/tag_array/tag_array_ext/mem_0_0"
+    type: hardmacro
+    x: 125
+    y: 150
+    orientation: "my"
+    top_layer: "M4"
+    master: "SRAM1RW64x21"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/data_arrays_0/data_arrays_0_0_ext/mem_0_0"
+    type: hardmacro
+    x: 0
+    y: 25
+    orientation: "my"
+    top_layer: "M4"
+    master: "SRAM1RW1024x32"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_0"
+    type: hardmacro
+    x: 0
+    y: 260
+    orientation: "my"
+    top_layer: "M4"
+    master: "SRAM1RW1024x37"
+
+# Pin placement constraints
+vlsi.inputs.pin_mode: generated
+vlsi.inputs.pin.generate_mode: semi_auto
+vlsi.inputs.pin.assignments: [
+  {pins: "*", layers: ["M5", "M7"], side: "bottom"}
+]
+
+# SRAM Compiler compiler options
+vlsi.core.sram_generator_tool: "sram_compiler"
+# You should specify a location for the SRAM generator in the tech plugin
+vlsi.core.sram_generator_tool_path: ["hammer/src/hammer-vlsi/technology/asap7"]
+vlsi.core.sram_generator_tool_path_meta: "append"

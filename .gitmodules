@@ -1,42 +1,47 @@
 [submodule "rocket-chip"]
 	path = generators/rocket-chip
-	url = https://github.com/ucb-bar/rocket-chip.git
+	url = https://github.com/chipsalliance/rocket-chip.git
+	shallow = true
 [submodule "testchipip"]
 	path = generators/testchipip
 	url = https://github.com/ucb-bar/testchipip.git
+	shallow = true
 [submodule "barstools"]
 	path = tools/barstools
 	url = https://github.com/ucb-bar/barstools.git
-[submodule "tools/chisel3"]
-	path = tools/chisel3
-	url = https://github.com/freechipsproject/chisel3.git
-[submodule "tools/firrtl"]
-	path = tools/firrtl
-	url = https://github.com/freechipsproject/firrtl
+	shallow = true
 [submodule "tools/torture"]
 	path = tools/torture
 	url = https://github.com/ucb-bar/riscv-torture.git
+	shallow = true
 [submodule "generators/boom"]
 	path = generators/boom
 	url = https://github.com/riscv-boom/riscv-boom.git
+	shallow = true
 [submodule "generators/sifive-blocks"]
 	path = generators/sifive-blocks
 	url = https://github.com/sifive/sifive-blocks.git
+	shallow = true
 [submodule "generators/hwacha"]
 	path = generators/hwacha
 	url = https://github.com/ucb-bar/hwacha.git
+	shallow = true
 [submodule "sims/firesim"]
 	path = sims/firesim
 	url = https://github.com/firesim/firesim.git
+	shallow = true
 [submodule "generators/icenet"]
 	path = generators/icenet
 	url = https://github.com/firesim/icenet.git
+	shallow = true
 [submodule "generators/block-inclusivecache-sifive"]
 	path = generators/sifive-cache
 	url = https://github.com/sifive/block-inclusivecache-sifive.git
+	shallow = true
 [submodule "toolchains/riscv-tools/riscv-gnu-toolchain"]
 	path = toolchains/riscv-tools/riscv-gnu-toolchain
 	url = https://github.com/riscv/riscv-gnu-toolchain.git
+	shallow = true
 [submodule "toolchains/riscv-tools/riscv-gnu-toolchain-prebuilt"]
 	path = toolchains/riscv-tools/riscv-gnu-toolchain-prebuilt
 	url = https://github.com/ucb-bar/chipyard-toolchain-prebuilt.git
@@ -44,99 +49,132 @@
 [submodule "toolchains/riscv-tools/riscv-isa-sim"]
 	path = toolchains/riscv-tools/riscv-isa-sim
 	url = https://github.com/riscv/riscv-isa-sim.git
+	shallow = true
 [submodule "toolchains/riscv-tools/riscv-pk"]
 	path = toolchains/riscv-tools/riscv-pk
 	url = https://github.com/riscv/riscv-pk.git
+	shallow = true
 [submodule "toolchains/riscv-tools/riscv-tests"]
 	path = toolchains/riscv-tools/riscv-tests
 	url = https://github.com/riscv/riscv-tests.git
+	shallow = true
 [submodule "toolchains/riscv-tools/riscv-openocd"]
 	path = toolchains/riscv-tools/riscv-openocd
 	url = https://github.com/riscv/riscv-openocd.git
+	shallow = true
 [submodule "toolchains/esp-tools/riscv-gnu-toolchain"]
 	path = toolchains/esp-tools/riscv-gnu-toolchain
 	url = https://github.com/ucb-bar/esp-gnu-toolchain.git
+	shallow = true
 [submodule "toolchains/esp-tools/riscv-isa-sim"]
 	path = toolchains/esp-tools/riscv-isa-sim
 	url = https://github.com/ucb-bar/esp-isa-sim.git
+	shallow = true
 [submodule "toolchains/esp-tools/riscv-pk"]
 	path = toolchains/esp-tools/riscv-pk
 	url = https://github.com/riscv/riscv-pk.git
+	shallow = true
 [submodule "toolchains/esp-tools/riscv-tests"]
 	path = toolchains/esp-tools/riscv-tests
 	url = https://github.com/ucb-bar/esp-tests.git
+	shallow = true
 [submodule "toolchains/libgloss"]
 	path = toolchains/libgloss
 	url = https://github.com/ucb-bar/libgloss-htif.git
+	shallow = true
 [submodule "vlsi/hammer"]
 	path = vlsi/hammer
 	url = https://github.com/ucb-bar/hammer.git
+	shallow = true
 [submodule "tools/dsptools"]
 	path = tools/dsptools
 	url = https://github.com/ucb-bar/dsptools.git
+	shallow = true
 [submodule "tools/chisel-testers"]
 	path = tools/chisel-testers
 	url = https://github.com/freechipsproject/chisel-testers.git
-[submodule "tools/treadle"]
-	path = tools/treadle
-	url = https://github.com/freechipsproject/treadle.git
+	shallow = true
 [submodule "generators/sha3"]
 	path = generators/sha3
 	url = https://github.com/ucb-bar/sha3.git
-[submodule "tools/firrtl-interpreter"]
-	path = tools/firrtl-interpreter
-	url = https://github.com/freechipsproject/firrtl-interpreter.git
+	shallow = true
 [submodule "vlsi/hammer-cadence-plugins"]
 	path = vlsi/hammer-cadence-plugins
 	url = https://github.com/ucb-bar/hammer-cadence-plugins.git
+	shallow = true
 [submodule "vlsi/hammer-synopsys-plugins"]
 	path = vlsi/hammer-synopsys-plugins
 	url = https://github.com/ucb-bar/hammer-synopsys-plugins.git
+	shallow = true
 [submodule "vlsi/hammer-mentor-plugins"]
 	path = vlsi/hammer-mentor-plugins
 	url = https://github.com/ucb-bar/hammer-mentor-plugins.git
+	shallow = true
 [submodule "toolchains/qemu"]
 	path = toolchains/qemu
 	url = https://github.com/qemu/qemu.git
+	shallow = true
 [submodule "tools/axe"]
 	path = tools/axe
 	url = https://github.com/CTSRD-CHERI/axe.git
+	shallow = true
 [submodule "software/spec2017"]
 	path = software/spec2017
 	url = https://github.com/ucb-bar/spec2017-workload.git
+	shallow = true
 [submodule "software/coremark"]
 	path = software/coremark
 	url = https://github.com/ucb-bar/coremark-workload.git
+	shallow = true
 [submodule "generators/gemmini"]
 	path = generators/gemmini
 	url = https://github.com/ucb-bar/gemmini
+	shallow = true
 [submodule "software/firemarshal"]
 	path = software/firemarshal
 	url = https://github.com/firesim/FireMarshal.git
+	shallow = true
 [submodule "generators/cva6"]
 	path = generators/cva6
 	url = https://github.com/ucb-bar/cva6-wrapper.git
+	shallow = true
 [submodule "tools/DRAMSim2"]
 	path = tools/DRAMSim2
 	url = https://github.com/firesim/DRAMSim2.git
+	shallow = true
 [submodule "generators/nvdla"]
 	path = generators/nvdla
 	url = https://github.com/ucb-bar/nvdla-wrapper.git
+	shallow = true
 [submodule "software/nvdla-workload"]
 	path = software/nvdla-workload
 	url = https://github.com/ucb-bar/nvdla-workload.git
+	shallow = true
 [submodule "tools/dromajo/dromajo-src"]
 	path = tools/dromajo/dromajo-src
 	url = https://github.com/riscv-boom/dromajo.git
+	shallow = true
 [submodule "generators/riscv-sodor"]
 	path = generators/riscv-sodor
 	url = https://github.com/ucb-bar/riscv-sodor.git
+	shallow = true
 [submodule "fpga/fpga-shells"]
 	path = fpga/fpga-shells
 	url = https://github.com/sifive/fpga-shells.git
+	shallow = true
 [submodule "tools/api-config-chipsalliance"]
 	path = tools/api-config-chipsalliance
 	url = https://github.com/chipsalliance/api-config-chipsalliance.git
+	shallow = true
 [submodule "tools/rocket-dsp-utils"]
 	path = tools/rocket-dsp-utils
 	url = https://github.com/ucb-bar/rocket-dsp-utils
+	shallow = true
+[submodule "generators/ibex"]
+	path = generators/ibex
+	url = https://github.com/ucb-bar/ibex-wrapper
+        shallow = true
+[submodule "generators/fft-generator"]
+	path = generators/fft-generator
+	url = https://github.com/ucb-bar/FFTGenerator.git
+	shallow = true

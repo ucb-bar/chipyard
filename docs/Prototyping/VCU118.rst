@@ -110,7 +110,7 @@ The 1st partition will be used to store the Linux binary (created with FireMarsh
 Additionally, these instructions assume you are using Linux with ``sudo`` privileges and ``gdisk``, but you can follow a similar set of steps on Mac (using ``gpt`` or another similar program).
 
 1. Wipe the GPT on the card using ``gdisk``.
-   Use the `z` command to zap everything from the expert menu (opened with 'x', closed with 'm').
+   Use the `z` command from the expert menu (opened with 'x', closed with 'm') to zap everything.
    For rest of these instructions, we assume the SDCard path is ``/dev/sdc`` (replace this with the path to your SDCard).
 
 .. code-block:: shell

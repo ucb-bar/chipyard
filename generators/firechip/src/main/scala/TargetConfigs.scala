@@ -17,6 +17,7 @@ import testchipip.{BlockDeviceKey, BlockDeviceConfig, TracePortKey, TracePortPar
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 
+import chipyard.clocking.{ChipyardPRCIControlKey}
 import icenet._
 import testchipip.WithRingSystemBus
 
@@ -40,6 +41,7 @@ class WithBootROM extends Config((site, here, up) => {
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
 class WithoutClockGating extends Config((site, here, up) => {
   case DebugModuleKey => up(DebugModuleKey, site).map(_.copy(clockGate = false))
+  case ChipyardPRCIControlKey => up(ChipyardPRCIControlKey, site).copy(enableTileClockGating = false)
 })
 
 // Testing configurations
@@ -62,9 +64,12 @@ class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
 // Non-frequency tweaks that are generally applied to all firesim configs
 class WithFireSimDesignTweaks extends Config(
+  // Optional: reduce the width of the Serial TL interface
+  new testchipip.WithSerialTLWidth(4) ++
   // Required: Bake in the default FASED memory model
   new WithDefaultMemModel ++
   // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
+  new WithFireSimHarnessClockBinder ++
   new WithFireSimSimpleClocks ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++

@@ -10,6 +10,6 @@ git submodule update --init --recursive vlsi/hammer-synopsys-plugins
 git submodule update --init --recursive vlsi/hammer-mentor-plugins
 
 # Initialize HAMMER tech plugin
-if [[ $1 != *asap7* ]]; then
+if [[ $1 != *asap7* ]] && [[ $1 != *sky130* ]]; then
     git submodule update --init --recursive vlsi/hammer-$1-plugin
 fi

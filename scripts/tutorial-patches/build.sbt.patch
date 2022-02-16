@@ -1,30 +1,30 @@
 diff --git a/build.sbt b/build.sbt
-index 3123c4b8..487fc428 100644
+index bbbb8251..b7adcb73 100644
 --- a/build.sbt
 +++ b/build.sbt
-@@ -184,7 +184,7 @@ lazy val testchipipLib = "edu.berkeley.cs" %% "testchipip" % "1.0-020719-SNAPSHO
+@@ -143,7 +143,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
+ 
  lazy val chipyard = (project in file("generators/chipyard"))
-   .sourceDependency(testchipip, testchipipLib)
-   .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
+   .dependsOn(testchipip, rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
 -    sha3, // On separate line to allow for cleaner tutorial-setup patches
 +//    sha3, // On separate line to allow for cleaner tutorial-setup patches
      dsptools, `rocket-dsp-utils`,
-     gemmini, icenet, tracegen, cva6, nvdla, sodor)
+     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator)
    .settings(libraryDependencies ++= rocketLibDeps.value)
-@@ -223,11 +223,11 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
+@@ -189,11 +189,11 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
    .settings(libraryDependencies ++= rocketLibDeps.value)
    .settings(commonSettings)
  
 -lazy val sha3 = (project in file("generators/sha3"))
--  .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
+-  .dependsOn(rocketchip, midasTargetUtils)
 -  .settings(libraryDependencies ++= rocketLibDeps.value)
--  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
+-  .settings(chiselTestSettings)
 -  .settings(commonSettings)
 +//lazy val sha3 = (project in file("generators/sha3"))
-+//  .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
++//  .dependsOn(rocketchip, midasTargetUtils)
 +//  .settings(libraryDependencies ++= rocketLibDeps.value)
-+//  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
++//  .settings(chiselTestSettings)
 +//  .settings(commonSettings)
  
  lazy val gemmini = (project in file("generators/gemmini"))
-   .sourceDependency(testchipip, testchipipLib)
+   .dependsOn(testchipip, rocketchip)
