@@ -105,8 +105,12 @@ class Arty100TFPGATestHarnessImp(_outer: Arty100TFPGATestHarness) extends LazyRa
   val buildtopClock = _outer.dutClock.in.head._1.clock
   val buildtopReset = WireInit(hReset)
   val dutReset = hReset.asAsyncReset
-  val success = false.B
+  val success = IO(Output(Bool()))
 
+  // This will be overridden by the WithFPGASimSerial harness binder to set
+  // success to the output of the sim serial module.
+  success := false.B
+  
   childClock := buildtopClock
   childReset := buildtopReset
 

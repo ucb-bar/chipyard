@@ -58,7 +58,7 @@ ifeq ($(SUB_PROJECT),arty)
 	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= arty
-	FPGA_FAMILY       ?= kintex7
+	FPGA_FAMILY       ?= artix7
 	FPGA_BRAND        ?= xilinx
 endif
 
@@ -74,15 +74,15 @@ ifeq ($(SUB_PROJECT),artysim)
 	TB                ?= ArtyTestDriver
 	TOP               ?= ChipTop
 	BOARD             ?= arty
-	FPGA_FAMILY       ?= kintex7
+	FPGA_FAMILY       ?= artix7
 	FPGA_BRAND        ?= xilinx
-	sim_name           = arty
+	sim_name          ?= arty
 endif
 
 ifeq ($(SUB_PROJECT),arty100t)
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= Arty100TFPGATestHarness
-	VLOG_MODEL        ?= Art100TyFPGATestHarness
+	VLOG_MODEL        ?= Art100TFPGATestHarness
 	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
 	CONFIG            ?= RocketArty100TConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
@@ -91,6 +91,22 @@ ifeq ($(SUB_PROJECT),arty100t)
 	TOP               ?= ChipTop
 	BOARD             ?= arty_a7_100
 	FPGA_BRAND        ?= xilinx
+endif
+
+ifeq ($(SUB_PROJECT),arty100tsim)
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= Arty100TFPGATestHarness
+	VLOG_MODEL        ?= Art100TFPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
+	CONFIG            ?= RocketArty100TSimConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= Arty100TTestDriver
+	TOP               ?= ChipTop
+	BOARD             ?= arty_a7_100
+	FPGA_FAMILY       ?= artix7
+	FPGA_BRAND        ?= xilinx
+	sim_name          ?= arty100t
 endif
 
 include $(base_dir)/variables.mk
@@ -112,7 +128,7 @@ fpga_common_script_dir := $(fpga_dir)/common/tcl
 #########################################################################################
 SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v \
-	$(base_dir)/generators/chipyard/src/main/resources/vsrc/ArtyTestDriver.v
+	$(base_dir)/generators/chipyard/src/main/resources/vsrc/$(TB).v
 
 # copy files but ignore *.h files in *.f (match vcs)
 $(sim_files): $(SIM_FILE_REQS) | $(build_dir)
@@ -188,8 +204,12 @@ $(vivado-project): $(synth_list_f) $(project-creation-script)
 			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
 			-board "$(BOARD)"
 
+fpga_sim_verilog_sources = $(build_dir)/fpga_sim_verilog_sources.f
+fpga_sim_vhdl_sources = $(build_dir)/fpga_sim_vhdl_sources.f
+fpga_sim_cc_sources = $(build_dir)/fpga_sim_cc_sources.f
+
 # generate vcs collateral
-vivado-vcs-collateral := $(build_dir)/$(MODEL).cache/compile_simlib/synopsys_sim.setup
+vivado-vcs-collateral := $(fpga_sim_verilog_sources) $(fpga_sim_vhdl_sources) $(fpga_sim_cc_sources)
 $(vivado-vcs-collateral): $(sim_dir)/scripts/generate_vcs_collateral.tcl $(vivado-project)
 	cd $(build_dir); vivado $(vivado-project) \
 		-nojournal -mode batch \
@@ -204,10 +224,6 @@ include $(base_dir)/vcs.mk
 
 sim_prefix = simv
 sim = $(build_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
-
-fpga_sim_verilog_sources = $(build_dir)/fpga_sim_verilog_sources.f
-fpga_sim_vhdl_sources = $(build_dir)/fpga_sim_vhdl_sources.f
-fpga_sim_cc_sources = $(build_dir)/fpga_sim_cc_sources.f
 
 xilinx_lib = xil_defaultlib
 
@@ -237,9 +253,16 @@ VLOGAN_OPTS = \
 # vcs-mx flow
 $(sim): $(vivado-vcs-collateral)
 	mkdir -p $(build_dir)/vcs_lib/xil_defaultlib
-	cd $(build_dir); $(VHDLAN) -work $(xilinx_lib) -f $(fpga_sim_vhdl_sources) -l vhdlan.log
-	cd $(build_dir); $(VLOGAN) $(VLOGAN_OPTS) +define+DEBUG -work $(xilinx_lib) -f $(fpga_sim_verilog_sources) -l vlogan.log
-	cd $(build_dir); $(VCS) $(VCS_CC_OPTS) $(xilinx_lib).$(TB) $(xilinx_lib).glbl -file $(fpga_sim_cc_sources) -o $@ -Mdir=$(build_dir)/$(long_name) -l vcs.log -debug_access+all
+	if [ -s $(fpga_sim_vhdl_sources) ]; \
+		then \
+			cd $(build_dir); $(VHDLAN) -work $(xilinx_lib) -f $(fpga_sim_vhdl_sources) -l vhdlan.log; \
+			fi; \
+	if [ -s $(fpga_sim_verilog_sources) ]; then \
+		cd $(build_dir); $(VLOGAN) $(VLOGAN_OPTS) +define+DEBUG -work $(xilinx_lib) -f $(fpga_sim_verilog_sources) -l vlogan.log; \
+	fi; \
+	if [ -s $(fpga_sim_cc_sources) ]; then \
+		cd $(build_dir); $(VCS) $(VCS_CC_OPTS) $(xilinx_lib).$(TB) $(xilinx_lib).glbl -file $(fpga_sim_cc_sources) -o $@ -Mdir=$(build_dir)/$(long_name) -l vcs.log -debug_access+all; \
+	fi
 
 .PHONY: sim-fpga
 sim-fpga: $(sim)

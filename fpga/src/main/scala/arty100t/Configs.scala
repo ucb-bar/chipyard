@@ -66,10 +66,12 @@ class RocketArty100TConfig extends Config(
   new chipyard.RocketConfig)
 // DOC include end: AbstractArty100T and Rocket
 
-class BoomArty100TConfig extends Config(
-  new WithFPGAFrequency(50) ++
-  new WithArty100TTweaks ++
-  new chipyard.MegaBoomConfig)
+class RocketArty100TSimConfig extends Config(
+   new WithFPGASimSerial ++
+   new testchipip.WithDefaultSerialTL ++
+   new chipyard.harness.WithSimSerial ++
+   new chipyard.harness.WithTiedOffDebug ++
+   new RocketArty100TConfig)
 
 class WithFPGAFrequency(fMHz: Double) extends Config(
   new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.

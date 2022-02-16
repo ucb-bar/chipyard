@@ -12,6 +12,8 @@ import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
 import chipyard.{HasHarnessSignalReferences, CanHaveMasterTLMemPort}
 import chipyard.harness.{OverrideHarnessBinder}
 
+import testchipip._
+
 /*** UART ***/
 class WithUART extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[UARTPortIO]) => {
@@ -40,6 +42,30 @@ class WithDDRMem extends OverrideHarnessBinder({
       val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
       bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
       ddrClientBundle <> ports.head
+    } }
+  }
+})
+
+class WithFPGASimSerial extends OverrideHarnessBinder({
+  (system: CanHavePeripheryTLSerial, th: BaseModule with HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    th match { case arty100tth: Arty100TFPGATestHarnessImp => {
+      ports.map({ port =>
+        val bits = SerialAdapter.asyncQueue(port, arty100tth.buildtopClock, arty100tth.buildtopReset)
+        withClockAndReset(arty100tth.buildtopClock, arty100tth.buildtopReset.asBool) {
+          val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, arty100tth.buildtopReset.asBool)
+
+          val success = {
+            val sim = Module(new SimSerial(ram.module.io.tsi_ser.w))
+            sim.io.clock := port.clock
+            sim.io.reset := arty100tth.buildtopReset.asBool
+            sim.io.serial <> ram.module.io.tsi_ser
+            sim.io.exit
+          }
+
+          when (success) { arty100tth.success := true.B }
+        }
+      })
     } }
   }
 })
