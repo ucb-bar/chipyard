@@ -25,6 +25,8 @@ search_submodule() {
     # Initialize submodule and get the hashes
     git submodule update --init $dir/$submodule
     git -C $dir/$submodule fetch --unshallow
+    git -C $dir/$submodule config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+    git -C $dir/$submodule fetch origin
 
     status=$(git submodule status)
     hash=$(echo "$status" | grep "$dir.*$submodule " | awk '{print$1}' | grep -o "[[:alnum:]]*")
