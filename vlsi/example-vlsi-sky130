@@ -32,7 +32,7 @@ def example_tool_settings(x: hammer_vlsi.HammerTool) -> bool:
         x.append('''
 # TODO
 # Place custom TCL here
-# only route in met1 to met4
+# only route in met1 to met4 [metal layers: li1(1), met1(2), ..., met4(5), met5(6)]
 set_db route_design_bottom_routing_layer 2
 set_db route_design_top_routing_layer 5
 ''')
