@@ -171,6 +171,7 @@ if [ -z "$IGNOREQEMU" ] ; then
     echo "=>  Starting qemu build"
     dir="$(pwd)/toolchains/qemu"
     echo "==>   Initializing qemu submodule"
+    git submodule update --init --recursive "$dir"
 
     # now actually do the build
     SRCDIR="$(pwd)/toolchains" module_build qemu --prefix="${RISCV}" --target-list=riscv${XLEN}-softmmu --disable-werror
