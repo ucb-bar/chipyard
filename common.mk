@@ -174,7 +174,7 @@ run-fast: run-asm-tests-fast run-bmark-tests-fast
 #########################################################################################
 # helper rules to run simulator with fast loadmem via hex files
 #########################################################################################
-$(binary_hex): $(output_dir) $(BINARY)
+$(binary_hex): $(output_dir) $(firstword $(BINARY))
 	$(base_dir)/scripts/smartelf2hex.sh $(BINARY) > $(binary_hex)
 
 run-binary-hex: $(output_dir) $(sim) $(binary_hex)
