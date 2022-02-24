@@ -160,13 +160,14 @@ echo '==>  Installing libfesvr static library'
 module_make riscv-isa-sim libfesvr.a
 cp -p "${SRCDIR}/riscv-isa-sim/build/libfesvr.a" "${RISCV}/lib/"
 
-CC= CXX= module_all riscv-pk --prefix="${RISCV}" --host=riscv${XLEN}-unknown-elf
+CC= CXX= CFLAGS= CPPFLAGFS= CXXFLAGS= LDFLAGS= DEBUG_CXXFLAGS= DEBUG_CPPFLAGS= DEBUG_CFLAGS= OBJCOPY= \
+	module_all riscv-pk --prefix="${RISCV}" --host=riscv${XLEN}-unknown-elf
 module_all riscv-tests --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --with-xlen=${XLEN}
 
 # Common tools (not in any particular toolchain dir)
 
-CC= CXX= SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --host=riscv${XLEN}-unknown-elf
-
+CC= CXX= CFLAGS= CPPFLAGFS= CXXFLAGS= LDFLAGS= DEBUG_CXXFLAGS= DEBUG_CPPFLAGS= DEBUG_CFLAGS= \
+	SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --host=riscv${XLEN}-unknown-elf
 if [ -z "$IGNOREQEMU" ] ; then
     echo "=>  Starting qemu build"
     dir="$(pwd)/toolchains/qemu"
@@ -186,8 +187,15 @@ if [ -z "$IGNOREQEMU" ] ; then
     git -C "$dir" submodule foreach --quiet --recursive '! grep -q "git\.qemu\.org" .gitmodules 2>/dev/null' && \
     echo "==>  PLEASE REMOVE qemu URL-REWRITING from scripts/build-toolchains.sh. It is no longer needed!" && exit 1
 
+    ld_directive="$LD"
+    if [[ -n "${LD_GOLD:-z}" ]]; then
+	    # conda bfd ld suffers from https://bugs.launchpad.net/ubuntu/+source/binutils/+bug/1907789
+	    # so use GOLD to link instead
+	    ld_directive="$LD_GOLD"
+    fi
+
     # now actually do the build
-    SRCDIR="$(pwd)/toolchains" module_build qemu --prefix="${RISCV}" --target-list=riscv${XLEN}-softmmu --disable-werror
+    LD="$ld_directive" SRCDIR="$(pwd)/toolchains" module_build qemu --prefix="${RISCV}" --target-list=riscv${XLEN}-softmmu --disable-werror
 fi
 
 # make Dromajo
