@@ -154,7 +154,7 @@ else
     module_make riscv-gnu-toolchain linux
 fi
 
-module_all riscv-isa-sim --prefix="${RISCV}"
+module_all riscv-isa-sim --prefix="${RISCV}" --with-boost=no
 # build static libfesvr library for linking into firesim driver (or others)
 echo '==>  Installing libfesvr static library'
 module_make riscv-isa-sim libfesvr.a
