@@ -119,13 +119,6 @@ class GB1MemoryRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
-// DOC include start: Sha3Rocket
-class Sha3RocketConfig extends Config(
-  new sha3.WithSha3Accel ++                                // add SHA3 rocc accelerator
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-// DOC include end: Sha3Rocket
-
 // DOC include start: InitZeroRocketConfig
 class InitZeroRocketConfig extends Config(
   new chipyard.example.WithInitZero(0x88000000L, 0x1000L) ++   // add InitZero
