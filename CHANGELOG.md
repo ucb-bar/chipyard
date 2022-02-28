@@ -2,6 +2,13 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.6.1] - 2022-03-01
+
+Minor fixes to FireSim.
+
+### Fixed
+* Bump to FireSim 1.13.2 (#1133)
+
 ## [1.6.0] - 2022-02-15
 
 A more detailed account of everything included is included in the dev to master PR for this release: https://github.com/ucb-bar/chipyard/pull/913
