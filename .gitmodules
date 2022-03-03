@@ -1,6 +1,6 @@
 [submodule "rocket-chip"]
 	path = generators/rocket-chip
-	url = https://github.com/chipsalliance/rocket-chip.git
+	url = https://github.com/vargandhi/rocket-chip.git
 	shallow = true
 [submodule "testchipip"]
 	path = generators/testchipip
@@ -32,7 +32,7 @@
 	shallow = true
 [submodule "generators/icenet"]
 	path = generators/icenet
-	url = https://github.com/firesim/icenet.git
+	url = https://github.com/vargandhi/icenet.git
 	shallow = true
 [submodule "generators/block-inclusivecache-sifive"]
 	path = generators/sifive-cache
