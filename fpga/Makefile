@@ -8,9 +8,6 @@
 base_dir=$(abspath ..)
 sim_dir=$(abspath .)
 
-# do not generate simulation files
-sim_name := none
-
 #########################################################################################
 # include shared variables
 #########################################################################################
@@ -27,7 +24,6 @@ ifeq ($(SUB_PROJECT),vcu118)
 	CONFIG            ?= RocketVCU118Config
 	CONFIG_PACKAGE    ?= chipyard.fpga.vcu118
 	GENERATOR_PACKAGE ?= chipyard
-	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= vcu118
 	FPGA_BRAND        ?= xilinx
@@ -41,7 +37,6 @@ ifeq ($(SUB_PROJECT),bringup)
 	CONFIG            ?= RocketBringupConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.vcu118.bringup
 	GENERATOR_PACKAGE ?= chipyard
-	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= vcu118
 	FPGA_BRAND        ?= xilinx
@@ -55,7 +50,6 @@ ifeq ($(SUB_PROJECT),arty)
 	CONFIG            ?= TinyRocketArtyConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty
 	GENERATOR_PACKAGE ?= chipyard
-	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= arty
 	FPGA_FAMILY       ?= artix7
@@ -76,7 +70,6 @@ ifeq ($(SUB_PROJECT),artysim)
 	BOARD             ?= arty
 	FPGA_FAMILY       ?= artix7
 	FPGA_BRAND        ?= xilinx
-	sim_name          ?= arty
 endif
 
 ifeq ($(SUB_PROJECT),arty100t)
@@ -87,7 +80,6 @@ ifeq ($(SUB_PROJECT),arty100t)
 	CONFIG            ?= RocketArty100TConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
 	GENERATOR_PACKAGE ?= chipyard
-	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= arty_a7_100
 	FPGA_BRAND        ?= xilinx
@@ -106,7 +98,6 @@ ifeq ($(SUB_PROJECT),arty100tsim)
 	BOARD             ?= arty_a7_100
 	FPGA_FAMILY       ?= artix7
 	FPGA_BRAND        ?= xilinx
-	sim_name          ?= arty100t
 endif
 
 include $(base_dir)/variables.mk
@@ -126,9 +117,14 @@ fpga_common_script_dir := $(fpga_dir)/common/tcl
 #########################################################################################
 # setup misc. sim files
 #########################################################################################
-SIM_FILE_REQS += \
-	$(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v \
-	$(base_dir)/generators/chipyard/src/main/resources/vsrc/$(TB).v
+
+# add the clock gate wrapper
+SIM_FILE_REQS += $(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v
+
+# add the testbench if needed for sim
+ifdef TB
+  SIM_FILE_REQS += $(base_dir)/generators/chipyard/src/main/resources/vsrc/$(TB).v
+endif
 
 # copy files but ignore *.h files in *.f (match vcs)
 $(sim_files): $(SIM_FILE_REQS) | $(build_dir)
