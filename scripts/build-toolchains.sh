@@ -154,6 +154,8 @@ else
     module_make riscv-gnu-toolchain linux
 fi
 
+# disable boost explicitly for https://github.com/riscv-software-src/riscv-isa-sim/issues/834
+# since we don't have it in our requirements
 module_all riscv-isa-sim --prefix="${RISCV}" --with-boost=no
 # build static libfesvr library for linking into firesim driver (or others)
 echo '==>  Installing libfesvr static library'
