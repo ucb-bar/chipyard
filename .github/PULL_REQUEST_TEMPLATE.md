@@ -1,4 +1,4 @@
-**Related PRs / Issues **:
+**Related PRs / Issues**:
 <!-- List any related PRs/issues here, if applicable -->
 
 <!-- choose one -->
