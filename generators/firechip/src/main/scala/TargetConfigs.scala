@@ -50,6 +50,7 @@ class WithScalaTestFeatures extends Config((site, here, up) => {
 
 // FASED Config Aliases. This to enable config generation via "_" concatenation
 // which requires that all config classes be defined in the same package
+class DDR3FCFS extends FCFS16GBQuadRank
 class DDR3FRFCFS extends FRFCFS16GBQuadRank
 class DDR3FRFCFSLLC4MB extends FRFCFS16GBQuadRankLLC4MB
 
@@ -70,7 +71,7 @@ class WithFireSimConfigTweaks extends Config(
   new WithBootROM ++
   // Optional*: Removing this will require adjusting the UART baud rate and
   // potential target-software changes to properly capture UART output
-  new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(1000.0) ++
   // Optional: These three configs put the DRAM memory system in it's own clock domian.
   // Removing the first config will result in the FASED timing model running
   // at the pbus freq (above, 3.2 GHz), which is outside the range of valid DDR3 speedgrades.

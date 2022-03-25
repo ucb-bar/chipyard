@@ -26,9 +26,14 @@ class DualSmallBoomConfig extends Config(
   new boom.common.WithNSmallBooms(2) ++                          // 2 boom cores
   new chipyard.config.AbstractConfig)
 
+class Large16BoomConfig extends Config(
+  new boom.common.WithNLargeBooms(16) ++
+  new chipyard.config.AbstractConfig)
+
 class HwachaLargeBoomConfig extends Config(
   new chipyard.config.WithHwachaTest ++
   new hwacha.DefaultHwachaConfig ++                              // use Hwacha vector accelerator
+  new freechips.rocketchip.subsystem.WithInclusiveCache(nBanks=4) ++
   new boom.common.WithNLargeBooms(1) ++
   new chipyard.config.AbstractConfig)
 
