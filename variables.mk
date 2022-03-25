@@ -145,7 +145,7 @@ sim_common_files       ?= $(build_dir)/sim_files.common.f
 #########################################################################################
 # java arguments used in sbt
 #########################################################################################
-JAVA_HEAP_SIZE ?= 8G
+JAVA_HEAP_SIZE ?= 65536M
 JAVA_OPTS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M -Djava.io.tmpdir=$(base_dir)/.java_tmp
 
 #########################################################################################
