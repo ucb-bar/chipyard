@@ -107,9 +107,13 @@ cd "$CHIPYARD_DIR"
     _unskip() { git config --local --unset-all "submodule.${1}.update" || : ; }
 
     trap 'git_submodule_exclude _unskip' EXIT INT TERM
+    set -x
     git_submodule_exclude _skip
     git submodule update --init --recursive #--jobs 8
+    set +x
 )
+
+set -x
 
 # Non-recursive clone to exclude riscv-linux
 git submodule update --init generators/sha3
@@ -124,6 +128,8 @@ git config --local submodule.sims/firesim.update none
 
 # Only shallow clone needed for basic SW tests
 git submodule update --init software/firemarshal
+
+set +x
 
 # Configure firemarshal to know where our firesim installation is
 if [ ! -f ./software/firemarshal/marshal-config.yaml ]; then
