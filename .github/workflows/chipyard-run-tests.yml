@@ -161,9 +161,9 @@ jobs:
     steps:
       - name: Checking
         run: |
-            git status
-            git submodule status
-            git log -n 5
+            git status || true
+            git submodule status || true
+            git log -n 5 || true
       - name: Checkout
         uses: actions/checkout@v2
       - name: Checking
