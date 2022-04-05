@@ -261,3 +261,498 @@ jobs:
           build-type: "fpga"
       - uses: ./.github/actions/job-end
 
+  ##########################################################################
+
+  chipyard-rocket-run-tests:
+    name: chipyard-rocket-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-rocket"
+      - uses: ./.github/actions/job-end
+
+  chipyard-hetero-run-tests:
+    name: chipyard-hetero-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-hetero"
+      - uses: ./.github/actions/job-end
+
+  chipyard-boom-run-tests:
+    name: chipyard-boom-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-boom"
+      - uses: ./.github/actions/job-end
+
+  chipyard-cva6-run-tests:
+    name: chipyard-cva6-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-cva6"
+      - uses: ./.github/actions/job-end
+
+  chipyard-ibex-run-tests:
+    name: chipyard-ibex-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-ibex"
+      - uses: ./.github/actions/job-end
+
+  chipyard-sodor-run-tests:
+    name: chipyard-sodor-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-sodor"
+      - uses: ./.github/actions/job-end
+
+  chipyard-fftgenerator-run-tests:
+    name: chipyard-fftgenerator-run-tests
+    needs: prepare-chipyard-accels
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-accels"
+          project-key: "chipyard-fftgenerator"
+      - uses: ./.github/actions/job-end
+
+  chipyard-dmirocket-run-tests:
+    name: chipyard-dmirocket-run-tests
+    needs: prepare-chipyard-peripherals
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-peripherals"
+          project-key: "chipyard-dmirocket"
+      - uses: ./.github/actions/job-end
+
+  chipyard-spiflashwrite-run-tests:
+    name: chipyard-spiflashwrite-run-tests
+    needs: prepare-chipyard-peripherals
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-peripherals"
+          project-key: "chipyard-spiflashwrite"
+      - uses: ./.github/actions/job-end
+
+  chipyard-spiflashread-run-tests:
+    name: chipyard-spiflashread-run-tests
+    needs: prepare-chipyard-peripherals
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-peripherals"
+          project-key: "chipyard-spiflashread"
+      - uses: ./.github/actions/job-end
+
+  chipyard-lbwif-run-tests:
+    name: chipyard-lbwif-run-tests
+    needs: prepare-chipyard-peripherals
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-peripherals"
+          project-key: "chipyard-lbwif"
+      - uses: ./.github/actions/job-end
+
+  chipyard-sha3-run-tests:
+    name: chipyard-sha3-run-tests
+    needs: prepare-chipyard-accels
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-accels"
+          project-key: "chipyard-sha3"
+      - uses: ./.github/actions/job-end
+
+  chipyard-streaming-fir-run-tests:
+    name: chipyard-streaming-fir-run-tests
+    needs: prepare-chipyard-accels
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-accels"
+          project-key: "chipyard-streaming-fir"
+      - uses: ./.github/actions/job-end
+
+  chipyard-streaming-passthrough-run-tests:
+    name: chipyard-streaming-passthrough-run-tests
+    needs: prepare-chipyard-accels
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-accels"
+          project-key: "chipyard-streaming-passthrough"
+      - uses: ./.github/actions/job-end
+
+  chipyard-hwacha-run-tests:
+    name: chipyard-hwacha-run-tests
+    needs: prepare-chipyard-accels
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-accels"
+          project-key: "chipyard-hwacha"
+      - uses: ./.github/actions/job-end
+
+  chipyard-gemmini-run-tests:
+    name: chipyard-gemmini-run-tests
+    needs: prepare-chipyard-accels
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-accels"
+          project-key: "chipyard-gemmini"
+      - uses: ./.github/actions/job-end
+
+  chipyard-nvdla-run-tests:
+    name: chipyard-nvdla-run-tests
+    needs: prepare-chipyard-accels
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-accels"
+          project-key: "chipyard-nvdla"
+      - uses: ./.github/actions/job-end
+
+  tracegen-boom-run-tests:
+    name: tracegen-boom-run-tests
+    needs: prepare-chipyard-tracegen
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-tracegen"
+          project-key: "tracegen-boom"
+      - uses: ./.github/actions/job-end
+
+  tracegen-run-tests:
+    name: tracegen-run-tests
+    needs: prepare-chipyard-tracegen
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-tracegen"
+          project-key: "tracegen"
+      - uses: ./.github/actions/job-end
+
+  icenet-run-tests:
+    name: icenet-run-tests
+    needs: prepare-chipyard-other
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-other"
+          project-key: "icenet"
+      - uses: ./.github/actions/job-end
+
+  testchipip-run-tests:
+    name: testchipip-run-tests
+    needs: prepare-chipyard-other
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-other"
+          project-key: "testchipip"
+      - uses: ./.github/actions/job-end
+
+  firesim-run-tests:
+    name: firesim-run-tests
+    needs: setup-complete
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests on self-hosted
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "extra-tests"
+          project-key: "firesim"
+          run-script: "remote-run-firesim-scala-tests.sh"
+      - uses: ./.github/actions/job-end
+
+  fireboom-run-tests:
+    name: fireboom-run-tests
+    needs: setup-complete
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests on self-hosted
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "extra-tests"
+          project-key: "fireboom"
+          run-script: "remote-run-firesim-scala-tests.sh"
+      - uses: ./.github/actions/job-end
+
+  firesim-multiclock-run-tests:
+    name: firesim-multiclock-run-tests
+    needs: setup-complete
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Run tests on self-hosted
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "extra-tests"
+          project-key: "firesim-multiclock"
+          run-script: "remote-run-firesim-scala-tests.sh"
+      - uses: ./.github/actions/job-end
+
+  # Sentinel job to simplify how we specify which checks need to pass in branch
+  # protection and in Mergify
+  #
+  # When adding new top level jobs, please add them to `needs` below
+  all_tests_passed:
+    name: "all tests passed"
+    needs: [commit-on-master-check, tutorial-setup-check, documentation-check,
+            chipyard-rocket-run-tests, chipyard-hetero-run-tests, chipyard-boom-run-tests, chipyard-cva6-run-tests, chipyard-ibex-run-tests,
+            chipyard-sodor-run-tests, chipyard-dmirocket-run-tests, chipyard-spiflashwrite-run-tests, chipyard-fftgenerator-run-tests,
+            chipyard-spiflashread-run-tests, chipyard-lbwif-run-tests, chipyard-sha3-run-tests,
+            chipyard-streaming-fir-run-tests, chipyard-streaming-passthrough-run-tests, chipyard-hwacha-run-tests,
+            chipyard-gemmini-run-tests, chipyard-nvdla-run-tests,
+            tracegen-boom-run-tests, tracegen-run-tests,
+            icenet-run-tests, testchipip-run-tests,
+            prepare-chipyard-fpga,
+            firesim-run-tests, fireboom-run-tests, firesim-multiclock-run-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo Success!
