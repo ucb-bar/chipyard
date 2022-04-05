@@ -95,6 +95,38 @@ jobs:
         uses: ./.github/actions/toolchain-build
       - uses: ./.github/actions/job-end
 
+  build-extra-tests:
+    name: build-extra-tests
+    needs: install-toolchains
+    runs-on: ubuntu-latest
+    container:
+      image: ucbbar/chipyard-ci-image:554b436
+      options: --entrypoint /bin/bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Build RISC-V toolchains
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/toolchain-build
+      - name: Generate keys
+        if: steps.job-start.outputs.run_result != 'success'
+        id: genkey
+        run: |
+          echo "::set-output name=extra-tests-cache-key::extra-tests-${{ github.ref }}-${{ github.sha }}"
+      - uses: actions/cache@v2
+        if: steps.job-start.outputs.run_result != 'success'
+        id: build-extra-tools-cache
+        with:
+          path: extra-tests-install
+          key: ${{ steps.genkey.outputs.extra-tests-cache-key }}
+          restore-keys: ${{ steps.genkey.outputs.extra-tests-cache-key }}
+      - name: Build extra tests
+        if: steps.job-start.outputs.run_result != 'success'
+        run: .github/scripts/build-extra-tests.sh
+      - uses: ./.github/actions/job-end
+
   install-verilator:
     name: install-verilator
     runs-on: self-hosted
@@ -114,7 +146,7 @@ jobs:
   # When adding new prep jobs, please add them to `needs` below
   setup-complete:
     name: setup-complete
-    needs: [install-toolchains, install-verilator]
+    needs: [install-toolchains, install-verilator, build-extra-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Set up complete
@@ -148,4 +180,84 @@ jobs:
           group-key: "group-cores"
       - uses: ./.github/actions/job-end
 
+  prepare-chipyard-peripherals:
+    name: prepare-chipyard-peripherals
+    needs: setup-complete
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Build RTL on self-hosted
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/prepare-rtl
+        with:
+          group-key: "group-peripherals"
+      - uses: ./.github/actions/job-end
+
+  prepare-chipyard-accels:
+    name: prepare-chipyard-accels
+    needs: setup-complete
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Build RTL on self-hosted
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/prepare-rtl
+        with:
+          group-key: "group-accels"
+      - uses: ./.github/actions/job-end
+
+  prepare-chipyard-tracegen:
+    name: prepare-chipyard-tracegen
+    needs: setup-complete
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Build RTL on self-hosted
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/prepare-rtl
+        with:
+          group-key: "group-tracegen"
+      - uses: ./.github/actions/job-end
+
+  prepare-chipyard-other:
+    name: prepare-chipyard-other
+    needs: setup-complete
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Build RTL on self-hosted
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/prepare-rtl
+        with:
+          group-key: "group-other"
+      - uses: ./.github/actions/job-end
+
+  prepare-chipyard-fpga:
+    name: prepare-chipyard-fpga
+    needs: setup-complete
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/job-start
+        id: job-start
+      - name: Build RTL on self-hosted
+        if: steps.job-start.outputs.run_result != 'success'
+        uses: ./.github/actions/prepare-rtl
+        with:
+          group-key: "group-fpga"
+          build-type: "fpga"
+      - uses: ./.github/actions/job-end
 
