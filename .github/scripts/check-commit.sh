@@ -9,7 +9,6 @@ set -ex
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
-# enter bhd repo
 cd $LOCAL_CHIPYARD_DIR
 
 # ignore the private vlsi submodules
@@ -17,18 +16,15 @@ git config submodule.vlsi/hammer-cadence-plugins.update none
 git config submodule.vlsi/hammer-mentor-plugins.update none
 git config submodule.vlsi/hammer-synopsys-plugins.update none
 
+# initialize submodules and get the hashes
+git submodule update --init
+status=$(git submodule status)
+
 all_names=()
 
 
 search_submodule() {
     echo "Running check on submodule $submodule in $dir"
-    # Initialize submodule and get the hashes
-    git submodule update --init $dir/$submodule
-    git -C $dir/$submodule fetch --unshallow
-    git -C $dir/$submodule config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
-    git -C $dir/$submodule fetch origin
-
-    status=$(git submodule status)
     hash=$(echo "$status" | grep "$dir.*$submodule " | awk '{print$1}' | grep -o "[[:alnum:]]*")
     for branch in "${branches[@]}"
     do

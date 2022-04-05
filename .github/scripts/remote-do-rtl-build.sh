@@ -15,6 +15,11 @@ SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
 cd $REMOTE_CHIPYARD_DIR
+
+git status
+git submodule status
+git log -n 5
+
 ./scripts/init-submodules-no-riscv-tools.sh --skip-validate
 ./scripts/init-fpga.sh
 
