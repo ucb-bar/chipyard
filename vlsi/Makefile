@@ -180,9 +180,7 @@ $(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_commo
 	echo "  saif.end_time: '`bc <<< $(timeout_cycles)*$(CLOCK_PERIOD)`ns'" >> $@
 ifdef USE_FSDB
 	echo "  options:" >> $@
-	echo '    - "-debug_access+all"' >> $@
 	echo '    - "-kdb"' >> $@
-	echo '    - "-lca"' >> $@
 	echo "  options_meta: 'append'" >> $@
 	echo "sim.outputs.waveforms: ['$(sim_out_name).fsdb']" >> $@
 else
