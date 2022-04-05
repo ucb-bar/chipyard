@@ -161,6 +161,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Checking
+        run: |
+            git status
+            git submodule status
+            git log -n 5
       - uses: ./.github/actions/job-start
         id: job-start
       - name: Build RTL on self-hosted
