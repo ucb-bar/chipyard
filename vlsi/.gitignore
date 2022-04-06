@@ -5,3 +5,4 @@ build
 src/test/output-*.json
 generated-src
 output.json
+generator_temp

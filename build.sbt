@@ -142,7 +142,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(commonSettings)
 
 lazy val chipyard = (project in file("generators/chipyard"))
-  .dependsOn(testchipip, rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
+  .dependsOn(testchipip, rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell, floorplan,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsp-utils`,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator)
@@ -212,6 +212,17 @@ lazy val iocell = Project(id = "iocell", base = file("./tools/barstools/") / "sr
     Compile / resourceDirectory := baseDirectory.value / "main" / "resources"
   )
   .settings(chiselSettings)
+  .settings(commonSettings)
+
+lazy val floorplan = (project in file("./tools/barstools/floorplan/"))
+  .sourceDependency(chiselRef, chiselLib)
+  .settings(addCompilerPlugin(chiselPluginLib))
+  .settings(libraryDependencies ++= chiselLibDeps.value)
+  .settings(libraryDependencies ++= Seq(
+      "org.json4s" %% "json4s-jackson" % "3.6.1",
+      "org.json4s" %% "json4s-ext" % "3.6.1",
+      "org.json4s" %% "json4s-native" % "3.6.1",
+  ))
   .settings(commonSettings)
 
 lazy val tapeout = (project in file("./tools/barstools/"))

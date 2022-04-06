@@ -71,7 +71,7 @@ else
 	lookup_srcs = $(shell fd -L ".*\.$(2)" $(1))
 endif
 
-SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools fpga/fpga-shells fpga/src)
+SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools/iocell tools/barstools/floorplan fpga/fpga-shells fpga/src)
 SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
 VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE_DIRS),v)
 # This assumes no SBT meta-build sources
@@ -102,7 +102,7 @@ $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip
 # create firrtl file rule and variables
 #########################################################################################
 .INTERMEDIATE: generator_temp
-$(FIRRTL_FILE) $(ANNO_FILE): generator_temp
+$(FIRRTL_FILE) $(ANNO_FILE) $(FLOORPLAN_FPIR): generator_temp
 	@echo "" > /dev/null
 
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
@@ -111,6 +111,8 @@ generator_temp: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GE
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
 		--name $(long_name) \
+		$(if $(FLOORPLAN_ASPECT), --with-aspect $(FLOORPLAN_ASPECT),) \
+		$(if $(FLOORPLAN_FPIR), --floorplan-ir-file $(FLOORPLAN_FPIR),) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
 		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG) \
 		$(EXTRA_CHISEL_OPTIONS))
