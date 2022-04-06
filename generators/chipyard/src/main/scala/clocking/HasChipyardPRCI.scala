@@ -29,8 +29,6 @@ case object ChipyardPRCIControlKey extends Field[ChipyardPRCIControlParams](Chip
 trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
   require(p(SubsystemDriveAsyncClockGroupsKey).isEmpty, "Subsystem asyncClockGroups must be undriven")
 
-  implicit val n = ValName("chipyardPRCI")
-
   val prciParams = p(ChipyardPRCIControlKey)
 
   // Set up clock domain
@@ -49,14 +47,17 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
   //    is created in the ChipTop (the hierarchy wrapping the subsystem), this function
   //    is provided to allow connecting that clock to the clock aggregator. This function
   //    should be called in the ChipTop context
-  def connectImplicitClockSinkNode(sink: ClockSinkNode) =
+  def connectImplicitClockSinkNode(sink: ClockSinkNode) = {
+    val implicitClockGrouper = this { ClockGroup() }
     (sink
-      := ClockGroup()
+      := implicitClockGrouper
       := aggregator)
+  }
 
   // 2. The rest of the diplomatic clocks in the subsystem are routed to this asyncClockGroupsNode
+  val clockNamePrefixer = ClockGroupNamePrefixer()
   (asyncClockGroupsNode
-    :*= ClockGroupNamePrefixer()
+    :*= clockNamePrefixer
     :*= aggregator)
 
 
@@ -68,12 +69,21 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
   // 5. Add reset control registers to the tiles (if desired)
   // The final clock group here contains physically distinct clock domains, which some PRCI node in a
   // diplomatic IOBinder should drive
+  val frequencySpecifier = ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
+  val clockGroupCombiner = ClockGroupCombiner()
+  val resetSynchronizer  = ClockGroupResetSynchronizer()
+  val tileClockGater     = prci_ctrl_domain {
+    TileClockGater(prciParams.baseAddress + 0x00000, tlbus, prciParams.enableTileClockGating)
+  }
+  val tileResetSetter    = prci_ctrl_domain {
+    TileResetSetter(prciParams.baseAddress + 0x10000, tlbus, tile_prci_domains.map(_.tile_reset_domain.clockNode.portParams(0).name.get), Nil)
+  }
   (aggregator
-    := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
-    := ClockGroupCombiner()
-    := ClockGroupResetSynchronizer()
-    := prci_ctrl_domain { TileClockGater(prciParams.baseAddress + 0x00000, tlbus, prciParams.enableTileClockGating) }
-    := prci_ctrl_domain { TileResetSetter(prciParams.baseAddress + 0x10000, tlbus, tile_prci_domains.map(_.tile_reset_domain.clockNode.portParams(0).name.get), Nil) }
+    := frequencySpecifier
+    := clockGroupCombiner
+    := resetSynchronizer
+    := tileClockGater
+    := tileResetSetter
     := allClockGroupsNode)
 }
 
