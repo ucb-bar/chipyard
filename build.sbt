@@ -142,8 +142,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(commonSettings)
 
 lazy val chipyard = (project in file("generators/chipyard"))
-  //.dependsOn(testchipip, rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell, floorplan,
-  .dependsOn(testchipip, rocketchip, boom, hwacha, sifive_blocks, sifive_cache, barstools,
+  .dependsOn(testchipip, rocketchip, boom, hwacha, sifive_blocks, sifive_cache, tapeout,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsp-utils`,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator)
