@@ -104,14 +104,24 @@ jobs:
       - name: Build extra tests
         run: .github/scripts/build-extra-tests.sh
 
-  install-verilator:
-    name: install-verilator
-    runs-on: self-hosted
+  install-verilator-knight:
+    name: install-verilator-knight
+    runs-on: knight
     needs: cancel-prior-workflows
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Build verilator on self-hosted
+      - name: Build verilator on knight CI machine
+        run: .github/scripts/remote-install-verilator.sh
+
+  install-verilator-ferry:
+    name: install-verilator-ferry
+    runs-on: ferry
+    needs: cancel-prior-workflows
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build verilator on ferry CI machine
         run: .github/scripts/remote-install-verilator.sh
 
   # Sentinel job to simplify how we specify which that basic setup is complete
@@ -119,7 +129,7 @@ jobs:
   # When adding new prep jobs, please add them to `needs` below
   setup-complete:
     name: setup-complete
-    needs: [install-toolchains, install-verilator, build-extra-tests]
+    needs: [install-toolchains, install-verilator-knight, install-verilator-ferry, build-extra-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Set up complete
