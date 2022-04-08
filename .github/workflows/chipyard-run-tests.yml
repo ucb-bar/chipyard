@@ -34,7 +34,7 @@ jobs:
     # Queried by downstream jobs to determine if they should run.
     outputs:
       needs-docs:    ${{ steps.filter.outputs.docs }}
-      needs-rtl-build: ${{ steps.filter.outputs.all_count != steps.filter.outputs.skip-rtl_count }}
+      needs-rtl: ${{ steps.filter.outputs.all_count != steps.filter.outputs.skip-rtl_count }}
 
     steps:
       - uses: actions/checkout@v2
