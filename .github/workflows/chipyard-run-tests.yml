@@ -146,9 +146,8 @@ jobs:
 
   build-extra-tests:
     name: build-extra-tests
-    needs: change-filters
+    needs: [change-filters, install-toolchains]
     if: needs.change-filters.outputs.needs-rtl == 'true'
-    needs: install-toolchains
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
@@ -179,10 +178,9 @@ jobs:
 
   install-verilator-knight:
     name: install-verilator-knight
-    needs: change-filters
+    needs: [change-filters, cancel-prior-workflows]
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: knight
-    needs: cancel-prior-workflows
     steps:
       - name: Delete old checkout
         run: |
@@ -197,10 +195,9 @@ jobs:
 
   install-verilator-ferry:
     name: install-verilator-ferry
-    needs: change-filters
+    needs: [change-filters, cancel-prior-workflows]
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ferry
-    needs: cancel-prior-workflows
     steps:
       - name: Delete old checkout
         run: |
@@ -218,8 +215,6 @@ jobs:
   # When adding new prep jobs, please add them to `needs` below
   setup-complete:
     name: setup-complete
-    needs: change-filters
-    if: needs.change-filters.outputs.needs-rtl == 'true'
     needs: [install-toolchains, install-verilator-knight, install-verilator-ferry, build-extra-tests]
     runs-on: ubuntu-latest
     steps:
