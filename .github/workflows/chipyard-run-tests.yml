@@ -1,10 +1,11 @@
 name: chipyard-ci-process
 
 on:
-  # run ci on pull requests targeting main only (since the ci runs on the merge commit)
+  # run ci on pull requests targeting following branches (runs on the merge commit)
   pull_request:
     branches:
       - main
+      - '1.[0-9]*.x'
 
 env:
   tools-cache-version: v13
@@ -24,8 +25,42 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
+  # Set up a set of boolean conditions to control which branches of the CI
+  # workflow will execute This is based off the conditional job execution
+  # example here: https://github.com/dorny/paths-filter#examples
+  change-filters:
+    name: filter-jobs-on-changes
+    runs-on: ubuntu-latest
+    # Queried by downstream jobs to determine if they should run.
+    outputs:
+      needs-docs:    ${{ steps.filter.outputs.docs }}
+      needs-rtl-build: ${{ steps.filter.outputs.all_count != steps.filter.outputs.skip-rtl_count }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            all:
+              - '**'
+
+            # If any of the files changed match, do a doc build
+            docs: &docs-filter
+              - 'docs/**'
+              - '.readthedocs.yml'
+
+            # If all files match to this filter, skip the main ci pipeline
+            skip-rtl:
+              - *docs-filter
+              - '**/*.md'
+              - '**/.gitignore'
+              - '.github/ISSUE_TEMPLATE/**'
+
   commit-on-master-check:
     name: commit-on-master-check
+    needs: change-filters
+    if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
@@ -44,6 +79,8 @@ jobs:
 
   tutorial-setup-check:
     name: tutorial-setup-check
+    needs: change-filters
+    if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
@@ -62,6 +99,8 @@ jobs:
 
   documentation-check:
     name: documentation-check
+    needs: change-filters
+    if: needs.change-filters.outputs.needs-docs == 'true'
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
@@ -87,6 +126,8 @@ jobs:
 
   install-toolchains:
     name: install-toolchains
+    needs: change-filters
+    if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
@@ -105,6 +146,8 @@ jobs:
 
   build-extra-tests:
     name: build-extra-tests
+    needs: change-filters
+    if: needs.change-filters.outputs.needs-rtl == 'true'
     needs: install-toolchains
     runs-on: ubuntu-latest
     container:
@@ -136,6 +179,8 @@ jobs:
 
   install-verilator-knight:
     name: install-verilator-knight
+    needs: change-filters
+    if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: knight
     needs: cancel-prior-workflows
     steps:
@@ -152,6 +197,8 @@ jobs:
 
   install-verilator-ferry:
     name: install-verilator-ferry
+    needs: change-filters
+    if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ferry
     needs: cancel-prior-workflows
     steps:
@@ -171,6 +218,8 @@ jobs:
   # When adding new prep jobs, please add them to `needs` below
   setup-complete:
     name: setup-complete
+    needs: change-filters
+    if: needs.change-filters.outputs.needs-rtl == 'true'
     needs: [install-toolchains, install-verilator-knight, install-verilator-ferry, build-extra-tests]
     runs-on: ubuntu-latest
     steps:
