@@ -31,6 +31,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Check commits of each submodule
@@ -43,6 +49,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Check that the tutorial-setup patches apply
@@ -55,6 +67,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Check that documentation builds with no warnings/errors
@@ -74,6 +92,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build RISC-V toolchains
@@ -87,6 +111,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build RISC-V toolchains
@@ -109,6 +139,12 @@ jobs:
     runs-on: knight
     needs: cancel-prior-workflows
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build verilator on knight CI machine
@@ -119,6 +155,12 @@ jobs:
     runs-on: ferry
     needs: cancel-prior-workflows
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build verilator on ferry CI machine
@@ -142,6 +184,12 @@ jobs:
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build RTL on self-hosted
@@ -154,6 +202,12 @@ jobs:
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build RTL on self-hosted
@@ -166,6 +220,12 @@ jobs:
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build RTL on self-hosted
@@ -178,6 +238,12 @@ jobs:
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build RTL on self-hosted
@@ -190,6 +256,12 @@ jobs:
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build RTL on self-hosted
@@ -202,6 +274,12 @@ jobs:
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build RTL on self-hosted
@@ -220,6 +298,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -236,6 +320,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -252,6 +342,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -268,6 +364,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -284,6 +386,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -300,6 +408,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -316,6 +430,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -332,6 +452,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -348,6 +474,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -364,6 +496,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -380,6 +518,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -396,6 +540,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -412,6 +562,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -428,6 +584,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -444,6 +606,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -460,6 +628,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -476,6 +650,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -492,6 +672,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -508,6 +694,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -524,6 +716,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -540,6 +738,12 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
@@ -553,6 +757,12 @@ jobs:
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests on self-hosted
@@ -567,6 +777,12 @@ jobs:
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests on self-hosted
@@ -581,6 +797,12 @@ jobs:
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ./* || true
+            rm -rf ./.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests on self-hosted
