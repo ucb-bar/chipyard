@@ -188,8 +188,24 @@ if [ -z "$IGNOREQEMU" ] ; then
     git -C "$dir" submodule foreach --quiet --recursive '! grep -q "git\.qemu\.org" .gitmodules 2>/dev/null' && \
     echo "==>  PLEASE REMOVE qemu URL-REWRITING from scripts/build-toolchains.sh. It is no longer needed!" && exit 1
 
+    (
+    # newer version of BFD-based ld has made '-no-pie' an error because it renamed to '--no-pie'
+    # meanwhile, ld.gold will still accept '-no-pie'
+    # QEMU 5.0 still uses '-no-pie' in it's linker options
+
+    # default LD to ld if it isn't set
+    if ( set +o pipefail; ${LD:-ld} -no-pie |& grep 'did you mean --no-pie' >/dev/null); then
+	echo "==>  LD doesn't like '-no-pie'"
+	# LD has the problem, look for ld.gold
+	if type ld.gold >&/dev/null; then
+	    echo "==>  Using ld.gold to link QEMU"
+	    export LD=ld.gold
+	fi
+    fi
+
     # now actually do the build
     SRCDIR="$(pwd)/toolchains" module_build qemu --prefix="${RISCV}" --target-list=riscv${XLEN}-softmmu --disable-werror
+    )
 fi
 
 # make Dromajo
