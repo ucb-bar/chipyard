@@ -8,6 +8,7 @@ class SaturnConfig extends Config(
 )
 
 class Saturn3WideConfig extends Config(
+  new saturn.common.WithSaturnFPWidth(2) ++
   new saturn.common.WithSaturnFetchWidth(16) ++
   new saturn.common.WithSaturnRetireWidth(3) ++
   new saturn.common.WithNSaturnCores(1) ++
@@ -15,6 +16,7 @@ class Saturn3WideConfig extends Config(
 )
 
 class Saturn4WideConfig extends Config(
+  new saturn.common.WithSaturnFPWidth(2) ++
   new saturn.common.WithSaturnFetchWidth(32) ++
   new saturn.common.WithSaturnRetireWidth(4) ++
   new saturn.common.WithNSaturnCores(1) ++
@@ -22,6 +24,7 @@ class Saturn4WideConfig extends Config(
 )
 
 class Saturn5WideConfig extends Config(
+  new saturn.common.WithSaturnFPWidth(2) ++
   new saturn.common.WithSaturnFetchWidth(64) ++
   new saturn.common.WithSaturnRetireWidth(5) ++
   new saturn.common.WithNSaturnCores(1) ++
