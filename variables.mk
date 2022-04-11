@@ -116,9 +116,9 @@ ifeq ($(SUB_PROJECT),constellation)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= constellation
+	MODEL_PACKAGE     ?= constellation.test
 	CONFIG            ?= TestConfig00
-	CONFIG_PACKAGE    ?= constellation
+	CONFIG_PACKAGE    ?= constellation.test
 	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
 	TOP               ?= NoC
