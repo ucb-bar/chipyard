@@ -93,7 +93,7 @@ class DecaRocketNoCConfig extends Config(
   new constellation.rc.WithSbusNoCInNodeMapping ("Core 3"   ,  1) ++
   new constellation.rc.WithSbusNoCInNodeMapping ("Core 2"   ,  0) ++
   new constellation.rc.WithSbusNoCInNodeMapping ("Core 1"   , 10) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("Core 0"   ,  0) ++
+  new constellation.rc.WithSbusNoCInNodeMapping ("Core 0"   ,  9) ++
   new constellation.rc.WithSbusNoCInNodeMapping ("serial-tl",  8) ++
 
   new constellation.rc.WithSbusNoC ++
