@@ -6,10 +6,10 @@ lazy val chipyardRoot = Project("chipyardRoot", file("."))
 
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
-  version := "1.3",
+  version := "1.6",
   scalaVersion := "2.12.10",
-  test in assembly := {},
-  assemblyMergeStrategy in assembly := { _ match {
+  assembly / test := {},
+  assembly / assemblyMergeStrategy := { _ match {
     case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
     case _ => MergeStrategy.first}},
   scalacOptions ++= Seq("-deprecation","-unchecked","-Xsource:2.11"),
@@ -48,8 +48,8 @@ lazy val firesimDir = if (firesimAsLibrary) {
 def freshProject(name: String, dir: File): Project = {
   Project(id = name, base = dir / "src")
     .settings(
-      scalaSource in Compile := baseDirectory.value / "main" / "scala",
-      resourceDirectory in Compile := baseDirectory.value / "main" / "resources"
+      Compile / scalaSource := baseDirectory.value / "main" / "scala",
+      Compile / resourceDirectory := baseDirectory.value / "main" / "resources"
     )
 }
 
@@ -60,25 +60,19 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
   new Group(test.name, Seq(test), SubProcess(options))
 } toSeq
 
-val chiselVersion = "3.4.4"
+val chiselVersion = "3.5.1"
 
 lazy val chiselSettings = Seq(
   libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % chiselVersion),
   addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % chiselVersion cross CrossVersion.full))
 
-val firrtlVersion = "1.4.4"
+val firrtlVersion = "1.5.1"
 
 lazy val firrtlSettings = Seq(libraryDependencies ++= Seq("edu.berkeley.cs" %% "firrtl" % firrtlVersion))
 
-// In some projects we override the default versions of Chisel and friends.
-// This map captures the expected defaults used by projects under Chipyard.
-lazy val chipyardMandatedVersions = Map(
-  "chisel-iotesters" -> "1.5.4",
-  "firrtl-interpreter" -> "1.4.4",
-  "treadle" -> "1.3.4",
-  "chisel3" -> chiselVersion,
-  "firrtl" -> firrtlVersion
-)
+val chiselTestVersion = "2.5.1"
+
+lazy val chiselTestSettings = Seq(libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel-iotesters" % chiselTestVersion))
 
 // Subproject definitions begin
 
@@ -137,19 +131,6 @@ lazy val rocketLibDeps = (rocketchip / Keys.libraryDependencies)
 
 
 // -- Chipyard-managed External Projects --
-
-// Because we're not using a release version of iotesters to work around a
-// scala test version problem, override it's libdeps to prevent using snapshots
-lazy val chisel_testers = (project in file("tools/chisel-testers"))
-  .settings(chiselSettings)
-  .settings(
-    allDependencies := allDependencies.value.map {
-      case dep if chipyardMandatedVersions.isDefinedAt(dep.name) =>
-        dep.organization %% dep.name % chipyardMandatedVersions(dep.name)
-      case o => o
-    })
-
-// -- Normal Projects --
 
 // Contains annotations & firrtl passes you may wish to use in rocket-chip without
 // introducing a circular dependency between RC and MIDAS
@@ -225,13 +206,15 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
   .settings(commonSettings)
 
 lazy val sha3 = (project in file("generators/sha3"))
-  .dependsOn(rocketchip, chisel_testers, midasTargetUtils)
+  .dependsOn(rocketchip, midasTargetUtils)
   .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(chiselTestSettings)
   .settings(commonSettings)
 
 lazy val gemmini = (project in file("generators/gemmini"))
-  .dependsOn(testchipip, rocketchip, chisel_testers)
+  .dependsOn(testchipip, rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(chiselTestSettings)
   .settings(commonSettings)
 
 lazy val nvdla = (project in file("generators/nvdla"))
@@ -239,26 +222,24 @@ lazy val nvdla = (project in file("generators/nvdla"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val iocell = (project in file("./tools/barstools/iocell/"))
+lazy val iocell = Project(id = "iocell", base = file("./tools/barstools/") / "src")
+  .settings(
+    Compile / scalaSource := baseDirectory.value / "main" / "scala" / "barstools" / "iocell",
+    Compile / resourceDirectory := baseDirectory.value / "main" / "resources"
+  )
   .settings(chiselSettings)
   .settings(commonSettings)
 
-lazy val tapeout = (project in file("./tools/barstools/tapeout/"))
-  .dependsOn(chisel_testers, chipyard) // must depend on chipyard to get scala resources
-  .settings(commonSettings)
-
-lazy val mdf = (project in file("./tools/barstools/mdf/scalalib/"))
-  .settings(commonSettings)
-
-lazy val barstoolsMacros = (project in file("./tools/barstools/macros/"))
-  .dependsOn(mdf)
+lazy val tapeout = (project in file("./tools/barstools/"))
+  .settings(chiselSettings)
+  .settings(chiselTestSettings)
   .enablePlugins(sbtassembly.AssemblyPlugin)
-  .settings(firrtlSettings)
   .settings(commonSettings)
 
 lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
-  .dependsOn(chisel_testers)
   .settings(
+    chiselSettings,
+    chiselTestSettings,
     commonSettings,
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.2.+" % "test",
@@ -289,7 +270,7 @@ lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
 lazy val sifive_cache = (project in file("generators/sifive-cache"))
   .settings(
     commonSettings,
-    scalaSource in Compile := baseDirectory.value / "design/craft")
+    Compile / scalaSource := baseDirectory.value / "design/craft")
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
 
@@ -305,9 +286,10 @@ lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
 lazy val firechip = (project in file("generators/firechip"))
   .dependsOn(chipyard, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
   .settings(
+    chiselSettings,
     commonSettings,
-    testGrouping in Test := isolateAllTests( (definedTests in Test).value ),
-    testOptions in Test += Tests.Argument("-oF")
+    Test / testGrouping := isolateAllTests( (Test / definedTests).value ),
+    Test / testOptions += Tests.Argument("-oF")
   )
 lazy val fpga_shells = (project in file("./fpga/fpga-shells"))
   .dependsOn(rocketchip, sifive_blocks)

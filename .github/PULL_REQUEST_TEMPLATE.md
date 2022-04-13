@@ -1,4 +1,4 @@
-**Related PRs / Issues **:
+**Related PRs / Issues**:
 <!-- List any related PRs/issues here, if applicable -->
 
 <!-- choose one -->
@@ -16,7 +16,7 @@
 
 <!-- must be filled out completely to be considered for merging -->
 **Contributor Checklist**:
-- [ ] Did you set `dev` as the base branch?
+- [ ] Did you set `main` as the base branch?
 - [ ] Did you delete any extraneous prints/debugging code?
 - [ ] (If applicable) Did you add documentation for the feature?
 - [ ] (If applicable) Did you add a test demonstrating the PR?

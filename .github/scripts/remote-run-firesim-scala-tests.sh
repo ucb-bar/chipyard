@@ -18,7 +18,8 @@ export PATH="$RISCV/bin:$PATH"
 # This would generally be handled by build-setup.sh/firesim-setup.sh
 REMOTE_FIRESIM_SYSROOT=$REMOTE_FIRESIM_DIR/lib-install
 
-./scripts/init-submodules-no-riscv-tools.sh
+cd $REMOTE_CHIPYARD_DIR
+./scripts/init-submodules-no-riscv-tools.sh --skip-validate
 cd $REMOTE_CHIPYARD_DIR/sims/firesim/sim/firesim-lib/src/main/cc/lib
 git submodule update --init elfutils libdwarf
 cd $REMOTE_CHIPYARD_DIR/sims/firesim

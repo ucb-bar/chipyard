@@ -1,10 +1,5 @@
-.. Chipyard documentation master file, created by
-   sphinx-quickstart on Fri Mar  8 11:46:38 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to Chipyard's documentation!
-====================================
+Welcome to Chipyard's documentation (version "|version|")!
+==========================================================
 
 .. image:: ./_static/images/chipyard-logo.svg
 

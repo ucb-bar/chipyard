@@ -65,10 +65,10 @@ class BoomLSUShim(implicit p: Parameters) extends BoomModule()(p)
   tracegen_uop.uses_ldq     := isRead(io.tracegen.req.bits.cmd) && !isWrite(io.tracegen.req.bits.cmd)
   tracegen_uop.uses_stq     := isWrite(io.tracegen.req.bits.cmd)
 
-  io.lsu.dis_uops(0).valid         := io.tracegen.req.fire()
+  io.lsu.dis_uops(0).valid         := io.tracegen.req.fire
   io.lsu.dis_uops(0).bits          := tracegen_uop
 
-  when (io.tracegen.req.fire()) {
+  when (io.tracegen.req.fire) {
     rob_tail := WrapInc(rob_tail, rob_sz)
     rob_bsy(rob_tail)   := true.B
     rob_uop(rob_tail)   := tracegen_uop
@@ -239,6 +239,7 @@ class BoomTraceGenTileModuleImp(outer: BoomTraceGenTile)
   ptw.io.requestors.head <> lsu.io.ptw
   outer.dcache.module.io.lsu <> lsu.io.dmem
   boom_shim.io.tracegen <> tracegen.io.mem
+  tracegen.io.fence_rdy := boom_shim.io.tracegen.ordered
   boom_shim.io.lsu <> lsu.io.core
 
   // Normally the PTW would use this port

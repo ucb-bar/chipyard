@@ -1,0 +1,175 @@
+# Technology Setup
+# Technology used is Sky130
+vlsi.core.technology: sky130
+
+vlsi.core.max_threads: 12
+
+# Technology paths
+technology.sky130:
+  sky130_pdk: "path-to-skywater-pdk/"
+  sky130A: "path-to-sky130A/"
+  sky130_nda: "path-to-skywater-src-nda/"
+  openram_lib: "path-to-sky130_sram_macros/" 
+
+# General Hammer Inputs
+
+# Hammer will auto-generate a CPF for simple power designs; see hammer/src/hammer-vlsi/defaults.yml for more info
+vlsi.inputs.power_spec_mode: "auto"
+vlsi.inputs.power_spec_type: "cpf"
+
+# Specify clock signals
+vlsi.inputs.clocks: [
+  {name: "clock_clock", period: "130ns", uncertainty: "1ns"}
+]
+
+# Generate Make include to aid in flow 
+vlsi.core.build_system: make
+
+# Power Straps
+par.power_straps_mode: generate
+par.generate_power_straps_method: by_tracks
+par.blockage_spacing: 2.0
+par.blockage_spacing_top_layer: met4
+par.generate_power_straps_options:
+  by_tracks:
+    strap_layers:
+      - met4
+      - met5
+    pin_layers:
+      - met5
+    blockage_spacing_met2: 4.0
+    track_width: 6
+    track_width_met5: 2
+    track_spacing: 1
+    track_start: 10
+    track_start_met5: 1
+    power_utilization: 0.1
+    power_utilization_met4: 0.3
+    power_utilization_met5: 0.5
+
+# Placement Constraints
+vlsi.inputs.placement_constraints:
+  - path: "ChipTop"
+    type: toplevel
+    x: 0
+    y: 0
+    width: 4500
+    height: 2500
+    margins:
+      left: 0
+      right: 0
+      top: 0
+      bottom: 0
+
+  # Place data cache SRAM instances
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_0"
+    type: hardmacro
+    x: 50
+    y: 100
+    orientation: r0
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_1_0"
+    type: hardmacro
+    x: 50
+    y: 700
+    orientation: r0
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_2_0"
+    type: hardmacro
+    x: 50
+    y: 1300
+    orientation: r0
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_3_0"
+    type: hardmacro
+    x: 50
+    y: 1900
+    orientation: r0
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_4_0"
+    type: hardmacro
+    x: 1000
+    y: 1900
+    orientation: r0
+
+    
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_5_0"
+    type: hardmacro
+    x: 1000 
+    y: 1300
+    orientation: r0
+    
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_6_0"
+    type: hardmacro
+    x: 1000 
+    y: 700
+    orientation: r0
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_7_0"
+    type: hardmacro
+    x: 1000 
+    y: 100
+    orientation: r0
+
+  # Place instruction cache SRAM instances
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/data_arrays_0/data_arrays_0_0_ext/mem_0_0"
+    type: hardmacro
+    x: 3700
+    y: 100
+    orientation: r0
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/data_arrays_0/data_arrays_0_0_ext/mem_1_0"
+    type: hardmacro
+    x: 3700
+    y: 700
+    orientation: r0
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/tag_array/tag_array_ext/mem_0_0"
+    type: hardmacro
+    x: 3000
+    y: 100
+    orientation: r0
+
+  # Place L2 TLB SRAM instances
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_0"
+    type: hardmacro
+    x: 1900
+    y: 1900
+    orientation: "r0"
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_1"
+    type: hardmacro
+    x: 2600
+    y: 1900
+    orientation: "r0"
+ 
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_2"
+    type: hardmacro
+    x: 3300
+    y: 1900
+    orientation: "r0"
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_3"
+    type: hardmacro
+    x: 3950
+    y: 1900
+    orientation: "r0"
+
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_4"
+    type: hardmacro
+    x: 3950
+    y: 1300
+    orientation: "r0"
+
+# Pin placement constraints
+vlsi.inputs.pin_mode: generated
+vlsi.inputs.pin.generate_mode: semi_auto
+vlsi.inputs.pin.assignments: [
+  {pins: "*", layers: ["met2", "met4"], side: "bottom"}
+]
+
+# SRAM Compiler compiler options
+vlsi.core.sram_generator_tool: "sram_compiler"
+# You should specify a location for the SRAM generator in the tech plugin
+vlsi.core.sram_generator_tool_path: ["hammer/src/hammer-vlsi/technology/sky130"]
+vlsi.core.sram_generator_tool_path_meta: "append"

@@ -9,40 +9,40 @@ Project Structure
 
 This example gives a suggested file structure and build system. The ``vlsi/`` folder will eventually contain the following files and folders:
 
-* Makefile, sim.mk, power.mk
+* ``Makefile``, ``sim.mk``, ``power.mk``
 
   * Integration of Hammer's build system into Chipyard and abstracts away some Hammer commands.
 
-* build
+* ``build``
 
   * Hammer output directory. Can be changed with the ``OBJ_DIR`` variable.
   * Will contain subdirectories such as ``syn-rundir`` and ``par-rundir`` and the ``inputs.yml`` denoting the top module and input Verilog files.
 
-* env.yml
+* ``env.yml``
 
   * A template file for tool environment configuration. Fill in the install and license server paths for your environment.
 
-* example-vlsi
+* ``example-vlsi``
 
   * Entry point to Hammer. Contains example placeholders for hooks.
 
-* example-asap7.yml, example-tools.yml
+* ``example-asap7.yml``, ``example-tools.yml``
 
   * Hammer IR for this tutorial.
 
-* example-design.yml, example-nangate45.yml, example-tech.yml
+* ``example-design.yml``, ``example-nangate45.yml``, ``example-tech.yml``
 
   * Hammer IR not used for this tutorial but provided as templates.
 
-* generated-src
+* ``generated-src``
 
   * All of the elaborated Chisel and FIRRTL.
 
-* hammer, hammer-<vendor>-plugins, hammer-<tech>-plugin
+* ``hammer``, ``hammer-<vendor>-plugins``, ``hammer-<tech>-plugin``
 
   * Core, tool, tech repositories.
 
-* view_gds.py
+* ``view_gds.py``
 
   * A convenience script to view a layout using gdstk or gdspy. Only use this for small layouts (i.e. smaller than the TinyRocketConfig example) since the gdstk-produced SVG will be too big and gdspy's GUI is very slow for large layouts!
 
@@ -65,7 +65,7 @@ In the Chipyard root, run:
 
     ./scripts/init-vlsi.sh asap7
     
-to pull the Hammer & plugin submodules. Note that for technologies other than ``asap7``, the tech submodule must be added in the ``vlsi`` folder first.
+to pull the Hammer & plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule must be added in the ``vlsi`` folder first.
 
 Pull the Hammer environment into the shell:
 
@@ -106,7 +106,7 @@ Synthesis
 
     make syn CONFIG=TinyRocketConfig
 
-Post-synthesis logs and collateral are in ``build/syn-rundir``. The raw QoR data is available at ``build/syn-rundir/reports``, and methods to extract this information for design space exploration are a WIP.
+Post-synthesis logs and collateral are in ``build/syn-rundir``. The raw quality of results data is available at ``build/syn-rundir/reports``, and methods to extract this information for design space exploration are a work in progress.
 
 Place-and-Route
 ^^^^^^^^^^^^^^^
@@ -144,15 +144,15 @@ Furthermore, the dummy SRAMs that are provided in this tutorial and PDK do not h
 
 Simulation
 ^^^^^^^^^^
-Simulation with VCS is supported, and can be run at the RTL- or gate-level (post-synthesis and P&R). The simulation infrastructure as included here is intended for running RISC-V binaries on a Chipyard config. For example, for an RTL-level simulation:
+Simulation with VCS is supported, and can be run at the RTL- or gate-level (post-synthesis and post-P&R). The simulation infrastructure as included here is intended for running RISC-V binaries on a Chipyard config. For example, for an RTL-level simulation:
 
 .. code-block:: shell
 
     make sim-rtl CONFIG=TinyRocketConfig BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv32ui-p-simple
 
-Post-synthesis and post-P&R simulations use the ``sim-syn`` and ``sim-par`` targets, respectively.
+Post-synthesis and post-P&R simulations use the ``sim-syn`` and ``sim-par`` make targets, respectively.
 
-You can also append ``-debug`` and ``-debug-timing`` to the above sim targets, which will instruct VCS to write a SAIF + VPD and do timing-annotated simulations, respectively. See the ``sim.mk`` file for all available targets.
+Appending ``-debug`` and ``-debug-timing`` to these make targets will instruct VCS to write a SAIF + VPD (or FSDB if the ``USE_FSDB`` flag is set) and do timing-annotated simulations, respectively. See the ``sim.mk`` file for all available targets.
 
 Power/Rail Analysis
 ^^^^^^^^^^^^^^^^^^^
@@ -164,4 +164,4 @@ Post-P&R power and rail (IR drop) analysis is supported with Voltus:
 
 If you append the ``BINARY`` variable to the command, it will use the activity file generated from a ``sim-<syn/par>-debug`` run and report dynamic power & IR drop from the toggles encoded in the waveform.
 
-Note that power and rail analysis can also be run without gate-level simulation, but you will need to run the power tool manually (see the generated commands in the generated ``hammer.d`` buildfile). Only static and active (vectorless) power & IR drop will be reported.
+To bypass gate-level simulation, you will need to run the power tool manually (see the generated commands in the generated ``hammer.d`` buildfile). Static and active (vectorless) power & IR drop will be reported.

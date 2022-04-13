@@ -1,11 +1,9 @@
 name: chipyard-ci-process
 
 on:
-  # run ci on pull requests targeting dev, master, main only (since the ci runs on the merge commit)
+  # run ci on pull requests targeting main only (since the ci runs on the merge commit)
   pull_request:
     branches:
-      - dev
-      - master
       - main
 
 env:
@@ -33,14 +31,16 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Check commits of each submodule
-        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/check-commit.sh
-      - uses: ./.github/actions/job-end
 
   tutorial-setup-check:
     name: tutorial-setup-check
@@ -49,14 +49,16 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Check that the tutorial-setup patches apply
-        if: steps.job-start.outputs.run_result != 'success'
         run: scripts/tutorial-setup.sh
-      - uses: ./.github/actions/job-end
 
   documentation-check:
     name: documentation-check
@@ -65,21 +67,23 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Check that documentation builds with no warnings/errors
-        if: steps.job-start.outputs.run_result != 'success'
         run: |
           sudo apt-get update -y
           sudo apt-get install -y python3-pip
           sudo pip3 install -r docs/requirements.txt
           make -C docs html
       - name: Show error log from sphinx if failed
-        if: ${{ steps.job-start.outputs.run_result != 'success' && failure() }}
+        if: ${{ failure() }}
         run: cat /tmp/sphinx-err*.log
-      - uses: ./.github/actions/job-end
 
   install-toolchains:
     name: install-toolchains
@@ -88,14 +92,16 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Build RISC-V toolchains
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
-      - uses: ./.github/actions/job-end
 
   build-extra-tests:
     name: build-extra-tests
@@ -105,50 +111,67 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Build RISC-V toolchains
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/toolchain-build
       - name: Generate keys
-        if: steps.job-start.outputs.run_result != 'success'
         id: genkey
         run: |
           echo "::set-output name=extra-tests-cache-key::extra-tests-${{ github.ref }}-${{ github.sha }}"
       - uses: actions/cache@v2
-        if: steps.job-start.outputs.run_result != 'success'
         id: build-extra-tools-cache
         with:
           path: extra-tests-install
           key: ${{ steps.genkey.outputs.extra-tests-cache-key }}
           restore-keys: ${{ steps.genkey.outputs.extra-tests-cache-key }}
       - name: Build extra tests
-        if: steps.job-start.outputs.run_result != 'success'
         run: .github/scripts/build-extra-tests.sh
-      - uses: ./.github/actions/job-end
 
-  install-verilator:
-    name: install-verilator
-    runs-on: self-hosted
+  install-verilator-knight:
+    name: install-verilator-knight
+    runs-on: knight
     needs: cancel-prior-workflows
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
-      - name: Build verilator on self-hosted
-        if: steps.job-start.outputs.run_result != 'success'
+      - name: Build verilator on knight CI machine
         run: .github/scripts/remote-install-verilator.sh
-      - uses: ./.github/actions/job-end
+
+  install-verilator-ferry:
+    name: install-verilator-ferry
+    runs-on: ferry
+    needs: cancel-prior-workflows
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build verilator on ferry CI machine
+        run: .github/scripts/remote-install-verilator.sh
 
   # Sentinel job to simplify how we specify which that basic setup is complete
   #
   # When adding new prep jobs, please add them to `needs` below
   setup-complete:
     name: setup-complete
-    needs: [install-toolchains, install-verilator, build-extra-tests]
+    needs: [install-toolchains, install-verilator-knight, install-verilator-ferry, build-extra-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Set up complete
@@ -161,97 +184,109 @@ jobs:
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Build RTL on self-hosted
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-cores"
-      - uses: ./.github/actions/job-end
 
   prepare-chipyard-peripherals:
     name: prepare-chipyard-peripherals
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Build RTL on self-hosted
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-peripherals"
-      - uses: ./.github/actions/job-end
 
   prepare-chipyard-accels:
     name: prepare-chipyard-accels
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Build RTL on self-hosted
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-accels"
-      - uses: ./.github/actions/job-end
 
   prepare-chipyard-tracegen:
     name: prepare-chipyard-tracegen
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Build RTL on self-hosted
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-tracegen"
-      - uses: ./.github/actions/job-end
 
   prepare-chipyard-other:
     name: prepare-chipyard-other
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Build RTL on self-hosted
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-other"
-      - uses: ./.github/actions/job-end
 
   prepare-chipyard-fpga:
     name: prepare-chipyard-fpga
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Build RTL on self-hosted
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-fpga"
           build-type: "fpga"
-      - uses: ./.github/actions/job-end
 
   ##########################################################################
 
@@ -263,17 +298,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-cores"
           project-key: "chipyard-rocket"
-      - uses: ./.github/actions/job-end
 
   chipyard-hetero-run-tests:
     name: chipyard-hetero-run-tests
@@ -283,17 +320,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-cores"
           project-key: "chipyard-hetero"
-      - uses: ./.github/actions/job-end
 
   chipyard-boom-run-tests:
     name: chipyard-boom-run-tests
@@ -303,17 +342,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-cores"
           project-key: "chipyard-boom"
-      - uses: ./.github/actions/job-end
 
   chipyard-cva6-run-tests:
     name: chipyard-cva6-run-tests
@@ -323,17 +364,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-cores"
           project-key: "chipyard-cva6"
-      - uses: ./.github/actions/job-end
 
   chipyard-ibex-run-tests:
     name: chipyard-ibex-run-tests
@@ -343,17 +386,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-cores"
           project-key: "chipyard-ibex"
-      - uses: ./.github/actions/job-end
 
   chipyard-sodor-run-tests:
     name: chipyard-sodor-run-tests
@@ -363,17 +408,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-cores"
           project-key: "chipyard-sodor"
-      - uses: ./.github/actions/job-end
 
   chipyard-fftgenerator-run-tests:
     name: chipyard-fftgenerator-run-tests
@@ -383,17 +430,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-accels"
           project-key: "chipyard-fftgenerator"
-      - uses: ./.github/actions/job-end
 
   chipyard-dmirocket-run-tests:
     name: chipyard-dmirocket-run-tests
@@ -403,17 +452,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-peripherals"
           project-key: "chipyard-dmirocket"
-      - uses: ./.github/actions/job-end
 
   chipyard-spiflashwrite-run-tests:
     name: chipyard-spiflashwrite-run-tests
@@ -423,17 +474,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-peripherals"
           project-key: "chipyard-spiflashwrite"
-      - uses: ./.github/actions/job-end
 
   chipyard-spiflashread-run-tests:
     name: chipyard-spiflashread-run-tests
@@ -443,17 +496,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-peripherals"
           project-key: "chipyard-spiflashread"
-      - uses: ./.github/actions/job-end
 
   chipyard-lbwif-run-tests:
     name: chipyard-lbwif-run-tests
@@ -463,17 +518,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-peripherals"
           project-key: "chipyard-lbwif"
-      - uses: ./.github/actions/job-end
 
   chipyard-sha3-run-tests:
     name: chipyard-sha3-run-tests
@@ -483,17 +540,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-accels"
           project-key: "chipyard-sha3"
-      - uses: ./.github/actions/job-end
 
   chipyard-streaming-fir-run-tests:
     name: chipyard-streaming-fir-run-tests
@@ -503,17 +562,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-accels"
           project-key: "chipyard-streaming-fir"
-      - uses: ./.github/actions/job-end
 
   chipyard-streaming-passthrough-run-tests:
     name: chipyard-streaming-passthrough-run-tests
@@ -523,17 +584,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-accels"
           project-key: "chipyard-streaming-passthrough"
-      - uses: ./.github/actions/job-end
 
   chipyard-hwacha-run-tests:
     name: chipyard-hwacha-run-tests
@@ -543,17 +606,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-accels"
           project-key: "chipyard-hwacha"
-      - uses: ./.github/actions/job-end
 
   chipyard-gemmini-run-tests:
     name: chipyard-gemmini-run-tests
@@ -563,17 +628,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-accels"
           project-key: "chipyard-gemmini"
-      - uses: ./.github/actions/job-end
 
   chipyard-nvdla-run-tests:
     name: chipyard-nvdla-run-tests
@@ -583,17 +650,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-accels"
           project-key: "chipyard-nvdla"
-      - uses: ./.github/actions/job-end
 
   tracegen-boom-run-tests:
     name: tracegen-boom-run-tests
@@ -603,17 +672,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-tracegen"
           project-key: "tracegen-boom"
-      - uses: ./.github/actions/job-end
 
   tracegen-run-tests:
     name: tracegen-run-tests
@@ -623,17 +694,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-tracegen"
           project-key: "tracegen"
-      - uses: ./.github/actions/job-end
 
   icenet-run-tests:
     name: icenet-run-tests
@@ -643,17 +716,19 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-other"
           project-key: "icenet"
-      - uses: ./.github/actions/job-end
 
   testchipip-run-tests:
     name: testchipip-run-tests
@@ -663,71 +738,79 @@ jobs:
       image: ucbbar/chipyard-ci-image:554b436
       options: --entrypoint /bin/bash
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-other"
           project-key: "testchipip"
-      - uses: ./.github/actions/job-end
 
   firesim-run-tests:
     name: firesim-run-tests
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests on self-hosted
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "extra-tests"
           project-key: "firesim"
           run-script: "remote-run-firesim-scala-tests.sh"
-      - uses: ./.github/actions/job-end
 
   fireboom-run-tests:
     name: fireboom-run-tests
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests on self-hosted
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "extra-tests"
           project-key: "fireboom"
           run-script: "remote-run-firesim-scala-tests.sh"
-      - uses: ./.github/actions/job-end
 
   firesim-multiclock-run-tests:
     name: firesim-multiclock-run-tests
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: ./.github/actions/job-start
-        id: job-start
       - name: Run tests on self-hosted
-        if: steps.job-start.outputs.run_result != 'success'
         uses: ./.github/actions/run-tests
         with:
           group-key: "extra-tests"
           project-key: "firesim-multiclock"
           run-script: "remote-run-firesim-scala-tests.sh"
-      - uses: ./.github/actions/job-end
 
   # Sentinel job to simplify how we specify which checks need to pass in branch
   # protection and in Mergify

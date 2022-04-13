@@ -10,7 +10,7 @@ vlsi.inputs.power_spec_type: "cpf"
 
 # Specify clock signals
 vlsi.inputs.clocks: [
-  {name: "clock", period: "2ns", uncertainty: "0.1ns"}
+  {name: "clock_clock", period: "2ns", uncertainty: "0.1ns"}
 ]
 
 # Specify pin properties

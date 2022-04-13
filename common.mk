@@ -71,7 +71,7 @@ else
 	lookup_srcs = $(shell fd -L ".*\.$(2)" $(1))
 endif
 
-SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools/iocell fpga/fpga-shells fpga/src)
+SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools fpga/fpga-shells fpga/src)
 SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
 VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE_DIRS),v)
 # This assumes no SBT meta-build sources
@@ -135,6 +135,7 @@ $(TOP_TARGETS) $(HARNESS_TARGETS): firrtl_temp
 
 firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTopAndHarness,\
+		--allow-unrecognized-annotations \
 		--output-file $(TOP_FILE) \
 		--harness-o $(HARNESS_FILE) \
 		--input-file $(FIRRTL_FILE) \
@@ -162,7 +163,7 @@ $(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR): top_macro_temp
 	@echo "" > /dev/null
 
 top_macro_temp: $(TOP_SMEMS_CONF)
-	$(call run_scala_main,barstoolsMacros,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE))
+	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE))
 
 HARNESS_MACROCOMPILER_MODE = --mode synflops
 .INTERMEDIATE: harness_macro_temp
@@ -170,7 +171,7 @@ $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): harness_macro_temp
 	@echo "" > /dev/null
 
 harness_macro_temp: $(HARNESS_SMEMS_CONF) | top_macro_temp
-	$(call run_scala_main,barstoolsMacros,barstools.macros.MacroCompiler, -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE))
+	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler, -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE))
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
