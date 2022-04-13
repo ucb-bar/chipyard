@@ -28,29 +28,30 @@ module_prepare() ( # <submodule> [ignored-submodule..]
     echo "=>  Starting ${name} build"
     echo "==>  Initializing ${name} submodule"
     if [ $# -gt 0 ] ; then
-        git submodule update --init "${dir}"
+	(set -x; git submodule update --init "${dir}")
         while [ -n "$1" ] ; do
-            git -C "${dir}" config submodule."${1}".update none
+	    (set -x; git -C "${dir}" config submodule."${1}".update none)
             shift
         done
     fi
-    git submodule update --init --recursive "${dir}"
+    (set -x; git submodule update --init --recursive "${dir}")
 )
 
 module_run() ( # <submodule> <command..>
     set -e
+    echo "=> cd ${SRCDIR}/${1}"
     cd "${SRCDIR}/${1}"
     shift
-    "$@"
+    (set -x; "$@")
 )
 
 module_make() ( # <submodule> <target..>
     set -e -o pipefail
-    cd "${SRCDIR}/${1}/build"
+    build_dir="${SRCDIR}/${1}/build"
     shift
-    "${MAKE}" "$@" | tee "build-${1:-make}.log"
+    (set -x; "${MAKE}" -C "$build_dir" "$@") | tee "build-${1:-make}.log"
     if [ -n "$CLEANAFTERINSTALL" ] ; then
-      "${MAKE}" clean  # get rid of intermediate files
+        (set -x; "${MAKE}" -C "$build_dir" clean)  # get rid of intermediate files
     fi
 )
 
@@ -59,33 +60,33 @@ module_build() ( # <submodule> [configure-arg..]
     name=$1
     shift
 
+    echo "==>  cd ${SRCDIR}/${name}"
     cd "${SRCDIR}/${name}"
 
     if [ -e build ] ; then
         echo "==>  Removing existing ${name}/build directory"
-        rm -rf build
+	(set -x; rm -rf build)
     fi
     if ! [ -e configure ] ; then
         echo "==>  Updating autoconf files for ${name}"
         find . -iname configure.ac -type f -print0 |
         while read -r -d '' file ; do
-            mkdir -p -- "${file%/*}/m4"
+	    (set -x; mkdir -p -- "${file%/*}/m4")
         done
-        autoreconf -i
+        (set -x; autoreconf -i)
     fi
 
-    mkdir -p build
-    cd build
+    (set -x; mkdir -p build)
     {
         export PATH="${RISCV:+${RISCV}/bin:}${PATH}"
         echo "==>  Configuring ${name}"
-        ../configure "$@"
+        (set -x; cd build && ../configure "$@")
         echo "==>  Building ${name}"
-        "${MAKE}"
+        (set -x; "${MAKE}" -C build)
         echo "==>  Installing ${name}"
-        "${MAKE}" install
+        (set -x; "${MAKE}" -C build install)
         if [ -n "$CLEANAFTERINSTALL" ] ; then
-          "${MAKE}" clean  # get rid of intermediate files
+            (set -x; "${MAKE}" -C build clean)  # get rid of intermediate files
         fi
     } 2>&1 | tee build.log
 )
