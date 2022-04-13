@@ -212,7 +212,7 @@ $(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 floorplan: $(FLOORPLAN_CONF)
 
 $(FLOORPLAN_CONF): generator_temp $(FLOORPLAN_OOBANNOS) $(FLOORPLAN_FPIR)
-	$(call run_scala_main,floorplan,barstools.floorplan.compiler.FloorplanCompiler,\
+	$(call run_scala_main,tapeout,barstools.floorplan.compiler.FloorplanCompiler,\
 		--input-file $(FLOORPLAN_FPIR)\
 		--output-file $(FLOORPLAN_CONF)\
 		--top-module $(TOP) \
