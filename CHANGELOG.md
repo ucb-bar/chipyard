@@ -2,13 +2,21 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.6.3] - 2022-04-06
+
+FireSim bump for various fixes. Revert shallow cloning. Various CI fixes.
+
+### Fixed
+* Bump to FireSim 1.13.4 (changelog: https://github.com/firesim/firesim/blob/1.13.4/CHANGELOG.md#1134---2022-04-06)
+* Revert shallow cloning.
+* Various CI fixes.
+
 ## [1.6.2] - 2022-03-01
 
 Minor fixes to FireSim.
 
 ### Fixed
 * Bump to FireSim 1.13.3 (#1134)
-
 
 ## [1.6.1] - 2022-03-01
 
