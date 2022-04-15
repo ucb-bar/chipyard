@@ -1,0 +1,24 @@
+pull_request_rules:
+  # For Chipyard version 1.x.y, here let x = minor, y = patch
+  # Only support backporting to the last minor release branch.
+  # This rule will need to be updated on minor releases.
+  - name: backport to latest minor release
+    conditions:
+      - merged
+      - base=main
+      - label="Please Backport"
+    actions:
+      backport:
+        branches:
+          - 1.6.x
+        ignore_conflicts: True
+        label_conflicts: "bp-conflict"
+      label:
+        add: [Backported]
+
+  - name: label Mergify backport PR
+    conditions:
+      - body~=This is an automated backport of pull request \#\d+ d
+    actions:
+      label:
+        add: [Backport]
