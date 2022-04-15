@@ -33,7 +33,6 @@ jobs:
     runs-on: ubuntu-latest
     # Queried by downstream jobs to determine if they should run.
     outputs:
-      needs-docs:    ${{ steps.filter.outputs.docs }}
       needs-rtl: ${{ steps.filter.outputs.all_count != steps.filter.outputs.skip-rtl_count }}
 
     steps:
@@ -100,7 +99,6 @@ jobs:
   documentation-check:
     name: documentation-check
     needs: change-filters
-    if: needs.change-filters.outputs.needs-docs == 'true'
     runs-on: ubuntu-latest
     container:
       image: ucbbar/chipyard-ci-image:554b436
