@@ -11,3 +11,13 @@ class BrainiacConfig extends Config(
   new brainiac.WithBrainiacLoopPredictor ++
   new brainiac.WithNBrainiacCores(1) ++
   new chipyard.config.AbstractConfig)
+
+class Brainiac3WideConfig extends Config(
+  new brainiac.WithBrainiacFetchWidth(16) ++
+  new brainiac.WithBrainiacRetireWidth(3) ++
+  new BrainiacConfig)
+
+class Brainiac4WideConfig extends Config(
+  new brainiac.WithBrainiacFetchWidth(16) ++
+  new brainiac.WithBrainiacRetireWidth(4) ++
+  new BrainiacConfig)
