@@ -21,3 +21,9 @@ class Brainiac4WideConfig extends Config(
   new brainiac.WithBrainiacFetchWidth(16) ++
   new brainiac.WithBrainiacRetireWidth(4) ++
   new BrainiacConfig)
+
+class BrainiacAndRocketConfig extends Config(
+  new brainiac.WithBrainiacCSRs(0x3000000) ++
+  new brainiac.WithNBrainiacCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
