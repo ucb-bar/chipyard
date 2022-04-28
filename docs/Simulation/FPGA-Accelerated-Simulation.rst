@@ -40,13 +40,12 @@ Finally, source the following environment at the root of the firesim directory:
 .. Note:: Every time you want to use FireSim with a fresh shell, you must source this ``sourceme-f1-manager.sh``
 
 At this point you're ready to use FireSim with Chipyard. If you're not already
-familiar with FireSim, please return to the `FireSim Docs
-<https://docs.fires.im/en/latest/Initial-Setup/Setting-up-your-Manager-Instance.html#completing-setup-using-the-manager>`__,
+familiar with FireSim, please return to the :fsim_doc:`FireSim Docs <Initial-Setup/Setting-up-your-Manager-Instance.html#completing-setup-using-the-manager>`,
 and proceed with the rest of the tutorial.
 
 Running your Design in FireSim
 ------------------------------
-Converting a Chipyard config (one in ``chipyard/src/main/scala`` to run in FireSim is simple, and can be done either through the traditional configuration system or through FireSim's build-recipes scheme. 
+Converting a Chipyard config (one in ``chipyard/src/main/scala`` to run in FireSim is simple, and can be done either through the traditional configuration system or through FireSim's build-recipes scheme.
 
 A FireSim simulation requires 3 additional config fragments:
 

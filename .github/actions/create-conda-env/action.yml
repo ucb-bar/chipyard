@@ -1,0 +1,18 @@
+name: create-conda-env
+description: 'Create conda environments if they dont exist'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Create conda environments
+      run: |
+        if conda env list | grep -q "envs/${{ env.conda-env-name-no-time }}"; then
+          echo "Using pre-existing conda environments with prefix ${{ env.conda-env-name-no-time }}"
+        else
+          echo "Creating a conda environment for each toolchain"
+          conda env create -f ./scripts/conda-requirements.yaml -n ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
+          conda install -n ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools -c ucb-bar -y riscv-tools
+          conda env create -f ./scripts/conda-requirements.yaml -n ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-esp-tools
+          conda install -n ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-esp-tools -c ucb-bar -y esp-tools
+        fi
+      shell: bash -leo pipefail {0}

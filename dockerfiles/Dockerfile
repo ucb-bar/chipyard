@@ -2,59 +2,53 @@
 
 # BUILD BASE FOR CI
 
-FROM ubuntu:18.04 as base
+FROM ubuntu:20.04 as base
 ARG CHIPYARD_HASH
 
 MAINTAINER https://groups.google.com/forum/#!forum/chipyard
 
-SHELL ["/bin/bash", "-c"] 
+SHELL ["/bin/bash", "-c"]
 
 # Install dependencies for ubuntu-req.sh
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-               curl \
-               git \
-               sudo \
-               ca-certificates \
-               keyboard-configuration \
-               console-setup \
-               bc \
-               unzip
+    curl \
+    wget \
+    git \
+    sudo \
+    ca-certificates \
+    keyboard-configuration \
+    console-setup \
+    bc \
+    unzip
 
 WORKDIR /root
 
 # Install Chipyard and run ubuntu-req.sh to install necessary dependencies
 RUN git clone https://github.com/ucb-bar/chipyard.git && \
         cd chipyard && \
-        git checkout $CHIPYARD_HASH && \
-        ./scripts/ubuntu-req.sh 1>/dev/null && \
-        sudo rm -rf /var/lib/apt/lists/*
+        git checkout $CHIPYARD_HASH
 
-# Update PATH for RISCV toolchain (note: hardcoded for CircleCI)
-ENV RISCV="/root/riscv-tools-install"
-ENV LD_LIBRARY_PATH="$RISCV/lib"
-ENV PATH="$RISCV/bin:$PATH"
+RUN ./chipyard/scripts/install-conda.sh
 
 # BUILD IMAGE WITH TOOLCHAINS
 
 # Use above build as base
 FROM base as base-with-tools
 
+SHELL ["/bin/bash", "-cl"]
+
+RUN conda env create -f ./chipyard/scripts/conda-requirements.yaml
+
+# Install riscv-tools
+RUN conda install -n chipyard -c ucb-bar ucb-bar-riscv-tools
+
+SHELL ["/opt/conda/bin/conda", "run", "-n", "chipyard", "/bin/bash", "-cl"]
+
 # Init submodules
 RUN cd chipyard && \
         export MAKEFLAGS=-"j $(nproc)" && \
-        ./scripts/init-submodules-no-riscv-tools.sh 1>/dev/null
-
-# Install riscv-tools
-RUN cd chipyard && \
-        export MAKEFLAGS=-"j $(nproc)" && \
-        ./scripts/build-toolchains.sh riscv-tools 1>/dev/null
-
-# Install esp-tools
-RUN cd chipyard && \
-        export MAKEFLAGS=-"j $(nproc)" && \
-        ./scripts/build-toolchains.sh esp-tools 1>/dev/null
-
+        ./scripts/init-submodules-no-riscv-tools.sh --skip-validate 1>/dev/null
 
 # Set up FireMarshal. Building and cleaning br-base.json builds the underlying
 # buildroot image (which takes a long time) but doesn't keep all the br-base
@@ -64,9 +58,8 @@ RUN cd chipyard && \
         cd software/firemarshal && \
         ./init-submodules.sh && \
         pip3 install -r python-requirements.txt && \
-        marshal build br-base.json && \
-        marshal clean br-base.json
-        
+        ./marshal build br-base.json && \
+        ./marshal clean br-base.json
 
 # Run script to set environment variables on entry
 ENTRYPOINT ["chipyard/scripts/entrypoint.sh"]

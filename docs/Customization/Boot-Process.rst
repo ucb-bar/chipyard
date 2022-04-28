@@ -74,6 +74,6 @@ mode, thus starting userspace execution.
 The easiest way to build a BBL image that boots Linux is to use the FireMarshal
 tool that lives in the `firesim-software <https://github.com/firesim/firesim-software>`_
 repository. Directions on how to use FireMarshal can be found in the
-`FireSim documentation <https://docs.fires.im/en/latest/Advanced-Usage/FireMarshal/index.html>`_.
+:fsim_doc:`FireSim documentation <Advanced-Usage/FireMarshal/index.html>`.
 Using FireMarshal, you can add custom kernel configurations and userspace software
 to your workload.

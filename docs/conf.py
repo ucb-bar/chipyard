@@ -32,14 +32,17 @@ import subprocess
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc',
+extensions = [
+    'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
-    'sphinx.ext.autosectionlabel']
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.extlinks',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -67,6 +70,8 @@ if on_rtd:
     for item, value in os.environ.items():
         print("[READTHEDOCS] {} = {}".format(item, value))
 
+# default to latest for non rtd builds (this will be overridden on rtd)
+rtd_version = "latest"
 if on_rtd:
     rtd_version = os.environ.get("READTHEDOCS_VERSION")
     if rtd_version == "latest":
@@ -93,7 +98,7 @@ release = version
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -227,3 +232,8 @@ intersphinx_mapping = {'python' : ('https://docs.python.org/', None),
 
 # resolve label conflict between documents
 autosectionlabel_prefix_document = True
+
+# shorten FireSim references
+extlinks = {
+    'fsim_doc' : ('https://docs.fires.im/en/' + rtd_version + '/%s', 'fsim_doc %s')
+}

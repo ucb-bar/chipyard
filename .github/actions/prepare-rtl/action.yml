@@ -13,28 +13,30 @@ inputs:
     description: type of build
     required: false
     default: "sim"
+  toolchain:
+    description: toolchain to use
+    required: false
+    default: "riscv-tools"
 
 runs:
   using: "composite"
   steps:
-    - name: Build RISC-V toolchains
-      uses: ./.github/actions/toolchain-build
-
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       id: rtl-build-id
       with:
         path: |
           sims/verilator
           sims/firesim/sim
           generators/gemmini/software/gemmini-rocc-tests
-        key: ${{ inputs.group-key }}-${{ github.ref }}-${{ github.sha }}
+        key: ${{ inputs.group-key }}-${{ github.sha }}
 
     - name: Run RTL build if not cached
       run: |
+        conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-${{ inputs.toolchain }}
         if [[ "${{ steps.rtl-build-id.outputs.cache-hit }}" != 'true' ]]; then
-          echo "Cache miss on ${{ inputs.group-key }}-${{ github.ref }}-${{ github.sha }}"
+          echo "Cache miss on ${{ inputs.group-key }}-${{ github.sha }}"
           ./.github/scripts/${{ inputs.build-script }} ${{ inputs.group-key }} ${{ inputs.build-type }}
         else
           echo "Cache hit do not rebuild RTL for ${{ inputs.group-key }}"
         fi
-      shell: bash
+      shell: bash -leo pipefail {0}

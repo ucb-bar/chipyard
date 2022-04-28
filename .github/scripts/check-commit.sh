@@ -52,28 +52,6 @@ dir="generators"
 branches=("master" "main" "dev")
 search
 
-submodules=("riscv-gnu-toolchain" "riscv-isa-sim" "riscv-pk" "riscv-tests")
-dir="toolchains/esp-tools"
-branches=("master")
-search
-
-
-submodules=("riscv-gnu-toolchain" "riscv-isa-sim" "riscv-pk" "riscv-tests")
-dir="toolchains/riscv-tools"
-branches=("master")
-search
-
-# riscv-openocd doesn't use its master branch
-submodules=("riscv-openocd")
-dir="toolchains/riscv-tools"
-branches=("riscv")
-search
-
-submodules=("qemu" "libgloss")
-dir="toolchains"
-branches=("master")
-search
-
 submodules=("coremark" "firemarshal" "nvdla-workload" "spec2017")
 dir="software"
 branches=("master" "dev")
@@ -82,11 +60,6 @@ search
 submodules=("DRAMSim2" "axe" "barstools" "chisel-testers" "dsptools" "rocket-dsp-utils" "torture")
 dir="tools"
 branches=("master" "dev")
-search
-
-submodules=("dromajo-src")
-dir="tools/dromajo"
-branches=("master")
 search
 
 submodules=("firesim")
