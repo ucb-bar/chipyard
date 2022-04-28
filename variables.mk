@@ -154,6 +154,8 @@ JAVA_OPTS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -XX:MaxPermSize=256M
 # by default build chisel3/firrtl and other subprojects from source
 override SBT_OPTS += -Dsbt.sourcemode=true -Dsbt.workspace=$(base_dir)/tools
 
+override SBT_OPTS += -DfirrtlVersion=1.4.1
+
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
 SBT_THIN_CLIENT_TIMESTAMP = $(base_dir)/project/target/active.json
