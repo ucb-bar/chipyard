@@ -4,102 +4,93 @@ import freechips.rocketchip.config.{Config}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 import freechips.rocketchip.subsystem.{SBUS, MBUS}
 import constellation.channel.{UserVirtualChannelParams}
-import constellation.routing.{RoutingRelation}
+import constellation.routing._
+import constellation.topology._
 
 
-class DualRocketNoCConfig extends Config(
-  new constellation.rc.WithNbusNoC(1, i => i % 10) ++
+/*
+ * SI/SO: Inward/outward names into sbus
+ * MI/MO: Inward/otward names into mbus
+ *
+ *   DRAM 0       | DRAM 1       | DRAM 2       | DRAM 3
+ *   MO:system[0] | MO:system[1] | MO:system[2] | MO:system[3]
+ *   MO:serdesser |              |              |
+ *   _____________|______________|______________|_____________
+ *                |              |              |
+ *                |              |              |
+ *                |              |              |
+ *   _____________|______________|______________|_____________
+ *                | L2_0         | L2_1         | Core0+Pbus
+ *                | SO:system[0] | SO:system[1] | SI:Core 0
+ *                | MI:L2[0]     | MI:L2[1]     | SO:pbus
+ *   _____________|______________|______________|_____________
+ *   FBus         | L2_4         | L2_3         |
+ *   SI:serial-tl | SO:System[2] | SO:system[3] |
+ *                | MI:L2[2]     | MI:L2[3]     |
+ */
+class BigNoCConfig extends Config(
+  new constellation.rc.WithNbusNoC(7, i => i % 16, Some(16)) ++
   new constellation.routing.WithNNonblockingVirtualNetworks(5) ++
-  new constellation.noc.WithTerminalPlane ++
-  new constellation.channel.WithUniformNVirtualChannels(5, UserVirtualChannelParams(5)) ++
-  new constellation.topology.WithMesh2DTopology(2, 5, RoutingRelation.mesh2DDimensionOrdered()) ++
+  new constellation.channel.WithUniformNVirtualChannels(5, UserVirtualChannelParams(4)) ++
+  new constellation.routing.WithTerminalPlaneRouting ++
+  new constellation.routing.WithRoutingRelation(new Mesh2DDimensionOrderedRouting(4, 4)) ++
+  new constellation.topology.WithTerminalPlane ++
+  new constellation.topology.WithTopology(new Mesh2D(4, 4)) ++
 
-  new constellation.rc.WithMbusGlobalNoC ++
-  new constellation.rc.WithSbusGlobalNoC ++
-  new constellation.routing.WithNNonblockingVirtualNetworksWithSharing(10, 3) ++
-  new constellation.noc.WithTerminalPlane ++
-  new constellation.channel.WithUniformNVirtualChannels(13, UserVirtualChannelParams(5)) ++
-  new constellation.topology.WithMesh2DTopology(2, 5, RoutingRelation.mesh2DEscapeRouter) ++
-
-
-  new constellation.rc.WithMbusNoCOutNodeMapping("serdesser", 9) ++
-  new constellation.rc.WithMbusNoCOutNodeMapping("system", 8) ++
-  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[3]", 7) ++
-  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[2]", 6) ++
-  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[1]", 5) ++
-  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[0]", 4) ++
-  new constellation.rc.WithMbusNoC ++
-
-  new constellation.rc.WithSbusNoCOutNodeMapping("system[3]", 7) ++
-  new constellation.rc.WithSbusNoCOutNodeMapping("system[2]", 6) ++
-  new constellation.rc.WithSbusNoCOutNodeMapping("system[1]", 5) ++
-  new constellation.rc.WithSbusNoCOutNodeMapping("system[0]", 4) ++
-  new constellation.rc.WithSbusNoCOutNodeMapping("pbus"     , 1) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("Core 1"   , 3) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("Core 0"   , 2) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("serial-tl", 0) ++
-  new constellation.rc.WithSbusNoC ++
-
-  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
-  new freechips.rocketchip.subsystem.WithNBanks(4) ++
-  new chipyard.config.AbstractConfig)
-
-class DecaRocketNoCConfig extends Config(
-  new constellation.rc.WithNbusNoC(11, i => i % 16) ++
-  new constellation.routing.WithNNonblockingVirtualNetworks(5) ++
-  new constellation.noc.WithTerminalPlane ++
-  new constellation.channel.WithUniformNVirtualChannels(5, UserVirtualChannelParams(5)) ++
-  new constellation.topology.WithMesh2DTopology(4, 4, RoutingRelation.mesh2DDimensionOrdered()) ++
-
+  new constellation.rc.WithGlobalNoCWidth(300) ++
   new constellation.rc.WithMbusGlobalNoC ++
   new constellation.rc.WithSbusGlobalNoC ++
   new constellation.noc.WithNoParamValidation ++
-  new constellation.routing.WithNNonblockingVirtualNetworksWithSharing(10, 3) ++
-  new constellation.noc.WithTerminalPlane ++
+
   new constellation.channel.WithUniformNVirtualChannels(13, UserVirtualChannelParams(5)) ++
-  new constellation.topology.WithMesh2DTopology(4, 4, RoutingRelation.mesh2DEscapeRouter) ++
+  new constellation.routing.WithNNonblockingVirtualNetworksWithSharing(10, 3) ++
+  new constellation.routing.WithTerminalPlaneRouting ++
+  new constellation.routing.WithRoutingRelation(new Mesh2DEscapeRouting(4, 4)) ++
+  new constellation.topology.WithTerminalPlane ++
+  new constellation.topology.WithTopology(new Mesh2D(4, 4)) ++
 
 
-  new constellation.rc.WithMbusNoCOutNodeMapping("serdesser",  9) ++
-  new constellation.rc.WithMbusNoCOutNodeMapping("system[3]", 15) ++
-  new constellation.rc.WithMbusNoCOutNodeMapping("system[2]", 14) ++
-  new constellation.rc.WithMbusNoCOutNodeMapping("system[1]", 13) ++
+  new constellation.rc.WithMbusNoCOutNodeMapping("serdesser", 12) ++
   new constellation.rc.WithMbusNoCOutNodeMapping("system[0]", 12) ++
-  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[7]", 7) ++
-  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[6]", 6) ++
-  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[5]", 5) ++
-  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[4]", 4) ++
-  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[3]", 3) ++
-  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[2]", 2) ++
-  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[1]", 1) ++
-  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[0]", 0) ++
+  new constellation.rc.WithMbusNoCOutNodeMapping("system[1]", 13) ++
+  new constellation.rc.WithMbusNoCOutNodeMapping("system[2]", 14) ++
+  new constellation.rc.WithMbusNoCOutNodeMapping("system[3]", 15) ++
+  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[3]", 2) ++
+  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[2]", 1) ++
+  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[1]", 6) ++
+  new constellation.rc.WithMbusNoCInNodeMapping("L2 InclusiveCache[0]", 5) ++
   new constellation.rc.WithMbusNoC ++
 
-  new constellation.rc.WithSbusNoCOutNodeMapping("system[7]",  7) ++
-  new constellation.rc.WithSbusNoCOutNodeMapping("system[6]",  6) ++
-  new constellation.rc.WithSbusNoCOutNodeMapping("system[5]",  5) ++
-  new constellation.rc.WithSbusNoCOutNodeMapping("system[4]",  4) ++
-  new constellation.rc.WithSbusNoCOutNodeMapping("system[3]",  3) ++
-  new constellation.rc.WithSbusNoCOutNodeMapping("system[2]",  2) ++
-  new constellation.rc.WithSbusNoCOutNodeMapping("system[1]",  1) ++
-  new constellation.rc.WithSbusNoCOutNodeMapping("system[0]",  0) ++
-  new constellation.rc.WithSbusNoCOutNodeMapping("pbus"     , 11) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("Core 9"   ,  7) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("Core 8"   ,  6) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("Core 7"   ,  5) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("Core 6"   ,  4) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("Core 5"   ,  3) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("Core 4"   ,  2) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("Core 3"   ,  1) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("Core 2"   ,  0) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("Core 1"   , 10) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("Core 0"   ,  9) ++
-  new constellation.rc.WithSbusNoCInNodeMapping ("serial-tl",  8) ++
-
+  new constellation.rc.WithSbusNoCOutNodeMapping("system[3]", 2) ++
+  new constellation.rc.WithSbusNoCOutNodeMapping("system[2]", 1) ++
+  new constellation.rc.WithSbusNoCOutNodeMapping("system[1]", 6) ++
+  new constellation.rc.WithSbusNoCOutNodeMapping("system[0]", 5) ++
+  new constellation.rc.WithSbusNoCOutNodeMapping("pbus"     , 7) ++
+  new constellation.rc.WithSbusNoCInNodeMapping ("Core 4"   , 2) ++
+  new constellation.rc.WithSbusNoCInNodeMapping ("Core 3"   , 1) ++
+  new constellation.rc.WithSbusNoCInNodeMapping ("Core 2"   , 6) ++
+  new constellation.rc.WithSbusNoCInNodeMapping ("Core 1"   , 5) ++
+  new constellation.rc.WithSbusNoCInNodeMapping ("Core 0"   , 7) ++
+  new constellation.rc.WithSbusNoCInNodeMapping ("serial-tl", 0) ++
   new constellation.rc.WithSbusNoC ++
 
-  new freechips.rocketchip.subsystem.WithNBigCores(10) ++
+  new chipyard.config.WithSystemBusWidth(256) ++
+  // Cores 1-4 are interior
+  new freechips.rocketchip.subsystem.WithNBigCores(4) ++
+
+  // Core 0 is small control core, minimize cache
+  new freechips.rocketchip.subsystem.WithL1ICacheSets(64) ++
+  new freechips.rocketchip.subsystem.WithL1ICacheWays(1) ++
+  new freechips.rocketchip.subsystem.WithL1DCacheSets(64) ++
+  new freechips.rocketchip.subsystem.WithL1DCacheWays(1) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+
+  // 4 L2 banks
+  new freechips.rocketchip.subsystem.WithNBanks(4)++
+
+
+  // 4 DRAM channels
   new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
-  new freechips.rocketchip.subsystem.WithNBanks(8) ++
-  new chipyard.config.AbstractConfig
-)
+
+
+  new chipyard.config.AbstractConfig)
