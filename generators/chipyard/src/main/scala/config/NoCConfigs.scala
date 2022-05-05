@@ -29,7 +29,18 @@ import constellation.topology._
  *                | MI:L2[2]     | MI:L2[3]     |
  */
 class BigNoCConfig extends Config(
-  new constellation.rc.WithNbusNoC(7, i => i % 16, Some(16)) ++
+  new constellation.rc.WithCBusNoCGlobalNoCCtrlMapping((i) => i % 16) ++
+  new constellation.rc.WithCbusNoCOutNodeMapping("chipyardPRCI[1]", 7) ++
+  new constellation.rc.WithCbusNoCOutNodeMapping("chipyardPRCI[0]", 7) ++
+  new constellation.rc.WithCbusNoCOutNodeMapping("bootrom", 7) ++
+  new constellation.rc.WithCbusNoCOutNodeMapping("dmInner", 7) ++
+  new constellation.rc.WithCbusNoCOutNodeMapping("clint", 7) ++
+  new constellation.rc.WithCbusNoCOutNodeMapping("plic", 7) ++
+  new constellation.rc.WithCbusNoCOutNodeMapping("pbus", 7) ++
+  new constellation.rc.WithCbusNoCOutNodeMapping("l2", 7) ++ // TODO fix this should be per L2 bank
+  new constellation.rc.WithCbusNoCOutNodeMapping("error", 7) ++
+  new constellation.rc.WithCbusNoCInNodeMapping("", 7) ++
+  new constellation.rc.WithCbusNoC(explicitWidth = Some(16)) ++
   new constellation.routing.WithNNonblockingVirtualNetworks(5) ++
   new constellation.channel.WithUniformNVirtualChannels(5, UserVirtualChannelParams(4)) ++
   new constellation.routing.WithTerminalPlaneRouting ++
@@ -42,7 +53,7 @@ class BigNoCConfig extends Config(
   new constellation.rc.WithSbusGlobalNoC ++
   new constellation.noc.WithNoParamValidation ++
 
-  new constellation.channel.WithUniformNVirtualChannels(13, UserVirtualChannelParams(5)) ++
+  new constellation.channel.WithUniformNVirtualChannels(13, UserVirtualChannelParams(7)) ++
   new constellation.routing.WithNNonblockingVirtualNetworksWithSharing(10, 3) ++
   new constellation.routing.WithTerminalPlaneRouting ++
   new constellation.routing.WithRoutingRelation(new Mesh2DEscapeRouting(4, 4)) ++
@@ -75,7 +86,7 @@ class BigNoCConfig extends Config(
   new constellation.rc.WithSbusNoC ++
 
   new chipyard.config.WithSystemBusWidth(256) ++
-  // Cores 1-4 are interior
+  // Cores 1-4 are standard processing cores
   new freechips.rocketchip.subsystem.WithNBigCores(4) ++
 
   // Core 0 is small control core, minimize cache

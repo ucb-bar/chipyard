@@ -24,7 +24,6 @@ import freechips.rocketchip.amba.axi4._
 
 import boom.common.{BoomTile}
 
-import constellation.rc.{NBUS}
 import testchipip.{DromajoHelper, CanHavePeripheryTLSerial, SerialTLKey}
 
 trait CanHaveHTIF { this: BaseSubsystem =>
@@ -70,7 +69,7 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
   // bus clocks to be given names of the form "subsystem_sbus_[0-9]*".
   // Conversly, if an async crossing is used, they instead receive names of the
   // form "subsystem_cbus_[0-9]*". The assignment below provides the latter names in all cases.
-  Seq(PBUS, FBUS, MBUS, CBUS, NBUS).foreach { loc => {
+  Seq(PBUS, FBUS, MBUS, CBUS).foreach { loc => {
     tlBusWrapperLocationMap.lift(loc).foreach { _.clockGroupNode := asyncClockGroupsNode }
   }}
   override lazy val module = new ChipyardSubsystemModuleImp(this)
