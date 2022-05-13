@@ -21,26 +21,44 @@ import constellation.topology._
  * As with all other CDE Configs, the configuration is built up from
  * bottom-up.
  *
- * This table describes the mappings of each edge onto the network
+ * Topology:
  *
+ * 12 - 13 - 14 - 15
+ *  |    |    |    |
+ *  8 -- 9 - 10 - 11
+ *  |    |    |    |
+ *  4 -- 5 -- 6 -- 7
+ *  |    |    |    |
+ *  0 -- 1 -- 2 -- 3
+ *
+ * This table describes the mappings of each edge onto the network
+ * Note that L2s are managers (outwards edges) from the sbus, but are
+ * clients (inwards edges) into the mbus
+ * 
  * SI/SO: Inward/outward names into sbus
  * MI/MO: Inward/otward names into mbus
  *
- *   DRAM 0       | DRAM 1       | DRAM 2       | DRAM 3
- *   MO:system[0] | MO:system[1] | MO:system[2] | MO:system[3]
- *   MO:serdesser |              |              |
- *   _____________|______________|______________|_____________
- *   Core1        | Core2        | Core3        | Core4
- *   SI:Core 1    | SI:Core 2    | SI:Core 3    | SI:Core 4
- *                |              |              |
- *   _____________|______________|______________|_____________
- *                | L2_0         | L2_1         | Core0+Pbus
- *                | SO:system[0] | SO:system[1] | SI:Core 0
- *                | MI:L2[0]     | MI:L2[1]     | SO:pbus
- *   _____________|______________|______________|_____________
- *   FBus         | L2_4         | L2_3         |
- *   SI:serial-tl | SO:System[2] | SO:system[3] |
- *                | MI:L2[2]     | MI:L2[3]     |
+ *   |(12)__________|(13)__________|(14)__________|(15)__________|
+ *   | DRAM 0       | DRAM 1       | DRAM 2       | DRAM 3       |
+ *   | MO:system[0] | MO:system[1] | MO:system[2] | MO:system[3] |
+ *   | MO:serdesser |              |              |              |
+ *   |              |              |              |              |
+ *   |(8)___________|(9)___________|(10)__________|(11)__________|
+ *   | Core1        | Core2        | Core3        | Core4        |
+ *   | SI:Core 1    | SI:Core 2    | SI:Core 3    | SI:Core 4    |
+ *   |              |              |              |              |
+ *   |              |              |              |              |
+ *   |(4)___________|(5)___________|(6)___________|(7)___________|
+ *   |              | L2_0         | L2_1         | Core0+Pbus   |
+ *   |              | SO:system[0] | SO:system[1] | SI:Core 0    |
+ *   |              | MI:L2[0]     | MI:L2[1]     | SO:pbus      |
+ *   |              |              |              |              |
+ *   |(0)___________|(1)___________|(2)___________|(3)___________|
+ *   | FBus         | L2_4         | L2_3         |              |
+ *   | SI:serial_tl | SO:System[2] | SO:system[3] |              |
+ *   |              | MI:L2[2]     | MI:L2[3]     |              |
+ *   |              |              |              |              |
+ *   |______________|______________|______________|______________|
  */
 class BigNoCConfig extends Config(
   // Map the inwards and outwards edges of the cbus to cbus NoC nodes
