@@ -19,14 +19,8 @@ class ChipyardStage extends ChiselStage {
     Dependency[freechips.rocketchip.stage.phases.Checks],
     Dependency[freechips.rocketchip.stage.phases.TransformAnnotations],
     Dependency[freechips.rocketchip.stage.phases.PreElaboration],
-    Dependency[chisel3.stage.phases.Checks],
-    Dependency[chisel3.stage.phases.Elaborate],
-    Dependency[freechips.rocketchip.stage.phases.GenerateROMs],
-    Dependency[chisel3.stage.phases.AddImplicitOutputFile],
-    Dependency[chisel3.stage.phases.AddImplicitOutputAnnotationFile],
-    Dependency[chisel3.stage.phases.MaybeAspectPhase],
-    Dependency[chisel3.stage.phases.Emitter],
-    Dependency[chisel3.stage.phases.Convert],
+    // Note: Dependency[RocketChiselStage] is not listed here because it is
+    // package private, however it is named as a prereq for the passes below.
     Dependency[freechips.rocketchip.stage.phases.GenerateFirrtlAnnos],
     Dependency[freechips.rocketchip.stage.phases.AddDefaultTests],
     Dependency[chipyard.stage.phases.AddDefaultTests],
