@@ -230,6 +230,15 @@ class WithFireSimFAME5 extends ComposeIOBinder({
   }
 })
 
+class RocketCoreMonitorILA extends ComposeIOBinder({
+  (system: HasTilesModuleImp) => {
+    system.outer.tiles.foreach { case r: RocketTile =>
+      val core = r.module.core.rocketImpl
+      midas.targetutils.FpgaDebug(core.coreMonitorBundle)
+    }
+    (Nil, Nil)
+  }
+})
 // Shorthand to register all of the provided bridges above
 class WithDefaultFireSimBridges extends Config(
   new WithSerialBridge ++
@@ -239,6 +248,7 @@ class WithDefaultFireSimBridges extends Config(
   new WithFASEDBridge ++
   new WithFireSimMultiCycleRegfile ++
   new WithFireSimFAME5 ++
+  new RocketCoreMonitorILA ++
   new WithTracerVBridge ++
   new WithFireSimIOCellModels
 )
