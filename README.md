@@ -4,9 +4,9 @@
 
 ## Quick Links
 
-* **STABLE DOCUMENTATION**: https://chipyard.readthedocs.io/
-* **USER QUESTION FORUM**: https://groups.google.com/forum/#!forum/chipyard
-* **BUGS AND FEATURE-REQUESTS**: https://github.com/ucb-bar/chipyard/issues
+* **Stable Documentation**: https://chipyard.readthedocs.io/
+* **User Question Forum**: https://groups.google.com/forum/#!forum/chipyard
+* **Bugs and Feature Requests**: https://github.com/ucb-bar/chipyard/issues
 
 ## Using Chipyard
 
