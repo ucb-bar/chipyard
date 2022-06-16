@@ -72,7 +72,7 @@ it can be mixed into a Rocket or BOOM core by overriding the
 generator. An example configuration highlighting the use of
 this config fragment is shown here:
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketSha3Configs.scala
    :language: scala
    :start-after: DOC include start: Sha3Rocket
    :end-before: DOC include end: Sha3Rocket

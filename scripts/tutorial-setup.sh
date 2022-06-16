@@ -2,7 +2,8 @@
 
 set -e -x
 
-rm -rf generators/sha3
+git rm generators/chipyard/src/main/scala/config/RocketSha3Configs.scala
+git rm -rf generators/sha3
 
 for p in scripts/tutorial-patches/*.patch
 do
