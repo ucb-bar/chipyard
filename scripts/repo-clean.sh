@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # this should be run from chipyard repo top
 TOPDIR=$(pwd)
 
