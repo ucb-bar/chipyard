@@ -1,0 +1,21 @@
+# SRAM Compiler compiler options
+vlsi.core.sram_generator_tool: "sram_compiler"
+# You should specify a location for the SRAM generator in the tech plugin
+vlsi.core.sram_generator_tool_path: []
+vlsi.core.sram_generator_tool_path_meta: "append"
+
+# Tool options. Replace with your tool plugin of choice.
+# Yosys options
+vlsi.core.synthesis_tool: "yosys"
+vlsi.core.synthesis_tool_path: ["hammer/src/hammer-vlsi/synthesis"]
+vlsi.core.synthesis_tool_path_meta: "append"
+# Innovus options
+vlsi.core.par_tool: "openroad"
+vlsi.core.par_tool_path: ["hammer/src/hammer-vlsi/par"]
+vlsi.core.par_tool_path_meta: "append"
+# Magic options
+vlsi.core.drc_tool: "magic"
+vlsi.core.drc_tool_path: ["hammer/src/hammer-vlsi/drc"]
+# Netgen options
+vlsi.core.lvs_tool: "netgen"
+vlsi.core.lvs_tool_path: ["hammer/src/hammer-vlsi/lvs"]
