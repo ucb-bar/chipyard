@@ -33,3 +33,4 @@ vlsi.core.power_tool: "voltus"
 vlsi.core.power_tool_path: ["hammer-cadence-plugins/power"]
 vlsi.core.power_tool_path_meta: "append"
 power.voltus.version: "191_ISR3"
+# NOTE (about VCS+Voltus versions): if using FSDB, the VCS version should be approx 2 years older than the Voltus version for compatibility
