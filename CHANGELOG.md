@@ -2,6 +2,26 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.7.0] - 2022-06-18
+
+FireSim bump for local (on-premises) FPGA and distributed metasimulation support.
+
+### Added
+* Add a FireSim config with no mem port (#1172)
+
+### Changed
+* Bump FireSim to 1.14.0
+* Give the PRCI widgets valnames to clean up module naming (#1152)
+
+### Fixed
+* Add missing Apache commons dependencies (fixes #1144) (#1147)
+* Disable Boost for spike (#1168)
+* VCS enhancements (#1150)
+    * Support multi-thread VCS simv option like FGP, Xprof etc.
+    * Idle tsi in the target thread
+* Don't shallow clone submodules (revert #1064) (#1143)
+* Remove extra spaces in FPGA makefile (#1135)
+
 ## [1.6.3] - 2022-04-06
 
 FireSim bump for various fixes. Revert shallow cloning. Various CI fixes.
