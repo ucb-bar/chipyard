@@ -71,9 +71,6 @@
 [submodule "tools/chisel-testers"]
 	path = tools/chisel-testers
 	url = https://github.com/freechipsproject/chisel-testers.git
-[submodule "generators/sha3"]
-	path = generators/sha3
-	url = https://github.com/ucb-bar/sha3.git
 [submodule "vlsi/hammer-cadence-plugins"]
 	path = vlsi/hammer-cadence-plugins
 	url = https://github.com/ucb-bar/hammer-cadence-plugins.git

@@ -116,7 +116,7 @@ cd "$CHIPYARD_DIR"
 set -x
 
 # Non-recursive clone to exclude riscv-linux
-git submodule update --init generators/sha3
+#git submodule update --init generators/sha3
 
 # Non-recursive clone to exclude gemmini-software
 git submodule update --init generators/gemmini
