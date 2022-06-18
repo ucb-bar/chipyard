@@ -4,10 +4,11 @@ This changelog follows the format defined here: https://keepachangelog.com/en/1.
 
 ## [1.7.0] - 2022-06-18
 
-FireSim bump for local (on-premises) FPGA and distributed metasimulation support.
+FireSim bump for local (on-premises) FPGA and distributed metasimulation support. Hammer now supports the OpenROAD open-source EDA tools for a fully open-source RTL-to-GDS VLSI flow.
 
 ### Added
 * Add a FireSim config with no mem port (#1172)
+* Hammer OpenROAD plugins: Yosys (syn), OpenROAD (par), Magic (drc), Netgen (lvs) (#1183)
 
 ### Changed
 * Bump FireSim to 1.14.0
