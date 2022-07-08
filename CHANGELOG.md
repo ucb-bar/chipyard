@@ -2,6 +2,13 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.7.1] - 2022-07-06
+
+FireSim bump for new builddriver command and various fixes. See FireSim 1.14.1 CHANGELOG.md.
+
+### Changed
+* Bump FireSim to 1.14.1
+
 ## [1.7.0] - 2022-06-18
 
 FireSim bump for local (on-premises) FPGA and distributed metasimulation support. Hammer now supports the OpenROAD open-source EDA tools for a fully open-source RTL-to-GDS VLSI flow.
