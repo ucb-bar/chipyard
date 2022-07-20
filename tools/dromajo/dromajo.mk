@@ -7,7 +7,7 @@ DROMAJO_LIB_NAME = dromajo_cosim
 DROMAJO_LIB = $(DROMAJO_DIR)/lib$(DROMAJO_LIB_NAME).a
 
 # Dromajo assumes using the default bootrom
-DROMAJO_ROM = $(base_dir)/bootrom/bootrom.rv64.img
+DROMAJO_ROM = $(build_dir)/bootrom.rv64.img
 
 DTS_FILE = $(build_dir)/$(long_name).dts
 DROMAJO_DTB = $(build_dir)/$(long_name).dtb
