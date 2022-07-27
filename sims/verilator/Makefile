@@ -125,7 +125,7 @@ VERILATOR_OPT_FLAGS ?= \
 
 # default flags added for external IP (cva6/NVDLA)
 VERILOG_IP_VERILATOR_FLAGS := \
-	-O1 \
+	-O0 \
 	--unroll-count 256 \
 	-Wno-PINCONNECTEMPTY \
 	-Wno-ASSIGNDLY \
