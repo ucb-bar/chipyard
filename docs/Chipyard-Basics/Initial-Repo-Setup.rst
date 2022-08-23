@@ -27,7 +27,7 @@ Conda allows users to create an "environment" that holds system dependencies lik
 
 First Chipyard requires there to be Conda installed on the system.
 Please refer to the `Conda installation instructions <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`__ on how to install Conda.
-Afterwards, verify that Conda is a sufficient version (we test on version 4.12.0/4.13.0).
+Afterwards, verify that Conda is a sufficient version (we test on version 4.12.0/4.13.0 but higher is most likely fine).
 
 .. code-block:: shell
 
@@ -40,7 +40,7 @@ This ``git`` is only used to first checkout the repository, we will later instal
 Setting up the Chipyard Repo
 -------------------------------------------
 
-Start by checkout out the proper Chipyard's version. Run:
+Start by checking out the proper Chipyard's version. Run:
 
 .. parsed-literal::
 
@@ -66,7 +66,7 @@ Next run the following command to create Chipyard's Conda environment.
 
     conda env create -f scripts/conda-requirements.yml
 
-By running the following command you should see a "chipyard" environment listed (the default environment is called "chipyard").
+By running the following command you should see a "chipyard" environment listed (the default environment is called "chipyard" and can be modified with ``conda`` arguments).
 
 .. code-block:: shell
 

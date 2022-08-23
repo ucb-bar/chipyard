@@ -76,6 +76,7 @@ cd "$CHIPYARD_DIR"
 
 (
     # Blocklist of submodules to initially skip:
+    # - Toolchain submodules
     # - Generators with huge submodules (e.g., linux sources)
     # - FireSim until explicitly requested
     # - Hammer tool plugins
@@ -83,6 +84,7 @@ cd "$CHIPYARD_DIR"
         # Call the given subcommand (shell function) on each submodule
         # path to temporarily exclude during the recursive update
         for name in \
+            toolchains/* \
             generators/sha3 \
             generators/gemmini \
             sims/firesim \

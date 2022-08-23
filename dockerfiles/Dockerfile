@@ -29,7 +29,7 @@ RUN git clone https://github.com/ucb-bar/chipyard.git && \
         cd chipyard && \
         git checkout $CHIPYARD_HASH
 
-RUN ./chipyard/scripts/install-conda.sh
+RUN ./chipyard/.github/scripts/install-conda.sh
 
 # BUILD IMAGE WITH TOOLCHAINS
 

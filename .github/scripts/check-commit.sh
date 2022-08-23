@@ -52,6 +52,11 @@ dir="generators"
 branches=("master" "main" "dev")
 search
 
+submodules=("riscv-tools" "esp-tools")
+dir="toolchains"
+branches=("main")
+search
+
 submodules=("coremark" "firemarshal" "nvdla-workload" "spec2017")
 dir="software"
 branches=("master" "dev")

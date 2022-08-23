@@ -31,7 +31,7 @@ body:
       description: OS setup for reproducibility
       placeholder: OS information
       value: |
-        Ex: Output of `uname -a` and `lsb_release -a`
+        Ex: Output of `uname -a` / `lsb_release -a` / `printenv`
     validations:
       required: true
 
