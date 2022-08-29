@@ -97,3 +97,33 @@
 [submodule "generators/fft-generator"]
 	path = generators/fft-generator
 	url = https://github.com/ucb-bar/FFTGenerator.git
+[submodule "toolchains/riscv-tools/riscv-tests"]
+	path = toolchains/riscv-tools/riscv-tests
+	url = https://github.com/riscv-software-src/riscv-tests.git
+[submodule "toolchains/riscv-tools/riscv-pk"]
+	path = toolchains/riscv-tools/riscv-pk
+	url = https://github.com/riscv-software-src/riscv-pk.git
+[submodule "toolchains/riscv-tools/riscv-openocd"]
+	path = toolchains/riscv-tools/riscv-openocd
+	url = https://github.com/riscv/riscv-openocd.git
+[submodule "toolchains/riscv-tools/riscv-isa-sim"]
+	path = toolchains/riscv-tools/riscv-isa-sim
+	url = https://github.com/riscv-software-src/riscv-isa-sim.git
+[submodule "toolchains/riscv-tools/riscv-tools-feedstock"]
+	path = toolchains/riscv-tools/riscv-tools-feedstock
+	url = https://github.com/ucb-bar/riscv-tools-feedstock.git
+[submodule "toolchains/esp-tools/esp-tools-feedstock"]
+	path = toolchains/esp-tools/esp-tools-feedstock
+	url = https://github.com/ucb-bar/esp-tools-feedstock.git
+[submodule "toolchains/esp-tools/riscv-isa-sim"]
+	path = toolchains/esp-tools/riscv-isa-sim
+	url = https://github.com/ucb-bar/esp-isa-sim.git
+[submodule "toolchains/esp-tools/riscv-pk"]
+	path = toolchains/esp-tools/riscv-pk
+	url = https://github.com/riscv-software-src/riscv-pk.git
+[submodule "toolchains/esp-tools/riscv-tests"]
+	path = toolchains/esp-tools/riscv-tests
+	url = https://github.com/ucb-bar/esp-tests.git
+[submodule "toolchains/libgloss"]
+	path = toolchains/libgloss
+	url = https://github.com/ucb-bar/libgloss-htif.git

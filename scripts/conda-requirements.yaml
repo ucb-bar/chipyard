@@ -1,4 +1,3 @@
-name: chipyard
 channels:
   - ucb-bar
   - conda-forge
