@@ -68,11 +68,25 @@ RUN cd chipyard && \
         ./scripts/build-toolchains.sh esp-tools 1>/dev/null
 
 # source environment variable
-RUN source env.sh
+RUN cd chipyard && \
+	source env.sh
+
+FROM base-with-tools as gemmini
+
+
+# Set up Gemmini
+RUN cd chipyard/generators/gemmini && \
+	git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*" && \
+	git fetch --depth=2147483647 && git checkout mlsys-tutorial-2022 && git pull origin dev && \
+	git submodule update
+
+RUN cd chipyard/toolchains/esp-tools/riscv-isa-sim/build && \
+	git fetch --depth=2147483647 && git checkout 051d820f08be84d069993de4375d29c91eb2f577 && \
+	make && make install
 
 # Patch pk to work with onnxruntime
 RUN cd chipyard/toolchains/esp-tools/riscv-pk && \
-	git remote add mlsys https://github.com/CobbledSteel/riscv-pk.git && \
+	git remote add mlsys https://github.com/hngenc/riscv-pk.git && \
 	git fetch mlsys && \
 	git checkout ort_pk_patch && \
 	mkdir -p build && \
@@ -81,16 +95,21 @@ RUN cd chipyard/toolchains/esp-tools/riscv-pk && \
 	make && \
 	make install 
 
+
+RUN pip3 install flake8
+
+# make sure onnx runtime is on MLSys tutorial branch
+RUN cd chipyard/generators/gemmini/software/onnxruntime-riscv && \
+	git checkout mlsys-tutorial-2022
+
 # update gemmini's onnxruntime
 RUN cd chipyard && \
 	 git -C generators/gemmini/ submodule update --init --recursive software/onnxruntime-riscv
 
-# TODO UPDATE TO USE COMMIT WITH PEP8 FIX
-RUN cd chipyard/generators/gemmini/software/onnxruntime-riscv && \
-	git checkout dev/fix-start-time && \
-	git submodule update --init --recursive
 
-RUN pip3 install flake8
+# RUN cd chipyard/generators/gemmini/software/onnxruntime-riscv && \
+# 	git checkout 2e6c3bb6a4b5ad49703a4d24b6153070f256c1b8 && \
+# 	git submodule update --init --recursive
 
 # Update PATH for RISCV toolchain (note: hardcoded for CircleCI)
 ENV RISCV="/root/chipyard/esp-tools-install"
@@ -99,29 +118,24 @@ ENV PATH="$RISCV/bin:$PATH"
 
 RUN ls $RISCV
 
-RUN cd chipyard/generators/gemmini/software/onnxruntime-riscv && \
-	./build.sh --config=Release --parallel --enable_training
+# MIDAS simulation
+# RUN cd chipyard/sims/firesim && \
+# 	git fetch --tags && git checkout 1.13.6 && \
+# 	./build-setup.sh --library --skip-validate
+
+# ONNX Runtime Set Up
+# to replace with running the scripts
 
 
-RUN cd chipyard/generators/gemmini/software/onnxruntime-riscv/systolic_runner/imagenet_runner && \
-	./build.sh --config=Release --parallel --enable_training
+# RUN cd chipyard/generators/gemmini/software/onnxruntime-riscv && \
+# 	./build.sh --config=Release --parallel --enable_training
 
-RUN cd chipyard/generators/gemmini/software/onnxruntime-riscv/systolic_runner/imagenet_trainer && \
-	./build.sh --config=Release --parallel --enable_training
+# RUN cd chipyard/generators/gemmini/software/onnxruntime-riscv/systolic_runner/imagenet_runner && \
+# 	./build.sh --config=Debug --parallel --enable_training --cmake_extra_defines onnxruntime_USE_SYSTOLIC=ON onnxruntime_SYSTOLIC_INT8=ON onnxruntime_SYSTOLIC_FP32=OFF
 
-
-# Set up FireMarshal. Building and cleaning br-base.json builds the underlying
-# buildroot image (which takes a long time) but doesn't keep all the br-base
-# stuff around (since that's faster to rebuild).
-#RUN cd chipyard && \
-#        source env.sh && \
-#        cd software/firemarshal && \
-#        ./init-submodules.sh && \
-#        pip3 install -r python-requirements.txt && \
-#        marshal build br-base.json && \
-#        marshal clean br-base.json
+# RUN cd chipyard/generators/gemmini/software/onnxruntime-riscv/systolic_runner/imagenet_trainer && \
+# 	./build.sh --config=Debug --parallel --enable_training --cmake_extra_defines onnxruntime_USE_SYSTOLIC=ON onnxruntime_SYSTOLIC_INT8=OFF onnxruntime_SYSTOLIC_FP32=ON
         
-
 # Run script to set environment variables on entry
 ENTRYPOINT ["chipyard/scripts/entrypoint.sh"]
 
