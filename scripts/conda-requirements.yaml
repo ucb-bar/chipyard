@@ -1,7 +1,8 @@
 name: chipyard
 channels:
-  - conda-forge
   - ucb-bar
+  - conda-forge
+  - nodefaults
 dependencies:
   # firemarshal deps
   - python=3.9
@@ -22,7 +23,7 @@ dependencies:
   - readline
   - coreutils
   - lzop
-  - qemu # from ucb-bar
+  - qemu # from ucb-bar channel - https://github.com/ucb-bar/qemu-feedstock
 
   # doc requirements
   - sphinx
@@ -44,7 +45,7 @@ dependencies:
   - verilator==4.034
 
   # chipyard deps
-  - dromajo # from ucb-bar
+  - dromajo # from ucb-bar channel - https://github.com/riscv-boom/dromajo
 
   # other misc. deps
   - ca-certificates

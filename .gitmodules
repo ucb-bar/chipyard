@@ -97,9 +97,3 @@
 [submodule "generators/fft-generator"]
 	path = generators/fft-generator
 	url = https://github.com/ucb-bar/FFTGenerator.git
-[submodule "toolchains/esp-tools"]
-	path = toolchains/esp-tools
-	url = https://github.com/ucb-bar/esp-tools-feedstock.git
-[submodule "toolchains/riscv-tools"]
-	path = toolchains/riscv-tools
-	url = https://github.com/ucb-bar/riscv-tools-feedstock.git
