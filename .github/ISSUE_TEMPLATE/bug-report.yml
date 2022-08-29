@@ -31,7 +31,7 @@ body:
       description: OS setup for reproducibility
       placeholder: OS information
       value: |
-        Ex: Output of `uname -a` / `lsb_release -a` / `printenv`
+        Ex: Output of `uname -a` + `lsb_release -a` + `printenv` + `conda list`
     validations:
       required: true
 
