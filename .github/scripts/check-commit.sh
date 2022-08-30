@@ -52,9 +52,35 @@ dir="generators"
 branches=("master" "main" "dev")
 search
 
-submodules=("riscv-tools" "esp-tools")
-dir="toolchains"
+submodules=("esp-tools-feedstock")
+dir="toolchains/esp-tools"
 branches=("main")
+search
+
+submodules=("riscv-isa-sim" "riscv-pk" "riscv-tests")
+dir="toolchains/esp-tools"
+branches=("master")
+search
+
+submodules=("riscv-tools-feedstock")
+dir="toolchains/riscv-tools"
+branches=("main")
+search
+
+submodules=("riscv-isa-sim" "riscv-pk" "riscv-tests")
+dir="toolchains/riscv-tools"
+branches=("master")
+search
+
+# riscv-openocd doesn't use its master branch
+submodules=("riscv-openocd")
+dir="toolchains/riscv-tools"
+branches=("riscv")
+search
+
+submodules=("libgloss")
+dir="toolchains"
+branches=("master")
 search
 
 submodules=("coremark" "firemarshal" "nvdla-workload" "spec2017")

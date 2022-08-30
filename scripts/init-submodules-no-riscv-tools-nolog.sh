@@ -84,7 +84,8 @@ cd "$CHIPYARD_DIR"
         # Call the given subcommand (shell function) on each submodule
         # path to temporarily exclude during the recursive update
         for name in \
-            toolchains/* \
+            toolchains/*-tools/* \
+            toolchains/libgloss \
             generators/sha3 \
             generators/gemmini \
             sims/firesim \
