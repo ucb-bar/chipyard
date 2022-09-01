@@ -3,6 +3,9 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
+  # RISC-V default compiler
+  - riscv-tools
+
   # firemarshal deps
   - python=3.9
   - rsync
@@ -55,3 +58,4 @@ dependencies:
   - wget
   - sed
   - autoconf
+  - conda-lock

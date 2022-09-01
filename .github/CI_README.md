@@ -22,7 +22,7 @@ For example:
 This specifies that the `prepare-chipyard-cores` job needs the both the `make-keys` and the `setup-complete` steps to
 be completed before it can run.
 
-Chipyard runs its CI using a docker image created from `dockerfiles/Dockerfile` and on Berkeley's millennium machines.
+Chipyard runs its CI using a docker image created from `dockerfiles/Dockerfile` and on Berkeley's compute infrastructure.
 See its [README](../dockerfiles/README.md) for more details.
 
 Finally, within each job's `steps:` section, the steps are run sequentially and state persists throughout a job.

@@ -38,17 +38,12 @@ FROM base as base-with-tools
 
 SHELL ["/bin/bash", "-cl"]
 
-RUN conda env create -f ./chipyard/scripts/conda-requirements.yaml
-
-# Install riscv-tools
-RUN conda install -n chipyard -c ucb-bar ucb-bar-riscv-tools
-
-SHELL ["/opt/conda/bin/conda", "run", "-n", "chipyard", "/bin/bash", "-cl"]
-
-# Init submodules
+# Initialize repo
 RUN cd chipyard && \
         export MAKEFLAGS=-"j $(nproc)" && \
-        ./scripts/init-submodules-no-riscv-tools.sh --skip-validate 1>/dev/null
+        ./setup.sh --env-name chipyard --skip-validate
+
+SHELL ["/opt/conda/bin/conda", "run", "-n", "chipyard", "/bin/bash", "-cl"]
 
 # Set up FireMarshal. Building and cleaning br-base.json builds the underlying
 # buildroot image (which takes a long time) but doesn't keep all the br-base

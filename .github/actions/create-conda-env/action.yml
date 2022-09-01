@@ -10,12 +10,10 @@ runs:
           echo "Using pre-existing conda environments with prefix ${{ env.conda-env-name-no-time }}"
         else
           echo "Creating a conda environment for each toolchain with the toolchain installed"
-          conda env create -f ./scripts/conda-requirements.yaml -n ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-          conda install -n ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools -c ucb-bar -y riscv-tools
-          conda env create -f ./scripts/conda-requirements.yaml -n ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-esp-tools
-          conda install -n ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-esp-tools -c ucb-bar -y esp-tools
+          conda-lock install -n ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools ./conda-requirements-riscv-tools-linux-64.conda-lock.yml
+          conda-lock install -n ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-esp-tools ./conda-requirements-esp-tools-linux-64.conda-lock.yml
 
-          echo "Add source collateral to RISC-V area"
+          echo "Add extra toolchain collateral to RISC-V install area"
           conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
           ./scripts/build-toolchain-extra.sh riscv-tools
           conda deactivate

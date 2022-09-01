@@ -1,0 +1,61 @@
+channels:
+  - ucb-bar
+  - conda-forge
+  - nodefaults
+dependencies:
+  # RISC-V ESP project compiler
+  - esp-tools
+
+  # firemarshal deps
+  - python=3.9
+  - rsync
+  - psutil
+  - doit=0.35.0
+  - gitpython
+  - humanfriendly
+  - e2fsprogs
+  - ctags
+  - bison
+  - flex
+  - expat
+  # current version of buildroot won't build with make 4.3 https://github.com/firesim/FireMarshal/issues/236
+  - make!=4.3
+  - pyyaml
+  - unzip
+  - readline
+  - coreutils
+  - lzop
+  - qemu # from ucb-bar channel - https://github.com/ucb-bar/qemu-feedstock
+
+  # doc requirements
+  - sphinx
+  - pygments
+  - sphinx-autobuild
+  - sphinx_rtd_theme
+  - docutils
+
+  # misc. c/c++ compilers + related
+  - gcc==10.* # pinned for libelf/libdwarf builds
+  - gxx==10.* # pinned for libelf/libdwarf builds
+  - conda-gcc-specs
+  - binutils
+
+  # rocket-chip deps
+  - sbt
+  - openjdk
+  - dtc
+  - verilator==4.034
+
+  # chipyard deps
+  - dromajo # from ucb-bar channel - https://github.com/riscv-boom/dromajo
+
+  # other misc. deps
+  - ca-certificates
+  - vim
+  - gengetopt
+  - cmake
+  - git
+  - wget
+  - sed
+  - autoconf
+  - conda-lock

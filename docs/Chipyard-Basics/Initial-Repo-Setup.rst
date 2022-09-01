@@ -41,6 +41,13 @@ After Conda is installed and is on your ``PATH``, we need to install a version o
 For this you can use the system package manager like ``yum`` or ``apt`` to install ``git``.
 This ``git`` is only used to first checkout the repository, we will later install a newer version of ``git`` with Conda.
 
+Finally we need to install ``conda-lock`` into the ``base`` conda environment.
+This is done by the following:
+
+.. code-block:: shell
+
+    conda install -n base conda-lock
+
 Setting up the Chipyard Repo
 -------------------------------------------
 
@@ -54,23 +61,36 @@ Start by checking out the proper Chipyard's version. Run:
     # note: this may not be the latest release if the documentation version != "stable"
     git checkout |version|
 
-If you are running Chipyard alongside FireSim on AWS EC2, you should skip the :ref:`Chipyard-Basics/Initial-Repo-Setup:Conda Environment Setup` section and instead jump to :ref:`Chipyard-Basics/Initial-Repo-Setup:Fetch Chipyard Sources`.
-
-Conda Environment Setup
-~~~~~~~~~~~~~~~~~~~~~~~
-
 .. Warning:: When running on an Amazon Web Services EC2 FPGA-development instance
     (for FireSim), FireSim includes a similar machine setup script that will install all
     of the aforementioned dependencies (and some additional ones) and will activate the
-    proper conda environment. Skip this section.
+    proper conda environment. **Skip the rest of this section.**
 
-Next run the following command to create Chipyard's Conda environment.
+Next run the following script to create Chipyard's Conda environment including a pre-built RISC-V toolchain.
+There are two toolchains, one for normal RISC-V programs called ``riscv-tools`` which is the one needed for most Chipyard use-cases, and another for Hwacha/Gemmini called ``esp-tools``.
+Run the following script based off which compiler you would like to use.
 
 .. code-block:: shell
 
-    conda env create -f scripts/conda-requirements.yml
+    ./setup.sh --env-name chipyard riscv-tools # or esp-tools
 
-By running the following command you should see a "chipyard" environment listed (the default environment is called "chipyard" and can be modified with ``conda`` arguments).
+This script wraps around the conda environment initialization process and also runs the ``init-submodules-no-riscv-tools.sh`` and ``build-toolchain-extra.sh`` scripts.
+
+The ``init-subodules-no-riscv-tools.sh`` script will initialize and checkout all of the necessary git submodules.
+This will also validate that you are on a tagged branch, otherwise it will prompt for confirmation.
+When updating Chipyard to a new version, you will also want to rerun this script to update the submodules.
+Using ``git`` directly will try to initialize all submodules; this is not recommended unless you expressly desire this behavior.
+
+The ``build-toolchain-extra.sh`` script will install extra toolchain utilities/tests used by Chipyard.
+This command builds utilities like Spike, RISC-V Proxy Kernel, libgloss, and RISC-V tests from source for a specific toolchain type.
+
+.. Note:: By default, the ``build-toolchain-extra.sh`` script installs to ``$CONDA_PREFIX/<toolchain-type>``. Thus, if you uninstall the compiler using ``conda remove`` these utilities/tests will also have to be re-installed/built.
+
+.. Note:: If you already have a working conda environment setup, separate Chipyard clones can use that pre-used environment in combination with running the aforementioned scripts yourself (``init-submodules...`` and ``build-toolchain...``).
+
+.. Note:: If you are a power user and would like to build your own compiler/toolchain, you can refer to the https://github.com/ucb-bar/riscv-tools-feedstock and https://github.com/ucb-bar/esp-tools-feedstock repositories (submoduled in the ``toolchains/*`` directories) on how to build the compiler yourself.
+
+By running the following command you should see a "chipyard" environment listed.
 
 .. code-block:: shell
 
@@ -85,51 +105,9 @@ Next go ahead and activate the conda environment that was setup.
 
     conda activate chipyard
 
-We recommend that you add this "activate" command to your ``.bashrc`` (or other environment setup file).
-
-Fetch Chipyard Sources
-~~~~~~~~~~~~~~~~~~~~~~
-
-To fetch all Chipyard sources, run the following:
-
-.. code-block:: shell
-
-    ./scripts/init-submodules-no-riscv-tools.sh
-
-This will initialize and checkout all of the necessary git submodules.
-This will also validate that you are on a tagged branch, otherwise it will prompt for confirmation.
-
-When updating Chipyard to a new version, you will also want to rerun this script to update the submodules.
-Using ``git`` directly will try to initialize all submodules; this is not recommended unless you expressly desire this behavior.
-
-Obtaining a Toolchain
-------------------------
-
-Currently there are two toolchains, one for normal RISC-V programs called ``riscv-tools``, and another for Hwacha/Gemmini called ``esp-tools``.
-To get a basic ``riscv-tools`` compiler installation (which is the only thing needed for most Chipyard use-cases), just the following steps are necessary.
-
-.. code-block:: shell
-
-    conda install -c ucb-bar riscv-tools # for a normal risc-v compiler
-
-.. Note:: If you are planning to use the Hwacha vector unit, or other RoCC-based accelerators, you should obtain the ``esp-tools`` compiler by substituting the ``esp-tools`` argument to the command above.
-
 Once the command is run, the ``PATH``, ``RISCV``, and ``LD_LIBRARY_PATH`` environment variables will be set properly.
 
-.. Note:: If you are a power user and would like to build your own compiler, you can refer to the https://github.com/ucb-bar/riscv-tools-feedstock and https://github.com/ucb-bar/esp-tools-feedstock repositories (submoduled in the ``toolchains`` directory) on how to build a toolchain yourself.
-
 .. Note:: You can deactivate/activate a compiler/toolchain (but keep it installed) by running ``source $CONDA_PREFIX/etc/conda/deactivate.d/deactivate-${PKG_NAME}.sh`` or ``$CONDA_PREFIX/etc/conda/activate.d/activate-${PKG_NAME}.sh`` (``PKG_NAME`` for example is ``ucb-bar-riscv-tools``). This will modify the aforementioned 3 environment variables.
-
-Afterwards, we need to install extra toolchain utilities/tests used by Chipyard.
-This is done by the following:
-
-.. code-block:: shell
-
-    ./scripts/build-toolchain-extra.sh riscv-tools # or esp-tools respectively
-
-This command builds utilities like Spike, RISC-V Proxy Kernel, libgloss, and RISC-V tests from source for a specific toolchain type.
-
-.. Note:: By default, the ``build-toolchain-extra.sh`` script installs to ``$CONDA_PREFIX/<toolchain-type>``. Thus, if you uninstall the compiler using ``conda remove`` these utilities/tests will also have to be re-installed/built.
 
 Sourcing ``env.sh``
 -------------------
