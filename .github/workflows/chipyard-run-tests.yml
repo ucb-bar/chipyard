@@ -68,7 +68,7 @@ jobs:
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:59dad4bc
+      image: ucbbar/chipyard-ci-image:3f9150
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -94,7 +94,7 @@ jobs:
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:59dad4bc
+      image: ucbbar/chipyard-ci-image:3f9150
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -119,7 +119,7 @@ jobs:
     needs: change-filters
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:59dad4bc
+      image: ucbbar/chipyard-ci-image:3f9150
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -148,7 +148,7 @@ jobs:
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:59dad4bc
+      image: ucbbar/chipyard-ci-image:3f9150
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
