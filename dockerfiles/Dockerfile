@@ -41,6 +41,7 @@ SHELL ["/bin/bash", "-cl"]
 # Initialize repo
 RUN cd chipyard && \
         export MAKEFLAGS=-"j $(nproc)" && \
+        conda activate base && \
         ./setup.sh --env-name chipyard --skip-validate
 
 SHELL ["/opt/conda/bin/conda", "run", "-n", "chipyard", "/bin/bash", "-cl"]

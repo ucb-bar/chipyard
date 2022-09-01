@@ -47,6 +47,7 @@ This is done by the following:
 .. code-block:: shell
 
     conda install -n base conda-lock
+    conda activate base
 
 Setting up the Chipyard Repo
 -------------------------------------------
