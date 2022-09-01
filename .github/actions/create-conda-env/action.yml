@@ -1,5 +1,10 @@
 name: create-conda-env
 description: 'Create conda environments if they dont exist'
+inputs:
+  install-collateral:
+    description: 'Install Spike/Libgloss/etc'
+    required: false
+    default: true
 
 runs:
   using: "composite"
@@ -15,12 +20,14 @@ runs:
           conda-lock install -n ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-esp-tools ./conda-requirements-esp-tools-linux-64.conda-lock.yml
           conda deactivate
 
-          echo "Add extra toolchain collateral to RISC-V install area"
-          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-          ./scripts/build-toolchain-extra.sh riscv-tools
-          conda deactivate
-          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-esp-tools
-          ./scripts/build-toolchain-extra.sh esp-tools
-          conda deactivate
+          if [[ "${{ inputs.install-collateral }}" == 'true' ]]; then
+            echo "Add extra toolchain collateral to RISC-V install area"
+            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
+            ./scripts/build-toolchain-extra.sh riscv-tools
+            conda deactivate
+            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-esp-tools
+            ./scripts/build-toolchain-extra.sh esp-tools
+            conda deactivate
+          fi
         fi
       shell: bash -leo pipefail {0}
