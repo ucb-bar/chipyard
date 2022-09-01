@@ -35,8 +35,8 @@ dependencies:
   - docutils
 
   # misc. c/c++ compilers + related
-  - gcc==10.* # pinned for libelf/libdwarf builds
-  - gxx==10.* # pinned for libelf/libdwarf builds
+  - gcc
+  - gxx
   - conda-gcc-specs
   - binutils
 
@@ -48,6 +48,10 @@ dependencies:
 
   # chipyard deps
   - dromajo # from ucb-bar channel - https://github.com/riscv-boom/dromajo
+
+  # firesim ci deps
+  - elfutils
+  - libdwarf-dev==0.0.0.20190110_28_ga81397fc4
 
   # other misc. deps
   - ca-certificates
