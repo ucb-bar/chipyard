@@ -11,4 +11,4 @@ sphinx:
     configuration: docs/conf.py
 
 conda:
-    environment: scripts/conda-requirements.yaml
+    environment: conda-requirements-riscv-tools.yaml
