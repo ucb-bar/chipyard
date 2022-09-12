@@ -1,7 +1,7 @@
 Initial Repository Setup
 ========================================================
 
-Requirements
+Prerequisites
 -------------------------------------------
 
 Chipyard is developed and tested on Linux-based systems.
@@ -14,7 +14,7 @@ Chipyard is developed and tested on Linux-based systems.
 Running on AWS EC2 with FireSim
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you plan on using Chipyard alongside FireSim, you should refer to the :fsim_doc:`FireSim documentation <>`.
+If you plan on using Chipyard alongside FireSim on AWS EC2 instances, you should refer to the :fsim_doc:`FireSim documentation <>`.
 Specifically, you should follow the :fsim_doc:`Initial Setup/Simulation <Initial-Setup/index.html>`
 section of the docs up until :fsim_doc:`Setting up the FireSim Repo <Initial-Setup/Setting-up-your-Manager-Instance.html#setting-up-the-firesim-repo>`.
 At that point, instead of checking out FireSim you can checkout Chipyard by following :ref:`Chipyard-Basics/Initial-Repo-Setup:Setting up the Chipyard Repo`.
@@ -28,8 +28,8 @@ Conda allows users to create an "environment" that holds system dependencies lik
 .. Note:: Chipyard can also run on systems without a Conda installation. However, users on these systems must manually install toolchains and dependencies.
 
 First Chipyard requires there to be Conda installed on the system.
-Please refer to the `Conda installation instructions <https://github.com/conda-forge/miniforge/#download>`__ on how to install Conda with the Miniforge installer.
-Afterwards, verify that Conda is a sufficient version (we test on version 4.12.0/4.13.0 but higher is most likely fine).
+Please refer to the `Conda installation instructions <https://github.com/conda-forge/miniforge/#download>`__ on how to install Conda with the **Miniforge** installer.
+Afterwards, verify that Conda is a sufficient version (we test on version 4.12.0 but higher is most likely fine).
 
 .. Note:: If you have installed conda separately from this documentation (i.e. from miniconda or full Anaconda), please ensure you follow https://conda-forge.org/docs/user/introduction.html#how-can-i-install-packages-from-conda-forge to use ``conda-forge`` packages without any issues.
 
@@ -62,18 +62,13 @@ Start by checking out the proper Chipyard's version. Run:
     # note: this may not be the latest release if the documentation version != "stable"
     git checkout |version|
 
-.. Warning:: When running on an Amazon Web Services EC2 FPGA-development instance
-    (for FireSim), FireSim includes a similar machine setup script that will install all
-    of the aforementioned dependencies (and some additional ones) and will activate the
-    proper conda environment. **Skip the rest of this section.**
-
 Next run the following script to create Chipyard's Conda environment including a pre-built RISC-V toolchain.
 There are two toolchains, one for normal RISC-V programs called ``riscv-tools`` which is the one needed for most Chipyard use-cases, and another for Hwacha/Gemmini called ``esp-tools``.
 Run the following script based off which compiler you would like to use.
 
 .. code-block:: shell
 
-    ./setup.sh --env-name chipyard riscv-tools # or esp-tools
+    ./build-setup.sh riscv-tools # or esp-tools
 
 This script wraps around the conda environment initialization process and also runs the ``init-submodules-no-riscv-tools.sh`` and ``build-toolchain-extra.sh`` scripts.
 
@@ -91,7 +86,7 @@ This command builds utilities like Spike, RISC-V Proxy Kernel, libgloss, and RIS
 
 .. Note:: If you are a power user and would like to build your own compiler/toolchain, you can refer to the https://github.com/ucb-bar/riscv-tools-feedstock and https://github.com/ucb-bar/esp-tools-feedstock repositories (submoduled in the ``toolchains/*`` directories) on how to build the compiler yourself.
 
-By running the following command you should see a "chipyard" environment listed.
+By running the following command you should see a environment listed with the path ``$CHIPYARD_DIRECTORY/.conda-env``.
 
 .. code-block:: shell
 
@@ -100,21 +95,12 @@ By running the following command you should see a "chipyard" environment listed.
 .. Note:: Refer to FireSim's :fsim_doc:`Conda documentation <Advanced-Usage/Conda.html>` on more information
     on how to use Conda and some of its benefits.
 
-Next go ahead and activate the conda environment that was setup.
-
-.. code-block:: shell
-
-    conda activate chipyard
-
-Once the command is run, the ``PATH``, ``RISCV``, and ``LD_LIBRARY_PATH`` environment variables will be set properly.
-
-.. Note:: You can deactivate/activate a compiler/toolchain (but keep it installed) by running ``source $CONDA_PREFIX/etc/conda/deactivate.d/deactivate-${PKG_NAME}.sh`` or ``$CONDA_PREFIX/etc/conda/activate.d/activate-${PKG_NAME}.sh`` (``PKG_NAME`` for example is ``ucb-bar-riscv-tools``). This will modify the aforementioned 3 environment variables.
-
 Sourcing ``env.sh``
 -------------------
 
 Once setup is complete, an emitted ``env.sh`` file should exist in the top-level repository.
-This sets up necessary environment variables needed for future Chipyard steps (needed for the ``make`` system to work properly).
+This file activates the conda environment created in ``build-setup.sh`` and sets up necessary environment variables needed for future Chipyard steps (needed for the ``make`` system to work properly).
+Once the script is run, the ``PATH``, ``RISCV``, and ``LD_LIBRARY_PATH`` environment variables will be set properly for the toolchain requested.
 You can source this file in your ``.bashrc`` or equivalent environment setup file to get the proper variables, or directly include it in your current environment:
 
 .. code-block:: shell
@@ -122,6 +108,8 @@ You can source this file in your ``.bashrc`` or equivalent environment setup fil
     source ./env.sh
 
 .. Warning:: This ``env.sh`` file should always be sourced before running any ``make`` commands.
+
+.. Note:: You can deactivate/activate a compiler/toolchain (but keep it installed) by running ``source $CONDA_PREFIX/etc/conda/deactivate.d/deactivate-${PKG_NAME}.sh`` or ``$CONDA_PREFIX/etc/conda/activate.d/activate-${PKG_NAME}.sh`` (``PKG_NAME`` for example is ``ucb-bar-riscv-tools``). This will modify the aforementioned 3 environment variables.
 
 .. Warning:: ``env.sh`` files are generated per-Chipyard repository.
     In a multi-Chipyard repository setup, it is possible to source multiple ``env.sh`` files (in any order).

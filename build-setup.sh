@@ -74,7 +74,7 @@ fi
 # use conda-lock to create env
 conda-lock install -p $DIR/.conda-env $LOCKFILE
 
-eval "$(conda shell.bash hook)"
+source $DIR/.conda-env/etc/profile.d/conda.sh
 conda activate $DIR/.conda-env
 
 $DIR/scripts/init-submodules-no-riscv-tools.sh $SKIP_VALIDATE_FLAG
