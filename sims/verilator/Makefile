@@ -118,6 +118,7 @@ TRACING_CFLAGS := $(if $(filter $(VERILATOR_FST_MODE),0),,-DCY_FST_TRACE)
 # we initially had --noassert for performance, but several modules use
 # assertions, including dramsim, so we enable --assert by default
 VERILATOR_OPT_FLAGS ?= \
+	-O3 \
 	--x-assign fast \
 	--x-initial fast \
 	--output-split 10000 \
@@ -125,7 +126,6 @@ VERILATOR_OPT_FLAGS ?= \
 
 # default flags added for external IP (cva6/NVDLA)
 VERILOG_IP_VERILATOR_FLAGS := \
-	-O0 \
 	--unroll-count 256 \
 	-Wno-PINCONNECTEMPTY \
 	-Wno-ASSIGNDLY \
@@ -138,7 +138,6 @@ VERILOG_IP_VERILATOR_FLAGS := \
 
 # normal flags used for chipyard builds (that are incompatible with vlog ip aka cva6/NVDLA)
 CHIPYARD_VERILATOR_FLAGS := \
-	-O3 \
 	--assert
 
 # options dependent on whether external IP (cva6/NVDLA) or just chipyard is used
