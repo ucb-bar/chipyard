@@ -15,7 +15,7 @@ Running on AWS EC2 with FireSim
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you plan on using Chipyard alongside FireSim on AWS EC2 instances, you should refer to the :fsim_doc:`FireSim documentation <>`.
-Specifically, you should follow the :fsim_doc:`Initial Setup/Simulation <Initial-Setup/index.html>`
+Specifically, you should follow the :fsim_doc:`Initial Setup/Installation <Initial-Setup/index.html>`
 section of the docs up until :fsim_doc:`Setting up the FireSim Repo <Initial-Setup/Setting-up-your-Manager-Instance.html#setting-up-the-firesim-repo>`.
 At that point, instead of checking out FireSim you can checkout Chipyard by following :ref:`Chipyard-Basics/Initial-Repo-Setup:Setting up the Chipyard Repo`.
 
