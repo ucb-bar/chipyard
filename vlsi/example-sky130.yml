@@ -19,7 +19,7 @@ vlsi.inputs.power_spec_type: "cpf"
 
 # Specify clock signals
 vlsi.inputs.clocks: [
-  {name: "clock_clock", period: "130ns", uncertainty: "1ns"}
+  {name: "clock_clock", period: "10ns", uncertainty: "1ns"}
 ]
 
 # Generate Make include to aid in flow 
@@ -28,7 +28,7 @@ vlsi.core.build_system: make
 # Power Straps
 par.power_straps_mode: generate
 par.generate_power_straps_method: by_tracks
-par.blockage_spacing: 2.0
+par.blockage_spacing: 40.0
 par.blockage_spacing_top_layer: met4
 par.generate_power_straps_options:
   by_tracks:
@@ -38,14 +38,16 @@ par.generate_power_straps_options:
     pin_layers:
       - met5
     blockage_spacing_met2: 4.0
-    track_width: 6
-    track_width_met5: 2
-    track_spacing: 1
+    blockage_spacing_met4: 2.0
+    blockage_spacing_met4: 2.0
+    track_width: 3
+    track_width_met5: 1
+    track_spacing: 5
     track_start: 10
     track_start_met5: 1
     power_utilization: 0.1
-    power_utilization_met4: 0.3
-    power_utilization_met5: 0.5
+    power_utilization_met4: 0.1
+    power_utilization_met5: 0.1
 
 # Placement Constraints
 vlsi.inputs.placement_constraints:
@@ -53,7 +55,7 @@ vlsi.inputs.placement_constraints:
     type: toplevel
     x: 0
     y: 0
-    width: 4500
+    width: 3800
     height: 2500
     margins:
       left: 0
