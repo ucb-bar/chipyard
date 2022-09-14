@@ -101,7 +101,7 @@ search
 
 submodules=("fpga-shells")
 dir="fpga"
-branches=("master")
+branches=("main")
 search
 
 # turn off verbose printing to make this easier to read
