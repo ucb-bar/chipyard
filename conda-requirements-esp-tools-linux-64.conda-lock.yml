@@ -9,7 +9,7 @@
 # To update a single package to the latest version compatible with the version constraints in the source:
 #     conda-lock lock --lockfile conda-requirements-esp-tools-linux-64.conda-lock.yml --update PACKAGE
 # To re-solve the entire environment, e.g. after changing a version constraint in the source file:
-#     conda-lock -f /home/ubuntu/work/cy2/conda-requirements-esp-tools.yaml --lockfile conda-requirements-esp-tools-linux-64.conda-lock.yml
+#     conda-lock -f /home/ubuntu/work/cy2/conda-requirements-esp-tools.yaml -f /scratch/abejgonza/chipyard-2/conda-requirements-esp-tools.yaml --lockfile conda-requirements-esp-tools-linux-64.conda-lock.yml
 metadata:
   channels:
   - url: ucb-bar
@@ -19,11 +19,12 @@ metadata:
   - url: nodefaults
     used_env_vars: []
   content_hash:
-    linux-64: 0793548ebe8273a7c6cffd32172a4ae11d2707c599d9232aca7673d63dbce9ce
+    linux-64: c43c09d14c98ff190a4bf2fbe3542c0211b68b457cb6d1b948e436cdb6deac9b
   platforms:
   - linux-64
   sources:
   - /home/ubuntu/work/cy2/conda-requirements-esp-tools.yaml
+  - /scratch/abejgonza/chipyard-2/conda-requirements-esp-tools.yaml
 package:
 - category: main
   dependencies: {}
@@ -61,14 +62,14 @@ package:
 - category: main
   dependencies: {}
   hash:
-    md5: 2be128ae4d5e44803720d43644ce3e3e
-    sha256: 27a6442ae7ef10d7935cd60aac9f3b33f687cd926ff2559e6bf05c02d8b189e1
+    md5: 64f6be425cd4897e5df1a9e9ac4dcb86
+    sha256: c0b84c0430c4a81c8f5415b268889880bdb695ef74c952378313929869aaec6d
   manager: conda
   name: ca-certificates
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/ca-certificates-2022.6.15.1-ha878542_0.tar.bz2
-  version: 2022.6.15.1
+  url: https://conda.anaconda.org/conda-forge/linux-64/ca-certificates-2022.6.15.2-ha878542_0.tar.bz2
+  version: 2022.6.15.2
 - category: main
   dependencies: {}
   hash:
@@ -1955,14 +1956,14 @@ package:
     make: ''
     perl: ''
   hash:
-    md5: 8b750420297e36dda7ba511c2f3fd0f0
-    sha256: 4da137e26381ea4948b5b399ce07b42848f0ffc14282e67059e120e57f413a44
+    md5: ca32c97ae3c69172f87f23d99806343f
+    sha256: 9fb8023a95d6609925585f8ea17880d05b141b8c36374d079df2e21c2c04a3ae
   manager: conda
   name: verilator
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/verilator-4.224-he0ac6c6_1.tar.bz2
-  version: '4.224'
+  url: https://conda.anaconda.org/conda-forge/linux-64/verilator-4.226-he0ac6c6_0.tar.bz2
+  version: '4.226'
 - category: main
   dependencies:
     libgcc-ng: '>=9.4.0'
@@ -2112,14 +2113,14 @@ package:
   dependencies:
     python: '>=3.7'
   hash:
-    md5: a7fa4e45a097ccca6b097f097800a7f6
-    sha256: 3953f7ead26d7144abff048fd1e42913d35b7645aa9d1ddea70c41793539a824
+    md5: 1bd4c453b6d4e446333f857907b0f465
+    sha256: c09e9ffb10141d82ddecf114aebff72847fb469de9fcc252fab0d838313c5dcd
   manager: conda
   name: certifi
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/certifi-2022.6.15.1-pyhd8ed1ab_0.tar.bz2
-  version: 2022.6.15.1
+  url: https://conda.anaconda.org/conda-forge/noarch/certifi-2022.6.15.2-pyhd8ed1ab_0.tar.bz2
+  version: 2022.6.15.2
 - category: main
   dependencies:
     python: '>=3.6'
@@ -2176,14 +2177,14 @@ package:
     zlib: '>=1.2.12,<1.3.0a0'
     zstd: '>=1.5.2,<1.6.0a0'
   hash:
-    md5: 6b35820a085bbde45903ec03bbc0ba73
-    sha256: c35b16afea3bd479da60a64f1603192c13f5e7cf607e6fc6db520eea039ba86a
+    md5: c57977f63831a8f43ace75fcc7151b9d
+    sha256: a7d740765dcb6c8f1d594550ae25d221b2a507d4f1d5e4ea94e8c5d4e3b1f215
   manager: conda
   name: cmake
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/cmake-3.24.1-h5432695_0.tar.bz2
-  version: 3.24.1
+  url: https://conda.anaconda.org/conda-forge/linux-64/cmake-3.24.2-h5432695_0.tar.bz2
+  version: 3.24.2
 - category: main
   dependencies:
     python: ''
@@ -2516,7 +2517,7 @@ package:
   version: 0.4.8
 - category: main
   dependencies:
-    python: 2.7.*|>=3.4
+    python: ==2.7.*|>=3.4
   hash:
     md5: 076becd9e05608f8dc72757d5f3a91ff
     sha256: 74c63fd03f1f1ea2b54e8bc529fd1a600aaafb24027b738d0db87909ee3a33dc
@@ -4076,7 +4077,7 @@ package:
 - category: main
   dependencies:
     importlib_metadata: ''
-    python: 2.7.*|>=3.5
+    python: ==2.7.*|>=3.5
   hash:
     md5: 35f19fabdfd44c8b53889be95333848c
     sha256: d497c6f3b064d3dd8b76f277ea8d6a507acfe8cb04e31811baf66d8c533b8c08
@@ -4671,14 +4672,14 @@ package:
     python: '>=3.6'
     six: ~=1.15
   hash:
-    md5: 9bfce725ebff596f7439f13711e8f799
-    sha256: b5dea52670670337f4c552314bbd71ba0ed4f1efbd34f6ae721c876f50aa335b
+    md5: 4a1e98f7bdd975767e314a58b0262eb6
+    sha256: deecd8a08d6de0616b5fc2e169cea53e71701cd146e835abe58c1c4e571721fe
   manager: conda
   name: aws-sam-translator
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/aws-sam-translator-1.50.0-pyhd8ed1ab_0.tar.bz2
-  version: 1.50.0
+  url: https://conda.anaconda.org/conda-forge/noarch/aws-sam-translator-1.51.0-pyhd8ed1ab_0.tar.bz2
+  version: 1.51.0
 - category: main
   dependencies:
     boto3: ''
@@ -4745,14 +4746,14 @@ package:
     sarif-om: ~=1.0.4
     six: '>=1.11'
   hash:
-    md5: 9cdaa473cfa8194286883be0e3caa489
-    sha256: 443e492434d01d626619694ae82341499bf7517e735d0362245c49005f45ca15
+    md5: 9b30cdd9b64cb4b749371980f1208f0f
+    sha256: 561034692d6f08f4aba92a61dc828812b0c98c31bc3ca8facb91843a646cb1ae
   manager: conda
   name: cfn-lint
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/cfn-lint-0.64.1-pyhd8ed1ab_0.tar.bz2
-  version: 0.64.1
+  url: https://conda.anaconda.org/conda-forge/noarch/cfn-lint-0.65.0-pyhd8ed1ab_0.tar.bz2
+  version: 0.65.0
 - category: main
   dependencies:
     aws-xray-sdk: '!=0.96,>=0.93'
