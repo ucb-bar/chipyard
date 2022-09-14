@@ -10,7 +10,7 @@ FireSim
 FireSim allows RTL-level simulation at orders-of-magnitude faster speeds than software RTL simulators.
 FireSim also provides additional device models to allow full-system simulation, including memory models and network models.
 
-FireSim supports running on Amazon EC2 F1 FPGA-enabled virtual instances and on locally managed Linux machines with FPGAs attached.
+FireSim supports running on Amazon EC2 F1 FPGA-enabled cloud instances and on locally managed Linux machines with FPGAs attached.
 The rest of this documentation assumes you are running on an Amazon EC2 F1 FPGA-enabled virtual instance.
 In order to simuate your Chipyard design using FireSim, make sure to follow the repository setup as described by
 :ref:`Chipyard-Basics/Initial-Repo-Setup:Initial Repository Setup`, if you have not already.

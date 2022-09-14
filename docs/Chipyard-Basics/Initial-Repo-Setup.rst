@@ -52,7 +52,7 @@ This is done by the following:
 Setting up the Chipyard Repo
 -------------------------------------------
 
-Start by checking out the proper Chipyard's version. Run:
+Start by checking out the proper Chipyard version. Run:
 
 .. parsed-literal::
 
