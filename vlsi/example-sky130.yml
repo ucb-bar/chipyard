@@ -6,7 +6,6 @@ vlsi.core.max_threads: 12
 
 # Technology paths
 technology.sky130:
-  sky130_pdk: "path-to-skywater-pdk/"
   sky130A: "path-to-sky130A/"
   sky130_nda: "path-to-skywater-src-nda/"
   openram_lib: "path-to-sky130_sram_macros/" 
