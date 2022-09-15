@@ -6,9 +6,12 @@ vlsi.core.max_threads: 12
 
 # Technology paths
 technology.sky130:
-  sky130A: "path-to-sky130A/"
+  # sky130A: "path-to-sky130A/"
   sky130_nda: "path-to-skywater-src-nda/"
-  openram_lib: "path-to-sky130_sram_macros/" 
+  # openram_lib: "path-to-sky130_sram_macros/" 
+  sky130A: "/tools/C/nayiri/sky130/sky130A"
+  # sky130_nda: "path-to-skywater-src-nda/"
+  openram_lib: "/tools/C/nayiri/sky130/sky130_sram_macros" 
 
 # General Hammer Inputs
 
@@ -62,105 +65,105 @@ vlsi.inputs.placement_constraints:
       top: 0
       bottom: 0
 
-  # Place data cache SRAM instances
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_0"
-    type: hardmacro
-    x: 50
-    y: 100
-    orientation: r0
+  # # Place data cache SRAM instances
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_0"
+  #   type: hardmacro
+  #   x: 50
+  #   y: 100
+  #   orientation: r0
 
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_1_0"
-    type: hardmacro
-    x: 50
-    y: 700
-    orientation: r0
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_1_0"
+  #   type: hardmacro
+  #   x: 50
+  #   y: 700
+  #   orientation: r0
 
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_2_0"
-    type: hardmacro
-    x: 50
-    y: 1300
-    orientation: r0
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_2_0"
+  #   type: hardmacro
+  #   x: 50
+  #   y: 1300
+  #   orientation: r0
 
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_3_0"
-    type: hardmacro
-    x: 50
-    y: 1900
-    orientation: r0
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_3_0"
+  #   type: hardmacro
+  #   x: 50
+  #   y: 1900
+  #   orientation: r0
 
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_4_0"
-    type: hardmacro
-    x: 1000
-    y: 1900
-    orientation: r0
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_4_0"
+  #   type: hardmacro
+  #   x: 1000
+  #   y: 1900
+  #   orientation: r0
 
     
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_5_0"
-    type: hardmacro
-    x: 1000 
-    y: 1300
-    orientation: r0
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_5_0"
+  #   type: hardmacro
+  #   x: 1000 
+  #   y: 1300
+  #   orientation: r0
     
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_6_0"
-    type: hardmacro
-    x: 1000 
-    y: 700
-    orientation: r0
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_6_0"
+  #   type: hardmacro
+  #   x: 1000 
+  #   y: 700
+  #   orientation: r0
 
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_7_0"
-    type: hardmacro
-    x: 1000 
-    y: 100
-    orientation: r0
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_7_0"
+  #   type: hardmacro
+  #   x: 1000 
+  #   y: 100
+  #   orientation: r0
 
-  # Place instruction cache SRAM instances
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/data_arrays_0/data_arrays_0_0_ext/mem_0_0"
-    type: hardmacro
-    x: 3700
-    y: 100
-    orientation: r0
+  # # Place instruction cache SRAM instances
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/data_arrays_0/data_arrays_0_0_ext/mem_0_0"
+  #   type: hardmacro
+  #   x: 3700
+  #   y: 100
+  #   orientation: r0
 
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/data_arrays_0/data_arrays_0_0_ext/mem_1_0"
-    type: hardmacro
-    x: 3700
-    y: 700
-    orientation: r0
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/data_arrays_0/data_arrays_0_0_ext/mem_1_0"
+  #   type: hardmacro
+  #   x: 3700
+  #   y: 700
+  #   orientation: r0
 
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/tag_array/tag_array_ext/mem_0_0"
-    type: hardmacro
-    x: 3000
-    y: 100
-    orientation: r0
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/tag_array/tag_array_ext/mem_0_0"
+  #   type: hardmacro
+  #   x: 3000
+  #   y: 100
+  #   orientation: r0
 
-  # Place L2 TLB SRAM instances
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_0"
-    type: hardmacro
-    x: 1900
-    y: 1900
-    orientation: "r0"
+  # # Place L2 TLB SRAM instances
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_0"
+  #   type: hardmacro
+  #   x: 1900
+  #   y: 1900
+  #   orientation: "r0"
 
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_1"
-    type: hardmacro
-    x: 2600
-    y: 1900
-    orientation: "r0"
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_1"
+  #   type: hardmacro
+  #   x: 2600
+  #   y: 1900
+  #   orientation: "r0"
  
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_2"
-    type: hardmacro
-    x: 3300
-    y: 1900
-    orientation: "r0"
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_2"
+  #   type: hardmacro
+  #   x: 3300
+  #   y: 1900
+  #   orientation: "r0"
 
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_3"
-    type: hardmacro
-    x: 3950
-    y: 1900
-    orientation: "r0"
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_3"
+  #   type: hardmacro
+  #   x: 3950
+  #   y: 1900
+  #   orientation: "r0"
 
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_4"
-    type: hardmacro
-    x: 3950
-    y: 1300
-    orientation: "r0"
+  # - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_4"
+  #   type: hardmacro
+  #   x: 3950
+  #   y: 1300
+  #   orientation: "r0"
 
 # Pin placement constraints
 vlsi.inputs.pin_mode: generated
