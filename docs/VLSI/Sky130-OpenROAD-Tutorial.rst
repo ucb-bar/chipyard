@@ -89,8 +89,15 @@ First, set ``technology.sky130.<sky130A, sky130_nda, openram_lib>`` to the absol
 for details about the PDK setup.
 
 
+example-openroad.yml
+^^^^^^^^^^^^^^^^^^^^
+This contains the Hammer configuration for the OpenROAD tool flow. 
+It selects tools for synthesis (Yosys), place and route (OpenROAD), DRC (Magic), and LVS (NetGen).
+For the remaining commands, we will need to specify this file as the tool configuration to hammer via the ``TOOLS_CONF`` Makefile variable.
+
+
 Generating SRAMs
-----------------
+^^^^^^^^^^^^^^^^
 To map the generic memory macros in the generarted Verilog to the SRAMs in your technology process, run the following command:
 
 .. code-block:: shell
@@ -98,7 +105,7 @@ To map the generic memory macros in the generarted Verilog to the SRAMs in your 
     make srams tech_name=sky130 CONFIG=TinyRocketConfig
 
 Generating Verilog
-------------------
+^^^^^^^^^^^^^^^^^^
 To elaborate the ``TinyRocketConfig`` from Chisel to Verilog, run:
 
 .. code-block:: shell
@@ -108,7 +115,7 @@ To elaborate the ``TinyRocketConfig`` from Chisel to Verilog, run:
 The ``CONFIG=TinyRocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a stripped-down Rocket Chip in the interest of minimizing tool runtime. The resulting verilog is located in ``./generated-src/chipyard.TestHarness.TinyRocketConfig/chipyard.TestHarness.TinyRocketConfig.top.v``.
 
 Note that in the generated Verilog, there are generic memory macros for the various memory components (dcache, icache, tag array, PTW). 
-This is the same Verilog that is generated for RTL simulations in the ``~chipyard/sims/verilator`` directory, see ` :ref:`Simulation/Software-RTL-Simulation:sw-rtl-sim-intro` for directions on how to run these simulations.
+This is the same Verilog that is generated for RTL simulations in the ``~chipyard/sims/verilator`` directory, see :ref:`Simulation/Software-RTL-Simulation:Software RTL Simulation` for directions on how to run these simulations.
 
 Building the Design
 ^^^^^^^^^^^^^^^^^^^
@@ -116,14 +123,11 @@ To set up all prerequisites for the build system to push the design and SRAM mac
 
 .. code-block:: shell
 
-    make buildfile tech_name=sky130 CONFIG=TinyRocketConfig
+    make buildfile tech_name=sky130 TOOLS_CONF=example-openroad.yml CONFIG=TinyRocketConfig
 
-For the curious, ``make buildfile`` generates a set of Make targets in ``build/hammer.d``. It needs to be re-run if environment variables are changed. It is recommended that you edit these variables directly in the Makefile rather than exporting them to your shell environment.
-
-
-example-openroad.yml
-^^^^^^^^^^^^^^^^^^^^
-This contains the Hammer configuration for the OpenROAD tool flow. It selects tools for the SRAM "compiler" (already specified in ``example-sky130.yml``), synthesis (Yosys), place and route (OpenROAD), DRC (Magic), and LVS (NetGen). For the remaining commands, we will need to specify this file as the tool configuration to hammer via the ``TOOLS_CONF`` Makefile variable.
+The command ``make buildfile`` generates a set of Make targets in ``build/hammer.d``. 
+It needs to be re-run if environment variables are changed. 
+It is recommended that you edit these variables directly in the Makefile rather than exporting them to your shell environment.
 
 
 Synthesis
@@ -131,7 +135,7 @@ Synthesis
 
 .. code-block:: shell
 
-    make syn tech_name=sky130 TOOLS_CONF=example-openroad.yml CONFIG=TinyRocketConfig
+    make syn tech_name=sky130 CONFIG=TinyRocketConfig
 
 Post-synthesis logs and collateral are in ``build/syn-rundir``. 
 
@@ -141,7 +145,7 @@ Place-and-Route
 ^^^^^^^^^^^^^^^
 .. code-block:: shell
 
-    make par tech_name=sky130 TOOLS_CONF=example-openroad.yml CONFIG=TinyRocketConfig
+    make par tech_name=sky130 CONFIG=TinyRocketConfig
 
 After completion, the final database can be opened in an interactive OpenROAD session.
 
@@ -167,8 +171,38 @@ To run DRC & LVS:
 
 .. code-block:: shell
 
-    make drc tech_name=sky130 TOOLS_CONF=example-openroad.yml CONFIG=TinyRocketConfig
-    make lvs tech_name=sky130 TOOLS_CONF=example-openroad.yml CONFIG=TinyRocketConfig
+    make drc tech_name=sky130 CONFIG=TinyRocketConfig
+    make lvs tech_name=sky130 CONFIG=TinyRocketConfig
 
 Some DRC errors are expected from this PDK, especially with regards to the SRAMs, as explained in the 
 `Sky130 Hammer plugin README  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__.
+
+
+VLSI Flow Control
+-----------------
+The Hammer tool plugins for each action (e.g. ``syn``, ``par``) support multiple steps (e.g. ``macro_placement``, ``global_route``).
+Hammer saves the design database before and after each step in ``build/par-rundir/<pre or post>_<step name>``.
+The Hammer flow supports being able to start/stop before/after any of these steps. 
+See the `Hammer documentation on Flow Control <https://docs.hammer-eda.org/en/latest/Hammer-Use/Flow-Control.html>`__ for a full list and description of the options.
+The ``Makefile`` in the ``vlsi`` directory passes this extra information via the ``HAMMER_EXTRA_ARGS`` variable.
+This variable can also be used to specify additional YAML configurations that may have changed or been omitted from the inital build.
+
+The below examples use the ``redo-par`` Make target to re-run only place-and-route. ``redo-`` may be prepended to any of the VLSI flow actions to re-run only that action.
+
+.. code-block:: shell
+
+      # the following two statements are equivalent because the 
+      #   extraction step immediately precedes the write_design step
+      make redo-par HAMMER_EXTRA_ARGS="--start_after_step extraction"
+      make redo-par HAMMER_EXTRA_ARGS="--start_before_step write_design"
+
+      # example of re-running only floorplanning to test out a new floorplan configuration
+      make redo-par HAMMER_EXTRA_ARGS="--only_step floorplan_design -p example-sky130.yml"
+
+
+Documentation
+-------------
+For more information about Hammer's underlying implementation, visit the `Hammer documentation website <https://docs.hammer-eda.org/en/latest/index.html>`__.
+
+For details about the plugins used in this tutorial, check out the `OpenROAD tool plugin repo + README <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/par/openroad>`__
+and `Sky130 tech plugin repo + README <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/technology/sky130>`__.
