@@ -101,7 +101,7 @@ To get the CI to work correctly you need to create the following GH Repository S
 | -------| ------------- |
 | BUILDDIR | the directory to use on the build server |
 
-Additionally, you need to install conda on the build servers that exist
+Additionally, you need to install conda on the build servers that exist.
 
 Notes on CIRCLE CI
 ------------------

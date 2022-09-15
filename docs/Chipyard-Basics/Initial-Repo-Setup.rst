@@ -17,7 +17,7 @@ Running on AWS EC2 with FireSim
 If you plan on using Chipyard alongside FireSim on AWS EC2 instances, you should refer to the :fsim_doc:`FireSim documentation <>`.
 Specifically, you should follow the :fsim_doc:`Initial Setup/Installation <Initial-Setup/index.html>`
 section of the docs up until :fsim_doc:`Setting up the FireSim Repo <Initial-Setup/Setting-up-your-Manager-Instance.html#setting-up-the-firesim-repo>`.
-At that point, instead of checking out FireSim you can checkout Chipyard by following :ref:`Chipyard-Basics/Initial-Repo-Setup:Setting up the Chipyard Repo`.
+At that point, instead of cloning FireSim you can clone Chipyard by following :ref:`Chipyard-Basics/Initial-Repo-Setup:Setting up the Chipyard Repo`.
 
 Default Requirements Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -27,7 +27,7 @@ Conda allows users to create an "environment" that holds system dependencies lik
 
 .. Note:: Chipyard can also run on systems without a Conda installation. However, users on these systems must manually install toolchains and dependencies.
 
-First Chipyard requires there to be Conda installed on the system.
+First, Chipyard requires Conda to be installed on the system.
 Please refer to the `Conda installation instructions <https://github.com/conda-forge/miniforge/#download>`__ on how to install Conda with the **Miniforge** installer.
 Afterwards, verify that Conda is a sufficient version (we test on version 4.12.0 but higher is most likely fine).
 
