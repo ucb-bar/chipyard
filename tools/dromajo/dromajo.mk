@@ -4,7 +4,7 @@
 
 DROMAJO_DIR = $(base_dir)/tools/dromajo/dromajo-src/src
 DROMAJO_LIB_NAME = dromajo_cosim
-DROMAJO_LIB = $(DROMAJO_DIR)/lib$(DROMAJO_LIB_NAME).a
+DROMAJO_LIB = $(CONDA_PREFIX)/lib/lib$(DROMAJO_LIB_NAME).a
 
 # Dromajo assumes using the default bootrom
 DROMAJO_ROM = $(build_dir)/bootrom.rv64.img
