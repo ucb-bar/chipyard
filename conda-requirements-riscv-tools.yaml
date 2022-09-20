@@ -21,7 +21,7 @@ dependencies:
 
     - gcc
     - gxx
-    - sysroot_linux-64=2.17 # needed to match pre-built CI XRT glibc version
+    - sysroot_linux-64>=2.17 # needed to match pre-built CI XRT glibc version
     - conda-gcc-specs
     - binutils
 
@@ -29,7 +29,18 @@ dependencies:
     - riscv-tools # from ucb-bar channel - https://github.com/ucb-bar/riscv-tools-feedstock
 
     # firemarshal deps
-    - python=3.9
+    - python>=3.8
+    - bc
+    - patch
+    - which
+    - diffutils
+    - bash
+    - gzip
+    - bzip2
+    - perl
+    - tar
+    - file
+    - findutils
     - rsync
     - psutil
     - doit=0.35.0
@@ -40,8 +51,7 @@ dependencies:
     - bison
     - flex
     - expat
-    # current version of buildroot won't build with make 4.3 https://github.com/firesim/FireMarshal/issues/236
-    - make!=4.3
+    - make
     - pyyaml
     - unzip
     - readline
@@ -49,8 +59,6 @@ dependencies:
     - lzop
     - qemu # from ucb-bar channel - https://github.com/ucb-bar/qemu-feedstock
 
-    # current version of buildroot won't build with make 4.3 https://github.com/firesim/FireMarshal/issues/236
-    - make!=4.3
     - bash-completion
     - sbt
     - ca-certificates
@@ -75,7 +83,7 @@ dependencies:
     - screen
     - elfutils
     - libdwarf-dev==0.0.0.20190110_28_ga81397fc4 # from ucb-bar channel - using mainline libdwarf-feedstock
-    - conda-lock
+    - conda-lock>=1
     - wget
     - sed
     - autoconf
