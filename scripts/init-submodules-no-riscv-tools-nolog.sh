@@ -13,18 +13,19 @@ common_setup
 
 function usage
 {
-    echo "Usage: $0 [--batch]"
+    echo "Usage: $0 [--force]"
     echo "Initialize Chipyard submodules and setup initial env.sh script."
     echo ""
-    echo "  --batch    Skip prompt checking for tagged release"
+    echo "  --force -f      : Skip prompt checking for tagged release"
+    echo "  --skip-validate : DEPRECATED: Same functionality as --force"
 }
 
-BATCH=false
+FORCE=false
 while test $# -gt 0
 do
    case "$1" in
-        --batch)
-            BATCH=true;
+        --force | -f | --skip-validate)
+            FORCE=true;
             ;;
         -h | -H | --help | help)
             usage
@@ -46,7 +47,7 @@ git_tag=$(git describe --exact-match --tags)
 git_tag_rc=$?
 restore_bash_options
 if [ "$git_tag_rc" -ne 0 ]; then
-    if [ "$BATCH" == false ]; then
+    if [ "$FORCE" == false ]; then
         while true; do
             read -p "WARNING: You are not on an official release of Chipyard."$'\n'"Type \"y\" to continue if this is intended or \"n\" if not: " validate
             case "$validate" in

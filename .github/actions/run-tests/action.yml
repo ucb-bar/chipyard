@@ -23,7 +23,7 @@ runs:
     - name: Init submodules (since only the RTL is cached)
       run: |
         conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-${{ inputs.toolchain }}
-        ./scripts/init-submodules-no-riscv-tools.sh --skip-validate
+        ./scripts/init-submodules-no-riscv-tools.sh --force
       shell: bash -leo pipefail {0}
 
     # Note: You shouldn't need the other inputs since it shouldn't build RTL from scratch

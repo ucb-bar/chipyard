@@ -26,7 +26,8 @@ usage() {
     echo "   --prefix PREFIX       : Install destination. If unset, defaults to $CONDA_PREFIX/riscv-tools"
     echo "                           or $CONDA_PREFIX/esp-tools"
     echo "   --clean-after-install : Run make clean in calls to module_make and module_build"
-    echo "   --batch               : Skip prompt checking for conda"
+    echo "   --force -f            : Skip prompt checking for conda"
+    echo "   --skip-validate       : DEPRECATED: Same functionality as --force"
     echo "   --help -h             : Display this message"
     exit "$1"
 }
@@ -34,7 +35,7 @@ usage() {
 TOOLCHAIN="riscv-tools"
 CLEANAFTERINSTALL=""
 RISCV=""
-BATCH=false
+FORCE=false
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
@@ -49,8 +50,8 @@ do
             CLEANAFTERINSTALL="true" ;;
         riscv-tools | esp-tools)
             TOOLCHAIN=$1 ;;
-        --batch)
-            BATCH=true;
+        --force | -f | --skip-validate)
+            FORCE=true;
             ;;
         * )
             error "invalid option $1"
@@ -59,7 +60,7 @@ do
     shift
 done
 
-if [ "$BATCH" = false ]; then
+if [ "$FORCE" = false ]; then
     if [ -z ${CONDA_DEFAULT_ENV+x} ]; then
         error "ERROR: No conda environment detected. Did you activate the conda environment (e.x. 'conda activate chipyard')?"
         exit 1
