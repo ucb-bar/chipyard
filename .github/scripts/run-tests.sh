@@ -102,10 +102,16 @@ case $1 in
         make -C $LOCAL_CHIPYARD_DIR/tests
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/fft.riscv run-binary-fast
         ;;
+    chipyard-constellation)
+        run_bmark ${mapping[$1]}
+        ;;
     icenet)
         make run-binary-fast BINARY=none -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}
         ;;
     testchipip)
+        make run-binary-fast BINARY=none -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}
+        ;;
+    constellation)
         make run-binary-fast BINARY=none -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}
         ;;
     *)
