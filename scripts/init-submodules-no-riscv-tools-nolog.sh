@@ -40,6 +40,22 @@ do
     shift
 done
 
+# check that git version is at least 1.7.8
+MYGIT=$(git --version)
+MYGIT=${MYGIT#'git version '} # Strip prefix
+case ${MYGIT} in
+    [1-9]*)
+        ;;
+    *)
+        echo "WARNING: unknown git version"
+        ;;
+esac
+MINGIT="1.8.5"
+if [ "$MINGIT" != "$(echo -e "$MINGIT\n$MYGIT" | sort -V | head -n1)" ]; then
+  echo "This script requires git version $MINGIT or greater. Exiting."
+  exit 4
+fi
+
 # before doing anything verify that you are on a release branch/tag
 save_bash_options
 set +e
