@@ -1,22 +1,15 @@
 #!/usr/bin/env bash
 
-# this script is based on the firesim build toolchains script
-
 # exit script if any command fails
 set -e
 set -o pipefail
 
-# On macOS, use GNU readlink from 'coreutils' package in Homebrew/MacPorts
-if [ "$(uname -s)" = "Darwin" ] ; then
-    READLINK=greadlink
-else
-    READLINK=readlink
-fi
+RDIR=$(git rev-parse --show-toplevel)
 
-# If BASH_SOURCE is undefined, we may be running under zsh, in that case
-# provide a zsh-compatible alternative
-DIR="$(dirname "$($READLINK -f "${BASH_SOURCE[0]:-${(%):-%x}}")")"
-CHIPYARD_DIR="$(dirname "$DIR")"
+# get helpful utilities
+source $RDIR/scripts/utils.sh
+
+common_setup
 
 # Allow user to override MAKE
 [ -n "${MAKE:+x}" ] || MAKE=$(command -v gnumake || command -v gmake || command -v make)
@@ -33,29 +26,22 @@ usage() {
     echo "   --prefix PREFIX       : Install destination. If unset, defaults to $CONDA_PREFIX/riscv-tools"
     echo "                           or $CONDA_PREFIX/esp-tools"
     echo "   --clean-after-install : Run make clean in calls to module_make and module_build"
-    echo "   --skip-validate       : Skip prompt checking for conda"
+    echo "   --force -f            : Skip prompt checking for conda"
+    echo "   --skip-validate       : DEPRECATED: Same functionality as --force"
     echo "   --help -h             : Display this message"
     exit "$1"
-}
-
-error() {
-    echo "${0##*/}: ${1}" >&2
-}
-die() {
-    error "$1"
-    exit "${2:--1}"
 }
 
 TOOLCHAIN="riscv-tools"
 CLEANAFTERINSTALL=""
 RISCV=""
-SKIP_VALIDATE=false
+FORCE=false
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
 do
     case $1 in
-        -h | --help | help )
+        -h | -H | --help | help )
             usage 3 ;;
         -p | --prefix )
             shift
@@ -64,8 +50,8 @@ do
             CLEANAFTERINSTALL="true" ;;
         riscv-tools | esp-tools)
             TOOLCHAIN=$1 ;;
-        --skip-validate)
-            SKIP_VALIDATE=true;
+        --force | -f | --skip-validate)
+            FORCE=true;
             ;;
         * )
             error "invalid option $1"
@@ -74,7 +60,7 @@ do
     shift
 done
 
-if [ "$SKIP_VALIDATE" = false ]; then
+if [ "$FORCE" = false ]; then
     if [ -z ${CONDA_DEFAULT_ENV+x} ]; then
         error "ERROR: No conda environment detected. Did you activate the conda environment (e.x. 'conda activate chipyard')?"
         exit 1
@@ -82,7 +68,7 @@ if [ "$SKIP_VALIDATE" = false ]; then
 fi
 
 if [ -z "$RISCV" ] ; then
-      RISCV="$CONDA_PREFIX/$TOOLCHAIN"
+    RISCV="$CONDA_PREFIX/$TOOLCHAIN"
 fi
 
 XLEN=64
@@ -92,7 +78,7 @@ echo "Installing extra toolchain utilities/tests to $RISCV"
 # install risc-v tools
 export RISCV="$RISCV"
 
-cd "${CHIPYARD_DIR}"
+cd "${RDIR}"
 
 SRCDIR="$(pwd)/toolchains/${TOOLCHAIN}"
 [ -d "${SRCDIR}" ] || die "unsupported toolchain: ${TOOLCHAIN}"
