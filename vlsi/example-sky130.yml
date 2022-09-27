@@ -6,9 +6,9 @@ vlsi.core.max_threads: 12
 
 # Technology paths
 technology.sky130:
-  sky130A: "path-to-sky130A/"
-  openram_lib: "path-to-sky130_sram_macros/" 
-  sky130_nda: "path-to-skywater-src-nda/"
+  sky130A: "/path-to-/sky130A"
+  openram_lib: "/path-to-/sky130_sram_macros" 
+  sky130_nda: "/path-to-/skywater-src-nda"
 
 # General Hammer Inputs
 
