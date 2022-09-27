@@ -31,13 +31,13 @@ ifdef USE_SRAM_COMPILER
 	MACROCOMPILER_MODE ?= -l $(SMEMS_COMP) --use-compiler -hir $(SMEMS_HAMMER) --mode strict
 else
 	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER) --mode strict
-endif	
+endif
 
 ENV_YML            ?= $(vlsi_dir)/env.yml
 TECH_CONF          ?= $(if $(filter $(tech_name),nangate45), 	example-nangate45.yml,\
-                      $(if $(filter $(tech_name),asap7),		example-asap7.yml,\
-																example-sky130.yml))
-TOOLS_CONF		   ?= example-tools.yml
+                      $(if $(filter $(tech_name),asap7),        example-asap7.yml,\
+                                                                example-sky130.yml))
+TOOLS_CONF         ?= example-tools.yml
 INPUT_CONFS        ?= $(TOOLS_CONF) $(TECH_CONF)
 HAMMER_EXEC        ?= $(if $(filter $(tech_name),sky130),\
                         ./example-vlsi-sky130,\
