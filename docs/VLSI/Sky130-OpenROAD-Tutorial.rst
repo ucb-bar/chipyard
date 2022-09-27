@@ -34,10 +34,9 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
   * All of the elaborated Chisel and FIRRTL.
 
-* ``hammer``, ``hammer-<vendor>-plugins``, ``hammer-<tech>-plugin``
+* ``hammer``, ``hammer/src/hammer-vlsi/<syn-par-drc-lvs>/<tool>``, ``hammer/src/hammer-vlsi/technology/<tech>``
 
-  * Core repository, and commercial tool and NDA technology plugins.
-  * Open-source plugins are located under ``hammer/src/hammer-vlsi/<syn-par-drc-lvs>/<tool>`` and ``hammer/src/hammer-vlsi/technology/<tech>``
+  * Core repository, and open-source tool and technology plugins.
 
 Prerequisites
 -------------
@@ -75,6 +74,15 @@ Pull the Hammer environment into the shell:
 Running the VLSI Flow
 ---------------------
 
+For this tutorial we will be setting the Make variable ``tutorial=sky130-openroad`` to abbreviate the configuration.
+The current options for this variable are defined in ``tutorial.mk``, a few of which are summarized as follows:
+
+* ``CONFIG=TinyRocketConfig`` selects the ``TinyRocketConfig`` from the Chipyard configurations.
+* ``tech_name`` sets a few more necessary paths in the ``Makefile``, such as the appropriate Hammer plugin
+* ``TOOLS_CONF`` and ``TECH_CONF`` select the approproate YAML configuration files, ``example-openroad.yml`` and ``example-sky130.yml``, which are described below
+* ``DESIGN_CONF`` and ``EXTRA_CONFS`` allow for additonal design-specific overrides of the Hammer IR in ``example-sky130.yml``
+* ``VLSI_OBJ_DIR`` gives the build directory a unique name to allow running multiple flows in the same repo.
+
 example-vlsi-sky130
 ^^^^^^^^^^^^^^^^^^^
 This is the entry script with placeholders for hooks. In the ``ExampleDriver`` class, a list of hooks is passed in the ``get_extra_par_hooks``. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in this example. Refer to the Hammer documentation on hooks for a detailed description of how these are injected into the VLSI flow.
@@ -102,7 +110,7 @@ To map the generic memory macros in the generarted Verilog to the SRAMs in your 
 
 .. code-block:: shell
 
-    make srams tech_name=sky130 CONFIG=TinyRocketConfig
+    make srams tutorial=sky130-openroad
 
 Generating Verilog
 ^^^^^^^^^^^^^^^^^^
@@ -110,7 +118,7 @@ To elaborate the ``TinyRocketConfig`` from Chisel to Verilog, run:
 
 .. code-block:: shell
 
-    make verilog tech_name=sky130 CONFIG=TinyRocketConfig
+    make verilog tutorial=sky130-openroad
 
 The ``CONFIG=TinyRocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a stripped-down Rocket Chip in the interest of minimizing tool runtime. The resulting verilog is located in ``./generated-src/chipyard.TestHarness.TinyRocketConfig/chipyard.TestHarness.TinyRocketConfig.top.v``.
 
@@ -135,7 +143,7 @@ Synthesis
 
 .. code-block:: shell
 
-    make syn tech_name=sky130 CONFIG=TinyRocketConfig
+    make syn tutorial=sky130-openroad
 
 Post-synthesis logs and collateral are in ``build/syn-rundir``. 
 
@@ -145,7 +153,7 @@ Place-and-Route
 ^^^^^^^^^^^^^^^
 .. code-block:: shell
 
-    make par tech_name=sky130 CONFIG=TinyRocketConfig
+    make par tutorial=sky130-openroad
 
 After completion, the final database can be opened in an interactive OpenROAD session.
 
@@ -174,8 +182,8 @@ To run DRC & LVS:
 
 .. code-block:: shell
 
-    make drc tech_name=sky130 CONFIG=TinyRocketConfig
-    make lvs tech_name=sky130 CONFIG=TinyRocketConfig
+    make drc tutorial=sky130-openroad
+    make lvs tutorial=sky130-openroad
 
 Some DRC errors are expected from this PDK, especially with regards to the SRAMs, as explained in the 
 `Sky130 Hammer plugin README  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__.
