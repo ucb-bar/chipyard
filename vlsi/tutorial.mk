@@ -40,7 +40,7 @@ ifeq ($(tutorial),sky130-openroad-sramdev)
 	CONFIG			  ?= TinyRocketConfig
 	TOOLS_CONF	      ?= example-openroad.yml
 	TECH_CONF		  ?= example-sky130.yml
-	DESIGN_CONF		  ?= example-designs/sky130-openroad-sramdev.yml
+	DESIGN_CONF		  ?= example-designs/sky130-openroad.yml
 	EXTRA_CONFS       ?= $(if $(filter $(TOP),Rocket RocketTile), example-designs/sky130-rocket.yml, )
 	INPUT_CONFS		  ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONF) $(EXTRA_CONFS) 
 	SMEMS_CACHE		  ?= $(abspath .)/hammer/src/hammer-vlsi/technology/sky130/sram-cache-dev.json
