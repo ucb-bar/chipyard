@@ -1,8 +1,8 @@
-# General Hammer Inputs
+# Override configurations in ../example-sky130.yml
 
 # Specify clock signals
 vlsi.inputs.clocks: [
-  {name: "clock_clock", period: "10ns", uncertainty: "1ns"}
+  {name: "clock_clock", period: "5ns", uncertainty: "1ns"}
 ]
 
 # Power Straps

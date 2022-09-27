@@ -7,6 +7,10 @@ tutorial ?= none
 ifeq ($(tutorial),asap7)
 	tech_name         ?= asap7
 	CONFIG			  ?= TinyRocketConfig
+	TOOLS_CONF	      ?= example-tools.yml
+	TECH_CONF		  ?= example-asap7.yml
+	INPUT_CONFS		  ?= $(EXTRA_CONFS) $(TOOLS_CONF) $(TECH_CONF)
+	VLSI_OBJ_DIR	  ?= build-asap7-commercial
 endif
 
 ifeq ($(tutorial),sky130-commercial)
@@ -14,8 +18,10 @@ ifeq ($(tutorial),sky130-commercial)
 	CONFIG			  ?= TinyRocketConfig
 	TOOLS_CONF	      ?= example-tools.yml
 	TECH_CONF		  ?= example-sky130.yml
-	DESIGN_CONF		  ?= example-design-sky130-commercial.yml
-	INPUT_CONFS		  ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONF)
+	DESIGN_CONF		  ?= example-designs/sky130-commercial.yml
+	EXTRA_CONFS       ?= $(if $(filter $(TOP),Rocket RocketTile), example-designs/sky130-rocket.yml, )
+	INPUT_CONFS		  ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONF) $(EXTRA_CONFS) 
+	VLSI_OBJ_DIR	  ?= build-sky130-commercial
 endif
 
 ifeq ($(tutorial),sky130-openroad)
@@ -23,6 +29,20 @@ ifeq ($(tutorial),sky130-openroad)
 	CONFIG			  ?= TinyRocketConfig
 	TOOLS_CONF	      ?= example-openroad.yml
 	TECH_CONF		  ?= example-sky130.yml
-	DESIGN_CONF		  ?= example-design-sky130-openroad.yml
-	INPUT_CONFS		  ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONF)
+	DESIGN_CONF		  ?= example-designs/sky130-openroad.yml
+	EXTRA_CONFS       ?= $(if $(filter $(TOP),Rocket RocketTile), example-designs/sky130-rocket.yml, )
+	INPUT_CONFS		  ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONF) $(EXTRA_CONFS) 
+	VLSI_OBJ_DIR	  ?= build-sky130-openroad
+endif
+
+ifeq ($(tutorial),sky130-openroad-sramdev)
+	tech_name         ?= sky130
+	CONFIG			  ?= TinyRocketConfig
+	TOOLS_CONF	      ?= example-openroad.yml
+	TECH_CONF		  ?= example-sky130.yml
+	DESIGN_CONF		  ?= example-designs/sky130-openroad-sramdev.yml
+	EXTRA_CONFS       ?= $(if $(filter $(TOP),Rocket RocketTile), example-designs/sky130-rocket.yml, )
+	INPUT_CONFS		  ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONF) $(EXTRA_CONFS) 
+	SMEMS_CACHE		  ?= $(abspath .)/hammer/src/hammer-vlsi/technology/sky130/sram-cache-dev.json
+	VLSI_OBJ_DIR	  ?= build-sky130-openroad-sramdev
 endif
