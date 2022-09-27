@@ -60,7 +60,7 @@ import scala.collection.immutable.ListMap
  *   |              |              |              |              |
  *   |______________|______________|______________|______________|
  */
-
+// DOC include start: MultiNoCConfig
 class MultiNoCConfig extends Config(
   new constellation.soc.WithCbusNoC(constellation.protocol.TLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
@@ -106,7 +106,7 @@ class MultiNoCConfig extends Config(
   new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
   new chipyard.config.AbstractConfig
 )
-
+// DOC include end: MultiNoCConfig
 
 /*
  * 10 - 11 - 12 - 13 - 14
@@ -147,6 +147,7 @@ class MultiNoCConfig extends Config(
  * DRAM 1 | MO  | system[1]  |    5
  * extram | MO  | serdesser  |    9
  */
+// DOC include start: SharedNoCConfig
 class SharedNoCConfig extends Config(
   new constellation.soc.WithGlobalNoC(GlobalNoCParams(
     NoCParams(
@@ -184,3 +185,4 @@ class SharedNoCConfig extends Config(
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
   new chipyard.config.AbstractConfig
 )
+// DOC include end: SharedNoCConfig
