@@ -22,7 +22,7 @@ For example:
 This specifies that the `prepare-chipyard-cores` job needs the both the `make-keys` and the `setup-complete` steps to
 be completed before it can run.
 
-Chipyard runs its CI using a docker image created from `dockerfiles/Dockerfile`.
+Chipyard runs its CI using a docker image created from `dockerfiles/Dockerfile` and on Berkeley's compute infrastructure.
 See its [README](../dockerfiles/README.md) for more details.
 
 Finally, within each job's `steps:` section, the steps are run sequentially and state persists throughout a job.
@@ -71,9 +71,7 @@ Our own composite actions are defined in the `.github/actions/<ActionName>/actio
 This directory contains most the collateral for the Chipyard CI to work.
 The following is included in `.github/scripts/: directory
 
-    `build-toolchains.sh`        # build either riscv-tools or esp-tools
-    `create-hash.sh`             # create hashes of riscv-tools/esp-tools to use as hash keys
-    `remote-do-rtl-build.sh`            # use verilator to build a sim executable (remotely)
+    `remote-do-rtl-build.sh`     # use verilator to build a sim executable (remotely)
     `defaults.sh`                # default variables used
     `check-commit.sh`            # check that submodule commits are valid
     `build-extra-tests.sh`       # build default chipyard tests located in tests/
@@ -101,21 +99,9 @@ To get the CI to work correctly you need to create the following GH Repository S
 
 | Secret | Value |
 | -------| ------------- |
-| BUILDSERVER | the hostname of the remote build server (likely be a millennium machine) |
-| BUILDUSER | the login to use on the build server |
 | BUILDDIR | the directory to use on the build server |
-| SERVERKEY | a private key to access the build server |
 
-The main workflow also constructs and places in the environment a SERVER and a work directyory on that server env using the above secrets.
-The SERVER is constructed like this:
-```bash
-SERVER = ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-```
-
-Additionally, you need to add under the "PERMISSIONS" "SSH Permissions" section a private key that is on the build server that you are using.
-After adding a private key, it will show a fingerprint that should be added under the jobs that need to be run.
-
-Note: On the remote server you need to have the `*.pub` key file added to the `authorized_keys` file.
+Additionally, you need to install conda on the build servers that exist.
 
 Notes on CIRCLE CI
 ------------------

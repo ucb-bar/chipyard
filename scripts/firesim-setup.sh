@@ -5,13 +5,12 @@
 set -e
 set -o pipefail
 
-RDIR=$(pwd)
-scripts_dir="$( cd "$( dirname "${BASH_SOURCE[0]:-${(%):-%x}}" )" >/dev/null 2>&1 && pwd )"
+RDIR=$(git rev-parse --show-toplevel)
 
-cd "${scripts_dir}/.."
+cd "$RDIR"
 
 # Reenable the FireSim submodule
 git config --unset submodule.sims/firesim.update || true
-cd sims/firesim
+pushd sims/firesim
 ./build-setup.sh "$@" --library --skip-validate
-cd "$RDIR"
+popd

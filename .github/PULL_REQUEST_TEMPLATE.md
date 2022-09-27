@@ -37,6 +37,7 @@ Provide a brief description of the PR immediately below this comment, if the tit
 - [ ] Did you state the type-of-change/impact?
 - [ ] Did you delete any extraneous prints/debugging code?
 - [ ] Did you mark the PR with a `changelog:` label?
+- [ ] (If applicable) Did you update the conda `.conda-lock.yml` file if you updated the conda requirements file?
 - [ ] (If applicable) Did you add documentation for the feature?
 - [ ] (If applicable) Did you add a test demonstrating the PR?
 <!-- Do this if this PR is a bugfix that should be applied to the latest release -->
