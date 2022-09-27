@@ -6,30 +6,28 @@ FPGA-Accelerated Simulation
 FireSim
 -----------------------
 
-`FireSim <https://fires.im/>`__ is an open-source cycle-accurate FPGA-accelerated full-system hardware simulation platform that runs on cloud FPGAs (Amazon EC2 F1).
+`FireSim <https://fires.im/>`__ is an open-source cycle-accurate FPGA-accelerated full-system hardware simulation platform that runs on FPGAs (Amazon EC2 F1 FPGAs and local FPGAs).
 FireSim allows RTL-level simulation at orders-of-magnitude faster speeds than software RTL simulators.
 FireSim also provides additional device models to allow full-system simulation, including memory models and network models.
 
-FireSim currently supports running only on Amazon EC2 F1 FPGA-enabled virtual instances.
-In order to simulate your Chipyard design using FireSim, if you have not
-already, follow the initial EC2 setup instructions as detailed in the `FireSim
-documentation  <http://docs.fires.im/en/latest/Initial-Setup/index.html>`__.
-Then clone Chipyard onto your FireSim manager
-instance, and setup your Chipyard repository as you would normally.
+FireSim supports running on Amazon EC2 F1 FPGA-enabled cloud instances and on locally managed Linux machines with FPGAs attached.
+The rest of this documentation assumes you are running on an Amazon EC2 F1 FPGA-enabled virtual instance.
+In order to simuate your Chipyard design using FireSim, make sure to follow the repository setup as described by
+:ref:`Chipyard-Basics/Initial-Repo-Setup:Initial Repository Setup`, if you have not already.
 
 Next, initalize FireSim as a library in Chipyard by running:
 
 .. code-block:: shell
 
     # At the root of your chipyard repo
-    ./scripts/firesim-setup.sh --fast
+    ./scripts/firesim-setup.sh
 
 ``firesim-setup.sh`` initializes additional submodules and then invokes
-firesim's ``build-setup.sh`` script adding ``--library`` to properly
-initialize FireSim as a library submodule in chipyard. You may run
+FireSim's ``build-setup.sh`` script adding ``--library`` to properly
+initialize FireSim as a library submodule in Chipyard. You may run
 ``./sims/firesim/build-setup.sh --help`` to see more options.
 
-Finally, source the following environment at the root of the firesim directory:
+Finally, source the following environment at the root of the FireSim directory:
 
 .. code-block:: shell
 
@@ -40,13 +38,13 @@ Finally, source the following environment at the root of the firesim directory:
 .. Note:: Every time you want to use FireSim with a fresh shell, you must source this ``sourceme-f1-manager.sh``
 
 At this point you're ready to use FireSim with Chipyard. If you're not already
-familiar with FireSim, please return to the `FireSim Docs
-<https://docs.fires.im/en/latest/Initial-Setup/Setting-up-your-Manager-Instance.html#completing-setup-using-the-manager>`__,
+familiar with FireSim, please return to the :fsim_doc:`FireSim Docs <Initial-Setup/Setting-up-your-Manager-Instance.html#completing-setup-using-the-manager>`,
 and proceed with the rest of the tutorial.
 
 Running your Design in FireSim
 ------------------------------
-Converting a Chipyard config (one in ``chipyard/src/main/scala`` to run in FireSim is simple, and can be done either through the traditional configuration system or through FireSim's build-recipes scheme. 
+
+Converting a Chipyard config (one in ``chipyard/src/main/scala`` to run in FireSim is simple, and can be done either through the traditional configuration system or through FireSim's build-recipes scheme.
 
 A FireSim simulation requires 3 additional config fragments:
 
