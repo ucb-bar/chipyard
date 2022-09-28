@@ -1,6 +1,12 @@
 package chipyard
 
 import freechips.rocketchip.config.{Config}
+import constellation.channel._
+import constellation.routing._
+import constellation.topology._
+import constellation.noc._
+import constellation.soc.{GlobalNoCParams}
+import scala.collection.immutable.ListMap
 
 // This file is designed to accompany a live tutorial, with slides.
 // For each of 4 phases, participants will customize and build a
@@ -66,5 +72,47 @@ class TutorialSha3BlackBoxConfig extends Config(
 
   // For this demonstration we assume the base system is a single-core Rocket, for fast elaboration
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig
+)
+
+// Tutorial Phase 5: Map a multicore heterogeneous SoC with multiple cores and memory-mapped accelerators
+class TutorialNoCConfig extends Config(
+  // Try changing the dimensions of the Mesh topology
+  new constellation.soc.WithGlobalNoC(constellation.soc.GlobalNoCParams(
+    NoCParams(
+      topology        = TerminalRouter(Mesh2D(3, 4)),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(12) { UserVirtualChannelParams(4) }),
+      routingRelation = NonblockingVirtualSubnetworksRouting(TerminalRouterRouting(
+        Mesh2DEscapeRouting()), 10, 1)
+    )
+  )) ++
+  // The inNodeMapping and outNodeMapping values are the physical identifiers of
+  // routers on the topology to map the agents to. Try changing these to any
+  // value within the range [0, topology.nNodes)
+  new constellation.soc.WithPbusNoC(constellation.protocol.TLNoCParams(
+    constellation.protocol.DiplomaticNetworkNodeMapping(
+      inNodeMapping = ListMap("Core" -> 7),
+      outNodeMapping = ListMap(
+        "pbus" -> 8, "uart" -> 9, "control" -> 10, "gcd" -> 11,
+        "writeQueue[0]" -> 0, "writeQueue[1]" -> 1, "tailChain[0]" -> 2))
+  ), true) ++
+  new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
+    constellation.protocol.DiplomaticNetworkNodeMapping(
+      inNodeMapping = ListMap(
+        "Core 0" -> 0, "Core 1" -> 1,
+        "serial-tl" -> 2),
+      outNodeMapping = ListMap(
+        "system[0]" -> 3, "system[1]" -> 4, "system[2]" -> 5, "system[3]" -> 6,
+        "pbus" -> 7))
+  ), true) ++
+  new chipyard.example.WithGCD ++
+  new chipyard.harness.WithLoopbackNIC ++
+  new icenet.WithIceNIC ++
+  new fftgenerator.WithFFTGenerator(numPoints=8) ++
+  new chipyard.example.WithStreamingFIR ++
+  new chipyard.example.WithStreamingPassthrough ++
+
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   new chipyard.config.AbstractConfig
 )
