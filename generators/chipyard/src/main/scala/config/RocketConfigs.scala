@@ -23,7 +23,7 @@ class TinyRocketConfig extends Config(
 
 // DOC include start: FFTRocketConfig
 class FFTRocketConfig extends Config(
-  new fftgenerator.WithFFTGenerator(baseAddr=0x2000, numPoints=8, width=16, decPt=8) ++ // add 8-point mmio fft at 0x2000 with 16bit fixed-point numbers.
+  new fftgenerator.WithFFTGenerator(numPoints=8, width=16, decPt=8) ++ // add 8-point mmio fft at 0x2000 with 16bit fixed-point numbers.
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: FFTRocketConfig

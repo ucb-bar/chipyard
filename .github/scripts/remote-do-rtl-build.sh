@@ -18,6 +18,13 @@ cd $REMOTE_CHIPYARD_DIR
 ./scripts/init-submodules-no-riscv-tools.sh --force
 ./scripts/init-fpga.sh
 
+
+# Constellation can run without espresso, but this improves
+# elaboration time drastically
+pushd $REMOTE_CHIPYARD_DIR/generators/constellation
+scripts/install-espresso.sh $RISCV
+popd
+
 if [ $1 = "group-accels" ]; then
     pushd $REMOTE_CHIPYARD_DIR/generators/gemmini/software
     git submodule update --init --recursive gemmini-rocc-tests

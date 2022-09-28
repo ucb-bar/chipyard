@@ -21,6 +21,7 @@ so changes to the generators themselves will automatically be used when building
    Rocket-Chip
    Rocket
    BOOM
+   Constellation
    Hwacha
    Gemmini
    IceNet

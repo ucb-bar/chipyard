@@ -111,6 +111,19 @@ ifeq ($(SUB_PROJECT),icenet)
 	TB                ?= TestDriver
 	TOP               ?= UnitTestSuite
 endif
+# For Constellation developers
+ifeq ($(SUB_PROJECT),constellation)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= TestHarness
+	MODEL_PACKAGE     ?= constellation.test
+	CONFIG            ?= TestConfig00
+	CONFIG_PACKAGE    ?= constellation.test
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= TestDriver
+	TOP               ?= NoC
+endif
+
 
 #########################################################################################
 # path to rocket-chip and testchipip

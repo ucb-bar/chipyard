@@ -28,8 +28,9 @@ declare -A grouping
 grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad"
 grouping["group-peripherals"]="chipyard-dmirocket chipyard-blkdev chipyard-spiflashread chipyard-spiflashwrite chipyard-mmios chipyard-lbwif"
 grouping["group-accels"]="chipyard-fftgenerator chipyard-nvdla chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-streaming-fir chipyard-streaming-passthrough"
+grouping["group-constellation"]="chipyard-constellation"
 grouping["group-tracegen"]="tracegen tracegen-boom"
-grouping["group-other"]="icenet testchipip"
+grouping["group-other"]="icenet testchipip constellation"
 grouping["group-fpga"]="arty vcu118"
 
 # key value store to get the build strings
@@ -58,7 +59,9 @@ mapping["chipyard-sodor"]=" CONFIG=Sodor5StageConfig"
 mapping["chipyard-multiclock-rocket"]=" CONFIG=MulticlockRocketConfig"
 mapping["chipyard-nomem-scratchpad"]=" CONFIG=MMIOScratchpadOnlyRocketConfig"
 mapping["chipyard-fftgenerator"]=" CONFIG=FFTRocketConfig"
+mapping["chipyard-constellation"]=" CONFIG=SharedNoCConfig"
 
+mapping["constellation"]=" SUB_PROJECT=constellation"
 mapping["firesim"]="SCALA_TEST=firesim.firesim.RocketNICF1Tests"
 mapping["firesim-multiclock"]="SCALA_TEST=firesim.firesim.RocketMulticlockF1Tests"
 mapping["fireboom"]="SCALA_TEST=firesim.firesim.BoomF1Tests"

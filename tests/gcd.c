@@ -1,9 +1,9 @@
 #include "mmio.h"
 
-#define GCD_STATUS 0x2000
-#define GCD_X 0x2004
-#define GCD_Y 0x2008
-#define GCD_GCD 0x200C
+#define GCD_STATUS 0x1000
+#define GCD_X 0x1004
+#define GCD_Y 0x1008
+#define GCD_GCD 0x100C
 
 unsigned int gcd_ref(unsigned int x, unsigned int y) {
   while (y != 0) {
@@ -37,6 +37,7 @@ int main(void)
     printf("Hardware result %d does not match reference value %d\n", result, ref);
     return 1;
   }
+  printf("Hardware result %d is correct for GCD\n", result);
   return 0;
 }
 // DOC include end: GCD test

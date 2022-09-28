@@ -127,3 +127,6 @@
 [submodule "toolchains/libgloss"]
 	path = toolchains/libgloss
 	url = https://github.com/ucb-bar/libgloss-htif.git
+[submodule "generators/constellation"]
+	path = generators/constellation
+	url = https://github.com/ucb-bar/constellation.git

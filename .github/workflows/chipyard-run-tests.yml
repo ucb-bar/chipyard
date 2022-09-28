@@ -261,6 +261,28 @@ jobs:
         with:
           group-key: "group-cores"
 
+  prepare-chipyard-constellation:
+    name: prepare-chipyard-constellation
+    needs: setup-complete
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Build RTL on self-hosted
+        uses: ./.github/actions/prepare-rtl
+        with:
+          group-key: "group-constellation"
+
   prepare-chipyard-peripherals:
     name: prepare-chipyard-peripherals
     needs: setup-complete
@@ -861,6 +883,53 @@ jobs:
           group-key: "group-other"
           project-key: "testchipip"
 
+  constellation-run-tests:
+    name: constellation-run-tests
+    needs: prepare-chipyard-other
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-other"
+          project-key: "constellation"
+
+  chipyard-constellation-run-tests:
+    name: chipyard-constellation-run-tests
+    needs: prepare-chipyard-constellation
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-constellation"
+          project-key: "chipyard-constellation"
+
+
   firesim-run-tests:
     name: firesim-run-tests
     needs: setup-complete
@@ -939,16 +1008,35 @@ jobs:
   # When adding new top level jobs, please add them to `needs` below
   all_tests_passed:
     name: "all tests passed"
-    needs: [commit-on-master-check, tutorial-setup-check, documentation-check,
-            chipyard-rocket-run-tests, chipyard-hetero-run-tests, chipyard-boom-run-tests, chipyard-cva6-run-tests, chipyard-ibex-run-tests,
-            chipyard-sodor-run-tests, chipyard-dmirocket-run-tests, chipyard-spiflashwrite-run-tests, chipyard-fftgenerator-run-tests,
-            chipyard-spiflashread-run-tests, chipyard-lbwif-run-tests, chipyard-sha3-run-tests,
-            chipyard-streaming-fir-run-tests, chipyard-streaming-passthrough-run-tests, chipyard-hwacha-run-tests,
-            chipyard-gemmini-run-tests, chipyard-nvdla-run-tests,
-            tracegen-boom-run-tests, tracegen-run-tests,
-            icenet-run-tests, testchipip-run-tests,
+    needs: [commit-on-master-check,
+            tutorial-setup-check,
+            documentation-check,
+            chipyard-rocket-run-tests,
+            chipyard-hetero-run-tests,
+            chipyard-boom-run-tests,
+            chipyard-cva6-run-tests,
+            chipyard-ibex-run-tests,
+            chipyard-sodor-run-tests,
+            chipyard-dmirocket-run-tests,
+            chipyard-spiflashwrite-run-tests,
+            chipyard-fftgenerator-run-tests,
+            chipyard-spiflashread-run-tests,
+            chipyard-lbwif-run-tests,
+            chipyard-sha3-run-tests,
+            chipyard-streaming-fir-run-tests,
+            chipyard-streaming-passthrough-run-tests,
+            chipyard-hwacha-run-tests,
+            chipyard-gemmini-run-tests,
+            chipyard-nvdla-run-tests,
+            chipyard-constellation-run-tests,
+            tracegen-boom-run-tests,
+            tracegen-run-tests,
+            icenet-run-tests,
+            testchipip-run-tests,
+            constellation-run-tests,
             prepare-chipyard-fpga, # firesim-run-tests,
-            fireboom-run-tests, firesim-multiclock-run-tests]
+            fireboom-run-tests,
+            firesim-multiclock-run-tests]
     runs-on: ubuntu-latest
     steps:
       - run: echo Success!
