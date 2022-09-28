@@ -102,6 +102,14 @@ CC= CXX= module_all riscv-pk --prefix="${RISCV}" --host=riscv${XLEN}-unknown-elf
 echo '==>  Installing RISC-V tests'
 module_all riscv-tests --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --with-xlen=${XLEN}
 
+echo '==> Installing espresso logic minimizer'
+(
+    cd $RDIR
+    git submodule update --init --checkout generators/constellation
+    cd generators/constellation
+    scripts/install-espresso.sh $RISCV
+)   
+
 # Common tools (not in any particular toolchain dir)
 
 echo '==>  Installing libgloss'
