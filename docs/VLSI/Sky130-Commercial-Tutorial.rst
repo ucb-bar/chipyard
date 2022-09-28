@@ -30,7 +30,7 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
   * Hammer IR for this tutorial.
 
-* ``example-design.yml``, ``example-nangate45.yml``, ``example-tech.yml``
+* ``example-design.yml``, ``example-asap7.yml``, ``example-tech.yml``
 
   * Hammer IR not used for this tutorial but provided as templates.
 
