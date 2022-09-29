@@ -15,6 +15,7 @@ export TUTORIAL_INSTALL_PATH=$(pwd)
 # # Sky130 SRAMs
 # echo "installing sky130 sram macros"
 # git clone https://github.com/efabless/sky130_sram_macros.git
+
 # # Yosys
 # # conda create --name yosys --no-default-packages -y
 # echo "installing yosys"
@@ -29,13 +30,21 @@ export TUTORIAL_INSTALL_PATH=$(pwd)
 # first install dependencies
 echo "installing openroad dependencies"
 conda install -y -c conda-forge time
-conda install -y -c intel tcl
+
+# wget -q https://prdownloads.sourceforge.net/tcl/tcl8.6.12-src.tar.gz
+# gunzip < tcl8.6.12-src.tar.gz | tar xf -
+# cd tcl8.6.12/unix
+# ./configure --prefix=$TUTORIAL_INSTALL_PATH
+# make
+# make test
+# make install
+
 git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
 cd OpenROAD
 sudo ./etc/DependencyInstaller.sh -dev
 mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$TUTORIAL_INSTALL_PATH -
+cmake .. -DCMAKE_INSTALL_PREFIX=$TUTORIAL_INSTALL_PATH 
 make
 # conda install -y -c conda-forge time
 # conda install -y -c intel tcl
@@ -50,8 +59,9 @@ make
 # cmake .. -DCMAKE_INSTALL_PREFIX=$TUTORIAL_INSTALL_PATH
 # make
 # make install
-# export PATH=$TUTORIAL_INSTALL_PATH/bin:$PATH
-# openroad -help
+export PATH=$TUTORIAL_INSTALL_PATH/bin:$PATH
+openroad -help
+
 # KLayout
 echo "installing klayout"
 cd $TUTORIAL_INSTALL_PATH
