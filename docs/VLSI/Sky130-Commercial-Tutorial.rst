@@ -1,8 +1,8 @@
-.. _sky130-tutorial:
+.. _sky130-commercial-tutorial:
 
 Sky130 Tutorial
 ===============
-The ``vlsi`` folder of this repository contains an example Hammer flow with the SHA-3 accelerator and a dummy hard macro. This example tutorial uses the built-in Sky130 technology plugin and requires access to the included Cadence and Mentor tool plugin submodules. Cadence is necessary for synthesis & place-and-route, while Mentor is needed for DRC & LVS.
+The ``vlsi`` folder of this repository contains an example Hammer flow with the TinyRocketConfig from Chipyard. This example tutorial uses the built-in Sky130 technology plugin and requires access to the included Cadence and Mentor tool plugin submodules. Cadence is necessary for synthesis & place-and-route, while Mentor is needed for DRC & LVS.
 
 Project Structure
 -----------------
@@ -30,7 +30,7 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
   * Hammer IR for this tutorial.
 
-* ``example-design.yml``, ``example-nangate45.yml``, ``example-tech.yml``
+* ``example-design.yml``, ``example-asap7.yml``, ``example-tech.yml``
 
   * Hammer IR not used for this tutorial but provided as templates.
 
@@ -45,7 +45,7 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 Prerequisites
 -------------
 
-* Python 3.4+
+* Python 3.6+
 * numpy package
 * Genus, Innovus, Voltus, VCS, and Calibre licenses
 * Sky130 PDK, install using `these directions  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__

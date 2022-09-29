@@ -12,6 +12,7 @@ sim_dir=$(abspath .)
 #########################################################################################
 # include shared variables
 #########################################################################################
+include $(vlsi_dir)/tutorial.mk
 include $(base_dir)/variables.mk
 
 #########################################################################################
@@ -30,15 +31,13 @@ ifdef USE_SRAM_COMPILER
 	MACROCOMPILER_MODE ?= -l $(SMEMS_COMP) --use-compiler -hir $(SMEMS_HAMMER) --mode strict
 else
 	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER) --mode strict
-endif	
+endif
 
 ENV_YML            ?= $(vlsi_dir)/env.yml
-INPUT_CONFS        ?= example-tools.yml \
-                      $(if $(filter $(tech_name),nangate45),\
-                        example-nangate45.yml,\
-                        $(if $(filter $(tech_name),asap7),\
-							example-asap7.yml,\
-							example-sky130.yml))
+TECH_CONF          ?= $(if $(filter $(tech_name),asap7),        example-asap7.yml,\
+                                                                example-sky130.yml))
+TOOLS_CONF         ?= example-tools.yml
+INPUT_CONFS        ?= $(TOOLS_CONF) $(TECH_CONF)
 HAMMER_EXEC        ?= $(if $(filter $(tech_name),sky130),\
                         ./example-vlsi-sky130,\
                         ./example-vlsi)
