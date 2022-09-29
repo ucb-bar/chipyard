@@ -3,7 +3,7 @@
 # Specify clock signals
 # Rocket/RocketTile names clock signal "clock" instead of "clock_clock"
 vlsi.inputs.clocks: [
-  {name: "clock", period: "10ns", uncertainty: "1ns"}
+  {name: "clock", period: "5ns", uncertainty: "1ns"}
 ]
 
 # Placement Constraints
