@@ -1,24 +1,37 @@
 #!/bin/bash
 
-mkdir -p vlsi/tutorial-installs
-cd vlsi/tutorial
+set -x
+
+echo "making tutorial directory"
+mkdir -p ~/tutorial-installs
+cd ~/tutorial-installs
 export TUTORIAL_INSTALL_PATH=$(pwd)
-# Sky130 PDK
-wget https://github.com/nayiri-k/hammer-workspace/raw/main/tech/sky130A.tar.bz2
-tar -xvf sky130A.tar.bz2
+# # >>>>>>>>> THIS WORKS
+# # Sky130 PDK
+# echo "installing sky130A PDK"
+# wget https://github.com/nayiri-k/hammer-workspace/raw/main/tech/sky130A.tar.bz2
+# tar -xf sky130A.tar.bz2
+# # <<<<<<<<< THIS WORKS
 # Sky130 SRAMs
-git clone git@github.com:efabless/sky130_sram_macros.git
+echo "installing sky130 sram macros"
+git clone https://github.com/efabless/sky130_sram_macros.git
 # Yosys
 # conda create --name yosys --no-default-packages -y
-conda install -c timvideos -y yosys
+echo "installing yosys"
+# conda install -c timvideos -y yosys
+wget https://github.com/YosysHQ/oss-cad-suite-build/releases/download/2022-09-29/oss-cad-suite-linux-x64-20220929.tgz
+tar zxf oss-cad-suite-linux-x64-20220929.tgz
+export PATH=$TUTORIAL_INSTALL_PATH/oss-cad-suite/bin:$PATH
 yosys -help
 # OpenROAD
 # first install dependencies
+echo "installing openroad dependencies"
 conda install -y -c anaconda libffi
 conda install -y -c intel tcl
 conda install -y -c conda-forge time
 conda install -y -c anaconda pandas
 # build openroad
+echo "installing openroad"
 git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
 cd OpenROAD
 mkdir build && cd build
@@ -28,6 +41,7 @@ make install
 export PATH=$TUTORIAL_INSTALL_PATH/bin:$PATH
 openroad -help
 # KLayout
+echo "installing klayout"
 cd $TUTORIAL_INSTALL_PATH
 wget https://www.klayout.org/downloads/source/klayout-0.27.1.tar.gz
 tar zxvf klayout-0.27.1.tar.gz
