@@ -45,7 +45,7 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 Prerequisites
 -------------
 
-* Python 3.4+
+* Python 3.6+
 * numpy package
 * Genus, Innovus, Voltus, VCS, and Calibre licenses
 * Sky130 PDK, install using `these directions  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__

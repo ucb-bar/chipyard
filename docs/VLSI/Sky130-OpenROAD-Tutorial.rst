@@ -41,7 +41,7 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 Prerequisites
 -------------
 
-* Python 3.4+
+* Python 3.6+
 * numpy package
 * OpenROAD flow tools:
 
@@ -190,15 +190,8 @@ Some DRC errors are expected from this PDK, especially with regards to the SRAMs
 
 
 VLSI Flow Control
------------------
-The Hammer tool plugins for each action (e.g. ``syn``, ``par``) support multiple steps (e.g. ``macro_placement``, ``global_route``).
-Hammer saves the design database before and after each step in ``build/par-rundir/<pre or post>_<step name>``.
-The Hammer flow supports being able to start/stop before/after any of these steps. 
-See the `Hammer documentation on Flow Control <https://docs.hammer-eda.org/en/latest/Hammer-Use/Flow-Control.html>`__ for a full list and description of the options.
-The ``Makefile`` in the ``vlsi`` directory passes this extra information via the ``HAMMER_EXTRA_ARGS`` variable.
-This variable can also be used to specify additional YAML configurations that may have changed or been omitted from the inital build.
-
-The below examples use the ``redo-par`` Make target to re-run only place-and-route. ``redo-`` may be prepended to any of the VLSI flow actions to re-run only that action.
+^^^^^^^^^^^^^^^^^
+Firt, refer to the :ref:`VLSI/Hammer:VLSI Flow Control` documentation. The below examples use the ``redo-par`` Make target to re-run only place-and-route. ``redo-`` may be prepended to any of the VLSI flow actions to re-run only that action.
 
 .. code-block:: shell
 
@@ -210,7 +203,7 @@ The below examples use the ``redo-par`` Make target to re-run only place-and-rou
       # example of re-running only floorplanning to test out a new floorplan configuration
       make redo-par HAMMER_EXTRA_ARGS="--only_step floorplan_design -p example-sky130.yml"
 
-See the `OpenROAD tool plugin README <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/par/openroad>`__ for the full list of OpenROAD tool steps.
+See the `OpenROAD tool plugin <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/par/openroad>`__ for the full list of OpenROAD tool steps and their implementations.
 
 Documentation
 -------------
