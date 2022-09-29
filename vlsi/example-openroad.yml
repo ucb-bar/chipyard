@@ -16,6 +16,7 @@ vlsi.core.par_tool_path_meta: "append"
 # Magic options
 vlsi.core.drc_tool: "magic"
 vlsi.core.drc_tool_path: ["hammer/src/hammer-vlsi/drc"]
+drc.magic.magic_bin: "magic"
 # Netgen options
 vlsi.core.lvs_tool: "netgen"
 vlsi.core.lvs_tool_path: ["hammer/src/hammer-vlsi/lvs"]
