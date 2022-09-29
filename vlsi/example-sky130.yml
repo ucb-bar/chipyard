@@ -26,6 +26,20 @@ vlsi.inputs.clocks: [
 # Generate Make include to aid in flow 
 vlsi.core.build_system: make
 
+# Placement Constraints
+vlsi.inputs.placement_constraints:
+  - path: "ChipTop"
+    type: toplevel
+    x: 0
+    y: 0
+    width: 3500
+    height: 2500
+    margins:
+      left: 10
+      right: 10
+      top: 10
+      bottom: 10
+
 # Power Straps
 par.power_straps_mode: generate
 par.generate_power_straps_method: by_tracks
