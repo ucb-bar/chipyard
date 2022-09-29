@@ -28,21 +28,30 @@ export TUTORIAL_INSTALL_PATH=$(pwd)
 # OpenROAD
 # first install dependencies
 echo "installing openroad dependencies"
-which time
 conda install -y -c conda-forge time
-conda install -y -c anaconda pandas
 conda install -y -c intel tcl
-conda install -y -c anaconda libffi
-# build openroad
-echo "installing openroad"
 git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
 cd OpenROAD
-mkdir build && cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$TUTORIAL_INSTALL_PATH
+sudo ./etc/DependencyInstaller.sh -dev
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=$TUTORIAL_INSTALL_PATH -
 make
-make install
-export PATH=$TUTORIAL_INSTALL_PATH/bin:$PATH
-openroad -help
+# conda install -y -c conda-forge time
+# conda install -y -c intel tcl
+# conda install -y -c anaconda pandas
+# conda install -y -c anaconda libffi
+
+# build openroad
+# echo "installing openroad"
+# git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
+# cd OpenROAD
+# mkdir build && cd build
+# cmake .. -DCMAKE_INSTALL_PREFIX=$TUTORIAL_INSTALL_PATH
+# make
+# make install
+# export PATH=$TUTORIAL_INSTALL_PATH/bin:$PATH
+# openroad -help
 # KLayout
 echo "installing klayout"
 cd $TUTORIAL_INSTALL_PATH
