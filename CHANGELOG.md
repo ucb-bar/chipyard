@@ -4,7 +4,7 @@ This changelog follows the format defined here: https://keepachangelog.com/en/1.
 
 ## [1.8.0] - 2022-09-30
 
-Adds support for NoC-based interconnects with Constellation
+Adds support for NoC-based interconnects with Constellation (https://constellation.readthedocs.io/en/latest/). Switch to Conda for dependency/environment management. Bump Rocket Chip and other hardware libraries. Bump to FireSim 1.15.0.
 
 ### Added
 * RTL: Support for packet-switched NoC-based TileLink main bus interconnects with Constellation
