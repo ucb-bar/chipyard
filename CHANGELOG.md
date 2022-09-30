@@ -2,6 +2,33 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.8.0] - 2022-09-30
+
+Adds support for NoC-based interconnects with Constellation (https://constellation.readthedocs.io/en/latest/). Switch to Conda for dependency/environment management. Bump Rocket Chip and other hardware libraries. Bump to FireSim 1.15.0.
+
+### Added
+* RTL: Support for packet-switched NoC-based TileLink main bus interconnects with Constellation
+* Conda: Support setting up a Chipyard development environment through Conda
+* Hammer: Fully open-source Sky130 flow with Yosys, OpenROAD, Magic, Netgen
+* Hammer: VCS FGP (fine-grained parallelism) support
+* Hammer: Support for Conformal LEC
+
+### Changed
+* RTL: Default memory-mapped addresses for fft/dsp/example MMIO accelerators changed to be non-overlapping
+* Repo: Update SiFive submodules to new chipsalliance upstreams
+* Rocketchip: Bumped to 1.6
+* Chisel: Bumped to 3.5.2
+* Firesim: Bumped to 1.15.0
+* Firemarshal: Bumped to latest
+
+### Fixed
+* RTL: Fix clock frequency rounding
+* Hammer: FSDB support for Cadence Voltus
+* Hammer: Various fixes to ASAP7 dummy SRAMs
+* Dromajo: Fix to variable definition
+* Testchipip: Fix write-strobe handling for 64B configurations
+* Build: Ignore dotfiles in lookup_srcs
+
 ## [1.7.1] - 2022-07-06
 
 FireSim bump for new builddriver command and various fixes. See FireSim 1.14.1 CHANGELOG.md.
