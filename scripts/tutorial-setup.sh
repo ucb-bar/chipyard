@@ -13,8 +13,18 @@ export PATH=$TUTORIAL_INSTALL_PATH/bin:$PATH
 echo "installing klayout"
 cd $TUTORIAL_INSTALL_PATH
 wget -q https://www.klayout.org/downloads/CentOS_7/klayout-0.27.1-0.x86_64.rpm
-# sudo rpm -i klayout-0.27.1-0.x86_64.rpm
+
+which dnf
+sudo dnf localinstall klayout-0.27.1-0.x86_64.rpm
+
+which rpm
+sudo rpm -i klayout-0.27.1-0.x86_64.rpm
+
+which yum
+sudo apt-get install yum
+which yum
 sudo yum localinstall klayout-0.27.1-0.x86_64.rpm
+
 ls
 which klayout
 klayout -h
