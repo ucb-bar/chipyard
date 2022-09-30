@@ -34,14 +34,14 @@ which yosys
 echo "installing openroad dependencies"
 git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
 cd OpenROAD
-sudo ./etc/DependencyInstaller.sh -dev
+sudo ./etc/DependencyInstaller.sh -dev &> /dev/null
 
 echo "installing openroad"
 mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=$TUTORIAL_INSTALL_PATH 
-make
-make install
+make &> /dev/null
+make install &> /dev/null
 
 openroad -help
 openroad -version
@@ -51,7 +51,7 @@ which openroad
 echo "installing klayout"
 cd $TUTORIAL_INSTALL_PATH
 sudo apt-get --yes --force-yes update
-sudo DEBIAN_FRONTEND=noninteractive apt-get  --yes --force-yes install klayout
+sudo DEBIAN_FRONTEND=noninteractive apt-get  --yes --force-yes install klayout &> /dev/null
 which klayout
 
 
