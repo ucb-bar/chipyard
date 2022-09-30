@@ -29,15 +29,6 @@ export TUTORIAL_INSTALL_PATH=$(pwd)
 # OpenROAD
 # first install dependencies
 echo "installing openroad dependencies"
-conda install -y -c conda-forge time
-
-# wget -q https://prdownloads.sourceforge.net/tcl/tcl8.6.12-src.tar.gz
-# gunzip < tcl8.6.12-src.tar.gz | tar xf -
-# cd tcl8.6.12/unix
-# ./configure --prefix=$TUTORIAL_INSTALL_PATH
-# make
-# make test
-# make install
 
 git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
 cd OpenROAD
@@ -46,10 +37,6 @@ mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=$TUTORIAL_INSTALL_PATH 
 make
-# conda install -y -c conda-forge time
-# conda install -y -c intel tcl
-# conda install -y -c anaconda pandas
-# conda install -y -c anaconda libffi
 
 # build openroad
 # echo "installing openroad"
