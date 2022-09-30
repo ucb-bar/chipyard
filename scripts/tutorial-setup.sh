@@ -6,6 +6,20 @@ echo "making tutorial directory"
 mkdir -p ~/tutorial-installs
 cd ~/tutorial-installs
 export TUTORIAL_INSTALL_PATH=$(pwd)
+export PATH=$TUTORIAL_INSTALL_PATH/bin:$PATH
+
+
+# KLayout
+echo "installing klayout"
+cd $TUTORIAL_INSTALL_PATH
+sudo apt-get update
+sudo apt-get install -y klayout
+# wget -q https://www.klayout.org/downloads/source/klayout-0.27.1.tar.gz
+# tar zxf klayout-0.27.1.tar.gz
+# cd klayout-0.27.1
+# ./build.sh -without-qtbinding
+# ls
+
 # # >>>>>>>>> THIS WORKS
 # # Sky130 PDK
 # echo "installing sky130A PDK"
@@ -24,33 +38,27 @@ export TUTORIAL_INSTALL_PATH=$(pwd)
 # tar zxf oss-cad-suite-linux-x64-20220929.tgz
 # export PATH=$TUTORIAL_INSTALL_PATH/oss-cad-suite/bin:$PATH
 # yosys -help
+
+
+# # OpenROAD
+# # first install dependencies
+# echo "installing openroad dependencies"
+# git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
+# cd OpenROAD
+# sudo ./etc/DependencyInstaller.sh -dev
+
+# echo "installing openroad"
+# mkdir build
+# cd build
+# cmake .. -DCMAKE_INSTALL_PREFIX=$TUTORIAL_INSTALL_PATH 
+# make
+# make install
+
+# openroad -help
+
 # # <<<<<<<<< THIS WORKS
 
-# OpenROAD
-# first install dependencies
-echo "installing openroad dependencies"
-git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
-cd OpenROAD
-sudo ./etc/DependencyInstaller.sh -dev
 
-echo "installing openroad"
-mkdir build
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$TUTORIAL_INSTALL_PATH 
-make
-make install
-
-export PATH=$TUTORIAL_INSTALL_PATH/bin:$PATH
-openroad -help
-
-# KLayout
-echo "installing klayout"
-cd $TUTORIAL_INSTALL_PATH
-wget -q https://www.klayout.org/downloads/source/klayout-0.27.1.tar.gz
-tar zxf klayout-0.27.1.tar.gz
-cd klayout-0.27.1
-./build.sh -without-qtbinding
-ls
 
 echo "end of tutorial setup testing"
 
