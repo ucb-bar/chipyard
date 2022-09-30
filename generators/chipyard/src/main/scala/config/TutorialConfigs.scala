@@ -77,18 +77,31 @@ class TutorialSha3BlackBoxConfig extends Config(
 
 // Tutorial Phase 5: Map a multicore heterogeneous SoC with multiple cores and memory-mapped accelerators
 class TutorialNoCConfig extends Config(
-  // Try changing the dimensions of the Mesh topology
-  new constellation.soc.WithGlobalNoC(constellation.soc.GlobalNoCParams(
-    NoCParams(
-      topology        = TerminalRouter(Mesh2D(3, 4)),
-      channelParamGen = (a, b) => UserChannelParams(Seq.fill(12) { UserVirtualChannelParams(4) }),
-      routingRelation = NonblockingVirtualSubnetworksRouting(TerminalRouterRouting(
-        Mesh2DEscapeRouting()), 10, 1)
-    )
-  )) ++
+  // Uncomment one of the two WithGlobalNoC options below to choose between a
+  // mesh NoC, or a heterogeneous irregular-topology NoC
+
+  // new constellation.soc.WithGlobalNoC(GlobalNoCParams(NoCParams(
+  //   topology        = TerminalRouter(HierarchicalTopology(
+  //     base     = Mesh2D(3, 2),
+  //     children = Seq(HierarchicalSubTopology(1, 1, BidirectionalLine(3)),
+  //                    HierarchicalSubTopology(4, 1, BidirectionalLine(3))))),
+  //   channelParamGen = (a, b) => UserChannelParams(Seq.fill(12) { UserVirtualChannelParams(4) }),
+  //   routingRelation = NonblockingVirtualSubnetworksRouting(TerminalRouterRouting(HierarchicalRouting(
+  //     baseRouting = Mesh2DDimensionOrderedRouting(),
+  //     childRouting = Seq(BidirectionalLineRouting(),
+  //                        BidirectionalLineRouting()))), 10, 1)
+  // ))) ++
+  new constellation.soc.WithGlobalNoC(constellation.soc.GlobalNoCParams(NoCParams(
+    topology        = TerminalRouter(Mesh2D(3, 4)),
+    channelParamGen = (a, b) => UserChannelParams(Seq.fill(12) { UserVirtualChannelParams(4) }),
+    routingRelation = NonblockingVirtualSubnetworksRouting(TerminalRouterRouting(
+      Mesh2DEscapeRouting()), 10, 1)
+  ))) ++
+
+
   // The inNodeMapping and outNodeMapping values are the physical identifiers of
   // routers on the topology to map the agents to. Try changing these to any
-  // value within the range [0, topology.nNodes)
+  // value within the range [0, 12)
   new constellation.soc.WithPbusNoC(constellation.protocol.TLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
       inNodeMapping = ListMap("Core" -> 7),
@@ -99,12 +112,16 @@ class TutorialNoCConfig extends Config(
   new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
       inNodeMapping = ListMap(
-        "Core 0" -> 0, "Core 1" -> 1,
+        "Core 0" -> 0, "SHA3[0]" -> 1,
+        "Core 1" -> 1, "SHA3[1]" -> 2,
+        "Core 2" -> 2, "SHA3[2]" -> 3,
         "serial-tl" -> 2),
       outNodeMapping = ListMap(
         "system[0]" -> 3, "system[1]" -> 4, "system[2]" -> 5, "system[3]" -> 6,
         "pbus" -> 7))
   ), true) ++
+
+  // Add custom MMIO devices/accelerators
   new chipyard.example.WithGCD ++
   new chipyard.harness.WithLoopbackNIC ++
   new icenet.WithIceNIC ++
@@ -112,7 +129,17 @@ class TutorialNoCConfig extends Config(
   new chipyard.example.WithStreamingFIR ++
   new chipyard.example.WithStreamingPassthrough ++
 
+  // Add custom RoCC accelerator
+  // new sha3.WithSha3Accel ++
+
+  // L2 cache configuration
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB = 128) ++
+
+  // Core configurations
+  new boom.common.WithNSmallBooms(1) ++
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++
+
+  // Inherit default configs
   new chipyard.config.AbstractConfig
 )
