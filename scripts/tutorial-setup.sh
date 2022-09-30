@@ -6,13 +6,19 @@ echo "making tutorial directory"
 mkdir -p ~/tutorial-installs
 cd ~/tutorial-installs
 export TUTORIAL_INSTALL_PATH=$(pwd)
+# installs should be added here
+export PATH=$TUTORIAL_INSTALL_PATH/bin:$PATH
 
 # KLayout
 echo "installing klayout"
 cd $TUTORIAL_INSTALL_PATH
 wget -q https://www.klayout.org/downloads/CentOS_7/klayout-0.27.1-0.x86_64.rpm
-sudo rpm -i klayout-0.27.1-0.x86_64.rpm
+# sudo rpm -i klayout-0.27.1-0.x86_64.rpm
+sudo yum localinstall klayout-0.27.1-0.x86_64.rpm
 ls
+which klayout
+klayout -h
+klayout -v
 
 # wget -q https://www.klayout.org/downloads/source/klayout-0.27.1.tar.gz
 # tar zxvf klayout-0.27.1.tar.gz
