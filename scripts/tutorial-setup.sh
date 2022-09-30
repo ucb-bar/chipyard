@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -ex
 
 echo "making tutorial directory"
 mkdir -p ~/tutorial-installs
@@ -9,14 +9,8 @@ export TUTORIAL_INSTALL_PATH=$(pwd)
 export PATH=$TUTORIAL_INSTALL_PATH/bin:$PATH
 
 
-# KLayout
-echo "installing klayout"
-cd $TUTORIAL_INSTALL_PATH
-sudo apt-get --yes --force-yes update
-sudo DEBIAN_FRONTEND=noninteractive apt-get  --yes --force-yes install klayout
-which klayout
-
 # >>>>>>>>> THIS WORKS
+
 # Sky130 PDK
 echo "installing sky130A PDK"
 wget -q https://github.com/nayiri-k/hammer-workspace/raw/main/tech/sky130A.tar.bz2
@@ -53,6 +47,13 @@ openroad -help
 openroad -version
 which openroad
 
+# KLayout
+echo "installing klayout"
+cd $TUTORIAL_INSTALL_PATH
+sudo apt-get --yes --force-yes update
+sudo DEBIAN_FRONTEND=noninteractive apt-get  --yes --force-yes install klayout
+which klayout
+
 
 yosys -help
 openroad -help
@@ -67,11 +68,6 @@ which klayout
 echo "End of tutorial setup testing"
 # <<<<<<<<< THIS WORKS
 
-
-
-
-
-set -ex
 
 RDIR=$(git rev-parse --show-toplevel)
 
