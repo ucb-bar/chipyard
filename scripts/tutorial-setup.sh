@@ -29,23 +29,17 @@ export TUTORIAL_INSTALL_PATH=$(pwd)
 # OpenROAD
 # first install dependencies
 echo "installing openroad dependencies"
-
 git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
 cd OpenROAD
 sudo ./etc/DependencyInstaller.sh -dev
+
+echo "installing openroad"
 mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=$TUTORIAL_INSTALL_PATH 
 make
+make install
 
-# build openroad
-# echo "installing openroad"
-# git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
-# cd OpenROAD
-# mkdir build && cd build
-# cmake .. -DCMAKE_INSTALL_PREFIX=$TUTORIAL_INSTALL_PATH
-# make
-# make install
 export PATH=$TUTORIAL_INSTALL_PATH/bin:$PATH
 openroad -help
 
@@ -53,7 +47,7 @@ openroad -help
 echo "installing klayout"
 cd $TUTORIAL_INSTALL_PATH
 wget -q https://www.klayout.org/downloads/source/klayout-0.27.1.tar.gz
-tar zxvf klayout-0.27.1.tar.gz
+tar zxf klayout-0.27.1.tar.gz
 cd klayout-0.27.1
 ./build.sh -without-qtbinding
 ls
