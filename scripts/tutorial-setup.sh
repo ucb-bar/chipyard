@@ -12,16 +12,9 @@ export PATH=$TUTORIAL_INSTALL_PATH/bin:$PATH
 # KLayout
 echo "installing klayout"
 cd $TUTORIAL_INSTALL_PATH
-sudo apt-get update
-sudo DEBIAN_FRONTEND=noninteractive apt-get -y install klayout
-klayout -h
-klayout -v
+sudo apt-get --yes --force-yes update
+sudo DEBIAN_FRONTEND=noninteractive apt-get  --yes --force-yes install klayout
 which klayout
-# wget -q https://www.klayout.org/downloads/source/klayout-0.27.1.tar.gz
-# tar zxf klayout-0.27.1.tar.gz
-# cd klayout-0.27.1
-# ./build.sh -without-qtbinding
-# ls
 
 # >>>>>>>>> THIS WORKS
 # Sky130 PDK
@@ -63,11 +56,9 @@ which openroad
 
 yosys -help
 openroad -help
-klayout -h
 
 yosys -version
 openroad -version
-klayout -v
 
 which yosys
 which openroad
