@@ -22,7 +22,7 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
   * Entry point to Hammer. Contains example placeholders for hooks.
 
-* ``example-sky130.yml``, ``example-openroad.yml``
+* ``example-sky130.yml``, ``example-openroad.yml``, ``example-designs/sky130-openroad.yml``
 
   * Hammer IR for this tutorial.
 
@@ -71,17 +71,30 @@ Pull the Hammer environment into the shell:
     export HAMMER_HOME=$PWD/hammer
     source $HAMMER_HOME/sourceme.sh
 
-Running the VLSI Flow
----------------------
+Building the Design
+--------------------
+To elaborate the ``TinyRocketConfig`` and set up all prerequisites for the build system to push the design and SRAM macros through the flow:
 
-For this tutorial we will be setting the Make variable ``tutorial=sky130-openroad`` to abbreviate the configuration.
-The current options for this variable are defined in ``tutorial.mk``, a few of which are summarized as follows:
+.. code-block:: shell
 
-* ``CONFIG=TinyRocketConfig`` selects the ``TinyRocketConfig`` from the Chipyard configurations.
-* ``tech_name`` sets a few more necessary paths in the ``Makefile``, such as the appropriate Hammer plugin
+    make buildfile tutorial=sky130-openroad
+
+The command ``make buildfile`` generates a set of Make targets in ``build/hammer.d``. 
+It needs to be re-run if environment variables are changed. 
+It is recommended that you edit these variables directly in the Makefile rather than exporting them to your shell environment.
+
+For the purpose of brevity, in this tutorial we will set the Make variable ``tutorial=sky130-openroad``,
+which will cause additional variables to be set in ``tutorial.mk``, a few of which are summarized as follows:
+
+* ``CONFIG=TinyRocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a stripped-down Rocket Chip in the interest of minimizing tool runtime. 
+* ``tech_name=sky130`` sets a few more necessary paths in the ``Makefile``, such as the appropriate Hammer plugin
 * ``TOOLS_CONF`` and ``TECH_CONF`` select the approproate YAML configuration files, ``example-openroad.yml`` and ``example-sky130.yml``, which are described below
 * ``DESIGN_CONF`` and ``EXTRA_CONFS`` allow for additonal design-specific overrides of the Hammer IR in ``example-sky130.yml``
-* ``VLSI_OBJ_DIR`` gives the build directory a unique name to allow running multiple flows in the same repo.
+* ``VLSI_OBJ_DIR=build-sky130-openroad`` gives the build directory a unique name to allow running multiple flows in the same repo. Note that for the rest of the tutorial we will still refer to this directory in file paths as ``build``, again for brevity.
+* ``VLSI_TOP`` is by default ``ChipTop``, which is the name of the top-level Verilog module generated in the Chipyard SoC configs. By instead setting ``VLSI_TOP=Rocket``, we can use the Rocket core as the top-level module for the VLSI flow, which consists only of a single RISC-V core (and no caches, peripherals, buses, etc). This is useful to run through this tutorial quickly, and does not rely on any SRAMs.
+
+Running the VLSI Flow
+---------------------
 
 example-vlsi-sky130
 ^^^^^^^^^^^^^^^^^^^
@@ -92,7 +105,7 @@ example-sky130.yml
 ^^^^^^^^^^^^^^^^^^
 This contains the Hammer configuration for this example project. Example clock constraints, power straps definitions, placement constraints, and pin constraints are given. Additional configuration for the extra libraries and tools are at the bottom.
 
-First, set ``technology.sky130.<sky130A, sky130_nda, openram_lib>`` to the absolute path of the respective directories containing the Sky130 PDK and SRAM files. See the 
+First, set ``technology.sky130.<sky130A, openram_lib>`` to the absolute path of the respective directories containing the Sky130 PDK and SRAM files. See the 
 `Sky130 Hammer plugin README <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__
 for details about the PDK setup.
 
@@ -101,42 +114,6 @@ example-openroad.yml
 ^^^^^^^^^^^^^^^^^^^^
 This contains the Hammer configuration for the OpenROAD tool flow. 
 It selects tools for synthesis (Yosys), place and route (OpenROAD), DRC (Magic), and LVS (NetGen).
-For the remaining commands, we will need to specify this file as the tool configuration to hammer via the ``TOOLS_CONF`` Makefile variable.
-
-
-Generating SRAMs
-^^^^^^^^^^^^^^^^
-To map the generic memory macros in the generarted Verilog to the SRAMs in your technology process, run the following command:
-
-.. code-block:: shell
-
-    make srams tutorial=sky130-openroad
-
-Generating Verilog
-^^^^^^^^^^^^^^^^^^
-To elaborate the ``TinyRocketConfig`` from Chisel to Verilog, run:
-
-.. code-block:: shell
-
-    make verilog tutorial=sky130-openroad
-
-The ``CONFIG=TinyRocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a stripped-down Rocket Chip in the interest of minimizing tool runtime. The resulting verilog is located in ``./generated-src/chipyard.TestHarness.TinyRocketConfig/chipyard.TestHarness.TinyRocketConfig.top.v``.
-
-Note that in the generated Verilog, there are generic memory macros for the various memory components (dcache, icache, tag array, PTW). 
-This is the same Verilog that is generated for RTL simulations in the ``~chipyard/sims/verilator`` directory, see :ref:`Simulation/Software-RTL-Simulation:Software RTL Simulation` for directions on how to run these simulations.
-
-Building the Design
-^^^^^^^^^^^^^^^^^^^
-To set up all prerequisites for the build system to push the design and SRAM macros through the flow:
-
-.. code-block:: shell
-
-    make buildfile tech_name=sky130 TOOLS_CONF=example-openroad.yml CONFIG=TinyRocketConfig
-
-The command ``make buildfile`` generates a set of Make targets in ``build/hammer.d``. 
-It needs to be re-run if environment variables are changed. 
-It is recommended that you edit these variables directly in the Makefile rather than exporting them to your shell environment.
-
 
 Synthesis
 ^^^^^^^^^
