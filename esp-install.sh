@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -ex
-
 pushd /home/centos
 git clone https://github.com/ucb-bar/esp-isa-sim.git
 pushd esp-isa-sim
