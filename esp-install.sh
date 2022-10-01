@@ -11,7 +11,7 @@ mkdir -p build
 pushd build
 mkdir /home/centos/spike-local
 ../configure --prefix=/home/centos/spike-local --without-boost
-make –j16
+make default
 make install
 
 export PATH=/home/centos/spike-local:$PATH
