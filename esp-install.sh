@@ -12,7 +12,7 @@ mkdir /home/centos/spike-local
 make default
 make install
 
-export PATH=/home/centos/spike-local:$PATH
+export PATH=/home/centos/spike-local/bin:$PATH
 
 popd
 popd
