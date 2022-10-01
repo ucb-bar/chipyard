@@ -106,7 +106,7 @@ def getPercentage(e0, e1):
 
 ax = plt.gca()
 fig = plt.gcf()
-fig.set_size_inches(16, 16)
+fig.set_size_inches(12, 12)
 
 ax.clear()
 nx.draw_networkx_nodes(G, xys, node_size=100, node_color=[toColor(n) for n in list(G)])
