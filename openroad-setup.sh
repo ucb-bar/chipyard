@@ -21,6 +21,10 @@ export PATH=$TUTORIAL_INSTALL_PATH/oss-cad-suite/bin:$PATH
 yosys -help
 yosys -version
 which yosys
+
+## NAYIRI SAID STOP HERE
+exit 0
+
 # OpenROAD
 # first install dependencies
 echo "installing openroad dependencies"
