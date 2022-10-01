@@ -22,7 +22,6 @@ yosys -help
 yosys -version
 which yosys
 
-## NAYIRI SAID STOP HERE
 
 # # OpenROAD
 # # first install dependencies
