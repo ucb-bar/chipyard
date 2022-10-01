@@ -7,6 +7,7 @@ git clone https://github.com/ucb-bar/esp-isa-sim.git
 pushd esp-isa-sim
 git checkout 090e82c473fd28b4eb2011ffcd771ead6076faab
 
+mkdir -p build
 pushd build
 mkdir /home/centos/spike-local
 ../configure --prefix=/home/centos/spike-local --without-boost
