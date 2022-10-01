@@ -1,9 +1,9 @@
 #!/bin/bash
 set -ex
 echo "making tutorial directory"
-rm -rf ~/tutorial-installs
-mkdir -p ~/tutorial-installs
-cd ~/tutorial-installs
+rm -rf /home/centos/tutorial-installs
+mkdir -p /home/centos/tutorial-installs
+cd /home/centos/tutorial-installs
 export TUTORIAL_INSTALL_PATH=$(pwd)
 export PATH=$TUTORIAL_INSTALL_PATH/bin:$PATH
 # Sky130 PDK
