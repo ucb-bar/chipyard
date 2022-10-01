@@ -9,9 +9,10 @@ Adds support for NoC-based interconnects with Constellation (https://constellati
 ### Added
 * RTL: Support for packet-switched NoC-based TileLink main bus interconnects with Constellation
 * Conda: Support setting up a Chipyard development environment through Conda
-* Hammer: Fully open-source Sky130 flow with Yosys, OpenROAD, Magic, Netgen
-* Hammer: VCS FGP (fine-grained parallelism) support
-* Hammer: Support for Conformal LEC
+* Hammer: Fully open-source Sky130 flow tutorials in open-source and commercial tools
+* Hammer: IR key history
+* Hammer: Joules power analysis support
+* Hammer: Tempus STA support
 
 ### Changed
 * RTL: Default memory-mapped addresses for fft/dsp/example MMIO accelerators changed to be non-overlapping
@@ -23,8 +24,7 @@ Adds support for NoC-based interconnects with Constellation (https://constellati
 
 ### Fixed
 * RTL: Fix clock frequency rounding
-* Hammer: FSDB support for Cadence Voltus
-* Hammer: Various fixes to ASAP7 dummy SRAMs
+* Hammer: VCS FGP is now opt-in
 * Dromajo: Fix to variable definition
 * Testchipip: Fix write-strobe handling for 64B configurations
 * Build: Ignore dotfiles in lookup_srcs
