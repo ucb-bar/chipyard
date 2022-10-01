@@ -34,7 +34,7 @@ HELP_SIMULATION_VARIABLES += \
 "   NUMACTL                = set to '1' to wrap simulator in the appropriate numactl command" \
 "   BREAK_SIM_PREREQ       = when running a binary, doesn't rebuild RTL on source changes"
 
-EXTRA_SIM_FLAGS ?=
+EXTRA_SIM_FLAGS ?= +noc_util_sample_rate=100
 NUMACTL         ?= 0
 
 NUMA_PREFIX = $(if $(filter $(NUMACTL),0),,$(shell $(base_dir)/scripts/numa_prefix))
