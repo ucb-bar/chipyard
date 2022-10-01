@@ -23,41 +23,40 @@ yosys -version
 which yosys
 
 ## NAYIRI SAID STOP HERE
-exit 0
 
-# OpenROAD
-# first install dependencies
-echo "installing openroad dependencies"
-rm -rf OpenROAD
-sudo rm -rf /tmp/installers
-git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
-cd OpenROAD
-sudo PATH=$PATH ./etc/DependencyInstaller.sh -dev
-(
-source /opt/rh/devtoolset-8/enable
-echo "installing openroad"
-mkdir build
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$TUTORIAL_INSTALL_PATH
-make -j16
-make -j16 install
-)
-openroad -help
-openroad -version
-which openroad
-# KLayout
-echo "installing klayout"
-cd $TUTORIAL_INSTALL_PATH
-wget https://www.klayout.org/downloads/CentOS_7/klayout-0.27.1-0.x86_64.rpm
-sudo yum -y localinstall klayout-0.27.1-0.x86_64.rpm
-#sudo apt-get --yes --force-yes update
-#sudo DEBIAN_FRONTEND=noninteractive apt-get  --yes --force-yes install klayout
-which klayout
-yosys -help
-openroad -help
-yosys -version
-openroad -version
-which yosys
-which openroad
-which klayout
-echo "End of tutorial setup testing"
+# # OpenROAD
+# # first install dependencies
+# echo "installing openroad dependencies"
+# rm -rf OpenROAD
+# sudo rm -rf /tmp/installers
+# git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
+# cd OpenROAD
+# sudo PATH=$PATH ./etc/DependencyInstaller.sh -dev
+# (
+# source /opt/rh/devtoolset-8/enable
+# echo "installing openroad"
+# mkdir build
+# cd build
+# cmake .. -DCMAKE_INSTALL_PREFIX=$TUTORIAL_INSTALL_PATH
+# make -j16
+# make -j16 install
+# )
+# openroad -help
+# openroad -version
+# which openroad
+# # KLayout
+# echo "installing klayout"
+# cd $TUTORIAL_INSTALL_PATH
+# wget https://www.klayout.org/downloads/CentOS_7/klayout-0.27.1-0.x86_64.rpm
+# sudo yum -y localinstall klayout-0.27.1-0.x86_64.rpm
+# #sudo apt-get --yes --force-yes update
+# #sudo DEBIAN_FRONTEND=noninteractive apt-get  --yes --force-yes install klayout
+# which klayout
+# yosys -help
+# openroad -help
+# yosys -version
+# openroad -version
+# which yosys
+# which openroad
+# which klayout
+# echo "End of tutorial setup testing"
