@@ -22,6 +22,7 @@ yosys -help
 yosys -version
 which yosys
 
+echo "export PATH=/home/centos/tutorial-installs/oss-cad-suite/bin:$PATH" >> ~/.bashrc
 
 # # OpenROAD
 # # first install dependencies
