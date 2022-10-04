@@ -147,22 +147,15 @@ FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
 
 VSRC_DUMP ?= $(build_dir)/vsrc
-VSRC_SMEMS_FILE ?= $(VSRC_DUMP)/$(long_name).mems.v
+VSRC_SMEMS_CONF ?= $(VSRC_DUMP)/$(long_name).mems.conf
 VSRC_MODH_JSON ?= $(VSRC_DUMP)/mod-he.json
 
-TOP_FILE       ?= $(build_dir)/$(long_name).top.v
-TOP_FIR        ?= $(build_dir)/$(long_name).top.fir
-TOP_ANNO       ?= $(build_dir)/$(long_name).top.anno.json
-TOP_SMEMS_FILE ?= $(build_dir)/$(long_name).top.mems.v
-TOP_SMEMS_CONF ?= $(build_dir)/$(long_name).top.mems.conf
-TOP_SMEMS_FIR  ?= $(build_dir)/$(long_name).top.mems.fir
+VSRC_SMEMS_FILE ?= $(build_dir)/$(VSRC_DUMP)/$(long_name).mems.v
+VSRC_SMEMS_FIR  ?= $(build_dir)/$(VSRC_DUMP)/$(long_name).mems.fir
 
-HARNESS_FILE       ?= $(build_dir)/$(long_name).harness.v
-HARNESS_FIR        ?= $(build_dir)/$(long_name).harness.fir
-HARNESS_ANNO       ?= $(build_dir)/$(long_name).harness.anno.json
-HARNESS_SMEMS_FILE ?= $(build_dir)/$(long_name).harness.mems.v
-HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
-HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
+# top only modules
+TOP_MODS_FILE ?= $(build_dir)/$(VSRC_DUMP)/$(long_name).top.f
+HARNESS_MODS_FILE ?= $(build_dir)/$(VSRC_DUMP)/$(long_name).top.f
 
 BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))

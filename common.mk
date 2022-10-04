@@ -130,7 +130,7 @@ firrtl: $(FIRRTL_FILE)
 #########################################################################################
 # create verilog files rules and variables
 #########################################################################################
-CIRCT_TARGETS = $(VSRC_SMEMS_FILE) $(VSRC_MODH_JSON)
+CIRCT_TARGETS = $(VSRC_SMEMS_CONF) $(VSRC_MODH_JSON)
 
 # DOC include start: FirrtlCompiler
 # NOTE: These *_temp intermediate targets will get removed in favor of make 4.3 grouped targets (&: operator)
@@ -152,34 +152,30 @@ firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 		--lowering-options=disallowPackedArrays,emittedLineLength=8192,noAlwaysComb,disallowLocalVariables \
 		--repl-seq-mem \
 		--repl-seq-mem-circuit=$(MODEL) \
-		--repl-seq-mem-file=$(VSRC_SMEMS_FILE) \
+		--repl-seq-mem-file=$(VSRC_SMEMS_CONF) \
 		--split-verilog \
 		-o $(VSRC_DUMP) \
 		$(FIRRTL_FILE)
 #	touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
 # DOC include end: FirrtlCompiler
 
+$(TOP_MODS_FILE) $(HARNESS_MODS_FILE): $(VSRC_MODH_JSON)
+	$(base_dir)/scripts/dump-mods.py $(TOP) $^ > $(TOP_MODS_FILE)
+	$(base_dir)/scripts/dump-mods.py $(MODEL) $^ > $(HARNESS_MODS_FILE)
+
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 MACROCOMPILER_MODE ?= --mode synflops
 .INTERMEDIATE: top_macro_temp
-$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR): top_macro_temp
+$(VSRC_SMEMS_FILE) $(VSRC_SMEMS_FIR): top_macro_temp
 	@echo "" > /dev/null
 
-top_macro_temp: $(TOP_SMEMS_CONF)
+top_macro_temp: $(VSRC_SMEMS_CONF)
 	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE))
-
-HARNESS_MACROCOMPILER_MODE = --mode synflops
-.INTERMEDIATE: harness_macro_temp
-$(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): harness_macro_temp
-	@echo "" > /dev/null
-
-harness_macro_temp: $(HARNESS_SMEMS_CONF) | top_macro_temp
-	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler, -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE))
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
 ########################################################################################
-$(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes)
+$(sim_common_files): $(sim_files)
 	sort -u $^ | grep -v '.*\.\(svh\|h\)$$' > $@
 
 #########################################################################################
