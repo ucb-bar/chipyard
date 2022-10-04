@@ -114,6 +114,15 @@ generator_temp: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GE
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
 		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG) \
 		$(EXTRA_CHISEL_OPTIONS))
+	sed -i '1d' $(ANNO_FILE)
+	echo "[" >> t.json
+	echo "{" >> t.json
+	echo "  \"class\": \"sifive.enterprise.firrtl.ModuleHierarchyAnnotation\"," >> t.json
+	echo "  \"filename\": \"./mod-he.json\"" >> t.json
+	echo "}," >> t.json
+	mv $(ANNO_FILE) t2.json
+	cat t.json t2.json > $(ANNO_FILE)
+	rm t.json t2.json
 
 .PHONY: firrtl
 firrtl: $(FIRRTL_FILE)
@@ -121,39 +130,33 @@ firrtl: $(FIRRTL_FILE)
 #########################################################################################
 # create verilog files rules and variables
 #########################################################################################
-REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(TOP_SMEMS_CONF)
-HARNESS_CONF_FLAGS = -thconf $(HARNESS_SMEMS_CONF)
-
-TOP_TARGETS = $(TOP_FILE) $(TOP_SMEMS_CONF) $(TOP_ANNO) $(TOP_FIR) $(sim_top_blackboxes)
-HARNESS_TARGETS = $(HARNESS_FILE) $(HARNESS_SMEMS_CONF) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes)
+CIRCT_TARGETS = $(VSRC_SMEMS_FILE) $(VSRC_MODH_JSON)
 
 # DOC include start: FirrtlCompiler
 # NOTE: These *_temp intermediate targets will get removed in favor of make 4.3 grouped targets (&: operator)
 .INTERMEDIATE: firrtl_temp
-$(TOP_TARGETS) $(HARNESS_TARGETS): firrtl_temp
+$(CIRCT_TARGETS): firrtl_temp
 	@echo "" > /dev/null
 
 firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
-	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTopAndHarness,\
-		--allow-unrecognized-annotations \
-		--output-file $(TOP_FILE) \
-		--harness-o $(HARNESS_FILE) \
-		--input-file $(FIRRTL_FILE) \
-		--syn-top $(TOP) \
-		--harness-top $(VLOG_MODEL) \
-		--annotation-file $(ANNO_FILE) \
-		--top-anno-out $(TOP_ANNO) \
-		--top-dotf-out $(sim_top_blackboxes) \
-		--top-fir $(TOP_FIR) \
-		--harness-anno-out $(HARNESS_ANNO) \
-		--harness-dotf-out $(sim_harness_blackboxes) \
-		--harness-fir $(HARNESS_FIR) \
-		$(REPL_SEQ_MEM) \
-		$(HARNESS_CONF_FLAGS) \
-		--target-dir $(build_dir) \
-		--log-level $(FIRRTL_LOGLEVEL) \
-		$(EXTRA_FIRRTL_OPTIONS))
-	touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
+	$(SCRATCH_HOME)/circt/build/bin/firtool \
+		--export-module-hierarchy \
+		--emit-metadata \
+		--format=fir \
+		-warn-on-unprocessed-annotations \
+		-verify-each=false \
+		-dedup \
+		--annotation-file=$(ANNO_FILE) \
+		--disable-annotation-classless \
+		--disable-annotation-unknown \
+		--lowering-options=disallowPackedArrays,emittedLineLength=8192,noAlwaysComb,disallowLocalVariables \
+		--repl-seq-mem \
+		--repl-seq-mem-circuit=$(MODEL) \
+		--repl-seq-mem-file=$(VSRC_SMEMS_FILE) \
+		--split-verilog \
+		-o $(VSRC_DUMP) \
+		$(FIRRTL_FILE)
+#	touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
 # DOC include end: FirrtlCompiler
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs

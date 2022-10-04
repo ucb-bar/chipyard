@@ -146,6 +146,10 @@ endif
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
 
+VSRC_DUMP ?= $(build_dir)/vsrc
+VSRC_SMEMS_FILE ?= $(VSRC_DUMP)/$(long_name).mems.v
+VSRC_MODH_JSON ?= $(VSRC_DUMP)/mod-he.json
+
 TOP_FILE       ?= $(build_dir)/$(long_name).top.v
 TOP_FIR        ?= $(build_dir)/$(long_name).top.fir
 TOP_ANNO       ?= $(build_dir)/$(long_name).top.anno.json
@@ -238,10 +242,8 @@ rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
 # sources needed to run simulators
 #########################################################################################
 sim_vsrcs = \
-	$(TOP_FILE) \
-	$(HARNESS_FILE) \
-	$(TOP_SMEMS_FILE) \
-	$(HARNESS_SMEMS_FILE)
+	$(VSRC_SMEMS_FILE) \
+	$(VSRC_MODH_JSON)
 
 #########################################################################################
 # assembly/benchmark variables
