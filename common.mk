@@ -126,7 +126,7 @@ firrtl: $(FIRRTL_FILE)
 #########################################################################################
 # create verilog files rules and variables
 #########################################################################################
-CIRCT_TARGETS = $(VSRC_SMEMS_FILE) $(VSRC_MODH_JSON)
+CIRCT_TARGETS = $(VSRC_SMEMS_CONF) $(VSRC_MODH_JSON)
 
 # DOC include start: FirrtlCompiler
 $(TOP_TARGETS) $(HARNESS_TARGETS) &: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
@@ -170,13 +170,16 @@ firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 		--lowering-options=disallowPackedArrays,emittedLineLength=8192,noAlwaysComb,disallowLocalVariables \
 		--repl-seq-mem \
 		--repl-seq-mem-circuit=$(MODEL) \
-		--repl-seq-mem-file=$(VSRC_SMEMS_FILE) \
+		--repl-seq-mem-file=$(VSRC_SMEMS_CONF) \
 		--split-verilog \
 		-o $(VSRC_DUMP) \
 		$(FIRRTL_FILE)
 #	touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
->>>>>>> 9306c549 (Initial CIRCT integration [ci skip])
 # DOC include end: FirrtlCompiler
+
+$(TOP_MODS_FILE) $(HARNESS_MODS_FILE): $(VSRC_MODH_JSON)
+	$(base_dir)/scripts/dump-mods.py $(TOP) $^ > $(TOP_MODS_FILE)
+	$(base_dir)/scripts/dump-mods.py $(MODEL) $^ > $(HARNESS_MODS_FILE)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 MACROCOMPILER_MODE ?= --mode synflops
@@ -190,7 +193,7 @@ $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR) &: $(HARNESS_SMEMS_CONF) | $(TOP_SMEM
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
 ########################################################################################
-$(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes)
+$(sim_common_files): $(sim_files)
 	sort -u $^ | grep -v '.*\.\(svh\|h\)$$' > $@
 
 #########################################################################################
