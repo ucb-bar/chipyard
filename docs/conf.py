@@ -91,7 +91,6 @@ if on_rtd:
         version = rtd_version # name of a branch
 elif on_gha:
     # GitHub actions does a build of the docs to ensure they are free of warnings.
-    logger.info("Running under GitHub Actions Pipeline")
     # Looking up a branch name or tag requires switching on the event type that triggered the workflow
     # so just use the SHA of the commit instead.
     version = os.environ.get("GITHUB_SHA")
