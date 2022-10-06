@@ -94,6 +94,7 @@ elif on_gha:
     # Looking up a branch name or tag requires switching on the event type that triggered the workflow
     # so just use the SHA of the commit instead.
     version = os.environ.get("GITHUB_SHA")
+    rtd_version = "stable" # default to stable when not on rtd
 else:
     # When running locally, try to set version to a branch name that could be
     # used to reference files on GH that could be added or moved. This should match rtd_version when running
@@ -104,6 +105,7 @@ else:
         version = output
     else:
         raise Exception("git rev-parse --abbrev-ref HEAD returned non-zero")
+    rtd_version = "stable" # default to stable when not on rtd
 
 # for now make these match
 release = version
