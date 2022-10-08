@@ -145,23 +145,24 @@ endif
 
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
+FIRTOOL_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
+FINAL_ANNO_FILE ?= $(build_dir)/$(long_name).appended.anno.json
 
-INT_FIR ?= $(build_dir)/$(long_name).intermediate.fir
-INT_ANNO ?= $(build_dir)/$(long_name).intermediate.anno.json
+SFC_FIRRTL_FILE ?= $(build_dir)/$(long_name).sfc.fir
+SFC_ANNO_FILE ?= $(build_dir)/$(long_name).sfc.anno.json
 
-VSRC_DUMP ?= $(build_dir)
-VSRC_SMEMS_CONF ?= $(VSRC_DUMP)/$(long_name).mems.conf
-VSRC_MODH_JSON ?= $(VSRC_DUMP)/mod-he.json
+FIRTOOL_MOD_HIER_JSON ?= $(build_dir)/modulehierarchy.json
+FIRTOOL_TB_MOD_HIER_JSON ?= $(build_dir)/tbmodulehierarchy.json
 
-VSRC_FILELIST ?= $(VSRC_DUMP)/filelist.f
-VSRC_BB_F ?= $(VSRC_DUMP)/firrtl_black_box_resource_files.json
+TOP_SMEMS_CONF ?= $(build_dir)/$(long_name).mems.conf
+TOP_SMEMS_FILE ?= $(build_dir)/$(long_name).mems.v
+TOP_SMEMS_FIR  ?= $(build_dir)/$(long_name).mems.fir
 
-VSRC_SMEMS_FILE ?= $(VSRC_DUMP)/$(long_name).mems.v
-VSRC_SMEMS_FIR  ?= $(VSRC_DUMP)/$(long_name).mems.fir
-
-# top only modules
-TOP_MODS_FILE ?= $(VSRC_DUMP)/$(long_name).top.f
-ALL_MODS_FILE ?= $(VSRC_DUMP)/$(long_name).all.f
+FIRTOOL_FILELIST ?= $(build_dir)/filelist.f
+# all module files to include (includes top modules)
+ALL_MODS_FILELIST ?= $(build_dir)/$(long_name).all.f
+# top module files to include
+TOP_MODS_FILELIST ?= $(build_dir)/$(long_name).top.f
 
 BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
@@ -229,18 +230,6 @@ binary_hex= $(sim_out_name).loadmem_hex
 #########################################################################################
 gen_dir=$(sim_dir)/generated-src
 build_dir=$(gen_dir)/$(long_name)
-
-#########################################################################################
-# vsrcs needed to run projects
-#########################################################################################
-rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
-
-#########################################################################################
-# sources needed to run simulators
-#########################################################################################
-sim_vsrcs = \
-	$(VSRC_SMEMS_FILE) \
-	$(VSRC_MODH_JSON)
 
 #########################################################################################
 # assembly/benchmark variables

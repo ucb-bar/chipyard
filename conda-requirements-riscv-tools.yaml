@@ -59,6 +59,7 @@ dependencies:
     - lzop
     - qemu # from ucb-bar channel - https://github.com/ucb-bar/qemu-feedstock
 
+    - jq
     - bash-completion
     - sbt
     - ca-certificates
