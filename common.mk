@@ -68,7 +68,7 @@ include $(base_dir)/tools/torture.mk
 ifeq ($(shell which fd 2> /dev/null),)
 	lookup_srcs = $(shell find -L $(1)/ -name target -prune -o \( -iname "*.$(2)" ! -iname ".*" \) -print 2> /dev/null)
 else
-	lookup_srcs = $(shell fd -L ".*\.$(2)" $(1))
+	lookup_srcs = $(shell fd -L -t f -e $(2) . $(1))
 endif
 
 SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools fpga/fpga-shells fpga/src)
