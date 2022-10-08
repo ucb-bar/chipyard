@@ -32,7 +32,7 @@ default: $(sim)
 debug: $(sim_debug)
 
 #########################################################################################
-# simulaton requirements
+# simulation requirements
 #########################################################################################
 SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
