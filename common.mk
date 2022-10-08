@@ -139,6 +139,15 @@ $(CIRCT_TARGETS): firrtl_temp
 	@echo "" > /dev/null
 
 firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
+	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTop,\
+		--input-file $(FIRRTL_FILE) \
+		--annotation-file $(ANNO_FILE) \
+		--out-fir-file $(INT_FIR) \
+		--out-anno-file $(INT_ANNO) \
+		--log-level $(FIRRTL_LOGLEVEL) \
+		--allow-unrecognized-annotations \
+		-X none \
+		$(EXTRA_FIRRTL_OPTIONS))
 	$(SCRATCH_HOME)/circt/build/bin/firtool \
 		--export-module-hierarchy \
 		--emit-metadata \
@@ -146,7 +155,7 @@ firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 		-warn-on-unprocessed-annotations \
 		-verify-each=false \
 		-dedup \
-		--annotation-file=$(ANNO_FILE) \
+		--annotation-file=$(INT_ANNO) \
 		--disable-annotation-classless \
 		--disable-annotation-unknown \
 		--lowering-options=disallowPackedArrays,emittedLineLength=8192,noAlwaysComb,disallowLocalVariables \
@@ -155,13 +164,16 @@ firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 		--repl-seq-mem-file=$(VSRC_SMEMS_CONF) \
 		--split-verilog \
 		-o $(VSRC_DUMP) \
-		$(FIRRTL_FILE)
-#	touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
+		$(INT_FIR)
+	sed -i 's/.*/& /' $(VSRC_SMEMS_CONF)
 # DOC include end: FirrtlCompiler
 
-$(TOP_MODS_FILE) $(HARNESS_MODS_FILE): $(VSRC_MODH_JSON)
-	$(base_dir)/scripts/dump-mods.py $(TOP) $^ > $(TOP_MODS_FILE)
-	$(base_dir)/scripts/dump-mods.py $(MODEL) $^ > $(HARNESS_MODS_FILE)
+$(TOP_MODS_FILE) $(ALL_MODS_FILE): $(VSRC_MODH_JSON) $(VSRC_FILELIST)
+	$(base_dir)/scripts/dump-mods.py --dut-top $(TOP) --hier-json $(VSRC_MODH_JSON) --dut-mods $(TOP_MODS_FILE) --filelist $(VSRC_FILELIST) --build_dir $(VSRC_DUMP)
+	sed -e 's;^;$(VSRC_DUMP)/;' $(VSRC_FILELIST) > $(ALL_MODS_FILE)
+
+.PHONY: temp
+temp: $(TOP_MODS_FILE)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 MACROCOMPILER_MODE ?= --mode synflops
@@ -170,13 +182,15 @@ $(VSRC_SMEMS_FILE) $(VSRC_SMEMS_FIR): top_macro_temp
 	@echo "" > /dev/null
 
 top_macro_temp: $(VSRC_SMEMS_CONF)
-	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE))
+	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler,-n $(VSRC_SMEMS_CONF) -v $(VSRC_SMEMS_FILE) -f $(VSRC_SMEMS_FIR) $(MACROCOMPILER_MODE))
+
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
 ########################################################################################
-$(sim_common_files): $(sim_files)
-	sort -u $^ | grep -v '.*\.\(svh\|h\)$$' > $@
+$(sim_common_files): $(sim_files) $(ALL_MODS_FILE) $(VSRC_SMEMS_FILE)
+	sort -u $(sim_files) $(ALL_MODS_FILE) | grep -v '.*\.\(svh\|h\)$$' > $@
+	echo "$(VSRC_SMEMS_FILE)" >> $@
 
 #########################################################################################
 # helper rule to just make verilog files

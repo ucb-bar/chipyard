@@ -50,7 +50,7 @@ SIM_FILE_REQS += \
 	$(CHIPYARD_RSRCS_DIR)/csrc/emulator.cc \
 	$(ROCKETCHIP_RSRCS_DIR)/csrc/verilator.h \
 
-# the following files are needed for emulator.cc to compile
+# the following files are needed for emulator.cc to compile (even if they aren't included in RTL)
 SIM_FILE_REQS += \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/SimSerial.cc \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/testchip_tsi.cc \
@@ -168,8 +168,7 @@ VERILATOR_NONCC_OPTS = \
 	$(PREPROC_DEFINES) \
 	--top-module $(VLOG_MODEL) \
 	--vpi \
-	-f $(sim_common_files) \
-	$(sim_vsrcs)
+	-f $(sim_common_files)
 
 #----------------------------------------------------------------------------------------
 # gcc configuration/optimization
@@ -210,13 +209,13 @@ model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
 #########################################################################################
 # build makefile fragment that builds the verilator sim rules
 #########################################################################################
-$(model_mk): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
+$(model_mk): $(sim_common_files) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir)
 	mkdir -p $(model_dir)
 	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim) -Mdir $(model_dir) -CFLAGS "-include $(model_header)"
 	touch $@
 
-$(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
+$(model_mk_debug): $(sim_common_files) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir_debug)
 	mkdir -p $(model_dir_debug)
 	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim_debug) $(TRACING_OPTS) -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
