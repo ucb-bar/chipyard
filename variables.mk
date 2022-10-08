@@ -146,16 +146,22 @@ endif
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
 
-VSRC_DUMP ?= $(build_dir)/vsrc
+INT_FIR ?= $(build_dir)/$(long_name).intermediate.fir
+INT_ANNO ?= $(build_dir)/$(long_name).intermediate.anno.json
+
+VSRC_DUMP ?= $(build_dir)
 VSRC_SMEMS_CONF ?= $(VSRC_DUMP)/$(long_name).mems.conf
 VSRC_MODH_JSON ?= $(VSRC_DUMP)/mod-he.json
 
-VSRC_SMEMS_FILE ?= $(build_dir)/$(VSRC_DUMP)/$(long_name).mems.v
-VSRC_SMEMS_FIR  ?= $(build_dir)/$(VSRC_DUMP)/$(long_name).mems.fir
+VSRC_FILELIST ?= $(VSRC_DUMP)/filelist.f
+VSRC_BB_F ?= $(VSRC_DUMP)/firrtl_black_box_resource_files.json
+
+VSRC_SMEMS_FILE ?= $(VSRC_DUMP)/$(long_name).mems.v
+VSRC_SMEMS_FIR  ?= $(VSRC_DUMP)/$(long_name).mems.fir
 
 # top only modules
-TOP_MODS_FILE ?= $(build_dir)/$(VSRC_DUMP)/$(long_name).top.f
-HARNESS_MODS_FILE ?= $(build_dir)/$(VSRC_DUMP)/$(long_name).top.f
+TOP_MODS_FILE ?= $(VSRC_DUMP)/$(long_name).top.f
+ALL_MODS_FILE ?= $(VSRC_DUMP)/$(long_name).all.f
 
 BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
@@ -163,8 +169,6 @@ BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
 # files that contain lists of files needed for VCS or Verilator simulation
 SIM_FILE_REQS =
 sim_files              ?= $(build_dir)/sim_files.f
-sim_top_blackboxes     ?= $(build_dir)/firrtl_black_box_resource_files.top.f
-sim_harness_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
 # single file that contains all files needed for VCS or Verilator simulation (unique and without .h's)
 sim_common_files       ?= $(build_dir)/sim_files.common.f
 
@@ -199,7 +203,7 @@ define run_scala_main
 	cd $(base_dir) && $(SBT) ";project $(1); runMain $(2) $(3)"
 endef
 
-FIRRTL_LOGLEVEL ?= error
+FIRRTL_LOGLEVEL ?= debug
 
 #########################################################################################
 # output directory for tests
