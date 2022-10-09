@@ -4,13 +4,9 @@
 SHELL=/bin/bash
 
 ifndef RISCV
-$(error RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
+$(error RISCV is unset. Did you source the Chipyard auto-generated env file (which activates the default conda environment)?)
 else
 $(info Running with RISCV=$(RISCV))
-endif
-
-ifndef CONDA_DEFAULT_ENV
-$(warning No conda environment detected. Did you source the Chipyard auto-generated env file?)
 endif
 
 #########################################################################################
