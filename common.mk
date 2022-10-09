@@ -9,6 +9,10 @@ else
 $(info Running with RISCV=$(RISCV))
 endif
 
+ifndef CONDA_DEFAULT_ENV
+$(warning No conda environment detected. Did you source the Chipyard auto-generated env file?)
+endif
+
 #########################################################################################
 # specify user-interface variables
 #########################################################################################
@@ -101,12 +105,8 @@ $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip
 #########################################################################################
 # create firrtl file rule and variables
 #########################################################################################
-.INTERMEDIATE: generator_temp
-$(FIRRTL_FILE) $(ANNO_FILE): generator_temp
-	@echo "" > /dev/null
-
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-generator_temp: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS)
+$(FIRRTL_FILE) $(ANNO_FILE) &: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
@@ -128,12 +128,7 @@ TOP_TARGETS = $(TOP_FILE) $(TOP_SMEMS_CONF) $(TOP_ANNO) $(TOP_FIR) $(sim_top_bla
 HARNESS_TARGETS = $(HARNESS_FILE) $(HARNESS_SMEMS_CONF) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes)
 
 # DOC include start: FirrtlCompiler
-# NOTE: These *_temp intermediate targets will get removed in favor of make 4.3 grouped targets (&: operator)
-.INTERMEDIATE: firrtl_temp
-$(TOP_TARGETS) $(HARNESS_TARGETS): firrtl_temp
-	@echo "" > /dev/null
-
-firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
+$(TOP_TARGETS) $(HARNESS_TARGETS) &: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTopAndHarness,\
 		--allow-unrecognized-annotations \
 		--output-file $(TOP_FILE) \
@@ -158,19 +153,11 @@ firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 MACROCOMPILER_MODE ?= --mode synflops
-.INTERMEDIATE: top_macro_temp
-$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR): top_macro_temp
-	@echo "" > /dev/null
-
-top_macro_temp: $(TOP_SMEMS_CONF)
+$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(TOP_SMEMS_CONF)
 	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE))
 
 HARNESS_MACROCOMPILER_MODE = --mode synflops
-.INTERMEDIATE: harness_macro_temp
-$(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): harness_macro_temp
-	@echo "" > /dev/null
-
-harness_macro_temp: $(HARNESS_SMEMS_CONF) | top_macro_temp
+$(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR) &: $(HARNESS_SMEMS_CONF) | $(TOP_SMEMS_FILE)
 	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler, -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE))
 
 ########################################################################################
