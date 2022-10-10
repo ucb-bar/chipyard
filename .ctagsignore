@@ -1,4 +1,4 @@
 */target
 sims
 toolchains
-.conda-env/
+.conda-env
