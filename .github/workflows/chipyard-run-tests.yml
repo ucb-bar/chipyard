@@ -581,53 +581,6 @@ jobs:
           group-key: "group-peripherals"
           project-key: "chipyard-dmirocket"
 
-# Unsupported in Verilator due to CIRCT emitting alias for Analog connections
-#  chipyard-spiflashwrite-run-tests:
-#    name: chipyard-spiflashwrite-run-tests
-#    needs: prepare-chipyard-peripherals
-#    runs-on: self-hosted
-#    steps:
-#      - name: Delete old checkout
-#        run: |
-#            ls -alh .
-#            rm -rf ${{ github.workspace }}/* || true
-#            rm -rf ${{ github.workspace }}/.* || true
-#            ls -alh .
-#      - name: Checkout
-#        uses: actions/checkout@v3
-#      - name: Git workaround
-#        uses: ./.github/actions/git-workaround
-#      - name: Create conda env
-#        uses: ./.github/actions/create-conda-env
-#      - name: Run tests
-#        uses: ./.github/actions/run-tests
-#        with:
-#          group-key: "group-peripherals"
-#          project-key: "chipyard-spiflashwrite"
-#
-#  chipyard-spiflashread-run-tests:
-#    name: chipyard-spiflashread-run-tests
-#    needs: prepare-chipyard-peripherals
-#    runs-on: self-hosted
-#    steps:
-#      - name: Delete old checkout
-#        run: |
-#            ls -alh .
-#            rm -rf ${{ github.workspace }}/* || true
-#            rm -rf ${{ github.workspace }}/.* || true
-#            ls -alh .
-#      - name: Checkout
-#        uses: actions/checkout@v3
-#      - name: Git workaround
-#        uses: ./.github/actions/git-workaround
-#      - name: Create conda env
-#        uses: ./.github/actions/create-conda-env
-#      - name: Run tests
-#        uses: ./.github/actions/run-tests
-#        with:
-#          group-key: "group-peripherals"
-#          project-key: "chipyard-spiflashread"
-
   chipyard-lbwif-run-tests:
     name: chipyard-lbwif-run-tests
     needs: prepare-chipyard-peripherals
