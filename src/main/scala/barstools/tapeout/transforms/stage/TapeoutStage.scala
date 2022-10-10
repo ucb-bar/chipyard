@@ -14,19 +14,6 @@ sealed trait TapeoutOption extends Unserializable {
   this: Annotation =>
 }
 
-case class OutFirAnnotation(outFir: String) extends NoTargetAnnotation with TapeoutOption
-
-object OutFirAnnotation extends HasShellOptions {
-  val options: Seq[ShellOption[_]] = Seq(
-    new ShellOption[String](
-      longOption = "out-fir-file",
-      shortOption = Some("off"),
-      toAnnotationSeq = (s: String) => Seq(OutFirAnnotation(s)),
-      helpText = "out-fir-file"
-    )
-  )
-}
-
 case class OutAnnoAnnotation(outAnno: String) extends NoTargetAnnotation with TapeoutOption
 
 object OutAnnoAnnotation extends HasShellOptions {
@@ -46,7 +33,6 @@ trait TapeoutCli {
 
   Seq(
     OutAnnoAnnotation,
-    OutFirAnnotation,
   ).foreach(_.addOptions(parser))
 }
 

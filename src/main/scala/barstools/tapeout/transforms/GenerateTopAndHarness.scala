@@ -7,13 +7,13 @@ import firrtl.ir._
 import firrtl.options.{Dependency, InputAnnotationFileAnnotation, StageMain}
 import firrtl.passes.memlib.ReplSeqMemAnnotation
 import firrtl.stage.{FirrtlCircuitAnnotation, FirrtlStage, OutputFileAnnotation, RunFirrtlTransformAnnotation}
+import firrtl.passes.{ConvertFixedToSInt}
 import firrtl.transforms.BlackBoxResourceFileNameAnno
 import logger.LazyLogging
 
 // Requires two phases, one to collect modules below synTop in the hierarchy
 // and a second to remove those modules to generate the test harness
 private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogging {
-  val outFir: Option[String] = annotations.collectFirst { case OutFirAnnotation(s) => s }
   val outAnno: Option[String] = annotations.collectFirst { case OutAnnoAnnotation(s) => s }
 
   // Dump firrtl and annotation files
@@ -21,11 +21,6 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
     circuit:     Circuit,
     annotations: AnnotationSeq,
   ): Unit = {
-    outFir.foreach { firPath =>
-      val outputFile = new java.io.PrintWriter(firPath)
-      outputFile.write(circuit.serialize)
-      outputFile.close()
-    }
     outAnno.foreach { annoPath =>
       val outputFile = new java.io.PrintWriter(annoPath)
       outputFile.write(JsonProtocol.serialize(annotations.filter(_ match {
@@ -34,16 +29,19 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
         case _: EmittedAnnotation[_]    => false
         case _: FirrtlCircuitAnnotation => false
         case _: OutAnnoAnnotation => false
-        case _: OutFirAnnotation => false
         case _ => true
       })))
       outputFile.close()
     }
   }
 
+  // TODO: Filter out blackbox dumping from this FIRRTL step, let CIRCT do it
+
   // Top Generation
   def executeTop(): Unit = {
-    val annos = new FirrtlStage().execute(Array.empty, annotations)
+    val annos = new FirrtlStage().execute(Array.empty, annotations) //++ Seq(
+    //  RunFirrtlTransformAnnotation(Dependency[CheckForUnsupportedFirtoolTypes]
+    //)))
     annos.collectFirst { case FirrtlCircuitAnnotation(circuit) => circuit } match {
       case Some(circuit) =>
         dump(circuit, annos)
