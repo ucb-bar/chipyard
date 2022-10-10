@@ -130,7 +130,7 @@ endef
 export firtool_extra_anno_contents
 $(FINAL_ANNO_FILE) $(FIRTOOL_EXTRA_ANNO_FILE): $(ANNO_FILE)
 	echo "$$firtool_extra_anno_contents" > $(FIRTOOL_EXTRA_ANNO_FILE)
-	jq -s '[.[][]]' $(ANNO_FILE) $(FIRTOOL_EXTRA_ANNO_FILE) > $@
+	jq -s '[.[][]]' $(ANNO_FILE) $(FIRTOOL_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
 
 .PHONY: firrtl
 firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
@@ -138,7 +138,7 @@ firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
 #########################################################################################
 # create verilog files rules and variables
 #########################################################################################
-CIRCT_TARGETS = $(FIRTOOL_SMEMS_CONF) $(FIRTOOL_MOD_HIER_JSON) $(FIRTOOL_TB_MOD_HIER_JSON) $(FIRTOOL_SMEMS_JSON) $(FIRTOOL_TB_SMEMS_JSON) $(FIRTOOL_FILELIST)
+CIRCT_TARGETS = $(FIRTOOL_SMEMS_CONF) $(FIRTOOL_MOD_HIER_JSON) $(FIRTOOL_TB_MOD_HIER_JSON) $(FIRTOOL_SMEMS_JSON) $(FIRTOOL_TB_SMEMS_JSON) $(FIRTOOL_FILELIST) $(FIRTOOL_BB_MODS_FILELIST)
 
 # DOC include start: FirrtlCompiler
 $(TOP_TARGETS) $(HARNESS_TARGETS) &: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
@@ -171,15 +171,17 @@ $(CIRCT_TARGETS): firrtl_temp
 # hack: lower to middle firrtl if Fixed types are found
 firrtl_temp: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTop,\
-		--output-file $(SFC_FIRRTL_FILE) \
+		--no-dedup \
+		--output-file $(SFC_FIRRTL_START) \
+		--output-annotation-file $(SFC_ANNO_FILE) \
 		--target-dir $(build_dir) \
 		--input-file $(FIRRTL_FILE) \
 		--annotation-file $(FINAL_ANNO_FILE) \
-		--out-anno-file $(SFC_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		--allow-unrecognized-annotations \
 		-X $(if $(shell grep "Fixed<" $(FIRRTL_FILE)),middle,none) \
 		$(EXTRA_FIRRTL_OPTIONS))
+	$(if $(shell grep "Fixed<" $(FIRRTL_FILE)),mv $(SFC_FIRRTL_START).mid.fir $(SFC_FIRRTL_FILE),)
 	firtool \
 		--export-module-hierarchy \
 		--emit-metadata \
@@ -200,7 +202,7 @@ firrtl_temp: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 	sed -i 's/.*/& /' $(FIRTOOL_SMEMS_CONF) # need trailing space for SFC macrocompiler
 # DOC include end: FirrtlCompiler
 
-$(TOP_MODS_FILELIST) $(TB_MODS_FILELIST) $(ALL_MODS_FILELIST) &: $(FIRTOOL_TB_MOD_HIER_JSON) $(FIRTOOL_FILELIST)
+$(TOP_MODS_FILELIST) $(TB_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) &: $(FIRTOOL_TB_MOD_HIER_JSON) $(FIRTOOL_FILELIST) $(FIRTOOL_BB_MODS_FILELIST)
 	$(base_dir)/scripts/split-module-files.py \
 		--tb-hier-json $(FIRTOOL_TB_MOD_HIER_JSON) \
 		--dut $(TOP) \
@@ -209,6 +211,8 @@ $(TOP_MODS_FILELIST) $(TB_MODS_FILELIST) $(ALL_MODS_FILELIST) &: $(FIRTOOL_TB_MO
 		--in-all-filelist $(FIRTOOL_FILELIST) \
 		--build-dir $(build_dir)
 	cat $(TOP_MODS_FILELIST) $(TB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
+	sed -i 's/\.\///' $(ALL_MODS_FILELIST)
+	sed -e 's;^;$(build_dir)/;' $(FIRTOOL_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
 
 $(TOP_SMEMS_CONF) $(HARNESS_SMEMS_CONF) &: $(FIRTOOL_SMEMS_JSON) $(FIRTOOL_TB_SMEMS_JSON) $(FIRTOOL_SMEMS_CONF)
 	$(base_dir)/scripts/split-mems-conf.py \
@@ -230,8 +234,8 @@ $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR) &: $(HARNESS_SMEMS_CONF) | $(TOP_SMEM
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
 ########################################################################################
-$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(HARNESS_SMEMS_FILE)
-	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' > $@
+$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) $(TOP_SMEMS_FILE) $(HARNESS_SMEMS_FILE)
+	sort -u $(sim_files) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' > $@
 	echo "$(TOP_SMEMS_FILE)" >> $@
 	echo "$(HARNESS_SMEMS_FILE)" >> $@
 
