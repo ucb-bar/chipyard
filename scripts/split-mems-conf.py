@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import json
 import argparse
 from typing import List, Optional
@@ -21,28 +22,6 @@ from typing import List, Optional
   ]
 }
 """
-
-def get_modules(js: dict) -> List[str]:
-    if 'instances' not in js:
-        return js['module_name']
-    else:
-        mods = []
-        for mod in js['instances']:
-            mods.extend(get_modules(mod))
-        return [js['module_name']] + mods
-
-def find_mod_by_name(js: dict, name: str) -> Optional[List[dict]]:
-    if 'instances' not in js:
-        return None
-    else:
-        mods = []
-        for mod in js['instances']:
-            if mod['module_name'] == name:
-                mods.append(mod)
-            other_mods = find_mod_by_name(mod, name)
-            if other_mods is not None:
-                mods.extend(other_mods)
-        return mods
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Use CIRCT (firtool) smems JSONs to create DUT and test harness smems confs')
@@ -71,11 +50,16 @@ if __name__ == "__main__":
                     with open(args.out_tb_smems_conf, "w") as otsc:
                         for l in isc:
                             sl = l.split()
-                            name = sl[1]
 
-                            if name in dut_mods:
-                                odsc.write(l)
-                            elif name in tb_mods:
-                                otsc.write(l)
+                            # the line can't be split then stop immediately (normally an empty file)
+                            if len(sl) > 2:
+                                name = sl[1]
+
+                                if name in dut_mods:
+                                    odsc.write(l)
+                                elif name in tb_mods:
+                                    otsc.write(l)
+                                else:
+                                    assert False, "Unable to find smem CONF module in firtool emitted JSON files."
                             else:
-                                assert False, "Unable to find smem CONF module in firtool emitted JSON files."
+                                exit(0)
