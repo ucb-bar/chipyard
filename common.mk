@@ -138,7 +138,7 @@ firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
 #########################################################################################
 # create verilog files rules and variables
 #########################################################################################
-CIRCT_TARGETS = $(FIRTOOL_SMEMS_CONF) $(FIRTOOL_MOD_HIER_JSON) $(FIRTOOL_TB_MOD_HIER_JSON) $(FIRTOOL_SMEMS_JSON) $(FIRTOOL_TB_SMEMS_JSON)
+CIRCT_TARGETS = $(FIRTOOL_SMEMS_CONF) $(FIRTOOL_MOD_HIER_JSON) $(FIRTOOL_TB_MOD_HIER_JSON) $(FIRTOOL_SMEMS_JSON) $(FIRTOOL_TB_SMEMS_JSON) $(FIRTOOL_FILELIST)
 
 # DOC include start: FirrtlCompiler
 $(TOP_TARGETS) $(HARNESS_TARGETS) &: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
@@ -208,7 +208,7 @@ $(TOP_MODS_FILELIST) $(TB_MODS_FILELIST) $(ALL_MODS_FILELIST) &: $(FIRTOOL_TB_MO
 		--out-tb-filelist $(TB_MODS_FILELIST) \
 		--in-all-filelist $(FIRTOOL_FILELIST) \
 		--build-dir $(build_dir)
-	sed -e 's;^;$(build_dir)/;' $(FIRTOOL_FILELIST) > $(ALL_MODS_FILELIST)
+	cat $(TOP_MODS_FILELIST) $(TB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
 
 $(TOP_SMEMS_CONF) $(HARNESS_SMEMS_CONF) &: $(FIRTOOL_SMEMS_JSON) $(FIRTOOL_TB_SMEMS_JSON) $(FIRTOOL_SMEMS_CONF)
 	$(base_dir)/scripts/split-mems-conf.py \

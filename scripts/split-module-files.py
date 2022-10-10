@@ -73,34 +73,40 @@ if __name__ == "__main__":
         dut_mods = set(get_modules(dut_top))
         tb_mods = set(get_modules(j)) - dut_mods
         both_mods = dut_mods.intersection(tb_mods)
+
         assert len(both_mods) == 0
 
         with open(args.out_dut_filelist, 'w') as df:
             with open(args.in_all_filelist) as fl:
                 # add paths that correspond to modules to output file
                 for path in fl:
-                    writeOut = True
+                    writeOut = False
                     for dm in dut_mods:
                         if dm in path:
-                            # don't write
-                            writeOut = False
+                            writeOut = True
                             break
 
                     # prepend the build directory to get filelist with absolute paths
                     if writeOut:
-                        df.write(f"{args.build_dir}/{path}")
+                        if not args.build_dir in path:
+                            df.write(f"{args.build_dir}/{path}")
+                        else:
+                            df.write(f"{path}")
+
 
         with open(args.out_tb_filelist, 'w') as df:
             with open(args.in_all_filelist) as fl:
                 # add paths that correspond to modules to output file
                 for path in fl:
-                    writeOut = True
+                    writeOut = False
                     for dm in tb_mods:
                         if dm in path:
-                            # don't write
-                            writeOut = False
+                            writeOut = True
                             break
 
                     # prepend the build directory to get filelist with absolute paths
                     if writeOut:
-                        df.write(f"{args.build_dir}/{path}")
+                        if not args.build_dir in path:
+                            df.write(f"{args.build_dir}/{path}")
+                        else:
+                            df.write(f"{path}")
