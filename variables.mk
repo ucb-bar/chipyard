@@ -218,7 +218,7 @@ define run_scala_main
 	cd $(base_dir) && $(SBT) ";project $(1); runMain $(2) $(3)"
 endef
 
-FIRRTL_LOGLEVEL ?= debug
+FIRRTL_LOGLEVEL ?= error
 
 #########################################################################################
 # output directory for tests
