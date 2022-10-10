@@ -115,22 +115,25 @@ generator_temp: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GE
 		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG) \
 		$(EXTRA_CHISEL_OPTIONS))
 
+define firtool_extra_anno_contents
+[
+	{
+		"class":"sifive.enterprise.firrtl.MarkDUTAnnotation",
+		"target":"~$(MODEL)|$(TOP)"
+	},
+	{
+		"class": "sifive.enterprise.firrtl.TestHarnessHierarchyAnnotation",
+		"filename": "$(FIRTOOL_TB_MOD_HIER_JSON)"
+	},
+	{
+		"class": "sifive.enterprise.firrtl.ModuleHierarchyAnnotation",
+		"filename": "$(FIRTOOL_MOD_HIER_JSON)"
+	}
+]
+endef
+export firtool_extra_anno_contents
 $(FINAL_ANNO_FILE) $(FIRTOOL_EXTRA_ANNO_FILE): $(ANNO_FILE)
-	echo " \
-	[\
-		{\
-			\"class\":\"sifive.enterprise.firrtl.MarkDUTAnnotation\",\
-			\"target\":\"~$(MODEL)|$(TOP)\"\
-		},\
-		{\
-			\"class\": \"sifive.enterprise.firrtl.TestHarnessHierarchyAnnotation\",\
-			\"filename\": \"$(FIRTOOL_TB_MOD_HIER_JSON)\"\
-		},\
-		{\
-			\"class\": \"sifive.enterprise.firrtl.ModuleHierarchyAnnotation\",\
-			\"filename\": \"$(FIRTOOL_MOD_HIER_JSON)\"\
-		}
-	]" > $(FIRTOOL_EXTRA_ANNO_FILE)
+	echo "$$firtool_extra_anno_contents" > $(FIRTOOL_EXTRA_ANNO_FILE)
 	jq -s '[.[][]]' $(ANNO_FILE) $(FIRTOOL_EXTRA_ANNO_FILE) > $@
 
 .PHONY: firrtl
@@ -139,7 +142,7 @@ firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
 #########################################################################################
 # create verilog files rules and variables
 #########################################################################################
-CIRCT_TARGETS = $(TOP_SMEMS_CONF) $(FIRTOOL_MOD_HIER_JSON) $(FIRTOOL_TB_MOD_HIER_JSON)
+CIRCT_TARGETS = $(FIRTOOL_SMEMS_CONF) $(FIRTOOL_MOD_HIER_JSON) $(FIRTOOL_TB_MOD_HIER_JSON) $(FIRTOOL_SMEMS_JSON) $(FIRTOOL_TB_SMEMS_JSON)
 
 # DOC include start: FirrtlCompiler
 # NOTE: These *_temp intermediate targets will get removed in favor of make 4.3 grouped targets (&: operator)
@@ -147,17 +150,19 @@ CIRCT_TARGETS = $(TOP_SMEMS_CONF) $(FIRTOOL_MOD_HIER_JSON) $(FIRTOOL_TB_MOD_HIER
 $(CIRCT_TARGETS): firrtl_temp
 	@echo "" > /dev/null
 
+# hack: lower to middle firrtl if Fixed types are found
 firrtl_temp: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTop,\
+		--output-file $(SFC_FIRRTL_FILE) \
+		--target-dir $(build_dir) \
 		--input-file $(FIRRTL_FILE) \
 		--annotation-file $(FINAL_ANNO_FILE) \
-		--out-fir-file $(SFC_FIRRTL_FILE) \
 		--out-anno-file $(SFC_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		--allow-unrecognized-annotations \
-		-X none \
+		-X $(if $(shell grep "Fixed<" $(FIRRTL_FILE)),middle,none) \
 		$(EXTRA_FIRRTL_OPTIONS))
-	$(SCRATCH_HOME)/circt/build/bin/firtool \
+	firtool \
 		--export-module-hierarchy \
 		--emit-metadata \
 		--format=fir \
@@ -170,19 +175,30 @@ firrtl_temp: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 		--lowering-options=disallowPackedArrays,emittedLineLength=8192,noAlwaysComb,disallowLocalVariables \
 		--repl-seq-mem \
 		--repl-seq-mem-circuit=$(MODEL) \
-		--repl-seq-mem-file=$(TOP_SMEMS_CONF) \
+		--repl-seq-mem-file=$(FIRTOOL_SMEMS_CONF) \
 		--split-verilog \
 		-o $(build_dir) \
 		$(SFC_FIRRTL_FILE)
-	sed -i 's/.*/& /' $(TOP_SMEMS_CONF) # need trailing space for SFC macrocompiler
+	sed -i 's/.*/& /' $(FIRTOOL_SMEMS_CONF) # need trailing space for SFC macrocompiler
 # DOC include end: FirrtlCompiler
 
-$(TOP_MODS_FILELIST) $(ALL_MODS_FILELIST): $(FIRTOOL_TB_MOD_HIER_JSON) $(FIRTOOL_FILELIST)
-	$(base_dir)/scripts/dump-mods.py --dut-top $(TOP) --hier-json $(FIRTOOL_TB_MOD_HIER_JSON) --dut-mods $(TOP_MODS_FILELIST) --filelist $(FIRTOOL_FILELIST) --build_dir $(build_dir)
+$(TOP_MODS_FILELIST) $(TB_MODS_FILELIST) $(ALL_MODS_FILELIST) &: $(FIRTOOL_TB_MOD_HIER_JSON) $(FIRTOOL_FILELIST)
+	$(base_dir)/scripts/split-module-files.py \
+		--tb-hier-json $(FIRTOOL_TB_MOD_HIER_JSON) \
+		--dut $(TOP) \
+		--out-dut-filelist $(TOP_MODS_FILELIST) \
+		--out-tb-filelist $(TB_MODS_FILELIST) \
+		--in-all-filelist $(FIRTOOL_FILELIST) \
+		--build-dir $(build_dir)
 	sed -e 's;^;$(build_dir)/;' $(FIRTOOL_FILELIST) > $(ALL_MODS_FILELIST)
 
-.PHONY: temp
-temp: $(TOP_MODS_FILELIST)
+$(TOP_SMEMS_CONF) $(HARNESS_SMEMS_CONF) &: $(FIRTOOL_SMEMS_JSON) $(FIRTOOL_TB_SMEMS_JSON) $(FIRTOOL_SMEMS_CONF)
+	$(base_dir)/scripts/split-mems-conf.py \
+		--in-smems-conf $(FIRTOOL_SMEMS_CONF) \
+		--in-dut-smems-json $(FIRTOOL_SMEMS_JSON) \
+		--in-tb-smems-json $(FIRTOOL_TB_SMEMS_JSON) \
+		--out-dut-smems-conf $(TOP_SMEMS_CONF) \
+		--out-tb-smems-conf $(HARNESS_SMEMS_CONF)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 MACROCOMPILER_MODE ?= --mode synflops
@@ -193,12 +209,21 @@ $(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR): top_macro_temp
 top_macro_temp: $(TOP_SMEMS_CONF)
 	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE))
 
+HARNESS_MACROCOMPILER_MODE = --mode synflops
+.INTERMEDIATE: harness_macro_temp
+$(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR): harness_macro_temp
+	@echo "" > /dev/null
+
+harness_macro_temp: $(HARNESS_SMEMS_CONF) | top_macro_temp
+	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler, -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE))
+
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
 ########################################################################################
-$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE)
+$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(HARNESS_SMEMS_FILE)
 	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' > $@
 	echo "$(TOP_SMEMS_FILE)" >> $@
+	echo "$(HARNESS_SMEMS_FILE)" >> $@
 
 #########################################################################################
 # helper rule to just make verilog files
