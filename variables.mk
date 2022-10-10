@@ -149,6 +149,7 @@ FIRTOOL_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
 FINAL_ANNO_FILE ?= $(build_dir)/$(long_name).appended.anno.json
 
 SFC_FIRRTL_FILE ?= $(build_dir)/$(long_name).sfc.fir
+SFC_FIRRTL_START ?= $(build_dir)/$(long_name).sfc
 SFC_ANNO_FILE ?= $(build_dir)/$(long_name).sfc.anno.json
 
 FIRTOOL_MOD_HIER_JSON ?= $(build_dir)/modulehierarchy.json
@@ -172,6 +173,10 @@ ALL_MODS_FILELIST ?= $(build_dir)/$(long_name).all.f
 TOP_MODS_FILELIST ?= $(build_dir)/$(long_name).top.f
 # tb module files to include (not including top modules)
 TB_MODS_FILELIST ?= $(build_dir)/$(long_name).tb.f
+# list of all blackbox files (may be included in the top/tb.f files)
+FIRTOOL_BB_MODS_FILELIST ?= $(build_dir)/firrtl_black_box_resource_files.f
+# this has the build_dir appended
+BB_MODS_FILELIST ?= $(build_dir)/firrtl_black_box_resource_files.final.f
 
 BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
