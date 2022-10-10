@@ -10,6 +10,7 @@ import hwacha.{Hwacha}
 import gemmini._
 
 import chipyard.{TestSuitesKey, TestSuiteHelper}
+import chipyard.rerocc._
 
 /**
  * Map from a hartId to a particular RoCC accelerator
@@ -84,4 +85,19 @@ class WithMultiRoCCGemmini[T <: Data : Arithmetic, U <: Data, V <: Data](
       gemmini
     }))
   }
+})
+
+class WithReRoCC extends Config((site, here, up) => {
+  case BuildRoCC => Seq((p: Parameters) => {
+    val rerocc_client = LazyModule(new ReRoCCClient()(p))
+    rerocc_client
+  })
+  case ReRoCCTileKey => up(BuildRoCC)
+})
+
+class WithAccumulatorRoCC(op: OpcodeSet = OpcodeSet.custom0) extends Config((site, here, up) =>{
+  case BuildRoCC => Seq((p: Parameters) => {
+    val accumulator = LazyModule(new AccumulatorExample(op, n = 4)(p))
+    accumulator
+  })
 })

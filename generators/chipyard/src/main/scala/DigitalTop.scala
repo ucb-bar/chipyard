@@ -34,6 +34,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with chipyard.clocking.HasChipyardPRCI // Use Chipyard reset/clock distribution
   with fftgenerator.CanHavePeripheryFFT // Enables optionally having an MMIO-based FFT block
   with constellation.soc.CanHaveGlobalNoC // Support instantiating a global NoC interconnect
+  with chipyard.rerocc.CanHaveReRoCCTiles // Enables remote-RoCC tiles
 {
   override lazy val module = new DigitalTopModule(this)
 }
