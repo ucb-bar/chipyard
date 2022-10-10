@@ -152,7 +152,4 @@ cat << EOT >> env.sh
 __DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-${(%):-%x}}")")"
 PATH=\$__DIR/bin:\$PATH
 PATH=\$__DIR/software/firemarshal:\$PATH
-if [ -z \${CONDA_DEFAULT_ENV+x} ]; then
-    echo "WARNING: No conda environment detected. Did you activate the conda environment (e.x. 'conda activate chipyard')?"
-fi
 EOT

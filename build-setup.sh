@@ -62,12 +62,13 @@ done
 
 if [ "$SKIP_CONDA" = false ]; then
     # note: lock file must end in .conda-lock.yml - see https://github.com/conda-incubator/conda-lock/issues/154
-    LOCKFILE=$RDIR/conda-requirements-$TOOLCHAIN-linux-64.conda-lock.yml
-    YAMLFILE=$RDIR/conda-requirements-$TOOLCHAIN.yaml
+    CONDA_REQS=$RDIR/conda-reqs
+    CONDA_LOCK_REQS=$CONDA_REQS/conda-lock-reqs
+    LOCKFILE=$CONDA_LOCK_REQS/conda-requirements-$TOOLCHAIN-linux-64.conda-lock.yml
 
     if [ "$USE_PINNED_DEPS" = false ]; then
         # auto-gen the lockfile
-        conda-lock -f $YAMLFILE -p linux-64 --lockfile $LOCKFILE
+        conda-lock -f $CONDA_REQS/chipyard.yaml -f $CONDA_REQS/$TOOLCHAIN.yaml --lockfile $LOCKFILE
     fi
 
     # use conda-lock to create env
