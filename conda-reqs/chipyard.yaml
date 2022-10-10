@@ -29,6 +29,11 @@ dependencies:
     - binutils
 
     - dromajo # from ucb-bar channel - https://github.com/riscv-boom/dromajo
+<<<<<<< HEAD:conda-reqs/chipyard.yaml
+=======
+    - esp-tools # from ucb-bar channel - https://github.com/ucb-bar/esp-tools-feedstock
+    - firtool # from ucb-bar channel - https://github.com/ucb-bar/firtool-feedstock
+>>>>>>> 3e131170 (Update all):conda-requirements-esp-tools.yaml
 
     # firemarshal deps
     - python>=3.8

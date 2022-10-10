@@ -9,7 +9,11 @@
 # To update a single package to the latest version compatible with the version constraints in the source:
 #     conda-lock lock --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml --update PACKAGE
 # To re-solve the entire environment, e.g. after changing a version constraint in the source file:
+<<<<<<< HEAD:conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64.conda-lock.yml
 #     conda-lock -f /scratch/buildbot/firesim/target-design/chipyard/conda-requirements-riscv-tools.yaml -f /scratch/abejgonza/cy-fix/conda-reqs/chipyard.yaml -f /scratch/abejgonza/cy-fix/conda-reqs/riscv-tools.yaml --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml
+=======
+#     conda-lock -f /scratch/buildbot/firesim/target-design/chipyard/conda-requirements-riscv-tools.yaml -f /scratch/abejgonza/cy-circt/conda-requirements-riscv-tools.yaml --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml
+>>>>>>> 3e131170 (Update all):conda-requirements-riscv-tools-linux-64.conda-lock.yml
 metadata:
   channels:
   - url: ucb-bar
@@ -19,13 +23,17 @@ metadata:
   - url: nodefaults
     used_env_vars: []
   content_hash:
-    linux-64: e0eaa8e6d532cfd33d97846ae17a35f71e62c135ff3edb6236f6d8d592b10e7a
+    linux-64: 6254f362fb6c8b59402fb3d4adb4b1023218ec62be09f7f75dfc5980e3233e50
   platforms:
   - linux-64
   sources:
   - /scratch/buildbot/firesim/target-design/chipyard/conda-requirements-riscv-tools.yaml
+<<<<<<< HEAD:conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64.conda-lock.yml
   - /scratch/abejgonza/cy-fix/conda-reqs/chipyard.yaml
   - /scratch/abejgonza/cy-fix/conda-reqs/riscv-tools.yaml
+=======
+  - /scratch/abejgonza/cy-circt/conda-requirements-riscv-tools.yaml
+>>>>>>> 3e131170 (Update all):conda-requirements-riscv-tools-linux-64.conda-lock.yml
 package:
 - category: main
   dependencies: {}
@@ -823,6 +831,18 @@ package:
   version: 3.8.1
 - category: main
   dependencies:
+    libgcc-ng: '>=12'
+  hash:
+    md5: 5be58359dbbf568c1ec0be87e0c6cb1b
+    sha256: f6c470ba56c43e5f6c75fd28b05256fd8f5d54d76df29c0652496bf3b104ae2b
+  manager: conda
+  name: oniguruma
+  optional: false
+  platform: linux-64
+  url: https://conda.anaconda.org/conda-forge/linux-64/oniguruma-6.9.8-h166bdaf_0.tar.bz2
+  version: 6.9.8
+- category: main
+  dependencies:
     ca-certificates: ''
     libgcc-ng: '>=12'
   hash:
@@ -1117,6 +1137,23 @@ package:
   version: 4.6.0
 - category: main
   dependencies:
+<<<<<<< HEAD:conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64.conda-lock.yml
+=======
+    libgcc-ng: '>=12'
+    libstdcxx-ng: '>=12'
+    ncurses: '>=6.3,<7.0a0'
+  hash:
+    md5: e6019194c1a4915a153c09516dcca08a
+    sha256: null
+  manager: conda
+  name: firtool
+  optional: false
+  platform: linux-64
+  url: https://conda.anaconda.org/ucb-bar/linux-64/firtool-1.16.0-0_h1234567_g14ac3cb0e.tar.bz2
+  version: 1.16.0
+- category: main
+  dependencies:
+>>>>>>> 3e131170 (Update all):conda-requirements-riscv-tools-linux-64.conda-lock.yml
     libgcc-ng: '>=7.5.0'
     libstdcxx-ng: '>=7.5.0'
     m4: ''
@@ -1149,6 +1186,22 @@ package:
   version: 12.1.0
 - category: main
   dependencies:
+<<<<<<< HEAD:conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64.conda-lock.yml
+=======
+    libgcc-ng: '>=7.5.0'
+    oniguruma: '>=6.9.3,<6.10.0a0'
+  hash:
+    md5: 8578ae83310b8c9f5717f1aa65054f36
+    sha256: 00e69aec19174e61c70b652bb62c77c0947a27d6720bda0cb8d5be654020804a
+  manager: conda
+  name: jq
+  optional: false
+  platform: linux-64
+  url: https://conda.anaconda.org/conda-forge/linux-64/jq-1.6-h36c2ea0_1000.tar.bz2
+  version: '1.6'
+- category: main
+  dependencies:
+>>>>>>> 3e131170 (Update all):conda-requirements-riscv-tools-linux-64.conda-lock.yml
     libopenblas: '>=0.3.21,<1.0a0'
   hash:
     md5: d9b7a8639171f6c6fa0a983edabcfe2b
@@ -3045,14 +3098,14 @@ package:
   dependencies:
     python: '>=3.7'
   hash:
-    md5: a3508a0c850745b875de88aea4c40cc5
-    sha256: bb6920451dad059ca31581ca6e36c5f1534fad8a8efe869c7eb9c9e3846b4f53
+    md5: 6f3fd8c9e0ab504010fb4216d5919c24
+    sha256: 7740d6fcd4fffb895a93c765388382b58ea78e005180cee88078eb18e59f7f06
   manager: conda
   name: zipp
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/zipp-3.8.1-pyhd8ed1ab_0.tar.bz2
-  version: 3.8.1
+  url: https://conda.anaconda.org/conda-forge/noarch/zipp-3.9.0-pyhd8ed1ab_0.tar.bz2
+  version: 3.9.0
 - category: main
   dependencies:
     python: '>=3.6'
@@ -4308,17 +4361,27 @@ package:
   version: 5.10.0
 - category: main
   dependencies:
-    cryptography: '>=35.0'
+    cryptography: '>=38.0.0,<39'
     python: '>=3.6'
   hash:
+<<<<<<< HEAD:conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64.conda-lock.yml
     md5: 2e7e3630919d29c8216bfa2cd643d79e
     sha256: 72af60a6164a380730c00ee996bda265267b53a99662d7ceb2ec6ed47dd74a0b
+=======
+    md5: fbfa0a180d48c800f922a10a114a8632
+    sha256: 42f04dded77ac2597108378d62b121697d0e982aba7b20a462a7239030563628
+>>>>>>> 3e131170 (Update all):conda-requirements-riscv-tools-linux-64.conda-lock.yml
   manager: conda
   name: pyopenssl
   optional: false
   platform: linux-64
+<<<<<<< HEAD:conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64.conda-lock.yml
   url: https://conda.anaconda.org/conda-forge/noarch/pyopenssl-22.0.0-pyhd8ed1ab_1.tar.bz2
   version: 22.0.0
+=======
+  url: https://conda.anaconda.org/conda-forge/noarch/pyopenssl-22.1.0-pyhd8ed1ab_0.tar.bz2
+  version: 22.1.0
+>>>>>>> 3e131170 (Update all):conda-requirements-riscv-tools-linux-64.conda-lock.yml
 - category: main
   dependencies:
     pytest: '>=3.6.0'
@@ -4879,18 +4942,18 @@ package:
     pyyaml: '>=5.1'
     requests: '>=2'
     ruamel.yaml: ''
-    setuptools: ''
-    toml: ''
+    tomli: ''
+    toolz: <1.0.0,>=0.12.0
     typing-extensions: ''
   hash:
-    md5: 2d1c6d733a45b168eef7acc6212109ed
-    sha256: 023ffdae76edde9f2d3fc6a8696cc8d8a60d61b2b8ae6d951f4e4802e47ef606
+    md5: 496c81a0d226177dbabb5fa495fadda9
+    sha256: 39b181da4620222ba831dc9570f600753c52bb8f649bfef036d2c79245a4c145
   manager: conda
   name: conda-lock
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/conda-lock-1.1.1-pyhd8ed1ab_0.tar.bz2
-  version: 1.1.1
+  url: https://conda.anaconda.org/conda-forge/noarch/conda-lock-1.1.3-pyhd8ed1ab_0.tar.bz2
+  version: 1.1.3
 - category: main
   dependencies:
     boto3: ''
