@@ -9,7 +9,7 @@
 # To update a single package to the latest version compatible with the version constraints in the source:
 #     conda-lock lock --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml --update PACKAGE
 # To re-solve the entire environment, e.g. after changing a version constraint in the source file:
-#     conda-lock -f /scratch/buildbot/firesim/target-design/chipyard/conda-requirements-riscv-tools.yaml -f /scratch/abejgonza/cy-circt/conda-requirements-riscv-tools.yaml --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml
+#     conda-lock -f /scratch/abejgonza/cy-circt/conda-reqs/chipyard.yaml -f /scratch/abejgonza/cy-circt/conda-reqs/riscv-tools.yaml --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml
 metadata:
   channels:
   - url: ucb-bar
@@ -19,12 +19,12 @@ metadata:
   - url: nodefaults
     used_env_vars: []
   content_hash:
-    linux-64: 6254f362fb6c8b59402fb3d4adb4b1023218ec62be09f7f75dfc5980e3233e50
+    linux-64: 18e98e3b7d2dbc99136ae91e74c8b58b0bab4248cd1e10da4626231a40700eb0
   platforms:
   - linux-64
   sources:
-  - /scratch/buildbot/firesim/target-design/chipyard/conda-requirements-riscv-tools.yaml
-  - /scratch/abejgonza/cy-circt/conda-requirements-riscv-tools.yaml
+  - /scratch/abejgonza/cy-circt/conda-reqs/chipyard.yaml
+  - /scratch/abejgonza/cy-circt/conda-reqs/riscv-tools.yaml
 package:
 - category: main
   dependencies: {}
@@ -859,19 +859,6 @@ package:
   version: 2.7.6
 - category: main
   dependencies:
-    libgcc-ng: '>=9.3.0'
-    libstdcxx-ng: '>=9.3.0'
-  hash:
-    md5: c05d1820a6d34ff07aaaab7a9b7eddaa
-    sha256: 8f35c244b1631a4f31fb1d66ab6e1d9bfac0ca9b679deced1112c7225b3ad138
-  manager: conda
-  name: pcre
-  optional: false
-  platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/pcre-8.45-h9c3ff4c_0.tar.bz2
-  version: '8.45'
-- category: main
-  dependencies:
     libgcc-ng: '>=7.5.0'
   hash:
     md5: 660e72c82f2e75a6b3fe6a6e75c79f19
@@ -1224,20 +1211,6 @@ package:
   platform: linux-64
   url: https://conda.anaconda.org/conda-forge/linux-64/libidn2-2.3.3-h166bdaf_0.tar.bz2
   version: 2.3.3
-- category: main
-  dependencies:
-    libgcc-ng: '>=12'
-    libstdcxx-ng: '>=12'
-    libzlib: '>=1.2.12,<1.3.0a0'
-  hash:
-    md5: f5759f0c80708fbf9c4836c0cb46d0fe
-    sha256: af0f505053153cd2e8ad08a8559fb3df73b22ce8f635dbcaf7818a7bf916437f
-  manager: conda
-  name: libllvm14
-  optional: false
-  platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libllvm14-14.0.6-he0ac6c6_0.tar.bz2
-  version: 14.0.6
 - category: main
   dependencies:
     libgcc-ng: '>=12'
@@ -1726,21 +1699,6 @@ package:
   version: 3.9.0
 - category: main
   dependencies:
-    libgcc-ng: '>=12'
-    libllvm14: '>=14.0.6,<14.1.0a0'
-    libstdcxx-ng: '>=12'
-    libzlib: '>=1.2.12,<1.3.0a0'
-  hash:
-    md5: 0e63ac182e381cd351c397f8e44a4b71
-    sha256: 4e17513579284329f89f36b1e02ec9b7df01ec67f66f02c8b07ac15354477b1b
-  manager: conda
-  name: libclang-cpp14
-  optional: false
-  platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libclang-cpp14-14.0.6-default_h2e3cab8_0.tar.bz2
-  version: 14.0.6
-- category: main
-  dependencies:
     gettext: '>=0.19.8.1,<1.0a0'
     libffi: '>=3.4,<4.0a0'
     libgcc-ng: '>=12'
@@ -1917,22 +1875,6 @@ package:
   platform: linux-64
   url: https://conda.anaconda.org/conda-forge/linux-64/atk-1.0-2.36.0-h3371d22_4.tar.bz2
   version: 2.36.0
-- category: main
-  dependencies:
-    libclang-cpp14: '>=14.0.6,<14.1.0a0'
-    libgcc-ng: '>=12'
-    libllvm14: '>=14.0.6,<14.1.0a0'
-    libstdcxx-ng: '>=12'
-    libzlib: '>=1.2.12,<1.3.0a0'
-  hash:
-    md5: ef9669b9847ce3c8a304e9eb08bf446d
-    sha256: 0c07d3ada12b27b0df8ea07faf4fa8c3b45cc791752a724ac86302af6378b4bb
-  manager: conda
-  name: clang-format-14
-  optional: false
-  platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/clang-format-14-14.0.6-default_h2e3cab8_0.tar.bz2
-  version: 14.0.6
 - category: main
   dependencies:
     expat: '>=2.4.2,<3.0a0'
@@ -3269,22 +3211,22 @@ package:
   version: 3.2.3
 - category: main
   dependencies:
-    cairo: '>=1.16.0,<2.0.0a0'
+    cairo: '>=1.16.0,<2.0a0'
     freetype: '>=2.12.1,<3.0a0'
     graphite2: ''
     icu: '>=70.1,<71.0a0'
     libgcc-ng: '>=12'
-    libglib: '>=2.72.1,<3.0a0'
+    libglib: '>=2.74.0,<3.0a0'
     libstdcxx-ng: '>=12'
   hash:
-    md5: 3c5f4fbd64c7254fbe246ca9d87863b6
-    sha256: 4def14eb862e0b05ffce33edbfc2cfc4d0e1720f134d52e378c4b661467069cf
+    md5: 888056bd4b12e110b10d4d1f29161c5e
+    sha256: 57c6ae03c3e70fe7cd28b9e5f27ee470181aef5426f6796a52bc591cfe473183
   manager: conda
   name: harfbuzz
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/harfbuzz-5.2.0-hf9f4e7c_0.tar.bz2
-  version: 5.2.0
+  url: https://conda.anaconda.org/conda-forge/linux-64/harfbuzz-5.3.0-h418a68e_0.tar.bz2
+  version: 5.3.0
 - category: main
   dependencies:
     python: ''
@@ -4957,14 +4899,14 @@ package:
     sarif-om: ~=1.0.4
     six: '>=1.11'
   hash:
-    md5: 5f029952a7ac4f8e086219054e0d870b
-    sha256: 2f2e0d5aa9cc4c1e1939b7299ea922bd84290eb069c42eba29d7c134c7dde72e
+    md5: c0194acb049810fc8eba88a3184e570f
+    sha256: 7920575550b0a9bd75f2007c00ff53164f35e7aebe887117d7c24c626af05371
   manager: conda
   name: cfn-lint
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/cfn-lint-0.66.1-pyhd8ed1ab_0.tar.bz2
-  version: 0.66.1
+  url: https://conda.anaconda.org/conda-forge/noarch/cfn-lint-0.67.0-pyhd8ed1ab_0.tar.bz2
+  version: 0.67.0
 - category: main
   dependencies:
     aws-xray-sdk: '!=0.96,>=0.93'
@@ -5003,14 +4945,14 @@ package:
 - category: main
   dependencies: {}
   hash:
-    sha256: bfb67f6a6c72dfb0a02f3df51550aa1862708e55128b22543e2b42c74f3620d7
+    sha256: ae88eca3024bb34bb3430f964beab71226e761f51b912de5133470b649d82344
   manager: pip
   name: bcrypt
   optional: false
   platform: linux-64
   source: null
-  url: https://files.pythonhosted.org/packages/c5/77/14bbcd08ad265577ad6ea8e8980b9c0ad668cecfd241ae169b6747c4491b/bcrypt-4.0.0-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-  version: 4.0.0
+  url: https://files.pythonhosted.org/packages/aa/48/fd2b197a9741fa790ba0b88a9b10b5e88e62ff5cf3e1bc96d8354d7ce613/bcrypt-4.0.1-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+  version: 4.0.1
 - category: main
   dependencies: {}
   hash:
