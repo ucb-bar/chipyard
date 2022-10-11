@@ -330,6 +330,7 @@ trait CanHaveReRoCCTiles { this: HasTiles =>
   val reRoCCClients = tiles.map { t => t match {
     case r: RocketTile => r.roccs collect { case r: ReRoCCClient => (t, r) }
     case b: BoomTile => b.roccs collect { case r: ReRoCCClient => (t, r) }
+    case _ => Nil
   }}.flatten
 
   val reRoCCManagers = p(ReRoCCTileKey).zipWithIndex.map { case (g,i) =>
