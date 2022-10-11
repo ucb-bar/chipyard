@@ -1,0 +1,15 @@
+name: git-workaround
+description: 'Workaround https://github.com/actions/checkout/issues/766'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Workaround
+      run: |
+        if git config --global -l | grep -q "safe.directory=$GITHUB_WORKSPACE"; then
+            echo "Skip adding safe directory"
+        else
+            echo "Add $GITHUB_WORKSPACE to global git config"
+            git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        fi
+      shell: bash -leo pipefail {0}

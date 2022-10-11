@@ -3,7 +3,9 @@ Customization
 
 These guides will walk you through customization of your system-on-chip:
 
-- Contructing heterogenous systems-on-chip using the existing Chipyard generators and configuration system.
+- Constructing heterogenous systems-on-chip using the existing Chipyard generators and configuration system.
+
+- Constructing SoCs with a NoC (network-on-chip) based interconnect using Constellation
 
 - How to include your custom Chisel sources in the Chipyard build system
 
@@ -36,6 +38,7 @@ We recommend reading all these pages in order. Hit next to get started!
    :caption: Customization:
 
    Heterogeneous-SoCs
+   NoC-SoCs
    Custom-Chisel
    Custom-Core
    RoCC-or-MMIO

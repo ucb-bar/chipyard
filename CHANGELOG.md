@@ -2,6 +2,61 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.8.0] - 2022-09-30
+
+Adds support for NoC-based interconnects with Constellation (https://constellation.readthedocs.io/en/latest/). Switch to Conda for dependency/environment management. Bump Rocket Chip and other hardware libraries. Bump to FireSim 1.15.0.
+
+### Added
+* RTL: Support for packet-switched NoC-based TileLink main bus interconnects with Constellation
+* Conda: Support setting up a Chipyard development environment through Conda
+* Hammer: Fully open-source Sky130 flow tutorials in open-source and commercial tools
+* Hammer: IR key history
+* Hammer: Joules power analysis support
+* Hammer: Tempus STA support
+
+### Changed
+* RTL: Default memory-mapped addresses for fft/dsp/example MMIO accelerators changed to be non-overlapping
+* Repo: Update SiFive submodules to new chipsalliance upstreams
+* Rocketchip: Bumped to 1.6
+* Chisel: Bumped to 3.5.2
+* Firesim: Bumped to 1.15.0
+* Firemarshal: Bumped to latest
+
+### Fixed
+* RTL: Fix clock frequency rounding
+* Hammer: VCS FGP is now opt-in
+* Dromajo: Fix to variable definition
+* Testchipip: Fix write-strobe handling for 64B configurations
+* Build: Ignore dotfiles in lookup_srcs
+
+## [1.7.1] - 2022-07-06
+
+FireSim bump for new builddriver command and various fixes. See FireSim 1.14.1 CHANGELOG.md.
+
+### Changed
+* Bump FireSim to 1.14.1
+
+## [1.7.0] - 2022-06-18
+
+FireSim bump for local (on-premises) FPGA and distributed metasimulation support. Hammer now supports the OpenROAD open-source EDA tools for a fully open-source RTL-to-GDS VLSI flow.
+
+### Added
+* Add a FireSim config with no mem port (#1172)
+* Hammer OpenROAD plugins: Yosys (syn), OpenROAD (par), Magic (drc), Netgen (lvs) (#1183)
+
+### Changed
+* Bump FireSim to 1.14.0
+* Give the PRCI widgets valnames to clean up module naming (#1152)
+
+### Fixed
+* Add missing Apache commons dependencies (fixes #1144) (#1147)
+* Disable Boost for spike (#1168)
+* VCS enhancements (#1150)
+    * Support multi-thread VCS simv option like FGP, Xprof etc.
+    * Idle tsi in the target thread
+* Don't shallow clone submodules (revert #1064) (#1143)
+* Remove extra spaces in FPGA makefile (#1135)
+
 ## [1.6.3] - 2022-04-06
 
 FireSim bump for various fixes. Revert shallow cloning. Various CI fixes.

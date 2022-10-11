@@ -13,10 +13,8 @@ target
 .idea
 .DS_Store
 env.sh
-riscv-tools-install
-esp-tools-install
 tags
 *~
-env-riscv-tools.sh
-env-esp-tools.sh
 .bsp/
+.conda-env/
+.#*

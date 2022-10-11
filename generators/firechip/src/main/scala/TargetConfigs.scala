@@ -252,3 +252,9 @@ class FireSim16LargeBoomConfig extends Config(
   new boom.common.WithNLargeBooms(16) ++
   new chipyard.config.AbstractConfig)
 
+class FireSimNoMemPortConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new freechips.rocketchip.subsystem.WithNoMemPort ++
+  new testchipip.WithBackingScratchpad ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.RocketConfig)

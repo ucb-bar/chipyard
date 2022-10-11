@@ -52,13 +52,22 @@ dir="generators"
 branches=("master" "main" "dev")
 search
 
-submodules=("riscv-gnu-toolchain" "riscv-isa-sim" "riscv-pk" "riscv-tests")
+submodules=("esp-tools-feedstock")
+dir="toolchains/esp-tools"
+branches=("main")
+search
+
+submodules=("riscv-isa-sim" "riscv-pk" "riscv-tests")
 dir="toolchains/esp-tools"
 branches=("master")
 search
 
+submodules=("riscv-tools-feedstock")
+dir="toolchains/riscv-tools"
+branches=("main")
+search
 
-submodules=("riscv-gnu-toolchain" "riscv-isa-sim" "riscv-pk" "riscv-tests")
+submodules=("riscv-isa-sim" "riscv-pk" "riscv-tests")
 dir="toolchains/riscv-tools"
 branches=("master")
 search
@@ -69,7 +78,7 @@ dir="toolchains/riscv-tools"
 branches=("riscv")
 search
 
-submodules=("qemu" "libgloss")
+submodules=("libgloss")
 dir="toolchains"
 branches=("master")
 search
@@ -84,11 +93,6 @@ dir="tools"
 branches=("master" "dev")
 search
 
-submodules=("dromajo-src")
-dir="tools/dromajo"
-branches=("master")
-search
-
 submodules=("firesim")
 dir="sims"
 branches=("master" "main" "dev" "1.13.x")
@@ -101,7 +105,7 @@ search
 
 submodules=("fpga-shells")
 dir="fpga"
-branches=("master")
+branches=("main")
 search
 
 # turn off verbose printing to make this easier to read

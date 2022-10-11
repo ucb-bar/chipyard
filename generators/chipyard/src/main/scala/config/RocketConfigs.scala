@@ -15,7 +15,7 @@ class TinyRocketConfig extends Config(
   new chipyard.config.WithTLSerialLocation(
     freechips.rocketchip.subsystem.FBUS,
     freechips.rocketchip.subsystem.PBUS) ++                       // attach TL serial adapter to f/p busses
-  new chipyard.WithMulticlockIncoherentBusTopology ++             // use incoherent bus topology
+  new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++ // use incoherent bus topology
   new freechips.rocketchip.subsystem.WithNBanks(0) ++             // remove L2$
   new freechips.rocketchip.subsystem.WithNoMemPort ++             // remove backing memory
   new freechips.rocketchip.subsystem.With1TinyCore ++             // single tiny rocket-core
@@ -23,7 +23,7 @@ class TinyRocketConfig extends Config(
 
 // DOC include start: FFTRocketConfig
 class FFTRocketConfig extends Config(
-  new fftgenerator.WithFFTGenerator(baseAddr=0x2000, numPoints=8, width=16, decPt=8) ++ // add 8-point mmio fft at 0x2000 with 16bit fixed-point numbers.
+  new fftgenerator.WithFFTGenerator(numPoints=8, width=16, decPt=8) ++ // add 8-point mmio fft at the default addr (0x2400) with 16bit fixed-point numbers.
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: FFTRocketConfig
@@ -128,13 +128,6 @@ class GB1MemoryRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithExtMemSize((1<<30) * 1L) ++ // use 1GB simulated external memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
-
-// DOC include start: Sha3Rocket
-class Sha3RocketConfig extends Config(
-  new sha3.WithSha3Accel ++                                // add SHA3 rocc accelerator
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-// DOC include end: Sha3Rocket
 
 // DOC include start: InitZeroRocketConfig
 class InitZeroRocketConfig extends Config(

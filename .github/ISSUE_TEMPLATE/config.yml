@@ -3,6 +3,9 @@ contact_links:
   - name: Chipyard Mailing List
     url: https://groups.google.com/forum/#!forum/chipyard
     about: Please ask and answer questions here.
+  - name: FireSim Mailing List
+    url: https://groups.google.com/forum/#!forum/firesim
+    about: Please ask and answer questions here.
   - name: Rocket Chip Support
     url: https://github.com/chipsalliance/rocket-chip/issues
     about: Please ask and answer questions here.

@@ -4,9 +4,9 @@
 
 ## Quick Links
 
-* **STABLE DOCUMENTATION**: https://chipyard.readthedocs.io/
-* **USER QUESTION FORUM**: https://groups.google.com/forum/#!forum/chipyard
-* **BUGS AND FEATURE-REQUESTS**: https://github.com/ucb-bar/chipyard/issues
+* **Stable Documentation**: https://chipyard.readthedocs.io/
+* **User Question Forum**: https://groups.google.com/forum/#!forum/chipyard
+* **Bugs and Feature Requests**: https://github.com/ucb-bar/chipyard/issues
 
 ## Using Chipyard
 
@@ -24,8 +24,8 @@ Chipyard is actively developed in the [Berkeley Architecture Research Group][ucb
 
 * Chipyard Stable Documentation: https://chipyard.readthedocs.io/
 * Chipyard (x FireSim) Tutorial: https://fires.im/tutorial
-* Chipyard Basics slides: https://fires.im/micro21-slides-pdf/02_chipyard_basics.pdf
-* Chipyard Tutorial Exercise slides: https://fires.im/micro21-slides-pdf/03_building_custom_socs.pdf
+* Chipyard Basics slides: https://fires.im/isca22-slides-pdf/02_chipyard_basics.pdf
+* Chipyard Tutorial Exercise slides: https://fires.im/isca22-slides-pdf/03_building_custom_socs.pdf
 
 ## Need help?
 

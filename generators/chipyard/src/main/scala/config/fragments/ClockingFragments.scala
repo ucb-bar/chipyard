@@ -38,17 +38,17 @@ class WithTileFrequency(fMHz: Double, hartId: Option[Int] = None) extends ClockN
   fMHz)
 
 class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {
-  case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
+  case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get.toDouble / (1000 * 1000))
 })
 
 class WithSystemBusFrequencyAsDefault extends Config((site, here, up) => {
-  case DefaultClockFrequencyKey => (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toDouble
+  case DefaultClockFrequencyKey => (site(SystemBusKey).dtsFrequency.get.toDouble / (1000 * 1000))
 })
 
 class BusFrequencyAssignment[T <: HasTLBusParams](re: Regex, key: Field[T]) extends Config((site, here, up) => {
   case ClockFrequencyAssignersKey => up(ClockFrequencyAssignersKey, site) ++
     Seq((cName: String) => site(key).dtsFrequency.flatMap { f =>
-      re.findFirstIn(cName).map {_ => (f / (1000 * 1000)).toDouble }
+      re.findFirstIn(cName).map {_ => (f.toDouble / (1000 * 1000)) }
     })
 })
 
