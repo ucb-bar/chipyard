@@ -21,6 +21,19 @@ class TinyRocketConfig extends Config(
   new freechips.rocketchip.subsystem.With1TinyCore ++             // single tiny rocket-core
   new chipyard.config.AbstractConfig)
 
+class MempressRocketBaseConfig extends Config(
+  new freechips.rocketchip.subsystem.WithInclusiveCache(nBanks=8, nWays=16, capacityKB=2048) ++
+  new WithExtMemIdBits(7) ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
+  new Config ((site, here, up) => {
+    case SystemBusKey => up(SystemBusKey, site).copy(beatBytes = 16)
+  }) ++
+new RocketConfig)
+
+class MemPressConfig extends Config(
+  new mempress.WithMemPress ++
+  new MempressRocketBaseConfig)
+
 // DOC include start: FFTRocketConfig
 class FFTRocketConfig extends Config(
   new fftgenerator.WithFFTGenerator(numPoints=8, width=16, decPt=8) ++ // add 8-point mmio fft at the default addr (0x2400) with 16bit fixed-point numbers.
