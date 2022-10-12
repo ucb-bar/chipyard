@@ -11,6 +11,53 @@ class RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
 
+class StridedPrefetcherRocketConfig extends Config(
+  new prefetchers.WithTLDCachePrefetcher(p = prefetchers.SingleStridedPrefetcherParams()) ++ 
+  new chipyard.config.WithTileToSBusPrefetchers ++ 
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  //new chipyard.config.WithTestChipBusFreqs ++
+  new chipyard.config.AbstractConfig)
+
+class NextLinePrefetcher221RocketConfig extends Config(
+  new prefetchers.WithTLDCachePrefetcher(p = prefetchers.SingleNextLinePrefetcherParams()) ++ 
+  new chipyard.config.WithTileToSBusPrefetchers ++ 
+  //new prefetchers.WithHellaCachePrefetcher(hartIds = {0}, p: CanInstantiatePrefetcher = MultiNextLinePrefetcherParams(handleVA=true))
+  new freechips.rocketchip.subsystem.WithL1DCacheSets(sets = 4) ++ //1KiB L1 DCache
+  new freechips.rocketchip.subsystem.WithL1DCacheWays(ways = 4) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB = 8) ++
+  //new chipyard.config.WithTestChipBusFreqs ++
+  new chipyard.config.AbstractConfig)
+
+class VERIFYAMPMPrefetcherRocketConfig extends Config(
+  new prefetchers.WithTLDCachePrefetcher(p = prefetchers.SingleAMPMPrefetcherParams()) ++ 
+  new chipyard.config.WithTileToSBusPrefetchers ++ 
+  new freechips.rocketchip.subsystem.WithL1DCacheSets(sets = 4) ++
+  new freechips.rocketchip.subsystem.WithL1DCacheWays(ways = 4) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB = 8) ++
+  //new chipyard.config.WithTestChipBusFreqs ++
+  new chipyard.config.AbstractConfig)
+
+class VERIFYStridedPrefetcherRocketConfig extends Config(
+  new prefetchers.WithTLDCachePrefetcher(p = prefetchers.SingleStridedPrefetcherParams()) ++ 
+  new chipyard.config.WithTileToSBusPrefetchers ++ 
+  new freechips.rocketchip.subsystem.WithL1DCacheSets(sets = 4) ++
+  new freechips.rocketchip.subsystem.WithL1DCacheWays(ways = 4) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB = 8) ++
+  //new chipyard.config.WithTestChipBusFreqs ++
+  new chipyard.config.AbstractConfig)
+
+class PassthroughPrefetcherRocketConfig extends Config(
+  new chipyard.config.WithTileToSBusPrefetchers ++ 
+  new freechips.rocketchip.subsystem.WithL1DCacheSets(sets = 4) ++
+  new freechips.rocketchip.subsystem.WithL1DCacheWays(ways = 4) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB = 8) ++
+  //new chipyard.config.WithTestChipBusFreqs ++
+  new chipyard.config.AbstractConfig)
+
 class TinyRocketConfig extends Config(
   new chipyard.config.WithTLSerialLocation(
     freechips.rocketchip.subsystem.FBUS,

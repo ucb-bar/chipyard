@@ -130,3 +130,9 @@
 [submodule "generators/constellation"]
 	path = generators/constellation
 	url = https://github.com/ucb-bar/constellation.git
+[submodule "generators/saturn"]
+	path = generators/saturn
+	url = https://github.com/ucb-bar/saturn.git
+[submodule "generators/bar-prefetchers"]
+	path = generators/bar-prefetchers
+	url = https://github.com/ucb-bar/bar-prefetchers.git

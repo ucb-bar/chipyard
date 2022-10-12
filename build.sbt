@@ -149,9 +149,19 @@ lazy val chipyard = (project in file("generators/chipyard"))
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsp-utils`,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
-    constellation)
+    /*saturn,*/ bar_prefetchers, constellation)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
+
+lazy val bar_prefetchers = (project in file ("generators/bar-prefetchers"))
+  .dependsOn(rocketchip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+/*lazy val saturn = (project in file("generators/saturn"))
+  .dependsOn(rocketchip, testchipip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)*/
 
 lazy val constellation = (project in file("generators/constellation"))
   .dependsOn(rocketchip)

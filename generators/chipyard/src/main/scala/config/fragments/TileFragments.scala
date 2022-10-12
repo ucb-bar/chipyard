@@ -11,6 +11,7 @@ import boom.common.{BoomTileAttachParams}
 import cva6.{CVA6TileAttachParams}
 
 import testchipip._
+import prefetchers.{TilePrefetchingMasterPortParams}
 
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
@@ -62,6 +63,17 @@ class WithRocketICacheScratchpad extends Config((site, here, up) => {
 class WithRocketDCacheScratchpad extends Config((site, here, up) => {
   case RocketTilesKey => up(RocketTilesKey, site) map { r =>
     r.copy(dcache = r.dcache.map(_.copy(nSets = 32, nWays = 1, scratch = Some(0x200000 + r.hartId * 0x10000))))
+  }
+})
+
+class WithTileToSBusPrefetchers extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: RocketTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
+      master = TilePrefetchingMasterPortParams(tp.tileParams.hartId, tp.crossingParams.master)))
+    case tp: BoomTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
+      master = TilePrefetchingMasterPortParams(tp.tileParams.hartId, tp.crossingParams.master)))
+    //case tp: SodorTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
+    //  master = TilePrefetchingMasterPortParams(tp.tileParams.hartId, tp.crossingParams.master)))
   }
 })
 
