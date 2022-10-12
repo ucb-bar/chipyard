@@ -24,7 +24,7 @@ class TinyRocketConfig extends Config(
 class MempressConfig extends Config(
   new mempress.WithMemPress ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nBanks=8, nWays=16, capacityKB=2048) ++
-  new WithExtMemIdBits(7) ++
+  new chipyard.config.WithExtMemIdBits(7) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new RocketConfig)
