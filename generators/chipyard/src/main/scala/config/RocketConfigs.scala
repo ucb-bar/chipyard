@@ -21,18 +21,13 @@ class TinyRocketConfig extends Config(
   new freechips.rocketchip.subsystem.With1TinyCore ++             // single tiny rocket-core
   new chipyard.config.AbstractConfig)
 
-class MempressRocketBaseConfig extends Config(
+class MempressConfig extends Config(
+  new mempress.WithMemPress ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nBanks=8, nWays=16, capacityKB=2048) ++
   new WithExtMemIdBits(7) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
-  new Config ((site, here, up) => {
-    case SystemBusKey => up(SystemBusKey, site).copy(beatBytes = 16)
-  }) ++
-new RocketConfig)
-
-class MemPressConfig extends Config(
-  new mempress.WithMemPress ++
-  new MempressRocketBaseConfig)
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new RocketConfig)
 
 // DOC include start: FFTRocketConfig
 class FFTRocketConfig extends Config(

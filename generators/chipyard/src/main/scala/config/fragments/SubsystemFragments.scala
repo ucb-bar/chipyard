@@ -11,3 +11,7 @@ class WithBroadcastManager extends Config((site, here, up) => {
 class WithSystemBusWidth(bitWidth: Int) extends Config((site, here, up) => {
   case SystemBusKey => up(SystemBusKey, site).copy(beatBytes=bitWidth/8)
 })
+
+class WithExtMemIdBits(n: Int) extends Config((site, here, up) => {
+    case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(idBits = n)))
+})
