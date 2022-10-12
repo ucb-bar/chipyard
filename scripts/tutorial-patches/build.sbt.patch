@@ -10,7 +10,7 @@ index bbbb8251..b7adcb73 100644
 +//    sha3, // On separate line to allow for cleaner tutorial-setup patches
      dsptools, `rocket-dsp-utils`,
      gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
-     constellation)
+     constellation, mempress)
    .settings(libraryDependencies ++= rocketLibDeps.value)
 @@ -189,11 +189,11 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
    .settings(libraryDependencies ++= rocketLibDeps.value)
