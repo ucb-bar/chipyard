@@ -143,40 +143,46 @@ ifeq ($(GENERATOR_PACKAGE),hwacha)
 	long_name=$(MODEL_PACKAGE).$(CONFIG)
 endif
 
+# chisel generated outputs
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
+
+# chisel anno modification output
 FIRTOOL_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
 FINAL_ANNO_FILE ?= $(build_dir)/$(long_name).appended.anno.json
 
-SFC_FIRRTL_FILE ?= $(build_dir)/$(long_name).sfc.fir
-SFC_FIRRTL_START ?= $(build_dir)/$(long_name).sfc
+# scala firrtl compiler (sfc) outputs
+SFC_FIRRTL_BASENAME ?= $(build_dir)/$(long_name).sfc
+SFC_FIRRTL_FILE ?= $(SFC_FIRRTL_BASENAME).fir
 SFC_ANNO_FILE ?= $(build_dir)/$(long_name).sfc.anno.json
 
-FIRTOOL_MOD_HIER_JSON ?= $(build_dir)/modulehierarchy.json
-FIRTOOL_TB_MOD_HIER_JSON ?= $(build_dir)/tbmodulehierarchy.json
+# firtool compiler outputs
+FIRTOOL_TOP_HRCHY_JSON ?= $(build_dir)/top_module_hierarchy.json
+FIRTOOL_MODEL_HRCHY_JSON ?= $(build_dir)/model_module_hierarchy.json
 FIRTOOL_SMEMS_CONF ?= $(build_dir)/$(long_name).mems.conf
-FIRTOOL_SMEMS_JSON ?= $(build_dir)/metadata/seq_mems.json
-FIRTOOL_TB_SMEMS_JSON ?= $(build_dir)/metadata/tb_seq_mems.json
+# hardcoded firtool outputs
+FIRTOOL_FILELIST = $(OUT_DIR)/filelist.f
+FIRTOOL_BB_MODS_FILELIST = $(OUT_DIR)/firrtl_black_box_resource_files.f
+FIRTOOL_TOP_SMEMS_JSON = $(OUT_DIR)/metadata/seq_mems.json
+FIRTOOL_MODEL_SMEMS_JSON = $(OUT_DIR)/metadata/tb_seq_mems.json
 
+# macrocompiler smems in/output
 TOP_SMEMS_CONF ?= $(build_dir)/$(long_name).top.mems.conf
-TOP_SMEMS_FILE ?= $(build_dir)/$(long_name).top.mems.v
+TOP_SMEMS_FILE ?= $(build_dir)/vsrc/$(long_name).top.mems.v
 TOP_SMEMS_FIR  ?= $(build_dir)/$(long_name).top.mems.fir
-
 HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
-HARNESS_SMEMS_FILE ?= $(build_dir)/$(long_name).harness.mems.v
+HARNESS_SMEMS_FILE ?= $(build_dir)/vsrc/$(long_name).harness.mems.v
 HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
 
-FIRTOOL_FILELIST ?= $(build_dir)/filelist.f
-# all module files to include (includes top modules)
-ALL_MODS_FILELIST ?= $(build_dir)/$(long_name).all.f
 # top module files to include
 TOP_MODS_FILELIST ?= $(build_dir)/$(long_name).top.f
-# tb module files to include (not including top modules)
-TB_MODS_FILELIST ?= $(build_dir)/$(long_name).tb.f
-# list of all blackbox files (may be included in the top/tb.f files)
-FIRTOOL_BB_MODS_FILELIST ?= $(build_dir)/firrtl_black_box_resource_files.f
+# model module files to include (not including top modules)
+MODEL_MODS_FILELIST ?= $(build_dir)/$(long_name).model.f
+# list of all blackbox files (may be included in the top/model.f files)
 # this has the build_dir appended
-BB_MODS_FILELIST ?= $(build_dir)/firrtl_black_box_resource_files.final.f
+BB_MODS_FILELIST ?= $(build_dir)/$(long_name).bb.f
+# all module files to include (top, model, bb included)
+ALL_MODS_FILELIST ?= $(build_dir)/$(long_name).all.f
 
 BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
@@ -244,8 +250,12 @@ binary_hex= $(sim_out_name).loadmem_hex
 #########################################################################################
 # build output directory for compilation
 #########################################################################################
+# output for all project builds
 gen_dir=$(sim_dir)/generated-src
+# per-project output directory
 build_dir=$(gen_dir)/$(long_name)
+# final generated collateral per-project
+OUT_DIR ?= $(build_dir)/gen-collateral
 
 #########################################################################################
 # assembly/benchmark variables

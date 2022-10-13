@@ -54,15 +54,15 @@ def find_mod_by_name(js: dict, name: str) -> Optional[List[dict]]:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert CIRCT (firtool) hierarchy JSON into DUT and test harness filelists')
-    parser.add_argument('--tb-hier-json', type=str, required=True, help='Path to hierarchy JSON emitted by firtool. Must include DUT as a module.')
+    parser.add_argument('--model-hier-json', type=str, required=True, help='Path to hierarchy JSON emitted by firtool. Must include DUT as a module.')
     parser.add_argument('--dut', type=str, required=True, help='Name of the DUT module.')
     parser.add_argument('--out-dut-filelist', type=str, required=True, help='Path to output filelist including all modules under the DUT.')
-    parser.add_argument('--out-tb-filelist', type=str, required=True, help='Path to output filelist including all modules under the top-most module but not modules under the DUT.')
+    parser.add_argument('--out-model-filelist', type=str, required=True, help='Path to output filelist including all modules under the top-most module but not modules under the DUT.')
     parser.add_argument('--in-all-filelist', type=str, required=True, help='Path to input filelist that has all modules (relative paths).')
-    parser.add_argument('--build-dir', type=str, required=True, help='Path to where module sources are located (combined with --in-all-filelist gives the absolute path to module sources).')
+    parser.add_argument('--target-dir', type=str, required=True, help='Path to where module sources are located (combined with --in-all-filelist gives the absolute path to module sources).')
     args = parser.parse_args()
 
-    with open(args.tb_hier_json) as f:
+    with open(args.model_hier_json) as f:
         j = json.load(f)
 
         dut_tops = find_mod_by_name(j, args.dut)
@@ -71,42 +71,41 @@ if __name__ == "__main__":
         dut_top = dut_tops[0]
 
         dut_mods = set(get_modules(dut_top))
-        tb_mods = set(get_modules(j)) - dut_mods
-        both_mods = dut_mods.intersection(tb_mods)
+        model_mods = set(get_modules(j)) - dut_mods
+        both_mods = dut_mods.intersection(model_mods)
 
         assert len(both_mods) == 0
 
-        with open(args.out_dut_filelist, 'w') as df:
-            with open(args.in_all_filelist) as fl:
-                # add paths that correspond to modules to output file
-                for path in fl:
-                    writeOut = False
-                    for dm in dut_mods:
-                        if dm in path:
-                            writeOut = True
-                            break
+        with open(args.out_dut_filelist, 'w') as df, \
+             open(args.in_all_filelist) as fl:
+            # add paths that correspond to modules to output file
+            for path in fl:
+                writeOut = False
+                for dm in dut_mods:
+                    if dm in path:
+                        writeOut = True
+                        break
 
-                    # prepend the build directory to get filelist with absolute paths
-                    if writeOut:
-                        if not args.build_dir in path:
-                            df.write(f"{args.build_dir}/{path}")
-                        else:
-                            df.write(f"{path}")
+                # prepend the target directory to get filelist with absolute paths
+                if writeOut:
+                    if not args.target_dir in path:
+                        df.write(f"{args.target_dir}/{path}")
+                    else:
+                        df.write(f"{path}")
 
+        with open(args.out_model_filelist, 'w') as df, \
+             open(args.in_all_filelist) as fl:
+            # add paths that correspond to modules to output file
+            for path in fl:
+                writeOut = False
+                for dm in model_mods:
+                    if dm in path:
+                        writeOut = True
+                        break
 
-        with open(args.out_tb_filelist, 'w') as df:
-            with open(args.in_all_filelist) as fl:
-                # add paths that correspond to modules to output file
-                for path in fl:
-                    writeOut = False
-                    for dm in tb_mods:
-                        if dm in path:
-                            writeOut = True
-                            break
-
-                    # prepend the build directory to get filelist with absolute paths
-                    if writeOut:
-                        if not args.build_dir in path:
-                            df.write(f"{args.build_dir}/{path}")
-                        else:
-                            df.write(f"{path}")
+                # prepend the target directory to get filelist with absolute paths
+                if writeOut:
+                    if not args.target_dir in path:
+                        df.write(f"{args.target_dir}/{path}")
+                    else:
+                        df.write(f"{path}")

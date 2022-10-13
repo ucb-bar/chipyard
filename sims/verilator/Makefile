@@ -66,13 +66,13 @@ SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.cc
 
 # copy files and add -FI for *.h files in *.f
-$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
-	cp -f $^ $(build_dir)
+$(sim_files): $(SIM_FILE_REQS) | $(OUT_DIR)
+	cp -f $^ $(OUT_DIR)
 	$(foreach file,\
 		$^,\
 		$(if $(filter %.h,$(file)),\
-			echo "-FI $(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;,\
-			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
+			echo "-FI $(addprefix $(OUT_DIR)/, $(notdir $(file)))" >> $@;,\
+			echo "$(addprefix $(OUT_DIR)/, $(notdir $(file)))" >> $@;))
 
 #########################################################################################
 # import other necessary rules and variables
@@ -181,7 +181,7 @@ VERILATOR_CXXFLAGS = \
 	-DTEST_HARNESS=V$(VLOG_MODEL) \
 	-DVERILATOR \
 	-include $(build_dir)/$(long_name).plusArgs \
-	-include $(build_dir)/verilator.h
+	-include $(OUT_DIR)/verilator.h
 
 VERILATOR_LDFLAGS = $(SIM_LDFLAGS)
 

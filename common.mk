@@ -92,7 +92,7 @@ endif
 #########################################################################################
 # copy over bootrom files
 #########################################################################################
-$(build_dir):
+$(build_dir) $(OUT_DIR):
 	mkdir -p $@
 
 $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip/bootrom/bootrom.%.img | $(build_dir)
@@ -119,11 +119,11 @@ define firtool_extra_anno_contents
 	},
 	{
 		"class": "sifive.enterprise.firrtl.TestHarnessHierarchyAnnotation",
-		"filename": "$(FIRTOOL_TB_MOD_HIER_JSON)"
+		"filename": "$(FIRTOOL_MODEL_HRCHY_JSON)"
 	},
 	{
 		"class": "sifive.enterprise.firrtl.ModuleHierarchyAnnotation",
-		"filename": "$(FIRTOOL_MOD_HIER_JSON)"
+		"filename": "$(FIRTOOL_TOP_HRCHY_JSON)"
 	}
 ]
 endef
@@ -138,7 +138,14 @@ firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
 #########################################################################################
 # create verilog files rules and variables
 #########################################################################################
-CIRCT_TARGETS = $(FIRTOOL_SMEMS_CONF) $(FIRTOOL_MOD_HIER_JSON) $(FIRTOOL_TB_MOD_HIER_JSON) $(FIRTOOL_SMEMS_JSON) $(FIRTOOL_TB_SMEMS_JSON) $(FIRTOOL_FILELIST) $(FIRTOOL_BB_MODS_FILELIST)
+FIRTOOL_TARGETS = \
+	$(FIRTOOL_SMEMS_CONF) \
+	$(FIRTOOL_TOP_SMEMS_JSON) \
+	$(FIRTOOL_TOP_HRCHY_JSON) \
+	$(FIRTOOL_MODEL_MOD_HRCHY_JSON) \
+	$(FIRTOOL_MODEL_SMEMS_JSON) \
+	$(FIRTOOL_FILELIST) \
+	$(FIRTOOL_BB_MODS_FILELIST)
 
 # DOC include start: FirrtlCompiler
 $(TOP_TARGETS) $(HARNESS_TARGETS) &: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
@@ -169,19 +176,19 @@ $(CIRCT_TARGETS): firrtl_temp
 	@echo "" > /dev/null
 
 # hack: lower to middle firrtl if Fixed types are found
-firrtl_temp: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
+$(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTop,\
 		--no-dedup \
-		--output-file $(SFC_FIRRTL_START) \
+		--output-file $(SFC_FIRRTL_BASENAME) \
 		--output-annotation-file $(SFC_ANNO_FILE) \
-		--target-dir $(build_dir) \
+		--target-dir $(OUT_DIR) \
 		--input-file $(FIRRTL_FILE) \
 		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		--allow-unrecognized-annotations \
 		-X $(if $(shell grep "Fixed<" $(FIRRTL_FILE)),middle,none) \
 		$(EXTRA_FIRRTL_OPTIONS))
-	$(if $(shell grep "Fixed<" $(FIRRTL_FILE)),mv $(SFC_FIRRTL_START).mid.fir $(SFC_FIRRTL_FILE),)
+	$(if $(shell grep "Fixed<" $(FIRRTL_FILE)),mv $(SFC_FIRRTL_BASENAME).mid.fir $(SFC_FIRRTL_FILE),)
 	firtool \
 		--export-module-hierarchy \
 		--emit-metadata \
@@ -197,30 +204,32 @@ firrtl_temp: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 		--repl-seq-mem-circuit=$(MODEL) \
 		--repl-seq-mem-file=$(FIRTOOL_SMEMS_CONF) \
 		--split-verilog \
-		-o $(build_dir) \
+		-o $(OUT_DIR) \
 		$(SFC_FIRRTL_FILE)
 	sed -i 's/.*/& /' $(FIRTOOL_SMEMS_CONF) # need trailing space for SFC macrocompiler
 # DOC include end: FirrtlCompiler
 
-$(TOP_MODS_FILELIST) $(TB_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) &: $(FIRTOOL_TB_MOD_HIER_JSON) $(FIRTOOL_FILELIST) $(FIRTOOL_BB_MODS_FILELIST)
+$(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) &: $(FIRTOOL_MODEL_MOD_HRCHY_JSON) $(FIRTOOL_FILELIST) $(FIRTOOL_BB_MODS_FILELIST)
 	$(base_dir)/scripts/split-module-files.py \
-		--tb-hier-json $(FIRTOOL_TB_MOD_HIER_JSON) \
+		--model-hier-json $(FIRTOOL_MODEL_HRCHY_JSON) \
 		--dut $(TOP) \
 		--out-dut-filelist $(TOP_MODS_FILELIST) \
-		--out-tb-filelist $(TB_MODS_FILELIST) \
+		--out-model-filelist $(MODEL_MODS_FILELIST) \
 		--in-all-filelist $(FIRTOOL_FILELIST) \
-		--build-dir $(build_dir)
-	cat $(TOP_MODS_FILELIST) $(TB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
-	sed -i 's/\.\///' $(ALL_MODS_FILELIST)
-	sed -e 's;^;$(build_dir)/;' $(FIRTOOL_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
+		--target-dir $(OUT_DIR)
+	sed -e 's;^;$(OUT_DIR)/;' $(FIRTOOL_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
+	sed -i 's/\.\///' $(TOP_MODS_FILELIST)
+	sed -i 's/\.\///' $(MODEL_MODS_FILELIST)
+	sed -i 's/\.\///' $(BB_MODS_FILELIST)
+	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
 
-$(TOP_SMEMS_CONF) $(HARNESS_SMEMS_CONF) &: $(FIRTOOL_SMEMS_JSON) $(FIRTOOL_TB_SMEMS_JSON) $(FIRTOOL_SMEMS_CONF)
+$(TOP_SMEMS_CONF) $(HARNESS_SMEMS_CONF) &: $(FIRTOOL_TOP_SMEMS_JSON) $(FIRTOOL_MODEL_SMEMS_JSON) $(FIRTOOL_SMEMS_CONF)
 	$(base_dir)/scripts/split-mems-conf.py \
 		--in-smems-conf $(FIRTOOL_SMEMS_CONF) \
-		--in-dut-smems-json $(FIRTOOL_SMEMS_JSON) \
-		--in-tb-smems-json $(FIRTOOL_TB_SMEMS_JSON) \
+		--in-dut-smems-json $(FIRTOOL_TOP_SMEMS_JSON) \
+		--in-model-smems-json $(FIRTOOL_MODEL_SMEMS_JSON) \
 		--out-dut-smems-conf $(TOP_SMEMS_CONF) \
-		--out-tb-smems-conf $(HARNESS_SMEMS_CONF)
+		--out-model-smems-conf $(HARNESS_SMEMS_CONF)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 MACROCOMPILER_MODE ?= --mode synflops
@@ -234,8 +243,8 @@ $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR) &: $(HARNESS_SMEMS_CONF) | $(TOP_SMEM
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
 ########################################################################################
-$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) $(TOP_SMEMS_FILE) $(HARNESS_SMEMS_FILE)
-	sort -u $(sim_files) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' > $@
+$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(HARNESS_SMEMS_FILE)
+	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' > $@
 	echo "$(TOP_SMEMS_FILE)" >> $@
 	echo "$(HARNESS_SMEMS_FILE)" >> $@
 
