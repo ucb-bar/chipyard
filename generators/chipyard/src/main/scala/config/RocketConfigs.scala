@@ -23,11 +23,12 @@ class TinyRocketConfig extends Config(
 
 class MempressConfig extends Config(
   new mempress.WithMemPress ++                                    // use Mempress (memory traffic generation) accelerator
-  new freechips.rocketchip.subsystem.WithInclusiveCache(nBanks=8, nWays=16, capacityKB=2048) ++
-  new chipyard.config.WithExtMemIdBits(7) ++                      // use 7 bits for tl like request ide
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new chipyard.config.WithExtMemIdBits(7) ++                      // use 7 bits for tl like request id
   new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
   new chipyard.config.WithSystemBusWidth(128) ++
-  new chipyard.config.RocketConfig)
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
 
 // DOC include start: FFTRocketConfig
 class FFTRocketConfig extends Config(
