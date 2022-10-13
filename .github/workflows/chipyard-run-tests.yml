@@ -488,6 +488,29 @@ jobs:
         with:
           group-key: "group-cores"
           project-key: "chipyard-cva6"
+          
+  chipyard-ibex-run-tests:
+    name: chipyard-ibex-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-ibex"
 
   chipyard-sodor-run-tests:
     name: chipyard-sodor-run-tests
@@ -946,6 +969,7 @@ jobs:
             chipyard-hetero-run-tests,
             chipyard-boom-run-tests,
             chipyard-cva6-run-tests,
+            chipyard-ibex-run-tests,
             chipyard-sodor-run-tests,
             chipyard-dmirocket-run-tests,
             chipyard-fftgenerator-run-tests,
