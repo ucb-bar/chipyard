@@ -38,13 +38,13 @@ SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
 
 # copy files but ignore *.h files in *.f since vcs has +incdir+$(build_dir)
-$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
-	cp -f $^ $(build_dir)
+$(sim_files): $(SIM_FILE_REQS) | $(OUT_DIR)
+	cp -f $^ $(OUT_DIR)
 	$(foreach file,\
 		$^,\
 		$(if $(filter %.h,$(file)),\
 			,\
-			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
+			echo "$(addprefix $(OUT_DIR)/, $(notdir $(file)))" >> $@;))
 
 #########################################################################################
 # import other necessary rules and variables
