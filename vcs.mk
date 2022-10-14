@@ -51,7 +51,7 @@ VCS_NONCC_OPTS = \
 	-sverilog +systemverilogext+.sv+.svi+.svh+.svt -assert svaext +libext+.sv \
 	+v2k +verilog2001ext+.v95+.vt+.vp +libext+.v \
 	-debug_pp \
-	+incdir+$(build_dir)
+	+incdir+$(OUT_DIR)
 
 PREPROC_DEFINES = \
 	+define+VCS \
