@@ -488,7 +488,7 @@ jobs:
         with:
           group-key: "group-cores"
           project-key: "chipyard-cva6"
-          
+
   chipyard-ibex-run-tests:
     name: chipyard-ibex-run-tests
     needs: prepare-chipyard-cores
