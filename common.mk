@@ -1,7 +1,5 @@
-#########################################################################################
-# set default shell for make
-#########################################################################################
 SHELL=/bin/bash
+SED ?= sed
 
 ifndef RISCV
 $(error RISCV is unset. Did you source the Chipyard auto-generated env file (which activates the default conda environment)?)
@@ -172,7 +170,7 @@ $(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 		--disable-annotation-classless \
 		--disable-annotation-unknown \
 		--warn-on-unprocessed-annotations \
-		--lowering-options=disallowPackedArrays,emittedLineLength=8192,noAlwaysComb,disallowLocalVariables \
+		--lowering-options=disallowPackedArrays,emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,explicitBitcast,verifLabels,locationInfoStyle=wrapInAtSquareBracket \
 		--repl-seq-mem \
 		--repl-seq-mem-circuit=$(MODEL) \
 		--repl-seq-mem-file=$(FIRTOOL_SMEMS_CONF) \
@@ -180,7 +178,7 @@ $(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 		--split-verilog \
 		-o $(OUT_DIR) \
 		$(SFC_FIRRTL_FILE)
-	sed -i 's/.*/& /' $(FIRTOOL_SMEMS_CONF) # need trailing space for SFC macrocompiler
+	$(SED) -i 's/.*/& /' $(FIRTOOL_SMEMS_CONF) # need trailing space for SFC macrocompiler
 # DOC include end: FirrtlCompiler
 
 $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) &: $(FIRTOOL_MODEL_MOD_HRCHY_JSON) $(FIRTOOL_FILELIST) $(FIRTOOL_BB_MODS_FILELIST)
@@ -191,10 +189,10 @@ $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILEL
 		--out-model-filelist $(MODEL_MODS_FILELIST) \
 		--in-all-filelist $(FIRTOOL_FILELIST) \
 		--target-dir $(OUT_DIR)
-	sed -e 's;^;$(OUT_DIR)/;' $(FIRTOOL_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
-	sed -i 's/\.\///' $(TOP_MODS_FILELIST)
-	sed -i 's/\.\///' $(MODEL_MODS_FILELIST)
-	sed -i 's/\.\///' $(BB_MODS_FILELIST)
+	$(SED) -e 's;^;$(OUT_DIR)/;' $(FIRTOOL_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
+	$(SED) -i 's/\.\///' $(TOP_MODS_FILELIST)
+	$(SED) -i 's/\.\///' $(MODEL_MODS_FILELIST)
+	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
 	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
 
 $(TOP_SMEMS_CONF) $(HARNESS_SMEMS_CONF) &: $(FIRTOOL_TOP_SMEMS_JSON) $(FIRTOOL_MODEL_SMEMS_JSON) $(FIRTOOL_SMEMS_CONF)
