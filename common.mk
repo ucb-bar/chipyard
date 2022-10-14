@@ -190,19 +190,20 @@ $(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 		$(EXTRA_FIRRTL_OPTIONS))
 	$(if $(shell grep "Fixed<" $(FIRRTL_FILE)),mv $(SFC_FIRRTL_BASENAME).mid.fir $(SFC_FIRRTL_FILE),)
 	firtool \
+		--format=fir \
+		-O=release \
+		--dedup \
 		--export-module-hierarchy \
 		--emit-metadata \
-		--format=fir \
-		-warn-on-unprocessed-annotations \
-		-verify-each=false \
-		-dedup \
-		--annotation-file=$(SFC_ANNO_FILE) \
+		--verify-each=false \
 		--disable-annotation-classless \
 		--disable-annotation-unknown \
+		--warn-on-unprocessed-annotations \
 		--lowering-options=disallowPackedArrays,emittedLineLength=8192,noAlwaysComb,disallowLocalVariables \
 		--repl-seq-mem \
 		--repl-seq-mem-circuit=$(MODEL) \
 		--repl-seq-mem-file=$(FIRTOOL_SMEMS_CONF) \
+		--annotation-file=$(SFC_ANNO_FILE) \
 		--split-verilog \
 		-o $(OUT_DIR) \
 		$(SFC_FIRRTL_FILE)
