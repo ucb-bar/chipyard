@@ -168,10 +168,10 @@ FIRTOOL_MODEL_SMEMS_JSON = $(OUT_DIR)/metadata/tb_seq_mems.json
 
 # macrocompiler smems in/output
 TOP_SMEMS_CONF ?= $(build_dir)/$(long_name).top.mems.conf
-TOP_SMEMS_FILE ?= $(build_dir)/vsrc/$(long_name).top.mems.v
+TOP_SMEMS_FILE ?= $(OUT_DIR)/$(long_name).top.mems.v
 TOP_SMEMS_FIR  ?= $(build_dir)/$(long_name).top.mems.fir
 HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
-HARNESS_SMEMS_FILE ?= $(build_dir)/vsrc/$(long_name).harness.mems.v
+HARNESS_SMEMS_FILE ?= $(OUT_DIR)/$(long_name).harness.mems.v
 HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
 
 # top module files to include
