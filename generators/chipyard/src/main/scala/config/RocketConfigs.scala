@@ -21,7 +21,7 @@ class TinyRocketConfig extends Config(
   new freechips.rocketchip.subsystem.With1TinyCore ++             // single tiny rocket-core
   new chipyard.config.AbstractConfig)
 
-class MempressConfig extends Config(
+class MempressRocketConfig extends Config(
   new mempress.WithMemPress ++                                    // use Mempress (memory traffic generation) accelerator
   new freechips.rocketchip.subsystem.WithNBanks(8) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nWays=16, capacityKB=2048) ++
