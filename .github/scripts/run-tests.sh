@@ -62,6 +62,10 @@ case $1 in
         (cd $LOCAL_CHIPYARD_DIR/generators/sha3/software && ./build.sh)
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/generators/sha3/software/tests/bare/sha3-rocc.riscv
         ;;
+    chipyard-mempress)
+        (cd $LOCAL_CHIPYARD_DIR/generators/mempress/software/src && make)
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/generators/mempress/software/src/mempress-rocc.riscv
+        ;;
     chipyard-streaming-passthrough)
         make -C $LOCAL_CHIPYARD_DIR/tests
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-passthrough.riscv
