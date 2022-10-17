@@ -16,12 +16,20 @@ rm -rf $RDIR/toolchains/esp-tools/riscv-tests/build.log
     pushd $RDIR/generators/constellation
     if [ -d espresso ]
     then
-	git submodule deinit espresso    
+	git submodule deinit -f espresso
     fi
     popd
 )
 (
     pushd $RDIR/tools/api-config-chipsalliance
     git config --local status.showUntrackedFiles no
+    popd
+)
+(
+    pushd $RDIR/generators/cva6/src/main/resources/vsrc
+    if [ -d cva6 ]
+    then
+	git submodule deinit -f cva6
+    fi
     popd
 )
