@@ -9,6 +9,9 @@ export MAKEFLAGS=-j16
 STARTDIR=$(git rev-parse --show-toplevel)
 
 ./build-setup.sh riscv-tools -f
+
+source $STARTDIR/.conda-env/etc/profile.d/conda.sh
+
 source env.sh
 
 ./scripts/firesim-setup.sh
@@ -17,7 +20,7 @@ source sourceme-f1-manager.sh --skip-ssh-setup
 
 cd sim
 unset MAKEFLAGS
-make f1
+make verilator
 export MAKEFLAGS=-j16
 
 cd $STARTDIR/software/firemarshal
