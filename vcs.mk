@@ -1,10 +1,10 @@
 HELP_COMPILATION_VARIABLES += \
-"   USE_FSDB               = set to '1' to build VCS simulator to emit FSDB instead of VPD."
+"   USE_VPD                = set to '1' to build VCS simulator to emit VPD instead of FSDB."
 
 HELP_SIMULATION_VARIABLES += \
-"   USE_FSDB               = set to '1' to run VCS simulator emitting FSDB instead of VPD."
+"   USE_VPD                = set to '1' to run VCS simulator emitting VPD instead of FSDB."
 
-ifdef USE_FSDB
+ifndef USE_VPD
 WAVEFORM_FLAG=+fsdbfile=$(sim_out_name).fsdb
 else
 WAVEFORM_FLAG=+vcdplusfile=$(sim_out_name).vpd
@@ -66,6 +66,6 @@ PREPROC_DEFINES = \
 	+define+RANDOMIZE_GARBAGE_ASSIGN \
 	+define+RANDOMIZE_INVALID_ASSIGN
 
-ifdef USE_FSDB
+ifndef USE_VPD
 PREPROC_DEFINES += +define+FSDB
 endif

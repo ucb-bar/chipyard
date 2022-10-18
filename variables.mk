@@ -191,7 +191,9 @@ SBT_CLIENT_FLAG = --client
 endif
 
 # passes $(JAVA_TOOL_OPTIONS) from env to java
-SBT_BIN ?= sbt
+# Use java -jar approach by default so that SBT thin-client sees the JAVA flags
+# Workaround for behavior reported here: https://github.com/sbt/sbt/issues/6468
+SBT_BIN ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
 SBT = $(SBT_BIN) $(SBT_CLIENT_FLAG)
 SBT_NON_THIN = $(subst $(SBT_CLIENT_FLAG),,$(SBT))
 

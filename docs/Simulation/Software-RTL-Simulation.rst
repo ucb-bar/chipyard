@@ -176,6 +176,12 @@ Generating Waveforms
 
 If you would like to extract waveforms from the simulation, run the command ``make debug`` instead of just ``make``.
 
+A special target that automatically generates the waveform file for a specific test is also available.
+
+.. code-block:: shell
+
+    make run-binary-debug BINARY=test.riscv
+
 For a Verilator simulation, this will generate a vcd file (vcd is a standard waveform representation file format) that can be loaded to any common waveform viewer.
 An open-source vcd-capable waveform viewer is `GTKWave <http://gtkwave.sourceforge.net/>`__.
 

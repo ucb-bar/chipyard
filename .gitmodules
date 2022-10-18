@@ -130,6 +130,9 @@
 [submodule "generators/constellation"]
 	path = generators/constellation
 	url = https://github.com/ucb-bar/constellation.git
+[submodule "generators/mempress"]
+	path = generators/mempress
+	url = https://github.com/ucb-bar/mempress.git
 [submodule "generators/saturn"]
 	path = generators/saturn
 	url = git@github.com:ucb-bar/saturn.git
