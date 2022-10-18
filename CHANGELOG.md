@@ -2,6 +2,23 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.8.1] - 2022-10-18
+
+Various fixes and improvements, bump FireSim to 1.15.1.
+
+### Added
+* Bump chipyard to integrate mempress #1253
+
+### Changed
+* Default VCS simulators should generate FSDB #1252
+* Bump to FireSim 1.15.1 for various improvements #1258
+
+### Fixed
+* Revert to using sbt-launch.jar to run SBT #1251
+* Fix open files issue automatically on systems with a sufficiently large hard limit, to work around buildroot bug. #1258
+* Fixed PATH issues in generated env.sh #1258
+* Fixed scripts/repo-clean.sh to restore clean repo state again #1258
+
 ## [1.8.0] - 2022-09-30
 
 Adds support for NoC-based interconnects with Constellation (https://constellation.readthedocs.io/en/latest/). Switch to Conda for dependency/environment management. Bump Rocket Chip and other hardware libraries. Bump to FireSim 1.15.0.
