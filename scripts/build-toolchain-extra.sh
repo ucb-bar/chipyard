@@ -60,16 +60,22 @@ do
     shift
 done
 
-if [ "$FORCE" = false ]; then
+if [ "$FORCE" = true ]; then
+    if [ -z "$RISCV" ] ; then
+        error "ERROR: -f/--f requires also passing --prefix"
+        exit 1
+    fi
+else
     if [ -z ${CONDA_DEFAULT_ENV+x} ]; then
         error "ERROR: No conda environment detected. Did you activate the conda environment (e.x. 'conda activate chipyard')?"
         exit 1
     fi
+    if [ -z "$RISCV" ] ; then
+        RISCV="$CONDA_PREFIX/$TOOLCHAIN"
+    fi
 fi
 
-if [ -z "$RISCV" ] ; then
-    RISCV="$CONDA_PREFIX/$TOOLCHAIN"
-fi
+
 
 XLEN=64
 
