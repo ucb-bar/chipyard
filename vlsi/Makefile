@@ -35,7 +35,7 @@ endif
 
 ENV_YML            ?= $(vlsi_dir)/env.yml
 TECH_CONF          ?= $(if $(filter $(tech_name),asap7),        example-asap7.yml,\
-                                                                example-sky130.yml))
+                                                                example-sky130.yml)
 TOOLS_CONF         ?= example-tools.yml
 INPUT_CONFS        ?= $(TOOLS_CONF) $(TECH_CONF)
 HAMMER_EXEC        ?= $(if $(filter $(tech_name),sky130),\
