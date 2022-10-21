@@ -64,11 +64,12 @@ class EmptyCoreParams extends CoreParams {
 
 case class ReRoCCTileParams(
   ibufEntries: Int = 4,
+  rowBits: Int = 64,
   dcacheParams: DCacheParams = DCacheParams(nSets = 4, nWays = 4)
 ) extends TileParams {
   val core = new EmptyCoreParams
   val icache = None
-  val dcache = Some(dcacheParams)
+  val dcache = Some(dcacheParams.copy(rowBits=rowBits))
   val btb = None
   val hartId = -1
   val beuAddr = None
@@ -334,7 +335,7 @@ trait CanHaveReRoCCTiles { this: HasTiles =>
   }}.flatten
 
   val reRoCCManagers = p(ReRoCCTileKey).zipWithIndex.map { case (g,i) =>
-    val rerocc_tile = LazyModule(new ReRoCCManagerTile(ReRoCCTileParams(), i, g, p))
+    val rerocc_tile = LazyModule(new ReRoCCManagerTile(ReRoCCTileParams(rowBits = p(SystemBusKey).beatBits), i, g, p))
     locateTLBusWrapper(SBUS).coupleFrom(s"port_named_rerocc_$i") {
       (_ :=* TLBuffer() :=* rerocc_tile.tlNode)
     }
