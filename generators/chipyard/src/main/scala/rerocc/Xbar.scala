@@ -11,7 +11,7 @@ import freechips.rocketchip.util._
 
 class ReRoCCXbar(implicit p: Parameters) extends LazyModule {
   val node = new NexusNode(ReRoCCImp)(
-    clients => ReRoCCClientParams(clients.size),
+    clients => ReRoCCClientParams(clients.map(_.nClients).sum),
     managers => ReRoCCManagerParams(
       managers.map(_.nManagers).sum,
       managers.map(_.ibufEntries).flatten
