@@ -24,6 +24,9 @@ class TinyRocketConfig extends Config(
 class RocketReRoCCConfig extends Config(
   new chipyard.config.WithReRoCC ++
   new chipyard.config.WithAccumulatorRoCC ++
+  new chipyard.config.WithAccumulatorRoCC ++
+  new chipyard.config.WithAccumulatorRoCC ++
+  new chipyard.config.WithAccumulatorRoCC ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
 

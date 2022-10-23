@@ -107,6 +107,7 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     val s_idle :: s_busy :: s_rel_wait :: s_sfence :: Nil = Enum(4)
 
     val client = Reg(UInt(log2Ceil(edge.cParams.nClients).W))
+    dontTouch(client)
     val status = Reg(new MStatus)
     val ptbr = Reg(new PTBR)
     val state = RegInit(s_idle)

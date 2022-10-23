@@ -9,16 +9,19 @@ import freechips.rocketchip.rocket._
 import freechips.rocketchip.util._
 
 object ReRoCCInstructions {
-  // op1 = opcode
+  // op1 = tracker
   // op2 = sel mask
   // ret = mask of selected
   val acquire = 0.U(7.W)
-  // op1 - opcode
+  // op1 = tracker
   val release = 1.U(7.W)
-  // op1[31:0] = pid
-  // op1[63:32] = opcode
-  // op2 = sel mask
-  val fence = 2.U(7.W)
+  // op1 = tracker
+  // op2 = opcode
+  val assign = 2.U(7.W)
+  // ret = number of trackers
+  val info = 3.U(7.W)
+
+  // val fence = 2.U(7.W)
 }
 
 class InstructionSender(b: ReRoCCBundleParams)(implicit p: Parameters) extends Module {
@@ -80,7 +83,7 @@ class InstructionSender(b: ReRoCCBundleParams)(implicit p: Parameters) extends M
   }
 }
 
-class ReRoCCSingleOpcodeClient(val opcode: UInt)(implicit p: Parameters) extends LazyModule {
+class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule {
   val reRoCCNode = ReRoCCClientNode()
   override lazy val module = new LazyModuleImp(this) {
     val (rerocc, edge) = reRoCCNode.out(0)
@@ -191,6 +194,7 @@ class ReRoCCSingleOpcodeClient(val opcode: UInt)(implicit p: Parameters) extends
     // send instructions to rerocc tile
     val inst_sender = Module(new InstructionSender(edge.bundle))
     req_arb.io.in(1) <> inst_sender.io.rr
+    req_arb.io.in(1).bits.manager_id := OHToUInt(manager)
     val tag_free = inst_ctr =/= inst_ret_ctr
     inst_sender.io.cmd.valid := inst_q.io.deq.valid && tag_free
     inst_q.io.deq.ready := inst_sender.io.cmd.ready && tag_free
@@ -206,7 +210,7 @@ class ReRoCCSingleOpcodeClient(val opcode: UInt)(implicit p: Parameters) extends
     req_arb.io.in(2).valid := state === s_releasing
     req_arb.io.in(2).bits.opcode := ReRoCCProtocolOpcodes.mRelease
     req_arb.io.in(2).bits.client_id := 0.U
-    req_arb.io.in(2).bits.manager_id := PriorityEncoder(manager)
+    req_arb.io.in(2).bits.manager_id := OHToUInt(manager)
     req_arb.io.in(2).bits.data := 0.U
     req_arb.io.in(2).bits.last := true.B
     when (req_arb.io.in(2).fire()) { state := s_rel_wait }
@@ -231,7 +235,7 @@ class ReRoCCSingleOpcodeClient(val opcode: UInt)(implicit p: Parameters) extends
             max_ctr := (rerocc.resp.bits.data >> 1)(instCtrSz-1,0) - 1.U
             inst_ctr := 0.U
             inst_ret_ctr := (rerocc.resp.bits.data >> 1)(instCtrSz-1,0) - 1.U
-            manager := rerocc.resp.bits.manager_id
+            manager := UIntToOH(rerocc.resp.bits.manager_id)
           }
         } .otherwise { // nack
           when (manager === 0.U) {
@@ -264,33 +268,66 @@ class ReRoCCSingleOpcodeClient(val opcode: UInt)(implicit p: Parameters) extends
 }
 
 
-class ReRoCCClient()(implicit p: Parameters) extends LazyRoCC(OpcodeSet.all, 1) {
+class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC(OpcodeSet.all, 1) {
   val reRoCCXbar = LazyModule(new ReRoCCXbar())
-  val reRoCCSubclients = Seq(OpcodeSet.custom1, OpcodeSet.custom2, OpcodeSet.custom3).map { o =>
-    LazyModule(new ReRoCCSingleOpcodeClient(o.opcodes.head))
-  }
-  reRoCCSubclients.foreach { s => reRoCCXbar.node := s.reRoCCNode }
+  val subclients = Seq.fill(16) { LazyModule(new ReRoCCSingleOpcodeClient) }
+
+  subclients.foreach { s => reRoCCXbar.node := s.reRoCCNode }
   val reRoCCNode = reRoCCXbar.node
 
   override lazy val module = new LazyRoCCModuleImp(this) {
     io.busy := false.B
 
-    val cmd = Queue(io.cmd)
-    val resp_arb = Module(new Arbiter(new RoCCResponse, 3))
-    io.resp <> resp_arb.io.out
+    val resp_arb = Module(new Arbiter(new RoCCResponse, 1+nTrackers))
+    val opcode_trackers = Reg(Vec(3, UInt(log2Ceil(nTrackers).W)))
 
+    val cmd = Queue(io.cmd)
+    io.resp <> Queue(resp_arb.io.out)
+
+    resp_arb.io.in(nTrackers).valid := false.B
+    resp_arb.io.in(nTrackers).bits := DontCare
     cmd.ready := false.B
-    for (i <- 0 until 3) {
-      val subclient = reRoCCSubclients(i)
-      val configuration_cmd = cmd.bits.inst.opcode === OpcodeSet.custom0.opcodes.head && cmd.bits.rs1(1,0) === (i+1).U
-      val send = cmd.bits.inst.opcode === subclient.opcode || configuration_cmd
-      subclient.module.io.cmd.valid := cmd.valid && send
-      subclient.module.io.cmd.bits := cmd.bits
-      when (send) {
-        cmd.ready := subclient.module.io.cmd.ready
+    val funct = cmd.bits.inst.funct
+    val opcode = cmd.bits.inst.opcode
+    val custom0 = OpcodeSet.custom0.matches(opcode)
+    val cmd_acquire = funct === ReRoCCInstructions.acquire
+    val cmd_release = funct === ReRoCCInstructions.release
+    val cmd_assign  = funct === ReRoCCInstructions.assign
+    val cmd_info    = funct === ReRoCCInstructions.info
+    val cmd_tracker_sel = WireInit(0.U(nTrackers.W))
+
+    cmd.ready := Mux1H(cmd_tracker_sel, subclients.map(_.module.io.cmd.ready))
+
+    for (i <- 0 until nTrackers) {
+      val subclient = subclients(i).module
+      resp_arb.io.in(i) <> subclient.io.resp
+      subclient.io.ptbr := io.ptw(0).ptbr
+      subclient.io.cmd.valid := cmd_tracker_sel(i) && cmd.valid
+      subclient.io.cmd.bits := cmd.bits
+    }
+
+    when (custom0) {
+      val tracker = cmd.bits.rs1
+      when (cmd_assign) {
+        when (cmd.fire()) { opcode_trackers(cmd.bits.rs2 - 1.U) := tracker }
+        cmd.ready := true.B
+      } .elsewhen (cmd_info) {
+        cmd.ready := resp_arb.io.in(nTrackers).ready
+        resp_arb.io.in(nTrackers).valid := cmd.valid
+        resp_arb.io.in(nTrackers).bits.data := nTrackers.U
+        resp_arb.io.in(nTrackers).bits.rd := cmd.bits.inst.rd
+      } .elsewhen (cmd_acquire || cmd_release) {
+        assert(!cmd.valid || tracker < nTrackers.U)
+        cmd_tracker_sel := UIntToOH(tracker(log2Ceil(nTrackers)-1,0))
+      } .otherwise {
+        assert(!cmd.valid)
       }
-      subclient.module.io.ptbr := io.ptw(0).ptbr
-      resp_arb.io.in(i) <> subclient.module.io.resp
+    } .otherwise {
+      val opcodes = Seq(OpcodeSet.custom1, OpcodeSet.custom2, OpcodeSet.custom3)
+      for (i <- 0 until 3) {
+        when (opcodes(i).matches(opcode)) { cmd_tracker_sel := UIntToOH(opcode_trackers(i)) }
+      }
     }
   }
+
 }

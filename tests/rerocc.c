@@ -48,22 +48,28 @@ int accum_test() {
 }
 
 int main(void) {
-  int r;
+  int r = 0;
   printf("attempting rerocc_acquire\n");
 
-  // First argument is opcode, second argument is accelerator mask
-  // This function attempts to assign one of the accelerators in the mask
-  // to opcode 0x1. 0x1, 0x2, 0x3 are possible opcodes to assign
-  // rerocc_acquire will return 0 until it acquires an accelerator, at which point it returns 1
-  while (!rerocc_acquire(1, 0x1)) {}
-  // Do accelerator stuff
-  r += accum_test();
-  // Release the accelerator currently allocated to opcode 1
-  rerocc_release(1);
+  // Assign trackers 0,1,2,3 to any of the available rerocc accelerators (0,1,2,3)
+  // mask is 0xf (0b1111), since we don't care which tracker gets which accelerator
+  // (accelerators 0,1,2,3 are identical)
+  for (int i = 0; i < 4; i++) {
+    while (!rerocc_acquire(i, 0xf)) {}
+  }
 
-  while (!rerocc_acquire(1, 0x1)) {}
-  r += accum_test();
-  rerocc_release(1);
+  // For each tracker, assign opcode 1 to it, then perform the operation
+  // The tracker will automatically forward instructions from the assigned opcode
+  // the the accelerator allocated to that tracker
+  for (int i = 0; i < 4; i++) {
+    rerocc_assign(0x1, i);
+    r += accum_test();
+  }
+
+  // Release all the trackers
+  for (int i = 0; i < 4; i++) {
+    rerocc_release(i);
+  }
 
   printf("r = %d\n", r);
 
