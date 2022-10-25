@@ -20,8 +20,8 @@ object ReRoCCInstructions {
   val assign = 2.U(7.W)
   // ret = number of trackers
   val info = 3.U(7.W)
-
-  // val fence = 2.U(7.W)
+  // op1 = tracker
+  val fence = 4.U(7.W)
 }
 
 class InstructionSender(b: ReRoCCBundleParams)(implicit p: Parameters) extends Module {
@@ -91,17 +91,19 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule {
       val cmd = Flipped(Decoupled(new RoCCCommand))
       val ptbr = Input(new PTBR)
       val resp = Decoupled(new RoCCResponse)
+      val fencing = Output(Bool())
     })
 
     val cmd = Queue(io.cmd)
 
-    val s_idle :: s_acquiring :: s_acq_wait :: s_busy :: s_releasing :: s_rel_wait :: Nil = Enum(6)
+    val s_idle :: s_acquiring :: s_acq_wait :: s_busy :: s_releasing :: s_rel_wait :: s_unbusying :: s_unbusy_wait :: Nil = Enum(8)
 
     val maxIBufEntries = edge.mParams.ibufEntries.max
     require(maxIBufEntries > 1)
     val instCtrSz = log2Ceil(maxIBufEntries)
 
     val state        = RegInit(s_idle)
+    val fencing      = RegInit(false.B)
     // tracks downstream instruction reordering resources
     val inst_ctr     = Reg(UInt(instCtrSz.W))
     val max_ctr      = Reg(UInt(instCtrSz.W))
@@ -114,15 +116,18 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule {
     val incr_inflight_wbs = WireInit(false.B)
     val decr_inflight_wbs = WireInit(false.B)
     inflight_wbs := (inflight_wbs + incr_inflight_wbs) - decr_inflight_wbs
+    val inst_empty = (inst_ret_ctr + 1.U === inst_ctr) || (inst_ctr === 0.U && inst_ret_ctr === max_ctr)
 
+    io.fencing := fencing
     // handles instructions that match what we've acquired
     val inst_q = Module(new Queue(new RoCCCommand, 2))
 
     // 0 -> acquire
     // 1 -> inst
     // 2 -> release
+    // 3 -> unbusy
     val req_arb = Module(new HellaPeekingArbiter(
-      new ReRoCCMsgBundle(edge.bundle), 3,
+      new ReRoCCMsgBundle(edge.bundle), 4,
       (b: ReRoCCMsgBundle) => b.last,
       Some((b: ReRoCCMsgBundle) => true.B)))
     rerocc.req <> req_arb.io.out
@@ -152,9 +157,12 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule {
             resp_arb.io.in(0).valid := true.B
           }
         } .elsewhen (cmd.bits.inst.funct === ReRoCCInstructions.release) {
-          val inst_empty = (inst_ret_ctr + 1.U === inst_ctr) || (inst_ctr === 0.U && inst_ret_ctr === max_ctr)
           cmd.ready := inflight_wbs === 0.U && inst_q.io.count === 0.U && inst_empty && state === s_busy
           when (cmd.ready) { state := s_releasing }
+        } .elsewhen (cmd.bits.inst.funct === ReRoCCInstructions.fence) {
+          cmd.ready := inflight_wbs === 0.U && inst_q.io.count === 0.U && inst_empty && state === s_busy
+          fencing := true.B
+          when (cmd.ready) { state := s_unbusying }
         } .otherwise {
           assert(false.B)
         }
@@ -215,6 +223,16 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule {
     req_arb.io.in(2).bits.last := true.B
     when (req_arb.io.in(2).fire()) { state := s_rel_wait }
 
+    // unbusy rerocc tile
+    req_arb.io.in(3).valid := state === s_unbusying
+    req_arb.io.in(3).bits.opcode := ReRoCCProtocolOpcodes.mUnbusy
+    req_arb.io.in(3).bits.client_id := 0.U
+    req_arb.io.in(3).bits.manager_id := OHToUInt(manager)
+    req_arb.io.in(3).bits.data := 0.U
+    req_arb.io.in(3).bits.last := true.B
+    when (req_arb.io.in(3).fire()) { state := s_unbusy_wait }
+
+
     // ReRoCC responses
     rerocc.resp.ready := false.B
     resp_arb.io.in(1).bits.rd := acq_rd
@@ -260,6 +278,10 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule {
       } .elsewhen (rerocc.resp.bits.opcode === ReRoCCProtocolOpcodes.sRelResp) {
         rerocc.resp.ready := true.B
         state := s_idle
+      } .elsewhen (rerocc.resp.bits.opcode === ReRoCCProtocolOpcodes.sUnbusyAck) {
+        rerocc.resp.ready := true.B
+        fencing := false.B
+        state := s_busy
       } .otherwise {
         assert(false.B)
       }
@@ -276,10 +298,24 @@ class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC
   val reRoCCNode = reRoCCXbar.node
 
   override lazy val module = new LazyRoCCModuleImp(this) {
-    io.busy := false.B
-
     val resp_arb = Module(new Arbiter(new RoCCResponse, 1+nTrackers))
     val opcode_trackers = Reg(Vec(3, UInt(log2Ceil(nTrackers).W)))
+
+    val fencing = RegInit(false.B)
+    val fencing_mask = Reg(UInt(nTrackers.W))
+    io.busy := fencing
+
+    when (fencing) {
+      val any_busy = (0 until nTrackers).map { i => subclients(i).module.io.fencing && fencing_mask(i) }.orR
+      when (!any_busy) { fencing := false.B }
+    }
+
+    when (io.cmd.fire()
+      && OpcodeSet.custom0.matches(io.cmd.bits.inst.opcode)
+      && io.cmd.bits.inst.funct === ReRoCCInstructions.fence) {
+      fencing := true.B
+      fencing_mask := 0.U
+    }
 
     val cmd = Queue(io.cmd)
     io.resp <> Queue(resp_arb.io.out)
@@ -294,6 +330,7 @@ class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC
     val cmd_release = funct === ReRoCCInstructions.release
     val cmd_assign  = funct === ReRoCCInstructions.assign
     val cmd_info    = funct === ReRoCCInstructions.info
+    val cmd_fence   = funct === ReRoCCInstructions.fence
     val cmd_tracker_sel = WireInit(0.U(nTrackers.W))
 
     cmd.ready := Mux1H(cmd_tracker_sel, subclients.map(_.module.io.cmd.ready))
@@ -319,6 +356,10 @@ class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC
       } .elsewhen (cmd_acquire || cmd_release) {
         assert(!cmd.valid || tracker < nTrackers.U)
         cmd_tracker_sel := UIntToOH(tracker(log2Ceil(nTrackers)-1,0))
+      } .elsewhen (cmd_fence) {
+        cmd_tracker_sel := UIntToOH(tracker(log2Ceil(nTrackers)-1,0))
+        fencing_mask := UIntToOH(tracker(log2Ceil(nTrackers)-1,0))
+        // do nothing
       } .otherwise {
         assert(!cmd.valid)
       }

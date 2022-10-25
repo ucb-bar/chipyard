@@ -25,6 +25,15 @@ static inline void accum_add(int idx, unsigned long addend)
 	ROCC_INSTRUCTION_SS(1, addend, idx, 3);
 }
 
+char test_string[64] __attribute__ ((aligned (64))) = "The quick brown fox jumped over the lazy dog";
+
+static inline unsigned long count_chars(char *start, char needle)
+{
+	unsigned long count;
+	ROCC_INSTRUCTION_DSS(2, count, start, needle, 0);
+	return count;
+}
+
 
 int accum_test() {
   unsigned long data = 0x3421;
@@ -47,6 +56,12 @@ int accum_test() {
   return 0;
 }
 
+int charcount_test() {
+  unsigned long count = count_chars(test_string + 14, 'o');
+  if (count != 3) return count + 1;
+  return 0;
+}
+
 int main(void) {
   int r = 0;
   printf("attempting rerocc_acquire\n");
@@ -63,7 +78,9 @@ int main(void) {
   // the the accelerator allocated to that tracker
   for (int i = 0; i < 4; i++) {
     rerocc_assign(0x1, i);
+    rerocc_fence(i);
     r += accum_test();
+    rerocc_fence(i);
   }
 
   // Release all the trackers

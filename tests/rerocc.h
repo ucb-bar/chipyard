@@ -8,6 +8,7 @@
 #define REROCC_RELEASE (1)
 #define REROCC_ASSIGN (2)
 #define REROCC_INFO (3)
+#define REROCC_FENCE (4)
 
 
 
@@ -41,6 +42,14 @@ inline uint64_t rerocc_ntrackers() {
   ROCC_INSTRUCTION_D(0, r, REROCC_INFO);
   return r;
 }
+
+// Fences a specific single tracker on this hart
+inline void rerocc_fence(uint64_t tracker) {
+  uint64_t op1 = tracker;
+  ROCC_INSTRUCTION_S(0, op1, REROCC_FENCE);
+  asm volatile("fence");
+}
+
 
 #endif
 

@@ -51,6 +51,13 @@ class GemminiRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: GemminiRocketConfig
 
+class GemminiReRoCCRocketConfig extends Config(
+  new chipyard.config.WithReRoCC ++
+  new gemmini.DefaultGemminiConfig ++                            // use Gemmini systolic array GEMM accelerator
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+
 class FPGemminiRocketConfig extends Config(
   new gemmini.GemminiFP32DefaultConfig ++                         // use FP32Gemmini systolic array GEMM accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++

@@ -104,7 +104,7 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     val (rerocc, edge) = node.in(0)
     dontTouch(rerocc)
 
-    val s_idle :: s_busy :: s_rel_wait :: s_sfence :: Nil = Enum(4)
+    val s_idle :: s_active :: s_rel_wait :: s_sfence :: s_unbusy :: Nil = Enum(5)
 
     val client = Reg(UInt(log2Ceil(edge.cParams.nClients).W))
     dontTouch(client)
@@ -150,7 +150,8 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     // 1 -> inst ack
     // 2 -> writeback
     // 4 -> rel
-    val resp_arb = Module(new HellaPeekingArbiter(new ReRoCCMsgBundle(edge.bundle), 4,
+    // 5 -> unbusyack
+    val resp_arb = Module(new HellaPeekingArbiter(new ReRoCCMsgBundle(edge.bundle), 5,
       (b: ReRoCCMsgBundle) => b.last,
       Some((b: ReRoCCMsgBundle) => true.B)
     ))
@@ -174,11 +175,11 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
         when (rr_req.bits.last) {
           rr_req.ready := resp_arb.io.in(0).ready
           resp_arb.io.in(0).valid := true.B
-          when (state === s_idle && rr_req.fire()) { state := s_busy }
+          when (state === s_idle && rr_req.fire()) { state := s_active }
         }
       } .elsewhen (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mInst) {
         val tag = (rr_req.bits.data >> 33)(ibufSz-1,0)
-        assert(state === s_busy && !inst_val(tag))
+        assert(state === s_active && (!inst_val(tag) || beat =/= 0.U))
         rr_req.ready := true.B
         val next_enq_inst = WireInit(enq_inst)
         when (beat === 0.U) {
@@ -216,6 +217,9 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
       } .elsewhen (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mRelease) {
         rr_req.ready := true.B
         state := s_rel_wait
+      } .elsewhen (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mUnbusy) {
+        rr_req.ready := true.B
+        state := s_unbusy
       } .otherwise {
         assert(false.B)
       }
@@ -262,15 +266,23 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     resp_arb.io.in(3).bits.manager_id := 0.U
     resp_arb.io.in(3).bits.data       := 0.U
     resp_arb.io.in(3).bits.last       := true.B
+
     when (resp_arb.io.in(3).fire()) {
       state := s_sfence
       inst_val.foreach(_ := false.B)
       inst_head := 0.U
     }
+    when (state === s_sfence) { state := s_idle }
 
-    when (state === s_sfence) {
-      state := s_idle
-    }
+    // unbusyack
+    resp_arb.io.in(4).valid           := state === s_unbusy && !io.busy && inst_q.io.count === 0.U
+    resp_arb.io.in(4).bits.opcode     := ReRoCCProtocolOpcodes.sUnbusyAck
+    resp_arb.io.in(4).bits.client_id  := client
+    resp_arb.io.in(4).bits.manager_id := 0.U
+    resp_arb.io.in(4).bits.data       := 0.U
+    resp_arb.io.in(4).bits.last       := true.B
+
+    when (resp_arb.io.in(4).fire()) { state := s_active }
 
 
   }

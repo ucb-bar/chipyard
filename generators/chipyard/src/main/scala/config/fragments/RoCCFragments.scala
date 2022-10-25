@@ -95,9 +95,16 @@ class WithReRoCC extends Config((site, here, up) => {
   case ReRoCCTileKey => up(BuildRoCC)
 })
 
-class WithAccumulatorRoCC(op: OpcodeSet = OpcodeSet.custom0) extends Config((site, here, up) =>{
+class WithAccumulatorRoCC(op: OpcodeSet = OpcodeSet.custom1) extends Config((site, here, up) => {
   case BuildRoCC => up(BuildRoCC) ++ Seq((p: Parameters) => {
     val accumulator = LazyModule(new AccumulatorExample(op, n = 4)(p))
     accumulator
+  })
+})
+
+class WithCharacterCountRoCC(op: OpcodeSet = OpcodeSet.custom2) extends Config((site, here, up) => {
+  case BuildRoCC => up(BuildRoCC) ++ Seq((p: Parameters) => {
+    val counter = LazyModule(new CharacterCountExample(op)(p))
+    counter
   })
 })
