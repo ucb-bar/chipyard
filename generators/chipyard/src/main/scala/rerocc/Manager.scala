@@ -158,24 +158,27 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     rr_resp <> resp_arb.io.out
     resp_arb.io.in.foreach { i => i.valid := false.B }
 
+    val status_new = Reg(new MStatus)
+    val client_new = Reg(UInt(log2Ceil(edge.cParams.nClients).W))
 
     when (rr_req.valid) {
       when (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mAcquire) {
         rr_req.ready := true.B
-        when (state === s_idle) {
-          when (beat === 0.U) {
-            status := rr_req.bits.data.asTypeOf(new MStatus)
-            client := rr_req.bits.client_id
-          } .elsewhen (beat === 1.U) {
-            status := Cat(rr_req.bits.data, status.asUInt(63,0)).asTypeOf(new MStatus)
-          } .elsewhen (beat === 2.U) {
-            ptbr := rr_req.bits.data.asTypeOf(new PTBR)
-          }
+        when (beat === 0.U) {
+          status_new := rr_req.bits.data.asTypeOf(new MStatus)
+          client_new := rr_req.bits.client_id
+        } .elsewhen (beat === 1.U) {
+          status_new := Cat(rr_req.bits.data, status_new.asUInt(63,0)).asTypeOf(new MStatus)
         }
         when (rr_req.bits.last) {
           rr_req.ready := resp_arb.io.in(0).ready
           resp_arb.io.in(0).valid := true.B
-          when (state === s_idle && rr_req.fire()) { state := s_active }
+          when (state === s_idle && rr_req.fire()) {
+            state := s_active
+            status := status_new
+            client := client_new
+            ptbr := rr_req.bits.data.asTypeOf(new PTBR)
+          }
         }
       } .elsewhen (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mInst) {
         val tag = (rr_req.bits.data >> 33)(ibufSz-1,0)

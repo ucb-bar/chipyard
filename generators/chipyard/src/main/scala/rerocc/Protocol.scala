@@ -13,7 +13,7 @@ object ReRoCCProtocolOpcodes {
   val width = 3
   // beat0: data = mstatus[63:0]
   // beat1: data = mstatus[127:64]
-  // beat3: data = ptbr
+  // beat2: data = ptbr
   val mAcquire = 0.U(width.W)
   // beat0: data = tag # has_mstatus # inst[31:0]
   // beat1: data = mstatus[63:0]
