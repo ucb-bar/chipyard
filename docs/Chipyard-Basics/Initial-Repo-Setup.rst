@@ -72,7 +72,7 @@ Run the following script based off which compiler you would like to use.
 
 This script wraps around the conda environment initialization process and also runs the ``init-submodules-no-riscv-tools.sh`` and ``build-toolchain-extra.sh`` scripts.
 
-The ``init-subodules-no-riscv-tools.sh`` script will initialize and checkout all of the necessary git submodules.
+The ``init-submodules-no-riscv-tools.sh`` script will initialize and checkout all of the necessary git submodules.
 This will also validate that you are on a tagged branch, otherwise it will prompt for confirmation.
 When updating Chipyard to a new version, you will also want to rerun this script to update the submodules.
 Using ``git`` directly will try to initialize all submodules; this is not recommended unless you expressly desire this behavior.
