@@ -120,7 +120,7 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule {
 
     io.fencing := fencing
     // handles instructions that match what we've acquired
-    val inst_q = Module(new Queue(new RoCCCommand, 2))
+    val inst_q = Module(new Queue(new RoCCCommand, 1, pipe=true))
 
     // 0 -> acquire
     // 1 -> inst
@@ -292,7 +292,7 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule {
 
 class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC(OpcodeSet.all, 1) {
   val reRoCCXbar = LazyModule(new ReRoCCXbar())
-  val subclients = Seq.fill(16) { LazyModule(new ReRoCCSingleOpcodeClient) }
+  val subclients = Seq.fill(nTrackers) { LazyModule(new ReRoCCSingleOpcodeClient) }
 
   subclients.foreach { s => reRoCCXbar.node := s.reRoCCNode }
   val reRoCCNode = reRoCCXbar.node
