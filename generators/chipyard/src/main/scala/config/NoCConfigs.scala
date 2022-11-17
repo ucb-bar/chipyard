@@ -211,7 +211,8 @@ class GemminiReRoCCNoCConfig extends Config(
       )),
     NoCParams(
       topology        = TerminalRouter(Mesh2D(4, 4)),
-      channelParamGen = (a, b) => UserChannelParams(Seq.fill(8) { UserVirtualChannelParams(4) }),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(8) { UserVirtualChannelParams(4) },
+        useOutputQueues = false),
       routingRelation = NonblockingVirtualSubnetworksRouting(TerminalRouterRouting(Mesh2DEscapeRouting()), 5, 1))
   )) ++
   new GemminiReRoCCBaseConfig
