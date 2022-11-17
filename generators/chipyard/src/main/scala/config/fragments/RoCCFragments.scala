@@ -87,12 +87,12 @@ class WithMultiRoCCGemmini[T <: Data : Arithmetic, U <: Data, V <: Data](
   }
 })
 
-class WithReRoCC(nTrackersPerHart: Int = 16) extends Config((site, here, up) => {
+class WithReRoCC(nTrackersPerHart: Int = 16, reRoCCManagerParams: ReRoCCTileParams = ReRoCCTileParams()) extends Config((site, here, up) => {
   case BuildRoCC => Seq((p: Parameters) => {
     val rerocc_client = LazyModule(new ReRoCCClient(nTrackersPerHart)(p))
     rerocc_client
   })
-  case ReRoCCTileKey => up(BuildRoCC)
+  case ReRoCCTileKey => up(BuildRoCC).map(gen => reRoCCManagerParams.copy(genRoCC=Some(gen)))
 })
 
 class WithAccumulatorRoCC(op: OpcodeSet = OpcodeSet.custom1) extends Config((site, here, up) => {

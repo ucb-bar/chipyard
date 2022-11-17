@@ -193,13 +193,13 @@ class GemminiReRoCCNoCConfig extends Config(
       inNodeMapping = ListMap(
         "serial-tl" -> 0,
         "Core 0" -> 1, "Core 1" -> 2, "Core 2" -> 13,
-        "stream-reader[0]" -> 3 , "ReRoCC 0" -> 3,
-        "stream-reader[1]" -> 6 , "ReRoCC 1" -> 6,
-        "stream-reader[2]" -> 7 , "ReRoCC 2" -> 7,
-        "stream-reader[3]" -> 10, "ReRoCC 3" -> 10,
-        "stream-reader[4]" -> 11, "ReRoCC 4" -> 11,
-        "stream-reader[5]" -> 14, "ReRoCC 5" -> 14,
-        "stream-reader[6]" -> 15, "ReRoCC 6" -> 15,
+        "ReRoCC 0" -> 3,
+        "ReRoCC 1" -> 6,
+        "ReRoCC 2" -> 7,
+        "ReRoCC 3" -> 10,
+        "ReRoCC 4" -> 11,
+        "ReRoCC 5" -> 14,
+        "ReRoCC 6" -> 15,
       ),
       outNodeMapping = ListMap(
         "error" -> 0,
@@ -210,16 +210,21 @@ class GemminiReRoCCNoCConfig extends Config(
         "system[0]|" -> 0, "system[1]|" -> 12
       )),
     NoCParams(
-      topology        = TerminalRouter(Mesh2D(4, 4)),
+      topology        = Mesh2D(4, 4),
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(8) { UserVirtualChannelParams(4) },
         useOutputQueues = false),
-      routingRelation = NonblockingVirtualSubnetworksRouting(TerminalRouterRouting(Mesh2DEscapeRouting()), 5, 1))
+      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DEscapeRouting(), 5, 1))
+    // NoCParams(
+    //   topology        = TerminalRouter(Mesh2D(4, 4)),
+    //   channelParamGen = (a, b) => UserChannelParams(Seq.fill(8) { UserVirtualChannelParams(4) },
+    //     useOutputQueues = false),
+    //   routingRelation = NonblockingVirtualSubnetworksRouting(TerminalRouterRouting(Mesh2DEscapeRouting()), 5, 1))
   )) ++
   new GemminiReRoCCBaseConfig
 )
 
 class GemminiReRoCCBaseConfig extends Config(
-  new chipyard.config.WithReRoCC ++
+  new chipyard.config.WithReRoCC(4, chipyard.rerocc.ReRoCCTileParams(dcacheParams=None, mergeTLNodes=true)) ++
   new gemmini.DefaultGemminiConfig ++
   new gemmini.DefaultGemminiConfig ++
   new gemmini.DefaultGemminiConfig ++

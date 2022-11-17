@@ -13,7 +13,27 @@ import freechips.rocketchip.subsystem._
 
 import boom.common.{BoomTile}
 
-case object ReRoCCTileKey extends Field[Seq[Parameters => LazyRoCC]](Nil)
+case class ReRoCCTileParams(
+  genRoCC: Option[Parameters => LazyRoCC] = None,
+  reroccId: Int = 0,
+  ibufEntries: Int = 4,
+  rowBits: Int = 64,
+  dcacheParams: Option[DCacheParams] = Some(DCacheParams(nSets = 4, nWays = 4)),
+  mergeTLNodes: Boolean = false
+) extends TileParams {
+  val core = new EmptyCoreParams
+  val icache = None
+  val dcache = Some(dcacheParams.getOrElse(DCacheParams()).copy(rowBits=rowBits))
+  val btb = None
+  val hartId = -1
+  val beuAddr = None
+  val blockerCtrlAddr = None
+  val name = None
+  val clockSinkParams = ClockSinkParameters()
+
+}
+
+case object ReRoCCTileKey extends Field[Seq[ReRoCCTileParams]](Nil)
 
 class EmptyCoreParams extends CoreParams {
   // Most fields are unused, or make no sense in the context of a ReRoCC tile
@@ -62,22 +82,7 @@ class EmptyCoreParams extends CoreParams {
   lazy val retireWidth: Int                 = 0
 }
 
-case class ReRoCCTileParams(
-  ibufEntries: Int = 4,
-  rowBits: Int = 64,
-  dcacheParams: DCacheParams = DCacheParams(nSets = 4, nWays = 4)
-) extends TileParams {
-  val core = new EmptyCoreParams
-  val icache = None
-  val dcache = Some(dcacheParams.copy(rowBits=rowBits))
-  val btb = None
-  val hartId = -1
-  val beuAddr = None
-  val blockerCtrlAddr = None
-  val name = None
-  val clockSinkParams = ClockSinkParameters()
 
-}
 
 // For local PTW
 class MiniDCache(reRoCCId: Int, crossing: ClockCrossingType)(implicit p: Parameters) extends DCache(0, crossing)(p) {
@@ -291,16 +296,17 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
   }
 }
 
-class ReRoCCManagerTile(reRoCCId: Int, gen: Parameters => LazyRoCC)(implicit p: Parameters) extends LazyModule {
+class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
   val reRoCCParams = p(TileKey).asInstanceOf[ReRoCCTileParams]
-  def this(tileParams: ReRoCCTileParams, reRoCCId: Int, gen: Parameters => LazyRoCC, p: Parameters) = {
-    this(reRoCCId, gen)(p.alterMap(Map(
+  val reRoCCId = reRoCCParams.reroccId
+  def this(tileParams: ReRoCCTileParams, p: Parameters) = {
+    this()(p.alterMap(Map(
       TileKey -> tileParams,
       TileVisibilityNodeKey -> TLEphemeralNode()(ValName("rerocc_manager"))
     )))
   }
 
-  val rocc = gen(p)
+  val rocc = reRoCCParams.genRoCC.get(p)
   require(rocc.opcodes.opcodes.size == 1)
   val rerocc_manager = LazyModule(new ReRoCCManager(reRoCCParams, rocc.opcodes.opcodes.head))
   val reRoCCNode = ReRoCCIdentityNode()
@@ -310,19 +316,36 @@ class ReRoCCManagerTile(reRoCCId: Int, gen: Parameters => LazyRoCC)(implicit p: 
 
 
   tlXbar :=* rocc.atlNode
-  tlXbar :=* rocc.tlNode
+  if (reRoCCParams.mergeTLNodes) {
+    tlXbar :=* rocc.tlNode
+  } else {
+    tlNode :=* rocc.tlNode
+  }
   tlNode :=* tlXbar
 
   // minicache
-  val dcache = LazyModule(new MiniDCache(reRoCCId, SynchronousCrossing())(p))
-  tlNode := dcache.node
+  val dcache = reRoCCParams.dcacheParams.map(_ => LazyModule(new MiniDCache(reRoCCId, SynchronousCrossing())(p)))
+  dcache.map(d => tlXbar := d.node)
+
+  val hellammio: Option[HellaMMIO] = if (!dcache.isDefined) {
+    val h = LazyModule(new HellaMMIO(s"ReRoCC $reRoCCId MMIO"))
+    tlXbar := h.node
+    Some(h)
+  } else { None }
 
   override lazy val module = new LazyModuleImp(this) {
     val dcacheArb = Module(new HellaCacheArbiter(2)(p))
-    dcache.module.io.cpu <> dcacheArb.io.mem
+    dcache.map(_.module.io.cpu).getOrElse(hellammio.get.module.io) <> dcacheArb.io.mem
 
-    val ptw = Module(new PTW(1 + rocc.nPTWPorts)(dcache.node.edges.out(0), p))
-    ptw.io.requestor(0) <> dcache.module.io.ptw
+    val edge = dcache.map(_.node.edges.out(0)).getOrElse(hellammio.get.node.edges.out(0))
+
+    val ptw = Module(new PTW(1 + rocc.nPTWPorts)(edge, p))
+    if (dcache.isDefined) {
+      ptw.io.requestor(0) <> dcache.get.module.io.ptw
+    } else {
+      ptw.io.requestor(0) := DontCare
+      ptw.io.requestor(0).req.valid := false.B
+    }
     dcacheArb.io.requestor(0) <> ptw.io.mem
 
     val dcIF = Module(new SimpleHellaCacheIF)
@@ -351,7 +374,7 @@ trait CanHaveReRoCCTiles { this: HasTiles =>
   }}.flatten
 
   val reRoCCManagers = p(ReRoCCTileKey).zipWithIndex.map { case (g,i) =>
-    val rerocc_tile = LazyModule(new ReRoCCManagerTile(ReRoCCTileParams(rowBits = p(SystemBusKey).beatBits), i, g, p))
+    val rerocc_tile = LazyModule(new ReRoCCManagerTile(g.copy(rowBits = p(SystemBusKey).beatBits, reroccId = i), p))
     locateTLBusWrapper(SBUS).coupleFrom(s"port_named_rerocc_$i") {
       (_ :=* TLBuffer() :=* rerocc_tile.tlNode)
     }
