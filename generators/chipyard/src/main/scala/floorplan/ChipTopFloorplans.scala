@@ -20,10 +20,22 @@ object ChipTopFloorplans {
       topGrid.placeAt(0, context.createSpacer(Some("spacer")))
       context.commit()
   }
+  def vertical: FloorplanFunction = {
+    case top: ChipTopLazyRawModuleImp =>
+      val context = Floorplan(top, 1000.0, 1500.0)
+      val topGrid = context.setTopGroup(context.createElasticArray(2))
+      val tiles = top.outer.lazySystem match {
+        case t: DigitalTop => t.tiles.map(x => context.addHier(x.module))
+        case _ => throw new Exception("Unsupported BuildSystem type")
+      }
+      topGrid.placeAt(1, context.createElasticArray(tiles))
+      topGrid.placeAt(0, context.createSpacer(Some("spacer")))
+      context.commit()
+  }
 
 }
 
 case object ChipTopFloorplanAspect extends FloorplanAspect[chipyard.TestHarness](
-  ChipTopFloorplans.default orElse
-  RocketFloorplans.default
+  ChipTopFloorplans.vertical orElse
+  RocketFloorplans.vertical
 )
