@@ -19,7 +19,7 @@ import sifive.blocks.devices.gpio._
 
 import testchipip.{HasPeripheryTSIHostWidget, PeripheryTSIHostKey, TSIHostWidgetIO, TLSinkSetter}
 
-import chipyard.fpga.vcu118.{VCU118FPGATestHarness, VCU118FPGATestHarnessImp, DDR2VCU118ShellPlacer, SysClock2VCU118ShellPlacer}
+import chipyard.fpga.vcu118.{VCU118FPGATestHarness, DDR2VCU118ShellPlacer, SysClock2VCU118ShellPlacer}
 
 import chipyard.{ChipTop}
 
@@ -92,9 +92,4 @@ class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends 
     := tsiDdrClient)
 
   // module implementation
-  override lazy val module = new BringupVCU118FPGATestHarnessImp(this)
-}
-
-class BringupVCU118FPGATestHarnessImp(_outer: BringupVCU118FPGATestHarness) extends VCU118FPGATestHarnessImp(_outer) {
-  lazy val bringupOuter = _outer
 }

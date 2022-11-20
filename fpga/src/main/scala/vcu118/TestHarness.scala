@@ -90,50 +90,45 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
   ddrNode := ddrClient
 
   // module implementation
-  override lazy val module = new VCU118FPGATestHarnessImp(this)
-}
+  override lazy val module = new LazyRawModuleImp(this) with HasHarnessSignalReferences {
+    val reset = IO(Input(Bool()))
+    xdc.addPackagePin(reset, "L19")
+    xdc.addIOStandard(reset, "LVCMOS12")
 
-class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessSignalReferences {
+    val resetIBUF = Module(new IBUF)
+    resetIBUF.io.I := reset
 
-  val vcu118Outer = _outer
+    val sysclk: Clock = sysClkNode.out.head._1.clock
 
-  val reset = IO(Input(Bool()))
-  _outer.xdc.addPackagePin(reset, "L19")
-  _outer.xdc.addIOStandard(reset, "LVCMOS12")
+    val powerOnReset: Bool = PowerOnResetFPGAOnly(sysclk)
+    sdc.addAsyncPath(Seq(powerOnReset))
 
-  val resetIBUF = Module(new IBUF)
-  resetIBUF.io.I := reset
+    val ereset: Bool = chiplink.get() match {
+      case Some(x: ChipLinkVCU118PlacedOverlay) => !x.ereset_n
+      case _ => false.B
+    }
 
-  val sysclk: Clock = _outer.sysClkNode.out.head._1.clock
+    pllReset := (resetIBUF.io.O || powerOnReset || ereset)
 
-  val powerOnReset: Bool = PowerOnResetFPGAOnly(sysclk)
-  _outer.sdc.addAsyncPath(Seq(powerOnReset))
+    // reset setup
+    val hReset = Wire(Reset())
+    hReset := dutClock.in.head._1.reset
 
-  val ereset: Bool = _outer.chiplink.get() match {
-    case Some(x: ChipLinkVCU118PlacedOverlay) => !x.ereset_n
-    case _ => false.B
-  }
+    val buildtopClock = dutClock.in.head._1.clock
+    val buildtopReset = WireInit(hReset)
+    val dutReset = hReset.asAsyncReset
+    val success = false.B
 
-  _outer.pllReset := (resetIBUF.io.O || powerOnReset || ereset)
+    childClock := buildtopClock
+    childReset := buildtopReset
 
-  // reset setup
-  val hReset = Wire(Reset())
-  hReset := _outer.dutClock.in.head._1.reset
-
-  val buildtopClock = _outer.dutClock.in.head._1.clock
-  val buildtopReset = WireInit(hReset)
-  val dutReset = hReset.asAsyncReset
-  val success = false.B
-
-  childClock := buildtopClock
-  childReset := buildtopReset
-
-  // harness binders are non-lazy
-  _outer.topDesign match { case d: HasIOBinders =>
-    ApplyHarnessBinders(this, d.lazySystem, d.portMap)
+    // harness binders are non-lazy
+    topDesign match { case d: HasIOBinders =>
+      ApplyHarnessBinders(this, d.lazySystem, d.portMap)
   }
 
   // check the top-level reference clock is equal to the default
   // non-exhaustive since you need all ChipTop clocks to equal the default
   require(getRefClockFreq == p(DefaultClockFrequencyKey))
+  }
 }
