@@ -224,7 +224,7 @@ class GemminiReRoCCNoCConfig extends Config(
 )
 
 class GemminiReRoCCBaseConfig extends Config(
-  new chipyard.config.WithReRoCC(4, chipyard.rerocc.ReRoCCTileParams(dcacheParams=None, mergeTLNodes=true)) ++
+  new chipyard.config.WithReRoCC(4, chipyard.rerocc.ReRoCCTileParams(dcacheParams=None, mergeTLNodes=true, l2TLBEntries=64)) ++
   new gemmini.DefaultGemminiConfig ++
   new gemmini.DefaultGemminiConfig ++
   new gemmini.DefaultGemminiConfig ++
@@ -235,6 +235,6 @@ class GemminiReRoCCBaseConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(3) ++
   new freechips.rocketchip.subsystem.WithExtMemSbusBypass ++
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
-  new freechips.rocketchip.subsystem.WithInclusiveCache(nWays=2, capacityKB=2048) ++ 
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=2048) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
   new chipyard.config.AbstractConfig)
