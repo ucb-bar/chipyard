@@ -251,6 +251,6 @@ class BoomTraceGenTileModuleImp(outer: BoomTraceGenTile)
   status.timeout.bits := 0.U
   status.error.valid := false.B
 
-  assert(!tracegen.io.timeout, cf"TraceGen tile ${outer.tileParams.hartId.toString}: request timed out")
+  assert(!tracegen.io.timeout, s"TraceGen tile ${outer.tileParams.hartId}: request timed out")
 
 }
