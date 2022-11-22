@@ -20,9 +20,10 @@ case class ReRoCCTileParams(
   rowBits: Int = 64,
   dcacheParams: Option[DCacheParams] = Some(DCacheParams(nSets = 4, nWays = 4)),
   mergeTLNodes: Boolean = false,
-  l2TLBEntries: Int = 0
+  l2TLBEntries: Int = 0,
+  l2TLBWays: Int = 4
 ) extends TileParams {
-  val core = new EmptyCoreParams(l2TLBEntries)
+  val core = new EmptyCoreParams(l2TLBEntries, l2TLBWays)
   val icache = None
   val dcache = Some(dcacheParams.getOrElse(DCacheParams()).copy(rowBits=rowBits))
   val btb = None
@@ -36,7 +37,7 @@ case class ReRoCCTileParams(
 
 case object ReRoCCTileKey extends Field[Seq[ReRoCCTileParams]](Nil)
 
-class EmptyCoreParams(val nL2TLBEntries: Int) extends CoreParams {
+class EmptyCoreParams(val nL2TLBEntries: Int, val nL2TLBWays: Int) extends CoreParams {
   // Most fields are unused, or make no sense in the context of a ReRoCC tile
   lazy val bootFreqHz: BigInt               = { require(false); 0; }
   lazy val useVM: Boolean                   = true
@@ -60,7 +61,6 @@ class EmptyCoreParams(val nL2TLBEntries: Int) extends CoreParams {
   lazy val haveBasicCounters: Boolean       = { require(false); false; }
   lazy val haveCFlush: Boolean              = false;
   lazy val misaWritable: Boolean            = { require(false); false; }
-  lazy val nL2TLBWays: Int                  = 1
   lazy val nPTECacheEntries: Int            = 0
   lazy val mtvecInit: Option[BigInt]        = None
   lazy val mtvecWritable: Boolean           = false

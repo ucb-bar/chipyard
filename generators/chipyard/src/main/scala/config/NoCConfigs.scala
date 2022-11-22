@@ -224,7 +224,8 @@ class GemminiReRoCCNoCConfig extends Config(
 )
 
 class GemminiReRoCCBaseConfig extends Config(
-  new chipyard.config.WithReRoCC(4, chipyard.rerocc.ReRoCCTileParams(dcacheParams=None, mergeTLNodes=true, l2TLBEntries=64)) ++
+  new chipyard.config.WithReRoCC(4,chipyard.rerocc.ReRoCCTileParams(
+    dcacheParams=None, mergeTLNodes=true, l2TLBEntries=256, l2TLBWays=4)) ++
   new gemmini.DefaultGemminiConfig ++
   new gemmini.DefaultGemminiConfig ++
   new gemmini.DefaultGemminiConfig ++
