@@ -90,6 +90,4 @@ class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends 
     := TLAtomicAutomata(passthrough=false)
     := TLSinkSetter(64)
     := tsiDdrClient)
-
-  // module implementation
 }
