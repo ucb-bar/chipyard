@@ -125,10 +125,10 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
     // harness binders are non-lazy
     topDesign match { case d: HasIOBinders =>
       ApplyHarnessBinders(this, d.lazySystem, d.portMap)
-  }
+    }
 
-  // check the top-level reference clock is equal to the default
-  // non-exhaustive since you need all ChipTop clocks to equal the default
-  require(getRefClockFreq == p(DefaultClockFrequencyKey))
+    // check the top-level reference clock is equal to the default
+    // non-exhaustive since you need all ChipTop clocks to equal the default
+    require(getRefClockFreq == p(DefaultClockFrequencyKey))
   }
 }
