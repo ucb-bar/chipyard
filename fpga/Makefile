@@ -112,8 +112,7 @@ include $(base_dir)/common.mk
 #########################################################################################
 all_vsrcs := \
 	$(sim_vsrcs) \
-	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v \
-	$(fpga_dir)/common/vsrc/PowerOnResetFPGAOnly.v
+	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v
 
 #########################################################################################
 # vivado rules
