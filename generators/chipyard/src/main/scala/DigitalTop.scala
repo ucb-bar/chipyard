@@ -16,6 +16,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with testchipip.CanHavePeripheryCustomBootPin // Enables optional custom boot pin
   with testchipip.HasPeripheryBootAddrReg // Use programmable boot address register
   with testchipip.CanHaveTraceIO // Enables optionally adding trace IO
+  with testchipip.CanHaveTraceDoctorIO // Enables optionally adding trace IO
   with testchipip.CanHaveBackingScratchpad // Enables optionally adding a backing scratchpad
   with testchipip.CanHavePeripheryBlockDevice // Enables optionally adding the block device
   with testchipip.CanHavePeripheryTLSerial // Enables optionally adding the backing memory and serial adapter
@@ -40,6 +41,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
 
 class DigitalTopModule[+L <: DigitalTop](l: L) extends ChipyardSystemModule(l)
   with testchipip.CanHaveTraceIOModuleImp
+  with testchipip.CanHaveTraceDoctorIOModuleImp
   with sifive.blocks.devices.i2c.HasPeripheryI2CModuleImp
   with sifive.blocks.devices.pwm.HasPeripheryPWMModuleImp
   with sifive.blocks.devices.uart.HasPeripheryUARTModuleImp

@@ -1,26 +1,25 @@
 package firesim.firesim
 
 import java.io.File
-
 import chisel3._
-import chisel3.util.{log2Up}
-import freechips.rocketchip.config.{Parameters, Config}
+import chisel3.util.log2Up
+import freechips.rocketchip.config.{Config, Parameters}
 import freechips.rocketchip.groundtest.TraceGenParams
 import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.{BootROMLocated, BootROMParams}
-import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
-import freechips.rocketchip.diplomacy.{LazyModule, AsynchronousCrossing}
-import testchipip.{BlockDeviceKey, BlockDeviceConfig, TracePortKey, TracePortParams}
+import freechips.rocketchip.devices.debug.{DebugModuleKey, DebugModuleParams}
+import freechips.rocketchip.diplomacy.{AsynchronousCrossing, LazyModule}
+import testchipip.{BlockDeviceConfig, BlockDeviceKey, TracePortKey, TracePortParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
-import scala.math.{min, max}
 
-import chipyard.clocking.{ChipyardPRCIControlKey}
+import scala.math.{max, min}
+import chipyard.clocking.ChipyardPRCIControlKey
+import chipyard.config.WithTraceDoctorIO
 import icenet._
 import testchipip.WithRingSystemBus
-
 import firesim.bridges._
 import firesim.configs._
 
@@ -78,7 +77,8 @@ class WithFireSimDesignTweaks extends Config(
   // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
   new WithoutTLMonitors ++
   // Optional: Adds IO to attach tracerV bridges
-  new chipyard.config.WithTraceIO ++
+  //  new chipyard.config.WithTraceIO ++
+  new chipyard.config.WithTraceDoctorIO ++
   // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 32 GiB on F1)
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
   // Optional: Removing this will require using an initramfs under linux
@@ -109,7 +109,7 @@ class WithFireSimHighPerfClocking extends Config(
 // Tweaks that are generally applied to all firesim configs setting a single clock domain at 1000 MHz
 class WithFireSimConfigTweaks extends Config(
   // 1 GHz matches the FASED default (DRAM modeli realistically configured for that frequency)
-  // Using some other frequency will require runnings the FASED runtime configuration generator 
+  // Using some other frequency will require runnings the FASED runtime configuration generator
   // to generate faithful DDR3 timing values.
   new chipyard.config.WithSystemBusFrequency(1000.0) ++
   new chipyard.config.WithSystemBusFrequencyAsDefault ++ // All unspecified clock frequencies, notably the implicit clock, will use the sbus freq (1000 MHz)
@@ -174,6 +174,16 @@ class FireSimSmallSystemConfig extends Config(
   new chipyard.config.WithUART ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nWays = 2, capacityKB = 64) ++
   new chipyard.RocketConfig)
+
+
+//*****************************************************************
+// Boom config, base off chipyard's SmallBoomConfig
+//*****************************************************************
+class FireSimSmallBoomConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.SmallBoomConfig)
 
 //*****************************************************************
 // Boom config, base off chipyard's LargeBoomConfig

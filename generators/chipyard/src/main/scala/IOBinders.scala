@@ -373,6 +373,17 @@ class WithTraceIOPunchthrough extends OverrideIOBinder({
   }
 })
 
+class WithTraceDoctorIOPunchthrough extends OverrideIOBinder({
+  (system: CanHaveTraceDoctorIOModuleImp) => {
+    val ports: Option[TraceDoctorOutputTop] = system.traceDoctorIO.map { t =>
+      val trace = IO(DataMirror.internal.chiselTypeClone[TraceDoctorOutputTop](t)).suggestName("tracedoctor")
+      trace <> t
+      trace
+    }
+    (ports.toSeq, Nil)
+  }
+})
+
 class WithCustomBootPin extends OverrideIOBinder({
   (system: CanHavePeripheryCustomBootPin) => system.custom_boot_pin.map({ p =>
     val sys = system.asInstanceOf[BaseSubsystem]

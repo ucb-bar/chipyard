@@ -184,6 +184,14 @@ class WithTracerVBridge extends ComposeHarnessBinder({
   }
 })
 
+class WithTraceDoctorBridge extends ComposeHarnessBinder({
+  (system: CanHaveTraceDoctorIOModuleImp, th: FireSim, ports: Seq[TraceDoctorOutputTop]) => {
+    ports.map { p => p.tracedoctors.map(tileTrace => TraceDoctorBridge(tileTrace)(system.p)) }
+    Nil
+  }
+})
+
+
 class WithDromajoBridge extends ComposeHarnessBinder({
   (system: CanHaveTraceIOModuleImp, th: FireSim, ports: Seq[TraceOutputTop]) =>
     ports.map { p => p.traces.map(tileTrace => DromajoBridge(tileTrace)(system.p)) }; Nil
@@ -239,6 +247,7 @@ class WithDefaultFireSimBridges extends Config(
   new WithFASEDBridge ++
   new WithFireSimMultiCycleRegfile ++
   new WithFireSimFAME5 ++
-  new WithTracerVBridge ++
+//  new WithTracerVBridge ++
+  new WithTraceDoctorBridge ++
   new WithFireSimIOCellModels
 )
