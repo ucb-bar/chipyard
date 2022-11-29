@@ -26,8 +26,8 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
 
 
   // Order matters; ddr depends on sys_clock
-  val uart      = Overlay(UARTOverlayKey, new UARTVC707ShellPlacer(this, UARTShellInput()))
-  val pcie       = Overlay(PCIeOverlayKey, new PCIeVC707ShellPlacer(this, PCIeShellInput()))
+  val uart = Overlay(UARTOverlayKey, new UARTVC707ShellPlacer(this, UARTShellInput()))
+  val pcie = Overlay(PCIeOverlayKey, new PCIeVC707ShellPlacer(this, PCIeShellInput()))
 
   val topDesign = LazyModule(p(BuildTop)(dp)).suggestName("chiptop")
 
@@ -63,8 +63,8 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   dp(SPIOverlayKey).head.place(SPIDesignInput(dp(PeripherySPIKey).head, io_spi_bb))
 
   /*** DDR ***/
-
-  val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)).overlayOutput.ddr
+  // Modify the last field of `DDRDesignInput` for 1GB RAM size
+  val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL, true)).overlayOutput.ddr
 
   // connect 1 mem. channel to the FPGA DDR
   val inParams = topDesign match { case td: ChipTop =>
@@ -76,47 +76,52 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   ddrNode := ddrClient
 
   // module implementation
-  override lazy val module = new LazyRawModuleImp(this) with HasHarnessSignalReferences {
-    val reset = IO(Input(Bool()))
-    xdc.addBoardPin(reset, "reset")
+  override lazy val module = new VC707FPGATestHarnessImp(this)
+}
 
-    val resetIBUF = Module(new IBUF)
-    resetIBUF.io.I := reset
+class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessSignalReferences {
+  
+  val vc707Outer = _outer
 
-    val sysclk: Clock = sysClkNode.out.head._1.clock
-    // val sysclk: Clock = sys_clock.get() match {
-    //   case Some(x: SysClockVC707PlacedOverlay) => x.clock
-    // }
+  val reset = IO(Input(Bool()))
+  _outer.xdc.addBoardPin(reset, "reset")
 
-    val powerOnReset: Bool = PowerOnResetFPGAOnly(sysclk)
-    sdc.addAsyncPath(Seq(powerOnReset))
+  val resetIBUF = Module(new IBUF)
+  resetIBUF.io.I := reset
 
-    val ereset: Bool = chiplink.get() match {
-      case Some(x: ChipLinkVC707PlacedOverlay) => !x.ereset_n
-      case _ => false.B
-    }
+  val sysclk: Clock = _outer.sysClkNode.out.head._1.clock
+  // val sysclk: Clock = sys_clock.get() match {
+  //   case Some(x: SysClockVC707PlacedOverlay) => x.clock
+  // }
 
-    pllReset := (resetIBUF.io.O || powerOnReset || ereset)
+  val powerOnReset: Bool = PowerOnResetFPGAOnly(sysclk)
+  _outer.sdc.addAsyncPath(Seq(powerOnReset))
 
-    // reset setup
-    val hReset = Wire(Reset())
-    hReset := dutClock.in.head._1.reset
-
-    val buildtopClock = dutClock.in.head._1.clock
-    val buildtopReset = WireInit(hReset)
-    val dutReset = hReset.asAsyncReset
-    val success = false.B
-
-    childClock := buildtopClock
-    childReset := buildtopReset
-
-    // harness binders are non-lazy
-    topDesign match { case d: HasIOBinders =>
-      ApplyHarnessBinders(this, d.lazySystem, d.portMap)
-    }
-
-    // check the top-level reference clock is equal to the default
-    // non-exhaustive since you need all ChipTop clocks to equal the default
-    require(getRefClockFreq == p(DefaultClockFrequencyKey))
+  val ereset: Bool = _outer.chiplink.get() match {
+    case Some(x: ChipLinkVC707PlacedOverlay) => !x.ereset_n
+    case _ => false.B
   }
+
+  _outer.pllReset := (resetIBUF.io.O || powerOnReset || ereset)
+
+  // reset setup
+  val hReset = Wire(Reset())
+  hReset := _outer.dutClock.in.head._1.reset
+
+  val buildtopClock = _outer.dutClock.in.head._1.clock
+  val buildtopReset = WireInit(hReset)
+  val dutReset = hReset.asAsyncReset
+  val success = false.B
+
+  childClock := buildtopClock
+  childReset := buildtopReset
+
+  // harness binders are non-lazy
+  _outer.topDesign match { case d: HasIOBinders =>
+    ApplyHarnessBinders(this, d.lazySystem, d.portMap)
+  }
+
+  // check the top-level reference clock is equal to the default
+  // non-exhaustive since you need all ChipTop clocks to equal the default
+  require(getRefClockFreq == p(DefaultClockFrequencyKey))
 }
