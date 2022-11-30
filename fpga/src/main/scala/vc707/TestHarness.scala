@@ -24,10 +24,8 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
 
   def dp = designParameters
 
-
   // Order matters; ddr depends on sys_clock
   val uart = Overlay(UARTOverlayKey, new UARTVC707ShellPlacer(this, UARTShellInput()))
-  val pcie = Overlay(PCIeOverlayKey, new PCIeVC707ShellPlacer(this, PCIeShellInput()))
 
   val topDesign = LazyModule(p(BuildTop)(dp)).suggestName("chiptop")
 
@@ -63,6 +61,7 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   dp(SPIOverlayKey).head.place(SPIDesignInput(dp(PeripherySPIKey).head, io_spi_bb))
 
   /*** DDR ***/
+
   // Modify the last field of `DDRDesignInput` for 1GB RAM size
   val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL, true)).overlayOutput.ddr
 
@@ -90,9 +89,6 @@ class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModul
   resetIBUF.io.I := reset
 
   val sysclk: Clock = _outer.sysClkNode.out.head._1.clock
-  // val sysclk: Clock = sys_clock.get() match {
-  //   case Some(x: SysClockVC707PlacedOverlay) => x.clock
-  // }
 
   val powerOnReset: Bool = PowerOnResetFPGAOnly(sysclk)
   _outer.sdc.addAsyncPath(Seq(powerOnReset))

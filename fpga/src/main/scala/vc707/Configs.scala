@@ -33,12 +33,11 @@ class WithSystemModifications extends Config((site, here, up) => {
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vc707/sdboot/build/sdboot.bin")
   }
-  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC7074GDDRSize)))) // set extmem to DDR size
+  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC7074GDDRSize)))) // set extmem to DDR size (note the size)
   case SerialTLKey => None // remove serialized tl port
 })
 
-// DOC include start: AbstractVC707 and Rocket
-class WithVC707Tweaks extends Config(
+class WithVC707Tweaks extends Config (
   // harness binders
   new WithVC707UARTHarnessBinder ++
   new WithVC707SPISDCardHarnessBinder ++
@@ -57,17 +56,18 @@ class WithVC707Tweaks extends Config(
   new WithFPGAFrequency(50) // default 50MHz freq
 )
 
-class RocketVC707Config extends Config(
+class RocketVC707Config extends Config (
   new WithVC707Tweaks ++
-  new chipyard.RocketConfig)
-// DOC include end: AbstractVC707 and Rocket
+  new chipyard.RocketConfig
+)
 
-class BoomVC707Config extends Config(
+class BoomVC707Config extends Config (
   new WithFPGAFrequency(50) ++
   new WithVC707Tweaks ++
-  new chipyard.MegaBoomConfig)
+  new chipyard.MegaBoomConfig
+)
 
-class WithFPGAFrequency(fMHz: Double) extends Config(
+class WithFPGAFrequency(fMHz: Double) extends Config (
   new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.
   new chipyard.config.WithMemoryBusFrequency(fMHz)
 )
