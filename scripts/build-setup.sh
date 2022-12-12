@@ -79,15 +79,16 @@ do
     shift
 done
 
-# check if the arg is found in the SKIP_LIST
-do_skip() {
+# return true if the arg is not found in the SKIP_LIST
+run_step() {
     local value=$1
     [[ ! " ${SKIP_LIST[*]} " =~ " ${value} " ]]
 }
 
 {
 
-if do_skip "1"; then
+# setup and install conda environment
+if run_step "1"; then
     # note: lock file must end in .conda-lock.yml - see https://github.com/conda-incubator/conda-lock/issues/154
     CONDA_REQS=$RDIR/conda-reqs
     CONDA_LOCK_REQS=$CONDA_REQS/conda-lock-reqs
@@ -112,12 +113,14 @@ if [ -z "$FORCE_FLAG" ]; then
     fi
 fi
 
-if do_skip "2"; then
+# initialize all submodules (without the toolchain submodules)
+if run_step "2"; then
     $RDIR/scripts/init-submodules-no-riscv-tools.sh $FORCE_FLAG
 fi
 
-if do_skip "3"; then
-    if do_skip "1"; then
+# build extra toolchain collateral (i.e. spike, pk, riscv-tests, libgloss)
+if run_step "3"; then
+    if run_step "1"; then
         PREFIX=$CONDA_PREFIX/$TOOLCHAIN_TYPE
     else
         if [ -z "$RISCV" ] ; then
@@ -129,22 +132,26 @@ if do_skip "3"; then
     $RDIR/scripts/build-toolchain-extra.sh $TOOLCHAIN_TYPE -p $PREFIX
 fi
 
-if do_skip "4"; then
+# run ctags for code navigation
+if run_step "4"; then
     $RDIR/scripts/gen-tags.sh
 fi
 
-if do_skip "5"; then
+# precompile chipyard scala sources
+if run_step "5"; then
     pushd $RDIR/sims/verilator
     make launch-sbt SBT_COMMAND=";project chipyard; compile"
     make launch-sbt SBT_COMMAND=";project tapeout; compile"
     popd
 fi
 
-if do_skip "6"; then
+# setup firesim
+if run_step "6"; then
     $RDIR/scripts/firesim-setup.sh
     $RDIR/sims/firesim/gen-tags.sh
 
-    if do_skip "7"; then
+    # precompile firesim scala sources
+    if run_step "7"; then
         pushd $RDIR/sims/firesim
         (
             source sourceme-f1-manager.sh --skip-ssh-setup
@@ -156,11 +163,13 @@ if do_skip "6"; then
     fi
 fi
 
-if do_skip "8"; then
+# setup firemarshal
+if run_step "8"; then
     pushd $RDIR/software/firemarshal
     ./init-submodules.sh
 
-    if do_skip "9"; then
+    # precompile firemarshal buildroot sources
+    if run_step "9"; then
         source $RDIR/scripts/fix-open-files.sh
         ./marshal $VERBOSE_FLAG build br-base.json
         ./marshal $VERBOSE_FLAG clean br-base.json
@@ -168,7 +177,8 @@ if do_skip "8"; then
     popd
 fi
 
-if do_skip "10"; then
+# do misc. cleanup for a "clean" git status
+if run_step "10"; then
     $RDIR/scripts/repo-clean.sh
 fi
 
