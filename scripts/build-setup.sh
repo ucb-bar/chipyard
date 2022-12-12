@@ -117,7 +117,16 @@ if do_skip "2"; then
 fi
 
 if do_skip "3"; then
-    $RDIR/scripts/build-toolchain-extra.sh $FORCE_FLAG $TOOLCHAIN_TYPE
+    if do_skip "1"; then
+        PREFIX=$CONDA_PREFIX/$TOOLCHAIN_TYPE
+    else
+        if [ -z "$RISCV" ] ; then
+            error "ERROR: If conda initialization skipped, \$RISCV variable must be defined."
+            exit 1
+        fi
+        PREFIX=$RISCV
+    fi
+    $RDIR/scripts/build-toolchain-extra.sh $TOOLCHAIN_TYPE -p $PREFIX
 fi
 
 if do_skip "4"; then
