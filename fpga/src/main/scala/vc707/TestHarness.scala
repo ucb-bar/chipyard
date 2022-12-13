@@ -9,7 +9,7 @@ import freechips.rocketchip.tilelink.{TLClientNode}
 
 import sifive.fpgashells.shell.xilinx.{VC707Shell, UARTVC707ShellPlacer, PCIeVC707ShellPlacer, ChipLinkVC707PlacedOverlay}
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
-import sifive.fpgashells.shell.{ClockInputOverlayKey, ClockInputDesignInput, UARTOverlayKey, UARTDesignInput, UARTShellInput, SPIOverlayKey, SPIDesignInput, PCIeOverlayKey, PCIeDesignInput, PCIeShellInput, DDROverlayKey, DDRDesignInput}
+import sifive.fpgashells.shell.{ClockInputOverlayKey, ClockInputDesignInput, UARTOverlayKey, UARTDesignInput, UARTShellInput, LEDOverlayKey, LEDDesignInput, SwitchOverlayKey, SwitchDesignInput, ButtonOverlayKey, ButtonDesignInput, SPIOverlayKey, SPIDesignInput, ChipLinkOverlayKey, ChipLinkDesignInput, PCIeOverlayKey, PCIeDesignInput, PCIeShellInput, DDROverlayKey, DDRDesignInput, JTAGDebugOverlayKey, JTAGDebugDesignInput}
 import sifive.fpgashells.clocks.{ClockGroup, ClockSinkNode, PLLFactoryKey, ResetWrangler}
 import sifive.fpgashells.devices.xilinx.xilinxvc707pciex1.{XilinxVC707PCIeX1IO}
 
@@ -31,7 +31,7 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
 
   // place all clocks in the shell
   require(dp(ClockInputOverlayKey).size >= 1)
-  val sysClkNode = dp(ClockInputOverlayKey)(0).place(ClockInputDesignInput()).overlayOutput.node
+  val sysClkNode = dp(ClockInputOverlayKey).head.place(ClockInputDesignInput()).overlayOutput.node
 
   /*** Connect/Generate clocks ***/
 
@@ -45,6 +45,18 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   val dutWrangler = LazyModule(new ResetWrangler)
   val dutGroup = ClockGroup()
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL
+
+  /*** LED ***/
+  val ledModule = dp(LEDOverlayKey).map(_.place(LEDDesignInput()).overlayOutput.led)
+
+  /*** Switch ***/
+  val switchModule = dp(SwitchOverlayKey).map(_.place(SwitchDesignInput()).overlayOutput.sw)
+
+  /*** Button ***/
+  val buttonModule = dp(ButtonOverlayKey).map(_.place(ButtonDesignInput()).overlayOutput.but)
+
+  /*** JTAG ***/
+  val jtagModule = dp(JTAGDebugOverlayKey).head.place(JTAGDebugDesignInput()).overlayOutput.jtag
 
   /*** UART ***/
 
