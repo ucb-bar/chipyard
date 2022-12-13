@@ -25,7 +25,7 @@ class WithUARTIOPassthrough extends OverrideIOBinder({
   }
 })
 
-class WithSPIIOPassthrough  extends OverrideLazyIOBinder({
+class WithSPIIOPassthrough extends OverrideLazyIOBinder({
   (system: HasPeripherySPI) => {
     // attach resource to 1st SPI
     ResourceBinding {
