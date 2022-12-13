@@ -71,3 +71,4 @@ mapping["testchipip"]="SUB_PROJECT=testchipip"
 
 mapping["arty"]="SUB_PROJECT=arty verilog"
 mapping["vcu118"]="SUB_PROJECT=vcu118 verilog"
+mapping["vc707"]="SUB_PROJECT=vc707 verilog"
