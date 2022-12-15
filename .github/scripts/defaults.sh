@@ -31,7 +31,7 @@ grouping["group-accels"]="chipyard-fftgenerator chipyard-nvdla chipyard-mempress
 grouping["group-constellation"]="chipyard-constellation"
 grouping["group-tracegen"]="tracegen tracegen-boom"
 grouping["group-other"]="icenet testchipip constellation"
-grouping["group-fpga"]="arty vcu118"
+grouping["group-fpga"]="arty vcu118 vc707"
 
 # key value store to get the build strings
 declare -A mapping
@@ -71,3 +71,4 @@ mapping["testchipip"]="SUB_PROJECT=testchipip"
 
 mapping["arty"]="SUB_PROJECT=arty verilog"
 mapping["vcu118"]="SUB_PROJECT=vcu118 verilog"
+mapping["vc707"]="SUB_PROJECT=vc707 verilog"
