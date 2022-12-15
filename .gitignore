@@ -19,3 +19,7 @@ tags
 .conda-env/
 .#*
 first-clone-setup-fast-log
+.bloop/
+.metals/
+.ammonite/
+metals.sbt

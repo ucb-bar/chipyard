@@ -1,0 +1,11 @@
+{
+    "files.exclude": {
+        "**/.conda-env": true,
+        "**/target/": true,
+        "**/.bsp/": true
+    },
+    "files.watcherExclude": {
+        "**/target": true
+    },
+    "metals.sbtScript": "/scratch/abejgonza/chipyard/.conda-env/bin/sbt $SBT_OPTS"
+}
