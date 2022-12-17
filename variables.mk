@@ -214,7 +214,7 @@ SBT_CLIENT_FLAG = --client
 endif
 
 # passes $(JAVA_TOOL_OPTIONS) from env to java
-SBT_BIN ?= sbt
+SBT_BIN ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
 SBT = $(SBT_BIN) $(SBT_CLIENT_FLAG)
 SBT_NON_THIN = $(subst $(SBT_CLIENT_FLAG),,$(SBT))
 
