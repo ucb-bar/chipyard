@@ -35,7 +35,7 @@ endif
 
 ENV_YML            ?= $(vlsi_dir)/env.yml
 TECH_CONF          ?= $(if $(filter $(tech_name),asap7),        example-asap7.yml,\
-                                                                example-sky130.yml))
+                                                                example-sky130.yml)
 TOOLS_CONF         ?= example-tools.yml
 INPUT_CONFS        ?= $(TOOLS_CONF) $(TECH_CONF)
 HAMMER_EXEC        ?= $(if $(filter $(tech_name),sky130),\
@@ -177,7 +177,7 @@ $(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_commo
 	echo "  saif.mode: 'time'" >> $@
 	echo "  saif.start_time: '0ns'" >> $@
 	echo "  saif.end_time: '`bc <<< $(timeout_cycles)*$(CLOCK_PERIOD)`ns'" >> $@
-ifdef USE_FSDB
+ifndef USE_VPD
 	echo "  options:" >> $@
 	echo '    - "-kdb"' >> $@
 	echo "  options_meta: 'append'" >> $@
@@ -202,7 +202,7 @@ $(POWER_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_fi
 	echo "  database: '$(OBJ_DIR)/par-rundir/$(VLSI_TOP)_FINAL'" >> $@
 ifneq ($(BINARY), )
 	echo "  waveforms: [" >> $@
-ifdef USE_FSDB
+ifndef USE_VPD
 	echo "    '$(sim_out_name).fsdb'" >> $@
 else
 	echo "    '$(sim_out_name).vpd'" >> $@

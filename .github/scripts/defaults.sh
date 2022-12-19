@@ -31,7 +31,7 @@ grouping["group-accels"]="chipyard-fftgenerator chipyard-nvdla chipyard-sha3 chi
 grouping["group-constellation"]="chipyard-constellation"
 grouping["group-tracegen"]="tracegen tracegen-boom"
 grouping["group-other"]="icenet testchipip constellation"
-grouping["group-fpga"]="arty vcu118"
+grouping["group-fpga"]="arty vcu118 vc707"
 
 # key value store to get the build strings
 declare -A mapping
@@ -39,6 +39,7 @@ mapping["chipyard-rocket"]=""
 mapping["chipyard-dmirocket"]=" CONFIG=dmiRocketConfig"
 mapping["chipyard-lbwif"]=" CONFIG=LBWIFRocketConfig"
 mapping["chipyard-sha3"]=" CONFIG=Sha3RocketConfig"
+mapping["chipyard-mempress"]=" CONFIG=MempressRocketConfig"
 mapping["chipyard-digitaltop"]=" TOP=DigitalTop"
 mapping["chipyard-streaming-fir"]=" CONFIG=StreamingFIRRocketConfig"
 mapping["chipyard-streaming-passthrough"]=" CONFIG=StreamingPassthroughRocketConfig"
@@ -71,3 +72,4 @@ mapping["testchipip"]="SUB_PROJECT=testchipip"
 
 mapping["arty"]="SUB_PROJECT=arty verilog"
 mapping["vcu118"]="SUB_PROJECT=vcu118 verilog"
+mapping["vc707"]="SUB_PROJECT=vc707 verilog"

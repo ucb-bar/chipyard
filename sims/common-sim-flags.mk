@@ -6,7 +6,7 @@ SIM_OPT_CXXFLAGS := -O3
 SIM_CXXFLAGS = \
 	$(CXXFLAGS) \
 	$(SIM_OPT_CXXFLAGS) \
-	-std=c++11 \
+	-std=c++17 \
 	-I$(RISCV)/include \
 	-I$(dramsim_dir) \
 	-I$(OUT_DIR) \
