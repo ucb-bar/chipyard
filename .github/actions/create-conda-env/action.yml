@@ -23,10 +23,10 @@ runs:
           if [[ "${{ inputs.install-collateral }}" == 'true' ]]; then
             echo "Add extra toolchain collateral to RISC-V install area"
             conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-            ./scripts/build-toolchain-extra.sh riscv-tools
+            ./scripts/build-toolchain-extra.sh riscv-tools -p $CONDA_PREFIX/riscv-tools
             conda deactivate
             conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-esp-tools
-            ./scripts/build-toolchain-extra.sh esp-tools
+            ./scripts/build-toolchain-extra.sh esp-tools -p $CONDA_PREFIX/esp-tools
             conda deactivate
           fi
         fi
