@@ -29,6 +29,7 @@ dependencies:
     - binutils
 
     - dromajo # from ucb-bar channel - https://github.com/riscv-boom/dromajo
+    - firtool # from ucb-bar channel - https://github.com/ucb-bar/firtool-feedstock
 
     # firemarshal deps
     - python>=3.8
@@ -61,6 +62,7 @@ dependencies:
     - lzop
     - qemu # from ucb-bar channel - https://github.com/ucb-bar/qemu-feedstock
 
+    - jq
     - bash-completion
     - sbt
     - ca-certificates

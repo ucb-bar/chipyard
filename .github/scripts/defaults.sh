@@ -26,12 +26,12 @@ LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 # key value store to get the build groups
 declare -A grouping
 grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad"
-grouping["group-peripherals"]="chipyard-dmirocket chipyard-blkdev chipyard-spiflashread chipyard-spiflashwrite chipyard-mmios chipyard-lbwif"
-grouping["group-accels"]="chipyard-fftgenerator chipyard-nvdla chipyard-mempress chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-streaming-fir chipyard-streaming-passthrough"
+grouping["group-peripherals"]="chipyard-dmirocket chipyard-blkdev chipyard-mmios chipyard-lbwif"
+grouping["group-accels"]="chipyard-fftgenerator chipyard-nvdla chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-streaming-fir chipyard-streaming-passthrough"
 grouping["group-constellation"]="chipyard-constellation"
 grouping["group-tracegen"]="tracegen tracegen-boom"
 grouping["group-other"]="icenet testchipip constellation"
-grouping["group-fpga"]="arty vcu118"
+grouping["group-fpga"]="arty vcu118 vc707"
 
 # key value store to get the build strings
 declare -A mapping
@@ -50,6 +50,7 @@ mapping["chipyard-hwacha"]=" CONFIG=HwachaRocketConfig"
 mapping["chipyard-gemmini"]=" CONFIG=GemminiRocketConfig"
 mapping["chipyard-cva6"]=" CONFIG=CVA6Config"
 mapping["chipyard-ibex"]=" CONFIG=IbexConfig"
+# currently spi tests are unsupported in verilator w/ circt
 mapping["chipyard-spiflashread"]=" CONFIG=LargeSPIFlashROMRocketConfig"
 mapping["chipyard-spiflashwrite"]=" CONFIG=SmallSPIFlashRocketConfig"
 mapping["chipyard-mmios"]=" CONFIG=MMIORocketConfig verilog"
@@ -71,3 +72,4 @@ mapping["testchipip"]="SUB_PROJECT=testchipip"
 
 mapping["arty"]="SUB_PROJECT=arty verilog"
 mapping["vcu118"]="SUB_PROJECT=vcu118 verilog"
+mapping["vc707"]="SUB_PROJECT=vc707 verilog"

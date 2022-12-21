@@ -1,7 +1,5 @@
-#########################################################################################
-# set default shell for make
-#########################################################################################
 SHELL=/bin/bash
+SED ?= sed
 
 ifndef RISCV
 $(error RISCV is unset. Did you source the Chipyard auto-generated env file (which activates the default conda environment)?)
@@ -92,7 +90,7 @@ endif
 #########################################################################################
 # copy over bootrom files
 #########################################################################################
-$(build_dir):
+$(build_dir) $(OUT_DIR):
 	mkdir -p $@
 
 $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip/bootrom/bootrom.%.img | $(build_dir)
@@ -111,41 +109,99 @@ $(FIRRTL_FILE) $(ANNO_FILE) &: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_D
 		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG) \
 		$(EXTRA_CHISEL_OPTIONS))
 
+define firtool_extra_anno_contents
+[
+	{
+		"class":"sifive.enterprise.firrtl.MarkDUTAnnotation",
+		"target":"~$(MODEL)|$(TOP)"
+	},
+	{
+		"class": "sifive.enterprise.firrtl.TestHarnessHierarchyAnnotation",
+		"filename": "$(FIRTOOL_MODEL_HRCHY_JSON)"
+	},
+	{
+		"class": "sifive.enterprise.firrtl.ModuleHierarchyAnnotation",
+		"filename": "$(FIRTOOL_TOP_HRCHY_JSON)"
+	}
+]
+endef
+export firtool_extra_anno_contents
+$(FINAL_ANNO_FILE) $(FIRTOOL_EXTRA_ANNO_FILE): $(ANNO_FILE)
+	echo "$$firtool_extra_anno_contents" > $(FIRTOOL_EXTRA_ANNO_FILE)
+	jq -s '[.[][]]' $(ANNO_FILE) $(FIRTOOL_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
+
 .PHONY: firrtl
-firrtl: $(FIRRTL_FILE)
+firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
 
 #########################################################################################
 # create verilog files rules and variables
 #########################################################################################
-REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(TOP_SMEMS_CONF)
-HARNESS_CONF_FLAGS = -thconf $(HARNESS_SMEMS_CONF)
-
-TOP_TARGETS = $(TOP_FILE) $(TOP_SMEMS_CONF) $(TOP_ANNO) $(TOP_FIR) $(sim_top_blackboxes)
-HARNESS_TARGETS = $(HARNESS_FILE) $(HARNESS_SMEMS_CONF) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes)
+FIRTOOL_TARGETS = \
+	$(FIRTOOL_SMEMS_CONF) \
+	$(FIRTOOL_TOP_SMEMS_JSON) \
+	$(FIRTOOL_TOP_HRCHY_JSON) \
+	$(FIRTOOL_MODEL_HRCHY_JSON) \
+	$(FIRTOOL_MODEL_SMEMS_JSON) \
+	$(FIRTOOL_FILELIST) \
+	$(FIRTOOL_BB_MODS_FILELIST)
 
 # DOC include start: FirrtlCompiler
-$(TOP_TARGETS) $(HARNESS_TARGETS) &: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
-	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTopAndHarness,\
-		--allow-unrecognized-annotations \
-		--output-file $(TOP_FILE) \
-		--harness-o $(HARNESS_FILE) \
+# hack: lower to middle firrtl if Fixed types are found
+$(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
+	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTop,\
+		--no-dedup \
+		--output-file $(SFC_FIRRTL_BASENAME) \
+		--output-annotation-file $(SFC_ANNO_FILE) \
+		--target-dir $(OUT_DIR) \
 		--input-file $(FIRRTL_FILE) \
-		--syn-top $(TOP) \
-		--harness-top $(VLOG_MODEL) \
-		--annotation-file $(ANNO_FILE) \
-		--top-anno-out $(TOP_ANNO) \
-		--top-dotf-out $(sim_top_blackboxes) \
-		--top-fir $(TOP_FIR) \
-		--harness-anno-out $(HARNESS_ANNO) \
-		--harness-dotf-out $(sim_harness_blackboxes) \
-		--harness-fir $(HARNESS_FIR) \
-		$(REPL_SEQ_MEM) \
-		$(HARNESS_CONF_FLAGS) \
-		--target-dir $(build_dir) \
+		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
+		--allow-unrecognized-annotations \
+		-X $(if $(shell grep "Fixed<" $(FIRRTL_FILE)),middle,none) \
 		$(EXTRA_FIRRTL_OPTIONS))
-	touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
+	$(if $(shell grep "Fixed<" $(FIRRTL_FILE)),mv $(SFC_FIRRTL_BASENAME).mid.fir $(SFC_FIRRTL_FILE),)
+	firtool \
+		--format=fir \
+		-O=release \
+		--dedup \
+		--export-module-hierarchy \
+		--emit-metadata \
+		--verify-each=false \
+		--disable-annotation-classless \
+		--disable-annotation-unknown \
+		--warn-on-unprocessed-annotations \
+		--lowering-options=disallowPackedArrays,emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,explicitBitcast,verifLabels,locationInfoStyle=wrapInAtSquareBracket \
+		--repl-seq-mem \
+		--repl-seq-mem-circuit=$(MODEL) \
+		--repl-seq-mem-file=$(FIRTOOL_SMEMS_CONF) \
+		--annotation-file=$(SFC_ANNO_FILE) \
+		--split-verilog \
+		-o $(OUT_DIR) \
+		$(SFC_FIRRTL_FILE)
+	$(SED) -i 's/.*/& /' $(FIRTOOL_SMEMS_CONF) # need trailing space for SFC macrocompiler
 # DOC include end: FirrtlCompiler
+
+$(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) &: $(FIRTOOL_MODEL_HRCHY_JSON) $(FIRTOOL_FILELIST) $(FIRTOOL_BB_MODS_FILELIST)
+	$(base_dir)/scripts/split-module-files.py \
+		--model-hier-json $(FIRTOOL_MODEL_HRCHY_JSON) \
+		--dut $(TOP) \
+		--out-dut-filelist $(TOP_MODS_FILELIST) \
+		--out-model-filelist $(MODEL_MODS_FILELIST) \
+		--in-all-filelist $(FIRTOOL_FILELIST) \
+		--target-dir $(OUT_DIR)
+	$(SED) -e 's;^;$(OUT_DIR)/;' $(FIRTOOL_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
+	$(SED) -i 's/\.\///' $(TOP_MODS_FILELIST)
+	$(SED) -i 's/\.\///' $(MODEL_MODS_FILELIST)
+	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
+	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
+
+$(TOP_SMEMS_CONF) $(HARNESS_SMEMS_CONF) &: $(FIRTOOL_TOP_SMEMS_JSON) $(FIRTOOL_MODEL_SMEMS_JSON) $(FIRTOOL_SMEMS_CONF)
+	$(base_dir)/scripts/split-mems-conf.py \
+		--in-smems-conf $(FIRTOOL_SMEMS_CONF) \
+		--in-dut-smems-json $(FIRTOOL_TOP_SMEMS_JSON) \
+		--in-model-smems-json $(FIRTOOL_MODEL_SMEMS_JSON) \
+		--out-dut-smems-conf $(TOP_SMEMS_CONF) \
+		--out-model-smems-conf $(HARNESS_SMEMS_CONF)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 MACROCOMPILER_MODE ?= --mode synflops
@@ -159,14 +215,16 @@ $(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR) &: $(HARNESS_SMEMS_CONF) | $(TOP_SMEM
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
 ########################################################################################
-$(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes)
-	sort -u $^ | grep -v '.*\.\(svh\|h\)$$' > $@
+$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(HARNESS_SMEMS_FILE)
+	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' > $@
+	echo "$(TOP_SMEMS_FILE)" >> $@
+	echo "$(HARNESS_SMEMS_FILE)" >> $@
 
 #########################################################################################
 # helper rule to just make verilog files
 #########################################################################################
 .PHONY: verilog
-verilog: $(sim_vsrcs)
+verilog: $(sim_common_files)
 
 #########################################################################################
 # helper rules to run simulations

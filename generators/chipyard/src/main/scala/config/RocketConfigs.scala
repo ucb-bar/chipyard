@@ -42,18 +42,21 @@ class HwachaRocketConfig extends Config(
   new chipyard.config.WithHwachaTest ++
   new hwacha.DefaultHwachaConfig ++                              // use Hwacha vector accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
 
 // DOC include start: GemminiRocketConfig
 class GemminiRocketConfig extends Config(
   new gemmini.DefaultGemminiConfig ++                            // use Gemmini systolic array GEMM accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: GemminiRocketConfig
 
 class FPGemminiRocketConfig extends Config(
   new gemmini.GemminiFP32DefaultConfig ++                         // use FP32Gemmini systolic array GEMM accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
 
 class BarCacheRocketConfig extends Config(

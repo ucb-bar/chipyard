@@ -142,22 +142,46 @@ ifeq ($(GENERATOR_PACKAGE),hwacha)
 	long_name=$(MODEL_PACKAGE).$(CONFIG)
 endif
 
+# chisel generated outputs
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
 
-TOP_FILE       ?= $(build_dir)/$(long_name).top.v
-TOP_FIR        ?= $(build_dir)/$(long_name).top.fir
-TOP_ANNO       ?= $(build_dir)/$(long_name).top.anno.json
-TOP_SMEMS_FILE ?= $(build_dir)/$(long_name).top.mems.v
-TOP_SMEMS_CONF ?= $(build_dir)/$(long_name).top.mems.conf
-TOP_SMEMS_FIR  ?= $(build_dir)/$(long_name).top.mems.fir
+# chisel anno modification output
+FIRTOOL_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
+FINAL_ANNO_FILE ?= $(build_dir)/$(long_name).appended.anno.json
 
-HARNESS_FILE       ?= $(build_dir)/$(long_name).harness.v
-HARNESS_FIR        ?= $(build_dir)/$(long_name).harness.fir
-HARNESS_ANNO       ?= $(build_dir)/$(long_name).harness.anno.json
-HARNESS_SMEMS_FILE ?= $(build_dir)/$(long_name).harness.mems.v
+# scala firrtl compiler (sfc) outputs
+SFC_FIRRTL_BASENAME ?= $(build_dir)/$(long_name).sfc
+SFC_FIRRTL_FILE ?= $(SFC_FIRRTL_BASENAME).fir
+SFC_ANNO_FILE ?= $(build_dir)/$(long_name).sfc.anno.json
+
+# firtool compiler outputs
+FIRTOOL_TOP_HRCHY_JSON ?= $(build_dir)/top_module_hierarchy.json
+FIRTOOL_MODEL_HRCHY_JSON ?= $(build_dir)/model_module_hierarchy.json
+FIRTOOL_SMEMS_CONF ?= $(build_dir)/$(long_name).mems.conf
+# hardcoded firtool outputs
+FIRTOOL_FILELIST = $(OUT_DIR)/filelist.f
+FIRTOOL_BB_MODS_FILELIST = $(OUT_DIR)/firrtl_black_box_resource_files.f
+FIRTOOL_TOP_SMEMS_JSON = $(OUT_DIR)/metadata/seq_mems.json
+FIRTOOL_MODEL_SMEMS_JSON = $(OUT_DIR)/metadata/tb_seq_mems.json
+
+# macrocompiler smems in/output
+TOP_SMEMS_CONF ?= $(build_dir)/$(long_name).top.mems.conf
+TOP_SMEMS_FILE ?= $(OUT_DIR)/$(long_name).top.mems.v
+TOP_SMEMS_FIR  ?= $(build_dir)/$(long_name).top.mems.fir
 HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
+HARNESS_SMEMS_FILE ?= $(OUT_DIR)/$(long_name).harness.mems.v
 HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
+
+# top module files to include
+TOP_MODS_FILELIST ?= $(build_dir)/$(long_name).top.f
+# model module files to include (not including top modules)
+MODEL_MODS_FILELIST ?= $(build_dir)/$(long_name).model.f
+# list of all blackbox files (may be included in the top/model.f files)
+# this has the build_dir appended
+BB_MODS_FILELIST ?= $(build_dir)/$(long_name).bb.f
+# all module files to include (top, model, bb included)
+ALL_MODS_FILELIST ?= $(build_dir)/$(long_name).all.f
 
 BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
@@ -165,8 +189,6 @@ BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
 # files that contain lists of files needed for VCS or Verilator simulation
 SIM_FILE_REQS =
 sim_files              ?= $(build_dir)/sim_files.f
-sim_top_blackboxes     ?= $(build_dir)/firrtl_black_box_resource_files.top.f
-sim_harness_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
 # single file that contains all files needed for VCS or Verilator simulation (unique and without .h's)
 sim_common_files       ?= $(build_dir)/sim_files.common.f
 
@@ -191,8 +213,6 @@ SBT_CLIENT_FLAG = --client
 endif
 
 # passes $(JAVA_TOOL_OPTIONS) from env to java
-# Use java -jar approach by default so that SBT thin-client sees the JAVA flags
-# Workaround for behavior reported here: https://github.com/sbt/sbt/issues/6468
 SBT_BIN ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
 SBT = $(SBT_BIN) $(SBT_CLIENT_FLAG)
 SBT_NON_THIN = $(subst $(SBT_CLIENT_FLAG),,$(SBT))
@@ -227,22 +247,12 @@ binary_hex= $(sim_out_name).loadmem_hex
 #########################################################################################
 # build output directory for compilation
 #########################################################################################
+# output for all project builds
 gen_dir=$(sim_dir)/generated-src
+# per-project output directory
 build_dir=$(gen_dir)/$(long_name)
-
-#########################################################################################
-# vsrcs needed to run projects
-#########################################################################################
-rocketchip_vsrc_dir = $(ROCKETCHIP_DIR)/src/main/resources/vsrc
-
-#########################################################################################
-# sources needed to run simulators
-#########################################################################################
-sim_vsrcs = \
-	$(TOP_FILE) \
-	$(HARNESS_FILE) \
-	$(TOP_SMEMS_FILE) \
-	$(HARNESS_SMEMS_FILE)
+# final generated collateral per-project
+OUT_DIR ?= $(build_dir)/gen-collateral
 
 #########################################################################################
 # assembly/benchmark variables

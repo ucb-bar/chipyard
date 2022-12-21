@@ -57,14 +57,18 @@ class WithNPMPs(n: Int = 8) extends Config((site, here, up) => {
 })
 
 class WithRocketICacheScratchpad extends Config((site, here, up) => {
-  case RocketTilesKey => up(RocketTilesKey, site) map { r =>
-    r.copy(icache = r.icache.map(_.copy(itimAddr = Some(0x300000 + r.hartId * 0x10000))))
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      icache = tp.tileParams.icache.map(_.copy(itimAddr = Some(0x300000 + tp.tileParams.hartId * 0x10000)))
+    ))
   }
 })
 
 class WithRocketDCacheScratchpad extends Config((site, here, up) => {
-  case RocketTilesKey => up(RocketTilesKey, site) map { r =>
-    r.copy(dcache = r.dcache.map(_.copy(nSets = 32, nWays = 1, scratch = Some(0x200000 + r.hartId * 0x10000))))
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      dcache = tp.tileParams.dcache.map(_.copy(nSets = 32, nWays = 1, scratch = Some(0x200000 + tp.tileParams.hartId * 0x10000)))
+    ))
   }
 })
 
