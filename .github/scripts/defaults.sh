@@ -50,7 +50,6 @@ mapping["chipyard-hwacha"]=" CONFIG=HwachaRocketConfig"
 mapping["chipyard-gemmini"]=" CONFIG=GemminiRocketConfig"
 mapping["chipyard-cva6"]=" CONFIG=CVA6Config"
 mapping["chipyard-ibex"]=" CONFIG=IbexConfig"
-# currently spi tests are unsupported in verilator w/ circt
 mapping["chipyard-spiflashread"]=" CONFIG=LargeSPIFlashROMRocketConfig"
 mapping["chipyard-spiflashwrite"]=" CONFIG=SmallSPIFlashRocketConfig"
 mapping["chipyard-mmios"]=" CONFIG=MMIORocketConfig verilog"
