@@ -7,7 +7,7 @@ vlsi.core.max_threads: 12
 # Technology paths
 technology.sky130:
   sky130A: "/path/to/sky130A"
-  openram_lib: "/path/to/sky130_sram_macros" 
+  openram_lib: "/path/to/sky130_sram_macros"
 
   # this key is OPTIONAL, no NDA files will be used if it does not point to a valid path
   sky130_nda: "/path/to/skywater-src-nda"
@@ -23,7 +23,7 @@ vlsi.inputs.clocks: [
   {name: "clock_clock", period: "10ns", uncertainty: "1ns"}
 ]
 
-# Generate Make include to aid in flow 
+# Generate Make include to aid in flow
 vlsi.core.build_system: make
 
 # Placement Constraints
@@ -53,7 +53,6 @@ par.generate_power_straps_options:
     pin_layers:
       - met5
     blockage_spacing_met2: 4.0
-    blockage_spacing_met4: 2.0
     blockage_spacing_met4: 2.0
     track_width: 3
     track_width_met5: 1

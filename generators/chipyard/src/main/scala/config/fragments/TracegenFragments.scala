@@ -11,4 +11,3 @@ class TraceGenTop(implicit p: Parameters) extends TraceGenSystem
 class WithTracegenSystem extends Config((site, here, up) => {
   case BuildSystem => (p: Parameters) => new TraceGenTop()(p)
 })
-

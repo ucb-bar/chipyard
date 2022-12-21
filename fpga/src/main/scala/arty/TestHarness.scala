@@ -38,4 +38,3 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
     ApplyHarnessBinders(this, d.lazySystem, d.portMap)
   }
 }
-

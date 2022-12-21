@@ -48,7 +48,7 @@ Prerequisites
   * Yosys (synthesis), install `from source <https://yosyshq.net/yosys/download.html>`__ or `using conda <https://anaconda.org/TimVideos/yosys>`__
   * OpenROAD (place-and-route), install `from source <https://openroad.readthedocs.io/en/latest/main/README.html#install-dependencies>`__
   * Magic (DRC), install `from source <http://www.opencircuitdesign.com/magic/install.html>`__
-  * NetGen (LVS), install `from source <http://www.opencircuitdesign.com/netgen/install.html>`__ or `using conda <https://anaconda.org/conda-forge/netgen>`__ 
+  * NetGen (LVS), install `from source <http://www.opencircuitdesign.com/netgen/install.html>`__ or `using conda <https://anaconda.org/conda-forge/netgen>`__
 
 * Sky130 PDK, install using `these directions  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__
 
@@ -59,8 +59,8 @@ In the Chipyard root, run:
 .. code-block:: shell
 
     ./scripts/init-vlsi.sh sky130 openroad
-    
-to pull the Hammer submodule. Note that for technologies other than ``sky130`` or ``asap7``, the tech plugin submodule is cloned into the ``vlsi`` folder, 
+
+to pull the Hammer submodule. Note that for technologies other than ``sky130`` or ``asap7``, the tech plugin submodule is cloned into the ``vlsi`` folder,
 and for the commercial tool flow (set up by omitting the ``openroad`` argument), the tool plugin submodules are cloned into the ``vlsi`` folder.
 
 Pull the Hammer environment into the shell:
@@ -79,14 +79,14 @@ To elaborate the ``TinyRocketConfig`` and set up all prerequisites for the build
 
     make buildfile tutorial=sky130-openroad
 
-The command ``make buildfile`` generates a set of Make targets in ``build/hammer.d``. 
-It needs to be re-run if environment variables are changed. 
+The command ``make buildfile`` generates a set of Make targets in ``build/hammer.d``.
+It needs to be re-run if environment variables are changed.
 It is recommended that you edit these variables directly in the Makefile rather than exporting them to your shell environment.
 
 For the purpose of brevity, in this tutorial we will set the Make variable ``tutorial=sky130-openroad``,
 which will cause additional variables to be set in ``tutorial.mk``, a few of which are summarized as follows:
 
-* ``CONFIG=TinyRocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a stripped-down Rocket Chip in the interest of minimizing tool runtime. 
+* ``CONFIG=TinyRocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a stripped-down Rocket Chip in the interest of minimizing tool runtime.
 * ``tech_name=sky130`` sets a few more necessary paths in the ``Makefile``, such as the appropriate Hammer plugin
 * ``TOOLS_CONF`` and ``TECH_CONF`` select the approproate YAML configuration files, ``example-openroad.yml`` and ``example-sky130.yml``, which are described below
 * ``DESIGN_CONF`` and ``EXTRA_CONFS`` allow for additonal design-specific overrides of the Hammer IR in ``example-sky130.yml``
@@ -105,14 +105,14 @@ example-sky130.yml
 ^^^^^^^^^^^^^^^^^^
 This contains the Hammer configuration for this example project. Example clock constraints, power straps definitions, placement constraints, and pin constraints are given. Additional configuration for the extra libraries and tools are at the bottom.
 
-First, set ``technology.sky130.<sky130A, openram_lib>`` to the absolute path of the respective directories containing the Sky130 PDK and SRAM files. See the 
+First, set ``technology.sky130.<sky130A, openram_lib>`` to the absolute path of the respective directories containing the Sky130 PDK and SRAM files. See the
 `Sky130 Hammer plugin README <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__
 for details about the PDK setup.
 
 
 example-openroad.yml
 ^^^^^^^^^^^^^^^^^^^^
-This contains the Hammer configuration for the OpenROAD tool flow. 
+This contains the Hammer configuration for the OpenROAD tool flow.
 It selects tools for synthesis (Yosys), place and route (OpenROAD), DRC (Magic), and LVS (NetGen).
 
 Synthesis
@@ -122,7 +122,7 @@ Synthesis
 
     make syn tutorial=sky130-openroad
 
-Post-synthesis logs and collateral are in ``build/syn-rundir``. 
+Post-synthesis logs and collateral are in ``build/syn-rundir``.
 
 .. The raw quality of results data is available at ``build/syn-rundir/reports``, and methods to extract this information for design space exploration are a work in progress.
 
@@ -162,7 +162,7 @@ To run DRC & LVS:
     make drc tutorial=sky130-openroad
     make lvs tutorial=sky130-openroad
 
-Some DRC errors are expected from this PDK, especially with regards to the SRAMs, as explained in the 
+Some DRC errors are expected from this PDK, especially with regards to the SRAMs, as explained in the
 `Sky130 Hammer plugin README  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__.
 
 
@@ -172,7 +172,7 @@ Firt, refer to the :ref:`VLSI/Hammer:VLSI Flow Control` documentation. The below
 
 .. code-block:: shell
 
-      # the following two statements are equivalent because the 
+      # the following two statements are equivalent because the
       #   extraction step immediately precedes the write_design step
       make redo-par HAMMER_EXTRA_ARGS="--start_after_step extraction"
       make redo-par HAMMER_EXTRA_ARGS="--start_before_step write_design"

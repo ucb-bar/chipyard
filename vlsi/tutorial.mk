@@ -20,7 +20,7 @@ ifeq ($(tutorial),sky130-commercial)
     TECH_CONF         ?= example-sky130.yml
     DESIGN_CONF       ?= example-designs/sky130-commercial.yml
     EXTRA_CONFS       ?= $(if $(filter $(VLSI_TOP),Rocket), example-designs/sky130-rocket.yml, )
-    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONF) $(EXTRA_CONFS) 
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONF) $(EXTRA_CONFS)
     VLSI_OBJ_DIR      ?= build-sky130-commercial
 endif
 
@@ -31,6 +31,6 @@ ifeq ($(tutorial),sky130-openroad)
     TECH_CONF         ?= example-sky130.yml
     DESIGN_CONF       ?= example-designs/sky130-openroad.yml
     EXTRA_CONFS       ?= $(if $(filter $(VLSI_TOP),Rocket), example-designs/sky130-rocket.yml, )
-    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONF) $(EXTRA_CONFS) 
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONF) $(EXTRA_CONFS)
     VLSI_OBJ_DIR      ?= build-sky130-openroad
 endif

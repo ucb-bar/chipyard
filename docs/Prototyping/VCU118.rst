@@ -122,7 +122,7 @@ Additionally, these instructions assume you are using Linux with ``sudo`` privil
 
 3. The VCU118 bootrom assumes that the Linux binary to load into memory will be located on sector 34 of the SDCard.
    Change the default partition alignment to `1` so you can write to sector `34`.
-   Do this with the `l` command from the expert menu (opened with 'x', closed with 'm'). 
+   Do this with the `l` command from the expert menu (opened with 'x', closed with 'm').
 
 4. Create a 512MiB partition to store the Linux binary (this can be smaller but it must be larger than the size of the Linux binary).
    Use `n`, partion number 1 and select sector 34, with size `+1048576` (corresponding to 512MiB).
@@ -162,4 +162,4 @@ To interact with Linux via the UART console, you can connect to the serial port 
 
    screen -S FPGA_UART_CONSOLE /dev/ttyUSB1 115200
 
-Once connected, you should see the binary being loaded as well as Linux output (in some cases you might need to reset the DUT). Sign in as 'root' with password 'fpga'. 
+Once connected, you should see the binary being loaded as well as Linux output (in some cases you might need to reset the DUT). Sign in as 'root' with password 'fpga'.

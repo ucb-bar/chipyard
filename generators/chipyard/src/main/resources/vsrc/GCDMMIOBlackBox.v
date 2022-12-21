@@ -17,7 +17,7 @@ module GCDMMIOBlackBox
 
    localparam S_IDLE = 2'b00, S_RUN = 2'b01, S_DONE = 2'b10;
 
-   reg [1:0]               state;   
+   reg [1:0]               state;
    reg [WIDTH-1:0]         tmp;
 
    assign input_ready = state == S_IDLE;
@@ -34,12 +34,12 @@ module GCDMMIOBlackBox
       else if (state == S_DONE && output_ready)
         state <= S_IDLE;
    end
-   
+
    always @(posedge clock) begin
       if (state == S_IDLE && input_valid) begin
          gcd <= x;
          tmp <= y;
-      end else if (state == S_RUN) begin  
+      end else if (state == S_RUN) begin
          if (gcd > tmp)
            gcd <= gcd - tmp;
          else

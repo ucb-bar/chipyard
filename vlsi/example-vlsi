@@ -56,7 +56,7 @@ class ExampleDriver(CLIDriver):
 
             # The target step in any of the above calls may be a default step or another one of your custom hooks
         ]
-        return extra_hooks 
+        return extra_hooks
 
 if __name__ == '__main__':
     ExampleDriver().main()

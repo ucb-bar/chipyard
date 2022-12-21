@@ -83,4 +83,3 @@ class ChipyardSubsystemModuleImp[+L <: ChipyardSubsystem](_outer: L) extends Bas
   // This is included in the `dromajo_params.h` header file
   DromajoHelper.addArtefacts(InSubsystem)
 }
-

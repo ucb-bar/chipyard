@@ -75,5 +75,3 @@ We can use this config fragment when composing our configs.
 
 .. note::
    Readers who want more information on the configuration system may be interested in reading :ref:`cdes`.
-
-

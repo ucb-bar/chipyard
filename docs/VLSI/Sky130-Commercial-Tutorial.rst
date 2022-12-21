@@ -57,7 +57,7 @@ In the Chipyard root, run:
 .. code-block:: shell
 
     ./scripts/init-vlsi.sh sky130
-    
+
 to pull the Hammer & plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule must be added in the ``vlsi`` folder first.
 
 Pull the Hammer environment into the shell:
@@ -76,14 +76,14 @@ To elaborate the ``TinyRocketConfig`` and set up all prerequisites for the build
 
     make buildfile tutorial=sky130-commercial
 
-The command ``make buildfile`` generates a set of Make targets in ``build/hammer.d``. 
-It needs to be re-run if environment variables are changed. 
+The command ``make buildfile`` generates a set of Make targets in ``build/hammer.d``.
+It needs to be re-run if environment variables are changed.
 It is recommended that you edit these variables directly in the Makefile rather than exporting them to your shell environment.
 
 For the purpose of brevity, in this tutorial we will set the Make variable ``tutorial=sky130-commercial``,
 which will cause additional variables to be set in ``tutorial.mk``, a few of which are summarized as follows:
 
-* ``CONFIG=TinyRocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a stripped-down Rocket Chip in the interest of minimizing tool runtime. 
+* ``CONFIG=TinyRocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a stripped-down Rocket Chip in the interest of minimizing tool runtime.
 * ``tech_name=sky130`` sets a few more necessary paths in the ``Makefile``, such as the appropriate Hammer plugin
 * ``TOOLS_CONF`` and ``TECH_CONF`` select the approproate YAML configuration files, ``example-tools.yml`` and ``example-sky130.yml``, which are described below
 * ``DESIGN_CONF`` and ``EXTRA_CONFS`` allow for additonal design-specific overrides of the Hammer IR in ``example-sky130.yml``
@@ -102,13 +102,13 @@ example-sky130.yml
 ^^^^^^^^^^^^^^^^^^
 This contains the Hammer configuration for this example project. Example clock constraints, power straps definitions, placement constraints, and pin constraints are given. Additional configuration for the extra libraries and tools are at the bottom.
 
-First, set ``technology.sky130.sky130A/sky130_nda/openram_lib`` to the absolute path of the respective directories containing the Sky130 PDK and SRAM files. See the 
+First, set ``technology.sky130.sky130A/sky130_nda/openram_lib`` to the absolute path of the respective directories containing the Sky130 PDK and SRAM files. See the
 `Sky130 Hammer plugin README <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__
 for details about the PDK setup.
 
 example-tools.yml
 ^^^^^^^^^^^^^^^^^
-This contains the Hammer configuration for a commercial tool flow. 
+This contains the Hammer configuration for a commercial tool flow.
 It selects tools for synthesis (Cadence Genus), place and route (Cadence Innovus), DRC and LVS (Mentor Calibre).
 
 Synthesis
@@ -127,7 +127,7 @@ Place-and-Route
 
 After completion, the final database can be opened in an interactive Innovus session via ``./build/par-rundir/generated-scripts/open_chip``.
 
-Intermediate database are written in ``build/par-rundir`` between each step of the ``par`` action, and can be restored in an interactive Innovus session as desired for debugging purposes. 
+Intermediate database are written in ``build/par-rundir`` between each step of the ``par`` action, and can be restored in an interactive Innovus session as desired for debugging purposes.
 
 Timing reports are found in ``build/par-rundir/timingReports``. They are gzipped text files.
 
@@ -142,9 +142,9 @@ To run DRC & LVS, and view the results in Calibre:
     make lvs tutorial=sky130-commercial
     ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/lvs-rundir/generated-scripts/view_lvs
 
-Some DRC errors are expected from this PDK, especially with regards to the SRAMs, as explained in the 
+Some DRC errors are expected from this PDK, especially with regards to the SRAMs, as explained in the
 `Sky130 Hammer plugin README  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__.
-For this reason, the ``example-vlsi-sky130`` script black-boxes the SRAMs for DRC/LVS analysis. 
+For this reason, the ``example-vlsi-sky130`` script black-boxes the SRAMs for DRC/LVS analysis.
 
 Simulation
 ^^^^^^^^^^
