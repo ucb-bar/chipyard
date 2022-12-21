@@ -197,7 +197,7 @@ $(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 		--disable-annotation-classless \
 		--disable-annotation-unknown \
 		--warn-on-unprocessed-annotations \
-		--lowering-options=disallowPackedArrays,emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,explicitBitcast,verifLabels,locationInfoStyle=wrapInAtSquareBracket \
+		--lowering-options=emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,explicitBitcast,verifLabels,locationInfoStyle=wrapInAtSquareBracket \
 		--repl-seq-mem \
 		--repl-seq-mem-circuit=$(MODEL) \
 		--repl-seq-mem-file=$(FIRTOOL_SMEMS_CONF) \
