@@ -16,7 +16,7 @@ object RocketFloorplans {
       val cacheDataArray = topGroup.placeAt(0, context.createElasticArray(3, Direction.Horizontal))
 
       val icacheData = cacheDataArray.placeAt(0, context.createMemArray(Some("l1_icache_data"), Some(0.9)))
-      tile.outer.frontend.icache.module.data_arrays.map(x => icacheData.addMem(x._1))
+      tile.outer.frontend.icache.module.data_arrays.map(x => icacheData.addMem(x))
 
       cacheDataArray.placeAt(1, context.createSpacer(
         name = Some("cache_spacer"),
@@ -27,7 +27,7 @@ object RocketFloorplans {
           val dcacheData = cacheDataArray.placeAt(2, context.createMemArray(Some("l1_dcache_data"), Some(0.9)))
           x.dcache match {
             case cache: DCache =>
-              cache.module.dcacheImpl.data.data_arrays.map(x => dcacheData.addMem(x._1))
+              cache.module.dcacheImpl.data.data_arrays.map(x => dcacheData.addMem(x))
             case _ =>
               ???
           }
@@ -54,7 +54,7 @@ object RocketFloorplans {
       val cacheDataArray = topGroup.placeAt(0, context.createElasticArray(3, Direction.Vertical))
 
       val icacheData = cacheDataArray.placeAt(0, context.createMemArray(Some("l1_icache_data"), Some(1)))
-      tile.outer.frontend.icache.module.data_arrays.map(x => icacheData.addMem(x._1))
+      tile.outer.frontend.icache.module.data_arrays.map(x => icacheData.addMem(x))
 
       cacheDataArray.placeAt(1, context.createSpacer(
         name = Some("cache_spacer"),
@@ -65,7 +65,7 @@ object RocketFloorplans {
           val dcacheData = cacheDataArray.placeAt(2, context.createMemArray(Some("l1_dcache_data"), Some(1)))
           x.dcache match {
             case cache: DCache =>
-              cache.module.dcacheImpl.data.data_arrays.map(x => dcacheData.addMem(x._1))
+              cache.module.dcacheImpl.data.data_arrays.map(x => dcacheData.addMem(x))
             case _ =>
               ???
           }
