@@ -4,8 +4,8 @@
 #include <inttypes.h>
 #include <math.h>
 
-#define FFT_WRITE_LANE  0x2000
-#define FFT_RD_LANE_BASE 0x2008
+#define FFT_WRITE_LANE  0x2400
+#define FFT_RD_LANE_BASE 0x2408
 // addr of read lane i is FFT_RD_LANE_BASE + i * 8
 
 // from generators/fft-generator/test_pts.py (in the fft-generator repo)

@@ -12,8 +12,45 @@ sim_dir=$(abspath .)
 #########################################################################################
 # include shared variables
 #########################################################################################
+include $(vlsi_dir)/tutorial.mk
 include $(base_dir)/variables.mk
 include $(vlsi_dir)/variables.mk
+
+#########################################################################################
+# vlsi types and rules
+#########################################################################################
+sim_name           ?= vcs # needed for GenerateSimFiles, but is unused
+tech_name          ?= asap7
+tech_dir           ?= $(if $(filter $(tech_name),sky130 asap7 nangate45),\
+                        $(vlsi_dir)/hammer/src/hammer-vlsi/technology/$(tech_name), \
+                        $(vlsi_dir)/hammer-$(tech_name)-plugin/$(tech_name))
+SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
+SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
+SMEMS_HAMMER       ?= $(build_dir)/$(long_name).mems.hammer.json
+
+ifdef USE_SRAM_COMPILER
+	MACROCOMPILER_MODE ?= -l $(SMEMS_COMP) --use-compiler -hir $(SMEMS_HAMMER) --mode strict
+else
+	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER) --mode strict
+endif
+
+ENV_YML            ?= $(vlsi_dir)/env.yml
+TECH_CONF          ?= $(if $(filter $(tech_name),asap7),        example-asap7.yml,\
+                                                                example-sky130.yml)
+TOOLS_CONF         ?= example-tools.yml
+INPUT_CONFS        ?= $(TOOLS_CONF) $(TECH_CONF)
+HAMMER_EXEC        ?= $(if $(filter $(tech_name),sky130),\
+                        ./example-vlsi-sky130,\
+                        ./example-vlsi)
+VLSI_TOP           ?= $(TOP)
+VLSI_HARNESS_DUT_NAME ?= chiptop
+# If overriding, this should be relative to $(vlsi_dir)
+VLSI_OBJ_DIR       ?= build
+ifneq ($(CUSTOM_VLOG),)
+	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/custom-$(VLSI_TOP)
+else
+	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/$(long_name)-$(VLSI_TOP)
+endif
 
 #########################################################################################
 # general rules
@@ -141,7 +178,7 @@ $(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_commo
 	echo "  saif.mode: 'time'" >> $@
 	echo "  saif.start_time: '0ns'" >> $@
 	echo "  saif.end_time: '`bc <<< $(timeout_cycles)*$(CLOCK_PERIOD)`ns'" >> $@
-ifdef USE_FSDB
+ifndef USE_VPD
 	echo "  options:" >> $@
 	echo '    - "-kdb"' >> $@
 	echo "  options_meta: 'append'" >> $@
@@ -166,7 +203,7 @@ $(POWER_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_fi
 	echo "  database: '$(OBJ_DIR)/par-rundir/$(VLSI_TOP)_FINAL'" >> $@
 ifneq ($(BINARY), )
 	echo "  waveforms: [" >> $@
-ifdef USE_FSDB
+ifndef USE_VPD
 	echo "    '$(sim_out_name).fsdb'" >> $@
 else
 	echo "    '$(sim_out_name).vpd'" >> $@

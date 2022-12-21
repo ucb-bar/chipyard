@@ -60,10 +60,12 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
   new Group(test.name, Seq(test), SubProcess(options))
 } toSeq
 
-val chiselVersion = "3.5.1"
+val chiselVersion = "3.5.2"
 
 lazy val chiselSettings = Seq(
-  libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % chiselVersion),
+  libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % chiselVersion,
+  "org.apache.commons" % "commons-lang3" % "3.12.0",
+  "org.apache.commons" % "commons-text" % "1.9"),
   addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % chiselVersion cross CrossVersion.full))
 
 val firrtlVersion = "1.5.1"
@@ -119,6 +121,7 @@ lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.json4s" %% "json4s-jackson" % "3.6.1",
+      "org.apache.commons" % "commons-lang3" % "3.12.0",
       "org.scalatest" %% "scalatest" % "3.2.0" % "test"
     )
   )
@@ -145,7 +148,19 @@ lazy val chipyard = (project in file("generators/chipyard"))
   .dependsOn(testchipip, rocketchip, boom, hwacha, sifive_blocks, sifive_cache, tapeout,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsp-utils`,
-    gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator)
+    gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
+    constellation, mempress)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+lazy val mempress = (project in file("generators/mempress"))
+  .dependsOn(rocketchip, midasTargetUtils)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(chiselTestSettings)
+  .settings(commonSettings)
+
+lazy val constellation = (project in file("generators/constellation"))
+  .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 

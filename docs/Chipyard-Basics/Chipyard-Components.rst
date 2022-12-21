@@ -47,6 +47,9 @@ Accelerators
 System Components:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+**constellation**
+  A generator for network-on-chip (NoC) interconnects.
+
 **icenet**
   A Network Interface Controller (NIC) designed to achieve up to 200 Gbps.
 

@@ -60,13 +60,15 @@ class WithVCU118Tweaks extends Config(
 
 class RocketVCU118Config extends Config(
   new WithVCU118Tweaks ++
-  new chipyard.RocketConfig)
+  new chipyard.RocketConfig
+)
 // DOC include end: AbstractVCU118 and Rocket
 
 class BoomVCU118Config extends Config(
   new WithFPGAFrequency(50) ++
   new WithVCU118Tweaks ++
-  new chipyard.MegaBoomConfig)
+  new chipyard.MegaBoomConfig
+)
 
 class WithFPGAFrequency(fMHz: Double) extends Config(
   new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.

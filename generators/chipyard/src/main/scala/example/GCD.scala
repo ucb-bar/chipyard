@@ -13,7 +13,7 @@ import freechips.rocketchip.util.UIntIsOneOf
 
 // DOC include start: GCD params
 case class GCDParams(
-  address: BigInt = 0x2000,
+  address: BigInt = 0x1000,
   width: Int = 32,
   useAXI4: Boolean = false,
   useBlackBox: Boolean = true)
@@ -201,7 +201,7 @@ trait CanHavePeripheryGCDModuleImp extends LazyModuleImp {
 
 
 // DOC include start: GCD config fragment
-class WithGCD(useAXI4: Boolean, useBlackBox: Boolean) extends Config((site, here, up) => {
+class WithGCD(useAXI4: Boolean = false, useBlackBox: Boolean = false) extends Config((site, here, up) => {
   case GCDKey => Some(GCDParams(useAXI4 = useAXI4, useBlackBox = useBlackBox))
 })
 // DOC include end: GCD config fragment

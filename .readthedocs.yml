@@ -3,13 +3,12 @@ version: 2
 build:
     os: ubuntu-20.04
     tools:
-        python: "3.6"
+        python: "mambaforge-4.10"
 
 formats: all
 
 sphinx:
     configuration: docs/conf.py
 
-python:
-    install:
-        - requirements: docs/requirements.txt
+conda:
+    environment: conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64.conda-lock.yml

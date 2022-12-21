@@ -38,7 +38,7 @@ We also see this class define several ``ElaborationArtefacts``, files emitted af
 Subsystem
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Looking in `generators/chipyard/src/main/scala/Subsystem.scala <https://github.com/ucb-bar/chipyard/blob/master/generators/chipyard/src/main/scala/Subsystem.scala>`__, we can see how Chipyard's ``Subsystem``
+Looking in `generators/chipyard/src/main/scala/Subsystem.scala <https://github.com/ucb-bar/chipyard/blob/main/generators/chipyard/src/main/scala/Subsystem.scala>`__, we can see how Chipyard's ``Subsystem``
 extends the ``BaseSubsystem`` abstract class. ``Subsystem`` mixes in the ``HasBoomAndRocketTiles`` trait that
 defines and instantiates BOOM or Rocket tiles, depending on the parameters specified.
 We also connect some basic IOs for each tile here, specifically the hartids and the reset vector.

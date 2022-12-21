@@ -15,7 +15,7 @@
 	url = https://github.com/riscv-boom/riscv-boom.git
 [submodule "generators/sifive-blocks"]
 	path = generators/sifive-blocks
-	url = https://github.com/sifive/sifive-blocks.git
+	url = https://github.com/chipsalliance/rocket-chip-blocks.git
 [submodule "generators/hwacha"]
 	path = generators/hwacha
 	url = https://github.com/ucb-bar/hwacha.git
@@ -27,41 +27,7 @@
 	url = https://github.com/firesim/icenet.git
 [submodule "generators/block-inclusivecache-sifive"]
 	path = generators/sifive-cache
-	url = https://github.com/sifive/block-inclusivecache-sifive.git
-[submodule "toolchains/riscv-tools/riscv-gnu-toolchain"]
-	path = toolchains/riscv-tools/riscv-gnu-toolchain
-	url = https://github.com/riscv/riscv-gnu-toolchain.git
-[submodule "toolchains/riscv-tools/riscv-gnu-toolchain-prebuilt"]
-	path = toolchains/riscv-tools/riscv-gnu-toolchain-prebuilt
-	url = https://github.com/ucb-bar/chipyard-toolchain-prebuilt.git
-	shallow = true
-[submodule "toolchains/riscv-tools/riscv-isa-sim"]
-	path = toolchains/riscv-tools/riscv-isa-sim
-	url = https://github.com/riscv/riscv-isa-sim.git
-[submodule "toolchains/riscv-tools/riscv-pk"]
-	path = toolchains/riscv-tools/riscv-pk
-	url = https://github.com/riscv/riscv-pk.git
-[submodule "toolchains/riscv-tools/riscv-tests"]
-	path = toolchains/riscv-tools/riscv-tests
-	url = https://github.com/riscv/riscv-tests.git
-[submodule "toolchains/riscv-tools/riscv-openocd"]
-	path = toolchains/riscv-tools/riscv-openocd
-	url = https://github.com/riscv/riscv-openocd.git
-[submodule "toolchains/esp-tools/riscv-gnu-toolchain"]
-	path = toolchains/esp-tools/riscv-gnu-toolchain
-	url = https://github.com/ucb-bar/esp-gnu-toolchain.git
-[submodule "toolchains/esp-tools/riscv-isa-sim"]
-	path = toolchains/esp-tools/riscv-isa-sim
-	url = https://github.com/ucb-bar/esp-isa-sim.git
-[submodule "toolchains/esp-tools/riscv-pk"]
-	path = toolchains/esp-tools/riscv-pk
-	url = https://github.com/riscv/riscv-pk.git
-[submodule "toolchains/esp-tools/riscv-tests"]
-	path = toolchains/esp-tools/riscv-tests
-	url = https://github.com/ucb-bar/esp-tests.git
-[submodule "toolchains/libgloss"]
-	path = toolchains/libgloss
-	url = https://github.com/ucb-bar/libgloss-htif.git
+	url = https://github.com/chipsalliance/rocket-chip-inclusive-cache.git
 [submodule "vlsi/hammer"]
 	path = vlsi/hammer
 	url = https://github.com/ucb-bar/hammer.git
@@ -83,9 +49,6 @@
 [submodule "vlsi/hammer-mentor-plugins"]
 	path = vlsi/hammer-mentor-plugins
 	url = https://github.com/ucb-bar/hammer-mentor-plugins.git
-[submodule "toolchains/qemu"]
-	path = toolchains/qemu
-	url = https://github.com/qemu/qemu.git
 [submodule "tools/axe"]
 	path = tools/axe
 	url = https://github.com/CTSRD-CHERI/axe.git
@@ -121,7 +84,7 @@
 	url = https://github.com/ucb-bar/riscv-sodor.git
 [submodule "fpga/fpga-shells"]
 	path = fpga/fpga-shells
-	url = https://github.com/sifive/fpga-shells.git
+	url = https://github.com/chipsalliance/rocket-chip-fpga-shells.git
 [submodule "tools/api-config-chipsalliance"]
 	path = tools/api-config-chipsalliance
 	url = https://github.com/chipsalliance/api-config-chipsalliance.git
@@ -134,3 +97,39 @@
 [submodule "generators/fft-generator"]
 	path = generators/fft-generator
 	url = https://github.com/ucb-bar/FFTGenerator.git
+[submodule "toolchains/riscv-tools/riscv-tests"]
+	path = toolchains/riscv-tools/riscv-tests
+	url = https://github.com/riscv-software-src/riscv-tests.git
+[submodule "toolchains/riscv-tools/riscv-pk"]
+	path = toolchains/riscv-tools/riscv-pk
+	url = https://github.com/riscv-software-src/riscv-pk.git
+[submodule "toolchains/riscv-tools/riscv-openocd"]
+	path = toolchains/riscv-tools/riscv-openocd
+	url = https://github.com/riscv/riscv-openocd.git
+[submodule "toolchains/riscv-tools/riscv-isa-sim"]
+	path = toolchains/riscv-tools/riscv-isa-sim
+	url = https://github.com/riscv-software-src/riscv-isa-sim.git
+[submodule "toolchains/riscv-tools/riscv-tools-feedstock"]
+	path = toolchains/riscv-tools/riscv-tools-feedstock
+	url = https://github.com/ucb-bar/riscv-tools-feedstock.git
+[submodule "toolchains/esp-tools/esp-tools-feedstock"]
+	path = toolchains/esp-tools/esp-tools-feedstock
+	url = https://github.com/ucb-bar/esp-tools-feedstock.git
+[submodule "toolchains/esp-tools/riscv-isa-sim"]
+	path = toolchains/esp-tools/riscv-isa-sim
+	url = https://github.com/ucb-bar/esp-isa-sim.git
+[submodule "toolchains/esp-tools/riscv-pk"]
+	path = toolchains/esp-tools/riscv-pk
+	url = https://github.com/riscv-software-src/riscv-pk.git
+[submodule "toolchains/esp-tools/riscv-tests"]
+	path = toolchains/esp-tools/riscv-tests
+	url = https://github.com/ucb-bar/esp-tests.git
+[submodule "toolchains/libgloss"]
+	path = toolchains/libgloss
+	url = https://github.com/ucb-bar/libgloss-htif.git
+[submodule "generators/constellation"]
+	path = generators/constellation
+	url = https://github.com/ucb-bar/constellation.git
+[submodule "generators/mempress"]
+	path = generators/mempress
+	url = https://github.com/ucb-bar/mempress.git

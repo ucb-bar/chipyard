@@ -1,0 +1,33 @@
+name: cleanup-conda
+description: 'Remove extra conda environments'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Remove extra conda environments
+      run: |
+        CONDA_REMOVE_NAMES=$(conda env list | awk '{print $1}' | tail -n +3 | grep "${{ env.conda-env-name-no-time }}" || true)
+        if [ -z "$CONDA_REMOVE_NAMES" ]; then
+          echo "No matching conda environments for ${{ env.conda-env-name-no-time }}. Skip removal."
+        else
+          echo "Removing $CONDA_REMOVE_NAMES conda environments."
+          for env in $CONDA_REMOVE_NAMES; do
+            conda env remove -n $env
+          done
+        fi
+        IS_NUMBER_REGEX='[0-9]+$'
+        conda env list | awk '{print $1}' | tail -n +4 | while read envname; do
+          ENV_DATE=$(echo $envname | sed "s/cy-[[:digit:]]\+-\(.*\)-\(riscv\|esp\)-tools/\1/")
+          if ! [[ $ENV_DATE =~ $IS_NUMBER_REGEX ]]; then
+            echo "Skipping removal of $envname since it cannot be parsed into a date"
+          else
+            NUM_DIFF=$(( ( $(date +%s) - $(date --date="$ENV_DATE" +%s) )/(60*60*24) ))
+            if (( $NUM_DIFF > 7 )); then
+              echo "Removing $envname since it is $NUM_DIFF days old."
+              conda env remove -n $envname
+            else
+              echo "Skipping removal of $envname since it is $NUM_DIFF days old."
+            fi
+          fi
+        done
+      shell: bash -leo pipefail {0}
