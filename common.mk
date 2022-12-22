@@ -104,7 +104,7 @@ $(FIRRTL_FILE) $(ANNO_FILE) $(FLOORPLAN_FPIR): generator_temp
 	@echo "" > /dev/null
 
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-$(FIRRTL_FILE) $(ANNO_FILE) &: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS)
+generator_temp &: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
@@ -163,9 +163,10 @@ $(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		--allow-unrecognized-annotations \
-		-X $(if $(shell grep "Fixed<" $(FIRRTL_FILE)),middle,none) \
+		-X $(if $(shell grep "Fixed<" $(FIRRTL_FILE)),middle,low) \
 		$(EXTRA_FIRRTL_OPTIONS))
 	$(if $(shell grep "Fixed<" $(FIRRTL_FILE)),mv $(SFC_FIRRTL_BASENAME).mid.fir $(SFC_FIRRTL_FILE),)
+	mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE)
 	firtool \
 		--format=fir \
 		-O=release \
