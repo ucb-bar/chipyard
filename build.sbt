@@ -153,7 +153,7 @@ lazy val chipyard = (project in file("generators/chipyard"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val bar_prefetchers = (project in file ("generators/bar-prefetchers"))
+lazy val bar_prefetchers = (project in file("generators/bar-prefetchers"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
