@@ -1,6 +1,6 @@
 # General Hammer Inputs Related to the Design and Build System
 
-# Generate Make include to aid in flow 
+# Generate Make include to aid in flow
 vlsi.core.build_system: make
 vlsi.core.max_threads: 12
 

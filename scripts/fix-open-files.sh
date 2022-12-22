@@ -11,4 +11,3 @@ fi
 
 # in any case, set the soft limit to the same value as the hard limit
 ulimit -Sn $(ulimit -Hn)
-

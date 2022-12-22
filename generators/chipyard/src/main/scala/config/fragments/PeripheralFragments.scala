@@ -75,4 +75,3 @@ class WithSerialTLBackingMemory extends Config((site, here, up) => {
 class WithExtMemIdBits(n: Int) extends Config((site, here, up) => {
     case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(idBits = n)))
 })
-

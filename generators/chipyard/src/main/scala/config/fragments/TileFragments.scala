@@ -68,4 +68,3 @@ class WithRocketDCacheScratchpad extends Config((site, here, up) => {
     ))
   }
 })
-

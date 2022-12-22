@@ -24,7 +24,7 @@ static inline size_t blkdev_max_req_len(void)
 
 static inline unsigned int blkdev_send_request(
 		unsigned long addr,
-		unsigned int offset, 
+		unsigned int offset,
 		unsigned int len,
 		unsigned char write)
 {

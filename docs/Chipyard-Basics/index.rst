@@ -19,5 +19,3 @@ Hit next to get started!
    Development-Ecosystem
    Configs-Parameters-Mixins
    Initial-Repo-Setup
-
-
