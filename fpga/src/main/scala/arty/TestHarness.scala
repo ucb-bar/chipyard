@@ -17,7 +17,7 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
 
   // Convert harness resets from Bool to Reset type.
   val hReset = Wire(Reset())
-  hReset := ck_rst
+  hReset := ~ck_rst
 
   val dReset = Wire(AsyncReset())
   dReset := reset_core.asAsyncReset
@@ -38,4 +38,3 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
     ApplyHarnessBinders(this, d.lazySystem, d.portMap)
   }
 }
-

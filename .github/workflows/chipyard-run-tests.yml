@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.1
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
 
@@ -791,6 +791,31 @@ jobs:
           group-key: "group-accels"
           project-key: "chipyard-nvdla"
 
+  chipyard-mempress-run-tests:
+    name: chipyard-mempress-run-tests
+    needs: prepare-chipyard-accels
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-accels"
+          project-key: "chipyard-mempress"
+          toolchain: "esp-tools"
+
+
   tracegen-boom-run-tests:
     name: tracegen-boom-run-tests
     needs: prepare-chipyard-tracegen
@@ -1028,6 +1053,7 @@ jobs:
             chipyard-hwacha-run-tests,
             chipyard-gemmini-run-tests,
             chipyard-nvdla-run-tests,
+            chipyard-mempress-run-tests,
             chipyard-constellation-run-tests,
             tracegen-boom-run-tests,
             tracegen-run-tests,

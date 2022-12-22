@@ -23,4 +23,3 @@ private[stage] object UnderscoreDelimitedConfigsAnnotation extends HasShellOptio
     )
   )
 }
-

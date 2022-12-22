@@ -23,11 +23,8 @@ usage() {
     echo "   esp-tools: if set, builds esp-tools toolchain used for the hwacha vector accelerator"
     echo ""
     echo "Options"
-    echo "   --prefix PREFIX       : Install destination. If unset, defaults to $CONDA_PREFIX/riscv-tools"
-    echo "                           or $CONDA_PREFIX/esp-tools"
+    echo "   --prefix -p PREFIX    : Install destination."
     echo "   --clean-after-install : Run make clean in calls to module_make and module_build"
-    echo "   --force -f            : Skip prompt checking for conda"
-    echo "   --skip-validate       : DEPRECATED: Same functionality as --force"
     echo "   --help -h             : Display this message"
     exit "$1"
 }
@@ -50,9 +47,6 @@ do
             CLEANAFTERINSTALL="true" ;;
         riscv-tools | esp-tools)
             TOOLCHAIN=$1 ;;
-        --force | -f | --skip-validate)
-            FORCE=true;
-            ;;
         * )
             error "invalid option $1"
             usage 1 ;;
@@ -60,15 +54,8 @@ do
     shift
 done
 
-if [ "$FORCE" = false ]; then
-    if [ -z ${CONDA_DEFAULT_ENV+x} ]; then
-        error "ERROR: No conda environment detected. Did you activate the conda environment (e.x. 'conda activate chipyard')?"
-        exit 1
-    fi
-fi
-
 if [ -z "$RISCV" ] ; then
-    RISCV="$CONDA_PREFIX/$TOOLCHAIN"
+    error "ERROR: Prefix not given. If conda is sourced, do you mean $CONDA_PREFIX/$TOOLCHAIN?"
 fi
 
 XLEN=64
@@ -101,6 +88,14 @@ CC= CXX= module_all riscv-pk --prefix="${RISCV}" --host=riscv${XLEN}-unknown-elf
 
 echo '==>  Installing RISC-V tests'
 module_all riscv-tests --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --with-xlen=${XLEN}
+
+echo '==> Installing espresso logic minimizer'
+(
+    cd $RDIR
+    git submodule update --init --checkout generators/constellation
+    cd generators/constellation
+    scripts/install-espresso.sh $RISCV
+)
 
 # Common tools (not in any particular toolchain dir)
 

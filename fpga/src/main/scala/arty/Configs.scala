@@ -26,6 +26,7 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
     debugIdleCycles = 5)
   case SerialTLKey => None // remove serialized tl port
 })
+
 // DOC include start: AbstractArty and Rocket
 class WithArtyTweaks extends Config(
   new WithArtyJTAGHarnessBinder ++
@@ -33,9 +34,11 @@ class WithArtyTweaks extends Config(
   new WithArtyResetHarnessBinder ++
   new WithDebugResetPassthrough ++
   new WithDefaultPeripherals ++
-  new freechips.rocketchip.subsystem.WithNBreakpoints(2))
+  new freechips.rocketchip.subsystem.WithNBreakpoints(2)
+)
 
 class TinyRocketArtyConfig extends Config(
   new WithArtyTweaks ++
-  new chipyard.TinyRocketConfig)
+  new chipyard.TinyRocketConfig
+)
 // DOC include end: AbstractArty and Rocket

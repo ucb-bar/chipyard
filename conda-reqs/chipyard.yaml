@@ -3,6 +3,9 @@ channels:
     - conda-forge
     - nodefaults
 
+platforms:
+    - linux-64
+
 dependencies:
     # https://conda-forge.org/feedstock-outputs/
     #   filterable list of all conda-forge packages
@@ -26,7 +29,6 @@ dependencies:
     - binutils
 
     - dromajo # from ucb-bar channel - https://github.com/riscv-boom/dromajo
-    - esp-tools # from ucb-bar channel - https://github.com/ucb-bar/esp-tools-feedstock
 
     # firemarshal deps
     - python>=3.8

@@ -2,15 +2,15 @@ Register Router
 ===============
 
 Memory-mapped devices generally follow a common pattern. They expose a set
-of registers to the CPUs. By writing to a register, the CPU can change the 
+of registers to the CPUs. By writing to a register, the CPU can change the
 device's settings or send a command. By reading from a register, the CPU can
 query the device's state or retrieve results.
 
-While designers can manually instantiate a manager node and write the logic 
+While designers can manually instantiate a manager node and write the logic
 for exposing registers themselves, it's much easier to use RocketChip's
 ``regmap`` interface, which can generate most of the glue logic.
 
-For TileLink devices, you can use the ``regmap`` interface by extending 
+For TileLink devices, you can use the ``regmap`` interface by extending
 the ``TLRegisterRouter`` class, as shown in :ref:`mmio-accelerators`,
 or you can create a regular LazyModule and instantiate a ``TLRegisterNode``.
 This section will focus on the second method.

@@ -136,3 +136,6 @@
 [submodule "generators/bar-prefetchers"]
 	path = generators/bar-prefetchers
 	url = https://github.com/ucb-bar/bar-prefetchers.git
+[submodule "generators/mempress"]
+	path = generators/mempress
+	url = https://github.com/ucb-bar/mempress.git

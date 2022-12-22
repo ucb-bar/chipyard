@@ -15,14 +15,19 @@ runs:
             conda env remove -n $env
           done
         fi
+        IS_NUMBER_REGEX='[0-9]+$'
         conda env list | awk '{print $1}' | tail -n +4 | while read envname; do
           ENV_DATE=$(echo $envname | sed "s/cy-[[:digit:]]\+-\(.*\)-\(riscv\|esp\)-tools/\1/")
-          NUM_DIFF=$(( ( $(date +%s) - $(date --date="$ENV_DATE" +%s) )/(60*60*24) ))
-          if (( $NUM_DIFF > 7 )); then
-            echo "Removing $envname since it is $NUM_DIFF days old."
-            conda env remove -n $envname
+          if ! [[ $ENV_DATE =~ $IS_NUMBER_REGEX ]]; then
+            echo "Skipping removal of $envname since it cannot be parsed into a date"
           else
-            echo "Skipping removal of $envname since it is $NUM_DIFF days old."
+            NUM_DIFF=$(( ( $(date +%s) - $(date --date="$ENV_DATE" +%s) )/(60*60*24) ))
+            if (( $NUM_DIFF > 7 )); then
+              echo "Removing $envname since it is $NUM_DIFF days old."
+              conda env remove -n $envname
+            else
+              echo "Skipping removal of $envname since it is $NUM_DIFF days old."
+            fi
           fi
         done
       shell: bash -leo pipefail {0}
