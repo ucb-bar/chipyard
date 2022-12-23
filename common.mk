@@ -11,14 +11,15 @@ endif
 # specify user-interface variables
 #########################################################################################
 HELP_COMPILATION_VARIABLES += \
-"   EXTRA_GENERATOR_REQS   = additional make requirements needed for the main generator" \
-"   EXTRA_SIM_CXXFLAGS     = additional CXXFLAGS for building simulators" \
-"   EXTRA_SIM_LDFLAGS      = additional LDFLAGS for building simulators" \
-"   EXTRA_SIM_SOURCES      = additional simulation sources needed for simulator" \
-"   EXTRA_SIM_REQS         = additional make requirements to build the simulator" \
-"   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
-"   EXTRA_CHISEL_OPTIONS   = additional options to pass to the Chisel compiler" \
-"   EXTRA_FIRRTL_OPTIONS   = additional options to pass to the FIRRTL compiler"
+"   EXTRA_GENERATOR_REQS      = additional make requirements needed for the main generator" \
+"   EXTRA_SIM_CXXFLAGS        = additional CXXFLAGS for building simulators" \
+"   EXTRA_SIM_LDFLAGS         = additional LDFLAGS for building simulators" \
+"   EXTRA_SIM_SOURCES         = additional simulation sources needed for simulator" \
+"   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
+"   ENABLE_SBT_THIN_CLIENT    = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
+"   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFT lowers to Low FIRRTL & CFT does the rest) \
+"   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
+"   EXTRA_FIRRTL_OPTIONS      = additional options to pass to the FIRRTL compiler"
 
 EXTRA_GENERATOR_REQS ?= $(BOOTROM_TARGETS)
 EXTRA_SIM_CXXFLAGS   ?=
@@ -145,6 +146,16 @@ FIRTOOL_TARGETS = \
 	$(FIRTOOL_FILELIST) \
 	$(FIRTOOL_BB_MODS_FILELIST)
 
+$(info $$ENABLE_CUSTOM_FIRRTL_PASS $(ENABLE_CUSTOM_FIRRTL_PASS))
+ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
+	REPL_SEQ_MEM = none
+# TOP_TARGETS = none
+else
+	REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(TOP_SMEMS_CONF)
+	TOP_TARGETS = $(TOP_SMEMS_CONF)
+endif
+
+
 # DOC include start: FirrtlCompiler
 $(TOP_TARGETS) $(HARNESS_TARGETS) &: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTopAndHarness,\
@@ -174,7 +185,12 @@ $(CIRCT_TARGETS): firrtl_temp
 	@echo "" > /dev/null
 
 # hack: lower to middle firrtl if Fixed types are found
-$(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
+$(TOP_TARGETS) $(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
+ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
+	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), middle, none))
+else
+	$(eval SFC_LEVEL := low)
+endif
 	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTop,\
 		--no-dedup \
 		--output-file $(SFC_FIRRTL_BASENAME) \
@@ -184,9 +200,13 @@ $(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		--allow-unrecognized-annotations \
-		-X $(if $(shell grep "Fixed<" $(FIRRTL_FILE)),middle,none) \
+	  $(REPL_SEQ_MEM) \
+		-X $(SFC_LEVEL) \
 		$(EXTRA_FIRRTL_OPTIONS))
-	$(if $(shell grep "Fixed<" $(FIRRTL_FILE)),mv $(SFC_FIRRTL_BASENAME).mid.fir $(SFC_FIRRTL_FILE),)
+	-mv $(SFC_FIRRTL_BASENAME).mid.fir $(SFC_FIRRTL_FILE)
+	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE)
+	$(if $(ENABLE_CUSTOM_FIRRTL_PASS), cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > $(build_dir)/tmp.json,)
+	$(if $(ENABLE_CUSTOM_FIRRTL_PASS), cat $(build_dir)/tmp.json > $(SFC_ANNO_FILE) && rm $(build_dir)/tmp.json,)
 	firtool \
 		--format=fir \
 		-O=release \
@@ -206,6 +226,7 @@ $(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 		-o $(OUT_DIR) \
 		$(SFC_FIRRTL_FILE)
 	$(SED) -i 's/.*/& /' $(FIRTOOL_SMEMS_CONF) # need trailing space for SFC macrocompiler
+	cat $(TOP_SMEMS_CONF)
 # DOC include end: FirrtlCompiler
 
 $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) &: $(FIRTOOL_MODEL_HRCHY_JSON) $(FIRTOOL_FILELIST) $(FIRTOOL_BB_MODS_FILELIST)
