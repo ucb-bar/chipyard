@@ -27,23 +27,41 @@ object OutAnnoAnnotation extends HasShellOptions {
   )
 }
 
+case class HarnessConfAnnotation(harnessConf: String) extends NoTargetAnnotation with TapeoutOption
+
+object HarnessConfAnnotation extends HasShellOptions {
+  val options: Seq[ShellOption[_]] = Seq(
+    new ShellOption[String](
+      longOption = "harness-conf",
+      shortOption = Some("thconf"),
+      toAnnotationSeq = (s: String) => Seq(HarnessConfAnnotation(s)),
+      helpText = "use this to set the harness conf file location"
+    )
+  )
+}
+
 trait TapeoutCli {
   this: Shell =>
   parser.note("Tapeout specific options")
 
   Seq(
     OutAnnoAnnotation,
+    HarnessConfAnnotation,
   ).foreach(_.addOptions(parser))
 }
 
-class TapeoutStage extends Stage {
+class TapeoutStage(doHarness: Boolean) extends Stage {
   override val shell: Shell = new Shell(applicationName = "tapeout") with TapeoutCli with ChiselCli with FirrtlCli
 
   override def run(annotations: AnnotationSeq): AnnotationSeq = {
     Logger.makeScope(annotations) {
       val generator = new GenerateTopAndHarness(annotations)
 
-      generator.executeTop()
+      if (doHarness) {
+        generator.executeTopAndHarness()
+      } else {
+        generator.executeTop()
+      }
     }
     annotations
   }
