@@ -17,7 +17,7 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_SOURCES         = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
 "   ENABLE_SBT_THIN_CLIENT    = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
-"   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFT lowers to Low FIRRTL & CFT does the rest) \
+"   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & FIRTOOL converts to Verilog) \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
 "   EXTRA_FIRRTL_OPTIONS      = additional options to pass to the FIRRTL compiler"
 
