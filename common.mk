@@ -144,26 +144,13 @@ FIRTOOL_TARGETS = \
 	$(FIRTOOL_MODEL_HRCHY_JSON) \
 	$(FIRTOOL_MODEL_SMEMS_JSON) \
 	$(FIRTOOL_FILELIST) \
-	$(FIRTOOL_BB_MODS_FILELIST)
+	$(FIRTOOL_BB_MODS_FILELIST) \
+	$(TOP_SMEMS_CONF) \
+	$(HARNESS_SMEMS_CONF)
 
-# If we are using a custom FIRRTL transform to generate LowFIRRTL, we need to use
-# the {top, harness}.mems.conf generated from SFC. Passing the REPL_SEQ_MEM
-# to the SFC will make it replace sequential memories with blackboxes(Macros) &
-# generates ${long_name}.top.mems.conf. Similarly, passing the HARNESS_CONF_FLAGS will
-# notify the SFC to generate ${long_name}.harness.mems.conf. The mems.conf files
-# will be passed to the MacroCompiler to generate verilog outputs of those Macros.
-ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
-	REPL_SEQ_MEM = none
-	TOP_TARGETS = none
-	HARNESS_TARGETS = none
-	TRANSFORMS = barstools.tapeout.transforms.GenerateTop
-else
-	REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(TOP_SMEMS_CONF)
-	TOP_TARGETS = $(TOP_SMEMS_CONF)
-	HARNESS_CONF_FLAGS = -thconf $(HARNESS_SMEMS_CONF)
-	HARNESS_TARGETS = $(HARNESS_SMEMS_CONF)
-	TRANSFORMS = barstools.tapeout.transforms.GenerateTopAndHarness
-endif
+SFC_MAIN = barstools.tapeout.transforms.GenerateTopAndHarness
+REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(TOP_SMEMS_CONF)
+HARNESS_CONF_FLAGS = -thconf $(HARNESS_SMEMS_CONF)
 
 
 # DOC include start: FirrtlCompiler
@@ -195,13 +182,13 @@ $(CIRCT_TARGETS): firrtl_temp
 	@echo "" > /dev/null
 
 # hack: lower to middle firrtl if Fixed types are found
-$(HARNESS_TARGETS) $(TOP_TARGETS) $(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
+$(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), middle, none))
 else
 	$(eval SFC_LEVEL := low)
 endif
-	$(call run_scala_main,tapeout,$(TRANSFORMS),\
+	$(call run_scala_main,tapeout,$(SFC_MAIN),\
 		--no-dedup \
 		--output-file $(SFC_FIRRTL_BASENAME) \
 		--output-annotation-file $(SFC_ANNO_FILE) \
@@ -216,8 +203,10 @@ endif
 		$(EXTRA_FIRRTL_OPTIONS))
 	-mv $(SFC_FIRRTL_BASENAME).mid.fir $(SFC_FIRRTL_FILE)
 	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE)
-	$(if $(ENABLE_CUSTOM_FIRRTL_PASS), cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > $(build_dir)/tmp.json,)
-	$(if $(ENABLE_CUSTOM_FIRRTL_PASS), cat $(build_dir)/tmp.json > $(SFC_ANNO_FILE) && rm $(build_dir)/tmp.json,)
+	-cat $(TOP_SMEMS_CONF)
+	-cat $(HARNESS_SMEMS_CONF)
+	$(if $(ENABLE_CUSTOM_FIRRTL_PASS), cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > /tmp/unnec-anno-deleted.sfc.anno.json,)
+	$(if $(ENABLE_CUSTOM_FIRRTL_PASS), cat /tmp/unnec-anno-deleted.sfc.anno.json > $(SFC_ANNO_FILE) && rm /tmp/unnec-anno-deleted.sfc.anno.json,)
 	firtool \
 		--format=fir \
 		-O=release \
@@ -252,16 +241,6 @@ $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILEL
 	$(SED) -i 's/\.\///' $(MODEL_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
 	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
-
-ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
-$(TOP_SMEMS_CONF) $(HARNESS_SMEMS_CONF) &: $(FIRTOOL_TOP_SMEMS_JSON) $(FIRTOOL_MODEL_SMEMS_JSON) $(FIRTOOL_SMEMS_CONF)
-	$(base_dir)/scripts/split-mems-conf.py \
-		--in-smems-conf $(FIRTOOL_SMEMS_CONF) \
-		--in-dut-smems-json $(FIRTOOL_TOP_SMEMS_JSON) \
-		--in-model-smems-json $(FIRTOOL_MODEL_SMEMS_JSON) \
-		--out-dut-smems-conf $(TOP_SMEMS_CONF) \
-		--out-model-smems-conf $(HARNESS_SMEMS_CONF)
-endif
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 MACROCOMPILER_MODE ?= --mode synflops
