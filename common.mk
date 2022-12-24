@@ -146,6 +146,12 @@ FIRTOOL_TARGETS = \
 	$(FIRTOOL_FILELIST) \
 	$(FIRTOOL_BB_MODS_FILELIST)
 
+# If we are using a custom FIRRTL transform to generate LowFIRRTL, we need to use
+# the {top, harness}.mems.conf generated from SFC. Passing the REPL_SEQ_MEM
+# to the SFC will make it replace sequential memories with blackboxes(Macros) &
+# generates ${long_name}.top.mems.conf. Similarly, passing the HARNESS_CONF_FLAGS will
+# notify the SFC to generate ${long_name}.harness.mems.conf. The mems.conf files
+# will be passed to the MacroCompiler to generate verilog outputs of those Macros.
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 	REPL_SEQ_MEM = none
 	TOP_TARGETS = none
@@ -204,7 +210,7 @@ endif
 		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		--allow-unrecognized-annotations \
-	  $(REPL_SEQ_MEM) \
+		$(REPL_SEQ_MEM) \
 		$(HARNESS_CONF_FLAGS) \
 		-X $(SFC_LEVEL) \
 		$(EXTRA_FIRRTL_OPTIONS))
