@@ -46,7 +46,7 @@ trait TapeoutCli {
 
   Seq(
     OutAnnoAnnotation,
-    HarnessConfAnnotation,
+    HarnessConfAnnotation
   ).foreach(_.addOptions(parser))
 }
 
@@ -66,4 +66,3 @@ class TapeoutStage(doHarness: Boolean) extends Stage {
     annotations
   }
 }
-

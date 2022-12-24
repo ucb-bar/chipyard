@@ -14,8 +14,8 @@ import logger.LazyLogging
 // Requires two phases, one to collect modules below synTop in the hierarchy
 // and a second to remove those modules to generate the test harness
 private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogging {
-  val outAnno: Option[String] = annotations.collectFirst { case OutAnnoAnnotation(s) => s }
-  val harnessConf:    Option[String] = annotations.collectFirst { case HarnessConfAnnotation(h) => h }
+  val outAnno:     Option[String] = annotations.collectFirst { case OutAnnoAnnotation(s) => s }
+  val harnessConf: Option[String] = annotations.collectFirst { case HarnessConfAnnotation(h) => h }
 
   val annoFiles: List[String] = annotations.flatMap {
     case InputAnnotationFileAnnotation(f) => Some(f)
@@ -25,7 +25,7 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
   // Dump firrtl and annotation files
   protected def dump(
     circuit:     Circuit,
-    annotations: AnnotationSeq,
+    annotations: AnnotationSeq
   ): Unit = {
     outAnno.foreach { annoPath =>
       val outputFile = new java.io.PrintWriter(annoPath)
@@ -34,7 +34,7 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
         case _: EmittedComponent        => false
         case _: EmittedAnnotation[_]    => false
         case _: FirrtlCircuitAnnotation => false
-        case _: OutAnnoAnnotation => false
+        case _: OutAnnoAnnotation       => false
         case _ => true
       })))
       outputFile.close()
