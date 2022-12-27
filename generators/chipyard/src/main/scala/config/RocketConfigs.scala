@@ -21,6 +21,72 @@ class TinyRocketConfig extends Config(
   new freechips.rocketchip.subsystem.With1TinyCore ++             // single tiny rocket-core
   new chipyard.config.AbstractConfig)
 
+class MempressRocketConfig extends Config(
+  new mempress.WithMemPress ++                                    // use Mempress (memory traffic generation) accelerator
+  new freechips.rocketchip.subsystem.WithNBanks(8) ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(nWays=16, capacityKB=2048) ++
+  new chipyard.config.WithExtMemIdBits(7) ++                      // use 7 bits for tl like request id
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class HwachaRocketConfig extends Config(
+  new chipyard.config.WithHwachaTest ++
+  new hwacha.DefaultHwachaConfig ++                              // use Hwacha vector accelerator
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new chipyard.config.AbstractConfig)
+
+// DOC include start: GemminiRocketConfig
+class GemminiRocketConfig extends Config(
+  new gemmini.DefaultGemminiConfig ++                            // use Gemmini systolic array GEMM accelerator
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new chipyard.config.AbstractConfig)
+// DOC include end: GemminiRocketConfig
+
+class FPGemminiRocketConfig extends Config(
+  new gemmini.GemminiFP32DefaultConfig ++                         // use FP32Gemmini systolic array GEMM accelerator
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new chipyard.config.AbstractConfig)
+
+
+// DOC include start: DmiRocket
+class dmiRocketConfig extends Config(
+  new chipyard.harness.WithSerialAdapterTiedOff ++               // don't attach an external SimSerial
+  new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+// DOC include end: DmiRocket
+
+// DOC include start: GCDTLRocketConfig
+class GCDTLRocketConfig extends Config(
+  new chipyard.example.WithGCD(useAXI4=false, useBlackBox=false) ++          // Use GCD Chisel, connect Tilelink
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+// DOC include end: GCDTLRocketConfig
+
+// DOC include start: GCDAXI4BlackBoxRocketConfig
+class GCDAXI4BlackBoxRocketConfig extends Config(
+  new chipyard.example.WithGCD(useAXI4=true, useBlackBox=true) ++            // Use GCD blackboxed verilog, connect by AXI4->Tilelink
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+// DOC include end: GCDAXI4BlackBoxRocketConfig
+
+class LargeSPIFlashROMRocketConfig extends Config(
+  new chipyard.harness.WithSimSPIFlashModel(true) ++        // add the SPI flash model in the harness (read-only)
+  new chipyard.config.WithSPIFlash ++                       // add the SPI flash controller
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class SmallSPIFlashRocketConfig extends Config(
+  new chipyard.harness.WithSimSPIFlashModel(false) ++       // add the SPI flash model in the harness (writeable)
+  new chipyard.config.WithSPIFlash(0x100000) ++             // add the SPI flash controller (1 MiB)
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 class SimAXIRocketConfig extends Config(
   new chipyard.harness.WithSimAXIMem ++                     // drive the master AXI4 memory with a SimAXIMem, a 1-cycle magic memory, instead of default SimDRAM
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -75,6 +141,29 @@ class MbusScratchpadRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: mbusscratchpadrocket
+
+// DOC include start: RingSystemBusRocket
+class RingSystemBusRocketConfig extends Config(
+  new testchipip.WithRingSystemBus ++                       // Ring-topology system bus
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+// DOC include end: RingSystemBusRocket
+
+class SmallNVDLARocketConfig extends Config(
+  new nvidia.blocks.dla.WithNVDLA("small") ++               // add a small NVDLA
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class LargeNVDLARocketConfig extends Config(
+  new nvidia.blocks.dla.WithNVDLA("large", true) ++         // add a large NVDLA with synth. rams
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class MMIORocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithDefaultMMIOPort ++  // add default external master port
+  new freechips.rocketchip.subsystem.WithDefaultSlavePort ++ // add default external slave port
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
 
 class MulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++

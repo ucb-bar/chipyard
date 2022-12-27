@@ -108,9 +108,6 @@ class TutorialNoCConfig extends Config(
   new chipyard.example.WithGCD ++
   new chipyard.harness.WithLoopbackNIC ++
   new icenet.WithIceNIC ++
-  new fftgenerator.WithFFTGenerator(numPoints=8) ++
-  new chipyard.example.WithStreamingFIR ++
-  new chipyard.example.WithStreamingPassthrough ++
 
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++

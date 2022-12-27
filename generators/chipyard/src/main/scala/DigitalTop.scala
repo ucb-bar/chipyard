@@ -28,11 +28,8 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with icenet.CanHavePeripheryIceNIC // Enables optionally adding the IceNIC for FireSim
   with chipyard.example.CanHavePeripheryInitZero // Enables optionally adding the initzero example widget
   with chipyard.example.CanHavePeripheryGCD // Enables optionally adding the GCD example widget
-  with chipyard.example.CanHavePeripheryStreamingFIR // Enables optionally adding the DSPTools FIR example widget
-  with chipyard.example.CanHavePeripheryStreamingPassthrough // Enables optionally adding the DSPTools streaming-passthrough example widget
   with nvidia.blocks.dla.CanHavePeripheryNVDLA // Enables optionally having an NVDLA
   with chipyard.clocking.HasChipyardPRCI // Use Chipyard reset/clock distribution
-  with fftgenerator.CanHavePeripheryFFT // Enables optionally having an MMIO-based FFT block
   with constellation.soc.CanHaveGlobalNoC // Support instantiating a global NoC interconnect
 {
   override lazy val module = new DigitalTopModule(this)
