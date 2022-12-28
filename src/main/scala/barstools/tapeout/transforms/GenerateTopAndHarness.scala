@@ -7,6 +7,7 @@ import firrtl.ir._
 import firrtl.options.{Dependency, InputAnnotationFileAnnotation, StageMain}
 import firrtl.passes.memlib.ReplSeqMemAnnotation
 import firrtl.stage.{FirrtlCircuitAnnotation, FirrtlStage, OutputFileAnnotation, RunFirrtlTransformAnnotation}
+import firrtl.passes.{ConvertFixedToSInt}
 import firrtl.transforms.BlackBoxResourceFileNameAnno
 import logger.LazyLogging
 
@@ -22,8 +23,8 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
   }.toList
 
   // Dump firrtl and annotation files
-  // Reads global params "outAnno"
-  protected def dumpAnnos(
+  protected def dump(
+    circuit:     Circuit,
     annotations: AnnotationSeq
   ): Unit = {
     outAnno.foreach { annoPath =>
@@ -42,8 +43,26 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
 
   // TODO: Filter out blackbox dumping from this FIRRTL step, let CIRCT do it
 
+  // Top Generation
+  def executeTop(): Unit = {
+    val annos = new FirrtlStage().execute(Array.empty, annotations)
+
+    annos.collectFirst { case FirrtlCircuitAnnotation(circuit) => circuit } match {
+      case Some(circuit) =>
+        dump(circuit, annos)
+      case _ =>
+        throw new Exception(s"executeTop failed while executing FIRRTL!\n")
+    }
+  }
+
   // Top and harness generation
-  def execute(): Unit = {
+  def executeTopAndHarness(): Unit = {
+    executeTop()
+
+    // For harness run, change some firrtlOptions (below) for harness phase
+    // customTransforms: setup harness transforms, add AvoidExtModuleCollisions
+    // outputFileNameOverride: change to harnessOutput
+    // conf file must change to harnessConf by mapping annotations
     val generatorAnnotations = annotations
       .filterNot(_.isInstanceOf[OutputFileAnnotation])
       .map {
@@ -54,11 +73,12 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
     val annos = new FirrtlStage().execute(Array.empty, generatorAnnotations)
     annos.collectFirst { case FirrtlCircuitAnnotation(circuit) => circuit } match {
       case Some(circuit) =>
-        dumpAnnos(annos)
+        dump(circuit, annos)
       case _ =>
         throw new Exception(s"executeTop failed while executing FIRRTL!\n")
     }
   }
 }
 
-object GenerateTopAndHarness extends StageMain(new TapeoutStage())
+object GenerateTop extends StageMain(new TapeoutStage(doHarness = false))
+object GenerateTopAndHarness extends StageMain(new TapeoutStage(doHarness = true))
