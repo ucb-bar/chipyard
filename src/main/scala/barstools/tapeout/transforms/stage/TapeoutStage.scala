@@ -50,18 +50,13 @@ trait TapeoutCli {
   ).foreach(_.addOptions(parser))
 }
 
-class TapeoutStage(doHarness: Boolean) extends Stage {
+class TapeoutStage() extends Stage {
   override val shell: Shell = new Shell(applicationName = "tapeout") with TapeoutCli with ChiselCli with FirrtlCli
 
   override def run(annotations: AnnotationSeq): AnnotationSeq = {
     Logger.makeScope(annotations) {
       val generator = new GenerateTopAndHarness(annotations)
-
-      if (doHarness) {
-        generator.executeTopAndHarness()
-      } else {
-        generator.executeTop()
-      }
+      generator.execute()
     }
     annotations
   }
