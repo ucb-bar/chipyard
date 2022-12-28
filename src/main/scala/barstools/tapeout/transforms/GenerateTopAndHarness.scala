@@ -7,7 +7,6 @@ import firrtl.ir._
 import firrtl.options.{Dependency, InputAnnotationFileAnnotation, StageMain}
 import firrtl.passes.memlib.ReplSeqMemAnnotation
 import firrtl.stage.{FirrtlCircuitAnnotation, FirrtlStage, OutputFileAnnotation, RunFirrtlTransformAnnotation}
-import firrtl.passes.{ConvertFixedToSInt}
 import firrtl.transforms.BlackBoxResourceFileNameAnno
 import logger.LazyLogging
 
@@ -23,8 +22,8 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
   }.toList
 
   // Dump firrtl and annotation files
-  protected def dump(
-    circuit:     Circuit,
+  // Use global param outAnno
+  protected def dumpAnnos(
     annotations: AnnotationSeq
   ): Unit = {
     outAnno.foreach { annoPath =>
@@ -49,7 +48,7 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
 
     annos.collectFirst { case FirrtlCircuitAnnotation(circuit) => circuit } match {
       case Some(circuit) =>
-        dump(circuit, annos)
+        dumpAnnos(annos)
       case _ =>
         throw new Exception(s"executeTop failed while executing FIRRTL!\n")
     }
@@ -73,7 +72,7 @@ private class GenerateTopAndHarness(annotations: AnnotationSeq) extends LazyLogg
     val annos = new FirrtlStage().execute(Array.empty, generatorAnnotations)
     annos.collectFirst { case FirrtlCircuitAnnotation(circuit) => circuit } match {
       case Some(circuit) =>
-        dump(circuit, annos)
+        dumpAnnos(annos)
       case _ =>
         throw new Exception(s"executeTop failed while executing FIRRTL!\n")
     }
