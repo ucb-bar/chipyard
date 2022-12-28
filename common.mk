@@ -148,7 +148,6 @@ FIRTOOL_TARGETS = \
 	$(TOP_SMEMS_CONF) \
 	$(HARNESS_SMEMS_CONF)
 
-SFC_MAIN = barstools.tapeout.transforms.GenerateTopAndHarness
 REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(TOP_SMEMS_CONF)
 HARNESS_CONF_FLAGS = -thconf $(HARNESS_SMEMS_CONF)
 
@@ -182,13 +181,14 @@ $(CIRCT_TARGETS): firrtl_temp
 	@echo "" > /dev/null
 
 # hack: lower to middle firrtl if Fixed types are found
+# hack: when using dontTouch, io.cpu annotations are not removed by SFC, hence we remove them manually
 $(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), middle, none))
 else
 	$(eval SFC_LEVEL := low)
 endif
-	$(call run_scala_main,tapeout,$(SFC_MAIN),\
+	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTopAndHarness,\
 		--no-dedup \
 		--output-file $(SFC_FIRRTL_BASENAME) \
 		--output-annotation-file $(SFC_ANNO_FILE) \
@@ -203,8 +203,6 @@ endif
 		$(EXTRA_FIRRTL_OPTIONS))
 	-mv $(SFC_FIRRTL_BASENAME).mid.fir $(SFC_FIRRTL_FILE)
 	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE)
-	-cat $(TOP_SMEMS_CONF)
-	-cat $(HARNESS_SMEMS_CONF)
 	$(if $(ENABLE_CUSTOM_FIRRTL_PASS), cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > /tmp/unnec-anno-deleted.sfc.anno.json,)
 	$(if $(ENABLE_CUSTOM_FIRRTL_PASS), cat /tmp/unnec-anno-deleted.sfc.anno.json > $(SFC_ANNO_FILE) && rm /tmp/unnec-anno-deleted.sfc.anno.json,)
 	firtool \
