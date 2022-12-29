@@ -11,7 +11,7 @@ import firrtl.transforms.BlackBoxResourceFileNameAnno
 import logger.LazyLogging
 
 private class GenerateModelStageMain(annotations: AnnotationSeq) extends LazyLogging {
-  val outAnno:     Option[String] = annotations.collectFirst { case OutAnnoAnnotation(s) => s }
+  val outAnno: Option[String] = annotations.collectFirst { case OutAnnoAnnotation(s) => s }
 
   val annoFiles: List[String] = annotations.flatMap {
     case InputAnnotationFileAnnotation(f) => Some(f)

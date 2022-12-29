@@ -32,7 +32,7 @@ trait TapeoutCli {
   parser.note("Tapeout specific options")
 
   Seq(
-    OutAnnoAnnotation,
+    OutAnnoAnnotation
   ).foreach(_.addOptions(parser))
 }
 
