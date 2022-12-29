@@ -144,12 +144,9 @@ FIRTOOL_TARGETS = \
 	$(FIRTOOL_MODEL_HRCHY_JSON) \
 	$(FIRTOOL_MODEL_SMEMS_JSON) \
 	$(FIRTOOL_FILELIST) \
-	$(FIRTOOL_BB_MODS_FILELIST) \
-	$(TOP_SMEMS_CONF) \
-	$(HARNESS_SMEMS_CONF)
+	$(FIRTOOL_BB_MODS_FILELIST)
 
-REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(TOP_SMEMS_CONF)
-HARNESS_CONF_FLAGS = -thconf $(HARNESS_SMEMS_CONF)
+REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(FIRTOOL_SMEMS_CONF)
 
 
 # DOC include start: FirrtlCompiler
@@ -197,8 +194,9 @@ endif
 		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		--allow-unrecognized-annotations \
+ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 		$(REPL_SEQ_MEM) \
-		$(HARNESS_CONF_FLAGS) \
+endif
 		-X $(SFC_LEVEL) \
 		$(EXTRA_FIRRTL_OPTIONS))
 	-mv $(SFC_FIRRTL_BASENAME).mid.fir $(SFC_FIRRTL_FILE)
