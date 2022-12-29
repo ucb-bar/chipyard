@@ -148,44 +148,21 @@ FIRTOOL_TARGETS = \
 
 REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(FIRTOOL_SMEMS_CONF)
 
+ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
+	EXTRA_FIRRTL_OPTIONS += $(REPL_SEQ_MEM)
+endif
 
 # DOC include start: FirrtlCompiler
-$(TOP_TARGETS) $(HARNESS_TARGETS) &: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
-	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTopAndHarness,\
-		--allow-unrecognized-annotations \
-		--output-file $(TOP_FILE) \
-		--harness-o $(HARNESS_FILE) \
-		--input-file $(FIRRTL_FILE) \
-		--syn-top $(TOP) \
-		--harness-top $(VLOG_MODEL) \
-		--annotation-file $(ANNO_FILE) \
-		--top-anno-out $(TOP_ANNO) \
-		--top-dotf-out $(sim_top_blackboxes) \
-		--top-fir $(TOP_FIR) \
-		--harness-anno-out $(HARNESS_ANNO) \
-		--harness-dotf-out $(sim_harness_blackboxes) \
-		--harness-fir $(HARNESS_FIR) \
-		$(REPL_SEQ_MEM) \
-		$(HARNESS_CONF_FLAGS) \
-		--target-dir $(build_dir) \
-		--log-level $(FIRRTL_LOGLEVEL) \
-		$(EXTRA_FIRRTL_OPTIONS))
-	touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
-
-# NOTE: These *_temp intermediate targets will get removed in favor of make 4.3 grouped targets (&: operator)
-.INTERMEDIATE: firrtl_temp
-$(CIRCT_TARGETS): firrtl_temp
-	@echo "" > /dev/null
-
-# hack: lower to middle firrtl if Fixed types are found
-# hack: when using dontTouch, io.cpu annotations are not removed by SFC, hence we remove them manually
+# hack: lower to low firrtl if Fixed types are found
+# hack: when using dontTouch, io.cpu annotations are not removed by SFC, 
+# hence we remove them manually by using jq before passing them to firtool
 $(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
-	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), middle, none))
+	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none))
 else
 	$(eval SFC_LEVEL := low)
 endif
-	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTopAndHarness,\
+	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateModelStageMain,\
 		--no-dedup \
 		--output-file $(SFC_FIRRTL_BASENAME) \
 		--output-annotation-file $(SFC_ANNO_FILE) \
@@ -194,12 +171,8 @@ endif
 		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		--allow-unrecognized-annotations \
-ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
-		$(REPL_SEQ_MEM) \
-endif
 		-X $(SFC_LEVEL) \
 		$(EXTRA_FIRRTL_OPTIONS))
-	-mv $(SFC_FIRRTL_BASENAME).mid.fir $(SFC_FIRRTL_FILE)
 	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE)
 	$(if $(ENABLE_CUSTOM_FIRRTL_PASS), cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > /tmp/unnec-anno-deleted.sfc.anno.json,)
 	$(if $(ENABLE_CUSTOM_FIRRTL_PASS), cat /tmp/unnec-anno-deleted.sfc.anno.json > $(SFC_ANNO_FILE) && rm /tmp/unnec-anno-deleted.sfc.anno.json,)
@@ -237,6 +210,14 @@ $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILEL
 	$(SED) -i 's/\.\///' $(MODEL_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
 	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
+
+$(TOP_SMEMS_CONF) $(HARNESS_SMEMS_CONF) &: $(FIRTOOL_TOP_SMEMS_JSON) $(FIRTOOL_MODEL_SMEMS_JSON) $(FIRTOOL_SMEMS_CONF)
+	$(base_dir)/scripts/split-mems-conf.py \
+		--in-smems-conf $(FIRTOOL_SMEMS_CONF) \
+		--in-dut-smems-json $(FIRTOOL_TOP_SMEMS_JSON) \
+		--in-model-smems-json $(FIRTOOL_MODEL_SMEMS_JSON) \
+		--out-dut-smems-conf $(TOP_SMEMS_CONF) \
+		--out-model-smems-conf $(HARNESS_SMEMS_CONF)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 MACROCOMPILER_MODE ?= --mode synflops
