@@ -146,11 +146,8 @@ FIRTOOL_TARGETS = \
 	$(FIRTOOL_FILELIST) \
 	$(FIRTOOL_BB_MODS_FILELIST)
 
-REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(FIRTOOL_SMEMS_CONF)
+SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 
-ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
-	EXTRA_FIRRTL_OPTIONS += $(REPL_SEQ_MEM)
-endif
 
 # DOC include start: FirrtlCompiler
 # hack: lower to low firrtl if Fixed types are found
@@ -159,8 +156,10 @@ endif
 $(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none))
+	$(eval EXTRA_FIRRTL_OPTIONS += $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), $(SFC_REPL_SEQ_MEM),))
 else
 	$(eval SFC_LEVEL := low)
+	$(eval EXTRA_FIRRTL_OPTIONS += $(SFC_REPL_SEQ_MEM))
 endif
 	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateModelStageMain,\
 		--no-dedup \
@@ -174,8 +173,8 @@ endif
 		-X $(SFC_LEVEL) \
 		$(EXTRA_FIRRTL_OPTIONS))
 	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE)
-	$(if $(ENABLE_CUSTOM_FIRRTL_PASS), cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > /tmp/unnec-anno-deleted.sfc.anno.json,)
-	$(if $(ENABLE_CUSTOM_FIRRTL_PASS), cat /tmp/unnec-anno-deleted.sfc.anno.json > $(SFC_ANNO_FILE) && rm /tmp/unnec-anno-deleted.sfc.anno.json,)
+	@if [ "$(SFC_LEVEL)" = low ]; then cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > /tmp/unnec-anno-deleted.sfc.anno.json; fi
+	@if [ "$(SFC_LEVEL)" = low ]; then cat /tmp/unnec-anno-deleted.sfc.anno.json > $(SFC_ANNO_FILE) && rm /tmp/unnec-anno-deleted.sfc.anno.json; fi
 	firtool \
 		--format=fir \
 		-O=release \
@@ -188,12 +187,13 @@ endif
 		--warn-on-unprocessed-annotations \
 		--lowering-options=emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,explicitBitcast,verifLabels,locationInfoStyle=wrapInAtSquareBracket \
 		--repl-seq-mem \
-		--repl-seq-mem-circuit=$(MODEL) \
 		--repl-seq-mem-file=$(FIRTOOL_SMEMS_CONF) \
+		--repl-seq-mem-circuit=$(MODEL) \
 		--annotation-file=$(SFC_ANNO_FILE) \
 		--split-verilog \
 		-o $(OUT_DIR) \
 		$(SFC_FIRRTL_FILE)
+	-mv $(SFC_SMEMS_CONF) $(FIRTOOL_SMEMS_CONF)
 	$(SED) -i 's/.*/& /' $(FIRTOOL_SMEMS_CONF) # need trailing space for SFC macrocompiler
 # DOC include end: FirrtlCompiler
 
@@ -214,8 +214,9 @@ $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILEL
 $(TOP_SMEMS_CONF) $(HARNESS_SMEMS_CONF) &: $(FIRTOOL_TOP_SMEMS_JSON) $(FIRTOOL_MODEL_SMEMS_JSON) $(FIRTOOL_SMEMS_CONF)
 	$(base_dir)/scripts/split-mems-conf.py \
 		--in-smems-conf $(FIRTOOL_SMEMS_CONF) \
-		--in-dut-smems-json $(FIRTOOL_TOP_SMEMS_JSON) \
-		--in-model-smems-json $(FIRTOOL_MODEL_SMEMS_JSON) \
+		--in-model-hrchy-json $(FIRTOOL_MODEL_HRCHY_JSON) \
+		--dut-module-name $(TOP) \
+		--model-module-name $(MODEL) \
 		--out-dut-smems-conf $(TOP_SMEMS_CONF) \
 		--out-model-smems-conf $(HARNESS_SMEMS_CONF)
 
