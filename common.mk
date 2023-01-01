@@ -18,7 +18,6 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_LDFLAGS      = additional LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES      = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS         = additional make requirements to build the simulator" \
-"   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
 "   EXTRA_CHISEL_OPTIONS   = additional options to pass to the Chisel compiler" \
 "   EXTRA_FIRRTL_OPTIONS   = additional options to pass to the FIRRTL compiler"
 
@@ -48,7 +47,7 @@ HELP_COMMANDS += \
 "   firrtl                      = generate intermediate firrtl files from chisel elaboration" \
 "   run-tests                   = run all assembly and benchmark tests" \
 "   launch-sbt                  = start sbt terminal" \
-"   {shutdown,start}-sbt-server = shutdown or start sbt server if using ENABLE_SBT_THIN_CLIENT" \
+"   {shutdown,start}-sbt-server = shutdown or start sbt server if not using DISABLE_SBT_THIN_CLIENT" \
 
 #########################################################################################
 # include additional subproject make fragments
@@ -266,8 +265,8 @@ launch-sbt:
 
 .PHONY: check-thin-client
 check-thin-client:
-ifeq (,$(ENABLE_SBT_THIN_CLIENT))
-	$(error ENABLE_SBT_THIN_CLIENT not set.)
+ifneq (,$(DISABLE_SBT_THIN_CLIENT))
+	$(error DISABLE_SBT_THIN_CLIENT set.)
 endif
 
 .PHONY: shutdown-sbt-server

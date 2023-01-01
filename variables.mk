@@ -9,7 +9,8 @@ HELP_COMPILATION_VARIABLES = \
 "   SBT_OPTS          = set additional sbt command line options (these take the form -Dsbt.<option>=<setting>) " \
 "                       See https://www.scala-sbt.org/1.x/docs/Command-Line-Reference.html\#Command+Line+Options" \
 "   SBT_BIN           = if overridden, used to invoke sbt (default is to invoke sbt by sbt-launch.jar)" \
-"   FIRRTL_LOGLEVEL   = if overridden, set firrtl log level (default is error)"
+"   FIRRTL_LOGLEVEL   = if overridden, set firrtl log level (default is error)" \
+"   DISABLE_SBT_THIN_CLIENT = if overridden, disable the experimental sbt thin client feature"
 
 HELP_PROJECT_VARIABLES = \
 "   SUB_PROJECT            = use the specific subproject default variables [$(SUB_PROJECT)]" \
@@ -184,7 +185,7 @@ SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
 SBT_THIN_CLIENT_TIMESTAMP = $(base_dir)/project/target/active.json
 
-ifdef ENABLE_SBT_THIN_CLIENT
+ifndef DISABLE_SBT_THIN_CLIENT
 SCALA_BUILDTOOL_DEPS += $(SBT_THIN_CLIENT_TIMESTAMP)
 # enabling speeds up sbt loading
 # use with sbt script or sbtn to bypass error code issues
