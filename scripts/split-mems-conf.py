@@ -28,21 +28,21 @@ sys.setrecursionlimit(100)
 
 
 
-# Performing DFS recursively is not a problem here since the modules that
-# we are interested in are close to the root of the module hierarchy
-def dfs_find_root(tree, module_name):
-  if tree['module_name'] == module_name:
-    return tree
-  if len(tree['instances']) == 0:
-    exit(0)
-  for c in tree['instances']:
-    ret = dfs_find_root(c, module_name)
-    if ret is not None:
-      return ret
+def bfs_find_root(tree, module_name):
+  q = [tree]
+
+  while len(q) != 0:
+    front = q[0]
+    q.pop(0)
+
+    if front['module_name'] == module_name:
+      return front
+    for c in front['instances']:
+      q.append(c)
   return None
 
 
-def bfs_collect_module(tree):
+def bfs_collect_submodules(tree):
   output = set()
   q = [(tree['instance_name'], tree['module_name'], tree['instances'])]
 
@@ -71,11 +71,11 @@ if __name__ == "__main__":
        open(args.in_model_hrchy_json) as imhj:
     imhj_data = json.load(imhj)
 
-    dut_root = dfs_find_root(imhj_data, args.dut_module_name)
-    dut_submodules = bfs_collect_module(dut_root)
+    dut_root = bfs_find_root(imhj_data, args.dut_module_name)
+    dut_submodules = bfs_collect_submodules(dut_root)
 
-    model_root = dfs_find_root(imhj_data, args.model_module_name)
-    model_submodules = bfs_collect_module(model_root)
+    model_root = bfs_find_root(imhj_data, args.model_module_name)
+    model_submodules = bfs_collect_submodules(model_root)
 
     with open(args.out_dut_smems_conf, "w") as odsc, \
          open(args.out_model_smems_conf, "w") as otsc:
