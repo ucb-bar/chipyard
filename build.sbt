@@ -139,13 +139,14 @@ lazy val rocketLibDeps = (rocketchip / Keys.libraryDependencies)
 // introducing a circular dependency between RC and MIDAS
 lazy val midasTargetUtils = ProjectRef(firesimDir, "targetutils")
 
-lazy val testchipip = (project in file("generators/testchipip"))
-  .dependsOn(rocketchip, sifive_blocks)
+val testchipipDir = file("generators/testchipip")
+lazy val testchipip = freshProject("testchipip", testchipipDir)
+  .dependsOn(rocketchip, rocket_chip_blocks)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
 lazy val chipyard = (project in file("generators/chipyard"))
-  .dependsOn(testchipip, rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
+  .dependsOn(testchipip, rocketchip, boom, hwacha, rocket_chip_blocks, sifive_cache, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsp-utils`,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
@@ -261,7 +262,7 @@ lazy val `rocket-dsp-utils` = freshProject("rocket-dsp-utils", file("./tools/roc
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val sifive_blocks = (project in file("generators/sifive-blocks"))
+lazy val rocket_chip_blocks = (project in file("generators/rocket-chip-blocks"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
@@ -286,7 +287,7 @@ lazy val firechip = (project in file("generators/firechip"))
     Test / testOptions += Tests.Argument("-oF")
   )
 lazy val fpga_shells = (project in file("./fpga/fpga-shells"))
-  .dependsOn(rocketchip, sifive_blocks)
+  .dependsOn(rocketchip, rocket_chip_blocks)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 

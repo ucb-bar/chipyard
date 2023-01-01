@@ -13,8 +13,8 @@
 [submodule "generators/boom"]
 	path = generators/boom
 	url = https://github.com/riscv-boom/riscv-boom.git
-[submodule "generators/sifive-blocks"]
-	path = generators/sifive-blocks
+[submodule "generators/rocket-chip-blocks"]
+	path = generators/rocket-chip-blocks
 	url = https://github.com/chipsalliance/rocket-chip-blocks.git
 [submodule "generators/hwacha"]
 	path = generators/hwacha
