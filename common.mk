@@ -137,7 +137,7 @@ firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
 #########################################################################################
 # create verilog files rules and variables
 #########################################################################################
-FIRTOOL_TARGETS = \
+SFC_FIRTOOL_TARGETS = \
 	$(FIRTOOL_SMEMS_CONF) \
 	$(FIRTOOL_TOP_SMEMS_JSON) \
 	$(FIRTOOL_TOP_HRCHY_JSON) \
@@ -150,10 +150,17 @@ SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 
 
 # DOC include start: FirrtlCompiler
+# This step can take either one of two paths. The first path is when SFC
+# compiles Chisel to CHIRRTL, and FIRTOOL compiles CHIRRTL to Verilog. Otherwise,
+# when custom FIRRTL transforms are included or if a Fixed type is used within
+# the dut, SFC compiles Chisel to LowFIRRTL and FIRTOOL compiles it to Verilog.
+# Users can indicate to the Makefile of custom FIRRTL transforms by setting the
+# "ENABLE_CUSTOM_FIRRTL_PASS" env variable.
+#
 # hack: lower to low firrtl if Fixed types are found
 # hack: when using dontTouch, io.cpu annotations are not removed by SFC, 
 # hence we remove them manually by using jq before passing them to firtool
-$(FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
+$(SFC_FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none))
 	$(eval EXTRA_FIRRTL_OPTIONS += $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), $(SFC_REPL_SEQ_MEM),))
@@ -172,7 +179,7 @@ endif
 		--allow-unrecognized-annotations \
 		-X $(SFC_LEVEL) \
 		$(EXTRA_FIRRTL_OPTIONS))
-	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE)
+	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE) # Optionally change file type when SFC generates LowFIRRTL
 	@if [ "$(SFC_LEVEL)" = low ]; then cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > /tmp/unnec-anno-deleted.sfc.anno.json; fi
 	@if [ "$(SFC_LEVEL)" = low ]; then cat /tmp/unnec-anno-deleted.sfc.anno.json > $(SFC_ANNO_FILE) && rm /tmp/unnec-anno-deleted.sfc.anno.json; fi
 	firtool \
@@ -211,31 +218,31 @@ $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILEL
 	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
 	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
 
-$(TOP_SMEMS_CONF) $(HARNESS_SMEMS_CONF) &: $(FIRTOOL_TOP_SMEMS_JSON) $(FIRTOOL_MODEL_SMEMS_JSON) $(FIRTOOL_SMEMS_CONF)
+$(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(FIRTOOL_SMEMS_CONF) $(FIRTOOL_MODEL_HRCHY_JSON)
 	$(base_dir)/scripts/split-mems-conf.py \
 		--in-smems-conf $(FIRTOOL_SMEMS_CONF) \
 		--in-model-hrchy-json $(FIRTOOL_MODEL_HRCHY_JSON) \
 		--dut-module-name $(TOP) \
 		--model-module-name $(MODEL) \
 		--out-dut-smems-conf $(TOP_SMEMS_CONF) \
-		--out-model-smems-conf $(HARNESS_SMEMS_CONF)
+		--out-model-smems-conf $(MODEL_SMEMS_CONF)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
-MACROCOMPILER_MODE ?= --mode synflops
+TOP_MACROCOMPILER_MODE ?= --mode synflops
 $(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(TOP_SMEMS_CONF)
-	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE))
+	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
 
-HARNESS_MACROCOMPILER_MODE = --mode synflops
-$(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR) &: $(HARNESS_SMEMS_CONF) | $(TOP_SMEMS_FILE)
-	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler, -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE))
+MODEL_MACROCOMPILER_MODE = --mode synflops
+$(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(MODEL_SMEMS_CONF) | $(TOP_SMEMS_FILE)
+	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
 ########################################################################################
-$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(HARNESS_SMEMS_FILE)
+$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE)
 	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' > $@
 	echo "$(TOP_SMEMS_FILE)" >> $@
-	echo "$(HARNESS_SMEMS_FILE)" >> $@
+	echo "$(MODEL_SMEMS_FILE)" >> $@
 
 #########################################################################################
 # helper rule to just make verilog files

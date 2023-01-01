@@ -171,9 +171,9 @@ SFC_SMEMS_CONF ?= $(build_dir)/$(long_name).sfc.mems.conf
 TOP_SMEMS_CONF ?= $(build_dir)/$(long_name).top.mems.conf
 TOP_SMEMS_FILE ?= $(OUT_DIR)/$(long_name).top.mems.v
 TOP_SMEMS_FIR  ?= $(build_dir)/$(long_name).top.mems.fir
-HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
-HARNESS_SMEMS_FILE ?= $(OUT_DIR)/$(long_name).harness.mems.v
-HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
+MODEL_SMEMS_CONF ?= $(build_dir)/$(long_name).model.mems.conf
+MODEL_SMEMS_FILE ?= $(OUT_DIR)/$(long_name).model.mems.v
+MODEL_SMEMS_FIR  ?= $(build_dir)/$(long_name).model.mems.fir
 
 # top module files to include
 TOP_MODS_FILELIST ?= $(build_dir)/$(long_name).top.f
