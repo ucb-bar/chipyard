@@ -104,6 +104,17 @@ if run_step "1"; then
 
     source $RDIR/.conda-env/etc/profile.d/conda.sh
     conda activate $RDIR/.conda-env
+
+    ENVVARS_ACTIVATE=$RDIR/.conda-env/etc/conda/activate.d/env_vars.sh
+    ENVVARS_DEACTIVATE=$RDIR/.conda-env/etc/conda/deactivate.d/env_vars.sh
+
+    touch $ENVVARS_ACTIVATE
+    echo "#!/bin/bash" > $ENVVARS_ACTIVATE
+    echo "export ENABLE_SBT_THIN_CLIENT=1" >> $ENVVARS_ACTIVATE
+
+    touch $ENVVARS_DEACTIVATE
+    echo "#!/bin/bash" > $ENVVARS_DEACTIVATE
+    echo "unset ENABLE_SBT_THIN_CLIENT" >> $ENVVARS_DEACTIVATE
 fi
 
 if [ -z "$FORCE_FLAG" ]; then
