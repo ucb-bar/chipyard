@@ -29,7 +29,6 @@ dependencies:
     - binutils
 
     - dromajo # from ucb-bar channel - https://github.com/riscv-boom/dromajo
-    - esp-tools # from ucb-bar channel - https://github.com/ucb-bar/esp-tools-feedstock
     - firtool>=1.25 # from ucb-bar channel - https://github.com/ucb-bar/firtool-feedstock
 
     # firemarshal deps
