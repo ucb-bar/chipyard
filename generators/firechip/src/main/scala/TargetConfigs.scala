@@ -62,12 +62,8 @@ class WithNIC extends icenet.WithIceNIC(inBufFlits = 8192, ctrlQueueDepth = 64)
 class WithNVDLALarge extends nvidia.blocks.dla.WithNVDLA("large")
 class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
-// Non-frequency tweaks that are generally applied to all firesim configs
-class WithFireSimDesignTweaks extends Config(
-  // Optional: reduce the width of the Serial TL interface
-  new testchipip.WithSerialTLWidth(4) ++
-  // Required: Bake in the default FASED memory model
-  new WithDefaultMemModel ++
+// Minimal set of FireSim-related design tweaks - notably discludes FASED, TraceIO, and the BlockDevice
+class WithMinimalFireSimDesignTweaks extends Config(
   // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
   new WithFireSimHarnessClockBinder ++
   new WithFireSimSimpleClocks ++
@@ -77,16 +73,25 @@ class WithFireSimDesignTweaks extends Config(
   new WithoutClockGating ++
   // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
   new WithoutTLMonitors ++
+  // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
+  new chipyard.config.WithNoDebug
+)
+
+// Non-frequency tweaks that are generally applied to all firesim configs
+class WithFireSimDesignTweaks extends Config(
+  new WithMinimalFireSimDesignTweaks ++
+  // Required: Bake in the default FASED memory model
+  new WithDefaultMemModel ++
+  // Optional: reduce the width of the Serial TL interface
+  new testchipip.WithSerialTLWidth(4) ++
+  // Required*: Scale default baud rate with periphery bus frequency
+  new chipyard.config.WithUART(BigInt(3686400L)) ++
   // Optional: Adds IO to attach tracerV bridges
   new chipyard.config.WithTraceIO ++
   // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 32 GiB on F1)
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
   // Optional: Removing this will require using an initramfs under linux
-  new testchipip.WithBlockDevice ++
-  // Required*: Scale default baud rate with periphery bus frequency
-  new chipyard.config.WithUART(BigInt(3686400L)) ++
-  // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
-  new chipyard.config.WithNoDebug
+  new testchipip.WithBlockDevice
 )
 
 // Tweaks to modify target clock frequencies / crossings to legacy firesim defaults
@@ -109,7 +114,7 @@ class WithFireSimHighPerfClocking extends Config(
 // Tweaks that are generally applied to all firesim configs setting a single clock domain at 1000 MHz
 class WithFireSimConfigTweaks extends Config(
   // 1 GHz matches the FASED default (DRAM modeli realistically configured for that frequency)
-  // Using some other frequency will require runnings the FASED runtime configuration generator 
+  // Using some other frequency will require runnings the FASED runtime configuration generator
   // to generate faithful DDR3 timing values.
   new chipyard.config.WithSystemBusFrequency(1000.0) ++
   new chipyard.config.WithSystemBusFrequencyAsDefault ++ // All unspecified clock frequencies, notably the implicit clock, will use the sbus freq (1000 MHz)
@@ -123,6 +128,15 @@ class WithFireSimConfigTweaks extends Config(
 class WithFireSimTestChipConfigTweaks extends Config(
   new chipyard.config.WithTestChipBusFreqs ++
   new WithFireSimDesignTweaks
+)
+
+// Tweaks to use minimal design tweaks
+// Need to use initramfs to use linux (no block device)
+class WithMinimalFireSimHighPerfConfigTweaks extends Config(
+  new WithFireSimHighPerfClocking ++
+  new freechips.rocketchip.subsystem.WithNoMemPort ++
+  new testchipip.WithBackingScratchpad ++
+  new WithMinimalFireSimDesignTweaks
 )
 
 // Tweaks for legacy FireSim configs.
