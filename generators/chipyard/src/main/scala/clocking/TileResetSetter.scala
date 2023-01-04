@@ -34,7 +34,7 @@ class TileResetSetter(address: BigInt, beatBytes: Int, tileNames: Seq[String], i
       }
     })
     tlNode.regmap((0 until nTiles).map({ i =>
-      i * 4 -> Seq(RegField.rwReg(1, r_tile_resets(i).io)),
+      i * 4 -> Seq(RegField.rwReg(1, r_tile_resets(i).io))
     }): _*)
 
     val tileMap = tileNames.zipWithIndex.map({ case (n, i) =>
