@@ -184,14 +184,13 @@ endif
 	@if [ "$(SFC_LEVEL)" = low ]; then cat /tmp/unnec-anno-deleted.sfc.anno.json > $(SFC_ANNO_FILE) && rm /tmp/unnec-anno-deleted.sfc.anno.json; fi
 	firtool \
 		--format=fir \
-		-O=release \
 		--dedup \
 		--export-module-hierarchy \
 		--emit-metadata \
-		--verify-each=false \
-		--disable-annotation-classless \
-		--disable-annotation-unknown \
+		--verify-each=true \
 		--warn-on-unprocessed-annotations \
+		--verbose-pass-executions \
+		--mlir-timing \
 		--lowering-options=emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,explicitBitcast,verifLabels,locationInfoStyle=wrapInAtSquareBracket \
 		--repl-seq-mem \
 		--repl-seq-mem-file=$(FIRTOOL_SMEMS_CONF) \
