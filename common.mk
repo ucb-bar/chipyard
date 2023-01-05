@@ -189,7 +189,8 @@ endif
 		--emit-metadata \
 		--verify-each=true \
 		--warn-on-unprocessed-annotations \
-		--verbose-pass-executions \
+		--disable-annotation-classless \
+		--disable-annotation-unknown \
 		--mlir-timing \
 		--lowering-options=emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,explicitBitcast,verifLabels,locationInfoStyle=wrapInAtSquareBracket \
 		--repl-seq-mem \
