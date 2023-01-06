@@ -33,6 +33,17 @@ class WithTraceIO extends Config((site, here, up) => {
   case TracePortKey => Some(TracePortParams())
 })
 
+class WithNoTraceIO extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      trace = false))
+    case tp: CVA6TileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      trace = false))
+    case other => other
+  }
+  case TracePortKey => None
+})
+
 class WithNPerfCounters(n: Int = 29) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
