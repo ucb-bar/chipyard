@@ -18,6 +18,7 @@ SIM_LDFLAGS = \
 	-Wl,-rpath,$(RISCV)/lib \
 	-L$(sim_dir) \
 	-L$(dramsim_dir) \
+	-lriscv \
 	-lfesvr \
 	-ldramsim \
 	$(EXTRA_SIM_LDFLAGS)
