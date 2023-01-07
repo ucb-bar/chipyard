@@ -252,12 +252,23 @@ extern "C" void spike_tile(int hartid, char* isa,
                                                    dcache_ways, dcache_sets,
                                                    cacheable, uncacheable, readonly_uncacheable, executable,
                                                    icache_sourceids, dcache_sourceids);
+    std::string* isastr = new std::string(isa);
+    cfg_t* cfg = new cfg_t(std::make_pair(0, 0),
+                           nullptr,
+                           isastr->c_str(),
+                           "MSU",
+                           "vlen:128,elen:64",
+                           false,
+                           endianness_little,
+                           false,
+                           pmpregions,
+                           std::vector<mem_cfg_t>(),
+                           std::vector<int>(),
+                           false);
     processor_t* p = new processor_t(isa_parser,
-                                     "vlen:128,elen:64",
+                                     cfg,
                                      simif,
                                      hartid,
-                                     false,
-                                     endianness_little,
                                      false,
                                      log_file->get(),
                                      sout);
@@ -901,10 +912,11 @@ void spike_thread_main(void* arg)
       host->switch_to();
     }
     while (tile->max_insns != 0) {
-      uint64_t last_bits = tile->proc->get_last_bits();
-      if (insn_should_fence(last_bits) && !tile->simif->stq_empty()) {
-        host->switch_to();
-      }
+      // TODO: Fences don't work
+      // uint64_t last_bits = tile->proc->get_last_bits();
+      // if (insn_should_fence(last_bits) && !tile->simif->stq_empty()) {
+      //   host->switch_to();
+      // }
       tile->proc->step(1);
       tile->max_insns--;
       tile->proc->get_state()->mcycle->write(tile->simif->cycle);

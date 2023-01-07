@@ -7,11 +7,11 @@ SIM_OPT_CXXFLAGS := -O3
 # so don't link with libriscv if it doesn't exist
 # potentially breaks some configs
 
-ifeq (,$(wildcard $RISCV/lib/libriscv.so))
+ifeq (,$(wildcard $(RISCV)/lib/libriscv.so))
 $(warning libriscv not found)
-LRISCV=""
+LRISCV=
 else
-LRISCV="-lriscv"
+LRISCV=-lriscv
 endif
 
 SIM_CXXFLAGS = \
