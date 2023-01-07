@@ -7,6 +7,7 @@ import chisel3.experimental.{Analog, BaseModule, DataMirror, Direction}
 import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
+import freechips.rocketchip.amba.apb.{APBParameters}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.system.{SimAXIMem}
@@ -234,7 +235,18 @@ class WithTieOffInterrupts extends OverrideHarnessBinder({
 
 class WithTieOffL2FBusAXI extends OverrideHarnessBinder({
   (system: CanHaveSlaveAXI4Port, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
-    ports.foreach({ p => p := DontCare; p.bits.tieoff() })
+    ports.foreach({ 
+      p => 
+        p := DontCare
+        p.bits.ar.valid := false.B
+        p.bits.ar.bits := DontCare
+        p.bits.aw.valid := false.B
+        p.bits.aw.bits := DontCare
+        p.bits.w.valid := false.B
+        p.bits.w.bits := DontCare
+        p.bits.r.ready := false.B
+        p.bits.b.ready := false.B
+    })
   }
 })
 
@@ -274,7 +286,12 @@ class WithTiedOffDebug extends OverrideHarnessBinder({
         d.dmiClock := false.B.asClock
         d.dmiReset := true.B
       case a: ClockedAPBBundle =>
-        a.tieoff()
+        a.pwrite := false.B
+        a.paddr := 0.U
+        a.pprot := APBParameters.PROT_DEFAULT
+        a.pwdata := 0.U
+        a.pstrb := 0.U
+        a.pauser :<= BundleMap()
         a.clock := false.B.asClock
         a.reset := true.B.asAsyncReset
         a.psel := false.B
