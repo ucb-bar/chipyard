@@ -150,6 +150,13 @@ std::map<int, tile_t*> tiles;
 std::ostream sout(nullptr);
 log_file_t* log_file;
 
+extern "C" void spike_tile_reset(int hartid)
+{
+  if (tiles.find(hartid) != tiles.end()) {
+    tiles[hartid]->proc->reset();
+  }
+}
+
 extern "C" void spike_tile(int hartid, char* isa,
                            int pmpregions,
                            int icache_sets, int icache_ways,

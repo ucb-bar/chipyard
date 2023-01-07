@@ -1,3 +1,5 @@
+import "DPI-C" function void spike_tile_reset(input int hartid);
+
 import "DPI-C" function void spike_tile(input int hartid,
                                         input string   isa,
                                         input int      pmpregions,
@@ -320,7 +322,7 @@ module SpikeBlackBox #(
          __dcache_c_data_6_reg <= 64'h0;
          __dcache_c_data_7 = 64'h0;
          __dcache_c_data_7_reg <= 64'h0;
-
+         spike_tile_reset(HARTID);
       end else begin
          spike_tile(HARTID, ISA, PMPREGIONS,
                     ICACHE_SETS, ICACHE_WAYS, DCACHE_SETS, DCACHE_WAYS,
