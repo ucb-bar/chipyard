@@ -3,6 +3,17 @@
 #----------------------------------------------------------------------------------------
 SIM_OPT_CXXFLAGS := -O3
 
+# Workaround: esp-isa-sim doesn't install libriscv,
+# so don't link with libriscv if it doesn't exist
+# potentially breaks some configs
+
+ifeq (,$(wildcard $RISCV/lib/libriscv.so))
+$(warning libriscv not found)
+LRISCV=""
+else
+LRISCV="-lriscv"
+endif
+
 SIM_CXXFLAGS = \
 	$(CXXFLAGS) \
 	$(SIM_OPT_CXXFLAGS) \
@@ -18,7 +29,7 @@ SIM_LDFLAGS = \
 	-Wl,-rpath,$(RISCV)/lib \
 	-L$(sim_dir) \
 	-L$(dramsim_dir) \
-	-lriscv \
+	$(LRISCV) \
 	-lfesvr \
 	-ldramsim \
 	$(EXTRA_SIM_LDFLAGS)
