@@ -11,11 +11,39 @@ class RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
 
+class Mempress2RocketConfig extends Config(
+  new mempress.WithMemPress ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new chipyard.config.AbstractConfig)
+
 class StridedPrefetcherRocketConfig extends Config(
   new prefetchers.WithTLDCachePrefetcher(p = prefetchers.SingleStridedPrefetcherParams()) ++ 
   new chipyard.config.WithTileToSBusPrefetchers ++ 
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   //new chipyard.config.WithTestChipBusFreqs ++
+  new chipyard.config.AbstractConfig)
+
+class StridedPrefetcherMempressRocketConfig extends Config(
+  new mempress.WithMemPress ++
+  new prefetchers.WithMempressPrefetcher(p = prefetchers.SingleStridedPrefetcherParams()) ++ 
+  new chipyard.config.WithTileToSBusPrefetchers ++ 
+    new freechips.rocketchip.subsystem.WithNBanks(8) ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(nWays=16, capacityKB=2048) ++
+  new chipyard.config.WithExtMemIdBits(7) ++                      // use 7 bits for tl like request id
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class NullPrefetcherMempressRocketConfig extends Config(
+  new mempress.WithMemPress ++
+  new chipyard.config.WithTileToSBusPrefetchers ++ 
+  new freechips.rocketchip.subsystem.WithNBanks(8) ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(nWays=16, capacityKB=2048) ++
+  new chipyard.config.WithExtMemIdBits(7) ++                      // use 7 bits for tl like request id
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
 
 class NextLinePrefetcher221RocketConfig extends Config(
