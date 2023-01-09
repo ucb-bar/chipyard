@@ -26,8 +26,6 @@ from typing import List, Optional
 
 sys.setrecursionlimit(100)
 
-
-
 def bfs_find_root(tree, module_name):
   q = [tree]
 
@@ -58,7 +56,7 @@ def bfs_collect_submodules(tree):
 
 
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser(description='Use CIRCT (firtool) model-hrchy JSONs to create DUT and test harness smems confs or ')
+  parser = argparse.ArgumentParser(description='Use MFC(FIRTOOL) generated model-hrchy JSONs to create smems confs for the DUT and TestHarness')
   parser.add_argument('--in-smems-conf', type=str, required=True, help='Overall smems conf file that contains all memory definitions')
   parser.add_argument('--in-model-hrchy-json', type=str, required=True, help='JSON indicating which mem modules are in the DUT')
   parser.add_argument('--dut-module-name', type=str, required=True, help='Module name of the DUT')
@@ -91,6 +89,6 @@ if __name__ == "__main__":
           elif name in model_submodules:
             otsc.write(l)
           else:
-            assert False, "Unable to find smem CONF module in firtool emitted JSON files."
+            assert False, "Unable to find smem CONF module in MFC(FIRTOOL) emitted JSON files."
         else:
             exit(0)
