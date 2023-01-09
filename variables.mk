@@ -148,7 +148,7 @@ FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
 
 # chisel anno modification output
-FIRTOOL_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
+MFC_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
 FINAL_ANNO_FILE ?= $(build_dir)/$(long_name).appended.anno.json
 
 # scala firrtl compiler (sfc) outputs
@@ -157,14 +157,14 @@ SFC_FIRRTL_FILE ?= $(SFC_FIRRTL_BASENAME).fir
 SFC_ANNO_FILE ?= $(build_dir)/$(long_name).sfc.anno.json
 
 # firtool compiler outputs
-FIRTOOL_TOP_HRCHY_JSON ?= $(build_dir)/top_module_hierarchy.json
-FIRTOOL_MODEL_HRCHY_JSON ?= $(build_dir)/model_module_hierarchy.json
-FIRTOOL_SMEMS_CONF ?= $(build_dir)/$(long_name).mems.conf
+MFC_TOP_HRCHY_JSON ?= $(build_dir)/top_module_hierarchy.json
+MFC_MODEL_HRCHY_JSON ?= $(build_dir)/model_module_hierarchy.json
+MFC_SMEMS_CONF ?= $(build_dir)/$(long_name).mems.conf
 # hardcoded firtool outputs
-FIRTOOL_FILELIST = $(OUT_DIR)/filelist.f
-FIRTOOL_BB_MODS_FILELIST = $(OUT_DIR)/firrtl_black_box_resource_files.f
-FIRTOOL_TOP_SMEMS_JSON = $(OUT_DIR)/metadata/seq_mems.json
-FIRTOOL_MODEL_SMEMS_JSON = $(OUT_DIR)/metadata/tb_seq_mems.json
+MFC_FILELIST = $(OUT_DIR)/filelist.f
+MFC_BB_MODS_FILELIST = $(OUT_DIR)/firrtl_black_box_resource_files.f
+MFC_TOP_SMEMS_JSON = $(OUT_DIR)/metadata/seq_mems.json
+MFC_MODEL_SMEMS_JSON = $(OUT_DIR)/metadata/tb_seq_mems.json
 
 # macrocompiler smems in/output
 SFC_SMEMS_CONF ?= $(build_dir)/$(long_name).sfc.mems.conf

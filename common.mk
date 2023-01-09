@@ -17,7 +17,7 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_SOURCES         = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
 "   ENABLE_SBT_THIN_CLIENT    = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
-"   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & FIRTOOL converts to Verilog) \
+"   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & MFC converts to Verilog) \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
 "   EXTRA_FIRRTL_OPTIONS      = additional options to pass to the FIRRTL compiler"
 
@@ -110,7 +110,7 @@ $(FIRRTL_FILE) $(ANNO_FILE) &: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_D
 		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG) \
 		$(EXTRA_CHISEL_OPTIONS))
 
-define firtool_extra_anno_contents
+define mfc_extra_anno_contents
 [
 	{
 		"class":"sifive.enterprise.firrtl.MarkDUTAnnotation",
@@ -118,18 +118,18 @@ define firtool_extra_anno_contents
 	},
 	{
 		"class": "sifive.enterprise.firrtl.TestHarnessHierarchyAnnotation",
-		"filename": "$(FIRTOOL_MODEL_HRCHY_JSON)"
+		"filename": "$(MFC_MODEL_HRCHY_JSON)"
 	},
 	{
 		"class": "sifive.enterprise.firrtl.ModuleHierarchyAnnotation",
-		"filename": "$(FIRTOOL_TOP_HRCHY_JSON)"
+		"filename": "$(MFC_TOP_HRCHY_JSON)"
 	}
 ]
 endef
-export firtool_extra_anno_contents
-$(FINAL_ANNO_FILE) $(FIRTOOL_EXTRA_ANNO_FILE): $(ANNO_FILE)
-	echo "$$firtool_extra_anno_contents" > $(FIRTOOL_EXTRA_ANNO_FILE)
-	jq -s '[.[][]]' $(ANNO_FILE) $(FIRTOOL_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
+export mfc_extra_anno_contents
+$(FINAL_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE): $(ANNO_FILE)
+	echo "$$mfc_extra_anno_contents" > $(MFC_EXTRA_ANNO_FILE)
+	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
 
 .PHONY: firrtl
 firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
@@ -137,30 +137,30 @@ firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
 #########################################################################################
 # create verilog files rules and variables
 #########################################################################################
-SFC_FIRTOOL_TARGETS = \
-	$(FIRTOOL_SMEMS_CONF) \
-	$(FIRTOOL_TOP_SMEMS_JSON) \
-	$(FIRTOOL_TOP_HRCHY_JSON) \
-	$(FIRTOOL_MODEL_HRCHY_JSON) \
-	$(FIRTOOL_MODEL_SMEMS_JSON) \
-	$(FIRTOOL_FILELIST) \
-	$(FIRTOOL_BB_MODS_FILELIST)
+SFC_MFC_TARGETS = \
+	$(MFC_SMEMS_CONF) \
+	$(MFC_TOP_SMEMS_JSON) \
+	$(MFC_TOP_HRCHY_JSON) \
+	$(MFC_MODEL_HRCHY_JSON) \
+	$(MFC_MODEL_SMEMS_JSON) \
+	$(MFC_FILELIST) \
+	$(MFC_BB_MODS_FILELIST)
 
 SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 
 
 # DOC include start: FirrtlCompiler
-# This step can take either one of two paths. The first path is when SFC
-# compiles Chisel to CHIRRTL, and FIRTOOL compiles CHIRRTL to Verilog. Otherwise,
+# There are two possible cases for this step. In the first case, SFC
+# compiles Chisel to CHIRRTL, and MFC compiles CHIRRTL to Verilog. Otherwise,
 # when custom FIRRTL transforms are included or if a Fixed type is used within
-# the dut, SFC compiles Chisel to LowFIRRTL and FIRTOOL compiles it to Verilog.
+# the dut, SFC compiles Chisel to LowFIRRTL and MFC compiles it to Verilog.
 # Users can indicate to the Makefile of custom FIRRTL transforms by setting the
-# "ENABLE_CUSTOM_FIRRTL_PASS" env variable.
+# "ENABLE_CUSTOM_FIRRTL_PASS" variable.
 #
 # hack: lower to low firrtl if Fixed types are found
 # hack: when using dontTouch, io.cpu annotations are not removed by SFC, 
 # hence we remove them manually by using jq before passing them to firtool
-$(SFC_FIRTOOL_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
+$(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none))
 	$(eval EXTRA_FIRRTL_OPTIONS += $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), $(SFC_REPL_SEQ_MEM),))
@@ -194,34 +194,34 @@ endif
 		--mlir-timing \
 		--lowering-options=emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,explicitBitcast,verifLabels,locationInfoStyle=wrapInAtSquareBracket \
 		--repl-seq-mem \
-		--repl-seq-mem-file=$(FIRTOOL_SMEMS_CONF) \
+		--repl-seq-mem-file=$(MFC_SMEMS_CONF) \
 		--repl-seq-mem-circuit=$(MODEL) \
 		--annotation-file=$(SFC_ANNO_FILE) \
 		--split-verilog \
 		-o $(OUT_DIR) \
 		$(SFC_FIRRTL_FILE)
-	-mv $(SFC_SMEMS_CONF) $(FIRTOOL_SMEMS_CONF)
-	$(SED) -i 's/.*/& /' $(FIRTOOL_SMEMS_CONF) # need trailing space for SFC macrocompiler
+	-mv $(SFC_SMEMS_CONF) $(MFC_SMEMS_CONF)
+	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 # DOC include end: FirrtlCompiler
 
-$(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) &: $(FIRTOOL_MODEL_HRCHY_JSON) $(FIRTOOL_FILELIST) $(FIRTOOL_BB_MODS_FILELIST)
+$(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) &: $(MFC_MODEL_HRCHY_JSON) $(MFC_FILELIST) $(MFC_BB_MODS_FILELIST)
 	$(base_dir)/scripts/split-module-files.py \
-		--model-hier-json $(FIRTOOL_MODEL_HRCHY_JSON) \
+		--model-hier-json $(MFC_MODEL_HRCHY_JSON) \
 		--dut $(TOP) \
 		--out-dut-filelist $(TOP_MODS_FILELIST) \
 		--out-model-filelist $(MODEL_MODS_FILELIST) \
-		--in-all-filelist $(FIRTOOL_FILELIST) \
+		--in-all-filelist $(MFC_FILELIST) \
 		--target-dir $(OUT_DIR)
-	$(SED) -e 's;^;$(OUT_DIR)/;' $(FIRTOOL_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
+	$(SED) -e 's;^;$(OUT_DIR)/;' $(MFC_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(TOP_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(MODEL_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
 	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
 
-$(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(FIRTOOL_SMEMS_CONF) $(FIRTOOL_MODEL_HRCHY_JSON)
+$(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JSON)
 	$(base_dir)/scripts/split-mems-conf.py \
-		--in-smems-conf $(FIRTOOL_SMEMS_CONF) \
-		--in-model-hrchy-json $(FIRTOOL_MODEL_HRCHY_JSON) \
+		--in-smems-conf $(MFC_SMEMS_CONF) \
+		--in-model-hrchy-json $(MFC_MODEL_HRCHY_JSON) \
 		--dut-module-name $(TOP) \
 		--model-module-name $(MODEL) \
 		--out-dut-smems-conf $(TOP_SMEMS_CONF) \
