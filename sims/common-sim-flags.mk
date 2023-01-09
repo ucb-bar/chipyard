@@ -9,7 +9,7 @@ SIM_CXXFLAGS = \
 	-std=c++17 \
 	-I$(RISCV)/include \
 	-I$(dramsim_dir) \
-	-I$(build_dir) \
+	-I$(OUT_DIR) \
 	$(EXTRA_SIM_CXXFLAGS)
 
 SIM_LDFLAGS = \

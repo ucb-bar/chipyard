@@ -28,9 +28,9 @@ SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
 SMEMS_HAMMER       ?= $(build_dir)/$(long_name).mems.hammer.json
 
 ifdef USE_SRAM_COMPILER
-	MACROCOMPILER_MODE ?= -l $(SMEMS_COMP) --use-compiler -hir $(SMEMS_HAMMER) --mode strict
+	TOP_MACROCOMPILER_MODE ?= -l $(SMEMS_COMP) --use-compiler -hir $(SMEMS_HAMMER) --mode strict
 else
-	MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER) --mode strict
+	TOP_MACROCOMPILER_MODE ?= -l $(SMEMS_CACHE) -hir $(SMEMS_HAMMER) --mode strict
 endif
 
 ENV_YML            ?= $(vlsi_dir)/env.yml
@@ -121,12 +121,12 @@ SIM_DEBUG_CONF = $(OBJ_DIR)/sim-debug-inputs.yml
 SIM_TIMING_CONF = $(OBJ_DIR)/sim-timing-inputs.yml
 
 include $(vlsi_dir)/sim.mk
-$(SIM_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files) $(dramsim_lib)
+$(SIM_CONF): $(VLSI_RTL) $(MODEL_FILE) $(MODEL_SMEMS_FILE) $(sim_common_files) $(dramsim_lib)
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
-	for x in $(HARNESS_FILE) $(HARNESS_SMEMS_FILE); do \
+	for x in $(MODEL_FILE) $(MODEL_SMEMS_FILE); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  input_files_meta: 'append'" >> $@
@@ -163,7 +163,7 @@ ifneq ($(BINARY), )
 endif
 	echo "  tb_dut: 'TestDriver.testHarness.$(VLSI_HARNESS_DUT_NAME)'" >> $@
 
-$(SIM_DEBUG_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
+$(SIM_DEBUG_CONF): $(VLSI_RTL) $(MODEL_FILE) $(MODEL_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
 	mkdir -p $(output_dir)
 	echo "sim.inputs:" > $@
@@ -186,7 +186,7 @@ else
 	echo "sim.outputs.waveforms: ['$(sim_out_name).vpd']" >> $@
 endif
 
-$(SIM_TIMING_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
+$(SIM_TIMING_CONF): $(VLSI_RTL) $(MODEL_FILE) $(MODEL_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
 	echo "  defines: ['NTC']" >> $@
@@ -195,7 +195,7 @@ $(SIM_TIMING_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_comm
 
 POWER_CONF = $(OBJ_DIR)/power-inputs.yml
 include $(vlsi_dir)/power.mk
-$(POWER_CONF): $(VLSI_RTL) $(HARNESS_FILE) $(HARNESS_SMEMS_FILE) $(sim_common_files)
+$(POWER_CONF): $(VLSI_RTL) $(MODEL_FILE) $(MODEL_SMEMS_FILE) $(sim_common_files)
 	mkdir -p $(dir $@)
 	echo "power.inputs:" > $@
 	echo "  tb_dut: 'testHarness/$(VLSI_HARNESS_DUT_NAME)'" >> $@

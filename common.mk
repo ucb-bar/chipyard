@@ -1,7 +1,5 @@
-#########################################################################################
-# set default shell for make
-#########################################################################################
 SHELL=/bin/bash
+SED ?= sed
 
 ifndef RISCV
 $(error RISCV is unset. Did you source the Chipyard auto-generated env file (which activates the default conda environment)?)
@@ -13,14 +11,15 @@ endif
 # specify user-interface variables
 #########################################################################################
 HELP_COMPILATION_VARIABLES += \
-"   EXTRA_GENERATOR_REQS   = additional make requirements needed for the main generator" \
-"   EXTRA_SIM_CXXFLAGS     = additional CXXFLAGS for building simulators" \
-"   EXTRA_SIM_LDFLAGS      = additional LDFLAGS for building simulators" \
-"   EXTRA_SIM_SOURCES      = additional simulation sources needed for simulator" \
-"   EXTRA_SIM_REQS         = additional make requirements to build the simulator" \
-"   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
-"   EXTRA_CHISEL_OPTIONS   = additional options to pass to the Chisel compiler" \
-"   EXTRA_FIRRTL_OPTIONS   = additional options to pass to the FIRRTL compiler"
+"   EXTRA_GENERATOR_REQS      = additional make requirements needed for the main generator" \
+"   EXTRA_SIM_CXXFLAGS        = additional CXXFLAGS for building simulators" \
+"   EXTRA_SIM_LDFLAGS         = additional LDFLAGS for building simulators" \
+"   EXTRA_SIM_SOURCES         = additional simulation sources needed for simulator" \
+"   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
+"   ENABLE_SBT_THIN_CLIENT    = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
+"   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & MFC converts to Verilog) \
+"   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
+"   EXTRA_FIRRTL_OPTIONS      = additional options to pass to the FIRRTL compiler"
 
 EXTRA_GENERATOR_REQS ?= $(BOOTROM_TARGETS)
 EXTRA_SIM_CXXFLAGS   ?=
@@ -92,7 +91,7 @@ endif
 #########################################################################################
 # copy over bootrom files
 #########################################################################################
-$(build_dir):
+$(build_dir) $(OUT_DIR):
 	mkdir -p $@
 
 $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip/bootrom/bootrom.%.img | $(build_dir)
@@ -111,62 +110,145 @@ $(FIRRTL_FILE) $(ANNO_FILE) &: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_D
 		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG) \
 		$(EXTRA_CHISEL_OPTIONS))
 
+define mfc_extra_anno_contents
+[
+	{
+		"class":"sifive.enterprise.firrtl.MarkDUTAnnotation",
+		"target":"~$(MODEL)|$(TOP)"
+	},
+	{
+		"class": "sifive.enterprise.firrtl.TestHarnessHierarchyAnnotation",
+		"filename": "$(MFC_MODEL_HRCHY_JSON)"
+	},
+	{
+		"class": "sifive.enterprise.firrtl.ModuleHierarchyAnnotation",
+		"filename": "$(MFC_TOP_HRCHY_JSON)"
+	}
+]
+endef
+export mfc_extra_anno_contents
+$(FINAL_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE): $(ANNO_FILE)
+	echo "$$mfc_extra_anno_contents" > $(MFC_EXTRA_ANNO_FILE)
+	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
+
 .PHONY: firrtl
-firrtl: $(FIRRTL_FILE)
+firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
 
 #########################################################################################
 # create verilog files rules and variables
 #########################################################################################
-REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(TOP_SMEMS_CONF)
-HARNESS_CONF_FLAGS = -thconf $(HARNESS_SMEMS_CONF)
+SFC_MFC_TARGETS = \
+	$(MFC_SMEMS_CONF) \
+	$(MFC_TOP_SMEMS_JSON) \
+	$(MFC_TOP_HRCHY_JSON) \
+	$(MFC_MODEL_HRCHY_JSON) \
+	$(MFC_MODEL_SMEMS_JSON) \
+	$(MFC_FILELIST) \
+	$(MFC_BB_MODS_FILELIST)
 
-TOP_TARGETS = $(TOP_FILE) $(TOP_SMEMS_CONF) $(TOP_ANNO) $(TOP_FIR) $(sim_top_blackboxes)
-HARNESS_TARGETS = $(HARNESS_FILE) $(HARNESS_SMEMS_CONF) $(HARNESS_ANNO) $(HARNESS_FIR) $(sim_harness_blackboxes)
+SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
+
 
 # DOC include start: FirrtlCompiler
-$(TOP_TARGETS) $(HARNESS_TARGETS) &: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
-	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateTopAndHarness,\
-		--allow-unrecognized-annotations \
-		--output-file $(TOP_FILE) \
-		--harness-o $(HARNESS_FILE) \
+# There are two possible cases for this step. In the first case, SFC
+# compiles Chisel to CHIRRTL, and MFC compiles CHIRRTL to Verilog. Otherwise,
+# when custom FIRRTL transforms are included or if a Fixed type is used within
+# the dut, SFC compiles Chisel to LowFIRRTL and MFC compiles it to Verilog.
+# Users can indicate to the Makefile of custom FIRRTL transforms by setting the
+# "ENABLE_CUSTOM_FIRRTL_PASS" variable.
+#
+# hack: lower to low firrtl if Fixed types are found
+# hack: when using dontTouch, io.cpu annotations are not removed by SFC, 
+# hence we remove them manually by using jq before passing them to firtool
+$(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
+ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
+	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none))
+	$(eval EXTRA_FIRRTL_OPTIONS += $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), $(SFC_REPL_SEQ_MEM),))
+else
+	$(eval SFC_LEVEL := low)
+	$(eval EXTRA_FIRRTL_OPTIONS += $(SFC_REPL_SEQ_MEM))
+endif
+	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateModelStageMain,\
+		--no-dedup \
+		--output-file $(SFC_FIRRTL_BASENAME) \
+		--output-annotation-file $(SFC_ANNO_FILE) \
+		--target-dir $(OUT_DIR) \
 		--input-file $(FIRRTL_FILE) \
-		--syn-top $(TOP) \
-		--harness-top $(VLOG_MODEL) \
-		--annotation-file $(ANNO_FILE) \
-		--top-anno-out $(TOP_ANNO) \
-		--top-dotf-out $(sim_top_blackboxes) \
-		--top-fir $(TOP_FIR) \
-		--harness-anno-out $(HARNESS_ANNO) \
-		--harness-dotf-out $(sim_harness_blackboxes) \
-		--harness-fir $(HARNESS_FIR) \
-		$(REPL_SEQ_MEM) \
-		$(HARNESS_CONF_FLAGS) \
-		--target-dir $(build_dir) \
+		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
+		--allow-unrecognized-annotations \
+		-X $(SFC_LEVEL) \
 		$(EXTRA_FIRRTL_OPTIONS))
-	touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
+	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE) # Optionally change file type when SFC generates LowFIRRTL
+	@if [ "$(SFC_LEVEL)" = low ]; then cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > /tmp/unnec-anno-deleted.sfc.anno.json; fi
+	@if [ "$(SFC_LEVEL)" = low ]; then cat /tmp/unnec-anno-deleted.sfc.anno.json > $(SFC_ANNO_FILE) && rm /tmp/unnec-anno-deleted.sfc.anno.json; fi
+	firtool \
+		--format=fir \
+		--dedup \
+		--export-module-hierarchy \
+		--emit-metadata \
+		--verify-each=true \
+		--warn-on-unprocessed-annotations \
+		--disable-annotation-classless \
+		--disable-annotation-unknown \
+		--mlir-timing \
+		--lowering-options=emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,explicitBitcast,verifLabels,locationInfoStyle=wrapInAtSquareBracket \
+		--repl-seq-mem \
+		--repl-seq-mem-file=$(MFC_SMEMS_CONF) \
+		--repl-seq-mem-circuit=$(MODEL) \
+		--annotation-file=$(SFC_ANNO_FILE) \
+		--split-verilog \
+		-o $(OUT_DIR) \
+		$(SFC_FIRRTL_FILE)
+	-mv $(SFC_SMEMS_CONF) $(MFC_SMEMS_CONF)
+	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 # DOC include end: FirrtlCompiler
 
-# This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
-MACROCOMPILER_MODE ?= --mode synflops
-$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(TOP_SMEMS_CONF)
-	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(MACROCOMPILER_MODE))
+$(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) &: $(MFC_MODEL_HRCHY_JSON) $(MFC_FILELIST) $(MFC_BB_MODS_FILELIST)
+	$(base_dir)/scripts/split-module-files.py \
+		--model-hier-json $(MFC_MODEL_HRCHY_JSON) \
+		--dut $(TOP) \
+		--out-dut-filelist $(TOP_MODS_FILELIST) \
+		--out-model-filelist $(MODEL_MODS_FILELIST) \
+		--in-all-filelist $(MFC_FILELIST) \
+		--target-dir $(OUT_DIR)
+	$(SED) -e 's;^;$(OUT_DIR)/;' $(MFC_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
+	$(SED) -i 's/\.\///' $(TOP_MODS_FILELIST)
+	$(SED) -i 's/\.\///' $(MODEL_MODS_FILELIST)
+	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
+	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
 
-HARNESS_MACROCOMPILER_MODE = --mode synflops
-$(HARNESS_SMEMS_FILE) $(HARNESS_SMEMS_FIR) &: $(HARNESS_SMEMS_CONF) | $(TOP_SMEMS_FILE)
-	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler, -n $(HARNESS_SMEMS_CONF) -v $(HARNESS_SMEMS_FILE) -f $(HARNESS_SMEMS_FIR) $(HARNESS_MACROCOMPILER_MODE))
+$(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JSON)
+	$(base_dir)/scripts/split-mems-conf.py \
+		--in-smems-conf $(MFC_SMEMS_CONF) \
+		--in-model-hrchy-json $(MFC_MODEL_HRCHY_JSON) \
+		--dut-module-name $(TOP) \
+		--model-module-name $(MODEL) \
+		--out-dut-smems-conf $(TOP_SMEMS_CONF) \
+		--out-model-smems-conf $(MODEL_SMEMS_CONF)
+
+# This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
+TOP_MACROCOMPILER_MODE ?= --mode synflops
+$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(TOP_SMEMS_CONF)
+	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
+
+MODEL_MACROCOMPILER_MODE = --mode synflops
+$(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(MODEL_SMEMS_CONF) | $(TOP_SMEMS_FILE)
+	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
 ########################################################################################
-$(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes)
-	sort -u $^ | grep -v '.*\.\(svh\|h\)$$' > $@
+$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE)
+	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' > $@
+	echo "$(TOP_SMEMS_FILE)" >> $@
+	echo "$(MODEL_SMEMS_FILE)" >> $@
 
 #########################################################################################
 # helper rule to just make verilog files
 #########################################################################################
 .PHONY: verilog
-verilog: $(sim_vsrcs)
+verilog: $(sim_common_files)
 
 #########################################################################################
 # helper rules to run simulations

@@ -94,13 +94,13 @@ SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v
 
 # copy files but ignore *.h files in *.f (match vcs)
-$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
-	cp -f $^ $(build_dir)
+$(sim_files): $(SIM_FILE_REQS) | $(OUT_DIR)
+	cp -f $^ $(OUT_DIR)
 	$(foreach file,\
 		$^,\
 		$(if $(filter %.h,$(file)),\
 			,\
-			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
+			echo "$(addprefix $(OUT_DIR)/, $(notdir $(file)))" >> $@;))
 
 #########################################################################################
 # import other necessary rules and variables
@@ -111,8 +111,8 @@ include $(base_dir)/common.mk
 # copy from other directory
 #########################################################################################
 all_vsrcs := \
-	$(sim_vsrcs) \
-	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v
+	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v \
+	$(fpga_dir)/common/vsrc/PowerOnResetFPGAOnly.v
 
 #########################################################################################
 # vivado rules

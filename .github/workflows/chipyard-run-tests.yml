@@ -588,10 +588,10 @@ jobs:
     steps:
       - name: Delete old checkout
         run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
+          ls -alh .
+          rm -rf ${{ github.workspace }}/* || true
+          rm -rf ${{ github.workspace }}/.* || true
+          ls -alh .
       - name: Checkout
         uses: actions/checkout@v3
       - name: Git workaround
@@ -611,10 +611,10 @@ jobs:
     steps:
       - name: Delete old checkout
         run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
+          ls -alh .
+          rm -rf ${{ github.workspace }}/* || true
+          rm -rf ${{ github.workspace }}/.* || true
+          ls -alh .
       - name: Checkout
         uses: actions/checkout@v3
       - name: Git workaround
@@ -1043,9 +1043,9 @@ jobs:
             chipyard-ibex-run-tests,
             chipyard-sodor-run-tests,
             chipyard-dmirocket-run-tests,
-            chipyard-spiflashwrite-run-tests,
             chipyard-fftgenerator-run-tests,
             chipyard-spiflashread-run-tests,
+            chipyard-spiflashwrite-run-tests,
             chipyard-lbwif-run-tests,
             chipyard-sha3-run-tests,
             chipyard-streaming-fir-run-tests,
