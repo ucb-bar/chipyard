@@ -91,7 +91,7 @@ class GenerateSpec extends AnyFreeSpec {
     val targetDir = "test_run_dir/generate_spec"
     generateTestData(targetDir)
 
-    GenerateTop.main(
+    GenerateModelStageMain.main(
       Array(
         "-i",
         s"$targetDir/GenerateExampleTester.fir",
