@@ -158,7 +158,7 @@ SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 # "ENABLE_CUSTOM_FIRRTL_PASS" variable.
 #
 # hack: lower to low firrtl if Fixed types are found
-# hack: when using dontTouch, io.cpu annotations are not removed by SFC, 
+# hack: when using dontTouch, io.cpu annotations are not removed by SFC,
 # hence we remove them manually by using jq before passing them to firtool
 $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
