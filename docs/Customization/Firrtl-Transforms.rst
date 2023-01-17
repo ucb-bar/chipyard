@@ -12,7 +12,7 @@ The Scala FIRRTL Compiler and the MLIR FIRRTL Compiler
 ------------------------------------------------------
 In Chipyard, two FIRRTL compilers work together to compile Chisel into Verilog. The Scala FIRRTL compiler(SFC) and the MLIR FIRRTL compiler(MFC).
 They are basically doing the same thing, except that MFC is written in C++ which makes compilation much faster. In the default setting, the SFC will compile Chisel into CHIRRTL and MFC will
-compile CHIRRTL into Verilog. By setting the ``ENABLE_CUSTOM_FIRRTL_PASS`` env variable to a non-zero value, we can make the SFC compile Chisel into LowFIRRTL so that our custom FIRRTL passes are applied.
+compile CHIRRTL into Verilog(as of now, we are using SFC as a backup for cases when MFC doesn't work, e.g., when the design is using Fixed types). By setting the ``ENABLE_CUSTOM_FIRRTL_PASS`` env variable to a non-zero value, we can make the SFC compile Chisel into LowFIRRTL so that our custom FIRRTL passes are applied.
 
 Where to add transforms
 -----------------------
