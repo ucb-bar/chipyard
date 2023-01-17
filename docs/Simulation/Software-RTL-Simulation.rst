@@ -144,8 +144,8 @@ All ``make`` targets that can be applied to the default example, can also be app
     make SUB_PROJECT=hwacha run-asm-tests
 
 
-Finally, in the ``generated-src/<...>-<package>-<config>/`` directory resides all of the collateral and Verilog source files for the build/simulation.
-Specifically, the SoC top-level (``TOP``) Verilog file is denoted with ``*.top.v`` while the ``TestHarness`` file is denoted with ``*.harness.v``.
+Finally, in the ``generated-src/<...>-<package>-<config>/`` directory resides all of the collateral while the generated Verilog source files resides in ``generated-src/<...>-<package>-<config>/gen-collateral`` for the build/simulation.
+Specifically, for ``CONFIG=RocketConfig`` the SoC top-level (``TOP``) Verilog file is ``ChipTop.sv`` while the (``Model``) file is ``TestHarness.sv``.
 
 Fast Memory Loading
 -------------------
