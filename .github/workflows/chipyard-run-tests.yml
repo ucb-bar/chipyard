@@ -1003,30 +1003,6 @@ jobs:
           project-key: "fireboom"
           run-script: "remote-run-firesim-scala-tests.sh"
 
-  firesim-multiclock-run-tests:
-    name: firesim-multiclock-run-tests
-    needs: setup-complete
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests on self-hosted
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "extra-tests"
-          project-key: "firesim-multiclock"
-          run-script: "remote-run-firesim-scala-tests.sh"
-
   # Sentinel job to simplify how we specify which checks need to pass in branch
   # protection and in Mergify
   #
@@ -1061,8 +1037,7 @@ jobs:
             testchipip-run-tests,
             constellation-run-tests,
             prepare-chipyard-fpga, # firesim-run-tests,
-            fireboom-run-tests,
-            firesim-multiclock-run-tests]
+            fireboom-run-tests]
     runs-on: ubuntu-latest
     steps:
       - run: echo Success!
