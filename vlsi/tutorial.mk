@@ -17,7 +17,7 @@ ifeq ($(tutorial),sky130-commercial)
     tech_name         ?= sky130
     CONFIG            ?= TinyRocketConfig
     TOOLS_CONF        ?= example-tools.yml
-    TECH_CONF         ?= example-sky130.yml
+    TECH_CONF         ?= hammer/e2e/pdks/sky130-bwrc.yml
     DESIGN_CONF       ?= example-designs/sky130-commercial.yml
     EXTRA_CONFS       ?= $(if $(filter $(VLSI_TOP),Rocket), example-designs/sky130-rocket.yml, )
     INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONF) $(EXTRA_CONFS)

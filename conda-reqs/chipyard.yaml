@@ -127,6 +127,7 @@ dependencies:
         - mypy-boto3-ec2==1.21.9
         - sure==2.0.0
         - pylddwrap==1.2.1
+        - hammer-vlsi
 
     # doc requirements
     - sphinx

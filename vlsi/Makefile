@@ -21,8 +21,8 @@ include $(base_dir)/variables.mk
 sim_name           ?= vcs # needed for GenerateSimFiles, but is unused
 tech_name          ?= asap7
 tech_dir           ?= $(if $(filter $(tech_name),sky130 asap7 nangate45),\
-                        $(vlsi_dir)/hammer/src/hammer-vlsi/technology/$(tech_name), \
-                        $(vlsi_dir)/hammer-$(tech_name)-plugin/$(tech_name))
+                        $(vlsi_dir)/hammer/hammer/technology/$(tech_name), \
+                        $(vlsi_dir)/hammer-$(tech_name)-plugin/hammer/technology/$(tech_name))
 SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
 SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
 SMEMS_HAMMER       ?= $(build_dir)/$(long_name).mems.hammer.json
