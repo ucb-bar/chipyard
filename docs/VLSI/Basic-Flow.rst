@@ -7,31 +7,22 @@ Using Hammer To Place and Route a Custom Block
 
 Initialize the Hammer Plug-ins
 ----------------------------------
-In the Chipyard root, run:
+In the Chipyard root, ensure that you have the Chipyard conda environment activated. Then, run:
 
 .. code-block:: shell
 
     ./scripts/init-vlsi.sh <tech-plugin-name>
 
 This will pull the Hammer & CAD tool plugin submodules, assuming the technology plugins are available on github.
-Currently only the asap7 technology plugin is available on github.
-If you have additional private technology plugins (this is a typical use-case for proprietry process technologies with require NDAs and secure servers), you can clone them directly
+Currently only the asap7 and sky130 technology plugins are available on github.
+If you have additional private technology plugins (this is a typical use-case for proprietry process technologies with require NDAs and secure servers), you can submodule them directly
 into VLSI directory with the name ``hammer-<tech-plugin-name>-plugin``.
 For example, for an imaginary process technology called tsmintel3:
 
 .. code-block:: shell
 
     cd vlsi
-    git clone git@my-secure-server.berkeley.edu:tsmintel3/hammer-tsmintel3-plugin.git
-
-
-Next, we define the Hammer environment into the shell:
-
-.. code-block:: shell
-
-    cd vlsi    # (if you haven't done so yet)
-    export HAMMER_HOME=$PWD/hammer
-    source $HAMMER_HOME/sourceme.sh
+    git submodule add git@my-secure-server.berkeley.edu:tsmintel3/hammer-tsmintel3-plugin.git
 
 
 .. Note:: Some VLSI EDA tools are supported only on RHEL-based operating systems. We recommend using Chipyard on RHEL7 and above. However, many VLSI server still have old operating systems such as RHEL6, which have software packages older than the basic chipyard requirements. In order to build Chipyard on RHEL6, you will likely need to use tool packages such as devtoolset (for example, devtoolset-8) and/or build from source gcc, git, gmake, make, dtc, cc, bison, libexpat and liby.
@@ -42,8 +33,7 @@ Setting up the Hammer Configuration Files
 The first configuration file that needs to be set up is the Hammer environment configuration file ``env.yml``. In this file you need to set the paths to the EDA tools and license servers you will be using. You do not have to fill all the fields in this configuration file, you only need to fill in the paths for the tools that you will be using.
 If you are working within a shared server farm environment with an LSF cluster setup (for example, the Berkeley Wireless Research Center), please note the additional possible environment configuration listed in the :ref:`VLSI/Basic-Flow:Advanced Environment Setup` segment of this documentation page.
 
-Hammer relies on YAML-based configuration files. While these configuration can be consolidated within a single files (as is the case in the ASAP7 tutorial :ref:`tutorial` and the ``sky130``
-OpenRoad example), the generally suggested way to work with an arbitrary process technology or tools plugins would be to use three configuration files, matching the three Hammer concerns - tools, tech, and design.
+Hammer relies on YAML-based configuration files. While these configuration can be consolidated within a single files (as is the case in the :ref:`tutorial` and the :ref:`sky130-openroad-tutorial`), the generally suggested way to work with an arbitrary process technology or tools plugins would be to use three configuration files, matching the three Hammer concerns - tools, tech, and design.
 The ``vlsi`` directory includes three such example configuration files matching the three concerns: ``example-tools.yml``, ``example-tech.yml``, and ``example-design.yml``.
 
 The ``example-tools.yml`` file configures which EDA tools hammer will use. This example file uses Cadence Innovus, Genus and Voltus, Synopsys VCS, and Mentor Calibre (which are likely the tools you will use if you're working in the Berkeley Wireless Research Center). Note that tool versions are highly sensitive to the process-technology in-use. Hence, tool versions that work with one process technology may not work with another.
@@ -52,7 +42,7 @@ The ``example-design.yml`` file contains basic build system information (how man
 
 Finally, the ``example-tech.yml`` file is a template file for a process technology plugin configuration. We will copy this file, and replace its fields with the appropriate process technology details for the tech plugin that we have access to. For example, for the ``asap7`` tech plugin, we will replace the <tech_name> field with "asap7" and the path to the process technology files installation directory. The technology plugin (which for ASAP7 is within Hammer) will define the technology node and other parameters.
 
-We recommend copying these example configuration files and customizing them with a different name, so you can have different configuration files for different process technologies and designs (e.g. create tech-tsmintel3.yml from example-tech.yml)
+We recommend copying these example configuration files and customizing them with a different name, so you can have different configuration files for different process technologies and designs (e.g. create ``tech-tsmintel3.yml`` from ``example-tech.yml``)
 
 
 Building the Design

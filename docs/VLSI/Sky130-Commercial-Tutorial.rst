@@ -45,28 +45,19 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 Prerequisites
 -------------
 
-* Python 3.6+
-* numpy package
+* Python 3.9+
 * Genus, Innovus, Voltus, VCS, and Calibre licenses
-* Sky130 PDK, install using `these directions  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__
+* Sky130 PDK, install using `these directions  <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__
 
 Initial Setup
 -------------
-In the Chipyard root, run:
+In the Chipyard root, ensure that you have the Chipyard conda environment activated. Then, run:
 
 .. code-block:: shell
 
     ./scripts/init-vlsi.sh sky130
 
-to pull the Hammer & plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule must be added in the ``vlsi`` folder first.
-
-Pull the Hammer environment into the shell:
-
-.. code-block:: shell
-
-    cd vlsi
-    export HAMMER_HOME=$PWD/hammer
-    source $HAMMER_HOME/sourceme.sh
+to pull and install the plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule must be added in the ``vlsi`` folder first.
 
 Building the Design
 --------------------
@@ -103,7 +94,7 @@ example-sky130.yml
 This contains the Hammer configuration for this example project. Example clock constraints, power straps definitions, placement constraints, and pin constraints are given. Additional configuration for the extra libraries and tools are at the bottom.
 
 First, set ``technology.sky130.sky130A/sky130_nda/openram_lib`` to the absolute path of the respective directories containing the Sky130 PDK and SRAM files. See the
-`Sky130 Hammer plugin README <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__
+`Sky130 Hammer plugin README <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__
 for details about the PDK setup.
 
 example-tools.yml
@@ -143,7 +134,7 @@ To run DRC & LVS, and view the results in Calibre:
     ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/lvs-rundir/generated-scripts/view_lvs
 
 Some DRC errors are expected from this PDK, especially with regards to the SRAMs, as explained in the
-`Sky130 Hammer plugin README  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__.
+`Sky130 Hammer plugin README  <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__.
 For this reason, the ``example-vlsi-sky130`` script black-boxes the SRAMs for DRC/LVS analysis.
 
 Simulation
