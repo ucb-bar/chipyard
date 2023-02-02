@@ -58,6 +58,11 @@ case class SpikeCoreParams(
   val rasEntries = 0
   val btbEntries = 0
   val bhtEntries = 0
+  val traceHasWdata = false
+  val useBitManip = false
+  val useBitManipCrypto = false
+  val useCryptoNIST = false
+  val useCryptoSM = false
 
   override def vLen = 128
   override def vMemDataBits = 128
