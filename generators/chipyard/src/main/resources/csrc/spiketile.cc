@@ -260,11 +260,11 @@ extern "C" void spike_tile(int hartid, char* isa,
                            "vlen:128,elen:64",
                            false,
                            endianness_little,
-                           false,
                            pmpregions,
                            std::vector<mem_cfg_t>(),
                            std::vector<int>(),
-                           false);
+                           false,
+                           0);
     processor_t* p = new processor_t(isa_parser,
                                      cfg,
                                      simif,
