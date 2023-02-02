@@ -74,11 +74,15 @@ class TestSuiteHelper
           addSuites(env.map(rv32uf))
           if (cfg.fLen >= 64)
             addSuites(env.map(rv32ud))
+          if (cfg.minFLen <= 16)
+            addSuites(env.map(rv32uzfh))
         } else {
           addSuite(rv32udBenchmarks)
           addSuites(env.map(rv64uf))
           if (cfg.fLen >= 64)
             addSuites(env.map(rv64ud))
+          if (cfg.minFLen <= 16)
+            addSuites(env.map(rv64uzfh))
         }
       }
       if (coreParams.useAtomics) {

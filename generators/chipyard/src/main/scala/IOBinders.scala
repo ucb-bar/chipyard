@@ -287,7 +287,7 @@ class WithAXI4MemPunchthrough extends OverrideLazyIOBinder({
         p.clock := clockBundle.clock
         p.reset := clockBundle.reset
         p
-      })
+      }).toSeq
       (ports, Nil)
     }
   }
@@ -307,7 +307,7 @@ class WithAXI4MMIOPunchthrough extends OverrideLazyIOBinder({
         p.clock := clockBundle.clock
         p.reset := clockBundle.reset
         p
-      })
+      }).toSeq
       (ports, Nil)
     }
   }
@@ -326,7 +326,7 @@ class WithL2FBusAXI4Punchthrough extends OverrideLazyIOBinder({
         m <> p.bits
         p.clock := clockBundle.clock
         p
-      })
+      }).toSeq
       (ports, Nil)
     }
   }

@@ -64,7 +64,6 @@ mapping["chipyard-constellation"]=" CONFIG=SharedNoCConfig"
 
 mapping["constellation"]=" SUB_PROJECT=constellation"
 mapping["firesim"]="SCALA_TEST=firesim.firesim.RocketNICF1Tests"
-mapping["firesim-multiclock"]="SCALA_TEST=firesim.firesim.RocketMulticlockF1Tests"
 mapping["fireboom"]="SCALA_TEST=firesim.firesim.BoomF1Tests"
 mapping["icenet"]="SUB_PROJECT=icenet"
 mapping["testchipip"]="SUB_PROJECT=testchipip"

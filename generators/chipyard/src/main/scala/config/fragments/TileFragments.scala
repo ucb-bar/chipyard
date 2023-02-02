@@ -25,7 +25,7 @@ class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
 class WithTraceIO extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
-      trace = true))
+      core = tp.tileParams.core.copy(trace = true)))
     case tp: CVA6TileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
       trace = true))
     case other => other
@@ -36,7 +36,7 @@ class WithTraceIO extends Config((site, here, up) => {
 class WithNoTraceIO extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
-      trace = false))
+      core = tp.tileParams.core.copy(trace = false)))
     case tp: CVA6TileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
       trace = false))
     case other => other
