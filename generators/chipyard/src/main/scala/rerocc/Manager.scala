@@ -39,43 +39,48 @@ case object ReRoCCTileKey extends Field[Seq[ReRoCCTileParams]](Nil)
 
 class EmptyCoreParams(val nL2TLBEntries: Int, val nL2TLBWays: Int) extends CoreParams {
   // Most fields are unused, or make no sense in the context of a ReRoCC tile
-  lazy val bootFreqHz: BigInt               = { require(false); 0; }
+  lazy val bootFreqHz: BigInt               = ???
   lazy val useVM: Boolean                   = true
-  lazy val useUser: Boolean                 = { require(false); false; }
-  lazy val useSupervisor: Boolean           = { require(false); false; }
+  lazy val useUser: Boolean                 = ???
+  lazy val useSupervisor: Boolean           = ???
   lazy val useHypervisor: Boolean           = false
-  lazy val useDebug: Boolean                = { require(false); false; }
+  lazy val useDebug: Boolean                = ???
   lazy val useAtomics: Boolean              = false
   lazy val useAtomicsOnlyForIO: Boolean     = false
   lazy val useCompressed: Boolean           = true
-  lazy val useRVE: Boolean                  = { require(false); false; }
+  lazy val useRVE: Boolean                  = ???
   lazy val useSCIE: Boolean                 = false
-  lazy val nLocalInterrupts: Int            = { require(false); 0; }
+  lazy val nLocalInterrupts: Int            = ???
   lazy val useNMI: Boolean                  = false
   lazy val nBreakpoints: Int                = 0
-  lazy val useBPWatch: Boolean              = { require(false); false; }
-  lazy val mcontextWidth: Int               = { require(false); 0; }
-  lazy val scontextWidth: Int               = { require(false); 0; }
+  lazy val useBPWatch: Boolean              = ???
+  lazy val mcontextWidth: Int               = ???
+  lazy val scontextWidth: Int               = ???
   lazy val nPMPs: Int                       = 0
   lazy val nPerfCounters: Int               = 0
-  lazy val haveBasicCounters: Boolean       = { require(false); false; }
+  lazy val haveBasicCounters: Boolean       = ???
   lazy val haveCFlush: Boolean              = false;
-  lazy val misaWritable: Boolean            = { require(false); false; }
+  lazy val misaWritable: Boolean            = ???
   lazy val nPTECacheEntries: Int            = 0
   lazy val mtvecInit: Option[BigInt]        = None
   lazy val mtvecWritable: Boolean           = false
-  lazy val fastLoadWord: Boolean            = { require(false); false; }
-  lazy val fastLoadByte: Boolean            = { require(false); false; }
-  lazy val branchPredictionModeCSR: Boolean = { require(false); false; }
-  lazy val clockGate: Boolean               = { require(false); false; }
-  lazy val mvendorid: Int                   = { require(false); 0; }
-  lazy val mimpid: Int                      = { require(false); 0; }
+  lazy val fastLoadWord: Boolean            = ???
+  lazy val fastLoadByte: Boolean            = ???
+  lazy val branchPredictionModeCSR: Boolean = ???
+  lazy val clockGate: Boolean               = ???
+  lazy val mvendorid: Int                   = ???
+  lazy val mimpid: Int                      = ???
   lazy val mulDiv: Option[MulDivParams]     = None
   lazy val fpu: Option[FPUParams]           = Some(FPUParams())
+  lazy val traceHasWdata: Boolean           = false
+  lazy val useBitManip: Boolean             = false
+  lazy val useBitManipCrypto: Boolean       = false
+  lazy val useCryptoNIST: Boolean           = false
+  lazy val useCryptoSM: Boolean             = false
 
   lazy val decodeWidth: Int                 = 0
   lazy val fetchWidth: Int                  = 0
-  lazy val haveFSDirty: Boolean             = { require(false); false; }
+  lazy val haveFSDirty: Boolean             = ???
   lazy val instBits: Int                    = 16
   lazy val lrscCycles: Int                  = 20
   lazy val pmpGranularity: Int              = 0
@@ -99,7 +104,8 @@ class MiniDCache(reRoCCId: Int, crossing: ClockCrossingType)(implicit p: Paramet
 class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implicit p: Parameters) extends LazyModule {
   val node = ReRoCCManagerNode(reRoCCTileParams.ibufEntries)
   val ibufEntries = reRoCCTileParams.ibufEntries
-  override lazy val module = new LazyModuleImp(this) {
+  override lazy val module = new Impl
+  class Impl extends LazyModuleImp(this) {
     val io = IO(new Bundle {
       val cmd = Decoupled(new RoCCCommand)
       val resp = Flipped(Decoupled(new RoCCResponse))

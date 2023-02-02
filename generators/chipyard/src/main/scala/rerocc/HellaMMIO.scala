@@ -22,8 +22,8 @@ class HellaMMIO(name: String)(implicit p: Parameters) extends LazyModule()(p) {
     )),
     minLatency = 1
   )))
-
-  override lazy val module = new LazyModuleImp(this) {
+  override lazy val module = new Impl
+  class Impl extends LazyModuleImp(this) {
     val io = IO(Flipped(new HellaCacheIO))
 
     val (tl, edge) = node.out(0)

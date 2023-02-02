@@ -87,7 +87,8 @@ class InstructionSender(b: ReRoCCBundleParams)(implicit p: Parameters) extends M
 
 class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule {
   val reRoCCNode = ReRoCCClientNode()
-  override lazy val module = new LazyModuleImp(this) {
+  override lazy val module = new Impl
+  class Impl extends LazyModuleImp(this) {
     val (rerocc, edge) = reRoCCNode.out(0)
     val io = IO(new Bundle {
       val cmd = Flipped(Decoupled(new RoCCCommand))

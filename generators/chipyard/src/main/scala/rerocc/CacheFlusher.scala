@@ -28,6 +28,7 @@ class Translator(implicit val p: Parameters) extends Module with HasNonDiplomati
   io.ptw.req.bits.bits.addr := cmd.io.deq.bits
   io.ptw.req.bits.bits.vstage1 := false.B
   io.ptw.req.bits.bits.stage2 := false.B
+  io.ptw.req.bits.bits.need_gpa := false.B
 
   cmd.io.deq.ready := io.ptw.resp.valid
   when (io.ptw.req.fire()) { inflight := true.B }
@@ -43,8 +44,8 @@ class Translator(implicit val p: Parameters) extends Module with HasNonDiplomati
 class ReRoCCCacheFlusher(nTrackers: Int = 8)(implicit p: Parameters) extends LazyModule {
   val node = TLClientNode(Seq(TLMasterPortParameters.v1(
     Seq(TLMasterParameters.v1("cacheflusher", IdRange(0, nTrackers))))))
-
-  override lazy val module = new LazyModuleImp(this) {
+  override lazy val module = new Impl
+  class Impl extends LazyModuleImp(this) {
     val io = IO(new Bundle {
       val cmd = Flipped(Decoupled(new RoCCCommand))
       val ptw = new TLBPTWIO
@@ -54,18 +55,19 @@ class ReRoCCCacheFlusher(nTrackers: Int = 8)(implicit p: Parameters) extends Laz
     val paddrBits = tl_out.a.bits.address.getWidth
 
     val cmd = Module(new Queue(new RoCCCommand, 1, pipe=true))
+    cmd.io.enq <> io.cmd
     val translator = Module(new Translator)
     translator.io.ptw <> io.ptw
     val translated_arb = Module(new Arbiter(UInt(paddrBits.W), 2))
     val vm_enabled = io.ptw.ptbr.mode(io.ptw.ptbr.mode.getWidth-1) && cmd.io.deq.bits.status.dprv <= PRV.S.U
 
     translated_arb.io.in(1).valid := cmd.io.deq.valid && !vm_enabled
-    translated_arb.io.in(1).bits := cmd.io.deq.bits
+    translated_arb.io.in(1).bits := cmd.io.deq.bits.rs1
 
     cmd.io.deq.ready := Mux(vm_enabled, translator.io.in.ready, translated_arb.io.in(1).ready)
 
     translator.io.in.valid := vm_enabled && cmd.io.deq.valid
-    translator.io.in.bits := cmd.io.deq.bits
+    translator.io.in.bits := cmd.io.deq.bits.rs1
 
     translated_arb.io.in(0) <> translator.io.out
 
