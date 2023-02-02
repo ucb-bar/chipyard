@@ -13,11 +13,12 @@ spiflash.img: spiflash.py
 
 .DEFAULT_GOAL := default
 
-.PHONY: default
-default: $(addsuffix .riscv,$(PROGRAMS)) spiflash.img
-
 .PHONY: dumps
 dumps: $(addsuffix .dump,$(PROGRAMS))
+
+.PHONY: default
+default: $(addsuffix .riscv,$(PROGRAMS)) spiflash.img dumps
+
 
 %.o: %.S
 	$(GCC) $(CFLAGS) -D__ASSEMBLY__=1 -c $< -o $@

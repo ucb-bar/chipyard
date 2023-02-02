@@ -9,6 +9,7 @@
 #define REROCC_ASSIGN (2)
 #define REROCC_INFO (3)
 #define REROCC_FENCE (4)
+#define REROCC_CFLUSH (5)
 
 
 
@@ -48,6 +49,11 @@ inline void rerocc_fence(uint64_t tracker) {
   uint64_t op1 = tracker;
   ROCC_INSTRUCTION_S(0, op1, REROCC_FENCE);
   asm volatile("fence");
+}
+
+inline void rerocc_cflush(void* addr) {
+  uint64_t op1 = addr;
+  ROCC_INSTRUCTION_S(0, op1, REROCC_CFLUSH);
 }
 
 

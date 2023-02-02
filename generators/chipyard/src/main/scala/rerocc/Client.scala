@@ -22,6 +22,8 @@ object ReRoCCInstructions {
   val info = 3.U(7.W)
   // op1 = tracker
   val fence = 4.U(7.W)
+  // op1 = vaddr
+  val cflush = 5.U(7.W)
 }
 
 class InstructionSender(b: ReRoCCBundleParams)(implicit p: Parameters) extends Module {
@@ -290,12 +292,15 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule {
 }
 
 
-class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC(OpcodeSet.all, 1) {
+class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC(OpcodeSet.all, 2) {
   val reRoCCXbar = LazyModule(new ReRoCCXbar())
   val subclients = Seq.fill(nTrackers) { LazyModule(new ReRoCCSingleOpcodeClient) }
 
   subclients.foreach { s => reRoCCXbar.node := s.reRoCCNode }
   val reRoCCNode = reRoCCXbar.node
+  val cflush = LazyModule(new ReRoCCCacheFlusher)
+
+  override val tlNode = cflush.node
 
   override lazy val module = new LazyRoCCModuleImp(this) {
     val resp_arb = Module(new Arbiter(new RoCCResponse, 1+nTrackers))
@@ -307,14 +312,16 @@ class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC
 
     when (fencing) {
       val any_busy = (0 until nTrackers).map { i => subclients(i).module.io.fencing && fencing_mask(i) }.orR
-      when (!any_busy) { fencing := false.B }
+      when (!any_busy && !cflush.module.io.busy) { fencing := false.B }
     }
+
+    cflush.module.io.ptw <> io.ptw(1)
 
     when (io.cmd.fire()
       && OpcodeSet.custom0.matches(io.cmd.bits.inst.opcode)
       && io.cmd.bits.inst.funct === ReRoCCInstructions.fence) {
       fencing := true.B
-      fencing_mask := 0.U
+      fencing_mask := UIntToOH(io.cmd.bits.rs1(log2Ceil(nTrackers)-1,0))
     }
 
     val cmd = Queue(io.cmd)
@@ -331,6 +338,7 @@ class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC
     val cmd_assign  = funct === ReRoCCInstructions.assign
     val cmd_info    = funct === ReRoCCInstructions.info
     val cmd_fence   = funct === ReRoCCInstructions.fence
+    val cmd_cflush  = funct === ReRoCCInstructions.cflush
     val cmd_tracker_sel = WireInit(0.U(nTrackers.W))
 
     cmd.ready := Mux1H(cmd_tracker_sel, subclients.map(_.module.io.cmd.ready))
@@ -343,6 +351,8 @@ class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC
       subclient.io.cmd.bits := cmd.bits
     }
 
+    cflush.module.io.cmd.valid := false.B
+    cflush.module.io.cmd.bits := cmd.bits
     when (custom0) {
       val tracker = cmd.bits.rs1
       when (cmd_assign) {
@@ -358,8 +368,9 @@ class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC
         cmd_tracker_sel := UIntToOH(tracker(log2Ceil(nTrackers)-1,0))
       } .elsewhen (cmd_fence) {
         cmd_tracker_sel := UIntToOH(tracker(log2Ceil(nTrackers)-1,0))
-        fencing_mask := UIntToOH(tracker(log2Ceil(nTrackers)-1,0))
-        // do nothing
+      } .elsewhen (cmd_cflush) {
+        cmd.ready := cflush.module.io.cmd.ready
+        cflush.module.io.cmd.valid := cmd.valid
       } .otherwise {
         assert(!cmd.valid)
       }
