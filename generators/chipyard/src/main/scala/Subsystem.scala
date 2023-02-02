@@ -78,7 +78,7 @@ class ChipyardSubsystemModuleImp[+L <: ChipyardSubsystem](_outer: L) extends Bas
   with HasTilesModuleImp
 {
   // create file with core params
-  ElaborationArtefacts.add("""core.config""", outer.tiles.map(x => x.module.toString).mkString("\n"))
+  ElaborationArtefacts.add("""core.config""", outer.tiles.map(_.name).mkString("\n"))
   // Generate C header with relevant information for Dromajo
   // This is included in the `dromajo_params.h` header file
   DromajoHelper.addArtefacts(InSubsystem)
