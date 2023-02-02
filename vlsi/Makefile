@@ -8,6 +8,7 @@
 base_dir=$(abspath ..)
 vlsi_dir=$(abspath .)
 sim_dir=$(abspath .)
+site_packages_dir=$(shell python3 -c "import site; print(site.getsitepackages()[0])")
 
 #########################################################################################
 # include shared variables
@@ -21,7 +22,7 @@ include $(base_dir)/variables.mk
 sim_name           ?= vcs # needed for GenerateSimFiles, but is unused
 tech_name          ?= asap7
 tech_dir           ?= $(if $(filter $(tech_name),sky130 asap7 nangate45),\
-                        $(vlsi_dir)/hammer/hammer/technology/$(tech_name), \
+                        $(site_packages_dir)/hammer/technology/$(tech_name), \
                         $(vlsi_dir)/hammer-$(tech_name)-plugin/hammer/technology/$(tech_name))
 SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
 SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
@@ -42,7 +43,7 @@ HAMMER_EXEC        ?= $(if $(filter $(tech_name),sky130),\
                         ./example-vlsi-sky130,\
                         ./example-vlsi)
 VLSI_TOP           ?= $(TOP)
-VLSI_HARNESS_DUT_NAME ?= chiptop
+VLSI_MODEL_DUT_NAME ?= chiptop
 # If overriding, this should be relative to $(vlsi_dir)
 VLSI_OBJ_DIR       ?= build
 ifneq ($(CUSTOM_VLOG),)
@@ -54,22 +55,18 @@ endif
 #########################################################################################
 # general rules
 #########################################################################################
-ALL_RTL = $(TOP_FILE) $(TOP_SMEMS_FILE)
-extra_v_includes = $(build_dir)/EICG_wrapper.v
+# TODO: get all the top blackboxes only
+extra_v_includes = $(build_dir)/EICG_wrapper.v $(build_dir)/gen-collateral/IOCell.v
 ifneq ($(CUSTOM_VLOG), )
 	VLSI_RTL = $(CUSTOM_VLOG)
-	VLSI_BB = /dev/null
 else
-	VLSI_RTL = $(ALL_RTL) $(extra_v_includes)
-	VLSI_BB = $(sim_top_blackboxes)
+	VLSI_RTL = $(shell cat $(TOP_MODS_FILELIST)) $(TOP_SMEMS_FILE) $(extra_v_includes)
 endif
 
-.PHONY: default verilog
+.PHONY: default
 default: all
 
 all: drc lvs
-
-verilog: $(ALL_RTL)
 
 #########################################################################################
 # import other necessary rules and variables
@@ -104,29 +101,17 @@ $(SRAM_CONF): $(SRAM_GENERATOR_CONF)
 #########################################################################################
 include $(base_dir)/vcs.mk
 
-SIM_FILE_REQS += \
-	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
-
-# copy files but ignore *.h files in *.f since vcs has +incdir+$(build_dir)
-$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
-	cp -f $^ $(build_dir)
-	$(foreach file,\
-		$^,\
-		$(if $(filter %.h,$(file)),\
-			,\
-			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
-
 SIM_CONF = $(OBJ_DIR)/sim-inputs.yml
 SIM_DEBUG_CONF = $(OBJ_DIR)/sim-debug-inputs.yml
 SIM_TIMING_CONF = $(OBJ_DIR)/sim-timing-inputs.yml
 
 include $(vlsi_dir)/sim.mk
-$(SIM_CONF): $(VLSI_RTL) $(MODEL_FILE) $(MODEL_SMEMS_FILE) $(sim_common_files) $(dramsim_lib)
+$(SIM_CONF): $(sim_common_files)
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
-	for x in $(MODEL_FILE) $(MODEL_SMEMS_FILE); do \
+	for x in $(shell cat $(sim_common_files)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  input_files_meta: 'append'" >> $@
@@ -161,9 +146,9 @@ $(SIM_CONF): $(VLSI_RTL) $(MODEL_FILE) $(MODEL_SMEMS_FILE) $(sim_common_files) $
 ifneq ($(BINARY), )
 	echo "  benchmarks: ['$(BINARY)']" >> $@
 endif
-	echo "  tb_dut: 'TestDriver.testHarness.$(VLSI_HARNESS_DUT_NAME)'" >> $@
+	echo "  tb_dut: 'TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)'" >> $@
 
-$(SIM_DEBUG_CONF): $(VLSI_RTL) $(MODEL_FILE) $(MODEL_SMEMS_FILE) $(sim_common_files)
+$(SIM_DEBUG_CONF): $(sim_common_files)
 	mkdir -p $(dir $@)
 	mkdir -p $(output_dir)
 	echo "sim.inputs:" > $@
@@ -186,7 +171,7 @@ else
 	echo "sim.outputs.waveforms: ['$(sim_out_name).vpd']" >> $@
 endif
 
-$(SIM_TIMING_CONF): $(VLSI_RTL) $(MODEL_FILE) $(MODEL_SMEMS_FILE) $(sim_common_files)
+$(SIM_TIMING_CONF): $(sim_common_files)
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
 	echo "  defines: ['NTC']" >> $@
@@ -195,10 +180,10 @@ $(SIM_TIMING_CONF): $(VLSI_RTL) $(MODEL_FILE) $(MODEL_SMEMS_FILE) $(sim_common_f
 
 POWER_CONF = $(OBJ_DIR)/power-inputs.yml
 include $(vlsi_dir)/power.mk
-$(POWER_CONF): $(VLSI_RTL) $(MODEL_FILE) $(MODEL_SMEMS_FILE) $(sim_common_files)
+$(POWER_CONF): $(VLSI_RTL)
 	mkdir -p $(dir $@)
 	echo "power.inputs:" > $@
-	echo "  tb_dut: 'testHarness/$(VLSI_HARNESS_DUT_NAME)'" >> $@
+	echo "  tb_dut: 'testHarness/$(VLSI_MODEL_DUT_NAME)'" >> $@
 	echo "  database: '$(OBJ_DIR)/par-rundir/$(VLSI_TOP)_FINAL'" >> $@
 ifneq ($(BINARY), )
 	echo "  waveforms: [" >> $@
@@ -223,18 +208,12 @@ ifeq ($(CUSTOM_VLOG), )
 	GENERATED_CONFS += $(SRAM_CONF)
 endif
 
-$(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
+$(SYN_CONF): $(VLSI_RTL)
 	mkdir -p $(dir $@)
-	echo "sim.inputs:" > $@
-	echo "  input_files:" >> $@
-	for x in $(VLSI_RTL); do \
-		echo '    - "'$$x'"' >> $@; \
-	done
-	echo "  input_files_meta: 'append'" >> $@
 	echo "synthesis.inputs:" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
-	for x in $(VLSI_RTL) $(shell cat $(VLSI_BB)); do \
+	for x in $(VLSI_RTL); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 

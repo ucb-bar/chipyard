@@ -49,6 +49,8 @@ This is done by the following:
     conda install -n base conda-lock
     conda activate base
 
+.. Note:: We also recommended switching to `libmamba <https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community>`__ for much faster dependency solving.
+
 Setting up the Chipyard Repo
 -------------------------------------------
 
@@ -100,6 +102,8 @@ Once setup is complete, an emitted ``env.sh`` file should exist in the top-level
 This file activates the conda environment created in ``build-setup.sh`` and sets up necessary environment variables needed for future Chipyard steps (needed for the ``make`` system to work properly).
 Once the script is run, the ``PATH``, ``RISCV``, and ``LD_LIBRARY_PATH`` environment variables will be set properly for the toolchain requested.
 You can source this file in your ``.bashrc`` or equivalent environment setup file to get the proper variables, or directly include it in your current environment:
+
+.. Note:: If you are on a Mac or a RHEL/CentOS-based Linux distribution, you must deactivate the base conda environment with ``conda deactivate`` first before proceeding. You may also choose to keep it deactivated by default with ``conda config --set auto_activate_base false``. See this `issue <https://github.com/conda/conda/issues/9392>`__ for more details.
 
 .. code-block:: shell
 

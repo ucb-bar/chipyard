@@ -1,7 +1,5 @@
-# SRAM Compiler compiler options
-vlsi.core.sram_generator_tool: "hammer.technology.<tech_name>.sram_compiler"
-
 # Tool options. Replace with your tool plugin of choice.
+vlsi.core.build_system: make
 # Genus options
 vlsi.core.synthesis_tool: "hammer.synthesis.genus"
 synthesis.genus.version: "211"
@@ -17,9 +15,8 @@ vlsi.core.lvs_tool: "hammer.lvs.calibre"
 lvs.calibre.version: "2022.2_24.16"
 # VCS options
 vlsi.core.sim_tool: "hammer.sim.vcs"
-sim.vcs.version: "T-2022.06-SP2"
+sim.vcs.version: "S-2021.09-SP1-1"
 # Voltus options
 vlsi.core.power_tool: "hammer.power.voltus"
-vlsi.core.power_tool_path_meta: "append"
 power.voltus.version: "211_ISR3"
 # NOTE (about VCS+Voltus versions): if using FSDB, the VCS version should be approx 2 years older than the Voltus version for compatibility
