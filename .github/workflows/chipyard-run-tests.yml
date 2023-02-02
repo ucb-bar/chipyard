@@ -320,7 +320,6 @@ jobs:
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-accels"
-          toolchain: "esp-tools"
 
   prepare-chipyard-tracegen:
     name: prepare-chipyard-tracegen
@@ -689,7 +688,6 @@ jobs:
         with:
           group-key: "group-accels"
           project-key: "chipyard-sha3"
-          toolchain: "esp-tools"
 
   chipyard-streaming-fir-run-tests:
     name: chipyard-streaming-fir-run-tests
@@ -737,30 +735,6 @@ jobs:
           group-key: "group-accels"
           project-key: "chipyard-streaming-passthrough"
 
-  chipyard-hwacha-run-tests:
-    name: chipyard-hwacha-run-tests
-    needs: prepare-chipyard-accels
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-accels"
-          project-key: "chipyard-hwacha"
-          toolchain: "esp-tools"
-
   chipyard-gemmini-run-tests:
     name: chipyard-gemmini-run-tests
     needs: prepare-chipyard-accels
@@ -783,7 +757,6 @@ jobs:
         with:
           group-key: "group-accels"
           project-key: "chipyard-gemmini"
-          toolchain: "esp-tools"
 
   chipyard-nvdla-run-tests:
     name: chipyard-nvdla-run-tests
@@ -830,7 +803,6 @@ jobs:
         with:
           group-key: "group-accels"
           project-key: "chipyard-mempress"
-          toolchain: "esp-tools"
 
 
   tracegen-boom-run-tests:
@@ -1043,7 +1015,6 @@ jobs:
             chipyard-sha3-run-tests,
             chipyard-streaming-fir-run-tests,
             chipyard-streaming-passthrough-run-tests,
-            chipyard-hwacha-run-tests,
             chipyard-gemmini-run-tests,
             chipyard-nvdla-run-tests,
             chipyard-mempress-run-tests,
