@@ -83,8 +83,6 @@ jobs:
         uses: ./.github/actions/git-workaround
       - name: Create conda env
         uses: ./.github/actions/create-conda-env
-        with:
-          install-collateral: false
       - name: Check commits of each submodule
         run: |
             conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
@@ -111,8 +109,6 @@ jobs:
         uses: ./.github/actions/git-workaround
       - name: Create conda env
         uses: ./.github/actions/create-conda-env
-        with:
-          install-collateral: false
       - name: Check that the tutorial-setup patches apply
         run: |
             conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
@@ -138,8 +134,6 @@ jobs:
         uses: ./.github/actions/git-workaround
       - name: Create conda env
         uses: ./.github/actions/create-conda-env
-        with:
-          install-collateral: false
       - name: Check that documentation builds with no warnings/errors
         run: |
           conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
@@ -534,6 +528,29 @@ jobs:
         with:
           group-key: "group-cores"
           project-key: "chipyard-sodor"
+
+  chipyard-spike-run-tests:
+    name: chipyard-spike-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-spike"
 
   chipyard-fftgenerator-run-tests:
     name: chipyard-fftgenerator-run-tests

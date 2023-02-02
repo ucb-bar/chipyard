@@ -37,6 +37,10 @@ class WithUART(baudrate: BigInt = 115200) extends Config((site, here, up) => {
     UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256, initBaudRate = baudrate))
 })
 
+class WithUARTFIFOEntries(txEntries: Int, rxEntries: Int) extends Config((site, here, up) => {
+  case PeripheryUARTKey => up(PeripheryUARTKey).map(_.copy(nTxEntries = txEntries, nRxEntries = rxEntries))
+})
+
 class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) => {
   // Note: the default size matches freedom with the addresses below
   case PeripherySPIFlashKey => Seq(

@@ -41,6 +41,9 @@ case $1 in
     chipyard-boom)
         run_bmark ${mapping[$1]}
         ;;
+    chipyard-spike)
+        run_bmark ${mapping[$1]}
+        ;;
     chipyard-hetero)
         run_bmark ${mapping[$1]}
         ;;
