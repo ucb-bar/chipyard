@@ -8,21 +8,27 @@ modify Chisel-elaborated RTL.
 As mentioned in Section :ref:`Tools/FIRRTL:firrtl`, transforms are modifications that happen on the FIRRTL IR that can modify a circuit.
 Transforms are a powerful tool to take in the FIRRTL IR that is emitted from Chisel and run analysis or convert the circuit into a new form.
 
+The Scala FIRRTL Compiler and the MLIR FIRRTL Compiler
+------------------------------------------------------
+In Chipyard, two FIRRTL compilers work together to compile Chisel into Verilog. The Scala FIRRTL compiler(SFC) and the MLIR FIRRTL compiler(MFC).
+They are basically doing the same thing, except that MFC is written in C++ which makes compilation much faster. In the default setting, the SFC will compile Chisel into CHIRRTL and MFC will
+compile CHIRRTL into Verilog(as of now, we are using SFC as a backup for cases when MFC doesn't work, e.g., when the design is using Fixed types). By setting the ``ENABLE_CUSTOM_FIRRTL_PASS`` env variable to a non-zero value, we can make the SFC compile Chisel into LowFIRRTL so that our custom FIRRTL passes are applied.
+
 Where to add transforms
 -----------------------
 
 In Chipyard, the FIRRTL compiler is called multiple times to create a "Top" file that contains the DUT and a "Harness" file containing the test harness, which instantiates the DUT.
 The "Harness" file does not contain the DUT's module definition or any of its submodules.
-This is done by the ``tapeout`` SBT project (located in ``tools/barstools/tapeout``) which calls ``GenerateTopAndHarness`` (a function that wraps the multiple FIRRTL compiler calls and extra transforms).
+This is done by the ``tapeout`` SBT project (located in ``tools/barstools/tapeout``) which calls ``GenerateModelStageMain`` (a function that wraps the multiple FIRRTL compiler calls and extra transforms).
 
 .. literalinclude:: ../../common.mk
     :language: make
     :start-after: DOC include start: FirrtlCompiler
     :end-before: DOC include end: FirrtlCompiler
 
-If you look inside of the `tools/barstools/tapeout/src/main/scala/transforms/Generate.scala <https://github.com/ucb-bar/barstools/blob/master/tapeout/src/main/scala/transforms/Generate.scala>`__ file,
-you can see that FIRRTL is invoked twice, once for the "Top" and once for the "Harness". If you want to add transforms to just modify the DUT, you can add them to ``topTransforms``.
-Otherwise, if you want to add transforms to just modify the test harness, you can add them to ``harnessTransforms``.
+If you look inside of the `tools/barstools/tapeout/src/main/scala/transforms/GenerateModelStageMain.scala <https://github.com/ucb-bar/barstools/blob/master/tapeout/src/main/scala/transforms/GenerateModelStageMain.scala>`__ file,
+you can see that FIRRTL is invoked for "Model". Currently, the FIRRTL compiler is agnostic to the ``TOP`` and ``MODEL`` differentiation,
+and the user is responsible for providing annotations that will inform the compiler where(``TOP`` vs ``MODEL``) to perform the custom FIRRTL transformations.
 
 For more information on Barstools, please visit the :ref:`Tools/Barstools:Barstools` section.
 

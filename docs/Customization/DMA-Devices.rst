@@ -35,5 +35,3 @@ Once we've created our top-level module including the DMA widget, we can create 
     :language: scala
     :start-after: DOC include start: InitZeroRocketConfig
     :end-before: DOC include end: InitZeroRocketConfig
-
-

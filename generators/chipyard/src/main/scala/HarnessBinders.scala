@@ -234,7 +234,14 @@ class WithTieOffInterrupts extends OverrideHarnessBinder({
 
 class WithTieOffL2FBusAXI extends OverrideHarnessBinder({
   (system: CanHaveSlaveAXI4Port, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
-    ports.foreach({ p => p := DontCare; p.bits.tieoff() })
+    ports.foreach({ p =>
+      p.bits := DontCare
+      p.bits.aw.valid := false.B
+      p.bits.w.valid := false.B
+      p.bits.b.ready := false.B
+      p.bits.ar.valid := false.B
+      p.bits.r.ready := false.B
+    })
   }
 })
 
@@ -274,7 +281,10 @@ class WithTiedOffDebug extends OverrideHarnessBinder({
         d.dmiClock := false.B.asClock
         d.dmiReset := true.B
       case a: ClockedAPBBundle =>
-        a.tieoff()
+        a.pready := false.B
+        a.pslverr := false.B
+        a.prdata := 0.U
+        a.pduser := DontCare
         a.clock := false.B.asClock
         a.reset := true.B.asAsyncReset
         a.psel := false.B

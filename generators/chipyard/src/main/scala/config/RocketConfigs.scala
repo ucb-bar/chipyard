@@ -31,6 +31,16 @@ class RocketReRoCCConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 
+class MempressRocketConfig extends Config(
+  new mempress.WithMemPress ++                                    // use Mempress (memory traffic generation) accelerator
+  new freechips.rocketchip.subsystem.WithNBanks(8) ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(nWays=16, capacityKB=2048) ++
+  new chipyard.config.WithExtMemIdBits(7) ++                      // use 7 bits for tl like request id
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 // DOC include start: FFTRocketConfig
 class FFTRocketConfig extends Config(
   new fftgenerator.WithFFTGenerator(numPoints=8, width=16, decPt=8) ++ // add 8-point mmio fft at the default addr (0x2400) with 16bit fixed-point numbers.
@@ -42,12 +52,14 @@ class HwachaRocketConfig extends Config(
   new chipyard.config.WithHwachaTest ++
   new hwacha.DefaultHwachaConfig ++                              // use Hwacha vector accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
 
 // DOC include start: GemminiRocketConfig
 class GemminiRocketConfig extends Config(
   new gemmini.DefaultGemminiConfig ++                            // use Gemmini systolic array GEMM accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: GemminiRocketConfig
 
@@ -61,6 +73,7 @@ class GemminiReRoCCRocketConfig extends Config(
 class FPGemminiRocketConfig extends Config(
   new gemmini.GemminiFP32DefaultConfig ++                         // use FP32Gemmini systolic array GEMM accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
 
 

@@ -54,8 +54,8 @@ Prerequisites
 * Genus, Innovus, Voltus, VCS, and Calibre licenses
 * For ASAP7 specifically (`README <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/technology/asap7>`__ for more details):
 
-  * First, download the `ASAP7 v1p7 PDK <https://github.com/The-OpenROAD-Project/asap7>`__ (we recommend shallow-cloning or downloading an archive of the repository). Then, download the `encrypted Calibre decks tarball <http://asap.asu.edu/asap/>`__ tarball to a directory of choice (e.g. the root directory of the PDK) but do not extract it like the instructions say. The tech plugin is configured to extract the tarball into a cache directory for you. 
-  * If you have additional ASAP7 hard macros, their LEF & GDS need to be 4x upscaled @ 4000 DBU precision. 
+  * First, download the `ASAP7 v1p7 PDK <https://github.com/The-OpenROAD-Project/asap7>`__ (we recommend shallow-cloning or downloading an archive of the repository). Then, download the `encrypted Calibre decks tarball <http://asap.asu.edu/asap/>`__ tarball to a directory of choice (e.g. the root directory of the PDK) but do not extract it like the instructions say. The tech plugin is configured to extract the tarball into a cache directory for you.
+  * If you have additional ASAP7 hard macros, their LEF & GDS need to be 4x upscaled @ 4000 DBU precision.
 
 Initial Setup
 -------------
@@ -64,7 +64,7 @@ In the Chipyard root, run:
 .. code-block:: shell
 
     ./scripts/init-vlsi.sh asap7
-    
+
 to pull the Hammer & plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule must be added in the ``vlsi`` folder first.
 
 Pull the Hammer environment into the shell:
@@ -116,7 +116,7 @@ Place-and-Route
 
 After completion, the final database can be opened in an interactive Innovus session via ``./build/par-rundir/generated-scripts/open_chip``.
 
-Intermediate database are written in ``build/par-rundir`` between each step of the ``par`` action, and can be restored in an interactive Innovus session as desired for debugging purposes. 
+Intermediate database are written in ``build/par-rundir`` between each step of the ``par`` action, and can be restored in an interactive Innovus session as desired for debugging purposes.
 
 Timing reports are found in ``build/par-rundir/timingReports``. They are gzipped text files.
 
@@ -152,7 +152,7 @@ Simulation with VCS is supported, and can be run at the RTL- or gate-level (post
 
 Post-synthesis and post-P&R simulations use the ``sim-syn`` and ``sim-par`` make targets, respectively.
 
-Appending ``-debug`` and ``-debug-timing`` to these make targets will instruct VCS to write a SAIF + VPD (or FSDB if the ``USE_FSDB`` flag is set) and do timing-annotated simulations, respectively. See the ``sim.mk`` file for all available targets.
+Appending ``-debug`` and ``-debug-timing`` to these make targets will instruct VCS to write a SAIF + FSDB (or VPD if the ``USE_VPD`` flag is set) and do timing-annotated simulations, respectively. See the ``sim.mk`` file for all available targets.
 
 Power/Rail Analysis
 ^^^^^^^^^^^^^^^^^^^

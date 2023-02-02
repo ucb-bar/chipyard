@@ -18,3 +18,9 @@ tags
 .bsp/
 .conda-env/
 .#*
+first-clone-setup-fast-log
+.bloop/
+.metals/
+project/.bloop/
+project/metals.sbt
+project/project/

@@ -144,8 +144,8 @@ All ``make`` targets that can be applied to the default example, can also be app
     make SUB_PROJECT=hwacha run-asm-tests
 
 
-Finally, in the ``generated-src/<...>-<package>-<config>/`` directory resides all of the collateral and Verilog source files for the build/simulation.
-Specifically, the SoC top-level (``TOP``) Verilog file is denoted with ``*.top.v`` while the ``TestHarness`` file is denoted with ``*.harness.v``.
+Finally, in the ``generated-src/<...>-<package>-<config>/`` directory resides all of the collateral while the generated Verilog source files resides in ``generated-src/<...>-<package>-<config>/gen-collateral`` for the build/simulation.
+Specifically, for ``CONFIG=RocketConfig`` the SoC top-level (``TOP``) Verilog file is ``ChipTop.sv`` while the (``Model``) file is ``TestHarness.sv``.
 
 Fast Memory Loading
 -------------------
@@ -175,6 +175,12 @@ Generating Waveforms
 -----------------------
 
 If you would like to extract waveforms from the simulation, run the command ``make debug`` instead of just ``make``.
+
+A special target that automatically generates the waveform file for a specific test is also available.
+
+.. code-block:: shell
+
+    make run-binary-debug BINARY=test.riscv
 
 For a Verilator simulation, this will generate a vcd file (vcd is a standard waveform representation file format) that can be loaded to any common waveform viewer.
 An open-source vcd-capable waveform viewer is `GTKWave <http://gtkwave.sourceforge.net/>`__.

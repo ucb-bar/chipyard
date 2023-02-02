@@ -25,13 +25,13 @@ LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 
 # key value store to get the build groups
 declare -A grouping
-grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad"
+grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad chipyard-spike"
 grouping["group-peripherals"]="chipyard-dmirocket chipyard-blkdev chipyard-spiflashread chipyard-spiflashwrite chipyard-mmios chipyard-lbwif"
-grouping["group-accels"]="chipyard-fftgenerator chipyard-nvdla chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-streaming-fir chipyard-streaming-passthrough"
+grouping["group-accels"]="chipyard-fftgenerator chipyard-nvdla chipyard-mempress chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-streaming-fir chipyard-streaming-passthrough"
 grouping["group-constellation"]="chipyard-constellation"
 grouping["group-tracegen"]="tracegen tracegen-boom"
 grouping["group-other"]="icenet testchipip constellation"
-grouping["group-fpga"]="arty vcu118"
+grouping["group-fpga"]="arty vcu118 vc707"
 
 # key value store to get the build strings
 declare -A mapping
@@ -39,11 +39,13 @@ mapping["chipyard-rocket"]=""
 mapping["chipyard-dmirocket"]=" CONFIG=dmiRocketConfig"
 mapping["chipyard-lbwif"]=" CONFIG=LBWIFRocketConfig"
 mapping["chipyard-sha3"]=" CONFIG=Sha3RocketConfig"
+mapping["chipyard-mempress"]=" CONFIG=MempressRocketConfig"
 mapping["chipyard-digitaltop"]=" TOP=DigitalTop"
 mapping["chipyard-streaming-fir"]=" CONFIG=StreamingFIRRocketConfig"
 mapping["chipyard-streaming-passthrough"]=" CONFIG=StreamingPassthroughRocketConfig"
 mapping["chipyard-hetero"]=" CONFIG=LargeBoomAndRocketConfig"
 mapping["chipyard-boom"]=" CONFIG=SmallBoomConfig"
+mapping["chipyard-spike"]=" CONFIG=SpikeConfig"
 mapping["chipyard-blkdev"]=" CONFIG=SimBlockDeviceRocketConfig"
 mapping["chipyard-hwacha"]=" CONFIG=HwachaRocketConfig"
 mapping["chipyard-gemmini"]=" CONFIG=GemminiRocketConfig"
@@ -63,10 +65,10 @@ mapping["chipyard-constellation"]=" CONFIG=SharedNoCConfig"
 
 mapping["constellation"]=" SUB_PROJECT=constellation"
 mapping["firesim"]="SCALA_TEST=firesim.firesim.RocketNICF1Tests"
-mapping["firesim-multiclock"]="SCALA_TEST=firesim.firesim.RocketMulticlockF1Tests"
 mapping["fireboom"]="SCALA_TEST=firesim.firesim.BoomF1Tests"
 mapping["icenet"]="SUB_PROJECT=icenet"
 mapping["testchipip"]="SUB_PROJECT=testchipip"
 
 mapping["arty"]="SUB_PROJECT=arty verilog"
 mapping["vcu118"]="SUB_PROJECT=vcu118 verilog"
+mapping["vc707"]="SUB_PROJECT=vc707 verilog"

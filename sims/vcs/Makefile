@@ -32,19 +32,19 @@ default: $(sim)
 debug: $(sim_debug)
 
 #########################################################################################
-# simulaton requirements
+# simulation requirements
 #########################################################################################
 SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
 
 # copy files but ignore *.h files in *.f since vcs has +incdir+$(build_dir)
-$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
-	cp -f $^ $(build_dir)
+$(sim_files): $(SIM_FILE_REQS) | $(OUT_DIR)
+	cp -f $^ $(OUT_DIR)
 	$(foreach file,\
 		$^,\
 		$(if $(filter %.h,$(file)),\
 			,\
-			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
+			echo "$(addprefix $(OUT_DIR)/, $(notdir $(file)))" >> $@;))
 
 #########################################################################################
 # import other necessary rules and variables
@@ -67,11 +67,11 @@ model_dir_debug = $(build_dir)/$(long_name).debug
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
-$(sim): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
+$(sim): $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir)
 	$(VCS) $(VCS_OPTS) $(EXTRA_SIM_SOURCES) -o $@ -Mdir=$(model_dir)
 
-$(sim_debug): $(sim_vsrcs) $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
+$(sim_debug): $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir_debug)
 	$(VCS) $(VCS_OPTS) $(EXTRA_SIM_SOURCES) -o $@ -Mdir=$(model_dir_debug)  \
 	+define+DEBUG -debug_access+all -kdb -lca

@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.1
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
 
@@ -83,8 +83,6 @@ jobs:
         uses: ./.github/actions/git-workaround
       - name: Create conda env
         uses: ./.github/actions/create-conda-env
-        with:
-          install-collateral: false
       - name: Check commits of each submodule
         run: |
             conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
@@ -111,8 +109,6 @@ jobs:
         uses: ./.github/actions/git-workaround
       - name: Create conda env
         uses: ./.github/actions/create-conda-env
-        with:
-          install-collateral: false
       - name: Check that the tutorial-setup patches apply
         run: |
             conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
@@ -138,8 +134,6 @@ jobs:
         uses: ./.github/actions/git-workaround
       - name: Create conda env
         uses: ./.github/actions/create-conda-env
-        with:
-          install-collateral: false
       - name: Check that documentation builds with no warnings/errors
         run: |
           conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
@@ -535,6 +529,29 @@ jobs:
           group-key: "group-cores"
           project-key: "chipyard-sodor"
 
+  chipyard-spike-run-tests:
+    name: chipyard-spike-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-spike"
+
   chipyard-fftgenerator-run-tests:
     name: chipyard-fftgenerator-run-tests
     needs: prepare-chipyard-accels
@@ -588,10 +605,10 @@ jobs:
     steps:
       - name: Delete old checkout
         run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
+          ls -alh .
+          rm -rf ${{ github.workspace }}/* || true
+          rm -rf ${{ github.workspace }}/.* || true
+          ls -alh .
       - name: Checkout
         uses: actions/checkout@v3
       - name: Git workaround
@@ -611,10 +628,10 @@ jobs:
     steps:
       - name: Delete old checkout
         run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
+          ls -alh .
+          rm -rf ${{ github.workspace }}/* || true
+          rm -rf ${{ github.workspace }}/.* || true
+          ls -alh .
       - name: Checkout
         uses: actions/checkout@v3
       - name: Git workaround
@@ -790,6 +807,31 @@ jobs:
         with:
           group-key: "group-accels"
           project-key: "chipyard-nvdla"
+
+  chipyard-mempress-run-tests:
+    name: chipyard-mempress-run-tests
+    needs: prepare-chipyard-accels
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-accels"
+          project-key: "chipyard-mempress"
+          toolchain: "esp-tools"
+
 
   tracegen-boom-run-tests:
     name: tracegen-boom-run-tests
@@ -978,30 +1020,6 @@ jobs:
           project-key: "fireboom"
           run-script: "remote-run-firesim-scala-tests.sh"
 
-  firesim-multiclock-run-tests:
-    name: firesim-multiclock-run-tests
-    needs: setup-complete
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests on self-hosted
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "extra-tests"
-          project-key: "firesim-multiclock"
-          run-script: "remote-run-firesim-scala-tests.sh"
-
   # Sentinel job to simplify how we specify which checks need to pass in branch
   # protection and in Mergify
   #
@@ -1018,9 +1036,9 @@ jobs:
             chipyard-ibex-run-tests,
             chipyard-sodor-run-tests,
             chipyard-dmirocket-run-tests,
-            chipyard-spiflashwrite-run-tests,
             chipyard-fftgenerator-run-tests,
             chipyard-spiflashread-run-tests,
+            chipyard-spiflashwrite-run-tests,
             chipyard-lbwif-run-tests,
             chipyard-sha3-run-tests,
             chipyard-streaming-fir-run-tests,
@@ -1028,6 +1046,7 @@ jobs:
             chipyard-hwacha-run-tests,
             chipyard-gemmini-run-tests,
             chipyard-nvdla-run-tests,
+            chipyard-mempress-run-tests,
             chipyard-constellation-run-tests,
             tracegen-boom-run-tests,
             tracegen-run-tests,
@@ -1035,8 +1054,7 @@ jobs:
             testchipip-run-tests,
             constellation-run-tests,
             prepare-chipyard-fpga, # firesim-run-tests,
-            fireboom-run-tests,
-            firesim-multiclock-run-tests]
+            fireboom-run-tests]
     runs-on: ubuntu-latest
     steps:
       - run: echo Success!

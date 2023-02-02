@@ -29,10 +29,10 @@ Hooks are modifications to steps or actions that are programmatically defined in
 VLSI Flow Control
 -----------------
 Sometimes we want more fine-grained control of the VLSI flow than at the action level.
-The Hammer flow supports being able to start/stop before/after any of the steps in a particular action. 
+The Hammer flow supports being able to start/stop before/after any of the steps in a particular action.
 See the `Hammer documentation on Flow Control <https://docs.hammer-eda.org/en/latest/Hammer-Use/Flow-Control.html>`__ for a full list and description of the options.
 The ``Makefile`` in the ``vlsi`` directory passes this extra information via the ``HAMMER_EXTRA_ARGS`` variable.
-This variable can also be used to specify additional YAML configurations that may have 
+This variable can also be used to specify additional YAML configurations that may have
 changed or been omitted from the inital build.
 
 

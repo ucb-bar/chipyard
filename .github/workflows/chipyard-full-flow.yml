@@ -1,0 +1,104 @@
+name: chipyard-ci-full-flow
+
+on:
+  # run ci on pull requests targeting following branches (runs on the merge commit)
+  pull_request:
+    branches:
+      - main
+      - '1.[0-9]*.x'
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+env:
+  REMOTE_WORK_DIR: ${{ secrets.BUILDDIR }}/cy-ci-shared/cy-${{ github.sha }}
+
+jobs:
+  cancel-prior-workflows:
+    name: cancel-prior-workflows
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+  # Set up a set of boolean conditions to control which branches of the CI
+  # workflow will execute This is based off the conditional job execution
+  # example here: https://github.com/dorny/paths-filter#examples
+  change-filters:
+    name: filter-jobs-on-changes
+    runs-on: ubuntu-latest
+    # Queried by downstream jobs to determine if they should run.
+    outputs:
+      needs-rtl: ${{ steps.filter.outputs.all_count != steps.filter.outputs.skip-rtl_count }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            all:
+              - '**'
+
+            # If any of the files changed match, do a doc build
+            docs: &docs-filter
+              - 'docs/**'
+              - '.readthedocs.yml'
+
+            # If all files match to this filter, skip the main ci pipeline
+            skip-rtl:
+              - *docs-filter
+              - '**/*.md'
+              - '**/.gitignore'
+              - '.github/ISSUE_TEMPLATE/**'
+
+  setup-repo:
+    name: setup-repo
+    needs: [change-filters, cancel-prior-workflows]
+    if: needs.change-filters.outputs.needs-rtl == 'true'
+    runs-on: ferry
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - uses: actions/checkout@v3
+      - name: Setup repo copy
+        run: |
+          git clone $GITHUB_WORKSPACE ${{ env.REMOTE_WORK_DIR }}
+      - name: Setup repo
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          eval "$(conda shell.bash hook)"
+          export MAKEFLAGS="-j32"
+          ./build-setup.sh -f
+
+  run-tutorial:
+    name: run-tutorial
+    needs: [setup-repo]
+    runs-on: ferry
+    steps:
+      - name: Run smoke test
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          eval "$(conda shell.bash hook)"
+          source env.sh
+          cd sims/verilator
+          make verilog
+
+  cleanup:
+    name: cleanup
+    needs: [run-tutorial]
+    runs-on: ferry
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+    steps:
+      - name: Delete repo copy and conda env
+        run: |
+           rm -rf ${{ env.REMOTE_WORK_DIR }}

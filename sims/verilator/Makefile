@@ -50,7 +50,7 @@ SIM_FILE_REQS += \
 	$(CHIPYARD_RSRCS_DIR)/csrc/emulator.cc \
 	$(ROCKETCHIP_RSRCS_DIR)/csrc/verilator.h \
 
-# the following files are needed for emulator.cc to compile
+# the following files are needed for emulator.cc to compile (even if they aren't part of the RTL build)
 SIM_FILE_REQS += \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/SimSerial.cc \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/testchip_tsi.cc \
@@ -66,13 +66,13 @@ SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.cc
 
 # copy files and add -FI for *.h files in *.f
-$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
-	cp -f $^ $(build_dir)
+$(sim_files): $(SIM_FILE_REQS) | $(OUT_DIR)
+	cp -f $^ $(OUT_DIR)
 	$(foreach file,\
 		$^,\
 		$(if $(filter %.h,$(file)),\
-			echo "-FI $(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;,\
-			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
+			echo "-FI $(addprefix $(OUT_DIR)/, $(notdir $(file)))" >> $@;,\
+			echo "$(addprefix $(OUT_DIR)/, $(notdir $(file)))" >> $@;))
 
 #########################################################################################
 # import other necessary rules and variables
@@ -143,7 +143,7 @@ CHIPYARD_VERILATOR_FLAGS := \
 # options dependent on whether external IP (cva6/NVDLA) or just chipyard is used
 # NOTE: defer the evaluation of this until it is used!
 PLATFORM_OPTS = $(shell \
-	if grep -qiP "module\s+(CVA6|NVDLA)" $(build_dir)/*.*v; \
+	if grep -qiP "module\s+(CVA6|NVDLA)" $(OUT_DIR)/*.*v; \
 	then echo "$(VERILOG_IP_VERILATOR_FLAGS)"; \
 	else echo "$(CHIPYARD_VERILATOR_FLAGS)"; fi)
 
@@ -168,8 +168,7 @@ VERILATOR_NONCC_OPTS = \
 	$(PREPROC_DEFINES) \
 	--top-module $(VLOG_MODEL) \
 	--vpi \
-	-f $(sim_common_files) \
-	$(sim_vsrcs)
+	-f $(sim_common_files)
 
 #----------------------------------------------------------------------------------------
 # gcc configuration/optimization
@@ -182,7 +181,7 @@ VERILATOR_CXXFLAGS = \
 	-DTEST_HARNESS=V$(VLOG_MODEL) \
 	-DVERILATOR \
 	-include $(build_dir)/$(long_name).plusArgs \
-	-include $(build_dir)/verilator.h
+	-include $(OUT_DIR)/verilator.h
 
 VERILATOR_LDFLAGS = $(SIM_LDFLAGS)
 
@@ -210,13 +209,13 @@ model_mk_debug = $(model_dir_debug)/V$(VLOG_MODEL).mk
 #########################################################################################
 # build makefile fragment that builds the verilator sim rules
 #########################################################################################
-$(model_mk): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
+$(model_mk): $(sim_common_files) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir)
 	mkdir -p $(model_dir)
 	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim) -Mdir $(model_dir) -CFLAGS "-include $(model_header)"
 	touch $@
 
-$(model_mk_debug): $(sim_vsrcs) $(sim_common_files) $(EXTRA_SIM_REQS)
+$(model_mk_debug): $(sim_common_files) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir_debug)
 	mkdir -p $(model_dir_debug)
 	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim_debug) $(TRACING_OPTS) -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
