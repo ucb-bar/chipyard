@@ -21,7 +21,7 @@ import barstools.iocell.chisel._
 
 import testchipip._
 
-import chipyard.{HasHarnessSignalReferences, HarnessClockInstantiatorKey}
+import chipyard._
 import chipyard.clocking.{HasChipyardPRCI}
 import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, ClockWithFreq}
 
@@ -332,6 +332,13 @@ class WithSimDromajoBridge extends ComposeHarnessBinder({
     ports.map { p => p.traces.map(tileTrace => SimDromajoBridge(tileTrace)(system.p)) }
   }
 })
+
+class WithCospikeBridge extends ComposeHarnessBinder({
+  (system: CanHaveTraceIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[TraceOutputTop]) => {
+    ports.map { p => p.traces.zipWithIndex.map(t => SpikeCosim(t._1, t._2)) }
+  }
+})
+
 
 class WithCustomBootPinPlusArg extends OverrideHarnessBinder({
   (system: CanHavePeripheryCustomBootPin, th: HasHarnessSignalReferences, ports: Seq[Bool]) => {
