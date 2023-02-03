@@ -23,7 +23,7 @@ sim_name           ?= vcs # needed for GenerateSimFiles, but is unused
 tech_name          ?= asap7
 tech_dir           ?= $(if $(filter $(tech_name),sky130 asap7 nangate45),\
                         $(site_packages_dir)/hammer/technology/$(tech_name), \
-                        $(vlsi_dir)/hammer-$(tech_name)-plugin/hammer/technology/$(tech_name))
+                        $(vlsi_dir)/hammer-$(tech_name)-plugin/hammer/$(tech_name))
 SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
 SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
 SMEMS_HAMMER       ?= $(build_dir)/$(long_name).mems.hammer.json
@@ -55,12 +55,13 @@ endif
 #########################################################################################
 # general rules
 #########################################################################################
-# TODO: get all the top blackboxes only
-extra_v_includes = $(build_dir)/EICG_wrapper.v $(build_dir)/gen-collateral/IOCell.v
 ifneq ($(CUSTOM_VLOG), )
 	VLSI_RTL = $(CUSTOM_VLOG)
+	VLSI_BB =
 else
-	VLSI_RTL = $(shell cat $(TOP_MODS_FILELIST)) $(TOP_SMEMS_FILE) $(extra_v_includes)
+	VLSI_RTL = $(shell cat $(TOP_MODS_FILELIST)) $(TOP_SMEMS_FILE) 
+	# TODO: have MFC split top & harness blackboxes
+	VLSI_BB = $(build_dir)/EICG_wrapper.v $(shell rev $(BB_MODS_FILELIST) | sed -E 's/cc(.*)/c\1/g' | uniq -s 1 | sed '/c\./d' | rev)
 endif
 
 .PHONY: default
@@ -122,6 +123,7 @@ $(SIM_CONF): $(sim_common_files)
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
+	echo "  tb_name: ''" >> $@  # don't specify -top
 	echo "  input_files:" >> $@
 	for x in $(shell cat $(sim_common_files)); do \
 		echo '    - "'$$x'"' >> $@; \
@@ -220,12 +222,12 @@ ifeq ($(CUSTOM_VLOG), )
 	GENERATED_CONFS += $(SRAM_CONF)
 endif
 
-$(SYN_CONF): $(VLSI_RTL)
+$(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
 	mkdir -p $(dir $@)
 	echo "synthesis.inputs:" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
-	for x in $(VLSI_RTL); do \
+	for x in $(VLSI_RTL) $(VLSI_BB); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 

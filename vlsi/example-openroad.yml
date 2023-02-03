@@ -1,4 +1,5 @@
 # Tool options. Replace with your tool plugin of choice.
+vlsi.core.build_system: make
 # Yosys
 vlsi.core.synthesis_tool: "hammer.synthesis.yosys"
 # OpenROAD
