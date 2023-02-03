@@ -13,8 +13,8 @@ import "DPI-C" function void cospike_cosim(input longint cycle,
 					   input bit	 valid,
 					   input longint iaddr,
 					   input int	 insn,
-					   input bit	 exception,
-					   input bit	 interrupt,
+					   input bit	 raise_exception,
+					   input bit	 raise_interrupt,
 					   input longint cause,
 					   input longint wdata
 					   );

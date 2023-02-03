@@ -58,8 +58,8 @@ extern "C" void cospike_cosim(long long int cycle,
 			      int valid,
 			      long long int iaddr,
 			      unsigned long int insn,
-			      int exception,
-			      int interrupt,
+			      int raise_exception,
+			      int raise_interrupt,
 			      unsigned long long int cause,
 			      unsigned long long int wdata)
 {
@@ -161,7 +161,7 @@ extern "C" void cospike_cosim(long long int cycle,
   processor_t* p = sim->get_core(hartid);
   state_t* s = p->get_state();
   uint64_t s_pc = s->pc;
-  if (interrupt) {
+  if (raise_interrupt) {
     printf("%d interrupt %lx\n", cycle, cause);
     uint64_t interrupt_cause = cause & 0x7FFFFFFFFFFFFFFF;
     if (interrupt_cause == 3) {
@@ -170,7 +170,7 @@ extern "C" void cospike_cosim(long long int cycle,
       printf("Unknown interrupt %lx\n", interrupt_cause);
     }
   }
-  if (exception)
+  if (raise_exception)
     printf("%d exception %lx\n", cycle, cause);
   if (valid) {
     printf("%d Cosim: %lx", cycle, iaddr);
@@ -179,7 +179,7 @@ extern "C" void cospike_cosim(long long int cycle,
     }
     printf("\n");
   }
-  if (valid || interrupt || exception)
+  if (valid || raise_interrupt || raise_exception)
     p->step(1);
 
   if (valid) {
