@@ -58,13 +58,8 @@ endif
 ifneq ($(CUSTOM_VLOG), )
 	VLSI_RTL = $(CUSTOM_VLOG)
 else
-	# This one-liner does a few things. Line-by-line:
-	# 1. concatenates the .top.f and .bb.f files and uniquifies them
-	# 2. removes all harness blackboxes with DPI calls (SimJTAG, etc.)
-	# 3. append EICG_wrapper.v and the compiled memories
-	VLSI_RTL = $(shell cat $(TOP_MODS_FILELIST) $(BB_MODS_FILELIST) | sort | uniq | \
-			   rev | sed -E 's/cc(.*)/c\1/g' | uniq -s 1 | sed '/c\./d' | rev) \
-			   $(build_dir)/EICG_wrapper.v $(TOP_SMEMS_FILE)
+	VLSI_RTL = $(shell cat $(TOP_MODS_FILELIST) $(TOP_BB_MODS_FILELIST)) \
+			   $(TOP_SMEMS_FILE) $(build_dir)/EICG_wrapper.v
 endif
 
 .PHONY: default
@@ -106,7 +101,7 @@ $(SRAM_CONF): $(SRAM_GENERATOR_CONF)
 include $(base_dir)/vcs.mk
 
 SIM_FILE_REQS += \
- 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
+	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
 
 # copy files but ignore *.h files in *.f since vcs has +incdir+$(build_dir)
 $(sim_files): $(SIM_FILE_REQS) | $(build_dir)
