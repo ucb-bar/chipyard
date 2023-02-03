@@ -57,6 +57,7 @@ class DromajoBoomConfig extends Config(
 
 class MediumBoomCosimConfig extends Config(
   new chipyard.harness.WithCospikeBridge ++                      // attach spike-cosim
+  new chipyard.config.EnableSpikeCosim ++                        // enable co-sim
   new chipyard.config.WithTraceIO ++                             // enable the traceio
   new boom.common.WithNMediumBooms(1) ++
   new chipyard.config.AbstractConfig)

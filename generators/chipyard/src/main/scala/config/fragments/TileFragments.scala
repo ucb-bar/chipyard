@@ -9,7 +9,7 @@ import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams
 
 import boom.common.{BoomTileAttachParams}
 import cva6.{CVA6TileAttachParams}
-
+import chipyard.{SpikeCosimKey}
 import testchipip._
 
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
@@ -78,4 +78,8 @@ class WithRocketDCacheScratchpad extends Config((site, here, up) => {
       dcache = tp.tileParams.dcache.map(_.copy(nSets = 32, nWays = 1, scratch = Some(0x200000 + tp.tileParams.hartId * 0x10000)))
     ))
   }
+})
+
+class EnableSpikeCosim extends Config((site, here, up) => {
+  case SpikeCosimKey => true
 })
