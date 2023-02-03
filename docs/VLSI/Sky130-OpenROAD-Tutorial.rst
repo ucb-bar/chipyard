@@ -18,13 +18,17 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
   * Hammer output directory. Can be changed with the ``OBJ_DIR`` variable.
   * Will contain subdirectories such as ``syn-rundir`` and ``par-rundir`` and the ``inputs.yml`` denoting the top module and input Verilog files.
 
+* ``env.yml``
+
+  * A template file for tool environment configuration. Fill in the install and license server paths for your environment. For SLICE and BWRC affiliates, example environment configs are found `here <https://github.com/ucb-bar/hammer/tree/master/e2e/env>`__.
+
 * ``example-vlsi-sky130``
 
   * Entry point to Hammer. Contains example placeholders for hooks.
 
 * ``example-sky130.yml``, ``example-openroad.yml``, ``example-designs/sky130-openroad.yml``
 
-  * Hammer IR for this tutorial.
+  * Hammer IR for this tutorial. For SLICE and BWRC affiliates, an example ASAP7 config is found `here <https://github.com/ucb-bar/hammer/tree/master/e2e/pdks>`__.
 
 * ``example-design.yml``, ``example-asap7.yml``, ``example-tech.yml``
 
@@ -34,9 +38,9 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
   * All of the elaborated Chisel and FIRRTL.
 
-* ``hammer``, ``hammer/src/hammer-vlsi/<syn-par-drc-lvs>/<tool>``, ``hammer/src/hammer-vlsi/technology/<tech>``
+* ``hammer-<vendor>-plugins``
 
-  * Core repository, and open-source tool and technology plugins.
+  * Tool plugin repositories not used for this tutorial (they are provided in the hammer-vlsi package).
 
 Prerequisites
 -------------

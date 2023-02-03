@@ -57,11 +57,14 @@ endif
 #########################################################################################
 ifneq ($(CUSTOM_VLOG), )
 	VLSI_RTL = $(CUSTOM_VLOG)
-	VLSI_BB =
 else
-	VLSI_RTL = $(shell cat $(TOP_MODS_FILELIST)) $(TOP_SMEMS_FILE) 
-	# TODO: have MFC split top & harness blackboxes
-	VLSI_BB = $(build_dir)/EICG_wrapper.v $(TOP_BB_MODS_FILELIST)
+	# This one-liner does a few things. Line-by-line:
+	# 1. concatenates the .top.f and .bb.f files and uniquifies them
+	# 2. removes all harness blackboxes with DPI calls (SimJTAG, etc.)
+	# 3. append EICG_wrapper.v and the compiled memories
+	VLSI_RTL = $(shell cat $(TOP_MODS_FILELIST) $(BB_MODS_FILELIST) | sort | uniq | \
+			   rev | sed -E 's/cc(.*)/c\1/g' | uniq -s 1 | sed '/c\./d' | rev) \
+			   $(build_dir)/EICG_wrapper.v $(TOP_SMEMS_FILE)
 endif
 
 .PHONY: default
@@ -222,12 +225,12 @@ ifeq ($(CUSTOM_VLOG), )
 	GENERATED_CONFS += $(SRAM_CONF)
 endif
 
-$(SYN_CONF): $(VLSI_RTL) $(VLSI_BB)
+$(SYN_CONF): $(VLSI_RTL)
 	mkdir -p $(dir $@)
 	echo "synthesis.inputs:" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
-	for x in $(VLSI_RTL) $(VLSI_BB); do \
+	for x in $(VLSI_RTL); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 

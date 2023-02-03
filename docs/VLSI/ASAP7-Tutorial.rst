@@ -20,7 +20,7 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
 * ``env.yml``
 
-  * A template file for tool environment configuration. Fill in the install and license server paths for your environment.
+  * A template file for tool environment configuration. Fill in the install and license server paths for your environment. For SLICE and BWRC affiliates, example environment configs are found `here <https://github.com/ucb-bar/hammer/tree/master/e2e/env>`__.
 
 * ``example-vlsi``
 
@@ -28,7 +28,7 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
 * ``example-asap7.yml``, ``example-tools.yml``
 
-  * Hammer IR for this tutorial.
+  * Hammer IR for this tutorial. For SLICE and BWRC affiliates, an example ASAP7 config is found `here <https://github.com/ucb-bar/hammer/tree/master/e2e/pdks>`__.
 
 * ``example-design.yml``, ``example-sky130.yml``, ``example-tech.yml``
 
@@ -38,9 +38,9 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
   * All of the elaborated Chisel and FIRRTL.
 
-* ``hammer``, ``hammer-<vendor>-plugins``, ``hammer-<tech>-plugin``
+* ``hammer-<vendor>-plugins``
 
-  * Core, tool, tech repositories.
+  * Tool plugin repositories.
 
 * ``view_gds.py``
 
