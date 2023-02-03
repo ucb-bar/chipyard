@@ -91,8 +91,8 @@ if __name__ == "__main__":
   " x      x   -> model
   "  - check inner module
   "  - currently, there is no way of knowing if certain inner modules(actual verilog
-  "  modules inside the files are all included in TOP or MODEL)
-  "  - for now, assume that if a innter module is included in TOP, the file itself
+  "  modules inside the files) are all included in TOP or MODEL
+  "  - for now, assume that if a inner module is included in TOP, the file itself
   "  is also for TOP
   """
   tbf = list()
