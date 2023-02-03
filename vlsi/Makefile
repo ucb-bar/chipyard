@@ -61,7 +61,7 @@ ifneq ($(CUSTOM_VLOG), )
 else
 	VLSI_RTL = $(shell cat $(TOP_MODS_FILELIST)) $(TOP_SMEMS_FILE) 
 	# TODO: have MFC split top & harness blackboxes
-	VLSI_BB = $(build_dir)/EICG_wrapper.v $(shell rev $(BB_MODS_FILELIST) | sed -E 's/cc(.*)/c\1/g' | uniq -s 1 | sed '/c\./d' | rev)
+	VLSI_BB = $(build_dir)/EICG_wrapper.v $(TOP_BB_MODS_FILELIST)
 endif
 
 .PHONY: default

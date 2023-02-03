@@ -218,6 +218,15 @@ $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILEL
 	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
 	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
 
+$(TOP_BB_MODS_FILELIST) $(MODEL_BB_MODS_FILELIST) &: $(BB_MODS_FILELIST) $(MFC_MODEL_HRCHY_JSON) $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST)
+	$(base_dir)/scripts/split-bb-files.py \
+		--in-top-f $(TOP_MODS_FILELIST) \
+		--in-model-f $(MODEL_MODS_FILELIST) \
+		--in-top-hrchy-json $(MFC_MODEL_HRCHY_JSON) \
+		--in-bb-f $(BB_MODS_FILELIST) \
+		--out-top-bb-f $(TOP_BB_MODS_FILELIST) \
+		--out-model-bb-f $(MODEL_BB_MODS_FILELIST)
+
 $(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JSON)
 	$(base_dir)/scripts/split-mems-conf.py \
 		--in-smems-conf $(MFC_SMEMS_CONF) \
@@ -239,7 +248,7 @@ $(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(MODEL_SMEMS_CONF) | $(TOP_SMEMS_FILE
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
 ########################################################################################
-$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE)
+$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE) $(TOP_BB_MODS_FILELIST) $(MODEL_BB_MODS_FILELIST)
 	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' > $@
 	echo "$(TOP_SMEMS_FILE)" >> $@
 	echo "$(MODEL_SMEMS_FILE)" >> $@
