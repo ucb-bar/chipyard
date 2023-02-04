@@ -25,7 +25,7 @@ LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 
 # key value store to get the build groups
 declare -A grouping
-grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad chipyard-spike"
+grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad chipyard-spike chipyard-clone"
 grouping["group-peripherals"]="chipyard-dmirocket chipyard-blkdev chipyard-spiflashread chipyard-spiflashwrite chipyard-mmios chipyard-lbwif"
 grouping["group-accels"]="chipyard-fftgenerator chipyard-nvdla chipyard-mempress chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-streaming-fir chipyard-streaming-passthrough"
 grouping["group-constellation"]="chipyard-constellation"
@@ -54,6 +54,7 @@ mapping["chipyard-ibex"]=" CONFIG=IbexConfig"
 mapping["chipyard-spiflashread"]=" CONFIG=LargeSPIFlashROMRocketConfig"
 mapping["chipyard-spiflashwrite"]=" CONFIG=SmallSPIFlashRocketConfig"
 mapping["chipyard-mmios"]=" CONFIG=MMIORocketConfig verilog"
+mapping["chipyard-cloneboom"]=" CONFIG=Cloned64MegaBoomConfig verilog"
 mapping["tracegen"]=" CONFIG=NonBlockingTraceGenL2Config"
 mapping["tracegen-boom"]=" CONFIG=BoomTraceGenConfig"
 mapping["chipyard-nvdla"]=" CONFIG=SmallNVDLARocketConfig"

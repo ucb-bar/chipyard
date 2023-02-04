@@ -28,6 +28,12 @@ class DualSmallBoomConfig extends Config(
   new boom.common.WithNSmallBooms(2) ++                          // 2 boom cores
   new chipyard.config.AbstractConfig)
 
+class Cloned64MegaBoomConfig extends Config(
+  new boom.common.WithCloneBoomTiles(63, 0) ++
+  new boom.common.WithNMegaBooms(1) ++                           // mega boom config
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new chipyard.config.AbstractConfig)
+
 class HwachaLargeBoomConfig extends Config(
   new chipyard.config.WithHwachaTest ++
   new hwacha.DefaultHwachaConfig ++                              // use Hwacha vector accelerator
