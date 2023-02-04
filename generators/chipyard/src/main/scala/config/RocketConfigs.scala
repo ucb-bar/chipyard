@@ -21,6 +21,10 @@ class TinyRocketConfig extends Config(
   new freechips.rocketchip.subsystem.With1TinyCore ++             // single tiny rocket-core
   new chipyard.config.AbstractConfig)
 
+class RocketGPUConfig extends Config(
+  new freechips.rocketchip.subsystem.WithNCustomSmallCores(2) ++          // multiple rocket-core
+  new chipyard.config.AbstractConfig)
+
 class SimAXIRocketConfig extends Config(
   new chipyard.harness.WithSimAXIMem ++                     // drive the master AXI4 memory with a SimAXIMem, a 1-cycle magic memory, instead of default SimDRAM
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
