@@ -7,22 +7,24 @@ Using Hammer To Place and Route a Custom Block
 
 Initialize the Hammer Plug-ins
 ----------------------------------
-In the Chipyard root, ensure that you have the Chipyard conda environment activated. Then, run:
+In the Chipyard root, ensure that you have the Chipyard conda environment activated. Then, depending on if you are using a technology plugin included with Hammer (ASAP7, Sky130) or as a separate plugin, you will run either of the commands below.
+
+For Hammer-provided plugins (``<tech-plugin-name>`` is ``asap7`` or ``sky130``):
 
 .. code-block:: shell
 
     ./scripts/init-vlsi.sh <tech-plugin-name>
 
-This will pull the Hammer & CAD tool plugin submodules, assuming the technology plugins are available on github.
-Currently only the asap7 and sky130 technology plugins are available on github.
-If you have additional private technology plugins (this is a typical use-case for proprietry process technologies with require NDAs and secure servers), you can submodule them directly
-into VLSI directory with the name ``hammer-<tech-plugin-name>-plugin``.
+For separate technology plugins (this is a typical use-case for proprietry process technologies with require NDAs and secure servers), submodule them directly
+into VLSI directory with the name ``hammer-<tech-plugin-name>-plugin`` before calling the ``init-vlsi.sh`` script.
 For example, for an imaginary process technology called tsmintel3:
 
 .. code-block:: shell
 
     cd vlsi
     git submodule add git@my-secure-server.berkeley.edu:tsmintel3/hammer-tsmintel3-plugin.git
+    cd -
+    ./scripts/init-vlsi.sh tsmintel3
 
 
 .. Note:: Some VLSI EDA tools are supported only on RHEL-based operating systems. We recommend using Chipyard on RHEL7 and above. However, many VLSI server still have old operating systems such as RHEL6, which have software packages older than the basic chipyard requirements. In order to build Chipyard on RHEL6, you will likely need to use tool packages such as devtoolset (for example, devtoolset-8) and/or build from source gcc, git, gmake, make, dtc, cc, bison, libexpat and liby.

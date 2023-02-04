@@ -8,7 +8,7 @@
 base_dir=$(abspath ..)
 vlsi_dir=$(abspath .)
 sim_dir=$(abspath .)
-site_packages_dir=$(shell python3 -c "import site; print(site.getsitepackages()[0])")
+site_packages_dir?=$(shell python3 -c "import site; print(site.getsitepackages()[0])")
 
 #########################################################################################
 # include shared variables
@@ -55,11 +55,24 @@ endif
 #########################################################################################
 # general rules
 #########################################################################################
+VLSI_RTL = $(build_dir)/syn.f
+
+.PHONY: custom_vlog gen_vlog
+
+custom_vlog: $(CUSTOM_VLOG)
+	echo "" > $(VLSI_RTL)
+	$(foreach file,$^,echo $file >> $(VLSI_RTL))
+
+gen_vlog: $(TOP_MODS_FILELIST) $(TOP_BB_MODS_FILELIST) $(TOP_SMEMS_FILE)
+	cat $(TOP_MODS_FILELIST) $(TOP_BB_MODS_FILELIST) > $(VLSI_RTL)
+	echo $(TOP_SMEMS_FILE) >> $(VLSI_RTL)
+	echo $(build_dir)/EICG_wrapper.v >> $(VLSI_RTL)
+
+
 ifneq ($(CUSTOM_VLOG), )
-	VLSI_RTL = $(CUSTOM_VLOG)
+$(VLSI_RTL): custom_vlog
 else
-	VLSI_RTL = $(shell cat $(TOP_MODS_FILELIST) $(TOP_BB_MODS_FILELIST)) \
-			   $(TOP_SMEMS_FILE) $(build_dir)/EICG_wrapper.v
+$(VLSI_RTL): gen_vlog
 endif
 
 .PHONY: default
@@ -225,7 +238,7 @@ $(SYN_CONF): $(VLSI_RTL)
 	echo "synthesis.inputs:" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
-	for x in $(VLSI_RTL); do \
+	for x in $(shell cat $(VLSI_RTL)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 
