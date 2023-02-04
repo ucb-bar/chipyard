@@ -212,12 +212,16 @@ extern "C" void cospike_cosim(long long int cycle,
 	// 4 => csr
 	if ((rd != 0 && type == 0) || type == 1) {
 	  // Override reads from some CSRs
-          if ((insn & 0xfff0007f) == 0xf1300073 || // mimpid
-              (insn & 0xfff0007f) == 0xf1200073 || // marchid
-              (insn & 0xfff0007f) == 0xf1100073 || // mvendorid
-	      (insn & 0xfff0007f) == 0xb0000073 || // mcycle
-	      (insn & 0xfff0007f) == 0xb0200073    // minstret
-              ) {
+          uint64_t csr_addr = insn >> 20;
+          bool csr_read = (insn & 0x7f) == 0x73;
+          if (csr_read && (
+                           (csr_addr == 0xf13) || // mimpid
+                           (csr_addr == 0xf12) || // marchid
+                           (csr_addr == 0xf11) || // mvendorid
+                           (csr_addr == 0xb00) || // mcycle
+                           (csr_addr == 0xb02) || // minstret
+                           (csr_addr >= 0x3b0 && csr_addr <= 0x3ef) // pmpaddr
+                           )) {
             printf("CSR override\n");
             s->XPR.write(rd, wdata);
 	  } else if (!mem_read.empty() &&
