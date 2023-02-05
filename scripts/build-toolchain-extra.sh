@@ -102,4 +102,9 @@ echo '==> Installing espresso logic minimizer'
 echo '==>  Installing libgloss'
 CC= CXX= SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --host=riscv${XLEN}-unknown-elf
 
+if [ $TOOLCHAIN == "riscv-tools" ]; then
+    echo '==> Installing gemmini spike extensions'
+    make -C $RDIR/generators/gemmini/software/libgemmini install
+fi
+
 echo "Extra Toolchain Utilities/Tests Build Complete!"
