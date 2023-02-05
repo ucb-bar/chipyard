@@ -91,6 +91,7 @@ dependencies:
     - wget
     - sed
     - autoconf
+    - pre-commit
 
     # clang-format for driver coding style enforcement.
     - clang-format
