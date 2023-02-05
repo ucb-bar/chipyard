@@ -16,7 +16,6 @@ import freechips.rocketchip.tile._
 import freechips.rocketchip.prci.ClockSinkParameters
 
 case class SpikeCoreParams(
-  val maxInsnsPerCycle: Int = 10000
 ) extends CoreParams {
   val useVM = true
   val useHypervisor = false
@@ -305,7 +304,7 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
   spike.io.msip := int_bundle.msip
   spike.io.meip := int_bundle.meip
   spike.io.seip := int_bundle.seip.get
-  spike.io.ipc := outer.spikeTileParams.core.maxInsnsPerCycle.U
+  spike.io.ipc := PlusArg("spike-ipc", 10000, width=64)
 
   val blockBits = log2Ceil(p(CacheBlockBytes))
   spike.io.icache.a.ready := icache_tl.a.ready
