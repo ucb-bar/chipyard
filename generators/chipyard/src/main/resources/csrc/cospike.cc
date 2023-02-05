@@ -212,8 +212,9 @@ extern "C" void cospike_cosim(long long int cycle,
 	// 4 => csr
 	if ((rd != 0 && type == 0) || type == 1) {
 	  // Override reads from some CSRs
-          uint64_t csr_addr = insn >> 20;
+          uint64_t csr_addr = (insn >> 20) & 0xfff;
           bool csr_read = (insn & 0x7f) == 0x73;
+          if (csr_read) printf("CSR read %lx\n", csr_addr);
           if (csr_read && (
                            (csr_addr == 0xf13) || // mimpid
                            (csr_addr == 0xf12) || // marchid
