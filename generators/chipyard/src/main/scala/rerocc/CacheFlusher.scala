@@ -85,9 +85,11 @@ class ReRoCCCacheFlusher(nTrackers: Int = 8)(implicit p: Parameters) extends Laz
         lgSize = log2Ceil(8).U,
         data = translated_arb.io.out.bits,
         corrupt = false.B)
-      tl_out.a.valid := translated_arb.io.out.valid && legal
+      val tracker_available = !(trackers.andR)
+      tl_out.a.valid := translated_arb.io.out.valid && legal && tracker_available
       tl_out.a.bits := put
-      translated_arb.io.out.ready := !legal || tl_out.a.ready
+
+      translated_arb.io.out.ready := !legal || (tl_out.a.ready && tracker_available)
 
 
       trackers := (trackers | Mux(tl_out.a.fire(), UIntToOH(alloc), 0.U)) & ~(Mux(tl_out.d.valid,
