@@ -301,7 +301,7 @@ class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC
   val reRoCCNode = reRoCCXbar.node
   val cflush = LazyModule(new ReRoCCCacheFlusher)
 
-  override val tlNode = cflush.node
+  override val atlNode = cflush.node
 
   override lazy val module = new LazyRoCCModuleImp(this) {
     val resp_arb = Module(new Arbiter(new RoCCResponse, 1+nTrackers))
