@@ -19,7 +19,7 @@ metadata:
   - url: nodefaults
     used_env_vars: []
   content_hash:
-    linux-64: 1fcefa1e4e6d9794ea47d5d139b0d4b9d4381ae536f9519c8a1efa82644a9f83
+    linux-64: a4e47e2bc87e218df5a95db5c131d80b5abb1be6c992fc5bec4cfc7b186890d6
   platforms:
   - linux-64
   sources:
@@ -1155,14 +1155,14 @@ package:
     libstdcxx-ng: '>=12'
     ncurses: '>=6.3,<7.0a0'
   hash:
-    md5: f3530f0cfbc7b4e243cb6b8f19cd077d
-    sha256: e9fa4c912e6c72dcc10e00c6769c6b0e20d32446345ef9f07626257cc80f7d7d
+    md5: a4aa97b71e4c7d735cda9149f2379796
+    sha256: a27405754cea702dc7634ba79035d533f0e43956e8ceebc33cffc0b474cad3fb
   manager: conda
   name: firtool
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/ucb-bar/linux-64/firtool-1.25.0-0_h1234567_gd0462e7ec.conda
-  version: 1.25.0
+  url: https://conda.anaconda.org/ucb-bar/linux-64/firtool-1.29.0-0_h1234567_ga5f6aa51f.conda
+  version: 1.29.0
 - category: main
   dependencies:
     libgcc-ng: '>=7.5.0'
