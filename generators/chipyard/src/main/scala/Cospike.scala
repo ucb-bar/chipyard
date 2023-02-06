@@ -32,22 +32,6 @@ class CospikeResources(
   addResource("/vsrc/cospike.v")
 }
 
-case object SpikeCosimKey extends Field[Boolean](false)
-
-trait CanHaveSpikeCosim { this: ChipyardSystem =>
-  if (p(SpikeCosimKey)) {
-    InModuleBody {
-      val isa = tiles.headOption.map(_.isaDTS).getOrElse("")
-      val mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0))
-      val mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0))
-      val pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0)
-      val nharts = tiles.size
-      val bootrom = bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse("")
-      val resources = Module(new CospikeResources(isa, pmpregions, mem0_base, mem0_size, nharts, bootrom))
-    }
-  }
-}
-
 class SpikeCosim extends BlackBox with HasBlackBoxResource
 {
   addResource("/csrc/cospike.cc")

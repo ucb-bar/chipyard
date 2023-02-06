@@ -333,8 +333,18 @@ class WithSimDromajoBridge extends ComposeHarnessBinder({
   }
 })
 
-class WithCospikeBridge extends ComposeHarnessBinder({
+class WithCospike extends ComposeHarnessBinder({
   (system: CanHaveTraceIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[TraceOutputTop]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    val chipyardSystem = system.asInstanceOf[ChipyardSystemModule[_]].outer.asInstanceOf[ChipyardSystem]
+    val tiles = chipyardSystem.tiles
+    val isa = tiles.headOption.map(_.isaDTS).getOrElse("")
+    val mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0))
+    val mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0))
+    val pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0)
+    val nharts = tiles.size
+    val bootrom = chipyardSystem.bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse("")
+    val resources = Module(new CospikeResources(isa, pmpregions, mem0_base, mem0_size, nharts, bootrom))
     ports.map { p => p.traces.zipWithIndex.map(t => SpikeCosim(t._1, t._2)) }
   }
 })
