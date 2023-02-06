@@ -75,3 +75,9 @@ We can use this config fragment when composing our configs.
 
 .. note::
    Readers who want more information on the configuration system may be interested in reading :ref:`cdes`.
+
+Chipyard Config Fragments
+-------------------------
+
+For discoverability, users can run ``make find-config-fragments`` to see a list of config. fragments and their file path
+in a fully initialized Chipyard repository.
