@@ -38,19 +38,30 @@ object ReRoCCProtocolOpcodes {
 }
 
 case class ReRoCCManagerParams(
-  nManagers: Int,
-  ibufEntries: Seq[Int])
+  managerId: Int,
+  ibufEntries: Int
+) {
+  require(managerId < 64)
+}
+
+case class ReRoCCManagerPortParams(
+  managers: Seq[ReRoCCManagerParams]
+)
 
 case class ReRoCCClientParams(
-  nClients: Int
+  tileId: Int
+)
+
+case class ReRoCCClientPortParams(
+  clients: Seq[ReRoCCClientParams]
 )
 
 case class ReRoCCEdgeParams(
-  mParams: ReRoCCManagerParams,
-  cParams: ReRoCCClientParams
+  mParams: ReRoCCManagerPortParams,
+  cParams: ReRoCCClientPortParams
 ) {
-  require(cParams.nClients >= 1 && mParams.nManagers >= 1)
-  val bundle = ReRoCCBundleParams(log2Ceil(cParams.nClients), log2Ceil(mParams.nManagers))
+  require(cParams.clients.size >= 1 && mParams.managers.size >= 1)
+  val bundle = ReRoCCBundleParams(log2Ceil(cParams.clients.size), log2Ceil(mParams.managers.size))
 }
 
 case class ReRoCCBundleParams(
@@ -74,8 +85,8 @@ class ReRoCCBundle(val params: ReRoCCBundleParams) extends Bundle {
 
 case class EmptyParams()
 
-object ReRoCCImp extends SimpleNodeImp[ReRoCCClientParams, ReRoCCManagerParams, ReRoCCEdgeParams, ReRoCCBundle] {
-  def edge(pd: ReRoCCClientParams, pu: ReRoCCManagerParams, p: Parameters, sourceInfo: SourceInfo) = {
+object ReRoCCImp extends SimpleNodeImp[ReRoCCClientPortParams, ReRoCCManagerPortParams, ReRoCCEdgeParams, ReRoCCBundle] {
+  def edge(pd: ReRoCCClientPortParams, pu: ReRoCCManagerPortParams, p: Parameters, sourceInfo: SourceInfo) = {
     ReRoCCEdgeParams(pu, pd)
   }
   def bundle(e: ReRoCCEdgeParams) = new ReRoCCBundle(e.bundle)
@@ -83,9 +94,9 @@ object ReRoCCImp extends SimpleNodeImp[ReRoCCClientParams, ReRoCCManagerParams, 
   def render(ei: ReRoCCEdgeParams) = RenderedEdge(colour = "#000000" /* black */)
 }
 
-case class ReRoCCClientNode()(implicit valName: ValName) extends SourceNode(ReRoCCImp)(Seq(ReRoCCClientParams(1)))
+case class ReRoCCClientNode(clientParams: ReRoCCClientParams)(implicit valName: ValName) extends SourceNode(ReRoCCImp)(Seq(ReRoCCClientPortParams(Seq(clientParams))))
 
-case class ReRoCCManagerNode(ibufEntries: Int)(implicit valName: ValName) extends SinkNode(ReRoCCImp)(Seq(ReRoCCManagerParams(1, Seq(ibufEntries))))
+case class ReRoCCManagerNode(managerParams: ReRoCCManagerParams)(implicit valName: ValName) extends SinkNode(ReRoCCImp)(Seq(ReRoCCManagerPortParams(Seq(managerParams))))
 
 
 

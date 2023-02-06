@@ -11,12 +11,10 @@ import freechips.rocketchip.util._
 
 class ReRoCCXbar(implicit p: Parameters) extends LazyModule {
   val node = new NexusNode(ReRoCCImp)(
-    clients => ReRoCCClientParams(clients.map(_.nClients).sum),
-    managers => ReRoCCManagerParams(
-      managers.map(_.nManagers).sum,
-      managers.map(_.ibufEntries).flatten
-    )
+    clients => ReRoCCClientPortParams(clients.map(_.clients).flatten),
+    managers => ReRoCCManagerPortParams(managers.map(_.managers).flatten)
   )
+
   lazy val module = new LazyModuleImp(this) {
     val (io_in, edgeIn) = node.in.unzip
     val (io_out, edgeOut) = node.out.unzip
@@ -35,7 +33,7 @@ class ReRoCCXbar(implicit p: Parameters) extends LazyModule {
         Some((b: ReRoCCMsgBundle) => true.B)
       ))
       val minManager = manager_offset
-      val maxManager = manager_offset + edgeOut(oi).mParams.nManagers
+      val maxManager = manager_offset + edgeOut(oi).mParams.managers.size
       var client_offset = 0
       out_arb.io.in.zipWithIndex.foreach { case (i, ii) => {
         val sel = (
@@ -49,10 +47,10 @@ class ReRoCCXbar(implicit p: Parameters) extends LazyModule {
         when (sel) {
           io_in(ii).req.ready := i.ready
         }
-        client_offset += edgeIn(ii).cParams.nClients
+        client_offset += edgeIn(ii).cParams.clients.size
       }}
       o.req <> out_arb.io.out
-      manager_offset += edgeOut(oi).mParams.nManagers
+      manager_offset += edgeOut(oi).mParams.managers.size
     }}
 
     io_out.foreach(_.resp.ready := false.B)
@@ -65,7 +63,7 @@ class ReRoCCXbar(implicit p: Parameters) extends LazyModule {
         Some((b: ReRoCCMsgBundle) => true.B)
       ))
       val minClient = client_offset
-      val maxClient = client_offset + edgeIn(ii).cParams.nClients
+      val maxClient = client_offset + edgeIn(ii).cParams.clients.size
       var manager_offset = 0
       in_arb.io.in.zipWithIndex.foreach { case (o, oi) => {
         val sel = (
@@ -79,10 +77,10 @@ class ReRoCCXbar(implicit p: Parameters) extends LazyModule {
         when (sel) {
           io_out(oi).resp.ready := o.ready
         }
-        manager_offset += edgeOut(oi).mParams.nManagers
+        manager_offset += edgeOut(oi).mParams.managers.size
       }}
       i.resp <> in_arb.io.out
-      client_offset += edgeIn(ii).cParams.nClients
+      client_offset += edgeIn(ii).cParams.clients.size
     }}
   }
 }

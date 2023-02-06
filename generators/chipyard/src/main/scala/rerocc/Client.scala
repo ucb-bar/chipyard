@@ -85,8 +85,8 @@ class InstructionSender(b: ReRoCCBundleParams)(implicit p: Parameters) extends M
   }
 }
 
-class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule {
-  val reRoCCNode = ReRoCCClientNode()
+class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with HasNonDiplomaticTileParameters {
+  val reRoCCNode = ReRoCCClientNode(ReRoCCClientParams(staticIdForMetadataUseOnly))
   override lazy val module = new Impl
   class Impl extends LazyModuleImp(this) {
     val (rerocc, edge) = reRoCCNode.out(0)
@@ -101,7 +101,7 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule {
 
     val s_idle :: s_acquiring :: s_acq_wait :: s_busy :: s_releasing :: s_rel_wait :: s_unbusying :: s_unbusy_wait :: Nil = Enum(8)
 
-    val maxIBufEntries = edge.mParams.ibufEntries.max
+    val maxIBufEntries = edge.mParams.managers.map(_.ibufEntries).max
     require(maxIBufEntries > 1)
     val instCtrSz = log2Ceil(maxIBufEntries)
 
@@ -113,7 +113,7 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule {
     val inst_ret_ctr = Reg(UInt(instCtrSz.W))
     val status       = Reg(new MStatus)
     val ptbr         = Reg(new PTBR)
-    val manager      = Reg(UInt(edge.mParams.nManagers.W))
+    val manager      = Reg(UInt(64.W))
     val acq_rd       = Reg(UInt(5.W))
     val inflight_wbs = RegInit(0.U(instCtrSz.W))
     val incr_inflight_wbs = WireInit(false.B)
@@ -148,7 +148,8 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule {
       when (OpcodeSet.custom0.matches(cmd.bits.inst.opcode)) {
         val mask = cmd.bits.rs2
         when (cmd.bits.inst.funct === ReRoCCInstructions.acquire) {
-          when (state === s_idle && mask(edge.mParams.nManagers-1,0) =/= 0.U) {
+          val accessibleManagers = edge.mParams.managers.map(_.managerId).map(i => BigInt(1) << i).sum
+          when (state === s_idle && (mask & accessibleManagers.U) =/= 0.U) {
             cmd.ready := true.B
             state     := s_acquiring
             manager   := mask

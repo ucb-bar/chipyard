@@ -102,7 +102,7 @@ class MiniDCache(reRoCCId: Int, crossing: ClockCrossingType)(implicit p: Paramet
 }
 
 class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implicit p: Parameters) extends LazyModule {
-  val node = ReRoCCManagerNode(reRoCCTileParams.ibufEntries)
+  val node = ReRoCCManagerNode(ReRoCCManagerParams(reRoCCTileParams.reroccId, reRoCCTileParams.ibufEntries))
   val ibufEntries = reRoCCTileParams.ibufEntries
   override lazy val module = new Impl
   class Impl extends LazyModuleImp(this) {
@@ -117,7 +117,9 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
 
     val s_idle :: s_active :: s_rel_wait :: s_sfence :: s_unbusy :: Nil = Enum(5)
 
-    val client = Reg(UInt(log2Ceil(edge.cParams.nClients).W))
+    val numClients = edge.cParams.clients.size
+
+    val client = Reg(UInt(log2Ceil(numClients).W))
     dontTouch(client)
     val status = Reg(new MStatus)
     val ptbr = Reg(new PTBR)
@@ -170,7 +172,7 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     resp_arb.io.in.foreach { i => i.valid := false.B }
 
     val status_new = Reg(new MStatus)
-    val client_new = Reg(UInt(log2Ceil(edge.cParams.nClients).W))
+    val client_new = Reg(UInt(log2Ceil(numClients).W))
 
     when (rr_req.valid) {
       when (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mAcquire) {
@@ -381,6 +383,7 @@ trait CanHaveReRoCCTiles { this: HasTiles =>
 
   val reRoCCManagers = p(ReRoCCTileKey).zipWithIndex.map { case (g,i) =>
     val rerocc_tile = LazyModule(new ReRoCCManagerTile(g.copy(rowBits = p(SystemBusKey).beatBits, reroccId = i), p))
+    println(s"ReRoCC Manager id $i is a ${rerocc_tile.rocc}")
     locateTLBusWrapper(SBUS).coupleFrom(s"port_named_rerocc_$i") {
       (_ :=* TLBuffer() :=* rerocc_tile.tlNode)
     }
