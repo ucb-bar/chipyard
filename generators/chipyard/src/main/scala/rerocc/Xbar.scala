@@ -9,11 +9,19 @@ import freechips.rocketchip.tile._
 import freechips.rocketchip.rocket._
 import freechips.rocketchip.util._
 
-class ReRoCCXbar(implicit p: Parameters) extends LazyModule {
+abstract class ReRoCCBus(implicit p: Parameters) extends LazyModule {
   val node = new NexusNode(ReRoCCImp)(
     clients => ReRoCCClientPortParams(clients.map(_.clients).flatten),
     managers => ReRoCCManagerPortParams(managers.map(_.managers).flatten)
   )
+}
+
+class ReRoCCBusRemapper(edgesIn: Seq[ReRoCCEdgeParams], edgesOut: Seq[ReRoCCEdgeParams]) {
+
+
+}
+
+class ReRoCCXbar(implicit p: Parameters) extends ReRoCCBus {
 
   lazy val module = new LazyModuleImp(this) {
     val (io_in, edgeIn) = node.in.unzip
@@ -24,25 +32,24 @@ class ReRoCCXbar(implicit p: Parameters) extends LazyModule {
     val nOut = io_out.size
 
     io_in.foreach(_.req.ready := false.B)
+    val bundles = (edgeIn ++ edgeOut).map(_.bundle)
+    val wideBundle = bundles.reduce((l,r) => l.union(r))
+    println("xbar")
+    println(edgeIn.head)
+    println(edgeOut.head)
 
-    var manager_offset = 0
     io_out.zipWithIndex.foreach { case (o, oi) => {
       val out_arb = Module(new HellaPeekingArbiter(
-        new ReRoCCMsgBundle(o.params), nIn,
+        new ReRoCCMsgBundle(wideBundle), nIn,
         (b: ReRoCCMsgBundle) => b.last,
         Some((b: ReRoCCMsgBundle) => true.B)
       ))
-      val minManager = manager_offset
-      val maxManager = manager_offset + edgeOut(oi).mParams.managers.size
       var client_offset = 0
       out_arb.io.in.zipWithIndex.foreach { case (i, ii) => {
-        val sel = (
-          io_in(ii).req.bits.manager_id >= minManager.U &&
-            io_in(ii).req.bits.manager_id < maxManager.U
-        )
+        val sel = edgeOut(oi).mParams.managers.map(_.managerId.U === io_in(ii).req.bits.manager_id).orR
         i.valid := io_in(ii).req.valid && sel
         i.bits := io_in(ii).req.bits
-        i.bits.manager_id := io_in(ii).req.bits.manager_id - minManager.U
+        i.bits.manager_id := io_in(ii).req.bits.manager_id
         i.bits.client_id := io_in(ii).req.bits.client_id +& client_offset.U
         when (sel) {
           io_in(ii).req.ready := i.ready
@@ -50,7 +57,6 @@ class ReRoCCXbar(implicit p: Parameters) extends LazyModule {
         client_offset += edgeIn(ii).cParams.clients.size
       }}
       o.req <> out_arb.io.out
-      manager_offset += edgeOut(oi).mParams.managers.size
     }}
 
     io_out.foreach(_.resp.ready := false.B)
@@ -58,13 +64,12 @@ class ReRoCCXbar(implicit p: Parameters) extends LazyModule {
     var client_offset = 0
     io_in.zipWithIndex.foreach { case (i, ii) => {
       val in_arb = Module(new HellaPeekingArbiter(
-        new ReRoCCMsgBundle(i.params), nOut,
+        new ReRoCCMsgBundle(wideBundle), nOut,
         (b: ReRoCCMsgBundle) => b.last,
         Some((b: ReRoCCMsgBundle) => true.B)
       ))
       val minClient = client_offset
       val maxClient = client_offset + edgeIn(ii).cParams.clients.size
-      var manager_offset = 0
       in_arb.io.in.zipWithIndex.foreach { case (o, oi) => {
         val sel = (
           io_out(oi).resp.bits.client_id >= minClient.U &&
@@ -73,11 +78,10 @@ class ReRoCCXbar(implicit p: Parameters) extends LazyModule {
         o.valid := io_out(oi).resp.valid && sel
         o.bits := io_out(oi).resp.bits
         o.bits.client_id := io_out(oi).resp.bits.client_id - minClient.U
-        o.bits.manager_id := io_out(oi).resp.bits.manager_id +& manager_offset.U
+        o.bits.manager_id := io_out(oi).resp.bits.manager_id
         when (sel) {
           io_out(oi).resp.ready := o.ready
         }
-        manager_offset += edgeOut(oi).mParams.managers.size
       }}
       i.resp <> in_arb.io.out
       client_offset += edgeIn(ii).cParams.clients.size

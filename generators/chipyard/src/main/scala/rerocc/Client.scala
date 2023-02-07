@@ -47,6 +47,7 @@ class InstructionSender(b: ReRoCCBundleParams)(implicit p: Parameters) extends M
     (s_rs1      -> io.cmd.bits.rs1),
     (s_rs2      -> io.cmd.bits.rs2)))
   io.rr.bits.last := false.B
+  io.rr.bits.first := false.B
   io.cmd.ready := io.rr.ready && io.rr.bits.last
 
   val next_state = WireInit(state)
@@ -57,6 +58,7 @@ class InstructionSender(b: ReRoCCBundleParams)(implicit p: Parameters) extends M
       Mux(io.cmd.bits.inst.xs1, s_rs1,
         Mux(io.cmd.bits.inst.xs1, s_rs2, s_inst)))
     io.rr.bits.last := !io.send_mstatus && !io.cmd.bits.inst.xs1 && !io.cmd.bits.inst.xs2
+    io.rr.bits.first := true.B
 
   } .elsewhen (state === s_mstatus0) {
 
@@ -194,6 +196,7 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
       (0.U -> status.asUInt),
       (1.U -> (status.asUInt >> 64)),
       (2.U -> ptbr.asUInt)))
+    req_arb.io.in(0).bits.first := acquire_beats === 0.U
     req_arb.io.in(0).bits.last := acquire_beats === 2.U
     when (req_arb.io.in(0).fire()) {
       acquire_beats := Mux(acquire_beats === 2.U, 0.U, acquire_beats + 1.U)
@@ -225,6 +228,7 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
     req_arb.io.in(2).bits.manager_id := OHToUInt(manager)
     req_arb.io.in(2).bits.data := 0.U
     req_arb.io.in(2).bits.last := true.B
+    req_arb.io.in(2).bits.first := true.B
     when (req_arb.io.in(2).fire()) { state := s_rel_wait }
 
     // unbusy rerocc tile
@@ -233,6 +237,7 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
     req_arb.io.in(3).bits.client_id := 0.U
     req_arb.io.in(3).bits.manager_id := OHToUInt(manager)
     req_arb.io.in(3).bits.data := 0.U
+    req_arb.io.in(3).bits.first := true.B
     req_arb.io.in(3).bits.last := true.B
     when (req_arb.io.in(3).fire()) { state := s_unbusy_wait }
 

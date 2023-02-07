@@ -61,19 +61,27 @@ case class ReRoCCEdgeParams(
   cParams: ReRoCCClientPortParams
 ) {
   require(cParams.clients.size >= 1 && mParams.managers.size >= 1)
-  val bundle = ReRoCCBundleParams(log2Ceil(cParams.clients.size), log2Ceil(mParams.managers.size))
+  val bundle = ReRoCCBundleParams(
+    log2Ceil(cParams.clients.size),
+    log2Ceil(mParams.managers.map(_.managerId).max + 1))
+
 }
 
 case class ReRoCCBundleParams(
   clientIdBits: Int,
   managerIdBits: Int
-)
+) {
+  def union(x: ReRoCCBundleParams) = ReRoCCBundleParams(
+    clientIdBits = clientIdBits.max(x.clientIdBits),
+    managerIdBits = managerIdBits.max(x.managerIdBits))
+}
 
 class ReRoCCMsgBundle(val params: ReRoCCBundleParams) extends Bundle {
   val opcode     = UInt(ReRoCCProtocolOpcodes.width.W)
   val client_id  = UInt(params.clientIdBits.W)
   val manager_id = UInt(params.managerIdBits.W)
   val data       = UInt(64.W)
+  val first      = Bool()
   val last       = Bool()
 }
 
