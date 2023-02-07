@@ -6,6 +6,9 @@
 #include <sstream>
 #include <set>
 
+#define CLINT_BASE (0x2000000)
+#define CLINT_SIZE (0x1000)
+
 typedef struct system_info_t {
   std::string isa;
   int pmpregions;
@@ -33,10 +36,10 @@ static std::vector<std::pair<reg_t, mem_t*>> make_mems(const std::vector<mem_cfg
 }
 
 extern "C" void cospike_set_sysinfo(char* isa, int pmpregions,
-				    long long int mem0_base, long long int mem0_size,
-				    int nharts,
-				    char* bootrom
-				    ) {
+                                    long long int mem0_base, long long int mem0_size,
+                                    int nharts,
+                                    char* bootrom
+                                    ) {
   if (!info) {
     info = new system_info_t;
     info->isa = std::string(isa);
@@ -54,14 +57,14 @@ extern "C" void cospike_set_sysinfo(char* isa, int pmpregions,
 
 extern "C" void cospike_cosim(long long int cycle,
                               long long int hartid,
-			      int has_wdata,
-			      int valid,
-			      long long int iaddr,
-			      unsigned long int insn,
-			      int raise_exception,
-			      int raise_interrupt,
-			      unsigned long long int cause,
-			      unsigned long long int wdata)
+                              int has_wdata,
+                              int valid,
+                              long long int iaddr,
+                              unsigned long int insn,
+                              int raise_exception,
+                              int raise_interrupt,
+                              unsigned long long int cause,
+                              unsigned long long int wdata)
 {
   assert(info);
   if (!sim) {
@@ -87,13 +90,20 @@ extern "C" void cospike_cosim(long long int cycle,
                     );
 
     std::vector<std::pair<reg_t, mem_t*>> mems = make_mems(cfg->mem_layout());
+
     rom_device_t *boot_rom = new rom_device_t(info->bootrom);
     mem_t *boot_addr_reg = new mem_t(0x1000);
     uint64_t default_boot_addr = 0x80000000;
-    std::vector<std::pair<reg_t, abstract_device_t*>> plugin_devices;
     boot_addr_reg->store(0, 8, (const uint8_t*)(&default_boot_addr));
-    plugin_devices.push_back(std::pair(0x10000, boot_rom));
+
+    // Don't actually build a clint
+    mem_t* clint_mem = new mem_t(CLINT_SIZE);
+
+    std::vector<std::pair<reg_t, abstract_device_t*>> plugin_devices;
+    // The device map is hardcoded here for now
     plugin_devices.push_back(std::pair(0x4000, boot_addr_reg));
+    plugin_devices.push_back(std::pair(0x10000, boot_rom));
+    plugin_devices.push_back(std::pair(CLINT_BASE, clint_mem));
 
     s_vpi_vlog_info vinfo;
     if (!vpi_get_vlog_info(&vinfo))
@@ -104,13 +114,13 @@ extern "C" void cospike_cosim(long long int cycle,
     for (int i = 1; i < vinfo.argc; i++) {
       std::string arg(vinfo.argv[i]);
       if (arg == "+permissive") {
-	in_permissive = true;
+        in_permissive = true;
       } else if (arg == "+permissive-off") {
-	in_permissive = false;
+        in_permissive = false;
       } else if (arg == "+cospike_debug") {
         cospike_debug = true;
       } else if (!in_permissive) {
-	htif_args.push_back(arg);
+        htif_args.push_back(arg);
       }
     }
 
@@ -132,16 +142,16 @@ extern "C" void cospike_cosim(long long int cycle,
     }
 
     sim = new sim_t(cfg, false,
-		    mems,
-		    plugin_devices,
-		    htif_args,
-		    dm_config,
-		    nullptr,
-		    false,
-		    nullptr,
-		    false,
-		    nullptr
-		    );
+                    mems,
+                    plugin_devices,
+                    htif_args,
+                    dm_config,
+                    nullptr,
+                    false,
+                    nullptr,
+                    false,
+                    nullptr
+                    );
 
     sim->configure_log(true, true);
     // Use our own reset vector
@@ -193,25 +203,25 @@ extern "C" void cospike_cosim(long long int cycle,
     if (!mem_write.empty() && tohost_addr && std::get<0>(mem_write[0]) == tohost_addr) {
       reg_t wdata = std::get<1>(mem_write[0]);
       if (wdata >= info->mem0_base && wdata < (info->mem0_base + info->mem0_size)) {
-	printf("Probable magic mem %x\n", wdata);
-	magic_addrs.insert(wdata);
+        printf("Probable magic mem %x\n", wdata);
+        magic_addrs.insert(wdata);
       }
     }
 
     if (has_wdata) {
       auto& log = s->log_reg_write;
       auto& mem_read = s->log_mem_read;
-
+      reg_t mem_read_addr = mem_read.empty() ? 0 : std::get<0>(mem_read[0]);
       for (auto regwrite : log) {
-	int rd = regwrite.first >> 4;
-	int type = regwrite.first & 0xf;
-	// 0 => int
-	// 1 => fp
-	// 2 => vec
-	// 3 => vec hint
-	// 4 => csr
-	if ((rd != 0 && type == 0) || type == 1) {
-	  // Override reads from some CSRs
+        int rd = regwrite.first >> 4;
+        int type = regwrite.first & 0xf;
+        // 0 => int
+        // 1 => fp
+        // 2 => vec
+        // 3 => vec hint
+        // 4 => csr
+        if ((rd != 0 && type == 0) || type == 1) {
+          // Override reads from some CSRs
           uint64_t csr_addr = (insn >> 20) & 0xfff;
           bool csr_read = (insn & 0x7f) == 0x73;
           if (csr_read) printf("CSR read %lx\n", csr_addr);
@@ -225,14 +235,15 @@ extern "C" void cospike_cosim(long long int cycle,
                            )) {
             printf("CSR override\n");
             s->XPR.write(rd, wdata);
-	  } else if (!mem_read.empty() &&
-		     ((magic_addrs.count(std::get<0>(mem_read[0])) ||
-                       tohost_addr && std::get<0>(mem_read[0]) == tohost_addr) ||
-		      (fromhost_addr && std::get<0>(mem_read[0]) == fromhost_addr))) {
-	    // Don't check reads from tohost, or reads from magic memory
+          } else if (!mem_read.empty() && ((magic_addrs.count(mem_read_addr) ||
+					    (tohost_addr && mem_read_addr == tohost_addr) ||
+					    (fromhost_addr && mem_read_addr == fromhost_addr) ||
+					    (CLINT_BASE <= mem_read_addr && mem_read_addr < (CLINT_BASE + CLINT_SIZE))
+					    ))) {
+	    // Don't check reads from tohost, reads from magic memory, or reads from clint
 	    // Technically this could be buggy because log_mem_read only reports vaddrs, but
-	    // no software ever should access tohost/fromhost with vaddrs anyways
-	    printf("To/From host read override\n");
+	    // no software ever should access tohost/fromhost/clint with vaddrs anyways
+	    printf("Read override %lx\n", mem_read_addr);
 	    s->XPR.write(rd, wdata);
           } else if (wdata != regwrite.second.v[0]) {
 	    printf("%d wdata mismatch reg %d %lx != %lx\n", cycle, rd, regwrite.second.v[0], wdata);
