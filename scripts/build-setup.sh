@@ -87,6 +87,27 @@ run_step() {
 
 {
 
+# esp-tools should ONLY be used for hwacha.
+# Check for this, since many users will be attempting to use this with gemmini
+if [ $TOOLCHAIN_TYPE == "esp-tools" ]; then
+    while true; do
+        read -p "WARNING: You are trying to install the esp-tools toolchain."$'n'"This should ONLY be used for Hwacha development."$'\n'"Gemmini should be used with riscv-tools."$'\n'"Type \"y\" to continue if this is intended, or \"n\" if not: " validate
+        case "$validate" in
+            y | Y)
+                echo "Installing esp-tools."
+                break
+                ;;
+            n | N)
+                error "Rerun with riscv-tools"
+                exit 3
+                ;;
+            *)
+                error "Invalid response. Please type \"y\" or \"n\""
+                ;;
+        esac
+    done
+fi
+
 # setup and install conda environment
 if run_step "1"; then
     # note: lock file must end in .conda-lock.yml - see https://github.com/conda-incubator/conda-lock/issues/154
