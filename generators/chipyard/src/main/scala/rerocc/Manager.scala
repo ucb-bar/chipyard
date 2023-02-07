@@ -377,6 +377,8 @@ class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
   }
 }
 
+case object ReRoCCNoCKey extends Field[Option[ReRoCCNoCParams]](None)
+
 trait CanHaveReRoCCTiles { this: HasTiles =>
 
   // WARNING: Not multi-clock safe
@@ -397,8 +399,8 @@ trait CanHaveReRoCCTiles { this: HasTiles =>
   require(!(reRoCCManagers.isEmpty ^ reRoCCClients.isEmpty))
 
   if (!reRoCCClients.isEmpty) {
-    val rerocc_xbar = LazyModule(new ReRoCCXbar())
-    reRoCCClients.foreach { case (t, c) => rerocc_xbar.node := t { ReRoCCBuffer() := c.reRoCCNode } }
-    reRoCCManagers.foreach { m => m.reRoCCNode := rerocc_xbar.node }
+    val rerocc_bus = LazyModule(p(ReRoCCNoCKey).map { k => new ReRoCCNoC(k) }.getOrElse(new ReRoCCXbar()))
+    reRoCCClients.foreach { case (t, c) => rerocc_bus.node := t { ReRoCCBuffer() := c.reRoCCNode } }
+    reRoCCManagers.foreach { m => m.reRoCCNode := rerocc_bus.node }
   }
 }
