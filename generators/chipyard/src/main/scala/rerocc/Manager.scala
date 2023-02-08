@@ -107,11 +107,13 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
   override lazy val module = new Impl
   class Impl extends LazyModuleImp(this) {
     val io = IO(new Bundle {
+      val manager_id = Input(UInt(64.W))
       val cmd = Decoupled(new RoCCCommand)
       val resp = Flipped(Decoupled(new RoCCResponse))
       val busy = Input(Bool())
       val ptw = Flipped(new DatapathPTWIO)
     })
+    dontTouch(io.manager_id)
     val (rerocc, edge) = node.in(0)
     dontTouch(rerocc)
 
@@ -244,7 +246,7 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     // acquire->ack/nack
     resp_arb.io.in(0).bits.opcode := ReRoCCProtocolOpcodes.sAcqResp
     resp_arb.io.in(0).bits.client_id := rr_req.bits.client_id
-    resp_arb.io.in(0).bits.manager_id := reRoCCTileParams.reroccId.U
+    resp_arb.io.in(0).bits.manager_id := io.manager_id
     resp_arb.io.in(0).bits.data := Cat(ibufEntries.U, state === s_idle)
     resp_arb.io.in(0).bits.last := true.B
     resp_arb.io.in(0).bits.first := true.B
@@ -253,7 +255,7 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     resp_arb.io.in(1).valid           := inst_val(inst_head) && inst_q.io.enq.ready
     resp_arb.io.in(1).bits.opcode     := ReRoCCProtocolOpcodes.sInstAck
     resp_arb.io.in(1).bits.client_id  := client
-    resp_arb.io.in(1).bits.manager_id := reRoCCTileParams.reroccId.U
+    resp_arb.io.in(1).bits.manager_id := io.manager_id
     resp_arb.io.in(1).bits.data       := inst_head
     resp_arb.io.in(1).bits.last       := true.B
     resp_arb.io.in(1).bits.first      := true.B
@@ -271,7 +273,7 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     resp_arb.io.in(2).valid           := resp.valid
     resp_arb.io.in(2).bits.opcode     := ReRoCCProtocolOpcodes.sWrite
     resp_arb.io.in(2).bits.client_id  := client
-    resp_arb.io.in(2).bits.manager_id := reRoCCTileParams.reroccId.U
+    resp_arb.io.in(2).bits.manager_id := io.manager_id
     resp_arb.io.in(2).bits.data       := Mux(resp_rd, resp.bits.rd, resp.bits.data)
     resp_arb.io.in(2).bits.last       := resp_rd
     resp_arb.io.in(2).bits.first      := !resp_rd
@@ -282,7 +284,7 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     resp_arb.io.in(3).valid           := state === s_rel_wait && !io.busy && inst_q.io.count === 0.U
     resp_arb.io.in(3).bits.opcode     := ReRoCCProtocolOpcodes.sRelResp
     resp_arb.io.in(3).bits.client_id  := client
-    resp_arb.io.in(3).bits.manager_id := reRoCCTileParams.reroccId.U
+    resp_arb.io.in(3).bits.manager_id := io.manager_id
     resp_arb.io.in(3).bits.data       := 0.U
     resp_arb.io.in(3).bits.last       := true.B
     resp_arb.io.in(3).bits.first      := true.B
@@ -298,7 +300,7 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     resp_arb.io.in(4).valid           := state === s_unbusy && !io.busy && inst_q.io.count === 0.U
     resp_arb.io.in(4).bits.opcode     := ReRoCCProtocolOpcodes.sUnbusyAck
     resp_arb.io.in(4).bits.client_id  := client
-    resp_arb.io.in(4).bits.manager_id := reRoCCTileParams.reroccId.U
+    resp_arb.io.in(4).bits.manager_id := io.manager_id
     resp_arb.io.in(4).bits.data       := 0.U
     resp_arb.io.in(4).bits.last       := true.B
     resp_arb.io.in(4).bits.first      := true.B
@@ -318,6 +320,7 @@ class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
       TileVisibilityNodeKey -> TLEphemeralNode()(ValName("rerocc_manager"))
     )))
   }
+  val reroccManagerIdSinkNode = BundleBridgeSink[UInt]()
 
   val rocc = reRoCCParams.genRoCC.get(p)
   require(rocc.opcodes.opcodes.size == 1)
