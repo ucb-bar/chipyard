@@ -2,6 +2,11 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.9.0] - 2023-??-??
+
+### Changed
+* FIRRTL: Change FIRRTL compiler from SFC to MFC
+
 ## [1.8.1] - 2022-10-18
 
 Various fixes and improvements, bump FireSim to 1.15.1.
