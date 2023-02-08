@@ -371,7 +371,7 @@ class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
     for (i <- 0 until rocc.nPTWPorts) {
       ptw.io.requestor(1+i) <> rocc.module.io.ptw(i)
     }
-
+    rerocc_manager.module.io.manager_id := reroccManagerIdSinkNode.bundle
     rocc.module.io.cmd <> rerocc_manager.module.io.cmd
     rerocc_manager.module.io.resp <> rocc.module.io.resp
     rerocc_manager.module.io.busy := rocc.module.io.busy
