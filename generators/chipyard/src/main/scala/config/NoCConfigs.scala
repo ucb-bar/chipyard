@@ -307,6 +307,53 @@ class GemminiReRoCCNoCConfig extends Config(
   new GemminiReRoCCBaseConfig
 )
 
+class GemminiReRoCCSharedNoCConfig extends Config(
+  new constellation.soc.WithGlobalNoC(GlobalNoCParams(
+    NoCParams(
+      topology        = Mesh2D(4, 4),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(8) { UserVirtualChannelParams(4) }),
+      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DEscapeRouting(), 6, 1))
+  )) ++
+  new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
+    constellation.protocol.DiplomaticNetworkNodeMapping(
+      inNodeMapping = ListMap(
+        "serial-tl" -> 0,
+        "Core 0" -> 1, "Core 1" -> 2, "Core 2" -> 13,
+        "ReRoCC 0" -> 3,
+        "ReRoCC 1" -> 6,
+        "ReRoCC 2" -> 7,
+        "ReRoCC 3" -> 10,
+        "ReRoCC 4" -> 11,
+        "ReRoCC 5" -> 14,
+        "ReRoCC 6" -> 15,
+      ),
+      outNodeMapping = ListMap(
+        "error" -> 0,
+        "serdesser[0]," -> 4,
+        "serdesser[1]," -> 5,
+        "serdesser[2]," -> 8,
+        "serdesser[3]," -> 9,
+        "system[0]|" -> 0, "system[1]|" -> 12
+      ))
+  ), globalNoC = true) ++
+  new chipyard.config.WithReRoCCNoC(chipyard.rerocc.ReRoCCNoCParams(
+    tileClientMapping = ListMap( // maps tile ids to noc nodes
+      0 -> 1,
+      1 -> 2,
+      2 -> 13),
+    managerMapping = ListMap( // maps manager ids to noc nodes
+      0 -> 3,
+      1 -> 6 ,
+      2 -> 7,
+      3 -> 10,
+      4 -> 11,
+      5 -> 14,
+      6 -> 15),
+    useGlobalNoC = true)) ++
+  new GemminiReRoCCBaseConfig
+)
+
+
 class GemminiReRoCCBaseConfig extends Config(
   new chipyard.config.WithReRoCC(4,chipyard.rerocc.ReRoCCTileParams(
     dcacheParams=None, mergeTLNodes=true, l2TLBEntries=256, l2TLBWays=4)) ++

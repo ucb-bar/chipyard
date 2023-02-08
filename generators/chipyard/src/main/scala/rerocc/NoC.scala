@@ -9,10 +9,10 @@ import freechips.rocketchip.tile._
 import freechips.rocketchip.rocket._
 import freechips.rocketchip.util._
 
-import constellation.protocol.ProtocolParams
 import constellation.noc.{NoCParams, NoCTerminalIO}
-import constellation.protocol.{ProtocolNoC, ProtocolNoCParams}
+import constellation.protocol.{ProtocolNoC, ProtocolParams, ProtocolNoCParams}
 import constellation.channel.{FlowParams}
+import constellation.soc.{CanAttachToGlobalNoC}
 
 import scala.collection.immutable.{ListMap}
 
@@ -21,7 +21,8 @@ case class ReRoCCNoCParams(
   tileClientMapping: ListMap[Int, Int] = ListMap[Int, Int](),
   // maps client IDs to noc node ids
   managerMapping: ListMap[Int, Int] = ListMap[Int, Int](),
-  nocParams: NoCParams = NoCParams()
+  nocParams: NoCParams = NoCParams(),
+  useGlobalNoC: Boolean = false
 )
 
 class ReRoCCInterconnectInterface(edgesIn: Seq[ReRoCCEdgeParams], edgesOut: Seq[ReRoCCEdgeParams])(implicit val p: Parameters) extends Bundle {
@@ -132,7 +133,6 @@ abstract class ReRoCCNoCModuleImp(outer: LazyModule) extends LazyModuleImp(outer
 }
 
 class ReRoCCNoC(params: ReRoCCNoCParams, name: String = "rerocc")(implicit p: Parameters) extends ReRoCCBus {
-
   lazy val module = new ReRoCCNoCModuleImp(this) {
     val (io_in, edgesIn) = node.in.unzip
     val (io_out, edgesOut) = node.out.unzip
@@ -152,4 +152,24 @@ class ReRoCCNoC(params: ReRoCCNoCParams, name: String = "rerocc")(implicit p: Pa
       }
     }
   }
+}
+
+class ReRoCCGlobalNoC(params: ReRoCCNoCParams, name: String = "rerocc")(implicit p: Parameters) extends ReRoCCBus {
+  lazy val module = new ReRoCCNoCModuleImp(this) with CanAttachToGlobalNoC {
+    val (io_in, edgesIn) = node.in.unzip
+    val (io_out, edgesOut) = node.out.unzip
+    val tileClientMapping = params.tileClientMapping
+    val managerMapping = params.managerMapping
+    val nocName = name
+    printNodeMappings()
+
+    val io_global = IO(Flipped(protocolParams.genIO()))
+    io_global match {
+      case protocol: ReRoCCInterconnectInterface => {
+        (protocol.in zip io_in).foreach { case (l, r) => l <> r }
+        (io_out zip protocol.out).foreach { case (l, r) => l <> r }
+      }
+    }
+  }
+
 }
