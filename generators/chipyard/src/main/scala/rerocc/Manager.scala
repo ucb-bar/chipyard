@@ -379,7 +379,7 @@ class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
 
 case object ReRoCCNoCKey extends Field[Option[ReRoCCNoCParams]](None)
 
-trait CanHaveReRoCCTiles { this: HasTiles =>
+trait CanHaveReRoCCTiles { this: HasTiles with constellation.soc.CanHaveGlobalNoC =>
 
   // WARNING: Not multi-clock safe
   val reRoCCClients = tiles.map { t => t match {
@@ -388,18 +388,35 @@ trait CanHaveReRoCCTiles { this: HasTiles =>
     case _ => Nil
   }}.flatten
 
+  val reRoCCManagerIds = (0 until p(ReRoCCTileKey).size)
+  val reRoCCManagerIdNexusNode = LazyModule(new BundleBridgeNexus[UInt](
+    inputFn = BundleBridgeNexus.orReduction[UInt](false) _,
+    outputFn = (prefix: UInt, n: Int) =>  Seq.tabulate(n) { i => {
+      dontTouch(prefix | reRoCCManagerIds(i).U(7.W)) // dontTouch to keep constant prop from breaking tile dedup
+    }},
+    default = Some(() => 0.U(7.W)),
+    inputRequiresOutput = true, // guard against this being driven but then ignored in tileHartIdIONodes below
+    shouldBeInlined = false // can't inline something whose output we are are dontTouching
+  )).node
   val reRoCCManagers = p(ReRoCCTileKey).zipWithIndex.map { case (g,i) =>
     val rerocc_tile = LazyModule(new ReRoCCManagerTile(g.copy(rowBits = p(SystemBusKey).beatBits, reroccId = i), p))
     println(s"ReRoCC Manager id $i is a ${rerocc_tile.rocc}")
     locateTLBusWrapper(SBUS).coupleFrom(s"port_named_rerocc_$i") {
       (_ :=* TLBuffer() :=* rerocc_tile.tlNode)
     }
+    rerocc_tile.reroccManagerIdSinkNode := reRoCCManagerIdNexusNode
     rerocc_tile
   }
   require(!(reRoCCManagers.isEmpty ^ reRoCCClients.isEmpty))
 
   if (!reRoCCClients.isEmpty) {
-    val rerocc_bus = LazyModule(p(ReRoCCNoCKey).map { k => new ReRoCCNoC(k) }.getOrElse(new ReRoCCXbar()))
+    val rerocc_bus = p(ReRoCCNoCKey).map { k =>
+      if (k.useGlobalNoC) {
+        globalNoCDomain { LazyModule(new ReRoCCGlobalNoC(k)) }
+      } else {
+        LazyModule(new ReRoCCNoC(k))
+      }
+    }.getOrElse(LazyModule(new ReRoCCXbar()))
     reRoCCClients.foreach { case (t, c) => rerocc_bus.node := t { ReRoCCBuffer() := c.reRoCCNode } }
     reRoCCManagers.foreach { m => m.reRoCCNode := rerocc_bus.node }
   }
