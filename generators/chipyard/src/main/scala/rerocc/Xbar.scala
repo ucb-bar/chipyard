@@ -22,10 +22,11 @@ trait HasReRoCCBusRemapper {
 
   lazy val clientOffsets = edgesIn.map(_.cParams.clients.size).scanLeft(0)(_+_)
 
+  def isClient(inEdgeId: Int, outClientId: UInt): Bool = {
+    clientOffsets(inEdgeId).U <= outClientId && clientOffsets(inEdgeId+1).U > outClientId
+  }
   def remapInToOut(inEdgeId: Int, inClientId: UInt): UInt = clientOffsets(inEdgeId).U +& inClientId
-  def remapOutToIn(inEdgeId: Int, inClientId: UInt): UInt = inClientId - clientOffsets(inEdgeId).U
-
-
+  def remapOutToIn(inEdgeId: Int, outClientId: UInt): UInt = outClientId - clientOffsets(inEdgeId).U
 }
 
 class ReRoCCXbar(implicit p: Parameters) extends ReRoCCBus {
@@ -72,10 +73,7 @@ class ReRoCCXbar(implicit p: Parameters) extends ReRoCCBus {
       val minClient = clientOffsets(ii)
       val maxClient = clientOffsets(ii+1)
       in_arb.io.in.zipWithIndex.foreach { case (o, oi) => {
-        val sel = (
-          io_out(oi).resp.bits.client_id >= minClient.U &&
-            io_out(oi).resp.bits.client_id < maxClient.U
-        )
+        val sel = isClient(ii, io_out(oi).resp.bits.client_id)
         o.valid := io_out(oi).resp.valid && sel
         o.bits := io_out(oi).resp.bits
         o.bits.client_id := remapOutToIn(ii, io_out(oi).resp.bits.client_id)

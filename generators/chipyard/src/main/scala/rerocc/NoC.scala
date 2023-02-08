@@ -18,9 +18,9 @@ import scala.collection.immutable.{ListMap}
 
 case class ReRoCCNoCParams(
   // maps tile IDs to noc node ids
-  inNodeMapping: ListMap[Int, Int] = ListMap[Int, Int](),
+  tileClientMapping: ListMap[Int, Int] = ListMap[Int, Int](),
   // maps client IDs to noc node ids
-  outNodeMapping: ListMap[Int, Int] = ListMap[Int, Int](),
+  managerMapping: ListMap[Int, Int] = ListMap[Int, Int](),
   nocParams: NoCParams = NoCParams()
 )
 
@@ -60,7 +60,7 @@ case class ReRoCCNoCProtocolParams(
         ingresses(i).flit.bits.head := wide_req.first
         ingresses(i).flit.bits.tail := wide_req.last
         ingresses(i).flit.bits.egress_id := edgesOut.zipWithIndex.map { case (e, ei) => {
-          Mux(e.mParams.managers.map(_.managerId.U === wide_req.manager_id).orR, edgeOutNodes(ei).U, 0.U)
+          Mux(e.mParams.managers.map(_.managerId.U === wide_req.manager_id).orR, ei.U, 0.U)
         }}.reduce(_|_) +& egressOffset.U
         protocol.in(i).req.ready := ingresses(i).flit.ready
 
@@ -79,7 +79,7 @@ case class ReRoCCNoCProtocolParams(
         ingresses(edgesIn.size + o).flit.bits.head := wide_resp.first
         ingresses(edgesIn.size + o).flit.bits.tail := wide_resp.last
         ingresses(edgesIn.size + o).flit.bits.egress_id := edgesIn.zipWithIndex.map { case (e, ei) => {
-          Mux(e.cParams.clients.map(_.tileId.U === wide_resp.client_id).orR, (edgeInNodes(ei) + edgesOut.size).U, 0.U)
+          Mux(isClient(ei, wide_resp.client_id), (ei + edgesOut.size).U, 0.U)
         }}.reduce(_|_) +& egressOffset.U
         protocol.out(o).resp.ready := ingresses(edgesIn.size + o).flit.ready
 
@@ -96,18 +96,18 @@ case class ReRoCCNoCProtocolParams(
 abstract class ReRoCCNoCModuleImp(outer: LazyModule) extends LazyModuleImp(outer) {
   val edgesIn: Seq[ReRoCCEdgeParams]
   val edgesOut: Seq[ReRoCCEdgeParams]
-  val inNodeMapping: ListMap[Int, Int]
-  val outNodeMapping: ListMap[Int, Int]
+  val tileClientMapping: ListMap[Int, Int]
+  val managerMapping: ListMap[Int, Int]
   val nocName: String
   lazy val inTileIds: Seq[Seq[Int]] = edgesIn.map(_.cParams.clients.map(_.tileId))
   lazy val outManagerIds: Seq[Seq[Int]] = edgesOut.map(_.mParams.managers.map(_.managerId))
   lazy val edgeInNodes: Seq[Option[Int]] = inTileIds.map(ids => {
-    val s = ids.map(i => inNodeMapping(i))
+    val s = ids.map(i => tileClientMapping(i))
     require(s.toSet.size <= 1)
     s.headOption
   })
   lazy val edgeOutNodes: Seq[Option[Int]] = outManagerIds.map(ids => {
-    val s = ids.map(i => outNodeMapping(i))
+    val s = ids.map(i => managerMapping(i))
     require(s.toSet.size <= 1)
     s.headOption
   })
@@ -121,9 +121,8 @@ abstract class ReRoCCNoCModuleImp(outer: LazyModule) extends LazyModuleImp(outer
     println(s"Constellation: ReRoCC $nocName manager mapping:")
     for ((n, i) <- inTileIds zip edgeInNodes) {
       val node = i.map(_.toString).getOrElse("X")
-      println(s"  $node <- Tiles $n")
+      println(s"  $node <- Tiles ${n.toSet}")
     }
-
     println(s"Constellation: ReRoCC $nocName outwards mapping:")
     for ((n, i) <- outManagerIds zip edgeOutNodes) {
       val node = i.map(_.toString).getOrElse("X")
@@ -137,8 +136,8 @@ class ReRoCCNoC(params: ReRoCCNoCParams, name: String = "rerocc")(implicit p: Pa
   lazy val module = new ReRoCCNoCModuleImp(this) {
     val (io_in, edgesIn) = node.in.unzip
     val (io_out, edgesOut) = node.out.unzip
-    val inNodeMapping = params.inNodeMapping
-    val outNodeMapping = params.outNodeMapping
+    val tileClientMapping = params.tileClientMapping
+    val managerMapping = params.managerMapping
     val nocName = name
     printNodeMappings()
     val noc = Module(new ProtocolNoC(ProtocolNoCParams(

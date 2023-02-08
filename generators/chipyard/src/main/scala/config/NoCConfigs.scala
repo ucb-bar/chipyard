@@ -216,6 +216,43 @@ class SbusRingNoCConfig extends Config(
   new chipyard.config.AbstractConfig
 )
 
+class RocketReRoCCNoCConfig extends Config(
+  new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
+    constellation.protocol.DiplomaticNetworkNodeMapping(
+      inNodeMapping = ListMap(
+        "Core 0" -> 0,
+        "ReRoCC 0" -> 1,
+        "ReRoCC 1" -> 2,
+        "ReRoCC 2" -> 3,
+        "ReRoCC 3" -> 4,
+        "serial-tl" -> 1),
+      outNodeMapping = ListMap(
+        "system[0]" -> 5,
+        "system[1]" -> 6,
+        "system[2]" -> 7,
+        "system[3]" -> 8,
+        "pbus" -> 1)), // TSI is on the pbus, so serial-tl and pbus should be on the same node
+    NoCParams(
+      topology        = UnidirectionalTorus1D(9),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(10) { UserVirtualChannelParams(4) }),
+      routingRelation = NonblockingVirtualSubnetworksRouting(UnidirectionalTorus1DDatelineRouting(), 5, 2))
+  )) ++
+  new chipyard.config.WithReRoCCNoC(chipyard.rerocc.ReRoCCNoCParams(
+    tileClientMapping = ListMap( // maps tile ids to noc nodes
+      0 -> 0),
+    managerMapping = ListMap( // maps manager ids to noc nodes
+      0 -> 1,
+      1 -> 2,
+      2 -> 3,
+      3 -> 4),
+    nocParams = NoCParams(
+      topology = UnidirectionalTorus1D(9),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(3) { UserVirtualChannelParams(4) }),
+      routingRelation = UnidirectionalTorus1DDatelineRouting())
+  )) ++
+  new chipyard.RocketReRoCCConfig
+)
+
 class GemminiReRoCCNoCConfig extends Config(
   new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
@@ -248,6 +285,24 @@ class GemminiReRoCCNoCConfig extends Config(
     //   channelParamGen = (a, b) => UserChannelParams(Seq.fill(8) { UserVirtualChannelParams(4) },
     //     useOutputQueues = false),
     //   routingRelation = NonblockingVirtualSubnetworksRouting(TerminalRouterRouting(Mesh2DEscapeRouting()), 5, 1))
+  )) ++
+  new chipyard.config.WithReRoCCNoC(chipyard.rerocc.ReRoCCNoCParams(
+    tileClientMapping = ListMap( // maps tile ids to noc nodes
+      0 -> 1,
+      1 -> 2,
+      2 -> 13),
+    managerMapping = ListMap( // maps manager ids to noc nodes
+      0 -> 3,
+      1 -> 6 ,
+      2 -> 7,
+      3 -> 10,
+      4 -> 11,
+      5 -> 14,
+      6 -> 15),
+    nocParams = NoCParams(
+      topology = Mesh2D(4, 4),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(3) { UserVirtualChannelParams(4) }),
+      routingRelation = Mesh2DEscapeRouting())
   )) ++
   new GemminiReRoCCBaseConfig
 )

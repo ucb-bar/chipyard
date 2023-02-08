@@ -95,6 +95,10 @@ class WithReRoCC(nTrackersPerHart: Int = 16, reRoCCManagerParams: ReRoCCTilePara
   case ReRoCCTileKey => up(BuildRoCC).map(gen => reRoCCManagerParams.copy(genRoCC=Some(gen)))
 })
 
+class WithReRoCCNoC(nocParams: ReRoCCNoCParams) extends Config((site, here, up) => {
+  case ReRoCCNoCKey => Some(nocParams)
+})
+
 class WithAccumulatorRoCC(op: OpcodeSet = OpcodeSet.custom1) extends Config((site, here, up) => {
   case BuildRoCC => up(BuildRoCC) ++ Seq((p: Parameters) => {
     val accumulator = LazyModule(new AccumulatorExample(op, n = 4)(p))
