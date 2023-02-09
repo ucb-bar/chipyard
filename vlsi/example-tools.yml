@@ -18,5 +18,6 @@ vlsi.core.sim_tool: "hammer.sim.vcs"
 sim.vcs.version: "S-2021.09-SP1-1"
 # Voltus options
 vlsi.core.power_tool: "hammer.power.voltus"
+power.joules.version: "211"
 power.voltus.version: "211_ISR3"
 # NOTE (about VCS+Voltus versions): if using FSDB, the VCS version should be approx 2 years older than the Voltus version for compatibility

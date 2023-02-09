@@ -1,4 +1,82 @@
+SIM_CONF = $(OBJ_DIR)/sim-inputs.yml
+SIM_DEBUG_CONF = $(OBJ_DIR)/sim-debug-inputs.yml
+SIM_TIMING_CONF = $(OBJ_DIR)/sim-timing-inputs.yml
+
 .PHONY: $(SIM_CONF) $(SIM_DEBUG_CONF) $(SIM_TIMING_CONF)
+
+$(SIM_CONF): $(sim_common_files)
+	mkdir -p $(dir $@)
+	echo "sim.inputs:" > $@
+	echo "  top_module: $(VLSI_TOP)" >> $@
+	echo "  tb_name: ''" >> $@  # don't specify -top
+	echo "  input_files:" >> $@
+	for x in $(shell cat $(sim_common_files)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  input_files_meta: 'append'" >> $@
+	echo "  timescale: '1ns/10ps'" >> $@
+	echo "  options:" >> $@
+	for x in $(filter-out -f $(sim_common_files),$(VCS_NONCC_OPTS)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  options_meta: 'append'" >> $@
+	echo "  defines:" >> $@
+	for x in $(subst +define+,,$(PREPROC_DEFINES)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  defines_meta: 'append'" >> $@
+	echo "  compiler_cc_opts:" >> $@
+	for x in $(filter-out "",$(VCS_CXXFLAGS)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  compiler_cc_opts_meta: 'append'" >> $@
+	echo "  compiler_ld_opts:" >> $@
+	for x in $(filter-out "",$(VCS_LDFLAGS)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  compiler_ld_opts_meta: 'append'" >> $@
+	echo "  execution_flags_prepend: ['$(PERMISSIVE_ON)']" >> $@
+	echo "  execution_flags_append: ['$(PERMISSIVE_OFF)']" >> $@
+	echo "  execution_flags:" >> $@
+	for x in $(SIM_FLAGS); do \
+	  echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  execution_flags_meta: 'append'" >> $@
+ifneq ($(BINARY), )
+	echo "  benchmarks: ['$(BINARY)']" >> $@
+endif
+	echo "  tb_dut: 'TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)'" >> $@
+
+$(SIM_DEBUG_CONF): $(sim_common_files)
+	mkdir -p $(dir $@)
+	mkdir -p $(output_dir)
+	echo "sim.inputs:" > $@
+	echo "  defines: ['DEBUG']" >> $@
+	echo "  defines_meta: 'append'" >> $@
+	echo "  execution_flags:" >> $@
+	for x in $(VERBOSE_FLAGS) $(WAVEFORM_FLAG); do \
+	  echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  execution_flags_meta: 'append'" >> $@
+	echo "  saif.mode: 'time'" >> $@
+	echo "  saif.start_time: '0ns'" >> $@
+	echo "  saif.end_time: '`bc <<< $(timeout_cycles)*$(CLOCK_PERIOD)`ns'" >> $@
+ifndef USE_VPD
+	echo "  options:" >> $@
+	echo '    - "-kdb"' >> $@
+	echo "  options_meta: 'append'" >> $@
+	echo "sim.outputs.waveforms: ['$(sim_out_name).fsdb']" >> $@
+else
+	echo "sim.outputs.waveforms: ['$(sim_out_name).vpd']" >> $@
+endif
+
+$(SIM_TIMING_CONF): $(sim_common_files)
+	mkdir -p $(dir $@)
+	echo "sim.inputs:" > $@
+	echo "  defines: ['NTC']" >> $@
+	echo "  defines_meta: 'append'" >> $@
+	echo "  timing_annotated: 'true'" >> $@
+
 # Update hammer top-level sim targets to include our generated sim configs
 redo-sim-rtl: $(SIM_CONF)
 redo-sim-rtl-$(VLSI_TOP): $(SIM_CONF)
