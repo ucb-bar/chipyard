@@ -5,15 +5,11 @@ Advanced Usage
 
 Hammer Development
 ------------------
-If you need to develop Hammer within Chipyard, you will not use the ``hammer-vlsi`` package as installed by conda.
-
-First, clone the `Hammer repository <https://github.com/ucb-bar/hammer>`__ somewhere else on your disk. Then:
+If you need to develop Hammer within Chipyard or use a version of Hammer beyond the latest PyPI release, clone the `Hammer repository <https://github.com/ucb-bar/hammer>`__ somewhere else on your disk. Then:
 
 .. code-block:: shell
     
     pip install -e <path/to/hammer>
-
-Finally, you will need to override the ``site_packages_dir`` variable in ``vlsi/Makefile`` to point to the abspath of your Hammer repository.
 
 Alternative RTL Flows
 ---------------------

@@ -8,7 +8,6 @@
 base_dir=$(abspath ..)
 vlsi_dir=$(abspath .)
 sim_dir=$(abspath .)
-site_packages_dir?=$(shell python3 -c "import site; print(site.getsitepackages()[0])")
 
 #########################################################################################
 # include shared variables
@@ -22,7 +21,8 @@ include $(base_dir)/variables.mk
 sim_name           ?= vcs # needed for GenerateSimFiles, but is unused
 tech_name          ?= asap7
 tech_dir           ?= $(if $(filter $(tech_name),sky130 asap7 nangate45),\
-                        $(site_packages_dir)/hammer/technology/$(tech_name), \
+                        $(shell python3 -c "import os, hammer.technology.$(tech_name);\
+						print(os.path.dirname(hammer.technology.$(tech_name).__file__))"),\
                         $(vlsi_dir)/hammer-$(tech_name)-plugin/hammer/$(tech_name))
 SMEMS_COMP         ?= $(tech_dir)/sram-compiler.json
 SMEMS_CACHE        ?= $(tech_dir)/sram-cache.json
