@@ -96,6 +96,7 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
       val cmd = Flipped(Decoupled(new RoCCCommand))
       val ptbr = Input(new PTBR)
       val resp = Decoupled(new RoCCResponse)
+      val set_fencing = Input(Bool())
       val fencing = Output(Bool())
     })
 
@@ -123,6 +124,7 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
     inflight_wbs := (inflight_wbs + incr_inflight_wbs) - decr_inflight_wbs
     val inst_empty = (inst_ret_ctr + 1.U === inst_ctr) || (inst_ctr === 0.U && inst_ret_ctr === max_ctr)
 
+    when (io.set_fencing) { fencing := true.B }
     io.fencing := fencing
     // handles instructions that match what we've acquired
     val inst_q = Module(new Queue(new RoCCCommand, 1, pipe=true))
@@ -167,7 +169,6 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
           when (cmd.ready) { state := s_releasing }
         } .elsewhen (cmd.bits.inst.funct === ReRoCCInstructions.fence) {
           cmd.ready := inflight_wbs === 0.U && inst_q.io.count === 0.U && inst_empty && state === s_busy
-          fencing := true.B
           when (cmd.ready) { state := s_unbusying }
         } .otherwise {
           assert(false.B)
@@ -313,22 +314,16 @@ class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC
     val resp_arb = Module(new Arbiter(new RoCCResponse, 1+nTrackers))
     val opcode_trackers = Reg(Vec(3, UInt(log2Ceil(nTrackers).W)))
 
-    val fencing = RegInit(false.B)
     val fencing_mask = Reg(UInt(nTrackers.W))
-    io.busy := fencing
-
-    when (fencing) {
-      val any_busy = (0 until nTrackers).map { i => subclients(i).module.io.fencing && fencing_mask(i) }.orR
-      when (!any_busy && !cflush.module.io.busy) { fencing := false.B }
-    }
+    io.busy := subclients.map(_.module.io.fencing).orR || cflush.module.io.busy
 
     cflush.module.io.ptw <> io.ptw(1)
 
-    when (io.cmd.fire()
-      && OpcodeSet.custom0.matches(io.cmd.bits.inst.opcode)
-      && io.cmd.bits.inst.funct === ReRoCCInstructions.fence) {
-      fencing := true.B
-      fencing_mask := UIntToOH(io.cmd.bits.rs1(log2Ceil(nTrackers)-1,0))
+    for (i <- 0 until nTrackers) {
+      subclients(i).module.io.set_fencing := (io.cmd.fire()
+        && OpcodeSet.custom0.matches(io.cmd.bits.inst.opcode)
+        && io.cmd.bits.inst.funct === ReRoCCInstructions.fence
+        && io.cmd.bits.rs1(log2Ceil(nTrackers)-1,0) === i.U)
     }
 
     val cmd = Queue(io.cmd)
