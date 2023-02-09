@@ -35,6 +35,4 @@ ifeq ($(tutorial),sky130-openroad)
     VLSI_OBJ_DIR      ?= build-sky130-openroad
     # This prevents multidimensional arrays (unsupported by Yosys) at the expense of elaboration time.
     #ENABLE_CUSTOM_FIRRTL_PASS = 1
-	# This runs sv2v for Yosys compatibility
-	CONVERT_SV2V = 1
 endif

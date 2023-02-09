@@ -80,17 +80,8 @@ $(VLSI_RTL): $(RTL_DEPS)
 ifneq ($(CUSTOM_VLOG), )
 	> $(VLSI_RTL)
 	$(foreach file,$^,echo $(file) >> $(VLSI_RTL))
-else ifneq ($(CONVERT_SV2V), )
-	# Convert System Verilog to Verilog, uniquify, remove incompatible tasks
-	sv2v -w=adjacent --oversized-numbers \
-		-D=ASSERT_VERBOSE_COND=0 -D=STOP_COND=0 -D=PRINTF_COND=0 \
-		$(filter-out %.v,$(shell cat $(TOP_MODS_FILELIST) $(TOP_BB_MODS_FILELIST)))
-	cat $(TOP_MODS_FILELIST) $(TOP_BB_MODS_FILELIST) | sort -u | sed 's/.sv/.v/g' > $(VLSI_RTL)
-	cat $(VLSI_RTL) | xargs sed -i 's/\$$fwrite.*/;/g'
-	echo $(TOP_SMEMS_FILE) >> $(VLSI_RTL)
-	echo $(build_dir)/EICG_wrapper.v >> $(VLSI_RTL)
 else
-	cat $(TOP_MODS_FILELIST) $(TOP_BB_MODS_FILELIST) | sort -u | > $(VLSI_RTL)
+	cat $(TOP_MODS_FILELIST) $(TOP_BB_MODS_FILELIST) | sort -u > $(VLSI_RTL)
 	echo $(TOP_SMEMS_FILE) >> $(VLSI_RTL)
 	echo $(build_dir)/EICG_wrapper.v >> $(VLSI_RTL)
 endif
