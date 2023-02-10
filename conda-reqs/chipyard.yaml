@@ -29,7 +29,7 @@ dependencies:
     - binutils
 
     - dromajo # from ucb-bar channel - https://github.com/riscv-boom/dromajo
-    - firtool>=1.29 # from ucb-bar channel - https://github.com/ucb-bar/firtool-feedstock
+    - firtool==1.29.0.newhammerhotfix # from ucb-bar channel - https://github.com/ucb-bar/firtool-feedstock
 
     # firemarshal deps
     - python>=3.9
@@ -129,7 +129,7 @@ dependencies:
         - mypy-boto3-ec2==1.21.9
         - sure==2.0.0
         - pylddwrap==1.2.1
-        - hammer-vlsi[asap7]
+        - hammer-vlsi[asap7]==1.0.0
 
     # doc requirements
     - sphinx
