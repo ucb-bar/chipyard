@@ -65,8 +65,10 @@ Start by checking out the proper Chipyard version. Run:
     git checkout |version|
 
 Next run the following script to fully setup Chipyard with a specific toolchain.
-There are two toolchains, one for normal RISC-V programs called ``riscv-tools`` which is the one needed for most Chipyard use-cases, and another for Hwacha/Gemmini called ``esp-tools``.
+There are two toolchains, one for normal RISC-V programs called ``riscv-tools`` which is the one needed for most Chipyard use-cases, and another for Hwacha called ``esp-tools``.
 Run the following script based off which compiler you would like to use.
+
+.. Note:: Prior versions of Chipyard recommended ``esp-tools`` for Gemmini development. Gemmini should now be used with the standard ``riscv-tools``.
 
 .. Warning:: The following script will complete a "full" installation of Chipyard which may take a long time depending on the system.
     Ensure that this script completes fully (no interruptions) before continuing on.
