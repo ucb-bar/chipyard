@@ -67,7 +67,7 @@ SUB_PROJECT ?= chipyard
 ifeq ($(SUB_PROJECT),chipyard)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= $(SBT_PROJECT)
 	CONFIG            ?= RocketConfig
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
@@ -79,7 +79,7 @@ endif
 ifeq ($(SUB_PROJECT),hwacha)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= freechips.rocketchip.system
 	CONFIG            ?= HwachaConfig
 	CONFIG_PACKAGE    ?= hwacha
@@ -91,7 +91,7 @@ endif
 ifeq ($(SUB_PROJECT),testchipip)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= chipyard.unittest
 	CONFIG            ?= TestChipUnitTestConfig
 	CONFIG_PACKAGE    ?= testchipip
@@ -103,7 +103,7 @@ endif
 ifeq ($(SUB_PROJECT),icenet)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= chipyard.unittest
 	CONFIG            ?= IceNetUnitTestConfig
 	CONFIG_PACKAGE    ?= icenet
@@ -115,7 +115,7 @@ endif
 ifeq ($(SUB_PROJECT),constellation)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= constellation.test
 	CONFIG            ?= TestConfig00
 	CONFIG_PACKAGE    ?= constellation.test
