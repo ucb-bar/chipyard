@@ -5,9 +5,7 @@ import firrtl._
 import firrtl.annotations._
 import firrtl.ir._
 import firrtl.options.{Dependency, InputAnnotationFileAnnotation, StageMain}
-import firrtl.passes.memlib.ReplSeqMemAnnotation
-import firrtl.stage.{FirrtlCircuitAnnotation, FirrtlStage, OutputFileAnnotation, RunFirrtlTransformAnnotation}
-import firrtl.transforms.BlackBoxResourceFileNameAnno
+import firrtl.stage.{FirrtlCircuitAnnotation, FirrtlStage, RunFirrtlTransformAnnotation}
 import logger.LazyLogging
 
 private class GenerateModelStageMain(annotations: AnnotationSeq) extends LazyLogging {
@@ -38,15 +36,23 @@ private class GenerateModelStageMain(annotations: AnnotationSeq) extends LazyLog
   }
 
   def executeStageMain(): Unit = {
-    val annos = new FirrtlStage().execute(Array.empty, annotations)
+    val appendedAnnotations = annotations.filter(_ match {
+      case CompilerNameAnnotation(_) => true
+      case _ => false
+    }).map(_ match {
+      case CompilerNameAnnotation("low") => Some(RunFirrtlTransformAnnotation(Dependency[ExtraLowTransforms]))
+      case _ => None
+    }).flatten
+    val annos = new FirrtlStage().execute(Array.empty, annotations ++ appendedAnnotations)
 
     annos.collectFirst { case FirrtlCircuitAnnotation(circuit) => circuit } match {
       case Some(circuit) =>
         dumpAnnos(annos)
       case _ =>
-        throw new Exception(s"executeTop failed while executing FIRRTL!\n")
+        throw new Exception(s"executeStageMain failed while executing FIRRTL!\n")
     }
   }
 }
 
+// main run class
 object GenerateModelStageMain extends StageMain(new TapeoutStage())

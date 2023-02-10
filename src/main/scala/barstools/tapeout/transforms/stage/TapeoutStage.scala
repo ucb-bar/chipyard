@@ -4,6 +4,7 @@ package barstools.tapeout.transforms.stage
 
 import barstools.tapeout.transforms.GenerateModelStageMain
 import chisel3.stage.ChiselCli
+import firrtl.stage.{RunFirrtlTransformAnnotation}
 import firrtl.AnnotationSeq
 import firrtl.annotations.{Annotation, NoTargetAnnotation}
 import firrtl.options.{HasShellOptions, Shell, ShellOption, Stage, Unserializable}
@@ -27,12 +28,32 @@ object OutAnnoAnnotation extends HasShellOptions {
   )
 }
 
+case class CompilerNameAnnotation(name: String) extends NoTargetAnnotation with TapeoutOption
+
+// duplicate of firrtl.stage.CompilerAnnotation but needed so that you can have a
+// CompilerAnnotation to match on when adding new transforms
+object DuplicateCompilerAnnotation extends HasShellOptions {
+  val options: Seq[ShellOption[_]] = Seq(
+    new ShellOption[String](
+      longOption = "duplicate-compiler",
+      shortOption = Some("DX"),
+      toAnnotationSeq = (s: String) => {
+        Seq(
+          CompilerNameAnnotation(s))
+      },
+      helpText = "duplicate-compiler",
+      helpValueName = Some("same as --compiler FIRRTL flag")
+    )
+  )
+}
+
 trait TapeoutCli {
   this: Shell =>
   parser.note("Tapeout specific options")
 
   Seq(
-    OutAnnoAnnotation
+    OutAnnoAnnotation,
+    DuplicateCompilerAnnotation
   ).foreach(_.addOptions(parser))
 }
 
