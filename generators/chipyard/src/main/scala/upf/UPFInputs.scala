@@ -9,10 +9,10 @@ object UPFInputs {
                          isGated=false, highVoltage=3.9, lowVoltage=3.4),
         PowerDomainInput(name="PD_RocketTile1", isTop=false, moduleList=List("RocketTile"),
                          parentPD="PD_top", childrenPDs=List(),
-                         isGated=false, highVoltage=3.9, lowVoltage=3.4),
+                         isGated=false, highVoltage=3.9, lowVoltage=3.1),
         PowerDomainInput(name="PD_RocketTile2", isTop=false, moduleList=List("RocketTile_1"),
                          parentPD="PD_top", childrenPDs=List(),
-                         isGated=false, highVoltage=3.9, lowVoltage=3.4),
+                         isGated=false, highVoltage=3.9, lowVoltage=3.2),
     )
 
     // PST info

@@ -6,6 +6,11 @@ import chipyard.{ChipTopLazyRawModuleImp, BuildSystem, DigitalTop}
 import freechips.rocketchip.config.{Parameters}
 import barstools.floorplan.chisel.{FloorplanAspect, Floorplan, FloorplanFunction}
 
+import scala.collection.mutable.ListBuffer//
+import freechips.rocketchip.diplomacy.LazyModule//
+
+
+
 object ChipTopFloorplans {
 
   def default: FloorplanFunction = {

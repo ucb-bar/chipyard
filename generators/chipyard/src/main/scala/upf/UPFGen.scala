@@ -6,7 +6,7 @@ import scala.collection.mutable.ListBuffer
 
 object UPFGenerator {
 
-    def generateUPF(node: Node): Unit = {
+    def generateUPF(node: Node, graph: PowerGraph): Unit = {
         val pd = node.nodeObj match {
             case o: PowerDomain => o
             case _ => throw new Exception("Power domain cannot be a non-PowerDomain object.")
@@ -16,8 +16,12 @@ object UPFGenerator {
                 case o: PowerDomain => o
                 case _ => throw new Exception("Power domain children cannot be non-PowerDomain objects.")
             }
-        }   
-        val fpath = s"/scratch/s.sridhar/upf4/${pd.name}.upf"
+        }
+        val pdList = graph.getAllObjs() match {
+            case l: List[PowerDomain] => l
+            case _ => throw new Exception("Power domain list cannot consist of non-PowerDomain objects.")
+        }
+        val fpath = s"/scratch/s.sridhar/upf6/${pd.name}.upf"
         writeFile(fpath, loadUPF(pd, children))
         writeFile(fpath, createPowerDomains(pd))
         writeFile(fpath, createSupplyPorts(pd))
@@ -26,6 +30,7 @@ object UPFGenerator {
         writeFile(fpath, setDomainNets(pd))
         writeFile(fpath, createPowerSwitches(pd))
         writeFile(fpath, createPowerStateTable(pd, getPorts(pd, children)))
+        writeFile(fpath, createLevelShifters(pd, pdList))
     }
 
     def getPorts(pd: PowerDomain, children: ListBuffer[PowerDomain]): ListBuffer[String] = {
@@ -200,6 +205,7 @@ object UPFGenerator {
         message += portStates
         message += createPST
         message += pstStates
+        message += "\n"
         return message
     }
 
@@ -207,6 +213,39 @@ object UPFGenerator {
         val stateVals = UPFInputs.states(state).split(",").map(_.trim.toInt)
         val index = UPFInputs.domains.indexOf(pd.name)
         return stateVals(index)
+    }
+
+    // current strategy: for each power domain, create level shifters for outputs going to all other pds
+    // not creating level shifters for inputs since every pd will already shift its outputs
+    // creating level shifters going to every other pd since not sure how to check if there is communication or not between any 2
+    def createLevelShifters(pd: PowerDomain, pdList: List[PowerDomain]): String = {
+        var message = "##### Level Shifters #####\n"
+        for (pd2 <- pdList) {
+            if (pd != pd2) {
+                val voltage1 = pd.mainVoltage
+                val voltage2 = pd2.mainVoltage
+                var subMessage = voltage1 match {
+                    case x if x < voltage2 => {
+                        s"set_level_shifter LtoH_${pd.name}_to_${pd2.name} " + 
+                        s"-domain ${pd.name} " + 
+                        "-applies_to outputs " + 
+                        "rule low_to_high " + 
+                        "-location self\n"
+                    }
+                    case y if y > voltage2 => {
+                        s"set_level_shifter HtoL_${pd.name}_to_${pd2.name} " + 
+                        s"-domain ${pd.name} " + 
+                        "-applies_to outputs " + 
+                        "rule high_to_low " + 
+                        "-location self\n"
+                    }
+                    case _ => ""
+                }
+                message += subMessage
+            }
+        }
+        message += "\n"
+        return message
     }
 
 }

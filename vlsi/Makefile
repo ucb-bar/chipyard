@@ -31,7 +31,7 @@ endif
 .PHONY: default verilog
 default: all
 
-all: drc lvs floorplan
+all: drc lvs floorplan upf
 
 verilog: $(ALL_RTL)
 
@@ -221,6 +221,15 @@ $(FLOORPLAN_CONF): generator_temp $(FLOORPLAN_OOBANNOS) $(FLOORPLAN_FPIR)
 # This just annotates all the SRAM instances
 $(FLOORPLAN_OOBMEM): generator_temp $(SMEMS_INSTMAP)
 	$(vlsi_dir)/gen_oob_annos.py $(tech_name) $(SMEMS_INSTMAP) > $@
+
+#########################################################################################
+# upf generation
+#########################################################################################
+
+.PHONY: upf
+upf: $(UPF_CONF)
+
+$(UPF_CONF): generator_temp
 
 #########################################################################################
 # AUTO BUILD FLOW

@@ -6,7 +6,12 @@ import scala.collection.mutable.{Map, Set, ListBuffer}
 
 case class PowerDomain (val name: String, val modules: ListBuffer[LazyModule], 
                         val isTop: Boolean, val isGated: Boolean,
-                        val highVoltage: Double, val lowVoltage: Double)
+                        val highVoltage: Double, val lowVoltage: Double) {
+    val mainVoltage = isGated match {
+        case true => highVoltage // gated nets should have access to high voltage rail (since they are being gated to optimize power)
+        case false => lowVoltage // currently assuming non-gated nets are on low voltage rail
+    }
+}
 
 class Node (var graph: PowerGraph, var nodeObj: Any) {
     var edges = Set[Edge]()
@@ -51,6 +56,14 @@ class PowerGraph {
         }
     }
 
+    def getAllNodes(): List[Node] = {
+        return nodeMap.values.toList
+    }
+
+    def getAllObjs(): List[Any] = {
+        return nodeMap.keys.toList
+    }
+
     def addChild(parentObj: Any, childObj: Any): Unit = {
         val parentNode = getNode(parentObj)
         val childNode = getNode(childObj)
@@ -60,13 +73,13 @@ class PowerGraph {
         childNode.addEdge(childEdge)
     }
 
-    def bfsVisitor(topObj: Any, action: Node => Unit): Unit = {
+    def bfsVisitor(topObj: Any, action: (Node, PowerGraph) => Unit): Unit = {
         var stack = new ListBuffer[Node]()
         val topNode = getNode(topObj)
         stack.append(topNode)
         while (stack.length > 0) {
             val node = stack.remove(0)
-            action(node)
+            action(node, this)
             for (child <- node.getChildren()) {
                 stack.append(child)
             }

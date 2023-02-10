@@ -113,6 +113,7 @@ generator_temp: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GE
 		--name $(long_name) \
 		$(if $(FLOORPLAN_ASPECT), --with-aspect $(FLOORPLAN_ASPECT),) \
 		$(if $(FLOORPLAN_FPIR), --floorplan-ir-file $(FLOORPLAN_FPIR),) \
+		$(if $(UPF_ASPECT), --with-aspect $(UPF_ASPECT),) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
 		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG) \
 		$(EXTRA_CHISEL_OPTIONS))
