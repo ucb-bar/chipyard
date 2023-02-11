@@ -98,7 +98,7 @@ As a reminder, to run a software RTL simulation, run:
 If you would like to build and simulate a Chipyard configuration with a DTM configured for DMI communication,
 then you must tie-off the serial-link interface, and instantiate the `SimDTM`.
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/PeripheralDeviceConfigs.scala
     :language: scala
     :start-after: DOC include start: DmiRocket
     :end-before: DOC include end: DmiRocket

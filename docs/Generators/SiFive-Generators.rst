@@ -31,7 +31,7 @@ This example instantiates a top-level module with include GPIO ports, and then t
 
 Finally, you add the relevant config fragment to the SoC config. For example:
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/PeripheralDeviceConfigs.scala
     :language: scala
     :start-after: DOC include start: GPIORocketConfig
     :end-before: DOC include end: GPIORocketConfig
