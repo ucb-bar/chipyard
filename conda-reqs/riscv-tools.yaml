@@ -14,4 +14,4 @@ dependencies:
     # https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/pkg-specs.html#package-match-specifications
     #   documentation on package_spec syntax for constraining versions
 
-    - riscv-tools # from ucb-bar channel - https://github.com/ucb-bar/riscv-tools-feedstock
+    - riscv-tools=1.0.1 # from ucb-bar channel - https://github.com/ucb-bar/riscv-tools-feedstock
