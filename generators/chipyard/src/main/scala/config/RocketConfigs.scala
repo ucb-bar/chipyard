@@ -122,13 +122,6 @@ class MbusScratchpadRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: mbusscratchpadrocket
 
-// DOC include start: RingSystemBusRocket
-class RingSystemBusRocketConfig extends Config(
-  new testchipip.WithRingSystemBus ++                       // Ring-topology system bus
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-// DOC include end: RingSystemBusRocket
-
 class MMIORocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithDefaultMMIOPort ++  // add default external master port
   new freechips.rocketchip.subsystem.WithDefaultSlavePort ++ // add default external slave port

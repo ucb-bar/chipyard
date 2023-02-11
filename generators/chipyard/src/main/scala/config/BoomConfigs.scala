@@ -34,13 +34,6 @@ class Cloned64MegaBoomConfig extends Config(
   new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
 
-class HwachaLargeBoomConfig extends Config(
-  new chipyard.config.WithHwachaTest ++
-  new hwacha.DefaultHwachaConfig ++                              // use Hwacha vector accelerator
-  new boom.common.WithNLargeBooms(1) ++
-  new chipyard.config.WithSystemBusWidth(128) ++
-  new chipyard.config.AbstractConfig)
-
 class LoopbackNICLargeBoomConfig extends Config(
   new chipyard.harness.WithLoopbackNIC ++                        // drive NIC IOs with loopback
   new icenet.WithIceNIC ++                                       // build a NIC
