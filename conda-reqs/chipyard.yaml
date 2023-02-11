@@ -29,7 +29,7 @@ dependencies:
     - binutils
 
     - dromajo # from ucb-bar channel - https://github.com/riscv-boom/dromajo
-    - firtool==1.29.0.newhammerhotfix # from ucb-bar channel - https://github.com/ucb-bar/firtool-feedstock
+    - firtool==1.30.0 # from ucb-bar channel - https://github.com/ucb-bar/firtool-feedstock
 
     # firemarshal deps
     - python>=3.9

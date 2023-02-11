@@ -9,7 +9,7 @@
 # To update a single package to the latest version compatible with the version constraints in the source:
 #     conda-lock lock  --lockfile conda-requirements-esp-tools-linux-64.conda-lock.yml --update PACKAGE
 # To re-solve the entire environment, e.g. after changing a version constraint in the source file:
-#     conda-lock -f /scratch/abejgonza/cy-circt/conda-reqs/chipyard.yaml -f /scratch/abejgonza/cy-circt/conda-reqs/esp-tools.yaml -f /scratch/abejgonza/chipyard/conda-reqs/chipyard.yaml -f /scratch/abejgonza/chipyard/conda-reqs/esp-tools.yaml
+#     conda-lock -f /scratch/abejgonza/cy-circt/conda-reqs/chipyard.yaml -f /scratch/abejgonza/cy-circt/conda-reqs/esp-tools.yaml -f /scratch/abejgonza/chipyard/conda-reqs/chipyard.yaml -f /scratch/abejgonza/chipyard/conda-reqs/esp-tools.yaml -f /Users/joonhohwangbo/Documents/Research/coding/chipyard/conda-reqs/chipyard.yaml -f /Users/joonhohwangbo/Documents/Research/coding/chipyard/conda-reqs/esp-tools.yaml --lockfile conda-requirements-esp-tools-linux-64.conda-lock.yml
 metadata:
   channels:
   - url: ucb-bar
@@ -19,7 +19,7 @@ metadata:
   - url: nodefaults
     used_env_vars: []
   content_hash:
-    linux-64: 74a3ef6460565c7ee37ad0be73fb5b78e4a2a7ca57ee4126f9c093fced1e963b
+    linux-64: 25cb0bbdeb403a7f7073c9d56142054e2b0a7f8968d289a54098f746698c25ce
   platforms:
   - linux-64
   sources:
@@ -27,6 +27,8 @@ metadata:
   - /scratch/abejgonza/cy-circt/conda-reqs/esp-tools.yaml
   - /scratch/abejgonza/chipyard/conda-reqs/chipyard.yaml
   - /scratch/abejgonza/chipyard/conda-reqs/esp-tools.yaml
+  - /Users/joonhohwangbo/Documents/Research/coding/chipyard/conda-reqs/chipyard.yaml
+  - /Users/joonhohwangbo/Documents/Research/coding/chipyard/conda-reqs/esp-tools.yaml
 package:
 - category: main
   dependencies: {}
@@ -1155,14 +1157,14 @@ package:
     libstdcxx-ng: '>=12'
     ncurses: '>=6.3,<7.0a0'
   hash:
-    md5: b5c5f55b4ec3a7c8d3646ce21e2b76e4
-    sha256: 90b9b6dc6d9ff620b443e696542ce8fcc850ed3e718b612cfa3867492ebededc
+    md5: 46a56cfe00f36b35e2d321bfabebf873
+    sha256: c8f93937ad2cdd170200cc5ba32d85229ef65b749544686884abad5a19b8ef7a
   manager: conda
   name: firtool
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/ucb-bar/linux-64/firtool-1.29.0.newhammerhotfix-0_h1234567_ga5f6aa51f.conda
-  version: 1.29.0.newhammerhotfix
+  url: https://conda.anaconda.org/ucb-bar/linux-64/firtool-1.30.0-0_h1234567_gdb40efbcd.conda
+  version: 1.30.0
 - category: main
   dependencies:
     libgcc-ng: '>=7.5.0'
@@ -2549,14 +2551,14 @@ package:
   dependencies:
     python: '>=3.8'
   hash:
-    md5: 88e40007414ea9a13f8df20fcffa87e2
-    sha256: edd149a40ea746ce17c1b135c72a1646810e99071bedb7d808914cc31b3c8a5d
+    md5: bb45ff9deddb045331fd039949f39650
+    sha256: a8e3531fdb6f9acfde885dd94c8639c020013215dab98ff4ed82db7aa745277a
   manager: conda
   name: networkx
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/networkx-3.0-pyhd8ed1ab_0.conda
-  version: '3.0'
+  url: https://conda.anaconda.org/conda-forge/noarch/networkx-2.8.8-pyhd8ed1ab_0.tar.bz2
+  version: 2.8.8
 - category: main
   dependencies:
     libblas: '>=3.8.0,<4.0a0'
@@ -2626,6 +2628,18 @@ package:
   platform: linux-64
   url: https://conda.anaconda.org/conda-forge/noarch/pkginfo-1.9.6-pyhd8ed1ab_0.conda
   version: 1.9.6
+- category: main
+  dependencies:
+    python: '>=3.6'
+  hash:
+    md5: 89e3c7cdde7d3aaa2aee933b604dd07f
+    sha256: 7d055ffc8a02bf781a89d069db3454b453605cdaff300b82cedcc7133283e47e
+  manager: conda
+  name: pkgutil-resolve-name
+  optional: false
+  platform: linux-64
+  url: https://conda.anaconda.org/conda-forge/noarch/pkgutil-resolve-name-1.3.10-pyhd8ed1ab_0.tar.bz2
+  version: 1.3.10
 - category: main
   dependencies:
     python: '>=3.8'
@@ -2717,7 +2731,7 @@ package:
   version: 0.6.4
 - category: main
   dependencies:
-    python: 2.7.*|>=3.4
+    python: ==2.7.*|>=3.4
   hash:
     md5: 076becd9e05608f8dc72757d5f3a91ff
     sha256: 74c63fd03f1f1ea2b54e8bc529fd1a600aaafb24027b738d0db87909ee3a33dc
@@ -3546,17 +3560,17 @@ package:
   version: 4.11.4
 - category: main
   dependencies:
-    python: '>=3.6'
-    zipp: '>=0.4'
+    python: '>=3.7'
+    zipp: '>=3.1.0'
   hash:
-    md5: 24dd95143fc4f3898143c93a6d5a5d41
-    sha256: 7a32c0b58ae4e2673f47c73ed1f010681501198e6aaa279c5eddc714bca12b48
+    md5: de76905f801c22fc43e624058574eab3
+    sha256: 6982827cbaba2e1e1a7df7fea50c96a17ae07d724c7b55fae58c70dc2a4106ab
   manager: conda
   name: importlib_resources
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/importlib_resources-3.3.1-pyhd8ed1ab_1.tar.bz2
-  version: 3.3.1
+  url: https://conda.anaconda.org/conda-forge/noarch/importlib_resources-5.10.2-pyhd8ed1ab_0.conda
+  version: 5.10.2
 - category: main
   dependencies:
     more-itertools: ''
@@ -4068,19 +4082,20 @@ package:
   dependencies:
     attrs: '>=17.4.0'
     importlib-metadata: ''
-    pyrsistent: '>=0.14.0'
-    python: '>=3.6'
-    setuptools: ''
-    six: '>=1.11.0'
+    importlib_resources: '>=1.4.0'
+    pkgutil-resolve-name: '>=1.3.10'
+    pyrsistent: '!=0.17.0,!=0.17.1,!=0.17.2,>=0.14.0'
+    python: '>=3.7'
+    typing_extensions: ''
   hash:
-    md5: 66125e28711d8ffc04a207a2b170316d
-    sha256: d74a3ddd3c3dd9bd7b00110a196e3af90490c5660674f18bfd53a8fdf91de418
+    md5: 723268a468177cd44568eb8f794e0d80
+    sha256: 4f68a23430d1afc5c9b41c46fbac0ade33c0bf57a293c646bfdd6dc65350eada
   manager: conda
   name: jsonschema
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/jsonschema-3.2.0-pyhd8ed1ab_3.tar.bz2
-  version: 3.2.0
+  url: https://conda.anaconda.org/conda-forge/noarch/jsonschema-4.17.3-pyhd8ed1ab_0.conda
+  version: 4.17.3
 - category: main
   dependencies:
     elfutils: '>=0.187,<0.188.0a0'
@@ -4144,14 +4159,14 @@ package:
     pip: ''
     python: '>=3.6'
   hash:
-    md5: 6cfd80f8f255415a400c5a2728087fce
-    sha256: 20ccc89905946674603db22f906269c73c075262edccc988f4ff640ba09bc238
+    md5: 5bde4ebca51438054099b9527c904ecb
+    sha256: bb6b283c27a8293cfd6d439959da45e848e401130fe3b44e31cde8243fdebdee
   manager: conda
   name: pbr
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/pbr-5.10.0-pyhd8ed1ab_0.tar.bz2
-  version: 5.10.0
+  url: https://conda.anaconda.org/conda-forge/noarch/pbr-5.11.1-pyhd8ed1ab_0.conda
+  version: 5.11.1
 - category: main
   dependencies:
     python: '>=3.7'
@@ -5098,23 +5113,24 @@ package:
   version: 1.21.0
 - category: main
   dependencies:
-    aws-sam-translator: '>=1.13.0'
+    aws-sam-translator: '>=1.55.0'
+    jschema-to-python: ~=1.2.3
     jsonpatch: ''
-    jsonschema: '>=3,<4'
-    python: ''
-    pyyaml: ''
-    requests: '>=2.15.0'
-    setuptools: ''
-    six: '>=1.11,<2'
+    jsonschema: '>=3.0,<5'
+    junit-xml: ~=1.9
+    networkx: ~=2.4
+    python: '>=3.7'
+    pyyaml: '>5.4'
+    sarif-om: ~=1.0.4
   hash:
-    md5: 8d4741824cf4fde7260aafa95e6beff2
-    sha256: 99e0ccd5c4bf4687280d0f63bac6c556ef35ba840ee4751dd63457b63c64a98f
+    md5: bbf77cf59dbad76a43b8af0414fed1fe
+    sha256: 935dfff9a3477bd07e17402e4eff8f00c965f4084c520c87c3eb46d51263779b
   manager: conda
   name: cfn-lint
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/cfn-lint-0.23.2-py_0.tar.bz2
-  version: 0.23.2
+  url: https://conda.anaconda.org/conda-forge/noarch/cfn-lint-0.73.1-pyhd8ed1ab_0.conda
+  version: 0.73.1
 - category: main
   dependencies:
     aws-xray-sdk: '!=0.96,>=0.93'
