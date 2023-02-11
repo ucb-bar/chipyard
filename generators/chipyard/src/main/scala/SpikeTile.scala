@@ -307,20 +307,26 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
   spike.io.ipc := PlusArg("spike-ipc", 10000, width=64)
 
   val blockBits = log2Ceil(p(CacheBlockBytes))
-  spike.io.icache.a.ready := icache_tl.a.ready
-  icache_tl.a.valid := spike.io.icache.a.valid
-  icache_tl.a.bits := icacheEdge.Get(
+
+  val icache_a_q = Module(new Queue(new TLBundleA(icacheEdge.bundle), 1, flow=true, pipe=true))
+  spike.io.icache.a.ready := icache_a_q.io.enq.ready && icache_a_q.io.count === 0.U
+  icache_tl.a <> icache_a_q.io.deq
+  icache_a_q.io.enq.valid := spike.io.icache.a.valid
+  icache_a_q.io.enq.bits := icacheEdge.Get(
     fromSource = spike.io.icache.a.sourceid,
     toAddress = (spike.io.icache.a.address >> blockBits) << blockBits,
     lgSize = blockBits.U)._2
+
   icache_tl.d.ready := true.B
   spike.io.icache.d.valid := icache_tl.d.valid
   spike.io.icache.d.sourceid := icache_tl.d.bits.source
   spike.io.icache.d.data := icache_tl.d.bits.data.asTypeOf(Vec(8, UInt(64.W)))
 
-  spike.io.dcache.a.ready := dcache_tl.a.ready
-  dcache_tl.a.valid := spike.io.dcache.a.valid
-  dcache_tl.a.bits := dcacheEdge.AcquireBlock(
+  val dcache_a_q = Module(new Queue(new TLBundleA(dcacheEdge.bundle), 1, flow=true, pipe=true))
+  spike.io.dcache.a.ready := dcache_a_q.io.enq.ready && dcache_a_q.io.count === 0.U
+  dcache_tl.a <> dcache_a_q.io.deq
+  dcache_a_q.io.enq.valid := spike.io.dcache.a.valid
+  dcache_a_q.io.enq.bits := dcacheEdge.AcquireBlock(
     fromSource = spike.io.dcache.a.sourceid,
     toAddress = (spike.io.dcache.a.address >> blockBits) << blockBits,
     lgSize = blockBits.U,
@@ -332,9 +338,11 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
   spike.io.dcache.b.source := dcache_tl.b.bits.source
   spike.io.dcache.b.param := dcache_tl.b.bits.param
 
-  spike.io.dcache.c.ready := dcache_tl.c.ready
-  dcache_tl.c.valid := spike.io.dcache.c.valid
-  dcache_tl.c.bits := Mux(spike.io.dcache.c.voluntary,
+  val dcache_c_q = Module(new Queue(new TLBundleC(dcacheEdge.bundle), 1, flow=true, pipe=true))
+  spike.io.dcache.c.ready := dcache_c_q.io.enq.ready && dcache_c_q.io.count === 0.U
+  dcache_tl.c <> dcache_c_q.io.deq
+  dcache_c_q.io.enq.valid := spike.io.dcache.c.valid
+  dcache_c_q.io.enq.bits := Mux(spike.io.dcache.c.voluntary,
     dcacheEdge.Release(
       fromSource = spike.io.dcache.c.sourceid,
       toAddress = spike.io.dcache.c.address,
@@ -368,10 +376,12 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
   dcache_tl.e.valid := dcache_tl.d.valid && should_finish
   dcache_tl.e.bits := dcacheEdge.GrantAck(dcache_tl.d.bits)
 
-  spike.io.mmio.a.ready := mmio_tl.a.ready
-  mmio_tl.a.valid := spike.io.mmio.a.valid
+  val mmio_a_q = Module(new Queue(new TLBundleA(mmioEdge.bundle), 1, flow=true, pipe=true))
+  spike.io.mmio.a.ready := mmio_a_q.io.enq.ready && mmio_a_q.io.count === 0.U
+  mmio_tl.a <> mmio_a_q.io.deq
+  mmio_a_q.io.enq.valid := spike.io.mmio.a.valid
   val log_size = MuxCase(0.U, (0 until 3).map { i => (spike.io.mmio.a.size === (1 << i).U) -> i.U })
-  mmio_tl.a.bits := Mux(spike.io.mmio.a.store,
+  mmio_a_q.io.enq.bits := Mux(spike.io.mmio.a.store,
     mmioEdge.Put(0.U, spike.io.mmio.a.address, log_size, spike.io.mmio.a.data)._2,
     mmioEdge.Get(0.U, spike.io.mmio.a.address, log_size)._2)
 
