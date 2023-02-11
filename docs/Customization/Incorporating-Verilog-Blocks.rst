@@ -116,7 +116,7 @@ Defining a Chip with a BlackBox
 Since we've parameterized the GCD instantiation to choose between the
 Chisel and the Verilog module, creating a config is easy.
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/MMIOAcceleratorConfigs.scala
     :language: scala
     :start-after: DOC include start: GCDAXI4BlackBoxRocketConfig
     :end-before: DOC include end: GCDAXI4BlackBoxRocketConfig

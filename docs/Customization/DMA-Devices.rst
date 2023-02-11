@@ -31,7 +31,7 @@ Once we've created our top-level module including the DMA widget, we can create 
     :start-after: DOC include start: WithInitZero
     :end-before: DOC include end: WithInitZero
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/MMIOAcceleratorConfigs.scala
     :language: scala
     :start-after: DOC include start: InitZeroRocketConfig
     :end-before: DOC include end: InitZeroRocketConfig
