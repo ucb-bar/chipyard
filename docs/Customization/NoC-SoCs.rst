@@ -1,3 +1,5 @@
+.. _noc-socs:
+
 SoCs with NoC-based Interconnects
 ==================================
 
