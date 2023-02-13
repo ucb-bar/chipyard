@@ -26,6 +26,7 @@ For example, for an imaginary process technology called tsmintel3:
     cd -
     ./scripts/init-vlsi.sh tsmintel3
 
+If submoduled plugins need to be updated, call the ``upgrade-vlsi.sh`` script. This will checkout and pull the latest master branch.
 
 .. Note:: Some VLSI EDA tools are supported only on RHEL-based operating systems. We recommend using Chipyard on RHEL7 and above. However, many VLSI server still have old operating systems such as RHEL6, which have software packages older than the basic chipyard requirements. In order to build Chipyard on RHEL6, you will likely need to use tool packages such as devtoolset (for example, devtoolset-8) and/or build from source gcc, git, gmake, make, dtc, cc, bison, libexpat and liby.
 
