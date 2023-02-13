@@ -91,7 +91,7 @@ endif
 #########################################################################################
 # copy over bootrom files
 #########################################################################################
-$(build_dir) $(OUT_DIR):
+$(build_dir) $(GEN_COLLATERAL_DIR):
 	mkdir -p $@
 
 $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip/bootrom/bootrom.%.img | $(build_dir)
@@ -172,7 +172,7 @@ endif
 		--no-dedup \
 		--output-file $(SFC_FIRRTL_BASENAME) \
 		--output-annotation-file $(SFC_ANNO_FILE) \
-		--target-dir $(OUT_DIR) \
+		--target-dir $(GEN_COLLATERAL_DIR) \
 		--input-file $(FIRRTL_FILE) \
 		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
@@ -198,7 +198,7 @@ endif
 		--repl-seq-mem-circuit=$(MODEL) \
 		--annotation-file=$(SFC_ANNO_FILE) \
 		--split-verilog \
-		-o $(OUT_DIR) \
+		-o $(GEN_COLLATERAL_DIR) \
 		$(SFC_FIRRTL_FILE)
 	-mv $(SFC_SMEMS_CONF) $(MFC_SMEMS_CONF)
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
@@ -211,8 +211,8 @@ $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILEL
 		--out-dut-filelist $(TOP_MODS_FILELIST) \
 		--out-model-filelist $(MODEL_MODS_FILELIST) \
 		--in-all-filelist $(MFC_FILELIST) \
-		--target-dir $(OUT_DIR)
-	$(SED) -e 's;^;$(OUT_DIR)/;' $(MFC_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
+		--target-dir $(GEN_COLLATERAL_DIR)
+	$(SED) -e 's;^;$(GEN_COLLATERAL_DIR)/;' $(MFC_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(TOP_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(MODEL_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)

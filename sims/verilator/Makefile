@@ -66,14 +66,14 @@ SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.cc
 
 # copy files and add -FI for *.h files in *.f
-$(sim_files): $(SIM_FILE_REQS) $(OUT_DIR)
-	rm -rf $(OUT_DIR)/*
-	cp -f $(SIM_FILE_REQS) $(OUT_DIR)
+$(sim_files): $(SIM_FILE_REQS) $(GEN_COLLATERAL_DIR)
+	rm -rf $(GEN_COLLATERAL_DIR)/*
+	cp -f $(SIM_FILE_REQS) $(GEN_COLLATERAL_DIR)
 	$(foreach file,\
 		$(SIM_FILE_REQS),\
 		$(if $(filter %.h,$(file)),\
-			echo "-FI $(addprefix $(OUT_DIR)/, $(notdir $(file)))" >> $@;,\
-			echo "$(addprefix $(OUT_DIR)/, $(notdir $(file)))" >> $@;))
+			echo "-FI $(addprefix $(GEN_COLLATERAL_DIR)/, $(notdir $(file)))" >> $@;,\
+			echo "$(addprefix $(GEN_COLLATERAL_DIR)/, $(notdir $(file)))" >> $@;))
 
 #########################################################################################
 # import other necessary rules and variables
@@ -144,7 +144,7 @@ CHIPYARD_VERILATOR_FLAGS := \
 # options dependent on whether external IP (cva6/NVDLA) or just chipyard is used
 # NOTE: defer the evaluation of this until it is used!
 PLATFORM_OPTS = $(shell \
-	if grep -qiP "module\s+(CVA6|NVDLA)" $(OUT_DIR)/*.*v; \
+	if grep -qiP "module\s+(CVA6|NVDLA)" $(GEN_COLLATERAL_DIR)/*.*v; \
 	then echo "$(VERILOG_IP_VERILATOR_FLAGS)"; \
 	else echo "$(CHIPYARD_VERILATOR_FLAGS)"; fi)
 
@@ -182,7 +182,7 @@ VERILATOR_CXXFLAGS = \
 	-DTEST_HARNESS=V$(VLOG_MODEL) \
 	-DVERILATOR \
 	-include $(build_dir)/$(long_name).plusArgs \
-	-include $(OUT_DIR)/verilator.h
+	-include $(GEN_COLLATERAL_DIR)/verilator.h
 
 VERILATOR_LDFLAGS = $(SIM_LDFLAGS)
 
