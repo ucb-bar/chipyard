@@ -27,7 +27,6 @@ trait HasHarnessSignalReferences {
   def getRefClockFreq: Double = refClockFreq
   def buildtopClock: Clock
   def buildtopReset: Reset
-  def dutReset: Reset
   def success: Bool
 }
 
@@ -91,7 +90,6 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
 
   io.success := false.B
 
-  val dutReset = buildtopReset.asAsyncReset
   val success = io.success
 
   lazyDut match { case d: HasIOBinders =>

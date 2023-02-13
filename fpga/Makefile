@@ -57,7 +57,6 @@ ifeq ($(SUB_PROJECT),bringup)
 	BOARD             ?= vcu118
 	FPGA_BRAND        ?= xilinx
 endif
-
 ifeq ($(SUB_PROJECT),arty)
 	# TODO: Fix with Arty
 	SBT_PROJECT       ?= fpga_platforms
@@ -70,6 +69,20 @@ ifeq ($(SUB_PROJECT),arty)
 	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= arty
+	FPGA_BRAND        ?= xilinx
+endif
+ifeq ($(SUB_PROJECT),arty100t)
+	# TODO: Fix with Arty
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= Arty100THarness
+	VLOG_MODEL        ?= Arty100THarness
+	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
+	CONFIG            ?= RocketArtyConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
+	TOP               ?= ChipTop
+	BOARD             ?= arty_a7_100
 	FPGA_BRAND        ?= xilinx
 endif
 
@@ -111,8 +124,7 @@ include $(base_dir)/common.mk
 # copy from other directory
 #########################################################################################
 all_vsrcs := \
-	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v \
-	$(fpga_dir)/common/vsrc/PowerOnResetFPGAOnly.v
+	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v
 
 #########################################################################################
 # vivado rules

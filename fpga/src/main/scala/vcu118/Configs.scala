@@ -47,7 +47,6 @@ class WithVCU118Tweaks extends Config(
   // io binders
   new WithUARTIOPassthrough ++
   new WithSPIIOPassthrough ++
-  new WithTLIOPassthrough ++
   // other configuration
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory

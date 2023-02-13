@@ -13,6 +13,7 @@ import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode
 import freechips.rocketchip.util._
 import freechips.rocketchip.prci._
 import freechips.rocketchip.groundtest.{GroundTestSubsystemModuleImp, GroundTestSubsystem}
+import freechips.rocketchip.tilelink.{TLBundle}
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
@@ -23,6 +24,7 @@ import barstools.iocell.chisel._
 
 import testchipip._
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
+import chipyard.{CanHaveMasterTLMemPort}
 import chipyard.clocking.{HasChipyardPRCI, DividerOnlyClockGenerator}
 
 import scala.reflect.{ClassTag}
@@ -380,6 +382,15 @@ class WithCustomBootPin extends OverrideIOBinder({
     (Seq(port), cells)
   }).getOrElse((Nil, Nil))
 })
+
+class WithTLMemPunchthrough extends OverrideIOBinder({
+  (system: CanHaveMasterTLMemPort) => {
+    val io_tl_mem_pins_temp = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](system.mem_tl)).suggestName("tl_slave")
+    io_tl_mem_pins_temp <> system.mem_tl
+    (Seq(io_tl_mem_pins_temp), Nil)
+  }
+})
+
 
 class WithDontTouchPorts extends OverrideIOBinder({
   (system: DontTouch) => system.dontTouchPorts(); (Nil, Nil)

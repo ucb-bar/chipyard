@@ -15,30 +15,20 @@ import testchipip.{SerialTLKey}
 
 import chipyard.{BuildSystem}
 
-class WithDefaultPeripherals extends Config((site, here, up) => {
-  case PeripheryUARTKey => List(
-    UARTParams(address = 0x10013000))
-  case DTSTimebase => BigInt(32768)
-  case JtagDTMKey => new JtagDTMConfig (
-    idcodeVersion = 2,
-    idcodePartNum = 0x000,
-    idcodeManufId = 0x489,
-    debugIdleCycles = 5)
-  case SerialTLKey => None // remove serialized tl port
-})
-
 // DOC include start: AbstractArty and Rocket
 class WithArtyTweaks extends Config(
   new WithArtyJTAGHarnessBinder ++
   new WithArtyUARTHarnessBinder ++
   new WithArtyResetHarnessBinder ++
   new WithDebugResetPassthrough ++
-  new WithDefaultPeripherals ++
-  new freechips.rocketchip.subsystem.WithNBreakpoints(2)
+
+  new chipyard.config.WithDTSTimebase(32768) ++
+  new testchipip.WithNoSerialTL
 )
 
 class TinyRocketArtyConfig extends Config(
   new WithArtyTweaks ++
+  new freechips.rocketchip.subsystem.WithNBreakpoints(2) ++
   new chipyard.TinyRocketConfig
 )
 // DOC include end: AbstractArty and Rocket

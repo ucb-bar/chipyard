@@ -42,11 +42,3 @@ class WithSPIIOPassthrough  extends OverrideLazyIOBinder({
     }
   }
 })
-
-class WithTLIOPassthrough extends OverrideIOBinder({
-  (system: CanHaveMasterTLMemPort) => {
-    val io_tl_mem_pins_temp = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](system.mem_tl)).suggestName("tl_slave")
-    io_tl_mem_pins_temp <> system.mem_tl
-    (Seq(io_tl_mem_pins_temp), Nil)
-  }
-})

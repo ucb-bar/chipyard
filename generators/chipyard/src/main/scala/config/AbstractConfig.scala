@@ -28,6 +28,7 @@ class AbstractConfig extends Config(
   // IOCells are generated for "Chip-like" IOs, while simulation-only IOs are directly punched through
   new chipyard.iobinders.WithAXI4MemPunchthrough ++
   new chipyard.iobinders.WithAXI4MMIOPunchthrough ++
+  new chipyard.iobinders.WithTLMemPunchthrough ++
   new chipyard.iobinders.WithL2FBusAXI4Punchthrough ++
   new chipyard.iobinders.WithBlockDeviceIOPunchthrough ++
   new chipyard.iobinders.WithNICIOPunchthrough ++
