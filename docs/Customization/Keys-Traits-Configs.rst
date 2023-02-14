@@ -68,7 +68,7 @@ For example, the ``WithGCD`` config fragment is parameterized by the type of GCD
 
 We can use this config fragment when composing our configs.
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/MMIOAcceleratorConfigs.scala
     :language: scala
     :start-after: DOC include start: GCDTLRocketConfig
     :end-before: DOC include end: GCDTLRocketConfig

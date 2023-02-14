@@ -42,15 +42,9 @@ The System Bus
 --------------
 
 The system bus is the TileLink network that sits between the tiles and the L2
-agents and MMIO peripherals. Ordinarily, it is a fully-connected crossbar,
-but TestChipIP provides a version that uses a ring network instead. This can
-be useful when taping out larger systems. To use  the ring network system
-bus, simply add the ``WithRingSystemBus`` config fragment to your configuration.
-
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
-    :language: scala
-    :start-after: DOC include start: RingSystemBusRocket
-    :end-before: DOC include end: RingSystemBusRocket
+agents and MMIO peripherals. Ordinarily, it is a fully-connected crossbar, but
+a network-on-chip-based implementation can be generated using Constellation.
+See :ref:`Customization/NoC-SoCs:SoCs with NoC-based Interconnects` for more.
 
 The SiFive L2 Cache
 -------------------
