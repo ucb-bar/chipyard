@@ -356,6 +356,7 @@ class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
   rerocc_manager.node := ReRoCCBuffer() := reRoCCNode
   val tlNode = p(TileVisibilityNodeKey) // throttle before TL Node (merged ->
   val tlXbar = TLXbar()
+  val tlThrottler = LazyModule(new TLThrottler(TLThrottlerParams()))
 
 
   tlXbar :=* rocc.atlNode
@@ -364,9 +365,7 @@ class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
   } else {
     tlNode :=* rocc.tlNode
   }
-  tlNode :=* tlXbar // implement throttle here
-
-
+  tlNode := tlThrottler.node :=* tlXbar
   // minicache
   val dcache = reRoCCParams.dcacheParams.map(_ => LazyModule(new MiniDCache(reRoCCId, SynchronousCrossing())(p)))
   dcache.map(d => tlXbar := d.node)
