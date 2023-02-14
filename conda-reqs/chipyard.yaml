@@ -129,7 +129,7 @@ dependencies:
         - mypy-boto3-ec2==1.21.9
         - sure==2.0.0
         - pylddwrap==1.2.1
-        - hammer-vlsi[asap7]==1.0.0
+        - hammer-vlsi[asap7]==1.0.1
 
     # doc requirements
     - sphinx
