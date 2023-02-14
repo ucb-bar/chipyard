@@ -19,7 +19,7 @@ if [[ ${plen} -gt 0 ]]; then
     for p in "${package_list[@]}"; do
         cd ${p}
         echo "Updating current directory: $PWD"
-        git checkout master
+        git checkout `basename "$(git rev-parse --abbrev-ref origin/HEAD)"`
         git pull
         cd - > /dev/null
         git add ${p}
