@@ -117,7 +117,7 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     val (rerocc, edge) = node.in(0)
     dontTouch(rerocc)
 
-    val s_idle :: s_active :: s_rel_wait :: s_sfence :: s_unbusy :: Nil = Enum(5)
+    val s_idle :: s_active :: s_rel_wait :: s_sfence :: s_unbusy :: s_rateset :: s_rateread :: Nil = Enum(5)
 
     val numClients = edge.cParams.clients.size
 
@@ -238,6 +238,14 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
       } .elsewhen (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mUnbusy) {
         rr_req.ready := true.B
         state := s_unbusy
+      } // set epoch
+        .elsewhen (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mRset) {
+        rr_req.ready := true.B
+        //state := s_active
+      } // set max_req and/or read req rate
+        .elsewhen (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mRread) {
+        rr_req.ready := true.B
+        //state := s_active
       } .otherwise {
         assert(false.B)
       }
@@ -307,6 +315,25 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
 
     when (resp_arb.io.in(4).fire()) { state := s_active }
 
+    // acknowledge memrate set epoch
+    resp_arb.io.in(5).valid           := state === s_rateset && !io.busy && inst_q.io.count === 0.U
+    resp_arb.io.in(5).bits.opcode     := ReRoCCProtocolOpcodes.sRsetAck
+    resp_arb.io.in(5).bits.client_id  := client
+    resp_arb.io.in(5).bits.manager_id := io.manager_id
+    resp_arb.io.in(5).bits.data       := 0.U
+    resp_arb.io.in(5).bits.last       := true.B
+    resp_arb.io.in(5).bits.first      := true.B
+    when (resp_arb.io.in(5).fire()) { state := s_active }
+
+    // acknowledge memrate set max_req and/or read
+    resp_arb.io.in(6).valid           := state === s_rateread && !io.busy && inst_q.io.count === 0.U
+    resp_arb.io.in(6).bits.opcode     := ReRoCCProtocolOpcodes.sRreadAck
+    resp_arb.io.in(6).bits.client_id  := client
+    resp_arb.io.in(6).bits.manager_id := io.manager_id
+    resp_arb.io.in(6).bits.data       := Mux(resp_rd, resp.bits.rd, 0.U) // only return if requested
+    resp_arb.io.in(6).bits.last       := true.B
+    resp_arb.io.in(6).bits.first      := true.B
+    when (resp_arb.io.in(6).fire()) { state := s_active }
 
   }
 }
@@ -327,7 +354,7 @@ class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
   val rerocc_manager = LazyModule(new ReRoCCManager(reRoCCParams, rocc.opcodes.opcodes.head))
   val reRoCCNode = ReRoCCIdentityNode()
   rerocc_manager.node := ReRoCCBuffer() := reRoCCNode
-  val tlNode = p(TileVisibilityNodeKey)
+  val tlNode = p(TileVisibilityNodeKey) // throttle before TL Node (merged ->
   val tlXbar = TLXbar()
 
 
@@ -337,7 +364,8 @@ class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
   } else {
     tlNode :=* rocc.tlNode
   }
-  tlNode :=* tlXbar
+  tlNode :=* tlXbar // implement throttle here
+
 
   // minicache
   val dcache = reRoCCParams.dcacheParams.map(_ => LazyModule(new MiniDCache(reRoCCId, SynchronousCrossing())(p)))
