@@ -33,9 +33,10 @@ class TileResetSetter(address: BigInt, beatBytes: Int, tileNames: Seq[String], i
         Module(new AsyncResetRegVec(w=1, init=(if (initResetHarts.contains(i)) 1 else 0)))
       }
     })
-    tlNode.regmap((0 until nTiles).map({ i =>
-      i * 4 -> Seq(RegField.rwReg(1, r_tile_resets(i).io))
-    }): _*)
+    if (nTiles > 0)
+      tlNode.regmap((0 until nTiles).map({ i =>
+        i * 4 -> Seq(RegField.rwReg(1, r_tile_resets(i).io))
+      }): _*)
 
     val tileMap = tileNames.zipWithIndex.map({ case (n, i) =>
         n -> (tile_async_resets(i), r_tile_resets(i).io.q)
