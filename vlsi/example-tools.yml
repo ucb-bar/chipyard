@@ -1,36 +1,23 @@
-# SRAM Compiler compiler options
-vlsi.core.sram_generator_tool: "sram_compiler"
-# You should specify a location for the SRAM generator in the tech plugin
-vlsi.core.sram_generator_tool_path: []
-vlsi.core.sram_generator_tool_path_meta: "append"
-
 # Tool options. Replace with your tool plugin of choice.
+vlsi.core.build_system: make
 # Genus options
-vlsi.core.synthesis_tool: "genus"
-vlsi.core.synthesis_tool_path: ["hammer-cadence-plugins/synthesis"]
-vlsi.core.synthesis_tool_path_meta: "append"
-synthesis.genus.version: "1813"
+vlsi.core.synthesis_tool: "hammer.synthesis.genus"
+synthesis.genus.version: "211"
 # Innovus options
-vlsi.core.par_tool: "innovus"
-vlsi.core.par_tool_path: ["hammer-cadence-plugins/par"]
-vlsi.core.par_tool_path_meta: "append"
-par.innovus.version: "191_ISR3"
+vlsi.core.par_tool: "hammer.par.innovus"
+par.innovus.version: "211"
 par.innovus.design_flow_effort: "standard"
 par.inputs.gds_merge: true
 # Calibre options
-vlsi.core.drc_tool: "calibre"
-vlsi.core.drc_tool_path: ["hammer-mentor-plugins/drc"]
-drc.calibre.version: "2017.3_38.30"
-vlsi.core.lvs_tool: "calibre"
-vlsi.core.lvs_tool_path: ["hammer-mentor-plugins/lvs"]
-lvs.calibre.version: "2017.3_38.30"
+vlsi.core.drc_tool: "hammer.drc.calibre"
+drc.calibre.version: "2022.2_24.16"
+vlsi.core.lvs_tool: "hammer.lvs.calibre"
+lvs.calibre.version: "2022.2_24.16"
 # VCS options
-vlsi.core.sim_tool: "vcs"
-vlsi.core.sim_tool_path: ["hammer-synopsys-plugins/sim"]
-sim.vcs.version: "P-2019.06-SP2-5"
+vlsi.core.sim_tool: "hammer.sim.vcs"
+sim.vcs.version: "S-2021.09-SP1-1"
 # Voltus options
-vlsi.core.power_tool: "voltus"
-vlsi.core.power_tool_path: ["hammer-cadence-plugins/power"]
-vlsi.core.power_tool_path_meta: "append"
-power.voltus.version: "191_ISR3"
+vlsi.core.power_tool: "hammer.power.voltus"
+power.joules.version: "211"
+power.voltus.version: "211_ISR3"
 # NOTE (about VCS+Voltus versions): if using FSDB, the VCS version should be approx 2 years older than the Voltus version for compatibility

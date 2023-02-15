@@ -98,11 +98,6 @@ dir="sims"
 branches=("master" "main" "dev" "1.13.x")
 search
 
-submodules=("hammer")
-dir="vlsi"
-branches=("master")
-search
-
 submodules=("fpga-shells")
 dir="fpga"
 branches=("main")

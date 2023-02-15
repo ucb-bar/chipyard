@@ -33,4 +33,6 @@ ifeq ($(tutorial),sky130-openroad)
     EXTRA_CONFS       ?= $(if $(filter $(VLSI_TOP),Rocket), example-designs/sky130-rocket.yml, )
     INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONF) $(EXTRA_CONFS)
     VLSI_OBJ_DIR      ?= build-sky130-openroad
+    # Yosys compatibility for CIRCT-generated Verilog, at the expense of elaboration time.
+    ENABLE_CUSTOM_FIRRTL_PASS = 1
 endif

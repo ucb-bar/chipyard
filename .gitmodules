@@ -28,9 +28,6 @@
 [submodule "generators/block-inclusivecache-sifive"]
 	path = generators/sifive-cache
 	url = https://github.com/chipsalliance/rocket-chip-inclusive-cache.git
-[submodule "vlsi/hammer"]
-	path = vlsi/hammer
-	url = https://github.com/ucb-bar/hammer.git
 [submodule "tools/dsptools"]
 	path = tools/dsptools
 	url = https://github.com/ucb-bar/dsptools.git
