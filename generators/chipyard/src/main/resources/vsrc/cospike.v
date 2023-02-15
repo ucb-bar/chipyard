@@ -20,46 +20,42 @@ import "DPI-C" function void cospike_cosim(input longint cycle,
 					   );
 
 
-module CospikeResources #(
-			  parameter ISA,
-			  parameter PMPREGIONS,
-			  parameter MEM0_BASE,
-			  parameter MEM0_SIZE,
-			  parameter NHARTS,
-			  parameter BOOTROM)
-   ();
+module SpikeCosim  #(
+		     parameter ISA,
+		     parameter PMPREGIONS,
+		     parameter MEM0_BASE,
+		     parameter MEM0_SIZE,
+		     parameter NHARTS,
+		     parameter BOOTROM) (
+					 input	      clock,
+					 input	      reset,
+
+					 input [63:0] cycle,
+
+					 input [63:0] hartid,
+
+					 input	      trace_0_valid,
+					 input [63:0] trace_0_iaddr,
+					 input [31:0] trace_0_insn,
+					 input	      trace_0_exception,
+					 input	      trace_0_interrupt,
+					 input [63:0] trace_0_cause,
+					 input	      trace_0_has_wdata,
+					 input [63:0] trace_0_wdata,
+
+					 input	      trace_1_valid,
+					 input [63:0] trace_1_iaddr,
+					 input [31:0] trace_1_insn,
+					 input	      trace_1_exception,
+					 input	      trace_1_interrupt,
+					 input [63:0] trace_1_cause,
+					 input	      trace_1_has_wdata,
+					 input [63:0] trace_1_wdata
+					 );
+
    initial begin
       cospike_set_sysinfo(ISA, PMPREGIONS, MEM0_BASE, MEM0_SIZE, NHARTS, BOOTROM);
    end;
-endmodule; // CospikeResources
-
-
-module SpikeCosim (
-		   input	clock,
-		   input	reset,
-
-                   input [63:0]	cycle,
-
-		   input [63:0]	hartid,
-
-		   input	trace_0_valid,
-		   input [63:0]	trace_0_iaddr,
-		   input [31:0]	trace_0_insn,
-		   input	trace_0_exception,
-		   input	trace_0_interrupt,
-		   input [63:0]	trace_0_cause,
-		   input	trace_0_has_wdata,
-		   input [63:0]	trace_0_wdata,
-
-		   input	trace_1_valid,
-		   input [63:0]	trace_1_iaddr,
-		   input [31:0]	trace_1_insn,
-		   input	trace_1_exception,
-		   input	trace_1_interrupt,
-		   input [63:0]	trace_1_cause,
-		   input	trace_1_has_wdata,
-		   input [63:0]	trace_1_wdata
-		   );
 
    always @(posedge clock) begin
       if (!reset) begin

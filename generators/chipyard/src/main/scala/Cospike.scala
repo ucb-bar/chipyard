@@ -12,27 +12,23 @@ import freechips.rocketchip.util._
 
 import testchipip.TileTraceIO
 
-class CospikeResources(
+case class SpikeCosimConfig(
   isa: String,
   pmpregions: Int,
   mem0_base: BigInt,
   mem0_size: BigInt,
   nharts: Int,
   bootrom: String
-) extends BlackBox(Map(
-  "ISA" -> StringParam(isa),
-  "PMPREGIONS" -> IntParam(pmpregions),
-  "MEM0_BASE" -> IntParam(mem0_base),
-  "MEM0_SIZE" -> IntParam(mem0_size),
-  "NHARTS" -> IntParam(nharts),
-  "BOOTROM" -> StringParam(bootrom)
-)) with HasBlackBoxResource {
-  val io = IO(new Bundle {})
-  addResource("/csrc/cospike.cc")
-  addResource("/vsrc/cospike.v")
-}
+)
 
-class SpikeCosim extends BlackBox with HasBlackBoxResource
+class SpikeCosim(cfg: SpikeCosimConfig) extends BlackBox(Map(
+  "ISA" -> StringParam(cfg.isa),
+  "PMPREGIONS" -> IntParam(cfg.pmpregions),
+  "MEM0_BASE" -> IntParam(cfg.mem0_base),
+  "MEM0_SIZE" -> IntParam(cfg.mem0_size),
+  "NHARTS" -> IntParam(cfg.nharts),
+  "BOOTROM" -> StringParam(cfg.bootrom)
+)) with HasBlackBoxResource
 {
   addResource("/csrc/cospike.cc")
   addResource("/vsrc/cospike.v")
@@ -56,8 +52,8 @@ class SpikeCosim extends BlackBox with HasBlackBoxResource
 
 object SpikeCosim
 {
-  def apply(trace: TileTraceIO, hartid: Int) = {
-    val cosim = Module(new SpikeCosim)
+  def apply(trace: TileTraceIO, hartid: Int, cfg: SpikeCosimConfig) = {
+    val cosim = Module(new SpikeCosim(cfg))
     val cycle = withClockAndReset(trace.clock, trace.reset) {
       val r = RegInit(0.U(64.W))
       r := r + 1.U
