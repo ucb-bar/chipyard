@@ -66,11 +66,10 @@ SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.cc
 
 # copy files and add -FI for *.h files in *.f
-$(sim_files): $(SIM_FILE_REQS) $(GEN_COLLATERAL_DIR)
-	rm -rf $(GEN_COLLATERAL_DIR)/*
-	cp -f $(SIM_FILE_REQS) $(GEN_COLLATERAL_DIR)
+$(sim_files): $(SIM_FILE_REQS) | $(GEN_COLLATERAL_DIR)
+	cp -f $^ $(GEN_COLLATERAL_DIR)
 	$(foreach file,\
-		$(SIM_FILE_REQS),\
+		$^,\
 		$(if $(filter %.h,$(file)),\
 			echo "-FI $(addprefix $(GEN_COLLATERAL_DIR)/, $(notdir $(file)))" >> $@;,\
 			echo "$(addprefix $(GEN_COLLATERAL_DIR)/, $(notdir $(file)))" >> $@;))

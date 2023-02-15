@@ -91,7 +91,7 @@ endif
 #########################################################################################
 # copy over bootrom files
 #########################################################################################
-$(build_dir) $(GEN_COLLATERAL_DIR):
+$(build_dir):
 	mkdir -p $@
 
 $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip/bootrom/bootrom.%.img | $(build_dir)
@@ -101,7 +101,7 @@ $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip
 # create firrtl file rule and variables
 #########################################################################################
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-$(FIRRTL_FILE) $(ANNO_FILE) &: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS)
+$(FIRRTL_FILE) $(ANNO_FILE) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
@@ -144,7 +144,8 @@ SFC_MFC_TARGETS = \
 	$(MFC_MODEL_HRCHY_JSON) \
 	$(MFC_MODEL_SMEMS_JSON) \
 	$(MFC_FILELIST) \
-	$(MFC_BB_MODS_FILELIST)
+	$(MFC_BB_MODS_FILELIST) \
+	$(GEN_COLLATERAL_DIR)
 
 SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 
@@ -161,6 +162,7 @@ SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 # hack: when using dontTouch, io.cpu annotations are not removed by SFC,
 # hence we remove them manually by using jq before passing them to firtool
 $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
+	rm -rf $(GEN_COLLATERAL_DIR)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none))
 	$(eval EXTRA_FIRRTL_OPTIONS += $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), $(SFC_REPL_SEQ_MEM),))
