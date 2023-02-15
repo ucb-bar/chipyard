@@ -21,7 +21,7 @@ import barstools.iocell.chisel._
 
 import testchipip._
 
-import chipyard.{HasHarnessSignalReferences, HarnessClockInstantiatorKey}
+import chipyard._
 import chipyard.clocking.{HasChipyardPRCI}
 import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, ClockWithFreq}
 
@@ -332,6 +332,24 @@ class WithSimDromajoBridge extends ComposeHarnessBinder({
     ports.map { p => p.traces.map(tileTrace => SimDromajoBridge(tileTrace)(system.p)) }
   }
 })
+
+class WithCospike extends ComposeHarnessBinder({
+  (system: CanHaveTraceIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[TraceOutputTop]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    val chipyardSystem = system.asInstanceOf[ChipyardSystemModule[_]].outer.asInstanceOf[ChipyardSystem]
+    val tiles = chipyardSystem.tiles
+    val cfg = SpikeCosimConfig(
+      isa = tiles.headOption.map(_.isaDTS).getOrElse(""),
+      mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0)),
+      mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
+      pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0),
+      nharts = tiles.size,
+      bootrom = chipyardSystem.bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse("")
+    )
+    ports.map { p => p.traces.zipWithIndex.map(t => SpikeCosim(t._1, t._2, cfg)) }
+  }
+})
+
 
 class WithCustomBootPinPlusArg extends OverrideHarnessBinder({
   (system: CanHavePeripheryCustomBootPin, th: HasHarnessSignalReferences, ports: Seq[Bool]) => {
