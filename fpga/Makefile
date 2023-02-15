@@ -77,7 +77,7 @@ ifeq ($(SUB_PROJECT),arty100t)
 	MODEL             ?= Arty100THarness
 	VLOG_MODEL        ?= Arty100THarness
 	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
-	CONFIG            ?= RocketArtyConfig
+	CONFIG            ?= RocketArty100TConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
 	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= none # unused

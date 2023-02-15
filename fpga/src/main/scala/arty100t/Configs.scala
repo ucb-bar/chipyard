@@ -26,15 +26,33 @@ class WithArty100TTweaks extends Config(
   new WithArty100TDDRTL ++
   new WithNoDesignKey ++
   new chipyard.config.WithNoDebug ++ // no jtag
-  new chipyard.config.WithNoUART ++
+  new chipyard.config.WithNoUART ++ // use UART for the UART-TSI thing instad
   new chipyard.config.WithTLBackingMemory ++
-  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(256) << 20) // 256mb on ARTY
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(256) << 20) ++ // 256mb on ARTY
+  new freechips.rocketchip.subsystem.WithoutTLMonitors
 )
 
-class RocketArtyConfig extends Config(
+class RocketArty100TConfig extends Config(
   new WithArty100TTweaks ++
-  new chipyard.config.WithMemoryBusFrequency(10.0) ++  // 2x the U540 freq (appropriate for a 128b Mbus)
+  new chipyard.config.WithMemoryBusFrequency(10.0) ++
   new chipyard.config.WithPeripheryBusFrequency(10.0) ++  // Match the sbus and pbus frequency
   new chipyard.config.WithBroadcastManager ++ // no l2
   new chipyard.RocketConfig
+)
+
+class NoCoresArty100TConfig extends Config(
+  new WithArty100TTweaks ++
+  new chipyard.config.WithMemoryBusFrequency(10.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(10.0) ++  // Match the sbus and pbus frequency
+  new chipyard.config.WithBroadcastManager ++ // no l2
+  new chipyard.NoCoresConfig
+)
+
+class InitZeroNoCoresArty100TConfig extends Config(
+  new WithArty100TTweaks ++
+  new chipyard.example.WithInitZero(0x80000000L, 0x1000L) ++
+  new chipyard.config.WithMemoryBusFrequency(10.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(10.0) ++  // Match the sbus and pbus frequency
+  new chipyard.config.WithBroadcastManager ++ // no l2
+  new chipyard.NoCoresConfig
 )

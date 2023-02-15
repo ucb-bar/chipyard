@@ -24,13 +24,24 @@ class WithArty100TUARTTSI extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
+      val ath = th.asInstanceOf[Arty100THarness]
       val freq = p(PeripheryBusKey).dtsFrequency.get
       val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
       withClockAndReset(th.buildtopClock, th.buildtopReset) {
         val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
         val uart_to_tsi = Module(new UARTToTSI(freq))
         ram.module.io.tsi_ser.flipConnect(uart_to_tsi.io.serial)
-        th.asInstanceOf[Arty100THarness].io_uart_bb.bundle <> uart_to_tsi.io.uart
+
+        ath.io_uart_bb.bundle <> uart_to_tsi.io.uart
+        ath.other_leds(1) := uart_to_tsi.io.serial.out.valid
+        ath.other_leds(2) := uart_to_tsi.io.serial.in.valid
+        ath.other_leds(3) := uart_to_tsi.io.uart.rxd
+        ath.other_leds(4) := uart_to_tsi.io.uart.txd
+
+        ath.other_leds(9) := ram.module.io.adapter_state(0)
+        ath.other_leds(10) := ram.module.io.adapter_state(1)
+        ath.other_leds(11) := ram.module.io.adapter_state(2)
+        ath.other_leds(12) := ram.module.io.adapter_state(3)
       }
     })
   }
