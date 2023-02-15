@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.config.{Parameters}
-import freechips.rocketchip.tilelink.{TLClientNode}
+import freechips.rocketchip.tilelink.{TLClientNode, TLBlockDuringReset}
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.shell._
@@ -28,7 +28,7 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
   val harnessSysPLLNode = harnessSysPLL()
   println(s"Arty100T FPGA Base Clock Freq: ${dp(DefaultClockFrequencyKey)} MHz")
   val dutClock = ClockSinkNode(freqMHz = dp(DefaultClockFrequencyKey))
-  val dutWrangler = LazyModule(new ResetWrangler)
+  val dutWrangler = LazyModule(new ResetWrangler())
   val dutGroup = ClockGroup()
   dutClock := dutWrangler.node := dutGroup := harnessSysPLLNode
 
@@ -44,7 +44,8 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
     }
   }
   val ddrClient = TLClientNode(Seq(ddrInParams.master))
-  ddrOverlay.overlayOutput.ddr := ddrClient
+  val ddrBlockDuringReset = LazyModule(new TLBlockDuringReset(4))
+  ddrOverlay.overlayOutput.ddr := ddrBlockDuringReset.node := ddrClient
 
   val ledOverlays = dp(LEDOverlayKey).map(_.place(LEDDesignInput()))
   val all_leds = ledOverlays.map(_.overlayOutput.led)
@@ -78,6 +79,10 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
 
     ddrOverlay.mig.module.clock := buildtopClock
     ddrOverlay.mig.module.reset := buildtopReset
+    ddrBlockDuringReset.module.clock := buildtopClock
+    ddrBlockDuringReset.module.reset := buildtopReset || !ddrOverlay.mig.module.io.port.init_calib_complete
+
+    other_leds(6) := ddrOverlay.mig.module.io.port.init_calib_complete
 
     chiptop match { case d: HasIOBinders =>
       ApplyHarnessBinders(this, d.lazySystem, d.portMap)
