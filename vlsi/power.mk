@@ -30,7 +30,7 @@ $(POWER_RTL_CONF): $(VLSI_RTL)
 	echo "power.inputs:" >> $@
 	echo "  level: rtl" >> $@
 	echo "  input_files:" >> $@
-	for x in $(shell cat $(VLSI_RTL)); do \
+	for x in $$(cat $(VLSI_RTL)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 
