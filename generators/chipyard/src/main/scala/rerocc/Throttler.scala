@@ -18,6 +18,7 @@ class TLThrottlerResp(param_bitwidth: Int) extends Bundle {
 
 class TLThrottler(param_bitwidth: Int, queue_depth: Int)(implicit p: Parameters) extends LazyModule {
   val node = TLIdentityNode()
+  override def shouldBeInlined = false
   override lazy val module = new Impl
   class Impl extends LazyModuleImp(this) {
   //lazy val module = new LazyModuleImp(this) {

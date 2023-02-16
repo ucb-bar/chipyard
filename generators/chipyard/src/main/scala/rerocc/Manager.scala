@@ -19,7 +19,7 @@ case class ReRoCCTileParams(
   ibufEntries: Int = 4,
   rowBits: Int = 64,
   dcacheParams: Option[DCacheParams] = Some(DCacheParams(nSets = 4, nWays = 4)),
-  mergeTLNodes: Boolean = false,
+  mergeTLNodes: Boolean = true,
   l2TLBEntries: Int = 0,
   l2TLBWays: Int = 4
 ) extends TileParams {
