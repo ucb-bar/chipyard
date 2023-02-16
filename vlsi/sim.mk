@@ -10,7 +10,7 @@ $(SIM_CONF): $(sim_common_files)
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  tb_name: ''" >> $@  # don't specify -top
 	echo "  input_files:" >> $@
-	for x in $(shell cat $(sim_common_files)); do \
+	for x in $$(cat $(sim_common_files)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  input_files_meta: 'append'" >> $@

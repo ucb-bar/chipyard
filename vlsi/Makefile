@@ -122,7 +122,7 @@ $(SYN_CONF): $(VLSI_RTL)
 	echo "synthesis.inputs:" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@
-	for x in $(shell cat $(VLSI_RTL)); do \
+	for x in $$(cat $(VLSI_RTL)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 
