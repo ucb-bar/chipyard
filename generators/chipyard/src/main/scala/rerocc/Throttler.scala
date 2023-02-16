@@ -46,6 +46,8 @@ class TLThrottler(param_bitwidth: Int, queue_depth: Int)(implicit p: Parameters)
     val epoch_temp = RegInit(0.U((param_bitwidth).W))
     val max_req_temp = RegInit(0.U((param_bitwidth).W))
     val prev_req = RegInit(0.U(param_bitwidth.W))
+    dontTouch(max_req)
+    dontTouch(max_req_temp)
 
     io.resp.valid := true.B
     io.resp.bits.prev_req := prev_req
@@ -72,15 +74,21 @@ class TLThrottler(param_bitwidth: Int, queue_depth: Int)(implicit p: Parameters)
       val throttle_queue = Module(new Queue(new TLBundleA(edgeIn.bundle), 1))
       throttle_queue.io.enq <> in.a
       //throttle_queue.io.enq.valid := in.a.valid
-      throttle_queue.io.deq.ready := (req_counter < max_req || epoch === 0.U || max_req === 0.U)
       //when(throttle_queue.io.deq.fire && epoch > 0.U){
       //  req_counter := satAdd(req_counter, (1.U << out.a.bits.size).asUInt, max_req)
       //}
       when(out.a.fire && epoch > 0.U){
-        req_counter := req_counter + 1.U << out.a.bits.size.asUInt //satAdd(req_counter, (1.U << out.a.bits.size).asUInt, max_req)
+        req_counter := req_counter + (1.U << (out.a.bits.size).asUInt) //satAdd(req_counter, (1.U << out.a.bits.size).asUInt, max_req)
       }
       //out.a <> in.a // Add throttle to this, in.a is Decoupled[TLBundleA]
       out.a <> throttle_queue.io.deq
+      //out.a.bits := throttle_queue.io.deq.bits
+      when(req_counter > max_req && epoch =/= 0.U && max_req =/= 0.U){
+        throttle_queue.io.enq.valid := false.B
+        //out.a.ready := false.B
+      }
+      //out.a.ready := Mux((req_counter < max_req || epoch === 0.U || max_req === 0.U), throttle_queue.io.deq.valid, false.B)
+
       in.d <> out.d
 
       if (edgeOut.manager.anySupportAcquireB && edgeOut.client.anySupportProbe) {
@@ -100,13 +108,15 @@ class TLThrottler(param_bitwidth: Int, queue_depth: Int)(implicit p: Parameters)
     when(epoch === 0.U && !io.req.fire){
       epoch_counter := 0.U
       req_counter := 0.U
-      max_req := 0.U
+      //max_req := 0.U
       //io.req.ready := true.B
       //prev_req := 0.U
       temp_waiting := false.B
     }.elsewhen(epoch_counter === epoch - 1.U) {
+      when (req_counter =/= 0.U){
+        prev_req := req_counter
+      }
       req_counter := 0.U
-      prev_req := req_counter
       when(temp_waiting) {
         epoch := epoch_temp
         max_req := max_req_temp
