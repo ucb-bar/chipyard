@@ -161,18 +161,18 @@ MFC_TOP_HRCHY_JSON ?= $(build_dir)/top_module_hierarchy.json
 MFC_MODEL_HRCHY_JSON ?= $(build_dir)/model_module_hierarchy.json
 MFC_SMEMS_CONF ?= $(build_dir)/$(long_name).mems.conf
 # hardcoded firtool outputs
-MFC_FILELIST = $(OUT_DIR)/filelist.f
-MFC_BB_MODS_FILELIST = $(OUT_DIR)/firrtl_black_box_resource_files.f
-MFC_TOP_SMEMS_JSON = $(OUT_DIR)/metadata/seq_mems.json
-MFC_MODEL_SMEMS_JSON = $(OUT_DIR)/metadata/tb_seq_mems.json
+MFC_FILELIST = $(GEN_COLLATERAL_DIR)/filelist.f
+MFC_BB_MODS_FILELIST = $(GEN_COLLATERAL_DIR)/firrtl_black_box_resource_files.f
+MFC_TOP_SMEMS_JSON = $(GEN_COLLATERAL_DIR)/metadata/seq_mems.json
+MFC_MODEL_SMEMS_JSON = $(GEN_COLLATERAL_DIR)/metadata/tb_seq_mems.json
 
 # macrocompiler smems in/output
 SFC_SMEMS_CONF ?= $(build_dir)/$(long_name).sfc.mems.conf
 TOP_SMEMS_CONF ?= $(build_dir)/$(long_name).top.mems.conf
-TOP_SMEMS_FILE ?= $(OUT_DIR)/$(long_name).top.mems.v
+TOP_SMEMS_FILE ?= $(GEN_COLLATERAL_DIR)/$(long_name).top.mems.v
 TOP_SMEMS_FIR  ?= $(build_dir)/$(long_name).top.mems.fir
 MODEL_SMEMS_CONF ?= $(build_dir)/$(long_name).model.mems.conf
-MODEL_SMEMS_FILE ?= $(OUT_DIR)/$(long_name).model.mems.v
+MODEL_SMEMS_FILE ?= $(GEN_COLLATERAL_DIR)/$(long_name).model.mems.v
 MODEL_SMEMS_FIR  ?= $(build_dir)/$(long_name).model.mems.fir
 
 # top module files to include
@@ -258,7 +258,7 @@ gen_dir=$(sim_dir)/generated-src
 # per-project output directory
 build_dir=$(gen_dir)/$(long_name)
 # final generated collateral per-project
-OUT_DIR ?= $(build_dir)/gen-collateral
+GEN_COLLATERAL_DIR ?= $(build_dir)/gen-collateral
 
 #########################################################################################
 # assembly/benchmark variables

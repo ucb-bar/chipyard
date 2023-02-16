@@ -94,13 +94,13 @@ SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v
 
 # copy files but ignore *.h files in *.f (match vcs)
-$(sim_files): $(SIM_FILE_REQS) | $(OUT_DIR)
-	cp -f $^ $(OUT_DIR)
+$(sim_files): $(SIM_FILE_REQS) | $(GEN_COLLATERAL_DIR)
+	cp -f $^ $(GEN_COLLATERAL_DIR)
 	$(foreach file,\
 		$^,\
 		$(if $(filter %.h,$(file)),\
 			,\
-			echo "$(addprefix $(OUT_DIR)/, $(notdir $(file)))" >> $@;))
+			echo "$(addprefix $(GEN_COLLATERAL_DIR)/, $(notdir $(file)))" >> $@;))
 
 #########################################################################################
 # import other necessary rules and variables
