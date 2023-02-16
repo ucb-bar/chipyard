@@ -73,8 +73,11 @@ class TLThrottler(param_bitwidth: Int, queue_depth: Int)(implicit p: Parameters)
       throttle_queue.io.enq <> in.a
       //throttle_queue.io.enq.valid := in.a.valid
       throttle_queue.io.deq.ready := (req_counter < max_req || epoch === 0.U || max_req === 0.U)
-      when(throttle_queue.io.deq.fire && epoch > 0.U){
-        req_counter := satAdd(req_counter, (1.U << in.a.bits.size).asUInt, max_req)
+      //when(throttle_queue.io.deq.fire && epoch > 0.U){
+      //  req_counter := satAdd(req_counter, (1.U << out.a.bits.size).asUInt, max_req)
+      //}
+      when(out.a.fire && epoch > 0.U){
+        req_counter := req_counter + 1.U << out.a.bits.size.asUInt //satAdd(req_counter, (1.U << out.a.bits.size).asUInt, max_req)
       }
       //out.a <> in.a // Add throttle to this, in.a is Decoupled[TLBundleA]
       out.a <> throttle_queue.io.deq
