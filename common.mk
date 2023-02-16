@@ -108,7 +108,7 @@ $(FIRRTL_FILE) $(ANNO_FILE) &: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_D
 		--name $(long_name) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
 		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG) \
-		$(if chipyard.upf.ChipTopUPFAspect, --with-aspect chipyard.upf.ChipTopUPFAspect,) \
+		--with-aspect chipyard.upf.ChipTopUPFAspect \
 		$(EXTRA_CHISEL_OPTIONS))
 
 define mfc_extra_anno_contents

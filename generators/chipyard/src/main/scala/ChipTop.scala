@@ -31,5 +31,7 @@ class ChipTop(implicit p: Parameters) extends LazyModule with BindingScope
   // of ChipTop (ex: ClockGroup) do not receive clock or reset.
   // However. anonymous children of ChipTop should not need an implicit Clock or Reset
   // anyways, they probably need to be explicitly clocked.
-  lazy val module: LazyModuleImpLike = new LazyRawModuleImp(this) {  }
+  lazy val module: LazyModuleImpLike = new ChipTopLazyRawModuleImp(this)
 }
+
+class ChipTopLazyRawModuleImp(val outer: ChipTop) extends LazyRawModuleImp(outer)

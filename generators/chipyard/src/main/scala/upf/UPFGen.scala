@@ -1,6 +1,7 @@
 package chipyard.upf
 
 import java.io.FileWriter
+import java.nio.file.{Paths, Files}
 import scala.collection.mutable.ListBuffer
 
 
@@ -21,16 +22,32 @@ object UPFGenerator {
             case l: List[PowerDomain] => l
             case _ => throw new Exception("Power domain list cannot consist of non-PowerDomain objects.")
         }
-        val fpath = s"/scratch/s.sridhar/upf6/${pd.name}.upf"
-        writeFile(fpath, loadUPF(pd, children))
-        writeFile(fpath, createPowerDomains(pd))
-        writeFile(fpath, createSupplyPorts(pd))
-        writeFile(fpath, createSupplyNets(pd))
-        writeFile(fpath, connectSupplies(pd))
-        writeFile(fpath, setDomainNets(pd))
-        writeFile(fpath, createPowerSwitches(pd))
-        writeFile(fpath, createPowerStateTable(pd, getPorts(pd, children)))
-        writeFile(fpath, createLevelShifters(pd, pdList))
+        val filePath = "/scratch/s.sridhar/upf7"
+        val fileName = s"${pd.name}.upf"
+        writeFile(filePath, fileName, createMessage(pd, children, pdList))
+    }
+
+    def createMessage(pd: PowerDomain, children: ListBuffer[PowerDomain], pdList: List[PowerDomain]): String = {
+        var message = ""
+        message += loadUPF(pd, children)
+        message += createPowerDomains(pd)
+        message += createSupplyPorts(pd)
+        message += createSupplyNets(pd)
+        message += connectSupplies(pd)
+        message += setDomainNets(pd)
+        message += createPowerSwitches(pd)
+        message += createPowerStateTable(pd, getPorts(pd, children))
+        message += createLevelShifters(pd, pdList)
+        return message
+    }
+
+    def writeFile(filePath: String, fileName: String, message: String): Unit = {
+        if (!Files.exists(Paths.get(filePath))) {
+            Files.createDirectories(Paths.get(filePath))
+        }
+        val fw = new FileWriter(s"${filePath}/${fileName}", false)
+        fw.write(message)
+        fw.close()
     }
 
     def getPorts(pd: PowerDomain, children: ListBuffer[PowerDomain]): ListBuffer[String] = {
@@ -46,12 +63,6 @@ object UPFGenerator {
             }
         }
         return portsList
-    }
-
-    def writeFile(filePath: String, message: String): Unit = {
-        val fw = new FileWriter(filePath, true)
-        fw.write(message)
-        fw.close()
     }
 
     def loadUPF(pd: PowerDomain, children: ListBuffer[PowerDomain]): String = {

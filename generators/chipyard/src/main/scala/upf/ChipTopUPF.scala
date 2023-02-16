@@ -1,33 +1,34 @@
 // See LICENSE for license details
 package chipyard.upf
 
-import chipyard.TestHarness
-import chipyard.{ChipTop, DigitalTop}
+import chipyard.{TestHarness, ChipTopLazyRawModuleImp, DigitalTop}
 import freechips.rocketchip.diplomacy.LazyModule
-import chisel.{UPFAspect, UPFFunction, ChiselUPFElement}
+import chisel.{UPFAspect, UPFFunc, ChiselUPFElement}
 
 import scala.collection.mutable.ListBuffer
 
 object ChipTopUPF {
-  def default: UPFFunction = {
-    case top: ChipTop => {
-      val tiles = top.lazySystem match {
-        case t: DigitalTop => t.tiles.map(x => x)
-        case _ => throw new Exception("Unsupported BuildSystem type")
-      }
-      var modulesList = ListBuffer[LazyModule]()
-      modulesList.append(top.lazySystem)
-      for (tile <- tiles) {
-        modulesList.append(tile)
-      }
-
+  def default: UPFFunc.UPFFunction = {
+    case top: ChipTopLazyRawModuleImp => {      
+      val modulesList = createModulesList(top)
       var (g, pdList) = createPowerDomains(modulesList)
       g = connectPDHierarchy(g, pdList)
       g.bfsVisitor(g.rootObj, UPFGenerator.generateUPF)
-
-      Seq(new ChiselUPFElement(top.toAbsoluteTarget, top.lazySystem.module.name))
     }
-    // case _ => throw new Exception("Failed UPF Gen")
+  }
+
+  def createModulesList(top: ChipTopLazyRawModuleImp): ListBuffer[LazyModule] = {
+    var modulesList = ListBuffer[LazyModule]()
+    modulesList.append(top.outer.lazySystem)
+    val tiles = top.outer.lazySystem match {
+      case t: DigitalTop => t.tiles.map(x => x)
+      case _ => throw new Exception("Unsupported BuildSystem type")
+    }
+    for (tile <- tiles) {
+      modulesList.append(tile)
+    }
+    modulesList ++= top.outer.lazySystem.getChildren
+    return modulesList
   }
 
   def createPowerDomains(modulesList: ListBuffer[LazyModule]): (PowerGraph, ListBuffer[PowerDomain]) = {
@@ -67,6 +68,4 @@ object ChipTopUPF {
 
 }
 
-case object ChipTopUPFAspect extends UPFAspect[chipyard.TestHarness](
-  ChipTopUPF.default
-)
+case object ChipTopUPFAspect extends UPFAspect[chipyard.TestHarness](ChipTopUPF.default)
