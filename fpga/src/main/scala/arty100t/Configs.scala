@@ -27,32 +27,33 @@ class WithArty100TTweaks extends Config(
   new WithNoDesignKey ++
   new chipyard.config.WithNoDebug ++ // no jtag
   new chipyard.config.WithNoUART ++ // use UART for the UART-TSI thing instad
-  new chipyard.config.WithTLBackingMemory ++
+  new chipyard.config.WithTLBackingMemory ++ // FPGA-shells converts the AXI to TL for us
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(256) << 20) ++ // 256mb on ARTY
-  new freechips.rocketchip.subsystem.WithoutTLMonitors
-)
+  new freechips.rocketchip.subsystem.WithoutTLMonitors)
 
 class RocketArty100TConfig extends Config(
   new WithArty100TTweaks ++
-  new chipyard.config.WithMemoryBusFrequency(10.0) ++
-  new chipyard.config.WithPeripheryBusFrequency(10.0) ++  // Match the sbus and pbus frequency
+  new chipyard.config.WithMemoryBusFrequency(50.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(50.0) ++  // Match the sbus and pbus frequency
   new chipyard.config.WithBroadcastManager ++ // no l2
-  new chipyard.RocketConfig
-)
+  new chipyard.RocketConfig)
+
+class UART230400RocketArty100TConfig extends Config(
+  new WithArty100TUARTTSI(uartBaudRate = 230400) ++
+  new RocketArty100TConfig)
+
+class UART460800RocketArty100TConfig extends Config(
+  new WithArty100TUARTTSI(uartBaudRate = 460800) ++
+  new RocketArty100TConfig)
+
+class UART921600RocketArty100TConfig extends Config(
+  new WithArty100TUARTTSI(uartBaudRate = 921600) ++
+  new RocketArty100TConfig)
+
 
 class NoCoresArty100TConfig extends Config(
   new WithArty100TTweaks ++
   new chipyard.config.WithMemoryBusFrequency(10.0) ++
   new chipyard.config.WithPeripheryBusFrequency(10.0) ++  // Match the sbus and pbus frequency
   new chipyard.config.WithBroadcastManager ++ // no l2
-  new chipyard.NoCoresConfig
-)
-
-class InitZeroNoCoresArty100TConfig extends Config(
-  new WithArty100TTweaks ++
-  new chipyard.example.WithInitZero(0x80000000L, 0x1000L) ++
-  new chipyard.config.WithMemoryBusFrequency(10.0) ++
-  new chipyard.config.WithPeripheryBusFrequency(10.0) ++  // Match the sbus and pbus frequency
-  new chipyard.config.WithBroadcastManager ++ // no l2
-  new chipyard.NoCoresConfig
-)
+  new chipyard.NoCoresConfig)

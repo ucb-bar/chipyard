@@ -8,7 +8,7 @@ import freechips.rocketchip.subsystem.{PeripheryBusKey}
 import freechips.rocketchip.tilelink.{TLBundle}
 import freechips.rocketchip.util.{HeterogeneousBag}
 
-import sifive.blocks.devices.uart.{UARTPortIO, HasPeripheryUARTModuleImp}
+import sifive.blocks.devices.uart.{UARTPortIO, HasPeripheryUARTModuleImp, UARTParams}
 import sifive.blocks.devices.jtag.{JTAGPins, JTAGPinsFromPort}
 import sifive.blocks.devices.pinctrl.{BasePin}
 
@@ -20,7 +20,7 @@ import chipyard.iobinders.JTAGChipIO
 
 import testchipip._
 
-class WithArty100TUARTTSI extends OverrideHarnessBinder({
+class WithArty100TUARTTSI(uartBaudRate: BigInt = 115200) extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
@@ -29,7 +29,7 @@ class WithArty100TUARTTSI extends OverrideHarnessBinder({
       val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
       withClockAndReset(th.buildtopClock, th.buildtopReset) {
         val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
-        val uart_to_tsi = Module(new UARTToTSI(freq))
+        val uart_to_tsi = Module(new UARTToTSI(freq, UARTParams(0, initBaudRate=uartBaudRate)))
         ram.module.io.tsi_ser.flipConnect(uart_to_tsi.io.serial)
 
         ath.io_uart_bb.bundle <> uart_to_tsi.io.uart
