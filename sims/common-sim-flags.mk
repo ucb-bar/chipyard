@@ -33,6 +33,3 @@ SIM_LDFLAGS = \
 	-lfesvr \
 	-ldramsim \
 	$(EXTRA_SIM_LDFLAGS)
-
-SIM_FILE_REQS += \
-	$(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v

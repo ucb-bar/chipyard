@@ -90,9 +90,6 @@ fpga_common_script_dir := $(fpga_dir)/common/tcl
 #########################################################################################
 # setup misc. sim files
 #########################################################################################
-SIM_FILE_REQS += \
-	$(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v
-
 # copy files but ignore *.h files in *.f (match vcs)
 $(sim_files): $(SIM_FILE_REQS) | $(GEN_COLLATERAL_DIR)
 	cp -f $^ $(GEN_COLLATERAL_DIR)

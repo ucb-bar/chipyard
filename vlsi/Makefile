@@ -54,7 +54,7 @@ endif
 #########################################################################################
 # general rules
 #########################################################################################
-.PHONY: default
+.PHONY: default all
 default: all
 
 all: drc lvs
@@ -82,7 +82,6 @@ ifneq ($(CUSTOM_VLOG), )
 else
 	cat $(TOP_MODS_FILELIST) $(TOP_BB_MODS_FILELIST) | sort -u > $(VLSI_RTL)
 	echo $(TOP_SMEMS_FILE) >> $(VLSI_RTL)
-	echo $(build_dir)/EICG_wrapper.v >> $(VLSI_RTL)
 endif
 
 #########################################################################################
