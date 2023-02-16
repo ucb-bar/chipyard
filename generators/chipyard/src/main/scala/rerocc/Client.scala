@@ -24,6 +24,9 @@ object ReRoCCInstructions {
   val fence = 4.U(7.W)
   // op1 = vaddr
   val cflush = 5.U(7.W)
+  // op1 = tracker
+  // op2 = max req | epoch
+  val memreq = 6.U(7.W)
 }
 
 class InstructionSender(b: ReRoCCBundleParams)(implicit p: Parameters) extends Module {
@@ -102,7 +105,7 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
 
     val cmd = Queue(io.cmd)
 
-    val s_idle :: s_acquiring :: s_acq_wait :: s_busy :: s_releasing :: s_rel_wait :: s_unbusying :: s_unbusy_wait :: Nil = Enum(8)
+    val s_idle :: s_acquiring :: s_acq_wait :: s_busy :: s_releasing :: s_rel_wait :: s_unbusying :: s_unbusy_wait :: s_ratesetting :: s_rateset_wait :: Nil = Enum(10)
 
     val maxIBufEntries = edge.mParams.managers.map(_.ibufEntries).max
     require(maxIBufEntries > 1)
@@ -134,7 +137,7 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
     // 2 -> release
     // 3 -> unbusy
     val req_arb = Module(new HellaPeekingArbiter(
-      new ReRoCCMsgBundle(edge.bundle), 4,
+      new ReRoCCMsgBundle(edge.bundle), 5,
       (b: ReRoCCMsgBundle) => b.last,
       Some((b: ReRoCCMsgBundle) => true.B)))
     rerocc.req <> req_arb.io.out
@@ -142,9 +145,14 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
     // 0 -> acquire-fast-deny
     // 1 -> acquire
     // 2 -> writeback
-    val resp_arb = Module(new Arbiter(new RoCCResponse, 3))
+    // 3 -> mem request rate
+    val resp_arb = Module(new Arbiter(new RoCCResponse, 4))
     resp_arb.io.in.foreach(_.valid := false.B)
     io.resp <> Queue(resp_arb.io.out)
+
+    val memreq_rd = Reg(UInt(5.W))
+    val req_inst_save = Reg(new RoCCCommand)
+    dontTouch(req_inst_save)
 
     cmd.ready := false.B
     when (cmd.valid) {
@@ -170,6 +178,11 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
         } .elsewhen (cmd.bits.inst.funct === ReRoCCInstructions.fence) {
           cmd.ready := inflight_wbs === 0.U && inst_q.io.count === 0.U && inst_empty && state === s_busy
           when (cmd.ready) { state := s_unbusying }
+        } .elsewhen (cmd.bits.inst.funct === ReRoCCInstructions.memreq) {
+          cmd.ready := inflight_wbs === 0.U && inst_q.io.count === 0.U && inst_empty && state === s_busy
+          memreq_rd := cmd.bits.inst.rd
+          req_inst_save := cmd.bits
+          when (cmd.ready) { state := s_ratesetting }
         } .otherwise {
           assert(false.B)
         }
@@ -242,6 +255,40 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
     req_arb.io.in(3).bits.last := true.B
     when (req_arb.io.in(3).fire()) { state := s_unbusy_wait }
 
+    // configure MEM request rate of Manager node
+    // configure epoch
+    val req_inst :: req_rs2 :: req_rd :: Nil = Enum(3)
+    val req_state = RegInit(req_inst)
+    val next_req_state = WireInit(req_state)
+    req_arb.io.in(4).bits.manager_id := OHToUInt(manager)
+    req_arb.io.in(4).valid := state === s_ratesetting
+    req_arb.io.in(4).bits.opcode := ReRoCCProtocolOpcodes.mRset
+    req_arb.io.in(4).bits.client_id := 0.U
+    req_arb.io.in(4).bits.manager_id := OHToUInt(manager)
+    req_arb.io.in(4).bits.data := MuxLookup(req_state, 0.U, Seq(
+      req_inst -> (req_inst_save.inst).asUInt,
+      req_rs2 -> (req_inst_save.rs2).asUInt,
+      req_rd -> (req_inst_save.inst.rd).asUInt
+    ))
+    req_arb.io.in(4).bits.first := req_state === req_inst
+    req_arb.io.in(4).bits.last := req_state === req_rd
+    when (req_state === req_inst && state === s_ratesetting) {
+      next_req_state := req_rs2
+    } .elsewhen (req_state === req_rs2) {
+      next_req_state := Mux(io.cmd.bits.inst.xs2, req_rs2, req_inst)
+      when(!req_inst_save.inst.xd){
+        req_arb.io.in(4).bits.last := true.B
+        next_req_state := req_inst
+      }
+    } .elsewhen (req_state === req_rd) {
+      next_req_state := req_inst
+    }
+    when(req_arb.io.in(4).fire){
+      req_state := next_req_state
+    }
+    when (req_arb.io.in(4).fire() && req_arb.io.in(4).bits.last) { state := s_rateset_wait }
+
+
 
     // ReRoCC responses
     rerocc.resp.ready := false.B
@@ -250,6 +297,8 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
     val wbdata = Reg(UInt(64.W))
     resp_arb.io.in(2).bits.data := wbdata
     resp_arb.io.in(2).bits.rd := rerocc.resp.bits.data
+    resp_arb.io.in(3).bits.rd := memreq_rd
+    resp_arb.io.in(3).bits.data := rerocc.resp.bits.data
 
     when (rerocc.resp.valid) {
       when (rerocc.resp.bits.opcode === ReRoCCProtocolOpcodes.sAcqResp) {
@@ -290,6 +339,15 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
         state := s_idle
       } .elsewhen (rerocc.resp.bits.opcode === ReRoCCProtocolOpcodes.sUnbusyAck) {
         rerocc.resp.ready := true.B
+        fencing := false.B
+        state := s_busy
+      } .elsewhen (rerocc.resp.bits.opcode === ReRoCCProtocolOpcodes.sRsetAck) {
+        when(memreq_rd === 0.U) {
+          rerocc.resp.ready := true.B
+        }.otherwise{
+          rerocc.resp.ready := resp_arb.io.in(3).ready
+          resp_arb.io.in(3).valid := true.B
+        }
         fencing := false.B
         state := s_busy
       } .otherwise {
@@ -341,6 +399,8 @@ class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC
     val cmd_info    = funct === ReRoCCInstructions.info
     val cmd_fence   = funct === ReRoCCInstructions.fence
     val cmd_cflush  = funct === ReRoCCInstructions.cflush
+    val cmd_memreq = funct === ReRoCCInstructions.memreq
+
     val cmd_tracker_sel = WireInit(0.U(nTrackers.W))
 
     cmd.ready := Mux1H(cmd_tracker_sel, subclients.map(_.module.io.cmd.ready))
@@ -373,6 +433,11 @@ class ReRoCCClient(nTrackers: Int = 16)(implicit p: Parameters) extends LazyRoCC
       } .elsewhen (cmd_cflush) {
         cmd.ready := cflush.module.io.cmd.ready
         cflush.module.io.cmd.valid := cmd.valid
+      } .elsewhen (cmd_memreq) {
+        cmd_tracker_sel := UIntToOH(tracker(log2Ceil(nTrackers)-1,0))
+        when(!(cmd.bits.inst.rd === 0.U)) {
+          resp_arb.io.in(nTrackers).bits.rd := cmd.bits.inst.rd
+        }
       } .otherwise {
         assert(!cmd.valid)
       }
