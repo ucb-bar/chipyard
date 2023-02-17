@@ -275,7 +275,9 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
     when (req_state === req_inst && state === s_ratesetting) {
       next_req_state := req_rs2
     } .elsewhen (req_state === req_rs2) {
-      next_req_state := Mux(io.cmd.bits.inst.xs2, req_rs2, req_inst)
+      //next_req_state := Mux(req_inst_save.inst.xs2, req_rs2, req_inst)
+      next_req_state := req_rd
+      req_arb.io.in(4).bits.last := false.B
       when(!req_inst_save.inst.xd){
         req_arb.io.in(4).bits.last := true.B
         next_req_state := req_inst
@@ -345,7 +347,7 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
         when(memreq_rd === 0.U) {
           rerocc.resp.ready := true.B
         }.otherwise{
-          rerocc.resp.ready := resp_arb.io.in(3).ready
+          rerocc.resp.ready := resp_arb.io.in(3).ready // || !rerocc.resp.bits.last
           resp_arb.io.in(3).valid := true.B
         }
         fencing := false.B

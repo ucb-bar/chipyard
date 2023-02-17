@@ -104,7 +104,7 @@ class MiniDCache(reRoCCId: Int, crossing: ClockCrossingType)(implicit p: Paramet
 class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implicit p: Parameters) extends LazyModule {
   val node = ReRoCCManagerNode(ReRoCCManagerParams(reRoCCTileParams.reroccId, reRoCCTileParams.ibufEntries))
   val ibufEntries = reRoCCTileParams.ibufEntries
-  val tlThrottler = LazyModule(new TLThrottler(20: Int, 1: Int))
+  val tlThrottler = LazyModule(new TLThrottler(32: Int, 1: Int))
   override lazy val module = new Impl
   class Impl extends LazyModuleImp(this) {
     val io = IO(new Bundle {
