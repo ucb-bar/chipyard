@@ -84,8 +84,9 @@ class TLThrottler(param_bitwidth: Int, queue_depth: Int)(implicit p: Parameters)
       out.a <> throttle_queue.io.deq
       //out.a.bits := throttle_queue.io.deq.bits
       when(req_counter > max_req && epoch =/= 0.U && max_req =/= 0.U){
-        throttle_queue.io.enq.valid := false.B
-        //out.a.ready := false.B
+        //throttle_queue.io.enq.valid := false.B
+        throttle_queue.io.deq.ready := false.B
+        out.a.valid := false.B
       }
       //out.a.ready := Mux((req_counter < max_req || epoch === 0.U || max_req === 0.U), throttle_queue.io.deq.valid, false.B)
 
