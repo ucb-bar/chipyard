@@ -52,7 +52,7 @@ class TLThrottler(param_bitwidth: Int, queue_depth: Int)(implicit p: Parameters)
     io.resp.valid := true.B
     io.resp.bits.prev_req := prev_req
     val temp_waiting = RegInit(false.B)
-    io.req.ready := !temp_waiting
+    io.req.ready := true.B//!temp_waiting
 
     val epoch_counter = RegInit(0.U((param_bitwidth).W))
     when(io.req.fire){

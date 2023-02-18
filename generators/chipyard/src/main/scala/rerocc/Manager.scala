@@ -353,7 +353,7 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     when (resp_arb.io.in(4).fire()) { state := s_active }
 
     // acknowledge memrate set epoch
-    resp_arb.io.in(5).valid           := state === s_rateset && !io.busy && inst_q.io.count === 0.U
+    resp_arb.io.in(5).valid           := state === s_rateset// && !io.busy && inst_q.io.count === 0.U
     resp_arb.io.in(5).bits.opcode     := ReRoCCProtocolOpcodes.sRsetAck
     resp_arb.io.in(5).bits.client_id  := client
     resp_arb.io.in(5).bits.manager_id := io.manager_id
