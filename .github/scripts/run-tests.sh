@@ -66,14 +66,22 @@ case $1 in
         (cd $LOCAL_CHIPYARD_DIR/generators/mempress/software/src && make)
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/generators/mempress/software/src/mempress-rocc.riscv
         ;;
-    chipyard-streaming-passthrough)
-        make -C $LOCAL_CHIPYARD_DIR/tests
+    chipyard-manymmioaccels)
+	make -C $LOCAL_CHIPYARD_DIR/tests
+
+	# test streaming-passthrough
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-passthrough.riscv
-        ;;
-    chipyard-streaming-fir)
-        make -C $LOCAL_CHIPYARD_DIR/tests
+
+	# test streaming-fir
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-fir.riscv
-        ;;
+
+	# test nvdla
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv run-binary-fast
+
+	# test fft
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/fft.riscv run-binary-fast
+
+	;;
     chipyard-manyperipherals)
 	# bmark tests, then SPI Flash read tests
         run_bmark ${mapping[$1]}
@@ -100,14 +108,6 @@ case $1 in
         ;;
     chipyard-sodor)
         run_asm ${mapping[$1]}
-        ;;
-    chipyard-nvdla)
-        make -C $LOCAL_CHIPYARD_DIR/tests
-        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv run-binary-fast
-        ;;
-    chipyard-fftgenerator)
-        make -C $LOCAL_CHIPYARD_DIR/tests
-        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/fft.riscv run-binary-fast
         ;;
     chipyard-constellation)
         run_bmark ${mapping[$1]}
