@@ -35,9 +35,6 @@ case $1 in
     chipyard-dmirocket)
         run_bmark ${mapping[$1]}
         ;;
-    chipyard-lbwif)
-        run_bmark ${mapping[$1]}
-        ;;
     chipyard-boom)
         run_bmark ${mapping[$1]}
         ;;
@@ -77,7 +74,10 @@ case $1 in
         make -C $LOCAL_CHIPYARD_DIR/tests
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-fir.riscv
         ;;
-    chipyard-spiflashread)
+    chipyard-manyperipherals)
+	# bmark tests, then SPI Flash read tests
+        run_bmark ${mapping[$1]}
+
         make -C $LOCAL_CHIPYARD_DIR/tests
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashread.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary-fast
         ;;
