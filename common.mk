@@ -126,26 +126,10 @@ define mfc_extra_anno_contents
 	}
 ]
 endef
-define sfc_extra_low_transforms_anno_contents
-[
-	{
-		"class": "firrtl.stage.RunFirrtlTransformAnnotation",
-		"transform": "barstools.tapeout.transforms.ExtraLowTransforms"
-	}
-]
-endef
 export mfc_extra_anno_contents
-export sfc_extra_low_transforms_anno_contents
 $(FINAL_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE): $(ANNO_FILE)
 	echo "$$mfc_extra_anno_contents" > $(MFC_EXTRA_ANNO_FILE)
-ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
-else
-	echo "$$sfc_extra_low_transforms_anno_contents" > $(SFC_EXTRA_ANNO_FILE)
-	jq -s '[.[][]]' $(SFC_EXTRA_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(EXTRA_ANNO_FILE)
-	jq -s '[.[][]]' $(ANNO_FILE) $(EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
-endif
-
 
 .PHONY: firrtl
 firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
@@ -195,8 +179,9 @@ endif
 		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		--allow-unrecognized-annotations \
+		-DX $(SFC_LEVEL) \
 		-X $(SFC_LEVEL) \
-		$(EXTRA_FIRRTL_OPTIONS))
+		$(EXTRA_FIRRTL_OPTIONS)) # -X and -DX are duplicates to allow for extra FIRRTL passes to be run
 	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE) # Optionally change file type when SFC generates LowFIRRTL
 	@if [ "$(SFC_LEVEL)" = low ]; then cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > /tmp/unnec-anno-deleted.sfc.anno.json; fi
 	@if [ "$(SFC_LEVEL)" = low ]; then cat /tmp/unnec-anno-deleted.sfc.anno.json | jq 'del(.[] | select(.class | test("SRAMAnnotation"))?)' > /tmp/unnec-anno-deleted2.sfc.anno.json; fi
