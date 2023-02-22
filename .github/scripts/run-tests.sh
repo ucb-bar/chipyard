@@ -83,15 +83,16 @@ case $1 in
 
 	;;
     chipyard-manyperipherals)
-	# bmark tests, then SPI Flash read tests
-        run_bmark ${mapping[$1]}
+	# SPI Flash read tests, then bmark tests
 
         make -C $LOCAL_CHIPYARD_DIR/tests
-        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashread.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary-fast
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashread.riscv run-binary-fast
+
+	run_bmark ${mapping[$1]}
         ;;
     chipyard-spiflashwrite)
         make -C $LOCAL_CHIPYARD_DIR/tests
-        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashwrite.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary-fast
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashwrite.riscv run-binary-fast
         [[ "`xxd $LOCAL_CHIPYARD_DIR/tests/spiflash.img  | grep 1337\ 00ff\ aa55\ face | wc -l`" == "6" ]] || false
         ;;
     tracegen)
