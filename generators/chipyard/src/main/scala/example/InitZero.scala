@@ -5,14 +5,14 @@ import chisel3.util._
 import freechips.rocketchip.subsystem.{BaseSubsystem, CacheBlockBytes}
 import freechips.rocketchip.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, IdRange}
-import testchipip.TLHelper
+import freechips.rocketchip.tilelink._
 
 case class InitZeroConfig(base: BigInt, size: BigInt)
 case object InitZeroKey extends Field[Option[InitZeroConfig]](None)
 
 class InitZero(implicit p: Parameters) extends LazyModule {
-  val node = TLHelper.makeClientNode(
-    name = "init-zero", sourceId = IdRange(0, 1))
+  val node = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLClientParameters(
+    name = "init-zero", sourceId = IdRange(0, 1))))))
 
   lazy val module = new InitZeroModuleImp(this)
 }

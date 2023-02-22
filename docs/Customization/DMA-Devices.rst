@@ -20,7 +20,7 @@ that writes zeros to the memory at a configured address.
     :start-after: DOC include start: DigitalTop
     :end-before: DOC include end: DigitalTop
 
-We use ``TLHelper.makeClientNode`` to create a TileLink client node for us.
+We use ``TLClientNode`` to create a TileLink client node for us.
 We then connect the client node to the memory system through the front bus (fbus).
 For more info on creating TileLink client nodes, take a look at :ref:`TileLink-Diplomacy-Reference/NodeTypes:Client Node`.
 

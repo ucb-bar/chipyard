@@ -16,8 +16,7 @@ on the C channel, and send grant acknowledgements on the E channel.
 
 The L1 caches and DMA devices in RocketChip/Chipyard have client nodes.
 
-You can add a TileLink client node to your LazyModule using the TLHelper
-object from testchipip like so:
+You can add a TileLink client node to your LazyModule like so:
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/NodeTypes.scala
     :language: scala
@@ -48,8 +47,7 @@ generators optimize the hardware by not arbitrating the client to managers with
 address ranges that don't overlap with its visibility.
 
 Inside your lazy module implementation, you can call ``node.out`` to get a
-list of bundle/edge pairs. If you used the TLHelper, you only specified a
-single client edge, so this list will only have one pair.
+list of bundle/edge pairs.
 
 The ``tl`` bundle is a Chisel hardware bundle that connects to the IO of this
 module. It contains two (in the case of TL-UL and TL-UH) or five (in the case
@@ -65,8 +63,7 @@ Manager Node
 ------------
 
 TileLink managers take requests from clients on the A channel and send
-responses back on the D channel. You can create a manager node using the
-TLHelper like so:
+responses back on the D channel. You can create a manager like so:
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/NodeTypes.scala
     :language: scala
