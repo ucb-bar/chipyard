@@ -111,7 +111,7 @@ case $1 in
         run_asm ${mapping[$1]}
         ;;
     chipyard-constellation)
-        run_bmark ${mapping[$1]}
+        make run-binary-hex BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}
         ;;
     icenet)
         make run-binary-fast BINARY=none -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}
