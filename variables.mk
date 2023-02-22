@@ -146,7 +146,6 @@ endif
 # chisel generated outputs
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
-EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extra.anno.json
 
 # chisel anno modification output
 MFC_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
@@ -155,7 +154,6 @@ FINAL_ANNO_FILE ?= $(build_dir)/$(long_name).appended.anno.json
 # scala firrtl compiler (sfc) outputs
 SFC_FIRRTL_BASENAME ?= $(build_dir)/$(long_name).sfc
 SFC_FIRRTL_FILE ?= $(SFC_FIRRTL_BASENAME).fir
-SFC_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrasfc.anno.json
 SFC_ANNO_FILE ?= $(build_dir)/$(long_name).sfc.anno.json
 
 # firtool compiler outputs
