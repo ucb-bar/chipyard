@@ -350,7 +350,6 @@ class ReRoCCSingleOpcodeClient(implicit p: Parameters) extends LazyModule with H
           rerocc.resp.ready := resp_arb.io.in(3).ready // || !rerocc.resp.bits.last
           resp_arb.io.in(3).valid := true.B
         }
-        fencing := false.B
         state := s_busy
       } .otherwise {
         assert(false.B)
