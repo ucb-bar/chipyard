@@ -134,10 +134,10 @@ SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
 
 # copy files but ignore *.h files in *.f since vcs has +incdir+$(build_dir)
-$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
-	cp -f $^ $(build_dir)
+$(sim_files): $(SIM_FILE_REQS) $(ALL_MODS_FILELIST) | $(build_dir)
+	cp -f $(SIM_FILE_REQS) $(build_dir)
 	$(foreach file,\
-		$^,\
+		$(SIM_FILE_REQS),\
 		$(if $(filter %.h,$(file)),\
 			,\
 			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))

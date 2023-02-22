@@ -23,6 +23,11 @@ LOCAL_CHIPYARD_DIR=$GITHUB_WORKSPACE
 LOCAL_SIM_DIR=$LOCAL_CHIPYARD_DIR/sims/verilator
 LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 
+# CI uses temp directories with very long names
+# explicitly force socket creation to use /tmp to avoid name length errors
+# https://github.com/sbt/sbt/pull/6887
+JAVA_TMP_DIR=$(mktemp -d -t ci-cy-XXXXXXXX)
+
 # key value store to get the build groups
 declare -A grouping
 grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad chipyard-spike chipyard-clone"
