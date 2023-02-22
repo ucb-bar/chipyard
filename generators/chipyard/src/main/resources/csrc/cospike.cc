@@ -226,6 +226,7 @@ extern "C" void cospike_cosim(long long int cycle,
           bool csr_read = (insn & 0x7f) == 0x73;
           if (csr_read) printf("CSR read %lx\n", csr_addr);
           if (csr_read && (
+                           (csr_addr == 0x301) || // misa
                            (csr_addr == 0xf13) || // mimpid
                            (csr_addr == 0xf12) || // marchid
                            (csr_addr == 0xf11) || // mvendorid
