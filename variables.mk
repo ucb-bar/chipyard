@@ -220,7 +220,8 @@ SBT_CLIENT_FLAG = --client
 endif
 
 # passes $(JAVA_TOOL_OPTIONS) from env to java
-SBT_BIN ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
+export SBT_OPTS ?= -Dsbt.ivy.home=$(base_dir)/.ivy2 -Dsbt.global.base=$(base_dir)/.sbt -Dsbt.boot.directory=$(base_dir)/.sbt/boot/
+SBT_BIN ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
 SBT = $(SBT_BIN) $(SBT_CLIENT_FLAG)
 SBT_NON_THIN = $(subst $(SBT_CLIENT_FLAG),,$(SBT))
 
