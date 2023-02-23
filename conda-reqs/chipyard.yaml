@@ -46,10 +46,10 @@ dependencies:
     - findutils
     - rsync
     - psutil
-    - doit=0.35.0
+    - doit
     - gitpython
     - humanfriendly
-    - e2fsprogs
+    # - e2fsprogs
     - ctags
     - bison
     - flex
@@ -102,27 +102,27 @@ dependencies:
     # conda environment, pip's dependency resolution can conflict with
     # conda and create broken environments.  It's best to use the conda
     # packages so that the environment is consistent
-    - boto3==1.20.21
-    - colorama==0.4.3
-    - argcomplete==1.12.3
-    - python-graphviz==0.19
-    - pyparsing==3.0.6
-    - numpy==1.19.5
-    - kiwisolver==1.3.1
-    - matplotlib-base==3.3.4
-    - pandas==1.1.5
-    - awscli==1.22.21
-    - pytest==6.2.5
-    - pytest-dependency==0.5.1
-    - pytest-mock==3.7.0
-    - moto==3.1.0
-    - pyyaml==5.4.1
-    - mypy==0.931
-    - types-pyyaml==6.0.4
-    - boto3-stubs==1.21.6
-    - botocore-stubs==1.24.7
-    - mypy-boto3-s3==1.21.0
-    - sty==1.0.0
+    - boto3>=1.20.21
+    - colorama>=0.4.3
+    - argcomplete>=1.12.3
+    - python-graphviz>=0.19
+    - pyparsing>=3.0.6
+    - numpy>=1.19.5
+    - kiwisolver>=1.3.1
+    - matplotlib-base>=3.3.4
+    - pandas>=1.1.5
+    - awscli>=1.22.21
+    - pytest>=6.2.5
+    - pytest-dependency>=0.5.1
+    - pytest-mock>=3.7.0
+    - moto>=3.1.0
+    - pyyaml>=5.4.1
+    - mypy>=0.931
+    - types-pyyaml>=6.0.4
+    - boto3-stubs>=1.21.6
+    - botocore-stubs>=1.24.7
+    - mypy-boto3-s3>=1.21.0
+    - sty>=1.0.0
     - pip
     - pip:
         - fab-classic==1.19.1
