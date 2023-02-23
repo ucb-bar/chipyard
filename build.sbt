@@ -12,7 +12,10 @@ lazy val commonSettings = Seq(
   assembly / assemblyMergeStrategy := { _ match {
     case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
     case _ => MergeStrategy.first}},
-  scalacOptions ++= Seq("-deprecation","-unchecked"),
+  scalacOptions ++= Seq(
+    "-deprecation",
+    "-unchecked",
+    "-Ymacro-annotations"), // fix hierarchy API
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
   allDependencies := {
     // drop specific maven dependencies in subprojects in favor of Chipyard's version
