@@ -208,7 +208,7 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES) $(SFC_LE
 		--disable-annotation-classless \
 		--disable-annotation-unknown \
 		--mlir-timing \
-		--lowering-options=emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,locationInfoStyle=wrapInAtSquareBracket \
+		--lowering-options=emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,disallowPackedArrays,verifLabels,locationInfoStyle=wrapInAtSquareBracket \
 		--repl-seq-mem \
 		--repl-seq-mem-file=$(MFC_SMEMS_CONF) \
 		--repl-seq-mem-circuit=$(MODEL) \
