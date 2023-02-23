@@ -123,6 +123,18 @@ ifeq ($(SUB_PROJECT),constellation)
 	TB                ?= TestDriver
 	TOP               ?= NoC
 endif
+# For graphics developers
+ifeq ($(SUB_PROJECT),graphics)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
+	MODEL_PACKAGE     ?= freechips.rocketchip.unittest
+	CONFIG            ?= CoalescingUnitTestConfig
+	CONFIG_PACKAGE    ?= freechips.rocketchip.unittest
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= TestDriver
+	TOP               ?= UnitTestSuite
+endif
 
 
 #########################################################################################
