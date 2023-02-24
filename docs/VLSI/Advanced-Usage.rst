@@ -22,14 +22,6 @@ The Make-based build system provided supports using Hammer without using RTL gen
 
 ``CUSTOM_VLOG`` breaks the dependency on the rest of the Chipyard infrastructure and does not start any Chisel/FIRRTL elaboration. ``VLSI_TOP`` selects the top module from your custom Verilog files.
 
-Hierarchical Flows
-------------------
-The Make-based build system supports bottom-up hierarchical place-and-route flows. You will need to create your module hierarchy in your input configuration YMLs before running the ``buildfile`` make target. If you change your hierarchy at any point, the ``hammer.d`` file needs to be re-generated.
-
-Throughout the execution of the hierarchical flow, you must override the ``VLSI_TOP`` Make variable to the hierarchical submodule that you are currently working on. Otherwise, simulation and power flows will not work properly.
-
-For more information about setting up hierarchical flows, see the `Hammer documentation <https://hammer-vlsi.readthedocs.io/en/stable/Hammer-Use/Hierarchical.html>`__.
-
 Under the Hood
 --------------
 To uncover what is happening under the hood, here are the commands that are executed:
@@ -103,6 +95,6 @@ With the Synopsys plugin, hierarchical RTL and gate-level simulation is supporte
 
 * ``redo-`` can be appended to all above targets to break dependency tracking, like described above.
 
-* ``-$(VLSI_TOP)`` suffixes denote simulations/power analysis on a submodule in a hierarchical flow (remember to override this variable, as explained above). Note that you must provide the testbenches for these modules since the default testbench only simulates a Chipyard-based ``ChipTop`` DUT instance.
+* ``-$(VLSI_TOP)`` suffixes denote simulations/power analysis on a submodule in a hierarchical flow (remember to override this variable). Note that you must provide the testbenches for these modules since the default testbench only simulates a Chipyard-based ``ChipTop`` DUT instance.
 
 The simulation configuration (e.g. binaries) can be edited for your design. See the ``Makefile`` and refer to Hammer's documentation for how to set up simulation parameters for your design.
