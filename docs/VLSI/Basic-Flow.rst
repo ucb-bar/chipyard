@@ -295,11 +295,11 @@ For example, if we choose to specifiy the previously mentioned ``GemminiRocketCo
             bottom: 0
 
 
-In this specification, ``vlsi.inputs.hierarchical.mode`` indicates the manual specification of the heirarchy tree (which is the only mode currently supported by Hammer), ``vlsi.inputs.hiearchical.top_module`` sets the root of the hierarchical tree, ``vlsi.inputs.hierarchical.manual_modules`` enumerates the tree of hierarchical modules, and ``vlsi.inputs.hierarchical.manual_placement_constraints`` enumerates the floorplan for each module.
+In this specification, ``vlsi.inputs.hierarchical.mode`` indicates the manual specification of the hierarchy tree (which is the only mode currently supported by Hammer), ``vlsi.inputs.hierarchical.top_module`` sets the root of the hierarchical tree, ``vlsi.inputs.hierarchical.manual_modules`` enumerates the tree of hierarchical modules, and ``vlsi.inputs.hierarchical.manual_placement_constraints`` enumerates the floorplan for each module.
 
 For more information about the Hammer hierarchical flow and specifying the hierarchy and constraints, visit the `Hammer documentation <https://hammer-vlsi.readthedocs.io/en/stable/Hammer-Use/Hierarchical.html>`__.
 
-.. Note:: You must generate the hierarchical hierarchy BEFORE running the ``make buildfile`` target. This is because Hammer encodes its hierarchical flow graph in a generated Makefile in ``$(OBJ_DIR)/hammer.d``. If you modify your physical hierarchy, you must wipe and regenerate this Makefile. Finally, it is important to always override the ``VLSI_TOP`` variable to be the hierarchical block that you are working on. This is required for hierarchical simulation and power flows.
+.. Note:: You must generate the hierarchical hierarchy BEFORE running the ``make buildfile`` target. This is because Hammer encodes its hierarchical flow graph in a generated Makefile in ``$(OBJ_DIR)/hammer.d``. If you modify your physical hierarchy, you must wipe and regenerate this Makefile. Finally, you must always override the ``VLSI_TOP`` variable to be the hierarchical block that you are working on. This is required for hierarchical simulation and power flows.
 
 .. Specifying a Custom Floorplan
 .. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
