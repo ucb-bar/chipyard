@@ -21,6 +21,24 @@ class FPGemminiRocketConfig extends Config(
   new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
 
+class FP8TransformerGemminiRocketConfig extends Config(
+  new gemmini.GemminiFP8TransformerConfig ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new chipyard.config.AbstractConfig)
+
+class HybridFP8TransformerGemminiRocketConfig extends Config(
+  new gemmini.GemminiHybridFP8TransformerConfig ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new chipyard.config.AbstractConfig)
+
+class Int8TransformerGemminiRocketConfig extends Config(
+  new gemmini.GemminiCustomConfig ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new chipyard.config.AbstractConfig)
+
 class HwachaRocketConfig extends Config(
   new chipyard.config.WithHwachaTest ++
   new hwacha.DefaultHwachaConfig ++                              // use Hwacha vector accelerator
