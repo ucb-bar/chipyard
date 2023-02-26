@@ -124,7 +124,7 @@ class TutorialNoCConfig extends Config(
   new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=128) ++
 
   // cores 0/1 are rocket, core2 is boom
-  new boom.common.WithNSmallBooms(1) ++
+  //new boom.common.WithNSmallBooms(1) ++
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   new chipyard.config.AbstractConfig
 )
