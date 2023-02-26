@@ -117,8 +117,8 @@ class TutorialNoCConfig extends Config(
   new chipyard.example.WithStreamingPassthrough ++
 
   // add SHA3 accel to all cores
-  new sha3.WithSha3Accel ++
-
+  // new sha3.WithSha3Accel ++
+  
   // 4 banks of L2, 32KB per bank
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=128) ++
