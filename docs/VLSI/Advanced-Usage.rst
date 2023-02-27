@@ -95,6 +95,6 @@ With the Synopsys plugin, hierarchical RTL and gate-level simulation is supporte
 
 * ``redo-`` can be appended to all above targets to break dependency tracking, like described above.
 
-* ``-$(VLSI_TOP)`` suffixes denote simulations/power analysis on a submodule in a hierarchical flow. Note that you must provide the testbenches for these modules since the default testbench only simulates a Chipyard-based ``ChipTop`` DUT instance.
+* ``-$(VLSI_TOP)`` suffixes denote simulations/power analysis on a submodule in a hierarchical flow (remember to override this variable). Note that you must provide the testbenches for these modules since the default testbench only simulates a Chipyard-based ``ChipTop`` DUT instance.
 
 The simulation configuration (e.g. binaries) can be edited for your design. See the ``Makefile`` and refer to Hammer's documentation for how to set up simulation parameters for your design.
