@@ -27,4 +27,4 @@ index ec36a85f..c0c2849a 100644
 +//  .settings(commonSettings)
 
  lazy val gemmini = (project in file("generators/gemmini"))
-   .dependsOn(testchipip, rocketchip)
+   .dependsOn(rocketchip)
