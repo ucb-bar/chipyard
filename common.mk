@@ -136,16 +136,10 @@ define sfc_extra_low_transforms_anno_contents
 endef
 export mfc_extra_anno_contents
 export sfc_extra_low_transforms_anno_contents
-$(FINAL_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE): $(ANNO_FILE)
+$(EXTRA_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE): $(ANNO_FILE)
 	echo "$$mfc_extra_anno_contents" > $(MFC_EXTRA_ANNO_FILE)
-ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
-	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
-else
 	echo "$$sfc_extra_low_transforms_anno_contents" > $(SFC_EXTRA_ANNO_FILE)
-	jq -s '[.[][]]' $(SFC_EXTRA_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(EXTRA_ANNO_FILE)
-	jq -s '[.[][]]' $(ANNO_FILE) $(EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
-endif
-
+	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(EXTRA_ANNO_FILE)
 
 .PHONY: firrtl
 firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
@@ -165,7 +159,6 @@ SFC_MFC_TARGETS = \
 
 SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 
-
 # DOC include start: FirrtlCompiler
 # There are two possible cases for this step. In the first case, SFC
 # compiles Chisel to CHIRRTL, and MFC compiles CHIRRTL to Verilog. Otherwise,
@@ -177,8 +170,7 @@ SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 # hack: lower to low firrtl if Fixed types are found
 # hack: when using dontTouch, io.cpu annotations are not removed by SFC,
 # hence we remove them manually by using jq before passing them to firtool
-$(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
-	rm -rf $(GEN_COLLATERAL_DIR)
+$(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) $(FINAL_ANNO_FILE) : $(FIRRTL_FILE) $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none))
 	$(eval EXTRA_FIRRTL_OPTIONS += $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), $(SFC_REPL_SEQ_MEM),))
@@ -186,6 +178,11 @@ else
 	$(eval SFC_LEVEL := low)
 	$(eval EXTRA_FIRRTL_OPTIONS += $(SFC_REPL_SEQ_MEM))
 endif
+	if [ $(SFC_LEVEL) = low ]; then jq -s '[.[][]]' $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE); fi
+	if [ $(SFC_LEVEL) = none ]; then cat $(EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE); fi
+
+$(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS)
+	rm -rf $(GEN_COLLATERAL_DIR)
 	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateModelStageMain,\
 		--no-dedup \
 		--output-file $(SFC_FIRRTL_BASENAME) \
@@ -198,9 +195,9 @@ endif
 		-X $(SFC_LEVEL) \
 		$(EXTRA_FIRRTL_OPTIONS))
 	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE) # Optionally change file type when SFC generates LowFIRRTL
-	@if [ "$(SFC_LEVEL)" = low ]; then cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > /tmp/unnec-anno-deleted.sfc.anno.json; fi
-	@if [ "$(SFC_LEVEL)" = low ]; then cat /tmp/unnec-anno-deleted.sfc.anno.json | jq 'del(.[] | select(.class | test("SRAMAnnotation"))?)' > /tmp/unnec-anno-deleted2.sfc.anno.json; fi
-	@if [ "$(SFC_LEVEL)" = low ]; then cat /tmp/unnec-anno-deleted2.sfc.anno.json > $(SFC_ANNO_FILE) && rm /tmp/unnec-anno-deleted.sfc.anno.json && rm /tmp/unnec-anno-deleted2.sfc.anno.json; fi
+	@if [ $(SFC_LEVEL) = low ]; then cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > /tmp/unnec-anno-deleted.sfc.anno.json; fi
+	@if [ $(SFC_LEVEL) = low ]; then cat /tmp/unnec-anno-deleted.sfc.anno.json | jq 'del(.[] | select(.class | test("SRAMAnnotation"))?)' > /tmp/unnec-anno-deleted2.sfc.anno.json; fi
+	@if [ $(SFC_LEVEL) = low ]; then cat /tmp/unnec-anno-deleted2.sfc.anno.json > $(SFC_ANNO_FILE) && rm /tmp/unnec-anno-deleted.sfc.anno.json && rm /tmp/unnec-anno-deleted2.sfc.anno.json; fi
 	firtool \
 		--format=fir \
 		--dedup \
