@@ -120,7 +120,7 @@ $(SYN_CONF): $(VLSI_RTL)
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
 	echo "  input_files:" >> $@
-	for x in $(VLSI_RTL); do \
+	for x in $$(cat $(VLSI_RTL)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  input_files_meta: 'append'" >> $@
