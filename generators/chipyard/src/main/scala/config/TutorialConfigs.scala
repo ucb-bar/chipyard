@@ -99,12 +99,16 @@ class TutorialNoCConfig extends Config(
   new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
       inNodeMapping = ListMap(
-        "Core 0" -> 0, "Core 1" -> 1,
+        "Core 0" -> 0, "SHA3[0]" -> 0,
+        "Core 1" -> 1, "SHA3[1]" -> 1,
+        "Core 2" -> 10, "SHA3[2]" -> 10,
         "serial-tl" -> 2),
       outNodeMapping = ListMap(
         "system[0]" -> 3, "system[1]" -> 4, "system[2]" -> 5, "system[3]" -> 6,
         "pbus" -> 7))
   ), true) ++
+
+  // Add other MMIO devices and accelerators
   new chipyard.example.WithGCD ++
   new chipyard.harness.WithLoopbackNIC ++
   new icenet.WithIceNIC ++
@@ -112,7 +116,15 @@ class TutorialNoCConfig extends Config(
   new chipyard.example.WithStreamingFIR ++
   new chipyard.example.WithStreamingPassthrough ++
 
+  // add SHA3 accel to all cores
+  // new sha3.WithSha3Accel ++
+
+  // 4 banks of L2, 32KB per bank
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=128) ++
+
+  // cores 0/1 are rocket, core2 is boom
+  new boom.common.WithNSmallBooms(1) ++
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   new chipyard.config.AbstractConfig
 )

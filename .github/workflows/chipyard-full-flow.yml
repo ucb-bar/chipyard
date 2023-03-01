@@ -91,8 +91,7 @@ jobs:
           cd ${{ env.REMOTE_WORK_DIR }}
           eval "$(conda shell.bash hook)"
           source env.sh
-          cd sims/verilator
-          make verilog
+          ./scripts/tutorial-full.sh
 
   cleanup:
     name: cleanup
