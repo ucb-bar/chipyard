@@ -81,6 +81,19 @@ jobs:
           export MAKEFLAGS="-j32"
           ./build-setup.sh -f
 
+  run-cfg-finder:
+    name: run-cfg-finder
+    needs: [setup-repo]
+    runs-on: ferry
+    steps:
+      - name: Run config finder
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          eval "$(conda shell.bash hook)"
+          source env.sh
+          cd sims/verilator
+          make find-config-fragments
+
   run-tutorial:
     name: run-tutorial
     needs: [setup-repo]
