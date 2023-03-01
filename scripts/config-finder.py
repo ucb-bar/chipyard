@@ -22,12 +22,16 @@ def deep_merge(a: dict, b: dict) -> dict:
     return result
 
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser(description='Pretty print all configs given a list of scala files')
-  parser.add_argument('FILES', metavar="FILE", type=str, nargs="+", help='File(s) to search within')
+  parser = argparse.ArgumentParser(description='Pretty print all configs given a filelist of scala files')
+  parser.add_argument('FILE', type=str, help='Filelist of scala files to search within')
   parser.add_argument('-l', '--levels', default=0, type=int, help='Number of levels to recursively look for configs')
   args = parser.parse_args()
 
-  cmd = ['grep', '-o', r"class \+.* \+extends \+Config"] + args.FILES
+  files = []
+  with open(args.FILE, 'r') as f:
+    files = f.read().splitlines()
+
+  cmd = ['grep', '-o', r"class \+.* \+extends \+Config"] + files
   r = subprocess.run(cmd, check=True, capture_output=True)
 
   base_file_path_dict = defaultdict(list)
@@ -50,7 +54,7 @@ if __name__ == "__main__":
 
     for configs in dict_to_use.values():
       for config in configs:
-        cmd = ['grep', '-o', r"class \+.* \+extends \+" + f"{config}"] + args.FILES
+        cmd = ['grep', '-o', r"class \+.* \+extends \+" + f"{config}"] + files
         r = subprocess.run(cmd, capture_output=True)
 
         for l in r.stdout.decode("UTF-8").splitlines():
