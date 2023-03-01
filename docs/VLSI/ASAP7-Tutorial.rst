@@ -20,7 +20,7 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
 * ``env.yml``
 
-  * A template file for tool environment configuration. Fill in the install and license server paths for your environment.
+  * A template file for tool environment configuration. Fill in the install and license server paths for your environment. For SLICE and BWRC affiliates, example environment configs are found `here <https://github.com/ucb-bar/hammer/tree/master/e2e/env>`__.
 
 * ``example-vlsi``
 
@@ -28,7 +28,7 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
 * ``example-asap7.yml``, ``example-tools.yml``
 
-  * Hammer IR for this tutorial.
+  * Hammer IR for this tutorial. For SLICE and BWRC affiliates, an example ASAP7 config is found `here <https://github.com/ucb-bar/hammer/tree/master/e2e/pdks>`__.
 
 * ``example-design.yml``, ``example-sky130.yml``, ``example-tech.yml``
 
@@ -38,9 +38,9 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
   * All of the elaborated Chisel and FIRRTL.
 
-* ``hammer``, ``hammer-<vendor>-plugins``, ``hammer-<tech>-plugin``
+* ``hammer-<vendor>-plugins``
 
-  * Core, tool, tech repositories.
+  * Tool plugin repositories.
 
 * ``view_gds.py``
 
@@ -49,31 +49,22 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 Prerequisites
 -------------
 
-* Python 3.4+
-* numpy and `gdstk <https://github.com/heitzmann/gdstk>`__ or `gdspy <https://github.com/heitzmann/gdspy>`__  packages. Note: gdspy must be version 1.4.
+* Python 3.9+
 * Genus, Innovus, Voltus, VCS, and Calibre licenses
-* For ASAP7 specifically (`README <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/technology/asap7>`__ for more details):
+* For ASAP7 specifically (`README <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/asap7>`__ for more details):
 
   * First, download the `ASAP7 v1p7 PDK <https://github.com/The-OpenROAD-Project/asap7>`__ (we recommend shallow-cloning or downloading an archive of the repository). Then, download the `encrypted Calibre decks tarball <http://asap.asu.edu/asap/>`__ tarball to a directory of choice (e.g. the root directory of the PDK) but do not extract it like the instructions say. The tech plugin is configured to extract the tarball into a cache directory for you.
   * If you have additional ASAP7 hard macros, their LEF & GDS need to be 4x upscaled @ 4000 DBU precision.
 
 Initial Setup
 -------------
-In the Chipyard root, run:
+In the Chipyard root, ensure that you have the Chipyard conda environment activated. Then, run:
 
 .. code-block:: shell
 
     ./scripts/init-vlsi.sh asap7
 
-to pull the Hammer & plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule must be added in the ``vlsi`` folder first.
-
-Pull the Hammer environment into the shell:
-
-.. code-block:: shell
-
-    cd vlsi
-    export HAMMER_HOME=$PWD/hammer
-    source $HAMMER_HOME/sourceme.sh
+to pull and install the plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule must be added in the ``vlsi`` folder first.
 
 Building the Design
 --------------------
@@ -139,7 +130,7 @@ To run DRC & LVS, and view the results in Calibre:
     make lvs CONFIG=TinyRocketConfig
     ./build/lvs-rundir/generated-scripts/view-lvs
 
-Some DRC errors are expected from this PDK, as explained in the `ASAP7 plugin readme <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/technology/asap7>`__.
+Some DRC errors are expected from this PDK, as explained in the `ASAP7 plugin readme <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/asap7>`__.
 Furthermore, the dummy SRAMs that are provided in this tutorial and PDK do not have any geometry inside, so will certainly cause DRC errors.
 
 Simulation

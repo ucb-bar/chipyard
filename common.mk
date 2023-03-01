@@ -17,7 +17,7 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_SOURCES         = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
 "   ENABLE_SBT_THIN_CLIENT    = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
-"   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & MFC converts to Verilog) \
+"   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & MFC converts to Verilog)" \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
 "   EXTRA_FIRRTL_OPTIONS      = additional options to pass to the FIRRTL compiler"
 
@@ -91,7 +91,7 @@ endif
 #########################################################################################
 # copy over bootrom files
 #########################################################################################
-$(build_dir) $(OUT_DIR):
+$(build_dir):
 	mkdir -p $@
 
 $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip/bootrom/bootrom.%.img | $(build_dir)
@@ -101,7 +101,7 @@ $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip
 # create firrtl file rule and variables
 #########################################################################################
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-$(FIRRTL_FILE) $(ANNO_FILE) &: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS)
+$(FIRRTL_FILE) $(ANNO_FILE) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
@@ -144,7 +144,8 @@ SFC_MFC_TARGETS = \
 	$(MFC_MODEL_HRCHY_JSON) \
 	$(MFC_MODEL_SMEMS_JSON) \
 	$(MFC_FILELIST) \
-	$(MFC_BB_MODS_FILELIST)
+	$(MFC_BB_MODS_FILELIST) \
+	$(GEN_COLLATERAL_DIR)
 
 SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 
@@ -161,6 +162,7 @@ SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 # hack: when using dontTouch, io.cpu annotations are not removed by SFC,
 # hence we remove them manually by using jq before passing them to firtool
 $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES)
+	rm -rf $(GEN_COLLATERAL_DIR)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none))
 	$(eval EXTRA_FIRRTL_OPTIONS += $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), $(SFC_REPL_SEQ_MEM),))
@@ -172,16 +174,18 @@ endif
 		--no-dedup \
 		--output-file $(SFC_FIRRTL_BASENAME) \
 		--output-annotation-file $(SFC_ANNO_FILE) \
-		--target-dir $(OUT_DIR) \
+		--target-dir $(GEN_COLLATERAL_DIR) \
 		--input-file $(FIRRTL_FILE) \
 		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		--allow-unrecognized-annotations \
+		-DX $(SFC_LEVEL) \
 		-X $(SFC_LEVEL) \
-		$(EXTRA_FIRRTL_OPTIONS))
+		$(EXTRA_FIRRTL_OPTIONS)) # -X and -DX are duplicates to allow for extra FIRRTL passes to be run
 	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE) # Optionally change file type when SFC generates LowFIRRTL
 	@if [ "$(SFC_LEVEL)" = low ]; then cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > /tmp/unnec-anno-deleted.sfc.anno.json; fi
-	@if [ "$(SFC_LEVEL)" = low ]; then cat /tmp/unnec-anno-deleted.sfc.anno.json > $(SFC_ANNO_FILE) && rm /tmp/unnec-anno-deleted.sfc.anno.json; fi
+	@if [ "$(SFC_LEVEL)" = low ]; then cat /tmp/unnec-anno-deleted.sfc.anno.json | jq 'del(.[] | select(.class | test("SRAMAnnotation"))?)' > /tmp/unnec-anno-deleted2.sfc.anno.json; fi
+	@if [ "$(SFC_LEVEL)" = low ]; then cat /tmp/unnec-anno-deleted2.sfc.anno.json > $(SFC_ANNO_FILE) && rm /tmp/unnec-anno-deleted.sfc.anno.json && rm /tmp/unnec-anno-deleted2.sfc.anno.json; fi
 	firtool \
 		--format=fir \
 		--dedup \
@@ -192,13 +196,13 @@ endif
 		--disable-annotation-classless \
 		--disable-annotation-unknown \
 		--mlir-timing \
-		--lowering-options=emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,explicitBitcast,verifLabels,locationInfoStyle=wrapInAtSquareBracket \
+		--lowering-options=emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,locationInfoStyle=wrapInAtSquareBracket \
 		--repl-seq-mem \
 		--repl-seq-mem-file=$(MFC_SMEMS_CONF) \
 		--repl-seq-mem-circuit=$(MODEL) \
 		--annotation-file=$(SFC_ANNO_FILE) \
 		--split-verilog \
-		-o $(OUT_DIR) \
+		-o $(GEN_COLLATERAL_DIR) \
 		$(SFC_FIRRTL_FILE)
 	-mv $(SFC_SMEMS_CONF) $(MFC_SMEMS_CONF)
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
@@ -211,12 +215,20 @@ $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILEL
 		--out-dut-filelist $(TOP_MODS_FILELIST) \
 		--out-model-filelist $(MODEL_MODS_FILELIST) \
 		--in-all-filelist $(MFC_FILELIST) \
-		--target-dir $(OUT_DIR)
-	$(SED) -e 's;^;$(OUT_DIR)/;' $(MFC_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
+		--target-dir $(GEN_COLLATERAL_DIR)
+	$(SED) -e 's;^;$(GEN_COLLATERAL_DIR)/;' $(MFC_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(TOP_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(MODEL_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
 	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
+
+$(TOP_BB_MODS_FILELIST) $(MODEL_BB_MODS_FILELIST) &: $(BB_MODS_FILELIST) $(MFC_TOP_HRCHY_JSON) $(FINAL_ANNO_FILE)
+	$(base_dir)/scripts/split-bb-files.py \
+		--in-bb-f $(BB_MODS_FILELIST) \
+		--in-top-hrchy-json $(MFC_TOP_HRCHY_JSON) \
+		--in-anno-json $(FINAL_ANNO_FILE) \
+		--out-top-bb-f $(TOP_BB_MODS_FILELIST) \
+		--out-model-bb-f $(MODEL_BB_MODS_FILELIST)
 
 $(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JSON)
 	$(base_dir)/scripts/split-mems-conf.py \
@@ -238,8 +250,10 @@ $(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(MODEL_SMEMS_CONF) | $(TOP_SMEMS_FILE
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
+# note: {MODEL,TOP}_BB_MODS_FILELIST is added as a req. so that the files get generated,
+#       however it is really unneeded since ALL_MODS_FILELIST includes all BB files
 ########################################################################################
-$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE)
+$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE) $(TOP_BB_MODS_FILELIST) $(MODEL_BB_MODS_FILELIST)
 	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' > $@
 	echo "$(TOP_SMEMS_FILE)" >> $@
 	echo "$(MODEL_SMEMS_FILE)" >> $@

@@ -18,13 +18,17 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
   * Hammer output directory. Can be changed with the ``OBJ_DIR`` variable.
   * Will contain subdirectories such as ``syn-rundir`` and ``par-rundir`` and the ``inputs.yml`` denoting the top module and input Verilog files.
 
+* ``env.yml``
+
+  * A template file for tool environment configuration. Fill in the install and license server paths for your environment. For SLICE and BWRC affiliates, example environment configs are found `here <https://github.com/ucb-bar/hammer/tree/master/e2e/env>`__.
+
 * ``example-vlsi-sky130``
 
   * Entry point to Hammer. Contains example placeholders for hooks.
 
 * ``example-sky130.yml``, ``example-openroad.yml``, ``example-designs/sky130-openroad.yml``
 
-  * Hammer IR for this tutorial.
+  * Hammer IR for this tutorial. For SLICE and BWRC affiliates, an example ASAP7 config is found `here <https://github.com/ucb-bar/hammer/tree/master/e2e/pdks>`__.
 
 * ``example-design.yml``, ``example-asap7.yml``, ``example-tech.yml``
 
@@ -34,15 +38,14 @@ This example gives a suggested file structure and build system. The ``vlsi/`` fo
 
   * All of the elaborated Chisel and FIRRTL.
 
-* ``hammer``, ``hammer/src/hammer-vlsi/<syn-par-drc-lvs>/<tool>``, ``hammer/src/hammer-vlsi/technology/<tech>``
+* ``hammer-<vendor>-plugins``
 
-  * Core repository, and open-source tool and technology plugins.
+  * Tool plugin repositories not used for this tutorial (they are provided in the hammer-vlsi package).
 
 Prerequisites
 -------------
 
-* Python 3.6+
-* numpy package
+* Python 3.9+
 * OpenROAD flow tools:
 
   * Yosys (synthesis), install `from source <https://yosyshq.net/yosys/download.html>`__ or `using conda <https://anaconda.org/TimVideos/yosys>`__
@@ -50,26 +53,18 @@ Prerequisites
   * Magic (DRC), install `from source <http://www.opencircuitdesign.com/magic/install.html>`__
   * NetGen (LVS), install `from source <http://www.opencircuitdesign.com/netgen/install.html>`__ or `using conda <https://anaconda.org/conda-forge/netgen>`__
 
-* Sky130 PDK, install using `these directions  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__
+* Sky130 PDK, install using `these directions  <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__
 
 Initial Setup
 -------------
-In the Chipyard root, run:
+In the Chipyard root, ensure that you have the Chipyard conda environment activated. Then, run:
 
 .. code-block:: shell
 
     ./scripts/init-vlsi.sh sky130 openroad
 
-to pull the Hammer submodule. Note that for technologies other than ``sky130`` or ``asap7``, the tech plugin submodule is cloned into the ``vlsi`` folder,
+to pull and install the plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule is cloned in the ``vlsi`` folder, 
 and for the commercial tool flow (set up by omitting the ``openroad`` argument), the tool plugin submodules are cloned into the ``vlsi`` folder.
-
-Pull the Hammer environment into the shell:
-
-.. code-block:: shell
-
-    cd vlsi
-    export HAMMER_HOME=$PWD/hammer
-    source $HAMMER_HOME/sourceme.sh
 
 Building the Design
 --------------------
@@ -92,6 +87,7 @@ which will cause additional variables to be set in ``tutorial.mk``, a few of whi
 * ``DESIGN_CONF`` and ``EXTRA_CONFS`` allow for additonal design-specific overrides of the Hammer IR in ``example-sky130.yml``
 * ``VLSI_OBJ_DIR=build-sky130-openroad`` gives the build directory a unique name to allow running multiple flows in the same repo. Note that for the rest of the tutorial we will still refer to this directory in file paths as ``build``, again for brevity.
 * ``VLSI_TOP`` is by default ``ChipTop``, which is the name of the top-level Verilog module generated in the Chipyard SoC configs. By instead setting ``VLSI_TOP=Rocket``, we can use the Rocket core as the top-level module for the VLSI flow, which consists only of a single RISC-V core (and no caches, peripherals, buses, etc). This is useful to run through this tutorial quickly, and does not rely on any SRAMs.
+* ``ENABLE_CUSTOM_FIRRTL_PASS = 1`` is required for synthesis through Yosys. This reverts to the Scala FIRRTL Compiler so that unsupported multidimensional arrays are not generated in the Verilog.
 
 Running the VLSI Flow
 ---------------------
@@ -106,7 +102,7 @@ example-sky130.yml
 This contains the Hammer configuration for this example project. Example clock constraints, power straps definitions, placement constraints, and pin constraints are given. Additional configuration for the extra libraries and tools are at the bottom.
 
 First, set ``technology.sky130.<sky130A, openram_lib>`` to the absolute path of the respective directories containing the Sky130 PDK and SRAM files. See the
-`Sky130 Hammer plugin README <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__
+`Sky130 Hammer plugin README <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__
 for details about the PDK setup.
 
 
@@ -163,7 +159,7 @@ To run DRC & LVS:
     make lvs tutorial=sky130-openroad
 
 Some DRC errors are expected from this PDK, especially with regards to the SRAMs, as explained in the
-`Sky130 Hammer plugin README  <https://github.com/ucb-bar/hammer/blob/master/src/hammer-vlsi/technology/sky130/README.md>`__.
+`Sky130 Hammer plugin README  <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__.
 
 
 VLSI Flow Control
@@ -180,11 +176,11 @@ Firt, refer to the :ref:`VLSI/Hammer:VLSI Flow Control` documentation. The below
       # example of re-running only floorplanning to test out a new floorplan configuration
       make redo-par HAMMER_EXTRA_ARGS="--only_step floorplan_design -p example-sky130.yml"
 
-See the `OpenROAD tool plugin <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/par/openroad>`__ for the full list of OpenROAD tool steps and their implementations.
+See the `OpenROAD tool plugin <https://github.com/ucb-bar/hammer/blob/master/hammer/par/openroad>`__ for the full list of OpenROAD tool steps and their implementations.
 
 Documentation
 -------------
-For more information about Hammer's underlying implementation, visit the `Hammer documentation website <https://docs.hammer-eda.org/en/latest/index.html>`__.
+For more information about Hammer's underlying implementation, visit the `Hammer documentation website <https://hammer-vlsi.readthedocs.io/en/latest/index.html>`__.
 
-For details about the plugins used in this tutorial, check out the `OpenROAD tool plugin repo + README <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/par/openroad>`__
-and `Sky130 tech plugin repo + README <https://github.com/ucb-bar/hammer/tree/master/src/hammer-vlsi/technology/sky130>`__.
+For details about the plugins used in this tutorial, check out the `OpenROAD tool plugin repo + README <https://github.com/ucb-bar/hammer/blob/master/hammer/par/openroad>`__
+and `Sky130 tech plugin repo + README <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__.

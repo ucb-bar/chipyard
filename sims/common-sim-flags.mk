@@ -20,7 +20,7 @@ SIM_CXXFLAGS = \
 	-std=c++17 \
 	-I$(RISCV)/include \
 	-I$(dramsim_dir) \
-	-I$(OUT_DIR) \
+	-I$(GEN_COLLATERAL_DIR) \
 	$(EXTRA_SIM_CXXFLAGS)
 
 SIM_LDFLAGS = \
@@ -33,6 +33,3 @@ SIM_LDFLAGS = \
 	-lfesvr \
 	-ldramsim \
 	$(EXTRA_SIM_LDFLAGS)
-
-SIM_FILE_REQS += \
-	$(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v

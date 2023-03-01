@@ -1,6 +1,6 @@
 # Technology Setup
 # Technology used is Sky130
-vlsi.core.technology: sky130
+vlsi.core.technology: "hammer.technology.sky130"
 
 vlsi.core.max_threads: 12
 
@@ -71,7 +71,4 @@ vlsi.inputs.pin.assignments: [
 ]
 
 # SRAM Compiler compiler options
-vlsi.core.sram_generator_tool: "sram_compiler"
-# You should specify a location for the SRAM generator in the tech plugin
-vlsi.core.sram_generator_tool_path: ["hammer/src/hammer-vlsi/technology/sky130"]
-vlsi.core.sram_generator_tool_path_meta: "append"
+vlsi.core.sram_generator_tool: "hammer.technology.sky130.sram_compiler"

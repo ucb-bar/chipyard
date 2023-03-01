@@ -12,7 +12,10 @@ lazy val commonSettings = Seq(
   assembly / assemblyMergeStrategy := { _ match {
     case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
     case _ => MergeStrategy.first}},
-  scalacOptions ++= Seq("-deprecation","-unchecked"),
+  scalacOptions ++= Seq(
+    "-deprecation",
+    "-unchecked",
+    "-Ymacro-annotations"), // fix hierarchy API
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
   allDependencies := {
     // drop specific maven dependencies in subprojects in favor of Chipyard's version
@@ -170,7 +173,7 @@ lazy val tracegen = (project in file("generators/tracegen"))
   .settings(commonSettings)
 
 lazy val icenet = (project in file("generators/icenet"))
-  .dependsOn(testchipip, rocketchip)
+  .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -206,7 +209,7 @@ lazy val sha3 = (project in file("generators/sha3"))
   .settings(commonSettings)
 
 lazy val gemmini = (project in file("generators/gemmini"))
-  .dependsOn(testchipip, rocketchip)
+  .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(chiselTestSettings)
   .settings(commonSettings)
