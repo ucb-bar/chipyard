@@ -29,14 +29,16 @@ class WithArty100TUARTTSI(uartBaudRate: BigInt = 115200) extends OverrideHarness
       val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
       withClockAndReset(th.buildtopClock, th.buildtopReset) {
         val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
-        val uart_to_tsi = Module(new UARTToTSI(freq, UARTParams(0, initBaudRate=uartBaudRate)))
-        ram.module.io.tsi_ser.flipConnect(uart_to_tsi.io.serial)
+        val uart_to_serial = Module(new UARTToSerial(
+          freq, UARTParams(0, initBaudRate=uartBaudRate)))
+        val serial_width_adapter = Module(new SerialWidthAdapter(
+          narrowW = 8, wideW = SerialAdapter.SERIAL_TSI_WIDTH))
+        serial_width_adapter.io.narrow.flipConnect(uart_to_serial.io.serial)
 
-        ath.io_uart_bb.bundle <> uart_to_tsi.io.uart
-        ath.other_leds(1) := uart_to_tsi.io.serial.out.valid
-        ath.other_leds(2) := uart_to_tsi.io.serial.in.valid
-        ath.other_leds(3) := uart_to_tsi.io.uart.rxd
-        ath.other_leds(4) := uart_to_tsi.io.uart.txd
+        ram.module.io.tsi_ser.flipConnect(serial_width_adapter.io.wide)
+
+        ath.io_uart_bb.bundle <> uart_to_serial.io.uart
+        ath.other_leds(1) := uart_to_serial.io.dropped
 
         ath.other_leds(9) := ram.module.io.adapter_state(0)
         ath.other_leds(10) := ram.module.io.adapter_state(1)

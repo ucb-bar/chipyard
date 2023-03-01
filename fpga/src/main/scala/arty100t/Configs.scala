@@ -53,7 +53,7 @@ class UART921600RocketArty100TConfig extends Config(
 
 class NoCoresArty100TConfig extends Config(
   new WithArty100TTweaks ++
-  new chipyard.config.WithMemoryBusFrequency(10.0) ++
-  new chipyard.config.WithPeripheryBusFrequency(10.0) ++  // Match the sbus and pbus frequency
+  new chipyard.config.WithMemoryBusFrequency(50.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(50.0) ++  // Match the sbus and pbus frequency
   new chipyard.config.WithBroadcastManager ++ // no l2
   new chipyard.NoCoresConfig)

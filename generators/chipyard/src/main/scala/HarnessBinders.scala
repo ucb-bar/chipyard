@@ -329,9 +329,12 @@ class WithUARTSerial extends OverrideHarnessBinder({
       val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
       withClockAndReset(th.buildtopClock, th.buildtopReset) {
         val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
-        val uart_to_tsi = Module(new UARTToTSI(freq))
-        UARTAdapter.connect(Seq(uart_to_tsi.io.uart), uart_to_tsi.div)
-        ram.module.io.tsi_ser.flipConnect(uart_to_tsi.io.serial)
+        val uart_to_serial = Module(new UARTToSerial(freq, UARTParams(0)))
+        val serial_width_adapter = Module(new SerialWidthAdapter(
+          8, SerialAdapter.SERIAL_TSI_WIDTH))
+        ram.module.io.tsi_ser.flipConnect(serial_width_adapter.io.wide)
+        UARTAdapter.connect(Seq(uart_to_serial.io.uart), uart_to_serial.div)
+        serial_width_adapter.io.narrow.flipConnect(uart_to_serial.io.serial)
         th.success := false.B
       }
     })
