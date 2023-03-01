@@ -8,7 +8,7 @@ HELP_COMPILATION_VARIABLES = \
 "   JAVA_TOOL_OPTIONS = if overridden, set underlying java tool options (default sets misc. sizes and tmp dir)" \
 "   SBT_OPTS          = set additional sbt command line options (these take the form -Dsbt.<option>=<setting>) " \
 "                       See https://www.scala-sbt.org/1.x/docs/Command-Line-Reference.html\#Command+Line+Options" \
-"   SBT_BIN           = if overridden, used to invoke sbt (default is to invoke sbt by sbt-launch.jar)" \
+"   SBT               = if overridden, used to invoke sbt (default is to invoke sbt by sbt-launch.jar)" \
 "   FIRRTL_LOGLEVEL   = if overridden, set firrtl log level (default is error)"
 
 HELP_PROJECT_VARIABLES = \
@@ -143,6 +143,13 @@ ifeq ($(GENERATOR_PACKAGE),hwacha)
 	long_name=$(MODEL_PACKAGE).$(CONFIG)
 endif
 
+# classpaths
+GEN_CLASSPATH ?= $(gen_dir)/chipyard-generator.jar
+BTL_CLASSPATH ?= $(gen_dir)/barstools.jar
+# if *_CLASSPATH is a true java classpath, it can be colon-delimited list of paths (on *nix)
+GEN_CLASSPATH_TARGETS ?= $(subst :, ,$(GEN_CLASSPATH))
+BTL_CLASSPATH_TARGETS ?= $(subst :, ,$(BTL_CLASSPATH))
+
 # chisel generated outputs
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
@@ -212,22 +219,20 @@ export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -Djava.io.tmpdir=$(JAVA
 #########################################################################################
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
-SBT_THIN_CLIENT_TIMESTAMP = $(base_dir)/project/target/active.json
-
-ifdef ENABLE_SBT_THIN_CLIENT
-SCALA_BUILDTOOL_DEPS += $(SBT_THIN_CLIENT_TIMESTAMP)
-# enabling speeds up sbt loading
-# use with sbt script or sbtn to bypass error code issues
-SBT_CLIENT_FLAG = --client
-endif
-
 # passes $(JAVA_TOOL_OPTIONS) from env to java
-SBT_BIN ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
-SBT = $(SBT_BIN) $(SBT_CLIENT_FLAG)
-SBT_NON_THIN = $(subst $(SBT_CLIENT_FLAG),,$(SBT))
+SBT ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
 
+# (1) - classpath of the fat jar
+# (2) - main class
+# (3) - main class arguments
 define run_scala_main
-	cd $(base_dir) && $(SBT) ";project $(1); runMain $(2) $(3)"
+	cd $(base_dir) && java -cp $(1) $(2) $(3)
+endef
+
+# (1) - sbt project to assemble
+# (2) - classpath file(s) to create
+define run_sbt_assembly
+	cd $(base_dir) && $(SBT) ";project $(1); set assembly / assemblyOutputPath := file(\"$(2)\"); assembly"
 endef
 
 FIRRTL_LOGLEVEL ?= error
