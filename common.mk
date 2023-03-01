@@ -378,9 +378,10 @@ start-sbt-server: check-thin-client
 #########################################################################################
 # print help text (and other help)
 #########################################################################################
+CONFIG_FRAG_LEVELS ?= 3
 .PHONY: find-config-fragments
 find-config-fragments: $(SCALA_SOURCES)
-	@$(base_dir)/scripts/config-finder.py $^
+	@$(base_dir)/scripts/config-finder.py -l $(CONFIG_FRAG_LEVELS) $^
 
 .PHONY: help
 help:
