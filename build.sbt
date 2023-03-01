@@ -1,15 +1,14 @@
 // See LICENSE for license details.
 
 val defaultVersions = Map(
-  "chisel3" -> "3.5.1",
-  "chisel-iotesters" -> "2.5.1"
+  "chisel3" -> "3.5.5",
+  "chisel-iotesters" -> "2.5.5"
 )
 
 organization := "edu.berkeley.cs"
 version := "0.4-SNAPSHOT"
 name := "tapeout"
-scalaVersion := "2.12.13"
-crossScalaVersions := Seq("2.12.13", "2.13.6")
+scalaVersion := "2.13.10"
 scalacOptions := Seq("-deprecation", "-feature", "-language:reflectiveCalls")
 Test / scalacOptions ++= Seq("-language:reflectiveCalls")
 fork := true

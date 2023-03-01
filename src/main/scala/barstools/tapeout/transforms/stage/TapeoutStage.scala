@@ -38,8 +38,7 @@ object DuplicateCompilerAnnotation extends HasShellOptions {
       longOption = "duplicate-compiler",
       shortOption = Some("DX"),
       toAnnotationSeq = (s: String) => {
-        Seq(
-          CompilerNameAnnotation(s))
+        Seq(CompilerNameAnnotation(s))
       },
       helpText = "duplicate-compiler",
       helpValueName = Some("same as --compiler FIRRTL flag")
