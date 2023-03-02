@@ -170,7 +170,7 @@ SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 # hack: lower to low firrtl if Fixed types are found
 # hack: when using dontTouch, io.cpu annotations are not removed by SFC,
 # hence we remove them manually by using jq before passing them to firtool
-$(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) $(FINAL_ANNO_FILE) : $(FIRRTL_FILE) $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE)
+$(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) $(FINAL_ANNO_FILE) &: $(FIRRTL_FILE) $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none))
 	$(eval EXTRA_FIRRTL_OPTIONS += $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), $(SFC_REPL_SEQ_MEM),))
