@@ -19,8 +19,6 @@ libraryDependencies ++= Seq("chisel3","chisel-iotesters").map {
 libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-json" % "2.9.2",
   "org.scalatest" %% "scalatest" % "3.2.9" % "test",
-  "org.apache.logging.log4j" % "log4j-api" % "2.11.2",
-  "org.apache.logging.log4j" % "log4j-core" % "2.11.2"
 )
 addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % defaultVersions("chisel3") cross CrossVersion.full)
 resolvers ++= Seq(
