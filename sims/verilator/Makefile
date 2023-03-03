@@ -47,7 +47,7 @@ debug: $(sim_debug)
 # simulaton requirements
 #########################################################################################
 SIM_FILE_REQS += \
-	$(CHIPYARD_RSRCS_DIR)/csrc/emulator.cc \
+	$(CHIPYARD_RSRCS_DIR)/csrc/cy-emulator.cc \
 	$(ROCKETCHIP_RSRCS_DIR)/csrc/verilator.h \
 
 # the following files are needed for emulator.cc to compile (even if they aren't part of the RTL build)

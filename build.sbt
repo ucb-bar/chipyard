@@ -4,14 +4,37 @@ import Tests._
 // implicit one
 lazy val chipyardRoot = Project("chipyardRoot", file("."))
 
+// keep chisel/firrtl specific class files, drop other conflicts
+val chiselFirrtlMergeStrategy = CustomMergeStrategy("cfmergestrategy") { deps =>
+  import sbtassembly.Assembly.{Project, Library}
+  val keepDeps = deps.filter { dep =>
+    val nm = dep match {
+      case p: Project => p.name
+      case l: Library => l.moduleCoord.name
+    }
+    Seq("firrtl", "chisel3").contains(nm.split("_")(0)) // split by _ to avoid checking on major/minor version
+  }
+  if (keepDeps.size <= 1) {
+    Right(keepDeps.map(dep => JarEntry(dep.target, dep.stream)))
+  } else {
+    Left(s"Unable to resolve conflict (${keepDeps.size}>1 conflicts):\n${keepDeps.mkString("\n")}")
+  }
+}
+
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
   version := "1.6",
   scalaVersion := "2.13.10",
   assembly / test := {},
-  assembly / assemblyMergeStrategy := { _ match {
-    case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
-    case _ => MergeStrategy.first}},
+  assembly / assemblyMergeStrategy := {
+    case PathList("chisel3", "stage", xs @ _*) => chiselFirrtlMergeStrategy
+    case PathList("firrtl", "stage", xs @ _*) => chiselFirrtlMergeStrategy
+    // should be safe in JDK11: https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
+    case x if x.endsWith("module-info.class") => MergeStrategy.discard
+    case x =>
+      val oldStrategy = (assembly / assemblyMergeStrategy).value
+      oldStrategy(x)
+  },
   scalacOptions ++= Seq(
     "-deprecation",
     "-unchecked",
@@ -86,8 +109,6 @@ lazy val hardfloat  = (project in rocketChipDir / "hardfloat")
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.json4s" %% "json4s-jackson" % "3.6.6",
       "org.scalatest" %% "scalatest" % "3.2.0" % "test"
     )
   )
@@ -97,20 +118,11 @@ lazy val rocketMacros  = (project in rocketChipDir / "macros")
   .settings(
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.json4s" %% "json4s-jackson" % "3.6.6",
-      "org.scalatest" %% "scalatest" % "3.2.0" % "test"
     )
   )
 
 lazy val rocketConfig = (project in rocketChipDir / "api-config-chipsalliance/build-rules/sbt")
   .settings(commonSettings)
-  .settings(
-    libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.json4s" %% "json4s-jackson" % "3.6.6",
-      "org.scalatest" %% "scalatest" % "3.2.0" % "test"
-    )
-  )
 
 lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
   .dependsOn(hardfloat, rocketMacros, rocketConfig)
@@ -230,7 +242,6 @@ lazy val iocell = Project(id = "iocell", base = file("./tools/barstools/") / "sr
 lazy val tapeout = (project in file("./tools/barstools/"))
   .settings(chiselSettings)
   .settings(chiselTestSettings)
-  .enablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonSettings)
 
 lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))

@@ -99,9 +99,11 @@ $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip
 # compile scala jars
 #########################################################################################
 $(GEN_CLASSPATH_TARGETS) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS)
+	mkdir -p $(dir $@)
 	$(call run_sbt_assembly,$(SBT_PROJECT),$(GEN_CLASSPATH))
 
 $(BTL_CLASSPATH_TARGETS) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS)
+	mkdir -p $(dir $@)
 	$(call run_sbt_assembly,tapeout,$(BTL_CLASSPATH))
 
 #########################################################################################
