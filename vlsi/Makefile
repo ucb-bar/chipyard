@@ -46,9 +46,9 @@ VLSI_MODEL_DUT_NAME ?= chiptop
 # If overriding, this should be relative to $(vlsi_dir)
 VLSI_OBJ_DIR       ?= build
 ifneq ($(CUSTOM_VLOG),)
-	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/custom-$(VLSI_TOP)
+	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/$(VLSI_TOP)
 else
-	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/$(long_name)-$(VLSI_TOP)
+	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/$(long_name)-$(TOP)
 endif
 
 #########################################################################################
