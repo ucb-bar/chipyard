@@ -220,7 +220,7 @@ export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -Djava.io.tmpdir=$(JAVA
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
 # passes $(JAVA_TOOL_OPTIONS) from env to java
-SBT ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
+SBT ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
 
 # (1) - classpath of the fat jar
 # (2) - main class
