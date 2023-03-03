@@ -3,13 +3,21 @@
 Advanced Usage
 ==============
 
-Hammer Development
-------------------
+Hammer Development and Upgrades
+-------------------------------
 If you need to develop Hammer within Chipyard or use a version of Hammer beyond the latest PyPI release, clone the `Hammer repository <https://github.com/ucb-bar/hammer>`__ somewhere else on your disk. Then:
 
 .. code-block:: shell
     
     pip install -e <path/to/hammer>
+
+To bump specific plugins to their latest commits and install them, you can use the upgrade script from the Chipyard root directory, with arguments for match patterns for the plugin names:
+
+.. code-block:: shell
+
+    ./scripts/upgrade-vlsi.sh <pattern(s)>
+
+If you would like to upgrade your Hammer installation to the latest PyPI release and bump all of your plugins at once, run the above script without arguments. WARNING: this may pull in plugin changes that are newer than the latest Hammer release and cause incompatibility issues.
 
 Alternative RTL Flows
 ---------------------
