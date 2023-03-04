@@ -4,20 +4,17 @@ import Tests._
 // implicit one
 lazy val chipyardRoot = Project("chipyardRoot", file("."))
 
-// keep chisel/firrtl specific class files, drop other conflicts
-val chiselFirrtlMergeStrategy = CustomMergeStrategy("cfmergestrategy") { deps =>
+// keep chisel/firrtl specific class files, rename other conflicts
+val chiselFirrtlMergeStrategy = CustomMergeStrategy.rename { dep =>
   import sbtassembly.Assembly.{Project, Library}
-  val keepDeps = deps.filter { dep =>
-    val nm = dep match {
-      case p: Project => p.name
-      case l: Library => l.moduleCoord.name
-    }
-    Seq("firrtl", "chisel3").contains(nm.split("_")(0)) // split by _ to avoid checking on major/minor version
+  val nm = dep match {
+    case p: Project => p.name
+    case l: Library => l.moduleCoord.name
   }
-  if (keepDeps.size <= 1) {
-    Right(keepDeps.map(dep => JarEntry(dep.target, dep.stream)))
+  if (Seq("firrtl", "chisel3").contains(nm.split("_")(0))) { // split by _ to avoid checking on major/minor version
+    dep.target
   } else {
-    Left(s"Unable to resolve conflict (${keepDeps.size}>1 conflicts):\n${keepDeps.mkString("\n")}")
+    "renamed/" + dep.target
   }
 }
 
