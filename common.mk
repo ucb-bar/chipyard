@@ -18,6 +18,7 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
 "   ENABLE_SBT_THIN_CLIENT    = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
 "   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & MFC converts to Verilog)" \
+" 	ENABLE_VLSI_FLOW          = if set, add compilation flags to enable the vlsi flow for hammer \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
 "   EXTRA_FIRRTL_OPTIONS      = additional options to pass to the FIRRTL compiler"
 
@@ -26,6 +27,11 @@ EXTRA_SIM_CXXFLAGS   ?=
 EXTRA_SIM_LDFLAGS    ?=
 EXTRA_SIM_SOURCES    ?=
 EXTRA_SIM_REQS       ?=
+ENABLE_CUSTOM_FIRRTL_PASS += $(ENABLE_VLSI_FLOW)
+
+
+$(info $$ENABLE_CUSTOM_FIRRTL_PASS is [${ENABLE_CUSTOM_FIRRTL_PASS}])
+$(info $$ENABLE_VLSI_FLOW is [${ENABLE_VLSI_FLOW}])
 
 #----------------------------------------------------------------------------
 HELP_SIMULATION_VARIABLES += \
