@@ -88,7 +88,7 @@ dir="software"
 branches=("master" "dev")
 search
 
-submodules=("DRAMSim2" "axe" "barstools" "chisel-testers" "dsptools" "rocket-dsp-utils" "torture")
+submodules=("DRAMSim2" "axe" "barstools" "dsptools" "rocket-dsp-utils" "torture")
 dir="tools"
 branches=("master" "dev")
 search
