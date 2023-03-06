@@ -11,7 +11,6 @@ The following pages will introduce them, and how we can use them in order to gen
    Chisel
    FIRRTL
    Treadle
-   Chisel-Testers
    Dsptools
    Barstools
    Dromajo
