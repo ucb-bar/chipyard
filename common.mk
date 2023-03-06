@@ -48,6 +48,7 @@ HELP_COMMANDS += \
 "   run-tests                   = run all assembly and benchmark tests" \
 "   launch-sbt                  = start sbt terminal" \
 "   {shutdown,start}-sbt-server = shutdown or start sbt server if using ENABLE_SBT_THIN_CLIENT" \
+"   find-config-fragments       = list all config. fragments and their locations (recursive up to CONFIG_FRAG_LEVELS=$(CONFIG_FRAG_LEVELS))"
 
 #########################################################################################
 # include additional subproject make fragments
@@ -387,8 +388,21 @@ start-sbt-server: check-thin-client
 	cd $(base_dir) && $(SBT) "exit"
 
 #########################################################################################
-# print help text
+# print help text (and other help)
 #########################################################################################
+# helper to add newlines (avoid bash argument too long)
+define \n
+
+
+endef
+
+CONFIG_FRAG_LEVELS ?= 3
+.PHONY: find-config-fragments
+find-config-fragments: $(SCALA_SOURCES)
+	rm -rf /tmp/scala_files.f
+	@$(foreach file,$(SCALA_SOURCES),echo $(file) >> /tmp/scala_files.f${\n})
+	$(base_dir)/scripts/config-finder.py -l $(CONFIG_FRAG_LEVELS) /tmp/scala_files.f
+
 .PHONY: help
 help:
 	@for line in $(HELP_LINES); do echo "$$line"; done
