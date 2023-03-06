@@ -205,7 +205,7 @@ sim_common_files       ?= $(build_dir)/sim_files.common.f
 #########################################################################################
 JAVA_HEAP_SIZE ?= 8G
 JAVA_TMP_DIR ?= $(base_dir)/.java_tmp
-export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -Djava.io.tmpdir=$(JAVA_TMP_DIR)
+export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -Dsbt.supershell=false -Djava.io.tmpdir=$(JAVA_TMP_DIR)
 
 #########################################################################################
 # default sbt launch command
