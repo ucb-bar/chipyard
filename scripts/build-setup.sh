@@ -167,6 +167,17 @@ fi
 
 # setup firemarshal
 if run_step "8"; then
+    if run_step "6"; then
+        firesim_dir="$CYDIR/sims/firesim"
+    else
+        firesim_dir="$CYDIR/../.."
+    fi
+
+    # Configure firemarshal to know where our firesim installation is
+    if [ ! -f ./software/firemarshal/marshal-config.yaml ]; then
+      echo "firesim-dir: '${firesim_dir}'" > ./software/firemarshal/marshal-config.yaml
+    fi
+
     pushd $CYDIR/software/firemarshal
     ./init-submodules.sh
 
