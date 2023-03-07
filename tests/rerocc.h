@@ -75,8 +75,8 @@ inline uint64_t rerocc_reqrate(uint64_t tracker, uint64_t epoch, uint64_t max_re
 // can have multiple configured bypass address range at the same time
 // initialize configured bypass range upon rerocc_fence
 inline void rerocc_bypass(uint64_t tracker, void* addr_start, void* addr_end){                    
-  uint64_t op1 = (addr_end << 16) | tracker;
-  uint64_t op2 = addr_start;
+  uint64_t op1 = ((uint64_t) addr_end << 16) | tracker;
+  uint64_t op2 = (uint64_t) addr_start;
   ROCC_INSTRUCTION_SS(0, op1, op2, REROCC_BYPASS);
 }    
 
