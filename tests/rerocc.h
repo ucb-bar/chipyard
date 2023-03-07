@@ -10,7 +10,8 @@
 #define REROCC_INFO (3)
 #define REROCC_FENCE (4)
 #define REROCC_CFLUSH (5)
-
+#define REROCC_MEMREQ (6)
+#define REROCC_BYPASS (7)
 
 
 // Attemps to assign a local tracker to one of the accelerators in the OH mask
@@ -64,10 +65,20 @@ inline uint64_t rerocc_reqrate(uint64_t tracker, uint64_t epoch, uint64_t max_re
     ROCC_INSTRUCTION_DSS(0, r, op1, op2, REROCC_MEMREQ);
   }
   else{
+    r = 0;
     ROCC_INSTRUCTION_SS(0, op1, op2, REROCC_MEMREQ);
   }
   return r;
 }
+
+// address falls into this range redirects to DRAM by bypassing
+// can have multiple configured bypass address range at the same time
+// initialize configured bypass range upon rerocc_fence
+inline void rerocc_bypass(uint64_t tracker, void* addr_start, void* addr_end){                    
+  uint64_t op1 = (addr_end << 16) | tracker;
+  uint64_t op2 = addr_start;
+  ROCC_INSTRUCTION_SS(0, op1, op2, REROCC_BYPASS);
+}    
 
 #endif
 
