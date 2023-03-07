@@ -56,6 +56,18 @@ inline void rerocc_cflush(void* addr) {
   ROCC_INSTRUCTION_S(0, op1, REROCC_CFLUSH);
 }
 
+inline uint64_t rerocc_reqrate(uint64_t tracker, uint64_t epoch, uint64_t max_req, bool read){
+  uint64_t op1 = tracker;
+  uint64_t op2 = (max_req << 32) | (epoch);  
+  uint64_t r;
+  if (read){
+    ROCC_INSTRUCTION_DSS(0, r, op1, op2, REROCC_MEMREQ);
+  }
+  else{
+    ROCC_INSTRUCTION_SS(0, op1, op2, REROCC_MEMREQ);
+  }
+  return r;
+}
 
 #endif
 
