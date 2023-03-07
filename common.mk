@@ -406,10 +406,11 @@ endef
 
 CONFIG_FRAG_LEVELS ?= 3
 .PHONY: find-config-fragments
+find-config-fragments: private IN_F := $(shell mktemp -d -t cy-XXXXXXXX)/scala_files.f
 find-config-fragments: $(SCALA_SOURCES)
-	rm -rf /tmp/scala_files.f
-	@$(foreach file,$(SCALA_SOURCES),echo $(file) >> /tmp/scala_files.f${\n})
-	$(base_dir)/scripts/config-finder.py -l $(CONFIG_FRAG_LEVELS) /tmp/scala_files.f
+	@$(foreach file,$(SCALA_SOURCES),echo $(file) >> $(IN_F)${\n})
+	$(base_dir)/scripts/config-finder.py -l $(CONFIG_FRAG_LEVELS) $(IN_F)
+	@rm -rf $(dir $(IN_F))
 
 .PHONY: help
 help:
