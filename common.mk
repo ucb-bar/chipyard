@@ -29,10 +29,6 @@ EXTRA_SIM_SOURCES    ?=
 EXTRA_SIM_REQS       ?=
 ENABLE_CUSTOM_FIRRTL_PASS += $(ENABLE_VLSI_FLOW)
 
-
-$(info $$ENABLE_CUSTOM_FIRRTL_PASS is [${ENABLE_CUSTOM_FIRRTL_PASS}])
-$(info $$ENABLE_VLSI_FLOW is [${ENABLE_VLSI_FLOW}])
-
 #----------------------------------------------------------------------------
 HELP_SIMULATION_VARIABLES += \
 "   EXTRA_SIM_FLAGS        = additional runtime simulation flags (passed within +permissive)" \
@@ -54,6 +50,7 @@ HELP_COMMANDS += \
 "   run-tests                   = run all assembly and benchmark tests" \
 "   launch-sbt                  = start sbt terminal" \
 "   {shutdown,start}-sbt-server = shutdown or start sbt server if using ENABLE_SBT_THIN_CLIENT" \
+"   find-config-fragments       = list all config. fragments and their locations (recursive up to CONFIG_FRAG_LEVELS=$(CONFIG_FRAG_LEVELS))"
 
 #########################################################################################
 # include additional subproject make fragments
@@ -164,6 +161,7 @@ SFC_MFC_TARGETS = \
 	$(GEN_COLLATERAL_DIR)
 
 SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
+MFC_BASE_LOWERING_OPTIONS = emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,locationInfoStyle=wrapInAtSquareBracket
 
 # DOC include start: FirrtlCompiler
 # There are two possible cases for this step. In the first case, SFC
@@ -176,13 +174,18 @@ SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 # hack: lower to low firrtl if Fixed types are found
 # hack: when using dontTouch, io.cpu annotations are not removed by SFC,
 # hence we remove them manually by using jq before passing them to firtool
-$(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) $(FINAL_ANNO_FILE) &: $(FIRRTL_FILE) $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE)
+$(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS) &: $(FIRRTL_FILE) $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none))
 	$(eval EXTRA_FIRRTL_OPTIONS += $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), $(SFC_REPL_SEQ_MEM),))
 else
 	$(eval SFC_LEVEL := low)
 	$(eval EXTRA_FIRRTL_OPTIONS += $(SFC_REPL_SEQ_MEM))
+endif
+ifeq (,$(ENABLE_VLSI_FLOW))
+	$(eval MFC_LOWERING_OPTIONS = $(MFC_BASE_LOWERING_OPTIONS))
+else
+	$(eval MFC_LOWERING_OPTIONS = $(MFC_BASE_LOWERING_OPTIONS),disallowPackedArrays)
 endif
 	if [ $(SFC_LEVEL) = low ]; then jq -s '[.[][]]' $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE); fi
 	if [ $(SFC_LEVEL) = none ]; then cat $(EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE); fi
@@ -214,7 +217,7 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES) $(SFC_LE
 		--disable-annotation-classless \
 		--disable-annotation-unknown \
 		--mlir-timing \
-		--lowering-options=emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,disallowPackedArrays,verifLabels,locationInfoStyle=wrapInAtSquareBracket \
+		--lowering-options=$(MFC_LOWERING_OPTIONS) \
 		--repl-seq-mem \
 		--repl-seq-mem-file=$(MFC_SMEMS_CONF) \
 		--repl-seq-mem-circuit=$(MODEL) \
@@ -393,8 +396,21 @@ start-sbt-server: check-thin-client
 	cd $(base_dir) && $(SBT) "exit"
 
 #########################################################################################
-# print help text
+# print help text (and other help)
 #########################################################################################
+# helper to add newlines (avoid bash argument too long)
+define \n
+
+
+endef
+
+CONFIG_FRAG_LEVELS ?= 3
+.PHONY: find-config-fragments
+find-config-fragments: $(SCALA_SOURCES)
+	rm -rf /tmp/scala_files.f
+	@$(foreach file,$(SCALA_SOURCES),echo $(file) >> /tmp/scala_files.f${\n})
+	$(base_dir)/scripts/config-finder.py -l $(CONFIG_FRAG_LEVELS) /tmp/scala_files.f
+
 .PHONY: help
 help:
 	@for line in $(HELP_LINES); do echo "$$line"; done
