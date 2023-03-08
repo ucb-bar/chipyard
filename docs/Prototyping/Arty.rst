@@ -1,8 +1,62 @@
 Running a Design on Arty
 ========================
 
-Basic Arty Design
------------------
+Arty100T Instructions
+----------------------
+
+The default Xilinx Arty 100T harness uses a TSI-over-UART adapter to bringup the FPGA.
+A user can connect to the Arty 100T target using a special ``uart_tsi`` program that opens a UART TTY.
+The interface for the ``uart_tsi`` program provides unique functionality that is useful for bringing up test chips.
+
+To build the design, run:
+
+.. code-block:: shell
+
+		cd fpga/
+		make SUB_PROJECT=arty100t
+
+To build the UART-based frontend server, run:
+
+.. code-block:: shell
+
+		cd generators/testchipip/uart_tsi
+		make
+
+After programming the bitstream, and connecting the Arty's UART to a host PC via the USB cable, the ``uart_tsi`` program can be run to interact with the target.
+
+Running a program:
+
+.. code-block:: shell
+
+		./uart_tsi +tty=/dev/ttyUSBX dhrystone.riscv
+
+Probe an address on the target system:
+
+.. code-block:: shell
+
+		./uart_tsi +tty=/dev/ttyUSBX +init_read=0x10040 none
+
+Write some address before running a program:
+
+.. code-block:: shell
+
+		./uart_tsi +tty=/dev/ttyUSBX +init_write=0x80000000:0xdeadbeef none
+
+Self-check that binary loading proceeded correctly:
+
+.. code-block:: shell
+
+		./uart_tsi +tty=/dev/ttyUSBX +selfcheck dhrystone.riscv
+
+Run a design at a higher baud rate than default (For example, if ``CONFIG=UART921600RocketArty100TConfig`` were built):
+
+.. code-block:: shell
+
+		./uart_tsi +tty=/dev/ttyUSBX +baudrate=921600 dhrystone.riscv
+
+
+Arty35T Legacy Instructions
+---------------------------
 
 The default Xilinx Arty 35T harness is setup to have JTAG available over the board's PMOD pins, and UART available over its FTDI serial USB adapter. The pin mappings for JTAG signals are identical to those described in the `SiFive Freedom E310 Arty 35T Getting Started Guide <https://static.dev.sifive.com/SiFive-E310-arty-gettingstarted-v1.0.6.pdf>`__.
 The JTAG interface allows a user to connect to the core via OpenOCD, run bare-metal applications, and debug these applications with gdb. UART allows a user to communicate with the core over a USB connection and serial console running on a PC.

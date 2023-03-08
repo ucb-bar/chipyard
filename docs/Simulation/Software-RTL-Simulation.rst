@@ -188,6 +188,16 @@ An open-source vcd-capable waveform viewer is `GTKWave <http://gtkwave.sourcefor
 For a VCS simulation, this will generate a vpd file (this is a proprietary waveform representation format used by Synopsys) that can be loaded to vpd-supported waveform viewers.
 If you have Synopsys licenses, we recommend using the DVE waveform viewer.
 
+Visualizing Chipyard SoCs
+--------------------------
+
+During verilog creation, a graphml file is emitted that will allow you to visualize your Chipyard SoC as a diplomacy graph.
+
+To view the graph, first download a viewer such as `yEd <https://www.yworks.com/products/yed/>`__.
+
+The ``*.graphml`` file will be located in ``generated-src/<...>/``. Open the file in the graph viewer. 
+To get a clearer view of the SoC, switch to "hierarchical" view. For yEd, this would be done by selecting ``layout`` -> ``hierarchical``, and then choosing "Ok" without changing any settings.
+
 .. _sw-sim-verilator-opts:
 
 Additional Verilator Options
