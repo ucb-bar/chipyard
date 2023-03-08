@@ -321,6 +321,27 @@ class WithSimSerial extends OverrideHarnessBinder({
   }
 })
 
+class WithUARTSerial extends OverrideHarnessBinder({
+  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    ports.map({ port =>
+      val freq = p(PeripheryBusKey).dtsFrequency.get
+      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+      withClockAndReset(th.buildtopClock, th.buildtopReset) {
+        val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
+        val uart_to_serial = Module(new UARTToSerial(freq, UARTParams(0)))
+        val serial_width_adapter = Module(new SerialWidthAdapter(
+          8, SerialAdapter.SERIAL_TSI_WIDTH))
+        ram.module.io.tsi_ser.flipConnect(serial_width_adapter.io.wide)
+        UARTAdapter.connect(Seq(uart_to_serial.io.uart), uart_to_serial.div)
+        serial_width_adapter.io.narrow.flipConnect(uart_to_serial.io.serial)
+        th.success := false.B
+      }
+    })
+  }
+})
+
+
 class WithTraceGenSuccess extends OverrideHarnessBinder({
   (system: TraceGenSystemModuleImp, th: HasHarnessSignalReferences, ports: Seq[Bool]) => {
     ports.map { p => when (p) { th.success := true.B } }
