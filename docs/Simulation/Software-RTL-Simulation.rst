@@ -191,11 +191,11 @@ If you have Synopsys licenses, we recommend using the DVE waveform viewer.
 Visualizing Chipyard SoCs
 --------------------------
 
-During the creation of the simulation executable, a graphml file is emitted that will allow you to visualize your Chipyard SoC in a graph format.
+During verilog creation, a graphml file is emitted that will allow you to visualize your Chipyard SoC as a diplomacy graph.
 
 To view the graph, first download a viewer such as `yEd <https://www.yworks.com/products/yed/>`__.
 
-The ``*.graphml`` file will be located in ``generated-src/<...>-<package>-<config>/``. Open the file in the graph viewer. 
+The ``*.graphml`` file will be located in ``generated-src/<...>/``. Open the file in the graph viewer. 
 To get a clearer view of the SoC, switch to "hierarchical" view. For yEd, this would be done by selecting ``layout`` -> ``hierarchical``, and then choosing "Ok" without changing any settings.
 
 .. _sw-sim-verilator-opts:
