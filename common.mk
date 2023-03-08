@@ -18,7 +18,7 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
 "   ENABLE_SBT_THIN_CLIENT    = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
 "   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & MFC converts to Verilog)" \
-" 	ENABLE_VLSI_FLOW          = if set, add compilation flags to enable the vlsi flow for hammer \
+"   ENABLE_YOSYS_FLOW         = if set, add compilation flags to enable the vlsi flow for yosys(tutorial flow) \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
 "   EXTRA_FIRRTL_OPTIONS      = additional options to pass to the FIRRTL compiler"
 
@@ -27,7 +27,7 @@ EXTRA_SIM_CXXFLAGS   ?=
 EXTRA_SIM_LDFLAGS    ?=
 EXTRA_SIM_SOURCES    ?=
 EXTRA_SIM_REQS       ?=
-ENABLE_CUSTOM_FIRRTL_PASS += $(ENABLE_VLSI_FLOW)
+ENABLE_CUSTOM_FIRRTL_PASS += $(ENABLE_YOSYS_FLOW)
 
 #----------------------------------------------------------------------------
 HELP_SIMULATION_VARIABLES += \
@@ -182,7 +182,7 @@ else
 	$(eval SFC_LEVEL := low)
 	$(eval EXTRA_FIRRTL_OPTIONS += $(SFC_REPL_SEQ_MEM))
 endif
-ifeq (,$(ENABLE_VLSI_FLOW))
+ifeq (,$(ENABLE_YOSYS_FLOW))
 	$(eval MFC_LOWERING_OPTIONS = $(MFC_BASE_LOWERING_OPTIONS))
 else
 	$(eval MFC_LOWERING_OPTIONS = $(MFC_BASE_LOWERING_OPTIONS),disallowPackedArrays)
@@ -406,10 +406,11 @@ endef
 
 CONFIG_FRAG_LEVELS ?= 3
 .PHONY: find-config-fragments
+find-config-fragments: private IN_F := $(shell mktemp -d -t cy-XXXXXXXX)/scala_files.f
 find-config-fragments: $(SCALA_SOURCES)
-	rm -rf /tmp/scala_files.f
-	@$(foreach file,$(SCALA_SOURCES),echo $(file) >> /tmp/scala_files.f${\n})
-	$(base_dir)/scripts/config-finder.py -l $(CONFIG_FRAG_LEVELS) /tmp/scala_files.f
+	@$(foreach file,$(SCALA_SOURCES),echo $(file) >> $(IN_F)${\n})
+	$(base_dir)/scripts/config-finder.py -l $(CONFIG_FRAG_LEVELS) $(IN_F)
+	@rm -rf $(dir $(IN_F))
 
 .PHONY: help
 help:
