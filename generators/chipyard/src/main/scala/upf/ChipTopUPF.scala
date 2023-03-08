@@ -13,9 +13,6 @@ object ChipTopUPF {
 
   def default: UPFFunc.UPFFunction = {
     case top: LazyModule => {
-      println("!!!!!")
-      println("UPF GEN")
-      println("!!!!!")
       val modulesList = getLazyModules(top)
       val pdList = createPowerDomains(modulesList)
       val g = connectPDHierarchy(pdList)
@@ -31,7 +28,6 @@ object ChipTopUPF {
       val lazyMod = result(i)
       for (child <- lazyMod.getChildren) {
         result.append(child)
-        println(child.pathName)
       }
       i += 1
     }
