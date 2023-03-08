@@ -109,6 +109,7 @@ $(FIRRTL_FILE) $(ANNO_FILE) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_
 		--name $(long_name) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
 		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG) \
+		$(UPF_ASPECT) \
 		$(EXTRA_CHISEL_OPTIONS))
 
 define mfc_extra_anno_contents
