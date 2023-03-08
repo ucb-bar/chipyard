@@ -52,6 +52,14 @@ else
 endif
 
 #########################################################################################
+# aspects (must be above the all definition to be used in make verilog invocation)
+#########################################################################################
+ifneq ($(ASPECTS), )
+	comma = ,
+	UPF_ASPECT = $(foreach aspect, $(subst $(comma), , $(ASPECTS)), --with-aspect $(aspect))
+endif
+
+#########################################################################################
 # general rules
 #########################################################################################
 .PHONY: default all
@@ -82,14 +90,6 @@ ifneq ($(CUSTOM_VLOG), )
 else
 	cat $(TOP_MODS_FILELIST) $(TOP_BB_MODS_FILELIST) | sort -u > $(VLSI_RTL)
 	echo $(TOP_SMEMS_FILE) >> $(VLSI_RTL)
-endif
-
-#########################################################################################
-# aspects
-#########################################################################################
-ifneq ($(ASPECTS), )
-	comma = ,
-	UPF_ASPECT = $(foreach aspect, $(subst $(comma), , $(ASPECTS)), --with-aspect $(aspect))
 endif
 
 #########################################################################################
