@@ -1,7 +1,10 @@
 #########################################################################################
 # makefile variables for Hammer tutorials
 #########################################################################################
-tutorial ?= none
+# tutorial ?= none
+tutorial ?= sky130-openroad
+
+extra ?=
 
 # TODO: eventually have asap7 commercial/openroad tutorial flavors
 ifeq ($(tutorial),asap7)
@@ -34,5 +37,7 @@ ifeq ($(tutorial),sky130-openroad)
     INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONF) $(EXTRA_CONFS)
     VLSI_OBJ_DIR      ?= build-sky130-openroad
     # Yosys compatibility for CIRCT-generated Verilog, at the expense of elaboration time.
-    ENABLE_CUSTOM_FIRRTL_PASS = 1
+    ENABLE_YOSYS_FLOW  = 1
 endif
+
+HAMMER_EXTRA_ARGS      ?= -p $(TOOLS_CONF) -p $(TECH_CONF) -p $(DESIGN_CONF) $(extra)
