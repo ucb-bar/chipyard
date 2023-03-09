@@ -1,0 +1,21 @@
+
+regular_args=""
+target_args="+permissive"
+for var in "$@"
+do
+    if [[ $var = -* ]] || [[ $var = +* ]]
+    then
+        if [[ $var = +vcdfile=* ]]
+        then
+            XCELIUM_WAVEFORM_FLAG=${var/+vcdfile=/""}
+        else
+            regular_args="$regular_args $var"
+        fi
+    else
+        target_args="$target_args +target-argument=$var"
+    fi
+done
+target_args="$target_args +permissive-off"
+
+INPUT_ARGS="$regular_args $target_args"
+

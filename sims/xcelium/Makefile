@@ -30,7 +30,7 @@ include $(base_dir)/variables.mk
 sim_name = xrun
 
 #########################################################################################
-# vcs simulator types and rules
+# xcelium simulator types and rules
 #########################################################################################
 sim_prefix = simx
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
@@ -66,26 +66,25 @@ $(sim_files): $(SIM_FILE_REQS) $(ALL_MODS_FILELIST) | $(GEN_COLLATERAL_DIR)
 include $(base_dir)/common.mk
 
 #########################################################################################
-# vcs binary and arguments
+# xcelium binary and arguments
 #########################################################################################
-VCS = xrun -64bit -elaborate
-#vcs -full64
-
-VCS_OPTS = $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(PREPROC_DEFINES)
+XCELIUM = xrun
+XCELIUM_OPTS = $(XCELIUM_CC_OPTS) $(XCELIUM_NONCC_OPTS) $(PREPROC_DEFINES)
 
 #########################################################################################
-# vcs build paths
+# xcelium build paths
 #########################################################################################
 model_dir = $(build_dir)/$(long_name)
 model_dir_debug = $(build_dir)/$(long_name).debug
 
+
 #########################################################################################
-# vcs simulator rules
+# xcelium simulator rules
 #########################################################################################
 
 $(sim_workdir): $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir)
-	$(VCS) $(VCS_OPTS) $(EXTRA_SIM_SOURCES) -xmlibdirname $@
+	$(XCELIUM) -elaborate $(XCELIUM_OPTS) $(EXTRA_SIM_SOURCES) $(XCELIUM_COMMON_ARGS)
 
 $(sim_run_tcl): $(sim_workdir)
 	echo "$$CAD_INFO_HEADER" > $(sim_run_tcl)
@@ -95,12 +94,13 @@ $(sim_run_tcl): $(sim_workdir)
 $(sim): $(sim_workdir) $(sim_run_tcl)
 	echo "#!/usr/bin/env bash" > $(sim)
 	echo "$$CAD_INFO_HEADER" >> $(sim)
-	echo "LD_PRELOAD=$(base_dir)/.conda-env/lib/libstdc++.so.6 xrun +verbose +binary=super-awesome-program +permissive -R -xmlibdirname $(sim_workdir) -input $(sim_run_tcl)" >> $(sim)
+	cat arg-reshuffle >> $(sim)
+	echo "LD_PRELOAD=$(base_dir)/.conda-env/lib/libstdc++.so.6 $(XCELIUM) +permissive -R -input $(sim_run_tcl) $(XCELIUM_COMMON_ARGS) +permissive-off \$$INPUT_ARGS" >> $(sim)
 	chmod +x $(sim)
 
 $(sim_debug_run_tcl): $(sim_workdir)
 	echo "$$CAD_INFO_HEADER" > $(sim_debug_run_tcl)
-	echo "database -open default_vcd_dump -vcd -into $(sim_out_name).vcd" >> $(sim_debug_run_tcl)
+	echo "database -open default_vcd_dump -vcd -into \$$env(XCELIUM_WAVEFORM_FLAG)" >> $(sim_debug_run_tcl)
 	echo "set probe_packed_limit 64k" >> $(sim_debug_run_tcl)
 	echo "probe -create $(TB) -database default_vcd_dump -depth all -all" >> $(sim_debug_run_tcl)
 	echo "run" >> $(sim_debug_run_tcl)
@@ -111,21 +111,18 @@ $(sim_debug_run_tcl): $(sim_workdir)
 $(sim_debug): $(sim_workdir) $(sim_debug_run_tcl)
 	echo "#!/usr/bin/env bash" > $(sim_debug)
 	echo "$$CAD_INFO_HEADER" >> $(sim_debug)
-	echo "LD_PRELOAD=$(base_dir)/.conda-env/lib/libstdc++.so.6 xrun +verbose +binary=super-awesome-program +permissive -R -xmlibdirname $(sim_workdir) -input $(sim_debug_run_tcl)" >> $(sim_debug)
+	cat arg-reshuffle >> $(sim_debug)
+	echo "export XCELIUM_WAVEFORM_FLAG=\$$XCELIUM_WAVEFORM_FLAG" >> $(sim_debug)
+	echo "LD_PRELOAD=$(base_dir)/.conda-env/lib/libstdc++.so.6 $(XCELIUM) +permissive -R -input $(sim_debug_run_tcl) $(XCELIUM_COMMON_ARGS) +permissive-off \$$INPUT_ARGS" >> $(sim_debug)
 	chmod +x $(sim_debug)
 
 
 #########################################################################################
-# create vcs vpd/fsdb rules
+# create vcd rules
 #########################################################################################
-.PRECIOUS: $(output_dir)/%.vpd %.vpd
-$(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
+.PRECIOUS: $(output_dir)/%.vcd %.vcd
+$(output_dir)/%.vcd: $(output_dir)/% $(sim_debug)
 	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) +vcdplusfile=$@ $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
-
-.PRECIOUS: $(output_dir)/%.fsdb %.fsdb
-$(output_dir)/%.fsdb: $(output_dir)/% $(sim_debug)
-	(set -o pipefail && $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) +fsdbfile=$@ $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $<.out) | tee $<.log)
-
 
 #########################################################################################
 # general cleanup rules
@@ -135,7 +132,7 @@ clean:
 	rm -rf $(gen_dir) $(sim_prefix)-* ucli.key
 
 clean-sim:
-	rm -rf $(model_dir) $(build_dir)/vc_hdrs.h $(sim) $(sim).daidir ucli.key
+	rm -rf $(model_dir) $(build_dir)/vc_hdrs.h $(sim) $(sim_workdir) $(sim_run_tcl) ucli.key bpad_*.err sigusrdump.out dramsim*.log
 
 clean-sim-debug:
-	rm -rf $(model_dir_debug) $(build_dir)/vc_hdrs.h $(sim_debug) $(sim_debug).daidir ucli.key
+	rm -rf $(model_dir_debug) $(build_dir)/vc_hdrs.h $(sim_debug) $(sim_workdir) $(sim_debug_run_tcl) ucli.key bpad_*.err sigusrdump.out dramsim*.log
