@@ -161,9 +161,9 @@ To run DRC & LVS, and view the results in Calibre:
 .. code-block:: shell
 
     make drc tutorial=sky130-commercial
-    ./build/drc-rundir/generated-scripts/view_drc
+    ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/drc-rundir/generated-scripts/view_drc
     make lvs tutorial=sky130-commercial
-    ./build/lvs-rundir/generated-scripts/view_lvs
+    ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/lvs-rundir/generated-scripts/view_lvs
 
 Some DRC errors are expected from this PDK, especially with regards to the SRAMs, as explained in the
 `Sky130 Hammer plugin README  <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__.

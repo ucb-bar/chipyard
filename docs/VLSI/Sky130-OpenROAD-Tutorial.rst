@@ -184,7 +184,7 @@ Hammer generates a convenient script to launch these sessions
 
 .. code-block:: shell
 
-    cd ./build/par-rundir
+    cd ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/par-rundir
     ./generated-scripts/open_chip
 
 Note that the conda OpenROAD package was compiled with the GUI disabled, so in order to view the layout,
@@ -199,7 +199,7 @@ These databases can be restored using the same ``open_chip`` script for debuggin
 
 .. code-block:: shell
 
-    cd build/par-rundir
+    cd build/chipyard.TestHarness.TinyRocketConfig-ChipTop/par-rundir
     ./generated_scripts/open_chip -h
     "
         Usage: ./generated-scripts/open_chip [-t] [openroad_db_name]
@@ -215,7 +215,7 @@ These databases can be restored using the same ``open_chip`` script for debuggin
     # load post-clock tree database with timing inforamtion
     ./generated_scripts/open_chip -t post_clock_tree
 
-.. Timing reports are found in ``build/par-rundir/timingReports``. They are gzipped text files.
+Various reports, including timing reports, are found in ``build/par-rundir/reports``.
 
 See the `OpenROAD tool plugin <https://github.com/ucb-bar/hammer/blob/master/hammer/par/openroad>`__ for the full list of OpenROAD tool steps and their implementations.
 
@@ -232,9 +232,9 @@ To run DRC & LVS in Magic & Netgen, respectively:
 .. code-block:: shell
 
     make drc tutorial=sky130-openroad
-    ./build/drc-rundir/generated-scripts/view_drc
+    ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/drc-rundir/generated-scripts/view_drc
     make lvs tutorial=sky130-openroad
-    ./build/lvs-rundir/generated-scripts/view_lvs
+    ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/lvs-rundir/generated-scripts/view_lvs
 
 Note that in ``sky130-openroad.yml`` we have set the following YAML keys:
 
