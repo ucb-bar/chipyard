@@ -1,10 +1,7 @@
 #########################################################################################
 # makefile variables for Hammer tutorials
 #########################################################################################
-# tutorial ?= none
-tutorial ?= sky130-openroad
-
-extra ?=
+tutorial ?= none
 
 # TODO: eventually have asap7 commercial/openroad tutorial flavors
 ifeq ($(tutorial),asap7)
@@ -39,5 +36,3 @@ ifeq ($(tutorial),sky130-openroad)
     # Yosys compatibility for CIRCT-generated Verilog, at the expense of elaboration time.
     ENABLE_YOSYS_FLOW  = 1
 endif
-
-HAMMER_EXTRA_ARGS      ?= -p $(TOOLS_CONF) -p $(TECH_CONF) -p $(DESIGN_CONF) $(extra)
