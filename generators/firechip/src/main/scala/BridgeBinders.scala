@@ -242,3 +242,14 @@ class WithDefaultFireSimBridges extends Config(
   new WithTracerVBridge ++
   new WithFireSimIOCellModels
 )
+
+// Shorthand to register all of the provided mmio-only bridges above
+class WithDefaultMMIOOnlyFireSimBridges extends Config(
+  new WithSerialBridge ++
+  new WithUARTBridge ++
+  new WithBlockDeviceBridge ++
+  new WithFASEDBridge ++
+  new WithFireSimMultiCycleRegfile ++
+  new WithFireSimFAME5 ++
+  new WithFireSimIOCellModels
+)

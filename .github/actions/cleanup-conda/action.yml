@@ -22,7 +22,7 @@ runs:
             echo "Skipping removal of $envname since it cannot be parsed into a date"
           else
             NUM_DIFF=$(( ( $(date +%s) - $(date --date="$ENV_DATE" +%s) )/(60*60*24) ))
-            if (( $NUM_DIFF > 7 )); then
+            if (( $NUM_DIFF > 2 )); then
               echo "Removing $envname since it is $NUM_DIFF days old."
               conda env remove -n $envname
             else
