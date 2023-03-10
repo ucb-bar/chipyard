@@ -6,7 +6,8 @@ import chisel3.util.{log2Up}
 
 import freechips.rocketchip.config.{Config}
 import freechips.rocketchip.devices.tilelink.{BootROMLocated}
-import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI}
+import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI, JtagDTMKey}
+import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 import freechips.rocketchip.stage.phases.TargetDirKey
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile.{XLen}
@@ -14,6 +15,7 @@ import freechips.rocketchip.tile.{XLen}
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
+import sifive.blocks.devices.i2c._
 
 import testchipip._
 
@@ -26,25 +28,49 @@ class WithBootROM extends Config((site, here, up) => {
 })
 
 // DOC include start: gpio config fragment
-class WithGPIO extends Config((site, here, up) => {
-  case PeripheryGPIOKey => Seq(
-    GPIOParams(address = 0x10012000, width = 4, includeIOF = false))
+class WithGPIO(address: BigInt = 0x10010000, width: Int = 4) extends Config ((site, here, up) => {
+  case PeripheryGPIOKey => up(PeripheryGPIOKey) ++ Seq(
+    GPIOParams(address = address, width = width, includeIOF = false))
 })
 // DOC include end: gpio config fragment
 
-class WithUART(baudrate: BigInt = 115200) extends Config((site, here, up) => {
+class WithUARTOverride(address: BigInt = 0x10020000, baudrate: BigInt = 115200) extends Config ((site, here, up) => {
   case PeripheryUARTKey => Seq(
-    UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256, initBaudRate = baudrate))
+    UARTParams(address = address, nTxEntries = 256, nRxEntries = 256, initBaudRate = baudrate))
 })
 
-class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) => {
+class WithUART(address: BigInt = 0x10020000, baudrate: BigInt = 115200) extends Config ((site, here, up) => {
+  case PeripheryUARTKey => up(PeripheryUARTKey) ++ Seq(
+    UARTParams(address = address, nTxEntries = 256, nRxEntries = 256, initBaudRate = baudrate))
+})
+
+class WithSPIFlash(address: BigInt = 0x10030000, fAddress: BigInt = 0x20000000, size: BigInt = 0x10000000) extends Config((site, here, up) => {
   // Note: the default size matches freedom with the addresses below
-  case PeripherySPIFlashKey => Seq(
-    SPIFlashParams(rAddress = 0x10040000, fAddress = 0x20000000, fSize = size))
+  case PeripherySPIFlashKey => up(PeripherySPIFlashKey) ++ Seq(
+    SPIFlashParams(rAddress = address, fAddress = fAddress, fSize = size))
+})
+
+class WithSPI(address: BigInt = 0x10031000) extends Config((site, here, up) => {
+  case PeripherySPIKey => up(PeripherySPIKey) ++ Seq(
+    SPIParams(rAddress = address))
+})
+
+class WithI2C(address: BigInt = 0x10040000) extends Config((site, here, up) => {
+  case PeripheryI2CKey => up(PeripheryI2CKey) ++ Seq(
+    I2CParams(address = address, controlXType = AsynchronousCrossing(), intXType = AsynchronousCrossing())
+  )
 })
 
 class WithDMIDTM extends Config((site, here, up) => {
   case ExportDebug => up(ExportDebug, site).copy(protocols = Set(DMI))
+})
+
+class WithJTAGDTMKey(partNum: Int = 0x000, manufId: Int = 0x489) extends Config((site, here, up) => {
+  case JtagDTMKey => new JtagDTMConfig (
+    idcodeVersion = 2,
+    idcodePartNum = partNum,
+    idcodeManufId = manufId,
+    debugIdleCycles = 5)
 })
 
 class WithNoDebug extends Config((site, here, up) => {
@@ -53,6 +79,10 @@ class WithNoDebug extends Config((site, here, up) => {
 
 class WithTLSerialLocation(masterWhere: TLBusWrapperLocation, slaveWhere: TLBusWrapperLocation) extends Config((site, here, up) => {
   case SerialTLAttachKey => up(SerialTLAttachKey, site).copy(masterWhere = masterWhere, slaveWhere = slaveWhere)
+})
+
+class WithNoSerialTL extends Config((site, here, up) => {
+  case SerialTLKey => None // remove serialized tl port
 })
 
 class WithTLBackingMemory extends Config((site, here, up) => {
