@@ -74,50 +74,6 @@ jobs:
       - name: Setup repo copy
         run: |
           git clone $GITHUB_WORKSPACE ${{ env.REMOTE_WORK_DIR }}
-      - name: VLSI test
-        run: |
-          cd ${{ env.REMOTE_WORK_DIR }}
-          eval "$(conda shell.bash hook)"
-          # *** source env.sh
-
-          cd vlsi
-          export tutorial=sky130-openroad
-          # TODO: consider setting VLSI_TOP=RocketTile
-
-          # NOTE: most conda installs are in separate conda envs because they mess up 
-          #   each other's versions (for no apparent reason) and we need the latest versions
-          conda config --add channels defaults
-          conda config --add channels litex-hub
-
-          # installs for example-sky130.yml
-          conda create -y --prefix ./.conda-sky1302 open_pdks.sky130a=1.0.399_0_g63dbde9
-          git clone https://github.com/rahulk29/sram22_sky130_macros.git
-          echo "" >> example-sky130.yml
-          echo "# tutorial configs" >> example-sky130.yml
-          echo "technology.sky130.sky130A: $PWD/sky130/share/pdk/sky130A" >> example-sky130.yml
-          echo "technology.sky130.sram22_sky130_macros: $PWD/sram22_sky130_macros" >> example-sky130.yml
-
-          # installs for example-openroad.yml
-          conda create -y --prefix ./.conda-yosys yosys=0.27_4_gb58664d44
-          conda create -y --prefix ./.conda-openroad openroad=2.0_7070_g0264023b6
-          conda create -y --prefix ./.conda-klayout klayout=0.28.5_98_g87e2def28
-          conda create -y --prefix ./.conda-signoff magic=8.3.376_0_g5e5879c netgen=1.5.250_0_g178b172
-          echo "" >> example-openroad.yml
-          echo "# tutorial configs" >> example-openroad.yml
-          echo "synthesis.yosys.yosys_bin: $PWD/.conda-yosys/bin/yosys" >> example-openroad.yml
-          echo "par.openroad.openroad_bin: $PWD/.conda-openroad/bin/openroad" >> example-openroad.yml
-          echo "par.openroad.klayout_bin: $PWD/.conda-klayout/bin/klayout" >> example-openroad.yml
-          echo "drc.magic.magic_bin: $PWD/.conda-signoff/bin/magic" >> example-openroad.yml
-          echo "lvs.netgen.netgen_bin: $PWD/.conda-signoff/bin/netgen" >> example-openroad.yml
-
-          conda config --remove channels litex-hub
-          conda config --remove channels defaults
-
-          # *** make buildfile
-          # *** make syn
-          # *** make par
-
-          
       - name: Setup repo
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
@@ -151,12 +107,51 @@ jobs:
           source env.sh
           cd sims/verilator
           make verilog
-      - name: VLSI flow
+      - name: VLSI test
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
           eval "$(conda shell.bash hook)"
-          # *** source env.sh
-          
+          source env.sh
+
+          cd vlsi
+          export tutorial=sky130-openroad
+          # TODO: consider setting VLSI_TOP=RocketTile
+
+          # NOTE: most conda installs are in separate conda envs because they mess up 
+          #   each other's versions (for no apparent reason) and we need the latest versions
+          conda config --add channels defaults
+          conda config --add channels litex-hub
+
+          # installs for example-sky130.yml
+          conda create -y --prefix ./.conda-sky130 open_pdks.sky130a=1.0.399_0_g63dbde9
+          git clone https://github.com/rahulk29/sram22_sky130_macros.git
+          echo "" >> example-sky130.yml
+          echo "# tutorial configs" >> example-sky130.yml
+          echo "technology.sky130.sky130A: $PWD/.conda-sky130/share/pdk/sky130A" >> example-sky130.yml
+          echo "technology.sky130.sram22_sky130_macros: $PWD/sram22_sky130_macros" >> example-sky130.yml
+
+          # installs for example-openroad.yml
+          conda create -y --prefix ./.conda-yosys yosys=0.27_4_gb58664d44
+          conda create -y --prefix ./.conda-openroad openroad=2.0_7070_g0264023b6
+          conda create -y --prefix ./.conda-klayout klayout=0.28.5_98_g87e2def28
+          conda create -y --prefix ./.conda-signoff magic=8.3.376_0_g5e5879c netgen=1.5.250_0_g178b172
+          echo "" >> example-openroad.yml
+          echo "# tutorial configs" >> example-openroad.yml
+          echo "synthesis.yosys.yosys_bin: $PWD/.conda-yosys/bin/yosys" >> example-openroad.yml
+          echo "par.openroad.openroad_bin: $PWD/.conda-openroad/bin/openroad" >> example-openroad.yml
+          echo "par.openroad.klayout_bin: $PWD/.conda-klayout/bin/klayout" >> example-openroad.yml
+          echo "drc.magic.magic_bin: $PWD/.conda-signoff/bin/magic" >> example-openroad.yml
+          echo "lvs.netgen.netgen_bin: $PWD/.conda-signoff/bin/netgen" >> example-openroad.yml
+
+          conda config --remove channels litex-hub
+          conda config --remove channels defaults
+
+          make buildfile
+          make syn
+          make par
+          make drc
+          make lvs
+
 
   cleanup:
     name: cleanup
