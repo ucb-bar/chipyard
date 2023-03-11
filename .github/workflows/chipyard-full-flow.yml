@@ -78,7 +78,7 @@ jobs:
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
           eval "$(conda shell.bash hook)"
-          source env.sh
+          # ***source env.sh
 
           cd vlsi
           export tutorial=sky130-openroad
@@ -86,11 +86,11 @@ jobs:
 
           # NOTE: most conda installs are in separate conda envs because they mess up 
           #   each other's versions (for no apparent reason) and we need the latest versions
-          conda config --add channels litex-hub
           conda config --add channels defaults
+          conda config --add channels litex-hub
 
           # installs for example-sky130.yml
-          conda create -y --prefix ./.conda-sky130 open_pdks.sky130a=1.0.399_0_g63dbde9
+          conda create -y --prefix ./.conda-sky1302 open_pdks.sky130a=1.0.399_0_g63dbde9
           git clone https://github.com/rahulk29/sram22_sky130_macros.git
           echo "" >> example-sky130.yml
           echo "# tutorial configs" >> example-sky130.yml
