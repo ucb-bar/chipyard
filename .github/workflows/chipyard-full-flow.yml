@@ -78,7 +78,7 @@ jobs:
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
           eval "$(conda shell.bash hook)"
-          # ***source env.sh
+          # *** source env.sh
 
           cd vlsi
           export tutorial=sky130-openroad
@@ -96,7 +96,7 @@ jobs:
           echo "# tutorial configs" >> example-sky130.yml
           echo "technology.sky130.sky130A: $PWD/sky130/share/pdk/sky130A" >> example-sky130.yml
           echo "technology.sky130.sram22_sky130_macros: $PWD/sram22_sky130_macros" >> example-sky130.yml
-          make buildfile
+          # *** make buildfile
 
           # installs for example-openroad.yml
           # yosys
@@ -104,7 +104,7 @@ jobs:
           echo "" >> example-openroad.yml
           echo "# tutorial configs" >> example-openroad.yml
           echo "synthesis.yosys.yosys_bin: $PWD/.conda-yosys/bin/yosys" >> example-openroad.yml
-          make syn
+          # *** make syn
           
           # openroad
           conda create -y --prefix ./.conda-openroad openroad=2.0_7070_g0264023b6
@@ -112,7 +112,7 @@ jobs:
           # klayout
           conda create -y --prefix ./.conda-klayout klayout=0.28.5_98_g87e2def28
           echo "par.openroad.klayout_bin: $PWD/.conda-klayout/bin/klayout" >> example-openroad.yml
-          make par
+          # *** make par
           
           # magic/netgen
           conda create -y --prefix ./.conda-signoff magic=8.3.376_0_g5e5879c netgen=1.5.250_0_g178b172
