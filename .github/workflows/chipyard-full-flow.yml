@@ -111,45 +111,55 @@ jobs:
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
           eval "$(conda shell.bash hook)"
+          source env.sh
 
-          # set up all eda tools
           cd vlsi
-          conda create -y --prefix ./osflow python=3.7
-          conda activate ./osflow
-          conda install -y -c litex-hub open_pdks.sky130a
-          conda install -y -c litex-hub yosys
-          conda install -y -c litex-hub openroad
-          conda install -y -c litex-hub klayout
-          conda install -y -c litex-hub magic
-          conda install -y -c litex-hub netgen
+          export tutorial=sky130-openroad
 
-          # modify vlsi yaml files
+          # NOTE: most conda installs are in separate conda envs because they mess up each other's versions (for no apparent reason)
+
+          # installs for example-sky130.yml
+          conda create -y --prefix ./.conda_sky130 open_pdks.sky130a=1.0.399_0_g63dbde9
           git clone https://github.com/rahulk29/sram22_sky130_macros.git
           echo "" >> example-sky130.yml
           echo "# tutorial configs" >> example-sky130.yml
-          echo "technology.sky130.sky130A: $PWD/osflow/share/pdk/sky130A" >> example-sky130.yml
+          echo "technology.sky130.sky130A: $PWD/sky130/share/pdk/sky130A" >> example-sky130.yml
           echo "technology.sky130.sram22_sky130_macros: $PWD/sram22_sky130_macros" >> example-sky130.yml
-          
+          make buildfile
+
+          # installs for example-openroad.yml
+          # yosys
+          conda create -y --prefix ./.conda_yosys yosys=0.27_4_gb58664d44
           echo "" >> example-openroad.yml
           echo "# tutorial configs" >> example-openroad.yml
-          echo "synthesis.yosys.yosys_bin: $(which yosys)" >> example-openroad.yml
-          echo "par.openroad.openroad_bin: $(which openroad)" >> example-openroad.yml
-          echo "par.openroad.klayout_bin: $(which klayout)" >> example-openroad.yml
-          echo "drc.magic.magic_bin: $(which klayout)" >> example-openroad.yml
-          echo "lvs.netgen.netgen_bin: $(which klayout)" >> example-openroad.yml
+          echo "synthesis.yosys.yosys_bin: $PWD/.conda_yosys/bin/yosys" >> example-openroad.yml
+          make syn
+          
+          # remaining tools
+          # conda create -y --prefix ./.conda_openroad openroad=2.0_7070_g0264023b6
+          # conda create -y --prefix ./.conda_openroad
+          # conda activate ./.conda_openroad
+          # conda install -y -c litex-hub openroad=2.0_7070_g0264023b6
+          # conda create -y --prefix ./.conda_klayout klayout=0.28.5_98_g87e2def28
+          # echo "par.openroad.openroad_bin: $PWD/.conda_openroad/bin/openroad" >> example-openroad.yml
+          # echo "par.openroad.klayout_bin: $PWD/.conda_klayout/bin/klayout" >> example-openroad.yml
+          
+          conda create -y --prefix ./.conda_signoff magic netgen
+          echo "drc.magic.magic_bin: $PWD/.conda_signoff/bin/magic" >> example-openroad.yml
+          echo "lvs.netgen.netgen_bin: $PWD/.conda_signoff/bin/netgen" >> example-openroad.yml
           conda deactivate
           
-          # normal chipyard setup
-          cd ${{ env.REMOTE_WORK_DIR }}
-          source env.sh
+          # # normal chipyard setup
+          # cd ${{ env.REMOTE_WORK_DIR }}
+          # source env.sh
           
           # vlsi flow
-          cd vlsi
-          export tutorial=sky130-openroad
+          # cd vlsi
+          
           # TODO: consider setting VLSI_TOP=RocketTile
-          make buildfile
-          make syn
-          make par
+          # make buildfile
+          # make syn
+          # make par
 
   cleanup:
     name: cleanup
