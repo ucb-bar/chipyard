@@ -148,6 +148,15 @@ The command ``make buildfile`` generates a set of Make targets in ``build/hammer
 It needs to be re-run if environment variables are changed.
 It is recommended that you edit these variables directly in the Makefile rather than exporting them to your shell environment.
 
+The ``buildfile`` make target has dependencies on both (1) the Verilog that is elaborated from all Chisel sources
+and (2) the mapping of memory instances in the design to SRAM macros;
+all files related to these two steps reside in the ``generated-src/chipyard.TestHarness.TinyRocketConfig-ChipTop`` directory.
+Note that the files in ``generated-src`` vary for each tool/technology flow.
+This especially applies to the Sky130 Commercial vs OpenROAD tutorial flows 
+(due to the ``ENABLE_YOSYS_FLOW`` flag, explained below), so these flows should be run in separate
+chipyard installations. If the wrong sources are generated, simply run ``make buildfile -B`` to rebuild all targets correctly.
+
+
 For the sake of brevity, in this tutorial we will set the Make variable ``tutorial=sky130-openroad``,
 which will cause additional variables to be set in ``tutorial.mk``, a few of which are summarized as follows:
 
