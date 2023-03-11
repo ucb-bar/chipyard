@@ -107,6 +107,49 @@ jobs:
           source env.sh
           cd sims/verilator
           make verilog
+      - name: VLSI test
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          eval "$(conda shell.bash hook)"
+
+          # set up all eda tools
+          cd vlsi
+          conda create -y --prefix ./osflow python=3.7
+          conda activate ./osflow
+          conda install -y -c litex-hub open_pdks.sky130a
+          conda install -y -c litex-hub yosys
+          conda install -y -c litex-hub openroad
+          conda install -y -c litex-hub klayout
+          conda install -y -c litex-hub magic
+          conda install -y -c litex-hub netgen
+
+          # modify vlsi yaml files
+          git clone https://github.com/rahulk29/sram22_sky130_macros.git
+          echo "" >> example-sky130.yml
+          echo "# tutorial configs" >> example-sky130.yml
+          echo "technology.sky130.sky130A: $PWD/osflow/share/pdk/sky130A" >> example-sky130.yml
+          echo "technology.sky130.sram22_sky130_macros: $PWD/sram22_sky130_macros" >> example-sky130.yml
+          
+          echo "" >> example-openroad.yml
+          echo "# tutorial configs" >> example-openroad.yml
+          echo "synthesis.yosys.yosys_bin: $(which yosys)" >> example-openroad.yml
+          echo "par.openroad.openroad_bin: $(which openroad)" >> example-openroad.yml
+          echo "par.openroad.klayout_bin: $(which klayout)" >> example-openroad.yml
+          echo "drc.magic.magic_bin: $(which klayout)" >> example-openroad.yml
+          echo "lvs.netgen.netgen_bin: $(which klayout)" >> example-openroad.yml
+          conda deactivate
+          
+          # normal chipyard setup
+          cd ${{ env.REMOTE_WORK_DIR }}
+          source env.sh
+          
+          # vlsi flow
+          cd vlsi
+          export tutorial=sky130-openroad
+          # TODO: consider setting VLSI_TOP=RocketTile
+          make buildfile
+          make syn
+          make par
 
   cleanup:
     name: cleanup
