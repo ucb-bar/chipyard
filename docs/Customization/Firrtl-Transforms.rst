@@ -10,15 +10,18 @@ Transforms are a powerful tool to take in the FIRRTL IR that is emitted from Chi
 
 The Scala FIRRTL Compiler and the MLIR FIRRTL Compiler
 ------------------------------------------------------
-In Chipyard, two FIRRTL compilers work together to compile Chisel into Verilog. The Scala FIRRTL compiler(SFC) and the MLIR FIRRTL compiler(MFC).
-They are basically doing the same thing, except that MFC is written in C++ which makes compilation much faster. In the default setting, the SFC will compile Chisel into CHIRRTL and MFC will
-compile CHIRRTL into Verilog(as of now, we are using SFC as a backup for cases when MFC doesn't work, e.g., when the design is using Fixed types). By setting the ``ENABLE_CUSTOM_FIRRTL_PASS`` env variable to a non-zero value, we can make the SFC compile Chisel into LowFIRRTL so that our custom FIRRTL passes are applied.
+In Chipyard, two FIRRTL compilers work together to compile Chisel into Verilog. The Scala FIRRTL compiler (SFC) and the MLIR FIRRTL compiler (MFC).
+They are basically doing the same thing, except that MFC is written in C++ which makes compilation much faster (the generated Verilog will be different). In the default setting, the SFC will compile Chisel into CHIRRTL and MFC will
+compile CHIRRTL into Verilog (as of now, we are using SFC as a backup for cases when MFC doesn't work, e.g., when the design is using Fixed types). By setting the ``ENABLE_CUSTOM_FIRRTL_PASS`` env variable to a non-zero value,
+we can make the SFC compile Chisel into LowFIRRTL so that our custom FIRRTL passes are applied.
+
+For more information on MLIR FIRRTL Compiler, please visit https://mlir.llvm.org/ and https://circt.llvm.org/.
 
 Where to add transforms
 -----------------------
 
-In Chipyard, the FIRRTL compiler is called multiple times to create a "Top" file that contains the DUT and a "Harness" file containing the test harness, which instantiates the DUT.
-The "Harness" file does not contain the DUT's module definition or any of its submodules.
+In Chipyard, the FIRRTL compiler is called multiple times to create a "Top" file that contains the DUT and a "Model" file containing the test harness, which instantiates the DUT.
+The "Model" file does not contain the DUT's module definition or any of its submodules.
 This is done by the ``tapeout`` SBT project (located in ``tools/barstools/tapeout``) which calls ``GenerateModelStageMain`` (a function that wraps the multiple FIRRTL compiler calls and extra transforms).
 
 .. literalinclude:: ../../common.mk
