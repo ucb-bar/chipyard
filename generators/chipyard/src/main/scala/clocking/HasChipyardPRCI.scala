@@ -86,4 +86,3 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
     := tileResetSetter
     := allClockGroupsNode)
 }
-

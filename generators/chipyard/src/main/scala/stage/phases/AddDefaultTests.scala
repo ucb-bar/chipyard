@@ -40,7 +40,7 @@ class AddDefaultTests extends Phase with HasRocketChipStageUtils {
       // If a custom test suite is set up, use the custom test suite
       annotations += CustomMakefragSnippet(p(TestSuitesKey).apply(tileParams, suiteHelper, p))
 
-    RocketTestSuiteAnnotation(suiteHelper.suites.values.toSeq) +: annotations
+    RocketTestSuiteAnnotation(suiteHelper.suites.values.toSeq) +: annotations.toSeq
   }
 
 

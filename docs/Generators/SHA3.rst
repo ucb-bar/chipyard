@@ -79,5 +79,3 @@ this config fragment is shown here:
 
 The SHA3 example baremetal and Linux tests are located in the SHA3 repository.
 Please refer to its `README.md <https://github.com/ucb-bar/sha3/blob/master/README.md>`_ for more information on how to run/build the tests.
-
-

@@ -465,6 +465,3 @@ if you want multi-beat reads/writes.
 AXI4RAM only supports AXI4-Lite operations, so multi-beat reads/writes and
 reads/writes smaller than full-width are not supported. Use an ``AXI4Fragmenter``
 if you want to use the full AXI4 protocol.
-
-
-

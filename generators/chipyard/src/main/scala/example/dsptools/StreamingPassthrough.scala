@@ -145,4 +145,3 @@ trait CanHavePeripheryStreamingPassthrough { this: BaseSubsystem =>
 class WithStreamingPassthrough extends Config((site, here, up) => {
   case StreamingPassthroughKey => Some(StreamingPassthroughParams(depth = 8))
 })
-

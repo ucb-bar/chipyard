@@ -186,3 +186,32 @@ class SharedNoCConfig extends Config(
   new chipyard.config.AbstractConfig
 )
 // DOC include end: SharedNoCConfig
+
+class SbusRingNoCConfig extends Config(
+  new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
+    constellation.protocol.DiplomaticNetworkNodeMapping(
+      inNodeMapping = ListMap(
+        "Core 0" -> 0,
+        "Core 1" -> 1,
+        "Core 2" -> 2,
+        "Core 3" -> 3,
+        "Core 4" -> 4,
+        "Core 5" -> 5,
+        "Core 6" -> 6,
+        "Core 7" -> 7,
+        "serial-tl" -> 8),
+      outNodeMapping = ListMap(
+        "system[0]" -> 9,
+        "system[1]" -> 10,
+        "system[2]" -> 11,
+        "system[3]" -> 12,
+        "pbus" -> 8)), // TSI is on the pbus, so serial-tl and pbus should be on the same node
+    NoCParams(
+      topology        = UnidirectionalTorus1D(13),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(10) { UserVirtualChannelParams(4) }),
+      routingRelation = NonblockingVirtualSubnetworksRouting(UnidirectionalTorus1DDatelineRouting(), 5, 2))
+  )) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(8) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
+  new chipyard.config.AbstractConfig
+)

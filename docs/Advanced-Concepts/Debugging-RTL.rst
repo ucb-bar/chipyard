@@ -96,11 +96,10 @@ To run overnight tests (repeated random tests), run
 
   make CONFIG=CustomConfig TORTURE_ONIGHT_OPTIONS=<overnight options> torture-overnight
 
-You can find the overnight options in `overnight/src/main/scala/main.scala` in the torture repo.  
+You can find the overnight options in `overnight/src/main/scala/main.scala` in the torture repo.
 
 Firesim Debugging
 ---------------------------
 Chisel printfs, asserts, Dromajo co-simulation, and waveform generation are also available in FireSim
 FPGA-accelerated simulation. See the FireSim
 `documentation <https://docs.fires.im/en/latest/>`__ for more detail.
-

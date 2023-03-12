@@ -8,4 +8,3 @@ with open(outfile, 'wb') as f:
     for i in range(0,0x100000,4):
         check = 0xdeadbeef - i
         f.write(check.to_bytes(4,'little'))
-

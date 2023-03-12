@@ -7,13 +7,15 @@ lazy val chipyardRoot = Project("chipyardRoot", file("."))
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
   version := "1.6",
-  scalaVersion := "2.12.10",
+  scalaVersion := "2.13.10",
   assembly / test := {},
   assembly / assemblyMergeStrategy := { _ match {
     case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
     case _ => MergeStrategy.first}},
-  scalacOptions ++= Seq("-deprecation","-unchecked","-Xsource:2.11"),
-  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
+  scalacOptions ++= Seq(
+    "-deprecation",
+    "-unchecked",
+    "-Ymacro-annotations"), // fix hierarchy API
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
   allDependencies := {
     // drop specific maven dependencies in subprojects in favor of Chipyard's version
@@ -60,7 +62,7 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
   new Group(test.name, Seq(test), SubProcess(options))
 } toSeq
 
-val chiselVersion = "3.5.2"
+val chiselVersion = "3.5.5"
 
 lazy val chiselSettings = Seq(
   libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % chiselVersion,
@@ -68,9 +70,6 @@ lazy val chiselSettings = Seq(
   "org.apache.commons" % "commons-text" % "1.9"),
   addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % chiselVersion cross CrossVersion.full))
 
-val firrtlVersion = "1.5.1"
-
-lazy val firrtlSettings = Seq(libraryDependencies ++= Seq("edu.berkeley.cs" %% "firrtl" % firrtlVersion))
 
 val chiselTestVersion = "2.5.1"
 
@@ -88,7 +87,7 @@ lazy val hardfloat  = (project in rocketChipDir / "hardfloat")
   .settings(
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.json4s" %% "json4s-jackson" % "3.6.1",
+      "org.json4s" %% "json4s-jackson" % "3.6.6",
       "org.scalatest" %% "scalatest" % "3.2.0" % "test"
     )
   )
@@ -98,7 +97,7 @@ lazy val rocketMacros  = (project in rocketChipDir / "macros")
   .settings(
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.json4s" %% "json4s-jackson" % "3.6.1",
+      "org.json4s" %% "json4s-jackson" % "3.6.6",
       "org.scalatest" %% "scalatest" % "3.2.0" % "test"
     )
   )
@@ -108,7 +107,7 @@ lazy val rocketConfig = (project in rocketChipDir / "api-config-chipsalliance/bu
   .settings(
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.json4s" %% "json4s-jackson" % "3.6.1",
+      "org.json4s" %% "json4s-jackson" % "3.6.6",
       "org.scalatest" %% "scalatest" % "3.2.0" % "test"
     )
   )
@@ -120,15 +119,14 @@ lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
   .settings(
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.json4s" %% "json4s-jackson" % "3.6.1",
-      "org.apache.commons" % "commons-lang3" % "3.12.0",
+      "org.json4s" %% "json4s-jackson" % "3.6.6",
       "org.scalatest" %% "scalatest" % "3.2.0" % "test"
     )
   )
   .settings( // Settings for scalafix
     semanticdbEnabled := true,
     semanticdbVersion := scalafixSemanticdb.revision,
-    scalacOptions += "-Ywarn-unused-import"
+    scalacOptions += "-Ywarn-unused"
   )
 lazy val rocketLibDeps = (rocketchip / Keys.libraryDependencies)
 
@@ -175,7 +173,7 @@ lazy val tracegen = (project in file("generators/tracegen"))
   .settings(commonSettings)
 
 lazy val icenet = (project in file("generators/icenet"))
-  .dependsOn(testchipip, rocketchip)
+  .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -185,7 +183,7 @@ lazy val hwacha = (project in file("generators/hwacha"))
   .settings(commonSettings)
 
 lazy val boom = (project in file("generators/boom"))
-  .dependsOn(testchipip, rocketchip)
+  .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -211,7 +209,7 @@ lazy val sha3 = (project in file("generators/sha3"))
   .settings(commonSettings)
 
 lazy val gemmini = (project in file("generators/gemmini"))
-  .dependsOn(testchipip, rocketchip)
+  .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(chiselTestSettings)
   .settings(commonSettings)
@@ -242,7 +240,7 @@ lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
     commonSettings,
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.2.+" % "test",
-      "org.typelevel" %% "spire" % "0.16.2",
+      "org.typelevel" %% "spire" % "0.17.0",
       "org.scalanlp" %% "breeze" % "1.1",
       "junit" % "junit" % "4.13" % "test",
       "org.scalacheck" %% "scalacheck" % "1.14.3" % "test",

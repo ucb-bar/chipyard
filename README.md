@@ -1,6 +1,9 @@
-![CHIPYARD](https://github.com/ucb-bar/chipyard/raw/master/docs/_static/images/chipyard-logo-full.png)
+![CHIPYARD](https://github.com/ucb-bar/chipyard/raw/main/docs/_static/images/chipyard-logo-full.png)
 
 # Chipyard Framework [![Test](https://github.com/ucb-bar/chipyard/actions/workflows/chipyard-run-tests.yml/badge.svg)](https://github.com/ucb-bar/chipyard/actions)
+
+| We're running the First FireSim and Chipyard User/Developer Workshop at ASPLOS 2023 on March 26, 2023! This workshop will feature a full-day of submitted talks from users and developers in the FireSim and Chipyard community. Learn more and **submit your work** on the [2023 Workshop Page](https://fires.im/workshop-2023/)! |
+|-----|
 
 ## Quick Links
 

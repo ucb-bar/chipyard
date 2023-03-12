@@ -16,6 +16,20 @@ sim_name := none
 #########################################################################################
 SUB_PROJECT ?= vcu118
 
+ifeq ($(SUB_PROJECT),vc707)
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= VC707FPGATestHarness
+	VLOG_MODEL        ?= VC707FPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.vc707
+	CONFIG            ?= RocketVC707Config
+	CONFIG_PACKAGE    ?= chipyard.fpga.vc707
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
+	TOP               ?= ChipTop
+	BOARD             ?= vc707
+	FPGA_BRAND        ?= xilinx
+endif
+
 ifeq ($(SUB_PROJECT),vcu118)
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= VCU118FPGATestHarness
@@ -43,7 +57,6 @@ ifeq ($(SUB_PROJECT),bringup)
 	BOARD             ?= vcu118
 	FPGA_BRAND        ?= xilinx
 endif
-
 ifeq ($(SUB_PROJECT),arty)
 	# TODO: Fix with Arty
 	SBT_PROJECT       ?= fpga_platforms
@@ -56,6 +69,20 @@ ifeq ($(SUB_PROJECT),arty)
 	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= arty
+	FPGA_BRAND        ?= xilinx
+endif
+ifeq ($(SUB_PROJECT),arty100t)
+	# TODO: Fix with Arty
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= Arty100THarness
+	VLOG_MODEL        ?= Arty100THarness
+	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
+	CONFIG            ?= RocketArty100TConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
+	TOP               ?= ChipTop
+	BOARD             ?= arty_a7_100
 	FPGA_BRAND        ?= xilinx
 endif
 
@@ -76,17 +103,15 @@ fpga_common_script_dir := $(fpga_dir)/common/tcl
 #########################################################################################
 # setup misc. sim files
 #########################################################################################
-SIM_FILE_REQS += \
-	$(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v
-
 # copy files but ignore *.h files in *.f (match vcs)
-$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
-	cp -f $^ $(build_dir)
+$(sim_files): $(SIM_FILE_REQS) $(ALL_MODS_FILELIST) | $(GEN_COLLATERAL_DIR)
+	-cp -f $(SIM_FILE_REQS) $(GEN_COLLATERAL_DIR)
+	touch $@
 	$(foreach file,\
-		$^,\
+		$(SIM_FILE_REQS),\
 		$(if $(filter %.h,$(file)),\
 			,\
-			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
+			echo "$(addprefix $(GEN_COLLATERAL_DIR)/, $(notdir $(file)))" >> $@;))
 
 #########################################################################################
 # import other necessary rules and variables
@@ -97,9 +122,7 @@ include $(base_dir)/common.mk
 # copy from other directory
 #########################################################################################
 all_vsrcs := \
-	$(sim_vsrcs) \
-	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v \
-	$(fpga_dir)/common/vsrc/PowerOnResetFPGAOnly.v
+	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v
 
 #########################################################################################
 # vivado rules

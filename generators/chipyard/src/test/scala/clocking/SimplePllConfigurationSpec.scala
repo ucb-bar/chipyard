@@ -14,7 +14,7 @@ class SimplePllConfigurationSpec extends org.scalatest.flatspec.AnyFlatSpec {
 
     def trySuccessfulConf(requestedFreqs: Seq[Double], expected: Double): Unit = {
       val freqStr = requestedFreqs.mkString(", ")
-      it should s"select a reference of ${expected} MHz for ${freqStr} MHz" in { 
+      it should s"select a reference of ${expected} MHz for ${freqStr} MHz" in {
         val conf = genConf(requestedFreqs)
         conf.emitSummaries
         assert(expected == conf.referenceFreqMHz)

@@ -44,6 +44,6 @@ int main(void)
   } else {
     printf("\n\nAll tests passed\n\n");
   }
-  
+
   return 0;
 }

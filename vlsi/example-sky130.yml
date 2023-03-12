@@ -1,13 +1,13 @@
 # Technology Setup
 # Technology used is Sky130
-vlsi.core.technology: sky130
+vlsi.core.technology: "hammer.technology.sky130"
 
 vlsi.core.max_threads: 12
 
 # Technology paths
 technology.sky130:
   sky130A: "/path/to/sky130A"
-  openram_lib: "/path/to/sky130_sram_macros" 
+  openram_lib: "/path/to/sky130_sram_macros"
 
   # this key is OPTIONAL, no NDA files will be used if it does not point to a valid path
   sky130_nda: "/path/to/skywater-src-nda"
@@ -23,7 +23,7 @@ vlsi.inputs.clocks: [
   {name: "clock_clock", period: "10ns", uncertainty: "1ns"}
 ]
 
-# Generate Make include to aid in flow 
+# Generate Make include to aid in flow
 vlsi.core.build_system: make
 
 # Placement Constraints
@@ -54,7 +54,6 @@ par.generate_power_straps_options:
       - met5
     blockage_spacing_met2: 4.0
     blockage_spacing_met4: 2.0
-    blockage_spacing_met4: 2.0
     track_width: 3
     track_width_met5: 1
     track_spacing: 5
@@ -72,7 +71,4 @@ vlsi.inputs.pin.assignments: [
 ]
 
 # SRAM Compiler compiler options
-vlsi.core.sram_generator_tool: "sram_compiler"
-# You should specify a location for the SRAM generator in the tech plugin
-vlsi.core.sram_generator_tool_path: ["hammer/src/hammer-vlsi/technology/sky130"]
-vlsi.core.sram_generator_tool_path_meta: "append"
+vlsi.core.sram_generator_tool: "hammer.technology.sky130.sram_compiler"

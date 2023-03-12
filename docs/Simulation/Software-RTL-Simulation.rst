@@ -144,8 +144,8 @@ All ``make`` targets that can be applied to the default example, can also be app
     make SUB_PROJECT=hwacha run-asm-tests
 
 
-Finally, in the ``generated-src/<...>-<package>-<config>/`` directory resides all of the collateral and Verilog source files for the build/simulation.
-Specifically, the SoC top-level (``TOP``) Verilog file is denoted with ``*.top.v`` while the ``TestHarness`` file is denoted with ``*.harness.v``.
+Finally, in the ``generated-src/<...>-<package>-<config>/`` directory resides all of the collateral while the generated Verilog source files resides in ``generated-src/<...>-<package>-<config>/gen-collateral`` for the build/simulation.
+Specifically, for ``CONFIG=RocketConfig`` the SoC top-level (``TOP``) Verilog file is ``ChipTop.sv`` while the (``Model``) file is ``TestHarness.sv``.
 
 Fast Memory Loading
 -------------------
@@ -187,6 +187,16 @@ An open-source vcd-capable waveform viewer is `GTKWave <http://gtkwave.sourcefor
 
 For a VCS simulation, this will generate a vpd file (this is a proprietary waveform representation format used by Synopsys) that can be loaded to vpd-supported waveform viewers.
 If you have Synopsys licenses, we recommend using the DVE waveform viewer.
+
+Visualizing Chipyard SoCs
+--------------------------
+
+During verilog creation, a graphml file is emitted that will allow you to visualize your Chipyard SoC as a diplomacy graph.
+
+To view the graph, first download a viewer such as `yEd <https://www.yworks.com/products/yed/>`__.
+
+The ``*.graphml`` file will be located in ``generated-src/<...>/``. Open the file in the graph viewer. 
+To get a clearer view of the SoC, switch to "hierarchical" view. For yEd, this would be done by selecting ``layout`` -> ``hierarchical``, and then choosing "Ok" without changing any settings.
 
 .. _sw-sim-verilator-opts:
 

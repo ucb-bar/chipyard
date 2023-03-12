@@ -7,32 +7,26 @@ Using Hammer To Place and Route a Custom Block
 
 Initialize the Hammer Plug-ins
 ----------------------------------
-In the Chipyard root, run:
+In the Chipyard root, ensure that you have the Chipyard conda environment activated. Then, depending on if you are using a technology plugin included with Hammer (ASAP7, Sky130) or as a separate plugin, you will run either of the commands below.
+
+For Hammer-provided plugins (``<tech-plugin-name>`` is ``asap7`` or ``sky130``):
 
 .. code-block:: shell
 
     ./scripts/init-vlsi.sh <tech-plugin-name>
 
-This will pull the Hammer & CAD tool plugin submodules, assuming the technology plugins are available on github.
-Currently only the asap7 technology plugin is available on github.
-If you have additional private technology plugins (this is a typical use-case for proprietry process technologies with require NDAs and secure servers), you can clone them directly
-into VLSI directory with the name ``hammer-<tech-plugin-name>-plugin``.
+For separate technology plugins (this is a typical use-case for proprietry process technologies with require NDAs and secure servers), submodule them directly
+into VLSI directory with the name ``hammer-<tech-plugin-name>-plugin`` before calling the ``init-vlsi.sh`` script.
 For example, for an imaginary process technology called tsmintel3:
 
 .. code-block:: shell
 
     cd vlsi
-    git clone git@my-secure-server.berkeley.edu:tsmintel3/hammer-tsmintel3-plugin.git
+    git submodule add git@my-secure-server.berkeley.edu:tsmintel3/hammer-tsmintel3-plugin.git
+    cd -
+    ./scripts/init-vlsi.sh tsmintel3
 
-
-Next, we define the Hammer environment into the shell:
-
-.. code-block:: shell
-
-    cd vlsi    # (if you haven't done so yet)
-    export HAMMER_HOME=$PWD/hammer
-    source $HAMMER_HOME/sourceme.sh
-
+If submoduled plugins need to be updated, call the ``upgrade-vlsi.sh`` script. This will checkout and pull the latest master branch.
 
 .. Note:: Some VLSI EDA tools are supported only on RHEL-based operating systems. We recommend using Chipyard on RHEL7 and above. However, many VLSI server still have old operating systems such as RHEL6, which have software packages older than the basic chipyard requirements. In order to build Chipyard on RHEL6, you will likely need to use tool packages such as devtoolset (for example, devtoolset-8) and/or build from source gcc, git, gmake, make, dtc, cc, bison, libexpat and liby.
 
@@ -42,8 +36,7 @@ Setting up the Hammer Configuration Files
 The first configuration file that needs to be set up is the Hammer environment configuration file ``env.yml``. In this file you need to set the paths to the EDA tools and license servers you will be using. You do not have to fill all the fields in this configuration file, you only need to fill in the paths for the tools that you will be using.
 If you are working within a shared server farm environment with an LSF cluster setup (for example, the Berkeley Wireless Research Center), please note the additional possible environment configuration listed in the :ref:`VLSI/Basic-Flow:Advanced Environment Setup` segment of this documentation page.
 
-Hammer relies on YAML-based configuration files. While these configuration can be consolidated within a single files (as is the case in the ASAP7 tutorial :ref:`tutorial` and the ``sky130``
-OpenRoad example), the generally suggested way to work with an arbitrary process technology or tools plugins would be to use three configuration files, matching the three Hammer concerns - tools, tech, and design.
+Hammer relies on YAML-based configuration files. While these configuration can be consolidated within a single files (as is the case in the :ref:`tutorial` and the :ref:`sky130-openroad-tutorial`), the generally suggested way to work with an arbitrary process technology or tools plugins would be to use three configuration files, matching the three Hammer concerns - tools, tech, and design.
 The ``vlsi`` directory includes three such example configuration files matching the three concerns: ``example-tools.yml``, ``example-tech.yml``, and ``example-design.yml``.
 
 The ``example-tools.yml`` file configures which EDA tools hammer will use. This example file uses Cadence Innovus, Genus and Voltus, Synopsys VCS, and Mentor Calibre (which are likely the tools you will use if you're working in the Berkeley Wireless Research Center). Note that tool versions are highly sensitive to the process-technology in-use. Hence, tool versions that work with one process technology may not work with another.
@@ -52,7 +45,7 @@ The ``example-design.yml`` file contains basic build system information (how man
 
 Finally, the ``example-tech.yml`` file is a template file for a process technology plugin configuration. We will copy this file, and replace its fields with the appropriate process technology details for the tech plugin that we have access to. For example, for the ``asap7`` tech plugin, we will replace the <tech_name> field with "asap7" and the path to the process technology files installation directory. The technology plugin (which for ASAP7 is within Hammer) will define the technology node and other parameters.
 
-We recommend copying these example configuration files and customizing them with a different name, so you can have different configuration files for different process technologies and designs (e.g. create tech-tsmintel3.yml from example-tech.yml)
+We recommend copying these example configuration files and customizing them with a different name, so you can have different configuration files for different process technologies and designs (e.g. create ``tech-tsmintel3.yml`` from ``example-tech.yml``)
 
 
 Building the Design
@@ -64,7 +57,7 @@ As in the rest of the Chipyard flows, we specify our SoC configuration using the
 However, unlike the rest of the Chipyard flows, in the case of physical design we might be interested in working in a hierarchical fashion and therefore we would like to work on a single module.
 Therefore, we can also specify a ``VLSI_TOP`` make variable with the same of a specific Verilog module (which should also match the name of the equivalent Chisel module) which we would like to work on.
 The makefile will automatically call tools such as Barstools and the MacroCompiler (:ref:`Tools/Barstools:barstools`) in order to make the generated Verilog more VLSI friendly.
-By default, the MacroCompiler will attempt to map memories into the SRAM options within the Hammer technology plugin. However, if you are working with a new process technology and prefer to work with flip-flop arrays, you can configure the MacroCompiler using the ``MACROCOMPILER_MODE`` make variable. For example, if your technology plugin does not have an SRAM compiler ready, you can use the ``MACROCOMPILER_MODE='--mode synflops'`` option (Note that synthesizing a design with only flipflops is very slow and will often may not meet constraints).
+By default, the MacroCompiler will attempt to map memories into the SRAM options within the Hammer technology plugin. However, if you are working with a new process technology and prefer to work with flip-flop arrays, you can configure the MacroCompiler using the ``TOP_MACROCOMPILER_MODE`` make variable. For example, if your technology plugin does not have an SRAM compiler ready, you can use the ``MACROCOMPILER_MODE='--mode synflops'`` option (Note that synthesizing a design with only flipflops is very slow and will often may not meet constraints).
 
 We call the ``make buildfile`` command while also specifying the name of the process technology we are working with (same ``tech_name`` for the configuration files and plugin name) and the configuration files we created. Note, in the ASAP7 tutorial ((:ref:`tutorial`)) these configuration files are merged into a single file called ``example-asap7.yml``.
 
@@ -302,8 +295,11 @@ For example, if we choose to specifiy the previously mentioned ``GemminiRocketCo
             bottom: 0
 
 
-In this specification, ``vlsi.inputs.hierarchical.mode`` indicates the manual specification of the heirarchy tree (which is the only mode currently supported by Hammer), ``vlsi.inputs.hiearchical.top_module`` sets the root of the hierarchical tree, ``vlsi.inputs.hierarchical.manual_modules`` enumerates the tree of hierarchical modules, and ``vlsi.inputs.hierarchical.manual_placement_constraints`` enumerates the floorplan for each module.
+In this specification, ``vlsi.inputs.hierarchical.mode`` indicates the manual specification of the hierarchy tree (which is the only mode currently supported by Hammer), ``vlsi.inputs.hierarchical.top_module`` sets the root of the hierarchical tree, ``vlsi.inputs.hierarchical.manual_modules`` enumerates the tree of hierarchical modules, and ``vlsi.inputs.hierarchical.manual_placement_constraints`` enumerates the floorplan for each module.
 
+For more information about the Hammer hierarchical flow and specifying the hierarchy and constraints, visit the `Hammer documentation <https://hammer-vlsi.readthedocs.io/en/stable/Hammer-Use/Hierarchical.html>`__.
+
+.. Note:: You must generate the hierarchical hierarchy BEFORE running the ``make buildfile`` target. This is because Hammer encodes its hierarchical flow graph in a generated Makefile in ``$(OBJ_DIR)/hammer.d``. If you modify your physical hierarchy, you must wipe and regenerate this Makefile. Finally, you must always override the ``VLSI_TOP`` variable to be the hierarchical block that you are working on. This is required for hierarchical simulation and power flows.
 
 .. Specifying a Custom Floorplan
 .. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

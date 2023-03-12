@@ -52,6 +52,8 @@ read -a keys <<< ${grouping[$1]}
 # need to set the PATH to use the new verilator (with the new verilator root)
 for key in "${keys[@]}"
 do
-    export COURSIER_CACHE=$REMOTE_WORK_DIR/.coursier-cache
-    make -j$REMOTE_MAKE_NPROC -C $REMOTE_MAKE_DIR FIRRTL_LOGLEVEL=info JAVA_OPTS="$REMOTE_JAVA_OPTS" SBT_OPTS="$REMOTE_SBT_OPTS" ${mapping[$key]}
+    export COURSIER_CACHE=$REMOTE_COURSIER_CACHE
+    export JVM_MEMORY=10G
+    export JAVA_TMP_DIR=$REMOTE_JAVA_TMP_DIR
+    make -j$REMOTE_MAKE_NPROC -C $REMOTE_MAKE_DIR FIRRTL_LOGLEVEL=info ${mapping[$key]}
 done

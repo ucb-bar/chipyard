@@ -21,7 +21,7 @@ import barstools.iocell.chisel._
 
 import testchipip._
 
-import chipyard.{HasHarnessSignalReferences, HarnessClockInstantiatorKey}
+import chipyard._
 import chipyard.clocking.{HasChipyardPRCI}
 import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, ClockWithFreq}
 
@@ -234,7 +234,14 @@ class WithTieOffInterrupts extends OverrideHarnessBinder({
 
 class WithTieOffL2FBusAXI extends OverrideHarnessBinder({
   (system: CanHaveSlaveAXI4Port, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
-    ports.foreach({ p => p := DontCare; p.bits.tieoff() })
+    ports.foreach({ p =>
+      p.bits := DontCare
+      p.bits.aw.valid := false.B
+      p.bits.w.valid := false.B
+      p.bits.b.ready := false.B
+      p.bits.ar.valid := false.B
+      p.bits.r.ready := false.B
+    })
   }
 })
 
@@ -274,7 +281,10 @@ class WithTiedOffDebug extends OverrideHarnessBinder({
         d.dmiClock := false.B.asClock
         d.dmiReset := true.B
       case a: ClockedAPBBundle =>
-        a.tieoff()
+        a.pready := false.B
+        a.pslverr := false.B
+        a.prdata := 0.U
+        a.pduser := DontCare
         a.clock := false.B.asClock
         a.reset := true.B.asAsyncReset
         a.psel := false.B
@@ -311,6 +321,27 @@ class WithSimSerial extends OverrideHarnessBinder({
   }
 })
 
+class WithUARTSerial extends OverrideHarnessBinder({
+  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    ports.map({ port =>
+      val freq = p(PeripheryBusKey).dtsFrequency.get
+      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+      withClockAndReset(th.buildtopClock, th.buildtopReset) {
+        val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
+        val uart_to_serial = Module(new UARTToSerial(freq, UARTParams(0)))
+        val serial_width_adapter = Module(new SerialWidthAdapter(
+          8, SerialAdapter.SERIAL_TSI_WIDTH))
+        ram.module.io.tsi_ser.flipConnect(serial_width_adapter.io.wide)
+        UARTAdapter.connect(Seq(uart_to_serial.io.uart), uart_to_serial.div)
+        serial_width_adapter.io.narrow.flipConnect(uart_to_serial.io.serial)
+        th.success := false.B
+      }
+    })
+  }
+})
+
+
 class WithTraceGenSuccess extends OverrideHarnessBinder({
   (system: TraceGenSystemModuleImp, th: HasHarnessSignalReferences, ports: Seq[Bool]) => {
     ports.map { p => when (p) { th.success := true.B } }
@@ -322,6 +353,24 @@ class WithSimDromajoBridge extends ComposeHarnessBinder({
     ports.map { p => p.traces.map(tileTrace => SimDromajoBridge(tileTrace)(system.p)) }
   }
 })
+
+class WithCospike extends ComposeHarnessBinder({
+  (system: CanHaveTraceIOModuleImp, th: HasHarnessSignalReferences, ports: Seq[TraceOutputTop]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    val chipyardSystem = system.asInstanceOf[ChipyardSystemModule[_]].outer.asInstanceOf[ChipyardSystem]
+    val tiles = chipyardSystem.tiles
+    val cfg = SpikeCosimConfig(
+      isa = tiles.headOption.map(_.isaDTS).getOrElse(""),
+      mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0)),
+      mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
+      pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0),
+      nharts = tiles.size,
+      bootrom = chipyardSystem.bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse("")
+    )
+    ports.map { p => p.traces.zipWithIndex.map(t => SpikeCosim(t._1, t._2, cfg)) }
+  }
+})
+
 
 class WithCustomBootPinPlusArg extends OverrideHarnessBinder({
   (system: CanHavePeripheryCustomBootPin, th: HasHarnessSignalReferences, ports: Seq[Bool]) => {

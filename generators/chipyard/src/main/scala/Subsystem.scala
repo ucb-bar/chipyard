@@ -54,6 +54,26 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
     case b: BoomTile => b.module.core.coreMonitorBundle
   }.toList
 
+  // No-tile configs have to be handled specially.
+  if (tiles.size == 0) {
+    // no PLIC, so sink interrupts to nowhere
+    require(!p(PLICKey).isDefined)
+    val intNexus = IntNexusNode(sourceFn = x => x.head, sinkFn = x => x.head)
+    val intSink = IntSinkNode(IntSinkPortSimple())
+    intSink := intNexus :=* ibus.toPLIC
+
+    // avoids a bug when there are no interrupt sources
+    ibus.fromAsync := NullIntSource()
+
+    // Need to have at least 1 driver to the tile notification sinks
+    tileHaltXbarNode := IntSourceNode(IntSourcePortSimple())
+    tileWFIXbarNode := IntSourceNode(IntSourcePortSimple())
+    tileCeaseXbarNode := IntSourceNode(IntSourcePortSimple())
+
+    // Sink reset vectors to nowhere
+    val resetVectorSink = BundleBridgeSink[UInt](Some(() => UInt(28.W)))
+    resetVectorSink := tileResetVectorNode
+  }
 
   // Relying on [[TLBusWrapperConnection]].driveClockFromMaster for
   // bus-couplings that are not asynchronous strips the bus name from the sink
@@ -77,10 +97,7 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
 class ChipyardSubsystemModuleImp[+L <: ChipyardSubsystem](_outer: L) extends BaseSubsystemModuleImp(_outer)
   with HasTilesModuleImp
 {
-  // create file with core params
-  ElaborationArtefacts.add("""core.config""", outer.tiles.map(x => x.module.toString).mkString("\n"))
   // Generate C header with relevant information for Dromajo
   // This is included in the `dromajo_params.h` header file
   DromajoHelper.addArtefacts(InSubsystem)
 }
-

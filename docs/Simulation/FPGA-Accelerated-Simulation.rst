@@ -14,14 +14,7 @@ FireSim supports running on Amazon EC2 F1 FPGA-enabled cloud instances and on lo
 The rest of this documentation assumes you are running on an Amazon EC2 F1 FPGA-enabled virtual instance.
 In order to simuate your Chipyard design using FireSim, make sure to follow the repository setup as described by
 :ref:`Chipyard-Basics/Initial-Repo-Setup:Initial Repository Setup`, if you have not already.
-
-Next, initalize FireSim as a library in Chipyard by running:
-
-.. code-block:: shell
-
-    # At the root of your chipyard repo
-    ./scripts/firesim-setup.sh
-
+This setup should have setup the Chipyard repository including FireSim by running the ``./scripts/firesim-setup.sh`` script.
 ``firesim-setup.sh`` initializes additional submodules and then invokes
 FireSim's ``build-setup.sh`` script adding ``--library`` to properly
 initialize FireSim as a library submodule in Chipyard. You may run

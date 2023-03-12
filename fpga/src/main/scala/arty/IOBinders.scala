@@ -3,8 +3,7 @@ package chipyard.fpga.arty
 import chisel3._
 import chisel3.experimental.{IO}
 
-import freechips.rocketchip.util._
-import freechips.rocketchip.devices.debug._
+import freechips.rocketchip.devices.debug.{HasPeripheryDebugModuleImp}
 
 import chipyard.iobinders.{ComposeIOBinder}
 

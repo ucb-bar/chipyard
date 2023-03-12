@@ -69,7 +69,7 @@ to the TLXbar provided by RocketChip, but uses ring networks internally rather
 than crossbars. This can be useful for chips with very wide TileLink networks
 (many cores and L2 banks) that can sacrifice cross-section bandwidth to relieve
 wire routing congestion. Documentation on how to use the ring network can be
-found in :ref:`Customization/Memory-Hierarchy:The System Bus`. The implementation itself can be found 
+found in :ref:`Customization/Memory-Hierarchy:The System Bus`. The implementation itself can be found
 `here <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/Ring.scala>`_,
 and may serve as an example of how to implement your own TileLink network with
 a different topology.

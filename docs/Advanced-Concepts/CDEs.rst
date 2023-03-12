@@ -107,5 +107,3 @@ In this example, note how ``up(SomeKeyY, site)`` in ``WithXEqualsYUp`` will refe
 
 
 Also note that again, ``site`` must be recursively passed through the call to ``up``.
-
-

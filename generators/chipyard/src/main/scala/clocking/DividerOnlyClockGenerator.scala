@@ -119,7 +119,8 @@ case class DividerOnlyClockGeneratorNode(pllName: String)(implicit valName: ValN
 class DividerOnlyClockGenerator(pllName: String)(implicit p: Parameters, valName: ValName) extends LazyModule {
   val node = DividerOnlyClockGeneratorNode(pllName)
 
-  lazy val module = new LazyRawModuleImp(this) {
+  lazy val module = new Impl
+  class Impl extends LazyRawModuleImp(this) {
     require(node.out.size == 1, "Idealized PLL expects to generate a single output clock group. Use a ClockGroupAggregator")
     val (refClock, ClockEdgeParameters(_, refSinkParam, _, _)) = node.in.head
     val (outClocks, ClockGroupEdgeParameters(_, outSinkParams,  _, _)) = node.out.head

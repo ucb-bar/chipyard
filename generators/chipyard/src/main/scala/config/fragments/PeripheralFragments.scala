@@ -44,6 +44,14 @@ class WithUART(address: BigInt = 0x10020000, baudrate: BigInt = 115200) extends 
     UARTParams(address = address, nTxEntries = 256, nRxEntries = 256, initBaudRate = baudrate))
 })
 
+class WithNoUART extends Config((site, here, up) => {
+  case PeripheryUARTKey => Nil
+})
+
+class WithUARTFIFOEntries(txEntries: Int, rxEntries: Int) extends Config((site, here, up) => {
+  case PeripheryUARTKey => up(PeripheryUARTKey).map(_.copy(nTxEntries = txEntries, nRxEntries = rxEntries))
+})
+
 class WithSPIFlash(address: BigInt = 0x10030000, fAddress: BigInt = 0x20000000, size: BigInt = 0x10000000) extends Config((site, here, up) => {
   // Note: the default size matches freedom with the addresses below
   case PeripherySPIFlashKey => up(PeripherySPIFlashKey) ++ Seq(
@@ -103,6 +111,9 @@ class WithSerialTLBackingMemory extends Config((site, here, up) => {
 })
 
 class WithExtMemIdBits(n: Int) extends Config((site, here, up) => {
-    case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(idBits = n)))
+  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(idBits = n)))
 })
 
+class WithNoPLIC extends Config((site, here, up) => {
+  case PLICKey => None
+})

@@ -35,10 +35,10 @@ case $1 in
     chipyard-dmirocket)
         run_bmark ${mapping[$1]}
         ;;
-    chipyard-lbwif)
+    chipyard-boom)
         run_bmark ${mapping[$1]}
         ;;
-    chipyard-boom)
+    chipyard-spike)
         run_bmark ${mapping[$1]}
         ;;
     chipyard-hetero)
@@ -66,21 +66,33 @@ case $1 in
         (cd $LOCAL_CHIPYARD_DIR/generators/mempress/software/src && make)
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/generators/mempress/software/src/mempress-rocc.riscv
         ;;
-    chipyard-streaming-passthrough)
-        make -C $LOCAL_CHIPYARD_DIR/tests
+    chipyard-manymmioaccels)
+	make -C $LOCAL_CHIPYARD_DIR/tests
+
+	# test streaming-passthrough
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-passthrough.riscv
-        ;;
-    chipyard-streaming-fir)
-        make -C $LOCAL_CHIPYARD_DIR/tests
+
+	# test streaming-fir
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-fir.riscv
-        ;;
-    chipyard-spiflashread)
+
+	# test nvdla
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv run-binary-fast
+
+	# test fft
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/fft.riscv run-binary-fast
+
+	;;
+    chipyard-manyperipherals)
+	# SPI Flash read tests, then bmark tests
+
         make -C $LOCAL_CHIPYARD_DIR/tests
-        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashread.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary-fast
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashread.riscv run-binary-fast
+
+	run_bmark ${mapping[$1]}
         ;;
     chipyard-spiflashwrite)
         make -C $LOCAL_CHIPYARD_DIR/tests
-        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashwrite.riscv SIM_FLAGS="+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img" run-binary-fast
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashwrite.riscv run-binary-fast
         [[ "`xxd $LOCAL_CHIPYARD_DIR/tests/spiflash.img  | grep 1337\ 00ff\ aa55\ face | wc -l`" == "6" ]] || false
         ;;
     tracegen)
@@ -98,16 +110,8 @@ case $1 in
     chipyard-sodor)
         run_asm ${mapping[$1]}
         ;;
-    chipyard-nvdla)
-        make -C $LOCAL_CHIPYARD_DIR/tests
-        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv run-binary-fast
-        ;;
-    chipyard-fftgenerator)
-        make -C $LOCAL_CHIPYARD_DIR/tests
-        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/fft.riscv run-binary-fast
-        ;;
     chipyard-constellation)
-        run_bmark ${mapping[$1]}
+        make run-binary-hex BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}
         ;;
     icenet)
         make run-binary-fast BINARY=none -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}

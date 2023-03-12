@@ -14,9 +14,9 @@ import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.regmapper._
 import freechips.rocketchip.subsystem._
 
-/** This node adds clock gating control registers. 
+/** This node adds clock gating control registers.
   * If deploying on a platform which does not support clock gating, deasserting the enable
-  * flag will generate the registers, preserving the same memory map and behavior, but will not 
+  * flag will generate the registers, preserving the same memory map and behavior, but will not
   * generate any gaters
   */
 class TileClockGater(address: BigInt, beatBytes: Int, enable: Boolean)(implicit p: Parameters, valName: ValName) extends LazyModule

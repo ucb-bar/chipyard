@@ -1,6 +1,6 @@
 # Technology Setup
 # Technology used is ASAP7
-vlsi.core.technology: asap7
+vlsi.core.technology: "hammer.technology.asap7"
 # Specify dir with ASAP7 Calibre deck tarball
 technology.asap7.tarball_dir: "/path/to/asap7"
 # Specify PDK and std cell install directories
@@ -20,7 +20,7 @@ vlsi.inputs.clocks: [
   {name: "clock_clock", period: "1ns", uncertainty: "0.1ns"}
 ]
 
-# Generate Make include to aid in flow 
+# Generate Make include to aid in flow
 vlsi.core.build_system: make
 
 # Placement Constraints
@@ -52,7 +52,7 @@ vlsi.inputs.placement_constraints:
     top_layer: "M4"
   - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_2"
     type: hardmacro
-    x: 675 
+    x: 675
     y: 25
     orientation: "r0"
     top_layer: "M4"
@@ -94,7 +94,4 @@ vlsi.inputs.pin.assignments: [
 ]
 
 # SRAM Compiler compiler options
-vlsi.core.sram_generator_tool: "sram_compiler"
-# You should specify a location for the SRAM generator in the tech plugin
-vlsi.core.sram_generator_tool_path: ["hammer/src/hammer-vlsi/technology/asap7"]
-vlsi.core.sram_generator_tool_path_meta: "append"
+vlsi.core.sram_generator_tool: "hammer.technology.asap7.sram_compiler"

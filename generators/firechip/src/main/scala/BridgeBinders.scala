@@ -76,7 +76,7 @@ class WithSerialBridge extends OverrideHarnessBinder({
       val ram = withClockAndReset(th.buildtopClock, th.buildtopReset) {
         SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
       }
-      SerialBridge(th.buildtopClock, ram.module.io.tsi_ser, p(ExtMem).map(_ => MainMemoryConsts.globalName))
+      SerialBridge(th.buildtopClock, ram.module.io.tsi_ser, p(ExtMem).map(_ => MainMemoryConsts.globalName), th.buildtopReset.asBool)
     }
     Nil
   }
@@ -97,7 +97,7 @@ class WithUARTBridge extends OverrideHarnessBinder({
     val pbusClockNode = system.outer.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(PBUS).fixedClockNode
     val pbusClock = pbusClockNode.in.head._1.clock
     BoringUtils.bore(pbusClock, Seq(uartSyncClock))
-    ports.map { p => UARTBridge(uartSyncClock, p)(system.p) }; Nil
+    ports.map { p => UARTBridge(uartSyncClock, p, th.buildtopReset.asBool)(system.p) }; Nil
 })
 
 class WithBlockDeviceBridge extends OverrideHarnessBinder({
@@ -134,7 +134,7 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
             axiClockBundle,
             th.buildtopReset)
         }
-        SerialBridge(th.buildtopClock, harnessMultiClockAXIRAM.module.io.tsi_ser, Some(MainMemoryConsts.globalName))
+        SerialBridge(th.buildtopClock, harnessMultiClockAXIRAM.module.io.tsi_ser, Some(MainMemoryConsts.globalName), th.buildtopReset.asBool)
 
         // connect SimAxiMem
         (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi4, edge) =>
@@ -240,5 +240,16 @@ class WithDefaultFireSimBridges extends Config(
   new WithFireSimMultiCycleRegfile ++
   new WithFireSimFAME5 ++
   new WithTracerVBridge ++
+  new WithFireSimIOCellModels
+)
+
+// Shorthand to register all of the provided mmio-only bridges above
+class WithDefaultMMIOOnlyFireSimBridges extends Config(
+  new WithSerialBridge ++
+  new WithUARTBridge ++
+  new WithBlockDeviceBridge ++
+  new WithFASEDBridge ++
+  new WithFireSimMultiCycleRegfile ++
+  new WithFireSimFAME5 ++
   new WithFireSimIOCellModels
 )

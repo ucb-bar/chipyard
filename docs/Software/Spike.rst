@@ -21,3 +21,15 @@ full cycle-accurate simulation using software RTL simulators or FireSim.
 
 Spike comes pre-packaged in the RISC-V toolchain and is available on the path as ``spike``.
 More information can be found in the `Spike repository <https://github.com/riscv/riscv-isa-sim>`__.
+
+Spike-as-a-Tile
+-----------------
+
+Chipyard contains experimental support for simulating a Spike processor model with the uncore, similar to a virtual-platform.
+In this configuration, Spike is cache-coherent, and communicates with the uncore through a C++ TileLink private cache model.
+
+.. code-block:: shell
+
+    make CONFIG=SpikeConfig run-binary BINARY=hello.riscv
+
+

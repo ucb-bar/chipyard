@@ -33,4 +33,3 @@ class ChipTop(implicit p: Parameters) extends LazyModule with BindingScope
   // anyways, they probably need to be explicitly clocked.
   lazy val module: LazyModuleImpLike = new LazyRawModuleImp(this) {  }
 }
-
