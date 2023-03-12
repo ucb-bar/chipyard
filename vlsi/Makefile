@@ -134,7 +134,7 @@ $(SYN_CONF): $(VLSI_RTL)
 #########################################################################################
 # simulation and power input configuration
 #########################################################################################
-include $(base_dir)/vcs.mk
+include $(base_dir)/sims/vcs/vcs.mk
 
 SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
