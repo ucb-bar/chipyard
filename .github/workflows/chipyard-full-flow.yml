@@ -114,8 +114,6 @@ jobs:
           source env.sh
 
           cd vlsi
-          export tutorial=sky130-openroad
-          # TODO: consider setting VLSI_TOP=RocketTile
 
           # NOTE: most conda installs are in separate conda envs because they mess up 
           #   each other's versions (for no apparent reason) and we need the latest versions
@@ -146,6 +144,8 @@ jobs:
           conda config --remove channels litex-hub
           conda config --remove channels defaults
 
+          export tutorial=sky130-openroad
+          # TODO: consider setting VLSI_TOP=RocketTile
           make buildfile
           make syn
           make par
