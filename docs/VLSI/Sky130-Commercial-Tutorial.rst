@@ -1,7 +1,7 @@
 .. _sky130-commercial-tutorial:
 
-Sky130 Tutorial
-===============
+Sky130 Commercial Tutorial
+==========================
 The ``vlsi`` folder of this repository contains an example Hammer flow with the TinyRocketConfig from Chipyard. This example tutorial uses the built-in Sky130 technology plugin and requires access to the included Cadence and Mentor tool plugin submodules. Cadence is necessary for synthesis & place-and-route, while Mentor is needed for DRC & LVS.
 
 Project Structure
@@ -121,6 +121,15 @@ The command ``make buildfile`` generates a set of Make targets in ``build/hammer
 It needs to be re-run if environment variables are changed.
 It is recommended that you edit these variables directly in the Makefile rather than exporting them to your shell environment.
 
+The ``buildfile`` make target has dependencies on both (1) the Verilog that is elaborated from all Chisel sources
+and (2) the mapping of memory instances in the design to SRAM macros;
+all files related to these two steps reside in the ``generated-src/chipyard.TestHarness.TinyRocketConfig-ChipTop`` directory.
+Note that the files in ``generated-src`` vary for each tool/technology flow.
+This especially applies to the Sky130 Commercial vs OpenROAD tutorial flows 
+(due to the ``ENABLE_YOSYS_FLOW`` flag present for the OpenROAD flow), so these flows should be run in separate
+chipyard installations. If the wrong sources are generated, simply run ``make buildfile -B`` to rebuild all targets correctly.
+
+
 For the purpose of brevity, in this tutorial we will set the Make variable ``tutorial=sky130-commercial``,
 which will cause additional variables to be set in ``tutorial.mk``, a few of which are summarized as follows:
 
@@ -161,9 +170,9 @@ To run DRC & LVS, and view the results in Calibre:
 .. code-block:: shell
 
     make drc tutorial=sky130-commercial
-    ./build/drc-rundir/generated-scripts/view_drc
+    ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/drc-rundir/generated-scripts/view_drc
     make lvs tutorial=sky130-commercial
-    ./build/lvs-rundir/generated-scripts/view_lvs
+    ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/lvs-rundir/generated-scripts/view_lvs
 
 Some DRC errors are expected from this PDK, especially with regards to the SRAMs, as explained in the
 `Sky130 Hammer plugin README  <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__.
