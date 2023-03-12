@@ -103,7 +103,7 @@ dependencies:
     # hammer packages
     - sty
     - pip:
-        - hammer-vlsi[asap7]==1.0.2
+        - hammer-vlsi[asap7]==1.0.3
 
     # doc requirements
     - sphinx
