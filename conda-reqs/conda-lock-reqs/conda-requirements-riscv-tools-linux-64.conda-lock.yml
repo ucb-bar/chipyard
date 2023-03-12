@@ -21,7 +21,7 @@ metadata:
   - url: nodefaults
     used_env_vars: []
   content_hash:
-    linux-64: 842e724161a92610b043040d99ffc3398c82d3f42a1ac6314b1b9c89d1ea5605
+    linux-64: 01a33092d9b6501c87e830b4dd22683af0a3c8f5ede87d42d7a079b5c345161b
   platforms:
   - linux-64
   sources:
@@ -5534,13 +5534,13 @@ package:
     pyyaml: '>=6.0,<7.0'
     ruamel.yaml: '>=0.17.21,<0.18.0'
   hash:
-    sha256: d3646ea047d17bb5115f29d58a11941052eee45c86ef50debe288da887d88828
+    sha256: 6bcd6cef086b6b6b6ab00822699d436451ef5f8f8460e07cad7c05ab6d05bfcf
   manager: pip
   name: hammer-vlsi
   optional: false
   platform: linux-64
-  url: https://files.pythonhosted.org/packages/c5/9f/fe767a72adcc2882b1be486da481c9d602952057a9470aa409cbb01dd596/hammer_vlsi-1.0.3-py3-none-any.whl
-  version: 1.0.3
+  url: https://files.pythonhosted.org/packages/65/f8/5ec3f1e3c629724fec4613e13c3da9be114b306ae452cd1e0f75eaf694a6/hammer_vlsi-1.0.4-py3-none-any.whl
+  version: 1.0.4
 - category: main
   dependencies:
     asttokens: '>=2,<3'
