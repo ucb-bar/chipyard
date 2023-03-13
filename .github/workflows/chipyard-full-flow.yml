@@ -152,7 +152,7 @@ jobs:
           export tutorial=sky130-openroad
           export EXTRA_CONFS=tutorial.yml
           export VLSI_TOP=RocketTile
-          make buildfile -B
+          make buildfile
           make syn
           # openroad freezes during some write commands after detailed route
           # so need to stop the flow & run last step separately
