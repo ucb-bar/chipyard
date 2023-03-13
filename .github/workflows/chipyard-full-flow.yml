@@ -158,9 +158,10 @@ jobs:
           export VLSI_TOP=RocketTile
           make buildfile
           make syn
-          # openroad freezes during the write_sdf command, so don't run last step for now
-          make par HAMMER_EXTRA_ARGS="--stop_before_step write_design"
-          make redo-par HAMMER_EXTRA_ARGS="--start_before_step write_design"
+          # openroad freezes during some write commands after detailed route
+          # so need to stop the flow & run last step separately
+          make par HAMMER_EXTRA_ARGS="--stop_after_step extraction"
+          make redo-par HAMMER_EXTRA_ARGS="--start_before_step extraction"
           make drc
           # doesn't work for now bc of hammer sky130 plugin bug, fix in next release
           # make lvs
