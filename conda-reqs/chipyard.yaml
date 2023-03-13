@@ -47,7 +47,6 @@ dependencies:
     - doit>=0.34.0
     - gitpython
     - humanfriendly
-    - e2fsprogs
     - ctags
     - bison
     - flex
