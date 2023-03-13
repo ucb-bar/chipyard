@@ -158,9 +158,8 @@ jobs:
           export VLSI_TOP=RocketTile
           make buildfile
           make syn
-          make par
           # openroad freezes during the write_sdf command, so don't run last step for now
-          # make par HAMMER_EXTRA_ARGS="--stop_before_step write_design"
+          make par HAMMER_EXTRA_ARGS="--stop_before_step write_design"
           # make drc
           # make lvs
 
