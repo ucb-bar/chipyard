@@ -160,9 +160,10 @@ jobs:
           make syn
           # openroad freezes during the write_sdf command, so don't run last step for now
           make par HAMMER_EXTRA_ARGS="--stop_before_step write_design"
-          make par HAMMER_EXTRA_ARGS="--start_before_step write_design"
+          make redo-par HAMMER_EXTRA_ARGS="--start_before_step write_design"
           make drc
-          make lvs
+          # doesn't work for now bc of hammer sky130 plugin bug, fix in next release
+          # make lvs
 
 
   cleanup:
