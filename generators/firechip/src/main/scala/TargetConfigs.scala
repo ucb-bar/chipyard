@@ -282,3 +282,15 @@ class FireSimNoMemPortConfig extends Config(
   new testchipip.WithBackingScratchpad ++
   new WithFireSimConfigTweaks ++
   new chipyard.RocketConfig)
+
+class FireSimRocketMMIOOnlyConfig extends Config(
+  new WithDefaultMMIOOnlyFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.RocketConfig)
+
+class FireSimGemminiRocketMMIOOnlyConfig extends Config(
+  new WithDefaultMMIOOnlyFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.LeanGemminiRocketConfig)

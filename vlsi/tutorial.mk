@@ -30,7 +30,10 @@ ifeq ($(tutorial),sky130-openroad)
     TOOLS_CONF        ?= example-openroad.yml
     TECH_CONF         ?= example-sky130.yml
     DESIGN_CONF       ?= example-designs/sky130-openroad.yml
-    EXTRA_CONFS       ?= $(if $(filter $(VLSI_TOP),Rocket), example-designs/sky130-rocket.yml, )
+    EXTRA_CONFS       ?= $(if $(filter $(VLSI_TOP),Rocket), \
+                            example-designs/sky130-rocket.yml, \
+                            $(if $(filter $(VLSI_TOP),RocketTile), \
+                                example-designs/sky130-openroad-rockettile.yml, ))
     INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONF) $(EXTRA_CONFS)
     VLSI_OBJ_DIR      ?= build-sky130-openroad
     # Yosys compatibility for CIRCT-generated Verilog, at the expense of elaboration time.
