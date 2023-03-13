@@ -151,7 +151,7 @@ jobs:
           echo "par.openroad.write_reports: false" >> tutorial.yml
 
           conda config --remove channels litex-hub
-          conda config --remove channels defaultss
+          conda config --remove channels defaults
 
           export tutorial=sky130-openroad
           export EXTRA_CONFS="example-designs/sky130-openroad-rockettile.yml tutorial.yml"
@@ -159,8 +159,10 @@ jobs:
           make buildfile
           make syn
           make par
-          make drc
-          make lvs
+          # openroad freezes during the write_sdf command, so don't run last step for now
+          # make par HAMMER_EXTRA_ARGS="--stop_before_step write_design"
+          # make drc
+          # make lvs
 
 
   cleanup:
