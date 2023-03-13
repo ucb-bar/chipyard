@@ -101,6 +101,7 @@ dependencies:
 
     # hammer packages
     - sty
+    - open_pdks.sky130a
     - pip:
         - hammer-vlsi[asap7]==1.0.4
 
@@ -135,9 +136,6 @@ dependencies:
     - pip:
         - sure
         - pylddwrap
-    
-    # hammer sky130 open-source vlsi flow
-    - open_pdks.sky130a
 
     # firesim ci shared packages
     - boto3
