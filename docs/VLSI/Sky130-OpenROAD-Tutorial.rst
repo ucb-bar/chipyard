@@ -59,25 +59,24 @@ Prerequisites
 
   * These SRAM macros were generated using the `Sram22 SRAM generator  <https://github.com/rahulk29/sram22>`__ (still very heavily under development)
 
-Prerequisite Setup with Conda
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Quick Prerequisite Setup
+^^^^^^^^^^^^^^^^^^^^^^^^
 As of recently, most of the prerequisites of this tutorial may now be installed as conda packages.
-The setup of these tools may eventually be scripted, but for now here are the directions to set them up:
+The prerequisite setup for this tutorial may eventually be scripted, but for now the directions to set them up are below.
+Note that we create a new conda environment for each tool because some of them have conflicting dependencies.
 
 .. code-block:: shell
 
-    # create conda environment named "osflow"
-    conda create -n osflow
     # download all files for Sky130A PDK
-    conda install -n osflow -c litex-hub open_pdks.sky130a
+    conda create -c litex-hub --prefix ~/.conda-sky130 open_pdks.sky130a=1.0.399_0_g63dbde9
+    # clone the SRAM22 Sky130 SRAM macros
+    git clone https://github.com/rahulk29/sram22_sky130_macros ~/sram22_sky130_macros
+
     # install all VLSI tools
-    conda install -n osflow -c litex-hub yosys
-    conda install -n osflow -c litex-hub openroad
-    conda install -n osflow -c litex-hub klayout
-    conda install -n osflow -c litex-hub magic
-    conda install -n osflow -c litex-hub netgen
-    # clone the SRAM22 Sky130 SRAM macros to a convenient location
-    git clone https://github.com/rahulk29/sram22_sky130_macros
+    conda create -c litex-hub --prefix ~/.conda-yosys yosys=0.27_4_gb58664d44
+    conda create -c litex-hub --prefix ~/.conda-openroad openroad=2.0_7070_g0264023b6
+    conda create -c litex-hub --prefix ~/.conda-klayout klayout=0.28.5_98_g87e2def28
+    conda create -c litex-hub --prefix ~/.conda-signoff magic=8.3.376_0_g5e5879c netgen=1.5.250_0_g178b172
 
 Initial Setup
 -------------
@@ -113,8 +112,8 @@ Add the following YAML keys to the top of this file to specify the location of t
 
     # all ~ should be replaced with absolute paths to these directories
     # technology paths
-    technology.sky130.sky130A: ~conda/envs/osflow/share/pdk/sky130A
-    technology.sky130.sram22_sky130_macros: ~sram22_sky130_macros
+    technology.sky130.sky130A: ~/.conda-sky130/share/pdk/sky130A
+    technology.sky130.sram22_sky130_macros: ~/sram22_sky130_macros
 
 example-openroad.yml
 ^^^^^^^^^^^^^^^^^^^^
@@ -128,11 +127,11 @@ Note that this is not required if the tools are already on your PATH.
 
     # all ~ should be replaced with absolute paths to these directories
     # tool binary paths
-    synthesis.yosys.yosys_bin: ~conda/envs/osflow/bin/yosys
-    par.openroad.openroad_bin: ~conda/envs/osflow/bin/openroad
-    par.openroad.klayout_bin: ~conda/envs/osflow/bin/klayout
-    drc.magic.magic_bin: ~conda/envs/osflow/bin/magic
-    lvs.netgen.netgen_bin: ~conda/envs/osflow/bin/netgen
+    synthesis.yosys.yosys_bin: ~/.conda-yosys/bin/yosys
+    par.openroad.openroad_bin: ~/.conda-openroad/bin/openroad
+    par.openroad.klayout_bin: ~/.conda-klayout/bin/klayout
+    drc.magic.magic_bin: ~/.conda-signoff/bin/magic
+    lvs.netgen.netgen_bin: ~/.conda-signoff/bin/netgen
 
 
 Building the Design

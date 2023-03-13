@@ -52,19 +52,17 @@ Prerequisites
 
   * These SRAM macros were generated using the `Sram22 SRAM generator  <https://github.com/rahulk29/sram22>`__ (still very heavily under development)
 
-Prerequisite Setup with Conda
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-As of recently, most of the prerequisites of this tutorial may now be installed as conda packages.
-The setup of these tools may eventually be scripted, but for now here are the directions to set them up:
+Quick Prerequisite Setup
+^^^^^^^^^^^^^^^^^^^^^^^^
+As of recently, the Sky130A PDK may be installed via conda.
+The prerequisite setup for this tutorial may eventually be scripted, but for now the directions to set them up are below.
 
 .. code-block:: shell
 
-    # create conda environment named "osflow"
-    conda create -n osflow
     # download all files for Sky130A PDK
-    conda install -n osflow -c litex-hub open_pdks.sky130a
-    # clone the SRAM22 Sky130 SRAM macros to a convenient location
-    git clone https://github.com/rahulk29/sram22_sky130_macros
+    conda create -c litex-hub --prefix ~/.conda-sky130 open_pdks.sky130a=1.0.399_0_g63dbde9
+    # clone the SRAM22 Sky130 SRAM macros
+    git clone https://github.com/rahulk29/sram22_sky130_macros ~/sram22_sky130_macros
 
 
 Initial Setup
@@ -99,8 +97,8 @@ Add the following YAML keys to the top of this file to specify the location of t
 
     # all ~ should be replaced with absolute paths to these directories
     # technology paths
-    technology.sky130.sky130A: ~conda/envs/osflow/share/pdk/sky130A
-    technology.sky130.sram22_sky130_macros: ~sram22_sky130_macros
+    technology.sky130.sky130A: ~/.conda-sky130/share/pdk/sky130A
+    technology.sky130.sram22_sky130_macros: ~/sram22_sky130_macros
 
 
 example-tools.yml
