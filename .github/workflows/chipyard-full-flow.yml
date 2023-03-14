@@ -149,8 +149,16 @@ jobs:
           conda config --remove channels litex-hub
           conda config --remove channels defaults
 
+          # *** TEST NEW HAMMER, REMOVE WHEN DONE
+          git clone https://github.com/ucb-bar/hammer.git
+          cd hammer
+          git checkout sky130fix
+          pip install -e .
+          cd ../
+          # ***
+
           export tutorial=sky130-openroad
-          export EXTRA_CONFS="example-designs/sky130-openroad-rockettile.yml tutorial.yml"
+          export EXTRA_CONFS=tutorial.yml
           export VLSI_TOP=RocketTile
           make buildfile
           make syn
@@ -159,8 +167,7 @@ jobs:
           make par HAMMER_EXTRA_ARGS="--stop_after_step extraction"
           make redo-par HAMMER_EXTRA_ARGS="--start_before_step extraction"
           make drc
-          # doesn't work for now bc of hammer sky130 plugin bug, fix in next release
-          # make lvs
+          make lvs
 
 
   cleanup:
