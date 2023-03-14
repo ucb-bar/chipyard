@@ -107,6 +107,60 @@ jobs:
           source env.sh
           cd sims/verilator
           make verilog
+      - name: VLSI test
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          eval "$(conda shell.bash hook)"
+          source env.sh
+
+          cd vlsi
+
+          # NOTE: most conda installs are in separate conda envs because they mess up 
+          #   each other's versions (for no apparent reason) and we need the latest versions
+          conda config --add channels defaults
+          conda config --add channels litex-hub
+
+          # installs for example-sky130.yml
+          conda create -y --prefix ./.conda-sky130 open_pdks.sky130a=1.0.399_0_g63dbde9
+          git clone https://github.com/rahulk29/sram22_sky130_macros.git
+
+          # installs for example-openroad.yml
+          conda create -y --prefix ./.conda-yosys yosys=0.27_4_gb58664d44
+          conda create -y --prefix ./.conda-openroad openroad=2.0_7070_g0264023b6
+          conda create -y --prefix ./.conda-klayout klayout=0.28.5_98_g87e2def28
+          conda create -y --prefix ./.conda-signoff magic=8.3.376_0_g5e5879c netgen=1.5.250_0_g178b172
+
+          echo "# Tutorial configs" > tutorial.yml
+          echo "# pdk" > tutorial.yml
+          echo "technology.sky130.sky130A: $PWD/.conda-sky130/share/pdk/sky130A" >> tutorial.yml
+          echo "technology.sky130.sram22_sky130_macros: $PWD/sram22_sky130_macros" >> tutorial.yml
+          echo "" >> tutorial.yml
+          echo "# tools" >> tutorial.yml
+          echo "synthesis.yosys.yosys_bin: $PWD/.conda-yosys/bin/yosys" >> tutorial.yml
+          echo "par.openroad.openroad_bin: $PWD/.conda-openroad/bin/openroad" >> tutorial.yml
+          echo "par.openroad.klayout_bin: $PWD/.conda-klayout/bin/klayout" >> tutorial.yml
+          echo "drc.magic.magic_bin: $PWD/.conda-signoff/bin/magic" >> tutorial.yml
+          echo "lvs.netgen.netgen_bin: $PWD/.conda-signoff/bin/netgen" >> tutorial.yml
+          echo "" >> tutorial.yml
+          echo "# speed up tutorial runs & declutter log output" >> tutorial.yml
+          echo "par.openroad.timing_driven: false" >> tutorial.yml
+          echo "par.openroad.write_reports: false" >> tutorial.yml
+
+          conda config --remove channels litex-hub
+          conda config --remove channels defaults
+
+          export tutorial=sky130-openroad
+          export EXTRA_CONFS=tutorial.yml
+          export VLSI_TOP=RocketTile
+          make buildfile
+          make syn
+          # openroad freezes during some write commands after detailed route
+          # so need to stop the flow & run last step separately
+          make par HAMMER_EXTRA_ARGS="--stop_after_step extraction"
+          make redo-par HAMMER_EXTRA_ARGS="--start_before_step extraction"
+          make drc
+          make lvs
+
 
   cleanup:
     name: cleanup

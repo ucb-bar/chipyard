@@ -1,5 +1,6 @@
 channels:
     - ucb-bar
+    - litex-hub
     - conda-forge
     - nodefaults
 

@@ -1,5 +1,6 @@
 channels:
     - ucb-bar
+    - litex-hub
     - conda-forge
     - nodefaults
 
@@ -100,8 +101,9 @@ dependencies:
 
     # hammer packages
     - sty
+    - open_pdks.sky130a
     - pip:
-        - hammer-vlsi[asap7]==1.0.1
+        - hammer-vlsi[asap7]==1.0.5
 
     # doc requirements
     - sphinx
