@@ -1,5 +1,6 @@
 channels:
     - ucb-bar
+    - litex-hub
     - conda-forge
     - nodefaults
 
@@ -46,7 +47,6 @@ dependencies:
     - doit>=0.34.0
     - gitpython
     - humanfriendly
-    - e2fsprogs
     - ctags
     - bison
     - flex
@@ -101,8 +101,9 @@ dependencies:
 
     # hammer packages
     - sty
+    - open_pdks.sky130a
     - pip:
-        - hammer-vlsi[asap7]==1.0.1
+        - hammer-vlsi[asap7]==1.0.5
 
     # doc requirements
     - sphinx
