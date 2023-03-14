@@ -187,6 +187,11 @@ Place-and-Route
 
     make par tutorial=sky130-openroad
 
+Note that sometimes OpenROAD freezes on commands following the ``detailed_route`` step,
+so for now we recomment running place-and-route until the ``extraction`` step, 
+then re-starting the flow at this step. See the :ref:`VLSI/Sky130-OpenROAD-Tutorial:VLSI Flow Control` documentation
+below for how to break up the flow into these steps.
+
 After completion, the final database can be opened in an interactive OpenROAD session.
 Hammer generates a convenient script to launch these sessions
 
@@ -263,8 +268,13 @@ Firt, refer to the :ref:`VLSI/Hammer:VLSI Flow Control` documentation. The below
 
 .. code-block:: shell
 
-      # the following two statements are equivalent because the
-      #   extraction step immediately precedes the write_design step
+      # the following two commands run the entire flow, using the pre_extraction
+      #   database to save and reload a checkpoint of the design
+      make par HAMMER_EXTRA_ARGS="--stop_after_step extraction"
+      make redo-par HAMMER_EXTRA_ARGS="--start_before_step extraction"
+
+      # the following two commands are equivalent because the extraction 
+      #   step immediately precedes the write_design step
       make redo-par HAMMER_EXTRA_ARGS="--start_after_step extraction"
       make redo-par HAMMER_EXTRA_ARGS="--start_before_step write_design"
 
