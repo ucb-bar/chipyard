@@ -103,7 +103,7 @@ dependencies:
     - sty
     - open_pdks.sky130a
     - pip:
-        - hammer-vlsi[asap7]==1.0.4
+        - hammer-vlsi[asap7]==1.0.5
 
     # doc requirements
     - sphinx

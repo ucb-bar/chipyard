@@ -149,14 +149,6 @@ jobs:
           conda config --remove channels litex-hub
           conda config --remove channels defaults
 
-          # *** TEST NEW HAMMER, REMOVE WHEN DONE
-          git clone https://github.com/ucb-bar/hammer.git
-          cd hammer
-          git checkout sky130fix
-          pip install -e .
-          cd ../
-          # ***
-
           export tutorial=sky130-openroad
           export EXTRA_CONFS=tutorial.yml
           export VLSI_TOP=RocketTile
