@@ -126,3 +126,9 @@ class MulticlockAXIOverSerialConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: MulticlockAXIOverSerialConfig
+
+class CustomIOChipTopRocketConfig extends Config(
+  new chipyard.example.WithCustomChipTop ++
+  new chipyard.example.WithCustomIOCells ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new chipyard.config.AbstractConfig)
