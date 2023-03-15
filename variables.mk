@@ -147,6 +147,7 @@ endif
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
 EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extra.anno.json
+CHISEL_LOG_FILE ?= $(build_dir)/$(long_name).chisel.log
 
 # chisel anno modification output
 MFC_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
