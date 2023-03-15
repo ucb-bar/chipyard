@@ -5,7 +5,8 @@ build:
     tools:
         python: "mambaforge-4.10"
 
-formats: all
+formats:
+    - html
 
 sphinx:
     configuration: docs/conf.py
