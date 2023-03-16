@@ -35,9 +35,9 @@ sim_name = xrun
 sim_prefix = simx
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim)-debug
-sim_workdir = $(sim).xcelium.d
-sim_run_tcl = $(sim)_run.tcl
-sim_debug_run_tcl = $(sim_debug)_run.tcl
+sim_workdir = $(build_dir)/xcelium.d
+sim_run_tcl = $(build_dir)/xcelium_run.tcl
+sim_debug_run_tcl = $(build_dir)/xcelium_debug_run.tcl
 
 include $(base_dir)/xcelium.mk
 
