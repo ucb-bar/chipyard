@@ -6,6 +6,7 @@ import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, BufferParams}
 import freechips.rocketchip.interrupts.{IntSinkNode, IntSinkPortSimple}
 import freechips.rocketchip.groundtest.{DebugCombiner, TraceGenParams, GroundTestTile}
 import freechips.rocketchip.subsystem._
+import boom.lsu.BoomTraceGenTile
 
 class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
     with HasTiles

@@ -5,7 +5,7 @@ import chisel3._
 import chisel3.util.{log2Up}
 
 import freechips.rocketchip.config.{Config}
-import freechips.rocketchip.devices.tilelink.{BootROMLocated}
+import freechips.rocketchip.devices.tilelink.{BootROMLocated, PLICKey}
 import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI}
 import freechips.rocketchip.stage.phases.TargetDirKey
 import freechips.rocketchip.subsystem._
@@ -35,6 +35,10 @@ class WithGPIO extends Config((site, here, up) => {
 class WithUART(baudrate: BigInt = 115200) extends Config((site, here, up) => {
   case PeripheryUARTKey => Seq(
     UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256, initBaudRate = baudrate))
+})
+
+class WithNoUART extends Config((site, here, up) => {
+  case PeripheryUARTKey => Nil
 })
 
 class WithUARTFIFOEntries(txEntries: Int, rxEntries: Int) extends Config((site, here, up) => {
@@ -77,5 +81,9 @@ class WithSerialTLBackingMemory extends Config((site, here, up) => {
 })
 
 class WithExtMemIdBits(n: Int) extends Config((site, here, up) => {
-    case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(idBits = n)))
+  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(idBits = n)))
+})
+
+class WithNoPLIC extends Config((site, here, up) => {
+  case PLICKey => None
 })

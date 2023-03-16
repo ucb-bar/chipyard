@@ -3,8 +3,41 @@
 # Specify clock signals
 # Relax the clock period for OpenROAD to meet timing
 vlsi.inputs.clocks: [
-  {name: "clock_clock", period: "30ns", uncertainty: "1ns"}
+  {name: "clock_clock", period: "50ns", uncertainty: "2ns"}
 ]
+
+# Flow parameters that yield a routable design with reasonable timing
+par.openroad:
+  timing_driven: true  # set to false to drastically speed up runs
+  create_archive_mode: none
+
+  write_reports: true  # set to false to slightly speed up runs
+
+  floorplan_mode: generate
+
+  macro_placement.halo: [50, 50]
+
+  global_placement.timing_driven: true
+  global_placement.routability_driven: true
+
+  global_placement.placement_padding: 6
+  detailed_placement.placement_padding: 4
+  clock_tree.placement_padding: 2
+  clock_tree_resize.placement_padding: 0
+
+  clock_tree_resize.setup_margin: 0.0
+  clock_tree_resize.hold_margin: 0.20
+  global_route_resize.hold_margin: 0.60
+  clock_tree_resize.hold_max_buffer_percent: 80  
+
+  global_placement.routing_adjustment: 0.5
+  global_route.routing_adjustment: 0.3
+  global_route_resize.routing_adjustment: 0.2
+
+# DRC/LVS configuration
+drc.magic.generate_only: true
+lvs.netgen.generate_only: true
+
 
 # Placement Constraints
 vlsi.inputs.placement_constraints:
@@ -13,78 +46,47 @@ vlsi.inputs.placement_constraints:
     x: 0
     y: 0
     width: 4000
-    height: 2500
+    height: 3000
     margins:
       left: 10
-      right: 10
+      right: 0
       top: 10
       bottom: 10
 
- # Place data cache SRAM instances
-  - path: "ChipTop/system.tile_prci_domain.tile_reset_domain.tile.dcache.data.data_arrays_0.data_arrays_0_ext.mem_0_0"
+  # Place SRAM memory instances
+  # SRAM paths and configurations are slightly different due to ENABLE_YOSYS_FLOW flag
+  # data cache
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0_0/data_arrays_0_0_ext/mem_0_0"
     type: hardmacro
     x: 50
-    y: 100
-    orientation: r0
-
-  - path: "ChipTop/system.tile_prci_domain.tile_reset_domain.tile.dcache.data.data_arrays_0.data_arrays_0_ext.mem_1_0"
+    y: 50
+    orientation: r90
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0_1/data_arrays_0_0_ext/mem_0_0"
     type: hardmacro
     x: 50
-    y: 700
-    orientation: r0
-
-  - path: "ChipTop/system.tile_prci_domain.tile_reset_domain.tile.dcache.data.data_arrays_0.data_arrays_0_ext.mem_2_0"
+    y: 450
+    orientation: r90
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0_2/data_arrays_0_0_ext/mem_0_0"
     type: hardmacro
     x: 50
-    y: 1300
-    orientation: r0
-
-  - path: "ChipTop/system.tile_prci_domain.tile_reset_domain.tile.dcache.data.data_arrays_0.data_arrays_0_ext.mem_3_0"
+    y: 850
+    orientation: r90
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0_3/data_arrays_0_0_ext/mem_0_0"
     type: hardmacro
     x: 50
-    y: 1900
-    orientation: r0
-
-  - path: "ChipTop/system.tile_prci_domain.tile_reset_domain.tile.dcache.data.data_arrays_0.data_arrays_0_ext.mem_4_0"
+    y: 1250
+    orientation: r90
+ 
+  # tag array
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/frontend/icache/tag_array_0/tag_array_0_ext/mem_0_0"
     type: hardmacro
-    x: 1000
-    y: 1900
-    orientation: r0
+    x: 50
+    y: 1600
+    orientation: r90
 
-
-  - path: "ChipTop/system.tile_prci_domain.tile_reset_domain.tile.dcache.data.data_arrays_0.data_arrays_0_ext.mem_5_0"
+  # instruction cache
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/frontend/icache/data_arrays_0_0/data_arrays_0_0_0_ext/mem_0_0"
     type: hardmacro
-    x: 1000
-    y: 1300
-    orientation: r0
-
-  - path: "ChipTop/system.tile_prci_domain.tile_reset_domain.tile.dcache.data.data_arrays_0.data_arrays_0_ext.mem_6_0"
-    type: hardmacro
-    x: 1000
-    y: 700
-    orientation: r0
-
-  - path: "ChipTop/system.tile_prci_domain.tile_reset_domain.tile.dcache.data.data_arrays_0.data_arrays_0_ext.mem_7_0"
-    type: hardmacro
-    x: 1000
-    y: 100
-    orientation: r0
-
-  # Place instruction cache SRAM instances
-  - path: "ChipTop/system.tile_prci_domain.tile_reset_domain.tile.frontend.icache.data_arrays_0.data_arrays_0_0_ext.mem_0_0"
-    type: hardmacro
-    x: 3250
-    y: 100
-    orientation: r0
-
-  - path: "ChipTop/system.tile_prci_domain.tile_reset_domain.tile.frontend.icache.data_arrays_0.data_arrays_0_0_ext.mem_1_0"
-    type: hardmacro
-    x: 3250
-    y: 700
-    orientation: r0
-
-  - path: "ChipTop/system.tile_prci_domain.tile_reset_domain.tile.frontend.icache.tag_array.tag_array_ext.mem_0_0"
-    type: hardmacro
-    x: 3450
-    y: 1300
-    orientation: r0
+    x: 50
+    y: 2100
+    orientation: r90

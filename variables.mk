@@ -67,7 +67,7 @@ SUB_PROJECT ?= chipyard
 ifeq ($(SUB_PROJECT),chipyard)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= $(SBT_PROJECT)
 	CONFIG            ?= RocketConfig
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
@@ -79,7 +79,7 @@ endif
 ifeq ($(SUB_PROJECT),hwacha)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= freechips.rocketchip.system
 	CONFIG            ?= HwachaConfig
 	CONFIG_PACKAGE    ?= hwacha
@@ -91,7 +91,7 @@ endif
 ifeq ($(SUB_PROJECT),testchipip)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= chipyard.unittest
 	CONFIG            ?= TestChipUnitTestConfig
 	CONFIG_PACKAGE    ?= testchipip
@@ -103,7 +103,7 @@ endif
 ifeq ($(SUB_PROJECT),icenet)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= chipyard.unittest
 	CONFIG            ?= IceNetUnitTestConfig
 	CONFIG_PACKAGE    ?= icenet
@@ -115,7 +115,7 @@ endif
 ifeq ($(SUB_PROJECT),constellation)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= constellation.test
 	CONFIG            ?= TestConfig00
 	CONFIG_PACKAGE    ?= constellation.test
@@ -146,6 +146,8 @@ endif
 # chisel generated outputs
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
+EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extra.anno.json
+CHISEL_LOG_FILE ?= $(build_dir)/$(long_name).chisel.log
 
 # chisel anno modification output
 MFC_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
@@ -154,6 +156,7 @@ FINAL_ANNO_FILE ?= $(build_dir)/$(long_name).appended.anno.json
 # scala firrtl compiler (sfc) outputs
 SFC_FIRRTL_BASENAME ?= $(build_dir)/$(long_name).sfc
 SFC_FIRRTL_FILE ?= $(SFC_FIRRTL_BASENAME).fir
+SFC_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrasfc.anno.json
 SFC_ANNO_FILE ?= $(build_dir)/$(long_name).sfc.anno.json
 
 # firtool compiler outputs
@@ -161,18 +164,18 @@ MFC_TOP_HRCHY_JSON ?= $(build_dir)/top_module_hierarchy.json
 MFC_MODEL_HRCHY_JSON ?= $(build_dir)/model_module_hierarchy.json
 MFC_SMEMS_CONF ?= $(build_dir)/$(long_name).mems.conf
 # hardcoded firtool outputs
-MFC_FILELIST = $(OUT_DIR)/filelist.f
-MFC_BB_MODS_FILELIST = $(OUT_DIR)/firrtl_black_box_resource_files.f
-MFC_TOP_SMEMS_JSON = $(OUT_DIR)/metadata/seq_mems.json
-MFC_MODEL_SMEMS_JSON = $(OUT_DIR)/metadata/tb_seq_mems.json
+MFC_FILELIST = $(GEN_COLLATERAL_DIR)/filelist.f
+MFC_BB_MODS_FILELIST = $(GEN_COLLATERAL_DIR)/firrtl_black_box_resource_files.f
+MFC_TOP_SMEMS_JSON = $(GEN_COLLATERAL_DIR)/metadata/seq_mems.json
+MFC_MODEL_SMEMS_JSON = $(GEN_COLLATERAL_DIR)/metadata/tb_seq_mems.json
 
 # macrocompiler smems in/output
 SFC_SMEMS_CONF ?= $(build_dir)/$(long_name).sfc.mems.conf
 TOP_SMEMS_CONF ?= $(build_dir)/$(long_name).top.mems.conf
-TOP_SMEMS_FILE ?= $(OUT_DIR)/$(long_name).top.mems.v
+TOP_SMEMS_FILE ?= $(GEN_COLLATERAL_DIR)/$(long_name).top.mems.v
 TOP_SMEMS_FIR  ?= $(build_dir)/$(long_name).top.mems.fir
 MODEL_SMEMS_CONF ?= $(build_dir)/$(long_name).model.mems.conf
-MODEL_SMEMS_FILE ?= $(OUT_DIR)/$(long_name).model.mems.v
+MODEL_SMEMS_FILE ?= $(GEN_COLLATERAL_DIR)/$(long_name).model.mems.v
 MODEL_SMEMS_FIR  ?= $(build_dir)/$(long_name).model.mems.fir
 
 # top module files to include
@@ -182,6 +185,10 @@ MODEL_MODS_FILELIST ?= $(build_dir)/$(long_name).model.f
 # list of all blackbox files (may be included in the top/model.f files)
 # this has the build_dir appended
 BB_MODS_FILELIST ?= $(build_dir)/$(long_name).bb.f
+# top blackbox module files to include
+TOP_BB_MODS_FILELIST ?= $(build_dir)/$(long_name).top.bb.f
+# model blackbox module files to include (not including top blackbox modules)
+MODEL_BB_MODS_FILELIST ?= $(build_dir)/$(long_name).model.bb.f
 # all module files to include (top, model, bb included)
 ALL_MODS_FILELIST ?= $(build_dir)/$(long_name).all.f
 
@@ -198,7 +205,8 @@ sim_common_files       ?= $(build_dir)/sim_files.common.f
 # java arguments used in sbt
 #########################################################################################
 JAVA_HEAP_SIZE ?= 8G
-export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -Djava.io.tmpdir=$(base_dir)/.java_tmp
+JAVA_TMP_DIR ?= $(base_dir)/.java_tmp
+export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -Dsbt.supershell=false -Djava.io.tmpdir=$(JAVA_TMP_DIR)
 
 #########################################################################################
 # default sbt launch command
@@ -215,7 +223,8 @@ SBT_CLIENT_FLAG = --client
 endif
 
 # passes $(JAVA_TOOL_OPTIONS) from env to java
-SBT_BIN ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
+export SBT_OPTS ?= -Dsbt.ivy.home=$(base_dir)/.ivy2 -Dsbt.global.base=$(base_dir)/.sbt -Dsbt.boot.directory=$(base_dir)/.sbt/boot/
+SBT_BIN ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
 SBT = $(SBT_BIN) $(SBT_CLIENT_FLAG)
 SBT_NON_THIN = $(subst $(SBT_CLIENT_FLAG),,$(SBT))
 
@@ -254,7 +263,7 @@ gen_dir=$(sim_dir)/generated-src
 # per-project output directory
 build_dir=$(gen_dir)/$(long_name)
 # final generated collateral per-project
-OUT_DIR ?= $(build_dir)/gen-collateral
+GEN_COLLATERAL_DIR ?= $(build_dir)/gen-collateral
 
 #########################################################################################
 # assembly/benchmark variables

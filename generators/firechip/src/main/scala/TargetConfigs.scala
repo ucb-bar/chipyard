@@ -19,7 +19,6 @@ import scala.math.{min, max}
 
 import chipyard.clocking.{ChipyardPRCIControlKey}
 import icenet._
-import testchipip.WithRingSystemBus
 
 import firesim.bridges._
 import firesim.configs._
@@ -236,15 +235,6 @@ class FireSimGemminiRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.GemminiRocketConfig)
 
-//******************************************************************
-// Configuration with Ring topology SystemBus
-//******************************************************************
-class FireSimRingSystemBusRocketConfig extends Config(
-  new WithDefaultFireSimBridges ++
-  new WithDefaultMemModel ++
-  new WithFireSimConfigTweaks ++
-  new chipyard.RingSystemBusRocketConfig)
-
 //**********************************************************************************
 // Supernode Configurations, base off chipyard's RocketConfig
 //**********************************************************************************
@@ -292,3 +282,15 @@ class FireSimNoMemPortConfig extends Config(
   new testchipip.WithBackingScratchpad ++
   new WithFireSimConfigTweaks ++
   new chipyard.RocketConfig)
+
+class FireSimRocketMMIOOnlyConfig extends Config(
+  new WithDefaultMMIOOnlyFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.RocketConfig)
+
+class FireSimGemminiRocketMMIOOnlyConfig extends Config(
+  new WithDefaultMMIOOnlyFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.LeanGemminiRocketConfig)

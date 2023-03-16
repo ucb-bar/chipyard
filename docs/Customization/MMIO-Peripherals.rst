@@ -105,14 +105,14 @@ The ``DigitalTopModule`` class is the actual RTL that gets synthesized.
 
 
 
-And finally, we create a configuration class in ``generators/chipyard/src/main/scala/config/RocketConfigs.scala`` that uses the ``WithGCD`` config fragment defined earlier.
+And finally, we create a configuration class in ``generators/chipyard/src/main/scala/config/MMIOAcceleratorConfigs.scala`` that uses the ``WithGCD`` config fragment defined earlier.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala
     :start-after: DOC include start: GCD config fragment
     :end-before: DOC include end: GCD config fragment
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/MMIOAcceleratorConfigs.scala
     :language: scala
     :start-after: DOC include start: GCDTLRocketConfig
     :end-before: DOC include end: GCDTLRocketConfig

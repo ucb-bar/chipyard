@@ -49,4 +49,5 @@ Running the VLSI tool flow
 --------------------------
 
 For the full documentation on how to use the VLSI tool flow, see the `Hammer Documentation <https://hammer-vlsi.readthedocs.io/>`__.
-For an example of how to use the VLSI in the context of Chipyard, see :ref:`VLSI/ASAP7-Tutorial:ASAP7 Tutorial`.
+For setup  and instructions for a VLSI tool flow in the context of Chipyard, see :ref:`hammer_basic_flow`.
+For specific examples, see :ref:`tutorial`, :ref:`sky130-commercial-tutorial`, and :ref:`sky130-openroad-tutorial`.
