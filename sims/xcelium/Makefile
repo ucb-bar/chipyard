@@ -129,10 +129,10 @@ $(output_dir)/%.vcd: $(output_dir)/% $(sim_debug)
 #########################################################################################
 .PHONY: clean clean-sim clean-sim-debug
 clean:
-	rm -rf $(gen_dir) $(sim_prefix)-* ucli.key
+	rm -rf $(gen_dir) $(sim_prefix)-*
 
 clean-sim:
-	rm -rf $(model_dir) $(build_dir)/vc_hdrs.h $(sim) $(sim_workdir) $(sim_run_tcl) ucli.key bpad_*.err sigusrdump.out dramsim*.log
+	rm -rf $(model_dir) $(sim) $(sim_workdir) $(sim_run_tcl) ucli.key bpad_*.err sigusrdump.out dramsim*.log
 
 clean-sim-debug:
-	rm -rf $(model_dir_debug) $(build_dir)/vc_hdrs.h $(sim_debug) $(sim_workdir) $(sim_debug_run_tcl) ucli.key bpad_*.err sigusrdump.out dramsim*.log
+	rm -rf $(model_dir_debug) $(sim_debug) $(sim_workdir) $(sim_debug_run_tcl) ucli.key bpad_*.err sigusrdump.out dramsim*.log
