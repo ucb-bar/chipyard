@@ -91,6 +91,8 @@ $(sim_run_tcl): $(sim_workdir)
 	echo "run" >> $(sim_run_tcl)
 	echo "exit" >> $(sim_run_tcl)
 
+# The system libstdc++ may not link correctly with some of our dynamic libs, so
+# force loading the conda one (if present) with LD_PRELOAD
 $(sim): $(sim_workdir) $(sim_run_tcl)
 	echo "#!/usr/bin/env bash" > $(sim)
 	echo "$$CAD_INFO_HEADER" >> $(sim)
