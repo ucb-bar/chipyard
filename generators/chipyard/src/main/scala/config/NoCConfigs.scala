@@ -247,9 +247,9 @@ class RocketReRoCCNoCConfig extends Config(
       3 -> 4),
     nocParams = NoCParams(
       topology = UnidirectionalTorus1D(9),
-      channelParamGen = (a, b) => UserChannelParams(Seq.fill(3) { UserVirtualChannelParams(4) }),
-      routingRelation = UnidirectionalTorus1DDatelineRouting())
-  )) ++
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(4) { UserVirtualChannelParams(4) }),
+      routingRelation = NonblockingVirtualSubnetworksRouting(UnidirectionalTorus1DDatelineRouting(), 2, 2)
+  ))) ++
   new chipyard.RocketReRoCCConfig
 )
 
@@ -302,8 +302,8 @@ class GemminiReRoCCNoCConfig extends Config(
     nocParams = NoCParams(
       topology = Mesh2D(4, 4),
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(3) { UserVirtualChannelParams(4) }),
-      routingRelation = Mesh2DEscapeRouting())
-  )) ++
+      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DEscapeRouting(), 2, 1)
+  ))) ++
   new GemminiReRoCCBaseConfig
 )
 
@@ -312,7 +312,7 @@ class GemminiReRoCCSharedNoCConfig extends Config(
     NoCParams(
       topology        = Mesh2D(4, 4),
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(8) { UserVirtualChannelParams(4) }),
-      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DEscapeRouting(), 6, 1))
+      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DEscapeRouting(), 7, 1))
   )) ++
   new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
