@@ -23,7 +23,9 @@ object ReRoCCProtocolOpcodes {
   val mInst    = 1.U(width.W)
   val mRelease = 2.U(width.W)
   val mUnbusy  = 3.U(width.W)
-  val mRset = 4.U(width.W)
+  // beat0: data = rd[4:0] # cfg[31:0]
+  // beat1: data = wdata
+  val mCfg     = 4.U(width.W)
 
   // data
   // data = tagEntries # acquired
@@ -35,7 +37,9 @@ object ReRoCCProtocolOpcodes {
   val sWrite     = 2.U(width.W)
   val sRelResp   = 3.U(width.W)
   val sUnbusyAck = 4.U(width.W)
-  val sRsetAck = 5.U(width.W)
+  // beat0: data = data
+  // beat1: data = rd
+  val sCfgResp   = 5.U(width.W)
 }
 
 case class ReRoCCManagerParams(

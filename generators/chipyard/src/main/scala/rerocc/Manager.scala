@@ -104,7 +104,7 @@ class MiniDCache(reRoCCId: Int, crossing: ClockCrossingType)(implicit p: Paramet
 class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implicit p: Parameters) extends LazyModule {
   val node = ReRoCCManagerNode(ReRoCCManagerParams(reRoCCTileParams.reroccId, reRoCCTileParams.ibufEntries))
   val ibufEntries = reRoCCTileParams.ibufEntries
-  val tlThrottler = LazyModule(new TLThrottler(32: Int, 1: Int))
+  val tlThrottler = LazyModule(new TLThrottler(32))
   override lazy val module = new Impl
   class Impl extends LazyModuleImp(this) {
     val io = IO(new Bundle {
@@ -118,7 +118,7 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     val (rerocc, edge) = node.in(0)
     dontTouch(rerocc)
 
-    val s_idle :: s_active :: s_rel_wait :: s_sfence :: s_unbusy :: s_rateset :: Nil = Enum(6)
+    val s_idle :: s_active :: s_rel_wait :: s_sfence :: s_unbusy :: Nil = Enum(5)
 
     val numClients = edge.cParams.clients.size
 
@@ -165,8 +165,9 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     // 0 -> acquire ack
     // 1 -> inst ack
     // 2 -> writeback
-    // 4 -> rel
-    // 5 -> unbusyack
+    // 3 -> rel
+    // 4 -> unbusyack
+    // 5 -> cfg resp
     val resp_arb = Module(new HellaPeekingArbiter(new ReRoCCMsgBundle(edge.bundle), 6,
       (b: ReRoCCMsgBundle) => b.last,
       Some((b: ReRoCCMsgBundle) => true.B)
@@ -176,16 +177,15 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
 
     val status_new = Reg(new MStatus)
     val client_new = Reg(UInt(log2Ceil(numClients).W))
+    val cfg_rd = Reg(UInt(5.W))
+    val cfg_id = Reg(UInt(32.W))
 
-    //added for TL throttling
-    //val tlThrottler = LazyModule(new TLThrottler(20: Int, 1: Int))
-    val memrate_rd = RegInit(0.U(5.W))
-    val memrate_data = RegInit(0.U(20.W))
+    // added for TL throttling
+    val epoch = RegInit(0.U(32.W))
+    val rate = RegInit(0.U(32.W))
 
-    tlThrottler.module.io.req.bits.max_req := rr_req.bits.data(63, 32)
-    tlThrottler.module.io.req.bits.epoch := rr_req.bits.data(31, 0)
-    tlThrottler.module.io.req.valid := false.B
-    tlThrottler.module.io.resp.ready := false.B
+    tlThrottler.module.io.rate := rate
+    tlThrottler.module.io.epoch := epoch
 
     when (rr_req.valid) {
       when (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mAcquire) {
@@ -249,39 +249,24 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
       } .elsewhen (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mUnbusy) {
         rr_req.ready := true.B
         state := s_unbusy
-      } .elsewhen (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mRset) {
-        // set max_req and/or read req rate
+      } .elsewhen (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mCfg) {
         rr_req.ready := true.B
-        val next_enq_inst = WireInit(enq_inst)
         when (beat === 0.U) {
-          val inst = rr_req.bits.data(31,0).asTypeOf(new RoCCInstruction)
-          enq_inst.inst := inst
-          //when (!inst.xs1        ) { enq_inst.rs1 := 0.U }
-          //when (!inst.xs2        ) { enq_inst.rs2 := 0.U }
-        } .otherwise {
-          //val enq_inst_rs1      = enq_inst.inst.xs1 && beat === (Mux(enq_inst_new_mstatus, 2.U, 0.U) +& 1.U)
-          val enq_inst_rs2 = enq_inst.inst.xs2 && beat === 1.U // +& enq_inst.inst.xs1)
-          val enq_inst_rd = enq_inst.inst.xd && beat === 1.U +& enq_inst.inst.xs2
-          when(enq_inst_rs2) {
-            //max_req_reg := rr_req.bits.data(63, 32)
-            //epoch_reg := rr_req.bits.data(31, 0)
-            tlThrottler.module.io.req.valid := true.B
-            when(!enq_inst.inst.xd && tlThrottler.module.io.req.fire) {
-              state := s_rateset
-              memrate_rd := 0.U
-              memrate_data := 0.U
-            }
+          cfg_id := rr_req.bits.data(31,0)
+          cfg_rd := rr_req.bits.data >> 32
+        }
+        when (rr_req.bits.last) {
+          rr_req.ready := resp_arb.io.in(5).ready && resp_arb.io.in(5).bits.last
+        }
+        when (rr_req.fire() && beat === 1.U) {
+          Seq(
+            (ReRoCCManagerCfgIds.epoch, epoch),
+            (ReRoCCManagerCfgIds.rate , rate)
+          ).foreach { case (id, r) => when (id === cfg_id) { r := rr_req.bits.data } }
+          when (ReRoCCManagerCfgIds.epoch_rate === cfg_id) {
+            epoch := rr_req.bits.data(63,32)
+            rate := rr_req.bits.data(31,0)
           }
-          when(enq_inst_rd) {
-            tlThrottler.module.io.resp.ready := true.B
-            memrate_rd := enq_inst.inst.rd
-            memrate_data := tlThrottler.module.io.resp.bits.prev_req
-            when(tlThrottler.module.io.resp.fire) {
-              state := s_rateset
-            }
-          }
-          enq_inst := next_enq_inst
-          //state := s_active
         }
       } .otherwise {
         assert(false.B)
@@ -353,15 +338,20 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     when (resp_arb.io.in(4).fire()) { state := s_active }
 
     // acknowledge memrate set epoch
-    resp_arb.io.in(5).valid           := state === s_rateset// && !io.busy && inst_q.io.count === 0.U
-    resp_arb.io.in(5).bits.opcode     := ReRoCCProtocolOpcodes.sRsetAck
-    resp_arb.io.in(5).bits.client_id  := client
+    val cfg_resp_rd = RegInit(false.B)
+    resp_arb.io.in(5).valid           := rr_req.valid && rr_req.bits.opcode === ReRoCCProtocolOpcodes.mCfg && rr_req.bits.last
+    resp_arb.io.in(5).bits.opcode     := ReRoCCProtocolOpcodes.sCfgResp
+    resp_arb.io.in(5).bits.client_id  := rr_req.bits.client_id
     resp_arb.io.in(5).bits.manager_id := io.manager_id
-    resp_arb.io.in(5).bits.data       := Mux(memrate_rd === 0.U, 0.U, memrate_data)
-    resp_arb.io.in(5).bits.last       := true.B
-    resp_arb.io.in(5).bits.first      := true.B
-    //when (resp_arb.io.in(5).fire) { resp_rd != resp_rd }
-    when (resp_arb.io.in(5).fire){ state := s_active }
+    resp_arb.io.in(5).bits.data       := Mux(cfg_resp_rd, cfg_rd, Seq(
+      (ReRoCCManagerCfgIds.epoch, epoch),
+      (ReRoCCManagerCfgIds.rate, rate),
+      (ReRoCCManagerCfgIds.last_reqs, tlThrottler.module.io.prev_reqs),
+      (ReRoCCManagerCfgIds.epoch_rate, tlThrottler.module.io.prev_reqs)
+    ).map { case (id, r) => Mux(id === cfg_id, r, 0.U) }.reduce(_|_))
+    resp_arb.io.in(5).bits.last       := cfg_resp_rd
+    resp_arb.io.in(5).bits.first      := !cfg_resp_rd
+    when (resp_arb.io.in(5).fire()) { cfg_resp_rd := !cfg_resp_rd }
   }
 }
 
@@ -383,10 +373,6 @@ class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
   rerocc_manager.node := ReRoCCBuffer() := reRoCCNode
   val tlNode = p(TileVisibilityNodeKey) // throttle before TL Node (merged ->
   val tlXbar = TLXbar()
-  //val tlThrottler = LazyModule(new TLThrottler(20: Int, 1: Int))
-  //tlThrottler.module.io.req.bits.epoch := rerocc_manager.module.io.epoch
-  //tlThrottler.module.io.req.bits.max_req := rerocc_manager.module.io.max_req
-
 
   tlXbar :=* rocc.atlNode
   if (reRoCCParams.mergeTLNodes) {
