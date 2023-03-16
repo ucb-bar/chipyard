@@ -2,6 +2,7 @@
 #define REROCC_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "rocc.h"
 
 #define REROCC_ACQUIRE (0)
@@ -10,8 +11,16 @@
 #define REROCC_INFO (3)
 #define REROCC_FENCE (4)
 #define REROCC_CFLUSH (5)
-#define REROCC_MEMREQ (6)
-#define REROCC_BYPASS (7)
+#define REROCC_CFG_READ_TRACKER (6)
+#define REROCC_CFG_READ_ID (7)
+#define REROCC_CFG_WRITE_TRACKER (8)
+#define REROCC_CFG_WRITE_ID (8)
+
+#define REROCC_CFG_EPOCH (0)
+#define REROCC_CFG_RATE (1)
+#define REROCC_CFG_LAST_REQS (2)
+#define REROCC_CFG_EPOCHRATE (3)
+
 
 
 // Attemps to assign a local tracker to one of the accelerators in the OH mask
@@ -53,32 +62,61 @@ inline void rerocc_fence(uint64_t tracker) {
 }
 
 inline void rerocc_cflush(void* addr) {
-  uint64_t op1 = addr;
+  uint64_t op1 = (uint64_t)addr;
   ROCC_INSTRUCTION_S(0, op1, REROCC_CFLUSH);
 }
 
-inline uint64_t rerocc_reqrate(uint64_t tracker, uint64_t epoch, uint64_t max_req, bool read){
-  uint64_t op1 = tracker;
-  uint64_t op2 = (max_req << 32) | (epoch);  
-  uint64_t r;
-  if (read){
-    ROCC_INSTRUCTION_DSS(0, r, op1, op2, REROCC_MEMREQ);
-  }
-  else{
-    r = 0;
-    ROCC_INSTRUCTION_SS(0, op1, op2, REROCC_MEMREQ);
+inline uint64_t rerocc_write_cfg_tracker(uint64_t tracker, uint64_t wdata, uint32_t cfg_id, bool read) {
+  uint64_t op1 = ((uint64_t) cfg_id << 32) | (tracker & 0xffffffff);
+  uint64_t op2 = wdata;
+  uint64_t r = 0;
+  if (read) {
+    ROCC_INSTRUCTION_DSS(0, r, op1, op2, REROCC_CFG_WRITE_TRACKER);
+  } else {
+    ROCC_INSTRUCTION_SS(0, op1, op2, REROCC_CFG_WRITE_TRACKER);
   }
   return r;
 }
 
-// address falls into this range redirects to DRAM by bypassing
-// can have multiple configured bypass address range at the same time
-// initialize configured bypass range upon rerocc_fence
-inline void rerocc_bypass(uint64_t tracker, void* addr_start, void* addr_end){                    
-  uint64_t op1 = ((uint64_t) addr_end << 16) | tracker;
-  uint64_t op2 = (uint64_t) addr_start;
-  ROCC_INSTRUCTION_SS(0, op1, op2, REROCC_BYPASS);
-}    
+inline uint64_t rerocc_write_cfg_mgr_id(uint64_t id, uint64_t wdata, uint32_t cfg_id, bool read) {
+  uint64_t op1 = ((uint64_t) cfg_id << 32) | (id & 0xffffffff);
+  uint64_t op2 = wdata;
+  uint64_t r = 0;
+  if (read) {
+    ROCC_INSTRUCTION_DSS(0, r, op1, op2, REROCC_CFG_WRITE_ID);
+  } else {
+    ROCC_INSTRUCTION_SS(0, op1, op2, REROCC_CFG_WRITE_ID);
+  }
+  return r;
+}
+
+inline uint64_t rerocc_read_cfg_tracker(uint64_t tracker, uint32_t cfg_id) {
+  uint64_t op1 = ((uint64_t) cfg_id << 32) | (tracker & 0xffffffff);
+  uint64_t r;
+  ROCC_INSTRUCTION_DS(0, r, op1, REROCC_CFG_READ_TRACKER);
+  return r;
+}
+
+inline uint64_t rerocc_read_cfg_mgr_id(uint64_t id, uint32_t cfg_id) {
+  uint64_t op1 = ((uint64_t) cfg_id << 32) | (id & 0xffffffff);
+  uint64_t r;
+  ROCC_INSTRUCTION_DS(0, r, op1, REROCC_CFG_READ_ID);
+  return r;
+}
+
+inline uint64_t rerocc_rateset_tracker(uint64_t tracker, uint64_t epoch, uint64_t max_req, bool read) {
+  uint64_t wdata = (epoch << 32) | (max_req & 0xffffffff);
+  return rerocc_write_cfg_tracker(tracker, wdata, REROCC_CFG_EPOCHRATE, read);
+}
+
+/* // address falls into this range redirects to DRAM by bypassing */
+/* // can have multiple configured bypass address range at the same time */
+/* // initialize configured bypass range upon rerocc_fence */
+/* inline void rerocc_bypass(uint64_t tracker, void* addr_start, void* addr_end){                     */
+/*   uint64_t op1 = ((uint64_t) addr_end << 16) | tracker; */
+/*   uint64_t op2 = (uint64_t) addr_start; */
+/*   ROCC_INSTRUCTION_SS(0, op1, op2, REROCC_BYPASS); */
+/* }     */
 
 #endif
 
