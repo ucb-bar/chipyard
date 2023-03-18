@@ -3,7 +3,7 @@
 	url = https://github.com/chipsalliance/rocket-chip.git
 [submodule "testchipip"]
 	path = generators/testchipip
-	url = https://github.com/ucb-bar/testchipip.git
+	url = https://github.com/joey0320/Multi-FPGA-Firesim-Testchipip.git
 [submodule "barstools"]
 	path = tools/barstools
 	url = https://github.com/ucb-bar/barstools.git
@@ -21,7 +21,7 @@
 	url = https://github.com/ucb-bar/hwacha.git
 [submodule "sims/firesim"]
 	path = sims/firesim
-	url = https://github.com/firesim/firesim.git
+  url = https://github.com/joey0320/Multi-FPGA-Firesim.git
 [submodule "generators/icenet"]
 	path = generators/icenet
 	url = https://github.com/firesim/icenet.git
