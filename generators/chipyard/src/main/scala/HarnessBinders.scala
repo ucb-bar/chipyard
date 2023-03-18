@@ -9,7 +9,7 @@ import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag.{JTAGIO}
-import freechips.rocketchip.system.{SimAXIMem, SimTLMem}
+import freechips.rocketchip.system.{SimAXIMem} 
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
