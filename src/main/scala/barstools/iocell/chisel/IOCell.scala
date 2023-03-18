@@ -60,7 +60,17 @@ class DigitalInIOCellBundle extends Bundle {
 }
 
 trait IOCell extends BaseModule {
-  var i_name: String
+	var iocell_name : Option[String] = None
+
+  /** Set IOCell name 
+   * @param s Proposed name for the IOCell
+   *
+   * @return An inherited IOCell with given the proposed name
+   */
+  def suggestName(s: String) : this.type = {
+    iocell_name = Some(s)
+    super.suggestName(s)
+  }
 }
 
 trait AnalogIOCell extends IOCell {
@@ -89,19 +99,15 @@ abstract class GenericIOCell extends BlackBox with HasBlackBoxResource {
 
 class GenericAnalogIOCell extends GenericIOCell with AnalogIOCell {
   val io = IO(new AnalogIOCellBundle)
-  var i_name = "NoNameAssigned"
 }
 class GenericDigitalGPIOCell extends GenericIOCell with DigitalGPIOCell {
   val io = IO(new DigitalGPIOCellBundle)
-  var i_name = "NoNameAssigned"
 }
 class GenericDigitalInIOCell extends GenericIOCell with DigitalInIOCell {
   val io = IO(new DigitalInIOCellBundle)
-  var i_name = "NoNameAssigned"
 }
 class GenericDigitalOutIOCell extends GenericIOCell with DigitalOutIOCell {
   val io = IO(new DigitalOutIOCellBundle)
-  var i_name = "NoNameAssigned"
 }
 
 trait IOCellTypeParams {
@@ -118,11 +124,9 @@ case class GenericIOCellParams() extends IOCellTypeParams {
   def output() = Module(new GenericDigitalOutIOCell)
 }
 
-trait IOCellName {
-  var i_name: String
-}
 
-object IOCell extends IOCellName {
+
+object IOCell {
 
   /** From within a RawModule or MultiIOModule context, generate new module IOs from a given
     * signal and return the new IO and a Seq containing all generated IO cells.
@@ -143,8 +147,6 @@ object IOCell extends IOCellName {
     val iocells = IOCell.generateFromSignal(coreSignal, padSignal, Some(s"iocell_$name"), typeParams, resetFn)
     (padSignal, iocells)
   }
-
-  var i_name = "NoNameAssigned"
 
   /** Connect two identical signals together by adding IO cells between them and return a Seq
     * containing all generated IO cells.
@@ -168,13 +170,11 @@ object IOCell extends IOCellName {
     )(coreSignal:   T,
       padSignal:    T
     ): Seq[IOCell] = {
-      print("Suggested names:  " + name + "    ")
       DataMirror.directionOf(coreSignal) match {
         case ActualDirection.Input => {
           val iocell = typeParams.input()
           name.foreach(n => {
-            iocell.suggestName(n)
-            iocell.i_name = n
+            iocell.suggestName(n)          
           })
           coreSignal := castFromBool(iocell.io.i)
           iocell.io.ie := true.B
@@ -184,8 +184,7 @@ object IOCell extends IOCellName {
         case ActualDirection.Output => {
           val iocell = typeParams.output()
           name.foreach(n => {
-            iocell.suggestName(n)
-            iocell.i_name = n
+            iocell.suggestName(n)            
           })
           iocell.io.o := castToBool(coreSignal)
           iocell.io.oe := true.B
@@ -236,7 +235,6 @@ object IOCell extends IOCellName {
                 // An alternative solution would be to suggestName(n + "_" + i)
                 name.foreach(n => {
                   iocell.suggestName(n)
-                  iocell.i_name = n
                 })
                 iocell.io.pad := sig
                 iocell.io.ie := true.B
@@ -254,8 +252,7 @@ object IOCell extends IOCellName {
                 // An alternative solution would be to suggestName(n + "_" + i)
                 name.foreach(n => {
                   iocell.suggestName(n)
-                  iocell.i_name = n
-                })
+                })                
                 iocell.io.o := sig
                 iocell.io.oe := true.B
                 iocell
