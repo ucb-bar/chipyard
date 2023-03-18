@@ -59,7 +59,19 @@ class DigitalInIOCellBundle extends Bundle {
   val ie = Input(Bool())
 }
 
-trait IOCell extends BaseModule
+trait IOCell extends BaseModule {
+  var iocell_name: Option[String] = None
+
+  /** Set IOCell name
+    * @param s Proposed name for the IOCell
+    *
+    * @return An inherited IOCell with given the proposed name
+    */
+  def suggestName(s: String): this.type = {
+    iocell_name = Some(s)
+    super.suggestName(s)
+  }
+}
 
 trait AnalogIOCell extends IOCell {
   val io: AnalogIOCellBundle
@@ -159,7 +171,9 @@ object IOCell {
       DataMirror.directionOf(coreSignal) match {
         case ActualDirection.Input => {
           val iocell = typeParams.input()
-          name.foreach(n => iocell.suggestName(n))
+          name.foreach(n => {
+            iocell.suggestName(n)
+          })
           coreSignal := castFromBool(iocell.io.i)
           iocell.io.ie := true.B
           iocell.io.pad := castToBool(padSignal)
@@ -167,7 +181,9 @@ object IOCell {
         }
         case ActualDirection.Output => {
           val iocell = typeParams.output()
-          name.foreach(n => iocell.suggestName(n))
+          name.foreach(n => {
+            iocell.suggestName(n)
+          })
           iocell.io.o := castToBool(coreSignal)
           iocell.io.oe := true.B
           padSignal := castFromBool(iocell.io.pad)
@@ -215,7 +231,9 @@ object IOCell {
                 // Note that we are relying on chisel deterministically naming this in the index order (which it does)
                 // This has the side-effect of naming index 0 with no _0 suffix, which is how chisel names other signals
                 // An alternative solution would be to suggestName(n + "_" + i)
-                name.foreach(n => iocell.suggestName(n))
+                name.foreach(n => {
+                  iocell.suggestName(n)
+                })
                 iocell.io.pad := sig
                 iocell.io.ie := true.B
                 iocell
@@ -230,7 +248,9 @@ object IOCell {
                 // Note that we are relying on chisel deterministically naming this in the index order (which it does)
                 // This has the side-effect of naming index 0 with no _0 suffix, which is how chisel names other signals
                 // An alternative solution would be to suggestName(n + "_" + i)
-                name.foreach(n => iocell.suggestName(n))
+                name.foreach(n => {
+                  iocell.suggestName(n)
+                })
                 iocell.io.o := sig
                 iocell.io.oe := true.B
                 iocell
