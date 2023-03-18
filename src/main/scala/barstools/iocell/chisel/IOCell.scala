@@ -60,14 +60,14 @@ class DigitalInIOCellBundle extends Bundle {
 }
 
 trait IOCell extends BaseModule {
-	var iocell_name : Option[String] = None
+  var iocell_name: Option[String] = None
 
-  /** Set IOCell name 
-   * @param s Proposed name for the IOCell
-   *
-   * @return An inherited IOCell with given the proposed name
-   */
-  def suggestName(s: String) : this.type = {
+  /** Set IOCell name
+    * @param s Proposed name for the IOCell
+    *
+    * @return An inherited IOCell with given the proposed name
+    */
+  def suggestName(s: String): this.type = {
     iocell_name = Some(s)
     super.suggestName(s)
   }
@@ -124,8 +124,6 @@ case class GenericIOCellParams() extends IOCellTypeParams {
   def output() = Module(new GenericDigitalOutIOCell)
 }
 
-
-
 object IOCell {
 
   /** From within a RawModule or MultiIOModule context, generate new module IOs from a given
@@ -174,7 +172,7 @@ object IOCell {
         case ActualDirection.Input => {
           val iocell = typeParams.input()
           name.foreach(n => {
-            iocell.suggestName(n)          
+            iocell.suggestName(n)
           })
           coreSignal := castFromBool(iocell.io.i)
           iocell.io.ie := true.B
@@ -184,7 +182,7 @@ object IOCell {
         case ActualDirection.Output => {
           val iocell = typeParams.output()
           name.foreach(n => {
-            iocell.suggestName(n)            
+            iocell.suggestName(n)
           })
           iocell.io.o := castToBool(coreSignal)
           iocell.io.oe := true.B
@@ -252,7 +250,7 @@ object IOCell {
                 // An alternative solution would be to suggestName(n + "_" + i)
                 name.foreach(n => {
                   iocell.suggestName(n)
-                })                
+                })
                 iocell.io.o := sig
                 iocell.io.oe := true.B
                 iocell
