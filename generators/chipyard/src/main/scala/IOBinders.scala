@@ -24,7 +24,7 @@ import barstools.iocell.chisel._
 
 import testchipip._
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
-import chipyard.{CanHaveMasterTLMemPort}
+import chipyard.{CanHaveMasterTLMemPort, CanHaveMasterTLExtPort, ExtTLBus}
 import chipyard.clocking.{HasChipyardPRCI, DividerOnlyClockGenerator}
 
 import scala.reflect.{ClassTag}
@@ -305,6 +305,26 @@ class WithAXI4MMIOPunchthrough extends OverrideLazyIOBinder({
     InModuleBody {
       val ports: Seq[ClockedAndResetIO[AXI4Bundle]] = system.mmio_axi4.zipWithIndex.map({ case (m, i) =>
         val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[AXI4Bundle](m))).suggestName(s"axi4_mmio_${i}")
+        p.bits <> m
+        p.clock := clockBundle.clock
+        p.reset := clockBundle.reset
+        p
+      }).toSeq
+      (ports, Nil)
+    }
+  }
+})
+
+class WithTLMasterExtPunchthrough extends OverrideLazyIOBinder({
+  (system: CanHaveMasterTLExtPort) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    val clockSinkNode = p(ExtTLBus).map(_ => ClockSinkNode(Seq(ClockSinkParameters())))
+    clockSinkNode.map(_ := system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(SBUS).fixedClockNode)
+    def clockBundle = clockSinkNode.get.in.head._1
+
+    InModuleBody {
+      val ports: Seq[ClockedAndResetIO[TLBundle]] = system.ext_master_tl.zipWithIndex.map({ case (m, i) =>
+        val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[TLBundle](m))).suggestName(s"tl_mmio_${i}")
         p.bits <> m
         p.clock := clockBundle.clock
         p.reset := clockBundle.reset

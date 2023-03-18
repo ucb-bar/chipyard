@@ -9,8 +9,9 @@ import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag.{JTAGIO}
-import freechips.rocketchip.system.{SimAXIMem}
+import freechips.rocketchip.system.{SimAXIMem, SimTLMem}
 import freechips.rocketchip.subsystem._
+import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
 
 import sifive.blocks.devices.gpio._
@@ -222,6 +223,19 @@ class WithSimAXIMMIO extends OverrideHarnessBinder({
         Module(mmio_mem.module).suggestName("mmio_mem")
       }
       mmio_mem.io_axi4.head <> port.bits
+    }
+  }
+})
+
+class WithSimTLMMIO extends OverrideHarnessBinder({
+  (system: CanHaveMasterTLExtPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[TLBundle]]) => {
+    val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
+    (ports zip system.extTLNode.edges.in).map { case (port, edge) =>
+      val tl_mmio_mem = LazyModule(new SimTLMem(edge, size = p(ExtTLBus).get.size)(p))
+      withClockAndReset(port.clock, port.reset) {
+        Module(tl_mmio_mem.module).suggestName("tl_mmio_mem")
+      }
+      tl_mmio_mem.io_tl.head <> port.bits
     }
   }
 })

@@ -19,6 +19,7 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithGPIOTiedOff ++                       // tie-off chiptop GPIOs, if GPIOs are present
   new chipyard.harness.WithSimSPIFlashModel ++                  // add simulated SPI flash memory, if SPI is enabled
   new chipyard.harness.WithSimAXIMMIO ++                        // add SimAXIMem for axi4 mmio port, if enabled
+  new chipyard.harness.WithSimTLMMIO ++                         // add SimTLMem for tl mmio port, if enabled
   new chipyard.harness.WithTieOffInterrupts ++                  // tie-off interrupt ports, if present
   new chipyard.harness.WithTieOffL2FBusAXI ++                   // tie-off external AXI4 master, if present
   new chipyard.harness.WithCustomBootPinPlusArg ++
@@ -28,6 +29,7 @@ class AbstractConfig extends Config(
   // IOCells are generated for "Chip-like" IOs, while simulation-only IOs are directly punched through
   new chipyard.iobinders.WithAXI4MemPunchthrough ++
   new chipyard.iobinders.WithAXI4MMIOPunchthrough ++
+  new chipyard.iobinders.WithTLMasterExtPunchthrough ++
   new chipyard.iobinders.WithTLMemPunchthrough ++
   new chipyard.iobinders.WithL2FBusAXI4Punchthrough ++
   new chipyard.iobinders.WithBlockDeviceIOPunchthrough ++

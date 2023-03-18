@@ -17,7 +17,7 @@ import sifive.blocks.devices.spi._
 
 import testchipip._
 
-import chipyard.{ExtTLMem}
+import chipyard.{ExtTLMem, ExtTLBus, ExtTLIn}
 
 // Set the bootrom to the Chipyard bootrom
 class WithBootROM extends Config((site, here, up) => {
@@ -86,4 +86,17 @@ class WithExtMemIdBits(n: Int) extends Config((site, here, up) => {
 
 class WithNoPLIC extends Config((site, here, up) => {
   case PLICKey => None
+})
+
+
+class WithExternalTLMasterPort extends Config((site, here, up) => {
+  case ExtTLBus => Some(MasterPortParams(
+                      base = BigInt("40000", 16),
+                      size = BigInt("10000", 16),
+                      beatBytes = site(MemoryBusKey).beatBytes,
+                      idBits = 4))
+})
+
+class WithExternalTLSlavePort extends Config((site, here, up) => {
+  case ExtTLIn  => Some(SlavePortParams(beatBytes = 8, idBits = 8, sourceBits = 4))
 })

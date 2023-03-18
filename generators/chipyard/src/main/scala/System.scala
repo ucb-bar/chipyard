@@ -13,6 +13,7 @@ import freechips.rocketchip.tilelink._
 import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util.{DontTouch}
+import freechips.rocketchip.util._
 
 // ---------------------------------------------------------------------
 // Base system that uses the debug test module (dtm) to bringup the core
@@ -24,6 +25,8 @@ import freechips.rocketchip.util.{DontTouch}
 class ChipyardSystem(implicit p: Parameters) extends ChipyardSubsystem
   with HasAsyncExtInterrupts
   with CanHaveMasterTLMemPort // export TL port for outer memory
+  with CanHaveSlaveTLExtPort
+  with CanHaveMasterTLExtPort
   with CanHaveMasterAXI4MemPort // expose AXI port for outer mem
   with CanHaveMasterAXI4MMIOPort
   with CanHaveSlaveAXI4Port
@@ -87,4 +90,64 @@ trait CanHaveMasterTLMemPort { this: BaseSubsystem =>
   }
 
   val mem_tl = InModuleBody { memTLNode.makeIOs() }
+}
+
+case object ExtTLBus extends Field[Option[MasterPortParams]](None)
+case object ExtTLIn extends Field[Option[SlavePortParams]](None)
+
+
+trait CanHaveMasterTLExtPort { this: BaseSubsystem =>
+  private val extMasterTLPortParamsOpt = p(ExtTLBus)
+  private val portName = "ext_master_port_tl"
+  private val device = new SimpleBus(portName.kebab, Nil)
+
+  val extTLNode = TLManagerNode(
+    extMasterTLPortParamsOpt.map(params =>
+      TLSlavePortParameters.v1(
+        managers = Seq(TLSlaveParameters.v1(
+          address            = AddressSet.misaligned(params.base, params.size),
+          resources          = device.ranges,
+          executable         = params.executable,
+          supportsGet        = TransferSizes(1, sbus.blockBytes),
+          supportsPutFull    = TransferSizes(1, sbus.blockBytes),
+          supportsPutPartial = TransferSizes(1, sbus.blockBytes))),
+        beatBytes = params.beatBytes)).toSeq)
+
+  extMasterTLPortParamsOpt.map { params =>
+    sbus.coupleTo(s"port_named_$portName") {
+      (extTLNode
+        := TLBuffer()
+        := TLSourceShrinker(1 << params.idBits)
+        := TLWidthWidget(sbus.beatBytes)
+        := _ )
+    }
+  }
+
+  val ext_master_tl = InModuleBody {
+    extTLNode.out.foreach { case (_, edge) => println(edge.prettySourceMapping(s"TL EXT Port")) }
+    extTLNode.makeIOs()
+  }
+}
+
+trait CanHaveSlaveTLExtPort { this: BaseSubsystem =>
+  private val extSlaveTLPortParamsOpt = p(ExtTLIn)
+  private val portName = "ext_slave_port_tl"
+
+  val l2FrontendTLNode = TLClientNode(
+    extSlaveTLPortParamsOpt.map(params =>
+      TLMasterPortParameters.v1(
+        clients = Seq(TLMasterParameters.v1(
+          name     = portName.kebab,
+          sourceId = IdRange(0, 1 << params.idBits))))).toSeq)
+
+  extSlaveTLPortParamsOpt.map { params =>
+    sbus.coupleFrom(s"port_named_$portName") {
+      ( _
+        := TLSourceShrinker(1 << params.sourceBits)
+        := TLWidthWidget(params.beatBytes)
+        := l2FrontendTLNode )
+    }
+  }
+
+  val l2_frontend_bus_tl = InModuleBody { l2FrontendTLNode.makeIOs() }
 }

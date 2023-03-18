@@ -126,3 +126,9 @@ class MulticlockAXIOverSerialConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: MulticlockAXIOverSerialConfig
+
+
+class TLPunchThroughRocketConfig extends Config(
+  new chipyard.config.WithExternalTLMasterPort ++
+  new chipyard.config.WithExternalTLSlavePort ++
+  new RocketConfig)
