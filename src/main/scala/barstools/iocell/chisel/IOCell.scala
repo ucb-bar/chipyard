@@ -60,7 +60,7 @@ class DigitalInIOCellBundle extends Bundle {
 }
 
 trait IOCell extends BaseModule {
-	var i_name : String
+  var i_name: String
 }
 
 trait AnalogIOCell extends IOCell {
@@ -119,11 +119,11 @@ case class GenericIOCellParams() extends IOCellTypeParams {
 }
 
 trait IOCellName {
-  var i_name : String
+  var i_name: String
 }
 
-object IOCell extends IOCellName{
-  var i_name = "NoNameAssigned"
+object IOCell extends IOCellName {
+
   /** From within a RawModule or MultiIOModule context, generate new module IOs from a given
     * signal and return the new IO and a Seq containing all generated IO cells.
     * @param coreSignal The signal onto which to add IO cells
@@ -143,6 +143,8 @@ object IOCell extends IOCellName{
     val iocells = IOCell.generateFromSignal(coreSignal, padSignal, Some(s"iocell_$name"), typeParams, resetFn)
     (padSignal, iocells)
   }
+
+  var i_name = "NoNameAssigned"
 
   /** Connect two identical signals together by adding IO cells between them and return a Seq
     * containing all generated IO cells.
@@ -253,7 +255,7 @@ object IOCell extends IOCellName{
                 name.foreach(n => {
                   iocell.suggestName(n)
                   iocell.i_name = n
-                })                
+                })
                 iocell.io.o := sig
                 iocell.io.oe := true.B
                 iocell
