@@ -184,8 +184,9 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     val epoch = RegInit(0.U(32.W))
     val rate = RegInit(0.U(32.W))
 
-    tlThrottler.module.io.rate := rate
-    tlThrottler.module.io.epoch := epoch
+    tlThrottler.module.io.req.bits.max_req := rr_req.bits.data(31,0)
+    tlThrottler.module.io.req.bits.epoch := rr_req.bits.data(63,32)
+    tlThrottler.module.io.req.valid := false.B
 
     when (rr_req.valid) {
       when (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mAcquire) {
@@ -266,6 +267,7 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
           when (ReRoCCManagerCfgIds.epoch_rate === cfg_id) {
             epoch := rr_req.bits.data(63,32)
             rate := rr_req.bits.data(31,0)
+            tlThrottler.module.io.req.valid := true.B
           }
         }
       } .otherwise {
