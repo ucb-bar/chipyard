@@ -21,27 +21,31 @@ class TLThrottler(width: Int)(implicit p: Parameters) extends LazyModule with Ha
   class Impl extends LazyModuleImp(this) {
     val io = IO(new TLThrottlerControlIO(width))
 
+    val epoch = RegInit(0.U(width.W))
+    val rate = RegInit(0.U(width.W))
     val prev_reqs = RegInit(0.U(width.W))
     io.prev_reqs := prev_reqs
     val req_ctr = RegInit(0.U(width.W))
     val time_ctr = RegInit(0.U(width.W))
     val time_ctr_incr = time_ctr + 1.U
     time_ctr := Mux(time_ctr_incr >= io.epoch, 0.U, time_ctr_incr)
-    when (time_ctr_incr >= io.epoch) {
+    when (time_ctr_incr >= epoch) {
       prev_reqs := req_ctr
       req_ctr := 0.U
+      epoch := io.epoch
+      rate := io.rate
     }
 
     (node.in zip node.out) foreach { case ((in, edgeIn), (out, edgeOut)) =>
       val throttle_queue = Module(new Queue(new TLBundleA(edgeIn.bundle), 1, pipe=true))
       throttle_queue.io.enq <> in.a
 
-      when (out.a.fire && io.epoch > 0.U) {
+      when (out.a.fire && epoch > 0.U) {
         req_ctr := req_ctr + (1.U << (out.a.bits.size).asUInt)
       }
 
       out.a <> throttle_queue.io.deq
-      when(req_ctr > io.rate && io.epoch =/= 0.U && io.rate =/= 0.U){
+      when(req_ctr > io.rate && epoch =/= 0.U && rate =/= 0.U){
         throttle_queue.io.deq.ready := false.B
         out.a.valid := false.B
       }
