@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include "rocc.h"
 
 #define REROCC_ACQUIRE (0)
@@ -20,7 +21,15 @@
 #define REROCC_CFG_RATE (1)
 #define REROCC_CFG_LAST_REQS (2)
 #define REROCC_CFG_EPOCHRATE (3)
-
+#define REROCC_CFG_OFFSETTER_OFFSET (4)
+#define REROCC_CFG_OFFSETTER_BASE0  (5)
+#define REROCC_CFG_OFFSETTER_BASE1  (6)
+#define REROCC_CFG_OFFSETTER_BASE2  (7)
+#define REROCC_CFG_OFFSETTER_BASE3  (8)
+#define REROCC_CFG_OFFSETTER_SIZE0  (9)
+#define REROCC_CFG_OFFSETTER_SIZE1  (10)
+#define REROCC_CFG_OFFSETTER_SIZE2  (11)
+#define REROCC_CFG_OFFSETTER_SIZE3  (12)
 
 
 // Attemps to assign a local tracker to one of the accelerators in the OH mask
@@ -104,19 +113,23 @@ inline uint64_t rerocc_read_cfg_mgr_id(uint64_t id, uint32_t cfg_id) {
   return r;
 }
 
-inline uint64_t rerocc_rateset_tracker(uint64_t tracker, uint64_t epoch, uint64_t max_req, bool read) {
+inline uint64_t rerocc_cfg_epochrate_by_tracker(uint64_t tracker, uint64_t epoch, uint64_t max_req, bool read) {
   uint64_t wdata = (epoch << 32) | (max_req & 0xffffffff);
   return rerocc_write_cfg_tracker(tracker, wdata, REROCC_CFG_EPOCHRATE, read);
 }
 
-/* // address falls into this range redirects to DRAM by bypassing */
-/* // can have multiple configured bypass address range at the same time */
-/* // initialize configured bypass range upon rerocc_fence */
-/* inline void rerocc_bypass(uint64_t tracker, void* addr_start, void* addr_end){                     */
-/*   uint64_t op1 = ((uint64_t) addr_end << 16) | tracker; */
-/*   uint64_t op2 = (uint64_t) addr_start; */
-/*   ROCC_INSTRUCTION_SS(0, op1, op2, REROCC_BYPASS); */
-/* }     */
+inline uint64_t rerocc_cfg_epochrate_by_mgr_id(uint64_t mgr_id, uint64_t epoch, uint64_t max_req, bool read) {
+  uint64_t wdata = (epoch << 32) | (max_req & 0xffffffff);
+  return rerocc_write_cfg_mgr_id(mgr_id, wdata, REROCC_CFG_EPOCHRATE, read);
+}
+
+inline void rerocc_cfg_offsetter_by_tracker(uint64_t tracker, void* base, size_t size, size_t offsetter_id) {
+  uint32_t base_cfg_id = REROCC_CFG_OFFSETTER_BASE0 + 1;
+  uint32_t size_cfg_id = REROCC_CFG_OFFSETTER_SIZE0 + 1;
+  rerocc_write_cfg_tracker(tracker, (uint64_t)base, base_cfg_id, false);
+  rerocc_write_cfg_tracker(tracker, (uint64_t)size, size_cfg_id, false);
+}
+
 
 #endif
 

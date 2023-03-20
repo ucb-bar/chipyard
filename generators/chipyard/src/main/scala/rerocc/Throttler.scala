@@ -6,18 +6,20 @@ import chisel3.util._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
+import freechips.rocketchip.tile.{HasNonDiplomaticTileParameters}
 
+class TLThrottlerControlIO(width: Int) extends Bundle {
+  val epoch = Input(UInt(width.W))
+  val rate = Input(UInt(width.W))
+  val prev_reqs = Output(UInt(width.W))
+}
 
-class TLThrottler(width: Int)(implicit p: Parameters) extends LazyModule {
+class TLThrottler(width: Int)(implicit p: Parameters) extends LazyModule with HasNonDiplomaticTileParameters {
   val node = TLIdentityNode()
   override def shouldBeInlined = false
   override lazy val module = new Impl
   class Impl extends LazyModuleImp(this) {
-    val io = IO(new Bundle {
-      val epoch = Input(UInt(width.W))
-      val rate = Input(UInt(width.W))
-      val prev_reqs = Output(UInt(width.W))
-    })
+    val io = IO(new TLThrottlerControlIO(width))
 
     val prev_reqs = RegInit(0.U(width.W))
     io.prev_reqs := prev_reqs

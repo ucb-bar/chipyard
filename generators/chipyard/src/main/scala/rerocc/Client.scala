@@ -31,6 +31,7 @@ object ReRoCCInstructions {
   // op2 = data
   val cfg_write_tracker = 8.U(7.W)
   val cfg_write_id      = 9.U(7.W)
+
 }
 
 object ReRoCCManagerCfgIds {
@@ -38,6 +39,16 @@ object ReRoCCManagerCfgIds {
   val rate       = 1.U(5.W)
   val last_reqs  = 2.U(5.W)
   val epoch_rate = 3.U(5.W) // writes to epoch/rate, reads last_reqs
+
+  val pmem_adj_offset = 4.U(5.W)
+  val pmem_adj_base0  = 5.U(6.W)
+  val pmem_adj_base1  = 6.U(5.W)
+  val pmem_adj_base2  = 7.U(5.W)
+  val pmem_adj_base3  = 8.U(5.W)
+  val pmem_adj_size0 = 9.U(5.W)
+  val pmem_adj_size1 = 10.U(5.W)
+  val pmem_adj_size2 = 11.U(5.W)
+  val pmem_adj_size3 = 12.U(5.W)
 }
 
 class InstructionSender(b: ReRoCCBundleParams)(implicit p: Parameters) extends Module {

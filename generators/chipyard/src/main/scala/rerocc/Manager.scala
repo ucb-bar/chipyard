@@ -104,7 +104,6 @@ class MiniDCache(reRoCCId: Int, crossing: ClockCrossingType)(implicit p: Paramet
 class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implicit p: Parameters) extends LazyModule {
   val node = ReRoCCManagerNode(ReRoCCManagerParams(reRoCCTileParams.reroccId, reRoCCTileParams.ibufEntries))
   val ibufEntries = reRoCCTileParams.ibufEntries
-  val tlThrottler = LazyModule(new TLThrottler(32))
   override lazy val module = new Impl
   class Impl extends LazyModuleImp(this) {
     val io = IO(new Bundle {
@@ -113,6 +112,9 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
       val resp = Flipped(Decoupled(new RoCCResponse))
       val busy = Input(Bool())
       val ptw = Flipped(new DatapathPTWIO)
+
+      val throttler = Flipped(new TLThrottlerControlIO(32))
+      val offsetter = Flipped(new AddressOffsetterControlIO)
     })
     dontTouch(io.manager_id)
     val (rerocc, edge) = node.in(0)
@@ -184,8 +186,17 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     val epoch = RegInit(0.U(32.W))
     val rate = RegInit(0.U(32.W))
 
-    tlThrottler.module.io.rate := rate
-    tlThrottler.module.io.epoch := epoch
+    io.throttler.rate := rate
+    io.throttler.epoch := epoch
+
+    val defaultOffset = p(ExtMem).map(_.incohBase).flatten.getOrElse(BigInt(0))
+    val offset = RegInit(defaultOffset.U(64.W))
+    val offset_base = RegInit(VecInit.fill(4)(0.U(64.W)))
+    val offset_size = RegInit(VecInit.fill(4)(0.U(32.W)))
+    io.offsetter.offset := offset
+    io.offsetter.base := offset_base
+    io.offsetter.size := offset_size
+    io.offsetter.vm_enabled := status.prv <= PRV.S.U && ptbr.mode(ptbr.mode.getWidth-1)
 
     when (rr_req.valid) {
       when (rr_req.bits.opcode === ReRoCCProtocolOpcodes.mAcquire) {
@@ -260,8 +271,17 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
         }
         when (rr_req.fire() && beat === 1.U) {
           Seq(
-            (ReRoCCManagerCfgIds.epoch, epoch),
-            (ReRoCCManagerCfgIds.rate , rate)
+            (ReRoCCManagerCfgIds.epoch          , epoch),
+            (ReRoCCManagerCfgIds.rate           , rate),
+            (ReRoCCManagerCfgIds.pmem_adj_offset, offset),
+            (ReRoCCManagerCfgIds.pmem_adj_base0 , offset_base(0)),
+            (ReRoCCManagerCfgIds.pmem_adj_base1 , offset_base(1)),
+            (ReRoCCManagerCfgIds.pmem_adj_base2 , offset_base(2)),
+            (ReRoCCManagerCfgIds.pmem_adj_base3 , offset_base(3)),
+            (ReRoCCManagerCfgIds.pmem_adj_size0 , offset_size(0)),
+            (ReRoCCManagerCfgIds.pmem_adj_size1 , offset_size(1)),
+            (ReRoCCManagerCfgIds.pmem_adj_size2 , offset_size(2)),
+            (ReRoCCManagerCfgIds.pmem_adj_size3 , offset_size(3)),
           ).foreach { case (id, r) => when (id === cfg_id) { r := rr_req.bits.data } }
           when (ReRoCCManagerCfgIds.epoch_rate === cfg_id) {
             epoch := rr_req.bits.data(63,32)
@@ -346,8 +366,8 @@ class ReRoCCManager(reRoCCTileParams: ReRoCCTileParams, roccOpcode: UInt)(implic
     resp_arb.io.in(5).bits.data       := Mux(cfg_resp_rd, cfg_rd, Seq(
       (ReRoCCManagerCfgIds.epoch, epoch),
       (ReRoCCManagerCfgIds.rate, rate),
-      (ReRoCCManagerCfgIds.last_reqs, tlThrottler.module.io.prev_reqs),
-      (ReRoCCManagerCfgIds.epoch_rate, tlThrottler.module.io.prev_reqs)
+      (ReRoCCManagerCfgIds.last_reqs, io.throttler.prev_reqs),
+      (ReRoCCManagerCfgIds.epoch_rate, io.throttler.prev_reqs)
     ).map { case (id, r) => Mux(id === cfg_id, r, 0.U) }.reduce(_|_))
     resp_arb.io.in(5).bits.last       := cfg_resp_rd
     resp_arb.io.in(5).bits.first      := !cfg_resp_rd
@@ -373,6 +393,8 @@ class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
   rerocc_manager.node := ReRoCCBuffer() := reRoCCNode
   val tlNode = p(TileVisibilityNodeKey) // throttle before TL Node (merged ->
   val tlXbar = TLXbar()
+  val tlThrottler = LazyModule(new TLThrottler(32))
+  val offsetter = LazyModule(new AddressOffsetter(4))
 
   tlXbar :=* rocc.atlNode
   if (reRoCCParams.mergeTLNodes) {
@@ -380,7 +402,7 @@ class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
   } else {
     tlNode :=* rocc.tlNode
   }
-  tlNode := rerocc_manager.tlThrottler.node :=* tlXbar
+  tlNode := tlThrottler.node := offsetter.node :=* tlXbar
   // minicache
   val dcache = reRoCCParams.dcacheParams.map(_ => LazyModule(new MiniDCache(reRoCCId, SynchronousCrossing())(p)))
   dcache.map(d => tlXbar := d.node)
@@ -398,6 +420,7 @@ class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
     val edge = dcache.map(_.node.edges.out(0)).getOrElse(hellammio.get.node.edges.out(0))
 
     val ptw = Module(new PTW(1 + rocc.nPTWPorts)(edge, p))
+
     if (dcache.isDefined) {
       ptw.io.requestor(0) <> dcache.get.module.io.ptw
     } else {
@@ -410,13 +433,21 @@ class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
     dcIF.io.requestor <> rocc.module.io.mem
     dcacheArb.io.requestor(1) <> dcIF.io.cache
 
+    require(rocc.nPTWPorts <= 1)
     for (i <- 0 until rocc.nPTWPorts) {
       ptw.io.requestor(1+i) <> rocc.module.io.ptw(i)
+      if (i == 0) {
+        offsetter.module.io.ptw_in := ptw.io.requestor(1+i).resp
+        rocc.module.io.ptw(i).resp := offsetter.module.io.ptw_out
+      }
     }
     rerocc_manager.module.io.manager_id := reroccManagerIdSinkNode.bundle
     rocc.module.io.cmd <> rerocc_manager.module.io.cmd
     rerocc_manager.module.io.resp <> rocc.module.io.resp
     rerocc_manager.module.io.busy := rocc.module.io.busy
+
+    tlThrottler.module.io <> rerocc_manager.module.io.throttler
+    offsetter.module.io.ctrl <> rerocc_manager.module.io.offsetter
 
     ptw.io.dpath <> rerocc_manager.module.io.ptw
   }
