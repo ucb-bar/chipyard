@@ -4,7 +4,7 @@ import scala.util.matching.Regex
 import chisel3._
 import chisel3.util.{log2Up}
 
-import freechips.rocketchip.config.{Field, Parameters, Config}
+import org.chipsalliance.cde.config.{Field, Parameters, Config}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.prci._
 import freechips.rocketchip.diplomacy._

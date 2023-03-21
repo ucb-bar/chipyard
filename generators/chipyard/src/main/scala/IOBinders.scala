@@ -3,7 +3,7 @@ package chipyard.iobinders
 import chisel3._
 import chisel3.experimental.{Analog, IO, DataMirror}
 
-import freechips.rocketchip.config._
+import org.chipsalliance.cde.config._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag.{JTAGIO}
@@ -219,7 +219,7 @@ class WithDebugIOCells extends OverrideLazyIOBinder({
     def clockBundle = clockSinkNode.get.in.head._1
 
 
-    InModuleBody { system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripheryDebugModuleImp => {
+    InModuleBody { system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripheryDebug => {
       system.debug.map({ debug =>
         // We never use the PSDIO, so tie it off on-chip
         system.psd.psd.foreach { _ <> 0.U.asTypeOf(new PSDTestMode) }

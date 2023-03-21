@@ -2,7 +2,7 @@ package chipyard.fpga.arty
 
 import chisel3._
 
-import freechips.rocketchip.devices.debug.{HasPeripheryDebug, HasPeripheryDebugModuleImp}
+import freechips.rocketchip.devices.debug.{HasPeripheryDebug}
 import freechips.rocketchip.jtag.{JTAGIO}
 
 import sifive.blocks.devices.uart.{UARTPortIO, HasPeripheryUARTModuleImp}
@@ -15,7 +15,7 @@ import chipyard.harness.{ComposeHarnessBinder, OverrideHarnessBinder}
 import chipyard.iobinders.JTAGChipIO
 
 class WithArtyResetHarnessBinder extends ComposeHarnessBinder({
-  (system: HasPeripheryDebugModuleImp, th: ArtyFPGATestHarness, ports: Seq[Bool]) => {
+  (system: HasPeripheryDebug, th: ArtyFPGATestHarness, ports: Seq[Bool]) => {
     require(ports.size == 2)
 
     withClockAndReset(th.clock_32MHz, th.ck_rst) {

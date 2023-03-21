@@ -1,6 +1,6 @@
 package chipyard.config
 
-import freechips.rocketchip.config.{Config}
+import org.chipsalliance.cde.config.{Config}
 
 // --------------
 // Chipyard abstract ("base") configuration

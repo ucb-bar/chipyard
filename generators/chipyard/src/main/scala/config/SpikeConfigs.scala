@@ -1,6 +1,6 @@
 package chipyard
 
-import freechips.rocketchip.config.{Config}
+import org.chipsalliance.cde.config.{Config}
 
 // Configs which instantiate a Spike-simulated
 // tile that interacts with the Chipyard SoC

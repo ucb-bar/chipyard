@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.experimental.{IO}
 
 import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp, BundleBridgeSource}
-import freechips.rocketchip.config.{Parameters}
+import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink.{TLClientNode}
 
 import sifive.fpgashells.shell.xilinx.{VC707Shell, UARTVC707ShellPlacer, PCIeVC707ShellPlacer, ChipLinkVC707PlacedOverlay}

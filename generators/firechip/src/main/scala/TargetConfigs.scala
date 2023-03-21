@@ -4,7 +4,7 @@ import java.io.File
 
 import chisel3._
 import chisel3.util.{log2Up}
-import freechips.rocketchip.config.{Parameters, Config}
+import org.chipsalliance.cde.config.{Parameters, Config}
 import freechips.rocketchip.groundtest.TraceGenParams
 import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._

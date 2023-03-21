@@ -4,7 +4,7 @@ import scala.util.matching.Regex
 import chisel3._
 import chisel3.util.{log2Up}
 
-import freechips.rocketchip.config.{Config}
+import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.devices.tilelink.{BootROMLocated, PLICKey}
 import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI}
 import freechips.rocketchip.stage.phases.TargetDirKey

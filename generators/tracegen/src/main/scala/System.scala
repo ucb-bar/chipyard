@@ -1,9 +1,9 @@
 package tracegen
 
 import chisel3._
-import freechips.rocketchip.config.{Field, Parameters}
+import org.chipsalliance.cde.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, BufferParams}
-import freechips.rocketchip.interrupts.{IntSinkNode, IntSinkPortSimple}
+import freechips.rocketchip.interrupts.{IntSinkNode, IntSinkPortSimple, NullIntSyncSource}
 import freechips.rocketchip.groundtest.{DebugCombiner, TraceGenParams, GroundTestTile}
 import freechips.rocketchip.subsystem._
 import boom.lsu.BoomTraceGenTile
@@ -17,6 +17,7 @@ class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
     case t: GroundTestTile => t.statusNode.makeSink()
     case t: BoomTraceGenTile => t.statusNode.makeSink()
   }
+  val debugNode = NullIntSyncSource()
   override lazy val module = new TraceGenSystemModuleImp(this)
 }
 

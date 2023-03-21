@@ -2,7 +2,7 @@ package chipyard.clocking
 
 import chisel3._
 
-import freechips.rocketchip.config.{Parameters, Config, Field}
+import org.chipsalliance.cde.config.{Parameters, Config, Field}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.prci._
 
