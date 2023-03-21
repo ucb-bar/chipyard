@@ -124,8 +124,8 @@ inline uint64_t rerocc_cfg_epochrate_by_mgr_id(uint64_t mgr_id, uint64_t epoch, 
 }
 
 inline void rerocc_cfg_offsetter_by_tracker(uint64_t tracker, void* base, size_t size, size_t offsetter_id) {
-  uint32_t base_cfg_id = REROCC_CFG_OFFSETTER_BASE0 + 1;
-  uint32_t size_cfg_id = REROCC_CFG_OFFSETTER_SIZE0 + 1;
+  uint32_t base_cfg_id = REROCC_CFG_OFFSETTER_BASE0 + offsetter_id;
+  uint32_t size_cfg_id = REROCC_CFG_OFFSETTER_SIZE0 + offsetter_id;
   rerocc_write_cfg_tracker(tracker, (uint64_t)base, base_cfg_id, false);
   rerocc_write_cfg_tracker(tracker, (uint64_t)size, size_cfg_id, false);
 }
