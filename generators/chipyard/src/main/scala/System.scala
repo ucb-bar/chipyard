@@ -141,7 +141,8 @@ trait CanHaveSlaveTLExtPort { this: BaseSubsystem =>
           sourceId = IdRange(0, 1 << params.idBits))))).toSeq)
 
   extSlaveTLPortParamsOpt.map { params =>
-    sbus.coupleFrom(s"port_named_$portName") {
+    println("Instantiating extSlaveTLPortParamsOpt")
+    fbus.coupleFrom(s"port_named_$portName") {
       ( _
         := TLSourceShrinker(1 << params.sourceBits)
         := TLWidthWidget(params.beatBytes)
@@ -149,5 +150,7 @@ trait CanHaveSlaveTLExtPort { this: BaseSubsystem =>
     }
   }
 
-  val l2_frontend_bus_tl = InModuleBody { l2FrontendTLNode.makeIOs() }
+  val l2_frontend_bus_tl = InModuleBody { 
+    l2FrontendTLNode.makeIOs() 
+  }
 }

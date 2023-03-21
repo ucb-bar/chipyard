@@ -24,7 +24,7 @@ import barstools.iocell.chisel._
 
 import testchipip._
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
-import chipyard.{CanHaveMasterTLMemPort, CanHaveMasterTLExtPort, ExtTLBus}
+import chipyard.{CanHaveMasterTLMemPort, CanHaveMasterTLExtPort, ExtTLBus, ExtTLIn, CanHaveSlaveTLExtPort}
 import chipyard.clocking.{HasChipyardPRCI, DividerOnlyClockGenerator}
 
 import scala.reflect.{ClassTag}
@@ -328,6 +328,27 @@ class WithTLMasterExtPunchthrough extends OverrideLazyIOBinder({
         p.bits <> m
         p.clock := clockBundle.clock
         p.reset := clockBundle.reset
+        p
+      }).toSeq
+      (ports, Nil)
+    }
+  }
+})
+
+class WithTLSlaveExtPunchthrough extends OverrideLazyIOBinder({
+  (system: CanHaveSlaveTLExtPort) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    val clockSinkNode = p(ExtTLIn).map(_ => ClockSinkNode(Seq(ClockSinkParameters())))
+    clockSinkNode.map(_ := system.asInstanceOf[BaseSubsystem].fbus.fixedClockNode)
+    def clockBundle = clockSinkNode.get.in.head._1
+
+    println("WithTLSlaveExtPunchthrough is called")
+
+    InModuleBody {
+      val ports: Seq[ClockedIO[TLBundle]] = system.l2_frontend_bus_tl.zipWithIndex.map({ case (m, i) =>
+        val p = IO(new ClockedIO(Flipped(DataMirror.internal.chiselTypeClone[TLBundle](m)))).suggestName(s"tl_fbus_${i}")
+        m <> p.bits
+        p.clock := clockBundle.clock
         p
       }).toSeq
       (ports, Nil)

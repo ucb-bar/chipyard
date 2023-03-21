@@ -22,6 +22,7 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithSimTLMMIO ++                         // add SimTLMem for tl mmio port, if enabled
   new chipyard.harness.WithTieOffInterrupts ++                  // tie-off interrupt ports, if present
   new chipyard.harness.WithTieOffL2FBusAXI ++                   // tie-off external AXI4 master, if present
+  new chipyard.harness.WithTieOffL2FBusTL ++                    // tie-off external TL master, if present
   new chipyard.harness.WithCustomBootPinPlusArg ++
   new chipyard.harness.WithClockAndResetFromHarness ++
 
@@ -29,9 +30,10 @@ class AbstractConfig extends Config(
   // IOCells are generated for "Chip-like" IOs, while simulation-only IOs are directly punched through
   new chipyard.iobinders.WithAXI4MemPunchthrough ++
   new chipyard.iobinders.WithAXI4MMIOPunchthrough ++
-  new chipyard.iobinders.WithTLMasterExtPunchthrough ++
-  new chipyard.iobinders.WithTLMemPunchthrough ++
   new chipyard.iobinders.WithL2FBusAXI4Punchthrough ++
+  new chipyard.iobinders.WithTLMasterExtPunchthrough ++
+  new chipyard.iobinders.WithTLSlaveExtPunchthrough ++
+  new chipyard.iobinders.WithTLMemPunchthrough ++
   new chipyard.iobinders.WithBlockDeviceIOPunchthrough ++
   new chipyard.iobinders.WithNICIOPunchthrough ++
   new chipyard.iobinders.WithSerialTLIOCells ++
@@ -57,7 +59,7 @@ class AbstractConfig extends Config(
   new freechips.rocketchip.subsystem.WithClockGateModel ++          // add default EICG_wrapper clock gate model
   new freechips.rocketchip.subsystem.WithJtagDTM ++                 // set the debug module to expose a JTAG port
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++              // no top-level MMIO master port (overrides default set in rocketchip)
-  new freechips.rocketchip.subsystem.WithNoSlavePort ++             // no top-level MMIO slave port (overrides default set in rocketchip)
+  new freechips.rocketchip.subsystem.WithDefaultSlavePort ++             // no top-level MMIO slave port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithInclusiveCache ++          // use Sifive L2 cache
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++    // no external interrupts
   new freechips.rocketchip.subsystem.WithDontDriveBusClocksFromSBus ++ // leave the bus clocks undriven by sbus

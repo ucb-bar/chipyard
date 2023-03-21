@@ -246,6 +246,65 @@ class WithTieOffInterrupts extends OverrideHarnessBinder({
   }
 })
 
+
+class WithTieOffL2FBusTL extends OverrideHarnessBinder({
+  (system: CanHaveSlaveTLExtPort, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[TLBundle]]) => {
+
+    println("Called WithTieOffL2FBusTL HarnessBinder")
+
+    ports.foreach({ p =>
+      dontTouch(p)
+
+      // NOTE: LHS : inside the chip, RHS : outside the chip
+      p.bits.a.valid := false.B
+      p.bits.a.bits.opcode := TLMessages.Get
+      p.bits.a.bits.param := 0.U
+      p.bits.a.bits.size := 0.U
+      p.bits.a.bits.source := 0.U
+      p.bits.a.bits.address := 0.U
+      p.bits.a.bits.mask := 0.U
+      p.bits.a.bits.data := 0.U
+      p.bits.a.bits.corrupt := false.B
+
+      p.bits.b.ready := false.B
+// p.bits.b.bits.opcode := 0.U
+// p.bits.b.bits.param := 0.U
+// p.bits.b.bits.size := 0.U
+// p.bits.b.bits.source := 0.U
+// p.bits.b.bits.address := 0.U
+// p.bits.b.bits.mask := 0.U
+// p.bits.b.bits.data := 0.U
+// p.bits.b.bits.corrupt := false.B
+
+
+      p.bits.c.valid := false.B
+      p.bits.c.bits.opcode := 0.U
+      p.bits.c.bits.param := 0.U
+      p.bits.c.bits.size := 0.U
+      p.bits.c.bits.source := 0.U
+      p.bits.c.bits.address := 0.U
+      p.bits.c.bits.data := 0.U
+      p.bits.c.bits.corrupt := false.B
+
+
+      p.bits.d.ready := false.B
+// p.bits.d.valid := false.B
+// p.bits.d.bits.opcode := 0.U
+// p.bits.d.bits.param := 0.U
+// p.bits.d.bits.size := 0.U
+// p.bits.d.bits.source := 0.U
+// p.bits.d.bits.sink := 0.U
+// p.bits.d.bits.denied := false.B
+// p.bits.d.bits.data := 0.U
+// p.bits.d.bits.corrupt := false.B
+
+      p.bits.e.valid := false.B
+      p.bits.e.bits.sink := 0.U
+
+    })
+  }
+})
+
 class WithTieOffL2FBusAXI extends OverrideHarnessBinder({
   (system: CanHaveSlaveAXI4Port, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[AXI4Bundle]]) => {
     ports.foreach({ p =>

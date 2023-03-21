@@ -89,6 +89,7 @@ class WithNoPLIC extends Config((site, here, up) => {
 })
 
 
+// SoC can send out requests to address ranges of 0x40000 to 0x4ffff
 class WithExternalTLMasterPort extends Config((site, here, up) => {
   case ExtTLBus => Some(MasterPortParams(
                       base = BigInt("40000", 16),
@@ -97,6 +98,7 @@ class WithExternalTLMasterPort extends Config((site, here, up) => {
                       idBits = 4))
 })
 
+// SoC can receive requests from the outer world
 class WithExternalTLSlavePort extends Config((site, here, up) => {
   case ExtTLIn  => Some(SlavePortParams(beatBytes = 8, idBits = 8, sourceBits = 4))
 })
