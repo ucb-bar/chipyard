@@ -263,7 +263,7 @@ class WithTLMasterBridge extends OverrideHarnessBinder({
     (ports zip system.extTLNode.edges.in).map { case(port, edge) =>
       dontTouch(port)
       system match {
-        case s: BaseSubsystem => portBridge(
+        case s: BaseSubsystem => TLMasterBridge(
           port.clock,
           port.reset,
           port.bits,
