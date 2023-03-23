@@ -129,7 +129,6 @@ class MulticlockAXIOverSerialConfig extends Config(
 
 
 class TLPunchThroughRocketConfig extends Config(
-// new chipyard.config.WithTLBackingMemory ++
   new chipyard.config.WithExternalTLMasterPort ++
   new chipyard.config.WithExternalTLSlavePort ++
   new RocketConfig)

@@ -14,6 +14,7 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile.{RocketTile}
 import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
 import freechips.rocketchip.util.{ResetCatchAndSync}
+import freechips.rocketchip.tilelink._
 import sifive.blocks.devices.uart._
 
 import testchipip._
@@ -32,6 +33,7 @@ import barstools.iocell.chisel._
 import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters, IOCellKey}
 import chipyard.{HasHarnessSignalReferences}
 import chipyard.harness._
+import chipyard.{CanHaveMasterTLExtPort}
 
 object MainMemoryConsts {
   val regionNamePrefix = "MainMemory"
@@ -252,4 +254,30 @@ class WithDefaultMMIOOnlyFireSimBridges extends Config(
   new WithFireSimMultiCycleRegfile ++
   new WithFireSimFAME5 ++
   new WithFireSimIOCellModels
+)
+
+
+class WithTLMasterBridge extends OverrideHarnessBinder({
+  (system: CanHaveMasterTLExtPort, th: FireSim, ports: Seq[ClockedAndResetIO[TLBundle]]) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    (ports zip system.extTLNode.edges.in).map { case(port, edge) =>
+      dontTouch(port)
+      system match {
+        case s: BaseSubsystem => portBridge(
+          port.clock,
+          port.reset,
+          port.bits,
+          TLBundleParameters(edge.master, edge.slave)
+          )
+        case _ => throw new Exception("Attempting to attach TLMaster Bridge to misconfigured design")
+      }
+    }
+    Nil
+  }
+})
+
+
+class WithTLPunchthroughFireSimBridges extends Config(
+  new WithTLMasterBridge ++
+  new WithDefaultFireSimBridges
 )
