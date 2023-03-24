@@ -215,3 +215,12 @@ class SbusRingNoCConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig
 )
+
+class ManyCoreNoCConfig extends Config(
+  new boom.common.WithCloneBoomTiles(15, 64) ++
+  new boom.common.WithNMegaBooms ++
+  new freechips.rocketchip.subsystem.WithCloneRocketTiles(63) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(16) ++
+  new chipyard.config.AbstractConfig
+)
