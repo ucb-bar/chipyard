@@ -26,7 +26,7 @@ lazy val commonSettings = Seq(
   },
   exportJars := true,
   resolvers ++= Seq(
-/* Resolver.sonatypeRepo("snapshots"), */
+    Resolver.sonatypeRepo("snapshots"),
     Resolver.sonatypeRepo("releases"),
     Resolver.mavenLocal))
 
