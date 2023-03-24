@@ -1,13 +1,13 @@
 GCC=riscv64-unknown-elf-gcc
 OBJDUMP=riscv64-unknown-elf-objdump
-CFLAGS= -std=gnu99 -O2 -fno-common -fno-builtin-printf -Wall
+CFLAGS= -std=gnu99 -O2 -fno-common -fno-builtin-printf -Wall -I../generators/gemmini/software/gemmini-rocc-tests
 LDFLAGS= -static
 
 include libgloss.mk
 
 PROGRAMS = pwm blkdev accum charcount nic-loopback big-blkdev pingd \
            streaming-passthrough streaming-fir nvdla spiflashread spiflashwrite fft gcd \
-           hello
+           hello mt-hello mt-gemmini
 
 spiflash.img: spiflash.py
 	python3 $<
@@ -15,7 +15,7 @@ spiflash.img: spiflash.py
 .DEFAULT_GOAL := default
 
 .PHONY: default
-default: $(addsuffix .riscv,$(PROGRAMS)) spiflash.img
+default: $(addsuffix .riscv,$(PROGRAMS)) spiflash.img dumps
 
 .PHONY: dumps
 dumps: $(addsuffix .dump,$(PROGRAMS))
