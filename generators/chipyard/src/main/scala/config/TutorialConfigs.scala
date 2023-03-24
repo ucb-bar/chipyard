@@ -116,3 +116,80 @@ class TutorialNoCConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   new chipyard.config.AbstractConfig
 )
+
+// Tutorial Phase 6: Gemmini Config
+class TutorialLeanGemminiConfig extends Config(
+  new chipyard.config.WithMultiRoCC ++
+
+  // Step 1: In the below line, add which cores you want to add gemmini to
+  // For example:     WithMultiRoCCFromBuildRoCC(0, 1, 2, 3) ++
+  new chipyard.config.WithMultiRoCCFromBuildRoCC(0) ++
+
+  // Step 2: Customize gemmini - set a config option for the accelerator: use_dedicated_tl_port=false
+  new gemmini.DefaultGemminiConfig(gemmini.GemminiConfigs.leanConfig.copy(use_dedicated_tl_port=true )) ++
+
+  // Step 3: Specify some number of Rocket + Boom cores
+  //         For this step, try to do <= 4 rockets, and <= 4 booms
+  new boom.common.WithNMediumBooms(1) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+
+  // Step 4: Some number of L2 cache banks (keep this <= 4 as well)
+  new freechips.rocketchip.subsystem.WithNBanks(1) ++
+  new chipyard.config.AbstractConfig
+)
+
+// Tutorial Phase 6: Many Core SoC on a NoC
+class TutorialManyCoreNoCConfig extends Config(
+  new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
+    constellation.protocol.DiplomaticNetworkNodeMapping(
+      // inNodeMappings map master agents onto the NoC
+      inNodeMapping = ListMap(
+        "Core 0 " ->  1, "Core 1 " ->  2, "Core 2 " ->  3, "Core 3 " ->  4,
+
+        "Core 4 " ->  7, "Core 5 " ->  7, "Core 6 " ->  8, "Core 7 " ->  8,
+        "Core 8 " ->  9, "Core 9 " ->  9, "Core 10" -> 10, "Core 11" -> 10,
+        "Core 12" -> 13, "Core 13" -> 13, "Core 14" -> 14, "Core 15" -> 14,
+        "Core 16" -> 15, "Core 17" -> 15, "Core 18" -> 16, "Core 19" -> 16,
+
+        "Core 20" ->  0, "Core 21" ->  6, "Core 22" -> 12, "Core 23" -> 18,
+        "Core 24" ->  5, "Core 25" -> 11, "Core 26" -> 17, "Core 27" -> 23,
+        "serial-tl" -> 0),
+      // outNodeMappings map client agents (L2 banks) onto the NoC
+      outNodeMapping = ListMap(
+        "system[0]"  ->  7, "system[1]"  ->  8, "system[2]"  ->  9, "system[3]"  -> 10,
+        "system[4]"  -> 13, "system[5]"  -> 14, "system[6]"  -> 15, "system[7]"  -> 16,
+        "pbus" -> 5)),
+    NoCParams(
+      topology        = TerminalRouter(Mesh2D(6, 4)),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(8) { UserVirtualChannelParams(4) }),
+      routingRelation = BlockingVirtualSubnetworksRouting(TerminalRouterRouting(Mesh2DEscapeRouting()), 5, 1),
+      skipValidationChecks = true
+    )
+  )) ++
+  // ==========================================
+  // DO NOT change below this line without    |
+  // carefully adjusting the NoC config above |
+  // ==========================================
+
+  // add LeanGemmini to Rocket-cores 0-3 (along the bottom edge of the topology)
+  new chipyard.config.WithMultiRoCC ++
+  new chipyard.config.WithMultiRoCCFromBuildRoCC(0, 1, 2, 3) ++
+  new gemmini.DefaultGemminiConfig(gemmini.GemminiConfigs.leanConfig.copy(use_dedicated_tl_port=false)) ++
+
+  // Add 8 duplicated 10-wide "Mega" SonicBoom cores along the left/right edges
+  new boom.common.WithCloneBoomTiles(7, 20) ++
+  new boom.common.WithNMegaBooms ++
+
+  // Add 16 duplicated simple RocketCores the the center region
+  new freechips.rocketchip.subsystem.WithCloneRocketTiles(15, 4) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+
+  // Add 4 duplicated RocketCores along the bottom edge (these will hold the LeanGemmini accelerators)
+  new freechips.rocketchip.subsystem.WithCloneRocketTiles(3, 0) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+
+  // Use 8 banks of L2 cache
+  new freechips.rocketchip.subsystem.WithNBanks(8) ++
+
+  new chipyard.config.AbstractConfig
+)
