@@ -3,6 +3,7 @@ package chipyard
 import freechips.rocketchip.config.{Config}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 import freechips.rocketchip.subsystem.{SBUS, MBUS}
+import freechips.rocketchip.rocket.DCacheParams
 
 import constellation.channel._
 import constellation.routing._
@@ -369,4 +370,125 @@ class GemminiReRoCCBaseConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=2048) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
+  new chipyard.config.AbstractConfig)
+
+
+// Tight integrated firesim config
+class GemminiTightNoCConfig extends Config(
+  new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
+    constellation.protocol.DiplomaticNetworkNodeMapping(
+      inNodeMapping = ListMap(
+        "serial-tl" -> 0,
+        "Core 0" -> 13,
+        "Core 1" -> 14,
+        "Core 2" -> 15,
+        "Core 3" -> 16,
+        "Core 4" -> 19,
+        "Core 5" -> 20,
+        "Core 6" -> 21,
+        "Core 7" -> 22,
+        "Core 8" -> 26,
+        "Core 9" -> 27,
+      ),
+      outNodeMapping = ListMap(
+        "error" -> 0,
+        "serdesser[0]," -> 1,
+        "serdesser[1]," -> 2,
+        "serdesser[2]," -> 3,
+        "serdesser[3]," -> 4,
+        "serdesser[4]," -> 7,
+        "serdesser[6]," -> 8,
+        "serdesser[7]," -> 9,
+        "serdesser[8]," -> 10,
+        "system[0]|" -> 0, "system[1]|" -> 5,
+        "system[2]|" -> 6, "system[3]|" -> 11
+      )),
+    NoCParams(
+      topology        = Mesh2D(5, 6),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(8) { UserVirtualChannelParams(4) }, useOutputQueues = false),
+      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DEscapeRouting(), 5, 1))     
+  )) ++
+  new GemminiTightRocketConfig
+)
+
+class GemminiDummyReRoCCNoCConfig extends Config(
+  new constellation.soc.WithGlobalNoC(GlobalNoCParams(
+    NoCParams(
+      topology        = Mesh2D(5, 6),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(8) { UserVirtualChannelParams(4) }),
+      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DEscapeRouting(), 7, 1))
+  )) ++
+  new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
+    constellation.protocol.DiplomaticNetworkNodeMapping(
+      inNodeMapping = ListMap(
+        "serial-tl" -> 0,
+        "Core 0" -> 12, "Core 1" -> 17, "Core 2" -> 18,
+        "Core 3" -> 23, "Core 4" -> 25,
+        "ReRoCC 0" -> 13,
+        "ReRoCC 1" -> 14,
+        "ReRoCC 2" -> 15,
+        "ReRoCC 3" -> 16,
+        "ReRoCC 4" -> 19,
+        "ReRoCC 5" -> 20,
+        "ReRoCC 6" -> 21,
+        "ReRoCC 7" -> 22,
+        "ReRoCC 8" -> 26,
+        "ReRoCC 9" -> 27,
+      ),
+      outNodeMapping = ListMap(
+        "error" -> 0,
+        "serdesser[0]," -> 1,
+        "serdesser[1]," -> 2,
+        "serdesser[2]," -> 3,
+        "serdesser[3]," -> 4,
+        "serdesser[4]," -> 7,
+        "serdesser[6]," -> 8,
+        "serdesser[7]," -> 9,
+        "serdesser[8]," -> 10,
+        "system[0]|" -> 0, "system[1]|" -> 5,
+        "system[2]|" -> 6, "system[3]|" -> 11
+      ))
+  ), globalNoC = true) ++
+  new chipyard.config.WithReRoCCNoC(chipyard.rerocc.ReRoCCNoCParams(
+    tileClientMapping = ListMap( // maps tile ids to noc nodes
+      0 -> 12,
+      1 -> 17,
+      2 -> 18,
+      3 -> 23,
+      4 -> 25),
+    managerMapping = ListMap( // maps manager ids to noc nodes
+      0 -> 13,
+      1 -> 14,
+      2 -> 15,
+      3 -> 16,
+      4 -> 19,
+      5 -> 20,
+      6 -> 21,
+      7 -> 22,
+      8 -> 26,
+      9 -> 27),
+    useGlobalNoC = true)) ++
+  new GemminiDummyReRoCCBaseConfig
+)
+
+// config for firesim build
+class GemminiDummyReRoCCBaseConfig extends Config(
+  new chipyard.config.WithReRoCC(4,chipyard.rerocc.ReRoCCTileParams(
+    mergeTLNodes=true, l2TLBEntries=0, dcacheParams=Some(DCacheParams()))) ++
+  new gemmini.DummyDefaultGemminiConfig ++
+  new gemmini.DummyDefaultGemminiConfig ++
+  new gemmini.DummyDefaultGemminiConfig ++
+  new gemmini.DummyDefaultGemminiConfig ++
+  new gemmini.DummyDefaultGemminiConfig ++
+  new gemmini.DummyDefaultGemminiConfig ++
+  new gemmini.DummyDefaultGemminiConfig ++
+  new gemmini.DummyDefaultGemminiConfig ++
+  new gemmini.DummyDefaultGemminiConfig ++
+  new gemmini.DummyDefaultGemminiConfig ++
+  new freechips.rocketchip.subsystem.WithNBigCores(5) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new freechips.rocketchip.subsystem.WithExtMemSbusBypass ++
+  new freechips.rocketchip.subsystem.WithNBanks(8) ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(nWays=2, capacityKB=2048) ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
   new chipyard.config.AbstractConfig)
