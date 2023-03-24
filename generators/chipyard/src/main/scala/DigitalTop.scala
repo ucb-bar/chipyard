@@ -30,6 +30,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with chipyard.example.CanHavePeripheryGCD // Enables optionally adding the GCD example widget
   with chipyard.example.CanHavePeripheryStreamingFIR // Enables optionally adding the DSPTools FIR example widget
   with chipyard.example.CanHavePeripheryStreamingPassthrough // Enables optionally adding the DSPTools streaming-passthrough example widget
+  with chipyard.example.CanHaveRoNBlocks // Enables support for the RoCC-over-NoC example RoCC accelerator
   with nvidia.blocks.dla.CanHavePeripheryNVDLA // Enables optionally having an NVDLA
   with chipyard.clocking.HasChipyardPRCI // Use Chipyard reset/clock distribution
   with fftgenerator.CanHavePeripheryFFT // Enables optionally having an MMIO-based FFT block
