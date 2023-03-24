@@ -2,6 +2,87 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.9.0] - 2023-03-23
+
+Faster FIRRTL build support work CIRCT. New software support for RISC-V GCC12 and Linux 6.2. Various bumps and fixes of all submodules.
+
+### Added
+* Add example ring-only NoC Config by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1325
+* Bump Gemmini by @hngenc, @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1276 https://github.com/ucb-bar/chipyard/pull/1326
+* Bump FireMarshal, Bump to newer RV toolchain (deprecate use of esp-tools for Gemmini) by @abejgonzalez, @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1284 https://github.com/ucb-bar/chipyard/pull/1304 https://github.com/ucb-bar/chipyard/pull/1306 https://github.com/ucb-bar/chipyard/pull/1327 https://github.com/ucb-bar/chipyard/pull/1334  https://github.com/ucb-bar/chipyard/pull/1335  https://github.com/ucb-bar/chipyard/pull/1344 https://github.com/ucb-bar/chipyard/pull/1394  https://github.com/ucb-bar/chipyard/pull/1403 https://github.com/ucb-bar/chipyard/pull/1415
+* Add support for VC707 FPGA board by @Lorilandly in https://github.com/ucb-bar/chipyard/pull/1278
+* Fail simulations on TSI errors by @tymcauley in https://github.com/ucb-bar/chipyard/pull/1288
+* Add pre-commit support by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1294 https://github.com/ucb-bar/chipyard/pull/1310
+* Bump mempress by @joey0320 in https://github.com/ucb-bar/chipyard/pull/1305
+* CIRCT Integration by @abejgonzalez, @joey0320 in https://github.com/ucb-bar/chipyard/pull/1239 https://github.com/ucb-bar/chipyard/pull/1312 https://github.com/ucb-bar/chipyard/pull/1372 https://github.com/ucb-bar/chipyard/pull/1396
+* Bump to scala 2.13.10/chisel 3.5.5/latest rocketchip by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1303
+* Spike-as-a-Tile and use for co-simulation by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1307 https://github.com/ucb-bar/chipyard/pull/1323 https://github.com/ucb-bar/chipyard/pull/1360
+* Add clone-tile configs by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1322
+* New Hammer by @harrisonliew in https://github.com/ucb-bar/chipyard/pull/1324 https://github.com/ucb-bar/chipyard/pull/1368  https://github.com/ucb-bar/chipyard/pull/1374  https://github.com/ucb-bar/chipyard/pull/1369 https://github.com/ucb-bar/chipyard/pull/1410
+* Config finder `make` target by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1328 https://github.com/ucb-bar/chipyard/pull/1381
+* Arty100T board + TSI-over-UART by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1345
+* Add graphml visualization section to docs by @schwarz-em in https://github.com/ucb-bar/chipyard/pull/1387
+* Add a frag./config for MMIO only FireSim bridges by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1393
+* Add log of chisel elaboration to generated src by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1400
+* Xcelium support by @sagark in https://github.com/ucb-bar/chipyard/pull/1386
+* Bump Sodor @a0u in https://github.com/ucb-bar/chipyard/pull/1338
+* Bump Constellation by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1339
+
+### Changed
+* remove RocketTilesKey by @SingularityKChen in https://github.com/ucb-bar/chipyard/pull/1264
+* Move setup script to scripts/, use a symlink at top-level by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1271
+* Decoupled sbus width from boom|hwacha|gemmini memory interface widths by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1273
+* Remove conda from build-toolchains-extra.sh by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1266
+* Rework build-setup | Add single-node CI by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1282
+* Switch simulators to C++17. by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1285
+* Init FPGA submodules in build-setup.sh by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1292
+* Stripped down rocket configs for FireSim testing by @t14916 in https://github.com/ucb-bar/chipyard/pull/1302
+* Add more minimal firesim configs for testing by @t14916 in https://github.com/ucb-bar/chipyard/pull/1313
+* Add workshop info to README.md by @sagark in https://github.com/ucb-bar/chipyard/pull/1314
+* Removed FireSim tests and harnesses by @nandor in https://github.com/ucb-bar/chipyard/pull/1317
+* Move boom's tracegen interface to boom submodule  by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1331
+* Split up RocketConfigs.scala by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1340
+* Sky130/Openroad Tutorial Fixes by @nayiri-k in https://github.com/ucb-bar/chipyard/pull/1392
+* Testing VLSI commands for chipyard tutorial by @nayiri-k in https://github.com/ucb-bar/chipyard/pull/1395
+* Reduce test cases for noc-config in CI by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1359
+* Remove TLHelper, directly use tilelink node constructors by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1358
+* Remove chisel-testers submodule by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1378
+* Cache `.ivy2` and `.sbt` within Chipyard root directory by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1362
+
+### Fixed
+* Remove extra parenthesis by @odxa20 in https://github.com/ucb-bar/chipyard/pull/1261
+* Fixed typo in Initial-Repo-Setup.rst by @PisonJay in https://github.com/ucb-bar/chipyard/pull/1269
+* fix: S-interpolator for assert, assume and printf by @SingularityKChen in https://github.com/ucb-bar/chipyard/pull/1242
+* Revert "fix: S-interpolator for assert, assume and printf" by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1272
+* changelog: fixed TinyRocketArtyConfig FPGA reset signal polarity (Please Backport) by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1257
+* Fix CY logo in README by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1295
+* More files to gitignore by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1297
+* Bump rocket-dsp-utils for ShiftRegisterMem fix. by @milovanovic in https://github.com/ucb-bar/chipyard/pull/1298
+* Set VLOGMODEL=MODEL by default in variables.mk by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1337
+* Fix compile breaking due to merge conflict by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1321
+* Makefile bug fixes by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1336
+* Fix Verilog Prerequisites + Ignore `mv` stdout by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1406
+* Fix Chisel hierarchy API - Fixes #1356 by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1361
+* Remove gen-collateral when rebuilding by @joey0320 in https://github.com/ucb-bar/chipyard/pull/1342
+* Fix VLSI input files list emission to avoid bash "too many arguments" error by @sagark in https://github.com/ucb-bar/chipyard/pull/1348
+* Small build system improvements by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1349
+* Fix socket name length issues on CI by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1353
+* Fix TestDriver.v missing from gen-collateral after recompiling by @joey0320 in https://github.com/ucb-bar/chipyard/pull/1354
+* Consolidate CI testing configs to improve CI runtime by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1352
+* Remove Duplicate Compiler Flags by @joey0320 in https://github.com/ucb-bar/chipyard/pull/1351
+* fpga makefile clean fix by @joey0320 in https://github.com/ucb-bar/chipyard/pull/1357
+* Fix newline in message in build-setup.sh by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1365
+* Update assert message if configs can't be split by `:` by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1373
+* Remove Duplicate Compiler Flags by @joey0320 in https://github.com/ucb-bar/chipyard/pull/1367
+* Move more tmp/ folders to a unique location by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1382
+* Remove stale conda env's after 2 days by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1389
+* Match CY/FireSim deps | Unpin deps | Update lockfiles by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1391
+* Only support HTML docs by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1401
+* Only HTML docs v2 by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1402
+* Fix ANSI color output by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1407
+* Fix chisel elab errors not causing flow to stop by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1409
+* lean gemmini tutorial by @sagark in https://github.com/ucb-bar/chipyard/pull/1413
+
 ## [1.8.1] - 2022-10-18
 
 Various fixes and improvements, bump FireSim to 1.15.1.
