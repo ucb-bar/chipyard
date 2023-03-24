@@ -119,22 +119,16 @@ class TutorialNoCConfig extends Config(
 
 // Tutorial Phase 6: Gemmini Config
 class TutorialLeanGemminiConfig extends Config(
-  new chipyard.config.WithMultiRoCC ++
-
-  // Step 1: In the below line, add which cores you want to add gemmini to
-  // For example:     WithMultiRoCCFromBuildRoCC(0, 1, 2, 3) ++
-  new chipyard.config.WithMultiRoCCFromBuildRoCC(0) ++
-
-  // Step 2: Customize gemmini - set a config option for the accelerator: use_dedicated_tl_port=false
+  // Step 1: Customize gemmini - set a config option for the accelerator: use_dedicated_tl_port=false
   new gemmini.DefaultGemminiConfig(gemmini.GemminiConfigs.leanConfig.copy(use_dedicated_tl_port=true )) ++
 
-  // Step 3: Specify some number of Rocket + Boom cores
-  //         For this step, try to do <= 4 rockets, and <= 4 booms
+  // Step 2: Specify some number of Rocket + Boom cores
+  //         For this step, the total number of Rocket + Boom cores should <= 8
   new boom.common.WithNMediumBooms(1) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(3) ++
 
-  // Step 4: Some number of L2 cache banks (keep this <= 4 as well)
-  new freechips.rocketchip.subsystem.WithNBanks(1) ++
+  // : Some number of L2 cache banks (keep this <= 4 as well)
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig
 )
 
