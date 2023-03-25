@@ -172,7 +172,7 @@ class TutorialManyCoreNoCConfig extends Config(
 
   // Add 8 duplicated 10-wide "Mega" SonicBoom cores along the left/right edges
   new boom.common.WithCloneBoomTiles(7, 20) ++
-  new boom.common.WithNMegaBooms ++
+  new boom.common.WithNMegaBooms(1) ++
 
   // Add 16 duplicated simple RocketCores the the center region
   new freechips.rocketchip.subsystem.WithCloneRocketTiles(15, 4) ++
