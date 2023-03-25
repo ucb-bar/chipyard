@@ -14,7 +14,11 @@ int main(void) {
   printf("Test started\n");
 
   for (int i = 0; i < N_TRIALS; i++) {
-    tlmaster_send_req();
+    tlmaster_send_write_req();
+  }
+
+  for (int i = 0; i < N_TRIALS; i++) {
+    tlmaster_send_read_req();
   }
 
   printf("Test ended\n");
