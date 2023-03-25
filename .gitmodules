@@ -96,7 +96,7 @@
 	url = https://github.com/riscv/riscv-openocd.git
 [submodule "toolchains/riscv-tools/riscv-isa-sim"]
 	path = toolchains/riscv-tools/riscv-isa-sim
-	url = https://github.com/riscv-software-src/riscv-isa-sim.git
+	url = https://github.com/ucb-bar/riscv-isa-sim.git
 [submodule "toolchains/riscv-tools/riscv-tools-feedstock"]
 	path = toolchains/riscv-tools/riscv-tools-feedstock
 	url = https://github.com/ucb-bar/riscv-tools-feedstock.git
