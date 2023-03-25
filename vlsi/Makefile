@@ -46,9 +46,9 @@ VLSI_MODEL_DUT_NAME ?= chiptop
 # If overriding, this should be relative to $(vlsi_dir)
 VLSI_OBJ_DIR       ?= build
 ifneq ($(CUSTOM_VLOG),)
-	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/custom-$(VLSI_TOP)
+	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/$(VLSI_TOP)
 else
-	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/$(long_name)-$(VLSI_TOP)
+	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/$(long_name)-$(TOP)
 endif
 
 #########################################################################################
@@ -118,6 +118,12 @@ endif
 
 $(SYN_CONF): $(VLSI_RTL)
 	mkdir -p $(dir $@)
+	echo "sim.inputs:" > $@
+	echo "  input_files:" >> $@
+	for x in $$(cat $(VLSI_RTL)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  input_files_meta: 'append'" >> $@
 	echo "synthesis.inputs:" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  input_files:" >> $@

@@ -46,7 +46,7 @@ The current set of all available Hammer APIs is codified `here <https://github.c
 Tool Plugins
 ============
 
-Hammer supports separately managed plugins for different CAD tool vendors. You may be able to acquire access to the included Cadence, Synopsys, and Mentor plugins repositories with permission from the respective CAD tool vendor.
+Hammer supports separately managed plugins for different CAD tool vendors. You may be able to acquire access to the included Mentor plugins submodule with permission from the respective CAD tool vendor.
 The types of tools (by Hammer names) supported currently include:
 
 * synthesis

@@ -75,7 +75,7 @@ public:
   void dcache_d(uint64_t sourceid, uint64_t data[8], unsigned char has_data, unsigned char grantack);
   void drain_stq();
   bool stq_empty() { return st_q.size() == 0; };
-  
+
   ~chipyard_simif_t() { };
   chipyard_simif_t(size_t icache_ways,
                    size_t icache_sets,
@@ -262,7 +262,7 @@ extern "C" void spike_tile(int hartid, char* isa,
                            endianness_little,
                            pmpregions,
                            std::vector<mem_cfg_t>(),
-                           std::vector<int>(),
+                           std::vector<size_t>(),
                            false,
                            0);
     processor_t* p = new processor_t(isa_parser,
@@ -488,7 +488,7 @@ bool chipyard_simif_t::mmio_load(reg_t addr, size_t len, uint8_t* bytes) {
       }
     }
   }
-  
+
   if (!found) {
     return false;
   }
@@ -576,7 +576,7 @@ bool chipyard_simif_t::handle_cache_access(reg_t addr, size_t len,
       }
     }
   }
-  
+
 #define SETIDX(ADDR) ((ADDR >> 6) & (n_sets - 1))
   uint64_t setidx = SETIDX(addr);
   uint64_t offset = addr & (64 - 1);
