@@ -15,5 +15,7 @@ rm -rf $O_DIR
 mkdir -p $O_DIR
 cp -r imagenet/resnet50-baremetal $O_DIR/
 cp -r imagenet/resnet50-linux $O_DIR/
+cp -r imagenet/mobilenet-baremetal $O_DIR/
+cp -r imagenet/mobilenet-linux $O_DIR/
 
 echo "Complete!"

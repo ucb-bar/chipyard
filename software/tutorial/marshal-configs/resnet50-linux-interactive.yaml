@@ -3,5 +3,6 @@
   "base" : "br-base.json",
   "workdir" : "..",
   "host-init" : "build.sh",
-  "overlay" : "overlay"
+  "overlay" : "overlay",
+  "spike-args" : "--extension=gemmini"
 }

@@ -4,5 +4,6 @@
   "workdir" : "..",
   "host-init" : "build.sh",
   "overlay" : "overlay",
-  "command" : "/root/resnet50-baremetal"
+  "command" : "/root/resnet50-linux"
+  "spike-args" : "--extension=gemmini"
 }
