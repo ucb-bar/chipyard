@@ -1067,6 +1067,7 @@ void spike_thread_main(void* arg)
         }
       }
       tile->proc->get_state()->mcycle->write(tile->simif->cycle);
+      tile->proc->get_state()->time->sync(tile->simif->cycle);
     }
   }
 }
