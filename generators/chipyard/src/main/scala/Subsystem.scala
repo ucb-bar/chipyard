@@ -51,10 +51,8 @@ trait CanHaveHTIF { this: BaseSubsystem =>
 case object ChosenInDTS extends Field[Boolean](true)
 trait CanHaveChosenInDTS { this: BaseSubsystem =>
   if (p(ChosenInDTS)) {
-    println("got here")
     this match {
       case t: HasPeripheryUART if (!p(PeripheryUARTKey).isEmpty) => {
-        println("Add chosen resource")
         val chosen = new Device {
           def describe(resources: ResourceBindings): Description = {
             val stdout = resources("stdout").map(_.value)
