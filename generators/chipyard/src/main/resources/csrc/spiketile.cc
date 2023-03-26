@@ -304,8 +304,6 @@ extern "C" void spike_tile(int hartid, char* isa,
                                      log_file->get(),
                                      sout);
 
-    p->enable_log_commits();
-
     s_vpi_vlog_info vinfo;
     if (!vpi_get_vlog_info(&vinfo))
       abort();
@@ -323,6 +321,9 @@ extern "C" void spike_tile(int hartid, char* isa,
       }
       if (arg == "+spike-fast-clint") {
         simif->fast_clint = true;
+      }
+      if (arg == "+spike-verbose") {
+        p->enable_log_commits();
       }
     }
     if (loadmem_file != "" && tcm_size > 0)
