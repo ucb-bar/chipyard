@@ -120,7 +120,7 @@ $(FIRRTL_FILE) $(ANNO_FILE) &: $(GEN_CLASSPATH_TARGETS) $(EXTRA_GENERATOR_REQS)
 		--name $(long_name) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
 		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG) \
-		$(EXTRA_CHISEL_OPTIONS)) | tee $(CHISEL_LOG_FILE))
+		$(EXTRA_CHISEL_OPTIONS) | tee $(CHISEL_LOG_FILE))
 
 define mfc_extra_anno_contents
 [

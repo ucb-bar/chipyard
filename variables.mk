@@ -220,6 +220,9 @@ export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -Dsbt.supershell=false 
 #########################################################################################
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
+
+SBT_OPTS += -Dsbt.server.forcestart=true
+
 # passes $(JAVA_TOOL_OPTIONS) from env to java
 SBT ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
 
