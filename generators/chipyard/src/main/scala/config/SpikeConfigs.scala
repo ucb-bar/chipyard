@@ -30,3 +30,18 @@ class SpikeUltraFastConfig extends Config(
   new chipyard.config.WithBroadcastManager ++
   new chipyard.config.AbstractConfig)
 
+// Add the default firechip devices
+class SpikeUltraFastDevicesConfig extends Config(
+  new chipyard.harness.WithSimBlockDevice ++
+  new chipyard.harness.WithLoopbackNIC ++
+  new icenet.WithIceNIC ++
+  new testchipip.WithBlockDevice ++
+
+  new chipyard.WithSpikeTCM ++
+  new chipyard.WithNSpikeCores(1) ++
+  new testchipip.WithSerialPBusMem ++
+  new chipyard.config.WithUARTFIFOEntries(128, 128) ++
+  new chipyard.config.WithMemoryBusFrequency(2) ++
+  new chipyard.config.WithPeripheryBusFrequency(2) ++
+  new chipyard.config.WithBroadcastManager ++
+  new chipyard.config.AbstractConfig)
