@@ -33,7 +33,7 @@ import barstools.iocell.chisel._
 import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters, IOCellKey}
 import chipyard.{HasHarnessSignalReferences}
 import chipyard.harness._
-import chipyard.{CanHaveMasterTLExtPort}
+import chipyard.{CanHaveMasterTLExtPort, CanHaveSlaveTLExtPort}
 
 object MainMemoryConsts {
   val regionNamePrefix = "MainMemory"
@@ -276,8 +276,33 @@ class WithTLMasterBridge extends OverrideHarnessBinder({
   }
 })
 
+class WithTLSlaveBridge extends OverrideHarnessBinder({
+  (system: CanHaveSlaveTLExtPort, th: FireSim, ports: Seq[ClockedAndResetIO[TLBundle]]) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    (ports zip system.l2FrontendTLNode.edges.out).map { case(port, edge) =>
+      dontTouch(port)
+
+      println(s"Inside WithTLSlaveBridge")
+// println(edge.master)
+// edge.master.masters.map(_.sourceId).foreach(println(_))
+
+      system match {
+        case s: BaseSubsystem => TLSlaveBridge(
+          port.clock,
+          port.reset,
+          port.bits,
+          TLBundleParameters(edge.master, edge.slave)
+          )
+        case _ => throw new Exception("Attempting to attach TLSlave Bridge to misconfigured design")
+      }
+    }
+    Nil
+  }
+})
+
 
 class WithTLPunchthroughFireSimBridges extends Config(
   new WithTLMasterBridge ++
+  new WithTLSlaveBridge ++
   new WithDefaultFireSimBridges
 )
