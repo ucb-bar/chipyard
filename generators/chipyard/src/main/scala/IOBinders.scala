@@ -324,7 +324,7 @@ class WithTLMasterExtPunchthrough extends OverrideLazyIOBinder({
 
     InModuleBody {
       val ports: Seq[ClockedAndResetIO[TLBundle]] = system.ext_master_tl.zipWithIndex.map({ case (m, i) =>
-        val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[TLBundle](m))).suggestName(s"tl_mmio_${i}")
+        val p = IO(new ClockedAndResetIO(DataMirror.internal.chiselTypeClone[TLBundle](m))).suggestName(s"tl_master_${i}")
         p.bits <> m
         p.clock := clockBundle.clock
         p.reset := clockBundle.reset
@@ -345,10 +345,11 @@ class WithTLSlaveExtPunchthrough extends OverrideLazyIOBinder({
     println("WithTLSlaveExtPunchthrough is called")
 
     InModuleBody {
-      val ports: Seq[ClockedIO[TLBundle]] = system.l2_frontend_bus_tl.zipWithIndex.map({ case (m, i) =>
-        val p = IO(new ClockedIO(Flipped(DataMirror.internal.chiselTypeClone[TLBundle](m)))).suggestName(s"tl_fbus_${i}")
+      val ports: Seq[ClockedAndResetIO[TLBundle]] = system.l2_frontend_bus_tl.zipWithIndex.map({ case (m, i) =>
+        val p = IO(new ClockedAndResetIO(Flipped(DataMirror.internal.chiselTypeClone[TLBundle](m)))).suggestName(s"tl_slave_${i}")
         m <> p.bits
         p.clock := clockBundle.clock
+        p.reset := clockBundle.reset
         p
       }).toSeq
       (ports, Nil)

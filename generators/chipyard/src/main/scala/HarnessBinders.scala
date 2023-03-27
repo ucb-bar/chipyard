@@ -248,7 +248,7 @@ class WithTieOffInterrupts extends OverrideHarnessBinder({
 
 
 class WithTieOffL2FBusTL extends OverrideHarnessBinder({
-  (system: CanHaveSlaveTLExtPort, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[TLBundle]]) => {
+  (system: CanHaveSlaveTLExtPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[TLBundle]]) => {
 
     println("Called WithTieOffL2FBusTL HarnessBinder")
 
