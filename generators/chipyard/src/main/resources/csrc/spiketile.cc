@@ -85,6 +85,9 @@ public:
   void drain_stq();
   bool stq_empty() { return st_q.size() == 0; };
 
+  const cfg_t &get_cfg() const { return cfg; }
+  const std::map<size_t, processor_t*>& get_harts() const { return harts; }
+
   ~chipyard_simif_t() { };
   chipyard_simif_t(size_t icache_ways,
                    size_t icache_sets,
@@ -97,11 +100,15 @@ public:
                    size_t icache_sourceids,
                    size_t dcache_sourceids,
                    size_t tcm_base,
-                   size_t tcm_size);
+                   size_t tcm_size,
+                   const char* isastr,
+                   size_t pmpregions);
   uint64_t cycle;
   bool use_stq;
   htif_t *htif;
   bool fast_clint;
+  cfg_t cfg;
+  std::map<size_t, processor_t*> harts;
 private:
   bool handle_cache_access(reg_t addr, size_t len,
                            uint8_t* load_bytes,
@@ -278,31 +285,21 @@ extern "C" void spike_tile(int hartid, char* isa,
   if (tiles.find(hartid) == tiles.end()) {
     printf("Constructing spike processor_t\n");
     isa_parser_t *isa_parser = new isa_parser_t(isa, "MSU");
+    std::string* isastr = new std::string(isa);
     chipyard_simif_t* simif = new chipyard_simif_t(icache_ways, icache_sets,
                                                    dcache_ways, dcache_sets,
                                                    cacheable, uncacheable, readonly_uncacheable, executable,
                                                    icache_sourceids, dcache_sourceids,
-                                                   tcm_base, tcm_size);
-    std::string* isastr = new std::string(isa);
-    cfg_t* cfg = new cfg_t(std::make_pair(0, 0),
-                           nullptr,
-                           isastr->c_str(),
-                           "MSU",
-                           "vlen:128,elen:64",
-                           false,
-                           endianness_little,
-                           pmpregions,
-                           std::vector<mem_cfg_t>(),
-                           std::vector<size_t>(),
-                           false,
-			   0);
+                                                   tcm_base, tcm_size,
+                                                   isastr->c_str(), pmpregions);
     processor_t* p = new processor_t(isa_parser,
-                                     cfg,
+                                     &simif->get_cfg(),
                                      simif,
                                      hartid,
                                      false,
                                      log_file->get(),
                                      sout);
+    simif->harts[hartid] = p;
 
     s_vpi_vlog_info vinfo;
     if (!vpi_get_vlog_info(&vinfo))
@@ -422,12 +419,26 @@ chipyard_simif_t::chipyard_simif_t(size_t icache_ways,
                                    size_t ic_sourceids,
                                    size_t dc_sourceids,
                                    size_t tcm_base,
-                                   size_t tcm_size
+                                   size_t tcm_size,
+                                   const char* isastr,
+                                   size_t pmpregions
                                    ) :
   cycle(0),
   use_stq(false),
   htif(nullptr),
   fast_clint(false),
+  cfg(std::make_pair(0, 0),
+      nullptr,
+      isastr,
+      "MSU",
+      "vlen:128,elen:64",
+      false,
+      endianness_little,
+      pmpregions,
+      std::vector<mem_cfg_t>(),
+      std::vector<size_t>(),
+      false,
+      0),
   icache_ways(icache_ways),
   icache_sets(icache_sets),
   dcache_ways(dcache_ways),
@@ -1036,38 +1047,47 @@ bool insn_is_wfi(uint64_t bits) {
 void spike_thread_main(void* arg)
 {
   tile_t* tile = (tile_t*) arg;
+  processor_t* proc = tile->proc;
+  chipyard_simif_t* simif = tile->simif;
+  state_t* state = proc->get_state();
   while (true) {
     while (tile->max_insns == 0) {
       host->switch_to();
     }
     while (tile->max_insns != 0) {
       // TODO: Fences don't work
-      //uint64_t last_bits = tile->proc->get_last_bits();
-      // if (insn_should_fence(last_bits) && !tile->simif->stq_empty()) {
+      //uint64_t last_bits = proc->get_last_bits();
+      // if (insn_should_fence(last_bits) && !simif->stq_empty()) {
       //   host->switch_to();
       // }
-      uint64_t old_minstret = tile->proc->get_state()->minstret->read();
-      tile->proc->step(1);
+      proc->step(1);
       tile->max_insns--;
-      if (tile->proc->is_waiting_for_interrupt()) {
-        if (tile->simif->fast_clint) {
-          tile->proc->get_state()->mip->backdoor_write_with_mask(MIP_MTIP, MIP_MTIP);
+      if (proc->is_waiting_for_interrupt()) {
+        if (simif->fast_clint) {
+          // uint64_t mip = state->mip->read();
+          // uint64_t mie = state->mie->read();
+          //printf("Setting MTIP %x %x %x %x %lx\n", simif->cycle, old_minstret, mip, mie,
+          //       state->pc);
+          state->mip->backdoor_write_with_mask(MIP_MTIP, MIP_MTIP);
+          tile->max_insns = tile->max_insns <= 1 ? 0 : 1;
+        } else {
+          //printf("SpikeTile in WFI\n");
+          tile->max_insns = 0;
         }
-        tile->max_insns = 0;
       }
       if (tile->max_insns % 100 == 0) {
-        uint64_t tohost_addr = tile->simif->htif ? tile->simif->htif->get_tohost_addr() : 0;
-        uint64_t fromhost_addr = tile->simif->htif ? tile->simif->htif->get_fromhost_addr() : 0;
-        auto& mem_read = tile->proc->get_state()->log_mem_read;
+        uint64_t old_minstret = state->minstret->read();
+        uint64_t tohost_addr = simif->htif ? simif->htif->get_tohost_addr() : 0;
+        uint64_t fromhost_addr = simif->htif ? simif->htif->get_fromhost_addr() : 0;
+        auto& mem_read = state->log_mem_read;
         reg_t mem_read_addr = mem_read.empty() ? 0 : std::get<0>(mem_read[0]);
-        if ((old_minstret == tile->proc->get_state()->minstret->read()) ||
+        if ((old_minstret == state->minstret->read()) ||
             (tohost_addr && mem_read_addr == tohost_addr) ||
             (fromhost_addr && mem_read_addr == fromhost_addr)) {
           tile->max_insns == 0;
         }
       }
-      tile->proc->get_state()->mcycle->write(tile->simif->cycle);
-      tile->proc->get_state()->time->sync(tile->simif->cycle);
+      state->mcycle->write(simif->cycle);
     }
   }
 }
