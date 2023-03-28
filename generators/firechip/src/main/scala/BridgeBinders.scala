@@ -257,6 +257,26 @@ class WithDefaultMMIOOnlyFireSimBridges extends Config(
 )
 
 
+class WithTLMasterDMABridge extends OverrideHarnessBinder({
+  (system: CanHaveMasterTLExtPort, th: FireSim, ports: Seq[ClockedAndResetIO[TLBundle]]) => {
+    implicit val p: Parameters = GetSystemParameters(system)
+    (ports zip system.extTLNode.edges.in).map { case(port, edge) =>
+      dontTouch(port)
+      system match {
+        case s: BaseSubsystem => TLMasterDMABridge(
+          port.clock,
+          port.reset,
+          port.bits,
+          TLBundleParameters(edge.master, edge.slave)
+          )
+        case _ => throw new Exception("Attempting to attach TLMaster DMA Bridge to misconfigured design")
+      }
+    }
+    Nil
+  }
+})
+
+
 class WithTLMasterBridge extends OverrideHarnessBinder({
   (system: CanHaveMasterTLExtPort, th: FireSim, ports: Seq[ClockedAndResetIO[TLBundle]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
@@ -302,7 +322,7 @@ class WithTLSlaveBridge extends OverrideHarnessBinder({
 
 
 class WithTLPunchthroughFireSimBridges extends Config(
-  new WithTLMasterBridge ++
+  new WithTLMasterDMABridge ++
   new WithTLSlaveBridge ++
   new WithDefaultFireSimBridges
 )
