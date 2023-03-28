@@ -12,9 +12,7 @@ source $SCRIPT_DIR/defaults.sh
 cd $LOCAL_CHIPYARD_DIR
 
 # ignore the private vlsi submodules
-git config submodule.vlsi/hammer-cadence-plugins.update none
 git config submodule.vlsi/hammer-mentor-plugins.update none
-git config submodule.vlsi/hammer-synopsys-plugins.update none
 
 # initialize submodules and get the hashes
 git submodule update --init
@@ -47,7 +45,7 @@ search () {
     done
 }
 
-submodules=("cva6" "boom" "ibex" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "sifive-blocks" "sifive-cache" "testchipip" "riscv-sodor" "mempress")
+submodules=("cva6" "boom" "ibex" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "sifive-blocks" "sifive-cache" "testchipip" "riscv-sodor" "mempress")
 dir="generators"
 branches=("master" "main" "dev")
 search
@@ -88,7 +86,7 @@ dir="software"
 branches=("master" "dev")
 search
 
-submodules=("DRAMSim2" "axe" "barstools" "chisel-testers" "dsptools" "rocket-dsp-utils" "torture")
+submodules=("DRAMSim2" "axe" "barstools" "dsptools" "rocket-dsp-utils" "torture")
 dir="tools"
 branches=("master" "dev")
 search

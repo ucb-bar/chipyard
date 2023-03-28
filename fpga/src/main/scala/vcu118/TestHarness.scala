@@ -7,15 +7,15 @@ import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp, BundleBridg
 import freechips.rocketchip.config.{Parameters}
 import freechips.rocketchip.tilelink.{TLClientNode}
 
-import sifive.fpgashells.shell.xilinx.{VCU118ShellBasicOverlays, UARTVCU118ShellPlacer, SDIOVCU118ShellPlacer, JTAGDebugBScanVCU118ShellPlacer, JTAGDebugVCU118ShellPlacer, cJTAGDebugVCU118ShellPlacer, PCIeVCU118FMCShellPlacer, PCIeVCU118EdgeShellPlacer, VCU118ShellPMOD, ChipLinkVCU118PlacedOverlay}
+import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
-import sifive.fpgashells.shell.{ClockInputOverlayKey, ClockInputDesignInput, ClockInputShellInput, UARTOverlayKey, UARTDesignInput, UARTShellInput, SPIOverlayKey, SPIDesignInput, SPIShellInput, JTAGDebugOverlayKey, JTAGDebugShellInput, JTAGDebugBScanOverlayKey, JTAGDebugBScanShellInput, cJTAGDebugOverlayKey, cJTAGDebugShellInput, PCIeOverlayKey, PCIeDesignInput, PCIeShellInput, DDROverlayKey, DDRDesignInput, DDRShellInput}
+import sifive.fpgashells.shell._
 import sifive.fpgashells.clocks.{ClockGroup, ClockSinkNode, PLLFactoryKey, ResetWrangler}
 
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTPortIO}
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIPortIO}
 
-import chipyard.{HasHarnessSignalReferences, BuildTop, ChipTop, ExtTLMem, CanHaveMasterTLMemPort, DefaultClockFrequencyKey}
+import chipyard._
 import chipyard.iobinders.{HasIOBinders}
 import chipyard.harness.{ApplyHarnessBinders}
 

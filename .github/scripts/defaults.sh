@@ -18,6 +18,7 @@ REMOTE_JAVA_OPTS="-Xmx10G -Xss8M"
 # Disable the supershell to greatly improve the readability of SBT output when captured by Circle CI
 REMOTE_SBT_OPTS="-Dsbt.server.forcestart=true -Dsbt.ivy.home=$REMOTE_WORK_DIR/.ivy2 -Dsbt.supershell=false -Dsbt.global.base=$REMOTE_WORK_DIR/.sbt -Dsbt.boot.directory=$REMOTE_WORK_DIR/.sbt/boot"
 
+
 # local variables (aka within the docker container)
 LOCAL_CHIPYARD_DIR=$GITHUB_WORKSPACE
 LOCAL_SIM_DIR=$LOCAL_CHIPYARD_DIR/sims/verilator
@@ -26,7 +27,8 @@ LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 # CI uses temp directories with very long names
 # explicitly force socket creation to use /tmp to avoid name length errors
 # https://github.com/sbt/sbt/pull/6887
-JAVA_TMP_DIR=$(mktemp -d -t ci-cy-XXXXXXXX)
+REMOTE_JAVA_TMP_DIR=$(mktemp -d -t ci-cy-XXXXXXXX)
+REMOTE_COURSIER_CACHE=$REMOTE_WORK_DIR/.coursier-cache
 
 # key value store to get the build groups
 declare -A grouping

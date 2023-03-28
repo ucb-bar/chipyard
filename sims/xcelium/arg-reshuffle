@@ -1,0 +1,30 @@
+
+# this is a wrapper that is copied into xcelium sim run scripts that
+# re-maps arguments from the argument pattern used by other
+# simulators (vcs, verilator) to the pattern required by xcelium.
+#
+# mainly:
+# * +vcdfile=VAL -> XCELIUM_WAVEFORM_FLAG=VAL, to be passed in as env var
+# * arguments not prefixed with a + or - are treated as the arguments to
+#   the target and are passed in instead with the +target-argument plusarg
+
+regular_args=""
+target_args="+permissive"
+for var in "$@"
+do
+    if [[ $var = -* ]] || [[ $var = +* ]]
+    then
+        if [[ $var = +vcdfile=* ]]
+        then
+            XCELIUM_WAVEFORM_FLAG=${var/+vcdfile=/""}
+        else
+            regular_args="$regular_args $var"
+        fi
+    else
+        target_args="$target_args +target-argument=$var"
+    fi
+done
+target_args="$target_args +permissive-off"
+
+INPUT_ARGS="$regular_args $target_args"
+

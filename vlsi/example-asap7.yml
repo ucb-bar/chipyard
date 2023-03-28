@@ -37,54 +37,47 @@ vlsi.inputs.placement_constraints:
       right: 0
       top: 0
       bottom: 0
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_0"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_0"
     type: hardmacro
     x: 550
     y: 25
     orientation: "r0"
     top_layer: "M4"
     master: "SRAM1RW4096x8"
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_1"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_1"
     type: hardmacro
     x: 550
     y: 270
     orientation: "r0"
     top_layer: "M4"
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_2"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_2"
     type: hardmacro
     x: 675
     y: 25
     orientation: "r0"
     top_layer: "M4"
     master: "SRAM1RW4096x8"
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_3"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_3"
     type: hardmacro
     x: 675
     y: 270
     orientation: "r0"
     top_layer: "M4"
     master: "SRAM1RW4096x8"
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/tag_array/tag_array_ext/mem_0_0"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/frontend/icache/tag_array_0/tag_array_0_ext/mem_0_0"
     type: hardmacro
     x: 125
     y: 150
     orientation: "my"
     top_layer: "M4"
     master: "SRAM1RW64x21"
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/frontend/icache/data_arrays_0/data_arrays_0_0_ext/mem_0_0"
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/frontend/icache/data_arrays_0_0/data_arrays_0_0_ext/mem_0_0"
     type: hardmacro
     x: 0
     y: 25
     orientation: "my"
     top_layer: "M4"
     master: "SRAM1RW1024x32"
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain/tile/ptw/l2_tlb_ram/l2_tlb_ram_ext/mem_0_0"
-    type: hardmacro
-    x: 0
-    y: 260
-    orientation: "my"
-    top_layer: "M4"
-    master: "SRAM1RW1024x37"
 
 # Pin placement constraints
 vlsi.inputs.pin_mode: generated

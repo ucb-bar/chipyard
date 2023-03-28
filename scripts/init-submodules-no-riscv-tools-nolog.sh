@@ -106,8 +106,6 @@ cd "$RDIR"
             software/coremark \
             software/firemarshal \
             software/spec2017 \
-            vlsi/hammer-cadence-plugins \
-            vlsi/hammer-synopsys-plugins \
             vlsi/hammer-mentor-plugins \
             fpga/fpga-shells
         do

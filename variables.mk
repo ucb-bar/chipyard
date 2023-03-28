@@ -154,6 +154,7 @@ BTL_CLASSPATH_TARGETS ?= $(subst :, ,$(BTL_CLASSPATH))
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
 EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extra.anno.json
+CHISEL_LOG_FILE ?= $(build_dir)/$(long_name).chisel.log
 
 # chisel anno modification output
 MFC_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
@@ -212,7 +213,7 @@ sim_common_files       ?= $(build_dir)/sim_files.common.f
 #########################################################################################
 JAVA_HEAP_SIZE ?= 8G
 JAVA_TMP_DIR ?= $(base_dir)/.java_tmp
-export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -Djava.io.tmpdir=$(JAVA_TMP_DIR)
+export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -Dsbt.supershell=false -Djava.io.tmpdir=$(JAVA_TMP_DIR)
 
 #########################################################################################
 # default sbt launch command
@@ -221,6 +222,7 @@ SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
 # passes $(JAVA_TOOL_OPTIONS) from env to java
 SBT ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
+
 
 # (1) - classpath of the fat jar
 # (2) - main class
