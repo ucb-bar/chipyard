@@ -219,7 +219,7 @@ class WithDebugIOCells extends OverrideLazyIOBinder({
     def clockBundle = clockSinkNode.get.in.head._1
 
 
-    InModuleBody { system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripheryDebug => {
+    InModuleBody { system.asInstanceOf[BaseSubsystem] match { case system: HasPeripheryDebug => {
       system.debug.map({ debug =>
         // We never use the PSDIO, so tie it off on-chip
         system.psd.psd.foreach { _ <> 0.U.asTypeOf(new PSDTestMode) }
