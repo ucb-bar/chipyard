@@ -323,6 +323,6 @@ class WithTLSlaveBridge extends OverrideHarnessBinder({
 
 class WithTLPunchthroughFireSimBridges extends Config(
   new WithTLMasterDMABridge ++
-  new WithTLSlaveBridge ++
+// new WithTLSlaveBridge ++
   new WithDefaultFireSimBridges
 )

@@ -7,6 +7,10 @@ import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 // Rocket Configs
 // --------------
 
+// class TileOnlyRocketConfig extends Config(
+// new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+// new chipyard.config.TileOnlyConfig)
+
 class RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
