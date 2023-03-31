@@ -39,14 +39,14 @@ within the Spike tile, allowing for very fast simulatoin performance.
 
     make CONFIG=SpikeUltraFastConfig run-binary BINARY=hello.riscv
 
-Spike-as-a-Tile can be configure with custom IPC, commit logging, and other behaviors. Spike-specific flags can be added as plusargs to ``EXTRA_SIM_FLAGS``
+Spike-as-a-Tile can be configured with custom IPC, commit logging, and other behaviors. Spike-specific flags can be added as plusargs to ``EXTRA_SIM_FLAGS``
 
 ..  code-block:: shell
 
-     make CONFIG=SpikeUltraFastConfig run-binary-hex BINARY=hello.riscv EXTRA_SPIKE_FLAGS="+spike-ipc=10000 +spike-fast-clint +spike-debug"
+    make CONFIG=SpikeUltraFastConfig run-binary-hex BINARY=hello.riscv EXTRA_SPIKE_FLAGS="+spike-ipc=10000 +spike-fast-clint +spike-debug"
 
 
 * ``+spike-ipc=``: Sets the maximum number of instructions Spike can retire in a single "tick", or cycle of the uncore simulation.
-* ``+spike-fast-clint``: Enables fast-forwrding through WFI stalls by generating fake timer interrupts
-* ``+spike-debug``: Enables debug spike logging
-* ``+spike-verbose``: Enabbls spike commit-log generation
+* ``+spike-fast-clint``: Enables fast-forwarding through WFI stalls by generating fake timer interrupts
+* ``+spike-debug``: Enables debug Spike logging
+* ``+spike-verbose``: Enables Spike commit-log generation

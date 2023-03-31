@@ -410,7 +410,7 @@ jobs:
       - name: Build Gemmini FireMarshal
         run: |
           conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-          cd software/firemarshal && ./init-submodules.sh
+          git submodule update --init software/firemarshal && cd software/firemarshal && ./init-submodules.sh
           cd generators/gemmini/software && ${{ github.workspace }}/software/firemarshal/marshal -v -d build gemmini-smoke.json
       - name: Running Gemmini FireMarshal smoke test
         run: |
