@@ -392,7 +392,7 @@ jobs:
 
   chipyard-spike-gemmini-run-tests:
     name: chipyard-spike-gemmini-run-tests
-    needs: prepare-chipyard-accels # technically doesn't depend on RTL
+    needs: prepare-chipyard-accels # technically doesn't depend on RTL but should be after the build.sh for Gemmini
     runs-on: self-hosted
     steps:
       - name: Delete old checkout
@@ -409,12 +409,12 @@ jobs:
         uses: ./.github/actions/create-conda-env
       - name: Build Gemmini FireMarshal
         run: |
-          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-${{ inputs.toolchain }}
+          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
           cd software/firemarshal && ./init-submodules.sh
           cd generators/gemmini/software && ${{ github.workspace }}/software/firemarshal/marshal -v -d build gemmini-smoke.json
       - name: Running Gemmini FireMarshal smoke test
         run: |
-          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-${{ inputs.toolchain }}
+          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
           cd generators/gemmini/software && ${{ github.workspace }}/software/firemarshal/marshal -v -d launch -s gemmini-smoke.json
 
   chipyard-rocket-run-tests:
@@ -692,29 +692,6 @@ jobs:
         with:
           group-key: "group-accels"
           project-key: "chipyard-gemmini"
-
-  chipyard-gemmini-spike-run-tests:
-    name: chipyard-gemmini-spike-run-tests
-    needs: prepare-chipyard-accels
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-accels"
-          project-key: "chipyard-gemmini-spike"
 
   chipyard-manymmioaccels-run-tests:
     name: chipyard-manymmioaccels-run-tests
