@@ -17,9 +17,9 @@ import chipyard.{BuildSystem}
 
 // DOC include start: AbstractArty and Rocket
 class WithArtyTweaks extends Config(
+  new WithArtyResetHarnessBinder ++
   new WithArtyJTAGHarnessBinder ++
   new WithArtyUARTHarnessBinder ++
-  new WithArtyResetHarnessBinder ++
   new WithDebugResetPassthrough ++
 
   new chipyard.config.WithDTSTimebase(32768) ++

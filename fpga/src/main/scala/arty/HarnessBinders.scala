@@ -15,15 +15,15 @@ import chipyard.harness.{ComposeHarnessBinder, OverrideHarnessBinder}
 import chipyard.iobinders.JTAGChipIO
 
 class WithArtyResetHarnessBinder extends ComposeHarnessBinder({
-  (system: HasPeripheryDebug, th: ArtyFPGATestHarness, ports: Seq[Bool]) => {
-    require(ports.size == 2)
-
+  (system: HasPeripheryDebug, th: ArtyFPGATestHarness, ports: Seq[Data]) => {
+    val resetPorts = ports.collect { case b: Bool => b }
+    require(resetPorts.size == 2)
     withClockAndReset(th.clock_32MHz, th.ck_rst) {
       // Debug module reset
-      th.dut_ndreset := ports(0)
+      th.dut_ndreset := resetPorts(0)
 
       // JTAG reset
-      ports(1) := PowerOnResetFPGAOnly(th.clock_32MHz)
+      resetPorts(1) := PowerOnResetFPGAOnly(th.clock_32MHz)
     }
   }
 })
