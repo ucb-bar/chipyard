@@ -63,6 +63,7 @@ class WithArtyJTAGHarnessBinder extends OverrideHarnessBinder({
         io_jtag.TMS.i.po.map(_ := DontCare)
         io_jtag.TDO.i.po.map(_ := DontCare)
       }
+      case b: Bool =>
     }
   }
 })
