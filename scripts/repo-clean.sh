@@ -21,7 +21,7 @@ rm -rf $RDIR/toolchains/esp-tools/riscv-tests/build.log
     popd
 )
 (
-    pushd $RDIR/tools/api-config-chipsalliance
+    pushd $RDIR/tools/cde
     git config --local status.showUntrackedFiles no
     popd
 )
