@@ -211,6 +211,7 @@ $(SFC_MFC_TARGETS) &: $(BTL_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
 		--log-level $(FIRRTL_LOGLEVEL) \
 		--allow-unrecognized-annotations \
 		-X $(SFC_LEVEL) \
+		-ST $(ENABLE_CUSTOM_FIRRTL_PASS) \
 		$(EXTRA_FIRRTL_OPTIONS))
 	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE) 2> /dev/null # Optionally change file type when SFC generates LowFIRRTL
 	@if [ $(SFC_LEVEL) = low ]; then cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json; fi

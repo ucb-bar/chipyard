@@ -28,7 +28,7 @@ class TinyRocketConfig extends Config(
 class UARTTSIRocketConfig extends Config(
   new chipyard.harness.WithUARTSerial ++
   new chipyard.config.WithNoUART ++
-  new chipyard.config.WithMemoryBusFrequency(10) ++              
+  new chipyard.config.WithMemoryBusFrequency(10) ++
   new chipyard.config.WithPeripheryBusFrequency(10) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
@@ -36,6 +36,11 @@ class UARTTSIRocketConfig extends Config(
 class SimAXIRocketConfig extends Config(
   new chipyard.harness.WithSimAXIMem ++                     // drive the master AXI4 memory with a SimAXIMem, a 1-cycle magic memory, instead of default SimDRAM
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class DualRocketSingleBoomConfig extends Config(
+  new boom.common.WithNSmallBooms(1) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(2) ++    // quad-core (4 RocketTiles)
   new chipyard.config.AbstractConfig)
 
 class QuadRocketConfig extends Config(

@@ -272,6 +272,9 @@ build_dir=$(gen_dir)/$(long_name)
 # final generated collateral per-project
 GEN_COLLATERAL_DIR ?= $(build_dir)/gen-collateral
 
+
+TMP_DIR ?= /tmp
+
 #########################################################################################
 # assembly/benchmark variables
 #########################################################################################
