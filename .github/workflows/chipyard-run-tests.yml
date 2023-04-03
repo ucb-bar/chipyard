@@ -393,7 +393,7 @@ jobs:
   chipyard-spike-gemmini-run-tests:
     name: chipyard-spike-gemmini-run-tests
     needs: prepare-chipyard-accels # technically doesn't depend on RTL but should be after the build.sh for Gemmini
-    runs-on: self-hosted
+    runs-on: ferry
     steps:
       - name: Delete old checkout
         run: |
