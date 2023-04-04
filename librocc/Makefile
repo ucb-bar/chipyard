@@ -8,7 +8,7 @@ PREFIX ?= $RISCV/
 
 default: libgeneric.so
 
-libgeneric.so: rocc.cc
+libgeneric.so: generic.cc
 	g++ -L $(RISCV)/lib -Wl,-rpath,$(RISCV)/lib -shared -o $@ -std=c++17 -I $(RISCV)/include -fPIC $^ -lriscv
 
 .PHONY: install

@@ -1,4 +1,4 @@
-#include "rocc.h"
+#include "generic.h"
 #include <riscv/mmu.h>
 #include <riscv/trap.h>
 #include <stdexcept>
@@ -9,7 +9,7 @@
 
 using namespace std;
 
-REGISTER_EXTENSION(rocc, []() { return new generic_t; })
+REGISTER_EXTENSION(generic, []() { return new generic_t; })
 
 #define dprintf(...) { if (p->get_log_commits_enabled()) printf(__VA_ARGS__); }
 
