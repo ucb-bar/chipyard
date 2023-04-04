@@ -50,7 +50,7 @@ HELP_COMMANDS += \
 "   run-tests                   = run all assembly and benchmark tests" \
 "   launch-sbt                  = start sbt terminal" \
 "   {shutdown,start}-sbt-server = shutdown or start sbt server if using ENABLE_SBT_THIN_CLIENT" \
-"   find-config-fragments       = list all config. fragments and their locations (recursive up to CONFIG_FRAG_LEVELS=$(CONFIG_FRAG_LEVELS))"
+"   find-config-fragments       = list all config. fragments"
 
 #########################################################################################
 # include additional subproject make fragments
@@ -406,13 +406,9 @@ define \n
 
 endef
 
-CONFIG_FRAG_LEVELS ?= 3
 .PHONY: find-config-fragments
-find-config-fragments: private IN_F := $(shell mktemp -d -t cy-XXXXXXXX)/scala_files.f
-find-config-fragments: $(SCALA_SOURCES)
-	@$(foreach file,$(SCALA_SOURCES),echo $(file) >> $(IN_F)${\n})
-	$(base_dir)/scripts/config-finder.py -l $(CONFIG_FRAG_LEVELS) $(IN_F)
-	@rm -rf $(dir $(IN_F))
+find-config-fragments:
+	$(call run_scala_main,chipyard,chipyard.ConfigFinder,)
 
 .PHONY: help
 help:

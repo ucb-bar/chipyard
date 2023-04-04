@@ -149,7 +149,12 @@ lazy val chipyard = (project in file("generators/chipyard"))
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
     constellation, mempress)
   .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.reflections" % "reflections" % "0.10.2"
+    )
+  )
+ .settings(commonSettings)
 
 lazy val mempress = (project in file("generators/mempress"))
   .dependsOn(rocketchip, midasTargetUtils)
