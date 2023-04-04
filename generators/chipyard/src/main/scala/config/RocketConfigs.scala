@@ -12,6 +12,7 @@ class RocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class TinyRocketConfig extends Config(
+  new chipyard.iobinders.WithDontTouchIOBinders(false) ++         // TODO FIX: Don't dontTouch the ports
   new chipyard.config.WithTLSerialLocation(
     freechips.rocketchip.subsystem.FBUS,
     freechips.rocketchip.subsystem.PBUS) ++                       // attach TL serial adapter to f/p busses
