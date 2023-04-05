@@ -32,7 +32,7 @@ class TileClockGater(address: BigInt, beatBytes: Int, enable: Boolean)(implicit 
       val sinkName = sinks(i)._1
       val reg = withReset(sources(i).reset) { Module(new AsyncResetRegVec(w=1, init=1)) }
       if (sinkName.contains("tile") && enable) {
-        println(s"ClockGate for ${sinkName} regmapped at ${(address+i*4).toString(16)}")
+        println(s"${(address+i*4).toString(16)}: Tile $sinkName clock gate")
         sinks(i)._2.clock := ClockGate(sources(i).clock,  reg.io.q.asBool)
         sinks(i)._2.reset := sources(i).reset
       } else {
