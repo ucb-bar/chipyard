@@ -15,8 +15,7 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.prci.ClockSinkParameters
 
-case class SpikeCoreParams(
-) extends CoreParams {
+case class SpikeCoreParams() extends CoreParams {
   val useVM = true
   val useHypervisor = false
   val useSupervisor = true
@@ -79,7 +78,8 @@ case class SpikeTileParams(
   hartId: Int = 0,
   val core: SpikeCoreParams = SpikeCoreParams(),
   icacheParams: ICacheParams = ICacheParams(nWays = 32),
-  dcacheParams: DCacheParams = DCacheParams(nWays = 32)
+  dcacheParams: DCacheParams = DCacheParams(nWays = 32),
+  tcmParams: Option[MasterPortParams] = None // tightly coupled memory
 ) extends InstantiableTileParams[SpikeTile]
 {
   val name = Some("spike_tile")
@@ -145,6 +145,27 @@ class SpikeTile(
     sourceId      = IdRange(0, 1),
     requestFifo   = true))))))
 
+  tlSlaveXbar.node :*= slaveNode
+  val tcmNode = spikeTileParams.tcmParams.map { tcmP =>
+    val device = new MemoryDevice
+    val base = AddressSet.misaligned(tcmP.base, tcmP.size)
+    val tcmNode = TLManagerNode(Seq(TLSlavePortParameters.v1(
+      managers = Seq(TLSlaveParameters.v1(
+        address = base,
+        resources = device.reg,
+        regionType = RegionType.IDEMPOTENT, // not cacheable
+        executable = true,
+        supportsGet = TransferSizes(1, 8),
+        supportsPutFull = TransferSizes(1, 8),
+        supportsPutPartial = TransferSizes(1, 8),
+        fifoId = Some(0)
+      )),
+      beatBytes = 8
+    )))
+    connectTLSlave(tcmNode := TLBuffer(), 8)
+    tcmNode
+  }
+
   tlOtherMastersNode := TLBuffer() := tlMasterXbar.node
   masterNode :=* tlOtherMastersNode
   tlMasterXbar.node := TLWidthWidget(64) := TLBuffer():= icacheNode
@@ -166,7 +187,9 @@ class SpikeBlackBox(
   cacheable_regions: String,
   uncacheable_regions: String,
   readonly_uncacheable_regions: String,
-  executable_regions: String) extends BlackBox(Map(
+  executable_regions: String,
+  tcm_base: BigInt,
+  tcm_size: BigInt) extends BlackBox(Map(
     "HARTID" -> IntParam(hartId),
     "ISA" -> StringParam(isa),
     "PMPREGIONS" -> IntParam(pmpregions),
@@ -179,7 +202,9 @@ class SpikeBlackBox(
     "UNCACHEABLE" -> StringParam(uncacheable_regions),
     "READONLY_UNCACHEABLE" -> StringParam(readonly_uncacheable_regions),
     "CACHEABLE" -> StringParam(cacheable_regions),
-    "EXECUTABLE" -> StringParam(executable_regions)
+    "EXECUTABLE" -> StringParam(executable_regions),
+    "TCM_BASE" -> IntParam(tcm_base),
+    "TCM_SIZE" -> IntParam(tcm_size)
   )) with HasBlackBoxResource {
 
   val io = IO(new Bundle {
@@ -258,6 +283,22 @@ class SpikeBlackBox(
         val data = Input(UInt(64.W))
       }
     }
+
+    val tcm = new Bundle {
+      val a = new Bundle {
+        val valid = Input(Bool())
+        val address = Input(UInt(64.W))
+        val data = Input(UInt(64.W))
+        val mask = Input(UInt(32.W))
+        val opcode = Input(UInt(32.W))
+        val size = Input(UInt(32.W))
+      }
+      val d = new Bundle {
+        val valid = Output(Bool())
+        val ready = Input(Bool())
+        val data = Output(UInt(64.W))
+      }
+    }
   })
   addResource("/vsrc/spiketile.v")
   addResource("/csrc/spiketile.cc")
@@ -289,7 +330,10 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     tileParams.icache.get.nSets, tileParams.icache.get.nWays,
     tileParams.dcache.get.nSets, tileParams.dcache.get.nWays,
     tileParams.dcache.get.nMSHRs,
-    cacheable_regions, uncacheable_regions, readonly_uncacheable_regions, executable_regions))
+    cacheable_regions, uncacheable_regions, readonly_uncacheable_regions, executable_regions,
+    outer.spikeTileParams.tcmParams.map(_.base).getOrElse(0),
+    outer.spikeTileParams.tcmParams.map(_.size).getOrElse(0)
+  ))
   spike.io.clock := clock.asBool
   val cycle = RegInit(0.U(64.W))
   cycle := cycle + 1.U
@@ -304,64 +348,63 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
   spike.io.msip := int_bundle.msip
   spike.io.meip := int_bundle.meip
   spike.io.seip := int_bundle.seip.get
-  spike.io.ipc := PlusArg("spike-ipc", 10000, width=64)
+  spike.io.ipc := PlusArg("spike-ipc", width=32, default=10000)
 
   val blockBits = log2Ceil(p(CacheBlockBytes))
-
-  val icache_a_q = Module(new Queue(new TLBundleA(icacheEdge.bundle), 1, flow=true, pipe=true))
-  spike.io.icache.a.ready := icache_a_q.io.enq.ready && icache_a_q.io.count === 0.U
-  icache_tl.a <> icache_a_q.io.deq
-  icache_a_q.io.enq.valid := spike.io.icache.a.valid
-  icache_a_q.io.enq.bits := icacheEdge.Get(
+  spike.io.icache.a.ready := icache_tl.a.ready
+  icache_tl.a.valid := spike.io.icache.a.valid
+  icache_tl.a.bits := icacheEdge.Get(
     fromSource = spike.io.icache.a.sourceid,
     toAddress = (spike.io.icache.a.address >> blockBits) << blockBits,
     lgSize = blockBits.U)._2
-
   icache_tl.d.ready := true.B
   spike.io.icache.d.valid := icache_tl.d.valid
   spike.io.icache.d.sourceid := icache_tl.d.bits.source
   spike.io.icache.d.data := icache_tl.d.bits.data.asTypeOf(Vec(8, UInt(64.W)))
 
-  val dcache_a_q = Module(new Queue(new TLBundleA(dcacheEdge.bundle), 1, flow=true, pipe=true))
-  spike.io.dcache.a.ready := dcache_a_q.io.enq.ready && dcache_a_q.io.count === 0.U
-  dcache_tl.a <> dcache_a_q.io.deq
-  dcache_a_q.io.enq.valid := spike.io.dcache.a.valid
-  dcache_a_q.io.enq.bits := dcacheEdge.AcquireBlock(
-    fromSource = spike.io.dcache.a.sourceid,
-    toAddress = (spike.io.dcache.a.address >> blockBits) << blockBits,
-    lgSize = blockBits.U,
-    growPermissions = Mux(spike.io.dcache.a.state_old, 2.U, Mux(spike.io.dcache.a.state_new, 1.U, 0.U)))._2
-
+  spike.io.dcache.a.ready := dcache_tl.a.ready
+  dcache_tl.a.valid := spike.io.dcache.a.valid
+  if (dcacheEdge.manager.anySupportAcquireB) {
+    dcache_tl.a.bits := dcacheEdge.AcquireBlock(
+      fromSource = spike.io.dcache.a.sourceid,
+      toAddress = (spike.io.dcache.a.address >> blockBits) << blockBits,
+      lgSize = blockBits.U,
+      growPermissions = Mux(spike.io.dcache.a.state_old, 2.U, Mux(spike.io.dcache.a.state_new, 1.U, 0.U)))._2
+  } else {
+    dcache_tl.a.bits := DontCare
+  }
   dcache_tl.b.ready := true.B
   spike.io.dcache.b.valid := dcache_tl.b.valid
   spike.io.dcache.b.address := dcache_tl.b.bits.address
   spike.io.dcache.b.source := dcache_tl.b.bits.source
   spike.io.dcache.b.param := dcache_tl.b.bits.param
 
-  val dcache_c_q = Module(new Queue(new TLBundleC(dcacheEdge.bundle), 1, flow=true, pipe=true))
-  spike.io.dcache.c.ready := dcache_c_q.io.enq.ready && dcache_c_q.io.count === 0.U
-  dcache_tl.c <> dcache_c_q.io.deq
-  dcache_c_q.io.enq.valid := spike.io.dcache.c.valid
-  dcache_c_q.io.enq.bits := Mux(spike.io.dcache.c.voluntary,
-    dcacheEdge.Release(
-      fromSource = spike.io.dcache.c.sourceid,
-      toAddress = spike.io.dcache.c.address,
-      lgSize = blockBits.U,
-      shrinkPermissions = spike.io.dcache.c.param,
-      data = spike.io.dcache.c.data.asUInt)._2,
-    Mux(spike.io.dcache.c.has_data,
-      dcacheEdge.ProbeAck(
+  spike.io.dcache.c.ready := dcache_tl.c.ready
+  dcache_tl.c.valid := spike.io.dcache.c.valid
+  if (dcacheEdge.manager.anySupportAcquireB) {
+    dcache_tl.c.bits := Mux(spike.io.dcache.c.voluntary,
+      dcacheEdge.Release(
         fromSource = spike.io.dcache.c.sourceid,
         toAddress = spike.io.dcache.c.address,
         lgSize = blockBits.U,
-        reportPermissions = spike.io.dcache.c.param,
-        data = spike.io.dcache.c.data.asUInt),
-      dcacheEdge.ProbeAck(
-        fromSource = spike.io.dcache.c.sourceid,
-        toAddress = spike.io.dcache.c.address,
-        lgSize = blockBits.U,
-        reportPermissions = spike.io.dcache.c.param)
-    ))
+        shrinkPermissions = spike.io.dcache.c.param,
+        data = spike.io.dcache.c.data.asUInt)._2,
+      Mux(spike.io.dcache.c.has_data,
+        dcacheEdge.ProbeAck(
+          fromSource = spike.io.dcache.c.sourceid,
+          toAddress = spike.io.dcache.c.address,
+          lgSize = blockBits.U,
+          reportPermissions = spike.io.dcache.c.param,
+          data = spike.io.dcache.c.data.asUInt),
+        dcacheEdge.ProbeAck(
+          fromSource = spike.io.dcache.c.sourceid,
+          toAddress = spike.io.dcache.c.address,
+          lgSize = blockBits.U,
+          reportPermissions = spike.io.dcache.c.param)
+      ))
+  } else {
+    dcache_tl.c.bits := DontCare
+  }
 
   val has_data = dcacheEdge.hasData(dcache_tl.d.bits)
   val should_finish = dcacheEdge.isRequest(dcache_tl.d.bits)
@@ -376,12 +419,10 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
   dcache_tl.e.valid := dcache_tl.d.valid && should_finish
   dcache_tl.e.bits := dcacheEdge.GrantAck(dcache_tl.d.bits)
 
-  val mmio_a_q = Module(new Queue(new TLBundleA(mmioEdge.bundle), 1, flow=true, pipe=true))
-  spike.io.mmio.a.ready := mmio_a_q.io.enq.ready && mmio_a_q.io.count === 0.U
-  mmio_tl.a <> mmio_a_q.io.deq
-  mmio_a_q.io.enq.valid := spike.io.mmio.a.valid
+  spike.io.mmio.a.ready := mmio_tl.a.ready
+  mmio_tl.a.valid := spike.io.mmio.a.valid
   val log_size = MuxCase(0.U, (0 until 3).map { i => (spike.io.mmio.a.size === (1 << i).U) -> i.U })
-  mmio_a_q.io.enq.bits := Mux(spike.io.mmio.a.store,
+  mmio_tl.a.bits := Mux(spike.io.mmio.a.store,
     mmioEdge.Put(0.U, spike.io.mmio.a.address, log_size, spike.io.mmio.a.data)._2,
     mmioEdge.Get(0.U, spike.io.mmio.a.address, log_size)._2)
 
@@ -389,9 +430,33 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
   spike.io.mmio.d.valid := mmio_tl.d.valid
   spike.io.mmio.d.data := mmio_tl.d.bits.data
 
+  spike.io.tcm := DontCare
+  spike.io.tcm.a.valid := false.B
+  spike.io.tcm.d.ready := true.B
+  outer.tcmNode.map { tcmNode =>
+    val (tcm_tl, tcmEdge) = tcmNode.in(0)
+    val debug_tcm_tl = WireInit(tcm_tl)
+    dontTouch(debug_tcm_tl)
+    tcm_tl.a.ready := true.B
+    spike.io.tcm.a.valid := tcm_tl.a.valid
+    spike.io.tcm.a.address := tcm_tl.a.bits.address
+    spike.io.tcm.a.data := tcm_tl.a.bits.data
+    spike.io.tcm.a.mask := tcm_tl.a.bits.mask
+    spike.io.tcm.a.opcode := tcm_tl.a.bits.opcode
+    spike.io.tcm.a.size := tcm_tl.a.bits.size
+
+    spike.io.tcm.d.ready := tcm_tl.d.ready
+    tcm_tl.d.bits := tcmEdge.AccessAck(RegNext(tcm_tl.a.bits))
+    when (RegNext(tcm_tl.a.bits.opcode === TLMessages.Get)) {
+      tcm_tl.d.bits.opcode := TLMessages.AccessAckData
+    }
+    tcm_tl.d.valid := spike.io.tcm.d.valid
+    tcm_tl.d.bits.data := spike.io.tcm.d.data
+  }
 }
 
-class WithNSpikeCores(n: Int = 1, overrideIdOffset: Option[Int] = None) extends Config((site, here, up) => {
+class WithNSpikeCores(n: Int = 1, tileParams: SpikeTileParams = SpikeTileParams(),
+  overrideIdOffset: Option[Int] = None) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => {
     // Calculate the next available hart ID (since hart ID cannot be duplicated)
     val prev = up(TilesLocated(InSubsystem), site)
@@ -399,8 +464,21 @@ class WithNSpikeCores(n: Int = 1, overrideIdOffset: Option[Int] = None) extends 
     // Create TileAttachParams for every core to be instantiated
     (0 until n).map { i =>
       SpikeTileAttachParams(
-        tileParams = SpikeTileParams(hartId = i + idOffset)
+        tileParams = tileParams.copy(hartId = i + idOffset)
       )
     } ++ prev
   }
+})
+
+class WithSpikeTCM extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => {
+    val prev = up(TilesLocated(InSubsystem))
+    require(prev.size == 1)
+    val spike = prev(0).asInstanceOf[SpikeTileAttachParams]
+    Seq(spike.copy(tileParams = spike.tileParams.copy(
+      tcmParams = Some(up(ExtMem).get.master)
+    )))
+  }
+  case ExtMem => None
+  case BankedL2Key => up(BankedL2Key).copy(nBanks = 0)
 })
