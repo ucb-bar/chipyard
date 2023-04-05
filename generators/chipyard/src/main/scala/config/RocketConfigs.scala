@@ -12,6 +12,7 @@ class RocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class TinyRocketConfig extends Config(
+  new chipyard.iobinders.WithDontTouchIOBinders(false) ++         // TODO FIX: Don't dontTouch the ports
   new chipyard.config.WithTLSerialLocation(
     freechips.rocketchip.subsystem.FBUS,
     freechips.rocketchip.subsystem.PBUS) ++                       // attach TL serial adapter to f/p busses
@@ -126,3 +127,9 @@ class MulticlockAXIOverSerialConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: MulticlockAXIOverSerialConfig
+
+class CustomIOChipTopRocketConfig extends Config(
+  new chipyard.example.WithCustomChipTop ++
+  new chipyard.example.WithCustomIOCells ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new chipyard.config.AbstractConfig)
