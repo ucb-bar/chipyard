@@ -79,5 +79,4 @@ We can use this config fragment when composing our configs.
 Chipyard Config Fragments
 -------------------------
 
-For discoverability, users can run ``make find-config-fragments`` to see a list of config. fragments
-(config. fragments that match "class NAME extends CONFIG\n" on a single line and a subset of their children) and their file path in a fully initialized Chipyard repository.
+For discoverability, users can run ``make find-config-fragments`` to see a list of config. fragments.
