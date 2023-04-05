@@ -22,8 +22,8 @@ import barstools.iocell.chisel._
 import testchipip._
 
 import chipyard._
-import chipyard.clocking.{HasChipyardPRCI}
-import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, ClockWithFreq}
+import chipyard.clocking.{HasChipyardPRCI, ClockWithFreq}
+import chipyard.iobinders.{GetSystemParameters, JTAGChipIO}
 
 import tracegen.{TraceGenSystemModuleImp}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
