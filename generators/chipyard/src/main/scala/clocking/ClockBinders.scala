@@ -103,9 +103,14 @@ class WithPLLSelectorDividerClockGenerator extends OverrideLazyIOBinder({
 
       // For a real chip you should replace this ClockSourceAtFreqFromPlusArg
       // with a blackbox of whatever PLL is being integrated
-      val fakeClockSource = Module(new ClockSourceAtFreqFromPlusArg("pll_freq_mhz"))
-      fakeClockSource.io.power := pllCtrlSink.in(0)._1.power
-      fakeClockSource.io.gate := pllCtrlSink.in(0)._1.gate
+      val fake_pll = Module(new ClockSourceAtFreqFromPlusArg("pll_freq_mhz"))
+      fake_pll.io.power := pllCtrlSink.in(0)._1.power
+      fake_pll.io.gate := pllCtrlSink.in(0)._1.gate
+
+      pllClockSource.out.unzip._1.map { o =>
+        o.clock := fake_pll.io.clk
+        o.reset := reset_wire
+      }
 
       (Seq(clock_io, reset_io), clockIOCell ++ resetIOCell)
     }
