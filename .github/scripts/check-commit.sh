@@ -12,9 +12,7 @@ source $SCRIPT_DIR/defaults.sh
 cd $LOCAL_CHIPYARD_DIR
 
 # ignore the private vlsi submodules
-git config submodule.vlsi/hammer-cadence-plugins.update none
 git config submodule.vlsi/hammer-mentor-plugins.update none
-git config submodule.vlsi/hammer-synopsys-plugins.update none
 
 # initialize submodules and get the hashes
 git submodule update --init

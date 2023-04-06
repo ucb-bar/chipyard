@@ -235,6 +235,18 @@ class FireSimGemminiRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.GemminiRocketConfig)
 
+class FireSimLeanGemminiRocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.LeanGemminiRocketConfig)
+
+class FireSimLeanGemminiPrintfRocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.LeanGemminiPrintfRocketConfig)
+
 //**********************************************************************************
 // Supernode Configurations, base off chipyard's RocketConfig
 //**********************************************************************************
@@ -288,3 +300,9 @@ class FireSimRocketMMIOOnlyConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.RocketConfig)
+
+class FireSimLeanGemminiRocketMMIOOnlyConfig extends Config(
+  new WithDefaultMMIOOnlyFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.LeanGemminiRocketConfig)

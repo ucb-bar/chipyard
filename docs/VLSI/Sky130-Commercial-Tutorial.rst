@@ -1,8 +1,8 @@
 .. _sky130-commercial-tutorial:
 
-Sky130 Tutorial
-===============
-The ``vlsi`` folder of this repository contains an example Hammer flow with the TinyRocketConfig from Chipyard. This example tutorial uses the built-in Sky130 technology plugin and requires access to the included Cadence and Mentor tool plugin submodules. Cadence is necessary for synthesis & place-and-route, while Mentor is needed for DRC & LVS.
+Sky130 Commercial Tutorial
+==========================
+The ``vlsi`` folder of this repository contains an example Hammer flow with the TinyRocketConfig from Chipyard. This example tutorial uses the built-in Sky130 technology plugin and requires access to the included Mentor tool plugin submodule, which is needed for DRC & LVS.
 
 Project Structure
 -----------------
@@ -47,7 +47,23 @@ Prerequisites
 
 * Python 3.9+
 * Genus, Innovus, Voltus, VCS, and Calibre licenses
-* Sky130 PDK, install using `these directions  <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__
+* Sky130A PDK, install `using conda <https://anaconda.org/litex-hub/open_pdks.sky130a>`__ or `these directions  <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__
+* `Sram22 Sky130 SRAM macros  <https://github.com/rahulk29/sram22_sky130_macros>`__ 
+
+  * These SRAM macros were generated using the `Sram22 SRAM generator  <https://github.com/rahulk29/sram22>`__ (still very heavily under development)
+
+Quick Prerequisite Setup
+^^^^^^^^^^^^^^^^^^^^^^^^
+As of recently, the Sky130A PDK may be installed via conda.
+The prerequisite setup for this tutorial may eventually be scripted, but for now the directions to set them up are below.
+
+.. code-block:: shell
+
+    # download all files for Sky130A PDK
+    conda create -c litex-hub --prefix ~/.conda-sky130 open_pdks.sky130a=1.0.399_0_g63dbde9
+    # clone the SRAM22 Sky130 SRAM macros
+    git clone https://github.com/rahulk29/sram22_sky130_macros ~/sram22_sky130_macros
+
 
 Initial Setup
 -------------
@@ -58,6 +74,38 @@ In the Chipyard root, ensure that you have the Chipyard conda environment activa
     ./scripts/init-vlsi.sh sky130
 
 to pull and install the plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule must be added in the ``vlsi`` folder first.
+
+Now navigate to the ``vlsi`` directory. The remainder of the tutorial will assume you are in this directory. 
+We will summarize a few files in this directory that will be important for the rest of the tutorial.
+
+.. code-block:: shell
+
+    cd ~chipyard/vlsi
+
+example-vlsi-sky130
+^^^^^^^^^^^^^^^^^^^
+This is the entry script with placeholders for hooks. In the ``ExampleDriver`` class, a list of hooks is passed in the ``get_extra_par_hooks``. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in this example. Refer to the Hammer documentation on hooks for a detailed description of how these are injected into the VLSI flow.
+
+
+example-sky130.yml
+^^^^^^^^^^^^^^^^^^
+This contains the Hammer configuration for this example project. Example clock constraints, power straps definitions, placement constraints, and pin constraints are given. Additional configuration for the extra libraries and tools are at the bottom.
+
+Add the following YAML keys to the top of this file to specify the location of the Sky130A PDK and SRAM macros.
+
+.. code-block:: yaml
+
+    # all ~ should be replaced with absolute paths to these directories
+    # technology paths
+    technology.sky130.sky130A: ~/.conda-sky130/share/pdk/sky130A
+    technology.sky130.sram22_sky130_macros: ~/sram22_sky130_macros
+
+
+example-tools.yml
+^^^^^^^^^^^^^^^^^
+This contains the Hammer configuration for a commercial tool flow.
+It selects tools for synthesis (Cadence Genus), place and route (Cadence Innovus), DRC and LVS (Mentor Calibre).
+
 
 Building the Design
 --------------------
@@ -71,36 +119,27 @@ The command ``make buildfile`` generates a set of Make targets in ``build/hammer
 It needs to be re-run if environment variables are changed.
 It is recommended that you edit these variables directly in the Makefile rather than exporting them to your shell environment.
 
+The ``buildfile`` make target has dependencies on both (1) the Verilog that is elaborated from all Chisel sources
+and (2) the mapping of memory instances in the design to SRAM macros;
+all files related to these two steps reside in the ``generated-src/chipyard.TestHarness.TinyRocketConfig-ChipTop`` directory.
+Note that the files in ``generated-src`` vary for each tool/technology flow.
+This especially applies to the Sky130 Commercial vs OpenROAD tutorial flows 
+(due to the ``ENABLE_YOSYS_FLOW`` flag present for the OpenROAD flow), so these flows should be run in separate
+chipyard installations. If the wrong sources are generated, simply run ``make buildfile -B`` to rebuild all targets correctly.
+
+
 For the purpose of brevity, in this tutorial we will set the Make variable ``tutorial=sky130-commercial``,
 which will cause additional variables to be set in ``tutorial.mk``, a few of which are summarized as follows:
 
 * ``CONFIG=TinyRocketConfig`` selects the target generator config in the same manner as the rest of the Chipyard framework. This elaborates a stripped-down Rocket Chip in the interest of minimizing tool runtime.
 * ``tech_name=sky130`` sets a few more necessary paths in the ``Makefile``, such as the appropriate Hammer plugin
-* ``TOOLS_CONF`` and ``TECH_CONF`` select the approproate YAML configuration files, ``example-tools.yml`` and ``example-sky130.yml``, which are described below
+* ``TOOLS_CONF`` and ``TECH_CONF`` select the approproate YAML configuration files, ``example-tools.yml`` and ``example-sky130.yml``, which are described above
 * ``DESIGN_CONF`` and ``EXTRA_CONFS`` allow for additonal design-specific overrides of the Hammer IR in ``example-sky130.yml``
 * ``VLSI_OBJ_DIR=build-sky130-commercial`` gives the build directory a unique name to allow running multiple flows in the same repo. Note that for the rest of the tutorial we will still refer to this directory in file paths as ``build``, again for brevity.
 * ``VLSI_TOP`` is by default ``ChipTop``, which is the name of the top-level Verilog module generated in the Chipyard SoC configs. By instead setting ``VLSI_TOP=Rocket``, we can use the Rocket core as the top-level module for the VLSI flow, which consists only of a single RISC-V core (and no caches, peripherals, buses, etc). This is useful to run through this tutorial quickly, and does not rely on any SRAMs.
 
 Running the VLSI Flow
 ---------------------
-
-example-vlsi-sky130
-^^^^^^^^^^^^^^^^^^^
-This is the entry script with placeholders for hooks. In the ``ExampleDriver`` class, a list of hooks is passed in the ``get_extra_par_hooks``. Hooks are additional snippets of python and TCL (via ``x.append()``) to extend the Hammer APIs. Hooks can be inserted using the ``make_pre/post/replacement_hook`` methods as shown in this example. Refer to the Hammer documentation on hooks for a detailed description of how these are injected into the VLSI flow.
-
-
-example-sky130.yml
-^^^^^^^^^^^^^^^^^^
-This contains the Hammer configuration for this example project. Example clock constraints, power straps definitions, placement constraints, and pin constraints are given. Additional configuration for the extra libraries and tools are at the bottom.
-
-First, set ``technology.sky130.sky130A/sky130_nda/openram_lib`` to the absolute path of the respective directories containing the Sky130 PDK and SRAM files. See the
-`Sky130 Hammer plugin README <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__
-for details about the PDK setup.
-
-example-tools.yml
-^^^^^^^^^^^^^^^^^
-This contains the Hammer configuration for a commercial tool flow.
-It selects tools for synthesis (Cadence Genus), place and route (Cadence Innovus), DRC and LVS (Mentor Calibre).
 
 Synthesis
 ^^^^^^^^^
@@ -160,3 +199,20 @@ Post-P&R power and rail (IR drop) analysis is supported with Voltus:
 If you append the ``BINARY`` variable to the command, it will use the activity file generated from a ``sim-<syn/par>-debug`` run and report dynamic power & IR drop from the toggles encoded in the waveform.
 
 To bypass gate-level simulation, you will need to run the power tool manually (see the generated commands in the generated ``hammer.d`` buildfile). Static and active (vectorless) power & IR drop will be reported.
+
+
+VLSI Flow Control
+^^^^^^^^^^^^^^^^^
+Firt, refer to the :ref:`VLSI/Hammer:VLSI Flow Control` documentation. The below examples use the ``redo-par`` Make target to re-run only place-and-route. ``redo-`` may be prepended to any of the VLSI flow actions to re-run only that action.
+
+.. code-block:: shell
+
+      # the following two statements are equivalent because the
+      #   extraction step immediately precedes the write_design step
+      make redo-par HAMMER_EXTRA_ARGS="--start_after_step extraction"
+      make redo-par HAMMER_EXTRA_ARGS="--start_before_step write_design"
+
+      # example of re-running only floorplanning to test out a new floorplan configuration
+      #   the "-p file.yml" causes file.yml to override any previous yaml/json configurations
+      make redo-par \
+        HAMMER_EXTRA_ARGS="--only_step floorplan_design -p example-designs/sky130-openroad.yml"

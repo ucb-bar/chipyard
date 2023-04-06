@@ -6,6 +6,9 @@
 #include <sstream>
 #include <vpi_user.h>
 #include <svdpi.h>
+#include "testchip_tsi.h"
+
+extern testchip_tsi_t* tsi;
 
 enum transfer_t {
   NToB,
@@ -73,9 +76,18 @@ public:
   void dcache_b(uint64_t address, uint64_t source, int param);
   bool dcache_c(uint64_t *address, uint64_t* source, int* param, unsigned char* voluntary, unsigned char* has_data, uint64_t* data[8]);
   void dcache_d(uint64_t sourceid, uint64_t data[8], unsigned char has_data, unsigned char grantack);
+
+  void tcm_a(uint64_t address, uint64_t data, uint32_t mask, uint32_t opcode, uint32_t size);
+  bool tcm_d(uint64_t *data);
+
+  void loadmem(const char* fname);
+
   void drain_stq();
   bool stq_empty() { return st_q.size() == 0; };
-  
+
+  const cfg_t &get_cfg() const { return cfg; }
+  const std::map<size_t, processor_t*>& get_harts() const { return harts; }
+
   ~chipyard_simif_t() { };
   chipyard_simif_t(size_t icache_ways,
                    size_t icache_sets,
@@ -86,9 +98,17 @@ public:
                    char* readonly_uncacheable,
                    char* executable,
                    size_t icache_sourceids,
-                   size_t dcache_sourceids);
+                   size_t dcache_sourceids,
+                   size_t tcm_base,
+                   size_t tcm_size,
+                   const char* isastr,
+                   size_t pmpregions);
   uint64_t cycle;
   bool use_stq;
+  htif_t *htif;
+  bool fast_clint;
+  cfg_t cfg;
+  std::map<size_t, processor_t*> harts;
 private:
   bool handle_cache_access(reg_t addr, size_t len,
                            uint8_t* load_bytes,
@@ -133,6 +153,11 @@ private:
   uint64_t mmio_stdata;
   size_t mmio_len;
   uint64_t mmio_lddata;
+
+  uint64_t tcm_base;
+  uint64_t tcm_size;
+  uint8_t* tcm;
+  std::vector<uint64_t> tcm_q;
 };
 
 class tile_t {
@@ -163,6 +188,7 @@ extern "C" void spike_tile(int hartid, char* isa,
                            int dcache_sets, int dcache_ways,
                            char* cacheable, char* uncacheable, char* readonly_uncacheable, char* executable,
                            int icache_sourceids, int dcache_sourceids,
+                           long long int tcm_base, long long int tcm_size,
                            long long int reset_vector,
                            long long int ipc,
                            long long int cycle,
@@ -237,7 +263,18 @@ extern "C" void spike_tile(int hartid, char* isa,
                            int* mmio_a_size,
 
                            unsigned char mmio_d_valid,
-                           long long int mmio_d_data
+                           long long int mmio_d_data,
+
+                           unsigned char tcm_a_valid,
+                           long long int tcm_a_address,
+                           long long int tcm_a_data,
+                           int tcm_a_mask,
+                           int tcm_a_opcode,
+                           int tcm_a_size,
+
+                           unsigned char* tcm_d_valid,
+                           unsigned char tcm_d_ready,
+                           long long int* tcm_d_data
                            )
 {
   if (!host) {
@@ -248,36 +285,26 @@ extern "C" void spike_tile(int hartid, char* isa,
   if (tiles.find(hartid) == tiles.end()) {
     printf("Constructing spike processor_t\n");
     isa_parser_t *isa_parser = new isa_parser_t(isa, "MSU");
+    std::string* isastr = new std::string(isa);
     chipyard_simif_t* simif = new chipyard_simif_t(icache_ways, icache_sets,
                                                    dcache_ways, dcache_sets,
                                                    cacheable, uncacheable, readonly_uncacheable, executable,
-                                                   icache_sourceids, dcache_sourceids);
-    std::string* isastr = new std::string(isa);
-    cfg_t* cfg = new cfg_t(std::make_pair(0, 0),
-                           nullptr,
-                           isastr->c_str(),
-                           "MSU",
-                           "vlen:128,elen:64",
-                           false,
-                           endianness_little,
-                           pmpregions,
-                           std::vector<mem_cfg_t>(),
-                           std::vector<int>(),
-                           false,
-                           0);
+                                                   icache_sourceids, dcache_sourceids,
+                                                   tcm_base, tcm_size,
+                                                   isastr->c_str(), pmpregions);
     processor_t* p = new processor_t(isa_parser,
-                                     cfg,
+                                     &simif->get_cfg(),
                                      simif,
                                      hartid,
                                      false,
                                      log_file->get(),
                                      sout);
-
-    p->enable_log_commits();
+    simif->harts[hartid] = p;
 
     s_vpi_vlog_info vinfo;
     if (!vpi_get_vlog_info(&vinfo))
       abort();
+    std::string loadmem_file = "";
     for (int i = 1; i < vinfo.argc; i++) {
       std::string arg(vinfo.argv[i]);
       if (arg == "+spike-debug") {
@@ -286,7 +313,18 @@ extern "C" void spike_tile(int hartid, char* isa,
       if (arg == "+spike-stq") {
         simif->use_stq = true;
       }
+      if (arg.find("+loadmem=") == 0) {
+        loadmem_file = arg.substr(strlen("+loadmem="));
+      }
+      if (arg == "+spike-fast-clint") {
+        simif->fast_clint = true;
+      }
+      if (arg == "+spike-verbose") {
+        p->enable_log_commits();
+      }
     }
+    if (loadmem_file != "" && tcm_size > 0)
+      simif->loadmem(loadmem_file.c_str());
 
     p->reset();
     p->get_state()->pc = reset_vector;
@@ -296,6 +334,9 @@ extern "C" void spike_tile(int hartid, char* isa,
   tile_t* tile = tiles[hartid];
   chipyard_simif_t* simif = tile->simif;
   processor_t* proc = tile->proc;
+  if (!simif->htif && tsi) {
+    simif->htif = (htif_t*) tsi;
+  }
 
   simif->cycle = cycle;
   if (debug) {
@@ -357,6 +398,13 @@ extern "C" void spike_tile(int hartid, char* isa,
   if (mmio_d_valid) {
     simif->mmio_d(mmio_d_data);
   }
+
+  if (tcm_a_valid) {
+    simif->tcm_a(tcm_a_address, tcm_a_data, tcm_a_mask, tcm_a_opcode, tcm_a_size);
+  }
+  if (tcm_d_ready) {
+    *tcm_d_valid = simif->tcm_d((uint64_t*)tcm_d_data);
+  }
 }
 
 
@@ -369,14 +417,34 @@ chipyard_simif_t::chipyard_simif_t(size_t icache_ways,
                                    char* readonly_uncacheable,
                                    char* executable,
                                    size_t ic_sourceids,
-                                   size_t dc_sourceids
+                                   size_t dc_sourceids,
+                                   size_t tcm_base,
+                                   size_t tcm_size,
+                                   const char* isastr,
+                                   size_t pmpregions
                                    ) :
   cycle(0),
   use_stq(false),
+  htif(nullptr),
+  fast_clint(false),
+  cfg(std::make_pair(0, 0),
+      nullptr,
+      isastr,
+      "MSU",
+      "vlen:128,elen:64",
+      false,
+      endianness_little,
+      pmpregions,
+      std::vector<mem_cfg_t>(),
+      std::vector<size_t>(),
+      false,
+      0),
   icache_ways(icache_ways),
   icache_sets(icache_sets),
   dcache_ways(dcache_ways),
   dcache_sets(dcache_sets),
+  tcm_base(tcm_base),
+  tcm_size(tcm_size),
   mmio_valid(false),
   mmio_inflight(false)
 {
@@ -432,6 +500,8 @@ chipyard_simif_t::chipyard_simif_t(size_t icache_ways,
     uint64_t size_int = std::stoul(size);
     executables.push_back(mem_region_t { base_int, size_int });
   }
+
+  tcm = (uint8_t*)malloc(tcm_size);
 }
 
 bool chipyard_simif_t::reservable(reg_t addr) {
@@ -440,11 +510,19 @@ bool chipyard_simif_t::reservable(reg_t addr) {
       return true;
     }
   }
+  if (addr >= tcm_base && addr < tcm_base + tcm_size) {
+    return true;
+  }
   return false;
 }
 
 bool chipyard_simif_t::mmio_fetch(reg_t addr, size_t len, uint8_t* bytes) {
   bool executable = false;
+
+  if (addr >= tcm_base && addr < tcm_base + tcm_size) {
+    memcpy(bytes, tcm + addr - tcm_base, len);
+    return true;
+  }
 
   for (auto& r: executables) {
     if (addr >= r.base && addr + len <= r.base + r.size) {
@@ -466,6 +544,10 @@ bool chipyard_simif_t::mmio_load(reg_t addr, size_t len, uint8_t* bytes) {
   bool found = false;
   bool cacheable = false;
   bool readonly = false;
+  if (addr >= tcm_base && addr < tcm_base + tcm_size) {
+    memcpy(bytes, tcm + addr - tcm_base, len);
+    return true;
+  }
   for (auto& r: cacheables) {
     if (addr >= r.base && addr + len <= r.base + r.size) {
       cacheable = true;
@@ -488,7 +570,7 @@ bool chipyard_simif_t::mmio_load(reg_t addr, size_t len, uint8_t* bytes) {
       }
     }
   }
-  
+
   if (!found) {
     return false;
   }
@@ -576,7 +658,7 @@ bool chipyard_simif_t::handle_cache_access(reg_t addr, size_t len,
       }
     }
   }
-  
+
 #define SETIDX(ADDR) ((ADDR >> 6) & (n_sets - 1))
   uint64_t setidx = SETIDX(addr);
   uint64_t offset = addr & (64 - 1);
@@ -829,9 +911,14 @@ bool chipyard_simif_t::dcache_c(uint64_t* address, uint64_t* source, int* param,
 }
 
 bool chipyard_simif_t::mmio_store(reg_t addr, size_t len, const uint8_t* bytes) {
+  if (addr >= tcm_base && addr < tcm_base + tcm_size) {
+    memcpy(tcm + addr - tcm_base, bytes, len);
+    return true;
+  }
+
   bool found = false;
   bool cacheable = false;
-   for (auto& r: cacheables) {
+  for (auto& r: cacheables) {
     if (addr >= r.base && addr + len <= r.base + r.size) {
       cacheable = true;
       found = true;
@@ -899,27 +986,108 @@ void chipyard_simif_t::dcache_d(uint64_t sourceid, uint64_t data[8], unsigned ch
   }
 }
 
+void chipyard_simif_t::tcm_a(uint64_t address, uint64_t data, uint32_t mask, uint32_t opcode, uint32_t size) {
+  bool load = opcode == 4;
+  uint64_t rdata = 0;
+  memcpy(&rdata, tcm + address - tcm_base, 8);
+  tcm_q.push_back(rdata);
+
+  if (!load) {
+    for (size_t i = 0; i < 8; i++) {
+      if ((mask >> i) & 1) {
+        memcpy(tcm + address - tcm_base + i, ((uint8_t*)&data) + i, 1);
+      }
+    }
+  }
+}
+
+bool chipyard_simif_t::tcm_d(uint64_t* data) {
+  if (tcm_q.size() == 0)
+    return false;
+  *data = tcm_q[0];
+  tcm_q.erase(tcm_q.begin());
+  return true;
+}
+
+#define parse_nibble(c) ((c) >= 'a' ? (c)-'a'+10 : (c)-'0')
+void chipyard_simif_t::loadmem(const char* fname) {
+  std::ifstream in(fname);
+  std::string line;
+  if (!in.is_open()) {
+    printf("SpikeTile couldn't open loadmem file %s\n", fname);
+    abort();
+  }
+  size_t fsize = 0;
+  size_t start = 0;
+  while (std::getline(in, line)) {
+    for (ssize_t i = line.length()-2, j = 0; i >= 0; i -= 2, j++) {
+      char byte = (parse_nibble(line[i]) << 4) | parse_nibble(line[i+1]);
+      ssize_t addr = (start + j) % tcm_size;
+      tcm[addr] = (uint8_t)byte;
+    }
+    start += line.length()/2;
+    fsize += line.length()/2;
+
+    if (fsize > tcm_size) {
+      fprintf(stderr, "Loadmem file is too large\n");
+      abort();
+    }
+  }
+}
+
 bool insn_should_fence(uint64_t bits) {
   uint8_t opcode = bits & 0x7f;
   return opcode == 0b0101111 || opcode == 0b0001111;
 }
 
+bool insn_is_wfi(uint64_t bits) {
+  return bits == 0x10500073;
+}
+
 void spike_thread_main(void* arg)
 {
   tile_t* tile = (tile_t*) arg;
+  processor_t* proc = tile->proc;
+  chipyard_simif_t* simif = tile->simif;
+  state_t* state = proc->get_state();
   while (true) {
     while (tile->max_insns == 0) {
       host->switch_to();
     }
     while (tile->max_insns != 0) {
       // TODO: Fences don't work
-      // uint64_t last_bits = tile->proc->get_last_bits();
-      // if (insn_should_fence(last_bits) && !tile->simif->stq_empty()) {
+      //uint64_t last_bits = proc->get_last_bits();
+      // if (insn_should_fence(last_bits) && !simif->stq_empty()) {
       //   host->switch_to();
       // }
-      tile->proc->step(1);
+      proc->step(1);
       tile->max_insns--;
-      tile->proc->get_state()->mcycle->write(tile->simif->cycle);
+      if (proc->is_waiting_for_interrupt()) {
+        if (simif->fast_clint) {
+          // uint64_t mip = state->mip->read();
+          // uint64_t mie = state->mie->read();
+          //printf("Setting MTIP %x %x %x %x %lx\n", simif->cycle, old_minstret, mip, mie,
+          //       state->pc);
+          state->mip->backdoor_write_with_mask(MIP_MTIP, MIP_MTIP);
+          tile->max_insns = tile->max_insns <= 1 ? 0 : 1;
+        } else {
+          //printf("SpikeTile in WFI\n");
+          tile->max_insns = 0;
+        }
+      }
+      if (tile->max_insns % 100 == 0) {
+        uint64_t old_minstret = state->minstret->read();
+        uint64_t tohost_addr = simif->htif ? simif->htif->get_tohost_addr() : 0;
+        uint64_t fromhost_addr = simif->htif ? simif->htif->get_fromhost_addr() : 0;
+        auto& mem_read = state->log_mem_read;
+        reg_t mem_read_addr = mem_read.empty() ? 0 : std::get<0>(mem_read[0]);
+        if ((old_minstret == state->minstret->read()) ||
+            (tohost_addr && mem_read_addr == tohost_addr) ||
+            (fromhost_addr && mem_read_addr == fromhost_addr)) {
+          tile->max_insns == 0;
+        }
+      }
+      state->mcycle->write(simif->cycle);
     }
   }
 }

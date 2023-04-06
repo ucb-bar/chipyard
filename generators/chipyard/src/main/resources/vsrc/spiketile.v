@@ -13,6 +13,8 @@ import "DPI-C" function void spike_tile(input int hartid,
                                         input string   executable,
                                         input int      icache_sourceids,
                                         input int      dcache_sourceids,
+                                        input longint  tcm_base,
+                                        input longint  tcm_size,
                                         input longint  reset_vector,
                                         input longint  ipc,
                                         input longint  cycle,
@@ -89,7 +91,18 @@ import "DPI-C" function void spike_tile(input int hartid,
                                         output int     mmio_a_size,
 
                                         input bit      mmio_d_valid,
-                                        input longint  mmio_d_data
+                                        input longint  mmio_d_data,
+
+                                        input bit      tcm_a_valid,
+                                        input longint  tcm_a_address,
+                                        input longint  tcm_a_data,
+                                        input int      tcm_a_mask,
+                                        input int      tcm_a_opcode,
+                                        input int      tcm_a_size,
+
+                                        output bit     tcm_d_valid,
+                                        input bit      tcm_d_ready,
+                                        output longint tcm_d_data
                                         );
 
 
@@ -106,7 +119,9 @@ module SpikeBlackBox #(
                       parameter READONLY_UNCACHEABLE,
                       parameter EXECUTABLE,
                       parameter ICACHE_SOURCEIDS,
-                      parameter DCACHE_SOURCEIDS )(
+                      parameter DCACHE_SOURCEIDS,
+                      parameter TCM_BASE,
+                      parameter TCM_SIZE)(
                                              input         clock,
                                              input         reset,
                                              input [63:0]  reset_vector,
@@ -185,7 +200,18 @@ module SpikeBlackBox #(
                                              output [31:0] mmio_a_size,
 
                                              input         mmio_d_valid,
-                                             input [63:0]  mmio_d_data
+                                             input [63:0]  mmio_d_data,
+
+                                             input         tcm_a_valid,
+                                             input [63:0]  tcm_a_address,
+                                             input [63:0]  tcm_a_data,
+                                             input [31:0]  tcm_a_mask,
+                                             input [31:0]  tcm_a_opcode,
+                                             input [31:0]  tcm_a_size,
+
+                                             output        tcm_d_valid,
+                                             input         tcm_d_ready,
+                                             output [63:0] tcm_d_data
  );
 
    longint                                                 __insns_retired;
@@ -257,7 +283,13 @@ module SpikeBlackBox #(
    reg [63:0]                                              __dcache_c_data_6_reg;
    reg [63:0]                                              __dcache_c_data_7_reg;
 
-
+   wire                                                    __tcm_d_ready;
+   bit                                                     __tcm_d_valid;
+   longint                                                 __tcm_d_data;
+   
+   reg                                                     __tcm_d_valid_reg;
+   reg [63:0]                                              __tcm_d_data_reg;
+   
 
 
    always @(posedge clock) begin
@@ -322,12 +354,18 @@ module SpikeBlackBox #(
          __dcache_c_data_6_reg <= 64'h0;
          __dcache_c_data_7 = 64'h0;
          __dcache_c_data_7_reg <= 64'h0;
+
+         __tcm_d_valid = 1'b0;
+         __tcm_d_valid_reg <= 1'b0;
+         __tcm_d_data = 64'h0;
+         __tcm_d_data_reg <= 64'h0;
          spike_tile_reset(HARTID);
       end else begin
          spike_tile(HARTID, ISA, PMPREGIONS,
                     ICACHE_SETS, ICACHE_WAYS, DCACHE_SETS, DCACHE_WAYS,
                     CACHEABLE, UNCACHEABLE, READONLY_UNCACHEABLE, EXECUTABLE,
                     ICACHE_SOURCEIDS, DCACHE_SOURCEIDS,
+                    TCM_BASE, TCM_SIZE,
                     reset_vector, ipc, cycle, __insns_retired,
                     debug, mtip, msip, meip, seip,
 
@@ -350,7 +388,10 @@ module SpikeBlackBox #(
                     dcache_d_data_4, dcache_d_data_5, dcache_d_data_6, dcache_d_data_7,
 
                     __mmio_a_ready, __mmio_a_valid, __mmio_a_address, __mmio_a_data, __mmio_a_store, __mmio_a_size,
-                    mmio_d_valid, mmio_d_data
+                    mmio_d_valid, mmio_d_data,
+
+                    tcm_a_valid, tcm_a_address, tcm_a_data, tcm_a_mask, tcm_a_opcode, tcm_a_size,
+                    __tcm_d_valid, __tcm_d_ready, __tcm_d_data
                     );
          __insns_retired_reg <= __insns_retired;
 
@@ -385,6 +426,10 @@ module SpikeBlackBox #(
          __mmio_a_data_reg <= __mmio_a_data;
          __mmio_a_store_reg <= __mmio_a_store;
          __mmio_a_size_reg <= __mmio_a_size;
+
+         __tcm_d_valid_reg <= __tcm_d_valid;
+         __tcm_d_data_reg <= __tcm_d_data;
+         
       end
    end // always @ (posedge clock)
    assign insns_retired = __insns_retired_reg;
@@ -424,6 +469,8 @@ module SpikeBlackBox #(
    assign mmio_a_size = __mmio_a_size_reg;
    assign __mmio_a_ready = mmio_a_ready;
 
-
+   assign tcm_d_valid = __tcm_d_valid_reg;
+   assign tcm_d_data = __tcm_d_data_reg;
+   assign __tcm_d_ready = tcm_d_ready;
 
 endmodule;

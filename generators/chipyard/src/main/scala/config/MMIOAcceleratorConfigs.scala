@@ -9,6 +9,7 @@ import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 
 // DOC include start: FFTRocketConfig
 class FFTRocketConfig extends Config(
+  new chipyard.iobinders.WithDontTouchIOBinders(false) ++              // TODO: hack around dontTouch not working in SFC
   new fftgenerator.WithFFTGenerator(numPoints=8, width=16, decPt=8) ++ // add 8-point mmio fft at the default addr (0x2400) with 16bit fixed-point numbers.
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
@@ -58,6 +59,7 @@ class LargeNVDLARocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class ManyMMIOAcceleratorRocketConfig extends Config(
+  new chipyard.iobinders.WithDontTouchIOBinders(false) ++   // TODO: hack around dontTouch not working in SFC
   new fftgenerator.WithFFTGenerator(numPoints=8, width=16, decPt=8) ++ // add 8-point mmio fft at the default addr (0x2400) with 16bit fixed-point numbers.
   new nvidia.blocks.dla.WithNVDLA("small") ++               // add a small NVDLA
   new chipyard.example.WithStreamingPassthrough ++          // use top with tilelink-controlled streaming passthrough
