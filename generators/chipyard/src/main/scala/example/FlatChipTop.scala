@@ -43,7 +43,9 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule {
   val slowClockSource = ClockSourceNode(Seq(ClockSourceParameters()))
   val pllClockSource = ClockSourceNode(Seq(ClockSourceParameters()))
 
-  // The order of the connections to clockSelector.clockNode configures what
+  // The order of the connections to clockSelector.clockNode configures the inputs
+  // of the clockSelector's clockMux. Default to using the slowClockSource,
+  // software should enable the PLL, then switch to the pllClockSource
   clockSelector.clockNode := slowClockSource
   clockSelector.clockNode := pllClockSource
 
