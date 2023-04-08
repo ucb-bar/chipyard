@@ -9,9 +9,9 @@ import chisel3._
 import chisel3.internal.sourceinfo.{SourceInfo}
 
 import freechips.rocketchip.prci._
-import freechips.rocketchip.config.{Field, Parameters}
+import org.chipsalliance.cde.config.{Field, Parameters}
 import freechips.rocketchip.devices.tilelink._
-import freechips.rocketchip.devices.debug.{HasPeripheryDebug, HasPeripheryDebugModuleImp, ExportDebug, DebugModuleKey}
+import freechips.rocketchip.devices.debug.{HasPeripheryDebug, ExportDebug, DebugModuleKey}
 import sifive.blocks.devices.uart.{HasPeripheryUART, PeripheryUARTKey}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tile._
@@ -71,6 +71,7 @@ trait CanHaveChosenInDTS { this: BaseSubsystem =>
 
 class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
   with HasTiles
+  with HasPeripheryDebug
   with CanHaveHTIF
   with CanHaveChosenInDTS
 {

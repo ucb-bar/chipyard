@@ -1,7 +1,7 @@
 package chipyard.unittest
 
 import chisel3._
-import freechips.rocketchip.config.Parameters
+import org.chipsalliance.cde.config.Parameters
 
 class TestHarness(implicit val p: Parameters) extends Module {
   val io = IO(new Bundle { val success = Output(Bool()) })

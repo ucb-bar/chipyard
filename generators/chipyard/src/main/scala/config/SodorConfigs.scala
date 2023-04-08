@@ -2,7 +2,7 @@ package chipyard
 
 import chisel3._
 
-import freechips.rocketchip.config.{Config}
+import org.chipsalliance.cde.config.{Config}
 
 class Sodor1StageConfig extends Config(
   // Create a Sodor 1-stage core

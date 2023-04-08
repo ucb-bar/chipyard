@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.experimental.{IntParam, StringParam, IO}
 import chisel3.util._
 
-import freechips.rocketchip.config.{Parameters, Field, Config}
+import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.devices.tilelink._

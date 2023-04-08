@@ -2,7 +2,6 @@ package chipyard.fpga.arty100t
 
 import chisel3._
 
-import freechips.rocketchip.devices.debug.{HasPeripheryDebug, HasPeripheryDebugModuleImp}
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem.{PeripheryBusKey}
 import freechips.rocketchip.tilelink.{TLBundle}

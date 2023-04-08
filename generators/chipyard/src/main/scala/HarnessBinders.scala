@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util._
 import chisel3.experimental.{Analog, BaseModule, DataMirror, Direction}
 
-import freechips.rocketchip.config.{Field, Config, Parameters}
+import org.chipsalliance.cde.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
 import freechips.rocketchip.devices.debug._

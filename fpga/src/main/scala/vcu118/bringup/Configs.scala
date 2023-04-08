@@ -2,7 +2,7 @@ package chipyard.fpga.vcu118.bringup
 
 import math.min
 
-import freechips.rocketchip.config.{Config, Parameters}
+import org.chipsalliance.cde.config.{Config, Parameters}
 import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet, ResourceBinding, Resource, ResourceAddress}
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.diplomacy._

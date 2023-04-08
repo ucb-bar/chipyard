@@ -3,7 +3,7 @@ package chipyard.fpga.arty
 import chisel3._
 
 import freechips.rocketchip.diplomacy.{LazyModule}
-import freechips.rocketchip.config.{Parameters}
+import org.chipsalliance.cde.config.{Parameters}
 
 import sifive.fpgashells.shell.xilinx.artyshell.{ArtyShell}
 
