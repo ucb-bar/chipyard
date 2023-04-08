@@ -4,7 +4,7 @@ import chisel3._
 
 import scala.collection.mutable.{ArrayBuffer, LinkedHashMap}
 
-import freechips.rocketchip.config.{Field, Parameters}
+import org.chipsalliance.cde.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.prci.{ClockSourceAtFreqFromPlusArg, ClockBundle, ClockBundleParameters}
 import freechips.rocketchip.util.{PlusArg}

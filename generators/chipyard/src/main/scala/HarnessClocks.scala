@@ -4,7 +4,7 @@ import chisel3._
 
 import scala.collection.mutable.{ArrayBuffer, LinkedHashMap}
 import freechips.rocketchip.diplomacy.{LazyModule}
-import freechips.rocketchip.config.{Field, Parameters, Config}
+import org.chipsalliance.cde.config.{Field, Parameters, Config}
 import freechips.rocketchip.util.{ResetCatchAndSync}
 import freechips.rocketchip.prci._
 

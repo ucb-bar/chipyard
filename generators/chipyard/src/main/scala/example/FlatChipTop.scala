@@ -2,7 +2,7 @@ package chipyard.example
 
 
 import chisel3._
-import freechips.rocketchip.config.{Field, Parameters}
+import org.chipsalliance.cde.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.prci._
 import freechips.rocketchip.util._
@@ -102,10 +102,10 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule {
     //=========================
     // JTAG/Debug
     //=========================
-    val debug = system.module.debug.get
+    val debug = system.debug.get
     // We never use the PSDIO, so tie it off on-chip
-    system.module.psd.psd.foreach { _ <> 0.U.asTypeOf(new PSDTestMode) }
-    system.module.resetctrl.map { rcio => rcio.hartIsInReset.map { _ := false.B } }
+    system.psd.psd.foreach { _ <> 0.U.asTypeOf(new PSDTestMode) }
+    system.resetctrl.map { rcio => rcio.hartIsInReset.map { _ := false.B } }
 
     // Tie off extTrigger
     debug.extTrigger.foreach { t =>

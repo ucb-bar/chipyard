@@ -4,7 +4,7 @@ import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy._
 
 // A simple config demonstrating how to set up a basic chip in Chipyard
-class ChipLikeRocketConfig extends Config(
+class ChipLikeQuadRocketConfig extends Config(
   //==================================
   // Set up TestHarness
   //==================================
