@@ -41,6 +41,8 @@ class TLClockDivider(address: BigInt, beatBytes: Int, divBits: Int = 8)(implicit
 
       // Note this is not synchronized to the output clock, which takes time to appear
       // so this is still asyncreset
+      // Stretch the reset for 40 cycles, to give enough time to reset any downstream
+      // digital logic
       sinks(i)._2.reset := ResetStretcher(sources(i).clock, asyncReset, 40).asAsyncReset
       reg
     }

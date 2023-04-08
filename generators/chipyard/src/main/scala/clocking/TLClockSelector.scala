@@ -59,6 +59,7 @@ class TLClockSelector(address: BigInt, beatBytes: Int)(implicit p: Parameters) e
       mux.io.sel        := sel
       mux.io.resetAsync := asyncReset.asAsyncReset
       sinks(i).clock := mux.io.clockOut
+      // Stretch the reset for 20 cycles, to give time to reset any downstream digital logic
       sinks(i).reset := ResetStretcher(clocks(0), asyncReset, 20).asAsyncReset
 
       reg
