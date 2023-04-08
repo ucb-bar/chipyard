@@ -3,7 +3,7 @@ package chipyard.example
 import chisel3._
 import chipyard.iobinders._
 
-import freechips.rocketchip.config._
+import org.chipsalliance.cde.config._
 import freechips.rocketchip.diplomacy.{InModuleBody}
 import barstools.iocell.chisel._
 import chipyard._

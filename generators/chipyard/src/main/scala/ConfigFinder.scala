@@ -5,7 +5,7 @@ import org.reflections.scanners.Scanners.SubTypes
 import scala.jdk.CollectionConverters._
 import scala.collection.{SortedSet}
 
-import freechips.rocketchip.config.{Config}
+import org.chipsalliance.cde.config.{Config}
 
 object ConfigFinder {
     def main(args: Array[String]) = {
