@@ -36,6 +36,8 @@ case class ClockSelNode()(implicit valName: ValName)
      uFn = { u => ClockSinkParameters() }
 )
 
+// This module adds a TileLink memory-mapped clock mux for each downstream clock domain
+// in the clock graph. The output clock/reset should be synchronized downstream
 class TLClockSelector(address: BigInt, beatBytes: Int)(implicit p: Parameters) extends LazyModule {
   val device = new SimpleDevice("clk-sel-ctrl", Nil)
   val tlNode = TLRegisterNode(Seq(AddressSet(address, 4096-1)), device, "reg/control", beatBytes=beatBytes)

@@ -13,6 +13,9 @@ class ClockWithFreq(val freqMHz: Double) extends Bundle {
   val clock = Clock()
 }
 
+// This uses synthesizable clock divisors to approximate frequency rations
+// between the requested clocks. This is currently the defualt clock generator "model",
+// as it can be used in VCS/Xcelium/Verilator/FireSim
 class WithDividerOnlyClockGenerator extends OverrideLazyIOBinder({
   (system: HasChipyardPRCI) => {
     // Connect the implicit clock
@@ -52,6 +55,10 @@ class WithDividerOnlyClockGenerator extends OverrideLazyIOBinder({
   }
 })
 
+// This uses the FakePLL, which uses a ClockAtFreq Verilog blackbox to generate
+// the requested clocks. This also adds TileLink ClockDivider and ClockSelector
+// blocks, which allow memory-mapped control of clock division, and clock muxing
+// between the FakePLL and the slow off-chip clock
 // Note: This will not simulate properly with verilator or firesim
 class WithPLLSelectorDividerClockGenerator extends OverrideLazyIOBinder({
   (system: HasChipyardPRCI) => {

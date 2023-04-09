@@ -13,6 +13,8 @@ import freechips.rocketchip.util.ElaborationArtefacts
 
 import testchipip._
 
+// This module adds a TileLink memory-mapped clock divider to the clock graph
+// The output clock/reset pairs from this module should be synchronized later
 class TLClockDivider(address: BigInt, beatBytes: Int, divBits: Int = 8)(implicit p: Parameters) extends LazyModule {
   val device = new SimpleDevice(s"clk-div-ctrl", Nil)
   val clockNode = ClockGroupIdentityNode()
