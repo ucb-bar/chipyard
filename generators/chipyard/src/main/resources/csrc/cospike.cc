@@ -5,6 +5,12 @@
 #include <svdpi.h>
 #include <sstream>
 #include <set>
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <fcntl.h>
 
 #define CLINT_BASE (0x2000000)
 #define CLINT_SIZE (0x1000)
@@ -95,6 +101,27 @@ extern "C" void cospike_cosim(long long int cycle,
     mem_t *boot_addr_reg = new mem_t(0x1000);
     uint64_t default_boot_addr = 0x80000000;
     boot_addr_reg->store(0, 8, (const uint8_t*)(&default_boot_addr));
+
+	for (auto& mem : mems) {
+		if (mem.first == info->mem0_base) {
+      std::string path_name = "chipyard-cosim-" + std::to_string(getpid());
+			ssize_t mem_size = mem.second->size();
+      int shared_fd = shm_open(path_name.c_str(), O_EXCL | O_RDWR, 0600);
+      if (shared_fd < 0) {
+        std::perror("[mm_t] shm_open for backing storage failed");
+        exit(-1);
+      }
+      uint8_t *data = (uint8_t *) mmap(
+        NULL, mem_size, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, shared_fd, 0);
+      if (data == MAP_FAILED) {
+        std::perror("[mm_t] mmap for backing storage failed");
+        exit(-1);
+      }
+			mem.second->store(0, mem_size,(const uint8_t *) data);
+      munmap(data, mem_size);
+      close(shared_fd);
+		}
+	}
 
     // Don't actually build a clint
     mem_t* clint_mem = new mem_t(CLINT_SIZE);
