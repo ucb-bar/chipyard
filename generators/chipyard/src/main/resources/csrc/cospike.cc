@@ -245,6 +245,10 @@ extern "C" void cospike_cosim(long long int cycle,
 	    // Technically this could be buggy because log_mem_read only reports vaddrs, but
 	    // no software ever should access tohost/fromhost/clint with vaddrs anyways
 	    printf("Read override %lx\n", mem_read_addr);
+      if (mem_read_addr == CLINT_BASE + 4) {
+          s->mip->backdoor_write_with_mask(MIP_MSIP, 0);
+      }
+
 	    s->XPR.write(rd, wdata);
           } else if (wdata != regwrite.second.v[0]) {
 	    printf("%d wdata mismatch reg %d %lx != %lx\n", cycle, rd, regwrite.second.v[0], wdata);
