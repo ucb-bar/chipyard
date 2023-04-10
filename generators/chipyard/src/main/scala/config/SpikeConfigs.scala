@@ -10,6 +10,13 @@ class SpikeConfig extends Config(
   new chipyard.WithNSpikeCores(1) ++
   new chipyard.config.AbstractConfig)
 
+class dmiSpikeConfig extends Config(
+  new chipyard.harness.WithSerialAdapterTiedOff ++               // don't attach an external SimSerial
+  new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
+  new chipyard.WithNSpikeCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+
 // Avoids polling on the UART registers
 class SpikeFastUARTConfig extends Config(
   new chipyard.WithNSpikeCores(1) ++

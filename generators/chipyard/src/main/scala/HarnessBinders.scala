@@ -252,7 +252,7 @@ class WithSimDebug extends OverrideHarnessBinder({
       case d: ClockedDMIIO =>
         val dtm_success = WireInit(false.B)
         when (dtm_success) { th.success := true.B }
-        val dtm = Module(new SimDTM).connect(th.buildtopClock, th.buildtopReset.asBool, d, dtm_success)
+        val dtm = Module(new TestchipSimDTM).connect(th.buildtopClock, th.buildtopReset.asBool, d, dtm_success)
       case j: JTAGChipIO =>
         val dtm_success = WireInit(false.B)
         when (dtm_success) { th.success := true.B }
@@ -262,7 +262,8 @@ class WithSimDebug extends OverrideHarnessBinder({
         j.TCK := jtag_wire.TCK
         j.TMS := jtag_wire.TMS
         j.TDI := jtag_wire.TDI
-        val jtag = Module(new SimJTAG(tickDelay=3)).connect(jtag_wire, th.buildtopClock, th.buildtopReset.asBool, ~(th.buildtopReset.asBool), dtm_success)
+        val jtag = Module(new SimJTAG(tickDelay=3))
+        jtag.connect(jtag_wire, th.buildtopClock, th.buildtopReset.asBool, ~(th.buildtopReset.asBool), dtm_success)
     }
   }
 })

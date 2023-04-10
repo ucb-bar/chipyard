@@ -2,13 +2,20 @@
 #include <riscv/processor.h>
 #include <riscv/log_file.h>
 #include <fesvr/context.h>
+#include <fesvr/htif.h>
 #include <map>
 #include <sstream>
 #include <vpi_user.h>
 #include <svdpi.h>
-#include "testchip_tsi.h"
+#include "spiketile_htif_mode.h"
 
-extern testchip_tsi_t* tsi;
+#if defined(SPIKETILE_HTIF_TSI)
+extern htif_t* tsi;
+#elif defined(SPIKETILE_HTIF_DTM)
+extern htif_t* dtm;
+#else
+#error "SpikeTile must be used with the TSI or DTM-based HTIF bringup"
+#endif
 
 enum transfer_t {
   NToB,
@@ -84,6 +91,7 @@ public:
 
   void drain_stq();
   bool stq_empty() { return st_q.size() == 0; };
+  void flush_icache();
 
   const cfg_t &get_cfg() const { return cfg; }
   const std::map<size_t, processor_t*>& get_harts() const { return harts; }
@@ -334,13 +342,20 @@ extern "C" void spike_tile(int hartid, char* isa,
   tile_t* tile = tiles[hartid];
   chipyard_simif_t* simif = tile->simif;
   processor_t* proc = tile->proc;
-  if (!simif->htif && tsi) {
-    simif->htif = (htif_t*) tsi;
-  }
+#if defined(SPIKETILE_HTIF_TSI)
+  if (!simif->htif && tsi)
+    simif->htif = tsi;
+#elif defined(SPIKETILE_HTIF_DTM)
+  if (!simif->htif && dtm)
+    simif->htif = dtm;
+#endif
 
   simif->cycle = cycle;
   if (debug) {
     proc->halt_request = proc->HR_REGULAR;
+  }
+  if (!debug && proc->halt_request != proc->HR_NONE) {
+    proc->halt_request = proc->HR_NONE;
   }
 
   proc->get_state()->mip->backdoor_write_with_mask(MIP_MTIP, mtip ? MIP_MTIP : 0);
@@ -504,6 +519,12 @@ chipyard_simif_t::chipyard_simif_t(size_t icache_ways,
   tcm = (uint8_t*)malloc(tcm_size);
 }
 
+void chipyard_simif_t::flush_icache() {
+ for (auto &w : icache) {
+    for (size_t i = 0; i < icache_sets; i++) w[i].state = NONE;
+  }
+}
+
 bool chipyard_simif_t::reservable(reg_t addr) {
   for (auto& r: cacheables) {
     if (addr >= r.base && addr < r.base + r.size) {
@@ -605,6 +626,7 @@ void chipyard_simif_t::handle_mmio_access(reg_t addr, size_t len,
   mmio_st = type == STORE;
   if (type == STORE) {
     assert(len <= 8);
+    mmio_stdata = 0;
     memcpy(&mmio_stdata, store_bytes, len);
   }
   mmio_len = len;
@@ -1075,7 +1097,16 @@ void spike_thread_main(void* arg)
           tile->max_insns = 0;
         }
       }
-      if (tile->max_insns % 100 == 0) {
+      if (state->debug_mode) {
+        // TODO: Fix. This needs to apply the same hack as rocket-chip...
+        // JALRs in debug mode should flush the ICache.
+        // There is no API to determine if a JALR was executed, so hack the
+        // pc of the JALR in the debug rom here instead.
+        if (state->pc == 0x838) {
+          simif->flush_icache();
+        }
+      }
+      if (tile->max_insns % 101 == 0) { // 101 to avoid harmonics with small loops
         uint64_t old_minstret = state->minstret->read();
         uint64_t tohost_addr = simif->htif ? simif->htif->get_tohost_addr() : 0;
         uint64_t fromhost_addr = simif->htif ? simif->htif->get_fromhost_addr() : 0;
