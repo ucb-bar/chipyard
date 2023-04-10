@@ -138,7 +138,7 @@ class WithFireSimConfigTweaks extends Config(
 class WithMinimalFireSimHighPerfConfigTweaks extends Config(
   new WithFireSimHighPerfClocking ++
   new freechips.rocketchip.subsystem.WithNoMemPort ++
-  new testchipip.WithBackingScratchpad ++
+  new testchipip.WithMbusScratchpad ++
   new WithMinimalFireSimDesignTweaks
 )
 
@@ -148,7 +148,7 @@ class WithMinimalFireSimHighPerfConfigTweaks extends Config(
 class WithMinimalAndBlockDeviceFireSimHighPerfConfigTweaks extends Config(
   new WithFireSimHighPerfClocking ++
   new freechips.rocketchip.subsystem.WithNoMemPort ++ // removes mem port for FASEDBridge to match against
-  new testchipip.WithBackingScratchpad ++ // adds backing scratchpad for memory to replace FASED model
+  new testchipip.WithMbusScratchpad ++ // adds backing scratchpad for memory to replace FASED model
   new testchipip.WithBlockDevice(true) ++ // add in block device
   new WithMinimalFireSimDesignTweaks
 )
@@ -329,7 +329,7 @@ class FireSim16LargeBoomConfig extends Config(
 class FireSimNoMemPortConfig extends Config(
   new WithDefaultFireSimBridges ++
   new freechips.rocketchip.subsystem.WithNoMemPort ++
-  new testchipip.WithBackingScratchpad ++
+  new testchipip.WithMbusScratchpad ++
   new WithFireSimConfigTweaks ++
   new chipyard.RocketConfig)
 
