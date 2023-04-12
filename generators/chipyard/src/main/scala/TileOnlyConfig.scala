@@ -78,19 +78,28 @@ class TileOnlyDigitalTop()(implicit p: Parameters)
   println(tile.name)
 
   val beatBytes = 8
-  val slaveNode = TLManagerNode(Seq(TLSlavePortParameters.v1(Seq(TLManagerParameters(
-    address = Seq(AddressSet(0x20000, 0xfff)),
-    regionType = RegionType.UNCACHED,
-    executable = true,
-    supportsArithmetic = TransferSizes(1, beatBytes),
-    supportsLogical = TransferSizes(1, beatBytes),
-    supportsGet = TransferSizes(1, beatBytes),
-    supportsPutFull = TransferSizes(1, beatBytes),
-    supportsPutPartial = TransferSizes(1, beatBytes),
-    supportsHint = TransferSizes(1, beatBytes),
-    fifoId = Some(0))), beatBytes)))
+  val slaveNode = TLManagerNode(Seq(TLSlavePortParameters.v1(
+    managers = Seq(TLManagerParameters(
+        address = Seq(AddressSet(0x20000, 0xfff)),
+        regionType = RegionType.CACHED,
+        executable = true,
+        supportsArithmetic = TransferSizes(1, beatBytes),
+        supportsLogical = TransferSizes(1, beatBytes),
+        supportsGet = TransferSizes(1, 64),
+        supportsPutFull = TransferSizes(1, 64),
+        supportsPutPartial = TransferSizes(1, 64),
+        supportsHint = TransferSizes(1, 64),
+        supportsAcquireB = TransferSizes(64, 64),
+        supportsAcquireT = TransferSizes(64, 64),
+        fifoId = Some(0))),
+    beatBytes = beatBytes,
+    endSinkId = 1,
+    minLatency = 1
+  )))
 
   slaveNode :=* tile.masterNode
+
+  println(tile.masterNode.edges)
 
    val masterNode = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLClientParameters(
       name = "my-client",
@@ -137,9 +146,6 @@ class TileOnlyDigitalTop()(implicit p: Parameters)
 class TileOnlyDigitalTopImp(outer: TileOnlyDigitalTop)(implicit p: Parameters) extends LazyModuleImp(outer) {
   println("TileOnlyDigitalTopImp")
   val rocket_tile = outer.tile.module
-
-  val reset_vector = Wire(UInt(64.W))
-  reset_vector := outer.tile.resetVectorSinkNode.bundle
 
   val (master, edge) = outer.tile.masterNode.out.head
   println(outer.tile.masterNode.outward)
