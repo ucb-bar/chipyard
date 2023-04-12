@@ -107,6 +107,7 @@ class TileOnlyDigitalTop()(implicit p: Parameters)
       requestFifo = true,
       visibility = Seq(AddressSet(0x10000, 0xffff)))))))
 
+  tile.slaveNode := masterNode
   masterNode :=* tile.slaveNode
 
   val intSinkNode = IntSinkNode(IntSinkPortSimple())
@@ -178,7 +179,9 @@ class WithTileOnlyTop extends Config((site, here, up) => {
 })
 
 class WithRawRocketTileConfig extends Config((site, here, up) => {
-  case RocketTileOnly => RocketTileParams()
+  case RocketTileOnly => RocketTileParams(
+    beuAddr = Some(BigInt("4000", 16))
+  )
   case XLen => 32
   case MaxHartIdBits => 2
 })
