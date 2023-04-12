@@ -111,8 +111,10 @@ class TileOnlyDigitalTop()(implicit p: Parameters)
   masterNode :=* tile.slaveNode
 
   val intSinkNode = IntSinkNode(IntSinkPortSimple())
+  val haltSinkNode = IntSinkNode(IntSinkPortSimple())
   val intSourceNode = IntSourceNode(IntSourcePortSimple())
   intSinkNode := tile.intOutwardNode
+  haltSinkNode := tile.haltNode
   tile.intInwardNode := intSourceNode
 
 
@@ -134,6 +136,7 @@ class TileOnlyDigitalTop()(implicit p: Parameters)
     slaveNode.makeIOs()
     masterNode.makeIOs()
     intSinkNode.makeIOs()
+    haltSinkNode.makeIOs()
     hartIdSource.makeIOs()
     // resetSource.makeIOs()
   //   resetSink.makeIOs()
