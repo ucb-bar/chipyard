@@ -7,7 +7,7 @@ import org.chipsalliance.cde.config.{Parameters, Config, Field}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.interrupts._
 import chipyard.iobinders._
-import freechips.rocketchip.tile.{RocketTileParams, RocketTile, RocketTileModuleImp, PriorityMuxHartIdFromSeq, BaseTile, XLen}
+import freechips.rocketchip.tile._
 import freechips.rocketchip.subsystem.RocketCrossingParams
 import freechips.rocketchip.tilelink._
 import testchipip._
@@ -110,12 +110,14 @@ class TileOnlyDigitalTop()(implicit p: Parameters)
   tile.hartIdNode := hartIdSource
 
   val resetSource = BundleBridgeSource(() => UInt(18.W))
-  println(tile.resetVectorNode.inward)
   tile.resetVectorNode := resetSource
   // tile.resetVectorNode.inward := resetSource
   // val resetSink = BundleBridgeSink(Some(() => UInt(64.W)))
   // tile.resetVectorSinkNode :*= resetSource
   // resetSink :=* tile.resetVectorSinkNode
+
+  val nmiSource = BundleBridgeSource(() => new NMI(18))
+  tile.nmiNode := nmiSource
 
 
   InModuleBody {
@@ -171,7 +173,8 @@ class WithTileOnlyTop extends Config((site, here, up) => {
 
 class WithRawRocketTileConfig extends Config((site, here, up) => {
   case RocketTileOnly => RocketTileParams()
-  case XLen => 8
+  case XLen => 32
+  case MaxHartIdBits => 2
 })
 
 
