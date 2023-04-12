@@ -112,13 +112,17 @@ class TileOnlyDigitalTop()(implicit p: Parameters)
 
   val intSinkNode = IntSinkNode(IntSinkPortSimple())
   val haltSinkNode = IntSinkNode(IntSinkPortSimple())
+  val ceaseSinkNode = IntSinkNode(IntSinkPortSimple())
+  val wfiSinkNode = IntSinkNode(IntSinkPortSimple())
   val intSourceNode = IntSourceNode(IntSourcePortSimple())
   intSinkNode := tile.intOutwardNode
   haltSinkNode := tile.haltNode
+  wfiSinkNode := tile.wfiNode
+  ceaseSinkNode := tile.ceaseNode
   tile.intInwardNode := intSourceNode
 
 
-  val hartIdSource = BundleBridgeSource(() => UInt(8.W))
+  val hartIdSource = BundleBridgeSource(() => UInt(2.W))
   tile.hartIdNode := hartIdSource
 
   val resetSource = BundleBridgeSource(() => UInt(18.W))
@@ -137,6 +141,8 @@ class TileOnlyDigitalTop()(implicit p: Parameters)
     masterNode.makeIOs()
     intSinkNode.makeIOs()
     haltSinkNode.makeIOs()
+    wfiSinkNode.makeIOs()
+    ceaseSinkNode.makeIOs()
     hartIdSource.makeIOs()
     // resetSource.makeIOs()
   //   resetSink.makeIOs()
