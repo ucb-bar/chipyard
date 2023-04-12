@@ -248,6 +248,21 @@ BINARY ?=
 override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(timeout_cycles)
 VERBOSE_FLAGS ?= +verbose
 sim_out_name = $(output_dir)/$(subst $() $(),_,$(notdir $(basename $(BINARY))))
+LOADMEM ?=
+LOADARCH ?=
+
+ifneq ($(LOADARCH),)
+override BINARY = $(LOADARCH)/mem.elf
+override SIM_FLAGS += +loadarch=$(LOADARCH)/loadarch
+endif
+
+ifeq ($(LOADMEM),1)
+# If LOADMEM=1, assume BINARY is the loadmem elf
+override SIM_FLAGS += +loadmem=$(BINARY)
+else ifneq ($(LOADMEM),)
+# Otherwise, assume the variable points to an elf file
+override SIM_FLAGS += +loadmem=$(LOADMEM)
+endif
 
 #########################################################################################
 # build output directory for compilation

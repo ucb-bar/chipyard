@@ -155,13 +155,8 @@ Loadmem files should be ELF files. In the most common use case, this can be the 
 
 .. code-block:: shell
 
-    make run-binary BINARY=test.riscv EXTRA_SIM_FLAGS="+loadmem=test.riscv"
-
-For convenience, special ``-loadmem`` targets are provided to automatically rely on loadmem to read in the binary.
-
-.. code-block:: shell
-
-    make run-binary-loadmem BINARY=test.riscv
+    make run-binary BINARY=test.riscv LOADMEM=test.riscv
+    make run-binary BINART=test.riscv LOADMEM=1
 
 Generating Waveforms
 -----------------------

@@ -319,24 +319,14 @@ run-fast: run-asm-tests-fast run-bmark-tests-fast
 
 #########################################################################################
 # helper rules to run simulator with fast loadmem
+# LEGACY - use LOADMEM=1 instead
 #########################################################################################
-run-binary-loadmem: check-binary
-run-binary-loadmem: $(SIM_PREREQ) | $(output_dir)
-run-binary-loadmem: run-binary
-run-binary-loadmem: override SIM_FLAGS += +loadmem=$(BINARY)
-run-binary-debug-loadmem: check-binary
-run-binary-debug-loadmem: $(SIM_DEBUG_REREQ) | $(output_dir)
-run-binary-debug-loadmem: run-binary-debug
-run-binary-debug-loadmem: override SIM_FLAGS += +loadmem=$(BINARY)
-run-binary-fast-loadmem: check-binary
-run-binary-fast-loadmem: $(SIM_PREREQ) | $(output_dir)
-run-binary-fast-loadmem: run-binary-fast
-run-binary-fast-loadmem: override SIM_FLAGS += +loadmem=$(BINARY)
-
-# Legacy targets for backwards compat
-run-binary-hex: run-binary-loadmem
-run-binary-debug-hex: run-binary-debug-loadmem
-run-binary-fast-hex: run-binary-fast-loadmem
+run-binary-hex: run-binary
+run-binary-hex: override SIM_FLAGS += +loadmem=$(BINARY)
+run-binary-debug-hex: run-binary-debug
+run-binary-debug-hex: override SIM_FLAGS += +loadmem=$(BINARY)
+run-binary-fast-hex: run-binary-fast
+run-binary-fast-hex: override SIM_FLAGS += +loadmem=$(BINARY)
 
 #########################################################################################
 # run assembly/benchmarks rules
