@@ -318,29 +318,25 @@ run-binary-debug: $(SIM_DEBUG_PREREQ) check-binary | $(output_dir)
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
 #########################################################################################
-# helper rules to run simulator with fast loadmem via hex files
+# helper rules to run simulator with fast loadmem
 #########################################################################################
-$(binary_hex): $(firstword $(BINARY)) | $(output_dir)
-	$(base_dir)/scripts/smartelf2hex.sh $(firstword $(BINARY)) > $(binary_hex)
+run-binary-loadmem: check-binary
+run-binary-loadmem: $(SIM_PREREQ) | $(output_dir)
+run-binary-loadmem: run-binary
+run-binary-loadmem: override SIM_FLAGS += +loadmem=$(BINARY)
+run-binary-debug-loadmem: check-binary
+run-binary-debug-loadmem: $(SIM_DEBUG_REREQ) | $(output_dir)
+run-binary-debug-loadmem: run-binary-debug
+run-binary-debug-loadmem: override SIM_FLAGS += +loadmem=$(BINARY)
+run-binary-fast-loadmem: check-binary
+run-binary-fast-loadmem: $(SIM_PREREQ) | $(output_dir)
+run-binary-fast-loadmem: run-binary-fast
+run-binary-fast-loadmem: override SIM_FLAGS += +loadmem=$(BINARY)
 
-run-binary-hex: check-binary
-run-binary-hex: $(SIM_PREREQ) $(binary_hex) | $(output_dir)
-run-binary-hex: run-binary
-run-binary-hex: override LOADMEM_ADDR = 80000000
-run-binary-hex: override LOADMEM = $(binary_hex)
-run-binary-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
-run-binary-debug-hex: check-binary
-run-binary-debug-hex: $(SIM_DEBUG_REREQ) $(binary_hex) | $(output_dir)
-run-binary-debug-hex: run-binary-debug
-run-binary-debug-hex: override LOADMEM_ADDR = 80000000
-run-binary-debug-hex: override LOADMEM = $(binary_hex)
-run-binary-debug-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
-run-binary-fast-hex: check-binary
-run-binary-fast-hex: $(SIM_PREREQ) $(binary_hex) | $(output_dir)
-run-binary-fast-hex: run-binary-fast
-run-binary-fast-hex: override LOADMEM_ADDR = 80000000
-run-binary-fast-hex: override LOADMEM = $(binary_hex)
-run-binary-fast-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
+# Legacy targets for backwards compat
+run-binary-hex: run-binary-loadmem
+run-binary-debug-hex: run-binary-debug-loadmem
+run-binary-fast-hex: run-binary-fast-loadmem
 
 #########################################################################################
 # run assembly/benchmarks rules
