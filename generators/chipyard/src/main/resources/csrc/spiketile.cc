@@ -3,6 +3,8 @@
 #include <riscv/log_file.h>
 #include <fesvr/context.h>
 #include <fesvr/htif.h>
+#include <fesvr/memif.h>
+#include <fesvr/elfloader.h>
 #include <map>
 #include <sstream>
 #include <vpi_user.h>
@@ -87,7 +89,7 @@ public:
   void tcm_a(uint64_t address, uint64_t data, uint32_t mask, uint32_t opcode, uint32_t size);
   bool tcm_d(uint64_t *data);
 
-  void loadmem(const char* fname);
+  void loadmem(size_t base, const char* fname);
 
   void drain_stq();
   bool stq_empty() { return st_q.size() == 0; };
@@ -117,6 +119,7 @@ public:
   bool fast_clint;
   cfg_t cfg;
   std::map<size_t, processor_t*> harts;
+  bool accessed_tofrom_host;
 private:
   bool handle_cache_access(reg_t addr, size_t len,
                            uint8_t* load_bytes,
@@ -332,7 +335,7 @@ extern "C" void spike_tile(int hartid, char* isa,
       }
     }
     if (loadmem_file != "" && tcm_size > 0)
-      simif->loadmem(loadmem_file.c_str());
+      simif->loadmem(tcm_base, loadmem_file.c_str());
 
     p->reset();
     p->get_state()->pc = reset_vector;
@@ -365,6 +368,7 @@ extern "C" void spike_tile(int hartid, char* isa,
 
   tile->max_insns = ipc;
   uint64_t pre_insns = proc->get_state()->minstret->read();
+  simif->accessed_tofrom_host = false;
   tile->spike_context.switch_to();
   *insns_retired = proc->get_state()->minstret->read() - pre_insns;
   if (simif->use_stq) {
@@ -454,6 +458,7 @@ chipyard_simif_t::chipyard_simif_t(size_t icache_ways,
       std::vector<size_t>(),
       false,
       0),
+  accessed_tofrom_host(false),
   icache_ways(icache_ways),
   icache_sets(icache_sets),
   dcache_ways(dcache_ways),
@@ -565,6 +570,12 @@ bool chipyard_simif_t::mmio_load(reg_t addr, size_t len, uint8_t* bytes) {
   bool found = false;
   bool cacheable = false;
   bool readonly = false;
+  reg_t tohost_addr = htif ? htif->get_tohost_addr() : 0;
+  reg_t fromhost_addr = htif ? htif->get_fromhost_addr() : 0;
+  if (addr == tohost_addr || addr == fromhost_addr) {
+    accessed_tofrom_host = true;
+  }
+
   if (addr >= tcm_base && addr < tcm_base + tcm_size) {
     memcpy(bytes, tcm + addr - tcm_base, len);
     return true;
@@ -600,6 +611,8 @@ bool chipyard_simif_t::mmio_load(reg_t addr, size_t len, uint8_t* bytes) {
     while (!handle_cache_access(addr, len, bytes, nullptr, LOAD)) {
       host->switch_to();
     }
+    uint64_t lddata = 0;
+    memcpy(&lddata, bytes, len);
   } else {
     handle_mmio_access(addr, len, bytes, nullptr, LOAD, readonly);
   }
@@ -933,6 +946,13 @@ bool chipyard_simif_t::dcache_c(uint64_t* address, uint64_t* source, int* param,
 }
 
 bool chipyard_simif_t::mmio_store(reg_t addr, size_t len, const uint8_t* bytes) {
+  reg_t tohost_addr = htif ? htif->get_tohost_addr() : 0;
+  reg_t fromhost_addr = htif ? htif->get_fromhost_addr() : 0;
+
+  if (addr == tohost_addr || addr == fromhost_addr) {
+    accessed_tofrom_host = true;
+  }
+
   if (addr >= tcm_base && addr < tcm_base + tcm_size) {
     memcpy(tcm + addr - tcm_base, bytes, len);
     return true;
@@ -958,6 +978,8 @@ bool chipyard_simif_t::mmio_store(reg_t addr, size_t len, const uint8_t* bytes) 
     return false;
   }
   if (cacheable) {
+    uint64_t temp = 0;
+    memcpy(&temp, bytes, len);
     if (use_stq) {
       assert(len <= 8);
       uint64_t stdata;
@@ -1031,30 +1053,28 @@ bool chipyard_simif_t::tcm_d(uint64_t* data) {
   return true;
 }
 
-#define parse_nibble(c) ((c) >= 'a' ? (c)-'a'+10 : (c)-'0')
-void chipyard_simif_t::loadmem(const char* fname) {
-  std::ifstream in(fname);
-  std::string line;
-  if (!in.is_open()) {
-    printf("SpikeTile couldn't open loadmem file %s\n", fname);
-    abort();
-  }
-  size_t fsize = 0;
-  size_t start = 0;
-  while (std::getline(in, line)) {
-    for (ssize_t i = line.length()-2, j = 0; i >= 0; i -= 2, j++) {
-      char byte = (parse_nibble(line[i]) << 4) | parse_nibble(line[i+1]);
-      ssize_t addr = (start + j) % tcm_size;
-      tcm[addr] = (uint8_t)byte;
+void chipyard_simif_t::loadmem(size_t base, const char* fname) {
+  class loadmem_memif_t : public memif_t {
+  public:
+    loadmem_memif_t(chipyard_simif_t* _simif, size_t _start) : memif_t(nullptr), simif(_simif), start(_start) {}
+    void write(addr_t taddr, size_t len, const void* src) override
+    {
+      addr_t addr = taddr - start;
+      memcpy(simif->tcm + addr, src, len);
     }
-    start += line.length()/2;
-    fsize += line.length()/2;
+    void read(addr_t taddr, size_t len, void* bytes) override {
+      assert(false);
+    }
+    endianness_t get_target_endianness() const override {
+      return endianness_little;
+    }
+  private:
+    chipyard_simif_t* simif;
+    size_t start;
+  } loadmem_memif(this, tcm_base);
 
-    if (fsize > tcm_size) {
-      fprintf(stderr, "Loadmem file is too large\n");
-      abort();
-    }
-  }
+  reg_t entry;
+  load_elf(fname, &loadmem_memif, &entry);
 }
 
 bool insn_should_fence(uint64_t bits) {
@@ -1082,18 +1102,14 @@ void spike_thread_main(void* arg)
       // if (insn_should_fence(last_bits) && !simif->stq_empty()) {
       //   host->switch_to();
       // }
+      uint64_t old_minstret = state->minstret->read();
       proc->step(1);
       tile->max_insns--;
       if (proc->is_waiting_for_interrupt()) {
         if (simif->fast_clint) {
-          // uint64_t mip = state->mip->read();
-          // uint64_t mie = state->mie->read();
-          //printf("Setting MTIP %x %x %x %x %lx\n", simif->cycle, old_minstret, mip, mie,
-          //       state->pc);
           state->mip->backdoor_write_with_mask(MIP_MTIP, MIP_MTIP);
           tile->max_insns = tile->max_insns <= 1 ? 0 : 1;
         } else {
-          //printf("SpikeTile in WFI\n");
           tile->max_insns = 0;
         }
       }
@@ -1106,17 +1122,10 @@ void spike_thread_main(void* arg)
           simif->flush_icache();
         }
       }
-      if (tile->max_insns % 101 == 0) { // 101 to avoid harmonics with small loops
-        uint64_t old_minstret = state->minstret->read();
-        uint64_t tohost_addr = simif->htif ? simif->htif->get_tohost_addr() : 0;
-        uint64_t fromhost_addr = simif->htif ? simif->htif->get_fromhost_addr() : 0;
-        auto& mem_read = state->log_mem_read;
-        reg_t mem_read_addr = mem_read.empty() ? 0 : std::get<0>(mem_read[0]);
-        if ((old_minstret == state->minstret->read()) ||
-            (tohost_addr && mem_read_addr == tohost_addr) ||
-            (fromhost_addr && mem_read_addr == fromhost_addr)) {
-          tile->max_insns == 0;
-        }
+
+      // If we get stuck in WFI, or we start polling tohost/fromhost, switch to host thread
+      if ((old_minstret == state->minstret->read()) || simif->accessed_tofrom_host) {
+        tile->max_insns = 0;
       }
       state->mcycle->write(simif->cycle);
     }
