@@ -168,8 +168,9 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
           // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
           (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi_port, edge) =>
             val memSize = sVal.memParams.size
+            val memBase = sVal.memParams.base
             val lineSize = p(CacheBlockBytes)
-            val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), edge.bundle)).suggestName("simdram")
+            val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), memBase, edge.bundle)).suggestName("simdram")
             mem.io.axi <> axi_port.bits
             mem.io.clock := axi_port.clock
             mem.io.reset := axi_port.reset
@@ -184,10 +185,12 @@ class WithBlackBoxSimMem(additionalLatency: Int = 0) extends OverrideHarnessBind
   (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
     (ports zip system.memAXI4Node.edges.in).map { case (port, edge) =>
+      // TODO FIX: This currently makes each SimDRAM contian the entire memory space
       val memSize = p(ExtMem).get.master.size
+      val memBase = p(ExtMem).get.master.base
       val lineSize = p(CacheBlockBytes)
       val clockFreq = p(MemoryBusKey).dtsFrequency.get
-      val mem = Module(new SimDRAM(memSize, lineSize, clockFreq, edge.bundle)).suggestName("simdram")
+      val mem = Module(new SimDRAM(memSize, lineSize, clockFreq, memBase, edge.bundle)).suggestName("simdram")
       mem.io.axi <> port.bits
       // Bug in Chisel implementation. See https://github.com/chipsalliance/chisel3/pull/1781
       def Decoupled[T <: Data](irr: IrrevocableIO[T]): DecoupledIO[T] = {

@@ -60,8 +60,9 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
     // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
     (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi_port, edge) =>
       val memSize = sVal.memParams.size
+      val memBase = sVal.memParams.base
       val lineSize = p(CacheBlockBytes)
-      val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), edge.bundle)).suggestName("simdram")
+      val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), memBase, edge.bundle)).suggestName("simdram")
       mem.io.axi <> axi_port.bits
       mem.io.clock := axi_port.clock
       mem.io.reset := axi_port.reset
