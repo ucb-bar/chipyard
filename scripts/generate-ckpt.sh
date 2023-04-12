@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 usage() {
     echo "Usage: $0 [OPTIONS] -- [SPIKEFLAGS]"
