@@ -14,8 +14,6 @@ import testchipip._
 
 class WithTileMasterHarness extends OverrideHarnessBinder({
   (system: HasTileMasterPort, th: HasHarnessSignalReferences, ports: Seq[HeterogeneousBag[TLBundle]]) => {
-    println("MasterHarness")
-
     ports.foreach({ port =>
       dontTouch(port)
 
