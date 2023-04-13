@@ -1,19 +1,14 @@
 package chipyard
 
 import chisel3._
-import chisel3.experimental.{IO, DataMirror}
-import chisel3.util._
 import org.chipsalliance.cde.config.{Parameters, Config, Field}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.interrupts._
-import chipyard.iobinders._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.subsystem.RocketCrossingParams
 import freechips.rocketchip.tilelink._
-import testchipip._
 
 case object RocketTileOnly extends Field[RocketTileParams]
-
 
 
 class TileOnlyTestHarness(implicit p: Parameters) extends Module {
@@ -21,34 +16,94 @@ class TileOnlyTestHarness(implicit p: Parameters) extends Module {
     val success = Output(Bool())
   })
   println("Elaborating TileOnlyTestHarness")
-  val lazyDut = LazyModule(new TileOnlyChipTop).suggestName("tileOnlyChipTop")
-  val dut = Module(lazyDut.module)
-}
 
-class TileOnlyChipTop(implicit p: Parameters) extends LazyModule
-  with BindingScope 
-  with HasIOBinders
-{
-  println("Elaborating TileOnlyChipTop")
-  lazy val lazySystem = LazyModule(p(BuildSystem)(p)).suggestName("TileOnlySystem")
-  lazy val module: LazyModuleImpLike = new LazyRawModuleImp(this) { }
+  io.success := false.B
 
-  // Do not remove this, this triggers the lazy evaluation of TileOnlyDigitalTop
-  println(lazySystem.name)
+  val lazyDut = LazyModule(p(BuildSystem)(p)).suggestName("TileOnlyDigitalTop")
+  lazy val dut = Module(lazyDut.module)
+
+
+  dut match {
+    case dt :TileOnlyDigitalTopImp =>
+      println("Tie off the IOs")
+      val tlmaster = dt.outer.tileMasterIO.head
+      dontTouch(tlmaster)
+
+      tlmaster.a.ready := false.B
+
+      tlmaster.b.valid := false.B
+      tlmaster.b.bits.opcode := 0.U
+      tlmaster.b.bits.param := 0.U
+      tlmaster.b.bits.size := 0.U
+      tlmaster.b.bits.source := 0.U
+      tlmaster.b.bits.address := 0.U
+      tlmaster.b.bits.mask := 0.U
+      tlmaster.b.bits.data := 0.U
+      tlmaster.b.bits.corrupt := false.B
+
+      tlmaster.c.ready := false.B
+
+      tlmaster.d.valid := false.B
+      tlmaster.d.bits.opcode := 0.U
+      tlmaster.d.bits.param := 0.U
+      tlmaster.d.bits.size := 0.U
+      tlmaster.d.bits.source := 0.U
+      tlmaster.d.bits.sink := 0.U
+      tlmaster.d.bits.denied := false.B
+      tlmaster.d.bits.data := 0.U
+      tlmaster.d.bits.corrupt := false.B
+
+      tlmaster.e.ready := false.B
+
+      val tlslave = dt.outer.tileSlaveIO.head
+      dontTouch(tlslave)
+      tlslave.a.valid := false.B
+      tlslave.a.bits.opcode := TLMessages.Get
+      tlslave.a.bits.param := 0.U
+      tlslave.a.bits.size := 0.U
+      tlslave.a.bits.source := 0.U
+      tlslave.a.bits.address := 0.U
+      tlslave.a.bits.mask := 0.U
+      tlslave.a.bits.data := 0.U
+      tlslave.a.bits.corrupt := false.B
+
+      tlslave.b.ready := false.B
+
+
+      tlslave.c.valid := false.B
+      tlslave.c.bits.opcode := 0.U
+      tlslave.c.bits.param := 0.U
+      tlslave.c.bits.size := 0.U
+      tlslave.c.bits.source := 0.U
+      tlslave.c.bits.address := 0.U
+      tlslave.c.bits.data := 0.U
+      tlslave.c.bits.corrupt := false.B
+
+      tlslave.d.ready := false.B
+
+      tlslave.e.valid := false.B
+      tlslave.e.bits.sink := 0.U
+
+      dontTouch(dt.outer.intSourceIO(0))
+      dontTouch(dt.outer.hartIdSourceIO(0))
+      dontTouch(dt.outer.resetVecSourceIO(0))
+      dontTouch(dt.outer.nmiSourceIO.head)
+
+      dt.outer.intSourceIO(0).asUInt := 0.U
+      dt.outer.hartIdSourceIO(0) := 0.U
+      dt.outer.resetVecSourceIO(0) := 0.U
+
+      dt.outer.nmiSourceIO.head.rnmi := false.B
+      dt.outer.nmiSourceIO.head.rnmi_interrupt_vector := 0.U
+      dt.outer.nmiSourceIO.head.rnmi_exception_vector := 0.U
+
+    case _ =>
+  }
 }
 
 class TileOnlyDigitalTop()(implicit p: Parameters)
   extends LazyModule 
-  with HasTileSlavePort
-  with HasTileMasterPort
-  with HasTileIntSinkPort
-  with HasTileIntSourcePort
-  with HasTileHaltSinkPort
-  with HasTileCeaseSinkPort
-  with HasTileWFISinkPort
-  with HasTileHartIdSourcePort
-  with HasTileResetSourcePort
-  with HasTileNMISourcePort 
+  with BindingScope
 {
   println("Elaborating TileOnlyDigitalTop")
   println(s"p(RocketTileOnly ${p(RocketTileOnly)}")
@@ -112,11 +167,22 @@ class TileOnlyDigitalTop()(implicit p: Parameters)
   val nmiSource = BundleBridgeSource(() => new NMI(18))
   tile.nmiNode := nmiSource
 
+
+  val tileMasterIO     = InModuleBody { println("inmodulebody"); masterNode.makeIOs() }
+  val tileSlaveIO      = InModuleBody { slaveNode.makeIOs() }
+  val intSinkIO        = InModuleBody { intSinkNode.makeIOs() }
+  val intSourceIO      = InModuleBody { intSourceNode.makeIOs() }
+  val haltSinkIO       = InModuleBody { haltSinkNode.makeIOs() }
+  val ceasesSinkIO     = InModuleBody { ceaseSinkNode.makeIOs() }
+  val wfiSinkIO        = InModuleBody { wfiSinkNode.makeIOs() }
+  val hartIdSourceIO   = InModuleBody { hartIdSource.makeIOs() }
+  val resetVecSourceIO = InModuleBody { resetSource.makeIOs() }
+  val nmiSourceIO      = InModuleBody { nmiSource.makeIOs() }
+
   override lazy val module = new TileOnlyDigitalTopImp(this)
 }
 
-class TileOnlyDigitalTopImp(outer: TileOnlyDigitalTop)(implicit p: Parameters) extends LazyModuleImp(outer) {
-  println("TileOnlyDigitalTopImp")
+class TileOnlyDigitalTopImp(val outer: TileOnlyDigitalTop)(implicit p: Parameters) extends LazyModuleImp(outer) {
   val rocket_tile = outer.tile.module
 
   val (master, edge) = outer.tile.masterNode.out.head
@@ -125,68 +191,7 @@ class TileOnlyDigitalTopImp(outer: TileOnlyDigitalTop)(implicit p: Parameters) e
   println(edge)
 }
 
-trait HasTileSlavePort { this: TileOnlyDigitalTop =>
-  val slave = InModuleBody {
-    slaveNode.makeIOs()
-  }
-}
-
-trait HasTileMasterPort { this :TileOnlyDigitalTop =>
-  val master = InModuleBody {
-    masterNode.makeIOs()
-  }
-}
-
-trait HasTileIntSinkPort { this: TileOnlyDigitalTop =>
-  val intSink = InModuleBody {
-    intSinkNode.makeIOs()
-  }
-}
-
-trait HasTileIntSourcePort { this: TileOnlyDigitalTop =>
-  val intSource = InModuleBody {
-    intSourceNode.makeIOs()
-  }
-}
-
-trait HasTileHaltSinkPort { this: TileOnlyDigitalTop =>
-  val halt = InModuleBody {
-    haltSinkNode.makeIOs()
-  }
-}
-
-trait HasTileCeaseSinkPort { this: TileOnlyDigitalTop =>
-  val cease = InModuleBody {
-    ceaseSinkNode.makeIOs()
-  }
-}
-
-trait HasTileWFISinkPort { this: TileOnlyDigitalTop =>
-  val wfi = InModuleBody {
-    wfiSinkNode.makeIOs()
-  }
-}
-
-trait HasTileHartIdSourcePort { this: TileOnlyDigitalTop =>
-  val hart = InModuleBody {
-    hartIdSource.makeIOs()
-  }
-}
-
-trait HasTileResetSourcePort { this: TileOnlyDigitalTop =>
-  val resetVec = InModuleBody {
-    resetSource.makeIOs()
-  }
-}
-
-trait HasTileNMISourcePort { this: TileOnlyDigitalTop =>
-  val nmi = InModuleBody {
-    nmiSource.makeIOs()
-  }
-}
-
 class WithTileOnlyConfig extends Config((site, here, up) => {
-  case BuildTop => (p: Parameters) => new TileOnlyChipTop()(p)
   case BuildSystem => (p: Parameters) => new TileOnlyDigitalTop()(p)
 })
 
@@ -200,8 +205,6 @@ class WithRawRocketTileConfig extends Config((site, here, up) => {
 
 
 class TileOnlyRocketConfig extends Config(
-  new chipyard.harness.WithTileOnlyHarnessBinders ++
-  new chipyard.iobinders.WithTileOnlyIOBinders ++
   new chipyard.WithRawRocketTileConfig ++
   new chipyard.WithTileOnlyConfig
 )

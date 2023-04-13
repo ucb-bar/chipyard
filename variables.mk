@@ -125,14 +125,14 @@ ifeq ($(SUB_PROJECT),constellation)
 endif
 ifeq ($(SUB_PROJECT),tileonly)
 	SBT_PROJECT       ?= chipyard
-	MODEL             ?= TestHarness
+	MODEL             ?= TileOnlyTestHarness
 	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= chipyard
 	CONFIG            ?= TileOnlyRocketConfig
 	CONFIG_PACKAGE    ?= chipyard
 	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
-	TOP               ?= TileOnlyChipTop
+	TOP               ?= TileOnlyDigitalTop
 endif
 
 
