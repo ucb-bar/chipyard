@@ -305,9 +305,9 @@ class SpikeBlackBox(
   addResource("/vsrc/spiketile.v")
   addResource("/csrc/spiketile.cc")
   if (use_dtm) {
-    addResource("/csrc/spiketile_dtm/spiketile_htif_mode.h")
+    addResource("/csrc/spiketile_dtm.h")
   } else {
-    addResource("/csrc/spiketile_tsi/spiketile_htif_mode.h")
+    addResource("/csrc/spiketile_tsi.h")
   }
 }
 

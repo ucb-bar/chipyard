@@ -9,14 +9,14 @@
 #include <sstream>
 #include <vpi_user.h>
 #include <svdpi.h>
-#include "spiketile_htif_mode.h"
 
-#if defined(SPIKETILE_HTIF_TSI)
+#if __has_include("spiketile_tsi.h")
+#define SPIKETILE_HTIF_TSI
 extern htif_t* tsi;
-#elif defined(SPIKETILE_HTIF_DTM)
+#endif
+#if __has_include("spiketile_dtm.h")
+#define SPIKETILE_HTIF_DTM
 extern htif_t* dtm;
-#else
-#error "SpikeTile must be used with the TSI or DTM-based HTIF bringup"
 #endif
 
 enum transfer_t {
@@ -348,7 +348,8 @@ extern "C" void spike_tile(int hartid, char* isa,
 #if defined(SPIKETILE_HTIF_TSI)
   if (!simif->htif && tsi)
     simif->htif = tsi;
-#elif defined(SPIKETILE_HTIF_DTM)
+#endif
+#if defined(SPIKETILE_HTIF_DTM)
   if (!simif->htif && dtm)
     simif->htif = dtm;
 #endif
