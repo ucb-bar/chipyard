@@ -57,7 +57,7 @@ class TileOnlyDigitalTop()(implicit p: Parameters)
   println(tile.name)
 
   val beatBytes = 8
-  val slaveNode = TLManagerNode(Seq(TLSlavePortParameters.v1(
+  val masterNode = TLManagerNode(Seq(TLSlavePortParameters.v1(
     managers = Seq(TLManagerParameters(
         address = Seq(AddressSet(0x20000, 0xfff)),
         regionType = RegionType.CACHED,
@@ -76,18 +76,17 @@ class TileOnlyDigitalTop()(implicit p: Parameters)
     minLatency = 1
   )))
 
-  slaveNode :=* tile.masterNode
+  masterNode :=* tile.masterNode
 
   println(tile.masterNode.edges)
 
-  val masterNode = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLClientParameters(
+  val slaveNode = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLClientParameters(
      name = "my-client",
      sourceId = IdRange(0, 4),
      requestFifo = true,
      visibility = Seq(AddressSet(0x10000, 0xffff)))))))
 
-  tile.slaveNode := masterNode
-  masterNode :=* tile.slaveNode
+  tile.slaveNode := slaveNode
 
   val intSinkNode = IntSinkNode(IntSinkPortSimple())
   intSinkNode := tile.intOutwardNode
@@ -201,6 +200,7 @@ class WithRawRocketTileConfig extends Config((site, here, up) => {
 
 
 class TileOnlyRocketConfig extends Config(
+  new chipyard.harness.WithTileOnlyHarnessBinders ++
   new chipyard.iobinders.WithTileOnlyIOBinders ++
   new chipyard.WithRawRocketTileConfig ++
   new chipyard.WithTileOnlyConfig

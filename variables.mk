@@ -123,6 +123,17 @@ ifeq ($(SUB_PROJECT),constellation)
 	TB                ?= TestDriver
 	TOP               ?= NoC
 endif
+ifeq ($(SUB_PROJECT),tileonly)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
+	MODEL_PACKAGE     ?= chipyard
+	CONFIG            ?= TileOnlyRocketConfig
+	CONFIG_PACKAGE    ?= chipyard
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= TestDriver
+	TOP               ?= TileOnlyChipTop
+endif
 
 
 #########################################################################################
