@@ -7,7 +7,7 @@ import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.interrupts._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.rocket._
-import freechips.rocketchip.subsystem.TileCrossingParamsLike
+import freechips.rocketchip.subsystem._
 import freechips.rocketchip.util._
 import freechips.rocketchip.prci.{ClockSinkParameters}
 
@@ -81,6 +81,7 @@ class DummyTile (val dummyParams: DummyTileParams,
      visibility = Seq(AddressSet(0x10000, 0xffff)))))))
   tlOtherMastersNode := placeholderMasterNode
   masterNode :=* tlOtherMastersNode
+  DisableMonitors { implicit p => tlSlaveXbar.node :*= slaveNode }
 
 
   // Required entry of CPU device in the device tree for interrupt purpose
@@ -109,4 +110,23 @@ class DummyTileModuleImp(outer: DummyTile) extends BaseTileModuleImp(outer)
 }
 
 
-class WithDummyTile()
+class WithDummyTile(n: Int = 1, tileParams: DummyTileParams = DummyTileParams(),
+  overrideIdOffset: Option[Int] = None) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => {
+    val prev = up(TilesLocated(InSubsystem), site)
+    val idOffset = overrideIdOffset.getOrElse(prev.size)
+    (0 until n).map { i =>
+      DummyTileAttachParams(
+        tileParams = tileParams.copy(
+          hartId = i + idOffset,
+          beuAddr = Some(BigInt("5000", 16)),
+          blockerCtrlAddr = Some(BigInt("6000", 16))
+        )
+      )
+    } ++ prev
+  }
+})
+
+class DummyTileConfig extends Config(
+  new chipyard.WithDummyTile ++
+  new chipyard.config.AbstractConfig)
