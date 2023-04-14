@@ -369,7 +369,8 @@ class WithCospike extends ComposeHarnessBinder({
       mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
       pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0),
       nharts = tiles.size,
-      bootrom = chipyardSystem.bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse("")
+      bootrom = chipyardSystem.bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse(""),
+      has_dtm = p(ExportDebug).protocols.contains(DMI) // assume that exposing clockeddmi means we will connect SimDTM
     )
     ports.map { p => p.traces.zipWithIndex.map(t => SpikeCosim(t._1, t._2, cfg)) }
   }

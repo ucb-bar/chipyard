@@ -6,6 +6,13 @@
 #include <sstream>
 #include <set>
 
+#if __has_include ("cospike_dtm.h")
+#define COSPIKE_DTM
+#include "testchip_dtm.h"
+extern testchip_dtm_t* dtm;
+bool spike_loadarch_done = false;
+#endif
+
 #define CLINT_BASE (0x2000000)
 #define CLINT_SIZE (0x1000)
 
@@ -64,7 +71,8 @@ extern "C" void cospike_cosim(long long int cycle,
                               int raise_exception,
                               int raise_interrupt,
                               unsigned long long int cause,
-                              unsigned long long int wdata)
+                              unsigned long long int wdata,
+			      int priv)
 {
   assert(info);
   if (!sim) {
@@ -168,16 +176,60 @@ extern "C" void cospike_cosim(long long int cycle,
     printf("Fromhost: %lx\n", fromhost_addr);
   }
 
+  if (priv & 0x4) { // debug
+    return;
+  }
+
   processor_t* p = sim->get_core(hartid);
   state_t* s = p->get_state();
+#ifdef COSPIKE_DTM
+  if (dtm && dtm->loadarch_done && !spike_loadarch_done) {
+    printf("Restoring spike state from testchip_dtm loadarch\n");
+    // copy the loadarch state into the cosim
+    loadarch_state_t &ls = dtm->loadarch_state[hartid];
+    s->pc  = ls.pc;
+    s->prv = ls.prv;
+#define RESTORE(CSRID, csr) s->csrmap[CSRID]->write(ls.csr);
+    RESTORE(CSR_STVEC    , stvec);
+    RESTORE(CSR_SSCRATCH , sscratch);
+    RESTORE(CSR_SEPC     , sepc);
+    RESTORE(CSR_SCAUSE   , scause);
+    RESTORE(CSR_STVAL    , stval);
+    RESTORE(CSR_SATP     , satp);
+    RESTORE(CSR_MSTATUS  , mstatus);
+    RESTORE(CSR_MEDELEG  , medeleg);
+    RESTORE(CSR_MIDELEG  , mideleg);
+    RESTORE(CSR_MIE      , mie);
+    RESTORE(CSR_MTVEC    , mtvec);
+    RESTORE(CSR_MSCRATCH , mscratch);
+    RESTORE(CSR_MEPC     , mepc);
+    RESTORE(CSR_MCAUSE   , mcause);
+    RESTORE(CSR_MTVAL    , mtval);
+    RESTORE(CSR_MIP      , mip);
+    RESTORE(CSR_MCYCLE   , mcycle);
+    RESTORE(CSR_MINSTRET , minstret);
+    for (size_t i = 0; i < 32; i++) {
+      s->XPR.write(i, ls.XPR[i]);
+      s->FPR.write(i, { (uint64_t)ls.FPR[i], (uint64_t)-1 });
+    }
+    spike_loadarch_done = true;
+    p->clear_waiting_for_interrupt();
+  }
+#endif
   uint64_t s_pc = s->pc;
+  uint64_t interrupt_cause = cause & 0x7FFFFFFFFFFFFFFF;
+  bool msip_interrupt = interrupt_cause == 0x3;
+  bool debug_interrupt = interrupt_cause == 0xe;
   if (raise_interrupt) {
     printf("%d interrupt %lx\n", cycle, cause);
-    uint64_t interrupt_cause = cause & 0x7FFFFFFFFFFFFFFF;
-    if (interrupt_cause == 3) {
+
+    if (msip_interrupt) {
       s->mip->backdoor_write_with_mask(MIP_MSIP, MIP_MSIP);
+    } else if (debug_interrupt) {
+      return;
     } else {
       printf("Unknown interrupt %lx\n", interrupt_cause);
+      abort();
     }
   }
   if (raise_exception)
@@ -189,12 +241,13 @@ extern "C" void cospike_cosim(long long int cycle,
     }
     printf("\n");
   }
-  if (valid || raise_interrupt || raise_exception)
+  if (valid || raise_interrupt || raise_exception) {
     p->step(1);
+  }
 
   if (valid) {
     if (s_pc != iaddr) {
-      printf("%d PC mismatch %lx != %lx\n", cycle, s_pc, iaddr);
+      printf("%d PC mismatch spike:%lx != dut:%lx\n", cycle, s_pc, iaddr);
       exit(1);
     }
 
@@ -247,7 +300,8 @@ extern "C" void cospike_cosim(long long int cycle,
 	    printf("Read override %lx\n", mem_read_addr);
 	    s->XPR.write(rd, wdata);
           } else if (wdata != regwrite.second.v[0]) {
-	    printf("%d wdata mismatch reg %d %lx != %lx\n", cycle, rd, regwrite.second.v[0], wdata);
+	    printf("%d wdata mismatch reg %d spike:%lx != dut:%lx addr: %lx\n",
+		   cycle, rd, regwrite.second.v[0], wdata, mem_read_addr);
 	    exit(1);
 	  }
 	}
@@ -255,4 +309,4 @@ extern "C" void cospike_cosim(long long int cycle,
     }
   }
 }
-// }
+
