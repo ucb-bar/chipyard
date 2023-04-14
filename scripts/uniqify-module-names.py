@@ -77,11 +77,7 @@ def dfs_update_modules(tree, common_fnames, visited, top_fnames, updated_modules
     new_file = os.path.join(args.gcpath, cur_file)
     assert(cur_file not in top_fnames)
 
-  if new_file is not None:
-    print(f"-- {cur_module}")
-
   for submodule_name in childs_to_update:
-    print(f"|- {submodule_name}")
     if (submodule_name + ".sv") in common_fnames:
       sh.sed("-i", f"s/\b{submodule_name}\b/{submodule_name}_Model/", new_file)
 
