@@ -243,6 +243,12 @@ $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILEL
 	$(SED) -i 's/\.\///' $(TOP_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(MODEL_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
+	$(base_dir)/scripts/uniqify-module-names.py \
+		--top-filelist $(TOP_MODS_FILELIST) \
+		--mod-filelist $(MODEL_MODS_FILELIST) \
+		--gen-collateral-path $(GEN_COLLATERAL_DIR) \
+		--model-hier-json $(MFC_MODEL_HRCHY_JSON) \
+		--dut $(TOP)
 	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
 
 $(TOP_BB_MODS_FILELIST) $(MODEL_BB_MODS_FILELIST) &: $(BB_MODS_FILELIST) $(MFC_TOP_HRCHY_JSON) $(FINAL_ANNO_FILE)
