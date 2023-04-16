@@ -134,6 +134,17 @@ ifeq ($(SUB_PROJECT),tileonly)
 	TB                ?= TestDriver
 	TOP               ?= TileOnlyDigitalTop
 endif
+ifeq ($(SUB_PROJECT),dummytile)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= DummyTileTestHarness
+	VLOG_MODEL        ?= $(MODEL)
+	MODEL_PACKAGE     ?= chipyard
+	CONFIG            ?= DummyTileConfig
+	CONFIG_PACKAGE    ?= chipyard
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= TestDriver
+	TOP               ?= DummyChipTop
+endif
 
 
 #########################################################################################

@@ -122,6 +122,26 @@ class DummyTile (val dummyParams: DummyTileParams,
 
 class DummyTileModuleImp(outer: DummyTile) extends BaseTileModuleImp(outer)
 {
+  outer.masterPunchThroughIO.head.a.ready := false.B
+  outer.masterPunchThroughIO.head.d.valid := false.B
+  outer.masterPunchThroughIO.head.c.ready := false.B
+  dontTouch(outer.masterPunchThroughIO.head)
+  dontTouch(outer.beuSlavePunchThroughIO.head)
+  dontTouch(outer.beuIntSlavePunchThroughIO(0))
+  dontTouch(outer.masterBlockerPunchThroughIO.head)
+
+  // TODO : instantiate bridges here
+
+// outer.masterPunchThroughIO.head.a.valid := false.B
+// outer.masterPunchThroughIO.head.a.bits.opcode := 0.U
+// outer.masterPunchThroughIO.head.a.bits.params := 0.U
+// outer.masterPunchThroughIO.head.a.bits.size := 0.U
+// outer.masterPunchThroughIO.head.a.bits.source := 0.U
+// outer.masterPunchThroughIO.head.a.bits.addr := 0.U
+// outer.masterPunchThroughIO.head.a.bits.user := 0.U
+// outer.masterPunchThroughIO.head.a.bits.mask := 0.U
+// outer.masterPunchThroughIO.head.a.bits.data := 0.U
+// outer.masterPunchThroughIO.head.a.bits.corrupt := false.B
 }
 
 
@@ -131,7 +151,7 @@ class DummyTileModuleImp(outer: DummyTile) extends BaseTileModuleImp(outer)
 
 
 class DummyChipTop(implicit p: Parameters) extends LazyModule {
-  override lazy val desiredName = "ChipTop"
+  override lazy val desiredName = "DummyChipTop"
   val system = LazyModule(p(BuildSystem)(p)).suggestName("system").asInstanceOf[DigitalTop]
 
   //========================
@@ -258,42 +278,42 @@ class DummyChipTopImpl(outer: DummyChipTop) extends LazyRawModuleImp(outer) {
   val (uart_pad, uartIOCells) = IOCell.generateIOFromSignal(outer.system.module.uart.head, "uart_0", p(IOCellKey))
 
 
-  private val cur_tile: BaseTile = outer.system.tiles(0) // assume single tile for now
-  val masterPunchThroughIO :Option[HeterogeneousBag[TLBundle]] = cur_tile match {
-    case tile: DummyTile =>
-      val masterPunchThroughIO = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](tile.masterPunchThroughIO))
-      masterPunchThroughIO <> tile.masterPunchThroughIO
-      Some(masterPunchThroughIO)
-    case _ => None
-  }
+// private val cur_tile: BaseTile = outer.system.tiles(0) // assume single tile for now
+// val masterPunchThroughIO :Option[HeterogeneousBag[TLBundle]] = cur_tile match {
+// case tile: DummyTile =>
+// val masterPunchThroughIO = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](tile.masterPunchThroughIO))
+// masterPunchThroughIO <> tile.masterPunchThroughIO
+// Some(masterPunchThroughIO)
+// case _ => None
+// }
 
-  val beuSlavePunchThroughIO :Option[HeterogeneousBag[TLBundle]] = cur_tile match {
-    case tile: DummyTile =>
-      println("beuSlavePunchThroughIO")
-      val beuSlavePunchThroughIO = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](tile.beuSlavePunchThroughIO))
-      tile.beuSlavePunchThroughIO <> beuSlavePunchThroughIO
-      Some(beuSlavePunchThroughIO)
-    case _ => None
-  }
+// val beuSlavePunchThroughIO :Option[HeterogeneousBag[TLBundle]] = cur_tile match {
+// case tile: DummyTile =>
+// println("beuSlavePunchThroughIO")
+// val beuSlavePunchThroughIO = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](tile.beuSlavePunchThroughIO))
+// tile.beuSlavePunchThroughIO <> beuSlavePunchThroughIO
+// Some(beuSlavePunchThroughIO)
+// case _ => None
+// }
 
-  val beuIntSlavePunchThroughIO :Option[HeterogeneousBag[Vec[Bool]]] = cur_tile match {
-    case tile: DummyTile =>
-      println("beuIntSlavePunchThroughIO")
-      val beuIntSlavePunchThroughIO = IO(Input(DataMirror.internal.chiselTypeClone[HeterogeneousBag[Vec[Bool]]](tile.beuIntSlavePunchThroughIO)))
-      println("IO generated")
-      tile.beuIntSlavePunchThroughIO <> beuIntSlavePunchThroughIO
-      println("connected")
-      Some(beuIntSlavePunchThroughIO)
-    case _ => None
-  }
+// val beuIntSlavePunchThroughIO :Option[HeterogeneousBag[Vec[Bool]]] = cur_tile match {
+// case tile: DummyTile =>
+// println("beuIntSlavePunchThroughIO")
+// val beuIntSlavePunchThroughIO = IO(Input(DataMirror.internal.chiselTypeClone[HeterogeneousBag[Vec[Bool]]](tile.beuIntSlavePunchThroughIO)))
+// println("IO generated")
+// tile.beuIntSlavePunchThroughIO <> beuIntSlavePunchThroughIO
+// println("connected")
+// Some(beuIntSlavePunchThroughIO)
+// case _ => None
+// }
 
-  val masterBlockerPunchThroughIO :Option[HeterogeneousBag[TLBundle]] = cur_tile match {
-    case tile: DummyTile =>
-      val masterBlockerPunchThroughIO = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](tile.masterBlockerPunchThroughIO))
-      tile.masterBlockerPunchThroughIO <> masterBlockerPunchThroughIO
-      Some(masterBlockerPunchThroughIO)
-    case _ => None
-  }
+// val masterBlockerPunchThroughIO :Option[HeterogeneousBag[TLBundle]] = cur_tile match {
+// case tile: DummyTile =>
+// val masterBlockerPunchThroughIO = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](tile.masterBlockerPunchThroughIO))
+// tile.masterBlockerPunchThroughIO <> masterBlockerPunchThroughIO
+// Some(masterBlockerPunchThroughIO)
+// case _ => None
+// }
 }
 
 class DummyTileTestHarness(implicit p: Parameters) extends Module {
@@ -362,29 +382,29 @@ class DummyTileTestHarness(implicit p: Parameters) extends Module {
   // UART
   UARTAdapter.connect(Seq(dut.uart_pad))
 
-  dut.masterPunchThroughIO.map { mio =>
-    val tl = mio.head
-    tl.a.valid := false.B
+// dut.masterPunchThroughIO.map { mio =>
+// val tl = mio.head
+// tl.a.valid := false.B
 
-    dontTouch(tl)
-  }
+// dontTouch(tl)
+// }
 
-  dut.beuSlavePunchThroughIO.map { sio =>
-    val tl = sio.head
-    tl.a.ready := false.B
-    dontTouch(tl)
-  }
+// dut.beuSlavePunchThroughIO.map { sio =>
+// val tl = sio.head
+// tl.a.ready := false.B
+// dontTouch(tl)
+// }
 
-  dut.beuIntSlavePunchThroughIO.map { sio =>
-    sio(0).asUInt := 0.U
-    dontTouch(sio)
-  }
+// dut.beuIntSlavePunchThroughIO.map { sio =>
+// sio(0).asUInt := 0.U
+// dontTouch(sio)
+// }
 
-  dut.masterBlockerPunchThroughIO.map { sio =>
-    val tl = sio.head
-    tl.a.ready := false.B
-    dontTouch(tl)
-  }
+// dut.masterBlockerPunchThroughIO.map { sio =>
+// val tl = sio.head
+// tl.a.ready := false.B
+// dontTouch(tl)
+// }
 }
 
 
@@ -410,36 +430,3 @@ class DummyTileConfig extends Config(
   new chipyard.config.WithSerialTLBackingMemory ++
   new chipyard.config.AbstractConfig
 )
-
-
-
-// trait CanHaveDummyTileBoundaryPunchthrough { this: HasTiles =>
-// val dummyTileIO = this.tiles.map { tile => tile match {
-// case dummy: DummyTile =>
-// InModuleBody {
-// dummy.placeholderMasterNode.makeIOs()
-// val masterIO = dummy.placeholderMasterNode.makeIOs()
-// val beuIntSlaveIO = dummy.bus_error_unit_intNode.makeIOs()
-// val beuSlaveIO = dummy.bus_error_unit_node.makeIOs()
-// val masterBlockerControlIO = dummy.tile_master_blocker_controlNode.makeIOs()
-// (masterIO, masterBlockerControlIO, beuIntSlaveIO, beuSlaveIO)
-// }
-// case _: _ =>
-// }
-// }
-// }
-
-
-// class WithDummyTilePunchthrough extends OverrideIOBinder({
-// (system: CanHaveDummyTileBoundaryPunchthrough) => {
-// system.dummyTileIO.map { mio =>
-// val io = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](mio.asInstanceOf[TLBundle]))
-// mio.asInstanceOf[TLBundle] <> io
-// }
-// }
-// })
-
-
-// class WithDummyTileHarness extends OverrideHarnessBinder({
-// (system: CanHaveDummyTileBoundaryPunchthrough, th: HasHarnessSignalReferences, ports: Seq[
-// })
