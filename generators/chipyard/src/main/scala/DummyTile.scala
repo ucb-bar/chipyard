@@ -49,6 +49,28 @@ case class DummyTileParams(
   }
 }
 
+class TileNodeWrapperModule(dummyParams: DummyTileParams, xBytes: Int, masterPortBeatBytes: Int)(implicit p: Parameters) extends LazyModule {
+  val bus_error_unit_device = new SimpleDevice("bus-error-unit", Seq("sifive,buserror0"))
+  val bus_error_unit_intNode = IntSourceNode(IntSourcePortSimple(resources = bus_error_unit_device.int))
+  val placeholderMasterNode = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLClientParameters(
+    name = "placeholder-master-node",
+    sourceId = IdRange(0, 31),
+    supportsProbe = TransferSizes(64, 64)
+  )))))
+
+
+  override lazy val module = new TileNodeWrapperModuleImp(this)
+
+  val masterPunchThroughIO = InModuleBody { placeholderMasterNode.makeIOs() }
+  val beuIntSlavePunchThroughIO = InModuleBody { println("beuIntSlavePunchThroughIO in InModuleBody"); bus_error_unit_intNode.makeIOs() }
+}
+
+class TileNodeWrapperModuleImp(outer: TileNodeWrapperModule) extends LazyModuleImp(outer) {
+  dontTouch(outer.masterPunchThroughIO.head)
+  dontTouch(outer.beuIntSlavePunchThroughIO(0))
+}
+
+
 
 class DummyTile (val dummyParams: DummyTileParams,
                  crossing: ClockCrossingType,
@@ -66,34 +88,15 @@ class DummyTile (val dummyParams: DummyTileParams,
   val slaveNode = TLIdentityNode()
   val masterNode = visibilityNode
 
-  val bus_error_unit_device = new SimpleDevice("bus-error-unit", Seq("sifive,buserror0"))
-  val bus_error_unit_intNode = IntSourceNode(IntSourcePortSimple(resources = bus_error_unit_device.int))
-  val bus_error_unit_node = TLRegisterNode(
-    address = Seq(AddressSet(dummyParams.beuAddr.get, 4096 - 1)),
-    device = bus_error_unit_device,
-    beatBytes = p(XLen) / 8)
-  intOutwardNode := bus_error_unit_intNode
-  connectTLSlave(bus_error_unit_node, xBytes)
+  val nodeWrapper = LazyModule(new TileNodeWrapperModule(dummyParams, xBytes, masterPortBeatBytes))
 
+  intOutwardNode := nodeWrapper.bus_error_unit_intNode
+  // connectTLSlave(nodeWrapper.bus_error_unit_node, xBytes)
+  // connectTLSlave(nodeWrapper.tile_master_blocker_controlNode, xBytes)
 
-  val tile_master_blocker_device = new SimpleDevice("basic-bus-blocker", Seq("sifive,basic-bus-blocker0"))
-  val tmb_params = BasicBusBlockerParams(dummyParams.blockerCtrlAddr.get, xBytes, masterPortBeatBytes, deadlock = true)
-  val tile_master_blocker_controlNode = TLRegisterNode(
-    address = Seq(AddressSet(tmb_params.controlAddress, tmb_params.controlSize - 1)),
-    device = tile_master_blocker_device,
-    beatBytes = tmb_params.controlBeatBytes)
-  connectTLSlave(tile_master_blocker_controlNode, xBytes)
-
-  // TODO : Add some random master node here & call makeIOs()?
-  val placeholderMasterNode = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLClientParameters(
-     name = "my-client",
-     sourceId = IdRange(0, 4),
-     requestFifo = true,
-     visibility = Seq(AddressSet(0x10000, 0xffff)))))))
-  tlOtherMastersNode := placeholderMasterNode
+  tlOtherMastersNode := nodeWrapper.placeholderMasterNode
   masterNode :=* tlOtherMastersNode
   DisableMonitors { implicit p => tlSlaveXbar.node :*= slaveNode }
-
 
   // Required entry of CPU device in the device tree for interrupt purpose
   val cpuDevice: SimpleDevice = new SimpleDevice("cpu", Seq("ucb-bar,dummy", "riscv")) {
@@ -112,37 +115,80 @@ class DummyTile (val dummyParams: DummyTileParams,
     Resource(cpuDevice, "reg").bind(ResourceAddress(hartId))
   }
 
-  val masterPunchThroughIO = InModuleBody { placeholderMasterNode.makeIOs() }
-  val beuSlavePunchThroughIO = InModuleBody { bus_error_unit_node.makeIOs() }
-  val beuIntSlavePunchThroughIO = InModuleBody { println("beuIntSlavePunchThroughIO in InModuleBody"); bus_error_unit_intNode.makeIOs() }
-  val masterBlockerPunchThroughIO = InModuleBody { tile_master_blocker_controlNode.makeIOs() }
-
   override lazy val module = new DummyTileModuleImp(outer = this)
 }
 
 class DummyTileModuleImp(outer: DummyTile) extends BaseTileModuleImp(outer)
 {
-  outer.masterPunchThroughIO.head.a.ready := false.B
-  outer.masterPunchThroughIO.head.d.valid := false.B
-  outer.masterPunchThroughIO.head.c.ready := false.B
-  dontTouch(outer.masterPunchThroughIO.head)
-  dontTouch(outer.beuSlavePunchThroughIO.head)
-  dontTouch(outer.beuIntSlavePunchThroughIO(0))
-  dontTouch(outer.masterBlockerPunchThroughIO.head)
-
   // TODO : instantiate bridges here
+  val bridge_emulator_blackbox = Module(new BridgeEmulatorBlackBox)
+  bridge_emulator_blackbox.io.clock := clock
+  bridge_emulator_blackbox.io.reset := reset.asBool
 
-// outer.masterPunchThroughIO.head.a.valid := false.B
-// outer.masterPunchThroughIO.head.a.bits.opcode := 0.U
-// outer.masterPunchThroughIO.head.a.bits.params := 0.U
-// outer.masterPunchThroughIO.head.a.bits.size := 0.U
-// outer.masterPunchThroughIO.head.a.bits.source := 0.U
-// outer.masterPunchThroughIO.head.a.bits.addr := 0.U
-// outer.masterPunchThroughIO.head.a.bits.user := 0.U
-// outer.masterPunchThroughIO.head.a.bits.mask := 0.U
-// outer.masterPunchThroughIO.head.a.bits.data := 0.U
-// outer.masterPunchThroughIO.head.a.bits.corrupt := false.B
+  val master_a = outer.nodeWrapper.masterPunchThroughIO.head.a
+  master_a.valid := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_valid
+  master_a.bits.opcode := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_opcode
+  master_a.bits.param := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_param
+  master_a.bits.size := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_size
+  master_a.bits.source := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_source
+  master_a.bits.address := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_address
+  master_a.bits.mask := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_mask
+  master_a.bits.data := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_data
+  master_a.bits.corrupt := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_corrupt
+
+  val master_d = outer.nodeWrapper.masterPunchThroughIO.head.d
+  master_d.ready := bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_ready
+
+  val beu_int = outer.nodeWrapper.beuIntSlavePunchThroughIO
+  beu_int(0).asUInt := bridge_emulator_blackbox.io.beuIntSlavePunchThroughIO_0_0
+
+  bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_ready := master_a.ready
+  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_valid := master_d.valid
+  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_opcode := master_d.bits.opcode
+  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_param := master_d.bits.param
+  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_size := master_d.bits.size
+  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_source := master_d.bits.source
+  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_sink := master_d.bits.sink
+  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_denied := master_d.bits.denied
+  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_data := master_d.bits.data
+  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_corrupt := master_d.bits.corrupt
+
+
+  bridge_emulator_blackbox.io.hartid := outer.hartIdSinkNode.bundle
 }
+
+
+class BridgeEmulatorBlackBox extends BlackBox with HasBlackBoxResource {
+  val io = IO(new Bundle {
+    val clock = Input(Clock())
+    val reset = Input(Bool())
+    val masterPunchThroughIO_0_a_valid = Output(Bool())
+    val masterPunchThroughIO_0_a_bits_opcode = Output(UInt(3.W))
+    val masterPunchThroughIO_0_a_bits_param = Output(UInt(3.W))
+    val masterPunchThroughIO_0_a_bits_size = Output(UInt(4.W))
+    val masterPunchThroughIO_0_a_bits_source = Output(UInt(2.W))
+    val masterPunchThroughIO_0_a_bits_address = Output(UInt(32.W))
+    val masterPunchThroughIO_0_a_bits_mask = Output(UInt(8.W))
+    val masterPunchThroughIO_0_a_bits_data = Output(UInt(64.W))
+    val masterPunchThroughIO_0_a_bits_corrupt = Output(Bool())
+    val masterPunchThroughIO_0_d_ready = Output(Bool())
+    val beuIntSlavePunchThroughIO_0_0 = Output(Bool())
+    val masterPunchThroughIO_0_a_ready = Input(Bool())
+    val masterPunchThroughIO_0_d_valid = Input(Bool())
+    val masterPunchThroughIO_0_d_bits_opcode = Input(UInt(3.W))
+    val masterPunchThroughIO_0_d_bits_param = Input(UInt(2.W))
+    val masterPunchThroughIO_0_d_bits_size = Input(UInt(4.W))
+    val masterPunchThroughIO_0_d_bits_source = Input(UInt(2.W))
+    val masterPunchThroughIO_0_d_bits_sink = Input(UInt(3.W))
+    val masterPunchThroughIO_0_d_bits_denied = Input(Bool())
+    val masterPunchThroughIO_0_d_bits_data = Input(UInt(64.W))
+    val masterPunchThroughIO_0_d_bits_corrupt = Input(Bool())
+    val hartid = Input(UInt(2.W))
+  })
+
+  addResource("/vsrc/BridgeEmulatorBlackBox.v")
+}
+
 
 
 
@@ -276,44 +322,6 @@ class DummyChipTopImpl(outer: DummyChipTop) extends LazyRawModuleImp(outer) {
   //==========================
   require(outer.system.uarts.size == 1)
   val (uart_pad, uartIOCells) = IOCell.generateIOFromSignal(outer.system.module.uart.head, "uart_0", p(IOCellKey))
-
-
-// private val cur_tile: BaseTile = outer.system.tiles(0) // assume single tile for now
-// val masterPunchThroughIO :Option[HeterogeneousBag[TLBundle]] = cur_tile match {
-// case tile: DummyTile =>
-// val masterPunchThroughIO = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](tile.masterPunchThroughIO))
-// masterPunchThroughIO <> tile.masterPunchThroughIO
-// Some(masterPunchThroughIO)
-// case _ => None
-// }
-
-// val beuSlavePunchThroughIO :Option[HeterogeneousBag[TLBundle]] = cur_tile match {
-// case tile: DummyTile =>
-// println("beuSlavePunchThroughIO")
-// val beuSlavePunchThroughIO = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](tile.beuSlavePunchThroughIO))
-// tile.beuSlavePunchThroughIO <> beuSlavePunchThroughIO
-// Some(beuSlavePunchThroughIO)
-// case _ => None
-// }
-
-// val beuIntSlavePunchThroughIO :Option[HeterogeneousBag[Vec[Bool]]] = cur_tile match {
-// case tile: DummyTile =>
-// println("beuIntSlavePunchThroughIO")
-// val beuIntSlavePunchThroughIO = IO(Input(DataMirror.internal.chiselTypeClone[HeterogeneousBag[Vec[Bool]]](tile.beuIntSlavePunchThroughIO)))
-// println("IO generated")
-// tile.beuIntSlavePunchThroughIO <> beuIntSlavePunchThroughIO
-// println("connected")
-// Some(beuIntSlavePunchThroughIO)
-// case _ => None
-// }
-
-// val masterBlockerPunchThroughIO :Option[HeterogeneousBag[TLBundle]] = cur_tile match {
-// case tile: DummyTile =>
-// val masterBlockerPunchThroughIO = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](tile.masterBlockerPunchThroughIO))
-// tile.masterBlockerPunchThroughIO <> masterBlockerPunchThroughIO
-// Some(masterBlockerPunchThroughIO)
-// case _ => None
-// }
 }
 
 class DummyTileTestHarness(implicit p: Parameters) extends Module {
@@ -381,30 +389,6 @@ class DummyTileTestHarness(implicit p: Parameters) extends Module {
 
   // UART
   UARTAdapter.connect(Seq(dut.uart_pad))
-
-// dut.masterPunchThroughIO.map { mio =>
-// val tl = mio.head
-// tl.a.valid := false.B
-
-// dontTouch(tl)
-// }
-
-// dut.beuSlavePunchThroughIO.map { sio =>
-// val tl = sio.head
-// tl.a.ready := false.B
-// dontTouch(tl)
-// }
-
-// dut.beuIntSlavePunchThroughIO.map { sio =>
-// sio(0).asUInt := 0.U
-// dontTouch(sio)
-// }
-
-// dut.masterBlockerPunchThroughIO.map { sio =>
-// val tl = sio.head
-// tl.a.ready := false.B
-// dontTouch(tl)
-// }
 }
 
 
