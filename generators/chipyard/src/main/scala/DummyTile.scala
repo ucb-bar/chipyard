@@ -23,11 +23,12 @@ import chipyard.{BuildTop}
 
 
 case class DummyTileAttachParams(
-  tileParams: DummyTileParams
+  tileParams: DummyTileParams,
+  crossingParams: RocketCrossingParams
 ) extends CanAttachTile {
   type TileType = DummyTile
-  val lookup = PriorityMuxHartIdFromSeq(Seq(tileParams))
-  val crossingParams = RocketCrossingParams()
+// val lookup = PriorityMuxHartIdFromSeq(Seq(tileParams))
+// val crossingParams = RocketCrossingParams()
 }
 
 case class DummyTileParams(
@@ -50,8 +51,6 @@ case class DummyTileParams(
 }
 
 class TileNodeWrapperModule(dummyParams: DummyTileParams, xBytes: Int, masterPortBeatBytes: Int)(implicit p: Parameters) extends LazyModule {
-  val bus_error_unit_device = new SimpleDevice("bus-error-unit", Seq("sifive,buserror0"))
-  val bus_error_unit_intNode = IntSourceNode(IntSourcePortSimple(resources = bus_error_unit_device.int))
   val placeholderMasterNode = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLClientParameters(
     name = "placeholder-master-node",
     sourceId = IdRange(0, 31),
@@ -62,12 +61,10 @@ class TileNodeWrapperModule(dummyParams: DummyTileParams, xBytes: Int, masterPor
   override lazy val module = new TileNodeWrapperModuleImp(this)
 
   val masterPunchThroughIO = InModuleBody { placeholderMasterNode.makeIOs() }
-  val beuIntSlavePunchThroughIO = InModuleBody { println("beuIntSlavePunchThroughIO in InModuleBody"); bus_error_unit_intNode.makeIOs() }
 }
 
 class TileNodeWrapperModuleImp(outer: TileNodeWrapperModule) extends LazyModuleImp(outer) {
   dontTouch(outer.masterPunchThroughIO.head)
-  dontTouch(outer.beuIntSlavePunchThroughIO(0))
 }
 
 
@@ -90,7 +87,7 @@ class DummyTile (val dummyParams: DummyTileParams,
 
   val nodeWrapper = LazyModule(new TileNodeWrapperModule(dummyParams, xBytes, masterPortBeatBytes))
 
-  intOutwardNode := nodeWrapper.bus_error_unit_intNode
+//  intOutwardNode := nodeWrapper.bus_error_unit_intNode
 
   tlOtherMastersNode := nodeWrapper.placeholderMasterNode
   masterNode :=* tlOtherMastersNode
@@ -114,16 +111,17 @@ class DummyTile (val dummyParams: DummyTileParams,
   }
 
   override lazy val module = new DummyTileModuleImp(outer = this)
-
-//  val wfi = InModuleBody {
-//    println("instantiating IO for wfi")
-//    wfiNode.makeIOs()
-//  }
 }
 
 class DummyTileModuleImp(outer: DummyTile) extends BaseTileModuleImp(outer)
 {
   // TODO : instantiate bridges here
+
+  val int_bundle = Wire(new TileInterrupts)
+  outer.decodeCoreInterrupts(int_bundle)
+  dontTouch(outer.intSinkNode.in(0)._1)
+  println(outer.intSinkNode.in(0))
+  // TODO : bridge_emulator_blackbox.io.lin := int_bundle.???
 
   val bridge_emulator_blackbox = Module(new BridgeEmulatorBlackBox)
   bridge_emulator_blackbox.io.clock := clock
@@ -143,9 +141,6 @@ class DummyTileModuleImp(outer: DummyTile) extends BaseTileModuleImp(outer)
   val master_d = outer.nodeWrapper.masterPunchThroughIO.head.d
   master_d.ready := bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_ready
 
-  val beu_int = outer.nodeWrapper.beuIntSlavePunchThroughIO
-  beu_int(0).asUInt := bridge_emulator_blackbox.io.beuIntSlavePunchThroughIO_0_0
-
   bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_ready := master_a.ready
   bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_valid := master_d.valid
   bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_opcode := master_d.bits.opcode
@@ -162,6 +157,13 @@ class DummyTileModuleImp(outer: DummyTile) extends BaseTileModuleImp(outer)
 
   val (wfi, _) = outer.wfiNode.out(0)
   wfi(0) := RegNext(bridge_emulator_blackbox.io.wfi)
+
+  int_bundle.debug := bridge_emulator_blackbox.io.debug
+  int_bundle.mtip  := bridge_emulator_blackbox.io.mtip
+  int_bundle.msip  := bridge_emulator_blackbox.io.msip
+  int_bundle.meip  := bridge_emulator_blackbox.io.meip
+  int_bundle.seip.get  := bridge_emulator_blackbox.io.seip // HACK : Assume that seip is defined in the default config
+  dontTouch(int_bundle)
 }
 
 
@@ -192,6 +194,11 @@ class BridgeEmulatorBlackBox extends BlackBox with HasBlackBoxResource {
     val masterPunchThroughIO_0_d_bits_corrupt = Input(Bool())
     val hartid = Input(UInt(2.W))
     val wfi = Output(Bool())
+    val debug = Output(Bool())
+    val mtip = Output(Bool())
+    val msip = Output(Bool())
+    val meip = Output(Bool())
+    val seip = Output(Bool())
   })
 
   addResource("/vsrc/BridgeEmulatorBlackBox.v")
@@ -408,10 +415,9 @@ class WithDummyTile(n: Int = 1, tileParams: DummyTileParams = DummyTileParams(),
     (0 until n).map { i =>
       DummyTileAttachParams(
         tileParams = tileParams.copy(
-          hartId = i + idOffset,
-          beuAddr = Some(BigInt("5000", 16)),
-          blockerCtrlAddr = Some(BigInt("6000", 16))
-        )
+          hartId = i + idOffset
+        ),
+        crossingParams = RocketCrossingParams()
       )
     } ++ prev
   }
