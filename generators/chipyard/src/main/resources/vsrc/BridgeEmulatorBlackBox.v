@@ -24,7 +24,8 @@ module BridgeEmulatorBlackBox
   input        masterPunchThroughIO_0_d_bits_denied,
   input [63:0] masterPunchThroughIO_0_d_bits_data,
   input        masterPunchThroughIO_0_d_bits_corrupt,
-  input [1:0]  hartid
+  input [1:0]  hartid,
+  output       wfi
 );
 
 // Do nothing??
@@ -38,5 +39,6 @@ assign  masterPunchThroughIO_0_a_bits_mask = 0;
 assign  masterPunchThroughIO_0_a_bits_data = 0;
 assign  masterPunchThroughIO_0_a_bits_corrupt = 0;
 assign masterPunchThroughIO_0_d_ready = 0;
+assign wfi = 0;
 
 endmodule

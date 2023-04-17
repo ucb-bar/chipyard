@@ -91,8 +91,6 @@ class DummyTile (val dummyParams: DummyTileParams,
   val nodeWrapper = LazyModule(new TileNodeWrapperModule(dummyParams, xBytes, masterPortBeatBytes))
 
   intOutwardNode := nodeWrapper.bus_error_unit_intNode
-  // connectTLSlave(nodeWrapper.bus_error_unit_node, xBytes)
-  // connectTLSlave(nodeWrapper.tile_master_blocker_controlNode, xBytes)
 
   tlOtherMastersNode := nodeWrapper.placeholderMasterNode
   masterNode :=* tlOtherMastersNode
@@ -116,11 +114,17 @@ class DummyTile (val dummyParams: DummyTileParams,
   }
 
   override lazy val module = new DummyTileModuleImp(outer = this)
+
+//  val wfi = InModuleBody {
+//    println("instantiating IO for wfi")
+//    wfiNode.makeIOs()
+//  }
 }
 
 class DummyTileModuleImp(outer: DummyTile) extends BaseTileModuleImp(outer)
 {
   // TODO : instantiate bridges here
+
   val bridge_emulator_blackbox = Module(new BridgeEmulatorBlackBox)
   bridge_emulator_blackbox.io.clock := clock
   bridge_emulator_blackbox.io.reset := reset.asBool
@@ -155,6 +159,9 @@ class DummyTileModuleImp(outer: DummyTile) extends BaseTileModuleImp(outer)
 
 
   bridge_emulator_blackbox.io.hartid := outer.hartIdSinkNode.bundle
+
+  val (wfi, _) = outer.wfiNode.out(0)
+  wfi(0) := RegNext(bridge_emulator_blackbox.io.wfi)
 }
 
 
@@ -184,6 +191,7 @@ class BridgeEmulatorBlackBox extends BlackBox with HasBlackBoxResource {
     val masterPunchThroughIO_0_d_bits_data = Input(UInt(64.W))
     val masterPunchThroughIO_0_d_bits_corrupt = Input(Bool())
     val hartid = Input(UInt(2.W))
+    val wfi = Output(Bool())
   })
 
   addResource("/vsrc/BridgeEmulatorBlackBox.v")
