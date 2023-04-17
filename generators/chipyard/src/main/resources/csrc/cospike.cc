@@ -189,7 +189,14 @@ extern "C" void cospike_cosim(long long int cycle,
     loadarch_state_t &ls = dtm->loadarch_state[hartid];
     s->pc  = ls.pc;
     s->prv = ls.prv;
+    s->csrmap[CSR_MSTATUS]->write(s->csrmap[CSR_MSTATUS]->read() | MSTATUS_VS | MSTATUS_XS | MSTATUS_FS);
 #define RESTORE(CSRID, csr) s->csrmap[CSRID]->write(ls.csr);
+    RESTORE(CSR_FCSR     , fcsr);
+    RESTORE(CSR_VSTART   , vstart);
+    RESTORE(CSR_VXSAT    , vxsat);
+    RESTORE(CSR_VXRM     , vxrm);
+    RESTORE(CSR_VCSR     , vcsr);
+    RESTORE(CSR_VTYPE    , vtype);
     RESTORE(CSR_STVEC    , stvec);
     RESTORE(CSR_SSCRATCH , sscratch);
     RESTORE(CSR_SEPC     , sepc);
@@ -208,9 +215,18 @@ extern "C" void cospike_cosim(long long int cycle,
     RESTORE(CSR_MIP      , mip);
     RESTORE(CSR_MCYCLE   , mcycle);
     RESTORE(CSR_MINSTRET , minstret);
+    if (ls.VLEN != p->VU.VLEN) {
+      printf("VLEN mismatch loadarch: $d != spike: $d\n", ls.VLEN, p->VU.VLEN);
+      abort();
+    }
+    if (ls.ELEN != p->VU.ELEN) {
+      printf("ELEN mismatch loadarch: $d != spike: $d\n", ls.ELEN, p->VU.ELEN);
+      abort();
+    }
     for (size_t i = 0; i < 32; i++) {
       s->XPR.write(i, ls.XPR[i]);
       s->FPR.write(i, { (uint64_t)ls.FPR[i], (uint64_t)-1 });
+      memcpy(p->VU.reg_file + i * ls.VLEN / 8, ls.VPR[i], ls.VLEN / 8);
     }
     spike_loadarch_done = true;
     p->clear_waiting_for_interrupt();
