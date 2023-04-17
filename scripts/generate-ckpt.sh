@@ -11,6 +11,7 @@ usage() {
     echo "  -b <elf>   : Binary to run in spike"
     echo "  -p <pc>    : PC to take checkpoint at [default 0x80000000]"
     echo "  -c <cycles>: Cycles after PC to take checkpoint at [default 0]"
+    echo "  -m <isa>   : ISA to pass to spike for checkpoint generation [defualt rv64gc]"
     exit "$1"
 }
 
@@ -18,6 +19,7 @@ NHARTS=1
 BINARY=""
 PC="0x80000000"
 CYCLES=0
+ISA="rv64gc"
 while [ "$1" != "" ];
 do
     case $1 in
@@ -35,6 +37,9 @@ do
 	-c )
 	    shift
 	    CYCLES=$1 ;;
+        -m )
+            shift
+            ISA=$1 ;;
 	* )
 	    error "Invalid option $1"
 	    usage 1 ;;
@@ -42,7 +47,7 @@ do
     shift
 done
 BASEMEM="$((0x80000000)):$((0x10000000))"
-SPIKEFLAGS="-p$NHARTS --pmpregions=0 --isa=rv64gc -m$BASEMEM"
+SPIKEFLAGS="-p$NHARTS --pmpregions=0 --isa=$ISA -m$BASEMEM"
 
 BASENAME=$(basename -- $BINARY)
 DIRNAME=$BASENAME.$PC.$CYCLES.loadarch
@@ -54,6 +59,7 @@ LOADARCH_FILE=$DIRNAME/loadarch
 RAWMEM_ELF=$DIRNAME/raw.elf
 LOADMEM_ELF=$DIRNAME/mem.elf
 CMDS_FILE=$DIRNAME/cmds_tmp.txt
+SPIKECMD_FILE=$DIRNAME/spikecmd.sh
 
 echo "Generating state capture spike interactive commands in $CMDS_FILE"
 echo "until pc 0 $PC" >> $CMDS_FILE
@@ -64,6 +70,12 @@ do
     echo "pc $h" >> $CMDS_FILE
     echo "priv $h" >> $CMDS_FILE
     echo "reg $h fcsr" >> $CMDS_FILE
+
+    echo "reg $h vstart" >> $CMDS_FILE
+    echo "reg $h vxsat" >> $CMDS_FILE
+    echo "reg $h vxrm" >> $CMDS_FILE
+    echo "reg $h vcsr" >> $CMDS_FILE
+    echo "reg $h vtype" >> $CMDS_FILE
 
     echo "reg $h stvec" >> $CMDS_FILE
     echo "reg $h sscratch" >> $CMDS_FILE
@@ -97,13 +109,17 @@ do
     do
 	echo "reg $h $xr" >> $CMDS_FILE
     done
+    echo "vreg $h" >> $CMDS_FILE
 done
 echo "quit" >> $CMDS_FILE
 
 #cat $CMDS_FILE
 
+echo "spike -d --debug-cmd=$CMDS_FILE $SPIKEFLAGS $BINARY" > $SPIKECMD_FILE
+
 echo "Capturing state at checkpoint to spikeout"
 spike -d --debug-cmd=$CMDS_FILE $SPIKEFLAGS $BINARY 2> $LOADARCH_FILE
+
 
 echo "Finding tohost/fromhost in elf file"
 TOHOST=$(riscv64-unknown-elf-nm $BINARY | grep tohost | head -c 16)
