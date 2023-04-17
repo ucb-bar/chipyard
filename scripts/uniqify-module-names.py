@@ -75,7 +75,6 @@ def dfs_update_modules(tree, common_fnames, visited, top_fnames, updated_modules
   # has some child to update, but new_file wasn't generated
   if (new_file is None) and len(childs_to_update) > 0:
     new_file = os.path.join(args.gcpath, cur_file)
-    assert(cur_file not in top_fnames)
 
   for submodule_name in childs_to_update:
     if (submodule_name + ".sv") in common_fnames:
