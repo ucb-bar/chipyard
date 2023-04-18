@@ -145,6 +145,17 @@ ifeq ($(SUB_PROJECT),dummytile)
 	TB                ?= TestDriver
 	TOP               ?= DummyChipTop
 endif
+ifeq ($(SUB_PROJECT),flatchip)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= FlatTestHarness
+	VLOG_MODEL        ?= $(MODEL)
+	MODEL_PACKAGE     ?= chipyard.example
+	CONFIG            ?= TLBackingMemoryRocketConfig
+	CONFIG_PACKAGE    ?= chipyard
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= TestDriver
+	TOP               ?= ChipTop
+endif
 
 
 #########################################################################################
