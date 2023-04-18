@@ -111,6 +111,10 @@ class DummyTile (val dummyParams: DummyTileParams,
   }
 
   override lazy val module = new DummyTileModuleImp(outer = this)
+
+  InModuleBody {
+    dontTouch(intSinkNode.in(0)._1)
+  }
 }
 
 class DummyTileModuleImp(outer: DummyTile) extends BaseTileModuleImp(outer)
@@ -119,8 +123,6 @@ class DummyTileModuleImp(outer: DummyTile) extends BaseTileModuleImp(outer)
 
   val int_bundle = Wire(new TileInterrupts)
   outer.decodeCoreInterrupts(int_bundle)
-  dontTouch(outer.intSinkNode.in(0)._1)
-  println(outer.intSinkNode.in(0))
 
   val bridge_emulator_blackbox = Module(new BridgeEmulatorBlackBox)
   bridge_emulator_blackbox.io.clock := clock
