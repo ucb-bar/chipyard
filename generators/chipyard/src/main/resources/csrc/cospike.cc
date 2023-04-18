@@ -70,7 +70,7 @@ extern "C" void cospike_cosim(long long int cycle,
   if (!sim) {
     printf("Configuring spike cosim\n");
     std::vector<mem_cfg_t> mem_cfg;
-    std::vector<int> hartids;
+    std::vector<size_t> hartids;
     mem_cfg.push_back(mem_cfg_t(info->mem0_base, info->mem0_size));
     for (int i = 0; i < info->nharts; i++)
       hartids.push_back(i);

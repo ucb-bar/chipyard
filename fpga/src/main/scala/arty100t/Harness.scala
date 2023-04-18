@@ -3,7 +3,7 @@ package chipyard.fpga.arty100t
 import chisel3._
 import chisel3.util._
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.config.{Parameters}
+import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink.{TLClientNode, TLBlockDuringReset}
 
 import sifive.fpgashells.shell.xilinx._

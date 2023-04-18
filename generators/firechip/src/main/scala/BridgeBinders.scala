@@ -6,9 +6,9 @@ import chisel3._
 import chisel3.experimental.annotate
 import chisel3.util.experimental.BoringUtils
 
-import freechips.rocketchip.config.{Field, Config, Parameters}
+import org.chipsalliance.cde.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
-import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebugModuleImp}
+import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebug}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile.{RocketTile}

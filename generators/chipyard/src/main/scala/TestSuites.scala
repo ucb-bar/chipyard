@@ -4,7 +4,7 @@ import scala.collection.mutable.{LinkedHashSet}
 
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile.{XLen, TileParams}
-import freechips.rocketchip.config.{Parameters, Field, Config}
+import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.system.{TestGeneration, RegressionTestSuite, RocketTestSuite}
 
 /**

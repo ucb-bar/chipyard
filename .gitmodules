@@ -34,12 +34,6 @@
 [submodule "generators/sha3"]
 	path = generators/sha3
 	url = https://github.com/ucb-bar/sha3.git
-[submodule "vlsi/hammer-cadence-plugins"]
-	path = vlsi/hammer-cadence-plugins
-	url = https://github.com/ucb-bar/hammer-cadence-plugins.git
-[submodule "vlsi/hammer-synopsys-plugins"]
-	path = vlsi/hammer-synopsys-plugins
-	url = https://github.com/ucb-bar/hammer-synopsys-plugins.git
 [submodule "vlsi/hammer-mentor-plugins"]
 	path = vlsi/hammer-mentor-plugins
 	url = https://github.com/ucb-bar/hammer-mentor-plugins.git
@@ -79,9 +73,6 @@
 [submodule "fpga/fpga-shells"]
 	path = fpga/fpga-shells
 	url = https://github.com/chipsalliance/rocket-chip-fpga-shells.git
-[submodule "tools/api-config-chipsalliance"]
-	path = tools/api-config-chipsalliance
-	url = https://github.com/chipsalliance/api-config-chipsalliance.git
 [submodule "tools/rocket-dsp-utils"]
 	path = tools/rocket-dsp-utils
 	url = https://github.com/ucb-bar/rocket-dsp-utils
@@ -127,3 +118,6 @@
 [submodule "generators/mempress"]
 	path = generators/mempress
 	url = https://github.com/ucb-bar/mempress.git
+[submodule "tools/cde"]
+	path = tools/cde
+	url = https://github.com/chipsalliance/cde.git

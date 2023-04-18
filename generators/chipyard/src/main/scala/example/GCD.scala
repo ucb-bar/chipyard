@@ -5,7 +5,7 @@ import chisel3.util._
 import chisel3.experimental.{IntParam, BaseModule}
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.subsystem.BaseSubsystem
-import freechips.rocketchip.config.{Parameters, Field, Config}
+import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper.{HasRegMap, RegField}
 import freechips.rocketchip.tilelink._
