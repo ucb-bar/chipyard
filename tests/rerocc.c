@@ -83,8 +83,20 @@ int main(void) {
     rerocc_fence(i);
   }
 
+  while (!rerocc_acquire(4, 0x10)) {}
+  rerocc_assign(0x2, 4);
+  rerocc_cfg_offsetter_by_tracker(4, test_string, 0x1000, 0);
+  rerocc_fence(4);
+  r += charcount_test();
+  rerocc_cfg_epochrate_by_tracker(4, 100, 10, false);
+  rerocc_fence(4);
+  for (int i = 0; i < 10; i++) {
+    r += charcount_test();
+  }  uint64_t reqs = rerocc_read_cfg_tracker(4, REROCC_CFG_LAST_REQS);
+  printf("reqs is %lu\n", reqs);
+
   // Release all the trackers
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 16; i++) {
     rerocc_release(i);
   }
 

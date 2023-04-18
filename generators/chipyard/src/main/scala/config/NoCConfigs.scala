@@ -226,6 +226,7 @@ class RocketReRoCCNoCConfig extends Config(
         "ReRoCC 1" -> 2,
         "ReRoCC 2" -> 3,
         "ReRoCC 3" -> 4,
+        "ReRoCC 4" -> 5,
         "serial-tl" -> 1),
       outNodeMapping = ListMap(
         "system[0]" -> 5,
@@ -245,7 +246,8 @@ class RocketReRoCCNoCConfig extends Config(
       0 -> 1,
       1 -> 2,
       2 -> 3,
-      3 -> 4),
+      3 -> 4,
+      4 -> 5),
     nocParams = NoCParams(
       topology = UnidirectionalTorus1D(9),
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(4) { UserVirtualChannelParams(4) }),
