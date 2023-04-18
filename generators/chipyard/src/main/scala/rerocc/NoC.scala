@@ -3,7 +3,7 @@ package chipyard.rerocc
 import chisel3._
 import chisel3.util._
 import chisel3.internal.sourceinfo.SourceInfo
-import freechips.rocketchip.config._
+import org.chipsalliance.cde.config._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.rocket._
