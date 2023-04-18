@@ -7,6 +7,7 @@ import freechips.rocketchip.interrupts._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.subsystem.RocketCrossingParams
 import freechips.rocketchip.tilelink._
+import freechips.rocketchip.rocket._
 
 case object RocketTileOnly extends Field[RocketTileParams]
 
@@ -26,11 +27,29 @@ class TileOnlyTestHarness(implicit p: Parameters) extends Module {
   dut match {
     case dt :TileOnlyDigitalTopImp =>
       println("Tie off the IOs")
+
+
       val tlmaster = dt.outer.tileMasterIO.head
+
+
+      dontTouch(dt.outer.intSourceIO0(0))
+      dontTouch(dt.outer.intSourceIO1(0))
+      dontTouch(dt.outer.intSourceIO2(0))
+      dontTouch(dt.outer.intSourceIO3(0))
+      dontTouch(dt.outer.intSourceIO4(0))
+      dontTouch(dt.outer.hartIdSourceIO(0))
+      dontTouch(dt.outer.wfiSinkIO(0))
       dontTouch(tlmaster)
 
-      tlmaster.a.ready := false.B
+      dt.outer.intSourceIO0(0).asUInt := 0.U
+      dt.outer.intSourceIO1(0).asUInt := 0.U
+      dt.outer.intSourceIO2(0).asUInt := 0.U
+      dt.outer.intSourceIO3(0).asUInt := 0.U
+      dt.outer.intSourceIO4(0).asUInt := 0.U
+      dt.outer.hartIdSourceIO(0) := 0.U
 
+
+      tlmaster.a.ready := false.B
       tlmaster.b.valid := false.B
       tlmaster.b.bits.opcode := 0.U
       tlmaster.b.bits.param := 0.U
@@ -40,9 +59,7 @@ class TileOnlyTestHarness(implicit p: Parameters) extends Module {
       tlmaster.b.bits.mask := 0.U
       tlmaster.b.bits.data := 0.U
       tlmaster.b.bits.corrupt := false.B
-
       tlmaster.c.ready := false.B
-
       tlmaster.d.valid := false.B
       tlmaster.d.bits.opcode := 0.U
       tlmaster.d.bits.param := 0.U
@@ -52,50 +69,7 @@ class TileOnlyTestHarness(implicit p: Parameters) extends Module {
       tlmaster.d.bits.denied := false.B
       tlmaster.d.bits.data := 0.U
       tlmaster.d.bits.corrupt := false.B
-
       tlmaster.e.ready := false.B
-
-      val tlslave = dt.outer.tileSlaveIO.head
-      dontTouch(tlslave)
-      tlslave.a.valid := false.B
-      tlslave.a.bits.opcode := TLMessages.Get
-      tlslave.a.bits.param := 0.U
-      tlslave.a.bits.size := 0.U
-      tlslave.a.bits.source := 0.U
-      tlslave.a.bits.address := 0.U
-      tlslave.a.bits.mask := 0.U
-      tlslave.a.bits.data := 0.U
-      tlslave.a.bits.corrupt := false.B
-
-      tlslave.b.ready := false.B
-
-
-      tlslave.c.valid := false.B
-      tlslave.c.bits.opcode := 0.U
-      tlslave.c.bits.param := 0.U
-      tlslave.c.bits.size := 0.U
-      tlslave.c.bits.source := 0.U
-      tlslave.c.bits.address := 0.U
-      tlslave.c.bits.data := 0.U
-      tlslave.c.bits.corrupt := false.B
-
-      tlslave.d.ready := false.B
-
-      tlslave.e.valid := false.B
-      tlslave.e.bits.sink := 0.U
-
-      dontTouch(dt.outer.intSourceIO(0))
-      dontTouch(dt.outer.hartIdSourceIO(0))
-      dontTouch(dt.outer.resetVecSourceIO(0))
-      dontTouch(dt.outer.nmiSourceIO.head)
-
-      dt.outer.intSourceIO(0).asUInt := 0.U
-      dt.outer.hartIdSourceIO(0) := 0.U
-      dt.outer.resetVecSourceIO(0) := 0.U
-
-      dt.outer.nmiSourceIO.head.rnmi := false.B
-      dt.outer.nmiSourceIO.head.rnmi_interrupt_vector := 0.U
-      dt.outer.nmiSourceIO.head.rnmi_exception_vector := 0.U
 
     case _ =>
   }
@@ -109,7 +83,16 @@ class TileOnlyDigitalTop()(implicit p: Parameters)
   println(s"p(RocketTileOnly ${p(RocketTileOnly)}")
 
   val tile = LazyModule(new RocketTile(p(RocketTileOnly), RocketCrossingParams(), PriorityMuxHartIdFromSeq(Seq(p(RocketTileOnly)))))
-  println(tile.name)
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Diplomatic nodes required to punch out tile IOs
+  ////////////////////////////////////////////////////////////////////////////
+  val wfiSinkNode = IntSinkNode(IntSinkPortSimple())
+  wfiSinkNode := tile.wfiNode
+
+  val hartIdSource = BundleBridgeSource(() => UInt(2.W))
+  tile.hartIdNode := hartIdSource
 
   val beatBytes = 8
   val masterNode = TLManagerNode(Seq(TLSlavePortParameters.v1(
@@ -133,62 +116,58 @@ class TileOnlyDigitalTop()(implicit p: Parameters)
 
   masterNode :=* tile.masterNode
 
-  println(tile.masterNode.edges)
+  val intSourceNode0 = IntSourceNode(IntSourcePortSimple())
+  val intSourceNode1 = IntSourceNode(IntSourcePortSimple())
+  val intSourceNode2 = IntSourceNode(IntSourcePortSimple())
+  val intSourceNode3 = IntSourceNode(IntSourcePortSimple())
+  val intSourceNode4 = IntSourceNode(IntSourcePortSimple())
+  tile.intInwardNode := intSourceNode0
+  tile.intInwardNode := intSourceNode1
+  tile.intInwardNode := intSourceNode2
+  tile.intInwardNode := intSourceNode3
+  tile.intInwardNode := intSourceNode4
 
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Placeholder nodes, will be optimized out by the firrtl compiler
+  ////////////////////////////////////////////////////////////////////////////
   val slaveNode = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLClientParameters(
-     name = "my-client",
-     sourceId = IdRange(0, 4),
-     requestFifo = true,
-     visibility = Seq(AddressSet(0x10000, 0xffff)))))))
-
+    name = "my-client",
+    sourceId = IdRange(0, 4),
+    requestFifo = true,
+    visibility = Seq(AddressSet(0x10000, 0xffff)))))))
   tile.slaveNode := slaveNode
 
   val intSinkNode = IntSinkNode(IntSinkPortSimple())
   intSinkNode := tile.intOutwardNode
 
-  val intSourceNode = IntSourceNode(IntSourcePortSimple())
-  tile.intInwardNode := intSourceNode
-
   val haltSinkNode = IntSinkNode(IntSinkPortSimple())
-  haltSinkNode := tile.haltNode
-
   val ceaseSinkNode = IntSinkNode(IntSinkPortSimple())
-  ceaseSinkNode := tile.ceaseNode
-
-  val wfiSinkNode = IntSinkNode(IntSinkPortSimple())
-  wfiSinkNode := tile.wfiNode
-
-  val hartIdSource = BundleBridgeSource(() => UInt(2.W))
-  tile.hartIdNode := hartIdSource
-
   val resetSource = BundleBridgeSource(() => UInt(18.W))
-  tile.resetVectorNode := resetSource
-
   val nmiSource = BundleBridgeSource(() => new NMI(18))
+  haltSinkNode := tile.haltNode
+  ceaseSinkNode := tile.ceaseNode
+  tile.resetVectorNode := resetSource
   tile.nmiNode := nmiSource
 
+  ////////////////////////////////////////////////////////////////////////////
 
-  val tileMasterIO     = InModuleBody { println("inmodulebody"); masterNode.makeIOs() }
-  val tileSlaveIO      = InModuleBody { slaveNode.makeIOs() }
-  val intSinkIO        = InModuleBody { intSinkNode.makeIOs() }
-  val intSourceIO      = InModuleBody { intSourceNode.makeIOs() }
-  val haltSinkIO       = InModuleBody { haltSinkNode.makeIOs() }
-  val ceasesSinkIO     = InModuleBody { ceaseSinkNode.makeIOs() }
-  val wfiSinkIO        = InModuleBody { wfiSinkNode.makeIOs() }
+  val intSourceIO0      = InModuleBody { intSourceNode0.makeIOs() }
+  val intSourceIO1      = InModuleBody { intSourceNode1.makeIOs() }
+  val intSourceIO2      = InModuleBody { intSourceNode2.makeIOs() }
+  val intSourceIO3      = InModuleBody { intSourceNode3.makeIOs() }
+  val intSourceIO4      = InModuleBody { intSourceNode4.makeIOs() }
   val hartIdSourceIO   = InModuleBody { hartIdSource.makeIOs() }
-  val resetVecSourceIO = InModuleBody { resetSource.makeIOs() }
-  val nmiSourceIO      = InModuleBody { nmiSource.makeIOs() }
+  val wfiSinkIO        = InModuleBody { wfiSinkNode.makeIOs() }
+  val tileMasterIO     = InModuleBody { masterNode.makeIOs() }
 
   override lazy val module = new TileOnlyDigitalTopImp(this)
 }
 
-class TileOnlyDigitalTopImp(val outer: TileOnlyDigitalTop)(implicit p: Parameters) extends LazyModuleImp(outer) {
-  val rocket_tile = outer.tile.module
+class TileOnlyDigitalTopImp(val outer: TileOnlyDigitalTop)(implicit p: Parameters)
+  extends LazyModuleImp(outer) {
 
-  val (master, edge) = outer.tile.masterNode.out.head
-  println(outer.tile.masterNode.outward)
-  println(master)
-  println(edge)
+  val rocket_tile = outer.tile.module
 }
 
 class WithTileOnlyConfig extends Config((site, here, up) => {
@@ -197,12 +176,13 @@ class WithTileOnlyConfig extends Config((site, here, up) => {
 
 class WithRawRocketTileConfig extends Config((site, here, up) => {
   case RocketTileOnly => RocketTileParams(
+    // Placeholder, required to complete the diplomatic graph
     beuAddr = Some(BigInt("4000", 16))
   )
-  case XLen => 32
+  case PgLevels => 3
+  case XLen => 64
   case MaxHartIdBits => 2
 })
-
 
 class TileOnlyRocketConfig extends Config(
   new chipyard.WithRawRocketTileConfig ++
