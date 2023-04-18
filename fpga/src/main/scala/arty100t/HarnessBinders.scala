@@ -25,7 +25,8 @@ class WithArty100TUARTTSI(uartBaudRate: BigInt = 115200) extends OverrideHarness
     ports.map({ port =>
       val ath = th.asInstanceOf[Arty100THarness]
       val freq = p(PeripheryBusKey).dtsFrequency.get
-      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+      val bits = port.bits
+      port.clock := th.buildtopClock
       withClockAndReset(th.buildtopClock, th.buildtopReset) {
         val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
         val uart_to_serial = Module(new UARTToSerial(
