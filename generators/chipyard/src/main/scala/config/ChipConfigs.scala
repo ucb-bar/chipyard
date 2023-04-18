@@ -39,7 +39,6 @@ class ChipLikeQuadRocketConfig extends Config(
   new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++  // Add Async crossing between PBUS and CBUS
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++  // Add Async crossings between backside of L2 and MBUS
   new testchipip.WithAsynchronousSerialSlaveCrossing ++                      // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
-  new testchipip.WithSerialTLAsyncResetQueue ++                              // Add Async reset queue to block ready while in reset
 
   new chipyard.config.AbstractConfig)
 
