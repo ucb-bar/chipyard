@@ -30,9 +30,8 @@ class ChipLikeQuadRocketConfig extends Config(
   //==================================
   new chipyard.clocking.WithPLLSelectorDividerClockGenerator ++   // Use a PLL-based clock selector/divider generator structure
 
-  // Create two clock groups, uncore and fbus, in addition to the tile clock groups
-  new chipyard.clocking.WithClockGroupsCombinedByName("uncore", "implicit", "sbus", "mbus", "cbus", "system_bus") ++
-  new chipyard.clocking.WithClockGroupsCombinedByName("fbus", "fbus", "pbus") ++
+  // Create the uncore clock group
+  new chipyard.clocking.WithClockGroupsCombinedByName("uncore", "implicit", "sbus", "mbus", "cbus", "system_bus", "fbus", "pbus") ++
 
   // Set up the crossings
   new chipyard.config.WithFbusToSbusCrossingType(AsynchronousCrossing()) ++  // Add Async crossing between SBUS and FBUS

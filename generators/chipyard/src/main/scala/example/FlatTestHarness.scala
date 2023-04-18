@@ -49,7 +49,8 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
     val memOverSerialTLClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
     memOverSerialTLClockBundle.clock := clock
     memOverSerialTLClockBundle.reset := reset
-    val serial_bits = SerialAdapter.asyncQueue(dut.serial_tl_pad, clock, reset)
+    val serial_bits = dut.serial_tl_pad.bits
+    dut.serial_tl_pad.clock := clock
     val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(
       lazyDut.system.serdesser.get,
       serial_bits,
