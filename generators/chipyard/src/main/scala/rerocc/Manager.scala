@@ -434,11 +434,14 @@ class ReRoCCManagerTile()(implicit p: Parameters) extends LazyModule {
     dcacheArb.io.requestor(1) <> dcIF.io.cache
 
     require(rocc.nPTWPorts <= 1)
+    offsetter.module.io.ptw := DontCare
     for (i <- 0 until rocc.nPTWPorts) {
-      ptw.io.requestor(1+i) <> rocc.module.io.ptw(i)
       if (i == 0) {
-        offsetter.module.io.ptw_in := ptw.io.requestor(1+i).resp
-        rocc.module.io.ptw(i).resp := offsetter.module.io.ptw_out
+        ptw.io.requestor(1+i) <> offsetter.module.io.ptw.req_out
+        offsetter.module.io.ptw.req_in <> rocc.module.io.ptw(i)
+
+        offsetter.module.io.ptw.resp_in := ptw.io.requestor(1+i).resp
+        rocc.module.io.ptw(i).resp := offsetter.module.io.ptw.resp_out
       }
     }
     rerocc_manager.module.io.manager_id := reroccManagerIdSinkNode.bundle
