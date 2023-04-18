@@ -53,7 +53,7 @@ case class DummyTileParams(
 class TileNodeWrapperModule(dummyParams: DummyTileParams, xBytes: Int, masterPortBeatBytes: Int)(implicit p: Parameters) extends LazyModule {
   val placeholderMasterNode = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLClientParameters(
     name = "placeholder-master-node",
-    sourceId = IdRange(0, 31),
+    sourceId = IdRange(0, 3),
     supportsProbe = TransferSizes(64, 64)
   )))))
 
@@ -121,7 +121,6 @@ class DummyTileModuleImp(outer: DummyTile) extends BaseTileModuleImp(outer)
   outer.decodeCoreInterrupts(int_bundle)
   dontTouch(outer.intSinkNode.in(0)._1)
   println(outer.intSinkNode.in(0))
-  // TODO : bridge_emulator_blackbox.io.lin := int_bundle.???
 
   val bridge_emulator_blackbox = Module(new BridgeEmulatorBlackBox)
   bridge_emulator_blackbox.io.clock := clock
