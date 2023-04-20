@@ -162,6 +162,7 @@ SFC_ANNO_FILE ?= $(build_dir)/$(long_name).sfc.anno.json
 # firtool compiler outputs
 MFC_TOP_HRCHY_JSON ?= $(build_dir)/top_module_hierarchy.json
 MFC_MODEL_HRCHY_JSON ?= $(build_dir)/model_module_hierarchy.json
+MFC_MODEL_HRCHY_JSON_UNIQUIFIED ?= $(build_dir)/model_module_hierarchy.uniquified.json
 MFC_SMEMS_CONF ?= $(build_dir)/$(long_name).mems.conf
 # hardcoded firtool outputs
 MFC_FILELIST = $(GEN_COLLATERAL_DIR)/filelist.f
