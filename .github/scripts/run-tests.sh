@@ -37,6 +37,9 @@ case $1 in
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.10000.loadarch
         ;;
     chipyard-boom)
+        run_bmark ${mapping[$1]}
+        ;;
+    chipyard-dmiboom)
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.10000.loadarch
         ;;

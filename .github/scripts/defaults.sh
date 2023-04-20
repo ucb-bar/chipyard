@@ -29,7 +29,7 @@ REMOTE_COURSIER_CACHE=$REMOTE_WORK_DIR/.coursier-cache
 # key value store to get the build groups
 declare -A grouping
 grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad chipyard-spike chipyard-clone"
-grouping["group-peripherals"]="chipyard-dmirocket chipyard-spiflashwrite chipyard-mmios chipyard-nocores chipyard-manyperipherals chipyard-chiplike"
+grouping["group-peripherals"]="chipyard-dmirocket chipyard-dmiboom chipyard-spiflashwrite chipyard-mmios chipyard-nocores chipyard-manyperipherals chipyard-chiplike"
 grouping["group-accels"]="chipyard-mempress chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-manymmioaccels"
 grouping["group-constellation"]="chipyard-constellation"
 grouping["group-tracegen"]="tracegen tracegen-boom"
@@ -45,7 +45,8 @@ mapping["chipyard-mempress"]=" CONFIG=MempressRocketConfig"
 mapping["chipyard-digitaltop"]=" TOP=DigitalTop"
 mapping["chipyard-manymmioaccels"]=" CONFIG=ManyMMIOAcceleratorRocketConfig"
 mapping["chipyard-hetero"]=" CONFIG=LargeBoomAndRocketConfig"
-mapping["chipyard-boom"]=" CONFIG=dmiMediumBoomCosimConfig"
+mapping["chipyard-boom"]=" CONFIG=MediumBoomCosimConfig"
+mapping["chipyard-dmiboom"]=" CONFIG=dmiMediumBoomCosimConfig"
 mapping["chipyard-spike"]=" CONFIG=SpikeFastUARTConfig EXTRA_SIM_FLAGS='+spike-ipc=10'"
 mapping["chipyard-hwacha"]=" CONFIG=HwachaRocketConfig"
 mapping["chipyard-gemmini"]=" CONFIG=GemminiRocketConfig"
