@@ -7,18 +7,18 @@ usage() {
     echo ""
     echo "Options"
     echo "  --help -h  : Display this message"
-    echo "  -n <n>     : Mumber of harts"
+    echo "  -n <n>     : Number of harts"
     echo "  -b <elf>   : Binary to run in spike"
     echo "  -p <pc>    : PC to take checkpoint at [default 0x80000000]"
-    echo "  -c <cycles>: Cycles after PC to take checkpoint at [default 0]"
-    echo "  -m <isa>   : ISA to pass to spike for checkpoint generation [defualt rv64gc]"
+    echo "  -i <insns> : Instructions after PC to take checkpoint at [default 0]"
+    echo "  -m <isa>   : ISA to pass to spike for checkpoint generation [default rv64gc]"
     exit "$1"
 }
 
 NHARTS=1
 BINARY=""
 PC="0x80000000"
-CYCLES=0
+INSNS=0
 ISA="rv64gc"
 while [ "$1" != "" ];
 do
@@ -34,9 +34,9 @@ do
 	-p )
 	    shift
 	    PC=$1 ;;
-	-c )
+	-i )
 	    shift
-	    CYCLES=$1 ;;
+	    INSNS=$1 ;;
         -m )
             shift
             ISA=$1 ;;
@@ -50,7 +50,7 @@ BASEMEM="$((0x80000000)):$((0x10000000))"
 SPIKEFLAGS="-p$NHARTS --pmpregions=0 --isa=$ISA -m$BASEMEM"
 
 BASENAME=$(basename -- $BINARY)
-DIRNAME=$BASENAME.$PC.$CYCLES.loadarch
+DIRNAME=$BASENAME.$PC.$INSNS.loadarch
 echo "Generating loadarch directory $DIRNAME"
 rm -rf $DIRNAME
 mkdir -p $DIRNAME
@@ -63,7 +63,7 @@ SPIKECMD_FILE=$DIRNAME/spikecmd.sh
 
 echo "Generating state capture spike interactive commands in $CMDS_FILE"
 echo "until pc 0 $PC" >> $CMDS_FILE
-echo "rs $CYCLES" >> $CMDS_FILE
+echo "rs $INSNS" >> $CMDS_FILE
 echo "dump" >> $CMDS_FILE
 for (( h=0; h<$NHARTS; h++ ))
 do
@@ -112,8 +112,6 @@ do
     echo "vreg $h" >> $CMDS_FILE
 done
 echo "quit" >> $CMDS_FILE
-
-#cat $CMDS_FILE
 
 echo "spike -d --debug-cmd=$CMDS_FILE $SPIKEFLAGS $BINARY" > $SPIKECMD_FILE
 

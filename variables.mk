@@ -25,6 +25,8 @@ HELP_PROJECT_VARIABLES = \
 
 HELP_SIMULATION_VARIABLES = \
 "   BINARY                 = riscv elf binary that the simulator will run when using the run-binary* targets" \
+"   LOADMEM                = riscv elf binary that should be loaded directly into simulated DRAM. LOADMEM=1 will load the BINARY elf" \
+"   LOADARCH               = path to a architectural checkpoint directory that should end in .loadarch/, for restoring from a checkpoint" \
 "   VERBOSE_FLAGS          = flags used when doing verbose simulation [$(VERBOSE_FLAGS)]" \
 "   timeout_cycles         = number of clock cycles before simulator times out, defaults to 10000000" \
 "   bmark_timeout_cycles   = number of clock cycles before benchmark simulator times out, defaults to 100000000"

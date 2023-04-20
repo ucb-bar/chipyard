@@ -185,7 +185,7 @@ class WithBlackBoxSimMem(additionalLatency: Int = 0) extends OverrideHarnessBind
   (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
     (ports zip system.memAXI4Node.edges.in).map { case (port, edge) =>
-      // TODO FIX: This currently makes each SimDRAM contian the entire memory space
+      // TODO FIX: This currently makes each SimDRAM contain the entire memory space
       val memSize = p(ExtMem).get.master.size
       val memBase = p(ExtMem).get.master.base
       val lineSize = p(CacheBlockBytes)

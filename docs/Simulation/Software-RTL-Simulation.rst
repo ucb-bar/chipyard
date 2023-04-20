@@ -156,7 +156,12 @@ Loadmem files should be ELF files. In the most common use case, this can be the 
 .. code-block:: shell
 
     make run-binary BINARY=test.riscv LOADMEM=test.riscv
-    make run-binary BINART=test.riscv LOADMEM=1
+
+Usually the ``LOADMEM`` ELF is the same as the ``BINARY`` ELF, so ``LOADMEM=1`` can be used as a shortcut.
+
+.. code-block:: shell
+
+   make run-binary BINARY=test.riscv LOADMEM=1
 
 Generating Waveforms
 -----------------------
