@@ -136,14 +136,15 @@ ifeq ($(SUB_PROJECT),tileonly)
 endif
 ifeq ($(SUB_PROJECT),dummytile)
 	SBT_PROJECT       ?= chipyard
-	MODEL             ?= DummyTileTestHarness
+# MODEL             ?= DummyTileTestHarness
+	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= chipyard
 	CONFIG            ?= DummyTileConfig
 	CONFIG_PACKAGE    ?= chipyard
 	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
-	TOP               ?= DummyChipTop
+	TOP               ?= ChipTop
 endif
 ifeq ($(SUB_PROJECT),flatchip)
 	SBT_PROJECT       ?= chipyard
