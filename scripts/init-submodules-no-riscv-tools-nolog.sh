@@ -65,6 +65,7 @@ restore_bash_options
 if [ "$git_tag_rc" -ne 0 ]; then
     if [ "$FORCE" == false ]; then
         while true; do
+            printf '\033[2J'
             read -p "WARNING: You are not on an official release of Chipyard."$'\n'"Type \"y\" to continue if this is intended or \"n\" if not: " validate
             case "$validate" in
                 y | Y)
