@@ -34,6 +34,7 @@ typedef struct system_info_t {
 
 system_info_t* info = NULL;
 sim_t* sim = NULL;
+bool cospike_debug;
 reg_t tohost_addr = 0;
 reg_t fromhost_addr = 0;
 std::set<reg_t> magic_addrs;
@@ -94,7 +95,7 @@ extern "C" void cospike_cosim(long long int cycle,
                     nullptr,
                     info->isa.c_str(),
                     "MSU",
-                    "vlen:512,elen:64",
+                    "vlen:128,elen:64",
                     false,
                     endianness_little,
                     info->pmpregions,
@@ -111,27 +112,6 @@ extern "C" void cospike_cosim(long long int cycle,
     uint64_t default_boot_addr = 0x80000000;
     boot_addr_reg->store(0, 8, (const uint8_t*)(&default_boot_addr));
 
-    for (auto& mem : mems) {
-      if (mem.first == info->mem0_base) {
-        std::string path_name = "chipyard-cosim-" + std::to_string(getpid());
-        ssize_t mem_size = mem.second->size();
-        int shared_fd = shm_open(path_name.c_str(), O_EXCL | O_RDWR, 0600);
-        if (shared_fd < 0) {
-          std::perror("[mm_t] shm_open for backing storage failed");
-          exit(-1);
-        }
-        uint8_t *data = (uint8_t *) mmap(
-          NULL, mem_size, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, shared_fd, 0);
-        if (data == MAP_FAILED) {
-          std::perror("[mm_t] mmap for backing storage failed");
-          exit(-1);
-        }
-        mem.second->store(0, mem_size,(const uint8_t *) data);
-        munmap(data, mem_size);
-        close(shared_fd);
-      }
-    }
-
     // Don't actually build a clint
     mem_t* clint_mem = new mem_t(CLINT_SIZE);
 
@@ -146,7 +126,7 @@ extern "C" void cospike_cosim(long long int cycle,
       abort();
     std::vector<std::string> htif_args;
     bool in_permissive = false;
-    bool cospike_debug = false;
+    cospike_debug = false;
     for (int i = 1; i < vinfo.argc; i++) {
       std::string arg(vinfo.argv[i]);
       if (arg == "+permissive") {
@@ -289,23 +269,23 @@ extern "C" void cospike_cosim(long long int cycle,
   }
   if (valid || raise_interrupt || raise_exception) {
     p->step(1);
-#ifdef SPIKE_DEBUG
-    printf("spike pc is %lx\n", s->pc);
-    printf("spike mstatus is %lx\n", s->mstatus->read());
-    printf("spike mip is %lx\n", s->mip->read());
-    printf("spike mie is %lx\n", s->mie->read());
-#endif
+    if (unlikely(cospike_debug)) {
+      printf("spike pc is %lx\n", s->pc);
+      printf("spike mstatus is %lx\n", s->mstatus->read());
+      printf("spike mip is %lx\n", s->mip->read());
+      printf("spike mie is %lx\n", s->mie->read());
+    }
   }
 
   if (valid) {
     if (s_pc != iaddr) {
       printf("%d PC mismatch spike %llx != DUT %llx\n", cycle, s_pc, iaddr);
-#ifdef SPIKE_DEBUG
-      printf("spike mstatus is %lx\n", s->mstatus->read());
-      printf("spike mcause is %lx\n", s->mcause->read());
-      printf("spike mtval is %lx\n" , s->mtval->read());
-      printf("spike mtinst is %lx\n", s->mtinst->read());
-#endif
+      if (unlikely(cospike_debug)) {
+       printf("spike mstatus is %lx\n", s->mstatus->read());
+       printf("spike mcause is %lx\n", s->mcause->read());
+       printf("spike mtval is %lx\n" , s->mtval->read());
+       printf("spike mtinst is %lx\n", s->mtinst->read());
+      }
       exit(1);
     }
 
@@ -315,11 +295,37 @@ extern "C" void cospike_cosim(long long int cycle,
   auto& mem_read = s->log_mem_read;
 
 
+<<<<<<< HEAD
   for (auto memwrite : mem_write) {
     reg_t waddr = std::get<0>(memwrite);
     uint64_t w_data = std::get<1>(memwrite);
     if (waddr == CLINT_BASE && w_data == 0) {
       s->mip->backdoor_write_with_mask(MIP_MSIP, 0);
+||||||| constructed merge base
+    for (auto memwrite : mem_write) {
+      reg_t waddr = std::get<0>(memwrite);
+      uint64_t w_data = std::get<1>(memwrite);
+      if (waddr == CLINT_BASE && w_data == 0) {
+        s->mip->backdoor_write_with_mask(MIP_MSIP, 0);
+      }
+      // Try to remember magic_mem addrs, and ignore these in the future
+      if ( waddr == tohost_addr && w_data >= info->mem0_base && w_data < (info->mem0_base + info->mem0_size)) {
+        printf("Probable magic mem %lx\n", w_data);
+        magic_addrs.insert(w_data);
+      }
+=======
+    for (auto memwrite : mem_write) {
+      reg_t waddr = std::get<0>(memwrite);
+      uint64_t w_data = std::get<1>(memwrite);
+      if ((waddr == CLINT_BASE + 4*hartid) && w_data == 0) {
+        s->mip->backdoor_write_with_mask(MIP_MSIP, 0);
+      }
+      // Try to remember magic_mem addrs, and ignore these in the future
+      if ( waddr == tohost_addr && w_data >= info->mem0_base && w_data < (info->mem0_base + info->mem0_size)) {
+        printf("Probable magic mem %lx\n", w_data);
+        magic_addrs.insert(w_data);
+      }
+>>>>>>> fix: address comments
     }
     // Try to remember magic_mem addrs, and ignore these in the future
     if ( waddr == tohost_addr && w_data >= info->mem0_base && w_data < (info->mem0_base + info->mem0_size)) {
@@ -396,8 +402,26 @@ extern "C" void cospike_cosim(long long int cycle,
     }
   }
 
+<<<<<<< HEAD
   if (scalar_wb ^ has_wdata) {
     printf("Scalar behavior divergence between spike and DUT\n");
     exit(-1);
+||||||| constructed merge base
+    if (vector_wb ^ has_vwdata) {
+      printf("vector behavior divergence between spike and DUT\n");
+      exit(-1);
+    }
+#ifdef SPIKE_DEBUG
+    if (vector_wb) {
+      printf("vector_cnt = %x\n", vector_cnt);
+      printf("vector_pre = %x\n", vector_pre);
+    }
+#endif
+=======
+    if (vector_wb ^ has_vwdata) {
+      printf("vector behavior divergence between spike and DUT\n");
+      exit(-1);
+    }
+>>>>>>> fix: address comments
   }
 }
