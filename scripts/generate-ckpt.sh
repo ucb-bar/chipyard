@@ -3,7 +3,7 @@
 set -e
 
 usage() {
-    echo "Usage: $0 [OPTIONS] -- [SPIKEFLAGS]"
+    echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "Options"
     echo "  --help -h  : Display this message"
@@ -12,6 +12,7 @@ usage() {
     echo "  -p <pc>    : PC to take checkpoint at [default 0x80000000]"
     echo "  -i <insns> : Instructions after PC to take checkpoint at [default 0]"
     echo "  -m <isa>   : ISA to pass to spike for checkpoint generation [default rv64gc]"
+    echo "  -o <out>   : Output directory to store the checkpoint in. [default <elf>.<pc>.<insns>.loadarch]"
     exit "$1"
 }
 
@@ -20,6 +21,7 @@ BINARY=""
 PC="0x80000000"
 INSNS=0
 ISA="rv64gc"
+OUTPATH=""
 while [ "$1" != "" ];
 do
     case $1 in
@@ -40,26 +42,33 @@ do
         -m )
             shift
             ISA=$1 ;;
+        -o )
+            shift
+            OUTPATH=$1 ;;
 	* )
 	    error "Invalid option $1"
 	    usage 1 ;;
     esac
     shift
 done
+
 BASEMEM="$((0x80000000)):$((0x10000000))"
 SPIKEFLAGS="-p$NHARTS --pmpregions=0 --isa=$ISA -m$BASEMEM"
-
 BASENAME=$(basename -- $BINARY)
-DIRNAME=$BASENAME.$PC.$INSNS.loadarch
-echo "Generating loadarch directory $DIRNAME"
-rm -rf $DIRNAME
-mkdir -p $DIRNAME
 
-LOADARCH_FILE=$DIRNAME/loadarch
-RAWMEM_ELF=$DIRNAME/raw.elf
-LOADMEM_ELF=$DIRNAME/mem.elf
-CMDS_FILE=$DIRNAME/cmds_tmp.txt
-SPIKECMD_FILE=$DIRNAME/spikecmd.sh
+if [ -z "$OUTPATH" ] ; then
+    OUTPATH=$BASENAME.$PC.$INSNS.loadarch
+fi
+
+echo "Generating loadarch directory $OUTPATH"
+rm -rf $OUTPATH
+mkdir -p $OUTPATH
+
+LOADARCH_FILE=$OUTPATH/loadarch
+RAWMEM_ELF=$OUTPATH/raw.elf
+LOADMEM_ELF=$OUTPATH/mem.elf
+CMDS_FILE=$OUTPATH/cmds_tmp.txt
+SPIKECMD_FILE=$OUTPATH/spikecmd.sh
 
 echo "Generating state capture spike interactive commands in $CMDS_FILE"
 echo "until pc 0 $PC" >> $CMDS_FILE
@@ -129,3 +138,4 @@ rm -rf mem.0x80000000.bin
 
 riscv64-unknown-elf-ld -Tdata=0x80000000 -nmagic --defsym tohost=0x$TOHOST --defsym fromhost=0x$FROMHOST -o $LOADMEM_ELF $RAWMEM_ELF
 rm -rf $RAWMEM_ELF
+
