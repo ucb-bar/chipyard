@@ -7,9 +7,9 @@
 # Install this environment as "YOURENV" with:
 #     conda-lock install -n YOURENV --file conda-requirements-riscv-tools-linux-64.conda-lock.yml
 # To update a single package to the latest version compatible with the version constraints in the source:
-#     conda-lock lock  --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml --update PACKAGE
+#     conda-lock lock --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml --update PACKAGE
 # To re-solve the entire environment, e.g. after changing a version constraint in the source file:
-#     conda-lock -f /bwrcq/C/harrisonliew/chipyard-new-hammer/conda-reqs/chipyard.yaml -f /bwrcq/C/harrisonliew/chipyard-new-hammer/conda-reqs/riscv-tools.yaml -f /scratch/joonho.whangbo/coding/circt-fix-cy/conda-reqs/chipyard.yaml -f /scratch/joonho.whangbo/coding/circt-fix-cy/conda-reqs/riscv-tools.yaml -f /Users/joonhohwangbo/Documents/UCB-BAR/coding/chipyard/conda-reqs/chipyard.yaml -f /Users/joonhohwangbo/Documents/UCB-BAR/coding/chipyard/conda-reqs/riscv-tools.yaml --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml
+#     conda-lock -f /bwrcq/C/harrisonliew/chipyard-new-hammer/conda-reqs/chipyard.yaml -f /bwrcq/C/harrisonliew/chipyard-new-hammer/conda-reqs/riscv-tools.yaml -f /scratch/joonho.whangbo/coding/circt-fix-cy/conda-reqs/chipyard.yaml -f /scratch/joonho.whangbo/coding/circt-fix-cy/conda-reqs/riscv-tools.yaml --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml
 metadata:
   channels:
   - url: ucb-bar
@@ -21,7 +21,7 @@ metadata:
   - url: nodefaults
     used_env_vars: []
   content_hash:
-    linux-64: 661e3655416e9e5de13d6b7ef41dd4f18c6e4725072890cdc12d17cdbde356bc
+    linux-64: 94be5f8cad4026c00d3aef6c3690da6cc358bc79c1f7398049754bd17e861420
   platforms:
   - linux-64
   sources:
@@ -29,8 +29,6 @@ metadata:
   - /bwrcq/C/harrisonliew/chipyard-new-hammer/conda-reqs/riscv-tools.yaml
   - /scratch/joonho.whangbo/coding/circt-fix-cy/conda-reqs/chipyard.yaml
   - /scratch/joonho.whangbo/coding/circt-fix-cy/conda-reqs/riscv-tools.yaml
-  - /Users/joonhohwangbo/Documents/UCB-BAR/coding/chipyard/conda-reqs/chipyard.yaml
-  - /Users/joonhohwangbo/Documents/UCB-BAR/coding/chipyard/conda-reqs/riscv-tools.yaml
 package:
 - category: main
   dependencies: {}
@@ -424,6 +422,7 @@ package:
     libstdcxx-ng: '>=12'
   hash:
     md5: 6bfb79319763a11c7423c9d0e0ee00b7
+    sha256: null
   manager: conda
   name: dromajo
   optional: false
@@ -3818,14 +3817,14 @@ package:
     python: '>=3.8'
     zipp: '>=0.5'
   hash:
-    md5: b3c9bdaa68a0ba7549f67e7f5c766c83
-    sha256: f51cfdafac71f7a3bb6e12cc68d7218de29391dd0798768b7775dea444bbdcae
+    md5: c63decd397ca639c4b17f6ea5d26bd4d
+    sha256: 26a56c66c95389e9e2bd95e88f023fd94d4a60e4817bcbe4103f6220d0c17d86
   manager: conda
   name: importlib-metadata
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/importlib-metadata-6.4.1-pyha770c72_0.conda
-  version: 6.4.1
+  url: https://conda.anaconda.org/conda-forge/noarch/importlib-metadata-6.3.0-pyha770c72_0.conda
+  version: 6.3.0
 - category: main
   dependencies:
     python: '>=3.7'
@@ -4006,14 +4005,14 @@ package:
     setuptools: ''
     wheel: ''
   hash:
-    md5: 9ccbacfd1cbfa0be00cc345fe5ad8816
-    sha256: 781992f04a8c765b1ad29b54fc9f76c12b0864f9defd2869eeb5edff15b51546
+    md5: 8025ca83b8ba5430b640b83917c2a6f7
+    sha256: e1698cbf4964cd60a2885c0edbc654133cd0db5ac4cb568412250e577dbc42ad
   manager: conda
   name: pip
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/pip-23.1-pyhd8ed1ab_0.conda
-  version: '23.1'
+  url: https://conda.anaconda.org/conda-forge/noarch/pip-23.0.1-pyhd8ed1ab_0.conda
+  version: 23.0.1
 - category: main
   dependencies:
     python: '>=3.6'
@@ -4368,16 +4367,16 @@ package:
   version: 6.0.0
 - category: main
   dependencies:
-    importlib-metadata: '>=6.4.1,<6.4.2.0a0'
+    importlib-metadata: '>=6.3.0,<6.3.1.0a0'
   hash:
-    md5: 15b0c51cb977c0243b750687eff917b6
-    sha256: 369e704eec7eca35dc10344113c778248b71c26fd17bec51412ca184808966ef
+    md5: 1dee0ac2ed01030b56bdd33eabebc42f
+    sha256: 0aee044df634fb4d652ecf117b17ab2dd24f8f863334d3010c37e3a96989f0fa
   manager: conda
   name: importlib_metadata
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/importlib_metadata-6.4.1-hd8ed1ab_0.conda
-  version: 6.4.1
+  url: https://conda.anaconda.org/conda-forge/noarch/importlib_metadata-6.3.0-hd8ed1ab_0.conda
+  version: 6.3.0
 - category: main
   dependencies:
     attrs: '>=17.4.0'
@@ -4403,6 +4402,7 @@ package:
     libzlib: '>=1.2.12,<1.3.0a0'
   hash:
     md5: 5b3ed39ee3809d63d347b649de0a45f8
+    sha256: null
   manager: conda
   name: libdwarf
   optional: false
@@ -4621,14 +4621,14 @@ package:
     types-awscrt: ''
     typing_extensions: ''
   hash:
-    md5: d981f03fa455593256ffa348118cd7d1
-    sha256: cd2c92d0ab21305cd1afc9c503495564cf56397816af0a12c84c35fbfc849fba
+    md5: 39387401b8d302b94a16bb2cf77f6ff8
+    sha256: 8deed72652219ab079ec5fd0bae5327a947622dcc40210e88837b62703780ecc
   manager: conda
   name: botocore-stubs
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/botocore-stubs-1.29.114-pyhd8ed1ab_0.conda
-  version: 1.29.114
+  url: https://conda.anaconda.org/conda-forge/noarch/botocore-stubs-1.29.113-pyhd8ed1ab_0.conda
+  version: 1.29.113
 - category: main
   dependencies:
     clang-format: 16.0.1 default_h62803fd_0
@@ -4723,6 +4723,7 @@ package:
     libzlib: '>=1.2.12,<1.3.0a0'
   hash:
     md5: 899c511688e6c41cb51c2921a8d25e63
+    sha256: null
   manager: conda
   name: libdwarf-dev
   optional: false
@@ -5076,14 +5077,14 @@ package:
     python-dateutil: '>=2.1,<3.0.0'
     urllib3: '>=1.25.4,<1.27'
   hash:
-    md5: 3c403408336b409bc12867c0f1416771
-    sha256: fd55f823f5649529d84162f4c1543b9fe6308b8d781078aff59a79b6d52e4e50
+    md5: 28e3074f0184e908a78dd99ad7206916
+    sha256: 3812de59fe902fbd6ca6096bdfd02ccd8300a460948979071e7e45bc7ebbb66c
   manager: conda
   name: botocore
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/botocore-1.29.114-pyhd8ed1ab_0.conda
-  version: 1.29.114
+  url: https://conda.anaconda.org/conda-forge/noarch/botocore-1.29.113-pyhd8ed1ab_0.conda
+  version: 1.29.113
 - category: main
   dependencies:
     cairo: '>=1.16.0,<2.0a0'
@@ -5330,7 +5331,7 @@ package:
   version: 5.1.1
 - category: main
   dependencies:
-    botocore: 1.29.114
+    botocore: 1.29.113
     colorama: '>=0.2.5,<0.4.5'
     docutils: '>=0.10,<0.17'
     python: '>=3.10,<3.11.0a0'
@@ -5339,29 +5340,29 @@ package:
     rsa: '>=3.1.2,<4.8'
     s3transfer: '>=0.6.0,<0.7.0'
   hash:
-    md5: 6018d1a712d1982015b748e26975fa80
-    sha256: cce05269e07a7709bf1c6808fe771997aebeff75431c0e1592fca2d4154c9ddb
+    md5: 3e9e90cd2b4355932b94898eda78783d
+    sha256: 6eda3942ffb8bd320e5b2ee0538bdb6b2333835653f2990666dc660c4fd3b6ee
   manager: conda
   name: awscli
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/awscli-1.27.114-py310hff52083_0.conda
-  version: 1.27.114
+  url: https://conda.anaconda.org/conda-forge/linux-64/awscli-1.27.113-py310hff52083_0.conda
+  version: 1.27.113
 - category: main
   dependencies:
-    botocore: '>=1.29.114,<1.30.0'
+    botocore: '>=1.29.113,<1.30.0'
     jmespath: '>=0.7.1,<2.0.0'
     python: '>=3.7'
     s3transfer: '>=0.6.0,<0.7.0'
   hash:
-    md5: e848c71388d684b223b6cc487acb0ff9
-    sha256: 7e268ec2c2783d23a32f02170fec03edce32b4ba81a36b410399537d38a343b1
+    md5: df6d2b9af30a1cca57b65514af77aeb9
+    sha256: 166352179c0be643a1b103a3e504f8704cbc528bf7d9723b28429cbf3ee36bfe
   manager: conda
   name: boto3
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/boto3-1.26.114-pyhd8ed1ab_0.conda
-  version: 1.26.114
+  url: https://conda.anaconda.org/conda-forge/noarch/boto3-1.26.113-pyhd8ed1ab_0.conda
+  version: 1.26.113
 - category: main
   dependencies:
     cachecontrol: 0.12.11 pyhd8ed1ab_1
@@ -5654,6 +5655,7 @@ package:
   name: mock
   optional: false
   platform: linux-64
+  source: null
   url: https://files.pythonhosted.org/packages/e6/88/8a05e7ad0bb823246b2add3d2e97f990c41c71a40762c8db77a4bd78eedf/mock-5.0.1-py3-none-any.whl
   version: 5.0.1
 - dependencies: {}
@@ -5662,6 +5664,7 @@ package:
   manager: pip
   name: pyyaml
   platform: linux-64
+  source: null
   url: https://files.pythonhosted.org/packages/02/25/6ba9f6bb50a3d4fbe22c1a02554dc670682a07c8701d1716d19ddea2c940/PyYAML-6.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl
   version: '6.0'
 - category: main
@@ -5673,6 +5676,7 @@ package:
   name: asttokens
   optional: false
   platform: linux-64
+  source: null
   url: https://files.pythonhosted.org/packages/f3/e1/64679d9d0759db5b182222c81ff322c2fe2c31e156a59afd6e9208c960e5/asttokens-2.2.1-py2.py3-none-any.whl
   version: 2.2.1
 - category: main
@@ -5684,6 +5688,7 @@ package:
   name: gdspy
   optional: false
   platform: linux-64
+  source: null
   url: https://files.pythonhosted.org/packages/1d/e4/97b8add92fbec2a9890ad4777272e9a9e4d7a0ceeac42b7e1febe94f0e86/gdspy-1.4.zip
   version: '1.4'
 - category: main
@@ -5696,6 +5701,7 @@ package:
   name: paramiko-ng
   optional: false
   platform: linux-64
+  source: null
   url: https://files.pythonhosted.org/packages/9f/53/1ac75eab589149b1e02e38185ecebf09e1b805fc3fdeadbc16d1a2b7d208/paramiko_ng-2.8.10-py2.py3-none-any.whl
   version: 2.8.10
 - category: main
@@ -5707,6 +5713,7 @@ package:
   name: ruamel.yaml
   optional: false
   platform: linux-64
+  source: null
   url: https://files.pythonhosted.org/packages/9e/cb/938214ac358fbef7058343b3765c79a1b7ed0c366f7f992ce7ff38335652/ruamel.yaml-0.17.21-py3-none-any.whl
   version: 0.17.21
 - category: main
@@ -5719,6 +5726,7 @@ package:
   name: sure
   optional: false
   platform: linux-64
+  source: null
   url: https://files.pythonhosted.org/packages/dd/ae/eb28ee3b6768e51cb938abcf521cb678217203f33385a2df54d3f23331c5/sure-2.0.1.tar.gz
   version: 2.0.1
 - category: main
@@ -5731,6 +5739,7 @@ package:
   name: fab-classic
   optional: false
   platform: linux-64
+  source: null
   url: https://files.pythonhosted.org/packages/6b/0f/efc537eebfd2a2c470250c0ac8bd8a05ffc13d95a7fb22021367890d7c46/fab_classic-1.19.2-py2.py3-none-any.whl
   version: 1.19.2
 - category: main
@@ -5746,6 +5755,7 @@ package:
   name: hammer-vlsi
   optional: false
   platform: linux-64
+  source: null
   url: https://files.pythonhosted.org/packages/53/39/18367e6fb4f20e9ae4fb3097f7b80704ff5cccf62980ea2871ba1d817a74/hammer_vlsi-1.1.0-py3-none-any.whl
   version: 1.1.0
 - category: main
@@ -5758,6 +5768,7 @@ package:
   name: icontract
   optional: false
   platform: linux-64
+  source: null
   url: https://files.pythonhosted.org/packages/d8/91/9756e7cf0b155e80bf9a62beffdd1dec4afce43cc6ab7f432f2267c62762/icontract-2.6.2-py3-none-any.whl
   version: 2.6.2
 - category: main
@@ -5770,6 +5781,7 @@ package:
   name: pylddwrap
   optional: false
   platform: linux-64
+  source: null
   url: https://files.pythonhosted.org/packages/c9/12/4afd6542c43cd20271f0e53bf0211decc10079a76a41e53c0288025a7b85/pylddwrap-1.2.2.tar.gz
   version: 1.2.2
 version: 1
