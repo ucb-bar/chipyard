@@ -22,6 +22,9 @@ import barstools.iocell.chisel._
 import chipyard.{BuildTop}
 
 
+case object IsFireChip extends Field[Boolean](false)
+
+
 case class DummyTileAttachParams(
   tileParams: DummyTileParams,
   crossingParams: RocketCrossingParams
@@ -124,47 +127,132 @@ class DummyTileModuleImp(outer: DummyTile) extends BaseTileModuleImp(outer)
   val int_bundle = Wire(new TileInterrupts)
   outer.decodeCoreInterrupts(int_bundle)
 
-  val bridge_emulator_blackbox = Module(new BridgeEmulatorBlackBox)
-  bridge_emulator_blackbox.io.clock := clock
-  bridge_emulator_blackbox.io.reset := reset.asBool
 
-  val master_a = outer.nodeWrapper.masterPunchThroughIO.head.a
-  master_a.valid := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_valid
-  master_a.bits.opcode := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_opcode
-  master_a.bits.param := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_param
-  master_a.bits.size := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_size
-  master_a.bits.source := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_source
-  master_a.bits.address := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_address
-  master_a.bits.mask := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_mask
-  master_a.bits.data := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_data
-  master_a.bits.corrupt := bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_bits_corrupt
+  if (p(IsFireChip)) {
+    val tile_bridge = Module(new TileCoreSideBridge())
+    tile_bridge.io.clock := clock
+    tile_bridge.io.reset := reset.asBool
 
-  val master_d = outer.nodeWrapper.masterPunchThroughIO.head.d
-  master_d.ready := bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_ready
+    tile_bridge.io.debug := int_bundle.debug
+    tile_bridge.io.mtip := int_bundle.mtip
+    tile_bridge.io.msip := int_bundle.msip
+    tile_bridge.io.meip := int_bundle.meip
+    tile_bridge.io.seip := int_bundle.seip.get
+    dontTouch(int_bundle)
 
-  bridge_emulator_blackbox.io.masterPunchThroughIO_0_a_ready := master_a.ready
-  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_valid := master_d.valid
-  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_opcode := master_d.bits.opcode
-  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_param := master_d.bits.param
-  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_size := master_d.bits.size
-  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_source := master_d.bits.source
-  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_sink := master_d.bits.sink
-  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_denied := master_d.bits.denied
-  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_data := master_d.bits.data
-  bridge_emulator_blackbox.io.masterPunchThroughIO_0_d_bits_corrupt := master_d.bits.corrupt
+    tile_bridge.io.hartid := outer.hartIdSinkNode.bundle
 
+    val tlmaster = outer.nodeWrapper.masterPunchThroughIO.head
+    tile_bridge.io.in.tlmaster_a_ready := tlmaster.a.ready
+    tile_bridge.io.in.tlmaster_b_valid := tlmaster.b.valid
+    tile_bridge.io.in.tlmaster_b_bits_opcode := tlmaster.b.bits.opcode
+    tile_bridge.io.in.tlmaster_b_bits_param := tlmaster.b.bits.param
+    tile_bridge.io.in.tlmaster_b_bits_size := tlmaster.b.bits.size
+    tile_bridge.io.in.tlmaster_b_bits_source := tlmaster.b.bits.source
+    tile_bridge.io.in.tlmaster_b_bits_address := tlmaster.b.bits.address
+    tile_bridge.io.in.tlmaster_b_bits_data := tlmaster.b.bits.data
+    tile_bridge.io.in.tlmaster_b_bits_mask := tlmaster.b.bits.mask
+    tile_bridge.io.in.tlmaster_b_bits_corrupt := tlmaster.b.bits.corrupt
+    tile_bridge.io.in.tlmaster_c_ready := tlmaster.c.ready
+    tile_bridge.io.in.tlmaster_d_valid := tlmaster.d.valid
+    tile_bridge.io.in.tlmaster_d_bits_opcode := tlmaster.d.bits.opcode
+    tile_bridge.io.in.tlmaster_d_bits_param := tlmaster.d.bits.param
+    tile_bridge.io.in.tlmaster_d_bits_size := tlmaster.d.bits.size
+    tile_bridge.io.in.tlmaster_d_bits_source := tlmaster.d.bits.source
+    tile_bridge.io.in.tlmaster_d_bits_sink := tlmaster.d.bits.sink
+    tile_bridge.io.in.tlmaster_d_bits_denied := tlmaster.d.bits.denied
+    tile_bridge.io.in.tlmaster_d_bits_data := tlmaster.d.bits.data
+    tile_bridge.io.in.tlmaster_d_bits_corrupt := tlmaster.d.bits.corrupt
+    tile_bridge.io.in.tlmaster_e_ready := tlmaster.e.ready
 
-  bridge_emulator_blackbox.io.hartid := outer.hartIdSinkNode.bundle
+    val (wfi, _) = outer.wfiNode.out(0)
+    wfi(0) := RegNext(tile_bridge.io.wfi)
+    tlmaster.a.valid := tile_bridge.io.out.tlmaster_a_valid
+    tlmaster.a.bits.opcode := tile_bridge.io.out.tlmaster_a_bits_opcode
+    tlmaster.a.bits.param := tile_bridge.io.out.tlmaster_a_bits_param
+    tlmaster.a.bits.size := tile_bridge.io.out.tlmaster_a_bits_size
+    tlmaster.a.bits.source := tile_bridge.io.out.tlmaster_a_bits_source
+    tlmaster.a.bits.address := tile_bridge.io.out.tlmaster_a_bits_address
+    tlmaster.a.bits.mask := tile_bridge.io.out.tlmaster_a_bits_mask
+    tlmaster.a.bits.data := tile_bridge.io.out.tlmaster_a_bits_data
+    tlmaster.a.bits.corrupt := tile_bridge.io.out.tlmaster_a_bits_corrupt
+    tlmaster.b.ready := tile_bridge.io.out.tlmaster_b_ready
+    tlmaster.c.valid := tile_bridge.io.out.tlmaster_c_valid
+    tlmaster.c.bits.opcode := tile_bridge.io.out.tlmaster_c_bits_opcode
+    tlmaster.c.bits.param := tile_bridge.io.out.tlmaster_c_bits_param
+    tlmaster.c.bits.size := tile_bridge.io.out.tlmaster_c_bits_size
+    tlmaster.c.bits.source := tile_bridge.io.out.tlmaster_c_bits_source
+    tlmaster.c.bits.address := tile_bridge.io.out.tlmaster_c_bits_address
+    tlmaster.c.bits.data := tile_bridge.io.out.tlmaster_c_bits_data
+    tlmaster.c.bits.corrupt := tile_bridge.io.out.tlmaster_c_bits_corrupt
+    tlmaster.d.ready := tile_bridge.io.out.tlmaster_d_ready
+    tlmaster.e.valid := tile_bridge.io.out.tlmaster_e_valid
+    tlmaster.e.bits.sink := tile_bridge.io.out.tlmaster_e_bits_sink
+  } else {
+    val bridge_emulator_blackbox = Module(new BridgeEmulatorBlackBox)
+    bridge_emulator_blackbox.io.clock := clock
+    bridge_emulator_blackbox.io.reset := reset.asBool
+  }
+}
 
-  val (wfi, _) = outer.wfiNode.out(0)
-  wfi(0) := RegNext(bridge_emulator_blackbox.io.wfi)
+class TileBoundaryBundleIn extends Bundle {
+  val debug = Input(Bool())
+  val mtip = Input(Bool())
+  val msip = Input(Bool())
+  val meip = Input(Bool())
+  val seip = Input(Bool())
+  val hartid = Input(UInt(2.W))
+  val tlmaster_a_ready = Input(Bool())
+  val tlmaster_b_valid = Input(Bool())
+  val tlmaster_b_bits_opcode = Input(UInt(3.W))
+  val tlmaster_b_bits_param = Input(UInt(2.W))
+  val tlmaster_b_bits_size = Input(UInt(4.W))
+  val tlmaster_b_bits_source = Input(UInt(2.W))
+  val tlmaster_b_bits_address = Input(UInt(32.W))
+  val tlmaster_b_bits_data = Input(UInt(64.W))
+  val tlmaster_b_bits_mask = Input(UInt(8.W))
+  val tlmaster_b_bits_corrupt = Input(Bool())
+  val tlmaster_c_ready = Input(Bool())
+  val tlmaster_d_valid = Input(Bool())
+  val tlmaster_d_bits_opcode = Input(UInt(3.W))
+  val tlmaster_d_bits_param = Input(UInt(2.W))
+  val tlmaster_d_bits_size = Input(UInt(4.W))
+  val tlmaster_d_bits_source = Input(UInt(2.W))
+  val tlmaster_d_bits_sink = Input(UInt(3.W))
+  val tlmaster_d_bits_denied = Input(Bool())
+  val tlmaster_d_bits_data = Input(UInt(64.W))
+  val tlmaster_d_bits_corrupt = Input(Bool())
+  val tlmaster_e_ready = Input(Bool())
+}
 
-  int_bundle.debug := bridge_emulator_blackbox.io.debug
-  int_bundle.mtip  := bridge_emulator_blackbox.io.mtip
-  int_bundle.msip  := bridge_emulator_blackbox.io.msip
-  int_bundle.meip  := bridge_emulator_blackbox.io.meip
-  int_bundle.seip.get  := bridge_emulator_blackbox.io.seip // HACK : Assume that seip is defined in the default config
-  dontTouch(int_bundle)
+class TileBoundaryBundleOut extends Bundle {
+  val wfi = Output(Bool())
+  val tlmaster_a_valid = Output(Bool())
+  val tlmaster_a_bits_opcode = Output(UInt(3.W))
+  val tlmaster_a_bits_param = Output(UInt(3.W))
+  val tlmaster_a_bits_size = Output(UInt(4.W))
+  val tlmaster_a_bits_source = Output(UInt(2.W))
+  val tlmaster_a_bits_address = Output(UInt(32.W))
+  val tlmaster_a_bits_mask = Output(UInt(8.W))
+  val tlmaster_a_bits_data = Output(UInt(64.W))
+  val tlmaster_a_bits_corrupt = Output(Bool())
+  val tlmaster_b_ready = Output(Bool())
+  val tlmaster_c_valid = Output(Bool())
+  val tlmaster_c_bits_opcode = Output(UInt(3.W))
+  val tlmaster_c_bits_param = Output(UInt(3.W))
+  val tlmaster_c_bits_size = Output(UInt(4.W))
+  val tlmaster_c_bits_source = Output(UInt(2.W))
+  val tlmaster_c_bits_address = Output(UInt(32.W))
+  val tlmaster_c_bits_data = Output(UInt(64.W))
+  val tlmaster_c_bits_corrupt = Output(Bool())
+  val tlmaster_d_ready = Output(Bool())
+  val tlmaster_e_valid = Output(Bool())
+  val tlmaster_e_bits_sink = Output(UInt(3.W))
+}
+
+class TileBoundaryBundle extends Bundle {
+  val in  = new TileBoundaryBundleIn()
+  val out = new TileBoundaryBundleOut()
 }
 
 
@@ -172,46 +260,13 @@ class BridgeEmulatorBlackBox extends BlackBox with HasBlackBoxResource {
   val io = IO(new Bundle {
     val clock = Input(Clock())
     val reset = Input(Bool())
-    val masterPunchThroughIO_0_a_valid = Output(Bool())
-    val masterPunchThroughIO_0_a_bits_opcode = Output(UInt(3.W))
-    val masterPunchThroughIO_0_a_bits_param = Output(UInt(3.W))
-    val masterPunchThroughIO_0_a_bits_size = Output(UInt(4.W))
-    val masterPunchThroughIO_0_a_bits_source = Output(UInt(2.W))
-    val masterPunchThroughIO_0_a_bits_address = Output(UInt(32.W))
-    val masterPunchThroughIO_0_a_bits_mask = Output(UInt(8.W))
-    val masterPunchThroughIO_0_a_bits_data = Output(UInt(64.W))
-    val masterPunchThroughIO_0_a_bits_corrupt = Output(Bool())
-    val masterPunchThroughIO_0_d_ready = Output(Bool())
-    val beuIntSlavePunchThroughIO_0_0 = Output(Bool())
-    val masterPunchThroughIO_0_a_ready = Input(Bool())
-    val masterPunchThroughIO_0_d_valid = Input(Bool())
-    val masterPunchThroughIO_0_d_bits_opcode = Input(UInt(3.W))
-    val masterPunchThroughIO_0_d_bits_param = Input(UInt(2.W))
-    val masterPunchThroughIO_0_d_bits_size = Input(UInt(4.W))
-    val masterPunchThroughIO_0_d_bits_source = Input(UInt(2.W))
-    val masterPunchThroughIO_0_d_bits_sink = Input(UInt(3.W))
-    val masterPunchThroughIO_0_d_bits_denied = Input(Bool())
-    val masterPunchThroughIO_0_d_bits_data = Input(UInt(64.W))
-    val masterPunchThroughIO_0_d_bits_corrupt = Input(Bool())
-    val hartid = Input(UInt(2.W))
-    val wfi = Output(Bool())
-    val debug = Output(Bool())
-    val mtip = Output(Bool())
-    val msip = Output(Bool())
-    val meip = Output(Bool())
-    val seip = Output(Bool())
   })
 
   addResource("/vsrc/BridgeEmulatorBlackBox.v")
 }
 
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
-
-
-
 
 
 
@@ -233,6 +288,5 @@ class WithDummyTile(n: Int = 1, tileParams: DummyTileParams = DummyTileParams(),
 
 class DummyTileConfig extends Config(
   new chipyard.WithDummyTile ++
-// new chipyard.config.WithSerialTLBackingMemory ++
   new chipyard.config.AbstractConfig
 )
