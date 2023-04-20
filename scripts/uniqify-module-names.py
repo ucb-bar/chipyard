@@ -4,7 +4,6 @@ import json
 import argparse
 import shutil
 import os
-import sh
 import datetime
 
 
@@ -14,11 +13,12 @@ parser.add_argument("--mod-filelist", type=str, required=True, help="Abs path to
 parser.add_argument("--gen-collateral-path", dest="gcpath", type=str, required=True, help="Abs path to the gen-collateral directory")
 parser.add_argument("--model-hier-json", type=str, required=True, help="Path to hierarchy JSON emitted by firtool. Must include DUT as a module.")
 parser.add_argument("--out-model-hier-json", type=str, required=True, help="Path to updated hierarchy JSON emitted by this script.")
-parser.add_argument('--dut', type=str, required=True, help='Name of the DUT module.')
+parser.add_argument("--dut", type=str, required=True, help="Name of the DUT module.")
+parser.add_argument("--model", type=str, required=True, help="Name of the Model module.")
 args = parser.parse_args()
 
 
-MODEL_SFX=str(datetime.date.today().year)
+MODEL_SFX=args.model + "_UNIQUIFIED"
 
 def bash(cmd):
   fail = os.system(cmd)
