@@ -211,7 +211,7 @@ Softcore-driven Bringup Setup of the Example Test Chip after Tapeout
 
 .. warning::
    Bringing up test chips with a FPGA softcore  as described here is discouraged.
-   An alternative approach using the FPGA to "bridge" between a x86 host and the test chip is the preferred approach.
+   An alternative approach using the FPGA to "bridge" between a host computer and the test chip is the preferred approach.
 
 Assuming this example test chip is taped out and now ready to be tested, we can communicate with the chip using this serial-link.
 For example, a common test setup used at Berkeley to evaluate Chipyard-based test-chips includes an FPGA running a RISC-V soft-core that is able to speak to the DUT (over an FMC).
