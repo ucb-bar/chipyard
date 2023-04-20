@@ -290,30 +290,10 @@ extern "C" void cospike_cosim(long long int cycle,
     }
 
 
-  auto& mem_write = s->log_mem_write;
-  auto& log = s->log_reg_write;
-  auto& mem_read = s->log_mem_read;
+    auto& mem_write = s->log_mem_write;
+    auto& log = s->log_reg_write;
+    auto& mem_read = s->log_mem_read;
 
-
-<<<<<<< HEAD
-  for (auto memwrite : mem_write) {
-    reg_t waddr = std::get<0>(memwrite);
-    uint64_t w_data = std::get<1>(memwrite);
-    if (waddr == CLINT_BASE && w_data == 0) {
-      s->mip->backdoor_write_with_mask(MIP_MSIP, 0);
-||||||| constructed merge base
-    for (auto memwrite : mem_write) {
-      reg_t waddr = std::get<0>(memwrite);
-      uint64_t w_data = std::get<1>(memwrite);
-      if (waddr == CLINT_BASE && w_data == 0) {
-        s->mip->backdoor_write_with_mask(MIP_MSIP, 0);
-      }
-      // Try to remember magic_mem addrs, and ignore these in the future
-      if ( waddr == tohost_addr && w_data >= info->mem0_base && w_data < (info->mem0_base + info->mem0_size)) {
-        printf("Probable magic mem %lx\n", w_data);
-        magic_addrs.insert(w_data);
-      }
-=======
     for (auto memwrite : mem_write) {
       reg_t waddr = std::get<0>(memwrite);
       uint64_t w_data = std::get<1>(memwrite);
@@ -325,7 +305,6 @@ extern "C" void cospike_cosim(long long int cycle,
         printf("Probable magic mem %lx\n", w_data);
         magic_addrs.insert(w_data);
       }
->>>>>>> fix: address comments
     }
     // Try to remember magic_mem addrs, and ignore these in the future
     if ( waddr == tohost_addr && w_data >= info->mem0_base && w_data < (info->mem0_base + info->mem0_size)) {
@@ -339,8 +318,6 @@ extern "C" void cospike_cosim(long long int cycle,
   uint32_t vector_cnt = 0;
 
   for (auto &regwrite : log) {
-
-    // if (regwrite.first == 0) continue;
 
     //TODO: scaling to multi issue reads?
     reg_t mem_read_addr = mem_read.empty() ? 0 : std::get<0>(mem_read[0]);
@@ -399,29 +376,9 @@ extern "C" void cospike_cosim(long long int cycle,
       }
     }
 
-    }
-  }
-
-<<<<<<< HEAD
-  if (scalar_wb ^ has_wdata) {
-    printf("Scalar behavior divergence between spike and DUT\n");
-    exit(-1);
-||||||| constructed merge base
-    if (vector_wb ^ has_vwdata) {
-      printf("vector behavior divergence between spike and DUT\n");
+    if (scalar_wb ^ has_wdata) {
+      printf("Scalar behavior divergence between spike and DUT\n");
       exit(-1);
     }
-#ifdef SPIKE_DEBUG
-    if (vector_wb) {
-      printf("vector_cnt = %x\n", vector_cnt);
-      printf("vector_pre = %x\n", vector_pre);
-    }
-#endif
-=======
-    if (vector_wb ^ has_vwdata) {
-      printf("vector behavior divergence between spike and DUT\n");
-      exit(-1);
-    }
->>>>>>> fix: address comments
   }
 }
