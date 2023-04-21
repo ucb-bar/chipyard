@@ -68,7 +68,7 @@ ifeq ($(SUB_PROJECT),chipyard)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= $(MODEL)
-	MODEL_PACKAGE     ?= $(SBT_PROJECT)
+	MODEL_PACKAGE     ?= chipyard.harness
 	CONFIG            ?= RocketConfig
 	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)

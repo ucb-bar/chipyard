@@ -1,4 +1,4 @@
-package chipyard
+package chipyard.harness
 
 import chisel3._
 
@@ -8,14 +8,15 @@ import org.chipsalliance.cde.config.{Field, Parameters}
 import freechips.rocketchip.util.{ResetCatchAndSync}
 import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters, ClockSinkParameters, ClockParameters}
 
-import chipyard.harness.{ApplyHarnessBinders, HarnessBinders}
 import chipyard.iobinders.HasIOBinders
 import chipyard.clocking.{SimplePllConfiguration, ClockDividerN}
+import chipyard.{ChipTop}
 
 // -------------------------------
 // Chipyard Test Harness
 // -------------------------------
 
+case object MultiChipParameters extends Field[Seq[Parameters]](Nil)
 case object BuildTop extends Field[Parameters => LazyModule]((p: Parameters) => new ChipTop()(p))
 case object DefaultClockFrequencyKey extends Field[Double](100.0) // MHz
 case object HarnessClockInstantiatorKey extends Field[() => HarnessClockInstantiator](() => new DividerOnlyHarnessClockInstantiator)
@@ -37,18 +38,24 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
     val success = Output(Bool())
   })
 
+  // These drive harness blocks
   val buildtopClock = Wire(Clock())
   val buildtopReset = Wire(Reset())
 
-  val lazyDut = LazyModule(p(BuildTop)(p)).suggestName("chiptop")
-  val dut = Module(lazyDut.module)
+  val chipParameters = if (p(MultiChipParameters).isEmpty) Seq(p) else p(MultiChipParameters)
+
+  val lazyDuts = chipParameters.zipWithIndex.map {
+    case (q, i) => LazyModule(q(BuildTop)(q)).suggestName(s"chiptop$i")
+  }
+  val duts = lazyDuts.map(l => Module(l.module))
 
   io.success := false.B
 
   val success = io.success
 
-  lazyDut match { case d: HasIOBinders =>
-    ApplyHarnessBinders(this, d.lazySystem, d.portMap)
+  lazyDuts.zipWithIndex.foreach {
+    case (d: HasIOBinders, i: Int) => ApplyHarnessBinders(this, d.lazySystem, d.portMap)(chipParameters(i))
+    case _ =>
   }
 
   val refClkBundle = harnessClockInstantiator.requestClockBundle("buildtop_reference_clock", getRefClockFreq * (1000 * 1000))

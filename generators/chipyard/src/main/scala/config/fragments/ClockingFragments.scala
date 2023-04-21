@@ -12,6 +12,7 @@ import freechips.rocketchip.util.{Symmetric}
 import freechips.rocketchip.tilelink.{HasTLBusParams}
 
 import chipyard._
+import chipyard.harness._
 import chipyard.clocking._
 
 

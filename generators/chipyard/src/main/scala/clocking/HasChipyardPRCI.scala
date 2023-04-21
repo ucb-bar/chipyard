@@ -15,7 +15,7 @@ import freechips.rocketchip.tile._
 import freechips.rocketchip.prci._
 
 import testchipip.{TLTileResetCtrl}
-import chipyard.{DefaultClockFrequencyKey}
+import chipyard.harness.{DefaultClockFrequencyKey}
 
 case class ChipyardPRCIControlParams(
   slaveWhere: TLBusWrapperLocation = CBUS,
