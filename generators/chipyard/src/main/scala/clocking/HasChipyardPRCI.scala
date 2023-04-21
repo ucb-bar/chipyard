@@ -20,7 +20,8 @@ import chipyard.harness.{DefaultClockFrequencyKey}
 case class ChipyardPRCIControlParams(
   slaveWhere: TLBusWrapperLocation = CBUS,
   baseAddress: BigInt = 0x100000,
-  enableTileClockGating: Boolean = true
+  enableTileClockGating: Boolean = true,
+  enableTileResetSetting: Boolean = true
 )
 
 
@@ -76,7 +77,7 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
     TileClockGater(prciParams.baseAddress + 0x00000, tlbus, prciParams.enableTileClockGating)
   }
   val tileResetSetter    = prci_ctrl_domain {
-    TileResetSetter(prciParams.baseAddress + 0x10000, tlbus, tile_prci_domains.map(_.tile_reset_domain.clockNode.portParams(0).name.get), Nil)
+    TileResetSetter(prciParams.baseAddress + 0x10000, tlbus, tile_prci_domains.map(_.tile_reset_domain.clockNode.portParams(0).name.get), Nil, prciParams.enableTileResetSetting)
   }
   (aggregator
     := frequencySpecifier

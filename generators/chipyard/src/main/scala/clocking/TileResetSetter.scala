@@ -65,9 +65,13 @@ class TileResetSetter(address: BigInt, beatBytes: Int, tileNames: Seq[String], i
 
 
 object TileResetSetter {
-  def apply(address: BigInt, tlbus: TLBusWrapper, tileNames: Seq[String], initResetHarts: Seq[Int])(implicit p: Parameters, v: ValName) = {
-    val setter = LazyModule(new TileResetSetter(address, tlbus.beatBytes, tileNames, initResetHarts))
-    tlbus.toVariableWidthSlave(Some("tile-reset-setter")) { setter.tlNode := TLBuffer() }
-    setter.clockNode
+  def apply(address: BigInt, tlbus: TLBusWrapper, tileNames: Seq[String], initResetHarts: Seq[Int], enable: Boolean)(implicit p: Parameters, v: ValName) = {
+    if (enable) {
+      val setter = LazyModule(new TileResetSetter(address, tlbus.beatBytes, tileNames, initResetHarts))
+      tlbus.toVariableWidthSlave(Some("tile-reset-setter")) { setter.tlNode := TLBuffer() }
+      setter.clockNode
+    } else {
+      ClockGroupEphemeralNode()
+    }
   }
 }
