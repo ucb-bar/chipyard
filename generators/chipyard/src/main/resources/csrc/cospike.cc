@@ -20,6 +20,12 @@ extern testchip_dtm_t* dtm;
 bool spike_loadarch_done = false;
 #endif
 
+#if __has_include ("mm.h")
+#define COSPIKE_SIMDRAM
+#include "mm.h"
+extern std::map<long long int, backing_data_t> backing_mem_data;
+#endif
+
 #define CLINT_BASE (0x2000000)
 #define CLINT_SIZE (0x1000)
 
@@ -169,6 +175,22 @@ extern "C" void cospike_cosim(long long int cycle,
                     nullptr
                     );
 
+#ifdef COSPIKE_SIMDRAM
+    // match sim_t's backing memory with the SimDRAM memory
+    bus_t temp_mem_bus;
+    for (auto& pair : mems) temp_mem_bus.add_device(pair.first, pair.second);
+
+    for (auto& pair : backing_mem_data) {
+      size_t base = pair.first;
+      size_t size = pair.second.size;
+      printf("Matching spike memory initial state for region %lx-%lx\n", base, base + size);
+      if (!temp_mem_bus.store(base, size, pair.second.data)) {
+        printf("Error, unable to match memory at address %lx\n", base);
+        abort();
+      }
+    }
+#endif
+
     sim->configure_log(true, true);
     // Use our own reset vector
     for (int i = 0; i < info->nharts; i++) {
@@ -281,10 +303,10 @@ extern "C" void cospike_cosim(long long int cycle,
     if (s_pc != iaddr) {
       printf("%d PC mismatch spike %llx != DUT %llx\n", cycle, s_pc, iaddr);
       if (unlikely(cospike_debug)) {
-       printf("spike mstatus is %lx\n", s->mstatus->read());
-       printf("spike mcause is %lx\n", s->mcause->read());
-       printf("spike mtval is %lx\n" , s->mtval->read());
-       printf("spike mtinst is %lx\n", s->mtinst->read());
+        printf("spike mstatus is %lx\n", s->mstatus->read());
+        printf("spike mcause is %lx\n", s->mcause->read());
+        printf("spike mtval is %lx\n" , s->mtval->read());
+        printf("spike mtinst is %lx\n", s->mtinst->read());
       }
       exit(1);
     }
@@ -305,80 +327,80 @@ extern "C" void cospike_cosim(long long int cycle,
         printf("Probable magic mem %lx\n", w_data);
         magic_addrs.insert(w_data);
       }
-    }
-    // Try to remember magic_mem addrs, and ignore these in the future
-    if ( waddr == tohost_addr && w_data >= info->mem0_base && w_data < (info->mem0_base + info->mem0_size)) {
-      printf("Probable magic mem %lx\n", w_data);
-      magic_addrs.insert(w_data);
-    }
-  }
-
-  bool scalar_wb = false;
-  bool vector_wb = false;
-  uint32_t vector_cnt = 0;
-
-  for (auto &regwrite : log) {
-
-    //TODO: scaling to multi issue reads?
-    reg_t mem_read_addr = mem_read.empty() ? 0 : std::get<0>(mem_read[0]);
-
-    int rd = regwrite.first >> 4;
-    int type = regwrite.first & 0xf;
-
-    // 0 => int
-    // 1 => fp
-    // 2 => vec
-    // 3 => vec hint
-    // 4 => csr
-
-    bool ignore_read = (!mem_read.empty() &&
-                        ((magic_addrs.count(mem_read_addr) ||
-                          (tohost_addr && mem_read_addr == tohost_addr) ||
-                          (fromhost_addr && mem_read_addr == fromhost_addr) ||
-                          (CLINT_BASE <= mem_read_addr &&
-                           mem_read_addr < (CLINT_BASE + CLINT_SIZE)))));
-
-    // check the type is compliant with writeback first
-    if ((type == 0 || type == 1))
-      scalar_wb = true;
-    if (type == 2) {
-      vector_wb = true;
-    }
-    if (type == 3) continue;
-
-
-    if ((rd != 0 && type == 0) || type == 1) {
-      // Override reads from some CSRs
-      uint64_t csr_addr = (insn >> 20) & 0xfff;
-      bool csr_read = (insn & 0x7f) == 0x73;
-      if (csr_read)
-        printf("CSR read %lx\n", csr_addr);
-      if (csr_read && ((csr_addr == 0xf13) ||                   // mimpid
-                       (csr_addr == 0xf12) ||                   // marchid
-                       (csr_addr == 0xf11) ||                   // mvendorid
-                       (csr_addr == 0xb00) ||                   // mcycle
-                       (csr_addr == 0xb02) ||                   // minstret
-                       (csr_addr >= 0x3b0 && csr_addr <= 0x3ef) // pmpaddr
-                       )) {
-        printf("CSR override\n");
-        s->XPR.write(rd, wdata);
-      } else if (ignore_read)  {
-        // Don't check reads from tohost, reads from magic memory, or reads
-        // from clint Technically this could be buggy because log_mem_read
-        // only reports vaddrs, but no software ever should access
-        // tohost/fromhost/clint with vaddrs anyways
-        printf("Read override %lx\n", mem_read_addr);
-        s->XPR.write(rd, wdata);
-      } else if (wdata != regwrite.second.v[0]) {
-        printf("%d wdata mismatch reg %d %lx != %lx\n", cycle, rd,
-               regwrite.second.v[0], wdata);
-        exit(1);
+      // Try to remember magic_mem addrs, and ignore these in the future
+      if ( waddr == tohost_addr && w_data >= info->mem0_base && w_data < (info->mem0_base + info->mem0_size)) {
+        printf("Probable magic mem %lx\n", w_data);
+        magic_addrs.insert(w_data);
       }
     }
 
-    if (scalar_wb ^ has_wdata) {
-      printf("Scalar behavior divergence between spike and DUT\n");
-      exit(-1);
+    bool scalar_wb = false;
+    bool vector_wb = false;
+    uint32_t vector_cnt = 0;
+
+    for (auto &regwrite : log) {
+
+      //TODO: scaling to multi issue reads?
+      reg_t mem_read_addr = mem_read.empty() ? 0 : std::get<0>(mem_read[0]);
+
+      int rd = regwrite.first >> 4;
+      int type = regwrite.first & 0xf;
+
+      // 0 => int
+      // 1 => fp
+      // 2 => vec
+      // 3 => vec hint
+      // 4 => csr
+
+      bool ignore_read = (!mem_read.empty() &&
+                          ((magic_addrs.count(mem_read_addr) ||
+                           (tohost_addr && mem_read_addr == tohost_addr) ||
+                           (fromhost_addr && mem_read_addr == fromhost_addr) ||
+                           (CLINT_BASE <= mem_read_addr && mem_read_addr < (CLINT_BASE + CLINT_SIZE)))));
+
+      // check the type is compliant with writeback first
+      if ((type == 0 || type == 1))
+        scalar_wb = true;
+      if (type == 2) {
+        vector_wb = true;
+      }
+      if (type == 3) continue;
+
+
+      if ((rd != 0 && type == 0) || type == 1) {
+        // Override reads from some CSRs
+        uint64_t csr_addr = (insn >> 20) & 0xfff;
+        bool csr_read = (insn & 0x7f) == 0x73;
+        if (csr_read)
+          printf("CSR read %lx\n", csr_addr);
+        if (csr_read && ((csr_addr == 0xf13) ||                   // mimpid
+                         (csr_addr == 0xf12) ||                   // marchid
+                         (csr_addr == 0xf11) ||                   // mvendorid
+                         (csr_addr == 0xb00) ||                   // mcycle
+                         (csr_addr == 0xb02) ||                   // minstret
+                         (csr_addr >= 0x3b0 && csr_addr <= 0x3ef) // pmpaddr
+                         )) {
+          printf("CSR override\n");
+          s->XPR.write(rd, wdata);
+        } else if (ignore_read)  {
+          // Don't check reads from tohost, reads from magic memory, or reads
+          // from clint Technically this could be buggy because log_mem_read
+          // only reports vaddrs, but no software ever should access
+          // tohost/fromhost/clint with vaddrs anyways
+          printf("Read override %lx\n", mem_read_addr);
+          s->XPR.write(rd, wdata);
+        } else if (wdata != regwrite.second.v[0]) {
+          printf("%d wdata mismatch reg %d %lx != %lx\n", cycle, rd,
+                 regwrite.second.v[0], wdata);
+          exit(1);
+        }
+      }
+
+      // TODO FIX: Rocketchip TracedInstruction.wdata should be Valid(UInt)
+      // if (scalar_wb ^ has_wdata) {
+      //   printf("Scalar wdata behavior divergence between spike and DUT\n");
+      //   exit(-1);
+      // }
     }
   }
 }
