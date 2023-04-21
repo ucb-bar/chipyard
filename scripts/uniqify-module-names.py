@@ -71,14 +71,10 @@ def dfs_update_modules(tree, common_fnames, visited, top_fnames):
   cur_file = cur_module + ".sv"
   new_file = None
 
-  # cur_file is in the common list, generate a new file
-  if cur_file in common_fnames:
+  # cur_file is in the common list, or is a ancestor of of them, generate a new file
+  if (cur_file in common_fnames) or len(childs_to_update) > 0:
     new_file = generate_copy(cur_file, MODEL_SFX)
     update_filelist(cur_file, os.path.basename(new_file))
-
-  # has some child to update, but new_file wasn't generated
-  if (new_file is None) and len(childs_to_update) > 0:
-    new_file = os.path.join(args.gcpath, cur_file)
 
   for submodule_name in childs_to_update:
     if (submodule_name + ".sv") in common_fnames:
