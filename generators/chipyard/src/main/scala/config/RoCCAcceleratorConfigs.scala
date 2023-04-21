@@ -56,3 +56,19 @@ class HwachaLargeBoomConfig extends Config(
   new boom.common.WithNLargeBooms(1) ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
+
+class EinsteinRocketConfig extends Config(
+  new einstein.DefaultEinsteinConfig ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class LargeEinsteinRocketConfig extends Config(
+  new einstein.LargeDenseEinsteinConfig ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class SparseDenseEinsteinRocketConfig extends Config(
+  new einstein.SparseDenseEinsteinConfig ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
