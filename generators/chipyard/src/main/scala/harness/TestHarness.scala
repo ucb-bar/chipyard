@@ -4,9 +4,10 @@ import chisel3._
 
 import scala.collection.mutable.{ArrayBuffer, LinkedHashMap}
 import freechips.rocketchip.diplomacy.{LazyModule}
-import org.chipsalliance.cde.config.{Field, Parameters}
+import org.chipsalliance.cde.config.{Config, Field, Parameters}
 import freechips.rocketchip.util.{ResetCatchAndSync}
 import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters, ClockSinkParameters, ClockParameters}
+import freechips.rocketchip.stage.phases.TargetDirKey
 
 import chipyard.iobinders.HasIOBinders
 import chipyard.clocking.{SimplePllConfiguration, ClockDividerN}
@@ -20,6 +21,10 @@ case object MultiChipParameters extends Field[Seq[Parameters]](Nil)
 case object BuildTop extends Field[Parameters => LazyModule]((p: Parameters) => new ChipTop()(p))
 case object DefaultClockFrequencyKey extends Field[Double](100.0) // MHz
 case object HarnessClockInstantiatorKey extends Field[() => HarnessClockInstantiator](() => new DividerOnlyHarnessClockInstantiator)
+
+class WithMultiChip(p: Parameters) extends Config((site, here, up) => {
+  case MultiChipParameters => up(MultiChipParameters) :+ p
+})
 
 trait HasHarnessSignalReferences {
   implicit val p: Parameters
@@ -42,10 +47,14 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
   val buildtopClock = Wire(Clock())
   val buildtopReset = Wire(Reset())
 
-  val chipParameters = if (p(MultiChipParameters).isEmpty) Seq(p) else p(MultiChipParameters)
+  val nChips = if (p(MultiChipParameters).isEmpty) 1 else p(MultiChipParameters).size
+  def chipParameters(i: Int) = if (p(MultiChipParameters).isEmpty) p else p(MultiChipParameters)(i).alterPartial {
+    case TargetDirKey => p(TargetDirKey)
+  }
 
-  val lazyDuts = chipParameters.zipWithIndex.map {
-    case (q, i) => LazyModule(q(BuildTop)(q)).suggestName(s"chiptop$i")
+  val lazyDuts = (0 until nChips).map { i =>
+    val q: Parameters = chipParameters(i)
+    LazyModule(q(BuildTop)(q)).suggestName(s"chiptop$i")
   }
   val duts = lazyDuts.map(l => Module(l.module))
 
