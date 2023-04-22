@@ -131,3 +131,11 @@ class WithTestChipBusFreqs extends Config(
   new boom.common.WithRationalBoomTiles ++ // Add rational crossings between BoomTile and uncore
   new testchipip.WithAsynchronousSerialSlaveCrossing // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
 )
+
+class WithNoTileClockGaters extends Config((site, here, up) => {
+  case ChipyardPRCIControlKey => up(ChipyardPRCIControlKey).copy(enableTileClockGating = false)
+})
+
+class WithNoTileResetSetters extends Config((site, here, up) => {
+  case ChipyardPRCIControlKey => up(ChipyardPRCIControlKey).copy(enableTileResetSetting = false)
+})

@@ -5,7 +5,7 @@ import chisel3._
 import chisel3.util.{log2Up}
 
 import org.chipsalliance.cde.config.{Config}
-import freechips.rocketchip.devices.tilelink.{BootROMLocated, PLICKey}
+import freechips.rocketchip.devices.tilelink.{BootROMLocated, PLICKey, CLINTKey}
 import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI}
 import freechips.rocketchip.stage.phases.TargetDirKey
 import freechips.rocketchip.subsystem._
@@ -21,8 +21,11 @@ import chipyard.{ExtTLMem}
 
 // Set the bootrom to the Chipyard bootrom
 class WithBootROM extends Config((site, here, up) => {
-  case BootROMLocated(x) => up(BootROMLocated(x), site)
+  case BootROMLocated(x) => {
+    require(site(BootAddrRegKey).isDefined)
+    up(BootROMLocated(x), site)
       .map(_.copy(contentFileName = s"${site(TargetDirKey)}/bootrom.rv${site(XLen)}.img"))
+  }
 })
 
 // DOC include start: gpio config fragment
@@ -86,4 +89,20 @@ class WithExtMemIdBits(n: Int) extends Config((site, here, up) => {
 
 class WithNoPLIC extends Config((site, here, up) => {
   case PLICKey => None
+})
+
+class WithNoCLINT extends Config((site, here, up) => {
+  case CLINTKey => None
+})
+
+class WithNoBootROM extends Config((site, here, up) => {
+  case BootROMLocated(_) => None
+})
+
+class WithNoBusErrorDevices extends Config((site, here, up) => {
+  case SystemBusKey => up(SystemBusKey).copy(errorDevice = None)
+  case ControlBusKey => up(ControlBusKey).copy(errorDevice = None)
+  case PeripheryBusKey => up(PeripheryBusKey).copy(errorDevice = None)
+  case MemoryBusKey => up(MemoryBusKey).copy(errorDevice = None)
+  case FrontBusKey => up(FrontBusKey).copy(errorDevice = None)
 })
