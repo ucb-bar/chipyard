@@ -420,6 +420,16 @@ class WithTLMemPunchthrough extends OverrideIOBinder({
   }
 })
 
+class WithUARTTSIPunchthrough extends OverrideIOBinder({
+  (system: CanHavePeripheryUARTTSITLClient) => {
+    val uart_tsi = system.uart_tsi.map { uart =>
+      val uart_tsi = IO(new UARTPortIO(uart.c))
+      uart_tsi <> uart
+      uart_tsi
+    }
+    (uart_tsi.toSeq, Nil)
+  }
+})
 
 class WithDontTouchPorts extends OverrideIOBinder({
   (system: DontTouch) => system.dontTouchPorts(); (Nil, Nil)

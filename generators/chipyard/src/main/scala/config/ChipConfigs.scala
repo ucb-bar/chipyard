@@ -4,7 +4,7 @@ import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy._
 
 // A simple config demonstrating how to set up a basic chip in Chipyard
-class ChipLikeQuadRocketConfig extends Config(
+class ChipLikeRocketConfig extends Config(
   //==================================
   // Set up TestHarness
   //==================================
@@ -15,7 +15,7 @@ class ChipLikeQuadRocketConfig extends Config(
   // Set up tiles
   //==================================
   new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(3, 3) ++    // Add rational crossings between RocketTile and uncore
-  new freechips.rocketchip.subsystem.WithNBigCores(4) ++                     // quad-core (4 RocketTiles)
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++                     // 1 RocketTile
 
   //==================================
   // Set up I/O
@@ -35,3 +35,23 @@ class ChipLikeQuadRocketConfig extends Config(
 
   new chipyard.config.AbstractConfig)
 
+class ChipBringupHostConfig extends Config(
+  new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++
+  new chipyard.harness.WithSerialTLTiedOff ++
+  new chipyard.clocking.WithPassthroughClockGenerator(1) ++
+
+  new testchipip.WithSerialTLMem(base = 0, size = BigInt("80000000", 16), isMainMemory = false) ++
+  new testchipip.WithSerialTLClockDirection(provideClock = true) ++
+  new testchipip.WithUARTTSITLClient ++
+
+  new chipyard.config.WithFrontBusFrequency(75.0) ++
+  new chipyard.config.WithMemoryBusFrequency(75.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(75.0) ++
+
+  new chipyard.NoCoresConfig
+)
+
+class TetheredChipLikeRocketConfig extends Config(
+  new chipyard.harness.WithMultiChip(0, new ChipLikeRocketConfig) ++
+  new chipyard.harness.WithMultiChip(1, new ChipBringupHostConfig)
+)

@@ -17,13 +17,15 @@ import chipyard.{ChipTop}
 // Chipyard Test Harness
 // -------------------------------
 
-case object MultiChipParameters extends Field[Seq[Parameters]](Nil)
+case object MultiChipNChips extends Field[Int](0) // 0 means ignore MultiChipParams
+case class MultiChipParameters(chipId: Int) extends Field[Parameters]
 case object BuildTop extends Field[Parameters => LazyModule]((p: Parameters) => new ChipTop()(p))
 case object DefaultClockFrequencyKey extends Field[Double](100.0) // MHz
 case object HarnessClockInstantiatorKey extends Field[() => HarnessClockInstantiator](() => new DividerOnlyHarnessClockInstantiator)
 
-class WithMultiChip(p: Parameters) extends Config((site, here, up) => {
-  case MultiChipParameters => up(MultiChipParameters) :+ p
+class WithMultiChip(id: Int, p: Parameters) extends Config((site, here, up) => {
+  case MultiChipParameters(`id`) => p
+  case MultiChipNChips => site(MultiChipNChips) max (id - 1)
 })
 
 trait HasHarnessSignalReferences {
@@ -47,13 +49,15 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
   val buildtopClock = Wire(Clock())
   val buildtopReset = Wire(Reset())
 
-  val nChips = if (p(MultiChipParameters).isEmpty) 1 else p(MultiChipParameters).size
-  def chipParameters(i: Int) = if (p(MultiChipParameters).isEmpty) p else p(MultiChipParameters)(i).alterPartial {
-    case TargetDirKey => p(TargetDirKey)
+  val chipParameters = if (p(MultiChipNChips) == 0) {
+    Seq(p)
+  } else {
+    (0 until p(MultiChipNChips)).map { i => p(MultiChipParameters(i)).alterPartial {
+      case TargetDirKey => p(TargetDirKey) // hacky fix
+    }}
   }
 
-  val lazyDuts = (0 until nChips).map { i =>
-    val q: Parameters = chipParameters(i)
+  val lazyDuts = chipParameters.zipWithIndex.map { case (q,i) =>
     LazyModule(q(BuildTop)(q)).suggestName(s"chiptop$i")
   }
   val duts = lazyDuts.map(l => Module(l.module))

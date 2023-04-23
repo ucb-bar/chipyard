@@ -73,14 +73,17 @@ class WithTLBackingMemory extends Config((site, here, up) => {
 
 class WithSerialTLBackingMemory extends Config((site, here, up) => {
   case ExtMem => None
-  case SerialTLKey => up(SerialTLKey, site).map { k => k.copy(
-    memParams = {
-      val memPortParams = up(ExtMem, site).get
-      require(memPortParams.nMemoryChannels == 1)
-      memPortParams.master
-    },
-    isMemoryDevice = true
-  )}
+  case SerialTLKey => {
+    val memPortParams = up(ExtMem).get
+    require(memPortParams.nMemoryChannels == 1)
+    val memParams = memPortParams.master
+    up(SerialTLKey, site).map { k => k.copy(
+      serialManagerParams = Some(k.serialManagerParams.getOrElse(SerialTLManagerParams(memParams)).copy(
+        memParams = memParams,
+        isMemoryDevice = true
+      ))
+    )}
+  }
 })
 
 class WithExtMemIdBits(n: Int) extends Config((site, here, up) => {

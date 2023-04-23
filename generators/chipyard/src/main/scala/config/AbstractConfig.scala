@@ -21,6 +21,7 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithSimAXIMMIO ++                        // add SimAXIMem for axi4 mmio port, if enabled
   new chipyard.harness.WithTieOffInterrupts ++                  // tie-off interrupt ports, if present
   new chipyard.harness.WithTieOffL2FBusAXI ++                   // tie-off external AXI4 master, if present
+  new chipyard.harness.WithUARTTSIAdapter ++
   new chipyard.harness.WithCustomBootPinPlusArg ++
   new chipyard.harness.WithClockAndResetFromHarness ++
 
@@ -40,6 +41,7 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithTraceIOPunchthrough ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
   new chipyard.iobinders.WithCustomBootPin ++
+  new chipyard.iobinders.WithUARTTSIPunchthrough ++
 
   // Default behavior is to use a divider-only clock-generator
   // This works in VCS, Verilator, and FireSim/
