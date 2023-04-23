@@ -30,9 +30,7 @@ import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvon
 
 import scala.reflect.{ClassTag}
 
-case object HarnessBinders extends Field[Map[String, (Any, HasHarnessSignalReferences, Seq[Data]) => Unit]](
-  Map[String, (Any, HasHarnessSignalReferences, Seq[Data]) => Unit]().withDefaultValue((t: Any, th: HasHarnessSignalReferences, d: Seq[Data]) => ())
-)
+case object HarnessBinders extends Field[HarnessBinderMap](HarnessBinderMapDefault)
 
 object ApplyHarnessBinders {
   def apply(th: HasHarnessSignalReferences, sys: LazyModule, portMap: Map[String, Seq[Data]])(implicit p: Parameters): Unit = {
@@ -48,15 +46,10 @@ object ApplyHarnessBinders {
 class HarnessBinder[T, S <: HasHarnessSignalReferences, U <: Data](composer: ((T, S, Seq[U]) => Unit) => (T, S, Seq[U]) => Unit)(implicit systemTag: ClassTag[T], harnessTag: ClassTag[S], portTag: ClassTag[U]) extends Config((site, here, up) => {
   case HarnessBinders => up(HarnessBinders, site) + (systemTag.runtimeClass.toString ->
       ((t: Any, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
-        val pts = ports.collect({case p: U => p})
-        require (pts.length == ports.length, s"Port type mismatch between IOBinder and HarnessBinder: ${portTag}")
+        val pts = ports.map(_.asInstanceOf[U])
         val upfn = up(HarnessBinders, site)(systemTag.runtimeClass.toString)
-        th match {
-          case th: S =>
-            t match {
-              case system: T => composer(upfn)(system, th, pts)
-              case _ =>
-            }
+        (th, t) match {
+          case (th: S, system: T) => composer(upfn)(system, th, pts)
           case _ =>
         }
       })
