@@ -125,3 +125,40 @@ class WithPLLSelectorDividerClockGenerator extends OverrideLazyIOBinder({
     }
   }
 })
+
+// This passes all clocks through to the TestHarness
+class WithPassthroughClockGenerator(nClockDomains: Int) extends OverrideLazyIOBinder({
+  (system: HasChipyardPRCI) => {
+    // Connect the implicit clock
+    implicit val p = GetSystemParameters(system)
+    val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
+    system.connectImplicitClockSinkNode(implicitClockSinkNode)
+    InModuleBody {
+      val implicit_clock = implicitClockSinkNode.in.head._1.clock
+      val implicit_reset = implicitClockSinkNode.in.head._1.reset
+      system.asInstanceOf[BaseSubsystem].module match { case l: LazyModuleImp => {
+        l.clock := implicit_clock
+        l.reset := implicit_reset
+      }}
+    }
+
+    val clockGroupsSourceNode = ClockGroupSourceNode(Seq.fill(nClockDomains) { ClockGroupSourceParameters() })
+    system.allClockGroupsNode :*= clockGroupsSourceNode
+
+    InModuleBody {
+      val reset_io = IO(Input(AsyncReset()))
+      val clock_ios = clockGroupsSourceNode.out.map { case (bundle, edge) =>
+        val freqs = edge.sink.members.map(_.take.map(_.freqMHz)).flatten
+        require(freqs.distinct.size == 1)
+        val clock_io = IO(Input(new ClockWithFreq(freqs.head))).suggestName(s"clock_${edge.sink.name}")
+        bundle.member.data.foreach { b =>
+          b.clock := clock_io.clock
+          b.reset := reset_io
+        }
+        clock_io
+      }
+      ((clock_ios :+ reset_io), Nil)
+    }
+  }
+})
+
