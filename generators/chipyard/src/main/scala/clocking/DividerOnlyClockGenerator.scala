@@ -46,13 +46,12 @@ object FrequencyUtils {
     maximumAllowableFreqMHz: Double,
     relativeThreshold: Double = 1.10,
     absoluteThreshold: Double = 0.01): ClockParameters = {
-
     require(requestedOutputs.nonEmpty)
     require(!requestedOutputs.contains(0.0))
     val requestedFreqs = requestedOutputs.map(_.freqMHz)
     val fastestFreq = requestedFreqs.max
     require(fastestFreq <= maximumAllowableFreqMHz)
-
+    require(maximumAllowableFreqMHz / fastestFreq <= 1000)
     val candidateFreqs =
       Seq.tabulate(Math.ceil(maximumAllowableFreqMHz / fastestFreq).toInt)(i => (i + 1) * fastestFreq)
     val errorTuples = candidateFreqs.map { f =>

@@ -23,7 +23,7 @@ import testchipip._
 
 import chipyard._
 import chipyard.clocking.{HasChipyardPRCI, ClockWithFreq}
-import chipyard.iobinders.{GetSystemParameters, JTAGChipIO}
+import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, HasIOBinders}
 
 import tracegen.{TraceGenSystemModuleImp}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
@@ -50,6 +50,7 @@ class MultiHarnessBinder[T, S <: HasHarnessSignalReferences, U <: Data](chip0: I
           ((c0: Any, c1: Any, th: HasHarnessSignalReferences, ports0: Seq[Data], ports1: Seq[Data]) => {
             val pts0 = ports0.map(_.asInstanceOf[U])
             val pts1 = ports1.map(_.asInstanceOf[U])
+            require(pts0.size == pts1.size)
             (c0, c1, th) match {
               case (c0: T, c1: T, th: S) => fn(c0, c1, th, pts0, pts1)
               case _ =>
@@ -57,3 +58,33 @@ class MultiHarnessBinder[T, S <: HasHarnessSignalReferences, U <: Data](chip0: I
           })
       )
     })
+
+object ApplyMultiHarnessBinders {
+  def apply(th: HasHarnessSignalReferences, chips: Seq[LazyModule])(implicit p: Parameters): Unit = {
+    Seq.tabulate(chips.size, chips.size) { case (i, j) => if (i != j) {
+      (chips(i), chips(j)) match {
+        case (l0: HasIOBinders, l1: HasIOBinders) => p(MultiHarnessBinders(i, j)).foreach {
+          case (s, f) => {
+            f(l0.lazySystem       , l1.lazySystem       , th, l0.portMap(s), l1.portMap(s))
+            f(l0.lazySystem.module, l1.lazySystem.module, th, l0.portMap(s), l1.portMap(s))
+          }
+        }
+        case _ =>
+      }
+    }}
+  }
+}
+
+class WithMultiChipSerialTL(chip0: Int, chip1: Int) extends MultiHarnessBinder(chip0, chip1, (
+  (system0: CanHavePeripheryTLSerial, system1: CanHavePeripheryTLSerial,
+    th: HasHarnessSignalReferences,
+    ports0: Seq[ClockedIO[SerialIO]], ports1: Seq[ClockedIO[SerialIO]]
+  ) => {
+    require(ports0.size == ports1.size)
+    (ports0 zip ports1).map { case (l, r) =>
+      l.clock <> r.clock
+      require(l.bits.w == r.bits.w)
+      l.bits.flipConnect(r.bits)
+    }
+  }
+))

@@ -25,16 +25,17 @@ case object HarnessClockInstantiatorKey extends Field[() => HarnessClockInstanti
 
 class WithMultiChip(id: Int, p: Parameters) extends Config((site, here, up) => {
   case MultiChipParameters(`id`) => p
-  case MultiChipNChips => site(MultiChipNChips) max (id - 1)
+  case MultiChipNChips => up(MultiChipNChips) max (id + 1)
 })
 
 trait HasHarnessSignalReferences {
   implicit val p: Parameters
   val harnessClockInstantiator = p(HarnessClockInstantiatorKey)()
   // clock/reset of the chiptop reference clock (can be different than the implicit harness clock/reset)
-  var refClockFreq: Double = p(DefaultClockFrequencyKey)
-  def setRefClockFreq(freqMHz: Double) = { refClockFreq = freqMHz }
-  def getRefClockFreq: Double = refClockFreq
+  private var refClockFreq: Double = p(DefaultClockFrequencyKey)
+  def setRefClockFreqMHz(freqMHz: Double) = { refClockFreq = freqMHz }
+  def getRefClockFreqHz: Double = refClockFreq * 1000000
+  def getRefClockFreqMHz: Double = refClockFreq
   def buildtopClock: Clock
   def buildtopReset: Reset
   def success: Bool
@@ -71,8 +72,9 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
     case _ =>
   }
 
-  val refClkBundle = harnessClockInstantiator.requestClockBundle("buildtop_reference_clock", getRefClockFreq * (1000 * 1000))
+  ApplyMultiHarnessBinders(this, lazyDuts)
 
+  val refClkBundle = harnessClockInstantiator.requestClockBundle("buildtop_reference_clock", getRefClockFreqHz)
   buildtopClock := refClkBundle.clock
   buildtopReset := WireInit(refClkBundle.reset)
 

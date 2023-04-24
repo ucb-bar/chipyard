@@ -325,9 +325,30 @@ class WithUARTTSIAdapter extends OverrideHarnessBinder({
   (system: CanHavePeripheryUARTTSITLClient, th: HasHarnessSignalReferences, ports: Seq[UARTPortIO]) => {
     require(ports.size <= 1)
     ports.foreach { port =>
-      val div = (th.refClockFreq * 1000000 / port.c.initBaudRate.doubleValue).toInt
+      val div = (th.getRefClockFreqHz / port.c.initBaudRate.doubleValue).toInt
       withClockAndReset(th.buildtopClock, th.buildtopReset) {
-        UARTAdapter.connect(Seq(port), div, forcePty = true)
+
+        val uart_port = Wire(new UARTPortIO(port.c))
+        uart_port := DontCare
+        UARTAdapter.connect(Seq(uart_port), div = div, forcePty = true)
+
+        val use_pty = PlusArg("uart_tsi_pty", 0, "Force the UART TSI to a PTY for the uart_tsi program").orR
+        val uart_to_ser = Module(new UARTToSerial(th.getRefClockFreqHz.toInt, port.c))
+        val width_adapter = Module(new SerialWidthAdapter(8, SerialAdapter.SERIAL_TSI_WIDTH))
+        val sim_ser = Module(new SimSerial)
+        sim_ser.io.clock := th.buildtopClock
+        sim_ser.io.reset := th.buildtopReset
+        sim_ser.io.serial <> width_adapter.io.wide
+        uart_to_ser.io.serial.flipConnect(width_adapter.io.narrow)
+        uart_to_ser.io.uart := DontCare
+        when (sim_ser.io.exit === 1.U) { th.success := true.B }
+
+        when (use_pty) {
+          uart_port <> port
+        } .otherwise {
+          uart_to_ser.io.uart.rxd := port.txd
+          port.rxd := uart_to_ser.io.uart.txd
+        }
       }
     }
   }
@@ -375,10 +396,7 @@ class WithClockAndResetFromHarness extends OverrideHarnessBinder({
   (system: HasChipyardPRCI, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
     implicit val p = GetSystemParameters(system)
     ports.map ({
-      case c: ClockWithFreq => {
-        th.setRefClockFreq(c.freqMHz)
-        c.clock := th.buildtopClock
-      }
+      case c: ClockWithFreq => c.clock := th.buildtopClock
       case r: AsyncReset => r := th.buildtopReset.asAsyncReset
     })
   }
