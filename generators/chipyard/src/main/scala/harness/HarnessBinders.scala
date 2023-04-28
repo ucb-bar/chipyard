@@ -152,13 +152,13 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
           val serial_bits = port.bits
           require(DataMirror.directionOf(port.clock) == Direction.Input)
           port.clock := th.buildtopClock
-          val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(
+          val harnessMultiClockAXIRAM = TSIHarness.connectMultiClockAXIRAM(
             system.serdesser.get,
             serial_bits,
             memOverSerialTLClockBundle,
             th.buildtopReset)
 // DOC include end: HarnessClockInstantiatorEx
-          val success = SerialAdapter.connectSimSerial(harnessMultiClockAXIRAM.module.io.tsi_ser, th.buildtopClock, th.buildtopReset.asBool)
+          val success = SimTSI.connect(Some(harnessMultiClockAXIRAM.module.io.tsi), th.buildtopClock, th.buildtopReset.asBool)
           when (success) { th.success := true.B }
 
           // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
@@ -313,8 +313,8 @@ class WithSimSerial extends OverrideHarnessBinder({
       require(DataMirror.directionOf(port.clock) == Direction.Input)
       port.clock := th.buildtopClock
       withClockAndReset(th.buildtopClock, th.buildtopReset) {
-        val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
-        val success = SerialAdapter.connectSimSerial(ram.module.io.tsi_ser, th.buildtopClock, th.buildtopReset.asBool)
+        val ram = TSIHarness.connectRAM(system.serdesser.get, bits, th.buildtopReset)
+        val success = SimTSI.connect(Some(ram.module.io.tsi), th.buildtopClock, th.buildtopReset.asBool)
         when (success) { th.success := true.B }
       }
     })
@@ -334,11 +334,11 @@ class WithUARTTSIAdapter extends OverrideHarnessBinder({
 
         val use_pty = PlusArg("uart_tsi_pty", 0, "Force the UART TSI to a PTY for the uart_tsi program").orR
         val uart_to_ser = Module(new UARTToSerial(th.getRefClockFreqHz.toInt, port.c))
-        val width_adapter = Module(new SerialWidthAdapter(8, SerialAdapter.SERIAL_TSI_WIDTH))
-        val sim_ser = Module(new SimSerial)
+        val width_adapter = Module(new SerialWidthAdapter(8, TSI.WIDTH))
+        val sim_ser = Module(new SimTSI)
         sim_ser.io.clock := th.buildtopClock
         sim_ser.io.reset := th.buildtopReset
-        sim_ser.io.serial <> width_adapter.io.wide
+        sim_ser.io.tsi <> width_adapter.io.wide
         uart_to_ser.io.serial.flipConnect(width_adapter.io.narrow)
         uart_to_ser.io.uart := DontCare
         when (sim_ser.io.exit === 1.U) { th.success := true.B }
@@ -396,7 +396,10 @@ class WithClockAndResetFromHarness extends OverrideHarnessBinder({
   (system: HasChipyardPRCI, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
     implicit val p = GetSystemParameters(system)
     ports.map ({
-      case c: ClockWithFreq => c.clock := th.buildtopClock
+      case c: ClockWithFreq => {
+        val clockBundle = th.harnessClockInstantiator.requestClockBundle(s"clock_${c.freqMHz}", c.freqMHz * 1000000)
+        c.clock := clockBundle.clock
+      }
       case r: AsyncReset => r := th.buildtopReset.asAsyncReset
     })
   }

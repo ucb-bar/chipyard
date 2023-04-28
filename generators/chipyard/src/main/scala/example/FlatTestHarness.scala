@@ -11,7 +11,7 @@ import freechips.rocketchip.util.{PlusArg}
 import freechips.rocketchip.subsystem.{CacheBlockBytes}
 import freechips.rocketchip.devices.debug.{SimJTAG}
 import freechips.rocketchip.jtag.{JTAGIO}
-import testchipip.{SerialTLKey, SerialAdapter, UARTAdapter, SimDRAM}
+import testchipip.{SerialTLKey, UARTAdapter, SimDRAM, SimTSI, TSIHarness}
 import chipyard.harness.{BuildTop}
 
 // A "flat" TestHarness that doesn't use IOBinders
@@ -51,12 +51,12 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
     memOverSerialTLClockBundle.reset := reset
     val serial_bits = dut.serial_tl_pad.bits
     dut.serial_tl_pad.clock := clock
-    val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(
+    val harnessMultiClockAXIRAM = TSIHarness.connectMultiClockAXIRAM(
       lazyDut.system.serdesser.get,
       serial_bits,
       memOverSerialTLClockBundle,
       reset)
-    io.success := SerialAdapter.connectSimSerial(harnessMultiClockAXIRAM.module.io.tsi_ser, clock, reset)
+    io.success := SimTSI.connect(Some(harnessMultiClockAXIRAM.module.io.tsi), clock, reset)
 
     // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
     (harnessMultiClockAXIRAM.mem_axi4.get zip harnessMultiClockAXIRAM.memNode.get.edges.in).map { case (axi_port, edge) =>
