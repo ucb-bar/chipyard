@@ -95,13 +95,16 @@ def bfs_update(tree, common_fnames, ext_dict, filelist):
 
     # if the module is common, make a copy & update its instance in its parent
     if mod in common_fnames:
-      mod_updated = True
-      new_file = generate_copy(cur_file, MODEL_SFX)
-      filelist.append((mod, new_file))
-      if parent is not None and ((parent, mod) not in updated_submodule):
-        parent_file = os.path.join(args.gcpath, parent + "." + ext_dict[parent])
-        bash(f"sed -i s/\"{mod} \"/\"{mod}_{MODEL_SFX} \"/ {parent_file}")
-        updated_submodule.add((parent, mod))
+      try:
+        new_file = generate_copy(cur_file, MODEL_SFX)
+        filelist.append((mod, new_file))
+        if parent is not None and ((parent, mod) not in updated_submodule):
+          parent_file = os.path.join(args.gcpath, parent + "." + ext_dict[parent])
+          bash(f"sed -i s/\"{mod} \"/\"{mod}_{MODEL_SFX} \"/ {parent_file}")
+          updated_submodule.add((parent, mod))
+        mod_updated = True
+      except:
+        print(f"No corresponding file for {cur_file}")
     else:
       filelist.append((mod, cur_file))
 
