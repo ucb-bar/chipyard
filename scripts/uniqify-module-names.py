@@ -129,7 +129,6 @@ def bfs_collect_modules(tree, child_to_ignore = None):
     modules.append(mod)
     for c in child:
       if c['module_name'] != child_to_ignore:
-        print(c['module_name'])
         q.append((c['instance_name'], c['module_name'], c['instances']))
   return modules
 
@@ -173,34 +172,13 @@ def main():
     imhj_data = json.load(imhj)
     modules_under_model = set(bfs_collect_modules(imhj_data, child_to_ignore=args.dut))
 
-  for x in modules_under_model:
-    print(f"model only {x}")
-
   with open(args.top_hier_json) as imhj:
     imhj_data = json.load(imhj)
     modules_under_top = set(bfs_collect_modules(imhj_data))
 
-  for x in modules_under_top:
-    print(f"top only {x}")
-
   common_modules = modules_under_top.intersection(modules_under_model)
-
-  print(f"modules under top {len(modules_under_top)}")
-  print(f"modules under model {len(modules_under_model)}")
-  print(f"modules under both {len(common_modules)}")
-  print(f"total modules {len(modules_under_top) + len(modules_under_model) - len(common_modules)}")
-
   write_filelist(modules_under_top, args.out_dut_filelist)
-
   ext_dict = get_file_ext(args.in_all_filelist)
-  print(f"total modules in filelist {len(ext_dict)}")
-
-  for x in common_modules:
-    print(f"common {x}")
-
-# for x in common_fnames:
-# print(f"common_fnames {x}")
-
 
   with open(args.model_hier_json) as imhj:
     imhj_data = json.load(imhj)
@@ -213,7 +191,6 @@ def main():
       json.dump(imhj_data, out_file, indent=2)
 
       updated_modules_under_model = set(bfs_collect_modules(imhj_data, child_to_ignore=args.dut))
-      print(filelist)
       write_filelist_model(set(filelist), args.out_model_filelist)
 
 if __name__ == "__main__":
