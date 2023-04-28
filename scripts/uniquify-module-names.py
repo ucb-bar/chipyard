@@ -141,7 +141,11 @@ def write_filelist(modules, out_file):
     for path in fl:
         writeOut = False
         for dm in modules:
-            if dm in path:
+            bm_ext = os.path.basename(path).split(".")
+            bm_ext.pop()
+            bm = ".".join(bm_ext)
+            print(bm)
+            if dm == bm:
                 writeOut = True
                 break
 
