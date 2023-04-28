@@ -97,14 +97,13 @@ def bfs_update(tree, common_fnames, ext_dict, filelist):
     if mod in common_fnames:
       mod_updated = True
       new_file = generate_copy(cur_file, MODEL_SFX)
-      filelist.append(new_file)
+      filelist.append((mod, new_file))
       if parent is not None and ((parent, mod) not in updated_submodule):
-        print(mod, parent)
         parent_file = os.path.join(args.gcpath, parent + "." + ext_dict[parent])
-        bash(f"sed -i s/\"{mod}\"/\"{mod}_{MODEL_SFX}\"/ {parent_file}")
+        bash(f"sed -i s/\"{mod} \"/\"{mod}_{MODEL_SFX} \"/ {parent_file}")
         updated_submodule.add((parent, mod))
     else:
-      filelist.append(cur_file)
+      filelist.append((mod, cur_file))
 
     # set the parent module name
     new_mod = mod
@@ -150,20 +149,24 @@ def write_filelist(modules, out_file):
             else:
                 df.write(f"{path}")
 
-def write_filelist_model(modules, out_file):
+def write_filelist_model(modules, out_file, ext_dict):
   with open(out_file, "w") as df:
-    for m in modules:
-      if not args.target_dir in m:
-        df.write(f"{args.target_dir}/{m}\n")
-      else:
-        df.write(f"{m}\n")
+    for (m, fname) in modules:
+      if m in ext_dict.keys():
+        if not args.target_dir in fname:
+          df.write(f"{args.target_dir}/{fname}\n")
+        else:
+          df.write(f"{fname}\n")
 
 def get_file_ext(all_filelist):
   ext_dict = dict()
-  with open(args.in_all_filelist) as fl:
+  with open(all_filelist) as fl:
     for path in fl:
       fname = os.path.basename(path)
-      (module, ext) = fname.strip().split(".")
+      fname_strip = fname.strip().split(".")
+      ext = fname_strip[-1]
+      fname_strip.pop()
+      module = ".".join(fname_strip)
       ext_dict[module] = ext
   return ext_dict
 
@@ -189,9 +192,7 @@ def main():
       bfs_update(imhj_data, common_modules, ext_dict, filelist)
       dfs_update_modules(imhj_data, common_modules, visited, ext_dict)
       json.dump(imhj_data, out_file, indent=2)
-
-      updated_modules_under_model = set(bfs_collect_modules(imhj_data, child_to_ignore=args.dut))
-      write_filelist_model(set(filelist), args.out_model_filelist)
+      write_filelist_model(set(filelist), args.out_model_filelist, ext_dict)
 
 if __name__ == "__main__":
   main()

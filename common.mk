@@ -232,7 +232,7 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIR
 # DOC include end: FirrtlCompiler
 
 $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) &: $(MFC_MODEL_HRCHY_JSON) $(MFC_TOP_HRCHY_JSON) $(MFC_FILELIST) $(MFC_BB_MODS_FILELIST)
-	$(base_dir)/scripts/uniqify-module-names.py \
+	$(base_dir)/scripts/uniquify-module-names.py \
 		--model-hier-json $(MFC_MODEL_HRCHY_JSON) \
 		--top-hier-json $(MFC_TOP_HRCHY_JSON) \
 		--in-all-filelist $(MFC_FILELIST) \
