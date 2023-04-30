@@ -134,7 +134,7 @@ def bfs_collect_modules(tree, child_to_ignore = None):
         q.append((c['instance_name'], c['module_name'], c['instances']))
   return modules
 
-def write_filelist(modules, out_file):
+def write_filelist(modules, out_file, files_written):
   with open(out_file, "w") as df, \
        open(args.in_all_filelist) as fl:
     # add paths that correspond to modules to output file
@@ -144,19 +144,20 @@ def write_filelist(modules, out_file):
             bm_ext = os.path.basename(path).split(".")
             bm_ext.pop()
             bm = ".".join(bm_ext)
-            print(bm)
-            if dm == bm:
+            print(dm, bm, bm_ext)
+            if (dm == bm) or (dm == bm_ext[0]):
                 writeOut = True
                 break
 
         # prepend the target directory to get filelist with absolute paths
         if writeOut:
+            files_written.add(os.path.basename(path))
             if not args.target_dir in path:
                 df.write(f"{args.target_dir}/{path}")
             else:
                 df.write(f"{path}")
 
-def write_filelist_model(modules, out_file, ext_dict):
+def write_filelist_model(modules, out_file, ext_dict, files_written):
   with open(out_file, "w") as df:
     for (m, fname) in modules:
       if m in ext_dict.keys():
@@ -164,10 +165,7 @@ def write_filelist_model(modules, out_file, ext_dict):
           df.write(f"{args.target_dir}/{fname}\n")
         else:
           df.write(f"{fname}\n")
-
-        if len(ext_dict[m]) > 1:
-          assert(len(ext_dict[m]) == 2)
-          df.write(f"{args.target_dir}/{m}.{ext_dict[m][1]}\n")
+        files_written.add(os.path.basename(fname))
 
 def get_file_ext(all_filelist):
   ext_dict = dict()
@@ -188,12 +186,15 @@ def main():
     imhj_data = json.load(imhj)
     modules_under_model = set(bfs_collect_modules(imhj_data, child_to_ignore=args.dut))
 
+
+  files_written = set()
+
   with open(args.top_hier_json) as imhj:
     imhj_data = json.load(imhj)
     modules_under_top = set(bfs_collect_modules(imhj_data))
 
   common_modules = modules_under_top.intersection(modules_under_model)
-  write_filelist(modules_under_top, args.out_dut_filelist)
+  write_filelist(modules_under_top, args.out_dut_filelist, files_written)
   ext_dict = get_file_ext(args.in_all_filelist)
 
   with open(args.model_hier_json) as imhj:
@@ -205,7 +206,15 @@ def main():
       bfs_update(imhj_data, common_modules, ext_dict, filelist)
       dfs_update_modules(imhj_data, common_modules, visited)
       json.dump(imhj_data, out_file, indent=2)
-      write_filelist_model(set(filelist), args.out_model_filelist, ext_dict)
+      write_filelist_model(set(filelist), args.out_model_filelist, ext_dict, files_written)
+
+  with open(args.out_model_filelist, "a") as of, \
+       open(args.in_all_filelist) as fl:
+    for path in fl:
+      fname = os.path.basename(path)
+      ext = fname.strip().split(".")[-1]
+      if (fname not in files_written) and (ext == "cc"):
+        of.write(f"{args.target_dir}/{fname}")
 
 if __name__ == "__main__":
   main()
