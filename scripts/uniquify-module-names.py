@@ -54,14 +54,14 @@ def generate_copy(c, sfx):
   bash(f"sed -i s/\"module {cur_name}\"/\"module {new_name}\"/ {new_file}")
   return new_file
 
-def dfs_update_modules(tree, common_fnames, visited, ext_dict):
+def dfs_update_modules(tree, common_fnames, visited):
   # List of direct submodules to update
   childs_to_update = list()
   for child in tree['instances']:
     # We don't have to change stuff that are under the dut
     if (child['module_name'] == args.dut):
       continue
-    if dfs_update_modules(child, common_fnames, visited, ext_dict):
+    if dfs_update_modules(child, common_fnames, visited):
       childs_to_update.append(child['module_name'])
       if (child['module_name']) in common_fnames:
         child['module_name'] = child['module_name'] + "_" + MODEL_SFX
@@ -87,7 +87,7 @@ def bfs_update(tree, common_fnames, ext_dict, filelist):
     (inst, mod, child, parent) = front
 
     try:
-      cur_file = mod + "." + ext_dict[mod]
+      cur_file = mod + "." + ext_dict[mod][0]
     except:
       cur_file = mod + ".sv"
 
@@ -99,7 +99,7 @@ def bfs_update(tree, common_fnames, ext_dict, filelist):
         new_file = generate_copy(cur_file, MODEL_SFX)
         filelist.append((mod, new_file))
         if parent is not None and ((parent, mod) not in updated_submodule):
-          parent_file = os.path.join(args.gcpath, parent + "." + ext_dict[parent])
+          parent_file = os.path.join(args.gcpath, parent + "." + ext_dict[parent][0])
           bash(f"sed -i s/\"{mod} \"/\"{mod}_{MODEL_SFX} \"/ {parent_file}")
           updated_submodule.add((parent, mod))
         mod_updated = True
@@ -165,6 +165,10 @@ def write_filelist_model(modules, out_file, ext_dict):
         else:
           df.write(f"{fname}\n")
 
+        if len(ext_dict[m]) > 1:
+          assert(len(ext_dict[m]) == 2)
+          df.write(f"{args.target_dir}/{m}.{ext_dict[m][1]}\n")
+
 def get_file_ext(all_filelist):
   ext_dict = dict()
   with open(all_filelist) as fl:
@@ -174,7 +178,9 @@ def get_file_ext(all_filelist):
       ext = fname_strip[-1]
       fname_strip.pop()
       module = ".".join(fname_strip)
-      ext_dict[module] = ext
+      if module not in ext_dict.keys():
+        ext_dict[module] = list()
+      ext_dict[module].append(ext)
   return ext_dict
 
 def main():
@@ -197,7 +203,7 @@ def main():
       visited = set()
       filelist = list()
       bfs_update(imhj_data, common_modules, ext_dict, filelist)
-      dfs_update_modules(imhj_data, common_modules, visited, ext_dict)
+      dfs_update_modules(imhj_data, common_modules, visited)
       json.dump(imhj_data, out_file, indent=2)
       write_filelist_model(set(filelist), args.out_model_filelist, ext_dict)
 
