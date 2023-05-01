@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "encoding.h"
+#include <riscv-pk/encoding.h>
 #include "marchid.h"
 
 int main(void) {
