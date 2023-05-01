@@ -1,0 +1,9 @@
+{
+  "name" : "resnet50-linux",
+  "base" : "br-base.json",
+  "workdir" : "..",
+  "host-init" : "build.sh",
+  "overlay" : "overlay",
+  "command" : "/root/resnet50-linux",
+  "spike-args" : "--extension=gemmini"
+}
