@@ -18,6 +18,7 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 
 import chipyard.clocking.{ChipyardPRCIControlKey}
+import chipyard.harness.{HarnessClockInstantiatorKey}
 import icenet._
 
 import firesim.bridges._
@@ -43,6 +44,11 @@ class WithoutClockGating extends Config((site, here, up) => {
   case ChipyardPRCIControlKey => up(ChipyardPRCIControlKey, site).copy(enableTileClockGating = false)
 })
 
+// Use the firesim clock bridge instantiator. this is required
+class WithFireSimHarnessClockBridgeInstantiator extends Config((site, here, up) => {
+  case HarnessClockInstantiatorKey => () => new FireSimClockBridgeInstantiator
+})
+
 // Testing configurations
 // This enables printfs used in testing
 class WithScalaTestFeatures extends Config((site, here, up) => {
@@ -63,9 +69,10 @@ class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
 // Minimal set of FireSim-related design tweaks - notably discludes FASED, TraceIO, and the BlockDevice
 class WithMinimalFireSimDesignTweaks extends Config(
-  // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
-  new WithFireSimHarnessClockBinder ++
-  new WithFireSimSimpleClocks ++
+  // Required*: Punch all clocks to FireSim's harness clock instantiator
+  new WithFireSimHarnessClockBridgeInstantiator ++
+  new chipyard.harness.WithClockAndResetFromHarness ++
+  new chipyard.clocking.WithPassthroughClockGenerator ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++
   // Required: Existing FAME-1 transform cannot handle black-box clock gates

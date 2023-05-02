@@ -36,7 +36,7 @@ import chipyard.harness._
 
 object MainMemoryConsts {
   val regionNamePrefix = "MainMemory"
-  def globalName = s"${regionNamePrefix}_${NodeIdx()}"
+  def globalName()(implicit p: Parameters) = s"${regionNamePrefix}_${p(MultiChipIdx)}"
 }
 
 trait Unsupported {
@@ -123,11 +123,7 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
       val memFreq = axiDomainParams.getMemFrequency(system.asInstanceOf[HasTileLinkLocations])
 
       ports.map({ port =>
-        val axiClock = p(ClockBridgeInstantiatorKey).requestClock("mem_over_serial_tl_clock", memFreq)
-        val axiClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
-        axiClockBundle.clock := axiClock
-        axiClockBundle.reset := ResetCatchAndSync(axiClock, th.buildtopReset.asBool)
-
+        val axiClockBundle = th.harnessClockInstantiator.requestClockBundle("mem_over_serial_tl_clock", memFreq)
         val serial_bits = port.bits
         port.clock := th.buildtopClock
         val harnessMultiClockAXIRAM = withClockAndReset(th.buildtopClock, th.buildtopReset) {
