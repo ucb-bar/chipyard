@@ -4,6 +4,7 @@ package firesim.firesim
 
 import chisel3._
 import chisel3.experimental.annotate
+import chisel3.experimental.{DataMirror, Direction}
 import chisel3.util.experimental.BoringUtils
 
 import org.chipsalliance.cde.config.{Field, Config, Parameters}
@@ -30,7 +31,7 @@ import cva6.CVA6Tile
 import boom.common.{BoomTile}
 import barstools.iocell.chisel._
 import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters, IOCellKey}
-import chipyard.{HasHarnessSignalReferences}
+import chipyard._
 import chipyard.harness._
 
 object MainMemoryConsts {
@@ -68,16 +69,17 @@ class WithFireSimIOCellModels extends Config((site, here, up) => {
   case IOCellKey => FireSimIOCellParams()
 })
 
-class WithSerialBridge extends OverrideHarnessBinder({
+class WithTSIBridgeAndHarnessRAM extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[ClockedIO[SerialIO]]) => {
     ports.map { port =>
       implicit val p = GetSystemParameters(system)
       val bits = port.bits
+      require(DataMirror.directionOf(port.clock) == Direction.Input)
       port.clock := th.buildtopClock
       val ram = withClockAndReset(th.buildtopClock, th.buildtopReset) {
-        SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
+        TSIHarness.connectRAM(system.serdesser.get, bits, th.buildtopReset)
       }
-      SerialBridge(th.buildtopClock, ram.module.io.tsi_ser, p(ExtMem).map(_ => MainMemoryConsts.globalName), th.buildtopReset.asBool)
+      TSIBridge(th.buildtopClock, ram.module.io.tsi, p(ExtMem).map(_ => MainMemoryConsts.globalName), th.buildtopReset.asBool)
     }
     Nil
   }
@@ -114,9 +116,9 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
     implicit val p = GetSystemParameters(system)
 
     p(SerialTLKey).map({ sVal =>
-      require(sVal.axiMemOverSerialTLParams.isDefined)
-      val axiDomainParams = sVal.axiMemOverSerialTLParams.get
-      require(sVal.isMemoryDevice)
+      val serialManagerParams = sVal.serialManagerParams.get
+      val axiDomainParams = serialManagerParams.axiMemOverSerialTLParams.get
+      require(serialManagerParams.isMemoryDevice)
 
       val memFreq = axiDomainParams.getMemFrequency(system.asInstanceOf[HasTileLinkLocations])
 
@@ -129,16 +131,16 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
         val serial_bits = port.bits
         port.clock := th.buildtopClock
         val harnessMultiClockAXIRAM = withClockAndReset(th.buildtopClock, th.buildtopReset) {
-          SerialAdapter.connectHarnessMultiClockAXIRAM(
+          TSIHarness.connectMultiClockAXIRAM(
             system.serdesser.get,
             serial_bits,
             axiClockBundle,
             th.buildtopReset)
         }
-        SerialBridge(th.buildtopClock, harnessMultiClockAXIRAM.module.io.tsi_ser, Some(MainMemoryConsts.globalName), th.buildtopReset.asBool)
+        TSIBridge(th.buildtopClock, harnessMultiClockAXIRAM.module.io.tsi, Some(MainMemoryConsts.globalName), th.buildtopReset.asBool)
 
         // connect SimAxiMem
-        (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi4, edge) =>
+        (harnessMultiClockAXIRAM.mem_axi4.get zip harnessMultiClockAXIRAM.memNode.get.edges.in).map { case (axi4, edge) =>
           val nastiKey = NastiParameters(axi4.bits.r.bits.data.getWidth,
                                         axi4.bits.ar.bits.addr.getWidth,
                                         axi4.bits.ar.bits.id.getWidth)
@@ -233,7 +235,7 @@ class WithFireSimFAME5 extends ComposeIOBinder({
 
 // Shorthand to register all of the provided bridges above
 class WithDefaultFireSimBridges extends Config(
-  new WithSerialBridge ++
+  new WithTSIBridgeAndHarnessRAM ++
   new WithNICBridge ++
   new WithUARTBridge ++
   new WithBlockDeviceBridge ++
@@ -246,7 +248,7 @@ class WithDefaultFireSimBridges extends Config(
 
 // Shorthand to register all of the provided mmio-only bridges above
 class WithDefaultMMIOOnlyFireSimBridges extends Config(
-  new WithSerialBridge ++
+  new WithTSIBridgeAndHarnessRAM ++
   new WithUARTBridge ++
   new WithBlockDeviceBridge ++
   new WithFASEDBridge ++

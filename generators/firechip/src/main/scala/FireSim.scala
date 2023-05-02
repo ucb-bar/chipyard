@@ -214,7 +214,7 @@ class WithFireSimHarnessClockBinder extends OverrideHarnessBinder({
       case c: ClocksWithSinkParams => {
         val pllConfig = new SimplePllConfiguration("firesimBuildTopClockGenerator", c.params)
         pllConfig.emitSummaries
-        th.setRefClockFreq(pllConfig.referenceFreqMHz)
+        th.setRefClockFreqMHz(pllConfig.referenceFreqMHz)
         val rationalClockSpecs = for ((sinkP, division) <- pllConfig.sinkDividerMap) yield {
           RationalClock(sinkP.name.get, 1, division)
         }
@@ -271,7 +271,7 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSigna
     NodeIdx.increment()
   }
 
-  buildtopClock := p(ClockBridgeInstantiatorKey).requestClock("buildtop_reference_clock", getRefClockFreq * (1000 * 1000))
+  buildtopClock := p(ClockBridgeInstantiatorKey).requestClock("buildtop_reference_clock", getRefClockFreqHz)
 
   p(ClockBridgeInstantiatorKey).instantiateFireSimClockBridge
 }
