@@ -29,6 +29,11 @@ class WithMultiChip(id: Int, p: Parameters) extends Config((site, here, up) => {
   case MultiChipNChips => up(MultiChipNChips) max (id + 1)
 })
 
+class WithHomogeneousMultiChip(n: Int, p: Parameters, idStart: Int = 0) extends Config((site, here, up) => {
+  case MultiChipParameters(id) => if (id >= idStart && id < idStart + n) p else up(MultiChipParameters(id))
+  case MultiChipNChips => up(MultiChipNChips) max (idStart + n)
+})
+
 trait HasHarnessSignalReferences {
   implicit val p: Parameters
   val harnessClockInstantiator = p(HarnessClockInstantiatorKey)()

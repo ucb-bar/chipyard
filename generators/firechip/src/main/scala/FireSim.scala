@@ -21,14 +21,6 @@ import chipyard.harness._
 import chipyard.iobinders._
 import chipyard.clocking._
 
-// Determines the number of times to instantiate the DUT in the harness.
-// Subsumes legacy supernode support
-case object NumNodes extends Field[Int](1)
-
-class WithNumNodes(n: Int) extends Config((pname, site, here) => {
-  case NumNodes => n
-})
-
 /**
   * Under FireSim's current multiclock implementation there can be only a
   * single clock bridge. This requires, therefore, that it  be instantiated in
