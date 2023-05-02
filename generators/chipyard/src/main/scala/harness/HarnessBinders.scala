@@ -305,7 +305,7 @@ class WithSerialTLTiedOff extends OverrideHarnessBinder({
   }
 })
 
-class WithSimSerial extends OverrideHarnessBinder({
+class WithSimTSI extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
