@@ -22,6 +22,7 @@ case class MultiChipParameters(chipId: Int) extends Field[Parameters]
 case object BuildTop extends Field[Parameters => LazyModule]((p: Parameters) => new ChipTop()(p))
 case object DefaultClockFrequencyKey extends Field[Double](100.0) // MHz
 case object HarnessClockInstantiatorKey extends Field[() => HarnessClockInstantiator](() => new DividerOnlyHarnessClockInstantiator)
+case object MultiChipIdx extends Field[Int]
 
 class WithMultiChip(id: Int, p: Parameters) extends Config((site, here, up) => {
   case MultiChipParameters(`id`) => p
@@ -55,6 +56,7 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
   } else {
     (0 until p(MultiChipNChips)).map { i => p(MultiChipParameters(i)).alterPartial {
       case TargetDirKey => p(TargetDirKey) // hacky fix
+      case MultiChipIdx => i
     }}
   }
 
