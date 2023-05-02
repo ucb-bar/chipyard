@@ -22,7 +22,7 @@ case class MultiChipParameters(chipId: Int) extends Field[Parameters]
 case object BuildTop extends Field[Parameters => LazyModule]((p: Parameters) => new ChipTop()(p))
 case object DefaultClockFrequencyKey extends Field[Double](100.0) // MHz
 case object HarnessClockInstantiatorKey extends Field[() => HarnessClockInstantiator](() => new DividerOnlyHarnessClockInstantiator)
-case object MultiChipIdx extends Field[Int]
+case object MultiChipIdx extends Field[Int](0)
 
 class WithMultiChip(id: Int, p: Parameters) extends Config((site, here, up) => {
   case MultiChipParameters(`id`) => p
