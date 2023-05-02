@@ -121,7 +121,8 @@ class MulticlockAXIOverSerialConfig extends Config(
     AsynchronousCrossing().sourceSync) ++
 
   new chipyard.harness.WithSimAXIMemOverSerialTL ++ // add SimDRAM DRAM model for axi4 backing memory over the SerDes link, if axi4 mem is enabled
-  new testchipip.WithOffchipBus(MBUS) ++
+  new testchipip.WithOffchipBusManager(MBUS) ++
+  new testchipip.WithOffchipBus ++
   new chipyard.config.WithSerialTLBackingMemory ++ // remove axi4 mem port in favor of SerialTL memory
 
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++

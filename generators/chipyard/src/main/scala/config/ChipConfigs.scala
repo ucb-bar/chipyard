@@ -28,7 +28,8 @@ class ChipLikeRocketConfig extends Config(
   //==================================
   // Set up subsystem
   //==================================
-  new testchipip.WithOffchipBus(MBUS) ++
+  new testchipip.WithOffchipBusManager(MBUS) ++
+  new testchipip.WithOffchipBus ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nWays = 2, capacityKB = 64) ++ // make the L2 small for this example chip
   new freechips.rocketchip.subsystem.WithNBanks(2) ++                                  // 2 bank of L2 only
 
@@ -61,11 +62,14 @@ class ChipBringupHostConfig extends Config(
   //=============================
   // Setup the SerialTL side on the bringup device
   //=============================
-  new testchipip.WithSerialTLWidth(4) ++                                                // match width with the chip
-  new testchipip.WithOffchipBus(SBUS) ++
-  new testchipip.WithSerialTLMem(base = 0x1000, size = BigInt("80000000", 16) - 0x1000, // out this chip's GPIO at 0x0000 - 0x1000
-                                 idBits = 1, isMainMemory = false) ++                   // chip will provide accessible memory from 0 to the base of DRAM
-  new testchipip.WithSerialTLClockDirection(provideClock = true) ++                     // bringup board drives the clock for the serial-tl receiver on the chip
+  new testchipip.WithSerialTLWidth(4) ++                                                  // match width with the chip
+  new testchipip.WithOffchipBusManager(SBUS,
+    blockRange = AddressSet.misaligned(0x80000000L, (1 << 30) * 4L),
+    replicationBase = Some(BigInt("1000000000", 16))) ++
+  new testchipip.WithOffchipBus ++                                                        // offchip bus, but don't directly connect it to existing buses
+  new testchipip.WithSerialTLMem(base = 0x1000, size = BigInt("1000000000", 16) - 0x1000, // accessible memory of the chip
+                                 idBits = 8, isMainMemory = false) ++
+  new testchipip.WithSerialTLClockDirection(provideClock = true) ++                       // bringup board drives the clock for the serial-tl receiver on the chip
 
   //=============================
   // Set up memory on the bringup system
