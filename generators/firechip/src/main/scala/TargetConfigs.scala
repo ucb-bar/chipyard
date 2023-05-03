@@ -257,9 +257,11 @@ class FireSimLeanGemminiPrintfRocketConfig extends Config(
 //**********************************************************************************
 // Supernode Configurations, base off chipyard's RocketConfig
 //**********************************************************************************
-class SupernodeFireSimRocketConfig extends chipyard.harness.WithHomogeneousMultiChip(n=4, new Config(
-  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 8L) ++ // 8GB DRAM per node
-  new FireSimRocketConfig))
+class SupernodeFireSimRocketConfig extends Config(
+  new WithFireSimHarnessClockBridgeInstantiator ++
+  new chipyard.harness.WithHomogeneousMultiChip(n=4, new Config(
+    new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 8L) ++ // 8GB DRAM per node
+    new FireSimRocketConfig)))
 
 //**********************************************************************************
 //* CVA6 Configurations

@@ -62,7 +62,7 @@ class FireSimClockBridgeInstantiator extends HarnessClockInstantiator {
   }
 }
 
-class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSignalReferences {
+class FireSim(implicit val p: Parameters) extends RawModule with HasChipyardHarnessInstantiators {
   freechips.rocketchip.util.property.cover.setPropLib(new midas.passes.FireSimPropertyLibrary())
 
   val buildtopClock = Wire(Clock())
@@ -82,37 +82,10 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessSigna
   // has been pipelined)
   midas.targetutils.GlobalResetCondition(buildtopReset)
 
-  def dutReset = { require(false, "dutReset should not be used in Firesim"); false.B }
   def success = { require(false, "success should not be used in Firesim"); false.B }
 
-  val chipParameters = if (p(MultiChipNChips) == 0) {
-    Seq(p)
-  } else {
-    (0 until p(MultiChipNChips)).map { i => p(MultiChipParameters(i)).alterPartial {
-      case TargetDirKey => p(TargetDirKey) // hacky fix
-      case MultiChipIdx => i
-    }}
-  }
-
-  val lazyDuts = chipParameters.zipWithIndex.map { case (q,i) =>
-    LazyModule(q(BuildTop)(q)).suggestName(s"chiptop$i")
-  }
-  val duts = lazyDuts.map(l => Module(l.module))
-
-  lazyDuts.zipWithIndex.foreach {
-    case (d: HasIOBinders, i: Int) => ApplyHarnessBinders(this, d.lazySystem, d.portMap)(chipParameters(i))
-    case _ =>
-  }
-
-  ApplyMultiHarnessBinders(this, lazyDuts)
-
-  val refClkBundle = harnessClockInstantiator.requestClockBundle("buildtop_reference_clock", getRefClockFreqHz)
-  buildtopClock := refClkBundle.clock
-  buildtopReset := refClkBundle.reset
-
-  // The clock here should be ignored by instantiateHarnessclocks
-  val implicitHarnessClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
-  implicitHarnessClockBundle.clock := false.B.asClock
+  implicitHarnessClockBundle.clock := false.B.asClock // this is ignored
   implicitHarnessClockBundle.reset := resetBridge.io.reset
-  harnessClockInstantiator.instantiateHarnessClocks(implicitHarnessClockBundle)
+
+  instantiateChipTops()
 }
