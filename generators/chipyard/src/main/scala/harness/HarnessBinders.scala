@@ -76,30 +76,28 @@ class WithGPIOTiedOff extends OverrideHarnessBinder({
 // DOC include start: WithUARTAdapter
 class WithUARTAdapter extends OverrideHarnessBinder({
   (system: HasPeripheryUARTModuleImp, th: HasChipyardHarnessInstantiators, ports: Seq[UARTPortIO]) => {
-    withClockAndReset(th.buildtopClock, th.buildtopReset) {
-      UARTAdapter.connect(ports)(system.p)
-    }
+    UARTAdapter.connect(ports)(system.p)
   }
 })
 // DOC include end: WithUARTAdapter
 
 class WithSimSPIFlashModel(rdOnly: Boolean = true) extends OverrideHarnessBinder({
   (system: HasPeripherySPIFlashModuleImp, th: HasChipyardHarnessInstantiators, ports: Seq[SPIChipIO]) => {
-    SimSPIFlashModel.connect(ports, th.buildtopReset, rdOnly)(system.p)
+    SimSPIFlashModel.connect(ports, th.harnessBinderReset, rdOnly)(system.p)
   }
 })
 
 class WithSimBlockDevice extends OverrideHarnessBinder({
   (system: CanHavePeripheryBlockDevice, th: HasChipyardHarnessInstantiators, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
-    ports.map { b => SimBlockDevice.connect(b.clock, th.buildtopReset.asBool, Some(b.bits)) }
+    ports.map { b => SimBlockDevice.connect(b.clock, th.harnessBinderReset.asBool, Some(b.bits)) }
   }
 })
 
 class WithBlockDeviceModel extends OverrideHarnessBinder({
   (system: CanHavePeripheryBlockDevice, th: HasChipyardHarnessInstantiators, ports: Seq[ClockedIO[BlockDeviceIO]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
-    ports.map { b => withClockAndReset(b.clock, th.buildtopReset) { BlockDeviceModel.connect(Some(b.bits)) } }
+    ports.map { b => withClockAndReset(b.clock, th.harnessBinderReset) { BlockDeviceModel.connect(Some(b.bits)) } }
   }
 })
 
@@ -107,7 +105,7 @@ class WithLoopbackNIC extends OverrideHarnessBinder({
   (system: CanHavePeripheryIceNIC, th: HasChipyardHarnessInstantiators, ports: Seq[ClockedIO[NICIOvonly]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
     ports.map { n =>
-      withClockAndReset(n.clock, th.buildtopReset) {
+      withClockAndReset(n.clock, th.harnessBinderReset) {
         NicLoopback.connect(Some(n.bits), p(NICKey))
       }
     }
@@ -117,7 +115,7 @@ class WithLoopbackNIC extends OverrideHarnessBinder({
 class WithSimNetwork extends OverrideHarnessBinder({
   (system: CanHavePeripheryIceNIC, th: BaseModule with HasChipyardHarnessInstantiators, ports: Seq[ClockedIO[NICIOvonly]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
-    ports.map { n => SimNetwork.connect(Some(n.bits), n.clock, th.buildtopReset.asBool) }
+    ports.map { n => SimNetwork.connect(Some(n.bits), n.clock, th.harnessBinderReset.asBool) }
   }
 })
 
@@ -147,29 +145,27 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
 
       ports.map({ port =>
 // DOC include start: HarnessClockInstantiatorEx
-        withClockAndReset(th.buildtopClock, th.buildtopReset) {
-          val memOverSerialTLClockBundle = th.harnessClockInstantiator.requestClockBundle("mem_over_serial_tl_clock", memFreq)
-          val serial_bits = port.bits
-          require(DataMirror.directionOf(port.clock) == Direction.Input)
-          port.clock := th.buildtopClock
-          val harnessMultiClockAXIRAM = TSIHarness.connectMultiClockAXIRAM(
-            system.serdesser.get,
-            serial_bits,
-            memOverSerialTLClockBundle,
-            th.buildtopReset)
-// DOC include end: HarnessClockInstantiatorEx
-          val success = SimTSI.connect(Some(harnessMultiClockAXIRAM.module.io.tsi), th.buildtopClock, th.buildtopReset.asBool)
-          when (success) { th.success := true.B }
+        val memOverSerialTLClockBundle = th.harnessClockInstantiator.requestClockBundle("mem_over_serial_tl_clock", memFreq)
+        val serial_bits = port.bits
+        require(DataMirror.directionOf(port.clock) == Direction.Input)
+        port.clock := th.harnessBinderClock
+        val harnessMultiClockAXIRAM = TSIHarness.connectMultiClockAXIRAM(
+          system.serdesser.get,
+          serial_bits,
+          memOverSerialTLClockBundle,
+          th.harnessBinderReset)
+        // DOC include end: HarnessClockInstantiatorEx
+        val success = SimTSI.connect(Some(harnessMultiClockAXIRAM.module.io.tsi), th.harnessBinderClock, th.harnessBinderReset.asBool)
+        when (success) { th.success := true.B }
 
-          // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
-          (harnessMultiClockAXIRAM.mem_axi4.get zip harnessMultiClockAXIRAM.memNode.get.edges.in).map { case (axi_port, edge) =>
-            val memSize = serialManagerParams.memParams.size
-            val lineSize = p(CacheBlockBytes)
-            val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), edge.bundle)).suggestName("simdram")
-            mem.io.axi <> axi_port.bits
-            mem.io.clock := axi_port.clock
-            mem.io.reset := axi_port.reset
-          }
+        // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
+        (harnessMultiClockAXIRAM.mem_axi4.get zip harnessMultiClockAXIRAM.memNode.get.edges.in).map { case (axi_port, edge) =>
+          val memSize = serialManagerParams.memParams.size
+          val lineSize = p(CacheBlockBytes)
+          val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), edge.bundle)).suggestName("simdram")
+          mem.io.axi <> axi_port.bits
+          mem.io.clock := axi_port.clock
+          mem.io.reset := axi_port.reset
         }
       })
     })
@@ -248,7 +244,7 @@ class WithSimDebug extends OverrideHarnessBinder({
       case d: ClockedDMIIO =>
         val dtm_success = WireInit(false.B)
         when (dtm_success) { th.success := true.B }
-        val dtm = Module(new SimDTM).connect(th.buildtopClock, th.buildtopReset.asBool, d, dtm_success)
+        val dtm = Module(new SimDTM).connect(th.harnessBinderClock, th.harnessBinderReset.asBool, d, dtm_success)
       case j: JTAGChipIO =>
         val dtm_success = WireInit(false.B)
         when (dtm_success) { th.success := true.B }
@@ -258,7 +254,7 @@ class WithSimDebug extends OverrideHarnessBinder({
         j.TCK := jtag_wire.TCK
         j.TMS := jtag_wire.TMS
         j.TDI := jtag_wire.TDI
-        val jtag = Module(new SimJTAG(tickDelay=3)).connect(jtag_wire, th.buildtopClock, th.buildtopReset.asBool, ~(th.buildtopReset.asBool), dtm_success)
+        val jtag = Module(new SimJTAG(tickDelay=3)).connect(jtag_wire, th.harnessBinderClock, th.harnessBinderReset.asBool, ~(th.harnessBinderReset.asBool), dtm_success)
     }
   }
 })
@@ -311,12 +307,10 @@ class WithSimTSI extends OverrideHarnessBinder({
     ports.map({ port =>
       val bits = port.bits
       require(DataMirror.directionOf(port.clock) == Direction.Input)
-      port.clock := th.buildtopClock
-      withClockAndReset(th.buildtopClock, th.buildtopReset) {
-        val ram = TSIHarness.connectRAM(system.serdesser.get, bits, th.buildtopReset)
-        val success = SimTSI.connect(Some(ram.module.io.tsi), th.buildtopClock, th.buildtopReset.asBool)
-        when (success) { th.success := true.B }
-      }
+      port.clock := th.harnessBinderClock
+      val ram = TSIHarness.connectRAM(system.serdesser.get, bits, th.harnessBinderReset)
+      val success = SimTSI.connect(Some(ram.module.io.tsi), th.harnessBinderClock, th.harnessBinderReset.asBool)
+      when (success) { th.success := true.B }
     })
   }
 })
@@ -325,30 +319,27 @@ class WithUARTTSIAdapter extends OverrideHarnessBinder({
   (system: CanHavePeripheryUARTTSITLClient, th: HasChipyardHarnessInstantiators, ports: Seq[UARTPortIO]) => {
     require(ports.size <= 1)
     ports.foreach { port =>
-      val div = (th.getRefClockFreqHz / port.c.initBaudRate.doubleValue).toInt
-      withClockAndReset(th.buildtopClock, th.buildtopReset) {
+      val div = (th.getHarnessBinderClockFreqHz / port.c.initBaudRate.doubleValue).toInt
+      val uart_port = Wire(new UARTPortIO(port.c))
+      uart_port := DontCare
+      UARTAdapter.connect(Seq(uart_port), div = div, forcePty = true)
 
-        val uart_port = Wire(new UARTPortIO(port.c))
-        uart_port := DontCare
-        UARTAdapter.connect(Seq(uart_port), div = div, forcePty = true)
+      val use_pty = PlusArg("uart_tsi_pty", 0, "Force the UART TSI to a PTY for the uart_tsi program").orR
+      val uart_to_ser = Module(new UARTToSerial(th.getHarnessBinderClockFreqHz.toInt, port.c))
+      val width_adapter = Module(new SerialWidthAdapter(8, TSI.WIDTH))
+      val sim_ser = Module(new SimTSI)
+      sim_ser.io.clock := th.harnessBinderClock
+      sim_ser.io.reset := th.harnessBinderReset
+      sim_ser.io.tsi <> width_adapter.io.wide
+      uart_to_ser.io.serial.flipConnect(width_adapter.io.narrow)
+      uart_to_ser.io.uart := DontCare
+      when (sim_ser.io.exit === 1.U) { th.success := true.B }
 
-        val use_pty = PlusArg("uart_tsi_pty", 0, "Force the UART TSI to a PTY for the uart_tsi program").orR
-        val uart_to_ser = Module(new UARTToSerial(th.getRefClockFreqHz.toInt, port.c))
-        val width_adapter = Module(new SerialWidthAdapter(8, TSI.WIDTH))
-        val sim_ser = Module(new SimTSI)
-        sim_ser.io.clock := th.buildtopClock
-        sim_ser.io.reset := th.buildtopReset
-        sim_ser.io.tsi <> width_adapter.io.wide
-        uart_to_ser.io.serial.flipConnect(width_adapter.io.narrow)
-        uart_to_ser.io.uart := DontCare
-        when (sim_ser.io.exit === 1.U) { th.success := true.B }
-
-        when (use_pty) {
-          uart_port <> port
-        } .otherwise {
-          uart_to_ser.io.uart.rxd := port.txd
-          port.rxd := uart_to_ser.io.uart.txd
-        }
+      when (use_pty) {
+        uart_port <> port
+      } .otherwise {
+        uart_to_ser.io.uart.rxd := port.txd
+        port.rxd := uart_to_ser.io.uart.txd
       }
     }
   }
@@ -400,7 +391,7 @@ class WithClockAndResetFromHarness extends OverrideHarnessBinder({
         val clockBundle = th.harnessClockInstantiator.requestClockBundle(s"clock_${c.freqMHz.toInt}MHz", c.freqMHz * 1000000)
         c.clock := clockBundle.clock
       }
-      case r: AsyncReset => r := th.buildtopReset.asAsyncReset
+      case r: AsyncReset => r := th.harnessBinderReset.asAsyncReset
     })
   }
 })

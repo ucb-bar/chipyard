@@ -21,6 +21,7 @@ case object MultiChipNChips extends Field[Int](0) // 0 means ignore MultiChipPar
 case class MultiChipParameters(chipId: Int) extends Field[Parameters]
 case object BuildTop extends Field[Parameters => LazyModule]((p: Parameters) => new ChipTop()(p))
 case object DefaultClockFrequencyKey extends Field[Double](100.0) // MHz
+case object HarnessBinderClockFrequencyKey extends Field[Double](100.0) // MHz/
 case object HarnessClockInstantiatorKey extends Field[() => HarnessClockInstantiator](() => new DividerOnlyHarnessClockInstantiator)
 case object MultiChipIdx extends Field[Int](0)
 
@@ -40,49 +41,60 @@ class WithHomogeneousMultiChip(n: Int, p: Parameters, idStart: Int = 0) extends 
 trait HasChipyardHarnessInstantiators {
   implicit val p: Parameters
   // clock/reset of the chiptop reference clock (can be different than the implicit harness clock/reset)
-  private val refClockFreq: Double = p(DefaultClockFrequencyKey)
-  def getRefClockFreqHz: Double = refClockFreq * 1000000
-  def getRefClockFreqMHz: Double = refClockFreq
+  private val harnessBinderClockFreq: Double = p(HarnessBinderClockFrequencyKey)
+  def getHarnessBinderClockFreqHz: Double = harnessBinderClockFreq * 1000000
+  def getHarnessBinderClockFreqMHz: Double = harnessBinderClockFreq
+
+  // buildtopClock takes the refClockFreq, and drives the harnessbinders
+  val harnessBinderClock = Wire(Clock())
+  val harnessBinderReset = Wire(Reset())
 
   // classes which inherit this trait should provide the below definitions
-  def buildtopClock: Clock
-  def buildtopReset: Reset
+  def implicitClock: Clock
+  def implicitReset: Reset
   def success: Bool
-
-  // This should be assigned to whatever its the "implicit" top-level clock/reset
-  val implicitHarnessClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
 
   // This can be accessed to get new clocks from the harness
   val harnessClockInstantiator = p(HarnessClockInstantiatorKey)()
 
-  // This shold be called last to build the ChipTops
-  def instantiateChipTops(): Unit = {
-    val chipParameters = if (p(MultiChipNChips) == 0) {
-      Seq(p)
-    } else {
-      (0 until p(MultiChipNChips)).map { i => p(MultiChipParameters(i)).alterPartial {
-        case TargetDirKey => p(TargetDirKey) // hacky fix
-        case MultiChipIdx => i
-      }}
-    }
+  private val chipParameters = if (p(MultiChipNChips) == 0) {
+    Seq(p)
+  } else {
+    (0 until p(MultiChipNChips)).map { i => p(MultiChipParameters(i)).alterPartial {
+      case TargetDirKey => p(TargetDirKey) // hacky fix
+      case MultiChipIdx => i
+    }}
+  }
 
-    val lazyDuts = chipParameters.zipWithIndex.map { case (q,i) =>
-      LazyModule(q(BuildTop)(q)).suggestName(s"chiptop$i")
-    }
+  val lazyDuts = chipParameters.zipWithIndex.map { case (q,i) =>
+    LazyModule(q(BuildTop)(q)).suggestName(s"chiptop$i")
+  }
+
+  // This shold be called last to build the ChipTops
+  def instantiateChipTops(): Seq[LazyModule] = {
     val duts = lazyDuts.map(l => Module(l.module))
 
-    lazyDuts.zipWithIndex.foreach {
-      case (d: HasIOBinders, i: Int) => ApplyHarnessBinders(this, d.lazySystem, d.portMap)(chipParameters(i))
-      case _ =>
+    withClockAndReset (harnessBinderClock, harnessBinderReset) {
+      lazyDuts.zipWithIndex.foreach {
+        case (d: HasIOBinders, i: Int) => ApplyHarnessBinders(this, d.lazySystem, d.portMap)(chipParameters(i))
+        case _ =>
+      }
+
+      ApplyMultiHarnessBinders(this, lazyDuts)
     }
 
-    ApplyMultiHarnessBinders(this, lazyDuts)
+    val harnessBinderClkBundle = harnessClockInstantiator.requestClockBundle("harnessbinder_clock", getHarnessBinderClockFreqHz)
+    println(s"Harness binder clock is $harnessBinderClockFreq")
+    harnessBinderClock := harnessBinderClkBundle.clock
+    harnessBinderReset := harnessBinderClkBundle.reset
 
-    val refClkBundle = harnessClockInstantiator.requestClockBundle("buildtop_reference_clock", getRefClockFreqHz)
-    buildtopClock := refClkBundle.clock
-    buildtopReset := WireInit(refClkBundle.reset)
-
+    // This should be assigned to whatever its the "implicit" top-level clock/reset
+    val implicitHarnessClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
+    implicitHarnessClockBundle.clock := implicitClock
+    implicitHarnessClockBundle.reset := implicitReset
     harnessClockInstantiator.instantiateHarnessClocks(implicitHarnessClockBundle)
+
+    lazyDuts
   }
 }
 
@@ -90,15 +102,11 @@ class TestHarness(implicit val p: Parameters) extends Module with HasChipyardHar
   val io = IO(new Bundle {
     val success = Output(Bool())
   })
-  // These drive harness blocks
-  val buildtopClock = Wire(Clock())
-  val buildtopReset = Wire(Reset())
   val success = WireInit(false.B)
-
   io.success := success
 
-  implicitHarnessClockBundle.clock := clock
-  implicitHarnessClockBundle.reset := reset
+  def implicitClock = clock
+  def implicitReset = reset
 
   instantiateChipTops()
 

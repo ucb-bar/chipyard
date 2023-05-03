@@ -47,7 +47,6 @@ class FireSimClockBridgeInstantiator extends HarnessClockInstantiator {
       } else {
         instantiatedClocks(freqMHz) = (instantiatedClocks(freqMHz)._1, instantiatedClocks(freqMHz)._2 :+ name)
       }
-
       bundle.clock := instantiatedClocks(freqMHz)._1
       bundle.reset := ResetCatchAndSync(bundle.clock, refClock.reset.asBool)
     }
@@ -65,27 +64,24 @@ class FireSimClockBridgeInstantiator extends HarnessClockInstantiator {
 class FireSim(implicit val p: Parameters) extends RawModule with HasChipyardHarnessInstantiators {
   freechips.rocketchip.util.property.cover.setPropLib(new midas.passes.FireSimPropertyLibrary())
 
-  val buildtopClock = Wire(Clock())
-  val buildtopReset = WireInit(false.B)
   // The peek-poke bridge must still be instantiated even though it's
   // functionally unused. This will be removed in a future PR.
   val dummy = WireInit(false.B)
-  val peekPokeBridge = PeekPokeBridge(buildtopClock, dummy)
+  val peekPokeBridge = PeekPokeBridge(harnessBinderClock, dummy)
 
   val resetBridge = Module(new ResetPulseBridge(ResetPulseBridgeParameters()))
   // In effect, the bridge counts the length of the reset in terms of this clock.
-  resetBridge.io.clock := buildtopClock
+  resetBridge.io.clock := harnessBinderClock
 
-  // Ensures FireSim-synthesized assertions and instrumentation is disabled
-  // while buildtopReset is asserted.  This ensures assertions do not fire at
-  // time zero in the event their local reset is delayed (typically because it
-  // has been pipelined)
-  midas.targetutils.GlobalResetCondition(buildtopReset)
-
+  def implicitClock = false.B.asClock // unused
+  def implicitReset = resetBridge.io.reset
   def success = { require(false, "success should not be used in Firesim"); false.B }
 
-  implicitHarnessClockBundle.clock := false.B.asClock // this is ignored
-  implicitHarnessClockBundle.reset := resetBridge.io.reset
-
   instantiateChipTops()
+
+  // Ensures FireSim-synthesized assertions and instrumentation is disabled
+  // while resetBridge.io.reset is asserted.  This ensures assertions do not fire at
+  // time zero in the event their local reset is delayed (typically because it
+  // has been pipelined)
+  midas.targetutils.GlobalResetCondition(resetBridge.io.reset)
 }
