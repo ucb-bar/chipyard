@@ -17,11 +17,11 @@ import chipyard._
 import chipyard.harness.{ApplyHarnessBinders}
 import chipyard.iobinders.{HasIOBinders}
 
-class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell with HasHarnessSignalReferences
+class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell with HasChipyardHarnessInstantiators
 {
   def dp = designParameters
 
-  val chiptop = LazyModule(p(BuildTop)(p))
+  require(lazyDuts.size == 1)
 
   val clockOverlay = dp(ClockInputOverlayKey).map(_.place(ClockInputDesignInput())).head
   val harnessSysPLL = dp(PLLFactoryKey)
@@ -38,7 +38,7 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
   val uartOverlay = dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
 
   val ddrOverlay = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLLNode)).asInstanceOf[DDRArtyPlacedOverlay]
-  val ddrInParams = chiptop match { case td: ChipTop =>
+  val ddrInParams = lazyDuts(0) match { case td: ChipTop =>
     td.lazySystem match { case lsys: CanHaveMasterTLMemPort =>
       lsys.memTLNode.edges.in(0)
     }

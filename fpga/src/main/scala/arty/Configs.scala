@@ -22,6 +22,9 @@ class WithArtyTweaks extends Config(
   new WithArtyUARTHarnessBinder ++
   new WithDebugResetPassthrough ++
 
+  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
+  new chipyard.harness.WithClockAndResetFromHarness ++
+  new chipyard.iobinders.WithPassthroughClockGenerator ++
   new chipyard.config.WithDTSTimebase(32768) ++
   new testchipip.WithNoSerialTL
 )
