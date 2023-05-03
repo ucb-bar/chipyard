@@ -65,6 +65,7 @@ trait CanHaveChosenInDTS { this: BaseSubsystem =>
           t.uarts.foreach(u => Resource(chosen, "uart").bind(ResourceAlias(u.device.label)))
         }
       }
+      case _ =>
     }
   }
 }
