@@ -35,6 +35,10 @@ class WithHomogeneousMultiChip(n: Int, p: Parameters, idStart: Int = 0) extends 
   case MultiChipNChips => up(MultiChipNChips) max (idStart + n)
 })
 
+class WithHarnessBinderClockFreqMHz(freqMHz: Double) extends Config((site, here, up) => {
+  case HarnessBinderClockFrequencyKey => freqMHz
+})
+
 // A TestHarness mixing this in will
 // - use the HarnessClockInstantiator clock provide
 // - use BuildTop/MultiChip fields to build ChipTops
@@ -66,12 +70,12 @@ trait HasChipyardHarnessInstantiators {
     }}
   }
 
-  val lazyDuts = chipParameters.zipWithIndex.map { case (q,i) =>
-    LazyModule(q(BuildTop)(q)).suggestName(s"chiptop$i")
-  }
 
   // This shold be called last to build the ChipTops
   def instantiateChipTops(): Seq[LazyModule] = {
+    val lazyDuts = chipParameters.zipWithIndex.map { case (q,i) =>
+      LazyModule(q(BuildTop)(q)).suggestName(s"chiptop$i")
+    }
     val duts = lazyDuts.map(l => Module(l.module))
 
     withClockAndReset (harnessBinderClock, harnessBinderReset) {

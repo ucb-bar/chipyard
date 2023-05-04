@@ -15,17 +15,17 @@ import chipyard.clocking.{SimplePllConfiguration, ClockDividerN}
 // HarnessClockInstantiators are classes which generate clocks that drive
 // TestHarness simulation models and any Clock inputs to the ChipTop
 trait HarnessClockInstantiator {
-  val _clockMap: LinkedHashMap[String, (Double, ClockBundle)] = LinkedHashMap.empty
+  val clockMap: LinkedHashMap[String, (Double, ClockBundle)] = LinkedHashMap.empty
 
   // request a clock bundle at a particular frequency
   def requestClockBundle(name: String, freqRequested: Double): ClockBundle = {
-    if (_clockMap.contains(name)) {
-      require(freqRequested == _clockMap(name)._1,
-        s"Request clock freq = $freqRequested != previously requested ${_clockMap(name)._2} for requested clock $name")
-      _clockMap(name)._2
+    if (clockMap.contains(name)) {
+      require(freqRequested == clockMap(name)._1,
+        s"Request clock freq = $freqRequested != previously requested ${clockMap(name)._2} for requested clock $name")
+      clockMap(name)._2
     } else {
       val clockBundle = Wire(new ClockBundle(ClockBundleParameters()))
-      _clockMap(name) = (freqRequested, clockBundle)
+      clockMap(name) = (freqRequested, clockBundle)
       clockBundle
     }
   }
@@ -40,7 +40,7 @@ trait HarnessClockInstantiator {
 class DividerOnlyHarnessClockInstantiator extends HarnessClockInstantiator {
   // connect all clock wires specified to a divider only PLL
   def instantiateHarnessClocks(refClock: ClockBundle): Unit = {
-    val sinks = _clockMap.map({ case (name, (freq, bundle)) =>
+    val sinks = clockMap.map({ case (name, (freq, bundle)) =>
       ClockSinkParameters(take=Some(ClockParameters(freqMHz=freq / (1000 * 1000))), name=Some(name))
     }).toSeq
 
@@ -67,8 +67,8 @@ class DividerOnlyHarnessClockInstantiator extends HarnessClockInstantiator {
         (refClock.clock, refClock.reset)
       }
 
-      _clockMap(sinkParams.name.get)._2.clock := divClock
-      _clockMap(sinkParams.name.get)._2.reset := divReset
+      clockMap(sinkParams.name.get)._2.clock := divClock
+      clockMap(sinkParams.name.get)._2.reset := divReset
     }
   }
 }
@@ -79,7 +79,7 @@ class DividerOnlyHarnessClockInstantiator extends HarnessClockInstantiator {
 // It is useful for VCS/Xcelium-driven RTL simulations
 class AbsoluteFreqHarnessClockInstantiator extends HarnessClockInstantiator {
   def instantiateHarnessClocks(refClock: ClockBundle): Unit = {
-    val sinks = _clockMap.map({ case (name, (freq, bundle)) =>
+    val sinks = clockMap.map({ case (name, (freq, bundle)) =>
       ClockSinkParameters(take=Some(ClockParameters(freqMHz=freq / (1000 * 1000))), name=Some(name))
     }).toSeq
 
@@ -89,8 +89,8 @@ class AbsoluteFreqHarnessClockInstantiator extends HarnessClockInstantiator {
       source.io.power := true.B
       source.io.gate := false.B
 
-      _clockMap(sinkParams.name.get)._2.clock := source.io.clk
-      _clockMap(sinkParams.name.get)._2.reset := refClock.reset
+      clockMap(sinkParams.name.get)._2.clock := source.io.clk
+      clockMap(sinkParams.name.get)._2.reset := refClock.reset
     }
   }
 }
@@ -101,7 +101,9 @@ class WithAbsoluteFreqHarnessClockInstantiator extends Config((site, here, up) =
 
 class AllClocksFromHarnessClockInstantiator extends HarnessClockInstantiator {
   def instantiateHarnessClocks(refClock: ClockBundle): Unit = {
-    for ((_, (_, bundle)) <- _clockMap) {
+    val freqs = clockMap.map(_._2._1)
+    freqs.tail.foreach(t => require(t == freqs.head, s"Mismatching clocks $t != ${freqs.head}"))
+    for ((_, (_, bundle)) <- clockMap) {
       bundle.clock := refClock.clock
       bundle.reset := refClock.reset
     }
