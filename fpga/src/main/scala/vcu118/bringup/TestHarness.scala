@@ -22,6 +22,7 @@ import testchipip.{HasPeripheryTSIHostWidget, PeripheryTSIHostKey, TSIHostWidget
 import chipyard.fpga.vcu118.{VCU118FPGATestHarness, VCU118FPGATestHarnessImp, DDR2VCU118ShellPlacer, SysClock2VCU118ShellPlacer}
 
 import chipyard.{ChipTop}
+import chipyard.harness._
 
 class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118FPGATestHarness {
 
@@ -78,12 +79,10 @@ class BringupVCU118FPGATestHarness(override implicit val p: Parameters) extends 
   dp(TSIHostOverlayKey).head.place(TSIHostDesignInput(dp(PeripheryTSIHostKey).head.offchipSerialIfWidth, io_tsi_serial_bb))
 
   // connect 1 mem. channel to the FPGA DDR
-  val inTsiParams = topDesign match { case td: ChipTop =>
-    td.lazySystem match { case lsys: HasPeripheryTSIHostWidget =>
-      lsys.tsiMemTLNodes.head.edges.in(0)
-    }
-  }
-  val tsiDdrClient = TLClientNode(Seq(inTsiParams.master))
+  val tsiDdrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
+    name = "chip_ddr",
+    sourceId = IdRange(0, 64)
+  )))))
   (ddr2Node
     := TLFragmenter(8,64,holdFirstDeny=true)
     := TLCacheCork()

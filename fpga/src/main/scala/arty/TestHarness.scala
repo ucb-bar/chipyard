@@ -20,12 +20,10 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
   val dReset = Wire(AsyncReset())
   dReset := reset_core.asAsyncReset
 
-  val buildtopClock = clock_32MHz
-  val buildtopReset = hReset
-  val success = false.B
+  def success = {require(false, "Success not supported"); false.B }
 
-  implicitHarnessClockBundle.clock := clock_32MHz
-  implicitHarnessClockBundle.reset := hReset
+  def implicitClock = clock_32MHz
+  def implicitReset = hReset
 
   instantiateChipTops()
 }

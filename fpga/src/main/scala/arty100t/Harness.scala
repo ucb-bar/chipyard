@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util._
 import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config.{Parameters}
-import freechips.rocketchip.tilelink.{TLClientNode, TLBlockDuringReset}
+import freechips.rocketchip.tilelink._
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.shell._
@@ -14,14 +14,13 @@ import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 import sifive.blocks.devices.uart._
 
 import chipyard._
-import chipyard.harness.{ApplyHarnessBinders}
+import chipyard.harness._
 import chipyard.iobinders.{HasIOBinders}
 
-class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell with HasChipyardHarnessInstantiators
-{
+class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell {
   def dp = designParameters
 
-  require(lazyDuts.size == 1)
+  require(dp(MultiChipNChips) == 0, "Arty100T harness does not support multi-chip")
 
   val clockOverlay = dp(ClockInputOverlayKey).map(_.place(ClockInputDesignInput())).head
   val harnessSysPLL = dp(PLLFactoryKey)
@@ -38,12 +37,10 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
   val uartOverlay = dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
 
   val ddrOverlay = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLLNode)).asInstanceOf[DDRArtyPlacedOverlay]
-  val ddrInParams = lazyDuts(0) match { case td: ChipTop =>
-    td.lazySystem match { case lsys: CanHaveMasterTLMemPort =>
-      lsys.memTLNode.edges.in(0)
-    }
-  }
-  val ddrClient = TLClientNode(Seq(ddrInParams.master))
+  val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
+    name = "chip_ddr",
+    sourceId = IdRange(0, 64)
+  )))))
   val ddrBlockDuringReset = LazyModule(new TLBlockDuringReset(4))
   ddrOverlay.overlayOutput.ddr := ddrBlockDuringReset.node := ddrClient
 
@@ -52,17 +49,16 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
   val status_leds = all_leds.take(3)
   val other_leds = all_leds.drop(3)
 
-  def buildtopClock = dutClock.in.head._1.clock
-  def buildtopReset = dutClock.in.head._1.reset
-  def success = { require(false, "Unused"); false.B }
 
-  InModuleBody {
+  override lazy val module = new HarnessLikeImpl
+
+  class HarnessLikeImpl extends Impl with HasChipyardHarnessInstantiators {
     clockOverlay.overlayOutput.node.out(0)._1.reset := ~resetPin
 
     val clk_100mhz = clockOverlay.overlayOutput.node.out.head._1.clock
 
     // Blink the status LEDs for sanity
-    withClock(clk_100mhz) {
+    withClockAndReset(clk_100mhz, dutClock.in.head._1.reset) {
       val period = (BigInt(100) << 20) / status_leds.size
       val counter = RegInit(0.U(log2Ceil(period).W))
       val on = RegInit(0.U(log2Ceil(status_leds.size).W))
@@ -77,16 +73,17 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
 
     harnessSysPLL.plls.foreach(_._1.getReset.get := pllReset)
 
-    ddrOverlay.mig.module.clock := buildtopClock
-    ddrOverlay.mig.module.reset := buildtopReset
-    ddrBlockDuringReset.module.clock := buildtopClock
-    ddrBlockDuringReset.module.reset := buildtopReset || !ddrOverlay.mig.module.io.port.init_calib_complete
+    def implicitClock = dutClock.in.head._1.clock
+    def implicitReset = dutClock.in.head._1.reset
+    def success = { require(false, "Unused"); false.B }
+
+    ddrOverlay.mig.module.clock := harnessBinderClock
+    ddrOverlay.mig.module.reset := harnessBinderReset
+    ddrBlockDuringReset.module.clock := harnessBinderClock
+    ddrBlockDuringReset.module.reset := harnessBinderReset.asBool || !ddrOverlay.mig.module.io.port.init_calib_complete
 
     other_leds(6) := ddrOverlay.mig.module.io.port.init_calib_complete
 
-    chiptop match { case d: HasIOBinders =>
-      ApplyHarnessBinders(this, d.lazySystem, d.portMap)
-    }
+    instantiateChipTops()
   }
-
 }

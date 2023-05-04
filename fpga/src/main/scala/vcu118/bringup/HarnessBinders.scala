@@ -13,12 +13,12 @@ import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp, GPIOPortIO}
 
 import testchipip.{HasPeripheryTSIHostWidget, TSIHostWidgetIO}
 
-import chipyard.{HasHarnessSignalReferences}
-import chipyard.harness.{ComposeHarnessBinder, OverrideHarnessBinder}
+import chipyard._
+import chipyard.harness._
 
 /*** UART ***/
 class WithBringupUART extends ComposeHarnessBinder({
-  (system: HasPeripheryUARTModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[UARTPortIO]) => {
+  (system: HasPeripheryUARTModuleImp, th: HasChipyardHarnessInstantiators, ports: Seq[UARTPortIO]) => {
     th match { case vcu118th: BringupVCU118FPGATestHarnessImp => {
       require(ports.size == 2)
 
@@ -29,7 +29,7 @@ class WithBringupUART extends ComposeHarnessBinder({
 
 /*** I2C ***/
 class WithBringupI2C extends OverrideHarnessBinder({
-  (system: HasPeripheryI2CModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[I2CPort]) => {
+  (system: HasPeripheryI2CModuleImp, th: HasChipyardHarnessInstantiators, ports: Seq[I2CPort]) => {
     th match { case vcu118th: BringupVCU118FPGATestHarnessImp => {
       require(ports.size == 1)
 
@@ -40,7 +40,7 @@ class WithBringupI2C extends OverrideHarnessBinder({
 
 /*** GPIO ***/
 class WithBringupGPIO extends OverrideHarnessBinder({
-  (system: HasPeripheryGPIOModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[GPIOPortIO]) => {
+  (system: HasPeripheryGPIOModuleImp, th: HasChipyardHarnessInstantiators, ports: Seq[GPIOPortIO]) => {
     th match { case vcu118th: BringupVCU118FPGATestHarnessImp => {
       (vcu118th.bringupOuter.io_gpio_bb zip ports).map { case (bb_io, dut_io) =>
         bb_io.bundle <> dut_io
@@ -51,7 +51,7 @@ class WithBringupGPIO extends OverrideHarnessBinder({
 
 /*** TSI Host Widget ***/
 class WithBringupTSIHost extends OverrideHarnessBinder({
-  (system: HasPeripheryTSIHostWidget, th: BaseModule with HasHarnessSignalReferences, ports: Seq[Data]) => {
+  (system: HasPeripheryTSIHostWidget, th: HasChipyardHarnessInstantiators, ports: Seq[Data]) => {
     th match { case vcu118th: BringupVCU118FPGATestHarnessImp => {
       require(ports.size == 2) // 1st goes to the TL mem, 2nd goes to the serial link
 

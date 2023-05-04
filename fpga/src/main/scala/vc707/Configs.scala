@@ -17,7 +17,8 @@ import sifive.fpgashells.shell.xilinx.{VC7074GDDRSize}
 
 import testchipip.{SerialTLKey}
 
-import chipyard.{BuildSystem, ExtTLMem, DefaultClockFrequencyKey}
+import chipyard._
+import chipyard.harness._
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
@@ -38,6 +39,10 @@ class WithSystemModifications extends Config((site, here, up) => {
 })
 
 class WithVC707Tweaks extends Config (
+  // clocking
+  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
+  new chipyard.clocking.WithPassthroughClockGenerator ++
+
   // harness binders
   new WithVC707UARTHarnessBinder ++
   new WithVC707SPISDCardHarnessBinder ++
@@ -53,6 +58,7 @@ class WithVC707Tweaks extends Config (
   new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++
+  new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
   new WithFPGAFrequency(50) // default 50MHz freq
 )
 

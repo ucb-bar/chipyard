@@ -25,9 +25,9 @@ class WithArty100TTweaks extends Config(
   new WithArty100TUARTTSI ++
   new WithArty100TDDRTL ++
   new WithNoDesignKey ++
+  new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
-  new chipyard.harness.WithClockAndResetFromHarness ++
-  new chipyard.iobinders.WithPassthroughClockGenerator ++
+  new chipyard.clocking.WithPassthroughClockGenerator ++
   new chipyard.config.WithNoDebug ++ // no jtag
   new chipyard.config.WithNoUART ++ // use UART for the UART-TSI thing instad
   new chipyard.config.WithTLBackingMemory ++ // FPGA-shells converts the AXI to TL for us

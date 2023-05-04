@@ -5,7 +5,8 @@ import chisel3.experimental.{IO}
 
 import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp, BundleBridgeSource}
 import org.chipsalliance.cde.config.{Parameters}
-import freechips.rocketchip.tilelink.{TLClientNode}
+import freechips.rocketchip.tilelink._
+import freechips.rocketchip.diplomacy.{IdRange, TransferSizes}
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
@@ -17,7 +18,7 @@ import sifive.blocks.devices.spi.{PeripherySPIKey, SPIPortIO}
 
 import chipyard._
 import chipyard.iobinders.{HasIOBinders}
-import chipyard.harness.{ApplyHarnessBinders}
+import chipyard.harness._
 
 class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118ShellBasicOverlays {
 
@@ -36,8 +37,6 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
   val edge      = Overlay(PCIeOverlayKey, new PCIeVCU118EdgeShellPlacer(this, PCIeShellInput()))
   val sys_clock2 = Overlay(ClockInputOverlayKey, new SysClock2VCU118ShellPlacer(this, ClockInputShellInput()))
   val ddr2       = Overlay(DDROverlayKey, new DDR2VCU118ShellPlacer(this, DDRShellInput()))
-
-  val topDesign = LazyModule(p(BuildTop)(dp)).suggestName("chiptop")
 
 // DOC include start: ClockOverlay
   // place all clocks in the shell
@@ -79,19 +78,18 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
   val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)).overlayOutput.ddr
 
   // connect 1 mem. channel to the FPGA DDR
-  val inParams = topDesign match { case td: ChipTop =>
-    td.lazySystem match { case lsys: CanHaveMasterTLMemPort =>
-      lsys.memTLNode.edges.in(0)
-    }
-  }
-  val ddrClient = TLClientNode(Seq(inParams.master))
+  val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
+    name = "chip_ddr",
+    sourceId = IdRange(0, 64)
+  )))))
   ddrNode := ddrClient
 
   // module implementation
   override lazy val module = new VCU118FPGATestHarnessImp(this)
 }
 
-class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessSignalReferences {
+class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawModuleImp(_outer) with HasChipyardHarnessInstantiators {
+  require(p(MultiChipNChips) == 0)
 
   val vcu118Outer = _outer
 
@@ -118,20 +116,16 @@ class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawMod
   val hReset = Wire(Reset())
   hReset := _outer.dutClock.in.head._1.reset
 
-  val buildtopClock = _outer.dutClock.in.head._1.clock
-  val buildtopReset = WireInit(hReset)
-  val dutReset = hReset.asAsyncReset
-  val success = false.B
+  def implicitClock = _outer.dutClock.in.head._1.clock
+  def implicitReset = hReset
+  def success = { require(false, "Unused"); false.B }
 
-  childClock := buildtopClock
-  childReset := buildtopReset
+  childClock := implicitClock
+  childReset := implicitReset
 
-  // harness binders are non-lazy
-  _outer.topDesign match { case d: HasIOBinders =>
-    ApplyHarnessBinders(this, d.lazySystem, d.portMap)
-  }
-
-  // check the top-level reference clock is equal to the default
+  // check that all requested clocks are equal to the default
   // non-exhaustive since you need all ChipTop clocks to equal the default
-  require(getRefClockFreq == p(DefaultClockFrequencyKey))
+  harnessClockInstantiator.clockMap.map(x => require(x._2._2 == p(DefaultClockFrequencyKey)))
+
+  instantiateChipTops()
 }
