@@ -138,7 +138,6 @@ fi
 # initialize all submodules (without the toolchain submodules)
 if run_step "2"; then
     $CYDIR/scripts/init-submodules-no-riscv-tools.sh $FORCE_FLAG
-    $CYDIR/scripts/init-fpga.sh $FORCE_FLAG
 fi
 
 # build extra toolchain collateral (i.e. spike, pk, riscv-tests, libgloss)
