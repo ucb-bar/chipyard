@@ -102,6 +102,42 @@ class WithPassthroughClockGenerator extends OverrideLazyIOBinder({
   }
 })
 
+// Broadcasts a single clock IO to all clock domains
+class WithSingleClockBroadcastClockGenerator extends OverrideLazyIOBinder({
+  (system: HasChipyardPRCI) => {
+    implicit val p = GetSystemParameters(system)
+    val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
+    system.connectImplicitClockSinkNode(implicitClockSinkNode)
+    InModuleBody {
+      val implicit_clock = implicitClockSinkNode.in.head._1.clock
+      val implicit_reset = implicitClockSinkNode.in.head._1.reset
+      system.asInstanceOf[BaseSubsystem].module match { case l: LazyModuleImp => {
+        l.clock := implicit_clock
+        l.reset := implicit_reset
+      }}
+    }
+
+    val clockGroupsAggregateNode = ClockGroupAggregateNode("single_clock")
+    val clockGroupsSourceNode = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
+    system.allClockGroupsNode :*= clockGroupsAggregateNode := clockGroupsSourceNode
+
+    InModuleBody {
+      val clock_wire = Wire(Input(new ClockWithFreq(100)))
+      val reset_wire = Wire(Input(AsyncReset()))
+      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
+      val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(reset_wire, "reset", p(IOCellKey))
+
+      clockGroupsSourceNode.out.foreach { case (bundle, edge) =>
+        bundle.member.data.foreach { b =>
+          b.clock := clock_io.clock
+          b.reset := reset_io
+        }
+      }
+      (Seq(clock_io, reset_io), clockIOCell ++ resetIOCell)
+    }
+  }
+})
+
 class WithClockTapIOCells extends OverrideIOBinder({
   (system: CanHaveClockTap) => {
     system.clockTapIO.map { tap =>
