@@ -4,8 +4,8 @@ import json
 import argparse
 import shutil
 import os
-import datetime
 import sys
+
 
 parser = argparse.ArgumentParser(description="")
 parser.add_argument("--model-hier-json", type=str, required=True, help="Path to hierarchy JSON emitted by firtool. Must include DUT as a module.")
@@ -13,14 +13,15 @@ parser.add_argument("--top-hier-json", type=str, required=True, help="Path to hi
 parser.add_argument('--in-all-filelist', type=str, required=True, help='Path to input filelist that has all modules (relative paths).')
 parser.add_argument("--dut", type=str, required=True, help="Name of the DUT module.")
 parser.add_argument("--model", type=str, required=True, help="Name of the Model module.")
-parser.add_argument('--target-dir', type=str, required=True, help='Path to where module sources are located (combined with --in-all-filelist gives the absolute path to module sources).')
 parser.add_argument('--out-dut-filelist', type=str, required=True, help='Path to output filelist including all modules under the DUT.')
 parser.add_argument('--out-model-filelist', type=str, required=True, help='Path to output filelist including all modules under the MODEL.')
 parser.add_argument("--out-model-hier-json", type=str, required=True, help="Path to updated hierarchy JSON emitted by this script.")
+parser.add_argument('--target-dir', type=str, required=True, help='Path to where module sources are located (combined with --in-all-filelist gives the absolute path to module sources).')
 parser.add_argument("--gcpath", type=str, required=True, help="Path to gen-collateral")
 args = parser.parse_args()
 
 MODEL_SFX=args.model + "_UNIQUIFIED"
+
 
 def bash(cmd):
   fail = os.system(cmd)
@@ -30,17 +31,74 @@ def bash(cmd):
   else:
     print(cmd)
 
-def get_filelist(filelist):
-  fnames = []
-  with open(filelist) as f:
+def bfs_collect_modules(tree, child_to_ignore = None):
+  q = [(tree['instance_name'], tree['module_name'], tree['instances'])]
+
+  modules = list()
+  while len(q) != 0:
+    front = q[0]
+    q.pop(0)
+
+    (inst, mod, child) = front
+    modules.append(mod)
+    for c in child:
+      if c['module_name'] != child_to_ignore:
+        q.append((c['instance_name'], c['module_name'], c['instances']))
+  return modules
+
+def get_modules_in_verilog_file(file):
+  module_names = list()
+  with open(file) as f:
     lines = f.readlines()
     for line in lines:
-      try:
-        fname = line.split("/")[-1].strip()
-        fnames.append(fname)
-      except:
-        print(f"Something is wrong about this line '{line}'")
-  return fnames
+      words = line.split()
+      if len(words) > 0 and words[0] == "module":
+        module_names.append(words[1].replace("(", ""))
+  return module_names
+
+def get_modules_in_filelist(verilog_module_filename, cc_filelist):
+  with open(args.in_all_filelist) as fl:
+    lines = fl.readlines()
+    for line in lines:
+      path = line.strip()
+      basepath = os.path.basename(path)
+      ext = basepath.split(".")[-1]
+
+      if (ext == "v") or (ext == "sv"):
+        modules = get_modules_in_verilog_file(os.path.join(args.gcpath, basepath))
+        for module in modules:
+          verilog_module_filename[module] = basepath
+      else:
+        cc_filelist.append(basepath)
+  return (verilog_module_filename, cc_filelist)
+
+def get_modules_under_hier(hier, child_to_ignore=None):
+  with open(hier) as hj:
+    hj_data = json.load(hj)
+    modules_under_hier = set(bfs_collect_modules(hj_data, child_to_ignore=child_to_ignore))
+  return modules_under_hier
+
+def write_verilog_filelist(modules, verilog_module_filename, out_filelist):
+  written_files = set()
+  existing_modules = verilog_module_filename.keys()
+
+  with open(out_filelist, "w") as df:
+    for module in modules:
+      if module in existing_modules:
+        verilog_filename = verilog_module_filename[module]
+        if verilog_filename not in written_files:
+          written_files.add(verilog_filename)
+          if args.target_dir in verilog_filename:
+            df.write(f"{verilog_filename}\n")
+          else:
+            df.write(f"{args.target_dir}/{verilog_filename}\n")
+  return written_files
+
+def write_cc_filelist(filelist, out_filelist):
+  with open(out_filelist, "a") as df:
+    for path in filelist:
+      file = os.path.basename(path)
+      df.write(f"{args.target_dir}/{file}\n")
 
 def generate_copy(c, sfx):
   (cur_name, ext) = os.path.splitext(c)
@@ -53,6 +111,44 @@ def generate_copy(c, sfx):
   shutil.copy(cur_file, new_file)
   bash(f"sed -i s/\"module {cur_name}\"/\"module {new_name}\"/ {new_file}")
   return new_file
+
+def bfs_uniquify_modules(tree, common_fnames, verilog_module_filename):
+  q = [(tree['instance_name'], tree['module_name'], tree['instances'], None)]
+  updated_submodule = set()
+  existing_modules = verilog_module_filename.keys()
+
+  while len(q) != 0:
+    front = q[0]
+    q.pop(0)
+    (inst, mod, child, parent) = front
+
+    # external module
+    if mod not in existing_modules:
+      assert(len(child) == 0)
+      continue
+
+    cur_file = verilog_module_filename[mod]
+
+    # if the module is common, make a copy & update its instance in its parent
+    new_mod = mod
+    if mod in common_fnames:
+      try:
+        new_file = generate_copy(cur_file, MODEL_SFX)
+        if parent is not None and ((parent, mod) not in updated_submodule):
+          parent_file = os.path.join(args.gcpath, verilog_module_filename[parent])
+          bash(f"sed -i s/\"{mod} \"/\"{mod}_{MODEL_SFX} \"/ {parent_file}")
+          updated_submodule.add((parent, mod))
+
+        # add the uniquified module to the verilog_modul_filename dict
+        new_mod = mod + "_" + MODEL_SFX
+        verilog_module_filename[new_mod] = new_file
+      except:
+        print(f"No corresponding file for {cur_file}")
+
+    # traverse its children
+    for c in child:
+      if c['module_name'] != args.dut:
+        q.append((c['instance_name'], c['module_name'], c['instances'], new_mod))
 
 def dfs_update_modules(tree, common_fnames, visited):
   # List of direct submodules to update
@@ -76,145 +172,36 @@ def dfs_update_modules(tree, common_fnames, visited):
   visited.add(cur_module)
   return (new_file is not None)
 
-def bfs_update(tree, common_fnames, ext_dict, filelist):
-  q = [(tree['instance_name'], tree['module_name'], tree['instances'], None)]
-
-  updated_submodule = set()
-
-  while len(q) != 0:
-    front = q[0]
-    q.pop(0)
-    (inst, mod, child, parent) = front
-
-    try:
-      cur_file = mod + "." + ext_dict[mod][0]
-    except:
-      cur_file = mod + ".sv"
-
-    mod_updated = False
-
-    # if the module is common, make a copy & update its instance in its parent
-    if mod in common_fnames:
-      try:
-        new_file = generate_copy(cur_file, MODEL_SFX)
-        filelist.append((mod, new_file))
-        if parent is not None and ((parent, mod) not in updated_submodule):
-          parent_file = os.path.join(args.gcpath, parent + "." + ext_dict[parent][0])
-          bash(f"sed -i s/\"{mod} \"/\"{mod}_{MODEL_SFX} \"/ {parent_file}")
-          updated_submodule.add((parent, mod))
-        mod_updated = True
-      except:
-        print(f"No corresponding file for {cur_file}")
-    else:
-      filelist.append((mod, cur_file))
-
-    # set the parent module name
-    new_mod = mod
-    if mod_updated:
-      new_mod = mod + "_" + MODEL_SFX
-      ext_dict[new_mod] = ext_dict[mod]
-
-    # traverse its children
-    for c in child:
-      if c['module_name'] != args.dut:
-        q.append((c['instance_name'], c['module_name'], c['instances'], new_mod))
-
-def bfs_collect_modules(tree, child_to_ignore = None):
-  q = [(tree['instance_name'], tree['module_name'], tree['instances'])]
-
-  modules = list()
-  while len(q) != 0:
-    front = q[0]
-    q.pop(0)
-
-    (inst, mod, child) = front
-    modules.append(mod)
-    for c in child:
-      if c['module_name'] != child_to_ignore:
-        q.append((c['instance_name'], c['module_name'], c['instances']))
-  return modules
-
-def write_filelist(modules, out_file, files_written):
-  with open(out_file, "w") as df, \
-       open(args.in_all_filelist) as fl:
-    # add paths that correspond to modules to output file
-    for path in fl:
-        writeOut = False
-        for dm in modules:
-            bm_ext = os.path.basename(path).split(".")
-            bm_ext.pop()
-            bm = ".".join(bm_ext)
-            print(dm, bm, bm_ext)
-            if (dm == bm) or (dm == bm_ext[0]):
-                writeOut = True
-                break
-
-        # prepend the target directory to get filelist with absolute paths
-        if writeOut:
-            files_written.add(os.path.basename(path))
-            if not args.target_dir in path:
-                df.write(f"{args.target_dir}/{path}")
-            else:
-                df.write(f"{path}")
-
-def write_filelist_model(modules, out_file, ext_dict, files_written):
-  with open(out_file, "w") as df:
-    for (m, fname) in modules:
-      if m in ext_dict.keys():
-        if not args.target_dir in fname:
-          df.write(f"{args.target_dir}/{fname}\n")
-        else:
-          df.write(f"{fname}\n")
-        files_written.add(os.path.basename(fname))
-
-def get_file_ext(all_filelist):
-  ext_dict = dict()
-  with open(all_filelist) as fl:
-    for path in fl:
-      fname = os.path.basename(path)
-      fname_strip = fname.strip().split(".")
-      ext = fname_strip[-1]
-      fname_strip.pop()
-      module = ".".join(fname_strip)
-      if module not in ext_dict.keys():
-        ext_dict[module] = list()
-      ext_dict[module].append(ext)
-  return ext_dict
-
-def main():
+def uniquify_modules_under_model(modules_under_model, common_modules, verilog_module_filename):
   with open(args.model_hier_json) as imhj:
     imhj_data = json.load(imhj)
-    modules_under_model = set(bfs_collect_modules(imhj_data, child_to_ignore=args.dut))
-
-
-  files_written = set()
-
-  with open(args.top_hier_json) as imhj:
-    imhj_data = json.load(imhj)
-    modules_under_top = set(bfs_collect_modules(imhj_data))
-
-  common_modules = modules_under_top.intersection(modules_under_model)
-  write_filelist(modules_under_top, args.out_dut_filelist, files_written)
-  ext_dict = get_file_ext(args.in_all_filelist)
-
-  with open(args.model_hier_json) as imhj:
-    imhj_data = json.load(imhj)
+    visited = set()
+    bfs_uniquify_modules(imhj_data, common_modules, verilog_module_filename)
+    dfs_update_modules  (imhj_data, common_modules, visited)
 
     with open(args.out_model_hier_json, "w+") as out_file:
-      visited = set()
-      filelist = list()
-      bfs_update(imhj_data, common_modules, ext_dict, filelist)
-      dfs_update_modules(imhj_data, common_modules, visited)
       json.dump(imhj_data, out_file, indent=2)
-      write_filelist_model(set(filelist), args.out_model_filelist, ext_dict, files_written)
 
-  with open(args.out_model_filelist, "a") as of, \
-       open(args.in_all_filelist) as fl:
-    for path in fl:
-      fname = os.path.basename(path)
-      ext = fname.strip().split(".")[-1]
-      if (fname not in files_written) and (ext == "cc"):
-        of.write(f"{args.target_dir}/{fname}")
+def main():
+  verilog_module_filename = dict()
+  cc_filelist = list()
+  get_modules_in_filelist(verilog_module_filename, cc_filelist)
 
-if __name__ == "__main__":
+  modules_under_model = get_modules_under_hier(args.model_hier_json, args.dut)
+  modules_under_top   = get_modules_under_hier(args.top_hier_json)
+  common_modules      = modules_under_top.intersection(modules_under_model)
+
+  # write top filelist
+  write_verilog_filelist(modules_under_top, verilog_module_filename, args.out_dut_filelist)
+
+  # rename modules that are common
+  uniquify_modules_under_model(modules_under_model, common_modules, verilog_module_filename)
+  uniquified_modules_under_model = get_modules_under_hier(args.out_model_hier_json, args.dut)
+
+  # write model filelist
+  write_verilog_filelist(uniquified_modules_under_model, verilog_module_filename, args.out_model_filelist)
+  write_cc_filelist     (cc_filelist, args.out_model_filelist)
+  
+
+if __name__=="__main__":
   main()
