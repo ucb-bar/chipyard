@@ -1,6 +1,6 @@
 package chipyard.config
 
-import freechips.rocketchip.config.{Config}
+import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.subsystem.{SystemBusKey, BankedL2Key, CoherenceManagerWrapper}
 import freechips.rocketchip.diplomacy.{DTSTimebase}
 

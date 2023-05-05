@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.experimental.{attach}
 
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.config.{Parameters, Field}
+import org.chipsalliance.cde.config.{Parameters, Field}
 import freechips.rocketchip.tilelink.{TLInwardNode, TLAsyncCrossingSink}
 
 import sifive.fpgashells.shell._

@@ -73,9 +73,6 @@
 [submodule "fpga/fpga-shells"]
 	path = fpga/fpga-shells
 	url = https://github.com/chipsalliance/rocket-chip-fpga-shells.git
-[submodule "tools/api-config-chipsalliance"]
-	path = tools/api-config-chipsalliance
-	url = https://github.com/chipsalliance/api-config-chipsalliance.git
 [submodule "tools/rocket-dsp-utils"]
 	path = tools/rocket-dsp-utils
 	url = https://github.com/ucb-bar/rocket-dsp-utils
@@ -121,3 +118,6 @@
 [submodule "generators/mempress"]
 	path = generators/mempress
 	url = https://github.com/ucb-bar/mempress.git
+[submodule "tools/cde"]
+	path = tools/cde
+	url = https://github.com/chipsalliance/cde.git

@@ -3,12 +3,12 @@ package chipyard.fpga.arty
 import chisel3._
 import chisel3.experimental.{IO}
 
-import freechips.rocketchip.devices.debug.{HasPeripheryDebugModuleImp}
+import freechips.rocketchip.devices.debug.{HasPeripheryDebug}
 
 import chipyard.iobinders.{ComposeIOBinder}
 
 class WithDebugResetPassthrough extends ComposeIOBinder({
-  (system: HasPeripheryDebugModuleImp) => {
+  (system: HasPeripheryDebug) => {
     // Debug module reset
     val io_ndreset: Bool = IO(Output(Bool())).suggestName("ndreset")
     io_ndreset := system.debug.get.ndreset

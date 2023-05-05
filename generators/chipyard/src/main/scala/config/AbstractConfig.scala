@@ -1,6 +1,6 @@
 package chipyard.config
 
-import freechips.rocketchip.config.{Config}
+import org.chipsalliance.cde.config.{Config}
 
 // --------------
 // Chipyard abstract ("base") configuration
@@ -40,7 +40,11 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithTraceIOPunchthrough ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
   new chipyard.iobinders.WithCustomBootPin ++
-  new chipyard.iobinders.WithDividerOnlyClockGenerator ++
+
+  // Default behavior is to use a divider-only clock-generator
+  // This works in VCS, Verilator, and FireSim/
+  // This should get replaced with a PLL-like config instead
+  new chipyard.clocking.WithDividerOnlyClockGenerator ++
 
   new testchipip.WithSerialTLWidth(32) ++                           // fatten the serialTL interface to improve testing performance
   new testchipip.WithDefaultSerialTL ++                             // use serialized tilelink port to external serialadapter/harnessRAM

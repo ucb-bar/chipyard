@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util._
 import chisel3.experimental.{Analog, IO}
 
-import freechips.rocketchip.config._
+import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.prci._
@@ -39,16 +39,16 @@ class TileResetSetter(address: BigInt, beatBytes: Int, tileNames: Seq[String], i
       }): _*)
 
     val tileMap = tileNames.zipWithIndex.map({ case (n, i) =>
-        n -> (tile_async_resets(i), r_tile_resets(i).io.q)
+        n -> (tile_async_resets(i), r_tile_resets(i).io.q, address + i * 4)
     })
 
     (clockNode.out zip clockNode.in).map { case ((o, _), (i, _)) =>
       (o.member.elements zip i.member.elements).foreach { case ((name, oD), (_, iD)) =>
         oD.clock := iD.clock
         oD.reset := iD.reset
-        for ((n, (rIn, rOut)) <- tileMap) {
+        for ((n, (rIn, rOut, addr)) <- tileMap) {
           if (name.contains(n)) {
-            println(name, n)
+            println(s"${addr.toString(16)}: Tile $name reset control")
             // Async because the reset coming out of the AsyncResetRegVec is
             // clocked to the bus this is attached to, not the clock in this
             // clock bundle. We expect a ClockGroupResetSynchronizer downstream

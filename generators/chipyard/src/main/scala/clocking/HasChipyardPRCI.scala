@@ -4,7 +4,7 @@ import chisel3._
 
 import scala.collection.mutable.{ArrayBuffer}
 
-import freechips.rocketchip.config.{Parameters, Field, Config}
+import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.devices.tilelink._
@@ -20,7 +20,8 @@ import chipyard.{DefaultClockFrequencyKey}
 case class ChipyardPRCIControlParams(
   slaveWhere: TLBusWrapperLocation = CBUS,
   baseAddress: BigInt = 0x100000,
-  enableTileClockGating: Boolean = true
+  enableTileClockGating: Boolean = true,
+  enableTileResetSetting: Boolean = true
 )
 
 
@@ -72,12 +73,13 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
   val frequencySpecifier = ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
   val clockGroupCombiner = ClockGroupCombiner()
   val resetSynchronizer  = ClockGroupResetSynchronizer()
-  val tileClockGater     = prci_ctrl_domain {
-    TileClockGater(prciParams.baseAddress + 0x00000, tlbus, prciParams.enableTileClockGating)
-  }
-  val tileResetSetter    = prci_ctrl_domain {
+  val tileClockGater     = if (prciParams.enableTileClockGating) { prci_ctrl_domain {
+    TileClockGater(prciParams.baseAddress + 0x00000, tlbus)
+  } } else { ClockGroupEphemeralNode() }
+  val tileResetSetter    = if (prciParams.enableTileResetSetting) { prci_ctrl_domain {
     TileResetSetter(prciParams.baseAddress + 0x10000, tlbus, tile_prci_domains.map(_.tile_reset_domain.clockNode.portParams(0).name.get), Nil)
-  }
+  } } else { ClockGroupEphemeralNode() }
+
   (aggregator
     := frequencySpecifier
     := clockGroupCombiner

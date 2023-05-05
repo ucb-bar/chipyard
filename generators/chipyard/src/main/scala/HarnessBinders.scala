@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util._
 import chisel3.experimental.{Analog, BaseModule, DataMirror, Direction}
 
-import freechips.rocketchip.config.{Field, Config, Parameters}
+import org.chipsalliance.cde.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
 import freechips.rocketchip.devices.debug._
@@ -22,8 +22,8 @@ import barstools.iocell.chisel._
 import testchipip._
 
 import chipyard._
-import chipyard.clocking.{HasChipyardPRCI}
-import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, ClockWithFreq}
+import chipyard.clocking.{HasChipyardPRCI, ClockWithFreq}
+import chipyard.iobinders.{GetSystemParameters, JTAGChipIO}
 
 import tracegen.{TraceGenSystemModuleImp}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
@@ -154,7 +154,7 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
       ports.map({ port =>
 // DOC include start: HarnessClockInstantiatorEx
         withClockAndReset(th.buildtopClock, th.buildtopReset) {
-          val memOverSerialTLClockBundle = p(HarnessClockInstantiatorKey).requestClockBundle("mem_over_serial_tl_clock", memFreq)
+          val memOverSerialTLClockBundle = th.harnessClockInstantiator.requestClockBundle("mem_over_serial_tl_clock", memFreq)
           val serial_bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
           val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(
             system.serdesser.get,

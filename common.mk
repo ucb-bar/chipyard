@@ -50,7 +50,7 @@ HELP_COMMANDS += \
 "   run-tests                   = run all assembly and benchmark tests" \
 "   launch-sbt                  = start sbt terminal" \
 "   {shutdown,start}-sbt-server = shutdown or start sbt server if using ENABLE_SBT_THIN_CLIENT" \
-"   find-config-fragments       = list all config. fragments and their locations (recursive up to CONFIG_FRAG_LEVELS=$(CONFIG_FRAG_LEVELS))"
+"   find-config-fragments       = list all config. fragments"
 
 #########################################################################################
 # include additional subproject make fragments
@@ -231,7 +231,7 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIR
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 # DOC include end: FirrtlCompiler
 
-$(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) &: $(MFC_MODEL_HRCHY_JSON) $(MFC_FILELIST) $(MFC_BB_MODS_FILELIST)
+$(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) &: $(MFC_MODEL_HRCHY_JSON) $(MFC_FILELIST) $(MFC_BB_MODS_FILELIST)
 	$(base_dir)/scripts/split-module-files.py \
 		--model-hier-json $(MFC_MODEL_HRCHY_JSON) \
 		--dut $(TOP) \
@@ -243,6 +243,14 @@ $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILEL
 	$(SED) -i 's/\.\///' $(TOP_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(MODEL_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
+	$(base_dir)/scripts/uniqify-module-names.py \
+		--top-filelist $(TOP_MODS_FILELIST) \
+		--mod-filelist $(MODEL_MODS_FILELIST) \
+		--gen-collateral-path $(GEN_COLLATERAL_DIR) \
+		--model-hier-json $(MFC_MODEL_HRCHY_JSON) \
+		--out-model-hier-json $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) \
+		--dut $(TOP) \
+		--model $(MODEL)
 	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
 
 $(TOP_BB_MODS_FILELIST) $(MODEL_BB_MODS_FILELIST) &: $(BB_MODS_FILELIST) $(MFC_TOP_HRCHY_JSON) $(FINAL_ANNO_FILE)
@@ -253,10 +261,10 @@ $(TOP_BB_MODS_FILELIST) $(MODEL_BB_MODS_FILELIST) &: $(BB_MODS_FILELIST) $(MFC_T
 		--out-top-bb-f $(TOP_BB_MODS_FILELIST) \
 		--out-model-bb-f $(MODEL_BB_MODS_FILELIST)
 
-$(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JSON)
+$(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED)
 	$(base_dir)/scripts/split-mems-conf.py \
 		--in-smems-conf $(MFC_SMEMS_CONF) \
-		--in-model-hrchy-json $(MFC_MODEL_HRCHY_JSON) \
+		--in-model-hrchy-json $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) \
 		--dut-module-name $(TOP) \
 		--model-module-name $(MODEL) \
 		--out-dut-smems-conf $(TOP_SMEMS_CONF) \
@@ -406,13 +414,9 @@ define \n
 
 endef
 
-CONFIG_FRAG_LEVELS ?= 3
 .PHONY: find-config-fragments
-find-config-fragments: private IN_F := $(shell mktemp -d -t cy-XXXXXXXX)/scala_files.f
-find-config-fragments: $(SCALA_SOURCES)
-	@$(foreach file,$(SCALA_SOURCES),echo $(file) >> $(IN_F)${\n})
-	$(base_dir)/scripts/config-finder.py -l $(CONFIG_FRAG_LEVELS) $(IN_F)
-	@rm -rf $(dir $(IN_F))
+find-config-fragments:
+	$(call run_scala_main,chipyard,chipyard.ConfigFinder,)
 
 .PHONY: help
 help:

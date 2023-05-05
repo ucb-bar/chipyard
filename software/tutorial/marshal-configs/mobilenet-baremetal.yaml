@@ -1,0 +1,8 @@
+{
+  "name" : "mobilenet-baremetal",
+  "base" : "bare-base.json",
+  "workdir" : "..",
+  "host-init" : "build.sh",
+  "bin" : "overlay/root/mobilenet-baremetal",
+  "spike-args" : "--extension=gemmini"
+}

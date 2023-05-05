@@ -2,7 +2,7 @@ package chipyard
 
 import chisel3._
 
-import freechips.rocketchip.config.{Config}
+import org.chipsalliance.cde.config.{Config}
 
 // ---------------------
 // Ibex Configs

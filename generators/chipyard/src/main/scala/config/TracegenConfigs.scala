@@ -1,6 +1,6 @@
 package chipyard
 
-import freechips.rocketchip.config.{Config}
+import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.rocket.{DCacheParams}
 
 class AbstractTraceGenConfig extends Config(
@@ -9,7 +9,7 @@ class AbstractTraceGenConfig extends Config(
   new chipyard.harness.WithClockAndResetFromHarness ++
   new chipyard.iobinders.WithAXI4MemPunchthrough ++
   new chipyard.iobinders.WithTraceGenSuccessPunchthrough ++
-  new chipyard.iobinders.WithDividerOnlyClockGenerator ++
+  new chipyard.clocking.WithDividerOnlyClockGenerator ++
   new chipyard.config.WithTracegenSystem ++
   new chipyard.config.WithNoSubsystemDrivenClocks ++
   new chipyard.config.WithPeripheryBusFrequencyAsDefault ++
