@@ -53,7 +53,7 @@ def get_modules_in_verilog_file(file):
     for line in lines:
       words = line.split()
       if len(words) > 0 and words[0] == "module":
-        module_names.append(words[1].replace("(", ""))
+        module_names.append(words[1].replace("(", "").replace(")", "").replace(";", ""))
   return module_names
 
 def get_modules_in_filelist(verilog_module_filename, cc_filelist):
