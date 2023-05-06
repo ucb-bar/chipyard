@@ -62,8 +62,18 @@ class EinsteinRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
+class SmallEinsteinRocketConfig extends Config(
+  new einstein.LargeDenseEinsteinConfig(size=4) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class MidEinsteinRocketConfig extends Config(
+  new einstein.LargeDenseEinsteinConfig(size=8) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 class LargeEinsteinRocketConfig extends Config(
-  new einstein.LargeDenseEinsteinConfig ++
+  new einstein.LargeDenseEinsteinConfig(size=16) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
@@ -72,3 +82,22 @@ class SparseDenseEinsteinRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
+class SmallSparseDenseEinsteinRocketConfig extends Config(
+  new einstein.SparseDenseEinsteinConfig(size = 4) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class MidSparseDenseEinsteinRocketConfig extends Config(
+  new einstein.SparseDenseEinsteinConfig(size = 8) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class LargeSparseDenseEinsteinRocketConfig extends Config(
+  new einstein.SparseDenseEinsteinConfig(size = 16) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class LoadBalancedSparseDenseEinsteinRocketConfig extends Config(
+  new einstein.SparseDenseEinsteinConfig(isLoadBalanced = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
