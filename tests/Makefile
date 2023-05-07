@@ -2,8 +2,7 @@
 # RISCV Toolchain
 #################################
 
-PREFIX_NO_MINUS = riscv64-unknown-elf
-PREFIX = $(PREFIX_NO_MINUS)-
+PREFIX = riscv64-unknown-elf-
 
 GCC = $(PREFIX)gcc
 CXX = $(PREFIX)g++
@@ -22,7 +21,7 @@ ARCH = rv64imafdc
 ABI = lp64d
 ARCHFLAGS = -march=$(ARCH) -mabi=$(ABI)
 
-CFLAGS  = -std=gnu99 -O2 -fno-common -fno-builtin-printf -Wall -I$(RISCV)/$(PREFIX_NO_MINUS)/include
+CFLAGS  = -std=gnu99 -O2 -fno-common -fno-builtin-printf -Wall
 CFLAGS += $(ARCHFLAGS)
 LDFLAGS = -static
 
