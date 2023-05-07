@@ -2,6 +2,34 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.9.1] - 2023-04-21
+
+Various fixes for Linux boot, More Chip/bringup examples, Chisel 3.5.6 bump
+
+### Added
+* QoL improvement to IOBinders + custom ChipTop example by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1399
+* PLL integration example + FlatChipTop/TestHarness by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1427
+* Bump TestChipIp to improve default serial_tl behavior by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1435
+* Bump testchipip to standardize TL serdesser bundle params by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1446
+* HarnessBinder asserts to catch bad clock generation by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1460
+
+### Changed
+* New Scala-based Config Finder by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1424
+* Bump to latest rocket-chip/chisel3.5.6 by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1411
+* Resolve merge conflicts in chisel3.5.6 bump by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1430
+* bump testchipip by @joey0320 in https://github.com/ucb-bar/chipyard/pull/1434
+* ADD: improve Makefile in tests/, add explicit arch flags by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1439
+* Various submodule bumps by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1448
+* Support not instantiating tile reset/clock contorl features by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1459
+
+### Fixed
+* Various improvements and fixes by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1420
+* Ensure conda cleanup regex properly filters out non-numeric chars by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1425
+* Fix ChipLikeQuadRocketConfig crossing by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1436
+* Uniquify module names that are common to Top & Model by @joey0320 in https://github.com/ucb-bar/chipyard/pull/1442
+* Support for no-bootROM systems by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1458
+* Support for no-UART systems by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1457
+
 ## [1.9.0] - 2023-03-23
 
 Faster FIRRTL build support work CIRCT. New software support for RISC-V GCC12 and Linux 6.2. Various bumps and fixes of all submodules.
