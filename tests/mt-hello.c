@@ -1,4 +1,4 @@
-#include "riscv-pk/encoding.h"
+#include <riscv-pk/encoding.h>
 #include <stdio.h>
 #include "marchid.h"
 

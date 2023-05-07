@@ -162,6 +162,7 @@ SFC_ANNO_FILE ?= $(build_dir)/$(long_name).sfc.anno.json
 # firtool compiler outputs
 MFC_TOP_HRCHY_JSON ?= $(build_dir)/top_module_hierarchy.json
 MFC_MODEL_HRCHY_JSON ?= $(build_dir)/model_module_hierarchy.json
+MFC_MODEL_HRCHY_JSON_UNIQUIFIED ?= $(build_dir)/model_module_hierarchy.uniquified.json
 MFC_SMEMS_CONF ?= $(build_dir)/$(long_name).mems.conf
 # hardcoded firtool outputs
 MFC_FILELIST = $(GEN_COLLATERAL_DIR)/filelist.f
@@ -185,10 +186,6 @@ MODEL_MODS_FILELIST ?= $(build_dir)/$(long_name).model.f
 # list of all blackbox files (may be included in the top/model.f files)
 # this has the build_dir appended
 BB_MODS_FILELIST ?= $(build_dir)/$(long_name).bb.f
-# top blackbox module files to include
-TOP_BB_MODS_FILELIST ?= $(build_dir)/$(long_name).top.bb.f
-# model blackbox module files to include (not including top blackbox modules)
-MODEL_BB_MODS_FILELIST ?= $(build_dir)/$(long_name).model.bb.f
 # all module files to include (top, model, bb included)
 ALL_MODS_FILELIST ?= $(build_dir)/$(long_name).all.f
 
