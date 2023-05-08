@@ -24,6 +24,7 @@ class ChipLikeQuadRocketConfig extends Config(
   new chipyard.harness.WithSimAXIMemOverSerialTL ++                                     // Attach fast SimDRAM to TestHarness
   new chipyard.config.WithSerialTLBackingMemory ++                                      // Backing memory is over serial TL protocol
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 4L) ++                  // 4GB max external memory
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++                          // 1 memory channel
 
   //==================================
   // Set up clock./reset

@@ -7,6 +7,7 @@ import chisel3.experimental.{IntParam, StringParam, IO}
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink._
+import freechips.rocketchip.devices.debug.{ExportDebug, DMI}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.rocket._
 import freechips.rocketchip.tilelink._
@@ -189,7 +190,8 @@ class SpikeBlackBox(
   readonly_uncacheable_regions: String,
   executable_regions: String,
   tcm_base: BigInt,
-  tcm_size: BigInt) extends BlackBox(Map(
+  tcm_size: BigInt,
+  use_dtm: Boolean) extends BlackBox(Map(
     "HARTID" -> IntParam(hartId),
     "ISA" -> StringParam(isa),
     "PMPREGIONS" -> IntParam(pmpregions),
@@ -302,7 +304,11 @@ class SpikeBlackBox(
   })
   addResource("/vsrc/spiketile.v")
   addResource("/csrc/spiketile.cc")
-
+  if (use_dtm) {
+    addResource("/csrc/spiketile_dtm.h")
+  } else {
+    addResource("/csrc/spiketile_tsi.h")
+  }
 }
 
 class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
@@ -326,13 +332,18 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
   val (dcache_tl, dcacheEdge) = outer.dcacheNode.out(0)
   val (mmio_tl, mmioEdge) = outer.mmioNode.out(0)
 
+  // Note: This assumes that if the debug module exposes the ClockedDMI port,
+  // then the DTM-based bringup with SimDTM will be used. This isn't required to be
+  // true, but it usually is
+  val useDTM = p(ExportDebug).protocols.contains(DMI)
   val spike = Module(new SpikeBlackBox(hartId, isaDTS, tileParams.core.nPMPs,
     tileParams.icache.get.nSets, tileParams.icache.get.nWays,
     tileParams.dcache.get.nSets, tileParams.dcache.get.nWays,
     tileParams.dcache.get.nMSHRs,
     cacheable_regions, uncacheable_regions, readonly_uncacheable_regions, executable_regions,
     outer.spikeTileParams.tcmParams.map(_.base).getOrElse(0),
-    outer.spikeTileParams.tcmParams.map(_.size).getOrElse(0)
+    outer.spikeTileParams.tcmParams.map(_.size).getOrElse(0),
+    useDTM
   ))
   spike.io.clock := clock.asBool
   val cycle = RegInit(0.U(64.W))
@@ -421,7 +432,7 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
 
   spike.io.mmio.a.ready := mmio_tl.a.ready
   mmio_tl.a.valid := spike.io.mmio.a.valid
-  val log_size = MuxCase(0.U, (0 until 3).map { i => (spike.io.mmio.a.size === (1 << i).U) -> i.U })
+  val log_size = (0 until 4).map { i => Mux(spike.io.mmio.a.size === (1 << i).U, i.U, 0.U) }.reduce(_|_)
   mmio_tl.a.bits := Mux(spike.io.mmio.a.store,
     mmioEdge.Put(0.U, spike.io.mmio.a.address, log_size, spike.io.mmio.a.data)._2,
     mmioEdge.Get(0.U, spike.io.mmio.a.address, log_size)._2)

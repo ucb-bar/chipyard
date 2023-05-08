@@ -168,8 +168,9 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
           // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
           (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi_port, edge) =>
             val memSize = sVal.memParams.size
+            val memBase = sVal.memParams.base
             val lineSize = p(CacheBlockBytes)
-            val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), edge.bundle)).suggestName("simdram")
+            val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), memBase, edge.bundle)).suggestName("simdram")
             mem.io.axi <> axi_port.bits
             mem.io.clock := axi_port.clock
             mem.io.reset := axi_port.reset
@@ -184,10 +185,12 @@ class WithBlackBoxSimMem(additionalLatency: Int = 0) extends OverrideHarnessBind
   (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
     (ports zip system.memAXI4Node.edges.in).map { case (port, edge) =>
+      // TODO FIX: This currently makes each SimDRAM contain the entire memory space
       val memSize = p(ExtMem).get.master.size
+      val memBase = p(ExtMem).get.master.base
       val lineSize = p(CacheBlockBytes)
       val clockFreq = p(MemoryBusKey).dtsFrequency.get
-      val mem = Module(new SimDRAM(memSize, lineSize, clockFreq, edge.bundle)).suggestName("simdram")
+      val mem = Module(new SimDRAM(memSize, lineSize, clockFreq, memBase, edge.bundle)).suggestName("simdram")
       mem.io.axi <> port.bits
       // Bug in Chisel implementation. See https://github.com/chipsalliance/chisel3/pull/1781
       def Decoupled[T <: Data](irr: IrrevocableIO[T]): DecoupledIO[T] = {
@@ -252,7 +255,7 @@ class WithSimDebug extends OverrideHarnessBinder({
       case d: ClockedDMIIO =>
         val dtm_success = WireInit(false.B)
         when (dtm_success) { th.success := true.B }
-        val dtm = Module(new SimDTM).connect(th.buildtopClock, th.buildtopReset.asBool, d, dtm_success)
+        val dtm = Module(new TestchipSimDTM).connect(th.buildtopClock, th.buildtopReset.asBool, d, dtm_success)
       case j: JTAGChipIO =>
         val dtm_success = WireInit(false.B)
         when (dtm_success) { th.success := true.B }
@@ -262,7 +265,8 @@ class WithSimDebug extends OverrideHarnessBinder({
         j.TCK := jtag_wire.TCK
         j.TMS := jtag_wire.TMS
         j.TDI := jtag_wire.TDI
-        val jtag = Module(new SimJTAG(tickDelay=3)).connect(jtag_wire, th.buildtopClock, th.buildtopReset.asBool, ~(th.buildtopReset.asBool), dtm_success)
+        val jtag = Module(new SimJTAG(tickDelay=3))
+        jtag.connect(jtag_wire, th.buildtopClock, th.buildtopReset.asBool, ~(th.buildtopReset.asBool), dtm_success)
     }
   }
 })
@@ -365,7 +369,8 @@ class WithCospike extends ComposeHarnessBinder({
       mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
       pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0),
       nharts = tiles.size,
-      bootrom = chipyardSystem.bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse("")
+      bootrom = chipyardSystem.bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse(""),
+      has_dtm = p(ExportDebug).protocols.contains(DMI) // assume that exposing clockeddmi means we will connect SimDTM
     )
     ports.map { p => p.traces.zipWithIndex.map(t => SpikeCosim(t._1, t._2, cfg)) }
   }
