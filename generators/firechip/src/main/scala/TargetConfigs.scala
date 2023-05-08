@@ -194,6 +194,17 @@ class FireSimRocketMMIOOnly1GiBDRAMConfig extends Config(
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 1L) ++
   new FireSimRocketMMIOOnlyConfig)
 
+
+class FireSimRocket4GiBDRAMConfig extends Config(
+  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 4L) ++
+  new FireSimRocketConfig)
+
+class FireSimRocketMMIOOnly4GiBDRAMConfig extends Config(
+  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 4L) ++
+  new FireSimRocketMMIOOnlyConfig)
+
+
+
 class FireSimQuadRocketConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
