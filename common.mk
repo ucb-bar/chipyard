@@ -231,7 +231,7 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIR
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 # DOC include end: FirrtlCompiler
 
-$(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) &: $(MFC_MODEL_HRCHY_JSON) $(MFC_FILELIST) $(MFC_BB_MODS_FILELIST)
+$(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) &: $(MFC_MODEL_HRCHY_JSON) $(MFC_FILELIST) $(MFC_BB_MODS_FILELIST)
 	$(base_dir)/scripts/split-module-files.py \
 		--model-hier-json $(MFC_MODEL_HRCHY_JSON) \
 		--dut $(TOP) \
@@ -243,6 +243,14 @@ $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILEL
 	$(SED) -i 's/\.\///' $(TOP_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(MODEL_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
+	$(base_dir)/scripts/uniqify-module-names.py \
+		--top-filelist $(TOP_MODS_FILELIST) \
+		--mod-filelist $(MODEL_MODS_FILELIST) \
+		--gen-collateral-path $(GEN_COLLATERAL_DIR) \
+		--model-hier-json $(MFC_MODEL_HRCHY_JSON) \
+		--out-model-hier-json $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) \
+		--dut $(TOP) \
+		--model $(MODEL)
 	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
 
 $(TOP_BB_MODS_FILELIST) $(MODEL_BB_MODS_FILELIST) &: $(BB_MODS_FILELIST) $(MFC_TOP_HRCHY_JSON) $(FINAL_ANNO_FILE)
@@ -253,10 +261,10 @@ $(TOP_BB_MODS_FILELIST) $(MODEL_BB_MODS_FILELIST) &: $(BB_MODS_FILELIST) $(MFC_T
 		--out-top-bb-f $(TOP_BB_MODS_FILELIST) \
 		--out-model-bb-f $(MODEL_BB_MODS_FILELIST)
 
-$(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JSON)
+$(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED)
 	$(base_dir)/scripts/split-mems-conf.py \
 		--in-smems-conf $(MFC_SMEMS_CONF) \
-		--in-model-hrchy-json $(MFC_MODEL_HRCHY_JSON) \
+		--in-model-hrchy-json $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) \
 		--dut-module-name $(TOP) \
 		--model-module-name $(MODEL) \
 		--out-dut-smems-conf $(TOP_SMEMS_CONF) \
