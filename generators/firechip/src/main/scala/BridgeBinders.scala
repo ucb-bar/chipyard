@@ -67,16 +67,16 @@ class WithFireSimIOCellModels extends Config((site, here, up) => {
   case IOCellKey => FireSimIOCellParams()
 })
 
-class WithSerialBridge extends OverrideHarnessBinder({
+class WithTSIBridgeAndHarnessRAMOverSerialTL extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[ClockedIO[SerialIO]]) => {
     ports.map { port =>
       implicit val p = GetSystemParameters(system)
       val bits = port.bits
       port.clock := th.buildtopClock
       val ram = withClockAndReset(th.buildtopClock, th.buildtopReset) {
-        SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
+        TSIHarness.connectRAM(system.serdesser.get, bits, th.buildtopReset)
       }
-      SerialBridge(th.buildtopClock, ram.module.io.tsi_ser, p(ExtMem).map(_ => MainMemoryConsts.globalName), th.buildtopReset.asBool)
+      TSIBridge(th.buildtopClock, ram.module.io.tsi, p(ExtMem).map(_ => MainMemoryConsts.globalName), th.buildtopReset.asBool)
     }
     Nil
   }
@@ -128,13 +128,13 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
         val serial_bits = port.bits
         port.clock := th.buildtopClock
         val harnessMultiClockAXIRAM = withClockAndReset(th.buildtopClock, th.buildtopReset) {
-          SerialAdapter.connectHarnessMultiClockAXIRAM(
+          TSIHarness.connectMultiClockAXIRAM(
             system.serdesser.get,
             serial_bits,
             axiClockBundle,
             th.buildtopReset)
         }
-        SerialBridge(th.buildtopClock, harnessMultiClockAXIRAM.module.io.tsi_ser, Some(MainMemoryConsts.globalName), th.buildtopReset.asBool)
+        TSIBridge(th.buildtopClock, harnessMultiClockAXIRAM.module.io.tsi, Some(MainMemoryConsts.globalName), th.buildtopReset.asBool)
 
         // connect SimAxiMem
         (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi4, edge) =>
@@ -232,7 +232,7 @@ class WithFireSimFAME5 extends ComposeIOBinder({
 
 // Shorthand to register all of the provided bridges above
 class WithDefaultFireSimBridges extends Config(
-  new WithSerialBridge ++
+  new WithTSIBridgeAndHarnessRAMOverSerialTL ++
   new WithNICBridge ++
   new WithUARTBridge ++
   new WithBlockDeviceBridge ++
@@ -245,7 +245,7 @@ class WithDefaultFireSimBridges extends Config(
 
 // Shorthand to register all of the provided mmio-only bridges above
 class WithDefaultMMIOOnlyFireSimBridges extends Config(
-  new WithSerialBridge ++
+  new WithTSIBridgeAndHarnessRAMOverSerialTL ++
   new WithUARTBridge ++
   new WithBlockDeviceBridge ++
   new WithFASEDBridge ++

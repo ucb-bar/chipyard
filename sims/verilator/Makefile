@@ -52,7 +52,7 @@ SIM_FILE_REQS += \
 
 # the following files are needed for emulator.cc to compile (even if they aren't part of the RTL build)
 SIM_FILE_REQS += \
-	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/SimSerial.cc \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/SimTSI.cc \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/testchip_tsi.cc \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/testchip_tsi.h \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/SimDRAM.cc \

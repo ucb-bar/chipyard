@@ -83,8 +83,8 @@ This example shows the Chipyard default top that composes multiple traits togeth
     :end-before: DOC include end: DigitalTop
 
 
-There are two "cakes" or mixins here. One for the lazy module (ex. ``CanHavePeripherySerial``) and one for the lazy module
-implementation (ex. ``CanHavePeripherySerialModuleImp`` where ``Imp`` refers to implementation). The lazy module defines
+There are two "cakes" or mixins here. One for the lazy module (ex. ``CanHavePeripheryTLSerial``) and one for the lazy module
+implementation (ex. ``CanHavePeripheryTLSerialModuleImp`` where ``Imp`` refers to implementation). The lazy module defines
 all the logical connections between generators and exchanges configuration information among them, while the
 lazy module implementation performs the actual Chisel RTL elaboration.
 
@@ -93,19 +93,17 @@ In the ``DigitalTop`` example class, the "outer" ``DigitalTop`` instantiates the
 of the module until all logical connections are determined and all configuration information is exchanged.
 The ``System`` outer base class, as well as the
 ``CanHavePeriphery<X>`` outer traits contain code to perform high-level logical
-connections. For example, the ``CanHavePeripherySerial`` outer trait contains code
-to optionally lazily instantiate the ``SerialAdapter``, and connect the ``SerialAdapter``'s
+connections. For example, the ``CanHavePeripheryTLSerial`` outer trait contains code
+to optionally lazily instantiate the ``TLSerdesser``, and connect the ``TLSerdesser`` 's
 TileLink node to the Front bus.
 
 The ``ModuleImp`` classes and traits perform elaboration of real RTL.
-For example, the ``CanHavePeripherySerialModuleImp`` trait optionally physically connects
-the ``SerialAdapter`` module, and instantiates queues.
 
 In the test harness, the SoC is elaborated with
 ``val dut = p(BuildTop)(p)``.
 
 After elaboration, the system submodule of ``ChipTop`` will be a ``DigitalTop`` module, which contains a
-``SerialAdapter`` module (among others), if the config specified for that block to be instantiated.
+``TLSerdesser`` module (among others), if the config specified for that block to be instantiated.
 
 From a high level, classes which extend ``LazyModule`` *must* reference
 their module implementation through ``lazy val module``, and they
@@ -116,7 +114,7 @@ other normal modules OR lazy modules (for nested Diplomacy
 graphs, for example).
 
 The naming convention for an additive mixin or trait is ``CanHave<YourMixin>``.
-This is shown in the ``Top`` class where things such as ``CanHavePeripherySerial`` connect a RTL component to a bus and expose signals to the top-level.
+This is shown in the ``Top`` class where things such as ``CanHavePeripheryTLSerial`` connect a RTL component to a bus and expose signals to the top-level.
 
 Additional References
 ---------------------------
