@@ -155,7 +155,8 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
 // DOC include start: HarnessClockInstantiatorEx
         withClockAndReset(th.buildtopClock, th.buildtopReset) {
           val memOverSerialTLClockBundle = th.harnessClockInstantiator.requestClockBundle("mem_over_serial_tl_clock", memFreq)
-          val serial_bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+          val serial_bits = port.bits
+          port.clock := th.buildtopClock
           val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(
             system.serdesser.get,
             serial_bits,
@@ -302,11 +303,11 @@ class WithSerialAdapterTiedOff extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
-      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
-      withClockAndReset(th.buildtopClock, th.buildtopReset) {
-        val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
-        SerialAdapter.tieoff(ram.module.io.tsi_ser)
-      }
+      val bits = port.bits
+      port.clock := false.B.asClock
+      port.bits.out.ready := false.B
+      port.bits.in.valid := false.B
+      port.bits.in.bits := DontCare
     })
   }
 })
@@ -315,7 +316,8 @@ class WithSimSerial extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
-      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+      val bits = port.bits
+      port.clock := th.buildtopClock
       withClockAndReset(th.buildtopClock, th.buildtopReset) {
         val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
         val success = SerialAdapter.connectSimSerial(ram.module.io.tsi_ser, th.buildtopClock, th.buildtopReset.asBool)
@@ -330,7 +332,8 @@ class WithUARTSerial extends OverrideHarnessBinder({
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
       val freq = p(PeripheryBusKey).dtsFrequency.get
-      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+      val bits = port.bits
+      port.clock := th.buildtopClock
       withClockAndReset(th.buildtopClock, th.buildtopReset) {
         val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
         val uart_to_serial = Module(new UARTToSerial(freq, UARTParams(0)))
