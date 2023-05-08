@@ -1,4 +1,4 @@
-package chipyard
+package chipyard.harness
 
 import chisel3._
 
@@ -8,10 +8,9 @@ import org.chipsalliance.cde.config.{Field, Parameters, Config}
 import freechips.rocketchip.util.{ResetCatchAndSync}
 import freechips.rocketchip.prci._
 
-import chipyard.harness.{ApplyHarnessBinders, HarnessBinders}
+import chipyard.harness.{ApplyHarnessBinders, HarnessBinders, HarnessClockInstantiatorKey}
 import chipyard.iobinders.HasIOBinders
 import chipyard.clocking.{SimplePllConfiguration, ClockDividerN}
-import chipyard.HarnessClockInstantiatorKey
 
 
 // HarnessClockInstantiators are classes which generate clocks that drive

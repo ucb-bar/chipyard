@@ -8,8 +8,8 @@ class ChipLikeQuadRocketConfig extends Config(
   //==================================
   // Set up TestHarness
   //==================================
-  new chipyard.WithAbsoluteFreqHarnessClockInstantiator ++ // use absolute frequencies for simulations in the harness
-                                                           // NOTE: This only simulates properly in VCS
+  new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ // use absolute frequencies for simulations in the harness
+                                                                   // NOTE: This only simulates properly in VCS
 
   //==================================
   // Set up tiles

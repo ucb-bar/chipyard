@@ -149,7 +149,7 @@ It is recommended that you edit these variables directly in the Makefile rather 
 
 The ``buildfile`` make target has dependencies on both (1) the Verilog that is elaborated from all Chisel sources
 and (2) the mapping of memory instances in the design to SRAM macros;
-all files related to these two steps reside in the ``generated-src/chipyard.TestHarness.TinyRocketConfig-ChipTop`` directory.
+all files related to these two steps reside in the ``generated-src/chipyard.harness.TestHarness.TinyRocketConfig-ChipTop`` directory.
 Note that the files in ``generated-src`` vary for each tool/technology flow.
 This especially applies to the Sky130 Commercial vs OpenROAD tutorial flows 
 (due to the ``ENABLE_YOSYS_FLOW`` flag, explained below), so these flows should be run in separate
@@ -197,7 +197,7 @@ Hammer generates a convenient script to launch these sessions
 
 .. code-block:: shell
 
-    cd ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/par-rundir
+    cd ./build/chipyard.harness.TestHarness.TinyRocketConfig-ChipTop/par-rundir
     ./generated-scripts/open_chip
 
 Note that the conda OpenROAD package was compiled with the GUI disabled, so in order to view the layout,
@@ -212,7 +212,7 @@ These databases can be restored using the same ``open_chip`` script for debuggin
 
 .. code-block:: shell
 
-    cd build/chipyard.TestHarness.TinyRocketConfig-ChipTop/par-rundir
+    cd build/chipyard.harness.TestHarness.TinyRocketConfig-ChipTop/par-rundir
     ./generated_scripts/open_chip -h
     "
         Usage: ./generated-scripts/open_chip [-t] [openroad_db_name]
@@ -245,9 +245,9 @@ To run DRC & LVS in Magic & Netgen, respectively:
 .. code-block:: shell
 
     make drc tutorial=sky130-openroad
-    ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/drc-rundir/generated-scripts/view_drc
+    ./build/chipyard.harness.TestHarness.TinyRocketConfig-ChipTop/drc-rundir/generated-scripts/view_drc
     make lvs tutorial=sky130-openroad
-    ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/lvs-rundir/generated-scripts/view_lvs
+    ./build/chipyard.harness.TestHarness.TinyRocketConfig-ChipTop/lvs-rundir/generated-scripts/view_lvs
 
 Note that in ``sky130-openroad.yml`` we have set the following YAML keys:
 

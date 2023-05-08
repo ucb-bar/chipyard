@@ -13,8 +13,8 @@ import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 
 import sifive.blocks.devices.uart._
 
-import chipyard._
-import chipyard.harness.{ApplyHarnessBinders}
+import chipyard.{ChipTop, CanHaveMasterTLMemPort, ExtTLMem}
+import chipyard.harness._
 import chipyard.iobinders.{HasIOBinders}
 
 class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell with HasHarnessSignalReferences

@@ -13,7 +13,7 @@ import freechips.rocketchip.tilelink.{HasTLBusParams}
 
 import chipyard._
 import chipyard.clocking._
-
+import chipyard.harness.{DefaultClockFrequencyKey}
 
 // The default RocketChip BaseSubsystem drives its diplomatic clock graph
 // with the implicit clocks of Subsystem. Don't do that, instead we extend

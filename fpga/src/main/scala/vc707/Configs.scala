@@ -17,7 +17,8 @@ import sifive.fpgashells.shell.xilinx.{VC7074GDDRSize}
 
 import testchipip.{SerialTLKey}
 
-import chipyard.{BuildSystem, ExtTLMem, DefaultClockFrequencyKey}
+import chipyard.{BuildSystem, ExtTLMem}
+import chipyard.harness.{DefaultClockFrequencyKey}
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
