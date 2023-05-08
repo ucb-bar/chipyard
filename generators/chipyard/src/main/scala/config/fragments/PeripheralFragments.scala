@@ -106,3 +106,7 @@ class WithNoBusErrorDevices extends Config((site, here, up) => {
   case MemoryBusKey => up(MemoryBusKey).copy(errorDevice = None)
   case FrontBusKey => up(FrontBusKey).copy(errorDevice = None)
 })
+
+class WithDebugModuleAbstractDataWords(words: Int = 16) extends Config((site, here, up) => {
+  case DebugModuleKey => up(DebugModuleKey).map(_.copy(nAbstractDataWords=words))
+})

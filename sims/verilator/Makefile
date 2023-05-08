@@ -60,7 +60,8 @@ SIM_FILE_REQS += \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm.cc \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm_dramsim2.h \
 	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/mm_dramsim2.cc \
-	$(ROCKETCHIP_RSRCS_DIR)/csrc/SimDTM.cc \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/testchip_dtm.cc \
+	$(TESTCHIP_RSRCS_DIR)/testchipip/csrc/testchip_dtm.h \
 	$(ROCKETCHIP_RSRCS_DIR)/csrc/SimJTAG.cc \
 	$(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.h \
 	$(ROCKETCHIP_RSRCS_DIR)/csrc/remote_bitbang.cc

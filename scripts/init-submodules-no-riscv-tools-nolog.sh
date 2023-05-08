@@ -107,8 +107,7 @@ cd "$RDIR"
             software/coremark \
             software/firemarshal \
             software/spec2017 \
-            vlsi/hammer-mentor-plugins \
-            fpga/fpga-shells
+            vlsi/hammer-mentor-plugins
         do
             "$1" "${name%/}"
         done

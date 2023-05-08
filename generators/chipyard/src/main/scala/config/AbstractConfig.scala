@@ -50,6 +50,7 @@ class AbstractConfig extends Config(
 
   new testchipip.WithSerialTLWidth(32) ++                           // fatten the serialTL interface to improve testing performance
   new testchipip.WithDefaultSerialTL ++                             // use serialized tilelink port to external serialadapter/harnessRAM
+  new chipyard.config.WithDebugModuleAbstractDataWords(8) ++        // increase debug module data capacity
   new chipyard.config.WithBootROM ++                                // use default bootrom
   new chipyard.config.WithUART ++                                   // add a UART
   new chipyard.config.WithL2TLBs(1024) ++                           // use L2 TLBs
@@ -58,6 +59,7 @@ class AbstractConfig extends Config(
   new chipyard.config.WithPeripheryBusFrequencyAsDefault ++         // Unspecified frequencies with match the pbus frequency (which is always set)
   new chipyard.config.WithMemoryBusFrequency(100.0) ++              // Default 100 MHz mbus
   new chipyard.config.WithPeripheryBusFrequency(100.0) ++           // Default 100 MHz pbus
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++      // Default 2 memory channels
   new freechips.rocketchip.subsystem.WithClockGateModel ++          // add default EICG_wrapper clock gate model
   new freechips.rocketchip.subsystem.WithJtagDTM ++                 // set the debug module to expose a JTAG port
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++              // no top-level MMIO master port (overrides default set in rocketchip)

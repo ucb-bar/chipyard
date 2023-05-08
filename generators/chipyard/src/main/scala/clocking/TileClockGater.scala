@@ -47,13 +47,9 @@ class TileClockGater(address: BigInt, beatBytes: Int)(implicit p: Parameters, va
 }
 
 object TileClockGater {
-  def apply(address: BigInt, tlbus: TLBusWrapper, enable: Boolean)(implicit p: Parameters, v: ValName) = {
-    if (enable) {
-      val gater = LazyModule(new TileClockGater(address, tlbus.beatBytes))
-      tlbus.toVariableWidthSlave(Some("clock-gater")) { gater.tlNode := TLBuffer() }
-      gater.clockNode
-    } else {
-      ClockGroupEphemeralNode()
-    }
+  def apply(address: BigInt, tlbus: TLBusWrapper)(implicit p: Parameters, v: ValName) = {
+    val gater = LazyModule(new TileClockGater(address, tlbus.beatBytes))
+    tlbus.toVariableWidthSlave(Some("clock-gater")) { gater.tlNode := TLBuffer() }
+    gater.clockNode
   }
 }

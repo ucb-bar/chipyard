@@ -126,6 +126,7 @@ class MulticlockAXIOverSerialConfig extends Config(
   new chipyard.config.WithSerialTLBackingMemory ++ // remove axi4 mem port in favor of SerialTL memory
 
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++ // 1 memory channel
   new chipyard.config.AbstractConfig)
 // DOC include end: MulticlockAXIOverSerialConfig
 

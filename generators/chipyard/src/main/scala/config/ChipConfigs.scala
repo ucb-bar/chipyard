@@ -39,6 +39,7 @@ class ChipLikeRocketConfig extends Config(
   new testchipip.WithSerialTLWidth(4) ++
   new chipyard.config.WithSerialTLBackingMemory ++                                      // Backing memory is over serial TL protocol
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 4L) ++                  // 4GB max external memory
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++                          // 1 memory channel
 
   //==================================
   // Set up clock./reset
@@ -69,7 +70,7 @@ class ChipBringupHostConfig extends Config(
   new testchipip.WithOffchipBus ++                                                        // offchip bus, but don't directly connect it to existing buses
   new testchipip.WithSerialTLMem(base = 0x1000, size = BigInt("1000000000", 16) - 0x1000, // accessible memory of the chip
                                  idBits = 8, isMainMemory = false) ++
-  new testchipip.WithSerialTLClockDirection(provideClock = true) ++                       // bringup board drives the clock for the serial-tl receiver on the chip
+  new testchipip.WithSerialTLClockDirection(provideClockFreqMHz = Some(50)) ++            // bringup board drives the clock for the serial-tl receiver on the chip, use 50MHz clock
 
   //=============================
   // Set up memory on the bringup system

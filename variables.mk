@@ -25,6 +25,8 @@ HELP_PROJECT_VARIABLES = \
 
 HELP_SIMULATION_VARIABLES = \
 "   BINARY                 = riscv elf binary that the simulator will run when using the run-binary* targets" \
+"   LOADMEM                = riscv elf binary that should be loaded directly into simulated DRAM. LOADMEM=1 will load the BINARY elf" \
+"   LOADARCH               = path to a architectural checkpoint directory that should end in .loadarch/, for restoring from a checkpoint" \
 "   VERBOSE_FLAGS          = flags used when doing verbose simulation [$(VERBOSE_FLAGS)]" \
 "   timeout_cycles         = number of clock cycles before simulator times out, defaults to 10000000" \
 "   bmark_timeout_cycles   = number of clock cycles before benchmark simulator times out, defaults to 100000000"
@@ -186,10 +188,6 @@ MODEL_MODS_FILELIST ?= $(build_dir)/$(long_name).model.f
 # list of all blackbox files (may be included in the top/model.f files)
 # this has the build_dir appended
 BB_MODS_FILELIST ?= $(build_dir)/$(long_name).bb.f
-# top blackbox module files to include
-TOP_BB_MODS_FILELIST ?= $(build_dir)/$(long_name).top.bb.f
-# model blackbox module files to include (not including top blackbox modules)
-MODEL_BB_MODS_FILELIST ?= $(build_dir)/$(long_name).model.bb.f
 # all module files to include (top, model, bb included)
 ALL_MODS_FILELIST ?= $(build_dir)/$(long_name).all.f
 
@@ -246,15 +244,28 @@ output_dir=$(sim_dir)/output/$(long_name)
 PERMISSIVE_ON=+permissive
 PERMISSIVE_OFF=+permissive-off
 BINARY ?=
-LOADMEM ?=
-LOADMEM_ADDR ?= 81000000
 override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(timeout_cycles)
-ifneq ($(LOADMEM),)
-override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
-endif
 VERBOSE_FLAGS ?= +verbose
-sim_out_name = $(output_dir)/$(subst $() $(),_,$(notdir $(basename $(BINARY))))
-binary_hex= $(sim_out_name).loadmem_hex
+OUT_NAME ?= $(subst $() $(),_,$(notdir $(basename $(BINARY))))
+LOADMEM ?=
+LOADARCH ?=
+
+ifneq ($(LOADARCH),)
+override BINARY = $(LOADARCH)/mem.elf
+override OUT_NAME = $(shell basename $(LOADARCH))
+override LOADMEM = 1
+override SIM_FLAGS += +loadarch=$(LOADARCH)/loadarch
+endif
+
+ifeq ($(LOADMEM),1)
+# If LOADMEM=1, assume BINARY is the loadmem elf
+override SIM_FLAGS += +loadmem=$(BINARY)
+else ifneq ($(LOADMEM),)
+# Otherwise, assume the variable points to an elf file
+override SIM_FLAGS += +loadmem=$(LOADMEM)
+endif
+
+sim_out_name = $(output_dir)/$(OUT_NAME)
 
 #########################################################################################
 # build output directory for compilation
