@@ -2,6 +2,8 @@ package chipyard
 
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
+import freechips.rocketchip.rocket.DCacheParams
+
 
 // ------------------------------
 // Configs with RoCC Accelerators
@@ -24,6 +26,18 @@ class GemminiTightRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBanks(8) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nWays=2, capacityKB=2048) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
+  new chipyard.config.AbstractConfig)
+
+class GemminiSingleReRoCCConfig extends Config(
+  new chipyard.config.WithReRoCC(4,chipyard.rerocc.ReRoCCTileParams(
+    dcacheParams=Some(DCacheParams(nSets = 4, nWays = 4)), mergeTLNodes=true, l2TLBEntries=256, l2TLBWays=4)) ++
+  new gemmini.DefaultGemminiConfig ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithExtMemSbusBypass ++
+  new freechips.rocketchip.subsystem.WithNBanks(2) ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=1024) ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
 
 class FPGemminiRocketConfig extends Config(
