@@ -118,8 +118,8 @@ if run_step "1"; then
     LOCKFILE=$CONDA_LOCK_REQS/conda-requirements-$TOOLCHAIN_TYPE-linux-64.conda-lock.yml
 
     if [ "$USE_UNPINNED_DEPS" = true ]; then
-        # auto-gen the lockfile
-        $CYDIR/scripts/generate-conda-lockfile.sh $TOOLCHAIN_TYPE
+        # auto-gen the lockfiles
+        $CYDIR/scripts/generate-conda-lockfiles.sh
     fi
 
     # use conda-lock to create env
