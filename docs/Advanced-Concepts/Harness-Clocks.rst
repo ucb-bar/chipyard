@@ -18,7 +18,7 @@ for a new clock domain.
 This is useful for simulating systems in which modules in the harness have independent clock domains
 from the DUT.
 
-Requests for a harness clock is done by the ``HarnessClockInstantiator`` class in ``generators/chipyard/src/main/scala/harness/TestHarness.scla``.
+Requests for a harness clock is done by the ``HarnessClockInstantiator`` class in ``generators/chipyard/src/main/scala/harness/TestHarness.scala``.
 This class is accessed in harness components by referencing the Rocket Chip parameters key ``p(HarnessClockInstantiatorKey)``.
 Then you can request a clock and syncronized reset at a particular frequency by invoking the ``requestClockBundle`` function.
 Take the following example:
