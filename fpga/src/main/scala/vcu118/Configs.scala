@@ -2,7 +2,7 @@ package chipyard.fpga.vcu118
 
 import sys.process._
 
-import freechips.rocketchip.config.{Config, Parameters}
+import org.chipsalliance.cde.config.{Config, Parameters}
 import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem}
 import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
 import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
@@ -17,7 +17,8 @@ import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
 
 import testchipip.{SerialTLKey}
 
-import chipyard.{BuildSystem, ExtTLMem, DefaultClockFrequencyKey}
+import chipyard.{BuildSystem, ExtTLMem}
+import chipyard.harness.{DefaultClockFrequencyKey}
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))

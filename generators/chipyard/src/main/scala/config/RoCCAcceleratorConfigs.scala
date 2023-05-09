@@ -1,6 +1,6 @@
 package chipyard
 
-import freechips.rocketchip.config.{Config}
+import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 
 // ------------------------------
@@ -23,6 +23,12 @@ class FPGemminiRocketConfig extends Config(
 
 class LeanGemminiRocketConfig extends Config(
   new gemmini.LeanGemminiConfig ++                                 // use Lean Gemmini systolic array GEMM accelerator
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new chipyard.config.AbstractConfig)
+
+class LeanGemminiPrintfRocketConfig extends Config(
+  new gemmini.LeanGemminiPrintfConfig ++                                 // use Lean Gemmini systolic array GEMM accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)

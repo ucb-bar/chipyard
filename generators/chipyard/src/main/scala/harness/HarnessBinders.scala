@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util._
 import chisel3.experimental.{Analog, BaseModule, DataMirror, Direction}
 
-import freechips.rocketchip.config.{Field, Config, Parameters}
+import org.chipsalliance.cde.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
 import freechips.rocketchip.devices.debug._
@@ -22,8 +22,8 @@ import barstools.iocell.chisel._
 import testchipip._
 
 import chipyard._
-import chipyard.clocking.{HasChipyardPRCI}
-import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, ClockWithFreq}
+import chipyard.clocking.{HasChipyardPRCI, ClockWithFreq}
+import chipyard.iobinders.{GetSystemParameters, JTAGChipIO}
 
 import tracegen.{TraceGenSystemModuleImp}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
@@ -154,8 +154,9 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
       ports.map({ port =>
 // DOC include start: HarnessClockInstantiatorEx
         withClockAndReset(th.buildtopClock, th.buildtopReset) {
-          val memOverSerialTLClockBundle = p(HarnessClockInstantiatorKey).requestClockBundle("mem_over_serial_tl_clock", memFreq)
-          val serial_bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+          val memOverSerialTLClockBundle = th.harnessClockInstantiator.requestClockBundle("mem_over_serial_tl_clock", memFreq)
+          val serial_bits = port.bits
+          port.clock := th.buildtopClock
           val harnessMultiClockAXIRAM = SerialAdapter.connectHarnessMultiClockAXIRAM(
             system.serdesser.get,
             serial_bits,
@@ -168,8 +169,9 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
           // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
           (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi_port, edge) =>
             val memSize = sVal.memParams.size
+            val memBase = sVal.memParams.base
             val lineSize = p(CacheBlockBytes)
-            val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), edge.bundle)).suggestName("simdram")
+            val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), memBase, edge.bundle)).suggestName("simdram")
             mem.io.axi <> axi_port.bits
             mem.io.clock := axi_port.clock
             mem.io.reset := axi_port.reset
@@ -184,10 +186,12 @@ class WithBlackBoxSimMem(additionalLatency: Int = 0) extends OverrideHarnessBind
   (system: CanHaveMasterAXI4MemPort, th: HasHarnessSignalReferences, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
     (ports zip system.memAXI4Node.edges.in).map { case (port, edge) =>
+      // TODO FIX: This currently makes each SimDRAM contain the entire memory space
       val memSize = p(ExtMem).get.master.size
+      val memBase = p(ExtMem).get.master.base
       val lineSize = p(CacheBlockBytes)
       val clockFreq = p(MemoryBusKey).dtsFrequency.get
-      val mem = Module(new SimDRAM(memSize, lineSize, clockFreq, edge.bundle)).suggestName("simdram")
+      val mem = Module(new SimDRAM(memSize, lineSize, clockFreq, memBase, edge.bundle)).suggestName("simdram")
       mem.io.axi <> port.bits
       // Bug in Chisel implementation. See https://github.com/chipsalliance/chisel3/pull/1781
       def Decoupled[T <: Data](irr: IrrevocableIO[T]): DecoupledIO[T] = {
@@ -252,7 +256,7 @@ class WithSimDebug extends OverrideHarnessBinder({
       case d: ClockedDMIIO =>
         val dtm_success = WireInit(false.B)
         when (dtm_success) { th.success := true.B }
-        val dtm = Module(new SimDTM).connect(th.buildtopClock, th.buildtopReset.asBool, d, dtm_success)
+        val dtm = Module(new TestchipSimDTM).connect(th.buildtopClock, th.buildtopReset.asBool, d, dtm_success)
       case j: JTAGChipIO =>
         val dtm_success = WireInit(false.B)
         when (dtm_success) { th.success := true.B }
@@ -262,7 +266,8 @@ class WithSimDebug extends OverrideHarnessBinder({
         j.TCK := jtag_wire.TCK
         j.TMS := jtag_wire.TMS
         j.TDI := jtag_wire.TDI
-        val jtag = Module(new SimJTAG(tickDelay=3)).connect(jtag_wire, th.buildtopClock, th.buildtopReset.asBool, ~(th.buildtopReset.asBool), dtm_success)
+        val jtag = Module(new SimJTAG(tickDelay=3))
+        jtag.connect(jtag_wire, th.buildtopClock, th.buildtopReset.asBool, ~(th.buildtopReset.asBool), dtm_success)
     }
   }
 })
@@ -298,11 +303,11 @@ class WithSerialAdapterTiedOff extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
-      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
-      withClockAndReset(th.buildtopClock, th.buildtopReset) {
-        val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
-        SerialAdapter.tieoff(ram.module.io.tsi_ser)
-      }
+      val bits = port.bits
+      port.clock := false.B.asClock
+      port.bits.out.ready := false.B
+      port.bits.in.valid := false.B
+      port.bits.in.bits := DontCare
     })
   }
 })
@@ -311,7 +316,8 @@ class WithSimSerial extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
-      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+      val bits = port.bits
+      port.clock := th.buildtopClock
       withClockAndReset(th.buildtopClock, th.buildtopReset) {
         val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
         val success = SerialAdapter.connectSimSerial(ram.module.io.tsi_ser, th.buildtopClock, th.buildtopReset.asBool)
@@ -326,7 +332,8 @@ class WithUARTSerial extends OverrideHarnessBinder({
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
       val freq = p(PeripheryBusKey).dtsFrequency.get
-      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+      val bits = port.bits
+      port.clock := th.buildtopClock
       withClockAndReset(th.buildtopClock, th.buildtopReset) {
         val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
         val uart_to_serial = Module(new UARTToSerial(freq, UARTParams(0)))
@@ -365,7 +372,8 @@ class WithCospike extends ComposeHarnessBinder({
       mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
       pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0),
       nharts = tiles.size,
-      bootrom = chipyardSystem.bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse("")
+      bootrom = chipyardSystem.bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse(""),
+      has_dtm = p(ExportDebug).protocols.contains(DMI) // assume that exposing clockeddmi means we will connect SimDTM
     )
     ports.map { p => p.traces.zipWithIndex.map(t => SpikeCosim(t._1, t._2, cfg)) }
   }

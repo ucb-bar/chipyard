@@ -32,4 +32,21 @@ In this configuration, Spike is cache-coherent, and communicates with the uncore
 
     make CONFIG=SpikeConfig run-binary BINARY=hello.riscv
 
+Spike-as-a-Tile also supports Tightly-Coupled-Memory (TCM) for the SpikeTile, in which the main system memory is entirely modeled
+within the Spike tile, allowing for very fast simulatoin performance.
 
+.. code-block:: shell
+
+    make CONFIG=SpikeUltraFastConfig run-binary BINARY=hello.riscv
+
+Spike-as-a-Tile can be configured with custom IPC, commit logging, and other behaviors. Spike-specific flags can be added as plusargs to ``EXTRA_SIM_FLAGS``
+
+..  code-block:: shell
+
+    make CONFIG=SpikeUltraFastConfig run-binary BINARY=hello.riscv EXTRA_SPIKE_FLAGS="+spike-ipc=10000 +spike-fast-clint +spike-debug" LOADMEM=1
+
+
+* ``+spike-ipc=``: Sets the maximum number of instructions Spike can retire in a single "tick", or cycle of the uncore simulation.
+* ``+spike-fast-clint``: Enables fast-forwarding through WFI stalls by generating fake timer interrupts
+* ``+spike-debug``: Enables debug Spike logging
+* ``+spike-verbose``: Enables Spike commit-log generation

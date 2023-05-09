@@ -4,7 +4,7 @@ import scala.util.matching.Regex
 import chisel3._
 import chisel3.util.{log2Up}
 
-import freechips.rocketchip.config.{Config}
+import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.devices.tilelink.{BootROMLocated, PLICKey}
 import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI}
 import freechips.rocketchip.stage.phases.TargetDirKey
@@ -86,4 +86,8 @@ class WithExtMemIdBits(n: Int) extends Config((site, here, up) => {
 
 class WithNoPLIC extends Config((site, here, up) => {
   case PLICKey => None
+})
+
+class WithDebugModuleAbstractDataWords(words: Int = 16) extends Config((site, here, up) => {
+  case DebugModuleKey => up(DebugModuleKey).map(_.copy(nAbstractDataWords=words))
 })

@@ -4,7 +4,7 @@ import java.io.File
 
 import chisel3._
 import chisel3.util.{log2Up}
-import freechips.rocketchip.config.{Parameters, Config}
+import org.chipsalliance.cde.config.{Parameters, Config}
 import freechips.rocketchip.groundtest.TraceGenParams
 import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
@@ -235,6 +235,18 @@ class FireSimGemminiRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.GemminiRocketConfig)
 
+class FireSimLeanGemminiRocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.LeanGemminiRocketConfig)
+
+class FireSimLeanGemminiPrintfRocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.LeanGemminiPrintfRocketConfig)
+
 //**********************************************************************************
 // Supernode Configurations, base off chipyard's RocketConfig
 //**********************************************************************************
@@ -289,7 +301,7 @@ class FireSimRocketMMIOOnlyConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.RocketConfig)
 
-class FireSimGemminiRocketMMIOOnlyConfig extends Config(
+class FireSimLeanGemminiRocketMMIOOnlyConfig extends Config(
   new WithDefaultMMIOOnlyFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++

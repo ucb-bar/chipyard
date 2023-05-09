@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.experimental.{IO}
 
 import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp, BundleBridgeSource}
-import freechips.rocketchip.config.{Parameters}
+import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink.{TLClientNode}
 
 import sifive.fpgashells.shell.xilinx.{VC707Shell, UARTVC707ShellPlacer, PCIeVC707ShellPlacer, ChipLinkVC707PlacedOverlay}
@@ -16,9 +16,9 @@ import sifive.fpgashells.devices.xilinx.xilinxvc707pciex1.{XilinxVC707PCIeX1IO}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTPortIO}
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIPortIO}
 
-import chipyard.{HasHarnessSignalReferences, BuildTop, ChipTop, ExtTLMem, CanHaveMasterTLMemPort, DefaultClockFrequencyKey}
+import chipyard.{ChipTop, ExtTLMem, CanHaveMasterTLMemPort}
 import chipyard.iobinders.{HasIOBinders}
-import chipyard.harness.{ApplyHarnessBinders}
+import chipyard.harness.{ApplyHarnessBinders, HasHarnessSignalReferences, BuildTop, DefaultClockFrequencyKey}
 
 class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707Shell { outer =>
 

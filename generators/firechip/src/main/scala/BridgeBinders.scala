@@ -6,9 +6,9 @@ import chisel3._
 import chisel3.experimental.annotate
 import chisel3.util.experimental.BoringUtils
 
-import freechips.rocketchip.config.{Field, Config, Parameters}
+import org.chipsalliance.cde.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
-import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebugModuleImp}
+import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebug}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile.{RocketTile}
@@ -30,7 +30,6 @@ import cva6.CVA6Tile
 import boom.common.{BoomTile}
 import barstools.iocell.chisel._
 import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters, IOCellKey}
-import chipyard.{HasHarnessSignalReferences}
 import chipyard.harness._
 
 object MainMemoryConsts {
@@ -72,7 +71,8 @@ class WithSerialBridge extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[ClockedIO[SerialIO]]) => {
     ports.map { port =>
       implicit val p = GetSystemParameters(system)
-      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+      val bits = port.bits
+      port.clock := th.buildtopClock
       val ram = withClockAndReset(th.buildtopClock, th.buildtopReset) {
         SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
       }
@@ -125,8 +125,8 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
         axiClockBundle.clock := axiClock
         axiClockBundle.reset := ResetCatchAndSync(axiClock, th.buildtopReset.asBool)
 
-        val serial_bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
-
+        val serial_bits = port.bits
+        port.clock := th.buildtopClock
         val harnessMultiClockAXIRAM = withClockAndReset(th.buildtopClock, th.buildtopReset) {
           SerialAdapter.connectHarnessMultiClockAXIRAM(
             system.serdesser.get,

@@ -1,0 +1,8 @@
+{
+  "name" : "resnet50-baremetal",
+  "base" : "bare-base.json",
+  "workdir" : "..",
+  "host-init" : "build.sh",
+  "bin" : "overlay/root/resnet50-baremetal",
+  "spike-args" : "--extension=gemmini"
+}

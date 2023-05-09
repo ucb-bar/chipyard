@@ -162,7 +162,7 @@ Simulation-exacted power estimation often requires a dedicated testharness for t
 The simulation-extracted power estimation flow implicitly uses Hammer's gate-level simulation flow (in order to generate the ``saif`` activity data file). This gate-level simulation flow can also be run independantly from the power estimation flow using the ``make sim-par`` command.
 
 
-.. Note:: The gate-level simulation flow (and there the simulation-extracted power-estimation) is currently integrated only with the Synopsys VCS simulation (Verilator does not support gate-level simulation. Support for Cadence Incisive is work-in-progress)
+.. Note:: The gate-level simulation flow (and there the simulation-extracted power-estimation) is currently integrated only with the Synopsys VCS simulation (Verilator does not support gate-level simulation. Support for Cadence Xcelium is work-in-progress)
 
 
 Signoff

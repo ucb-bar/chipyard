@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.experimental.{IO}
 
 import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp, BundleBridgeSource}
-import freechips.rocketchip.config.{Parameters}
+import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink.{TLClientNode}
 
 import sifive.fpgashells.shell.xilinx._
@@ -17,7 +17,7 @@ import sifive.blocks.devices.spi.{PeripherySPIKey, SPIPortIO}
 
 import chipyard._
 import chipyard.iobinders.{HasIOBinders}
-import chipyard.harness.{ApplyHarnessBinders}
+import chipyard.harness._
 
 class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118ShellBasicOverlays {
 

@@ -3,7 +3,7 @@ package chipyard.fpga.arty100t
 import chisel3._
 import chisel3.util._
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.config.{Parameters}
+import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink.{TLClientNode, TLBlockDuringReset}
 
 import sifive.fpgashells.shell.xilinx._
@@ -13,8 +13,8 @@ import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 
 import sifive.blocks.devices.uart._
 
-import chipyard._
-import chipyard.harness.{ApplyHarnessBinders}
+import chipyard.{ChipTop, CanHaveMasterTLMemPort, ExtTLMem}
+import chipyard.harness._
 import chipyard.iobinders.{HasIOBinders}
 
 class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell with HasHarnessSignalReferences

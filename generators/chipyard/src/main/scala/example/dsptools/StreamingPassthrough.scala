@@ -8,7 +8,7 @@ import chisel3.util._
 import dspblocks._
 import dsptools.numbers._
 import freechips.rocketchip.amba.axi4stream._
-import freechips.rocketchip.config.{Parameters, Field, Config}
+import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._

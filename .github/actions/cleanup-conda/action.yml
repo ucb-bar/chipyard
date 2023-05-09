@@ -15,7 +15,7 @@ runs:
             conda env remove -n $env
           done
         fi
-        IS_NUMBER_REGEX='[0-9]+$'
+        IS_NUMBER_REGEX='^[0-9]+$'
         conda env list | awk '{print $1}' | tail -n +4 | while read envname; do
           ENV_DATE=$(echo $envname | sed "s/cy-[[:digit:]]\+-\(.*\)-\(riscv\|esp\)-tools/\1/")
           if ! [[ $ENV_DATE =~ $IS_NUMBER_REGEX ]]; then

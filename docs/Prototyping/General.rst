@@ -1,18 +1,11 @@
 General Setup and Usage
 ==============================
 
-Sources and Submodule Setup
+Sources
 ---------------------------
 
 All FPGA prototyping-related collateral and sources are located in the ``fpga`` top-level Chipyard directory.
 This includes the ``fpga-shells`` submodule and the ``src`` directory that hold both Scala, TCL and other collateral.
-However, the ``fpga-shells`` submodule repository is not initialized by default.
-To initialize the ``fpga-shells`` submodule repository, run the included initialization script from the Chipyard top-level directory:
-
-.. code-block:: shell
-
-    # in the chipyard top level folder
-    ./scripts/init-fpga.sh
 
 Generating a Bitstream
 ----------------------

@@ -1,6 +1,6 @@
 package chipyard
 
-import freechips.rocketchip.config.{Config}
+import org.chipsalliance.cde.config.{Config}
 import constellation.channel._
 import constellation.routing._
 import constellation.topology._
@@ -77,6 +77,7 @@ class TutorialSha3BlackBoxConfig extends Config(
 
 // Tutorial Phase 5: Map a multicore heterogeneous SoC with multiple cores and memory-mapped accelerators
 class TutorialNoCConfig extends Config(
+  new chipyard.iobinders.WithDontTouchIOBinders(false) ++
   // Try changing the dimensions of the Mesh topology
   new constellation.soc.WithGlobalNoC(constellation.soc.GlobalNoCParams(
     NoCParams(

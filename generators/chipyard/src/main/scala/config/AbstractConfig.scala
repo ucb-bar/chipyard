@@ -1,6 +1,6 @@
 package chipyard.config
 
-import freechips.rocketchip.config.{Config}
+import org.chipsalliance.cde.config.{Config}
 
 // --------------
 // Chipyard abstract ("base") configuration
@@ -40,10 +40,15 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithTraceIOPunchthrough ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
   new chipyard.iobinders.WithCustomBootPin ++
-  new chipyard.iobinders.WithDividerOnlyClockGenerator ++
+
+  // Default behavior is to use a divider-only clock-generator
+  // This works in VCS, Verilator, and FireSim/
+  // This should get replaced with a PLL-like config instead
+  new chipyard.clocking.WithDividerOnlyClockGenerator ++
 
   new testchipip.WithSerialTLWidth(32) ++                           // fatten the serialTL interface to improve testing performance
   new testchipip.WithDefaultSerialTL ++                             // use serialized tilelink port to external serialadapter/harnessRAM
+  new chipyard.config.WithDebugModuleAbstractDataWords(8) ++        // increase debug module data capacity
   new chipyard.config.WithBootROM ++                                // use default bootrom
   new chipyard.config.WithUART ++                                   // add a UART
   new chipyard.config.WithL2TLBs(1024) ++                           // use L2 TLBs
@@ -52,6 +57,7 @@ class AbstractConfig extends Config(
   new chipyard.config.WithPeripheryBusFrequencyAsDefault ++         // Unspecified frequencies with match the pbus frequency (which is always set)
   new chipyard.config.WithMemoryBusFrequency(100.0) ++              // Default 100 MHz mbus
   new chipyard.config.WithPeripheryBusFrequency(100.0) ++           // Default 100 MHz pbus
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++      // Default 2 memory channels
   new freechips.rocketchip.subsystem.WithClockGateModel ++          // add default EICG_wrapper clock gate model
   new freechips.rocketchip.subsystem.WithJtagDTM ++                 // set the debug module to expose a JTAG port
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++              // no top-level MMIO master port (overrides default set in rocketchip)
@@ -60,4 +66,5 @@ class AbstractConfig extends Config(
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++    // no external interrupts
   new freechips.rocketchip.subsystem.WithDontDriveBusClocksFromSBus ++ // leave the bus clocks undriven by sbus
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++     // hierarchical buses including sbus/mbus/pbus/fbus/cbus/l2
+  new freechips.rocketchip.subsystem.WithDTS("ucb-bar,chipyard", Nil) ++ // custom device name for DTS
   new freechips.rocketchip.system.BaseConfig)                       // "base" rocketchip system

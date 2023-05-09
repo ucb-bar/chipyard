@@ -111,4 +111,11 @@ if [ $TOOLCHAIN == "riscv-tools" ]; then
     make -C $RDIR/generators/gemmini/software/libgemmini install
 fi
 
+echo '==>  Installing DRAMSim2 Shared Library'
+cd $RDIR
+git submodule update --init tools/DRAMSim2
+cd tools/DRAMSim2
+make libdramsim.so
+cp libdramsim.so $RISCV/lib/
+
 echo "Extra Toolchain Utilities/Tests Build Complete!"

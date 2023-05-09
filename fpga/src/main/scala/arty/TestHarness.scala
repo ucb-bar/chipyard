@@ -3,12 +3,11 @@ package chipyard.fpga.arty
 import chisel3._
 
 import freechips.rocketchip.diplomacy.{LazyModule}
-import freechips.rocketchip.config.{Parameters}
+import org.chipsalliance.cde.config.{Parameters}
 
 import sifive.fpgashells.shell.xilinx.artyshell.{ArtyShell}
 
-import chipyard.{BuildTop, HasHarnessSignalReferences}
-import chipyard.harness.{ApplyHarnessBinders}
+import chipyard.harness.{ApplyHarnessBinders, BuildTop, HasHarnessSignalReferences}
 import chipyard.iobinders.{HasIOBinders}
 
 class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell with HasHarnessSignalReferences {
