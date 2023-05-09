@@ -30,7 +30,6 @@ import cva6.CVA6Tile
 import boom.common.{BoomTile}
 import barstools.iocell.chisel._
 import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters, IOCellKey}
-import chipyard.{HasHarnessSignalReferences}
 import chipyard.harness._
 
 object MainMemoryConsts {

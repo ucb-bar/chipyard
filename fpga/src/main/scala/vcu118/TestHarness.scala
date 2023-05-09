@@ -17,7 +17,7 @@ import sifive.blocks.devices.spi.{PeripherySPIKey, SPIPortIO}
 
 import chipyard._
 import chipyard.iobinders.{HasIOBinders}
-import chipyard.harness.{ApplyHarnessBinders}
+import chipyard.harness._
 
 class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118ShellBasicOverlays {
 
