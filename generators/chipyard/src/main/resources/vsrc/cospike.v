@@ -16,7 +16,8 @@ import "DPI-C" function void cospike_cosim(input longint cycle,
 					   input bit	 raise_exception,
 					   input bit	 raise_interrupt,
 					   input longint cause,
-					   input longint wdata
+					   input longint wdata,
+					   input int	 priv
 					   );
 
 
@@ -42,6 +43,7 @@ module SpikeCosim  #(
 					 input [63:0] trace_0_cause,
 					 input	      trace_0_has_wdata,
 					 input [63:0] trace_0_wdata,
+					 input [2:0]  trace_0_priv,
 
 					 input	      trace_1_valid,
 					 input [63:0] trace_1_iaddr,
@@ -50,7 +52,8 @@ module SpikeCosim  #(
 					 input	      trace_1_interrupt,
 					 input [63:0] trace_1_cause,
 					 input	      trace_1_has_wdata,
-					 input [63:0] trace_1_wdata
+					 input [63:0] trace_1_wdata,
+					 input [2:0]  trace_1_priv
 					 );
 
    initial begin
@@ -62,12 +65,12 @@ module SpikeCosim  #(
 	 if (trace_0_valid || trace_0_exception || trace_0_cause) begin
 	    cospike_cosim(cycle, hartid, trace_0_has_wdata, trace_0_valid, trace_0_iaddr,
 			  trace_0_insn, trace_0_exception, trace_0_interrupt, trace_0_cause,
-			  trace_0_wdata);
+			  trace_0_wdata, trace_0_priv);
 	 end
 	 if (trace_1_valid || trace_1_exception || trace_1_cause) begin
 	    cospike_cosim(cycle, hartid, trace_1_has_wdata, trace_1_valid, trace_1_iaddr,
 			  trace_1_insn, trace_1_exception, trace_1_interrupt, trace_1_cause,
-			  trace_1_wdata);
+			  trace_1_wdata, trace_1_priv);
 	 end
       end
    end

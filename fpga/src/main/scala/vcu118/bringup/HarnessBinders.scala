@@ -13,8 +13,7 @@ import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp, GPIOPortIO}
 
 import testchipip.{HasPeripheryTSIHostWidget, TSIHostWidgetIO}
 
-import chipyard.{HasHarnessSignalReferences}
-import chipyard.harness.{ComposeHarnessBinder, OverrideHarnessBinder}
+import chipyard.harness.{ComposeHarnessBinder, OverrideHarnessBinder, HasHarnessSignalReferences}
 
 /*** UART ***/
 class WithBringupUART extends ComposeHarnessBinder({

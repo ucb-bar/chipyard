@@ -18,7 +18,8 @@ case class SpikeCosimConfig(
   mem0_base: BigInt,
   mem0_size: BigInt,
   nharts: Int,
-  bootrom: String
+  bootrom: String,
+  has_dtm: Boolean
 )
 
 class SpikeCosim(cfg: SpikeCosimConfig) extends BlackBox(Map(
@@ -32,6 +33,7 @@ class SpikeCosim(cfg: SpikeCosimConfig) extends BlackBox(Map(
 {
   addResource("/csrc/cospike.cc")
   addResource("/vsrc/cospike.v")
+  if (cfg.has_dtm) addResource("/csrc/cospike_dtm.h")
   val io = IO(new Bundle {
     val clock = Input(Clock())
     val reset = Input(Bool())
@@ -46,6 +48,7 @@ class SpikeCosim(cfg: SpikeCosimConfig) extends BlackBox(Map(
       val cause = UInt(64.W)
       val has_wdata = Bool()
       val wdata = UInt(64.W)
+      val priv = UInt(3.W)
     }))
   })
 }
@@ -64,12 +67,8 @@ object SpikeCosim
     require(trace.numInsns <= 2)
     cosim.io.cycle := cycle
     cosim.io.trace.map(t => {
+      t := DontCare
       t.valid := false.B
-      t.iaddr := 0.U
-      t.insn := 0.U
-      t.exception := false.B
-      t.interrupt := false.B
-      t.cause := 0.U
     })
     cosim.io.hartid := hartid.U
     for (i <- 0 until trace.numInsns) {
@@ -83,6 +82,7 @@ object SpikeCosim
       cosim.io.trace(i).cause := trace.insns(i).cause
       cosim.io.trace(i).has_wdata := trace.insns(i).wdata.isDefined.B
       cosim.io.trace(i).wdata := trace.insns(i).wdata.getOrElse(0.U)
+      cosim.io.trace(i).priv := trace.insns(i).priv
     }
   }
 }

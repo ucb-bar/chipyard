@@ -47,8 +47,14 @@ After the harness is created, the ``BundleBridgeSource``'s must be connected to 
 This is done with harness binders and io binders (see ``fpga/src/main/scala/vcu118/HarnessBinders.scala`` and ``fpga/src/main/scala/vcu118/IOBinders.scala``).
 For more information on harness binders and io binders, refer to :ref:`Customization/IOBinders:IOBinders and HarnessBinders`.
 
-Introduction to the Bringup Design
-----------------------------------
+(Legacy) Introduction to the Legacy Bringup Design
+--------------------------------------------------
+
+.. warning::
+   The bringup VCU118 design described here is designed for old versions of Chipyard SoCs, pre-1.9.1.
+   The key difference is that these designs rely on a clock generated on-chip to synchronize the slow serialized-TileLink interface.
+   After Chipyard 1.9.1, the FPGA host is expected to pass the clock to the chip, instead of the other way around.
+   A new bringup solution will be developed for post-1.9.1 Chipyard designs.
 
 An example of a more complicated design used for Chipyard test chips can be viewed in ``fpga/src/main/scala/vcu118/bringup/``.
 This example extends the default test harness and creates new ``Overlays`` to connect to a DUT (connected to the FMC port).

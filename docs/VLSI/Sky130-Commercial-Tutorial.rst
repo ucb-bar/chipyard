@@ -121,7 +121,7 @@ It is recommended that you edit these variables directly in the Makefile rather 
 
 The ``buildfile`` make target has dependencies on both (1) the Verilog that is elaborated from all Chisel sources
 and (2) the mapping of memory instances in the design to SRAM macros;
-all files related to these two steps reside in the ``generated-src/chipyard.TestHarness.TinyRocketConfig-ChipTop`` directory.
+all files related to these two steps reside in the ``generated-src/chipyard.harness.TestHarness.TinyRocketConfig-ChipTop`` directory.
 Note that the files in ``generated-src`` vary for each tool/technology flow.
 This especially applies to the Sky130 Commercial vs OpenROAD tutorial flows 
 (due to the ``ENABLE_YOSYS_FLOW`` flag present for the OpenROAD flow), so these flows should be run in separate
@@ -168,9 +168,9 @@ To run DRC & LVS, and view the results in Calibre:
 .. code-block:: shell
 
     make drc tutorial=sky130-commercial
-    ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/drc-rundir/generated-scripts/view_drc
+    ./build/chipyard.harness.TestHarness.TinyRocketConfig-ChipTop/drc-rundir/generated-scripts/view_drc
     make lvs tutorial=sky130-commercial
-    ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/lvs-rundir/generated-scripts/view_lvs
+    ./build/chipyard.harness.TestHarness.TinyRocketConfig-ChipTop/lvs-rundir/generated-scripts/view_lvs
 
 Some DRC errors are expected from this PDK, especially with regards to the SRAMs, as explained in the
 `Sky130 Hammer plugin README  <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__.

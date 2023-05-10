@@ -1,4 +1,4 @@
-package chipyard
+package chipyard.harness
 
 import chisel3._
 
@@ -11,6 +11,7 @@ import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters, ClockSinkP
 import chipyard.harness.{ApplyHarnessBinders, HarnessBinders}
 import chipyard.iobinders.HasIOBinders
 import chipyard.clocking.{SimplePllConfiguration, ClockDividerN}
+import chipyard.{ChipTop}
 
 // -------------------------------
 // Chipyard Test Harness

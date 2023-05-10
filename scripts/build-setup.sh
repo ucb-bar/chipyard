@@ -91,6 +91,7 @@ run_step() {
 # Check for this, since many users will be attempting to use this with gemmini
 if [ $TOOLCHAIN_TYPE == "esp-tools" ]; then
     while true; do
+        printf '\033[2J'
         read -p "WARNING: You are trying to install the esp-tools toolchain."$'\n'"This should ONLY be used for Hwacha development."$'\n'"Gemmini should be used with riscv-tools."$'\n'"Type \"y\" to continue if this is intended, or \"n\" if not: " validate
         case "$validate" in
             y | Y)
@@ -137,7 +138,6 @@ fi
 # initialize all submodules (without the toolchain submodules)
 if run_step "2"; then
     $CYDIR/scripts/init-submodules-no-riscv-tools.sh $FORCE_FLAG
-    $CYDIR/scripts/init-fpga.sh $FORCE_FLAG
 fi
 
 # build extra toolchain collateral (i.e. spike, pk, riscv-tests, libgloss)

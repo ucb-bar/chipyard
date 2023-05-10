@@ -87,3 +87,7 @@ class WithExtMemIdBits(n: Int) extends Config((site, here, up) => {
 class WithNoPLIC extends Config((site, here, up) => {
   case PLICKey => None
 })
+
+class WithDebugModuleAbstractDataWords(words: Int = 16) extends Config((site, here, up) => {
+  case DebugModuleKey => up(DebugModuleKey).map(_.copy(nAbstractDataWords=words))
+})
