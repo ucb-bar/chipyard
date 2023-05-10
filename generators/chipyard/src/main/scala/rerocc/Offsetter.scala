@@ -23,8 +23,8 @@ class AddressOffsetter(n: Int)(implicit p: Parameters) extends LazyModule with H
     val io = IO(new Bundle {
       val ctrl = new AddressOffsetterControlIO
       val ptw = new Bundle {
-        val req_in = Flipped(Decoupled(new PTWReq))
-        val req_out = Decoupled(new PTWReq)
+        val req_in = Flipped(Decoupled(Valid(new PTWReq)))
+        val req_out = Decoupled(Valid(new PTWReq))
         val resp_in = Flipped(Valid(new PTWResp))
         val resp_out = Valid(new PTWResp)
       }
@@ -42,7 +42,7 @@ class AddressOffsetter(n: Int)(implicit p: Parameters) extends LazyModule with H
     io.ptw.req_out.bits := io.ptw.req_in.bits
     when (io.ptw.req_in.fire()) { ptw_busy := true.B }
     val ptw_addr = Reg(UInt(vpnBits.W))
-    when (io.ptw.req_in.fire()) { ptw_addr := io.ptw.req_in.bits.addr }
+    when (io.ptw.req_in.fire()) { ptw_addr := io.ptw.req_in.bits.bits.addr }
 
     io.ptw.resp_out := io.ptw.resp_in
     when (io.ptw.resp_out.fire()) { ptw_busy := false.B }
