@@ -55,7 +55,7 @@ class MediumBoomCosimConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class dmiMediumBoomConfig extends Config(
-  new chipyard.harness.WithSerialAdapterTiedOff ++               // don't attach an external SimSerial
+  new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tl
   new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
   new boom.common.WithNMediumBooms(1) ++
   new chipyard.config.AbstractConfig)
@@ -63,7 +63,7 @@ class dmiMediumBoomConfig extends Config(
 class dmiMediumBoomCosimConfig extends Config(
   new chipyard.harness.WithCospike ++                            // attach spike-cosim
   new chipyard.config.WithTraceIO ++                             // enable the traceio
-  new chipyard.harness.WithSerialAdapterTiedOff ++               // don't attach an external SimSerial
+  new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anythint to serial-tl
   new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
   new boom.common.WithNMediumBooms(1) ++
   new chipyard.config.AbstractConfig)

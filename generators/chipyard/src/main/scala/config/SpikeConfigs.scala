@@ -11,7 +11,7 @@ class SpikeConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class dmiSpikeConfig extends Config(
-  new chipyard.harness.WithSerialAdapterTiedOff ++               // don't attach an external SimSerial
+  new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tilelink
   new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
   new SpikeConfig)
 
@@ -35,7 +35,7 @@ class SpikeUltraFastConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class dmiSpikeUltraFastConfig extends Config(
-  new chipyard.harness.WithSerialAdapterTiedOff ++               // don't attach an external SimSerial
+  new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tilelink
   new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
   new SpikeUltraFastConfig)
 
