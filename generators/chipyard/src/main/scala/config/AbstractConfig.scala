@@ -46,6 +46,8 @@ class AbstractConfig extends Config(
   // This should get replaced with a PLL-like config instead
   new chipyard.clocking.WithDividerOnlyClockGenerator ++
 
+  new testchipip.WithCustomBootPin ++                               // add a custom-boot-pin to support pin-driven boot address
+  new testchipip.WithBootAddrReg ++                                 // add a boot-addr-reg for configurable boot address
   new testchipip.WithSerialTLWidth(32) ++                           // fatten the serialTL interface to improve testing performance
   new testchipip.WithDefaultSerialTL ++                             // use serialized tilelink port to external serialadapter/harnessRAM
   new chipyard.config.WithDebugModuleAbstractDataWords(8) ++        // increase debug module data capacity
