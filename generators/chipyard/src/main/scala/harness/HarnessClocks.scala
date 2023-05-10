@@ -1,7 +1,8 @@
 package chipyard.harness
 
 import chisel3._
-
+import chisel3.util._
+import chisel3.experimental.DoubleParam
 import scala.collection.mutable.{ArrayBuffer, LinkedHashMap}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import org.chipsalliance.cde.config.{Field, Parameters, Config}
@@ -36,6 +37,26 @@ trait HarnessClockInstantiator {
   def instantiateHarnessClocks(refClock: ClockBundle): Unit
 }
 
+class ClockSourceAtFreqMHz(val freqMHz: Double) extends BlackBox(Map(
+  "PERIOD" -> DoubleParam(freqMHz)
+)) with HasBlackBoxInline {
+  val io = IO(new ClockSourceIO)
+
+  setInline("ClockSourceAtFreqMHz.v",
+    s"""
+      |module ClockSourceAtFreqMHz #(parameter PERIOD="") (
+      |    input power,
+      |    input gate,
+      |    output clk);
+      |
+      |  reg clk_i = 1'b0;
+      |  always #(PERIOD/2.0) clk_i = ~clk_i & (power & ~gate);
+      |  assign clk = clk_i;
+      |endmodule
+      |""".stripMargin)
+}
+
+
 // The AbsoluteFreqHarnessClockInstantiator uses a Verilog blackbox to
 // provide the precise requested frequency.
 // This ClockInstantiator cannot be synthesized, run in Verilator, or run in FireSim
@@ -48,7 +69,7 @@ class AbsoluteFreqHarnessClockInstantiator extends HarnessClockInstantiator {
 
     // connect wires to clock source
     for (sinkParams <- sinks) {
-      val source = Module(new ClockSourceAtFreq(sinkParams.take.get.freqMHz))
+      val source = Module(new ClockSourceAtFreqMHz(sinkParams.take.get.freqMHz))
       source.io.power := true.B
       source.io.gate := false.B
 
