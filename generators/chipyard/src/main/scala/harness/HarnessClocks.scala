@@ -36,44 +36,6 @@ trait HarnessClockInstantiator {
   def instantiateHarnessClocks(refClock: ClockBundle): Unit
 }
 
-// The DividerOnlyHarnessClockInstantiator uses synthesizable clock divisors
-// to approximate frequency ratios between the requested clocks
-class DividerOnlyHarnessClockInstantiator extends HarnessClockInstantiator {
-  // connect all clock wires specified to a divider only PLL
-  def instantiateHarnessClocks(refClock: ClockBundle): Unit = {
-    val sinks = _clockMap.map({ case (name, (freq, bundle)) =>
-      ClockSinkParameters(take=Some(ClockParameters(freqMHz=freq / (1000 * 1000))), name=Some(name))
-    }).toSeq
-
-    val pllConfig = new SimplePllConfiguration("harnessDividerOnlyClockGenerator", sinks)
-    pllConfig.emitSummaries()
-
-    val dividedClocks = LinkedHashMap[Int, Clock]()
-    def instantiateDivider(div: Int): Clock = {
-      val divider = Module(new ClockDividerN(div))
-      divider.suggestName(s"ClockDivideBy${div}")
-      divider.io.clk_in := refClock.clock
-      dividedClocks(div) = divider.io.clk_out
-      divider.io.clk_out
-    }
-
-    // connect wires to clock source
-    for (sinkParams <- sinks) {
-      // bypass the reference freq. (don't create a divider + reset sync)
-      val (divClock, divReset) = if (sinkParams.take.get.freqMHz != pllConfig.referenceFreqMHz) {
-        val div = pllConfig.sinkDividerMap(sinkParams)
-        val divClock = dividedClocks.getOrElse(div, instantiateDivider(div))
-        (divClock, ResetCatchAndSync(divClock, refClock.reset.asBool))
-      } else {
-        (refClock.clock, refClock.reset)
-      }
-
-      _clockMap(sinkParams.name.get)._2.clock := divClock
-      _clockMap(sinkParams.name.get)._2.reset := divReset
-    }
-  }
-}
-
 // The AbsoluteFreqHarnessClockInstantiator uses a Verilog blackbox to
 // provide the precise requested frequency.
 // This ClockInstantiator cannot be synthesized, run in Verilator, or run in FireSim

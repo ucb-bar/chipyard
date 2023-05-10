@@ -23,6 +23,7 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithTieOffL2FBusAXI ++                   // tie-off external AXI4 master, if present
   new chipyard.harness.WithCustomBootPinPlusArg ++
   new chipyard.harness.WithClockAndResetFromHarness ++
+  new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++
 
   // The IOBinders instantiate ChipTop IOs to match desired digital IOs
   // IOCells are generated for "Chip-like" IOs, while simulation-only IOs are directly punched through
@@ -41,10 +42,8 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithExtInterruptIOCells ++
   new chipyard.iobinders.WithCustomBootPin ++
 
-  // Default behavior is to use a divider-only clock-generator
-  // This works in VCS, Verilator, and FireSim/
-  // This should get replaced with a PLL-like config instead
-  new chipyard.clocking.WithDividerOnlyClockGenerator ++
+  // By default, punch out IOs to the Harness
+  new chipyard.clocking.WithPassthroughClockGenerator ++
 
   new testchipip.WithCustomBootPin ++                               // add a custom-boot-pin to support pin-driven boot address
   new testchipip.WithBootAddrReg ++                                 // add a boot-addr-reg for configurable boot address
