@@ -57,5 +57,5 @@ VCS_PREPROC_DEFINES = \
 	+define+VCS
 
 ifndef USE_VPD
-PREPROC_DEFINES += +define+FSDB
+VCS_PREPROC_DEFINES += +define+FSDB
 endif
