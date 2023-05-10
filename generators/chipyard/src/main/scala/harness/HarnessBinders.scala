@@ -295,9 +295,7 @@ class WithSerialTLTiedOff extends OverrideHarnessBinder({
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
       val bits = port.bits
-      if (DataMirror.directionOf(port.clock) == Direction.Input) {
-        port.clock := false.B.asClock
-      }
+      port.clock := false.B.asClock
       port.bits.out.ready := false.B
       port.bits.in.valid := false.B
       port.bits.in.bits := DontCare
@@ -305,7 +303,7 @@ class WithSerialTLTiedOff extends OverrideHarnessBinder({
   }
 })
 
-class WithSimTSI extends OverrideHarnessBinder({
+class WithSimTSIOverSerialTL extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasChipyardHarnessInstantiators, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>

@@ -89,7 +89,7 @@ dependencies:
     - graphviz
     - expect
     - dtc
-    - verilator==4.226
+    - verilator==5.008
     - screen
     - elfutils
     - libdwarf-dev==0.0.0.20190110_28_ga81397fc4 # from ucb-bar channel - using mainline libdwarf-feedstock
@@ -131,7 +131,7 @@ dependencies:
     - pytest-mock
     - moto
     - mypy
-    - s3fs
+    - s3fs==0.4.2
     - aiohttp
     - pip:
         - sure

@@ -14,7 +14,7 @@ class AbstractConfig extends Config(
   // The HarnessBinders control generation of hardware in the TestHarness
   new chipyard.harness.WithUARTAdapter ++                       // add UART adapter to display UART on stdout, if uart is present
   new chipyard.harness.WithBlackBoxSimMem ++                    // add SimDRAM DRAM model for axi4 backing memory, if axi4 mem is enabled
-  new chipyard.harness.WithSimTSI ++                            // add external serial-adapter and RAM
+  new chipyard.harness.WithSimTSIOverSerialTL ++                // add external serial-adapter and RAM
   new chipyard.harness.WithSimDebug ++                          // add SimJTAG or SimDTM adapters if debug module is enabled
   new chipyard.harness.WithGPIOTiedOff ++                       // tie-off chiptop GPIOs, if GPIOs are present
   new chipyard.harness.WithSimSPIFlashModel ++                  // add simulated SPI flash memory, if SPI is enabled

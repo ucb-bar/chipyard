@@ -2,12 +2,12 @@ Accessing Scala Resources
 ===============================
 
 A simple way to copy over a source file to the build directory to be used for a simulation compile or VLSI flow is to use the ``addResource`` function given by FIRRTL.
-An example of its use can be seen in `generators/testchipip/src/main/scala/TSIToTileLink.scala <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/TSIToTileLink.scala>`_.
+An example of its use can be seen in `generators/testchipip/src/main/scala/SimTSI.scala <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/SimTSI.scala>`_.
 Here is the example inlined:
 
 .. code-block:: scala
 
-    class SimTSI(w: Int) extends BlackBox with HasBlackBoxResource {
+    class SimTSI extends BlackBox with HasBlackBoxResource {
       val io = IO(new Bundle {
         val clock = Input(Clock())
         val reset = Input(Bool())

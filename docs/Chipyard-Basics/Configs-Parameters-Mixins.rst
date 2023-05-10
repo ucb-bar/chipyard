@@ -94,18 +94,16 @@ of the module until all logical connections are determined and all configuration
 The ``System`` outer base class, as well as the
 ``CanHavePeriphery<X>`` outer traits contain code to perform high-level logical
 connections. For example, the ``CanHavePeripheryTLSerial`` outer trait contains code
-to optionally lazily instantiate the ``TSI2TL``, and connect the ``TSI2TL``'s
+to optionally lazily instantiate the ``TLSerdesser``, and connect the ``TLSerdesser`` 's
 TileLink node to the Front bus.
 
 The ``ModuleImp`` classes and traits perform elaboration of real RTL.
-For example, the ``CanHavePeripheryTLSerialModuleImp`` trait optionally physically connects
-the ``TSI2TL`` module, and instantiates queues.
 
 In the test harness, the SoC is elaborated with
 ``val dut = p(BuildTop)(p)``.
 
 After elaboration, the system submodule of ``ChipTop`` will be a ``DigitalTop`` module, which contains a
-``TSI2TL`` module (among others), if the config specified for that block to be instantiated.
+``TLSerdesser`` module (among others), if the config specified for that block to be instantiated.
 
 From a high level, classes which extend ``LazyModule`` *must* reference
 their module implementation through ``lazy val module``, and they
