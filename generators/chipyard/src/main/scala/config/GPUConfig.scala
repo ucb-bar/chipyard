@@ -4,8 +4,9 @@ import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 
 class MemtraceCoreConfig extends Config(
-  // Memtrace core
-  new freechips.rocketchip.tilelink.WithMemtraceCore("vecadd.core1.thread4.trace")++
+  // Memtrace
+  new freechips.rocketchip.subsystem.WithMemtraceCore("vecadd.core1.thread4.trace",
+    traceHasSource = true) ++
   new freechips.rocketchip.subsystem.WithNLanes(4) ++
   // L2
   new freechips.rocketchip.subsystem.WithInclusiveCache(nWays=8, capacityKB=512) ++
@@ -15,5 +16,3 @@ class MemtraceCoreConfig extends Config(
   new freechips.rocketchip.subsystem.WithNCustomSmallCores(1) ++
   new chipyard.config.AbstractConfig
   )
-
-
