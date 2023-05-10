@@ -292,6 +292,11 @@ check-binary:
 ifeq (,$(BINARY))
 	$(error BINARY variable is not set. Set it to the simulation binary)
 endif
+ifneq (none,$(BINARY))
+ifeq ("$(wildcard $(BINARY))","")
+	$(error BINARY=$(BINARY) not found)
+endif
+endif
 
 # allow you to override sim prereq
 ifeq (,$(BREAK_SIM_PREREQ))
