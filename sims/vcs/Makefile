@@ -25,7 +25,7 @@ sim_prefix = simv
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
-include $(base_dir)/vcs.mk
+include $(sim_dir)/vcs.mk
 
 .PHONY: default debug
 default: $(sim)
@@ -56,7 +56,7 @@ include $(base_dir)/common.mk
 #########################################################################################
 VCS = vcs -full64
 
-VCS_OPTS = $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(PREPROC_DEFINES)
+VCS_OPTS = $(VCS_CC_OPTS) $(VCS_NONCC_OPTS) $(SIM_PREPROC_DEFINES) $(VCS_PREPROC_DEFINES)
 
 #########################################################################################
 # vcs build paths

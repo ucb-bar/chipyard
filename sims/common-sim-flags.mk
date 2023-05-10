@@ -33,3 +33,17 @@ SIM_LDFLAGS = \
 	-lfesvr \
 	-ldramsim \
 	$(EXTRA_SIM_LDFLAGS)
+
+CLOCK_PERIOD ?= 1.0
+RESET_DELAY ?= 777.7
+
+SIM_PREPROC_DEFINES = \
+	+define+CLOCK_PERIOD=$(CLOCK_PERIOD) \
+	+define+RESET_DELAY=$(RESET_DELAY) \
+	+define+PRINTF_COND=$(TB).printf_cond \
+	+define+STOP_COND=!$(TB).reset \
+	+define+MODEL=$(MODEL) \
+	+define+RANDOMIZE_MEM_INIT \
+	+define+RANDOMIZE_REG_INIT \
+	+define+RANDOMIZE_GARBAGE_ASSIGN \
+	+define+RANDOMIZE_INVALID_ASSIGN
