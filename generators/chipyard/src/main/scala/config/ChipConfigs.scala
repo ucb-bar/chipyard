@@ -70,7 +70,7 @@ class ChipBringupHostConfig extends Config(
   new testchipip.WithOffchipBus ++                                                        // offchip bus, but don't directly connect it to existing buses
   new testchipip.WithSerialTLMem(base = 0x1000, size = BigInt("1000000000", 16) - 0x1000, // accessible memory of the chip
                                  idBits = 8, isMainMemory = false) ++
-  new testchipip.WithSerialTLClockDirection(provideClockFreqMHz = Some(50)) ++            // bringup board drives the clock for the serial-tl receiver on the chip, use 50MHz clock
+  new testchipip.WithSerialTLClockDirection(provideClockFreqMHz = Some(75)) ++            // bringup board drives the clock for the serial-tl receiver on the chip, use 50MHz clock
 
   //=============================
   // Set up memory on the bringup system
