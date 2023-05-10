@@ -131,7 +131,7 @@ dependencies:
     - pytest-mock
     - moto
     - mypy
-    - s3fs
+    - s3fs==0.4.2
     - aiohttp
     - pip:
         - sure
