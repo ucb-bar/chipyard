@@ -41,10 +41,11 @@ class ClockSourceAtFreqMHz(val freqMHz: Double) extends BlackBox(Map(
   "PERIOD" -> DoubleParam(1000/freqMHz)
 )) with HasBlackBoxInline {
   val io = IO(new ClockSourceIO)
+  val moduleName = this.getClass.getSimpleName
 
-  setInline("ClockSourceAtFreqMHz.v",
+  setInline(s"$moduleName.v",
     s"""
-      |module ClockSourceAtFreqMHz #(parameter PERIOD="") (
+      |module $moduleName #(parameter PERIOD="") (
       |    input power,
       |    input gate,
       |    output clk);
