@@ -86,7 +86,7 @@ class MbusScratchpadRocketConfig extends Config(
 // DOC include end: mbusscratchpadrocket
 
 class MulticlockRocketConfig extends Config(
-  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(3, 3) ++ // Add async crossings between RocketTile and uncore
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   // Frequency specifications
   new chipyard.config.WithTileFrequency(1600.0) ++       // Matches the maximum frequency of U540
