@@ -103,20 +103,20 @@ class WithPassthroughClockGenerator extends OverrideLazyIOBinder({
     // This aggregate node should do nothing
     val clockGroupAggNode = ClockGroupAggregateNode("fake")
     val clockGroupsSourceNode = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
-    system.allClockGroupsNode :*= clockGroupAggNode := clockGroupsSourceNode
+    system.allClockGroupsNode := clockGroupAggNode := clockGroupsSourceNode
 
     InModuleBody {
       val reset_io = IO(Input(AsyncReset()))
-      val clock_ios = clockGroupAggNode.out.map { case (bundle, edge) =>
-        val freqs = edge.sink.members.map(_.take.map(_.freqMHz)).flatten
-        require(freqs.distinct.size == 1)
-        val clock_io = IO(Input(new ClockWithFreq(freqs.head))).suggestName(s"clock_${edge.sink.name}")
-        bundle.member.data.foreach { b =>
-          b.clock := clock_io.clock
-          b.reset := reset_io
-        }
+      require(clockGroupAggNode.out.size == 1)
+      val (bundle, edge) = clockGroupAggNode.out(0)
+
+      val clock_ios = (bundle.member.data zip edge.sink.members).map { case (b, m) =>
+        val freq = m.take.get.freqMHz
+        val clock_io = IO(Input(new ClockWithFreq(freq))).suggestName(s"clock_${m.name.get}")
+        b.clock := clock_io.clock
+        b.reset := reset_io
         clock_io
-      }
+      }.toSeq
       ((clock_ios :+ reset_io), Nil)
     }
   }
