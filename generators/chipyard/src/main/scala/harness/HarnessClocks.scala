@@ -38,7 +38,7 @@ trait HarnessClockInstantiator {
 }
 
 class ClockSourceAtFreqMHz(val freqMHz: Double) extends BlackBox(Map(
-  "PERIOD" -> DoubleParam(freqMHz)
+  "PERIOD" -> DoubleParam(1000/freqMHz)
 )) with HasBlackBoxInline {
   val io = IO(new ClockSourceIO)
 
