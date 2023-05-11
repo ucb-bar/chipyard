@@ -3,6 +3,7 @@ package chipyard.fpga.arty
 import chisel3._
 
 import freechips.rocketchip.diplomacy.{LazyModule}
+import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
 import org.chipsalliance.cde.config.{Parameters}
 
 import sifive.fpgashells.shell.xilinx.artyshell.{ArtyShell}
@@ -36,4 +37,9 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
   lazyDut match { case d: HasIOBinders =>
     ApplyHarnessBinders(this, d.lazySystem, d.portMap)
   }
+
+  val implicitHarnessClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
+  implicitHarnessClockBundle.clock := buildtopClock
+  implicitHarnessClockBundle.reset := buildtopReset
+  harnessClockInstantiator.instantiateHarnessClocks(implicitHarnessClockBundle)
 }

@@ -83,3 +83,18 @@ class AbsoluteFreqHarnessClockInstantiator extends HarnessClockInstantiator {
 class WithAbsoluteFreqHarnessClockInstantiator extends Config((site, here, up) => {
   case HarnessClockInstantiatorKey => () => new AbsoluteFreqHarnessClockInstantiator
 })
+
+class AllClocksFromHarnessClockInstantiator extends HarnessClockInstantiator {
+  def instantiateHarnessClocks(refClock: ClockBundle): Unit = {
+    val freqs = _clockMap.map(_._2._1)
+    freqs.tail.foreach(t => require(t == freqs.head, s"Mismatching clocks $t != ${freqs.head}"))
+    for ((_, (_, bundle)) <- _clockMap) {
+      bundle.clock := refClock.clock
+      bundle.reset := refClock.reset
+    }
+  }
+}
+
+class WithAllClocksFromHarnessClockInstantiator extends Config((site, here, up) => {
+  case HarnessClockInstantiatorKey => () => new AllClocksFromHarnessClockInstantiator
+})
