@@ -21,8 +21,8 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
 
   def success = {require(false, "Success not supported"); false.B }
 
-  def implicitClock = clock_32MHz
-  def implicitReset = hReset
+  def referenceClock = clock_32MHz
+  def referenceReset = hReset
 
   instantiateChipTops()
 }

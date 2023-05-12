@@ -118,12 +118,12 @@ class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawMod
   val hReset = Wire(Reset())
   hReset := _outer.dutClock.in.head._1.reset
 
-  def implicitClock = _outer.dutClock.in.head._1.clock
-  def implicitReset = hReset
+  def referenceClock = _outer.dutClock.in.head._1.clock
+  def referenceReset = hReset
   def success = { require(false, "Unused"); false.B }
 
-  childClock := implicitClock
-  childReset := implicitReset
+  childClock := referenceClock
+  childReset := referenceReset
 
   instantiateChipTops()
 }

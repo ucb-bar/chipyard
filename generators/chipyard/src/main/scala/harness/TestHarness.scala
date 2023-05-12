@@ -24,8 +24,8 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessInst
   val success = WireInit(false.B)
   io.success := success
 
-  def implicitClock = clock
-  def implicitReset = reset
+  def referenceClock = clock
+  def referenceReset = reset
 
   instantiateChipTops()
 }

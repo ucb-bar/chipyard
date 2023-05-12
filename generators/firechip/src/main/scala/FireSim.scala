@@ -72,8 +72,8 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessInsta
   // In effect, the bridge counts the length of the reset in terms of this clock.
   resetBridge.io.clock := harnessBinderClock
 
-  def implicitClock = false.B.asClock // unused
-  def implicitReset = resetBridge.io.reset
+  def referenceClock = false.B.asClock // unused
+  def referenceReset = resetBridge.io.reset
   def success = { require(false, "success should not be used in Firesim"); false.B }
 
   instantiateChipTops()

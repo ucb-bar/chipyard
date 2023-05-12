@@ -76,8 +76,8 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
 
     harnessSysPLL.plls.foreach(_._1.getReset.get := pllReset)
 
-    def implicitClock = dutClock.in.head._1.clock
-    def implicitReset = dutClock.in.head._1.reset
+    def referenceClock = dutClock.in.head._1.clock
+    def referenceReset = dutClock.in.head._1.reset
     def success = { require(false, "Unused"); false.B }
 
     ddrOverlay.mig.module.clock := harnessBinderClock

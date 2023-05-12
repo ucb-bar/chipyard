@@ -53,8 +53,8 @@ trait HasHarnessInstantiators {
   val harnessBinderReset = Wire(Reset())
 
   // classes which inherit this trait should provide the below definitions
-  def implicitClock: Clock
-  def implicitReset: Reset
+  def referenceClock: Clock
+  def referenceReset: Reset
   def success: Bool
 
   // This can be accessed to get new clocks from the harness
@@ -86,9 +86,9 @@ trait HasHarnessInstantiators {
     val harnessBinderClk = harnessClockInstantiator.requestClockMHz("harnessbinder_clock", getHarnessBinderClockFreqMHz)
     println(s"Harness binder clock is $harnessBinderClockFreq")
     harnessBinderClock := harnessBinderClk
-    harnessBinderReset := implicitReset
+    harnessBinderReset := ResetCatchAndSync(harnessBinderClk, referenceReset.asBool)
 
-    harnessClockInstantiator.instantiateHarnessClocks(implicitClock)
+    harnessClockInstantiator.instantiateHarnessClocks(referenceClock)
 
     lazyDuts
   }
