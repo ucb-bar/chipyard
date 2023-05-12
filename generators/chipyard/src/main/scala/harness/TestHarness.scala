@@ -87,16 +87,12 @@ trait HasChipyardHarnessInstantiators {
       ApplyMultiHarnessBinders(this, lazyDuts)
     }
 
-    val harnessBinderClkBundle = harnessClockInstantiator.requestClockBundle("harnessbinder_clock", getHarnessBinderClockFreqHz)
+    val harnessBinderClk = harnessClockInstantiator.requestClockMHz("harnessbinder_clock", getHarnessBinderClockFreqMHz)
     println(s"Harness binder clock is $harnessBinderClockFreq")
-    harnessBinderClock := harnessBinderClkBundle.clock
-    harnessBinderReset := harnessBinderClkBundle.reset
+    harnessBinderClock := harnessBinderClk
+    harnessBinderReset := implicitReset
 
-    // This should be assigned to whatever its the "implicit" top-level clock/reset
-    val implicitHarnessClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
-    implicitHarnessClockBundle.clock := implicitClock
-    implicitHarnessClockBundle.reset := implicitReset
-    harnessClockInstantiator.instantiateHarnessClocks(implicitHarnessClockBundle)
+    harnessClockInstantiator.instantiateHarnessClocks(implicitClock)
 
     lazyDuts
   }

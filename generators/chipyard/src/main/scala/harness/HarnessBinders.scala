@@ -145,14 +145,14 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
 
       ports.map({ port =>
 // DOC include start: HarnessClockInstantiatorEx
-        val memOverSerialTLClockBundle = th.harnessClockInstantiator.requestClockBundle("mem_over_serial_tl_clock", memFreq)
+        val memOverSerialTLClock = th.harnessClockInstantiator.requestClockHz("mem_over_serial_tl_clock", memFreq)
         val serial_bits = port.bits
         require(DataMirror.directionOf(port.clock) == Direction.Input)
         port.clock := th.harnessBinderClock
         val harnessMultiClockAXIRAM = TSIHarness.connectMultiClockAXIRAM(
           system.serdesser.get,
           serial_bits,
-          memOverSerialTLClockBundle,
+          memOverSerialTLClock,
           th.harnessBinderReset)
 // DOC include end: HarnessClockInstantiatorEx
         val success = SimTSI.connect(Some(harnessMultiClockAXIRAM.module.io.tsi), th.harnessBinderClock, th.harnessBinderReset.asBool)
@@ -391,8 +391,8 @@ class WithClockAndResetFromHarness extends OverrideHarnessBinder({
     implicit val p = GetSystemParameters(system)
     ports.map ({
       case c: ClockWithFreq => {
-        val clockBundle = th.harnessClockInstantiator.requestClockBundle(s"clock_${c.freqMHz.toInt}MHz", c.freqMHz)
-        c.clock := clockBundle.clock
+        val clockBundle = th.harnessClockInstantiator.requestClockMHz(s"clock_${c.freqMHz.toInt}MHz", c.freqMHz)
+        c.clock := clockBundle
       }
       case r: AsyncReset => r := th.harnessBinderReset.asAsyncReset
     })
