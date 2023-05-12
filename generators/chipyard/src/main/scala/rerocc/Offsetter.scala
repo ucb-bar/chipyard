@@ -60,7 +60,7 @@ class AddressOffsetter(n: Int)(implicit p: Parameters) extends LazyModule with H
       val edit_addr = Mux(io.ctrl.vm_enabled,
         io.ptw.resp_in.bits.pte.ppn << pgIdxBits,
         q.bits.address)
-      val out_addr = WireInit(addr)
+      val out_addr = WireInit(edit_addr)
       for (i <- 0 until n) {
         val base = io.ctrl.base(i)
         val bound = bounds(i)
