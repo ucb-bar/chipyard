@@ -67,7 +67,7 @@ class TileResetSetter(address: BigInt, beatBytes: Int, tileNames: Seq[String], i
 object TileResetSetter {
   def apply(address: BigInt, tlbus: TLBusWrapper, tileNames: Seq[String], initResetHarts: Seq[Int])(implicit p: Parameters, v: ValName) = {
     val setter = LazyModule(new TileResetSetter(address, tlbus.beatBytes, tileNames, initResetHarts))
-    tlbus.toVariableWidthSlave(Some("tile-reset-setter")) { setter.tlNode := TLBuffer() }
+    tlbus.coupleTo("tile-reset-setter") { setter.tlNode := TLFragmenter(tlbus.beatBytes, tlbus.blockBytes) := TLBuffer() := _ }
     setter.clockNode
   }
 }

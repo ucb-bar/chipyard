@@ -49,7 +49,7 @@ class TileClockGater(address: BigInt, beatBytes: Int)(implicit p: Parameters, va
 object TileClockGater {
   def apply(address: BigInt, tlbus: TLBusWrapper)(implicit p: Parameters, v: ValName) = {
     val gater = LazyModule(new TileClockGater(address, tlbus.beatBytes))
-    tlbus.toVariableWidthSlave(Some("clock-gater")) { gater.tlNode := TLBuffer() }
+    tlbus.coupleTo("clock-gater") { gater.tlNode := TLFragmenter(tlbus.beatBytes, tlbus.blockBytes) := TLBuffer() := _ }
     gater.clockNode
   }
 }

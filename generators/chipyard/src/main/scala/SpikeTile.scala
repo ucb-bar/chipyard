@@ -62,6 +62,7 @@ case class SpikeCoreParams() extends CoreParams {
   val useBitManipCrypto = false
   val useCryptoNIST = false
   val useCryptoSM = false
+  val useConditionalZero = false
 
   override def vLen = 128
   override def vMemDataBits = 128

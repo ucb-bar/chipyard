@@ -132,7 +132,7 @@ trait CanHavePeripheryStreamingPassthrough { this: BaseSubsystem =>
   val passthrough = p(StreamingPassthroughKey) match {
     case Some(params) => {
       val streamingPassthroughChain = LazyModule(new TLStreamingPassthroughChain(params, UInt(32.W)))
-      pbus.toVariableWidthSlave(Some("streamingPassthrough")) { streamingPassthroughChain.mem.get := TLFIFOFixer() }
+      pbus.coupleTo("streamingPassthrough") { streamingPassthroughChain.mem.get := TLFIFOFixer() := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
       Some(streamingPassthroughChain)
     }
     case None => None

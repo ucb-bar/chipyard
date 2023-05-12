@@ -203,7 +203,7 @@ trait CanHavePeripheryStreamingFIR extends BaseSubsystem {
         genOut = FixedPoint(8.W, 3.BP),
         coeffs = Seq(1.F(0.BP), 2.F(0.BP), 3.F(0.BP)),
         params = params))
-      pbus.toVariableWidthSlave(Some("streamingFIR")) { streamingFIR.mem.get := TLFIFOFixer() }
+      pbus.coupleTo("streamingFIR") { streamingFIR.mem.get := TLFIFOFixer() := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
       Some(streamingFIR)
     }
     case None => None
