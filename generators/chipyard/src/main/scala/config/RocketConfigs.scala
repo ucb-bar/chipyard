@@ -25,7 +25,7 @@ class TinyRocketConfig extends Config(
 class UARTTSIRocketConfig extends Config(
   new chipyard.harness.WithUARTSerial ++
   new chipyard.config.WithNoUART ++
-  new chipyard.config.WithMemoryBusFrequency(10) ++              
+  new chipyard.config.WithMemoryBusFrequency(10) ++
   new chipyard.config.WithPeripheryBusFrequency(10) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
@@ -90,11 +90,13 @@ class MulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   // Frequency specifications
   new chipyard.config.WithTileFrequency(1600.0) ++       // Matches the maximum frequency of U540
-  new chipyard.config.WithSystemBusFrequency(800.0) ++   // Ditto
+  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore"   , Seq("sbus", "cbus", "implicit")),
+                                                      ("periphery", Seq("pbus", "fbus"))) ++
+  new chipyard.config.WithSystemBusFrequency(800.0) ++   // Matches the maximum frequency of U540
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++  // 2x the U540 freq (appropriate for a 128b Mbus)
-  new chipyard.config.WithPeripheryBusFrequency(100) ++  // Retains the default pbus frequency
-  new chipyard.config.WithSystemBusFrequencyAsDefault ++ // All unspecified clock frequencies, notably the implicit clock, will use the sbus freq (800 MHz)
+  new chipyard.config.WithPeripheryBusFrequency(100) ++  // Slow periphery bus
   //  Crossing specifications
+  new chipyard.config.WithFbusToSbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between FBUS and SBUS
   new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
   new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
@@ -102,7 +104,6 @@ class MulticlockRocketConfig extends Config(
 
 // DOC include start: MulticlockAXIOverSerialConfig
 class MulticlockAXIOverSerialConfig extends Config(
-  new chipyard.config.WithSystemBusFrequencyAsDefault ++
   new chipyard.config.WithSystemBusFrequency(250) ++
   new chipyard.config.WithPeripheryBusFrequency(250) ++
   new chipyard.config.WithMemoryBusFrequency(250) ++

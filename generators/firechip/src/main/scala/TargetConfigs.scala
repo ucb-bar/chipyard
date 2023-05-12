@@ -18,6 +18,7 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 
 import chipyard.clocking.{ChipyardPRCIControlKey}
+import chipyard.harness.{HarnessClockInstantiatorKey}
 import icenet._
 
 import firesim.bridges._
@@ -43,6 +44,11 @@ class WithoutClockGating extends Config((site, here, up) => {
   case ChipyardPRCIControlKey => up(ChipyardPRCIControlKey, site).copy(enableTileClockGating = false)
 })
 
+// Use the firesim clock bridge instantiator. this is required
+class WithFireSimHarnessClockBridgeInstantiator extends Config((site, here, up) => {
+  case HarnessClockInstantiatorKey => () => new FireSimClockBridgeInstantiator
+})
+
 // Testing configurations
 // This enables printfs used in testing
 class WithScalaTestFeatures extends Config((site, here, up) => {
@@ -63,9 +69,10 @@ class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 
 // Minimal set of FireSim-related design tweaks - notably discludes FASED, TraceIO, and the BlockDevice
 class WithMinimalFireSimDesignTweaks extends Config(
-  // Required*: Uses FireSim ClockBridge and PeekPokeBridge to drive the system with a single clock/reset
-  new WithFireSimHarnessClockBinder ++
-  new WithFireSimSimpleClocks ++
+  // Required*: Punch all clocks to FireSim's harness clock instantiator
+  new WithFireSimHarnessClockBridgeInstantiator ++
+  new chipyard.harness.WithClockAndResetFromHarness ++
+  new chipyard.clocking.WithPassthroughClockGenerator ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++
   // Required: Existing FAME-1 transform cannot handle black-box clock gates
@@ -116,16 +123,8 @@ class WithFireSimConfigTweaks extends Config(
   // Using some other frequency will require runnings the FASED runtime configuration generator
   // to generate faithful DDR3 timing values.
   new chipyard.config.WithSystemBusFrequency(1000.0) ++
-  new chipyard.config.WithSystemBusFrequencyAsDefault ++ // All unspecified clock frequencies, notably the implicit clock, will use the sbus freq (1000 MHz)
-  // Explicitly set PBUS + MBUS to 1000 MHz, since they will be driven to 100 MHz by default because of assignments in the Chisel
   new chipyard.config.WithPeripheryBusFrequency(1000.0) ++
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++
-  new WithFireSimDesignTweaks
-)
-
-// Tweak more representative of testchip configs
-class WithFireSimTestChipConfigTweaks extends Config(
-  new chipyard.config.WithTestChipBusFreqs ++
   new WithFireSimDesignTweaks
 )
 
@@ -267,9 +266,10 @@ class FireSimLeanGemminiPrintfRocketConfig extends Config(
 // Supernode Configurations, base off chipyard's RocketConfig
 //**********************************************************************************
 class SupernodeFireSimRocketConfig extends Config(
-  new WithNumNodes(4) ++
-  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 8L) ++ // 8 GB
-  new FireSimRocketConfig)
+  new WithFireSimHarnessClockBridgeInstantiator ++
+  new chipyard.harness.WithHomogeneousMultiChip(n=4, new Config(
+    new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 8L) ++ // 8GB DRAM per node
+    new FireSimRocketConfig)))
 
 //**********************************************************************************
 //* CVA6 Configurations

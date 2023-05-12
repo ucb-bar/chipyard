@@ -13,7 +13,6 @@ import freechips.rocketchip.tilelink.{HasTLBusParams}
 
 import chipyard._
 import chipyard.clocking._
-import chipyard.harness.{DefaultClockFrequencyKey}
 
 // The default RocketChip BaseSubsystem drives its diplomatic clock graph
 // with the implicit clocks of Subsystem. Don't do that, instead we extend
@@ -36,14 +35,6 @@ class WithTileFrequency(fMHz: Double, hartId: Option[Int] = None) extends ClockN
     }
   },
   fMHz)
-
-class WithPeripheryBusFrequencyAsDefault extends Config((site, here, up) => {
-  case DefaultClockFrequencyKey => (site(PeripheryBusKey).dtsFrequency.get.toDouble / (1000 * 1000))
-})
-
-class WithSystemBusFrequencyAsDefault extends Config((site, here, up) => {
-  case DefaultClockFrequencyKey => (site(SystemBusKey).dtsFrequency.get.toDouble / (1000 * 1000))
-})
 
 class BusFrequencyAssignment[T <: HasTLBusParams](re: Regex, key: Field[T]) extends Config((site, here, up) => {
   case ClockFrequencyAssignersKey => up(ClockFrequencyAssignersKey, site) ++

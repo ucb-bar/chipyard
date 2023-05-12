@@ -8,13 +8,10 @@ import org.chipsalliance.cde.config.{Parameters}
 
 import sifive.fpgashells.shell.xilinx.artyshell.{ArtyShell}
 
-import chipyard.harness.{ApplyHarnessBinders, BuildTop, HasHarnessSignalReferences}
+import chipyard.harness.{HasHarnessInstantiators}
 import chipyard.iobinders.{HasIOBinders}
 
-class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell with HasHarnessSignalReferences {
-
-  val lazyDut = LazyModule(p(BuildTop)(p)).suggestName("chiptop")
-
+class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell with HasHarnessInstantiators {
   // Convert harness resets from Bool to Reset type.
   val hReset = Wire(Reset())
   hReset := ~ck_rst
@@ -22,24 +19,10 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
   val dReset = Wire(AsyncReset())
   dReset := reset_core.asAsyncReset
 
-  // default to 32MHz clock
-  withClockAndReset(clock_32MHz, hReset) {
-    val dut = Module(lazyDut.module)
-  }
+  def success = {require(false, "Success not supported"); false.B }
 
-  val buildtopClock = clock_32MHz
-  val buildtopReset = hReset
-  val success = false.B
+  def implicitClock = clock_32MHz
+  def implicitReset = hReset
 
-  val dutReset = dReset
-
-  // must be after HasHarnessSignalReferences assignments
-  lazyDut match { case d: HasIOBinders =>
-    ApplyHarnessBinders(this, d.lazySystem, d.portMap)
-  }
-
-  val implicitHarnessClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
-  implicitHarnessClockBundle.clock := buildtopClock
-  implicitHarnessClockBundle.reset := buildtopReset
-  harnessClockInstantiator.instantiateHarnessClocks(implicitHarnessClockBundle)
+  instantiateChipTops()
 }

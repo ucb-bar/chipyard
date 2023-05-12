@@ -13,7 +13,6 @@ class AbstractTraceGenConfig extends Config(
   new chipyard.clocking.WithPassthroughClockGenerator ++
   new chipyard.config.WithTracegenSystem ++
   new chipyard.config.WithNoSubsystemDrivenClocks ++
-  new chipyard.config.WithPeripheryBusFrequencyAsDefault ++
   new chipyard.config.WithMemoryBusFrequency(100.0) ++
   new chipyard.config.WithPeripheryBusFrequency(100.0) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
