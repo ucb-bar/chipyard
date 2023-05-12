@@ -22,6 +22,7 @@ class WithNoDesignKey extends Config((site, here, up) => {
 })
 
 class WithArty100TTweaks extends Config(
+  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new WithArty100TUARTTSI ++
   new WithArty100TDDRTL ++
   new WithNoDesignKey ++

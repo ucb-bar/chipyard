@@ -42,6 +42,7 @@ class WithSystemModifications extends Config((site, here, up) => {
 // DOC include start: AbstractVCU118 and Rocket
 class WithVCU118Tweaks extends Config(
   // harness binders
+  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new WithUART ++
   new WithSPISDCard ++
   new WithDDRMem ++

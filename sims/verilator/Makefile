@@ -96,8 +96,7 @@ USE_FST ?= 0
 TRACING_OPTS := $(if $(filter $(USE_FST),0),\
 	                  --trace,--trace-fst --trace-threads 1)
 # TODO: consider renaming +vcdfile in TestDriver.v to +waveformfile (or similar)
-WAVEFORM_FLAG := +vcdfile=$(sim_out_name).$(if $(filter $(USE_FST),0),\
-	                  vcd,fst)
+WAVEFORM_FLAG := +vcdfile=$(sim_out_name).$(if $(filter $(USE_FST),0),vcd,fst)
 
 #----------------------------------------------------------------------------------------
 # verilation configuration/optimization

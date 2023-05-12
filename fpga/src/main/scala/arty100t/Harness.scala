@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util._
 import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config.{Parameters}
-import freechips.rocketchip.tilelink._
+import freechips.rocketchip.tilelink.{TLClientNode, TLBlockDuringReset}
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.shell._

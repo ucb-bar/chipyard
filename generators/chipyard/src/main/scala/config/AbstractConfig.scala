@@ -12,18 +12,19 @@ import org.chipsalliance.cde.config.{Config}
 
 class AbstractConfig extends Config(
   // The HarnessBinders control generation of hardware in the TestHarness
-  new chipyard.harness.WithUARTAdapter ++                       // add UART adapter to display UART on stdout, if uart is present
-  new chipyard.harness.WithBlackBoxSimMem ++                    // add SimDRAM DRAM model for axi4 backing memory, if axi4 mem is enabled
-  new chipyard.harness.WithSimTSIOverSerialTL ++                // add external serial-adapter and RAM
-  new chipyard.harness.WithSimDebug ++                          // add SimJTAG or SimDTM adapters if debug module is enabled
-  new chipyard.harness.WithGPIOTiedOff ++                       // tie-off chiptop GPIOs, if GPIOs are present
-  new chipyard.harness.WithSimSPIFlashModel ++                  // add simulated SPI flash memory, if SPI is enabled
-  new chipyard.harness.WithSimAXIMMIO ++                        // add SimAXIMem for axi4 mmio port, if enabled
-  new chipyard.harness.WithTieOffInterrupts ++                  // tie-off interrupt ports, if present
-  new chipyard.harness.WithTieOffL2FBusAXI ++                   // tie-off external AXI4 master, if present
   new chipyard.harness.WithUARTTSIAdapter ++
-  new chipyard.harness.WithCustomBootPinPlusArg ++
-  new chipyard.harness.WithClockAndResetFromHarness ++
+  new chipyard.harness.WithUARTAdapter ++                          // add UART adapter to display UART on stdout, if uart is present
+  new chipyard.harness.WithBlackBoxSimMem ++                       // add SimDRAM DRAM model for axi4 backing memory, if axi4 mem is enabled
+  new chipyard.harness.WithSimTSIOverSerialTL ++                   // add external serial-adapter and RAM
+  new chipyard.harness.WithSimDebug ++                             // add SimJTAG or SimDTM adapters if debug module is enabled
+  new chipyard.harness.WithGPIOTiedOff ++                          // tie-off chiptop GPIOs, if GPIOs are present
+  new chipyard.harness.WithSimSPIFlashModel ++                     // add simulated SPI flash memory, if SPI is enabled
+  new chipyard.harness.WithSimAXIMMIO ++                           // add SimAXIMem for axi4 mmio port, if enabled
+  new chipyard.harness.WithTieOffInterrupts ++                     // tie-off interrupt ports, if present
+  new chipyard.harness.WithTieOffL2FBusAXI ++                      // tie-off external AXI4 master, if present
+  new chipyard.harness.WithCustomBootPinPlusArg ++                 // drive custom-boot pin with a plusarg, if custom-boot-pin is present
+  new chipyard.harness.WithClockAndResetFromHarness ++             // all Clock/Reset I/O in ChipTop should be driven by harnessClockInstantiator
+  new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ // generate clocks in harness with unsynthesizable ClockSourceAtFreqMHz
 
   // The IOBinders instantiate ChipTop IOs to match desired digital IOs
   // IOCells are generated for "Chip-like" IOs, while simulation-only IOs are directly punched through
@@ -43,10 +44,8 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithCustomBootPin ++
   new chipyard.iobinders.WithUARTTSIPunchthrough ++
 
-  // Default behavior is to use a divider-only clock-generator
-  // This works in VCS, Verilator, and FireSim/
-  // This should get replaced with a PLL-like config instead
-  new chipyard.clocking.WithDividerOnlyClockGenerator ++
+  // By default, punch out IOs to the Harness
+  new chipyard.clocking.WithPassthroughClockGenerator ++
 
   new testchipip.WithCustomBootPin ++                               // add a custom-boot-pin to support pin-driven boot address
   new testchipip.WithBootAddrReg ++                                 // add a boot-addr-reg for configurable boot address
@@ -59,8 +58,8 @@ class AbstractConfig extends Config(
   new chipyard.config.WithNoSubsystemDrivenClocks ++                // drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks
   new chipyard.config.WithInheritBusFrequencyAssignments ++         // Unspecified clocks within a bus will receive the bus frequency if set
   new chipyard.config.WithPeripheryBusFrequencyAsDefault ++         // Unspecified frequencies with match the pbus frequency (which is always set)
-  new chipyard.config.WithMemoryBusFrequency(100.0) ++              // Default 100 MHz mbus
-  new chipyard.config.WithPeripheryBusFrequency(100.0) ++           // Default 100 MHz pbus
+  new chipyard.config.WithMemoryBusFrequency(500.0) ++              // Default 500 MHz mbus
+  new chipyard.config.WithPeripheryBusFrequency(500.0) ++           // Default 500 MHz pbus
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++      // Default 2 memory channels
   new freechips.rocketchip.subsystem.WithClockGateModel ++          // add default EICG_wrapper clock gate model
   new freechips.rocketchip.subsystem.WithJtagDTM ++                 // set the debug module to expose a JTAG port

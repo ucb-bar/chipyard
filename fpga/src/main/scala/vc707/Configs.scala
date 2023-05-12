@@ -44,6 +44,7 @@ class WithVC707Tweaks extends Config (
   new chipyard.clocking.WithPassthroughClockGenerator ++
 
   // harness binders
+  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new WithVC707UARTHarnessBinder ++
   new WithVC707SPISDCardHarnessBinder ++
   new WithVC707DDRMemHarnessBinder ++

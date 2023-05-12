@@ -25,7 +25,6 @@ import barstools.iocell.chisel._
 import testchipip._
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 import chipyard.{CanHaveMasterTLMemPort}
-import chipyard.clocking.{HasChipyardPRCI, DividerOnlyClockGenerator}
 
 import scala.reflect.{ClassTag}
 
