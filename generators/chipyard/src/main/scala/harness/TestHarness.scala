@@ -19,7 +19,7 @@ import chipyard.{ChipTop}
 
 case object BuildTop extends Field[Parameters => LazyModule]((p: Parameters) => new ChipTop()(p))
 case object DefaultClockFrequencyKey extends Field[Double](100.0) // MHz
-case object HarnessClockInstantiatorKey extends Field[() => HarnessClockInstantiator](() => new DividerOnlyHarnessClockInstantiator)
+case object HarnessClockInstantiatorKey extends Field[() => HarnessClockInstantiator]()
 
 trait HasHarnessSignalReferences {
   implicit val p: Parameters

@@ -393,8 +393,8 @@ class WithClockAndResetFromHarness extends OverrideHarnessBinder({
     implicit val p = GetSystemParameters(system)
     ports.map ({
       case c: ClockWithFreq => {
-        th.setRefClockFreq(c.freqMHz)
-        c.clock := th.buildtopClock
+        val clock = th.harnessClockInstantiator.requestClockBundle(s"clock_${c.freqMHz}MHz", c.freqMHz * (1000 * 1000))
+        c.clock := clock.clock
       }
       case r: AsyncReset => r := th.buildtopReset.asAsyncReset
     })

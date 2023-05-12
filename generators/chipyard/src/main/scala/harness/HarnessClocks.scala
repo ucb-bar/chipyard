@@ -1,7 +1,8 @@
 package chipyard.harness
 
 import chisel3._
-
+import chisel3.util._
+import chisel3.experimental.DoubleParam
 import scala.collection.mutable.{ArrayBuffer, LinkedHashMap}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import org.chipsalliance.cde.config.{Field, Parameters, Config}
@@ -36,43 +37,26 @@ trait HarnessClockInstantiator {
   def instantiateHarnessClocks(refClock: ClockBundle): Unit
 }
 
-// The DividerOnlyHarnessClockInstantiator uses synthesizable clock divisors
-// to approximate frequency ratios between the requested clocks
-class DividerOnlyHarnessClockInstantiator extends HarnessClockInstantiator {
-  // connect all clock wires specified to a divider only PLL
-  def instantiateHarnessClocks(refClock: ClockBundle): Unit = {
-    val sinks = _clockMap.map({ case (name, (freq, bundle)) =>
-      ClockSinkParameters(take=Some(ClockParameters(freqMHz=freq / (1000 * 1000))), name=Some(name))
-    }).toSeq
+class ClockSourceAtFreqMHz(val freqMHz: Double) extends BlackBox(Map(
+  "PERIOD" -> DoubleParam(1000/freqMHz)
+)) with HasBlackBoxInline {
+  val io = IO(new ClockSourceIO)
+  val moduleName = this.getClass.getSimpleName
 
-    val pllConfig = new SimplePllConfiguration("harnessDividerOnlyClockGenerator", sinks)
-    pllConfig.emitSummaries()
-
-    val dividedClocks = LinkedHashMap[Int, Clock]()
-    def instantiateDivider(div: Int): Clock = {
-      val divider = Module(new ClockDividerN(div))
-      divider.suggestName(s"ClockDivideBy${div}")
-      divider.io.clk_in := refClock.clock
-      dividedClocks(div) = divider.io.clk_out
-      divider.io.clk_out
-    }
-
-    // connect wires to clock source
-    for (sinkParams <- sinks) {
-      // bypass the reference freq. (don't create a divider + reset sync)
-      val (divClock, divReset) = if (sinkParams.take.get.freqMHz != pllConfig.referenceFreqMHz) {
-        val div = pllConfig.sinkDividerMap(sinkParams)
-        val divClock = dividedClocks.getOrElse(div, instantiateDivider(div))
-        (divClock, ResetCatchAndSync(divClock, refClock.reset.asBool))
-      } else {
-        (refClock.clock, refClock.reset)
-      }
-
-      _clockMap(sinkParams.name.get)._2.clock := divClock
-      _clockMap(sinkParams.name.get)._2.reset := divReset
-    }
-  }
+  setInline(s"$moduleName.v",
+    s"""
+      |module $moduleName #(parameter PERIOD="") (
+      |    input power,
+      |    input gate,
+      |    output clk);
+      |  timeunit 1ns/1ps;
+      |  reg clk_i = 1'b0;
+      |  always #(PERIOD/2.0) clk_i = ~clk_i & (power & ~gate);
+      |  assign clk = clk_i;
+      |endmodule
+      |""".stripMargin)
 }
+
 
 // The AbsoluteFreqHarnessClockInstantiator uses a Verilog blackbox to
 // provide the precise requested frequency.
@@ -86,7 +70,7 @@ class AbsoluteFreqHarnessClockInstantiator extends HarnessClockInstantiator {
 
     // connect wires to clock source
     for (sinkParams <- sinks) {
-      val source = Module(new ClockSourceAtFreq(sinkParams.take.get.freqMHz))
+      val source = Module(new ClockSourceAtFreqMHz(sinkParams.take.get.freqMHz))
       source.io.power := true.B
       source.io.gate := false.B
 
@@ -98,4 +82,19 @@ class AbsoluteFreqHarnessClockInstantiator extends HarnessClockInstantiator {
 
 class WithAbsoluteFreqHarnessClockInstantiator extends Config((site, here, up) => {
   case HarnessClockInstantiatorKey => () => new AbsoluteFreqHarnessClockInstantiator
+})
+
+class AllClocksFromHarnessClockInstantiator extends HarnessClockInstantiator {
+  def instantiateHarnessClocks(refClock: ClockBundle): Unit = {
+    val freqs = _clockMap.map(_._2._1)
+    freqs.tail.foreach(t => require(t == freqs.head, s"Mismatching clocks $t != ${freqs.head}"))
+    for ((_, (_, bundle)) <- _clockMap) {
+      bundle.clock := refClock.clock
+      bundle.reset := refClock.reset
+    }
+  }
+}
+
+class WithAllClocksFromHarnessClockInstantiator extends Config((site, here, up) => {
+  case HarnessClockInstantiatorKey => () => new AllClocksFromHarnessClockInstantiator
 })

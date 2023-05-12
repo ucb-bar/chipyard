@@ -6,6 +6,7 @@ import chisel3.experimental.{IO}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp, BundleBridgeSource}
 import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink.{TLClientNode}
+import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
@@ -134,4 +135,9 @@ class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawMod
   // check the top-level reference clock is equal to the default
   // non-exhaustive since you need all ChipTop clocks to equal the default
   require(getRefClockFreq == p(DefaultClockFrequencyKey))
+
+  val implicitHarnessClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
+  implicitHarnessClockBundle.clock := buildtopClock
+  implicitHarnessClockBundle.reset := buildtopReset
+  harnessClockInstantiator.instantiateHarnessClocks(implicitHarnessClockBundle)
 }

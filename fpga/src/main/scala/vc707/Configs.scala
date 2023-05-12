@@ -40,6 +40,7 @@ class WithSystemModifications extends Config((site, here, up) => {
 
 class WithVC707Tweaks extends Config (
   // harness binders
+  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new WithVC707UARTHarnessBinder ++
   new WithVC707SPISDCardHarnessBinder ++
   new WithVC707DDRMemHarnessBinder ++

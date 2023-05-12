@@ -5,6 +5,7 @@ import chisel3.util._
 import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink.{TLClientNode, TLBlockDuringReset}
+import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.shell._
@@ -87,6 +88,11 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
     chiptop match { case d: HasIOBinders =>
       ApplyHarnessBinders(this, d.lazySystem, d.portMap)
     }
+
+    val implicitHarnessClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
+    implicitHarnessClockBundle.clock := buildtopClock
+    implicitHarnessClockBundle.reset := buildtopReset
+    harnessClockInstantiator.instantiateHarnessClocks(implicitHarnessClockBundle)
   }
 
 }
