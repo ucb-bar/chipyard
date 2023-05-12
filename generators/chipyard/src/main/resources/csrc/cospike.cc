@@ -139,7 +139,7 @@ extern "C" void cospike_cosim(long long int cycle,
         in_permissive = true;
       } else if (arg == "+permissive-off") {
         in_permissive = false;
-      } else if (arg == "+cospike_debug") {
+      } else if (arg == "+cospike_debug" || arg == "+cospike-debug") {
         cospike_debug = true;
       } else if (!in_permissive) {
         htif_args.push_back(arg);
@@ -283,6 +283,7 @@ extern "C" void cospike_cosim(long long int cycle,
   if (raise_exception)
     printf("%d exception %lx\n", cycle, cause);
   if (valid) {
+    p->clear_waiting_for_interrupt();
     printf("%d Cosim: %lx", cycle, iaddr);
     if (has_wdata) {
       printf(" s: %lx", wdata);
@@ -296,6 +297,7 @@ extern "C" void cospike_cosim(long long int cycle,
       printf("spike mstatus is %lx\n", s->mstatus->read());
       printf("spike mip is %lx\n", s->mip->read());
       printf("spike mie is %lx\n", s->mie->read());
+      printf("spike wfi state is %d\n", p->is_waiting_for_interrupt());
     }
   }
 
