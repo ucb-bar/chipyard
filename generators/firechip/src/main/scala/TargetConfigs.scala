@@ -71,6 +71,7 @@ class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 class WithMinimalFireSimDesignTweaks extends Config(
   // Required*: Punch all clocks to FireSim's harness clock instantiator
   new WithFireSimHarnessClockBridgeInstantiator ++
+  new chipyard.harness.WithHarnessBinderClockFreqMHz(1000.0) ++
   new chipyard.harness.WithClockAndResetFromHarness ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
