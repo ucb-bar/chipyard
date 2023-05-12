@@ -100,11 +100,6 @@ class MulticlockRocketConfig extends Config(
   new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
   new chipyard.config.AbstractConfig)
 
-class TestChipMulticlockRocketConfig extends Config(
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.WithTestChipBusFreqs ++
-  new chipyard.config.AbstractConfig)
-
 // DOC include start: MulticlockAXIOverSerialConfig
 class MulticlockAXIOverSerialConfig extends Config(
   new chipyard.config.WithSystemBusFrequencyAsDefault ++
