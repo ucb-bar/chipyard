@@ -53,6 +53,7 @@ trait HasHarnessInstantiators {
   val harnessBinderReset = Wire(Reset())
 
   // classes which inherit this trait should provide the below definitions
+  def referenceClockFreqMHz: Double
   def referenceClock: Clock
   def referenceReset: Reset
   def success: Bool
@@ -88,7 +89,7 @@ trait HasHarnessInstantiators {
     harnessBinderClock := harnessBinderClk
     harnessBinderReset := ResetCatchAndSync(harnessBinderClk, referenceReset.asBool)
 
-    harnessClockInstantiator.instantiateHarnessClocks(referenceClock)
+    harnessClockInstantiator.instantiateHarnessClocks(referenceClock, referenceClockFreqMHz)
 
     lazyDuts
   }

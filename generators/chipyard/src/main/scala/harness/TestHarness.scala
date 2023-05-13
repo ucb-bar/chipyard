@@ -24,6 +24,11 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessInst
   val success = WireInit(false.B)
   io.success := success
 
+  // By default, the chipyard makefile sets the TestHarness implicit clock to be 1GHz
+  // This clock shouldn't be used by this TestHarness however, as most users
+  // will use the AbsoluteFreqHarnessClockInstantiator, which generates clocks
+  // in verilog blackboxes
+  def referenceClockFreqMHz = 1000.0
   def referenceClock = clock
   def referenceReset = reset
 

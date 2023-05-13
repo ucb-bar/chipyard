@@ -379,9 +379,10 @@ class WithCustomBootPinPlusArg extends OverrideHarnessBinder({
 class WithClockAndResetFromHarness extends OverrideHarnessBinder({
   (system: HasChipyardPRCI, th: HasHarnessInstantiators, ports: Seq[Data]) => {
     implicit val p = GetSystemParameters(system)
+    val clocks = ports.collect { case c: ClockWithFreq => c }
     ports.map ({
       case c: ClockWithFreq => {
-        val clock = th.harnessClockInstantiator.requestClockMHz(s"clock_${c.freqMHz}MHz", c.freqMHz)
+        val clock = th.harnessClockInstantiator.requestClockMHz(s"clock_${c.freqMHz.toInt}MHz", c.freqMHz)
         c.clock := clock
       }
       case r: AsyncReset => r := th.harnessBinderReset.asAsyncReset

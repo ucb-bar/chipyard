@@ -114,6 +114,7 @@ class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModul
   val hReset = Wire(Reset())
   hReset := _outer.dutClock.in.head._1.reset
 
+  def referenceClockFreqMHz = _outer.dutFreqMHz
   def referenceClock = _outer.dutClock.in.head._1.clock
   def referenceReset = hReset
   def success = { require(false, "Unused"); false.B }

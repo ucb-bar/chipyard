@@ -21,6 +21,7 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
 
   def success = {require(false, "Success not supported"); false.B }
 
+  def referenceClockFreqMHz = 32.0
   def referenceClock = clock_32MHz
   def referenceReset = hReset
 
