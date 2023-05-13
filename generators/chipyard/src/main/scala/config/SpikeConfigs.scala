@@ -27,7 +27,6 @@ class SpikeFastUARTConfig extends Config(
 class SpikeUltraFastConfig extends Config(
   new chipyard.WithSpikeTCM ++
   new chipyard.WithNSpikeCores(1) ++
-  new testchipip.WithSerialPBusMem ++
   new chipyard.config.WithUARTFIFOEntries(128, 128) ++
   new chipyard.config.WithMemoryBusFrequency(2) ++
   new chipyard.config.WithPeripheryBusFrequency(2) ++
@@ -48,7 +47,6 @@ class SpikeUltraFastDevicesConfig extends Config(
 
   new chipyard.WithSpikeTCM ++
   new chipyard.WithNSpikeCores(1) ++
-  new testchipip.WithSerialPBusMem ++
   new chipyard.config.WithUARTFIFOEntries(128, 128) ++
   new chipyard.config.WithMemoryBusFrequency(2) ++
   new chipyard.config.WithPeripheryBusFrequency(2) ++

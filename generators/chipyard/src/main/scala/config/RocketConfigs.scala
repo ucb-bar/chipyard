@@ -13,9 +13,6 @@ class RocketConfig extends Config(
 
 class TinyRocketConfig extends Config(
   new chipyard.iobinders.WithDontTouchIOBinders(false) ++         // TODO FIX: Don't dontTouch the ports
-  new chipyard.config.WithTLSerialLocation(
-    freechips.rocketchip.subsystem.FBUS,
-    freechips.rocketchip.subsystem.PBUS) ++                       // attach TL serial adapter to f/p busses
   new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++ // use incoherent bus topology
   new freechips.rocketchip.subsystem.WithNBanks(0) ++             // remove L2$
   new freechips.rocketchip.subsystem.WithNoMemPort ++             // remove backing memory
@@ -56,7 +53,6 @@ class GB1MemoryRocketConfig extends Config(
 
 // DOC include start: l1scratchpadrocket
 class ScratchpadOnlyRocketConfig extends Config(
-  new testchipip.WithSerialPBusMem ++
   new chipyard.config.WithL2TLBs(0) ++
   new freechips.rocketchip.subsystem.WithNBanks(0) ++
   new freechips.rocketchip.subsystem.WithNoMemPort ++          // remove offchip mem port
@@ -122,7 +118,7 @@ class MulticlockAXIOverSerialConfig extends Config(
     AsynchronousCrossing().sourceSync) ++
 
   new chipyard.harness.WithSimAXIMemOverSerialTL ++ // add SimDRAM DRAM model for axi4 backing memory over the SerDes link, if axi4 mem is enabled
-  new chipyard.config.WithSerialTLBackingMemory ++ // remove axi4 mem port in favor of SerialTL memory
+  new testchipip.WithSerialTLBackingMemory ++       // remove axi4 mem port in favor of SerialTL memory
 
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++ // 1 memory channel
