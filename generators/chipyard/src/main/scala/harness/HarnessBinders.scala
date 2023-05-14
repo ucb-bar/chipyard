@@ -145,9 +145,9 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
 
     p(SerialTLKey).map({ sVal =>
-      val serialManagerParams = sVal.serialManagerParams.get
-      val axiDomainParams = serialManagerParams.axiMemOverSerialTLParams.get
-      require(serialManagerParams.isMemoryDevice)
+      val serialTLManagerParams = sVal.serialTLManagerParams.get
+      val axiDomainParams = serialTLManagerParams.axiMemOverSerialTLParams.get
+      require(serialTLManagerParams.isMemoryDevice)
 
       val memFreq = axiDomainParams.getMemFrequency(system.asInstanceOf[HasTileLinkLocations])
 
@@ -168,8 +168,8 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
 
           // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
           (harnessMultiClockAXIRAM.mem_axi4.get zip harnessMultiClockAXIRAM.memNode.get.edges.in).map { case (axi_port, edge) =>
-            val memSize = serialManagerParams.memParams.size
-            val memBase = serialManagerParams.memParams.base
+            val memSize = serialTLManagerParams.memParams.size
+            val memBase = serialTLManagerParams.memParams.base
             val lineSize = p(CacheBlockBytes)
             val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), memBase, edge.bundle)).suggestName("simdram")
             mem.io.axi <> axi_port.bits

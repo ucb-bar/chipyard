@@ -113,9 +113,9 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
     implicit val p = GetSystemParameters(system)
 
     p(SerialTLKey).map({ sVal =>
-      val serialManagerParams = sVal.serialManagerParams.get
-      val axiDomainParams = serialManagerParams.axiMemOverSerialTLParams.get
-      require(serialManagerParams.isMemoryDevice)
+      val serialTLManagerParams = sVal.serialTLManagerParams.get
+      val axiDomainParams = serialTLManagerParams.axiMemOverSerialTLParams.get
+      require(serialTLManagerParams.isMemoryDevice)
       val memFreq = axiDomainParams.getMemFrequency(system.asInstanceOf[HasTileLinkLocations])
 
       ports.map({ port =>
