@@ -89,12 +89,12 @@ class MulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(3, 3) ++ // Add async crossings between RocketTile and uncore
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   // Frequency specifications
-  new chipyard.config.WithTileFrequency(1600.0) ++       // Matches the maximum frequency of U540
+  new chipyard.config.WithTileFrequency(1000.0) ++        // Matches the maximum frequency of U540
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore"   , Seq("sbus", "cbus", "implicit")),
                                                       ("periphery", Seq("pbus", "fbus"))) ++
-  new chipyard.config.WithSystemBusFrequency(800.0) ++   // Matches the maximum frequency of U540
-  new chipyard.config.WithMemoryBusFrequency(1000.0) ++  // 2x the U540 freq (appropriate for a 128b Mbus)
-  new chipyard.config.WithPeripheryBusFrequency(100) ++  // Slow periphery bus
+  new chipyard.config.WithSystemBusFrequency(500.0) ++    // Matches the maximum frequency of U540
+  new chipyard.config.WithMemoryBusFrequency(500.0) ++    // Matches the maximum frequency of U540
+  new chipyard.config.WithPeripheryBusFrequency(500.0) ++ // Matches the maximum frequency of U540
   //  Crossing specifications
   new chipyard.config.WithFbusToSbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between FBUS and SBUS
   new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
