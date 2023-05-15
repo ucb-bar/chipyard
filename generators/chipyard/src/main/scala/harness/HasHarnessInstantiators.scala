@@ -18,7 +18,7 @@ import chipyard.{ChipTop}
 // Chipyard Test Harness
 // -------------------------------
 
-case object MultiChipNChips extends Field[Int](0) // 0 means ignore MultiChipParams
+case object MultiChipNChips extends Field[Option[Int]](None) // None means ignore MultiChipParams
 case class MultiChipParameters(chipId: Int) extends Field[Parameters]
 case object BuildTop extends Field[Parameters => LazyModule]((p: Parameters) => new ChipTop()(p))
 case object HarnessClockInstantiatorKey extends Field[() => HarnessClockInstantiator]()
@@ -27,12 +27,12 @@ case object MultiChipIdx extends Field[Int](0)
 
 class WithMultiChip(id: Int, p: Parameters) extends Config((site, here, up) => {
   case MultiChipParameters(`id`) => p
-  case MultiChipNChips => up(MultiChipNChips) max (id + 1)
+  case MultiChipNChips => Some(up(MultiChipNChips).getOrElse(0) max (id + 1))
 })
 
 class WithHomogeneousMultiChip(n: Int, p: Parameters, idStart: Int = 0) extends Config((site, here, up) => {
   case MultiChipParameters(id) => if (id >= idStart && id < idStart + n) p else up(MultiChipParameters(id))
-  case MultiChipNChips => up(MultiChipNChips) max (idStart + n)
+  case MultiChipNChips => Some(up(MultiChipNChips).getOrElse(0) max (idStart + n))
 })
 
 class WithHarnessBinderClockFreqMHz(freqMHz: Double) extends Config((site, here, up) => {
@@ -61,17 +61,21 @@ trait HasHarnessInstantiators {
   // This can be accessed to get new clocks from the harness
   val harnessClockInstantiator = p(HarnessClockInstantiatorKey)()
 
-  private val chipParameters = if (p(MultiChipNChips) == 0) {
-    Seq(p)
-  } else {
-    (0 until p(MultiChipNChips)).map { i => p(MultiChipParameters(i)).alterPartial {
+  val supportsMultiChip: Boolean = false
+
+  private val chipParameters = p(MultiChipNChips) match {
+    case Some(n) => (0 until n).map { i => p(MultiChipParameters(i)).alterPartial {
       case TargetDirKey => p(TargetDirKey) // hacky fix
       case MultiChipIdx => i
     }}
+    case None => Seq(p)
   }
 
   // This shold be called last to build the ChipTops
   def instantiateChipTops(): Seq[LazyModule] = {
+    require(p(MultiChipNChips).isEmpty || supportsMultiChip,
+      s"Selected Harness does not support multi-chip")
+
     val lazyDuts = chipParameters.zipWithIndex.map { case (q,i) =>
       LazyModule(q(BuildTop)(q)).suggestName(s"chiptop$i")
     }

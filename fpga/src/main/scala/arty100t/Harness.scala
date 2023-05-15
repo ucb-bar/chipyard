@@ -22,8 +22,6 @@ import chipyard.iobinders.{HasIOBinders}
 class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell {
   def dp = designParameters
 
-  require(dp(MultiChipNChips) == 0, "Arty100T harness does not support multi-chip")
-
   val clockOverlay = dp(ClockInputOverlayKey).map(_.place(ClockInputDesignInput())).head
   val harnessSysPLL = dp(PLLFactoryKey)
   val harnessSysPLLNode = harnessSysPLL()

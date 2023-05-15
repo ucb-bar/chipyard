@@ -91,8 +91,6 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
 }
 
 class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessInstantiators {
-  require(p(MultiChipNChips) == 0)
-
   val vcu118Outer = _outer
 
   val reset = IO(Input(Bool()))

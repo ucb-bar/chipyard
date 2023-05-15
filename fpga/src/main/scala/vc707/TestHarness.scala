@@ -88,8 +88,6 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
 }
 
 class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessInstantiators {
-  require (p(MultiChipNChips) == 0)
-
   val vc707Outer = _outer
 
   val reset = IO(Input(Bool()))
