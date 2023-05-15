@@ -62,8 +62,8 @@ class ClockSourceAtFreqMHz(val freqMHz: Double) extends BlackBox(Map(
 
 // The AbsoluteFreqHarnessClockInstantiator uses a Verilog blackbox to
 // provide the precise requested frequency.
-// This ClockInstantiator cannot be synthesized, run in Verilator, or run in FireSim
-// It is useful for VCS/Xcelium-driven RTL simulations
+// This ClockInstantiator cannot be synthesized or run in FireSim
+// It is useful for RTL simulations
 class AbsoluteFreqHarnessClockInstantiator extends HarnessClockInstantiator {
   def instantiateHarnessClocks(refClock: Clock, refClockFreqMHz: Double): Unit = {
     // connect wires to clock source
