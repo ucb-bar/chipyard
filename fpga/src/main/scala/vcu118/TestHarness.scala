@@ -82,7 +82,7 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
   // connect 1 mem. channel to the FPGA DDR
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
     name = "chip_ddr",
-    sourceId = IdRange(0, 64)
+    sourceId = IdRange(0, 1 << dp(ExtTLMem).get.master.idBits)
   )))))
   ddrNode := ddrClient
 

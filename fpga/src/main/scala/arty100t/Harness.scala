@@ -40,7 +40,7 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
   val ddrOverlay = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLLNode)).asInstanceOf[DDRArtyPlacedOverlay]
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
     name = "chip_ddr",
-    sourceId = IdRange(0, 64)
+    sourceId = IdRange(0, 1 << dp(ExtTLMem).get.master.idBits)
   )))))
   val ddrBlockDuringReset = LazyModule(new TLBlockDuringReset(4))
   ddrOverlay.overlayOutput.ddr := ddrBlockDuringReset.node := ddrClient
