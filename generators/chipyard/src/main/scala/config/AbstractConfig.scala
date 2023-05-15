@@ -47,6 +47,7 @@ class AbstractConfig extends Config(
 
   new testchipip.WithCustomBootPin ++                               // add a custom-boot-pin to support pin-driven boot address
   new testchipip.WithBootAddrReg ++                                 // add a boot-addr-reg for configurable boot address
+  new testchipip.WithSerialTLClientIdBits(4) ++                     // support up to 1 << 4 simultaneous requests from serialTL port
   new testchipip.WithSerialTLWidth(32) ++                           // fatten the serialTL interface to improve testing performance
   new testchipip.WithDefaultSerialTL ++                             // use serialized tilelink port to external serialadapter/harnessRAM
   new chipyard.config.WithDebugModuleAbstractDataWords(8) ++        // increase debug module data capacity
