@@ -296,11 +296,19 @@ class WithDebugIOCells extends OverrideLazyIOBinder({
 })
 
 class WithSerialTLIOCells extends OverrideIOBinder({
-  (system: CanHavePeripheryTLSerial) => system.serial_tl.map({ s =>
+  (system: CanHavePeripheryTLSerial) => {
     val sys = system.asInstanceOf[BaseSubsystem]
-    val (port, cells) = IOCell.generateIOFromSignal(s.getWrappedValue, "serial_tl", sys.p(IOCellKey), abstractResetAsAsync = true)
-    (Seq(port), cells)
-  }).getOrElse((Nil, Nil))
+
+    val (ports, cells) = Seq(
+      (system.serial_tl_data, "serial_tl_data"),
+      (system.serial_tl_clock_in, "serial_tl_clock_in"),
+      (system.serial_tl_clock_out, "serial_tl_clock_out")
+    ).map { case (sig, name) => sig.map { s =>
+      val (port, cells) = IOCell.generateIOFromSignal(s.getWrappedValue, name, sys.p(IOCellKey), abstractResetAsAsync = true)
+      (port, cells)
+    } }.flatten.unzip
+    (ports, cells.flatten)
+  }
 })
 
 class WithAXI4MemPunchthrough extends OverrideLazyIOBinder({

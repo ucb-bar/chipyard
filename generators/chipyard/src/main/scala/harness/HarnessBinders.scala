@@ -141,7 +141,7 @@ class WithSimAXIMem extends OverrideHarnessBinder({
 })
 
 class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
 
     p(SerialTLKey).map({ sVal =>
@@ -151,33 +151,34 @@ class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
 
       val memFreq = axiDomainParams.getMemFrequency(system.asInstanceOf[HasTileLinkLocations])
 
-      ports.map({ port =>
+      ports.map { _ match {
+        case clock: Clock => clock := th.buildtopClock
+        case port: SerialIO => {
 // DOC include start: HarnessClockInstantiatorEx
-        withClockAndReset(th.buildtopClock, th.buildtopReset) {
-          val memOverSerialTLClockBundle = th.harnessClockInstantiator.requestClockBundle("mem_over_serial_tl_clock", memFreq)
-          val serial_bits = port.bits
-          port.clock := th.buildtopClock
-          val harnessMultiClockAXIRAM = TSIHarness.connectMultiClockAXIRAM(
-            system.serdesser.get,
-            serial_bits,
-            memOverSerialTLClockBundle,
-            th.buildtopReset)
+          withClockAndReset(th.buildtopClock, th.buildtopReset) {
+            val memOverSerialTLClockBundle = th.harnessClockInstantiator.requestClockBundle("mem_over_serial_tl_clock", memFreq)
+            val harnessMultiClockAXIRAM = TSIHarness.connectMultiClockAXIRAM(
+              system.serdesser.get,
+              port,
+              memOverSerialTLClockBundle,
+              th.buildtopReset)
 // DOC include end: HarnessClockInstantiatorEx
-          val success = SimTSI.connect(Some(harnessMultiClockAXIRAM.module.io.tsi), th.buildtopClock, th.buildtopReset.asBool)
-          when (success) { th.success := true.B }
+            val success = SimTSI.connect(Some(harnessMultiClockAXIRAM.module.io.tsi), th.buildtopClock, th.buildtopReset.asBool)
+            when (success) { th.success := true.B }
 
-          // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
-          (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi_port, edge) =>
-            val memSize = sVal.memParams.size
-            val memBase = sVal.memParams.base
-            val lineSize = p(CacheBlockBytes)
-            val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), memBase, edge.bundle)).suggestName("simdram")
-            mem.io.axi <> axi_port.bits
-            mem.io.clock := axi_port.clock
-            mem.io.reset := axi_port.reset
+            // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
+            (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi_port, edge) =>
+              val memSize = sVal.memParams.size
+              val memBase = sVal.memParams.base
+              val lineSize = p(CacheBlockBytes)
+              val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), memBase, edge.bundle)).suggestName("simdram")
+              mem.io.axi <> axi_port.bits
+              mem.io.clock := axi_port.clock
+              mem.io.reset := axi_port.reset
+            }
           }
         }
-      })
+      }}
     })
   }
 })
@@ -300,51 +301,52 @@ class WithTiedOffDebug extends OverrideHarnessBinder({
 
 
 class WithSerialTLTiedOff extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
-    ports.map({ port =>
-      val bits = port.bits
-      port.clock := false.B.asClock
-      port.bits.out.ready := false.B
-      port.bits.in.valid := false.B
-      port.bits.in.bits := DontCare
-    })
+    ports.map { _ match {
+      case clock: Clock => clock := false.B.asClock
+      case port: SerialIO => {
+        port.out.ready := false.B
+        port.in.valid := false.B
+        port.in.bits := DontCare
+      }
+    }}
   }
 })
 
 class WithSimTSIOverSerialTL extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
-    ports.map({ port =>
-      val bits = port.bits
-      port.clock := th.buildtopClock
-      withClockAndReset(th.buildtopClock, th.buildtopReset) {
-        val ram = TSIHarness.connectRAM(system.serdesser.get, bits, th.buildtopReset)
+    ports.map { _ match {
+      case clock: Clock => clock := th.buildtopClock
+      case port: SerialIO => withClockAndReset(th.buildtopClock, th.buildtopReset) {
+        val ram = TSIHarness.connectRAM(system.serdesser.get, port, th.buildtopReset)
         val success = SimTSI.connect(Some(ram.module.io.tsi), th.buildtopClock, th.buildtopReset.asBool)
         when (success) { th.success := true.B }
       }
-    })
+    }}
   }
 })
 
 class WithUARTSerial extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[Data]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
-    ports.map({ port =>
-      val freq = p(PeripheryBusKey).dtsFrequency.get
-      val bits = port.bits
-      port.clock := th.buildtopClock
-      withClockAndReset(th.buildtopClock, th.buildtopReset) {
-        val ram = TSIHarness.connectRAM(system.serdesser.get, bits, th.buildtopReset)
-        val uart_to_serial = Module(new UARTToSerial(freq, UARTParams(0)))
-        val serial_width_adapter = Module(new SerialWidthAdapter(
-          8, TSI.WIDTH))
-        ram.module.io.tsi.flipConnect(serial_width_adapter.io.wide)
-        UARTAdapter.connect(Seq(uart_to_serial.io.uart), uart_to_serial.div)
-        serial_width_adapter.io.narrow.flipConnect(uart_to_serial.io.serial)
-        th.success := false.B
+    ports.map { _ match {
+      case clock: Clock => clock := th.buildtopClock
+      case port: SerialIO => {
+        val freq = p(PeripheryBusKey).dtsFrequency.get
+        withClockAndReset(th.buildtopClock, th.buildtopReset) {
+          val ram = TSIHarness.connectRAM(system.serdesser.get, port, th.buildtopReset)
+          val uart_to_serial = Module(new UARTToSerial(freq, UARTParams(0)))
+          val serial_width_adapter = Module(new SerialWidthAdapter(
+            8, TSI.WIDTH))
+          ram.module.io.tsi.flipConnect(serial_width_adapter.io.wide)
+          UARTAdapter.connect(Seq(uart_to_serial.io.uart), uart_to_serial.div)
+          serial_width_adapter.io.narrow.flipConnect(uart_to_serial.io.serial)
+          th.success := false.B
+        }
       }
-    })
+    }}
   }
 })
 
