@@ -110,7 +110,7 @@ case $1 in
         make run-binary-fast -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/multiply.riscv
         ;;
     chipyard-ibex)
-        run_bmark ${mapping[$1]} #TODO: Find 32-bit test
+        make run-binary-fast -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv32ui-p-simple
         ;;
     chipyard-sodor)
         run_asm ${mapping[$1]}
