@@ -300,7 +300,7 @@ class WithSerialTLIOCells extends OverrideIOBinder({
     val sys = system.asInstanceOf[BaseSubsystem]
 
     val (ports, cells) = Seq(
-      (system.serial_tl_data, "serial_tl_data"),
+      (system.serial_tl, "serial_tl"),
       (system.serial_tl_clock_in, "serial_tl_clock_in"),
       (system.serial_tl_clock_out, "serial_tl_clock_out")
     ).map { case (sig, name) => sig.map { s =>

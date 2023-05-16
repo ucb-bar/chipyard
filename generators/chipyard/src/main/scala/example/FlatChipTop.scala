@@ -97,7 +97,7 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule {
     //=========================
     // Serialized TileLink
     //=========================
-    val (serial_tl_data_pad, serialTLIOCells) = IOCell.generateIOFromSignal(system.serial_tl_data.get.getWrappedValue, "serial_tl_data", p(IOCellKey))
+    val (serial_tl_pad, serialTLIOCells) = IOCell.generateIOFromSignal(system.serial_tl.get.getWrappedValue, "serial_tl", p(IOCellKey))
     val (serial_tl_clock_in_pad, serialTLCLockIOCells) = IOCell.generateIOFromSignal(system.serial_tl_clock_in.get.getWrappedValue, "serial_tl_clock_in", p(IOCellKey))
 
     //=========================

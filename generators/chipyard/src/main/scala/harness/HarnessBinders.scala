@@ -310,6 +310,11 @@ class WithSerialTLTiedOff extends OverrideHarnessBinder({
         port.in.valid := false.B
         port.in.bits := DontCare
       }
+      case port: BidirCreditedIO => {
+        port.out.credit := false.B
+        port.in.debit := false.B
+        port.in.bits := DontCare
+      }
     }}
   }
 })
@@ -320,6 +325,11 @@ class WithSimTSIOverSerialTL extends OverrideHarnessBinder({
     ports.map { _ match {
       case clock: Clock => clock := th.buildtopClock
       case port: SerialIO => withClockAndReset(th.buildtopClock, th.buildtopReset) {
+        val ram = TSIHarness.connectRAM(system.serdesser.get, port, th.buildtopReset)
+        val success = SimTSI.connect(Some(ram.module.io.tsi), th.buildtopClock, th.buildtopReset.asBool)
+        when (success) { th.success := true.B }
+      }
+      case port: BidirCreditedIO => withClockAndReset(th.buildtopClock, th.buildtopReset) {
         val ram = TSIHarness.connectRAM(system.serdesser.get, port, th.buildtopReset)
         val success = SimTSI.connect(Some(ram.module.io.tsi), th.buildtopClock, th.buildtopReset.asBool)
         when (success) { th.success := true.B }

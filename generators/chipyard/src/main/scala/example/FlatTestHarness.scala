@@ -11,7 +11,7 @@ import freechips.rocketchip.util.{PlusArg}
 import freechips.rocketchip.subsystem.{CacheBlockBytes}
 import freechips.rocketchip.devices.debug.{SimJTAG}
 import freechips.rocketchip.jtag.{JTAGIO}
-import testchipip.{SerialTLKey, UARTAdapter, SimDRAM, TSIHarness, SimTSI}
+import testchipip.{SerialTLKey, UARTAdapter, SimDRAM, TSIHarness, SimTSI, SerialIO}
 import chipyard.harness.{BuildTop}
 
 // A "flat" TestHarness that doesn't use IOBinders
@@ -49,7 +49,7 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
     val memOverSerialTLClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
     memOverSerialTLClockBundle.clock := clock
     memOverSerialTLClockBundle.reset := reset
-    val serial_bits = dut.serial_tl_data_pad
+    val serial_bits = dut.serial_tl_pad.asInstanceOf[SerialIO]
     dut.serial_tl_clock_in_pad := clock
     val harnessMultiClockAXIRAM = TSIHarness.connectMultiClockAXIRAM(
       lazyDut.system.serdesser.get,
