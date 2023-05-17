@@ -290,23 +290,20 @@ verilog: $(sim_common_files)
 # helper rules to run simulations
 #########################################################################################
 .PHONY: run-binary run-binary-fast run-binary-debug run-fast
-
-
+	%.check-exists check-binary check-binaries
 
 check-binary:
 ifeq (,$(BINARY))
 	$(error BINARY variable is not set. Set it to the simulation binary)
-endif
-ifneq (none,$(BINARY))
-ifeq ("$(wildcard $(BINARY))","")
-	$(error BINARY=$(BINARY) not found)
-endif
 endif
 
 check-binaries:
 ifeq (,$(BINARIES))
 	$(error BINARIES variable is not set. Set it to the list of simulation binaries to run)
 endif
+
+%.check-exists:
+	if [ "$*" != "none" ] && [ ! -f "$*" ]; then printf "\n\nBinary $* not found\n\n"; exit 1; fi
 
 # allow you to override sim prereq
 ifeq (,$(BREAK_SIM_PREREQ))
@@ -332,23 +329,23 @@ get_sim_out_name = $(output_dir)/$(call get_out_name,$(1))
 run-binary: $(BINARY).run check-binary
 run-binaries: $(addsuffix .run,$(BINARIES)) check-binaries
 
-%.run: $(SIM_PREREQ) | $(output_dir)
+%.run: %.check-exists $(SIM_PREREQ) | $(output_dir)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(call get_loadmem_flag,$*) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $* </dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
 
 # run simulator as fast as possible (no insn disassembly)
 run-binary-fast: $(BINARY).run.fast check-binary
 run-binaries-fast: $(addsuffix .run.fast,$(BINARIES)) check-binaries
 
-%.run.fast: $(SIM_PREREQ) | $(output_dir)
+%.run.fast: %.check-exists $(SIM_PREREQ) | $(output_dir)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(call get_loadmem_flag,$*) $(SEED_FLAG) $(PERMISSIVE_OFF) $* </dev/null | tee $(call get_sim_out_name,$*).log)
 
 # run simulator with as much debug info as possible
 run-binary-debug: $(BINARY).run.debug check-binary
 run-binaries-debug: $(addsuffix .run.debug,$(BINARIES)) check-binaries
 
-%.run.debug: $(SIM_DEBUG_PREREQ) | $(output_dir)
+%.run.debug: %.check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
 ifneq (none,$*)
-	riscv64-unknown-elf-objdump -D $* > $(call get)sim_out_name,$*).dump
+	riscv64-unknown-elf-objdump -D $* > $(call get_sim_out_name,$*).dump
 endif
 	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(call get_loadmem_flag,$*) $(SEED_FLAG) $(VERBOSE_FLAGS) $(call get_waveform_flag,$(call get_sim_out_name,$*)) $(PERMISSIVE_OFF) $* </dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
 
