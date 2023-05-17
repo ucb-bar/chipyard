@@ -63,7 +63,8 @@ extern "C" void cospike_set_sysinfo(char* isa, int pmpregions,
                                     ) {
   if (!info) {
     info = new system_info_t;
-    info->isa = std::string(isa);
+    // technically the targets aren't zicntr compliant, but they implement the zicntr registers
+    info->isa = std::string(isa) + "_zicntr";
     info->pmpregions = pmpregions;
     info->mem0_base = mem0_base;
     info->mem0_size = mem0_size;
