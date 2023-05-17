@@ -266,12 +266,15 @@ extern "C" void cospike_cosim(long long int cycle,
 #endif
   uint64_t s_pc = s->pc;
   uint64_t interrupt_cause = cause & 0x7FFFFFFFFFFFFFFF;
+  bool ssip_interrupt = interrupt_cause == 0x1;
   bool msip_interrupt = interrupt_cause == 0x3;
   bool debug_interrupt = interrupt_cause == 0xe;
   if (raise_interrupt) {
     printf("%d interrupt %lx\n", cycle, cause);
 
-    if (msip_interrupt) {
+    if (ssip_interrupt) {
+      // do nothing
+    } else if (msip_interrupt) {
       s->mip->backdoor_write_with_mask(MIP_MSIP, MIP_MSIP);
     } else if (debug_interrupt) {
       return;
