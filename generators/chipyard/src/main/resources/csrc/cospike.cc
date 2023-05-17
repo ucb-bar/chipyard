@@ -63,7 +63,8 @@ extern "C" void cospike_set_sysinfo(char* isa, int pmpregions,
                                     ) {
   if (!info) {
     info = new system_info_t;
-    info->isa = std::string(isa);
+    // technically the targets aren't zicntr compliant, but they implement the zicntr registers
+    info->isa = std::string(isa) + "_zicntr";
     info->pmpregions = pmpregions;
     info->mem0_base = mem0_base;
     info->mem0_size = mem0_size;
@@ -266,12 +267,15 @@ extern "C" void cospike_cosim(long long int cycle,
 #endif
   uint64_t s_pc = s->pc;
   uint64_t interrupt_cause = cause & 0x7FFFFFFFFFFFFFFF;
+  bool ssip_interrupt = interrupt_cause == 0x1;
   bool msip_interrupt = interrupt_cause == 0x3;
   bool debug_interrupt = interrupt_cause == 0xe;
   if (raise_interrupt) {
     printf("%d interrupt %lx\n", cycle, cause);
 
-    if (msip_interrupt) {
+    if (ssip_interrupt) {
+      // do nothing
+    } else if (msip_interrupt) {
       s->mip->backdoor_write_with_mask(MIP_MSIP, MIP_MSIP);
     } else if (debug_interrupt) {
       return;
@@ -284,9 +288,9 @@ extern "C" void cospike_cosim(long long int cycle,
     printf("%d exception %lx\n", cycle, cause);
   if (valid) {
     printf("%d Cosim: %lx", cycle, iaddr);
-    if (has_wdata) {
-      printf(" s: %lx", wdata);
-    }
+    // if (has_wdata) {
+    //   printf(" s: %lx", wdata);
+    // }
     printf("\n");
   }
   if (valid || raise_interrupt || raise_exception) {
@@ -299,7 +303,7 @@ extern "C" void cospike_cosim(long long int cycle,
     }
   }
 
-  if (valid) {
+  if (valid && !raise_exception) {
     if (s_pc != iaddr) {
       printf("%d PC mismatch spike %llx != DUT %llx\n", cycle, s_pc, iaddr);
       if (unlikely(cospike_debug)) {
@@ -373,12 +377,13 @@ extern "C" void cospike_cosim(long long int cycle,
         bool csr_read = (insn & 0x7f) == 0x73;
         if (csr_read)
           printf("CSR read %lx\n", csr_addr);
-        if (csr_read && ((csr_addr == 0xf13) ||                   // mimpid
-                         (csr_addr == 0xf12) ||                   // marchid
-                         (csr_addr == 0xf11) ||                   // mvendorid
-                         (csr_addr == 0xb00) ||                   // mcycle
-                         (csr_addr == 0xb02) ||                   // minstret
-                         (csr_addr >= 0x3b0 && csr_addr <= 0x3ef) // pmpaddr
+        if (csr_read && ((csr_addr == 0xf13) ||                      // mimpid
+                         (csr_addr == 0xf12) ||                      // marchid
+                         (csr_addr == 0xf11) ||                      // mvendorid
+                         (csr_addr == 0xb00) ||                      // mcycle
+                         (csr_addr == 0xb02) ||                      // minstret
+                         (csr_addr >= 0x7a0 && csr_addr <= 0x7aa) || // debug trigger registers
+                         (csr_addr >= 0x3b0 && csr_addr <= 0x3ef)    // pmpaddr
                          )) {
           printf("CSR override\n");
           s->XPR.write(rd, wdata);

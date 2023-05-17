@@ -292,6 +292,11 @@ check-binary:
 ifeq (,$(BINARY))
 	$(error BINARY variable is not set. Set it to the simulation binary)
 endif
+ifneq (none,$(BINARY))
+ifeq ("$(wildcard $(BINARY))","")
+	$(error BINARY=$(BINARY) not found)
+endif
+endif
 
 # allow you to override sim prereq
 ifeq (,$(BREAK_SIM_PREREQ))
@@ -309,6 +314,9 @@ run-binary-fast: $(SIM_PREREQ) check-binary | $(output_dir)
 
 # run simulator with as much debug info as possible
 run-binary-debug: $(SIM_DEBUG_PREREQ) check-binary | $(output_dir)
+ifneq (none,$(BINARY))
+	riscv64-unknown-elf-objdump -D $(BINARY) > $(sim_out_name).dump
+endif
 	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
