@@ -244,28 +244,20 @@ output_dir=$(sim_dir)/output/$(long_name)
 PERMISSIVE_ON=+permissive
 PERMISSIVE_OFF=+permissive-off
 BINARY ?=
+BINARIES ?=
 override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(timeout_cycles)
 VERBOSE_FLAGS ?= +verbose
-OUT_NAME ?= $(subst $() $(),_,$(notdir $(basename $(BINARY))))
+# get_out_name is a function, 1st argument is the binary
+get_out_name = $(subst $() $(),_,$(notdir $(basename $(1))))
 LOADMEM ?=
 LOADARCH ?=
 
 ifneq ($(LOADARCH),)
 override BINARY = $(LOADARCH)/mem.elf
-override OUT_NAME = $(shell basename $(LOADARCH))
+override get_out_name = $(shell basename $(LOADARCH))
 override LOADMEM = 1
 override SIM_FLAGS += +loadarch=$(LOADARCH)/loadarch
 endif
-
-ifeq ($(LOADMEM),1)
-# If LOADMEM=1, assume BINARY is the loadmem elf
-override SIM_FLAGS += +loadmem=$(BINARY)
-else ifneq ($(LOADMEM),)
-# Otherwise, assume the variable points to an elf file
-override SIM_FLAGS += +loadmem=$(LOADMEM)
-endif
-
-sim_out_name = $(output_dir)/$(OUT_NAME)
 
 #########################################################################################
 # build output directory for compilation

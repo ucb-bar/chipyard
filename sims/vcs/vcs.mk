@@ -5,9 +5,9 @@ HELP_SIMULATION_VARIABLES += \
 "   USE_VPD                = set to '1' to run VCS simulator emitting VPD instead of FSDB."
 
 ifndef USE_VPD
-WAVEFORM_FLAG=+fsdbfile=$(sim_out_name).fsdb
+get_waveform_flag=+fsdbfile=$(1).fsdb
 else
-WAVEFORM_FLAG=+vcdplusfile=$(sim_out_name).vpd
+get_waveform_flag=+vcdplusfile=$(1).vpd
 endif
 
 # If ntb_random_seed unspecified, vcs uses 1 as constant seed.
