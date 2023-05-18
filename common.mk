@@ -114,9 +114,9 @@ $(BTL_CLASSPATH_TARGETS) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS)
 # verilog generation pipeline
 #########################################################################################
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-$(FIRRTL_FILE) $(ANNO_FILE) &: $(GEN_CLASSPATH_TARGETS) $(EXTRA_GENERATOR_REQS)
+$(FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(GEN_CLASSPATH_TARGETS) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
-	$(call run_jar_scala_main,$(GEN_CLASSPATH),$(GENERATOR_PACKAGE).Generator,\
+	(set -o pipefail && $(call run_jar_scala_main,$(GEN_CLASSPATH),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
 		--name $(long_name) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
@@ -200,7 +200,8 @@ endif
 	if [ $(SFC_LEVEL) = low ]; then jq -s '[.[][]]' $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE); fi
 	if [ $(SFC_LEVEL) = none ]; then cat $(EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE); fi
 
-$(SFC_MFC_TARGETS) &: $(BTL_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS)
+$(SFC_MFC_TARGETS) &: private TMP_DIR := $(shell mktemp -d -t cy-XXXXXXXX)
+$(SFC_MFC_TARGETS) &: $(BTL_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
 	$(call run_jar_scala_main,$(BTL_CLASSPATH),barstools.tapeout.transforms.GenerateModelStageMain,\
 		--no-dedup \
