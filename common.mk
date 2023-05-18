@@ -48,7 +48,7 @@ HELP_COMMANDS += \
 "   firrtl                      = generate intermediate firrtl files from chisel elaboration" \
 "   run-tests                   = run all assembly and benchmark tests" \
 "   launch-sbt                  = start sbt terminal" \
-
+"   find-config-fragments       = list all config. fragments"
 
 #########################################################################################
 # include additional subproject make fragments
@@ -239,32 +239,28 @@ $(SFC_MFC_TARGETS) &: $(BTL_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 # DOC include end: FirrtlCompiler
 
-$(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) &: $(MFC_MODEL_HRCHY_JSON) $(MFC_FILELIST) $(MFC_BB_MODS_FILELIST)
-	$(base_dir)/scripts/split-module-files.py \
+$(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) &: $(MFC_MODEL_HRCHY_JSON) $(MFC_TOP_HRCHY_JSON) $(MFC_FILELIST) $(MFC_BB_MODS_FILELIST)
+	$(base_dir)/scripts/uniquify-module-names.py \
 		--model-hier-json $(MFC_MODEL_HRCHY_JSON) \
+		--top-hier-json $(MFC_TOP_HRCHY_JSON) \
+		--in-all-filelist $(MFC_FILELIST) \
 		--dut $(TOP) \
+		--model $(MODEL) \
+		--target-dir $(GEN_COLLATERAL_DIR) \
 		--out-dut-filelist $(TOP_MODS_FILELIST) \
 		--out-model-filelist $(MODEL_MODS_FILELIST) \
-		--in-all-filelist $(MFC_FILELIST) \
-		--target-dir $(GEN_COLLATERAL_DIR)
+		--out-model-hier-json $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) \
+		--gcpath $(GEN_COLLATERAL_DIR)
 	$(SED) -e 's;^;$(GEN_COLLATERAL_DIR)/;' $(MFC_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(TOP_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(MODEL_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
 	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
 
-$(TOP_BB_MODS_FILELIST) $(MODEL_BB_MODS_FILELIST) &: $(BB_MODS_FILELIST) $(MFC_TOP_HRCHY_JSON) $(FINAL_ANNO_FILE)
-	$(base_dir)/scripts/split-bb-files.py \
-		--in-bb-f $(BB_MODS_FILELIST) \
-		--in-top-hrchy-json $(MFC_TOP_HRCHY_JSON) \
-		--in-anno-json $(FINAL_ANNO_FILE) \
-		--out-top-bb-f $(TOP_BB_MODS_FILELIST) \
-		--out-model-bb-f $(MODEL_BB_MODS_FILELIST)
-
-$(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JSON)
+$(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED)
 	$(base_dir)/scripts/split-mems-conf.py \
 		--in-smems-conf $(MFC_SMEMS_CONF) \
-		--in-model-hrchy-json $(MFC_MODEL_HRCHY_JSON) \
+		--in-model-hrchy-json $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) \
 		--dut-module-name $(TOP) \
 		--model-module-name $(MODEL) \
 		--out-dut-smems-conf $(TOP_SMEMS_CONF) \
@@ -284,7 +280,7 @@ $(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(BTL_CLASSPATH_TARGETS) $(MODEL_SMEMS
 # note: {MODEL,TOP}_BB_MODS_FILELIST is added as a req. so that the files get generated,
 #       however it is really unneeded since ALL_MODS_FILELIST includes all BB files
 ########################################################################################
-$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE) $(TOP_BB_MODS_FILELIST) $(MODEL_BB_MODS_FILELIST)
+$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE) $(BB_MODS_FILELIST)
 	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' > $@
 	echo "$(TOP_SMEMS_FILE)" >> $@
 	echo "$(MODEL_SMEMS_FILE)" >> $@
@@ -304,6 +300,11 @@ check-binary:
 ifeq (,$(BINARY))
 	$(error BINARY variable is not set. Set it to the simulation binary)
 endif
+ifneq (none,$(BINARY))
+ifeq ("$(wildcard $(BINARY))","")
+	$(error BINARY=$(BINARY) not found)
+endif
+endif
 
 # allow you to override sim prereq
 ifeq (,$(BREAK_SIM_PREREQ))
@@ -321,34 +322,23 @@ run-binary-fast: $(SIM_PREREQ) check-binary | $(output_dir)
 
 # run simulator with as much debug info as possible
 run-binary-debug: $(SIM_DEBUG_PREREQ) check-binary | $(output_dir)
+ifneq (none,$(BINARY))
+	riscv64-unknown-elf-objdump -D $(BINARY) > $(sim_out_name).dump
+endif
 	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
 #########################################################################################
-# helper rules to run simulator with fast loadmem via hex files
+# helper rules to run simulator with fast loadmem
+# LEGACY - use LOADMEM=1 instead
 #########################################################################################
-$(binary_hex): $(firstword $(BINARY)) | $(output_dir)
-	$(base_dir)/scripts/smartelf2hex.sh $(firstword $(BINARY)) > $(binary_hex)
-
-run-binary-hex: check-binary
-run-binary-hex: $(SIM_PREREQ) $(binary_hex) | $(output_dir)
 run-binary-hex: run-binary
-run-binary-hex: override LOADMEM_ADDR = 80000000
-run-binary-hex: override LOADMEM = $(binary_hex)
-run-binary-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
-run-binary-debug-hex: check-binary
-run-binary-debug-hex: $(SIM_DEBUG_REREQ) $(binary_hex) | $(output_dir)
+run-binary-hex: override SIM_FLAGS += +loadmem=$(BINARY)
 run-binary-debug-hex: run-binary-debug
-run-binary-debug-hex: override LOADMEM_ADDR = 80000000
-run-binary-debug-hex: override LOADMEM = $(binary_hex)
-run-binary-debug-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
-run-binary-fast-hex: check-binary
-run-binary-fast-hex: $(SIM_PREREQ) $(binary_hex) | $(output_dir)
+run-binary-debug-hex: override SIM_FLAGS += +loadmem=$(BINARY)
 run-binary-fast-hex: run-binary-fast
-run-binary-fast-hex: override LOADMEM_ADDR = 80000000
-run-binary-fast-hex: override LOADMEM = $(binary_hex)
-run-binary-fast-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
+run-binary-fast-hex: override SIM_FLAGS += +loadmem=$(BINARY)
 
 #########################################################################################
 # run assembly/benchmarks rules
@@ -398,13 +388,9 @@ define \n
 
 endef
 
-CONFIG_FRAG_LEVELS ?= 3
 .PHONY: find-config-fragments
-find-config-fragments: private IN_F := $(shell mktemp -d -t cy-XXXXXXXX)/scala_files.f
-find-config-fragments: $(SCALA_SOURCES)
-	@$(foreach file,$(SCALA_SOURCES),echo $(file) >> $(IN_F)${\n})
-	$(base_dir)/scripts/config-finder.py -l $(CONFIG_FRAG_LEVELS) $(IN_F)
-	@rm -rf $(dir $(IN_F))
+find-config-fragments:
+	$(call run_scala_main,chipyard,chipyard.ConfigFinder,)
 
 .PHONY: help
 help:

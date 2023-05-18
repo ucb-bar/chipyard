@@ -4,7 +4,7 @@ import scala.util.matching.Regex
 import chisel3._
 import chisel3.util.{log2Up}
 
-import freechips.rocketchip.config.{Field, Parameters, Config}
+import org.chipsalliance.cde.config.{Field, Parameters, Config}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.prci._
 import freechips.rocketchip.diplomacy._
@@ -13,7 +13,7 @@ import freechips.rocketchip.tilelink.{HasTLBusParams}
 
 import chipyard._
 import chipyard.clocking._
-
+import chipyard.harness.{DefaultClockFrequencyKey}
 
 // The default RocketChip BaseSubsystem drives its diplomatic clock graph
 // with the implicit clocks of Subsystem. Don't do that, instead we extend

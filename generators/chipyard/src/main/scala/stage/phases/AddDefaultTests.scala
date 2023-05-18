@@ -6,7 +6,7 @@ package chipyard.stage.phases
 import scala.util.Try
 import scala.collection.mutable
 
-import chipsalliance.rocketchip.config.Parameters
+import org.chipsalliance.cde.config.Parameters
 import chisel3.stage.phases.Elaborate
 import firrtl.AnnotationSeq
 import firrtl.annotations.{Annotation, NoTargetAnnotation}

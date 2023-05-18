@@ -2,24 +2,24 @@ Accessing Scala Resources
 ===============================
 
 A simple way to copy over a source file to the build directory to be used for a simulation compile or VLSI flow is to use the ``addResource`` function given by FIRRTL.
-An example of its use can be seen in `generators/testchipip/src/main/scala/SerialAdapter.scala <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/SerialAdapter.scala>`_.
+An example of its use can be seen in `generators/testchipip/src/main/scala/SimTSI.scala <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/SimTSI.scala>`_.
 Here is the example inlined:
 
 .. code-block:: scala
 
-    class SimSerial(w: Int) extends BlackBox with HasBlackBoxResource {
+    class SimTSI extends BlackBox with HasBlackBoxResource {
       val io = IO(new Bundle {
         val clock = Input(Clock())
         val reset = Input(Bool())
-        val serial = Flipped(new SerialIO(w))
+        val tsi = Flipped(new TSIIO)
         val exit = Output(Bool())
       })
 
-      addResource("/testchipip/vsrc/SimSerial.v")
-      addResource("/testchipip/csrc/SimSerial.cc")
+      addResource("/testchipip/vsrc/SimTSI.v")
+      addResource("/testchipip/csrc/SimTSI.cc")
     }
 
-In this example, the ``SimSerial`` files will be copied from a specific folder (in this case the ``path/to/testchipip/src/main/resources/testchipip/...``) to the build folder.
+In this example, the ``SimTSI`` files will be copied from a specific folder (in this case the ``path/to/testchipip/src/main/resources/testchipip/...``) to the build folder.
 The ``addResource`` path retrieves resources from the ``src/main/resources`` directory.
 So to get an item at ``src/main/resources/fileA.v`` you can use ``addResource("/fileA.v")``.
 However, one caveat of this approach is that to retrieve the file during the FIRRTL compile, you must have that project in the FIRRTL compiler's classpath.

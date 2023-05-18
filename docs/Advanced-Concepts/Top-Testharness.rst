@@ -18,6 +18,13 @@ The ``IOBinders`` are responsible for instantiating the IO cells for ``ChipTop``
 The ``HarnessBinders`` are responsible for instantiating test harness collateral that connects to the ``ChipTop`` ports.
 Most types of devices and testing collateral can be instantiated using custom ``IOBinders`` and ``HarnessBinders``.
 
+Custom ChipTops
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The default standard ``ChipTop`` provides a mimimal, barebones template for ``IOBinders`` to generate IOCells around ``DigitalTop`` traits.
+For tapeouts, integrating Analog IP, or other non-standard use cases, Chipyard supports specifying a custom ``ChipTop`` using the ``BuildTop`` key.
+An example of a custom ChipTop which uses non-standard IOCells is provided in `generators/chipyard/src/main/scala/example/CustomChipTop.scala <https://github.com/ucb-bar/chipyard/blob/main/generators/chipyard/src/main/scala/example/CustomChipTop.scala>`__
+
 
 System/DigitalTop
 -------------------------

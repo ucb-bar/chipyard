@@ -3,8 +3,9 @@ package chipyard.fpga.arty100t
 import chisel3._
 import chisel3.util._
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.config.{Parameters}
+import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink.{TLClientNode, TLBlockDuringReset}
+import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.shell._
@@ -13,8 +14,8 @@ import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 
 import sifive.blocks.devices.uart._
 
-import chipyard._
-import chipyard.harness.{ApplyHarnessBinders}
+import chipyard.{ChipTop, CanHaveMasterTLMemPort, ExtTLMem}
+import chipyard.harness._
 import chipyard.iobinders.{HasIOBinders}
 
 class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell with HasHarnessSignalReferences
@@ -87,6 +88,11 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
     chiptop match { case d: HasIOBinders =>
       ApplyHarnessBinders(this, d.lazySystem, d.portMap)
     }
+
+    val implicitHarnessClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
+    implicitHarnessClockBundle.clock := buildtopClock
+    implicitHarnessClockBundle.reset := buildtopReset
+    harnessClockInstantiator.instantiateHarnessClocks(implicitHarnessClockBundle)
   }
 
 }

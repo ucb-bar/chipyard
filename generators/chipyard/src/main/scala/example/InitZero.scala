@@ -3,7 +3,7 @@ package chipyard.example
 import chisel3._
 import chisel3.util._
 import freechips.rocketchip.subsystem.{BaseSubsystem, CacheBlockBytes}
-import freechips.rocketchip.config.{Parameters, Field, Config}
+import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, IdRange}
 import freechips.rocketchip.tilelink._
 

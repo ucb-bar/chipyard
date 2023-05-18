@@ -2,7 +2,6 @@ package chipyard.fpga.arty100t
 
 import chisel3._
 
-import freechips.rocketchip.devices.debug.{HasPeripheryDebug, HasPeripheryDebugModuleImp}
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem.{PeripheryBusKey}
 import freechips.rocketchip.tilelink.{TLBundle}
@@ -26,24 +25,25 @@ class WithArty100TUARTTSI(uartBaudRate: BigInt = 115200) extends OverrideHarness
     ports.map({ port =>
       val ath = th.asInstanceOf[Arty100THarness]
       val freq = p(PeripheryBusKey).dtsFrequency.get
-      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+      val bits = port.bits
+      port.clock := th.buildtopClock
       withClockAndReset(th.buildtopClock, th.buildtopReset) {
-        val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
+        val ram = TSIHarness.connectRAM(system.serdesser.get, bits, th.buildtopReset)
         val uart_to_serial = Module(new UARTToSerial(
           freq, UARTParams(0, initBaudRate=uartBaudRate)))
         val serial_width_adapter = Module(new SerialWidthAdapter(
-          narrowW = 8, wideW = SerialAdapter.SERIAL_TSI_WIDTH))
+          narrowW = 8, wideW = TSI.WIDTH))
         serial_width_adapter.io.narrow.flipConnect(uart_to_serial.io.serial)
 
-        ram.module.io.tsi_ser.flipConnect(serial_width_adapter.io.wide)
+        ram.module.io.tsi.flipConnect(serial_width_adapter.io.wide)
 
         ath.io_uart_bb.bundle <> uart_to_serial.io.uart
         ath.other_leds(1) := uart_to_serial.io.dropped
 
-        ath.other_leds(9) := ram.module.io.adapter_state(0)
-        ath.other_leds(10) := ram.module.io.adapter_state(1)
-        ath.other_leds(11) := ram.module.io.adapter_state(2)
-        ath.other_leds(12) := ram.module.io.adapter_state(3)
+        ath.other_leds(9) := ram.module.io.tsi2tl_state(0)
+        ath.other_leds(10) := ram.module.io.tsi2tl_state(1)
+        ath.other_leds(11) := ram.module.io.tsi2tl_state(2)
+        ath.other_leds(12) := ram.module.io.tsi2tl_state(3)
       }
     })
   }

@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <vector>
 #include <string>
 #include <riscv/sim.h>
@@ -5,6 +6,25 @@
 #include <svdpi.h>
 #include <sstream>
 #include <set>
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <fcntl.h>
+
+#if __has_include ("cospike_dtm.h")
+#define COSPIKE_DTM
+#include "testchip_dtm.h"
+extern testchip_dtm_t* dtm;
+bool spike_loadarch_done = false;
+#endif
+
+#if __has_include ("mm.h")
+#define COSPIKE_SIMDRAM
+#include "mm.h"
+extern std::map<long long int, backing_data_t> backing_mem_data;
+#endif
 
 #define CLINT_BASE (0x2000000)
 #define CLINT_SIZE (0x1000)
@@ -20,6 +40,7 @@ typedef struct system_info_t {
 
 system_info_t* info = NULL;
 sim_t* sim = NULL;
+bool cospike_debug;
 reg_t tohost_addr = 0;
 reg_t fromhost_addr = 0;
 std::set<reg_t> magic_addrs;
@@ -42,7 +63,8 @@ extern "C" void cospike_set_sysinfo(char* isa, int pmpregions,
                                     ) {
   if (!info) {
     info = new system_info_t;
-    info->isa = std::string(isa);
+    // technically the targets aren't zicntr compliant, but they implement the zicntr registers
+    info->isa = std::string(isa) + "_zicntr";
     info->pmpregions = pmpregions;
     info->mem0_base = mem0_base;
     info->mem0_size = mem0_size;
@@ -64,10 +86,11 @@ extern "C" void cospike_cosim(long long int cycle,
                               int raise_exception,
                               int raise_interrupt,
                               unsigned long long int cause,
-                              unsigned long long int wdata)
+                              unsigned long long int wdata,
+                              int priv)
 {
   assert(info);
-  if (!sim) {
+  if (unlikely(!sim)) {
     printf("Configuring spike cosim\n");
     std::vector<mem_cfg_t> mem_cfg;
     std::vector<size_t> hartids;
@@ -110,7 +133,7 @@ extern "C" void cospike_cosim(long long int cycle,
       abort();
     std::vector<std::string> htif_args;
     bool in_permissive = false;
-    bool cospike_debug = false;
+    cospike_debug = false;
     for (int i = 1; i < vinfo.argc; i++) {
       std::string arg(vinfo.argv[i]);
       if (arg == "+permissive") {
@@ -136,7 +159,7 @@ extern "C" void cospike_cosim(long long int cycle,
       .support_impebreak = true
     };
 
-    printf("%s\n", info->isa.c_str());
+    printf("isa string is %s\n", info->isa.c_str());
     for (int i = 0; i < htif_args.size(); i++) {
       printf("%s\n", htif_args[i].c_str());
     }
@@ -146,12 +169,28 @@ extern "C" void cospike_cosim(long long int cycle,
                     plugin_devices,
                     htif_args,
                     dm_config,
-                    nullptr,
+                    "cospike.log",
                     false,
                     nullptr,
                     false,
                     nullptr
                     );
+
+#ifdef COSPIKE_SIMDRAM
+    // match sim_t's backing memory with the SimDRAM memory
+    bus_t temp_mem_bus;
+    for (auto& pair : mems) temp_mem_bus.add_device(pair.first, pair.second);
+
+    for (auto& pair : backing_mem_data) {
+      size_t base = pair.first;
+      size_t size = pair.second.size;
+      printf("Matching spike memory initial state for region %lx-%lx\n", base, base + size);
+      if (!temp_mem_bus.store(base, size, pair.second.data)) {
+        printf("Error, unable to match memory at address %lx\n", base);
+        abort();
+      }
+    }
+#endif
 
     sim->configure_log(true, true);
     // Use our own reset vector
@@ -166,93 +205,207 @@ extern "C" void cospike_cosim(long long int cycle,
     fromhost_addr = ((htif_t*)sim)->get_fromhost_addr();
     printf("Tohost  : %lx\n", tohost_addr);
     printf("Fromhost: %lx\n", fromhost_addr);
+    printf("Memory base  : %lx\n", info->mem0_base);
+    printf("Memory Size  : %lx\n", info->mem0_size);
+  }
+
+  if (priv & 0x4) { // debug
+    return;
   }
 
   processor_t* p = sim->get_core(hartid);
   state_t* s = p->get_state();
+#ifdef COSPIKE_DTM
+  if (dtm && dtm->loadarch_done && !spike_loadarch_done) {
+    printf("Restoring spike state from testchip_dtm loadarch\n");
+    // copy the loadarch state into the cosim
+    loadarch_state_t &ls = dtm->loadarch_state[hartid];
+    s->pc  = ls.pc;
+    s->prv = ls.prv;
+    s->csrmap[CSR_MSTATUS]->write(s->csrmap[CSR_MSTATUS]->read() | MSTATUS_VS | MSTATUS_XS | MSTATUS_FS);
+#define RESTORE(CSRID, csr) s->csrmap[CSRID]->write(ls.csr);
+    RESTORE(CSR_FCSR     , fcsr);
+    RESTORE(CSR_VSTART   , vstart);
+    RESTORE(CSR_VXSAT    , vxsat);
+    RESTORE(CSR_VXRM     , vxrm);
+    RESTORE(CSR_VCSR     , vcsr);
+    RESTORE(CSR_VTYPE    , vtype);
+    RESTORE(CSR_STVEC    , stvec);
+    RESTORE(CSR_SSCRATCH , sscratch);
+    RESTORE(CSR_SEPC     , sepc);
+    RESTORE(CSR_SCAUSE   , scause);
+    RESTORE(CSR_STVAL    , stval);
+    RESTORE(CSR_SATP     , satp);
+    RESTORE(CSR_MSTATUS  , mstatus);
+    RESTORE(CSR_MEDELEG  , medeleg);
+    RESTORE(CSR_MIDELEG  , mideleg);
+    RESTORE(CSR_MIE      , mie);
+    RESTORE(CSR_MTVEC    , mtvec);
+    RESTORE(CSR_MSCRATCH , mscratch);
+    RESTORE(CSR_MEPC     , mepc);
+    RESTORE(CSR_MCAUSE   , mcause);
+    RESTORE(CSR_MTVAL    , mtval);
+    RESTORE(CSR_MIP      , mip);
+    RESTORE(CSR_MCYCLE   , mcycle);
+    RESTORE(CSR_MINSTRET , minstret);
+    if (ls.VLEN != p->VU.VLEN) {
+      printf("VLEN mismatch loadarch: $d != spike: $d\n", ls.VLEN, p->VU.VLEN);
+      abort();
+    }
+    if (ls.ELEN != p->VU.ELEN) {
+      printf("ELEN mismatch loadarch: $d != spike: $d\n", ls.ELEN, p->VU.ELEN);
+      abort();
+    }
+    for (size_t i = 0; i < 32; i++) {
+      s->XPR.write(i, ls.XPR[i]);
+      s->FPR.write(i, { (uint64_t)ls.FPR[i], (uint64_t)-1 });
+      memcpy(p->VU.reg_file + i * ls.VLEN / 8, ls.VPR[i], ls.VLEN / 8);
+    }
+    spike_loadarch_done = true;
+    p->clear_waiting_for_interrupt();
+  }
+#endif
   uint64_t s_pc = s->pc;
+  uint64_t interrupt_cause = cause & 0x7FFFFFFFFFFFFFFF;
+  bool ssip_interrupt = interrupt_cause == 0x1;
+  bool msip_interrupt = interrupt_cause == 0x3;
+  bool debug_interrupt = interrupt_cause == 0xe;
   if (raise_interrupt) {
     printf("%d interrupt %lx\n", cycle, cause);
-    uint64_t interrupt_cause = cause & 0x7FFFFFFFFFFFFFFF;
-    if (interrupt_cause == 3) {
+
+    if (ssip_interrupt) {
+      // do nothing
+    } else if (msip_interrupt) {
       s->mip->backdoor_write_with_mask(MIP_MSIP, MIP_MSIP);
+    } else if (debug_interrupt) {
+      return;
     } else {
       printf("Unknown interrupt %lx\n", interrupt_cause);
+      abort();
     }
   }
   if (raise_exception)
     printf("%d exception %lx\n", cycle, cause);
   if (valid) {
     printf("%d Cosim: %lx", cycle, iaddr);
-    if (has_wdata) {
-      printf(" %lx", wdata);
-    }
+    // if (has_wdata) {
+    //   printf(" s: %lx", wdata);
+    // }
     printf("\n");
   }
-  if (valid || raise_interrupt || raise_exception)
+  if (valid || raise_interrupt || raise_exception) {
     p->step(1);
+    if (unlikely(cospike_debug)) {
+      printf("spike pc is %lx\n", s->pc);
+      printf("spike mstatus is %lx\n", s->mstatus->read());
+      printf("spike mip is %lx\n", s->mip->read());
+      printf("spike mie is %lx\n", s->mie->read());
+    }
+  }
 
-  if (valid) {
+  if (valid && !raise_exception) {
     if (s_pc != iaddr) {
-      printf("%d PC mismatch %lx != %lx\n", cycle, s_pc, iaddr);
+      printf("%d PC mismatch spike %llx != DUT %llx\n", cycle, s_pc, iaddr);
+      if (unlikely(cospike_debug)) {
+        printf("spike mstatus is %lx\n", s->mstatus->read());
+        printf("spike mcause is %lx\n", s->mcause->read());
+        printf("spike mtval is %lx\n" , s->mtval->read());
+        printf("spike mtinst is %lx\n", s->mtinst->read());
+      }
       exit(1);
     }
 
-    // Try to remember magic_mem addrs, and ignore these in the future
+
     auto& mem_write = s->log_mem_write;
-    if (!mem_write.empty() && tohost_addr && std::get<0>(mem_write[0]) == tohost_addr) {
-      reg_t wdata = std::get<1>(mem_write[0]);
-      if (wdata >= info->mem0_base && wdata < (info->mem0_base + info->mem0_size)) {
-        printf("Probable magic mem %x\n", wdata);
-        magic_addrs.insert(wdata);
+    auto& log = s->log_reg_write;
+    auto& mem_read = s->log_mem_read;
+
+    for (auto memwrite : mem_write) {
+      reg_t waddr = std::get<0>(memwrite);
+      uint64_t w_data = std::get<1>(memwrite);
+      if ((waddr == CLINT_BASE + 4*hartid) && w_data == 0) {
+        s->mip->backdoor_write_with_mask(MIP_MSIP, 0);
+      }
+      // Try to remember magic_mem addrs, and ignore these in the future
+      if ( waddr == tohost_addr && w_data >= info->mem0_base && w_data < (info->mem0_base + info->mem0_size)) {
+        printf("Probable magic mem %lx\n", w_data);
+        magic_addrs.insert(w_data);
+      }
+      // Try to remember magic_mem addrs, and ignore these in the future
+      if ( waddr == tohost_addr && w_data >= info->mem0_base && w_data < (info->mem0_base + info->mem0_size)) {
+        printf("Probable magic mem %lx\n", w_data);
+        magic_addrs.insert(w_data);
       }
     }
 
-    if (has_wdata) {
-      auto& log = s->log_reg_write;
-      auto& mem_read = s->log_mem_read;
+    bool scalar_wb = false;
+    bool vector_wb = false;
+    uint32_t vector_cnt = 0;
+
+    for (auto &regwrite : log) {
+
+      //TODO: scaling to multi issue reads?
       reg_t mem_read_addr = mem_read.empty() ? 0 : std::get<0>(mem_read[0]);
-      for (auto regwrite : log) {
-        int rd = regwrite.first >> 4;
-        int type = regwrite.first & 0xf;
-        // 0 => int
-        // 1 => fp
-        // 2 => vec
-        // 3 => vec hint
-        // 4 => csr
-        if ((rd != 0 && type == 0) || type == 1) {
-          // Override reads from some CSRs
-          uint64_t csr_addr = (insn >> 20) & 0xfff;
-          bool csr_read = (insn & 0x7f) == 0x73;
-          if (csr_read) printf("CSR read %lx\n", csr_addr);
-          if (csr_read && (
-                           (csr_addr == 0x301) || // misa
-                           (csr_addr == 0xf13) || // mimpid
-                           (csr_addr == 0xf12) || // marchid
-                           (csr_addr == 0xf11) || // mvendorid
-                           (csr_addr == 0xb00) || // mcycle
-                           (csr_addr == 0xb02) || // minstret
-                           (csr_addr >= 0x3b0 && csr_addr <= 0x3ef) // pmpaddr
-                           )) {
-            printf("CSR override\n");
-            s->XPR.write(rd, wdata);
-          } else if (!mem_read.empty() && ((magic_addrs.count(mem_read_addr) ||
-					    (tohost_addr && mem_read_addr == tohost_addr) ||
-					    (fromhost_addr && mem_read_addr == fromhost_addr) ||
-					    (CLINT_BASE <= mem_read_addr && mem_read_addr < (CLINT_BASE + CLINT_SIZE))
-					    ))) {
-	    // Don't check reads from tohost, reads from magic memory, or reads from clint
-	    // Technically this could be buggy because log_mem_read only reports vaddrs, but
-	    // no software ever should access tohost/fromhost/clint with vaddrs anyways
-	    printf("Read override %lx\n", mem_read_addr);
-	    s->XPR.write(rd, wdata);
-          } else if (wdata != regwrite.second.v[0]) {
-	    printf("%d wdata mismatch reg %d %lx != %lx\n", cycle, rd, regwrite.second.v[0], wdata);
-	    exit(1);
-	  }
-	}
+
+      int rd = regwrite.first >> 4;
+      int type = regwrite.first & 0xf;
+
+      // 0 => int
+      // 1 => fp
+      // 2 => vec
+      // 3 => vec hint
+      // 4 => csr
+
+      bool ignore_read = (!mem_read.empty() &&
+                          ((magic_addrs.count(mem_read_addr) ||
+                           (tohost_addr && mem_read_addr == tohost_addr) ||
+                           (fromhost_addr && mem_read_addr == fromhost_addr) ||
+                           (CLINT_BASE <= mem_read_addr && mem_read_addr < (CLINT_BASE + CLINT_SIZE)))));
+
+      // check the type is compliant with writeback first
+      if ((type == 0 || type == 1))
+        scalar_wb = true;
+      if (type == 2) {
+        vector_wb = true;
       }
+      if (type == 3) continue;
+
+
+      if ((rd != 0 && type == 0) || type == 1) {
+        // Override reads from some CSRs
+        uint64_t csr_addr = (insn >> 20) & 0xfff;
+        bool csr_read = (insn & 0x7f) == 0x73;
+        if (csr_read)
+          printf("CSR read %lx\n", csr_addr);
+        if (csr_read && ((csr_addr == 0xf13) ||                      // mimpid
+                         (csr_addr == 0xf12) ||                      // marchid
+                         (csr_addr == 0xf11) ||                      // mvendorid
+                         (csr_addr == 0xb00) ||                      // mcycle
+                         (csr_addr == 0xb02) ||                      // minstret
+                         (csr_addr >= 0x7a0 && csr_addr <= 0x7aa) || // debug trigger registers
+                         (csr_addr >= 0x3b0 && csr_addr <= 0x3ef)    // pmpaddr
+                         )) {
+          printf("CSR override\n");
+          s->XPR.write(rd, wdata);
+        } else if (ignore_read)  {
+          // Don't check reads from tohost, reads from magic memory, or reads
+          // from clint Technically this could be buggy because log_mem_read
+          // only reports vaddrs, but no software ever should access
+          // tohost/fromhost/clint with vaddrs anyways
+          printf("Read override %lx\n", mem_read_addr);
+          s->XPR.write(rd, wdata);
+        } else if (wdata != regwrite.second.v[0]) {
+          printf("%d wdata mismatch reg %d %lx != %lx\n", cycle, rd,
+                 regwrite.second.v[0], wdata);
+          exit(1);
+        }
+      }
+
+      // TODO FIX: Rocketchip TracedInstruction.wdata should be Valid(UInt)
+      // if (scalar_wb ^ has_wdata) {
+      //   printf("Scalar wdata behavior divergence between spike and DUT\n");
+      //   exit(-1);
+      // }
     }
   }
 }
-// }

@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util._
 import chisel3.experimental.{Analog, IO}
 
-import freechips.rocketchip.config._
+import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.prci._
@@ -19,7 +19,7 @@ import freechips.rocketchip.subsystem._
   * flag will generate the registers, preserving the same memory map and behavior, but will not
   * generate any gaters
   */
-class TileClockGater(address: BigInt, beatBytes: Int, enable: Boolean)(implicit p: Parameters, valName: ValName) extends LazyModule
+class TileClockGater(address: BigInt, beatBytes: Int)(implicit p: Parameters, valName: ValName) extends LazyModule
 {
   val device = new SimpleDevice(s"clock-gater", Nil)
   val clockNode = ClockGroupIdentityNode()
@@ -31,8 +31,8 @@ class TileClockGater(address: BigInt, beatBytes: Int, enable: Boolean)(implicit 
     val regs = (0 until nSinks).map({i =>
       val sinkName = sinks(i)._1
       val reg = withReset(sources(i).reset) { Module(new AsyncResetRegVec(w=1, init=1)) }
-      if (sinkName.contains("tile") && enable) {
-        println(s"ClockGate for ${sinkName} regmapped at ${(address+i*4).toString(16)}")
+      if (sinkName.contains("tile")) {
+        println(s"${(address+i*4).toString(16)}: Tile $sinkName clock gate")
         sinks(i)._2.clock := ClockGate(sources(i).clock,  reg.io.q.asBool)
         sinks(i)._2.reset := sources(i).reset
       } else {
@@ -47,8 +47,8 @@ class TileClockGater(address: BigInt, beatBytes: Int, enable: Boolean)(implicit 
 }
 
 object TileClockGater {
-  def apply(address: BigInt, tlbus: TLBusWrapper, enable: Boolean)(implicit p: Parameters, v: ValName) = {
-    val gater = LazyModule(new TileClockGater(address, tlbus.beatBytes, enable))
+  def apply(address: BigInt, tlbus: TLBusWrapper)(implicit p: Parameters, v: ValName) = {
+    val gater = LazyModule(new TileClockGater(address, tlbus.beatBytes))
     tlbus.toVariableWidthSlave(Some("clock-gater")) { gater.tlNode := TLBuffer() }
     gater.clockNode
   }

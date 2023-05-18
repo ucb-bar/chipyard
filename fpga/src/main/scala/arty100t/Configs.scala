@@ -1,7 +1,7 @@
 // See LICENSE for license details.
 package chipyard.fpga.arty100t
 
-import freechips.rocketchip.config._
+import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.devices.tilelink._
@@ -22,6 +22,7 @@ class WithNoDesignKey extends Config((site, here, up) => {
 })
 
 class WithArty100TTweaks extends Config(
+  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new WithArty100TUARTTSI ++
   new WithArty100TDDRTL ++
   new WithNoDesignKey ++

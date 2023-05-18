@@ -72,7 +72,7 @@ VLSI_RTL = $(build_dir)/syn.f
 ifneq ($(CUSTOM_VLOG), )
 	RTL_DEPS = $(CUSTOM_VLOG)
 else
-	RTL_DEPS = $(TOP_MODS_FILELIST) $(TOP_BB_MODS_FILELIST) $(TOP_SMEMS_FILE)
+	RTL_DEPS = $(TOP_MODS_FILELIST) $(TOP_SMEMS_FILE)
 endif
 
 $(VLSI_RTL): $(RTL_DEPS)
@@ -80,7 +80,7 @@ ifneq ($(CUSTOM_VLOG), )
 	> $(VLSI_RTL)
 	$(foreach file,$^,echo $(file) >> $(VLSI_RTL))
 else
-	cat $(TOP_MODS_FILELIST) $(TOP_BB_MODS_FILELIST) | sort -u > $(VLSI_RTL)
+	cat $(TOP_MODS_FILELIST) | sort -u > $(VLSI_RTL)
 	echo $(TOP_SMEMS_FILE) >> $(VLSI_RTL)
 endif
 
@@ -134,7 +134,7 @@ $(SYN_CONF): $(VLSI_RTL)
 #########################################################################################
 # simulation and power input configuration
 #########################################################################################
-include $(base_dir)/vcs.mk
+include $(base_dir)/sims/vcs/vcs.mk
 
 SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v

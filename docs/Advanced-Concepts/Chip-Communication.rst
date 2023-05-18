@@ -47,12 +47,12 @@ Using the Tethered Serial Interface (TSI)
 By default, Chipyard uses the Tethered Serial Interface (TSI) to communicate with the DUT.
 TSI protocol is an implementation of HTIF that is used to send commands to the RISC-V DUT.
 These TSI commands are simple R/W commands that are able to access the DUT's memory space.
-During simulation, the host sends TSI commands to a simulation stub in the test harness called ``SimSerial``
-(C++ class) that resides in a ``SimSerial`` Verilog module (both are located in the ``generators/testchipip``
+During simulation, the host sends TSI commands to a simulation stub in the test harness called ``SimTSI``
+(C++ class) that resides in a ``SimTSI`` Verilog module (both are located in the ``generators/testchipip``
 project).
-This ``SimSerial`` Verilog module then sends the TSI command recieved by the simulation stub
+This ``SimTSI`` Verilog module then sends the TSI command recieved by the simulation stub
 to an adapter that converts the TSI command into a TileLink request.
-This conversion is done by the ``SerialAdapter`` module (located in the ``generators/testchipip`` project).
+This conversion is done by the ``TSIToTileLink`` module (located in the ``generators/testchipip`` project).
 After the transaction is converted to TileLink, the ``TLSerdesser`` (located in ``generators/testchipip``) serializes the
 transaction and sends it to the chip (this ``TLSerdesser`` is sometimes also referred to as a digital serial-link or SerDes).
 Once the serialized transaction is received on the chip, it is deserialized and masters a TileLink bus on the chip
@@ -76,7 +76,7 @@ simulation stub called ``SimDTM`` (C++ class) that resides in a ``SimDTM`` Veril
 sends the DMI command recieved by the simulation stub into the DUT which then converts the DMI
 command into a TileLink request. This conversion is done by the DTM named ``DebugModule`` in the ``generators/rocket-chip`` project.
 When the DTM receives the program to load, it starts to write the binary byte-wise into memory.
-This is considerably slower than the TSI protocol communication pipeline (i.e. ``SimSerial``/``SerialAdapter``/TileLink)
+This is considerably slower than the TSI protocol communication pipeline (i.e. ``SimTSI``/``TSIToTileLink``/TileLink)
 which directly writes the program binary to memory.
 
 Starting the TSI or DMI Simulation
@@ -206,13 +206,17 @@ This type of simulation setup is done in the following multi-clock configuration
     :start-after: DOC include start: MulticlockAXIOverSerialConfig
     :end-before: DOC include end: MulticlockAXIOverSerialConfig
 
-Bringup Setup of the Example Test Chip after Tapeout
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Softcore-driven Bringup Setup of the Example Test Chip after Tapeout
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. warning::
+   Bringing up test chips with a FPGA softcore  as described here is discouraged.
+   An alternative approach using the FPGA to "bridge" between a host computer and the test chip is the preferred approach.
 
 Assuming this example test chip is taped out and now ready to be tested, we can communicate with the chip using this serial-link.
 For example, a common test setup used at Berkeley to evaluate Chipyard-based test-chips includes an FPGA running a RISC-V soft-core that is able to speak to the DUT (over an FMC).
 This RISC-V soft-core would serve as the host of the test that will run on the DUT.
-This is done by the RISC-V soft-core running FESVR, sending TSI commands to a ``SerialAdapter`` / ``TLSerdesser`` programmed on the FPGA.
+This is done by the RISC-V soft-core running FESVR, sending TSI commands to a ``TSIToTileLink`` / ``TLSerdesser`` programmed on the FPGA.
 Once the commands are converted to serialized TileLink, then they can be sent over some medium to the DUT
 (like an FMC cable or a set of wires connecting FPGA outputs to the DUT board).
 Similar to simulation, if the chip requests offchip memory, it can then send the transaction back over the serial-link.
@@ -222,4 +226,4 @@ The following image shows this flow:
 .. image:: ../_static/images/chip-bringup.png
 
 In fact, this exact type of bringup setup is what the following section discusses:
-:ref:`Prototyping/VCU118:Introduction to the Bringup Design`.
+:ref:_legacy-vcu118-bringup.

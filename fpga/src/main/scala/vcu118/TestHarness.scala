@@ -4,8 +4,9 @@ import chisel3._
 import chisel3.experimental.{IO}
 
 import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp, BundleBridgeSource}
-import freechips.rocketchip.config.{Parameters}
+import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink.{TLClientNode}
+import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
@@ -17,7 +18,7 @@ import sifive.blocks.devices.spi.{PeripherySPIKey, SPIPortIO}
 
 import chipyard._
 import chipyard.iobinders.{HasIOBinders}
-import chipyard.harness.{ApplyHarnessBinders}
+import chipyard.harness._
 
 class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118ShellBasicOverlays {
 
@@ -134,4 +135,9 @@ class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawMod
   // check the top-level reference clock is equal to the default
   // non-exhaustive since you need all ChipTop clocks to equal the default
   require(getRefClockFreq == p(DefaultClockFrequencyKey))
+
+  val implicitHarnessClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
+  implicitHarnessClockBundle.clock := buildtopClock
+  implicitHarnessClockBundle.reset := buildtopReset
+  harnessClockInstantiator.instantiateHarnessClocks(implicitHarnessClockBundle)
 }
