@@ -106,7 +106,8 @@ $(GEN_CLASSPATH_TARGETS) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS)
 	mkdir -p $(dir $@)
 	$(call run_sbt_assembly,$(SBT_PROJECT),$(GEN_CLASSPATH))
 
-$(BTL_CLASSPATH_TARGETS) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS)
+# order only dependency between sbt runs needed to avoid concurrent sbt runs
+$(BTL_CLASSPATH_TARGETS) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) | $(GEN_CLASSPATH_TARGETS)
 	mkdir -p $(dir $@)
 	$(call run_sbt_assembly,tapeout,$(BTL_CLASSPATH))
 
