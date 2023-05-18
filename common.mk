@@ -116,7 +116,7 @@ $(BTL_CLASSPATH_TARGETS) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS)
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
 $(FIRRTL_FILE) $(ANNO_FILE) &: $(GEN_CLASSPATH_TARGETS) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
-	$(call run_scala_main,$(GEN_CLASSPATH),$(GENERATOR_PACKAGE).Generator,\
+	$(call run_jar_scala_main,$(GEN_CLASSPATH),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
 		--name $(long_name) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
@@ -202,7 +202,7 @@ endif
 
 $(SFC_MFC_TARGETS) &: $(BTL_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(VLOG_SOURCES) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
-	$(call run_scala_main,$(BTL_CLASSPATH),barstools.tapeout.transforms.GenerateModelStageMain,\
+	$(call run_jar_scala_main,$(BTL_CLASSPATH),barstools.tapeout.transforms.GenerateModelStageMain,\
 		--no-dedup \
 		--output-file $(SFC_FIRRTL_BASENAME) \
 		--output-annotation-file $(SFC_ANNO_FILE) \
@@ -269,11 +269,11 @@ $(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JS
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 TOP_MACROCOMPILER_MODE ?= --mode synflops
 $(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(BTL_CLASSPATH_TARGETS) $(TOP_SMEMS_CONF)
-	$(call run_scala_main,$(BTL_CLASSPATH),barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
+	$(call run_jar_scala_main,$(BTL_CLASSPATH),barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
 
 MODEL_MACROCOMPILER_MODE = --mode synflops
 $(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(BTL_CLASSPATH_TARGETS) $(MODEL_SMEMS_CONF) | $(TOP_SMEMS_FILE)
-	$(call run_scala_main,$(BTL_CLASSPATH),barstools.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
+	$(call run_jar_scala_main,$(BTL_CLASSPATH),barstools.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
@@ -390,7 +390,7 @@ endef
 
 .PHONY: find-config-fragments
 find-config-fragments:
-	$(call run_scala_main,chipyard,chipyard.ConfigFinder,)
+	$(call run_jar_scala_main,chipyard,chipyard.ConfigFinder,)
 
 .PHONY: help
 help:

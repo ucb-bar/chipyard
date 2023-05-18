@@ -222,12 +222,18 @@ SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 # passes $(JAVA_TOOL_OPTIONS) from env to java
 SBT ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
 
-
 # (1) - classpath of the fat jar
 # (2) - main class
 # (3) - main class arguments
-define run_scala_main
+define run_jar_scala_main
 	cd $(base_dir) && java -cp $(1) $(2) $(3)
+endef
+
+# (1) - sbt project
+# (2) - main class
+# (3) - main class arguments
+define run_scala_main
+	cd $(base_dir) && $(SBT) ";project $(1); runMain $(2) $(3)"
 endef
 
 # (1) - sbt project to assemble
