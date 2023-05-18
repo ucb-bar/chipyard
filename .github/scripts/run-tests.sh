@@ -28,6 +28,10 @@ run_tracegen () {
     make tracegen -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $@
 }
 
+run_none () {
+    make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ run-binary-fast BINARY=none $@
+}
+
 case $1 in
     chipyard-rocket)
         run_bmark ${mapping[$1]}
@@ -123,13 +127,25 @@ case $1 in
         make run-binary-hex BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}
         ;;
     icenet)
-        make run-binary-fast BINARY=none -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}
+        run_none ${mapping[$1]}
         ;;
     testchipip)
-        make run-binary-fast BINARY=none -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}
+        run_none ${mapping[$1]}
         ;;
     constellation)
-        make run-binary-fast BINARY=none -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}
+        run_none ${mapping[$1]}
+        ;;
+    rocketchip-amba)
+        run_none ${mapping[$1]}
+        ;;
+    rocketchip-tlsimple)
+	run_none ${mapping[$1]}
+        ;;
+    rocketchip-tlwidth)
+	run_none ${mapping[$1]}
+        ;;
+    rocketchip-tlxbar)
+	run_none ${mapping[$1]}
         ;;
     *)
         echo "No set of tests for $1. Did you spell it right?"

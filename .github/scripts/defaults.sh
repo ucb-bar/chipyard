@@ -33,7 +33,7 @@ grouping["group-peripherals"]="chipyard-dmirocket chipyard-dmiboom chipyard-spif
 grouping["group-accels"]="chipyard-mempress chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-manymmioaccels"
 grouping["group-constellation"]="chipyard-constellation"
 grouping["group-tracegen"]="tracegen tracegen-boom"
-grouping["group-other"]="icenet testchipip constellation"
+grouping["group-other"]="icenet testchipip constellation rocketchip-amba rocketchip-tlsimple rocketchip-tlwidth rocketchip-tlxbar"
 grouping["group-fpga"]="arty vcu118 vc707"
 
 # key value store to get the build strings
@@ -69,6 +69,10 @@ mapping["firesim"]="SCALA_TEST=firesim.firesim.RocketNICF1Tests"
 mapping["fireboom"]="SCALA_TEST=firesim.firesim.BoomF1Tests"
 mapping["icenet"]="SUB_PROJECT=icenet"
 mapping["testchipip"]="SUB_PROJECT=testchipip"
+mapping["rocketchip-amba"]="SUB_PROJECT=rocketchip CONFIG=AMBAUnitTestConfig"
+mapping["rocketchip-tlsimple"]="SUB_PROJECT=rocketchip CONFIG=TLSimpleUnitTestConfig"
+mapping["rocketchip-tlwidth"]="SUB_PROJECT=rocketchip CONFIG=TLWidthUnitTestConfig"
+mapping["rocketchip-tlxbar"]="SUB_PROJECT=rocketchip CONFIG=TLXbarUnitTestConfig"
 
 mapping["arty"]="SUB_PROJECT=arty verilog"
 mapping["vcu118"]="SUB_PROJECT=vcu118 verilog"

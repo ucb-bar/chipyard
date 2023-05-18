@@ -857,6 +857,44 @@ jobs:
           group-key: "group-other"
           project-key: "testchipip"
 
+  rocketchip-run-tests:
+    name: rocketchip-run-tests
+    needs: prepare-chipyard-other
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run amba tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-other"
+          project-key: "rocketchip-amba"
+      - name: Run tlsimple tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-other"
+          project-key: "rocketchip-tlsimple"
+      - name: Run tlwidth tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-other"
+          project-key: "rocketchip-tlwidth"
+      - name: Run tlxbar tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-other"
+          project-key: "rocketchip-tlxbar"
+
   constellation-run-tests:
     name: constellation-run-tests
     needs: prepare-chipyard-other
@@ -980,6 +1018,7 @@ jobs:
             tracegen-run-tests,
             icenet-run-tests,
             testchipip-run-tests,
+            rocketchip-run-tests,
             constellation-run-tests,
             prepare-chipyard-fpga, # firesim-run-tests,
             fireboom-run-tests]
