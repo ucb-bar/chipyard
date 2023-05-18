@@ -14,10 +14,6 @@ REMOTE_CHIPYARD_DIR=$GITHUB_WORKSPACE
 REMOTE_SIM_DIR=$REMOTE_CHIPYARD_DIR/sims/verilator
 REMOTE_FIRESIM_DIR=$REMOTE_CHIPYARD_DIR/sims/firesim/sim
 REMOTE_FPGA_DIR=$REMOTE_CHIPYARD_DIR/fpga
-REMOTE_JAVA_OPTS="-Xmx10G -Xss8M"
-# Disable the supershell to greatly improve the readability of SBT output when captured by Circle CI
-REMOTE_SBT_OPTS="-Dsbt.server.forcestart=true -Dsbt.ivy.home=$REMOTE_WORK_DIR/.ivy2 -Dsbt.supershell=false -Dsbt.global.base=$REMOTE_WORK_DIR/.sbt -Dsbt.boot.directory=$REMOTE_WORK_DIR/.sbt/boot"
-
 
 # local variables (aka within the docker container)
 LOCAL_CHIPYARD_DIR=$GITHUB_WORKSPACE
