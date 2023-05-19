@@ -113,10 +113,9 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
     implicit val p = GetSystemParameters(system)
 
     p(SerialTLKey).map({ sVal =>
-      require(sVal.axiMemOverSerialTLParams.isDefined)
-      val axiDomainParams = sVal.axiMemOverSerialTLParams.get
-      require(sVal.isMemoryDevice)
-
+      val serialTLManagerParams = sVal.serialTLManagerParams.get
+      val axiDomainParams = serialTLManagerParams.axiMemOverSerialTLParams.get
+      require(serialTLManagerParams.isMemoryDevice)
       val memFreq = axiDomainParams.getMemFrequency(system.asInstanceOf[HasTileLinkLocations])
 
       ports.map({ port =>
@@ -132,7 +131,7 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
         TSIBridge(th.harnessBinderClock, harnessMultiClockAXIRAM.module.io.tsi, Some(MainMemoryConsts.globalName), th.harnessBinderReset.asBool)
 
         // connect SimAxiMem
-        (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi4, edge) =>
+        (harnessMultiClockAXIRAM.mem_axi4.get zip harnessMultiClockAXIRAM.memNode.get.edges.in).map { case (axi4, edge) =>
           val nastiKey = NastiParameters(axi4.bits.r.bits.data.getWidth,
                                         axi4.bits.ar.bits.addr.getWidth,
                                         axi4.bits.ar.bits.id.getWidth)

@@ -40,9 +40,9 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
 
   // Serialized TL
   val sVal = p(SerialTLKey).get
-  require(sVal.axiMemOverSerialTLParams.isDefined)
-  require(sVal.isMemoryDevice)
-  val axiDomainParams = sVal.axiMemOverSerialTLParams.get
+  val serialTLManagerParams = sVal.serialTLManagerParams.get
+  val axiDomainParams = serialTLManagerParams.axiMemOverSerialTLParams.get
+  require(serialTLManagerParams.isMemoryDevice)
   val memFreq = axiDomainParams.getMemFrequency(lazyDut.system)
 
   withClockAndReset(clock, reset) {
@@ -56,9 +56,9 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
     io.success := SimTSI.connect(Some(harnessMultiClockAXIRAM.module.io.tsi), clock, reset)
 
     // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
-    (harnessMultiClockAXIRAM.mem_axi4 zip harnessMultiClockAXIRAM.memNode.edges.in).map { case (axi_port, edge) =>
-      val memSize = sVal.memParams.size
-      val memBase = sVal.memParams.base
+    (harnessMultiClockAXIRAM.mem_axi4.get zip harnessMultiClockAXIRAM.memNode.get.edges.in).map { case (axi_port, edge) =>
+      val memSize = serialTLManagerParams.memParams.size
+      val memBase = serialTLManagerParams.memParams.base
       val lineSize = p(CacheBlockBytes)
       val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), memBase, edge.bundle)).suggestName("simdram")
       mem.io.axi <> axi_port.bits
