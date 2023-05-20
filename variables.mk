@@ -254,10 +254,10 @@ LOADMEM ?=
 LOADARCH ?=
 
 ifneq ($(LOADARCH),)
-override BINARY = $(LOADARCH)/mem.elf
-override get_out_name = $(shell basename $(LOADARCH))
+override BINARY = $(addsuffix /mem.elf,$(LOADARCH))
+override BINARIES = $(addsuffix /mem.elf,$(LOADARCH))
+override get_out_name = $(shell basename $(dir $(1)))
 override LOADMEM = 1
-override SIM_FLAGS += +loadarch=$(LOADARCH)/loadarch
 endif
 
 #########################################################################################
