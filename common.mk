@@ -320,7 +320,7 @@ else ifneq ($(LOADMEM),)
 get_loadmem_flag = +loadmem=$(LOADMEM)
 endif
 
-ifneq ($(LOADARCH),_)
+ifneq ($(LOADARCH),)
 get_loadarch_flag = +loadarch=$(subst mem.elf,loadarch,$(1))
 endif
 
@@ -332,22 +332,22 @@ get_common_sim_flags = $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(call get_l
 .PHONY: %.run %.run.debug %.run.fast
 
 # run normal binary with hardware-logged insn dissassembly
-run-binary: $(BINARY).run check-binary
-run-binaries: $(addsuffix .run,$(BINARIES)) check-binaries
+run-binary: check-binary $(BINARY).run
+run-binaries: check-binaries $(addsuffix .run,$(BINARIES))
 
 %.run: %.check-exists $(SIM_PREREQ) | $(output_dir)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(call get_common_sim_flags,$*) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $* </dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
 
 # run simulator as fast as possible (no insn disassembly)
-run-binary-fast: $(BINARY).run.fast check-binary
-run-binaries-fast: $(addsuffix .run.fast,$(BINARIES)) check-binaries
+run-binary-fast: check-binary $(BINARY).run.fast
+run-binaries-fast: check-binaries $(addsuffix .run.fast,$(BINARIES))
 
 %.run.fast: %.check-exists $(SIM_PREREQ) | $(output_dir)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(call get_common_sim_flags,$*) $(PERMISSIVE_OFF) $* </dev/null | tee $(call get_sim_out_name,$*).log)
 
 # run simulator with as much debug info as possible
-run-binary-debug: $(BINARY).run.debug check-binary
-run-binaries-debug: $(addsuffix .run.debug,$(BINARIES)) check-binaries
+run-binary-debug: check-binary $(BINARY).run.debug
+run-binaries-debug: check-binaries $(addsuffix .run.debug,$(BINARIES))
 
 %.run.debug: %.check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
 ifneq (none,$*)
