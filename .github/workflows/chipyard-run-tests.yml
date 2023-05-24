@@ -879,21 +879,22 @@ jobs:
         with:
           group-key: "group-other"
           project-key: "rocketchip-amba"
-      - name: Run tlsimple tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-other"
-          project-key: "rocketchip-tlsimple"
-      - name: Run tlwidth tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-other"
-          project-key: "rocketchip-tlwidth"
-      - name: Run tlxbar tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-other"
-          project-key: "rocketchip-tlxbar"
+      # Below tests segfault with verilator, work fine in VCS
+      # - name: Run tlsimple tests
+      #   uses: ./.github/actions/run-tests
+      #   with:
+      #     group-key: "group-other"
+      #     project-key: "rocketchip-tlsimple"
+      # - name: Run tlwidth tests
+      #   uses: ./.github/actions/run-tests
+      #   with:
+      #     group-key: "group-other"
+      #     project-key: "rocketchip-tlwidth"
+      # - name: Run tlxbar tests
+      #   uses: ./.github/actions/run-tests
+      #   with:
+      #     group-key: "group-other"
+      #     project-key: "rocketchip-tlxbar"
 
   constellation-run-tests:
     name: constellation-run-tests
