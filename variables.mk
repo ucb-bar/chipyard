@@ -146,11 +146,11 @@ ifeq ($(GENERATOR_PACKAGE),hwacha)
 endif
 
 # classpaths
-GEN_CLASSPATH ?= $(gen_dir)/chipyard-generator.jar
-BTL_CLASSPATH ?= $(gen_dir)/barstools.jar
+CHIPYARD_CLASSPATH ?= $(gen_dir)/chipyard.jar
+TAPEOUT_CLASSPATH ?= $(gen_dir)/tapeout.jar
 # if *_CLASSPATH is a true java classpath, it can be colon-delimited list of paths (on *nix)
-GEN_CLASSPATH_TARGETS ?= $(subst :, ,$(GEN_CLASSPATH))
-BTL_CLASSPATH_TARGETS ?= $(subst :, ,$(BTL_CLASSPATH))
+CHIPYARD_CLASSPATH_TARGETS ?= $(subst :, ,$(CHIPYARD_CLASSPATH))
+TAPEOUT_CLASSPATH_TARGETS ?= $(subst :, ,$(TAPEOUT_CLASSPATH))
 
 # chisel generated outputs
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
