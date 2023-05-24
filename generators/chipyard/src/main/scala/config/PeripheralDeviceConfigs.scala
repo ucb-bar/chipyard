@@ -75,3 +75,8 @@ class ManyPeripheralsRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMemPort ++        // remove AXI4 backing memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
+
+class QuadChannelRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++      // 4 AXI4 channels
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)

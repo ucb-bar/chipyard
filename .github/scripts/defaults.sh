@@ -38,7 +38,7 @@ grouping["group-fpga"]="arty vcu118 vc707"
 
 # key value store to get the build strings
 declare -A mapping
-mapping["chipyard-rocket"]=""
+mapping["chipyard-rocket"]=" CONFIG=QuadChannelRocketConfig"
 mapping["chipyard-dmirocket"]=" CONFIG=dmiRocketConfig"
 mapping["chipyard-sha3"]=" CONFIG=Sha3RocketConfig"
 mapping["chipyard-mempress"]=" CONFIG=MempressRocketConfig"
