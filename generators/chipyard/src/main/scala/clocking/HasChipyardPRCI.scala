@@ -15,7 +15,6 @@ import freechips.rocketchip.tile._
 import freechips.rocketchip.prci._
 
 import testchipip.{TLTileResetCtrl}
-import chipyard.harness.{DefaultClockFrequencyKey}
 
 case class ChipyardPRCIControlParams(
   slaveWhere: TLBusWrapperLocation = CBUS,
@@ -70,7 +69,7 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
   // 5. Add reset control registers to the tiles (if desired)
   // The final clock group here contains physically distinct clock domains, which some PRCI node in a
   // diplomatic IOBinder should drive
-  val frequencySpecifier = ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
+  val frequencySpecifier = ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey))
   val clockGroupCombiner = ClockGroupCombiner()
   val resetSynchronizer  = ClockGroupResetSynchronizer()
   val tileClockGater     = if (prciParams.enableTileClockGating) { prci_ctrl_domain {

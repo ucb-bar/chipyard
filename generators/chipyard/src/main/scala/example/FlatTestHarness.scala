@@ -46,15 +46,12 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
   val memFreq = axiDomainParams.getMemFrequency(lazyDut.system)
 
   withClockAndReset(clock, reset) {
-    val memOverSerialTLClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
-    memOverSerialTLClockBundle.clock := clock
-    memOverSerialTLClockBundle.reset := reset
     val serial_bits = dut.serial_tl_pad.bits
     dut.serial_tl_pad.clock := clock
     val harnessMultiClockAXIRAM = TSIHarness.connectMultiClockAXIRAM(
       lazyDut.system.serdesser.get,
       serial_bits,
-      memOverSerialTLClockBundle,
+      clock,
       reset)
     io.success := SimTSI.connect(Some(harnessMultiClockAXIRAM.module.io.tsi), clock, reset)
 
