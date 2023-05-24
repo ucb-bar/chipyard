@@ -1,5 +1,5 @@
 
-WAVEFORM_FLAG=+vcdfile=$(sim_out_name).vcd
+get_waveform_flag=+vcdfile=$(1).vcd
 
 # If ntb_random_seed unspecified, xcelium uses 1 as constant seed.
 # Set ntb_random_seed_automatic to actually get a random seed
