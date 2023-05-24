@@ -24,7 +24,6 @@ class UARTTSIRocketConfig extends Config(
   new testchipip.WithUARTTSITLClient ++
   new testchipip.WithNoSerialTL ++
   new chipyard.config.WithNoUART ++
-  new chipyard.config.WithFrontBusFrequency(10) ++
   new chipyard.config.WithMemoryBusFrequency(10) ++
   new chipyard.config.WithPeripheryBusFrequency(10) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
@@ -88,25 +87,21 @@ class MulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(3, 3) ++ // Add async crossings between RocketTile and uncore
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   // Frequency specifications
-  new chipyard.config.WithTileFrequency(1600.0) ++       // Matches the maximum frequency of U540
-  new chipyard.config.WithSystemBusFrequency(800.0) ++   // Ditto
-  new chipyard.config.WithMemoryBusFrequency(1000.0) ++  // 2x the U540 freq (appropriate for a 128b Mbus)
-  new chipyard.config.WithPeripheryBusFrequency(100) ++  // Retains the default pbus frequency
-  new chipyard.config.WithSystemBusFrequencyAsDefault ++ // All unspecified clock frequencies, notably the implicit clock, will use the sbus freq (800 MHz)
+  new chipyard.config.WithTileFrequency(1000.0) ++        // Matches the maximum frequency of U540
+  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore"   , Seq("sbus", "cbus", "implicit")),
+                                                      ("periphery", Seq("pbus", "fbus"))) ++
+  new chipyard.config.WithSystemBusFrequency(500.0) ++    // Matches the maximum frequency of U540
+  new chipyard.config.WithMemoryBusFrequency(500.0) ++    // Matches the maximum frequency of U540
+  new chipyard.config.WithPeripheryBusFrequency(500.0) ++ // Matches the maximum frequency of U540
   //  Crossing specifications
+  new chipyard.config.WithFbusToSbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between FBUS and SBUS
   new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
   new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
   new chipyard.config.AbstractConfig)
 
-class TestChipMulticlockRocketConfig extends Config(
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.WithTestChipBusFreqs ++
-  new chipyard.config.AbstractConfig)
-
 // DOC include start: MulticlockAXIOverSerialConfig
 class MulticlockAXIOverSerialConfig extends Config(
-  new chipyard.config.WithSystemBusFrequencyAsDefault ++
   new chipyard.config.WithSystemBusFrequency(250) ++
   new chipyard.config.WithPeripheryBusFrequency(250) ++
   new chipyard.config.WithMemoryBusFrequency(250) ++
@@ -121,9 +116,7 @@ class MulticlockAXIOverSerialConfig extends Config(
     AsynchronousCrossing().sourceSync) ++
 
   new chipyard.harness.WithSimAXIMemOverSerialTL ++ // add SimDRAM DRAM model for axi4 backing memory over the SerDes link, if axi4 mem is enabled
-  new testchipip.WithOffchipBusManager(MBUS) ++
-  new testchipip.WithOffchipBus ++
-  new chipyard.config.WithSerialTLBackingMemory ++ // remove axi4 mem port in favor of SerialTL memory
+  new testchipip.WithSerialTLBackingMemory ++       // remove axi4 mem port in favor of SerialTL memory
 
   new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++ // 1 memory channel

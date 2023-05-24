@@ -21,14 +21,13 @@ import chipyard.iobinders.JTAGChipIO
 import testchipip._
 
 class WithArty100TUARTTSI(uartBaudRate: BigInt = 115200) extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: HasChipyardHarnessInstantiators, ports: Seq[ClockedIO[SerialIO]]) => {
+  (system: CanHavePeripheryTLSerial, th: HasHarnessInstantiators, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
       val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
       val freq = p(PeripheryBusKey).dtsFrequency.get
       val bits = port.bits
       port.clock := th.harnessBinderClock
-
       val ram = TSIHarness.connectRAM(system.serdesser.get, bits, th.harnessBinderReset)
       val uart_to_serial = Module(new UARTToSerial(
         freq, UARTParams(0, initBaudRate=uartBaudRate)))
@@ -50,7 +49,7 @@ class WithArty100TUARTTSI(uartBaudRate: BigInt = 115200) extends OverrideHarness
 })
 
 class WithArty100TDDRTL extends OverrideHarnessBinder({
-  (system: CanHaveMasterTLMemPort, th: HasChipyardHarnessInstantiators, ports: Seq[HeterogeneousBag[TLBundle]]) => {
+  (system: CanHaveMasterTLMemPort, th: HasHarnessInstantiators, ports: Seq[HeterogeneousBag[TLBundle]]) => {
     require(ports.size == 1)
     val artyTh = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     val bundles = artyTh.ddrClient.out.map(_._1)

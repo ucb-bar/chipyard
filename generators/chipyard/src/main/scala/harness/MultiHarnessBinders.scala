@@ -32,7 +32,7 @@ import scala.reflect.{ClassTag}
 
 case class MultiHarnessBinders(c0: Int, c1: Int) extends Field[MultiHarnessBinderMap](MultiHarnessBinderMapDefault)
 
-class MultiHarnessBinder[T, S <: HasChipyardHarnessInstantiators, U <: Data](chip0: Int, chip1: Int, fn: => (T, T, S, Seq[U], Seq[U]) => Unit)
+class MultiHarnessBinder[T, S <: HasHarnessInstantiators, U <: Data](chip0: Int, chip1: Int, fn: => (T, T, S, Seq[U], Seq[U]) => Unit)
   (implicit tag: ClassTag[T], thtag: ClassTag[S], ptag: ClassTag[U])
     extends Config((site, here, up) => {
       // Override any HarnessBinders for chip0/chip1
@@ -47,7 +47,7 @@ class MultiHarnessBinder[T, S <: HasChipyardHarnessInstantiators, U <: Data](chi
       // Set the multiharnessbinder key
       case MultiHarnessBinders(`chip0`, `chip1`) => up(MultiHarnessBinders(chip0, chip1)) +
         (tag.runtimeClass.toString ->
-          ((c0: Any, c1: Any, th: HasChipyardHarnessInstantiators, ports0: Seq[Data], ports1: Seq[Data]) => {
+          ((c0: Any, c1: Any, th: HasHarnessInstantiators, ports0: Seq[Data], ports1: Seq[Data]) => {
             val pts0 = ports0.map(_.asInstanceOf[U])
             val pts1 = ports1.map(_.asInstanceOf[U])
             require(pts0.size == pts1.size)
@@ -60,7 +60,7 @@ class MultiHarnessBinder[T, S <: HasChipyardHarnessInstantiators, U <: Data](chi
     })
 
 object ApplyMultiHarnessBinders {
-  def apply(th: HasChipyardHarnessInstantiators, chips: Seq[LazyModule])(implicit p: Parameters): Unit = {
+  def apply(th: HasHarnessInstantiators, chips: Seq[LazyModule])(implicit p: Parameters): Unit = {
     Seq.tabulate(chips.size, chips.size) { case (i, j) => if (i != j) {
       (chips(i), chips(j)) match {
         case (l0: HasIOBinders, l1: HasIOBinders) => p(MultiHarnessBinders(i, j)).foreach {
@@ -77,7 +77,7 @@ object ApplyMultiHarnessBinders {
 
 class WithMultiChipSerialTL(chip0: Int, chip1: Int) extends MultiHarnessBinder(chip0, chip1, (
   (system0: CanHavePeripheryTLSerial, system1: CanHavePeripheryTLSerial,
-    th: HasChipyardHarnessInstantiators,
+    th: HasHarnessInstantiators,
     ports0: Seq[ClockedIO[SerialIO]], ports1: Seq[ClockedIO[SerialIO]]
   ) => {
     require(ports0.size == ports1.size)

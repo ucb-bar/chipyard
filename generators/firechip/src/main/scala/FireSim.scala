@@ -29,8 +29,8 @@ import chipyard.clocking._
   */
 class FireSimClockBridgeInstantiator extends HarnessClockInstantiator {
   // connect all clock wires specified to the RationalClockBridge
-  def instantiateHarnessClocks(refClock: ClockBundle): Unit = {
-    val sinks = _clockMap.map({ case (name, (freq, bundle)) =>
+  def instantiateHarnessClocks(refClock: Clock, refClockFreqMHz: Double): Unit = {
+    val sinks = clockMap.map({ case (name, (freq, bundle)) =>
       ClockSinkParameters(take=Some(ClockParameters(freqMHz=freq / (1000 * 1000))), name=Some(name))
     }).toSeq
 
@@ -39,7 +39,7 @@ class FireSimClockBridgeInstantiator extends HarnessClockInstantiator {
 
     var instantiatedClocks = LinkedHashMap[Int, (Clock, Seq[String])]()
     // connect wires to clock source
-    for ((name, (freq, bundle)) <- _clockMap) {
+    for ((name, (freq, clock)) <- clockMap) {
       val freqMHz = (freq / (1000 * 1000)).toInt
       if (!instantiatedClocks.contains(freqMHz)) {
         val clock = Wire(Clock())
@@ -47,8 +47,7 @@ class FireSimClockBridgeInstantiator extends HarnessClockInstantiator {
       } else {
         instantiatedClocks(freqMHz) = (instantiatedClocks(freqMHz)._1, instantiatedClocks(freqMHz)._2 :+ name)
       }
-      bundle.clock := instantiatedClocks(freqMHz)._1
-      bundle.reset := ResetCatchAndSync(bundle.clock, refClock.reset.asBool)
+      clock := instantiatedClocks(freqMHz)._1
     }
 
     val ratClocks = instantiatedClocks.map { case (freqMHz, (clock, names)) =>
@@ -61,7 +60,8 @@ class FireSimClockBridgeInstantiator extends HarnessClockInstantiator {
   }
 }
 
-class FireSim(implicit val p: Parameters) extends RawModule with HasChipyardHarnessInstantiators {
+class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessInstantiators {
+  require(harnessClockInstantiator.isInstanceOf[FireSimClockBridgeInstantiator])
   freechips.rocketchip.util.property.cover.setPropLib(new midas.passes.FireSimPropertyLibrary())
 
   // The peek-poke bridge must still be instantiated even though it's
@@ -73,9 +73,12 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasChipyardHarn
   // In effect, the bridge counts the length of the reset in terms of this clock.
   resetBridge.io.clock := harnessBinderClock
 
+  def referenceClockFreqMHz = 0.0
   def referenceClock = false.B.asClock // unused
   def referenceReset = resetBridge.io.reset
   def success = { require(false, "success should not be used in Firesim"); false.B }
+
+  override val supportsMultiChip = true
 
   instantiateChipTops()
 

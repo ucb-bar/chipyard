@@ -71,6 +71,7 @@ class WithNVDLASmall extends nvidia.blocks.dla.WithNVDLA("small")
 class WithMinimalFireSimDesignTweaks extends Config(
   // Required*: Punch all clocks to FireSim's harness clock instantiator
   new WithFireSimHarnessClockBridgeInstantiator ++
+  new chipyard.harness.WithHarnessBinderClockFreqMHz(1000.0) ++
   new chipyard.harness.WithClockAndResetFromHarness ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
@@ -123,16 +124,8 @@ class WithFireSimConfigTweaks extends Config(
   // Using some other frequency will require runnings the FASED runtime configuration generator
   // to generate faithful DDR3 timing values.
   new chipyard.config.WithSystemBusFrequency(1000.0) ++
-  new chipyard.config.WithSystemBusFrequencyAsDefault ++ // All unspecified clock frequencies, notably the implicit clock, will use the sbus freq (1000 MHz)
-  // Explicitly set PBUS + MBUS to 1000 MHz, since they will be driven to 100 MHz by default because of assignments in the Chisel
   new chipyard.config.WithPeripheryBusFrequency(1000.0) ++
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++
-  new WithFireSimDesignTweaks
-)
-
-// Tweak more representative of testchip configs
-class WithFireSimTestChipConfigTweaks extends Config(
-  new chipyard.config.WithTestChipBusFreqs ++
   new WithFireSimDesignTweaks
 )
 

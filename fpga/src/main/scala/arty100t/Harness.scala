@@ -4,7 +4,9 @@ import chisel3._
 import chisel3.util._
 import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config.{Parameters}
-import freechips.rocketchip.tilelink.{TLClientNode, TLBlockDuringReset}
+import freechips.rocketchip.tilelink._
+import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
+import freechips.rocketchip.subsystem.{SystemBusKey}
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.shell._
@@ -20,13 +22,12 @@ import chipyard.iobinders.{HasIOBinders}
 class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell {
   def dp = designParameters
 
-  require(dp(MultiChipNChips) == 0, "Arty100T harness does not support multi-chip")
-
   val clockOverlay = dp(ClockInputOverlayKey).map(_.place(ClockInputDesignInput())).head
   val harnessSysPLL = dp(PLLFactoryKey)
   val harnessSysPLLNode = harnessSysPLL()
-  println(s"Arty100T FPGA Base Clock Freq: ${dp(DefaultClockFrequencyKey)} MHz")
-  val dutClock = ClockSinkNode(freqMHz = dp(DefaultClockFrequencyKey))
+  val dutFreqMHz = (dp(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toInt
+  val dutClock = ClockSinkNode(freqMHz = dutFreqMHz)
+  println(s"Arty100T FPGA Base Clock Freq: ${dutFreqMHz} MHz")
   val dutWrangler = LazyModule(new ResetWrangler())
   val dutGroup = ClockGroup()
   dutClock := dutWrangler.node := dutGroup := harnessSysPLLNode
@@ -39,7 +40,7 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
   val ddrOverlay = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLLNode)).asInstanceOf[DDRArtyPlacedOverlay]
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
     name = "chip_ddr",
-    sourceId = IdRange(0, 64)
+    sourceId = IdRange(0, 1 << dp(ExtTLMem).get.master.idBits)
   )))))
   val ddrBlockDuringReset = LazyModule(new TLBlockDuringReset(4))
   ddrOverlay.overlayOutput.ddr := ddrBlockDuringReset.node := ddrClient
@@ -52,7 +53,7 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
 
   override lazy val module = new HarnessLikeImpl
 
-  class HarnessLikeImpl extends Impl with HasChipyardHarnessInstantiators {
+  class HarnessLikeImpl extends Impl with HasHarnessInstantiators {
     clockOverlay.overlayOutput.node.out(0)._1.reset := ~resetPin
 
     val clk_100mhz = clockOverlay.overlayOutput.node.out.head._1.clock
@@ -73,8 +74,9 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
 
     harnessSysPLL.plls.foreach(_._1.getReset.get := pllReset)
 
-    def implicitClock = dutClock.in.head._1.clock
-    def implicitReset = dutClock.in.head._1.reset
+    def referenceClockFreqMHz = dutFreqMHz
+    def referenceClock = dutClock.in.head._1.clock
+    def referenceReset = dutClock.in.head._1.reset
     def success = { require(false, "Unused"); false.B }
 
     ddrOverlay.mig.module.clock := harnessBinderClock

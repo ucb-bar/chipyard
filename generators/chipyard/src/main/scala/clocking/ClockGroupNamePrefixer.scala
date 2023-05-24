@@ -60,23 +60,23 @@ object ClockGroupNamePrefixer {
   * The default if all functions return None.
   */
 object ClockGroupFrequencySpecifier {
-  def apply(
-      assigners: Seq[(String) => Option[Double]],
-      defaultFreq: Double)(
-      implicit p: Parameters, valName: ValName): ClockGroupAdapterNode = {
+  def apply(assigners: Seq[(String) => Option[Double]])(
+    implicit p: Parameters, valName: ValName): ClockGroupAdapterNode = {
 
-    def lookupFrequencyForName(clock: ClockSinkParameters): ClockSinkParameters = {
-      require(clock.name.nonEmpty, "All clocks in clock group must have an assigned name")
-      val clockFreq = assigners.foldLeft(defaultFreq)(
-        (currentFreq, candidateFunc) => candidateFunc(clock.name.get).getOrElse(currentFreq))
-
-      clock.copy(take = clock.take match {
-        case Some(cp) =>
-          println(s"Clock ${clock.name.get}: using diplomatically specified frequency of ${cp.freqMHz}.")
-          Some(cp)
-        case None => Some(ClockParameters(clockFreq))
-      })
-    }
+    def lookupFrequencyForName(clock: ClockSinkParameters): ClockSinkParameters = clock.copy(take = clock.take match {
+      case Some(cp) =>
+        println(s"Clock ${clock.name.get}: using diplomatically specified frequency of ${cp.freqMHz}.")
+        Some(cp)
+      case None => {
+        val freqs = assigners.map { f => f(clock.name.get) }.flatten
+        if (freqs.size > 0) {
+          println(s"Clock ${clock.name.get}: using specified frequency of ${freqs.last}")
+          Some(ClockParameters(freqs.last))
+        } else {
+          None
+        }
+      }
+    })
 
     LazyModule(new ClockGroupParameterModifier(sinkFn = { s => s.copy(members = s.members.map(lookupFrequencyForName)) })).node
   }

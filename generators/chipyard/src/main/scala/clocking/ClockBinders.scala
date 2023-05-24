@@ -111,6 +111,8 @@ class WithPassthroughClockGenerator extends OverrideLazyIOBinder({
       val (bundle, edge) = clockGroupAggNode.out(0)
 
       val clock_ios = (bundle.member.data zip edge.sink.members).map { case (b, m) =>
+        require(m.take.isDefined, s"""Clock ${m.name.get} has no requested frequency
+                                     |Clocks: ${edge.sink.members.map(_.name.get)}""".stripMargin)
         val freq = m.take.get.freqMHz
         val clock_io = IO(Input(new ClockWithFreq(freq))).suggestName(s"clock_${m.name.get}")
         b.clock := clock_io.clock

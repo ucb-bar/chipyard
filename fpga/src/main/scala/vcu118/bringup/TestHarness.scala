@@ -1,5 +1,4 @@
 package chipyard.fpga.vcu118.bringup
-
 import chisel3._
 
 import freechips.rocketchip.diplomacy._

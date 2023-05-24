@@ -121,3 +121,6 @@
 [submodule "tools/cde"]
 	path = tools/cde
 	url = https://github.com/chipsalliance/cde.git
+[submodule "software/embench/embench-iot"]
+	path = software/embench/embench-iot
+	url = https://github.com/embench/embench-iot.git

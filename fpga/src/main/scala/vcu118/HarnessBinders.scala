@@ -14,7 +14,7 @@ import chipyard.harness._
 
 /*** UART ***/
 class WithUART extends OverrideHarnessBinder({
-  (system: HasPeripheryUARTModuleImp, th: HasChipyardHarnessInstantiators, ports: Seq[UARTPortIO]) => {
+  (system: HasPeripheryUARTModuleImp, th: HasHarnessInstantiators, ports: Seq[UARTPortIO]) => {
     th match { case vcu118th: VCU118FPGATestHarnessImp => {
       vcu118th.vcu118Outer.io_uart_bb.bundle <> ports.head
     } }
@@ -23,7 +23,7 @@ class WithUART extends OverrideHarnessBinder({
 
 /*** SPI ***/
 class WithSPISDCard extends OverrideHarnessBinder({
-  (system: HasPeripherySPI, th: HasChipyardHarnessInstantiators, ports: Seq[SPIPortIO]) => {
+  (system: HasPeripherySPI, th: HasHarnessInstantiators, ports: Seq[SPIPortIO]) => {
     th match { case vcu118th: VCU118FPGATestHarnessImp => {
       vcu118th.vcu118Outer.io_spi_bb.bundle <> ports.head
     } }
@@ -32,7 +32,7 @@ class WithSPISDCard extends OverrideHarnessBinder({
 
 /*** Experimental DDR ***/
 class WithDDRMem extends OverrideHarnessBinder({
-  (system: CanHaveMasterTLMemPort, th: HasChipyardHarnessInstantiators, ports: Seq[HeterogeneousBag[TLBundle]]) => {
+  (system: CanHaveMasterTLMemPort, th: HasHarnessInstantiators, ports: Seq[HeterogeneousBag[TLBundle]]) => {
     th match { case vcu118th: VCU118FPGATestHarnessImp => {
       require(ports.size == 1)
 

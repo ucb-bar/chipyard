@@ -74,7 +74,6 @@ class WithTSIBridgeAndHarnessRAMOverSerialTL extends OverrideHarnessBinder({
     ports.map { port =>
       implicit val p = GetSystemParameters(system)
       val bits = port.bits
-      require(DataMirror.directionOf(port.clock) == Direction.Input)
       port.clock := th.harnessBinderClock
       val ram = TSIHarness.connectRAM(system.serdesser.get, bits, th.harnessBinderReset)
       TSIBridge(th.harnessBinderClock, ram.module.io.tsi, p(ExtMem).map(_ => MainMemoryConsts.globalName), th.harnessBinderReset.asBool)
@@ -114,22 +113,21 @@ class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
     implicit val p = GetSystemParameters(system)
 
     p(SerialTLKey).map({ sVal =>
-      val serialManagerParams = sVal.serialManagerParams.get
-      val axiDomainParams = serialManagerParams.axiMemOverSerialTLParams.get
-      require(serialManagerParams.isMemoryDevice)
-
+      val serialTLManagerParams = sVal.serialTLManagerParams.get
+      val axiDomainParams = serialTLManagerParams.axiMemOverSerialTLParams.get
+      require(serialTLManagerParams.isMemoryDevice)
       val memFreq = axiDomainParams.getMemFrequency(system.asInstanceOf[HasTileLinkLocations])
 
       ports.map({ port =>
-        val axiClockBundle = th.harnessClockInstantiator.requestClockBundle("mem_over_serial_tl_clock", memFreq)
+        val axiClock = th.harnessClockInstantiator.requestClockHz("mem_over_serial_tl_clock", memFreq)
+
         val serial_bits = port.bits
         port.clock := th.harnessBinderClock
         val harnessMultiClockAXIRAM = TSIHarness.connectMultiClockAXIRAM(
           system.serdesser.get,
           serial_bits,
-          axiClockBundle,
-          th.harnessBinderReset)
-
+          axiClock,
+          ResetCatchAndSync(axiClock, th.harnessBinderReset.asBool))
         TSIBridge(th.harnessBinderClock, harnessMultiClockAXIRAM.module.io.tsi, Some(MainMemoryConsts.globalName), th.harnessBinderReset.asBool)
 
         // connect SimAxiMem

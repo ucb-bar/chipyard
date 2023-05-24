@@ -1,11 +1,11 @@
 package chipyard.fpga.vc707
-
 import chisel3._
 import chisel3.experimental.{IO}
 
 import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp, BundleBridgeSource}
 import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink._
+import freechips.rocketchip.subsystem.{SystemBusKey}
 import freechips.rocketchip.diplomacy.{IdRange, TransferSizes}
 
 import sifive.fpgashells.shell.xilinx.{VC707Shell, UARTVC707ShellPlacer, PCIeVC707ShellPlacer, ChipLinkVC707PlacedOverlay}
@@ -39,8 +39,9 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   harnessSysPLL := sysClkNode
 
   // create and connect to the dutClock
-  println(s"VC707 FPGA Base Clock Freq: ${dp(DefaultClockFrequencyKey)} MHz")
-  val dutClock = ClockSinkNode(freqMHz = dp(DefaultClockFrequencyKey))
+  val dutFreqMHz = (dp(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toInt
+  val dutClock = ClockSinkNode(freqMHz = dutFreqMHz)
+  println(s"VC707 FPGA Base Clock Freq: ${dutFreqMHz} MHz")
   val dutWrangler = LazyModule(new ResetWrangler)
   val dutGroup = ClockGroup()
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL
@@ -77,7 +78,7 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL, true)).overlayOutput.ddr
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
     name = "chip_ddr",
-    sourceId = IdRange(0, 64)
+    sourceId = IdRange(0, 1 << dp(ExtTLMem).get.master.idBits)
   )))))
 
   ddrNode := ddrClient
@@ -86,9 +87,7 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   override lazy val module = new VC707FPGATestHarnessImp(this)
 }
 
-class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModuleImp(_outer) with HasChipyardHarnessInstantiators {
-  require (p(MultiChipNChips) == 0)
-
+class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessInstantiators {
   val vc707Outer = _outer
 
   val reset = IO(Input(Bool()))
@@ -113,16 +112,13 @@ class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModul
   val hReset = Wire(Reset())
   hReset := _outer.dutClock.in.head._1.reset
 
-  def implicitClock = _outer.dutClock.in.head._1.clock
-  def implicitReset = hReset
+  def referenceClockFreqMHz = _outer.dutFreqMHz
+  def referenceClock = _outer.dutClock.in.head._1.clock
+  def referenceReset = hReset
   def success = { require(false, "Unused"); false.B }
 
-  childClock := implicitClock
-  childReset := implicitReset
-
-  // check that all requested clocks are equal to the default
-  // non-exhaustive since you need all ChipTop clocks to equal the default
-  harnessClockInstantiator.clockMap.map(x => require(x._2._2 == p(DefaultClockFrequencyKey)))
+  childClock := referenceClock
+  childReset := referenceReset
 
   instantiateChipTops()
 }

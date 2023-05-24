@@ -8,12 +8,10 @@ import org.chipsalliance.cde.config.{Parameters}
 
 import sifive.fpgashells.shell.xilinx.artyshell.{ArtyShell}
 
-import chipyard._
-import chipyard.harness._
+import chipyard.harness.{HasHarnessInstantiators}
 import chipyard.iobinders.{HasIOBinders}
 
-class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell with HasChipyardHarnessInstantiators {
-
+class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell with HasHarnessInstantiators {
   // Convert harness resets from Bool to Reset type.
   val hReset = Wire(Reset())
   hReset := ~ck_rst
@@ -23,8 +21,9 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
 
   def success = {require(false, "Success not supported"); false.B }
 
-  def implicitClock = clock_32MHz
-  def implicitReset = hReset
+  def referenceClockFreqMHz = 32.0
+  def referenceClock = clock_32MHz
+  def referenceReset = hReset
 
   instantiateChipTops()
 }

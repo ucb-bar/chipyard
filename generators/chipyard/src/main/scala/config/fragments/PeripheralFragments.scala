@@ -62,25 +62,9 @@ class WithNoDebug extends Config((site, here, up) => {
   case DebugModuleKey => None
 })
 
-
 class WithTLBackingMemory extends Config((site, here, up) => {
   case ExtMem => None // disable AXI backing memory
   case ExtTLMem => up(ExtMem, site) // enable TL backing memory
-})
-
-class WithSerialTLBackingMemory extends Config((site, here, up) => {
-  case ExtMem => None
-  case SerialTLKey => {
-    val memPortParams = up(ExtMem).get
-    require(memPortParams.nMemoryChannels == 1)
-    val memParams = memPortParams.master
-    up(SerialTLKey, site).map { k => k.copy(
-      serialManagerParams = Some(k.serialManagerParams.getOrElse(SerialTLManagerParams(memParams)).copy(
-        memParams = memParams,
-        isMemoryDevice = true
-      ))
-    )}
-  }
 })
 
 class WithExtMemIdBits(n: Int) extends Config((site, here, up) => {

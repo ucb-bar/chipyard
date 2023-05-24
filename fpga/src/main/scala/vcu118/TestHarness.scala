@@ -7,6 +7,7 @@ import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp, BundleBridg
 import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.diplomacy.{IdRange, TransferSizes}
+import freechips.rocketchip.subsystem.{SystemBusKey}
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
@@ -50,8 +51,9 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
   harnessSysPLL := sysClkNode
 
   // create and connect to the dutClock
-  println(s"VCU118 FPGA Base Clock Freq: ${dp(DefaultClockFrequencyKey)} MHz")
-  val dutClock = ClockSinkNode(freqMHz = dp(DefaultClockFrequencyKey))
+  val dutFreqMHz = (dp(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toInt
+  val dutClock = ClockSinkNode(freqMHz = dutFreqMHz)
+  println(s"VCU118 FPGA Base Clock Freq: ${dutFreqMHz} MHz")
   val dutWrangler = LazyModule(new ResetWrangler)
   val dutGroup = ClockGroup()
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL
@@ -80,7 +82,7 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
   // connect 1 mem. channel to the FPGA DDR
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
     name = "chip_ddr",
-    sourceId = IdRange(0, 64)
+    sourceId = IdRange(0, 1 << dp(ExtTLMem).get.master.idBits)
   )))))
   ddrNode := ddrClient
 
@@ -88,9 +90,7 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
   override lazy val module = new VCU118FPGATestHarnessImp(this)
 }
 
-class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawModuleImp(_outer) with HasChipyardHarnessInstantiators {
-  require(p(MultiChipNChips) == 0)
-
+class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessInstantiators {
   val vcu118Outer = _outer
 
   val reset = IO(Input(Bool()))
@@ -116,16 +116,13 @@ class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawMod
   val hReset = Wire(Reset())
   hReset := _outer.dutClock.in.head._1.reset
 
-  def implicitClock = _outer.dutClock.in.head._1.clock
-  def implicitReset = hReset
+  def referenceClockFreqMHz = _outer.dutFreqMHz
+  def referenceClock = _outer.dutClock.in.head._1.clock
+  def referenceReset = hReset
   def success = { require(false, "Unused"); false.B }
 
-  childClock := implicitClock
-  childReset := implicitReset
-
-  // check that all requested clocks are equal to the default
-  // non-exhaustive since you need all ChipTop clocks to equal the default
-  harnessClockInstantiator.clockMap.map(x => require(x._2._2 == p(DefaultClockFrequencyKey)))
+  childClock := referenceClock
+  childReset := referenceReset
 
   instantiateChipTops()
 }

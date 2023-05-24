@@ -37,7 +37,8 @@ class ChipLikeRocketConfig extends Config(
   // Set up I/O
   //==================================
   new testchipip.WithSerialTLWidth(4) ++
-  new chipyard.config.WithSerialTLBackingMemory ++                                      // Backing memory is over serial TL protocol
+  new testchipip.WithSerialTLBackingMemory ++                                           // Backing memory is over serial TL protocol
+  new chipyard.harness.WithSimAXIMemOverSerialTL ++                                     // Attach fast SimDRAM to TestHarness
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 4L) ++                  // 4GB max external memory
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++                          // 1 memory channel
 
@@ -47,7 +48,7 @@ class ChipLikeRocketConfig extends Config(
   new chipyard.clocking.WithPLLSelectorDividerClockGenerator ++   // Use a PLL-based clock selector/divider generator structure
 
   // Create the uncore clock group
-  new chipyard.clocking.WithClockGroupsCombinedByName("uncore", "implicit", "sbus", "mbus", "cbus", "system_bus", "fbus", "pbus") ++
+  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("implicit", "sbus", "mbus", "cbus", "system_bus", "fbus", "pbus"))) ++
 
   new chipyard.config.AbstractConfig)
 
@@ -69,7 +70,7 @@ class ChipBringupHostConfig extends Config(
     replicationBase = Some(BigInt("1000000000", 16))) ++
   new testchipip.WithOffchipBus ++                                                        // offchip bus, but don't directly connect it to existing buses
   new testchipip.WithSerialTLMem(base = 0x1000, size = BigInt("1000000000", 16) - 0x1000, // accessible memory of the chip
-                                 idBits = 8, isMainMemory = false) ++
+                                 idBits = 4, isMainMemory = false) ++
   new testchipip.WithSerialTLClockDirection(provideClockFreqMHz = Some(75)) ++            // bringup board drives the clock for the serial-tl receiver on the chip, use 50MHz clock
 
   //=============================
