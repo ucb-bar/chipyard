@@ -39,7 +39,7 @@ sim_workdir = $(build_dir)/xcelium.d
 sim_run_tcl = $(build_dir)/xcelium_run.tcl
 sim_debug_run_tcl = $(build_dir)/xcelium_debug_run.tcl
 
-include $(base_dir)/xcelium.mk
+include $(base_dir)/sims/xcelium/xcelium.mk
 
 .PHONY: default debug
 default: $(sim)
