@@ -59,7 +59,7 @@ class AbstractConfig extends Config(
   new chipyard.config.WithPeripheryBusFrequencyAsDefault ++         // Unspecified frequencies with match the pbus frequency (which is always set)
   new chipyard.config.WithMemoryBusFrequency(500.0) ++              // Default 500 MHz mbus
   new chipyard.config.WithPeripheryBusFrequency(500.0) ++           // Default 500 MHz pbus
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++      // Default 2 memory channels
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++      // Default 1 memory channels
   new freechips.rocketchip.subsystem.WithClockGateModel ++          // add default EICG_wrapper clock gate model
   new freechips.rocketchip.subsystem.WithJtagDTM ++                 // set the debug module to expose a JTAG port
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++              // no top-level MMIO master port (overrides default set in rocketchip)
