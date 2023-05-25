@@ -30,9 +30,7 @@ import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvon
 
 import scala.reflect.{ClassTag}
 
-case object HarnessBinders extends Field[Map[String, (Any, HasHarnessInstantiators, Seq[Data]) => Unit]](
-  Map[String, (Any, HasHarnessInstantiators, Seq[Data]) => Unit]().withDefaultValue((t: Any, th: HasHarnessInstantiators, d: Seq[Data]) => ())
-)
+case object HarnessBinders extends Field[HarnessBinderMap](HarnessBinderMapDefault)
 
 object ApplyHarnessBinders {
   def apply(th: HasHarnessInstantiators, sys: LazyModule, portMap: Map[String, Seq[Data]])(implicit p: Parameters): Unit = {
