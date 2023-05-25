@@ -51,12 +51,8 @@ class HarnessBinder[T, S <: HasHarnessInstantiators, U <: Data](composer: ((T, S
         val pts = ports.collect({case p: U => p})
         require (pts.length == ports.length, s"Port type mismatch between IOBinder and HarnessBinder: ${portTag}")
         val upfn = up(HarnessBinders, site)(systemTag.runtimeClass.toString)
-        th match {
-          case th: S =>
-            t match {
-              case system: T => composer(upfn)(system, th, pts)
-              case _ =>
-            }
+        (th, t) match {
+          case (th: S, system: T) => composer(upfn)(system, th, pts)
           case _ =>
         }
       })
