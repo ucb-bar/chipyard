@@ -411,6 +411,15 @@ class WithCustomBootPin extends OverrideIOBinder({
   }).getOrElse((Nil, Nil))
 })
 
+class WithUARTTSIPunchthrough extends OverrideIOBinder({
+  (system: CanHavePeripheryUARTTSI) => system.uart_tsi.map({ p =>
+    val sys = system.asInstanceOf[BaseSubsystem]
+    val port = IO(new UARTPortIO(p.c))
+    port <> p
+    (Seq(port), Nil)
+  }).getOrElse((Nil, Nil))
+})
+
 class WithTLMemPunchthrough extends OverrideIOBinder({
   (system: CanHaveMasterTLMemPort) => {
     val io_tl_mem_pins_temp = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](system.mem_tl)).suggestName("tl_slave")

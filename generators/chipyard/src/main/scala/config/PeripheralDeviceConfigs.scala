@@ -80,3 +80,13 @@ class QuadChannelRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++      // 4 AXI4 channels
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
+
+class UARTTSIRocketConfig extends Config(
+  new chipyard.harness.WithSerialTLTiedOff ++
+  new testchipip.WithUARTTSIClient ++
+  new chipyard.config.WithMemoryBusFrequency(10) ++
+  new chipyard.config.WithFrontBusFrequency(10) ++
+  new chipyard.config.WithPeripheryBusFrequency(10) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new chipyard.config.AbstractConfig)
+

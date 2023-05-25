@@ -22,25 +22,29 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithTieOffInterrupts ++                     // tie-off interrupt ports, if present
   new chipyard.harness.WithTieOffL2FBusAXI ++                      // tie-off external AXI4 master, if present
   new chipyard.harness.WithCustomBootPinPlusArg ++                 // drive custom-boot pin with a plusarg, if custom-boot-pin is present
+  new chipyard.harness.WithSimUARTToUARTTSI ++                    // connect a SimUART to the UART-TSI port
   new chipyard.harness.WithClockAndResetFromHarness ++             // all Clock/Reset I/O in ChipTop should be driven by harnessClockInstantiator
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ // generate clocks in harness with unsynthesizable ClockSourceAtFreqMHz
 
   // The IOBinders instantiate ChipTop IOs to match desired digital IOs
-  // IOCells are generated for "Chip-like" IOs, while simulation-only IOs are directly punched through
+  // IOCells are generated for "Chip-like" IOs
+  new chipyard.iobinders.WithSerialTLIOCells ++
+  new chipyard.iobinders.WithDebugIOCells ++
+  new chipyard.iobinders.WithUARTIOCells ++
+  new chipyard.iobinders.WithGPIOCells ++
+  new chipyard.iobinders.WithSPIIOCells ++
+  new chipyard.iobinders.WithExtInterruptIOCells ++
+  new chipyard.iobinders.WithCustomBootPin ++
+  // The "punchtrough" IOBInders below don't generate IOCells, as these interfaces shouldn't really be mapped to ASIC IO
+  // Instead, they directly pass through the DigitalTop ports to ports in the ChipTop
   new chipyard.iobinders.WithAXI4MemPunchthrough ++
   new chipyard.iobinders.WithAXI4MMIOPunchthrough ++
   new chipyard.iobinders.WithTLMemPunchthrough ++
   new chipyard.iobinders.WithL2FBusAXI4Punchthrough ++
   new chipyard.iobinders.WithBlockDeviceIOPunchthrough ++
   new chipyard.iobinders.WithNICIOPunchthrough ++
-  new chipyard.iobinders.WithSerialTLIOCells ++
-  new chipyard.iobinders.WithDebugIOCells ++
-  new chipyard.iobinders.WithUARTIOCells ++
-  new chipyard.iobinders.WithGPIOCells ++
-  new chipyard.iobinders.WithSPIIOCells ++
   new chipyard.iobinders.WithTraceIOPunchthrough ++
-  new chipyard.iobinders.WithExtInterruptIOCells ++
-  new chipyard.iobinders.WithCustomBootPin ++
+  new chipyard.iobinders.WithUARTTSIPunchthrough ++
 
   // By default, punch out IOs to the Harness
   new chipyard.clocking.WithPassthroughClockGenerator ++

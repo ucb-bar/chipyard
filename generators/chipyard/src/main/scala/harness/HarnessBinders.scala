@@ -317,21 +317,14 @@ class WithSimTSIOverSerialTL extends OverrideHarnessBinder({
   }
 })
 
-class WithUARTSerial extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: HasHarnessInstantiators, ports: Seq[ClockedIO[SerialIO]]) => {
+class WithSimUARTToUARTTSI extends OverrideHarnessBinder({
+  (system: CanHavePeripheryUARTTSI, th: HasHarnessInstantiators, ports: Seq[UARTPortIO]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
-      val freq = p(PeripheryBusKey).dtsFrequency.get
-      val bits = port.bits
-      port.clock := th.harnessBinderClock
-      val ram = TSIHarness.connectRAM(system.serdesser.get, bits, th.harnessBinderReset)
-      val uart_to_serial = Module(new UARTToSerial(freq, UARTParams(0)))
-      val serial_width_adapter = Module(new SerialWidthAdapter(
-        8, TSI.WIDTH))
-      ram.module.io.tsi.flipConnect(serial_width_adapter.io.wide)
-      UARTAdapter.connect(Seq(uart_to_serial.io.uart), uart_to_serial.div)
-      serial_width_adapter.io.narrow.flipConnect(uart_to_serial.io.serial)
-      th.success := false.B
+      UARTAdapter.connect(Seq(port),
+        baudrate=port.c.initBaudRate,
+        clockFrequency=th.getHarnessBinderClockFreqHz.toInt,
+        forcePty=true)
     })
   }
 })
