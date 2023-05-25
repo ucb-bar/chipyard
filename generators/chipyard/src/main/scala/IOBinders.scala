@@ -303,6 +303,15 @@ class WithSerialTLIOCells extends OverrideIOBinder({
   }).getOrElse((Nil, Nil))
 })
 
+class WithSerialTLPunchthrough extends OverrideIOBinder({
+  (system: CanHavePeripheryTLSerial) => system.serial_tl.map({ s =>
+    val sys = system.asInstanceOf[BaseSubsystem]
+    val port = IO(s.getWrappedValue.cloneType)
+    port <> s.getWrappedValue
+    (Seq(port), Nil)
+  }).getOrElse((Nil, Nil))
+})
+
 class WithAXI4MemPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveMasterAXI4MemPort) => {
     implicit val p: Parameters = GetSystemParameters(system)

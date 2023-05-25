@@ -290,7 +290,9 @@ class WithSerialTLTiedOff extends OverrideHarnessBinder({
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
       val bits = port.bits
-      port.clock := false.B.asClock
+      if (DataMirror.directionOf(port.clock) == Direction.Input) {
+        port.clock := false.B.asClock
+      }
       port.bits.out.ready := false.B
       port.bits.in.valid := false.B
       port.bits.in.bits := DontCare
@@ -322,6 +324,24 @@ class WithSimUARTToUARTTSI extends OverrideHarnessBinder({
         forcePty=true)
       assert(!port.dropped)
     }}
+  }
+})
+
+class WithSimTSIToUARTTSI extends OverrideHarnessBinder({
+  (system: CanHavePeripheryUARTTSI, th: HasHarnessInstantiators, ports: Seq[UARTTSIIO]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    require(ports.size <= 1)
+    ports.map({ port =>
+      val freq = th.getHarnessBinderClockFreqHz.toInt
+      val uart_to_serial = Module(new UARTToSerial(freq, port.uartParams))
+      val serial_width_adapter = Module(new SerialWidthAdapter(8, TSI.WIDTH))
+      val success = SimTSI.connect(Some(TSIIO(serial_width_adapter.io.wide)), th.harnessBinderClock, th.harnessBinderReset)
+      when (success) { th.success := true.B }
+      assert(!uart_to_serial.io.dropped)
+      serial_width_adapter.io.narrow.flipConnect(uart_to_serial.io.serial)
+      uart_to_serial.io.uart.rxd := port.uart.txd
+      port.uart.rxd := uart_to_serial.io.uart.txd
+    })
   }
 })
 

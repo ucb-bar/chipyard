@@ -106,3 +106,11 @@ class WithControlBusFrequency(freqMHz: Double) extends Config((site, here, up) =
 
 class WithRationalMemoryBusCrossing extends WithSbusToMbusCrossingType(RationalCrossing(Symmetric))
 class WithAsynchrousMemoryBusCrossing extends WithSbusToMbusCrossingType(AsynchronousCrossing())
+
+class WithNoTileClockGaters extends Config((site, here, up) => {
+  case ChipyardPRCIControlKey => up(ChipyardPRCIControlKey).copy(enableTileClockGating = false)
+})
+
+class WithNoTileResetSetters extends Config((site, here, up) => {
+  case ChipyardPRCIControlKey => up(ChipyardPRCIControlKey).copy(enableTileResetSetting = false)
+})
