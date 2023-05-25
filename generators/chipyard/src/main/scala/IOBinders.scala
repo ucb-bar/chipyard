@@ -414,9 +414,9 @@ class WithCustomBootPin extends OverrideIOBinder({
 class WithUARTTSIPunchthrough extends OverrideIOBinder({
   (system: CanHavePeripheryUARTTSI) => system.uart_tsi.map({ p =>
     val sys = system.asInstanceOf[BaseSubsystem]
-    val port = IO(new UARTPortIO(p.c))
-    port <> p
-    (Seq(port), Nil)
+    val uart_tsi = IO(new UARTTSIIO(p.uartParams))
+    uart_tsi <> p
+    (Seq(uart_tsi), Nil)
   }).getOrElse((Nil, Nil))
 })
 
