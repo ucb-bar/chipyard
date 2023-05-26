@@ -84,8 +84,8 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
     name = "chip_ddr",
     sourceId = IdRange(0, 1 << dp(ExtTLMem).get.master.idBits)
   )))))
-  ddrNode := ddrClient
-
+  ddrNode := TLWidthWidget(dp(XLen)/8) := ddrClient
+  
   // module implementation
   override lazy val module = new VCU118FPGATestHarnessImp(this)
 }
