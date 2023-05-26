@@ -146,8 +146,9 @@ ifeq ($(GENERATOR_PACKAGE),hwacha)
 endif
 
 # classpaths
-CHIPYARD_CLASSPATH ?= $(gen_dir)/chipyard.jar
-TAPEOUT_CLASSPATH ?= $(gen_dir)/tapeout.jar
+CLASSPATH_CACHE ?= $(base_dir)/classpath-cache
+CHIPYARD_CLASSPATH ?= $(CLASSPATH_CACHE)/chipyard.jar
+TAPEOUT_CLASSPATH ?= $(CLASSPATH_CACHE)/tapeout.jar
 # if *_CLASSPATH is a true java classpath, it can be colon-delimited list of paths (on *nix)
 CHIPYARD_CLASSPATH_TARGETS ?= $(subst :, ,$(CHIPYARD_CLASSPATH))
 TAPEOUT_CLASSPATH_TARGETS ?= $(subst :, ,$(TAPEOUT_CLASSPATH))

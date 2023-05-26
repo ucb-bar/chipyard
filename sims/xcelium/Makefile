@@ -131,7 +131,7 @@ $(output_dir)/%.vcd: $(output_dir)/% $(sim_debug)
 #########################################################################################
 .PHONY: clean clean-sim clean-sim-debug
 clean:
-	rm -rf $(gen_dir) $(sim_prefix)-*
+	rm -rf $(CLASSPATH_CACHE) $(gen_dir) $(sim_prefix)-*
 
 clean-sim:
 	rm -rf $(model_dir) $(sim) $(sim_workdir) $(sim_run_tcl) ucli.key bpad_*.err sigusrdump.out dramsim*.log
