@@ -146,7 +146,7 @@ ifeq ($(GENERATOR_PACKAGE),hwacha)
 endif
 
 # classpaths
-CLASSPATH_CACHE ?= $(base_dir)/classpath-cache
+CLASSPATH_CACHE ?= $(base_dir)/.classpath_cache
 CHIPYARD_CLASSPATH ?= $(CLASSPATH_CACHE)/chipyard.jar
 TAPEOUT_CLASSPATH ?= $(CLASSPATH_CACHE)/tapeout.jar
 # if *_CLASSPATH is a true java classpath, it can be colon-delimited list of paths (on *nix)

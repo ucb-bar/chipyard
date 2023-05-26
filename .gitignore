@@ -26,4 +26,4 @@ project/metals.sbt
 project/project/
 .ivy2
 .sbt
-classpath-cache/
+.classpath_cache/
