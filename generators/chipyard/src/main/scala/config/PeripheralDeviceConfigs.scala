@@ -2,6 +2,7 @@ package chipyard
 
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
+import freechips.rocketchip.subsystem.{MBUS}
 
 // ---------------------------------------------------------
 // Configs which add non-default peripheral devices or ports
@@ -66,8 +67,8 @@ class dmiRocketConfig extends Config(
 
 class ManyPeripheralsRocketConfig extends Config(
   new testchipip.WithBlockDevice ++                          // add block-device module to peripherybus
-  new testchipip.WithOffchipBusClient(MBUS) ++
-  new testchipip.WithOffchipBus ++
+  new testchipip.WithOffchipBusClient(MBUS) ++               // OBUS provides backing memory to the MBUS
+  new testchipip.WithOffchipBus ++                           // OBUS must exist for serial-tl to master off-chip memory
   new testchipip.WithSerialTLMem(isMainMemory=true) ++       // set lbwif memory base to DRAM_BASE, use as main memory
   new chipyard.harness.WithSimSPIFlashModel(true) ++         // add the SPI flash model in the harness (read-only)
   new chipyard.harness.WithSimBlockDevice ++                 // drive block-device IOs with SimBlockDevice

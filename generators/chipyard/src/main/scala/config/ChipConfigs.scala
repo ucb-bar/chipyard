@@ -31,7 +31,7 @@ class ChipLikeRocketConfig extends Config(
   //==================================
   // Set up buses
   //==================================
-  new testchipip.WithOffchipBusManager(MBUS) ++
+  new testchipip.WithOffchipBusClient(MBUS) ++
   new testchipip.WithOffchipBus ++
 
   //==================================
@@ -65,8 +65,8 @@ class ChipBringupHostConfig extends Config(
   //============================
   // Setup bus topology on the bringup system
   //============================
-  new testchipip.WithOffchipBusClient(SBUS,                                   // offchip bus hans off the SBUS
-    blockRange = AddressSet.misaligned(0x80000000L, (BigInt(1) << 30) * 4)) ++ // offchip bus should not see the main memory of the testchip, since that can be accesses directly through this system
+  new testchipip.WithOffchipBusClient(SBUS,                                    // offchip bus hangs off the SBUS
+    blockRange = AddressSet.misaligned(0x80000000L, (BigInt(1) << 30) * 4)) ++ // offchip bus should not see the main memory of the testchip, since that can be accessed directly
   new testchipip.WithOffchipBus ++                                             // offchip bus
 
   //=============================
