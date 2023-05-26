@@ -164,6 +164,22 @@ class WithFireSimHighPerfConfigTweaks extends Config(
   new WithFireSimDesignTweaks
 )
 
+// Tweak more representative of testchip configs
+class WithFireSimTestChipConfigTweaks extends Config(
+  // Frequency specifications
+  new chipyard.config.WithTileFrequency(1000.0) ++       // Realistic tile frequency for a test chip
+  new chipyard.config.WithSystemBusFrequency(500.0) ++   // Realistic system bus frequency
+  new chipyard.config.WithMemoryBusFrequency(1000.0) ++  // Needs to be 1000 MHz to model DDR performance accurately
+  new chipyard.config.WithPeripheryBusFrequency(500.0) ++  // Match the sbus and pbus frequency
+  //  Crossing specifications
+  new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
+  new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
+  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new boom.common.WithRationalBoomTiles ++ // Add rational crossings between BoomTile and uncore
+  new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
+  new WithFireSimDesignTweaks
+)
+
 /*******************************************************************************
 * Full TARGET_CONFIG configurations. These set parameters of the target being
 * simulated.
