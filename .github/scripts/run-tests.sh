@@ -105,6 +105,9 @@ case $1 in
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashwrite.riscv
         [[ "`xxd $LOCAL_CHIPYARD_DIR/tests/spiflash.img  | grep 1337\ 00ff\ aa55\ face | wc -l`" == "6" ]] || false
         ;;
+    chipyard-tethered)
+        make -C $LOCAL_CHIPYARD_DIR/tests
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv LOADMEM=1 EXTRA_SIM_FLAGS="+cflush_addr=0x2010200"
     tracegen)
         run_tracegen
         ;;
