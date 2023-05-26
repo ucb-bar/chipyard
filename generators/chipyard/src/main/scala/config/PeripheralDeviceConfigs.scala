@@ -66,7 +66,7 @@ class dmiRocketConfig extends Config(
 
 class ManyPeripheralsRocketConfig extends Config(
   new testchipip.WithBlockDevice ++                          // add block-device module to peripherybus
-  new testchipip.WithOffchipBusManager(MBUS) ++
+  new testchipip.WithOffchipBusClient(MBUS) ++
   new testchipip.WithOffchipBus ++
   new testchipip.WithSerialTLMem(isMainMemory=true) ++       // set lbwif memory base to DRAM_BASE, use as main memory
   new chipyard.harness.WithSimSPIFlashModel(true) ++         // add the SPI flash model in the harness (read-only)

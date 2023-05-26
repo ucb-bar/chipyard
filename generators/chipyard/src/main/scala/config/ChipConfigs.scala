@@ -65,7 +65,7 @@ class ChipBringupHostConfig extends Config(
   //============================
   // Setup bus topology on the bringup system
   //============================
-  new testchipip.WithOffchipBusManager(SBUS,                                   // offchip bus hans off the SBUS
+  new testchipip.WithOffchipBusClient(SBUS,                                   // offchip bus hans off the SBUS
     blockRange = AddressSet.misaligned(0x80000000L, (BigInt(1) << 30) * 4)) ++ // offchip bus should not see the main memory of the testchip, since that can be accesses directly through this system
   new testchipip.WithOffchipBus ++                                             // offchip bus
 
