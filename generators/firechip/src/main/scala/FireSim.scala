@@ -38,16 +38,22 @@ class FireSimClockBridgeInstantiator extends HarnessClockInstantiator {
 
     var instantiatedClocks = LinkedHashMap[Int, (Clock, Seq[String])]()
     // connect wires to clock source
-    for ((name, (freq, clock)) <- clockMap) {
-      val freqMHz = (freq / (1000 * 1000)).toInt
+    def findOrInstantiate(freqMHz: Int, name: String): Clock = {
       if (!instantiatedClocks.contains(freqMHz)) {
         val clock = Wire(Clock())
         instantiatedClocks(freqMHz) = (clock, Seq(name))
       } else {
         instantiatedClocks(freqMHz) = (instantiatedClocks(freqMHz)._1, instantiatedClocks(freqMHz)._2 :+ name)
       }
-      clock := instantiatedClocks(freqMHz)._1
+      instantiatedClocks(freqMHz)._1
     }
+    for ((name, (freq, clock)) <- clockMap) {
+      val freqMHz = (freq / (1000 * 1000)).toInt
+      clock := findOrInstantiate(freqMHz, name)
+    }
+
+    // The undivided reference clock as calculated by pllConfig must be instantiated
+    findOrInstantiate(pllConfig.referenceFreqMHz.toInt, "reference")
 
     val ratClocks = instantiatedClocks.map { case (freqMHz, (clock, names)) =>
       (RationalClock(names.mkString(","), 1, pllConfig.referenceFreqMHz.toInt / freqMHz), clock)

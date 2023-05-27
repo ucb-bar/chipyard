@@ -103,11 +103,15 @@ class WithFireSimDesignTweaks extends Config(
 
 // Tweaks to modify target clock frequencies / crossings to legacy firesim defaults
 class WithFireSimHighPerfClocking extends Config(
+  // Create clock group for uncore that does not include mbus
+  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("sbus", "pbus", "fbus", "cbus", "implicit"), Nil)) ++
   // Optional: This sets the default frequency for all buses in the system to 3.2 GHz
   // (since unspecified bus frequencies will use the pbus frequency)
   // This frequency selection matches FireSim's legacy selection and is required
   // to support 200Gb NIC performance. You may select a smaller value.
   new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
+  new chipyard.config.WithSystemBusFrequency(3200.0) ++
+  new chipyard.config.WithFrontBusFrequency(3200.0) ++
   // Optional: These three configs put the DRAM memory system in it's own clock domain.
   // Removing the first config will result in the FASED timing model running
   // at the pbus freq (above, 3.2 GHz), which is outside the range of valid DDR3 speedgrades.
