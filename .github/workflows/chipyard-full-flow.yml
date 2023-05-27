@@ -115,7 +115,7 @@ jobs:
 
           cd vlsi
 
-          # NOTE: most conda installs are in separate conda envs because they mess up 
+          # NOTE: most conda installs are in separate conda envs because they mess up
           #   each other's versions (for no apparent reason) and we need the latest versions
           conda config --add channels defaults
           conda config --add channels litex-hub
@@ -166,7 +166,7 @@ jobs:
     name: cleanup
     needs: [run-tutorial]
     runs-on: ferry
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+    if: ${{ always() }}
     steps:
       - name: Delete repo copy and conda env
         run: |
