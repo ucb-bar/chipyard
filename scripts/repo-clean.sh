@@ -26,9 +26,9 @@ rm -rf $RDIR/toolchains/esp-tools/riscv-tests/build.log
     popd
 )
 (
-    if [ -d $RDIR/generators/cva6/src/main/resources/vsrc/cva6 ]
+    if [ -d $RDIR/generators/cva6/src/main/resources/cva6/vsrc ]
     then
-        pushd $RDIR/generators/cva6/src/main/resources/vsrc/cva6
+        pushd $RDIR/generators/cva6/src/main/resources/cva6/vsrc
         if [ -d cva6 ]
         then
 	    git submodule deinit -f cva6

@@ -8,7 +8,7 @@ HELP_COMPILATION_VARIABLES = \
 "   JAVA_TOOL_OPTIONS = if overridden, set underlying java tool options (default sets misc. sizes and tmp dir)" \
 "   SBT_OPTS          = set additional sbt command line options (these take the form -Dsbt.<option>=<setting>) " \
 "                       See https://www.scala-sbt.org/1.x/docs/Command-Line-Reference.html\#Command+Line+Options" \
-"   SBT_BIN           = if overridden, used to invoke sbt (default is to invoke sbt by sbt-launch.jar)" \
+"   SBT               = if overridden, used to invoke sbt (default is to invoke sbt by sbt-launch.jar)" \
 "   FIRRTL_LOGLEVEL   = if overridden, set firrtl log level (default is error)"
 
 HELP_PROJECT_VARIABLES = \
@@ -25,6 +25,7 @@ HELP_PROJECT_VARIABLES = \
 
 HELP_SIMULATION_VARIABLES = \
 "   BINARY                 = riscv elf binary that the simulator will run when using the run-binary* targets" \
+"   BINARIES               = list of riscv elf binary that the simulator will run when using the run-binaries* targets" \
 "   LOADMEM                = riscv elf binary that should be loaded directly into simulated DRAM. LOADMEM=1 will load the BINARY elf" \
 "   LOADARCH               = path to a architectural checkpoint directory that should end in .loadarch/, for restoring from a checkpoint" \
 "   VERBOSE_FLAGS          = flags used when doing verbose simulation [$(VERBOSE_FLAGS)]" \
@@ -157,6 +158,14 @@ ifeq ($(GENERATOR_PACKAGE),hwacha)
 	long_name=$(MODEL_PACKAGE).$(CONFIG)
 endif
 
+# classpaths
+CLASSPATH_CACHE ?= $(base_dir)/.classpath_cache
+CHIPYARD_CLASSPATH ?= $(CLASSPATH_CACHE)/chipyard.jar
+TAPEOUT_CLASSPATH ?= $(CLASSPATH_CACHE)/tapeout.jar
+# if *_CLASSPATH is a true java classpath, it can be colon-delimited list of paths (on *nix)
+CHIPYARD_CLASSPATH_TARGETS ?= $(subst :, ,$(CHIPYARD_CLASSPATH))
+TAPEOUT_CLASSPATH_TARGETS ?= $(subst :, ,$(TAPEOUT_CLASSPATH))
+
 # chisel generated outputs
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
@@ -217,30 +226,35 @@ sim_common_files       ?= $(build_dir)/sim_files.common.f
 #########################################################################################
 JAVA_HEAP_SIZE ?= 8G
 JAVA_TMP_DIR ?= $(base_dir)/.java_tmp
-export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -Dsbt.supershell=false -Djava.io.tmpdir=$(JAVA_TMP_DIR)
+export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -Djava.io.tmpdir=$(JAVA_TMP_DIR)
 
 #########################################################################################
 # default sbt launch command
 #########################################################################################
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
-SBT_THIN_CLIENT_TIMESTAMP = $(base_dir)/project/target/active.json
-
-ifdef ENABLE_SBT_THIN_CLIENT
-SCALA_BUILDTOOL_DEPS += $(SBT_THIN_CLIENT_TIMESTAMP)
-# enabling speeds up sbt loading
-# use with sbt script or sbtn to bypass error code issues
-SBT_CLIENT_FLAG = --client
-endif
-
 # passes $(JAVA_TOOL_OPTIONS) from env to java
-export SBT_OPTS ?= -Dsbt.ivy.home=$(base_dir)/.ivy2 -Dsbt.global.base=$(base_dir)/.sbt -Dsbt.boot.directory=$(base_dir)/.sbt/boot/ -Dsbt.color=always
-SBT_BIN ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
-SBT = $(SBT_BIN) $(SBT_CLIENT_FLAG)
-SBT_NON_THIN = $(subst $(SBT_CLIENT_FLAG),,$(SBT))
+export SBT_OPTS ?= -Dsbt.ivy.home=$(base_dir)/.ivy2 -Dsbt.global.base=$(base_dir)/.sbt -Dsbt.boot.directory=$(base_dir)/.sbt/boot/ -Dsbt.color=always -Dsbt.supershell=false -Dsbt.server.forcestart=true
+SBT ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
 
+# (1) - classpath of the fat jar
+# (2) - main class
+# (3) - main class arguments
+define run_jar_scala_main
+	cd $(base_dir) && java -cp $(1) $(2) $(3)
+endef
+
+# (1) - sbt project
+# (2) - main class
+# (3) - main class arguments
 define run_scala_main
 	cd $(base_dir) && $(SBT) ";project $(1); runMain $(2) $(3)"
+endef
+
+# (1) - sbt project to assemble
+# (2) - classpath file(s) to create
+define run_sbt_assembly
+	cd $(base_dir) && $(SBT) ";project $(1); set assembly / assemblyOutputPath := file(\"$(2)\"); assembly"
 endef
 
 FIRRTL_LOGLEVEL ?= error
@@ -256,28 +270,20 @@ output_dir=$(sim_dir)/output/$(long_name)
 PERMISSIVE_ON=+permissive
 PERMISSIVE_OFF=+permissive-off
 BINARY ?=
+BINARIES ?=
 override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(timeout_cycles)
 VERBOSE_FLAGS ?= +verbose
-OUT_NAME ?= $(subst $() $(),_,$(notdir $(basename $(BINARY))))
+# get_out_name is a function, 1st argument is the binary
+get_out_name = $(subst $() $(),_,$(notdir $(basename $(1))))
 LOADMEM ?=
 LOADARCH ?=
 
 ifneq ($(LOADARCH),)
-override BINARY = $(LOADARCH)/mem.elf
-override OUT_NAME = $(shell basename $(LOADARCH))
+override BINARY = $(addsuffix /mem.elf,$(LOADARCH))
+override BINARIES = $(addsuffix /mem.elf,$(LOADARCH))
+override get_out_name = $(shell basename $(dir $(1)))
 override LOADMEM = 1
-override SIM_FLAGS += +loadarch=$(LOADARCH)/loadarch
 endif
-
-ifeq ($(LOADMEM),1)
-# If LOADMEM=1, assume BINARY is the loadmem elf
-override SIM_FLAGS += +loadmem=$(BINARY)
-else ifneq ($(LOADMEM),)
-# Otherwise, assume the variable points to an elf file
-override SIM_FLAGS += +loadmem=$(LOADMEM)
-endif
-
-sim_out_name = $(output_dir)/$(OUT_NAME)
 
 #########################################################################################
 # build output directory for compilation

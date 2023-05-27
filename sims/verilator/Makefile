@@ -96,7 +96,7 @@ USE_FST ?= 0
 TRACING_OPTS := $(if $(filter $(USE_FST),0),\
 	                  --trace,--trace-fst --trace-threads 1)
 # TODO: consider renaming +vcdfile in TestDriver.v to +waveformfile (or similar)
-WAVEFORM_FLAG := +vcdfile=$(sim_out_name).$(if $(filter $(USE_FST),0),vcd,fst)
+get_waveform_flag = +vcdfile=$(1).$(if $(filter $(USE_FST),0),vcd,fst)
 
 #----------------------------------------------------------------------------------------
 # verilation configuration/optimization
@@ -226,7 +226,7 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 #########################################################################################
 .PHONY: clean clean-sim clean-sim-debug
 clean:
-	rm -rf $(gen_dir) $(sim_prefix)-*
+	rm -rf $(CLASSPATH_CACHE) $(gen_dir) $(sim_prefix)-*
 
 clean-sim:
 	rm -rf $(model_dir) $(sim)

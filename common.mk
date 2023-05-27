@@ -16,7 +16,6 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_LDFLAGS         = additional LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES         = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
-"   ENABLE_SBT_THIN_CLIENT    = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
 "   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & MFC converts to Verilog)" \
 "   ENABLE_YOSYS_FLOW         = if set, add compilation flags to enable the vlsi flow for yosys(tutorial flow)" \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
@@ -45,11 +44,13 @@ HELP_COMMANDS += \
 "   run-binary                  = run [./$(shell basename $(sim))] and log instructions to file" \
 "   run-binary-fast             = run [./$(shell basename $(sim))] and don't log instructions" \
 "   run-binary-debug            = run [./$(shell basename $(sim_debug))] and log instructions and waveform to files" \
+"   run-binaries                = run [./$(shell basename $(sim))] and log instructions to file" \
+"   run-binaries-fast           = run [./$(shell basename $(sim))] and don't log instructions" \
+"   run-binaries-debug          = run [./$(shell basename $(sim_debug))] and log instructions and waveform to files" \
 "   verilog                     = generate intermediate verilog files from chisel elaboration and firrtl passes" \
 "   firrtl                      = generate intermediate firrtl files from chisel elaboration" \
 "   run-tests                   = run all assembly and benchmark tests" \
 "   launch-sbt                  = start sbt terminal" \
-"   {shutdown,start}-sbt-server = shutdown or start sbt server if using ENABLE_SBT_THIN_CLIENT" \
 "   find-config-fragments       = list all config. fragments"
 
 #########################################################################################
@@ -102,12 +103,24 @@ $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip
 	cp -f $< $@
 
 #########################################################################################
-# create firrtl file rule and variables
+# compile scala jars
+#########################################################################################
+$(CHIPYARD_CLASSPATH_TARGETS) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS)
+	mkdir -p $(dir $@)
+	$(call run_sbt_assembly,$(SBT_PROJECT),$(CHIPYARD_CLASSPATH))
+
+# order only dependency between sbt runs needed to avoid concurrent sbt runs
+$(TAPEOUT_CLASSPATH_TARGETS) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) | $(CHIPYARD_CLASSPATH_TARGETS)
+	mkdir -p $(dir $@)
+	$(call run_sbt_assembly,tapeout,$(TAPEOUT_CLASSPATH))
+
+#########################################################################################
+# verilog generation pipeline
 #########################################################################################
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-$(FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS)
+$(FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(CHIPYARD_CLASSPATH_TARGETS) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
-	(set -o pipefail && $(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
+	(set -o pipefail && $(call run_jar_scala_main,$(CHIPYARD_CLASSPATH),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
 		--name $(long_name) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
@@ -192,9 +205,9 @@ endif
 	if [ $(SFC_LEVEL) = none ]; then cat $(EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE); fi
 
 $(SFC_MFC_TARGETS) &: private TMP_DIR := $(shell mktemp -d -t cy-XXXXXXXX)
-$(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS)
+$(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
-	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateModelStageMain,\
+	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.tapeout.transforms.GenerateModelStageMain,\
 		--no-dedup \
 		--output-file $(SFC_FIRRTL_BASENAME) \
 		--output-annotation-file $(SFC_ANNO_FILE) \
@@ -260,12 +273,12 @@ $(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JS
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 TOP_MACROCOMPILER_MODE ?= --mode synflops
-$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(TOP_SMEMS_CONF)
-	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
+$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH_TARGETS) $(TOP_SMEMS_CONF)
+	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
 
 MODEL_MACROCOMPILER_MODE = --mode synflops
-$(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(MODEL_SMEMS_CONF) | $(TOP_SMEMS_FILE)
-	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
+$(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH_TARGETS) $(MODEL_SMEMS_CONF) | $(TOP_SMEMS_FILE)
+	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
@@ -287,16 +300,20 @@ verilog: $(sim_common_files)
 # helper rules to run simulations
 #########################################################################################
 .PHONY: run-binary run-binary-fast run-binary-debug run-fast
+	%.check-exists check-binary check-binaries
 
 check-binary:
 ifeq (,$(BINARY))
 	$(error BINARY variable is not set. Set it to the simulation binary)
 endif
-ifneq (none,$(BINARY))
-ifeq ("$(wildcard $(BINARY))","")
-	$(error BINARY=$(BINARY) not found)
+
+check-binaries:
+ifeq (,$(BINARIES))
+	$(error BINARIES variable is not set. Set it to the list of simulation binaries to run)
 endif
-endif
+
+%.check-exists:
+	if [ "$*" != "none" ] && [ ! -f "$*" ]; then printf "\n\nBinary $* not found\n\n"; exit 1; fi
 
 # allow you to override sim prereq
 ifeq (,$(BREAK_SIM_PREREQ))
@@ -304,20 +321,49 @@ SIM_PREREQ = $(sim)
 SIM_DEBUG_PREREQ = $(sim_debug)
 endif
 
+# Function to generate the loadmem flag. First arg is the binary
+ifeq ($(LOADMEM),1)
+# If LOADMEM=1, assume BINARY is the loadmem elf
+get_loadmem_flag = +loadmem=$(1)
+else ifneq ($(LOADMEM),)
+# Otherwise, assume the variable points to an elf file
+get_loadmem_flag = +loadmem=$(LOADMEM)
+endif
+
+ifneq ($(LOADARCH),)
+get_loadarch_flag = +loadarch=$(subst mem.elf,loadarch,$(1))
+endif
+
+# get the output path base name for simulation outputs, First arg is the binary
+get_sim_out_name = $(output_dir)/$(call get_out_name,$(1))
+# sim flags that are common to run-binary/run-binary-fast/run-binary-debug
+get_common_sim_flags = $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(call get_loadmem_flag,$(1)) $(call get_loadarch_flag,$(1))
+
+.PHONY: %.run %.run.debug %.run.fast
+
 # run normal binary with hardware-logged insn dissassembly
-run-binary: $(SIM_PREREQ) check-binary | $(output_dir)
-	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+run-binary: check-binary $(BINARY).run
+run-binaries: check-binaries $(addsuffix .run,$(BINARIES))
+
+%.run: %.check-exists $(SIM_PREREQ) | $(output_dir)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(call get_common_sim_flags,$*) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $* </dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
 
 # run simulator as fast as possible (no insn disassembly)
-run-binary-fast: $(SIM_PREREQ) check-binary | $(output_dir)
-	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
+run-binary-fast: check-binary $(BINARY).run.fast
+run-binaries-fast: check-binaries $(addsuffix .run.fast,$(BINARIES))
+
+%.run.fast: %.check-exists $(SIM_PREREQ) | $(output_dir)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(call get_common_sim_flags,$*) $(PERMISSIVE_OFF) $* </dev/null | tee $(call get_sim_out_name,$*).log)
 
 # run simulator with as much debug info as possible
-run-binary-debug: $(SIM_DEBUG_PREREQ) check-binary | $(output_dir)
-ifneq (none,$(BINARY))
-	riscv64-unknown-elf-objdump -D $(BINARY) > $(sim_out_name).dump
+run-binary-debug: check-binary $(BINARY).run.debug
+run-binaries-debug: check-binaries $(addsuffix .run.debug,$(BINARIES))
+
+%.run.debug: %.check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
+ifneq (none,$*)
+	riscv64-unknown-elf-objdump -D $* > $(call get_sim_out_name,$*).dump
 endif
-	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(call get_common_sim_flags,$*) $(VERBOSE_FLAGS) $(call get_waveform_flag,$(call get_sim_out_name,$*)) $(PERMISSIVE_OFF) $* </dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
@@ -325,11 +371,11 @@ run-fast: run-asm-tests-fast run-bmark-tests-fast
 # helper rules to run simulator with fast loadmem
 # LEGACY - use LOADMEM=1 instead
 #########################################################################################
-run-binary-hex: run-binary
+run-binary-hex: $(BINARY).run
 run-binary-hex: override SIM_FLAGS += +loadmem=$(BINARY)
-run-binary-debug-hex: run-binary-debug
+run-binary-debug-hex: $(BINARY).run.debug
 run-binary-debug-hex: override SIM_FLAGS += +loadmem=$(BINARY)
-run-binary-fast-hex: run-binary-fast
+run-binary-fast-hex: $(BINARY).run.fast
 run-binary-fast-hex: override SIM_FLAGS += +loadmem=$(BINARY)
 
 #########################################################################################
@@ -357,7 +403,6 @@ endif
 #######################################
 # Rules for building DRAMSim2 library
 #######################################
-
 dramsim_dir = $(base_dir)/tools/DRAMSim2
 dramsim_lib = $(dramsim_dir)/libdramsim.a
 
@@ -365,27 +410,12 @@ $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
 
 ################################################
-# Helper to run SBT or manage the SBT server
+# Helper to run SBT
 ################################################
-
 SBT_COMMAND ?= shell
 .PHONY: launch-sbt
 launch-sbt:
-	cd $(base_dir) && $(SBT_NON_THIN) "$(SBT_COMMAND)"
-
-.PHONY: check-thin-client
-check-thin-client:
-ifeq (,$(ENABLE_SBT_THIN_CLIENT))
-	$(error ENABLE_SBT_THIN_CLIENT not set.)
-endif
-
-.PHONY: shutdown-sbt-server
-shutdown-sbt-server: check-thin-client
-	cd $(base_dir) && $(SBT) "shutdown"
-
-.PHONY: start-sbt-server
-start-sbt-server: check-thin-client
-	cd $(base_dir) && $(SBT) "exit"
+	cd $(base_dir) && $(SBT) "$(SBT_COMMAND)"
 
 #########################################################################################
 # print help text (and other help)
