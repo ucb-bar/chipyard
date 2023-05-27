@@ -226,7 +226,7 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 #########################################################################################
 .PHONY: clean clean-sim clean-sim-debug
 clean:
-	rm -rf $(gen_dir) $(sim_prefix)-*
+	rm -rf $(CLASSPATH_CACHE) $(gen_dir) $(sim_prefix)-*
 
 clean-sim:
 	rm -rf $(model_dir) $(sim)
