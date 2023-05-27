@@ -10,13 +10,14 @@ SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
 DISABLE_SIM_PREREQ="BREAK_SIM_PREREQ=1"
+MAPPING_FLAGS=${mapping[$1]}
 
 run_bmark () {
-    make run-bmark-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} $@
+    make run-bmark-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS $@
 }
 
 run_asm () {
-    make run-asm-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} $@
+    make run-asm-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS $@
 }
 
 run_both () {
@@ -25,11 +26,12 @@ run_both () {
 }
 
 run_tracegen () {
-    make tracegen -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} $@
+    make tracegen -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS $@
 }
 
 run_binary () {
-    make run-binary-fast -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} $@
+    make run-binary-fast -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS $@
+}
 
 case $1 in
     chipyard-rocket)
@@ -62,7 +64,7 @@ case $1 in
         run_bmark
         ;;
     chipyard-hwacha)
-        make run-rv64uv-p-asm-tests -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]}
+        make run-rv64uv-p-asm-tests -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS
         ;;
     chipyard-gemmini)
         GEMMINI_SOFTWARE_DIR=$LOCAL_SIM_DIR/../../generators/gemmini/software/gemmini-rocc-tests
@@ -108,6 +110,7 @@ case $1 in
     chipyard-tethered)
         make -C $LOCAL_CHIPYARD_DIR/tests
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv LOADMEM=1 EXTRA_SIM_FLAGS="+cflush_addr=0x2010200"
+        ;;
     tracegen)
         run_tracegen
         ;;
