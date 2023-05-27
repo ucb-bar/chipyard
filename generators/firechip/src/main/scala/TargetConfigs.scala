@@ -171,6 +171,7 @@ class WithFireSimTestChipConfigTweaks extends Config(
   new chipyard.config.WithSystemBusFrequency(500.0) ++   // Realistic system bus frequency
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++  // Needs to be 1000 MHz to model DDR performance accurately
   new chipyard.config.WithPeripheryBusFrequency(500.0) ++  // Match the sbus and pbus frequency
+  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("sbus", "pbus", "fbus", "cbus", "implicit"), Seq("tile"))) ++
   //  Crossing specifications
   new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
