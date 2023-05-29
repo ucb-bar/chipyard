@@ -71,7 +71,7 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
   // diplomatic IOBinder should drive
   val frequencySpecifier = ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey))
   val clockGroupCombiner = ClockGroupCombiner()
-  val resetSynchronizer  = ClockGroupResetSynchronizer()
+  val resetSynchronizer  = prci_ctrl_domain { ClockGroupResetSynchronizer() }
   val tileClockGater     = if (prciParams.enableTileClockGating) { prci_ctrl_domain {
     TileClockGater(prciParams.baseAddress + 0x00000, tlbus)
   } } else { ClockGroupEphemeralNode() }
