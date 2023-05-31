@@ -90,7 +90,7 @@ ifeq ($(SUB_PROJECT),hwacha)
 	TB                ?= TestDriver
 	TOP               ?= ExampleRocketSystem
 endif
-# For TestChipIP developers
+# For TestChipIP developers running unit-tests
 ifeq ($(SUB_PROJECT),testchipip)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
@@ -98,6 +98,18 @@ ifeq ($(SUB_PROJECT),testchipip)
 	MODEL_PACKAGE     ?= chipyard.unittest
 	CONFIG            ?= TestChipUnitTestConfig
 	CONFIG_PACKAGE    ?= testchipip
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= TestDriver
+	TOP               ?= UnitTestSuite
+endif
+# For rocketchip developers running unit-tests
+ifeq ($(SUB_PROJECT),rocketchip)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
+	MODEL_PACKAGE     ?= chipyard.unittest
+	CONFIG            ?= TLSimpleUnitTestConfig
+	CONFIG_PACKAGE    ?= freechips.rocketchip.unittest
 	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
 	TOP               ?= UnitTestSuite
