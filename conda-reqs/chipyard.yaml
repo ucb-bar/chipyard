@@ -25,7 +25,7 @@ dependencies:
 
     - gcc
     - gxx
-    - sysroot_linux-64>=2.17 # needed to match pre-built CI XRT glibc version
+    - sysroot_linux-64=2.17 # needed to match pre-built CI XRT glibc version
     - conda-gcc-specs
     - binutils
 
@@ -143,6 +143,7 @@ dependencies:
     - mypy-boto3-s3
     - mypy_boto3_ec2
     - botocore-stubs
+    - cryptography<41
     - pytz
     - types-pytz
     - pyyaml
