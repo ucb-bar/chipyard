@@ -38,9 +38,9 @@ class WithPLLSelectorDividerClockGenerator extends OverrideLazyIOBinder({
     val clockSelector = system.prci_ctrl_domain { LazyModule(new TLClockSelector(baseAddress + 0x30000, tlbus.beatBytes)) }
     val pllCtrl       = system.prci_ctrl_domain { LazyModule(new FakePLLCtrl    (baseAddress + 0x40000, tlbus.beatBytes)) }
 
-    tlbus.toVariableWidthSlave(Some("clock-div-ctrl")) { clockDivider.tlNode := TLBuffer() }
-    tlbus.toVariableWidthSlave(Some("clock-sel-ctrl")) { clockSelector.tlNode := TLBuffer() }
-    tlbus.toVariableWidthSlave(Some("pll-ctrl")) { pllCtrl.tlNode := TLBuffer() }
+    clockDivider.tlNode  := system.prci_ctrl_bus
+    clockSelector.tlNode := system.prci_ctrl_bus
+    pllCtrl.tlNode       := system.prci_ctrl_bus
 
     system.allClockGroupsNode := clockDivider.clockNode := clockSelector.clockNode
 

@@ -23,9 +23,9 @@ object ClockGroupCombiner {
 case object ClockGroupCombinerKey extends Field[Seq[(String, ClockSinkParameters => Boolean)]](Nil)
 
 // All clock groups with a name containing any substring in names will be combined into a single clock group
-class WithClockGroupsCombinedByName(groups: (String, Seq[String])*) extends Config((site, here, up) => {
-  case ClockGroupCombinerKey => groups.map { case (grouped_name, matched_names) =>
-    (grouped_name, (m: ClockSinkParameters) => matched_names.map(n => m.name.get.contains(n)).reduce(_||_))
+class WithClockGroupsCombinedByName(groups: (String, Seq[String], Seq[String])*) extends Config((site, here, up) => {
+  case ClockGroupCombinerKey => groups.map { case (grouped_name, matched_names, unmatched_names) =>
+    (grouped_name, (m: ClockSinkParameters) => matched_names.exists(n => m.name.get.contains(n)) && !unmatched_names.exists(n => m.name.get.contains(n)))
   }
 })
 

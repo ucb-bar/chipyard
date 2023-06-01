@@ -46,7 +46,7 @@ This is done by the following:
 
 .. code-block:: shell
 
-    conda install -n base conda-lock
+    conda install -n base conda-lock=1
     conda activate base
 
 .. Note:: We also recommended switching to `libmamba <https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community>`__ for much faster dependency solving.

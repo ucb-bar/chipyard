@@ -16,7 +16,6 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_LDFLAGS         = additional LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES         = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
-"   ENABLE_SBT_THIN_CLIENT    = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
 "   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & MFC converts to Verilog)" \
 "   ENABLE_YOSYS_FLOW         = if set, add compilation flags to enable the vlsi flow for yosys(tutorial flow)" \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
@@ -52,7 +51,6 @@ HELP_COMMANDS += \
 "   firrtl                      = generate intermediate firrtl files from chisel elaboration" \
 "   run-tests                   = run all assembly and benchmark tests" \
 "   launch-sbt                  = start sbt terminal" \
-"   {shutdown,start}-sbt-server = shutdown or start sbt server if using ENABLE_SBT_THIN_CLIENT" \
 "   find-config-fragments       = list all config. fragments"
 
 #########################################################################################
@@ -105,12 +103,24 @@ $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip
 	cp -f $< $@
 
 #########################################################################################
-# create firrtl file rule and variables
+# compile scala jars
+#########################################################################################
+$(CHIPYARD_CLASSPATH_TARGETS) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS)
+	mkdir -p $(dir $@)
+	$(call run_sbt_assembly,$(SBT_PROJECT),$(CHIPYARD_CLASSPATH))
+
+# order only dependency between sbt runs needed to avoid concurrent sbt runs
+$(TAPEOUT_CLASSPATH_TARGETS) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) | $(CHIPYARD_CLASSPATH_TARGETS)
+	mkdir -p $(dir $@)
+	$(call run_sbt_assembly,tapeout,$(TAPEOUT_CLASSPATH))
+
+#########################################################################################
+# verilog generation pipeline
 #########################################################################################
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-$(FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS)
+$(FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(CHIPYARD_CLASSPATH_TARGETS) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
-	(set -o pipefail && $(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
+	(set -o pipefail && $(call run_jar_scala_main,$(CHIPYARD_CLASSPATH),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
 		--name $(long_name) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
@@ -195,9 +205,9 @@ endif
 	if [ $(SFC_LEVEL) = none ]; then cat $(EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE); fi
 
 $(SFC_MFC_TARGETS) &: private TMP_DIR := $(shell mktemp -d -t cy-XXXXXXXX)
-$(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS)
+$(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
-	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateModelStageMain,\
+	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.tapeout.transforms.GenerateModelStageMain,\
 		--no-dedup \
 		--output-file $(SFC_FIRRTL_BASENAME) \
 		--output-annotation-file $(SFC_ANNO_FILE) \
@@ -263,12 +273,12 @@ $(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JS
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 TOP_MACROCOMPILER_MODE ?= --mode synflops
-$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(TOP_SMEMS_CONF)
-	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
+$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH_TARGETS) $(TOP_SMEMS_CONF)
+	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
 
 MODEL_MACROCOMPILER_MODE = --mode synflops
-$(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(MODEL_SMEMS_CONF) | $(TOP_SMEMS_FILE)
-	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
+$(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH_TARGETS) $(MODEL_SMEMS_CONF) | $(TOP_SMEMS_FILE)
+	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
@@ -391,7 +401,6 @@ endif
 #######################################
 # Rules for building DRAMSim2 library
 #######################################
-
 dramsim_dir = $(base_dir)/tools/DRAMSim2
 dramsim_lib = $(dramsim_dir)/libdramsim.a
 
@@ -399,27 +408,12 @@ $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
 
 ################################################
-# Helper to run SBT or manage the SBT server
+# Helper to run SBT
 ################################################
-
 SBT_COMMAND ?= shell
 .PHONY: launch-sbt
 launch-sbt:
-	cd $(base_dir) && $(SBT_NON_THIN) "$(SBT_COMMAND)"
-
-.PHONY: check-thin-client
-check-thin-client:
-ifeq (,$(ENABLE_SBT_THIN_CLIENT))
-	$(error ENABLE_SBT_THIN_CLIENT not set.)
-endif
-
-.PHONY: shutdown-sbt-server
-shutdown-sbt-server: check-thin-client
-	cd $(base_dir) && $(SBT) "shutdown"
-
-.PHONY: start-sbt-server
-start-sbt-server: check-thin-client
-	cd $(base_dir) && $(SBT) "exit"
+	cd $(base_dir) && $(SBT) "$(SBT_COMMAND)"
 
 #########################################################################################
 # print help text (and other help)

@@ -36,6 +36,14 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
   val prci_ctrl_domain = LazyModule(new ClockSinkDomain(name=Some("chipyard-prci-control")))
   prci_ctrl_domain.clockNode := tlbus.fixedClockNode
 
+  val prci_ctrl_bus = prci_ctrl_domain { TLXbar() }
+  tlbus.coupleTo("prci_ctrl") { (prci_ctrl_bus
+    := TLFIFOFixer(TLFIFOFixer.all)
+    := TLFragmenter(tlbus.beatBytes, tlbus.blockBytes)
+    := TLBuffer()
+    := _)
+  }
+
   // Aggregate all the clock groups into a single node
   val aggregator = LazyModule(new ClockGroupAggregator("allClocks")).node
   val allClockGroupsNode = ClockGroupEphemeralNode()
@@ -71,19 +79,24 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
   // diplomatic IOBinder should drive
   val frequencySpecifier = ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey))
   val clockGroupCombiner = ClockGroupCombiner()
-  val resetSynchronizer  = ClockGroupResetSynchronizer()
-  val tileClockGater     = if (prciParams.enableTileClockGating) { prci_ctrl_domain {
-    TileClockGater(prciParams.baseAddress + 0x00000, tlbus)
-  } } else { ClockGroupEphemeralNode() }
-  val tileResetSetter    = if (prciParams.enableTileResetSetting) { prci_ctrl_domain {
-    TileResetSetter(prciParams.baseAddress + 0x10000, tlbus, tile_prci_domains.map(_.tile_reset_domain.clockNode.portParams(0).name.get), Nil)
-  } } else { ClockGroupEphemeralNode() }
+  val resetSynchronizer  = prci_ctrl_domain { ClockGroupResetSynchronizer() }
+  val tileClockGater     = Option.when(prciParams.enableTileClockGating) { prci_ctrl_domain {
+    val clock_gater = LazyModule(new TileClockGater(prciParams.baseAddress + 0x00000, tlbus.beatBytes))
+    clock_gater.tlNode := prci_ctrl_bus
+    clock_gater
+  } }
+  val tileResetSetter    = Option.when(prciParams.enableTileResetSetting) { prci_ctrl_domain {
+    val reset_setter = LazyModule(new TileResetSetter(prciParams.baseAddress + 0x10000, tlbus.beatBytes,
+      tile_prci_domains.map(_.tile_reset_domain.clockNode.portParams(0).name.get), Nil))
+    reset_setter.tlNode := prci_ctrl_bus
+    reset_setter
+  } }
 
   (aggregator
     := frequencySpecifier
     := clockGroupCombiner
     := resetSynchronizer
-    := tileClockGater
-    := tileResetSetter
+    := tileClockGater.map(_.clockNode).getOrElse(ClockGroupEphemeralNode()(ValName("temp")))
+    := tileResetSetter.map(_.clockNode).getOrElse(ClockGroupEphemeralNode()(ValName("temp")))
     := allClockGroupsNode)
 }

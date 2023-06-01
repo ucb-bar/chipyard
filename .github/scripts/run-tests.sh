@@ -139,6 +139,18 @@ case $1 in
     constellation)
         run_binary BINARY=none
         ;;
+    rocketchip-amba)
+        run_binary BINARY=none
+        ;;
+    rocketchip-tlsimple)
+        run_binary BINARY=none
+        ;;
+    rocketchip-tlwidth)
+        run_binary BINARY=none
+        ;;
+    rocketchip-tlxbar)
+        run_binary BINARY=none
+        ;;
     *)
         echo "No set of tests for $1. Did you spell it right?"
         exit 1

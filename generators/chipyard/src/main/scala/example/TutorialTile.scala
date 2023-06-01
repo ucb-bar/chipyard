@@ -67,6 +67,7 @@ case class MyCoreParams(
   val useCryptoNIST: Boolean = false
   val useCryptoSM: Boolean = false
   val traceHasWdata: Boolean = false
+  val useConditionalZero = false
 }
 
 // DOC include start: CanAttachTile
