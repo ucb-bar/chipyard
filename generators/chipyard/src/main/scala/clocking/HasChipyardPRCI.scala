@@ -21,7 +21,9 @@ case class ChipyardPRCIControlParams(
   baseAddress: BigInt = 0x100000,
   enableTileClockGating: Boolean = true,
   enableTileResetSetting: Boolean = true
-)
+) {
+  def generatePRCIXBar = enableTileClockGating || enableTileResetSetting
+}
 
 
 case object ChipyardPRCIControlKey extends Field[ChipyardPRCIControlParams](ChipyardPRCIControlParams())
@@ -36,13 +38,13 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
   val prci_ctrl_domain = LazyModule(new ClockSinkDomain(name=Some("chipyard-prci-control")))
   prci_ctrl_domain.clockNode := tlbus.fixedClockNode
 
-  val prci_ctrl_bus = prci_ctrl_domain { TLXbar() }
-  tlbus.coupleTo("prci_ctrl") { (prci_ctrl_bus
+  val prci_ctrl_bus = Option.when(prciParams.generatePRCIXBar) { prci_ctrl_domain { TLXbar() } }
+  prci_ctrl_bus.foreach(xbar => tlbus.coupleTo("prci_ctrl") { (xbar
     := TLFIFOFixer(TLFIFOFixer.all)
     := TLFragmenter(tlbus.beatBytes, tlbus.blockBytes)
     := TLBuffer()
     := _)
-  }
+  })
 
   // Aggregate all the clock groups into a single node
   val aggregator = LazyModule(new ClockGroupAggregator("allClocks")).node
@@ -82,13 +84,13 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
   val resetSynchronizer  = prci_ctrl_domain { ClockGroupResetSynchronizer() }
   val tileClockGater     = Option.when(prciParams.enableTileClockGating) { prci_ctrl_domain {
     val clock_gater = LazyModule(new TileClockGater(prciParams.baseAddress + 0x00000, tlbus.beatBytes))
-    clock_gater.tlNode := prci_ctrl_bus
+    clock_gater.tlNode := prci_ctrl_bus.get
     clock_gater
   } }
   val tileResetSetter    = Option.when(prciParams.enableTileResetSetting) { prci_ctrl_domain {
     val reset_setter = LazyModule(new TileResetSetter(prciParams.baseAddress + 0x10000, tlbus.beatBytes,
       tile_prci_domains.map(_.tile_reset_domain.clockNode.portParams(0).name.get), Nil))
-    reset_setter.tlNode := prci_ctrl_bus
+    reset_setter.tlNode := prci_ctrl_bus.get
     reset_setter
   } }
 
