@@ -35,7 +35,7 @@ Afterwards, verify that Conda is a sufficient version (we test on version 4.12.0
 
 .. code-block:: shell
 
-    conda --version # must be version 4.12.0 or higher
+    conda --version # must be version 22.11.1 or higher
 
 After Conda is installed and is on your ``PATH``, we need to install a version of ``git`` to initially checkout the repository.
 For this you can use the system package manager like ``yum`` or ``apt`` to install ``git``.
@@ -46,7 +46,7 @@ This is done by the following:
 
 .. code-block:: shell
 
-    conda install -n base conda-lock=1
+    conda install -n base conda-lock=1.4
     conda activate base
 
 .. Note:: We also recommended switching to `libmamba <https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community>`__ for much faster dependency solving.

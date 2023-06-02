@@ -221,6 +221,10 @@ sim_files              ?= $(build_dir)/sim_files.f
 # single file that contains all files needed for VCS or Verilator simulation (unique and without .h's)
 sim_common_files       ?= $(build_dir)/sim_files.common.f
 
+SFC_LEVEL ?= $(build_dir)/.sfc_level
+EXTRA_FIRRTL_OPTIONS ?= $(build_dir)/.extra_firrtl_options
+MFC_LOWERING_OPTIONS ?= $(build_dir)/.mfc_lowering_options
+
 #########################################################################################
 # java arguments used in sbt
 #########################################################################################
@@ -254,7 +258,7 @@ endef
 # (1) - sbt project to assemble
 # (2) - classpath file(s) to create
 define run_sbt_assembly
-	cd $(base_dir) && $(SBT) ";project $(1); set assembly / assemblyOutputPath := file(\"$(2)\"); assembly"
+	cd $(base_dir) && $(SBT) ";project $(1); set assembly / assemblyOutputPath := file(\"$(2)\"); assembly" && touch $(2)
 endef
 
 FIRRTL_LOGLEVEL ?= error
