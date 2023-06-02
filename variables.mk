@@ -222,7 +222,7 @@ sim_files              ?= $(build_dir)/sim_files.f
 sim_common_files       ?= $(build_dir)/sim_files.common.f
 
 SFC_LEVEL ?= $(build_dir)/.sfc_level
-FINAL_EXTRA_FIRRTL_OPTIONS ?= $(build_dir)/.final_extra_firrtl_options
+EXTRA_FIRRTL_OPTIONS ?= $(build_dir)/.extra_firrtl_options
 MFC_LOWERING_OPTIONS ?= $(build_dir)/.mfc_lowering_options
 
 #########################################################################################

@@ -19,7 +19,8 @@ HELP_COMPILATION_VARIABLES += \
 "   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & MFC converts to Verilog)" \
 "   ENABLE_YOSYS_FLOW         = if set, add compilation flags to enable the vlsi flow for yosys(tutorial flow)" \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
-"   EXTRA_FIRRTL_OPTIONS      = additional options to pass to the FIRRTL compiler"
+"   EXTRA_BASE_FIRRTL_OPTIONS = additional options to pass to the Scala FIRRTL compiler" \
+"   MFC_BASE_LOWERING_OPTIONS = override lowering options to pass to the MLIR FIRRTL compiler"
 
 EXTRA_GENERATOR_REQS ?= $(BOOTROM_TARGETS)
 EXTRA_SIM_CXXFLAGS   ?=
@@ -175,7 +176,7 @@ SFC_MFC_TARGETS = \
 	$(GEN_COLLATERAL_DIR)
 
 SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
-MFC_BASE_LOWERING_OPTIONS = emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,locationInfoStyle=wrapInAtSquareBracket
+MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,locationInfoStyle=wrapInAtSquareBracket
 
 # DOC include start: FirrtlCompiler
 # There are two possible cases for this step. In the first case, SFC
@@ -189,13 +190,13 @@ MFC_BASE_LOWERING_OPTIONS = emittedLineLength=2048,noAlwaysComb,disallowLocalVar
 # hack: when using dontTouch, io.cpu annotations are not removed by SFC,
 # hence we remove them manually by using jq before passing them to firtool
 
-$(SFC_LEVEL) $(FINAL_EXTRA_FIRRTL_OPTIONS) &: $(FIRRTL_FILE)
+$(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) &: $(FIRRTL_FILE)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 	echo $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none) > $(SFC_LEVEL)
-	echo "$(EXTRA_FIRRTL_OPTIONS)" $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), "$(SFC_REPL_SEQ_MEM)",) > $(FINAL_EXTRA_FIRRTL_OPTIONS)
+	echo "$(EXTRA_BASE_FIRRTL_OPTIONS)" $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), "$(SFC_REPL_SEQ_MEM)",) > $(EXTRA_FIRRTL_OPTIONS)
 else
 	echo low > $(SFC_LEVEL)
-	echo "$(EXTRA_FIRRTL_OPTIONS)" "$(SFC_REPL_SEQ_MEM)" > $(FINAL_EXTRA_FIRRTL_OPTIONS)
+	echo "$(EXTRA_BASE_FIRRTL_OPTIONS)" "$(SFC_REPL_SEQ_MEM)" > $(EXTRA_FIRRTL_OPTIONS)
 endif
 
 $(MFC_LOWERING_OPTIONS):
@@ -211,7 +212,7 @@ $(FINAL_ANNO_FILE): $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) $(VLOG_SOURCES) $(
 	touch $@
 
 $(SFC_MFC_TARGETS) &: private TMP_DIR := $(shell mktemp -d -t cy-XXXXXXXX)
-$(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(FINAL_EXTRA_FIRRTL_OPTIONS) $(MFC_LOWERING_OPTIONS)
+$(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) $(MFC_LOWERING_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
 	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.tapeout.transforms.GenerateModelStageMain,\
 		--no-dedup \
@@ -223,7 +224,7 @@ $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_F
 		--log-level $(FIRRTL_LOGLEVEL) \
 		--allow-unrecognized-annotations \
 		-X $(shell cat $(SFC_LEVEL)) \
-		$(shell cat $(FINAL_EXTRA_FIRRTL_OPTIONS)))
+		$(shell cat $(EXTRA_FIRRTL_OPTIONS)))
 	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE) 2> /dev/null # Optionally change file type when SFC generates LowFIRRTL
 	@if [ $(shell cat $(SFC_LEVEL)) = low ]; then cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json; fi
 	@if [ $(shell cat $(SFC_LEVEL)) = low ]; then cat $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json | jq 'del(.[] | select(.class | test("SRAMAnnotation"))?)' > $(TMP_DIR)/unnec-anno-deleted2.sfc.anno.json; fi
