@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # exit script if any command fails
-set -e
+set -ex
 set -o pipefail
 
 RDIR=$(git rev-parse --show-toplevel)
@@ -107,7 +107,13 @@ cd "$RDIR"
             software/coremark \
             software/firemarshal \
             software/spec2017 \
-            vlsi/hammer-mentor-plugins
+            vlsi/hammer-mentor-plugins \
+            generators/cva6 \
+            generators/hwacha \
+            generators/nvdla \
+            generators/ibex \
+            generators/riscv-sodor \
+            generators/tracegen
         do
             "$1" "${name%/}"
         done
@@ -125,6 +131,15 @@ cd "$RDIR"
 )
 
 (
+    # Use optimized sparse checkout for uncommon repos
+    git submodule update --init --recursive --filter=blob:none \
+        generators/cva6 \
+        generators/hwacha \
+        generators/nvdla \
+        generators/ibex \
+        generators/riscv-sodor \
+        generators/tracegen
+
     # Non-recursive clone to exclude riscv-linux
     git submodule update --init generators/sha3
 
