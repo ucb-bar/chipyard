@@ -126,3 +126,11 @@ class CustomIOChipTopRocketConfig extends Config(
   new chipyard.example.WithCustomIOCells ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
+
+class PrefetchingRocketConfig extends Config(
+  new barf.WithHellaCachePrefetcher(Seq(0), barf.SingleStridedPrefetcherParams()) ++   // strided prefetcher into L1D$
+  new barf.WithTLICachePrefetcher(barf.MultiNextLinePrefetcherParams()) ++             // next-line prefetcher into L2 for L1I$ accesses
+  new barf.WithTLDCachePrefetcher(barf.SingleAMPMPrefetcherParams()) ++                // AMPM prefetcher into L2 for L1D$ accesses
+  new chipyard.config.WithTilePrefetchers ++                                           // add TL prefetchers between tiles and the sbus
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++                               // single rocket-core
+  new chipyard.config.AbstractConfig)
