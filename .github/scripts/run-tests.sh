@@ -91,11 +91,12 @@ case $1 in
 	# test streaming-fir
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-fir.riscv
 
-	# test nvdla
-        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv
-
 	# test fft
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/fft.riscv
+	;;
+    chipyard-nvdla)
+	make -C $LOCAL_CHIPYARD_DIR/tests
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv
 	;;
     chipyard-manyperipherals)
 	# SPI Flash read tests
