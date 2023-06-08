@@ -87,12 +87,14 @@ case $1 in
 	# test streaming-fir
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-fir.riscv
 
-	# test nvdla
-        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv run-binary-fast
-
 	# test fft
         make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/fft.riscv run-binary-fast
+	;;
+    chipyard-nvdla)
+	make -C $LOCAL_CHIPYARD_DIR/tests
 
+	# test nvdla
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv run-binary-fast
 	;;
     chipyard-manyperipherals)
 	# SPI Flash read tests, then bmark tests
