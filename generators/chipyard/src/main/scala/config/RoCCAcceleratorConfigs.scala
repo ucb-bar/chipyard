@@ -56,3 +56,13 @@ class HwachaLargeBoomConfig extends Config(
   new boom.common.WithNLargeBooms(1) ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
+
+class ReRoCCTestConfig extends Config(
+  new rerocc.WithReRoCC ++
+  new chipyard.config.WithCharacterCountRoCC ++                // rerocc tile4 is charcnt
+  new chipyard.config.WithAccumulatorRoCC ++                   // rerocc tile3 is accum
+  new chipyard.config.WithAccumulatorRoCC ++                   // rerocc tile2 is accum
+  new chipyard.config.WithAccumulatorRoCC ++                   // rerocc tile1 is accum
+  new chipyard.config.WithAccumulatorRoCC ++                   // rerocc tile0 is accum
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
