@@ -208,6 +208,7 @@ else
 endif
 
 $(MFC_LOWERING_OPTIONS):
+	mkdir -p $(dir $@)
 ifeq (,$(ENABLE_YOSYS_FLOW))
 	echo "$(MFC_BASE_LOWERING_OPTIONS)" > $@
 else
