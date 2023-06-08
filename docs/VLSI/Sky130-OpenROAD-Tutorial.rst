@@ -46,13 +46,14 @@ Prerequisites
 -------------
 
 * Python 3.9+
-* OpenROAD flow tools:
+* OpenROAD flow tools (NOTE: tutorial may break with different tool versions):
 
-  * Yosys (synthesis), install `using conda <https://anaconda.org/litex-hub/yosys>`__ or `from source <https://yosyshq.net/yosys/download.html>`__
-  * OpenROAD (place-and-route), install `using conda <https://anaconda.org/litex-hub/openroad>`__ (note that GUI is disabled in conda package) or `from source <https://openroad.readthedocs.io/en/latest/main/README.html#install-dependencies>`__
-  * KLayout (DEF to GDSII conversion, DRC), install `using conda <https://anaconda.org/litex-hub/klayout>`__ or `from source <https://www.klayout.de/build.html>`__
-  * Magic (DRC), , install `using conda <https://anaconda.org/litex-hub/magic>`__ or `from source <http://www.opencircuitdesign.com/magic/install.html>`__
-  * NetGen (LVS), , install `using conda <https://anaconda.org/litex-hub/netgen>`__ or `from source <http://www.opencircuitdesign.com/netgen/install.html>`__
+  * **Yosys 0.27+3** (synthesis), install `using conda <https://anaconda.org/litex-hub/yosys>`__ or `from source <https://yosyshq.net/yosys/download.html>`__
+  * **OpenROAD v2.0-7070-g0264023b6** (place-and-route), install `using conda <https://anaconda.org/litex-hub/openroad>`__ (note that GUI is disabled in conda package) or 
+    `from source <https://github.com/The-OpenROAD-Project/OpenROAD/blob/master/docs/user/Build.md>`__ (git hash: 0264023b6c2a8ae803b8d440478d657387277d93)
+  * **KLayout 0.28.5** (DEF to GDSII conversion, DRC), install `using conda <https://anaconda.org/litex-hub/klayout>`__ or `from source <https://www.klayout.de/build.html>`__
+  * **Magic 8.3.376** (DRC), install `using conda <https://anaconda.org/litex-hub/magic>`__ or `from source <http://www.opencircuitdesign.com/magic/install.html>`__
+  * **NetGen 1.5.250** (LVS), install `using conda <https://anaconda.org/litex-hub/netgen>`__ or `from source <http://www.opencircuitdesign.com/netgen/install.html>`__
 
 * Sky130A PDK, install `using conda <https://anaconda.org/litex-hub/open_pdks.sky130a>`__ or `these directions  <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__
 * `Sram22 Sky130 SRAM macros  <https://github.com/rahulk29/sram22_sky130_macros>`__ 
