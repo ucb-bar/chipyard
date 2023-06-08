@@ -114,3 +114,7 @@ class WithNoTileClockGaters extends Config((site, here, up) => {
 class WithNoTileResetSetters extends Config((site, here, up) => {
   case ChipyardPRCIControlKey => up(ChipyardPRCIControlKey).copy(enableTileResetSetting = false)
 })
+
+class WithNoResetSynchronizers extends Config((site, here, up) => {
+  case ChipyardPRCIControlKey => up(ChipyardPRCIControlKey).copy(enableResetSynchronizers = false)
+})

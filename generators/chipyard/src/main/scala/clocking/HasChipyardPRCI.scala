@@ -14,13 +14,14 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.prci._
 
-import testchipip.{TLTileResetCtrl}
+import testchipip.{TLTileResetCtrl, ClockGroupFakeResetSynchronizer}
 
 case class ChipyardPRCIControlParams(
   slaveWhere: TLBusWrapperLocation = CBUS,
   baseAddress: BigInt = 0x100000,
   enableTileClockGating: Boolean = true,
-  enableTileResetSetting: Boolean = true
+  enableTileResetSetting: Boolean = true,
+  enableResetSynchronizers: Boolean = true // this should only be disable to work around verilator async-reset initialziation problems
 ) {
   def generatePRCIXBar = enableTileClockGating || enableTileResetSetting
 }
@@ -81,7 +82,9 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
   // diplomatic IOBinder should drive
   val frequencySpecifier = ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey))
   val clockGroupCombiner = ClockGroupCombiner()
-  val resetSynchronizer  = prci_ctrl_domain { ClockGroupResetSynchronizer() }
+  val resetSynchronizer  = prci_ctrl_domain {
+    if (prciParams.enableResetSynchronizers) ClockGroupResetSynchronizer() else ClockGroupFakeResetSynchronizer()
+  }
   val tileClockGater     = Option.when(prciParams.enableTileClockGating) { prci_ctrl_domain {
     val clock_gater = LazyModule(new TileClockGater(prciParams.baseAddress + 0x00000, tlbus.beatBytes))
     clock_gater.tlNode := prci_ctrl_bus.get
@@ -93,6 +96,25 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
     reset_setter.tlNode := prci_ctrl_bus.get
     reset_setter
   } }
+
+  if (!prciParams.enableResetSynchronizers) {
+    println(Console.RED + s"""
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+WARNING:
+
+DISABLING THE RESET SYNCHRONIZERS RESULTS IN
+A BROKEN DESIGN THAT WILL NOT BEHAVE
+PROPERLY AS ASIC OR FPGA.
+
+THESE SHOULD ONLY BE DISABLED TO WORK AROUND
+LIMITATIONS IN ASYNC RESET INITIALIZATION IN
+RTL SIMULATORS.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+""" + Console.RESET)
+  }
 
   (aggregator
     := frequencySpecifier

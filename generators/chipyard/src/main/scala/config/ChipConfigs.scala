@@ -95,3 +95,13 @@ class TetheredChipLikeRocketConfig extends Config(
   new chipyard.harness.WithMultiChipSerialTL(0, 1) ++                // connect the serial-tl ports of the chips together
   new chipyard.harness.WithMultiChip(0, new ChipLikeRocketConfig) ++
   new chipyard.harness.WithMultiChip(1, new ChipBringupHostConfig))
+
+
+// Verilator does not initialize some of the async-reset reset-synchronizer
+// flops properly, so this config disables them.
+// This config should only be used for verilator simulations
+class VerilatorCITetheredChipLikeRocketConfig extends Config(
+  new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++   // use absolute freqs for sims in the harness
+  new chipyard.harness.WithMultiChipSerialTL(0, 1) ++                // connect the serial-tl ports of the chips together
+  new chipyard.harness.WithMultiChip(0, new chipyard.config.WithNoResetSynchronizers ++ new ChipLikeRocketConfig) ++
+  new chipyard.harness.WithMultiChip(1, new ChipBringupHostConfig))
