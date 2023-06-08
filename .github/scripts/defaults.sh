@@ -28,7 +28,7 @@ REMOTE_COURSIER_CACHE=$REMOTE_WORK_DIR/.coursier-cache
 
 # key value store to get the build groups
 declare -A grouping
-grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad chipyard-spike chipyard-clone"
+grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad chipyard-spike chipyard-clone chipyard-prefetchers"
 grouping["group-peripherals"]="chipyard-dmirocket chipyard-dmiboom chipyard-spiflashwrite chipyard-mmios chipyard-nocores chipyard-manyperipherals chipyard-chiplike"
 grouping["group-accels"]="chipyard-mempress chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-manymmioaccels chipyard-nvdla"
 grouping["group-constellation"]="chipyard-constellation"
@@ -42,6 +42,7 @@ mapping["chipyard-rocket"]=" CONFIG=QuadChannelRocketConfig"
 mapping["chipyard-dmirocket"]=" CONFIG=dmiRocketConfig"
 mapping["chipyard-sha3"]=" CONFIG=Sha3RocketConfig"
 mapping["chipyard-mempress"]=" CONFIG=MempressRocketConfig"
+mapping["chipyard-prefetchers"]=" CONFIG=PrefetchingRocketConfig"
 mapping["chipyard-digitaltop"]=" TOP=DigitalTop"
 mapping["chipyard-manymmioaccels"]=" CONFIG=ManyMMIOAcceleratorRocketConfig"
 mapping["chipyard-nvdla"]=" CONFIG=SmallNVDLARocketConfig verilog"
