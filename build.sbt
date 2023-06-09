@@ -198,6 +198,12 @@ lazy val boom = (project in file("generators/boom"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
+// add to whatever sbt project wants to use the helper
+lazy val chipyard_helpers = (project in file("generators/chipyard_helpers"))
+  .dependsOn(rocketchip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
 lazy val cva6 = (project in file("generators/cva6"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
