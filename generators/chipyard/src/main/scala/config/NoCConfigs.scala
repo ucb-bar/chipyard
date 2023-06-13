@@ -68,9 +68,9 @@ class MultiNoCConfig extends Config(
         "serial-tl" -> 0),
       outNodeMapping = ListMap(
         "error" -> 1, "l2[0]" -> 2, "pbus" -> 3, "plic" -> 4,
-        "clint" -> 5, "dmInner" -> 6, "bootrom" -> 7, "tileClockGater" -> 8, "tileResetSetter" -> 9)),
+        "clint" -> 5, "dmInner" -> 6, "bootrom" -> 7, "clock" -> 8)),
     NoCParams(
-      topology = TerminalRouter(BidirectionalLine(10)),
+      topology = TerminalRouter(BidirectionalLine(9)),
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(5) { UserVirtualChannelParams(4) }),
       routingRelation = NonblockingVirtualSubnetworksRouting(TerminalRouterRouting(BidirectionalLineRouting()), 5, 1))
   )) ++

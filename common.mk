@@ -68,7 +68,7 @@ include $(base_dir)/tools/torture.mk
 #########################################################################################
 # Prerequisite lists
 #########################################################################################
-# Returns a list of files in directory $1 with file extension $2.
+# Returns a list of files in directories $1 with single file extension $2.
 # If available, use 'fd' to find the list of files, which is faster than 'find'.
 ifeq ($(shell which fd 2> /dev/null),)
 	lookup_srcs = $(shell find -L $(1)/ -name target -prune -o \( -iname "*.$(2)" ! -iname ".*" \) -print 2> /dev/null)
@@ -76,9 +76,17 @@ else
 	lookup_srcs = $(shell fd -L -t f -e $(2) . $(1))
 endif
 
-SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools fpga/fpga-shells fpga/src)
-SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
-VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE_DIRS),v)
+# Returns a list of files in directories $1 with *any* of the file extensions in $2
+lookup_srcs_by_multiple_type = $(foreach type,$(2),$(call lookup_srcs,$(1),$(type)))
+
+SCALA_EXT = scala
+VLOG_EXT = sv v
+CHIPYARD_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim fpga/fpga-shells fpga/src)
+CHIPYARD_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(CHIPYARD_SOURCE_DIRS),$(SCALA_EXT))
+CHIPYARD_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(CHIPYARD_SOURCE_DIRS),$(VLOG_EXT))
+BARSTOOLS_SOURCE_DIRS = $(addprefix $(base_dir)/,tools/barstools)
+BARSTOOLS_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(BARSTOOLS_SOURCE_DIRS),$(SCALA_EXT))
+BARSTOOLS_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(BARSTOOLS_SOURCE_DIRS),$(VLOG_EXT))
 # This assumes no SBT meta-build sources
 SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools)
 SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
@@ -106,12 +114,12 @@ $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip
 #########################################################################################
 # compile scala jars
 #########################################################################################
-$(CHIPYARD_CLASSPATH_TARGETS) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS)
+$(CHIPYARD_CLASSPATH_TARGETS) &: $(CHIPYARD_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS)
 	mkdir -p $(dir $@)
 	$(call run_sbt_assembly,$(SBT_PROJECT),$(CHIPYARD_CLASSPATH))
 
 # order only dependency between sbt runs needed to avoid concurrent sbt runs
-$(TAPEOUT_CLASSPATH_TARGETS) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) | $(CHIPYARD_CLASSPATH_TARGETS)
+$(TAPEOUT_CLASSPATH_TARGETS) &: $(BARSTOOLS_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) | $(CHIPYARD_CLASSPATH_TARGETS)
 	mkdir -p $(dir $@)
 	$(call run_sbt_assembly,tapeout,$(TAPEOUT_CLASSPATH))
 
@@ -200,19 +208,20 @@ else
 endif
 
 $(MFC_LOWERING_OPTIONS):
+	mkdir -p $(dir $@)
 ifeq (,$(ENABLE_YOSYS_FLOW))
 	echo "$(MFC_BASE_LOWERING_OPTIONS)" > $@
 else
 	echo "$(MFC_BASE_LOWERING_OPTIONS),disallowPackedArrays" > $@
 endif
 
-$(FINAL_ANNO_FILE): $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) $(VLOG_SOURCES) $(SFC_LEVEL)
+$(FINAL_ANNO_FILE): $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) $(SFC_LEVEL)
 	if [ $(shell cat $(SFC_LEVEL)) = low ]; then jq -s '[.[][]]' $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) > $@; fi
 	if [ $(shell cat $(SFC_LEVEL)) = none ]; then cat $(EXTRA_ANNO_FILE) > $@; fi
 	touch $@
 
 $(SFC_MFC_TARGETS) &: private TMP_DIR := $(shell mktemp -d -t cy-XXXXXXXX)
-$(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) $(MFC_LOWERING_OPTIONS)
+$(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) $(MFC_LOWERING_OPTIONS) $(CHIPYARD_VLOG_SOURCES) $(BARSTOOLS_VLOG_SOURCES)
 	rm -rf $(GEN_COLLATERAL_DIR)
 	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.tapeout.transforms.GenerateModelStageMain,\
 		--no-dedup \
