@@ -442,6 +442,29 @@ jobs:
           group-key: "group-cores"
           project-key: "chipyard-rocket"
 
+  chipyard-prefetchers-run-tests:
+    name: chipyard-prefetchers-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-prefetchers"
+
   chipyard-hetero-run-tests:
     name: chipyard-hetero-run-tests
     needs: prepare-chipyard-cores
@@ -764,28 +787,28 @@ jobs:
           group-key: "group-accels"
           project-key: "chipyard-manymmioaccels"
 
-  chipyard-nvdla-run-tests:
-    name: chipyard-nvdla-run-tests
-    needs: prepare-chipyard-accels
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-accels"
-          project-key: "chipyard-nvdla"
+  # chipyard-nvdla-run-tests:
+  #   name: chipyard-nvdla-run-tests
+  #   needs: prepare-chipyard-accels
+  #   runs-on: self-hosted
+  #   steps:
+  #     - name: Delete old checkout
+  #       run: |
+  #           ls -alh .
+  #           rm -rf ${{ github.workspace }}/* || true
+  #           rm -rf ${{ github.workspace }}/.* || true
+  #           ls -alh .
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Git workaround
+  #       uses: ./.github/actions/git-workaround
+  #     - name: Create conda env
+  #       uses: ./.github/actions/create-conda-env
+  #     - name: Run tests
+  #       uses: ./.github/actions/run-tests
+  #       with:
+  #         group-key: "group-accels"
+  #         project-key: "chipyard-nvdla"
 
   chipyard-mempress-run-tests:
     name: chipyard-mempress-run-tests
@@ -1059,8 +1082,8 @@ jobs:
             chipyard-manyperipherals-run-tests,
             chipyard-sha3-run-tests,
             chipyard-gemmini-run-tests,
-            chipyard-manymmioaccels-run-tests,
-            chipyard-nvdla-run-tests,
+            chipyard-manymmioaccels-run-tests, # chipyard-nvdla-run-tests,
+            chipyard-prefetchers-run-tests,
             chipyard-mempress-run-tests,
             chipyard-constellation-run-tests,
             tracegen-boom-run-tests,

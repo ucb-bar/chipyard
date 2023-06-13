@@ -35,3 +35,4 @@ so changes to the generators themselves will automatically be used when building
    Sodor
    Shuttle
    Mempress
+   Prefetchers

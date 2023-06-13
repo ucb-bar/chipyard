@@ -127,3 +127,6 @@
 [submodule "shuttle"]
 	path = generators/shuttle
 	url = https://github.com/ucb-bar/shuttle.git
+[submodule "generators/bar-fetchers"]
+	path = generators/bar-fetchers
+	url = https://github.com/ucb-bar/bar-fetchers.git
