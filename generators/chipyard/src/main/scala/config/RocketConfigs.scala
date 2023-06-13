@@ -74,12 +74,18 @@ class L1ScratchpadRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 // DOC include start: mbusscratchpadrocket
-class MbusScratchpadRocketConfig extends Config(
-  new testchipip.WithBackingScratchpad ++                   // add mbus backing scratchpad
-  new freechips.rocketchip.subsystem.WithNoMemPort ++       // remove offchip mem port
+class MbusScratchpadOnlyRocketConfig extends Config(
+  new testchipip.WithMbusScratchpad(banks=2, partitions=2) ++               // add 2 partitions of 2 banks mbus backing scratchpad
+  new freechips.rocketchip.subsystem.WithNoMemPort ++         // remove offchip mem port
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: mbusscratchpadrocket
+
+class SbusScratchpadRocketConfig extends Config(
+  new testchipip.WithSbusScratchpad(base=0x70000000L, banks=4) ++ // add 4 banks sbus backing scratchpad
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 
 class MulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(3, 3) ++ // Add async crossings between RocketTile and uncore
