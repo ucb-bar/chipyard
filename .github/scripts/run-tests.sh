@@ -56,6 +56,9 @@ case $1 in
     chipyard-hetero)
         run_bmark ${mapping[$1]}
         ;;
+    chipyard-prefetchers)
+        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
+        ;;
     rocketchip)
         run_bmark ${mapping[$1]}
         ;;
