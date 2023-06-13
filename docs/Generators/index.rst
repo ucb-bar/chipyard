@@ -33,5 +33,6 @@ so changes to the generators themselves will automatically be used when building
    fft
    NVDLA
    Sodor
+   Shuttle
    Mempress
    Prefetchers
