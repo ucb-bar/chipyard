@@ -88,7 +88,8 @@ In your ``LazyRoCCModuleImp``, the signal ``io.mem`` is a ``HellaCacheIO``, whic
 
 At a high level, you must tag requests that you send across this interface using the ``io.mem.req.tag``, and the tag will be returned to you when the data is ready.
 Responses may come back out of order if you issue multiple requests, so you can use these tags to tell what data came back.
-Note that the top two bits of the tag are reserved, and MUST be set to zero, or the interface will exhibit undefined behavior.
+Note that the number of tag bits is controled by ``dcacheReqTagBits``, which is usually set to 6.
+Using more than 6 bits will cause errors or hangs.
 
 
 Adding RoCC accelerator to Config
