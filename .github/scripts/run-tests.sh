@@ -49,6 +49,9 @@ case $1 in
     chipyard-boom)
         run_bmark
         ;;
+    chipyard-shuttle)
+        run_bmark ${mapping[$1]}
+        ;;
     chipyard-dmiboom)
         # Test checkpoint-restore
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
@@ -61,7 +64,7 @@ case $1 in
         run_bmark
         ;;
     chipyard-prefetchers)
-        make -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ ${mapping[$1]} run-binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
+        run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
         ;;
     rocketchip)
         run_bmark

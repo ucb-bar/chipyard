@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 #include <riscv/sim.h>
+#include <riscv/mmu.h>
+#include <riscv/encoding.h>
 #include <vpi_user.h>
 #include <svdpi.h>
 #include <sstream>
@@ -27,7 +29,11 @@ extern std::map<long long int, backing_data_t> backing_mem_data;
 #endif
 
 #define CLINT_BASE (0x2000000)
-#define CLINT_SIZE (0x1000)
+#define CLINT_SIZE (0x10000)
+#define UART_BASE (0x54000000)
+#define UART_SIZE (0x1000)
+#define PLIC_BASE (0xc000000)
+#define PLIC_SIZE (0x4000000)
 
 typedef struct system_info_t {
   std::string isa;
@@ -38,13 +44,33 @@ typedef struct system_info_t {
   std::vector<char> bootrom;
 };
 
+class read_override_device_t : public abstract_device_t {
+public:
+  read_override_device_t(std::string n, reg_t sz) : was_read_from(false), size(size), name(n) { };
+  bool load(reg_t addr, size_t len, uint8_t* bytes) {
+    if (addr + len < addr || addr + len > size) return false;
+    printf("Read from device %s at %lx\n", name.c_str(), addr);
+    was_read_from = true;
+    return true;
+  }
+  bool store(reg_t addr, size_t len, const uint8_t* bytes) {
+    return (addr + len >= addr && addr + len <= size);
+  }
+  bool was_read_from;
+private:
+  reg_t size;
+  std::string name;
+};
+
 system_info_t* info = NULL;
 sim_t* sim = NULL;
 bool cospike_debug;
 reg_t tohost_addr = 0;
 reg_t fromhost_addr = 0;
+reg_t cospike_timeout = 0;
 std::set<reg_t> magic_addrs;
 cfg_t* cfg;
+std::vector<read_override_device_t*> read_override_devices;
 
 static std::vector<std::pair<reg_t, mem_t*>> make_mems(const std::vector<mem_cfg_t> &layout)
 {
@@ -90,6 +116,7 @@ extern "C" void cospike_cosim(long long int cycle,
                               int priv)
 {
   assert(info);
+
   if (unlikely(!sim)) {
     printf("Configuring spike cosim\n");
     std::vector<mem_cfg_t> mem_cfg;
@@ -114,19 +141,31 @@ extern "C" void cospike_cosim(long long int cycle,
 
     std::vector<std::pair<reg_t, mem_t*>> mems = make_mems(cfg->mem_layout());
 
+    size_t default_boot_rom_size = 0x10000;
+    size_t default_boot_rom_addr = 0x10000;
+    assert(info->bootrom.size() < default_boot_rom_size);
+    info->bootrom.resize(default_boot_rom_size);
+
     rom_device_t *boot_rom = new rom_device_t(info->bootrom);
     mem_t *boot_addr_reg = new mem_t(0x1000);
     uint64_t default_boot_addr = 0x80000000;
     boot_addr_reg->store(0, 8, (const uint8_t*)(&default_boot_addr));
 
-    // Don't actually build a clint
-    mem_t* clint_mem = new mem_t(CLINT_SIZE);
+    read_override_device_t* clint = new read_override_device_t("clint", CLINT_SIZE);
+    read_override_device_t* uart = new read_override_device_t("uart", UART_SIZE);
+    read_override_device_t* plic = new read_override_device_t("plic", PLIC_SIZE);
+
+    read_override_devices.push_back(clint);
+    read_override_devices.push_back(uart);
+    read_override_devices.push_back(plic);
 
     std::vector<std::pair<reg_t, abstract_device_t*>> plugin_devices;
     // The device map is hardcoded here for now
     plugin_devices.push_back(std::pair(0x4000, boot_addr_reg));
-    plugin_devices.push_back(std::pair(0x10000, boot_rom));
-    plugin_devices.push_back(std::pair(CLINT_BASE, clint_mem));
+    plugin_devices.push_back(std::pair(default_boot_rom_addr, boot_rom));
+    plugin_devices.push_back(std::pair(CLINT_BASE, clint));
+    plugin_devices.push_back(std::pair(UART_BASE, uart));
+    plugin_devices.push_back(std::pair(PLIC_BASE, plic));
 
     s_vpi_vlog_info vinfo;
     if (!vpi_get_vlog_info(&vinfo))
@@ -142,6 +181,8 @@ extern "C" void cospike_cosim(long long int cycle,
         in_permissive = false;
       } else if (arg == "+cospike_debug" || arg == "+cospike-debug") {
         cospike_debug = true;
+      } else if (arg.find("+cospike-timeout=") == 0) {
+	cospike_timeout = strtoull(arg.substr(17).c_str(), 0, 10);
       } else if (!in_permissive) {
         htif_args.push_back(arg);
       }
@@ -159,17 +200,19 @@ extern "C" void cospike_cosim(long long int cycle,
       .support_impebreak = true
     };
 
-    printf("isa string is %s\n", info->isa.c_str());
+    printf("isa string: %s\n", info->isa.c_str());
+    printf("htif args: ");
     for (int i = 0; i < htif_args.size(); i++) {
-      printf("%s\n", htif_args[i].c_str());
+      printf("%s", htif_args[i].c_str());
     }
+    printf("\n");
 
     sim = new sim_t(cfg, false,
                     mems,
                     plugin_devices,
                     htif_args,
                     dm_config,
-                    "cospike.log",
+                    nullptr,
                     false,
                     nullptr,
                     false,
@@ -193,11 +236,19 @@ extern "C" void cospike_cosim(long long int cycle,
 #endif
 
     sim->configure_log(true, true);
-    // Use our own reset vector
     for (int i = 0; i < info->nharts; i++) {
+      // Use our own reset vector
       sim->get_core(hartid)->get_state()->pc = 0x10040;
+      // Set MMU to support up to sv39, as our normal hw configs do
+      sim->get_core(hartid)->set_impl(IMPL_MMU_SV48, false);
+      sim->get_core(hartid)->set_impl(IMPL_MMU_SV57, false);
+
+      // HACKS: Our processor's don't implement zicntr fully, they don't provide time
+      sim->get_core(hartid)->get_state()->csrmap.erase(CSR_TIME);
     }
     sim->set_debug(cospike_debug);
+    sim->set_histogram(true);
+    sim->set_procs_debug(cospike_debug);
     printf("Setting up htif for spike cosim\n");
     ((htif_t*)sim)->start();
     printf("Spike cosim started\n");
@@ -205,13 +256,24 @@ extern "C" void cospike_cosim(long long int cycle,
     fromhost_addr = ((htif_t*)sim)->get_fromhost_addr();
     printf("Tohost  : %lx\n", tohost_addr);
     printf("Fromhost: %lx\n", fromhost_addr);
-    printf("Memory base  : %lx\n", info->mem0_base);
-    printf("Memory Size  : %lx\n", info->mem0_size);
+    printf("BootROM base  : %lx\n", default_boot_rom_addr);
+    printf("BootROM size  : %lx\n", boot_rom->contents().size());
+    printf("Memory  base  : %lx\n", info->mem0_base);
+    printf("Memory  size  : %lx\n", info->mem0_size);
   }
 
   if (priv & 0x4) { // debug
     return;
   }
+
+  if (cospike_timeout && cycle > cospike_timeout) {
+    if (sim) {
+      printf("Cospike reached timeout cycles = %ld, terminating\n", cospike_timeout);
+      delete sim;
+    }
+    exit(0);
+  }
+
 
   processor_t* p = sim->get_core(hartid);
   state_t* s = p->get_state();
@@ -269,14 +331,18 @@ extern "C" void cospike_cosim(long long int cycle,
   uint64_t interrupt_cause = cause & 0x7FFFFFFFFFFFFFFF;
   bool ssip_interrupt = interrupt_cause == 0x1;
   bool msip_interrupt = interrupt_cause == 0x3;
+  bool stip_interrupt = interrupt_cause == 0x5;
+  bool mtip_interrupt = interrupt_cause == 0x7;
   bool debug_interrupt = interrupt_cause == 0xe;
   if (raise_interrupt) {
     printf("%d interrupt %lx\n", cycle, cause);
 
-    if (ssip_interrupt) {
+    if (ssip_interrupt || stip_interrupt) {
       // do nothing
     } else if (msip_interrupt) {
       s->mip->backdoor_write_with_mask(MIP_MSIP, MIP_MSIP);
+    } else if (mtip_interrupt) {
+      s->mip->backdoor_write_with_mask(MIP_MTIP, MIP_MTIP);
     } else if (debug_interrupt) {
       return;
     } else {
@@ -295,6 +361,8 @@ extern "C" void cospike_cosim(long long int cycle,
     printf("\n");
   }
   if (valid || raise_interrupt || raise_exception) {
+    p->clear_waiting_for_interrupt();
+    for (auto& e : read_override_devices) e->was_read_from = false;
     p->step(1);
     if (unlikely(cospike_debug)) {
       printf("spike pc is %lx\n", s->pc);
@@ -328,10 +396,8 @@ extern "C" void cospike_cosim(long long int cycle,
       if ((waddr == CLINT_BASE + 4*hartid) && w_data == 0) {
         s->mip->backdoor_write_with_mask(MIP_MSIP, 0);
       }
-      // Try to remember magic_mem addrs, and ignore these in the future
-      if ( waddr == tohost_addr && w_data >= info->mem0_base && w_data < (info->mem0_base + info->mem0_size)) {
-        printf("Probable magic mem %lx\n", w_data);
-        magic_addrs.insert(w_data);
+      if ((waddr == CLINT_BASE + 0x4000 + 4*hartid)) {
+        s->mip->backdoor_write_with_mask(MIP_MTIP, 0);
       }
       // Try to remember magic_mem addrs, and ignore these in the future
       if ( waddr == tohost_addr && w_data >= info->mem0_base && w_data < (info->mem0_base + info->mem0_size)) {
@@ -357,13 +423,18 @@ extern "C" void cospike_cosim(long long int cycle,
       // 2 => vec
       // 3 => vec hint
       // 4 => csr
+      bool device_read = false;
+      for (auto& e : read_override_devices) if (e->was_read_from) device_read = true;
 
-      bool ignore_read = (!mem_read.empty() &&
-                          ((magic_addrs.count(mem_read_addr) ||
+      bool lr_read = ((insn & MASK_LR_D) == MATCH_LR_D) || ((insn & MASK_LR_W) == MATCH_LR_W);
+      bool sc_read = ((insn & MASK_SC_D) == MATCH_SC_D) || ((insn & MASK_SC_W) == MATCH_SC_W);
+
+      bool ignore_read = sc_read || (!mem_read.empty() &&
+                          (magic_addrs.count(mem_read_addr) ||
+                           device_read ||
+                           lr_read ||
                            (tohost_addr && mem_read_addr == tohost_addr) ||
-                           (fromhost_addr && mem_read_addr == fromhost_addr) ||
-                           (CLINT_BASE <= mem_read_addr && mem_read_addr < (CLINT_BASE + CLINT_SIZE)))));
-
+                           (fromhost_addr && mem_read_addr == fromhost_addr)));
       // check the type is compliant with writeback first
       if ((type == 0 || type == 1))
         scalar_wb = true;
@@ -379,11 +450,16 @@ extern "C" void cospike_cosim(long long int cycle,
         bool csr_read = (insn & 0x7f) == 0x73;
         if (csr_read)
           printf("CSR read %lx\n", csr_addr);
-        if (csr_read && ((csr_addr == 0xf13) ||                      // mimpid
+        if (csr_read && ((csr_addr == 0x301) ||                      // misa
+                         (csr_addr == 0x306) ||                      // mcounteren
+                         (csr_addr == 0xf13) ||                      // mimpid
                          (csr_addr == 0xf12) ||                      // marchid
                          (csr_addr == 0xf11) ||                      // mvendorid
                          (csr_addr == 0xb00) ||                      // mcycle
                          (csr_addr == 0xb02) ||                      // minstret
+                         (csr_addr == 0xc00) ||                      // cycle
+                         (csr_addr == 0xc01) ||                      // time
+                         (csr_addr == 0xc02) ||                      // instret
                          (csr_addr >= 0x7a0 && csr_addr <= 0x7aa) || // debug trigger registers
                          (csr_addr >= 0x3b0 && csr_addr <= 0x3ef)    // pmpaddr
                          )) {
@@ -394,7 +470,7 @@ extern "C" void cospike_cosim(long long int cycle,
           // from clint Technically this could be buggy because log_mem_read
           // only reports vaddrs, but no software ever should access
           // tohost/fromhost/clint with vaddrs anyways
-          printf("Read override %lx\n", mem_read_addr);
+          printf("Read override %lx = %lx\n", mem_read_addr, wdata);
           s->XPR.write(rd, wdata);
         } else if (wdata != regwrite.second.v[0]) {
           printf("%d wdata mismatch reg %d %lx != %lx\n", cycle, rd,
