@@ -34,7 +34,7 @@ class WithBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigInt =
       .map(_.copy(
         address = address,
         size = size,
-        hang = hand,
+        hang = hang,
         contentFileName = contentFileName
       ))
 })
