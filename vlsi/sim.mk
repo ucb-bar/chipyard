@@ -75,7 +75,7 @@ $(SIM_TIMING_CONF): $(sim_common_files)
 	echo "sim.inputs:" > $@
 	echo "  defines: ['NTC']" >> $@
 	echo "  defines_meta: 'append'" >> $@
-	echo "  timing_annotated: 'true'" >> $@
+	echo "  timing_annotated: true" >> $@
 
 # Update hammer top-level sim targets to include our generated sim configs
 redo-sim-rtl: $(SIM_CONF)
