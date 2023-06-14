@@ -101,3 +101,8 @@ class LoadBalancedSparseDenseEinsteinRocketConfig extends Config(
   new einstein.SparseDenseEinsteinConfig(isLoadBalanced = true) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
+
+class OSSparseDenseEinsteinRocketConfig extends Config(
+  new einstein.SparseDenseEinsteinConfig(outputStationary = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
