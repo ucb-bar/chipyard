@@ -275,6 +275,12 @@ This is because Magic and Netgen, as of the writing of this tutorial, do not hav
 so to view the DRC/LVS results for debugging you must launch the tool interactively, then run DRC/LVS checks,
 which is done by the ``generated-scripts/view_[drc|lvs]`` scripts. This is not the case for KLayout, which does have a loadable database format.
 
+Below is the window you should see when loading the KLayout DRC results interactively. Note that most of these DRC errors are 
+from special rules relating to Sky130 SRAMs, which have been verified separately. In the future the KLayout tool plugin should blackbox these
+SRAM macros by default, but this feature does not exist yet.
+
+.. image:: ../_static/images/vlsi-openroad-klayout-drc.png
+
 
 VLSI Flow Control
 ^^^^^^^^^^^^^^^^^
