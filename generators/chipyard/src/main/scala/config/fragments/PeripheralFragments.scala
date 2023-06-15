@@ -74,6 +74,10 @@ class WithUARTFIFOEntries(txEntries: Int, rxEntries: Int) extends Config((site, 
   case PeripheryUARTKey => up(PeripheryUARTKey).map(_.copy(nTxEntries = txEntries, nRxEntries = rxEntries))
 })
 
+class WithUARTInitBaudRate(baudrate: BigInt = 115200) extends Config ((site, here, up) => {
+  case PeripheryUARTKey => up(PeripheryUARTKey).map(_.copy(initBaudRate=baudrate))
+})
+
 /**
   * Config fragment for adding a SPI peripheral device with Execute-in-Place capability to the SoC
   *
