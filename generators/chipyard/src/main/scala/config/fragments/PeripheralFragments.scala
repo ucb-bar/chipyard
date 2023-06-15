@@ -39,7 +39,6 @@ class WithBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigInt =
       ))
 })
 
-// DOC include start: gpio config fragment
 /**
  * Config fragment for adding a GPIO peripheral device to the SoC
  * 
@@ -50,7 +49,6 @@ class WithGPIO(address: BigInt = 0x10010000, width: Int = 4) extends Config ((si
   case PeripheryGPIOKey => up(PeripheryGPIOKey) ++ Seq(
     GPIOParams(address = address, width = width, includeIOF = false))
 })
-// DOC include end: gpio config fragment
 
 /**
  * Config fragment for removing all UART peripheral devices from the SoC
