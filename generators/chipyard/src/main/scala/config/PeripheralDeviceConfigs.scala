@@ -15,7 +15,7 @@ class LargeSPIFlashROMRocketConfig extends Config(
 
 class SmallSPIFlashRocketConfig extends Config(
   new chipyard.harness.WithSimSPIFlashModel(false) ++       // add the SPI flash model in the harness (writeable)
-  new chipyard.config.WithSPIFlash(0x100000) ++             // add the SPI flash controller (1 MiB)
+  new chipyard.config.WithSPIFlash(size=0x100000) ++        // add the SPI flash controller (1 MiB)
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
