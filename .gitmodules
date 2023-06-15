@@ -124,3 +124,9 @@
 [submodule "software/embench/embench-iot"]
 	path = software/embench/embench-iot
 	url = https://github.com/embench/embench-iot.git
+[submodule "shuttle"]
+	path = generators/shuttle
+	url = https://github.com/ucb-bar/shuttle.git
+[submodule "generators/bar-fetchers"]
+	path = generators/bar-fetchers
+	url = https://github.com/ucb-bar/bar-fetchers.git
