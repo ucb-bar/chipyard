@@ -178,7 +178,7 @@ if run_step "6"; then
         pushd $CYDIR/sims/firesim
         (
             echo $CYDIR
-            source sourceme-f1-manager.sh --skip-ssh-setup
+            source sourceme-manager.sh --skip-ssh-setup
             pushd sim
             make sbt SBT_COMMAND="project {file:$CYDIR}firechip; compile" TARGET_PROJECT=firesim
             popd
