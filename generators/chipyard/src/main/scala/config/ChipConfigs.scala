@@ -86,6 +86,8 @@ class ExampleChipConfig extends Config(
   new testchipip.WithSerialTLWidth(32) ++                           // fatten the serialTL interface to improve testing performance
   new testchipip.WithDefaultSerialTL ++                             // use serialized tilelink port to external serialadapter/harnessRAM
 
+  new testchipip.WithMbusScratchpad(base = 0x08000000) ++       // use rocket l1 DCache scratchpad as base phys mem
+
   // Peripheral section
   new chipyard.config.WithUART(address = 0x10020000, baudrate = 115200) ++
 
