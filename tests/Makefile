@@ -21,7 +21,7 @@ ARCH = rv64imafdc
 ABI = lp64d
 ARCHFLAGS = -march=$(ARCH) -mabi=$(ABI)
 
-CFLAGS  = -std=gnu99 -O2 -fno-common -fno-builtin-printf -Wall
+CFLAGS  = -std=gnu99 -O2 -fno-common -fno-builtin-printf -Wall -I../generators/gemmini/software/gemmini-rocc-tests
 CFLAGS += $(ARCHFLAGS)
 LDFLAGS = -static
 
@@ -29,7 +29,7 @@ include libgloss.mk
 
 PROGRAMS = pwm blkdev accum charcount nic-loopback big-blkdev pingd \
            streaming-passthrough streaming-fir nvdla spiflashread spiflashwrite fft gcd \
-           hello mt-hello
+           hello mt-hello mt-gemmini
 
 
 .DEFAULT_GOAL := default
