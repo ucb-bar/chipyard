@@ -4,7 +4,7 @@ This changelog follows the format defined here: https://keepachangelog.com/en/1.
 
 ## [1.10.0] - 2023-6-16
 
-Adds superscalar in-order core, prefetchers, architectural checkpointing, examples for custom-chiptop/tapeout-chip/flat-chiptop
+Adds superscalar in-order core, prefetchers, architectural checkpointing, examples for custom-chiptop/tapeout-chip/flat-chiptop. FireSim bumped with new local FPGA support: Xilinx VCU118 (w/XDMA), Xilinx Alveo U250/U280 (w/XDMA, in addition to previous Vitis support), RHSResearch NiteFury II (w/XDMA). FireSim now also supports Xcelium for metasims.
 
 ### Added
 * QoL improvement to IOBinders + custom ChipTop example by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1399
