@@ -29,7 +29,7 @@ import chipyard.{ExtTLMem}
   * @param hang the power-on reset vector, i.e. the program counter will be set to this value on reset
   * @param contentFileName the path to the BootROM image
   */
-class WithBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigInt = 0x10040) extends Config((site, here, up) => {
+class WithBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigInt = 0x10000) extends Config((site, here, up) => {
   case BootROMLocated(x) => up(BootROMLocated(x), site)
       .map(_.copy(
         address = address,
