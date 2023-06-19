@@ -63,7 +63,7 @@ class WithNoUART extends Config((site, here, up) => {
   * @param address the address of the UART device
   * @param baudrate the baudrate of the UART device
   */
-class WithUART(address: BigInt = 0x10020000, baudrate: BigInt = 115200) extends Config ((site, here, up) => {
+class WithUART(baudrate: BigInt = 115200, address: BigInt = 0x10020000) extends Config ((site, here, up) => {
   case PeripheryUARTKey => up(PeripheryUARTKey) ++ Seq(
     UARTParams(address = address, nTxEntries = 256, nRxEntries = 256, initBaudRate = baudrate))
 })
@@ -79,7 +79,7 @@ class WithUARTFIFOEntries(txEntries: Int, rxEntries: Int) extends Config((site, 
   * @param fAddress the address of the Execute-in-Place (XIP) region of the SPI flash memory
   * @param size the size of the Execute-in-Place (XIP) region of the SPI flash memory
   */
-class WithSPIFlash(address: BigInt = 0x10030000, fAddress: BigInt = 0x20000000, size: BigInt = 0x10000000) extends Config((site, here, up) => {
+class WithSPIFlash(size: BigInt = 0x10000000, address: BigInt = 0x10030000, fAddress: BigInt = 0x20000000) extends Config((site, here, up) => {
   // Note: the default size matches freedom with the addresses below
   case PeripherySPIFlashKey => up(PeripherySPIFlashKey) ++ Seq(
     SPIFlashParams(rAddress = address, fAddress = fAddress, fSize = size))
