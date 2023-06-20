@@ -70,7 +70,7 @@ reg_t fromhost_addr = 0;
 reg_t cospike_timeout = 0;
 std::set<reg_t> magic_addrs;
 cfg_t* cfg;
-std::vector<read_override_device_t*> read_override_devices;
+std::vector<std::shared_ptr<read_override_device_t>> read_override_devices;
 
 static std::vector<std::pair<reg_t, mem_t*>> make_mems(const std::vector<mem_cfg_t> &layout)
 {
@@ -146,26 +146,26 @@ extern "C" void cospike_cosim(long long int cycle,
     assert(info->bootrom.size() < default_boot_rom_size);
     info->bootrom.resize(default_boot_rom_size);
 
-    rom_device_t *boot_rom = new rom_device_t(info->bootrom);
-    mem_t *boot_addr_reg = new mem_t(0x1000);
+    std::shared_ptr<rom_device_t> boot_rom = std::make_shared<rom_device_t>(info->bootrom);
+    std::shared_ptr<mem_t> boot_addr_reg = std::make_shared<mem_t>(0x1000);
     uint64_t default_boot_addr = 0x80000000;
-    boot_addr_reg->store(0, 8, (const uint8_t*)(&default_boot_addr));
+    boot_addr_reg.get()->store(0, 8, (const uint8_t*)(&default_boot_addr));
 
-    read_override_device_t* clint = new read_override_device_t("clint", CLINT_SIZE);
-    read_override_device_t* uart = new read_override_device_t("uart", UART_SIZE);
-    read_override_device_t* plic = new read_override_device_t("plic", PLIC_SIZE);
+    std::shared_ptr<read_override_device_t> clint = std::make_shared<read_override_device_t>("clint", CLINT_SIZE);
+    std::shared_ptr<read_override_device_t> uart = std::make_shared<read_override_device_t>("uart", UART_SIZE);
+    std::shared_ptr<read_override_device_t> plic = std::make_shared<read_override_device_t>("plic", PLIC_SIZE);
 
     read_override_devices.push_back(clint);
     read_override_devices.push_back(uart);
     read_override_devices.push_back(plic);
 
-    std::vector<std::pair<reg_t, abstract_device_t*>> plugin_devices;
+    std::vector<std::pair<reg_t, std::shared_ptr<abstract_device_t>>> devices;
     // The device map is hardcoded here for now
-    plugin_devices.push_back(std::pair(0x4000, boot_addr_reg));
-    plugin_devices.push_back(std::pair(default_boot_rom_addr, boot_rom));
-    plugin_devices.push_back(std::pair(CLINT_BASE, clint));
-    plugin_devices.push_back(std::pair(UART_BASE, uart));
-    plugin_devices.push_back(std::pair(PLIC_BASE, plic));
+    devices.push_back(std::pair(0x4000, boot_addr_reg));
+    devices.push_back(std::pair(default_boot_rom_addr, boot_rom));
+    devices.push_back(std::pair(CLINT_BASE, clint));
+    devices.push_back(std::pair(UART_BASE, uart));
+    devices.push_back(std::pair(PLIC_BASE, plic));
 
     s_vpi_vlog_info vinfo;
     if (!vpi_get_vlog_info(&vinfo))
@@ -206,10 +206,10 @@ extern "C" void cospike_cosim(long long int cycle,
       printf("%s", htif_args[i].c_str());
     }
     printf("\n");
-
+    std::vector<const device_factory_t*> plugin_device_factories;
     sim = new sim_t(cfg, false,
                     mems,
-                    plugin_devices,
+                    plugin_device_factories,
                     htif_args,
                     dm_config,
                     nullptr,
@@ -218,6 +218,8 @@ extern "C" void cospike_cosim(long long int cycle,
                     false,
                     nullptr
                     );
+    for (auto &it : devices)
+      sim->add_device(it.first, it.second);
 
 #ifdef COSPIKE_SIMDRAM
     // match sim_t's backing memory with the SimDRAM memory
@@ -362,7 +364,7 @@ extern "C" void cospike_cosim(long long int cycle,
   }
   if (valid || raise_interrupt || raise_exception) {
     p->clear_waiting_for_interrupt();
-    for (auto& e : read_override_devices) e->was_read_from = false;
+    for (auto& e : read_override_devices) e.get()->was_read_from = false;
     p->step(1);
     if (unlikely(cospike_debug)) {
       printf("spike pc is %lx\n", s->pc);
@@ -424,7 +426,7 @@ extern "C" void cospike_cosim(long long int cycle,
       // 3 => vec hint
       // 4 => csr
       bool device_read = false;
-      for (auto& e : read_override_devices) if (e->was_read_from) device_read = true;
+      for (auto& e : read_override_devices) if (e.get()->was_read_from) device_read = true;
 
       bool lr_read = ((insn & MASK_LR_D) == MATCH_LR_D) || ((insn & MASK_LR_W) == MATCH_LR_W);
       bool sc_read = ((insn & MASK_SC_D) == MATCH_SC_D) || ((insn & MASK_SC_W) == MATCH_SC_W);
