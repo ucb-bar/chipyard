@@ -85,7 +85,7 @@ class WithUARTInitBaudRate(baudrate: BigInt = 115200) extends Config ((site, her
   * @param fAddress the address of the Execute-in-Place (XIP) region of the SPI flash memory
   * @param size the size of the Execute-in-Place (XIP) region of the SPI flash memory
   */
-class WithSPIFlash(size: BigInt = 0x10000000, address: BigInt = 0x10030000, fAddress: BigInt = 0x20000000) extends Config((site, here, up) => {
+class WithSPIFlash(size: BigInt = 0x10000000, address: BigInt = 0x10040000, fAddress: BigInt = 0x20000000) extends Config((site, here, up) => {
   // Note: the default size matches freedom with the addresses below
   case PeripherySPIFlashKey => up(PeripherySPIFlashKey) ++ Seq(
     SPIFlashParams(rAddress = address, fAddress = fAddress, fSize = size))
