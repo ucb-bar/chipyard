@@ -82,7 +82,7 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
   new Group(test.name, Seq(test), SubProcess(options))
 } toSeq
 
-val chiselVersion = "3.5.6"
+val chiselVersion = "3.6.0"
 
 lazy val chiselSettings = Seq(
   libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % chiselVersion,
@@ -91,16 +91,12 @@ lazy val chiselSettings = Seq(
   addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % chiselVersion cross CrossVersion.full))
 
 
-val chiselTestVersion = "2.5.1"
-
-lazy val chiselTestSettings = Seq(libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel-iotesters" % chiselTestVersion))
-
 // Subproject definitions begin
 
 // -- Rocket Chip --
 
 // Rocket-chip dependencies (subsumes making RC a RootProject)
-lazy val hardfloat  = (project in rocketChipDir / "hardfloat")
+lazy val hardfloat  = freshProject("hardfloat", rocketChipDir / "hardfloat")
   .settings(chiselSettings)
   .dependsOn(midasTargetUtils)
   .settings(commonSettings)
@@ -165,7 +161,6 @@ lazy val chipyard = (project in file("generators/chipyard"))
 lazy val mempress = (project in file("generators/mempress"))
   .dependsOn(rocketchip, midasTargetUtils)
   .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(chiselTestSettings)
   .settings(commonSettings)
 
 lazy val barf = (project in file("generators/bar-fetchers"))
@@ -226,13 +221,11 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
 lazy val sha3 = (project in file("generators/sha3"))
   .dependsOn(rocketchip, midasTargetUtils)
   .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(chiselTestSettings)
   .settings(commonSettings)
 
 lazy val gemmini = (project in file("generators/gemmini"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(chiselTestSettings)
   .settings(commonSettings)
 
 lazy val nvdla = (project in file("generators/nvdla"))
@@ -250,13 +243,11 @@ lazy val iocell = Project(id = "iocell", base = file("./tools/barstools/") / "sr
 
 lazy val tapeout = (project in file("./tools/barstools/"))
   .settings(chiselSettings)
-  .settings(chiselTestSettings)
   .settings(commonSettings)
 
 lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
   .settings(
     chiselSettings,
-    chiselTestSettings,
     commonSettings,
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.2.+" % "test",
