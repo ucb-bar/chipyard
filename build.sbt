@@ -1,9 +1,6 @@
 // See LICENSE for license details.
 
-val defaultVersions = Map(
-  "chisel3" -> "3.5.5",
-  "chisel-iotesters" -> "2.5.5"
-)
+val defaultVersions = Map("chisel3" -> "3.6.0")
 
 organization := "edu.berkeley.cs"
 version := "0.4-SNAPSHOT"
@@ -13,7 +10,7 @@ scalacOptions := Seq("-deprecation", "-feature", "-language:reflectiveCalls")
 Test / scalacOptions ++= Seq("-language:reflectiveCalls")
 fork := true
 mainClass := Some("barstools.macros.MacroCompiler")
-libraryDependencies ++= Seq("chisel3","chisel-iotesters").map {
+libraryDependencies ++= Seq("chisel3").map {
   dep: String => "edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", defaultVersions(dep))
 }
 libraryDependencies ++= Seq(
