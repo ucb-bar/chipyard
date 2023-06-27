@@ -71,7 +71,27 @@ Run the following script based off which compiler you would like to use.
 .. Note:: Prior versions of Chipyard recommended ``esp-tools`` for Gemmini development. Gemmini should now be used with the standard ``riscv-tools``.
 
 .. Warning:: The following script will complete a "full" installation of Chipyard which may take a long time depending on the system.
-    Ensure that this script completes fully (no interruptions) before continuing on.
+    Ensure that this script completes fully (no interruptions) before continuing on. User can use the ``-s`` flag to skip steps:
+    
+    ``-s1`` skips initializing conda environment
+    
+    ``-s2`` skips initializing chipyard submodules
+    
+    ``-s3`` skips initializing toolchain collateral (Spike, PK, tests, libgloss)
+    
+    ``-s4`` skips initializing ctags
+    
+    ``-s5`` skips pre-compiling chipyard sources
+    
+    ``-s6`` skips initializing FireSim
+    
+    ``-s7`` skips pre-compiling FireSim sources
+    
+    ``-s8`` skips initializing FireMarshal
+    
+    ``-s9`` skips pre-compiling FireMarshal default buildroot Linux sources
+    
+    ``-s10`` skips running repository clean-up
 
 .. code-block:: shell
 
