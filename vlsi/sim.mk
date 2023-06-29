@@ -21,7 +21,7 @@ $(SIM_CONF): $(sim_common_files) check-binary
 	done
 	echo "  options_meta: 'append'" >> $@
 	echo "  defines:" >> $@
-	for x in $(subst +define+,,$(PREPROC_DEFINES)); do \
+	for x in $(subst +define+,,$(SIM_PREPROC_DEFINES)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  defines_meta: 'append'" >> $@
