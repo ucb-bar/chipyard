@@ -21,18 +21,18 @@ Consider the following example using CDEs.
 
     class WithX(b: Boolean) extends Config((site, here, up) => {
       case SomeKeyX => b
-    }
+    })
 
     class WithY(b: Boolean) extends Config((site, here, up) => {
       case SomeKeyY => b
-    }
+    })
 
 
 When forming a query based on a ``Parameters`` object, like ``p(SomeKeyX)``, the configuration system traverses the "chain" of config fragments until it finds a partial function which is defined at the key, and then returns that value.
 
 .. code:: scala
 
-    val params = Config(new WithX(true) ++ new WithY(true)) // "chain" together config fragments
+    val params = new Config(new WithX(true) ++ new WithY(true)) // "chain" together config fragments
     params(SomeKeyX) // evaluates to true
     params(SomeKeyY) // evaluates to true
     params(SomeKeyZ) // evaluates to false
@@ -54,10 +54,10 @@ Site
 
     class WithXEqualsYSite extends Config((site, here, up) => {
       case SomeKeyX => site(SomeKeyY) // expands to site(SomeKeyY, site)
-    }
+    })
 
-    val params_1 = Config(new WithXEqualsYSite ++ new WithY(true))
-    val params_2 = Config(new WithY(true) ++ new WithXEqualsYSite)
+    val params_1 = new Config(new WithXEqualsYSite ++ new WithY(true))
+    val params_2 = new Config(new WithY(true) ++ new WithXEqualsYSite)
     params_1(SomeKeyX) // evaluates to true
     params_2(SomeKeyX) // evaluates to true
 
@@ -75,10 +75,10 @@ Here
     class WithXEqualsYHere extends Config((site, here, up) => {
       case SomeKeyY => false
       case SomeKeyX => here(SomeKeyY, site)
-    }
+    })
 
-    val params_1 = Config(new WithXEqualsYHere ++ new WithY(true))
-    val params_2 = Config(new WithY(true) ++ new WithXEqualsYHere)
+    val params_1 = new Config(new WithXEqualsYHere ++ new WithY(true))
+    val params_2 = new Config(new WithY(true) ++ new WithXEqualsYHere)
 
     params_1(SomeKeyX) // evaluates to false
     params_2(SomeKeyX) // evaluates to false
@@ -95,10 +95,10 @@ Up
 
     class WithXEqualsYUp extends Config((site, here, up) => {
       case SomeKeyX => up(SomeKeyY, site)
-    }
+    })
 
-    val params_1 = Config(new WithXEqualsYUp ++ new WithY(true))
-    val params_2 = Config(new WithY(true) ++ new WithXEqualsYUp)
+    val params_1 = new Config(new WithXEqualsYUp ++ new WithY(true))
+    val params_2 = new Config(new WithY(true) ++ new WithXEqualsYUp)
 
     params_1(SomeKeyX) // evaluates to true
     params_2(SomeKeyX) // evaluates to false
