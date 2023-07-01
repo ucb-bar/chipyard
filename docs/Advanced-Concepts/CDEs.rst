@@ -39,6 +39,19 @@ When forming a query based on a ``Parameters`` object, like ``p(SomeKeyX)``, the
 
 In this example, the evaluation of ``params(SomeKeyX)`` will terminate in the partial function defined in ``WithX(true)``, while the evaluation of ``params(SomeKeyY)`` will terminate in the partial function defined in ``WithY(true)``. Note that when no partial functions match, the evaluation will return the default value for that parameter.
 
+Config fragments take precedence from left to right, meaning that a fragment at the start of the chain can override the value of a fragment to the right. It helps to read the fragment chain from right to left.
+
+.. code:: scala
+
+    case object SomeKeyX extends Field[Int](0)
+
+    class WithX(n: Int) extends Config((site, here, up) => {
+      case SomeKeyX => n
+    })
+
+    val params = new Config(new WithX(10) ++ new WithX(5))
+    println(params(SomeKeyX)) // evaluates to 10
+
 The real power of CDEs arises from the ``(site, here, up)`` parameters to the partial functions, which provide useful "views" into the global parameterization that the partial functions may access to determine a parameterization.
 
 .. note::
