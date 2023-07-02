@@ -193,7 +193,7 @@ lazy val hwacha = (project in file("generators/hwacha"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val boom = (project in file("generators/boom"))
+lazy val boom = freshProject("boom", file("generators/boom"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
