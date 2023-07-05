@@ -22,7 +22,7 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithTieOffInterrupts ++                     // tie-off interrupt ports, if present
   new chipyard.harness.WithTieOffL2FBusAXI ++                      // tie-off external AXI4 master, if present
   new chipyard.harness.WithCustomBootPinPlusArg ++                 // drive custom-boot pin with a plusarg, if custom-boot-pin is present
-  new chipyard.harness.WithSimUARTToUARTTSI ++                    // connect a SimUART to the UART-TSI port
+  new chipyard.harness.WithSimUARTToUARTTSI ++                     // connect a SimUART to the UART-TSI port
   new chipyard.harness.WithClockAndResetFromHarness ++             // all Clock/Reset I/O in ChipTop should be driven by harnessClockInstantiator
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ // generate clocks in harness with unsynthesizable ClockSourceAtFreqMHz
 
@@ -35,7 +35,7 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithSPIIOCells ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
   new chipyard.iobinders.WithCustomBootPin ++
-  // The "punchtrough" IOBInders below don't generate IOCells, as these interfaces shouldn't really be mapped to ASIC IO
+  // The "punchthrough" IOBInders below don't generate IOCells, as these interfaces shouldn't really be mapped to ASIC IO
   // Instead, they directly pass through the DigitalTop ports to ports in the ChipTop
   new chipyard.iobinders.WithAXI4MemPunchthrough ++
   new chipyard.iobinders.WithAXI4MMIOPunchthrough ++

@@ -21,7 +21,7 @@ case class ChipyardPRCIControlParams(
   baseAddress: BigInt = 0x100000,
   enableTileClockGating: Boolean = true,
   enableTileResetSetting: Boolean = true,
-  enableResetSynchronizers: Boolean = true // this should only be disable to work around verilator async-reset initialziation problems
+  enableResetSynchronizers: Boolean = true // this should only be disabled to work around verilator async-reset initialization problems
 ) {
   def generatePRCIXBar = enableTileClockGating || enableTileResetSetting
 }
@@ -110,7 +110,7 @@ PROPERLY AS ASIC OR FPGA.
 
 THESE SHOULD ONLY BE DISABLED TO WORK AROUND
 LIMITATIONS IN ASYNC RESET INITIALIZATION IN
-RTL SIMULATORS.
+RTL SIMULATORS, NAMELY VERILATOR.
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 """ + Console.RESET)
