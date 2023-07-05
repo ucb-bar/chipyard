@@ -1,0 +1,56 @@
+{
+    "categories": [
+      {
+        "title": "## Added",
+        "labels": ["changelog:added"]
+      },
+      {
+        "title": "## Changed",
+        "labels": ["changelog:changed"]
+      },
+      {
+        "title": "## Fixed",
+        "labels": ["changelog:fixed"]
+      },
+      {
+        "title": "## Removed",
+        "labels": ["changelog:removed"]
+      },
+      {
+        "title": "## Uncategorized",
+        "labels": []
+      }
+    ],
+    "ignore_labels": [
+      "changelog:omit"
+    ],
+    "sort": {
+      "order": "ASC",
+      "on_property": "mergedAt"
+    },
+    "template": "${{CHANGELOG}}\n\n**Full Changelog:** ${{RELEASE_DIFF}}\n",
+    "pr_template": "- ${{TITLE}} (by @${{AUTHOR}} in ${{URL}})${{RELEASE_NOTES}}",
+    "empty_template": "- no changes",
+    "transformers": [
+      {
+        "pattern": "<!--.*-->",
+        "flags": "gus",
+        "target": ""
+      }
+    ],
+    "custom_placeholders": [
+      {
+        "name": "RELEASE_NOTES",
+        "source": "BODY",
+        "transformer": {
+          "pattern": ".*#### Release Notes(?:[\n\\s]|(?:<!--.*?-->))*((?:\\S(?!!--)).*?)[\n\\s]*\n#.*",
+          "flags": "gus",
+          "target": "\n  $1"
+        }
+      }
+    ],
+    "trim_values": false,
+    "max_tags_to_fetch": 200,
+    "max_pull_requests": 500,
+    "max_back_track_time_days": 365
+}
