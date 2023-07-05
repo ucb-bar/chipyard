@@ -2,6 +2,8 @@
 
 # Chipyard Framework [![Test](https://github.com/ucb-bar/chipyard/actions/workflows/chipyard-run-tests.yml/badge.svg)](https://github.com/ucb-bar/chipyard/actions)
 
+DUMMY
+
 ## Quick Links
 
 * **Stable Documentation**: https://chipyard.readthedocs.io/
