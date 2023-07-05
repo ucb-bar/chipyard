@@ -44,8 +44,7 @@ build.sbt.
     cd generators/
     git submodule add https://git-repository.com/yourproject.git
 
-Then add ``yourproject`` to the Chipyard top-level build.sbt file. 
-Make sure it goes above the definition `lazy val chipyard`.
+Then add ``yourproject`` to the Chipyard top-level build.sbt file.
 
 .. code-block:: scala
 
