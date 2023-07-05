@@ -73,15 +73,15 @@ Run the following script based off which compiler you would like to use.
 .. Warning:: The following script will complete a "full" installation of Chipyard which may take a long time depending on the system.
     Ensure that this script completes fully (no interruptions) before continuing on. User can use the ``--skip`` or ``-s`` flag to skip steps:
     
-    ``-s 1`` skips initializing conda environment
+    ``-s 1`` skips initializing Conda environment
     
-    ``-s 2`` skips initializing chipyard submodules
+    ``-s 2`` skips initializing Chipyard submodules
     
     ``-s 3`` skips initializing toolchain collateral (Spike, PK, tests, libgloss)
     
     ``-s 4`` skips initializing ctags
     
-    ``-s 5`` skips pre-compiling chipyard Scala sources
+    ``-s 5`` skips pre-compiling Chipyard Scala sources
     
     ``-s 6`` skips initializing FireSim
     
