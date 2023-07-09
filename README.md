@@ -23,9 +23,8 @@ Chipyard is actively developed in the [Berkeley Architecture Research Group][ucb
 ## Resources
 
 * Chipyard Stable Documentation: https://chipyard.readthedocs.io/
-* Chipyard (x FireSim) Tutorial: https://fires.im/tutorial
-* Chipyard Basics slides: https://fires.im/isca22-slides-pdf/02_chipyard_basics.pdf
-* Chipyard Tutorial Exercise slides: https://fires.im/isca22-slides-pdf/03_building_custom_socs.pdf
+* Chipyard (x FireSim) Tutorial: https://fires.im/tutorial-recent/
+* Chipyard Basics slides: https://fires.im/asplos23-slides-pdf/02_chipyard_basics.pdf
 
 ## Need help?
 
@@ -74,6 +73,7 @@ These additional publications cover many of the internal components used in Chip
         * **FASED**: D. Biancolin, et al., *FPGA'19*. [PDF](https://people.eecs.berkeley.edu/~biancolin/papers/fased-fpga19.pdf).
         * **Golden Gate**: A. Magyar, et al., *ICCAD'19*. [PDF](https://davidbiancolin.github.io/papers/goldengate-iccad19.pdf).
         * **FirePerf**: S. Karandikar, et al., *ASPLOS'20*. [PDF](https://sagark.org/assets/pubs/fireperf-asplos2020.pdf).
+        * **FireSim ISCA@50 Retrospective**: S. Karandikar, et al., *ISCA@50 Retrospective: 1996-2020*. [PDF](https://sites.coecis.cornell.edu/isca50retrospective/files/2023/06/Karandikar_2018_FireSim.pdf)
 * **Tools**
     * **Chisel**: J. Bachrach, et al., *DAC'12*. [PDF](https://people.eecs.berkeley.edu/~krste/papers/chisel-dac2012.pdf).
     * **FIRRTL**: A. Izraelevitz, et al., *ICCAD'17*. [PDF](https://ieeexplore.ieee.org/document/8203780).
