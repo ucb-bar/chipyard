@@ -30,12 +30,6 @@ Conda allows users to create an "environment" that holds system dependencies lik
 First, Chipyard requires the latest Conda to be installed on the system.
 Please refer to the `Conda installation instructions <https://github.com/conda-forge/miniforge/#download>`__ on how to install the latest Conda with the **Miniforge** installer.
 
-.. Note:: If you have installed conda separately from this documentation (i.e. from miniconda or full Anaconda), please ensure you follow https://conda-forge.org/docs/user/introduction.html#how-can-i-install-packages-from-conda-forge to use ``conda-forge`` packages without any issues. Additionally, ensure that it is up-to-date by running ``conda update -n base -c conda-forge conda``.
-
-.. code-block:: shell
-
-    conda --version # must be version 22.11.1 or higher
-
 After Conda is installed and is on your ``PATH``, we need to install a version of ``git`` to initially checkout the repository.
 For this you can use the system package manager like ``yum`` or ``apt`` to install ``git``.
 This ``git`` is only used to first checkout the repository, we will later install a newer version of ``git`` with Conda.
