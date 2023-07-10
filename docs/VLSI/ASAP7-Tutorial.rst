@@ -66,6 +66,12 @@ In the Chipyard root, ensure that you have the Chipyard conda environment activa
 
 to pull and install the plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule must be added in the ``vlsi`` folder first.
 
+Now navigate to the ``vlsi`` directory. The remainder of the tutorial will assume you are in this directory.
+
+.. code-block:: shell
+
+    cd ~chipyard/vlsi
+
 Building the Design
 --------------------
 To elaborate the ``TinyRocketConfig`` and set up all prerequisites for the build system to push the design and SRAM macros through the flow:

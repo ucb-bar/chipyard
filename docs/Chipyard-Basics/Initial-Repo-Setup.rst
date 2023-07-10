@@ -27,15 +27,8 @@ Conda allows users to create an "environment" that holds system dependencies lik
 
 .. Note:: Chipyard can also run on systems without a Conda installation. However, users on these systems must manually install toolchains and dependencies.
 
-First, Chipyard requires Conda to be installed on the system.
-Please refer to the `Conda installation instructions <https://github.com/conda-forge/miniforge/#download>`__ on how to install Conda with the **Miniforge** installer.
-Afterwards, verify that Conda is a sufficient version (we test on version 4.12.0 but higher is most likely fine).
-
-.. Note:: If you have installed conda separately from this documentation (i.e. from miniconda or full Anaconda), please ensure you follow https://conda-forge.org/docs/user/introduction.html#how-can-i-install-packages-from-conda-forge to use ``conda-forge`` packages without any issues.
-
-.. code-block:: shell
-
-    conda --version # must be version 22.11.1 or higher
+First, Chipyard requires the latest Conda to be installed on the system.
+Please refer to the `Conda installation instructions <https://github.com/conda-forge/miniforge/#download>`__ on how to install the latest Conda with the **Miniforge** installer.
 
 After Conda is installed and is on your ``PATH``, we need to install a version of ``git`` to initially checkout the repository.
 For this you can use the system package manager like ``yum`` or ``apt`` to install ``git``.
@@ -71,7 +64,27 @@ Run the following script based off which compiler you would like to use.
 .. Note:: Prior versions of Chipyard recommended ``esp-tools`` for Gemmini development. Gemmini should now be used with the standard ``riscv-tools``.
 
 .. Warning:: The following script will complete a "full" installation of Chipyard which may take a long time depending on the system.
-    Ensure that this script completes fully (no interruptions) before continuing on.
+    Ensure that this script completes fully (no interruptions) before continuing on. User can use the ``--skip`` or ``-s`` flag to skip steps:
+
+    ``-s 1`` skips initializing Conda environment
+
+    ``-s 2`` skips initializing Chipyard submodules
+
+    ``-s 3`` skips initializing toolchain collateral (Spike, PK, tests, libgloss)
+
+    ``-s 4`` skips initializing ctags
+
+    ``-s 5`` skips pre-compiling Chipyard Scala sources
+
+    ``-s 6`` skips initializing FireSim
+
+    ``-s 7`` skips pre-compiling FireSim sources
+
+    ``-s 8`` skips initializing FireMarshal
+
+    ``-s 9`` skips pre-compiling FireMarshal default buildroot Linux sources
+
+    ``-s 10`` skips running repository clean-up
 
 .. code-block:: shell
 
@@ -120,7 +133,7 @@ You can source this file in your ``.bashrc`` or equivalent environment setup fil
     However, it is recommended that the final ``env.sh`` file sourced is the ``env.sh`` located in the
     Chipyard repo that you expect to run ``make`` commands in.
 
-Pre-built Docker Image
+DEPRECATED: Pre-built Docker Image
 -------------------------------------------
 
 An alternative to setting up the Chipyard repository locally is to pull the pre-built Docker image from Docker Hub. The image comes with all dependencies installed, Chipyard cloned, and toolchains initialized. This image sets up baseline Chipyard (not including FireMarshal, FireSim, and Hammer initializations). Each image comes with a tag that corresponds to the version of Chipyard cloned/set-up in that image. Not including a tag during the pull will pull the image with the latest version of Chipyard.

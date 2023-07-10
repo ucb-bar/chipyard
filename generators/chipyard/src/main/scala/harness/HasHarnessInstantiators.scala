@@ -86,6 +86,7 @@ trait HasHarnessInstantiators {
         case (d: HasIOBinders, i: Int) => ApplyHarnessBinders(this, d.lazySystem, d.portMap)(chipParameters(i))
         case _ =>
       }
+      ApplyMultiHarnessBinders(this, lazyDuts)
     }
 
     val harnessBinderClk = harnessClockInstantiator.requestClockMHz("harnessbinder_clock", getHarnessBinderClockFreqMHz)

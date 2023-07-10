@@ -22,12 +22,14 @@ class WithNoDesignKey extends Config((site, here, up) => {
 })
 
 class WithArty100TTweaks extends Config(
-  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new WithArty100TUARTTSI ++
   new WithArty100TDDRTL ++
   new WithNoDesignKey ++
+  new testchipip.WithUARTTSIClient ++
+  new chipyard.harness.WithSerialTLTiedOff ++
   new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
   new chipyard.config.WithMemoryBusFrequency(50.0) ++
+  new chipyard.config.WithFrontBusFrequency(50.0) ++
   new chipyard.config.WithSystemBusFrequency(50.0) ++
   new chipyard.config.WithPeripheryBusFrequency(50.0) ++
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
