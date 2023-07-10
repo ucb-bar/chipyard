@@ -174,3 +174,4 @@ jobs:
       - name: Delete repo copy and conda env
         run: |
            rm -rf ${{ env.REMOTE_WORK_DIR }}
+           rm -rf ${{ env.JAVA_TMP_DIR }}
