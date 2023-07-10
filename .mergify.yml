@@ -22,21 +22,3 @@ pull_request_rules:
     actions:
       label:
         add: [Backport]
-
-  - name: check PR has changelog label
-    conditions:
-      - base=main
-    actions:
-      post_check:
-        success_conditions:
-          - "label~=^changelog:"
-        title: |
-          {% if check_succeed %}
-          Labeled for changelog
-          {% else %}
-          Needs label for changelog
-          {% endif %}
-        summary: |
-          {% if not check_succeed %}
-          Your pull request must have a changelog label (e.g. `changelog: ...`).
-          {% endif %}
