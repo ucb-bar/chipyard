@@ -303,6 +303,15 @@ class WithSerialTLIOCells extends OverrideIOBinder({
   }).getOrElse((Nil, Nil))
 })
 
+class WithSerialTLPunchthrough extends OverrideIOBinder({
+  (system: CanHavePeripheryTLSerial) => system.serial_tl.map({ s =>
+    val sys = system.asInstanceOf[BaseSubsystem]
+    val port = IO(s.getWrappedValue.cloneType)
+    port <> s.getWrappedValue
+    (Seq(port), Nil)
+  }).getOrElse((Nil, Nil))
+})
+
 class WithAXI4MemPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveMasterAXI4MemPort) => {
     implicit val p: Parameters = GetSystemParameters(system)
@@ -408,6 +417,15 @@ class WithCustomBootPin extends OverrideIOBinder({
     val sys = system.asInstanceOf[BaseSubsystem]
     val (port, cells) = IOCell.generateIOFromSignal(p.getWrappedValue, "custom_boot", sys.p(IOCellKey), abstractResetAsAsync = true)
     (Seq(port), cells)
+  }).getOrElse((Nil, Nil))
+})
+
+class WithUARTTSIPunchthrough extends OverrideIOBinder({
+  (system: CanHavePeripheryUARTTSI) => system.uart_tsi.map({ p =>
+    val sys = system.asInstanceOf[BaseSubsystem]
+    val uart_tsi = IO(new UARTTSIIO(p.uartParams))
+    uart_tsi <> p
+    (Seq(uart_tsi), Nil)
   }).getOrElse((Nil, Nil))
 })
 
