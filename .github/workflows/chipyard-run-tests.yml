@@ -178,11 +178,11 @@ jobs:
             conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
             .github/scripts/build-extra-tests.sh
 
-  create-conda-env-knight:
-    name: create-conda-env-knight
+  create-conda-env-jktgz:
+    name: create-conda-env-jktgz
     needs: [change-filters, cancel-prior-workflows]
     if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: knight
+    runs-on: jktgz
     steps:
       - name: Delete old checkout
         run: |
@@ -199,11 +199,11 @@ jobs:
       - name: Create conda env
         uses: ./.github/actions/create-conda-env
 
-  create-conda-env-ferry:
-    name: create-conda-env-ferry
+  create-conda-env-jktqos:
+    name: create-conda-env-jktqos
     needs: [change-filters, cancel-prior-workflows]
     if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: ferry
+    runs-on: jktqos
     steps:
       - name: Delete old checkout
         run: |
@@ -225,7 +225,7 @@ jobs:
   # When adding new prep jobs, please add them to `needs` below
   setup-complete:
     name: setup-complete
-    needs: [create-conda-env-knight, create-conda-env-ferry, build-extra-tests]
+    needs: [create-conda-env-jktgz, create-conda-env-jktqos, build-extra-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Set up complete
@@ -393,7 +393,7 @@ jobs:
   chipyard-spike-gemmini-run-tests:
     name: chipyard-spike-gemmini-run-tests
     needs: prepare-chipyard-accels # technically doesn't depend on RTL but should be after the build.sh for Gemmini
-    runs-on: ferry
+    runs-on: jktqos
     steps:
       - name: Delete old checkout
         run: |
