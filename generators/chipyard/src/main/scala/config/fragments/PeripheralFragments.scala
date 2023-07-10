@@ -5,7 +5,7 @@ import chisel3._
 import chisel3.util.{log2Up}
 
 import org.chipsalliance.cde.config.{Config}
-import freechips.rocketchip.devices.tilelink.{BootROMLocated, PLICKey}
+import freechips.rocketchip.devices.tilelink.{BootROMLocated, PLICKey, CLINTKey}
 import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI, JtagDTMKey, JtagDTMConfig}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 import freechips.rocketchip.stage.phases.TargetDirKey
@@ -151,4 +151,20 @@ class WithNoPLIC extends Config((site, here, up) => {
 
 class WithDebugModuleAbstractDataWords(words: Int = 16) extends Config((site, here, up) => {
   case DebugModuleKey => up(DebugModuleKey).map(_.copy(nAbstractDataWords=words))
+})
+
+class WithNoCLINT extends Config((site, here, up) => {
+  case CLINTKey => None
+})
+
+class WithNoBootROM extends Config((site, here, up) => {
+  case BootROMLocated(_) => None
+})
+
+class WithNoBusErrorDevices extends Config((site, here, up) => {
+  case SystemBusKey => up(SystemBusKey).copy(errorDevice = None)
+  case ControlBusKey => up(ControlBusKey).copy(errorDevice = None)
+  case PeripheryBusKey => up(PeripheryBusKey).copy(errorDevice = None)
+  case MemoryBusKey => up(MemoryBusKey).copy(errorDevice = None)
+  case FrontBusKey => up(FrontBusKey).copy(errorDevice = None)
 })

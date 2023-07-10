@@ -3,7 +3,7 @@
 # Specify clock signals
 # Relax the clock period for OpenROAD to meet timing
 vlsi.inputs.clocks: [
-  {name: "clock_clock", period: "50ns", uncertainty: "2ns"}
+  {name: "clock_uncore_clock", period: "50ns", uncertainty: "2ns"}
 ]
 
 # Flow parameters that yield a routable design with reasonable timing

@@ -32,7 +32,7 @@ include $(base_dir)/sims/common-sim-flags.mk
 
 # If verilator seed unspecified, verilator uses srand as random seed
 ifdef RANDOM_SEED
-SEED_FLAG=+verilator+seed+I$(RANDOM_SEED)
+SEED_FLAG=+verilator+seed+$(RANDOM_SEED)
 else
 SEED_FLAG=
 endif

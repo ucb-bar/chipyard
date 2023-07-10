@@ -13,23 +13,6 @@ import freechips.rocketchip.util.ElaborationArtefacts
 
 import testchipip._
 
-object ResetStretcher {
-  def apply(clock: Clock, reset: Reset, cycles: Int): Reset = {
-    withClockAndReset(clock, reset) {
-      val n = log2Ceil(cycles)
-      val count = Module(new AsyncResetRegVec(w=n, init=0))
-      val resetout = Module(new AsyncResetRegVec(w=1, init=1))
-      count.io.en := resetout.io.q
-      count.io.d := count.io.q + 1.U
-      resetout.io.en := resetout.io.q
-      resetout.io.d := count.io.q < (cycles-1).U
-
-      resetout.io.q.asBool
-    }
-  }
-}
-
-
 case class ClockSelNode()(implicit valName: ValName)
   extends MixedNexusNode(ClockImp, ClockGroupImp)(
      dFn = { d => ClockGroupSourceParameters() },

@@ -240,11 +240,7 @@ lazy val nvdla = (project in file("generators/nvdla"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val iocell = Project(id = "iocell", base = file("./tools/barstools/") / "src")
-  .settings(
-    Compile / scalaSource := baseDirectory.value / "main" / "scala" / "barstools" / "iocell",
-    Compile / resourceDirectory := baseDirectory.value / "main" / "resources"
-  )
+lazy val iocell = Project(id = "iocell", base = file("./tools/barstools/") / "iocell")
   .settings(chiselSettings)
   .settings(commonSettings)
 
