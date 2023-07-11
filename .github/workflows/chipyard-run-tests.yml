@@ -166,7 +166,7 @@ jobs:
       - name: Generate keys
         id: genkey
         run: |
-          echo "::set-output name=extra-tests-cache-key::extra-tests-${{ github.sha }}"
+          echo "extra-tests-cache-key=extra-tests-${{ github.sha }}" >> $GITHUB_OUTPUT
       - uses: actions/cache@v3
         id: build-extra-tools-cache
         with:
