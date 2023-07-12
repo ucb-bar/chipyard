@@ -1,12 +1,12 @@
 // See LICENSE for license details
 package chipyard.upf
 
-import scala.collection.mutable.ListBuffer
-import scalax.collection.mutable.Graph
+import scala.collection.mutable.{ListBuffer}
+import scalax.collection.mutable.{Graph}
 import scalax.collection.GraphPredef._, scalax.collection.GraphEdge._
 
-import chipyard.TestHarness
-import freechips.rocketchip.diplomacy.LazyModule
+import chipyard.harness.{TestHarness}
+import freechips.rocketchip.diplomacy.{LazyModule}
 
 object ChipTopUPF {
 
@@ -87,4 +87,4 @@ object ChipTopUPF {
 
 }
 
-case object ChipTopUPFAspect extends UPFAspect[chipyard.TestHarness](ChipTopUPF.default)
+case object ChipTopUPFAspect extends UPFAspect[chipyard.harness.TestHarness](ChipTopUPF.default)

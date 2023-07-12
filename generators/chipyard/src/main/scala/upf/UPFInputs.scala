@@ -13,10 +13,10 @@ object UPFInputs {
         PowerDomainInput(name="PD_top", isTop=true, moduleList=List("DigitalTop"),
                          parentPD="", childrenPDs=List("PD_RocketTile1", "PD_RocketTile2"),
                          isGated=false, highVoltage=3.9, lowVoltage=3.4),
-        PowerDomainInput(name="PD_RocketTile1", isTop=false, moduleList=List("RocketTile"),
+        PowerDomainInput(name="PD_RocketTile1", isTop=false, moduleList=List("tile_prci_domain"),
                          parentPD="PD_top", childrenPDs=List(),
                          isGated=false, highVoltage=3.9, lowVoltage=3.1),
-        PowerDomainInput(name="PD_RocketTile2", isTop=false, moduleList=List("RocketTile_1"),
+        PowerDomainInput(name="PD_RocketTile2", isTop=false, moduleList=List("tile_prci_domain_1"),
                          parentPD="PD_top", childrenPDs=List(),
                          isGated=false, highVoltage=3.9, lowVoltage=3.2),
     )

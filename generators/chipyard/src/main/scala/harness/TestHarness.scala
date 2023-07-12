@@ -34,5 +34,5 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessInst
   def referenceClock = clock
   def referenceReset = reset
 
-  instantiateChipTops()
+  val lazyDuts = instantiateChipTops()
 }

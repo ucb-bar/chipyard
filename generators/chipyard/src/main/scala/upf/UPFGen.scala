@@ -1,13 +1,13 @@
 // See LICENSE for license details
 package chipyard.upf
 
-import java.io.FileWriter
+import java.io.{FileWriter}
 import java.nio.file.{Paths, Files}
-import scala.collection.mutable.ListBuffer
-import scalax.collection.mutable.Graph
+import scala.collection.mutable.{ListBuffer}
+import scalax.collection.mutable.{Graph}
 import scalax.collection.GraphPredef._, scalax.collection.GraphEdge._
 
-import freechips.rocketchip.diplomacy.LazyModule
+import freechips.rocketchip.diplomacy.{LazyModule}
 
 case class PowerDomain (val name: String, val modules: ListBuffer[LazyModule],
                         val isTop: Boolean, val isGated: Boolean,

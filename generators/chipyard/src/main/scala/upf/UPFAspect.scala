@@ -1,17 +1,18 @@
 // See LICENSE for license details
 package chipyard.upf
 
-import chisel3.aop.Aspect
+import chisel3.aop.{Aspect}
 import firrtl.{AnnotationSeq}
-import chipyard.TestHarness
-import freechips.rocketchip.stage.phases.TargetDirKey
-import freechips.rocketchip.diplomacy.LazyModule
+import chipyard.harness.{TestHarness}
+import freechips.rocketchip.stage.phases.{TargetDirKey}
+import freechips.rocketchip.diplomacy.{LazyModule}
 
 abstract class UPFAspect[T <: TestHarness](upf: UPFFunc.UPFFunction) extends Aspect[T] {
 
   final override def toAnnotation(top: T): AnnotationSeq = {
     UPFFunc.UPFPath = top.p(TargetDirKey) + "/upf"
-    upf(top.lazyDut)
+    require(top.lazyDuts.length == 1) // currently only supports 1 chiptop
+    upf(top.lazyDuts.head)
     AnnotationSeq(Seq()) // noop
   }
 
