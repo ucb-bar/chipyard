@@ -20,7 +20,8 @@ HELP_COMPILATION_VARIABLES += \
 "   ENABLE_YOSYS_FLOW         = if set, add compilation flags to enable the vlsi flow for yosys(tutorial flow)" \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
 "   EXTRA_BASE_FIRRTL_OPTIONS = additional options to pass to the Scala FIRRTL compiler" \
-"   MFC_BASE_LOWERING_OPTIONS = override lowering options to pass to the MLIR FIRRTL compiler"
+"   MFC_BASE_LOWERING_OPTIONS = override lowering options to pass to the MLIR FIRRTL compiler" \
+"   ASPECTS                   = comma separated list of Chisel aspect flows to run (e.x. chipyard.upf.ChipTopUPFAspect)"
 
 EXTRA_GENERATOR_REQS ?= $(BOOTROM_TARGETS)
 EXTRA_SIM_CXXFLAGS   ?=
@@ -28,6 +29,11 @@ EXTRA_SIM_LDFLAGS    ?=
 EXTRA_SIM_SOURCES    ?=
 EXTRA_SIM_REQS       ?=
 ENABLE_CUSTOM_FIRRTL_PASS += $(ENABLE_YOSYS_FLOW)
+
+ifneq ($(ASPECTS), )
+	comma = ,
+	ASPECT_ARGS = $(foreach aspect, $(subst $(comma), , $(ASPECTS)), --with-aspect $(aspect))
+endif
 
 #----------------------------------------------------------------------------
 HELP_SIMULATION_VARIABLES += \
@@ -134,6 +140,7 @@ $(FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(CHIPYARD_CLASSPATH_TARGETS) 
 		--name $(long_name) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
 		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG) \
+		$(ASPECT_ARGS) \
 		$(EXTRA_CHISEL_OPTIONS)) | tee $(CHISEL_LOG_FILE))
 
 define mfc_extra_anno_contents

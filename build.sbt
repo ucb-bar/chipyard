@@ -126,7 +126,8 @@ lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.json4s" %% "json4s-jackson" % "3.6.6",
-      "org.scalatest" %% "scalatest" % "3.2.0" % "test"
+      "org.scalatest" %% "scalatest" % "3.2.0" % "test",
+      "org.scala-graph" %% "graph-core" % "1.13.5"
     )
   )
   .settings( // Settings for scalafix
