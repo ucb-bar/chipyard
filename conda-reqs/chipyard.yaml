@@ -23,8 +23,8 @@ dependencies:
     # bundle FireSim driver with deps into installer shell-script
     - constructor
 
-    - gcc
-    - gxx
+    - gcc<13
+    - gxx<13
     - sysroot_linux-64=2.17 # needed to match pre-built CI XRT glibc version
     - conda-gcc-specs
     - binutils
