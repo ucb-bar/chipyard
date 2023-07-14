@@ -14,6 +14,7 @@ import testchipip.TileTraceIO
 
 case class SpikeCosimConfig(
   isa: String,
+  priv: String,
   pmpregions: Int,
   mem0_base: BigInt,
   mem0_size: BigInt,
@@ -24,6 +25,7 @@ case class SpikeCosimConfig(
 
 class SpikeCosim(cfg: SpikeCosimConfig) extends BlackBox(Map(
   "ISA" -> StringParam(cfg.isa),
+  "PRIV" -> StringParam(cfg.priv),
   "PMPREGIONS" -> IntParam(cfg.pmpregions),
   "MEM0_BASE" -> IntParam(cfg.mem0_base),
   "MEM0_SIZE" -> IntParam(cfg.mem0_size),
