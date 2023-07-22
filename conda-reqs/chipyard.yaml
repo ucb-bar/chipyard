@@ -23,9 +23,9 @@ dependencies:
     # bundle FireSim driver with deps into installer shell-script
     - constructor
 
-    - gcc
-    - gxx
-    - sysroot_linux-64>=2.17 # needed to match pre-built CI XRT glibc version
+    - gcc<13
+    - gxx<13
+    - sysroot_linux-64=2.17 # needed to match pre-built CI XRT glibc version
     - conda-gcc-specs
     - binutils
 
@@ -89,11 +89,11 @@ dependencies:
     - graphviz
     - expect
     - dtc
-    - verilator==4.226
+    - verilator==5.008
     - screen
     - elfutils
     - libdwarf-dev==0.0.0.20190110_28_ga81397fc4 # from ucb-bar channel - using mainline libdwarf-feedstock
-    - conda-lock>=1
+    - conda-lock=1.4
 
     # clang-format for driver coding style enforcement.
     - clang-format
@@ -131,7 +131,7 @@ dependencies:
     - pytest-mock
     - moto
     - mypy
-    - s3fs
+    - s3fs==0.4.2
     - aiohttp
     - pip:
         - sure
@@ -143,6 +143,7 @@ dependencies:
     - mypy-boto3-s3
     - mypy_boto3_ec2
     - botocore-stubs
+    - cryptography<41
     - pytz
     - types-pytz
     - pyyaml

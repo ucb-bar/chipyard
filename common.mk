@@ -16,11 +16,12 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_LDFLAGS         = additional LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES         = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
-"   ENABLE_SBT_THIN_CLIENT    = if set, use sbt's experimental thin client (works best when overridding SBT_BIN with the mainline sbt script)" \
 "   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & MFC converts to Verilog)" \
 "   ENABLE_YOSYS_FLOW         = if set, add compilation flags to enable the vlsi flow for yosys(tutorial flow)" \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
-"   EXTRA_FIRRTL_OPTIONS      = additional options to pass to the FIRRTL compiler"
+"   EXTRA_BASE_FIRRTL_OPTIONS = additional options to pass to the Scala FIRRTL compiler" \
+"   MFC_BASE_LOWERING_OPTIONS = override lowering options to pass to the MLIR FIRRTL compiler" \
+"   ASPECTS                   = comma separated list of Chisel aspect flows to run (e.x. chipyard.upf.ChipTopUPFAspect)"
 
 EXTRA_GENERATOR_REQS ?= $(BOOTROM_TARGETS)
 EXTRA_SIM_CXXFLAGS   ?=
@@ -28,6 +29,11 @@ EXTRA_SIM_LDFLAGS    ?=
 EXTRA_SIM_SOURCES    ?=
 EXTRA_SIM_REQS       ?=
 ENABLE_CUSTOM_FIRRTL_PASS += $(ENABLE_YOSYS_FLOW)
+
+ifneq ($(ASPECTS), )
+	comma = ,
+	ASPECT_ARGS = $(foreach aspect, $(subst $(comma), , $(ASPECTS)), --with-aspect $(aspect))
+endif
 
 #----------------------------------------------------------------------------
 HELP_SIMULATION_VARIABLES += \
@@ -45,11 +51,13 @@ HELP_COMMANDS += \
 "   run-binary                  = run [./$(shell basename $(sim))] and log instructions to file" \
 "   run-binary-fast             = run [./$(shell basename $(sim))] and don't log instructions" \
 "   run-binary-debug            = run [./$(shell basename $(sim_debug))] and log instructions and waveform to files" \
+"   run-binaries                = run [./$(shell basename $(sim))] and log instructions to file" \
+"   run-binaries-fast           = run [./$(shell basename $(sim))] and don't log instructions" \
+"   run-binaries-debug          = run [./$(shell basename $(sim_debug))] and log instructions and waveform to files" \
 "   verilog                     = generate intermediate verilog files from chisel elaboration and firrtl passes" \
 "   firrtl                      = generate intermediate firrtl files from chisel elaboration" \
 "   run-tests                   = run all assembly and benchmark tests" \
 "   launch-sbt                  = start sbt terminal" \
-"   {shutdown,start}-sbt-server = shutdown or start sbt server if using ENABLE_SBT_THIN_CLIENT" \
 "   find-config-fragments       = list all config. fragments"
 
 #########################################################################################
@@ -66,7 +74,7 @@ include $(base_dir)/tools/torture.mk
 #########################################################################################
 # Prerequisite lists
 #########################################################################################
-# Returns a list of files in directory $1 with file extension $2.
+# Returns a list of files in directories $1 with single file extension $2.
 # If available, use 'fd' to find the list of files, which is faster than 'find'.
 ifeq ($(shell which fd 2> /dev/null),)
 	lookup_srcs = $(shell find -L $(1)/ -name target -prune -o \( -iname "*.$(2)" ! -iname ".*" \) -print 2> /dev/null)
@@ -74,9 +82,17 @@ else
 	lookup_srcs = $(shell fd -L -t f -e $(2) . $(1))
 endif
 
-SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools/barstools fpga/fpga-shells fpga/src)
-SCALA_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),scala)
-VLOG_SOURCES = $(call lookup_srcs,$(SOURCE_DIRS),sv) $(call lookup_srcs,$(SOURCE_DIRS),v)
+# Returns a list of files in directories $1 with *any* of the file extensions in $2
+lookup_srcs_by_multiple_type = $(foreach type,$(2),$(call lookup_srcs,$(1),$(type)))
+
+SCALA_EXT = scala
+VLOG_EXT = sv v
+CHIPYARD_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim fpga/fpga-shells fpga/src)
+CHIPYARD_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(CHIPYARD_SOURCE_DIRS),$(SCALA_EXT))
+CHIPYARD_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(CHIPYARD_SOURCE_DIRS),$(VLOG_EXT))
+BARSTOOLS_SOURCE_DIRS = $(addprefix $(base_dir)/,tools/barstools)
+BARSTOOLS_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(BARSTOOLS_SOURCE_DIRS),$(SCALA_EXT))
+BARSTOOLS_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(BARSTOOLS_SOURCE_DIRS),$(VLOG_EXT))
 # This assumes no SBT meta-build sources
 SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools)
 SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
@@ -102,16 +118,29 @@ $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip
 	cp -f $< $@
 
 #########################################################################################
-# create firrtl file rule and variables
+# compile scala jars
+#########################################################################################
+$(CHIPYARD_CLASSPATH_TARGETS) &: $(CHIPYARD_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS)
+	mkdir -p $(dir $@)
+	$(call run_sbt_assembly,$(SBT_PROJECT),$(CHIPYARD_CLASSPATH))
+
+# order only dependency between sbt runs needed to avoid concurrent sbt runs
+$(TAPEOUT_CLASSPATH_TARGETS) &: $(BARSTOOLS_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) | $(CHIPYARD_CLASSPATH_TARGETS)
+	mkdir -p $(dir $@)
+	$(call run_sbt_assembly,tapeout,$(TAPEOUT_CLASSPATH))
+
+#########################################################################################
+# verilog generation pipeline
 #########################################################################################
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-$(FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS)
+$(FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(CHIPYARD_CLASSPATH_TARGETS) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
-	(set -o pipefail && $(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
+	(set -o pipefail && $(call run_jar_scala_main,$(CHIPYARD_CLASSPATH),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
 		--name $(long_name) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
 		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG) \
+		$(ASPECT_ARGS) \
 		$(EXTRA_CHISEL_OPTIONS)) | tee $(CHISEL_LOG_FILE))
 
 define mfc_extra_anno_contents
@@ -162,7 +191,7 @@ SFC_MFC_TARGETS = \
 	$(GEN_COLLATERAL_DIR)
 
 SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
-MFC_BASE_LOWERING_OPTIONS = emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,locationInfoStyle=wrapInAtSquareBracket
+MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,locationInfoStyle=wrapInAtSquareBracket
 
 # DOC include start: FirrtlCompiler
 # There are two possible cases for this step. In the first case, SFC
@@ -175,26 +204,33 @@ MFC_BASE_LOWERING_OPTIONS = emittedLineLength=2048,noAlwaysComb,disallowLocalVar
 # hack: lower to low firrtl if Fixed types are found
 # hack: when using dontTouch, io.cpu annotations are not removed by SFC,
 # hence we remove them manually by using jq before passing them to firtool
-$(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS) &: $(FIRRTL_FILE) $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) $(VLOG_SOURCES)
+
+$(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) &: $(FIRRTL_FILE)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
-	$(eval SFC_LEVEL := $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none))
-	$(eval EXTRA_FIRRTL_OPTIONS += $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), $(SFC_REPL_SEQ_MEM),))
+	echo $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none) > $(SFC_LEVEL)
+	echo "$(EXTRA_BASE_FIRRTL_OPTIONS)" $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), "$(SFC_REPL_SEQ_MEM)",) > $(EXTRA_FIRRTL_OPTIONS)
 else
-	$(eval SFC_LEVEL := low)
-	$(eval EXTRA_FIRRTL_OPTIONS += $(SFC_REPL_SEQ_MEM))
+	echo low > $(SFC_LEVEL)
+	echo "$(EXTRA_BASE_FIRRTL_OPTIONS)" "$(SFC_REPL_SEQ_MEM)" > $(EXTRA_FIRRTL_OPTIONS)
 endif
+
+$(MFC_LOWERING_OPTIONS):
+	mkdir -p $(dir $@)
 ifeq (,$(ENABLE_YOSYS_FLOW))
-	$(eval MFC_LOWERING_OPTIONS = $(MFC_BASE_LOWERING_OPTIONS))
+	echo "$(MFC_BASE_LOWERING_OPTIONS)" > $@
 else
-	$(eval MFC_LOWERING_OPTIONS = $(MFC_BASE_LOWERING_OPTIONS),disallowPackedArrays)
+	echo "$(MFC_BASE_LOWERING_OPTIONS),disallowPackedArrays" > $@
 endif
-	if [ $(SFC_LEVEL) = low ]; then jq -s '[.[][]]' $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE); fi
-	if [ $(SFC_LEVEL) = none ]; then cat $(EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE); fi
+
+$(FINAL_ANNO_FILE): $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) $(SFC_LEVEL)
+	if [ $(shell cat $(SFC_LEVEL)) = low ]; then jq -s '[.[][]]' $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) > $@; fi
+	if [ $(shell cat $(SFC_LEVEL)) = none ]; then cat $(EXTRA_ANNO_FILE) > $@; fi
+	touch $@
 
 $(SFC_MFC_TARGETS) &: private TMP_DIR := $(shell mktemp -d -t cy-XXXXXXXX)
-$(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS)
+$(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) $(MFC_LOWERING_OPTIONS) $(CHIPYARD_VLOG_SOURCES) $(BARSTOOLS_VLOG_SOURCES)
 	rm -rf $(GEN_COLLATERAL_DIR)
-	$(call run_scala_main,tapeout,barstools.tapeout.transforms.GenerateModelStageMain,\
+	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.tapeout.transforms.GenerateModelStageMain,\
 		--no-dedup \
 		--output-file $(SFC_FIRRTL_BASENAME) \
 		--output-annotation-file $(SFC_ANNO_FILE) \
@@ -203,12 +239,12 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIR
 		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		--allow-unrecognized-annotations \
-		-X $(SFC_LEVEL) \
-		$(EXTRA_FIRRTL_OPTIONS))
+		-X $(shell cat $(SFC_LEVEL)) \
+		$(shell cat $(EXTRA_FIRRTL_OPTIONS)))
 	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE) 2> /dev/null # Optionally change file type when SFC generates LowFIRRTL
-	@if [ $(SFC_LEVEL) = low ]; then cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json; fi
-	@if [ $(SFC_LEVEL) = low ]; then cat $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json | jq 'del(.[] | select(.class | test("SRAMAnnotation"))?)' > $(TMP_DIR)/unnec-anno-deleted2.sfc.anno.json; fi
-	@if [ $(SFC_LEVEL) = low ]; then cat $(TMP_DIR)/unnec-anno-deleted2.sfc.anno.json > $(SFC_ANNO_FILE) && rm $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json && rm $(TMP_DIR)/unnec-anno-deleted2.sfc.anno.json; fi
+	@if [ $(shell cat $(SFC_LEVEL)) = low ]; then cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json; fi
+	@if [ $(shell cat $(SFC_LEVEL)) = low ]; then cat $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json | jq 'del(.[] | select(.class | test("SRAMAnnotation"))?)' > $(TMP_DIR)/unnec-anno-deleted2.sfc.anno.json; fi
+	@if [ $(shell cat $(SFC_LEVEL)) = low ]; then cat $(TMP_DIR)/unnec-anno-deleted2.sfc.anno.json > $(SFC_ANNO_FILE) && rm $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json && rm $(TMP_DIR)/unnec-anno-deleted2.sfc.anno.json; fi
 	firtool \
 		--format=fir \
 		--dedup \
@@ -219,7 +255,7 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIR
 		--disable-annotation-classless \
 		--disable-annotation-unknown \
 		--mlir-timing \
-		--lowering-options=$(MFC_LOWERING_OPTIONS) \
+		--lowering-options=$(shell cat $(MFC_LOWERING_OPTIONS)) \
 		--repl-seq-mem \
 		--repl-seq-mem-file=$(MFC_SMEMS_CONF) \
 		--repl-seq-mem-circuit=$(MODEL) \
@@ -231,35 +267,23 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIR
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 # DOC include end: FirrtlCompiler
 
-$(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) &: $(MFC_MODEL_HRCHY_JSON) $(MFC_FILELIST) $(MFC_BB_MODS_FILELIST)
-	$(base_dir)/scripts/split-module-files.py \
+$(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) &: $(MFC_MODEL_HRCHY_JSON) $(MFC_TOP_HRCHY_JSON) $(MFC_FILELIST) $(MFC_BB_MODS_FILELIST)
+	$(base_dir)/scripts/uniquify-module-names.py \
 		--model-hier-json $(MFC_MODEL_HRCHY_JSON) \
+		--top-hier-json $(MFC_TOP_HRCHY_JSON) \
+		--in-all-filelist $(MFC_FILELIST) \
 		--dut $(TOP) \
+		--model $(MODEL) \
+		--target-dir $(GEN_COLLATERAL_DIR) \
 		--out-dut-filelist $(TOP_MODS_FILELIST) \
 		--out-model-filelist $(MODEL_MODS_FILELIST) \
-		--in-all-filelist $(MFC_FILELIST) \
-		--target-dir $(GEN_COLLATERAL_DIR)
+		--out-model-hier-json $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) \
+		--gcpath $(GEN_COLLATERAL_DIR)
 	$(SED) -e 's;^;$(GEN_COLLATERAL_DIR)/;' $(MFC_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(TOP_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(MODEL_MODS_FILELIST)
 	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
-	$(base_dir)/scripts/uniqify-module-names.py \
-		--top-filelist $(TOP_MODS_FILELIST) \
-		--mod-filelist $(MODEL_MODS_FILELIST) \
-		--gen-collateral-path $(GEN_COLLATERAL_DIR) \
-		--model-hier-json $(MFC_MODEL_HRCHY_JSON) \
-		--out-model-hier-json $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) \
-		--dut $(TOP) \
-		--model $(MODEL)
 	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
-
-$(TOP_BB_MODS_FILELIST) $(MODEL_BB_MODS_FILELIST) &: $(BB_MODS_FILELIST) $(MFC_TOP_HRCHY_JSON) $(FINAL_ANNO_FILE)
-	$(base_dir)/scripts/split-bb-files.py \
-		--in-bb-f $(BB_MODS_FILELIST) \
-		--in-top-hrchy-json $(MFC_TOP_HRCHY_JSON) \
-		--in-anno-json $(FINAL_ANNO_FILE) \
-		--out-top-bb-f $(TOP_BB_MODS_FILELIST) \
-		--out-model-bb-f $(MODEL_BB_MODS_FILELIST)
 
 $(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED)
 	$(base_dir)/scripts/split-mems-conf.py \
@@ -272,19 +296,19 @@ $(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JS
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 TOP_MACROCOMPILER_MODE ?= --mode synflops
-$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(TOP_SMEMS_CONF)
-	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
+$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH_TARGETS) $(TOP_SMEMS_CONF)
+	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
 
 MODEL_MACROCOMPILER_MODE = --mode synflops
-$(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(MODEL_SMEMS_CONF) | $(TOP_SMEMS_FILE)
-	$(call run_scala_main,tapeout,barstools.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
+$(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH_TARGETS) $(MODEL_SMEMS_CONF) | $(TOP_SMEMS_FILE)
+	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
 # note: {MODEL,TOP}_BB_MODS_FILELIST is added as a req. so that the files get generated,
 #       however it is really unneeded since ALL_MODS_FILELIST includes all BB files
 ########################################################################################
-$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE) $(TOP_BB_MODS_FILELIST) $(MODEL_BB_MODS_FILELIST)
+$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE) $(BB_MODS_FILELIST)
 	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' > $@
 	echo "$(TOP_SMEMS_FILE)" >> $@
 	echo "$(MODEL_SMEMS_FILE)" >> $@
@@ -299,11 +323,20 @@ verilog: $(sim_common_files)
 # helper rules to run simulations
 #########################################################################################
 .PHONY: run-binary run-binary-fast run-binary-debug run-fast
+	%.check-exists check-binary check-binaries
 
 check-binary:
 ifeq (,$(BINARY))
 	$(error BINARY variable is not set. Set it to the simulation binary)
 endif
+
+check-binaries:
+ifeq (,$(BINARIES))
+	$(error BINARIES variable is not set. Set it to the list of simulation binaries to run)
+endif
+
+%.check-exists:
+	if [ "$*" != "none" ] && [ ! -f "$*" ]; then printf "\n\nBinary $* not found\n\n"; exit 1; fi
 
 # allow you to override sim prereq
 ifeq (,$(BREAK_SIM_PREREQ))
@@ -311,44 +344,60 @@ SIM_PREREQ = $(sim)
 SIM_DEBUG_PREREQ = $(sim_debug)
 endif
 
+# Function to generate the loadmem flag. First arg is the binary
+ifeq ($(LOADMEM),1)
+# If LOADMEM=1, assume BINARY is the loadmem elf
+get_loadmem_flag = +loadmem=$(1)
+else ifneq ($(LOADMEM),)
+# Otherwise, assume the variable points to an elf file
+get_loadmem_flag = +loadmem=$(LOADMEM)
+endif
+
+ifneq ($(LOADARCH),)
+get_loadarch_flag = +loadarch=$(subst mem.elf,loadarch,$(1))
+endif
+
+# get the output path base name for simulation outputs, First arg is the binary
+get_sim_out_name = $(output_dir)/$(call get_out_name,$(1))
+# sim flags that are common to run-binary/run-binary-fast/run-binary-debug
+get_common_sim_flags = $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(call get_loadmem_flag,$(1)) $(call get_loadarch_flag,$(1))
+
+.PHONY: %.run %.run.debug %.run.fast
+
 # run normal binary with hardware-logged insn dissassembly
-run-binary: $(SIM_PREREQ) check-binary | $(output_dir)
-	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+run-binary: check-binary $(BINARY).run
+run-binaries: check-binaries $(addsuffix .run,$(BINARIES))
+
+%.run: %.check-exists $(SIM_PREREQ) | $(output_dir)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(call get_common_sim_flags,$*) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $* </dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
 
 # run simulator as fast as possible (no insn disassembly)
-run-binary-fast: $(SIM_PREREQ) check-binary | $(output_dir)
-	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null | tee $(sim_out_name).log)
+run-binary-fast: check-binary $(BINARY).run.fast
+run-binaries-fast: check-binaries $(addsuffix .run.fast,$(BINARIES))
+
+%.run.fast: %.check-exists $(SIM_PREREQ) | $(output_dir)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(call get_common_sim_flags,$*) $(PERMISSIVE_OFF) $* </dev/null | tee $(call get_sim_out_name,$*).log)
 
 # run simulator with as much debug info as possible
-run-binary-debug: $(SIM_DEBUG_PREREQ) check-binary | $(output_dir)
-	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(WAVEFORM_FLAG) $(PERMISSIVE_OFF) $(BINARY) </dev/null 2> >(spike-dasm > $(sim_out_name).out) | tee $(sim_out_name).log)
+run-binary-debug: check-binary $(BINARY).run.debug
+run-binaries-debug: check-binaries $(addsuffix .run.debug,$(BINARIES))
+
+%.run.debug: %.check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
+	if [ "$*" != "none" ]; then riscv64-unknown-elf-objdump -D -S $* > $(call get_sim_out_name,$*).dump ; fi
+	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(call get_common_sim_flags,$*) $(VERBOSE_FLAGS) $(call get_waveform_flag,$(call get_sim_out_name,$*)) $(PERMISSIVE_OFF) $* </dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
 #########################################################################################
-# helper rules to run simulator with fast loadmem via hex files
+# helper rules to run simulator with fast loadmem
+# LEGACY - use LOADMEM=1 instead
 #########################################################################################
-$(binary_hex): $(firstword $(BINARY)) | $(output_dir)
-	$(base_dir)/scripts/smartelf2hex.sh $(firstword $(BINARY)) > $(binary_hex)
-
-run-binary-hex: check-binary
-run-binary-hex: $(SIM_PREREQ) $(binary_hex) | $(output_dir)
-run-binary-hex: run-binary
-run-binary-hex: override LOADMEM_ADDR = 80000000
-run-binary-hex: override LOADMEM = $(binary_hex)
-run-binary-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
-run-binary-debug-hex: check-binary
-run-binary-debug-hex: $(SIM_DEBUG_REREQ) $(binary_hex) | $(output_dir)
-run-binary-debug-hex: run-binary-debug
-run-binary-debug-hex: override LOADMEM_ADDR = 80000000
-run-binary-debug-hex: override LOADMEM = $(binary_hex)
-run-binary-debug-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
-run-binary-fast-hex: check-binary
-run-binary-fast-hex: $(SIM_PREREQ) $(binary_hex) | $(output_dir)
-run-binary-fast-hex: run-binary-fast
-run-binary-fast-hex: override LOADMEM_ADDR = 80000000
-run-binary-fast-hex: override LOADMEM = $(binary_hex)
-run-binary-fast-hex: override SIM_FLAGS += +loadmem=$(LOADMEM) +loadmem_addr=$(LOADMEM_ADDR)
+run-binary-hex: $(BINARY).run
+run-binary-hex: override SIM_FLAGS += +loadmem=$(BINARY)
+run-binary-debug-hex: $(BINARY).run.debug
+run-binary-debug-hex: override SIM_FLAGS += +loadmem=$(BINARY)
+run-binary-fast-hex: $(BINARY).run.fast
+run-binary-fast-hex: override SIM_FLAGS += +loadmem=$(BINARY)
 
 #########################################################################################
 # run assembly/benchmarks rules
@@ -375,7 +424,6 @@ endif
 #######################################
 # Rules for building DRAMSim2 library
 #######################################
-
 dramsim_dir = $(base_dir)/tools/DRAMSim2
 dramsim_lib = $(dramsim_dir)/libdramsim.a
 
@@ -383,27 +431,12 @@ $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
 
 ################################################
-# Helper to run SBT or manage the SBT server
+# Helper to run SBT
 ################################################
-
 SBT_COMMAND ?= shell
 .PHONY: launch-sbt
 launch-sbt:
-	cd $(base_dir) && $(SBT_NON_THIN) "$(SBT_COMMAND)"
-
-.PHONY: check-thin-client
-check-thin-client:
-ifeq (,$(ENABLE_SBT_THIN_CLIENT))
-	$(error ENABLE_SBT_THIN_CLIENT not set.)
-endif
-
-.PHONY: shutdown-sbt-server
-shutdown-sbt-server: check-thin-client
-	cd $(base_dir) && $(SBT) "shutdown"
-
-.PHONY: start-sbt-server
-start-sbt-server: check-thin-client
-	cd $(base_dir) && $(SBT) "exit"
+	cd $(base_dir) && $(SBT) "$(SBT_COMMAND)"
 
 #########################################################################################
 # print help text (and other help)

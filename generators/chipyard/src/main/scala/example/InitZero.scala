@@ -62,7 +62,7 @@ trait CanHavePeripheryInitZero { this: BaseSubsystem =>
 
   p(InitZeroKey) .map { k =>
     val initZero = LazyModule(new InitZero()(p))
-    fbus.fromPort(Some("init-zero"))() := initZero.node
+    fbus.coupleFrom("init-zero") { _ := initZero.node }
   }
 }
 

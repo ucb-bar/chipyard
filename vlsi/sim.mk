@@ -4,13 +4,13 @@ SIM_TIMING_CONF = $(OBJ_DIR)/sim-timing-inputs.yml
 
 .PHONY: $(SIM_CONF) $(SIM_DEBUG_CONF) $(SIM_TIMING_CONF)
 
-$(SIM_CONF): $(sim_common_files)
+$(SIM_CONF): $(sim_common_files) check-binary
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  tb_name: ''" >> $@  # don't specify -top
 	echo "  input_files:" >> $@
-	for x in $$(cat $(MODEL_MODS_FILELIST) $(MODEL_BB_MODS_FILELIST) | sort -u) $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
+	for x in $$(cat $(MODEL_MODS_FILELIST) | sort -u) $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  input_files_meta: 'append'" >> $@
@@ -21,7 +21,7 @@ $(SIM_CONF): $(sim_common_files)
 	done
 	echo "  options_meta: 'append'" >> $@
 	echo "  defines:" >> $@
-	for x in $(subst +define+,,$(PREPROC_DEFINES)); do \
+	for x in $(subst +define+,,$(SIM_PREPROC_DEFINES)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  defines_meta: 'append'" >> $@
@@ -47,14 +47,14 @@ ifneq ($(BINARY), )
 endif
 	echo "  tb_dut: 'TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)'" >> $@
 
-$(SIM_DEBUG_CONF): $(sim_common_files)
+$(SIM_DEBUG_CONF): $(sim_common_files) check-binary
 	mkdir -p $(dir $@)
 	mkdir -p $(output_dir)
 	echo "sim.inputs:" > $@
 	echo "  defines: ['DEBUG']" >> $@
 	echo "  defines_meta: 'append'" >> $@
 	echo "  execution_flags:" >> $@
-	for x in $(VERBOSE_FLAGS) $(WAVEFORM_FLAG); do \
+	for x in $(VERBOSE_FLAGS) $(call get_waveform_flag,$(call get_sim_out_name,$(BINARY))); do \
 	  echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  execution_flags_meta: 'append'" >> $@
@@ -65,9 +65,9 @@ ifndef USE_VPD
 	echo "  options:" >> $@
 	echo '    - "-kdb"' >> $@
 	echo "  options_meta: 'append'" >> $@
-	echo "sim.outputs.waveforms: ['$(sim_out_name).fsdb']" >> $@
+	echo "sim.outputs.waveforms: ['$(call get_sim_out_name,$(BINARY)).fsdb']" >> $@
 else
-	echo "sim.outputs.waveforms: ['$(sim_out_name).vpd']" >> $@
+	echo "sim.outputs.waveforms: ['$(call get_sim_out_name,$(BINARY)).vpd']" >> $@
 endif
 
 $(SIM_TIMING_CONF): $(sim_common_files)
@@ -75,7 +75,7 @@ $(SIM_TIMING_CONF): $(sim_common_files)
 	echo "sim.inputs:" > $@
 	echo "  defines: ['NTC']" >> $@
 	echo "  defines_meta: 'append'" >> $@
-	echo "  timing_annotated: 'true'" >> $@
+	echo "  timing_annotated: true" >> $@
 
 # Update hammer top-level sim targets to include our generated sim configs
 redo-sim-rtl: $(SIM_CONF)

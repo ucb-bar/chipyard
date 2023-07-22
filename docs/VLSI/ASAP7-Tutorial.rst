@@ -66,6 +66,12 @@ In the Chipyard root, ensure that you have the Chipyard conda environment activa
 
 to pull and install the plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule must be added in the ``vlsi`` folder first.
 
+Now navigate to the ``vlsi`` directory. The remainder of the tutorial will assume you are in this directory.
+
+.. code-block:: shell
+
+    cd ~chipyard/vlsi
+
 Building the Design
 --------------------
 To elaborate the ``TinyRocketConfig`` and set up all prerequisites for the build system to push the design and SRAM macros through the flow:
@@ -115,7 +121,7 @@ Timing reports are found in ``build/par-rundir/timingReports``. They are gzipped
 
 .. code-block:: shell
 
-    ./view_gds.py build/chipyard.TestHarness.TinyRocketConfig/par-rundir/ChipTop.gds
+    ./view_gds.py build/chipyard.harness.TestHarness.TinyRocketConfig/par-rundir/ChipTop.gds
 
 By default, this script only shows the M2 thru M4 routing. Layers can be toggled in the layout viewer's side pane and ``view_gds.py`` has a mapping of layer numbers to layer names.
 
@@ -126,9 +132,9 @@ To run DRC & LVS, and view the results in Calibre:
 .. code-block:: shell
 
     make drc CONFIG=TinyRocketConfig
-    ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/drc-rundir/generated-scripts/view-drc
+    ./build/chipyard.harness.TestHarness.TinyRocketConfig-ChipTop/drc-rundir/generated-scripts/view-drc
     make lvs CONFIG=TinyRocketConfig
-    ./build/chipyard.TestHarness.TinyRocketConfig-ChipTop/lvs-rundir/generated-scripts/view-lvs
+    ./build/chipyard.harness.TestHarness.TinyRocketConfig-ChipTop/lvs-rundir/generated-scripts/view-lvs
 
 Some DRC errors are expected from this PDK, as explained in the `ASAP7 plugin readme <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/asap7>`__.
 Furthermore, the dummy SRAMs that are provided in this tutorial and PDK do not have any geometry inside, so will certainly cause DRC errors.

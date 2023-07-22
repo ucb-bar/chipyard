@@ -7,6 +7,7 @@ import org.chipsalliance.cde.config._
 import freechips.rocketchip.diplomacy.{InModuleBody}
 import barstools.iocell.chisel._
 import chipyard._
+import chipyard.harness.{BuildTop}
 
 // A "custom" IOCell with additional I/O
 // The IO don't do anything here in this example

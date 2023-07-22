@@ -5,9 +5,9 @@ HELP_SIMULATION_VARIABLES += \
 "   USE_VPD                = set to '1' to run VCS simulator emitting VPD instead of FSDB."
 
 ifndef USE_VPD
-WAVEFORM_FLAG=+fsdbfile=$(sim_out_name).fsdb
+get_waveform_flag=+fsdbfile=$(1).fsdb
 else
-WAVEFORM_FLAG=+vcdplusfile=$(sim_out_name).vpd
+get_waveform_flag=+vcdplusfile=$(1).vpd
 endif
 
 # If ntb_random_seed unspecified, vcs uses 1 as constant seed.
@@ -53,18 +53,9 @@ VCS_NONCC_OPTS = \
 	-debug_pp \
 	+incdir+$(GEN_COLLATERAL_DIR)
 
-PREPROC_DEFINES = \
-	+define+VCS \
-	+define+CLOCK_PERIOD=$(CLOCK_PERIOD) \
-	+define+RESET_DELAY=$(RESET_DELAY) \
-	+define+PRINTF_COND=$(TB).printf_cond \
-	+define+STOP_COND=!$(TB).reset \
-	+define+MODEL=$(MODEL) \
-	+define+RANDOMIZE_MEM_INIT \
-	+define+RANDOMIZE_REG_INIT \
-	+define+RANDOMIZE_GARBAGE_ASSIGN \
-	+define+RANDOMIZE_INVALID_ASSIGN
+VCS_PREPROC_DEFINES = \
+	+define+VCS
 
 ifndef USE_VPD
-PREPROC_DEFINES += +define+FSDB
+VCS_PREPROC_DEFINES += +define+FSDB
 endif

@@ -6,6 +6,9 @@ on:
     branches:
       - main
       - '1.[0-9]*.x'
+  schedule:
+    # run at 00:00 on sunday
+    - cron: "0 0 * * 0"
 
 defaults:
   run:
@@ -62,7 +65,7 @@ jobs:
     name: setup-repo
     needs: [change-filters, cancel-prior-workflows]
     if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: ferry
+    runs-on: jktqos
     steps:
       - name: Delete old checkout
         run: |
@@ -80,12 +83,12 @@ jobs:
           eval "$(conda shell.bash hook)"
           mkdir ${{ env.JAVA_TMP_DIR }}
           export MAKEFLAGS="-j32"
-          ./build-setup.sh -f
+          ./build-setup.sh -f -v
 
   run-cfg-finder:
     name: run-cfg-finder
     needs: [setup-repo]
-    runs-on: ferry
+    runs-on: jktqos
     steps:
       - name: Run config finder
         run: |
@@ -98,7 +101,7 @@ jobs:
   run-tutorial:
     name: run-tutorial
     needs: [setup-repo]
-    runs-on: ferry
+    runs-on: jktqos
     steps:
       - name: Run smoke test
         run: |
@@ -115,7 +118,7 @@ jobs:
 
           cd vlsi
 
-          # NOTE: most conda installs are in separate conda envs because they mess up 
+          # NOTE: most conda installs are in separate conda envs because they mess up
           #   each other's versions (for no apparent reason) and we need the latest versions
           conda config --add channels defaults
           conda config --add channels litex-hub
@@ -165,9 +168,10 @@ jobs:
   cleanup:
     name: cleanup
     needs: [run-tutorial]
-    runs-on: ferry
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+    runs-on: jktqos
+    if: ${{ always() }}
     steps:
       - name: Delete repo copy and conda env
         run: |
            rm -rf ${{ env.REMOTE_WORK_DIR }}
+           rm -rf ${{ env.JAVA_TMP_DIR }}

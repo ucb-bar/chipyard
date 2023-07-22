@@ -9,12 +9,12 @@ import freechips.rocketchip.tilelink.{TLBundle}
 import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp, UARTPortIO}
 import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
 
-import chipyard.{HasHarnessSignalReferences, CanHaveMasterTLMemPort}
-import chipyard.harness.{OverrideHarnessBinder}
+import chipyard._
+import chipyard.harness._
 
 /*** UART ***/
 class WithUART extends OverrideHarnessBinder({
-  (system: HasPeripheryUARTModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[UARTPortIO]) => {
+  (system: HasPeripheryUARTModuleImp, th: BaseModule with HasHarnessInstantiators, ports: Seq[UARTPortIO]) => {
     th match { case vcu118th: VCU118FPGATestHarnessImp => {
       vcu118th.vcu118Outer.io_uart_bb.bundle <> ports.head
     } }
@@ -23,7 +23,7 @@ class WithUART extends OverrideHarnessBinder({
 
 /*** SPI ***/
 class WithSPISDCard extends OverrideHarnessBinder({
-  (system: HasPeripherySPI, th: BaseModule with HasHarnessSignalReferences, ports: Seq[SPIPortIO]) => {
+  (system: HasPeripherySPI, th: BaseModule with HasHarnessInstantiators, ports: Seq[SPIPortIO]) => {
     th match { case vcu118th: VCU118FPGATestHarnessImp => {
       vcu118th.vcu118Outer.io_spi_bb.bundle <> ports.head
     } }
@@ -32,7 +32,7 @@ class WithSPISDCard extends OverrideHarnessBinder({
 
 /*** Experimental DDR ***/
 class WithDDRMem extends OverrideHarnessBinder({
-  (system: CanHaveMasterTLMemPort, th: BaseModule with HasHarnessSignalReferences, ports: Seq[HeterogeneousBag[TLBundle]]) => {
+  (system: CanHaveMasterTLMemPort, th: BaseModule with HasHarnessInstantiators, ports: Seq[HeterogeneousBag[TLBundle]]) => {
     th match { case vcu118th: VCU118FPGATestHarnessImp => {
       require(ports.size == 1)
 

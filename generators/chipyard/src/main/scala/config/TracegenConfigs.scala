@@ -4,19 +4,22 @@ import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.rocket.{DCacheParams}
 
 class AbstractTraceGenConfig extends Config(
+  new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++
   new chipyard.harness.WithBlackBoxSimMem ++
   new chipyard.harness.WithTraceGenSuccess ++
   new chipyard.harness.WithClockAndResetFromHarness ++
   new chipyard.iobinders.WithAXI4MemPunchthrough ++
   new chipyard.iobinders.WithTraceGenSuccessPunchthrough ++
-  new chipyard.clocking.WithDividerOnlyClockGenerator ++
+  new chipyard.clocking.WithPassthroughClockGenerator ++
+  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("sbus", "implicit"), Nil)) ++
   new chipyard.config.WithTracegenSystem ++
   new chipyard.config.WithNoSubsystemDrivenClocks ++
-  new chipyard.config.WithPeripheryBusFrequencyAsDefault ++
-  new chipyard.config.WithMemoryBusFrequency(100.0) ++
-  new chipyard.config.WithPeripheryBusFrequency(100.0) ++
+  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
+  new chipyard.config.WithSystemBusFrequency(1000.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(1000.0) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.groundtest.GroundTestBaseConfig)
+
 
 
 class TraceGenConfig extends Config(

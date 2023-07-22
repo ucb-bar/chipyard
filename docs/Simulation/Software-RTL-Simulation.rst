@@ -151,25 +151,17 @@ Fast Memory Loading
 -------------------
 
 The simulator loads the program binary over a simulated serial line. This can be quite slow if there is a lot of static data, so the simulator also allows data to be loaded from a file directly into the DRAM model.
+Loadmem files should be ELF files. In the most common use case, this can be the binary.
 
 .. code-block:: shell
 
-    make run-binary BINARY=test.riscv LOADMEM=testdata.hex LOADMEM_ADDR=81000000
+    make run-binary BINARY=test.riscv LOADMEM=test.riscv
 
-The ``.hex`` file should be a text file with a hexadecimal number on each line.
-
-.. code-block:: text
-
-    deadbeef
-    0123
-
-Each line uses little-endian order, so this file would produce the bytes "ef be ad de 01 23". ``LOADMEM_ADDR`` specifies which address in memory (in hexadecimal) to write the first byte to. The default is 0x81000000.
-
-A special target that facilitates automatically generating a hex file for an entire elf RISC-V exectuable and then running the simulator with the appropriate flags is also available.
+Usually the ``LOADMEM`` ELF is the same as the ``BINARY`` ELF, so ``LOADMEM=1`` can be used as a shortcut.
 
 .. code-block:: shell
 
-    make run-binary-hex BINARY=test.riscv
+   make run-binary BINARY=test.riscv LOADMEM=1
 
 Generating Waveforms
 -----------------------

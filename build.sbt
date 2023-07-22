@@ -4,14 +4,34 @@ import Tests._
 // implicit one
 lazy val chipyardRoot = Project("chipyardRoot", file("."))
 
+// keep chisel/firrtl specific class files, rename other conflicts
+val chiselFirrtlMergeStrategy = CustomMergeStrategy.rename { dep =>
+  import sbtassembly.Assembly.{Project, Library}
+  val nm = dep match {
+    case p: Project => p.name
+    case l: Library => l.moduleCoord.name
+  }
+  if (Seq("firrtl", "chisel3").contains(nm.split("_")(0))) { // split by _ to avoid checking on major/minor version
+    dep.target
+  } else {
+    "renamed/" + dep.target
+  }
+}
+
 lazy val commonSettings = Seq(
   organization := "edu.berkeley.cs",
   version := "1.6",
   scalaVersion := "2.13.10",
   assembly / test := {},
-  assembly / assemblyMergeStrategy := { _ match {
-    case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
-    case _ => MergeStrategy.first}},
+  assembly / assemblyMergeStrategy := {
+    case PathList("chisel3", "stage", xs @ _*) => chiselFirrtlMergeStrategy
+    case PathList("firrtl", "stage", xs @ _*) => chiselFirrtlMergeStrategy
+    // should be safe in JDK11: https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
+    case x if x.endsWith("module-info.class") => MergeStrategy.discard
+    case x =>
+      val oldStrategy = (assembly / assemblyMergeStrategy).value
+      oldStrategy(x)
+  },
   scalacOptions ++= Seq(
     "-deprecation",
     "-unchecked",
@@ -86,8 +106,6 @@ lazy val hardfloat  = (project in rocketChipDir / "hardfloat")
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.json4s" %% "json4s-jackson" % "3.6.6",
       "org.scalatest" %% "scalatest" % "3.2.0" % "test"
     )
   )
@@ -97,8 +115,6 @@ lazy val rocketMacros  = (project in rocketChipDir / "macros")
   .settings(
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.json4s" %% "json4s-jackson" % "3.6.6",
-      "org.scalatest" %% "scalatest" % "3.2.0" % "test"
     )
   )
 
@@ -110,7 +126,8 @@ lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.json4s" %% "json4s-jackson" % "3.6.6",
-      "org.scalatest" %% "scalatest" % "3.2.0" % "test"
+      "org.scalatest" %% "scalatest" % "3.2.0" % "test",
+      "org.scala-graph" %% "graph-core" % "1.13.5"
     )
   )
   .settings( // Settings for scalafix
@@ -137,7 +154,7 @@ lazy val chipyard = (project in file("generators/chipyard"))
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsp-utils`,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
-    constellation, mempress)
+    constellation, mempress, barf, shuttle)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(
     libraryDependencies ++= Seq(
@@ -150,6 +167,11 @@ lazy val mempress = (project in file("generators/mempress"))
   .dependsOn(rocketchip, midasTargetUtils)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(chiselTestSettings)
+  .settings(commonSettings)
+
+lazy val barf = (project in file("generators/bar-fetchers"))
+  .dependsOn(rocketchip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
 lazy val constellation = (project in file("generators/constellation"))
@@ -178,6 +200,11 @@ lazy val hwacha = (project in file("generators/hwacha"))
   .settings(commonSettings)
 
 lazy val boom = (project in file("generators/boom"))
+  .dependsOn(rocketchip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+lazy val shuttle = (project in file("generators/shuttle"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
@@ -214,18 +241,13 @@ lazy val nvdla = (project in file("generators/nvdla"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val iocell = Project(id = "iocell", base = file("./tools/barstools/") / "src")
-  .settings(
-    Compile / scalaSource := baseDirectory.value / "main" / "scala" / "barstools" / "iocell",
-    Compile / resourceDirectory := baseDirectory.value / "main" / "resources"
-  )
+lazy val iocell = Project(id = "iocell", base = file("./tools/barstools/") / "iocell")
   .settings(chiselSettings)
   .settings(commonSettings)
 
 lazy val tapeout = (project in file("./tools/barstools/"))
   .settings(chiselSettings)
   .settings(chiselTestSettings)
-  .enablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonSettings)
 
 lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))

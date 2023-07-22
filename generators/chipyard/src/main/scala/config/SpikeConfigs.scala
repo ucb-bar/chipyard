@@ -10,6 +10,11 @@ class SpikeConfig extends Config(
   new chipyard.WithNSpikeCores(1) ++
   new chipyard.config.AbstractConfig)
 
+class dmiSpikeConfig extends Config(
+  new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tilelink
+  new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
+  new SpikeConfig)
+
 // Avoids polling on the UART registers
 class SpikeFastUARTConfig extends Config(
   new chipyard.WithNSpikeCores(1) ++
@@ -22,12 +27,16 @@ class SpikeFastUARTConfig extends Config(
 class SpikeUltraFastConfig extends Config(
   new chipyard.WithSpikeTCM ++
   new chipyard.WithNSpikeCores(1) ++
-  new testchipip.WithSerialPBusMem ++
   new chipyard.config.WithUARTFIFOEntries(128, 128) ++
   new chipyard.config.WithMemoryBusFrequency(2) ++
   new chipyard.config.WithPeripheryBusFrequency(2) ++
   new chipyard.config.WithBroadcastManager ++
   new chipyard.config.AbstractConfig)
+
+class dmiSpikeUltraFastConfig extends Config(
+  new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tilelink
+  new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
+  new SpikeUltraFastConfig)
 
 // Add the default firechip devices
 class SpikeUltraFastDevicesConfig extends Config(
@@ -38,7 +47,6 @@ class SpikeUltraFastDevicesConfig extends Config(
 
   new chipyard.WithSpikeTCM ++
   new chipyard.WithNSpikeCores(1) ++
-  new testchipip.WithSerialPBusMem ++
   new chipyard.config.WithUARTFIFOEntries(128, 128) ++
   new chipyard.config.WithMemoryBusFrequency(2) ++
   new chipyard.config.WithPeripheryBusFrequency(2) ++

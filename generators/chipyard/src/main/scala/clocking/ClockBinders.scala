@@ -13,53 +13,11 @@ class ClockWithFreq(val freqMHz: Double) extends Bundle {
   val clock = Clock()
 }
 
-// This uses synthesizable clock divisors to approximate frequency rations
-// between the requested clocks. This is currently the defualt clock generator "model",
-// as it can be used in VCS/Xcelium/Verilator/FireSim
-class WithDividerOnlyClockGenerator extends OverrideLazyIOBinder({
-  (system: HasChipyardPRCI) => {
-    // Connect the implicit clock
-    implicit val p = GetSystemParameters(system)
-    val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
-    system.connectImplicitClockSinkNode(implicitClockSinkNode)
-    InModuleBody {
-      val implicit_clock = implicitClockSinkNode.in.head._1.clock
-      val implicit_reset = implicitClockSinkNode.in.head._1.reset
-      system.asInstanceOf[BaseSubsystem].module match { case l: LazyModuleImp => {
-        l.clock := implicit_clock
-        l.reset := implicit_reset
-      }}
-    }
-
-    // Connect all other requested clocks
-    val referenceClockSource = ClockSourceNode(Seq(ClockSourceParameters()))
-    val dividerOnlyClockGen = LazyModule(new DividerOnlyClockGenerator("buildTopClockGenerator"))
-
-    (system.allClockGroupsNode
-      := dividerOnlyClockGen.node
-      := referenceClockSource)
-
-    InModuleBody {
-      val clock_wire = Wire(Input(new ClockWithFreq(dividerOnlyClockGen.module.referenceFreq)))
-      val reset_wire = Wire(Input(AsyncReset()))
-      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
-      val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(reset_wire, "reset", p(IOCellKey))
-
-      referenceClockSource.out.unzip._1.map { o =>
-        o.clock := clock_wire.clock
-        o.reset := reset_wire
-      }
-
-      (Seq(clock_io, reset_io), clockIOCell ++ resetIOCell)
-    }
-  }
-})
-
 // This uses the FakePLL, which uses a ClockAtFreq Verilog blackbox to generate
 // the requested clocks. This also adds TileLink ClockDivider and ClockSelector
 // blocks, which allow memory-mapped control of clock division, and clock muxing
 // between the FakePLL and the slow off-chip clock
-// Note: This will not simulate properly with verilator or firesim
+// Note: This will not simulate properly with firesim
 class WithPLLSelectorDividerClockGenerator extends OverrideLazyIOBinder({
   (system: HasChipyardPRCI) => {
     // Connect the implicit clock
@@ -80,9 +38,9 @@ class WithPLLSelectorDividerClockGenerator extends OverrideLazyIOBinder({
     val clockSelector = system.prci_ctrl_domain { LazyModule(new TLClockSelector(baseAddress + 0x30000, tlbus.beatBytes)) }
     val pllCtrl       = system.prci_ctrl_domain { LazyModule(new FakePLLCtrl    (baseAddress + 0x40000, tlbus.beatBytes)) }
 
-    tlbus.toVariableWidthSlave(Some("clock-div-ctrl")) { clockDivider.tlNode := TLBuffer() }
-    tlbus.toVariableWidthSlave(Some("clock-sel-ctrl")) { clockSelector.tlNode := TLBuffer() }
-    tlbus.toVariableWidthSlave(Some("pll-ctrl")) { pllCtrl.tlNode := TLBuffer() }
+    clockDivider.tlNode  := system.prci_ctrl_domain { TLFragmenter(tlbus.beatBytes, tlbus.blockBytes) := system.prci_ctrl_bus.get }
+    clockSelector.tlNode := system.prci_ctrl_domain { TLFragmenter(tlbus.beatBytes, tlbus.blockBytes) := system.prci_ctrl_bus.get }
+    pllCtrl.tlNode       := system.prci_ctrl_domain { TLFragmenter(tlbus.beatBytes, tlbus.blockBytes) := system.prci_ctrl_bus.get }
 
     system.allClockGroupsNode := clockDivider.clockNode := clockSelector.clockNode
 
@@ -100,7 +58,7 @@ class WithPLLSelectorDividerClockGenerator extends OverrideLazyIOBinder({
     pllCtrlSink := pllCtrl.ctrlNode
 
     InModuleBody {
-      val clock_wire = Wire(Input(new ClockWithFreq(80)))
+      val clock_wire = Wire(Input(new ClockWithFreq(100)))
       val reset_wire = Wire(Input(AsyncReset()))
       val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
       val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(reset_wire, "reset", p(IOCellKey))
@@ -122,6 +80,46 @@ class WithPLLSelectorDividerClockGenerator extends OverrideLazyIOBinder({
       }
 
       (Seq(clock_io, reset_io), clockIOCell ++ resetIOCell)
+    }
+  }
+})
+
+// This passes all clocks through to the TestHarness
+class WithPassthroughClockGenerator extends OverrideLazyIOBinder({
+  (system: HasChipyardPRCI) => {
+    // Connect the implicit clock
+    implicit val p = GetSystemParameters(system)
+    val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
+    system.connectImplicitClockSinkNode(implicitClockSinkNode)
+    InModuleBody {
+      val implicit_clock = implicitClockSinkNode.in.head._1.clock
+      val implicit_reset = implicitClockSinkNode.in.head._1.reset
+      system.asInstanceOf[BaseSubsystem].module match { case l: LazyModuleImp => {
+        l.clock := implicit_clock
+        l.reset := implicit_reset
+      }}
+    }
+
+    // This aggregate node should do nothing
+    val clockGroupAggNode = ClockGroupAggregateNode("fake")
+    val clockGroupsSourceNode = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
+    system.allClockGroupsNode := clockGroupAggNode := clockGroupsSourceNode
+
+    InModuleBody {
+      val reset_io = IO(Input(AsyncReset()))
+      require(clockGroupAggNode.out.size == 1)
+      val (bundle, edge) = clockGroupAggNode.out(0)
+
+      val clock_ios = (bundle.member.data zip edge.sink.members).map { case (b, m) =>
+        require(m.take.isDefined, s"""Clock ${m.name.get} has no requested frequency
+                                     |Clocks: ${edge.sink.members.map(_.name.get)}""".stripMargin)
+        val freq = m.take.get.freqMHz
+        val clock_io = IO(Input(new ClockWithFreq(freq))).suggestName(s"clock_${m.name.get}")
+        b.clock := clock_io.clock
+        b.reset := reset_io
+        clock_io
+      }.toSeq
+      ((clock_ios :+ reset_io), Nil)
     }
   }
 })

@@ -23,10 +23,9 @@ object ClockGroupCombiner {
 case object ClockGroupCombinerKey extends Field[Seq[(String, ClockSinkParameters => Boolean)]](Nil)
 
 // All clock groups with a name containing any substring in names will be combined into a single clock group
-class WithClockGroupsCombinedByName(grouped_name: String, names: String*) extends Config((site, here, up) => {
-  case ClockGroupCombinerKey => {
-    val combiner: ClockSinkParameters => Boolean = { m => names.map(n => m.name.get.contains(n)).reduce(_||_) }
-    up(ClockGroupCombinerKey) ++ Seq((grouped_name, combiner))
+class WithClockGroupsCombinedByName(groups: (String, Seq[String], Seq[String])*) extends Config((site, here, up) => {
+  case ClockGroupCombinerKey => groups.map { case (grouped_name, matched_names, unmatched_names) =>
+    (grouped_name, (m: ClockSinkParameters) => matched_names.exists(n => m.name.get.contains(n)) && !unmatched_names.exists(n => m.name.get.contains(n)))
   }
 })
 
@@ -49,9 +48,14 @@ class ClockGroupCombiner(implicit p: Parameters, v: ValName) extends LazyModule 
       val name = combiners(i)._1
       i = i + 1
       require(g.size >= 1)
-      require(g.forall(_.take.get == g.head.take.get))
-      (grouped ++ Seq(ClockSinkParameters(take = g.head.take, name = Some(name))), r)
+      val takes = g.map(_.take).flatten
+      require(takes.distinct.size <= 1,
+        s"Clock group $name has non-homogeneous requested ClockParameters $takes")
+      require(takes.size > 0,
+        s"Clock group $name has no inheritable frequencies")
+      (grouped ++ Seq(ClockSinkParameters(take = takes.headOption, name = Some(name))), r)
     }
+
     ClockGroupSinkParameters(
       name = u.name,
       members = grouped ++ rest
