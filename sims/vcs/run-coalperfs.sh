@@ -17,7 +17,7 @@ rm -f coal_perf.txt
 
 for config in "${configurations[@]}"; do
     make CONFIG="$config" run-binary BINARY=none
-    logfile="output/chipyard.TestHarness.$config/none.log"
+    logfile="output/chipyard.harness.TestHarness.$config/none.log"
     time=$(grep "simulation time" "$logfile" | awk '{print $NF}')
     echo "($config, $time)" >> coal_perf.txt
 done
