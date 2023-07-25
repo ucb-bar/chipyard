@@ -1,5 +1,6 @@
 import "DPI-C" function void cospike_set_sysinfo(
 						 input string  isa,
+						 input string  priv,
 						 input int     pmpregions,
 						 input longint mem0_base,
 						 input longint mem0_size,
@@ -23,6 +24,7 @@ import "DPI-C" function void cospike_cosim(input longint cycle,
 
 module SpikeCosim  #(
 		     parameter ISA,
+		     parameter PRIV,
 		     parameter PMPREGIONS,
 		     parameter MEM0_BASE,
 		     parameter MEM0_SIZE,
@@ -57,7 +59,7 @@ module SpikeCosim  #(
 					 );
 
    initial begin
-      cospike_set_sysinfo(ISA, PMPREGIONS, MEM0_BASE, MEM0_SIZE, NHARTS, BOOTROM);
+      cospike_set_sysinfo(ISA, PRIV, PMPREGIONS, MEM0_BASE, MEM0_SIZE, NHARTS, BOOTROM);
    end;
 
    always @(posedge clock) begin
