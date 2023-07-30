@@ -3,7 +3,7 @@
 package barstools.iocell.chisel
 
 import chisel3._
-import chisel3.util.{Cat, HasBlackBoxResource}
+import chisel3.util.{Cat, HasBlackBoxResource, HasBlackBoxInline}
 import chisel3.experimental.{Analog, BaseModule, DataMirror, IO}
 
 // The following four IO cell bundle types are bare-minimum functional connections
@@ -93,21 +93,73 @@ trait DigitalOutIOCell extends IOCell {
 // implementation of an IO cell. For building a real chip, it is important to implement
 // and use similar classes which wrap the foundry-specific IO cells.
 
-abstract class GenericIOCell extends BlackBox with HasBlackBoxResource {
-  addResource("/barstools/iocell/vsrc/IOCell.v")
+abstract class GenericIOCell extends BlackBox with HasBlackBoxInline {
+  val impl: String
+  val moduleName = this.getClass.getSimpleName
+  setInline(s"$moduleName.v", impl);
 }
 
 class GenericAnalogIOCell extends GenericIOCell with AnalogIOCell {
   val io = IO(new AnalogIOCellBundle)
+  lazy val impl = s"""
+`timescale 1ns/1ps
+module GenericAnalogIOCell(
+    inout pad,
+    inout core
+);
+
+    assign core = 1'bz;
+    assign pad = core;
+
+endmodule"""
 }
+
 class GenericDigitalGPIOCell extends GenericIOCell with DigitalGPIOCell {
   val io = IO(new DigitalGPIOCellBundle)
+  lazy val impl = s"""
+`timescale 1ns/1ps
+module GenericDigitalGPIOCell(
+    inout pad,
+    output i,
+    input ie,
+    input o,
+    input oe
+);
+
+    assign pad = oe ? o : 1'bz;
+    assign i = ie ? pad : 1'b0;
+
+endmodule"""
 }
+
 class GenericDigitalInIOCell extends GenericIOCell with DigitalInIOCell {
   val io = IO(new DigitalInIOCellBundle)
+  lazy val impl = s"""
+`timescale 1ns/1ps
+module GenericDigitalInIOCell(
+    input pad,
+    output i,
+    input ie
+);
+
+    assign i = ie ? pad : 1'b0;
+
+endmodule"""
 }
+
 class GenericDigitalOutIOCell extends GenericIOCell with DigitalOutIOCell {
   val io = IO(new DigitalOutIOCellBundle)
+  lazy val impl = s"""
+`timescale 1ns/1ps
+module GenericDigitalOutIOCell(
+    output pad,
+    input o,
+    input oe
+);
+
+    assign pad = oe ? o : 1'bz;
+
+endmodule"""
 }
 
 trait IOCellTypeParams {
