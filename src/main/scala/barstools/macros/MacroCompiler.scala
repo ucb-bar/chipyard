@@ -14,7 +14,6 @@ import firrtl.ir._
 import firrtl.options.Dependency
 import firrtl.stage.TransformManager.TransformDependency
 import firrtl.stage.{FirrtlSourceAnnotation, FirrtlStage, Forms, OutputFileAnnotation, RunFirrtlTransformAnnotation}
-import firrtl.transforms.NoDCEAnnotation
 import firrtl.{PrimOps, _}
 import mdf.macrolib.{PolarizedPort, PortPolarity, SRAMCompiler, SRAMGroup, SRAMMacro}
 
@@ -898,16 +897,34 @@ object MacroCompiler extends App {
         val macroCompiled = (new MacroCompilerTransform).execute(macroCompilerInput)
 
         // Run FIRRTL compiler
-        (new FirrtlStage).execute(
-          Array.empty,
-          Seq(
-            OutputFileAnnotation(params.getOrElse(Verilog, "")),
-            RunFirrtlTransformAnnotation(new VerilogEmitter),
-            EmitCircuitAnnotation(classOf[VerilogEmitter]),
-            NoDCEAnnotation,
-            FirrtlSourceAnnotation(macroCompiled.circuit.serialize)
-          )
-        )
+        // For each generated module, have to create a new circuit with that module
+        // as top, and all other modules as ExtModules. This guarantees all modules
+        // are elaborated
+        val verilog = macroCompiled.circuit.modules
+          .map(_.name)
+          .map { macroName =>
+            val (mainMod, otherMods) = macroCompiled.circuit.modules.partition(_.name == macroName)
+            val extMods = otherMods.map(m => ExtModule(NoInfo, m.name, m.ports, m.name, Nil))
+
+            val circuit = Circuit(NoInfo, mainMod ++ extMods, macroName)
+            (new FirrtlStage)
+              .execute(
+                Array.empty,
+                Seq(
+                  RunFirrtlTransformAnnotation(new VerilogEmitter),
+                  EmitCircuitAnnotation(classOf[VerilogEmitter]),
+                  FirrtlSourceAnnotation(circuit.serialize)
+                )
+              )
+              .collect { case c: EmittedVerilogCircuitAnnotation => c }
+              .head
+              .value
+              .value
+          }
+          .mkString("\n")
+        val verilogWriter = new FileWriter(new File(params.get(Verilog).get))
+        verilogWriter.write(verilog)
+        verilogWriter.close()
 
         params.get(HammerIR) match {
           case Some(hammerIRFile: String) =>
