@@ -79,9 +79,9 @@ std::set<reg_t> magic_addrs;
 cfg_t* cfg;
 std::vector<std::shared_ptr<read_override_device_t>> read_override_devices;
 
-static std::vector<std::pair<reg_t, mem_t*>> make_mems(const std::vector<mem_cfg_t> &layout)
+static std::vector<std::pair<reg_t, abstract_mem_t*>> make_mems(const std::vector<mem_cfg_t> &layout)
 {
-  std::vector<std::pair<reg_t, mem_t*>> mems;
+  std::vector<std::pair<reg_t, abstract_mem_t*>> mems;
   mems.reserve(layout.size());
   for (const auto &cfg : layout) {
     mems.push_back(std::make_pair(cfg.get_base(), new mem_t(cfg.get_size())));
@@ -147,7 +147,7 @@ extern "C" void cospike_cosim(long long int cycle,
                     0
                     );
 
-    std::vector<std::pair<reg_t, mem_t*>> mems = make_mems(cfg->mem_layout());
+    std::vector<std::pair<reg_t, abstract_mem_t*>> mems = make_mems(cfg->mem_layout());
 
     size_t default_boot_rom_size = 0x10000;
     size_t default_boot_rom_addr = 0x10000;
