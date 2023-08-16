@@ -108,6 +108,8 @@ class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModul
 
   _outer.pllReset := (resetIBUF.io.O || powerOnReset || ereset)
 
+  _outer.ledModule.foreach(_ := DontCare)
+
   // reset setup
   val hReset = Wire(Reset())
   hReset := _outer.dutClock.in.head._1.reset

@@ -225,6 +225,7 @@ class WithExtInterruptIOCells extends OverrideIOBinder({
       val (port: UInt, cells) = IOCell.generateIOFromSignal(system.interrupts, "ext_interrupts", system.p(IOCellKey), abstractResetAsAsync = true)
       (Seq(port), cells)
     } else {
+      system.interrupts := DontCare // why do I have to drive this 0-wide wire???
       (Nil, Nil)
     }
   }
@@ -442,4 +443,13 @@ class WithDontTouchPorts extends OverrideIOBinder({
   (system: DontTouch) => system.dontTouchPorts(); (Nil, Nil)
 })
 
-
+class WithNMITiedOff extends ComposeIOBinder({
+  (system: HasTilesModuleImp) => {
+    system.nmi.flatten.foreach { nmi =>
+      nmi.rnmi := false.B
+      nmi.rnmi_interrupt_vector := 0.U
+      nmi.rnmi_exception_vector := 0.U
+    }
+    (Nil, Nil)
+  }
+})

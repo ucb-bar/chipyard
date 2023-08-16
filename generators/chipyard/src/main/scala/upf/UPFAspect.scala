@@ -4,7 +4,7 @@ package chipyard.upf
 import chisel3.aop.{Aspect}
 import firrtl.{AnnotationSeq}
 import chipyard.harness.{TestHarness}
-import freechips.rocketchip.stage.phases.{TargetDirKey}
+import chipyard.stage.phases.{TargetDirKey}
 import freechips.rocketchip.diplomacy.{LazyModule}
 
 abstract class UPFAspect[T <: TestHarness](upf: UPFFunc.UPFFunction) extends Aspect[T] {
