@@ -34,7 +34,7 @@ Finally, you add the relevant config fragment to the SoC config. For example:
 General Purpose I/Os (GPIO) Device
 ----------------------------------
 
-GPIO device is a periphery device provided by ``sifive-blocks``. Each general-purpose I/O port has five 32-bit configuration registers (GPIOx_INPUT_EN, GPIOx_OUTPUT_EN, GPIOx_PUE GPIOx_DS, and GPIOx_XOR), two 32-bit data registers (GPIOx_INPUT_VAL and GPIOx_OUTPUT_VAL) and eight 32-bit interrupt control/status register (GPIOx_RISE_IE, GPIOx_RISE_IP, GPIOx_FALL_IE, GPIOx_FALL_IP, GPIOx_HIGH_IE, GPIOx_HIGH_IP, GPIOx_LOW_IE, GPIOx_LOW_IP). In addition, all GPIOs can have two 32-bit alternate function selection registers (GPIOx_IOF_EN and GPIOx_IOF_SEL). 
+GPIO device is a periphery device provided by ``sifive-blocks``. Each general-purpose I/O port has five 32-bit configuration registers, two 32-bit data registers controlling pin input and output values, and eight 32-bit interrupt control/status register for signal level and edge triggering. In addition, all GPIOs can have two 32-bit alternate function selection registers. 
 
 
 GPIO main features
@@ -78,7 +78,7 @@ Including GPIO in the SoC
 Universal Asynchronous Receiver/Transmitter (UART) Device
 ----------------------------------------------------------
 
-UART device is a periphery device provided by ``sifive-blocks``. The UART offers a flexible means to perform Full-duplex data exchange with external devices. A very wide range of baud rates can be achieved through a fractional baud rate generator. The UART peripheral does not support hardware flow control or other modem control signals, or synchronous serial data transfers.
+UART device is a periphery device provided by ``sifive-blocks``. The UART offers a flexible means to perform Full-duplex data exchange with external devices. A very wide range of baud rates can be achieved through a fractional baud rate generator. The UART peripheral does not support other modem control signals, or synchronous serial data transfers.
 
 
 UART main features
@@ -99,6 +99,8 @@ UART main features
 * Separate enable bits for transmitter and receiver
 
 * Interrupt sources with flags
+
+* Configurable hardware flow control signals
 
 
 Including UART in the SoC
