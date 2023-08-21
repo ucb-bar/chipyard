@@ -14,3 +14,4 @@ This includes popular FPGAs such as the Xilinx VCU118 and the Xilinx Arty 35T bo
    General
    VCU118
    Arty
+   Baremetal
