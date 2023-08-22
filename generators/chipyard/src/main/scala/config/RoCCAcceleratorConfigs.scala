@@ -2,6 +2,7 @@ package chipyard
 
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
+import freechips.rocketchip.rocket.DCacheParams
 
 // ------------------------------
 // Configs with RoCC Accelerators
@@ -65,4 +66,16 @@ class ReRoCCTestConfig extends Config(
   new chipyard.config.WithAccumulatorRoCC ++                   // rerocc tile1 is accum
   new chipyard.config.WithAccumulatorRoCC ++                   // rerocc tile0 is accum
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+
+class DualReRoCCConfig extends Config(
+  new rerocc.WithReRoCC(rerocc.ReRoCCClientParams(nCfgs=4), rerocc.ReRoCCTileParams(l2TLBEntries=512, l2TLBWays=1, dcacheParams=Some(DCacheParams(nWays=1, nSets=64)))) ++
+  new vega.DefaultVegaConfig ++
+  new vega.DefaultVegaConfig ++
+  new gemmini.DefaultGemminiConfig ++
+  new gemmini.DefaultGemminiConfig ++
+  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(nWays=2, capacityKB=1024) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
