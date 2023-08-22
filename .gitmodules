@@ -133,3 +133,6 @@
 [submodule "generators/rerocc"]
 	path = generators/rerocc
 	url = https://github.com/ucb-bar/rerocc
+[submodule "generators/Vega"]
+	path = generators/Vega
+	url = https://github.com/ucb-bar/Vega
