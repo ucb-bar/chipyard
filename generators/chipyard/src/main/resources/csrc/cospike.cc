@@ -42,6 +42,7 @@ extern std::map<long long int, backing_data_t> backing_mem_data;
 
 typedef struct system_info_t {
   std::string isa;
+  int vlen;
   int pmpregions;
   uint64_t mem0_base;
   uint64_t mem0_size;
@@ -79,9 +80,9 @@ std::set<reg_t> magic_addrs;
 cfg_t* cfg;
 std::vector<std::shared_ptr<read_override_device_t>> read_override_devices;
 
-static std::vector<std::pair<reg_t, mem_t*>> make_mems(const std::vector<mem_cfg_t> &layout)
+static std::vector<std::pair<reg_t, abstract_mem_t*>> make_mems(const std::vector<mem_cfg_t> &layout)
 {
-  std::vector<std::pair<reg_t, mem_t*>> mems;
+  std::vector<std::pair<reg_t, abstract_mem_t*>> mems;
   mems.reserve(layout.size());
   for (const auto &cfg : layout) {
     mems.push_back(std::make_pair(cfg.get_base(), new mem_t(cfg.get_size())));
@@ -89,7 +90,7 @@ static std::vector<std::pair<reg_t, mem_t*>> make_mems(const std::vector<mem_cfg
   return mems;
 }
 
-extern "C" void cospike_set_sysinfo(char* isa, char* priv, int pmpregions,
+extern "C" void cospike_set_sysinfo(char* isa, int vlen, char* priv, int pmpregions,
                                     long long int mem0_base, long long int mem0_size,
                                     int nharts,
                                     char* bootrom
@@ -98,6 +99,7 @@ extern "C" void cospike_set_sysinfo(char* isa, char* priv, int pmpregions,
     info = new system_info_t;
     // technically the targets aren't zicntr compliant, but they implement the zicntr registers
     info->isa = std::string(isa) + "_zicntr";
+    info->vlen = vlen;
     info->priv = std::string(priv);
     info->pmpregions = pmpregions;
     info->mem0_base = mem0_base;
@@ -133,11 +135,12 @@ extern "C" void cospike_cosim(long long int cycle,
     for (int i = 0; i < info->nharts; i++)
       hartids.push_back(i);
 
+    std::string visa = "vlen:" + std::to_string(info->vlen ? info->vlen : 128) + ",elen:64";
     cfg = new cfg_t(std::make_pair(0, 0),
                     nullptr,
                     info->isa.c_str(),
                     info->priv.c_str(),
-                    "vlen:128,elen:64",
+                    visa.c_str(),
                     false,
                     endianness_little,
                     info->pmpregions,
@@ -147,7 +150,7 @@ extern "C" void cospike_cosim(long long int cycle,
                     0
                     );
 
-    std::vector<std::pair<reg_t, mem_t*>> mems = make_mems(cfg->mem_layout());
+    std::vector<std::pair<reg_t, abstract_mem_t*>> mems = make_mems(cfg->mem_layout());
 
     size_t default_boot_rom_size = 0x10000;
     size_t default_boot_rom_addr = 0x10000;
@@ -420,7 +423,8 @@ extern "C" void cospike_cosim(long long int cycle,
     bool scalar_wb = false;
     bool vector_wb = false;
     uint32_t vector_cnt = 0;
-
+    std::vector<reg_t> vector_rds;
+    
     for (auto &regwrite : log) {
 
       //TODO: scaling to multi issue reads?
@@ -446,14 +450,15 @@ extern "C" void cospike_cosim(long long int cycle,
                            lr_read ||
                            (tohost_addr && mem_read_addr == tohost_addr) ||
                            (fromhost_addr && mem_read_addr == fromhost_addr)));
+      //COSPIKE_PRINTF("register write type %d\n", type);
       // check the type is compliant with writeback first
       if ((type == 0 || type == 1))
         scalar_wb = true;
       if (type == 2) {
+        vector_rds.push_back(rd);
         vector_wb = true;
       }
       if (type == 3) continue;
-
 
       if ((rd != 0 && type == 0) || type == 1) {
         // Override reads from some CSRs
@@ -495,6 +500,9 @@ extern "C" void cospike_cosim(long long int cycle,
       //   COSPIKE_PRINTF("Scalar wdata behavior divergence between spike and DUT\n");
       //   exit(-1);
       // }
+    }
+    for (auto &a : vector_rds) {
+      COSPIKE_PRINTF("vector writeback to v%d\n", a);
     }
   }
 }

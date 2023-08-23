@@ -130,3 +130,9 @@
 [submodule "generators/bar-fetchers"]
 	path = generators/bar-fetchers
 	url = https://github.com/ucb-bar/bar-fetchers.git
+[submodule "tools/fixedpoint"]
+	path = tools/fixedpoint
+	url = https://github.com/ucb-bar/fixedpoint.git
+[submodule "generators/hardfloat"]
+	path = generators/hardfloat
+	url = https://github.com/ucb-bar/berkeley-hardfloat.git
