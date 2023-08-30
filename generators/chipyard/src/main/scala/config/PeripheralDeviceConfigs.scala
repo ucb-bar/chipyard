@@ -92,4 +92,3 @@ class UARTTSIRocketConfig extends Config(
   new chipyard.config.WithPeripheryBusFrequency(10) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
-

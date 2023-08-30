@@ -3,7 +3,7 @@ index 302d99e6..0aa0fcb4 100644
 --- a/build.sbt
 +++ b/build.sbt
 @@ -148,7 +148,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
- 
+
  lazy val chipyard = (project in file("generators/chipyard"))
    .dependsOn(testchipip, rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
 -    sha3, // On separate line to allow for cleaner tutorial-setup patches
@@ -14,7 +14,7 @@ index 302d99e6..0aa0fcb4 100644
 @@ -220,10 +220,10 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
    .settings(libraryDependencies ++= rocketLibDeps.value)
    .settings(commonSettings)
- 
+
 -lazy val sha3 = (project in file("generators/sha3"))
 -  .dependsOn(rocketchip, midasTargetUtils)
 -  .settings(libraryDependencies ++= rocketLibDeps.value)
@@ -23,6 +23,6 @@ index 302d99e6..0aa0fcb4 100644
 +//   .dependsOn(rocketchip, midasTargetUtils)
 +//   .settings(libraryDependencies ++= rocketLibDeps.value)
 +//   .settings(commonSettings)
- 
+
  lazy val gemmini = (project in file("generators/gemmini"))
    .dependsOn(rocketchip)

@@ -201,7 +201,7 @@ def main():
   # write model filelist
   write_verilog_filelist(uniquified_modules_under_model, verilog_module_filename, args.out_model_filelist)
   write_cc_filelist     (cc_filelist, args.out_model_filelist)
-  
+
 
 if __name__=="__main__":
   main()

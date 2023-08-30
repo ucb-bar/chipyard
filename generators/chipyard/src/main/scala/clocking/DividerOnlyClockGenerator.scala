@@ -91,4 +91,3 @@ class SimplePllConfiguration(
    }
    def referenceSinkParams(): ClockSinkParameters = sinkDividerMap.find(_._2 == 1).get._1
 }
-

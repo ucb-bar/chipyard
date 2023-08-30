@@ -424,7 +424,7 @@ extern "C" void cospike_cosim(long long int cycle,
     bool vector_wb = false;
     uint32_t vector_cnt = 0;
     std::vector<reg_t> vector_rds;
-    
+
     for (auto &regwrite : log) {
 
       //TODO: scaling to multi issue reads?
