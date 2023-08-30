@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#============================================================================
+# ============================================================================
 # - really simple script, which just prints out the numactl cmd to
 #   prefix before your actual command. it determines this based on free
 #   memory size attached to every node.
@@ -21,7 +21,7 @@
 #     node   0   1
 #       0:  10  20
 #       1:  20  10
-#============================================================================
+# ============================================================================
 
 import subprocess
 import re
@@ -48,7 +48,7 @@ if out != "":
 
         # loop through available nodes, selecting the node with the most free mem
         for i in avail_nodes:
-            cpu_line      = lines[line_idx]
+            cpu_line = lines[line_idx]
             # mem. size unused. skip and use mem. free
             mem_free_line = lines[line_idx + 2]
             line_idx += 3
@@ -58,7 +58,9 @@ if out != "":
                 node_id = cpu_match.group(1)
                 cpus = cpu_match.group(2).replace(" ", ",")
 
-                mem_free_match = re.match(r"^ *node " + node_id + " free: (\d+) \S+$", mem_free_line)
+                mem_free_match = re.match(
+                    r"^ *node " + node_id + " free: (\d+) \S+$", mem_free_line
+                )
                 if mem_free_match:
                     free_size = mem_free_match.group(1)
                     if int(free_size) > int(best_free_size):

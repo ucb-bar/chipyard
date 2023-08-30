@@ -14,3 +14,8 @@ repos:
     hooks:
     - id: checkmake
       args: [--config=./.checkmake-config.ini]
+  - repo: https://github.com/psf/black
+    rev: stable
+    hooks:
+    - id: black
+      language_version: python3.9

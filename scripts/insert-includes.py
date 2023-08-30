@@ -25,8 +25,8 @@ incDirs = sys.argv[3:]
 print("[INFO] Searching following dirs for includes: " + str(incDirs))
 
 # open file
-with open(inVlog, 'r') as inFile:
-    with open(outVlog, 'w') as outFile:
+with open(inVlog, "r") as inFile:
+    with open(outVlog, "w") as outFile:
         # for each include found, search through all dirs and replace if found, error if not
         for num, line in enumerate(inFile, 1):
             match = re.match(r"^ *`include +\"(.*)\"", line)
@@ -37,14 +37,19 @@ with open(inVlog, 'r') as inFile:
                     potentialIncFileName = d + "/" + match.group(1)
                     if os.path.exists(potentialIncFileName):
                         found = True
-                        with open(potentialIncFileName, 'r') as incFile:
+                        with open(potentialIncFileName, "r") as incFile:
                             for iline in incFile:
                                 outFile.write(iline)
                         break
 
                 # must find something to include with
                 if not found:
-                    sys.exit("[ERROR] Couldn't replace include \"" + str(match.group(1)) + "\" found on line " + str(num))
+                    sys.exit(
+                        "[ERROR] Couldn't replace include \""
+                        + str(match.group(1))
+                        + '" found on line '
+                        + str(num)
+                    )
             else:
                 outFile.write(line)
 
