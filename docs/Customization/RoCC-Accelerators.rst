@@ -112,4 +112,3 @@ For instance, if we wanted to add the previously defined accelerator and route c
       new RocketConfig)
 
 To add RoCC instructions in your program, use the RoCC C macros provided in ``tests/rocc.h``. You can find examples in the files ``tests/accum.c`` and ``charcount.c``.
-

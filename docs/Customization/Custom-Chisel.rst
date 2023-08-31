@@ -52,7 +52,7 @@ Then add ``yourproject`` to the Chipyard top-level build.sbt file.
 
 You can then import the classes defined in the submodule in a new project if
 you add it as a dependency. For instance, if you want to use this code in
-the ``chipyard`` project, add your project to the list of sub-projects in the 
+the ``chipyard`` project, add your project to the list of sub-projects in the
 `.dependsOn()` for `lazy val chipyard`. The original code may change over time, but it
 should look something like this:
 

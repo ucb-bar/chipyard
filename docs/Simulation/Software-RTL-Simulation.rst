@@ -187,7 +187,7 @@ During verilog creation, a graphml file is emitted that will allow you to visual
 
 To view the graph, first download a viewer such as `yEd <https://www.yworks.com/products/yed/>`__.
 
-The ``*.graphml`` file will be located in ``generated-src/<...>/``. Open the file in the graph viewer. 
+The ``*.graphml`` file will be located in ``generated-src/<...>/``. Open the file in the graph viewer.
 To get a clearer view of the SoC, switch to "hierarchical" view. For yEd, this would be done by selecting ``layout`` -> ``hierarchical``, and then choosing "Ok" without changing any settings.
 
 .. _sw-sim-verilator-opts:

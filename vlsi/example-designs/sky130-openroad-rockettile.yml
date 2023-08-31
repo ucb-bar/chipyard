@@ -44,7 +44,7 @@ vlsi.inputs.placement_constraints:
     x: 50
     y: 1250
     orientation: r90
- 
+
   # tag array
   - path: "RocketTile/frontend/icache/tag_array_0/tag_array_0_ext/mem_0_0"
     type: hardmacro

@@ -38,4 +38,3 @@ class ChipyardOptions private[stage] (
       if (!topPackage.isEmpty && !configClass.isEmpty) Some(s"${topPackage.get}.${configClass.get}") else None
   }
 }
-
