@@ -3,29 +3,29 @@
 
 // These are configuration-dependent, but for the unit test we'll use the
 // example config
-#define SPIFLASH_BASE_MEM 0x20000000
+#define SPIFLASH_BASE_MEM      0x20000000
 #define SPIFLASH_BASE_MEM_SIZE 0x10000000
 
 #define SPIFLASH_BASE_CTRL 0x10030000
 // Only defining the registers we use; there are more
 // Software control
 #define SPIFLASH_OFFS_CSMODE 0x18
-#define SPIFLASH_OFFS_FMT 0x40
+#define SPIFLASH_OFFS_FMT    0x40
 #define SPIFLASH_OFFS_TXDATA 0x48
 #define SPIFLASH_OFFS_RXDATA 0x4c
 // Hardware state machine control
 #define SPIFLASH_OFFS_FLASH_EN 0x60
-#define SPIFLASH_OFFS_FFMT 0x64
+#define SPIFLASH_OFFS_FFMT     0x64
 
 // chip select modes
 #define CSMODE_AUTO 0
 #define CSMODE_HOLD 2
-#define CSMODE_OFF 3
+#define CSMODE_OFF  3
 
 // SPI flash protocol settings
 #define SPIFLASH_PROTO_SINGLE 0
-#define SPIFLASH_PROTO_DUAL 1
-#define SPIFLASH_PROTO_QUAD 2
+#define SPIFLASH_PROTO_DUAL   1
+#define SPIFLASH_PROTO_QUAD   2
 
 // SPI flash IO settings
 #define SPIFLASH_IODIR_RX 0

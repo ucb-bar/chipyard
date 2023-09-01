@@ -4,7 +4,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define FFT_WRITE_LANE 0x2400
+#define FFT_WRITE_LANE   0x2400
 #define FFT_RD_LANE_BASE 0x2408
 // addr of read lane i is FFT_RD_LANE_BASE + i * 8
 

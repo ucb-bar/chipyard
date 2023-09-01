@@ -1,4 +1,5 @@
 BasedOnStyle: LLVM
-AlwaysBreakTemplateDeclarations: Yes
+AlwaysBreakTemplateDeclarations: true
 BinPackArguments: false
 BinPackParameters: false
+AlignConsecutiveMacros: true

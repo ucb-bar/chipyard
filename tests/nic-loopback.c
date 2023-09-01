@@ -6,11 +6,11 @@
 #include "nic.h"
 #include <riscv-pk/encoding.h>
 
-#define NPACKETS 10
+#define NPACKETS    10
 #define TEST_OFFSET 3
-#define TEST_LEN 356
-#define ARRAY_LEN 360
-#define NTRIALS 3
+#define TEST_LEN    356
+#define ARRAY_LEN   360
+#define NTRIALS     3
 
 uint32_t src[NPACKETS][ARRAY_LEN];
 uint32_t dst[NPACKETS][ARRAY_LEN];

@@ -12,7 +12,7 @@
 #define _AT(T, X) ((T)(X))
 #endif /* !__ASSEMBLER__*/
 
-#define _BITUL(x) (_AC(1, UL) << (x))
+#define _BITUL(x)  (_AC(1, UL) << (x))
 #define _BITULL(x) (_AC(1, ULL) << (x))
 
 #endif /* _SIFIVE_CONST_H */

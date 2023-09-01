@@ -29,10 +29,10 @@ extern std::map<long long int, backing_data_t> backing_mem_data;
 
 #define CLINT_BASE (0x2000000)
 #define CLINT_SIZE (0x10000)
-#define UART_BASE (0x54000000)
-#define UART_SIZE (0x1000)
-#define PLIC_BASE (0xc000000)
-#define PLIC_SIZE (0x4000000)
+#define UART_BASE  (0x54000000)
+#define UART_SIZE  (0x1000)
+#define PLIC_BASE  (0xc000000)
+#define PLIC_SIZE  (0x4000000)
 
 #define COSPIKE_PRINTF(...)                                                    \
   {                                                                            \

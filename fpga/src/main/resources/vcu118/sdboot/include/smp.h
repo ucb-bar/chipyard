@@ -7,7 +7,7 @@
 #ifndef MAX_HARTS
 #define MAX_HARTS 32
 #endif
-#define CLINT_END_HART_IPI CLINT_CTRL_ADDR + (MAX_HARTS * 4)
+#define CLINT_END_HART_IPI  CLINT_CTRL_ADDR + (MAX_HARTS * 4)
 #define CLINT1_END_HART_IPI CLINT1_CTRL_ADDR + (MAX_HARTS * 4)
 
 // The hart that non-SMP tests should run on

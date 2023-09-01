@@ -6,15 +6,15 @@
 
 #include <stdint.h>
 
-#define STR1(x) #x
-#define STR(x) STR1(x)
+#define STR1(x)                  #x
+#define STR(x)                   STR1(x)
 #define EXTRACT(a, size, offset) (((~(~0 << size) << offset) & a) >> offset)
 
 #define CUSTOMX_OPCODE(x) CUSTOM_##x
-#define CUSTOM_0 0b0001011
-#define CUSTOM_1 0b0101011
-#define CUSTOM_2 0b1011011
-#define CUSTOM_3 0b1111011
+#define CUSTOM_0          0b0001011
+#define CUSTOM_1          0b0101011
+#define CUSTOM_2          0b1011011
+#define CUSTOM_3          0b1111011
 
 #define CUSTOMX(X, xd, xs1, xs2, rd, rs1, rs2, funct)                          \
   CUSTOMX_OPCODE(X) | (rd << (7)) | (xs2 << (7 + 5)) | (xs1 << (7 + 5 + 1)) |  \

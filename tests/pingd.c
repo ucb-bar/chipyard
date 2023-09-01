@@ -6,20 +6,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ETH_MAX_WORDS 190
-#define NET_IP_ALIGN 2
+#define ETH_MAX_WORDS   190
+#define NET_IP_ALIGN    2
 #define ETH_HEADER_SIZE 14
-#define MAC_ADDR_SIZE 6
-#define IP_ADDR_SIZE 4
+#define MAC_ADDR_SIZE   6
+#define IP_ADDR_SIZE    4
 
 #define IPV4_ETHTYPE 0x0800
-#define ARP_ETHTYPE 0x0806
-#define ICMP_PROT 1
-#define ECHO_REPLY 0
+#define ARP_ETHTYPE  0x0806
+#define ICMP_PROT    1
+#define ECHO_REPLY   0
 #define ECHO_REQUEST 8
-#define ARP_REQUEST 1
-#define ARP_REPLY 2
-#define HTYPE_ETH 1
+#define ARP_REQUEST  1
+#define ARP_REPLY    2
+#define HTYPE_ETH    1
 
 static inline uint16_t ntohs(uint16_t nint) {
   return ((nint & 0xff) << 8) | ((nint >> 8) & 0xff);

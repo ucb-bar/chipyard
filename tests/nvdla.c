@@ -4,9 +4,9 @@
 #include "nvdla.h"
 #include <riscv-pk/encoding.h>
 
-#define NVDLA_BASE 0x10040000
+#define NVDLA_BASE           0x10040000
 #define reg_write(addr, val) reg_write32(NVDLA_BASE + addr, val)
-#define reg_read(addr) reg_read32(NVDLA_BASE + addr)
+#define reg_read(addr)       reg_read32(NVDLA_BASE + addr)
 
 int main(void) {
   //----------## Layer:CDP_0: cross layer dependency, begin----------

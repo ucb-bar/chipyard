@@ -143,9 +143,9 @@ static uint16_t crc16_round(uint16_t crc, uint8_t data) {
   return crc;
 }
 
-#define SPIN_SHIFT 6
+#define SPIN_SHIFT     6
 #define SPIN_UPDATE(i) (!((i) & ((1 << SPIN_SHIFT) - 1)))
-#define SPIN_INDEX(i) (((i) >> SPIN_SHIFT) & 0x3)
+#define SPIN_INDEX(i)  (((i) >> SPIN_SHIFT) & 0x3)
 
 static const char spinner[] = {'-', '/', '|', '\\'};
 

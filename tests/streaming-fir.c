@@ -1,9 +1,9 @@
-#define PASSTHROUGH_WRITE 0x2000
+#define PASSTHROUGH_WRITE       0x2000
 #define PASSTHROUGH_WRITE_COUNT 0x2008
-#define PASSTHROUGH_READ 0x2100
-#define PASSTHROUGH_READ_COUNT 0x2108
+#define PASSTHROUGH_READ        0x2100
+#define PASSTHROUGH_READ_COUNT  0x2108
 
-#define BP 3
+#define BP       3
 #define BP_SCALE ((double)(1 << BP))
 
 #include "mmio.h"
