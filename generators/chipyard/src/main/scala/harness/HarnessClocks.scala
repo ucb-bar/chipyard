@@ -3,16 +3,11 @@ package chipyard.harness
 import chisel3._
 import chisel3.util._
 import chisel3.experimental.DoubleParam
-import scala.collection.mutable.{ArrayBuffer, LinkedHashMap}
-import freechips.rocketchip.diplomacy.{LazyModule}
-import org.chipsalliance.cde.config.{Field, Parameters, Config}
-import freechips.rocketchip.util.{ResetCatchAndSync}
+import scala.collection.mutable.LinkedHashMap
+import org.chipsalliance.cde.config.Config
 import freechips.rocketchip.prci._
 
-import chipyard.harness.{ApplyHarnessBinders, HarnessBinders, HarnessClockInstantiatorKey}
-import chipyard.iobinders.HasIOBinders
-import chipyard.clocking.{SimplePllConfiguration, ClockDividerN}
-
+import chipyard.harness.HarnessClockInstantiatorKey
 
 // HarnessClockInstantiators are classes which generate clocks that drive
 // TestHarness simulation models and any Clock inputs to the ChipTop
@@ -20,10 +15,12 @@ trait HarnessClockInstantiator {
   val clockMap: LinkedHashMap[String, (Double, Clock)] = LinkedHashMap.empty
 
   // request a clock at a particular frequency
-  def requestClockHz(name: String, freqHzRequested: Double): Clock = {
+  def requestClockHz(name: String, freqHzRequested: Double): Clock   = {
     if (clockMap.contains(name)) {
-      require(freqHzRequested == clockMap(name)._1,
-        s"Request clock freq = $freqHzRequested != previously requested ${clockMap(name)._2} for requested clock $name")
+      require(
+        freqHzRequested == clockMap(name)._1,
+        s"Request clock freq = $freqHzRequested != previously requested ${clockMap(name)._2} for requested clock $name",
+      )
       clockMap(name)._2
     } else {
       val clock = Wire(Clock())
@@ -39,26 +36,31 @@ trait HarnessClockInstantiator {
   def instantiateHarnessClocks(refClock: Clock, refClockFreqMHz: Double): Unit
 }
 
-class ClockSourceAtFreqMHz(val freqMHz: Double) extends BlackBox(Map(
-  "PERIOD" -> DoubleParam(1000/freqMHz)
-)) with HasBlackBoxInline {
-  val io = IO(new ClockSourceIO)
+class ClockSourceAtFreqMHz(val freqMHz: Double)
+    extends BlackBox(
+      Map(
+        "PERIOD" -> DoubleParam(1000 / freqMHz)
+      )
+    )
+    with HasBlackBoxInline {
+  val io         = IO(new ClockSourceIO)
   val moduleName = this.getClass.getSimpleName
 
-  setInline(s"$moduleName.v",
+  setInline(
+    s"$moduleName.v",
     s"""
-      |module $moduleName #(parameter PERIOD="") (
-      |    input power,
-      |    input gate,
-      |    output clk);
-      |  timeunit 1ns/1ps;
-      |  reg clk_i = 1'b0;
-      |  always #(PERIOD/2.0) clk_i = ~clk_i & (power & ~gate);
-      |  assign clk = clk_i;
-      |endmodule
-      |""".stripMargin)
+       |module $moduleName #(parameter PERIOD="") (
+       |    input power,
+       |    input gate,
+       |    output clk);
+       |  timeunit 1ns/1ps;
+       |  reg clk_i = 1'b0;
+       |  always #(PERIOD/2.0) clk_i = ~clk_i & (power & ~gate);
+       |  assign clk = clk_i;
+       |endmodule
+       |""".stripMargin,
+  )
 }
-
 
 // The AbsoluteFreqHarnessClockInstantiator uses a Verilog blackbox to
 // provide the precise requested frequency.
@@ -70,16 +72,17 @@ class AbsoluteFreqHarnessClockInstantiator extends HarnessClockInstantiator {
     for ((name, (freqHz, clock)) <- clockMap) {
       val source = Module(new ClockSourceAtFreqMHz(freqHz / (1000 * 1000)))
       source.io.power := true.B
-      source.io.gate := false.B
+      source.io.gate  := false.B
 
       clock := source.io.clk
     }
   }
 }
 
-class WithAbsoluteFreqHarnessClockInstantiator extends Config((site, here, up) => {
-  case HarnessClockInstantiatorKey => () => new AbsoluteFreqHarnessClockInstantiator
-})
+class WithAbsoluteFreqHarnessClockInstantiator
+    extends Config((site, here, up) => { case HarnessClockInstantiatorKey =>
+      () => new AbsoluteFreqHarnessClockInstantiator
+    })
 
 class AllClocksFromHarnessClockInstantiator extends HarnessClockInstantiator {
   def instantiateHarnessClocks(refClock: Clock, refClockFreqMHz: Double): Unit = {
@@ -87,14 +90,17 @@ class AllClocksFromHarnessClockInstantiator extends HarnessClockInstantiator {
     freqs.tail.foreach(t => require(t == freqs.head, s"Mismatching clocks $t != ${freqs.head}"))
     for ((name, (freq, clock)) <- clockMap) {
       val freqMHz = freq / (1000 * 1000)
-      require(freqMHz == refClockFreqMHz,
-        s"AllClocksFromHarnessClockInstantiator has reference ${refClockFreqMHz.toInt} MHz attempting to drive clock $name which requires $freqMHz MHz")
+      require(
+        freqMHz == refClockFreqMHz,
+        s"AllClocksFromHarnessClockInstantiator has reference ${refClockFreqMHz.toInt} MHz attempting to drive clock $name which requires $freqMHz MHz",
+      )
 
       clock := refClock
     }
   }
 }
 
-class WithAllClocksFromHarnessClockInstantiator extends Config((site, here, up) => {
-  case HarnessClockInstantiatorKey => () => new AllClocksFromHarnessClockInstantiator
-})
+class WithAllClocksFromHarnessClockInstantiator
+    extends Config((site, here, up) => { case HarnessClockInstantiatorKey =>
+      () => new AllClocksFromHarnessClockInstantiator
+    })

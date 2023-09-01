@@ -20,7 +20,7 @@ class Checks extends Phase with PreservesAll[Phase] {
       case a: TopModuleAnnotation      => a +=: topModule
       case a: ConfigsAnnotation        => a +=: configNames
       case a: OutputBaseNameAnnotation => a +=: outputBaseName
-      case _ =>
+      case _                           =>
     }
 
     def required(annoList: mutable.ListBuffer[Annotation], option: String): Unit = {

@@ -1,17 +1,14 @@
 package chipyard
 
-import scala.collection.mutable.{LinkedHashSet}
+import scala.collection.mutable.LinkedHashSet
 
-import freechips.rocketchip.subsystem._
-import freechips.rocketchip.tile.{XLen, TileParams}
-import org.chipsalliance.cde.config.{Parameters, Field, Config}
-import freechips.rocketchip.system.{TestGeneration, RegressionTestSuite, RocketTestSuite}
+import freechips.rocketchip.tile.{TileParams, XLen}
+import org.chipsalliance.cde.config.{Field, Parameters}
+import freechips.rocketchip.system.{RegressionTestSuite, RocketTestSuite}
 
-/**
- * A set of pre-chosen regression tests
- */
-object RegressionTestSuites
-{
+/** A set of pre-chosen regression tests
+  */
+object RegressionTestSuites {
   val rv64RegrTestNames = LinkedHashSet(
     "rv64ud-v-fcvt",
     "rv64ud-p-fdiv",
@@ -37,7 +34,8 @@ object RegressionTestSuites
     "rv64ud-v-fmadd",
     "rv64uf-v-ldst",
     "rv64um-v-mulh",
-    "rv64si-p-dirty")
+    "rv64si-p-dirty",
+  )
 
   val rv32RegrTestNames = LinkedHashSet(
     "rv32mi-p-ma_addr",
@@ -46,30 +44,28 @@ object RegressionTestSuites
     "rv32ui-p-lh",
     "rv32uc-p-rvc",
     "rv32mi-p-sbreak",
-    "rv32ui-p-sll")
+    "rv32ui-p-sll",
+  )
 }
 
-/**
- * Helper functions to add BOOM or Rocket tests
- */
-class TestSuiteHelper
-{
+/** Helper functions to add BOOM or Rocket tests
+  */
+class TestSuiteHelper {
   import freechips.rocketchip.system.DefaultTestSuites._
   import RegressionTestSuites._
   val suites = collection.mutable.ListMap[String, RocketTestSuite]()
-  def addSuite(s: RocketTestSuite) { suites += (s.makeTargetName -> s) }
+  def addSuite(s:  RocketTestSuite) { suites += (s.makeTargetName -> s) }
   def addSuites(s: Seq[RocketTestSuite]) { s.foreach(addSuite) }
 
-  /**
-  * Add generic tests (asm, bmark, regression) for all cores.
-  */
+  /** Add generic tests (asm, bmark, regression) for all cores.
+    */
   def addGenericTestSuites(tiles: Seq[TileParams])(implicit p: Parameters) = {
     val xlen = p(XLen)
     tiles.find(_.hartId == 0).map { tileParams =>
       val coreParams = tileParams.core
-      val vm = coreParams.useVM
-      val env = if (vm) List("p","v") else List("p")
-      coreParams.fpu foreach { case cfg =>
+      val vm         = coreParams.useVM
+      val env        = if (vm) List("p", "v") else List("p")
+      coreParams.fpu.foreach { case cfg =>
         if (xlen == 32) {
           addSuites(env.map(rv32uf))
           if (cfg.fLen >= 64)
@@ -94,7 +90,7 @@ class TestSuiteHelper
       if (coreParams.useCompressed) addSuites(env.map(if (xlen == 64) rv64uc else rv32uc))
       val (rvi, rvu) =
         if (xlen == 64) ((if (vm) rv64i else rv64pi), (if (coreParams.mulDiv.isDefined) rv64u else List(rv64ui)))
-        else            ((if (vm) rv32i else rv32pi), (if (coreParams.mulDiv.isDefined) rv32u else List(rv32ui)))
+        else ((if (vm) rv32i else rv32pi), (if (coreParams.mulDiv.isDefined) rv32u else List(rv32ui)))
 
       addSuites(rvi.map(_("p")))
       addSuites(rvu.map(_("p")))
@@ -105,11 +101,11 @@ class TestSuiteHelper
   }
 }
 
-/**
- * Config key of custom test suite.
- */
-case object TestSuitesKey extends Field[(Seq[TileParams], TestSuiteHelper, Parameters) => String]((tiles, helper, p) => {
-  helper.addGenericTestSuites(tiles)(p)
-  // Return an empty string as makefile additional snippets
-  ""
-})
+/** Config key of custom test suite.
+  */
+case object TestSuitesKey
+    extends Field[(Seq[TileParams], TestSuiteHelper, Parameters) => String]((tiles, helper, p) => {
+      helper.addGenericTestSuites(tiles)(p)
+      // Return an empty string as makefile additional snippets
+      ""
+    })

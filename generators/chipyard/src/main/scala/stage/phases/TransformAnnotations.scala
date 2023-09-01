@@ -12,9 +12,10 @@ import chipyard.stage._
 class TransformAnnotations extends Phase with PreservesAll[Phase] with HasChipyardStageUtils {
 
   override val prerequisites = Seq(Dependency[Checks])
-  override val dependents = Seq(Dependency[chisel3.stage.phases.AddImplicitOutputFile])
+  override val dependents    = Seq(Dependency[chisel3.stage.phases.AddImplicitOutputFile])
 
   override def transform(annotations: AnnotationSeq): AnnotationSeq = {
+
     /** Construct output file annotation for emission */
     new ChiselOutputFileAnnotation(view[ChipyardOptions](annotations).longName.get) +: annotations
   }

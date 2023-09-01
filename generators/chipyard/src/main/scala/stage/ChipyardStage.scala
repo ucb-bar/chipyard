@@ -5,11 +5,10 @@ package chipyard.stage
 
 import chisel3.stage.{ChiselCli, ChiselStage}
 import firrtl.options.PhaseManager.PhaseDependency
-import firrtl.options.{Phase, PreservesAll, Shell}
+import firrtl.options.PreservesAll
 import firrtl.stage.FirrtlCli
 
-import firrtl.options.{Phase, PhaseManager, PreservesAll, Shell, Stage, StageError, StageMain, Dependency}
-import firrtl.options.phases.DeletedWrapper
+import firrtl.options.{Dependency, Phase, PreservesAll, Shell}
 
 final class ChipyardChiselStage extends ChiselStage {
 
@@ -20,13 +19,13 @@ final class ChipyardChiselStage extends ChiselStage {
     Dependency[chisel3.stage.phases.AddImplicitOutputAnnotationFile],
     Dependency[chisel3.stage.phases.MaybeAspectPhase],
     Dependency[chisel3.stage.phases.Emitter],
-    Dependency[chisel3.stage.phases.Convert]
+    Dependency[chisel3.stage.phases.Convert],
   )
 
 }
 
 class ChipyardStage extends ChiselStage {
-  override val shell = new Shell("chipyard") with ChipyardCli with ChiselCli with FirrtlCli
+  override val shell                         = new Shell("chipyard") with ChipyardCli with ChiselCli with FirrtlCli
   override val targets: Seq[PhaseDependency] = Seq(
     Dependency[chipyard.stage.phases.Checks],
     Dependency[chipyard.stage.phases.TransformAnnotations],

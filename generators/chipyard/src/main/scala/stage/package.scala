@@ -11,11 +11,11 @@ package object stage {
 
     def view(annotations: AnnotationSeq): ChipyardOptions = annotations
       .collect { case a: ChipyardOption => a }
-      .foldLeft(new ChipyardOptions()){ (c, x) =>
+      .foldLeft(new ChipyardOptions()) { (c, x) =>
         x match {
-          case TopModuleAnnotation(a)         => c.copy(topModule = Some(a))
-          case ConfigsAnnotation(a)           => c.copy(configNames = Some(a))
-          case OutputBaseNameAnnotation(a)    => c.copy(outputBaseName = Some(a))
+          case TopModuleAnnotation(a)      => c.copy(topModule = Some(a))
+          case ConfigsAnnotation(a)        => c.copy(configNames = Some(a))
+          case OutputBaseNameAnnotation(a) => c.copy(outputBaseName = Some(a))
         }
       }
 

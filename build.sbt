@@ -35,6 +35,7 @@ lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-deprecation",
     "-unchecked",
+    "-Ywarn-unused",
     "-Ymacro-annotations"), // fix hierarchy API
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
   allDependencies := {
@@ -48,7 +49,10 @@ lazy val commonSettings = Seq(
   resolvers ++= Seq(
     Resolver.sonatypeRepo("snapshots"),
     Resolver.sonatypeRepo("releases"),
-    Resolver.mavenLocal))
+    Resolver.mavenLocal),
+  // Scalafix
+  semanticdbEnabled := true,
+  semanticdbVersion := scalafixSemanticdb.revision)
 
 val rocketChipDir = file("generators/rocket-chip")
 

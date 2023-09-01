@@ -10,11 +10,20 @@ import freechips.rocketchip.tilelink._
 
 // DOC include start: MyClient
 class MyClient(implicit p: Parameters) extends LazyModule {
-  val node = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLClientParameters(
-    name = "my-client",
-    sourceId = IdRange(0, 4),
-    requestFifo = true,
-    visibility = Seq(AddressSet(0x10000, 0xffff)))))))
+  val node = TLClientNode(
+    Seq(
+      TLMasterPortParameters.v1(
+        Seq(
+          TLClientParameters(
+            name        = "my-client",
+            sourceId    = IdRange(0, 4),
+            requestFifo = true,
+            visibility  = Seq(AddressSet(0x10000, 0xffff)),
+          )
+        )
+      )
+    )
+  )
 
   lazy val module = new LazyModuleImp(this) {
     val (tl, edge) = node.out(0)
@@ -26,20 +35,30 @@ class MyClient(implicit p: Parameters) extends LazyModule {
 
 // DOC include start: MyManager
 class MyManager(implicit p: Parameters) extends LazyModule {
-  val device = new SimpleDevice("my-device", Seq("tutorial,my-device0"))
+  val device    = new SimpleDevice("my-device", Seq("tutorial,my-device0"))
   val beatBytes = 8
-  val node = TLManagerNode(Seq(TLSlavePortParameters.v1(Seq(TLManagerParameters(
-    address = Seq(AddressSet(0x20000, 0xfff)),
-    resources = device.reg,
-    regionType = RegionType.UNCACHED,
-    executable = true,
-    supportsArithmetic = TransferSizes(1, beatBytes),
-    supportsLogical = TransferSizes(1, beatBytes),
-    supportsGet = TransferSizes(1, beatBytes),
-    supportsPutFull = TransferSizes(1, beatBytes),
-    supportsPutPartial = TransferSizes(1, beatBytes),
-    supportsHint = TransferSizes(1, beatBytes),
-    fifoId = Some(0))), beatBytes)))
+  val node      = TLManagerNode(
+    Seq(
+      TLSlavePortParameters.v1(
+        Seq(
+          TLManagerParameters(
+            address            = Seq(AddressSet(0x20000, 0xfff)),
+            resources          = device.reg,
+            regionType         = RegionType.UNCACHED,
+            executable         = true,
+            supportsArithmetic = TransferSizes(1, beatBytes),
+            supportsLogical    = TransferSizes(1, beatBytes),
+            supportsGet        = TransferSizes(1, beatBytes),
+            supportsPutFull    = TransferSizes(1, beatBytes),
+            supportsPutPartial = TransferSizes(1, beatBytes),
+            supportsHint       = TransferSizes(1, beatBytes),
+            fifoId             = Some(0),
+          )
+        ),
+        beatBytes,
+      )
+    )
+  )
 
   lazy val module = new LazyModuleImp(this) {
     val (tl, edge) = node.in(0)
@@ -49,8 +68,7 @@ class MyManager(implicit p: Parameters) extends LazyModule {
 
 // DOC include start: MyClient1+MyClient2
 class MyClient1(implicit p: Parameters) extends LazyModule {
-  val node = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLClientParameters(
-    "my-client1", IdRange(0, 1))))))
+  val node = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLClientParameters("my-client1", IdRange(0, 1))))))
 
   lazy val module = new LazyModuleImp(this) {
     // ...
@@ -58,8 +76,7 @@ class MyClient1(implicit p: Parameters) extends LazyModule {
 }
 
 class MyClient2(implicit p: Parameters) extends LazyModule {
-  val node = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLClientParameters(
-    "my-client2", IdRange(0, 1))))))
+  val node = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLClientParameters("my-client2", IdRange(0, 1))))))
 
   lazy val module = new LazyModuleImp(this) {
     // ...
@@ -71,7 +88,7 @@ class MyClient2(implicit p: Parameters) extends LazyModule {
 class MyClientGroup(implicit p: Parameters) extends LazyModule {
   val client1 = LazyModule(new MyClient1)
   val client2 = LazyModule(new MyClient2)
-  val node = TLIdentityNode()
+  val node    = TLIdentityNode()
 
   node := client1.node
   node := client2.node
@@ -84,8 +101,9 @@ class MyClientGroup(implicit p: Parameters) extends LazyModule {
 
 // DOC include start: MyManagerGroup
 class MyManager1(beatBytes: Int)(implicit p: Parameters) extends LazyModule {
-  val node = TLManagerNode(Seq(TLSlavePortParameters.v1(Seq(TLManagerParameters(
-    address = Seq(AddressSet(0x0, 0xfff)))), beatBytes)))
+  val node = TLManagerNode(
+    Seq(TLSlavePortParameters.v1(Seq(TLManagerParameters(address = Seq(AddressSet(0x0, 0xfff)))), beatBytes))
+  )
 
   lazy val module = new LazyModuleImp(this) {
     // ...
@@ -93,8 +111,9 @@ class MyManager1(beatBytes: Int)(implicit p: Parameters) extends LazyModule {
 }
 
 class MyManager2(beatBytes: Int)(implicit p: Parameters) extends LazyModule {
-  val node = TLManagerNode(Seq(TLSlavePortParameters.v1(Seq(TLManagerParameters(
-    address = Seq(AddressSet(0x1000, 0xfff)))), beatBytes)))
+  val node = TLManagerNode(
+    Seq(TLSlavePortParameters.v1(Seq(TLManagerParameters(address = Seq(AddressSet(0x1000, 0xfff)))), beatBytes))
+  )
 
   lazy val module = new LazyModuleImp(this) {
     // ...
@@ -117,7 +136,7 @@ class MyManagerGroup(beatBytes: Int)(implicit p: Parameters) extends LazyModule 
 
 // DOC include start: MyClientManagerComplex
 class MyClientManagerComplex(implicit p: Parameters) extends LazyModule {
-  val client = LazyModule(new MyClientGroup)
+  val client  = LazyModule(new MyClientGroup)
   val manager = LazyModule(new MyManagerGroup(8))
 
   manager.node :=* client.node

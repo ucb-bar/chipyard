@@ -6,39 +6,35 @@
 package chipyard
 
 import chisel3._
-import chisel3.internal.sourceinfo.{SourceInfo}
+import chisel3.internal.sourceinfo.SourceInfo
 
-import freechips.rocketchip.prci._
 import org.chipsalliance.cde.config.{Field, Parameters}
 import freechips.rocketchip.devices.tilelink._
-import freechips.rocketchip.devices.debug.{HasPeripheryDebug, ExportDebug, DebugModuleKey}
+import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, HasPeripheryDebug}
 import sifive.blocks.devices.uart.{HasPeripheryUART, PeripheryUARTKey}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tile._
-import freechips.rocketchip.tilelink._
 import freechips.rocketchip.interrupts._
-import freechips.rocketchip.util._
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.amba.axi4._
 
-import boom.common.{BoomTile}
+import boom.common.BoomTile
 
-
-import testchipip.{DromajoHelper, CanHavePeripheryTLSerial, SerialTLKey}
+import testchipip.{CanHavePeripheryTLSerial, DromajoHelper, SerialTLKey}
 
 trait CanHaveHTIF { this: BaseSubsystem =>
   // Advertise HTIF if system can communicate with fesvr
-  if (this match {
-    case _: CanHavePeripheryTLSerial if p(SerialTLKey).nonEmpty => true
-    case _: HasPeripheryDebug if (!p(DebugModuleKey).isEmpty && p(ExportDebug).dmi) => true
-    case _ => false
-  }) {
+  if (
+    this match {
+      case _: CanHavePeripheryTLSerial if p(SerialTLKey).nonEmpty                     => true
+      case _: HasPeripheryDebug if (!p(DebugModuleKey).isEmpty && p(ExportDebug).dmi) => true
+      case _                                                                          => false
+    }
+  ) {
     ResourceBinding {
       val htif = new Device {
         def describe(resources: ResourceBindings): Description = {
           val compat = resources("compat").map(_.value)
-          Description("htif", Map(
-            "compatible" -> compat))
+          Description("htif", Map("compatible" -> compat))
         }
       }
       Resource(htif, "compat").bind(ResourceString("ucb,htif0"))
@@ -56,29 +52,32 @@ trait CanHaveChosenInDTS { this: BaseSubsystem =>
         val chosen = new Device {
           def describe(resources: ResourceBindings): Description = {
             val stdout = resources("stdout").map(_.value)
-            Description("chosen", resources("uart").headOption.map { case Binding(_, value) =>
-              "stdout-path" -> Seq(value)
-            }.toMap)
+            Description(
+              "chosen",
+              resources("uart").headOption.map { case Binding(_, value) =>
+                "stdout-path" -> Seq(value)
+              }.toMap,
+            )
           }
         }
         ResourceBinding {
           t.uarts.foreach(u => Resource(chosen, "uart").bind(ResourceAlias(u.device.label)))
         }
       }
-      case _ =>
+      case _                                                     =>
     }
   }
 }
 
-class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
-  with HasTiles
-  with HasPeripheryDebug
-  with CanHaveHTIF
-  with CanHaveChosenInDTS
-{
+class ChipyardSubsystem(implicit p: Parameters)
+    extends BaseSubsystem
+    with HasTiles
+    with HasPeripheryDebug
+    with CanHaveHTIF
+    with CanHaveChosenInDTS {
   def coreMonitorBundles = tiles.map {
     case r: RocketTile => r.module.core.rocketImpl.coreMonitorBundle
-    case b: BoomTile => b.module.core.coreMonitorBundle
+    case b: BoomTile   => b.module.core.coreMonitorBundle
   }.toList
 
   // No-tile configs have to be handled specially.
@@ -86,15 +85,15 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
     // no PLIC, so sink interrupts to nowhere
     require(!p(PLICKey).isDefined)
     val intNexus = IntNexusNode(sourceFn = x => x.head, sinkFn = x => x.head)
-    val intSink = IntSinkNode(IntSinkPortSimple())
+    val intSink  = IntSinkNode(IntSinkPortSimple())
     intSink := intNexus :=* ibus.toPLIC
 
     // avoids a bug when there are no interrupt sources
     ibus.fromAsync := NullIntSource()
 
     // Need to have at least 1 driver to the tile notification sinks
-    tileHaltXbarNode := IntSourceNode(IntSourcePortSimple())
-    tileWFIXbarNode := IntSourceNode(IntSourcePortSimple())
+    tileHaltXbarNode  := IntSourceNode(IntSourcePortSimple())
+    tileWFIXbarNode   := IntSourceNode(IntSourcePortSimple())
     tileCeaseXbarNode := IntSourceNode(IntSourcePortSimple())
 
     // Sink reset vectors to nowhere
@@ -121,9 +120,9 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
   override lazy val module = new ChipyardSubsystemModuleImp(this)
 }
 
-class ChipyardSubsystemModuleImp[+L <: ChipyardSubsystem](_outer: L) extends BaseSubsystemModuleImp(_outer)
-  with HasTilesModuleImp
-{
+class ChipyardSubsystemModuleImp[+L <: ChipyardSubsystem](_outer: L)
+    extends BaseSubsystemModuleImp(_outer)
+    with HasTilesModuleImp {
   // Generate C header with relevant information for Dromajo
   // This is included in the `dromajo_params.h` header file
   DromajoHelper.addArtefacts(InSubsystem)

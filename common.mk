@@ -438,6 +438,49 @@ SBT_COMMAND ?= shell
 launch-sbt:
 	cd $(base_dir) && $(SBT) "$(SBT_COMMAND)"
 
+#########################
+# Scalafmt              #
+#########################
+
+# Checks that all scala main sources under chipyard SBT subprojects are formatted.
+.PHONY: scalafmtCheckAll
+scalafmtCheckAll:
+	cd $(base_dir) && $(SBT) ";project chipyard; \
+		chipyard / scalafmtCheckAll; \
+		tracegen / scalafmtCheckAll; \
+		firechip / scalafmtCheckAll; "
+
+# Runs the code reformatter in all chipyard SBT subprojects
+.PHONY: scalafmtAll
+scalafmtAll:
+	cd $(base_dir) && $(SBT) ";project chipyard; \
+		chipyard / scalafmtAll; \
+		tracegen / scalafmtAll; \
+		firechip / scalafmtAll; "
+
+# Checks scala sources comply with the Scalafix rules defined here: sim/.scalafix.conf
+.PHONY: scalaFixCheck
+scalaFixCheck:
+	cd $(base_dir) && $(SBT) ";project chipyard; \
+		chipyard / scalafix --check; \
+		tracegen / scalafix --check; \
+		firechip / scalafix --check; "
+
+# Applies the scalafix rules defined here: sim/.scalafix.conf
+.PHONY: scalaFix
+scalaFix:
+	cd $(base_dir) && $(SBT) ";project chipyard; \
+		chipyard / scalafix; \
+		tracegen / scalafix; \
+		firechip / scalafix; "
+
+# These targets combine Scalafix and Scalafmt passes.
+# It's important to run Scalafix first so Scalafmt can cleanup whitespace issues
+.PHONY: scala-lint scala-lint-check
+.NOTPARALLEL: scala-lint scala-lint-check
+scala-lint: scalaFix scalafmtAll
+scala-lint-check: scalaFixCheck scalafmtCheckAll
+
 #########################################################################################
 # print help text (and other help)
 #########################################################################################
