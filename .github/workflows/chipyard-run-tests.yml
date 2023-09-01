@@ -233,6 +233,42 @@ jobs:
 
   ##########################################################################
 
+  run-all-linting:
+    name: run-all-linting
+    needs: setup-complete
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Scala Lint
+        run: |
+          make -C sim/vcs scala-lint-check
+      - name: Clang Lint
+        run: |
+          git fetch --recurse-submodules=no origin ${{ github.base_ref }}
+          DIFF_COMMIT=$(git rev-parse origin/${{ github.base_ref }})
+          git clang-format $DIFF_COMMIT
+          git diff --ignore-submodules > clang-format.patch
+          if [ -s clang-format.patch ]; then
+            echo "error: clang-format had to fix the following files:"
+            git diff --ignore-submodules --name-only
+            echo "----- 8< ---- PATCH ----- 8< ----"
+            cat clang-format.patch
+            echo "----- 8< ---- PATCH ----- 8< ----"
+            git checkout .
+            exit 1
+          fi
+
   prepare-chipyard-cores:
     name: prepare-chipyard-cores
     needs: setup-complete
