@@ -5,15 +5,14 @@
 
 #include "mmio.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 
-int main(void)
-{
+int main(void) {
   printf("Starting writing\n");
-  uint32_t test_vector[7] = {3, 2, 1, 0, -1, -2, -3} ;
+  uint32_t test_vector[7] = {3, 2, 1, 0, -1, -2, -3};
   for (int i = 0; i < 7; i++) {
     reg_write64(PASSTHROUGH_WRITE, test_vector[i]);
   }

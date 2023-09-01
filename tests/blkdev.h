@@ -12,27 +12,23 @@
 #define BLKDEV_SECTOR_SIZE 512
 #define BLKDEV_SECTOR_SHIFT 9
 
-static inline size_t blkdev_nsectors(void)
-{
-	return reg_read32(BLKDEV_NSECTORS);
+static inline size_t blkdev_nsectors(void) {
+  return reg_read32(BLKDEV_NSECTORS);
 }
 
-static inline size_t blkdev_max_req_len(void)
-{
-	return reg_read32(BLKDEV_MAX_REQUEST_LENGTH);
+static inline size_t blkdev_max_req_len(void) {
+  return reg_read32(BLKDEV_MAX_REQUEST_LENGTH);
 }
 
-static inline unsigned int blkdev_send_request(
-		unsigned long addr,
-		unsigned int offset,
-		unsigned int len,
-		unsigned char write)
-{
-		reg_write64(BLKDEV_ADDR, addr);
-		reg_write32(BLKDEV_OFFSET, offset);
-		reg_write32(BLKDEV_LEN, len);
-		reg_write8(BLKDEV_WRITE, write);
+static inline unsigned int blkdev_send_request(unsigned long addr,
+                                               unsigned int offset,
+                                               unsigned int len,
+                                               unsigned char write) {
+  reg_write64(BLKDEV_ADDR, addr);
+  reg_write32(BLKDEV_OFFSET, offset);
+  reg_write32(BLKDEV_LEN, len);
+  reg_write8(BLKDEV_WRITE, write);
 
-		asm volatile ("fence");
-		return reg_read8(BLKDEV_REQUEST);
+  asm volatile("fence");
+  return reg_read8(BLKDEV_REQUEST);
 }

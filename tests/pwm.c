@@ -4,11 +4,10 @@
 
 #include "mmio.h"
 
-int main(void)
-{
-	reg_write32(PWM_PERIOD, 20);
-	reg_write32(PWM_DUTY, 5);
-	reg_write32(PWM_ENABLE, 1);
+int main(void) {
+  reg_write32(PWM_PERIOD, 20);
+  reg_write32(PWM_DUTY, 5);
+  reg_write32(PWM_ENABLE, 1);
 
-	return 0;
+  return 0;
 }
