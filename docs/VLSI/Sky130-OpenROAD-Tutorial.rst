@@ -55,7 +55,7 @@ Prerequisites
   * NetGen (LVS), , install `using conda <https://anaconda.org/litex-hub/netgen>`__ or `from source <http://www.opencircuitdesign.com/netgen/install.html>`__
 
 * Sky130A PDK, install `using conda <https://anaconda.org/litex-hub/open_pdks.sky130a>`__ or `these directions  <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__
-* `Sram22 Sky130 SRAM macros  <https://github.com/rahulk29/sram22_sky130_macros>`__ 
+* `Sram22 Sky130 SRAM macros  <https://github.com/rahulk29/sram22_sky130_macros>`__
 
   * These SRAM macros were generated using the `Sram22 SRAM generator  <https://github.com/rahulk29/sram22>`__ (still very heavily under development)
 
@@ -86,10 +86,10 @@ In the Chipyard root, ensure that you have the Chipyard conda environment activa
 
     ./scripts/init-vlsi.sh sky130 openroad
 
-to pull and install the plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule is cloned in the ``vlsi`` folder, 
+to pull and install the plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule is cloned in the ``vlsi`` folder,
 and for the commercial tool flow (set up by omitting the ``openroad`` argument), the tool plugin submodules are cloned into the ``vlsi`` folder.
 
-Now navigate to the ``vlsi`` directory. The remainder of the tutorial will assume you are in this directory. 
+Now navigate to the ``vlsi`` directory. The remainder of the tutorial will assume you are in this directory.
 We will summarize a few files in this directory that will be important for the rest of the tutorial.
 
 .. code-block:: shell
@@ -151,7 +151,7 @@ The ``buildfile`` make target has dependencies on both (1) the Verilog that is e
 and (2) the mapping of memory instances in the design to SRAM macros;
 all files related to these two steps reside in the ``generated-src/chipyard.harness.TestHarness.TinyRocketConfig-ChipTop`` directory.
 Note that the files in ``generated-src`` vary for each tool/technology flow.
-This especially applies to the Sky130 Commercial vs OpenROAD tutorial flows 
+This especially applies to the Sky130 Commercial vs OpenROAD tutorial flows
 (due to the ``ENABLE_YOSYS_FLOW`` flag, explained below), so these flows should be run in separate
 chipyard installations. If the wrong sources are generated, simply run ``make buildfile -B`` to rebuild all targets correctly.
 
@@ -188,7 +188,7 @@ Place-and-Route
     make par tutorial=sky130-openroad
 
 Note that sometimes OpenROAD freezes on commands following the ``detailed_route`` step,
-so for now we recomment running place-and-route until the ``extraction`` step, 
+so for now we recomment running place-and-route until the ``extraction`` step,
 then re-starting the flow at this step. See the :ref:`VLSI/Sky130-OpenROAD-Tutorial:VLSI Flow Control` documentation
 below for how to break up the flow into these steps.
 
@@ -273,7 +273,7 @@ Firt, refer to the :ref:`VLSI/Hammer:VLSI Flow Control` documentation. The below
       make par HAMMER_EXTRA_ARGS="--stop_after_step extraction"
       make redo-par HAMMER_EXTRA_ARGS="--start_before_step extraction"
 
-      # the following two commands are equivalent because the extraction 
+      # the following two commands are equivalent because the extraction
       #   step immediately precedes the write_design step
       make redo-par HAMMER_EXTRA_ARGS="--start_after_step extraction"
       make redo-par HAMMER_EXTRA_ARGS="--start_before_step write_design"

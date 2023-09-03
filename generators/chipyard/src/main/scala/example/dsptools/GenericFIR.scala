@@ -3,7 +3,6 @@
 package chipyard.example
 
 import chisel3._
-import chisel3.experimental.FixedPoint
 import chisel3.util._
 import dspblocks._
 import dsptools.numbers._
@@ -12,6 +11,8 @@ import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
+import fixedpoint._
+import fixedpoint.{fromIntToBinaryPoint, fromSIntToFixedPoint, fromUIntToFixedPoint}
 
 // FIR params
 case class GenericFIRParams(
@@ -56,7 +57,7 @@ object GenericFIRIO {
 
 // A generic FIR filter
 // DOC include start: GenericFIR chisel
-class GenericFIR[T<:Data:Ring](genIn:T, genOut:T, coeffs: Seq[T]) extends Module {
+class GenericFIR[T<:Data:Ring](genIn:T, genOut:T, coeffs: => Seq[T]) extends Module {
   val io = IO(GenericFIRIO(genIn, genOut))
 
   // Construct a vector of genericFIRDirectCells
@@ -139,7 +140,7 @@ abstract class GenericFIRBlock[D, U, EO, EI, B<:Data, T<:Data:Ring]
 (
   genIn: T,
   genOut: T,
-  coeffs: Seq[T]
+  coeffs: => Seq[T]
 )(implicit p: Parameters) extends DspBlock[D, U, EO, EI, B] {
   val streamNode = AXI4StreamIdentityNode()
   val mem = None
@@ -175,7 +176,7 @@ class TLGenericFIRBlock[T<:Data:Ring]
 (
   val genIn: T,
   val genOut: T,
-  coeffs: Seq[T]
+  coeffs: => Seq[T]
 )(implicit p: Parameters) extends
 GenericFIRBlock[TLClientPortParameters, TLManagerPortParameters, TLEdgeOut, TLEdgeIn, TLBundle, T](
     genIn, genOut, coeffs
@@ -183,7 +184,7 @@ GenericFIRBlock[TLClientPortParameters, TLManagerPortParameters, TLEdgeOut, TLEd
 // DOC include end: TLGenericFIRBlock chisel
 
 // DOC include start: TLGenericFIRChain chisel
-class TLGenericFIRChain[T<:Data:Ring] (genIn: T, genOut: T, coeffs: Seq[T], params: GenericFIRParams)(implicit p: Parameters)
+class TLGenericFIRChain[T<:Data:Ring] (genIn: T, genOut: T, coeffs: => Seq[T], params: GenericFIRParams)(implicit p: Parameters)
   extends TLChain(Seq(
     TLWriteQueue(params.depth, AddressSet(params.writeAddress, 0xff))(_),
     { implicit p: Parameters =>
@@ -201,7 +202,7 @@ trait CanHavePeripheryStreamingFIR extends BaseSubsystem {
       val streamingFIR = LazyModule(new TLGenericFIRChain(
         genIn = FixedPoint(8.W, 3.BP),
         genOut = FixedPoint(8.W, 3.BP),
-        coeffs = Seq(1.F(0.BP), 2.F(0.BP), 3.F(0.BP)),
+        coeffs = Seq(1.U.asFixedPoint(0.BP), 2.U.asFixedPoint(0.BP), 3.U.asFixedPoint(0.BP)),
         params = params))
       pbus.coupleTo("streamingFIR") { streamingFIR.mem.get := TLFIFOFixer() := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
       Some(streamingFIR)

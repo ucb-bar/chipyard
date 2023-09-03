@@ -90,7 +90,7 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
 class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessInstantiators {
   val vc707Outer = _outer
 
-  val reset = IO(Input(Bool()))
+  val reset = IO(Input(Bool())).suggestName("reset")
   _outer.xdc.addBoardPin(reset, "reset")
 
   val resetIBUF = Module(new IBUF)
@@ -107,6 +107,8 @@ class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModul
   }
 
   _outer.pllReset := (resetIBUF.io.O || powerOnReset || ereset)
+
+  _outer.ledModule.foreach(_ := DontCare)
 
   // reset setup
   val hReset = Wire(Reset())

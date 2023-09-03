@@ -5,10 +5,10 @@ import chisel3._
 import chisel3.util.{log2Up}
 
 import org.chipsalliance.cde.config.{Config}
-import freechips.rocketchip.devices.tilelink.{BootROMLocated, PLICKey}
+import freechips.rocketchip.devices.tilelink.{BootROMLocated, PLICKey, CLINTKey}
 import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI, JtagDTMKey, JtagDTMConfig}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
-import freechips.rocketchip.stage.phases.TargetDirKey
+import chipyard.stage.phases.TargetDirKey
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile.{XLen}
 
@@ -23,7 +23,7 @@ import chipyard.{ExtTLMem}
 
 /**
   * Config fragment for adding a BootROM to the SoC
-  * 
+  *
   * @param address the address of the BootROM device
   * @param size the size of the BootROM
   * @param hang the power-on reset vector, i.e. the program counter will be set to this value on reset
@@ -42,7 +42,7 @@ class WithBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigInt =
 // DOC include start: gpio config fragment
 /**
  * Config fragment for adding a GPIO peripheral device to the SoC
- * 
+ *
  * @param address the address of the GPIO device
  * @param width the number of pins of the GPIO device
  */
@@ -65,13 +65,17 @@ class WithNoUART extends Config((site, here, up) => {
   * @param address the address of the UART device
   * @param baudrate the baudrate of the UART device
   */
-class WithUART(address: BigInt = 0x10020000, baudrate: BigInt = 115200) extends Config ((site, here, up) => {
+class WithUART(baudrate: BigInt = 115200, address: BigInt = 0x10020000) extends Config ((site, here, up) => {
   case PeripheryUARTKey => up(PeripheryUARTKey) ++ Seq(
     UARTParams(address = address, nTxEntries = 256, nRxEntries = 256, initBaudRate = baudrate))
 })
 
 class WithUARTFIFOEntries(txEntries: Int, rxEntries: Int) extends Config((site, here, up) => {
   case PeripheryUARTKey => up(PeripheryUARTKey).map(_.copy(nTxEntries = txEntries, nRxEntries = rxEntries))
+})
+
+class WithUARTInitBaudRate(baudrate: BigInt = 115200) extends Config ((site, here, up) => {
+  case PeripheryUARTKey => up(PeripheryUARTKey).map(_.copy(initBaudRate=baudrate))
 })
 
 /**
@@ -81,7 +85,7 @@ class WithUARTFIFOEntries(txEntries: Int, rxEntries: Int) extends Config((site, 
   * @param fAddress the address of the Execute-in-Place (XIP) region of the SPI flash memory
   * @param size the size of the Execute-in-Place (XIP) region of the SPI flash memory
   */
-class WithSPIFlash(address: BigInt = 0x10030000, fAddress: BigInt = 0x20000000, size: BigInt = 0x10000000) extends Config((site, here, up) => {
+class WithSPIFlash(size: BigInt = 0x10000000, address: BigInt = 0x10030000, fAddress: BigInt = 0x20000000) extends Config((site, here, up) => {
   // Note: the default size matches freedom with the addresses below
   case PeripherySPIFlashKey => up(PeripherySPIFlashKey) ++ Seq(
     SPIFlashParams(rAddress = address, fAddress = fAddress, fSize = size))
@@ -147,4 +151,20 @@ class WithNoPLIC extends Config((site, here, up) => {
 
 class WithDebugModuleAbstractDataWords(words: Int = 16) extends Config((site, here, up) => {
   case DebugModuleKey => up(DebugModuleKey).map(_.copy(nAbstractDataWords=words))
+})
+
+class WithNoCLINT extends Config((site, here, up) => {
+  case CLINTKey => None
+})
+
+class WithNoBootROM extends Config((site, here, up) => {
+  case BootROMLocated(_) => None
+})
+
+class WithNoBusErrorDevices extends Config((site, here, up) => {
+  case SystemBusKey => up(SystemBusKey).copy(errorDevice = None)
+  case ControlBusKey => up(ControlBusKey).copy(errorDevice = None)
+  case PeripheryBusKey => up(PeripheryBusKey).copy(errorDevice = None)
+  case MemoryBusKey => up(MemoryBusKey).copy(errorDevice = None)
+  case FrontBusKey => up(FrontBusKey).copy(errorDevice = None)
 })

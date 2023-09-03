@@ -21,29 +21,17 @@ import chipyard.iobinders.JTAGChipIO
 import testchipip._
 
 class WithArty100TUARTTSI(uartBaudRate: BigInt = 115200) extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: HasHarnessInstantiators, ports: Seq[ClockedIO[SerialIO]]) => {
+  (system: CanHavePeripheryUARTTSI, th: HasHarnessInstantiators, ports: Seq[UARTTSIIO]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    require(ports.size <= 1)
+    val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     ports.map({ port =>
-      val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
-      val freq = p(PeripheryBusKey).dtsFrequency.get
-      val bits = port.bits
-      port.clock := th.harnessBinderClock
-      val ram = TSIHarness.connectRAM(system.serdesser.get, bits, th.harnessBinderReset)
-      val uart_to_serial = Module(new UARTToSerial(
-        freq, UARTParams(0, initBaudRate=uartBaudRate)))
-      val serial_width_adapter = Module(new SerialWidthAdapter(
-        narrowW = 8, wideW = TSI.WIDTH))
-      serial_width_adapter.io.narrow.flipConnect(uart_to_serial.io.serial)
-
-      ram.module.io.tsi.flipConnect(serial_width_adapter.io.wide)
-
-      ath.io_uart_bb.bundle <> uart_to_serial.io.uart
-      ath.other_leds(1) := uart_to_serial.io.dropped
-
-      ath.other_leds(9) := ram.module.io.tsi2tl_state(0)
-      ath.other_leds(10) := ram.module.io.tsi2tl_state(1)
-      ath.other_leds(11) := ram.module.io.tsi2tl_state(2)
-      ath.other_leds(12) := ram.module.io.tsi2tl_state(3)
+      ath.io_uart_bb.bundle <> port.uart
+      ath.other_leds(1) := port.dropped
+      ath.other_leds(9) := port.tsi2tl_state(0)
+      ath.other_leds(10) := port.tsi2tl_state(1)
+      ath.other_leds(11) := port.tsi2tl_state(2)
+      ath.other_leds(12) := port.tsi2tl_state(3)
     })
   }
 })

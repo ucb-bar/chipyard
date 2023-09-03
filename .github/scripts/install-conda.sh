@@ -3,7 +3,7 @@
 export HOME="${HOME:-/root}"
 
 CONDA_INSTALL_PREFIX=/opt/conda
-CONDA_INSTALLER_VERSION=22.11.1-4
+CONDA_INSTALLER_VERSION=23.1.0-1
 CONDA_INSTALLER="https://github.com/conda-forge/miniforge/releases/download/${CONDA_INSTALLER_VERSION}/Miniforge3-${CONDA_INSTALLER_VERSION}-Linux-x86_64.sh"
 CONDA_CMD="conda" # some installers install mamba or micromamba
 
@@ -145,15 +145,16 @@ else
     $SUDO bash ./install_conda.sh -b -p "$CONDA_INSTALL_PREFIX" $conda_install_extra
     rm ./install_conda.sh
 
+    # get most up-to-date conda version
+    "${DRY_RUN_ECHO[@]}" $SUDO "$CONDA_EXE" update $DRY_RUN_OPTION -y -n base -c conda-forge conda
+
     # see https://conda-forge.org/docs/user/tipsandtricks.html#multiple-channels
     # for more information on flexible channel_priority
     "${DRY_RUN_ECHO[@]}" $SUDO "$CONDA_EXE" config --system --set channel_priority flexible
     # By default, don't mess with people's PS1, I personally find it annoying
     "${DRY_RUN_ECHO[@]}" $SUDO "$CONDA_EXE" config --system --set changeps1 false
-    # don't automatically activate the 'base' environment when intializing shells
+    # don't automatically activate the 'base' environment when initializing shells
     "${DRY_RUN_ECHO[@]}" $SUDO "$CONDA_EXE" config --system --set auto_activate_base false
-    # don't automatically update conda to avoid https://github.com/conda-forge/conda-libmamba-solver-feedstock/issues/2
-    "${DRY_RUN_ECHO[@]}" $SUDO "$CONDA_EXE" config --system --set auto_update_conda false
     # automatically use the ucb-bar channel for specific packages https://anaconda.org/ucb-bar/repo
     "${DRY_RUN_ECHO[@]}" $SUDO "$CONDA_EXE" config --system --add channels ucb-bar
 

@@ -138,4 +138,3 @@ rm -rf mem.0x80000000.bin
 
 riscv64-unknown-elf-ld -Tdata=0x80000000 -nmagic --defsym tohost=0x$TOHOST --defsym fromhost=0x$FROMHOST -o $LOADMEM_ELF $RAWMEM_ELF
 rm -rf $RAWMEM_ELF
-

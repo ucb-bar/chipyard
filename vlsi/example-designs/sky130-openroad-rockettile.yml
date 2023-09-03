@@ -1,7 +1,7 @@
 # Override configurations in ../example-sky130.yml and example-designs
 
 # Specify clock signals
-# Rocket/RocketTile names clock signal "clock" instead of "clock_clock"
+# Rocket/RocketTile names clock signal "clock" instead of "clock_uncore_clock"
 vlsi.inputs.clocks: [
   {name: "clock", period: "30ns", uncertainty: "3ns"}
 ]
@@ -44,7 +44,7 @@ vlsi.inputs.placement_constraints:
     x: 50
     y: 1250
     orientation: r90
- 
+
   # tag array
   - path: "RocketTile/frontend/icache/tag_array_0/tag_array_0_ext/mem_0_0"
     type: hardmacro

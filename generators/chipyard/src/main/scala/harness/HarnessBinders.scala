@@ -30,9 +30,7 @@ import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvon
 
 import scala.reflect.{ClassTag}
 
-case object HarnessBinders extends Field[Map[String, (Any, HasHarnessInstantiators, Seq[Data]) => Unit]](
-  Map[String, (Any, HasHarnessInstantiators, Seq[Data]) => Unit]().withDefaultValue((t: Any, th: HasHarnessInstantiators, d: Seq[Data]) => ())
-)
+case object HarnessBinders extends Field[HarnessBinderMap](HarnessBinderMapDefault)
 
 object ApplyHarnessBinders {
   def apply(th: HasHarnessInstantiators, sys: LazyModule, portMap: Map[String, Seq[Data]])(implicit p: Parameters): Unit = {
@@ -51,12 +49,8 @@ class HarnessBinder[T, S <: HasHarnessInstantiators, U <: Data](composer: ((T, S
         val pts = ports.collect({case p: U => p})
         require (pts.length == ports.length, s"Port type mismatch between IOBinder and HarnessBinder: ${portTag}")
         val upfn = up(HarnessBinders, site)(systemTag.runtimeClass.toString)
-        th match {
-          case th: S =>
-            t match {
-              case system: T => composer(upfn)(system, th, pts)
-              case _ =>
-            }
+        (th, t) match {
+          case (th: S, system: T) => composer(upfn)(system, th, pts)
           case _ =>
         }
       })
@@ -296,7 +290,9 @@ class WithSerialTLTiedOff extends OverrideHarnessBinder({
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
       val bits = port.bits
-      port.clock := false.B.asClock
+      if (DataMirror.directionOf(port.clock) == Direction.Input) {
+        port.clock := false.B.asClock
+      }
       port.bits.out.ready := false.B
       port.bits.in.valid := false.B
       port.bits.in.bits := DontCare
@@ -317,21 +313,34 @@ class WithSimTSIOverSerialTL extends OverrideHarnessBinder({
   }
 })
 
-class WithUARTSerial extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: HasHarnessInstantiators, ports: Seq[ClockedIO[SerialIO]]) => {
+class WithSimUARTToUARTTSI extends OverrideHarnessBinder({
+  (system: CanHavePeripheryUARTTSI, th: HasHarnessInstantiators, ports: Seq[UARTTSIIO]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    require(ports.size <= 1)
+    ports.map { port => {
+      UARTAdapter.connect(Seq(port.uart),
+        baudrate=port.uartParams.initBaudRate,
+        clockFrequency=th.getHarnessBinderClockFreqHz.toInt,
+        forcePty=true)
+      assert(!port.dropped)
+    }}
+  }
+})
+
+class WithSimTSIToUARTTSI extends OverrideHarnessBinder({
+  (system: CanHavePeripheryUARTTSI, th: HasHarnessInstantiators, ports: Seq[UARTTSIIO]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    require(ports.size <= 1)
     ports.map({ port =>
-      val freq = p(PeripheryBusKey).dtsFrequency.get
-      val bits = port.bits
-      port.clock := th.harnessBinderClock
-      val ram = TSIHarness.connectRAM(system.serdesser.get, bits, th.harnessBinderReset)
-      val uart_to_serial = Module(new UARTToSerial(freq, UARTParams(0)))
-      val serial_width_adapter = Module(new SerialWidthAdapter(
-        8, TSI.WIDTH))
-      ram.module.io.tsi.flipConnect(serial_width_adapter.io.wide)
-      UARTAdapter.connect(Seq(uart_to_serial.io.uart), uart_to_serial.div)
+      val freq = th.getHarnessBinderClockFreqHz.toInt
+      val uart_to_serial = Module(new UARTToSerial(freq, port.uartParams))
+      val serial_width_adapter = Module(new SerialWidthAdapter(8, TSI.WIDTH))
+      val success = SimTSI.connect(Some(TSIIO(serial_width_adapter.io.wide)), th.harnessBinderClock, th.harnessBinderReset)
+      when (success) { th.success := true.B }
+      assert(!uart_to_serial.io.dropped)
       serial_width_adapter.io.narrow.flipConnect(uart_to_serial.io.serial)
-      th.success := false.B
+      uart_to_serial.io.uart.rxd := port.uart.txd
+      port.uart.rxd := uart_to_serial.io.uart.txd
     })
   }
 })
@@ -356,6 +365,8 @@ class WithCospike extends ComposeHarnessBinder({
     val tiles = chipyardSystem.tiles
     val cfg = SpikeCosimConfig(
       isa = tiles.headOption.map(_.isaDTS).getOrElse(""),
+      vlen = tiles.headOption.map(_.tileParams.core.vLen).getOrElse(0),
+      priv = tiles.headOption.map(t => if (t.usingUser) "MSU" else if (t.usingSupervisor) "MS" else "M").getOrElse(""),
       mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0)),
       mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
       pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0),
@@ -385,7 +396,7 @@ class WithClockAndResetFromHarness extends OverrideHarnessBinder({
         val clock = th.harnessClockInstantiator.requestClockMHz(s"clock_${c.freqMHz.toInt}MHz", c.freqMHz)
         c.clock := clock
       }
-      case r: AsyncReset => r := th.harnessBinderReset.asAsyncReset
+      case r: AsyncReset => r := th.referenceReset.asAsyncReset
     })
   }
 })

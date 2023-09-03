@@ -93,7 +93,7 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
 class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessInstantiators {
   val vcu118Outer = _outer
 
-  val reset = IO(Input(Bool()))
+  val reset = IO(Input(Bool())).suggestName("reset")
   _outer.xdc.addPackagePin(reset, "L19")
   _outer.xdc.addIOStandard(reset, "LVCMOS12")
 

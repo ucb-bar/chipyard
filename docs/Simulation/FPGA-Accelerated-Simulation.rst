@@ -26,9 +26,9 @@ Finally, source the following environment at the root of the FireSim directory:
 
     cd sims/firesim
     # (Recommended) The default manager environment (includes env.sh)
-    source sourceme-f1-manager.sh
+    source sourceme-manager.sh
 
-.. Note:: Every time you want to use FireSim with a fresh shell, you must source this ``sourceme-f1-manager.sh``
+.. Note:: Every time you want to use FireSim with a fresh shell, you must source ``sourceme-manager.sh``
 
 At this point you're ready to use FireSim with Chipyard. If you're not already
 familiar with FireSim, please return to the :fsim_doc:`FireSim Docs <Initial-Setup/Setting-up-your-Manager-Instance.html#completing-setup-using-the-manager>`,

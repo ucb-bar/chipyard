@@ -21,4 +21,3 @@ Take the following example:
     :end-before: DOC include end: HarnessClockInstantiatorEx
 
 Here you can see the ``th.harnessClockInstantiator`` is used to request a clock and reset at ``memFreq`` frequency.
-

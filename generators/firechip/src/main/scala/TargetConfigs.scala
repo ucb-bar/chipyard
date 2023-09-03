@@ -92,7 +92,7 @@ class WithFireSimDesignTweaks extends Config(
   // Optional: reduce the width of the Serial TL interface
   new testchipip.WithSerialTLWidth(4) ++
   // Required*: Scale default baud rate with periphery bus frequency
-  new chipyard.config.WithUART(BigInt(3686400L)) ++
+  new chipyard.config.WithUARTInitBaudRate(BigInt(3686400L)) ++
   // Optional: Adds IO to attach tracerV bridges
   new chipyard.config.WithTraceIO ++
   // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 32 GiB on F1)
@@ -241,7 +241,7 @@ class FireSimSmallSystemConfig extends Config(
   new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++
   new testchipip.WithDefaultSerialTL ++
   new testchipip.WithBlockDevice ++
-  new chipyard.config.WithUART ++
+  new chipyard.config.WithUARTInitBaudRate(BigInt(3686400L)) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nWays = 2, capacityKB = 64) ++
   new chipyard.RocketConfig)
 

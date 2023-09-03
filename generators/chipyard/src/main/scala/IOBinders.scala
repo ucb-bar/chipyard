@@ -225,6 +225,7 @@ class WithExtInterruptIOCells extends OverrideIOBinder({
       val (port: UInt, cells) = IOCell.generateIOFromSignal(system.interrupts, "ext_interrupts", system.p(IOCellKey), abstractResetAsAsync = true)
       (Seq(port), cells)
     } else {
+      system.interrupts := DontCare // why do I have to drive this 0-wide wire???
       (Nil, Nil)
     }
   }
@@ -300,6 +301,15 @@ class WithSerialTLIOCells extends OverrideIOBinder({
     val sys = system.asInstanceOf[BaseSubsystem]
     val (port, cells) = IOCell.generateIOFromSignal(s.getWrappedValue, "serial_tl", sys.p(IOCellKey), abstractResetAsAsync = true)
     (Seq(port), cells)
+  }).getOrElse((Nil, Nil))
+})
+
+class WithSerialTLPunchthrough extends OverrideIOBinder({
+  (system: CanHavePeripheryTLSerial) => system.serial_tl.map({ s =>
+    val sys = system.asInstanceOf[BaseSubsystem]
+    val port = IO(s.getWrappedValue.cloneType)
+    port <> s.getWrappedValue
+    (Seq(port), Nil)
   }).getOrElse((Nil, Nil))
 })
 
@@ -411,6 +421,15 @@ class WithCustomBootPin extends OverrideIOBinder({
   }).getOrElse((Nil, Nil))
 })
 
+class WithUARTTSIPunchthrough extends OverrideIOBinder({
+  (system: CanHavePeripheryUARTTSI) => system.uart_tsi.map({ p =>
+    val sys = system.asInstanceOf[BaseSubsystem]
+    val uart_tsi = IO(new UARTTSIIO(p.uartParams))
+    uart_tsi <> p
+    (Seq(uart_tsi), Nil)
+  }).getOrElse((Nil, Nil))
+})
+
 class WithTLMemPunchthrough extends OverrideIOBinder({
   (system: CanHaveMasterTLMemPort) => {
     val io_tl_mem_pins_temp = IO(DataMirror.internal.chiselTypeClone[HeterogeneousBag[TLBundle]](system.mem_tl)).suggestName("tl_slave")
@@ -424,4 +443,13 @@ class WithDontTouchPorts extends OverrideIOBinder({
   (system: DontTouch) => system.dontTouchPorts(); (Nil, Nil)
 })
 
-
+class WithNMITiedOff extends ComposeIOBinder({
+  (system: HasTilesModuleImp) => {
+    system.nmi.flatten.foreach { nmi =>
+      nmi.rnmi := false.B
+      nmi.rnmi_interrupt_vector := 0.U
+      nmi.rnmi_exception_vector := 0.U
+    }
+    (Nil, Nil)
+  }
+})

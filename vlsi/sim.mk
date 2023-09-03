@@ -21,7 +21,7 @@ $(SIM_CONF): $(sim_common_files) check-binary
 	done
 	echo "  options_meta: 'append'" >> $@
 	echo "  defines:" >> $@
-	for x in $(subst +define+,,$(PREPROC_DEFINES)); do \
+	for x in $(subst +define+,,$(SIM_PREPROC_DEFINES)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  defines_meta: 'append'" >> $@
@@ -75,7 +75,7 @@ $(SIM_TIMING_CONF): $(sim_common_files)
 	echo "sim.inputs:" > $@
 	echo "  defines: ['NTC']" >> $@
 	echo "  defines_meta: 'append'" >> $@
-	echo "  timing_annotated: 'true'" >> $@
+	echo "  timing_annotated: true" >> $@
 
 # Update hammer top-level sim targets to include our generated sim configs
 redo-sim-rtl: $(SIM_CONF)
