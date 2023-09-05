@@ -91,7 +91,7 @@ class ExampleChipConfig extends Config(
   // ==================================
   // External memory section
   new testchipip.WithSerialTLClientIdBits(4) ++                     // support up to 1 << 4 simultaneous requests from serialTL port
-  new testchipip.WithSerialTLWidth(32) ++                           // fatten the serialTL interface to improve testing performance
+  new testchipip.WithSerialTLWidth(4) ++                           // fatten the serialTL interface to improve testing performance
   new testchipip.WithDefaultSerialTL ++                             // use serialized tilelink port to external serialadapter/harnessRAM
 
   new testchipip.WithMbusScratchpad(base = 0x08000000) ++       // use rocket l1 DCache scratchpad as base phys mem
@@ -109,7 +109,6 @@ class ExampleChipConfig extends Config(
   // ==================================
   // Debug settings
   new chipyard.config.WithJTAGDTMKey(idcodeVersion = 2, partNum = 0x000, manufId = 0x489, debugIdleCycles = 5) ++
-  new freechips.rocketchip.subsystem.WithNBreakpoints(2) ++
   new freechips.rocketchip.subsystem.WithNBreakpoints(2) ++
   new freechips.rocketchip.subsystem.WithJtagDTM ++                 // set the debug module to expose a JTAG port
 
