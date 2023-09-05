@@ -9,7 +9,7 @@
 # To update a single package to the latest version compatible with the version constraints in the source:
 #     conda-lock lock --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml --update PACKAGE
 # To re-solve the entire environment, e.g. after changing a version constraint in the source file:
-#     conda-lock -f /scratch/abejgonza/cy/conda-reqs/chipyard.yaml -f /scratch/abejgonza/cy/conda-reqs/riscv-tools.yaml -f /scratch/abejgonza/cy-check/conda-reqs/chipyard.yaml -f /scratch/abejgonza/cy-check/conda-reqs/riscv-tools.yaml -f /scratch/abejgonza/new-cy/conda-reqs/chipyard.yaml -f /scratch/abejgonza/new-cy/conda-reqs/riscv-tools.yaml --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml
+#     conda-lock -f /scratch/abejgonza/cy/conda-reqs/chipyard.yaml -f /scratch/abejgonza/cy/conda-reqs/riscv-tools.yaml --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml
 metadata:
   channels:
   - url: ucb-bar
@@ -21,16 +21,12 @@ metadata:
   - url: nodefaults
     used_env_vars: []
   content_hash:
-    linux-64: c21b046554fff6a17a993f763664cc9d9994650e380510f7391ababd82f27219
+    linux-64: 0335b8b27ccf73c4f8f9b753f8248f87111cbb6e79860d1ffb1171841f5e264d
   platforms:
   - linux-64
   sources:
   - /scratch/abejgonza/cy/conda-reqs/chipyard.yaml
   - /scratch/abejgonza/cy/conda-reqs/riscv-tools.yaml
-  - /scratch/abejgonza/cy-check/conda-reqs/chipyard.yaml
-  - /scratch/abejgonza/cy-check/conda-reqs/riscv-tools.yaml
-  - /scratch/abejgonza/new-cy/conda-reqs/chipyard.yaml
-  - /scratch/abejgonza/new-cy/conda-reqs/riscv-tools.yaml
 package:
 - category: main
   dependencies: {}
@@ -189,14 +185,14 @@ package:
 - category: main
   dependencies: {}
   hash:
-    md5: 0fde972b336190cd618fe158e7b8f295
-    sha256: b72044c8657645a8a8f7a7e1b8f37b552080cd67df06ef1054e34831677ca66d
+    md5: 212e31461947b52bde67eab980d73435
+    sha256: 7a2701c0d40d0f09c7192148df609e958c2e5a3fea367f4fee3e0b5f427d8375
   manager: conda
   name: open_pdks.sky130a
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/litex-hub/noarch/open_pdks.sky130a-1.0.423_0_g1604945-20230709_210322.tar.bz2
-  version: 1.0.423_0_g1604945
+  url: https://conda.anaconda.org/litex-hub/noarch/open_pdks.sky130a-1.0.424_0_g78b7bc3-20230709_210322.tar.bz2
+  version: 1.0.424_0_g78b7bc3
 - category: main
   dependencies: {}
   hash:
@@ -2888,14 +2884,14 @@ package:
   dependencies:
     python: '>=3.6'
   hash:
-    md5: e8fbc1b54b25f4b08281467bc13b70cc
-    sha256: 4acc7151cef5920d130f2e0a7615559cce8bfb037aeecb14d4d359ae3d9bc51b
+    md5: d3ed087d1f7f8f5590e8e87b57a8ce64
+    sha256: 18e3bd52c64f23bbc7c200fd2fc4152dd29423936dc43e8f129cb43f1af0136c
   manager: conda
   name: pyparsing
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.0.9-pyhd8ed1ab_0.tar.bz2
-  version: 3.0.9
+  url: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.1.0-pyhd8ed1ab_0.conda
+  version: 3.1.0
 - category: main
   dependencies:
     libgcc-ng: '>=12'
@@ -3632,14 +3628,14 @@ package:
     python_abi: 3.10.* *_cp310
     unicodedata2: '>=14.0.0'
   hash:
-    md5: d3d83b419c81ac718a9221442707882b
-    sha256: e5d22bcf75a4414d84000a3d905c70d4d2a1db96c0dfbf5a89169817351b2bb7
+    md5: 606aea800172f81896b21cabc5575206
+    sha256: b9e1a3b84c670fab1c491b29c6b36f630aa520f45f08a44440851f46750d85c1
   manager: conda
   name: fonttools
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/fonttools-4.40.0-py310h2372a71_0.conda
-  version: 4.40.0
+  url: https://conda.anaconda.org/conda-forge/linux-64/fonttools-4.41.0-py310h2372a71_0.conda
+  version: 4.41.0
 - category: main
   dependencies:
     python: '>=3.4'
@@ -4264,20 +4260,20 @@ package:
     numpy: '>=1.21.6,<2.0a0'
     packaging: '>=20.0'
     pillow: '>=6.2.0'
-    pyparsing: '>=2.3.1,<3.1'
+    pyparsing: '>=2.3.1'
     python: '>=3.10,<3.11.0a0'
     python-dateutil: '>=2.7'
     python_abi: 3.10.* *_cp310
     tk: '>=8.6.12,<8.7.0a0'
   hash:
-    md5: 9b55c9041c5a7f80f184a2cb05ec9663
-    sha256: 28ff078d33e18b52a455d58d24ab7b959b4db98411470afd5869f30fbb54250b
+    md5: 68b2dd34c69d08b05a9db5e3596fe3ee
+    sha256: d2be8ac0a90aa12ba808f8777d1837b5aa983fc3c7c60c600e8fe6bd9352541c
   manager: conda
   name: matplotlib-base
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/matplotlib-base-3.7.2-py310hf38f957_0.conda
-  version: 3.7.2
+  url: https://conda.anaconda.org/conda-forge/linux-64/matplotlib-base-3.7.1-py310he60537e_0.conda
+  version: 3.7.1
 - category: main
   dependencies:
     libgcc-ng: '>=12'
@@ -5456,14 +5452,14 @@ package:
 - category: main
   dependencies: {}
   hash:
-    sha256: 0e0bc5ba78b8db3667ad636d964eb963dc97a59f04c6f6214c5f0e4a8f726c56
+    sha256: 18c694e5ae8a208cdb3d2c20a993ca1a7b0efa258c247a1e565150f477f83744
   manager: pip
   name: mock
   optional: false
   platform: linux-64
   source: null
-  url: https://files.pythonhosted.org/packages/27/6f/fbb16f260a7107ee98871d83f6793d88c4311b7189b10ef239da0b2181db/mock-5.0.2-py3-none-any.whl
-  version: 5.0.2
+  url: https://files.pythonhosted.org/packages/6b/20/471f41173930550f279ccb65596a5ac19b9ac974a8d93679bcd3e0c31498/mock-5.1.0-py3-none-any.whl
+  version: 5.1.0
 - dependencies: {}
   hash:
     sha256: f84fbc98b019fef2ee9a1cb3ce93e3187a6df0b2538a651bfb890254ba9f90b5
@@ -5524,14 +5520,14 @@ package:
   dependencies:
     ruamel.yaml.clib: '>=0.2.7'
   hash:
-    sha256: 25d0ee82a0a9a6f44683dcf8c282340def4074a4562f3a24f55695bb254c1693
+    sha256: 23cd2ed620231677564646b0c6a89d138b6822a0d78656df7abda5879ec4f447
   manager: pip
   name: ruamel.yaml
   optional: false
   platform: linux-64
   source: null
-  url: https://files.pythonhosted.org/packages/23/33/dbc62343de0cf92e0f9c15bc0a287bdaea0953f1cadca0480c78d5ac6641/ruamel.yaml-0.17.26-py3-none-any.whl
-  version: 0.17.26
+  url: https://files.pythonhosted.org/packages/d9/0e/2a05efa11ea33513fbdf4a2e2576fe94fd8fa5ad226dbb9c660886390974/ruamel.yaml-0.17.32-py3-none-any.whl
+  version: 0.17.32
 - category: main
   dependencies:
     mock: '*'
@@ -5566,14 +5562,14 @@ package:
     pyyaml: '>=6.0,<7.0'
     ruamel.yaml: '>=0.17.21,<0.18.0'
   hash:
-    sha256: f4fb4dd5f7fac1f2206a25d0949024046fe8f855198e8edbd5206fa9d58ab05f
+    sha256: 47f1fc5904756b01d46a8d23a4f3950382086b716138e21a027cd44dc5101f27
   manager: pip
   name: hammer-vlsi
   optional: false
   platform: linux-64
   source: null
-  url: https://files.pythonhosted.org/packages/0a/da/1897421311c6332655e2f73d02d8c914ecb724198a1988aacd8f4c61ae6e/hammer_vlsi-1.1.1-py3-none-any.whl
-  version: 1.1.1
+  url: https://files.pythonhosted.org/packages/30/e4/37b77c7921b80d58d8b2a325c031e75d656319b676e7fd4555e02b651a9d/hammer_vlsi-1.1.2-py3-none-any.whl
+  version: 1.1.2
 - category: main
   dependencies:
     asttokens: '>=2,<3'

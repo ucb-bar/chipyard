@@ -1,10 +1,11 @@
 # Tool options. Replace with your tool plugin of choice.
 vlsi.core.build_system: make
-# Yosys
+# Synthesis: Yosys
 vlsi.core.synthesis_tool: "hammer.synthesis.yosys"
-# OpenROAD
+# Place-and-Route: OpenROAD
 vlsi.core.par_tool: "hammer.par.openroad"
-# Magic
-vlsi.core.drc_tool: "hammer.drc.magic"
-# Netgen
+# DRC: KLayout or Magic (comment other one out)
+vlsi.core.drc_tool: "hammer.drc.klayout"
+# vlsi.core.drc_tool: "hammer.drc.magic"
+# LVS: Netgen
 vlsi.core.lvs_tool: "hammer.lvs.netgen"
