@@ -9,7 +9,7 @@ import chisel3.util.experimental.BoringUtils
 
 import org.chipsalliance.cde.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
-import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebug}
+import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebug, ExportDebug, DMI}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile.{RocketTile}
@@ -178,11 +178,25 @@ class WithTracerVBridge extends ComposeHarnessBinder({
   }
 })
 
-class WithDromajoBridge extends ComposeHarnessBinder({
-  (system: CanHaveTraceIOModuleImp, th: FireSim, ports: Seq[TraceOutputTop]) =>
-    ports.map { p => p.traces.map(tileTrace => DromajoBridge(tileTrace)(system.p)) }; Nil
+class WithCospikeBridge extends ComposeHarnessBinder({
+  (system: CanHaveTraceIOModuleImp, th: FireSim, ports: Seq[TraceOutputTop]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    val chipyardSystem = system.asInstanceOf[ChipyardSystemModule[_]].outer.asInstanceOf[ChipyardSystem]
+    val tiles = chipyardSystem.tiles
+    val cfg = SpikeCosimConfig(
+      isa = tiles.headOption.map(_.isaDTS).getOrElse(""),
+      vlen = tiles.headOption.map(_.tileParams.core.vLen).getOrElse(0),
+      priv = tiles.headOption.map(t => if (t.usingUser) "MSU" else if (t.usingSupervisor) "MS" else "M").getOrElse(""),
+      mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0)),
+      mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
+      pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0),
+      nharts = tiles.size,
+      bootrom = chipyardSystem.bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse(""),
+      has_dtm = p(ExportDebug).protocols.contains(DMI) // assume that exposing clockeddmi means we will connect SimDTM
+    )
+    ports.map { p => p.traces.zipWithIndex.map(t => CospikeBridge(t._1, t._2, cfg)) }
+  }
 })
-
 
 class WithTraceGenBridge extends OverrideHarnessBinder({
   (system: TraceGenSystemModuleImp, th: FireSim, ports: Seq[Bool]) =>
