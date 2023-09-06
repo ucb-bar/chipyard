@@ -100,6 +100,6 @@ You can find the overnight options in `overnight/src/main/scala/main.scala` in t
 
 Firesim Debugging
 ---------------------------
-Chisel printfs, asserts, Dromajo co-simulation, and waveform generation are also available in FireSim
+Chisel printfs, asserts, Cospike co-simulation, and waveform generation are also available in FireSim
 FPGA-accelerated simulation. See the FireSim
 `documentation <https://docs.fires.im/en/latest/>`__ for more detail.

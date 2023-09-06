@@ -352,12 +352,6 @@ class WithTraceGenSuccess extends OverrideHarnessBinder({
   }
 })
 
-class WithSimDromajoBridge extends ComposeHarnessBinder({
-  (system: CanHaveTraceIOModuleImp, th: HasHarnessInstantiators, ports: Seq[TraceOutputTop]) => {
-    ports.map { p => p.traces.map(tileTrace => SimDromajoBridge(tileTrace)(system.p)) }
-  }
-})
-
 class WithCospike extends ComposeHarnessBinder({
   (system: CanHaveTraceIOModuleImp, th: HasHarnessInstantiators, ports: Seq[TraceOutputTop]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
