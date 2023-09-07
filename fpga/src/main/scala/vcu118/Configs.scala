@@ -77,6 +77,8 @@ class BoomVCU118Config extends Config(
 )
 
 class WithFPGAFrequency(fMHz: Double) extends Config(
+  new chipyard.harness.WithHarnessBinderClockFreqMHz(fMHz) ++
+  new chipyard.config.WithSystemBusFrequency(fMHz) ++
   new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.
   new chipyard.config.WithMemoryBusFrequency(fMHz)
 )
