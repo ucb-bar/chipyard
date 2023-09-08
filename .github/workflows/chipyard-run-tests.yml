@@ -62,122 +62,6 @@ jobs:
               - '**/.gitignore'
               - '.github/ISSUE_TEMPLATE/**'
 
-  commit-on-master-check:
-    name: commit-on-master-check
-    needs: change-filters
-    if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-ci-image:3f9150
-      options: --entrypoint /bin/bash
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Check commits of each submodule
-        run: |
-            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-            .github/scripts/check-commit.sh
-
-  tutorial-setup-check:
-    name: tutorial-setup-check
-    needs: change-filters
-    if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-ci-image:3f9150
-      options: --entrypoint /bin/bash
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Check that the tutorial-setup patches apply
-        run: |
-            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-            scripts/tutorial-setup.sh
-
-  documentation-check:
-    name: documentation-check
-    needs: change-filters
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-ci-image:3f9150
-      options: --entrypoint /bin/bash
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Check that documentation builds with no warnings/errors
-        run: |
-          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-          make -C docs html
-      - name: Show error log from sphinx if failed
-        if: ${{ failure() }}
-        run: cat /tmp/sphinx-err*.log
-
-  build-extra-tests:
-    name: build-extra-tests
-    needs: [change-filters]
-    if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-ci-image:3f9150
-      options: --entrypoint /bin/bash
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Generate keys
-        id: genkey
-        run: |
-          echo "extra-tests-cache-key=extra-tests-${{ github.sha }}" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v3
-        id: build-extra-tools-cache
-        with:
-          path: extra-tests-install
-          key: ${{ steps.genkey.outputs.extra-tests-cache-key }}
-          restore-keys: ${{ steps.genkey.outputs.extra-tests-cache-key }}
-      - name: Build extra tests
-        run: |
-            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-            .github/scripts/build-extra-tests.sh
-
   create-conda-env-jktgz:
     name: create-conda-env-jktgz
     needs: [change-filters, cancel-prior-workflows]
@@ -225,13 +109,117 @@ jobs:
   # When adding new prep jobs, please add them to `needs` below
   setup-complete:
     name: setup-complete
-    needs: [create-conda-env-jktgz, create-conda-env-jktqos, build-extra-tests]
+    needs: [create-conda-env-jktgz, create-conda-env-jktqos]
     runs-on: ubuntu-latest
     steps:
       - name: Set up complete
         run: echo Set up is complete!
 
   ##########################################################################
+
+  commit-on-master-check:
+    name: commit-on-master-check
+    needs: [setup-complete]
+    if: needs.change-filters.outputs.needs-rtl == 'true'
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Check commits of each submodule
+        run: |
+            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
+            .github/scripts/check-commit.sh
+
+  tutorial-setup-check:
+    name: tutorial-setup-check
+    needs: change-filters
+    if: needs.change-filters.outputs.needs-rtl == 'true'
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Check that the tutorial-setup patches apply
+        run: |
+            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
+            scripts/tutorial-setup.sh
+
+  documentation-check:
+    name: documentation-check
+    needs: change-filters
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Check that documentation builds with no warnings/errors
+        run: |
+          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
+          make -C docs html
+      - name: Show error log from sphinx if failed
+        if: ${{ failure() }}
+        run: cat /tmp/sphinx-err*.log
+
+  build-extra-tests:
+    name: build-extra-tests
+    needs: [change-filters]
+    if: needs.change-filters.outputs.needs-rtl == 'true'
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Generate keys
+        id: genkey
+        run: |
+          echo "extra-tests-cache-key=extra-tests-${{ github.sha }}" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v3
+        id: build-extra-tools-cache
+        with:
+          path: extra-tests-install
+          key: ${{ steps.genkey.outputs.extra-tests-cache-key }}
+          restore-keys: ${{ steps.genkey.outputs.extra-tests-cache-key }}
+      - name: Build extra tests
+        run: |
+            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
+            .github/scripts/build-extra-tests.sh
 
   prepare-chipyard-cores:
     name: prepare-chipyard-cores
