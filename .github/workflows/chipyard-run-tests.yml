@@ -142,7 +142,7 @@ jobs:
 
   tutorial-setup-check:
     name: tutorial-setup-check
-    needs: change-filters
+    needs: [setup-complete]
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: self-hosted
     steps:
@@ -165,7 +165,7 @@ jobs:
 
   documentation-check:
     name: documentation-check
-    needs: change-filters
+    needs: [setup-complete]
     runs-on: self-hosted
     steps:
       - name: Delete old checkout
@@ -190,7 +190,7 @@ jobs:
 
   build-extra-tests:
     name: build-extra-tests
-    needs: [change-filters]
+    needs: [setup-complete]
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: self-hosted
     steps:
