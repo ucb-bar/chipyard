@@ -11,6 +11,10 @@ class RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
 
+class RadianceConfig extends Config(
+  new freechips.rocketchip.subsystem.WithRadianceCores() ++
+  new chipyard.config.AbstractConfig)
+
 class TinyRocketConfig extends Config(
   new chipyard.iobinders.WithDontTouchIOBinders(false) ++         // TODO FIX: Don't dontTouch the ports
   new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++ // use incoherent bus topology
