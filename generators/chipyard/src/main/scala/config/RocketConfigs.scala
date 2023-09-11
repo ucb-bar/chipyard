@@ -13,7 +13,7 @@ class RocketConfig extends Config(
 
 class RadianceConfig extends Config(
   new freechips.rocketchip.subsystem.WithRadianceCores() ++
-  new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++ // use incoherent bus topology
+  new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++
   new freechips.rocketchip.subsystem.WithNoMemPort ++
   new testchipip.WithSbusScratchpad(banks=2) ++
   // new testchipip.WithMbusScratchpad(banks=2) ++
