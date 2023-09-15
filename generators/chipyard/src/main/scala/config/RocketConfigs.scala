@@ -1,8 +1,9 @@
 package chipyard
 
-import org.chipsalliance.cde.config.{Config}
-import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
-
+import org.chipsalliance.cde.config.{Config, Field}
+import freechips.rocketchip.diplomacy.AsynchronousCrossing
+import freechips.rocketchip.devices.tilelink.{RadianceArgsROMLocated, RadianceArgsROMParams}
+import freechips.rocketchip.subsystem.WithExtMemSize
 // --------------
 // Rocket Configs
 // --------------
@@ -11,12 +12,20 @@ class RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
 
+
+class WithRadArgsROM(filename: String) extends Config((site, here, up) => {
+  case RadianceArgsROMLocated() => up(RadianceArgsROMLocated()).map(_.copy(
+    contentFileName = filename))
+})
+
 class RadianceConfig extends Config(
   new freechips.rocketchip.subsystem.WithRadianceCores() ++
-  new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++
-  new freechips.rocketchip.subsystem.WithNoMemPort ++
-  new testchipip.WithSbusScratchpad(banks=2) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  // new freechips.rocketchip.subsystem.WithNoMemPort ++
+  // new testchipip.WithSbusScratchpad(banks=2) ++
   // new testchipip.WithMbusScratchpad(banks=2) ++
+  new WithExtMemSize(BigInt("80000000", 16)) ++
+  new WithRadArgsROM("sims/vcs/args.bin") ++
   new chipyard.config.AbstractConfig)
 
 class TinyRocketConfig extends Config(

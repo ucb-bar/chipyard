@@ -6,13 +6,14 @@
 package chipyard
 
 import chisel3._
-
-import org.chipsalliance.cde.config.{Parameters, Field}
+import org.chipsalliance.cde.config.{Field, Parameters}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.util.{DontTouch}
+import freechips.rocketchip.util.DontTouch
+
+import java.nio.file.Paths
 
 // ---------------------------------------------------------------------
 // Base system that uses the debug test module (dtm) to bringup the core
@@ -31,6 +32,7 @@ class ChipyardSystem(implicit p: Parameters) extends ChipyardSubsystem
 
   val bootROM  = p(BootROMLocated(location)).map { BootROM.attach(_, this, CBUS) }
   val maskROMs = p(MaskROMLocated(location)).map { MaskROM.attach(_, this, CBUS) }
+  p(RadianceArgsROMLocated()).foreach { BootROM.attachArgs(_, this, CBUS) }
 
   // If there is no bootrom, the tile reset vector bundle will be tied to zero
   if (bootROM.isEmpty) {
