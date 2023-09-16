@@ -12,7 +12,6 @@ class ChipLikeRocketConfig extends Config(
   //==================================
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ // use absolute frequencies for simulations in the harness
                                                                    // NOTE: This only simulates properly in VCS
-  new chipyard.harness.WithSimAXIMemOverSerialTL ++                // Attach SimDRAM to serial-tl port
 
   //==================================
   // Set up tiles

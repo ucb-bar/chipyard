@@ -303,18 +303,6 @@ class FireSimCVA6Config extends Config(
   new chipyard.CVA6Config)
 
 //**********************************************************************************
-//* Multiclock Configurations
-//*********************************************************************************/
-class FireSimMulticlockAXIOverSerialConfig extends Config(
-  new WithAXIOverSerialTLCombinedBridges ++ // use combined bridge to connect to axi mem over serial
-  new WithDefaultFireSimBridges ++
-  new testchipip.WithBlockDevice(false) ++ // disable blockdev
-  new WithDefaultMemModel ++
-  new WithFireSimDesignTweaks ++ // don't inherit firesim clocking
-  new chipyard.MulticlockAXIOverSerialConfig
-)
-
-//**********************************************************************************
 // System with 16 LargeBOOMs that can be simulated with Golden Gate optimizations
 // - Requires MTModels and MCRams mixins as prefixes to the platform config
 // - May require larger build instances or JVM memory footprints
