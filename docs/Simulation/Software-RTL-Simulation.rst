@@ -177,7 +177,7 @@ A special target that automatically generates the waveform file for a specific t
 For a Verilator simulation, this will generate a vcd file (vcd is a standard waveform representation file format) that can be loaded to any common waveform viewer.
 An open-source vcd-capable waveform viewer is `GTKWave <http://gtkwave.sourceforge.net/>`__.
 
-For a VCS simulation, this will generate an fsdb file (fast signal database, a proprietary waveform representation format developed by Novas Software, later acquired by Synopsys) that can be loaded to fsdb-supported waveform viewers.
+For a VCS simulation, this will generate an fsdb file that can be loaded to fsdb-supported waveform viewers.
 If you have Synopsys licenses, we recommend using the Verdi waveform viewer.
 
 Visualizing Chipyard SoCs
