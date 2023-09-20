@@ -347,6 +347,7 @@ class WithClockAndResetFromHarness extends OverrideHarnessBinder({
   (system: HasChipyardPRCI, th: HasHarnessInstantiators, ports: Seq[Data]) => {
     implicit val p = GetSystemParameters(system)
     val clocks = ports.collect { case c: ClockWithFreq => c }
+// DOC include start: HarnessClockInstantiatorEx
     ports.map ({
       case c: ClockWithFreq => {
         val clock = th.harnessClockInstantiator.requestClockMHz(s"clock_${c.freqMHz.toInt}MHz", c.freqMHz)
@@ -354,5 +355,6 @@ class WithClockAndResetFromHarness extends OverrideHarnessBinder({
       }
       case r: AsyncReset => r := th.referenceReset.asAsyncReset
     })
+// DOC include end: HarnessClockInstantiatorEx
   }
 })
