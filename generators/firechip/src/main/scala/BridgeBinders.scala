@@ -108,48 +108,6 @@ class WithBlockDeviceBridge extends OverrideHarnessBinder({
   }
 })
 
-class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[ClockedIO[SerialIO]]) => {
-    implicit val p = GetSystemParameters(system)
-
-    p(SerialTLKey).map({ sVal =>
-      val serialTLManagerParams = sVal.serialTLManagerParams.get
-      val axiDomainParams = serialTLManagerParams.axiMemOverSerialTLParams.get
-      require(serialTLManagerParams.isMemoryDevice)
-      val memFreq = axiDomainParams.getMemFrequency(system.asInstanceOf[HasTileLinkLocations])
-
-      ports.map({ port =>
-        val axiClock = th.harnessClockInstantiator.requestClockHz("mem_over_serial_tl_clock", memFreq)
-
-        val serial_bits = port.bits
-        port.clock := th.harnessBinderClock
-        val harnessMultiClockAXIRAM = TSIHarness.connectMultiClockAXIRAM(
-          system.serdesser.get,
-          serial_bits,
-          axiClock,
-          ResetCatchAndSync(axiClock, th.harnessBinderReset.asBool))
-        TSIBridge(th.harnessBinderClock, harnessMultiClockAXIRAM.module.io.tsi, Some(MainMemoryConsts.globalName), th.harnessBinderReset.asBool)
-
-        // connect SimAxiMem
-        (harnessMultiClockAXIRAM.mem_axi4.get zip harnessMultiClockAXIRAM.memNode.get.edges.in).map { case (axi4, edge) =>
-          val nastiKey = NastiParameters(axi4.bits.r.bits.data.getWidth,
-                                        axi4.bits.ar.bits.addr.getWidth,
-                                        axi4.bits.ar.bits.id.getWidth)
-          system match {
-            case s: BaseSubsystem => FASEDBridge(axi4.clock, axi4.bits, axi4.reset.asBool,
-              CompleteConfig(p(firesim.configs.MemModelKey),
-                            nastiKey,
-                            Some(AXI4EdgeSummary(edge)),
-                            Some(MainMemoryConsts.globalName)))
-            case _ => throw new Exception("Attempting to attach FASED Bridge to misconfigured design")
-          }
-        }
-      })
-    })
-
-    Nil
-  }
-})
 
 class WithFASEDBridge extends OverrideHarnessBinder({
   (system: CanHaveMasterAXI4MemPort, th: FireSim, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {

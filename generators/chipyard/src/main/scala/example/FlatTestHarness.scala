@@ -1,7 +1,7 @@
 package chipyard.example
 
 import chisel3._
-
+import chisel3.experimental.{Analog, BaseModule, DataMirror, Direction}
 import scala.collection.mutable.{ArrayBuffer, LinkedHashMap}
 
 import org.chipsalliance.cde.config.{Field, Parameters}
@@ -41,30 +41,19 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
   // Serialized TL
   val sVal = p(SerialTLKey).get
   val serialTLManagerParams = sVal.serialTLManagerParams.get
-  val axiDomainParams = serialTLManagerParams.axiMemOverSerialTLParams.get
   require(serialTLManagerParams.isMemoryDevice)
-  val memFreq = axiDomainParams.getMemFrequency(lazyDut.system)
 
   withClockAndReset(clock, reset) {
     val serial_bits = dut.serial_tl_pad.bits
-    dut.serial_tl_pad.clock := clock
-    val harnessMultiClockAXIRAM = TSIHarness.connectMultiClockAXIRAM(
+    if (DataMirror.directionOf(dut.serial_tl_pad.clock) == Direction.Input) {
+      dut.serial_tl_pad.clock := clock
+    }
+    val harnessRAM = TSIHarness.connectRAM(
       lazyDut.system.serdesser.get,
       serial_bits,
-      clock,
       reset)
-    io.success := SimTSI.connect(Some(harnessMultiClockAXIRAM.module.io.tsi), clock, reset)
+    io.success := SimTSI.connect(Some(harnessRAM.module.io.tsi), clock, reset)
 
-    // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
-    (harnessMultiClockAXIRAM.mem_axi4.get zip harnessMultiClockAXIRAM.memNode.get.edges.in).map { case (axi_port, edge) =>
-      val memSize = serialTLManagerParams.memParams.size
-      val memBase = serialTLManagerParams.memParams.base
-      val lineSize = p(CacheBlockBytes)
-      val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), memBase, edge.bundle)).suggestName("simdram")
-      mem.io.axi <> axi_port.bits
-      mem.io.clock := axi_port.clock
-      mem.io.reset := axi_port.reset
-    }
   }
 
   // JTAG
