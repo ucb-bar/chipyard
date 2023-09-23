@@ -12,7 +12,6 @@ class ChipLikeRocketConfig extends Config(
   //==================================
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ // use absolute frequencies for simulations in the harness
                                                                    // NOTE: This only simulates properly in VCS
-  new chipyard.harness.WithSimAXIMemOverSerialTL ++                // Attach SimDRAM to serial-tl port
 
   //==================================
   // Set up tiles
@@ -90,12 +89,13 @@ class ChipBringupHostConfig extends Config(
   // Base is the no-cores config
   new chipyard.NoCoresConfig)
 
+// DOC include start: TetheredChipLikeRocketConfig
 class TetheredChipLikeRocketConfig extends Config(
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++   // use absolute freqs for sims in the harness
   new chipyard.harness.WithMultiChipSerialTL(0, 1) ++                // connect the serial-tl ports of the chips together
-  new chipyard.harness.WithMultiChip(0, new ChipLikeRocketConfig) ++
-  new chipyard.harness.WithMultiChip(1, new ChipBringupHostConfig))
-
+  new chipyard.harness.WithMultiChip(0, new ChipLikeRocketConfig) ++ // ChipTop0 is the design-to-be-taped-out
+  new chipyard.harness.WithMultiChip(1, new ChipBringupHostConfig))  // ChipTop1 is the bringup design
+// DOC include end: TetheredChipLikeRocketConfig
 
 // Verilator does not initialize some of the async-reset reset-synchronizer
 // flops properly, so this config disables them.
