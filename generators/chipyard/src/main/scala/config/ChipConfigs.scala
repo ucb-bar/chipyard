@@ -16,22 +16,22 @@ class ChipLikeRocketConfig extends Config(
   //==================================
   // Set up tiles
   //==================================
-  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(8, 3) ++    // Add async crossings between RocketTile and uncore
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++                     // 1 RocketTile
+  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(depth=8, sync=3) ++ // Add async crossings between RocketTile and uncore
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++                             // 1 RocketTile
 
   //==================================
   // Set up I/O
   //==================================
-  new testchipip.WithSerialTLWidth(4) ++
-  new testchipip.WithSerialTLBackingMemory ++                                           // Backing memory is over serial TL protocol
+  new testchipip.WithSerialTLWidth(4) ++                                                // 4bit wide Serialized TL interface to minimize IO
+  new testchipip.WithSerialTLBackingMemory ++                                           // Configure the off-chip memory accessible over serial-tl as backing memory
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 4L) ++                  // 4GB max external memory
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++                          // 1 memory channel
 
   //==================================
   // Set up buses
   //==================================
-  new testchipip.WithOffchipBusClient(MBUS) ++
-  new testchipip.WithOffchipBus ++
+  new testchipip.WithOffchipBusClient(MBUS) ++                                          // offchip bus connects to MBUS, since the serial-tl needs to provide backing memory
+  new testchipip.WithOffchipBus ++                                                      // attach a offchip bus, since the serial-tl will master some external tilelink memory
 
   //==================================
   // Set up clock./reset

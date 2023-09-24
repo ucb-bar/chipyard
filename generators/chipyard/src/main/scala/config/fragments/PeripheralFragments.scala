@@ -23,7 +23,7 @@ import chipyard.{ExtTLMem}
 
 /**
   * Config fragment for adding a BootROM to the SoC
-  * 
+  *
   * @param address the address of the BootROM device
   * @param size the size of the BootROM
   * @param hang the power-on reset vector, i.e. the program counter will be set to this value on reset
@@ -42,7 +42,7 @@ class WithBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigInt =
 // DOC include start: gpio config fragment
 /**
  * Config fragment for adding a GPIO peripheral device to the SoC
- * 
+ *
  * @param address the address of the GPIO device
  * @param width the number of pins of the GPIO device
  */
