@@ -19,7 +19,7 @@ class WithRadArgsROM(filename: String) extends Config((site, here, up) => {
 })
 
 class RadianceConfig extends Config(
-  new freechips.rocketchip.subsystem.WithRadianceCores() ++
+  new freechips.rocketchip.subsystem.WithRadianceCores(use_vx_cache = false) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   // new freechips.rocketchip.subsystem.WithNoMemPort ++
   // new testchipip.WithSbusScratchpad(banks=2) ++
@@ -27,6 +27,17 @@ class RadianceConfig extends Config(
   new WithExtMemSize(BigInt("80000000", 16)) ++
   new WithRadArgsROM("sims/vcs/args.bin") ++
   new chipyard.config.AbstractConfig)
+
+class RadianceConfigVortexCache extends Config(
+  new freechips.rocketchip.subsystem.WithRadianceCores(use_vx_cache = true) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  // new freechips.rocketchip.subsystem.WithNoMemPort ++
+  // new testchipip.WithSbusScratchpad(banks=2) ++
+  // new testchipip.WithMbusScratchpad(banks=2) ++
+  new WithExtMemSize(BigInt("80000000", 16)) ++
+  new WithRadArgsROM("sims/vcs/args.bin") ++
+  new chipyard.config.AbstractConfig
+)
 
 class TinyRocketConfig extends Config(
   new chipyard.iobinders.WithDontTouchIOBinders(false) ++         // TODO FIX: Don't dontTouch the ports
