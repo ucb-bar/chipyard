@@ -1,9 +1,12 @@
 package chipyard
 
+import chipyard.config.{AbstractConfig, WithBootROM}
+import chipyard.stage.phases.TargetDirKey
 import org.chipsalliance.cde.config.{Config, Field}
 import freechips.rocketchip.diplomacy.AsynchronousCrossing
-import freechips.rocketchip.devices.tilelink.{RadianceArgsROMLocated, RadianceArgsROMParams}
-import freechips.rocketchip.subsystem.WithExtMemSize
+import freechips.rocketchip.devices.tilelink.{BootROMLocated, RadianceROMParams, RadianceROMsLocated}
+import freechips.rocketchip.subsystem.{WithBootROMFile, WithExtMemSize}
+import freechips.rocketchip.tile.XLen
 // --------------
 // Rocket Configs
 // --------------
@@ -13,9 +16,23 @@ class RocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 
-class WithRadArgsROM(filename: String) extends Config((site, here, up) => {
-  case RadianceArgsROMLocated() => up(RadianceArgsROMLocated()).map(_.copy(
-    contentFileName = filename))
+class WithRadROMs(address: BigInt, size: Int, filename: String) extends Config((site, here, up) => {
+  case RadianceROMsLocated() => up(RadianceROMsLocated()) ++
+    Seq(RadianceROMParams(
+      address = address,
+      size = size,
+      contentFileName = filename
+    ))
+})
+
+class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigInt = 0x10100) extends Config((site, here, up) => {
+  case BootROMLocated(x) => up(BootROMLocated(x), site)
+    .map(_.copy(
+      address = address,
+      size = size,
+      hang = hang,
+      contentFileName = s"${site(TargetDirKey)}/bootrom.radiance.rv${site(XLen)}.img"
+    ))
 })
 
 class RadianceConfig extends Config(
@@ -25,8 +42,11 @@ class RadianceConfig extends Config(
   // new testchipip.WithSbusScratchpad(banks=2) ++
   // new testchipip.WithMbusScratchpad(banks=2) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
-  new WithRadArgsROM("sims/vcs/args.bin") ++
-  new chipyard.config.AbstractConfig)
+  new WithRadBootROM() ++
+  new WithRadROMs(0x7FFF0000L, 0x10000, "sims/vcs/args.bin") ++
+  new WithRadROMs(0x20000L, 0x8000, "sims/vcs/op_a.bin") ++
+  new WithRadROMs(0x28000L, 0x8000, "sims/vcs/op_b.bin") ++
+  new AbstractConfig)
 
 class RadianceConfigVortexCache extends Config(
   new freechips.rocketchip.subsystem.WithRadianceCores(use_vx_cache = true) ++
