@@ -55,8 +55,11 @@ class RadianceConfigVortexCache extends Config(
   // new testchipip.WithSbusScratchpad(banks=2) ++
   // new testchipip.WithMbusScratchpad(banks=2) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
-  new WithRadArgsROM("sims/vcs/args.bin") ++
-  new chipyard.config.AbstractConfig
+  new WithRadBootROM() ++
+  new WithRadROMs(0x7FFF0000L, 0x10000, "sims/vcs/args.bin") ++
+  new WithRadROMs(0x20000L, 0x8000, "sims/vcs/op_a.bin") ++
+  new WithRadROMs(0x28000L, 0x8000, "sims/vcs/op_b.bin") ++
+  new AbstractConfig
 )
 
 class TinyRocketConfig extends Config(
