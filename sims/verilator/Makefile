@@ -152,6 +152,7 @@ VERILATOR_NONCC_OPTS = \
 	$(MAX_WIDTH_OPTS) \
 	$(SIM_PREPROC_DEFINES) \
 	$(VERILATOR_PREPROC_DEFINES) \
+	-I$(GEN_COLLATERAL_DIR) \
 	--top-module $(TB) \
 	--vpi \
 	-f $(sim_common_files)
