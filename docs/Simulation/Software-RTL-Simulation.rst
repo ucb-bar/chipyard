@@ -177,8 +177,8 @@ A special target that automatically generates the waveform file for a specific t
 For a Verilator simulation, this will generate a vcd file (vcd is a standard waveform representation file format) that can be loaded to any common waveform viewer.
 An open-source vcd-capable waveform viewer is `GTKWave <http://gtkwave.sourceforge.net/>`__.
 
-For a VCS simulation, this will generate a vpd file (this is a proprietary waveform representation format used by Synopsys) that can be loaded to vpd-supported waveform viewers.
-If you have Synopsys licenses, we recommend using the DVE waveform viewer.
+For a VCS simulation, this will generate an fsdb file that can be loaded to fsdb-supported waveform viewers.
+If you have Synopsys licenses, we recommend using the Verdi waveform viewer.
 
 Visualizing Chipyard SoCs
 --------------------------
@@ -187,7 +187,7 @@ During verilog creation, a graphml file is emitted that will allow you to visual
 
 To view the graph, first download a viewer such as `yEd <https://www.yworks.com/products/yed/>`__.
 
-The ``*.graphml`` file will be located in ``generated-src/<...>/``. Open the file in the graph viewer. 
+The ``*.graphml`` file will be located in ``generated-src/<...>/``. Open the file in the graph viewer.
 To get a clearer view of the SoC, switch to "hierarchical" view. For yEd, this would be done by selecting ``layout`` -> ``hierarchical``, and then choosing "Ok" without changing any settings.
 
 .. _sw-sim-verilator-opts:

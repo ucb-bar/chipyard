@@ -9,7 +9,7 @@ Chipyard is developed and tested on Linux-based systems.
 .. Warning:: It is possible to use this on macOS or other BSD-based systems, although GNU tools will need to be installed;
     it is also recommended to install the RISC-V toolchain from ``brew``.
 
-.. Warning:: Working under Windows is not recommended.
+.. Warning:: If using Windows, it is recommended that you use `Windows Subsystem for Linux <https://learn.microsoft.com/en-us/windows/wsl/> (WSL)`.
 
 Running on AWS EC2 with FireSim
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

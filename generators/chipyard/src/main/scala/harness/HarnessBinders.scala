@@ -128,46 +128,6 @@ class WithSimAXIMem extends OverrideHarnessBinder({
   }
 })
 
-class WithSimAXIMemOverSerialTL extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: HasHarnessInstantiators, ports: Seq[ClockedIO[SerialIO]]) => {
-    implicit val p = chipyard.iobinders.GetSystemParameters(system)
-
-    p(SerialTLKey).map({ sVal =>
-      val serialTLManagerParams = sVal.serialTLManagerParams.get
-      val axiDomainParams = serialTLManagerParams.axiMemOverSerialTLParams.get
-      require(serialTLManagerParams.isMemoryDevice)
-
-      val memFreq = axiDomainParams.getMemFrequency(system.asInstanceOf[HasTileLinkLocations])
-
-      ports.map({ port =>
-// DOC include start: HarnessClockInstantiatorEx
-        val memOverSerialTLClock = th.harnessClockInstantiator.requestClockHz("mem_over_serial_tl_clock", memFreq)
-        val serial_bits = port.bits
-        port.clock := th.harnessBinderClock
-        val harnessMultiClockAXIRAM = TSIHarness.connectMultiClockAXIRAM(
-          system.serdesser.get,
-          serial_bits,
-          memOverSerialTLClock,
-          th.harnessBinderReset)
-        // DOC include end: HarnessClockInstantiatorEx
-        val success = SimTSI.connect(Some(harnessMultiClockAXIRAM.module.io.tsi), th.harnessBinderClock, th.harnessBinderReset.asBool)
-        when (success) { th.success := true.B }
-
-        // connect SimDRAM from the AXI port coming from the harness multi clock axi ram
-        (harnessMultiClockAXIRAM.mem_axi4.get zip harnessMultiClockAXIRAM.memNode.get.edges.in).map { case (axi_port, edge) =>
-          val memSize = serialTLManagerParams.memParams.size
-          val memBase = serialTLManagerParams.memParams.base
-          val lineSize = p(CacheBlockBytes)
-          val mem = Module(new SimDRAM(memSize, lineSize, BigInt(memFreq.toLong), memBase, edge.bundle)).suggestName("simdram")
-          mem.io.axi <> axi_port.bits
-          mem.io.clock := axi_port.clock
-          mem.io.reset := axi_port.reset
-        }
-      })
-    })
-  }
-})
-
 class WithBlackBoxSimMem(additionalLatency: Int = 0) extends OverrideHarnessBinder({
   (system: CanHaveMasterAXI4MemPort, th: HasHarnessInstantiators, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
     val p: Parameters = chipyard.iobinders.GetSystemParameters(system)
@@ -305,7 +265,9 @@ class WithSimTSIOverSerialTL extends OverrideHarnessBinder({
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
       val bits = port.bits
-      port.clock := th.harnessBinderClock
+      if (DataMirror.directionOf(port.clock) == Direction.Input) {
+        port.clock := th.harnessBinderClock
+      }
       val ram = TSIHarness.connectRAM(system.serdesser.get, bits, th.harnessBinderReset)
       val success = SimTSI.connect(Some(ram.module.io.tsi), th.harnessBinderClock, th.harnessBinderReset.asBool)
       when (success) { th.success := true.B }
@@ -352,12 +314,6 @@ class WithTraceGenSuccess extends OverrideHarnessBinder({
   }
 })
 
-class WithSimDromajoBridge extends ComposeHarnessBinder({
-  (system: CanHaveTraceIOModuleImp, th: HasHarnessInstantiators, ports: Seq[TraceOutputTop]) => {
-    ports.map { p => p.traces.map(tileTrace => SimDromajoBridge(tileTrace)(system.p)) }
-  }
-})
-
 class WithCospike extends ComposeHarnessBinder({
   (system: CanHaveTraceIOModuleImp, th: HasHarnessInstantiators, ports: Seq[TraceOutputTop]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
@@ -391,6 +347,7 @@ class WithClockAndResetFromHarness extends OverrideHarnessBinder({
   (system: HasChipyardPRCI, th: HasHarnessInstantiators, ports: Seq[Data]) => {
     implicit val p = GetSystemParameters(system)
     val clocks = ports.collect { case c: ClockWithFreq => c }
+// DOC include start: HarnessClockInstantiatorEx
     ports.map ({
       case c: ClockWithFreq => {
         val clock = th.harnessClockInstantiator.requestClockMHz(s"clock_${c.freqMHz.toInt}MHz", c.freqMHz)
@@ -398,5 +355,6 @@ class WithClockAndResetFromHarness extends OverrideHarnessBinder({
       }
       case r: AsyncReset => r := th.referenceReset.asAsyncReset
     })
+// DOC include end: HarnessClockInstantiatorEx
   }
 })

@@ -27,4 +27,3 @@ done
 target_args="$target_args +permissive-off"
 
 INPUT_ARGS="$regular_args $target_args"
-
