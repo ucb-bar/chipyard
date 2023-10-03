@@ -13,7 +13,7 @@ The ``IOBinder`` functions are responsible for instantiating IO cells and IOPort
 For example, the ``WithUARTIOCells`` IOBinder will, for any ``System`` that might have UART ports (``HasPeripheryUARTModuleImp``, generate ports within the ``ChipTop`` (``ports``) as well as IOCells with the appropriate type and direction (``cells2d``). This function returns a the list of generated ports, and the list of generated IOCells. The list of generated ports is passed to the ``HarnessBinders`` such that they can be connected to ``TestHarness`` devices.
 
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/IOBinders.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/iobinders/IOBinders.scala
    :language: scala
    :start-after: DOC include start: WithUARTIOCells
    :end-before: DOC include end: WithUARTIOCells

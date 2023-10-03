@@ -55,6 +55,16 @@ class WithScalaTestFeatures extends Config((site, here, up) => {
   case TracePortKey => up(TracePortKey, site).map(_.copy(print = true))
 })
 
+// Multi-cycle regfile for rocket+boom
+class WithFireSimMultiCycleRegfile extends Config((site, here, up) => {
+  case FireSimMultiCycleRegFile => true
+})
+
+// Model multithreading optimization
+class WithFireSimFAME5 extends Config((site, here, up) => {
+  case FireSimFAME5 => true
+})
+
 // FASED Config Aliases. This to enable config generation via "_" concatenation
 // which requires that all config classes be defined in the same package
 class DDR3FCFS extends FCFS16GBQuadRank
@@ -72,7 +82,8 @@ class WithMinimalFireSimDesignTweaks extends Config(
   // Required*: Punch all clocks to FireSim's harness clock instantiator
   new WithFireSimHarnessClockBridgeInstantiator ++
   new chipyard.harness.WithHarnessBinderClockFreqMHz(1000.0) ++
-  new chipyard.harness.WithClockAndResetFromHarness ++
+  new chipyard.harness.WithClockFromHarness ++
+  new chipyard.harness.WithResetFromHarness ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++
