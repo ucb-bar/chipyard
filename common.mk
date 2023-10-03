@@ -242,7 +242,7 @@ $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_F
 		--format=fir \
 		--dedup \
 		--export-module-hierarchy \
-		--emit-metadata \
+		--emit-bytecode \
 		--verify-each=true \
 		--warn-on-unprocessed-annotations \
 		--disable-annotation-classless \
