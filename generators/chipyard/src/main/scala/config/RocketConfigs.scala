@@ -11,6 +11,26 @@ class RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
 
+class MediumRocketConfigFPU extends Config(
+  new freechips.rocketchip.subsystem.WithNMedCores(1) ++        // single rocket medium core with FPU - note this default setting is changed
+  new chipyard.config.AbstractConfig)
+
+class MediumRocketConfigFPUBTB extends Config(
+  new freechips.rocketchip.subsystem.WithNMedCores(1) ++        // single rocket medium core with FPU & BTB - note this default setting is changed
+  new freechips.rocketchip.subsystem.WithDefaultBtb ++
+  new chipyard.config.AbstractConfig)
+
+class MediumRocketConfigBTB extends Config(
+  new freechips.rocketchip.subsystem.WithNMedCores(1) ++        // single rocket medium core with BTB - note this default setting is changed
+  new freechips.rocketchip.subsystem.WithDefaultBtb ++
+  new freechips.rocketchip.subsystem.WithoutFPU ++
+  new chipyard.config.AbstractConfig)
+
+class MediumRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithNMedCores(1) ++        // single rocket medium core without FPU & BTB - note this default setting is changed
+  new freechips.rocketchip.subsystem.WithoutFPU ++
+  new chipyard.config.AbstractConfig)
+
 class TinyRocketConfig extends Config(
   new chipyard.iobinders.WithDontTouchIOBinders(false) ++         // TODO FIX: Don't dontTouch the ports
   new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++ // use incoherent bus topology
