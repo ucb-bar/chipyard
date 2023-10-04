@@ -6,6 +6,10 @@ on:
     branches:
       - main
       - '1.[0-9]*.x'
+  # run ci on pushes to following branches
+  push:
+    branches:
+      - graphics
 
 defaults:
   run:
