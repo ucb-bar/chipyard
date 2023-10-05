@@ -45,9 +45,15 @@ search () {
     done
 }
 
-submodules=("cva6" "boom" "ibex" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "sifive-blocks" "sifive-cache" "testchipip" "riscv-sodor" "mempress" "bar-fetchers" "shuttle")
+submodules=("cva6" "boom" "ibex" "gemmini" "hwacha" "icenet" "nvdla" "sha3" "sifive-blocks" "sifive-cache" "testchipip" "riscv-sodor" "mempress" "bar-fetchers" "shuttle")
 dir="generators"
 branches=("master" "main" "dev")
+search
+
+# rocket-chip is forked to graphics branch
+submodules=("rocket-chip")
+dir="generators"
+branches=("graphics")
 search
 
 submodules=("esp-tools-feedstock")

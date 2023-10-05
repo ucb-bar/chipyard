@@ -330,29 +330,6 @@ jobs:
         with:
           group-key: "group-other"
 
-  prepare-chipyard-fpga:
-    name: prepare-chipyard-fpga
-    needs: setup-complete
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Build RTL on self-hosted
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-fpga"
-          build-type: "fpga"
-
   ##########################################################################
 
   chipyard-spike-gemmini-run-tests:
