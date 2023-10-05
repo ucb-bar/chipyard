@@ -53,3 +53,24 @@ function restore_bash_options
 {
     set +vx; eval "$OLDSTATE"
 }
+
+#######################################
+# Basic try-catch block implementation
+# for bash scripts.
+# Usage: try; ( run commands )
+#  catch || { handle error }
+# Source: https://stackoverflow.com/a/25180186/5121242
+#######################################
+function try()
+{
+    [[ $- = *e* ]]; SAVED_OPT_E=$?
+    set +e
+}
+
+function catch()
+{
+    export ex_code=$?
+    (( $SAVED_OPT_E )) && set +e
+    return $ex_code
+}
+
