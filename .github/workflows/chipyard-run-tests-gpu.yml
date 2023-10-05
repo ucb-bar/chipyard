@@ -18,12 +18,21 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
+  cancel-prior-workflows:
+    name: cancel-prior-workflows
+    runs-on: self-hosted
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
   # Set up a set of boolean conditions to control which branches of the CI
   # workflow will execute This is based off the conditional job execution
   # example here: https://github.com/dorny/paths-filter#examples
   change-filters:
     name: filter-jobs-on-changes
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     # Queried by downstream jobs to determine if they should run.
     outputs:
       needs-rtl: ${{ steps.filter.outputs.all_count != steps.filter.outputs.skip-rtl_count }}
@@ -51,10 +60,34 @@ jobs:
               - '**/.gitignore'
               - '.github/ISSUE_TEMPLATE/**'
 
-  # FIXME: currently always succeeds to keep prepare jobs happy
+  create-conda-env:
+    name: create-conda-env
+    needs: [change-filters, cancel-prior-workflows]
+    if: needs.change-filters.outputs.needs-rtl == 'true'
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Cleanup conda
+        uses: ./.github/actions/cleanup-conda
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+
+  # Sentinel job to simplify how we specify which that basic setup is complete
+  #
+  # When adding new prep jobs, please add them to `needs` below
   setup-complete:
     name: setup-complete
-    runs-on: ubuntu-latest
+    needs: [create-conda-env]
+    runs-on: self-hosted
     steps:
       - name: Set up complete
         run: echo Set up is complete!
@@ -325,7 +358,7 @@ jobs:
   chipyard-spike-gemmini-run-tests:
     name: chipyard-spike-gemmini-run-tests
     needs: prepare-chipyard-accels # technically doesn't depend on RTL but should be after the build.sh for Gemmini
-    runs-on: jktqos
+    runs-on: self-hosted
     steps:
       - name: Delete old checkout
         run: |
