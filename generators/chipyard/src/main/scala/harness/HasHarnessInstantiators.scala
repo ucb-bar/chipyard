@@ -7,7 +7,7 @@ import freechips.rocketchip.diplomacy.{LazyModule}
 import org.chipsalliance.cde.config.{Field, Parameters, Config}
 import freechips.rocketchip.util.{ResetCatchAndSync}
 import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters, ClockSinkParameters, ClockParameters}
-import freechips.rocketchip.stage.phases.TargetDirKey
+import chipyard.stage.phases.TargetDirKey
 
 import chipyard.harness.{ApplyHarnessBinders, HarnessBinders}
 import chipyard.iobinders.HasIOBinders
@@ -86,6 +86,7 @@ trait HasHarnessInstantiators {
         case (d: HasIOBinders, i: Int) => ApplyHarnessBinders(this, d.lazySystem, d.portMap)(chipParameters(i))
         case _ =>
       }
+      ApplyMultiHarnessBinders(this, lazyDuts)
     }
 
     val harnessBinderClk = harnessClockInstantiator.requestClockMHz("harnessbinder_clock", getHarnessBinderClockFreqMHz)

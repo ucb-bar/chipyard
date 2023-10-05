@@ -82,7 +82,7 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
   new Group(test.name, Seq(test), SubProcess(options))
 } toSeq
 
-val chiselVersion = "3.5.6"
+val chiselVersion = "3.6.0"
 
 lazy val chiselSettings = Seq(
   libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % chiselVersion,
@@ -91,16 +91,11 @@ lazy val chiselSettings = Seq(
   addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % chiselVersion cross CrossVersion.full))
 
 
-val chiselTestVersion = "2.5.1"
-
-lazy val chiselTestSettings = Seq(libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel-iotesters" % chiselTestVersion))
-
 // Subproject definitions begin
 
 // -- Rocket Chip --
 
-// Rocket-chip dependencies (subsumes making RC a RootProject)
-lazy val hardfloat  = (project in rocketChipDir / "hardfloat")
+lazy val hardfloat = freshProject("hardfloat", rocketChipDir / "hardfloat/hardfloat")
   .settings(chiselSettings)
   .dependsOn(midasTargetUtils)
   .settings(commonSettings)
@@ -124,9 +119,11 @@ lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
   .settings(chiselSettings)
   .settings(
     libraryDependencies ++= Seq(
+      "com.lihaoyi" %% "mainargs" % "0.5.0",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.json4s" %% "json4s-jackson" % "3.6.6",
-      "org.scalatest" %% "scalatest" % "3.2.0" % "test"
+      "org.json4s" %% "json4s-jackson" % "4.0.5",
+      "org.scalatest" %% "scalatest" % "3.2.0" % "test",
+      "org.scala-graph" %% "graph-core" % "1.13.5"
     )
   )
   .settings( // Settings for scalafix
@@ -151,7 +148,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
 lazy val chipyard = (project in file("generators/chipyard"))
   .dependsOn(testchipip, rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
-    dsptools, `rocket-dsp-utils`,
+    dsptools, rocket_dsp_utils,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
     constellation, mempress, barf, shuttle, rerocc)
   .settings(libraryDependencies ++= rocketLibDeps.value)
@@ -165,7 +162,6 @@ lazy val chipyard = (project in file("generators/chipyard"))
 lazy val mempress = (project in file("generators/mempress"))
   .dependsOn(rocketchip, midasTargetUtils)
   .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(chiselTestSettings)
   .settings(commonSettings)
 
 lazy val barf = (project in file("generators/bar-fetchers"))
@@ -184,7 +180,7 @@ lazy val rerocc = (project in file("generators/rerocc"))
   .settings(commonSettings)
 
 lazy val fft_generator = (project in file("generators/fft-generator"))
-  .dependsOn(rocketchip, `rocket-dsp-utils`)
+  .dependsOn(rocketchip, rocket_dsp_utils)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -203,7 +199,7 @@ lazy val hwacha = (project in file("generators/hwacha"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val boom = (project in file("generators/boom"))
+lazy val boom = freshProject("boom", file("generators/boom"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
@@ -231,13 +227,11 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
 lazy val sha3 = (project in file("generators/sha3"))
   .dependsOn(rocketchip, midasTargetUtils)
   .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(chiselTestSettings)
   .settings(commonSettings)
 
 lazy val gemmini = (project in file("generators/gemmini"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(chiselTestSettings)
   .settings(commonSettings)
 
 lazy val nvdla = (project in file("generators/nvdla"))
@@ -245,28 +239,28 @@ lazy val nvdla = (project in file("generators/nvdla"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val iocell = Project(id = "iocell", base = file("./tools/barstools/") / "src")
-  .settings(
-    Compile / scalaSource := baseDirectory.value / "main" / "scala" / "barstools" / "iocell",
-    Compile / resourceDirectory := baseDirectory.value / "main" / "resources"
-  )
+lazy val iocell = Project(id = "iocell", base = file("./tools/barstools/") / "iocell")
   .settings(chiselSettings)
   .settings(commonSettings)
 
 lazy val tapeout = (project in file("./tools/barstools/"))
   .settings(chiselSettings)
-  .settings(chiselTestSettings)
+  .settings(commonSettings)
+
+lazy val fixedpoint = (project in file("./tools/fixedpoint/"))
+  .settings(chiselSettings)
   .settings(commonSettings)
 
 lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
+  .dependsOn(fixedpoint)
   .settings(
     chiselSettings,
-    chiselTestSettings,
     commonSettings,
     libraryDependencies ++= Seq(
+      "edu.berkeley.cs" %% "chiseltest" % "0.6.0",
       "org.scalatest" %% "scalatest" % "3.2.+" % "test",
-      "org.typelevel" %% "spire" % "0.17.0",
-      "org.scalanlp" %% "breeze" % "1.1",
+      "org.typelevel" %% "spire" % "0.18.0",
+      "org.scalanlp" %% "breeze" % "2.1.0",
       "junit" % "junit" % "4.13" % "test",
       "org.scalacheck" %% "scalacheck" % "1.14.3" % "test",
   ))
@@ -275,7 +269,7 @@ lazy val cde = (project in file("tools/cde"))
   .settings(commonSettings)
   .settings(Compile / scalaSource := baseDirectory.value / "cde/src/chipsalliance/rocketchip")
 
-lazy val `rocket-dsp-utils` = freshProject("rocket-dsp-utils", file("./tools/rocket-dsp-utils"))
+lazy val rocket_dsp_utils = freshProject("rocket-dsp-utils", file("./tools/rocket-dsp-utils"))
   .dependsOn(rocketchip, cde, dsptools)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)

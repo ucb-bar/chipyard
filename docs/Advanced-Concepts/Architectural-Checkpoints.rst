@@ -36,4 +36,3 @@ The target config should also match the architectural configuration of however s
 
    cd sims/vcs
    make CONFIG=dmiRocketConfig run-binary LOADARCH=../../hello.riscv.0x80000000.1000.loadarch
-

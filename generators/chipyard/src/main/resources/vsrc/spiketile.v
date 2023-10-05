@@ -286,10 +286,10 @@ module SpikeBlackBox #(
    wire                                                    __tcm_d_ready;
    bit                                                     __tcm_d_valid;
    longint                                                 __tcm_d_data;
-   
+
    reg                                                     __tcm_d_valid_reg;
    reg [63:0]                                              __tcm_d_data_reg;
-   
+
 
 
    always @(posedge clock) begin
@@ -429,7 +429,7 @@ module SpikeBlackBox #(
 
          __tcm_d_valid_reg <= __tcm_d_valid;
          __tcm_d_data_reg <= __tcm_d_data;
-         
+
       end
    end // always @ (posedge clock)
    assign insns_retired = __insns_retired_reg;

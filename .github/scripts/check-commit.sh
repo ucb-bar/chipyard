@@ -91,11 +91,6 @@ dir="tools"
 branches=("master" "dev")
 search
 
-submodules=("firesim")
-dir="sims"
-branches=("master" "main" "dev" "1.13.x")
-search
-
 submodules=("fpga-shells")
 dir="fpga"
 branches=("main")

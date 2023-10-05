@@ -10,25 +10,23 @@ import org.chipsalliance.cde.config.Parameters
 import chisel3.stage.phases.Elaborate
 import firrtl.AnnotationSeq
 import firrtl.annotations.{Annotation, NoTargetAnnotation}
-import firrtl.options.{Phase, PreservesAll, Dependency}
-import firrtl.options.Viewer.view
-import freechips.rocketchip.stage.RocketChipOptions
-import freechips.rocketchip.stage.phases.{RocketTestSuiteAnnotation}
+import firrtl.options._
+import firrtl.options.Viewer._
 import freechips.rocketchip.system.{RocketTestSuite, TestGeneration}
 import freechips.rocketchip.subsystem.{TilesLocated, InSubsystem}
-import freechips.rocketchip.util.HasRocketChipStageUtils
 import freechips.rocketchip.tile.XLen
 
 import chipyard.TestSuiteHelper
 import chipyard.TestSuitesKey
+import chipyard.stage._
 
-class AddDefaultTests extends Phase with HasRocketChipStageUtils {
-  // Make sure we run both after RocketChip's version of this phase, and Rocket Chip's annotation emission phase
-  // because the RocketTestSuiteAnnotation is not serializable (but is not marked as such).
-  override val prerequisites = Seq(
-    Dependency[freechips.rocketchip.stage.phases.GenerateFirrtlAnnos],
-    Dependency[freechips.rocketchip.stage.phases.AddDefaultTests])
-  override val dependents = Seq(Dependency[freechips.rocketchip.stage.phases.GenerateTestSuiteMakefrags])
+/** Annotation that contains a list of [[RocketTestSuite]]s to run */
+case class ChipyardTestSuiteAnnotation(tests: Seq[RocketTestSuite]) extends NoTargetAnnotation with Unserializable
+
+
+class AddDefaultTests extends Phase with PreservesAll[Phase] with HasChipyardStageUtils {
+  override val prerequisites = Seq(Dependency[ChipyardChiselStage])
+  override val dependents = Seq(Dependency[GenerateTestSuiteMakefrags])
 
   private def addTestSuiteAnnotations(implicit p: Parameters): Seq[Annotation] = {
     val annotations = mutable.ArrayBuffer[Annotation]()
@@ -40,18 +38,16 @@ class AddDefaultTests extends Phase with HasRocketChipStageUtils {
       // If a custom test suite is set up, use the custom test suite
       annotations += CustomMakefragSnippet(p(TestSuitesKey).apply(tileParams, suiteHelper, p))
 
-    RocketTestSuiteAnnotation(suiteHelper.suites.values.toSeq) +: annotations.toSeq
+    ChipyardTestSuiteAnnotation(suiteHelper.suites.values.toSeq) +: annotations.toSeq
   }
 
 
   override def transform(annotations: AnnotationSeq): AnnotationSeq = {
     val (testSuiteAnnos, oAnnos) = annotations.partition {
-      case RocketTestSuiteAnnotation(_)  => true
+      case ChipyardTestSuiteAnnotation(_)  => true
       case o => false
     }
-    implicit val p = getConfig(view[RocketChipOptions](annotations).configNames.get).toInstance
-    addTestSuiteAnnotations ++ oAnnos
+    implicit val p = getConfig(view[ChipyardOptions](annotations).configNames.get).toInstance
+    addTestSuiteAnnotations(p) ++ oAnnos
   }
-
-  override final def invalidates(a: Phase): Boolean = false
 }

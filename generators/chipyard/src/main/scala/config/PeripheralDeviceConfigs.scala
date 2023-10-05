@@ -2,6 +2,7 @@ package chipyard
 
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
+import freechips.rocketchip.subsystem.{MBUS}
 
 // ---------------------------------------------------------
 // Configs which add non-default peripheral devices or ports
@@ -65,13 +66,15 @@ class dmiRocketConfig extends Config(
 // DOC include end: DmiRocket
 
 class ManyPeripheralsRocketConfig extends Config(
+  new testchipip.WithBlockDevice ++                          // add block-device module to peripherybus
+  new testchipip.WithOffchipBusClient(MBUS) ++               // OBUS provides backing memory to the MBUS
+  new testchipip.WithOffchipBus ++                           // OBUS must exist for serial-tl to master off-chip memory
+  new testchipip.WithSerialTLMem(isMainMemory=true) ++       // set lbwif memory base to DRAM_BASE, use as main memory
   new chipyard.harness.WithSimSPIFlashModel(true) ++         // add the SPI flash model in the harness (read-only)
   new chipyard.harness.WithSimBlockDevice ++                 // drive block-device IOs with SimBlockDevice
   new chipyard.config.WithSPIFlash ++                        // add the SPI flash controller
   new freechips.rocketchip.subsystem.WithDefaultMMIOPort ++  // add default external master port
   new freechips.rocketchip.subsystem.WithDefaultSlavePort ++ // add default external slave port
-  new testchipip.WithBlockDevice ++                          // add block-device module to peripherybus
-  new testchipip.WithSerialTLMem(isMainMemory=true) ++       // set lbwif memory base to DRAM_BASE, use as main memory
   new freechips.rocketchip.subsystem.WithNoMemPort ++        // remove AXI4 backing memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
@@ -79,4 +82,13 @@ class ManyPeripheralsRocketConfig extends Config(
 class QuadChannelRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++      // 4 AXI4 channels
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class UARTTSIRocketConfig extends Config(
+  new chipyard.harness.WithSerialTLTiedOff ++
+  new testchipip.WithUARTTSIClient ++
+  new chipyard.config.WithMemoryBusFrequency(10) ++
+  new chipyard.config.WithFrontBusFrequency(10) ++
+  new chipyard.config.WithPeripheryBusFrequency(10) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)

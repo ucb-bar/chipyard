@@ -25,5 +25,11 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
   def referenceClock = clock_32MHz
   def referenceReset = hReset
 
+  dut_jtag_TCK := DontCare
+  dut_jtag_TMS := DontCare
+  dut_jtag_TDI := DontCare
+  dut_jtag_TDO := DontCare
+  dut_jtag_reset := DontCare
+
   instantiateChipTops()
 }

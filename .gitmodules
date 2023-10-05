@@ -64,9 +64,6 @@
 [submodule "software/nvdla-workload"]
 	path = software/nvdla-workload
 	url = https://github.com/ucb-bar/nvdla-workload.git
-[submodule "tools/dromajo/dromajo-src"]
-	path = tools/dromajo/dromajo-src
-	url = https://github.com/riscv-boom/dromajo.git
 [submodule "generators/riscv-sodor"]
 	path = generators/riscv-sodor
 	url = https://github.com/ucb-bar/riscv-sodor.git
@@ -133,3 +130,9 @@
 [submodule "generators/rerocc"]
 	path = generators/rerocc
 	url = https://github.com/ucb-bar/rerocc.git
+[submodule "tools/fixedpoint"]
+	path = tools/fixedpoint
+	url = https://github.com/ucb-bar/fixedpoint.git
+[submodule "generators/hardfloat"]
+	path = generators/hardfloat
+	url = https://github.com/ucb-bar/berkeley-hardfloat.git

@@ -62,14 +62,66 @@ jobs:
               - '**/.gitignore'
               - '.github/ISSUE_TEMPLATE/**'
 
+  create-conda-env-jktgz:
+    name: create-conda-env-jktgz
+    needs: [change-filters, cancel-prior-workflows]
+    if: needs.change-filters.outputs.needs-rtl == 'true'
+    runs-on: jktgz
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Cleanup conda
+        uses: ./.github/actions/cleanup-conda
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+
+  create-conda-env-jktqos:
+    name: create-conda-env-jktqos
+    needs: [change-filters, cancel-prior-workflows]
+    if: needs.change-filters.outputs.needs-rtl == 'true'
+    runs-on: jktqos
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Cleanup conda
+        uses: ./.github/actions/cleanup-conda
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+
+  # Sentinel job to simplify how we specify which that basic setup is complete
+  #
+  # When adding new prep jobs, please add them to `needs` below
+  setup-complete:
+    name: setup-complete
+    needs: [create-conda-env-jktgz, create-conda-env-jktqos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up complete
+        run: echo Set up is complete!
+
+  ##########################################################################
+
   commit-on-master-check:
     name: commit-on-master-check
-    needs: change-filters
+    needs: [setup-complete]
     if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-ci-image:3f9150
-      options: --entrypoint /bin/bash
+    runs-on: self-hosted
     steps:
       - name: Delete old checkout
         run: |
@@ -90,12 +142,9 @@ jobs:
 
   tutorial-setup-check:
     name: tutorial-setup-check
-    needs: change-filters
+    needs: [setup-complete]
     if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-ci-image:3f9150
-      options: --entrypoint /bin/bash
+    runs-on: self-hosted
     steps:
       - name: Delete old checkout
         run: |
@@ -116,11 +165,8 @@ jobs:
 
   documentation-check:
     name: documentation-check
-    needs: change-filters
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-ci-image:3f9150
-      options: --entrypoint /bin/bash
+    needs: [setup-complete]
+    runs-on: self-hosted
     steps:
       - name: Delete old checkout
         run: |
@@ -144,12 +190,9 @@ jobs:
 
   build-extra-tests:
     name: build-extra-tests
-    needs: [change-filters]
+    needs: [setup-complete]
     if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-ci-image:3f9150
-      options: --entrypoint /bin/bash
+    runs-on: self-hosted
     steps:
       - name: Delete old checkout
         run: |
@@ -166,7 +209,7 @@ jobs:
       - name: Generate keys
         id: genkey
         run: |
-          echo "::set-output name=extra-tests-cache-key::extra-tests-${{ github.sha }}"
+          echo "extra-tests-cache-key=extra-tests-${{ github.sha }}" >> $GITHUB_OUTPUT
       - uses: actions/cache@v3
         id: build-extra-tools-cache
         with:
@@ -177,61 +220,6 @@ jobs:
         run: |
             conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
             .github/scripts/build-extra-tests.sh
-
-  create-conda-env-knight:
-    name: create-conda-env-knight
-    needs: [change-filters, cancel-prior-workflows]
-    if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: knight
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Cleanup conda
-        uses: ./.github/actions/cleanup-conda
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-
-  create-conda-env-ferry:
-    name: create-conda-env-ferry
-    needs: [change-filters, cancel-prior-workflows]
-    if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: ferry
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Cleanup conda
-        uses: ./.github/actions/cleanup-conda
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-
-  # Sentinel job to simplify how we specify which that basic setup is complete
-  #
-  # When adding new prep jobs, please add them to `needs` below
-  setup-complete:
-    name: setup-complete
-    needs: [create-conda-env-knight, create-conda-env-ferry, build-extra-tests]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up complete
-        run: echo Set up is complete!
-
-  ##########################################################################
 
   prepare-chipyard-cores:
     name: prepare-chipyard-cores
@@ -393,7 +381,7 @@ jobs:
   chipyard-spike-gemmini-run-tests:
     name: chipyard-spike-gemmini-run-tests
     needs: prepare-chipyard-accels # technically doesn't depend on RTL but should be after the build.sh for Gemmini
-    runs-on: ferry
+    runs-on: jktqos
     steps:
       - name: Delete old checkout
         run: |
@@ -717,6 +705,29 @@ jobs:
         with:
           group-key: "group-peripherals"
           project-key: "chipyard-manyperipherals"
+
+  chipyard-tethered-run-tests:
+    name: chipyard-tethered-run-tests
+    needs: prepare-chipyard-peripherals
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-peripherals"
+          project-key: "chipyard-tethered"
 
   chipyard-sha3-run-tests:
     name: chipyard-sha3-run-tests
@@ -1080,6 +1091,7 @@ jobs:
             chipyard-dmirocket-run-tests,
             chipyard-spiflashwrite-run-tests,
             chipyard-manyperipherals-run-tests,
+            chipyard-tethered-run-tests,
             chipyard-sha3-run-tests,
             chipyard-gemmini-run-tests,
             chipyard-manymmioaccels-run-tests, # chipyard-nvdla-run-tests,

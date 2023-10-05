@@ -141,5 +141,11 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule {
     //==========================
     require(system.uarts.size == 1)
     val (uart_pad, uartIOCells) = IOCell.generateIOFromSignal(system.module.uart.head, "uart_0", p(IOCellKey))
+
+
+    //==========================
+    // External interrupts (tie off)
+    //==========================
+    system.module.interrupts := DontCare
   }
 }

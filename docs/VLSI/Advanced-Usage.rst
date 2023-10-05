@@ -8,7 +8,7 @@ Hammer Development and Upgrades
 If you need to develop Hammer within Chipyard or use a version of Hammer beyond the latest PyPI release, clone the `Hammer repository <https://github.com/ucb-bar/hammer>`__ somewhere else on your disk. Then:
 
 .. code-block:: shell
-    
+
     pip install -e <path/to/hammer>
 
 To bump specific plugins to their latest commits and install them, you can use the upgrade script from the Chipyard root directory, with arguments for match patterns for the plugin names:
@@ -106,3 +106,22 @@ With the Synopsys plugin, hierarchical RTL and gate-level simulation is supporte
 * ``-$(VLSI_TOP)`` suffixes denote simulations/power analysis on a submodule in a hierarchical flow (remember to override this variable). Note that you must provide the testbenches for these modules since the default testbench only simulates a Chipyard-based ``ChipTop`` DUT instance.
 
 The simulation configuration (e.g. binaries) can be edited for your design. See the ``Makefile`` and refer to Hammer's documentation for how to set up simulation parameters for your design.
+
+UPF Generation Flow
+-------------------------------
+This VLSI flow experimentally supports generating Chisel-based `UPF <https://vlsitutorials.com/upf-low-power-vlsi/>`__ files using `Chisel Aspects <https://javadoc.io/doc/edu.berkeley.cs/chisel3_2.13/latest/chisel3/aop/Aspect.html>`__.
+
+To generate UPF for any design, first modify the ``UPFInputs`` object in ``generators/chipyard/src/main/scala/upf/UPFInputs.scala`` to fit your design power specifications.
+
+This involves filling in the ``upfInfo`` list with ``PowerDomainInput`` objects representing all the power domains you want in your design, along with specifying hierarchy and domain attributes.
+
+The given example in ``UPFInputs`` corresponds to a dual-core Rocket config with 3 power domains (1 parent domain with all uncore modules and 2 children corresponding to the Rocket tiles).
+
+To run the flow:
+
+.. code-block:: shell
+
+    cd chipyard/vlsi
+    make verilog ASPECTS=chipyard.upf.ChipTopUPFAspect
+
+The output UPF files will be dumped in ``vlsi/generated-src/upf``.

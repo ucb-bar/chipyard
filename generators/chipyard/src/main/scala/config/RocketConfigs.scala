@@ -19,14 +19,6 @@ class TinyRocketConfig extends Config(
   new freechips.rocketchip.subsystem.With1TinyCore ++             // single tiny rocket-core
   new chipyard.config.AbstractConfig)
 
-class UARTTSIRocketConfig extends Config(
-  new chipyard.harness.WithUARTSerial ++
-  new chipyard.config.WithNoUART ++
-  new chipyard.config.WithMemoryBusFrequency(10) ++
-  new chipyard.config.WithPeripheryBusFrequency(10) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
-  new chipyard.config.AbstractConfig)
-
 class SimAXIRocketConfig extends Config(
   new chipyard.harness.WithSimAXIMem ++                     // drive the master AXI4 memory with a SimAXIMem, a 1-cycle magic memory, instead of default SimDRAM
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -103,29 +95,6 @@ class MulticlockRocketConfig extends Config(
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
   new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
   new chipyard.config.AbstractConfig)
-
-// DOC include start: MulticlockAXIOverSerialConfig
-class MulticlockAXIOverSerialConfig extends Config(
-  new chipyard.config.WithSystemBusFrequency(250) ++
-  new chipyard.config.WithPeripheryBusFrequency(250) ++
-  new chipyard.config.WithMemoryBusFrequency(250) ++
-  new chipyard.config.WithFrontBusFrequency(50) ++
-  new chipyard.config.WithTileFrequency(500, Some(1)) ++
-  new chipyard.config.WithTileFrequency(250, Some(0)) ++
-
-  new chipyard.config.WithFbusToSbusCrossingType(AsynchronousCrossing()) ++
-  new testchipip.WithAsynchronousSerialSlaveCrossing ++
-  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(
-    AsynchronousCrossing().depth,
-    AsynchronousCrossing().sourceSync) ++
-
-  new chipyard.harness.WithSimAXIMemOverSerialTL ++ // add SimDRAM DRAM model for axi4 backing memory over the SerDes link, if axi4 mem is enabled
-  new testchipip.WithSerialTLBackingMemory ++       // remove axi4 mem port in favor of SerialTL memory
-
-  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++ // 1 memory channel
-  new chipyard.config.AbstractConfig)
-// DOC include end: MulticlockAXIOverSerialConfig
 
 class CustomIOChipTopRocketConfig extends Config(
   new chipyard.example.WithCustomChipTop ++

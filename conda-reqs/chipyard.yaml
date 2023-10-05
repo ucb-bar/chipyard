@@ -23,13 +23,12 @@ dependencies:
     # bundle FireSim driver with deps into installer shell-script
     - constructor
 
-    - gcc
-    - gxx
+    - gcc<13
+    - gxx<13
     - sysroot_linux-64=2.17 # needed to match pre-built CI XRT glibc version
     - conda-gcc-specs
     - binutils
 
-    - dromajo # from ucb-bar channel - https://github.com/riscv-boom/dromajo
     - firtool==1.30.0 # from ucb-bar channel - https://github.com/ucb-bar/firtool-feedstock
 
     # misc
@@ -103,7 +102,7 @@ dependencies:
     - sty
     - open_pdks.sky130a
     - pip:
-        - hammer-vlsi[asap7]==1.1.1
+        - hammer-vlsi[asap7]==1.1.2
 
     # doc requirements
     - sphinx

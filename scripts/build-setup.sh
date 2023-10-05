@@ -123,7 +123,7 @@ if run_step "1"; then
     fi
 
     # use conda-lock to create env
-    conda-lock install -p $CYDIR/.conda-env $LOCKFILE
+    conda-lock install --conda $(which conda) -p $CYDIR/.conda-env $LOCKFILE
 
     source $CYDIR/.conda-env/etc/profile.d/conda.sh
     conda activate $CYDIR/.conda-env
@@ -178,7 +178,7 @@ if run_step "6"; then
         pushd $CYDIR/sims/firesim
         (
             echo $CYDIR
-            source sourceme-f1-manager.sh --skip-ssh-setup
+            source sourceme-manager.sh --skip-ssh-setup
             pushd sim
             make sbt SBT_COMMAND="project {file:$CYDIR}firechip; compile" TARGET_PROJECT=firesim
             popd

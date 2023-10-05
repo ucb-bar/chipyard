@@ -5,7 +5,7 @@
 #define SPIFLASH_BASE_MEM 0x20000000
 #define SPIFLASH_BASE_MEM_SIZE 0x10000000
 
-#define SPIFLASH_BASE_CTRL 0x10040000
+#define SPIFLASH_BASE_CTRL 0x10030000
 // Only defining the registers we use; there are more
 // Software control
 #define SPIFLASH_OFFS_CSMODE 0x18
