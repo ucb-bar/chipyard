@@ -94,110 +94,6 @@ jobs:
 
   ##########################################################################
 
-  commit-on-master-check:
-    name: commit-on-master-check
-    needs: [setup-complete]
-    if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Check commits of each submodule
-        run: |
-            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-            .github/scripts/check-commit.sh
-
-  tutorial-setup-check:
-    name: tutorial-setup-check
-    needs: [setup-complete]
-    if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Check that the tutorial-setup patches apply
-        run: |
-            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-            scripts/tutorial-setup.sh
-
-  documentation-check:
-    name: documentation-check
-    needs: [setup-complete]
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Check that documentation builds with no warnings/errors
-        run: |
-          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-          make -C docs html
-      - name: Show error log from sphinx if failed
-        if: ${{ failure() }}
-        run: cat /tmp/sphinx-err*.log
-
-  build-extra-tests:
-    name: build-extra-tests
-    needs: [setup-complete]
-    if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Generate keys
-        id: genkey
-        run: |
-          echo "extra-tests-cache-key=extra-tests-${{ github.sha }}" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v3
-        id: build-extra-tools-cache
-        with:
-          path: extra-tests-install
-          key: ${{ steps.genkey.outputs.extra-tests-cache-key }}
-          restore-keys: ${{ steps.genkey.outputs.extra-tests-cache-key }}
-      - name: Build extra tests
-        run: |
-            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-            .github/scripts/build-extra-tests.sh
-
   prepare-chipyard-cores:
     name: prepare-chipyard-cores
     needs: setup-complete
@@ -219,50 +115,6 @@ jobs:
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-cores"
-
-  prepare-chipyard-constellation:
-    name: prepare-chipyard-constellation
-    needs: setup-complete
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Build RTL on self-hosted
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-constellation"
-
-  prepare-chipyard-peripherals:
-    name: prepare-chipyard-peripherals
-    needs: setup-complete
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Build RTL on self-hosted
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-peripherals"
 
   prepare-chipyard-accels:
     name: prepare-chipyard-accels
@@ -568,121 +420,6 @@ jobs:
           group-key: "group-cores"
           project-key: "chipyard-spike"
 
-  chipyard-dmirocket-run-tests:
-    name: chipyard-dmirocket-run-tests
-    needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-peripherals"
-          project-key: "chipyard-dmirocket"
-
-  chipyard-dmiboom-run-tests:
-    name: chipyard-dmiboom-run-tests
-    needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-peripherals"
-          project-key: "chipyard-dmiboom"
-
-  chipyard-spiflashwrite-run-tests:
-    name: chipyard-spiflashwrite-run-tests
-    needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-          ls -alh .
-          rm -rf ${{ github.workspace }}/* || true
-          rm -rf ${{ github.workspace }}/.* || true
-          ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-peripherals"
-          project-key: "chipyard-spiflashwrite"
-
-  chipyard-manyperipherals-run-tests:
-    name: chipyard-manyperipherals-run-tests
-    needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-peripherals"
-          project-key: "chipyard-manyperipherals"
-
-  chipyard-tethered-run-tests:
-    name: chipyard-tethered-run-tests
-    needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-peripherals"
-          project-key: "chipyard-tethered"
-
   chipyard-sha3-run-tests:
     name: chipyard-sha3-run-tests
     needs: prepare-chipyard-accels
@@ -930,86 +667,29 @@ jobs:
       #     group-key: "group-other"
       #     project-key: "rocketchip-tlxbar"
 
-  constellation-run-tests:
-    name: constellation-run-tests
-    needs: prepare-chipyard-other
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-other"
-          project-key: "constellation"
-
-  chipyard-constellation-run-tests:
-    name: chipyard-constellation-run-tests
-    needs: prepare-chipyard-constellation
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-constellation"
-          project-key: "chipyard-constellation"
-
   # Sentinel job to simplify how we specify which checks need to pass in branch
   # protection and in Mergify
   #
   # When adding new top level jobs, please add them to `needs` below
   all_tests_passed:
     name: "all tests passed"
-    needs: [commit-on-master-check,
-            tutorial-setup-check,
-            documentation-check,
-            chipyard-rocket-run-tests,
+    needs: [chipyard-rocket-run-tests,
             chipyard-hetero-run-tests,
             chipyard-boom-run-tests,
             chipyard-shuttle-run-tests,
             chipyard-cva6-run-tests,
             chipyard-ibex-run-tests,
             chipyard-sodor-run-tests,
-            chipyard-dmiboom-run-tests,
-            chipyard-dmirocket-run-tests,
-            chipyard-spiflashwrite-run-tests,
-            chipyard-manyperipherals-run-tests,
-            chipyard-tethered-run-tests,
             chipyard-sha3-run-tests,
             chipyard-gemmini-run-tests,
             chipyard-manymmioaccels-run-tests, # chipyard-nvdla-run-tests,
             chipyard-prefetchers-run-tests,
             chipyard-mempress-run-tests,
-            chipyard-constellation-run-tests,
             tracegen-boom-run-tests,
             tracegen-run-tests,
             icenet-run-tests,
             testchipip-run-tests,
             rocketchip-run-tests,
-            constellation-run-tests,
-            # prepare-chipyard-fpga, # firesim-run-tests,
             ]
     runs-on: self-hosted
     steps:
