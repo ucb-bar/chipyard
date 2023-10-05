@@ -5,8 +5,6 @@ runs:
   steps:
     - name: Create conda environments
       run: |
-        echo $(which conda)
-        conda activate base
         if conda env list | grep -q "envs/${{ env.conda-env-name-no-time }}"; then
           echo "Using pre-existing conda environments with prefix ${{ env.conda-env-name-no-time }}"
         else
