@@ -300,6 +300,7 @@ class FireSimLeanGemminiPrintfRocketConfig extends Config(
 //**********************************************************************************
 class SupernodeFireSimRocketConfig extends Config(
   new WithFireSimHarnessClockBridgeInstantiator ++
+  new WithDefaultMemModel ++ // this is a global for all the multi-chip configs
   new chipyard.harness.WithHomogeneousMultiChip(n=4, new Config(
     new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 8L) ++ // 8GB DRAM per node
     new FireSimRocketConfig)))
