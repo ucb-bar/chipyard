@@ -208,7 +208,7 @@ class WithUARTIOCells extends OverrideIOBinder({
       val (port, ios) = IOCell.generateIOFromSignal(u, s"uart_${i}", system.p(IOCellKey), abstractResetAsAsync = true)
       val where = PBUS // TODO fix
       val bus = system.outer.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(where)
-      val freqMHz = bus.dtsFrequency.get.toInt / 1000000000
+      val freqMHz = bus.dtsFrequency.get.toInt / 1000000
       (UARTPort(port, i, freqMHz), ios)
     }).unzip
     (ports, cells2d.flatten)
