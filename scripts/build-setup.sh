@@ -194,9 +194,9 @@ fi
 # precompile chipyard scala sources
 if run_step "5"; then
     begin_step "5" "Pre-compiling Chipyard Scala sources"
-    pushd $CYDIR/sims/verilator
-    make launch-sbt SBT_COMMAND=";project chipyard; compile"
-    make launch-sbt SBT_COMMAND=";project tapeout; compile"
+    pushd $CYDIR/sims/verilator &&
+    make launch-sbt SBT_COMMAND=";project chipyard; compile" &&
+    make launch-sbt SBT_COMMAND=";project tapeout; compile" &&
     popd
     exit_if_last_command_failed
 fi
@@ -204,14 +204,14 @@ fi
 # setup firesim
 if run_step "6"; then
     begin_step "6" "Setting up FireSim"
-    $CYDIR/scripts/firesim-setup.sh
+    $CYDIR/scripts/firesim-setup.sh &&
     $CYDIR/sims/firesim/gen-tags.sh
     exit_if_last_command_failed
 
     # precompile firesim scala sources
     if run_step "7"; then
         begin_step "7" "Pre-compiling Firesim Scala sources"
-        pushd $CYDIR/sims/firesim
+        pushd $CYDIR/sims/firesim &&
         (
             set -e # Subshells un-set "set -e" so it must be re enabled
             echo $CYDIR
@@ -228,7 +228,7 @@ fi
 # setup firemarshal
 if run_step "8"; then
     begin_step "8" "Setting up FireMarshal"
-    pushd $CYDIR/software/firemarshal
+    pushd $CYDIR/software/firemarshal &&
     ./init-submodules.sh
     exit_if_last_command_failed
 
