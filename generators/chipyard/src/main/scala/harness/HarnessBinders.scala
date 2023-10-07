@@ -42,7 +42,7 @@ class WithGPIOTiedOff extends HarnessBinder({
 // DOC include start: WithUARTAdapter
 class WithUARTAdapter extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: UARTPort) => {
-    val div = (th.getHarnessBinderClockFreqMHz / port.io.c.initBaudRate.toDouble).toInt
+    val div = (th.getHarnessBinderClockFreqMHz * 1000000 / port.io.c.initBaudRate.toDouble).toInt
     val uart_sim = Module(new UARTAdapter(port.uartNo, div, false)).suggestName(s"uart_sim_uartno${port.uartNo}")
     uart_sim.io.uart.txd := port.io.txd
     port.io.rxd := uart_sim.io.uart.rxd
