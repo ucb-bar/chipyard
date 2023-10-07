@@ -86,7 +86,7 @@ class WithNICBridge extends HarnessBinder({
 class WithUARTBridge extends HarnessBinder({
   case (th: FireSim, port: UARTPort) =>
     val uartSyncClock = th.harnessClockInstantiator.requestClockMHz("uart_clock", port.freqMHz)
-    UARTBridge(uartSyncClock, port.io, th.harnessBinderReset.asBool)(th.p)
+    UARTBridge(uartSyncClock, port.io, th.harnessBinderReset.asBool, port.freqMHz)(th.p)
 })
 
 class WithBlockDeviceBridge extends HarnessBinder({
