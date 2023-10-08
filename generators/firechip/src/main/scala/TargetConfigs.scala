@@ -79,9 +79,7 @@ class WithMinimalFireSimDesignTweaks extends Config(
   // Required: Existing FAME-1 transform cannot handle black-box clock gates
   new WithoutClockGating ++
   // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
-  new WithoutTLMonitors ++
-  // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
-  new chipyard.config.WithNoDebug
+  new WithoutTLMonitors
 )
 
 // Non-frequency tweaks that are generally applied to all firesim configs
@@ -244,6 +242,12 @@ class FireSimSmallSystemConfig extends Config(
   new chipyard.config.WithUARTInitBaudRate(BigInt(3686400L)) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nWays = 2, capacityKB = 64) ++
   new chipyard.RocketConfig)
+
+class FireSimDmiRocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.dmiRocketConfig)
 
 //*****************************************************************
 // Boom config, base off chipyard's LargeBoomConfig

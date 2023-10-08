@@ -9,7 +9,7 @@ import chisel3.util.experimental.BoringUtils
 
 import org.chipsalliance.cde.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
-import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebug, ExportDebug, DMI}
+import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebug, ExportDebug, DMI, ClockedDMIIO, DebugModuleKey}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile.{RocketTile}
@@ -30,7 +30,7 @@ import cva6.CVA6Tile
 
 import boom.common.{BoomTile}
 import barstools.iocell.chisel._
-import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters, IOCellKey}
+import chipyard.iobinders.{IOBinders, OverrideIOBinder, ComposeIOBinder, GetSystemParameters, IOCellKey, JTAGChipIO}
 import chipyard._
 import chipyard.harness._
 
@@ -77,6 +77,19 @@ class WithTSIBridgeAndHarnessRAMOverSerialTL extends OverrideHarnessBinder({
       port.clock := th.harnessBinderClock
       val ram = TSIHarness.connectRAM(system.serdesser.get, bits, th.harnessBinderReset)
       TSIBridge(th.harnessBinderClock, ram.module.io.tsi, p(ExtMem).map(_ => MainMemoryConsts.globalName), th.harnessBinderReset.asBool)
+    }
+    Nil
+  }
+})
+
+class WithDMIBridge extends OverrideHarnessBinder({
+  (system: HasPeripheryDebug, th: FireSim, ports: Seq[Data]) => {
+    implicit val p = GetSystemParameters(system)
+    ports.map {
+      case d: ClockedDMIIO =>
+        DMIBridge(th.harnessBinderClock, d, p(ExtMem).map(_ => MainMemoryConsts.globalName), th.harnessBinderReset.asBool, p(DebugModuleKey).get.nDMIAddrSize)
+      // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
+      case j: JTAGChipIO => require(false)
     }
     Nil
   }
@@ -199,6 +212,7 @@ class WithFireSimFAME5 extends ComposeIOBinder({
 // Shorthand to register all of the provided bridges above
 class WithDefaultFireSimBridges extends Config(
   new WithTSIBridgeAndHarnessRAMOverSerialTL ++
+  new WithDMIBridge ++
   new WithNICBridge ++
   new WithUARTBridge ++
   new WithBlockDeviceBridge ++
@@ -212,6 +226,7 @@ class WithDefaultFireSimBridges extends Config(
 // Shorthand to register all of the provided mmio-only bridges above
 class WithDefaultMMIOOnlyFireSimBridges extends Config(
   new WithTSIBridgeAndHarnessRAMOverSerialTL ++
+  new WithDMIBridge ++
   new WithUARTBridge ++
   new WithBlockDeviceBridge ++
   new WithFASEDBridge ++
