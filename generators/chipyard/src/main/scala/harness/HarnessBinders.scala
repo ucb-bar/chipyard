@@ -106,7 +106,11 @@ class WithBlockDeviceModel extends OverrideHarnessBinder({
 class WithLoopbackNIC extends OverrideHarnessBinder({
   (system: CanHavePeripheryIceNIC, th: HasHarnessInstantiators, ports: Seq[ClockedIO[NICIOvonly]]) => {
     implicit val p: Parameters = GetSystemParameters(system)
-    ports.map { n => NicLoopback.connect(Some(n.bits), p(NICKey)) }
+    ports.map { n =>
+      withClockAndReset(n.clock, th.harnessBinderReset.asBool) {
+        NicLoopback.connect(Some(n.bits), p(NICKey))
+      }
+    }
   }
 })
 
