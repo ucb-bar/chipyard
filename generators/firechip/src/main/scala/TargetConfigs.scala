@@ -344,3 +344,26 @@ class FireSimLeanGemminiRocketMMIOOnlyConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.LeanGemminiRocketConfig)
+
+class WithFireSimNoBDConfigTweaks extends Config(
+  new chipyard.config.WithSystemBusFrequency(1000.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(1000.0) ++
+  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
+  new WithMinimalFireSimDesignTweaks ++
+  // Required: Bake in the default FASED memory model
+  new WithDefaultMemModel ++
+  // Optional: reduce the width of the Serial TL interface
+  new testchipip.WithSerialTLWidth(4) ++
+  // Required*: Scale default baud rate with periphery bus frequency
+  new chipyard.config.WithUARTInitBaudRate(BigInt(3686400L)) ++
+  // Optional: Adds IO to attach tracerV bridges
+  new chipyard.config.WithTraceIO ++
+  // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 32 GiB on F1)
+  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
+)
+
+class FireSimRocketNoBlockDeviceMMIOOnlyConfig extends Config(
+  new WithDefaultMMIOOnlyFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimNoBDConfigTweaks ++
+  new chipyard.RocketConfig)
