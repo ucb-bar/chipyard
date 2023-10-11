@@ -72,8 +72,13 @@ class WithTSIBridgeAndHarnessRAMOverSerialTL extends HarnessBinder({
     val ram = LazyModule(new SerialRAM(port.serdesser)(Parameters.empty))
     Module(ram.module)
     ram.module.io.ser <> port.io.bits
-    TSIBridge(th.harnessBinderClock, ram.module.io.tsi,
-      port.params.serialTLManagerParams.map(_ => MainMemoryConsts.globalName(th.p(MultiChipIdx))), th.harnessBinderReset.asBool)(th.p)
+
+    // This assumes that:
+    // If ExtMem for the target is defined, then FASED bridge will be attached
+    // If FASED bridge is attached, loadmem widget is present
+    val hasMainMemory = th.chipParameters(th.p(MultiChipIdx))(ExtMem).isDefined
+    val mainMemoryName = Option.when(hasMainMemory)(MainMemoryConsts.globalName(th.p(MultiChipIdx)))
+    TSIBridge(th.harnessBinderClock, ram.module.io.tsi, mainMemoryName, th.harnessBinderReset.asBool)(th.p)
   }
 })
 
