@@ -36,20 +36,21 @@ class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigIn
 })
 
 class RadianceConfig extends Config(
-  new freechips.rocketchip.subsystem.WithRadianceCores(use_vx_cache = false) ++
+  new freechips.rocketchip.subsystem.WithRadianceCores(1, useVxCache = false) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   // new freechips.rocketchip.subsystem.WithNoMemPort ++
   // new testchipip.WithSbusScratchpad(banks=2) ++
   // new testchipip.WithMbusScratchpad(banks=2) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
   new WithRadBootROM() ++
+  // new testchipip.WithMbusScratchpad(base=0x7FFF0000L, size=0x10000, banks=1) ++
   new WithRadROMs(0x7FFF0000L, 0x10000, "sims/vcs/args.bin") ++
   new WithRadROMs(0x20000L, 0x8000, "sims/vcs/op_a.bin") ++
   new WithRadROMs(0x28000L, 0x8000, "sims/vcs/op_b.bin") ++
   new AbstractConfig)
 
 class RadianceConfigVortexCache extends Config(
-  new freechips.rocketchip.subsystem.WithRadianceCores(use_vx_cache = true) ++
+  new freechips.rocketchip.subsystem.WithRadianceCores(1, useVxCache = true) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   // new freechips.rocketchip.subsystem.WithNoMemPort ++
   // new testchipip.WithSbusScratchpad(banks=2) ++
