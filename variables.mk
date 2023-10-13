@@ -224,7 +224,7 @@ BB_MODS_FILELIST ?= $(build_dir)/$(long_name).bb.f
 # all module files to include (top, model, bb included)
 ALL_MODS_FILELIST ?= $(build_dir)/$(long_name).all.f
 
-BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
+BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img bootrom.radiance.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
 
 # files that contain lists of files needed for VCS or Verilator simulation
