@@ -46,7 +46,7 @@ class RadianceROMConfig extends Config(
     new AbstractConfig)
 
 class RadianceConfig extends Config(
-  new freechips.rocketchip.subsystem.WithRadianceCores(use_vx_cache = false) ++
+  new freechips.rocketchip.subsystem.WithRadianceCores(1, useVxCache = false) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
   new WithRadBootROM() ++
@@ -54,7 +54,7 @@ class RadianceConfig extends Config(
   new AbstractConfig)
 
 class RadianceConfigVortexCache extends Config(
-  new freechips.rocketchip.subsystem.WithRadianceCores(use_vx_cache = true) ++
+  new freechips.rocketchip.subsystem.WithRadianceCores(1, useVxCache = true) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   // new freechips.rocketchip.subsystem.WithNoMemPort ++
   // new testchipip.WithSbusScratchpad(banks=2) ++
