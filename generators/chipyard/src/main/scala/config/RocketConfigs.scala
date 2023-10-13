@@ -46,12 +46,26 @@ class RadianceROMConfig extends Config(
     new AbstractConfig)
 
 class RadianceConfig extends Config(
-  new freechips.rocketchip.subsystem.WithRadianceCores() ++
+  new freechips.rocketchip.subsystem.WithRadianceCores(use_vx_cache = false) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
   new WithRadBootROM() ++
   new testchipip.WithMbusScratchpad(base=0x7FFF0000L, size=0x10000, banks=1) ++
   new AbstractConfig)
+
+class RadianceConfigVortexCache extends Config(
+  new freechips.rocketchip.subsystem.WithRadianceCores(use_vx_cache = true) ++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  // new freechips.rocketchip.subsystem.WithNoMemPort ++
+  // new testchipip.WithSbusScratchpad(banks=2) ++
+  // new testchipip.WithMbusScratchpad(banks=2) ++
+  new WithExtMemSize(BigInt("80000000", 16)) ++
+  new WithRadBootROM() ++
+  new WithRadROMs(0x7FFF0000L, 0x10000, "sims/vcs/args.bin") ++
+  new WithRadROMs(0x20000L, 0x8000, "sims/vcs/op_a.bin") ++
+  new WithRadROMs(0x28000L, 0x8000, "sims/vcs/op_b.bin") ++
+  new AbstractConfig
+)
 
 class TinyRocketConfig extends Config(
   new chipyard.iobinders.WithDontTouchIOBinders(false) ++         // TODO FIX: Don't dontTouch the ports
@@ -141,29 +155,6 @@ class MulticlockRocketConfig extends Config(
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
   new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
   new chipyard.config.AbstractConfig)
-
-// DOC include start: MulticlockAXIOverSerialConfig
-class MulticlockAXIOverSerialConfig extends Config(
-  new chipyard.config.WithSystemBusFrequency(250) ++
-  new chipyard.config.WithPeripheryBusFrequency(250) ++
-  new chipyard.config.WithMemoryBusFrequency(250) ++
-  new chipyard.config.WithFrontBusFrequency(50) ++
-  new chipyard.config.WithTileFrequency(500, Some(1)) ++
-  new chipyard.config.WithTileFrequency(250, Some(0)) ++
-
-  new chipyard.config.WithFbusToSbusCrossingType(AsynchronousCrossing()) ++
-  new testchipip.WithAsynchronousSerialSlaveCrossing ++
-  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(
-    AsynchronousCrossing().depth,
-    AsynchronousCrossing().sourceSync) ++
-
-  new chipyard.harness.WithSimAXIMemOverSerialTL ++ // add SimDRAM DRAM model for axi4 backing memory over the SerDes link, if axi4 mem is enabled
-  new testchipip.WithSerialTLBackingMemory ++       // remove axi4 mem port in favor of SerialTL memory
-
-  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++ // 1 memory channel
-  new chipyard.config.AbstractConfig)
-// DOC include end: MulticlockAXIOverSerialConfig
 
 class CustomIOChipTopRocketConfig extends Config(
   new chipyard.example.WithCustomChipTop ++

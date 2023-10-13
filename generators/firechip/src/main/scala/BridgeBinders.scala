@@ -9,7 +9,7 @@ import chisel3.util.experimental.BoringUtils
 
 import org.chipsalliance.cde.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
-import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebug}
+import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebug, ExportDebug, DMI}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile.{RocketTile}
@@ -108,48 +108,6 @@ class WithBlockDeviceBridge extends OverrideHarnessBinder({
   }
 })
 
-class WithAXIOverSerialTLCombinedBridges extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: FireSim, ports: Seq[ClockedIO[SerialIO]]) => {
-    implicit val p = GetSystemParameters(system)
-
-    p(SerialTLKey).map({ sVal =>
-      val serialTLManagerParams = sVal.serialTLManagerParams.get
-      val axiDomainParams = serialTLManagerParams.axiMemOverSerialTLParams.get
-      require(serialTLManagerParams.isMemoryDevice)
-      val memFreq = axiDomainParams.getMemFrequency(system.asInstanceOf[HasTileLinkLocations])
-
-      ports.map({ port =>
-        val axiClock = th.harnessClockInstantiator.requestClockHz("mem_over_serial_tl_clock", memFreq)
-
-        val serial_bits = port.bits
-        port.clock := th.harnessBinderClock
-        val harnessMultiClockAXIRAM = TSIHarness.connectMultiClockAXIRAM(
-          system.serdesser.get,
-          serial_bits,
-          axiClock,
-          ResetCatchAndSync(axiClock, th.harnessBinderReset.asBool))
-        TSIBridge(th.harnessBinderClock, harnessMultiClockAXIRAM.module.io.tsi, Some(MainMemoryConsts.globalName), th.harnessBinderReset.asBool)
-
-        // connect SimAxiMem
-        (harnessMultiClockAXIRAM.mem_axi4.get zip harnessMultiClockAXIRAM.memNode.get.edges.in).map { case (axi4, edge) =>
-          val nastiKey = NastiParameters(axi4.bits.r.bits.data.getWidth,
-                                        axi4.bits.ar.bits.addr.getWidth,
-                                        axi4.bits.ar.bits.id.getWidth)
-          system match {
-            case s: BaseSubsystem => FASEDBridge(axi4.clock, axi4.bits, axi4.reset.asBool,
-              CompleteConfig(p(firesim.configs.MemModelKey),
-                            nastiKey,
-                            Some(AXI4EdgeSummary(edge)),
-                            Some(MainMemoryConsts.globalName)))
-            case _ => throw new Exception("Attempting to attach FASED Bridge to misconfigured design")
-          }
-        }
-      })
-    })
-
-    Nil
-  }
-})
 
 class WithFASEDBridge extends OverrideHarnessBinder({
   (system: CanHaveMasterAXI4MemPort, th: FireSim, ports: Seq[ClockedAndResetIO[AXI4Bundle]]) => {
@@ -178,11 +136,25 @@ class WithTracerVBridge extends ComposeHarnessBinder({
   }
 })
 
-class WithDromajoBridge extends ComposeHarnessBinder({
-  (system: CanHaveTraceIOModuleImp, th: FireSim, ports: Seq[TraceOutputTop]) =>
-    ports.map { p => p.traces.map(tileTrace => DromajoBridge(tileTrace)(system.p)) }; Nil
+class WithCospikeBridge extends ComposeHarnessBinder({
+  (system: CanHaveTraceIOModuleImp, th: FireSim, ports: Seq[TraceOutputTop]) => {
+    implicit val p = chipyard.iobinders.GetSystemParameters(system)
+    val chipyardSystem = system.asInstanceOf[ChipyardSystemModule[_]].outer.asInstanceOf[ChipyardSystem]
+    val tiles = chipyardSystem.tiles
+    val cfg = SpikeCosimConfig(
+      isa = tiles.headOption.map(_.isaDTS).getOrElse(""),
+      vlen = tiles.headOption.map(_.tileParams.core.vLen).getOrElse(0),
+      priv = tiles.headOption.map(t => if (t.usingUser) "MSU" else if (t.usingSupervisor) "MS" else "M").getOrElse(""),
+      mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0)),
+      mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
+      pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0),
+      nharts = tiles.size,
+      bootrom = chipyardSystem.bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse(""),
+      has_dtm = p(ExportDebug).protocols.contains(DMI) // assume that exposing clockeddmi means we will connect SimDTM
+    )
+    ports.map { p => p.traces.zipWithIndex.map(t => CospikeBridge(t._1, t._2, cfg)) }
+  }
 })
-
 
 class WithTraceGenBridge extends OverrideHarnessBinder({
   (system: TraceGenSystemModuleImp, th: FireSim, ports: Seq[Bool]) =>

@@ -139,7 +139,7 @@ ifeq ($(SUB_PROJECT),constellation)
 	TOP               ?= NoC
 endif
 # For graphics developers
-ifeq ($(SUB_PROJECT),graphics)
+ifeq ($(SUB_PROJECT),coalescer)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= $(MODEL)
