@@ -135,7 +135,7 @@ class WithBlackBoxSimMem(additionalLatency: Int = 0) extends HarnessBinder({
 class WithSimAXIMMIO extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: AXI4MMIOPort) => {
     val mmio_mem = LazyModule(new SimAXIMem(port.edge, size = port.params.size)(Parameters.empty))
-    withClock(port.io.clock) { Module(mmio_mem.module) }
+    withClock(port.io.clock) { Module(mmio_mem.module).suggestName("mmio_mem") }
     mmio_mem.io_axi4.head <> port.io.bits
   }
 })
