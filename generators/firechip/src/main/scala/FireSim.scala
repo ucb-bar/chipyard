@@ -5,20 +5,25 @@ package firesim.firesim
 import scala.collection.mutable.{LinkedHashMap}
 
 import chisel3._
-import chisel3.experimental.{IO}
+import chisel3.experimental.{IO, annotate}
 
 import freechips.rocketchip.prci._
-import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey}
+import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey, HasTiles}
 import org.chipsalliance.cde.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, InModuleBody, ValName}
 import freechips.rocketchip.util.{ResetCatchAndSync, RecordMap}
+import freechips.rocketchip.tile.{RocketTile}
+import boom.common.{BoomTile}
 
 import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge, RationalClock, ResetPulseBridge, ResetPulseBridgeParameters}
-
+import midas.targetutils.{MemModelAnnotation, EnableModelMultiThreadingAnnotation}
 import chipyard._
 import chipyard.harness._
 import chipyard.iobinders._
 import chipyard.clocking._
+
+case object FireSimMultiCycleRegFile extends Field[Boolean](false)
+case object FireSimFAME5 extends Field[Boolean](false)
 
 /**
   * Under FireSim's current multiclock implementation there can be only a
@@ -85,11 +90,46 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessInsta
 
   override val supportsMultiChip = true
 
-  instantiateChipTops()
+  val chiptops = instantiateChipTops()
 
   // Ensures FireSim-synthesized assertions and instrumentation is disabled
   // while resetBridge.io.reset is asserted.  This ensures assertions do not fire at
   // time zero in the event their local reset is delayed (typically because it
   // has been pipelined)
   midas.targetutils.GlobalResetCondition(resetBridge.io.reset)
+
+
+  // FireSim multi-cycle regfile optimization
+  // FireSim ModelMultithreading
+  chiptops.foreach {
+    case c: ChipTop => c.lazySystem match {
+      case ls: HasTiles => {
+        if (p(FireSimMultiCycleRegFile)) ls.tiles.map {
+          case r: RocketTile => {
+            annotate(MemModelAnnotation(r.module.core.rocketImpl.rf.rf))
+            r.module.fpuOpt.foreach(fpu => annotate(MemModelAnnotation(fpu.fpuImpl.regfile)))
+          }
+          case b: BoomTile => {
+            val core = b.module.core
+            core.iregfile match {
+              case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
+            }
+            if (core.fp_pipeline != null) core.fp_pipeline.fregfile match {
+              case frf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(frf.regfile))
+            }
+          }
+          case _ =>
+        }
+        if (p(FireSimFAME5)) ls.tiles.map {
+          case b: BoomTile =>
+            annotate(EnableModelMultiThreadingAnnotation(b.module))
+          case r: RocketTile =>
+            annotate(EnableModelMultiThreadingAnnotation(r.module))
+          case _ => Nil
+        }
+      }
+      case _ =>
+    }
+    case _ =>
+  }
 }

@@ -63,7 +63,7 @@ trait HasHarnessInstantiators {
 
   val supportsMultiChip: Boolean = false
 
-  private val chipParameters = p(MultiChipNChips) match {
+  val chipParameters = p(MultiChipNChips) match {
     case Some(n) => (0 until n).map { i => p(MultiChipParameters(i)).alterPartial {
       case TargetDirKey => p(TargetDirKey) // hacky fix
       case MultiChipIdx => i
@@ -83,7 +83,7 @@ trait HasHarnessInstantiators {
 
     withClockAndReset (harnessBinderClock, harnessBinderReset) {
       lazyDuts.zipWithIndex.foreach {
-        case (d: HasIOBinders, i: Int) => ApplyHarnessBinders(this, d.lazySystem, d.portMap)(chipParameters(i))
+        case (d: HasIOBinders, i: Int) => ApplyHarnessBinders(this, d.portMap.values.flatten.toSeq)(chipParameters(i))
         case _ =>
       }
       ApplyMultiHarnessBinders(this, lazyDuts)

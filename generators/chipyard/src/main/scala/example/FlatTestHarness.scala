@@ -30,7 +30,7 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
   val clock_source = Module(new ClockSourceAtFreqFromPlusArg("slow_clk_freq_mhz"))
   clock_source.io.power := true.B
   clock_source.io.gate := false.B
-  dut.clock_pad.clock := clock_source.io.clk
+  dut.clock_pad := clock_source.io.clk
 
   // Reset
   dut.reset_pad := reset.asAsyncReset
