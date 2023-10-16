@@ -36,7 +36,7 @@ class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigIn
 })
 
 class RadianceROMConfig extends Config(
-  new freechips.rocketchip.subsystem.WithRadianceCores() ++
+  new freechips.rocketchip.subsystem.WithRadianceCores(1, useVxCache = false) ++
     new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
     new WithExtMemSize(BigInt("80000000", 16)) ++
     new WithRadBootROM() ++
