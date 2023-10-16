@@ -911,6 +911,7 @@ object MacroCompiler extends App {
               .execute(
                 Array.empty,
                 Seq(
+                  OutputFileAnnotation(params.get(Verilog).get),
                   RunFirrtlTransformAnnotation(new VerilogEmitter),
                   EmitCircuitAnnotation(classOf[VerilogEmitter]),
                   FirrtlSourceAnnotation(circuit.serialize)
@@ -922,6 +923,7 @@ object MacroCompiler extends App {
               .value
           }
           .mkString("\n")
+
         val verilogWriter = new FileWriter(new File(params.get(Verilog).get))
         verilogWriter.write(verilog)
         verilogWriter.close()
