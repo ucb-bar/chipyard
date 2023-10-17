@@ -121,6 +121,7 @@ jobs:
     needs: setup-complete
     runs-on: self-hosted
     steps:
+      # see https://gist.github.com/pataruco/91b6cda6b02b61b3bcd2bbbfaa963fd9
       - uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
