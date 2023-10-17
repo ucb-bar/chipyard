@@ -139,7 +139,7 @@ case $1 in
         ;;
     chipyard-vortex)
         # FIXME fix args.bin
-        run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.elf
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.bin.elf
         ;;
     chipyard-coalescer)
         run_binary BINARY=none
