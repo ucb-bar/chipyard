@@ -29,8 +29,8 @@ case class ChipyardPRCIControlParams(
 
 case object ChipyardPRCIControlKey extends Field[ChipyardPRCIControlParams](ChipyardPRCIControlParams())
 
-trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesHierarchicalElementss =>
-  require(!p(SubsystemDriveDriveClockGroupsFromIO), "Subsystem allClockGroups cannot be driven from implicit clocks")
+trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesHierarchicalElements =>
+  require(!p(SubsystemDriveClockGroupsFromIO), "Subsystem allClockGroups cannot be driven from implicit clocks")
 
   val prciParams = p(ChipyardPRCIControlKey)
 
