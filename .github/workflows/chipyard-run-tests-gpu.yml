@@ -270,6 +270,9 @@ jobs:
     needs: prepare-chipyard-gpu
     runs-on: self-hosted
     steps:
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
       - name: Delete old checkout
         run: |
             ls -alh .
@@ -293,6 +296,9 @@ jobs:
     needs: prepare-chipyard-gpu
     runs-on: self-hosted
     steps:
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
       - name: Delete old checkout
         run: |
             ls -alh .
@@ -316,6 +322,9 @@ jobs:
     needs: prepare-chipyard-gpu
     runs-on: self-hosted
     steps:
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
       - name: Delete old checkout
         run: |
             ls -alh .
