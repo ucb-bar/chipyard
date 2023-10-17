@@ -13,19 +13,18 @@ import scala.math.{max, min}
 
 class WithTraceGen(
   n: Int = 2,
-  overrideIdOffset: Option[Int] = None,
   overrideMemOffset: Option[BigInt] = None)(
   params: Seq[DCacheParams] = List.fill(n){ DCacheParams(nSets = 16, nWays = 1) },
   nReqs: Int = 8192
 ) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => {
     val prev = up(TilesLocated(InSubsystem), site)
-    val idOffset = overrideIdOffset.getOrElse(prev.size)
+    val idOffset = up(NumTiles)
     val memOffset: BigInt = overrideMemOffset.orElse(site(ExtMem).map(_.master.base)).getOrElse(0x0L)
     params.zipWithIndex.map { case (dcp, i) =>
       TraceGenTileAttachParams(
         tileParams = TraceGenParams(
-          hartId = i + idOffset,
+          tileId = i + idOffset,
           dcache = Some(dcp),
           wordBits = site(XLen),
           addrBits = 48,
@@ -48,23 +47,23 @@ class WithTraceGen(
       )
     } ++ prev
   }
+  case NumTiles => up(NumTiles) + n
 })
 
 class WithBoomTraceGen(
   n: Int = 2,
-  overrideIdOffset: Option[Int] = None,
   overrideMemOffset: Option[BigInt] = None)(
   params: Seq[DCacheParams] = List.fill(n){ DCacheParams(nMSHRs = 4, nSets = 16, nWays = 2) },
   nReqs: Int = 8192
 ) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => {
     val prev = up(TilesLocated(InSubsystem), site)
-    val idOffset = overrideIdOffset.getOrElse(prev.size)
+    val idOffset = up(NumTiles)
     val memOffset: BigInt = overrideMemOffset.orElse(site(ExtMem).map(_.master.base)).getOrElse(0x0L)
     params.zipWithIndex.map { case (dcp, i) =>
       BoomTraceGenTileAttachParams(
         tileParams = BoomTraceGenParams(
-          hartId = i + idOffset,
+          tileId = i + idOffset,
           dcache = Some(dcp),
           wordBits = site(XLen),
           addrBits = 48,
@@ -84,24 +83,24 @@ class WithBoomTraceGen(
       )
     } ++ prev
   }
+  case NumTiles => up(NumTiles) + n
 })
 
 class WithL2TraceGen(
   n: Int = 2,
-  overrideIdOffset: Option[Int] = None,
   overrideMemOffset: Option[BigInt] = None)(
   params: Seq[DCacheParams] = List.fill(n){ DCacheParams(nSets = 16, nWays = 1) },
   nReqs: Int = 8192
 ) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => {
     val prev = up(TilesLocated(InSubsystem), site)
-    val idOffset = overrideIdOffset.getOrElse(prev.size)
+    val idOffset = up(NumTiles)
     val memOffset: BigInt = overrideMemOffset.orElse(site(ExtMem).map(_.master.base)).getOrElse(0x0L)
 
     params.zipWithIndex.map { case (dcp, i) =>
       TraceGenTileAttachParams(
         tileParams = TraceGenParams(
-          hartId = i + idOffset,
+          tileId = i + idOffset,
           dcache = Some(dcp),
           wordBits = site(XLen),
           addrBits = 48,
@@ -126,4 +125,5 @@ class WithL2TraceGen(
       )
     } ++ prev
   }
+  case NumTiles => up(NumTiles) + n
 })

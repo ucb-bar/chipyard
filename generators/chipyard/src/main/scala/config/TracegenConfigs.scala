@@ -14,7 +14,7 @@ class AbstractTraceGenConfig extends Config(
   new chipyard.clocking.WithPassthroughClockGenerator ++
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("sbus", "implicit"), Nil)) ++
   new chipyard.config.WithTracegenSystem ++
-  new chipyard.config.WithNoSubsystemDrivenClocks ++
+  new chipyard.config.WithNoSubsystemClockIO ++
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++
   new chipyard.config.WithSystemBusFrequency(1000.0) ++
   new chipyard.config.WithPeripheryBusFrequency(1000.0) ++

@@ -2,6 +2,7 @@ package chipyard
 
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
+import freechips.rocketchip.subsystem.{InCluster}
 
 // --------------
 // Rocket Configs
@@ -109,4 +110,11 @@ class PrefetchingRocketConfig extends Config(
   new chipyard.config.WithTilePrefetchers ++                                           // add TL prefetchers between tiles and the sbus
   new freechips.rocketchip.subsystem.WithNonblockingL1(2) ++                           // non-blocking L1D$, L1 prefetching only works with non-blocking L1D$
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++                               // single rocket-core
+  new chipyard.config.AbstractConfig)
+
+class ClusteredRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithNBigCores(4, location=InCluster(1)) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(4, location=InCluster(0)) ++
+  new freechips.rocketchip.subsystem.WithCluster(1) ++
+  new freechips.rocketchip.subsystem.WithCluster(0) ++
   new chipyard.config.AbstractConfig)

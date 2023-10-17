@@ -24,9 +24,6 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule {
   //========================
   // Diplomatic clock stuff
   //========================
-  val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
-  system.connectImplicitClockSinkNode(implicitClockSinkNode)
-
   val tlbus = system.locateTLBusWrapper(system.prciParams.slaveWhere)
   val baseAddress = system.prciParams.baseAddress
   val clockDivider  = system.prci_ctrl_domain { LazyModule(new TLClockDivider (baseAddress + 0x20000, tlbus.beatBytes)) }
@@ -37,7 +34,7 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule {
   tlbus.coupleTo("clock-sel-ctrl") { clockSelector.tlNode := TLFragmenter(tlbus.beatBytes, tlbus.blockBytes) := TLBuffer() := _ }
   tlbus.coupleTo("pll-ctrl") { pllCtrl.tlNode := TLFragmenter(tlbus.beatBytes, tlbus.blockBytes) := TLBuffer() := _ }
 
-  system.allClockGroupsNode := clockDivider.clockNode := clockSelector.clockNode
+  system.chiptopClockGroupsNode := clockDivider.clockNode := clockSelector.clockNode
 
   // Connect all other requested clocks
   val slowClockSource = ClockSourceNode(Seq(ClockSourceParameters()))
@@ -61,13 +58,6 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule {
     //=========================
     // Clock/reset
     //=========================
-    val implicit_clock = implicitClockSinkNode.in.head._1.clock
-    val implicit_reset = implicitClockSinkNode.in.head._1.reset
-    system.module match { case l: LazyModuleImp => {
-      l.clock := implicit_clock
-      l.reset := implicit_reset
-    }}
-
     val clock_wire = Wire(Input(Clock()))
     val reset_wire = Wire(Input(AsyncReset()))
     val (clock_pad, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))

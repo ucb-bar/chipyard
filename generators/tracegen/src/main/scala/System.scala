@@ -9,11 +9,12 @@ import freechips.rocketchip.subsystem._
 import boom.lsu.BoomTraceGenTile
 
 class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
-    with HasTiles
+    with InstantiatesHierarchicalElements
+    with HasTileNotificationSinks
     with CanHaveMasterAXI4MemPort {
 
   def coreMonitorBundles = Nil
-  val tileStatusNodes = tiles.collect {
+  val tileStatusNodes = totalTiles.values.toSeq.collect {
     case t: GroundTestTile => t.statusNode.makeSink()
     case t: BoomTraceGenTile => t.statusNode.makeSink()
   }

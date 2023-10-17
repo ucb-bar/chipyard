@@ -18,16 +18,6 @@ class WithPLLSelectorDividerClockGenerator extends OverrideLazyIOBinder({
   (system: HasChipyardPRCI) => {
     // Connect the implicit clock
     implicit val p = GetSystemParameters(system)
-    val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
-    system.connectImplicitClockSinkNode(implicitClockSinkNode)
-    InModuleBody {
-      val implicit_clock = implicitClockSinkNode.in.head._1.clock
-      val implicit_reset = implicitClockSinkNode.in.head._1.reset
-      system.asInstanceOf[BaseSubsystem].module match { case l: LazyModuleImp => {
-        l.clock := implicit_clock
-        l.reset := implicit_reset
-      }}
-    }
     val tlbus = system.asInstanceOf[BaseSubsystem].locateTLBusWrapper(system.prciParams.slaveWhere)
     val baseAddress = system.prciParams.baseAddress
     val clockDivider  = system.prci_ctrl_domain { LazyModule(new TLClockDivider (baseAddress + 0x20000, tlbus.beatBytes)) }
@@ -38,7 +28,7 @@ class WithPLLSelectorDividerClockGenerator extends OverrideLazyIOBinder({
     clockSelector.tlNode := system.prci_ctrl_domain { TLFragmenter(tlbus.beatBytes, tlbus.blockBytes) := system.prci_ctrl_bus.get }
     pllCtrl.tlNode       := system.prci_ctrl_domain { TLFragmenter(tlbus.beatBytes, tlbus.blockBytes) := system.prci_ctrl_bus.get }
 
-    system.allClockGroupsNode := clockDivider.clockNode := clockSelector.clockNode
+    system.chiptopClockGroupsNode := clockDivider.clockNode := clockSelector.clockNode
 
     // Connect all other requested clocks
     val slowClockSource = ClockSourceNode(Seq(ClockSourceParameters()))
@@ -83,23 +73,12 @@ class WithPLLSelectorDividerClockGenerator extends OverrideLazyIOBinder({
 // This passes all clocks through to the TestHarness
 class WithPassthroughClockGenerator extends OverrideLazyIOBinder({
   (system: HasChipyardPRCI) => {
-    // Connect the implicit clock
     implicit val p = GetSystemParameters(system)
-    val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
-    system.connectImplicitClockSinkNode(implicitClockSinkNode)
-    InModuleBody {
-      val implicit_clock = implicitClockSinkNode.in.head._1.clock
-      val implicit_reset = implicitClockSinkNode.in.head._1.reset
-      system.asInstanceOf[BaseSubsystem].module match { case l: LazyModuleImp => {
-        l.clock := implicit_clock
-        l.reset := implicit_reset
-      }}
-    }
 
     // This aggregate node should do nothing
     val clockGroupAggNode = ClockGroupAggregateNode("fake")
     val clockGroupsSourceNode = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
-    system.allClockGroupsNode := clockGroupAggNode := clockGroupsSourceNode
+    system.chiptopClockGroupsNode := clockGroupAggNode := clockGroupsSourceNode
 
     InModuleBody {
       val reset_io = IO(Input(AsyncReset()))

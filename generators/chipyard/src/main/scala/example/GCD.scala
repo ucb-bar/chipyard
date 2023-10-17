@@ -185,7 +185,7 @@ trait CanHavePeripheryGCD { this: BaseSubsystem =>
 // DOC include end: GCD lazy trait
 
 // DOC include start: GCD imp trait
-trait CanHavePeripheryGCDModuleImp extends LazyModuleImp {
+trait CanHavePeripheryGCDModuleImp extends LazyRawModuleImp {
   val outer: CanHavePeripheryGCD
   val gcd_busy = outer.gcd match {
     case Some(gcd) => {

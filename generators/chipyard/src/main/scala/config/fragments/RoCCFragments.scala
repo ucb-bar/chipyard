@@ -12,15 +12,15 @@ import gemmini._
 import chipyard.{TestSuitesKey, TestSuiteHelper}
 
 /**
- * Map from a hartId to a particular RoCC accelerator
+ * Map from a tileId to a particular RoCC accelerator
  */
 case object MultiRoCCKey extends Field[Map[Int, Seq[Parameters => LazyRoCC]]](Map.empty[Int, Seq[Parameters => LazyRoCC]])
 
 /**
- * Config fragment to enable different RoCCs based on the hartId
+ * Config fragment to enable different RoCCs based on the tileId
  */
 class WithMultiRoCC extends Config((site, here, up) => {
-  case BuildRoCC => site(MultiRoCCKey).getOrElse(site(TileKey).hartId, Nil)
+  case BuildRoCC => site(MultiRoCCKey).getOrElse(site(TileKey).tileId, Nil)
 })
 
 /**
@@ -39,7 +39,7 @@ class WithMultiRoCCFromBuildRoCC(harts: Int*) extends Config((site, here, up) =>
  *
  * For ex:
  *   Core 0, 1, 2, 3 have been defined earlier
- *     with hartIds of 0, 1, 2, 3 respectively
+ *     with tileIds of 0, 1, 2, 3 respectively
  *   And you call WithMultiRoCCHwacha(0,1)
  *   Then Core 0 and 1 will get a Hwacha
  *
