@@ -122,9 +122,13 @@ jobs:
     runs-on: self-hosted
     steps:
       # see https://gist.github.com/pataruco/91b6cda6b02b61b3bcd2bbbfaa963fd9
-      - uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
+      # - uses: webfactory/ssh-agent@v0.8.0
+      #   with:
+      #     ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
+      - name: Run ssh-agent
+        run: |
+            eval `ssh-agent -s`
+            echo "${{ secrets.PRIVATE_SSH_KEY }}" | ssh-add -
       - name: Delete old checkout
         run: |
             ls -alh .
@@ -270,9 +274,13 @@ jobs:
     needs: prepare-chipyard-gpu
     runs-on: self-hosted
     steps:
-      - uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
+      # - uses: webfactory/ssh-agent@v0.8.0
+      #   with:
+      #     ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
+      - name: Run ssh-agent
+        run: |
+            eval `ssh-agent -s`
+            echo "${{ secrets.PRIVATE_SSH_KEY }}" | ssh-add -
       - name: Delete old checkout
         run: |
             ls -alh .
@@ -296,9 +304,13 @@ jobs:
     needs: prepare-chipyard-gpu
     runs-on: self-hosted
     steps:
-      - uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
+      # - uses: webfactory/ssh-agent@v0.8.0
+      #   with:
+      #     ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
+      - name: Run ssh-agent
+        run: |
+            eval `ssh-agent -s`
+            echo "${{ secrets.PRIVATE_SSH_KEY }}" | ssh-add -
       - name: Delete old checkout
         run: |
             ls -alh .
@@ -322,9 +334,13 @@ jobs:
     needs: prepare-chipyard-gpu
     runs-on: self-hosted
     steps:
-      - uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
+      # - uses: webfactory/ssh-agent@v0.8.0
+      #   with:
+      #     ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
+      - name: Run ssh-agent
+        run: |
+            eval `ssh-agent -s`
+            echo "${{ secrets.PRIVATE_SSH_KEY }}" | ssh-add -
       - name: Delete old checkout
         run: |
             ls -alh .
