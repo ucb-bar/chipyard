@@ -137,6 +137,13 @@ case $1 in
     chipyard-constellation)
         run_binary LOADMEM=1 BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
         ;;
+    chipyard-vortex)
+        # FIXME fix args.bin
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.elf
+        ;;
+    chipyard-coalescer)
+        run_binary BINARY=none
+        ;;
     icenet)
         run_binary BINARY=none
         ;;
@@ -144,6 +151,9 @@ case $1 in
         run_binary BINARY=none
         ;;
     constellation)
+        run_binary BINARY=none
+        ;;
+    coalescer)
         run_binary BINARY=none
         ;;
     rocketchip-amba)
