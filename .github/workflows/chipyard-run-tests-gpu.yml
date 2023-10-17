@@ -261,7 +261,7 @@ jobs:
 
   chipyard-vortex-run-tests:
     name: chipyard-vortex-run-tests
-    needs: prepare-chipyard-cores
+    needs: prepare-chipyard-gpu
     runs-on: self-hosted
     steps:
       - name: Delete old checkout
@@ -282,9 +282,32 @@ jobs:
           group-key: "group-gpu"
           project-key: "chipyard-vortex"
 
+  chipyard-coalescer-run-tests:
+    name: chipyard-coalescer-run-tests
+    needs: prepare-chipyard-gpu
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-gpu"
+          project-key: "chipyard-coalescer"
+
   coalescer-run-tests:
     name: coalescer-run-tests
-    needs: prepare-chipyard-cores
+    needs: prepare-chipyard-gpu
     runs-on: self-hosted
     steps:
       - name: Delete old checkout
