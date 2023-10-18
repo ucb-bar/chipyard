@@ -111,7 +111,7 @@ class SpikeTile(
     this(params, crossing.crossingType, lookup, p)
 
   // Required TileLink nodes
-  val intOutwardNode = Some(IntIdentityNode())
+  val intOutwardNode = None
   val masterNode = visibilityNode
   val slaveNode = TLIdentityNode()
 

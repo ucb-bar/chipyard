@@ -459,7 +459,7 @@ class WithTraceIOPunchthrough extends OverrideLazyIOBinder({
       val trace = IO(DataMirror.internal.chiselTypeClone[TraceOutputTop](t)).suggestName("trace")
       trace <> t
       val p = GetSystemParameters(system)
-      val chipyardSystem = system.asInstanceOf[ChipyardSystemModule[_]].outer.asInstanceOf[ChipyardSystem]
+      val chipyardSystem = system.asInstanceOf[ChipyardSystem]
       val tiles = chipyardSystem.totalTiles.values
       val cfg = SpikeCosimConfig(
         isa = tiles.headOption.map(_.isaDTS).getOrElse(""),
