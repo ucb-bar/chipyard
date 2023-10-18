@@ -11,14 +11,22 @@ import boom.lsu.BoomTraceGenTile
 class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
     with InstantiatesHierarchicalElements
     with HasTileNotificationSinks
+    with HasTileInputConstants
+    with HasHierarchicalElementsRootContext
+    with HasHierarchicalElements
     with CanHaveMasterAXI4MemPort {
 
   def coreMonitorBundles = Nil
+
   val tileStatusNodes = totalTiles.values.toSeq.collect {
     case t: GroundTestTile => t.statusNode.makeSink()
     case t: BoomTraceGenTile => t.statusNode.makeSink()
   }
-  lazy val debugNode = IntSyncXbar() := NullIntSyncSource()
+
+  lazy val clintOpt = None
+  lazy val debugOpt = None
+  lazy val plicOpt = None
+
   override lazy val module = new TraceGenSystemModuleImp(this)
 }
 
