@@ -52,6 +52,9 @@ class MMIORocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class LBWIFRocketConfig extends Config(
+  new chipyard.config.WithOffchipBusFrequency(500) ++
+  new testchipip.WithOffchipBusClient(MBUS) ++
+  new testchipip.WithOffchipBus ++
   new testchipip.WithSerialTLMem(isMainMemory=true) ++      // set lbwif memory base to DRAM_BASE, use as main memory
   new freechips.rocketchip.subsystem.WithNoMemPort ++       // remove AXI4 backing memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++

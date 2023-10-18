@@ -342,10 +342,10 @@ class WithDebugIOCells extends OverrideLazyIOBinder({
 
 class WithSerialTLIOCells extends OverrideIOBinder({
   (system: CanHavePeripheryTLSerial) => {
-    val (ports, cells) = system.serial_tl.zipWithIndex.map({ case (s, id) =>
+    val (ports, cells) = system.serial_tls.zipWithIndex.map({ case (s, id) =>
       val sys = system.asInstanceOf[BaseSubsystem]
-      val (port, cells) = IOCell.generateIOFromSignal(s.getWrappedValue, "serial_tl", sys.p(IOCellKey), abstractResetAsAsync = true)
-      (SerialTLPort(port, sys.p(SerialTLKey).get, system.serdesser.get, id), cells)
+      val (port, cells) = IOCell.generateIOFromSignal(s.getWrappedValue, s"serial_tl_$id", sys.p(IOCellKey), abstractResetAsAsync = true)
+      (SerialTLPort(port, sys.p(SerialTLKey)(id), system.serdessers(id), id), cells)
     }).unzip
     (ports.toSeq, cells.flatten.toSeq)
   }
@@ -353,11 +353,11 @@ class WithSerialTLIOCells extends OverrideIOBinder({
 
 class WithSerialTLPunchthrough extends OverrideIOBinder({
   (system: CanHavePeripheryTLSerial) => {
-    val (ports, cells) = system.serial_tl.zipWithIndex.map({ case (s, id) =>
+    val (ports, cells) = system.serial_tls.zipWithIndex.map({ case (s, id) =>
       val sys = system.asInstanceOf[BaseSubsystem]
       val port = IO(s.getWrappedValue.cloneType)
       port <> s.getWrappedValue
-      (SerialTLPort(port, sys.p(SerialTLKey).get, system.serdesser.get, id), Nil)
+      (SerialTLPort(port, sys.p(SerialTLKey)(id), system.serdessers(id), id), Nil)
     }).unzip
     (ports.toSeq, cells.flatten.toSeq)
   }
