@@ -137,6 +137,12 @@ case $1 in
     chipyard-constellation)
         run_binary LOADMEM=1 BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
         ;;
+    chipyard-vortex)
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.bin.elf
+        ;;
+    chipyard-coalescer)
+        run_binary BINARY=none EXTRA_SIM_FLAGS="+memtracefile=$LOCAL_CHIPYARD_DIR/generators/rocket-gpu/tracefiles/vecadd.core1.thread4.trace"
+        ;;
     icenet)
         run_binary BINARY=none
         ;;
@@ -145,6 +151,9 @@ case $1 in
         ;;
     constellation)
         run_binary BINARY=none
+        ;;
+    coalescer)
+        run_binary BINARY=none EXTRA_SIM_FLAGS="+memtracefile=$LOCAL_CHIPYARD_DIR/generators/rocket-gpu/tracefiles/vecadd.core1.thread4.trace"
         ;;
     rocketchip-amba)
         run_binary BINARY=none

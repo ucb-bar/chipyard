@@ -16,6 +16,7 @@ env:
   conda-env-name-no-time: cy-${{ github.run_id }}
   workflow-timestamp: ${{ github.event.pull_request.updated_at }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  SSH_AUTH_SOCK: /tmp/ssh_agent_github.sock
 
 jobs:
   cancel-prior-workflows:
@@ -72,6 +73,12 @@ jobs:
             rm -rf ${{ github.workspace }}/* || true
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
+      # note: the agent spun up here will be made available throughout the
+      # workflow via env.SSH_AUTH_SOCK.
+      - name: Run ssh-agent
+        run: |
+            eval `ssh-agent -a $SSH_AUTH_SOCK -s`
+            echo "${{ secrets.PRIVATE_SSH_KEY }}" | ssh-add -
       - name: Checkout
         uses: actions/checkout@v3
       - name: Git workaround
@@ -94,30 +101,30 @@ jobs:
 
   ##########################################################################
 
-  prepare-chipyard-cores:
-    name: prepare-chipyard-cores
-    needs: setup-complete
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Build RTL on self-hosted
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-cores"
+  # prepare-chipyard-cores:
+  #   name: prepare-chipyard-cores
+  #   needs: setup-complete
+  #   runs-on: self-hosted
+  #   steps:
+  #     - name: Delete old checkout
+  #       run: |
+  #           ls -alh .
+  #           rm -rf ${{ github.workspace }}/* || true
+  #           rm -rf ${{ github.workspace }}/.* || true
+  #           ls -alh .
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Git workaround
+  #       uses: ./.github/actions/git-workaround
+  #     - name: Create conda env
+  #       uses: ./.github/actions/create-conda-env
+  #     - name: Build RTL on self-hosted
+  #       uses: ./.github/actions/prepare-rtl
+  #       with:
+  #         group-key: "group-cores"
 
-  prepare-chipyard-accels:
-    name: prepare-chipyard-accels
+  prepare-chipyard-gpu:
+    name: prepare-chipyard-gpu
     needs: setup-complete
     runs-on: self-hosted
     steps:
@@ -133,89 +140,137 @@ jobs:
         uses: ./.github/actions/git-workaround
       - name: Create conda env
         uses: ./.github/actions/create-conda-env
+      - name: Prepare GPU binaries
+        uses: ./.github/actions/prepare-gpu
       - name: Build RTL on self-hosted
         uses: ./.github/actions/prepare-rtl
         with:
-          group-key: "group-accels"
+          group-key: "group-gpu"
 
-  prepare-chipyard-tracegen:
-    name: prepare-chipyard-tracegen
-    needs: setup-complete
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Build RTL on self-hosted
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-tracegen"
+  # prepare-chipyard-accels:
+  #   name: prepare-chipyard-accels
+  #   needs: setup-complete
+  #   runs-on: self-hosted
+  #   steps:
+  #     - name: Delete old checkout
+  #       run: |
+  #           ls -alh .
+  #           rm -rf ${{ github.workspace }}/* || true
+  #           rm -rf ${{ github.workspace }}/.* || true
+  #           ls -alh .
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Git workaround
+  #       uses: ./.github/actions/git-workaround
+  #     - name: Create conda env
+  #       uses: ./.github/actions/create-conda-env
+  #     - name: Build RTL on self-hosted
+  #       uses: ./.github/actions/prepare-rtl
+  #       with:
+  #         group-key: "group-accels"
 
-  prepare-chipyard-other:
-    name: prepare-chipyard-other
-    needs: setup-complete
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Build RTL on self-hosted
-        uses: ./.github/actions/prepare-rtl
-        with:
-          group-key: "group-other"
+  # prepare-chipyard-other:
+  #   name: prepare-chipyard-other
+  #   needs: setup-complete
+  #   runs-on: self-hosted
+  #   steps:
+  #     - name: Delete old checkout
+  #       run: |
+  #           ls -alh .
+  #           rm -rf ${{ github.workspace }}/* || true
+  #           rm -rf ${{ github.workspace }}/.* || true
+  #           ls -alh .
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Git workaround
+  #       uses: ./.github/actions/git-workaround
+  #     - name: Create conda env
+  #       uses: ./.github/actions/create-conda-env
+  #     - name: Build RTL on self-hosted
+  #       uses: ./.github/actions/prepare-rtl
+  #       with:
+  #         group-key: "group-other"
 
   ##########################################################################
 
-  chipyard-spike-gemmini-run-tests:
-    name: chipyard-spike-gemmini-run-tests
-    needs: prepare-chipyard-accels # technically doesn't depend on RTL but should be after the build.sh for Gemmini
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Build Gemmini FireMarshal
-        run: |
-          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-          cd ${{ github.workspace }} && ./scripts/init-submodules-no-riscv-tools.sh --force
-          cd ${{ github.workspace }} && source ./scripts/fix-open-files.sh
-          git submodule update --init software/firemarshal && cd software/firemarshal && ./init-submodules.sh
-          cd ${{ github.workspace }}/generators/gemmini/software && ${{ github.workspace }}/software/firemarshal/marshal -v -d build gemmini-smoke.json
-      - name: Running Gemmini FireMarshal smoke test
-        run: |
-          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-          cd ${{ github.workspace }}/generators/gemmini/software && ${{ github.workspace }}/software/firemarshal/marshal -v -d launch -s gemmini-smoke.json
+  # chipyard-spike-gemmini-run-tests:
+  #   name: chipyard-spike-gemmini-run-tests
+  #   needs: prepare-chipyard-accels # technically doesn't depend on RTL but should be after the build.sh for Gemmini
+  #   runs-on: self-hosted
+  #   steps:
+  #     - name: Delete old checkout
+  #       run: |
+  #           ls -alh .
+  #           rm -rf ${{ github.workspace }}/* || true
+  #           rm -rf ${{ github.workspace }}/.* || true
+  #           ls -alh .
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Git workaround
+  #       uses: ./.github/actions/git-workaround
+  #     - name: Create conda env
+  #       uses: ./.github/actions/create-conda-env
+  #     - name: Build Gemmini FireMarshal
+  #       run: |
+  #         conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
+  #         cd ${{ github.workspace }} && ./scripts/init-submodules-no-riscv-tools.sh --force
+  #         cd ${{ github.workspace }} && source ./scripts/fix-open-files.sh
+  #         git submodule update --init software/firemarshal && cd software/firemarshal && ./init-submodules.sh
+  #         cd ${{ github.workspace }}/generators/gemmini/software && ${{ github.workspace }}/software/firemarshal/marshal -v -d build gemmini-smoke.json
+  #     - name: Running Gemmini FireMarshal smoke test
+  #       run: |
+  #         conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
+  #         cd ${{ github.workspace }}/generators/gemmini/software && ${{ github.workspace }}/software/firemarshal/marshal -v -d launch -s gemmini-smoke.json
 
-  chipyard-rocket-run-tests:
-    name: chipyard-rocket-run-tests
-    needs: prepare-chipyard-cores
+  # chipyard-rocket-run-tests:
+  #   name: chipyard-rocket-run-tests
+  #   needs: prepare-chipyard-cores
+  #   runs-on: self-hosted
+  #   steps:
+  #     - name: Delete old checkout
+  #       run: |
+  #           ls -alh .
+  #           rm -rf ${{ github.workspace }}/* || true
+  #           rm -rf ${{ github.workspace }}/.* || true
+  #           ls -alh .
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Git workaround
+  #       uses: ./.github/actions/git-workaround
+  #     - name: Create conda env
+  #       uses: ./.github/actions/create-conda-env
+  #     - name: Run tests
+  #       uses: ./.github/actions/run-tests
+  #       with:
+  #         group-key: "group-cores"
+  #         project-key: "chipyard-rocket"
+
+  # chipyard-boom-run-tests:
+  #   name: chipyard-boom-run-tests
+  #   needs: prepare-chipyard-cores
+  #   runs-on: self-hosted
+  #   steps:
+  #     - name: Delete old checkout
+  #       run: |
+  #           ls -alh .
+  #           rm -rf ${{ github.workspace }}/* || true
+  #           rm -rf ${{ github.workspace }}/.* || true
+  #           ls -alh .
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Git workaround
+  #       uses: ./.github/actions/git-workaround
+  #     - name: Create conda env
+  #       uses: ./.github/actions/create-conda-env
+  #     - name: Run tests
+  #       uses: ./.github/actions/run-tests
+  #       with:
+  #         group-key: "group-cores"
+  #         project-key: "chipyard-boom"
+
+  chipyard-vortex-run-tests:
+    name: chipyard-vortex-run-tests
+    needs: prepare-chipyard-gpu
     runs-on: self-hosted
     steps:
       - name: Delete old checkout
@@ -233,12 +288,12 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-cores"
-          project-key: "chipyard-rocket"
+          group-key: "group-gpu"
+          project-key: "chipyard-vortex"
 
-  chipyard-prefetchers-run-tests:
-    name: chipyard-prefetchers-run-tests
-    needs: prepare-chipyard-cores
+  chipyard-coalescer-run-tests:
+    name: chipyard-coalescer-run-tests
+    needs: prepare-chipyard-gpu
     runs-on: self-hosted
     steps:
       - name: Delete old checkout
@@ -256,12 +311,12 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-cores"
-          project-key: "chipyard-prefetchers"
+          group-key: "group-gpu"
+          project-key: "chipyard-coalescer"
 
-  chipyard-hetero-run-tests:
-    name: chipyard-hetero-run-tests
-    needs: prepare-chipyard-cores
+  coalescer-run-tests:
+    name: coalescer-run-tests
+    needs: prepare-chipyard-gpu
     runs-on: self-hosted
     steps:
       - name: Delete old checkout
@@ -279,215 +334,54 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          group-key: "group-cores"
-          project-key: "chipyard-hetero"
+          group-key: "group-gpu"
+          project-key: "coalescer"
 
-  chipyard-boom-run-tests:
-    name: chipyard-boom-run-tests
-    needs: prepare-chipyard-cores
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-cores"
-          project-key: "chipyard-boom"
+  # chipyard-spike-run-tests:
+  #   name: chipyard-spike-run-tests
+  #   needs: prepare-chipyard-cores
+  #   runs-on: self-hosted
+  #   steps:
+  #     - name: Delete old checkout
+  #       run: |
+  #           ls -alh .
+  #           rm -rf ${{ github.workspace }}/* || true
+  #           rm -rf ${{ github.workspace }}/.* || true
+  #           ls -alh .
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Git workaround
+  #       uses: ./.github/actions/git-workaround
+  #     - name: Create conda env
+  #       uses: ./.github/actions/create-conda-env
+  #     - name: Run tests
+  #       uses: ./.github/actions/run-tests
+  #       with:
+  #         group-key: "group-cores"
+  #         project-key: "chipyard-spike"
 
-  chipyard-shuttle-run-tests:
-    name: chipyard-shuttle-run-tests
-    needs: prepare-chipyard-cores
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-cores"
-          project-key: "chipyard-shuttle"
-
-  chipyard-cva6-run-tests:
-    name: chipyard-cva6-run-tests
-    needs: prepare-chipyard-cores
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-cores"
-          project-key: "chipyard-cva6"
-
-  chipyard-ibex-run-tests:
-    name: chipyard-ibex-run-tests
-    needs: prepare-chipyard-cores
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-cores"
-          project-key: "chipyard-ibex"
-
-  chipyard-sodor-run-tests:
-    name: chipyard-sodor-run-tests
-    needs: prepare-chipyard-cores
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-cores"
-          project-key: "chipyard-sodor"
-
-  chipyard-spike-run-tests:
-    name: chipyard-spike-run-tests
-    needs: prepare-chipyard-cores
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-cores"
-          project-key: "chipyard-spike"
-
-  chipyard-sha3-run-tests:
-    name: chipyard-sha3-run-tests
-    needs: prepare-chipyard-accels
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-accels"
-          project-key: "chipyard-sha3"
-
-  chipyard-gemmini-run-tests:
-    name: chipyard-gemmini-run-tests
-    needs: prepare-chipyard-accels
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-accels"
-          project-key: "chipyard-gemmini"
-
-  chipyard-manymmioaccels-run-tests:
-    name: chipyard-manymmioaccels-run-tests
-    needs: prepare-chipyard-accels
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-accels"
-          project-key: "chipyard-manymmioaccels"
+  # chipyard-gemmini-run-tests:
+  #   name: chipyard-gemmini-run-tests
+  #   needs: prepare-chipyard-accels
+  #   runs-on: self-hosted
+  #   steps:
+  #     - name: Delete old checkout
+  #       run: |
+  #           ls -alh .
+  #           rm -rf ${{ github.workspace }}/* || true
+  #           rm -rf ${{ github.workspace }}/.* || true
+  #           ls -alh .
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Git workaround
+  #       uses: ./.github/actions/git-workaround
+  #     - name: Create conda env
+  #       uses: ./.github/actions/create-conda-env
+  #     - name: Run tests
+  #       uses: ./.github/actions/run-tests
+  #       with:
+  #         group-key: "group-accels"
+  #         project-key: "chipyard-gemmini"
 
   # chipyard-nvdla-run-tests:
   #   name: chipyard-nvdla-run-tests
@@ -512,160 +406,67 @@ jobs:
   #         group-key: "group-accels"
   #         project-key: "chipyard-nvdla"
 
-  chipyard-mempress-run-tests:
-    name: chipyard-mempress-run-tests
-    needs: prepare-chipyard-accels
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-accels"
-          project-key: "chipyard-mempress"
+  # testchipip-run-tests:
+  #   name: testchipip-run-tests
+  #   needs: prepare-chipyard-other
+  #   runs-on: self-hosted
+  #   steps:
+  #     - name: Delete old checkout
+  #       run: |
+  #           ls -alh .
+  #           rm -rf ${{ github.workspace }}/* || true
+  #           rm -rf ${{ github.workspace }}/.* || true
+  #           ls -alh .
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Git workaround
+  #       uses: ./.github/actions/git-workaround
+  #     - name: Create conda env
+  #       uses: ./.github/actions/create-conda-env
+  #     - name: Run tests
+  #       uses: ./.github/actions/run-tests
+  #       with:
+  #         group-key: "group-other"
+  #         project-key: "testchipip"
 
-
-  tracegen-boom-run-tests:
-    name: tracegen-boom-run-tests
-    needs: prepare-chipyard-tracegen
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-tracegen"
-          project-key: "tracegen-boom"
-
-  tracegen-run-tests:
-    name: tracegen-run-tests
-    needs: prepare-chipyard-tracegen
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-tracegen"
-          project-key: "tracegen"
-
-  icenet-run-tests:
-    name: icenet-run-tests
-    needs: prepare-chipyard-other
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-other"
-          project-key: "icenet"
-
-  testchipip-run-tests:
-    name: testchipip-run-tests
-    needs: prepare-chipyard-other
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-other"
-          project-key: "testchipip"
-
-  rocketchip-run-tests:
-    name: rocketchip-run-tests
-    needs: prepare-chipyard-other
-    runs-on: self-hosted
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run amba tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-other"
-          project-key: "rocketchip-amba"
-      # Below tests segfault with verilator, work fine in VCS
-      # - name: Run tlsimple tests
-      #   uses: ./.github/actions/run-tests
-      #   with:
-      #     group-key: "group-other"
-      #     project-key: "rocketchip-tlsimple"
-      # - name: Run tlwidth tests
-      #   uses: ./.github/actions/run-tests
-      #   with:
-      #     group-key: "group-other"
-      #     project-key: "rocketchip-tlwidth"
-      # - name: Run tlxbar tests
-      #   uses: ./.github/actions/run-tests
-      #   with:
-      #     group-key: "group-other"
-      #     project-key: "rocketchip-tlxbar"
+  # rocketchip-run-tests:
+  #   name: rocketchip-run-tests
+  #   needs: prepare-chipyard-other
+  #   runs-on: self-hosted
+  #   steps:
+  #     - name: Delete old checkout
+  #       run: |
+  #           ls -alh .
+  #           rm -rf ${{ github.workspace }}/* || true
+  #           rm -rf ${{ github.workspace }}/.* || true
+  #           ls -alh .
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Git workaround
+  #       uses: ./.github/actions/git-workaround
+  #     - name: Create conda env
+  #       uses: ./.github/actions/create-conda-env
+  #     - name: Run amba tests
+  #       uses: ./.github/actions/run-tests
+  #       with:
+  #         group-key: "group-other"
+  #         project-key: "rocketchip-amba"
+  #     # Below tests segfault with verilator, work fine in VCS
+  #     # - name: Run tlsimple tests
+  #     #   uses: ./.github/actions/run-tests
+  #     #   with:
+  #     #     group-key: "group-other"
+  #     #     project-key: "rocketchip-tlsimple"
+  #     # - name: Run tlwidth tests
+  #     #   uses: ./.github/actions/run-tests
+  #     #   with:
+  #     #     group-key: "group-other"
+  #     #     project-key: "rocketchip-tlwidth"
+  #     # - name: Run tlxbar tests
+  #     #   uses: ./.github/actions/run-tests
+  #     #   with:
+  #     #     group-key: "group-other"
+  #     #     project-key: "rocketchip-tlxbar"
 
   # Sentinel job to simplify how we specify which checks need to pass in branch
   # protection and in Mergify
@@ -673,23 +474,15 @@ jobs:
   # When adding new top level jobs, please add them to `needs` below
   all_tests_passed:
     name: "all tests passed"
-    needs: [chipyard-rocket-run-tests,
-            chipyard-hetero-run-tests,
-            chipyard-boom-run-tests,
-            chipyard-shuttle-run-tests,
-            chipyard-cva6-run-tests,
-            chipyard-ibex-run-tests,
-            chipyard-sodor-run-tests,
-            chipyard-sha3-run-tests,
-            chipyard-gemmini-run-tests,
-            chipyard-manymmioaccels-run-tests, # chipyard-nvdla-run-tests,
-            chipyard-prefetchers-run-tests,
-            chipyard-mempress-run-tests,
-            tracegen-boom-run-tests,
-            tracegen-run-tests,
-            icenet-run-tests,
-            testchipip-run-tests,
-            rocketchip-run-tests,
+    needs: [
+            # chipyard-rocket-run-tests,
+            # chipyard-boom-run-tests,
+            chipyard-vortex-run-tests,
+            chipyard-coalescer-run-tests,
+            coalescer-run-tests,
+            # chipyard-gemmini-run-tests,
+            # testchipip-run-tests,
+            # rocketchip-run-tests,
             ]
     runs-on: self-hosted
     steps:

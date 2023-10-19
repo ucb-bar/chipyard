@@ -26,6 +26,7 @@ runs:
       with:
         path: |
           sims/verilator
+          sims/vcs
           sims/firesim/sim
           generators/gemmini/software/gemmini-rocc-tests
         key: ${{ inputs.group-key }}-${{ github.sha }}
