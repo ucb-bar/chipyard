@@ -950,6 +950,14 @@ object MacroCompiler extends App {
             verilogWriter.close()
           case None =>
         }
+        params.get(HammerIR) match {
+          case Some(hammerIRFile: String) =>
+            // Create an empty HammerIR file
+            val hammerIRWriter = new FileWriter(new File(hammerIRFile))
+            hammerIRWriter.write("[]\n")
+            hammerIRWriter.close()
+          case None =>
+        }
       }
     } catch {
       case e: java.util.NoSuchElementException =>
