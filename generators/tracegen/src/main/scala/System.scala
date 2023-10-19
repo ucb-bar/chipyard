@@ -26,6 +26,8 @@ class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
   lazy val clintOpt = None
   lazy val debugOpt = None
   lazy val plicOpt = None
+  lazy val clintDomainOpt = None
+  lazy val plicDomainOpt = None
 
   override lazy val module = new TraceGenSystemModuleImp(this)
 }
