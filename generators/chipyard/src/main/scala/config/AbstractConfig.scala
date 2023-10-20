@@ -53,7 +53,7 @@ class AbstractConfig extends Config(
 
   // By default, punch out IOs to the Harness
   new chipyard.clocking.WithPassthroughClockGenerator ++
-  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("sbus", "mbus", "pbus", "fbus", "cbus", "implicit"), Seq("tile"))) ++
+  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("sbus", "mbus", "pbus", "fbus", "cbus"), Seq("tile"))) ++
   new chipyard.config.WithPeripheryBusFrequency(500.0) ++           // Default 500 MHz pbus
   new chipyard.config.WithControlBusFrequency(500.0) ++             // Default 500 MHz cbus
   new chipyard.config.WithMemoryBusFrequency(500.0) ++              // Default 500 MHz mbus

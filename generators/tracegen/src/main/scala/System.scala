@@ -23,11 +23,13 @@ class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
     case t: BoomTraceGenTile => t.statusNode.makeSink()
   }
 
+  lazy val fakeClockDomain = sbus.generateSynchronousDomain
+
   lazy val clintOpt = None
   lazy val debugOpt = None
   lazy val plicOpt = None
-  lazy val clintDomainOpt = None
-  lazy val plicDomainOpt = None
+  lazy val clintDomainOpt = Some(fakeClockDomain)
+  lazy val plicDomainOpt = Some(fakeClockDomain)
 
   override lazy val module = new TraceGenSystemModuleImp(this)
 }
