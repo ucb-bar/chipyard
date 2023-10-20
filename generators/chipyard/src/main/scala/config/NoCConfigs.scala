@@ -6,6 +6,7 @@ import freechips.rocketchip.subsystem.{SBUS, MBUS}
 
 import constellation.channel._
 import constellation.routing._
+import constellation.router._
 import constellation.topology._
 import constellation.noc._
 import constellation.soc.{GlobalNoCParams}
@@ -62,19 +63,19 @@ import scala.collection.immutable.ListMap
  */
 // DOC include start: MultiNoCConfig
 class MultiNoCConfig extends Config(
-  new constellation.soc.WithCbusNoC(constellation.protocol.TLNoCParams(
+  new constellation.soc.WithCbusNoC(constellation.protocol.SimpleTLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
       inNodeMapping = ListMap(
         "serial-tl" -> 0),
       outNodeMapping = ListMap(
-        "error" -> 1, "l2[0]" -> 2, "pbus" -> 3, "plic" -> 4,
+        "error" -> 1, "ctrls[0]" -> 2, "pbus" -> 3, "plic" -> 4,
         "clint" -> 5, "dmInner" -> 6, "bootrom" -> 7, "clock" -> 8)),
     NoCParams(
       topology = TerminalRouter(BidirectionalLine(9)),
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(5) { UserVirtualChannelParams(4) }),
       routingRelation = NonblockingVirtualSubnetworksRouting(TerminalRouterRouting(BidirectionalLineRouting()), 5, 1))
   )) ++
-  new constellation.soc.WithMbusNoC(constellation.protocol.TLNoCParams(
+  new constellation.soc.WithMbusNoC(constellation.protocol.SimpleTLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
       inNodeMapping = ListMap(
         "L2 InclusiveCache[0]" -> 1, "L2 InclusiveCache[1]" -> 2,
@@ -87,7 +88,7 @@ class MultiNoCConfig extends Config(
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(10) { UserVirtualChannelParams(4) }),
       routingRelation = BlockingVirtualSubnetworksRouting(TerminalRouterRouting(BidirectionalTorus1DShortestRouting()), 5, 2))
   )) ++
-  new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
+  new constellation.soc.WithSbusNoC(constellation.protocol.SimpleTLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
       inNodeMapping = ListMap(
         "Core 0" -> 1, "Core 1" -> 2,  "Core 2" -> 4 , "Core 3" -> 7,
@@ -162,15 +163,15 @@ class SharedNoCConfig extends Config(
                            BidirectionalLineRouting()))), 10, 2)
     )
   )) ++
-  new constellation.soc.WithMbusNoC(constellation.protocol.TLNoCParams(
+  new constellation.soc.WithMbusNoC(constellation.protocol.GlobalTLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
       inNodeMapping = ListMap(
         "Cache[0]" -> 0, "Cache[1]" -> 2, "Cache[2]" -> 8, "Cache[3]" -> 6),
       outNodeMapping = ListMap(
         "system[0]" -> 3, "system[1]" -> 5,
         "serdesser" -> 9))
-  ), true) ++
-  new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
+  )) ++
+  new constellation.soc.WithSbusNoC(constellation.protocol.GlobalTLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
       inNodeMapping = ListMap(
         "serial-tl" -> 9, "Core 0" -> 2,
@@ -179,7 +180,7 @@ class SharedNoCConfig extends Config(
       outNodeMapping = ListMap(
         "system[0]" -> 0, "system[1]" -> 2, "system[2]" -> 8, "system[3]" -> 6,
         "pbus" -> 4))
-  ), true) ++
+  )) ++
   new freechips.rocketchip.subsystem.WithNBigCores(8) ++
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
@@ -188,7 +189,7 @@ class SharedNoCConfig extends Config(
 // DOC include end: SharedNoCConfig
 
 class SbusRingNoCConfig extends Config(
-  new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
+  new constellation.soc.WithSbusNoC(constellation.protocol.SplitACDxBETLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
       inNodeMapping = ListMap(
         "Core 0" -> 0,
@@ -206,12 +207,58 @@ class SbusRingNoCConfig extends Config(
         "system[2]" -> 11,
         "system[3]" -> 12,
         "pbus" -> 8)), // TSI is on the pbus, so serial-tl and pbus should be on the same node
-    NoCParams(
+    acdNoCParams = NoCParams(
       topology        = UnidirectionalTorus1D(13),
-      channelParamGen = (a, b) => UserChannelParams(Seq.fill(10) { UserVirtualChannelParams(4) }),
-      routingRelation = NonblockingVirtualSubnetworksRouting(UnidirectionalTorus1DDatelineRouting(), 5, 2))
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(6) { UserVirtualChannelParams(4) }),
+      routingRelation = NonblockingVirtualSubnetworksRouting(UnidirectionalTorus1DDatelineRouting(), 3, 2)),
+    beNoCParams = NoCParams(
+      topology        = UnidirectionalTorus1D(13),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(4) { UserVirtualChannelParams(1) }),
+      routingRelation = NonblockingVirtualSubnetworksRouting(UnidirectionalTorus1DDatelineRouting(), 2, 2))
   )) ++
   new freechips.rocketchip.subsystem.WithNBigCores(8) ++
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig
 )
+
+class SbusMeshNoCConfig extends Config(
+  new constellation.soc.WithSbusNoC(constellation.protocol.SplitACDxBETLNoCParams(
+    constellation.protocol.DiplomaticNetworkNodeMapping(
+      inNodeMapping = ListMap(
+        "Core 0 " -> 0,
+        "Core 1 " -> 1,
+        "Core 2 " -> 2,
+        "Core 3 " -> 3,
+        "Core 4 " -> 4,
+        "Core 5 " -> 7,
+        "Core 6 " -> 8,
+        "Core 7 " -> 11,
+        "Core 8 " -> 12,
+        "Core 9 " -> 13,
+        "Core 10 " -> 14,
+        "Core 11 " -> 15,
+        "serial-tl" -> 0),
+      outNodeMapping = ListMap(
+        "system[0]" -> 5,
+        "system[1]" -> 6,
+        "system[2]" -> 9,
+        "system[3]" -> 10,
+        "pbus" -> 0)), // TSI is on the pbus, so serial-tl and pbus should be on the same node
+    acdNoCParams = NoCParams(
+      topology        = Mesh2D(4, 4),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(3) { UserVirtualChannelParams(3) }, unifiedBuffer = false),
+      routerParams    = (i) => UserRouterParams(combineRCVA=true, combineSAST=true),
+      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DDimensionOrderedRouting(), 3, 1)),
+    beNoCParams = NoCParams(
+      topology        = Mesh2D(4, 4),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(2) { UserVirtualChannelParams(3) }, unifiedBuffer = false),
+      routerParams    = (i) => UserRouterParams(combineRCVA=true, combineSAST=true),
+      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DDimensionOrderedRouting(), 2, 1)),
+    beDivision = 4
+  )) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(12) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new chipyard.config.AbstractConfig
+)
+
