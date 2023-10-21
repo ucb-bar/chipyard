@@ -45,6 +45,7 @@ class WithVC707Tweaks extends Config (
   new chipyard.config.WithMemoryBusFrequency(50.0) ++
   new chipyard.config.WithSystemBusFrequency(50.0) ++
   new chipyard.config.WithPeripheryBusFrequency(50.0) ++
+  new chipyard.config.WithControlBusFrequency(50.0) ++
 
   new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
   new WithFPGAFrequency(50) ++ // default 50MHz freq
@@ -75,6 +76,7 @@ class BoomVC707Config extends Config (
 
 class WithFPGAFrequency(fMHz: Double) extends Config (
   new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.
+  new chipyard.config.WithControlBusFrequency(fMHz) ++
   new chipyard.config.WithMemoryBusFrequency(fMHz)
 )
 
