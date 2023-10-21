@@ -96,7 +96,7 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
     intSink := intNexus :=* ibus.toPLIC
 
     // avoids a bug when there are no interrupt sources
-    ibus.fromAsync := NullIntSource()
+    ibus { ibus.fromAsync := NullIntSource() }
 
     // Need to have at least 1 driver to the tile notification sinks
     tileHaltXbarNode := IntSourceNode(IntSourcePortSimple())
