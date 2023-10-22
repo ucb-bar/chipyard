@@ -85,6 +85,7 @@ class ChipBringupHostConfig extends Config(
   new chipyard.config.WithFrontBusFrequency(75.0) ++     // run all buses of this system at 75 MHz
   new chipyard.config.WithMemoryBusFrequency(75.0) ++
   new chipyard.config.WithPeripheryBusFrequency(75.0) ++
+  new chipyard.config.WithControlBusFrequency(75.0) ++
 
   // Base is the no-cores config
   new chipyard.NoCoresConfig)
