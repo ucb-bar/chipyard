@@ -21,6 +21,7 @@ runs:
       run: |
         conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-${{ inputs.toolchain }}
         cd $REMOTE_CHIPYARD_DIR
+        echo $PWD
         ./scripts/init-submodules-no-riscv-tools.sh --force
       shell: bash -leo pipefail {0}
 
