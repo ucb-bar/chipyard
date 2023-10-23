@@ -21,6 +21,10 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: cd into remote
+      run: |
+        cd "${{ env.REMOTE_WORK_DIR }}"
+
     - uses: actions/cache@v3
       id: rtl-build-id
       with:
