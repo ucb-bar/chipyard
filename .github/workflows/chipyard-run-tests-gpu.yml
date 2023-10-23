@@ -161,6 +161,7 @@ jobs:
       - name: Prepare GPU binaries
         uses: ./.github/actions/prepare-gpu
       - name: Build RTL on self-hosted
+        working-directory: ${{ env.REMOTE_WORK_DIR }}
         uses: ./.github/actions/prepare-rtl
         with:
           group-key: "group-gpu"
