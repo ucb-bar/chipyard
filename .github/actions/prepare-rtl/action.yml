@@ -21,11 +21,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: cd into remote
-      run: |
-        cd "${{ env.REMOTE_WORK_DIR }}"
-      shell: bash -leo pipefail {0}
-
     - uses: actions/cache@v3
       id: rtl-build-id
       with:
