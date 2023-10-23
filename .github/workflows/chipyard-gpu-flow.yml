@@ -1,9 +1,9 @@
 name: chipyard-ci-full-flow-gpu
 
-on:
-  push:
-    branches:
-      # - graphics
+# on:
+#   push:
+#     branches:
+#       - graphics
 
 defaults:
   run:
