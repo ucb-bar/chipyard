@@ -12,6 +12,7 @@ defaults:
 env:
   tools-cache-version: v17
   CI_DIR: ${{ secrets.BUILDDIR }}
+  REMOTE_WORK_DIR: ${{ secrets.BUILDDIR }}/cy-ci-shared/cy-${{ github.sha }}
   JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
   conda-env-name-no-time: cy-${{ github.run_id }}
   workflow-timestamp: ${{ github.event.pull_request.updated_at }}
@@ -88,12 +89,29 @@ jobs:
       - name: Create conda env
         uses: ./.github/actions/create-conda-env
 
+  setup-repo:
+    name: setup-repo
+    needs: create-conda-env
+    if: needs.change-filters.outputs.needs-rtl == 'true'
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - uses: actions/checkout@v3
+      - name: Setup repo copy
+        run: |
+          git clone $GITHUB_WORKSPACE ${{ env.REMOTE_WORK_DIR }}
+
   # Sentinel job to simplify how we specify which that basic setup is complete
   #
   # When adding new prep jobs, please add them to `needs` below
   setup-complete:
     name: setup-complete
-    needs: [create-conda-env]
+    needs: setup-repo
     runs-on: self-hosted
     steps:
       - name: Set up complete

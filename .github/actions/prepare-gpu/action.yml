@@ -20,6 +20,8 @@ runs:
     - name: Init submodules to ensure stimuli is located
       run: |
         conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-${{ inputs.toolchain }}
+        cd ${{ env.REMOTE_WORK_DIR }}
+        echo $PWD
         ./scripts/init-submodules-no-riscv-tools.sh --force
       shell: bash -leo pipefail {0}
 

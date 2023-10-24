@@ -36,6 +36,7 @@ runs:
         conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-${{ inputs.toolchain }}
         if [[ "${{ steps.rtl-build-id.outputs.cache-hit }}" != 'true' ]]; then
           echo "Cache miss on ${{ inputs.group-key }}-${{ github.sha }}"
+          echo "Cache miss happened in: $PWD"
           ./.github/scripts/${{ inputs.build-script }} ${{ inputs.group-key }} ${{ inputs.build-type }}
         else
           echo "Cache hit do not rebuild RTL for ${{ inputs.group-key }}"
