@@ -21,7 +21,11 @@ sim_name = vcs
 #########################################################################################
 # vcs simulator types and rules
 #########################################################################################
+ifdef STATE_INJECT
+sim_prefix = simv-inject
+else
 sim_prefix = simv
+endif
 sim = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
 sim_debug = $(sim_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)-debug
 
@@ -34,8 +38,13 @@ debug: $(sim_debug)
 #########################################################################################
 # simulation requirements
 #########################################################################################
+ifdef STATE_INJECT
+SIM_FILE_REQS += \
+	$(CHIPYARD_RSRCS_DIR)/vsrc/TestDriver-inject.v
+else
 SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
+endif
 
 # copy files but ignore *.h files in *.f since vcs has +incdir+$(build_dir)
 $(sim_files): $(SIM_FILE_REQS) $(ALL_MODS_FILELIST) | $(GEN_COLLATERAL_DIR)

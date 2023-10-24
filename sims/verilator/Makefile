@@ -50,7 +50,7 @@ debug: $(sim_debug)
 #########################################################################################
 ifdef STATE_INJECT
 SIM_FILE_REQS += \
-	$(CHIPYARD_RSRCS_DIR)/vsrc/TestDriver.v
+	$(CHIPYARD_RSRCS_DIR)/vsrc/TestDriver-inject.v
 else
 SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
