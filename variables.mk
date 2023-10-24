@@ -21,6 +21,7 @@ HELP_PROJECT_VARIABLES = \
 "   CONFIG_PACKAGE         = the scala package to find the CONFIG class [$(CONFIG_PACKAGE)]" \
 "   GENERATOR_PACKAGE      = the scala package to find the Generator class in [$(GENERATOR_PACKAGE)]" \
 "   TB                     = testbench wrapper over the TestHarness needed to simulate in a verilog simulator [$(TB)]" \
+"   STATE_INJECT           = set to 1 to use a TestDriver.v that is capable of injecting state into the DUT \
 "   TOP                    = top level module of the project (normally the module instantiated by the harness) [$(TOP)]"
 
 HELP_SIMULATION_VARIABLES = \
@@ -277,7 +278,11 @@ PERMISSIVE_OFF=+permissive-off
 BINARY ?=
 BINARIES ?=
 BINARY_ARGS ?=
+ifdef STATE_INJECT
+override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(TIMEOUT_CYCLES) +no_hart0_msip
+else
 override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(TIMEOUT_CYCLES)
+endif
 VERBOSE_FLAGS ?= +verbose
 # get_out_name is a function, 1st argument is the binary
 get_out_name = $(subst $() $(),_,$(notdir $(basename $(1))))
