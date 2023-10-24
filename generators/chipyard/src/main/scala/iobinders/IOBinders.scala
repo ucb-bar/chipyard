@@ -31,7 +31,7 @@ import scala.reflect.{ClassTag}
 
 object IOBinderTypes {
   type IOBinderTuple = (Seq[Port[_]], Seq[IOCell])
-  type IOBinderFunction = (Boolean, => Any) => ModuleValue[IOBinderTuple]
+  type IOBinderFunction = (Boolean, => Any, => HasIOBinders) => ModuleValue[IOBinderTuple]
 }
 import IOBinderTypes._
 
@@ -62,8 +62,8 @@ abstract trait HasIOBinders { this: LazyModule =>
   private val iobinders = p(IOBinders)
   // Note: IOBinders cannot rely on the implicit clock/reset, as they may be called from the
   // context of a LazyRawModuleImp
-  private val lzy = iobinders.map({ case (s,fns) => s -> fns.map(f => f(true, lazySystem)) })
-  private val imp = iobinders.map({ case (s,fns) => s -> fns.map(f => f(false, lazySystem.module)) })
+  private val lzy = iobinders.map({ case (s,fns) => s -> fns.map(f => f(true, lazySystem, this)) })
+  private val imp = iobinders.map({ case (s,fns) => s -> fns.map(f => f(false, lazySystem.module, this)) })
 
   private lazy val lzyFlattened: Map[String, IOBinderTuple] = lzy.map({
     case (s,ms) => s -> (ms.map(_._1).flatten, ms.map(_._2).flatten)
@@ -121,23 +121,23 @@ class IOBinder[T](composer: Seq[IOBinderFunction] => Seq[IOBinderFunction])(impl
   case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString -> composer(up(IOBinders, site)(tag.runtimeClass.toString)))
 })
 
-class ConcreteIOBinder[T](composes: Boolean, fn: T => IOBinderTuple)(implicit tag: ClassTag[T]) extends IOBinder[T](
-  up => (if (composes) up else Nil) ++ Seq(((_, t) => { InModuleBody {
-    t match {
-      case system: T => fn(system)
+class ConcreteIOBinder[T, S](composes: Boolean, fn: (T, S) => IOBinderTuple)(implicit tag: ClassTag[T]) extends IOBinder[T](
+  up => (if (composes) up else Nil) ++ Seq(((_, t, ct) => { InModuleBody {
+    (t, ct) match {
+      case (system: T, chiptop: S) => fn(system, chiptop)
       case _ => (Nil, Nil)
     }
   }}): IOBinderFunction)
 )
 
-class LazyIOBinder[T](composes: Boolean, fn: T => ModuleValue[IOBinderTuple])(implicit tag: ClassTag[T]) extends IOBinder[T](
-  up => (if (composes) up else Nil) ++ Seq(((isLazy, t) => {
+class LazyIOBinder[T, S](composes: Boolean, fn: (T, S) => ModuleValue[IOBinderTuple])(implicit tag: ClassTag[T]) extends IOBinder[T](
+  up => (if (composes) up else Nil) ++ Seq(((isLazy, t, ct) => {
     val empty = new ModuleValue[IOBinderTuple] {
       def getWrappedValue: IOBinderTuple = (Nil, Nil)
     }
     if (isLazy) {
-      t match {
-        case system: T => fn(system)
+      (t, ct) match {
+        case (system: T, chiptop: S) => fn(system, chiptop)
         case _ => empty
       }
     } else {
@@ -151,11 +151,21 @@ class LazyIOBinder[T](composes: Boolean, fn: T => ModuleValue[IOBinderTuple])(im
 // The default IOBinders evaluate only in the concrete "ModuleImp" phase of elaboration
 // The "Lazy" IOBinders evaluate in the LazyModule phase, but can also generate hardware through InModuleBody
 
-class OverrideIOBinder[T](fn: T => IOBinderTuple)(implicit tag: ClassTag[T]) extends ConcreteIOBinder[T](false, fn)
-class ComposeIOBinder[T](fn: T => IOBinderTuple)(implicit tag: ClassTag[T]) extends ConcreteIOBinder[T](true, fn)
+class OverrideIOBinder[T, S <: HasIOBinders](fn: (T, S) => IOBinderTuple)(implicit tag: ClassTag[T]) extends ConcreteIOBinder[T, S](false, fn) {
+  def this(fn: T => IOBinderTuple)(implicit tag: ClassTag[T]) = this((t: T, ct: HasIOBinders) => fn(t))(tag)
+}
 
-class OverrideLazyIOBinder[T](fn: T => ModuleValue[IOBinderTuple])(implicit tag: ClassTag[T]) extends LazyIOBinder[T](false, fn)
-class ComposeLazyIOBinder[T](fn: T => ModuleValue[IOBinderTuple])(implicit tag: ClassTag[T]) extends LazyIOBinder[T](true, fn)
+class ComposeIOBinder[T, S <: HasIOBinders](fn: (T, S) => IOBinderTuple)(implicit tag: ClassTag[T]) extends ConcreteIOBinder[T, S](true, fn) {
+  def this(fn: T => IOBinderTuple)(implicit tag: ClassTag[T]) = this((t: T, ct: HasIOBinders) => fn(t))(tag)
+}
+
+
+class OverrideLazyIOBinder[T, S <: HasIOBinders](fn: (T, S) => ModuleValue[IOBinderTuple])(implicit tag: ClassTag[T]) extends LazyIOBinder[T, S](false, fn) {
+  def this(fn: T => ModuleValue[IOBinderTuple])(implicit tag: ClassTag[T]) = this((t: T, ct: HasIOBinders) => fn(t))(tag)
+}
+class ComposeLazyIOBinder[T, S <: HasIOBinders](fn: (T, S) => ModuleValue[IOBinderTuple])(implicit tag: ClassTag[T]) extends LazyIOBinder[T, S](true, fn) {
+  def this(fn: T => ModuleValue[IOBinderTuple])(implicit tag: ClassTag[T]) = this((t: T, ct: HasIOBinders) => fn(t))(tag)
+}
 
 
 case object IOCellKey extends Field[IOCellTypeParams](GenericIOCellParams())

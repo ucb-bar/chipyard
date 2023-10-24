@@ -42,6 +42,7 @@ class WithArty100TTweaks extends Config(
 
 class RocketArty100TConfig extends Config(
   new WithArty100TTweaks ++
+  new chipyard.config.WithGPIO ++
   new chipyard.config.WithBroadcastManager ++ // no l2
   new chipyard.RocketConfig)
 

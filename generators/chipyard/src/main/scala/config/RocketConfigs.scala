@@ -99,6 +99,7 @@ class MulticlockRocketConfig extends Config(
 class CustomIOChipTopRocketConfig extends Config(
   new chipyard.example.WithCustomChipTop ++
   new chipyard.example.WithCustomIOCells ++
+  new chipyard.example.WithCustomChipTopUART ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
 
