@@ -18,7 +18,7 @@ import chipyard.{BuildSystem}
 
 // don't use FPGAShell's DesignKey
 class WithNoDesignKey extends Config((site, here, up) => {
-  case DesignKey => (p: Parameters) => new SimpleLazyModule()(p)
+  case DesignKey => (p: Parameters) => new SimpleLazyRawModule()(p)
 })
 
 class WithArty100TTweaks extends Config(

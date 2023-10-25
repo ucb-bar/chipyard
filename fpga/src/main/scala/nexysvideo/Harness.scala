@@ -7,10 +7,10 @@ import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem.{SystemBusKey}
-
+import freechips.rocketchip.prci._
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.shell._
-import sifive.fpgashells.clocks.{ClockGroup, ClockSinkNode, PLLFactoryKey, ResetWrangler}
+import sifive.fpgashells.clocks._
 
 import sifive.blocks.devices.uart._
 

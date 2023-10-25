@@ -5,7 +5,7 @@ import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tilelink._
-
+import freechips.rocketchip.prci._
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.ip.xilinx._
 import sifive.fpgashells.shell._

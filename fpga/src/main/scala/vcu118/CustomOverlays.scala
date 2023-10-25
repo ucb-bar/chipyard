@@ -5,7 +5,7 @@ import chisel3._
 import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config.{Parameters, Field}
 import freechips.rocketchip.tilelink.{TLInwardNode, TLAsyncCrossingSink}
-
+import freechips.rocketchip.prci._
 import sifive.fpgashells.shell._
 import sifive.fpgashells.ip.xilinx._
 import sifive.fpgashells.shell.xilinx._
@@ -79,7 +79,7 @@ class DDR2VCU118PlacedOverlay(val shell: VCU118FPGATestHarness, name: String, va
     ui.reset := /*!port.mmcm_locked ||*/ port.c0_ddr4_ui_clk_sync_rst
     port.c0_sys_clk_i := sys.clock.asUInt
     port.sys_rst := sys.reset // pllReset
-    port.c0_ddr4_aresetn := !ar.reset
+    port.c0_ddr4_aresetn := !(ar.reset.asBool)
 
     // This was just copied from the SiFive example, but it's hard to follow.
     // The pins are emitted in the following order:
