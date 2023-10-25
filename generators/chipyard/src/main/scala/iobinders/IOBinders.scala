@@ -57,7 +57,7 @@ class WithDontTouchIOBinders(b: Boolean = true) extends Config((site, here, up) 
   case DontTouchIOBindersPorts => b
 })
 
-abstract trait HasIOBinders { this: LazyModule =>
+abstract trait HasIOBinders extends HasChipyardPorts { this: LazyModule =>
   val lazySystem: LazyModule
   private val iobinders = p(IOBinders)
   // Note: IOBinders cannot rely on the implicit clock/reset, as they may be called from the
@@ -80,6 +80,8 @@ abstract trait HasIOBinders { this: LazyModule =>
 
   // A mapping between stringified DigitalSystem traits and their corresponding ChipTop iocells
   val iocellMap = InModuleBody { iobinders.keys.map(k => k -> (lzyFlattened(k)._2 ++ impFlattened(k)._2)).toMap }
+
+  def ports = portMap.getWrappedValue.values.flatten.toSeq
 
   InModuleBody {
     if (p(DontTouchIOBindersPorts)) {

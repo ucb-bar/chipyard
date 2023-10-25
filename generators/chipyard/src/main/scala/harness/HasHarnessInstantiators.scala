@@ -10,7 +10,7 @@ import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters, ClockSinkP
 import chipyard.stage.phases.TargetDirKey
 
 import chipyard.harness.{ApplyHarnessBinders, HarnessBinders}
-import chipyard.iobinders.HasIOBinders
+import chipyard.iobinders.HasChipyardPorts
 import chipyard.clocking.{SimplePllConfiguration, ClockDividerN}
 import chipyard.{ChipTop}
 
@@ -83,7 +83,7 @@ trait HasHarnessInstantiators {
 
     withClockAndReset (harnessBinderClock, harnessBinderReset) {
       lazyDuts.zipWithIndex.foreach {
-        case (d: HasIOBinders, i: Int) => ApplyHarnessBinders(this, d.portMap.values.flatten.toSeq)(chipParameters(i))
+        case (d: HasChipyardPorts, i: Int) => ApplyHarnessBinders(this, d.ports)(chipParameters(i))
         case _ =>
       }
       ApplyMultiHarnessBinders(this, lazyDuts)
