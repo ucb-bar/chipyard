@@ -8,7 +8,7 @@ import chisel3.util.experimental.BoringUtils
 
 import org.chipsalliance.cde.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
-import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebug, ExportDebug, DMI, ClockedDMIIO, DebugModuleKey}
+import freechips.rocketchip.devices.debug.{Debug, HasPeripheryDebug, ExportDebug, DMI}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
