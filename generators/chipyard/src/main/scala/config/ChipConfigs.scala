@@ -24,7 +24,7 @@ class ChipLikeRocketConfig extends Config(
   //==================================
   new testchipip.WithSerialTLWidth(4) ++                                                // 4bit wide Serialized TL interface to minimize IO
   new testchipip.WithSerialTLMem(size = (1 << 30) * 4L) ++                              // Configure the off-chip memory accessible over serial-tl as backing memory
-  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 4L) ++                  // 4GB max external memory
+  new freechips.rocketchip.subsystem.WithNoMemPort ++                                   // Remove axi4 mem port
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++                          // 1 memory channel
 
   //==================================
