@@ -89,8 +89,8 @@ class WithDMIBridge extends HarnessBinder({
     // If FASED bridge is attached, loadmem widget is present
     val hasMainMemory = th.chipParameters(th.p(MultiChipIdx))(ExtMem).isDefined
     val mainMemoryName = Option.when(hasMainMemory)(MainMemoryConsts.globalName(th.p(MultiChipIdx)))
-    val nDMIAddrBits = port.dmi.req.bits.addr.getWidth
-    DMIBridge(th.harnessBinderClock, port, mainMemoryName, th.harnessBinderReset.asBool, nDMIAddrBits)
+    val nDMIAddrBits = port.io.dmi.req.bits.addr.getWidth
+    DMIBridge(th.harnessBinderClock, port.io, mainMemoryName, th.harnessBinderReset.asBool, nDMIAddrBits)
   }
 })
 
