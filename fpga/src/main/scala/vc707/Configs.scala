@@ -53,10 +53,6 @@ class WithVC707Tweaks extends Config (
   new WithVC707UARTHarnessBinder ++
   new WithVC707SPISDCardHarnessBinder ++
   new WithVC707DDRMemHarnessBinder ++
-  // io binders
-  new WithUARTIOPassthrough ++
-  new WithSPIIOPassthrough ++
-  new WithTLIOPassthrough ++
   // other configuration
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
