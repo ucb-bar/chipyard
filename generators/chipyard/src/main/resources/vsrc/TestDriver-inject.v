@@ -7,6 +7,55 @@
  `define MODEL TestHarness
 `endif
 
+typedef struct {
+  longint unsigned pc;
+  longint unsigned prv;
+
+  longint unsigned fcsr;
+
+  longint unsigned vstart;
+  longint unsigned vxsat;
+  longint unsigned vxrm;
+  longint unsigned vcsr;
+  longint unsigned vtype;
+
+  longint unsigned stvec;
+  longint unsigned sscratch;
+  longint unsigned sepc;
+  longint unsigned scause;
+  longint unsigned stval;
+  longint unsigned satp;
+
+  longint unsigned mstatus;
+  longint unsigned medeleg;
+  longint unsigned mideleg;
+  longint unsigned mie;
+  longint unsigned mtvec;
+  longint unsigned mscratch;
+  longint unsigned mepc;
+  longint unsigned mcause;
+  longint unsigned mtval;
+  longint unsigned mip;
+
+  longint unsigned mcycle;
+  longint unsigned minstret;
+  longint unsigned mtime;
+  longint unsigned mtimecmp;
+
+  longint unsigned XPR[32];
+  longint unsigned FPR[32];
+
+  longint unsigned VLEN;
+  longint unsigned ELEN;
+  string VPR[32];
+} loadarch_state_t;
+
+import "DPI-C" function void loadarch_from_file
+(
+  input string loadarch_file,
+  output loadarch_state_t loadarch_state
+);
+
 module TestDriver;
 
   reg clock = 1'b0;
@@ -25,6 +74,8 @@ module TestDriver;
   reg [2047:0] vcdplusfile = 0;
   reg [2047:0] vcdfile = 0;
   int unsigned rand_value;
+  loadarch_state_t loadarch_state;
+  string loadarch_file;
   initial
   begin
     void'($value$plusargs("max-cycles=%d", max_cycles));
@@ -75,6 +126,13 @@ module TestDriver;
     begin
       $dumpfile(vcdfile);
       $dumpvars(0, testHarness);
+    end
+
+    if ($value$plusargs("loadarch=%s", loadarch_file))
+    begin
+      $display("Reading loadarch file: %s", loadarch_file);
+      loadarch_from_file(loadarch_file, loadarch_state);
+      $display("Loadarch struct: %p", loadarch_state);
     end
 
 `ifdef FSDB
