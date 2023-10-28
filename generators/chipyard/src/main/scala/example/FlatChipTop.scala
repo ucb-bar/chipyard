@@ -68,13 +68,13 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule {
       l.reset := implicit_reset
     }}
 
-    val clock_wire = Wire(Input(new ClockWithFreq(80)))
+    val clock_wire = Wire(Input(Clock()))
     val reset_wire = Wire(Input(AsyncReset()))
     val (clock_pad, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
     val (reset_pad, resetIOCell) = IOCell.generateIOFromSignal(reset_wire, "reset", p(IOCellKey))
 
     slowClockSource.out.unzip._1.map { o =>
-      o.clock := clock_wire.clock
+      o.clock := clock_wire
       o.reset := reset_wire
     }
 
