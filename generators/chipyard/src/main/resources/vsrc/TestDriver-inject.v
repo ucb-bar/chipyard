@@ -47,7 +47,11 @@ typedef struct {
 
   longint unsigned VLEN;
   longint unsigned ELEN;
-  string VPR[32];
+  chandle VPR[32];
+  // unsigned char* = SystemVerilog string
+  // so VPR should be a string
+  // BUT, a string in a SV struct makes it 'dynamic' and then any reference to any member of the struct is illegal as the RHS of a force
+  // but chandle seems OK lol
 } loadarch_state_t;
 
 import "DPI-C" function void loadarch_from_file
@@ -76,6 +80,9 @@ module TestDriver;
   int unsigned rand_value;
   static loadarch_state_t loadarch_state;
   string loadarch_file;
+  event loadarch_struct_ready;
+  `define CSR_FILE testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.csr
+  `define CORE_RESET testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.reset
   initial
   begin
     void'($value$plusargs("max-cycles=%d", max_cycles));
@@ -163,13 +170,12 @@ module TestDriver;
       loadarch_from_file(loadarch_file, loadarch_state);
       $display("Loadarch struct: %p", loadarch_state);
     end
+    ->loadarch_struct_ready;
 
     $display("Starting state injection via forces");
     // mtime and mtimecmp to CLINT
     force testHarness.chiptop0.system.clint.time_0 = loadarch_state.mtime;
     force testHarness.chiptop0.system.clint.timecmp_0 = loadarch_state.mtimecmp;
-
-    `define CSR_FILE testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.csr
 
     // similar to testchip_dtm, set mstatus_fs, mstatus_xs, mstatus_vs
     // TODO: ask Jerry why
@@ -177,10 +183,6 @@ module TestDriver;
     // TODO: why don't we set the other bits of mstatus from loadarch_state?
     force `CSR_FILE.reg_mstatus_fs = 2'b11;
 
-    // Always reload FPRs, just cause. TODO: ask Jerry why he gates loading FPRs based on state.mstatus, may be related to DTM configuration
-    for (int i = 0; i < 32; i++) begin
-        force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.regfile_ext.Memory[i] = loadarch_state.FPR[i];
-    end
     // forcing fcsr is a bit tough
     // FPU.sv has fcsr_flags_valid/bits as outputs, they come from other state
     // in the FPU. Can't just force I/Os, need to force the register origins.
@@ -245,21 +247,13 @@ module TestDriver;
     // pc
     force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc = loadarch_state.pc; // 40'h8000_0000;
 
-    // XPRs
-    for (int i = 1; i < 32; i++) begin // Don't attempt to restore register x0 (only 31 registers)
-        force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.rf_ext.Memory[i-1] = loadarch_state.XPR[i];
-    end
-
     $display("Forcing complete, waiting for reset to fall");
-    @(negedge testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.reset);
+    @(negedge `CORE_RESET);
 
     $display("Releasing all forced registers after negedge reset");
     release testHarness.chiptop0.system.clint.time_0;
     release testHarness.chiptop0.system.clint.timecmp_0;
     release `CSR_FILE.reg_mstatus_fs;
-    for (int i = 0; i < 32; i++) begin
-        release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.regfile_ext.Memory[i];
-    end
     release `CSR_FILE.reg_frm;
 
     release `CSR_FILE.reg_stvec;
@@ -306,10 +300,29 @@ module TestDriver;
     release `CSR_FILE.reg_mstatus_prv;
     // pc
     release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc;
-    for (int i = 1; i < 32; i++) begin // Don't attempt to restore register x0 (only 31 registers)
-        release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.rf_ext.Memory[i-1];
-    end
     $display("Finished releasing all registers");
+  end
+
+  // LHS of a force statement must be static and genvar loops aren't allowed
+  // inside initial blocks
+  // Always reload FPRs, just cause. TODO: ask Jerry why he gates loading FPRs based on state.mstatus, may be related to DTM configuration
+  for (genvar i_fpr=0; i_fpr < 32; i_fpr++) begin
+    initial begin
+      @(loadarch_struct_ready);
+      force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.regfile_ext.Memory[i_fpr] = loadarch_state.FPR[i_fpr];
+      @(negedge `CORE_RESET);
+      release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.regfile_ext.Memory[i_fpr];
+    end
+  end
+
+  // XPRs
+  for (genvar i_xpr=1; i_xpr < 32; i_xpr++) begin // Don't attempt to restore register x0 (only 31 registers)
+    initial begin
+      @(loadarch_struct_ready);
+      force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.rf_ext.Memory[i_xpr-1] = loadarch_state.XPR[i_xpr];
+      @(negedge `CORE_RESET);
+      release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.rf_ext.Memory[i_xpr-1];
+    end
   end
 
 `ifdef TESTBENCH_IN_UVM
