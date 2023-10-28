@@ -74,7 +74,7 @@ module TestDriver;
   reg [2047:0] vcdplusfile = 0;
   reg [2047:0] vcdfile = 0;
   int unsigned rand_value;
-  loadarch_state_t loadarch_state;
+  static loadarch_state_t loadarch_state;
   string loadarch_file;
   initial
   begin
@@ -128,13 +128,6 @@ module TestDriver;
       $dumpvars(0, testHarness);
     end
 
-    if ($value$plusargs("loadarch=%s", loadarch_file))
-    begin
-      $display("Reading loadarch file: %s", loadarch_file);
-      loadarch_from_file(loadarch_file, loadarch_state);
-      $display("Loadarch struct: %p", loadarch_state);
-    end
-
 `ifdef FSDB
 `define VCDPLUSON $fsdbDumpon;
 `define VCDPLUSCLOSE $fsdbDumpoff;
@@ -163,6 +156,160 @@ module TestDriver;
       // Start dumping before first clock edge to capture reset sequence in waveform
       `VCDPLUSON
     end
+
+    if ($value$plusargs("loadarch=%s", loadarch_file))
+    begin
+      $display("Reading loadarch file: %s", loadarch_file);
+      loadarch_from_file(loadarch_file, loadarch_state);
+      $display("Loadarch struct: %p", loadarch_state);
+    end
+
+    $display("Starting state injection via forces");
+    // mtime and mtimecmp to CLINT
+    force testHarness.chiptop0.system.clint.time_0 = loadarch_state.mtime;
+    force testHarness.chiptop0.system.clint.timecmp_0 = loadarch_state.mtimecmp;
+
+    `define CSR_FILE testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.csr
+
+    // similar to testchip_dtm, set mstatus_fs, mstatus_xs, mstatus_vs
+    // TODO: ask Jerry why
+    // TODO: mstatus_xs and mstatus_vs are not found in Rocket (no vector unit, no custom instruction unit either). This is probably OK.
+    // TODO: why don't we set the other bits of mstatus from loadarch_state?
+    force `CSR_FILE.reg_mstatus_fs = 2'b11;
+
+    // Always reload FPRs, just cause. TODO: ask Jerry why he gates loading FPRs based on state.mstatus, may be related to DTM configuration
+    for (int i = 0; i < 32; i++) begin
+        force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.regfile_ext.Memory[i] = loadarch_state.FPR[i];
+    end
+    // forcing fcsr is a bit tough
+    // FPU.sv has fcsr_flags_valid/bits as outputs, they come from other state
+    // in the FPU. Can't just force I/Os, need to force the register origins.
+    // I can set the rounding mode, but not the other flag bits.
+    // TODO: figure out how to set FPU flag bits
+    // force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.io_fcsr
+    force `CSR_FILE.reg_frm = loadarch_state.fcsr[7:5];
+
+    // The vector registers won't be restored, idk how DTM handles restores to
+    // non-existent registers... TODO: ask Jerry
+
+    // Restore all the regular CSRs
+    force `CSR_FILE.reg_stvec = loadarch_state.stvec;
+    force `CSR_FILE.reg_sscratch = loadarch_state.sscratch;
+    force `CSR_FILE.reg_sepc = loadarch_state.sepc;
+    force `CSR_FILE.reg_stval = loadarch_state.stval;
+
+    // satp
+    force `CSR_FILE.reg_satp_mode = loadarch_state.satp[63:60];
+    force `CSR_FILE.reg_satp_ppn = loadarch_state.satp[43:0];
+    // TODO: register for satp ASID not found (possibly b/c plain Rocket doesn't have split address spaces)
+
+    // mstatus
+    // TODO: why is mstatus being set here again? This must be some caveat of DTM...
+    force `CSR_FILE.reg_mstatus_fs    = loadarch_state.mstatus[14:13];
+    // force `CSR_FILE.reg_mstatus_gva   = loadarch_state.mstatus[];
+    // TODO: gva doesn't exist anymore in mstatus? seems like it's hypervisor related
+    force `CSR_FILE.reg_mstatus_mie   = loadarch_state.mstatus[3];
+    force `CSR_FILE.reg_mstatus_mpie  = loadarch_state.mstatus[7];
+    force `CSR_FILE.reg_mstatus_mpp   = loadarch_state.mstatus[12:11];
+    force `CSR_FILE.reg_mstatus_mprv  = loadarch_state.mstatus[17];
+    force `CSR_FILE.reg_mstatus_mxr   = loadarch_state.mstatus[19];
+    // force `CSR_FILE.reg_mstatus_prv   = loadarch_state.mstatus[];
+    // TODO: what is prv? It doesn't exist in the spec
+    force `CSR_FILE.reg_mstatus_sie   = loadarch_state.mstatus[1];
+    force `CSR_FILE.reg_mstatus_spie  = loadarch_state.mstatus[5];
+    force `CSR_FILE.reg_mstatus_spp   = loadarch_state.mstatus[8];
+    force `CSR_FILE.reg_mstatus_sum   = loadarch_state.mstatus[18];
+    force `CSR_FILE.reg_mstatus_tsr   = loadarch_state.mstatus[22];
+    force `CSR_FILE.reg_mstatus_tvm   = loadarch_state.mstatus[20];
+    force `CSR_FILE.reg_mstatus_tw    = loadarch_state.mstatus[21];
+
+    // other CSRs
+    force `CSR_FILE.reg_medeleg = loadarch_state.medeleg;
+    force `CSR_FILE.reg_mideleg = loadarch_state.mideleg;
+    force `CSR_FILE.reg_mie     = loadarch_state.mie;
+    force `CSR_FILE.reg_mtvec   = loadarch_state.mtvec;
+    force `CSR_FILE.reg_mscratch = loadarch_state.mscratch;
+    force `CSR_FILE.reg_mepc    = loadarch_state.mepc;
+    force `CSR_FILE.reg_mcause  = loadarch_state.mcause;
+    force `CSR_FILE.reg_mtval   = loadarch_state.mtval;
+    // TODO: missing machine mode interrupt registers
+    force `CSR_FILE.reg_mip_seip = loadarch_state.mip[9];
+    force `CSR_FILE.reg_mip_ssip = loadarch_state.mip[1];
+    force `CSR_FILE.reg_mip_stip = loadarch_state.mip[5];
+    // TODO: can't find mcycle/minstret registers in Rocket
+    // force `CSR_FILE.mcycle      = loadarch_state.mcycle;
+    // force `CSR_FILE.minstret    = loadarch_state.minstret;
+
+    // prv (TODO: this is a guess)
+    force `CSR_FILE.reg_mstatus_prv = loadarch_state.prv;
+    // pc
+    force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc = loadarch_state.pc; // 40'h8000_0000;
+
+    // XPRs
+    for (int i = 1; i < 32; i++) begin // Don't attempt to restore register x0 (only 31 registers)
+        force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.rf_ext.Memory[i-1] = loadarch_state.XPR[i];
+    end
+
+    $display("Forcing complete, waiting for reset to fall");
+    @(negedge testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.reset);
+
+    $display("Releasing all forced registers after negedge reset");
+    release testHarness.chiptop0.system.clint.time_0;
+    release testHarness.chiptop0.system.clint.timecmp_0;
+    release `CSR_FILE.reg_mstatus_fs;
+    for (int i = 0; i < 32; i++) begin
+        release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.regfile_ext.Memory[i];
+    end
+    release `CSR_FILE.reg_frm;
+
+    release `CSR_FILE.reg_stvec;
+    release `CSR_FILE.reg_sscratch;
+    release `CSR_FILE.reg_sepc;
+    release `CSR_FILE.reg_stval;
+
+    // satp
+    release `CSR_FILE.reg_satp_mode;
+    release `CSR_FILE.reg_satp_ppn;
+
+    // mstatus
+    release `CSR_FILE.reg_mstatus_fs;
+    // release `CSR_FILE.reg_mstatus_gva;
+    release `CSR_FILE.reg_mstatus_mie;
+    release `CSR_FILE.reg_mstatus_mpie;
+    release `CSR_FILE.reg_mstatus_mpp;
+    release `CSR_FILE.reg_mstatus_mprv;
+    release `CSR_FILE.reg_mstatus_mxr;
+    release `CSR_FILE.reg_mstatus_sie;
+    release `CSR_FILE.reg_mstatus_spie;
+    release `CSR_FILE.reg_mstatus_spp;
+    release `CSR_FILE.reg_mstatus_sum;
+    release `CSR_FILE.reg_mstatus_tsr;
+    release `CSR_FILE.reg_mstatus_tvm;
+    release `CSR_FILE.reg_mstatus_tw;
+
+    // other CSRs
+    release `CSR_FILE.reg_medeleg;
+    release `CSR_FILE.reg_mideleg;
+    release `CSR_FILE.reg_mie;
+    release `CSR_FILE.reg_mtvec;
+    release `CSR_FILE.reg_mscratch;
+    release `CSR_FILE.reg_mepc;
+    release `CSR_FILE.reg_mcause;
+    release `CSR_FILE.reg_mtval;
+    release `CSR_FILE.reg_mip_seip;
+    release `CSR_FILE.reg_mip_ssip;
+    release `CSR_FILE.reg_mip_stip;
+    // release `CSR_FILE.mcycle;
+    // release `CSR_FILE.minstret;
+
+    // prv
+    release `CSR_FILE.reg_mstatus_prv;
+    // pc
+    release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc;
+    for (int i = 1; i < 32; i++) begin // Don't attempt to restore register x0 (only 31 registers)
+        release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.rf_ext.Memory[i-1];
+    end
+    $display("Finished releasing all registers");
   end
 
 `ifdef TESTBENCH_IN_UVM
@@ -224,17 +371,5 @@ module TestDriver;
     .reset(reset),
     .io_success(success)
   );
-
-  initial begin
-    $display("Starting force");
-    //force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s1_pc = 40'h8000_0010;
-    // s1_pc isn't reset, so I think I only have to drive s2_pc
-    force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc = 40'h8000_0000;
-    //force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc = 40'h10044;
-    @(negedge testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.reset);
-    //release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s1_pc;
-    release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc;
-    $display("Released after negedge reset");
-  end
 
 endmodule
