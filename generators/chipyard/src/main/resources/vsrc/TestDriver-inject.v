@@ -247,6 +247,13 @@ module TestDriver;
     // pc
     force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc = loadarch_state.pc; // 40'h8000_0000;
 
+    // PMPs
+    force `CSR_FILE.reg_pmp_0_addr = 'h1f_ffff_ffff_ffff;
+    force `CSR_FILE.reg_pmp_0_cfg_a = 2'b11;
+    force `CSR_FILE.reg_pmp_0_cfg_x = 1'b1;
+    force `CSR_FILE.reg_pmp_0_cfg_w = 1'b1;
+    force `CSR_FILE.reg_pmp_0_cfg_r = 1'b1;
+
     $display("Forcing complete, waiting for reset to fall");
     @(negedge `CORE_RESET);
 
@@ -300,6 +307,12 @@ module TestDriver;
     release `CSR_FILE.reg_mstatus_prv;
     // pc
     release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc;
+
+    release `CSR_FILE.reg_pmp_0_addr;
+    release `CSR_FILE.reg_pmp_0_cfg_a;
+    release `CSR_FILE.reg_pmp_0_cfg_x;
+    release `CSR_FILE.reg_pmp_0_cfg_w;
+    release `CSR_FILE.reg_pmp_0_cfg_r;
     $display("Finished releasing all registers");
   end
 
