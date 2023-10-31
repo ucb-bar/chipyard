@@ -258,7 +258,7 @@ module TestDriver;
       force `CSR_FILE.reg_pmp_0_cfg_r = 1'b1;
 
       $display("Forcing complete, waiting for reset to fall");
-      @(negedge `CORE_RESET);
+      @(negedge `CORE_RESET) begin end
 
       $display("Releasing all forced registers after negedge reset");
       release testHarness.chiptop0.system.clint.time_0;
@@ -325,20 +325,25 @@ module TestDriver;
   // Always reload FPRs, just cause. TODO: ask Jerry why he gates loading FPRs based on state.mstatus, may be related to DTM configuration
   for (genvar i_fpr=0; i_fpr < 32; i_fpr++) begin
     initial begin
-      @(loadarch_struct_ready);
-      force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.regfile_ext.Memory[i_fpr] = loadarch_state.FPR[i_fpr];
-      @(negedge `CORE_RESET);
-      release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.regfile_ext.Memory[i_fpr];
+      wait(loadarch_struct_ready.triggered) begin end
+      force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.regfile_ext.Memory[31-i_fpr] = loadarch_state.FPR[i_fpr];
+      @(negedge `CORE_RESET) begin end
+      release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.regfile_ext.Memory[31-i_fpr];
     end
   end
 
   // XPRs
   for (genvar i_xpr=1; i_xpr < 32; i_xpr++) begin // Don't attempt to restore register x0 (only 31 registers)
     initial begin
-      @(loadarch_struct_ready);
-      force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.rf_ext.Memory[i_xpr-1] = loadarch_state.XPR[i_xpr];
-      @(negedge `CORE_RESET);
-      release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.rf_ext.Memory[i_xpr-1];
+      wait (loadarch_struct_ready.triggered) begin end
+      $display("Loadarch struct is ready");
+      $display("Forcing XPR %d with value %x", i_xpr, loadarch_state.XPR[i_xpr]);
+      force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.rf_ext.Memory[30-i_xpr+1] = loadarch_state.XPR[i_xpr];
+      $display("Waiting for reset negedge");
+      @(negedge `CORE_RESET) begin end
+      $display("Got reset negedge");
+      release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.rf_ext.Memory[30-i_xpr+1];
+      $display("Releasing XPR %d", i_xpr);
     end
   end
 
