@@ -18,6 +18,6 @@ class WithDebugResetPassthrough extends ComposeIOBinder({
     val io_sjtag_reset: Bool = IO(Input(Bool())).suggestName("sjtag_reset")
     sjtag.reset := io_sjtag_reset
 
-    (Seq(DebugResetPort(io_ndreset), JTAGResetPort(io_sjtag_reset)), Nil)
+    (Seq(DebugResetPort(() => io_ndreset), JTAGResetPort(() => io_sjtag_reset)), Nil)
   }
 })

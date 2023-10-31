@@ -12,7 +12,7 @@ class RocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class TinyRocketConfig extends Config(
-  new chipyard.iobinders.WithDontTouchIOBinders(false) ++         // TODO FIX: Don't dontTouch the ports
+  new chipyard.harness.WithDontTouchChipTopPorts(false) ++         // TODO FIX: Don't dontTouch the ports
   new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++ // use incoherent bus topology
   new freechips.rocketchip.subsystem.WithNBanks(0) ++             // remove L2$
   new freechips.rocketchip.subsystem.WithNoMemPort ++             // remove backing memory
@@ -97,6 +97,7 @@ class MulticlockRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class CustomIOChipTopRocketConfig extends Config(
+  new chipyard.example.WithBrokenOutUARTIO ++
   new chipyard.example.WithCustomChipTop ++
   new chipyard.example.WithCustomIOCells ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core

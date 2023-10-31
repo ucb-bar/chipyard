@@ -86,8 +86,8 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule with HasChipyardPor
       o.reset := reset_wire
     }
 
-    ports = ports :+ ClockPort(clock_pad, 100.0)
-    ports = ports :+ ResetPort(reset_pad)
+    ports = ports :+ ClockPort(() => clock_pad, 100.0)
+    ports = ports :+ ResetPort(() => reset_pad)
 
     // For a real chip you should replace this ClockSourceAtFreqFromPlusArg
     // with a blackbox of whatever PLL is being integrated
@@ -104,13 +104,13 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule with HasChipyardPor
     // Custom Boot
     //=========================
     val (custom_boot_pad, customBootIOCell) = IOCell.generateIOFromSignal(system.custom_boot_pin.get.getWrappedValue, "custom_boot", p(IOCellKey))
-    ports = ports :+ CustomBootPort(custom_boot_pad)
+    ports = ports :+ CustomBootPort(() => custom_boot_pad)
 
     //=========================
     // Serialized TileLink
     //=========================
     val (serial_tl_pad, serialTLIOCells) = IOCell.generateIOFromSignal(system.serial_tl.get.getWrappedValue, "serial_tl", p(IOCellKey))
-    ports = ports :+ SerialTLPort(serial_tl_pad, p(SerialTLKey).get, system.serdesser.get, 0)
+    ports = ports :+ SerialTLPort(() => serial_tl_pad, p(SerialTLKey).get, system.serdesser.get, 0)
 
     //=========================
     // JTAG/Debug
@@ -149,7 +149,7 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule with HasChipyardPor
       IOCell.generateIOFromSignal(jtag_wire, "jtag", p(IOCellKey), abstractResetAsAsync = true)
     }.get
 
-    ports = ports :+ JTAGPort(jtag_pad)
+    ports = ports :+ JTAGPort(() => jtag_pad)
 
     //==========================
     // UART
@@ -159,7 +159,7 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule with HasChipyardPor
     val where = PBUS // TODO fix
     val bus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(where)
     val freqMHz = bus.dtsFrequency.get / 1000000
-    ports = ports :+ UARTPort(uart_pad, 0, freqMHz.toInt)
+    ports = ports :+ UARTPort(() => uart_pad, 0, freqMHz.toInt)
 
     //==========================
     // External interrupts (tie off)
