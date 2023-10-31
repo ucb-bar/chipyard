@@ -82,6 +82,15 @@ class WithRocketDCacheScratchpad extends Config((site, here, up) => {
   }
 })
 
+class WithRocketCacheRowBits(rowBits: Int = 64) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem)) map {
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      dcache = tp.tileParams.dcache.map(_.copy(rowBits = rowBits)),
+      icache = tp.tileParams.icache.map(_.copy(rowBits = rowBits))
+    ))
+  }
+})
+
 class WithTilePrefetchers extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: RocketTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
