@@ -278,11 +278,6 @@ PERMISSIVE_OFF=+permissive-off
 BINARY ?=
 BINARIES ?=
 BINARY_ARGS ?=
-ifdef STATE_INJECT
-override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(TIMEOUT_CYCLES) +no_hart0_msip
-else
-override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(TIMEOUT_CYCLES)
-endif
 VERBOSE_FLAGS ?= +verbose
 # get_out_name is a function, 1st argument is the binary
 get_out_name = $(subst $() $(),_,$(notdir $(basename $(1))))
@@ -298,6 +293,17 @@ endif
 
 ifneq ($(BINARIES_DIR),)
 override BINARIES = $(shell find -L $(BINARIES_DIR) -type f -print 2> /dev/null)
+endif
+
+ifdef STATE_INJECT
+ifdef LOADARCH
+override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(TIMEOUT_CYCLES) +no_hart0_msip
+else
+# STATE_INJECT without loadarch should be like running a regular simulation
+override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(TIMEOUT_CYCLES)
+endif
+else
+override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(TIMEOUT_CYCLES)
 endif
 
 #########################################################################################

@@ -81,6 +81,7 @@ module TestDriver;
   static loadarch_state_t loadarch_state;
   string loadarch_file;
   event loadarch_struct_ready;
+  bit do_loadarch = 0;
   `define CSR_FILE testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.csr
   `define CORE_RESET testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.reset
   initial
@@ -166,154 +167,157 @@ module TestDriver;
 
     if ($value$plusargs("loadarch=%s", loadarch_file))
     begin
+      do_loadarch = 1;
       $display("Reading loadarch file: %s", loadarch_file);
       loadarch_from_file(loadarch_file, loadarch_state);
       $display("Loadarch struct: %p", loadarch_state);
     end
-    ->loadarch_struct_ready;
 
-    $display("Starting state injection via forces");
-    // mtime and mtimecmp to CLINT
-    force testHarness.chiptop0.system.clint.time_0 = loadarch_state.mtime;
-    force testHarness.chiptop0.system.clint.timecmp_0 = loadarch_state.mtimecmp;
+    if (do_loadarch) begin
+      ->loadarch_struct_ready;
+      $display("Starting state injection via forces");
+      // mtime and mtimecmp to CLINT
+      force testHarness.chiptop0.system.clint.time_0 = loadarch_state.mtime;
+      force testHarness.chiptop0.system.clint.timecmp_0 = loadarch_state.mtimecmp;
 
-    // similar to testchip_dtm, set mstatus_fs, mstatus_xs, mstatus_vs
-    // TODO: ask Jerry why
-    // TODO: mstatus_xs and mstatus_vs are not found in Rocket (no vector unit, no custom instruction unit either). This is probably OK.
-    // TODO: why don't we set the other bits of mstatus from loadarch_state?
-    force `CSR_FILE.reg_mstatus_fs = 2'b11;
+      // similar to testchip_dtm, set mstatus_fs, mstatus_xs, mstatus_vs
+      // TODO: ask Jerry why
+      // TODO: mstatus_xs and mstatus_vs are not found in Rocket (no vector unit, no custom instruction unit either). This is probably OK.
+      // TODO: why don't we set the other bits of mstatus from loadarch_state?
+      force `CSR_FILE.reg_mstatus_fs = 2'b11;
 
-    // forcing fcsr is a bit tough
-    // FPU.sv has fcsr_flags_valid/bits as outputs, they come from other state
-    // in the FPU. Can't just force I/Os, need to force the register origins.
-    // I can set the rounding mode, but not the other flag bits.
-    // TODO: figure out how to set FPU flag bits
-    // force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.io_fcsr
-    force `CSR_FILE.reg_frm = loadarch_state.fcsr[7:5];
+      // forcing fcsr is a bit tough
+      // FPU.sv has fcsr_flags_valid/bits as outputs, they come from other state
+      // in the FPU. Can't just force I/Os, need to force the register origins.
+      // I can set the rounding mode, but not the other flag bits.
+      // TODO: figure out how to set FPU flag bits
+      // force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.io_fcsr
+      force `CSR_FILE.reg_frm = loadarch_state.fcsr[7:5];
 
-    // The vector registers won't be restored, idk how DTM handles restores to
-    // non-existent registers... TODO: ask Jerry
+      // The vector registers won't be restored, idk how DTM handles restores to
+      // non-existent registers... TODO: ask Jerry
 
-    // Restore all the regular CSRs
-    force `CSR_FILE.reg_stvec = loadarch_state.stvec;
-    force `CSR_FILE.reg_sscratch = loadarch_state.sscratch;
-    force `CSR_FILE.reg_sepc = loadarch_state.sepc;
-    force `CSR_FILE.reg_stval = loadarch_state.stval;
+      // Restore all the regular CSRs
+      force `CSR_FILE.reg_stvec = loadarch_state.stvec;
+      force `CSR_FILE.reg_sscratch = loadarch_state.sscratch;
+      force `CSR_FILE.reg_sepc = loadarch_state.sepc;
+      force `CSR_FILE.reg_stval = loadarch_state.stval;
 
-    // satp
-    force `CSR_FILE.reg_satp_mode = loadarch_state.satp[63:60];
-    force `CSR_FILE.reg_satp_ppn = loadarch_state.satp[43:0];
-    // TODO: register for satp ASID not found (possibly b/c plain Rocket doesn't have split address spaces)
+      // satp
+      force `CSR_FILE.reg_satp_mode = loadarch_state.satp[63:60];
+      force `CSR_FILE.reg_satp_ppn = loadarch_state.satp[43:0];
+      // TODO: register for satp ASID not found (possibly b/c plain Rocket doesn't have split address spaces)
 
-    // mstatus
-    // TODO: why is mstatus being set here again? This must be some caveat of DTM...
-    force `CSR_FILE.reg_mstatus_fs    = loadarch_state.mstatus[14:13];
-    // force `CSR_FILE.reg_mstatus_gva   = loadarch_state.mstatus[];
-    // TODO: gva doesn't exist anymore in mstatus? seems like it's hypervisor related
-    force `CSR_FILE.reg_mstatus_mie   = loadarch_state.mstatus[3];
-    force `CSR_FILE.reg_mstatus_mpie  = loadarch_state.mstatus[7];
-    force `CSR_FILE.reg_mstatus_mpp   = loadarch_state.mstatus[12:11];
-    force `CSR_FILE.reg_mstatus_mprv  = loadarch_state.mstatus[17];
-    force `CSR_FILE.reg_mstatus_mxr   = loadarch_state.mstatus[19];
-    // force `CSR_FILE.reg_mstatus_prv   = loadarch_state.mstatus[];
-    // TODO: what is prv? It doesn't exist in the spec
-    force `CSR_FILE.reg_mstatus_sie   = loadarch_state.mstatus[1];
-    force `CSR_FILE.reg_mstatus_spie  = loadarch_state.mstatus[5];
-    force `CSR_FILE.reg_mstatus_spp   = loadarch_state.mstatus[8];
-    force `CSR_FILE.reg_mstatus_sum   = loadarch_state.mstatus[18];
-    force `CSR_FILE.reg_mstatus_tsr   = loadarch_state.mstatus[22];
-    force `CSR_FILE.reg_mstatus_tvm   = loadarch_state.mstatus[20];
-    force `CSR_FILE.reg_mstatus_tw    = loadarch_state.mstatus[21];
+      // mstatus
+      // TODO: why is mstatus being set here again? This must be some caveat of DTM...
+      force `CSR_FILE.reg_mstatus_fs    = loadarch_state.mstatus[14:13];
+      // force `CSR_FILE.reg_mstatus_gva   = loadarch_state.mstatus[];
+      // TODO: gva doesn't exist anymore in mstatus? seems like it's hypervisor related
+      force `CSR_FILE.reg_mstatus_mie   = loadarch_state.mstatus[3];
+      force `CSR_FILE.reg_mstatus_mpie  = loadarch_state.mstatus[7];
+      force `CSR_FILE.reg_mstatus_mpp   = loadarch_state.mstatus[12:11];
+      force `CSR_FILE.reg_mstatus_mprv  = loadarch_state.mstatus[17];
+      force `CSR_FILE.reg_mstatus_mxr   = loadarch_state.mstatus[19];
+      // force `CSR_FILE.reg_mstatus_prv   = loadarch_state.mstatus[];
+      // TODO: what is prv? It doesn't exist in the spec
+      force `CSR_FILE.reg_mstatus_sie   = loadarch_state.mstatus[1];
+      force `CSR_FILE.reg_mstatus_spie  = loadarch_state.mstatus[5];
+      force `CSR_FILE.reg_mstatus_spp   = loadarch_state.mstatus[8];
+      force `CSR_FILE.reg_mstatus_sum   = loadarch_state.mstatus[18];
+      force `CSR_FILE.reg_mstatus_tsr   = loadarch_state.mstatus[22];
+      force `CSR_FILE.reg_mstatus_tvm   = loadarch_state.mstatus[20];
+      force `CSR_FILE.reg_mstatus_tw    = loadarch_state.mstatus[21];
 
-    // other CSRs
-    force `CSR_FILE.reg_medeleg = loadarch_state.medeleg;
-    force `CSR_FILE.reg_mideleg = loadarch_state.mideleg;
-    force `CSR_FILE.reg_mie     = loadarch_state.mie;
-    force `CSR_FILE.reg_mtvec   = loadarch_state.mtvec;
-    force `CSR_FILE.reg_mscratch = loadarch_state.mscratch;
-    force `CSR_FILE.reg_mepc    = loadarch_state.mepc;
-    force `CSR_FILE.reg_mcause  = loadarch_state.mcause;
-    force `CSR_FILE.reg_mtval   = loadarch_state.mtval;
-    // TODO: missing machine mode interrupt registers
-    force `CSR_FILE.reg_mip_seip = loadarch_state.mip[9];
-    force `CSR_FILE.reg_mip_ssip = loadarch_state.mip[1];
-    force `CSR_FILE.reg_mip_stip = loadarch_state.mip[5];
-    // TODO: can't find mcycle/minstret registers in Rocket
-    // force `CSR_FILE.mcycle      = loadarch_state.mcycle;
-    // force `CSR_FILE.minstret    = loadarch_state.minstret;
+      // other CSRs
+      force `CSR_FILE.reg_medeleg = loadarch_state.medeleg;
+      force `CSR_FILE.reg_mideleg = loadarch_state.mideleg;
+      force `CSR_FILE.reg_mie     = loadarch_state.mie;
+      force `CSR_FILE.reg_mtvec   = loadarch_state.mtvec;
+      force `CSR_FILE.reg_mscratch = loadarch_state.mscratch;
+      force `CSR_FILE.reg_mepc    = loadarch_state.mepc;
+      force `CSR_FILE.reg_mcause  = loadarch_state.mcause;
+      force `CSR_FILE.reg_mtval   = loadarch_state.mtval;
+      // TODO: missing machine mode interrupt registers
+      force `CSR_FILE.reg_mip_seip = loadarch_state.mip[9];
+      force `CSR_FILE.reg_mip_ssip = loadarch_state.mip[1];
+      force `CSR_FILE.reg_mip_stip = loadarch_state.mip[5];
+      // TODO: can't find mcycle/minstret registers in Rocket
+      // force `CSR_FILE.mcycle      = loadarch_state.mcycle;
+      // force `CSR_FILE.minstret    = loadarch_state.minstret;
 
-    // prv (TODO: this is a guess)
-    force `CSR_FILE.reg_mstatus_prv = loadarch_state.prv;
-    // pc
-    force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc = loadarch_state.pc; // 40'h8000_0000;
+      // prv (TODO: this is a guess)
+      force `CSR_FILE.reg_mstatus_prv = loadarch_state.prv;
+      // pc
+      force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc = loadarch_state.pc; // 40'h8000_0000;
 
-    // PMPs
-    force `CSR_FILE.reg_pmp_0_addr = 'h1f_ffff_ffff_ffff;
-    force `CSR_FILE.reg_pmp_0_cfg_a = 2'b11;
-    force `CSR_FILE.reg_pmp_0_cfg_x = 1'b1;
-    force `CSR_FILE.reg_pmp_0_cfg_w = 1'b1;
-    force `CSR_FILE.reg_pmp_0_cfg_r = 1'b1;
+      // PMPs
+      force `CSR_FILE.reg_pmp_0_addr = 'h1f_ffff_ffff_ffff;
+      force `CSR_FILE.reg_pmp_0_cfg_a = 2'b11;
+      force `CSR_FILE.reg_pmp_0_cfg_x = 1'b1;
+      force `CSR_FILE.reg_pmp_0_cfg_w = 1'b1;
+      force `CSR_FILE.reg_pmp_0_cfg_r = 1'b1;
 
-    $display("Forcing complete, waiting for reset to fall");
-    @(negedge `CORE_RESET);
+      $display("Forcing complete, waiting for reset to fall");
+      @(negedge `CORE_RESET);
 
-    $display("Releasing all forced registers after negedge reset");
-    release testHarness.chiptop0.system.clint.time_0;
-    release testHarness.chiptop0.system.clint.timecmp_0;
-    release `CSR_FILE.reg_mstatus_fs;
-    release `CSR_FILE.reg_frm;
+      $display("Releasing all forced registers after negedge reset");
+      release testHarness.chiptop0.system.clint.time_0;
+      release testHarness.chiptop0.system.clint.timecmp_0;
+      release `CSR_FILE.reg_mstatus_fs;
+      release `CSR_FILE.reg_frm;
 
-    release `CSR_FILE.reg_stvec;
-    release `CSR_FILE.reg_sscratch;
-    release `CSR_FILE.reg_sepc;
-    release `CSR_FILE.reg_stval;
+      release `CSR_FILE.reg_stvec;
+      release `CSR_FILE.reg_sscratch;
+      release `CSR_FILE.reg_sepc;
+      release `CSR_FILE.reg_stval;
 
-    // satp
-    release `CSR_FILE.reg_satp_mode;
-    release `CSR_FILE.reg_satp_ppn;
+      // satp
+      release `CSR_FILE.reg_satp_mode;
+      release `CSR_FILE.reg_satp_ppn;
 
-    // mstatus
-    release `CSR_FILE.reg_mstatus_fs;
-    // release `CSR_FILE.reg_mstatus_gva;
-    release `CSR_FILE.reg_mstatus_mie;
-    release `CSR_FILE.reg_mstatus_mpie;
-    release `CSR_FILE.reg_mstatus_mpp;
-    release `CSR_FILE.reg_mstatus_mprv;
-    release `CSR_FILE.reg_mstatus_mxr;
-    release `CSR_FILE.reg_mstatus_sie;
-    release `CSR_FILE.reg_mstatus_spie;
-    release `CSR_FILE.reg_mstatus_spp;
-    release `CSR_FILE.reg_mstatus_sum;
-    release `CSR_FILE.reg_mstatus_tsr;
-    release `CSR_FILE.reg_mstatus_tvm;
-    release `CSR_FILE.reg_mstatus_tw;
+      // mstatus
+      release `CSR_FILE.reg_mstatus_fs;
+      // release `CSR_FILE.reg_mstatus_gva;
+      release `CSR_FILE.reg_mstatus_mie;
+      release `CSR_FILE.reg_mstatus_mpie;
+      release `CSR_FILE.reg_mstatus_mpp;
+      release `CSR_FILE.reg_mstatus_mprv;
+      release `CSR_FILE.reg_mstatus_mxr;
+      release `CSR_FILE.reg_mstatus_sie;
+      release `CSR_FILE.reg_mstatus_spie;
+      release `CSR_FILE.reg_mstatus_spp;
+      release `CSR_FILE.reg_mstatus_sum;
+      release `CSR_FILE.reg_mstatus_tsr;
+      release `CSR_FILE.reg_mstatus_tvm;
+      release `CSR_FILE.reg_mstatus_tw;
 
-    // other CSRs
-    release `CSR_FILE.reg_medeleg;
-    release `CSR_FILE.reg_mideleg;
-    release `CSR_FILE.reg_mie;
-    release `CSR_FILE.reg_mtvec;
-    release `CSR_FILE.reg_mscratch;
-    release `CSR_FILE.reg_mepc;
-    release `CSR_FILE.reg_mcause;
-    release `CSR_FILE.reg_mtval;
-    release `CSR_FILE.reg_mip_seip;
-    release `CSR_FILE.reg_mip_ssip;
-    release `CSR_FILE.reg_mip_stip;
-    // release `CSR_FILE.mcycle;
-    // release `CSR_FILE.minstret;
+      // other CSRs
+      release `CSR_FILE.reg_medeleg;
+      release `CSR_FILE.reg_mideleg;
+      release `CSR_FILE.reg_mie;
+      release `CSR_FILE.reg_mtvec;
+      release `CSR_FILE.reg_mscratch;
+      release `CSR_FILE.reg_mepc;
+      release `CSR_FILE.reg_mcause;
+      release `CSR_FILE.reg_mtval;
+      release `CSR_FILE.reg_mip_seip;
+      release `CSR_FILE.reg_mip_ssip;
+      release `CSR_FILE.reg_mip_stip;
+      // release `CSR_FILE.mcycle;
+      // release `CSR_FILE.minstret;
 
-    // prv
-    release `CSR_FILE.reg_mstatus_prv;
-    // pc
-    release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc;
+      // prv
+      release `CSR_FILE.reg_mstatus_prv;
+      // pc
+      release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc;
 
-    release `CSR_FILE.reg_pmp_0_addr;
-    release `CSR_FILE.reg_pmp_0_cfg_a;
-    release `CSR_FILE.reg_pmp_0_cfg_x;
-    release `CSR_FILE.reg_pmp_0_cfg_w;
-    release `CSR_FILE.reg_pmp_0_cfg_r;
-    $display("Finished releasing all registers");
+      release `CSR_FILE.reg_pmp_0_addr;
+      release `CSR_FILE.reg_pmp_0_cfg_a;
+      release `CSR_FILE.reg_pmp_0_cfg_x;
+      release `CSR_FILE.reg_pmp_0_cfg_w;
+      release `CSR_FILE.reg_pmp_0_cfg_r;
+      $display("Finished releasing all registers");
+    end
   end
 
   // LHS of a force statement must be static and genvar loops aren't allowed
