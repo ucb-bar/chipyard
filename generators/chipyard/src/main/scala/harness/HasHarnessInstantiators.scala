@@ -96,9 +96,11 @@ trait HasHarnessInstantiators {
       ApplyMultiHarnessBinders(this, lazyDuts)
     }
 
-    duts.map(_ match {
-      case d: DontTouch => d.dontTouchPorts()
-    })
+    if (p(DontTouchChipTopPorts)) {
+      duts.map(_ match {
+        case d: DontTouch => d.dontTouchPorts()
+      })
+    }
 
     val harnessBinderClk = harnessClockInstantiator.requestClockMHz("harnessbinder_clock", getHarnessBinderClockFreqMHz)
     println(s"Harness binder clock is $harnessBinderClockFreq")
