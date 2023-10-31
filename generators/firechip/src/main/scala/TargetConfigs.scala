@@ -123,6 +123,7 @@ class WithFireSimHighPerfClocking extends Config(
   new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
   new chipyard.config.WithSystemBusFrequency(3200.0) ++
   new chipyard.config.WithFrontBusFrequency(3200.0) ++
+  new chipyard.config.WithControlBusFrequency(3200.0) ++
   // Optional: These three configs put the DRAM memory system in it's own clock domain.
   // Removing the first config will result in the FASED timing model running
   // at the pbus freq (above, 3.2 GHz), which is outside the range of valid DDR3 speedgrades.
@@ -138,8 +139,10 @@ class WithFireSimConfigTweaks extends Config(
   // Using some other frequency will require runnings the FASED runtime configuration generator
   // to generate faithful DDR3 timing values.
   new chipyard.config.WithSystemBusFrequency(1000.0) ++
+  new chipyard.config.WithControlBusFrequency(1000.0) ++
   new chipyard.config.WithPeripheryBusFrequency(1000.0) ++
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++
+  new chipyard.config.WithFrontBusFrequency(1000.0) ++
   new WithFireSimDesignTweaks
 )
 
@@ -185,6 +188,8 @@ class WithFireSimTestChipConfigTweaks extends Config(
   new chipyard.config.WithSystemBusFrequency(500.0) ++   // Realistic system bus frequency
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++  // Needs to be 1000 MHz to model DDR performance accurately
   new chipyard.config.WithPeripheryBusFrequency(500.0) ++  // Match the sbus and pbus frequency
+  new chipyard.config.WithFrontBusFrequency(500.0) ++      // Match the sbus and fbus frequency
+  new chipyard.config.WithControlBusFrequency(500.0) ++    // Match the sbus and cbus frequency
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("sbus", "pbus", "fbus", "cbus", "implicit"), Seq("tile"))) ++
   //  Crossing specifications
   new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
@@ -245,6 +250,10 @@ class FireSimSmallSystemConfig extends Config(
   new WithDefaultMemModel ++
   new WithBootROM ++
   new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
+  new chipyard.config.WithControlBusFrequency(3200.0) ++
+  new chipyard.config.WithSystemBusFrequency(3200.0) ++
+  new chipyard.config.WithFrontBusFrequency(3200.0) ++
+  new chipyard.config.WithMemoryBusFrequency(3200.0) ++
   new WithoutClockGating ++
   new WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++

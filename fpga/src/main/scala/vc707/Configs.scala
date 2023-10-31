@@ -35,7 +35,7 @@ class WithSystemModifications extends Config((site, here, up) => {
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vc707/sdboot/build/sdboot.bin")
   }
   case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC7074GDDRSize)))) // set extmem to DDR size (note the size)
-  case SerialTLKey => None // remove serialized tl port
+  case SerialTLKey => Nil // remove serialized tl port
 })
 
 class WithVC707Tweaks extends Config (
