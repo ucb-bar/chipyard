@@ -34,7 +34,7 @@ grouping["group-accels"]="chipyard-mempress chipyard-sha3 chipyard-hwacha chipya
 grouping["group-constellation"]="chipyard-constellation"
 grouping["group-tracegen"]="tracegen tracegen-boom"
 grouping["group-other"]="icenet testchipip constellation rocketchip-amba rocketchip-tlsimple rocketchip-tlwidth rocketchip-tlxbar"
-grouping["group-fpga"]="arty vcu118 vc707"
+grouping["group-fpga"]="arty arty100t nexysvideo vc707 vcu118"
 
 # key value store to get the build strings
 declare -A mapping
@@ -79,5 +79,7 @@ mapping["rocketchip-tlwidth"]="SUB_PROJECT=rocketchip CONFIG=TLWidthUnitTestConf
 mapping["rocketchip-tlxbar"]="SUB_PROJECT=rocketchip CONFIG=TLXbarUnitTestConfig"
 
 mapping["arty"]="SUB_PROJECT=arty verilog"
-mapping["vcu118"]="SUB_PROJECT=vcu118 verilog"
+mapping["arty100t"]="SUB_PROJECT=arty100t verilog"
+mapping["nexysvideo"]="SUB_PROJECT=nexysvideo verilog"
 mapping["vc707"]="SUB_PROJECT=vc707 verilog"
+mapping["vcu118"]="SUB_PROJECT=vcu118 verilog"

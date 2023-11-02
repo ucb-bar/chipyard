@@ -7,7 +7,8 @@ class AbstractTraceGenConfig extends Config(
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++
   new chipyard.harness.WithBlackBoxSimMem ++
   new chipyard.harness.WithTraceGenSuccess ++
-  new chipyard.harness.WithClockAndResetFromHarness ++
+  new chipyard.harness.WithClockFromHarness ++
+  new chipyard.harness.WithResetFromHarness ++
   new chipyard.iobinders.WithAXI4MemPunchthrough ++
   new chipyard.iobinders.WithTraceGenSuccessPunchthrough ++
   new chipyard.clocking.WithPassthroughClockGenerator ++

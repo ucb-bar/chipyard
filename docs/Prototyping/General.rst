@@ -2,7 +2,7 @@ General Setup and Usage
 ==============================
 
 Sources
----------------------------
+-------
 
 All FPGA prototyping-related collateral and sources are located in the ``fpga`` top-level Chipyard directory.
 This includes the ``fpga-shells`` submodule and the ``src`` directory that hold both Scala, TCL and other collateral.

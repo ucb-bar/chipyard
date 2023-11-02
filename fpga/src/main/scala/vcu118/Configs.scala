@@ -52,9 +52,6 @@ class WithVCU118Tweaks extends Config(
   new WithUART ++
   new WithSPISDCard ++
   new WithDDRMem ++
-  // io binders
-  new WithUARTIOPassthrough ++
-  new WithSPIIOPassthrough ++
   // other configuration
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
