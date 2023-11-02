@@ -109,7 +109,7 @@ def generate_copy(c, sfx):
   new_file = os.path.join(args.gcpath, new_file)
 
   shutil.copy(cur_file, new_file)
- bash(f"sed -i 's/module\( \+\){cur_name}/module\\1{new_name}/' {new_file}")
+  bash(f"sed -i 's/module\( \+\){cur_name}/module\\1{new_name}/' {new_file}")
   return new_file
 
 def bfs_uniquify_modules(tree, common_fnames, verilog_module_filename):
