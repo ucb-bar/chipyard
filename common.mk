@@ -248,7 +248,6 @@ $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_F
 		--format=fir \
 		--dedup \
 		--export-module-hierarchy \
-		--emit-metadata \
 		--verify-each=true \
 		--warn-on-unprocessed-annotations \
 		--disable-annotation-classless \
@@ -257,7 +256,6 @@ $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_F
 		--lowering-options=$(shell cat $(MFC_LOWERING_OPTIONS)) \
 		--repl-seq-mem \
 		--repl-seq-mem-file=$(MFC_SMEMS_CONF) \
-		--repl-seq-mem-circuit=$(MODEL) \
 		--annotation-file=$(SFC_ANNO_FILE) \
 		--split-verilog \
 		-o $(GEN_COLLATERAL_DIR) \
