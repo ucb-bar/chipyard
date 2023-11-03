@@ -81,6 +81,24 @@ For example:
 
 .. _sw-sim-custom:
 
+Custom Benchmarks/Tests
+-------------------------------
+
+To compile your own code to run in a Verilator/VCS simulation, add it to Chipyard's ``tests`` directory then add its name to the list of ``PROGRAMS`` inside the ``Makefile``. Then when you run ``make``, all of the programs inside ``tests`` will output a ``.riscv`` binary, which can be used with the simulator as described above.
+
+.. code-block:: shell
+
+    # Enter Tests directory
+    cd tests
+    make
+
+    # Enter Verilator or VCS directory
+    cd ../sims/verilator
+    make run-binary BINARY=../../tests/hello.riscv
+
+.. Note:: On multi-core configurations, only hart (**har**\ dware **t**\ hread) 0 executes the ``main()`` function. All other harts execute the secondary ``__main()`` function, which defaults to a busy loop. To run a multi-threaded workload on a Verilator/VCS simulation, override ``__main()`` with your own code. More details can be found `here <https://github.com/ucb-bar/libgloss-htif>`_
+
+
 Makefile Variables and Commands
 -------------------------------
 You can get a list of useful Makefile variables and commands available from the Verilator or VCS directories. simply run ``make help``:
