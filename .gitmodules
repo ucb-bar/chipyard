@@ -133,3 +133,6 @@
 [submodule "generators/hardfloat"]
 	path = generators/hardfloat
 	url = https://github.com/ucb-bar/berkeley-hardfloat.git
+[submodule "generators/latency-injection-queue"]
+	path = generators/latency-injection-queue
+	url = https://github.com/ucb-bar/latency-injection-queue.git
