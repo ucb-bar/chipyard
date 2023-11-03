@@ -60,5 +60,5 @@ class HwachaLargeBoomConfig extends Config(
 class AES256ECBRocketConfig extends Config(
   new aes.WithAES256ECBAccel ++                                   // use Caliptra AES 256 ECB accelerator
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.WithSystemBusWidth(128) ++
+  new chipyard.config.WithSystemBusWidth(256) ++
   new chipyard.config.AbstractConfig)

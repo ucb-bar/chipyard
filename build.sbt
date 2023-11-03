@@ -235,11 +235,11 @@ lazy val nvdla = (project in file("generators/nvdla"))
   .settings(commonSettings)
 
 lazy val caliptra_aes = (project in file("generators/caliptra-aes-acc"))
-  .dependsOn(rocketchip, rocc_acc_utils, midasTargetUtils)
+  .dependsOn(rocketchip, rocc_acc_utils, testchipip, midasTargetUtils)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-llazy val rocc_acc_utils = (project in file("generators/rocc-acc-utils"))
+lazy val rocc_acc_utils = (project in file("generators/rocc-acc-utils"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
