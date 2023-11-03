@@ -13,7 +13,7 @@ import freechips.rocketchip.util.UIntIsOneOf
 
 // DOC include start: GCD params
 case class GCDParams(
-  address: BigInt = 0x1000,
+  address: BigInt = 0x4000,
   width: Int = 32,
   useAXI4: Boolean = false,
   useBlackBox: Boolean = true)
@@ -46,11 +46,10 @@ trait HasGCDIO extends BaseModule {
 }
 
 // DOC include start: GCD blackbox
-class GCDMMIOBlackBox(val w: Int) extends BlackBox(Map("WIDTH" -> IntParam(w))) with HasBlackBoxPath
+class GCDMMIOBlackBox(val w: Int) extends BlackBox(Map("WIDTH" -> IntParam(w))) with HasBlackBoxResource
   with HasGCDIO
 {
-  val chipyardDir = System.getProperty("user.dir")
-  addPath(s"$chipyardDir/generators/chipyard/src/main/resources/vsrc/GCDMMIOBlackBox.v")
+  addResource("/vsrc/GCDMMIOBlackBox.v")
 }
 // DOC include end: GCD blackbox
 
@@ -114,36 +113,20 @@ trait GCDModule extends HasRegMap {
     Module(new GCDMMIOChiselModule(params.width))
   }
 
-  val impl1 = if (params.useBlackBox) {
-    Module(new GCDMMIOBlackBox(params.width))
-  } else {
-    Module(new GCDMMIOChiselModule(params.width))
-  }
-
-
   impl.io.clock := clock
   impl.io.reset := reset.asBool
 
   impl.io.x := x
   impl.io.y := y.bits
   impl.io.input_valid := y.valid
-  y.ready := impl.io.input_ready && impl1.io.input_ready
+  y.ready := impl.io.input_ready
 
   gcd.bits := impl.io.gcd
-  gcd.valid := impl.io.output_valid && impl1.io.output_valid
+  gcd.valid := impl.io.output_valid
   impl.io.output_ready := gcd.ready
 
-  status := Cat(impl.io.input_ready, impl.io.output_valid, impl1.io.input_ready, impl1.io.output_valid)
-  io.gcd_busy := impl.io.busy && impl1.io.busy
-
-  impl1.io.clock := clock
-  impl1.io.reset := reset.asBool
-
-  impl1.io.x := x
-  impl1.io.y := y.bits
-  impl1.io.input_valid := y.valid
-
-  impl1.io.output_ready := gcd.ready
+  status := Cat(impl.io.input_ready, impl.io.output_valid)
+  io.gcd_busy := impl.io.busy
 
   regmap(
     0x00 -> Seq(
