@@ -9,7 +9,7 @@
 # To update a single package to the latest version compatible with the version constraints in the source:
 #     conda-lock lock  --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml --update PACKAGE
 # To re-solve the entire environment, e.g. after changing a version constraint in the source file:
-#     conda-lock -f /scratch/abejgonza/chipyard-work/cy-2/conda-reqs/chipyard.yaml -f /scratch/abejgonza/chipyard-work/cy-2/conda-reqs/riscv-tools.yaml --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml
+#     conda-lock -f /scratch/abejgonza/cy/conda-reqs/chipyard.yaml -f /scratch/abejgonza/cy/conda-reqs/riscv-tools.yaml --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml
 metadata:
   channels:
   - url: ucb-bar
@@ -21,12 +21,12 @@ metadata:
   - url: nodefaults
     used_env_vars: []
   content_hash:
-    linux-64: 9963da13032f21beaffd417b65e4c28807446ab56efa04c0748ae798fc95fe92
+    linux-64: 93a869dc0877b2364deeee14c69593a84494391c0255828dc6f4b6b17dbbf62d
   platforms:
   - linux-64
   sources:
-  - /scratch/abejgonza/chipyard-work/cy-2/conda-reqs/chipyard.yaml
-  - /scratch/abejgonza/chipyard-work/cy-2/conda-reqs/riscv-tools.yaml
+  - /scratch/abejgonza/cy/conda-reqs/chipyard.yaml
+  - /scratch/abejgonza/cy/conda-reqs/riscv-tools.yaml
 package:
 - category: main
   dependencies: {}
@@ -3413,14 +3413,14 @@ package:
     perl: ''
     python: ''
   hash:
-    md5: 6ecc6f19e3a0661c096d0e84015c8122
-    sha256: 582ae4513d3ef87d4b0c5d53a3a691575de2aabe8cc5a5554bb1db5bcd6a40b4
+    md5: efb0e7909f1a41159856e688e216bd26
+    sha256: c24f5fc704ee3c0737456e7a4b8f75114b25a51812c6f801a22ed43652e0b211
   manager: conda
   name: verilator
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/verilator-5.018-h4f9daa6_0.conda
-  version: '5.018'
+  url: https://conda.anaconda.org/conda-forge/linux-64/verilator-5.008-h514fc35_1.conda
+  version: '5.008'
 - category: main
   dependencies:
     python: '>=2.6'
@@ -4345,14 +4345,14 @@ package:
     python-dateutil: '>=2.1,<3.0.0'
     urllib3: '>=1.25.4,<1.27'
   hash:
-    md5: e0f0f67f85591144a2e921a0af338cf5
-    sha256: 51c1e96ec09fedc1ad2972b2c1c258e1bb1c344d3ca64485da063a369c3c919e
+    md5: 4b1ebbd11ffe33a61602a0a78d319ffc
+    sha256: 4575ab6abd1bea6c29c6fced00283012815874cba55e19524c094ab279b238f8
   manager: conda
   name: botocore
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/botocore-1.31.77-pyhd8ed1ab_0.conda
-  version: 1.31.77
+  url: https://conda.anaconda.org/conda-forge/noarch/botocore-1.31.78-pyhd8ed1ab_0.conda
+  version: 1.31.78
 - category: main
   dependencies:
     clang-format-16: 16.0.3 default_h1cdf331_2
@@ -4837,18 +4837,18 @@ package:
   dependencies:
     libgcc-ng: '>=12'
     libstdcxx-ng: '>=12'
-    numpy: '>=1.16'
+    numpy: '>=1.20,<2'
     python: '>=3.10,<3.11.0a0'
     python_abi: 3.10.* *_cp310
   hash:
-    md5: 6a38f65d330b74495ad6990280486049
-    sha256: 16f44e7e47f7cf9c3c02d760beb9179698510740e0eb1927ade3d8fb69aa1a0d
+    md5: 85d2aaa7af046528d339da1e813c3a9f
+    sha256: 73dd7868bfd98fa9e4d2cc524687b5c5c8f9d427d4e521875aacfe152eae4715
   manager: conda
   name: contourpy
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/contourpy-1.1.1-py310hd41b1e2_1.conda
-  version: 1.1.1
+  url: https://conda.anaconda.org/conda-forge/linux-64/contourpy-1.2.0-py310hd41b1e2_0.conda
+  version: 1.2.0
 - category: main
   dependencies:
     appdirs: ''
@@ -5200,19 +5200,19 @@ package:
   version: 20.24.6
 - category: main
   dependencies:
-    botocore: '>=1.31.77,<1.32.0'
+    botocore: '>=1.31.78,<1.32.0'
     jmespath: '>=0.7.1,<2.0.0'
     python: '>=3.7'
     s3transfer: '>=0.7.0,<0.8.0'
   hash:
-    md5: a4cfb5de20a9b5d788f36163f3e9e418
-    sha256: 51c2fa0df9da38402bc0910751bec55982c136cc270c9dbf9bfcadead724a2bb
+    md5: 533f30aebff7a261fc8706fbfbff3cac
+    sha256: 99cc42c0ec102fa316f9b5baf96887be976c0c09143ff745f7da5d6e4cac08bd
   manager: conda
   name: boto3
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/boto3-1.28.77-pyhd8ed1ab_0.conda
-  version: 1.28.77
+  url: https://conda.anaconda.org/conda-forge/noarch/boto3-1.28.78-pyhd8ed1ab_0.conda
+  version: 1.28.78
 - category: main
   dependencies:
     cachecontrol: 0.13.1 pyhd8ed1ab_0
@@ -5458,14 +5458,14 @@ package:
     ruamel.yaml.clib: '>=0.2.0,<=0.2.7'
     urllib3: '>=1.25.4,<1.27'
   hash:
-    md5: 05708847ad1e55b6b9dd2022e1001770
-    sha256: 1830a413a82ac9a098c352448857406f306e4023e2b2f939fc51adb329373abf
+    md5: de603cf1b46103c94b8c3d9b88f77169
+    sha256: 242dbeb4e7b8df6fc35918c53a3a79aee57b3b3c37879a659674cb9d3b1605f5
   manager: conda
   name: awscli
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/awscli-2.13.31-py310hff52083_0.conda
-  version: 2.13.31
+  url: https://conda.anaconda.org/conda-forge/linux-64/awscli-2.13.32-py310hff52083_0.conda
+  version: 2.13.32
 - category: main
   dependencies:
     azure-core: <2.0.0,>=1.23.0
