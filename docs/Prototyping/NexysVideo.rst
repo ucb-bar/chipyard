@@ -34,7 +34,7 @@ Probe an address on the target system:
 
 .. code-block:: shell
 
-		./uart_tsi +tty=/dev/ttyUSBX +init_read=0x10040 none
+		./uart_tsi +tty=/dev/ttyUSBX +init_read=0x10000 none
 
 Write some address before running a program:
 
