@@ -84,7 +84,7 @@ For example:
 Custom Benchmarks/Tests
 -------------------------------
 
-To compile your own code to run in a Verilator/VCS simulation, add it to Chipyard's ``tests`` directory then add its name to the list of ``PROGRAMS`` inside the ``Makefile``. Then when you run ``make``, all of the programs inside ``tests`` will output a ``.riscv`` binary, which can be used with the simulator as described above.
+To compile your own bare-metal code to run in a Verilator/VCS simulation, add it to Chipyard's ``tests`` directory then add its name to the list of ``PROGRAMS`` inside the ``Makefile``. These binaries are compiled with the libgloss-htif library, which implements a minimal set of useful syscalls for bare-metal binaries. Then when you run ``make``, all of the programs inside ``tests`` will be compiled into ``.riscv`` ELF binaries, which can be used with the simulator as described above.
 
 .. code-block:: shell
 
