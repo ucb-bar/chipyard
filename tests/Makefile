@@ -2,7 +2,6 @@
 # RISCV Toolchain
 #################################
 
-
 TARGET = riscv64-unknown-elf
 
 GCC = $(TARGET)-gcc
