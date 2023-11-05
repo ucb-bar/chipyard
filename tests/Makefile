@@ -2,14 +2,15 @@
 # RISCV Toolchain
 #################################
 
-PREFIX = riscv64-unknown-elf-
 
-GCC = $(PREFIX)gcc
-CXX = $(PREFIX)g++
-CP = $(PREFIX)objcopy
-OBJDUMP = $(PREFIX)objdump
-DG = $(PREFIX)gdb
-SIZE = $(PREFIX)size
+TARGET = riscv64-unknown-elf
+
+GCC = $(TARGET)-gcc
+CXX = $(TARGET)-g++
+CP = $(TARGET)-objcopy
+OBJDUMP = $(TARGET)-objdump
+DG = $(TARGET)-gdb
+SIZE = $(TARGET)-size
 
 
 #################################
