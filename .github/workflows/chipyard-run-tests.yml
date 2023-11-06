@@ -121,7 +121,7 @@ jobs:
     name: commit-on-master-check
     needs: [setup-complete]
     if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -144,7 +144,7 @@ jobs:
     name: tutorial-setup-check
     needs: [setup-complete]
     if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -166,7 +166,7 @@ jobs:
   documentation-check:
     name: documentation-check
     needs: [setup-complete]
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -192,7 +192,7 @@ jobs:
     name: build-extra-tests
     needs: [setup-complete]
     if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -224,7 +224,7 @@ jobs:
   prepare-chipyard-cores:
     name: prepare-chipyard-cores
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -246,7 +246,7 @@ jobs:
   prepare-chipyard-constellation:
     name: prepare-chipyard-constellation
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -268,7 +268,7 @@ jobs:
   prepare-chipyard-peripherals:
     name: prepare-chipyard-peripherals
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -290,7 +290,7 @@ jobs:
   prepare-chipyard-accels:
     name: prepare-chipyard-accels
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -312,7 +312,7 @@ jobs:
   prepare-chipyard-tracegen:
     name: prepare-chipyard-tracegen
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -334,7 +334,7 @@ jobs:
   prepare-chipyard-other:
     name: prepare-chipyard-other
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -356,7 +356,7 @@ jobs:
   prepare-chipyard-fpga:
     name: prepare-chipyard-fpga
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -410,7 +410,7 @@ jobs:
   chipyard-rocket-run-tests:
     name: chipyard-rocket-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -433,7 +433,7 @@ jobs:
   chipyard-prefetchers-run-tests:
     name: chipyard-prefetchers-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -456,7 +456,7 @@ jobs:
   chipyard-hetero-run-tests:
     name: chipyard-hetero-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -479,7 +479,7 @@ jobs:
   chipyard-boom-run-tests:
     name: chipyard-boom-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -502,7 +502,7 @@ jobs:
   chipyard-shuttle-run-tests:
     name: chipyard-shuttle-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -525,7 +525,7 @@ jobs:
   chipyard-cva6-run-tests:
     name: chipyard-cva6-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -548,7 +548,7 @@ jobs:
   chipyard-ibex-run-tests:
     name: chipyard-ibex-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -571,7 +571,7 @@ jobs:
   chipyard-sodor-run-tests:
     name: chipyard-sodor-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -594,7 +594,7 @@ jobs:
   chipyard-spike-run-tests:
     name: chipyard-spike-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -617,7 +617,7 @@ jobs:
   chipyard-dmirocket-run-tests:
     name: chipyard-dmirocket-run-tests
     needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -640,7 +640,7 @@ jobs:
   chipyard-dmiboom-run-tests:
     name: chipyard-dmiboom-run-tests
     needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -663,7 +663,7 @@ jobs:
   chipyard-spiflashwrite-run-tests:
     name: chipyard-spiflashwrite-run-tests
     needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -686,7 +686,7 @@ jobs:
   chipyard-manyperipherals-run-tests:
     name: chipyard-manyperipherals-run-tests
     needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -709,7 +709,7 @@ jobs:
   chipyard-tethered-run-tests:
     name: chipyard-tethered-run-tests
     needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -732,7 +732,7 @@ jobs:
   chipyard-sha3-run-tests:
     name: chipyard-sha3-run-tests
     needs: prepare-chipyard-accels
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -755,7 +755,7 @@ jobs:
   chipyard-gemmini-run-tests:
     name: chipyard-gemmini-run-tests
     needs: prepare-chipyard-accels
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -778,7 +778,7 @@ jobs:
   chipyard-manymmioaccels-run-tests:
     name: chipyard-manymmioaccels-run-tests
     needs: prepare-chipyard-accels
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -801,7 +801,7 @@ jobs:
   # chipyard-nvdla-run-tests:
   #   name: chipyard-nvdla-run-tests
   #   needs: prepare-chipyard-accels
-  #   runs-on: self-hosted
+  #   runs-on: old-ci
   #   steps:
   #     - name: Delete old checkout
   #       run: |
@@ -824,7 +824,7 @@ jobs:
   chipyard-mempress-run-tests:
     name: chipyard-mempress-run-tests
     needs: prepare-chipyard-accels
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -848,7 +848,7 @@ jobs:
   tracegen-boom-run-tests:
     name: tracegen-boom-run-tests
     needs: prepare-chipyard-tracegen
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -871,7 +871,7 @@ jobs:
   tracegen-run-tests:
     name: tracegen-run-tests
     needs: prepare-chipyard-tracegen
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -894,7 +894,7 @@ jobs:
   icenet-run-tests:
     name: icenet-run-tests
     needs: prepare-chipyard-other
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -917,7 +917,7 @@ jobs:
   testchipip-run-tests:
     name: testchipip-run-tests
     needs: prepare-chipyard-other
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -940,7 +940,7 @@ jobs:
   rocketchip-run-tests:
     name: rocketchip-run-tests
     needs: prepare-chipyard-other
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -979,7 +979,7 @@ jobs:
   constellation-run-tests:
     name: constellation-run-tests
     needs: prepare-chipyard-other
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -1002,7 +1002,7 @@ jobs:
   chipyard-constellation-run-tests:
     name: chipyard-constellation-run-tests
     needs: prepare-chipyard-constellation
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -1026,7 +1026,7 @@ jobs:
   firesim-run-tests:
     name: firesim-run-tests
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
@@ -1050,7 +1050,7 @@ jobs:
   fireboom-run-tests:
     name: fireboom-run-tests
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: old-ci
     steps:
       - name: Delete old checkout
         run: |
