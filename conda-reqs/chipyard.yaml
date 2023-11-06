@@ -29,7 +29,7 @@ dependencies:
     - conda-gcc-specs
     - binutils
 
-    - firtool==1.30.0 # from ucb-bar channel - https://github.com/ucb-bar/firtool-feedstock
+    - firtool==1.58.0 # from ucb-bar channel - https://github.com/ucb-bar/firtool-feedstock
 
     # misc
     - autoconf

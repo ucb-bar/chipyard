@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-# replaces a `include with the full include file
+# replaces a `include with the full include file.
+# recursively replaces `include's until none are left
 #
 # args
 # $1 - file to remove includes from
