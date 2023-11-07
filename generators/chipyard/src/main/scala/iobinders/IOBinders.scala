@@ -355,7 +355,7 @@ class WithSerialTLPunchthrough extends OverrideIOBinder({
   (system: CanHavePeripheryTLSerial) => {
     val (ports, cells) = system.serial_tl.zipWithIndex.map({ case (s, id) =>
       val sys = system.asInstanceOf[BaseSubsystem]
-      val port = IO(s.getWrappedValue.cloneType)
+      val port = IO(chiselTypeOf(s.getWrappedValue))
       port <> s.getWrappedValue
       (SerialTLPort(port, sys.p(SerialTLKey).get, system.serdesser.get, id), Nil)
     }).unzip
