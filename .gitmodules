@@ -148,6 +148,9 @@
 [submodule "tools/rocket-dsp-utils"]
 	path = tools/rocket-dsp-utils
 	url = https://github.com/ucb-bar/rocket-dsp-utils.git
+[submodule "tools/tidalsim"]
+	path = tools/tidalsim
+	url = git@github.com:euphoric-hardware/tidalsim
 [submodule "tools/torture"]
 	path = tools/torture
 	url = https://github.com/ucb-bar/riscv-torture.git
