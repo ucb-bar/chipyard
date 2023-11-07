@@ -48,6 +48,21 @@ class RadianceROMConfig extends Config(
   new WithRadROMs(0x28000L, 0x8000, "sims/op_b.bin") ++
   new AbstractConfig)
 
+class RadianceFatBankROMConfig extends Config(
+  new freechips.rocketchip.subsystem.WithRadianceCores(1, useVxCache = false) ++
+  new freechips.rocketchip.subsystem.WithCoalescer(nNewSrcIds = 16) ++
+  new freechips.rocketchip.subsystem.WithSimtLanes(nLanes = 4, nSrcIds = 16) ++
+  new freechips.rocketchip.subsystem.WithVortexFatBank(nBanks = 4)++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
+  new WithExtMemSize(BigInt("80000000", 16)) ++
+  new WithRadBootROM() ++
+  new WithRadROMs(0x7FFF0000L, 0x10000, "sims/args.bin") ++
+  new WithRadROMs(0x20000L, 0x8000, "sims/op_a.bin") ++
+  new WithRadROMs(0x28000L, 0x8000, "sims/op_b.bin") ++
+  new AbstractConfig)
+
+
 class RadianceConfig extends Config(
   new freechips.rocketchip.subsystem.WithRadianceCores(1, useVxCache = false) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
