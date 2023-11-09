@@ -7,6 +7,14 @@
  `define MODEL TestHarness
 `endif
 
+`define ROCKET testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core
+`define CSR_FILE `ROCKET.csr
+`define CORE_RESET `ROCKET.reset
+`define TRACE_VALID `ROCKET._csr_io_trace_0_valid
+`define TRACE_EXCEPTION `ROCKET._csr_io_trace_0_exception
+`define TRACE_TIME `ROCKET._csr_io_time
+`define INSTRET (!`CORE_RESET && `TRACE_VALID && !`TRACE_EXCEPTION)
+
 typedef struct {
   longint unsigned pc;
   longint unsigned prv;
@@ -82,10 +90,46 @@ module TestDriver;
   string loadarch_file;
   event loadarch_struct_ready;
   bit do_loadarch = 0;
-  `define CSR_FILE testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.csr
-  `define CORE_RESET testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.reset
+
+  // Performance metric extraction
+  int unsigned cycles = 0;
+  int unsigned instret = 0;
+  int unsigned sample_period = 1000;
+  int max_instructions = -1;
+  int unsigned total_instret = 0;
+  string perf_file;
+  int perf_file_fd;
+
+  function void dump_perf_stats();
+    if (perf_file != "") begin
+      $fwrite(perf_file_fd, "instret: %d\n", instret);
+    end
+  endfunction
+
+  always @(posedge clock) begin
+    if (!reset && !`CORE_RESET) begin
+      cycles = cycles + 1;
+      if (`INSTRET) begin
+        instret = instret + 1;
+        total_instret = total_instret + 1;
+      end
+    end
+    if (cycles == sample_period) begin
+      dump_perf_stats();
+      cycles = 0;
+      instret = 0;
+    end
+  end
+
   initial
   begin
+    if ($value$plusargs("perf-file=%s", perf_file))
+    begin
+      perf_file_fd = $fopen(perf_file, "w");
+      $display("Dumping performance metrics to file: %s", perf_file);
+    end
+    void'($value$plusargs("perf-sample-period=%d", sample_period));
+    void'($value$plusargs("max-instructions=%d", max_instructions));
     void'($value$plusargs("max-cycles=%d", max_cycles));
     void'($value$plusargs("dump-start=%d", dump_start));
     verbose = $test$plusargs("verbose");
@@ -248,7 +292,7 @@ module TestDriver;
       // prv (TODO: this is a guess)
       force `CSR_FILE.reg_mstatus_prv = loadarch_state.prv;
       // pc
-      force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc = loadarch_state.pc; // 40'h8000_0000;
+      force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc = loadarch_state.pc;
 
       // PMPs
       force `CSR_FILE.reg_pmp_0_addr = 'h1f_ffff_ffff_ffff;
@@ -336,14 +380,14 @@ module TestDriver;
   for (genvar i_xpr=1; i_xpr < 32; i_xpr++) begin // Don't attempt to restore register x0 (only 31 registers)
     initial begin
       wait (loadarch_struct_ready.triggered) begin end
-      $display("Loadarch struct is ready");
-      $display("Forcing XPR %d with value %x", i_xpr, loadarch_state.XPR[i_xpr]);
+      //$display("Loadarch struct is ready");
+      //$display("Forcing XPR %d with value %x", i_xpr, loadarch_state.XPR[i_xpr]);
       force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.rf_ext.Memory[30-i_xpr+1] = loadarch_state.XPR[i_xpr];
-      $display("Waiting for reset negedge");
+      //$display("Waiting for reset negedge");
       @(negedge `CORE_RESET) begin end
-      $display("Got reset negedge");
+      //$display("Got reset negedge");
       release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.rf_ext.Memory[30-i_xpr+1];
-      $display("Releasing XPR %d", i_xpr);
+      //$display("Releasing XPR %d", i_xpr);
     end
   end
 
@@ -397,6 +441,13 @@ module TestDriver;
 `else
         $finish;
 `endif
+      end
+
+      if ((max_instructions != -1) && (total_instret >= max_instructions)) begin
+        $display("TERMINATING after %d instructions and %d cycles", total_instret, trace_count);
+        $fwrite(perf_file_fd, "--- TAIL ---\n");
+        dump_perf_stats();
+        $finish;
       end
     end
   end
