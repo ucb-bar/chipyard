@@ -9,7 +9,6 @@ import freechips.rocketchip.util.{ResetCatchAndSync}
 import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters, ClockSinkParameters, ClockParameters}
 
 import chipyard.harness.{ApplyHarnessBinders, HarnessBinders}
-import chipyard.iobinders.HasIOBinders
 import chipyard.clocking.{SimplePllConfiguration, ClockDividerN}
 import chipyard.{ChipTop}
 

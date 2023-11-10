@@ -43,6 +43,10 @@ class ChipLikeRocketConfig extends Config(
 
   new chipyard.config.AbstractConfig)
 
+class FlatChipTopChipLikeRocketConfig extends Config(
+  new chipyard.example.WithFlatChipTop ++
+  new chipyard.ChipLikeRocketConfig)
+
 // A simple config demonstrating a "bringup prototype" to bringup the ChipLikeRocketconfig
 class ChipBringupHostConfig extends Config(
   //=============================

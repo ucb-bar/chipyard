@@ -13,7 +13,7 @@ import freechips.rocketchip.util._
 import testchipip._
 
 import chipyard._
-import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, HasIOBinders, Port, SerialTLPort}
+import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, HasChipyardPorts, Port, SerialTLPort}
 
 import scala.reflect.{ClassTag}
 
@@ -23,8 +23,8 @@ object ApplyMultiHarnessBinders {
   def apply(th: HasHarnessInstantiators, chips: Seq[LazyModule])(implicit p: Parameters): Unit = {
     Seq.tabulate(chips.size, chips.size) { case (i, j) => if (i != j) {
       (chips(i), chips(j)) match {
-        case (l0: HasIOBinders, l1: HasIOBinders) => p(MultiHarnessBinders(i, j)).foreach { f =>
-          f(l0.portMap.values.flatten.toSeq, l1.portMap.values.flatten.toSeq)
+        case (l0: HasChipyardPorts, l1: HasChipyardPorts) => p(MultiHarnessBinders(i, j)).foreach { f =>
+          f(l0.ports, l1.ports)
         }
       }
     }}
