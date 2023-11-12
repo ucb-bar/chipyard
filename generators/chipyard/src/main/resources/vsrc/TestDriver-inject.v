@@ -86,6 +86,8 @@ module TestDriver;
   reg [2047:0] vcdplusfile = 0;
   reg [2047:0] vcdfile = 0;
   int unsigned rand_value;
+
+  // Loadarch
   static loadarch_state_t loadarch_state;
   string loadarch_file;
   event loadarch_struct_ready;
@@ -95,14 +97,14 @@ module TestDriver;
   int unsigned cycles = 0;
   int unsigned instret = 0;
   int unsigned sample_period = 1000;
-  int max_instructions = -1;
+  int max_instructions = -1; // -1 = no maximum
   int unsigned total_instret = 0;
   string perf_file;
   int perf_file_fd;
 
   function void dump_perf_stats();
     if (perf_file != "") begin
-      $fwrite(perf_file_fd, "instret: %d\n", instret);
+      $fwrite(perf_file_fd, "%0d,%0d\n", cycles, instret);
     end
   endfunction
 
@@ -114,7 +116,7 @@ module TestDriver;
         total_instret = total_instret + 1;
       end
     end
-    if (cycles == sample_period) begin
+    if (instret == sample_period) begin
       dump_perf_stats();
       cycles = 0;
       instret = 0;
@@ -123,13 +125,17 @@ module TestDriver;
 
   initial
   begin
+    // Performance metric extration related plusargs
     if ($value$plusargs("perf-file=%s", perf_file))
     begin
       perf_file_fd = $fopen(perf_file, "w");
       $display("Dumping performance metrics to file: %s", perf_file);
+      $fwrite(perf_file_fd, "cycles,instret\n");
     end
     void'($value$plusargs("perf-sample-period=%d", sample_period));
     void'($value$plusargs("max-instructions=%d", max_instructions));
+
+    // Rest of plusargs
     void'($value$plusargs("max-cycles=%d", max_cycles));
     void'($value$plusargs("dump-start=%d", dump_start));
     verbose = $test$plusargs("verbose");
@@ -445,7 +451,6 @@ module TestDriver;
 
       if ((max_instructions != -1) && (total_instret >= max_instructions)) begin
         $display("TERMINATING after %d instructions and %d cycles", total_instret, trace_count);
-        $fwrite(perf_file_fd, "--- TAIL ---\n");
         dump_perf_stats();
         $finish;
       end
