@@ -9,11 +9,12 @@
 
 `define ROCKET testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core
 `define CSR_FILE `ROCKET.csr
-`define CORE_RESET `ROCKET.reset
-`define TRACE_VALID `ROCKET._csr_io_trace_0_valid
-`define TRACE_EXCEPTION `ROCKET._csr_io_trace_0_exception
-`define TRACE_TIME `ROCKET._csr_io_time
-`define INSTRET (!`CORE_RESET && `TRACE_VALID && !`TRACE_EXCEPTION)
+`define CORE_RESET (`ROCKET.reset)
+`define CORE_CLOCK (`ROCKET.clock)
+`define TRACE_VALID (`ROCKET._csr_io_trace_0_valid)
+`define TRACE_EXCEPTION (`ROCKET._csr_io_trace_0_exception)
+`define TRACE_TIME (`ROCKET._csr_io_time)
+`define INSTRET (!(`CORE_RESET) && `TRACE_VALID && !(`TRACE_EXCEPTION))
 
 typedef struct {
   longint unsigned pc;
@@ -108,7 +109,7 @@ module TestDriver;
     end
   endfunction
 
-  always @(posedge clock) begin
+  always @(posedge `CORE_CLOCK) begin
     if (!reset && !`CORE_RESET) begin
       cycles = cycles + 1;
       if (`INSTRET) begin
@@ -432,7 +433,8 @@ module TestDriver;
 
       if (failure)
       begin
-        $fdisplay(stderr, "*** FAILED ***%s after %d simulation cycles", reason, trace_count);
+        $fdisplay(stderr, "*** FAILED ***%s after %d simulation cycles and %d instructions", reason, trace_count, total_instret);
+        dump_perf_stats();
         `VCDPLUSCLOSE
         $fatal;
       end
@@ -440,7 +442,8 @@ module TestDriver;
       if (success)
       begin
         if (verbose)
-          $fdisplay(stderr, "*** PASSED *** Completed after %d simulation cycles", trace_count);
+          $fdisplay(stderr, "*** PASSED *** Completed after %d simulation cycles and %d instructions", trace_count, total_instret);
+        dump_perf_stats();
         `VCDPLUSCLOSE
 `ifdef TESTBENCH_IN_UVM
         finish_request = 1;
