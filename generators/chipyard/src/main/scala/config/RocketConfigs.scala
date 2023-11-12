@@ -19,11 +19,6 @@ class TinyRocketConfig extends Config(
   new freechips.rocketchip.subsystem.With1TinyCore ++             // single tiny rocket-core
   new chipyard.config.AbstractConfig)
 
-class SimAXIRocketConfig extends Config(
-  new chipyard.harness.WithSimAXIMem ++                     // drive the master AXI4 memory with a SimAXIMem, a 1-cycle magic memory, instead of default SimDRAM
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
 class QuadRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(4) ++    // quad-core (4 RocketTiles)
   new chipyard.config.AbstractConfig)
@@ -35,11 +30,6 @@ class Cloned64RocketConfig extends Config(
 
 class RV32RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRV32 ++            // set RocketTiles to be 32-bit
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class GB1MemoryRocketConfig extends Config(
-  new freechips.rocketchip.subsystem.WithExtMemSize((1<<30) * 1L) ++ // use 1GB simulated external memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
@@ -64,20 +54,6 @@ class L1ScratchpadRocketConfig extends Config(
   new chipyard.config.WithRocketDCacheScratchpad ++         // use rocket DCache scratchpad
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
-
-// DOC include start: mbusscratchpadrocket
-class MbusScratchpadOnlyRocketConfig extends Config(
-  new testchipip.WithMbusScratchpad(banks=2, partitions=2) ++               // add 2 partitions of 2 banks mbus backing scratchpad
-  new freechips.rocketchip.subsystem.WithNoMemPort ++         // remove offchip mem port
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-// DOC include end: mbusscratchpadrocket
-
-class SbusScratchpadRocketConfig extends Config(
-  new testchipip.WithSbusScratchpad(base=0x70000000L, banks=4) ++ // add 4 banks sbus backing scratchpad
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
 
 class MulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(3, 3) ++ // Add async crossings between RocketTile and uncore
