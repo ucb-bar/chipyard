@@ -97,7 +97,7 @@ and remove the off-chip link. This is done by adding a fragment like
 ``testchipip.WithScratchpad`` to your configuration and removing the
 memory port with ``freechips.rocketchip.subsystem.WithNoMemPort``.
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/MemorySystemConfigs.scala
     :language: scala
     :start-after: DOC include start: mbusscratchpadrocket
     :end-before: DOC include end: mbusscratchpadrocket
