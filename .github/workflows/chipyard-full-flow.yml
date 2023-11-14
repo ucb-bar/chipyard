@@ -124,7 +124,7 @@ jobs:
           conda config --add channels litex-hub
 
           # installs for example-sky130.yml
-          conda create -y --prefix ./.conda-sky130 open_pdks.sky130a=1.0.399_0_g63dbde9
+          conda create -y --prefix ./.conda-sky130 open_pdks.sky130a=1.0.457_0_g32e8f23
           git clone https://github.com/rahulk29/sram22_sky130_macros.git
 
           # installs for example-openroad.yml

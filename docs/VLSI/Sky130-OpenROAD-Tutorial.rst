@@ -73,7 +73,7 @@ Note that we create a new conda environment for each tool because some of them h
     conda config --add channels defaults
 
     # download all files for Sky130A PDK
-    conda create -c litex-hub --prefix ~/.conda-sky130 open_pdks.sky130a=1.0.399_0_g63dbde9
+    conda create -c litex-hub --prefix ~/.conda-sky130 open_pdks.sky130a=1.0.457_0_g32e8f23
     # clone the SRAM22 Sky130 SRAM macros
     git clone https://github.com/rahulk29/sram22_sky130_macros ~/sram22_sky130_macros
 
