@@ -18,11 +18,12 @@ class WithDTSTimebase(freqMHz: BigInt) extends Config((site, here, up) => {
   case DTSTimebase => freqMHz
 })
 
-// Adds buffers on the interior of the inclusive L2, to improve PD
+// Adds buffers on the interior of the inclusive LLC, to improve PD
 class WithInclusiveCacheInteriorBuffer(buffer: InclusiveCachePortParameters = InclusiveCachePortParameters.full) extends Config((site, here, up) => {
   case InclusiveCacheKey => up(InclusiveCacheKey).copy(bufInnerInterior=buffer, bufOuterInterior=buffer)
 })
 
+// Adds buffers on the exterior of the inclusive LLC, to improve PD
 class WithInclusiveCacheExteriorBuffer(buffer: InclusiveCachePortParameters = InclusiveCachePortParameters.full) extends Config((site, here, up) => {
   case InclusiveCacheKey => up(InclusiveCacheKey).copy(bufInnerExterior=buffer, bufOuterExterior=buffer)
 })                                                                                                                                                                                                                 
