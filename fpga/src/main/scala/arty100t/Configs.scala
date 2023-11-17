@@ -52,7 +52,9 @@ class NoCoresArty100TConfig extends Config(
   new chipyard.config.WithBroadcastManager ++ // no l2
   new chipyard.NoCoresConfig)
 
+// This will fail to close timing above 50 MHz
 class BringupArty100TConfig extends Config(
   new WithArty100TSerialTLToGPIO ++
-  new WithArty100TTweaks(freqMHz = 75) ++
+  new WithArty100TTweaks(freqMHz = 50) ++
+  new testchipip.WithSerialTLClockDirection(provideClockFreqMHz = Some(50)) ++
   new chipyard.ChipBringupHostConfig)
