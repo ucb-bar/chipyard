@@ -23,3 +23,6 @@ class WithInclusiveCacheInteriorBuffer(buffer: InclusiveCachePortParameters = In
   case InclusiveCacheKey => up(InclusiveCacheKey).copy(bufInnerInterior=buffer, bufOuterInterior=buffer)
 })
 
+class WithInclusiveCacheExteriorBuffer(buffer: InclusiveCachePortParameters = InclusiveCachePortParameters.full) extends Config((site, here, up) => {
+  case InclusiveCacheKey => up(InclusiveCacheKey).copy(bufInnerExterior=buffer, bufOuterExterior=buffer)
+})                                                                                                                                                                                                                 
