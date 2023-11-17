@@ -48,7 +48,7 @@ class WithArty100TDDRTL extends HarnessBinder({
 class WithArty100TSerialTLToGPIO extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: SerialTLPort) => {
     val artyTh = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
-    val harnessIO = IO(port.io.cloneType).suggestName("serial_tl")
+    val harnessIO = IO(chiselTypeOf(port.io)).suggestName("serial_tl")
     harnessIO <> port.io
     val clkIO = IOPin(harnessIO.clock)
     val packagePinsWithPackageIOs = Seq(
