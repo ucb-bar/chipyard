@@ -293,9 +293,10 @@ endif
 # build output directory for compilation
 #########################################################################################
 # output for all project builds
-gen_dir=$(sim_dir)/generated-src
+generated_src_name ?= generated-src
+gen_dir             = $(sim_dir)/$(generated_src_dir_name)
 # per-project output directory
-build_dir=$(gen_dir)/$(long_name)
+build_dir           = $(gen_dir)/$(long_name)
 # final generated collateral per-project
 GEN_COLLATERAL_DIR ?= $(build_dir)/gen-collateral
 
