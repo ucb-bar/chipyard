@@ -40,6 +40,7 @@ class RadianceROMConfig extends Config(
   new freechips.rocketchip.subsystem.WithCoalescer(nNewSrcIds = 16) ++
   new freechips.rocketchip.subsystem.WithSimtLanes(nLanes = 4, nSrcIds = 16) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  // new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
   new WithRadBootROM() ++
@@ -48,11 +49,25 @@ class RadianceROMConfig extends Config(
   new WithRadROMs(0x28000L, 0x8000, "sims/op_b.bin") ++
   new AbstractConfig)
 
-class RadianceFatBankROMConfig extends Config(
-  new freechips.rocketchip.subsystem.WithRadianceCores(1, useVxCache = false) ++
+class RadianceROMLargeConfig extends Config(
+  new freechips.rocketchip.subsystem.WithRadianceCores(4, useVxCache = false) ++
   new freechips.rocketchip.subsystem.WithCoalescer(nNewSrcIds = 16) ++
   new freechips.rocketchip.subsystem.WithSimtLanes(nLanes = 4, nSrcIds = 16) ++
-  new freechips.rocketchip.subsystem.WithVortexL1Banks(nBanks = 1)++
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
+  // new freechips.rocketchip.subsystem.WithNBanks(4) ++
+  new chipyard.config.WithSystemBusWidth(bitWidth = 512) ++
+  new WithExtMemSize(BigInt("80000000", 16)) ++
+  new WithRadBootROM() ++
+  new WithRadROMs(0x7FFF0000L, 0x10000, "sims/args.bin") ++
+  new WithRadROMs(0x20000L, 0x8000, "sims/op_a.bin") ++
+  new WithRadROMs(0x28000L, 0x8000, "sims/op_b.bin") ++
+  new AbstractConfig)
+
+class RadianceROMCacheConfig extends Config(
+  new freechips.rocketchip.subsystem.WithRadianceCores(8, useVxCache = false) ++
+  new freechips.rocketchip.subsystem.WithCoalescer(nNewSrcIds = 16) ++
+  new freechips.rocketchip.subsystem.WithSimtLanes(nLanes = 4, nSrcIds = 16) ++
+  new freechips.rocketchip.subsystem.WithVortexL1Banks(nBanks = 4)++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
