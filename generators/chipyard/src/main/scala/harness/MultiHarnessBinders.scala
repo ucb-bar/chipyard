@@ -41,7 +41,7 @@ class MultiHarnessBinder[T <: Port[_], S <: HasHarnessInstantiators](
       new HarnessBinder({case (th: S, port: T) if chip0portFn(port) => }) ++ up(MultiChipParameters(chip0))
     )
     case MultiChipParameters(`chip1`) => new Config(
-      new HarnessBinder({case (th, port: T) if chip1portFn(port) => }) ++ up(MultiChipParameters(chip1))
+      new HarnessBinder({case (th: S, port: T) if chip1portFn(port) => }) ++ up(MultiChipParameters(chip1))
     )
     // Set the multiharnessbinder key
     case MultiHarnessBinders(`chip0`, `chip1`) => up(MultiHarnessBinders(chip0, chip1)) :+ {
