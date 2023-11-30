@@ -17,6 +17,7 @@ tags
 *~
 .bsp/
 .conda-env/
+.circt/
 .#*
 first-clone-setup-fast-log
 .bloop/
