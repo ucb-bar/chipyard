@@ -38,7 +38,7 @@ class MultiHarnessBinder[T <: Port[_], S <: HasHarnessInstantiators](
 )(implicit tag0: ClassTag[T], tag1: ClassTag[S]) extends Config((site, here, up) => {
     // Override any HarnessBinders for chip0/chip1
     case MultiChipParameters(`chip0`) => new Config(
-      new HarnessBinder({case (th, port: T) if chip0portFn(port) => }) ++ up(MultiChipParameters(chip0))
+      new HarnessBinder({case (th: S, port: T) if chip0portFn(port) => }) ++ up(MultiChipParameters(chip0))
     )
     case MultiChipParameters(`chip1`) => new Config(
       new HarnessBinder({case (th, port: T) if chip1portFn(port) => }) ++ up(MultiChipParameters(chip1))
