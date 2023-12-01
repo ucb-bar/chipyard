@@ -23,6 +23,7 @@ runs:
           conda deactivate
 
           echo "Installing CIRCT to conda area"
+          git submodule update --init ./conda-reqs/install-circt
           ./conda-reqs/install-circt/bin/download-release-or-nightly-circt.sh \
               -f circt-full-shared-linux-x64.tar.gz \
               -i $CONDA_PREFIX \
