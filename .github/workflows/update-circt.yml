@@ -1,9 +1,9 @@
 name: update-circt
 
-# run weekly
-on: push
-#  schedule:
-#    - cron: 0 0 * * 1
+# run daily
+on:
+  schedule:
+    - cron: 0 8 * * *
 
 defaults:
   run:
