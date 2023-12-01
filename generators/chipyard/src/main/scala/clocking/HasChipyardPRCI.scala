@@ -19,6 +19,7 @@ import testchipip.{TLTileResetCtrl, ClockGroupFakeResetSynchronizer}
 case class ChipyardPRCIControlParams(
   slaveWhere: TLBusWrapperLocation = CBUS,
   baseAddress: BigInt = 0x100000,
+  syncResetShiftN: Int = 4,
   enableTileClockGating: Boolean = true,
   enableTileResetSetting: Boolean = true,
   enableResetSynchronizers: Boolean = true // this should only be disabled to work around verilator async-reset initialization problems
@@ -81,6 +82,7 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesTiles =>
   // diplomatic IOBinder should drive
   val frequencySpecifier = ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey))
   val clockGroupCombiner = ClockGroupCombiner()
+  val resetShifter       = ClockGroupResetShifter(prciParams.syncResetShiftN)
   val resetSynchronizer  = prci_ctrl_domain {
     if (prciParams.enableResetSynchronizers) ClockGroupResetSynchronizer() else ClockGroupFakeResetSynchronizer()
   }
@@ -118,6 +120,7 @@ RTL SIMULATORS, NAMELY VERILATOR.
   (aggregator
     := frequencySpecifier
     := clockGroupCombiner
+    := resetShifter
     := resetSynchronizer
     := tileClockGater.map(_.clockNode).getOrElse(ClockGroupEphemeralNode()(ValName("temp")))
     := tileResetSetter.map(_.clockNode).getOrElse(ClockGroupEphemeralNode()(ValName("temp")))
