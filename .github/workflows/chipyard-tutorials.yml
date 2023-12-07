@@ -19,7 +19,7 @@ env:
 
 jobs:
   cancel-prior-workflows:
-    name: cancel-prior-workflows
+    name: Cancel Prior Workflows
     runs-on: ubuntu-latest
     steps:
       - name: Cancel Previous Runs
@@ -27,8 +27,8 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-  setup-chipyard-tutorial:
-    name: nice name
+  first-verilog-build-tutorial:
+    name: First Verilog Build Tutorial
     needs: [cancel-prior-workflows]
     runs-on: as4
     steps:
