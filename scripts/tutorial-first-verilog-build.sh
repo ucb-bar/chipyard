@@ -10,7 +10,7 @@ if [[ -z "${CHIPYARD_DIR}" ]]; then
   exit 1
 fi
 
-cd $CHIPYARD
+cd $CHIPYARD_DIR
 
 # speed up setup
 export MAKEFLAGS="-j32"
