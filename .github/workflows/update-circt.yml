@@ -3,7 +3,8 @@ name: update-circt
 # run daily
 on:
   schedule:
-    - cron: 0 8 * * *
+    - cron: 0,15,30,45 * * * *
+    #- cron: 0 8 * * *
 
 defaults:
   run:

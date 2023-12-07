@@ -153,8 +153,8 @@ if run_step "1"; then
     exit_if_last_command_failed
 
     # install circt into conda
-    git submodule update --init $CYDIR/conda-reqs/install-circt &&
-    $CYDIR/conda-reqs/install-circt/bin/download-release-or-nightly-circt.sh \
+    git submodule update --init $CYDIR/tools/install-circt &&
+    $CYDIR/tools/install-circt/bin/download-release-or-nightly-circt.sh \
         -f circt-full-shared-linux-x64.tar.gz \
         -i $CONDA_PREFIX \
         -v version-file \
@@ -181,6 +181,7 @@ END_CONDA_ACTIVATE
 $CONDA_ACTIVATE_PREAMBLE
 conda activate $CYDIR/.conda-env
 source $CYDIR/scripts/fix-open-files.sh"
+
 fi
 
 if [ -z "$FORCE_FLAG" ]; then
