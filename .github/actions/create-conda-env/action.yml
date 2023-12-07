@@ -15,10 +15,10 @@ runs:
           conda deactivate
 
           echo "Add extra toolchain collateral + CIRCT to RISC-V install area"
-          git submodule update --init ./conda-reqs/install-circt
+          git submodule update --init ./tools/install-circt
           conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
           ./scripts/build-toolchain-extra.sh riscv-tools -p $CONDA_PREFIX/riscv-tools
-          ./conda-reqs/install-circt/bin/download-release-or-nightly-circt.sh \
+          ./tools/install-circt/bin/download-release-or-nightly-circt.sh \
               -f circt-full-shared-linux-x64.tar.gz \
               -i $CONDA_PREFIX \
               -v version-file \
@@ -27,7 +27,7 @@ runs:
           conda deactivate
           conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-esp-tools
           ./scripts/build-toolchain-extra.sh esp-tools -p $CONDA_PREFIX/esp-tools
-          ./conda-reqs/install-circt/bin/download-release-or-nightly-circt.sh \
+          ./tools/install-circt/bin/download-release-or-nightly-circt.sh \
               -f circt-full-shared-linux-x64.tar.gz \
               -i $CONDA_PREFIX \
               -v version-file \
