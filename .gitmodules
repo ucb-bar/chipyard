@@ -142,3 +142,6 @@
 [submodule "tools/install-circt"]
 	path = tools/install-circt
 	url = https://github.com/circt/install-circt/
+[submodule "generators/uciedigital"]
+	path = generators/uciedigital
+	url = git@github.com:ucb-ucie/uciedigital.git
