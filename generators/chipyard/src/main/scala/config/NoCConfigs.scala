@@ -188,6 +188,7 @@ class SharedNoCConfig extends Config(
 )
 // DOC include end: SharedNoCConfig
 
+// This Config implements a simple ring interconnect for the system bus
 class SbusRingNoCConfig extends Config(
   new constellation.soc.WithSbusNoC(constellation.protocol.SplitACDxBETLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
@@ -221,6 +222,8 @@ class SbusRingNoCConfig extends Config(
   new chipyard.config.AbstractConfig
 )
 
+// This config integrates a mesh interconnect for the system bus, and divides the system bus
+// tilelink messages across two isolated interconnects
 class SbusMeshNoCConfig extends Config(
   new constellation.soc.WithSbusNoC(constellation.protocol.SplitACDxBETLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
