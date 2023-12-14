@@ -21,18 +21,19 @@ class WithNoDesignKey extends Config((site, here, up) => {
   case DesignKey => (p: Parameters) => new SimpleLazyModule()(p)
 })
 
-class WithArty100TTweaks extends Config(
+class WithArty100TTweaks(freqMHz: Double = 50) extends Config(
   new WithArty100TUARTTSI ++
   new WithArty100TDDRTL ++
   new WithNoDesignKey ++
   new testchipip.WithUARTTSIClient ++
   new chipyard.harness.WithSerialTLTiedOff ++
-  new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
-  new chipyard.config.WithMemoryBusFrequency(50.0) ++
-  new chipyard.config.WithFrontBusFrequency(50.0) ++
-  new chipyard.config.WithSystemBusFrequency(50.0) ++
-  new chipyard.config.WithPeripheryBusFrequency(50.0) ++
-  new chipyard.config.WithControlBusFrequency(50.0) ++
+  new chipyard.harness.WithHarnessBinderClockFreqMHz(freqMHz) ++
+  new chipyard.config.WithMemoryBusFrequency(freqMHz) ++
+  new chipyard.config.WithFrontBusFrequency(freqMHz) ++
+  new chipyard.config.WithSystemBusFrequency(freqMHz) ++
+  new chipyard.config.WithPeripheryBusFrequency(freqMHz) ++
+  new chipyard.config.WithControlBusFrequency(freqMHz) ++
+  new chipyard.config.WithOffchipBusFrequency(freqMHz) ++
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
   new chipyard.config.WithNoDebug ++ // no jtag
@@ -46,22 +47,14 @@ class RocketArty100TConfig extends Config(
   new chipyard.config.WithBroadcastManager ++ // no l2
   new chipyard.RocketConfig)
 
-class UART230400RocketArty100TConfig extends Config(
-  new WithArty100TUARTTSI(uartBaudRate = 230400) ++
-  new RocketArty100TConfig)
-
-class UART460800RocketArty100TConfig extends Config(
-  new WithArty100TUARTTSI(uartBaudRate = 460800) ++
-  new RocketArty100TConfig)
-
-class UART921600RocketArty100TConfig extends Config(
-  new WithArty100TUARTTSI(uartBaudRate = 921600) ++
-  new RocketArty100TConfig)
-
-
 class NoCoresArty100TConfig extends Config(
   new WithArty100TTweaks ++
-  new chipyard.config.WithMemoryBusFrequency(50.0) ++
-  new chipyard.config.WithPeripheryBusFrequency(50.0) ++  // Match the sbus and pbus frequency
   new chipyard.config.WithBroadcastManager ++ // no l2
   new chipyard.NoCoresConfig)
+
+// This will fail to close timing above 50 MHz
+class BringupArty100TConfig extends Config(
+  new WithArty100TSerialTLToGPIO ++
+  new WithArty100TTweaks(freqMHz = 50) ++
+  new testchipip.WithSerialTLClockDirection(provideClockFreqMHz = Some(50)) ++
+  new chipyard.ChipBringupHostConfig)

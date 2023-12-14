@@ -13,6 +13,7 @@ import freechips.rocketchip.tilelink.{HasTLBusParams}
 
 import chipyard._
 import chipyard.clocking._
+import testchipip.{OffchipBusKey}
 
 import testchipip.{OffchipBusKey}
 
@@ -108,7 +109,6 @@ class WithControlBusFrequency(freqMHz: Double) extends Config((site, here, up) =
 class WithOffchipBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
   case OffchipBusKey => up(OffchipBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
 })
-
 
 class WithRationalMemoryBusCrossing extends WithSbusToMbusCrossingType(RationalCrossing(Symmetric))
 class WithAsynchrousMemoryBusCrossing extends WithSbusToMbusCrossingType(AsynchronousCrossing())

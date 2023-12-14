@@ -51,7 +51,11 @@ $(SIM_DEBUG_CONF): $(sim_common_files) check-binary
 	mkdir -p $(dir $@)
 	mkdir -p $(output_dir)
 	echo "sim.inputs:" > $@
-	echo "  defines: ['DEBUG']" >> $@
+	echo "  defines:" >> $@
+	echo "    - 'DEBUG'" >> $@;
+ifndef USE_VPD
+	echo "    - 'FSDB=1'" >> $@;
+endif
 	echo "  defines_meta: 'append'" >> $@
 	echo "  execution_flags:" >> $@
 	for x in $(VERBOSE_FLAGS) $(call get_waveform_flag,$(call get_sim_out_name,$(BINARY))); do \

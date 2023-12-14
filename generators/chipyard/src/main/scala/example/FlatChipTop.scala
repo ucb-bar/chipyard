@@ -2,22 +2,28 @@ package chipyard.example
 
 
 import chisel3._
-import org.chipsalliance.cde.config.{Field, Parameters}
+import org.chipsalliance.cde.config.{Config, Field, Parameters}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.prci._
 import freechips.rocketchip.util._
+import freechips.rocketchip.subsystem.{PBUS, HasTileLinkLocations}
 import freechips.rocketchip.devices.debug.{ExportDebug, JtagDTMKey, Debug}
 import freechips.rocketchip.tilelink.{TLBuffer, TLFragmenter}
 import chipyard.{BuildSystem, DigitalTop}
+import chipyard.harness.{BuildTop}
 import chipyard.clocking._
-import chipyard.iobinders.{IOCellKey, JTAGChipIO}
+import chipyard.iobinders._
 import barstools.iocell.chisel._
+import testchipip.{SerialTLKey}
 
+class WithFlatChipTop extends Config((site, here, up) => {
+  case BuildTop => (p: Parameters) => new FlatChipTop()(p)
+})
 
 // This "FlatChipTop" uses no IOBinders, so all the IO have
 // to be explicitly constructed.
 // This only supports the base "DigitalTop"
-class FlatChipTop(implicit p: Parameters) extends LazyModule {
+class FlatChipTop(implicit p: Parameters) extends LazyModule with HasChipyardPorts {
   override lazy val desiredName = "ChipTop"
   val system = LazyModule(p(BuildSystem)(p)).suggestName("system").asInstanceOf[DigitalTop]
 
@@ -56,6 +62,8 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule {
   debugClockSinkNode := system.locateTLBusWrapper(p(ExportDebug).slaveWhere).fixedClockNode
   def debugClockBundle = debugClockSinkNode.in.head._1
 
+  var ports: Seq[Port[_]] = Nil
+
   override lazy val module = new FlatChipTopImpl
   class FlatChipTopImpl extends LazyRawModuleImp(this) {
     //=========================
@@ -78,6 +86,9 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule {
       o.reset := reset_wire
     }
 
+    ports = ports :+ ClockPort(() => clock_pad, 100.0)
+    ports = ports :+ ResetPort(() => reset_pad)
+
     // For a real chip you should replace this ClockSourceAtFreqFromPlusArg
     // with a blackbox of whatever PLL is being integrated
     val fake_pll = Module(new ClockSourceAtFreqFromPlusArg("pll_freq_mhz"))
@@ -93,11 +104,13 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule {
     // Custom Boot
     //=========================
     val (custom_boot_pad, customBootIOCell) = IOCell.generateIOFromSignal(system.custom_boot_pin.get.getWrappedValue, "custom_boot", p(IOCellKey))
+    ports = ports :+ CustomBootPort(() => custom_boot_pad)
 
     //=========================
     // Serialized TileLink
     //=========================
     val (serial_tl_pad, serialTLIOCells) = IOCell.generateIOFromSignal(system.serial_tls(0).getWrappedValue, "serial_tl", p(IOCellKey))
+    ports = ports :+ SerialTLPort(() => serial_tl_pad, p(SerialTLKey)(0), system.serdessers(0), 0)
 
     //=========================
     // JTAG/Debug
@@ -136,12 +149,17 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule {
       IOCell.generateIOFromSignal(jtag_wire, "jtag", p(IOCellKey), abstractResetAsAsync = true)
     }.get
 
+    ports = ports :+ JTAGPort(() => jtag_pad)
+
     //==========================
     // UART
     //==========================
     require(system.uarts.size == 1)
     val (uart_pad, uartIOCells) = IOCell.generateIOFromSignal(system.module.uart.head, "uart_0", p(IOCellKey))
-
+    val where = PBUS // TODO fix
+    val bus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(where)
+    val freqMHz = bus.dtsFrequency.get / 1000000
+    ports = ports :+ UARTPort(() => uart_pad, 0, freqMHz.toInt)
 
     //==========================
     // External interrupts (tie off)

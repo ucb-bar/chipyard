@@ -118,4 +118,11 @@ cd tools/DRAMSim2
 make libdramsim.so
 cp libdramsim.so $RISCV/lib/
 
+echo '==>  Installing uart_tsi bringup utility'
+cd $RDIR
+git submodule update --init generators/testchipip
+cd generators/testchipip/uart_tsi
+make
+cp uart_tsi $RISCV/bin
+
 echo "Extra Toolchain Utilities/Tests Build Complete!"
