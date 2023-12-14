@@ -3,15 +3,17 @@ package customAccRoCC
 import chisel3._
 import chisel3.util._
 import chiseltest._
+import org.chipsalliance.cde.config._
 import freechips.rocketchip.tile._
-import freechips.rocketchip.config._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.rocket._
-import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class vectorAddTest extends AnyFreeSpec with ChiselScalatestTester {
+class vectorAddTest extends AnyFlatSpec with ChiselScalatestTester {
 
-  "Basic Testcase" in {
+  behavior of "Vector-Add RoCC Accelerator"
+
+  it should "add two vectors" in {
     test(new vectorAdd()(Parameters.empty)).withAnnotations(Seq(VerilatorBackendAnnotation, WriteFstAnnotation)) { c =>
 
       /* expect ready */

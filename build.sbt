@@ -224,6 +224,12 @@ lazy val sha3 = (project in file("generators/sha3"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
+lazy val customAccRoCC = (project in file ("generators/customAccRoCC"))
+  .dependsOn(rocketchip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq("edu.berkeley.cs" %% "chiseltest" % "0.6.2" % "test"))
+
 lazy val gemmini = (project in file("generators/gemmini"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)

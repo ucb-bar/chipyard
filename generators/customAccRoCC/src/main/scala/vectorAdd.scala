@@ -2,8 +2,8 @@ package customAccRoCC
 
 import chisel3._
 import chisel3.util._
+import org.chipsalliance.cde.config._
 import freechips.rocketchip.tile._
-import freechips.rocketchip.config._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.rocket._
 import freechips.rocketchip.tilelink._
@@ -12,22 +12,11 @@ object consts {
   val len = 64
 }
 
-class command extends Bundle {
-  val inst = new RoCCInstruction
-  val rs1 = Bits(consts.len.W)
-  val rs2 = Bits(consts.len.W)
-}
-
-class response extends Bundle {
-  val rd = Bits(5.W)
-  val data = Bits(consts.len.W)
-}
-
 class vectorAdd()(implicit p: Parameters) extends Module {
 
   val io = IO(new Bundle {
-    val cmd = Flipped(Decoupled(new command))
-    val resp = Decoupled(new response)
+    val cmd = Flipped(Decoupled(new RoCCCommand))
+    val resp = Decoupled(new RoCCResponse)
     val busy = Output(Bool())
   })
   
@@ -49,7 +38,7 @@ class vectorAdd()(implicit p: Parameters) extends Module {
   val in2_vec_wire = WireInit(VecInit(Seq.fill(8) {0.U(8.W)})) 
   val sum_vec_wire = /* YOUR CODE HERE */ 
   
-  val cmd_bits_reg = RegInit(0.U.asTypeOf(new command))
+  val cmd_bits_reg = RegInit(0.U.asTypeOf(new RoCCCommand))
   val state_reg = RegInit(0.U(1.W))
 
   /* in ready */
@@ -70,7 +59,7 @@ class vectorAdd()(implicit p: Parameters) extends Module {
     }    
   }
     
-  io.resp.bits.rd := /* YOUR CODE HERE */
+  io.resp.bits.rd := /* YOUR CODE HERE */ 
   io.resp.bits.data := sum_vec_wire.asTypeOf(UInt(consts.len.W))
 
   /* Set up inputs */
