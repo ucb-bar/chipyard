@@ -122,3 +122,7 @@ class WithNoTileResetSetters extends Config((site, here, up) => {
 class WithNoResetSynchronizers extends Config((site, here, up) => {
   case ChipyardPRCIControlKey => up(ChipyardPRCIControlKey).copy(enableResetSynchronizers = false)
 })
+
+class WithNoClockTap extends Config((site, here, up) => {
+  case ClockTapKey => None
+})
