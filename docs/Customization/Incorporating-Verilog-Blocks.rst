@@ -161,4 +161,31 @@ transformed or augmented by any Chipyard FIRRTL transform.
 As mentioned earlier in this section, ``BlackBox`` resource files must
 be integrated into the build process, so any project providing
 ``BlackBox`` resources must be made visible to the ``tapeout`` project
-in ``build.sbt``
+in ``build.sbt``.
+
+Differences between ``HasBlackBoxPath`` and ``HasBlackBoxResource``
+-------------------------------------------------------------------
+
+Chisel provides two mechanisms for integrating blackbox files into a Chisel project that work slightly differently in Chipyard: ``HasBlackBoxPath`` and ``HasBlackBoxResource``.
+
+``HasBlackBoxResource`` incorporates extra files by looking up the relative path of the files within the ``src/main/resources`` area of project.
+This requires that the file added by ``addResource`` is present in the ``src/main/resources`` area and is **not** auto-generated (the file is static throughout the lifetime of generating RTL).
+This is due to the fact that when the Chisel sources are compiled they are put in a ``jar`` file, along with the ``src/main/resources`` area, and that ``jar`` is used to run the Chisel generator.
+Files referenced by the ``addResource`` must be located within this ``jar`` file during the Chisel elaboration.
+Thus if a file is generated during Chisel generation it will not be present in the ``jar`` file until the next time the Chisel sources are compiled.
+
+``HasBlackBoxPath`` differs in that it incorporates extra files by using an absolute path to them.
+Later in the build process, the FIRRTL compiler will copy the file from that location to the generated sources directory.
+Thus, the file must be present before the FIRRTL compiler is run (i.e. the file doesn't need to be in the ``src/main/resources`` or it can be auto-generated during Chisel elaboration).
+
+Additionally, both mechanisms do not enforce the order of files added.
+For example:
+
+.. code-block:: scala
+
+    addResource("fileA")
+    addResource("fileB")
+
+In this case, ``fileA`` is not guaranteed to be before ``fileB`` when passed to downstream tools.
+To bypass this, it is recommended to auto-generate a single file with the ordering needed by concatenating the files and using ``addPath`` given by ``HasBlackBoxPath``.
+An example of this is https://github.com/ucb-bar/ibex-wrapper/blob/main/src/main/scala/IbexCoreBlackbox.scala.

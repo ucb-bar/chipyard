@@ -16,7 +16,6 @@ import sifive.blocks.devices.uart._
 
 import chipyard._
 import chipyard.harness._
-import chipyard.iobinders.{HasIOBinders}
 
 class NexysVideoHarness(override implicit val p: Parameters) extends NexysVideoShell {
   def dp = designParameters

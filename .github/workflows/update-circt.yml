@@ -1,0 +1,25 @@
+name: update-circt
+
+# run daily
+on:
+  schedule:
+    - cron: 0,15,30,45 * * * *
+    #- cron: 0 8 * * *
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+jobs:
+  update-circt:
+    name: update-circt
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update CIRCT
+        uses: circt/update-circt@v1.0.0
+        with:
+          user: 'bartender'
+          email: 'firesimchipyard@gmail.com'
+          pr-reviewers: ''
+          pr-labels: 'changelog:changed'
+          circt-config: './conda-reqs/circt.json'

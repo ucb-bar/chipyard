@@ -13,7 +13,7 @@ import freechips.rocketchip.util.UIntIsOneOf
 
 // DOC include start: GCD params
 case class GCDParams(
-  address: BigInt = 0x1000,
+  address: BigInt = 0x4000,
   width: Int = 32,
   useAXI4: Boolean = false,
   useBlackBox: Boolean = true)

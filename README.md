@@ -85,7 +85,7 @@ These additional publications cover many of the internal components used in Chip
 
 ## Acknowledgements
 
-This work is supported by the NSF CCRI ENS Chipyard Award #201662.
+This work is supported by the NSF CCRI ENS Chipyard Award #2016662.
 
 [hwacha]:https://www2.eecs.berkeley.edu/Pubs/TechRpts/2015/EECS-2015-262.pdf
 [hammer]:https://github.com/ucb-bar/hammer

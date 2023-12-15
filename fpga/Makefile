@@ -72,11 +72,11 @@ ifeq ($(SUB_PROJECT),nexysvideo)
 	FPGA_BRAND        ?= xilinx
 endif
 
-ifeq ($(SUB_PROJECT),arty)
+ifeq ($(SUB_PROJECT),arty35t)
 	# TODO: Fix with Arty
 	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= ArtyFPGATestHarness
-	VLOG_MODEL        ?= ArtyFPGATestHarness
+	MODEL             ?= Arty35THarness
+	VLOG_MODEL        ?= Arty35THarness
 	MODEL_PACKAGE     ?= chipyard.fpga.arty
 	CONFIG            ?= TinyRocketArtyConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty

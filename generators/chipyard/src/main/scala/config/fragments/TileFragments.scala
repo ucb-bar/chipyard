@@ -66,6 +66,15 @@ class WithNPMPs(n: Int = 8) extends Config((site, here, up) => {
   }
 })
 
+class WithRocketCacheRowBits(rowBits: Int = 64) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem)) map {
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      dcache = tp.tileParams.dcache.map(_.copy(rowBits = rowBits)),
+      icache = tp.tileParams.icache.map(_.copy(rowBits = rowBits))
+    ))
+  }
+})
+
 class WithRocketICacheScratchpad extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
@@ -96,3 +105,13 @@ class WithTilePrefetchers extends Config((site, here, up) => {
       master = TilePrefetchingMasterPortParams(tp.tileParams.tileId, tp.crossingParams.master)))
   }
 })
+
+// Adds boundary buffers to RocketTiles, which places buffers between the caches and the TileLink interface
+// This typically makes it easier to close timing
+class WithRocketBoundaryBuffers(buffers: Option[RocketTileBoundaryBufferParams] = Some(RocketTileBoundaryBufferParams(true))) extends Config((site, here, up) => {                                                                                                                                                           
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem)) map {                                                                                                                                                                                                                                                      
+    case tp: RocketTileAttachParams => tp.copy(tileParams=tp.tileParams.copy(                                                                                                                                                                                                                                                
+      boundaryBuffers=buffers                                                                                                                                                                                                                                                                                                
+    ))                                                                                                                                                                                                                                                                                                                       
+  }                                                                                                                                                                                                                                                                                                                          
+})   
