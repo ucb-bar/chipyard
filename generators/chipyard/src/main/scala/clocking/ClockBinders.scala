@@ -2,7 +2,7 @@ package chipyard.clocking
 
 import chisel3._
 import chisel3.util._
-import chipyard.iobinders.{OverrideLazyIOBinder, GetSystemParameters, IOCellKey, ClockPort, ResetPort}
+import chipyard.iobinders._
 import freechips.rocketchip.prci._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.subsystem._
@@ -117,5 +117,14 @@ class WithPassthroughClockGenerator extends OverrideLazyIOBinder({
       }.toSeq
       ((clock_ios :+ ResetPort(() => reset_io)), Nil)
     }
+  }
+})
+
+class WithClockTapIOCells extends OverrideIOBinder({
+  (system: CanHaveClockTap) => {
+    system.clockTapIO.map { tap =>
+      val (clock_tap_io, clock_tap_cell) = IOCell.generateIOFromSignal(tap.getWrappedValue, "clock_tap")
+      (Seq(ClockTapPort(() => clock_tap_io)), clock_tap_cell)
+    }.getOrElse((Nil, Nil))
   }
 })

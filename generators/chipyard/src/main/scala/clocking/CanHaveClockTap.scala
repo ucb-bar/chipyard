@@ -22,5 +22,11 @@ trait CanHaveClockTap { this: BaseSubsystem =>
     val clockTap = ClockSinkNode(Seq(ClockSinkParameters(name=Some("clock_tap"))))
     val clockTapDivider = LazyModule(new ClockDivider(tapParams.divider))
     clockTap := clockTapDivider.node := locateTLBusWrapper(tapParams.busWhere).fixedClockNode
+    clockTap
   }
+  val clockTapIO = clockTapNode.map { node => InModuleBody {
+    val clock_tap = IO(Output(Clock()))
+    clock_tap := node.in.head._1.clock
+    clock_tap
+  }}
 }
