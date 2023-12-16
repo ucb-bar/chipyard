@@ -7,7 +7,8 @@
  `define MODEL TestHarness
 `endif
 
-`define ROCKET testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core
+`define TILE testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile
+`define ROCKET `TILE.core
 `define CSR_FILE `ROCKET.csr
 `define CORE_RESET (`ROCKET.reset)
 `define CORE_CLOCK (`ROCKET.clock)
@@ -15,6 +16,10 @@
 `define TRACE_EXCEPTION (`ROCKET._csr_io_trace_0_exception)
 `define TRACE_TIME (`ROCKET._csr_io_time)
 `define INSTRET (!(`CORE_RESET) && `TRACE_VALID && !(`TRACE_EXCEPTION))
+`define DCACHE_DATA_ARRAY_ROOT `TILE.dcache.data.data_arrays_0.data_arrays_0_ext
+`define DCACHE_DATA_ARRAY(bank) `DCACHE_DATA_ARRAY_ROOT.mem_0_``bank
+`define DCACHE_TAG_ARRAY_ROOT `TILE.dcache.tag_array.tag_array_ext
+`define DCACHE_TAG_ARRAY(way) `DCACHE_TAG_ARRAY_ROOT.mem_0_``way.ram
 
 typedef struct {
   longint unsigned pc;
@@ -108,6 +113,19 @@ module TestDriver;
       $fwrite(perf_file_fd, "%0d,%0d\n", cycles, instret);
     end
   endfunction
+
+  // DCache functional warmup
+  localparam integer physical_address_bits = 32;
+  localparam integer dcache_block_size = 64;
+  localparam integer dcache_sets = 64;
+  localparam integer dcache_size = 16384;
+  localparam integer dcache_ways = dcache_size / (dcache_sets * dcache_block_size);
+  localparam integer dcache_offset_bits = $clog2(dcache_block_size);
+  localparam integer dcache_set_bits = $clog2(dcache_sets);
+  localparam integer dcache_raw_tag_bits = physical_address_bits - dcache_set_bits - dcache_offset_bits;
+  localparam integer dcache_tag_bits = dcache_raw_tag_bits + 2; // 2 bits for coherency metadata
+  assert dcache_tag_bits == 22;
+  bit dcache_tag_array [0:dcache_ways-1][0:dcache_sets-1][dcache_tag_bits-1:0];
 
   always @(posedge `CORE_CLOCK) begin
     if (!reset && !`CORE_RESET) begin
