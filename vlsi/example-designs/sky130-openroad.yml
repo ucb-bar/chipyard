@@ -54,8 +54,6 @@ vlsi.inputs.placement_constraints:
       bottom: 10
 
   # Place SRAM memory instances
-  # SRAM paths and configurations are slightly different due to ENABLE_YOSYS_FLOW flag
-  # data cache
   - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0_0/data_arrays_0_0_ext/mem_0_0"
     type: hardmacro
     x: 50
