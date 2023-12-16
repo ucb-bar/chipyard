@@ -124,7 +124,6 @@ module TestDriver;
   localparam integer dcache_set_bits = $clog2(dcache_sets);
   localparam integer dcache_raw_tag_bits = physical_address_bits - dcache_set_bits - dcache_offset_bits;
   localparam integer dcache_tag_bits = dcache_raw_tag_bits + 2; // 2 bits for coherency metadata
-  assert dcache_tag_bits == 22;
   bit dcache_tag_array [0:dcache_ways-1][0:dcache_sets-1][dcache_tag_bits-1:0];
 
   always @(posedge `CORE_CLOCK) begin
