@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Replace text in a file given a key identifying a block to replace.
 # If the file doesn't exist, create it.
