@@ -95,7 +95,7 @@ lazy val chiselSettings = Seq(
 
 // -- Rocket Chip --
 
-lazy val hardfloat = freshProject("hardfloat", rocketChipDir / "hardfloat/hardfloat")
+lazy val hardfloat = freshProject("hardfloat", file("generators/hardfloat/hardfloat"))
   .settings(chiselSettings)
   .dependsOn(midasTargetUtils)
   .settings(commonSettings)
