@@ -123,8 +123,7 @@ The ``buildfile`` make target has dependencies on both (1) the Verilog that is e
 and (2) the mapping of memory instances in the design to SRAM macros;
 all files related to these two steps reside in the ``generated-src/chipyard.harness.TestHarness.TinyRocketConfig-ChipTop`` directory.
 Note that the files in ``generated-src`` vary for each tool/technology flow.
-This especially applies to the Sky130 Commercial vs OpenROAD tutorial flows
-(due to the ``ENABLE_YOSYS_FLOW`` flag present for the OpenROAD flow), so these flows should be run in separate
+This especially applies to the Sky130 Commercial vs OpenROAD tutorial flows, so these flows should be run in separate
 chipyard installations. If the wrong sources are generated, simply run ``make buildfile -B`` to rebuild all targets correctly.
 
 
