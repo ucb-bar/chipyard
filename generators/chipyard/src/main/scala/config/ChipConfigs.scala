@@ -23,8 +23,8 @@ class ChipLikeRocketConfig extends Config(
   // Set up I/O
   //==================================
   new testchipip.WithSerialTLWidth(4) ++                                                // 4bit wide Serialized TL interface to minimize IO
-  new testchipip.WithSerialTLBackingMemory ++                                           // Configure the off-chip memory accessible over serial-tl as backing memory
-  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 4L) ++                  // 4GB max external memory
+  new testchipip.WithSerialTLMem(size = (1 << 30) * 4L) ++                              // Configure the off-chip memory accessible over serial-tl as backing memory
+  new freechips.rocketchip.subsystem.WithNoMemPort ++                                   // Remove axi4 mem port
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++                          // 1 memory channel
 
   //==================================
@@ -89,7 +89,9 @@ class ChipBringupHostConfig extends Config(
   new chipyard.config.WithFrontBusFrequency(75.0) ++     // run all buses of this system at 75 MHz
   new chipyard.config.WithMemoryBusFrequency(75.0) ++
   new chipyard.config.WithPeripheryBusFrequency(75.0) ++
+  new chipyard.config.WithSystemBusFrequency(75.0) ++
   new chipyard.config.WithControlBusFrequency(75.0) ++
+  new chipyard.config.WithOffchipBusFrequency(75.0) ++
 
   // Base is the no-cores config
   new chipyard.NoCoresConfig)

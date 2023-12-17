@@ -10,6 +10,10 @@ class WithBroadcastManager extends Config((site, here, up) => {
   case SubsystemBankedCoherenceKey => up(SubsystemBankedCoherenceKey, site).copy(coherenceManager = CoherenceManagerWrapper.broadcastManager)
 })
 
+class WithBroadcastParams(params: BroadcastParams) extends Config((site, here, up) => {
+  case BroadcastKey => params
+})
+
 class WithSystemBusWidth(bitWidth: Int) extends Config((site, here, up) => {
   case SystemBusKey => up(SystemBusKey, site).copy(beatBytes=bitWidth/8)
 })

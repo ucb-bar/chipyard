@@ -99,8 +99,8 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule with HasChipyardPor
     //=========================
     // Serialized TileLink
     //=========================
-    val (serial_tl_pad, serialTLIOCells) = IOCell.generateIOFromSignal(system.serial_tl.get.getWrappedValue, "serial_tl", p(IOCellKey))
-    ports = ports :+ SerialTLPort(() => serial_tl_pad, p(SerialTLKey).get, system.serdesser.get, 0)
+    val (serial_tl_pad, serialTLIOCells) = IOCell.generateIOFromSignal(system.serial_tls(0).getWrappedValue, "serial_tl", p(IOCellKey))
+    ports = ports :+ SerialTLPort(() => serial_tl_pad, p(SerialTLKey)(0), system.serdessers(0), 0)
 
     //=========================
     // JTAG/Debug
