@@ -54,15 +54,20 @@ class AbstractConfig extends Config(
   new chipyard.clocking.WithClockTapIOCells ++                      // Default generate a clock tapio
   new chipyard.clocking.WithPassthroughClockGenerator ++            // Default punch out IOs to the Harness
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore",    // Default merge all the bus clocks
-    Seq("sbus", "mbus", "pbus", "fbus", "cbus", "implicit"), Seq("tile"))) ++
+    Seq("sbus", "mbus", "pbus", "fbus", "cbus", "obus", "implicit"), Seq("tile"))) ++
   new chipyard.config.WithPeripheryBusFrequency(500.0) ++           // Default 500 MHz pbus
   new chipyard.config.WithMemoryBusFrequency(500.0) ++              // Default 500 MHz mbus
+  new chipyard.config.WithControlBusFrequency(500.0) ++             // Default 500 MHz cbus
+  new chipyard.config.WithSystemBusFrequency(500.0) ++              // Default 500 MHz sbus
+  new chipyard.config.WithFrontBusFrequency(500.0) ++               // Default 500 MHz fbus
+  new chipyard.config.WithOffchipBusFrequency(500.0) ++             // Default 500 MHz obus
 
   new testchipip.WithCustomBootPin ++                               // add a custom-boot-pin to support pin-driven boot address
   new testchipip.WithBootAddrReg ++                                 // add a boot-addr-reg for configurable boot address
-  new testchipip.WithSerialTLClientIdBits(4) ++                     // support up to 1 << 4 simultaneous requests from serialTL port
-  new testchipip.WithSerialTLWidth(32) ++                           // fatten the serialTL interface to improve testing performance
-  new testchipip.WithDefaultSerialTL ++                             // use serialized tilelink port to external serialadapter/harnessRAM
+  new testchipip.WithSerialTL(Seq(testchipip.SerialTLParams(        // add a serial-tilelink interface
+    client = Some(testchipip.SerialTLClientParams(idBits = 4)),     // serial-tilelink interface will master the FBUS, and support 4 idBits
+    width = 32                                                      // serial-tilelink interface with 32 lanes
+  ))) ++
   new chipyard.config.WithDebugModuleAbstractDataWords(8) ++        // increase debug module data capacity
   new chipyard.config.WithBootROM ++                                // use default bootrom
   new chipyard.config.WithUART ++                                   // add a UART

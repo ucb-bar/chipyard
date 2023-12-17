@@ -142,3 +142,6 @@
 [submodule "tools/install-circt"]
 	path = tools/install-circt
 	url = https://github.com/circt/install-circt/
+[submodule "toolchains/riscv-tools/riscv-spike-devices"]
+	path = toolchains/riscv-tools/riscv-spike-devices
+	url = https://github.com/ucb-bar/spike-devices.git

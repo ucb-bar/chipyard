@@ -126,14 +126,14 @@ class WithFireSimHighPerfClocking extends Config(
   new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
   new chipyard.config.WithSystemBusFrequency(3200.0) ++
   new chipyard.config.WithFrontBusFrequency(3200.0) ++
+  new chipyard.config.WithControlBusFrequency(3200.0) ++
   // Optional: These three configs put the DRAM memory system in it's own clock domain.
   // Removing the first config will result in the FASED timing model running
   // at the pbus freq (above, 3.2 GHz), which is outside the range of valid DDR3 speedgrades.
   // 1 GHz matches the FASED default, using some other frequency will require
   // runnings the FASED runtime configuration generator to generate faithful DDR3 timing values.
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++
-  new chipyard.config.WithAsynchrousMemoryBusCrossing ++
-  new testchipip.WithAsynchronousSerialSlaveCrossing
+  new chipyard.config.WithAsynchrousMemoryBusCrossing
 )
 
 // Tweaks that are generally applied to all firesim configs setting a single clock domain at 1000 MHz
@@ -142,8 +142,10 @@ class WithFireSimConfigTweaks extends Config(
   // Using some other frequency will require runnings the FASED runtime configuration generator
   // to generate faithful DDR3 timing values.
   new chipyard.config.WithSystemBusFrequency(1000.0) ++
+  new chipyard.config.WithControlBusFrequency(1000.0) ++
   new chipyard.config.WithPeripheryBusFrequency(1000.0) ++
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++
+  new chipyard.config.WithFrontBusFrequency(1000.0) ++
   new WithFireSimDesignTweaks
 )
 
@@ -189,13 +191,14 @@ class WithFireSimTestChipConfigTweaks extends Config(
   new chipyard.config.WithSystemBusFrequency(500.0) ++   // Realistic system bus frequency
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++  // Needs to be 1000 MHz to model DDR performance accurately
   new chipyard.config.WithPeripheryBusFrequency(500.0) ++  // Match the sbus and pbus frequency
+  new chipyard.config.WithFrontBusFrequency(500.0) ++      // Match the sbus and fbus frequency
+  new chipyard.config.WithControlBusFrequency(500.0) ++    // Match the sbus and cbus frequency
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("sbus", "pbus", "fbus", "cbus", "implicit"), Seq("tile"))) ++
   //  Crossing specifications
   new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
   new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
   new boom.common.WithRationalBoomTiles ++ // Add rational crossings between BoomTile and uncore
-  new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
   new WithFireSimDesignTweaks
 )
 
@@ -250,10 +253,17 @@ class FireSimSmallSystemConfig extends Config(
   new WithDefaultMemModel ++
   new WithBootROM ++
   new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
+  new chipyard.config.WithControlBusFrequency(3200.0) ++
+  new chipyard.config.WithSystemBusFrequency(3200.0) ++
+  new chipyard.config.WithFrontBusFrequency(3200.0) ++
+  new chipyard.config.WithMemoryBusFrequency(3200.0) ++
   new WithoutClockGating ++
   new WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++
-  new testchipip.WithDefaultSerialTL ++
+  new testchipip.WithSerialTL(Seq(testchipip.SerialTLParams(
+    client = Some(testchipip.SerialTLClientParams(idBits = 4)),
+    width = 32
+  ))) ++
   new testchipip.WithBlockDevice ++
   new chipyard.config.WithUARTInitBaudRate(BigInt(3686400L)) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nWays = 2, capacityKB = 64) ++

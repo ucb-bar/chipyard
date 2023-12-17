@@ -39,7 +39,6 @@ ifeq ($(tutorial),sky130-openroad)
                             example-designs/sky130-openroad-rockettile.yml, )
     VLSI_OBJ_DIR      ?= build-sky130-openroad
     INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
-    # Yosys compatibility for CIRCT-generated Verilog, at the expense of elaboration time.
+    # Yosys compatibility for CIRCT-generated Verilog
     ENABLE_YOSYS_FLOW  = 1
 endif
-
