@@ -50,3 +50,24 @@ Spike-as-a-Tile can be configured with custom IPC, commit logging, and other beh
 * ``+spike-fast-clint``: Enables fast-forwarding through WFI stalls by generating fake timer interrupts
 * ``+spike-debug``: Enables debug Spike logging
 * ``+spike-verbose``: Enables Spike commit-log generation
+
+Adding a new spike device model
+-------------------------------
+
+Spike comes with a few functional device models such as UART, CLINT, and PLIC.
+However, you may want to add custom device models into Spike such as a block device.
+Example devices are in the ``toolchains/riscv-tools/riscv-spike-devices`` directory.
+These devices are compiled as a shared library that can be dynamically linked to Spike.
+
+To compile these plugins, run ``make`` inside ``toolchains/riscv-tools/riscv-spike-devices``. This will generate a ``libspikedevices.so``.
+
+To hook up a block device to spike and provide a default image to initialize the block device, run
+
+.. code-block:: shell
+
+   spike --extlib=libspikedevices.so --device="iceblk,img=<path to Linux image>" <path to kernel binary>
+
+.
+
+The ``--device`` option consists of the device name and arguments.
+In the above example ``iceblk`` is the device name and ``img=<path to Linux image>`` is the argument passed on to the plugin device.
