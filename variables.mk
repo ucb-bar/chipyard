@@ -29,7 +29,7 @@ HELP_SIMULATION_VARIABLES = \
 "   LOADMEM                = riscv elf binary that should be loaded directly into simulated DRAM. LOADMEM=1 will load the BINARY elf" \
 "   LOADARCH               = path to a architectural checkpoint directory that should end in .loadarch/, for restoring from a checkpoint" \
 "   VERBOSE_FLAGS          = flags used when doing verbose simulation [$(VERBOSE_FLAGS)]" \
-"   timeout_cycles         = number of clock cycles before simulator times out, defaults to 10000000"
+"   TIMEOUT_CYCLES         = number of clock cycles before simulator times out, defaults to 10000000"
 
 # include default simulation rules
 HELP_COMMANDS = \
@@ -274,7 +274,7 @@ PERMISSIVE_ON=+permissive
 PERMISSIVE_OFF=+permissive-off
 BINARY ?=
 BINARIES ?=
-override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(timeout_cycles)
+override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(TIMEOUT_CYCLES)
 VERBOSE_FLAGS ?= +verbose
 # get_out_name is a function, 1st argument is the binary
 get_out_name = $(subst $() $(),_,$(notdir $(basename $(1))))
@@ -300,7 +300,12 @@ build_dir           =$(gen_dir)/$(long_name)
 GEN_COLLATERAL_DIR ?=$(build_dir)/gen-collateral
 
 #########################################################################################
-# assembly/benchmark variables
+# simulation variables
 #########################################################################################
-timeout_cycles = 10000000
-bmark_timeout_cycles = 100000000
+TIMEOUT_CYCLES = 10000000
+
+# legacy timeout_cycles handling
+timeout_cycles ?=
+ifneq ($(timeout_cycles),)
+TIMEOUT_CYCLES=$(timeout_cycles)
+endif
