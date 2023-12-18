@@ -130,5 +130,5 @@ class WithNoResetSynchronizers extends Config((site, here, up) => {
 
 // Remove any ClockTap ports in this system
 class WithNoClockTap extends Config((site, here, up) => {
-  case ClockTapKey => None
+  case ClockTapKey => false
 })

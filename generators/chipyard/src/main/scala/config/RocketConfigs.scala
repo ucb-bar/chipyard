@@ -60,7 +60,7 @@ class MulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   // Frequency specifications
   new chipyard.config.WithTileFrequency(1000.0) ++        // Matches the maximum frequency of U540
-  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore"   , Seq("sbus", "cbus", "implicit"), Nil),
+  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore"   , Seq("sbus", "cbus", "implicit", "clock_tap"), Nil),
                                                       ("periphery", Seq("pbus", "fbus"), Nil)) ++
   new chipyard.config.WithSystemBusFrequency(500.0) ++    // Matches the maximum frequency of U540
   new chipyard.config.WithMemoryBusFrequency(500.0) ++    // Matches the maximum frequency of U540

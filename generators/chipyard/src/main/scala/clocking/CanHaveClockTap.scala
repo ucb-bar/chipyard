@@ -10,18 +10,13 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.prci._
 
-case class ClockTapParams(
-  busWhere: TLBusWrapperLocation = SBUS, // by default, tap the sbus clock as a debug clock
-  divider: Int = 16, // a fixed clock division ratio for the clock tap
-)
-
-case object ClockTapKey extends Field[Option[ClockTapParams]](Some(ClockTapParams()))
+case object ClockTapKey extends Field[Boolean](true)
 
 trait CanHaveClockTap { this: BaseSubsystem =>
-  val clockTapNode = p(ClockTapKey).map { tapParams =>
+  require(p(SubsystemDriveAsyncClockGroupsKey).isEmpty, "Subsystem asyncClockGroups must be undriven")
+  val clockTapNode = Option.when(p(ClockTapKey)) {
     val clockTap = ClockSinkNode(Seq(ClockSinkParameters(name=Some("clock_tap"))))
-    val clockTapDivider = LazyModule(new ClockDivider(tapParams.divider))
-    clockTap := clockTapDivider.node := locateTLBusWrapper(tapParams.busWhere).fixedClockNode
+    clockTap := ClockGroup() := asyncClockGroupsNode
     clockTap
   }
   val clockTapIO = clockTapNode.map { node => InModuleBody {
