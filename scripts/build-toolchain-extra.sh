@@ -125,4 +125,10 @@ cd generators/testchipip/uart_tsi
 make
 cp uart_tsi $RISCV/bin
 
+echo '==>  Installing spike-devices'
+cd $RDIR
+git submodule update --init toolchains/riscv-tools/riscv-spike-devices
+cd toolchains/riscv-tools/riscv-spike-devices
+make install
+
 echo "Extra Toolchain Utilities/Tests Build Complete!"

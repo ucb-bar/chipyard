@@ -48,6 +48,11 @@ vlsi.inputs.placement_constraints:
     x: 50
     y: 50
     orientation: r90
+  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_1_0"
+    type: hardmacro
+    x: 50
+    y: 800
+    orientation: r90
 
   # tag array
   - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/frontend/icache/tag_array_0/tag_array_0_ext/mem_0_0"
