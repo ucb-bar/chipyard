@@ -16,8 +16,8 @@ import testchipip.dram.{SimDRAM}
 import testchipip.tsi.{SimTSI, SerialRAM, TSI, TSIIO}
 import testchipip.soc.{TestchipSimDTM}
 import testchipip.spi.{SimSPIFlashModel}
-import testchipip.uart.{UARTAdapter}
-import testchipip.serdes.{UARTToSerial, SerialWidthAdapter}
+import testchipip.uart.{UARTAdapter, UARTToSerial}
+import testchipip.serdes.{SerialWidthAdapter}
 import testchipip.iceblk.{SimBlockDevice, BlockDeviceModel}
 import testchipip.cosim.{SpikeCosim}
 import icenet.{NicLoopback, SimNetwork}
