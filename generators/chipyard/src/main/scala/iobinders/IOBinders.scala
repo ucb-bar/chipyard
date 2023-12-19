@@ -23,7 +23,13 @@ import tracegen.{TraceGenSystemModuleImp}
 
 import barstools.iocell.chisel._
 
-import testchipip._
+import testchipip.serdes.{CanHavePeripheryTLSerial, SerialTLKey}
+import testchipip.spi.{SPIChipIO}
+import testchipip.boot.{CanHavePeripheryCustomBootPin}
+import testchipip.util.{ClockedIO}
+import testchipip.iceblk.{CanHavePeripheryBlockDevice, BlockDeviceKey, BlockDeviceIO}
+import testchipip.cosim.{CanHaveTraceIOModuleImp, TraceOutputTop, SpikeCosimConfig}
+import testchipip.tsi.{CanHavePeripheryUARTTSI, UARTTSIIO}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 import chipyard.{CanHaveMasterTLMemPort, ChipyardSystem, ChipyardSystemModule}
 

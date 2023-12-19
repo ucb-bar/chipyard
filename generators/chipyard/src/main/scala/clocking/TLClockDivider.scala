@@ -11,7 +11,7 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.prci._
 import freechips.rocketchip.util.ElaborationArtefacts
 
-import testchipip._
+import testchipip.clocking._
 
 // This module adds a TileLink memory-mapped clock divider to the clock graph
 // The output clock/reset pairs from this module should be synchronized later
@@ -38,7 +38,7 @@ class TLClockDivider(address: BigInt, beatBytes: Int, divBits: Int = 8)(implicit
       val reg = Module(new AsyncResetRegVec(w=divBits, init=0))
 
       println(s"${(address+i*4).toString(16)}: Clock domain $sinkName divider")
-      val divider = Module(new testchipip.ClockDivideOrPass(divBits, depth = 3, genClockGate = p(ClockGateImpl)))
+      val divider = Module(new ClockDivideOrPass(divBits, depth = 3, genClockGate = p(ClockGateImpl)))
       divider.io.clockIn := sources(i).clock
       // busReset is expected to be high for a long time, since reset will take a while to propagate
       // to the TL bus. While reset is propagating, make sure we propagate a fast, undivided clock
