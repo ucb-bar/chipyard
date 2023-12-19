@@ -275,7 +275,9 @@ class JTAGChipIO extends Bundle {
   val TDO = Output(Bool())
 }
 
-class WithDebugIOCells extends OverrideLazyIOBinder({
+// WARNING: Don't disable syncReset unless you are trying to
+// get around bugs in RTL simulators
+class WithDebugIOCells(syncReset: Boolean = true) extends OverrideLazyIOBinder({
   (system: HasPeripheryDebug) => {
     implicit val p = GetSystemParameters(system)
     val tlbus = system.asInstanceOf[BaseSubsystem].locateTLBusWrapper(p(ExportDebug).slaveWhere)
@@ -299,7 +301,7 @@ class WithDebugIOCells extends OverrideLazyIOBinder({
           d.disableDebug.foreach { d => d := false.B }
           // Drive JTAG on-chip IOs
           d.systemjtag.map { j =>
-            j.reset := ResetCatchAndSync(j.jtag.TCK, clockBundle.reset.asBool)
+            j.reset := (if (syncReset) ResetCatchAndSync(j.jtag.TCK, clockBundle.reset.asBool) else clockBundle.reset.asBool)
             j.mfr_id := p(JtagDTMKey).idcodeManufId.U(11.W)
             j.part_number := p(JtagDTMKey).idcodePartNum.U(16.W)
             j.version := p(JtagDTMKey).idcodeVersion.U(4.W)
