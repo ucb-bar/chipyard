@@ -110,7 +110,8 @@ class TetheredChipLikeRocketConfig extends Config(
 class VerilatorCITetheredChipLikeRocketConfig extends Config(
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++   // use absolute freqs for sims in the harness
   new chipyard.harness.WithMultiChipSerialTL(0, 1) ++                // connect the serial-tl ports of the chips together
-  new chipyard.harness.WithMultiChip(0,
+  new chipyard.harness.WithMultiChip(0,                                         // These fragments remove all troublesome
+    new chipyard.clocking.WithPLLSelectorDividerClockGenerator(enable=false) ++ // clocking features from the design
     new chipyard.iobinders.WithDebugIOCells(syncReset = false) ++
     new chipyard.config.WithNoResetSynchronizers ++
     new ChipLikeRocketConfig) ++
