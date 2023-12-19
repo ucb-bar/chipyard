@@ -94,7 +94,7 @@ memory channel.
 
 Instead of connecting to off-chip DRAM, you can instead connect a scratchpad
 and remove the off-chip link. This is done by adding a fragment like
-``testchipip.WithScratchpad`` to your configuration and removing the
+``testchipip.soc.WithScratchpad`` to your configuration and removing the
 memory port with ``freechips.rocketchip.subsystem.WithNoMemPort``.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/config/MemorySystemConfigs.scala

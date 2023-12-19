@@ -12,8 +12,6 @@ import sifive.blocks.devices.uart.{UARTParams}
 
 import chipyard._
 import chipyard.harness._
-
-import testchipip._
 import chipyard.iobinders._
 
 class WithNexysVideoUARTTSI(uartBaudRate: BigInt = 115200) extends HarnessBinder({
