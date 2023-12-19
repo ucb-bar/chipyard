@@ -12,27 +12,26 @@ class ChipLikeRocketConfig extends Config(
   //==================================
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ // use absolute frequencies for simulations in the harness
                                                                    // NOTE: This only simulates properly in VCS
-  new chipyard.harness.WithSimAXIMemOverSerialTL ++                // Attach SimDRAM to serial-tl port
 
   //==================================
   // Set up tiles
   //==================================
-  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(8, 3) ++    // Add async crossings between RocketTile and uncore
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++                     // 1 RocketTile
+  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(depth=8, sync=3) ++ // Add async crossings between RocketTile and uncore
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++                             // 1 RocketTile
 
   //==================================
   // Set up I/O
   //==================================
-  new testchipip.WithSerialTLWidth(4) ++
-  new testchipip.WithSerialTLBackingMemory ++                                           // Backing memory is over serial TL protocol
-  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 4L) ++                  // 4GB max external memory
+  new testchipip.WithSerialTLWidth(4) ++                                                // 4bit wide Serialized TL interface to minimize IO
+  new testchipip.WithSerialTLMem(size = (1 << 30) * 4L) ++                              // Configure the off-chip memory accessible over serial-tl as backing memory
+  new freechips.rocketchip.subsystem.WithNoMemPort ++                                   // Remove axi4 mem port
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++                          // 1 memory channel
 
   //==================================
   // Set up buses
   //==================================
-  new testchipip.WithOffchipBusClient(MBUS) ++
-  new testchipip.WithOffchipBus ++
+  new testchipip.WithOffchipBusClient(MBUS) ++                                          // offchip bus connects to MBUS, since the serial-tl needs to provide backing memory
+  new testchipip.WithOffchipBus ++                                                      // attach a offchip bus, since the serial-tl will master some external tilelink memory
 
   //==================================
   // Set up clock./reset
@@ -43,6 +42,10 @@ class ChipLikeRocketConfig extends Config(
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("implicit", "sbus", "mbus", "cbus", "system_bus", "fbus", "pbus"), Nil)) ++
 
   new chipyard.config.AbstractConfig)
+
+class FlatChipTopChipLikeRocketConfig extends Config(
+  new chipyard.example.WithFlatChipTop ++
+  new chipyard.ChipLikeRocketConfig)
 
 // A simple config demonstrating a "bringup prototype" to bringup the ChipLikeRocketconfig
 class ChipBringupHostConfig extends Config(
@@ -86,16 +89,20 @@ class ChipBringupHostConfig extends Config(
   new chipyard.config.WithFrontBusFrequency(75.0) ++     // run all buses of this system at 75 MHz
   new chipyard.config.WithMemoryBusFrequency(75.0) ++
   new chipyard.config.WithPeripheryBusFrequency(75.0) ++
+  new chipyard.config.WithSystemBusFrequency(75.0) ++
+  new chipyard.config.WithControlBusFrequency(75.0) ++
+  new chipyard.config.WithOffchipBusFrequency(75.0) ++
 
   // Base is the no-cores config
   new chipyard.NoCoresConfig)
 
+// DOC include start: TetheredChipLikeRocketConfig
 class TetheredChipLikeRocketConfig extends Config(
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++   // use absolute freqs for sims in the harness
   new chipyard.harness.WithMultiChipSerialTL(0, 1) ++                // connect the serial-tl ports of the chips together
-  new chipyard.harness.WithMultiChip(0, new ChipLikeRocketConfig) ++
-  new chipyard.harness.WithMultiChip(1, new ChipBringupHostConfig))
-
+  new chipyard.harness.WithMultiChip(0, new ChipLikeRocketConfig) ++ // ChipTop0 is the design-to-be-taped-out
+  new chipyard.harness.WithMultiChip(1, new ChipBringupHostConfig))  // ChipTop1 is the bringup design
+// DOC include end: TetheredChipLikeRocketConfig
 
 // Verilator does not initialize some of the async-reset reset-synchronizer
 // flops properly, so this config disables them.

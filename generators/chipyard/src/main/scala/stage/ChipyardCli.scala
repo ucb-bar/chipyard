@@ -9,6 +9,9 @@ trait ChipyardCli { this: Shell =>
 
   parser.note("Chipyard Generator Options")
   Seq(
+    TopModuleAnnotation,
+    ConfigsAnnotation,
+    OutputBaseNameAnnotation,
     UnderscoreDelimitedConfigsAnnotation
   ).foreach(_.addOptions(parser))
 }

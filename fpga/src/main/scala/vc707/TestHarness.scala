@@ -18,7 +18,6 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTPortIO}
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIPortIO}
 
 import chipyard._
-import chipyard.iobinders.{HasIOBinders}
 import chipyard.harness._
 
 class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707Shell { outer =>
@@ -107,6 +106,8 @@ class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModul
   }
 
   _outer.pllReset := (resetIBUF.io.O || powerOnReset || ereset)
+
+  _outer.ledModule.foreach(_ := DontCare)
 
   // reset setup
   val hReset = Wire(Reset())

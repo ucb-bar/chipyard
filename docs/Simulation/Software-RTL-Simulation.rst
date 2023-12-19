@@ -81,6 +81,24 @@ For example:
 
 .. _sw-sim-custom:
 
+Custom Benchmarks/Tests
+-------------------------------
+
+To compile your own bare-metal code to run in a Verilator/VCS simulation, add it to Chipyard's ``tests`` directory then add its name to the list of ``PROGRAMS`` inside the ``Makefile``. These binaries are compiled with the libgloss-htif library, which implements a minimal set of useful syscalls for bare-metal binaries. Then when you run ``make``, all of the programs inside ``tests`` will be compiled into ``.riscv`` ELF binaries, which can be used with the simulator as described above.
+
+.. code-block:: shell
+
+    # Enter Tests directory
+    cd tests
+    make
+
+    # Enter Verilator or VCS directory
+    cd ../sims/verilator
+    make run-binary BINARY=../../tests/hello.riscv
+
+.. Note:: On multi-core configurations, only hart (**har**\ dware **t**\ hread) 0 executes the ``main()`` function. All other harts execute the secondary ``__main()`` function, which defaults to a busy loop. To run a multi-threaded workload on a Verilator/VCS simulation, override ``__main()`` with your own code. More details can be found `here <https://github.com/ucb-bar/libgloss-htif>`_
+
+
 Makefile Variables and Commands
 -------------------------------
 You can get a list of useful Makefile variables and commands available from the Verilator or VCS directories. simply run ``make help``:
@@ -177,7 +195,7 @@ A special target that automatically generates the waveform file for a specific t
 For a Verilator simulation, this will generate a vcd file (vcd is a standard waveform representation file format) that can be loaded to any common waveform viewer.
 An open-source vcd-capable waveform viewer is `GTKWave <http://gtkwave.sourceforge.net/>`__.
 
-For a VCS simulation, this will generate an fsdb file (fast signal database, a proprietary waveform representation format developed by Novas Software, later acquired by Synopsys) that can be loaded to fsdb-supported waveform viewers.
+For a VCS simulation, this will generate an fsdb file that can be loaded to fsdb-supported waveform viewers.
 If you have Synopsys licenses, we recommend using the Verdi waveform viewer.
 
 Visualizing Chipyard SoCs
@@ -187,7 +205,7 @@ During verilog creation, a graphml file is emitted that will allow you to visual
 
 To view the graph, first download a viewer such as `yEd <https://www.yworks.com/products/yed/>`__.
 
-The ``*.graphml`` file will be located in ``generated-src/<...>/``. Open the file in the graph viewer. 
+The ``*.graphml`` file will be located in ``generated-src/<...>/``. Open the file in the graph viewer.
 To get a clearer view of the SoC, switch to "hierarchical" view. For yEd, this would be done by selecting ``layout`` -> ``hierarchical``, and then choosing "Ok" without changing any settings.
 
 .. _sw-sim-verilator-opts:

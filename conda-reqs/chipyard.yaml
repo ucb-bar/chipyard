@@ -29,8 +29,7 @@ dependencies:
     - conda-gcc-specs
     - binutils
 
-    - dromajo # from ucb-bar channel - https://github.com/riscv-boom/dromajo
-    - firtool==1.30.0 # from ucb-bar channel - https://github.com/ucb-bar/firtool-feedstock
+    # firtool handled outside of conda
 
     # misc
     - autoconf
@@ -103,7 +102,7 @@ dependencies:
     - sty
     - open_pdks.sky130a
     - pip:
-        - hammer-vlsi[asap7]==1.1.1
+        - hammer-vlsi[asap7]==1.2.0
 
     # doc requirements
     - sphinx

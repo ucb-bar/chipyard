@@ -45,7 +45,7 @@ search () {
     done
 }
 
-submodules=("cva6" "boom" "ibex" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "sifive-blocks" "sifive-cache" "testchipip" "riscv-sodor" "mempress" "bar-fetchers" "shuttle")
+submodules=("cva6" "boom" "ibex" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "sifive-blocks" "sifive-cache" "testchipip" "riscv-sodor" "mempress" "bar-fetchers" "shuttle" "constellation" "fft-generator" "hardfloat" "caliptra-aes-acc" "rocc-acc-utils")
 dir="generators"
 branches=("master" "main" "dev")
 search
@@ -81,14 +81,20 @@ dir="toolchains"
 branches=("master")
 search
 
+submodules=("firesim")
+dir="sims"
+branches=("main")
+search
+
+
 submodules=("coremark" "firemarshal" "nvdla-workload" "spec2017")
 dir="software"
 branches=("master" "dev")
 search
 
-submodules=("DRAMSim2" "axe" "barstools" "dsptools" "rocket-dsp-utils" "torture")
+submodules=("DRAMSim2" "axe" "barstools" "dsptools" "rocket-dsp-utils" "torture" "fixedpoint" "cde")
 dir="tools"
-branches=("master" "dev")
+branches=("master" "dev" "main")
 search
 
 submodules=("fpga-shells")

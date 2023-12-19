@@ -45,4 +45,3 @@ class TileClockGater(address: BigInt, beatBytes: Int)(implicit p: Parameters, va
     }): _*)
   }
 }
-

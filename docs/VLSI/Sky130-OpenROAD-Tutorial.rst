@@ -46,16 +46,17 @@ Prerequisites
 -------------
 
 * Python 3.9+
-* OpenROAD flow tools:
+* OpenROAD flow tools (NOTE: tutorial may break with different tool versions):
 
-  * Yosys (synthesis), install `using conda <https://anaconda.org/litex-hub/yosys>`__ or `from source <https://yosyshq.net/yosys/download.html>`__
-  * OpenROAD (place-and-route), install `using conda <https://anaconda.org/litex-hub/openroad>`__ (note that GUI is disabled in conda package) or `from source <https://openroad.readthedocs.io/en/latest/main/README.html#install-dependencies>`__
-  * KLayout (DEF to GDSII conversion), install `using conda <https://anaconda.org/litex-hub/klayout>`__ or `from source <https://www.klayout.de/build.html>`__
-  * Magic (DRC), , install `using conda <https://anaconda.org/litex-hub/magic>`__ or `from source <http://www.opencircuitdesign.com/magic/install.html>`__
-  * NetGen (LVS), , install `using conda <https://anaconda.org/litex-hub/netgen>`__ or `from source <http://www.opencircuitdesign.com/netgen/install.html>`__
+  * **Yosys 0.27+3** (synthesis), install `using conda <https://anaconda.org/litex-hub/yosys>`__ or `from source <https://yosyshq.net/yosys/download.html>`__
+  * **OpenROAD v2.0-7070-g0264023b6** (place-and-route), install `using conda <https://anaconda.org/litex-hub/openroad>`__ (note that GUI is disabled in conda package) or
+    `from source <https://github.com/The-OpenROAD-Project/OpenROAD/blob/master/docs/user/Build.md>`__ (git hash: 0264023b6c2a8ae803b8d440478d657387277d93)
+  * **KLayout 0.28.5** (DEF to GDSII conversion, DRC), install `using conda <https://anaconda.org/litex-hub/klayout>`__ or `from source <https://www.klayout.de/build.html>`__
+  * **Magic 8.3.376** (DRC), install `using conda <https://anaconda.org/litex-hub/magic>`__ or `from source <http://www.opencircuitdesign.com/magic/install.html>`__
+  * **NetGen 1.5.250** (LVS), install `using conda <https://anaconda.org/litex-hub/netgen>`__ or `from source <http://www.opencircuitdesign.com/netgen/install.html>`__
 
 * Sky130A PDK, install `using conda <https://anaconda.org/litex-hub/open_pdks.sky130a>`__ or `these directions  <https://github.com/ucb-bar/hammer/blob/master/hammer/technology/sky130>`__
-* `Sram22 Sky130 SRAM macros  <https://github.com/rahulk29/sram22_sky130_macros>`__ 
+* `Sram22 Sky130 SRAM macros  <https://github.com/rahulk29/sram22_sky130_macros>`__
 
   * These SRAM macros were generated using the `Sram22 SRAM generator  <https://github.com/rahulk29/sram22>`__ (still very heavily under development)
 
@@ -67,8 +68,12 @@ Note that we create a new conda environment for each tool because some of them h
 
 .. code-block:: shell
 
+    # channel settings so openroad/klayout install properly
+    conda config --set channel_priority true
+    conda config --add channels defaults
+
     # download all files for Sky130A PDK
-    conda create -c litex-hub --prefix ~/.conda-sky130 open_pdks.sky130a=1.0.399_0_g63dbde9
+    conda create -c litex-hub --prefix ~/.conda-sky130 open_pdks.sky130a=1.0.457_0_g32e8f23
     # clone the SRAM22 Sky130 SRAM macros
     git clone https://github.com/rahulk29/sram22_sky130_macros ~/sram22_sky130_macros
 
@@ -78,6 +83,10 @@ Note that we create a new conda environment for each tool because some of them h
     conda create -c litex-hub --prefix ~/.conda-klayout klayout=0.28.5_98_g87e2def28
     conda create -c litex-hub --prefix ~/.conda-signoff magic=8.3.376_0_g5e5879c netgen=1.5.250_0_g178b172
 
+    # revert conda settings
+    conda config --set channel_priority strict
+    conda config --remove channels defaults
+
 Initial Setup
 -------------
 In the Chipyard root, ensure that you have the Chipyard conda environment activated. Then, run:
@@ -86,10 +95,10 @@ In the Chipyard root, ensure that you have the Chipyard conda environment activa
 
     ./scripts/init-vlsi.sh sky130 openroad
 
-to pull and install the plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule is cloned in the ``vlsi`` folder, 
+to pull and install the plugin submodules. Note that for technologies other than ``sky130`` or ``asap7``, the tech submodule is cloned in the ``vlsi`` folder,
 and for the commercial tool flow (set up by omitting the ``openroad`` argument), the tool plugin submodules are cloned into the ``vlsi`` folder.
 
-Now navigate to the ``vlsi`` directory. The remainder of the tutorial will assume you are in this directory. 
+Now navigate to the ``vlsi`` directory. The remainder of the tutorial will assume you are in this directory.
 We will summarize a few files in this directory that will be important for the rest of the tutorial.
 
 .. code-block:: shell
@@ -118,7 +127,7 @@ Add the following YAML keys to the top of this file to specify the location of t
 example-openroad.yml
 ^^^^^^^^^^^^^^^^^^^^
 This contains the Hammer configuration for the OpenROAD tool flow.
-It selects tools for synthesis (Yosys), place and route (OpenROAD), DRC (Magic), and LVS (NetGen).
+It selects tools for synthesis (Yosys), place and route (OpenROAD), DRC (KLayout or Magic), and LVS (NetGen).
 
 Add the following YAML keys to the top of this file to specify the locations of the tool binaries.
 Note that this is not required if the tools are already on your PATH.
@@ -129,7 +138,8 @@ Note that this is not required if the tools are already on your PATH.
     # tool binary paths
     synthesis.yosys.yosys_bin: ~/.conda-yosys/bin/yosys
     par.openroad.openroad_bin: ~/.conda-openroad/bin/openroad
-    par.openroad.klayout_bin: ~/.conda-klayout/bin/klayout
+    par.openroad.klayout_bin: ~/.conda-klayout/bin/klayout  # binary that OpenROAD calls for final GDS writeout
+    drc.klayout.klayout_bin: ~/.conda-klayout/bin/klayout   # binary that runs for DRC step
     drc.magic.magic_bin: ~/.conda-signoff/bin/magic
     lvs.netgen.netgen_bin: ~/.conda-signoff/bin/netgen
 
@@ -151,8 +161,7 @@ The ``buildfile`` make target has dependencies on both (1) the Verilog that is e
 and (2) the mapping of memory instances in the design to SRAM macros;
 all files related to these two steps reside in the ``generated-src/chipyard.harness.TestHarness.TinyRocketConfig-ChipTop`` directory.
 Note that the files in ``generated-src`` vary for each tool/technology flow.
-This especially applies to the Sky130 Commercial vs OpenROAD tutorial flows 
-(due to the ``ENABLE_YOSYS_FLOW`` flag, explained below), so these flows should be run in separate
+This especially applies to the Sky130 Commercial vs OpenROAD tutorial flows, so these flows should be run in separate
 chipyard installations. If the wrong sources are generated, simply run ``make buildfile -B`` to rebuild all targets correctly.
 
 
@@ -165,7 +174,6 @@ which will cause additional variables to be set in ``tutorial.mk``, a few of whi
 * ``DESIGN_CONF`` and ``EXTRA_CONFS`` allow for additonal design-specific overrides of the Hammer IR in ``example-sky130.yml``
 * ``VLSI_OBJ_DIR=build-sky130-openroad`` gives the build directory a unique name to allow running multiple flows in the same repo. Note that for the rest of the tutorial we will still refer to this directory in file paths as ``build``, again for brevity.
 * ``VLSI_TOP`` is by default ``ChipTop``, which is the name of the top-level Verilog module generated in the Chipyard SoC configs. By instead setting ``VLSI_TOP=Rocket``, we can use the Rocket core as the top-level module for the VLSI flow, which consists only of a single RISC-V core (and no caches, peripherals, buses, etc). This is useful to run through this tutorial quickly, and does not rely on any SRAMs.
-* ``ENABLE_YOSYS_FLOW = 1`` is required for synthesis through Yosys. This reverts to the Scala FIRRTL Compiler so that unsupported multidimensional arrays are not generated in the Verilog.
 
 Running the VLSI Flow
 ---------------------
@@ -188,7 +196,7 @@ Place-and-Route
     make par tutorial=sky130-openroad
 
 Note that sometimes OpenROAD freezes on commands following the ``detailed_route`` step,
-so for now we recomment running place-and-route until the ``extraction`` step, 
+so for now we recomment running place-and-route until the ``extraction`` step,
 then re-starting the flow at this step. See the :ref:`VLSI/Sky130-OpenROAD-Tutorial:VLSI Flow Control` documentation
 below for how to break up the flow into these steps.
 
@@ -237,10 +245,14 @@ DRC & LVS
 
 As a note, this tutorial has been run extensively through commercial signoff tools,
 thus the open-source signoff flow is not stable or guaranteed to produce useful results.
-We welcome any contributions to improving both our `Magic tool plugin <https://github.com/ucb-bar/hammer/blob/master/hammer/drc/magic>`__
+We welcome any contributions to improving our  `KLayout tool plugin <https://github.com/ucb-bar/hammer/blob/master/hammer/drc/klayout>`__,
+`Magic tool plugin <https://github.com/ucb-bar/hammer/blob/master/hammer/drc/magic>`__,
 and `Netgen tool plugin <https://github.com/ucb-bar/hammer/blob/master/hammer/lvs/netgen>`__.
 
-To run DRC & LVS in Magic & Netgen, respectively:
+We recommend KLayout for DRC to produce readable results, but Magic may be selected in ``example-openroad.yml``
+by uncommenting the line ``vlsi.core.drc_tool: "hammer.drc.magic"``.
+
+To run DRC & LVS and view the results:
 
 .. code-block:: shell
 
@@ -259,7 +271,13 @@ Note that in ``sky130-openroad.yml`` we have set the following YAML keys:
 These keys cause the Hammer plugin to only generate all necessary scripts, without executing them with the respective tool.
 This is because Magic and Netgen, as of the writing of this tutorial, do not have a database format that may be loaded interactively,
 so to view the DRC/LVS results for debugging you must launch the tool interactively, then run DRC/LVS checks,
-which is done by the ``generated-scripts/view_[drc|lvs]`` scripts.
+which is done by the ``generated-scripts/view_[drc|lvs]`` scripts. This is not the case for KLayout, which does have a loadable database format.
+
+Below is the window you should see when loading the KLayout DRC results interactively. Note that most of these DRC errors are
+from special rules relating to Sky130 SRAMs, which have been verified separately. In the future the KLayout tool plugin should blackbox these
+SRAM macros by default, but this feature does not exist yet.
+
+.. image:: ../_static/images/vlsi-openroad-klayout-drc.png
 
 
 VLSI Flow Control
@@ -273,7 +291,7 @@ Firt, refer to the :ref:`VLSI/Hammer:VLSI Flow Control` documentation. The below
       make par HAMMER_EXTRA_ARGS="--stop_after_step extraction"
       make redo-par HAMMER_EXTRA_ARGS="--start_before_step extraction"
 
-      # the following two commands are equivalent because the extraction 
+      # the following two commands are equivalent because the extraction
       #   step immediately precedes the write_design step
       make redo-par HAMMER_EXTRA_ARGS="--start_after_step extraction"
       make redo-par HAMMER_EXTRA_ARGS="--start_before_step write_design"

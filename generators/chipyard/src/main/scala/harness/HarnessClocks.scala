@@ -10,7 +10,6 @@ import freechips.rocketchip.util.{ResetCatchAndSync}
 import freechips.rocketchip.prci._
 
 import chipyard.harness.{ApplyHarnessBinders, HarnessBinders, HarnessClockInstantiatorKey}
-import chipyard.iobinders.HasIOBinders
 import chipyard.clocking.{SimplePllConfiguration, ClockDividerN}
 
 

@@ -12,16 +12,11 @@ class RocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class TinyRocketConfig extends Config(
-  new chipyard.iobinders.WithDontTouchIOBinders(false) ++         // TODO FIX: Don't dontTouch the ports
+  new chipyard.harness.WithDontTouchChipTopPorts(false) ++         // TODO FIX: Don't dontTouch the ports
   new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++ // use incoherent bus topology
   new freechips.rocketchip.subsystem.WithNBanks(0) ++             // remove L2$
   new freechips.rocketchip.subsystem.WithNoMemPort ++             // remove backing memory
   new freechips.rocketchip.subsystem.With1TinyCore ++             // single tiny rocket-core
-  new chipyard.config.AbstractConfig)
-
-class SimAXIRocketConfig extends Config(
-  new chipyard.harness.WithSimAXIMem ++                     // drive the master AXI4 memory with a SimAXIMem, a 1-cycle magic memory, instead of default SimDRAM
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class QuadRocketConfig extends Config(
@@ -35,11 +30,6 @@ class Cloned64RocketConfig extends Config(
 
 class RV32RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRV32 ++            // set RocketTiles to be 32-bit
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class GB1MemoryRocketConfig extends Config(
-  new freechips.rocketchip.subsystem.WithExtMemSize((1<<30) * 1L) ++ // use 1GB simulated external memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
@@ -65,20 +55,6 @@ class L1ScratchpadRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
-// DOC include start: mbusscratchpadrocket
-class MbusScratchpadOnlyRocketConfig extends Config(
-  new testchipip.WithMbusScratchpad(banks=2, partitions=2) ++               // add 2 partitions of 2 banks mbus backing scratchpad
-  new freechips.rocketchip.subsystem.WithNoMemPort ++         // remove offchip mem port
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-// DOC include end: mbusscratchpadrocket
-
-class SbusScratchpadRocketConfig extends Config(
-  new testchipip.WithSbusScratchpad(base=0x70000000L, banks=4) ++ // add 4 banks sbus backing scratchpad
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-
 class MulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(3, 3) ++ // Add async crossings between RocketTile and uncore
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -93,33 +69,10 @@ class MulticlockRocketConfig extends Config(
   new chipyard.config.WithFbusToSbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between FBUS and SBUS
   new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
-  new testchipip.WithAsynchronousSerialSlaveCrossing ++ // Add Async crossing between serial and MBUS. Its master-side is tied to the FBUS
   new chipyard.config.AbstractConfig)
-
-// DOC include start: MulticlockAXIOverSerialConfig
-class MulticlockAXIOverSerialConfig extends Config(
-  new chipyard.config.WithSystemBusFrequency(250) ++
-  new chipyard.config.WithPeripheryBusFrequency(250) ++
-  new chipyard.config.WithMemoryBusFrequency(250) ++
-  new chipyard.config.WithFrontBusFrequency(50) ++
-  new chipyard.config.WithTileFrequency(500, Some(1)) ++
-  new chipyard.config.WithTileFrequency(250, Some(0)) ++
-
-  new chipyard.config.WithFbusToSbusCrossingType(AsynchronousCrossing()) ++
-  new testchipip.WithAsynchronousSerialSlaveCrossing ++
-  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(
-    AsynchronousCrossing().depth,
-    AsynchronousCrossing().sourceSync) ++
-
-  new chipyard.harness.WithSimAXIMemOverSerialTL ++ // add SimDRAM DRAM model for axi4 backing memory over the SerDes link, if axi4 mem is enabled
-  new testchipip.WithSerialTLBackingMemory ++       // remove axi4 mem port in favor of SerialTL memory
-
-  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++ // 1 memory channel
-  new chipyard.config.AbstractConfig)
-// DOC include end: MulticlockAXIOverSerialConfig
 
 class CustomIOChipTopRocketConfig extends Config(
+  new chipyard.example.WithBrokenOutUARTIO ++
   new chipyard.example.WithCustomChipTop ++
   new chipyard.example.WithCustomIOCells ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core

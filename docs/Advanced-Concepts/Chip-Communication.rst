@@ -183,28 +183,21 @@ This new setup (shown below) is a typical Chipyard test chip setup:
 Simulation Setup of the Example Test Chip
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To test this type of configuration (TSI/memory transactions over the serial-link), most of the same TSI collateral
-would be used.
-The main difference is that the TileLink-to-AXI converters and simulated AXI memory resides on the other side of the
-serial-link.
+The standard test-chip bringup procedure tethers the chip to a FPGA config with serialized tilelink.
 
 .. image:: ../_static/images/chip-bringup-simulation.png
 
-.. note::
-    Here the simulated AXI memory and the converters can be in a different clock domain in the test harness
-    than the reference clock of the DUT.
-    For example, the DUT can be clocked at 3.2GHz while the simulated AXI memory can be clocked at 1GHz.
-    This functionality is done in the harness binder that instantiates the TSI collateral, TL-to-AXI converters,
-    and simulated AXI memory.
-    See :ref:`Advanced-Concepts/Harness-Clocks:Creating Clocks in the Test Harness` on how to generate a clock
-    in a harness binder.
+The entire bringup procedure can be simulated using the Multi-ChipTop simulation feature, where
+one ``ChipTop`` is the design-to-be-taped-out, while the other is the FPGA bringup design.
 
-This type of simulation setup is done in the following multi-clock configuration:
+This system can be generated and simulated with the following example configuration, which marries
+a ``ChipLikeRocketConfig`` (the design to be taped-out) with the ``ChipBringupHostConfig`` (the FPGA
+bringup design).
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/ChipConfigs.scala
     :language: scala
-    :start-after: DOC include start: MulticlockAXIOverSerialConfig
-    :end-before: DOC include end: MulticlockAXIOverSerialConfig
+    :start-after: DOC include start: TetheredChipLikeRocketConfig
+    :end-before: DOC include end: TetheredChipLikeRocketConfig
 
 Softcore-driven Bringup Setup of the Example Test Chip after Tapeout
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

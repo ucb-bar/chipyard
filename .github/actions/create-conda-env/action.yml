@@ -14,12 +14,25 @@ runs:
           conda-lock install --conda $(which conda) -n ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-esp-tools ./conda-reqs/conda-lock-reqs/conda-requirements-esp-tools-linux-64.conda-lock.yml
           conda deactivate
 
-          echo "Add extra toolchain collateral to RISC-V install area"
+          echo "Add extra toolchain collateral + CIRCT to RISC-V install area"
+          git submodule update --init ./tools/install-circt
           conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
           ./scripts/build-toolchain-extra.sh riscv-tools -p $CONDA_PREFIX/riscv-tools
+          ./tools/install-circt/bin/download-release-or-nightly-circt.sh \
+              -f circt-full-shared-linux-x64.tar.gz \
+              -i $CONDA_PREFIX \
+              -v version-file \
+              -x ./conda-reqs/circt.json \
+              -g ${{ github.token }}
           conda deactivate
           conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-esp-tools
           ./scripts/build-toolchain-extra.sh esp-tools -p $CONDA_PREFIX/esp-tools
+          ./tools/install-circt/bin/download-release-or-nightly-circt.sh \
+              -f circt-full-shared-linux-x64.tar.gz \
+              -i $CONDA_PREFIX \
+              -v version-file \
+              -x ./conda-reqs/circt.json \
+              -g ${{ github.token }}
           conda deactivate
         fi
       shell: bash -leo pipefail {0}

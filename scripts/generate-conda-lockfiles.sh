@@ -13,6 +13,13 @@ fi
 for TOOLCHAIN_TYPE in riscv-tools esp-tools; do
     # note: lock file must end in .conda-lock.yml - see https://github.com/conda-incubator/conda-lock/issues/154
     LOCKFILE=$REQS_DIR/conda-lock-reqs/conda-requirements-$TOOLCHAIN_TYPE-linux-64.conda-lock.yml
+    rm -rf $LOCKFILE
 
-    conda-lock --conda $(which conda) -f "$REQS_DIR/chipyard.yaml" -f "$REQS_DIR/$TOOLCHAIN_TYPE.yaml" -p linux-64 --lockfile $LOCKFILE
+    conda-lock \
+	    --no-mamba \
+	    --no-micromamba \
+	    -f "$REQS_DIR/chipyard.yaml" \
+	    -f "$REQS_DIR/$TOOLCHAIN_TYPE.yaml" \
+	    -p linux-64 \
+	    --lockfile $LOCKFILE
 done

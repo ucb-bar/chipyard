@@ -59,8 +59,8 @@ void blkdev_write(unsigned long offset, void *addr, size_t nsectors)
 #define TEST_NSECTORS 4
 #define TEST_SIZE (TEST_NSECTORS * BLKDEV_SECTOR_SIZE / sizeof(int))
 
-unsigned int test_data[TEST_SIZE];
-unsigned int res_data[TEST_SIZE];
+unsigned int test_data[TEST_SIZE] __attribute__ ((aligned (64)));
+unsigned int res_data[TEST_SIZE]  __attribute__ ((aligned (64)));
 
 int main(void)
 {

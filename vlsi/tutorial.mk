@@ -12,6 +12,7 @@ ifeq ($(tutorial),asap7)
     TECH_CONF         ?= example-asap7.yml
     DESIGN_CONFS      ?=
     VLSI_OBJ_DIR      ?= build-asap7-commercial
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
 endif
 
 ifeq ($(tutorial),sky130-commercial)
@@ -23,6 +24,7 @@ ifeq ($(tutorial),sky130-commercial)
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/sky130-rocket.yml, )
     VLSI_OBJ_DIR      ?= build-sky130-commercial
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
 endif
 
 ifeq ($(tutorial),sky130-openroad)
@@ -36,8 +38,7 @@ ifeq ($(tutorial),sky130-openroad)
                         $(if $(filter $(VLSI_TOP),RocketTile), \
                             example-designs/sky130-openroad-rockettile.yml, )
     VLSI_OBJ_DIR      ?= build-sky130-openroad
-    # Yosys compatibility for CIRCT-generated Verilog, at the expense of elaboration time.
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
+    # Yosys compatibility for CIRCT-generated Verilog
     ENABLE_YOSYS_FLOW  = 1
 endif
-
-INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)

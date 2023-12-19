@@ -51,7 +51,7 @@ object FrequencyUtils {
     require(!requestedOutputs.contains(0.0))
     val requestedFreqs = requestedOutputs.map(_.freqMHz)
     val fastestFreq = requestedFreqs.max
-    require(fastestFreq <= maximumAllowableFreqMHz)
+    require(fastestFreq <= maximumAllowableFreqMHz, s"Fastest Freq $fastestFreq > Max Freq $maximumAllowableFreqMHz")
 
     val candidateFreqs =
       Seq.tabulate(Math.ceil(maximumAllowableFreqMHz / fastestFreq).toInt)(i => (i + 1) * fastestFreq)
@@ -91,4 +91,3 @@ class SimplePllConfiguration(
    }
    def referenceSinkParams(): ClockSinkParameters = sinkDividerMap.find(_._2 == 1).get._1
 }
-

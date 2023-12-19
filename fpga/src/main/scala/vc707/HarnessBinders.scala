@@ -11,36 +11,29 @@ import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
 import sifive.fpgashells.devices.xilinx.xilinxvc707pciex1.{HasSystemXilinxVC707PCIeX1ModuleImp, XilinxVC707PCIeX1IO}
 
 import chipyard.{CanHaveMasterTLMemPort}
-import chipyard.harness.{OverrideHarnessBinder}
+import chipyard.harness.{HarnessBinder}
+import chipyard.iobinders._
 
 /*** UART ***/
-class WithVC707UARTHarnessBinder extends OverrideHarnessBinder({
-  (system: HasPeripheryUARTModuleImp, th: BaseModule, ports: Seq[UARTPortIO]) => {
-    th match { case vc707th: VC707FPGATestHarnessImp => {
-      vc707th.vc707Outer.io_uart_bb.bundle <> ports.head
-    }}
+class WithVC707UARTHarnessBinder extends HarnessBinder({
+  case (th: VC707FPGATestHarnessImp, port: UARTPort) => {
+    th.vc707Outer.io_uart_bb.bundle <> port.io
   }
 })
 
 /*** SPI ***/
-class WithVC707SPISDCardHarnessBinder extends OverrideHarnessBinder({
-  (system: HasPeripherySPI, th: BaseModule, ports: Seq[SPIPortIO]) => {
-    th match { case vc707th: VC707FPGATestHarnessImp => {
-      vc707th.vc707Outer.io_spi_bb.bundle <> ports.head
-    }}
+class WithVC707SPISDCardHarnessBinder extends HarnessBinder({
+  case (th: VC707FPGATestHarnessImp, port: SPIPort) => {
+    th.vc707Outer.io_spi_bb.bundle <> port.io
   }
 })
 
 /*** Experimental DDR ***/
-class WithVC707DDRMemHarnessBinder extends OverrideHarnessBinder({
-  (system: CanHaveMasterTLMemPort, th: BaseModule, ports: Seq[HeterogeneousBag[TLBundle]]) => {
-    th match { case vc707th: VC707FPGATestHarnessImp => {
-      require(ports.size == 1)
-
-      val bundles = vc707th.vc707Outer.ddrClient.out.map(_._1)
-      val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
-      bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
-      ddrClientBundle <> ports.head
-    }}
+class WithVC707DDRMemHarnessBinder extends HarnessBinder({
+  case (th: VC707FPGATestHarnessImp, port: TLMemPort) => {
+    val bundles = th.vc707Outer.ddrClient.out.map(_._1)
+    val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
+    bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
+    ddrClientBundle <> port.io
   }
 })

@@ -20,4 +20,3 @@ for bmark in "${bmarks[@]}"
 do
     cp bd/src/$bmark/$bmark $BUILDDIR/
 done
-

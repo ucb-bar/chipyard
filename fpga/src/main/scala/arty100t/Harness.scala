@@ -17,7 +17,6 @@ import sifive.blocks.devices.uart._
 
 import chipyard._
 import chipyard.harness._
-import chipyard.iobinders.{HasIOBinders}
 
 class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell {
   def dp = designParameters
@@ -54,6 +53,7 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
   override lazy val module = new HarnessLikeImpl
 
   class HarnessLikeImpl extends Impl with HasHarnessInstantiators {
+    all_leds.foreach(_ := DontCare)
     clockOverlay.overlayOutput.node.out(0)._1.reset := ~resetPin
 
     val clk_100mhz = clockOverlay.overlayOutput.node.out.head._1.clock

@@ -52,6 +52,9 @@ class MMIORocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class LBWIFRocketConfig extends Config(
+  new chipyard.config.WithOffchipBusFrequency(500) ++
+  new testchipip.WithOffchipBusClient(MBUS) ++
+  new testchipip.WithOffchipBus ++
   new testchipip.WithSerialTLMem(isMainMemory=true) ++      // set lbwif memory base to DRAM_BASE, use as main memory
   new freechips.rocketchip.subsystem.WithNoMemPort ++       // remove AXI4 backing memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -79,11 +82,6 @@ class ManyPeripheralsRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
-class QuadChannelRocketConfig extends Config(
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++      // 4 AXI4 channels
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
 class UARTTSIRocketConfig extends Config(
   new chipyard.harness.WithSerialTLTiedOff ++
   new testchipip.WithUARTTSIClient ++
@@ -92,4 +90,3 @@ class UARTTSIRocketConfig extends Config(
   new chipyard.config.WithPeripheryBusFrequency(10) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
-

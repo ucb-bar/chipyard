@@ -28,7 +28,7 @@ par.openroad:
   clock_tree_resize.setup_margin: 0.0
   clock_tree_resize.hold_margin: 0.20
   global_route_resize.hold_margin: 0.60
-  clock_tree_resize.hold_max_buffer_percent: 80  
+  clock_tree_resize.hold_max_buffer_percent: 80
 
   global_placement.routing_adjustment: 0.5
   global_route.routing_adjustment: 0.3
@@ -54,8 +54,6 @@ vlsi.inputs.placement_constraints:
       bottom: 10
 
   # Place SRAM memory instances
-  # SRAM paths and configurations are slightly different due to ENABLE_YOSYS_FLOW flag
-  # data cache
   - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0_0/data_arrays_0_0_ext/mem_0_0"
     type: hardmacro
     x: 50
@@ -76,7 +74,7 @@ vlsi.inputs.placement_constraints:
     x: 50
     y: 1250
     orientation: r90
- 
+
   # tag array
   - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/frontend/icache/tag_array_0/tag_array_0_ext/mem_0_0"
     type: hardmacro

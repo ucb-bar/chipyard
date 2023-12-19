@@ -239,7 +239,7 @@ SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
 # passes $(JAVA_TOOL_OPTIONS) from env to java
 export SBT_OPTS ?= -Dsbt.ivy.home=$(base_dir)/.ivy2 -Dsbt.global.base=$(base_dir)/.sbt -Dsbt.boot.directory=$(base_dir)/.sbt/boot/ -Dsbt.color=always -Dsbt.supershell=false -Dsbt.server.forcestart=true
-SBT ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
+SBT ?= java -jar $(base_dir)/scripts/sbt-launch.jar $(SBT_OPTS)
 
 # (1) - classpath of the fat jar
 # (2) - main class
@@ -293,11 +293,12 @@ endif
 # build output directory for compilation
 #########################################################################################
 # output for all project builds
-gen_dir=$(sim_dir)/generated-src
+generated_src_name ?=generated-src
+gen_dir             =$(sim_dir)/$(generated_src_name)
 # per-project output directory
-build_dir=$(gen_dir)/$(long_name)
+build_dir           =$(gen_dir)/$(long_name)
 # final generated collateral per-project
-GEN_COLLATERAL_DIR ?= $(build_dir)/gen-collateral
+GEN_COLLATERAL_DIR ?=$(build_dir)/gen-collateral
 
 #########################################################################################
 # assembly/benchmark variables

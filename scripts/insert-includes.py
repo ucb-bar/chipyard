@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-# replaces a `include with the full include file
+# replaces a `include with the full include file.
+# recursively replaces `include's until none are left
 #
 # args
 # $1 - file to remove includes from
@@ -12,6 +13,8 @@
 import sys
 import re
 import os
+import tempfile
+import shutil
 
 inVlog = sys.argv[1]
 outVlog = sys.argv[2]
@@ -24,28 +27,52 @@ if inVlog == outVlog:
 incDirs = sys.argv[3:]
 print("[INFO] Searching following dirs for includes: " + str(incDirs))
 
-# open file
-with open(inVlog, 'r') as inFile:
-    with open(outVlog, 'w') as outFile:
-        # for each include found, search through all dirs and replace if found, error if not
-        for num, line in enumerate(inFile, 1):
+def process(inF, outF):
+    # open file
+    with open(inF, 'r') as inFile:
+        with open(outF, 'w') as outFile:
+            # for each include found, search through all dirs and replace if found, error if not
+            for num, line in enumerate(inFile, 1):
+                match = re.match(r"^ *`include +\"(.*)\"", line)
+                if match:
+                    # search for include and replace
+                    found = False
+                    for d in incDirs:
+                        potentialIncFileName = d + "/" + match.group(1)
+                        if os.path.exists(potentialIncFileName):
+                            found = True
+                            with open(potentialIncFileName, 'r') as incFile:
+                                for iline in incFile:
+                                    outFile.write(iline)
+                            break
+
+                    # must find something to include with
+                    if not found:
+                        sys.exit("[ERROR] Couldn't replace include \"" + str(match.group(1)) + "\" found on line " + str(num))
+                else:
+                    outFile.write(line)
+
+inF = inVlog
+
+while True:
+    # create a copy of the input
+    fd, temp_path = tempfile.mkstemp()
+    shutil.copy2(inF, temp_path)
+
+    with open(temp_path, 'r') as inFile:
+        anyIncludes = False
+        for line in inFile:
             match = re.match(r"^ *`include +\"(.*)\"", line)
             if match:
-                # search for include and replace
-                found = False
-                for d in incDirs:
-                    potentialIncFileName = d + "/" + match.group(1)
-                    if os.path.exists(potentialIncFileName):
-                        found = True
-                        with open(potentialIncFileName, 'r') as incFile:
-                            for iline in incFile:
-                                outFile.write(iline)
-                        break
+                anyIncludes = True
+                break
 
-                # must find something to include with
-                if not found:
-                    sys.exit("[ERROR] Couldn't replace include \"" + str(match.group(1)) + "\" found on line " + str(num))
-            else:
-                outFile.write(line)
+        if anyIncludes:
+            process(temp_path, outVlog)
+            inF = outVlog
+            os.remove(temp_path)
+        else:
+            os.remove(temp_path)
+            break
 
 print("[INFO] Success. Writing output to: " + str(outVlog))

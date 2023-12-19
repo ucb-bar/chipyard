@@ -5,6 +5,10 @@ ifndef GCC
 $(error GCC is not defined)
 endif
 
+ifndef TARGET
+$(error TARGET is not defined)
+endif
+
 libgloss_specs := htif_nano.specs
 
 # Test whether libgloss-htif is globally installed and usable

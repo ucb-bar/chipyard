@@ -22,29 +22,18 @@ vlsi.inputs.placement_constraints:
       bottom: 10
 
   # Place SRAM memory instances
-  # SRAM paths and configurations are slightly different due to ENABLE_YOSYS_FLOW flag
-  # data cache
-  - path: "RocketTile/dcache/data/data_arrays_0_0/data_arrays_0_0_ext/mem_0_0"
+    # data cache
+  - path: "RocketTile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_0"
     type: hardmacro
     x: 50
     y: 50
     orientation: r90
-  - path: "RocketTile/dcache/data/data_arrays_0_1/data_arrays_0_0_ext/mem_0_0"
+  - path: "RocketTile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_1_0"
     type: hardmacro
     x: 50
-    y: 450
+    y: 800
     orientation: r90
-  - path: "RocketTile/dcache/data/data_arrays_0_2/data_arrays_0_0_ext/mem_0_0"
-    type: hardmacro
-    x: 50
-    y: 850
-    orientation: r90
-  - path: "RocketTile/dcache/data/data_arrays_0_3/data_arrays_0_0_ext/mem_0_0"
-    type: hardmacro
-    x: 50
-    y: 1250
-    orientation: r90
- 
+
   # tag array
   - path: "RocketTile/frontend/icache/tag_array_0/tag_array_0_ext/mem_0_0"
     type: hardmacro
@@ -53,7 +42,7 @@ vlsi.inputs.placement_constraints:
     orientation: r90
 
   # instruction cache
-  - path: "RocketTile/frontend/icache/data_arrays_0_0/data_arrays_0_0_0_ext/mem_0_0"
+  - path: "RocketTile/frontend/icache/data_arrays_0_0/data_arrays_0_0_ext/mem_0_0"
     type: hardmacro
     x: 50
     y: 2100

@@ -8,7 +8,7 @@ Hammer Development and Upgrades
 If you need to develop Hammer within Chipyard or use a version of Hammer beyond the latest PyPI release, clone the `Hammer repository <https://github.com/ucb-bar/hammer>`__ somewhere else on your disk. Then:
 
 .. code-block:: shell
-    
+
     pip install -e <path/to/hammer>
 
 To bump specific plugins to their latest commits and install them, you can use the upgrade script from the Chipyard root directory, with arguments for match patterns for the plugin names:
@@ -120,7 +120,7 @@ The given example in ``UPFInputs`` corresponds to a dual-core Rocket config with
 To run the flow:
 
 .. code-block:: shell
-    
+
     cd chipyard/vlsi
     make verilog ASPECTS=chipyard.upf.ChipTopUPFAspect
 

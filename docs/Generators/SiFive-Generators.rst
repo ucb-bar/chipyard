@@ -16,7 +16,7 @@ Peripheral Devices Overview
 ``sifive-blocks`` includes multiple peripheral device generators, such as UART, SPI, PWM, JTAG, GPIO and more.
 
 These peripheral devices usually affect the memory map of the SoC, and its top-level IO as well.
-All the peripheral blocks comes with a default memory address that would not collide with each other, but if integrating multiple duplicated blocks in the SoC is needed, you will need to explicitly specify an approriate memory address for that device. 
+All the peripheral blocks comes with a default memory address that would not collide with each other, but if integrating multiple duplicated blocks in the SoC is needed, you will need to explicitly specify an approriate memory address for that device.
 
 Additionally, if the device requires top-level IOs, you will need to define a config fragment to change the top-level configuration of your SoC.
 When adding a top-level IO, you should also be aware of whether it interacts with the test-harness.
@@ -34,7 +34,7 @@ Finally, you add the relevant config fragment to the SoC config. For example:
 General Purpose I/Os (GPIO) Device
 ----------------------------------
 
-GPIO device is a periphery device provided by ``sifive-blocks``. Each general-purpose I/O port has five 32-bit configuration registers, two 32-bit data registers controlling pin input and output values, and eight 32-bit interrupt control/status register for signal level and edge triggering. In addition, all GPIOs can have two 32-bit alternate function selection registers. 
+GPIO device is a periphery device provided by ``sifive-blocks``. Each general-purpose I/O port has five 32-bit configuration registers, two 32-bit data registers controlling pin input and output values, and eight 32-bit interrupt control/status register for signal level and edge triggering. In addition, all GPIOs can have two 32-bit alternate function selection registers.
 
 
 GPIO main features
@@ -67,7 +67,7 @@ Including GPIO in the SoC
       //   Set up Memory Devices
       // ==================================
       // ...
-      
+
       // Peripheral section
       new chipyard.config.WithGPIO(address = 0x10010000, width = 32) ++
 
@@ -115,7 +115,7 @@ Including UART in the SoC
       //   Set up Memory Devices
       // ==================================
       // ...
-      
+
       // Peripheral section
       new chipyard.config.WithUART(address = 0x10020000, baudrate = 115200) ++
 
@@ -125,7 +125,7 @@ Including UART in the SoC
 Inter-Integrated Circuit (I2C) Interface Device
 -------------------------------------------------
 
-I2C device is a periphery device provided by ``sifive-blocks``. The I2C (inter-integrated circuit) bus interface handles communications to the serial I2C bus. It provides multi-master capability, and controls all I2C bus-specific sequencing, protocol, arbitration and timing. It supports Standard-mode (Sm), Fast-mode (Fm) and Fast-mode Plus (Fm+). 
+I2C device is a periphery device provided by ``sifive-blocks``. The I2C (inter-integrated circuit) bus interface handles communications to the serial I2C bus. It provides multi-master capability, and controls all I2C bus-specific sequencing, protocol, arbitration and timing. It supports Standard-mode (Sm), Fast-mode (Fm) and Fast-mode Plus (Fm+).
 
 
 I2C main features
@@ -158,7 +158,7 @@ Including I2C in the SoC
       //   Set up Memory Devices
       // ==================================
       // ...
-      
+
       // Peripheral section
       new chipyard.config.WithI2C(address = 0x10040000) ++
 
@@ -169,9 +169,9 @@ Including I2C in the SoC
 Serial Peripheral Interface (SPI) Device
 -------------------------------------------------
 
-SPI device is a periphery device provided by ``sifive-blocks``. The SPI interface can be used to communicate with external devices using the SPI protocol. 
+SPI device is a periphery device provided by ``sifive-blocks``. The SPI interface can be used to communicate with external devices using the SPI protocol.
 
-The serial peripheral interface (SPI) protocol supports half-duplex, full-duplex and simplex synchronous, serial communication with external devices. The interface can be configured as master and in this case it provides the communication clock (SCLK) to the external slave device. 
+The serial peripheral interface (SPI) protocol supports half-duplex, full-duplex and simplex synchronous, serial communication with external devices. The interface can be configured as master and in this case it provides the communication clock (SCLK) to the external slave device.
 
 
 SPI main features
@@ -208,7 +208,7 @@ Including SPI in the SoC
       //   Set up Memory Devices
       // ==================================
       // ...
-      
+
       // Peripheral section
       new chipyard.config.WithSPI(address = 0x10031000) ++
 

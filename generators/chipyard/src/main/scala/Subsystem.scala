@@ -24,12 +24,12 @@ import freechips.rocketchip.amba.axi4._
 import boom.common.{BoomTile}
 
 
-import testchipip.{DromajoHelper, CanHavePeripheryTLSerial, SerialTLKey}
+import testchipip.{CanHavePeripheryTLSerial, SerialTLKey}
 
 trait CanHaveHTIF { this: BaseSubsystem =>
   // Advertise HTIF if system can communicate with fesvr
   if (this match {
-    case _: CanHavePeripheryTLSerial if p(SerialTLKey).nonEmpty => true
+    case _: CanHavePeripheryTLSerial if (p(SerialTLKey).size != 0) => true
     case _: HasPeripheryDebug if (!p(DebugModuleKey).isEmpty && p(ExportDebug).dmi) => true
     case _ => false
   }) {
@@ -124,7 +124,4 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
 class ChipyardSubsystemModuleImp[+L <: ChipyardSubsystem](_outer: L) extends BaseSubsystemModuleImp(_outer)
   with HasTilesModuleImp
 {
-  // Generate C header with relevant information for Dromajo
-  // This is included in the `dromajo_params.h` header file
-  DromajoHelper.addArtefacts(InSubsystem)
 }

@@ -305,7 +305,7 @@ module SpikeBlackBox #(
    wire                                                    __tcm_d_ready;
    bit                                                     __tcm_d_valid;
    longint                                                 __tcm_d_data;
-   
+
    reg                                                     __tcm_d_valid_reg;
    reg [63:0]                                              __tcm_d_data_reg;
 
@@ -323,8 +323,6 @@ module SpikeBlackBox #(
    longint                                                 __accel_d_rd;
    longint                                                 __accel_d_result;
    
-
-
    always @(posedge clock) begin
       if (reset) begin
          __insns_retired = 64'h0;

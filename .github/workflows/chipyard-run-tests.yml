@@ -62,14 +62,45 @@ jobs:
               - '**/.gitignore'
               - '.github/ISSUE_TEMPLATE/**'
 
+  create-conda-env-as4:
+    name: create-conda-env-as4
+    needs: [change-filters, cancel-prior-workflows]
+    if: needs.change-filters.outputs.needs-rtl == 'true'
+    runs-on: as4
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Cleanup conda
+        uses: ./.github/actions/cleanup-conda
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+
+  # Sentinel job to simplify how we specify which that basic setup is complete
+  #
+  # When adding new prep jobs, please add them to `needs` below
+  setup-complete:
+    name: setup-complete
+    needs: [create-conda-env-as4]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up complete
+        run: echo Set up is complete!
+
+  ##########################################################################
+
   commit-on-master-check:
     name: commit-on-master-check
-    needs: change-filters
+    needs: [setup-complete]
     if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-ci-image:3f9150
-      options: --entrypoint /bin/bash
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -90,12 +121,9 @@ jobs:
 
   tutorial-setup-check:
     name: tutorial-setup-check
-    needs: change-filters
+    needs: [setup-complete]
     if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-ci-image:3f9150
-      options: --entrypoint /bin/bash
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -116,11 +144,8 @@ jobs:
 
   documentation-check:
     name: documentation-check
-    needs: change-filters
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-ci-image:3f9150
-      options: --entrypoint /bin/bash
+    needs: [setup-complete]
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -144,12 +169,9 @@ jobs:
 
   build-extra-tests:
     name: build-extra-tests
-    needs: [change-filters]
+    needs: [setup-complete]
     if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: ubuntu-latest
-    container:
-      image: ucbbar/chipyard-ci-image:3f9150
-      options: --entrypoint /bin/bash
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -178,65 +200,10 @@ jobs:
             conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
             .github/scripts/build-extra-tests.sh
 
-  create-conda-env-jktgz:
-    name: create-conda-env-jktgz
-    needs: [change-filters, cancel-prior-workflows]
-    if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: jktgz
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Cleanup conda
-        uses: ./.github/actions/cleanup-conda
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-
-  create-conda-env-jktqos:
-    name: create-conda-env-jktqos
-    needs: [change-filters, cancel-prior-workflows]
-    if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: jktqos
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Cleanup conda
-        uses: ./.github/actions/cleanup-conda
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-
-  # Sentinel job to simplify how we specify which that basic setup is complete
-  #
-  # When adding new prep jobs, please add them to `needs` below
-  setup-complete:
-    name: setup-complete
-    needs: [create-conda-env-jktgz, create-conda-env-jktqos, build-extra-tests]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up complete
-        run: echo Set up is complete!
-
-  ##########################################################################
-
   prepare-chipyard-cores:
     name: prepare-chipyard-cores
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -258,7 +225,7 @@ jobs:
   prepare-chipyard-constellation:
     name: prepare-chipyard-constellation
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -280,7 +247,7 @@ jobs:
   prepare-chipyard-peripherals:
     name: prepare-chipyard-peripherals
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -302,7 +269,7 @@ jobs:
   prepare-chipyard-accels:
     name: prepare-chipyard-accels
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -324,7 +291,7 @@ jobs:
   prepare-chipyard-tracegen:
     name: prepare-chipyard-tracegen
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -346,7 +313,7 @@ jobs:
   prepare-chipyard-other:
     name: prepare-chipyard-other
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -368,7 +335,7 @@ jobs:
   prepare-chipyard-fpga:
     name: prepare-chipyard-fpga
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -393,7 +360,7 @@ jobs:
   chipyard-spike-gemmini-run-tests:
     name: chipyard-spike-gemmini-run-tests
     needs: prepare-chipyard-accels # technically doesn't depend on RTL but should be after the build.sh for Gemmini
-    runs-on: jktqos
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -422,7 +389,7 @@ jobs:
   chipyard-rocket-run-tests:
     name: chipyard-rocket-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -445,7 +412,7 @@ jobs:
   chipyard-prefetchers-run-tests:
     name: chipyard-prefetchers-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -468,7 +435,7 @@ jobs:
   chipyard-hetero-run-tests:
     name: chipyard-hetero-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -491,7 +458,7 @@ jobs:
   chipyard-boom-run-tests:
     name: chipyard-boom-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -514,7 +481,7 @@ jobs:
   chipyard-shuttle-run-tests:
     name: chipyard-shuttle-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -537,7 +504,7 @@ jobs:
   chipyard-cva6-run-tests:
     name: chipyard-cva6-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -560,7 +527,7 @@ jobs:
   chipyard-ibex-run-tests:
     name: chipyard-ibex-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -583,7 +550,7 @@ jobs:
   chipyard-sodor-run-tests:
     name: chipyard-sodor-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -606,7 +573,7 @@ jobs:
   chipyard-spike-run-tests:
     name: chipyard-spike-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -629,7 +596,7 @@ jobs:
   chipyard-dmirocket-run-tests:
     name: chipyard-dmirocket-run-tests
     needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -652,7 +619,7 @@ jobs:
   chipyard-dmiboom-run-tests:
     name: chipyard-dmiboom-run-tests
     needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -675,7 +642,7 @@ jobs:
   chipyard-spiflashwrite-run-tests:
     name: chipyard-spiflashwrite-run-tests
     needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -698,7 +665,7 @@ jobs:
   chipyard-manyperipherals-run-tests:
     name: chipyard-manyperipherals-run-tests
     needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -721,7 +688,7 @@ jobs:
   chipyard-tethered-run-tests:
     name: chipyard-tethered-run-tests
     needs: prepare-chipyard-peripherals
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -744,7 +711,7 @@ jobs:
   chipyard-sha3-run-tests:
     name: chipyard-sha3-run-tests
     needs: prepare-chipyard-accels
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -767,7 +734,7 @@ jobs:
   chipyard-gemmini-run-tests:
     name: chipyard-gemmini-run-tests
     needs: prepare-chipyard-accels
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -790,7 +757,7 @@ jobs:
   chipyard-manymmioaccels-run-tests:
     name: chipyard-manymmioaccels-run-tests
     needs: prepare-chipyard-accels
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -813,7 +780,7 @@ jobs:
   # chipyard-nvdla-run-tests:
   #   name: chipyard-nvdla-run-tests
   #   needs: prepare-chipyard-accels
-  #   runs-on: self-hosted
+  #   runs-on: as4
   #   steps:
   #     - name: Delete old checkout
   #       run: |
@@ -836,7 +803,7 @@ jobs:
   chipyard-mempress-run-tests:
     name: chipyard-mempress-run-tests
     needs: prepare-chipyard-accels
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -860,7 +827,7 @@ jobs:
   tracegen-boom-run-tests:
     name: tracegen-boom-run-tests
     needs: prepare-chipyard-tracegen
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -883,7 +850,7 @@ jobs:
   tracegen-run-tests:
     name: tracegen-run-tests
     needs: prepare-chipyard-tracegen
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -906,7 +873,7 @@ jobs:
   icenet-run-tests:
     name: icenet-run-tests
     needs: prepare-chipyard-other
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -929,7 +896,7 @@ jobs:
   testchipip-run-tests:
     name: testchipip-run-tests
     needs: prepare-chipyard-other
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -952,7 +919,7 @@ jobs:
   rocketchip-run-tests:
     name: rocketchip-run-tests
     needs: prepare-chipyard-other
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -991,7 +958,7 @@ jobs:
   constellation-run-tests:
     name: constellation-run-tests
     needs: prepare-chipyard-other
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -1014,7 +981,7 @@ jobs:
   chipyard-constellation-run-tests:
     name: chipyard-constellation-run-tests
     needs: prepare-chipyard-constellation
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -1038,7 +1005,7 @@ jobs:
   firesim-run-tests:
     name: firesim-run-tests
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
@@ -1062,7 +1029,7 @@ jobs:
   fireboom-run-tests:
     name: fireboom-run-tests
     needs: setup-complete
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
