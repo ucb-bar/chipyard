@@ -38,6 +38,7 @@ dependencies:
     - coreutils
     - jq
     - pip
+    - gxx_linux-64
 
     # firemarshal deps
     - qemu # from ucb-bar channel - https://github.com/ucb-bar/qemu-feedstock
