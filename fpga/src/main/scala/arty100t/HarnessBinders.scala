@@ -113,4 +113,27 @@ class WithArty100TUART(rxdPin: String = "A9", txdPin: String = "D10") extends Ha
 })
 
 // Maps the UART device to PMOD JD pins 3/7
-class WithArty100TPMODUART extends WithArty100TUART("E2", "F4")
+class WithArty100TPMODUART extends WithArty100TUART("G2", "F3")
+
+class WithArty100TJTAG extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: JTAGPort) => {
+    val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
+    val harnessIO = IO(chiselTypeOf(port.io)).suggestName("jtag")
+    harnessIO <> port.io
+
+    ath.sdc.addClock("JTCK", IOPin(harnessIO.TCK), 10)
+    ath.sdc.addGroup(clocks = Seq("JTCK"))
+    ath.xdc.clockDedicatedRouteFalse(IOPin(harnessIO.TCK))
+    val packagePinsWithPackageIOs = Seq(
+      ("F4", IOPin(harnessIO.TCK)),
+      ("D2", IOPin(harnessIO.TMS)),
+      ("E2", IOPin(harnessIO.TDI)),
+      ("D4", IOPin(harnessIO.TDO))
+    )
+    packagePinsWithPackageIOs foreach { case (pin, io) => {
+      ath.xdc.addPackagePin(io, pin)
+      ath.xdc.addIOStandard(io, "LVCMOS33")
+      ath.xdc.addPullup(io)
+    } }
+  }
+})

@@ -27,6 +27,7 @@ class WithArty100TTweaks(freqMHz: Double = 50) extends Config(
   new WithArty100TPMODUART ++
   new WithArty100TUARTTSI ++
   new WithArty100TDDRTL ++
+  new WithArty100TJTAG ++
   new WithNoDesignKey ++
   new testchipip.WithUARTTSIClient ++
   new chipyard.harness.WithSerialTLTiedOff ++
@@ -39,7 +40,6 @@ class WithArty100TTweaks(freqMHz: Double = 50) extends Config(
   new chipyard.config.WithOffchipBusFrequency(freqMHz) ++
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
-  new chipyard.config.WithNoDebug ++ // no jtag
   new chipyard.config.WithTLBackingMemory ++ // FPGA-shells converts the AXI to TL for us
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(256) << 20) ++ // 256mb on ARTY
   new freechips.rocketchip.subsystem.WithoutTLMonitors)
