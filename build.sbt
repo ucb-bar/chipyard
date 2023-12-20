@@ -245,6 +245,7 @@ lazy val rocc_acc_utils = (project in file("generators/rocc-acc-utils"))
   .settings(commonSettings)
 
 lazy val uciedigital = freshProject("uciedigital",  file("generators/uciedigital"))
+  .dependsOn(rocketchip)
   .settings(chiselSettings)
   .settings(commonSettings)
 
