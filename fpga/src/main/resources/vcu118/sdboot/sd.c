@@ -25,7 +25,7 @@
 #define F_CLK 		(TL_CLK)
 
 // SPI SCLK frequency, in kHz
-#define SPI_CLK 	1250
+#define SPI_CLK 	25000 // 1250
 
 // SPI clock divisor value
 // @see https://ucb-bar.gitbook.io/baremetal-ide/baremetal-ide/using-peripheral-devices/sifive-ips/serial-peripheral-interface-spi
