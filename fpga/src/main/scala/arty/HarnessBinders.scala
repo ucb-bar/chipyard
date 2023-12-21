@@ -15,19 +15,19 @@ import chipyard.harness.{HarnessBinder}
 import chipyard.iobinders._
 
 class WithArtyDebugResetHarnessBinder extends HarnessBinder({
-  case (th: ArtyFPGATestHarness, port: DebugResetPort) => {
+  case (th: Arty35THarness, port: DebugResetPort) => {
     th.dut_ndreset := port.io // Debug module reset
   }
 })
 
 class WithArtyJTAGResetHarnessBinder extends HarnessBinder({
-  case (th: ArtyFPGATestHarness, port: JTAGResetPort) => {
+  case (th: Arty35THarness, port: JTAGResetPort) => {
     port.io := PowerOnResetFPGAOnly(th.clock_32MHz) // JTAG module reset
   }
 })
 
 class WithArtyJTAGHarnessBinder extends HarnessBinder({
-  case (th: ArtyFPGATestHarness, port: JTAGPort) => {
+  case (th: Arty35THarness, port: JTAGPort) => {
     val jtag_wire = Wire(new JTAGIO)
     jtag_wire.TDO.data := port.io.TDO
     jtag_wire.TDO.driven := true.B
@@ -62,7 +62,7 @@ class WithArtyJTAGHarnessBinder extends HarnessBinder({
 })
 
 class WithArtyUARTHarnessBinder extends HarnessBinder({
-  case (th: ArtyFPGATestHarness, port: UARTPort) => {
+  case (th: Arty35THarness, port: UARTPort) => {
     withClockAndReset(th.clock_32MHz, th.ck_rst) {
       IOBUF(th.uart_rxd_out,  port.io.txd)
       port.io.rxd := IOBUF(th.uart_txd_in)
