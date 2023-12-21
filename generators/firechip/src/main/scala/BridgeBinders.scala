@@ -15,6 +15,7 @@ import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
 import freechips.rocketchip.util.{ResetCatchAndSync}
 import sifive.blocks.devices.uart._
 
+import testchipip.serdes.{ExternallySyncSerialIO}
 import testchipip.tsi.{SerialRAM}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 
@@ -67,18 +68,21 @@ class WithFireSimIOCellModels extends Config((site, here, up) => {
 
 class WithTSIBridgeAndHarnessRAMOverSerialTL extends HarnessBinder({
   case (th: FireSim, port: SerialTLPort) => {
-    val bits = port.io.bits
-    port.io.clock := th.harnessBinderClock
-    val ram = LazyModule(new SerialRAM(port.serdesser, port.params)(port.serdesser.p))
-    Module(ram.module)
-    ram.module.io.ser <> port.io.bits
+    port.io match {
+      case io: ExternallySyncSerialIO => {
+        io.clock_in := th.harnessBinderClock
+        val ram = Module(LazyModule(new SerialRAM(port.serdesser, port.params)(port.serdesser.p)).module)
+        ram.io.ser.in <> io.out
+        io.in <> ram.io.ser.out
 
-    // This assumes that:
-    // If ExtMem for the target is defined, then FASED bridge will be attached
-    // If FASED bridge is attached, loadmem widget is present
-    val hasMainMemory = th.chipParameters(th.p(MultiChipIdx))(ExtMem).isDefined
-    val mainMemoryName = Option.when(hasMainMemory)(MainMemoryConsts.globalName(th.p(MultiChipIdx)))
-    TSIBridge(th.harnessBinderClock, ram.module.io.tsi.get, mainMemoryName, th.harnessBinderReset.asBool)(th.p)
+        // This assumes that:
+        // If ExtMem for the target is defined, then FASED bridge will be attached
+        // If FASED bridge is attached, loadmem widget is present
+        val hasMainMemory = th.chipParameters(th.p(MultiChipIdx))(ExtMem).isDefined
+        val mainMemoryName = Option.when(hasMainMemory)(MainMemoryConsts.globalName(th.p(MultiChipIdx)))
+        TSIBridge(th.harnessBinderClock, ram.io.tsi.get, mainMemoryName, th.harnessBinderReset.asBool)(th.p)
+      }
+    }
   }
 })
 

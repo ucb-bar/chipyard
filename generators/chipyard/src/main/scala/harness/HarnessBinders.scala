@@ -17,7 +17,7 @@ import testchipip.tsi.{SimTSI, SerialRAM, TSI, TSIIO}
 import testchipip.soc.{TestchipSimDTM}
 import testchipip.spi.{SimSPIFlashModel}
 import testchipip.uart.{UARTAdapter, UARTToSerial}
-import testchipip.serdes.{SerialWidthAdapter}
+import testchipip.serdes._
 import testchipip.iceblk.{SimBlockDevice, BlockDeviceModel}
 import testchipip.cosim.{SpikeCosim}
 import icenet.{NicLoopback, SimNetwork}
@@ -207,33 +207,41 @@ class WithTiedOffDMI extends HarnessBinder({
 
 class WithSerialTLTiedOff extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: SerialTLPort) => {
-    if (DataMirror.directionOf(port.io.clock) == Direction.Input) {
-      port.io.clock := false.B.asClock
+    port.io match {
+      case io: DecoupledSerialIO => io.out.ready := false.B; io.in.valid := false.B; io.in.bits := DontCare;
     }
-    port.io.bits.out.ready := false.B
-    port.io.bits.in.valid := false.B
-    port.io.bits.in.bits := DontCare
+    port.io match {
+      case io: LocallySyncSerialIO =>
+      case io: ExternallySyncSerialIO => io.clock_in := false.B.asClock
+    }
   }
 })
 
 class WithSimTSIOverSerialTL extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: SerialTLPort) => {
-    val bits = port.io.bits
-    if (DataMirror.directionOf(port.io.clock) == Direction.Input) {
-      port.io.clock := th.harnessBinderClock
+    port.io match {
+      case io: LocallySyncSerialIO =>
+      case io: ExternallySyncSerialIO => io.clock_in := false.B.asClock
     }
-    val ram = LazyModule(new SerialRAM(port.serdesser, port.params)(port.serdesser.p))
-    Module(ram.module)
-    ram.module.io.ser <> port.io.bits
-    val tsi = Module(new SimTSI)
-    tsi.io.clock := th.harnessBinderClock
-    tsi.io.reset := th.harnessBinderReset
-    tsi.io.tsi <> ram.module.io.tsi.get
-    val exit = tsi.io.exit
-    val success = exit === 1.U
-    val error = exit >= 2.U
-    assert(!error, "*** FAILED *** (exit code = %d)\n", exit >> 1.U)
-    when (success) { th.success := true.B }
+
+    port.io match {
+      case io: DecoupledSerialIO => {
+        // If the port is locally synchronous (provides a clock), drive everything with that clock
+        // Else, drive everything with the harnes clock
+        val clock = port.io match {
+          case io: LocallySyncSerialIO => io.clock_out
+          case io: ExternallySyncSerialIO => th.harnessBinderClock
+        }
+        withClock(clock) {
+          val ram = Module(LazyModule(new SerialRAM(port.serdesser, port.params)(port.serdesser.p)).module)
+          ram.io.ser.in <> io.out
+          io.in <> ram.io.ser.out
+
+          val success = SimTSI.connect(ram.io.tsi, clock, th.harnessBinderReset)
+          when (success) { th.success := true.B }
+        }
+      }
+    }
   }
 })
 

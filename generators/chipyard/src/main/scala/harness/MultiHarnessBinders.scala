@@ -10,7 +10,7 @@ import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.util._
 
-import testchipip._
+import testchipip.serdes._
 
 import chipyard._
 import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, HasChipyardPorts, Port, SerialTLPort}
@@ -60,11 +60,14 @@ class WithMultiChipSerialTL(chip0: Int, chip1: Int, chip0portId: Int = 0, chip1p
   (p0: SerialTLPort) => p0.portId == chip0portId,
   (p1: SerialTLPort) => p1.portId == chip1portId,
   (th: HasHarnessInstantiators, p0: SerialTLPort, p1: SerialTLPort) => {
-    (DataMirror.directionOf(p0.io.clock), DataMirror.directionOf(p1.io.clock)) match {
-      case (Direction.Input, Direction.Output) => p0.io.clock := p1.io.clock
-      case (Direction.Output, Direction.Input) => p1.io.clock := p0.io.clock
+    def connectDecoupledSyncSerialIO(clkSource: LocallySyncSerialIO, clkSink: ExternallySyncSerialIO) = {
+      clkSink.clock_in := clkSource.clock_out
+      clkSink.in <> clkSource.out
+      clkSource.in <> clkSink.out
     }
-    p0.io.bits.in <> p1.io.bits.out
-    p1.io.bits.in <> p0.io.bits.out
+    (p0.io, p1.io) match {
+      case (io0: LocallySyncSerialIO   , io1: ExternallySyncSerialIO) => connectDecoupledSyncSerialIO(io0, io1)
+      case (io0: ExternallySyncSerialIO, io1: LocallySyncSerialIO)    => connectDecoupledSyncSerialIO(io1, io0)
+    }
   }
 )

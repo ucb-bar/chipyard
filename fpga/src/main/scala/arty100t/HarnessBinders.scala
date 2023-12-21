@@ -19,6 +19,7 @@ import sifive.fpgashells.clocks._
 import chipyard._
 import chipyard.harness._
 import chipyard.iobinders._
+import testchipip.serdes._
 
 class WithArty100TUARTTSI extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: UARTTSIPort) => {
@@ -48,36 +49,47 @@ class WithArty100TSerialTLToGPIO extends HarnessBinder({
     val artyTh = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     val harnessIO = IO(chiselTypeOf(port.io)).suggestName("serial_tl")
     harnessIO <> port.io
-    val clkIO = IOPin(harnessIO.clock)
-    val packagePinsWithPackageIOs = Seq(
-      ("G13", clkIO),
-      ("B11", IOPin(harnessIO.bits.out.valid)),
-      ("A11", IOPin(harnessIO.bits.out.ready)),
-      ("D12", IOPin(harnessIO.bits.in.valid)),
-      ("D13", IOPin(harnessIO.bits.in.ready)),
-      ("B18", IOPin(harnessIO.bits.out.bits, 0)),
-      ("A18", IOPin(harnessIO.bits.out.bits, 1)),
-      ("K16", IOPin(harnessIO.bits.out.bits, 2)),
-      ("E15", IOPin(harnessIO.bits.out.bits, 3)),
-      ("E16", IOPin(harnessIO.bits.in.bits, 0)),
-      ("D15", IOPin(harnessIO.bits.in.bits, 1)),
-      ("C15", IOPin(harnessIO.bits.in.bits, 2)),
-      ("J17", IOPin(harnessIO.bits.in.bits, 3))
-    )
-    packagePinsWithPackageIOs foreach { case (pin, io) => {
-      artyTh.xdc.addPackagePin(io, pin)
-      artyTh.xdc.addIOStandard(io, "LVCMOS33")
-    }}
 
-    // Don't add IOB to the clock, if its an input
-    if (DataMirror.directionOf(port.io.clock) == Direction.Input) {
-      packagePinsWithPackageIOs foreach { case (pin, io) => {
-        artyTh.xdc.addIOB(io)
-      }}
+    harnessIO match {
+      case io: DecoupledSerialIO => {
+        val clkIO = io match {
+          case io: LocallySyncSerialIO => IOPin(io.clock_out)
+          case io: ExternallySyncSerialIO => IOPin(io.clock_in)
+        }
+        val packagePinsWithPackageIOs = Seq(
+          ("G13", clkIO),
+          ("B11", IOPin(io.out.valid)),
+          ("A11", IOPin(io.out.ready)),
+          ("D12", IOPin(io.in.valid)),
+          ("D13", IOPin(io.in.ready)),
+          ("B18", IOPin(io.out.bits, 0)),
+          ("A18", IOPin(io.out.bits, 1)),
+          ("K16", IOPin(io.out.bits, 2)),
+          ("E15", IOPin(io.out.bits, 3)),
+          ("E16", IOPin(io.in.bits, 0)),
+          ("D15", IOPin(io.in.bits, 1)),
+          ("C15", IOPin(io.in.bits, 2)),
+          ("J17", IOPin(io.in.bits, 3))
+        )
+        packagePinsWithPackageIOs foreach { case (pin, io) => {
+          artyTh.xdc.addPackagePin(io, pin)
+          artyTh.xdc.addIOStandard(io, "LVCMOS33")
+        }}
+
+        // Don't add IOB to the clock, if its an input
+        io match {
+          case io: LocallySyncSerialIO => packagePinsWithPackageIOs foreach { case (pin, io) => {
+            artyTh.xdc.addIOB(io)
+          }}
+          case io: ExternallySyncSerialIO => packagePinsWithPackageIOs.drop(1).foreach { case (pin, io) => {
+            artyTh.xdc.addIOB(io)
+          }}
+        }
+
+        artyTh.sdc.addClock("ser_tl_clock", clkIO, 100)
+        artyTh.sdc.addGroup(pins = Seq(clkIO))
+        artyTh.xdc.clockDedicatedRouteFalse(clkIO)
+      }
     }
-
-    artyTh.sdc.addClock("ser_tl_clock", clkIO, 100)
-    artyTh.sdc.addGroup(pins = Seq(clkIO))
-    artyTh.xdc.clockDedicatedRouteFalse(clkIO)
   }
 })
