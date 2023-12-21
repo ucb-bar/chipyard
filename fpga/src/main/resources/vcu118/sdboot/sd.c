@@ -25,7 +25,9 @@
 #define F_CLK 		(TL_CLK)
 
 // SPI SCLK frequency, in kHz
-#define SPI_CLK 	25000 // 1250
+// We are using the 25MHz High Speed mode. If this speed is not supported by the
+// SD card, consider changing to the Default Speed mode (12.5 MHz).
+#define SPI_CLK 	25000
 
 // SPI clock divisor value
 // @see https://ucb-bar.gitbook.io/baremetal-ide/baremetal-ide/using-peripheral-devices/sifive-ips/serial-peripheral-interface-spi
