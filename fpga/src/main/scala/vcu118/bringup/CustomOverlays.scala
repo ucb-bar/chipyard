@@ -13,7 +13,7 @@ import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.clocks._
 import sifive.fpgashells.devices.xilinx.xilinxvcu118mig.{XilinxVCU118MIGPads, XilinxVCU118MIGParams, XilinxVCU118MIG}
 
-import testchipip.{TSIHostWidgetIO}
+import testchipip.tsi.{TSIHostWidgetIO}
 
 import chipyard.fpga.vcu118.{FMCPMap}
 

@@ -15,7 +15,7 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
 
-import testchipip.{PeripheryTSIHostKey, TSIHostParams, TSIHostSerdesParams}
+import testchipip.tsi.{PeripheryTSIHostKey, TSIHostParams, TSIHostSerdesParams}
 
 import chipyard.{BuildSystem}
 
