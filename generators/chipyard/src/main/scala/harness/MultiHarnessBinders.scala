@@ -60,14 +60,14 @@ class WithMultiChipSerialTL(chip0: Int, chip1: Int, chip0portId: Int = 0, chip1p
   (p0: SerialTLPort) => p0.portId == chip0portId,
   (p1: SerialTLPort) => p1.portId == chip1portId,
   (th: HasHarnessInstantiators, p0: SerialTLPort, p1: SerialTLPort) => {
-    def connectDecoupledSyncSerialIO(clkSource: LocallySyncSerialIO, clkSink: ExternallySyncSerialIO) = {
+    def connectDecoupledSyncSerialIO(clkSource: InternalSyncSerialIO, clkSink: ExternalSyncSerialIO) = {
       clkSink.clock_in := clkSource.clock_out
       clkSink.in <> clkSource.out
       clkSource.in <> clkSink.out
     }
     (p0.io, p1.io) match {
-      case (io0: LocallySyncSerialIO   , io1: ExternallySyncSerialIO) => connectDecoupledSyncSerialIO(io0, io1)
-      case (io0: ExternallySyncSerialIO, io1: LocallySyncSerialIO)    => connectDecoupledSyncSerialIO(io1, io0)
+      case (io0: InternalSyncSerialIO, io1: ExternalSyncSerialIO) => connectDecoupledSyncSerialIO(io0, io1)
+      case (io0: ExternalSyncSerialIO, io1: InternalSyncSerialIO) => connectDecoupledSyncSerialIO(io1, io0)
     }
   }
 )

@@ -11,7 +11,7 @@ import freechips.rocketchip.util.{PlusArg}
 import freechips.rocketchip.subsystem.{CacheBlockBytes}
 import freechips.rocketchip.devices.debug.{SimJTAG}
 import freechips.rocketchip.jtag.{JTAGIO}
-import testchipip.serdes.{SerialTLKey, LocallySyncSerialIO, ExternallySyncSerialIO}
+import testchipip.serdes._
 import testchipip.uart.{UARTAdapter}
 import testchipip.dram.{SimDRAM}
 import testchipip.tsi.{TSIHarness, SimTSI, SerialRAM}
@@ -48,23 +48,26 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
 
   // Figure out which clock drives the harness TLSerdes, based on the port type
   val serial_ram_clock = dut.serial_tl_pad match {
-    case io: LocallySyncSerialIO => io.clock_out
-    case io: ExternallySyncSerialIO => clock
+    case io: InternalSyncSerialIO => io.clock_out
+    case io: ExternalSyncSerialIO => clock
+  }
+  dut.serial_tl_pad match {
+    case io: ExternalSyncSerialIO => io.clock_in := clock
+    case io: InternalSyncSerialIO =>
   }
 
-  withClockAndReset(serial_ram_clock, reset) {
-    dut.serial_tl_pad match {
-      case io: ExternallySyncSerialIO => io.clock_in := clock
-      case io: LocallySyncSerialIO =>
+  dut.serial_tl_pad match {
+    case pad: DecoupledSerialIO => {
+      withClockAndReset(serial_ram_clock, reset) {
+        // SerialRAM implements the memory regions the chip expects
+        val ram = Module(LazyModule(new SerialRAM(lazyDut.system.serdessers(0), p(SerialTLKey)(0))).module)
+        ram.io.ser.in <> pad.out
+        pad.in <> ram.io.ser.out
+
+        // Allow TSI to master the chip
+        io.success := SimTSI.connect(ram.io.tsi, serial_ram_clock, reset)
+      }
     }
-
-    // SerialRAM implements the memory regions the chip expects
-    val ram = Module(LazyModule(new SerialRAM(lazyDut.system.serdessers(0), p(SerialTLKey)(0))).module)
-    ram.io.ser.in <> dut.serial_tl_pad.out
-    dut.serial_tl_pad.in <> ram.io.ser.out
-
-    // Allow TSI to master the chip
-    io.success := SimTSI.connect(ram.io.tsi, serial_ram_clock, reset)
   }
 
   // JTAG

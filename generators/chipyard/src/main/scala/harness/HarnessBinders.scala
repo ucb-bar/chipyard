@@ -211,8 +211,8 @@ class WithSerialTLTiedOff extends HarnessBinder({
       case io: DecoupledSerialIO => io.out.ready := false.B; io.in.valid := false.B; io.in.bits := DontCare;
     }
     port.io match {
-      case io: LocallySyncSerialIO =>
-      case io: ExternallySyncSerialIO => io.clock_in := false.B.asClock
+      case io: InternalSyncSerialIO =>
+      case io: ExternalSyncSerialIO => io.clock_in := false.B.asClock
     }
   }
 })
@@ -220,8 +220,8 @@ class WithSerialTLTiedOff extends HarnessBinder({
 class WithSimTSIOverSerialTL extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: SerialTLPort) => {
     port.io match {
-      case io: LocallySyncSerialIO =>
-      case io: ExternallySyncSerialIO => io.clock_in := false.B.asClock
+      case io: InternalSyncSerialIO =>
+      case io: ExternalSyncSerialIO => io.clock_in := false.B.asClock
     }
 
     port.io match {
@@ -229,8 +229,8 @@ class WithSimTSIOverSerialTL extends HarnessBinder({
         // If the port is locally synchronous (provides a clock), drive everything with that clock
         // Else, drive everything with the harnes clock
         val clock = port.io match {
-          case io: LocallySyncSerialIO => io.clock_out
-          case io: ExternallySyncSerialIO => th.harnessBinderClock
+          case io: InternalSyncSerialIO => io.clock_out
+          case io: ExternalSyncSerialIO => th.harnessBinderClock
         }
         withClock(clock) {
           val ram = Module(LazyModule(new SerialRAM(port.serdesser, port.params)(port.serdesser.p)).module)
