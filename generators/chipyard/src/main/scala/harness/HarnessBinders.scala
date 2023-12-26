@@ -205,23 +205,32 @@ class WithTiedOffDMI extends HarnessBinder({
   }
 })
 
-class WithSerialTLTiedOff extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: SerialTLPort) => {
+// If tieoffs is specified, a list of serial portIds to tie off
+// If tieoffs is unspecified, ties off all serial ports
+class WithSerialTLTiedOff(tieoffs: Option[Seq[Int]] = None) extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: SerialTLPort) if (tieoffs.map(_.contains(port.portId)).getOrElse(true)) => {
     port.io match {
       case io: DecoupledSerialIO => io.out.ready := false.B; io.in.valid := false.B; io.in.bits := DontCare;
+      case io: SourceSyncSerialIO => {
+        io.clock_in := false.B.asClock
+        io.reset_in := false.B.asAsyncReset
+        io.in := DontCare
+        io.credit_in := DontCare
+      }
     }
     port.io match {
       case io: InternalSyncSerialIO =>
       case io: ExternalSyncSerialIO => io.clock_in := false.B.asClock
+      case _ =>
     }
   }
 })
 
 class WithSimTSIOverSerialTL extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: SerialTLPort) => {
+  case (th: HasHarnessInstantiators, port: SerialTLPort) if (port.portId == 0) => {
     port.io match {
       case io: InternalSyncSerialIO =>
-      case io: ExternalSyncSerialIO => io.clock_in := false.B.asClock
+      case io: ExternalSyncSerialIO => io.clock_in := th.harnessBinderClock
     }
 
     port.io match {
