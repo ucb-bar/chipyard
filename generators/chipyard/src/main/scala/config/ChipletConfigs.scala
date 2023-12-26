@@ -36,3 +36,11 @@ class SymmetricChipletRocketConfig extends Config(
   new testchipip.soc.WithOffchipBus ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
+
+// Simulates 2X of the SymmetricChipletRocketConfig in a multi-sim config
+class MultiSimSymmetricChipletRocketConfig extends Config(
+  new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++
+  new chipyard.harness.WithMultiChipSerialTL(chip0=0, chip1=1, chip0portId=1, chip1portId=1) ++
+  new chipyard.harness.WithMultiChip(0, new SymmetricChipletRocketConfig) ++
+  new chipyard.harness.WithMultiChip(1, new SymmetricChipletRocketConfig)
+)

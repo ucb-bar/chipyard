@@ -50,9 +50,7 @@ class WithGPIOTiedOff extends HarnessBinder({
 class WithUARTAdapter extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: UARTPort) => {
     val div = (th.getHarnessBinderClockFreqMHz.toDouble * 1000000 / port.io.c.initBaudRate.toDouble).toInt
-    val uart_sim = Module(new UARTAdapter(port.uartNo, div, false)).suggestName(s"uart_sim_uartno${port.uartNo}")
-    uart_sim.io.uart.txd := port.io.txd
-    port.io.rxd := uart_sim.io.uart.rxd
+    UARTAdapter.connect(Seq(port.io), div, false)
   }
 })
 // DOC include end: WithUARTAdapter
@@ -113,7 +111,7 @@ class WithBlackBoxSimMem(additionalLatency: Int = 0) extends HarnessBinder({
     val memBase = port.params.master.base
     val lineSize = 64 // cache block size
     val clockFreq = port.clockFreqMHz
-    val mem = Module(new SimDRAM(memSize, lineSize, clockFreq, memBase, port.edge.bundle)).suggestName("simdram")
+    val mem = Module(new SimDRAM(memSize, lineSize, clockFreq, memBase, port.edge.bundle, th.p(MultiChipIdx))).suggestName("simdram")
 
     mem.io.clock := port.io.clock
     mem.io.reset := th.harnessBinderReset.asAsyncReset
@@ -246,7 +244,7 @@ class WithSimTSIOverSerialTL extends HarnessBinder({
           ram.io.ser.in <> io.out
           io.in <> ram.io.ser.out
 
-          val success = SimTSI.connect(ram.io.tsi, clock, th.harnessBinderReset)
+          val success = SimTSI.connect(ram.io.tsi, clock, th.harnessBinderReset, th.p(MultiChipIdx))
           when (success) { th.success := true.B }
         }
       }
