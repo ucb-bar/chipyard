@@ -25,11 +25,11 @@ import testchipip._
 class WithArty100TUARTTSI extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: UARTTSIPort) => {
     val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
-    val harnessIO = IO(chiselTypeOf(port.io)).suggestName("uart_tsi")
-    harnessIO <> port.io
+    val harnessIO = IO(new UARTPortIO(port.io.uartParams)).suggestName("uart_tsi")
+    harnessIO <> port.io.uart
     val packagePinsWithPackageIOs = Seq(
-      ("A9" , IOPin(harnessIO.uart.rxd)),
-      ("D10", IOPin(harnessIO.uart.txd)))
+      ("A9" , IOPin(harnessIO.rxd)),
+      ("D10", IOPin(harnessIO.txd)))
     packagePinsWithPackageIOs foreach { case (pin, io) => {
       ath.xdc.addPackagePin(io, pin)
       ath.xdc.addIOStandard(io, "LVCMOS33")
