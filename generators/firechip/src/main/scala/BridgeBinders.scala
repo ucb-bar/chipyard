@@ -67,7 +67,7 @@ class WithFireSimIOCellModels extends Config((site, here, up) => {
 })
 
 class WithTSIBridgeAndHarnessRAMOverSerialTL extends HarnessBinder({
-  case (th: FireSim, port: SerialTLPort) => {
+  case (th: FireSim, port: SerialTLPort, chipId: Int) => {
     port.io match {
       case io: ExternalSyncSerialIO => {
         io.clock_in := th.harnessBinderClock
@@ -78,8 +78,8 @@ class WithTSIBridgeAndHarnessRAMOverSerialTL extends HarnessBinder({
         // This assumes that:
         // If ExtMem for the target is defined, then FASED bridge will be attached
         // If FASED bridge is attached, loadmem widget is present
-        val hasMainMemory = th.chipParameters(th.p(MultiChipIdx))(ExtMem).isDefined
-        val mainMemoryName = Option.when(hasMainMemory)(MainMemoryConsts.globalName(th.p(MultiChipIdx)))
+        val hasMainMemory = th.chipParameters(chipId)(ExtMem).isDefined
+        val mainMemoryName = Option.when(hasMainMemory)(MainMemoryConsts.globalName(chipId))
         TSIBridge(th.harnessBinderClock, ram.io.tsi.get, mainMemoryName, th.harnessBinderReset.asBool)(th.p)
       }
     }
@@ -87,26 +87,26 @@ class WithTSIBridgeAndHarnessRAMOverSerialTL extends HarnessBinder({
 })
 
 class WithNICBridge extends HarnessBinder({
-  case (th: FireSim, port: NICPort) => {
+  case (th: FireSim, port: NICPort, chipId: Int) => {
     NICBridge(port.io.clock, port.io.bits)(th.p)
   }
 })
 
 class WithUARTBridge extends HarnessBinder({
-  case (th: FireSim, port: UARTPort) =>
+  case (th: FireSim, port: UARTPort, chipId: Int) =>
     val uartSyncClock = th.harnessClockInstantiator.requestClockMHz("uart_clock", port.freqMHz)
     UARTBridge(uartSyncClock, port.io, th.harnessBinderReset.asBool, port.freqMHz)(th.p)
 })
 
 class WithBlockDeviceBridge extends HarnessBinder({
-  case (th: FireSim, port: BlockDevicePort) => {
+  case (th: FireSim, port: BlockDevicePort, chipId: Int) => {
     BlockDevBridge(port.io.clock, port.io.bits, th.harnessBinderReset.asBool)
   }
 })
 
 
 class WithFASEDBridge extends HarnessBinder({
-  case (th: FireSim, port: AXI4MemPort) => {
+  case (th: FireSim, port: AXI4MemPort, chipId: Int) => {
     val nastiKey = NastiParameters(port.io.bits.r.bits.data.getWidth,
                                    port.io.bits.ar.bits.addr.getWidth,
                                    port.io.bits.ar.bits.id.getWidth)
@@ -114,24 +114,24 @@ class WithFASEDBridge extends HarnessBinder({
       CompleteConfig(th.p(firesim.configs.MemModelKey),
         nastiKey,
         Some(AXI4EdgeSummary(port.edge)),
-        Some(MainMemoryConsts.globalName(th.p(MultiChipIdx)))))(th.p)
+        Some(MainMemoryConsts.globalName(chipId))))(th.p)
   }
 })
 
 class WithTracerVBridge extends HarnessBinder({
-  case (th: FireSim, port: TracePort) => {
+  case (th: FireSim, port: TracePort, chipId: Int) => {
     port.io.traces.map(tileTrace => TracerVBridge(tileTrace)(th.p))
   }
 })
 
 class WithCospikeBridge extends HarnessBinder({
-  case (th: FireSim, port: TracePort) => {
+  case (th: FireSim, port: TracePort, chipId: Int) => {
     port.io.traces.zipWithIndex.map(t => CospikeBridge(t._1, t._2, port.cosimCfg))
   }
 })
 
 class WithSuccessBridge extends HarnessBinder({
-  case (th: FireSim, port: SuccessPort) => {
+  case (th: FireSim, port: SuccessPort, chipId: Int) => {
     GroundTestBridge(th.harnessBinderClock, port.io)(th.p)
   }
 })

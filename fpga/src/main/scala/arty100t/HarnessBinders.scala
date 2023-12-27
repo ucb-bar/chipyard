@@ -22,7 +22,7 @@ import chipyard.iobinders._
 import testchipip.serdes._
 
 class WithArty100TUARTTSI extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: UARTTSIPort) => {
+  case (th: HasHarnessInstantiators, port: UARTTSIPort, chipId: Int) => {
     val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     ath.io_uart_bb.bundle <> port.io.uart
     ath.other_leds(1) := port.io.dropped
@@ -34,7 +34,7 @@ class WithArty100TUARTTSI extends HarnessBinder({
 })
 
 class WithArty100TDDRTL extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: TLMemPort) => {
+  case (th: HasHarnessInstantiators, port: TLMemPort, chipId: Int) => {
     val artyTh = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     val bundles = artyTh.ddrClient.out.map(_._1)
     val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
@@ -45,7 +45,7 @@ class WithArty100TDDRTL extends HarnessBinder({
 
 // Uses PMOD JA/JB
 class WithArty100TSerialTLToGPIO extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: SerialTLPort) => {
+  case (th: HasHarnessInstantiators, port: SerialTLPort, chipId: Int) => {
     val artyTh = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     val harnessIO = IO(chiselTypeOf(port.io)).suggestName("serial_tl")
     harnessIO <> port.io
