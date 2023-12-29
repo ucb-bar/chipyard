@@ -19,14 +19,14 @@ class GB1MemoryRocketConfig extends Config(
 
 // DOC include start: mbusscratchpadrocket
 class MbusScratchpadOnlyRocketConfig extends Config(
-  new testchipip.WithMbusScratchpad(banks=2, partitions=2) ++ // add 2 partitions of 2 banks mbus backing scratchpad
+  new testchipip.soc.WithMbusScratchpad(banks=2, partitions=2) ++ // add 2 partitions of 2 banks mbus backing scratchpad
   new freechips.rocketchip.subsystem.WithNoMemPort ++         // remove offchip mem port
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: mbusscratchpadrocket
 
 class SbusScratchpadRocketConfig extends Config(
-  new testchipip.WithSbusScratchpad(base=0x70000000L, banks=4) ++ // add 4 banks sbus scratchpad
+  new testchipip.soc.WithSbusScratchpad(base=0x70000000L, banks=4) ++ // add 4 banks sbus scratchpad
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 

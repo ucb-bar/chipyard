@@ -11,7 +11,10 @@ import freechips.rocketchip.util.{PlusArg}
 import freechips.rocketchip.subsystem.{CacheBlockBytes}
 import freechips.rocketchip.devices.debug.{SimJTAG}
 import freechips.rocketchip.jtag.{JTAGIO}
-import testchipip.{SerialTLKey, UARTAdapter, SimDRAM, TSIHarness, SimTSI}
+import testchipip.serdes.{SerialTLKey}
+import testchipip.uart.{UARTAdapter}
+import testchipip.dram.{SimDRAM}
+import testchipip.tsi.{TSIHarness, SimTSI}
 import chipyard.harness.{BuildTop}
 
 // A "flat" TestHarness that doesn't use IOBinders

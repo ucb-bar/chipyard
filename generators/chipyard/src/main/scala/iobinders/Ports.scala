@@ -4,9 +4,13 @@ import chisel3._
 import chisel3.experimental.{Analog}
 import sifive.blocks.devices.uart.{UARTPortIO}
 import sifive.blocks.devices.spi.{SPIFlashParams, SPIPortIO}
-import sifive.blocks.devices.i2c.{I2CPort}
 import sifive.blocks.devices.gpio.{GPIOPortIO}
-import testchipip._
+import testchipip.util.{ClockedIO}
+import testchipip.serdes.{TLSerdesser, SerialIO, SerialTLParams}
+import testchipip.spi.{SPIChipIO}
+import testchipip.cosim.{TraceOutputTop, SpikeCosimConfig}
+import testchipip.iceblk.{BlockDeviceIO, BlockDeviceConfig}
+import testchipip.tsi.{UARTTSIIO}
 import icenet.{NICIOvonly, NICConfig}
 import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4EdgeParameters}

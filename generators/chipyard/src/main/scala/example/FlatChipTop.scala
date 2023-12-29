@@ -14,7 +14,7 @@ import chipyard.harness.{BuildTop}
 import chipyard.clocking._
 import chipyard.iobinders._
 import barstools.iocell.chisel._
-import testchipip.{SerialTLKey}
+import testchipip.serdes.{SerialTLKey}
 
 class WithFlatChipTop extends Config((site, here, up) => {
   case BuildTop => (p: Parameters) => new FlatChipTop()(p)

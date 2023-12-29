@@ -20,8 +20,6 @@ import chipyard._
 import chipyard.harness._
 import chipyard.iobinders._
 
-import testchipip._
-
 class WithArty100TUARTTSI extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: UARTTSIPort) => {
     val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
