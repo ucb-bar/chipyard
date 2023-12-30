@@ -97,7 +97,7 @@ ifeq ($(SUB_PROJECT),testchipip)
 	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= chipyard.unittest
 	CONFIG            ?= TestChipUnitTestConfig
-	CONFIG_PACKAGE    ?= testchipip
+	CONFIG_PACKAGE    ?= testchipip.test
 	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
 	TOP               ?= UnitTestSuite

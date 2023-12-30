@@ -13,7 +13,8 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.{BootROMLocated, BootROMParams}
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
 import freechips.rocketchip.diplomacy.{LazyModule, AsynchronousCrossing}
-import testchipip.{BlockDeviceKey, BlockDeviceConfig, TracePortKey, TracePortParams}
+import testchipip.iceblk.{BlockDeviceKey, BlockDeviceConfig}
+import testchipip.cosim.{TracePortKey, TracePortParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import scala.math.{min, max}
 
@@ -104,7 +105,7 @@ class WithFireSimDesignTweaks extends Config(
   // Required: Bake in the default FASED memory model
   new WithDefaultMemModel ++
   // Optional: reduce the width of the Serial TL interface
-  new testchipip.WithSerialTLWidth(4) ++
+  new testchipip.serdes.WithSerialTLWidth(4) ++
   // Required*: Scale default baud rate with periphery bus frequency
   new chipyard.config.WithUARTInitBaudRate(BigInt(3686400L)) ++
   // Optional: Adds IO to attach tracerV bridges
@@ -112,7 +113,7 @@ class WithFireSimDesignTweaks extends Config(
   // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 64 GiB on F1)
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
   // Optional: Removing this will require using an initramfs under linux
-  new testchipip.WithBlockDevice
+  new testchipip.iceblk.WithBlockDevice
 )
 
 // Tweaks to modify target clock frequencies / crossings to legacy firesim defaults
@@ -154,7 +155,7 @@ class WithFireSimConfigTweaks extends Config(
 class WithMinimalFireSimHighPerfConfigTweaks extends Config(
   new WithFireSimHighPerfClocking ++
   new freechips.rocketchip.subsystem.WithNoMemPort ++
-  new testchipip.WithMbusScratchpad ++
+  new testchipip.soc.WithMbusScratchpad ++
   new WithMinimalFireSimDesignTweaks
 )
 
@@ -164,8 +165,8 @@ class WithMinimalFireSimHighPerfConfigTweaks extends Config(
 class WithMinimalAndBlockDeviceFireSimHighPerfConfigTweaks extends Config(
   new WithFireSimHighPerfClocking ++
   new freechips.rocketchip.subsystem.WithNoMemPort ++ // removes mem port for FASEDBridge to match against
-  new testchipip.WithMbusScratchpad ++ // adds backing scratchpad for memory to replace FASED model
-  new testchipip.WithBlockDevice(true) ++ // add in block device
+  new testchipip.soc.WithMbusScratchpad ++ // adds backing scratchpad for memory to replace FASED model
+  new testchipip.iceblk.WithBlockDevice(true) ++ // add in block device
   new WithMinimalFireSimDesignTweaks
 )
 
@@ -260,11 +261,11 @@ class FireSimSmallSystemConfig extends Config(
   new WithoutClockGating ++
   new WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++
-  new testchipip.WithSerialTL(Seq(testchipip.SerialTLParams(
-    client = Some(testchipip.SerialTLClientParams(idBits = 4)),
+  new testchipip.serdes.WithSerialTL(Seq(testchipip.serdes.SerialTLParams(
+    client = Some(testchipip.serdes.SerialTLClientParams(idBits = 4)),
     width = 32
   ))) ++
-  new testchipip.WithBlockDevice ++
+  new testchipip.iceblk.WithBlockDevice ++
   new chipyard.config.WithUARTInitBaudRate(BigInt(3686400L)) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nWays = 2, capacityKB = 64) ++
   new chipyard.RocketConfig)
@@ -342,7 +343,7 @@ class FireSim16LargeBoomConfig extends Config(
 class FireSimNoMemPortConfig extends Config(
   new WithDefaultFireSimBridges ++
   new freechips.rocketchip.subsystem.WithNoMemPort ++
-  new testchipip.WithMbusScratchpad ++
+  new testchipip.soc.WithMbusScratchpad ++
   new WithFireSimConfigTweaks ++
   new chipyard.RocketConfig)
 

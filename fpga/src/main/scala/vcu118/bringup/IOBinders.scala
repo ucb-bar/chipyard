@@ -9,7 +9,7 @@ import freechips.rocketchip.tilelink.{TLBundle}
 import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp}
 import sifive.blocks.devices.i2c.{HasPeripheryI2CModuleImp}
 
-import testchipip.{HasPeripheryTSIHostWidget, TSIHostWidgetIO}
+import testchipip.tsi.{HasPeripheryTSIHostWidget, TSIHostWidgetIO}
 
 import chipyard.iobinders.{OverrideIOBinder, Port, TLMemPort}
 

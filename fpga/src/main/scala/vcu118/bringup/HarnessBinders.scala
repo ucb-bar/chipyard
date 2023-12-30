@@ -11,7 +11,7 @@ import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
 import sifive.blocks.devices.i2c.{HasPeripheryI2CModuleImp, I2CPort}
 import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp, GPIOPortIO}
 
-import testchipip.{HasPeripheryTSIHostWidget, TSIHostWidgetIO}
+import testchipip.tsi.{HasPeripheryTSIHostWidget, TSIHostWidgetIO}
 
 import chipyard.harness._
 import chipyard.iobinders._

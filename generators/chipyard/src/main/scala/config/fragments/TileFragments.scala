@@ -11,7 +11,7 @@ import boom.common.{BoomTileAttachParams}
 import cva6.{CVA6TileAttachParams}
 import sodor.common.{SodorTileAttachParams}
 import ibex.{IbexTileAttachParams}
-import testchipip._
+import testchipip.cosim.{TracePortKey, TracePortParams}
 import barf.{TilePrefetchingMasterPortParams}
 
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {

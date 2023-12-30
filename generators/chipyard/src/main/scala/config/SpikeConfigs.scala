@@ -43,7 +43,7 @@ class SpikeUltraFastDevicesConfig extends Config(
   new chipyard.harness.WithSimBlockDevice ++
   new chipyard.harness.WithLoopbackNIC ++
   new icenet.WithIceNIC ++
-  new testchipip.WithBlockDevice ++
+  new testchipip.iceblk.WithBlockDevice ++
 
   new chipyard.WithSpikeTCM ++
   new chipyard.WithNSpikeCores(1) ++

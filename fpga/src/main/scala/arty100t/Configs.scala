@@ -12,7 +12,7 @@ import freechips.rocketchip.tile._
 import sifive.blocks.devices.uart._
 import sifive.fpgashells.shell.{DesignKey}
 
-import testchipip.{SerialTLKey}
+import testchipip.serdes.{SerialTLKey}
 
 import chipyard.{BuildSystem}
 
@@ -25,7 +25,7 @@ class WithArty100TTweaks(freqMHz: Double = 50) extends Config(
   new WithArty100TUARTTSI ++
   new WithArty100TDDRTL ++
   new WithNoDesignKey ++
-  new testchipip.WithUARTTSIClient ++
+  new testchipip.tsi.WithUARTTSIClient ++
   new chipyard.harness.WithSerialTLTiedOff ++
   new chipyard.harness.WithHarnessBinderClockFreqMHz(freqMHz) ++
   new chipyard.config.WithMemoryBusFrequency(freqMHz) ++
@@ -56,5 +56,5 @@ class NoCoresArty100TConfig extends Config(
 class BringupArty100TConfig extends Config(
   new WithArty100TSerialTLToGPIO ++
   new WithArty100TTweaks(freqMHz = 50) ++
-  new testchipip.WithSerialTLClockDirection(provideClockFreqMHz = Some(50)) ++
+  new testchipip.serdes.WithSerialTLClockDirection(provideClockFreqMHz = Some(50)) ++
   new chipyard.ChipBringupHostConfig)

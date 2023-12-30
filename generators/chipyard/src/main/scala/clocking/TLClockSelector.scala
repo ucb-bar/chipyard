@@ -11,7 +11,7 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.prci._
 import freechips.rocketchip.util.ElaborationArtefacts
 
-import testchipip._
+import testchipip.clocking._
 
 case class ClockSelNode()(implicit valName: ValName)
   extends MixedNexusNode(ClockImp, ClockGroupImp)(
@@ -58,7 +58,7 @@ FOR RTL SIMULATION
       sel := reg.io.q
       println(s"${(address+i*4).toString(16)}: Clock domain $sinkName clock mux")
 
-      val mux = testchipip.ClockMutexMux(clocks).suggestName(s"${sinkName}_clkmux")
+      val mux = ClockMutexMux(clocks).suggestName(s"${sinkName}_clkmux")
       mux.io.sel        := sel
       mux.io.resetAsync := asyncReset.asAsyncReset
       if (enable) {

@@ -15,7 +15,7 @@ import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
 import freechips.rocketchip.util.{ResetCatchAndSync}
 import sifive.blocks.devices.uart._
 
-import testchipip._
+import testchipip.tsi.{SerialRAM}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 
 import junctions.{NastiKey, NastiParameters}

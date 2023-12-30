@@ -62,12 +62,14 @@ class AbstractConfig extends Config(
   new chipyard.config.WithFrontBusFrequency(500.0) ++               // Default 500 MHz fbus
   new chipyard.config.WithOffchipBusFrequency(500.0) ++             // Default 500 MHz obus
 
-  new testchipip.WithCustomBootPin ++                               // add a custom-boot-pin to support pin-driven boot address
-  new testchipip.WithBootAddrReg ++                                 // add a boot-addr-reg for configurable boot address
-  new testchipip.WithSerialTL(Seq(testchipip.SerialTLParams(        // add a serial-tilelink interface
-    client = Some(testchipip.SerialTLClientParams(idBits = 4)),     // serial-tilelink interface will master the FBUS, and support 4 idBits
-    width = 32                                                      // serial-tilelink interface with 32 lanes
-  ))) ++
+  new testchipip.boot.WithCustomBootPin ++                          // add a custom-boot-pin to support pin-driven boot address
+  new testchipip.boot.WithBootAddrReg ++                            // add a boot-addr-reg for configurable boot address
+  new testchipip.serdes.WithSerialTL(Seq(                           // add a serial-tilelink interface
+    testchipip.serdes.SerialTLParams(
+      client = Some(testchipip.serdes.SerialTLClientParams(idBits=4)), // serial-tilelink interface will master the FBUS, and support 4 idBits
+      width = 32                                                    // serial-tilelink interface with 32 lanes
+    )
+  )) ++
   new chipyard.config.WithDebugModuleAbstractDataWords(8) ++        // increase debug module data capacity
   new chipyard.config.WithBootROM ++                                // use default bootrom
   new chipyard.config.WithUART ++                                   // add a UART
