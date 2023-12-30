@@ -69,10 +69,11 @@ class AbstractConfig extends Config(
       width = 32                                                    // serial-tilelink interface with 32 lanes
     )
   )) ++
+  new testchipip.soc.WithMbusScratchpad(base = 0x08000000,          // add 64 KiB on-chip scratchpad
+                                        size = 64 * 1024) ++
   new chipyard.config.WithDebugModuleAbstractDataWords(8) ++        // increase debug module data capacity
   new chipyard.config.WithBootROM ++                                // use default bootrom
   new chipyard.config.WithUART ++                                   // add a UART
-  new testchipip.soc.WithMbusScratchpad(base = 0x08000000, size = 64 * 1024) ++ // add 64 KiB on-chip scratchpad
   new chipyard.config.WithL2TLBs(1024) ++                           // use L2 TLBs
   new chipyard.config.WithNoSubsystemDrivenClocks ++                // drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks
   new chipyard.config.WithInheritBusFrequencyAssignments ++         // Unspecified clocks within a bus will receive the bus frequency if set

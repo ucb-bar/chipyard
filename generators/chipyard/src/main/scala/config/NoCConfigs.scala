@@ -146,7 +146,7 @@ class MultiNoCConfig extends Config(
  * L2 3   | MI  | Cache[3]   |    6
  * DRAM 0 | MO  | system[0]  |    3
  * DRAM 1 | MO  | system[1]  |    5
- * extram | MO  | serial_tl_0  |    9
+ * spad   | MO  | ram[0]     |    9
  */
 // DOC include start: SharedNoCConfig
 class SharedNoCConfig extends Config(
@@ -169,7 +169,7 @@ class SharedNoCConfig extends Config(
         "Cache[0]" -> 0, "Cache[1]" -> 2, "Cache[2]" -> 8, "Cache[3]" -> 6),
       outNodeMapping = ListMap(
         "system[0]" -> 3, "system[1]" -> 5,
-        "serial_tl_0" -> 9))
+        "ram[0]" -> 9))
   )) ++
   new constellation.soc.WithSbusNoC(constellation.protocol.GlobalTLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
