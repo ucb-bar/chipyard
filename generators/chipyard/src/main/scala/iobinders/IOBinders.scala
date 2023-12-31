@@ -27,6 +27,7 @@ import barstools.iocell.chisel._
 import testchipip.serdes.{CanHavePeripheryTLSerial, SerialTLKey}
 import testchipip.spi.{SPIChipIO}
 import testchipip.boot.{CanHavePeripheryCustomBootPin}
+import testchipip.soc.{CanHavePeripheryChipIdPin}
 import testchipip.util.{ClockedIO}
 import testchipip.iceblk.{CanHavePeripheryBlockDevice, BlockDeviceKey, BlockDeviceIO}
 import testchipip.cosim.{CanHaveTraceIO, TraceOutputTop, SpikeCosimConfig}
@@ -353,6 +354,14 @@ class WithSerialTLIOCells extends OverrideIOBinder({
     }).unzip
     (ports.toSeq, cells.flatten.toSeq)
   }
+})
+
+class WithChipIdPin extends OverrideIOBinder({
+  (system: CanHavePeripheryChipIdPin) => system.chip_id_pin.map({ p =>
+    val sys = system.asInstanceOf[BaseSubsystem]
+    val (port, cells) = IOCell.generateIOFromSignal(p.getWrappedValue, s"chip_id", sys.p(IOCellKey), abstractResetAsAsync = true)
+    (Seq(ChipIdPort(() => port)), cells)
+  }).getOrElse(Nil, Nil)
 })
 
 class WithSerialTLPunchthrough extends OverrideIOBinder({

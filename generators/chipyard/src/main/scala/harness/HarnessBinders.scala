@@ -252,6 +252,13 @@ class WithSimTSIOverSerialTL extends HarnessBinder({
   }
 })
 
+//TODO: Allow setting from harness with chipId argument, hardcoding is temporary hack
+class WithChipIdPinFromHarness extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: ChipIdPort) => {
+    port.io := 0.U
+  }
+})
+
 class WithSimUARTToUARTTSI extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: UARTPort, chipId: Int) => {
     UARTAdapter.connect(Seq(port.io),

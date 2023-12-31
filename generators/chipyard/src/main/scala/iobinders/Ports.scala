@@ -76,6 +76,9 @@ case class JTAGPort        (val getIO: () => JTAGChipIO)
 case class SerialTLPort    (val getIO: () => Data, val params: SerialTLParams, val serdesser: TLSerdesser, val portId: Int)
     extends Port[Data]
 
+case class ChipIdPort      (val getIO: () => UInt)
+    extends Port[UInt]
+
 case class UARTTSIPort     (val getIO: () => UARTTSIIO)
     extends Port[UARTTSIIO]
 

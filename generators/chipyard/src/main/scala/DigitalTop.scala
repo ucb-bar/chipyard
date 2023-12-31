@@ -20,6 +20,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with testchipip.soc.CanHaveBankedScratchpad // Enables optionally adding a banked scratchpad
   with testchipip.iceblk.CanHavePeripheryBlockDevice // Enables optionally adding the block device
   with testchipip.serdes.CanHavePeripheryTLSerial // Enables optionally adding the backing memory and serial adapter
+  with testchipip.soc.CanHavePeripheryChipIdPin // Enables optional pin to set chip id for multi-chip configs
   with sifive.blocks.devices.i2c.HasPeripheryI2C // Enables optionally adding the sifive I2C
   with sifive.blocks.devices.pwm.HasPeripheryPWM // Enables optionally adding the sifive PWM
   with sifive.blocks.devices.uart.HasPeripheryUART // Enables optionally adding the sifive UART
