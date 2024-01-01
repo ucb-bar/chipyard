@@ -356,7 +356,7 @@ class WithSerialTLIOCells extends OverrideIOBinder({
   }
 })
 
-class WithChipIdPin extends OverrideIOBinder({
+class WithChipIdIOCells extends OverrideIOBinder({
   (system: CanHavePeripheryChipIdPin) => system.chip_id_pin.map({ p =>
     val sys = system.asInstanceOf[BaseSubsystem]
     val (port, cells) = IOCell.generateIOFromSignal(p.getWrappedValue, s"chip_id", sys.p(IOCellKey), abstractResetAsAsync = true)
