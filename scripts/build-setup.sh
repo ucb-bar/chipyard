@@ -29,7 +29,8 @@ usage() {
     echo "   7. FireSim pre-compile sources"
     echo "   8. FireMarshal"
     echo "   9. FireMarshal pre-compile default buildroot Linux sources"
-    echo "  10. Runs repository clean-up"
+    echo "  10. Install CIRCT"
+    echo "  11. Runs repository clean-up"
     echo ""
     echo "**See below for options to skip parts of the setup. Skipping parts of the setup is not guaranteed to be tested/working.**"
     echo ""
@@ -152,16 +153,6 @@ if run_step "1"; then
     conda activate $CYDIR/.conda-env
     exit_if_last_command_failed
 
-    # install circt into conda
-    git submodule update --init $CYDIR/tools/install-circt &&
-    $CYDIR/tools/install-circt/bin/download-release-or-nightly-circt.sh \
-        -f circt-full-shared-linux-x64.tar.gz \
-        -i $CONDA_PREFIX \
-        -v version-file \
-        -x $CYDIR/conda-reqs/circt.json \
-        -g null
-    exit_if_last_command_failed
-
     # Conda Setup
     # Provide a sourceable snippet that can be used in subshells that may not have
     # inhereted conda functions that would be brought in under a login shell that
@@ -273,8 +264,31 @@ if run_step "8"; then
     popd
 fi
 
-# do misc. cleanup for a "clean" git status
 if run_step "10"; then
+    # install circt into conda
+    if run_step "1"; then
+        PREFIX=$CONDA_PREFIX/$TOOLCHAIN_TYPE
+    else
+        if [ -z "$RISCV" ] ; then
+            error "ERROR: If conda initialization skipped, \$RISCV variable must be defined."
+            exit 1
+        fi
+        PREFIX=$RISCV
+    fi
+
+    git submodule update --init $CYDIR/tools/install-circt &&
+    $CYDIR/tools/install-circt/bin/download-release-or-nightly-circt.sh \
+        -f circt-full-shared-linux-x64.tar.gz \
+        -i $PREFIX \
+        -v version-file \
+        -x $CYDIR/conda-reqs/circt.json \
+        -g null
+    exit_if_last_command_failed
+fi
+
+
+# do misc. cleanup for a "clean" git status
+if run_step "11"; then
     begin_step "10" "Cleaning up repository"
     $CYDIR/scripts/repo-clean.sh
     exit_if_last_command_failed
