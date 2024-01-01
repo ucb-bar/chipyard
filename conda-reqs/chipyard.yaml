@@ -88,7 +88,7 @@ dependencies:
     - graphviz
     - expect
     - dtc
-    - verilator==5.018
+    - verilator==5.020
     - screen
     - elfutils
     - libdwarf-dev==0.0.0.20190110_28_ga81397fc4 # from ucb-bar channel - using mainline libdwarf-feedstock

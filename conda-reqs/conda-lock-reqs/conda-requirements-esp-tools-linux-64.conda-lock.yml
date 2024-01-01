@@ -21,7 +21,7 @@ metadata:
   - url: nodefaults
     used_env_vars: []
   content_hash:
-    linux-64: ff6d08e475547b935387001d63d60acbd5f49e2b4fe52cca99a819e4d97a1861
+    linux-64: de1e2d263317a6a0c7c45acb734d166b9975ff1a94cd138e3427bb7b7bdd8db4
   platforms:
   - linux-64
   sources:
@@ -2100,14 +2100,14 @@ package:
   dependencies:
     python: '>=3.7'
   hash:
-    md5: 3edfead7cedd1ab4400a6c588f3e75f8
-    sha256: 063639cd568f5c7a557b0fb1cc27f098598c0d8ff869088bfeb82934674f8821
+    md5: 5e4c0743c70186509d1412e03c2d8dfa
+    sha256: 77c7d03bdb243a048fff398cedc74327b7dc79169ebe3b4c8448b0331ea55fea
   manager: conda
   name: attrs
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/attrs-23.1.0-pyh71513ae_1.conda
-  version: 23.1.0
+  url: https://conda.anaconda.org/conda-forge/noarch/attrs-23.2.0-pyh71513ae_0.conda
+  version: 23.2.0
 - category: main
   dependencies:
     aws-c-common: '>=0.9.10,<0.9.11.0a0'
@@ -3398,14 +3398,14 @@ package:
     perl: ''
     python: ''
   hash:
-    md5: 6ecc6f19e3a0661c096d0e84015c8122
-    sha256: 582ae4513d3ef87d4b0c5d53a3a691575de2aabe8cc5a5554bb1db5bcd6a40b4
+    md5: 0b2929f84fe7d3a6117439507d5d50d9
+    sha256: 1d6af07d2d19be7adc296e8b6c43bd3eb12b48d8ab8e0cec566e8f9872661813
   manager: conda
   name: verilator
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/verilator-5.018-h4f9daa6_0.conda
-  version: '5.018'
+  url: https://conda.anaconda.org/conda-forge/linux-64/verilator-5.020-h7cd9344_0.conda
+  version: '5.020'
 - category: main
   dependencies:
     python: '>=3.8'
@@ -4061,14 +4061,14 @@ package:
     python: '>=3.7'
     tomli: '>=1.0.0'
   hash:
-    md5: 5bdca0aca30b0ee62bb84854e027eae0
-    sha256: 14e948e620ec87d9e62a8d9c21d40084b4805a939cfee322be7d457379dc96a0
+    md5: a9d145de8c5f064b5fa68fb34725d9f4
+    sha256: 8979721b7f86b183d21103f3ec2734783847d317c1b754f462f407efc7c60886
   manager: conda
   name: pytest
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/pytest-7.4.3-pyhd8ed1ab_0.conda
-  version: 7.4.3
+  url: https://conda.anaconda.org/conda-forge/noarch/pytest-7.4.4-pyhd8ed1ab_0.conda
+  version: 7.4.4
 - category: main
   dependencies:
     python: '>=3.6'
