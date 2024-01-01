@@ -107,7 +107,7 @@ class WithArty100TSerialTLToGPIO extends HarnessBinder({
 
 // Maps the UART device to the on-board USB-UART
 class WithArty100TUART(rxdPin: String = "A9", txdPin: String = "D10") extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: UARTPort) => {
+  case (th: HasHarnessInstantiators, port: UARTPort, chipId: Int) => {
     val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     val harnessIO = IO(chiselTypeOf(port.io)).suggestName("uart")
     harnessIO <> port.io
@@ -126,7 +126,7 @@ class WithArty100TUART(rxdPin: String = "A9", txdPin: String = "D10") extends Ha
 class WithArty100TPMODUART extends WithArty100TUART("G2", "F3")
 
 class WithArty100TJTAG extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: JTAGPort) => {
+  case (th: HasHarnessInstantiators, port: JTAGPort, chipId: Int) => {
     val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     val harnessIO = IO(chiselTypeOf(port.io)).suggestName("jtag")
     harnessIO <> port.io

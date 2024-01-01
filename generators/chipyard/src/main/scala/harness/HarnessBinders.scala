@@ -100,7 +100,7 @@ class WithSimAXIMem extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: AXI4MemPort, chipId: Int) => {
     val mem = LazyModule(new SimAXIMem(port.edge, size=port.params.master.size)(Parameters.empty))
     withClock(port.io.clock) { Module(mem.module) }
-    mem.io_axi4.head <> port.io
+    mem.io_axi4.head <> port.io.bits
   }
 })
 
