@@ -116,7 +116,10 @@ object GetSystemParameters {
 }
 
 class IOBinder[T](composer: Seq[IOBinderFunction] => Seq[IOBinderFunction])(implicit tag: ClassTag[T]) extends Config((site, here, up) => {
-  case IOBinders => up(IOBinders, site) + (tag.runtimeClass.toString -> composer(up(IOBinders, site)(tag.runtimeClass.toString)))
+  case IOBinders => {
+    val upMap = up(IOBinders)
+    upMap + (tag.runtimeClass.toString -> composer(upMap(tag.runtimeClass.toString)))
+  }
 })
 
 class ConcreteIOBinder[T](composes: Boolean, fn: T => IOBinderTuple)(implicit tag: ClassTag[T]) extends IOBinder[T](
