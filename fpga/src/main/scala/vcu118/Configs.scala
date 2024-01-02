@@ -15,7 +15,7 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
 
-import testchipip.{SerialTLKey}
+import testchipip.serdes.{SerialTLKey}
 
 import chipyard._
 import chipyard.harness._

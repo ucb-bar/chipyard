@@ -11,7 +11,7 @@ import freechips.rocketchip.tile._
 
 import sifive.blocks.devices.uart._
 
-import testchipip.{SerialTLKey}
+import testchipip.serdes.{SerialTLKey}
 
 import chipyard.{BuildSystem}
 
@@ -30,7 +30,8 @@ class WithArtyTweaks extends Config(
   new chipyard.config.WithFrontBusFrequency(32) ++
   new chipyard.config.WithControlBusFrequency(32) ++
   new chipyard.config.WithPeripheryBusFrequency(32) ++
-  new testchipip.WithNoSerialTL
+  new testchipip.serdes.WithNoSerialTL ++
+  new testchipip.soc.WithNoScratchpads
 )
 
 class TinyRocketArtyConfig extends Config(

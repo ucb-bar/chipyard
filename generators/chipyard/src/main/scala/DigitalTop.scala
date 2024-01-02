@@ -13,13 +13,13 @@ import freechips.rocketchip.devices.tilelink._
 
 // DOC include start: DigitalTop
 class DigitalTop(implicit p: Parameters) extends ChipyardSystem
-  with testchipip.CanHavePeripheryUARTTSI // Enables optional UART-based TSI transport
-  with testchipip.CanHavePeripheryCustomBootPin // Enables optional custom boot pin
-  with testchipip.CanHavePeripheryBootAddrReg // Use programmable boot address register
-  with testchipip.CanHaveTraceIO // Enables optionally adding trace IO
-  with testchipip.CanHaveBankedScratchpad // Enables optionally adding a banked scratchpad
-  with testchipip.CanHavePeripheryBlockDevice // Enables optionally adding the block device
-  with testchipip.CanHavePeripheryTLSerial // Enables optionally adding the backing memory and serial adapter
+  with testchipip.tsi.CanHavePeripheryUARTTSI // Enables optional UART-based TSI transport
+  with testchipip.boot.CanHavePeripheryCustomBootPin // Enables optional custom boot pin
+  with testchipip.boot.CanHavePeripheryBootAddrReg // Use programmable boot address register
+  with testchipip.cosim.CanHaveTraceIO // Enables optionally adding trace IO
+  with testchipip.soc.CanHaveBankedScratchpad // Enables optionally adding a banked scratchpad
+  with testchipip.iceblk.CanHavePeripheryBlockDevice // Enables optionally adding the block device
+  with testchipip.serdes.CanHavePeripheryTLSerial // Enables optionally adding the backing memory and serial adapter
   with sifive.blocks.devices.i2c.HasPeripheryI2C // Enables optionally adding the sifive I2C
   with sifive.blocks.devices.pwm.HasPeripheryPWM // Enables optionally adding the sifive PWM
   with sifive.blocks.devices.uart.HasPeripheryUART // Enables optionally adding the sifive UART
@@ -40,7 +40,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
 }
 
 class DigitalTopModule[+L <: DigitalTop](l: L) extends ChipyardSystemModule(l)
-  with testchipip.CanHaveTraceIOModuleImp
+  with testchipip.cosim.CanHaveTraceIOModuleImp
   with sifive.blocks.devices.i2c.HasPeripheryI2CModuleImp
   with sifive.blocks.devices.pwm.HasPeripheryPWMModuleImp
   with sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
