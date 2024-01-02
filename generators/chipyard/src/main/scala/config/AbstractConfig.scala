@@ -11,6 +11,9 @@ import org.chipsalliance.cde.config.{Config}
 // --------------
 
 class AbstractConfig extends Config(
+  // ==================================
+  //   Set up TestHarness
+  // ==================================
   // The HarnessBinders control generation of hardware in the TestHarness
   new chipyard.harness.WithUARTAdapter ++                          // add UART adapter to display UART on stdout, if uart is present
   new chipyard.harness.WithBlackBoxSimMem ++                       // add SimDRAM DRAM model for axi4 backing memory, if axi4 mem is enabled
@@ -28,6 +31,9 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithResetFromHarness ++                     // reset controlled by harness
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ // generate clocks in harness with unsynthesizable ClockSourceAtFreqMHz
 
+  // ==================================
+  //   Set up I/O harness
+  // ==================================
   // The IOBinders instantiate ChipTop IOs to match desired digital IOs
   // IOCells are generated for "Chip-like" IOs
   new chipyard.iobinders.WithSerialTLIOCells ++
@@ -51,38 +57,68 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithUARTTSIPunchthrough ++
   new chipyard.iobinders.WithNMITiedOff ++
 
-  // By default, punch out IOs to the Harness
-  new chipyard.clocking.WithPassthroughClockGenerator ++
-  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("sbus", "mbus", "pbus", "fbus", "cbus", "obus", "implicit"), Seq("tile"))) ++
-  new chipyard.config.WithPeripheryBusFrequency(500.0) ++           // Default 500 MHz pbus
-  new chipyard.config.WithMemoryBusFrequency(500.0) ++              // Default 500 MHz mbus
-  new chipyard.config.WithControlBusFrequency(500.0) ++             // Default 500 MHz cbus
-  new chipyard.config.WithSystemBusFrequency(500.0) ++              // Default 500 MHz sbus
-  new chipyard.config.WithFrontBusFrequency(500.0) ++               // Default 500 MHz fbus
-  new chipyard.config.WithOffchipBusFrequency(500.0) ++             // Default 500 MHz obus
-
-  new testchipip.boot.WithCustomBootPin ++                          // add a custom-boot-pin to support pin-driven boot address
-  new testchipip.boot.WithBootAddrReg ++                            // add a boot-addr-reg for configurable boot address
-  new testchipip.serdes.WithSerialTL(Seq(                           // add a serial-tilelink interface
+  // ==================================
+  //   Set up Memory Devices
+  // ==================================
+  // External memory section
+  new testchipip.serdes.WithSerialTL(Seq(                           /** add a serial-tilelink interface */
     testchipip.serdes.SerialTLParams(
-      client = Some(testchipip.serdes.SerialTLClientParams(idBits=4)), // serial-tilelink interface will master the FBUS, and support 4 idBits
-      width = 32                                                    // serial-tilelink interface with 32 lanes
+      client = Some(testchipip.serdes.SerialTLClientParams(idBits=4)), /** serial-tilelink interface will master the FBUS, and support 4 idBits */
+      width = 32                                                    /** serial-tilelink interface with 32 lanes */
     )
   )) ++
-  new chipyard.config.WithDebugModuleAbstractDataWords(8) ++        // increase debug module data capacity
-  new chipyard.config.WithBootROM ++                                // use default bootrom
-  new chipyard.config.WithUART ++                                   // add a UART
-  new chipyard.config.WithL2TLBs(1024) ++                           // use L2 TLBs
-  new chipyard.config.WithNoSubsystemDrivenClocks ++                // drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks
-  new chipyard.config.WithInheritBusFrequencyAssignments ++         // Unspecified clocks within a bus will receive the bus frequency if set
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++      // Default 1 memory channels
-  new freechips.rocketchip.subsystem.WithClockGateModel ++          // add default EICG_wrapper clock gate model
-  new freechips.rocketchip.subsystem.WithJtagDTM ++                 // set the debug module to expose a JTAG port
-  new freechips.rocketchip.subsystem.WithNoMMIOPort ++              // no top-level MMIO master port (overrides default set in rocketchip)
-  new freechips.rocketchip.subsystem.WithNoSlavePort ++             // no top-level MMIO slave port (overrides default set in rocketchip)
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++          // use Sifive L2 cache
-  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++    // no external interrupts
-  new freechips.rocketchip.subsystem.WithDontDriveBusClocksFromSBus ++ // leave the bus clocks undriven by sbus
-  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++     // hierarchical buses including sbus/mbus/pbus/fbus/cbus/l2
-  new freechips.rocketchip.subsystem.WithDTS("ucb-bar,chipyard", Nil) ++ // custom device name for DTS
-  new freechips.rocketchip.system.BaseConfig)                       // "base" rocketchip system
+
+  // Peripheral section
+  new chipyard.config.WithUART ++                                   /** add a UART */
+  
+  // Core section
+  new chipyard.config.WithBootROM ++                                /** use default bootrom */
+  new testchipip.boot.WithCustomBootPin ++                          /** add a custom-boot-pin to support pin-driven boot address */
+  new testchipip.boot.WithBootAddrReg ++                            /** add a boot-addr-reg for configurable boot address */
+  
+  // ==================================
+  //   Set up tiles
+  // ==================================
+  // Debug settings
+  new chipyard.config.WithDebugModuleAbstractDataWords(8) ++        /** increase debug module data capacity */
+  // TODO: add these fragments
+  // new chipyard.config.WithJTAGDTMKey(idcodeVersion = 2, partNum = 0x000, manufId = 0x489, debugIdleCycles = 5) ++
+  // new freechips.rocketchip.subsystem.WithNBreakpoints(2) ++
+  new freechips.rocketchip.subsystem.WithJtagDTM ++                 /** set the debug module to expose a JTAG port */
+  
+  // Cache settings
+  new chipyard.config.WithL2TLBs(1024) ++                           /** use L2 TLBs */
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++          /** use Sifive L2 cache */
+  
+  // Memory settings
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++      /** Default 1 memory channels */
+  new freechips.rocketchip.subsystem.WithNoMMIOPort ++              /** no top-level MMIO master port (overrides default set in rocketchip) */
+  new freechips.rocketchip.subsystem.WithNoSlavePort ++             /** no top-level MMIO slave port (overrides default set in rocketchip) */
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++     /** hierarchical buses including sbus/mbus/pbus/fbus/cbus/l2 */
+
+  // Core Settings
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++    /** no external interrupts */
+  
+  // ==================================
+  //   Set up reset and clocking
+  // ==================================
+  new freechips.rocketchip.subsystem.WithDontDriveBusClocksFromSBus ++ /** leave the bus clocks undriven by sbus */
+  new freechips.rocketchip.subsystem.WithClockGateModel ++          /** add default EICG_wrapper clock gate model */
+  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("sbus", "mbus", "pbus", "fbus", "cbus", "obus", "implicit"), Seq("tile"))) ++
+
+  new chipyard.config.WithPeripheryBusFrequency(500.0) ++           /** Default 500 MHz pbus */
+  new chipyard.config.WithMemoryBusFrequency(500.0) ++              /** Default 500 MHz mbus */
+  new chipyard.config.WithControlBusFrequency(500.0) ++             /** Default 500 MHz cbus */
+  new chipyard.config.WithSystemBusFrequency(500.0) ++              /** Default 500 MHz sbus */
+  new chipyard.config.WithFrontBusFrequency(500.0) ++               /** Default 500 MHz fbus */
+  new chipyard.config.WithOffchipBusFrequency(500.0) ++             /** Default 500 MHz obus */
+  new chipyard.config.WithInheritBusFrequencyAssignments ++         /** Unspecified clocks within a bus will receive the bus frequency if set */
+
+  new chipyard.config.WithNoSubsystemDrivenClocks ++                /** drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks */
+  new chipyard.clocking.WithPassthroughClockGenerator ++
+  
+  // ==================================
+  //   Base Settings
+  // ==================================
+  new freechips.rocketchip.subsystem.WithDTS("ucb-bar,chipyard", Nil) ++ /** custom device name for DTS */
+  new freechips.rocketchip.system.BaseConfig)                       /** "base" rocketchip system */
