@@ -46,7 +46,6 @@ class WithArty100TTweaks(freqMHz: Double = 50) extends Config(
 
 class RocketArty100TConfig extends Config(
   new WithArty100TTweaks ++
-  new testchipip.soc.WithMbusScratchpad(base = 0x08000000, size = 128 * 1024) ++ // add on-chip scratchpad for small programs
   new chipyard.config.WithBroadcastManager ++ // no l2
   new chipyard.RocketConfig)
 
