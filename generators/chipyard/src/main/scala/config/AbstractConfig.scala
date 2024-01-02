@@ -101,6 +101,8 @@ class AbstractConfig extends Config(
   // ================================================
   // On-chip memory section
   new chipyard.config.WithBootROM ++                                /** use default bootrom */
+  new testchipip.soc.WithMbusScratchpad(base = 0x08000000,          /** add 64 KiB on-chip scratchpad */
+                                        size = 64 * 1024) ++
   
   // Cache settings
   new chipyard.config.WithL2TLBs(1024) ++                           /** use L2 TLBs */
@@ -139,4 +141,5 @@ class AbstractConfig extends Config(
   //   Base Settings
   // ==================================
   new freechips.rocketchip.subsystem.WithDTS("ucb-bar,chipyard", Nil) ++ /** custom device name for DTS */
-  new freechips.rocketchip.system.BaseConfig)                       /** "base" rocketchip system */
+  new freechips.rocketchip.system.BaseConfig                        /** "base" rocketchip system */
+)
