@@ -76,16 +76,15 @@ class AbstractConfig extends Config(
   new testchipip.boot.WithCustomBootPin ++                          /** add a custom-boot-pin to support pin-driven boot address */
   new testchipip.boot.WithBootAddrReg ++                            /** add a boot-addr-reg for configurable boot address */
   
-  // ==================================
-  //   Set up tiles
-  // ==================================
-  // Debug settings
+  // Debug section
   new chipyard.config.WithDebugModuleAbstractDataWords(8) ++        /** increase debug module data capacity */
-  // TODO: add these fragments
   // new chipyard.config.WithJTAGDTMKey(idcodeVersion = 2, partNum = 0x000, manufId = 0x489, debugIdleCycles = 5) ++
   // new freechips.rocketchip.subsystem.WithNBreakpoints(2) ++
   new freechips.rocketchip.subsystem.WithJtagDTM ++                 /** set the debug module to expose a JTAG port */
   
+  // ==================================
+  //   Set up tiles
+  // ==================================
   // Cache settings
   new chipyard.config.WithL2TLBs(1024) ++                           /** use L2 TLBs */
   new freechips.rocketchip.subsystem.WithInclusiveCache ++          /** use Sifive L2 cache */
