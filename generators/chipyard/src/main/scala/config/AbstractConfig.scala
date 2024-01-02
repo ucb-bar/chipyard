@@ -69,6 +69,8 @@ class AbstractConfig extends Config(
       width = 32                                                    // serial-tilelink interface with 32 lanes
     )
   )) ++
+  new testchipip.soc.WithMbusScratchpad(base = 0x08000000,          // add 64 KiB on-chip scratchpad
+                                        size = 64 * 1024) ++
   new chipyard.config.WithDebugModuleAbstractDataWords(8) ++        // increase debug module data capacity
   new chipyard.config.WithBootROM ++                                // use default bootrom
   new chipyard.config.WithUART ++                                   // add a UART
