@@ -57,7 +57,8 @@ HELP_COMMANDS += \
 "   firrtl                      = generate intermediate firrtl files from chisel elaboration" \
 "   run-tests                   = run all assembly and benchmark tests" \
 "   launch-sbt                  = start sbt terminal" \
-"   find-config-fragments       = list all config. fragments"
+"   find-config-fragments       = list all config. fragments" \
+"   check-submodule-status      = check that all submodules in generators/ have been initialized"
 
 #########################################################################################
 # include additional subproject make fragments
