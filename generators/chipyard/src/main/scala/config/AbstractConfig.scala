@@ -11,9 +11,9 @@ import org.chipsalliance.cde.config.{Config}
 // --------------
 
 class AbstractConfig extends Config(
-  // ==================================
+  // ================================================
   //   Set up TestHarness
-  // ==================================
+  // ================================================
   // The HarnessBinders control generation of hardware in the TestHarness
   new chipyard.harness.WithUARTAdapter ++                          // add UART adapter to display UART on stdout, if uart is present
   new chipyard.harness.WithBlackBoxSimMem ++                       // add SimDRAM DRAM model for axi4 backing memory, if axi4 mem is enabled
@@ -31,9 +31,9 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithResetFromHarness ++                     // reset controlled by harness
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ // generate clocks in harness with unsynthesizable ClockSourceAtFreqMHz
 
-  // ==================================
+  // ================================================
   //   Set up I/O harness
-  // ==================================
+  // ================================================
   // The IOBinders instantiate ChipTop IOs to match desired digital IOs
   // IOCells are generated for "Chip-like" IOs
   new chipyard.iobinders.WithSerialTLIOCells ++
@@ -57,9 +57,9 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithUARTTSIPunchthrough ++
   new chipyard.iobinders.WithNMITiedOff ++
 
-  // ==================================
-  //   Set up Memory Devices
-  // ==================================
+  // ================================================
+  //   Set up External Memory and IO Devices
+  // ================================================
   // External memory section
   new testchipip.serdes.WithSerialTL(Seq(                           /** add a serial-tilelink interface */
     testchipip.serdes.SerialTLParams(
@@ -68,39 +68,54 @@ class AbstractConfig extends Config(
     )
   )) ++
 
-  // Peripheral section
+  // MMIO device section
   new chipyard.config.WithUART ++                                   /** add a UART */
   
-  // Core section
-  new chipyard.config.WithBootROM ++                                /** use default bootrom */
-  new testchipip.boot.WithCustomBootPin ++                          /** add a custom-boot-pin to support pin-driven boot address */
-  new testchipip.boot.WithBootAddrReg ++                            /** add a boot-addr-reg for configurable boot address */
-  
-  // Debug section
+  // ================================================
+  //   Set up Debugging
+  // ================================================
+  // JTAG
   new chipyard.config.WithDebugModuleAbstractDataWords(8) ++        /** increase debug module data capacity */
   // new chipyard.config.WithJTAGDTMKey(idcodeVersion = 2, partNum = 0x000, manufId = 0x489, debugIdleCycles = 5) ++
   // new freechips.rocketchip.subsystem.WithNBreakpoints(2) ++
   new freechips.rocketchip.subsystem.WithJtagDTM ++                 /** set the debug module to expose a JTAG port */
+
+  // Boot Select Pins
+  new testchipip.boot.WithCustomBootPin ++                          /** add a custom-boot-pin to support pin-driven boot address */
+  new testchipip.boot.WithBootAddrReg ++                            /** add a boot-addr-reg for configurable boot address */
   
-  // ==================================
-  //   Set up tiles
-  // ==================================
+  // ================================================
+  //   Set up Interrupts
+  // ================================================
+  // CLINT and PLIC related settings goes here
+  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++    /** no external interrupts */
+  
+  // ================================================
+  //   Set up Tiles
+  // ================================================
+  // core settings goes here
+  
+
+  // ================================================
+  //   Set up Memory system
+  // ================================================
+  // On-chip memory section
+  new chipyard.config.WithBootROM ++                                /** use default bootrom */
+  
   // Cache settings
   new chipyard.config.WithL2TLBs(1024) ++                           /** use L2 TLBs */
   new freechips.rocketchip.subsystem.WithInclusiveCache ++          /** use Sifive L2 cache */
   
-  // Memory settings
+  // Memory Bus settings
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++      /** Default 1 memory channels */
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++              /** no top-level MMIO master port (overrides default set in rocketchip) */
   new freechips.rocketchip.subsystem.WithNoSlavePort ++             /** no top-level MMIO slave port (overrides default set in rocketchip) */
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++     /** hierarchical buses including sbus/mbus/pbus/fbus/cbus/l2 */
 
-  // Core Settings
-  new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++    /** no external interrupts */
-  
-  // ==================================
-  //   Set up reset and clocking
-  // ==================================
+  // ================================================
+  //   Set up power, reset and clocking
+  // ================================================
+  // clocking
   new freechips.rocketchip.subsystem.WithDontDriveBusClocksFromSBus ++ /** leave the bus clocks undriven by sbus */
   new freechips.rocketchip.subsystem.WithClockGateModel ++          /** add default EICG_wrapper clock gate model */
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("sbus", "mbus", "pbus", "fbus", "cbus", "obus", "implicit"), Seq("tile"))) ++
@@ -116,6 +131,10 @@ class AbstractConfig extends Config(
   new chipyard.config.WithNoSubsystemDrivenClocks ++                /** drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks */
   new chipyard.clocking.WithPassthroughClockGenerator ++
   
+  // reset
+
+  // power
+
   // ==================================
   //   Base Settings
   // ==================================
