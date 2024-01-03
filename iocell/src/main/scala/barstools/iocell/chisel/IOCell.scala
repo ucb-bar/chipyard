@@ -3,8 +3,9 @@
 package barstools.iocell.chisel
 
 import chisel3._
-import chisel3.util.{Cat, HasBlackBoxResource, HasBlackBoxInline}
-import chisel3.experimental.{Analog, BaseModule, DataMirror, IO}
+import chisel3.util.{Cat, HasBlackBoxInline}
+import chisel3.reflect.DataMirror
+import chisel3.experimental.{Analog, BaseModule}
 
 // The following four IO cell bundle types are bare-minimum functional connections
 // for modeling 4 different IO cell scenarios. The intention is that the user
