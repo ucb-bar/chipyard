@@ -76,6 +76,9 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
     def referenceReset = dutClock.in.head._1.reset
     def success = { require(false, "Unused"); false.B }
 
+    childClock := harnessBinderClock
+    childReset := harnessBinderReset
+
     ddrOverlay.mig.module.clock := harnessBinderClock
     ddrOverlay.mig.module.reset := harnessBinderReset
     ddrBlockDuringReset.module.clock := harnessBinderClock
