@@ -1,7 +1,8 @@
 package chipyard.iobinders
 
 import chisel3._
-import chisel3.experimental.{Analog, IO, DataMirror}
+import chisel3.reflect.DataMirror
+import chisel3.experimental.Analog
 
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.diplomacy._
