@@ -145,3 +145,6 @@
 [submodule "toolchains/riscv-tools/riscv-spike-devices"]
 	path = toolchains/riscv-tools/riscv-spike-devices
 	url = https://github.com/ucb-bar/spike-devices.git
+[submodule "generators/uciedigital"]
+	path = generators/uciedigital
+	url = git@github.com:ucb-ucie/uciedigital.git
