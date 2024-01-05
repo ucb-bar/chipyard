@@ -84,6 +84,8 @@ endif
 # Returns a list of files in directories $1 with *any* of the file extensions in $2
 lookup_srcs_by_multiple_type = $(foreach type,$(2),$(call lookup_srcs,$(1),$(type)))
 
+CHECK_SUBMODULES_COMMAND = echo "Checking all submodules in generators/ are initialized. Uninitialized submodules will be displayed" ; ! git submodule status $(base_dir)/generators | grep ^-
+
 SCALA_EXT = scala
 VLOG_EXT = sv v
 CHIPYARD_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim fpga/fpga-shells fpga/src)
@@ -119,7 +121,8 @@ $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip
 #########################################################################################
 # compile scala jars
 #########################################################################################
-$(CHIPYARD_CLASSPATH_TARGETS) &: check-submodule-status $(CHIPYARD_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(CHIPYARD_VLOG_SOURCES)
+$(CHIPYARD_CLASSPATH_TARGETS) &: $(CHIPYARD_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(CHIPYARD_VLOG_SOURCES)
+	$(CHECK_SUBMODULES_COMMAND)
 	mkdir -p $(dir $@)
 	$(call run_sbt_assembly,$(SBT_PROJECT),$(CHIPYARD_CLASSPATH))
 
@@ -458,8 +461,7 @@ help:
 
 .PHONY: check-submodule-status
 check-submodule-status:
-	echo "Checking all submodules in generators/ are initialized. Uninitialized submodules will be displayed"
-	! git submodule status $(base_dir)/generators | grep ^-
+	$(CHECK_SUBMODULES_COMMAND)
 
 #########################################################################################
 # Implicit rule handling
