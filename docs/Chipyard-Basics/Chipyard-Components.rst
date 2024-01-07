@@ -107,7 +107,7 @@ Software
   See :ref:`fire-marshal` for more information.
 
 **Baremetal-IDE**
-  Baremetal-IDE is an all-in-one tool for baremetal-level C/C++ program developments. See `Tutorial <https://ucb-bar.gitbook.io/chipyard/baremetal-ide/getting-started-with-baremetal-ide/>`_ for more information.
+  Baremetal-IDE is an all-in-one tool for baremetal-level C/C++ program development. See `Tutorial <https://ucb-bar.gitbook.io/chipyard/baremetal-ide/getting-started-with-baremetal-ide/>`_ for more information.
 
 Sims
 -------------------------------------------
