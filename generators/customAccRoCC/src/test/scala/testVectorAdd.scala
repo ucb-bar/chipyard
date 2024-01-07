@@ -24,7 +24,7 @@ class vectorAddTest extends AnyFlatSpec with ChiselScalatestTester {
       c.io.cmd.bits.rs2.poke("h_08_07_06_05_04_03_02_01".U)
       c.io.cmd.valid.poke(/* YOUR CODE HERE */)
 
-			/* step the clock by 1 cycle */
+      /* step the clock by 1 cycle */
       /* YOUR CODE HERE */
 
       /* expect valid */
@@ -32,7 +32,7 @@ class vectorAddTest extends AnyFlatSpec with ChiselScalatestTester {
       c.io.resp.ready.poke(true.B)
       c.io.resp.bits.data.expect(/* YOUR CODE HERE */)
       
-			println("Observed output value :" + c.io.resp.bits.data.peek().litValue)
+      println("Observed output value :" + c.io.resp.bits.data.peek().litValue)
       
       c.clock.step(1)
 

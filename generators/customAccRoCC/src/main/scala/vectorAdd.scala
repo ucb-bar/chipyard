@@ -68,9 +68,9 @@ class vectorAdd()(implicit p: Parameters) extends Module {
  
   /* Performing sum */
   for (i <- 0 until 8) {
-		/* YOUR CODE HERE */
+    /* YOUR CODE HERE */
   }
 
-	/* printf for debugging in sim */
-	// printf("sum_vec_wire = %x \n", sum_vec_wire.asUInt) // example C-style printf
+  /* printf for debugging in sim */
+  // printf("sum_vec_wire = %x \n", sum_vec_wire.asUInt) // example C-style printf
 }
