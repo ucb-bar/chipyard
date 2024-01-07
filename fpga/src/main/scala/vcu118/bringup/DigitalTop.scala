@@ -17,7 +17,7 @@ import chipyard.{DigitalTop, DigitalTopModule}
 
 class BringupVCU118DigitalTop(implicit p: Parameters) extends DigitalTop
   with sifive.blocks.devices.i2c.HasPeripheryI2C
-  with testchipip.HasPeripheryTSIHostWidget
+  with testchipip.tsi.HasPeripheryTSIHostWidget
 {
   override lazy val module = new BringupVCU118DigitalTopModule(this)
 }

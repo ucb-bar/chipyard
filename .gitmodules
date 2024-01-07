@@ -136,3 +136,15 @@
 [submodule "generators/hardfloat"]
 	path = generators/hardfloat
 	url = https://github.com/ucb-bar/berkeley-hardfloat.git
+[submodule "generators/caliptra-aes-acc"]
+	path = generators/caliptra-aes-acc
+	url = https://github.com/ucb-bar/caliptra-aes-acc
+[submodule "generators/rocc-acc-utils"]
+	path = generators/rocc-acc-utils
+	url = https://github.com/ucb-bar/rocc-acc-utils
+[submodule "tools/install-circt"]
+	path = tools/install-circt
+	url = https://github.com/circt/install-circt/
+[submodule "toolchains/riscv-tools/riscv-spike-devices"]
+	path = toolchains/riscv-tools/riscv-spike-devices
+	url = https://github.com/ucb-bar/spike-devices.git

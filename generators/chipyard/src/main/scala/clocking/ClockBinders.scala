@@ -75,11 +75,11 @@ class WithPLLSelectorDividerClockGenerator extends OverrideLazyIOBinder({
         o.reset := reset_wire
       }
 
-      (Seq(ClockPort(clock_io, 100), ResetPort(reset_io)), clockIOCell ++ resetIOCell)
+      (Seq(ClockPort(() => clock_io, 100), ResetPort(() => reset_io)), clockIOCell ++ resetIOCell)
     }
   }
 })
-
+ 
 // This passes all clocks through to the TestHarness
 class WithPassthroughClockGenerator extends OverrideLazyIOBinder({
   (system: HasChipyardPRCI) => {
@@ -113,9 +113,9 @@ class WithPassthroughClockGenerator extends OverrideLazyIOBinder({
         val clock_io = IO(Input(Clock())).suggestName(s"clock_${m.name.get}")
         b.clock := clock_io
         b.reset := reset_io
-        ClockPort(clock_io, freq)
+        ClockPort(() => clock_io, freq)
       }.toSeq
-      ((clock_ios :+ ResetPort(reset_io)), Nil)
+      ((clock_ios :+ ResetPort(() => reset_io)), Nil)
     }
   }
 })

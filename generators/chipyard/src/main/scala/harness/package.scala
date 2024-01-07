@@ -7,5 +7,5 @@ package object harness
 {
   import chipyard.iobinders.Port
   type HarnessBinderFunction = PartialFunction[(HasHarnessInstantiators, Port[_]), Unit]
-  type MultiHarnessBinderFunction = (Seq[Port[_]], Seq[Port[_]]) => Unit
+  type MultiHarnessBinderFunction = (HasHarnessInstantiators, Seq[Port[_]], Seq[Port[_]]) => Unit
 }

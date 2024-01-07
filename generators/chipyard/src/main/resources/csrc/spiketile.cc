@@ -447,18 +447,6 @@ chipyard_simif_t::chipyard_simif_t(size_t icache_ways,
   use_stq(false),
   htif(nullptr),
   fast_clint(false),
-  cfg(std::make_pair(0, 0),
-      nullptr,
-      isastr,
-      "MSU",
-      "vlen:128,elen:64",
-      false,
-      endianness_little,
-      pmpregions,
-      std::vector<mem_cfg_t>(),
-      std::vector<size_t>(),
-      false,
-      0),
   accessed_tofrom_host(false),
   icache_ways(icache_ways),
   icache_sets(icache_sets),
@@ -469,6 +457,19 @@ chipyard_simif_t::chipyard_simif_t(size_t icache_ways,
   mmio_valid(false),
   mmio_inflight(false)
 {
+
+  cfg.initrd_bounds = std::make_pair(0, 0);
+  cfg.bootargs = nullptr;
+  cfg.isa = isastr;
+  cfg.priv = "MSU";
+  cfg.varch = "vlen:128,elen:64";
+  cfg.misaligned = false;
+  cfg.endianness = endianness_little;
+  cfg.pmpregions = pmpregions;
+  cfg.mem_layout = std::vector<mem_cfg_t>();
+  cfg.hartids = std::vector<size_t>();
+  cfg.explicit_hartids = false;
+  cfg.trigger_count = 0;
 
   icache.resize(icache_ways);
   for (auto &w : icache) {

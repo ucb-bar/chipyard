@@ -12,7 +12,14 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.devices.debug.{SimJTAG}
 import barstools.iocell.chisel._
-import testchipip._
+import testchipip.dram.{SimDRAM}
+import testchipip.tsi.{SimTSI, SerialRAM, TSI, TSIIO}
+import testchipip.soc.{TestchipSimDTM}
+import testchipip.spi.{SimSPIFlashModel}
+import testchipip.uart.{UARTAdapter, UARTToSerial}
+import testchipip.serdes.{SerialWidthAdapter}
+import testchipip.iceblk.{SimBlockDevice, BlockDeviceModel}
+import testchipip.cosim.{SpikeCosim}
 import icenet.{NicLoopback, SimNetwork}
 import chipyard._
 import chipyard.clocking.{HasChipyardPRCI}
@@ -215,13 +222,13 @@ class WithSimTSIOverSerialTL extends HarnessBinder({
     if (DataMirror.directionOf(port.io.clock) == Direction.Input) {
       port.io.clock := th.harnessBinderClock
     }
-    val ram = LazyModule(new SerialRAM(port.serdesser)(port.serdesser.p))
+    val ram = LazyModule(new SerialRAM(port.serdesser, port.params)(port.serdesser.p))
     Module(ram.module)
     ram.module.io.ser <> port.io.bits
     val tsi = Module(new SimTSI)
     tsi.io.clock := th.harnessBinderClock
     tsi.io.reset := th.harnessBinderReset
-    tsi.io.tsi <> ram.module.io.tsi
+    tsi.io.tsi <> ram.module.io.tsi.get
     val exit = tsi.io.exit
     val success = exit === 1.U
     val error = exit >= 2.U

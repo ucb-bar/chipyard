@@ -1,9 +1,9 @@
 #include "mmio.h"
 
-#define GCD_STATUS 0x1000
-#define GCD_X 0x1004
-#define GCD_Y 0x1008
-#define GCD_GCD 0x100C
+#define GCD_STATUS 0x4000
+#define GCD_X 0x4004
+#define GCD_Y 0x4008
+#define GCD_GCD 0x400C
 
 unsigned int gcd_ref(unsigned int x, unsigned int y) {
   while (y != 0) {

@@ -97,7 +97,7 @@ ifeq ($(SUB_PROJECT),testchipip)
 	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= chipyard.unittest
 	CONFIG            ?= TestChipUnitTestConfig
-	CONFIG_PACKAGE    ?= testchipip
+	CONFIG_PACKAGE    ?= testchipip.test
 	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
 	TOP               ?= UnitTestSuite
@@ -293,11 +293,12 @@ endif
 # build output directory for compilation
 #########################################################################################
 # output for all project builds
-gen_dir=$(sim_dir)/generated-src
+generated_src_name ?=generated-src
+gen_dir             =$(sim_dir)/$(generated_src_name)
 # per-project output directory
-build_dir=$(gen_dir)/$(long_name)
+build_dir           =$(gen_dir)/$(long_name)
 # final generated collateral per-project
-GEN_COLLATERAL_DIR ?= $(build_dir)/gen-collateral
+GEN_COLLATERAL_DIR ?=$(build_dir)/gen-collateral
 
 #########################################################################################
 # assembly/benchmark variables

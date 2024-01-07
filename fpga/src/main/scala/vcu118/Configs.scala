@@ -15,7 +15,7 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
 
-import testchipip.{SerialTLKey}
+import testchipip.serdes.{SerialTLKey}
 
 import chipyard._
 import chipyard.harness._
@@ -36,7 +36,7 @@ class WithSystemModifications extends Config((site, here, up) => {
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vcu118/sdboot/build/sdboot.bin")
   }
   case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VCU118DDRSize)))) // set extmem to DDR size
-  case SerialTLKey => None // remove serialized tl port
+  case SerialTLKey => Nil // remove serialized tl port
 })
 
 // DOC include start: AbstractVCU118 and Rocket
@@ -46,6 +46,7 @@ class WithVCU118Tweaks extends Config(
   new chipyard.clocking.WithPassthroughClockGenerator ++
   new chipyard.config.WithMemoryBusFrequency(100) ++
   new chipyard.config.WithSystemBusFrequency(100) ++
+  new chipyard.config.WithControlBusFrequency(100) ++
   new chipyard.config.WithPeripheryBusFrequency(100) ++
   new WithFPGAFrequency(100) ++ // default 100MHz freq
   // harness binders
@@ -76,7 +77,9 @@ class BoomVCU118Config extends Config(
 class WithFPGAFrequency(fMHz: Double) extends Config(
   new chipyard.harness.WithHarnessBinderClockFreqMHz(fMHz) ++
   new chipyard.config.WithSystemBusFrequency(fMHz) ++
-  new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.
+  new chipyard.config.WithPeripheryBusFrequency(fMHz) ++
+  new chipyard.config.WithControlBusFrequency(fMHz) ++
+  new chipyard.config.WithFrontBusFrequency(fMHz) ++
   new chipyard.config.WithMemoryBusFrequency(fMHz)
 )
 

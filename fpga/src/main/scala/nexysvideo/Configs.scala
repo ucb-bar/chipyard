@@ -12,7 +12,7 @@ import freechips.rocketchip.tile._
 import sifive.blocks.devices.uart._
 import sifive.fpgashells.shell.{DesignKey}
 
-import testchipip.{SerialTLKey}
+import testchipip.serdes.{SerialTLKey}
 
 import chipyard.{BuildSystem}
 
@@ -26,13 +26,14 @@ class WithNexysVideoTweaks extends Config(
   new WithNexysVideoUARTTSI ++
   new WithNexysVideoDDRTL ++
   new WithNoDesignKey ++
-  new testchipip.WithUARTTSIClient ++
+  new testchipip.tsi.WithUARTTSIClient ++
   new chipyard.harness.WithSerialTLTiedOff ++
   new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
   new chipyard.config.WithMemoryBusFrequency(50.0) ++
   new chipyard.config.WithFrontBusFrequency(50.0) ++
   new chipyard.config.WithSystemBusFrequency(50.0) ++
   new chipyard.config.WithPeripheryBusFrequency(50.0) ++
+  new chipyard.config.WithControlBusFrequency(50.0) ++
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
   new chipyard.config.WithNoDebug ++ // no jtag
@@ -52,7 +53,7 @@ class WithTinyNexysVideoTweaks extends Config(
   new WithNexysVideoUARTTSI ++
   new WithNoDesignKey ++
   new sifive.fpgashells.shell.xilinx.WithNoNexysVideoShellDDR ++ // no DDR
-  new testchipip.WithUARTTSIClient ++
+  new testchipip.tsi.WithUARTTSIClient ++
   new chipyard.harness.WithSerialTLTiedOff ++
   new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
   new chipyard.config.WithMemoryBusFrequency(50.0) ++

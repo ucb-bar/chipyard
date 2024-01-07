@@ -11,7 +11,10 @@ import freechips.rocketchip.util.{PlusArg}
 import freechips.rocketchip.subsystem.{CacheBlockBytes}
 import freechips.rocketchip.devices.debug.{SimJTAG}
 import freechips.rocketchip.jtag.{JTAGIO}
-import testchipip.{SerialTLKey, UARTAdapter, SimDRAM, TSIHarness, SimTSI}
+import testchipip.serdes.{SerialTLKey}
+import testchipip.uart.{UARTAdapter}
+import testchipip.dram.{SimDRAM}
+import testchipip.tsi.{TSIHarness, SimTSI}
 import chipyard.harness.{BuildTop}
 
 // A "flat" TestHarness that doesn't use IOBinders
@@ -39,8 +42,8 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
   dut.custom_boot_pad := PlusArg("custom_boot_pin", width=1)
 
   // Serialized TL
-  val sVal = p(SerialTLKey).get
-  val serialTLManagerParams = sVal.serialTLManagerParams.get
+  val sVal = p(SerialTLKey)(0)
+  val serialTLManagerParams = sVal.manager.get
   require(serialTLManagerParams.isMemoryDevice)
 
   withClockAndReset(clock, reset) {
@@ -49,10 +52,11 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
       dut.serial_tl_pad.clock := clock
     }
     val harnessRAM = TSIHarness.connectRAM(
-      lazyDut.system.serdesser.get,
+      p(SerialTLKey)(0),
+      lazyDut.system.serdessers(0),
       serial_bits,
       reset)
-    io.success := SimTSI.connect(Some(harnessRAM.module.io.tsi), clock, reset)
+    io.success := SimTSI.connect(harnessRAM.module.io.tsi, clock, reset)
 
   }
 

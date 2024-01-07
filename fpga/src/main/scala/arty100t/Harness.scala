@@ -17,7 +17,6 @@ import sifive.blocks.devices.uart._
 
 import chipyard._
 import chipyard.harness._
-import chipyard.iobinders.{HasIOBinders}
 
 class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell {
   def dp = designParameters
@@ -33,9 +32,6 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
   dutClock := dutWrangler.node := dutGroup := harnessSysPLLNode
 
   harnessSysPLLNode := clockOverlay.overlayOutput.node
-
-  val io_uart_bb = BundleBridgeSource(() => new UARTPortIO(dp(PeripheryUARTKey).headOption.getOrElse(UARTParams(0))))
-  val uartOverlay = dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
 
   val ddrOverlay = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLLNode)).asInstanceOf[DDRArtyPlacedOverlay]
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(

@@ -9,11 +9,11 @@ import freechips.rocketchip.tilelink.{TLBundle}
 import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp}
 import sifive.blocks.devices.i2c.{HasPeripheryI2CModuleImp}
 
-import testchipip.{HasPeripheryTSIHostWidget, TSIHostWidgetIO}
+import testchipip.tsi.{HasPeripheryTSIHostWidget, TSIHostWidgetIO}
 
 import chipyard.iobinders.{OverrideIOBinder, Port, TLMemPort}
 
-case class TSIHostWidgetPort(val io: TSIHostWidgetIO)
+case class TSIHostWidgetPort(val getIO: () => TSIHostWidgetIO)
   extends Port[TSIHostWidgetIO]
 
 class WithTSITLIOPassthrough extends OverrideIOBinder({
@@ -25,6 +25,6 @@ class WithTSITLIOPassthrough extends OverrideIOBinder({
     require(system.tsiSerial.size == 1)
     val io_tsi_serial_pins_temp = IO(DataMirror.internal.chiselTypeClone[TSIHostWidgetIO](system.tsiSerial.head)).suggestName("tsi_serial")
     io_tsi_serial_pins_temp <> system.tsiSerial.head
-    (Seq(TLMemPort(io_tsi_tl_mem_pins_temp), TSIHostWidgetPort(io_tsi_serial_pins_temp)), Nil)
+    (Seq(TLMemPort(() => io_tsi_tl_mem_pins_temp), TSIHostWidgetPort(() => io_tsi_serial_pins_temp)), Nil)
   }
 })

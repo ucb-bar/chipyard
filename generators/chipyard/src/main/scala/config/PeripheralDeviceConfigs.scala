@@ -22,13 +22,13 @@ class SmallSPIFlashRocketConfig extends Config(
 
 class SimBlockDeviceRocketConfig extends Config(
   new chipyard.harness.WithSimBlockDevice ++                // drive block-device IOs with SimBlockDevice
-  new testchipip.WithBlockDevice ++                         // add block-device module to peripherybus
+  new testchipip.iceblk.WithBlockDevice ++                  // add block-device module to peripherybus
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class BlockDeviceModelRocketConfig extends Config(
   new chipyard.harness.WithBlockDeviceModel ++              // drive block-device IOs with a BlockDeviceModel
-  new testchipip.WithBlockDevice ++                         // add block-device module to periphery bus
+  new testchipip.iceblk.WithBlockDevice ++                  // add block-device module to periphery bus
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
@@ -52,8 +52,11 @@ class MMIORocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class LBWIFRocketConfig extends Config(
-  new testchipip.WithSerialTLMem(isMainMemory=true) ++      // set lbwif memory base to DRAM_BASE, use as main memory
-  new freechips.rocketchip.subsystem.WithNoMemPort ++       // remove AXI4 backing memory
+  new chipyard.config.WithOffchipBusFrequency(500) ++
+  new testchipip.soc.WithOffchipBusClient(MBUS) ++
+  new testchipip.soc.WithOffchipBus ++
+  new testchipip.serdes.WithSerialTLMem(isMainMemory=true) ++ // set lbwif memory base to DRAM_BASE, use as main memory
+  new freechips.rocketchip.subsystem.WithNoMemPort ++         // remove AXI4 backing memory
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
@@ -66,10 +69,10 @@ class dmiRocketConfig extends Config(
 // DOC include end: DmiRocket
 
 class ManyPeripheralsRocketConfig extends Config(
-  new testchipip.WithBlockDevice ++                          // add block-device module to peripherybus
-  new testchipip.WithOffchipBusClient(MBUS) ++               // OBUS provides backing memory to the MBUS
-  new testchipip.WithOffchipBus ++                           // OBUS must exist for serial-tl to master off-chip memory
-  new testchipip.WithSerialTLMem(isMainMemory=true) ++       // set lbwif memory base to DRAM_BASE, use as main memory
+  new testchipip.iceblk.WithBlockDevice ++                   // add block-device module to peripherybus
+  new testchipip.soc.WithOffchipBusClient(MBUS) ++           // OBUS provides backing memory to the MBUS
+  new testchipip.soc.WithOffchipBus ++                       // OBUS must exist for serial-tl to master off-chip memory
+  new testchipip.serdes.WithSerialTLMem(isMainMemory=true) ++ // set lbwif memory base to DRAM_BASE, use as main memory
   new chipyard.harness.WithSimSPIFlashModel(true) ++         // add the SPI flash model in the harness (read-only)
   new chipyard.harness.WithSimBlockDevice ++                 // drive block-device IOs with SimBlockDevice
   new chipyard.config.WithSPIFlash ++                        // add the SPI flash controller
@@ -79,14 +82,9 @@ class ManyPeripheralsRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
-class QuadChannelRocketConfig extends Config(
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++      // 4 AXI4 channels
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
 class UARTTSIRocketConfig extends Config(
   new chipyard.harness.WithSerialTLTiedOff ++
-  new testchipip.WithUARTTSIClient ++
+  new testchipip.tsi.WithUARTTSIClient ++
   new chipyard.config.WithMemoryBusFrequency(10) ++
   new chipyard.config.WithFrontBusFrequency(10) ++
   new chipyard.config.WithPeripheryBusFrequency(10) ++

@@ -15,7 +15,7 @@ import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
 import freechips.rocketchip.util.{ResetCatchAndSync}
 import sifive.blocks.devices.uart._
 
-import testchipip._
+import testchipip.tsi.{SerialRAM}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 
 import junctions.{NastiKey, NastiParameters}
@@ -69,7 +69,7 @@ class WithTSIBridgeAndHarnessRAMOverSerialTL extends HarnessBinder({
   case (th: FireSim, port: SerialTLPort) => {
     val bits = port.io.bits
     port.io.clock := th.harnessBinderClock
-    val ram = LazyModule(new SerialRAM(port.serdesser)(Parameters.empty))
+    val ram = LazyModule(new SerialRAM(port.serdesser, port.params)(port.serdesser.p))
     Module(ram.module)
     ram.module.io.ser <> port.io.bits
 
@@ -78,7 +78,7 @@ class WithTSIBridgeAndHarnessRAMOverSerialTL extends HarnessBinder({
     // If FASED bridge is attached, loadmem widget is present
     val hasMainMemory = th.chipParameters(th.p(MultiChipIdx))(ExtMem).isDefined
     val mainMemoryName = Option.when(hasMainMemory)(MainMemoryConsts.globalName(th.p(MultiChipIdx)))
-    TSIBridge(th.harnessBinderClock, ram.module.io.tsi, mainMemoryName, th.harnessBinderReset.asBool)(th.p)
+    TSIBridge(th.harnessBinderClock, ram.module.io.tsi.get, mainMemoryName, th.harnessBinderReset.asBool)(th.p)
   }
 })
 

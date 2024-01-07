@@ -13,6 +13,7 @@ import freechips.rocketchip.tilelink.{HasTLBusParams}
 
 import chipyard._
 import chipyard.clocking._
+import testchipip.soc.{OffchipBusKey}
 
 // The default RocketChip BaseSubsystem drives its diplomatic clock graph
 // with the implicit clocks of Subsystem. Don't do that, instead we extend
@@ -102,6 +103,9 @@ class WithFrontBusFrequency(freqMHz: Double) extends Config((site, here, up) => 
 })
 class WithControlBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
   case ControlBusKey => up(ControlBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
+})
+class WithOffchipBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
+  case OffchipBusKey => up(OffchipBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
 })
 
 class WithRationalMemoryBusCrossing extends WithSbusToMbusCrossingType(RationalCrossing(Symmetric))
