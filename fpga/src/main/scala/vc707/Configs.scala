@@ -15,7 +15,7 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VC7074GDDRSize}
 
-import testchipip.{SerialTLKey}
+import testchipip.serdes.{SerialTLKey}
 
 import chipyard.{BuildSystem, ExtTLMem}
 import chipyard.harness._

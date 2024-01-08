@@ -106,6 +106,9 @@ Software
   FireMarshal is the default workload generation tool that Chipyard uses to create software to run on its platforms.
   See :ref:`fire-marshal` for more information.
 
+**Baremetal-IDE**
+  Baremetal-IDE is an all-in-one tool for baremetal-level C/C++ program development. See `Tutorial <https://ucb-bar.gitbook.io/chipyard/baremetal-ide/getting-started-with-baremetal-ide/>`_ for more information.
+
 Sims
 -------------------------------------------
 
