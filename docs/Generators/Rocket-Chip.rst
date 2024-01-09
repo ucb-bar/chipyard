@@ -1,8 +1,8 @@
 Rocket Chip
 ===========
 
-Rocket Chip generator is an SoC generator developed at Berkeley and now supported by
-`SiFive <https://www.sifive.com>`__. Chipyard uses the Rocket Chip generator as the basis for producing a RISC-V SoC.
+Rocket Chip generator is an SoC generator developed at Berkeley and SiFive, and now maintained openly in Chips Alliance.
+Chipyard uses the Rocket Chip generator as the basis for producing a RISC-V SoC.
 
 `Rocket Chip` is distinct from `Rocket core`, the in-order RISC-V CPU generator.
 Rocket Chip includes many parts of the SoC besides the CPU. Though Rocket Chip

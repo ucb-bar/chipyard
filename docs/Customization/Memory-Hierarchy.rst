@@ -46,17 +46,17 @@ agents and MMIO peripherals. Ordinarily, it is a fully-connected crossbar, but
 a network-on-chip-based implementation can be generated using Constellation.
 See :ref:`Customization/NoC-SoCs:SoCs with NoC-based Interconnects` for more.
 
-The SiFive L2 Cache
--------------------
+The Inclusive Last-Level Cache
+---------------------------------
 
-The default ``RocketConfig`` provided in the Chipyard example project uses SiFive's
+The default ``RocketConfig`` provided in the Chipyard example project uses the Rocket-Chip
 InclusiveCache generator to produce a shared L2 cache. In the default
 configuration, the L2 uses a single cache bank with 512 KiB capacity and 8-way
 set-associativity. However, you can change these parameters to obtain your
 desired cache configuration. The main restriction is that the number of ways
 and the number of banks must be powers of 2.
 
-Refer to the ``CacheParameters`` object defined in sifive-cache for
+Refer to the ``CacheParameters`` object defined in ``rocket-chip-inclusive-cache`` for
 customization options.
 
 The Broadcast Hub

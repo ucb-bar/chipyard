@@ -13,9 +13,6 @@
 [submodule "generators/boom"]
 	path = generators/boom
 	url = https://github.com/riscv-boom/riscv-boom.git
-[submodule "generators/sifive-blocks"]
-	path = generators/sifive-blocks
-	url = https://github.com/chipsalliance/rocket-chip-blocks.git
 [submodule "generators/hwacha"]
 	path = generators/hwacha
 	url = https://github.com/ucb-bar/hwacha.git
@@ -25,9 +22,6 @@
 [submodule "generators/icenet"]
 	path = generators/icenet
 	url = https://github.com/firesim/icenet.git
-[submodule "generators/block-inclusivecache-sifive"]
-	path = generators/sifive-cache
-	url = https://github.com/chipsalliance/rocket-chip-inclusive-cache.git
 [submodule "tools/dsptools"]
 	path = tools/dsptools
 	url = https://github.com/ucb-bar/dsptools.git
@@ -148,3 +142,9 @@
 [submodule "toolchains/riscv-tools/riscv-spike-devices"]
 	path = toolchains/riscv-tools/riscv-spike-devices
 	url = https://github.com/ucb-bar/spike-devices.git
+[submodule "generators/rocket-chip-blocks"]
+	path = generators/rocket-chip-blocks
+	url = https://github.com/chipsalliance/rocket-chip-blocks.git
+[submodule "generators/rocket-chip-inclusive-cache"]
+	path = generators/rocket-chip-inclusive-cache
+	url = https://github.com/chipsalliance/rocket-chip-inclusive-cache.git
