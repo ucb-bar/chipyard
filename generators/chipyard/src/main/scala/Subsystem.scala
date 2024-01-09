@@ -24,7 +24,7 @@ import freechips.rocketchip.amba.axi4._
 import boom.common.{BoomTile}
 
 
-import testchipip.{CanHavePeripheryTLSerial, SerialTLKey}
+import testchipip.serdes.{CanHavePeripheryTLSerial, SerialTLKey}
 
 trait CanHaveHTIF { this: BaseSubsystem =>
   // Advertise HTIF if system can communicate with fesvr

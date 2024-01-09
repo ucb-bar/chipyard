@@ -29,7 +29,8 @@ usage() {
     echo "   7. FireSim pre-compile sources"
     echo "   8. FireMarshal"
     echo "   9. FireMarshal pre-compile default buildroot Linux sources"
-    echo "  10. Runs repository clean-up"
+    echo "  10. Install CIRCT"
+    echo "  11. Runs repository clean-up"
     echo ""
     echo "**See below for options to skip parts of the setup. Skipping parts of the setup is not guaranteed to be tested/working.**"
     echo ""
@@ -37,12 +38,20 @@ usage() {
     echo "  --help -h               : Display this message"
 
     echo "  --force -f              : Skip all prompts and checks"
-    echo "  --skip-validate         : DEPRECATED: Same functionality as --force"
     echo "  --verbose -v            : Verbose printout"
 
     echo "  --use-unpinned-deps -ud : Use unpinned conda environment"
 
     echo "  --skip -s N             : Skip step N in the list above. Use multiple times to skip multiple steps ('-s N -s M ...')."
+    echo "  --skip-conda            : Skip Conda initialization (step 1)"
+    echo "  --skip-submodules       : Skip submodule initialization (step 2)"
+    echo "  --skip-toolchain        : Skip toolchain collateral (step 3)"
+    echo "  --skip-ctags            : Skip ctags (step 4)"
+    echo "  --skip-precompile       : Skip precompiling sources (steps 5/7)"
+    echo "  --skip-firesim          : Skip Firesim initialization (steps 6/7)"
+    echo "  --skip-marshal          : Skip firemarshal initialization (steps 8/9)"
+    echo "  --skip-circt            : Skip CIRCT install (step 10)"
+    echo "  --skip-clean            : Skip repository clean-up (step 11)"
 
     exit "$1"
 }
@@ -72,6 +81,24 @@ do
         --skip | -s)
             shift
             SKIP_LIST+=(${1}) ;;
+        --skip-conda)
+            SKIP_LIST+=(1) ;;
+        --skip-submodules)
+            SKIP_LIST+=(2) ;;
+        --skip-toolchain)
+            SKIP_LIST+=(3) ;;
+        --skip-ctags)
+            SKIP_LIST+=(4) ;;
+        --skip-precompile)
+            SKIP_LIST+=(5 6) ;;
+        --skip-firesim)
+            SKIP_LIST+=(6 7) ;;
+        --skip-marshal)
+            SKIP_LIST+=(8 9) ;;
+        --skip-circt)
+            SKIP_LIST+=(10) ;;
+        --skip-clean)
+            SKIP_LIST+=(11) ;;
         * )
             error "invalid option $1"
             usage 1 ;;
@@ -150,16 +177,6 @@ if run_step "1"; then
     conda-lock install --conda $(which conda) -p $CYDIR/.conda-env $LOCKFILE &&
     source $CYDIR/.conda-env/etc/profile.d/conda.sh &&
     conda activate $CYDIR/.conda-env
-    exit_if_last_command_failed
-
-    # install circt into conda
-    git submodule update --init $CYDIR/tools/install-circt &&
-    $CYDIR/tools/install-circt/bin/download-release-or-nightly-circt.sh \
-        -f circt-full-shared-linux-x64.tar.gz \
-        -i $CONDA_PREFIX \
-        -v version-file \
-        -x $CYDIR/conda-reqs/circt.json \
-        -g null
     exit_if_last_command_failed
 
     # Conda Setup
@@ -273,8 +290,31 @@ if run_step "8"; then
     popd
 fi
 
-# do misc. cleanup for a "clean" git status
 if run_step "10"; then
+    # install circt into conda
+    if run_step "1"; then
+        PREFIX=$CONDA_PREFIX/$TOOLCHAIN_TYPE
+    else
+        if [ -z "$RISCV" ] ; then
+            error "ERROR: If conda initialization skipped, \$RISCV variable must be defined."
+            exit 1
+        fi
+        PREFIX=$RISCV
+    fi
+
+    git submodule update --init $CYDIR/tools/install-circt &&
+    $CYDIR/tools/install-circt/bin/download-release-or-nightly-circt.sh \
+        -f circt-full-shared-linux-x64.tar.gz \
+        -i $PREFIX \
+        -v version-file \
+        -x $CYDIR/conda-reqs/circt.json \
+        -g null
+    exit_if_last_command_failed
+fi
+
+
+# do misc. cleanup for a "clean" git status
+if run_step "11"; then
     begin_step "10" "Cleaning up repository"
     $CYDIR/scripts/repo-clean.sh
     exit_if_last_command_failed

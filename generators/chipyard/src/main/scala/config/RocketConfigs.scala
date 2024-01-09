@@ -13,7 +13,8 @@ class RocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class TinyRocketConfig extends Config(
-  new chipyard.harness.WithDontTouchChipTopPorts(false) ++         // TODO FIX: Don't dontTouch the ports
+  new chipyard.harness.WithDontTouchChipTopPorts(false) ++        // TODO FIX: Don't dontTouch the ports
+  new testchipip.soc.WithNoScratchpads ++                         // All memory is the Rocket TCMs
   new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++ // use incoherent bus topology
   new freechips.rocketchip.subsystem.WithNBanks(0) ++             // remove L2$
   new freechips.rocketchip.subsystem.WithNoMemPort ++             // remove backing memory
@@ -37,6 +38,7 @@ class RV32RocketConfig extends Config(
 // DOC include start: l1scratchpadrocket
 class ScratchpadOnlyRocketConfig extends Config(
   new chipyard.config.WithL2TLBs(0) ++
+  new testchipip.soc.WithNoScratchpads ++                      // remove subsystem scratchpads, confusingly named, does not remove the L1D$ scratchpads
   new freechips.rocketchip.subsystem.WithNBanks(0) ++
   new freechips.rocketchip.subsystem.WithNoMemPort ++          // remove offchip mem port
   new freechips.rocketchip.subsystem.WithScratchpadsOnly ++    // use rocket l1 DCache scratchpad as base phys mem

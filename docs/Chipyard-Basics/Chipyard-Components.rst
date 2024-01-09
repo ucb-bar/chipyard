@@ -53,9 +53,9 @@ System Components:
 **icenet**
   A Network Interface Controller (NIC) designed to achieve up to 200 Gbps.
 
-**sifive-blocks**
-  System components implemented by SiFive and used by SiFive projects, designed to be integrated with the Rocket Chip generator.
-  These system and peripheral components include UART, SPI, JTAG, I2C, PWM, and other peripheral and interface devices.
+**rocket-chip-blocks**
+  System components originally implemented by SiFive and used by SiFive projects, designed to be integrated with the Rocket Chip generator.
+  Now maintained by Chips Alliance. These system and peripheral components include UART, SPI, JTAG, I2C, PWM, and other peripheral and interface devices.
 
 **AWL (Analog Widget Library)**
   Digital components required for integration with high speed serial links.
@@ -105,6 +105,9 @@ Software
 **FireMarshal**
   FireMarshal is the default workload generation tool that Chipyard uses to create software to run on its platforms.
   See :ref:`fire-marshal` for more information.
+
+**Baremetal-IDE**
+  Baremetal-IDE is an all-in-one tool for baremetal-level C/C++ program development. See `Tutorial <https://ucb-bar.gitbook.io/chipyard/baremetal-ide/getting-started-with-baremetal-ide/>`_ for more information.
 
 Sims
 -------------------------------------------

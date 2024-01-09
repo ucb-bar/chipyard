@@ -33,9 +33,6 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
 
   harnessSysPLLNode := clockOverlay.overlayOutput.node
 
-  val io_uart_bb = BundleBridgeSource(() => new UARTPortIO(dp(PeripheryUARTKey).headOption.getOrElse(UARTParams(0))))
-  val uartOverlay = dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
-
   val ddrOverlay = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLLNode)).asInstanceOf[DDRArtyPlacedOverlay]
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
     name = "chip_ddr",
@@ -78,6 +75,9 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
     def referenceClock = dutClock.in.head._1.clock
     def referenceReset = dutClock.in.head._1.reset
     def success = { require(false, "Unused"); false.B }
+
+    childClock := harnessBinderClock
+    childReset := harnessBinderReset
 
     ddrOverlay.mig.module.clock := harnessBinderClock
     ddrOverlay.mig.module.reset := harnessBinderReset

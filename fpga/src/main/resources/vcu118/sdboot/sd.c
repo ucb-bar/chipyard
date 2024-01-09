@@ -22,7 +22,16 @@
 #error Must define TL_CLK
 #endif
 
-#define F_CLK TL_CLK
+#define F_CLK 		(TL_CLK)
+
+// SPI SCLK frequency, in kHz
+// We are using the 25MHz High Speed mode. If this speed is not supported by the
+// SD card, consider changing to the Default Speed mode (12.5 MHz).
+#define SPI_CLK 	25000
+
+// SPI clock divisor value
+// @see https://ucb-bar.gitbook.io/baremetal-ide/baremetal-ide/using-peripheral-devices/sifive-ips/serial-peripheral-interface-spi
+#define SPI_DIV 	(((F_CLK * 1000) / SPI_CLK) / 2 - 1)
 
 static volatile uint32_t * const spi = (void *)(SPI_CTRL_ADDR);
 
@@ -79,7 +88,9 @@ static inline void sd_cmd_end(void)
 static void sd_poweron(void)
 {
 	long i;
-	REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 300000UL);
+	// HACK: frequency change
+
+	REG32(spi, SPI_REG_SCKDIV) = SPI_DIV;
 	REG32(spi, SPI_REG_CSMODE) = SPI_CSMODE_OFF;
 	for (i = 10; i > 0; i--) {
 		sd_dummy();
@@ -171,12 +182,10 @@ static int copy(void)
 
 	dputs("CMD18");
 
-	kprintf("LOADING 0x%xB PAYLOAD\r\n", PAYLOAD_SIZE_B);
+	kprintf("LOADING 0x%x B PAYLOAD\r\n", PAYLOAD_SIZE_B);
 	kprintf("LOADING  ");
 
-	// TODO: Speed up SPI freq. (breaks between these two values)
-	//REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 16666666UL);
-	REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
+	REG32(spi, SPI_REG_SCKDIV) = SPI_DIV;
 	if (sd_cmd(0x52, BBL_PARTITION_START_SECTOR, 0xE1) != 0x00) {
 		sd_cmd_end();
 		return 1;

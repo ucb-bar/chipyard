@@ -14,7 +14,8 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.prci._
 
-import testchipip.{TLTileResetCtrl, ClockGroupFakeResetSynchronizer}
+import testchipip.boot.{TLTileResetCtrl}
+import testchipip.clocking.{ClockGroupFakeResetSynchronizer}
 
 case class ChipyardPRCIControlParams(
   slaveWhere: TLBusWrapperLocation = CBUS,

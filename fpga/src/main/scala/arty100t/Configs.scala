@@ -12,7 +12,7 @@ import freechips.rocketchip.tile._
 import sifive.blocks.devices.uart._
 import sifive.fpgashells.shell.{DesignKey}
 
-import testchipip.{SerialTLKey}
+import testchipip.serdes.{SerialTLKey}
 
 import chipyard.{BuildSystem}
 
@@ -21,11 +21,15 @@ class WithNoDesignKey extends Config((site, here, up) => {
   case DesignKey => (p: Parameters) => new SimpleLazyRawModule()(p)
 })
 
+// By default, this uses the on-board USB-UART for the TSI-over-UART link
+// The PMODUART HarnessBinder maps the actual UART device to JD pin
 class WithArty100TTweaks(freqMHz: Double = 50) extends Config(
+  new WithArty100TPMODUART ++
   new WithArty100TUARTTSI ++
   new WithArty100TDDRTL ++
+  new WithArty100TJTAG ++
   new WithNoDesignKey ++
-  new testchipip.WithUARTTSIClient ++
+  new testchipip.tsi.WithUARTTSIClient ++
   new chipyard.harness.WithSerialTLTiedOff ++
   new chipyard.harness.WithHarnessBinderClockFreqMHz(freqMHz) ++
   new chipyard.config.WithMemoryBusFrequency(freqMHz) ++
@@ -36,8 +40,6 @@ class WithArty100TTweaks(freqMHz: Double = 50) extends Config(
   new chipyard.config.WithOffchipBusFrequency(freqMHz) ++
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
-  new chipyard.config.WithNoDebug ++ // no jtag
-  new chipyard.config.WithNoUART ++ // use UART for the UART-TSI thing instad
   new chipyard.config.WithTLBackingMemory ++ // FPGA-shells converts the AXI to TL for us
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(256) << 20) ++ // 256mb on ARTY
   new freechips.rocketchip.subsystem.WithoutTLMonitors)
@@ -56,5 +58,5 @@ class NoCoresArty100TConfig extends Config(
 class BringupArty100TConfig extends Config(
   new WithArty100TSerialTLToGPIO ++
   new WithArty100TTweaks(freqMHz = 50) ++
-  new testchipip.WithSerialTLClockDirection(provideClockFreqMHz = Some(50)) ++
+  new testchipip.serdes.WithSerialTLClockDirection(provideClockFreqMHz = Some(50)) ++
   new chipyard.ChipBringupHostConfig)
