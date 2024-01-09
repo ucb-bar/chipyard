@@ -305,3 +305,12 @@ GEN_COLLATERAL_DIR ?=$(build_dir)/gen-collateral
 #########################################################################################
 timeout_cycles = 10000000
 bmark_timeout_cycles = 100000000
+
+#########################################################################################
+# locale settings
+# some of the sbt/java commands will error on specific locales
+#########################################################################################
+ENCODING="en_US.UTF-8"
+export LANG=$(ENCODING)
+export LANGUAGE="en_US:en"
+export LC_ALL=$(ENCODING)
