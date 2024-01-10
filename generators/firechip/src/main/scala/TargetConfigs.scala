@@ -344,3 +344,10 @@ class FireSimLeanGemminiRocketMMIOOnlyConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.LeanGemminiRocketConfig)
+
+class FireSimMMIOOnlyNoMemPortConfig extends Config(
+  new WithDefaultMMIOOnlyFireSimBridges ++
+  new freechips.rocketchip.subsystem.WithNoMemPort ++
+  new testchipip.WithMbusScratchpad ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.RocketConfig)
