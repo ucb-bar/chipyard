@@ -224,7 +224,7 @@ lazy val sha3 = (project in file("generators/sha3"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val customAccRoCC = (project in file ("generators/customAccRoCC"))
+lazy val custom_acc_rocc = (project in file ("generators/custom-acc-rocc"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)

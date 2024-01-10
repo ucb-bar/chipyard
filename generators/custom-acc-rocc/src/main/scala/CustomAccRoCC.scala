@@ -1,4 +1,4 @@
-package customAccRoCC
+package custom_acc_rocc
 
 import chisel3._
 import chisel3.util._
@@ -9,15 +9,15 @@ import freechips.rocketchip.rocket._
 import freechips.rocketchip.tilelink._
 
 
-class customAccelerator(opcodes: OpcodeSet)
+class CustomAccelerator(opcodes: OpcodeSet)
     (implicit p: Parameters) extends LazyRoCC(opcodes) {
-  override lazy val module = new customAcceleratorModule(this)
+  override lazy val module = new CustomAcceleratorModule(this)
 }
 
-class customAcceleratorModule(outer: customAccelerator)
+class CustomAcceleratorModule(outer: CustomAccelerator)
     extends LazyRoCCModuleImp(outer) {
 
-  val vectorAdd = Module(new vectorAdd())
+  val vectorAdd = Module(new VectorAdd())
 
   io.cmd <> vectorAdd.io.cmd
   io.resp <> vectorAdd.io.resp

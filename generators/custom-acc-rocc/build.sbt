@@ -1,4 +1,4 @@
-name := "customAccRoCC"
+name := "custom_acc_rocc"
 version := "0.1"
 scalaVersion := "2.13.10"
 
