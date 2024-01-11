@@ -78,7 +78,7 @@ class WithRocketCacheRowBits(rowBits: Int = 64) extends Config((site, here, up) 
 class WithRocketICacheScratchpad extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
-      icache = tp.tileParams.icache.map(_.copy(itimAddr = Some(0x300000 + tp.tileParams.hartId * 0x10000)))
+      icache = tp.tileParams.icache.map(_.copy(itimAddr = Some(0x300000 + tp.tileParams.tileId * 0x10000)))
     ))
   }
 })
@@ -86,7 +86,7 @@ class WithRocketICacheScratchpad extends Config((site, here, up) => {
 class WithRocketDCacheScratchpad extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
-      dcache = tp.tileParams.dcache.map(_.copy(nSets = 32, nWays = 1, scratch = Some(0x200000 + tp.tileParams.hartId * 0x10000)))
+      dcache = tp.tileParams.dcache.map(_.copy(nSets = 32, nWays = 1, scratch = Some(0x200000 + tp.tileParams.tileId * 0x10000)))
     ))
   }
 })
@@ -94,15 +94,15 @@ class WithRocketDCacheScratchpad extends Config((site, here, up) => {
 class WithTilePrefetchers extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: RocketTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
-      master = TilePrefetchingMasterPortParams(tp.tileParams.hartId, tp.crossingParams.master)))
+      master = TilePrefetchingMasterPortParams(tp.tileParams.tileId, tp.crossingParams.master)))
     case tp: BoomTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
-      master = TilePrefetchingMasterPortParams(tp.tileParams.hartId, tp.crossingParams.master)))
+      master = TilePrefetchingMasterPortParams(tp.tileParams.tileId, tp.crossingParams.master)))
     case tp: SodorTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
-      master = TilePrefetchingMasterPortParams(tp.tileParams.hartId, tp.crossingParams.master)))
+      master = TilePrefetchingMasterPortParams(tp.tileParams.tileId, tp.crossingParams.master)))
     case tp: IbexTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
-      master = TilePrefetchingMasterPortParams(tp.tileParams.hartId, tp.crossingParams.master)))
+      master = TilePrefetchingMasterPortParams(tp.tileParams.tileId, tp.crossingParams.master)))
     case tp: CVA6TileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
-      master = TilePrefetchingMasterPortParams(tp.tileParams.hartId, tp.crossingParams.master)))
+      master = TilePrefetchingMasterPortParams(tp.tileParams.tileId, tp.crossingParams.master)))
   }
 })
 

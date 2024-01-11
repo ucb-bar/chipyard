@@ -18,7 +18,7 @@ import chipyard.{BuildSystem}
 
 // don't use FPGAShell's DesignKey
 class WithNoDesignKey extends Config((site, here, up) => {
-  case DesignKey => (p: Parameters) => new SimpleLazyModule()(p)
+  case DesignKey => (p: Parameters) => new SimpleLazyRawModule()(p)
 })
 
 // By default, this uses the on-board USB-UART for the TSI-over-UART link

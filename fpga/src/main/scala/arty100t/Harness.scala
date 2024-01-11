@@ -5,12 +5,12 @@ import chisel3.util._
 import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
+import freechips.rocketchip.prci._
 import freechips.rocketchip.subsystem.{SystemBusKey}
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.shell._
-import sifive.fpgashells.clocks.{ClockGroup, ClockSinkNode, PLLFactoryKey, ResetWrangler}
+import sifive.fpgashells.clocks._
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 
 import sifive.blocks.devices.uart._
@@ -75,6 +75,9 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
     def referenceClock = dutClock.in.head._1.clock
     def referenceReset = dutClock.in.head._1.reset
     def success = { require(false, "Unused"); false.B }
+
+    childClock := harnessBinderClock
+    childReset := harnessBinderReset
 
     ddrOverlay.mig.module.clock := harnessBinderClock
     ddrOverlay.mig.module.reset := harnessBinderReset

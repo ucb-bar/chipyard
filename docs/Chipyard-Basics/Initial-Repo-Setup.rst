@@ -46,7 +46,7 @@ This is done by the following:
 
 .. code-block:: shell
 
-    conda install -n base conda-lock=1.4
+    conda install -n base conda-lock==1.4.0
     conda activate base
 
 

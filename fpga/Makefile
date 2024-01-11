@@ -137,7 +137,7 @@ include $(base_dir)/common.mk
 # copy from other directory
 #########################################################################################
 all_vsrcs := \
-	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v
+	$(base_dir)/generators/rocket-chip-blocks/vsrc/SRLatch.v
 
 #########################################################################################
 # vivado rules

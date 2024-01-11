@@ -38,12 +38,20 @@ usage() {
     echo "  --help -h               : Display this message"
 
     echo "  --force -f              : Skip all prompts and checks"
-    echo "  --skip-validate         : DEPRECATED: Same functionality as --force"
     echo "  --verbose -v            : Verbose printout"
 
     echo "  --use-unpinned-deps -ud : Use unpinned conda environment"
 
     echo "  --skip -s N             : Skip step N in the list above. Use multiple times to skip multiple steps ('-s N -s M ...')."
+    echo "  --skip-conda            : Skip Conda initialization (step 1)"
+    echo "  --skip-submodules       : Skip submodule initialization (step 2)"
+    echo "  --skip-toolchain        : Skip toolchain collateral (step 3)"
+    echo "  --skip-ctags            : Skip ctags (step 4)"
+    echo "  --skip-precompile       : Skip precompiling sources (steps 5/7)"
+    echo "  --skip-firesim          : Skip Firesim initialization (steps 6/7)"
+    echo "  --skip-marshal          : Skip firemarshal initialization (steps 8/9)"
+    echo "  --skip-circt            : Skip CIRCT install (step 10)"
+    echo "  --skip-clean            : Skip repository clean-up (step 11)"
 
     exit "$1"
 }
@@ -73,6 +81,24 @@ do
         --skip | -s)
             shift
             SKIP_LIST+=(${1}) ;;
+        --skip-conda)
+            SKIP_LIST+=(1) ;;
+        --skip-submodules)
+            SKIP_LIST+=(2) ;;
+        --skip-toolchain)
+            SKIP_LIST+=(3) ;;
+        --skip-ctags)
+            SKIP_LIST+=(4) ;;
+        --skip-precompile)
+            SKIP_LIST+=(5 6) ;;
+        --skip-firesim)
+            SKIP_LIST+=(6 7) ;;
+        --skip-marshal)
+            SKIP_LIST+=(8 9) ;;
+        --skip-circt)
+            SKIP_LIST+=(10) ;;
+        --skip-clean)
+            SKIP_LIST+=(11) ;;
         * )
             error "invalid option $1"
             usage 1 ;;

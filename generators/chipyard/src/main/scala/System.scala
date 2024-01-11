@@ -32,13 +32,6 @@ class ChipyardSystem(implicit p: Parameters) extends ChipyardSubsystem
   val bootROM  = p(BootROMLocated(location)).map { BootROM.attach(_, this, CBUS) }
   val maskROMs = p(MaskROMLocated(location)).map { MaskROM.attach(_, this, CBUS) }
 
-  // If there is no bootrom, the tile reset vector bundle will be tied to zero
-  if (bootROM.isEmpty) {
-    val fakeResetVectorSourceNode = BundleBridgeSource[UInt]()
-    InModuleBody { fakeResetVectorSourceNode.bundle := 0.U }
-    tileResetVectorNexusNode := fakeResetVectorSourceNode
-  }
-
   override lazy val module = new ChipyardSystemModule(this)
 }
 
