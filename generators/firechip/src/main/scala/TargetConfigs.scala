@@ -122,6 +122,7 @@ class WithFireSimHighPerfClocking extends Config(
   // This frequency selection matches FireSim's legacy selection and is required
   // to support 200Gb NIC performance. You may select a smaller value.
   new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
+  new chipyard.config.WithControlBusFrequency(3200.0) ++
   new chipyard.config.WithSystemBusFrequency(3200.0) ++
   new chipyard.config.WithFrontBusFrequency(3200.0) ++
   new chipyard.config.WithControlBusFrequency(3200.0) ++
@@ -142,6 +143,7 @@ class WithFireSimConfigTweaks extends Config(
   new chipyard.config.WithSystemBusFrequency(1000.0) ++
   new chipyard.config.WithControlBusFrequency(1000.0) ++
   new chipyard.config.WithPeripheryBusFrequency(1000.0) ++
+  new chipyard.config.WithControlBusFrequency(1000.0) ++
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++
   new chipyard.config.WithFrontBusFrequency(1000.0) ++
   new WithFireSimDesignTweaks

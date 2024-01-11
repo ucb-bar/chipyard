@@ -199,12 +199,13 @@ class TLGenericFIRChain[T<:Data:Ring] (genIn: T, genOut: T, coeffs: => Seq[T], p
 trait CanHavePeripheryStreamingFIR extends BaseSubsystem {
   val streamingFIR = p(GenericFIRKey) match {
     case Some(params) => {
-      val streamingFIR = LazyModule(new TLGenericFIRChain(
+      val domain = pbus.generateSynchronousDomain.suggestName("fir_domain")
+      val streamingFIR = domain { LazyModule(new TLGenericFIRChain(
         genIn = FixedPoint(8.W, 3.BP),
         genOut = FixedPoint(8.W, 3.BP),
         coeffs = Seq(1.U.asFixedPoint(0.BP), 2.U.asFixedPoint(0.BP), 3.U.asFixedPoint(0.BP)),
-        params = params))
-      pbus.coupleTo("streamingFIR") { streamingFIR.mem.get := TLFIFOFixer() := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
+        params = params)) }
+      pbus.coupleTo("streamingFIR") { domain { streamingFIR.mem.get := TLFIFOFixer() := TLFragmenter(pbus.beatBytes, pbus.blockBytes) } := _ }
       Some(streamingFIR)
     }
     case None => None

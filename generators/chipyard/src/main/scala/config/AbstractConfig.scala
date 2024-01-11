@@ -55,6 +55,7 @@ class AbstractConfig extends Config(
   new chipyard.clocking.WithPassthroughClockGenerator ++
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("sbus", "mbus", "pbus", "fbus", "cbus", "obus", "implicit"), Seq("tile"))) ++
   new chipyard.config.WithPeripheryBusFrequency(500.0) ++           // Default 500 MHz pbus
+  new chipyard.config.WithControlBusFrequency(500.0) ++             // Default 500 MHz cbus
   new chipyard.config.WithMemoryBusFrequency(500.0) ++              // Default 500 MHz mbus
   new chipyard.config.WithControlBusFrequency(500.0) ++             // Default 500 MHz cbus
   new chipyard.config.WithSystemBusFrequency(500.0) ++              // Default 500 MHz sbus
@@ -75,7 +76,7 @@ class AbstractConfig extends Config(
   new chipyard.config.WithBootROM ++                                // use default bootrom
   new chipyard.config.WithUART ++                                   // add a UART
   new chipyard.config.WithL2TLBs(1024) ++                           // use L2 TLBs
-  new chipyard.config.WithNoSubsystemDrivenClocks ++                // drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks
+  new chipyard.config.WithNoSubsystemClockIO ++                     // drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks
   new chipyard.config.WithInheritBusFrequencyAssignments ++         // Unspecified clocks within a bus will receive the bus frequency if set
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++      // Default 1 memory channels
   new freechips.rocketchip.subsystem.WithClockGateModel ++          // add default EICG_wrapper clock gate model

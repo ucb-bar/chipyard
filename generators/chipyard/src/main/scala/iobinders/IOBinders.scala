@@ -29,7 +29,7 @@ import testchipip.spi.{SPIChipIO}
 import testchipip.boot.{CanHavePeripheryCustomBootPin}
 import testchipip.util.{ClockedIO}
 import testchipip.iceblk.{CanHavePeripheryBlockDevice, BlockDeviceKey, BlockDeviceIO}
-import testchipip.cosim.{CanHaveTraceIOModuleImp, TraceOutputTop, SpikeCosimConfig}
+import testchipip.cosim.{CanHaveTraceIO, TraceOutputTop, SpikeCosimConfig}
 import testchipip.tsi.{CanHavePeripheryUARTTSI, UARTTSIIO}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 import chipyard.{CanHaveMasterTLMemPort, ChipyardSystem, ChipyardSystemModule}
@@ -455,14 +455,14 @@ class WithTraceGenSuccessPunchthrough extends OverrideIOBinder({
   }
 })
 
-class WithTraceIOPunchthrough extends OverrideIOBinder({
-  (system: CanHaveTraceIOModuleImp) => {
+class WithTraceIOPunchthrough extends OverrideLazyIOBinder({
+  (system: CanHaveTraceIO) => InModuleBody {
     val ports: Option[TracePort] = system.traceIO.map { t =>
       val trace = IO(DataMirror.internal.chiselTypeClone[TraceOutputTop](t)).suggestName("trace")
       trace <> t
       val p = GetSystemParameters(system)
-      val chipyardSystem = system.asInstanceOf[ChipyardSystemModule[_]].outer.asInstanceOf[ChipyardSystem]
-      val tiles = chipyardSystem.tiles
+      val chipyardSystem = system.asInstanceOf[ChipyardSystem]
+      val tiles = chipyardSystem.totalTiles.values
       val cfg = SpikeCosimConfig(
         isa = tiles.headOption.map(_.isaDTS).getOrElse(""),
         vlen = tiles.headOption.map(_.tileParams.core.vLen).getOrElse(0),
@@ -511,8 +511,8 @@ class WithDontTouchPorts extends OverrideIOBinder({
 })
 
 class WithNMITiedOff extends ComposeIOBinder({
-  (system: HasTilesModuleImp) => {
-    system.nmi.flatten.foreach { nmi =>
+  (system: HasHierarchicalElementsRootContextModuleImp) => {
+    system.nmi.foreach { nmi =>
       nmi.rnmi := false.B
       nmi.rnmi_interrupt_vector := 0.U
       nmi.rnmi_exception_vector := 0.U

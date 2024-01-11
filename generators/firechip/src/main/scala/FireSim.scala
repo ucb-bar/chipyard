@@ -8,7 +8,7 @@ import chisel3._
 import chisel3.experimental.{IO, annotate}
 
 import freechips.rocketchip.prci._
-import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey, HasTiles}
+import freechips.rocketchip.subsystem._
 import org.chipsalliance.cde.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, InModuleBody, ValName}
 import freechips.rocketchip.util.{ResetCatchAndSync, RecordMap}
@@ -103,8 +103,8 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessInsta
   // FireSim ModelMultithreading
   chiptops.foreach {
     case c: ChipTop => c.lazySystem match {
-      case ls: HasTiles => {
-        if (p(FireSimMultiCycleRegFile)) ls.tiles.map {
+      case ls: InstantiatesHierarchicalElements => {
+        if (p(FireSimMultiCycleRegFile)) ls.totalTiles.values.map {
           case r: RocketTile => {
             annotate(MemModelAnnotation(r.module.core.rocketImpl.rf.rf))
             r.module.fpuOpt.foreach(fpu => annotate(MemModelAnnotation(fpu.fpuImpl.regfile)))
@@ -120,7 +120,7 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessInsta
           }
           case _ =>
         }
-        if (p(FireSimFAME5)) ls.tiles.map {
+        if (p(FireSimFAME5)) ls.totalTiles.values.map {
           case b: BoomTile =>
             annotate(EnableModelMultiThreadingAnnotation(b.module))
           case r: RocketTile =>

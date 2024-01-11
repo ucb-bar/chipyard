@@ -33,7 +33,7 @@ grouping["group-peripherals"]="chipyard-dmirocket chipyard-dmiboom chipyard-spif
 grouping["group-accels"]="chipyard-mempress chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-manymmioaccels chipyard-nvdla chipyard-aes256ecb"
 grouping["group-constellation"]="chipyard-constellation"
 grouping["group-tracegen"]="tracegen tracegen-boom"
-grouping["group-other"]="icenet testchipip constellation rocketchip-amba rocketchip-tlsimple rocketchip-tlwidth rocketchip-tlxbar"
+grouping["group-other"]="icenet testchipip constellation rocketchip-amba rocketchip-tlsimple rocketchip-tlwidth rocketchip-tlxbar chipyard-clusters"
 grouping["group-fpga"]="arty35t arty100t nexysvideo vc707 vcu118"
 
 # key value store to get the build strings
@@ -67,6 +67,7 @@ mapping["chipyard-shuttle"]=" CONFIG=ShuttleConfig"
 mapping["chipyard-multiclock-rocket"]=" CONFIG=MulticlockRocketConfig"
 mapping["chipyard-nomem-scratchpad"]=" CONFIG=MMIOScratchpadOnlyRocketConfig"
 mapping["chipyard-constellation"]=" CONFIG=SharedNoCConfig"
+mapping["chipyard-clusters"]=" CONFIG=ClusteredRocketConfig verilog"
 mapping["chipyard-aes256ecb"]=" CONFIG=AES256ECBRocketConfig"
 
 mapping["constellation"]=" SUB_PROJECT=constellation"
