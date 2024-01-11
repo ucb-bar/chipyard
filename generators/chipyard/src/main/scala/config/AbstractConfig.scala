@@ -51,9 +51,10 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithUARTTSIPunchthrough ++
   new chipyard.iobinders.WithNMITiedOff ++
 
-  // By default, punch out IOs to the Harness
-  new chipyard.clocking.WithPassthroughClockGenerator ++
-  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("sbus", "mbus", "pbus", "fbus", "cbus", "obus", "implicit"), Seq("tile"))) ++
+  new chipyard.clocking.WithClockTapIOCells ++                      // Default generate a clock tapio
+  new chipyard.clocking.WithPassthroughClockGenerator ++            // Default punch out IOs to the Harness
+  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore",    // Default merge all the bus clocks
+    Seq("sbus", "mbus", "pbus", "fbus", "cbus", "obus", "implicit", "clock_tap"), Seq("tile"))) ++
   new chipyard.config.WithPeripheryBusFrequency(500.0) ++           // Default 500 MHz pbus
   new chipyard.config.WithControlBusFrequency(500.0) ++             // Default 500 MHz cbus
   new chipyard.config.WithMemoryBusFrequency(500.0) ++              // Default 500 MHz mbus
