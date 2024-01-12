@@ -254,8 +254,8 @@ class WithSimTSIOverSerialTL extends HarnessBinder({
 
 //TODO: Set with chipId argument to harness binder, hardcoding is temporary hack
 class WithDriveChipIdPin extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: ChipIdPort) => {
-    port.io := 0.U
+  case (th: HasHarnessInstantiators, port: ChipIdPort, chipId: Int) => {
+    port.io := chipId.U
   }
 })
 

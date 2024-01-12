@@ -11,6 +11,7 @@ import testchipip.soc.{OBUS}
 
 // Simple design which exposes a second serial-tl port that can connect to another instance of itself
 class SymmetricChipletRocketConfig extends Config(
+  new testchipip.soc.WithChipIdPin ++                               // Add pin to identify chips
   new chipyard.harness.WithSerialTLTiedOff(tieoffs=Some(Seq(1))) ++ // Tie-off the chip-to-chip link in single-chip sims
   new testchipip.serdes.WithSerialTL(Seq(
     testchipip.serdes.SerialTLParams(                               // 0th serial-tl is chip-to-bringup-fpga
