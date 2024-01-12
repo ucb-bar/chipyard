@@ -13,10 +13,10 @@ import freechips.rocketchip.prci._
 case object ClockTapKey extends Field[Boolean](true)
 
 trait CanHaveClockTap { this: BaseSubsystem =>
-  require(p(SubsystemDriveAsyncClockGroupsKey).isEmpty, "Subsystem asyncClockGroups must be undriven")
+  require(!p(SubsystemDriveClockGroupsFromIO), "Subsystem must not drive clocks from IO")
   val clockTapNode = Option.when(p(ClockTapKey)) {
     val clockTap = ClockSinkNode(Seq(ClockSinkParameters(name=Some("clock_tap"))))
-    clockTap := ClockGroup() := asyncClockGroupsNode
+    clockTap := ClockGroup() := allClockGroupsNode
     clockTap
   }
   val clockTapIO = clockTapNode.map { node => InModuleBody {
