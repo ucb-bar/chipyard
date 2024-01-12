@@ -12,7 +12,7 @@
 
 #if __has_include("spiketile_tsi.h")
 #define SPIKETILE_HTIF_TSI
-extern htif_t* tsi;
+extern std::map<int, htif_t*> tsis;
 #endif
 #if __has_include("spiketile_dtm.h")
 #define SPIKETILE_HTIF_DTM
@@ -346,8 +346,8 @@ extern "C" void spike_tile(int hartid, char* isa,
   chipyard_simif_t* simif = tile->simif;
   processor_t* proc = tile->proc;
 #if defined(SPIKETILE_HTIF_TSI)
-  if (!simif->htif && tsi)
-    simif->htif = tsi;
+  if (!simif->htif && tsis.size() > 0 && tsis[0])
+    simif->htif = tsis[0];
 #endif
 #if defined(SPIKETILE_HTIF_DTM)
   if (!simif->htif && dtm)

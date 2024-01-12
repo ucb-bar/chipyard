@@ -15,7 +15,7 @@ import chipyard.harness._
 import chipyard.iobinders._
 
 class WithNexysVideoUARTTSI(uartBaudRate: BigInt = 115200) extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: UARTTSIPort) => {
+  case (th: HasHarnessInstantiators, port: UARTTSIPort, chipId: Int) => {
     val nexysvideoth = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[NexysVideoHarness]
     nexysvideoth.io_uart_bb.bundle <> port.io.uart
     nexysvideoth.other_leds(1) := port.io.dropped
@@ -27,7 +27,7 @@ class WithNexysVideoUARTTSI(uartBaudRate: BigInt = 115200) extends HarnessBinder
 })
 
 class WithNexysVideoDDRTL extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: TLMemPort) => {
+  case (th: HasHarnessInstantiators, port: TLMemPort, chipId: Int) => {
     val nexysTh = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[NexysVideoHarness]
     val bundles = nexysTh.ddrClient.get.out.map(_._1)
     val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))

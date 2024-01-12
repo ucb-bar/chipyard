@@ -23,8 +23,8 @@ dependencies:
     # bundle FireSim driver with deps into installer shell-script
     - constructor
 
-    - gcc<13
-    - gxx<13
+    - gcc<12
+    - gxx<12
     - sysroot_linux-64=2.17 # needed to match pre-built CI XRT glibc version
     - conda-gcc-specs
     - binutils
@@ -88,7 +88,7 @@ dependencies:
     - graphviz
     - expect
     - dtc
-    - verilator==5.008
+    - verilator==5.020
     - screen
     - elfutils
     - libdwarf-dev==0.0.0.20190110_28_ga81397fc4 # from ucb-bar channel - using mainline libdwarf-feedstock

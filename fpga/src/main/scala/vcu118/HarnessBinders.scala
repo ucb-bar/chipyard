@@ -15,21 +15,21 @@ import chipyard.iobinders._
 
 /*** UART ***/
 class WithUART extends HarnessBinder({
-  case (th: VCU118FPGATestHarnessImp, port: UARTPort) => {
+  case (th: VCU118FPGATestHarnessImp, port: UARTPort, chipId: Int) => {
     th.vcu118Outer.io_uart_bb.bundle <> port.io
   }
 })
 
 /*** SPI ***/
 class WithSPISDCard extends HarnessBinder({
-  case (th: VCU118FPGATestHarnessImp, port: SPIPort) => {
+  case (th: VCU118FPGATestHarnessImp, port: SPIPort, chipId: Int) => {
     th.vcu118Outer.io_spi_bb.bundle <> port.io
   }
 })
 
 /*** Experimental DDR ***/
 class WithDDRMem extends HarnessBinder({
-  case (th: VCU118FPGATestHarnessImp, port: TLMemPort) => {
+  case (th: VCU118FPGATestHarnessImp, port: TLMemPort, chipId: Int) => {
     val bundles = th.vcu118Outer.ddrClient.out.map(_._1)
     val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
     bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
