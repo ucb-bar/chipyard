@@ -58,6 +58,7 @@ case class SpikeCoreParams() extends CoreParams {
   val btbEntries = 0
   val bhtEntries = 0
   val traceHasWdata = false
+  val traceHasRFWdata = false
   val useBitManip = false
   val useBitManipCrypto = false
   val useCryptoNIST = false

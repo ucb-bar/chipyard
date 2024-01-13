@@ -35,6 +35,16 @@ class WithTraceIO extends Config((site, here, up) => {
   case TracePortKey => Some(TracePortParams())
 })
 
+class WithRFWBTrace extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(traceRFWb = true)))
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(traceRFWb = true)))
+    case other => other
+  }
+})
+
 class WithNoTraceIO extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(

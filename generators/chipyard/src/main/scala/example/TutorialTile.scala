@@ -67,6 +67,7 @@ case class MyCoreParams(
   val useCryptoNIST: Boolean = false
   val useCryptoSM: Boolean = false
   val traceHasWdata: Boolean = false
+  val traceHasRFWdata: Boolean = false
   val useConditionalZero = false
 }
 
