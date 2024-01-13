@@ -87,3 +87,7 @@ class PrefetchingRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNonblockingL1(2) ++                           // non-blocking L1D$, L1 prefetching only works with non-blocking L1D$
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++                               // single rocket-core
   new chipyard.config.AbstractConfig)
+
+class TracingRocketConfig extends Config(
+  new chipyard.config.WithTraceIO ++
+  new chipyard.RocketConfig)
