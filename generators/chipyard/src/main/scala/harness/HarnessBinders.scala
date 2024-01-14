@@ -252,9 +252,9 @@ class WithSimTSIOverSerialTL extends HarnessBinder({
   }
 })
 
-//TODO: Set with chipId argument to harness binder, hardcoding is temporary hack
 class WithDriveChipIdPin extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: ChipIdPort, chipId: Int) => {
+    assert(chipId < math.pow(2, port.io.getWidth), "ID Pin is not wide enough")
     port.io := chipId.U
   }
 })
