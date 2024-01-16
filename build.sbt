@@ -114,7 +114,7 @@ lazy val rocketMacros  = (project in rocketChipDir / "macros")
   )
 
 lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
-  .dependsOn(hardfloat, rocketMacros, cde)
+  .dependsOn(hardfloat, rocketMacros, cde, midasTargetUtils)
   .settings(commonSettings)
   .settings(chiselSettings)
   .settings(
