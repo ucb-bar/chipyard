@@ -92,3 +92,15 @@ The SPI flash model is a device that models a simple SPI flash device. It curren
 only supports single read, quad read, single write, and quad write instructions. The
 memory is backed by a file which is provided using ``+spiflash#=<NAME_OF_FILE>``,
 where ``#`` is the SPI flash ID (usually ``0``).
+
+Chip ID Pin
+---------------
+
+The chip ID pin sets the chip ID for the chip it is added to. This is most useful in 
+multi-chip configs. The pin value is driven by the chip ID value set in the harness 
+binder and the chip ID value can be read through MMIO at the address ``0x2000`` by default.
+
+The pin can be added to a system with the ``testchipip.soc.WithChipIdPin`` config. The pin
+width and MMIO address are parameterizable and can be set by passing ``ChipIdPinParams`` as an 
+argument to the config. The width can additionally be set using the ``testchipip.soc.WithChipIdPinWidth``
+config. 

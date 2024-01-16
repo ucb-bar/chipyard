@@ -252,6 +252,13 @@ class WithSimTSIOverSerialTL extends HarnessBinder({
   }
 })
 
+class WithDriveChipIdPin extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: ChipIdPort, chipId: Int) => {
+    require(chipId < math.pow(2, port.io.getWidth), "ID Pin is not wide enough")
+    port.io := chipId.U
+  }
+})
+
 class WithSimUARTToUARTTSI extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: UARTPort, chipId: Int) => {
     UARTAdapter.connect(Seq(port.io),
