@@ -348,3 +348,10 @@ class FireSimLeanGemminiRocketMMIOOnlyConfig extends Config(
 class FireSimRocketCoSpikeConfig extends Config(
   new firesim.firesim.WithCospikeBridge ++
   new firesim.firesim.FireSimRocketConfig)
+
+class FireSimLargeBoomCoSpikeConfig extends Config(
+  new firesim.firesim.WithCospikeBridge ++
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.LargeBoomConfig)
