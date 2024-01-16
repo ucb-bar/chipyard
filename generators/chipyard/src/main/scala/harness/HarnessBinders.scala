@@ -254,7 +254,7 @@ class WithSimTSIOverSerialTL extends HarnessBinder({
 
 class WithDriveChipIdPin extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: ChipIdPort, chipId: Int) => {
-    assert(chipId < math.pow(2, port.io.getWidth), "ID Pin is not wide enough")
+    require(chipId < math.pow(2, port.io.getWidth), "ID Pin is not wide enough")
     port.io := chipId.U
   }
 })
