@@ -263,7 +263,7 @@ lazy val tapeout = (project in file("./tools/barstools/"))
   .settings(chiselSettings)
   .settings(commonSettings)
 
-lazy val fixedpoint = (project in file("./tools/dsptools/fixedpoint/"))
+lazy val fixedpoint = (project in file("./tools/fixedpoint/"))
   .settings(chiselSettings)
   .settings(commonSettings)
 
