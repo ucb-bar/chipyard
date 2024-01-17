@@ -38,7 +38,7 @@ VCS_CC_OPTS = \
 VCS_NONCC_OPTS = \
 	-notice \
 	-line \
-	+lint=all,noVCDE,noONGS,noUI \
+	+lint=all,noVCDE,noONGS,noUI,noPCTIO-L,noPCTI-L \
 	-error=PCWM-L \
 	-error=noZMMCM \
 	-timescale=1ns/10ps \
