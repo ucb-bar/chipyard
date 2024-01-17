@@ -150,7 +150,7 @@ lazy val chipyard = (project in file("generators/chipyard"))
     radiance,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, rocket_dsp_utils,
-    gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
+    gemmini, icenet, tracegen, cva6, nvdla, radiance, sodor, ibex, fft_generator,
     constellation, mempress, barf, shuttle, caliptra_aes)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(
@@ -250,6 +250,11 @@ lazy val rocc_acc_utils = (project in file("generators/rocc-acc-utils"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
+lazy val radiance = (project in file("generators/radiance"))
+  .dependsOn(rocketchip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
 lazy val iocell = Project(id = "iocell", base = file("./tools/barstools/") / "iocell")
   .settings(chiselSettings)
   .settings(commonSettings)
@@ -258,7 +263,7 @@ lazy val tapeout = (project in file("./tools/barstools/"))
   .settings(chiselSettings)
   .settings(commonSettings)
 
-lazy val fixedpoint = (project in file("./tools/fixedpoint/"))
+lazy val fixedpoint = (project in file("./tools/dsptools/fixedpoint/"))
   .settings(chiselSettings)
   .settings(commonSettings)
 
