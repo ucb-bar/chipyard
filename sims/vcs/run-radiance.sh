@@ -10,12 +10,6 @@ CONFIG=$1
 KERNEL=$2
 [ $# -ge 3 ] && PREPROC_DEFINES=$3
 
-
-if ! diff ../args.bin ../args.bin.$KERNEL; then
-    echo 'args.bin changed, running make clean'
-    make CONFIG=$CONFIG clean
-fi
-
 ../switch-vortex.sh $KERNEL
 
 ls -lh ../args.bin
