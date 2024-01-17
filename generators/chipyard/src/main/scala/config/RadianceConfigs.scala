@@ -38,7 +38,7 @@ class RocketDummyVortexConfig extends Config(
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
-  new testchipip.WithMbusScratchpad(base=0x7FFF0000L, size=0x10000, banks=1) ++
+  new testchipip.soc.WithMbusScratchpad(base=0x7FFF0000L, size=0x10000, banks=1) ++
 
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
 
@@ -125,7 +125,7 @@ class RadianceConfig extends Config(
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
   new WithRadBootROM() ++
-  new testchipip.WithMbusScratchpad(base=0x7FFF0000L, size=0x10000, banks=1) ++
+  new testchipip.soc.WithMbusScratchpad(base=0x7FFF0000L, size=0x10000, banks=1) ++
   new AbstractConfig)
 
 class RadianceConfigVortexCache extends Config(
@@ -133,7 +133,7 @@ class RadianceConfigVortexCache extends Config(
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   // new freechips.rocketchip.subsystem.WithNoMemPort ++
   // new testchipip.WithSbusScratchpad(banks=2) ++
-  // new testchipip.WithMbusScratchpad(banks=2) ++
+  // new testchipip.soc.WithMbusScratchpad(banks=2) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
   new WithRadBootROM() ++
   new WithRadROMs(0x7FFF0000L, 0x10000, "sims/args.bin") ++
