@@ -28,7 +28,8 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with sifive.blocks.devices.spi.HasPeripherySPI // Enables optionally adding the sifive SPI port
 
 
-  with freechips.rocketchip.tilelink.CanHaveMemtraceCore // Enable memtrace core
+  with radiance.memory.CanHaveMemtraceCore // Enable memtrace core
+  with radiance.memory.CanHaveRadianceROMs // Enable argument ROMs
 
 
   with icenet.CanHavePeripheryIceNIC // Enables optionally adding the IceNIC for FireSim
