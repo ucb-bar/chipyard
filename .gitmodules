@@ -13,9 +13,6 @@
 [submodule "generators/boom"]
 	path = generators/boom
 	url = https://github.com/riscv-boom/riscv-boom.git
-[submodule "generators/sifive-blocks"]
-	path = generators/sifive-blocks
-	url = https://github.com/chipsalliance/rocket-chip-blocks.git
 [submodule "generators/hwacha"]
 	path = generators/hwacha
 	url = https://github.com/ucb-bar/hwacha.git
@@ -25,9 +22,6 @@
 [submodule "generators/icenet"]
 	path = generators/icenet
 	url = https://github.com/firesim/icenet.git
-[submodule "generators/block-inclusivecache-sifive"]
-	path = generators/sifive-cache
-	url = https://github.com/chipsalliance/rocket-chip-inclusive-cache.git
 [submodule "tools/dsptools"]
 	path = tools/dsptools
 	url = https://github.com/ucb-bar/dsptools.git
@@ -64,6 +58,9 @@
 [submodule "software/nvdla-workload"]
 	path = software/nvdla-workload
 	url = https://github.com/ucb-bar/nvdla-workload.git
+[submodule "software/baremetal-ide"]
+	path = software/baremetal-ide
+	url = https://github.com/ucb-bar/Baremetal-IDE.git
 [submodule "generators/riscv-sodor"]
 	path = generators/riscv-sodor
 	url = https://github.com/ucb-bar/riscv-sodor.git
@@ -133,6 +130,24 @@
 [submodule "generators/hardfloat"]
 	path = generators/hardfloat
 	url = https://github.com/ucb-bar/berkeley-hardfloat.git
+[submodule "generators/caliptra-aes-acc"]
+	path = generators/caliptra-aes-acc
+	url = https://github.com/ucb-bar/caliptra-aes-acc
+[submodule "generators/rocc-acc-utils"]
+	path = generators/rocc-acc-utils
+	url = https://github.com/ucb-bar/rocc-acc-utils
+[submodule "tools/install-circt"]
+	path = tools/install-circt
+	url = https://github.com/circt/install-circt/
+[submodule "toolchains/riscv-tools/riscv-spike-devices"]
+	path = toolchains/riscv-tools/riscv-spike-devices
+	url = https://github.com/ucb-bar/spike-devices.git
+[submodule "generators/rocket-chip-blocks"]
+	path = generators/rocket-chip-blocks
+	url = https://github.com/chipsalliance/rocket-chip-blocks.git
+[submodule "generators/rocket-chip-inclusive-cache"]
+	path = generators/rocket-chip-inclusive-cache
+	url = https://github.com/chipsalliance/rocket-chip-inclusive-cache.git
 [submodule "generators/rocket-gpu"]
 	path = generators/rocket-gpu
 	url = git@github.com:hansungk/rocket-gpu.git

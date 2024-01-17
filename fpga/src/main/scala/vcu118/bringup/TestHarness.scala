@@ -5,7 +5,7 @@ import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tilelink._
-
+import freechips.rocketchip.prci._
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.ip.xilinx._
 import sifive.fpgashells.shell._
@@ -16,7 +16,8 @@ import sifive.blocks.devices.spi._
 import sifive.blocks.devices.i2c._
 import sifive.blocks.devices.gpio._
 
-import testchipip.{HasPeripheryTSIHostWidget, PeripheryTSIHostKey, TSIHostWidgetIO, TLSinkSetter}
+import testchipip.tsi.{HasPeripheryTSIHostWidget, PeripheryTSIHostKey, TSIHostWidgetIO}
+import testchipip.util.{TLSinkSetter}
 
 import chipyard.fpga.vcu118.{VCU118FPGATestHarness, VCU118FPGATestHarnessImp, DDR2VCU118ShellPlacer, SysClock2VCU118ShellPlacer}
 

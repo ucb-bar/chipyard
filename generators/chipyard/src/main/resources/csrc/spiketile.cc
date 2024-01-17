@@ -12,7 +12,7 @@
 
 #if __has_include("spiketile_tsi.h")
 #define SPIKETILE_HTIF_TSI
-extern htif_t* tsi;
+extern std::map<int, htif_t*> tsis;
 #endif
 #if __has_include("spiketile_dtm.h")
 #define SPIKETILE_HTIF_DTM
@@ -346,8 +346,8 @@ extern "C" void spike_tile(int hartid, char* isa,
   chipyard_simif_t* simif = tile->simif;
   processor_t* proc = tile->proc;
 #if defined(SPIKETILE_HTIF_TSI)
-  if (!simif->htif && tsi)
-    simif->htif = tsi;
+  if (!simif->htif && tsis.size() > 0 && tsis[0])
+    simif->htif = tsis[0];
 #endif
 #if defined(SPIKETILE_HTIF_DTM)
   if (!simif->htif && dtm)
@@ -447,18 +447,6 @@ chipyard_simif_t::chipyard_simif_t(size_t icache_ways,
   use_stq(false),
   htif(nullptr),
   fast_clint(false),
-  cfg(std::make_pair(0, 0),
-      nullptr,
-      isastr,
-      "MSU",
-      "vlen:128,elen:64",
-      false,
-      endianness_little,
-      pmpregions,
-      std::vector<mem_cfg_t>(),
-      std::vector<size_t>(),
-      false,
-      0),
   accessed_tofrom_host(false),
   icache_ways(icache_ways),
   icache_sets(icache_sets),
@@ -469,6 +457,19 @@ chipyard_simif_t::chipyard_simif_t(size_t icache_ways,
   mmio_valid(false),
   mmio_inflight(false)
 {
+
+  cfg.initrd_bounds = std::make_pair(0, 0);
+  cfg.bootargs = nullptr;
+  cfg.isa = isastr;
+  cfg.priv = "MSU";
+  cfg.varch = "vlen:128,elen:64";
+  cfg.misaligned = false;
+  cfg.endianness = endianness_little;
+  cfg.pmpregions = pmpregions;
+  cfg.mem_layout = std::vector<mem_cfg_t>();
+  cfg.hartids = std::vector<size_t>();
+  cfg.explicit_hartids = false;
+  cfg.trigger_count = 0;
 
   icache.resize(icache_ways);
   for (auto &w : icache) {

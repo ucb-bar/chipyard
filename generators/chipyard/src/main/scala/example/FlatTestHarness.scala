@@ -11,7 +11,10 @@ import freechips.rocketchip.util.{PlusArg}
 import freechips.rocketchip.subsystem.{CacheBlockBytes}
 import freechips.rocketchip.devices.debug.{SimJTAG}
 import freechips.rocketchip.jtag.{JTAGIO}
-import testchipip.{SerialTLKey, UARTAdapter, SimDRAM, TSIHarness, SimTSI}
+import testchipip.serdes._
+import testchipip.uart.{UARTAdapter}
+import testchipip.dram.{SimDRAM}
+import testchipip.tsi.{TSIHarness, SimTSI, SerialRAM}
 import chipyard.harness.{BuildTop}
 
 // A "flat" TestHarness that doesn't use IOBinders
@@ -30,7 +33,7 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
   val clock_source = Module(new ClockSourceAtFreqFromPlusArg("slow_clk_freq_mhz"))
   clock_source.io.power := true.B
   clock_source.io.gate := false.B
-  dut.clock_pad.clock := clock_source.io.clk
+  dut.clock_pad := clock_source.io.clk
 
   // Reset
   dut.reset_pad := reset.asAsyncReset
@@ -39,21 +42,32 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
   dut.custom_boot_pad := PlusArg("custom_boot_pin", width=1)
 
   // Serialized TL
-  val sVal = p(SerialTLKey).get
-  val serialTLManagerParams = sVal.serialTLManagerParams.get
+  val sVal = p(SerialTLKey)(0)
+  val serialTLManagerParams = sVal.manager.get
   require(serialTLManagerParams.isMemoryDevice)
 
-  withClockAndReset(clock, reset) {
-    val serial_bits = dut.serial_tl_pad.bits
-    if (DataMirror.directionOf(dut.serial_tl_pad.clock) == Direction.Input) {
-      dut.serial_tl_pad.clock := clock
-    }
-    val harnessRAM = TSIHarness.connectRAM(
-      lazyDut.system.serdesser.get,
-      serial_bits,
-      reset)
-    io.success := SimTSI.connect(Some(harnessRAM.module.io.tsi), clock, reset)
+  // Figure out which clock drives the harness TLSerdes, based on the port type
+  val serial_ram_clock = dut.serial_tl_pad match {
+    case io: InternalSyncSerialIO => io.clock_out
+    case io: ExternalSyncSerialIO => clock
+  }
+  dut.serial_tl_pad match {
+    case io: ExternalSyncSerialIO => io.clock_in := clock
+    case io: InternalSyncSerialIO =>
+  }
 
+  dut.serial_tl_pad match {
+    case pad: DecoupledSerialIO => {
+      withClockAndReset(serial_ram_clock, reset) {
+        // SerialRAM implements the memory regions the chip expects
+        val ram = Module(LazyModule(new SerialRAM(lazyDut.system.serdessers(0), p(SerialTLKey)(0))).module)
+        ram.io.ser.in <> pad.out
+        pad.in <> ram.io.ser.out
+
+        // Allow TSI to master the chip
+        io.success := SimTSI.connect(ram.io.tsi, serial_ram_clock, reset)
+      }
+    }
   }
 
   // JTAG

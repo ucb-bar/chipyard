@@ -3,7 +3,7 @@ package chipyard
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.subsystem.{MBUS, SBUS}
-import testchipip.{OBUS}
+import testchipip.soc.{OBUS}
 
 // A simple config demonstrating how to set up a basic chip in Chipyard
 class ChipLikeRocketConfig extends Config(
@@ -22,16 +22,26 @@ class ChipLikeRocketConfig extends Config(
   //==================================
   // Set up I/O
   //==================================
-  new testchipip.WithSerialTLWidth(4) ++                                                // 4bit wide Serialized TL interface to minimize IO
-  new testchipip.WithSerialTLBackingMemory ++                                           // Configure the off-chip memory accessible over serial-tl as backing memory
-  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 4L) ++                  // 4GB max external memory
+  new testchipip.serdes.WithSerialTL(Seq(testchipip.serdes.SerialTLParams(              // 1 serial tilelink port
+    manager = Some(testchipip.serdes.SerialTLManagerParams(                             // port acts as a manager of offchip memory
+      memParams = Seq(testchipip.serdes.ManagerRAMParams(                               // 4 GB of off-chip memory
+        address = BigInt("80000000", 16),
+        size    = BigInt("100000000", 16)
+      )),
+      isMemoryDevice = true
+    )),
+    client = Some(testchipip.serdes.SerialTLClientParams()),                            // Allow an external manager to probe this chip
+    phyParams = testchipip.serdes.ExternalSyncSerialParams(width=4)                     // 4-bit bidir interface, sync'd to an external clock
+  ))) ++
+
+  new freechips.rocketchip.subsystem.WithNoMemPort ++                                   // Remove axi4 mem port
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++                          // 1 memory channel
 
   //==================================
   // Set up buses
   //==================================
-  new testchipip.WithOffchipBusClient(MBUS) ++                                          // offchip bus connects to MBUS, since the serial-tl needs to provide backing memory
-  new testchipip.WithOffchipBus ++                                                      // attach a offchip bus, since the serial-tl will master some external tilelink memory
+  new testchipip.soc.WithOffchipBusClient(MBUS) ++                                      // offchip bus connects to MBUS, since the serial-tl needs to provide backing memory
+  new testchipip.soc.WithOffchipBus ++                                                  // attach a offchip bus, since the serial-tl will master some external tilelink memory
 
   //==================================
   // Set up clock./reset
@@ -42,6 +52,10 @@ class ChipLikeRocketConfig extends Config(
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("implicit", "sbus", "mbus", "cbus", "system_bus", "fbus", "pbus"), Nil)) ++
 
   new chipyard.config.AbstractConfig)
+
+class FlatChipTopChipLikeRocketConfig extends Config(
+  new chipyard.example.WithFlatChipTop ++
+  new chipyard.ChipLikeRocketConfig)
 
 // A simple config demonstrating a "bringup prototype" to bringup the ChipLikeRocketconfig
 class ChipBringupHostConfig extends Config(
@@ -56,17 +70,23 @@ class ChipBringupHostConfig extends Config(
   //=============================
   // Setup the SerialTL side on the bringup device
   //=============================
-  new testchipip.WithSerialTLWidth(4) ++                                       // match width with the chip
-  new testchipip.WithSerialTLMem(base = 0x0, size = 0x80000000L,               // accessible memory of the chip that doesn't come from the tethered host
-                                 idBits = 4, isMainMemory = false) ++          // This assumes off-chip mem starts at 0x8000_0000
-  new testchipip.WithSerialTLClockDirection(provideClockFreqMHz = Some(75)) ++ // bringup board drives the clock for the serial-tl receiver on the chip, use 75MHz clock
+  new testchipip.serdes.WithSerialTL(Seq(testchipip.serdes.SerialTLParams(
+    manager = Some(testchipip.serdes.SerialTLManagerParams(
+      memParams = Seq(testchipip.serdes.ManagerRAMParams(                            // Bringup platform can access all memory from 0 to DRAM_BASE
+        address = BigInt("00000000", 16),
+        size    = BigInt("80000000", 16)
+      ))
+    )),
+    client = Some(testchipip.serdes.SerialTLClientParams()),                         // Allow chip to access this device's memory (DRAM)
+    phyParams = testchipip.serdes.InternalSyncSerialParams(width=4, freqMHz = 75)    // bringup platform provides the clock
+  ))) ++
 
   //============================
   // Setup bus topology on the bringup system
   //============================
-  new testchipip.WithOffchipBusClient(SBUS,                                    // offchip bus hangs off the SBUS
+  new testchipip.soc.WithOffchipBusClient(SBUS,                                // offchip bus hangs off the SBUS
     blockRange = AddressSet.misaligned(0x80000000L, (BigInt(1) << 30) * 4)) ++ // offchip bus should not see the main memory of the testchip, since that can be accessed directly
-  new testchipip.WithOffchipBus ++                                             // offchip bus
+  new testchipip.soc.WithOffchipBus ++                                         // offchip bus
 
   //=============================
   // Set up memory on the bringup system
@@ -76,7 +96,7 @@ class ChipBringupHostConfig extends Config(
   //=============================
   // Generate the TSI-over-UART side of the bringup system
   //=============================
-  new testchipip.WithUARTTSIClient(initBaudRate = BigInt(921600)) ++           // nonstandard baud rate to improve performance
+  new testchipip.tsi.WithUARTTSIClient(initBaudRate = BigInt(921600)) ++       // nonstandard baud rate to improve performance
 
   //=============================
   // Set up clocks of the bringup system
@@ -85,6 +105,9 @@ class ChipBringupHostConfig extends Config(
   new chipyard.config.WithFrontBusFrequency(75.0) ++     // run all buses of this system at 75 MHz
   new chipyard.config.WithMemoryBusFrequency(75.0) ++
   new chipyard.config.WithPeripheryBusFrequency(75.0) ++
+  new chipyard.config.WithSystemBusFrequency(75.0) ++
+  new chipyard.config.WithControlBusFrequency(75.0) ++
+  new chipyard.config.WithOffchipBusFrequency(75.0) ++
 
   // Base is the no-cores config
   new chipyard.NoCoresConfig)
@@ -103,5 +126,9 @@ class TetheredChipLikeRocketConfig extends Config(
 class VerilatorCITetheredChipLikeRocketConfig extends Config(
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++   // use absolute freqs for sims in the harness
   new chipyard.harness.WithMultiChipSerialTL(0, 1) ++                // connect the serial-tl ports of the chips together
-  new chipyard.harness.WithMultiChip(0, new chipyard.config.WithNoResetSynchronizers ++ new ChipLikeRocketConfig) ++
+  new chipyard.harness.WithMultiChip(0,                                         // These fragments remove all troublesome
+    new chipyard.clocking.WithPLLSelectorDividerClockGenerator(enable=false) ++ // clocking features from the design
+    new chipyard.iobinders.WithDebugIOCells(syncReset = false) ++
+    new chipyard.config.WithNoResetSynchronizers ++
+    new ChipLikeRocketConfig) ++
   new chipyard.harness.WithMultiChip(1, new ChipBringupHostConfig))

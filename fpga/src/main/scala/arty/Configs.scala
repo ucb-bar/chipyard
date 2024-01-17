@@ -11,13 +11,14 @@ import freechips.rocketchip.tile._
 
 import sifive.blocks.devices.uart._
 
-import testchipip.{SerialTLKey}
+import testchipip.serdes.{SerialTLKey}
 
 import chipyard.{BuildSystem}
 
 // DOC include start: AbstractArty and Rocket
 class WithArtyTweaks extends Config(
-  new WithArtyResetHarnessBinder ++
+  new WithArtyDebugResetHarnessBinder ++
+  new WithArtyJTAGResetHarnessBinder ++
   new WithArtyJTAGHarnessBinder ++
   new WithArtyUARTHarnessBinder ++
   new WithDebugResetPassthrough ++
@@ -26,8 +27,12 @@ class WithArtyTweaks extends Config(
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new chipyard.config.WithDTSTimebase(32000) ++
   new chipyard.config.WithSystemBusFrequency(32) ++
+  new chipyard.config.WithFrontBusFrequency(32) ++
+  new chipyard.config.WithControlBusFrequency(32) ++
   new chipyard.config.WithPeripheryBusFrequency(32) ++
-  new testchipip.WithNoSerialTL
+  new chipyard.config.WithControlBusFrequency(32) ++
+  new testchipip.serdes.WithNoSerialTL ++
+  new testchipip.soc.WithNoScratchpads
 )
 
 class TinyRocketArtyConfig extends Config(

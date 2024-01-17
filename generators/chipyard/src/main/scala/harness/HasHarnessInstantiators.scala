@@ -5,12 +5,12 @@ import chisel3._
 import scala.collection.mutable.{ArrayBuffer, LinkedHashMap}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import org.chipsalliance.cde.config.{Field, Parameters, Config}
-import freechips.rocketchip.util.{ResetCatchAndSync}
+import freechips.rocketchip.util.{ResetCatchAndSync, DontTouch}
 import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters, ClockSinkParameters, ClockParameters}
 import chipyard.stage.phases.TargetDirKey
 
 import chipyard.harness.{ApplyHarnessBinders, HarnessBinders}
-import chipyard.iobinders.HasIOBinders
+import chipyard.iobinders.HasChipyardPorts
 import chipyard.clocking.{SimplePllConfiguration, ClockDividerN}
 import chipyard.{ChipTop}
 
@@ -24,6 +24,7 @@ case object BuildTop extends Field[Parameters => LazyModule]((p: Parameters) => 
 case object HarnessClockInstantiatorKey extends Field[() => HarnessClockInstantiator]()
 case object HarnessBinderClockFrequencyKey extends Field[Double](100.0) // MHz
 case object MultiChipIdx extends Field[Int](0)
+case object DontTouchChipTopPorts extends Field[Boolean](true)
 
 class WithMultiChip(id: Int, p: Parameters) extends Config((site, here, up) => {
   case MultiChipParameters(`id`) => p
@@ -37,6 +38,10 @@ class WithHomogeneousMultiChip(n: Int, p: Parameters, idStart: Int = 0) extends 
 
 class WithHarnessBinderClockFreqMHz(freqMHz: Double) extends Config((site, here, up) => {
   case HarnessBinderClockFrequencyKey => freqMHz
+})
+
+class WithDontTouchChipTopPorts(b: Boolean = true) extends Config((site, here, up) => {
+  case DontTouchChipTopPorts => b
 })
 
 // A TestHarness mixing this in will
@@ -63,7 +68,7 @@ trait HasHarnessInstantiators {
 
   val supportsMultiChip: Boolean = false
 
-  private val chipParameters = p(MultiChipNChips) match {
+  val chipParameters = p(MultiChipNChips) match {
     case Some(n) => (0 until n).map { i => p(MultiChipParameters(i)).alterPartial {
       case TargetDirKey => p(TargetDirKey) // hacky fix
       case MultiChipIdx => i
@@ -83,10 +88,18 @@ trait HasHarnessInstantiators {
 
     withClockAndReset (harnessBinderClock, harnessBinderReset) {
       lazyDuts.zipWithIndex.foreach {
-        case (d: HasIOBinders, i: Int) => ApplyHarnessBinders(this, d.lazySystem, d.portMap)(chipParameters(i))
+        case (d: HasChipyardPorts, i: Int) => {
+          ApplyHarnessBinders(this, d.ports, i)(chipParameters(i))
+        }
         case _ =>
       }
       ApplyMultiHarnessBinders(this, lazyDuts)
+    }
+
+    if (p(DontTouchChipTopPorts)) {
+      duts.map(_ match {
+        case d: DontTouch => d.dontTouchPorts()
+      })
     }
 
     val harnessBinderClk = harnessClockInstantiator.requestClockMHz("harnessbinder_clock", getHarnessBinderClockFreqMHz)

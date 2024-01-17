@@ -5,10 +5,9 @@ import chisel3._
 import scala.collection.mutable.{ArrayBuffer}
 
 import freechips.rocketchip.prci.{ClockGroupIdentityNode, ClockSinkParameters, ClockSinkNode, ClockGroup}
-import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey}
 import org.chipsalliance.cde.config.{Parameters, Field}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, LazyRawModuleImp, LazyModuleImpLike, BindingScope}
-import freechips.rocketchip.util.{ResetCatchAndSync}
+import freechips.rocketchip.util.{DontTouch}
 import chipyard.iobinders._
 
 import barstools.iocell.chisel._
@@ -31,5 +30,5 @@ class ChipTop(implicit p: Parameters) extends LazyModule with BindingScope
   // of ChipTop (ex: ClockGroup) do not receive clock or reset.
   // However. anonymous children of ChipTop should not need an implicit Clock or Reset
   // anyways, they probably need to be explicitly clocked.
-  lazy val module: LazyModuleImpLike = new LazyRawModuleImp(this) {  }
+  lazy val module: LazyModuleImpLike = new LazyRawModuleImp(this) with DontTouch {  }
 }

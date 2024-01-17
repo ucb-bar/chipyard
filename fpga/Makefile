@@ -57,11 +57,26 @@ ifeq ($(SUB_PROJECT),bringup)
 	BOARD             ?= vcu118
 	FPGA_BRAND        ?= xilinx
 endif
-ifeq ($(SUB_PROJECT),arty)
+
+ifeq ($(SUB_PROJECT),nexysvideo)
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= NexysVideoHarness
+	VLOG_MODEL        ?= NexysVideoHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.nexysvideo
+	CONFIG            ?= RocketNexysVideoConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.nexysvideo
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
+	TOP               ?= ChipTop
+	BOARD             ?= nexys_video
+	FPGA_BRAND        ?= xilinx
+endif
+
+ifeq ($(SUB_PROJECT),arty35t)
 	# TODO: Fix with Arty
 	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= ArtyFPGATestHarness
-	VLOG_MODEL        ?= ArtyFPGATestHarness
+	MODEL             ?= Arty35THarness
+	VLOG_MODEL        ?= Arty35THarness
 	MODEL_PACKAGE     ?= chipyard.fpga.arty
 	CONFIG            ?= TinyRocketArtyConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty
@@ -122,7 +137,7 @@ include $(base_dir)/common.mk
 # copy from other directory
 #########################################################################################
 all_vsrcs := \
-	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v
+	$(base_dir)/generators/rocket-chip-blocks/vsrc/SRLatch.v
 
 #########################################################################################
 # vivado rules

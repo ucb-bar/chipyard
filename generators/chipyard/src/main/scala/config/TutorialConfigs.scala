@@ -77,7 +77,7 @@ class TutorialSha3BlackBoxConfig extends Config(
 
 // Tutorial Phase 5: Map a multicore heterogeneous SoC with multiple cores and memory-mapped accelerators
 class TutorialNoCConfig extends Config(
-  new chipyard.iobinders.WithDontTouchIOBinders(false) ++
+  new chipyard.harness.WithDontTouchChipTopPorts(false) ++
   // Try changing the dimensions of the Mesh topology
   new constellation.soc.WithGlobalNoC(constellation.soc.GlobalNoCParams(
     NoCParams(
@@ -90,14 +90,14 @@ class TutorialNoCConfig extends Config(
   // The inNodeMapping and outNodeMapping values are the physical identifiers of
   // routers on the topology to map the agents to. Try changing these to any
   // value within the range [0, topology.nNodes)
-  new constellation.soc.WithPbusNoC(constellation.protocol.TLNoCParams(
+  new constellation.soc.WithPbusNoC(constellation.protocol.GlobalTLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
       inNodeMapping = ListMap("Core" -> 7),
       outNodeMapping = ListMap(
         "pbus" -> 8, "uart" -> 9, "control" -> 10, "gcd" -> 11,
         "writeQueue[0]" -> 0, "writeQueue[1]" -> 1, "tailChain[0]" -> 2))
-  ), true) ++
-  new constellation.soc.WithSbusNoC(constellation.protocol.TLNoCParams(
+  )) ++
+  new constellation.soc.WithSbusNoC(constellation.protocol.GlobalTLNoCParams(
     constellation.protocol.DiplomaticNetworkNodeMapping(
       inNodeMapping = ListMap(
         "Core 0" -> 0, "Core 1" -> 1,
@@ -105,7 +105,7 @@ class TutorialNoCConfig extends Config(
       outNodeMapping = ListMap(
         "system[0]" -> 3, "system[1]" -> 4, "system[2]" -> 5, "system[3]" -> 6,
         "pbus" -> 7))
-  ), true) ++
+  )) ++
   new chipyard.example.WithGCD ++
   new chipyard.harness.WithLoopbackNIC ++
   new icenet.WithIceNIC ++

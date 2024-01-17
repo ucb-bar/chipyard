@@ -2,6 +2,7 @@ package chipyard.harness
 
 import chisel3._
 import chisel3.util._
+import chisel3.experimental.{DataMirror, Direction}
 
 import org.chipsalliance.cde.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
@@ -9,70 +10,75 @@ import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.util._
 
-import testchipip._
+import testchipip.serdes._
 
 import chipyard._
-import chipyard.clocking.{HasChipyardPRCI, ClockWithFreq}
-import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, HasIOBinders}
+import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, HasChipyardPorts, Port, SerialTLPort}
 
 import scala.reflect.{ClassTag}
 
-case class MultiHarnessBinders(c0: Int, c1: Int) extends Field[MultiHarnessBinderMap](MultiHarnessBinderMapDefault)
-
-class MultiHarnessBinder[T0, T1, S <: HasHarnessInstantiators, U0 <: Data, U1 <: Data]
-  (chip0: Int, chip1: Int, fn: => (T0, T1, S, Seq[U0], Seq[U1]) => Unit)
-  (implicit tag0: ClassTag[T0], tag1: ClassTag[T1], thtag: ClassTag[S], ptag0: ClassTag[U0], ptag1: ClassTag[U1])
-    extends Config((site, here, up) => {
-      // Override any HarnessBinders for chip0/chip1
-      case MultiChipParameters(`chip0`) => new Config(
-        new OverrideHarnessBinder[T0, S, U0]((system: T0, th: S, ports: Seq[U0]) => Nil) ++
-        up(MultiChipParameters(chip0))
-      )
-      case MultiChipParameters(`chip1`) => new Config(
-        new OverrideHarnessBinder[T1, S, U1]((system: T1, th: S, ports: Seq[U1]) => Nil) ++
-        up(MultiChipParameters(chip1))
-      )
-      // Set the multiharnessbinder key
-      case MultiHarnessBinders(`chip0`, `chip1`) => up(MultiHarnessBinders(chip0, chip1)) +
-        ((tag0.runtimeClass.toString, tag1.runtimeClass.toString) ->
-          ((c0: Any, c1: Any, th: HasHarnessInstantiators, ports0: Seq[Data], ports1: Seq[Data]) => {
-            val pts0 = ports0.map(_.asInstanceOf[U0])
-            val pts1 = ports1.map(_.asInstanceOf[U1])
-            require(pts0.size == pts1.size)
-            (c0, c1, th) match {
-              case (c0: T0, c1: T1, th: S) => fn(c0, c1, th, pts0, pts1)
-              case _ =>
-            }
-          })
-      )
-    })
+case class MultiHarnessBinders(chip0: Int, chip1: Int) extends Field[Seq[MultiHarnessBinderFunction]](Nil)
 
 object ApplyMultiHarnessBinders {
   def apply(th: HasHarnessInstantiators, chips: Seq[LazyModule])(implicit p: Parameters): Unit = {
     Seq.tabulate(chips.size, chips.size) { case (i, j) => if (i != j) {
       (chips(i), chips(j)) match {
-        case (l0: HasIOBinders, l1: HasIOBinders) => p(MultiHarnessBinders(i, j)).foreach {
-          case ((s0, s1), f) => {
-            f(l0.lazySystem       , l1.lazySystem       , th, l0.portMap(s0), l1.portMap(s1))
-            f(l0.lazySystem.module, l1.lazySystem.module, th, l0.portMap(s0), l1.portMap(s1))
-          }
+        case (l0: HasChipyardPorts, l1: HasChipyardPorts) => p(MultiHarnessBinders(i, j)).foreach { f =>
+          f(th, l0.ports, l1.ports)
         }
-        case _ =>
       }
     }}
   }
 }
 
-class WithMultiChipSerialTL(chip0: Int, chip1: Int) extends MultiHarnessBinder(chip0, chip1, (
-  (system0: CanHavePeripheryTLSerial, system1: CanHavePeripheryTLSerial,
-    th: HasHarnessInstantiators,
-    ports0: Seq[ClockedIO[SerialIO]], ports1: Seq[ClockedIO[SerialIO]]
-  ) => {
-    require(ports0.size == ports1.size)
-    (ports0 zip ports1).map { case (l, r) =>
-      l.clock <> r.clock
-      require(l.bits.w == r.bits.w)
-      l.bits.flipConnect(r.bits)
+class MultiHarnessBinder[T <: Port[_], S <: HasHarnessInstantiators](
+  chip0: Int, chip1: Int,
+  chip0portFn: T => Boolean, chip1portFn: T => Boolean,
+  connectFn: (S, T, T) => Unit
+)(implicit tag0: ClassTag[T], tag1: ClassTag[S]) extends Config((site, here, up) => {
+    // Override any HarnessBinders for chip0/chip1
+    case MultiChipParameters(`chip0`) => new Config(
+      new HarnessBinder({case (th: S, port: T, chipId: Int) if chip0portFn(port) => }) ++ up(MultiChipParameters(chip0))
+    )
+    case MultiChipParameters(`chip1`) => new Config(
+      new HarnessBinder({case (th: S, port: T, chipId: Int) if chip1portFn(port) => }) ++ up(MultiChipParameters(chip1))
+    )
+    // Set the multiharnessbinder key
+    case MultiHarnessBinders(`chip0`, `chip1`) => up(MultiHarnessBinders(chip0, chip1)) :+ {
+      ((th: S, chip0Ports: Seq[Port[_]], chip1Ports: Seq[Port[_]]) => {
+        val chip0Port: Seq[T] = chip0Ports.collect { case (p: T) if chip0portFn(p) => p }
+        val chip1Port: Seq[T] = chip1Ports.collect { case (p: T) if chip1portFn(p) => p }
+        require(chip0Port.size == 1 && chip1Port.size == 1)
+        connectFn(th, chip0Port(0), chip1Port(0))
+      })
+    }
+  })
+
+
+class WithMultiChipSerialTL(chip0: Int, chip1: Int, chip0portId: Int = 0, chip1portId: Int = 0) extends MultiHarnessBinder(
+  chip0, chip1,
+  (p0: SerialTLPort) => p0.portId == chip0portId,
+  (p1: SerialTLPort) => p1.portId == chip1portId,
+  (th: HasHarnessInstantiators, p0: SerialTLPort, p1: SerialTLPort) => {
+    def connectDecoupledSyncSerialIO(clkSource: InternalSyncSerialIO, clkSink: ExternalSyncSerialIO) = {
+      clkSink.clock_in := clkSource.clock_out
+      clkSink.in <> clkSource.out
+      clkSource.in <> clkSink.out
+    }
+    def connectSourceSyncSerialIO(a: SourceSyncSerialIO, b: SourceSyncSerialIO) = {
+      a.clock_in := b.clock_out
+      b.clock_in := a.clock_out
+      a.reset_in := b.reset_out
+      b.reset_in := a.reset_out
+      a.in := b.out
+      b.in := a.out
+      a.credit_in := b.credit_out
+      b.credit_in := a.credit_out
+    }
+    (p0.io, p1.io) match {
+      case (io0: InternalSyncSerialIO, io1: ExternalSyncSerialIO) => connectDecoupledSyncSerialIO(io0, io1)
+      case (io0: ExternalSyncSerialIO, io1: InternalSyncSerialIO) => connectDecoupledSyncSerialIO(io1, io0)
+      case (io0: SourceSyncSerialIO  , io1: SourceSyncSerialIO  ) => connectSourceSyncSerialIO   (io0, io1)
     }
   }
-))
+)

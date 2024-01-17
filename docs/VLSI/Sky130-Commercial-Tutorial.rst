@@ -60,7 +60,7 @@ The prerequisite setup for this tutorial may eventually be scripted, but for now
 .. code-block:: shell
 
     # download all files for Sky130A PDK
-    conda create -c litex-hub --prefix ~/.conda-sky130 open_pdks.sky130a=1.0.399_0_g63dbde9
+    conda create -c litex-hub --prefix ~/.conda-sky130 open_pdks.sky130a=1.0.457_0_g32e8f23
     # clone the SRAM22 Sky130 SRAM macros
     git clone https://github.com/rahulk29/sram22_sky130_macros ~/sram22_sky130_macros
 
@@ -123,8 +123,7 @@ The ``buildfile`` make target has dependencies on both (1) the Verilog that is e
 and (2) the mapping of memory instances in the design to SRAM macros;
 all files related to these two steps reside in the ``generated-src/chipyard.harness.TestHarness.TinyRocketConfig-ChipTop`` directory.
 Note that the files in ``generated-src`` vary for each tool/technology flow.
-This especially applies to the Sky130 Commercial vs OpenROAD tutorial flows
-(due to the ``ENABLE_YOSYS_FLOW`` flag present for the OpenROAD flow), so these flows should be run in separate
+This especially applies to the Sky130 Commercial vs OpenROAD tutorial flows, so these flows should be run in separate
 chipyard installations. If the wrong sources are generated, simply run ``make buildfile -B`` to rebuild all targets correctly.
 
 

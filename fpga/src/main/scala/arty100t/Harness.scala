@@ -5,19 +5,18 @@ import chisel3.util._
 import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
+import freechips.rocketchip.prci._
 import freechips.rocketchip.subsystem.{SystemBusKey}
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.shell._
-import sifive.fpgashells.clocks.{ClockGroup, ClockSinkNode, PLLFactoryKey, ResetWrangler}
+import sifive.fpgashells.clocks._
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 
 import sifive.blocks.devices.uart._
 
 import chipyard._
 import chipyard.harness._
-import chipyard.iobinders.{HasIOBinders}
 
 class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell {
   def dp = designParameters
@@ -33,9 +32,6 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
   dutClock := dutWrangler.node := dutGroup := harnessSysPLLNode
 
   harnessSysPLLNode := clockOverlay.overlayOutput.node
-
-  val io_uart_bb = BundleBridgeSource(() => new UARTPortIO(dp(PeripheryUARTKey).headOption.getOrElse(UARTParams(0))))
-  val uartOverlay = dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
 
   val ddrOverlay = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLLNode)).asInstanceOf[DDRArtyPlacedOverlay]
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
@@ -79,6 +75,9 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
     def referenceClock = dutClock.in.head._1.clock
     def referenceReset = dutClock.in.head._1.reset
     def success = { require(false, "Unused"); false.B }
+
+    childClock := harnessBinderClock
+    childReset := harnessBinderReset
 
     ddrOverlay.mig.module.clock := harnessBinderClock
     ddrOverlay.mig.module.reset := harnessBinderReset

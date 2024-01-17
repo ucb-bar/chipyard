@@ -15,7 +15,7 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VC7074GDDRSize}
 
-import testchipip.{SerialTLKey}
+import testchipip.serdes.{SerialTLKey}
 
 import chipyard.{BuildSystem, ExtTLMem}
 import chipyard.harness._
@@ -35,7 +35,7 @@ class WithSystemModifications extends Config((site, here, up) => {
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vc707/sdboot/build/sdboot.bin")
   }
   case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC7074GDDRSize)))) // set extmem to DDR size (note the size)
-  case SerialTLKey => None // remove serialized tl port
+  case SerialTLKey => Nil // remove serialized tl port
 })
 
 class WithVC707Tweaks extends Config (
@@ -45,6 +45,8 @@ class WithVC707Tweaks extends Config (
   new chipyard.config.WithMemoryBusFrequency(50.0) ++
   new chipyard.config.WithSystemBusFrequency(50.0) ++
   new chipyard.config.WithPeripheryBusFrequency(50.0) ++
+  new chipyard.config.WithControlBusFrequency(50.0) ++
+  new chipyard.config.WithFrontBusFrequency(50.0) ++
 
   new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
   new WithFPGAFrequency(50) ++ // default 50MHz freq
@@ -53,10 +55,6 @@ class WithVC707Tweaks extends Config (
   new WithVC707UARTHarnessBinder ++
   new WithVC707SPISDCardHarnessBinder ++
   new WithVC707DDRMemHarnessBinder ++
-  // io binders
-  new WithUARTIOPassthrough ++
-  new WithSPIIOPassthrough ++
-  new WithTLIOPassthrough ++
   // other configuration
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
@@ -78,8 +76,11 @@ class BoomVC707Config extends Config (
 )
 
 class WithFPGAFrequency(fMHz: Double) extends Config (
-  new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.
-  new chipyard.config.WithMemoryBusFrequency(fMHz)
+  new chipyard.config.WithPeripheryBusFrequency(fMHz) ++
+  new chipyard.config.WithMemoryBusFrequency(fMHz) ++
+  new chipyard.config.WithSystemBusFrequency(fMHz) ++
+  new chipyard.config.WithControlBusFrequency(fMHz) ++
+  new chipyard.config.WithFrontBusFrequency(fMHz)
 )
 
 class WithFPGAFreq25MHz extends WithFPGAFrequency(25)

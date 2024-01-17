@@ -2,14 +2,14 @@
 # RISCV Toolchain
 #################################
 
-PREFIX = riscv64-unknown-elf-
+TARGET = riscv64-unknown-elf
 
-GCC = $(PREFIX)gcc
-CXX = $(PREFIX)g++
-CP = $(PREFIX)objcopy
-OBJDUMP = $(PREFIX)objdump
-DG = $(PREFIX)gdb
-SIZE = $(PREFIX)size
+GCC = $(TARGET)-gcc
+CXX = $(TARGET)-g++
+CP = $(TARGET)-objcopy
+OBJDUMP = $(TARGET)-objdump
+DG = $(TARGET)-gdb
+SIZE = $(TARGET)-size
 
 
 #################################
@@ -29,7 +29,7 @@ include libgloss.mk
 
 PROGRAMS = pwm blkdev accum charcount nic-loopback big-blkdev pingd \
            streaming-passthrough streaming-fir nvdla spiflashread spiflashwrite fft gcd \
-           hello mt-hello
+           hello mt-hello symmetric
 
 
 .DEFAULT_GOAL := default

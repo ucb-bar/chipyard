@@ -46,17 +46,17 @@ agents and MMIO peripherals. Ordinarily, it is a fully-connected crossbar, but
 a network-on-chip-based implementation can be generated using Constellation.
 See :ref:`Customization/NoC-SoCs:SoCs with NoC-based Interconnects` for more.
 
-The SiFive L2 Cache
--------------------
+The Inclusive Last-Level Cache
+---------------------------------
 
-The default ``RocketConfig`` provided in the Chipyard example project uses SiFive's
+The default ``RocketConfig`` provided in the Chipyard example project uses the Rocket-Chip
 InclusiveCache generator to produce a shared L2 cache. In the default
 configuration, the L2 uses a single cache bank with 512 KiB capacity and 8-way
 set-associativity. However, you can change these parameters to obtain your
 desired cache configuration. The main restriction is that the number of ways
 and the number of banks must be powers of 2.
 
-Refer to the ``CacheParameters`` object defined in sifive-cache for
+Refer to the ``CacheParameters`` object defined in ``rocket-chip-inclusive-cache`` for
 customization options.
 
 The Broadcast Hub
@@ -94,10 +94,10 @@ memory channel.
 
 Instead of connecting to off-chip DRAM, you can instead connect a scratchpad
 and remove the off-chip link. This is done by adding a fragment like
-``testchipip.WithScratchpad`` to your configuration and removing the
+``testchipip.soc.WithScratchpad`` to your configuration and removing the
 memory port with ``freechips.rocketchip.subsystem.WithNoMemPort``.
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/RocketConfigs.scala
+.. literalinclude:: ../../generators/chipyard/src/main/scala/config/MemorySystemConfigs.scala
     :language: scala
     :start-after: DOC include start: mbusscratchpadrocket
     :end-before: DOC include end: mbusscratchpadrocket

@@ -13,7 +13,7 @@ import freechips.rocketchip.util.UIntIsOneOf
 
 // DOC include start: GCD params
 case class GCDParams(
-  address: BigInt = 0x1000,
+  address: BigInt = 0x4000,
   width: Int = 32,
   useAXI4: Boolean = false,
   useBlackBox: Boolean = true)
@@ -185,7 +185,7 @@ trait CanHavePeripheryGCD { this: BaseSubsystem =>
 // DOC include end: GCD lazy trait
 
 // DOC include start: GCD imp trait
-trait CanHavePeripheryGCDModuleImp extends LazyModuleImp {
+trait CanHavePeripheryGCDModuleImp extends LazyRawModuleImp {
   val outer: CanHavePeripheryGCD
   val gcd_busy = outer.gcd match {
     case Some(gcd) => {

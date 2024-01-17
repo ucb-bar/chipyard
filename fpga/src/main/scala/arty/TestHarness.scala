@@ -9,9 +9,8 @@ import org.chipsalliance.cde.config.{Parameters}
 import sifive.fpgashells.shell.xilinx.artyshell.{ArtyShell}
 
 import chipyard.harness.{HasHarnessInstantiators}
-import chipyard.iobinders.{HasIOBinders}
 
-class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell with HasHarnessInstantiators {
+class Arty35THarness(override implicit val p: Parameters) extends ArtyShell with HasHarnessInstantiators {
   // Convert harness resets from Bool to Reset type.
   val hReset = Wire(Reset())
   hReset := ~ck_rst

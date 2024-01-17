@@ -11,7 +11,7 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.prci._
 import freechips.rocketchip.util.ElaborationArtefacts
 
-import testchipip._
+import testchipip.clocking._
 
 case class ClockSelNode()(implicit valName: ValName)
   extends MixedNexusNode(ClockImp, ClockGroupImp)(
@@ -21,11 +21,29 @@ case class ClockSelNode()(implicit valName: ValName)
 
 // This module adds a TileLink memory-mapped clock mux for each downstream clock domain
 // in the clock graph. The output clock/reset should be synchronized downstream
-class TLClockSelector(address: BigInt, beatBytes: Int)(implicit p: Parameters) extends LazyModule {
+// If enable is unset, this will always pass through the 0'th clock
+// DO NOT unset enable for VLSI, or prototyping flows. The disable feature is a work around for
+// some RTL simulators which do not simulate the reset synchronization properly
+class TLClockSelector(address: BigInt, beatBytes: Int, enable: Boolean = true)(implicit p: Parameters) extends LazyModule {
   val device = new SimpleDevice("clk-sel-ctrl", Nil)
   val tlNode = TLRegisterNode(Seq(AddressSet(address, 4096-1)), device, "reg/control", beatBytes=beatBytes)
 
   val clockNode = ClockSelNode()
+
+  if (!enable) println(Console.RED + s"""
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+WARNING:
+
+YOU ARE USING THE TLCLOCKSELECTOR IN
+"DISABLED" MODE. THIS SHOULD ONLY BE DONE
+FOR RTL SIMULATION
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+""" + Console.RESET)
+
+
 
   lazy val module = new LazyModuleImp(this) {
     val asyncReset = clockNode.in.map(_._1).map(_.reset).toSeq(0)
@@ -40,13 +58,18 @@ class TLClockSelector(address: BigInt, beatBytes: Int)(implicit p: Parameters) e
       sel := reg.io.q
       println(s"${(address+i*4).toString(16)}: Clock domain $sinkName clock mux")
 
-      val mux = testchipip.ClockMutexMux(clocks).suggestName(s"${sinkName}_clkmux")
+      val mux = ClockMutexMux(clocks).suggestName(s"${sinkName}_clkmux")
       mux.io.sel        := sel
       mux.io.resetAsync := asyncReset.asAsyncReset
-      sinks(i).clock := mux.io.clockOut
-      // Stretch the reset for 20 cycles, to give time to reset any downstream digital logic
-      sinks(i).reset := ResetStretcher(clocks(0), asyncReset, 20).asAsyncReset
-
+      if (enable) {
+        sinks(i).clock := mux.io.clockOut
+        // Stretch the reset for 20 cycles, to give time to reset any downstream digital logic
+        sinks(i).reset := ResetStretcher(clocks(0), asyncReset, 20).asAsyncReset
+      } else {
+        // WARNING: THIS IS FOR RTL SIMULATION ONLY
+        sinks(i).clock := clocks(0)
+        sinks(i).reset := asyncReset
+      }
       reg
     }
     tlNode.regmap((0 until sinks.size).map { i =>

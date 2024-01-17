@@ -15,11 +15,12 @@ import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
 
-import testchipip.{PeripheryTSIHostKey, TSIHostParams, TSIHostSerdesParams}
+import testchipip.tsi.{PeripheryTSIHostKey, TSIHostParams, TSIHostSerdesParams}
 
 import chipyard.{BuildSystem}
 
 import chipyard.fpga.vcu118.{WithVCU118Tweaks, WithFPGAFrequency, VCU118DDR2Size}
+import chipyard.iobinders.{WithGPIOPunchthrough}
 
 class WithBringupPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => up(PeripheryUARTKey, site) ++ List(UARTParams(address = BigInt(0x64003000L)))
@@ -80,8 +81,7 @@ class WithBringupAdditions extends Config(
   new WithBringupGPIO ++
   new WithBringupTSIHost ++
   new WithTSITLIOPassthrough ++
-  new WithI2CIOPassthrough ++
-  new WithGPIOIOPassthrough ++
+  new WithGPIOPunchthrough ++
   new WithBringupPeripherals ++
   new WithBringupVCU118System)
 
