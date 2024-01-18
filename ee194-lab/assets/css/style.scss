@@ -1,0 +1,13 @@
+---
+---
+
+// Theme Customizations
+// per https://github.com/pages-themes/cayman#stylesheet
+
+// Colors
+$header-heading-color: #fff !default;
+$header-bg-color: yellow;
+$header-bg-color-secondary: blue;
+$section-headings-color: blue;
+
+@import "{{ site.theme }}";
