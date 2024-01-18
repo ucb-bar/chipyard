@@ -1,7 +1,6 @@
 package chipyard.fpga.arty100t
 
 import chisel3._
-import chisel3.experimental.{DataMirror, Direction}
 
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem.{PeripheryBusKey}

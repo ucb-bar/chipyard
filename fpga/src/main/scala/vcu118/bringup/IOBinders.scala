@@ -1,7 +1,7 @@
 package chipyard.fpga.vcu118.bringup
 
 import chisel3._
-import chisel3.experimental.{IO, DataMirror}
+import chisel3.reflect.DataMirror
 
 import freechips.rocketchip.util.{HeterogeneousBag}
 import freechips.rocketchip.tilelink.{TLBundle}

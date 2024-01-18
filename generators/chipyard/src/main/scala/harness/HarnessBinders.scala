@@ -2,7 +2,8 @@ package chipyard.harness
 
 import chisel3._
 import chisel3.util._
-import chisel3.experimental.{Analog, BaseModule, DataMirror, Direction}
+import chisel3.reflect.DataMirror
+import chisel3.experimental.Direction
 
 import org.chipsalliance.cde.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImpLike}
