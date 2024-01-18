@@ -104,13 +104,6 @@ dependencies:
     - pip:
         - hammer-vlsi[asap7]==1.2.0
 
-    # doc requirements
-    - sphinx
-    - pygments
-    - sphinx-autobuild
-    - sphinx_rtd_theme
-    - docutils
-
     # firesim python packages
     # While it is possible to install using pip after creating the
     # conda environment, pip's dependency resolution can conflict with
