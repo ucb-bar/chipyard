@@ -469,3 +469,10 @@ check-submodule-status:
 # Disable all suffix rules to improve Make performance on systems running older
 # versions of Make
 .SUFFIXES:
+
+.PHONY: print-%
+# Print any variable and it's origin. This helps figure out where the
+# variable was defined and to distinguish between empty and undefined.
+print-%:
+	@echo "$*=$($*)"
+	@echo "Origin is: $(origin $*)"
