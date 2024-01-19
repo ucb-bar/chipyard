@@ -1,7 +1,6 @@
 package chipyard.example
 
 import chisel3._
-import chisel3.experimental.{Analog, BaseModule, DataMirror, Direction}
 import scala.collection.mutable.{ArrayBuffer, LinkedHashMap}
 
 import org.chipsalliance.cde.config.{Field, Parameters}
