@@ -21,7 +21,7 @@ ARCH = rv64imafdc
 ABI = lp64d
 ARCHFLAGS = -march=$(ARCH) -mabi=$(ABI)
 
-CFLAGS  = -std=gnu99 -O2 -fno-common -fno-builtin-printf -Wall
+CFLAGS  = -std=gnu99 -O2 -fno-common -fno-builtin-printf -Wall -I$(RISCV)/riscv64-unknown-elf/include
 CFLAGS += $(ARCHFLAGS)
 LDFLAGS = -static
 

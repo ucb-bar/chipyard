@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <inttypes.h>
 #include <riscv-pk/encoding.h>
 #include "marchid.h"
 
