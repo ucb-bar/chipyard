@@ -223,3 +223,29 @@ The ``VERILATOR_THREADS=<num>`` option enables the compiled Verilator simulator 
 On a multi-socket machine, you will want to make sure all threads are on the same socket by using ``NUMACTL=1`` to enable ``numactl``.
 By enabling this, you will use Chipyard's ``numa_prefix`` wrapper, which is a simple wrapper around ``numactl`` that runs your verilated simulator like this: ``$(numa_prefix) ./simulator-<name> <simulator-args>``.
 Note that both these flags are mutually exclusive, you can use either independently (though it makes sense to use ``NUMACTL`` just with ``VERILATOR_THREADS=8`` during a Verilator simulation).
+
+
+When the SoC Hangs Due to Bad Tilelink Messages
+-----------------------------------------------
+
+There are many cases when your custom module interfaces with Tilelink (e.g., when you write a custom accelerator).
+Wrong interfaces with Tilelink can cause the SoC to hang and can be tricky to debug.
+To help deal with these situations, you can add hardware modules called Tilelink monitors into
+your SoC that will fire assertions when wrong Tilelink messages are sent.
+
+You can simply add these modules into your SoC by adding the below line into your config.
+
+.. code-block:: scala
+
+  new chipyard.config.WithTLMonitors ++
+
+
+For instance:
+
+.. code-block:: scala
+
+  class TLMonitorRocketConfig extends Config(
+    new chipyard.config.WithTLMonitors ++
+    new chipyard.RocketConfig)
+
+One caveat is that adding these modules can slow down your RTL simulation by around 2x.
