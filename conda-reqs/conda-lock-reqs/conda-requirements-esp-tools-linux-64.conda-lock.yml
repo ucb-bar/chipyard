@@ -21,7 +21,7 @@ metadata:
   - url: nodefaults
     used_env_vars: []
   content_hash:
-    linux-64: 383253be0dd2e70d701f5b4bb5f510e5a4b88111836f40c9cbb36f8b3890c1e4
+    linux-64: a2872fe2d8fc6a2a3f399b0d339f82dd875249e58c97daeb7d00804e0d3f348a
   platforms:
   - linux-64
   sources:
@@ -461,6 +461,18 @@ package:
   version: 2.5.0
 - category: main
   dependencies:
+    libgcc-ng: '>=12'
+  hash:
+    md5: b479e94095fbb82702d736b1c100c0e8
+    sha256: a4490042212d56d6a0f13ebd172f6be7524a9229a94820cd7d12c57d95b3f8cd
+  manager: conda
+  name: libfdt
+  optional: false
+  platform: linux-64
+  url: https://conda.anaconda.org/conda-forge/linux-64/libfdt-1.6.1-h166bdaf_2.tar.bz2
+  version: 1.6.1
+- category: main
+  dependencies:
     libgcc-ng: '>=9.4.0'
   hash:
     md5: d645c6d2ac96843a2bfaccd2d62b3ac3
@@ -785,6 +797,20 @@ package:
   platform: linux-64
   url: https://conda.anaconda.org/conda-forge/linux-64/yaml-0.2.5-h7f98852_2.tar.bz2
   version: 0.2.5
+- category: main
+  dependencies:
+    libfdt: '>=1.6.1,<1.7.0a0'
+    libgcc-ng: '>=12'
+    yaml: '>=0.2.5,<0.3.0a0'
+  hash:
+    md5: 22b23b5006eb63ed81af6a84569c930e
+    sha256: 5a056172bd4fee3f6dd21441bfdd3c9960d3a637f48e8dfe16d3a7aa56e883a5
+  manager: conda
+  name: dtc
+  optional: false
+  platform: linux-64
+  url: https://conda.anaconda.org/conda-forge/linux-64/dtc-1.6.1-h166bdaf_2.tar.bz2
+  version: 1.6.1
 - category: main
   dependencies:
     libexpat: 2.5.0 hcb278e6_1

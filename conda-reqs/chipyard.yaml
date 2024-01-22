@@ -34,5 +34,6 @@ dependencies:
     - vim
     - git
     - openjdk=20
+    - dtc
     - verilator==5.020
     - conda-lock=1.4

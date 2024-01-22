@@ -91,4 +91,5 @@ class AbstractConfig extends Config(
   new freechips.rocketchip.subsystem.WithDontDriveBusClocksFromSBus ++ // leave the bus clocks undriven by sbus
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++     // hierarchical buses including sbus/mbus/pbus/fbus/cbus/l2
   new freechips.rocketchip.subsystem.WithDTS("ucb-bar,chipyard", Nil) ++ // custom device name for DTS
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++           // Remove tl monitors
   new freechips.rocketchip.system.BaseConfig)                       // "base" rocketchip system
