@@ -19,6 +19,7 @@ for TOOLCHAIN_TYPE in riscv-tools esp-tools; do
 	    --no-mamba \
 	    --no-micromamba \
 	    -f "$REQS_DIR/chipyard.yaml" \
+	    -f "$REQS_DIR/docs.yaml" \
 	    -f "$REQS_DIR/$TOOLCHAIN_TYPE.yaml" \
 	    -p linux-64 \
 	    --lockfile $LOCKFILE
