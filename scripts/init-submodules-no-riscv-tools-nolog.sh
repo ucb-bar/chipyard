@@ -25,6 +25,8 @@ do
             usage
             exit 1
             ;;
+        --force | -f | --skip-validate) # Deprecated flags
+            ;;
         *)
             echo "ERROR: bad argument $1"
             usage

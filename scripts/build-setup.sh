@@ -93,6 +93,8 @@ do
             SKIP_LIST+=(10) ;;
         --skip-clean)
             SKIP_LIST+=(11) ;;
+        --force | -f | --skip-validate) # Deprecated flags
+            ;;
         * )
             error "invalid option $1"
             usage 1 ;;
