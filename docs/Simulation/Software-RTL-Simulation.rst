@@ -234,7 +234,8 @@ To help deal with these situations, you can add hardware modules called Tilelink
 your SoC that will fire assertions when wrong Tilelink messages are sent.
 However, these modules can significantly slow down the speed of your RTL simulation.
 
-You can simply remove these modules by adding the below line into your config.
+These modules are added to the SoC as a default and users have to manually
+remove these modules by adding the below line into your config.
 
 .. code-block:: scala
 
