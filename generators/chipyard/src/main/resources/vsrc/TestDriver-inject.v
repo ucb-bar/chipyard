@@ -7,7 +7,7 @@
  `define MODEL TestHarness
 `endif
 
-`define TILE testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile
+`define TILE testHarness.chiptop0.system.tile_prci_domain.element_reset_domain_rockettile
 `define ROCKET `TILE.core
 `define CSR_FILE `ROCKET.csr
 `define CORE_RESET (`ROCKET.reset)
@@ -245,8 +245,9 @@ module TestDriver;
       ->loadarch_struct_ready;
       $display("Starting state injection via forces");
       // mtime and mtimecmp to CLINT
-      force testHarness.chiptop0.system.clint.time_0 = loadarch_state.mtime;
-      force testHarness.chiptop0.system.clint.timecmp_0 = loadarch_state.mtimecmp;
+      force testHarness.chiptop0.system.clint_domain.clint.time_0 = loadarch_state.mtime;
+      // this signal is 'timecmp_0' in firrtl, but MFC screws up the name to 'pad'
+      force testHarness.chiptop0.system.clint_domain.clint.pad = loadarch_state.mtimecmp;
 
       // similar to testchip_dtm, set mstatus_fs, mstatus_xs, mstatus_vs
       // TODO: ask Jerry why
@@ -316,7 +317,7 @@ module TestDriver;
       // prv (TODO: this is a guess)
       force `CSR_FILE.reg_mstatus_prv = loadarch_state.prv;
       // pc
-      force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc = loadarch_state.pc;
+      force testHarness.chiptop0.system.tile_prci_domain.element_reset_domain_rockettile.frontend.s2_pc = loadarch_state.pc;
 
       // PMPs
       force `CSR_FILE.reg_pmp_0_addr = 'h1f_ffff_ffff_ffff;
@@ -329,8 +330,8 @@ module TestDriver;
       @(negedge `CORE_RESET) begin end
 
       $display("Releasing all forced registers after negedge reset");
-      release testHarness.chiptop0.system.clint.time_0;
-      release testHarness.chiptop0.system.clint.timecmp_0;
+      release testHarness.chiptop0.system.clint_domain.clint.time_0;
+      release testHarness.chiptop0.system.clint_domain.clint.pad;
       release `CSR_FILE.reg_mstatus_fs;
       release `CSR_FILE.reg_frm;
 
@@ -377,7 +378,7 @@ module TestDriver;
       // prv
       release `CSR_FILE.reg_mstatus_prv;
       // pc
-      release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.frontend.s2_pc;
+      release testHarness.chiptop0.system.tile_prci_domain.element_reset_domain_rockettile.frontend.s2_pc;
 
       release `CSR_FILE.reg_pmp_0_addr;
       release `CSR_FILE.reg_pmp_0_cfg_a;
@@ -394,9 +395,9 @@ module TestDriver;
   for (genvar i_fpr=0; i_fpr < 32; i_fpr++) begin
     initial begin
       wait(loadarch_struct_ready.triggered) begin end
-      force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.regfile_ext.Memory[31-i_fpr] = loadarch_state.FPR[i_fpr];
+      force testHarness.chiptop0.system.tile_prci_domain.element_reset_domain_rockettile.fpuOpt.regfile_ext.Memory[31-i_fpr] = loadarch_state.FPR[i_fpr];
       @(negedge `CORE_RESET) begin end
-      release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.fpuOpt.regfile_ext.Memory[31-i_fpr];
+      release testHarness.chiptop0.system.tile_prci_domain.element_reset_domain_rockettile.fpuOpt.regfile_ext.Memory[31-i_fpr];
     end
   end
 
@@ -406,11 +407,11 @@ module TestDriver;
       wait (loadarch_struct_ready.triggered) begin end
       //$display("Loadarch struct is ready");
       //$display("Forcing XPR %d with value %x", i_xpr, loadarch_state.XPR[i_xpr]);
-      force testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.rf_ext.Memory[30-i_xpr+1] = loadarch_state.XPR[i_xpr];
+      force testHarness.chiptop0.system.tile_prci_domain.element_reset_domain_rockettile.core.rf_ext.Memory[30-i_xpr+1] = loadarch_state.XPR[i_xpr];
       //$display("Waiting for reset negedge");
       @(negedge `CORE_RESET) begin end
       //$display("Got reset negedge");
-      release testHarness.chiptop0.system.tile_prci_domain.tile_reset_domain_tile.core.rf_ext.Memory[30-i_xpr+1];
+      release testHarness.chiptop0.system.tile_prci_domain.element_reset_domain_rockettile.core.rf_ext.Memory[30-i_xpr+1];
       //$display("Releasing XPR %d", i_xpr);
     end
   end
