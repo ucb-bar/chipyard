@@ -5,11 +5,11 @@
 # available, unless you explicitly update the lock file.
 #
 # Install this environment as "YOURENV" with:
-#     conda-lock install -n YOURENV --file conda-requirements-riscv-tools-linux-64-lean.conda-lock.yml
+#     conda-lock install -n YOURENV --file conda-requirements-esp-tools-linux-64-lean.conda-lock.yml
 # To update a single package to the latest version compatible with the version constraints in the source:
-#     conda-lock lock  --lockfile conda-requirements-riscv-tools-linux-64-lean.conda-lock.yml --update PACKAGE
+#     conda-lock lock  --lockfile conda-requirements-esp-tools-linux-64-lean.conda-lock.yml --update PACKAGE
 # To re-solve the entire environment, e.g. after changing a version constraint in the source file:
-#     conda-lock -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/chipyard-base.yaml -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/docs.yaml -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/riscv-tools.yaml --lockfile conda-requirements-riscv-tools-linux-64-lean.conda-lock.yml
+#     conda-lock -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/chipyard-base.yaml -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/docs.yaml -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/riscv-tools.yaml --lockfile conda-requirements-esp-tools-linux-64-lean.conda-lock.yml
 metadata:
   channels:
   - url: ucb-bar

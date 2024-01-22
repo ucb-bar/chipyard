@@ -9,7 +9,7 @@
 # To update a single package to the latest version compatible with the version constraints in the source:
 #     conda-lock lock  --lockfile conda-requirements-esp-tools-linux-64.conda-lock.yml --update PACKAGE
 # To re-solve the entire environment, e.g. after changing a version constraint in the source file:
-#     conda-lock -f /scratch/abejgonza/cy-circt/conda-reqs/chipyard.yaml -f /scratch/abejgonza/cy-circt/conda-reqs/docs.yaml -f /scratch/abejgonza/cy-circt/conda-reqs/esp-tools.yaml --lockfile conda-requirements-esp-tools-linux-64.conda-lock.yml
+#     conda-lock -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/chipyard-base.yaml -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/fsim-marshal.yaml -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/docs.yaml -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/esp-tools.yaml --lockfile conda-requirements-esp-tools-linux-64.conda-lock.yml
 metadata:
   channels:
   - url: ucb-bar
@@ -21,13 +21,14 @@ metadata:
   - url: nodefaults
     used_env_vars: []
   content_hash:
-    linux-64: 49806d76b27927ce173d3b40bc3cb7a27b124e37fca50b32d653588b3f5a2a9a
+    linux-64: e6f7ea5e7ade6d5e422a65ad3ec62aabcadde05413e29340a1a234e7806c2764
   platforms:
   - linux-64
   sources:
-  - /scratch/abejgonza/cy-circt/conda-reqs/chipyard.yaml
-  - /scratch/abejgonza/cy-circt/conda-reqs/docs.yaml
-  - /scratch/abejgonza/cy-circt/conda-reqs/esp-tools.yaml
+  - /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/chipyard-base.yaml
+  - /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/fsim-marshal.yaml
+  - /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/docs.yaml
+  - /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/esp-tools.yaml
 package:
 - category: main
   dependencies: {}
@@ -2157,7 +2158,7 @@ package:
   version: 1.7.0
 - category: main
   dependencies:
-    python: 2.7.*|>=3.7
+    python: ==2.7.*|>=3.7
   hash:
     md5: 56febe65315cc388a5d20adf2b39a74d
     sha256: 0ff5173f6b20a5c95401aa52d10dbdc05c322fc568dc7417c6f76cf68e706d16
@@ -2503,16 +2504,16 @@ package:
   version: 11.4.0
 - category: main
   dependencies:
-    python: '>=3.9,<3.10.0a0'
-    python_abi: 3.9.* *_cp39
+    __unix: ''
+    python: '>=3.8'
   hash:
-    md5: d4b34ce06e172f5f18c39be4aed98fd8
-    sha256: d259113b1a2eeea896ea3062cea1325fd5ab979a1186b209b7bdb8e066b09156
+    md5: 2ed1fe4b9079da97c44cfe9c2e5078fd
+    sha256: cd93d5d4b1d98f7ce76a8658c35de9c63e17b3a40e52f40fa2f459e0da83d0b1
   manager: conda
   name: humanfriendly
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/humanfriendly-10.0-py39hf3d152e_5.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/humanfriendly-10.0-pyhd8ed1ab_6.conda
   version: '10.0'
 - category: main
   dependencies:
@@ -3027,7 +3028,7 @@ package:
   version: 0.6.6
 - category: main
   dependencies:
-    python: 2.7.*|>=3.4
+    python: ==2.7.*|>=3.4
   hash:
     md5: 076becd9e05608f8dc72757d5f3a91ff
     sha256: 74c63fd03f1f1ea2b54e8bc529fd1a600aaafb24027b738d0db87909ee3a33dc
@@ -3087,16 +3088,16 @@ package:
   version: 3.1.1
 - category: main
   dependencies:
-    python: '>=3.9,<3.10.0a0'
-    python_abi: 3.9.* *_cp39
+    __unix: ''
+    python: '>=3.8'
   hash:
-    md5: d34b97a2386932b97c7cb80916a673e7
-    sha256: 42d46baeab725d3c70d22a4258549e9f0f1a72b740166cd9c3b394c4369cb306
+    md5: 2a7de29fb590ca14b5243c4c812c8025
+    sha256: a42f826e958a8d22e65b3394f437af7332610e43ee313393d1cf143f0a2d274b
   manager: conda
   name: pysocks
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/pysocks-1.7.1-py39hf3d152e_5.tar.bz2
+  url: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyha2e5f31_6.tar.bz2
   version: 1.7.1
 - category: main
   dependencies:
@@ -4645,14 +4646,14 @@ package:
     pip: ''
     python: '>=3.7,<4.0'
   hash:
-    md5: aaafd70a6934549210865f558a0eee96
-    sha256: 4e695e4d83cfc4ffd557cc2bdbecc0cedb9df8831d1a415b8e8c0e5f96bc6b5f
+    md5: a699f404daa279b4cb41a047cf70c94a
+    sha256: 8cf9f34336ef7af3479a03682e171c6a2c5837cb86bf9e4c2582b75cf3a27ab9
   manager: conda
   name: types-awscrt
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/types-awscrt-0.20.0-pyhd8ed1ab_0.conda
-  version: 0.20.0
+  url: https://conda.anaconda.org/conda-forge/noarch/types-awscrt-0.20.2-pyhd8ed1ab_0.conda
+  version: 0.20.2
 - category: main
   dependencies:
     cffi: ''
@@ -5188,13 +5189,13 @@ package:
     ruamel.yaml.clib: '>=0.2.0,<=0.2.7'
     urllib3: '>=1.25.4,<1.27'
   hash:
-    md5: 8376298ea81d582557485a166528a2e7
-    sha256: ededf952f2bb95033fea0969e01e048675e0738a5277fb145810af859be05366
+    md5: 42415f0a777728616a1014d6c2d03570
+    sha256: 94a448e74b118c6cfa22fb2ed950dd5810612ccd76626a8471b0e74595a5c221
   manager: conda
   name: awscli
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/awscli-2.15.12-py39hf3d152e_0.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/awscli-2.15.12-py39hf3d152e_1.conda
   version: 2.15.12
 - category: main
   dependencies:

@@ -169,10 +169,6 @@ if run_step "1"; then
     if [ "$USE_LEAN_CONDA" = false ]; then
       LOCKFILE=$CONDA_LOCK_REQS/conda-requirements-$TOOLCHAIN_TYPE-linux-64.conda-lock.yml
     else
-      if [ "$TOOLCHAIN_TYPE" != "riscv-tools" ]; then
-        echo "::ERROR:: Lean conda env is not supported for esp-tools"
-        exit 1
-      fi
       LOCKFILE=$CONDA_LOCK_REQS/conda-requirements-$TOOLCHAIN_TYPE-linux-64-lean.conda-lock.yml
     fi
 
@@ -181,7 +177,7 @@ if run_step "1"; then
         $CYDIR/scripts/generate-conda-lockfiles.sh
         exit_if_last_command_failed
     fi
-    echo "lockfile $LOCKFILE"
+    echo "Using lockfile: $LOCKFILE"
 
     # use conda-lock to create env
     conda-lock install --conda $(which conda) -p $CYDIR/.conda-env $LOCKFILE &&
