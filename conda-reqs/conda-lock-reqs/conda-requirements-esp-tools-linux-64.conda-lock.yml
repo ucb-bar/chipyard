@@ -9,7 +9,7 @@
 # To update a single package to the latest version compatible with the version constraints in the source:
 #     conda-lock lock  --lockfile conda-requirements-esp-tools-linux-64.conda-lock.yml --update PACKAGE
 # To re-solve the entire environment, e.g. after changing a version constraint in the source file:
-#     conda-lock -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/chipyard-base.yaml -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/fsim-marshal.yaml -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/docs.yaml -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/esp-tools.yaml --lockfile conda-requirements-esp-tools-linux-64.conda-lock.yml
+#     conda-lock -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/chipyard-base.yaml -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/chipyard-extended.yaml -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/docs.yaml -f /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/esp-tools.yaml --lockfile conda-requirements-esp-tools-linux-64.conda-lock.yml
 metadata:
   channels:
   - url: ucb-bar
@@ -26,7 +26,7 @@ metadata:
   - linux-64
   sources:
   - /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/chipyard-base.yaml
-  - /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/fsim-marshal.yaml
+  - /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/chipyard-extended.yaml
   - /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/docs.yaml
   - /scratch/joonho.whangbo/coding/chipyard-release-118/conda-reqs/esp-tools.yaml
 package:

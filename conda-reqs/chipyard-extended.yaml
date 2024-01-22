@@ -8,6 +8,17 @@ platforms:
     - linux-64
 
 dependencies:
+    # handy tool for introspecting package relationships and file ownership
+    # see https://github.com/rvalieris/conda-tree
+    - conda-tree
+
+    # bundle FireSim driver with deps into installer shell-script
+    - constructor
+
+    # misc
+    - pre-commit
+    - readline
+
     # firemarshal deps
     - qemu # from ucb-bar channel - https://github.com/ucb-bar/qemu-feedstock
     - rsync
@@ -36,7 +47,6 @@ dependencies:
     - findutils
     - lzop
 
-    - make
     - bash-completion
     - ca-certificates
     - mosh
@@ -45,7 +55,6 @@ dependencies:
     - mpc
     - zlib
     - vim
-    - git
     - gengetopt
     - libffi
     - expat
@@ -70,6 +79,9 @@ dependencies:
     # conda environment, pip's dependency resolution can conflict with
     # conda and create broken environments.  It's best to use the conda
     # packages so that the environment is consistent
+    - screen
+    - elfutils
+    - libdwarf-dev==0.0.0.20190110_28_ga81397fc4 # from ucb-bar channel - using mainline libdwarf-feedstock
     - colorama
     - argcomplete
     - python-graphviz
