@@ -225,27 +225,26 @@ By enabling this, you will use Chipyard's ``numa_prefix`` wrapper, which is a si
 Note that both these flags are mutually exclusive, you can use either independently (though it makes sense to use ``NUMACTL`` just with ``VERILATOR_THREADS=8`` during a Verilator simulation).
 
 
-When the SoC Hangs Due to Bad Tilelink Messages
+Speeding up your RTL Simulation by 2x!
 -----------------------------------------------
 
 There are many cases when your custom module interfaces with Tilelink (e.g., when you write a custom accelerator).
 Wrong interfaces with Tilelink can cause the SoC to hang and can be tricky to debug.
 To help deal with these situations, you can add hardware modules called Tilelink monitors into
 your SoC that will fire assertions when wrong Tilelink messages are sent.
+However, these modules can significantly slow down the speed of your RTL simulation.
 
-You can simply add these modules into your SoC by adding the below line into your config.
+You can simply remove these modules by adding the below line into your config.
 
 .. code-block:: scala
 
-  new chipyard.config.WithTLMonitors ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
 
 
 For instance:
 
 .. code-block:: scala
 
-  class TLMonitorRocketConfig extends Config(
-    new chipyard.config.WithTLMonitors ++
+  class FastRTLSimRocketConfig extends Config(
+    new freechips.rocketchip.subsystem.WithoutTLMonitors ++
     new chipyard.RocketConfig)
-
-One caveat is that adding these modules can slow down your RTL simulation by around 2x.

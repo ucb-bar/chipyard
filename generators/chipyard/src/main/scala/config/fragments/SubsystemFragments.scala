@@ -2,7 +2,7 @@ package chipyard.config
 
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.diplomacy.{DTSTimebase, MonitorsEnabled}
+import freechips.rocketchip.diplomacy.{DTSTimebase}
 import sifive.blocks.inclusivecache.{InclusiveCachePortParameters}
 
 // Replaces the L2 with a broadcast manager for maintaining coherence
@@ -30,8 +30,4 @@ class WithInclusiveCacheInteriorBuffer(buffer: InclusiveCachePortParameters = In
 // Adds buffers on the exterior of the inclusive LLC, to improve PD
 class WithInclusiveCacheExteriorBuffer(buffer: InclusiveCachePortParameters = InclusiveCachePortParameters.full) extends Config((site, here, up) => {
   case InclusiveCacheKey => up(InclusiveCacheKey).copy(bufInnerExterior=buffer, bufOuterExterior=buffer)
-})
-
-class WithTLMonitors extends Config((site, here, up) => {
-  case MonitorsEnabled => true
 })
