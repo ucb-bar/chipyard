@@ -16,11 +16,20 @@ for TOOLCHAIN_TYPE in riscv-tools esp-tools; do
     rm -rf $LOCKFILE
 
     conda-lock \
-	    --no-mamba \
-	    --no-micromamba \
-	    -f "$REQS_DIR/chipyard.yaml" \
-	    -f "$REQS_DIR/docs.yaml" \
-	    -f "$REQS_DIR/$TOOLCHAIN_TYPE.yaml" \
-	    -p linux-64 \
-	    --lockfile $LOCKFILE
+      --no-mamba \
+      --no-micromamba \
+      -f "$REQS_DIR/chipyard.yaml" \
+      -f "$REQS_DIR/docs.yaml" \
+      -f "$REQS_DIR/$TOOLCHAIN_TYPE.yaml" \
+      -p linux-64 \
+      --lockfile $LOCKFILE
 done
+
+conda-lock \
+  --no-mamba \
+  --no-micromamba \
+  -f "$REQS_DIR/chipyard-lean.yaml" \
+  -f "$REQS_DIR/docs.yaml" \
+  -f "$REQS_DIR/riscv-tools.yaml" \
+  -p linux-64 \
+  --lockfile $REQS_DIR/conda-lock-reqs/conda-requirements-riscv-tools-linux-64-lean.conda-lock.yml
