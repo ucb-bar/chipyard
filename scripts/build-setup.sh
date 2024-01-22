@@ -36,10 +36,7 @@ usage() {
     echo ""
     echo "Options"
     echo "  --help -h               : Display this message"
-
-    echo "  --force -f              : Skip all prompts and checks"
     echo "  --verbose -v            : Verbose printout"
-
     echo "  --use-unpinned-deps -ud : Use unpinned conda environment"
 
     echo "  --skip -s N             : Skip step N in the list above. Use multiple times to skip multiple steps ('-s N -s M ...')."
@@ -57,7 +54,6 @@ usage() {
 }
 
 TOOLCHAIN_TYPE="riscv-tools"
-FORCE_FLAG=""
 VERBOSE=false
 VERBOSE_FLAG=""
 USE_UNPINNED_DEPS=false
@@ -71,8 +67,6 @@ do
             usage 3 ;;
         riscv-tools | esp-tools)
             TOOLCHAIN_TYPE=$1 ;;
-        --force | -f | --skip-validate)
-            FORCE_FLAG=$1 ;;
         --verbose | -v)
             VERBOSE_FLAG=$1
             set -x ;;
@@ -201,17 +195,14 @@ source $CYDIR/scripts/fix-open-files.sh"
 
 fi
 
-if [ -z "$FORCE_FLAG" ]; then
-    if [ -z ${CONDA_DEFAULT_ENV+x} ]; then
-        error "ERROR: No conda environment detected. Did you activate the conda environment (e.x. 'conda activate base')?"
-        exit 1
-    fi
+if [ -z ${CONDA_DEFAULT_ENV+x} ]; then
+    echo "!!!!! WARNING: No conda environment detected. Did you activate the conda environment (e.x. 'conda activate base')?"
 fi
 
 # initialize all submodules (without the toolchain submodules)
 if run_step "2"; then
     begin_step "2" "Initializing Chipyard submodules"
-    $CYDIR/scripts/init-submodules-no-riscv-tools.sh $FORCE_FLAG
+    $CYDIR/scripts/init-submodules-no-riscv-tools.sh
     exit_if_last_command_failed
 fi
 

@@ -13,20 +13,14 @@ common_setup
 
 function usage
 {
-    echo "Usage: $0 [--force]"
+    echo "Usage: $0"
     echo "Initialize Chipyard submodules and setup initial env.sh script."
     echo ""
-    echo "  --force -f      : Skip prompt checking for tagged release"
-    echo "  --skip-validate : DEPRECATED: Same functionality as --force"
 }
 
-FORCE=false
 while test $# -gt 0
 do
    case "$1" in
-        --force | -f | --skip-validate)
-            FORCE=true;
-            ;;
         -h | -H | --help | help)
             usage
             exit 1
@@ -59,32 +53,6 @@ fi
 # before doing anything verify that you are on a release branch/tag
 save_bash_options
 set +e
-git_tag=$(git describe --exact-match --tags)
-git_tag_rc=$?
-restore_bash_options
-if [ "$git_tag_rc" -ne 0 ]; then
-    if [ "$FORCE" == false ]; then
-        while true; do
-            printf '\033[2J'
-            read -p "WARNING: You are not on an official release of Chipyard."$'\n'"Type \"y\" to continue if this is intended or \"n\" if not: " validate
-            case "$validate" in
-                y | Y)
-                    echo "Continuing on to setting up non-official Chipyard release repository"
-                    break
-                    ;;
-                n | N)
-                    error "See https://chipyard.readthedocs.io/en/stable/Chipyard-Basics/Initial-Repo-Setup.html#setting-up-the-chipyard-repo for setting up an official release of Chipyard. "
-                    exit 3
-                    ;;
-                *)
-                    error "Invalid response. Please type \"y\" or \"n\""
-                    ;;
-            esac
-        done
-    fi
-else
-    echo "Setting up official Chipyard release: $git_tag"
-fi
 
 cd "$RDIR"
 
