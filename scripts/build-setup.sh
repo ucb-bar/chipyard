@@ -38,7 +38,7 @@ usage() {
     echo "  --help -h               : Display this message"
     echo "  --verbose -v            : Verbose printout"
     echo "  --use-unpinned-deps -ud : Use unpinned conda environment"
-    echo "  --use-lean-conda        : Install a leaner version of conda (no firesim && no marshal)"
+    echo "  --use-lean-conda        : Install a leaner version of the repository (Smaller conda env, no FireSim, no FireMarshal)"
 
     echo "  --skip -s N             : Skip step N in the list above. Use multiple times to skip multiple steps ('-s N -s M ...')."
     echo "  --skip-conda            : Skip Conda initialization (step 1)"
