@@ -2,6 +2,101 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.11.0] - 2024-1-22
+
+Adds Ubuntu support for firemarshal, multi-chiptop configuration for chiplets, caliptra accelerator, spike-cosim.
+
+## Added
+- Provide example of tethered-config simulation with MultiHarnessBinders (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1484)
+- Add release note automation (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1548)
+- Improve peripheral config binders (Reapply #1511) (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1527)
+- UPF Generation (by @sriramsridhar23 in https://github.com/ucb-bar/chipyard/pull/1347)
+- Improve: SiFive peripheral device doumentation (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1578)
+- Bump to latest rocket-chip | integrated fixed-point | pull in stage/phase (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1577)
+- Enable precommit | Format files (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1585)
+- KLayout section of Sky130+OpenROAD tutorial (by @nayiri-k in https://github.com/ucb-bar/chipyard/pull/1514)
+- Added useful "Build script exited at step X" errors for each step in build-setup.sh (by @JL102 in https://github.com/ucb-bar/chipyard/pull/1614)
+- Adds support for Digilent Nexys Video FPGA board. (by @milovanovic in https://github.com/ucb-bar/chipyard/pull/1616)
+- Add NarrowRocketCache config fragment (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1603)
+- Add Caliptra AES256 ECB engine as RoCC accelerator (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1642)
+- Support using HarnessBinders without IOBinders (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1636)
+- Add Bringup on Arty100T config, using PMOD-gpio for ser-tl (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1657)
+- Install uart_tsi utility as part of build-toolchain-extra (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1670)
+- Add spike devices (by @joey0320 in https://github.com/ucb-bar/chipyard/pull/1692)
+- Bump testchipip to support multi-serial-tl (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1630)
+- ADD: bump fpga-shell (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1703)
+- Add UART device/JTAG to Arty100T default design (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1712)
+- Add generators/ submodule status check to all Make targets (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1718)
+- Add clearer --skip flags to build-setup (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1724)
+- Add Baremetal IDE support (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1534)
+- ADD: add information on Baremetal-IDE in docs (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1730)
+- Support clustered-cores (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1629)
+- Add debug clock tap port to all default designs (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1697)
+- Add support for symmetric serial-tilelink (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1716)
+- Add Chip ID Pin and Port (by @schwarz-em in https://github.com/ucb-bar/chipyard/pull/1721)
+- FastSimRocketConfig with no TLMonitors (by @joey0320 in https://github.com/ucb-bar/chipyard/pull/1752)
+- Use lean conda for faster initial setup (by @joey0320 in https://github.com/ucb-bar/chipyard/pull/1750)
+- Add BroadcastCoherence rocket config (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1755)
+
+## Changed
+- Bump FireMarshal (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1556)
+- Bump spike | support M-mode only cosim (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1530)
+- Bump to chisel3.6 (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1531)
+- Replace Dromajo FireSim bridge with Cospike (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1588)
+- Add PortAPI between IO and Harness blocks (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1610)
+- REFACTOR: change bootaddr register address and PC reset vector address (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1605)
+- REFACTOR: rename arty35t explicitly (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1682)
+- Add HasHarnessInstantiators into MultiHarnessBinder (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1674)
+- Install CIRCT out of Conda (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1675)
+- [cd] Bump CIRCT from firtool-1.58.0 to firtool-1.60.0 (copy #1688) (by @mergify[bot] in https://github.com/ucb-bar/chipyard/pull/1689)
+- Bump constellation with improved TL-noc (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1633)
+- Update testchipip imports with new testchipip organization (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1710)
+- CHANGE: Set scratchpad as default config (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1719)
+- Rename blocks/cache submodules to match new chipsalliance ownership (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1726)
+- Rename timeout_cycles to TIMEOUT_CYCLES to match convention (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1706)
+- [cd] Bump CIRCT from firtool-1.60.0 to firtool-1.61.0 (copy #1691) (by @mergify[bot] in https://github.com/ucb-bar/chipyard/pull/1699)
+- Bump tcip/barf/marshal/fsim (by @joey0320 in https://github.com/ucb-bar/chipyard/pull/1748)
+- Remove skip-validate option (by @joey0320 in https://github.com/ucb-bar/chipyard/pull/1749)
+- Add .gitignore for Embench Build Folder (by @vighneshiyer in https://github.com/ucb-bar/chipyard/pull/1754)
+
+## Fixed
+- Bump lockfiles | Force user-installed conda during conda-lock (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1555)
+- Fix FIFO-fixing for PRCI bus (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1563)
+- Fix VCU118 freq adjustment configs (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1597)
+- Fix Arty100T verilog build (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1608)
+- Make scripts/insert-includes.py use Python from conda env (by @hansungk in https://github.com/ucb-bar/chipyard/pull/1615)
+- Fix icenet-loopback clock and reset domain (by @joey0320 in https://github.com/ucb-bar/chipyard/pull/1612)
+- Bump FireMarshal for linux rng init fix (by @raghav-g13 in https://github.com/ucb-bar/chipyard/pull/1620)
+- Bump barstools (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1625)
+- [vlsi][ci skip] Fix tutorial.mk so that INPUT_CONFS override only affects tutorials (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1631)
+- Fix regex for similar module names that are uniquified (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1640)
+- Rebuild `jar`s when `sv`/`v` files are changed + Add documentation on blackboxes (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1639)
+- Use TARGET instead of PREFIX in /tests Makefile(s) (by @raghav-g13 in https://github.com/ucb-bar/chipyard/pull/1647)
+- Fix IO direction for host Serial-TL port (by @ethanwu10 in https://github.com/ucb-bar/chipyard/pull/1654)
+- More robust env.sh | Fix conda activate if in subshell (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1653)
+- Always generate MFC Blackbox filelist (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1668)
+- Remove references to ENABLE_YOSYS (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1695)
+- FIX: fix vcu118 sd card frequency (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1685)
+- FIX: fix conda-lock version, >1.4.0 does not work! (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1714)
+- docs: correct to TOP_MACROCOMPILER_MODE (by @oharboe in https://github.com/ucb-bar/chipyard/pull/1744)
+- Use non-lock-file conda requirements in RTD (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1742)
+- Fix GCD MMIO example (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1753)
+
+## Removed
+- Remove pre-commit from env.sh (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1587)
+- Remove Dromajo (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1598)
+- Remove MultiClockHarnessAXIMem (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1601)
+
+## Uncategorized
+- Documentation: Change "don't use Windows" to "if using Windows, use WSL" (by @JL102 in https://github.com/ucb-bar/chipyard/pull/1572)
+- docs: Add info on chipyard's tests directory and how to do multithreading in RTL simulations (by @JL102 in https://github.com/ucb-bar/chipyard/pull/1646)
+- Reduce CDE lookups for IOBinders (by @tymcauley in https://github.com/ucb-bar/chipyard/pull/1720)
+- Update deprecated APIs to prepare for Chisel 5 (by @tymcauley in https://github.com/ucb-bar/chipyard/pull/1723)
+- Allow sed override in uniquify-module-names.py (by @tymcauley in https://github.com/ucb-bar/chipyard/pull/1729)
+- Update deprecated/unused Chisel APIs (by @tymcauley in https://github.com/ucb-bar/chipyard/pull/1743)
+
+**Full Changelog:** https://github.com/ucb-bar/chipyard/compare/1.10.0...main
+
 ## [1.10.0] - 2023-6-16
 
 Adds superscalar in-order core, prefetchers, architectural checkpointing, examples for custom-chiptop/tapeout-chip/flat-chiptop. FireSim bumped with new local FPGA support: Xilinx VCU118 (w/XDMA), Xilinx Alveo U250/U280 (w/XDMA, in addition to previous Vitis support), RHSResearch NiteFury II (w/XDMA). FireSim now also supports Xcelium for metasims.
