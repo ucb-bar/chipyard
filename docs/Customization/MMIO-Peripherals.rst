@@ -79,13 +79,7 @@ Register routers have a TileLink node simply named "node", which we can hook up 
 This will automatically add address map and device tree entries for the peripheral.
 Also observe how we have to place additional AXI4 buffers and converters for the AXI4 version of this peripheral.
 
-For peripherals which instantiate a concrete module, or which need to be connected to concrete IOs or wires, a matching concrete trait is necessary. We will make our GCD example output a ``gcd_busy`` signal as a top-level port to demonstrate. In the concrete module implementation trait, we instantiate the top level IO (a concrete object) and wire it to the IO of our lazy module.
-
-
-.. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
-    :language: scala
-    :start-after: DOC include start: GCD imp trait
-    :end-before: DOC include end: GCD imp trait
+Peripherals which expose I/O can use `InModuleBody` to punch their I/O to the `DigitalTop` module.
 
 Constructing the DigitalTop and Config
 --------------------------------------

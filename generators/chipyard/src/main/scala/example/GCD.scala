@@ -161,10 +161,10 @@ trait CanHavePeripheryGCD { this: BaseSubsystem =>
   private val portName = "gcd"
 
   // Only build if we are using the TL (nonAXI4) version
-  val gcd = p(GCDKey) match {
+  val gcd_busy = p(GCDKey) match {
     case Some(params) => {
-      if (params.useAXI4) {
-        val gcd = LazyModule(new GCDAXI4(params, pbus.beatBytes)(p))
+      val gcd = if (params.useAXI4) {
+        val gcd = pbus { LazyModule(new GCDAXI4(params, pbus.beatBytes)(p)) }
         pbus.coupleTo(portName) {
           gcd.node :=
           AXI4Buffer () :=
@@ -172,33 +172,28 @@ trait CanHavePeripheryGCD { this: BaseSubsystem =>
           // toVariableWidthSlave doesn't use holdFirstDeny, which TLToAXI4() needsx
           TLFragmenter(pbus.beatBytes, pbus.blockBytes, holdFirstDeny = true) := _
         }
-        Some(gcd)
+        gcd
       } else {
-        val gcd = LazyModule(new GCDTL(params, pbus.beatBytes)(p))
+        val gcd = pbus { LazyModule(new GCDTL(params, pbus.beatBytes)(p)) }
         pbus.coupleTo(portName) { gcd.node := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
-        Some(gcd)
+        gcd
       }
+      val pbus_io = pbus { InModuleBody {
+        val busy = IO(Output(Bool()))
+        busy := gcd.module.io.gcd_busy
+        busy
+      }}
+      val gcd_busy = InModuleBody {
+        val busy = IO(Output(Bool())).suggestName("gcd_busy")
+        busy := pbus_io
+        busy
+      }
+      Some(gcd_busy)
     }
     case None => None
   }
 }
 // DOC include end: GCD lazy trait
-
-// DOC include start: GCD imp trait
-trait CanHavePeripheryGCDModuleImp extends LazyRawModuleImp {
-  val outer: CanHavePeripheryGCD
-  val gcd_busy = outer.gcd match {
-    case Some(gcd) => {
-      val busy = IO(Output(Bool()))
-      busy := gcd.module.io.gcd_busy
-      Some(busy)
-    }
-    case None => None
-  }
-}
-
-// DOC include end: GCD imp trait
-
 
 // DOC include start: GCD config fragment
 class WithGCD(useAXI4: Boolean = false, useBlackBox: Boolean = false) extends Config((site, here, up) => {
