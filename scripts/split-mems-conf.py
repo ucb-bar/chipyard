@@ -77,6 +77,8 @@ if __name__ == "__main__":
 
     with open(args.out_dut_smems_conf, "w") as odsc, \
          open(args.out_model_smems_conf, "w") as otsc:
+      os.utime(args.out_dut_smems_conf)
+      os.utime(args.out_model_smems_conf)
       for l in isc:
         sl = l.split()
 
