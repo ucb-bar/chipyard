@@ -39,3 +39,8 @@ class QuadChannelRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++      // 4 AXI4 channels
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
+
+class BroadcastCoherenceRocketConfig extends Config(
+  new chipyard.config.WithBroadcastManager ++                 // Use broadcast-based coherence hub
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
