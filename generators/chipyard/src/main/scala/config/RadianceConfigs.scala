@@ -24,7 +24,7 @@ class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigIn
       address = address,
       size = size,
       hang = hang,
-      contentFileName = s"${site(TargetDirKey)}/bootrom.radiance.rv${site(XLen)}.img"
+      contentFileName = s"${site(TargetDirKey)}/bootrom.radiance.rv32.img"
     ))
 })
 
