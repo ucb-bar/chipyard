@@ -226,7 +226,7 @@ lazy val sha3 = (project in file("generators/sha3"))
   .settings(commonSettings)
 
 lazy val radiance = (project in file("generators/radiance"))
-  .dependsOn(rocketchip)
+  .dependsOn(rocketchip, gemmini)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
