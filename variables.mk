@@ -144,7 +144,7 @@ ifeq ($(SUB_PROJECT),coalescer)
 	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= freechips.rocketchip.unittest
 	CONFIG            ?= CoalescingUnitTestConfig
-	CONFIG_PACKAGE    ?= freechips.rocketchip.unittest
+	CONFIG_PACKAGE    ?= radiance.memory
 	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
 	TOP               ?= UnitTestSuite
