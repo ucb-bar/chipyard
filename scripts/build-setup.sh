@@ -294,6 +294,7 @@ if run_step "8"; then
 fi
 
 if run_step "10"; then
+    begin_step "10" "Installing CIRCT"
     # install circt into conda
     if run_step "1"; then
         PREFIX=$CONDA_PREFIX/$TOOLCHAIN_TYPE
@@ -318,7 +319,7 @@ fi
 
 # do misc. cleanup for a "clean" git status
 if run_step "11"; then
-    begin_step "10" "Cleaning up repository"
+    begin_step "11" "Cleaning up repository"
     $CYDIR/scripts/repo-clean.sh
     exit_if_last_command_failed
 fi
