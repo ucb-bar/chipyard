@@ -90,12 +90,7 @@ class GCDMMIOChiselModule(val w: Int) extends Module {
 
 // DOC include start: GCD router
 class GCDTL(params: GCDParams, beatBytes: Int)(implicit p: Parameters) extends ClockSinkDomain(ClockSinkParameters())(p) {
-  val device = new SimpleDevice("gcd", Seq("ucbbar,gcd")) {
-    override def describe(resources: ResourceBindings): Description = {
-      val Description(name, mapping) = super.describe(resources)
-      Description(name, mapping)
-    }
-  }
+  val device = new SimpleDevice("gcd", Seq("ucbbar,gcd")) 
   val node = TLRegisterNode(Seq(AddressSet(params.address, 4096-1)), device, "reg/control", beatBytes=beatBytes)
 
   override lazy val module = new GCDImpl
