@@ -71,7 +71,7 @@ mapping["chipyard-nomem-scratchpad"]=" CONFIG=MMIOScratchpadOnlyRocketConfig"
 mapping["chipyard-constellation"]=" CONFIG=SharedNoCConfig"
 mapping["chipyard-clusters"]=" CONFIG=ClusteredRocketConfig verilog"
 mapping["chipyard-aes256ecb"]=" CONFIG=AES256ECBRocketConfig"
-mapping["chipyard-vortex"]=" CONFIG=RadianceROMConfig"
+mapping["chipyard-vortex"]=" CONFIG=RadianceConfig"
 mapping["chipyard-coalescer"]=" CONFIG=MemtraceCoreConfig"
 
 mapping["constellation"]=" SUB_PROJECT=constellation"
