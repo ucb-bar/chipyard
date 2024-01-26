@@ -11,13 +11,17 @@ set -ex
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
+echo "$0: REMOTE_CHIPYARD_DIR=$REMOTE_CHIPYARD_DIR"
 cd $REMOTE_CHIPYARD_DIR
 
-cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.bin.elf \
+ls -la $REMOTE_CHIPYARD_DIR/generators/rocket-gpu
+ls -la $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli
+
+cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecaddloop.bin.elf \
        $REMOTE_CHIPYARD_DIR/sims/
-cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.args.size64.romAddr.bin \
+cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecaddloop.args.n256.cores1.romAddr.bin \
        $REMOTE_CHIPYARD_DIR/sims/args.bin
-cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.input.a.size64.bin \
+cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecaddloop.input.a.size256.bin \
        $REMOTE_CHIPYARD_DIR/sims/op_a.bin
-cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.input.b.size64.bin \
+cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecaddloop.input.b.size256.bin \
        $REMOTE_CHIPYARD_DIR/sims/op_b.bin
