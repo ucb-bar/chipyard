@@ -16,7 +16,7 @@ cd $REMOTE_CHIPYARD_DIR
 
 cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.bin.elf \
        $REMOTE_CHIPYARD_DIR/sims/
-cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.args.size64.romAddr.bin \
+cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.args.size64.romAddr.core1.bin \
        $REMOTE_CHIPYARD_DIR/sims/args.bin
 cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.input.a.size64.bin \
        $REMOTE_CHIPYARD_DIR/sims/op_a.bin
