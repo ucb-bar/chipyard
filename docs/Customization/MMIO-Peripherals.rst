@@ -10,7 +10,8 @@ To create a RegisterRouter-based peripheral, you will need to specify a paramete
 For this example, we will show how to connect a MMIO peripheral which computes the GCD.
 The full code can be found in ``generators/chipyard/src/main/scala/example/GCD.scala``.
 
-In this case we use a submodule ``GCDMMIOChiselModule`` to actually perform the GCD. The ``GCDModule`` class only creates the registers and hooks them up using ``regmap``.
+In this case we use a submodule ``GCDMMIOChiselModule`` to actually perform the GCD. The ``GCDTL`` and ``GCDAXI4`` classes are the ``LazyModule`` classes which construct the TileLink or AXI4 ports, wrapping the inner ``GCDMMIOChiselModule``.
+The ``node`` object is a Diplomacy node, which connects the peripheral to the Diplomacy interconnect graph.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala
@@ -19,8 +20,9 @@ In this case we use a submodule ``GCDMMIOChiselModule`` to actually perform the 
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala
-    :start-after: DOC include start: GCD instance regmap
-    :end-before: DOC include end: GCD instance regmap
+    :start-after: DOC include start: GCD router
+    :end-before: DOC include end: GCD router
+
 
 Advanced Features of RegField Entries
 -------------------------------------
@@ -41,15 +43,21 @@ triggering the GCD algorithm when ``y`` is written. Therefore, the
 algorithm is set up by first writing ``x`` and then performing a
 triggering write to ``y``. Polling can be used for status checks.
 
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
+    :language: scala
+    :start-after: DOC include start: GCD instance regmap
+    :end-before: DOC include end: GCD instance regmap
+
 
 Connecting by TileLink
 ----------------------
 
-Once you have these classes, you can construct the final peripheral by extending the ``TLRegisterRouter`` and passing the proper arguments.
-The first set of arguments determines where the register router will be placed in the global address map and what information will be put in its device tree entry.
-The second set of arguments is the IO bundle constructor, which we create by extending ``TLRegBundle`` with our bundle trait.
-The final set of arguments is the module constructor, which we create by extends ``TLRegModule`` with our module trait.
-Notice how we can create an analogous AXI4 version of our peripheral.
+The key to connecting to the TileLink Diplomatic graph is the construction of the TileLink node for this peripheral.
+In this case, since the peripheral acts as a manager of some register-mapped address space, it uses the ``TLRegisterNode`` object.
+The parameters to the ``TLRegisterNode`` object specify the size of the managed space, the base address, and the port width.
+
+Within the register-mapped peripheral, the control registers can be mapped using the ``node.regmap`` function, as described above.
+A similar procedure is followed for both AXI4 and TileLin peripherals.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala
@@ -62,12 +70,8 @@ Top-level Traits
 ----------------
 
 After creating the module, we need to hook it up to our SoC.
-Rocket Chip accomplishes this using the cake pattern.
-This basically involves placing code inside traits.
-In the Rocket Chip cake, there are two kinds of traits: a ``LazyModule`` trait and a module implementation trait.
-
 The ``LazyModule`` trait runs setup code that must execute before all the hardware gets elaborated.
-For a simple memory-mapped peripheral, this just involves connecting the peripheral's TileLink node to the MMIO crossbar.
+For a simple memory-mapped peripheral, this just involves connecting the peripheral's TileLink node to the relevant bus.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala
@@ -80,6 +84,7 @@ This will automatically add address map and device tree entries for the peripher
 Also observe how we have to place additional AXI4 buffers and converters for the AXI4 version of this peripheral.
 
 Peripherals which expose I/O can use `InModuleBody` to punch their I/O to the `DigitalTop` module.
+In this example, the GCD module's ``gcd_busy`` signal is exposed as a I/O of DigitalTop.
 
 Constructing the DigitalTop and Config
 --------------------------------------
