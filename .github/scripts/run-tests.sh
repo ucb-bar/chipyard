@@ -142,7 +142,7 @@ case $1 in
         run_binary LOADMEM=1 BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
         ;;
     chipyard-radiance)
-        run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.bin.elf
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecaddloop.bin.elf
         ;;
     chipyard-coalescer)
         run_binary BINARY=none EXTRA_SIM_FLAGS="+memtracefile=$LOCAL_CHIPYARD_DIR/generators/rocket-gpu/tracefiles/vecadd.core1.thread4.trace"
