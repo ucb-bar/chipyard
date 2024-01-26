@@ -14,6 +14,9 @@ source $SCRIPT_DIR/defaults.sh
 echo "$0: REMOTE_CHIPYARD_DIR=$REMOTE_CHIPYARD_DIR"
 cd $REMOTE_CHIPYARD_DIR
 
+ls -la $REMOTE_CHIPYARD_DIR/generators/rocket-gpu
+ls -la $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli
+
 cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecaddloop.bin.elf \
        $REMOTE_CHIPYARD_DIR/sims/
 cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecaddloop.args.n256.cores1.romAddr.bin \
