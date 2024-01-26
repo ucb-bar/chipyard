@@ -244,7 +244,7 @@ jobs:
     name: "all tests passed"
     needs: [
             chipyard-radiance-run-tests,
-            # chipyard-coalescer-run-tests,
+            chipyard-coalescer-run-tests,
             coalescer-run-tests,
             ]
     runs-on: self-hosted
