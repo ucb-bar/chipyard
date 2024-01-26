@@ -72,7 +72,7 @@ mapping["chipyard-constellation"]=" CONFIG=SharedNoCConfig"
 mapping["chipyard-clusters"]=" CONFIG=ClusteredRocketConfig verilog"
 mapping["chipyard-aes256ecb"]=" CONFIG=AES256ECBRocketConfig"
 mapping["chipyard-radiance"]=" CONFIG=RadianceConfig"
-mapping["chipyard-coalescer"]=" CONFIG=MemtraceCoreConfig"
+# mapping["chipyard-coalescer"]=" CONFIG=MemtraceCoreConfig"
 
 mapping["constellation"]=" SUB_PROJECT=constellation"
 mapping["coalescer"]=" SUB_PROJECT=coalescer"
