@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - graphics
+      - graphics-ci
 
 defaults:
   run:
