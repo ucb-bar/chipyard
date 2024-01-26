@@ -11,6 +11,7 @@ set -ex
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
+echo "$0: REMOTE_CHIPYARD_DIR=$REMOTE_CHIPYARD_DIR"
 cd $REMOTE_CHIPYARD_DIR
 
 cp -av $REMOTE_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.bin.elf \
