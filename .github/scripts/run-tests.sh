@@ -141,7 +141,7 @@ case $1 in
     chipyard-constellation)
         run_binary LOADMEM=1 BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
         ;;
-    chipyard-vortex)
+    chipyard-radiance)
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecadd.bin.elf
         ;;
     chipyard-coalescer)

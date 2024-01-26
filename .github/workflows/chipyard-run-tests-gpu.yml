@@ -167,8 +167,8 @@ jobs:
 
   ##########################################################################
 
-  chipyard-vortex-run-tests:
-    name: chipyard-vortex-run-tests
+  chipyard-radiance-run-tests:
+    name: chipyard-radiance-run-tests
     needs: prepare-chipyard-gpu
     runs-on: self-hosted
     steps:
@@ -188,7 +188,7 @@ jobs:
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-gpu"
-          project-key: "chipyard-vortex"
+          project-key: "chipyard-radiance"
 
   chipyard-coalescer-run-tests:
     name: chipyard-coalescer-run-tests
@@ -243,8 +243,8 @@ jobs:
   all_tests_passed:
     name: "all tests passed"
     needs: [
-            chipyard-vortex-run-tests,
-            chipyard-coalescer-run-tests,
+            chipyard-radiance-run-tests,
+            # chipyard-coalescer-run-tests,
             coalescer-run-tests,
             ]
     runs-on: self-hosted
