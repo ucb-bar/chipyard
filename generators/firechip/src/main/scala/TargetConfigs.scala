@@ -265,7 +265,7 @@ class FireSimSmallSystemConfig extends Config(
   new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++
   new testchipip.serdes.WithSerialTL(Seq(testchipip.serdes.SerialTLParams(
     client = Some(testchipip.serdes.SerialTLClientParams(idBits = 4)),
-    phyParams = testchipip.serdes.ExternalSyncSerialParams(width=32)
+    phyParams = testchipip.serdes.ExternalSyncSerialPhyParams(phitWidth=32, flitWidth=32)
   ))) ++
   new testchipip.iceblk.WithBlockDevice ++
   new chipyard.config.WithUARTInitBaudRate(BigInt(3686400L)) ++
