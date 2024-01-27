@@ -41,6 +41,8 @@ class RadianceBaseConfig extends Config(
   new WithRadROMs(0x7FFF0000L, 0x10000, "sims/args.bin") ++
   new WithRadROMs(0x20000L, 0x8000, "sims/op_a.bin") ++
   new WithRadROMs(0x28000L, 0x8000, "sims/op_b.bin") ++
+  new chipyard.harness.WithCeaseSuccess ++
+  new chipyard.iobinders.WithCeasePunchThrough ++
   new AbstractConfig)
 
 class RadianceConfig extends Config(
