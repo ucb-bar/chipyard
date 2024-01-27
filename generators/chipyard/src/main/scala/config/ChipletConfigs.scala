@@ -16,7 +16,7 @@ class SymmetricChipletRocketConfig extends Config(
   new testchipip.serdes.WithSerialTL(Seq(
     testchipip.serdes.SerialTLParams(                               // 0th serial-tl is chip-to-bringup-fpga
       client = Some(testchipip.serdes.SerialTLClientParams()),      // bringup serial-tl acts only as a client
-      phyParams = testchipip.serdes.ExternalSyncSerialParams()      // bringup serial-tl is sync'd to external clock
+      phyParams = testchipip.serdes.ExternalSyncSerialPhyParams()   // bringup serial-tl is sync'd to external clock
     ),
     testchipip.serdes.SerialTLParams(                               // 1st serial-tl is chip-to-chip
       client = Some(testchipip.serdes.SerialTLClientParams()),      // chip-to-chip serial-tl acts as a client
@@ -27,7 +27,7 @@ class SymmetricChipletRocketConfig extends Config(
         )),
         slaveWhere = OBUS
       )),
-      phyParams = testchipip.serdes.SourceSyncSerialParams()        // chip-to-chip serial-tl is symmetric source-sync'd
+      phyParams = testchipip.serdes.SourceSyncSerialPhyParams()     // chip-to-chip serial-tl is symmetric source-sync'd
     ))
   ) ++
   new testchipip.soc.WithOffchipBusClient(SBUS,                     // obus provides path to other chip's memory

@@ -70,7 +70,7 @@ class AbstractConfig extends Config(
   new testchipip.serdes.WithSerialTL(Seq(                           // add a serial-tilelink interface
     testchipip.serdes.SerialTLParams(
       client = Some(testchipip.serdes.SerialTLClientParams()),      // serial-tilelink interface will master the FBUS, and support 4 idBits
-      phyParams = testchipip.serdes.ExternalSyncSerialParams(width=32) // serial-tilelink interface with 32 lanes
+      phyParams = testchipip.serdes.ExternalSyncSerialPhyParams(phitWidth=32, flitWidth=32) // serial-tilelink interface with 32 lanes
     )
   )) ++
   new testchipip.soc.WithMbusScratchpad(base = 0x08000000,          // add 64 KiB on-chip scratchpad
