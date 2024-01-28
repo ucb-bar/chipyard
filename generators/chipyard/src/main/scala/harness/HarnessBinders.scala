@@ -213,8 +213,7 @@ class WithSerialTLTiedOff(tieoffs: Option[Seq[Int]] = None) extends HarnessBinde
       case io: SourceSyncPhitIO => {
         io.clock_in := false.B.asClock
         io.reset_in := false.B.asAsyncReset
-        io.phit_in := DontCare
-        io.credit_in := DontCare
+        io.in := DontCare
       }
     }
     port.io match {

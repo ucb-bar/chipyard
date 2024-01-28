@@ -69,10 +69,8 @@ class WithMultiChipSerialTL(chip0: Int, chip1: Int, chip0portId: Int = 0, chip1p
       b.clock_in := a.clock_out
       a.reset_in := b.reset_out
       b.reset_in := a.reset_out
-      a.phit_in := b.phit_out
-      b.phit_in := a.phit_out
-      a.credit_in := b.credit_out
-      b.credit_in := a.credit_out
+      a.in := b.out
+      b.in := a.out
     }
     (p0.io, p1.io) match {
       case (io0: InternalSyncPhitIO, io1: ExternalSyncPhitIO) => connectDecoupledSyncPhitIO(io0, io1)
