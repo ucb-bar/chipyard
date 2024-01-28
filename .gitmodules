@@ -4,30 +4,18 @@
 [submodule "testchipip"]
 	path = generators/testchipip
 	url = https://github.com/ucb-bar/testchipip.git
-[submodule "barstools"]
-	path = tools/barstools
-	url = https://github.com/ucb-bar/barstools.git
 [submodule "tools/torture"]
 	path = tools/torture
 	url = https://github.com/ucb-bar/riscv-torture.git
 [submodule "generators/boom"]
 	path = generators/boom
 	url = https://github.com/riscv-boom/riscv-boom.git
-[submodule "generators/hwacha"]
-	path = generators/hwacha
-	url = https://github.com/ucb-bar/hwacha.git
-[submodule "sims/firesim"]
-	path = sims/firesim
-	url = https://github.com/firesim/firesim.git
 [submodule "generators/icenet"]
 	path = generators/icenet
 	url = https://github.com/firesim/icenet.git
 [submodule "tools/dsptools"]
 	path = tools/dsptools
 	url = https://github.com/ucb-bar/dsptools.git
-[submodule "generators/sha3"]
-	path = generators/sha3
-	url = https://github.com/ucb-bar/sha3.git
 [submodule "vlsi/hammer-mentor-plugins"]
 	path = vlsi/hammer-mentor-plugins
 	url = https://github.com/ucb-bar/hammer-mentor-plugins.git
@@ -91,27 +79,12 @@
 [submodule "toolchains/riscv-tools/riscv-tools-feedstock"]
 	path = toolchains/riscv-tools/riscv-tools-feedstock
 	url = https://github.com/ucb-bar/riscv-tools-feedstock.git
-[submodule "toolchains/esp-tools/esp-tools-feedstock"]
-	path = toolchains/esp-tools/esp-tools-feedstock
-	url = https://github.com/ucb-bar/esp-tools-feedstock.git
-[submodule "toolchains/esp-tools/riscv-isa-sim"]
-	path = toolchains/esp-tools/riscv-isa-sim
-	url = https://github.com/ucb-bar/esp-isa-sim.git
-[submodule "toolchains/esp-tools/riscv-pk"]
-	path = toolchains/esp-tools/riscv-pk
-	url = https://github.com/riscv-software-src/riscv-pk.git
-[submodule "toolchains/esp-tools/riscv-tests"]
-	path = toolchains/esp-tools/riscv-tests
-	url = https://github.com/ucb-bar/esp-tests.git
 [submodule "toolchains/libgloss"]
 	path = toolchains/libgloss
 	url = https://github.com/ucb-bar/libgloss-htif.git
 [submodule "generators/constellation"]
 	path = generators/constellation
 	url = https://github.com/ucb-bar/constellation.git
-[submodule "generators/mempress"]
-	path = generators/mempress
-	url = https://github.com/ucb-bar/mempress.git
 [submodule "tools/cde"]
 	path = tools/cde
 	url = https://github.com/chipsalliance/cde.git
@@ -148,3 +121,9 @@
 [submodule "generators/rocket-chip-inclusive-cache"]
 	path = generators/rocket-chip-inclusive-cache
 	url = https://github.com/chipsalliance/rocket-chip-inclusive-cache.git
+[submodule "tools/midas-targetutils"]
+	path = tools/midas-targetutils
+	url = git@github.com:firesim/midas-targetutils.git
+[submodule "tools/firrtl2"]
+	path = tools/firrtl2
+	url = git@github.com:ucb-bar/firrtl2.git

@@ -7,7 +7,7 @@ import freechips.rocketchip.prci._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tilelink._
-import barstools.iocell.chisel._
+import chipyard.iocell._
 
 // This uses the FakePLL, which uses a ClockAtFreq Verilog blackbox to generate
 // the requested clocks. This also adds TileLink ClockDivider and ClockSelector

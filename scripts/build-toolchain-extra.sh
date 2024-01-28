@@ -16,11 +16,7 @@ common_setup
 readonly MAKE
 
 usage() {
-    echo "usage: ${0} [OPTIONS] [riscv-tools | esp-tools]"
-    echo ""
-    echo "Installation Types"
-    echo "   riscv-tools: if set, builds the riscv toolchain (this is also the default)"
-    echo "   esp-tools: if set, builds esp-tools toolchain used for the hwacha vector accelerator"
+    echo "usage: ${0} [OPTIONS]"
     echo ""
     echo "Options"
     echo "   --prefix -p PREFIX    : Install destination."
@@ -45,8 +41,6 @@ do
             RISCV=$(realpath $1) ;;
         --clean-after-install )
             CLEANAFTERINSTALL="true" ;;
-        riscv-tools | esp-tools)
-            TOOLCHAIN=$1 ;;
         * )
             error "invalid option $1"
             usage 1 ;;
@@ -130,5 +124,18 @@ cd $RDIR
 git submodule update --init toolchains/riscv-tools/riscv-spike-devices
 cd toolchains/riscv-tools/riscv-spike-devices
 make install
+
+echo '==>  Installing verilator'
+cd $RDIR
+rm -rf verilator
+git clone https://github.com/verilator/verilator.git
+cd verilator
+git checkout 3eaed3b6f52f933c32aa2469264c047a930d0f00
+autoconf
+./configure --prefix=$RISCV
+make
+make install
+cd $RDIR
+rm -rf verilator
 
 echo "Extra Toolchain Utilities/Tests Build Complete!"

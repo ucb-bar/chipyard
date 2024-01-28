@@ -91,9 +91,9 @@ VLOG_EXT = sv v
 CHIPYARD_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim fpga/fpga-shells fpga/src)
 CHIPYARD_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(CHIPYARD_SOURCE_DIRS),$(SCALA_EXT))
 CHIPYARD_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(CHIPYARD_SOURCE_DIRS),$(VLOG_EXT))
-BARSTOOLS_SOURCE_DIRS = $(addprefix $(base_dir)/,tools/barstools)
-BARSTOOLS_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(BARSTOOLS_SOURCE_DIRS),$(SCALA_EXT))
-BARSTOOLS_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(BARSTOOLS_SOURCE_DIRS),$(VLOG_EXT))
+TAPEOUT_SOURCE_DIRS = $(addprefix $(base_dir)/,tools/tapeout)
+TAPEOUT_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(TAPEOUT_SOURCE_DIRS),$(SCALA_EXT))
+TAPEOUT_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(TAPEOUT_SOURCE_DIRS),$(VLOG_EXT))
 # This assumes no SBT meta-build sources
 SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools)
 SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
@@ -127,7 +127,7 @@ $(CHIPYARD_CLASSPATH_TARGETS) &: $(CHIPYARD_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEP
 	$(call run_sbt_assembly,$(SBT_PROJECT),$(CHIPYARD_CLASSPATH))
 
 # order only dependency between sbt runs needed to avoid concurrent sbt runs
-$(TAPEOUT_CLASSPATH_TARGETS) &: $(BARSTOOLS_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(BARSTOOLS_VLOG_SOURCES) | $(CHIPYARD_CLASSPATH_TARGETS)
+$(TAPEOUT_CLASSPATH_TARGETS) &: $(TAPEOUT_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(TAPEOUT_VLOG_SOURCES) | $(CHIPYARD_CLASSPATH_TARGETS)
 	mkdir -p $(dir $@)
 	$(call run_sbt_assembly,tapeout,$(TAPEOUT_CLASSPATH))
 
@@ -165,7 +165,7 @@ define sfc_extra_low_transforms_anno_contents
 [
 	{
 		"class": "firrtl.stage.RunFirrtlTransformAnnotation",
-		"transform": "barstools.tapeout.transforms.ExtraLowTransforms"
+		"transform": "tapeout.transforms.ExtraLowTransforms"
 	}
 ]
 endef
@@ -232,7 +232,7 @@ $(FINAL_ANNO_FILE): $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) $(SFC_LEVEL)
 $(SFC_MFC_TARGETS) &: private TMP_DIR := $(shell mktemp -d -t cy-XXXXXXXX)
 $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) $(MFC_LOWERING_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
-	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.tapeout.transforms.GenerateModelStageMain,\
+	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),tapeout.transforms.GenerateModelStageMain,\
 		--no-dedup \
 		--output-file $(SFC_FIRRTL_BASENAME) \
 		--output-annotation-file $(SFC_ANNO_FILE) \
@@ -297,12 +297,12 @@ $(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JS
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 TOP_MACROCOMPILER_MODE ?= --mode synflops
 $(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH_TARGETS) $(TOP_SMEMS_CONF)
-	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
+	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),tapeout.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
 	touch $(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR)
 
 MODEL_MACROCOMPILER_MODE = --mode synflops
 $(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH_TARGETS) $(MODEL_SMEMS_CONF)
-	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
+	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),tapeout.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
 	touch $(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR)
 
 ########################################################################################

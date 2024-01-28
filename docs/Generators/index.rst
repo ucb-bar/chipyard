@@ -27,12 +27,10 @@ so changes to the generators themselves will automatically be used when building
    IceNet
    TestChipIP
    Rocket-Chip-Generators
-   SHA3
    CVA6
    Ibex
    fft
    NVDLA
    Sodor
    Shuttle
-   Mempress
    Prefetchers

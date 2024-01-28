@@ -24,9 +24,9 @@ import chipyard.stage._
 case class ChipyardTestSuiteAnnotation(tests: Seq[RocketTestSuite]) extends NoTargetAnnotation with Unserializable
 
 
-class AddDefaultTests extends Phase with PreservesAll[Phase] with HasChipyardStageUtils {
+class AddDefaultTests extends Phase with PreservesAll with HasChipyardStageUtils {
   override val prerequisites = Seq(Dependency[ChipyardChiselStage])
-  override val dependents = Seq(Dependency[GenerateTestSuiteMakefrags])
+  override val optionalPrerequisiteOf = Seq(Dependency[GenerateTestSuiteMakefrags])
 
   private def addTestSuiteAnnotations(implicit p: Parameters): Seq[Annotation] = {
     val annotations = mutable.ArrayBuffer[Annotation]()

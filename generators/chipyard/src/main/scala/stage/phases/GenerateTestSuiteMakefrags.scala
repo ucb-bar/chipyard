@@ -7,7 +7,7 @@ import scala.collection.mutable
 
 import firrtl.AnnotationSeq
 import firrtl.annotations.{Annotation, NoTargetAnnotation}
-import firrtl.options.{Phase, PreservesAll, StageOptions, Unserializable, Dependency}
+import firrtl.options.{Phase, StageOptions, Unserializable, Dependency}
 import firrtl.options.Viewer.view
 import chipyard.stage._
 import freechips.rocketchip.system.TestGeneration

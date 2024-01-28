@@ -5,7 +5,6 @@ package chipyard.stage
 import java.io.{File, FileWriter}
 
 import org.chipsalliance.cde.config.{Config, Parameters}
-import chisel3.internal.firrtl.Circuit
 import freechips.rocketchip.util.{BlackBoxedROM, ROMGenerator}
 
 trait HasChipyardStageUtils {
@@ -20,21 +19,6 @@ trait HasChipyardStageUtils {
       }
       currentConfig ++ config
     })
-  }
-
-  def enumerateROMs(circuit: Circuit): String = {
-    val res = new StringBuilder
-    val configs =
-      circuit.components flatMap { m =>
-        m.id match {
-          case rom: BlackBoxedROM => Some((rom.name, ROMGenerator.lookup(rom)))
-          case _ => None
-        }
-      }
-    configs foreach { case (name, c) =>
-      res append s"name ${name} depth ${c.depth} width ${c.width}\n"
-    }
-    res.toString
   }
 
   def writeOutputFile(targetDir: String, fname: String, contents: String): File = {

@@ -6,7 +6,7 @@ import chipyard.iobinders._
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.diplomacy.{InModuleBody}
 import freechips.rocketchip.subsystem.{PBUS, HasTileLinkLocations}
-import barstools.iocell.chisel._
+import chipyard.iocell._
 import chipyard._
 import chipyard.harness.{BuildTop}
 import sifive.blocks.devices.uart._

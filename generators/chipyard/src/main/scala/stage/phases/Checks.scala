@@ -4,13 +4,13 @@ package chipyard.stage.phases
 
 import firrtl.AnnotationSeq
 import firrtl.annotations.Annotation
-import firrtl.options.{OptionsException, Phase, PreservesAll, TargetDirAnnotation}
+import firrtl.options.{OptionsException, Phase, TargetDirAnnotation}
 import chipyard.stage._
 
 import scala.collection.mutable
 
 /** Checks for the correct type and number of command line arguments */
-class Checks extends Phase with PreservesAll[Phase] {
+class Checks extends Phase with PreservesAll {
 
   override def transform(annotations: AnnotationSeq): AnnotationSeq = {
     val targetDir, topModule, configNames, outputBaseName = mutable.ListBuffer[Annotation]()

@@ -7,7 +7,6 @@ import freechips.rocketchip.diplomacy.{LazyModule}
 import org.chipsalliance.cde.config.{Field, Parameters, Config}
 import freechips.rocketchip.util.{ResetCatchAndSync, DontTouch}
 import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters, ClockSinkParameters, ClockParameters}
-import chipyard.stage.phases.TargetDirKey
 
 import chipyard.harness.{ApplyHarnessBinders, HarnessBinders}
 import chipyard.iobinders.HasChipyardPorts
@@ -70,7 +69,6 @@ trait HasHarnessInstantiators {
 
   val chipParameters = p(MultiChipNChips) match {
     case Some(n) => (0 until n).map { i => p(MultiChipParameters(i)).alterPartial {
-      case TargetDirKey => p(TargetDirKey) // hacky fix
       case MultiChipIdx => i
     }}
     case None => Seq(p)

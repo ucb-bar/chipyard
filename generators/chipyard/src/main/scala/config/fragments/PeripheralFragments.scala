@@ -8,7 +8,6 @@ import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.devices.tilelink.{BootROMLocated, PLICKey, CLINTKey}
 import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI, JtagDTMKey, JtagDTMConfig}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
-import chipyard.stage.phases.TargetDirKey
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile.{XLen}
 
@@ -35,7 +34,7 @@ class WithBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigInt =
         address = address,
         size = size,
         hang = hang,
-        contentFileName = s"${site(TargetDirKey)}/bootrom.rv${site(XLen)}.img"
+        // contentFileName = s"${site(TargetDirKey)}/bootrom.rv${site(XLen)}.img"
       ))
 })
 

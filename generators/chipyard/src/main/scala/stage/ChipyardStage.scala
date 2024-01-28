@@ -3,39 +3,69 @@
 
 package chipyard.stage
 
-import chisel3.stage.{ChiselCli, ChiselStage}
+import circt.stage.{ChiselStage}
 import firrtl.options.PhaseManager.PhaseDependency
-import firrtl.options.{Phase, PreservesAll, Shell}
-import firrtl.stage.FirrtlCli
-
-import firrtl.options.{Phase, PhaseManager, PreservesAll, Shell, Stage, StageError, StageMain, Dependency}
-import firrtl.options.phases.DeletedWrapper
+import firrtl.options.{Shell}
+import firrtl.{AnnotationSeq}
+import firrtl.options.{Phase, PhaseManager, Shell, Stage, StageError, StageMain, Dependency}
 
 final class ChipyardChiselStage extends ChiselStage {
+  override def run(annotations: AnnotationSeq): AnnotationSeq = {
 
-  override val targets = Seq(
-    Dependency[chisel3.stage.phases.Checks],
-    Dependency[chisel3.stage.phases.Elaborate],
-    Dependency[chisel3.stage.phases.AddImplicitOutputFile],
-    Dependency[chisel3.stage.phases.AddImplicitOutputAnnotationFile],
-    Dependency[chisel3.stage.phases.MaybeAspectPhase],
-    Dependency[chisel3.stage.phases.Emitter],
-    Dependency[chisel3.stage.phases.Convert]
-  )
-
+    val pm = new PhaseManager(
+      targets = Seq(
+        Dependency[chisel3.stage.phases.Checks],
+        Dependency[chisel3.stage.phases.AddImplicitOutputFile],
+        Dependency[chisel3.stage.phases.AddImplicitOutputAnnotationFile],
+        Dependency[chisel3.stage.phases.MaybeAspectPhase],
+        Dependency[chisel3.stage.phases.AddSerializationAnnotations],
+        Dependency[chisel3.stage.phases.Convert],
+        Dependency[chisel3.stage.phases.AddDedupGroupAnnotations],
+        Dependency[chisel3.stage.phases.MaybeInjectingPhase],
+        Dependency[circt.stage.phases.AddImplicitOutputFile],
+        Dependency[circt.stage.phases.Checks],
+        Dependency[circt.stage.phases.CIRCT]
+      ),
+      currentState = Seq(
+        Dependency[firrtl.stage.phases.AddDefaults],
+        Dependency[firrtl.stage.phases.Checks]
+      )
+    )
+    pm.transform(annotations)
+  }
 }
 
 class ChipyardStage extends ChiselStage {
-  override val shell = new Shell("chipyard") with ChipyardCli with ChiselCli with FirrtlCli
-  override val targets: Seq[PhaseDependency] = Seq(
-    Dependency[chipyard.stage.phases.Checks],
-    Dependency[chipyard.stage.phases.TransformAnnotations],
-    Dependency[chipyard.stage.phases.PreElaboration],
-    Dependency[ChipyardChiselStage],
-    Dependency[chipyard.stage.phases.GenerateFirrtlAnnos],
-    Dependency[chipyard.stage.phases.AddDefaultTests],
-    Dependency[chipyard.stage.phases.GenerateTestSuiteMakefrags],
-    Dependency[chipyard.stage.phases.GenerateArtefacts],
-  )
+  override val shell = new Shell("chipyard") with ChipyardCli with circt.stage.CLI
+  override def run(annotations: AnnotationSeq): AnnotationSeq = {
+
+    val pm = new PhaseManager(
+      targets = Seq(
+        Dependency[chipyard.stage.phases.Checks],
+        Dependency[chipyard.stage.phases.TransformAnnotations],
+        Dependency[chipyard.stage.phases.PreElaboration],
+        Dependency[ChipyardChiselStage],
+        Dependency[chipyard.stage.phases.GenerateFirrtlAnnos],
+        Dependency[chipyard.stage.phases.AddDefaultTests],
+        Dependency[chipyard.stage.phases.GenerateTestSuiteMakefrags],
+        Dependency[chipyard.stage.phases.GenerateArtefacts],
+      ),
+      currentState = Seq(
+        Dependency[firrtl.stage.phases.AddDefaults],
+        Dependency[firrtl.stage.phases.Checks]
+      )
+    )
+    pm.transform(annotations)
+  }
+  // override val targets: Seq[PhaseDependency] = Seq(
+  //   Dependency[chipyard.stage.phases.Checks],
+  //   Dependency[chipyard.stage.phases.TransformAnnotations],
+  //   Dependency[chipyard.stage.phases.PreElaboration],
+  //   Dependency[ChipyardChiselStage],
+  //   Dependency[chipyard.stage.phases.GenerateFirrtlAnnos],
+  //   Dependency[chipyard.stage.phases.AddDefaultTests],
+  //   Dependency[chipyard.stage.phases.GenerateTestSuiteMakefrags],
+  //   Dependency[chipyard.stage.phases.GenerateArtefacts],
+  // )
   override final def invalidates(a: Phase): Boolean = false
 }

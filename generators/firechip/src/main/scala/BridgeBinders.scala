@@ -26,7 +26,7 @@ import firesim.configs.MemModelKey
 import tracegen.{TraceGenSystemModuleImp}
 import cva6.CVA6Tile
 
-import barstools.iocell.chisel._
+import chipyard.iocell._
 import chipyard.iobinders._
 import chipyard._
 import chipyard.harness._
