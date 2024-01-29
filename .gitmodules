@@ -148,3 +148,6 @@
 [submodule "generators/rocket-chip-inclusive-cache"]
 	path = generators/rocket-chip-inclusive-cache
 	url = https://github.com/chipsalliance/rocket-chip-inclusive-cache.git
+[submodule "generators/saturn"]
+	path = generators/saturn
+	url = git@github.com:ucb-bar/saturn-vector-impls.git
