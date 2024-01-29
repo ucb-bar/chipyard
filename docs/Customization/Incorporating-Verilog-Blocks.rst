@@ -99,10 +99,16 @@ Instantiating the BlackBox and Defining MMIO
 
 Next, we must instantiate the blackbox. In order to take advantage of
 diplomatic memory mapping on the system bus, we still have to
-integrate the peripheral at the Chisel level by mixing
-peripheral-specific traits into a ``TLRegisterRouter``. The ``params``
-member and ``HasRegMap`` base trait should look familiar from the
-previous memory-mapped GCD device example.
+integrate the peripheral at the Chisel level by instantiating a LazyModule wrapper
+that instantiates a TileLink RegisterNode.
+
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
+    :language: scala
+    :start-after: DOC include start: GCD router
+    :end-before: DOC include end: GCD router
+
+Within the LazyModule, the ``regmap`` function can be called to attach wires and
+registers to the MMIO port.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala

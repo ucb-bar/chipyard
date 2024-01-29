@@ -1,4 +1,4 @@
-Register Router
+Register Node
 ===============
 
 Memory-mapped devices generally follow a common pattern. They expose a set
@@ -10,10 +10,7 @@ While designers can manually instantiate a manager node and write the logic
 for exposing registers themselves, it's much easier to use RocketChip's
 ``regmap`` interface, which can generate most of the glue logic.
 
-For TileLink devices, you can use the ``regmap`` interface by extending
-the ``TLRegisterRouter`` class, as shown in :ref:`mmio-accelerators`,
-or you can create a regular LazyModule and instantiate a ``TLRegisterNode``.
-This section will focus on the second method.
+For TileLink devices, you can use the ``regmap`` interface of the ``TLRegisterNode``.
 
 Basic Usage
 -----------
@@ -32,7 +29,7 @@ The default value is 4 bytes. The ``concurrency`` argument is the size of the
 internal queue for TileLink requests. By default, this value is 0, which means
 there will be no queue. This value must be greater than 0 if you wish to
 decoupled requests and responses for register accesses. This is discussed
-in :ref:`TileLink-Diplomacy-Reference/Register-Router:Using Functions`.
+in :ref:`TileLink-Diplomacy-Reference/Register-Node:Using Functions`.
 
 The main way to interact with the node is to call the ``regmap`` method, which
 takes a sequence of pairs. The first element of the pair is an offset from the
@@ -123,12 +120,12 @@ output for write.
 In order to use this variant, you need to set ``concurrency`` to a value
 larger than 0.
 
-Register Routers for Other Protocols
+Register Nodes for Other Protocols
 ------------------------------------
 
-One useful feature of the register router interface is that you can easily
+One useful feature of the register node interface is that you can easily
 change the protocol being used. For instance, in the first example in
-:ref:`TileLink-Diplomacy-Reference/Register-Router:Basic Usage`, you could simply change the ``TLRegisterNode`` to
+:ref:`TileLink-Diplomacy-Reference/Register-Node:Basic Usage`, you could simply change the ``TLRegisterNode`` to
 and ``AXI4RegisterNode``.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/RegisterNodeExample.scala
