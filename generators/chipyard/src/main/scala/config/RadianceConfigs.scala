@@ -34,7 +34,6 @@ class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigIn
 
 class RadianceBaseConfig extends Config(
   new radiance.subsystem.WithSimtLanes(nLanes = 4, nSrcIds = 4) ++
-  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
   new WithRadBootROM() ++
@@ -70,7 +69,6 @@ class RadianceNoCoalConfig extends Config(
 
 class RadianceNoCacheNoCoalConfig extends Config(
   new radiance.subsystem.WithRadianceCores(1, useVxCache = false) ++
-  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new RadianceBaseConfig)
 
 class RadianceLargeConfig extends Config(
@@ -91,10 +89,6 @@ class RadianceFuzzerConfig extends Config(
   new radiance.subsystem.WithFuzzerCores(1, useVxCache = false) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 4, enable = true) ++
   new radiance.subsystem.WithSimtLanes(nLanes = 16, nSrcIds = 4) ++
-  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
-  new freechips.rocketchip.subsystem.WithNBanks(4) ++
-  new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
-  new WithExtMemSize(BigInt("80000000", 16)) ++
   new AbstractConfig)
 
 class RadianceOldCacheConfig extends Config(
@@ -116,7 +110,6 @@ class RocketDummyVortexConfig extends Config(
   new radiance.subsystem.WithRadianceCores(1, useVxCache = false) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
   new radiance.subsystem.WithSimtLanes(nLanes = 4, nSrcIds = 16) ++
-  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
   new testchipip.soc.WithMbusScratchpad(base=0x7FFF0000L, size=0x10000, banks=1) ++
