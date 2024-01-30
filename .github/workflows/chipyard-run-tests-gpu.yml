@@ -190,6 +190,29 @@ jobs:
           group-key: "group-gpu"
           project-key: "chipyard-radiance"
 
+  chipyard-radiance-fuzzer-run-tests:
+    name: chipyard-radiance-fuzzer-run-tests
+    needs: prepare-chipyard-gpu
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-gpu"
+          project-key: "chipyard-radiance"
+
   chipyard-coalescer-run-tests:
     name: chipyard-coalescer-run-tests
     needs: prepare-chipyard-gpu
@@ -244,6 +267,7 @@ jobs:
     name: "all tests passed"
     needs: [
             chipyard-radiance-run-tests,
+            chipyard-radiance-fuzzer-run-tests,
             chipyard-coalescer-run-tests,
             coalescer-run-tests,
             ]

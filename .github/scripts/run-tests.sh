@@ -144,6 +144,9 @@ case $1 in
     chipyard-radiance)
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/rocket-gpu/stimuli/vecaddloop.bin.elf
         ;;
+    chipyard-radiance-fuzzer)
+        run_binary BINARY=none
+        ;;
     chipyard-coalescer)
         run_binary BINARY=none EXTRA_SIM_FLAGS="+memtracefile=$LOCAL_CHIPYARD_DIR/generators/rocket-gpu/tracefiles/vecadd.core1.thread4.trace"
         ;;
