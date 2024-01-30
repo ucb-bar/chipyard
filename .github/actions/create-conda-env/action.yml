@@ -5,8 +5,8 @@ runs:
   steps:
     - name: Create conda environments
       run: |
-        if conda env list | grep -q "envs/${{ env.conda-env-name-no-time }}-$(date --date \"${{ env.workflow-timestamp }}\" +%Y%m%d)"; then
-          echo "Using pre-existing conda environments with prefix ${{ env.conda-env-name-no-time }}-$(date --date \"${{ env.workflow-timestamp }}\" +%Y%m%d)"
+        if conda env list | grep -q "envs/${{ env.conda-env-name-no-time }}-$(date --date ${{ env.workflow-timestamp }} +%Y%m%d)"; then
+          echo "Using pre-existing conda environments with prefix ${{ env.conda-env-name-no-time }}-$(date --date ${{ env.workflow-timestamp }} +%Y%m%d)"
         else
           echo "Creating a conda environment for each toolchain with the toolchain installed"
           conda activate base
