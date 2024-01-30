@@ -79,7 +79,7 @@ dependencies:
     - zlib
     - vim
     - git
-    - openjdk
+    - openjdk<20
     - gengetopt
     - libffi
     - expat
