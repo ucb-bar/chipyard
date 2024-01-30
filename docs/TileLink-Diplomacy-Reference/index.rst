@@ -28,5 +28,5 @@ A detailed specification of the TileLink 1.7 protocol can be found on the
     NodeTypes
     Diplomacy-Connectors
     EdgeFunctions
-    Register-Router
+    Register-Node
     Widgets
