@@ -67,7 +67,6 @@ dependencies:
     - findutils
     - lzop
 
-    - rust
     - make
     - bash-completion
     - sbt
