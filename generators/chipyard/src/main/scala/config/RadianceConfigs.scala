@@ -91,6 +91,7 @@ class RadianceFuzzerConfig extends Config(
   new radiance.subsystem.WithSimtLanes(nLanes = 16, nSrcIds = 4) ++
   new AbstractConfig)
 
+
 class RadianceOldCacheConfig extends Config(
   new radiance.subsystem.WithRadianceCores(1, useVxCache = true) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
