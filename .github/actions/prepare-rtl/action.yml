@@ -29,6 +29,7 @@ runs:
           sims/vcs
           sims/firesim/sim
           generators/gemmini/software/gemmini-rocc-tests
+          generators/radiance/radpie
         key: ${{ inputs.group-key }}-${{ github.sha }}
 
     - name: Run RTL build if not cached
