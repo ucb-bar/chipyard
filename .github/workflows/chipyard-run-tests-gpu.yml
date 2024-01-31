@@ -211,7 +211,7 @@ jobs:
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-gpu"
-          project-key: "chipyard-radiance"
+          project-key: "chipyard-radiance-fuzzer"
 
   chipyard-coalescer-run-tests:
     name: chipyard-coalescer-run-tests
