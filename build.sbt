@@ -180,7 +180,7 @@ lazy val fft_generator = (project in file("generators/fft-generator"))
   .settings(commonSettings)
 
 lazy val tracegen = (project in file("generators/tracegen"))
-  .dependsOn(testchipip, rocketchip, sifive_cache, boom)
+  .dependsOn(testchipip, rocketchip, sifive_cache, boom, uciedigital)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 

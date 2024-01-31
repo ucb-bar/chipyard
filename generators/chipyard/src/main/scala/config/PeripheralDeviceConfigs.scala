@@ -93,7 +93,7 @@ class UARTTSIRocketConfig extends Config(
 
 class UCIRocketConfig extends Config(
   new edu.berkeley.cs.ucie.digital.tilelink.WithUCITLAdapter(edu.berkeley.cs.ucie.digital.tilelink.UCITLParams(
-    fdi   = edu.berkeley.cs.ucie.digital.interfaces.FdiParams(width = 8, dllpWidth = 8, sbWidth = 8),
+    fdi   = edu.berkeley.cs.ucie.digital.interfaces.FdiParams(width = 64, dllpWidth = 64, sbWidth = 32),
     proto = edu.berkeley.cs.ucie.digital.protocol.ProtocolLayerParams(),
     tl    = edu.berkeley.cs.ucie.digital.tilelink.TileLinkParams(address = 0x20000, addressRange = 0xfff, configAddress = 0x4000, inwardQueueDepth = 2, outwardQueueDepth = 2)
   )) ++
