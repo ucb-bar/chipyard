@@ -10,6 +10,36 @@ class SpikeConfig extends Config(
   new chipyard.WithNSpikeCores(1) ++
   new chipyard.config.AbstractConfig)
 
+// class SpikeRoCCExample extends Config(
+//   case BuildRoCC => List(
+//     (p: Parameters) => {
+//         val accumulator = LazyModule(new AccumulatorExample(OpcodeSet.custom0, n = 4)(p))
+//         accumulator
+//     },
+//     (p: Parameters) => {
+//         val translator = LazyModule(new TranslatorExample(OpcodeSet.custom1)(p))
+//         translator
+//     },
+//     (p: Parameters) => {
+//         val counter = LazyModule(new CharacterCountExample(OpcodeSet.custom2)(p))
+//         counter
+//     },
+//     (p: Parameters) => {
+//       val blackbox = LazyModule(new BlackBoxExample(OpcodeSet.custom3, "RoccBlackBox")(p))
+//       blackbox
+//     })
+// )
+
+// class SpikeAdderExample extends Config(
+//   new chipyard.WithNSpikeCores(1) ++
+//   case BuildRoCC => List(
+//     (p: Parameters) => {
+//       val adder = LazyModule(new AdderExample(OpcodeSet.all, "RoCCAdder")(p));
+//       adder
+//     }) ++
+//   new chipyard.config.AbstractConfig
+// )
+
 class dmiSpikeConfig extends Config(
   new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tilelink
   new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
