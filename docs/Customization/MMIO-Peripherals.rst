@@ -48,6 +48,16 @@ triggering write to ``y``. Polling can be used for status checks.
     :start-after: DOC include start: GCD instance regmap
     :end-before: DOC include end: GCD instance regmap
 
+.. note::
+   In older versions of Chipyard and Rocket-Chip, a ``TLRegisterRouter`` abstrat
+   class was used to abstract away the construction of the ``TLRegisterNode`` and
+   ``LazyModule`` classes necessary to construct MMIO peripherals. This was removed,
+   in favor of requiring users to explicitly construct the necessary classes.
+
+   This matches more closely how standard ``Modules`` and ``LazyModules`` are
+   constructed, making it clearer how a MMIO peripheral fits into the ``Module``
+   and ``LazyModule`` design patterns.
+
 
 Connecting by TileLink
 ----------------------
