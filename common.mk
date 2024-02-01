@@ -229,6 +229,8 @@ $(FINAL_ANNO_FILE): $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) $(SFC_LEVEL)
 	if [ $(shell cat $(SFC_LEVEL)) = none ]; then cat $(EXTRA_ANNO_FILE) > $@; fi
 	touch $@
 
+REPL_SEQ_MEM_OPTIONS = $(if $(findstring --mode synflops,$(TOP_MACROCOMPILER_MODE)),,--repl-seq-mem --repl-seq-mem-file=$(MFC_SMEMS_CONF))
+
 $(SFC_MFC_TARGETS) &: private TMP_DIR := $(shell mktemp -d -t cy-XXXXXXXX)
 $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) $(MFC_LOWERING_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
@@ -256,12 +258,14 @@ $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_F
 		--disable-annotation-unknown \
 		--mlir-timing \
 		--lowering-options=$(shell cat $(MFC_LOWERING_OPTIONS)) \
-		--repl-seq-mem \
-		--repl-seq-mem-file=$(MFC_SMEMS_CONF) \
+		$(REPL_SEQ_MEM_OPTIONS) \
 		--annotation-file=$(SFC_ANNO_FILE) \
 		--split-verilog \
 		-o $(GEN_COLLATERAL_DIR) \
 		$(SFC_FIRRTL_FILE)
+ifneq ($(findstring --mode synflops,$(TOP_MACROCOMPILER_MODE)),)
+	echo >$(MFC_SMEMS_CONF)
+endif
 	-mv $(SFC_SMEMS_CONF) $(MFC_SMEMS_CONF) 2> /dev/null
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 	touch $(MFC_BB_MODS_FILELIST) # if there are no BB's then the file might not be generated, instead always generate it
