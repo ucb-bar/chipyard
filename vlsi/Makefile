@@ -112,8 +112,10 @@ $(SRAM_CONF): $(SRAM_GENERATOR_CONF)
 #########################################################################################
 SYN_CONF = $(OBJ_DIR)/inputs.yml
 GENERATED_CONFS = $(SYN_CONF)
+ifeq ($(findstring --mode synflops,$(TOP_MACROCOMPILER_MODE)),)
 ifeq ($(CUSTOM_VLOG), )
 	GENERATED_CONFS += $(SRAM_CONF)
+endif
 endif
 
 $(SYN_CONF): $(VLSI_RTL)
