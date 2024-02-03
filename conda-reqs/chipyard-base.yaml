@@ -1,0 +1,35 @@
+channels:
+    - ucb-bar
+    - conda-forge
+    - litex-hub
+    - nodefaults
+
+platforms:
+    - linux-64
+
+dependencies:
+    # https://conda-forge.org/feedstock-outputs/
+    #   filterable list of all conda-forge packages
+    # https://conda-forge.org/#contribute
+    #   instructions on adding a recipe
+    # https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/pkg-specs.html#package-match-specifications
+    #   documentation on package_spec syntax for constraining versions
+    - gcc<12
+    - gxx<12
+    - sysroot_linux-64=2.17 # needed to match pre-built CI XRT glibc version
+    - conda-gcc-specs
+    - binutils
+
+    # misc
+    - autoconf
+    - coreutils
+    - jq
+    - pip
+    - make
+    - git
+
+    - sbt
+    - openjdk=20
+    - dtc
+    - verilator==5.020
+    - conda-lock=1.4

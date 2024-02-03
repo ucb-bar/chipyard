@@ -6,7 +6,6 @@
 package chipyard
 
 import chisel3._
-import chisel3.internal.sourceinfo.{SourceInfo}
 
 import freechips.rocketchip.prci._
 import org.chipsalliance.cde.config.{Field, Parameters}

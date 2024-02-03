@@ -1,10 +1,10 @@
-[submodule "rocket-chip"]
+[submodule "generators/rocket-chip"]
 	path = generators/rocket-chip
-	url = https://github.com/hansungk/rocket-chip.git
-[submodule "testchipip"]
+	url = https://github.com/chipsalliance/rocket-chip.git
+[submodule "generators/testchipip"]
 	path = generators/testchipip
 	url = https://github.com/richardyrh/testchipip.git
-[submodule "barstools"]
+[submodule "tools/barstools"]
 	path = tools/barstools
 	url = https://github.com/ucb-bar/barstools.git
 [submodule "tools/torture"]
@@ -148,9 +148,6 @@
 [submodule "generators/rocket-chip-inclusive-cache"]
 	path = generators/rocket-chip-inclusive-cache
 	url = https://github.com/chipsalliance/rocket-chip-inclusive-cache.git
-[submodule "generators/rocket-gpu"]
-	path = generators/rocket-gpu
-	url = git@github.com:hansungk/rocket-gpu.git
 [submodule "generators/radiance"]
 	path = generators/radiance
-	url = git@github.com:hansungk/radiance.git
+	url = https://github.com/ucb-bar/radiance.git

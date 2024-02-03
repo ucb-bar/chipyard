@@ -83,7 +83,7 @@ jobs:
           eval "$(conda shell.bash hook)"
           mkdir ${{ env.JAVA_TMP_DIR }}
           export MAKEFLAGS="-j32"
-          ./build-setup.sh -f -v
+          ./build-setup.sh -v
 
   run-cfg-finder:
     name: run-cfg-finder

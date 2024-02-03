@@ -96,3 +96,7 @@ class ClusteredRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithCluster(1) ++
   new freechips.rocketchip.subsystem.WithCluster(0) ++
   new chipyard.config.AbstractConfig)
+
+class FastRTLSimRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new chipyard.RocketConfig)
