@@ -100,8 +100,8 @@ $(SMEMS_HAMMER): $(TOP_SMEMS_FILE)
 
 $(SRAM_GENERATOR_CONF): $(SMEMS_HAMMER)
 	mkdir -p $(dir $@)
-	echo "vlsi.inputs.sram_parameters: '$(SMEMS_HAMMER)'" >> $@
-	echo "vlsi.inputs.sram_parameters_meta: [\"transclude\", \"json2list\"]">> $@
+	echo "vlsi.inputs.sram_parameters: '$(SMEMS_HAMMER)'" > $@
+	echo "vlsi.inputs.sram_parameters_meta: [\"transclude\", \"json2list\"]" >> $@
 
 $(SRAM_CONF): $(SRAM_GENERATOR_CONF)
 	cd $(vlsi_dir) && $(HAMMER_EXEC) -e $(ENV_YML) $(foreach x,$(INPUT_CONFS) $(SRAM_GENERATOR_CONF), -p $(x)) --obj_dir $(build_dir) sram_generator

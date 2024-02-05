@@ -198,25 +198,3 @@ bringup design).
     :language: scala
     :start-after: DOC include start: TetheredChipLikeRocketConfig
     :end-before: DOC include end: TetheredChipLikeRocketConfig
-
-Softcore-driven Bringup Setup of the Example Test Chip after Tapeout
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. warning::
-   Bringing up test chips with a FPGA softcore  as described here is discouraged.
-   An alternative approach using the FPGA to "bridge" between a host computer and the test chip is the preferred approach.
-
-Assuming this example test chip is taped out and now ready to be tested, we can communicate with the chip using this serial-link.
-For example, a common test setup used at Berkeley to evaluate Chipyard-based test-chips includes an FPGA running a RISC-V soft-core that is able to speak to the DUT (over an FMC).
-This RISC-V soft-core would serve as the host of the test that will run on the DUT.
-This is done by the RISC-V soft-core running FESVR, sending TSI commands to a ``TSIToTileLink`` / ``TLSerdesser`` programmed on the FPGA.
-Once the commands are converted to serialized TileLink, then they can be sent over some medium to the DUT
-(like an FMC cable or a set of wires connecting FPGA outputs to the DUT board).
-Similar to simulation, if the chip requests offchip memory, it can then send the transaction back over the serial-link.
-Then the request can be serviced by the FPGA DRAM.
-The following image shows this flow:
-
-.. image:: ../_static/images/chip-bringup.png
-
-In fact, this exact type of bringup setup is what the following section discusses:
-:ref:_legacy-vcu118-bringup.
