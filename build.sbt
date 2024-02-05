@@ -254,7 +254,7 @@ lazy val caliptra_aes = (project in file("generators/caliptra-aes-acc"))
   .settings(commonSettings)
 
 lazy val rerocc = (project in file("generators/rerocc"))
-  .dependsOn(rocketchip)
+  .dependsOn(rocketchip, constellation, boom)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
