@@ -47,6 +47,9 @@ dependencies:
     - findutils
     - lzop
 
+    # dpi module
+    - rust
+
     - bash-completion
     - ca-certificates
     - mosh
