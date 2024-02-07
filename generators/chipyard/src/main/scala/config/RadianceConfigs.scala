@@ -87,10 +87,12 @@ class RadianceNoROMConfig extends Config(
 
 class RadianceFuzzerConfig extends Config(
   new radiance.subsystem.WithFuzzerCores(1, useVxCache = false) ++
-  new radiance.subsystem.WithCoalescer(nNewSrcIds = 4, enable = true) ++
-  new radiance.subsystem.WithSimtLanes(nLanes = 16, nSrcIds = 4) ++
+  new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
+  new radiance.subsystem.WithSimtLanes(nLanes = 4, nSrcIds = 4) ++
+  new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
+  new chipyard.harness.WithCeaseSuccess ++
+  new chipyard.iobinders.WithCeasePunchThrough ++
   new AbstractConfig)
-
 
 class RadianceOldCacheConfig extends Config(
   new radiance.subsystem.WithRadianceCores(1, useVxCache = true) ++
