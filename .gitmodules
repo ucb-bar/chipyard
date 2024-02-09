@@ -130,3 +130,6 @@
 [submodule "generators/bar-fetchers"]
 	path = generators/bar-fetchers
 	url = https://github.com/ucb-bar/bar-fetchers.git
+[submodule "generators/lpddr-generator"]
+	path = generators/lpddr-generator
+	url = git@github.com:kenhoberkeley/lpddr-generator.git
