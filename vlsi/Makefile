@@ -20,6 +20,7 @@ include $(base_dir)/variables.mk
 #########################################################################################
 sim_name           ?= vcs # needed for GenerateSimFiles, but is unused
 tech_name          ?= asap7
+vlsi_mode          ?= standard
 tech_dir           ?= $(if $(filter $(tech_name),sky130 asap7 nangate45),\
                         $(shell python3 -c "import os, hammer.technology.$(tech_name);\
 						print(os.path.dirname(hammer.technology.$(tech_name).__file__))"),\
@@ -35,11 +36,15 @@ else
 endif
 
 ENV_YML            ?= $(vlsi_dir)/env.yml
-TECH_CONF          ?= example-$(tech_name).yml
+TECH_CONF          ?= example-$(tech_name)\
+                        $(if $(filter $(vlsi_mode),tapeout),\
+			-tapeout,).yml
 TOOLS_CONF         ?= example-tools.yml
 INPUT_CONFS        ?= $(TOOLS_CONF) $(TECH_CONF)
 HAMMER_EXEC        ?= $(if $(filter $(tech_name),sky130),\
-                        ./example-vlsi-sky130,\
+                        $(if $(filter $(vlsi_mode),tapeout),\
+			  ./example-vlsi-sky130-tapeout,\
+			  ./example-vlsi-sky130),\
                         ./example-vlsi)
 VLSI_TOP           ?= $(TOP)
 VLSI_MODEL_DUT_NAME ?= chiptop0

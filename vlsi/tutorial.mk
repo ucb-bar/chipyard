@@ -1,12 +1,13 @@
 #########################################################################################
 # makefile variables for Hammer tutorials
 #########################################################################################
-tutorial ?= none
+tutorial ?= sky130-commercial-tapeout
 EXTRA_CONFS ?=
 
 # TODO: eventually have asap7 commercial/openroad tutorial flavors
 ifeq ($(tutorial),asap7)
     tech_name         ?= asap7
+    vlsi_mode         ?= standard
     CONFIG            ?= TinyRocketConfig
     TOOLS_CONF        ?= example-tools.yml
     TECH_CONF         ?= example-asap7.yml
@@ -17,6 +18,20 @@ endif
 
 ifeq ($(tutorial),sky130-commercial)
     tech_name         ?= sky130
+    vlsi_mode         ?= standard
+    CONFIG            ?= TinyRocketConfig
+    TOOLS_CONF        ?= example-tools.yml
+    TECH_CONF         ?= example-sky130.yml
+    DESIGN_CONFS      ?= example-designs/sky130-commercial.yml \
+                        $(if $(filter $(VLSI_TOP),Rocket), \
+                            example-designs/sky130-rocket.yml, )
+    VLSI_OBJ_DIR      ?= build-sky130-commercial
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
+endif
+
+ifeq ($(tutorial),sky130-commercial-tapeout)
+    tech_name         ?= sky130
+    vlsi_mode         ?= tapeout
     CONFIG            ?= TinyRocketConfig
     TOOLS_CONF        ?= example-tools.yml
     TECH_CONF         ?= example-sky130.yml
@@ -29,6 +44,7 @@ endif
 
 ifeq ($(tutorial),sky130-openroad)
     tech_name         ?= sky130
+    vlsi_mode         ?= standard
     CONFIG            ?= TinyRocketConfig
     TOOLS_CONF        ?= example-openroad.yml
     TECH_CONF         ?= example-sky130.yml

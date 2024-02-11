@@ -1,102 +1,61 @@
-![CHIPYARD](https://github.com/ucb-bar/chipyard/raw/main/docs/_static/images/chipyard-logo-full.png)
+# SKY 130 Chipyard
 
-# Chipyard Framework [![Test](https://github.com/ucb-bar/chipyard/actions/workflows/chipyard-run-tests.yml/badge.svg)](https://github.com/ucb-bar/chipyard/actions)
+A SKY 130 tapeout harness built with [Chipyard](https://github.com/ucb-bar/chipyard).
 
-## Quick Links
+## BWRC Setup
 
-* **Stable Documentation**: https://chipyard.readthedocs.io/
-* **User Question Forum**: https://groups.google.com/forum/#!forum/chipyard
-* **Bugs and Feature Requests**: https://github.com/ucb-bar/chipyard/issues
-
-## Using Chipyard
-
-To get started using Chipyard, see the stable documentation on the Chipyard documentation site: https://chipyard.readthedocs.io/
-
-## What is Chipyard
-
-Chipyard is an open source framework for agile development of Chisel-based systems-on-chip.
-It will allow you to leverage the Chisel HDL, Rocket Chip SoC generator, and other [Berkeley][berkeley] projects to produce a [RISC-V][riscv] SoC with everything from MMIO-mapped peripherals to custom accelerators.
-Chipyard contains processor cores ([Rocket][rocket-chip], [BOOM][boom], [CVA6 (Ariane)][cva6]), accelerators ([Hwacha][hwacha], [Gemmini][gemmini], [NVDLA][nvdla]), memory systems, and additional peripherals and tooling to help create a full featured SoC.
-Chipyard supports multiple concurrent flows of agile hardware development, including software RTL simulation, FPGA-accelerated simulation ([FireSim][firesim]), automated VLSI flows ([Hammer][hammer]), and software workload generation for bare-metal and Linux-based systems ([FireMarshal][firemarshal]).
-Chipyard is actively developed in the [Berkeley Architecture Research Group][ucb-bar] in the [Electrical Engineering and Computer Sciences Department][eecs] at the [University of California, Berkeley][berkeley].
-
-## Resources
-
-* Chipyard Stable Documentation: https://chipyard.readthedocs.io/
-* Chipyard (x FireSim) Tutorial: https://fires.im/tutorial-recent/
-* Chipyard Basics slides: https://fires.im/asplos23-slides-pdf/02_chipyard_basics.pdf
-
-## Need help?
-
-* Join the Chipyard Mailing List: https://groups.google.com/forum/#!forum/chipyard
-* If you find a bug or would like propose a feature, post an issue on this repo: https://github.com/ucb-bar/chipyard/issues
-
-## Contributing
-
-* See [CONTRIBUTING.md](/CONTRIBUTING.md)
-
-## Attribution and Chipyard-related Publications
-
-If used for research, please cite Chipyard by the following publication:
+Install `conda` (say "yes" and press enter when prompted):
 
 ```
-@article{chipyard,
-  author={Amid, Alon and Biancolin, David and Gonzalez, Abraham and Grubb, Daniel and Karandikar, Sagar and Liew, Harrison and Magyar,   Albert and Mao, Howard and Ou, Albert and Pemberton, Nathan and Rigge, Paul and Schmidt, Colin and Wright, John and Zhao, Jerry and Shao, Yakun Sophia and Asanovi\'{c}, Krste and Nikoli\'{c}, Borivoje},
-  journal={IEEE Micro},
-  title={Chipyard: Integrated Design, Simulation, and Implementation Framework for Custom SoCs},
-  year={2020},
-  volume={40},
-  number={4},
-  pages={10-21},
-  doi={10.1109/MM.2020.2996616},
-  ISSN={1937-4143},
-}
+mkdir -m 0700 -p /tools/C/$USER
+cd /tools/C/$USER
+wget -O Miniforge3.sh \
+"https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+bash Miniforge3.sh -p "/tools/C/${USER}/conda"
 ```
 
-* **Chipyard**
-    * A. Amid, et al. *IEEE Micro'20* [PDF](https://ieeexplore.ieee.org/document/9099108).
-    * A. Amid, et al. *DAC'20* [PDF](https://ieeexplore.ieee.org/document/9218756).
-    * A. Amid, et al. *ISCAS'21* [PDF](https://ieeexplore.ieee.org/abstract/document/9401515).
+Then, run Chipyard setup from the root directory of this repo:
 
-These additional publications cover many of the internal components used in Chipyard. However, for the most up-to-date details, users should refer to the Chipyard docs.
+```
+source ~/.bashrc
+mamba install -n base conda-lock=1.4
+mamba activate base
+./build-setup.sh riscv-tools -s 6 -s 7 -s 8 -s 9 -s 10 --force
+./scripts/init-vlsi sky130
+```
 
-* **Generators**
-    * **Rocket Chip**: K. Asanovic, et al., *UCB EECS TR*. [PDF](http://www2.eecs.berkeley.edu/Pubs/TechRpts/2016/EECS-2016-17.pdf).
-    * **BOOM**: C. Celio, et al., *Hot Chips 30*. [PDF](https://old.hotchips.org/hc30/1conf/1.03_Berkeley_BROOM_HC30.Berkeley.Celio.v02.pdf).
-      * **SonicBOOM (BOOMv3)**: J. Zhao, et al., *CARRV'20*. [PDF](https://carrv.github.io/2020/papers/CARRV2020_paper_15_Zhao.pdf).
-      * **COBRA (BOOM Branch Prediction)**: J. Zhao, et al., *ISPASS'21*. [PDF](https://ieeexplore.ieee.org/document/9408173).
-    * **Hwacha**: Y. Lee, et al., *ESSCIRC'14*. [PDF](http://hwacha.org/papers/riscv-esscirc2014.pdf).
-    * **Gemmini**: H. Genc, et al., *DAC'21*. [PDF](https://arxiv.org/pdf/1911.09925).
-* **Sims**
-    * **FireSim**: S. Karandikar, et al., *ISCA'18*. [PDF](https://sagark.org/assets/pubs/firesim-isca2018.pdf).
-        * **FireSim Micro Top Picks**: S. Karandikar, et al., *IEEE Micro, Top Picks 2018*. [PDF](https://sagark.org/assets/pubs/firesim-micro-top-picks2018.pdf).
-        * **FASED**: D. Biancolin, et al., *FPGA'19*. [PDF](https://people.eecs.berkeley.edu/~biancolin/papers/fased-fpga19.pdf).
-        * **Golden Gate**: A. Magyar, et al., *ICCAD'19*. [PDF](https://davidbiancolin.github.io/papers/goldengate-iccad19.pdf).
-        * **FirePerf**: S. Karandikar, et al., *ASPLOS'20*. [PDF](https://sagark.org/assets/pubs/fireperf-asplos2020.pdf).
-        * **FireSim ISCA@50 Retrospective**: S. Karandikar, et al., *ISCA@50 Retrospective: 1996-2020*. [PDF](https://sites.coecis.cornell.edu/isca50retrospective/files/2023/06/Karandikar_2018_FireSim.pdf)
-* **Tools**
-    * **Chisel**: J. Bachrach, et al., *DAC'12*. [PDF](https://people.eecs.berkeley.edu/~krste/papers/chisel-dac2012.pdf).
-    * **FIRRTL**: A. Izraelevitz, et al., *ICCAD'17*. [PDF](https://ieeexplore.ieee.org/document/8203780).
-    * **Chisel DSP**: A. Wang, et al., *DAC'18*. [PDF](https://ieeexplore.ieee.org/document/8465790).
-    * **FireMarshal**: N. Pemberton, et al., *ISPASS'21*. [PDF](https://ieeexplore.ieee.org/document/9408192).
-* **VLSI**
-    * **Hammer**: E. Wang, et al., *ISQED'20*. [PDF](https://www.isqed.org/English/Archives/2020/Technical_Sessions/113.html).
-    * **Hammer**: H. Liew, et al., *DAC'22*. [PDF](https://dl.acm.org/doi/abs/10.1145/3489517.3530672).
+Add the following to the generated `env.sh` file:
 
-## Acknowledgements
+```
+export PATH=/tools/C/rohankumar/circt/build/bin
+```
 
-This work is supported by the NSF CCRI ENS Chipyard Award #2016662.
+To run synthesis, P&R, DRC, and LVS on a `TinyRocket` in SKY 130:
 
-[hwacha]:https://www2.eecs.berkeley.edu/Pubs/TechRpts/2015/EECS-2015-262.pdf
-[hammer]:https://github.com/ucb-bar/hammer
-[firesim]:https://fires.im
-[ucb-bar]: http://bar.eecs.berkeley.edu
-[eecs]: https://eecs.berkeley.edu
-[berkeley]: https://berkeley.edu
-[riscv]: https://riscv.org/
-[rocket-chip]: https://github.com/freechipsproject/rocket-chip
-[boom]: https://github.com/riscv-boom/riscv-boom
-[firemarshal]: https://github.com/firesim/FireMarshal/
-[cva6]: https://github.com/openhwgroup/cva6/
-[gemmini]: https://github.com/ucb-bar/gemmini
-[nvdla]: http://nvdla.org/
+```
+make syn
+make par
+make drc
+make lvs
+```
+
+Make sure you can view the results and that they look correct (DRC and LVS should be clean).
+
+## Development
+
+This harness is currently under development. It is based on the [STAC tapeout](https://github.com/ucb-bar/stac-top/tree/stac-master) 
+from June 2023, but aims to be more general-purpose and simple.
+
+Relevant files from STAC:
+- SKY 130 Chipyard additions 
+    ([`stac-top/generators/chipyard/src/main/scala/sky130`](https://github.com/ucb-bar/stac-top/tree/stac-master/generators/chipyard/src/main/scala/sky130))
+- Hammer input files ([`stac-top/vlsi/design-stac.yml`](https://github.com/ucb-bar/stac-top/blob/stac-master/vlsi/design-stac.yml), [`stac-top/vlsi/tech-sky130.yml`](https://github.com/ucb-bar/stac-top/blob/stac-master/vlsi/tech-sky130.yml))
+- Hammer CLI driver ([`stac-top/vlsi/hammer-driver`](https://github.com/ucb-bar/stac-top/blob/stac-master/vlsi/hammer-driver))
+- IO file generator ([`stac-top/vlsi/scripts/gen-io-file.py`](https://github.com/ucb-bar/stac-top/blob/stac-master/vlsi/scripts/gen-io-file.py))
+
+Files in this harness that will need to be modified/added:
+- SKY 130 Chipyard additions 
+    ([`sky130-chipyard/generators/chipyard/src/main/scala/tech/sky130`](https://github.com/ucb-bar/sky130-chipyard/blob/main/generators/chipyard/src/main/scala/tech/sky130))
+- Hammer input file ([`sky130-chipyard/vlsi/example-sky130-tapeout.yml`](https://github.com/ucb-bar/sky130-chipyard/blob/main/vlsi/example-sky130-tapeout.yml))
+- Hammer CLI driver ([`sky130-chipyard/vlsi/example-vlsi-sky130-tapeout`](https://github.com/ucb-bar/sky130-chipyard/blob/main/vlsi/example-vlsi-sky130-tapeout))
+
