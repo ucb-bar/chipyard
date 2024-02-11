@@ -83,6 +83,7 @@ class AbstractConfig extends Config(
   //   Set up Debug/Bringup/Testing Features
   // ================================================
   // JTAG
+  new freechips.rocketchip.subsystem.WithDebugSBA ++                /** enable the SBA (system-bus-access) feature of the debug module */
   new chipyard.config.WithDebugModuleAbstractDataWords(8) ++        /** increase debug module data word capacity */
   new freechips.rocketchip.subsystem.WithJtagDTM ++                 /** set the debug module to expose a JTAG port */
 
