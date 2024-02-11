@@ -26,6 +26,7 @@ HELP_PROJECT_VARIABLES = \
 HELP_SIMULATION_VARIABLES = \
 "   BINARY                 = riscv elf binary that the simulator will run when using the run-binary* targets" \
 "   BINARIES               = list of riscv elf binary that the simulator will run when using the run-binaries* targets" \
+"   BINARIES_DIR           = directory of riscv elf binaries that the simulator will run when using the run-binaries* targets" \
 "   LOADMEM                = riscv elf binary that should be loaded directly into simulated DRAM. LOADMEM=1 will load the BINARY elf" \
 "   LOADARCH               = path to a architectural checkpoint directory that should end in .loadarch/, for restoring from a checkpoint" \
 "   VERBOSE_FLAGS          = flags used when doing verbose simulation [$(VERBOSE_FLAGS)]" \
@@ -286,6 +287,10 @@ override BINARY = $(addsuffix /mem.elf,$(LOADARCH))
 override BINARIES = $(addsuffix /mem.elf,$(LOADARCH))
 override get_out_name = $(shell basename $(dir $(1)))
 override LOADMEM = 1
+endif
+
+ifneq ($(BINARIES_DIR),)
+override BINARIES = $(shell find -L $(BINARIES_DIR) -type f -print 2> /dev/null)
 endif
 
 #########################################################################################

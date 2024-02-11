@@ -69,6 +69,8 @@ cd "$RDIR"
         # path to temporarily exclude during the recursive update
         for name in \
             toolchains/*-tools/* \
+            generators/cva6 \
+            generators/nvdla \
             toolchains/libgloss \
             generators/sha3 \
             generators/gemmini \
@@ -100,6 +102,20 @@ cd "$RDIR"
 (
     # Non-recursive clone to exclude riscv-linux
     git submodule update --init generators/sha3
+
+    # Non-recursive clone to exclude cva6 submods
+    git submodule update --init generators/cva6
+    git -C generators/cva6 submodule update --init src/main/resources/cva6/vsrc/cva6
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/axi
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/axi_riscv_atomics
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/common_cells
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/fpga-support
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/riscv-dbg
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/register_interface
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init --recursive src/fpu
+    # Non-recursive clone to exclude nvdla submods
+    git submodule update --init generators/nvdla
+    git -C generators/nvdla submodule update --init src/main/resources/hw
 
     # Non-recursive clone to exclude gemmini-software
     git submodule update --init generators/gemmini

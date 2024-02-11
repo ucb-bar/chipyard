@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Update CIRCT
-        uses: circt/update-circt@v1.0.0
+        uses: circt/update-circt@v1
         with:
           user: 'bartender'
           email: 'firesimchipyard@gmail.com'
