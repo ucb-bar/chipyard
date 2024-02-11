@@ -31,6 +31,7 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithResetFromHarness ++                     /** reset controlled by harness */
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ /** generate clocks in harness with unsynthesizable ClockSourceAtFreqMHz */
 
+
   // ================================================
   //   Set up I/O cells + punch I/Os in ChipTop
   // ================================================
@@ -58,6 +59,7 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithUARTTSIPunchthrough ++
   new chipyard.iobinders.WithNMITiedOff ++
 
+
   // ================================================
   //   Set up External Memory and IO Devices
   // ================================================
@@ -75,6 +77,7 @@ class AbstractConfig extends Config(
   // MMIO device section
   new chipyard.config.WithUART ++                                  /** add a UART */
 
+
   // ================================================
   //   Set up Debug/Bringup/Testing Features
   // ================================================
@@ -86,16 +89,19 @@ class AbstractConfig extends Config(
   new testchipip.boot.WithCustomBootPin ++                          /** add a custom-boot-pin to support pin-driven boot address */
   new testchipip.boot.WithBootAddrReg ++                            /** add a boot-addr-reg for configurable boot address */
 
+
   // ================================================
   //   Set up Interrupts
   // ================================================
   // CLINT and PLIC related settings goes here
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++    /** no external interrupts */
 
+
   // ================================================
   //   Set up Tiles
   // ================================================
   // tile-local settings goes here
+
 
   // ================================================
   //   Set up Memory system
@@ -107,10 +113,11 @@ class AbstractConfig extends Config(
                                         size = 64 * 1024) ++
 
   // Coherency settings
-  new freechips.rocketchip.subsystem.WithInclusiveCache ++          /** use Sifive LLC cache as root of coherence*/
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++          /** use Sifive LLC cache as root of coherence */
 
   // Bus/interconnect settings
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++     /** hierarchical buses including sbus/mbus/pbus/fbus/cbus/l2 */
+
 
   // ================================================
   //   Set up power, reset and clocking
@@ -140,6 +147,7 @@ class AbstractConfig extends Config(
 
   // power
 
+  
   // ==================================
   //   Base Settings
   // ==================================
