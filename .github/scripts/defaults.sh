@@ -29,11 +29,11 @@ REMOTE_COURSIER_CACHE=$REMOTE_WORK_DIR/.coursier-cache
 # key value store to get the build groups
 declare -A grouping
 grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad chipyard-spike chipyard-clone chipyard-prefetchers chipyard-shuttle"
-grouping["group-peripherals"]="chipyard-dmirocket chipyard-dmiboom chipyard-spiflashwrite chipyard-mmios chipyard-nocores chipyard-manyperipherals chipyard-chiplike chipyard-tethered"
+grouping["group-peripherals"]="chipyard-dmirocket chipyard-dmiboom chipyard-spiflashwrite chipyard-mmios chipyard-nocores chipyard-manyperipherals chipyard-chiplike chipyard-tethered chipyard-symmetric"
 grouping["group-accels"]="chipyard-mempress chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-manymmioaccels chipyard-nvdla chipyard-aes256ecb"
 grouping["group-constellation"]="chipyard-constellation"
 grouping["group-tracegen"]="tracegen tracegen-boom"
-grouping["group-other"]="icenet testchipip constellation rocketchip-amba rocketchip-tlsimple rocketchip-tlwidth rocketchip-tlxbar"
+grouping["group-other"]="icenet testchipip constellation rocketchip-amba rocketchip-tlsimple rocketchip-tlwidth rocketchip-tlxbar chipyard-clusters"
 grouping["group-fpga"]="arty35t arty100t nexysvideo vc707 vcu118"
 
 # key value store to get the build strings
@@ -58,6 +58,7 @@ mapping["chipyard-spiflashwrite"]=" CONFIG=SmallSPIFlashRocketConfig EXTRA_SIM_F
 mapping["chipyard-manyperipherals"]=" CONFIG=ManyPeripheralsRocketConfig EXTRA_SIM_FLAGS='+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img'"
 mapping["chipyard-chiplike"]=" CONFIG=ChipLikeRocketConfig MODEL=FlatTestHarness MODEL_PACKAGE=chipyard.example verilog"
 mapping["chipyard-tethered"]=" CONFIG=VerilatorCITetheredChipLikeRocketConfig"
+mapping["chipyard-symmetric"]=" CONFIG=MultiSimSymmetricChipletRocketConfig"
 mapping["chipyard-cloneboom"]=" CONFIG=Cloned64MegaBoomConfig verilog"
 mapping["chipyard-nocores"]=" CONFIG=NoCoresConfig verilog"
 mapping["tracegen"]=" CONFIG=NonBlockingTraceGenL2Config"
@@ -67,6 +68,7 @@ mapping["chipyard-shuttle"]=" CONFIG=ShuttleConfig"
 mapping["chipyard-multiclock-rocket"]=" CONFIG=MulticlockRocketConfig"
 mapping["chipyard-nomem-scratchpad"]=" CONFIG=MMIOScratchpadOnlyRocketConfig"
 mapping["chipyard-constellation"]=" CONFIG=SharedNoCConfig"
+mapping["chipyard-clusters"]=" CONFIG=ClusteredRocketConfig verilog"
 mapping["chipyard-aes256ecb"]=" CONFIG=AES256ECBRocketConfig"
 
 mapping["constellation"]=" SUB_PROJECT=constellation"

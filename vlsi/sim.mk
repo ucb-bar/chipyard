@@ -64,7 +64,7 @@ endif
 	echo "  execution_flags_meta: 'append'" >> $@
 	echo "  saif.mode: 'time'" >> $@
 	echo "  saif.start_time: '0ns'" >> $@
-	echo "  saif.end_time: '`bc <<< $(timeout_cycles)*$(CLOCK_PERIOD)`ns'" >> $@
+	echo "  saif.end_time: '`bc <<< $(TIMEOUT_CYCLES)*$(CLOCK_PERIOD)`ns'" >> $@
 ifndef USE_VPD
 	echo "  options:" >> $@
 	echo '    - "-kdb"' >> $@

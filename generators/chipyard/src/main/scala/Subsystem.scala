@@ -6,7 +6,6 @@
 package chipyard
 
 import chisel3._
-import chisel3.internal.sourceinfo.{SourceInfo}
 
 import freechips.rocketchip.prci._
 import org.chipsalliance.cde.config.{Field, Parameters}
@@ -71,18 +70,24 @@ trait CanHaveChosenInDTS { this: BaseSubsystem =>
 }
 
 class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
-  with HasTiles
-  with HasPeripheryDebug
-  with CanHaveHTIF
-  with CanHaveChosenInDTS
+    with InstantiatesHierarchicalElements
+    with HasTileNotificationSinks
+    with HasTileInputConstants
+    with CanHavePeripheryCLINT
+    with CanHavePeripheryPLIC
+    with HasPeripheryDebug
+    with HasHierarchicalElementsRootContext
+    with HasHierarchicalElements
+    with CanHaveHTIF
+    with CanHaveChosenInDTS
 {
-  def coreMonitorBundles = tiles.map {
+  def coreMonitorBundles = totalTiles.values.map {
     case r: RocketTile => r.module.core.rocketImpl.coreMonitorBundle
     case b: BoomTile => b.module.core.coreMonitorBundle
   }.toList
 
   // No-tile configs have to be handled specially.
-  if (tiles.size == 0) {
+  if (totalTiles.size == 0) {
     // no PLIC, so sink interrupts to nowhere
     require(!p(PLICKey).isDefined)
     val intNexus = IntNexusNode(sourceFn = x => x.head, sinkFn = x => x.head)
@@ -90,16 +95,12 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
     intSink := intNexus :=* ibus.toPLIC
 
     // avoids a bug when there are no interrupt sources
-    ibus.fromAsync := NullIntSource()
+    ibus { ibus.fromAsync := NullIntSource() }
 
     // Need to have at least 1 driver to the tile notification sinks
     tileHaltXbarNode := IntSourceNode(IntSourcePortSimple())
     tileWFIXbarNode := IntSourceNode(IntSourcePortSimple())
     tileCeaseXbarNode := IntSourceNode(IntSourcePortSimple())
-
-    // Sink reset vectors to nowhere
-    val resetVectorSink = BundleBridgeSink[UInt](Some(() => UInt(28.W)))
-    resetVectorSink := tileResetVectorNode
   }
 
   // Relying on [[TLBusWrapperConnection]].driveClockFromMaster for
@@ -107,7 +108,7 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
   // ClockGroup. This makes it impossible to determine which clocks are driven
   // by which bus based on the member names, which is problematic when there is
   // a rational crossing between two buses. Instead, provide all bus clocks
-  // directly from the asyncClockGroupsNode in the subsystem to ensure bus
+  // directly from the allClockGroupsNode in the subsystem to ensure bus
   // names are always preserved in the top-level clock names.
   //
   // For example, using a RationalCrossing between the Sbus and Cbus, and
@@ -116,12 +117,12 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
   // Conversly, if an async crossing is used, they instead receive names of the
   // form "subsystem_cbus_[0-9]*". The assignment below provides the latter names in all cases.
   Seq(PBUS, FBUS, MBUS, CBUS).foreach { loc =>
-    tlBusWrapperLocationMap.lift(loc).foreach { _.clockGroupNode := asyncClockGroupsNode }
+    tlBusWrapperLocationMap.lift(loc).foreach { _.clockGroupNode := allClockGroupsNode }
   }
   override lazy val module = new ChipyardSubsystemModuleImp(this)
 }
 
 class ChipyardSubsystemModuleImp[+L <: ChipyardSubsystem](_outer: L) extends BaseSubsystemModuleImp(_outer)
-  with HasTilesModuleImp
+    with HasHierarchicalElementsRootContextModuleImp
 {
 }

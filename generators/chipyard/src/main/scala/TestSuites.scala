@@ -65,7 +65,7 @@ class TestSuiteHelper
   */
   def addGenericTestSuites(tiles: Seq[TileParams])(implicit p: Parameters) = {
     val xlen = p(XLen)
-    tiles.find(_.hartId == 0).map { tileParams =>
+    tiles.find(_.tileId == 0).map { tileParams =>
       val coreParams = tileParams.core
       val vm = coreParams.useVM
       val env = if (vm) List("p","v") else List("p")

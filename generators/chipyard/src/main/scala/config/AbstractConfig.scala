@@ -42,6 +42,7 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithGPIOCells ++
   new chipyard.iobinders.WithSPIFlashIOCells ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
+  new chipyard.iobinders.WithChipIdIOCells ++
   new chipyard.iobinders.WithCustomBootPin ++
   // The "punchthrough" IOBInders below don't generate IOCells, as these interfaces shouldn't really be mapped to ASIC IO
   // Instead, they directly pass through the DigitalTop ports to ports in the ChipTop
@@ -61,20 +62,18 @@ class AbstractConfig extends Config(
   //   Set up External Memory and IO Devices
   // ================================================
   // External memory section
-  new testchipip.serdes.WithSerialTL(Seq(                              /** add a serial-tilelink interface */
+  new testchipip.serdes.WithSerialTL(Seq(                           /** add a serial-tilelink interface */
     testchipip.serdes.SerialTLParams(
       client = Some(testchipip.serdes.SerialTLClientParams(idBits=4)), /** serial-tilelink interface will master the FBUS, and support 4 idBits */
-      width = 32                                                       /** serial-tilelink interface with 32 lanes */
+      phyParams = testchipip.serdes.ExternalSyncSerialParams(width=32) /** serial-tilelink interface with 32 lanes */
     )
   )) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++         /** Default 1 AXI-4 memory channels */
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++                 /** no top-level MMIO master port (overrides default set in rocketchip) */
   new freechips.rocketchip.subsystem.WithNoSlavePort ++                /** no top-level MMIO slave port (overrides default set in rocketchip) */
 
-
-
   // MMIO device section
-  new chipyard.config.WithUART ++                                      /** add a UART */
+  new chipyard.config.WithUART ++                                  /** add a UART */
 
   // ================================================
   //   Set up Debug/Bringup/Testing Features
@@ -118,13 +117,14 @@ class AbstractConfig extends Config(
   // ================================================
 
   // ChipTop clock IO/PLL/Divider/Mux settings
+  new chipyard.clocking.WithClockTapIOCells ++                      /** Default generate a clock tapio */
   new chipyard.clocking.WithPassthroughClockGenerator ++
 
   // DigitalTop-internal clocking settings
-  new freechips.rocketchip.subsystem.WithDontDriveBusClocksFromSBus ++ /** leave the bus clocks undriven by sbus */
-  new freechips.rocketchip.subsystem.WithClockGateModel ++             /** add default EICG_wrapper clock gate model */
-  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore",       /** create a "uncore" clock group tieing all the bus clocks together */
-    Seq("sbus", "mbus", "pbus", "fbus", "cbus", "obus", "implicit"),
+  new freechips.rocketchip.subsystem.WithDontDriveBusClocksFromSBus ++  /** leave the bus clocks undriven by sbus */
+  new freechips.rocketchip.subsystem.WithClockGateModel ++              /** add default EICG_wrapper clock gate model */
+  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore",        /** create a "uncore" clock group tieing all the bus clocks together */
+    Seq("sbus", "mbus", "pbus", "fbus", "cbus", "obus", "implicit", "clock_tap"), 
     Seq("tile"))) ++
 
   new chipyard.config.WithPeripheryBusFrequency(500.0) ++           /** Default 500 MHz pbus */
@@ -134,7 +134,7 @@ class AbstractConfig extends Config(
   new chipyard.config.WithFrontBusFrequency(500.0) ++               /** Default 500 MHz fbus */
   new chipyard.config.WithOffchipBusFrequency(500.0) ++             /** Default 500 MHz obus */
   new chipyard.config.WithInheritBusFrequencyAssignments ++         /** Unspecified clocks within a bus will receive the bus frequency if set */
-  new chipyard.config.WithNoSubsystemDrivenClocks ++                /** drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks */
+  new chipyard.config.WithNoSubsystemClockIO ++                     /** drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks */
 
   // reset
 

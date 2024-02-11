@@ -162,8 +162,7 @@ VERILATOR_NONCC_OPTS = \
 VERILATOR_CXXFLAGS = \
 	$(SIM_CXXFLAGS) \
 	$(RUNTIME_PROFILING_CFLAGS) \
-	-DVERILATOR \
-	-include $(build_dir)/$(long_name).plusArgs
+	-DVERILATOR
 
 VERILATOR_LDFLAGS = $(SIM_LDFLAGS)
 
@@ -194,13 +193,13 @@ model_mk_debug = $(model_dir_debug)/V$(TB).mk
 $(model_mk): $(sim_common_files) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir)
 	mkdir -p $(model_dir)
-	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim) -Mdir $(model_dir) -CFLAGS "-include $(model_header)"
+	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim) -Mdir $(model_dir)
 	touch $@
 
 $(model_mk_debug): $(sim_common_files) $(EXTRA_SIM_REQS)
 	rm -rf $(model_dir_debug)
 	mkdir -p $(model_dir_debug)
-	$(VERILATOR) $(VERILATOR_OPTS) +define+DEBUG $(EXTRA_SIM_SOURCES) -o $(sim_debug) $(TRACING_OPTS) -Mdir $(model_dir_debug) -CFLAGS "-include $(model_header_debug)"
+	$(VERILATOR) $(VERILATOR_OPTS) +define+DEBUG $(EXTRA_SIM_SOURCES) -o $(sim_debug) $(TRACING_OPTS) -Mdir $(model_dir_debug)
 	touch $@
 
 #########################################################################################

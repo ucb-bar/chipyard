@@ -18,7 +18,7 @@ import chipyard.{BuildSystem}
 
 // don't use FPGAShell's DesignKey
 class WithNoDesignKey extends Config((site, here, up) => {
-  case DesignKey => (p: Parameters) => new SimpleLazyModule()(p)
+  case DesignKey => (p: Parameters) => new SimpleLazyRawModule()(p)
 })
 
 // By default, this uses the on-board USB-UART for the TSI-over-UART link
@@ -58,5 +58,5 @@ class NoCoresArty100TConfig extends Config(
 class BringupArty100TConfig extends Config(
   new WithArty100TSerialTLToGPIO ++
   new WithArty100TTweaks(freqMHz = 50) ++
-  new testchipip.serdes.WithSerialTLClockDirection(provideClockFreqMHz = Some(50)) ++
+  new testchipip.serdes.WithSerialTLPHYParams(testchipip.serdes.InternalSyncSerialParams(freqMHz=50)) ++
   new chipyard.ChipBringupHostConfig)

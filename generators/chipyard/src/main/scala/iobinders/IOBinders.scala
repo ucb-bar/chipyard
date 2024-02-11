@@ -1,7 +1,8 @@
 package chipyard.iobinders
 
 import chisel3._
-import chisel3.experimental.{Analog, IO, DataMirror}
+import chisel3.reflect.DataMirror
+import chisel3.experimental.Analog
 
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.diplomacy._
@@ -26,9 +27,10 @@ import barstools.iocell.chisel._
 import testchipip.serdes.{CanHavePeripheryTLSerial, SerialTLKey}
 import testchipip.spi.{SPIChipIO}
 import testchipip.boot.{CanHavePeripheryCustomBootPin}
+import testchipip.soc.{CanHavePeripheryChipIdPin}
 import testchipip.util.{ClockedIO}
 import testchipip.iceblk.{CanHavePeripheryBlockDevice, BlockDeviceKey, BlockDeviceIO}
-import testchipip.cosim.{CanHaveTraceIOModuleImp, TraceOutputTop, SpikeCosimConfig}
+import testchipip.cosim.{CanHaveTraceIO, TraceOutputTop, SpikeCosimConfig}
 import testchipip.tsi.{CanHavePeripheryUARTTSI, UARTTSIIO}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 import chipyard.{CanHaveMasterTLMemPort, ChipyardSystem, ChipyardSystemModule}
@@ -284,7 +286,9 @@ class JTAGChipIO extends Bundle {
   val TDO = Output(Bool())
 }
 
-class WithDebugIOCells extends OverrideLazyIOBinder({
+// WARNING: Don't disable syncReset unless you are trying to
+// get around bugs in RTL simulators
+class WithDebugIOCells(syncReset: Boolean = true) extends OverrideLazyIOBinder({
   (system: HasPeripheryDebug) => {
     implicit val p = GetSystemParameters(system)
     val tlbus = system.asInstanceOf[BaseSubsystem].locateTLBusWrapper(p(ExportDebug).slaveWhere)
@@ -308,7 +312,7 @@ class WithDebugIOCells extends OverrideLazyIOBinder({
           d.disableDebug.foreach { d => d := false.B }
           // Drive JTAG on-chip IOs
           d.systemjtag.map { j =>
-            j.reset := ResetCatchAndSync(j.jtag.TCK, clockBundle.reset.asBool)
+            j.reset := (if (syncReset) ResetCatchAndSync(j.jtag.TCK, clockBundle.reset.asBool) else clockBundle.reset.asBool)
             j.mfr_id := p(JtagDTMKey).idcodeManufId.U(11.W)
             j.part_number := p(JtagDTMKey).idcodePartNum.U(16.W)
             j.version := p(JtagDTMKey).idcodeVersion.U(4.W)
@@ -350,6 +354,14 @@ class WithSerialTLIOCells extends OverrideIOBinder({
     }).unzip
     (ports.toSeq, cells.flatten.toSeq)
   }
+})
+
+class WithChipIdIOCells extends OverrideIOBinder({
+  (system: CanHavePeripheryChipIdPin) => system.chip_id_pin.map({ p =>
+    val sys = system.asInstanceOf[BaseSubsystem]
+    val (port, cells) = IOCell.generateIOFromSignal(p.getWrappedValue, s"chip_id", sys.p(IOCellKey), abstractResetAsAsync = true)
+    (Seq(ChipIdPort(() => port)), cells)
+  }).getOrElse(Nil, Nil)
 })
 
 class WithSerialTLPunchthrough extends OverrideIOBinder({
@@ -454,14 +466,14 @@ class WithTraceGenSuccessPunchthrough extends OverrideIOBinder({
   }
 })
 
-class WithTraceIOPunchthrough extends OverrideIOBinder({
-  (system: CanHaveTraceIOModuleImp) => {
+class WithTraceIOPunchthrough extends OverrideLazyIOBinder({
+  (system: CanHaveTraceIO) => InModuleBody {
     val ports: Option[TracePort] = system.traceIO.map { t =>
       val trace = IO(DataMirror.internal.chiselTypeClone[TraceOutputTop](t)).suggestName("trace")
       trace <> t
       val p = GetSystemParameters(system)
-      val chipyardSystem = system.asInstanceOf[ChipyardSystemModule[_]].outer.asInstanceOf[ChipyardSystem]
-      val tiles = chipyardSystem.tiles
+      val chipyardSystem = system.asInstanceOf[ChipyardSystem]
+      val tiles = chipyardSystem.totalTiles.values
       val cfg = SpikeCosimConfig(
         isa = tiles.headOption.map(_.isaDTS).getOrElse(""),
         vlen = tiles.headOption.map(_.tileParams.core.vLen).getOrElse(0),
@@ -510,8 +522,8 @@ class WithDontTouchPorts extends OverrideIOBinder({
 })
 
 class WithNMITiedOff extends ComposeIOBinder({
-  (system: HasTilesModuleImp) => {
-    system.nmi.flatten.foreach { nmi =>
+  (system: HasHierarchicalElementsRootContextModuleImp) => {
+    system.nmi.foreach { nmi =>
       nmi.rnmi := false.B
       nmi.rnmi_interrupt_vector := 0.U
       nmi.rnmi_exception_vector := 0.U

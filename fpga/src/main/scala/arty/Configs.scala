@@ -30,6 +30,7 @@ class WithArtyTweaks extends Config(
   new chipyard.config.WithFrontBusFrequency(32) ++
   new chipyard.config.WithControlBusFrequency(32) ++
   new chipyard.config.WithPeripheryBusFrequency(32) ++
+  new chipyard.config.WithControlBusFrequency(32) ++
   new testchipip.serdes.WithNoSerialTL ++
   new testchipip.soc.WithNoScratchpads
 )

@@ -57,7 +57,8 @@ HELP_COMMANDS += \
 "   firrtl                      = generate intermediate firrtl files from chisel elaboration" \
 "   run-tests                   = run all assembly and benchmark tests" \
 "   launch-sbt                  = start sbt terminal" \
-"   find-config-fragments       = list all config. fragments"
+"   find-config-fragments       = list all config. fragments" \
+"   check-submodule-status      = check that all submodules in generators/ have been initialized"
 
 #########################################################################################
 # include additional subproject make fragments
@@ -82,6 +83,8 @@ endif
 
 # Returns a list of files in directories $1 with *any* of the file extensions in $2
 lookup_srcs_by_multiple_type = $(foreach type,$(2),$(call lookup_srcs,$(1),$(type)))
+
+CHECK_SUBMODULES_COMMAND = echo "Checking all submodules in generators/ are initialized. Uninitialized submodules will be displayed" ; ! git submodule status $(base_dir)/generators | grep ^-
 
 SCALA_EXT = scala
 VLOG_EXT = sv v
@@ -119,6 +122,7 @@ $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip
 # compile scala jars
 #########################################################################################
 $(CHIPYARD_CLASSPATH_TARGETS) &: $(CHIPYARD_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(CHIPYARD_VLOG_SOURCES)
+	$(CHECK_SUBMODULES_COMMAND)
 	mkdir -p $(dir $@)
 	$(call run_sbt_assembly,$(SBT_PROJECT),$(CHIPYARD_CLASSPATH))
 
@@ -294,10 +298,12 @@ $(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JS
 TOP_MACROCOMPILER_MODE ?= --mode synflops
 $(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH_TARGETS) $(TOP_SMEMS_CONF)
 	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
+	touch $(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR)
 
 MODEL_MACROCOMPILER_MODE = --mode synflops
-$(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH_TARGETS) $(MODEL_SMEMS_CONF) | $(TOP_SMEMS_FILE)
+$(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH_TARGETS) $(MODEL_SMEMS_CONF)
 	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
+	touch $(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR)
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
@@ -452,8 +458,23 @@ help:
 	@for line in $(HELP_LINES); do echo "$$line"; done
 
 #########################################################################################
+# Check submodule status
+#########################################################################################
+
+.PHONY: check-submodule-status
+check-submodule-status:
+	$(CHECK_SUBMODULES_COMMAND)
+
+#########################################################################################
 # Implicit rule handling
 #########################################################################################
 # Disable all suffix rules to improve Make performance on systems running older
 # versions of Make
 .SUFFIXES:
+
+.PHONY: print-%
+# Print any variable and it's origin. This helps figure out where the
+# variable was defined and to distinguish between empty and undefined.
+print-%:
+	@echo "$*=$($*)"
+	@echo "Origin is: $(origin $*)"
