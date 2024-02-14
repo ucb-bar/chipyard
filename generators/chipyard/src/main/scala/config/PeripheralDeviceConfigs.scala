@@ -75,6 +75,7 @@ class ManyPeripheralsRocketConfig extends Config(
   new testchipip.serdes.WithSerialTLMem(isMainMemory=true) ++ // set lbwif memory base to DRAM_BASE, use as main memory
   new chipyard.harness.WithSimSPIFlashModel(true) ++         // add the SPI flash model in the harness (read-only)
   new chipyard.harness.WithSimBlockDevice ++                 // drive block-device IOs with SimBlockDevice
+  new chipyard.config.WithPeripheryTimer ++                  // add the pwm timer device
   new chipyard.config.WithSPIFlash ++                        // add the SPI flash controller
   new freechips.rocketchip.subsystem.WithDefaultMMIOPort ++  // add default external master port
   new freechips.rocketchip.subsystem.WithDefaultSlavePort ++ // add default external slave port
