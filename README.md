@@ -1,5 +1,19 @@
 ![CHIPYARD](https://github.com/ucb-bar/chipyard/raw/main/docs/_static/images/chipyard-logo-full.png)
 
+
+This repo was used for Labs 2 and 3 of EE290-2 (HW for ML) at Berkeley.
+If you want to run Lab 3, then checkout the `ee290-sp24-lab3` in `generators/gemmini`.
+
+**Please note that we will not provide ANY debugging or setup support to anyone who is not a member of our class.**
+We make no guarantee that any of this will build or run correctly.
+
+Also, note that we built all dependencies and `esp-tools` for our students.
+You will need to build `esp-tools` yourself, which is not described in the lab documents.
+You can do this by following the setup instructions in Chipyard's mainstream docs.
+
+Finally, note that one of Chipyard's external dependencies recently broke.
+You may need to implement the fixes described [in this PR](https://github.com/ucb-bar/chipyard/pull/1054) yourself to resolve this.
+
 # Chipyard Framework [![Test](https://github.com/ucb-bar/chipyard/actions/workflows/chipyard-run-tests.yml/badge.svg)](https://github.com/ucb-bar/chipyard/actions)
 
 ## Quick Links
