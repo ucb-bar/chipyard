@@ -16,10 +16,10 @@
 `define TRACE_EXCEPTION (`ROCKET._csr_io_trace_0_exception)
 `define TRACE_TIME (`ROCKET._csr_io_time)
 `define INSTRET (!(`CORE_RESET) && `TRACE_VALID && !(`TRACE_EXCEPTION))
+// L1 DCache Functional warmup
+`define DCACHE_RESETTING `TILE.dcache.resetting
 `define DCACHE_DATA_ARRAY_ROOT `TILE.dcache.data.data_arrays_0.data_arrays_0_ext
-`define DCACHE_DATA_ARRAY(bank) `DCACHE_DATA_ARRAY_ROOT.mem_0_``bank
 `define DCACHE_TAG_ARRAY_ROOT `TILE.dcache.tag_array.tag_array_ext
-`define DCACHE_TAG_ARRAY(way) `DCACHE_TAG_ARRAY_ROOT.mem_0_``way.ram
 
 typedef struct {
   longint unsigned pc;
@@ -117,6 +117,7 @@ module TestDriver;
   // DCache functional warmup
   localparam integer physical_address_bits = 32;
   localparam integer dcache_block_size = 64;
+  localparam integer dcache_data_bus_width = 8;
   localparam integer dcache_sets = 64;
   localparam integer dcache_size = 16384;
   localparam integer dcache_ways = dcache_size / (dcache_sets * dcache_block_size);
@@ -124,7 +125,8 @@ module TestDriver;
   localparam integer dcache_set_bits = $clog2(dcache_sets);
   localparam integer dcache_raw_tag_bits = physical_address_bits - dcache_set_bits - dcache_offset_bits;
   localparam integer dcache_tag_bits = dcache_raw_tag_bits + 2; // 2 bits for coherency metadata
-  bit dcache_tag_array [0:dcache_ways-1][0:dcache_sets-1][dcache_tag_bits-1:0];
+  localparam integer dcache_data_rows_per_set = dcache_block_size / dcache_data_bus_width;
+  string checkpoint_dir;
 
   always @(posedge `CORE_CLOCK) begin
     if (!reset && !`CORE_RESET) begin
@@ -152,6 +154,7 @@ module TestDriver;
     end
     void'($value$plusargs("perf-sample-period=%d", sample_period));
     void'($value$plusargs("max-instructions=%d", max_instructions));
+    void'($value$plusargs("checkpoint-dir=%s", checkpoint_dir));
 
     // Rest of plusargs
     void'($value$plusargs("max-cycles=%d", max_cycles));
@@ -415,6 +418,80 @@ module TestDriver;
       //$display("Releasing XPR %d", i_xpr);
     end
   end
+
+    // Dcache injection
+  `define TAG_ARRAY_FORCE(way_idx) \
+    bit [dcache_tag_bits-1:0] dcache_tag_array``way_idx`` [dcache_sets]; \
+    event dcache_tag_array_ready``way_idx; \
+    initial begin \
+      if (checkpoint_dir.len() > 0) begin \
+        $readmemb({checkpoint_dir, "/dcache_tag_array``way_idx.bin"}, dcache_tag_array``way_idx``); \
+        -> dcache_tag_array_ready``way_idx; \
+      end \
+    end \
+    initial begin \
+      wait(dcache_tag_array_ready``way_idx.triggered) begin end \
+      force `DCACHE_TAG_ARRAY_ROOT.mem_0_``way_idx.ram = dcache_tag_array``way_idx; \
+      @(negedge `CORE_RESET) begin end \
+      @(negedge `DCACHE_RESETTING) begin end \
+      release `DCACHE_TAG_ARRAY_ROOT.mem_0_``way_idx.ram; \
+    end \
+
+    `TAG_ARRAY_FORCE(0);
+    `TAG_ARRAY_FORCE(1);
+    `TAG_ARRAY_FORCE(2);
+    `TAG_ARRAY_FORCE(3);
+
+    `define DATA_ARRAY_FORCE(byte_idx) \
+      bit [dcache_data_bus_width-1:0] dcache_data_array``byte_idx`` [dcache_data_rows_per_set * dcache_sets]; \
+      event dcache_data_array_ready``byte_idx; \
+      initial begin \
+        if (checkpoint_dir.len() > 0) begin \
+          $readmemb({checkpoint_dir, "/dcache_data_array``byte_idx.bin"}, dcache_data_array``byte_idx``); \
+          -> dcache_data_array_ready``byte_idx; \
+        end \
+      end \
+      initial begin \
+        wait(dcache_data_array_ready``byte_idx.triggered) begin end \
+        force `DCACHE_DATA_ARRAY_ROOT.mem_0_``byte_idx.ram = dcache_data_array``byte_idx; \
+        @(negedge `CORE_RESET) begin end \
+        @(negedge `DCACHE_RESETTING) begin end \
+        release `DCACHE_DATA_ARRAY_ROOT.mem_0_``byte_idx.ram; \
+      end \
+
+    // There are data_bus_width * ways (8 * 4 = 32) dcache data RAMs
+    `DATA_ARRAY_FORCE(0);
+    `DATA_ARRAY_FORCE(1);
+    `DATA_ARRAY_FORCE(2);
+    `DATA_ARRAY_FORCE(3);
+    `DATA_ARRAY_FORCE(4);
+    `DATA_ARRAY_FORCE(5);
+    `DATA_ARRAY_FORCE(6);
+    `DATA_ARRAY_FORCE(7);
+    `DATA_ARRAY_FORCE(8);
+    `DATA_ARRAY_FORCE(9);
+    `DATA_ARRAY_FORCE(10);
+    `DATA_ARRAY_FORCE(11);
+    `DATA_ARRAY_FORCE(12);
+    `DATA_ARRAY_FORCE(13);
+    `DATA_ARRAY_FORCE(14);
+    `DATA_ARRAY_FORCE(15);
+    `DATA_ARRAY_FORCE(16);
+    `DATA_ARRAY_FORCE(17);
+    `DATA_ARRAY_FORCE(18);
+    `DATA_ARRAY_FORCE(19);
+    `DATA_ARRAY_FORCE(20);
+    `DATA_ARRAY_FORCE(21);
+    `DATA_ARRAY_FORCE(22);
+    `DATA_ARRAY_FORCE(23);
+    `DATA_ARRAY_FORCE(24);
+    `DATA_ARRAY_FORCE(25);
+    `DATA_ARRAY_FORCE(26);
+    `DATA_ARRAY_FORCE(27);
+    `DATA_ARRAY_FORCE(28);
+    `DATA_ARRAY_FORCE(29);
+    `DATA_ARRAY_FORCE(30);
+    `DATA_ARRAY_FORCE(31);
 
 `ifdef TESTBENCH_IN_UVM
   // UVM library has its own way to manage end-of-simulation.
