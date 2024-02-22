@@ -195,7 +195,7 @@ lazy val hwacha = (project in file("generators/hwacha"))
   .settings(commonSettings)
 
 lazy val saturn = (project in file("generators/saturn"))
-  .dependsOn(rocketchip)
+  .dependsOn(rocketchip, shuttle)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
