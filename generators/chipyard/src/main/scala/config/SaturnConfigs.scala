@@ -87,5 +87,6 @@ class REFV256D64ShuttleConfig extends Config(
   new chipyard.config.WithTraceIO ++
   new saturn.shuttle.WithShuttleVectorUnit(256, 64, VectorParams.refParams) ++
   new shuttle.common.WithShuttleDebugROB ++                      // enable shuttle debug ROB for cosim
+  new shuttle.common.WithTCM ++
   new shuttle.common.WithNShuttleCores(1) ++
   new chipyard.config.AbstractConfig)

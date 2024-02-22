@@ -34,6 +34,7 @@ import testchipip.cosim.{CanHaveTraceIO, TraceOutputTop, SpikeCosimConfig}
 import testchipip.tsi.{CanHavePeripheryUARTTSI, UARTTSIIO}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 import chipyard.{CanHaveMasterTLMemPort, ChipyardSystem, ChipyardSystemModule}
+import shuttle.common.{ShuttleTile}
 
 import scala.reflect.{ClassTag}
 
@@ -474,12 +475,19 @@ class WithTraceIOPunchthrough extends OverrideLazyIOBinder({
       val p = GetSystemParameters(system)
       val chipyardSystem = system.asInstanceOf[ChipyardSystem]
       val tiles = chipyardSystem.totalTiles.values
+      val (mem1_base, mem1_size) = tiles.headOption match {
+        case s: Option[ShuttleTile] => s.get.shuttleParams.tcm.map(t => (t.base, t.size)).getOrElse((BigInt(0), BigInt(0)))
+        case _ => (BigInt(0), BigInt(0))
+      }
+
       val cfg = SpikeCosimConfig(
         isa = tiles.headOption.map(_.isaDTS).getOrElse(""),
         vlen = tiles.headOption.map(_.tileParams.core.vLen).getOrElse(0),
         priv = tiles.headOption.map(t => if (t.usingUser) "MSU" else if (t.usingSupervisor) "MS" else "M").getOrElse(""),
         mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0)),
         mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
+        mem1_base = mem1_base,
+        mem1_size = mem1_size,
         pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0),
         nharts = tiles.size,
         bootrom = chipyardSystem.bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse(""),
