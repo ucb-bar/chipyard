@@ -51,7 +51,6 @@ class RadianceConfig extends Config(
   new RadianceBaseConfig)
 
 class RadianceGemminiConfig extends Config(
-  new gemmini.DefaultGemminiConfig ++
   new radiance.subsystem.WithRadianceCores(1, useVxCache = false) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 4) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 1)++
