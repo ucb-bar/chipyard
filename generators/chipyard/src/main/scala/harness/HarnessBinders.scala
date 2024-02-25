@@ -219,6 +219,7 @@ class WithSerialTLTiedOff(tieoffs: Option[Seq[Int]] = None) extends HarnessBinde
     port.io match {
       case io: InternalSyncPhitIO =>
       case io: ExternalSyncPhitIO => io.clock_in := false.B.asClock
+      case io: SourceSyncPhitIO =>
       case _ =>
     }
   }
@@ -229,6 +230,7 @@ class WithSimTSIOverSerialTL extends HarnessBinder({
     port.io match {
       case io: InternalSyncPhitIO =>
       case io: ExternalSyncPhitIO => io.clock_in := th.harnessBinderClock
+      case io: SourceSyncPhitIO => io.clock_in := th.harnessBinderClock; io.reset_in := th.harnessBinderReset
     }
 
     port.io match {
