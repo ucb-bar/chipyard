@@ -174,6 +174,7 @@ class WithGPIOCells extends OverrideIOBinder({
         iocell.io.oe := pin.o.oe
         iocell.io.ie := pin.o.ie
         pin.i.ival := iocell.io.i
+        pin.i.po.foreach(_ := DontCare)
         iocell.io.pad <> g
         (GPIOPort(() => g, i, j), iocell)
       }).unzip

@@ -360,3 +360,10 @@ class FireSimLeanGemminiRocketMMIOOnlyConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.LeanGemminiRocketConfig)
+
+class FireSimLargeBoomCospikeConfig extends Config(
+  new firesim.firesim.WithCospikeBridge ++
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks++
+  new chipyard.LargeBoomConfig)

@@ -16,6 +16,7 @@ import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 import sifive.blocks.devices.i2c._
+import sifive.blocks.devices.timer._
 
 import testchipip._
 
@@ -167,4 +168,8 @@ class WithNoBusErrorDevices extends Config((site, here, up) => {
   case PeripheryBusKey => up(PeripheryBusKey).copy(errorDevice = None)
   case MemoryBusKey => up(MemoryBusKey).copy(errorDevice = None)
   case FrontBusKey => up(FrontBusKey).copy(errorDevice = None)
+})
+
+class WithPeripheryTimer(timerParams: TimerParams = TimerParams(0x4000)) extends Config((site, here, up) => {
+  case PeripheryTimerKey => Seq(timerParams)
 })
