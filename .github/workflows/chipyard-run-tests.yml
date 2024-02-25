@@ -731,6 +731,29 @@ jobs:
           group-key: "group-peripherals"
           project-key: "chipyard-symmetric"
 
+  chipyard-llcchiplet-run-tests:
+    name: chipyard-llcchiplet-run-tests
+    needs: prepare-chipyard-peripherals
+    runs-on: as4
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-peripherals"
+          project-key: "chipyard-llcchiplet"
+
   chipyard-sha3-run-tests:
     name: chipyard-sha3-run-tests
     needs: prepare-chipyard-accels
@@ -1095,6 +1118,7 @@ jobs:
             chipyard-manyperipherals-run-tests,
             chipyard-tethered-run-tests,
             chipyard-symmetric-run-tests,
+            chipyard-llcchiplet-run-tests,
             chipyard-sha3-run-tests,
             chipyard-gemmini-run-tests,
             chipyard-manymmioaccels-run-tests, # chipyard-nvdla-run-tests,
