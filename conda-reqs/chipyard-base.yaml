@@ -31,5 +31,5 @@ dependencies:
     - sbt
     - openjdk=20
     - dtc
-    - verilator==5.020
+    - verilator==5.022
     - conda-lock=1.4
