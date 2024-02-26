@@ -9,7 +9,7 @@
 # To update a single package to the latest version compatible with the version constraints in the source:
 #     conda-lock lock  --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml --update PACKAGE
 # To re-solve the entire environment, e.g. after changing a version constraint in the source file:
-#     conda-lock -f /scratch/vighneshiyer/chipyard-verilator/conda-reqs/chipyard-base.yaml -f /scratch/vighneshiyer/chipyard-verilator/conda-reqs/chipyard-extended.yaml -f /scratch/vighneshiyer/chipyard-verilator/conda-reqs/docs.yaml -f /scratch/vighneshiyer/chipyard-verilator/conda-reqs/riscv-tools.yaml --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml
+#     conda-lock -f /scratch/vighneshiyer/chipyard-bump-gcc/conda-reqs/chipyard-base.yaml -f /scratch/vighneshiyer/chipyard-bump-gcc/conda-reqs/chipyard-extended.yaml -f /scratch/vighneshiyer/chipyard-bump-gcc/conda-reqs/docs.yaml -f /scratch/vighneshiyer/chipyard-bump-gcc/conda-reqs/riscv-tools.yaml --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml
 metadata:
   channels:
   - url: ucb-bar
@@ -21,14 +21,14 @@ metadata:
   - url: nodefaults
     used_env_vars: []
   content_hash:
-    linux-64: 29a14a9b62700e49e61d068bfc5545ecab7c9956444b32961a56cfc4037992a2
+    linux-64: af6e3950d3a0c153df1ff33c0e9281941398323520a73bf0183d9ad864d91e5c
   platforms:
   - linux-64
   sources:
-  - /scratch/vighneshiyer/chipyard-verilator/conda-reqs/chipyard-base.yaml
-  - /scratch/vighneshiyer/chipyard-verilator/conda-reqs/chipyard-extended.yaml
-  - /scratch/vighneshiyer/chipyard-verilator/conda-reqs/docs.yaml
-  - /scratch/vighneshiyer/chipyard-verilator/conda-reqs/riscv-tools.yaml
+  - /scratch/vighneshiyer/chipyard-bump-gcc/conda-reqs/chipyard-base.yaml
+  - /scratch/vighneshiyer/chipyard-bump-gcc/conda-reqs/chipyard-extended.yaml
+  - /scratch/vighneshiyer/chipyard-bump-gcc/conda-reqs/docs.yaml
+  - /scratch/vighneshiyer/chipyard-bump-gcc/conda-reqs/riscv-tools.yaml
 package:
 - category: main
   dependencies: {}
@@ -143,25 +143,25 @@ package:
 - category: main
   dependencies: {}
   hash:
-    md5: fb94f6b17ef1a75faac2e06937dc4223
-    sha256: 86d1e11bf0b8dbc74fec07f3c71bb1b20f83e32b5b9f8625b3dc653ce00e40bd
+    md5: 3bc29a967fee57e193ce51f51c598bca
+    sha256: 858029ad4d66869c533bb5a22e95e7c044ca66c61d6f403f10d9ae074a0e360e
   manager: conda
   name: libgcc-devel_linux-64
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/libgcc-devel_linux-64-11.4.0-h922705a_105.conda
-  version: 11.4.0
+  url: https://conda.anaconda.org/conda-forge/noarch/libgcc-devel_linux-64-13.2.0-ha9c7c90_105.conda
+  version: 13.2.0
 - category: main
   dependencies: {}
   hash:
-    md5: a884fe2f11c6167f3dc62d4b1db20ced
-    sha256: 20c4f2b96b8fb57a3cad0bb8f1ce407ee7bc935cb0ce68b430b10b77616c0b16
+    md5: 66383205c2e1bdf013df52fa9e3e6763
+    sha256: 67e999ee56481844ca4ce2e61132c5c16f3f00a05daa1d0ea4b2c684eea5de5a
   manager: conda
   name: libstdcxx-devel_linux-64
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/libstdcxx-devel_linux-64-11.4.0-h922705a_105.conda
-  version: 11.4.0
+  url: https://conda.anaconda.org/conda-forge/noarch/libstdcxx-devel_linux-64-13.2.0-ha9c7c90_105.conda
+  version: 13.2.0
 - category: main
   dependencies: {}
   hash:
@@ -665,16 +665,16 @@ package:
   version: 2.0.1
 - category: main
   dependencies:
-    libgcc-ng: '>=11.4.0'
+    libgcc-ng: '>=13.2.0'
   hash:
-    md5: 47a9846c7679f8381b06fc5052ab4a4b
-    sha256: fc00e9a71c07446cf1744bd1d5cd3efa6dfd3a7db6c2c8a82853f19b8b1416f8
+    md5: 3f686300a92604d1bdff9a29dd4a6639
+    sha256: 97ecdab7e4e96400d712c2d6ba2b7c30a97278e9f4470ea0ff36bf4f1447b3b9
   manager: conda
   name: libsanitizer
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libsanitizer-11.4.0-h4dcbe23_5.conda
-  version: 11.4.0
+  url: https://conda.anaconda.org/conda-forge/linux-64/libsanitizer-13.2.0-h7e041cc_5.conda
+  version: 13.2.0
 - category: main
   dependencies:
     libgcc-ng: '>=7.5.0'
@@ -1221,21 +1221,21 @@ package:
 - category: main
   dependencies:
     binutils_impl_linux-64: '>=2.39'
-    libgcc-devel_linux-64: 11.4.0 h922705a_105
-    libgcc-ng: '>=11.4.0'
-    libgomp: '>=11.4.0'
-    libsanitizer: 11.4.0 h4dcbe23_5
-    libstdcxx-ng: '>=11.4.0'
+    libgcc-devel_linux-64: 13.2.0 ha9c7c90_105
+    libgcc-ng: '>=13.2.0'
+    libgomp: '>=13.2.0'
+    libsanitizer: 13.2.0 h7e041cc_5
+    libstdcxx-ng: '>=13.2.0'
     sysroot_linux-64: ''
   hash:
-    md5: dd619b391c1c85728a6c70aac733e0a8
-    sha256: b354a25c5eee51c7f2d9bd1232d445302068e55e540eddddf32bf96cc54f48b9
+    md5: a6be13181cb66a78544b1d5f7bac97d0
+    sha256: baab8f8b9af54959735e629cf6d5ec9378166aa4c68ba8dc98dc0a781d548409
   manager: conda
   name: gcc_impl_linux-64
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/gcc_impl_linux-64-11.4.0-h7aa1c59_5.conda
-  version: 11.4.0
+  url: https://conda.anaconda.org/conda-forge/linux-64/gcc_impl_linux-64-13.2.0-h338b0a0_5.conda
+  version: 13.2.0
 - category: main
   dependencies:
     libgcc-ng: '>=12'
@@ -1715,16 +1715,16 @@ package:
   version: 1.1.0
 - category: main
   dependencies:
-    gcc_impl_linux-64: '>=11.4.0,<11.4.1.0a0'
+    gcc_impl_linux-64: '>=13.2.0,<13.2.1.0a0'
   hash:
-    md5: f400dd0a481abdfff466337623081d1a
-    sha256: 33504fd9020cd95f66c1d096112634c12e8bfd813d2bcd52ede90626c4768d3b
+    md5: 790b8a5645a44a714f7a18d72f97eef8
+    sha256: 2cda1b309d4ebf10863dc189b07e952c8fcad872f0fbde3e1af450a61ec3f2d9
   manager: conda
   name: conda-gcc-specs
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/conda-gcc-specs-11.4.0-h240829a_5.conda
-  version: 11.4.0
+  url: https://conda.anaconda.org/conda-forge/linux-64/conda-gcc-specs-13.2.0-h6a59387_5.conda
+  version: 13.2.0
 - category: main
   dependencies:
     libgcc-ng: '>=7.5.0'
@@ -1768,16 +1768,16 @@ package:
   version: 2.12.1
 - category: main
   dependencies:
-    gcc_impl_linux-64: 11.4.0.*
+    gcc_impl_linux-64: 13.2.0.*
   hash:
-    md5: 0c8d100583c5fd6d20cd5307aaedaf0d
-    sha256: b515e9222a8af974024b02c7265bed8e4edf912707a5a8fc207cbc8bc2ac0bff
+    md5: 383b0f9eb07cff7e00470fb7cb82b102
+    sha256: 7e73102a89208bea391231f58c8bb22c8fb2134858064ed88c783b11a1760c89
   manager: conda
   name: gcc
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/gcc-11.4.0-h7baecda_2.conda
-  version: 11.4.0
+  url: https://conda.anaconda.org/conda-forge/linux-64/gcc-13.2.0-h574f8da_2.conda
+  version: 13.2.0
 - category: main
   dependencies:
     libgcc-ng: '>=12'
@@ -1797,18 +1797,18 @@ package:
   version: 3.7.9
 - category: main
   dependencies:
-    gcc_impl_linux-64: 11.4.0 h7aa1c59_5
-    libstdcxx-devel_linux-64: 11.4.0 h922705a_105
+    gcc_impl_linux-64: 13.2.0 h338b0a0_5
+    libstdcxx-devel_linux-64: 13.2.0 ha9c7c90_105
     sysroot_linux-64: ''
   hash:
-    md5: 99ef88bf2364edd566e9bfec9db2bf95
-    sha256: 391b83e5cf7a31f49c3d2147dcc146a62a0a98d2c73e629680b6263b8e2c9df4
+    md5: 88d0ccab114eb0e837725bd48cdddae5
+    sha256: 9049d84fef7526e1dde8311acd2a592bf1d6f16453e68087c17d1bda01eb7867
   manager: conda
   name: gxx_impl_linux-64
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/gxx_impl_linux-64-11.4.0-h7aa1c59_5.conda
-  version: 11.4.0
+  url: https://conda.anaconda.org/conda-forge/linux-64/gxx_impl_linux-64-13.2.0-h338b0a0_5.conda
+  version: 13.2.0
 - category: main
   dependencies:
     keyutils: '>=1.6.1,<2.0a0'
@@ -2501,17 +2501,17 @@ package:
   version: 0.7.6
 - category: main
   dependencies:
-    gcc: 11.4.0.*
-    gxx_impl_linux-64: 11.4.0.*
+    gcc: 13.2.0.*
+    gxx_impl_linux-64: 13.2.0.*
   hash:
-    md5: 4821dd86fa505a0d5b6aacd28ed8291f
-    sha256: e07c2da262b374fc9aad422a4927660ef96aec6d1445c7673a6ba58a445523a5
+    md5: 825744f8a518e301e43c1b14accc97b3
+    sha256: b6f594f512bb671c4b509435126f23c0e0544ba3996a1a7daf3679015168defb
   manager: conda
   name: gxx
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/gxx-11.4.0-h7baecda_2.conda
-  version: 11.4.0
+  url: https://conda.anaconda.org/conda-forge/linux-64/gxx-13.2.0-h574f8da_2.conda
+  version: 13.2.0
 - category: main
   dependencies:
     __unix: ''
@@ -3410,14 +3410,14 @@ package:
   dependencies:
     python: '>=3.8'
   hash:
-    md5: a92a6440c3fe7052d63244f3aba2a4a7
-    sha256: f3c5be8673bfd905c4665efcb27fa50192f24f84fa8eff2f19cba5d09753d905
+    md5: 16ae769069b380646c47142d719ef466
+    sha256: 4be24d557897b2f6609f5d5f7c437833c62f4d4a96581e39530067e96a2d0451
   manager: conda
   name: typing_extensions
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.9.0-pyha770c72_0.conda
-  version: 4.9.0
+  url: https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.10.0-pyha770c72_0.conda
+  version: 4.10.0
 - category: main
   dependencies:
     libgcc-ng: '>=12'
@@ -4247,16 +4247,16 @@ package:
   version: 2.31.0.6
 - category: main
   dependencies:
-    typing_extensions: 4.9.0 pyha770c72_0
+    typing_extensions: 4.10.0 pyha770c72_0
   hash:
-    md5: c16524c1b7227dc80b36b4fa6f77cc86
-    sha256: d795c1eb1db4ea147f01ece74e5a504d7c2e8d5ee8c11ec987884967dd938f9c
+    md5: 091683b9150d2ebaa62fd7e2c86433da
+    sha256: 0698fe2c4e555fb44c27c60f7a21fa0eea7f5bf8186ad109543c5b056e27f96a
   manager: conda
   name: typing-extensions
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/typing-extensions-4.9.0-hd8ed1ab_0.conda
-  version: 4.9.0
+  url: https://conda.anaconda.org/conda-forge/noarch/typing-extensions-4.10.0-hd8ed1ab_0.conda
+  version: 4.10.0
 - category: main
   dependencies:
     brotli-python: '>=1.0.9'
