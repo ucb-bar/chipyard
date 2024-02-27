@@ -148,3 +148,6 @@
 [submodule "generators/rocket-chip-inclusive-cache"]
 	path = generators/rocket-chip-inclusive-cache
 	url = https://github.com/chipsalliance/rocket-chip-inclusive-cache.git
+[submodule "generators/rerocc"]
+	path = generators/rerocc
+	url = https://github.com/ucb-bar/rerocc.git

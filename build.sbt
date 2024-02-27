@@ -150,7 +150,7 @@ lazy val chipyard = (project in file("generators/chipyard"))
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, rocket_dsp_utils,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
-    constellation, mempress, barf, shuttle, caliptra_aes)
+    constellation, mempress, barf, shuttle, caliptra_aes, rerocc)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(
     libraryDependencies ++= Seq(
@@ -236,6 +236,11 @@ lazy val nvdla = (project in file("generators/nvdla"))
 
 lazy val caliptra_aes = (project in file("generators/caliptra-aes-acc"))
   .dependsOn(rocketchip, rocc_acc_utils, testchipip, midasTargetUtils)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+lazy val rerocc = (project in file("generators/rerocc"))
+  .dependsOn(rocketchip, constellation, boom)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
