@@ -308,7 +308,7 @@ if run_step "10"; then
 
     git submodule update --init $CYDIR/tools/install-circt &&
     $CYDIR/tools/install-circt/bin/download-release-or-nightly-circt.sh \
-        -f circt-full-shared-linux-x64.tar.gz \
+        -f circt-full-static-linux-x64.tar.gz \
         -i $PREFIX \
         -v version-file \
         -x $CYDIR/conda-reqs/circt.json \
