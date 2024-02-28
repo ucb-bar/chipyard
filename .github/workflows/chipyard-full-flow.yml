@@ -6,9 +6,9 @@ on:
     branches:
       - main
       - '1.[0-9]*.x'
-  schedule:
-    # run at 00:00 on sunday
-    - cron: "0 0 * * 0"
+  # schedule:
+  #   # run at 00:00 on sunday
+  #   - cron: "0 0 * * 0"
 
 defaults:
   run:
