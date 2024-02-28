@@ -148,3 +148,6 @@
 [submodule "generators/rocket-chip-inclusive-cache"]
 	path = generators/rocket-chip-inclusive-cache
 	url = https://github.com/chipsalliance/rocket-chip-inclusive-cache.git
+[submodule "tools/circt"]
+	path = tools/circt
+	url = https://github.com/llvm/circt.git

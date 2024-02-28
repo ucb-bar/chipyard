@@ -82,6 +82,7 @@ cd "$RDIR"
             software/spec2017 \
             tools/dsptools \
             tools/rocket-dsp-utils \
+            tools/circt \
             vlsi/hammer-mentor-plugins
         do
             "$1" "${name%/}"
