@@ -58,7 +58,9 @@ echo "Cloning CIRCT/LLVM"
 (
     cd $RDIR/tools/circt
     git submodule init
+    # The settings in circt/.gitmodules don't "stick", so force-set them here
     git config submodule.llvm.shallow true
+    git config submodule.llvm.branch main
     git submodule update --recommend-shallow --progress llvm
 )
 
