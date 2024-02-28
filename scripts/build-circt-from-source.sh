@@ -49,13 +49,17 @@ fi
 
 
 
-echo "Cloning CIRCT submodules"
+echo "Cloning CIRCT"
 (
     cd $RDIR/tools
-    git submodule update --init circt
-    cd circt
+    git submodule update --init --progress circt
+)
+echo "Cloning CIRCT/LLVM"
+(
+    cd $RDIR/tools/circt
     git submodule init
-    git submodule update
+    git config submodule.llvm.shallow true
+    git submodule update --recommend-shallow --progress llvm
 )
 
 echo "Building CIRCT's LLVM/MLIR"
