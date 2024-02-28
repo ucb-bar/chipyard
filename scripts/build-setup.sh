@@ -312,7 +312,7 @@ if run_step "10"; then
 
     if [ "$BUILD_CIRCT" = true ] ; then
 	echo "Building CIRCT from source, and installing to $PREFIX"
-	$CYDIR/scripts/build-circt-from-source --prefix $PREFIX
+	$CYDIR/scripts/build-circt-from-source.sh --prefix $PREFIX
     else
 	echo "Downloading CIRCT from nightly build"
 
