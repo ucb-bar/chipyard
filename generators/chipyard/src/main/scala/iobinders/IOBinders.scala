@@ -476,7 +476,10 @@ class WithTraceIOPunchthrough extends OverrideLazyIOBinder({
       val chipyardSystem = system.asInstanceOf[ChipyardSystem]
       val tiles = chipyardSystem.totalTiles.values
       val (mem1_base, mem1_size) = tiles.headOption match {
-        case s: Option[ShuttleTile] => s.get.shuttleParams.tcm.map(t => (t.base, t.size)).getOrElse((BigInt(0), BigInt(0)))
+        case Some(tile) => tile match {
+          case t: ShuttleTile => t.shuttleParams.tcm.map(t => (t.base, t.size)).getOrElse((BigInt(0), BigInt(0)))
+          case _ => (BigInt(0), BigInt(0))
+        }
         case _ => (BigInt(0), BigInt(0))
       }
 
