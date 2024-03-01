@@ -4,7 +4,7 @@ import chipyard.config.AbstractConfig
 import chipyard.stage.phases.TargetDirKey
 import freechips.rocketchip.devices.tilelink.BootROMLocated
 import freechips.rocketchip.diplomacy.AsynchronousCrossing
-import freechips.rocketchip.subsystem.WithExtMemSize
+import freechips.rocketchip.subsystem.{WithCluster, InCluster, WithExtMemSize}
 import freechips.rocketchip.tile.XLen
 import org.chipsalliance.cde.config.Config
 import radiance.memory._
@@ -33,7 +33,7 @@ class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigIn
 // ----------------
 
 class RadianceBaseConfig extends Config(
-  new radiance.subsystem.WithSimtConfig(nWarps = 16, nCoreLanes = 8, nMemLanes = 4, nSrcIds = 8) ++
+  new radiance.subsystem.WithSimtConfig(nWarps = 8, nCoreLanes = 8, nMemLanes = 4, nSrcIds = 8) ++
   new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
   new WithRadBootROM() ++
@@ -48,6 +48,13 @@ class RadianceConfig extends Config(
   new radiance.subsystem.WithRadianceCores(1, useVxCache = false) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 8) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 1)++
+  new RadianceBaseConfig)
+
+class RadianceClusterConfig extends Config(
+  new radiance.subsystem.WithRadianceCores(2, location=InCluster(0), useVxCache = false) ++
+  new radiance.subsystem.WithCoalescer(nNewSrcIds = 8) ++
+  new radiance.subsystem.WithVortexL1Banks(nBanks = 1)++
+  new WithCluster(0) ++
   new RadianceBaseConfig)
 
 class RadianceGemminiConfig extends Config(
