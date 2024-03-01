@@ -86,8 +86,8 @@ echo "Building CIRCT"
     mkdir build
     cd build
     cmake -G Ninja .. \
-	  -DMLIR_DIR=../llvm/build/lib/cmake/mlir \
-	  -DLLVM_DIR=../llvm/build/lib/cmake/llvm \
+	  -DMLIR_DIR=$RDIR/tools/circt/llvm/build/lib/cmake/mlir \
+	  -DLLVM_DIR=$RDIR/tools/circt/llvm/build/lib/cmake/llvm \
 	  -DLLVM_ENABLE_ASSERTIONS=ON \
 	  -DCMAKE_BUILD_TYPE=RELEASE \
 	  -DCMAKE_INSTALL_PREFIX=$PREFIX
