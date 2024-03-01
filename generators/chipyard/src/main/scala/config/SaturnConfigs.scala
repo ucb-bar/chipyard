@@ -85,6 +85,17 @@ class REFV512D256RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
+class DMAV256D256RocketConfig extends Config(
+  new chipyard.harness.WithCospike ++
+  new chipyard.config.WithTraceIO ++
+  new chipyard.config.WithSystemBusWidth(256) ++
+  new saturn.rocket.WithRocketVectorUnit(256, 256, VectorParams.dmaParams) ++
+  new chipyard.config.WithSystemBusWidth(256) ++
+  new freechips.rocketchip.subsystem.WithRocketCease(false) ++
+  new freechips.rocketchip.subsystem.WithRocketDebugROB ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 // Shuttle-integrated configs
 class REFV256D64ShuttleConfig extends Config(
   new chipyard.harness.WithCospike ++
