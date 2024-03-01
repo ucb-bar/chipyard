@@ -47,20 +47,6 @@ After the harness is created, the ``BundleBridgeSource``'s must be connected to 
 This is done with harness binders and io binders (see ``fpga/src/main/scala/vcu118/HarnessBinders.scala`` and ``fpga/src/main/scala/vcu118/IOBinders.scala``).
 For more information on harness binders and io binders, refer to :ref:`Customization/IOBinders:IOBinders and HarnessBinders`.
 
-(Legacy) Introduction to the Legacy Bringup Design
---------------------------------------------------
-
-.. warning::
-   The bringup VCU118 design described here is designed for old versions of Chipyard SoCs, pre-1.9.1.
-   The key difference is that these designs rely on a clock generated on-chip to synchronize the slow serialized-TileLink interface.
-   After Chipyard 1.9.1, the FPGA host is expected to pass the clock to the chip, instead of the other way around.
-   A new bringup solution will be developed for post-1.9.1 Chipyard designs.
-
-An example of a more complicated design used for Chipyard test chips can be viewed in ``fpga/src/main/scala/vcu118/bringup/``.
-This example extends the default test harness and creates new ``Overlays`` to connect to a DUT (connected to the FMC port).
-Extensions include another UART (connected over FMC), I2C (connected over FMC), miscellaneous GPIOS (can be connected to anything), and a TSI Host Widget.
-The TSI Host Widget is used to interact with the DUT from the prototype over a SerDes link (sometimes called the Low BandWidth InterFace - LBWIF) and provide access to a channel of the FPGA's DRAM.
-
 .. Note:: Remember that since whenever a new test harness is created (or the config changes, or the config packages changes, or...), you need to modify the make invocation.
     For example, ``make SUB_PROJECT=vcu118 CONFIG=MyNewVCU118Config CONFIG_PACKAGE=this.is.my.scala.package bitstream``.
     See :ref:`Prototyping/General:Generating a Bitstream` for information on the various make variables.

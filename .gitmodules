@@ -151,3 +151,6 @@
 [submodule "generators/saturn"]
 	path = generators/saturn
 	url = git@github.com:ucb-bar/saturn-vector-impls.git
+[submodule "tools/circt"]
+	path = tools/circt
+	url = https://github.com/llvm/circt.git
