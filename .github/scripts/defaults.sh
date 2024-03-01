@@ -29,7 +29,7 @@ REMOTE_COURSIER_CACHE=$REMOTE_WORK_DIR/.coursier-cache
 # key value store to get the build groups
 declare -A grouping
 grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boom chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad chipyard-spike chipyard-clone chipyard-prefetchers chipyard-shuttle"
-grouping["group-peripherals"]="chipyard-dmirocket chipyard-dmiboom chipyard-spiflashwrite chipyard-mmios chipyard-nocores chipyard-manyperipherals chipyard-chiplike chipyard-tethered chipyard-symmetric"
+grouping["group-peripherals"]="chipyard-dmirocket chipyard-dmiboom chipyard-spiflashwrite chipyard-mmios chipyard-nocores chipyard-manyperipherals chipyard-chiplike chipyard-tethered chipyard-symmetric chipyard-llcchiplet"
 grouping["group-accels"]="chipyard-mempress chipyard-sha3 chipyard-hwacha chipyard-gemmini chipyard-manymmioaccels chipyard-nvdla chipyard-aes256ecb"
 grouping["group-constellation"]="chipyard-constellation"
 grouping["group-tracegen"]="tracegen tracegen-boom"
@@ -59,6 +59,7 @@ mapping["chipyard-manyperipherals"]=" CONFIG=ManyPeripheralsRocketConfig EXTRA_S
 mapping["chipyard-chiplike"]=" CONFIG=ChipLikeRocketConfig MODEL=FlatTestHarness MODEL_PACKAGE=chipyard.example verilog"
 mapping["chipyard-tethered"]=" CONFIG=VerilatorCITetheredChipLikeRocketConfig"
 mapping["chipyard-symmetric"]=" CONFIG=MultiSimSymmetricChipletRocketConfig"
+mapping["chipyard-llcchiplet"]=" CONFIG=MultiSimLLCChipletRocketConfig"
 mapping["chipyard-cloneboom"]=" CONFIG=Cloned64MegaBoomConfig verilog"
 mapping["chipyard-nocores"]=" CONFIG=NoCoresConfig verilog"
 mapping["tracegen"]=" CONFIG=NonBlockingTraceGenL2Config"

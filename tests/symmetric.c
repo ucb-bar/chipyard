@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <riscv-pk/encoding.h>
 #include "marchid.h"
 
@@ -20,10 +21,13 @@ int main(void) {
   memcpy(test, dest + OBUS_OFFSET, sizeof(src));
   size_t read_end = rdcycle();
 
-  if (memcmp(src, test, sizeof(src))) {
-    printf("Remote write/read failed\n");
-    exit(1);
+  for (int i = 0; i < sizeof(src); i++) {
+    if (src[i] != test[i]) {
+      printf("Remote write/read failed at %p %p %p %x %x\n", src+i, test+i, dest + OBUS_OFFSET + i, src[i], test[i]);
+      exit(1);
+    }
   }
+
   printf("Read %ld bytes in %ld cycles\n", sizeof(src), read_end - read_start);
 
   return 0;
