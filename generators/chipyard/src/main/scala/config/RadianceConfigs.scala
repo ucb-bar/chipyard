@@ -33,6 +33,8 @@ class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigIn
 // ----------------
 
 class RadianceBaseConfig extends Config(
+  // NOTE: when changing these, remember to change +define+NUM_CORES/THREADS/WARPS in
+  // radiance.mk as well!
   new radiance.subsystem.WithSimtConfig(nWarps = 8, nCoreLanes = 8, nMemLanes = 4, nSrcIds = 8) ++
   new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
@@ -54,7 +56,7 @@ class RadianceClusterConfig extends Config(
   new radiance.subsystem.WithRadianceCores(2, location=InCluster(0), useVxCache = false) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 8) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 1)++
-  new WithCluster(0) ++
+  new radiance.subsystem.WithRadianceCluster(0) ++
   new RadianceBaseConfig)
 
 class RadianceGemminiConfig extends Config(
