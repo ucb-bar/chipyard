@@ -9,7 +9,7 @@
 	url = https://github.com/riscv-boom/riscv-boom.git
 [submodule "generators/caliptra-aes-acc"]
 	path = generators/caliptra-aes-acc
-	url = https://github.com/ucb-bar/caliptra-aes-acc
+	url = https://github.com/ucb-bar/caliptra-aes-acc.git
 [submodule "generators/constellation"]
 	path = generators/constellation
 	url = https://github.com/ucb-bar/constellation.git
@@ -21,7 +21,7 @@
 	url = https://github.com/ucb-bar/FFTGenerator.git
 [submodule "generators/gemmini"]
 	path = generators/gemmini
-	url = https://github.com/ucb-bar/gemmini
+	url = https://github.com/ucb-bar/gemmini.git
 [submodule "generators/hardfloat"]
 	path = generators/hardfloat
 	url = https://github.com/ucb-bar/berkeley-hardfloat.git
@@ -30,7 +30,7 @@
 	url = https://github.com/ucb-bar/hwacha.git
 [submodule "generators/ibex"]
 	path = generators/ibex
-	url = https://github.com/ucb-bar/ibex-wrapper
+	url = https://github.com/ucb-bar/ibex-wrapper.git
 [submodule "generators/icenet"]
 	path = generators/icenet
 	url = https://github.com/firesim/icenet.git
@@ -45,7 +45,7 @@
 	url = https://github.com/ucb-bar/riscv-sodor.git
 [submodule "generators/rocc-acc-utils"]
 	path = generators/rocc-acc-utils
-	url = https://github.com/ucb-bar/rocc-acc-utils
+	url = https://github.com/ucb-bar/rocc-acc-utils.git
 [submodule "generators/rocket-chip"]
 	path = generators/rocket-chip
 	url = https://github.com/chipsalliance/rocket-chip.git
@@ -58,7 +58,7 @@
 [submodule "generators/sha3"]
 	path = generators/sha3
 	url = https://github.com/ucb-bar/sha3.git
-[submodule "shuttle"]
+[submodule "generators/shuttle"]
 	path = generators/shuttle
 	url = https://github.com/ucb-bar/shuttle.git
 [submodule "generators/testchipip"]
@@ -141,10 +141,10 @@
 	url = https://github.com/ucb-bar/fixedpoint.git
 [submodule "tools/install-circt"]
 	path = tools/install-circt
-	url = https://github.com/circt/install-circt/
+	url = https://github.com/circt/install-circt.git
 [submodule "tools/rocket-dsp-utils"]
 	path = tools/rocket-dsp-utils
-	url = https://github.com/ucb-bar/rocket-dsp-utils
+	url = https://github.com/ucb-bar/rocket-dsp-utils.git
 [submodule "tools/torture"]
 	path = tools/torture
 	url = https://github.com/ucb-bar/riscv-torture.git
