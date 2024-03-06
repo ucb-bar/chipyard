@@ -136,7 +136,7 @@ class WithFireSimHighPerfClocking extends Config(
 
 // Tweaks that are generally applied to all firesim configs setting a single clock domain at 1000 MHz
 class WithFireSimConfigTweaks extends Config(
-  new chipyard.config.WithUART(txEntries=128, rxEntries=128) ++ // FireSim requires a larger UART FIFO buffer, 
+  new chipyard.config.WithUART(txEntries=256, rxEntries=256) ++ // FireSim requires a larger UART FIFO buffer, 
   new chipyard.config.WithNoUART() ++                           // so we overwrite the default one
 
   // 1 GHz matches the FASED default (DRAM modeli realistically configured for that frequency)
