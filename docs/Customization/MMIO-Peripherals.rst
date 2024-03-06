@@ -3,14 +3,15 @@
 MMIO Peripherals
 ==================
 
-The easiest way to create a MMIO peripheral is to use the ``TLRegisterRouter`` or ``AXI4RegisterRouter`` widgets, which abstracts away the details of handling the interconnect protocols and provides a convenient interface for specifying memory-mapped registers. Since Chipyard and Rocket Chip SoCs primarily use Tilelink as the on-chip interconnect protocol, this section will primarily focus on designing Tilelink-based peripherals. However, see ``generators/chipyard/src/main/scala/example/GCD.scala`` for how an example AXI4 based peripheral is defined and connected to the Tilelink graph through converters.
+The easiest way to create a MMIO peripheral is to follow the GCD TileLink MMIO example. Since Chipyard and Rocket Chip SoCs primarily use Tilelink as the on-chip interconnect protocol, this section will primarily focus on designing Tilelink-based peripherals. However, see ``generators/chipyard/src/main/scala/example/GCD.scala`` for how an example AXI4 based peripheral is defined and connected to the Tilelink graph through converters.
 
-To create a RegisterRouter-based peripheral, you will need to specify a parameter case class for the configuration settings, a bundle trait with the extra top-level ports, and a module implementation containing the actual RTL.
+To create a MMIO-mapped peripheral, you will need to specify a ``LazyModule`` wrapper containing the TileLink port as a Diplomacy Node, as well as an internal ``LazyModuleImp`` class that defines the MMIO's implementation and any non-TileLink I/O.
 
 For this example, we will show how to connect a MMIO peripheral which computes the GCD.
 The full code can be found in ``generators/chipyard/src/main/scala/example/GCD.scala``.
 
-In this case we use a submodule ``GCDMMIOChiselModule`` to actually perform the GCD. The ``GCDModule`` class only creates the registers and hooks them up using ``regmap``.
+In this case we use a submodule ``GCDMMIOChiselModule`` to actually perform the GCD. The ``GCDTL`` and ``GCDAXI4`` classes are the ``LazyModule`` classes which construct the TileLink or AXI4 ports, wrapping the inner ``GCDMMIOChiselModule``.
+The ``node`` object is a Diplomacy node, which connects the peripheral to the Diplomacy interconnect graph.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala
@@ -19,8 +20,9 @@ In this case we use a submodule ``GCDMMIOChiselModule`` to actually perform the 
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala
-    :start-after: DOC include start: GCD instance regmap
-    :end-before: DOC include end: GCD instance regmap
+    :start-after: DOC include start: GCD router
+    :end-before: DOC include end: GCD router
+
 
 Advanced Features of RegField Entries
 -------------------------------------
@@ -41,15 +43,31 @@ triggering the GCD algorithm when ``y`` is written. Therefore, the
 algorithm is set up by first writing ``x`` and then performing a
 triggering write to ``y``. Polling can be used for status checks.
 
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
+    :language: scala
+    :start-after: DOC include start: GCD instance regmap
+    :end-before: DOC include end: GCD instance regmap
+
+.. note::
+   In older versions of Chipyard and Rocket-Chip, a ``TLRegisterRouter`` abstrat
+   class was used to abstract away the construction of the ``TLRegisterNode`` and
+   ``LazyModule`` classes necessary to construct MMIO peripherals. This was removed,
+   in favor of requiring users to explicitly construct the necessary classes.
+
+   This matches more closely how standard ``Modules`` and ``LazyModules`` are
+   constructed, making it clearer how a MMIO peripheral fits into the ``Module``
+   and ``LazyModule`` design patterns.
+
 
 Connecting by TileLink
 ----------------------
 
-Once you have these classes, you can construct the final peripheral by extending the ``TLRegisterRouter`` and passing the proper arguments.
-The first set of arguments determines where the register router will be placed in the global address map and what information will be put in its device tree entry.
-The second set of arguments is the IO bundle constructor, which we create by extending ``TLRegBundle`` with our bundle trait.
-The final set of arguments is the module constructor, which we create by extends ``TLRegModule`` with our module trait.
-Notice how we can create an analogous AXI4 version of our peripheral.
+The key to connecting to the TileLink Diplomatic graph is the construction of the TileLink node for this peripheral.
+In this case, since the peripheral acts as a manager of some register-mapped address space, it uses the ``TLRegisterNode`` object.
+The parameters to the ``TLRegisterNode`` object specify the size of the managed space, the base address, and the port width.
+
+Within the register-mapped peripheral, the control registers can be mapped using the ``node.regmap`` function, as described above.
+A similar procedure is followed for both AXI4 and TileLin peripherals.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala
@@ -62,30 +80,18 @@ Top-level Traits
 ----------------
 
 After creating the module, we need to hook it up to our SoC.
-Rocket Chip accomplishes this using the cake pattern.
-This basically involves placing code inside traits.
-In the Rocket Chip cake, there are two kinds of traits: a ``LazyModule`` trait and a module implementation trait.
-
-The ``LazyModule`` trait runs setup code that must execute before all the hardware gets elaborated.
-For a simple memory-mapped peripheral, this just involves connecting the peripheral's TileLink node to the MMIO crossbar.
+The ``LazyModule`` abstract class containst the TileLink node representing the peripheral's I/O.
+For a simple memory-mapped peripheral, connecting the peripheral's TileLink node must be connected to the relevant bu.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala
     :start-after: DOC include start: GCD lazy trait
     :end-before: DOC include end: GCD lazy trait
 
-Note that the ``GCDTL`` class we created from the register router is itself a ``LazyModule``.
-Register routers have a TileLink node simply named "node", which we can hook up to the Rocket Chip bus.
-This will automatically add address map and device tree entries for the peripheral.
 Also observe how we have to place additional AXI4 buffers and converters for the AXI4 version of this peripheral.
 
-For peripherals which instantiate a concrete module, or which need to be connected to concrete IOs or wires, a matching concrete trait is necessary. We will make our GCD example output a ``gcd_busy`` signal as a top-level port to demonstrate. In the concrete module implementation trait, we instantiate the top level IO (a concrete object) and wire it to the IO of our lazy module.
-
-
-.. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
-    :language: scala
-    :start-after: DOC include start: GCD imp trait
-    :end-before: DOC include end: GCD imp trait
+Peripherals which expose I/O can use `InModuleBody` to punch their I/O to the `DigitalTop` module.
+In this example, the GCD module's ``gcd_busy`` signal is exposed as a I/O of DigitalTop.
 
 Constructing the DigitalTop and Config
 --------------------------------------

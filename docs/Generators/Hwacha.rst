@@ -5,7 +5,7 @@ The Hwacha project is developing a new vector architecture for future computer s
 The Hwacha project is inspired by traditional vector machines from the 70s and 80s, and lessons learned from our previous vector-thread architectures such as Scale and Maven
 The Hwacha project includes the Hwacha microarchitecture generator, as well as the ``XHwacha`` non-standard RISC-V extension. Hwacha does not implement the RISC-V standard vector extension proposal.
 
-For more information on the Hwacha project, please visit the `Hwacha website <http://hwacha.org/>`__.
+For more information on the Hwacha project, please visit the `Hwacha website <https://bar.eecs.berkeley.edu/projects/hwacha.html>`__ or search for "Krste Asanovic Hwacha" on Google Scholar for publications.
 
 To add the Hwacha vector unit to an SoC, you should add the ``hwacha.DefaultHwachaConfig`` config fragment to the SoC configurations. The Hwacha vector unit uses the RoCC port of a Rocket or BOOM `tile`, and by default connects to the memory system through the `System Bus` (i.e., directly to the L2 cache).
 

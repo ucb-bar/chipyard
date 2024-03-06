@@ -21,6 +21,7 @@ parser.add_argument("--gcpath", type=str, required=True, help="Path to gen-colla
 args = parser.parse_args()
 
 MODEL_SFX=args.model + "_UNIQUIFIED"
+SED=os.environ.get("SED", "sed")
 
 
 def bash(cmd):
@@ -109,7 +110,7 @@ def generate_copy(c, sfx):
   new_file = os.path.join(args.gcpath, new_file)
 
   shutil.copy(cur_file, new_file)
-  bash(f"sed -i 's/module\( \+\){cur_name}/module\\1{new_name}/' {new_file}")
+  bash(rf"{SED} -i 's/module\( \+\){cur_name}/module\1{new_name}/' {new_file}")
   return new_file
 
 def bfs_uniquify_modules(tree, common_fnames, verilog_module_filename):
@@ -136,7 +137,7 @@ def bfs_uniquify_modules(tree, common_fnames, verilog_module_filename):
         new_file = generate_copy(cur_file, MODEL_SFX)
         if parent is not None and ((parent, mod) not in updated_submodule):
           parent_file = os.path.join(args.gcpath, verilog_module_filename[parent])
-          bash(f"sed -i 's/\( \*\){mod}\( \+\)/\\1{mod}_{MODEL_SFX}\\2/' {parent_file}")
+          bash(rf"{SED} -i 's/\( \*\){mod}\( \+\)/\1{mod}_{MODEL_SFX}\2/' {parent_file}")
           updated_submodule.add((parent, mod))
 
         # add the uniquified module to the verilog_modul_filename dict

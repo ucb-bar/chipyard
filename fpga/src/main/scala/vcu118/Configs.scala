@@ -48,16 +48,17 @@ class WithVCU118Tweaks extends Config(
   new chipyard.config.WithSystemBusFrequency(100) ++
   new chipyard.config.WithControlBusFrequency(100) ++
   new chipyard.config.WithPeripheryBusFrequency(100) ++
+  new chipyard.config.WithControlBusFrequency(100) ++
   new WithFPGAFrequency(100) ++ // default 100MHz freq
   // harness binders
   new WithUART ++
   new WithSPISDCard ++
   new WithDDRMem ++
+  new WithJTAG ++
   // other configuration
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
-  new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1)
 )

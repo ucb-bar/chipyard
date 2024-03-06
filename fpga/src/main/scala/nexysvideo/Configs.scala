@@ -18,7 +18,7 @@ import chipyard.{BuildSystem}
 
 // don't use FPGAShell's DesignKey
 class WithNoDesignKey extends Config((site, here, up) => {
-  case DesignKey => (p: Parameters) => new SimpleLazyModule()(p)
+  case DesignKey => (p: Parameters) => new SimpleLazyRawModule()(p)
 })
 
 // DOC include start: WithNexysVideoTweaks and Rocket
@@ -60,6 +60,7 @@ class WithTinyNexysVideoTweaks extends Config(
   new chipyard.config.WithFrontBusFrequency(50.0) ++
   new chipyard.config.WithSystemBusFrequency(50.0) ++
   new chipyard.config.WithPeripheryBusFrequency(50.0) ++
+  new chipyard.config.WithControlBusFrequency(50.0) ++
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
   new chipyard.config.WithNoDebug ++ // no jtag

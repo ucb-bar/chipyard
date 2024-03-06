@@ -44,20 +44,6 @@ ifeq ($(SUB_PROJECT),vcu118)
 	FPGA_BRAND        ?= xilinx
 endif
 
-ifeq ($(SUB_PROJECT),bringup)
-	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= BringupVCU118FPGATestHarness
-	VLOG_MODEL        ?= BringupVCU118FPGATestHarness
-	MODEL_PACKAGE     ?= chipyard.fpga.vcu118.bringup
-	CONFIG            ?= RocketBringupConfig
-	CONFIG_PACKAGE    ?= chipyard.fpga.vcu118.bringup
-	GENERATOR_PACKAGE ?= chipyard
-	TB                ?= none # unused
-	TOP               ?= ChipTop
-	BOARD             ?= vcu118
-	FPGA_BRAND        ?= xilinx
-endif
-
 ifeq ($(SUB_PROJECT),nexysvideo)
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= NexysVideoHarness
@@ -137,7 +123,7 @@ include $(base_dir)/common.mk
 # copy from other directory
 #########################################################################################
 all_vsrcs := \
-	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v
+	$(base_dir)/generators/rocket-chip-blocks/vsrc/SRLatch.v
 
 #########################################################################################
 # vivado rules

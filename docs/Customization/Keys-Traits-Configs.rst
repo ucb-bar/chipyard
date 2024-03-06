@@ -40,12 +40,12 @@ Top-level traits specify that the ``DigitalTop`` has been parameterized to read 
 
 Top-level traits should be defined and documented in subprojects, alongside their corresponding keys. The traits should then be added to the ``DigitalTop`` being used by Chipyard.
 
-Below we see the traits for the GCD example. The Lazy trait connects the GCD module to the Diplomacy graph, while the Implementation trait causes the ``DigitalTop`` to instantiate an additional port and concretely connect it to the GCD module.
+Below we see the traits for the GCD example. The Lazy trait connects the GCD module to the Diplomacy graph.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala
     :start-after: DOC include start: GCD lazy trait
-    :end-before: DOC include end: GCD imp trait
+    :end-before: DOC include end: GCD lazy trait
 
 These traits are added to the default ``DigitalTop`` in Chipyard.
 

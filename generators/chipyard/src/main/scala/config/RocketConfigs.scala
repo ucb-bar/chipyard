@@ -2,6 +2,7 @@ package chipyard
 
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
+import freechips.rocketchip.subsystem.{InCluster}
 
 // --------------
 // Rocket Configs
@@ -62,7 +63,7 @@ class MulticlockRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   // Frequency specifications
   new chipyard.config.WithTileFrequency(1000.0) ++        // Matches the maximum frequency of U540
-  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore"   , Seq("sbus", "cbus", "implicit"), Nil),
+  new chipyard.clocking.WithClockGroupsCombinedByName(("uncore"   , Seq("sbus", "cbus", "implicit", "clock_tap"), Nil),
                                                       ("periphery", Seq("pbus", "fbus"), Nil)) ++
   new chipyard.config.WithSystemBusFrequency(500.0) ++    // Matches the maximum frequency of U540
   new chipyard.config.WithMemoryBusFrequency(500.0) ++    // Matches the maximum frequency of U540
@@ -88,3 +89,14 @@ class PrefetchingRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNonblockingL1(2) ++                           // non-blocking L1D$, L1 prefetching only works with non-blocking L1D$
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++                               // single rocket-core
   new chipyard.config.AbstractConfig)
+
+class ClusteredRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithNBigCores(4, location=InCluster(1)) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(4, location=InCluster(0)) ++
+  new freechips.rocketchip.subsystem.WithCluster(1) ++
+  new freechips.rocketchip.subsystem.WithCluster(0) ++
+  new chipyard.config.AbstractConfig)
+
+class FastRTLSimRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new chipyard.RocketConfig)

@@ -7,7 +7,7 @@ import sifive.blocks.inclusivecache.{InclusiveCachePortParameters}
 
 // Replaces the L2 with a broadcast manager for maintaining coherence
 class WithBroadcastManager extends Config((site, here, up) => {
-  case BankedL2Key => up(BankedL2Key, site).copy(coherenceManager = CoherenceManagerWrapper.broadcastManager)
+  case SubsystemBankedCoherenceKey => up(SubsystemBankedCoherenceKey, site).copy(coherenceManager = CoherenceManagerWrapper.broadcastManager)
 })
 
 class WithBroadcastParams(params: BroadcastParams) extends Config((site, here, up) => {

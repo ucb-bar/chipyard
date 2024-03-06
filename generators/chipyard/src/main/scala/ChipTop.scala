@@ -5,7 +5,6 @@ import chisel3._
 import scala.collection.mutable.{ArrayBuffer}
 
 import freechips.rocketchip.prci.{ClockGroupIdentityNode, ClockSinkParameters, ClockSinkNode, ClockGroup}
-import freechips.rocketchip.subsystem.{BaseSubsystem, SubsystemDriveAsyncClockGroupsKey}
 import org.chipsalliance.cde.config.{Parameters, Field}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, LazyRawModuleImp, LazyModuleImpLike, BindingScope}
 import freechips.rocketchip.util.{DontTouch}

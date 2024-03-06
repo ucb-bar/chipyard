@@ -11,7 +11,7 @@ SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
 cd $REMOTE_CHIPYARD_DIR
-./scripts/init-submodules-no-riscv-tools.sh --force
+./scripts/init-submodules-no-riscv-tools.sh
 
 # Run Firesim Scala Tests
 export FIRESIM_ENV_SOURCED=1

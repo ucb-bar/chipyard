@@ -22,8 +22,18 @@ class ChipLikeRocketConfig extends Config(
   //==================================
   // Set up I/O
   //==================================
-  new testchipip.serdes.WithSerialTLWidth(4) ++                                         // 4bit wide Serialized TL interface to minimize IO
-  new testchipip.serdes.WithSerialTLMem(size = (1 << 30) * 4L) ++                       // Configure the off-chip memory accessible over serial-tl as backing memory
+  new testchipip.serdes.WithSerialTL(Seq(testchipip.serdes.SerialTLParams(              // 1 serial tilelink port
+    manager = Some(testchipip.serdes.SerialTLManagerParams(                             // port acts as a manager of offchip memory
+      memParams = Seq(testchipip.serdes.ManagerRAMParams(                               // 4 GB of off-chip memory
+        address = BigInt("80000000", 16),
+        size    = BigInt("100000000", 16)
+      )),
+      isMemoryDevice = true
+    )),
+    client = Some(testchipip.serdes.SerialTLClientParams()),                            // Allow an external manager to probe this chip
+    phyParams = testchipip.serdes.ExternalSyncSerialPhyParams(phitWidth=4, flitWidth=16)   // 4-bit bidir interface, sync'd to an external clock
+  ))) ++
+
   new freechips.rocketchip.subsystem.WithNoMemPort ++                                   // Remove axi4 mem port
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++                          // 1 memory channel
 
@@ -60,10 +70,16 @@ class ChipBringupHostConfig extends Config(
   //=============================
   // Setup the SerialTL side on the bringup device
   //=============================
-  new testchipip.serdes.WithSerialTLWidth(4) ++                                // match width with the chip
-  new testchipip.serdes.WithSerialTLMem(base = 0x0, size = 0x80000000L,        // accessible memory of the chip that doesn't come from the tethered host
-                                        idBits = 4, isMainMemory = false) ++   // This assumes off-chip mem starts at 0x8000_0000
-  new testchipip.serdes.WithSerialTLClockDirection(provideClockFreqMHz = Some(75)) ++ // bringup board drives the clock for the serial-tl receiver on the chip, use 75MHz clock
+  new testchipip.serdes.WithSerialTL(Seq(testchipip.serdes.SerialTLParams(
+    manager = Some(testchipip.serdes.SerialTLManagerParams(
+      memParams = Seq(testchipip.serdes.ManagerRAMParams(                            // Bringup platform can access all memory from 0 to DRAM_BASE
+        address = BigInt("00000000", 16),
+        size    = BigInt("80000000", 16)
+      ))
+    )),
+    client = Some(testchipip.serdes.SerialTLClientParams()),                                        // Allow chip to access this device's memory (DRAM)
+    phyParams = testchipip.serdes.InternalSyncSerialPhyParams(phitWidth=4, flitWidth=16, freqMHz = 75) // bringup platform provides the clock
+  ))) ++
 
   //============================
   // Setup bus topology on the bringup system
@@ -110,5 +126,9 @@ class TetheredChipLikeRocketConfig extends Config(
 class VerilatorCITetheredChipLikeRocketConfig extends Config(
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++   // use absolute freqs for sims in the harness
   new chipyard.harness.WithMultiChipSerialTL(0, 1) ++                // connect the serial-tl ports of the chips together
-  new chipyard.harness.WithMultiChip(0, new chipyard.config.WithNoResetSynchronizers ++ new ChipLikeRocketConfig) ++
+  new chipyard.harness.WithMultiChip(0,                                         // These fragments remove all troublesome
+    new chipyard.clocking.WithPLLSelectorDividerClockGenerator(enable=false) ++ // clocking features from the design
+    new chipyard.iobinders.WithDebugIOCells(syncReset = false) ++
+    new chipyard.config.WithNoResetSynchronizers ++
+    new ChipLikeRocketConfig) ++
   new chipyard.harness.WithMultiChip(1, new ChipBringupHostConfig))

@@ -23,7 +23,7 @@ endif
 endif
 	echo "  start_times: ['0ns']" >> $@
 	echo "  end_times: [" >> $@
-	echo "    '`bc <<< $(timeout_cycles)*$(CLOCK_PERIOD)`ns'" >> $@
+	echo "    '`bc <<< $(TIMEOUT_CYCLES)*$(CLOCK_PERIOD)`ns'" >> $@
 	echo "  ]" >> $@
 
 $(POWER_RTL_CONF): $(VLSI_RTL)

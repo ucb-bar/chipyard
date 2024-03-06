@@ -26,7 +26,7 @@ so changes to the generators themselves will automatically be used when building
    Gemmini
    IceNet
    TestChipIP
-   SiFive-Generators
+   Rocket-Chip-Generators
    SHA3
    CVA6
    Ibex

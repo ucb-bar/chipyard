@@ -1,0 +1,23 @@
+channels:
+    - ucb-bar
+    - conda-forge
+    - litex-hub
+    - nodefaults
+
+platforms:
+    - linux-64
+
+dependencies:
+    # https://conda-forge.org/feedstock-outputs/
+    #   filterable list of all conda-forge packages
+    # https://conda-forge.org/#contribute
+    #   instructions on adding a recipe
+    # https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/pkg-specs.html#package-match-specifications
+    #   documentation on package_spec syntax for constraining versions
+
+    # doc requirements
+    - sphinx
+    - pygments
+    - sphinx-autobuild
+    - sphinx_rtd_theme
+    - docutils

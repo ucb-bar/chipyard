@@ -85,6 +85,7 @@ class WithMinimalFireSimDesignTweaks extends Config(
   new chipyard.harness.WithHarnessBinderClockFreqMHz(1000.0) ++
   new chipyard.harness.WithClockFromHarness ++
   new chipyard.harness.WithResetFromHarness ++
+  new chipyard.config.WithNoClockTap ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
   // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
   new WithBootROM ++
@@ -99,6 +100,8 @@ class WithMinimalFireSimDesignTweaks extends Config(
 // Non-frequency tweaks that are generally applied to all firesim configs
 class WithFireSimDesignTweaks extends Config(
   new WithMinimalFireSimDesignTweaks ++
+  // Required: Remove the debug clock tap, this breaks compilation of target-level sim in FireSim
+  new chipyard.config.WithNoClockTap ++
   // Required: Bake in the default FASED memory model
   new WithDefaultMemModel ++
   // Optional: reduce the width of the Serial TL interface
@@ -125,6 +128,7 @@ class WithFireSimHighPerfClocking extends Config(
   // This frequency selection matches FireSim's legacy selection and is required
   // to support 200Gb NIC performance. You may select a smaller value.
   new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
+  new chipyard.config.WithControlBusFrequency(3200.0) ++
   new chipyard.config.WithSystemBusFrequency(3200.0) ++
   new chipyard.config.WithFrontBusFrequency(3200.0) ++
   new chipyard.config.WithControlBusFrequency(3200.0) ++
@@ -145,6 +149,7 @@ class WithFireSimConfigTweaks extends Config(
   new chipyard.config.WithSystemBusFrequency(1000.0) ++
   new chipyard.config.WithControlBusFrequency(1000.0) ++
   new chipyard.config.WithPeripheryBusFrequency(1000.0) ++
+  new chipyard.config.WithControlBusFrequency(1000.0) ++
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++
   new chipyard.config.WithFrontBusFrequency(1000.0) ++
   new WithFireSimDesignTweaks
@@ -262,8 +267,8 @@ class FireSimSmallSystemConfig extends Config(
   new WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++
   new testchipip.serdes.WithSerialTL(Seq(testchipip.serdes.SerialTLParams(
-    client = Some(testchipip.serdes.SerialTLClientParams(idBits = 4)),
-    width = 32
+    client = Some(testchipip.serdes.SerialTLClientParams(totalIdBits = 4)),
+    phyParams = testchipip.serdes.ExternalSyncSerialPhyParams(phitWidth=32, flitWidth=32)
   ))) ++
   new testchipip.iceblk.WithBlockDevice ++
   new chipyard.config.WithUARTInitBaudRate(BigInt(3686400L)) ++
@@ -358,3 +363,10 @@ class FireSimLeanGemminiRocketMMIOOnlyConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.LeanGemminiRocketConfig)
+
+class FireSimLargeBoomCospikeConfig extends Config(
+  new firesim.firesim.WithCospikeBridge ++
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks++
+  new chipyard.LargeBoomConfig)

@@ -9,4 +9,4 @@ sphinx:
     configuration: docs/conf.py
 
 conda:
-    environment: conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64.conda-lock.yml
+    environment: conda-reqs/docs.yaml

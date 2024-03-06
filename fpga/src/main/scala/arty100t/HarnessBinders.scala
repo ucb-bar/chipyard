@@ -1,7 +1,6 @@
 package chipyard.fpga.arty100t
 
 import chisel3._
-import chisel3.experimental.{DataMirror, Direction}
 
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem.{PeripheryBusKey}
@@ -19,9 +18,10 @@ import sifive.fpgashells.clocks._
 import chipyard._
 import chipyard.harness._
 import chipyard.iobinders._
+import testchipip.serdes._
 
 class WithArty100TUARTTSI extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: UARTTSIPort) => {
+  case (th: HasHarnessInstantiators, port: UARTTSIPort, chipId: Int) => {
     val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     val harnessIO = IO(new UARTPortIO(port.io.uartParams)).suggestName("uart_tsi")
     harnessIO <> port.io.uart
@@ -44,7 +44,7 @@ class WithArty100TUARTTSI extends HarnessBinder({
 
 
 class WithArty100TDDRTL extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: TLMemPort) => {
+  case (th: HasHarnessInstantiators, port: TLMemPort, chipId: Int) => {
     val artyTh = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     val bundles = artyTh.ddrClient.out.map(_._1)
     val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
@@ -55,47 +55,58 @@ class WithArty100TDDRTL extends HarnessBinder({
 
 // Uses PMOD JA/JB
 class WithArty100TSerialTLToGPIO extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: SerialTLPort) => {
+  case (th: HasHarnessInstantiators, port: SerialTLPort, chipId: Int) => {
     val artyTh = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     val harnessIO = IO(chiselTypeOf(port.io)).suggestName("serial_tl")
     harnessIO <> port.io
-    val clkIO = IOPin(harnessIO.clock)
-    val packagePinsWithPackageIOs = Seq(
-      ("G13", clkIO),
-      ("B11", IOPin(harnessIO.bits.out.valid)),
-      ("A11", IOPin(harnessIO.bits.out.ready)),
-      ("D12", IOPin(harnessIO.bits.in.valid)),
-      ("D13", IOPin(harnessIO.bits.in.ready)),
-      ("B18", IOPin(harnessIO.bits.out.bits, 0)),
-      ("A18", IOPin(harnessIO.bits.out.bits, 1)),
-      ("K16", IOPin(harnessIO.bits.out.bits, 2)),
-      ("E15", IOPin(harnessIO.bits.out.bits, 3)),
-      ("E16", IOPin(harnessIO.bits.in.bits, 0)),
-      ("D15", IOPin(harnessIO.bits.in.bits, 1)),
-      ("C15", IOPin(harnessIO.bits.in.bits, 2)),
-      ("J17", IOPin(harnessIO.bits.in.bits, 3))
-    )
-    packagePinsWithPackageIOs foreach { case (pin, io) => {
-      artyTh.xdc.addPackagePin(io, pin)
-      artyTh.xdc.addIOStandard(io, "LVCMOS33")
-    }}
 
-    // Don't add IOB to the clock, if its an input
-    if (DataMirror.directionOf(port.io.clock) == Direction.Input) {
-      packagePinsWithPackageIOs foreach { case (pin, io) => {
-        artyTh.xdc.addIOB(io)
-      }}
+    harnessIO match {
+      case io: DecoupledPhitIO => {
+        val clkIO = io match {
+          case io: InternalSyncPhitIO => IOPin(io.clock_out)
+          case io: ExternalSyncPhitIO => IOPin(io.clock_in)
+        }
+        val packagePinsWithPackageIOs = Seq(
+          ("G13", clkIO),
+          ("B11", IOPin(io.out.valid)),
+          ("A11", IOPin(io.out.ready)),
+          ("D12", IOPin(io.in.valid)),
+          ("D13", IOPin(io.in.ready)),
+          ("B18", IOPin(io.out.bits.phit, 0)),
+          ("A18", IOPin(io.out.bits.phit, 1)),
+          ("K16", IOPin(io.out.bits.phit, 2)),
+          ("E15", IOPin(io.out.bits.phit, 3)),
+          ("E16", IOPin(io.in.bits.phit, 0)),
+          ("D15", IOPin(io.in.bits.phit, 1)),
+          ("C15", IOPin(io.in.bits.phit, 2)),
+          ("J17", IOPin(io.in.bits.phit, 3))
+        )
+        packagePinsWithPackageIOs foreach { case (pin, io) => {
+          artyTh.xdc.addPackagePin(io, pin)
+          artyTh.xdc.addIOStandard(io, "LVCMOS33")
+        }}
+
+        // Don't add IOB to the clock, if its an input
+        io match {
+          case io: InternalSyncPhitIO => packagePinsWithPackageIOs foreach { case (pin, io) => {
+            artyTh.xdc.addIOB(io)
+          }}
+          case io: ExternalSyncPhitIO => packagePinsWithPackageIOs.drop(1).foreach { case (pin, io) => {
+            artyTh.xdc.addIOB(io)
+          }}
+        }
+
+        artyTh.sdc.addClock("ser_tl_clock", clkIO, 100)
+        artyTh.sdc.addGroup(pins = Seq(clkIO))
+        artyTh.xdc.clockDedicatedRouteFalse(clkIO)
+      }
     }
-
-    artyTh.sdc.addClock("ser_tl_clock", clkIO, 100)
-    artyTh.sdc.addGroup(pins = Seq(clkIO))
-    artyTh.xdc.clockDedicatedRouteFalse(clkIO)
   }
 })
 
 // Maps the UART device to the on-board USB-UART
 class WithArty100TUART(rxdPin: String = "A9", txdPin: String = "D10") extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: UARTPort) => {
+  case (th: HasHarnessInstantiators, port: UARTPort, chipId: Int) => {
     val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     val harnessIO = IO(chiselTypeOf(port.io)).suggestName("uart")
     harnessIO <> port.io
@@ -114,7 +125,7 @@ class WithArty100TUART(rxdPin: String = "A9", txdPin: String = "D10") extends Ha
 class WithArty100TPMODUART extends WithArty100TUART("G2", "F3")
 
 class WithArty100TJTAG extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: JTAGPort) => {
+  case (th: HasHarnessInstantiators, port: JTAGPort, chipId: Int) => {
     val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     val harnessIO = IO(chiselTypeOf(port.io)).suggestName("jtag")
     harnessIO <> port.io

@@ -8,14 +8,6 @@ platforms:
     - linux-64
 
 dependencies:
-    # https://conda-forge.org/feedstock-outputs/
-    #   filterable list of all conda-forge packages
-    # https://conda-forge.org/#contribute
-    #   instructions on adding a recipe
-    # https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/pkg-specs.html#package-match-specifications
-    #   documentation on package_spec syntax for constraining versions
-
-
     # handy tool for introspecting package relationships and file ownership
     # see https://github.com/rvalieris/conda-tree
     - conda-tree
@@ -23,21 +15,9 @@ dependencies:
     # bundle FireSim driver with deps into installer shell-script
     - constructor
 
-    - gcc<13
-    - gxx<13
-    - sysroot_linux-64=2.17 # needed to match pre-built CI XRT glibc version
-    - conda-gcc-specs
-    - binutils
-
-    # firtool handled outside of conda
-
     # misc
-    - autoconf
     - pre-commit
     - readline
-    - coreutils
-    - jq
-    - pip
 
     # firemarshal deps
     - qemu # from ucb-bar channel - https://github.com/ucb-bar/qemu-feedstock
@@ -67,9 +47,7 @@ dependencies:
     - findutils
     - lzop
 
-    - make
     - bash-completion
-    - sbt
     - ca-certificates
     - mosh
     - gmp
@@ -77,8 +55,6 @@ dependencies:
     - mpc
     - zlib
     - vim
-    - git
-    - openjdk
     - gengetopt
     - libffi
     - expat
@@ -87,12 +63,6 @@ dependencies:
     - cmake
     - graphviz
     - expect
-    - dtc
-    - verilator==5.008
-    - screen
-    - elfutils
-    - libdwarf-dev==0.0.0.20190110_28_ga81397fc4 # from ucb-bar channel - using mainline libdwarf-feedstock
-    - conda-lock=1.4
 
     # clang-format for driver coding style enforcement.
     - clang-format
@@ -104,18 +74,14 @@ dependencies:
     - pip:
         - hammer-vlsi[asap7]==1.2.0
 
-    # doc requirements
-    - sphinx
-    - pygments
-    - sphinx-autobuild
-    - sphinx_rtd_theme
-    - docutils
-
     # firesim python packages
     # While it is possible to install using pip after creating the
     # conda environment, pip's dependency resolution can conflict with
     # conda and create broken environments.  It's best to use the conda
     # packages so that the environment is consistent
+    - screen
+    - elfutils
+    - libdwarf-dev==0.0.0.20190110_28_ga81397fc4 # from ucb-bar channel - using mainline libdwarf-feedstock
     - colorama
     - argcomplete
     - python-graphviz
