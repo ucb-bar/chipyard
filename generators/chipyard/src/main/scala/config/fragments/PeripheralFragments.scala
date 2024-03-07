@@ -66,11 +66,12 @@ class WithNoUART extends Config((site, here, up) => {
   * @param address the address of the UART device
   * @param baudrate the baudrate of the UART device
   */
-class WithUART(baudrate: BigInt = 115200, address: BigInt = 0x10020000) extends Config ((site, here, up) => {
+class WithUART(baudrate: BigInt = 115200, address: BigInt = 0x10020000, txEntries: Int = 8, rxEntries: Int = 8) extends Config ((site, here, up) => {
   case PeripheryUARTKey => up(PeripheryUARTKey) ++ Seq(
-    UARTParams(address = address, nTxEntries = 256, nRxEntries = 256, initBaudRate = baudrate))
+    UARTParams(address = address, nTxEntries = txEntries, nRxEntries = rxEntries, initBaudRate = baudrate))
 })
 
+// @deprecated("Use WithUART instead of WithUARTFIFOEntries", "chipyard v1.10")
 class WithUARTFIFOEntries(txEntries: Int, rxEntries: Int) extends Config((site, here, up) => {
   case PeripheryUARTKey => up(PeripheryUARTKey).map(_.copy(nTxEntries = txEntries, nRxEntries = rxEntries))
 })

@@ -107,7 +107,10 @@ class WithFireSimDesignTweaks extends Config(
   // Optional: reduce the width of the Serial TL interface
   new testchipip.serdes.WithSerialTLWidth(4) ++
   // Required*: Scale default baud rate with periphery bus frequency
-  new chipyard.config.WithUARTInitBaudRate(BigInt(3686400L)) ++
+  new chipyard.config.WithUART(
+    baudrate=BigInt(3686400L), 
+    txEntries=256, rxEntries=256) ++        // FireSim requires a larger UART FIFO buffer, 
+  new chipyard.config.WithNoUART() ++       // so we overwrite the default one
   // Optional: Adds IO to attach tracerV bridges
   new chipyard.config.WithTraceIO ++
   // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 64 GiB on F1)
