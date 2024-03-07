@@ -3,7 +3,7 @@
 #include <riscv/log_file.h>
 #include <fesvr/context.h>
 #include <fesvr/htif.h>
-#include <fesvr/memif.h>
+// #include <fesvr/memif.h>
 #include <fesvr/elfloader.h>
 #include <map>
 #include <sstream>
@@ -103,6 +103,8 @@ public:
 
   bool accel_handshake(rocc_insn_t *insn, reg_t* rs1, reg_t* rs2);
   void push_accel_insn(rocc_insn_t insn, reg_t rs1, reg_t rs2);
+  void push_accel_result(long long int result);
+  long long int get_accel_result();
 
   void loadmem(size_t base, const char* fname);
 
@@ -169,6 +171,11 @@ private:
   std::vector<cache_miss_t> dcache_inflight;
   std::vector<writeback_t> wb_q;
   std::vector<stq_entry_t> st_q;
+
+  std::vector<rocc_insn_t> accel_insn_q;
+  std::vector<long long int> accel_result_q;
+  std::vector<reg_t> accel_reg_q_1;
+  std::vector<reg_t> accel_reg_q_2;
 
   std::map<std::pair<uint64_t, size_t>, uint64_t> readonly_cache;
 
@@ -327,12 +334,14 @@ extern "C" void spike_tile(int hartid, char* isa,
                            unsigned char tcm_d_ready,
                            long long int* tcm_d_data,
 
+                           unsigned char* accel_exists,
                            unsigned char accel_a_ready,
                            unsigned char* accel_a_valid,
                            int* accel_a_insn,
                            int* accel_a_rs1,
                            int* accel_a_rs2,
                            unsigned char accel_d_valid,
+                           long long int accel_d_rd,
                            long long int accel_d_result
                            )
 {
@@ -482,27 +491,34 @@ extern "C" void spike_tile(int hartid, char* isa,
   if (accel_a_ready) {
     *accel_a_valid = simif->accel_handshake((rocc_insn_t*) accel_a_insn, (reg_t*) accel_a_rs1, (reg_t*) accel_a_rs2);
   }
+
+  if (accel_d_valid) {
+    simif->push_accel_result(accel_d_result);
+  }
 }
 
 /*Begin Accelerator Section*/
 reg_t generic_t::custom0(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
   simif->push_accel_insn(insn, xs1, xs2);
-  return 0;
+  long long int result = simif->get_accel_result();
+  
+  printf("Returned from pushing accel insn, returning result: %lld\n", result);
+  return result;
 }
 
 reg_t generic_t::custom1(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
   simif->push_accel_insn(insn, xs1, xs2);
-  return 0;
+  return simif->get_accel_result();
 }
 
 reg_t generic_t::custom2(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
   simif->push_accel_insn(insn, xs1, xs2);
-  return 0;
+  return simif->get_accel_result();
 }
 
 reg_t generic_t::custom3(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
   simif->push_accel_insn(insn, xs1, xs2);
-  return 0;
+  return simif->get_accel_result();
 }
 
 define_custom_func(generic_t, "generic", generic_custom0, custom0);
@@ -1169,11 +1185,28 @@ bool chipyard_simif_t::accel_handshake(rocc_insn_t* insn, reg_t* rs1, reg_t* rs2
 }
 
 void chipyard_simif_t::push_accel_insn(rocc_insn_t insn, reg_t rs1, reg_t rs2) {
+  // printf("Pushing instruction to accelerator queue\n");
+  // printf("Instruction: %d\n", insn);
+  // printf("rs1: %d\n", rs1);
+  // printf("rs2: %d\n", rs2);
   accel_insn_q.push_back(insn);
   accel_reg_q_1.push_back(rs1);
   accel_reg_q_2.push_back(rs2);
   
   host->switch_to();
+}
+
+void chipyard_simif_t::push_accel_result(long long int result) {
+  accel_result_q.push_back(result);
+}
+
+long long int chipyard_simif_t::get_accel_result() {
+  while (accel_result_q.size() == 0) {
+    host->switch_to();
+  }
+  long long int result = accel_result_q.front();
+  accel_result_q.erase(accel_result_q.begin());
+  return result;
 }
 
 void chipyard_simif_t::loadmem(size_t base, const char* fname) {

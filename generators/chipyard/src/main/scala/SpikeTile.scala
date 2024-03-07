@@ -65,7 +65,7 @@ case class SpikeCoreParams() extends CoreParams {
   val useConditionalZero = false
 
   override def vLen = 128
-  override def vMemDataBits = 128
+  override def vMemDataBits = 64 //128
 }
 
 case class SpikeTileAttachParams(
@@ -178,7 +178,8 @@ class SpikeTile(
   override lazy val module = new SpikeTileModuleImp(this)
   //TODO: Modularize Accel instantiation with configs
   //Add line below with instantiation of desired accelerator
-  val accel: AdderExample = LazyModule(new AdderExample(OpcodeSet.all));
+  val accel_module: AdderExample = LazyModule(new AdderExample(OpcodeSet.all))
+  // val accel_module: AccumulatorExample = LazyModule(new AccumulatorExample(OpcodeSet.all));
 }
 
 class SpikeBlackBox(
@@ -489,67 +490,126 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
 
   /* Begin Accel Section */
    val to_accel_enq_bits = IO(new Bundle{
-    val insn = UInt(64.W)
-    val rs1 = UInt(64.W)
     val rs2 = UInt(64.W)
+    val rs1 = UInt(64.W)
+    val insn = UInt(64.W)
   })
 
   val to_accel_q = Module(new Queue(UInt(192.W), 1, flow=true, pipe=true))
   spike.io.accel.a.ready := to_accel_q.io.enq.ready && to_accel_q.io.count === 0.U
   to_accel_q.io.enq.valid := spike.io.accel.a.valid
-  printf(cf"Accel valid? ${spike.io.accel.a.valid}\n")
+  // printf(cf"Accel valid? ${spike.io.accel.a.valid}\n")
   to_accel_enq_bits.insn := spike.io.accel.a.insn
   to_accel_enq_bits.rs1 := spike.io.accel.a.rs1
   to_accel_enq_bits.rs2 := spike.io.accel.a.rs2
   to_accel_q.io.enq.bits := to_accel_enq_bits.asUInt
-  printf(cf"Enq bits: ${to_accel_enq_bits.insn(63, 0)}\n")
-  printf(cf"RS1 bits: ${to_accel_enq_bits.rs1(63, 0)}\n")
-  printf(cf"RS2 bits: ${to_accel_enq_bits.rs2(63, 0)}\n")
+  // printf(cf"Enq bits: ${to_accel_enq_bits.insn(63, 0)}\n")
+  // printf(cf"RS1 bits: ${to_accel_enq_bits.rs1(63, 0)}\n")
+  // printf(cf"RS2 bits: ${to_accel_enq_bits.rs2(63, 0)}\n")
+  // printf(cf"Enq valid? ${to_accel_q.io.enq.valid}\n")
+  // printf(cf"Enq ready? ${to_accel_q.io.enq.ready}\n")
+  // printf(cf"Deq valid? ${to_accel_q.io.deq.valid}\n")
+  // printf(cf"Deq ready? ${to_accel_q.io.deq.ready}\n")
 
-  outer.accel.module.io.cmd.valid := to_accel_q.io.deq.valid
-  to_accel_q.io.deq.ready := outer.accel.module.io.cmd.ready
+  outer.accel_module.module.io.cmd.valid := to_accel_q.io.deq.valid
+  to_accel_q.io.deq.ready := outer.accel_module.module.io.cmd.ready
 
   val inst = Wire(new RoCCInstruction())
-  inst.funct := to_accel_q.io.deq.bits(6,0)
-  inst.rs2 := to_accel_q.io.deq.bits(11,7)
-  inst.rs1 := to_accel_q.io.deq.bits(16,12)
-  inst.xd := to_accel_q.io.deq.bits(17)
-  inst.xs1 := to_accel_q.io.deq.bits(18)
-  inst.xs2 := to_accel_q.io.deq.bits(19)
-  inst.rd := to_accel_q.io.deq.bits(24,20)
-  inst.opcode := to_accel_q.io.deq.bits(31,25)
+  inst.funct := to_accel_q.io.deq.bits(31,25)
+  inst.rs2 := to_accel_q.io.deq.bits(24,20)
+  inst.rs1 := to_accel_q.io.deq.bits(19,15)
+  inst.xd := to_accel_q.io.deq.bits(14)
+  inst.xs1 := to_accel_q.io.deq.bits(13)
+  inst.xs2 := to_accel_q.io.deq.bits(12)
+  inst.rd := to_accel_q.io.deq.bits(11,7)
+  inst.opcode := to_accel_q.io.deq.bits(6,0)
 
   val cmd = Wire(new RoCCCommand())
   cmd.inst := inst
-  cmd.rs1 := to_accel_q.io.deq.bits(123,64)
-  cmd.rs2 := to_accel_q.io.deq.bits(191,124)
+  cmd.rs1 := to_accel_q.io.deq.bits(127,64)
+  cmd.rs2 := to_accel_q.io.deq.bits(191,128)
   cmd.status := DontCare
-  outer.accel.module.io.cmd.bits := cmd
-  dontTouch(outer.accel.module.io)
+  outer.accel_module.module.io.cmd.bits := cmd
+  dontTouch(outer.accel_module.module.io)
+
+  // printf(cf"inst bits: ${inst}\n")
+  // printf(cf"rs1 bits: ${cmd.rs1}\n")
+  // printf(cf"rs2 bits: ${cmd.rs2}\n")
+
+  //Instantiate unused signals, will probably be used as interface develops further.
+  outer.accel_module.module.io.mem.req.ready := false.B
+  outer.accel_module.module.io.mem.s2_nack := false.B
+  outer.accel_module.module.io.mem.s2_uncached := false.B
+  outer.accel_module.module.io.mem.s2_paddr := 0.U
+  outer.accel_module.module.io.mem.resp.valid := false.B
+  outer.accel_module.module.io.mem.resp.bits := DontCare
+  outer.accel_module.module.io.mem.replay_next := false.B
+  outer.accel_module.module.io.mem.s2_xcpt.ma.ld := false.B
+  outer.accel_module.module.io.mem.s2_xcpt.ma.st := false.B
+  outer.accel_module.module.io.mem.s2_xcpt.pf.ld := false.B
+  outer.accel_module.module.io.mem.s2_xcpt.pf.st := false.B
+  outer.accel_module.module.io.mem.s2_xcpt.ae.ld := false.B
+  outer.accel_module.module.io.mem.s2_xcpt.ae.st := false.B
+  outer.accel_module.module.io.mem.s2_xcpt.gf.ld := false.B
+  outer.accel_module.module.io.mem.s2_xcpt.gf.st := false.B
+  outer.accel_module.module.io.mem.s2_gpa := 0.U
+  outer.accel_module.module.io.mem.ordered := false.B
+  outer.accel_module.module.io.mem.perf.acquire := false.B
+  outer.accel_module.module.io.mem.perf.release := false.B
+  outer.accel_module.module.io.mem.perf.grant := false.B
+  outer.accel_module.module.io.exception := false.B
+  outer.accel_module.module.io.mem.clock_enabled := true.B
+  outer.accel_module.module.io.mem.perf.storeBufferEmptyAfterStore := false.B
+  outer.accel_module.module.io.mem.perf.storeBufferEmptyAfterLoad := false.B
+  outer.accel_module.module.io.mem.perf.canAcceptLoadThenLoad := false.B
+  outer.accel_module.module.io.mem.perf.canAcceptStoreThenLoad := false.B
+  outer.accel_module.module.io.mem.perf.canAcceptStoreThenRMW := false.B
+  outer.accel_module.module.io.mem.s2_nack_cause_raw := 0.U
+  outer.accel_module.module.io.mem.s2_gpa_is_pte := false.B
+  outer.accel_module.module.io.mem.perf.tlbMiss := false.B
+  outer.accel_module.module.io.mem.perf.blocked := false.B
+
+  outer.accel_module.module.io.fpu_req.ready := false.B
+  outer.accel_module.module.io.fpu_resp.valid := false.B
+  outer.accel_module.module.io.fpu_resp.bits := DontCare
 
   val from_accel_enq_bits = IO(new Bundle {
     val rd = UInt(64.W)
     val resp = UInt(64.W)
   })
 
-  val from_accel_q = Module(new Queue(UInt(69.W), 1, flow=true, pipe=true)) //rd and result stitched together
-  outer.accel.module.io.resp.ready := from_accel_q.io.enq.ready && from_accel_q.io.count === 0.U
-  from_accel_q.io.enq.valid := outer.accel.module.io.resp.valid
+  val from_accel_q = Module(new Queue(UInt(128.W), 1, flow=true, pipe=true)) //rd and result stitched together
+  // printf(cf"From Accel:\n")
+  // printf(cf"Enq valid? ${from_accel_q.io.enq.valid}\n")
+  // printf(cf"Enq ready? ${from_accel_q.io.enq.ready}\n")
+  // printf(cf"Deq valid? ${from_accel_q.io.deq.valid}\n")
+  // printf(cf"Deq ready? ${from_accel_q.io.deq.ready}\n")
+  outer.accel_module.module.io.resp.ready := from_accel_q.io.enq.ready && from_accel_q.io.count === 0.U
+  from_accel_q.io.enq.valid := outer.accel_module.module.io.resp.valid
 
-  from_accel_enq_bits.rd := outer.accel.module.io.resp.bits.rd
-  from_accel_enq_bits.resp := outer.accel.module.io.resp.bits.data
+  from_accel_enq_bits.rd := outer.accel_module.module.io.resp.bits.rd
+  from_accel_enq_bits.resp := outer.accel_module.module.io.resp.bits.data
   from_accel_q.io.enq.bits := from_accel_enq_bits.asUInt
-  spike.io.accel.d.valid := from_accel_q.io.deq.valid
+  // spike.io.accel.d.valid := from_accel_q.io.deq.valid
+  spike.io.accel.d.valid := false.B
   from_accel_q.io.deq.ready := true.B
-  spike.io.accel.d.rd := from_accel_q.io.deq.bits(68,64)
-  spike.io.accel.d.result := from_accel_q.io.deq.bits(63,0)
-  when (to_accel_q.io.deq.fire) {
-    printf(cf"Got accel instruction: ${to_accel_q.io.deq.bits(63, 0)}\n")
-  }
+  spike.io.accel.d.rd := from_accel_q.io.deq.bits(127,64)
+  spike.io.accel.d.result := 0.U
+  // spike.io.accel.d.result := outer.accel_module.module.io.resp.bits.data
+  // printf(cf"Accel pre-queue result? ${outer.accel_module.module.io.resp.bits.data}\n")
+  // printf(cf"Accel dequeue result: ${from_accel_q.io.deq.bits(68,5)}\n")
+  // printf(cf"From Accel queue ready? ${from_accel_q.io.enq.ready}\n")
+  // printf(cf"From Accel queue valid? ${from_accel_q.io.enq.valid}\n")
+  // when (to_accel_q.io.deq.fire) {
+  //   printf(cf"Got accel instruction: ${to_accel_q.io.deq.bits(63, 0)}\n")
+  // }
 
   when (from_accel_q.io.deq.fire) {
-    printf(cf"Got result: ${from_accel_q.io.deq.bits(68, 5)}\n")
+    spike.io.accel.d.valid := true.B
+    spike.io.accel.d.result := from_accel_q.io.deq.bits(63,0)
+    // printf(cf"Got result: ${spike.io.accel.d.result}\n")
   }
+  printf("Accel result: %d\n", spike.io.accel.d.result)
   /* End Accel Section */
 }
 
