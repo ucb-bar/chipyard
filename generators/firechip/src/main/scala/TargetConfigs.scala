@@ -204,7 +204,7 @@ class WithFireSimTestChipConfigTweaks extends Config(
   new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
   new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
-  new boom.common.WithRationalBoomTiles ++ // Add rational crossings between BoomTile and uncore
+  new boom.v3.common.WithRationalBoomTiles ++ // Add rational crossings between BoomTile and uncore
   new WithFireSimDesignTweaks
 )
 
@@ -276,13 +276,13 @@ class FireSimSmallSystemConfig extends Config(
   new chipyard.RocketConfig)
 
 //*****************************************************************
-// Boom config, base off chipyard's LargeBoomConfig
+// Boom config, base off chipyard's LargeBoomV3Config
 //*****************************************************************
 class FireSimLargeBoomConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new chipyard.LargeBoomConfig)
+  new chipyard.LargeBoomV3Config)
 
 //********************************************************************
 // Heterogeneous config, base off chipyard's LargeBoomAndRocketConfig
@@ -338,11 +338,11 @@ class FireSimCVA6Config extends Config(
 // - Requires MTModels and MCRams mixins as prefixes to the platform config
 // - May require larger build instances or JVM memory footprints
 //*********************************************************************************/
-class FireSim16LargeBoomConfig extends Config(
+class FireSim16LargeBoomV3Config extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new boom.common.WithNLargeBooms(16) ++
+  new boom.v3.common.WithNLargeBooms(16) ++
   new chipyard.config.AbstractConfig)
 
 class FireSimNoMemPortConfig extends Config(
@@ -369,4 +369,4 @@ class FireSimLargeBoomCospikeConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks++
-  new chipyard.LargeBoomConfig)
+  new chipyard.LargeBoomV3Config)
