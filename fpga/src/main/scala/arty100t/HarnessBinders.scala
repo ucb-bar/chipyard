@@ -5,10 +5,9 @@ import chisel3._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem.{PeripheryBusKey}
 import freechips.rocketchip.tilelink.{TLBundle}
-import freechips.rocketchip.util.{HeterogeneousBag}
 import freechips.rocketchip.diplomacy.{LazyRawModuleImp}
-
-import sifive.blocks.devices.uart.{UARTPortIO, HasPeripheryUARTModuleImp, UARTParams}
+import org.chipsalliance.diplomacy.nodes.{HeterogeneousBag}
+import sifive.blocks.devices.uart.{UARTPortIO, UARTParams}
 import sifive.blocks.devices.jtag.{JTAGPins, JTAGPinsFromPort}
 import sifive.blocks.devices.pinctrl.{BasePin}
 import sifive.fpgashells.shell._

@@ -2,7 +2,7 @@ package chipyard.example
 
 import chisel3._
 import chisel3.util._
-import freechips.rocketchip.subsystem.{BaseSubsystem, CacheBlockBytes}
+import freechips.rocketchip.subsystem.{BaseSubsystem, CacheBlockBytes, FBUS}
 import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, IdRange}
 import freechips.rocketchip.tilelink._
@@ -62,6 +62,7 @@ trait CanHavePeripheryInitZero { this: BaseSubsystem =>
 
   p(InitZeroKey) .map { k =>
     val initZero = LazyModule(new InitZero()(p))
+    val fbus = locateTLBusWrapper(FBUS)
     fbus.coupleFrom("init-zero") { _ := initZero.node }
   }
 }

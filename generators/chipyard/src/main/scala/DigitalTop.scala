@@ -43,12 +43,6 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   override lazy val module = new DigitalTopModule(this)
 }
 
-class DigitalTopModule[+L <: DigitalTop](l: L) extends ChipyardSystemModule(l)
-  with sifive.blocks.devices.i2c.HasPeripheryI2CModuleImp
-  with sifive.blocks.devices.pwm.HasPeripheryPWMModuleImp
-  with sifive.blocks.devices.uart.HasPeripheryUARTModuleImp
-  with sifive.blocks.devices.gpio.HasPeripheryGPIOModuleImp
-  with sifive.blocks.devices.spi.HasPeripherySPIFlashModuleImp
-  with sifive.blocks.devices.spi.HasPeripherySPIModuleImp
+class DigitalTopModule(l: DigitalTop) extends ChipyardSystemModule(l)
   with freechips.rocketchip.util.DontTouch
 // DOC include end: DigitalTop
