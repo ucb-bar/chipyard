@@ -51,7 +51,7 @@ function [63:0] bit_matrix_mult;
                 // TODO: Extract a row from matrix A
                 // TODO: Extract a column from matrix B
                 row_a = 00000;
-                row_b = 00000;
+                col_b = 00000;
                 // TODO: Perform the bitwise AND and then reduce using XOR for each bit in the row and column
                 result_bit = 00000;
                 // Set the result bit in the result matrix
