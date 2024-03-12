@@ -145,7 +145,7 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule with HasChipyardPor
     // UART
     //==========================
     require(system.uarts.size == 1)
-    val (uart_pad, uartIOCells) = IOCell.generateIOFromSignal(system.module.uart.head, "uart_0", p(IOCellKey))
+    val (uart_pad, uartIOCells) = IOCell.generateIOFromSignal(system.uart.head, "uart_0", p(IOCellKey))
     val where = PBUS // TODO fix
     val bus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(where)
     val freqMHz = bus.dtsFrequency.get / 1000000

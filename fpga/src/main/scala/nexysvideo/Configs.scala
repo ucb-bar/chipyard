@@ -5,7 +5,7 @@ import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.devices.tilelink._
-import freechips.rocketchip.diplomacy._
+import org.chipsalliance.diplomacy.lazymodule._
 import freechips.rocketchip.system._
 import freechips.rocketchip.tile._
 

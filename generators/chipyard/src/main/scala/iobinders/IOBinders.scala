@@ -5,7 +5,12 @@ import chisel3.reflect.DataMirror
 import chisel3.experimental.Analog
 
 import org.chipsalliance.cde.config._
-import freechips.rocketchip.diplomacy._
+import org.chipsalliance.diplomacy._
+import org.chipsalliance.diplomacy.nodes._
+import org.chipsalliance.diplomacy.aop._
+import org.chipsalliance.diplomacy.lazymodule._
+import org.chipsalliance.diplomacy.bundlebridge._
+import freechips.rocketchip.diplomacy.{Resource, ResourceBinding, ResourceAddress}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem._
@@ -165,11 +170,12 @@ case object IOCellKey extends Field[IOCellTypeParams](GenericIOCellParams())
 
 
 class WithGPIOCells extends OverrideIOBinder({
-  (system: HasPeripheryGPIOModuleImp) => {
+  (system: HasPeripheryGPIO) => {
     val (ports2d, cells2d) = system.gpio.zipWithIndex.map({ case (gpio, i) =>
       gpio.pins.zipWithIndex.map({ case (pin, j) =>
+        val p = system.asInstanceOf[BaseSubsystem].p
         val g = IO(Analog(1.W)).suggestName(s"gpio_${i}_${j}")
-        val iocell = system.p(IOCellKey).gpio().suggestName(s"iocell_gpio_${i}_${j}")
+        val iocell = p(IOCellKey).gpio().suggestName(s"iocell_gpio_${i}_${j}")
         iocell.io.o := pin.o.oval
         iocell.io.oe := pin.o.oe
         iocell.io.ie := pin.o.ie
@@ -184,7 +190,7 @@ class WithGPIOCells extends OverrideIOBinder({
 })
 
 class WithGPIOPunchthrough extends OverrideIOBinder({
-  (system: HasPeripheryGPIOModuleImp) => {
+  (system: HasPeripheryGPIO) => {
     val ports = system.gpio.zipWithIndex.map { case (gpio, i) =>
       val io_gpio = IO(gpio.cloneType).suggestName(s"gpio_$i")
       io_gpio <> gpio
@@ -195,7 +201,7 @@ class WithGPIOPunchthrough extends OverrideIOBinder({
 })
 
 class WithI2CPunchthrough extends OverrideIOBinder({
-  (system: HasPeripheryI2CModuleImp) => {
+  (system: HasPeripheryI2C) => {
     val ports = system.i2c.zipWithIndex.map { case (i2c, i) =>
       val io_i2c = IO(i2c.cloneType).suggestName(s"i2c_$i")
       io_i2c <> i2c
@@ -207,11 +213,12 @@ class WithI2CPunchthrough extends OverrideIOBinder({
 
 // DOC include start: WithUARTIOCells
 class WithUARTIOCells extends OverrideIOBinder({
-  (system: HasPeripheryUARTModuleImp) => {
+  (system: HasPeripheryUART) => {
     val (ports: Seq[UARTPort], cells2d) = system.uart.zipWithIndex.map({ case (u, i) =>
-      val (port, ios) = IOCell.generateIOFromSignal(u, s"uart_${i}", system.p(IOCellKey), abstractResetAsAsync = true)
+      val p = system.asInstanceOf[BaseSubsystem].p
+      val (port, ios) = IOCell.generateIOFromSignal(u, s"uart_${i}", p(IOCellKey), abstractResetAsAsync = true)
       val where = PBUS // TODO fix
-      val bus = system.outer.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(where)
+      val bus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(where)
       val freqMHz = bus.dtsFrequency.get / 1000000
       (UARTPort(() => port, i, freqMHz.toInt), ios)
     }).unzip
@@ -227,7 +234,7 @@ class WithSPIIOPunchthrough extends OverrideLazyIOBinder({
       Resource(new MMCDevice(system.tlSpiNodes.head.device, 1), "reg").bind(ResourceAddress(0))
     }
     InModuleBody {
-      val spi = system.asInstanceOf[BaseSubsystem].module.asInstanceOf[HasPeripherySPIBundle].spi
+      val spi = system.spi
       val ports = spi.zipWithIndex.map({ case (s, i) =>
         val io_spi = IO(s.cloneType).suggestName(s"spi_$i")
         io_spi <> s
@@ -239,20 +246,20 @@ class WithSPIIOPunchthrough extends OverrideLazyIOBinder({
 })
 
 class WithSPIFlashIOCells extends OverrideIOBinder({
-  (system: HasPeripherySPIFlashModuleImp) => {
+  (system: HasPeripherySPIFlash) => {
     val (ports: Seq[SPIFlashPort], cells2d) = system.qspi.zipWithIndex.map({ case (s, i) =>
-
+      val p = system.asInstanceOf[BaseSubsystem].p
       val name = s"spi_${i}"
       val port = IO(new SPIChipIO(s.c.csWidth)).suggestName(name)
       val iocellBase = s"iocell_${name}"
 
       // SCK and CS are unidirectional outputs
-      val sckIOs = IOCell.generateFromSignal(s.sck, port.sck, Some(s"${iocellBase}_sck"), system.p(IOCellKey), IOCell.toAsyncReset)
-      val csIOs = IOCell.generateFromSignal(s.cs, port.cs, Some(s"${iocellBase}_cs"), system.p(IOCellKey), IOCell.toAsyncReset)
+      val sckIOs = IOCell.generateFromSignal(s.sck, port.sck, Some(s"${iocellBase}_sck"), p(IOCellKey), IOCell.toAsyncReset)
+      val csIOs = IOCell.generateFromSignal(s.cs, port.cs, Some(s"${iocellBase}_cs"), p(IOCellKey), IOCell.toAsyncReset)
 
       // DQ are bidirectional, so then need special treatment
       val dqIOs = s.dq.zip(port.dq).zipWithIndex.map { case ((pin, ana), j) =>
-        val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_dq_${j}")
+        val iocell = p(IOCellKey).gpio().suggestName(s"${iocellBase}_dq_${j}")
         iocell.io.o := pin.o
         iocell.io.oe := pin.oe
         iocell.io.ie := true.B
@@ -261,7 +268,7 @@ class WithSPIFlashIOCells extends OverrideIOBinder({
         iocell
       }
 
-      (SPIFlashPort(() => port, system.p(PeripherySPIFlashKey)(i), i), dqIOs ++ csIOs ++ sckIOs)
+      (SPIFlashPort(() => port, p(PeripherySPIFlashKey)(i), i), dqIOs ++ csIOs ++ sckIOs)
     }).unzip
     (ports, cells2d.flatten)
   }
@@ -419,7 +426,8 @@ class WithL2FBusAXI4Punchthrough extends OverrideLazyIOBinder({
   (system: CanHaveSlaveAXI4Port) => {
     implicit val p: Parameters = GetSystemParameters(system)
     val clockSinkNode = p(ExtIn).map(_ => ClockSinkNode(Seq(ClockSinkParameters())))
-    clockSinkNode.map(_ := system.asInstanceOf[BaseSubsystem].fbus.fixedClockNode)
+    val fbus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(FBUS)
+    clockSinkNode.map(_ := fbus.fixedClockNode)
     def clockBundle = clockSinkNode.get.in.head._1
 
     InModuleBody {

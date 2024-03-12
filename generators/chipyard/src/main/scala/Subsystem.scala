@@ -121,6 +121,6 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
 }
 
 class ChipyardSubsystemModuleImp[+L <: ChipyardSubsystem](_outer: L) extends BaseSubsystemModuleImp(_outer)
-    with HasHierarchicalElementsRootContextModuleImp
-{
+    with HasHierarchicalElementsRootContextModuleImp {
+  override lazy val outer = _outer
 }
