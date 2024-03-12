@@ -17,6 +17,15 @@ if [ -f "/scratch/ee290-2/miniforge-install/etc/profile.d/mamba.sh" ]; then
 fi
 # <<< conda initialize <<<
 
+FILE_PATH="./generators/rocket-chip/src/main/scala/rocket/SimpleHellaCacheIF.scala"
+if [ -f "$FILE_PATH" ]; then
+    # Use sed to comment out the specified line
+    sed -i '/^[^\/]*assert(!s2_req_fire || !io.cache.s2_xcpt.asUInt.orR, "SimpleHellaCacheIF exception")/s/^/\/\//' "$FILE_PATH"
+    echo "The file has been modified."
+else
+    echo "The file does not exist."
+fi
+
 source /scratch/ee290-2/circt_fix_chipyard/chipyard/env.sh
 export PATH="/scratch/ee290-2/circt/build/bin:$PATH"
 export PATH="/scratch/ee290-2/circt/llvm/build/bin:$PATH"
