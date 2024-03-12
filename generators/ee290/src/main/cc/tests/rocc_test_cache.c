@@ -5,8 +5,11 @@
 #include <stdint.h>
 
 
+
 #include "marchid.h"
 #include "rocc.h"
+
+#define BMM_VEC_LEN 128
 
 // Utility function to generate a random 8x8 bit matrix
 uint64_t generate_random_bitmat() {
@@ -34,6 +37,11 @@ uint64_t rocc_bmm(uint64_t * a, uint64_t * b) {
   return result;
 }
 
+uint64_t rocc_config_elements(uint16_t num_elems) {
+    uint64_t result;
+    ROCC_INSTRUCTION_S(1, num_elems, 0x1);
+}
+
 uint64_t cpu_bmm(uint64_t a, uint64_t b) {
     uint64_t result = 0;
     for (int i = 0; i < 8; ++i) {
@@ -51,7 +59,7 @@ uint64_t cpu_bmm(uint64_t a, uint64_t b) {
 int main(void) {
     uint64_t marchid = read_csr(marchid);
     const char* march = get_march(marchid);
-    printf("RoCC BMM test on core %s\n\n", march);
+    printf("RoCC BMM test on core %s\n", march);
     
     srand(0);
 
@@ -62,7 +70,16 @@ int main(void) {
     uint64_t rand_mat1 = generate_random_bitmat();
     uint64_t rand_mat2 = generate_random_bitmat();
 
+    uint64_t rand_mats1[BMM_VEC_LEN];
+    uint64_t rand_mats2[BMM_VEC_LEN];
+    for (int i = 0; i < BMM_VEC_LEN; i++) {
+        rand_mats1[i] = generate_random_bitmat();
+        rand_mats2[i] = generate_random_bitmat();
+    }
+
+
     // Perform BMM operation using RoCC
+    rocc_config_elements(1);
     uint64_t result = rocc_bmm(&mat1, &mat2);
     // Perform BMM operation using CPU-based golden model
     uint64_t expected = cpu_bmm(mat1, mat2);
@@ -85,7 +102,7 @@ int main(void) {
     }
 
     // Test case with an identity matrix
-    printf("\nTesting multiplication by identity matrix:\n");
+    printf("Testing multiplication by identity matrix:\n");
     uint64_t identityResult = rocc_bmm(&mat1, &identity);
 
     // Verify multiplication by identity matrix
@@ -104,7 +121,6 @@ int main(void) {
 
     // Perform BMM operation using RoCC
     uint64_t rand_result = rocc_bmm(&rand_mat1, &rand_mat2);
-
     // Perform BMM operation using CPU-based golden model
     uint64_t rand_expected = cpu_bmm(rand_mat1, rand_mat2);
 
@@ -123,6 +139,37 @@ int main(void) {
     } else {
         printf("Random test passed. RoCC result matches CPU-based golden model.\n");
     }
+
+    // Perform BMM operation with multiple elements with RoCC
+    rocc_config_elements(BMM_VEC_LEN);
+    uint64_t bmm_vec_result = rocc_bmm(rand_mats1, rand_mats2);
+    // Perform BMM operation with multiple elements using CPU-based golden model
+    uint64_t bmm_vec_expected = 0;
+    for (int i = 0; i < BMM_VEC_LEN; i++) {
+        bmm_vec_expected ^= cpu_bmm(rand_mats1[i], rand_mats2[i]);
+    }
+
+    // Verify RoCC result against CPU-based golden model for multiple elements
+    if (bmm_vec_result != bmm_vec_expected) {
+        printf("Random test failed. RoCC result does not match CPU-based golden model.\n");
+        // Print the random matrices and result
+        printf("Random Matrices 1:\n");
+        for (int i = 0; i < BMM_VEC_LEN; i++) {
+            print_bitmat(rand_mats1[i]);
+        }
+        printf("Random Matrices 2:\n");
+        for (int i = 0; i < BMM_VEC_LEN; i++) {
+            print_bitmat(rand_mats2[i]);
+        }
+        printf("BMM Result (RoCC) for Random Matrices:\n");
+        print_bitmat(bmm_vec_result);
+        printf("Expected BMM Result (CPU) for Random Matrices:\n");
+        print_bitmat(bmm_vec_expected);
+    } else {
+        printf("Random test passed. RoCC result matches CPU-based golden model.\n");
+    }
+
+
 
 
     return 0;
