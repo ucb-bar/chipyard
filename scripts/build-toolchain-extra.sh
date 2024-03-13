@@ -84,7 +84,7 @@ cp -p "${SRCDIR}/riscv-isa-sim/build/libfesvr.a" "${RISCV}/lib/"
 CLEANAFTERINSTALL=$OLDCLEANAFTERINSTALL
 
 echo '==>  Installing Proxy Kernel'
-CC= CXX= module_all riscv-pk --prefix="${RISCV}" --host=riscv${XLEN}-unknown-elf
+CC= CXX= module_all riscv-pk --prefix="${RISCV}" --host=riscv${XLEN}-unknown-elf --with-arch=rv64gc_zifencei
 
 echo '==>  Installing RISC-V tests'
 module_all riscv-tests --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --with-xlen=${XLEN}
