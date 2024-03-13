@@ -115,3 +115,11 @@ class WithRocketBoundaryBuffers(buffers: Option[RocketTileBoundaryBufferParams] 
     ))                                                                                                                                                                                                                                                                                                                       
   }                                                                                                                                                                                                                                                                                                                          
 })   
+
+class WithRocketMSHRs(n: Int = 1, mmios: Int = 1) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      dcache = tp.tileParams.dcache.map(_.copy(nMSHRs=n, nMMIOs=mmios))
+    ))
+  }
+})

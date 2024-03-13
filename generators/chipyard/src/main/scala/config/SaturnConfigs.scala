@@ -151,3 +151,28 @@ class REFV512D512ShuttleConfig extends Config(
   new shuttle.common.WithTCM ++
   new shuttle.common.WithNShuttleCores(1) ++
   new chipyard.config.AbstractConfig)
+
+class QuadREFV512D256ShuttleConfig extends Config(
+  new chipyard.config.WithSystemBusWidth(256) ++
+  new saturn.shuttle.WithShuttleVectorUnit(512, 256, VectorParams.refParams) ++
+  new shuttle.common.WithShuttleTileBeatBytes(32) ++
+  new shuttle.common.WithTCM ++
+  new shuttle.common.WithNShuttleCores(4) ++
+  new chipyard.config.AbstractConfig)
+
+class DSPMultiSaturnConfig extends Config(
+  new chipyard.config.WithSystemBusWidth(256) ++
+
+  new saturn.shuttle.WithShuttleVectorUnit(512, 256, VectorParams.refParams) ++
+  new shuttle.common.WithL1DCacheIOMSHRs(8) ++
+  new shuttle.common.WithTCM ++
+  new shuttle.common.WithShuttleTileBeatBytes(32) ++
+  new shuttle.common.WithNShuttleCores(2) ++             // dsp-Saturn
+
+  new saturn.rocket.WithRocketVectorUnit(256, 256, VectorParams.dmaParams, cores = Some(Seq(1)), useL1DCache = false) ++
+  new chipyard.config.WithRocketMSHRs(1, 6) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++ // dma-Saturn
+
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++ // ctrl core
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
+  new chipyard.config.AbstractConfig)
