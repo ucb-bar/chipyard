@@ -61,8 +61,8 @@ trait CanHavePeripheryInitZero { this: BaseSubsystem =>
   implicit val p: Parameters
 
   p(InitZeroKey) .map { k =>
-    val initZero = LazyModule(new InitZero()(p))
     val fbus = locateTLBusWrapper(FBUS)
+    val initZero = fbus { LazyModule(new InitZero()(p)) }
     fbus.coupleFrom("init-zero") { _ := initZero.node }
   }
 }
