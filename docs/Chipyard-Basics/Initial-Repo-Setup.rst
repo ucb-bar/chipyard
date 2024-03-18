@@ -90,7 +90,9 @@ Run the following script based off which compiler you would like to use.
 
     ``-s 9`` skips pre-compiling FireMarshal default buildroot Linux sources
 
-    ``-s 10`` skips running repository clean-up
+    ``-s 10`` skips installing CIRCT
+
+    ``-s 11`` skips running repository clean-up
 
 .. code-block:: shell
 
