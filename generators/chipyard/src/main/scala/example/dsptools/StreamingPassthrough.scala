@@ -131,6 +131,7 @@ class TLStreamingPassthroughChain[T<:Data:Ring](params: StreamingPassthroughPara
 trait CanHavePeripheryStreamingPassthrough { this: BaseSubsystem =>
   val passthrough = p(StreamingPassthroughKey) match {
     case Some(params) => {
+      val pbus = locateTLBusWrapper(PBUS)
       val domain = pbus.generateSynchronousDomain.suggestName("streaming_passthrough_domain")
       val streamingPassthroughChain = domain { LazyModule(new TLStreamingPassthroughChain(params, UInt(32.W))) }
       pbus.coupleTo("streamingPassthrough") { domain { streamingPassthroughChain.mem.get := TLFIFOFixer() := TLFragmenter(pbus.beatBytes, pbus.blockBytes)} := _ }

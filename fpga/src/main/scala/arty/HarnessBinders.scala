@@ -5,7 +5,7 @@ import chisel3._
 import freechips.rocketchip.devices.debug.{HasPeripheryDebug}
 import freechips.rocketchip.jtag.{JTAGIO}
 
-import sifive.blocks.devices.uart.{UARTPortIO, HasPeripheryUARTModuleImp}
+import sifive.blocks.devices.uart.{UARTPortIO}
 import sifive.blocks.devices.jtag.{JTAGPins, JTAGPinsFromPort}
 import sifive.blocks.devices.pinctrl.{BasePin}
 

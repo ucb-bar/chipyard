@@ -46,13 +46,21 @@ case $1 in
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
         run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.10000.loadarch
         ;;
-    chipyard-boom)
+    chipyard-boomv3)
+        run_bmark
+        ;;
+    chipyard-boomv4)
         run_bmark
         ;;
     chipyard-shuttle)
         run_bmark ${mapping[$1]}
         ;;
-    chipyard-dmiboom)
+    chipyard-dmiboomv3)
+        # Test checkpoint-restore
+        $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
+        run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.10000.loadarch
+        ;;
+    chipyard-dmiboomv4)
         # Test checkpoint-restore
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
         run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.10000.loadarch
@@ -129,7 +137,10 @@ case $1 in
     tracegen)
         run_tracegen
         ;;
-    tracegen-boom)
+    tracegen-boomv3)
+        run_tracegen
+        ;;
+    tracegen-boomv4)
         run_tracegen
         ;;
     chipyard-cva6)

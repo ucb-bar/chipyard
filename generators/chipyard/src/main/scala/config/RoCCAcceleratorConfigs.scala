@@ -50,10 +50,10 @@ class MempressRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
-class HwachaLargeBoomConfig extends Config(
+class HwachaLargeBoomV3Config extends Config(
   new chipyard.config.WithHwachaTest ++
   new hwacha.DefaultHwachaConfig ++                              // use Hwacha vector accelerator
-  new boom.common.WithNLargeBooms(1) ++
+  new boom.v3.common.WithNLargeBooms(1) ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
 

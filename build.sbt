@@ -113,8 +113,19 @@ lazy val rocketMacros  = (project in rocketChipDir / "macros")
     )
   )
 
+lazy val diplomacy = freshProject("diplomacy", file("generators/diplomacy/diplomacy"))
+  .dependsOn(cde)
+  .settings(commonSettings)
+  .settings(chiselSettings)
+  .settings(Compile / scalaSource := baseDirectory.value / "diplomacy")
+  .settings(
+    libraryDependencies ++= Seq(
+      "com.lihaoyi" %% "sourcecode" % "0.3.1"
+    )
+  )
+
 lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
-  .dependsOn(hardfloat, rocketMacros, cde)
+  .dependsOn(hardfloat, rocketMacros, diplomacy, cde)
   .settings(commonSettings)
   .settings(chiselSettings)
   .settings(
@@ -123,7 +134,8 @@ lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.json4s" %% "json4s-jackson" % "4.0.5",
       "org.scalatest" %% "scalatest" % "3.2.0" % "test",
-      "org.scala-graph" %% "graph-core" % "1.13.5"
+      "org.scala-graph" %% "graph-core" % "1.13.5",
+      "com.lihaoyi" %% "sourcecode" % "0.3.1"
     )
   )
   .settings( // Settings for scalafix
