@@ -102,7 +102,7 @@ class FastRTLSimRocketConfig extends Config(
   new chipyard.RocketConfig)
 
 class FastRTLSimRocketNoL2Config extends Config(
+  new chipyard.config.WithBroadcastManager ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new chipyard.RocketConfig ++
-  new chipyard.config.WithBroadcastManager
+  new chipyard.RocketConfig
 )
