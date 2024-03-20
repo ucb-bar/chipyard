@@ -157,3 +157,10 @@
 [submodule "vlsi/hammer-mentor-plugins"]
 	path = vlsi/hammer-mentor-plugins
 	url = https://github.com/ucb-bar/hammer-mentor-plugins.git
+[submodule "generators/--force"]
+	path = generators/--force
+	url = git@github.com:ucb-bar/ara-wrapper.git
+[submodule "generators/ara"]
+	path = generators/ara
+	url = git@github.com:ucb-bar/ara-wrapper.git
+	branch = main
