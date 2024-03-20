@@ -154,3 +154,6 @@
 [submodule "software/firesim-paper-workloads"]
 	path = software/firesim-paper-workloads
 	url = https://github.com/firesim/firesim-paper-workloads.git
+[submodule "generators/ara"]
+	path = generators/ara
+	url = https://github.com/ucb-bar/ara-wrapper.git
