@@ -42,6 +42,7 @@ def process(inF, outF):
                         potentialIncFileName = d + "/" + match.group(1)
                         if os.path.exists(potentialIncFileName):
                             found = True
+                            print("[INFO] Found missing include in {}".format(potentialIncFileName))
                             with open(potentialIncFileName, 'r') as incFile:
                                 for iline in incFile:
                                     outFile.write(iline)
