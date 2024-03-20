@@ -282,7 +282,7 @@ SRAM macros by default, but this feature does not exist yet.
 
 VLSI Flow Control
 ^^^^^^^^^^^^^^^^^
-Firt, refer to the :ref:`VLSI/Hammer:VLSI Flow Control` documentation. The below examples use the ``redo-par`` Make target to re-run only place-and-route. ``redo-`` may be prepended to any of the VLSI flow actions to re-run only that action.
+First, refer to the :ref:`VLSI/Hammer:VLSI Flow Control` documentation. The below examples use the ``redo-par`` Make target to re-run only place-and-route. ``redo-`` may be prepended to any of the VLSI flow actions to re-run only that action.
 
 .. code-block:: shell
 
