@@ -310,8 +310,13 @@ $(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH_TARGETS) $(MODEL_S
 # note: {MODEL,TOP}_BB_MODS_FILELIST is added as a req. so that the files get generated,
 #       however it is really unneeded since ALL_MODS_FILELIST includes all BB files
 ########################################################################################
-$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE) $(BB_MODS_FILELIST)
-	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' > $@
+$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE) $(BB_MODS_FILELIST) $(EXT_FILELISTS)
+ifneq (,$(EXT_FILELISTS))
+	cat $(EXT_FILELISTS) > $@
+else
+	rm -f $@
+endif
+	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' >> $@
 	echo "$(TOP_SMEMS_FILE)" >> $@
 	echo "$(MODEL_SMEMS_FILE)" >> $@
 

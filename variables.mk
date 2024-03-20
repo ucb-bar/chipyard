@@ -213,6 +213,12 @@ BB_MODS_FILELIST ?= $(build_dir)/$(long_name).bb.f
 # all module files to include (top, model, bb included)
 ALL_MODS_FILELIST ?= $(build_dir)/$(long_name).all.f
 
+# external filelists. Users, or project-supplied make fragments can append filelists
+# with absolute paths here
+EXT_FILELISTS ?=
+# external verilog incdirs. Users, or project-supplied make fragments can append to this
+EXT_INCDIRS ?=
+
 BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
 
