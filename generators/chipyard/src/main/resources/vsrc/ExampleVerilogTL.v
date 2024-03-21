@@ -72,7 +72,7 @@ module ExampleVerilogTLDevice #(
   wire out_front_ready;
   wire out_valid;
   wire [2:0] nodeIn_d_bits_opcode;
-  
+
   reg [1:0]                        state;     // State register for high level FSM
   reg [2:0]                        dma_state; // State register for the DMA FSM
   reg [CTRL_DATA_BITS-1:0]         src;       // MMIO register to store the source pointer
@@ -91,18 +91,18 @@ module ExampleVerilogTLDevice #(
   // If reading CSR check if module is ready for output, if writing check if module is ready for input
   assign out_oready = in_bits_read ? ~(|addr_index) | output_ready : input_ready;
   // TODO: Check if out_oready and if the ctrl node D channel is ready to take response
-  assign out_front_ready = ;
+  assign out_front_ready = 0;
   // TODO: Check if out_oready and module got a valid request on A channel
-  assign out_valid = ;
+  assign out_valid = 0;
   // TODO: Assign opcode to 000 when writing/Put and 001 when reading/Get (Based on TL specs)
-  assign nodeIn_d_bits_opcode = ;
+  assign nodeIn_d_bits_opcode = '0;
 
   // When Ctrl node A request is valid and its ready to take a response back
   // Check if its a read or writem, and the address bits are for input 1 -> src pointer
   assign input1_valid = tl_ctrl_a_valid & tl_ctrl_d_ready & ~in_bits_read & (~addr_index[1] & addr_index[0]);
   // TODO: Apply similar logic for checking if dest pointer and size input are valid (input2_valid and input3_valid)
   // Make sure to check the correct addr_index for the registers, check the memcpy.c for the #define statements
-  
+
   // FSM to change the state of the high level module
   always @(posedge clock) begin
     if (reset) begin 
@@ -164,17 +164,17 @@ module ExampleVerilogTLDevice #(
   assign tl_ctrl_a_ready = out_front_ready; // You assigned this above
   assign tl_ctrl_d_valid = out_valid; // You assigned this above
   assign tl_ctrl_d_bits_opcode = nodeIn_d_bits_opcode; // You assigned this above
-  assign tl_ctrl_d_bits_size = ; // TODO: Should be same as the request 
-  assign tl_ctrl_d_bits_source = ; // TODO: Should be same as the request
+  assign tl_ctrl_d_bits_size = '0; // TODO: Should be same as the request 
+  assign tl_ctrl_d_bits_source = '0; // TODO: Should be same as the request
   assign tl_ctrl_d_bits_data = (|(tl_ctrl_a_bits_address[11:5])) ? 64'h0 : {62'h0, input_ready, output_ready};
 
   // TileLink Client node interface signal assignment
-  assign tl_client_d_ready = ; // TODO: Module is ready to start DMA operation
-  assign tl_client_a_valid = ; // TODO: Valid request to the TL node, use the states to fill this
-  assign tl_client_a_bits_address = ; // TODO: Based on read or write, use the CSRs and counter to send the read/write address
-  assign tl_client_a_bits_opcode = ; // TODO: Read requests or Get opcode is 4 and Write request or Put is 0
-  assign tl_client_a_bits_source = ; // TODO: give your requests unique IDs, VERY IMP: every request needs to have a different ID
-  assign tl_client_a_bits_data = ; // TODO: Data for read is 0 and data for write should be the registered value from your read
+  assign tl_client_d_ready = '0; // TODO: Module is ready to start DMA operation
+  assign tl_client_a_valid = '0; // TODO: Valid request to the TL node, use the states to fill this
+  assign tl_client_a_bits_address = '0; // TODO: Based on read or write, use the CSRs and counter to send the read/write address
+  assign tl_client_a_bits_opcode = '0; // TODO: Read requests or Get opcode is 4 and Write request or Put is 0
+  assign tl_client_a_bits_source = '0; // TODO: give your requests unique IDs, VERY IMP: every request needs to have a different ID
+  assign tl_client_a_bits_data = '0; // TODO: Data for read is 0 and data for write should be the registered value from your read
   assign tl_client_a_bits_mask = (dma_state == READ_REQ || dma_state == WRITE_REQ) ? '1 : '0;
   assign tl_client_a_bits_param = 3'b0;
   assign tl_client_a_bits_size = 4'h3;
