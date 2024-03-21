@@ -154,6 +154,7 @@ VERILATOR_NONCC_OPTS = \
 	$(VERILATOR_PREPROC_DEFINES) \
 	--top-module $(TB) \
 	--vpi \
+	$(addprefix +incdir+,$(EXT_INCDIRS)) \
 	-f $(sim_common_files)
 
 #----------------------------------------------------------------------------------------
