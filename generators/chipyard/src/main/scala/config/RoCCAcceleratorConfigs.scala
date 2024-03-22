@@ -1,7 +1,8 @@
 package chipyard
 
-import freechips.rocketchip.config.{Config}
-import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
+import freechips.rocketchip.config.Config
+import freechips.rocketchip.diplomacy.AsynchronousCrossing
+import freechips.rocketchip.subsystem.WithoutTLMonitors
 
 // ------------------------------
 // Configs with RoCC Accelerators
@@ -97,6 +98,26 @@ class LargeSparseDenseEinsteinRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
+class SpDenseMVEinsteinRocketConfig extends Config(
+  new einstein.SpDenseMVEinsteinConfig(size = 2) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class SmallSpDenseMVEinsteinRocketConfig extends Config(
+  new einstein.SpDenseMVEinsteinConfig(size = 4) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class MidSpDenseMVEinsteinRocketConfig extends Config(
+  new einstein.SpDenseMVEinsteinConfig(size = 8) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class LargeSpDenseMVEinsteinRocketConfig extends Config(
+  new einstein.SpDenseMVEinsteinConfig(size = 16) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 class LoadBalancedSparseDenseEinsteinRocketConfig extends Config(
   new einstein.SparseDenseEinsteinConfig(isLoadBalanced = true) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
@@ -104,5 +125,50 @@ class LoadBalancedSparseDenseEinsteinRocketConfig extends Config(
 
 class OSSparseDenseEinsteinRocketConfig extends Config(
   new einstein.SparseDenseEinsteinConfig(outputStationary = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class OuterSpaceMatmulEinsteinRocketConfig extends Config(
+  new einstein.OuterSpaceEinsteinConfig(size = 2, hasMatmul = true, hasMerger = false) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class SmallOuterSpaceMatmulEinsteinRocketConfig extends Config(
+  new einstein.OuterSpaceEinsteinConfig(size = 4, hasMatmul = true, hasMerger = false) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class MidOuterSpaceMatmulEinsteinRocketConfig extends Config(
+  new einstein.OuterSpaceEinsteinConfig(size = 8, hasMatmul = true, hasMerger = false) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class LargeOuterSpaceMatmulEinsteinRocketConfig extends Config(
+  new einstein.OuterSpaceEinsteinConfig(size = 16, hasMatmul = true, hasMerger = false) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class OuterSpaceMergerEinsteinRocketConfig extends Config(
+  new einstein.OuterSpaceEinsteinConfig(size = 2, hasMatmul = false, hasMerger = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class SmallOuterSpaceMergerEinsteinRocketConfig extends Config(
+  new einstein.OuterSpaceEinsteinConfig(size = 4, hasMatmul = false, hasMerger = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class MidOuterSpaceMergerEinsteinRocketConfig extends Config(
+  new einstein.OuterSpaceEinsteinConfig(size = 8, hasMatmul = false, hasMerger = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class LargeOuterSpaceMergerEinsteinRocketConfig extends Config(
+  new einstein.OuterSpaceEinsteinConfig(size = 16, hasMatmul = false, hasMerger = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class SCNNEinsteinRocketConfig extends Config(
+  new einstein.SCNNEinsteinConfig() ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
