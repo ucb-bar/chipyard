@@ -17,7 +17,7 @@ env:
   conda-env-name-no-time: cy-${{ github.run_id }}
   workflow-timestamp: ${{ github.event.pull_request.updated_at }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  SSH_AUTH_SOCK: /tmp/ssh_agent_github.sock
+  # SSH_AUTH_SOCK: /tmp/ssh_agent_github.sock
 
 jobs:
   cancel-prior-workflows:
@@ -76,7 +76,7 @@ jobs:
             ls -alh .
       - name: Run ssh-agent
         run: |
-            pgrep -u $USER ssh-agent || false
+            ssh-add -l >/dev/null
       - name: Checkout
         uses: actions/checkout@v3
       - name: Git workaround
