@@ -76,9 +76,7 @@ jobs:
             ls -alh .
       - name: Run ssh-agent
         run: |
-            pgrep -u $USER ssh-agent || exit 1
-            # eval `ssh-agent -a $SSH_AUTH_SOCK -s`
-            # echo "${{ secrets.PRIVATE_SSH_KEY }}" | ssh-add -
+            pgrep -u $USER ssh-agent || false
       - name: Checkout
         uses: actions/checkout@v3
       - name: Git workaround
