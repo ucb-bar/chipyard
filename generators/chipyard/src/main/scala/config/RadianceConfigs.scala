@@ -47,15 +47,16 @@ class RadianceBaseConfig extends Config(
   new AbstractConfig)
 
 class RadianceConfig extends Config(
-  new radiance.subsystem.WithRadianceCores(1, useVxCache = false) ++
+  new radiance.subsystem.WithRadianceCores(1, location=InCluster(0), useVxCache = false) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 8) ++
-  new radiance.subsystem.WithVortexL1Banks(nBanks = 1)++
+  new radiance.subsystem.WithVortexL1Banks(nBanks = 4)++
+  new radiance.subsystem.WithRadianceCluster(0) ++
   new RadianceBaseConfig)
 
 class RadianceClusterConfig extends Config(
   new radiance.subsystem.WithRadianceCores(2, location=InCluster(0), useVxCache = false) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 8) ++
-  new radiance.subsystem.WithVortexL1Banks(nBanks = 1)++
+  new radiance.subsystem.WithVortexL1Banks(nBanks = 4)++
   new radiance.subsystem.WithRadianceCluster(0) ++
   new RadianceBaseConfig)
 
