@@ -74,12 +74,11 @@ jobs:
             rm -rf ${{ github.workspace }}/* || true
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
-      # note: the agent spun up here will be made available throughout the
-      # workflow via env.SSH_AUTH_SOCK.
       - name: Run ssh-agent
         run: |
-            eval `ssh-agent -a $SSH_AUTH_SOCK -s`
-            echo "${{ secrets.PRIVATE_SSH_KEY }}" | ssh-add -
+            pgrep -u $USER ssh-agent || exit 1
+            # eval `ssh-agent -a $SSH_AUTH_SOCK -s`
+            # echo "${{ secrets.PRIVATE_SSH_KEY }}" | ssh-add -
       - name: Checkout
         uses: actions/checkout@v3
       - name: Git workaround
