@@ -164,6 +164,3 @@
 	path = generators/ara
 	url = git@github.com:ucb-bar/ara-wrapper.git
 	branch = main
-[submodule "generators/rv2-wrapper"]
-	path = generators/rv2-wrapper
-	url = git@github.com:ucb-bar/rv2-wrapper.git
