@@ -3,11 +3,12 @@ package chipyard
 import chipyard.config.AbstractConfig
 import chipyard.stage.phases.TargetDirKey
 import freechips.rocketchip.devices.tilelink.BootROMLocated
-import freechips.rocketchip.diplomacy.AsynchronousCrossing
-import freechips.rocketchip.subsystem.{WithCluster, InCluster, WithExtMemSize}
+import freechips.rocketchip.diplomacy.{AsynchronousCrossing, BigIntHexContext}
+import freechips.rocketchip.subsystem.{InCluster, WithCluster, WithExtMemSize}
 import freechips.rocketchip.tile.XLen
 import org.chipsalliance.cde.config.Config
 import radiance.memory._
+import radiance.subsystem.WithRadianceGemmini
 
 class WithRadROMs(address: BigInt, size: Int, filename: String) extends Config((site, here, up) => {
   case RadianceROMsLocated() => Some(up(RadianceROMsLocated()).getOrElse(Seq()) ++
@@ -53,6 +54,8 @@ class RadianceConfig extends Config(
   new RadianceBaseConfig)
 
 class RadianceClusterConfig extends Config(
+   // important to keep gemmini tile before RadianceCores to ensure radiance tile id is 0-indexed
+  new WithRadianceGemmini(location = InCluster(0), dim = 8, extMemBase = x"ff000000", spSizeInKB = 16, accSizeInKB = 8) ++
   new radiance.subsystem.WithRadianceCores(2, location=InCluster(0), useVxCache = false) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 8) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 1)++
