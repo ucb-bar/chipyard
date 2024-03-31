@@ -55,8 +55,37 @@ class REFV256D64RocketConfig extends Config(
 class REFV256D128RocketConfig extends Config(
   new chipyard.harness.WithCospike ++
   new chipyard.config.WithTraceIO ++
-  new chipyard.config.WithSystemBusWidth(128) ++
   new saturn.rocket.WithRocketVectorUnit(256, 128, VectorParams.refParams) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new freechips.rocketchip.subsystem.WithRocketCease(false) ++
+  new freechips.rocketchip.subsystem.WithRocketDebugROB ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class REFV256D128C1RocketConfig extends Config(
+  new chipyard.harness.WithCospike ++
+  new chipyard.config.WithTraceIO ++
+  new saturn.rocket.WithRocketVectorUnit(256, 128, VectorParams.refParams.copy(hazardingMultiplier=1)) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new freechips.rocketchip.subsystem.WithRocketCease(false) ++
+  new freechips.rocketchip.subsystem.WithRocketDebugROB ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class REFV256D128C2RocketConfig extends Config(
+  new chipyard.harness.WithCospike ++
+  new chipyard.config.WithTraceIO ++
+  new saturn.rocket.WithRocketVectorUnit(256, 128, VectorParams.refParams.copy(hazardingMultiplier=2)) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new freechips.rocketchip.subsystem.WithRocketCease(false) ++
+  new freechips.rocketchip.subsystem.WithRocketDebugROB ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class REFV256D128C3RocketConfig extends Config(
+  new chipyard.harness.WithCospike ++
+  new chipyard.config.WithTraceIO ++
+  new saturn.rocket.WithRocketVectorUnit(256, 128, VectorParams.refParams.copy(hazardingMultiplier=3)) ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
   new freechips.rocketchip.subsystem.WithRocketDebugROB ++
@@ -66,7 +95,6 @@ class REFV256D128RocketConfig extends Config(
 class REFV512D128RocketConfig extends Config(
   new chipyard.harness.WithCospike ++
   new chipyard.config.WithTraceIO ++
-  new chipyard.config.WithSystemBusWidth(128) ++
   new saturn.rocket.WithRocketVectorUnit(512, 128, VectorParams.refParams) ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
@@ -77,7 +105,6 @@ class REFV512D128RocketConfig extends Config(
 class REFV512D256RocketConfig extends Config(
   new chipyard.harness.WithCospike ++
   new chipyard.config.WithTraceIO ++
-  new chipyard.config.WithSystemBusWidth(256) ++
   new saturn.rocket.WithRocketVectorUnit(512, 256, VectorParams.refParams) ++
   new chipyard.config.WithSystemBusWidth(256) ++
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
@@ -88,7 +115,6 @@ class REFV512D256RocketConfig extends Config(
 class DMAV256D256RocketConfig extends Config(
   new chipyard.harness.WithCospike ++
   new chipyard.config.WithTraceIO ++
-  new chipyard.config.WithSystemBusWidth(256) ++
   new saturn.rocket.WithRocketVectorUnit(256, 256, VectorParams.dmaParams) ++
   new chipyard.config.WithSystemBusWidth(256) ++
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
@@ -113,6 +139,61 @@ class REFV256D128ShuttleConfig extends Config(
   new chipyard.config.WithTraceIO ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new saturn.shuttle.WithShuttleVectorUnit(256, 128, VectorParams.refParams) ++
+  new shuttle.common.WithShuttleDebugROB ++                      // enable shuttle debug ROB for cosim
+  new shuttle.common.WithShuttleTileBeatBytes(16) ++
+  new shuttle.common.WithTCM ++
+  new shuttle.common.WithNShuttleCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class DSPV256D128ShuttleConfig extends Config(
+  new chipyard.harness.WithCospike ++
+  new chipyard.config.WithTraceIO ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new saturn.shuttle.WithShuttleVectorUnit(256, 128, VectorParams.dspParams) ++
+  new shuttle.common.WithShuttleDebugROB ++                      // enable shuttle debug ROB for cosim
+  new shuttle.common.WithShuttleTileBeatBytes(16) ++
+  new shuttle.common.WithTCM ++
+  new shuttle.common.WithNShuttleCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class GENV256D128ShuttleConfig extends Config(
+  new chipyard.harness.WithCospike ++
+  new chipyard.config.WithTraceIO ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new saturn.shuttle.WithShuttleVectorUnit(256, 128, VectorParams.genParams) ++
+  new shuttle.common.WithShuttleDebugROB ++                      // enable shuttle debug ROB for cosim
+  new shuttle.common.WithShuttleTileBeatBytes(16) ++
+  new shuttle.common.WithTCM ++
+  new shuttle.common.WithNShuttleCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class REFV512D128ShuttleConfig extends Config(
+  new chipyard.harness.WithCospike ++
+  new chipyard.config.WithTraceIO ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new saturn.shuttle.WithShuttleVectorUnit(512, 128, VectorParams.refParams) ++
+  new shuttle.common.WithShuttleDebugROB ++                      // enable shuttle debug ROB for cosim
+  new shuttle.common.WithShuttleTileBeatBytes(16) ++
+  new shuttle.common.WithTCM ++
+  new shuttle.common.WithNShuttleCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class DSPV512D128ShuttleConfig extends Config(
+  new chipyard.harness.WithCospike ++
+  new chipyard.config.WithTraceIO ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new saturn.shuttle.WithShuttleVectorUnit(512, 128, VectorParams.dspParams) ++
+  new shuttle.common.WithShuttleDebugROB ++                      // enable shuttle debug ROB for cosim
+  new shuttle.common.WithShuttleTileBeatBytes(16) ++
+  new shuttle.common.WithTCM ++
+  new shuttle.common.WithNShuttleCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class GENV512D128ShuttleConfig extends Config(
+  new chipyard.harness.WithCospike ++
+  new chipyard.config.WithTraceIO ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new saturn.shuttle.WithShuttleVectorUnit(512, 128, VectorParams.genParams) ++
   new shuttle.common.WithShuttleDebugROB ++                      // enable shuttle debug ROB for cosim
   new shuttle.common.WithShuttleTileBeatBytes(16) ++
   new shuttle.common.WithTCM ++
