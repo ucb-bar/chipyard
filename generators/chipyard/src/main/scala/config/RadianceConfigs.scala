@@ -33,14 +33,14 @@ class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigIn
 // Radiance Configs
 // ----------------
 
-class RadianceBaseConfig extends Config(
+class RadianceBaseConfig(argsBinFilename: String = "args.bin") extends Config(
   // NOTE: when changing these, remember to change +define+NUM_CORES/THREADS/WARPS in
   // radiance.mk as well!
   new radiance.subsystem.WithSimtConfig(nWarps = 8, nCoreLanes = 8, nMemLanes = 8, nSrcIds = 8) ++
   new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
   new WithRadBootROM() ++
-  new WithRadROMs(0x7FFF0000L, 0x10000, "sims/args.bin") ++
+  new WithRadROMs(0x7FFF0000L, 0x10000, s"sims/${argsBinFilename}") ++
   new WithRadROMs(0x20000L, 0x8000, "sims/op_a.bin") ++
   new WithRadROMs(0x28000L, 0x8000, "sims/op_b.bin") ++
   new chipyard.harness.WithCeaseSuccess ++
@@ -62,6 +62,27 @@ class RadianceClusterConfig extends Config(
   new radiance.subsystem.WithVortexL1Banks(nBanks = 8)++
   new radiance.subsystem.WithRadianceCluster(0) ++
   new RadianceBaseConfig)
+
+class RadianceClusterConfig0 extends Config(
+  new radiance.subsystem.WithRadianceCores(2, location=InCluster(0), useVxCache = false) ++
+  // new radiance.subsystem.WithCoalescer(nNewSrcIds = 8, enable = false) ++
+  new radiance.subsystem.WithVortexL1Banks(nBanks = 4)++
+  new radiance.subsystem.WithRadianceCluster(0) ++
+  new RadianceBaseConfig)
+
+class RadianceClusterConfig1 extends Config(
+  new radiance.subsystem.WithRadianceCores(2, location=InCluster(0), useVxCache = false) ++
+  new radiance.subsystem.WithCoalescer(nNewSrcIds = 8) ++
+  new radiance.subsystem.WithVortexL1Banks(nBanks = 4)++
+  new radiance.subsystem.WithRadianceCluster(0) ++
+  new RadianceBaseConfig("args.1.bin"))
+
+class RadianceClusterConfig2 extends Config(
+  new radiance.subsystem.WithRadianceCores(2, location=InCluster(0), useVxCache = false) ++
+  new radiance.subsystem.WithCoalescer(nNewSrcIds = 8) ++
+  new radiance.subsystem.WithVortexL1Banks(nBanks = 4)++
+  new radiance.subsystem.WithRadianceCluster(0) ++
+  new RadianceBaseConfig("args.2.bin"))
 
 class RadianceGemminiConfig extends Config(
   new radiance.subsystem.WithRadianceCores(1, useVxCache = false) ++
