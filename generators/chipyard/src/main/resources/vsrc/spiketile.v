@@ -19,6 +19,7 @@ import "DPI-C" function void spike_tile(input int hartid,
                                         input longint  ipc,
                                         input longint  cycle,
                                         output longint insns_retired,
+                                        input bit      has_accel,
 
                                         input bit      debug,
                                         input bit      mtip,
@@ -104,7 +105,6 @@ import "DPI-C" function void spike_tile(input int hartid,
                                         input bit      tcm_d_ready,
                                         output longint tcm_d_data,
 
-                                        output bit     accel_exists,
                                         input bit      accel_a_ready,
                                         output bit     accel_a_valid,
                                         output longint accel_a_insn,
@@ -131,14 +131,14 @@ module SpikeBlackBox #(
                       parameter ICACHE_SOURCEIDS,
                       parameter DCACHE_SOURCEIDS,
                       parameter TCM_BASE,
-                      parameter TCM_SIZE
-                      /*parameter HAS_ACCEL*/)(
+                      parameter TCM_SIZE)(
                                              input         clock,
                                              input         reset,
                                              input [63:0]  reset_vector,
                                              input [63:0]  ipc,
                                              input [63:0]  cycle,
                                              output [63:0] insns_retired,
+                                             input        has_accel,
 
                                              input         debug,
                                              input         mtip,
@@ -224,7 +224,6 @@ module SpikeBlackBox #(
                                              input         tcm_d_ready,
                                              output [63:0] tcm_d_data,
 
-                                             output        accel_exists,
 
                                              input         accel_a_ready,
                                              output        accel_a_valid,
@@ -239,6 +238,8 @@ module SpikeBlackBox #(
 
    longint                                                 __insns_retired;
    reg [63:0]                                              __insns_retired_reg;
+
+   wire                                                     __has_accel;
 
    wire                                                    __icache_a_ready;
    bit                                                     __icache_a_valid;
@@ -313,13 +314,11 @@ module SpikeBlackBox #(
    reg                                                     __tcm_d_valid_reg;
    reg [63:0]                                              __tcm_d_data_reg;
 
-   bit                                                     __accel_exists;
    wire                                                    __accel_a_ready;
    bit                                                     __accel_a_valid;
    longint                                                 __accel_a_insn;
    longint                                                 __accel_a_rs1;
    longint                                                 __accel_a_rs2;
-   reg                                                     __accel_exists_reg;
    reg                                                     __accel_a_valid_reg;
    reg [63:0]                                              __accel_a_insn_reg;
    reg [63:0]                                              __accel_a_rs1_reg;
@@ -396,6 +395,7 @@ module SpikeBlackBox #(
          __tcm_d_valid_reg <= 1'b0;
          __tcm_d_data = 64'h0;
          __tcm_d_data_reg <= 64'h0;
+
          spike_tile_reset(HARTID);
       end else begin
          spike_tile(HARTID, ISA, PMPREGIONS,
@@ -404,6 +404,7 @@ module SpikeBlackBox #(
                     ICACHE_SOURCEIDS, DCACHE_SOURCEIDS,
                     TCM_BASE, TCM_SIZE,
                     reset_vector, ipc, cycle, __insns_retired,
+                    __has_accel,
                     debug, mtip, msip, meip, seip,
 
                     __icache_a_ready, __icache_a_valid, __icache_a_address, __icache_a_sourceid,
@@ -430,7 +431,7 @@ module SpikeBlackBox #(
                     tcm_a_valid, tcm_a_address, tcm_a_data, tcm_a_mask, tcm_a_opcode, tcm_a_size,
                     __tcm_d_valid, __tcm_d_ready, __tcm_d_data,
 
-                    __accel_exists, __accel_a_ready, __accel_a_valid, __accel_a_insn, __accel_a_rs1, __accel_a_rs2, 
+                    __accel_a_ready, __accel_a_valid, __accel_a_insn, __accel_a_rs1, __accel_a_rs2, 
                     __accel_d_valid, accel_d_rd, __accel_d_result
                     );
          __insns_retired_reg <= __insns_retired;
@@ -470,7 +471,6 @@ module SpikeBlackBox #(
          __tcm_d_valid_reg <= __tcm_d_valid;
          __tcm_d_data_reg <= __tcm_d_data;
 
-         __accel_exists_reg <= __accel_exists;
          __accel_a_valid_reg <= __accel_a_valid;
          __accel_a_insn_reg <= __accel_a_insn;
          __accel_a_rs1_reg <= __accel_a_rs1;
@@ -519,7 +519,7 @@ module SpikeBlackBox #(
    assign tcm_d_data = __tcm_d_data_reg;
    assign __tcm_d_ready = tcm_d_ready;
 
-   assign accel_exists = __accel_exists_reg;
+   assign __has_accel = has_accel;
    assign accel_a_valid = __accel_a_valid_reg;
    assign accel_a_insn = __accel_a_insn_reg;
    assign accel_a_rs1 = __accel_a_rs1_reg;

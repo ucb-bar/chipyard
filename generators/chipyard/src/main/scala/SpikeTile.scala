@@ -177,9 +177,9 @@ class SpikeTile(
 
   override lazy val module = new SpikeTileModuleImp(this)
   //TODO: Modularize Accel instantiation with configs
-  //Add line below with instantiation of desired accelerator
-  val accel_module: AdderExample = LazyModule(new AdderExample(OpcodeSet.all))
-  // val accel_module: AccumulatorExample = LazyModule(new AccumulatorExample(OpcodeSet.all));
+  val accel_sequence = p(BuildRoCC).map(_(p))//.getOrElse(new NoAccelerator)
+  val has_accel = accel_sequence.nonEmpty
+  val accel_module = if (has_accel) accel_sequence.head else null
 }
 
 class SpikeBlackBox(
@@ -197,8 +197,8 @@ class SpikeBlackBox(
   executable_regions: String,
   tcm_base: BigInt,
   tcm_size: BigInt,
-  /*has_accel: Boolean,*/
-  use_dtm: Boolean) extends BlackBox(Map(
+  use_dtm: Boolean,
+  ) extends BlackBox(Map(
     "HARTID" -> IntParam(hartId),
     "ISA" -> StringParam(isa),
     "PMPREGIONS" -> IntParam(pmpregions),
@@ -213,8 +213,7 @@ class SpikeBlackBox(
     "CACHEABLE" -> StringParam(cacheable_regions),
     "EXECUTABLE" -> StringParam(executable_regions),
     "TCM_BASE" -> IntParam(tcm_base),
-    "TCM_SIZE" -> IntParam(tcm_size),
-    /*"HAS_ACCEL" -> IntParam(has_accel)*/
+    "TCM_SIZE" -> IntParam(tcm_size)
   )) with HasBlackBoxResource {
 
   val io = IO(new Bundle {
@@ -224,6 +223,7 @@ class SpikeBlackBox(
     val ipc = Input(UInt(64.W))
     val cycle = Input(UInt(64.W))
     val insns_retired = Output(UInt(64.W))
+    val has_accel = Input(Bool())
 
     val debug = Input(Bool())
     val mtip = Input(Bool())
@@ -368,6 +368,7 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     outer.spikeTileParams.tcmParams.map(_.size).getOrElse(0),
     useDTM
   ))
+  spike.io.has_accel := outer.has_accel.asBool
   spike.io.clock := clock.asBool
   val cycle = RegInit(0.U(64.W))
   cycle := cycle + 1.U
@@ -489,7 +490,9 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
   }
 
   /* Begin Accel Section */
-   val to_accel_enq_bits = IO(new Bundle{
+
+  if (outer.has_accel) {
+    val to_accel_enq_bits = IO(new Bundle{
     val rs2 = UInt(64.W)
     val rs1 = UInt(64.W)
     val insn = UInt(64.W)
@@ -498,18 +501,10 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
   val to_accel_q = Module(new Queue(UInt(192.W), 1, flow=true, pipe=true))
   spike.io.accel.a.ready := to_accel_q.io.enq.ready && to_accel_q.io.count === 0.U
   to_accel_q.io.enq.valid := spike.io.accel.a.valid
-  // printf(cf"Accel valid? ${spike.io.accel.a.valid}\n")
   to_accel_enq_bits.insn := spike.io.accel.a.insn
   to_accel_enq_bits.rs1 := spike.io.accel.a.rs1
   to_accel_enq_bits.rs2 := spike.io.accel.a.rs2
   to_accel_q.io.enq.bits := to_accel_enq_bits.asUInt
-  // printf(cf"Enq bits: ${to_accel_enq_bits.insn(63, 0)}\n")
-  // printf(cf"RS1 bits: ${to_accel_enq_bits.rs1(63, 0)}\n")
-  // printf(cf"RS2 bits: ${to_accel_enq_bits.rs2(63, 0)}\n")
-  // printf(cf"Enq valid? ${to_accel_q.io.enq.valid}\n")
-  // printf(cf"Enq ready? ${to_accel_q.io.enq.ready}\n")
-  // printf(cf"Deq valid? ${to_accel_q.io.deq.valid}\n")
-  // printf(cf"Deq ready? ${to_accel_q.io.deq.ready}\n")
 
   outer.accel_module.module.io.cmd.valid := to_accel_q.io.deq.valid
   to_accel_q.io.deq.ready := outer.accel_module.module.io.cmd.ready
@@ -531,10 +526,6 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
   cmd.status := DontCare
   outer.accel_module.module.io.cmd.bits := cmd
   dontTouch(outer.accel_module.module.io)
-
-  // printf(cf"inst bits: ${inst}\n")
-  // printf(cf"rs1 bits: ${cmd.rs1}\n")
-  // printf(cf"rs2 bits: ${cmd.rs2}\n")
 
   //Instantiate unused signals, will probably be used as interface develops further.
   outer.accel_module.module.io.mem.req.ready := false.B
@@ -579,37 +570,27 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
   })
 
   val from_accel_q = Module(new Queue(UInt(128.W), 1, flow=true, pipe=true)) //rd and result stitched together
-  // printf(cf"From Accel:\n")
-  // printf(cf"Enq valid? ${from_accel_q.io.enq.valid}\n")
-  // printf(cf"Enq ready? ${from_accel_q.io.enq.ready}\n")
-  // printf(cf"Deq valid? ${from_accel_q.io.deq.valid}\n")
-  // printf(cf"Deq ready? ${from_accel_q.io.deq.ready}\n")
   outer.accel_module.module.io.resp.ready := from_accel_q.io.enq.ready && from_accel_q.io.count === 0.U
   from_accel_q.io.enq.valid := outer.accel_module.module.io.resp.valid
 
   from_accel_enq_bits.rd := outer.accel_module.module.io.resp.bits.rd
   from_accel_enq_bits.resp := outer.accel_module.module.io.resp.bits.data
   from_accel_q.io.enq.bits := from_accel_enq_bits.asUInt
-  // spike.io.accel.d.valid := from_accel_q.io.deq.valid
   spike.io.accel.d.valid := false.B
   from_accel_q.io.deq.ready := true.B
   spike.io.accel.d.rd := from_accel_q.io.deq.bits(127,64)
   spike.io.accel.d.result := 0.U
-  // spike.io.accel.d.result := outer.accel_module.module.io.resp.bits.data
-  // printf(cf"Accel pre-queue result? ${outer.accel_module.module.io.resp.bits.data}\n")
-  // printf(cf"Accel dequeue result: ${from_accel_q.io.deq.bits(68,5)}\n")
-  // printf(cf"From Accel queue ready? ${from_accel_q.io.enq.ready}\n")
-  // printf(cf"From Accel queue valid? ${from_accel_q.io.enq.valid}\n")
-  // when (to_accel_q.io.deq.fire) {
-  //   printf(cf"Got accel instruction: ${to_accel_q.io.deq.bits(63, 0)}\n")
-  // }
 
   when (from_accel_q.io.deq.fire) {
     spike.io.accel.d.valid := true.B
     spike.io.accel.d.result := from_accel_q.io.deq.bits(63,0)
-    // printf(cf"Got result: ${spike.io.accel.d.result}\n")
   }
-  printf("Accel result: %d\n", spike.io.accel.d.result)
+  } else {
+    spike.io.accel.a.ready := false.B
+    spike.io.accel.d.valid := false.B
+    spike.io.accel.d.result := 0.U
+    spike.io.accel.d.rd := 0.U
+  }
   /* End Accel Section */
 }
 
@@ -641,4 +622,16 @@ class WithSpikeTCM extends Config((site, here, up) => {
   }
   case ExtMem => None
   case SubsystemBankedCoherenceKey => up(SubsystemBankedCoherenceKey).copy(nBanks = 0)
+})
+
+/**
+ * Config fragment to enable different RoCCs, work in progress
+ */
+class WithAccumRoCC extends Config((site, here, up) => {
+  case BuildRoCC => List(
+    (p: Parameters) => {
+        val accumulator = LazyModule(new AccumulatorExample(OpcodeSet.custom0, n = 4)(p))
+        accumulator
+    }
+  )
 })
