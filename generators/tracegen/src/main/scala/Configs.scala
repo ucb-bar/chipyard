@@ -8,7 +8,6 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.BaseConfig
 import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.tile.{MaxHartIdBits, XLen}
-import boom.lsu._
 import scala.math.{max, min}
 
 class WithTraceGen(
@@ -50,7 +49,7 @@ class WithTraceGen(
   case NumTiles => up(NumTiles) + n
 })
 
-class WithBoomTraceGen(
+class WithBoomV3TraceGen(
   n: Int = 2,
   overrideMemOffset: Option[BigInt] = None)(
   params: Seq[DCacheParams] = List.fill(n){ DCacheParams(nMSHRs = 4, nSets = 16, nWays = 2) },
@@ -61,8 +60,44 @@ class WithBoomTraceGen(
     val idOffset = up(NumTiles)
     val memOffset: BigInt = overrideMemOffset.orElse(site(ExtMem).map(_.master.base)).getOrElse(0x0L)
     params.zipWithIndex.map { case (dcp, i) =>
-      BoomTraceGenTileAttachParams(
-        tileParams = BoomTraceGenParams(
+      boom.v3.lsu.BoomTraceGenTileAttachParams(
+        tileParams = boom.v3.lsu.BoomTraceGenParams(
+          tileId = i + idOffset,
+          dcache = Some(dcp),
+          wordBits = site(XLen),
+          addrBits = 48,
+          addrBag = {
+            val nSets = dcp.nSets
+            val nWays = dcp.nWays
+            val blockOffset = site(SystemBusKey).blockOffset
+            val nBeats = site(SystemBusKey).blockBeats
+            List.tabulate(nWays) { i =>
+              Seq.tabulate(nBeats) { j => BigInt((j * 8) + ((i * nSets) << blockOffset)) }
+            }.flatten
+          },
+          maxRequests = nReqs,
+          memStart = memOffset,
+          numGens = params.size),
+        crossingParams = RocketCrossingParams()
+      )
+    } ++ prev
+  }
+  case NumTiles => up(NumTiles) + n
+})
+
+class WithBoomV4TraceGen(
+  n: Int = 2,
+  overrideMemOffset: Option[BigInt] = None)(
+  params: Seq[DCacheParams] = List.fill(n){ DCacheParams(nMSHRs = 4, nSets = 16, nWays = 2) },
+  nReqs: Int = 8192
+) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => {
+    val prev = up(TilesLocated(InSubsystem), site)
+    val idOffset = up(NumTiles)
+    val memOffset: BigInt = overrideMemOffset.orElse(site(ExtMem).map(_.master.base)).getOrElse(0x0L)
+    params.zipWithIndex.map { case (dcp, i) =>
+      boom.v4.lsu.BoomTraceGenTileAttachParams(
+        tileParams = boom.v4.lsu.BoomTraceGenParams(
           tileId = i + idOffset,
           dcache = Some(dcp),
           wordBits = site(XLen),

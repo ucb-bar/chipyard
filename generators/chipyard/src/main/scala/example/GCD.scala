@@ -4,7 +4,8 @@ import chisel3._
 import chisel3.util._
 import chisel3.experimental.{IntParam, BaseModule}
 import freechips.rocketchip.amba.axi4._
-import freechips.rocketchip.subsystem.BaseSubsystem
+import freechips.rocketchip.prci._
+import freechips.rocketchip.subsystem.{BaseSubsystem, PBUS}
 import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper.{HasRegMap, RegField}
@@ -36,27 +37,24 @@ class GCDIO(val w: Int) extends Bundle {
   val busy = Output(Bool())
 }
 
-trait GCDTopIO extends Bundle {
+class GCDTopIO extends Bundle {
   val gcd_busy = Output(Bool())
 }
 
-trait HasGCDIO extends BaseModule {
-  val w: Int
-  val io = IO(new GCDIO(w))
+trait HasGCDTopIO {
+  def io: GCDTopIO
 }
 
 // DOC include start: GCD blackbox
-class GCDMMIOBlackBox(val w: Int) extends BlackBox(Map("WIDTH" -> IntParam(w))) with HasBlackBoxResource
-  with HasGCDIO
-{
+class GCDMMIOBlackBox(val w: Int) extends BlackBox(Map("WIDTH" -> IntParam(w))) with HasBlackBoxResource {
+  val io = IO(new GCDIO(w))
   addResource("/vsrc/GCDMMIOBlackBox.v")
 }
 // DOC include end: GCD blackbox
 
 // DOC include start: GCD chisel
-class GCDMMIOChiselModule(val w: Int) extends Module
-  with HasGCDIO
-{
+class GCDMMIOChiselModule(val w: Int) extends Module {
+  val io = IO(new GCDIO(w))
   val s_idle :: s_run :: s_done :: Nil = Enum(3)
 
   val state = RegInit(s_idle)
@@ -90,81 +88,120 @@ class GCDMMIOChiselModule(val w: Int) extends Module
 }
 // DOC include end: GCD chisel
 
-// DOC include start: GCD instance regmap
-
-trait GCDModule extends HasRegMap {
-  val io: GCDTopIO
-
-  implicit val p: Parameters
-  def params: GCDParams
-  val clock: Clock
-  val reset: Reset
-
-
-  // How many clock cycles in a PWM cycle?
-  val x = Reg(UInt(params.width.W))
-  val y = Wire(new DecoupledIO(UInt(params.width.W)))
-  val gcd = Wire(new DecoupledIO(UInt(params.width.W)))
-  val status = Wire(UInt(2.W))
-
-  val impl = if (params.useBlackBox) {
-    Module(new GCDMMIOBlackBox(params.width))
-  } else {
-    Module(new GCDMMIOChiselModule(params.width))
-  }
-
-  impl.io.clock := clock
-  impl.io.reset := reset.asBool
-
-  impl.io.x := x
-  impl.io.y := y.bits
-  impl.io.input_valid := y.valid
-  y.ready := impl.io.input_ready
-
-  gcd.bits := impl.io.gcd
-  gcd.valid := impl.io.output_valid
-  impl.io.output_ready := gcd.ready
-
-  status := Cat(impl.io.input_ready, impl.io.output_valid)
-  io.gcd_busy := impl.io.busy
-
-  regmap(
-    0x00 -> Seq(
-      RegField.r(2, status)), // a read-only register capturing current status
-    0x04 -> Seq(
-      RegField.w(params.width, x)), // a plain, write-only register
-    0x08 -> Seq(
-      RegField.w(params.width, y)), // write-only, y.valid is set on write
-    0x0C -> Seq(
-      RegField.r(params.width, gcd))) // read-only, gcd.ready is set on read
-}
-// DOC include end: GCD instance regmap
-
 // DOC include start: GCD router
-class GCDTL(params: GCDParams, beatBytes: Int)(implicit p: Parameters)
-  extends TLRegisterRouter(
-    params.address, "gcd", Seq("ucbbar,gcd"),
-    beatBytes = beatBytes)(
-      new TLRegBundle(params, _) with GCDTopIO)(
-      new TLRegModule(params, _, _) with GCDModule)
+class GCDTL(params: GCDParams, beatBytes: Int)(implicit p: Parameters) extends ClockSinkDomain(ClockSinkParameters())(p) {
+  val device = new SimpleDevice("gcd", Seq("ucbbar,gcd")) 
+  val node = TLRegisterNode(Seq(AddressSet(params.address, 4096-1)), device, "reg/control", beatBytes=beatBytes)
 
-class GCDAXI4(params: GCDParams, beatBytes: Int)(implicit p: Parameters)
-  extends AXI4RegisterRouter(
-    params.address,
-    beatBytes=beatBytes)(
-      new AXI4RegBundle(params, _) with GCDTopIO)(
-      new AXI4RegModule(params, _, _) with GCDModule)
+  override lazy val module = new GCDImpl
+  class GCDImpl extends Impl with HasGCDTopIO {
+    val io = IO(new GCDTopIO)
+    withClockAndReset(clock, reset) {
+      // How many clock cycles in a PWM cycle?
+      val x = Reg(UInt(params.width.W))
+      val y = Wire(new DecoupledIO(UInt(params.width.W)))
+      val gcd = Wire(new DecoupledIO(UInt(params.width.W)))
+      val status = Wire(UInt(2.W))
+
+      val impl_io = if (params.useBlackBox) {
+        val impl = Module(new GCDMMIOBlackBox(params.width))
+        impl.io
+      } else {
+        val impl = Module(new GCDMMIOChiselModule(params.width))
+        impl.io
+      }
+
+      impl_io.clock := clock
+      impl_io.reset := reset.asBool
+
+      impl_io.x := x
+      impl_io.y := y.bits
+      impl_io.input_valid := y.valid
+      y.ready := impl_io.input_ready
+
+      gcd.bits := impl_io.gcd
+      gcd.valid := impl_io.output_valid
+      impl_io.output_ready := gcd.ready
+
+      status := Cat(impl_io.input_ready, impl_io.output_valid)
+      io.gcd_busy := impl_io.busy
+
+// DOC include start: GCD instance regmap
+      node.regmap(
+        0x00 -> Seq(
+          RegField.r(2, status)), // a read-only register capturing current status
+        0x04 -> Seq(
+          RegField.w(params.width, x)), // a plain, write-only register
+        0x08 -> Seq(
+          RegField.w(params.width, y)), // write-only, y.valid is set on write
+        0x0C -> Seq(
+          RegField.r(params.width, gcd))) // read-only, gcd.ready is set on read
+// DOC include end: GCD instance regmap
+    }
+  }
+}
+
+class GCDAXI4(params: GCDParams, beatBytes: Int)(implicit p: Parameters) extends ClockSinkDomain(ClockSinkParameters())(p) {
+  val node = AXI4RegisterNode(AddressSet(params.address, 4096-1), beatBytes=beatBytes)
+  override lazy val module = new GCDImpl
+  class GCDImpl extends Impl with HasGCDTopIO {
+    val io = IO(new GCDTopIO)
+    withClockAndReset(clock, reset) {
+      // How many clock cycles in a PWM cycle?
+      val x = Reg(UInt(params.width.W))
+      val y = Wire(new DecoupledIO(UInt(params.width.W)))
+      val gcd = Wire(new DecoupledIO(UInt(params.width.W)))
+      val status = Wire(UInt(2.W))
+
+      val impl_io = if (params.useBlackBox) {
+        val impl = Module(new GCDMMIOBlackBox(params.width))
+        impl.io
+      } else {
+        val impl = Module(new GCDMMIOChiselModule(params.width))
+        impl.io
+      }
+
+      impl_io.clock := clock
+      impl_io.reset := reset.asBool
+
+      impl_io.x := x
+      impl_io.y := y.bits
+      impl_io.input_valid := y.valid
+      y.ready := impl_io.input_ready
+
+      gcd.bits := impl_io.gcd
+      gcd.valid := impl_io.output_valid
+      impl_io.output_ready := gcd.ready
+
+      status := Cat(impl_io.input_ready, impl_io.output_valid)
+      io.gcd_busy := impl_io.busy
+
+      node.regmap(
+        0x00 -> Seq(
+          RegField.r(2, status)), // a read-only register capturing current status
+        0x04 -> Seq(
+          RegField.w(params.width, x)), // a plain, write-only register
+        0x08 -> Seq(
+          RegField.w(params.width, y)), // write-only, y.valid is set on write
+        0x0C -> Seq(
+          RegField.r(params.width, gcd))) // read-only, gcd.ready is set on read
+    }
+  }
+}
 // DOC include end: GCD router
 
 // DOC include start: GCD lazy trait
 trait CanHavePeripheryGCD { this: BaseSubsystem =>
   private val portName = "gcd"
 
+  private val pbus = locateTLBusWrapper(PBUS)
+
   // Only build if we are using the TL (nonAXI4) version
   val gcd_busy = p(GCDKey) match {
     case Some(params) => {
       val gcd = if (params.useAXI4) {
-        val gcd = pbus { LazyModule(new GCDAXI4(params, pbus.beatBytes)(p)) }
+        val gcd = LazyModule(new GCDAXI4(params, pbus.beatBytes)(p))
+        gcd.clockNode := pbus.fixedClockNode
         pbus.coupleTo(portName) {
           gcd.node :=
           AXI4Buffer () :=
@@ -174,18 +211,14 @@ trait CanHavePeripheryGCD { this: BaseSubsystem =>
         }
         gcd
       } else {
-        val gcd = pbus { LazyModule(new GCDTL(params, pbus.beatBytes)(p)) }
+        val gcd = LazyModule(new GCDTL(params, pbus.beatBytes)(p))
+        gcd.clockNode := pbus.fixedClockNode
         pbus.coupleTo(portName) { gcd.node := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
         gcd
       }
-      val pbus_io = pbus { InModuleBody {
-        val busy = IO(Output(Bool()))
-        busy := gcd.module.io.gcd_busy
-        busy
-      }}
       val gcd_busy = InModuleBody {
         val busy = IO(Output(Bool())).suggestName("gcd_busy")
-        busy := pbus_io
+        busy := gcd.module.io.gcd_busy
         busy
       }
       Some(gcd_busy)

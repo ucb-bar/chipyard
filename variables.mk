@@ -26,6 +26,8 @@ HELP_PROJECT_VARIABLES = \
 HELP_SIMULATION_VARIABLES = \
 "   BINARY                 = riscv elf binary that the simulator will run when using the run-binary* targets" \
 "   BINARIES               = list of riscv elf binary that the simulator will run when using the run-binaries* targets" \
+"   BINARIES_DIR           = directory of riscv elf binaries that the simulator will run when using the run-binaries* targets" \
+"   BINARY_ARGS            = arguments to pass to each binary in run-binary targets (primarily meant for pk arguments)" \
 "   LOADMEM                = riscv elf binary that should be loaded directly into simulated DRAM. LOADMEM=1 will load the BINARY elf" \
 "   LOADARCH               = path to a architectural checkpoint directory that should end in .loadarch/, for restoring from a checkpoint" \
 "   VERBOSE_FLAGS          = flags used when doing verbose simulation [$(VERBOSE_FLAGS)]" \
@@ -211,6 +213,12 @@ BB_MODS_FILELIST ?= $(build_dir)/$(long_name).bb.f
 # all module files to include (top, model, bb included)
 ALL_MODS_FILELIST ?= $(build_dir)/$(long_name).all.f
 
+# external filelists. Users, or project-supplied make fragments can append filelists
+# with absolute paths here
+EXT_FILELISTS ?=
+# external verilog incdirs. Users, or project-supplied make fragments can append to this
+EXT_INCDIRS ?=
+
 BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
 
@@ -274,6 +282,7 @@ PERMISSIVE_ON=+permissive
 PERMISSIVE_OFF=+permissive-off
 BINARY ?=
 BINARIES ?=
+BINARY_ARGS ?=
 override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(TIMEOUT_CYCLES)
 VERBOSE_FLAGS ?= +verbose
 # get_out_name is a function, 1st argument is the binary
@@ -286,6 +295,10 @@ override BINARY = $(addsuffix /mem.elf,$(LOADARCH))
 override BINARIES = $(addsuffix /mem.elf,$(LOADARCH))
 override get_out_name = $(shell basename $(dir $(1)))
 override LOADMEM = 1
+endif
+
+ifneq ($(BINARIES_DIR),)
+override BINARIES = $(shell find -L $(BINARIES_DIR) -type f -print 2> /dev/null)
 endif
 
 #########################################################################################

@@ -67,13 +67,13 @@ class WithCustomChipTop extends Config((site, here, up) => {
 })
 
 class WithBrokenOutUARTIO extends OverrideIOBinder({
-  (system: HasPeripheryUARTModuleImp) => {
+  (system: HasPeripheryUART) => {
     val uart_txd = IO(Output(Bool()))
     val uart_rxd = IO(Input(Bool()))
     system.uart(0).rxd := uart_rxd
     uart_txd := system.uart(0).txd
     val where = PBUS // TODO fix
-    val bus = system.outer.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(where)
+    val bus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(where)
     val freqMHz = bus.dtsFrequency.get / 1000000
     (Seq(UARTPort(() => {
       val uart_wire = Wire(new UARTPortIO(system.uart(0).c))

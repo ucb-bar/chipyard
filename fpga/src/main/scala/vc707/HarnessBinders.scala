@@ -3,10 +3,10 @@ package chipyard.fpga.vc707
 import chisel3._
 import chisel3.experimental.{BaseModule}
 
-import freechips.rocketchip.util.{HeterogeneousBag}
+import org.chipsalliance.diplomacy.nodes.{HeterogeneousBag}
 import freechips.rocketchip.tilelink.{TLBundle}
 
-import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp, UARTPortIO}
+import sifive.blocks.devices.uart.{UARTPortIO}
 import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
 import sifive.fpgashells.devices.xilinx.xilinxvc707pciex1.{HasSystemXilinxVC707PCIeX1ModuleImp, XilinxVC707PCIeX1IO}
 

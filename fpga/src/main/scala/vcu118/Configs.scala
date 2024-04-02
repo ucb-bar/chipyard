@@ -54,11 +54,11 @@ class WithVCU118Tweaks extends Config(
   new WithUART ++
   new WithSPISDCard ++
   new WithDDRMem ++
+  new WithJTAG ++
   // other configuration
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
-  new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1)
 )
@@ -72,7 +72,7 @@ class RocketVCU118Config extends Config(
 class BoomVCU118Config extends Config(
   new WithFPGAFrequency(50) ++
   new WithVCU118Tweaks ++
-  new chipyard.MegaBoomConfig
+  new chipyard.MegaBoomV3Config
 )
 
 class WithFPGAFrequency(fMHz: Double) extends Config(

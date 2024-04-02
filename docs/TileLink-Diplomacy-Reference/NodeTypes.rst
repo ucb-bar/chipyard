@@ -134,7 +134,7 @@ to handle TileLink requests, it is usually much easier to use a register node.
 This type of node provides a ``regmap`` method that allows you to specify
 control/status registers and automatically generates the logic to handle the
 TileLink protocol. More information about how to use register nodes can be
-found in :ref:`TileLink-Diplomacy-Reference/Register-Router:Register Router`.
+found in :ref:`TileLink-Diplomacy-Reference/Register-Node:Register Node`.
 
 Identity Node
 -------------

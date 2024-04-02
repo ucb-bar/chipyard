@@ -13,7 +13,7 @@ import org.chipsalliance.cde.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, InModuleBody, ValName}
 import freechips.rocketchip.util.{ResetCatchAndSync, RecordMap}
 import freechips.rocketchip.tile.{RocketTile}
-import boom.common.{BoomTile}
+import boom.v3.common.{BoomTile}
 
 import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge, RationalClock, ResetPulseBridge, ResetPulseBridgeParameters}
 import midas.targetutils.{MemModelAnnotation, EnableModelMultiThreadingAnnotation}
@@ -112,10 +112,10 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessInsta
           case b: BoomTile => {
             val core = b.module.core
             core.iregfile match {
-              case irf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
+              case irf: boom.v3.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(irf.regfile))
             }
             if (core.fp_pipeline != null) core.fp_pipeline.fregfile match {
-              case frf: boom.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(frf.regfile))
+              case frf: boom.v3.exu.RegisterFileSynthesizable => annotate(MemModelAnnotation(frf.regfile))
             }
           }
           case _ =>
