@@ -1,7 +1,6 @@
 package chipyard
 
 import org.chipsalliance.cde.config.{Config}
-// import freechips.rocketchip.tile.{BuildRoCC, OpcodeSet, XLen}
 
 // Configs which instantiate a Spike-simulated
 // tile that interacts with the Chipyard SoC
