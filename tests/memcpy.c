@@ -14,7 +14,7 @@ int main(void)
 {
   volatile int A[x][y];
   volatile int B[x][y];
-  int size = x*y;
+  int size = x*y/2;
 
   for (int i=0; i<x; i=i+1) {
     for (int j=0; j<y; j=j+1) {

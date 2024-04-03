@@ -111,7 +111,7 @@ module ExampleVerilogTLDevice #(
       state <= S_RUN;
     end else if (state == S_RUN && done) begin
       state <= S_DONE;
-    end else if (state == S_DONE) begin
+    end else if (state == S_DONE && out_valid) begin
       state <= S_IDLE;
     end
   end
@@ -169,7 +169,7 @@ module ExampleVerilogTLDevice #(
   assign tl_ctrl_d_bits_data = (|(tl_ctrl_a_bits_address[11:5])) ? 64'h0 : {62'h0, input_ready, output_ready};
 
   // TileLink Client node interface signal assignment
-  assign tl_client_d_ready = '0; // TODO: Module is ready to start DMA operation
+  assign tl_client_d_ready = '0; // TODO: Module is ready to start DMA operation --> use start signal
   assign tl_client_a_valid = '0; // TODO: Valid request to the TL node, use the states to fill this
   assign tl_client_a_bits_address = '0; // TODO: Based on read or write, use the CSRs and counter to send the read/write address
   assign tl_client_a_bits_opcode = '0; // TODO: Read requests or Get opcode is 4 and Write request or Put is 0
