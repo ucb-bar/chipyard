@@ -176,10 +176,9 @@ class SpikeTile(
   tlMasterXbar.node := TLWidthWidget(8) := TLBuffer() := mmioNode
 
   override lazy val module = new SpikeTileModuleImp(this)
-  //TODO: Modularize Accel instantiation with configs
-  val accel_sequence = p(BuildRoCC).map(_(p))//.getOrElse(new NoAccelerator)
-  val has_accel = accel_sequence.nonEmpty
-  val accel_module = if (has_accel) accel_sequence.head else null
+  val rocc_sequence = p(BuildRoCC).map(_(p))
+  val has_rocc = rocc_sequence.nonEmpty
+  val rocc_module = if (has_rocc) rocc_sequence.head else null
 }
 
 class SpikeBlackBox(
@@ -223,7 +222,7 @@ class SpikeBlackBox(
     val ipc = Input(UInt(64.W))
     val cycle = Input(UInt(64.W))
     val insns_retired = Output(UInt(64.W))
-    val has_accel = Input(Bool())
+    val has_rocc = Input(Bool())
 
     val debug = Input(Bool())
     val mtip = Input(Bool())
@@ -310,7 +309,7 @@ class SpikeBlackBox(
       }
     }
 
-    val accel = new Bundle {
+    val rocc = new Bundle {
       val a = new Bundle {
         val ready = Input(Bool())
         val valid = Output(Bool())
@@ -368,7 +367,7 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     outer.spikeTileParams.tcmParams.map(_.size).getOrElse(0),
     useDTM
   ))
-  spike.io.has_accel := outer.has_accel.asBool
+  spike.io.has_rocc := outer.has_rocc.asBool
   spike.io.clock := clock.asBool
   val cycle = RegInit(0.U(64.W))
   cycle := cycle + 1.U
@@ -491,105 +490,105 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
 
   /* Begin Accel Section */
 
-  if (outer.has_accel) {
-    val to_accel_enq_bits = IO(new Bundle{
+  if (outer.has_rocc) {
+    val to_rocc_enq_bits = IO(new Bundle{
     val rs2 = UInt(64.W)
     val rs1 = UInt(64.W)
     val insn = UInt(64.W)
   })
 
-  val to_accel_q = Module(new Queue(UInt(192.W), 1, flow=true, pipe=true))
-  spike.io.accel.a.ready := to_accel_q.io.enq.ready && to_accel_q.io.count === 0.U
-  to_accel_q.io.enq.valid := spike.io.accel.a.valid
-  to_accel_enq_bits.insn := spike.io.accel.a.insn
-  to_accel_enq_bits.rs1 := spike.io.accel.a.rs1
-  to_accel_enq_bits.rs2 := spike.io.accel.a.rs2
-  to_accel_q.io.enq.bits := to_accel_enq_bits.asUInt
+  val to_rocc_q = Module(new Queue(UInt(192.W), 1, flow=true, pipe=true))
+  spike.io.rocc.a.ready := to_rocc_q.io.enq.ready && to_rocc_q.io.count === 0.U
+  to_rocc_q.io.enq.valid := spike.io.rocc.a.valid
+  to_rocc_enq_bits.insn := spike.io.rocc.a.insn
+  to_rocc_enq_bits.rs1 := spike.io.rocc.a.rs1
+  to_rocc_enq_bits.rs2 := spike.io.rocc.a.rs2
+  to_rocc_q.io.enq.bits := to_rocc_enq_bits.asUInt
 
-  outer.accel_module.module.io.cmd.valid := to_accel_q.io.deq.valid
-  to_accel_q.io.deq.ready := outer.accel_module.module.io.cmd.ready
+  outer.rocc_module.module.io.cmd.valid := to_rocc_q.io.deq.valid
+  to_rocc_q.io.deq.ready := outer.rocc_module.module.io.cmd.ready
 
   val inst = Wire(new RoCCInstruction())
-  inst.funct := to_accel_q.io.deq.bits(31,25)
-  inst.rs2 := to_accel_q.io.deq.bits(24,20)
-  inst.rs1 := to_accel_q.io.deq.bits(19,15)
-  inst.xd := to_accel_q.io.deq.bits(14)
-  inst.xs1 := to_accel_q.io.deq.bits(13)
-  inst.xs2 := to_accel_q.io.deq.bits(12)
-  inst.rd := to_accel_q.io.deq.bits(11,7)
-  inst.opcode := to_accel_q.io.deq.bits(6,0)
+  inst.funct := to_rocc_q.io.deq.bits(31,25)
+  inst.rs2 := to_rocc_q.io.deq.bits(24,20)
+  inst.rs1 := to_rocc_q.io.deq.bits(19,15)
+  inst.xd := to_rocc_q.io.deq.bits(14)
+  inst.xs1 := to_rocc_q.io.deq.bits(13)
+  inst.xs2 := to_rocc_q.io.deq.bits(12)
+  inst.rd := to_rocc_q.io.deq.bits(11,7)
+  inst.opcode := to_rocc_q.io.deq.bits(6,0)
 
   val cmd = Wire(new RoCCCommand())
   cmd.inst := inst
-  cmd.rs1 := to_accel_q.io.deq.bits(127,64)
-  cmd.rs2 := to_accel_q.io.deq.bits(191,128)
+  cmd.rs1 := to_rocc_q.io.deq.bits(127,64)
+  cmd.rs2 := to_rocc_q.io.deq.bits(191,128)
   cmd.status := DontCare
-  outer.accel_module.module.io.cmd.bits := cmd
-  dontTouch(outer.accel_module.module.io)
+  outer.rocc_module.module.io.cmd.bits := cmd
+  dontTouch(outer.rocc_module.module.io)
 
   //Instantiate unused signals, will probably be used as interface develops further.
-  outer.accel_module.module.io.mem.req.ready := false.B
-  outer.accel_module.module.io.mem.s2_nack := false.B
-  outer.accel_module.module.io.mem.s2_uncached := false.B
-  outer.accel_module.module.io.mem.s2_paddr := 0.U
-  outer.accel_module.module.io.mem.resp.valid := false.B
-  outer.accel_module.module.io.mem.resp.bits := DontCare
-  outer.accel_module.module.io.mem.replay_next := false.B
-  outer.accel_module.module.io.mem.s2_xcpt.ma.ld := false.B
-  outer.accel_module.module.io.mem.s2_xcpt.ma.st := false.B
-  outer.accel_module.module.io.mem.s2_xcpt.pf.ld := false.B
-  outer.accel_module.module.io.mem.s2_xcpt.pf.st := false.B
-  outer.accel_module.module.io.mem.s2_xcpt.ae.ld := false.B
-  outer.accel_module.module.io.mem.s2_xcpt.ae.st := false.B
-  outer.accel_module.module.io.mem.s2_xcpt.gf.ld := false.B
-  outer.accel_module.module.io.mem.s2_xcpt.gf.st := false.B
-  outer.accel_module.module.io.mem.s2_gpa := 0.U
-  outer.accel_module.module.io.mem.ordered := false.B
-  outer.accel_module.module.io.mem.perf.acquire := false.B
-  outer.accel_module.module.io.mem.perf.release := false.B
-  outer.accel_module.module.io.mem.perf.grant := false.B
-  outer.accel_module.module.io.exception := false.B
-  outer.accel_module.module.io.mem.clock_enabled := true.B
-  outer.accel_module.module.io.mem.perf.storeBufferEmptyAfterStore := false.B
-  outer.accel_module.module.io.mem.perf.storeBufferEmptyAfterLoad := false.B
-  outer.accel_module.module.io.mem.perf.canAcceptLoadThenLoad := false.B
-  outer.accel_module.module.io.mem.perf.canAcceptStoreThenLoad := false.B
-  outer.accel_module.module.io.mem.perf.canAcceptStoreThenRMW := false.B
-  outer.accel_module.module.io.mem.s2_nack_cause_raw := 0.U
-  outer.accel_module.module.io.mem.s2_gpa_is_pte := false.B
-  outer.accel_module.module.io.mem.perf.tlbMiss := false.B
-  outer.accel_module.module.io.mem.perf.blocked := false.B
+  outer.rocc_module.module.io.mem.req.ready := false.B
+  outer.rocc_module.module.io.mem.s2_nack := false.B
+  outer.rocc_module.module.io.mem.s2_uncached := false.B
+  outer.rocc_module.module.io.mem.s2_paddr := 0.U
+  outer.rocc_module.module.io.mem.resp.valid := false.B
+  outer.rocc_module.module.io.mem.resp.bits := DontCare
+  outer.rocc_module.module.io.mem.replay_next := false.B
+  outer.rocc_module.module.io.mem.s2_xcpt.ma.ld := false.B
+  outer.rocc_module.module.io.mem.s2_xcpt.ma.st := false.B
+  outer.rocc_module.module.io.mem.s2_xcpt.pf.ld := false.B
+  outer.rocc_module.module.io.mem.s2_xcpt.pf.st := false.B
+  outer.rocc_module.module.io.mem.s2_xcpt.ae.ld := false.B
+  outer.rocc_module.module.io.mem.s2_xcpt.ae.st := false.B
+  outer.rocc_module.module.io.mem.s2_xcpt.gf.ld := false.B
+  outer.rocc_module.module.io.mem.s2_xcpt.gf.st := false.B
+  outer.rocc_module.module.io.mem.s2_gpa := 0.U
+  outer.rocc_module.module.io.mem.ordered := false.B
+  outer.rocc_module.module.io.mem.perf.acquire := false.B
+  outer.rocc_module.module.io.mem.perf.release := false.B
+  outer.rocc_module.module.io.mem.perf.grant := false.B
+  outer.rocc_module.module.io.exception := false.B
+  outer.rocc_module.module.io.mem.clock_enabled := true.B
+  outer.rocc_module.module.io.mem.perf.storeBufferEmptyAfterStore := false.B
+  outer.rocc_module.module.io.mem.perf.storeBufferEmptyAfterLoad := false.B
+  outer.rocc_module.module.io.mem.perf.canAcceptLoadThenLoad := false.B
+  outer.rocc_module.module.io.mem.perf.canAcceptStoreThenLoad := false.B
+  outer.rocc_module.module.io.mem.perf.canAcceptStoreThenRMW := false.B
+  outer.rocc_module.module.io.mem.s2_nack_cause_raw := 0.U
+  outer.rocc_module.module.io.mem.s2_gpa_is_pte := false.B
+  outer.rocc_module.module.io.mem.perf.tlbMiss := false.B
+  outer.rocc_module.module.io.mem.perf.blocked := false.B
 
-  outer.accel_module.module.io.fpu_req.ready := false.B
-  outer.accel_module.module.io.fpu_resp.valid := false.B
-  outer.accel_module.module.io.fpu_resp.bits := DontCare
+  outer.rocc_module.module.io.fpu_req.ready := false.B
+  outer.rocc_module.module.io.fpu_resp.valid := false.B
+  outer.rocc_module.module.io.fpu_resp.bits := DontCare
 
-  val from_accel_enq_bits = IO(new Bundle {
+  val from_rocc_enq_bits = IO(new Bundle {
     val rd = UInt(64.W)
     val resp = UInt(64.W)
   })
 
-  val from_accel_q = Module(new Queue(UInt(128.W), 1, flow=true, pipe=true)) //rd and result stitched together
-  outer.accel_module.module.io.resp.ready := from_accel_q.io.enq.ready && from_accel_q.io.count === 0.U
-  from_accel_q.io.enq.valid := outer.accel_module.module.io.resp.valid
+  val from_rocc_q = Module(new Queue(UInt(128.W), 1, flow=true, pipe=true)) //rd and result stitched together
+  outer.rocc_module.module.io.resp.ready := from_rocc_q.io.enq.ready && from_rocc_q.io.count === 0.U
+  from_rocc_q.io.enq.valid := outer.rocc_module.module.io.resp.valid
 
-  from_accel_enq_bits.rd := outer.accel_module.module.io.resp.bits.rd
-  from_accel_enq_bits.resp := outer.accel_module.module.io.resp.bits.data
-  from_accel_q.io.enq.bits := from_accel_enq_bits.asUInt
-  spike.io.accel.d.valid := false.B
-  from_accel_q.io.deq.ready := true.B
-  spike.io.accel.d.rd := from_accel_q.io.deq.bits(127,64)
-  spike.io.accel.d.result := 0.U
+  from_rocc_enq_bits.rd := outer.rocc_module.module.io.resp.bits.rd
+  from_rocc_enq_bits.resp := outer.rocc_module.module.io.resp.bits.data
+  from_rocc_q.io.enq.bits := from_rocc_enq_bits.asUInt
+  spike.io.rocc.d.valid := false.B
+  from_rocc_q.io.deq.ready := true.B
+  spike.io.rocc.d.rd := from_rocc_q.io.deq.bits(127,64)
+  spike.io.rocc.d.result := 0.U
 
-  when (from_accel_q.io.deq.fire) {
-    spike.io.accel.d.valid := true.B
-    spike.io.accel.d.result := from_accel_q.io.deq.bits(63,0)
+  when (from_rocc_q.io.deq.fire) {
+    spike.io.rocc.d.valid := true.B
+    spike.io.rocc.d.result := from_rocc_q.io.deq.bits(63,0)
   }
   } else {
-    spike.io.accel.a.ready := false.B
-    spike.io.accel.d.valid := false.B
-    spike.io.accel.d.result := 0.U
-    spike.io.accel.d.rd := 0.U
+    spike.io.rocc.a.ready := false.B
+    spike.io.rocc.d.valid := false.B
+    spike.io.rocc.d.result := 0.U
+    spike.io.rocc.d.rd := 0.U
   }
   /* End Accel Section */
 }

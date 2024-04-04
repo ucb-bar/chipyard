@@ -19,7 +19,7 @@ import "DPI-C" function void spike_tile(input int hartid,
                                         input longint  ipc,
                                         input longint  cycle,
                                         output longint insns_retired,
-                                        input bit      has_accel,
+                                        input bit      has_rocc,
 
                                         input bit      debug,
                                         input bit      mtip,
@@ -105,14 +105,14 @@ import "DPI-C" function void spike_tile(input int hartid,
                                         input bit      tcm_d_ready,
                                         output longint tcm_d_data,
 
-                                        input bit      accel_a_ready,
-                                        output bit     accel_a_valid,
-                                        output longint accel_a_insn,
-                                        output longint accel_a_rs1,
-                                        output longint accel_a_rs2,
-                                        input bit      accel_d_valid,
-                                        input longint  accel_d_rd,
-                                        input longint  accel_d_result
+                                        input bit      rocc_a_ready,
+                                        output bit     rocc_a_valid,
+                                        output longint rocc_a_insn,
+                                        output longint rocc_a_rs1,
+                                        output longint rocc_a_rs2,
+                                        input bit      rocc_d_valid,
+                                        input longint  rocc_d_rd,
+                                        input longint  rocc_d_result
                                         );
 
 
@@ -138,7 +138,7 @@ module SpikeBlackBox #(
                                              input [63:0]  ipc,
                                              input [63:0]  cycle,
                                              output [63:0] insns_retired,
-                                             input        has_accel,
+                                             input        has_rocc,
 
                                              input         debug,
                                              input         mtip,
@@ -225,21 +225,21 @@ module SpikeBlackBox #(
                                              output [63:0] tcm_d_data,
 
 
-                                             input         accel_a_ready,
-                                             output        accel_a_valid,
-                                             output [63:0] accel_a_insn,
-                                             output [63:0] accel_a_rs1,
-                                             output [63:0] accel_a_rs2,
+                                             input         rocc_a_ready,
+                                             output        rocc_a_valid,
+                                             output [63:0] rocc_a_insn,
+                                             output [63:0] rocc_a_rs1,
+                                             output [63:0] rocc_a_rs2,
 
-                                             input         accel_d_valid,
-                                             input [63:0]  accel_d_rd,
-                                             input [63:0]  accel_d_result
+                                             input         rocc_d_valid,
+                                             input [63:0]  rocc_d_rd,
+                                             input [63:0]  rocc_d_result
  );
 
    longint                                                 __insns_retired;
    reg [63:0]                                              __insns_retired_reg;
 
-   wire                                                     __has_accel;
+   wire                                                     __has_rocc;
 
    wire                                                    __icache_a_ready;
    bit                                                     __icache_a_valid;
@@ -314,19 +314,19 @@ module SpikeBlackBox #(
    reg                                                     __tcm_d_valid_reg;
    reg [63:0]                                              __tcm_d_data_reg;
 
-   wire                                                    __accel_a_ready;
-   bit                                                     __accel_a_valid;
-   longint                                                 __accel_a_insn;
-   longint                                                 __accel_a_rs1;
-   longint                                                 __accel_a_rs2;
-   reg                                                     __accel_a_valid_reg;
-   reg [63:0]                                              __accel_a_insn_reg;
-   reg [63:0]                                              __accel_a_rs1_reg;
-   reg [63:0]                                              __accel_a_rs2_reg;
+   wire                                                    __rocc_a_ready;
+   bit                                                     __rocc_a_valid;
+   longint                                                 __rocc_a_insn;
+   longint                                                 __rocc_a_rs1;
+   longint                                                 __rocc_a_rs2;
+   reg                                                     __rocc_a_valid_reg;
+   reg [63:0]                                              __rocc_a_insn_reg;
+   reg [63:0]                                              __rocc_a_rs1_reg;
+   reg [63:0]                                              __rocc_a_rs2_reg;
 
-   wire                                                    __accel_d_valid;
-   longint                                                 __accel_d_rd;
-   longint                                                 __accel_d_result;
+   wire                                                    __rocc_d_valid;
+   longint                                                 __rocc_d_rd;
+   longint                                                 __rocc_d_result;
 
    always @(posedge clock) begin
       if (reset) begin
@@ -404,7 +404,7 @@ module SpikeBlackBox #(
                     ICACHE_SOURCEIDS, DCACHE_SOURCEIDS,
                     TCM_BASE, TCM_SIZE,
                     reset_vector, ipc, cycle, __insns_retired,
-                    __has_accel,
+                    __has_rocc,
                     debug, mtip, msip, meip, seip,
 
                     __icache_a_ready, __icache_a_valid, __icache_a_address, __icache_a_sourceid,
@@ -431,8 +431,8 @@ module SpikeBlackBox #(
                     tcm_a_valid, tcm_a_address, tcm_a_data, tcm_a_mask, tcm_a_opcode, tcm_a_size,
                     __tcm_d_valid, __tcm_d_ready, __tcm_d_data,
 
-                    __accel_a_ready, __accel_a_valid, __accel_a_insn, __accel_a_rs1, __accel_a_rs2, 
-                    __accel_d_valid, accel_d_rd, __accel_d_result
+                    __rocc_a_ready, __rocc_a_valid, __rocc_a_insn, __rocc_a_rs1, __rocc_a_rs2, 
+                    __rocc_d_valid, rocc_d_rd, __rocc_d_result
                     );
          __insns_retired_reg <= __insns_retired;
 
@@ -471,10 +471,10 @@ module SpikeBlackBox #(
          __tcm_d_valid_reg <= __tcm_d_valid;
          __tcm_d_data_reg <= __tcm_d_data;
 
-         __accel_a_valid_reg <= __accel_a_valid;
-         __accel_a_insn_reg <= __accel_a_insn;
-         __accel_a_rs1_reg <= __accel_a_rs1;
-         __accel_a_rs2_reg <= __accel_a_rs2;
+         __rocc_a_valid_reg <= __rocc_a_valid;
+         __rocc_a_insn_reg <= __rocc_a_insn;
+         __rocc_a_rs1_reg <= __rocc_a_rs1;
+         __rocc_a_rs2_reg <= __rocc_a_rs2;
 
       end
    end // always @ (posedge clock)
@@ -519,14 +519,14 @@ module SpikeBlackBox #(
    assign tcm_d_data = __tcm_d_data_reg;
    assign __tcm_d_ready = tcm_d_ready;
 
-   assign __has_accel = has_accel;
-   assign accel_a_valid = __accel_a_valid_reg;
-   assign accel_a_insn = __accel_a_insn_reg;
-   assign accel_a_rs1 = __accel_a_rs1_reg;
-   assign accel_a_rs2 = __accel_a_rs2_reg;
-   assign __accel_a_ready = accel_a_ready;
-   assign __accel_d_valid = accel_d_valid;
-   assign __accel_d_rd = accel_d_rd;
-   assign __accel_d_result = accel_d_result;
+   assign __has_rocc = has_rocc;
+   assign rocc_a_valid = __rocc_a_valid_reg;
+   assign rocc_a_insn = __rocc_a_insn_reg;
+   assign rocc_a_rs1 = __rocc_a_rs1_reg;
+   assign rocc_a_rs2 = __rocc_a_rs2_reg;
+   assign __rocc_a_ready = rocc_a_ready;
+   assign __rocc_d_valid = rocc_d_valid;
+   assign __rocc_d_rd = rocc_d_rd;
+   assign __rocc_d_result = rocc_d_result;
 
 endmodule;

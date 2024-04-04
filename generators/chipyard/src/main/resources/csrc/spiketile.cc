@@ -10,7 +10,7 @@
 #include <vpi_user.h>
 #include <svdpi.h>
 
-/* Includes for accel support */
+/* Includes for rocc support */
 #include <riscv/extension.h>
 #include <riscv/rocc.h>
 #include <random>
@@ -101,12 +101,12 @@ public:
   void tcm_a(uint64_t address, uint64_t data, uint32_t mask, uint32_t opcode, uint32_t size);
   bool tcm_d(uint64_t *data);
 
-  bool accel_handshake(rocc_insn_t *insn, reg_t* rs1, reg_t* rs2);
-  void push_accel_insn(rocc_insn_t insn, reg_t rs1, reg_t rs2);
-  void push_accel_result(long long int result);
-  long long int get_accel_result();
-  void set_accel_exists(bool exists);
-  bool get_accel_exists();
+  bool rocc_handshake(rocc_insn_t *insn, reg_t* rs1, reg_t* rs2);
+  void push_rocc_insn(rocc_insn_t insn, reg_t rs1, reg_t rs2);
+  void push_rocc_result(long long int result);
+  long long int get_rocc_result();
+  void set_rocc_exists(bool exists);
+  bool get_rocc_exists();
 
   void loadmem(size_t base, const char* fname);
 
@@ -174,11 +174,11 @@ private:
   std::vector<writeback_t> wb_q;
   std::vector<stq_entry_t> st_q;
 
-  std::vector<rocc_insn_t> accel_insn_q;
-  std::vector<long long int> accel_result_q;
-  std::vector<reg_t> accel_reg_q_1;
-  std::vector<reg_t> accel_reg_q_2;
-  bool accel_exists;
+  std::vector<rocc_insn_t> rocc_insn_q;
+  std::vector<long long int> rocc_result_q;
+  std::vector<reg_t> rocc_reg_q_1;
+  std::vector<reg_t> rocc_reg_q_2;
+  bool rocc_exists;
 
   std::map<std::pair<uint64_t, size_t>, uint64_t> readonly_cache;
 
@@ -206,7 +206,7 @@ public:
   context_t stq_context;
 };
 
-/* Begin accel header file */
+/* Begin rocc header file */
 class generic_t : public extension_t
 {
   public:
@@ -254,7 +254,7 @@ extern "C" void spike_tile(int hartid, char* isa,
                            long long int ipc,
                            long long int cycle,
                            long long int* insns_retired,
-                           unsigned char has_accel,
+                           unsigned char has_rocc,
 
                            char debug,
                            char mtip, char msip, char meip,
@@ -338,14 +338,14 @@ extern "C" void spike_tile(int hartid, char* isa,
                            unsigned char tcm_d_ready,
                            long long int* tcm_d_data,
 
-                           unsigned char accel_a_ready,
-                           unsigned char* accel_a_valid,
-                           int* accel_a_insn,
-                           int* accel_a_rs1,
-                           int* accel_a_rs2,
-                           unsigned char accel_d_valid,
-                           long long int accel_d_rd,
-                           long long int accel_d_result
+                           unsigned char rocc_a_ready,
+                           unsigned char* rocc_a_valid,
+                           int* rocc_a_insn,
+                           int* rocc_a_rs1,
+                           int* rocc_a_rs2,
+                           unsigned char rocc_d_valid,
+                           long long int rocc_d_rd,
+                           long long int rocc_d_result
                            )
 {
   if (!host) {
@@ -375,7 +375,7 @@ extern "C" void spike_tile(int hartid, char* isa,
     std::function<extension_t*()> extension;
     generic_t* my_generic_extension = new generic_t(simif);
     p->register_extension(my_generic_extension);
-    simif->set_accel_exists(has_accel);
+    simif->set_rocc_exists(has_rocc);
 
     s_vpi_vlog_info vinfo;
     if (!vpi_get_vlog_info(&vinfo))
@@ -491,58 +491,58 @@ extern "C" void spike_tile(int hartid, char* isa,
     *tcm_d_valid = simif->tcm_d((uint64_t*)tcm_d_data);
   }
 
-  *accel_a_valid = 0;
-  if (accel_a_ready) {
-    *accel_a_valid = simif->accel_handshake((rocc_insn_t*) accel_a_insn, (reg_t*) accel_a_rs1, (reg_t*) accel_a_rs2);
+  *rocc_a_valid = 0;
+  if (rocc_a_ready) {
+    *rocc_a_valid = simif->rocc_handshake((rocc_insn_t*) rocc_a_insn, (reg_t*) rocc_a_rs1, (reg_t*) rocc_a_rs2);
   }
 
-  if (accel_d_valid) {
-    simif->push_accel_result(accel_d_result);
+  if (rocc_d_valid) {
+    simif->push_rocc_result(rocc_d_result);
   }
 }
 
 /*Begin Accelerator Section*/
 reg_t generic_t::custom0(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
-  bool has_accel = simif->get_accel_exists();
-  if (!has_accel) {
+  bool has_rocc = simif->get_rocc_exists();
+  if (!has_rocc) {
     printf("Accelerator not instantiated, are you using the right config?\n");
     exit(1);
   } else {
-    simif->push_accel_insn(insn, xs1, xs2);
-    return simif->get_accel_result();
+    simif->push_rocc_insn(insn, xs1, xs2);
+    return simif->get_rocc_result();
   }
 }
 
 reg_t generic_t::custom1(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
-  bool has_accel = simif->get_accel_exists();
-  if (!has_accel) {
+  bool has_rocc = simif->get_rocc_exists();
+  if (!has_rocc) {
     printf("Accelerator not instantiated, are you using the right config?\n");
     exit(1);
   } else {
-    simif->push_accel_insn(insn, xs1, xs2);
-    return simif->get_accel_result();
+    simif->push_rocc_insn(insn, xs1, xs2);
+    return simif->get_rocc_result();
   }
 }
 
 reg_t generic_t::custom2(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
-  bool has_accel = simif->get_accel_exists();
-  if (!has_accel) {
+  bool has_rocc = simif->get_rocc_exists();
+  if (!has_rocc) {
     printf("Accelerator not instantiated, are you using the right config?\n");
     exit(1);
   } else {
-    simif->push_accel_insn(insn, xs1, xs2);
-    return simif->get_accel_result();
+    simif->push_rocc_insn(insn, xs1, xs2);
+    return simif->get_rocc_result();
   }
 }
 
 reg_t generic_t::custom3(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
-  bool has_accel = simif->get_accel_exists();
-  if (!has_accel) {
+  bool has_rocc = simif->get_rocc_exists();
+  if (!has_rocc) {
     printf("Accelerator not instantiated, are you using the right config?\n");
     exit(1);
   } else {
-    simif->push_accel_insn(insn, xs1, xs2);
-    return simif->get_accel_result();
+    simif->push_rocc_insn(insn, xs1, xs2);
+    return simif->get_rocc_result();
   }
 }
 
@@ -1195,47 +1195,47 @@ bool chipyard_simif_t::tcm_d(uint64_t* data) {
   return true;
 }
 
-bool chipyard_simif_t::accel_handshake(rocc_insn_t* insn, reg_t* rs1, reg_t* rs2) {
-  if (accel_insn_q.empty()) {
+bool chipyard_simif_t::rocc_handshake(rocc_insn_t* insn, reg_t* rs1, reg_t* rs2) {
+  if (rocc_insn_q.empty()) {
     return false;
   }
-  *insn = accel_insn_q[0];
-  *rs1 = accel_reg_q_1[0];
-  *rs2 = accel_reg_q_2[0];
+  *insn = rocc_insn_q[0];
+  *rs1 = rocc_reg_q_1[0];
+  *rs2 = rocc_reg_q_2[0];
   
-  accel_insn_q.erase(accel_insn_q.begin());
-  accel_reg_q_1.erase(accel_reg_q_1.begin());
-  accel_reg_q_2.erase(accel_reg_q_2.begin());
+  rocc_insn_q.erase(rocc_insn_q.begin());
+  rocc_reg_q_1.erase(rocc_reg_q_1.begin());
+  rocc_reg_q_2.erase(rocc_reg_q_2.begin());
   return true;
 }
 
-void chipyard_simif_t::push_accel_insn(rocc_insn_t insn, reg_t rs1, reg_t rs2) {
-  accel_insn_q.push_back(insn);
-  accel_reg_q_1.push_back(rs1);
-  accel_reg_q_2.push_back(rs2);
+void chipyard_simif_t::push_rocc_insn(rocc_insn_t insn, reg_t rs1, reg_t rs2) {
+  rocc_insn_q.push_back(insn);
+  rocc_reg_q_1.push_back(rs1);
+  rocc_reg_q_2.push_back(rs2);
   
   host->switch_to();
 }
 
-void chipyard_simif_t::push_accel_result(long long int result) {
-  accel_result_q.push_back(result);
+void chipyard_simif_t::push_rocc_result(long long int result) {
+  rocc_result_q.push_back(result);
 }
 
-long long int chipyard_simif_t::get_accel_result() {
-  while (accel_result_q.size() == 0) {
+long long int chipyard_simif_t::get_rocc_result() {
+  while (rocc_result_q.size() == 0) {
     host->switch_to();
   }
-  long long int result = accel_result_q.front();
-  accel_result_q.erase(accel_result_q.begin());
+  long long int result = rocc_result_q.front();
+  rocc_result_q.erase(rocc_result_q.begin());
   return result;
 }
 
-void chipyard_simif_t::set_accel_exists(bool exists) {
-  accel_exists = exists;
+void chipyard_simif_t::set_rocc_exists(bool exists) {
+  rocc_exists = exists;
 }
 
-bool chipyard_simif_t::get_accel_exists() {
-  return accel_exists;
+bool chipyard_simif_t::get_rocc_exists() {
+  return rocc_exists;
 }
 
 void chipyard_simif_t::loadmem(size_t base, const char* fname) {
