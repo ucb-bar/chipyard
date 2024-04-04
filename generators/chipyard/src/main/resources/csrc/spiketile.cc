@@ -176,8 +176,8 @@ private:
 
   std::vector<rocc_insn_t> rocc_insn_q;
   std::vector<long long int> rocc_result_q;
-  std::vector<reg_t> rocc_reg_q_1;
-  std::vector<reg_t> rocc_reg_q_2;
+  std::vector<reg_t> rocc_rs1_q;
+  std::vector<reg_t> rocc_rs2_q;
   bool rocc_exists;
 
   std::map<std::pair<uint64_t, size_t>, uint64_t> readonly_cache;
@@ -206,7 +206,7 @@ public:
   context_t stq_context;
 };
 
-/* Begin rocc header file */
+/* Begin RoCC header file */
 class generic_t : public extension_t
 {
   public:
@@ -229,7 +229,7 @@ class generic_t : public extension_t
    protected:
    chipyard_simif_t* simif; 
 };
-/* End Accel header file */
+/* End RoCC header file */
 
 context_t *host;
 std::map<int, tile_t*> tiles;
@@ -338,14 +338,14 @@ extern "C" void spike_tile(int hartid, char* isa,
                            unsigned char tcm_d_ready,
                            long long int* tcm_d_data,
 
-                           unsigned char rocc_a_ready,
-                           unsigned char* rocc_a_valid,
-                           int* rocc_a_insn,
-                           int* rocc_a_rs1,
-                           int* rocc_a_rs2,
-                           unsigned char rocc_d_valid,
-                           long long int rocc_d_rd,
-                           long long int rocc_d_result
+                           unsigned char rocc_request_ready,
+                           unsigned char* rocc_request_valid,
+                           int* rocc_request_insn,
+                           int* rocc_request_rs1,
+                           int* rocc_request_rs2,
+                           unsigned char rocc_response_valid,
+                           long long int rocc_response_rd,
+                           long long int rocc_response_result
                            )
 {
   if (!host) {
@@ -491,17 +491,17 @@ extern "C" void spike_tile(int hartid, char* isa,
     *tcm_d_valid = simif->tcm_d((uint64_t*)tcm_d_data);
   }
 
-  *rocc_a_valid = 0;
-  if (rocc_a_ready) {
-    *rocc_a_valid = simif->rocc_handshake((rocc_insn_t*) rocc_a_insn, (reg_t*) rocc_a_rs1, (reg_t*) rocc_a_rs2);
+  *rocc_request_valid = 0;
+  if (rocc_request_ready) {
+    *rocc_request_valid = simif->rocc_handshake((rocc_insn_t*) rocc_request_insn, (reg_t*) rocc_request_rs1, (reg_t*) rocc_request_rs2);
   }
 
-  if (rocc_d_valid) {
-    simif->push_rocc_result(rocc_d_result);
+  if (rocc_response_valid) {
+    simif->push_rocc_result(rocc_response_result);
   }
 }
 
-/*Begin Accelerator Section*/
+/* Begin RoCC Section */
 reg_t generic_t::custom0(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
   bool has_rocc = simif->get_rocc_exists();
   if (!has_rocc) {
@@ -566,7 +566,7 @@ std::vector<disasm_insn_t*> generic_t::get_disasms()
   std::vector<disasm_insn_t*> insns;
   return insns;
 }
-/*End Accelerator Section*/
+/*End RoCC Section*/
 
 chipyard_simif_t::chipyard_simif_t(size_t icache_ways,
                                    size_t icache_sets,
@@ -1200,19 +1200,19 @@ bool chipyard_simif_t::rocc_handshake(rocc_insn_t* insn, reg_t* rs1, reg_t* rs2)
     return false;
   }
   *insn = rocc_insn_q[0];
-  *rs1 = rocc_reg_q_1[0];
-  *rs2 = rocc_reg_q_2[0];
+  *rs1 = rocc_rs1_q[0];
+  *rs2 = rocc_rs2_q[0];
   
   rocc_insn_q.erase(rocc_insn_q.begin());
-  rocc_reg_q_1.erase(rocc_reg_q_1.begin());
-  rocc_reg_q_2.erase(rocc_reg_q_2.begin());
+  rocc_rs1_q.erase(rocc_rs1_q.begin());
+  rocc_rs2_q.erase(rocc_rs2_q.begin());
   return true;
 }
 
 void chipyard_simif_t::push_rocc_insn(rocc_insn_t insn, reg_t rs1, reg_t rs2) {
   rocc_insn_q.push_back(insn);
-  rocc_reg_q_1.push_back(rs1);
-  rocc_reg_q_2.push_back(rs2);
+  rocc_rs1_q.push_back(rs1);
+  rocc_rs2_q.push_back(rs2);
   
   host->switch_to();
 }
