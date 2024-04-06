@@ -1,12 +1,18 @@
 package chipyard
 
 import org.chipsalliance.cde.config.{Config}
+// import freechips.rocketchip.tile.{BuildRoCC, OpcodeSet, XLen}
 
 // Configs which instantiate a Spike-simulated
 // tile that interacts with the Chipyard SoC
 // as a hardware core would
 
 class SpikeConfig extends Config(
+  new chipyard.WithNSpikeCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class SpikeAdderExampleConfig extends Config(
+  new chipyard.WithMultiRoCC ++
   new chipyard.WithNSpikeCores(1) ++
   new chipyard.config.AbstractConfig)
 
