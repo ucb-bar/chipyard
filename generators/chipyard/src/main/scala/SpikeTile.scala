@@ -316,11 +316,12 @@ class SpikeBlackBox(
         val insn = Output(UInt(64.W))
         val rs1 = Output(UInt(64.W))
         val rs2 = Output(UInt(64.W))
+        
       }
       val response = new Bundle {
         val valid = Input(Bool())
         val rd = Input(UInt(64.W))
-        val result = Input(UInt(64.W))
+        val data = Input(UInt(64.W))
       }
     }
   })
@@ -507,18 +508,18 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     outer.rocc_module.module.io.cmd.valid := to_rocc_q.io.deq.valid
     to_rocc_q.io.deq.ready := outer.rocc_module.module.io.cmd.ready
 
-    val inst = Wire(new RoCCInstruction())
-    inst.funct := to_rocc_q.io.deq.bits(31,25)
-    inst.rs2 := to_rocc_q.io.deq.bits(24,20)
-    inst.rs1 := to_rocc_q.io.deq.bits(19,15)
-    inst.xd := to_rocc_q.io.deq.bits(14)
-    inst.xs1 := to_rocc_q.io.deq.bits(13)
-    inst.xs2 := to_rocc_q.io.deq.bits(12)
-    inst.rd := to_rocc_q.io.deq.bits(11,7)
-    inst.opcode := to_rocc_q.io.deq.bits(6,0)
+    val insn = Wire(new RoCCInstruction())
+    insn.funct := to_rocc_q.io.deq.bits(31,25)
+    insn.rs2 := to_rocc_q.io.deq.bits(24,20)
+    insn.rs1 := to_rocc_q.io.deq.bits(19,15)
+    insn.xd := to_rocc_q.io.deq.bits(14)
+    insn.xs1 := to_rocc_q.io.deq.bits(13)
+    insn.xs2 := to_rocc_q.io.deq.bits(12)
+    insn.rd := to_rocc_q.io.deq.bits(11,7)
+    insn.opcode := to_rocc_q.io.deq.bits(6,0)
 
     val cmd = Wire(new RoCCCommand())
-    cmd.inst := inst
+    cmd.insn := insn
     cmd.rs1 := to_rocc_q.io.deq.bits(127,64)
     cmd.rs2 := to_rocc_q.io.deq.bits(191,128)
     cmd.status := DontCare
@@ -567,7 +568,7 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
       val resp = UInt(64.W)
     })
 
-    val from_rocc_q = Module(new Queue(UInt(128.W), 1, flow=true, pipe=true)) //rd and result stitched together
+    val from_rocc_q = Module(new Queue(UInt(128.W), 1, flow=true, pipe=true)) //rd and data stitched together
     outer.rocc_module.module.io.resp.ready := from_rocc_q.io.enq.ready && from_rocc_q.io.count === 0.U
     from_rocc_q.io.enq.valid := outer.rocc_module.module.io.resp.valid
 
@@ -577,16 +578,16 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     spike.io.rocc.response.valid := false.B
     from_rocc_q.io.deq.ready := true.B
     spike.io.rocc.response.rd := from_rocc_q.io.deq.bits(127,64)
-    spike.io.rocc.response.result := 0.U
+    spike.io.rocc.response.data := 0.U
 
     when (from_rocc_q.io.deq.fire) {
       spike.io.rocc.response.valid := true.B
-      spike.io.rocc.response.result := from_rocc_q.io.deq.bits(63,0)
+      spike.io.rocc.response.data := from_rocc_q.io.deq.bits(63,0)
     }
   } else {
     spike.io.rocc.request.ready := false.B
     spike.io.rocc.response.valid := false.B
-    spike.io.rocc.response.result := 0.U
+    spike.io.rocc.response.data := 0.U
     spike.io.rocc.response.rd := 0.U
   }
   /* End RoCC Section */

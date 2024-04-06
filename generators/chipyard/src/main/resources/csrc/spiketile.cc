@@ -345,7 +345,7 @@ extern "C" void spike_tile(int hartid, char* isa,
                            int* rocc_request_rs2,
                            unsigned char rocc_response_valid,
                            long long int rocc_response_rd,
-                           long long int rocc_response_result
+                           long long int rocc_response_data
                            )
 {
   if (!host) {
@@ -497,7 +497,7 @@ extern "C" void spike_tile(int hartid, char* isa,
   }
 
   if (rocc_response_valid) {
-    simif->push_rocc_result(rocc_response_result);
+    simif->push_rocc_result(rocc_response_data);
   }
 }
 

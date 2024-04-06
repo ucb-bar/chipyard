@@ -112,7 +112,7 @@ import "DPI-C" function void spike_tile(input int hartid,
                                         output longint rocc_request_rs2,
                                         input bit      rocc_response_valid,
                                         input longint  rocc_response_rd,
-                                        input longint  rocc_response_result
+                                        input longint  rocc_response_data
                                         );
 
 
@@ -233,7 +233,7 @@ module SpikeBlackBox #(
 
                                              input         rocc_response_valid,
                                              input [63:0]  rocc_response_rd,
-                                             input [63:0]  rocc_response_result
+                                             input [63:0]  rocc_response_data
  );
 
    longint                                                 __insns_retired;
@@ -326,7 +326,7 @@ module SpikeBlackBox #(
 
    wire                                                    __rocc_response_valid;
    longint                                                 __rocc_response_rd;
-   longint                                                 __rocc_response_result;
+   longint                                                 __rocc_response_data;
 
    always @(posedge clock) begin
       if (reset) begin
@@ -432,7 +432,7 @@ module SpikeBlackBox #(
                     __tcm_d_valid, __tcm_d_ready, __tcm_d_data,
 
                     __rocc_request_ready, __rocc_request_valid, __rocc_request_insn, __rocc_request_rs1, __rocc_request_rs2, 
-                    __rocc_response_valid, rocc_response_rd, __rocc_response_result
+                    __rocc_response_valid, rocc_response_rd, __rocc_response_data
                     );
          __insns_retired_reg <= __insns_retired;
 
@@ -527,6 +527,6 @@ module SpikeBlackBox #(
    assign __rocc_request_ready = rocc_request_ready;
    assign __rocc_response_valid = rocc_response_valid;
    assign __rocc_response_rd = rocc_response_rd;
-   assign __rocc_response_result = rocc_response_result;
+   assign __rocc_response_data = rocc_response_data;
 
 endmodule;
