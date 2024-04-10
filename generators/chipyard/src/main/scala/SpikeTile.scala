@@ -316,7 +316,6 @@ class SpikeBlackBox(
         val insn = Output(UInt(64.W))
         val rs1 = Output(UInt(64.W))
         val rs2 = Output(UInt(64.W))
-        
       }
       val response = new Bundle {
         val valid = Input(Bool())
@@ -495,10 +494,10 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
       val rs2 = UInt(64.W)
       val rs1 = UInt(64.W)
       val insn = UInt(64.W)
-    })
+    }) //Bundle for enqueuing RoCC requests
 
-    val to_rocc_q = Module(new Queue(UInt(192.W), 1, flow=true, pipe=true))
-    spike.io.rocc.request.ready := to_rocc_q.io.enq.ready && to_rocc_q.io.count === 0.U
+    val to_rocc_q = Module(new Queue(UInt(192.W), 1, flow=true, pipe=true)) //Queue for RoCC requests
+    spike.io.rocc.request.ready := to_rocc_q.io.enq.ready && to_rocc_q.io.count === 0.U // TODO: Currently only one request allowed to be in-flight
     to_rocc_q.io.enq.valid := spike.io.rocc.request.valid
     to_rocc_enq_bits.insn := spike.io.rocc.request.insn
     to_rocc_enq_bits.rs1 := spike.io.rocc.request.rs1
@@ -508,7 +507,8 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     outer.rocc_module.module.io.cmd.valid := to_rocc_q.io.deq.valid
     to_rocc_q.io.deq.ready := outer.rocc_module.module.io.cmd.ready
 
-    val insn = Wire(new RoCCInstruction())
+    // Set individual instruction fields
+    val insn = Wire(new RoCCInstruction()) 
     insn.funct := to_rocc_q.io.deq.bits(31,25)
     insn.rs2 := to_rocc_q.io.deq.bits(24,20)
     insn.rs1 := to_rocc_q.io.deq.bits(19,15)
@@ -519,12 +519,12 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     insn.opcode := to_rocc_q.io.deq.bits(6,0)
 
     val cmd = Wire(new RoCCCommand())
-    cmd.insn := insn
+    cmd.inst := insn
     cmd.rs1 := to_rocc_q.io.deq.bits(127,64)
     cmd.rs2 := to_rocc_q.io.deq.bits(191,128)
     cmd.status := DontCare
     outer.rocc_module.module.io.cmd.bits := cmd
-    dontTouch(outer.rocc_module.module.io)
+    // dontTouch(outer.rocc_module.module.io)
 
     //Instantiate unused signals, will probably be used as interface develops further.
     outer.rocc_module.module.io.mem.req.ready := false.B
@@ -563,7 +563,7 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     outer.rocc_module.module.io.fpu_resp.valid := false.B
     outer.rocc_module.module.io.fpu_resp.bits := DontCare
 
-    val from_rocc_enq_bits = IO(new Bundle {
+    val from_rocc_result_enq_bits = IO(new Bundle {
       val rd = UInt(64.W)
       val resp = UInt(64.W)
     })
@@ -572,9 +572,9 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     outer.rocc_module.module.io.resp.ready := from_rocc_q.io.enq.ready && from_rocc_q.io.count === 0.U
     from_rocc_q.io.enq.valid := outer.rocc_module.module.io.resp.valid
 
-    from_rocc_enq_bits.rd := outer.rocc_module.module.io.resp.bits.rd
-    from_rocc_enq_bits.resp := outer.rocc_module.module.io.resp.bits.data
-    from_rocc_q.io.enq.bits := from_rocc_enq_bits.asUInt
+    from_rocc_result_enq_bits.rd := outer.rocc_module.module.io.resp.bits.rd
+    from_rocc_result_enq_bits.resp := outer.rocc_module.module.io.resp.bits.data
+    from_rocc_q.io.enq.bits := from_rocc_result_enq_bits.asUInt
     spike.io.rocc.response.valid := false.B
     from_rocc_q.io.deq.ready := true.B
     spike.io.rocc.response.rd := from_rocc_q.io.deq.bits(127,64)
