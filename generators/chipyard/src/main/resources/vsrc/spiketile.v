@@ -1,3 +1,5 @@
+`define loingint longint
+
 import "DPI-C" function void spike_tile_reset(input int hartid);
 
 import "DPI-C" function void spike_tile(input int hartid,
@@ -234,6 +236,17 @@ module SpikeBlackBox #(
                                              input         rocc_response_valid,
                                              input [63:0]  rocc_response_rd,
                                              input [63:0]  rocc_response_data
+
+                                             input         rocc_mem_request_valid,
+                                             output        rocc_mem_response_valid,
+                                             intput         rocc_mem_response_ready,
+
+                                             input [63:0]  rocc_mem_request_addr,
+                                             input [31:0]  rocc_mem_request_len,
+                                             input [63:0]  rocc_mem_request_store_data,
+                                             input [7:0]   rocc_mem_request_access_type,
+
+                                             output [63:0] rocc_mem_reponse_data
  );
 
    longint                                                 __insns_retired;
@@ -328,6 +341,19 @@ module SpikeBlackBox #(
    longint                                                 __rocc_response_rd;
    longint                                                 __rocc_response_data;
 
+   wire                                                    __rocc_mem_request_valid,
+   wire                                                    __rocc_mem_response_valid,
+   reg                                                     __rocc_mem_response_valid_reg,
+   wire                                                    __rocc_mem_response_ready,
+
+   longint                                                 __rocc_mem_request_addr,
+   longint                                                 __rocc_mem_request_len,
+   longint                                                 __rocc_mem_request_store_data,
+   byte                                                    __rocc_mem_request_access_type,
+
+   longint                                                 __rocc_mem_reponse_data
+   reg [63:0]                                              __rocc_mem_reponse_data_reg;
+
    always @(posedge clock) begin
       if (reset) begin
          __insns_retired = 64'h0;
@@ -396,6 +422,8 @@ module SpikeBlackBox #(
          __tcm_d_data = 64'h0;
          __tcm_d_data_reg <= 64'h0;
 
+         __rocc_mem_response_valid_reg <= 64'h0;
+         __rocc_mem_reponse_data_reg <= 64'h0;
          spike_tile_reset(HARTID);
       end else begin
          spike_tile(HARTID, ISA, PMPREGIONS,
@@ -432,7 +460,11 @@ module SpikeBlackBox #(
                     __tcm_d_valid, __tcm_d_ready, __tcm_d_data,
 
                     __rocc_request_ready, __rocc_request_valid, __rocc_request_insn, __rocc_request_rs1, __rocc_request_rs2, 
-                    __rocc_response_valid, rocc_response_rd, __rocc_response_data
+                    __rocc_response_valid, rocc_response_rd, __rocc_response_data,
+
+                    __rocc_mem_request_valid, __rocc_mem_response_valid, __rocc_mem_response_ready,
+                    __rocc_mem_request_addr, __rocc_mem_request_len, __rocc_mem_request_store_data,
+                    __rocc_mem_request_access_type, __rocc_mem_reponse_data
                     );
          __insns_retired_reg <= __insns_retired;
 
@@ -475,6 +507,9 @@ module SpikeBlackBox #(
          __rocc_request_insn_reg <= __rocc_request_insn;
          __rocc_request_rs1_reg <= __rocc_request_rs1;
          __rocc_request_rs2_reg <= __rocc_request_rs2;
+
+         __rocc_mem_response_valid_reg <= __rocc_mem_response_valid;
+         __rocc_mem_response_data_reg <= __rocc_mem_response_data;
 
       end
    end // always @ (posedge clock)
@@ -528,5 +563,14 @@ module SpikeBlackBox #(
    assign __rocc_response_valid = rocc_response_valid;
    assign __rocc_response_rd = rocc_response_rd;
    assign __rocc_response_data = rocc_response_data;
+
+   assign __rocc_mem_request_valid = rocc_mem_request_valid;
+   assign rocc_mem_response_valid = __rocc_mem_response_valid_reg;
+   assign __rocc_mem_response_ready = rocc_mem_response_ready;
+   assign __rocc_mem_request_addr = rocc_mem_request_addr;
+   assign __rocc_mem_request_len = rocc_mem_request_len;
+   assign __rocc_mem_request_store_data = rocc_mem_request_store_data;
+   assign __rocc_mem_request_access_type = rocc_mem_request_access_type;
+   assign rocc_mem_reponse_data = __rocc_mem_reponse_data_reg;
 
 endmodule;

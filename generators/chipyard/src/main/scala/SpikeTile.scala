@@ -322,6 +322,18 @@ class SpikeBlackBox(
         val rd = Input(UInt(64.W))
         val data = Input(UInt(64.W))
       }
+      val mem_request = new Bundle {
+        val valid = Input(Bool())
+        val addr = Input(UInt(64.W))
+        val len = Input(UInt(32.W))
+        val store_data = Input(UInt(64.W))
+        val access_type = Input(UInt(8.W))
+      }
+      val mem_response = new Bundle {
+        val ready = Input(Bool())
+        val valid = Output(Bool())
+        val data = Output(UInt(64.W))
+      }
     }
   })
   addResource("/vsrc/spiketile.v")
@@ -490,49 +502,73 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
 
   /* Begin RoCC Section */
   if (outer.has_rocc) {
-    val to_rocc_enq_bits = IO(new Bundle{
+    val to_rocc_req_enq_bits = IO(new Bundle{
       val rs2 = UInt(64.W)
       val rs1 = UInt(64.W)
       val insn = UInt(64.W)
     }) //Bundle for enqueuing RoCC requests
 
-    val to_rocc_q = Module(new Queue(UInt(192.W), 1, flow=true, pipe=true)) //Queue for RoCC requests
-    spike.io.rocc.request.ready := to_rocc_q.io.enq.ready && to_rocc_q.io.count === 0.U // TODO: Currently only one request allowed to be in-flight
-    to_rocc_q.io.enq.valid := spike.io.rocc.request.valid
-    to_rocc_enq_bits.insn := spike.io.rocc.request.insn
-    to_rocc_enq_bits.rs1 := spike.io.rocc.request.rs1
-    to_rocc_enq_bits.rs2 := spike.io.rocc.request.rs2
-    to_rocc_q.io.enq.bits := to_rocc_enq_bits.asUInt
+    val to_rocc_req_q = Module(new Queue(UInt(192.W), 1, flow=true, pipe=true)) //Queue for RoCC requests
+    spike.io.rocc.request.ready := to_rocc_req_q.io.enq.ready && to_rocc_req_q.io.count === 0.U // TODO: Currently only one request allowed to be in-flight
+    // Attach signals coming from C++ side
+    to_rocc_req_q.io.enq.valid := spike.io.rocc.request.valid
+    to_rocc_req_enq_bits.insn := spike.io.rocc.request.insn
+    to_rocc_req_enq_bits.rs1 := spike.io.rocc.request.rs1
+    to_rocc_req_enq_bits.rs2 := spike.io.rocc.request.rs2
+    to_rocc_req_q.io.enq.bits := to_rocc_req_enq_bits.asUInt
 
-    outer.rocc_module.module.io.cmd.valid := to_rocc_q.io.deq.valid
-    to_rocc_q.io.deq.ready := outer.rocc_module.module.io.cmd.ready
+    outer.rocc_module.module.io.cmd.valid := to_rocc_req_q.io.deq.valid
+    to_rocc_req_q.io.deq.ready := outer.rocc_module.module.io.cmd.ready
 
     // Set individual instruction fields
     val insn = Wire(new RoCCInstruction()) 
-    insn.funct := to_rocc_q.io.deq.bits(31,25)
-    insn.rs2 := to_rocc_q.io.deq.bits(24,20)
-    insn.rs1 := to_rocc_q.io.deq.bits(19,15)
-    insn.xd := to_rocc_q.io.deq.bits(14)
-    insn.xs1 := to_rocc_q.io.deq.bits(13)
-    insn.xs2 := to_rocc_q.io.deq.bits(12)
-    insn.rd := to_rocc_q.io.deq.bits(11,7)
-    insn.opcode := to_rocc_q.io.deq.bits(6,0)
+    insn.funct := to_rocc_req_q.io.deq.bits(31,25)
+    insn.rs2 := to_rocc_req_q.io.deq.bits(24,20)
+    insn.rs1 := to_rocc_req_q.io.deq.bits(19,15)
+    insn.xd := to_rocc_req_q.io.deq.bits(14)
+    insn.xs1 := to_rocc_req_q.io.deq.bits(13)
+    insn.xs2 := to_rocc_req_q.io.deq.bits(12)
+    insn.rd := to_rocc_req_q.io.deq.bits(11,7)
+    insn.opcode := to_rocc_req_q.io.deq.bits(6,0)
 
+    // Attach cmd signals correctly
     val cmd = Wire(new RoCCCommand())
     cmd.inst := insn
-    cmd.rs1 := to_rocc_q.io.deq.bits(127,64)
-    cmd.rs2 := to_rocc_q.io.deq.bits(191,128)
+    cmd.rs1 := to_rocc_req_q.io.deq.bits(127,64)
+    cmd.rs2 := to_rocc_req_q.io.deq.bits(191,128)
     cmd.status := DontCare
     outer.rocc_module.module.io.cmd.bits := cmd
     // dontTouch(outer.rocc_module.module.io)
 
+    // // Queue for RoCC L1 Cache Requests
+    // val to_spike_cache_req_enq_bits = Wire(new HellaCacheIO) //Bundle for enqueuing RoCC requests
+
+    // val to_spike_cache_req_q = Module(new Quue(UInt(64.W), 1, flow=true, pipe=true))
+
+    outer.rocc_module.module.io.mem.req.ready := true.B
+    spike.io.rocc.mem_request.valid := outer.rocc_module.module.io.mem.req.valid
+    spike.io.rocc.mem_request.addr := outer.rocc_module.module.io.mem.req.bits.addr
+    spike.io.rocc.mem_request.len := outer.rocc_module.module.io.mem.req.bits.size
+    spike.io.rocc.mem_request.store_data := outer.rocc_module.module.io.mem.req.bits.data
+    spike.io.rocc.mem_request.access_type := outer.rocc_module.module.io.mem.req.bits.cmd
+    spike.io.rocc.mem_response.ready := true.B
+    outer.rocc_module.module.io.mem.resp.valid := spike.io.rocc.mem_response.valid
+    outer.rocc_module.module.io.mem.resp.bits.data := spike.io.rocc.mem_response.data
+
     //Instantiate unused signals, will probably be used as interface develops further.
-    outer.rocc_module.module.io.mem.req.ready := false.B
+    outer.rocc_module.module.io.mem.resp.bits.addr := 0.U
+    outer.rocc_module.module.io.mem.resp.bits.tag := 0.U
+    outer.rocc_module.module.io.mem.resp.bits.cmd := 0.U
+    outer.rocc_module.module.io.mem.resp.bits.size := 0.U
+    
+    
+    outer.rocc_module.module.io.mem.resp.bits.store_data := 0.U
+    // outer.rocc_module.module.io.mem.req.ready := false.B
     outer.rocc_module.module.io.mem.s2_nack := false.B
     outer.rocc_module.module.io.mem.s2_uncached := false.B
     outer.rocc_module.module.io.mem.s2_paddr := 0.U
-    outer.rocc_module.module.io.mem.resp.valid := false.B
-    outer.rocc_module.module.io.mem.resp.bits := DontCare
+    // outer.rocc_module.module.io.mem.resp.valid := false.B
+    // outer.rocc_module.module.io.mem.resp.bits := DontCare
     outer.rocc_module.module.io.mem.replay_next := false.B
     outer.rocc_module.module.io.mem.s2_xcpt.ma.ld := false.B
     outer.rocc_module.module.io.mem.s2_xcpt.ma.st := false.B
