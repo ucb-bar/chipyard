@@ -1210,10 +1210,6 @@ bool chipyard_simif_t::rocc_handshake(rocc_insn_t* insn, reg_t* rs1, reg_t* rs2)
 }
 
 void chipyard_simif_t::push_rocc_insn(rocc_insn_t insn, reg_t rs1, reg_t rs2) {
-  // printf("Pushing instruction to accelerator queue\n");
-  // printf("Instruction: %d\n", insn);
-  // printf("rs1: %d\n", rs1);
-  // printf("rs2: %d\n", rs2);
   rocc_insn_q.push_back(insn);
   rocc_rs1_q.push_back(rs1);
   rocc_rs2_q.push_back(rs2);
