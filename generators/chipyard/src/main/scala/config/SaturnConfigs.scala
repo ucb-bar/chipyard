@@ -11,6 +11,7 @@ class MINV64D64RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
   new freechips.rocketchip.subsystem.WithRocketDebugROB ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class MINV128D64RocketConfig extends Config(
@@ -20,6 +21,7 @@ class MINV128D64RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
   new freechips.rocketchip.subsystem.WithRocketDebugROB ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class MINV256D64RocketConfig extends Config(
@@ -29,6 +31,7 @@ class MINV256D64RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
   new freechips.rocketchip.subsystem.WithRocketDebugROB ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class REFV128D128RocketConfig extends Config(
@@ -40,6 +43,7 @@ class REFV128D128RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
   new freechips.rocketchip.subsystem.WithRocketDebugROB ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class REFV256D64RocketConfig extends Config(
@@ -50,6 +54,7 @@ class REFV256D64RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
   new freechips.rocketchip.subsystem.WithRocketDebugROB ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class REFV256D128RocketConfig extends Config(
@@ -60,6 +65,7 @@ class REFV256D128RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
   new freechips.rocketchip.subsystem.WithRocketDebugROB ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class REFV256D128C1RocketConfig extends Config(
@@ -70,6 +76,7 @@ class REFV256D128C1RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
   new freechips.rocketchip.subsystem.WithRocketDebugROB ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class REFV256D128C2RocketConfig extends Config(
@@ -80,6 +87,7 @@ class REFV256D128C2RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
   new freechips.rocketchip.subsystem.WithRocketDebugROB ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class REFV256D128C3RocketConfig extends Config(
@@ -90,6 +98,7 @@ class REFV256D128C3RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
   new freechips.rocketchip.subsystem.WithRocketDebugROB ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class REFV512D128RocketConfig extends Config(
@@ -100,6 +109,7 @@ class REFV512D128RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
   new freechips.rocketchip.subsystem.WithRocketDebugROB ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class REFV512D256RocketConfig extends Config(
@@ -110,6 +120,7 @@ class REFV512D256RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
   new freechips.rocketchip.subsystem.WithRocketDebugROB ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class DMAV256D256RocketConfig extends Config(
@@ -120,6 +131,7 @@ class DMAV256D256RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithRocketCease(false) ++
   new freechips.rocketchip.subsystem.WithRocketDebugROB ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 // Shuttle-integrated configs
@@ -132,6 +144,7 @@ class REFV256D64ShuttleConfig extends Config(
   new shuttle.common.WithShuttleTileBeatBytes(16) ++
   new shuttle.common.WithTCM ++
   new shuttle.common.WithNShuttleCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class REFV256D128ShuttleConfig extends Config(
@@ -143,6 +156,7 @@ class REFV256D128ShuttleConfig extends Config(
   new shuttle.common.WithShuttleTileBeatBytes(16) ++
   new shuttle.common.WithTCM ++
   new shuttle.common.WithNShuttleCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class DSPV256D128ShuttleConfig extends Config(
@@ -154,6 +168,7 @@ class DSPV256D128ShuttleConfig extends Config(
   new shuttle.common.WithShuttleTileBeatBytes(16) ++
   new shuttle.common.WithTCM ++
   new shuttle.common.WithNShuttleCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class GENV256D128ShuttleConfig extends Config(
@@ -165,6 +180,7 @@ class GENV256D128ShuttleConfig extends Config(
   new shuttle.common.WithShuttleTileBeatBytes(16) ++
   new shuttle.common.WithTCM ++
   new shuttle.common.WithNShuttleCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class REFV512D128ShuttleConfig extends Config(
@@ -176,6 +192,7 @@ class REFV512D128ShuttleConfig extends Config(
   new shuttle.common.WithShuttleTileBeatBytes(16) ++
   new shuttle.common.WithTCM ++
   new shuttle.common.WithNShuttleCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class DSPV512D128ShuttleConfig extends Config(
@@ -187,6 +204,7 @@ class DSPV512D128ShuttleConfig extends Config(
   new shuttle.common.WithShuttleTileBeatBytes(16) ++
   new shuttle.common.WithTCM ++
   new shuttle.common.WithNShuttleCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class GENV512D128ShuttleConfig extends Config(
@@ -198,6 +216,7 @@ class GENV512D128ShuttleConfig extends Config(
   new shuttle.common.WithShuttleTileBeatBytes(16) ++
   new shuttle.common.WithTCM ++
   new shuttle.common.WithNShuttleCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class REFV256D256ShuttleConfig extends Config(
@@ -209,6 +228,7 @@ class REFV256D256ShuttleConfig extends Config(
   new shuttle.common.WithShuttleTileBeatBytes(32) ++
   new shuttle.common.WithTCM ++
   new shuttle.common.WithNShuttleCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class REFV512D256ShuttleConfig extends Config(
@@ -220,6 +240,7 @@ class REFV512D256ShuttleConfig extends Config(
   new shuttle.common.WithShuttleTileBeatBytes(32) ++
   new shuttle.common.WithTCM ++
   new shuttle.common.WithNShuttleCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class REFV512D512ShuttleConfig extends Config(
@@ -231,6 +252,7 @@ class REFV512D512ShuttleConfig extends Config(
   new shuttle.common.WithShuttleTileBeatBytes(64) ++
   new shuttle.common.WithTCM ++
   new shuttle.common.WithNShuttleCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class QuadREFV512D256ShuttleConfig extends Config(
@@ -239,6 +261,7 @@ class QuadREFV512D256ShuttleConfig extends Config(
   new shuttle.common.WithShuttleTileBeatBytes(32) ++
   new shuttle.common.WithTCM ++
   new shuttle.common.WithNShuttleCores(4) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig)
 
 class DSPMultiSaturnConfig extends Config(
