@@ -99,6 +99,7 @@ trait HasHarnessInstantiators {
     if (p(DontTouchChipTopPorts)) {
       duts.map(_ match {
         case d: DontTouch => d.dontTouchPorts()
+        case _ =>
       })
     }
 
