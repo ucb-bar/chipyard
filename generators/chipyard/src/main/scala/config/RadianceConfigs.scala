@@ -48,6 +48,8 @@ class RadianceBaseConfig(argsBinFilename: String = "args.bin") extends Config(
   new AbstractConfig)
 
 class RadianceConfig extends Config(
+   // important to keep gemmini tile before RadianceCores to ensure radiance tile id is 0-indexed
+  new WithRadianceGemmini(location = InCluster(0), dim = 8, extMemBase = x"ff000000", spSizeInKB = 16, accSizeInKB = 8) ++
   new radiance.subsystem.WithRadianceCores(1, location=InCluster(0), useVxCache = false) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 8) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 4)++
