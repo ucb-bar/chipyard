@@ -120,6 +120,7 @@ class AbstractConfig extends Config(
 
   // Bus/interconnect settings
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++     /** hierarchical buses including sbus/mbus/pbus/fbus/cbus/l2 */
+  new chipyard.config.WithSV48IfPossible ++                         /** use sv48 if possible */
 
 
   // ================================================
@@ -134,7 +135,7 @@ class AbstractConfig extends Config(
   new freechips.rocketchip.subsystem.WithDontDriveBusClocksFromSBus ++  /** leave the bus clocks undriven by sbus */
   new freechips.rocketchip.subsystem.WithClockGateModel ++              /** add default EICG_wrapper clock gate model */
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore",        /** create a "uncore" clock group tieing all the bus clocks together */
-    Seq("sbus", "mbus", "pbus", "fbus", "cbus", "obus", "implicit", "clock_tap"), 
+    Seq("sbus", "mbus", "pbus", "fbus", "cbus", "obus", "implicit", "clock_tap"),
     Seq("tile"))) ++
 
   new chipyard.config.WithPeripheryBusFrequency(500.0) ++           /** Default 500 MHz pbus */
