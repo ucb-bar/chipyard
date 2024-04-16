@@ -566,7 +566,11 @@ reg_t generic_t::custom0(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
     exit(1);
   } else {
     simif->push_rocc_insn(insn, xs1, xs2);
-    return simif->get_rocc_result();
+    if (insn.xd) {
+      return simif->get_rocc_result();
+    } else {
+      return 0;
+    }
   }
 }
 
@@ -1322,7 +1326,7 @@ void chipyard_simif_t::handle_rocc_mem_req() {
     if (request.cmd == 0) {
       // Read req
       response.has_data = 1;
-      mmio_load((reg_t) request.addr, (size_t) request.size, (uint8_t*) &response.data);
+      mmio_load((reg_t) request.addr, (size_t) (1 << request.size), (uint8_t*) &response.data);
     } else if (request.cmd == 1) {
       // Write req
       response.store_data = request.data;
@@ -1337,8 +1341,13 @@ void chipyard_simif_t::handle_rocc_mem_req() {
 }
 
 long long int chipyard_simif_t::get_rocc_result() {
+  // Wait some cycles for a result. This is a hack while fences do not work.
   while (rocc_result_q.size() == 0) {
     host->switch_to();
+  }
+
+  if (rocc_result_q.size() == 0) {
+    return 0;
   }
   long long int result = rocc_result_q.front();
   rocc_result_q.erase(rocc_result_q.begin());

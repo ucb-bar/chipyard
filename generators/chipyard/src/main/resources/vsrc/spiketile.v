@@ -369,10 +369,6 @@ module SpikeBlackBox #(
    reg [63:0]                                              __rocc_request_rs1_reg;
    reg [63:0]                                              __rocc_request_rs2_reg;
 
-   // wire                                                    __rocc_response_valid;
-   // longint                                                 __rocc_response_rd;
-   // longint                                                 __rocc_response_data;
-
    bit                                                     __rocc_mem_response_valid;
    longint                                                 __rocc_mem_response_addr;
    int                                                     __rocc_mem_response_tag;

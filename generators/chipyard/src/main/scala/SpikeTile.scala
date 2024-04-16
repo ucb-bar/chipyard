@@ -570,7 +570,6 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     outer.rocc_module.module.io.mem.resp.bits.size := spike.io.rocc.mem_response.size
     outer.rocc_module.module.io.mem.resp.bits.data := spike.io.rocc.mem_response.data
     outer.rocc_module.module.io.mem.resp.bits.data_raw := spike.io.rocc.mem_response.data
-    // outer.rocc_module.module.io.mem.resp.bits.nack := spike.io.rocc.mem_response.nack
     outer.rocc_module.module.io.mem.resp.bits.replay := spike.io.rocc.mem_response.replay
     outer.rocc_module.module.io.mem.resp.bits.has_data := spike.io.rocc.mem_response.has_data
     outer.rocc_module.module.io.mem.resp.bits.data_word_bypass := spike.io.rocc.mem_response.word_bypass
@@ -578,12 +577,6 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     outer.rocc_module.module.io.mem.resp.bits.mask := spike.io.rocc.mem_response.mask
 
     //Instantiate unused signals, will probably be used as interface develops further.
-    // outer.rocc_module.module.io.mem.resp.bits.addr := 0.U
-    // outer.rocc_module.module.io.mem.resp.bits.tag := 0.U
-    // outer.rocc_module.module.io.mem.resp.bits.cmd := 0.U
-    // outer.rocc_module.module.io.mem.resp.bits.size := 0.U
-    // outer.rocc_module.module.io.mem.resp.bits.store_data := 0.U
-    // outer.rocc_module.module.io.mem.req.ready := false.B
     outer.rocc_module.module.io.mem.resp.bits.signed := false.B
     outer.rocc_module.module.io.mem.resp.bits.dprv := false.B
     outer.rocc_module.module.io.mem.resp.bits.dv := false.B
