@@ -5,19 +5,13 @@ import java.io.File
 import chisel3._
 import chisel3.util.{log2Up}
 import org.chipsalliance.cde.config.{Parameters, Config}
-import freechips.rocketchip.groundtest.TraceGenParams
 import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.devices.tilelink.{BootROMLocated, BootROMParams}
-import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
-import freechips.rocketchip.diplomacy.{LazyModule}
+import freechips.rocketchip.devices.tilelink.{BootROMLocated}
+import freechips.rocketchip.devices.debug.{DebugModuleKey}
 import freechips.rocketchip.prci.{AsynchronousCrossing}
-import testchipip.iceblk.{BlockDeviceKey, BlockDeviceConfig}
-import testchipip.cosim.{TracePortKey, TracePortParams}
-import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
-import scala.math.{min, max}
+import testchipip.cosim.{TracePortKey}
 
 import chipyard.clocking.{ChipyardPRCIControlKey}
 import chipyard.harness.{HarnessClockInstantiatorKey}
@@ -92,10 +86,10 @@ class WithMinimalFireSimDesignTweaks extends Config(
   new WithBootROM ++
   // Required: Existing FAME-1 transform cannot handle black-box clock gates
   new WithoutClockGating ++
+  // Optional: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
+  new chipyard.config.WithNoDebug ++
   // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
-  new WithoutTLMonitors ++
-  // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
-  new chipyard.config.WithNoDebug
+  new WithoutTLMonitors
 )
 
 // Non-frequency tweaks that are generally applied to all firesim configs
@@ -109,8 +103,8 @@ class WithFireSimDesignTweaks extends Config(
   new testchipip.serdes.WithSerialTLWidth(4) ++
   // Required*: Scale default baud rate with periphery bus frequency
   new chipyard.config.WithUART(
-    baudrate=BigInt(3686400L), 
-    txEntries=256, rxEntries=256) ++        // FireSim requires a larger UART FIFO buffer, 
+    baudrate=BigInt(3686400L),
+    txEntries=256, rxEntries=256) ++        // FireSim requires a larger UART FIFO buffer,
   new chipyard.config.WithNoUART() ++       // so we overwrite the default one
   // Optional: Adds IO to attach tracerV bridges
   new chipyard.config.WithTraceIO ++
@@ -275,6 +269,13 @@ class FireSimSmallSystemConfig extends Config(
   new chipyard.config.WithUARTInitBaudRate(BigInt(3686400L)) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nWays = 2, capacityKB = 64) ++
   new chipyard.RocketConfig)
+
+class FireSimDmiRocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new testchipip.serdes.WithNoSerialTL ++ // disable serial TL so that only DMI port is connected
+  new chipyard.dmiRocketConfig)
 
 //*****************************************************************
 // Boom config, base off chipyard's LargeBoomV3Config
