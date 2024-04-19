@@ -34,10 +34,6 @@ Accelerators
 **Gemmini**
   A matrix-multiply accelerator targeting neural-networks
 
-**SHA3**
-  A fixed-function accelerator for the SHA3 hash function. This simple accelerator is used as a demonstration for some of the
-  Chipyard integration flows using the RoCC interface.
-
 System Components:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
