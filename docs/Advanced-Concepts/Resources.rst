@@ -33,7 +33,3 @@ For example:
     lazy val myAwesomeAccel = (project in file("generators/myAwesomeAccelFolder"))
       .dependsOn(rocketchip)
       .settings(commonSettings)
-
-    lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
-      .dependsOn(myAwesomeAccel)
-      .settings(commonSettings)

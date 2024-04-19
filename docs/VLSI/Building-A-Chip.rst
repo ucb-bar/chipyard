@@ -10,7 +10,7 @@ Transforming the RTL
 --------------------
 
 Building a chip requires specializing the generic verilog emitted by FIRRTL to adhere to the constraints imposed by the technology used for fabrication.
-This includes mapping Chisel memories to available technology macros such as SRAMs, mapping the input and output of your chip to connect to technology IO cells, see :ref:`Tools/Barstools:Barstools`.
+This includes mapping Chisel memories to available technology macros such as SRAMs, mapping the input and output of your chip to connect to technology IO cells, see :ref:`Tools/Tapeout-Tools:Tapeout-tools`.
 In addition to these required transformations, it may also be beneficial to transform the RTL to make it more amenable to hierarchical physical design easier.
 This often includes modifying the logical hierarchy to match the physical hierarchy through grouping components together or flattening components into a single larger module.
 
