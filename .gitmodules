@@ -55,9 +55,6 @@
 [submodule "generators/rocket-chip-inclusive-cache"]
 	path = generators/rocket-chip-inclusive-cache
 	url = https://github.com/chipsalliance/rocket-chip-inclusive-cache.git
-[submodule "generators/sha3"]
-	path = generators/sha3
-	url = https://github.com/ucb-bar/sha3.git
 [submodule "generators/shuttle"]
 	path = generators/shuttle
 	url = https://github.com/ucb-bar/shuttle.git

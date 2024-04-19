@@ -119,29 +119,6 @@ jobs:
             conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
             .github/scripts/check-commit.sh
 
-  tutorial-setup-check:
-    name: tutorial-setup-check
-    needs: [setup-complete]
-    if: needs.change-filters.outputs.needs-rtl == 'true'
-    runs-on: as4
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Check that the tutorial-setup patches apply
-        run: |
-            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-            scripts/tutorial-setup.sh
-
   documentation-check:
     name: documentation-check
     needs: [setup-complete]
@@ -800,29 +777,6 @@ jobs:
           group-key: "group-peripherals"
           project-key: "chipyard-llcchiplet"
 
-  chipyard-sha3-run-tests:
-    name: chipyard-sha3-run-tests
-    needs: prepare-chipyard-accels
-    runs-on: as4
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-accels"
-          project-key: "chipyard-sha3"
-
   chipyard-gemmini-run-tests:
     name: chipyard-gemmini-run-tests
     needs: prepare-chipyard-accels
@@ -1172,7 +1126,6 @@ jobs:
   all_tests_passed:
     name: "all tests passed"
     needs: [commit-on-master-check,
-            tutorial-setup-check,
             documentation-check,
             chipyard-rocket-run-tests,
             chipyard-hetero-run-tests,
@@ -1190,7 +1143,6 @@ jobs:
             chipyard-tethered-run-tests,
             chipyard-symmetric-run-tests,
             chipyard-llcchiplet-run-tests,
-            chipyard-sha3-run-tests,
             chipyard-gemmini-run-tests,
             chipyard-manymmioaccels-run-tests, # chipyard-nvdla-run-tests,
             chipyard-prefetchers-run-tests,
