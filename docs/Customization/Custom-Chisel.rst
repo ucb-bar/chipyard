@@ -63,7 +63,7 @@ should look something like this:
             dsptools, `rocket-dsp-utils`,
             gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
             yourproject, // <- added to the middle of the list for simplicity
-            constellation, mempress)
+            constellation)
         .settings(libraryDependencies ++= rocketLibDeps.value)
         .settings(
             libraryDependencies ++= Seq(

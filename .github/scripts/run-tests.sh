@@ -85,10 +85,6 @@ case $1 in
         run_binary BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/raw_hazard-baremetal
         run_binary BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal
         ;;
-    chipyard-mempress)
-        (cd $LOCAL_CHIPYARD_DIR/generators/mempress/software/src && make)
-        run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/mempress/software/src/mempress-rocc.riscv
-        ;;
     chipyard-manymmioaccels)
 	make -C $LOCAL_CHIPYARD_DIR/tests
 

@@ -34,9 +34,6 @@
 [submodule "generators/icenet"]
 	path = generators/icenet
 	url = https://github.com/firesim/icenet.git
-[submodule "generators/mempress"]
-	path = generators/mempress
-	url = https://github.com/ucb-bar/mempress.git
 [submodule "generators/nvdla"]
 	path = generators/nvdla
 	url = https://github.com/ucb-bar/nvdla-wrapper.git
