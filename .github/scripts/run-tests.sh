@@ -77,9 +77,6 @@ case $1 in
     rocketchip)
         run_bmark
         ;;
-    chipyard-hwacha)
-        make run-rv64uv-p-asm-tests -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS
-        ;;
     chipyard-gemmini)
         GEMMINI_SOFTWARE_DIR=$LOCAL_SIM_DIR/../../generators/gemmini/software/gemmini-rocc-tests
         rm -rf $GEMMINI_SOFTWARE_DIR/riscv-tests

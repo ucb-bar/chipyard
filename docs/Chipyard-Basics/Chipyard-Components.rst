@@ -31,12 +31,6 @@ Processor Cores
 Accelerators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Hwacha**
-  A decoupled vector architecture co-processor.
-  Hwacha currently implements a non-standard RISC-V extension, using a vector architecture programming model.
-  Hwacha integrates with a Rocket or BOOM core using the RoCC (Rocket Custom Co-processor) interface.
-  See :ref:`Generators/Hwacha:Hwacha` for more information.
-
 **Gemmini**
   A matrix-multiply accelerator targeting neural-networks
 
@@ -94,10 +88,6 @@ Toolchains
   The include compiler and assembler toolchains, functional ISA simulator (spike), the Berkeley Boot Loader (BBL) and proxy kernel.
   The riscv-tools repository was previously required to run any RISC-V software, however, many of the riscv-tools components have since been upstreamed to their respective open-source projects (Linux, GNU, etc.).
   Nevertheless, for consistent versioning, as well as software design flexibility for custom hardware, we include the riscv-tools repository and installation in the Chipyard framework.
-
-**esp-tools**
-  A fork of riscv-tools, designed to work with the Hwacha non-standard RISC-V extension.
-  This fork can also be used as an example demonstrating how to add additional RoCC accelerators to the ISA-level simulation (Spike) and the higher-level software toolchain (GNU binutils, riscv-opcodes, etc.)
 
 Software
 -------------------------------------------

@@ -155,13 +155,6 @@ Therefore, in order to simulate a simple Rocket-based example system we can use:
     ./simulator-<yourproject>-<yourconfig> ...
 
 
-All ``make`` targets that can be applied to the default example, can also be applied to custom project using the custom environment variables. For example, the following code example will run the RISC-V assembly benchmark suite on the Hwacha subproject:
-
-.. code-block:: shell
-
-    make SUB_PROJECT=hwacha run-asm-tests
-
-
 Finally, in the ``generated-src/<...>-<package>-<config>/`` directory resides all of the collateral while the generated Verilog source files resides in ``generated-src/<...>-<package>-<config>/gen-collateral`` for the build/simulation.
 Specifically, for ``CONFIG=RocketConfig`` the SoC top-level (``TOP``) Verilog file is ``ChipTop.sv`` while the (``Model``) file is ``TestHarness.sv``.
 
