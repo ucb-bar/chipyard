@@ -1,8 +1,8 @@
 // See LICENSE for license details.
 
-package barstools.macros
+package tapeout.macros
 
-import barstools.macros.Utils._
+import tapeout.macros.Utils._
 import firrtl.Utils.{one, zero}
 import firrtl._
 import firrtl.ir._

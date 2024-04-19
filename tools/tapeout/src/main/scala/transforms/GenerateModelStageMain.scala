@@ -1,6 +1,6 @@
-package barstools.tapeout.transforms
+package tapeout.transforms
 
-import barstools.tapeout.transforms.stage._
+import tapeout.transforms.stage._
 import firrtl._
 import firrtl.annotations._
 import firrtl.ir._

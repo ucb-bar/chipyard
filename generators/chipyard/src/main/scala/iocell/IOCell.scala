@@ -1,6 +1,6 @@
 // See LICENSE for license details
 
-package barstools.iocell.chisel
+package chipyard.iocell
 
 import chisel3._
 import chisel3.util.{Cat, HasBlackBoxInline}

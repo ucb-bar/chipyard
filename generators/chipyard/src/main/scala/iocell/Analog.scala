@@ -1,6 +1,6 @@
 // See LICENSE for license details
 
-package barstools.iocell.chisel
+package chipyard.iocell
 
 import chisel3._
 import chisel3.util.{HasBlackBoxResource}
@@ -10,7 +10,7 @@ class AnalogConst(value: Int, width: Int = 1)
     extends BlackBox(Map("CONST" -> IntParam(value), "WIDTH" -> IntParam(width)))
     with HasBlackBoxResource {
   val io = IO(new Bundle { val io = Analog(width.W) })
-  addResource("/barstools/iocell/vsrc/Analog.v")
+  addResource("/vsrc/Analog.v")
 }
 
 object AnalogConst {

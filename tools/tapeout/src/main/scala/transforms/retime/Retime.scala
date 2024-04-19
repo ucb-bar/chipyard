@@ -1,6 +1,6 @@
 // See LICENSE for license details.
 
-package barstools.tapeout.transforms.retime
+package tapeout.transforms.retime
 
 import chisel3.experimental.RunFirrtlTransform
 import firrtl.annotations._

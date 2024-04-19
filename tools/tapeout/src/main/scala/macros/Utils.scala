@@ -1,6 +1,6 @@
 // See LICENSE for license details.
 
-package barstools.macros
+package tapeout.macros
 
 import firrtl.Utils.BoolType
 import firrtl.ir._

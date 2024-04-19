@@ -1,6 +1,6 @@
 // See LICENSE for license details.
 
-package barstools.macros
+package tapeout.macros
 
 /** Trait which can calculate the cost of compiling a memory against a certain
   * library memory macro using a cost function.

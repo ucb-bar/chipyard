@@ -1,4 +1,4 @@
-package barstools.tapeout.transforms.utils
+package tapeout.transforms.utils
 
 import firrtl.FileUtils
 import net.jcazevedo.moultingyaml._

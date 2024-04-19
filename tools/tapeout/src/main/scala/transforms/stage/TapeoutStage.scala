@@ -1,8 +1,8 @@
 // See LICENSE for license details.
 
-package barstools.tapeout.transforms.stage
+package tapeout.transforms.stage
 
-import barstools.tapeout.transforms.GenerateModelStageMain
+import tapeout.transforms.GenerateModelStageMain
 import chisel3.stage.ChiselCli
 import firrtl.stage.{RunFirrtlTransformAnnotation}
 import firrtl.AnnotationSeq

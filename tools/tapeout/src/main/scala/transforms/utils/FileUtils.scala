@@ -1,6 +1,6 @@
 // See LICENSE for license details.
 
-package barstools.tapeout.transforms.utils
+package tapeout.transforms.utils
 
 import chisel3.experimental.{annotate, ChiselAnnotation}
 import firrtl._

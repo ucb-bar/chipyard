@@ -5,9 +5,9 @@
   * lib - technology SRAM(s) to use to compile mem
   */
 
-package barstools.macros
+package tapeout.macros
 
-import barstools.macros.Utils._
+import tapeout.macros.Utils._
 import firrtl.Utils.{one, zero, BoolType}
 import firrtl.annotations._
 import firrtl.ir._

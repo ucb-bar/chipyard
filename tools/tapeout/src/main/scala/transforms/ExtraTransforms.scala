@@ -1,6 +1,6 @@
 // See LICENSE for license details.
 
-package barstools.tapeout.transforms
+package tapeout.transforms
 
 import firrtl.Mappers._
 import firrtl._

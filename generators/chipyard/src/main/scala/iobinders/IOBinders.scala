@@ -27,7 +27,7 @@ import sifive.blocks.devices.spi._
 import sifive.blocks.devices.i2c._
 import tracegen.{TraceGenSystemModuleImp}
 
-import barstools.iocell.chisel._
+import chipyard.iocell._
 
 import testchipip.serdes.{CanHavePeripheryTLSerial, SerialTLKey}
 import testchipip.spi.{SPIChipIO}
