@@ -28,9 +28,6 @@
 [submodule "generators/hardfloat"]
 	path = generators/hardfloat
 	url = https://github.com/ucb-bar/berkeley-hardfloat.git
-[submodule "generators/hwacha"]
-	path = generators/hwacha
-	url = https://github.com/ucb-bar/hwacha.git
 [submodule "generators/ibex"]
 	path = generators/ibex
 	url = https://github.com/ucb-bar/ibex-wrapper.git
@@ -88,18 +85,6 @@
 [submodule "software/spec2017"]
 	path = software/spec2017
 	url = https://github.com/ucb-bar/spec2017-workload.git
-[submodule "toolchains/esp-tools/esp-tools-feedstock"]
-	path = toolchains/esp-tools/esp-tools-feedstock
-	url = https://github.com/ucb-bar/esp-tools-feedstock.git
-[submodule "toolchains/esp-tools/riscv-isa-sim"]
-	path = toolchains/esp-tools/riscv-isa-sim
-	url = https://github.com/ucb-bar/esp-isa-sim.git
-[submodule "toolchains/esp-tools/riscv-pk"]
-	path = toolchains/esp-tools/riscv-pk
-	url = https://github.com/riscv-software-src/riscv-pk.git
-[submodule "toolchains/esp-tools/riscv-tests"]
-	path = toolchains/esp-tools/riscv-tests
-	url = https://github.com/ucb-bar/esp-tests.git
 [submodule "toolchains/libgloss"]
 	path = toolchains/libgloss
 	url = https://github.com/ucb-bar/libgloss-htif.git

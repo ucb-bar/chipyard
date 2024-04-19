@@ -78,18 +78,6 @@ ifeq ($(SUB_PROJECT),chipyard)
 	TB                ?= TestDriver
 	TOP               ?= ChipTop
 endif
-# for Hwacha developers
-ifeq ($(SUB_PROJECT),hwacha)
-	SBT_PROJECT       ?= chipyard
-	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= $(MODEL)
-	MODEL_PACKAGE     ?= freechips.rocketchip.system
-	CONFIG            ?= HwachaConfig
-	CONFIG_PACKAGE    ?= hwacha
-	GENERATOR_PACKAGE ?= chipyard
-	TB                ?= TestDriver
-	TOP               ?= ExampleRocketSystem
-endif
 # For TestChipIP developers running unit-tests
 ifeq ($(SUB_PROJECT),testchipip)
 	SBT_PROJECT       ?= chipyard
@@ -154,9 +142,6 @@ CHIPYARD_RSRCS_DIR   = $(base_dir)/generators/chipyard/src/main/resources
 # names of various files needed to compile and run things
 #########################################################################################
 long_name = $(MODEL_PACKAGE).$(MODEL).$(CONFIG)
-ifeq ($(GENERATOR_PACKAGE),hwacha)
-	long_name=$(MODEL_PACKAGE).$(CONFIG)
-endif
 
 # classpaths
 CLASSPATH_CACHE ?= $(base_dir)/.classpath_cache
