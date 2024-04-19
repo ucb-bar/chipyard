@@ -1,0 +1,1165 @@
+[
+  {
+    "family": "1rw",
+    "width": 8,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_1024x8",
+    "type": "sram",
+    "depth": "1024"
+  },
+  {
+    "family": "1rw",
+    "width": 46,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_128x46",
+    "type": "sram",
+    "depth": "128"
+  },
+  {
+    "family": "1rw",
+    "width": 48,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_128x48",
+    "type": "sram",
+    "depth": "128"
+  },
+  {
+    "family": "1rw",
+    "width": 8,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_128x8",
+    "type": "sram",
+    "depth": "128"
+  },
+  {
+    "family": "1rw",
+    "width": 128,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_256x128",
+    "type": "sram",
+    "depth": "256"
+  },
+  {
+    "family": "1rw",
+    "width": 32,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_256x32",
+    "type": "sram",
+    "depth": "256"
+  },
+  {
+    "family": "1rw",
+    "width": 46,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_256x46",
+    "type": "sram",
+    "depth": "256"
+  },
+  {
+    "family": "1rw",
+    "width": 48,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_256x48",
+    "type": "sram",
+    "depth": "256"
+  },
+  {
+    "family": "1rw",
+    "width": 8,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_256x8",
+    "type": "sram",
+    "depth": "256"
+  },
+  {
+    "family": "1rw",
+    "width": 50,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_32x50",
+    "type": "sram",
+    "depth": "32"
+  },
+  {
+    "family": "1rw",
+    "width": 128,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_512x128",
+    "type": "sram",
+    "depth": "512"
+  },
+  {
+    "family": "1rw",
+    "width": 32,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_512x32",
+    "type": "sram",
+    "depth": "512"
+  },
+  {
+    "family": "1rw",
+    "width": 8,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_512x8",
+    "type": "sram",
+    "depth": "512"
+  },
+  {
+    "family": "1rw",
+    "width": 128,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_64x128",
+    "type": "sram",
+    "depth": "64"
+  },
+  {
+    "family": "1rw",
+    "width": 32,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_64x32",
+    "type": "sram",
+    "depth": "64"
+  },
+  {
+    "family": "1rw",
+    "width": 34,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_64x34",
+    "type": "sram",
+    "depth": "64"
+  },
+  {
+    "family": "1rw",
+    "width": 8,
+    "ports": [
+      {
+        "chip enable port name": "CSB",
+        "write enable port name": "WEB",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE",
+        "chip enable port polarity": "active low",
+        "address port name": "A",
+        "read enable port name": "OEB",
+        "input port name": "I",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_1rw_64x8",
+    "type": "sram",
+    "depth": "64"
+  },
+  {
+    "family": "2rw",
+    "width": 16,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_128x16",
+    "type": "sram",
+    "depth": "128"
+  },
+  {
+    "family": "2rw",
+    "width": 32,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_128x32",
+    "type": "sram",
+    "depth": "128"
+  },
+  {
+    "family": "2rw",
+    "width": 4,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_128x4",
+    "type": "sram",
+    "depth": "128"
+  },
+  {
+    "family": "2rw",
+    "width": 8,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_128x8",
+    "type": "sram",
+    "depth": "128"
+  },
+  {
+    "family": "2rw",
+    "width": 16,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_16x16",
+    "type": "sram",
+    "depth": "16"
+  },
+  {
+    "family": "2rw",
+    "width": 32,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_16x32",
+    "type": "sram",
+    "depth": "16"
+  },
+  {
+    "family": "2rw",
+    "width": 4,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_16x4",
+    "type": "sram",
+    "depth": "16"
+  },
+  {
+    "family": "2rw",
+    "width": 8,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_16x8",
+    "type": "sram",
+    "depth": "16"
+  },
+  {
+    "family": "2rw",
+    "width": 16,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_32x16",
+    "type": "sram",
+    "depth": "32"
+  },
+  {
+    "family": "2rw",
+    "width": 22,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_32x22",
+    "type": "sram",
+    "depth": "32"
+  },
+  {
+    "family": "2rw",
+    "width": 32,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_32x32",
+    "type": "sram",
+    "depth": "32"
+  },
+  {
+    "family": "2rw",
+    "width": 39,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_32x39",
+    "type": "sram",
+    "depth": "32"
+  },
+  {
+    "family": "2rw",
+    "width": 4,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_32x4",
+    "type": "sram",
+    "depth": "32"
+  },
+  {
+    "family": "2rw",
+    "width": 8,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_32x8",
+    "type": "sram",
+    "depth": "32"
+  },
+  {
+    "family": "2rw",
+    "width": 16,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_64x16",
+    "type": "sram",
+    "depth": "64"
+  },
+  {
+    "family": "2rw",
+    "width": 32,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_64x32",
+    "type": "sram",
+    "depth": "64"
+  },
+  {
+    "family": "2rw",
+    "width": 4,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_64x4",
+    "type": "sram",
+    "depth": "64"
+  },
+  {
+    "family": "2rw",
+    "width": 8,
+    "ports": [
+      {
+        "chip enable port name": "CSB1",
+        "write enable port name": "WEB1",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O1",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE1",
+        "chip enable port polarity": "active low",
+        "address port name": "A1",
+        "read enable port name": "OEB1",
+        "input port name": "I1",
+        "input port polarity": "active high"
+      },
+      {
+        "chip enable port name": "CSB2",
+        "write enable port name": "WEB2",
+        "address port polarity": "active high",
+        "output port polarity": "active high",
+        "output port name": "O2",
+        "write enable port polarity": "active low",
+        "read enable port polarity": "active low",
+        "clock port polarity": "positive edge",
+        "clock port name": "CE2",
+        "chip enable port polarity": "active low",
+        "address port name": "A2",
+        "read enable port name": "OEB2",
+        "input port name": "I2",
+        "input port polarity": "active high"
+      }
+    ],
+    "name": "my_sram_2rw_64x8",
+    "type": "sram",
+    "depth": "64"
+  }
+]

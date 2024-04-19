@@ -1,0 +1,26 @@
+[
+  {
+    "type": "sram",
+    "name": "fake_mem",
+    "width": 64,
+    "depth": "4096",
+    "mux": 4,
+    "family": "1rw",
+    "ports": [
+      {
+        "address port name": "addr",
+        "address port polarity": "active high",
+        "clock port name": "clk",
+        "clock port polarity": "positive edge",
+        "write enable port name": "wen",
+        "write enable port polarity": "active high",
+        "read enable port name": "ren",
+        "read enable port polarity": "active high",
+        "output port name": "dataout",
+        "output port polarity": "active high",
+        "input port name": "datain",
+        "input port polarity": "active high"
+      }
+    ]
+  }
+]

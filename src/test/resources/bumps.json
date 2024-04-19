@@ -1,0 +1,41 @@
+[
+    {
+        "name" : "example",
+        "type" : "flipchip",
+        "bump_dimensions" : [27,27],
+        "bump_locations" : [
+            ["-",  "GND", "VDDC0_SEL[0]", "VDDC0_SEL[1]", "VDDC1_SEL[0]", "VDDC1_SEL[1]", "VDDC2_SEL[0]", "VDDC2_SEL[1]", "VDDC3_SEL[0]", "VDDC3_SEL[1]", "VDDC0_EN", "VDDC1_EN", "VDDC2_EN", "VDDC3_EN", "CCLK0", "CCLK1", "CCLK2", "RESET", "BOOT", "I2C_SDA", "I2C_SCL", "SPI_SCLK", "SPI_MOSI", "SPI_MISO", "SPI_SS_L", "GND", "-"],
+            [ "GND",     "",     "",    "",    "GND",    "GND","GPIO[1]", "VDD1V8", "VDD1V8", "VDD1V8", "VDD1V8", "VDD1V8", "VDD1V8", "VDD1V8", "VDD1V8", "VDD1V8", "VDD1V8","UART_RX","UART_TX",    "GND",    "GND",    "GND",    "GND",    "",     "",     "",  "GND"],
+
+            ["TXP0", "VDDA", "VDDA", "GND",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "", "GND", "VDDA", "VDDA", "TXP4"],
+            ["TXN0", "VDDA", "VDDA", "GND",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "", "GND", "VDDA", "VDDA", "TXN4"],
+            [ "GND",     "",     "",    "", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8",    "",     "",     "",  "GND"],
+            ["RXP0", "VDDA", "VDDA", "GND", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "GND", "VDDA", "VDDA", "RXP4"],
+            ["RXN0", "VDDA", "VDDA", "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND", "GND", "VDDA", "VDDA", "RXN4"],
+            [ "GND",     "",     "",    "",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "",     "",     "",  "GND"],
+
+            ["TXP1", "VDDA", "VDDA", "GND",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0", "GND", "VDDA", "VDDA", "TXP5"],
+            ["TXN1", "VDDA", "VDDA", "GND",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0", "GND", "VDDA", "VDDA", "TXN5"],
+            [ "GND",     "",     "",    "",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "",     "",     "",  "GND"],
+            ["RXP1", "VDDA", "VDDA", "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND", "GND", "VDDA", "VDDA", "RXP5"],
+            ["RXN1", "VDDA", "VDDA", "GND",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",    "GND",    "GND",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0", "GND", "VDDA", "VDDA", "RXN5"],
+            [ "GND",     "",     "",    "",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",  "VDDC1",    "GND",    "GND",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC0",  "VDDC0",  "VDDC0",  "VDDC0",    "",     "",     "",  "GND"],
+
+            ["TXP2", "VDDA", "VDDA", "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND", "GND", "VDDA", "VDDA", "TXP6"],
+            ["TXN2", "VDDA", "VDDA", "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND", "GND", "VDDA", "VDDA", "TXN6"],
+            [ "GND",     "",     "",    "",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",    "",     "",     "",  "GND"],
+            ["RXP2", "VDDA", "VDDA", "GND",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC2",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3",  "VDDC3", "GND", "VDDA", "VDDA", "RXP6"],
+            ["RXN2", "VDDA", "VDDA", "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND", "GND", "VDDA", "VDDA", "RXN6"],
+            [ "GND",     "",     "",    "",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "GND",    "",     "",     "",  "GND"],
+
+            ["TXP3", "VDDA", "VDDA", "GND", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "GND", "VDDA", "VDDA", "TXP7"],
+            ["TXN3", "VDDA", "VDDA", "GND", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "VDD0V8", "GND", "VDDA", "VDDA", "TXN7"],
+            [ "GND",     "",     "",    "",     "-", "SERIAL_IN_READY",     "-",     "-",     "SERIAL_IN_VALID",     "-",     "-",     "-",     "-",     "",     "-",     "SERIAL_OUT_VALID",     "-",     "-",     "SERIAL_OUT_READY",     "-",     "-",     "GPIO[0]",     "-",    "",     "",     "",  "GND"],
+            ["RXP3", "VDDA", "VDDA", "GND",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "", "GND", "VDDA", "VDDA", "RXP7"],
+            ["RXN3", "VDDA", "VDDA", "GND",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "",       "", "GND", "VDDA", "VDDA", "RXN7"],
+
+            [ "GND",     "",     "",    "",    "GND",    "GND",    "GND",    "GND",    "GND", "VDD1V8", "VDD1V8", "VDD1V8", "VDD1V8", "VDD1V8", "VDD1V8", "VDD1V8", "VDD1V8", "VDD1V8",    "GND",    "GND",    "GND",    "GND",    "GND",    "",     "",     "",  "GND"],
+            ["-", "GND", "REFCLK0P", "REFCLK0N", "GND", "SERIAL_OUT[0]", "SERIAL_OUT[1]", "SERIAL_OUT[2]", "SERIAL_OUT[3]", "SERIAL_IN[0]", "SERIAL_IN[1]", "SERIAL_IN[2]", "SERIAL_IN[3]", "JTAG_TMS", "JTAG_TCK", "JTAG_TDO", "JTAG_TDI", "CLKSEL", "PLLCLK_OUT", "GND", "PLLREFCLKP", "PLLREFCLKN", "GND", "REFCLK1P", "REFCLK1N", "GND", "-"]
+        ]
+    }
+]
