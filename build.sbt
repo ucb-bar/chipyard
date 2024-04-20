@@ -248,11 +248,11 @@ lazy val tapeout = (project in file("./tools/tapeout/"))
   .settings(commonSettings)
   .settings(libraryDependencies ++= Seq("com.typesafe.play" %% "play-json" % "2.9.2"))
 
-lazy val fixedpoint = (project in file("./tools/fixedpoint/"))
+lazy val fixedpoint = freshProject("fixedpoint", file("./tools/fixedpoint-chisel3/"))
   .settings(chiselSettings)
   .settings(commonSettings)
 
-lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
+lazy val dsptools = freshProject("dsptools", file("./tools/dsptools-chisel3"))
   .dependsOn(fixedpoint)
   .settings(
     chiselSettings,

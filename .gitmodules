@@ -115,11 +115,11 @@
 [submodule "tools/circt"]
 	path = tools/circt
 	url = https://github.com/llvm/circt.git
-[submodule "tools/dsptools"]
-	path = tools/dsptools
+[submodule "tools/dsptools-fixedpoint"]
+	path = tools/dsptools-chisel3
 	url = https://github.com/ucb-bar/dsptools.git
-[submodule "tools/fixedpoint"]
-	path = tools/fixedpoint
+[submodule "tools/fixedpoint-chisel3"]
+	path = tools/fixedpoint-chisel3
 	url = https://github.com/ucb-bar/fixedpoint.git
 [submodule "tools/install-circt"]
 	path = tools/install-circt
