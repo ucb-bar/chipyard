@@ -7,6 +7,11 @@ import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 // Configs with MMIO accelerators
 // ------------------------------
 
+class CalyxSumRocketConfig extends Config(
+  new chipyard.example.WithCalyxSum ++          // Use GCD Chisel, connect Tilelink
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 // DOC include start: FFTRocketConfig
 class FFTRocketConfig extends Config(
   new chipyard.harness.WithDontTouchChipTopPorts(false) ++              // TODO: hack around dontTouch not working in SFC
