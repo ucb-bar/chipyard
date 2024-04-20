@@ -47,16 +47,16 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
 
   // Figure out which clock drives the harness TLSerdes, based on the port type
   val serial_ram_clock = dut.serial_tl_pad match {
-    case io: InternalSyncSerialIO => io.clock_out
-    case io: ExternalSyncSerialIO => clock
+    case io: InternalSyncPhitIO => io.clock_out
+    case io: ExternalSyncPhitIO => clock
   }
   dut.serial_tl_pad match {
-    case io: ExternalSyncSerialIO => io.clock_in := clock
-    case io: InternalSyncSerialIO =>
+    case io: ExternalSyncPhitIO => io.clock_in := clock
+    case io: InternalSyncPhitIO =>
   }
 
   dut.serial_tl_pad match {
-    case pad: DecoupledSerialIO => {
+    case pad: DecoupledPhitIO => {
       withClockAndReset(serial_ram_clock, reset) {
         // SerialRAM implements the memory regions the chip expects
         val ram = Module(LazyModule(new SerialRAM(lazyDut.system.serdessers(0), p(SerialTLKey)(0))).module)

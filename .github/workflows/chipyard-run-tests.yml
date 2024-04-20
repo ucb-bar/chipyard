@@ -455,8 +455,8 @@ jobs:
           group-key: "group-cores"
           project-key: "chipyard-hetero"
 
-  chipyard-boom-run-tests:
-    name: chipyard-boom-run-tests
+  chipyard-boomv3-run-tests:
+    name: chipyard-boomv3-run-tests
     needs: prepare-chipyard-cores
     runs-on: as4
     steps:
@@ -476,7 +476,30 @@ jobs:
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-cores"
-          project-key: "chipyard-boom"
+          project-key: "chipyard-boomv3"
+
+  chipyard-boomv4-run-tests:
+    name: chipyard-boomv4-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: as4
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-boomv4"
 
   chipyard-shuttle-run-tests:
     name: chipyard-shuttle-run-tests
@@ -616,8 +639,8 @@ jobs:
           group-key: "group-peripherals"
           project-key: "chipyard-dmirocket"
 
-  chipyard-dmiboom-run-tests:
-    name: chipyard-dmiboom-run-tests
+  chipyard-dmiboomv3-run-tests:
+    name: chipyard-dmiboomv3-run-tests
     needs: prepare-chipyard-peripherals
     runs-on: as4
     steps:
@@ -637,7 +660,30 @@ jobs:
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-peripherals"
-          project-key: "chipyard-dmiboom"
+          project-key: "chipyard-dmiboomv3"
+
+  chipyard-dmiboomv4-run-tests:
+    name: chipyard-dmiboomv4-run-tests
+    needs: prepare-chipyard-peripherals
+    runs-on: as4
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-peripherals"
+          project-key: "chipyard-dmiboomv4"
 
   chipyard-spiflashwrite-run-tests:
     name: chipyard-spiflashwrite-run-tests
@@ -730,6 +776,29 @@ jobs:
         with:
           group-key: "group-peripherals"
           project-key: "chipyard-symmetric"
+
+  chipyard-llcchiplet-run-tests:
+    name: chipyard-llcchiplet-run-tests
+    needs: prepare-chipyard-peripherals
+    runs-on: as4
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-peripherals"
+          project-key: "chipyard-llcchiplet"
 
   chipyard-sha3-run-tests:
     name: chipyard-sha3-run-tests
@@ -847,8 +916,8 @@ jobs:
           project-key: "chipyard-mempress"
 
 
-  tracegen-boom-run-tests:
-    name: tracegen-boom-run-tests
+  tracegen-boomv3-run-tests:
+    name: tracegen-boomv3-run-tests
     needs: prepare-chipyard-tracegen
     runs-on: as4
     steps:
@@ -868,7 +937,30 @@ jobs:
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-tracegen"
-          project-key: "tracegen-boom"
+          project-key: "tracegen-boomv3"
+
+  tracegen-boomv4-run-tests:
+    name: tracegen-boomv4-run-tests
+    needs: prepare-chipyard-tracegen
+    runs-on: as4
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-tracegen"
+          project-key: "tracegen-boomv4"
 
   tracegen-run-tests:
     name: tracegen-run-tests
@@ -1084,24 +1176,28 @@ jobs:
             documentation-check,
             chipyard-rocket-run-tests,
             chipyard-hetero-run-tests,
-            chipyard-boom-run-tests,
+            chipyard-boomv3-run-tests,
+            chipyard-boomv4-run-tests,
             chipyard-shuttle-run-tests,
             chipyard-cva6-run-tests,
             chipyard-ibex-run-tests,
             chipyard-sodor-run-tests,
-            chipyard-dmiboom-run-tests,
+            chipyard-dmiboomv3-run-tests,
+            chipyard-dmiboomv4-run-tests,
             chipyard-dmirocket-run-tests,
             chipyard-spiflashwrite-run-tests,
             chipyard-manyperipherals-run-tests,
             chipyard-tethered-run-tests,
             chipyard-symmetric-run-tests,
+            chipyard-llcchiplet-run-tests,
             chipyard-sha3-run-tests,
             chipyard-gemmini-run-tests,
             chipyard-manymmioaccels-run-tests, # chipyard-nvdla-run-tests,
             chipyard-prefetchers-run-tests,
             chipyard-mempress-run-tests,
             chipyard-constellation-run-tests,
-            tracegen-boom-run-tests,
+            tracegen-boomv3-run-tests,
+            tracegen-boomv4-run-tests,
             tracegen-run-tests,
             icenet-run-tests,
             testchipip-run-tests,

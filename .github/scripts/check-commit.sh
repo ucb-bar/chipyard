@@ -45,7 +45,7 @@ search () {
     done
 }
 
-submodules=("cva6" "boom" "ibex" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "rocket-chip-blocks" "rocket-chip-inclusive-cache" "testchipip" "riscv-sodor" "mempress" "bar-fetchers" "shuttle" "constellation" "fft-generator" "hardfloat" "caliptra-aes-acc" "rocc-acc-utils")
+submodules=("cva6" "boom" "ibex" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "rocket-chip-blocks" "rocket-chip-inclusive-cache" "testchipip" "riscv-sodor" "mempress" "bar-fetchers" "shuttle" "constellation" "fft-generator" "hardfloat" "caliptra-aes-acc" "rocc-acc-utils" "diplomacy")
 dir="generators"
 branches=("master" "main" "dev")
 search

@@ -107,7 +107,10 @@ class WithFireSimDesignTweaks extends Config(
   // Optional: reduce the width of the Serial TL interface
   new testchipip.serdes.WithSerialTLWidth(4) ++
   // Required*: Scale default baud rate with periphery bus frequency
-  new chipyard.config.WithUARTInitBaudRate(BigInt(3686400L)) ++
+  new chipyard.config.WithUART(
+    baudrate=BigInt(3686400L), 
+    txEntries=256, rxEntries=256) ++        // FireSim requires a larger UART FIFO buffer, 
+  new chipyard.config.WithNoUART() ++       // so we overwrite the default one
   // Optional: Adds IO to attach tracerV bridges
   new chipyard.config.WithTraceIO ++
   // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 64 GiB on F1)
@@ -201,7 +204,7 @@ class WithFireSimTestChipConfigTweaks extends Config(
   new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
   new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
-  new boom.common.WithRationalBoomTiles ++ // Add rational crossings between BoomTile and uncore
+  new boom.v3.common.WithRationalBoomTiles ++ // Add rational crossings between BoomTile and uncore
   new WithFireSimDesignTweaks
 )
 
@@ -264,8 +267,8 @@ class FireSimSmallSystemConfig extends Config(
   new WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithExtMemSize(1 << 28) ++
   new testchipip.serdes.WithSerialTL(Seq(testchipip.serdes.SerialTLParams(
-    client = Some(testchipip.serdes.SerialTLClientParams(idBits = 4)),
-    phyParams = testchipip.serdes.ExternalSyncSerialParams(width=32)
+    client = Some(testchipip.serdes.SerialTLClientParams(totalIdBits = 4)),
+    phyParams = testchipip.serdes.ExternalSyncSerialPhyParams(phitWidth=32, flitWidth=32)
   ))) ++
   new testchipip.iceblk.WithBlockDevice ++
   new chipyard.config.WithUARTInitBaudRate(BigInt(3686400L)) ++
@@ -273,13 +276,13 @@ class FireSimSmallSystemConfig extends Config(
   new chipyard.RocketConfig)
 
 //*****************************************************************
-// Boom config, base off chipyard's LargeBoomConfig
+// Boom config, base off chipyard's LargeBoomV3Config
 //*****************************************************************
 class FireSimLargeBoomConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new chipyard.LargeBoomConfig)
+  new chipyard.LargeBoomV3Config)
 
 //********************************************************************
 // Heterogeneous config, base off chipyard's LargeBoomAndRocketConfig
@@ -335,11 +338,11 @@ class FireSimCVA6Config extends Config(
 // - Requires MTModels and MCRams mixins as prefixes to the platform config
 // - May require larger build instances or JVM memory footprints
 //*********************************************************************************/
-class FireSim16LargeBoomConfig extends Config(
+class FireSim16LargeBoomV3Config extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new boom.common.WithNLargeBooms(16) ++
+  new boom.v3.common.WithNLargeBooms(16) ++
   new chipyard.config.AbstractConfig)
 
 class FireSimNoMemPortConfig extends Config(
@@ -360,3 +363,10 @@ class FireSimLeanGemminiRocketMMIOOnlyConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.LeanGemminiRocketConfig)
+
+class FireSimLargeBoomCospikeConfig extends Config(
+  new firesim.firesim.WithCospikeBridge ++
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks++
+  new chipyard.LargeBoomV3Config)

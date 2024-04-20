@@ -6,7 +6,6 @@ import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, BufferParams}
 import freechips.rocketchip.interrupts.{IntSinkNode, IntSinkPortSimple, NullIntSyncSource, IntSyncXbar}
 import freechips.rocketchip.groundtest.{DebugCombiner, TraceGenParams, GroundTestTile}
 import freechips.rocketchip.subsystem._
-import boom.lsu.BoomTraceGenTile
 
 class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
     with InstantiatesHierarchicalElements
@@ -20,10 +19,11 @@ class TraceGenSystem(implicit p: Parameters) extends BaseSubsystem
 
   val tileStatusNodes = totalTiles.values.toSeq.collect {
     case t: GroundTestTile => t.statusNode.makeSink()
-    case t: BoomTraceGenTile => t.statusNode.makeSink()
+    case t: boom.v3.lsu.BoomTraceGenTile => t.statusNode.makeSink()
+    case t: boom.v4.lsu.BoomTraceGenTile => t.statusNode.makeSink()
   }
 
-  lazy val fakeClockDomain = sbus.generateSynchronousDomain
+  lazy val fakeClockDomain = locateTLBusWrapper("sbus").generateSynchronousDomain
 
   lazy val clintOpt = None
   lazy val debugOpt = None

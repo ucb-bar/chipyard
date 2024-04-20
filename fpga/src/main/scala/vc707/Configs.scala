@@ -72,7 +72,7 @@ class RocketVC707Config extends Config (
 class BoomVC707Config extends Config (
   new WithFPGAFrequency(50) ++
   new WithVC707Tweaks ++
-  new chipyard.MegaBoomConfig
+  new chipyard.MegaBoomV3Config
 )
 
 class WithFPGAFrequency(fMHz: Double) extends Config (

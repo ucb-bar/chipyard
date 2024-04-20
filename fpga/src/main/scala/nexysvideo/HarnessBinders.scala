@@ -7,6 +7,7 @@ import freechips.rocketchip.subsystem.{PeripheryBusKey}
 import freechips.rocketchip.tilelink.{TLBundle}
 import freechips.rocketchip.util.{HeterogeneousBag}
 import freechips.rocketchip.diplomacy.{LazyRawModuleImp}
+import org.chipsalliance.diplomacy.nodes.{HeterogeneousBag}
 
 import sifive.blocks.devices.uart.{UARTParams}
 

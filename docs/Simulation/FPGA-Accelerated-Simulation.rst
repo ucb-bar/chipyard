@@ -26,12 +26,14 @@ Finally, source the following environment at the root of the FireSim directory:
 
     cd sims/firesim
     # (Recommended) The default manager environment (includes env.sh)
-    source sourceme-manager.sh
+    source sourceme-manager.sh`
+    # Completing setup using the manager
+    firesim managerinit --platform f1
 
 .. Note:: Every time you want to use FireSim with a fresh shell, you must source ``sourceme-manager.sh``
 
 At this point you're ready to use FireSim with Chipyard. If you're not already
-familiar with FireSim, please return to the :fsim_doc:`FireSim Docs <Initial-Setup/Setting-up-your-Manager-Instance.html#completing-setup-using-the-manager>`,
+familiar with FireSim, please return to the :fsim_doc:`FireSim Docs <Getting-Started-Guides/AWS-EC2-F1-Getting-Started/Initial-Setup/Setting-up-your-Manager-Instance.html#completing-setup-using-the-manager>`,
 and proceed with the rest of the tutorial.
 
 Running your Design in FireSim
@@ -47,7 +49,7 @@ A FireSim simulation requires 3 additional config fragments:
 
 
 The simplest method to add this config fragments to your custom Chipyard config is through FireSim's build recipe scheme.
-After your FireSim environment is setup, you will define your custom build recipe in ``sims/firesim/deploy/deploy/config_build_recipes.ini``. By prepending the FireSim config fragments (separated by ``_``) to your Chipyard configuration, these config fragments will be added to your custom configuration as if they were listed in a custom Chisel config class definition. For example, if you would like to convert the Chipyard ``LargeBoomConfig`` to a FireSim simulation with a DDR3 memory model, the appropriate FireSim ``TARGET_CONFIG`` would be ``DDR3FRFCFSLLC4MB_WithDefaultFireSimBridges_WithFireSimConfigTweaks_chipyard.LargeBoomConfig``. Note that the FireSim config fragments are part of the ``firesim.firesim`` scala package and therefore there do not need to be prefixed with the full package name as opposed to the Chipyard config fragments which need to be prefixed with the chipyard package name.
+After your FireSim environment is setup, you will define your custom build recipe in ``sims/firesim/deploy/config_build_recipes.yaml``. By prepending the FireSim config fragments (separated by ``_``) to your Chipyard configuration, these config fragments will be added to your custom configuration as if they were listed in a custom Chisel config class definition. For example, if you would like to convert the Chipyard ``LargeBoomV3Config`` to a FireSim simulation with a DDR3 memory model, the appropriate FireSim ``TARGET_CONFIG`` would be ``DDR3FRFCFSLLC4MB_WithDefaultFireSimBridges_WithFireSimConfigTweaks_chipyard.LargeBoomV3Config``. Note that the FireSim config fragments are part of the ``firesim.firesim`` scala package and therefore there do not need to be prefixed with the full package name as opposed to the Chipyard config fragments which need to be prefixed with the chipyard package name.
 
 An alternative method to prepending the FireSim config fragments in the FireSim build recipe is to create a new "permanent" FireChip custom configuration, which includes the FireSim config fragments.
 We are using the same target (top) RTL, and only need to specify a new set of connection behaviors for the IOs of that module. Simply create a matching config within ``generators/firechip/src/main/scala/TargetConfigs`` that inherits your config defined in ``chipyard``.
@@ -59,3 +61,5 @@ We are using the same target (top) RTL, and only need to specify a new set of co
     :end-before: DOC include end: firesimconfig
 
 While this option seems to require the maintenance of additional configuration code, it has the benefit of allowing for the inclusion of more complex config fragments which also accept custom arguments (for example, ``WithDefaultMemModel`` can take an optional argument``)
+
+For more information on how to build your own hardware design on FireSim, please refer to :fsim_doc:`FireSim Docs <Getting-Started-Guides/AWS-EC2-F1-Getting-Started/Building-a-FireSim-AFI.html#building-your-own-hardware-designs-firesim-amazon-fpga-images>`.
