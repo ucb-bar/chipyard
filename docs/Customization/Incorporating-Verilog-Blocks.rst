@@ -33,19 +33,6 @@ different directory from Chisel (Scala) sources.
                 vsrc/
                     YourFile.v
 
-In addition to the steps outlined in the previous section on adding a
-project to the ``build.sbt`` at the top level, it is also necessary to
-add any projects that contain Verilog IP as dependencies to the
-``tapeout`` project. This ensures that the Verilog sources are visible
-to the downstream FIRRTL passes that provide utilities for integrating
-Verilog files into the build process, which are part of the
-``tapeout`` package in ``barstools/tapeout``.
-
-.. code-block:: scala
-
-    lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
-      .dependsOn(chisel_testers, example, yourproject)
-      .settings(commonSettings)
 
 For this concrete GCD example, we will be using a ``GCDMMIOBlackBox``
 Verilog module that is defined in the ``chipyard`` project. The Scala

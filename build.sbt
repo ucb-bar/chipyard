@@ -158,7 +158,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(commonSettings)
 
 lazy val chipyard = (project in file("generators/chipyard"))
-  .dependsOn(testchipip, rocketchip, boom, hwacha, rocketchip_blocks, rocketchip_inclusive_cache, iocell,
+  .dependsOn(testchipip, rocketchip, boom, hwacha, rocketchip_blocks, rocketchip_inclusive_cache,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, rocket_dsp_utils,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
@@ -256,13 +256,10 @@ lazy val rocc_acc_utils = (project in file("generators/rocc-acc-utils"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val iocell = Project(id = "iocell", base = file("./tools/barstools/") / "iocell")
+lazy val tapeout = (project in file("./tools/tapeout/"))
   .settings(chiselSettings)
   .settings(commonSettings)
-
-lazy val tapeout = (project in file("./tools/barstools/"))
-  .settings(chiselSettings)
-  .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq("com.typesafe.play" %% "play-json" % "2.9.2"))
 
 lazy val fixedpoint = (project in file("./tools/fixedpoint/"))
   .settings(chiselSettings)
