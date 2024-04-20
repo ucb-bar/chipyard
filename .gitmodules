@@ -133,3 +133,9 @@
 [submodule "vlsi/hammer-mentor-plugins"]
 	path = vlsi/hammer-mentor-plugins
 	url = https://github.com/ucb-bar/hammer-mentor-plugins.git
+[submodule "tools/dsptools"]
+	path = tools/dsptools
+	url = https://github.com/ucb-bar/dsptools.git
+[submodule "tools/fixedpoint"]
+	path = tools/fixedpoint
+	url = https://github.com/ucb-bar/fixedpoint.git
