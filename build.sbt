@@ -271,7 +271,6 @@ lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
     chiselSettings,
     commonSettings,
     libraryDependencies ++= Seq(
-      "edu.berkeley.cs" %% "chiseltest" % "0.6.0",
       "org.scalatest" %% "scalatest" % "3.2.+" % "test",
       "org.typelevel" %% "spire" % "0.18.0",
       "org.scalanlp" %% "breeze" % "2.1.0",
