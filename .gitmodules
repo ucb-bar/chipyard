@@ -139,3 +139,7 @@
 [submodule "tools/fixedpoint"]
 	path = tools/fixedpoint
 	url = https://github.com/ucb-bar/fixedpoint.git
+[submodule "tools/midas-targetutils"]
+	path = tools/midas-targetutils
+	url = https://github.com/firesim/midas-targetutils.git
+
