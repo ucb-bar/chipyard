@@ -32,8 +32,13 @@ class NonBlockingTraceGenConfig extends Config(
   new tracegen.WithTraceGen()(List.fill(2) { DCacheParams(nMSHRs = 2, nSets = 16, nWays = 2) }) ++
   new AbstractTraceGenConfig)
 
-class BoomTraceGenConfig extends Config(
-  new tracegen.WithBoomTraceGen()(List.fill(2) { DCacheParams(nMSHRs = 8, nSets = 16, nWays = 2) }) ++
+class BoomV3TraceGenConfig extends Config(
+  new tracegen.WithBoomV3TraceGen()(List.fill(2) { DCacheParams(nMSHRs = 8, nSets = 16, nWays = 2) }) ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache ++
+  new AbstractTraceGenConfig)
+
+class BoomV4TraceGenConfig extends Config(
+  new tracegen.WithBoomV4TraceGen()(List.fill(2) { DCacheParams(nMSHRs = 8, nSets = 16, nWays = 2) }) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache ++
   new AbstractTraceGenConfig)
 

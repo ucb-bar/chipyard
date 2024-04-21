@@ -14,8 +14,8 @@ dependencies:
     #   instructions on adding a recipe
     # https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/pkg-specs.html#package-match-specifications
     #   documentation on package_spec syntax for constraining versions
-    - gcc<12
-    - gxx<12
+    - gcc=13.2
+    - gxx=13.2
     - sysroot_linux-64=2.17 # needed to match pre-built CI XRT glibc version
     - conda-gcc-specs
     - binutils
@@ -31,5 +31,5 @@ dependencies:
     - sbt
     - openjdk=20
     - dtc
-    - verilator==5.020
+    - verilator==5.022
     - conda-lock=1.4

@@ -49,6 +49,9 @@
 [submodule "generators/cva6"]
 	path = generators/cva6
 	url = https://github.com/ucb-bar/cva6-wrapper.git
+[submodule "generators/diplomacy"]
+	path = generators/diplomacy
+	url = https://github.com/chipsalliance/diplomacy.git
 [submodule "tools/DRAMSim2"]
 	path = tools/DRAMSim2
 	url = https://github.com/firesim/DRAMSim2.git

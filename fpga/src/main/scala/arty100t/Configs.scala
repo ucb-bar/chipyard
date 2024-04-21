@@ -5,7 +5,8 @@ import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.devices.tilelink._
-import freechips.rocketchip.diplomacy._
+import org.chipsalliance.diplomacy._
+import org.chipsalliance.diplomacy.lazymodule._
 import freechips.rocketchip.system._
 import freechips.rocketchip.tile._
 
@@ -58,5 +59,5 @@ class NoCoresArty100TConfig extends Config(
 class BringupArty100TConfig extends Config(
   new WithArty100TSerialTLToGPIO ++
   new WithArty100TTweaks(freqMHz = 50) ++
-  new testchipip.serdes.WithSerialTLPHYParams(testchipip.serdes.InternalSyncSerialParams(freqMHz=50)) ++
+  new testchipip.serdes.WithSerialTLPHYParams(testchipip.serdes.InternalSyncSerialPhyParams(freqMHz=50)) ++
   new chipyard.ChipBringupHostConfig)

@@ -15,8 +15,8 @@ Running on AWS EC2 with FireSim
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you plan on using Chipyard alongside FireSim on AWS EC2 instances, you should refer to the :fsim_doc:`FireSim documentation <>`.
-Specifically, you should follow the :fsim_doc:`Initial Setup/Installation <Initial-Setup/index.html>`
-section of the docs up until :fsim_doc:`Setting up the FireSim Repo <Initial-Setup/Setting-up-your-Manager-Instance.html#setting-up-the-firesim-repo>`.
+Specifically, you should follow the :fsim_doc:`Initial Setup/Installation <Getting-Started-Guides/AWS-EC2-F1-Getting-Started/Initial-Setup/index.html>`
+section of the docs up until :fsim_doc:`Setting up the FireSim Repo <Getting-Started-Guides/AWS-EC2-F1-Getting-Started/Initial-Setup/Setting-up-your-Manager-Instance.html#setting-up-the-firesim-repo>`.
 At that point, instead of cloning FireSim you can clone Chipyard by following :ref:`Chipyard-Basics/Initial-Repo-Setup:Setting up the Chipyard Repo`.
 
 Default Requirements Installation
@@ -90,7 +90,9 @@ Run the following script based off which compiler you would like to use.
 
     ``-s 9`` skips pre-compiling FireMarshal default buildroot Linux sources
 
-    ``-s 10`` skips running repository clean-up
+    ``-s 10`` skips installing CIRCT
+
+    ``-s 11`` skips running repository clean-up
 
 .. code-block:: shell
 
