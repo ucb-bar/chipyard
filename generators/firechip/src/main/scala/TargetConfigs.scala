@@ -360,3 +360,9 @@ class FireSimLeanGemminiRocketMMIOOnlyConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.LeanGemminiRocketConfig)
+
+class FireSimRadianceClusterSynConfig extends Config(
+  new WithDefaultFireSimBridges ++
+    new WithDefaultMemModel ++
+    new WithFireSimConfigTweaks ++
+    new chipyard.RadianceClusterSynConfig)
