@@ -25,6 +25,8 @@ The default standard ``ChipTop`` provides a mimimal, barebones template for ``IO
 For tapeouts, integrating Analog IP, or other non-standard use cases, Chipyard supports specifying a custom ``ChipTop`` using the ``BuildTop`` key.
 An example of a custom ChipTop which uses non-standard IOCells is provided in `generators/chipyard/src/main/scala/example/CustomChipTop.scala <https://github.com/ucb-bar/chipyard/blob/main/generators/chipyard/src/main/scala/example/CustomChipTop.scala>`__
 
+You can also specify a fully custom ChipTop that does not use any RocketChip or Chipyard SoC components. An example of this is provided in `generators/chipyard/src/main/scala/example/EmptyChipTop.scala <https://github.com/ucb-bar/chipyard/blob/main/generators/chipyard/src/main/scala/example/EmptyChipTop.scala>`__. The ``EmptyChipTop`` example can be built with ``make CONFIG=EmptyChipTopConfig TOP=EmptyChipTop``.
+
 
 System/DigitalTop
 -------------------------
