@@ -168,7 +168,8 @@ lazy val chipyard = (project in file("generators/chipyard"))
       "org.reflections" % "reflections" % "0.10.2"
     )
   )
- .settings(commonSettings)
+  .settings(commonSettings)
+  .settings(Compile / unmanagedSourceDirectories += file("tools/stage-chisel3/src/main/scala"))
 
 lazy val barf = (project in file("generators/bar-fetchers"))
   .dependsOn(rocketchip)
