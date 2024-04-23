@@ -3,7 +3,7 @@
 
 package chipyard.stage
 
-import circt.stage.{ChiselStage}
+import circt.stage.{ChiselStage, CIRCTTargetAnnotation, CIRCTTarget}
 import firrtl.options.PhaseManager.PhaseDependency
 import firrtl.options.{Shell}
 import firrtl.{AnnotationSeq}
@@ -31,7 +31,7 @@ final class ChipyardChiselStage extends ChiselStage {
         Dependency[firrtl.stage.phases.Checks]
       )
     )
-    pm.transform(annotations)
+    pm.transform(annotations :+ CIRCTTargetAnnotation(CIRCTTarget.CHIRRTL))
   }
 }
 
