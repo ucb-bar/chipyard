@@ -228,7 +228,6 @@ sim_files              ?= $(build_dir)/sim_files.f
 # single file that contains all files needed for VCS or Verilator simulation (unique and without .h's)
 sim_common_files       ?= $(build_dir)/sim_files.common.f
 
-EXTRA_FIRRTL_OPTIONS ?= $(build_dir)/.extra_firrtl_options
 MFC_LOWERING_OPTIONS ?= $(build_dir)/.mfc_lowering_options
 
 #########################################################################################

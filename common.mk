@@ -18,7 +18,6 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
 "   ENABLE_YOSYS_FLOW         = if set, add compilation flags to enable the vlsi flow for yosys(tutorial flow)" \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
-"   EXTRA_BASE_FIRRTL_OPTIONS = additional options to pass to the Scala FIRRTL compiler" \
 "   MFC_BASE_LOWERING_OPTIONS = override lowering options to pass to the MLIR FIRRTL compiler" \
 "   ASPECTS                   = comma separated list of Chisel aspect flows to run (e.x. chipyard.upf.ChipTopUPFAspect)"
 
@@ -195,17 +194,6 @@ SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,disallowPortDeclSharing,locationInfoStyle=wrapInAtSquareBracket
 
 # DOC include start: FirrtlCompiler
-# There are two possible cases for this step. In the first case, SFC
-# compiles Chisel to CHIRRTL, and MFC compiles CHIRRTL to Verilog. Otherwise,
-# when custom FIRRTL transforms are included
-# SFC compiles Chisel to LowFIRRTL and MFC compiles it to Verilog.
-#
-# hack: when using dontTouch, io.cpu annotations are not removed by SFC,
-# hence we remove them manually by using jq before passing them to firtool
-
-$(EXTRA_FIRRTL_OPTIONS) &: $(FIRRTL_FILE)
-	echo "$(EXTRA_BASE_FIRRTL_OPTIONS)" > $(EXTRA_FIRRTL_OPTIONS)
-
 $(MFC_LOWERING_OPTIONS):
 	mkdir -p $(dir $@)
 ifeq (,$(ENABLE_YOSYS_FLOW))
@@ -218,7 +206,7 @@ $(FINAL_ANNO_FILE): $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE)
 	cat $(EXTRA_ANNO_FILE) > $@
 	touch $@
 
-$(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(EXTRA_FIRRTL_OPTIONS) $(MFC_LOWERING_OPTIONS)
+$(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
 	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),tapeout.transforms.GenerateModelStageMain,\
 		--no-dedup \
@@ -228,8 +216,7 @@ $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_F
 		--input-file $(FIRRTL_FILE) \
 		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
-		--allow-unrecognized-annotations \
-		$(shell cat $(EXTRA_FIRRTL_OPTIONS)))
+		--allow-unrecognized-annotations)
 	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE) 2> /dev/null # Optionally change file type when SFC generates LowFIRRTL
 	firtool \
 		--format=fir \
