@@ -8,11 +8,9 @@ modify Chisel-elaborated RTL.
 As mentioned in Section :ref:`Tools/FIRRTL:firrtl`, transforms are modifications that happen on the FIRRTL IR that can modify a circuit.
 Transforms are a powerful tool to take in the FIRRTL IR that is emitted from Chisel and run analysis or convert the circuit into a new form.
 
-The Scala FIRRTL Compiler and the MLIR FIRRTL Compiler
+The MLIR FIRRTL Compiler
 ------------------------------------------------------
-In Chipyard, two FIRRTL compilers work together to compile Chisel into Verilog. The Scala FIRRTL compiler (SFC) and the MLIR FIRRTL compiler (MFC).
-They are basically doing the same thing, except that MFC is written in C++ which makes compilation much faster (the generated Verilog will be different). In the default setting, the SFC will compile Chisel into CHIRRTL and MFC will
-compile CHIRRTL into Verilog.
+In Chipyard, the LLVM-based MLIR FIRRTL compiler (CIRCT or MFC) compiles Chisel into Verilog.
 
 For more information on MLIR FIRRTL Compiler, please visit https://mlir.llvm.org/ and https://circt.llvm.org/.
 
