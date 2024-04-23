@@ -22,18 +22,18 @@ Where to add transforms
 
 In Chipyard, the FIRRTL compiler is called multiple times to create a "Top" file that contains the DUT and a "Model" file containing the test harness, which instantiates the DUT.
 The "Model" file does not contain the DUT's module definition or any of its submodules.
-This is done by the ``tapeout`` SBT project (located in ``tools/barstools/tapeout``) which calls ``GenerateModelStageMain`` (a function that wraps the multiple FIRRTL compiler calls and extra transforms).
+This is done by the ``tapeout`` SBT project (located in ``tools/tapeout``) which calls ``GenerateModelStageMain`` (a function that wraps the multiple FIRRTL compiler calls and extra transforms).
 
 .. literalinclude:: ../../common.mk
     :language: make
     :start-after: DOC include start: FirrtlCompiler
     :end-before: DOC include end: FirrtlCompiler
 
-If you look inside of the `tools/barstools/tapeout/src/main/scala/transforms/GenerateModelStageMain.scala <https://github.com/ucb-bar/barstools/blob/master/tapeout/src/main/scala/transforms/GenerateModelStageMain.scala>`__ file,
+If you look inside of the ``tools/tapeout/src/main/scala/transforms/GenerateModelStageMain.scala`` file,
 you can see that FIRRTL is invoked for "Model". Currently, the FIRRTL compiler is agnostic to the ``TOP`` and ``MODEL`` differentiation,
 and the user is responsible for providing annotations that will inform the compiler where(``TOP`` vs ``MODEL``) to perform the custom FIRRTL transformations.
 
-For more information on Barstools, please visit the :ref:`Tools/Barstools:Barstools` section.
+For more information on the Tapeout sub-project, please visit the :ref:`Tools/Tapeout-Tools:Tapeout-Tools` section.
 
 Examples of transforms
 ----------------------

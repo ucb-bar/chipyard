@@ -127,9 +127,6 @@
 [submodule "tools/axe"]
 	path = tools/axe
 	url = https://github.com/CTSRD-CHERI/axe.git
-[submodule "tools/barstools"]
-	path = tools/barstools
-	url = https://github.com/ucb-bar/barstools.git
 [submodule "tools/cde"]
 	path = tools/cde
 	url = https://github.com/chipsalliance/cde.git

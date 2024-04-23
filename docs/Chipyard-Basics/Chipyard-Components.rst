@@ -79,9 +79,9 @@ Tools
   FIRRTL enables digital circuits manipulation between Chisel elaboration and Verilog generation.
   See :ref:`Tools/FIRRTL:FIRRTL` for more information.
 
-**Barstools**
+**Tapeout-Tools (Formerly Barstools)**
   A collection of common FIRRTL transformations used to manipulate a digital circuit without changing the generator source RTL.
-  See :ref:`Tools/Barstools:Barstools` for more information.
+  See :ref:`Tools/Tapeout-Tools:Tapeout-Tools` for more information.
 
 **Dsptools**
   A Chisel library for writing custom signal processing hardware, as well as integrating custom signal processing hardware into an SoC (especially a Rocket-based SoC).

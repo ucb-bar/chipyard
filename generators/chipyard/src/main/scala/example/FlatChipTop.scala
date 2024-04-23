@@ -13,7 +13,7 @@ import chipyard.{BuildSystem, DigitalTop}
 import chipyard.harness.{BuildTop}
 import chipyard.clocking._
 import chipyard.iobinders._
-import barstools.iocell.chisel._
+import chipyard.iocell._
 import testchipip.serdes.{SerialTLKey}
 
 class WithFlatChipTop extends Config((site, here, up) => {
