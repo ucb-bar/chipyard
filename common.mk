@@ -202,7 +202,9 @@ $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_F
 		--input-file $(FIRRTL_FILE) \
 		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
+		-X none \
 		--allow-unrecognized-annotations)
+	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE)
 	firtool \
 		--format=fir \
 		--export-module-hierarchy \
