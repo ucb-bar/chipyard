@@ -198,19 +198,18 @@ MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVa
 # DOC include start: FirrtlCompiler
 # There are two possible cases for this step. In the first case, SFC
 # compiles Chisel to CHIRRTL, and MFC compiles CHIRRTL to Verilog. Otherwise,
-# when custom FIRRTL transforms are included or if a Fixed type is used within
-# the dut, SFC compiles Chisel to LowFIRRTL and MFC compiles it to Verilog.
+# when custom FIRRTL transforms are included
+# SFC compiles Chisel to LowFIRRTL and MFC compiles it to Verilog.
 # Users can indicate to the Makefile of custom FIRRTL transforms by setting the
 # "ENABLE_CUSTOM_FIRRTL_PASS" variable.
 #
-# hack: lower to low firrtl if Fixed types are found
 # hack: when using dontTouch, io.cpu annotations are not removed by SFC,
 # hence we remove them manually by using jq before passing them to firtool
 
 $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) &: $(FIRRTL_FILE)
 ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
-	echo $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none) > $(SFC_LEVEL)
-	echo "$(EXTRA_BASE_FIRRTL_OPTIONS)" $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), "$(SFC_REPL_SEQ_MEM)",) > $(EXTRA_FIRRTL_OPTIONS)
+	echo none > $(SFC_LEVEL)
+	echo "$(EXTRA_BASE_FIRRTL_OPTIONS)" > $(EXTRA_FIRRTL_OPTIONS)
 else
 	echo low > $(SFC_LEVEL)
 	echo "$(EXTRA_BASE_FIRRTL_OPTIONS)" "$(SFC_REPL_SEQ_MEM)" > $(EXTRA_FIRRTL_OPTIONS)
