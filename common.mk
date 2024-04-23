@@ -161,9 +161,9 @@ define mfc_extra_anno_contents
 endef
 export mfc_extra_anno_contents
 export sfc_extra_low_transforms_anno_contents
-$(EXTRA_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) &: $(ANNO_FILE)
+$(FINAL_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) &: $(ANNO_FILE)
 	echo "$$mfc_extra_anno_contents" > $(MFC_EXTRA_ANNO_FILE)
-	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(EXTRA_ANNO_FILE)
+	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
 
 .PHONY: firrtl
 firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
@@ -192,10 +192,6 @@ ifeq (,$(ENABLE_YOSYS_FLOW))
 else
 	echo "$(MFC_BASE_LOWERING_OPTIONS),disallowPackedArrays" > $@
 endif
-
-$(FINAL_ANNO_FILE): $(EXTRA_ANNO_FILE)
-	cat $(EXTRA_ANNO_FILE) > $@
-	touch $@
 
 $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
