@@ -140,3 +140,6 @@
 	path = tools/midas-targetutils
 	url = https://github.com/firesim/midas-targetutils.git
 
+[submodule "tools/firrtl2"]
+	path = tools/firrtl2
+	url = https://github.com/ucb-bar/firrtl2.git
