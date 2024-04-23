@@ -16,7 +16,6 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_LDFLAGS         = additional LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES         = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
-"   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & MFC converts to Verilog)" \
 "   ENABLE_YOSYS_FLOW         = if set, add compilation flags to enable the vlsi flow for yosys(tutorial flow)" \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
 "   EXTRA_BASE_FIRRTL_OPTIONS = additional options to pass to the Scala FIRRTL compiler" \
@@ -200,20 +199,13 @@ MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVa
 # compiles Chisel to CHIRRTL, and MFC compiles CHIRRTL to Verilog. Otherwise,
 # when custom FIRRTL transforms are included
 # SFC compiles Chisel to LowFIRRTL and MFC compiles it to Verilog.
-# Users can indicate to the Makefile of custom FIRRTL transforms by setting the
-# "ENABLE_CUSTOM_FIRRTL_PASS" variable.
 #
 # hack: when using dontTouch, io.cpu annotations are not removed by SFC,
 # hence we remove them manually by using jq before passing them to firtool
 
 $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) &: $(FIRRTL_FILE)
-ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
 	echo none > $(SFC_LEVEL)
 	echo "$(EXTRA_BASE_FIRRTL_OPTIONS)" > $(EXTRA_FIRRTL_OPTIONS)
-else
-	echo low > $(SFC_LEVEL)
-	echo "$(EXTRA_BASE_FIRRTL_OPTIONS)" "$(SFC_REPL_SEQ_MEM)" > $(EXTRA_FIRRTL_OPTIONS)
-endif
 
 $(MFC_LOWERING_OPTIONS):
 	mkdir -p $(dir $@)
