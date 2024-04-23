@@ -130,7 +130,7 @@ public:
   void push_rocc_mem_request(long long int address, int tag, int cmd, int size, bool phys, long long int data, int mask);
   void push_rocc_mem_response(rocc_mem_resp_t data);
   bool rocc_mem_response_handshake(long long int* addr, int* tag, int* cmd, int* size, long long int* data, unsigned char* replay, unsigned char* has_data, long long int* word_bypass, long long int* store_data, int* mask);
-  void handle_rocc_mem_req();
+  void handle_rocc_mem_request();
   void set_rocc_exists(bool exists);
   bool get_rocc_exists();
 
@@ -554,7 +554,7 @@ extern "C" void spike_tile(int hartid, char* isa,
     simif->push_rocc_mem_request(rocc_mem_request_addr, rocc_mem_request_tag, rocc_mem_request_cmd, rocc_mem_request_size, rocc_mem_request_phys, rocc_mem_request_data, rocc_mem_request_mask);
   }
 
-  simif->handle_rocc_mem_req();
+  simif->handle_rocc_mem_request();
   *rocc_mem_response_valid = simif->rocc_mem_response_handshake(rocc_mem_response_addr, rocc_mem_response_tag, rocc_mem_response_cmd, rocc_mem_response_size, rocc_mem_response_data, rocc_mem_response_replay, rocc_mem_response_has_data, rocc_mem_response_word_bypass, rocc_mem_response_store_data, rocc_mem_response_mask);
 }
 
@@ -581,7 +581,11 @@ reg_t generic_t::custom1(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
     exit(1);
   } else {
     simif->push_rocc_insn(insn, xs1, xs2);
-    return simif->get_rocc_result();
+    if (insn.xd) {
+      return simif->get_rocc_result();
+    } else {
+      return 0;
+    }
   }
 }
 
@@ -592,7 +596,11 @@ reg_t generic_t::custom2(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
     exit(1);
   } else {
     simif->push_rocc_insn(insn, xs1, xs2);
-    return simif->get_rocc_result();
+    if (insn.xd) {
+      return simif->get_rocc_result();
+    } else {
+      return 0;
+    }
   }
 }
 
@@ -603,7 +611,11 @@ reg_t generic_t::custom3(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
     exit(1);
   } else {
     simif->push_rocc_insn(insn, xs1, xs2);
-    return simif->get_rocc_result();
+    if (insn.xd) {
+      return simif->get_rocc_result();
+    } else {
+      return 0;
+    }
   }
 }
 
@@ -1284,10 +1296,12 @@ void chipyard_simif_t::push_rocc_result(long long int result) {
 
 void chipyard_simif_t::push_rocc_mem_request(long long int address, int tag, int cmd, int size, bool phys, long long int data, int mask) {
   rocc_mem_request_q.push_back({address, tag, cmd, size, phys, data, mask});
+  // printf("Pushed rocc mem request: %llx %d %d %d %d %llx %d\n", address, tag, cmd, size, phys, data, mask);
 }
 
 void chipyard_simif_t::push_rocc_mem_response(struct rocc_mem_resp_t result) {
   rocc_mem_response_q.push_back(result);
+  // printf("Pushed rocc mem response: %llx %d %d %d %llx %d %d %llx %llx %d\n", result.addr, result.tag, result.cmd, result.size, result.data, result.replay, result.has_data, result.word_bypass, result.store_data, result.mask);
 }
 
 bool chipyard_simif_t::rocc_mem_response_handshake(long long int* addr, int* tag, int* cmd, int* size, long long int* data, unsigned char* replay, unsigned char* has_data, long long int* word_bypass, long long int* store_data, int* mask) {
@@ -1310,7 +1324,7 @@ bool chipyard_simif_t::rocc_mem_response_handshake(long long int* addr, int* tag
   }
 }
 
-void chipyard_simif_t::handle_rocc_mem_req() {
+void chipyard_simif_t::handle_rocc_mem_request() {
   if (!rocc_mem_request_q.empty()) {
     rocc_mem_req_t request = rocc_mem_request_q[0];
     rocc_mem_resp_t response;
@@ -1341,7 +1355,6 @@ void chipyard_simif_t::handle_rocc_mem_req() {
 }
 
 long long int chipyard_simif_t::get_rocc_result() {
-  // Wait some cycles for a result. This is a hack while fences do not work.
   while (rocc_result_q.size() == 0) {
     host->switch_to();
   }
