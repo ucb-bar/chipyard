@@ -4,6 +4,7 @@
 SIM_OPT_CXXFLAGS := -O3
 LRISCV=-lriscv
 
+export USE_CHISEL6=1
 
 SIM_CXXFLAGS = \
 	$(CXXFLAGS) \

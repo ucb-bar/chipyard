@@ -87,6 +87,8 @@ ifeq ($(SUB_PROJECT),arty100t)
 	FPGA_BRAND        ?= xilinx
 endif
 
+export USE_CHISEL6=1
+
 include $(base_dir)/variables.mk
 
 # default variables to build the arty example
