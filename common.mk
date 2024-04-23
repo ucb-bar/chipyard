@@ -159,19 +159,10 @@ define mfc_extra_anno_contents
 	}
 ]
 endef
-define sfc_extra_low_transforms_anno_contents
-[
-	{
-		"class": "firrtl.stage.RunFirrtlTransformAnnotation",
-		"transform": "tapeout.transforms.ExtraLowTransforms"
-	}
-]
-endef
 export mfc_extra_anno_contents
 export sfc_extra_low_transforms_anno_contents
-$(EXTRA_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) &: $(ANNO_FILE)
+$(EXTRA_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) &: $(ANNO_FILE)
 	echo "$$mfc_extra_anno_contents" > $(MFC_EXTRA_ANNO_FILE)
-	echo "$$sfc_extra_low_transforms_anno_contents" > $(SFC_EXTRA_ANNO_FILE)
 	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(EXTRA_ANNO_FILE)
 
 .PHONY: firrtl
@@ -202,7 +193,7 @@ else
 	echo "$(MFC_BASE_LOWERING_OPTIONS),disallowPackedArrays" > $@
 endif
 
-$(FINAL_ANNO_FILE): $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE)
+$(FINAL_ANNO_FILE): $(EXTRA_ANNO_FILE)
 	cat $(EXTRA_ANNO_FILE) > $@
 	touch $@
 
