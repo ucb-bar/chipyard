@@ -176,11 +176,6 @@ CHISEL_LOG_FILE ?= $(build_dir)/$(long_name).chisel.log
 MFC_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
 FINAL_ANNO_FILE ?= $(build_dir)/$(long_name).appended.anno.json
 
-# scala firrtl compiler (sfc) outputs
-SFC_FIRRTL_BASENAME ?= $(build_dir)/$(long_name).sfc
-SFC_FIRRTL_FILE ?= $(SFC_FIRRTL_BASENAME).fir
-SFC_ANNO_FILE ?= $(build_dir)/$(long_name).sfc.anno.json
-
 # firtool compiler outputs
 MFC_TOP_HRCHY_JSON ?= $(build_dir)/top_module_hierarchy.json
 MFC_MODEL_HRCHY_JSON ?= $(build_dir)/model_module_hierarchy.json
