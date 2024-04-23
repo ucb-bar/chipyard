@@ -193,7 +193,6 @@ MFC_TOP_SMEMS_JSON = $(GEN_COLLATERAL_DIR)/metadata/seq_mems.json
 MFC_MODEL_SMEMS_JSON = $(GEN_COLLATERAL_DIR)/metadata/tb_seq_mems.json
 
 # macrocompiler smems in/output
-SFC_SMEMS_CONF ?= $(build_dir)/$(long_name).sfc.mems.conf
 TOP_SMEMS_CONF ?= $(build_dir)/$(long_name).top.mems.conf
 TOP_SMEMS_FILE ?= $(GEN_COLLATERAL_DIR)/$(long_name).top.mems.v
 TOP_SMEMS_FIR  ?= $(build_dir)/$(long_name).top.mems.fir

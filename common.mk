@@ -181,7 +181,6 @@ SFC_MFC_TARGETS = \
 	$(MFC_BB_MODS_FILELIST) \
 	$(GEN_COLLATERAL_DIR)
 
-SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,disallowPortDeclSharing,locationInfoStyle=wrapInAtSquareBracket
 
 # DOC include start: FirrtlCompiler
@@ -219,7 +218,6 @@ $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_F
 		--split-verilog \
 		-o $(GEN_COLLATERAL_DIR) \
 		$(SFC_FIRRTL_FILE)
-	-mv $(SFC_SMEMS_CONF) $(MFC_SMEMS_CONF) 2> /dev/null
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 	touch $(MFC_BB_MODS_FILELIST) # if there are no BB's then the file might not be generated, instead always generate it
 # DOC include end: FirrtlCompiler
