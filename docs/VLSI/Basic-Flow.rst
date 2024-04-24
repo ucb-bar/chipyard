@@ -227,7 +227,7 @@ While hierarchical physical design can be performed in multiple ways (top-down, 
 The bottom-up approach traverses a tree representing the hierarchy starting from the leaves and towards the direction of the root (the "top level"), and runs the physical design flow on each node of the hierarchy tree using the previously layed-out children nodes.
 As nodes get closer to the root (or "top level") of the hierarchy, largers sections of the design get layed-out.
 
-The Hammer hierarchical flow relies on a manually-specified descrition of the desired heirarchy tree. The specification of the heirarchy tree is defined based on the instance names in the generated Verilog, which sometime make this specification challenging due to inconsisent instance names. Additionally, the specification of the heirarchy tree is intertwined with the manual specification of a floorplan for the design.
+The Hammer hierarchical flow relies on a manually-specified description of the desired hierarchy tree. The specification of the hierarchy tree is defined based on the instance names in the generated Verilog, which sometime make this specification challenging due to inconsisent instance names. Additionally, the specification of the hierarchy tree is intertwined with the manual specification of a floorplan for the design.
 
 For example, if we choose to specifiy the previously mentioned ``GemminiRocketConfig`` configuration in a hierarchical fashion in which the Gemmini accelerator and the last-level cache are run separetly from the top-level SoC, we would replace the floorplan example in ``example-design.yml`` from the :ref:`VLSI/Basic-Flow:Place-and-Route` section with the following specification:
 
