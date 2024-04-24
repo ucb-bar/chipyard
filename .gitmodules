@@ -22,6 +22,9 @@
 [submodule "generators/icenet"]
 	path = generators/icenet
 	url = https://github.com/firesim/icenet.git
+[submodule "tools/circt"]
+	path = tools/circt
+	url = https://github.com/llvm/circt.git
 [submodule "tools/dsptools"]
 	path = tools/dsptools
 	url = https://github.com/ucb-bar/dsptools.git
