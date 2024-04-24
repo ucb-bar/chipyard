@@ -24,7 +24,7 @@ final class ChipyardChiselStage extends ChiselStage {
         Dependency[chisel3.stage.phases.MaybeInjectingPhase],
         Dependency[circt.stage.phases.AddImplicitOutputFile],
         Dependency[circt.stage.phases.Checks],
-        Dependency[circt.stage.phases.CIRCT]
+        Dependency[circt.stage.phases.CIRCT],
       ),
       currentState = Seq(
         Dependency[firrtl.stage.phases.AddDefaults],
@@ -49,6 +49,7 @@ class ChipyardStage extends ChiselStage {
         Dependency[chipyard.stage.phases.AddDefaultTests],
         Dependency[chipyard.stage.phases.GenerateTestSuiteMakefrags],
         Dependency[chipyard.stage.phases.GenerateArtefacts],
+        Dependency[chipyard.stage.phases.LegacyFirrtl2Emission]
       ),
       currentState = Seq(
         Dependency[firrtl.stage.phases.AddDefaults],
