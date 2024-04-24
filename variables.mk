@@ -153,6 +153,7 @@ TAPEOUT_CLASSPATH_TARGETS ?= $(subst :, ,$(TAPEOUT_CLASSPATH))
 
 # chisel generated outputs
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
+SFC_FIRRTL_FILE ?= $(build_dir)/$(long_name).sfc.fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
 CHISEL_LOG_FILE ?= $(build_dir)/$(long_name).chisel.log
 

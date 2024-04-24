@@ -133,7 +133,7 @@ $(TAPEOUT_CLASSPATH_TARGETS) &: $(TAPEOUT_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS)
 # verilog generation pipeline
 #########################################################################################
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-$(FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(CHIPYARD_CLASSPATH_TARGETS) $(EXTRA_GENERATOR_REQS)
+$(FIRRTL_FILE) $(SFC_FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(CHIPYARD_CLASSPATH_TARGETS) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
 	(set -o pipefail && $(call run_jar_scala_main,$(CHIPYARD_CLASSPATH),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
@@ -166,7 +166,7 @@ $(FINAL_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) &: $(ANNO_FILE)
 	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
 
 .PHONY: firrtl
-firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
+firrtl: $(FIRRTL_FILE) $(SFC_FIRRTL_FILE) $(FINAL_ANNO_FILE)
 
 #########################################################################################
 # create verilog files rules and variables
