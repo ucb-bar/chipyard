@@ -179,6 +179,19 @@ class SpikeTile(
   val rocc_sequence = p(BuildRoCC).map(_(p))
   val has_rocc = rocc_sequence.nonEmpty
   val rocc_module = if (has_rocc) rocc_sequence.head else null
+
+  if (has_rocc) {
+    // val rocc_module = rocc_sequence.head
+    val roccCSRs = rocc_sequence.map(_.roccCSRs) // the set of custom CSRs requested by all roccs
+    require(roccCSRs.flatten.map(_.id).toSet.size == roccCSRs.flatten.size,
+    "LazyRoCC instantiations require overlapping CSRs")
+    rocc_sequence.map(_.atlNode).foreach { atl => tlMasterXbar.node :=* atl }
+    rocc_sequence.map(_.tlNode).foreach { tl => tlOtherMastersNode :=* tl }
+    // rocc_sequence.map(_.stlNode).foreach { stl => stl :*= tlSlaveXbar.node }
+
+    // nPTWPorts += rocc_sequence.map(_.nPTWPorts).sum
+    // nDCachePorts += rocc_sequence.size
+  }
 }
 
 class SpikeBlackBox(
@@ -685,29 +698,22 @@ class WithSpikeTCM extends Config((site, here, up) => {
 })
 
 /**
- * Config fragment to enable different RoCCs
+ * Config fragments to enable different RoCCs
  */
-class WithMultiRoCC extends Config((site, here, up) => {
+class WithAdderRoCC extends Config((site, here, up) => {
   case BuildRoCC => List(
     (p: Parameters) => {
         val adder = LazyModule(new AdderExample(OpcodeSet.custom0)(p))
         adder
     }
-    // (p: Parameters) => {
-    //     val accumulator = LazyModule(new AccumulatorExample(OpcodeSet.custom0, n = 4)(p))
-    //     accumulator
-    // }
-    // (p: Parameters) => {
-    //     val translator = LazyModule(new TranslatorExample(OpcodeSet.custom1)(p))
-    //     translator
-    // },
-    // (p: Parameters) => {
-    //     val counter = LazyModule(new CharacterCountExample(OpcodeSet.custom2)(p))
-    //     counter
-    // },
-    // (p: Parameters) => {
-    //   val blackbox = LazyModule(new BlackBoxExample(OpcodeSet.custom3, "RoccBlackBox")(p))
-    //   blackbox
-    // }
+  )
+})
+
+class WithAccumulatorRoCC extends Config((site, here, up) => {
+  case BuildRoCC => List(
+    (p: Parameters) => {
+        val accum = LazyModule(new AccumulatorExample(OpcodeSet.all)(p))
+        accum
+    }
   )
 })

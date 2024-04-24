@@ -12,11 +12,11 @@ class SpikeConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class SpikeAdderExampleConfig extends Config(
-  new chipyard.WithMultiRoCC ++
+  new chipyard.WithAdderRoCC ++
   new chipyard.WithNSpikeCores(1) ++
   new chipyard.config.AbstractConfig)
 
-class SpikeEE290RoCCConfig extends Config(
+class SpikeEE290L1BMMRoCCConfig extends Config(
   new ee290.WithEE290RoCCAccelWithCacheBlackBox ++
   new chipyard.WithNSpikeCores(1) ++
   new chipyard.config.AbstractConfig
