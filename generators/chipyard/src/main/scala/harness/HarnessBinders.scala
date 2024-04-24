@@ -12,7 +12,7 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.util._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.devices.debug.{SimJTAG}
-import barstools.iocell.chisel._
+import chipyard.iocell._
 import testchipip.dram.{SimDRAM}
 import testchipip.tsi.{SimTSI, SerialRAM, TSI, TSIIO}
 import testchipip.soc.{TestchipSimDTM}
