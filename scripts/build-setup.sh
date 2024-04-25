@@ -271,7 +271,7 @@ if run_step "6"; then
             echo $CYDIR
             source sourceme-manager.sh --skip-ssh-setup
             pushd sim
-            make sbt SBT_COMMAND="project {file:$CYDIR}firechip; compile" TARGET_PROJECT=firesim
+            make sbt SBT_COMMAND="project firesim; compile" TARGET_PROJECT=firesim
             popd
         )
         exit_if_last_command_failed
