@@ -115,6 +115,7 @@ import "DPI-C" function void spike_tile(input int hartid,
                                         input bit      rocc_response_valid,
                                         input longint  rocc_response_rd,
                                         input longint  rocc_response_data,
+                                        input bit      rocc_busy,
 
                                         input bit      rocc_mem_request_valid,
                                         input longint  rocc_mem_request_addr,
@@ -257,6 +258,7 @@ module SpikeBlackBox #(
                                              input         rocc_response_valid,
                                              input [63:0]  rocc_response_rd,
                                              input [63:0]  rocc_response_data,
+                                             input         rocc_busy,
 
                                              input         rocc_mem_request_valid,
                                              input [63:0]  rocc_mem_request_addr,
@@ -500,7 +502,7 @@ module SpikeBlackBox #(
                     __tcm_d_valid, __tcm_d_ready, __tcm_d_data,
 
                     __rocc_request_ready, __rocc_request_valid, __rocc_request_insn, __rocc_request_rs1, __rocc_request_rs2, 
-                    rocc_response_valid, rocc_response_rd, rocc_response_data,
+                    rocc_response_valid, rocc_response_rd, rocc_response_data, rocc_busy,
 
                     rocc_mem_request_valid, rocc_mem_request_addr, rocc_mem_request_tag, rocc_mem_request_cmd, rocc_mem_request_size, 
                     rocc_mem_request_phys, rocc_mem_request_data, rocc_mem_request_mask, __rocc_mem_response_valid,
@@ -610,9 +612,6 @@ module SpikeBlackBox #(
    assign rocc_request_rs1 = __rocc_request_rs1_reg;
    assign rocc_request_rs2 = __rocc_request_rs2_reg;
    assign __rocc_request_ready = rocc_request_ready;
-   // assign __rocc_response_valid = rocc_response_valid;
-   // assign __rocc_response_rd = rocc_response_rd;
-   // assign __rocc_response_data = rocc_response_data;
 
    assign rocc_mem_response_valid = __rocc_mem_response_valid_reg;
    assign rocc_mem_response_addr = __rocc_mem_response_addr_reg;

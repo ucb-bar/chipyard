@@ -181,7 +181,6 @@ class SpikeTile(
   val rocc_module = if (has_rocc) rocc_sequence.head else null
 
   if (has_rocc) {
-    // val rocc_module = rocc_sequence.head
     val roccCSRs = rocc_sequence.map(_.roccCSRs) // the set of custom CSRs requested by all roccs
     require(roccCSRs.flatten.map(_.id).toSet.size == roccCSRs.flatten.size,
     "LazyRoCC instantiations require overlapping CSRs")
@@ -326,6 +325,7 @@ class SpikeBlackBox(
     For the memory interface, some signals that are unnecessary from the software 
     perspective are included from the RoCC spec but tied off internally */
     val rocc = new Bundle {
+      val busy = Input(Bool())
       val request = new Bundle {
         val ready = Input(Bool())
         val valid = Output(Bool())
@@ -565,10 +565,8 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     cmd.rs2 := to_rocc_req_q.io.deq.bits(191,128)
     cmd.status := DontCare
     outer.rocc_module.module.io.cmd.bits := cmd
-
-    printf(cf"RoCC mem request valid?: ${outer.rocc_module.module.io.mem.req.valid}\n")
-    printf(cf"RoCC mem request addr: ${outer.rocc_module.module.io.mem.req.bits.addr}\n")
     outer.rocc_module.module.io.mem.req.ready := true.B
+    spike.io.rocc.busy := outer.rocc_module.module.io.busy
     spike.io.rocc.mem_request.valid := outer.rocc_module.module.io.mem.req.valid
     spike.io.rocc.mem_request.addr := outer.rocc_module.module.io.mem.req.bits.addr
     spike.io.rocc.mem_request.tag := outer.rocc_module.module.io.mem.req.bits.tag
@@ -709,11 +707,11 @@ class WithAdderRoCC extends Config((site, here, up) => {
   )
 })
 
-class WithAccumulatorRoCC extends Config((site, here, up) => {
+class WithCharCountRoCC extends Config((site, here, up) => {
   case BuildRoCC => List(
     (p: Parameters) => {
-        val accum = LazyModule(new AccumulatorExample(OpcodeSet.all)(p))
-        accum
+        val charCounter = LazyModule(new CharacterCountExample(OpcodeSet.all)(p))
+        charCounter
     }
   )
 })

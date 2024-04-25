@@ -375,6 +375,7 @@ extern "C" void spike_tile(int hartid, char* isa,
                            unsigned char rocc_response_valid,
                            long long int rocc_response_rd,
                            long long int rocc_response_data,
+                           unsigned char rocc_busy,
 
                            unsigned char rocc_mem_request_valid,
                            long long int rocc_mem_request_addr,
