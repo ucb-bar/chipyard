@@ -240,7 +240,7 @@ class SbusMeshNoCConfig extends Config(
         "Core 9 " -> 13,
         "Core 10 " -> 14,
         "Core 11 " -> 15,
-        "serial-tl" -> 0),
+        "serial_tl" -> 0),
       outNodeMapping = ListMap(
         "system[0]" -> 5,
         "system[1]" -> 6,
@@ -251,14 +251,16 @@ class SbusMeshNoCConfig extends Config(
       topology        = Mesh2D(4, 4),
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(3) { UserVirtualChannelParams(3) }, unifiedBuffer = false),
       routerParams    = (i) => UserRouterParams(combineRCVA=true, combineSAST=true),
-      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DDimensionOrderedRouting(), 3, 1)),
+      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DDimensionOrderedRouting(), 3, 1),
+    ),
     beNoCParams = NoCParams(
       topology        = Mesh2D(4, 4),
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(2) { UserVirtualChannelParams(3) }, unifiedBuffer = false),
       routerParams    = (i) => UserRouterParams(combineRCVA=true, combineSAST=true),
-      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DDimensionOrderedRouting(), 2, 1)),
+      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DDimensionOrderedRouting(), 2, 1),
+    ),
     beDivision = 4
-  )) ++
+  ), inlineNoC = true) ++
   new freechips.rocketchip.subsystem.WithNBigCores(12) ++
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.WithSystemBusWidth(128) ++

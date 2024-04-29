@@ -50,14 +50,13 @@ VCS_NONCC_OPTS = \
 	+incdir+$(base_dir)/generators/radiance/src/main/resources/vsrc/vortex/third_party/fpnew/src/common_cells/include \
 	$(base_dir)/generators/radiance/src/main/resources/vsrc/vortex/third_party/fpnew/src/fpnew_pkg.sv \
 	$(base_dir)/generators/radiance/src/main/resources/vsrc/vortex/third_party/fpnew/src/fpu_div_sqrt_mvp/hdl/defs_div_sqrt_mvp.sv \
-	$(base_dir)/generators/radiance/src/main/resources/vsrc/vortex/third_party/fpnew/src/common_cells/src/cb_filter_pkg.sv \
-	$(base_dir)/generators/radiance/src/main/resources/vsrc/vortex/third_party/fpnew/src/common_cells/src/cf_math_pkg.sv \
-	$(base_dir)/generators/radiance/src/main/resources/vsrc/vortex/third_party/fpnew/src/common_cells/src/ecc_pkg.sv \
 	-f $(sim_common_files) \
 	-sverilog +systemverilogext+.sv+.svi+.svh+.svt -assert svaext +libext+.sv \
 	+v2k +verilog2001ext+.v95+.vt+.vp +libext+.v \
 	-debug_pp \
-	+incdir+$(GEN_COLLATERAL_DIR)
+	-top $(TB) \
+	+incdir+$(GEN_COLLATERAL_DIR) \
+	$(addprefix +incdir+,$(EXT_INCDIRS))
 
 VCS_PREPROC_DEFINES = \
 	+define+VCS

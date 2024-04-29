@@ -85,6 +85,9 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
   )))))
   ddrNode := TLWidthWidget(dp(ExtTLMem).get.master.beatBytes) := ddrClient
 
+  /*** JTAG ***/
+  val jtagPlacedOverlay = dp(JTAGDebugOverlayKey).head.place(JTAGDebugDesignInput())
+
   // module implementation
   override lazy val module = new VCU118FPGATestHarnessImp(this)
 }

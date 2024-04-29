@@ -155,6 +155,7 @@ VERILATOR_NONCC_OPTS = \
 	-I$(GEN_COLLATERAL_DIR) \
 	--top-module $(TB) \
 	--vpi \
+	$(addprefix +incdir+,$(EXT_INCDIRS)) \
 	-f $(sim_common_files)
 
 #----------------------------------------------------------------------------------------

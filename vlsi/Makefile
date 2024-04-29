@@ -72,7 +72,7 @@ VLSI_RTL = $(build_dir)/syn.f
 ifneq ($(CUSTOM_VLOG), )
 	RTL_DEPS = $(CUSTOM_VLOG)
 else
-	RTL_DEPS = $(TOP_MODS_FILELIST) $(TOP_SMEMS_FILE)
+	RTL_DEPS = $(TOP_MODS_FILELIST) $(TOP_SMEMS_FILE) $(EXT_FILELISTS)
 endif
 
 $(VLSI_RTL): $(RTL_DEPS)
@@ -82,6 +82,9 @@ ifneq ($(CUSTOM_VLOG), )
 else
 	cat $(TOP_MODS_FILELIST) | sort -u > $(VLSI_RTL)
 	echo $(TOP_SMEMS_FILE) >> $(VLSI_RTL)
+ifneq ($(EXT_FILELISTS),)
+	cat $(EXT_FILELISTS) >> $(VLSI_RTL)
+endif
 endif
 
 #########################################################################################

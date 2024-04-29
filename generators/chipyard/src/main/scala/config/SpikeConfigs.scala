@@ -18,7 +18,8 @@ class dmiSpikeConfig extends Config(
 // Avoids polling on the UART registers
 class SpikeFastUARTConfig extends Config(
   new chipyard.WithNSpikeCores(1) ++
-  new chipyard.config.WithUARTFIFOEntries(128, 128) ++
+  new chipyard.config.WithUART(txEntries=128, rxEntries=128) ++ // Spike sim requires a larger UART FIFO buffer, 
+  new chipyard.config.WithNoUART() ++                           // so we overwrite the default one
   new chipyard.config.WithMemoryBusFrequency(2) ++
   new chipyard.config.WithPeripheryBusFrequency(2) ++
   new chipyard.config.AbstractConfig)
@@ -27,7 +28,8 @@ class SpikeFastUARTConfig extends Config(
 class SpikeUltraFastConfig extends Config(
   new chipyard.WithSpikeTCM ++
   new chipyard.WithNSpikeCores(1) ++
-  new chipyard.config.WithUARTFIFOEntries(128, 128) ++
+  new chipyard.config.WithUART(txEntries=128, rxEntries=128) ++ // Spike sim requires a larger UART FIFO buffer, 
+  new chipyard.config.WithNoUART() ++                           // so we overwrite the default one
   new chipyard.config.WithMemoryBusFrequency(2) ++
   new chipyard.config.WithPeripheryBusFrequency(2) ++
   new chipyard.config.WithBroadcastManager ++
@@ -47,7 +49,8 @@ class SpikeUltraFastDevicesConfig extends Config(
 
   new chipyard.WithSpikeTCM ++
   new chipyard.WithNSpikeCores(1) ++
-  new chipyard.config.WithUARTFIFOEntries(128, 128) ++
+  new chipyard.config.WithUART(txEntries=128, rxEntries=128) ++ // Spike sim requires a larger UART FIFO buffer, 
+  new chipyard.config.WithNoUART() ++                           // so we overwrite the default one
   new chipyard.config.WithMemoryBusFrequency(2) ++
   new chipyard.config.WithPeripheryBusFrequency(2) ++
   new chipyard.config.WithBroadcastManager ++

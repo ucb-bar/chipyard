@@ -5,7 +5,7 @@ import chisel3.util._
 import chisel3.experimental.{IntParam, BaseModule}
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.prci._
-import freechips.rocketchip.subsystem.BaseSubsystem
+import freechips.rocketchip.subsystem.{BaseSubsystem, PBUS}
 import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper.{HasRegMap, RegField}
@@ -193,6 +193,8 @@ class GCDAXI4(params: GCDParams, beatBytes: Int)(implicit p: Parameters) extends
 // DOC include start: GCD lazy trait
 trait CanHavePeripheryGCD { this: BaseSubsystem =>
   private val portName = "gcd"
+
+  private val pbus = locateTLBusWrapper(PBUS)
 
   // Only build if we are using the TL (nonAXI4) version
   val gcd_busy = p(GCDKey) match {

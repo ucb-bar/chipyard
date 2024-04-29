@@ -5,10 +5,8 @@ import chipyard.stage.phases.TargetDirKey
 import freechips.rocketchip.devices.tilelink.BootROMLocated
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing, BigIntHexContext}
 import freechips.rocketchip.subsystem.{InCluster, WithCluster, WithExtMemSize}
-import freechips.rocketchip.tile.XLen
 import org.chipsalliance.cde.config.Config
 import radiance.memory._
-import radiance.subsystem.WithRadianceGemmini
 
 class WithRadROMs(address: BigInt, size: Int, filename: String) extends Config((site, here, up) => {
   case RadianceROMsLocated() => Some(up(RadianceROMsLocated()).getOrElse(Seq()) ++
@@ -45,11 +43,12 @@ class RadianceBaseConfig(argsBinFilename: String = "args.bin") extends Config(
   new WithRadROMs(0x40000L, 0x20000, "sims/op_b.bin") ++
   new chipyard.harness.WithCeaseSuccess ++
   new chipyard.iobinders.WithCeasePunchThrough ++
+  new radiance.subsystem.WithRadianceSimParams(true) ++
   new AbstractConfig)
 
 class RadianceConfig extends Config(
-   // important to keep gemmini tile before RadianceCores to ensure radiance tile id is 0-indexed
-  // new WithRadianceGemmini(location = InCluster(0), dim = 8, extMemBase = x"ff000000", spSizeInKB = 16, accSizeInKB = 8) ++
+  // important to keep gemmini tile before RadianceCores to ensure radiance tile id is 0-indexed
+  new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, extMemBase = x"ff000000", spSizeInKB = 16, accSizeInKB = 8) ++
   new radiance.subsystem.WithRadianceCores(1, location=InCluster(0), useVxCache = false) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 4)++
@@ -57,8 +56,8 @@ class RadianceConfig extends Config(
   new RadianceBaseConfig)
 
 class RadianceClusterConfig extends Config(
-   // important to keep gemmini tile before RadianceCores to ensure radiance tile id is 0-indexed
-  // new WithRadianceGemmini(location = InCluster(0), dim = 8, extMemBase = x"ff000000", spSizeInKB = 16, accSizeInKB = 8) ++
+  // important to keep gemmini tile before RadianceCores to ensure radiance tile id is 0-indexed
+  new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, extMemBase = x"ff000000", spSizeInKB = 16, accSizeInKB = 8) ++
   new radiance.subsystem.WithRadianceCores(2, location=InCluster(0), useVxCache = false) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 8) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 8)++
@@ -85,6 +84,10 @@ class RadianceClusterConfig2 extends Config(
   new radiance.subsystem.WithVortexL1Banks(nBanks = 4)++
   new radiance.subsystem.WithRadianceCluster(0) ++
   new RadianceBaseConfig("args.2.bin"))
+
+class RadianceClusterSynConfig extends Config(
+  new radiance.subsystem.WithRadianceSimParams(false) ++
+  new RadianceClusterConfig)
 
 class RadianceGemminiConfig extends Config(
   new radiance.subsystem.WithRadianceCores(1, useVxCache = false) ++

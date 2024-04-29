@@ -22,6 +22,9 @@
 [submodule "generators/icenet"]
 	path = generators/icenet
 	url = https://github.com/firesim/icenet.git
+[submodule "tools/circt"]
+	path = tools/circt
+	url = https://github.com/llvm/circt.git
 [submodule "tools/dsptools"]
 	path = tools/dsptools
 	url = https://github.com/ucb-bar/dsptools.git
@@ -49,6 +52,9 @@
 [submodule "generators/cva6"]
 	path = generators/cva6
 	url = https://github.com/ucb-bar/cva6-wrapper.git
+[submodule "generators/diplomacy"]
+	path = generators/diplomacy
+	url = https://github.com/chipsalliance/diplomacy.git
 [submodule "tools/DRAMSim2"]
 	path = tools/DRAMSim2
 	url = https://github.com/firesim/DRAMSim2.git

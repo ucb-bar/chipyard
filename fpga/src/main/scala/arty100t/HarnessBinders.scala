@@ -5,10 +5,9 @@ import chisel3._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem.{PeripheryBusKey}
 import freechips.rocketchip.tilelink.{TLBundle}
-import freechips.rocketchip.util.{HeterogeneousBag}
 import freechips.rocketchip.diplomacy.{LazyRawModuleImp}
-
-import sifive.blocks.devices.uart.{UARTPortIO, HasPeripheryUARTModuleImp, UARTParams}
+import org.chipsalliance.diplomacy.nodes.{HeterogeneousBag}
+import sifive.blocks.devices.uart.{UARTPortIO, UARTParams}
 import sifive.blocks.devices.jtag.{JTAGPins, JTAGPinsFromPort}
 import sifive.blocks.devices.pinctrl.{BasePin}
 import sifive.fpgashells.shell._
@@ -61,10 +60,10 @@ class WithArty100TSerialTLToGPIO extends HarnessBinder({
     harnessIO <> port.io
 
     harnessIO match {
-      case io: DecoupledSerialIO => {
+      case io: DecoupledPhitIO => {
         val clkIO = io match {
-          case io: InternalSyncSerialIO => IOPin(io.clock_out)
-          case io: ExternalSyncSerialIO => IOPin(io.clock_in)
+          case io: InternalSyncPhitIO => IOPin(io.clock_out)
+          case io: ExternalSyncPhitIO => IOPin(io.clock_in)
         }
         val packagePinsWithPackageIOs = Seq(
           ("G13", clkIO),
@@ -72,14 +71,14 @@ class WithArty100TSerialTLToGPIO extends HarnessBinder({
           ("A11", IOPin(io.out.ready)),
           ("D12", IOPin(io.in.valid)),
           ("D13", IOPin(io.in.ready)),
-          ("B18", IOPin(io.out.bits, 0)),
-          ("A18", IOPin(io.out.bits, 1)),
-          ("K16", IOPin(io.out.bits, 2)),
-          ("E15", IOPin(io.out.bits, 3)),
-          ("E16", IOPin(io.in.bits, 0)),
-          ("D15", IOPin(io.in.bits, 1)),
-          ("C15", IOPin(io.in.bits, 2)),
-          ("J17", IOPin(io.in.bits, 3))
+          ("B18", IOPin(io.out.bits.phit, 0)),
+          ("A18", IOPin(io.out.bits.phit, 1)),
+          ("K16", IOPin(io.out.bits.phit, 2)),
+          ("E15", IOPin(io.out.bits.phit, 3)),
+          ("E16", IOPin(io.in.bits.phit, 0)),
+          ("D15", IOPin(io.in.bits.phit, 1)),
+          ("C15", IOPin(io.in.bits.phit, 2)),
+          ("J17", IOPin(io.in.bits.phit, 3))
         )
         packagePinsWithPackageIOs foreach { case (pin, io) => {
           artyTh.xdc.addPackagePin(io, pin)
@@ -88,10 +87,10 @@ class WithArty100TSerialTLToGPIO extends HarnessBinder({
 
         // Don't add IOB to the clock, if its an input
         io match {
-          case io: InternalSyncSerialIO => packagePinsWithPackageIOs foreach { case (pin, io) => {
+          case io: InternalSyncPhitIO => packagePinsWithPackageIOs foreach { case (pin, io) => {
             artyTh.xdc.addIOB(io)
           }}
-          case io: ExternalSyncSerialIO => packagePinsWithPackageIOs.drop(1).foreach { case (pin, io) => {
+          case io: ExternalSyncPhitIO => packagePinsWithPackageIOs.drop(1).foreach { case (pin, io) => {
             artyTh.xdc.addIOB(io)
           }}
         }
