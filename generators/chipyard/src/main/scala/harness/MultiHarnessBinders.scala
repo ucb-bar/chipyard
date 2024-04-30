@@ -30,29 +30,28 @@ object ApplyMultiHarnessBinders {
   }
 }
 
-class MultiHarnessBinder[T <: Port[_], S <: HasHarnessInstantiators](
+class MultiHarnessBinder[T <: Port[_], U <: Port[_], S <: HasHarnessInstantiators](
   chip0: Int, chip1: Int,
-  chip0portFn: T => Boolean, chip1portFn: T => Boolean,
-  connectFn: (S, T, T) => Unit
-)(implicit tag0: ClassTag[T], tag1: ClassTag[S]) extends Config((site, here, up) => {
+  chip0portFn: T => Boolean, chip1portFn: U => Boolean,
+  connectFn: (S, T, U) => Unit
+)(implicit tag0: ClassTag[T], tag1: ClassTag[U], tag2: ClassTag[S]) extends Config((site, here, up) => {
     // Override any HarnessBinders for chip0/chip1
     case MultiChipParameters(`chip0`) => new Config(
       new HarnessBinder({case (th: S, port: T, chipId: Int) if chip0portFn(port) => }) ++ up(MultiChipParameters(chip0))
     )
     case MultiChipParameters(`chip1`) => new Config(
-      new HarnessBinder({case (th: S, port: T, chipId: Int) if chip1portFn(port) => }) ++ up(MultiChipParameters(chip1))
+      new HarnessBinder({case (th: S, port: U, chipId: Int) if chip1portFn(port) => }) ++ up(MultiChipParameters(chip1))
     )
     // Set the multiharnessbinder key
     case MultiHarnessBinders(`chip0`, `chip1`) => up(MultiHarnessBinders(chip0, chip1)) :+ {
       ((th: S, chip0Ports: Seq[Port[_]], chip1Ports: Seq[Port[_]]) => {
         val chip0Port: Seq[T] = chip0Ports.collect { case (p: T) if chip0portFn(p) => p }
-        val chip1Port: Seq[T] = chip1Ports.collect { case (p: T) if chip1portFn(p) => p }
+        val chip1Port: Seq[U] = chip1Ports.collect { case (p: U) if chip1portFn(p) => p }
         require(chip0Port.size == 1 && chip1Port.size == 1)
         connectFn(th, chip0Port(0), chip1Port(0))
       })
     }
   })
-
 
 class WithMultiChipSerialTL(chip0: Int, chip1: Int, chip0portId: Int = 0, chip1portId: Int = 0) extends MultiHarnessBinder(
   chip0, chip1,
