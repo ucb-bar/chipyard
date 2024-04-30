@@ -24,3 +24,8 @@ class EE290WithCacheBlackBoxRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: EE290Rocket
+
+class SpikeEE290RoCCConfig extends Config(
+  new ee290.WithEE290RoCCAccelWithCacheBlackBox ++                                // add EE290 rocc accelerator
+  new chipyard.WithNSpikeCores(1) ++
+  new chipyard.config.AbstractConfig)

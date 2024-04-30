@@ -37,7 +37,7 @@ class AdderExampleModuleImp(outer: AdderExample)(implicit p: Parameters) extends
   io.resp.bits.rd := cmd.bits.inst.rd
   io.resp.bits.data := wdata
 
-  io.busy := io.cmd.valid
+  io.busy := true.B
   io.interrupt := false.B
   io.mem.req.valid := false.B
 }
