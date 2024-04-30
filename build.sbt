@@ -44,6 +44,9 @@ lazy val commonSettings = Seq(
       dropDeps.contains((dep.organization, dep.name))
     }
   },
+  libraryDependencies += "com.lihaoyi" %% "sourcecode" % "0.3.1",
+  libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+
   exportJars := true,
   resolvers ++= Seq(
     Resolver.sonatypeRepo("snapshots"),
@@ -109,7 +112,6 @@ lazy val rocketMacros  = (project in rocketChipDir / "macros")
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     )
   )
 
@@ -118,11 +120,6 @@ lazy val diplomacy = freshProject("diplomacy", file("generators/diplomacy/diplom
   .settings(commonSettings)
   .settings(chiselSettings)
   .settings(Compile / scalaSource := baseDirectory.value / "diplomacy")
-  .settings(
-    libraryDependencies ++= Seq(
-      "com.lihaoyi" %% "sourcecode" % "0.3.1"
-    )
-  )
 
 lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
   .dependsOn(hardfloat, rocketMacros, diplomacy, cde)
@@ -131,11 +128,9 @@ lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
   .settings(
     libraryDependencies ++= Seq(
       "com.lihaoyi" %% "mainargs" % "0.5.0",
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.json4s" %% "json4s-jackson" % "4.0.5",
       "org.scalatest" %% "scalatest" % "3.2.0" % "test",
-      "org.scala-graph" %% "graph-core" % "1.13.5",
-      "com.lihaoyi" %% "sourcecode" % "0.3.1"
+      "org.scala-graph" %% "graph-core" % "1.13.5"
     )
   )
   .settings( // Settings for scalafix
@@ -150,7 +145,10 @@ lazy val rocketLibDeps = (rocketchip / Keys.libraryDependencies)
 
 // Contains annotations & firrtl passes you may wish to use in rocket-chip without
 // introducing a circular dependency between RC and MIDAS
-lazy val midasTargetUtils = ProjectRef(firesimDir, "targetutils")
+
+lazy val midasTargetUtils = (project in file ("sims/firesim/sim/midas/targetutils"))
+  .settings(commonSettings)
+  .settings(chiselSettings)
 
 lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip, rocketchip_blocks)
@@ -301,8 +299,17 @@ lazy val rocketchip_inclusive_cache = (project in file("generators/rocket-chip-i
   .settings(libraryDependencies ++= rocketLibDeps.value)
 
 // Library components of FireSim
-lazy val midas      = ProjectRef(firesimDir, "midas")
-lazy val firesimLib = ProjectRef(firesimDir, "firesimLib")
+lazy val midas      = (project in file ("sims/firesim/sim/midas"))
+  .dependsOn(rocketchip, midasTargetUtils)
+  .settings(libraryDependencies ++= Seq(
+     "org.scalatestplus" %% "scalacheck-1-14" % "3.1.3.0" % "test"))
+  .settings(commonSettings)
+  .settings(chiselSettings)
+
+lazy val firesimLib = (project in file("sims/firesim/sim/firesim-lib"))
+  .dependsOn(midas, icenet, testchipip, rocketchip_blocks)
+  .settings(commonSettings)
+  .settings(chiselSettings)
 
 lazy val firechip = (project in file("generators/firechip"))
   .dependsOn(chipyard, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
