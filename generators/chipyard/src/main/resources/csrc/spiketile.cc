@@ -557,6 +557,13 @@ extern "C" void spike_tile(int hartid, char* isa,
 
   simif->handle_rocc_mem_request();
   *rocc_mem_response_valid = simif->rocc_mem_response_handshake(rocc_mem_response_addr, rocc_mem_response_tag, rocc_mem_response_cmd, rocc_mem_response_size, rocc_mem_response_data, rocc_mem_response_replay, rocc_mem_response_has_data, rocc_mem_response_word_bypass, rocc_mem_response_store_data, rocc_mem_response_mask);
+
+  uint8_t opcode = proc->get_last_inst() & 0x7f;
+  if (opcode == 15)
+    printf("Last bits is %ld, Opcode is %d\r\n", proc->get_last_inst(), opcode);
+  while ((opcode == 0b0101111 || opcode == 0b0001111) && rocc_busy) {
+    host->switch_to();
+  }
 }
 
 /* Begin RoCC Section */
