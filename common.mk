@@ -16,10 +16,8 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_LDFLAGS         = additional LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES         = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
-"   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & MFC converts to Verilog)" \
 "   ENABLE_YOSYS_FLOW         = if set, add compilation flags to enable the vlsi flow for yosys(tutorial flow)" \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
-"   EXTRA_BASE_FIRRTL_OPTIONS = additional options to pass to the Scala FIRRTL compiler" \
 "   MFC_BASE_LOWERING_OPTIONS = override lowering options to pass to the MLIR FIRRTL compiler" \
 "   ASPECTS                   = comma separated list of Chisel aspect flows to run (e.x. chipyard.upf.ChipTopUPFAspect)"
 
@@ -161,20 +159,11 @@ define mfc_extra_anno_contents
 	}
 ]
 endef
-define sfc_extra_low_transforms_anno_contents
-[
-	{
-		"class": "firrtl.stage.RunFirrtlTransformAnnotation",
-		"transform": "tapeout.transforms.ExtraLowTransforms"
-	}
-]
-endef
 export mfc_extra_anno_contents
 export sfc_extra_low_transforms_anno_contents
-$(EXTRA_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) &: $(ANNO_FILE)
+$(FINAL_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) &: $(ANNO_FILE)
 	echo "$$mfc_extra_anno_contents" > $(MFC_EXTRA_ANNO_FILE)
-	echo "$$sfc_extra_low_transforms_anno_contents" > $(SFC_EXTRA_ANNO_FILE)
-	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(EXTRA_ANNO_FILE)
+	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
 
 .PHONY: firrtl
 firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
@@ -192,30 +181,9 @@ SFC_MFC_TARGETS = \
 	$(MFC_BB_MODS_FILELIST) \
 	$(GEN_COLLATERAL_DIR)
 
-SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
 MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,disallowPortDeclSharing,locationInfoStyle=wrapInAtSquareBracket
 
 # DOC include start: FirrtlCompiler
-# There are two possible cases for this step. In the first case, SFC
-# compiles Chisel to CHIRRTL, and MFC compiles CHIRRTL to Verilog. Otherwise,
-# when custom FIRRTL transforms are included or if a Fixed type is used within
-# the dut, SFC compiles Chisel to LowFIRRTL and MFC compiles it to Verilog.
-# Users can indicate to the Makefile of custom FIRRTL transforms by setting the
-# "ENABLE_CUSTOM_FIRRTL_PASS" variable.
-#
-# hack: lower to low firrtl if Fixed types are found
-# hack: when using dontTouch, io.cpu annotations are not removed by SFC,
-# hence we remove them manually by using jq before passing them to firtool
-
-$(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) &: $(FIRRTL_FILE)
-ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
-	echo $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none) > $(SFC_LEVEL)
-	echo "$(EXTRA_BASE_FIRRTL_OPTIONS)" $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), "$(SFC_REPL_SEQ_MEM)",) > $(EXTRA_FIRRTL_OPTIONS)
-else
-	echo low > $(SFC_LEVEL)
-	echo "$(EXTRA_BASE_FIRRTL_OPTIONS)" "$(SFC_REPL_SEQ_MEM)" > $(EXTRA_FIRRTL_OPTIONS)
-endif
-
 $(MFC_LOWERING_OPTIONS):
 	mkdir -p $(dir $@)
 ifeq (,$(ENABLE_YOSYS_FLOW))
@@ -224,13 +192,7 @@ else
 	echo "$(MFC_BASE_LOWERING_OPTIONS),disallowPackedArrays" > $@
 endif
 
-$(FINAL_ANNO_FILE): $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) $(SFC_LEVEL)
-	if [ $(shell cat $(SFC_LEVEL)) = low ]; then jq -s '[.[][]]' $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) > $@; fi
-	if [ $(shell cat $(SFC_LEVEL)) = none ]; then cat $(EXTRA_ANNO_FILE) > $@; fi
-	touch $@
-
-$(SFC_MFC_TARGETS) &: private TMP_DIR := $(shell mktemp -d -t cy-XXXXXXXX)
-$(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) $(MFC_LOWERING_OPTIONS)
+$(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
 	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),tapeout.transforms.GenerateModelStageMain,\
 		--no-dedup \
@@ -240,13 +202,9 @@ $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_F
 		--input-file $(FIRRTL_FILE) \
 		--annotation-file $(FINAL_ANNO_FILE) \
 		--log-level $(FIRRTL_LOGLEVEL) \
-		--allow-unrecognized-annotations \
-		-X $(shell cat $(SFC_LEVEL)) \
-		$(shell cat $(EXTRA_FIRRTL_OPTIONS)))
-	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE) 2> /dev/null # Optionally change file type when SFC generates LowFIRRTL
-	@if [ $(shell cat $(SFC_LEVEL)) = low ]; then cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json; fi
-	@if [ $(shell cat $(SFC_LEVEL)) = low ]; then cat $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json | jq 'del(.[] | select(.class | test("SRAMAnnotation"))?)' > $(TMP_DIR)/unnec-anno-deleted2.sfc.anno.json; fi
-	@if [ $(shell cat $(SFC_LEVEL)) = low ]; then cat $(TMP_DIR)/unnec-anno-deleted2.sfc.anno.json > $(SFC_ANNO_FILE) && rm $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json && rm $(TMP_DIR)/unnec-anno-deleted2.sfc.anno.json; fi
+		-X none \
+		--allow-unrecognized-annotations)
+	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE)
 	firtool \
 		--format=fir \
 		--export-module-hierarchy \
@@ -262,7 +220,6 @@ $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_F
 		--split-verilog \
 		-o $(GEN_COLLATERAL_DIR) \
 		$(SFC_FIRRTL_FILE)
-	-mv $(SFC_SMEMS_CONF) $(MFC_SMEMS_CONF) 2> /dev/null
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 	touch $(MFC_BB_MODS_FILELIST) # if there are no BB's then the file might not be generated, instead always generate it
 # DOC include end: FirrtlCompiler

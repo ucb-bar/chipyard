@@ -170,7 +170,6 @@ TAPEOUT_CLASSPATH_TARGETS ?= $(subst :, ,$(TAPEOUT_CLASSPATH))
 # chisel generated outputs
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
-EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extra.anno.json
 CHISEL_LOG_FILE ?= $(build_dir)/$(long_name).chisel.log
 
 # chisel anno modification output
@@ -180,7 +179,6 @@ FINAL_ANNO_FILE ?= $(build_dir)/$(long_name).appended.anno.json
 # scala firrtl compiler (sfc) outputs
 SFC_FIRRTL_BASENAME ?= $(build_dir)/$(long_name).sfc
 SFC_FIRRTL_FILE ?= $(SFC_FIRRTL_BASENAME).fir
-SFC_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrasfc.anno.json
 SFC_ANNO_FILE ?= $(build_dir)/$(long_name).sfc.anno.json
 
 # firtool compiler outputs
@@ -195,7 +193,6 @@ MFC_TOP_SMEMS_JSON = $(GEN_COLLATERAL_DIR)/metadata/seq_mems.json
 MFC_MODEL_SMEMS_JSON = $(GEN_COLLATERAL_DIR)/metadata/tb_seq_mems.json
 
 # macrocompiler smems in/output
-SFC_SMEMS_CONF ?= $(build_dir)/$(long_name).sfc.mems.conf
 TOP_SMEMS_CONF ?= $(build_dir)/$(long_name).top.mems.conf
 TOP_SMEMS_FILE ?= $(GEN_COLLATERAL_DIR)/$(long_name).top.mems.v
 TOP_SMEMS_FIR  ?= $(build_dir)/$(long_name).top.mems.fir
@@ -228,8 +225,6 @@ sim_files              ?= $(build_dir)/sim_files.f
 # single file that contains all files needed for VCS or Verilator simulation (unique and without .h's)
 sim_common_files       ?= $(build_dir)/sim_files.common.f
 
-SFC_LEVEL ?= $(build_dir)/.sfc_level
-EXTRA_FIRRTL_OPTIONS ?= $(build_dir)/.extra_firrtl_options
 MFC_LOWERING_OPTIONS ?= $(build_dir)/.mfc_lowering_options
 
 #########################################################################################
