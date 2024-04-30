@@ -192,19 +192,8 @@ else
 	echo "$(MFC_BASE_LOWERING_OPTIONS),disallowPackedArrays" > $@
 endif
 
-$(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
+$(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
-	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),tapeout.transforms.GenerateModelStageMain,\
-		--no-dedup \
-		--output-file $(SFC_FIRRTL_BASENAME) \
-		--output-annotation-file $(SFC_ANNO_FILE) \
-		--target-dir $(GEN_COLLATERAL_DIR) \
-		--input-file $(FIRRTL_FILE) \
-		--annotation-file $(FINAL_ANNO_FILE) \
-		--log-level $(FIRRTL_LOGLEVEL) \
-		-X none \
-		--allow-unrecognized-annotations)
-	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE)
 	firtool \
 		--format=fir \
 		--export-module-hierarchy \
@@ -216,10 +205,10 @@ $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_F
 		--lowering-options=$(shell cat $(MFC_LOWERING_OPTIONS)) \
 		--repl-seq-mem \
 		--repl-seq-mem-file=$(MFC_SMEMS_CONF) \
-		--annotation-file=$(SFC_ANNO_FILE) \
+		--annotation-file=$(FINAL_ANNO_FILE) \
 		--split-verilog \
 		-o $(GEN_COLLATERAL_DIR) \
-		$(SFC_FIRRTL_FILE)
+		$(FIRRTL_FILE)
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 	touch $(MFC_BB_MODS_FILELIST) # if there are no BB's then the file might not be generated, instead always generate it
 # DOC include end: FirrtlCompiler

@@ -9,7 +9,6 @@ HELP_COMPILATION_VARIABLES = \
 "   SBT_OPTS          = set additional sbt command line options (these take the form -Dsbt.<option>=<setting>) " \
 "                       See https://www.scala-sbt.org/1.x/docs/Command-Line-Reference.html\#Command+Line+Options" \
 "   SBT               = if overridden, used to invoke sbt (default is to invoke sbt by sbt-launch.jar)" \
-"   FIRRTL_LOGLEVEL   = if overridden, set firrtl log level (default is error)"
 
 HELP_PROJECT_VARIABLES = \
 "   SUB_PROJECT            = use the specific subproject default variables [$(SUB_PROJECT)]" \
@@ -176,11 +175,6 @@ CHISEL_LOG_FILE ?= $(build_dir)/$(long_name).chisel.log
 MFC_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
 FINAL_ANNO_FILE ?= $(build_dir)/$(long_name).appended.anno.json
 
-# scala firrtl compiler (sfc) outputs
-SFC_FIRRTL_BASENAME ?= $(build_dir)/$(long_name).sfc
-SFC_FIRRTL_FILE ?= $(SFC_FIRRTL_BASENAME).fir
-SFC_ANNO_FILE ?= $(build_dir)/$(long_name).sfc.anno.json
-
 # firtool compiler outputs
 MFC_TOP_HRCHY_JSON ?= $(build_dir)/top_module_hierarchy.json
 MFC_MODEL_HRCHY_JSON ?= $(build_dir)/model_module_hierarchy.json
@@ -262,8 +256,6 @@ endef
 define run_sbt_assembly
 	cd $(base_dir) && $(SBT) ";project $(1); set assembly / assemblyOutputPath := file(\"$(2)\"); assembly" && touch $(2)
 endef
-
-FIRRTL_LOGLEVEL ?= error
 
 #########################################################################################
 # output directory for tests
