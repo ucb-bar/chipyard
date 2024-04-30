@@ -27,6 +27,11 @@ class SpikeEE290L1BMMRoCCConfig extends Config(
   new chipyard.config.AbstractConfig
 )
 
+class SpikeGemminiConfig extends Config(
+  new gemmini.DefaultGemminiConfig ++                            // use Gemmini systolic array GEMM accelerator
+  new chipyard.WithNSpikeCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 class dmiSpikeConfig extends Config(
   new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tilelink
   new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port

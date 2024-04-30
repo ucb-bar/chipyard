@@ -598,7 +598,8 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     outer.rocc_module.module.io.mem.resp.bits.store_data := spike.io.rocc.mem_response.store_data
     outer.rocc_module.module.io.mem.resp.bits.mask := spike.io.rocc.mem_response.mask
 
-    //Instantiate unused signals, will probably be used as interface develops further.
+    //Tie off unused signals, will probably be used as interface develops further.
+    outer.rocc_module.module.io.ptw := DontCare
     outer.rocc_module.module.io.mem.resp.bits.signed := false.B
     outer.rocc_module.module.io.mem.resp.bits.dprv := false.B
     outer.rocc_module.module.io.mem.resp.bits.dv := false.B
