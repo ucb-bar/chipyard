@@ -20,6 +20,8 @@
 `define DCACHE_RESETTING `TILE.dcache.resetting
 `define DCACHE_DATA_ARRAY_ROOT `TILE.dcache.data.data_arrays_0.data_arrays_0_ext
 `define DCACHE_TAG_ARRAY_ROOT `TILE.dcache.tag_array.tag_array_ext
+`define DCACHE `TILE.dcache
+`define DCACHE_MISS (!`DCACHE_RESETTING && `DCACHE.auto_out_a_valid && `DCACHE.auto_out_a_ready)
 
 typedef struct {
   longint unsigned pc;
@@ -105,12 +107,13 @@ module TestDriver;
   int unsigned sample_period = 1000;
   int max_instructions = -1; // -1 = no maximum
   int unsigned total_instret = 0;
+  int unsigned miss_l1d_req = 0;
   string perf_file;
   int perf_file_fd;
 
   function void dump_perf_stats();
     if (perf_file != "") begin
-      $fwrite(perf_file_fd, "%0d,%0d\n", cycles, instret);
+      $fwrite(perf_file_fd, "%0d,%0d,%0d,%0d\n", cycles, instret, miss_l1d_req);
     end
   endfunction
 
@@ -135,11 +138,15 @@ module TestDriver;
         instret = instret + 1;
         total_instret = total_instret + 1;
       end
+      if (`DCACHE_MISS) begin
+        miss_l1d_req = miss_l1d_req + 1;
+      end
     end
     if (instret == sample_period) begin
       dump_perf_stats();
       cycles = 0;
       instret = 0;
+      miss_l1d_req = 0;
     end
   end
 
@@ -150,7 +157,7 @@ module TestDriver;
     begin
       perf_file_fd = $fopen(perf_file, "w");
       $display("Dumping performance metrics to file: %s", perf_file);
-      $fwrite(perf_file_fd, "cycles,instret\n");
+      $fwrite(perf_file_fd, "cycles,instret,l1d_miss\n");
     end
     void'($value$plusargs("perf-sample-period=%d", sample_period));
     void'($value$plusargs("max-instructions=%d", max_instructions));
