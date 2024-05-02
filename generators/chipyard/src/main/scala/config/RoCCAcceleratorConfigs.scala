@@ -69,8 +69,8 @@ class AES256ECBRocketConfig extends Config(
     new chipyard.config.WithSystemBusWidth(256) ++
     new chipyard.config.AbstractConfig)
 
-  class CharCountSpikeConfig extends Config(
-    new freechips.rocketchip.subsystem.WithRoccExample ++
+  class AdderRocketConfig extends Config(
+    new chipyard.WithAdderRoCC ++
     new freechips.rocketchip.subsystem.WithNBigCores(1) ++
     new chipyard.config.WithSystemBusWidth(256) ++
     new chipyard.config.AbstractConfig)

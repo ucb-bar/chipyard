@@ -24,8 +24,7 @@ class SpikeCharCountExampleConfig extends Config(
 class SpikeEE290L1BMMRoCCConfig extends Config(
   new ee290.WithEE290RoCCAccelWithCacheBlackBox ++
   new chipyard.WithNSpikeCores(1) ++
-  new chipyard.config.AbstractConfig
-)
+  new chipyard.config.AbstractConfig)
 
 class SpikeGemminiConfig extends Config(
   new gemmini.DefaultGemminiConfig ++                            // use Gemmini systolic array GEMM accelerator
