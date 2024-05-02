@@ -91,3 +91,12 @@ class UARTTSIRocketConfig extends Config(
   new chipyard.config.WithPeripheryBusFrequency(10) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
+
+class UCIRocketConfig extends Config(
+  new edu.berkeley.cs.ucie.digital.tilelink.WithUCITLAdapter(edu.berkeley.cs.ucie.digital.tilelink.UCITLParams(
+    fdi   = edu.berkeley.cs.ucie.digital.interfaces.FdiParams(width = 64, dllpWidth = 64, sbWidth = 32),
+    proto = edu.berkeley.cs.ucie.digital.protocol.ProtocolLayerParams(),
+    tl    = edu.berkeley.cs.ucie.digital.tilelink.TileLinkParams(address = 0x20000, addressRange = 0xfff, configAddress = 0x4000, inwardQueueDepth = 2, outwardQueueDepth = 2)
+  )) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new chipyard.config.AbstractConfig)

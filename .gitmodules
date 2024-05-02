@@ -151,3 +151,6 @@
 [submodule "vlsi/hammer-mentor-plugins"]
 	path = vlsi/hammer-mentor-plugins
 	url = https://github.com/ucb-bar/hammer-mentor-plugins.git
+[submodule "generators/uciedigital"]
+	path = generators/uciedigital
+	url = git@github.com:ucb-ucie/uciedigital.git

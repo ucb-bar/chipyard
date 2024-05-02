@@ -39,6 +39,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with chipyard.clocking.CanHaveClockTap // Enables optionally adding a clock tap output port
   with fftgenerator.CanHavePeripheryFFT // Enables optionally having an MMIO-based FFT block
   with constellation.soc.CanHaveGlobalNoC // Support instantiating a global NoC interconnect
+  with edu.berkeley.cs.ucie.digital.tilelink.CanHaveTLUCIAdapter // Connect UCIe stack
 {
   override lazy val module = new DigitalTopModule(this)
 }
