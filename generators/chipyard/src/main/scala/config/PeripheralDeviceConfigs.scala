@@ -3,6 +3,7 @@ package chipyard
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 import freechips.rocketchip.subsystem.{MBUS}
+import freechips.rocketchip.util.AsyncQueueParams
 
 // ---------------------------------------------------------
 // Configs which add non-default peripheral devices or ports
@@ -94,9 +95,15 @@ class UARTTSIRocketConfig extends Config(
 
 class UCIRocketConfig extends Config(
   new edu.berkeley.cs.ucie.digital.tilelink.WithUCITLAdapter(edu.berkeley.cs.ucie.digital.tilelink.UCITLParams(
-    fdi   = edu.berkeley.cs.ucie.digital.interfaces.FdiParams(width = 64, dllpWidth = 64, sbWidth = 32),
-    proto = edu.berkeley.cs.ucie.digital.protocol.ProtocolLayerParams(),
-    tl    = edu.berkeley.cs.ucie.digital.tilelink.TileLinkParams(address = 0x20000, addressRange = 0xfff, configAddress = 0x4000, inwardQueueDepth = 2, outwardQueueDepth = 2)
+    protoParams = edu.berkeley.cs.ucie.digital.protocol.ProtocolLayerParams(),
+    tlParams    = edu.berkeley.cs.ucie.digital.tilelink.TileLinkParams(address = 0x20000, addressRange = 0xfff, configAddress = 0x4000, inwardQueueDepth = 2, outwardQueueDepth = 2),
+    fdiParams   = edu.berkeley.cs.ucie.digital.interfaces.FdiParams(width = 64, dllpWidth = 64, sbWidth = 32),
+    rdiParams   = edu.berkeley.cs.ucie.digital.interfaces.RdiParams(width = 64, sbWidth = 32),
+    sbParams    = edu.berkeley.cs.ucie.digital.sideband.SidebandParams(),
+    myId        = 1,
+    linkTrainingParams = edu.berkeley.cs.ucie.digital.logphy.LinkTrainingParams(),
+    afeParams   = edu.berkeley.cs.ucie.digital.interfaces.AfeParams(),
+    laneAsyncQueueParams = AsyncQueueParams()
   )) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
