@@ -134,5 +134,5 @@ class WithSV48IfPossible extends Config((site, here, up) => {
 
 // Uses SV439 if possible, otherwise default to the Rocket Chip core default
 class WithSV39 extends Config((site, here, up) => {
-  case PgLevels => if (site(XLen) == 64) 3 /* Sv48 */ else up(PgLevels)
+  case PgLevels => { require(site(XLen) == 64); 3; }
 })
