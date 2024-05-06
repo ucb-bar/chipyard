@@ -109,6 +109,8 @@ public:
   void proc_reset(unsigned id) override { };
   const char* get_symbol(uint64_t addr) override { return nullptr; };
 
+  void handle_fence();
+
   bool icache_a(uint64_t *address, uint64_t *source);
   void icache_d(uint64_t sourceid, uint64_t data[8]);
 
@@ -133,6 +135,8 @@ public:
   void handle_rocc_mem_request();
   void set_rocc_exists(bool exists);
   bool get_rocc_exists();
+
+  void set_rocc_busy(bool busy);
 
   void loadmem(size_t base, const char* fname);
 
@@ -209,6 +213,7 @@ private:
   std::vector<rocc_mem_req_t> rocc_mem_request_q;
   std::vector<rocc_mem_resp_t> rocc_mem_response_q;
 
+  bool rocc_busy;
   std::map<std::pair<uint64_t, size_t>, uint64_t> readonly_cache;
 
   bool mmio_valid;
@@ -557,16 +562,8 @@ extern "C" void spike_tile(int hartid, char* isa,
 
   simif->handle_rocc_mem_request();
   *rocc_mem_response_valid = simif->rocc_mem_response_handshake(rocc_mem_response_addr, rocc_mem_response_tag, rocc_mem_response_cmd, rocc_mem_response_size, rocc_mem_response_data, rocc_mem_response_replay, rocc_mem_response_has_data, rocc_mem_response_word_bypass, rocc_mem_response_store_data, rocc_mem_response_mask);
-  // printf("Stepped");
-  // uint8_t opcode = proc->get_last_inst() & 0x7f;
-  // if (opcode == 15)
-  //   printf("Last bits is %ld, Opcode is %d\r\n", proc->get_last_inst(), opcode);
-  // while ((opcode == 0b0101111 || opcode == 0b0001111) && rocc_busy) {
-  //   host->switch_to();
-  // }
-  // while (rocc_busy) {
-  //   host->switch_to();
-  // }
+
+  simif->set_rocc_busy(rocc_busy);
 }
 
 /* Begin RoCC Section */
@@ -1298,12 +1295,7 @@ void chipyard_simif_t::push_rocc_insn(rocc_insn_t insn, reg_t rs1, reg_t rs2) {
   rocc_rs1_q.push_back(rs1);
   rocc_rs2_q.push_back(rs2);
   
-  int count = 0;
-  while (count < 5000) {
-    host->switch_to();
-    count++;
-  }
-  // host->switch_to();
+  host->switch_to();
 }
 
 void chipyard_simif_t::push_rocc_result(long long int result) {
@@ -1391,6 +1383,10 @@ bool chipyard_simif_t::get_rocc_exists() {
   return rocc_exists;
 }
 
+void chipyard_simif_t::set_rocc_busy(bool busy) {
+  rocc_busy = busy;
+}
+
 void chipyard_simif_t::loadmem(size_t base, const char* fname) {
   class loadmem_memif_t : public memif_t {
   public:
@@ -1415,6 +1411,11 @@ void chipyard_simif_t::loadmem(size_t base, const char* fname) {
   load_elf(fname, &loadmem_memif, &entry);
 }
 
+void chipyard_simif_t::handle_fence() {
+  while(rocc_busy) {
+    host->switch_to();
+  }
+}
 bool insn_should_fence(uint64_t bits) {
   uint8_t opcode = bits & 0x7f;
   return opcode == 0b0101111 || opcode == 0b0001111;
@@ -1443,6 +1444,11 @@ void spike_thread_main(void* arg)
       uint64_t old_minstret = state->minstret->read();
       proc->step(1);
       tile->max_insns--;
+
+      if (insn_should_fence(proc->get_last_inst())) { //If Instruction is fence, tick the RTL
+        simif->handle_fence();
+      }
+
       if (proc->is_waiting_for_interrupt()) {
         if (simif->fast_clint) {
           state->mip->backdoor_write_with_mask(MIP_MTIP, MIP_MTIP);
