@@ -9,32 +9,28 @@ import org.chipsalliance.cde.config.{Config}
 
 class SpikeConfig extends Config(
   new chipyard.WithNSpikeCores(1) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new chipyard.config.AbstractConfig)
 
 class SpikeAdderExampleConfig extends Config(
   new chipyard.WithAdderRoCC ++
-  new chipyard.WithNSpikeCores(1) ++
-  new chipyard.config.AbstractConfig)
+  new SpikeConfig)
 
 class SpikeAccumExampleConfig extends Config(
   new chipyard.WithAccumRoCC ++
-  new chipyard.WithNSpikeCores(1) ++
-  new chipyard.config.AbstractConfig)
+  new SpikeConfig)
 
 class SpikeCharCountExampleConfig extends Config(
   new chipyard.WithCharCountRoCC ++
-  new chipyard.WithNSpikeCores(1) ++
-  new chipyard.config.AbstractConfig)
+  new SpikeConfig)
 
 class SpikeEE290L1BMMRoCCConfig extends Config(
   new ee290.WithEE290RoCCAccelWithCacheBlackBox ++
-  new chipyard.WithNSpikeCores(1) ++
-  new chipyard.config.AbstractConfig)
+  new SpikeConfig)
 
 class SpikeGemminiConfig extends Config(
   new gemmini.DefaultGemminiConfig ++                            // use Gemmini systolic array GEMM accelerator
-  new chipyard.WithNSpikeCores(1) ++
-  new chipyard.config.AbstractConfig)
+  new SpikeConfig)
 
 class dmiSpikeConfig extends Config(
   new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tilelink
