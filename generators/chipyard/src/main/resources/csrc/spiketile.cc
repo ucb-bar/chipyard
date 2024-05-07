@@ -1412,10 +1412,11 @@ void chipyard_simif_t::loadmem(size_t base, const char* fname) {
 }
 
 void chipyard_simif_t::handle_fence() {
-  while(rocc_busy) {
+  while(rocc_busy || !stq_empty()) {
     host->switch_to();
   }
 }
+
 bool insn_should_fence(uint64_t bits) {
   uint8_t opcode = bits & 0x7f;
   return opcode == 0b0101111 || opcode == 0b0001111;

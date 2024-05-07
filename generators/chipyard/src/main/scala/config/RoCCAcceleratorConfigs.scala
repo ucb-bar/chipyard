@@ -74,3 +74,9 @@ class AES256ECBRocketConfig extends Config(
     new freechips.rocketchip.subsystem.WithNBigCores(1) ++
     new chipyard.config.WithSystemBusWidth(256) ++
     new chipyard.config.AbstractConfig)
+
+  class AccumRocketConfig extends Config(
+    new chipyard.WithAccumRoCC ++
+    new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+    new chipyard.config.WithSystemBusWidth(256) ++
+    new chipyard.config.AbstractConfig)

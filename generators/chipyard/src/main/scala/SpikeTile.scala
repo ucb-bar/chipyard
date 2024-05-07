@@ -576,15 +576,6 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     spike.io.rocc.mem_request.data := outer.rocc_module.module.io.mem.req.bits.data
     spike.io.rocc.mem_request.mask := outer.rocc_module.module.io.mem.req.bits.mask
     
-    // printf(cf"Mem resp valid?: ${spike.io.rocc.mem_response.valid}\n")
-    // printf(cf"Mem resp addr: ${spike.io.rocc.mem_response.addr}\n")
-    // printf(cf"Mem resp tag: ${spike.io.rocc.mem_response.tag}\n")
-    // printf(cf"Mem resp cmd: ${spike.io.rocc.mem_response.cmd}\n")
-    // printf(cf"Mem resp size: ${spike.io.rocc.mem_response.size}\n")
-    // printf(cf"Mem resp data: ${spike.io.rocc.mem_response.data}\n")
-    // printf(cf"Mem resp replay: ${spike.io.rocc.mem_response.replay}\n")
-    // printf(cf"Mem resp has_data: ${spike.io.rocc.mem_response.has_data}\n")
-    // printf(cf"Mem resp word_bypass: ${spike.io.rocc.mem_response.word_bypass}\n")
     outer.rocc_module.module.io.mem.resp.valid := spike.io.rocc.mem_response.valid
     outer.rocc_module.module.io.mem.resp.bits.addr := spike.io.rocc.mem_response.addr
     outer.rocc_module.module.io.mem.resp.bits.tag := spike.io.rocc.mem_response.tag
@@ -713,6 +704,15 @@ class WithCharCountRoCC extends Config((site, here, up) => {
     (p: Parameters) => {
         val charCounter = LazyModule(new CharacterCountExample(OpcodeSet.all)(p))
         charCounter
+    }
+  )
+})
+
+class WithAccumRoCC extends Config((site, here, up) => {
+  case BuildRoCC => List(
+    (p: Parameters) => {
+        val accum = LazyModule(new AccumulatorExample(OpcodeSet.custom0)(p))
+        accum
     }
   )
 })

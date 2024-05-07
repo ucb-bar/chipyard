@@ -16,6 +16,11 @@ class SpikeAdderExampleConfig extends Config(
   new chipyard.WithNSpikeCores(1) ++
   new chipyard.config.AbstractConfig)
 
+class SpikeAccumExampleConfig extends Config(
+  new chipyard.WithAccumRoCC ++
+  new chipyard.WithNSpikeCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 class SpikeCharCountExampleConfig extends Config(
   new chipyard.WithCharCountRoCC ++
   new chipyard.WithNSpikeCores(1) ++
