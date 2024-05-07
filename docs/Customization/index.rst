@@ -29,8 +29,6 @@ We also provide information on:
 
 - The boot process for Chipyard SoCs
 
-- Examples of FIRRTL transforms used in Chipyard, and where they are specified
-
 We recommend reading all these pages in order. Hit next to get started!
 
 .. toctree::
@@ -50,5 +48,4 @@ We recommend reading all these pages in order. Hit next to get started!
    Incorporating-Verilog-Blocks
    Memory-Hierarchy
    Boot-Process
-   Firrtl-Transforms
    IOBinders

@@ -53,5 +53,5 @@ do
     export COURSIER_CACHE=$REMOTE_COURSIER_CACHE
     export JVM_MEMORY=10G
     export JAVA_TMP_DIR=$REMOTE_JAVA_TMP_DIR
-    make -j$REMOTE_MAKE_NPROC -C $REMOTE_MAKE_DIR FIRRTL_LOGLEVEL=info ${mapping[$key]}
+    make -j$REMOTE_MAKE_NPROC -C $REMOTE_MAKE_DIR ${mapping[$key]}
 done

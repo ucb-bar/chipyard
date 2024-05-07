@@ -7,6 +7,4 @@ Without going into too much detail, FIRRTL is consumed by FIRRTL compilers which
 An example of a FIRRTL pass (transformation) is one that optimizes out unused signals.
 Once the transformations are done, a Verilog file is emitted and the build process is done.
 
-To see how FIRRTL is transformed to Verilog in Chipyard, please visit the :ref:`firrtl-transforms` section.
-
 For more information on FIRRTL, please visit their `website <https://chisel-lang.org/firrtl/>`__.
