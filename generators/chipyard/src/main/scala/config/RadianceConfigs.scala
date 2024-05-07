@@ -39,6 +39,7 @@ class RadianceBaseConfig(argsBinFilename: String = "args.bin") extends Config(
   new WithExtMemSize(BigInt("80000000", 16)) ++
   new WithRadBootROM() ++
   new WithRadROMs(0x7FFF0000L, 0x10000, s"sims/${argsBinFilename}") ++
+  new chipyard.harness.WithCeaseSuccess ++
   new chipyard.iobinders.WithCeasePunchThrough ++
   new radiance.subsystem.WithRadianceSimParams(true) ++
   new WithCacheBlockBytes(64) ++
@@ -48,7 +49,7 @@ class RadianceConfig extends Config(
   // important to keep gemmini tile before RadianceCores to ensure radiance tile id is 0-indexed
   new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, extMemBase = x"ff000000", spSizeInKB = 16, accSizeInKB = 8) ++
   new radiance.subsystem.WithRadianceCores(1, location=InCluster(0), useVxCache = false) ++
-  new radiance.subsystem.WithCoalescer(nNewSrcIds = 8) ++
+  new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 4)++
   new radiance.subsystem.WithRadianceCluster(0) ++
   new RadianceBaseConfig)
