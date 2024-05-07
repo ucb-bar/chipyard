@@ -4,7 +4,7 @@ import chipyard.config.AbstractConfig
 import chipyard.stage.phases.TargetDirKey
 import freechips.rocketchip.devices.tilelink.BootROMLocated
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing, BigIntHexContext}
-import freechips.rocketchip.subsystem.{InCluster, WithCluster, WithExtMemSize}
+import freechips.rocketchip.subsystem._
 import org.chipsalliance.cde.config.Config
 import radiance.memory._
 
@@ -34,16 +34,14 @@ class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigIn
 class RadianceBaseConfig(argsBinFilename: String = "args.bin") extends Config(
   // NOTE: when changing these, remember to change +define+NUM_CORES/THREADS/WARPS in
   // radiance.mk as well!
-  new radiance.subsystem.WithSimtConfig(nWarps = 8, nCoreLanes = 8, nMemLanes = 8, nSrcIds = 8) ++
+  new radiance.subsystem.WithSimtConfig(nWarps = 8, nCoreLanes = 8, nMemLanes = 8, nSrcIds = 32) ++
   new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
   new WithRadBootROM() ++
   new WithRadROMs(0x7FFF0000L, 0x10000, s"sims/${argsBinFilename}") ++
-  new WithRadROMs(0x20000L, 0x8000, "sims/op_a.bin") ++
-  new WithRadROMs(0x28000L, 0x8000, "sims/op_b.bin") ++
-  new chipyard.harness.WithCeaseSuccess ++
   new chipyard.iobinders.WithCeasePunchThrough ++
   new radiance.subsystem.WithRadianceSimParams(true) ++
+  new WithCacheBlockBytes(64) ++
   new AbstractConfig)
 
 class RadianceConfig extends Config(
@@ -58,10 +56,16 @@ class RadianceConfig extends Config(
 class RadianceClusterConfig extends Config(
   // important to keep gemmini tile before RadianceCores to ensure radiance tile id is 0-indexed
   new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, extMemBase = x"ff000000", spSizeInKB = 16, accSizeInKB = 8) ++
-  new radiance.subsystem.WithRadianceCores(2, location=InCluster(0), useVxCache = false) ++
-  new radiance.subsystem.WithCoalescer(nNewSrcIds = 8) ++
+  new radiance.subsystem.WithRadianceCores(2, location = InCluster(0),
+    // crossing = RocketCrossingParams(master = HierarchicalElementMasterPortParams(where = CMBUS(0))),
+    useVxCache = false) ++
+  new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 8)++
-  new radiance.subsystem.WithRadianceCluster(0) ++
+  new radiance.subsystem.WithRadianceCluster(0,
+    // crossing = RocketCrossingParams(master = HierarchicalElementMasterPortParams(where = MBUS))
+  ) ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
+  new freechips.rocketchip.subsystem.WithEdgeDataBits(256) ++
   new RadianceBaseConfig)
 
 class RadianceClusterConfig0 extends Config(
