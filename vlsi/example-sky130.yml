@@ -20,7 +20,7 @@ vlsi.inputs.power_spec_type: "cpf"
 
 # Specify clock signals
 vlsi.inputs.clocks: [
-  {name: "clock_uncore_clock", period: "20ns", uncertainty: "1ns"}
+  {name: "clock_uncore", period: "20ns", uncertainty: "1ns"}
 ]
 
 # Generate Make include to aid in flow
@@ -42,27 +42,27 @@ vlsi.inputs.placement_constraints:
       bottom: 10
 
   # Place SRAM memory instances
-    # data cache
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_0"
+  # data cache
+  - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_0"
     type: hardmacro
     x: 50
     y: 50
     orientation: r90
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_1_0"
+  - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_1_0"
     type: hardmacro
     x: 50
     y: 800
     orientation: r90
 
   # tag array
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/frontend/icache/tag_array_0/tag_array_0_ext/mem_0_0"
+  - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/frontend/icache/tag_array_0/tag_array_0_ext/mem_0_0"
     type: hardmacro
     x: 50
     y: 1600
     orientation: r90
 
   # instruction cache
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/frontend/icache/data_arrays_0_0/data_arrays_0_0_ext/mem_0_0"
+  - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/frontend/icache/data_arrays_0_0/data_arrays_0_0_ext/mem_0_0"
     type: hardmacro
     x: 50
     y: 2100

@@ -2,7 +2,7 @@
 
 # Specify clock signals
 vlsi.inputs.clocks: [
-  {name: "clock_uncore_clock", period: "30ns", uncertainty: "2ns"}
+  {name: "clock_uncore", period: "30ns", uncertainty: "2ns"}
 ]
 
 # Placement Constraints
