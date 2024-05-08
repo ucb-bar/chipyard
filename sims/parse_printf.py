@@ -1,5 +1,7 @@
 import sys
 
+PRINT_BUF = 0x4000 / 4
+
 def parse_log_file(log_file_path):
     target_string = ''  # Initialize the string we'll build from hex values
     print_buf = [0] * 65536
@@ -23,7 +25,7 @@ def parse_log_file(log_file_path):
                 # print(rs1_data_last_element)
                 for rs1, rs2, byteen in zip(rs1_data_elts, rs2_data_elts, byteen_elts):
                     if '0x3fc0' in rs1:
-                        offset = (int(rs1, 16) - 8192) % 65536
+                        offset = (int(rs1, 16) - PRINT_BUF) % 65536
                         if offset < 0 or offset >= 1024:
                             continue
                         else:
@@ -58,13 +60,40 @@ def parse_log_file(log_file_path):
     return target_string
 # return print_buf
 
+def parse_out_file(out_file_path):
+    target_string = ""
+
+    with open(out_file_path, 'r') as file:
+        for line in file:
+            if 'TRACEWR' in line:
+                tokens = line.strip().split()
+                addr, data, mask = int(tokens[2], 16), int(tokens[3], 16), int(tokens[4], 16)
+                assert((addr >> 16) == 0xff00)
+                bytes_object = bytes.fromhex(tokens[3])
+                masked_bytes_list = []
+                assert(len(bytes_object) <= 4)
+                for i, byte in enumerate(bytes_object[::-1]):
+                    if mask & (1 << i):
+                        masked_bytes_list.append(byte)
+                reversed_bytes = bytes(masked_bytes_list)
+                try:
+                    target_string += reversed_bytes.decode('ascii', errors="ignore")
+                except UnicodeDecodeError:
+                    print(f"Skipping invalid UTF-8 sequence: {hex_value}")
+    return target_string
+
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python parse_printf.py <path_to_log_file>")
         sys.exit(1)
 
     log_file_path = sys.argv[1]
-    parsed_string = print(parse_log_file(log_file_path))
+    if log_file_path[-4:] == "log":
+        print(parse_log_file(log_file_path))
+    else:
+        print(parse_out_file(log_file_path))
+
     # parsed_string = bytes(parse_log_file(log_file_path))
     # try:
     #     print(parsed_string.decode('utf-8', errors="ignore"))
