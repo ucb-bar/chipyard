@@ -9,7 +9,7 @@ import org.chipsalliance.cde.config.{Config}
 
 class SpikeConfig extends Config(
   new chipyard.WithNSpikeCores(1) ++
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  // new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new chipyard.config.AbstractConfig)
 
 class SpikeAdderExampleConfig extends Config(

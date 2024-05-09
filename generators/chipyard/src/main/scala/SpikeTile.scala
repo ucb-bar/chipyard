@@ -361,6 +361,17 @@ class SpikeBlackBox(
         val store_data = Output(UInt(64.W))
         val mask = Output(UInt(8.W))
       }
+      // val ptw_request = new Bundle {
+      //   val valid = Input(Bool())
+      //   val addr = Input(UInt(64.W))
+      //   val need_gpa = Input(Bool())
+      //   val vstage1 = Input(Bool())
+      //   val stage2 = Input(Bool())
+      // }
+      // val ptw_response = new Bundle {
+      //   val valid = Output(Bool())
+      //   val addr = Output(UInt(64.W))
+      // }
     }
   })
   addResource("/vsrc/spiketile.v")

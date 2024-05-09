@@ -137,6 +137,15 @@ import "DPI-C" function void spike_tile(input int hartid,
                                         output longint rocc_mem_response_word_bypass,
                                         output longint rocc_mem_response_store_data,
                                         output int     rocc_mem_response_mask
+
+                                       //  input bit rocc_ptw_request_valid,
+                                       //  input longint rocc_ptw_request_addr,
+                                       //  input bit rocc_ptw_request_need_gpa,
+                                       //  input bit rocc_ptw_request_vstage1,
+                                       //  input bit rocc_ptw_request_stage2,
+
+                                       //  output bit rocc_ptw_response_valid,
+                                       //  output longint rocc_ptw_response_addr
                                         );
 
 
@@ -280,6 +289,15 @@ module SpikeBlackBox #(
                                              output [63:0] rocc_mem_response_word_bypass,
                                              output [63:0] rocc_mem_response_store_data,
                                              output [7:0]  rocc_mem_response_mask
+
+                                             // input          rocc_ptw_request_valid,
+                                             // input [63:0]   rocc_ptw_request_addr,
+                                             // input          rocc_ptw_request_need_gpa,
+                                             // input          rocc_ptw_request_vstage1,
+                                             // input          rocc_ptw_request_stage2,
+
+                                             // output         rocc_ptw_response_valid,
+                                             // output [63:0]  rocc_ptw_response_addr
  );
 
    longint                                                 __insns_retired;
@@ -360,7 +378,6 @@ module SpikeBlackBox #(
    reg                                                     __tcm_d_valid_reg;
    reg [63:0]                                              __tcm_d_data_reg;
 
-   wire                                                    __rocc_request_ready;
    bit                                                     __rocc_request_valid;
    longint                                                 __rocc_request_insn;
    longint                                                 __rocc_request_rs1;
@@ -395,6 +412,11 @@ module SpikeBlackBox #(
    reg [63:0]                                              __rocc_mem_response_store_data_reg;
    reg [7:0]                                               __rocc_mem_response_mask_reg;
 
+   // bit                                                     __rocc_ptw_response_valid;
+   // longint                                                 __rocc_ptw_response_addr;
+
+   // reg                                                     __rocc_ptw_response_valid_reg;
+   // reg [63:0]                                              __rocc_ptw_response_addr_reg;
 
    always @(posedge clock) begin
       if (reset) begin
@@ -466,6 +488,8 @@ module SpikeBlackBox #(
 
          __rocc_mem_response_valid_reg <= 64'h0;
          __rocc_mem_response_data_reg <= 64'h0;
+         // __rocc_ptw_response_valid_reg <= 1'b0;
+         // __rocc_ptw_response_addr_reg <= 64'h0;
          spike_tile_reset(HARTID);
       end else begin
          spike_tile(HARTID, ISA, PMPREGIONS,
@@ -501,7 +525,7 @@ module SpikeBlackBox #(
                     tcm_a_valid, tcm_a_address, tcm_a_data, tcm_a_mask, tcm_a_opcode, tcm_a_size,
                     __tcm_d_valid, __tcm_d_ready, __tcm_d_data,
 
-                    __rocc_request_ready, __rocc_request_valid, __rocc_request_insn, __rocc_request_rs1, __rocc_request_rs2, 
+                    rocc_request_ready, __rocc_request_valid, __rocc_request_insn, __rocc_request_rs1, __rocc_request_rs2, 
                     rocc_response_valid, rocc_response_rd, rocc_response_data, rocc_busy,
 
                     rocc_mem_request_valid, rocc_mem_request_addr, rocc_mem_request_tag, rocc_mem_request_cmd, rocc_mem_request_size, 
@@ -509,6 +533,9 @@ module SpikeBlackBox #(
                     __rocc_mem_response_addr, __rocc_mem_response_tag, __rocc_mem_response_cmd, __rocc_mem_response_size,
                     __rocc_mem_response_data, __rocc_mem_response_replay, __rocc_mem_response_has_data,
                     __rocc_mem_response_word_bypass, __rocc_mem_response_store_data, __rocc_mem_response_mask
+
+                  //   rocc_ptw_request_valid, rocc_ptw_request_addr, rocc_ptw_request_need_gpa, rocc_ptw_request_vstage1, rocc_ptw_request_stage2,
+                  //    __rocc_ptw_response_valid, __rocc_ptw_response_addr
                     );
          __insns_retired_reg <= __insns_retired;
 
@@ -563,6 +590,9 @@ module SpikeBlackBox #(
          __rocc_mem_response_word_bypass_reg <= __rocc_mem_response_word_bypass;
          __rocc_mem_response_store_data_reg <= __rocc_mem_response_store_data;
          __rocc_mem_response_mask_reg <= __rocc_mem_response_mask;
+
+         // __rocc_ptw_response_valid_reg <= __rocc_ptw_response_valid;
+         // __rocc_ptw_response_addr_reg <= __rocc_ptw_response_addr;
       end
    end // always @ (posedge clock)
    assign insns_retired = __insns_retired_reg;
@@ -611,7 +641,6 @@ module SpikeBlackBox #(
    assign rocc_request_insn = __rocc_request_insn_reg;
    assign rocc_request_rs1 = __rocc_request_rs1_reg;
    assign rocc_request_rs2 = __rocc_request_rs2_reg;
-   assign __rocc_request_ready = rocc_request_ready;
 
    assign rocc_mem_response_valid = __rocc_mem_response_valid_reg;
    assign rocc_mem_response_addr = __rocc_mem_response_addr_reg;
@@ -624,4 +653,7 @@ module SpikeBlackBox #(
    assign rocc_mem_response_word_bypass = __rocc_mem_response_word_bypass_reg;
    assign rocc_mem_response_store_data = __rocc_mem_response_store_data_reg;
    assign rocc_mem_response_mask = __rocc_mem_response_mask_reg;
+
+   // assign rocc_ptw_response_valid = __rocc_ptw_response_valid_reg;
+   // assign rocc_ptw_response_addr = __rocc_ptw_response_addr_reg;
 endmodule;

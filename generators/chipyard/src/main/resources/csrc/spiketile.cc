@@ -129,10 +129,14 @@ public:
   void push_rocc_insn(rocc_insn_t insn, reg_t rs1, reg_t rs2);
   void push_rocc_result(long long int result);
   long long int get_rocc_result();
+
   void push_rocc_mem_request(long long int address, int tag, int cmd, int size, bool phys, long long int data, int mask);
   void push_rocc_mem_response(rocc_mem_resp_t data);
   bool rocc_mem_response_handshake(long long int* addr, int* tag, int* cmd, int* size, long long int* data, unsigned char* replay, unsigned char* has_data, long long int* word_bypass, long long int* store_data, int* mask);
   void handle_rocc_mem_request(processor_t* proc);
+
+  long long int translate_rocc_mem_addr(processor_t* proc, long long int addr);
+
   void set_rocc_exists(bool exists);
   bool get_rocc_exists();
 
@@ -402,6 +406,15 @@ extern "C" void spike_tile(int hartid, char* isa,
                            long long int* rocc_mem_response_word_bypass,
                            long long int* rocc_mem_response_store_data,
                            int* rocc_mem_response_mask
+
+                          //  unsigned char rocc_ptw_request_valid,
+                          //  long long int rocc_ptw_request_addr,
+                          //  unsigned char rocc_ptw_request_need_gpa,
+                          //  unsigned char rocc_ptw_request_vstage1,
+                          //  unsigned char rocc_ptw_request_stage2,
+
+                          //  unsigned char* rocc_ptw_response_valid,
+                          //  long long int* rocc_ptw_response_addr
                            )
 {
   if (!host) {
@@ -1302,6 +1315,19 @@ void chipyard_simif_t::push_rocc_result(long long int result) {
   rocc_result_q.push_back(result);
 }
 
+long long int chipyard_simif_t::get_rocc_result() {
+  while (rocc_result_q.size() == 0) {
+    host->switch_to();
+  }
+
+  if (rocc_result_q.size() == 0) {
+    return 0;
+  }
+  long long int result = rocc_result_q.front();
+  rocc_result_q.erase(rocc_result_q.begin());
+  return result;
+}
+
 void chipyard_simif_t::push_rocc_mem_request(long long int address, int tag, int cmd, int size, bool phys, long long int data, int mask) {
   rocc_mem_request_q.push_back({address, tag, cmd, size, phys, data, mask});
   // printf("Pushed rocc mem request: %llx %d %d %d %d %llx %d\n", address, tag, cmd, size, phys, data, mask);
@@ -1366,17 +1392,9 @@ void chipyard_simif_t::handle_rocc_mem_request(processor_t* proc) {
   }
 }
 
-long long int chipyard_simif_t::get_rocc_result() {
-  while (rocc_result_q.size() == 0) {
-    host->switch_to();
-  }
-
-  if (rocc_result_q.size() == 0) {
-    return 0;
-  }
-  long long int result = rocc_result_q.front();
-  rocc_result_q.erase(rocc_result_q.begin());
-  return result;
+long long int chipyard_simif_t::translate_rocc_mem_addr(processor_t* proc, long long int addr) {
+  //TODO
+  //return proc->translate(addr, );
 }
 
 void chipyard_simif_t::set_rocc_exists(bool exists) {
