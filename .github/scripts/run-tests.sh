@@ -125,7 +125,8 @@ case $1 in
         ;;
     chipyard-symmetric)
         make -C $LOCAL_CHIPYARD_DIR/tests
-        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/symmetric.riscv LOADMEM=1
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/symmetric.riscv LOADMEM=1 EXTRA_SIM_FLAGS="+offchip_sel=0"
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/symmetric.riscv LOADMEM=1 EXTRA_SIM_FLAGS="+offchip_sel=1"
         ;;
     chipyard-llcchiplet)
         make -C $LOCAL_CHIPYARD_DIR/tests

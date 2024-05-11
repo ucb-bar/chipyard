@@ -84,7 +84,7 @@ class MultiLinkSymmetricChipletRocketConfig extends Config(
     replicationBase = Some(1L << 32)                                // The upper 4GB goes off-chip
   ) ++
   new testchipip.soc.WithOffchipBus ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.rocket.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 // Simulates 2X of the SymmetricChipletRocketConfig in a multi-sim config
