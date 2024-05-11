@@ -32,7 +32,7 @@ import chipyard.iocell._
 import testchipip.serdes.{CanHavePeripheryTLSerial, SerialTLKey}
 import testchipip.spi.{SPIChipIO}
 import testchipip.boot.{CanHavePeripheryCustomBootPin}
-import testchipip.soc.{CanHavePeripheryChipIdPin}
+import testchipip.soc.{CanHavePeripheryChipIdPin, CanHaveSwitchableOffchipBus}
 import testchipip.util.{ClockedIO}
 import testchipip.iceblk.{CanHavePeripheryBlockDevice, BlockDeviceKey, BlockDeviceIO}
 import testchipip.cosim.{CanHaveTraceIO, TraceOutputTop, SpikeCosimConfig}
@@ -548,4 +548,14 @@ class WithGCDBusyPunchthrough extends OverrideIOBinder({
     io_gcd_busy := busy
     (Seq(GCDBusyPort(() => io_gcd_busy)), Nil)
   }.getOrElse((Nil, Nil))
+})
+
+class WithOffchipBusSel extends OverrideIOBinder({
+  (system: CanHaveSwitchableOffchipBus) => {
+    system.io_obus_sel.getWrappedValue.map { sel =>
+      val sys = system.asInstanceOf[BaseSubsystem]
+      val (port, cells) = IOCell.generateIOFromSignal(sel, "obus_sel", sys.p(IOCellKey))
+      (Seq(OffchipSelPort(() => port)), cells)
+    }.getOrElse(Nil, Nil)
+  }
 })

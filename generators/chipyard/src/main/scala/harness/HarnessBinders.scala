@@ -326,3 +326,10 @@ class WithResetFromHarness extends HarnessBinder({
   }
 })
 
+class WithOffchipBusSelPlusArg extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: OffchipSelPort, chipId: Int) => {
+    val pin = PlusArg("offchip_sel", width=port.io.getWidth)
+    port.io := pin
+  }
+})
+
