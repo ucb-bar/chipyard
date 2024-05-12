@@ -94,21 +94,20 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
 
 
 lazy val chisel6Settings = Seq(
-  libraryDependencies ++= Seq("org.chipsalliance" %% "chisel" % "6.0.0",
-    "org.apache.commons" % "commons-lang3" % "3.12.0",
-    "org.apache.commons" % "commons-text" % "1.9"),
+  libraryDependencies ++= Seq("org.chipsalliance" %% "chisel" % "6.0.0"),
   addCompilerPlugin("org.chipsalliance" % "chisel-plugin" % "6.0.0" cross CrossVersion.full)
 )
 lazy val chisel3Settings = Seq(
-  libraryDependencies ++= Seq(
-    "edu.berkeley.cs" %% "chisel3" % "3.6.0",
-    "org.apache.commons" % "commons-lang3" % "3.12.0",
-    "org.apache.commons" % "commons-text" % "1.9"
-  ),
+  libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % "3.6.0"),
   addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % "3.6.0" cross CrossVersion.full)
 )
 
-lazy val chiselSettings = if (chisel6) chisel6Settings else chisel3Settings
+lazy val chiselSettings = (if (chisel6) chisel6Settings else chisel3Settings) ++ Seq(
+  libraryDependencies ++= Seq(
+    "org.apache.commons" % "commons-lang3" % "3.12.0",
+    "org.apache.commons" % "commons-text" % "1.9"
+  )
+)
 
 
 // Subproject definitions begin
