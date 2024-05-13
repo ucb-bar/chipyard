@@ -45,6 +45,7 @@ VLSI_TOP           ?= $(TOP)
 VLSI_MODEL_DUT_NAME ?= chiptop0
 # If overriding, this should be relative to $(vlsi_dir)
 VLSI_OBJ_DIR       ?= build
+export USE_CHISEL6        = 1
 ifneq ($(CUSTOM_VLOG),)
 	OBJ_DIR          ?= $(vlsi_dir)/$(VLSI_OBJ_DIR)/$(VLSI_TOP)
 else

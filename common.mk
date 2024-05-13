@@ -86,7 +86,7 @@ CHECK_SUBMODULES_COMMAND = echo "Checking all submodules in generators/ are init
 
 SCALA_EXT = scala
 VLOG_EXT = sv v
-CHIPYARD_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim fpga/fpga-shells fpga/src)
+CHIPYARD_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim/src sims/firesim/sim/firesim-lib sims/firesim/sim/midas fpga/fpga-shells fpga/src tools/stage tools/stage-chisel3)
 CHIPYARD_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(CHIPYARD_SOURCE_DIRS),$(SCALA_EXT))
 CHIPYARD_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(CHIPYARD_SOURCE_DIRS),$(VLOG_EXT))
 TAPEOUT_SOURCE_DIRS = $(addprefix $(base_dir)/,tools/tapeout)

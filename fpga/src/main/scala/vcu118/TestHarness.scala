@@ -1,7 +1,6 @@
 package chipyard.fpga.vcu118
 
 import chisel3._
-import chisel3.experimental.{IO}
 
 import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp, BundleBridgeSource}
 import org.chipsalliance.cde.config.{Parameters}
