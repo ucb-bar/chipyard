@@ -206,6 +206,7 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 		--repl-seq-mem \
 		--repl-seq-mem-file=$(MFC_SMEMS_CONF) \
 		--annotation-file=$(FINAL_ANNO_FILE) \
+		--emit-hgldd \
 		--split-verilog \
 		-o $(GEN_COLLATERAL_DIR) \
 		$(FIRRTL_FILE)
