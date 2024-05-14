@@ -12,6 +12,10 @@ class RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
 
+class DualRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
+  new chipyard.config.AbstractConfig)
+
 class TinyRocketConfig extends Config(
   new chipyard.harness.WithDontTouchChipTopPorts(false) ++        // TODO FIX: Don't dontTouch the ports
   new testchipip.soc.WithNoScratchpads ++                         // All memory is the Rocket TCMs
