@@ -397,5 +397,5 @@ class WithFireSimNoTraceIOConfigTweaks extends Config(
   new chipyard.config.WithControlBusFrequency(1000.0) ++
   new chipyard.config.WithMemoryBusFrequency(1000.0) ++
   new chipyard.config.WithFrontBusFrequency(1000.0) ++
-  new WithFireSimNoTraceIOConfigTweaks
+  new WithFireSimNoTraceIODesignTweaks
 )
