@@ -370,32 +370,3 @@ class FireSimLargeBoomCospikeConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks++
   new chipyard.LargeBoomV3Config)
-
-class WithFireSimNoTraceIODesignTweaks extends Config(
-  new WithMinimalFireSimDesignTweaks ++
-  // Required: Remove the debug clock tap, this breaks compilation of target-level sim in FireSim
-  new chipyard.config.WithNoClockTap ++
-  // Required: Bake in the default FASED memory model
-  new WithDefaultMemModel ++
-  // Optional: reduce the width of the Serial TL interface
-  new testchipip.serdes.WithSerialTLWidth(4) ++
-  // Required*: Scale default baud rate with periphery bus frequency
-  new chipyard.config.WithUART(
-    baudrate=BigInt(3686400L), 
-    txEntries=256, rxEntries=256) ++        // FireSim requires a larger UART FIFO buffer, 
-  new chipyard.config.WithNoUART() ++       // so we overwrite the default one
-  // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 64 GiB on F1)
-  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
-  // Optional: Removing this will require using an initramfs under linux
-  new testchipip.iceblk.WithBlockDevice
-)
-
-class WithFireSimNoTraceIOConfigTweaks extends Config(
-  new chipyard.config.WithSystemBusFrequency(1000.0) ++
-  new chipyard.config.WithControlBusFrequency(1000.0) ++
-  new chipyard.config.WithPeripheryBusFrequency(1000.0) ++
-  new chipyard.config.WithControlBusFrequency(1000.0) ++
-  new chipyard.config.WithMemoryBusFrequency(1000.0) ++
-  new chipyard.config.WithFrontBusFrequency(1000.0) ++
-  new WithFireSimNoTraceIODesignTweaks
-)
