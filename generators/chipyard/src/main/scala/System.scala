@@ -80,9 +80,10 @@ trait CanHaveMasterTLMemPort { this: BaseSubsystem =>
     }
   }).toList.flatten)
 
+  // disable inwards monitors from node since the class with this trait (i.e. DigitalTop)
+  // doesn't provide an implicit clock to those monitors
   mbus.coupleTo(s"memory_controller_port_named_$portName") {
-    (memTLNode
-      :*= TLBuffer()
+    (DisableMonitors { implicit p => memTLNode :*= TLBuffer() }
       :*= TLSourceShrinker(1 << idBits)
       :*= TLWidthWidget(mbus.beatBytes)
       :*= _)

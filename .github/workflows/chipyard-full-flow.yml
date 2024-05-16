@@ -61,8 +61,8 @@ jobs:
               - '**/.gitignore'
               - '.github/ISSUE_TEMPLATE/**'
 
-  setup-repo:
-    name: setup-repo
+  full-flow:
+    name: full-flow
     needs: [change-filters, cancel-prior-workflows]
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: as4
@@ -84,12 +84,6 @@ jobs:
           mkdir ${{ env.JAVA_TMP_DIR }}
           export MAKEFLAGS="-j32"
           ./build-setup.sh -v
-
-  run-cfg-finder:
-    name: run-cfg-finder
-    needs: [setup-repo]
-    runs-on: as4
-    steps:
       - name: Run config finder
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
@@ -97,12 +91,6 @@ jobs:
           source env.sh
           cd sims/verilator
           make find-config-fragments
-
-  run-tutorial:
-    name: run-tutorial
-    needs: [setup-repo]
-    runs-on: as4
-    steps:
       - name: Run smoke test
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
@@ -169,7 +157,7 @@ jobs:
 
   cleanup:
     name: cleanup
-    needs: [run-tutorial]
+    needs: [full-flow]
     runs-on: as4
     if: ${{ always() }}
     steps:

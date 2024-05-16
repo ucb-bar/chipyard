@@ -2,17 +2,9 @@
 # common gcc configuration/optimization
 #----------------------------------------------------------------------------------------
 SIM_OPT_CXXFLAGS := -O3
-
-# Workaround: esp-isa-sim doesn't install libriscv,
-# so don't link with libriscv if it doesn't exist
-# potentially breaks some configs
-
-ifeq (,$(wildcard $(RISCV)/lib/libriscv.so))
-$(warning libriscv not found)
-LRISCV=
-else
 LRISCV=-lriscv
-endif
+
+export USE_CHISEL6=1
 
 SIM_CXXFLAGS = \
 	$(CXXFLAGS) \

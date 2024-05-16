@@ -59,8 +59,8 @@ should look something like this:
 .. code-block:: scala
 
     lazy val chipyard = (project in file("generators/chipyard"))
-        .dependsOn(testchipip, rocketchip, boom, hwacha, rocketchip_blocks, rocketchip_inclusive_cache, iocell,
-            sha3, dsptools, `rocket-dsp-utils`,
+        .dependsOn(testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
+            dsptools, `rocket-dsp-utils`,
             gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
             yourproject, // <- added to the middle of the list for simplicity
             constellation, mempress)
