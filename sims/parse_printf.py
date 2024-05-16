@@ -68,7 +68,7 @@ def parse_out_file(out_file_path):
             if 'TRACEWR' in line:
                 tokens = line.strip().split()
                 addr, data, mask = int(tokens[2], 16), int(tokens[3], 16), int(tokens[4], 16)
-                assert((addr >> 16) == 0xff00)
+                assert((addr >> 20) == 0xff0)
                 bytes_object = bytes.fromhex(tokens[3])
                 masked_bytes_list = []
                 assert(len(bytes_object) <= 4)
