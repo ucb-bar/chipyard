@@ -145,11 +145,10 @@ long_name = $(MODEL_PACKAGE).$(MODEL).$(CONFIG)
 
 # classpaths
 CLASSPATH_CACHE ?= $(base_dir)/.classpath_cache
-CHIPYARD_CLASSPATH ?= $(CLASSPATH_CACHE)/chipyard.jar
+# The generator classpath must contain the Generator main
+GENERATOR_CLASSPATH ?= $(CLASSPATH_CACHE)/$(SBT_PROJECT).jar
+# The tapeout classpath must contain MacroCompiler
 TAPEOUT_CLASSPATH ?= $(CLASSPATH_CACHE)/tapeout.jar
-# if *_CLASSPATH is a true java classpath, it can be colon-delimited list of paths (on *nix)
-CHIPYARD_CLASSPATH_TARGETS ?= $(subst :, ,$(CHIPYARD_CLASSPATH))
-TAPEOUT_CLASSPATH_TARGETS ?= $(subst :, ,$(TAPEOUT_CLASSPATH))
 
 # chisel generated outputs
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
