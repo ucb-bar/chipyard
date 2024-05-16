@@ -160,7 +160,9 @@ endif
 
 # classpaths
 CLASSPATH_CACHE ?= $(base_dir)/.classpath_cache
-CHIPYARD_CLASSPATH ?= $(CLASSPATH_CACHE)/chipyard.jar
+# The chipyard classpath must contain the Generator main
+CHIPYARD_CLASSPATH ?= $(CLASSPATH_CACHE)/$(SBT_PROJECT).jar
+# The tapeout classpath must contain MacroCompiler
 TAPEOUT_CLASSPATH ?= $(CLASSPATH_CACHE)/tapeout.jar
 
 # chisel generated outputs
