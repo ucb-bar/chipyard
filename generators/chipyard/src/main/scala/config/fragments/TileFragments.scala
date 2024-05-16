@@ -5,7 +5,7 @@ import chisel3._
 import org.chipsalliance.cde.config.{Field, Parameters, Config}
 import freechips.rocketchip.tile._
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams}
+import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams, PgLevels}
 
 import cva6.{CVA6TileAttachParams}
 import sodor.common.{SodorTileAttachParams}
@@ -125,4 +125,14 @@ class WithRocketBoundaryBuffers(buffers: Option[RocketTileBoundaryBufferParams] 
       boundaryBuffers=buffers
     ))
   }
+})
+
+// Uses SV48 if possible, otherwise default to the Rocket Chip core default
+class WithSV48IfPossible extends Config((site, here, up) => {
+  case PgLevels => if (site(XLen) == 64) 4 /* Sv48 */ else up(PgLevels)
+})
+
+// Uses SV39 if possible, otherwise default to the Rocket Chip core default
+class WithSV39 extends Config((site, here, up) => {
+  case PgLevels => { require(site(XLen) == 64); 3; }
 })

@@ -45,19 +45,9 @@ search () {
     done
 }
 
-submodules=("cva6" "boom" "ibex" "gemmini" "hwacha" "icenet" "nvdla" "rocket-chip" "sha3" "rocket-chip-blocks" "rocket-chip-inclusive-cache" "testchipip" "riscv-sodor" "mempress" "bar-fetchers" "shuttle" "constellation" "fft-generator" "hardfloat" "caliptra-aes-acc" "rocc-acc-utils" "diplomacy")
+submodules=("cva6" "boom" "ibex" "gemmini" "icenet" "nvdla" "rocket-chip" "rocket-chip-blocks" "rocket-chip-inclusive-cache" "testchipip" "riscv-sodor" "mempress" "bar-fetchers" "shuttle" "constellation" "fft-generator" "hardfloat" "caliptra-aes-acc" "rocc-acc-utils" "diplomacy")
 dir="generators"
 branches=("master" "main" "dev")
-search
-
-submodules=("esp-tools-feedstock")
-dir="toolchains/esp-tools"
-branches=("main")
-search
-
-submodules=("riscv-isa-sim" "riscv-pk" "riscv-tests")
-dir="toolchains/esp-tools"
-branches=("master")
 search
 
 submodules=("riscv-tools-feedstock")
@@ -92,7 +82,7 @@ dir="software"
 branches=("master" "dev")
 search
 
-submodules=("DRAMSim2" "axe" "barstools" "dsptools" "rocket-dsp-utils" "torture" "fixedpoint" "cde")
+submodules=("DRAMSim2" "axe" "dsptools" "dsptools-chisel3" "rocket-dsp-utils" "torture" "fixedpoint" "fixedpoint-chisel3" "cde" "midas-targetutils")
 dir="tools"
 branches=("master" "dev" "main")
 search

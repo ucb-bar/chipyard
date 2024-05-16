@@ -10,7 +10,7 @@ import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, LazyRawModuleI
 import freechips.rocketchip.util.{DontTouch}
 import chipyard.iobinders._
 
-import barstools.iocell.chisel._
+import chipyard.iocell._
 
 case object BuildSystem extends Field[Parameters => LazyModule]((p: Parameters) => new DigitalTop()(p))
 

@@ -50,16 +50,16 @@ This will elaborate the ``RocketConfig`` in the example project.
 
 .. Note:: The elaboration of ``RocketConfig`` requires about 6.5 GB of main memory. Otherwise the process will fail with ``make: *** [firrtl_temp] Error 137`` which is most likely related to limited resources. Other configurations might require even more main memory.
 
-An executable called ``simulator-chipyard-RocketConfig`` will be produced.
+An executable called ``simulator-chipyard.harness-RocketConfig`` will be produced.
 This executable is a simulator that has been compiled based on the design that was built.
 You can then use this executable to run any compatible RV64 code.
 For instance, to run one of the riscv-tools assembly tests.
 
 .. code-block:: shell
 
-    ./simulator-chipyard-RocketConfig $RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
+    ./simulator-chipyard.harness-RocketConfig $RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-simple
 
-.. Note:: In a VCS simulator, the simulator name will be ``simv-chipyard-RocketConfig`` instead of ``simulator-chipyard-RocketConfig``.
+.. Note:: In a VCS simulator, the simulator name will be ``simv-chipyard.harness-RocketConfig`` instead of ``simulator-chipyard.harness-RocketConfig``.
 
 The makefiles have a ``run-binary`` rule that simplifies running the simulation executable. It adds many of the common command line options for you and redirects the output to a file.
 
@@ -153,13 +153,6 @@ Therefore, in order to simulate a simple Rocket-based example system we can use:
 
     make SUB_PROJECT=yourproject
     ./simulator-<yourproject>-<yourconfig> ...
-
-
-All ``make`` targets that can be applied to the default example, can also be applied to custom project using the custom environment variables. For example, the following code example will run the RISC-V assembly benchmark suite on the Hwacha subproject:
-
-.. code-block:: shell
-
-    make SUB_PROJECT=hwacha run-asm-tests
 
 
 Finally, in the ``generated-src/<...>-<package>-<config>/`` directory resides all of the collateral while the generated Verilog source files resides in ``generated-src/<...>-<package>-<config>/gen-collateral`` for the build/simulation.

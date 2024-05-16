@@ -4,7 +4,7 @@ Heterogeneous SoCs
 ===============================
 
 The Chipyard framework involves multiple cores and accelerators that can be composed in arbitrary ways.
-This discussion will focus on how you combine Rocket, BOOM and Hwacha in particular ways to create a unique SoC.
+This discussion will focus on how you combine Rocket and BOOM in particular ways to create a unique SoC.
 
 Creating a Rocket and BOOM System
 -------------------------------------------
@@ -21,40 +21,6 @@ The following example shows a dual core BOOM with a single core Rocket.
     :end-before: DOC include end: DualBoomAndSingleRocket
 
 
-Adding Hwachas
--------------------------------------------
-
-Adding a Hwacha accelerator is as easy as adding the ``DefaultHwachaConfig`` so that it can setup the Hwacha parameters and add itself to the ``BuildRoCC`` parameter.
-An example of adding a Hwacha to all tiles in the system is below.
-
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/HeteroConfigs.scala
-    :language: scala
-    :start-after: DOC include start: BoomAndRocketWithHwacha
-    :end-before: DOC include end: BoomAndRocketWithHwacha
-
-In this example, Hwachas are added to both BOOM tiles and to the Rocket tile.
-All with the same Hwacha parameters.
-
-Assigning Accelerators to Specific Tiles with MultiRoCC
--------------------------------------------------------
-
-Located in ``generators/chipyard/src/main/scala/config/fragments/RoCCFragments.scala`` is a config fragment that provides support for adding RoCC accelerators to specific tiles in your SoC.
-Named ``MultiRoCCKey``, this key allows you to attach RoCC accelerators based on the ``hartId`` of the tile.
-For example, using this allows you to create a 8 tile system with a RoCC accelerator on only a subset of the tiles.
-An example is shown below with two BOOM cores, and one Rocket tile with a RoCC accelerator (Hwacha) attached.
-
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/HeteroConfigs.scala
-    :language: scala
-    :start-after: DOC include start: DualBoomAndRocketOneHwacha
-    :end-before: DOC include end: DualBoomAndRocketOneHwacha
-
-The ``WithMultiRoCCHwacha`` config fragment assigns a Hwacha accelerator to a particular ``hartId`` (in this case, the ``hartId`` of ``0`` corresponds to the Rocket core).
-Finally, the ``WithMultiRoCC`` config fragment is called.
-This config fragment sets the ``BuildRoCC`` key to use the ``MultiRoCCKey`` instead of the default.
-This must be used after all the RoCC parameters are set because it needs to override the ``BuildRoCC`` parameter.
-If this is used earlier in the configuration sequence, then MultiRoCC does not work.
-
-This config fragment can be changed to put more accelerators on more cores by changing the arguments to cover more ``hartId``'s (i.e. ``WithMultiRoCCHwacha(0,1,3,6,...)``).
 
 Since config fragments are applied from right-to-left (or bottom-to-top as they are formatted here), the right-most config fragment specifying a core (which is ``freechips.rocketchip.subsystem.WithNBigCores`` in the example above) gets the first hart ID.
 Consider this config:

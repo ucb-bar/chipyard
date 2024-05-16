@@ -16,11 +16,10 @@ common_setup
 readonly MAKE
 
 usage() {
-    echo "usage: ${0} [OPTIONS] [riscv-tools | esp-tools]"
+    echo "usage: ${0} [OPTIONS] [riscv-tools]"
     echo ""
     echo "Installation Types"
     echo "   riscv-tools: if set, builds the riscv toolchain (this is also the default)"
-    echo "   esp-tools: if set, builds esp-tools toolchain used for the hwacha vector accelerator"
     echo ""
     echo "Options"
     echo "   --prefix -p PREFIX    : Install destination."
@@ -45,7 +44,7 @@ do
             RISCV=$(realpath $1) ;;
         --clean-after-install )
             CLEANAFTERINSTALL="true" ;;
-        riscv-tools | esp-tools)
+        riscv-tools )
             TOOLCHAIN=$1 ;;
         * )
             error "invalid option $1"
@@ -115,6 +114,7 @@ echo '==>  Installing DRAMSim2 Shared Library'
 cd $RDIR
 git submodule update --init tools/DRAMSim2
 cd tools/DRAMSim2
+make clean
 make libdramsim.so
 cp libdramsim.so $RISCV/lib/
 

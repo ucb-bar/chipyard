@@ -17,3 +17,9 @@ class NoCoresConfig extends Config(
   new chipyard.config.WithNoDebug ++
   new chipyard.config.WithNoPLIC ++
   new chipyard.config.AbstractConfig)
+
+// A config that uses a empty chiptop module with no rocket-chip soc components
+class EmptyChipTopConfig extends Config(
+  new chipyard.example.WithEmptyChipTop ++
+  new chipyard.config.AbstractConfig             // since we aren't using rocket-chip, this doesn't do anything
+)

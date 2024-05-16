@@ -12,11 +12,10 @@ source $CYDIR/scripts/utils.sh
 common_setup
 
 usage() {
-    echo "Usage: ${0} [OPTIONS] [riscv-tools | esp-tools]"
+    echo "Usage: ${0} [OPTIONS] [riscv-tools]"
     echo ""
     echo "Installation Types"
     echo "  riscv-tools: if set, builds the riscv toolchain (this is also the default)"
-    echo "  esp-tools: if set, builds esp-tools toolchain used for the hwacha vector accelerator"
     echo ""
     echo "Helper script to fully initialize repository that wraps other scripts."
     echo "By default it initializes/installs things in the following order:"
@@ -69,7 +68,7 @@ do
     case $1 in
         -h | --help )
             usage 3 ;;
-        riscv-tools | esp-tools)
+        riscv-tools )
             TOOLCHAIN_TYPE=$1 ;;
         --verbose | -v)
             VERBOSE_FLAG=$1
@@ -118,29 +117,6 @@ run_step() {
 }
 
 {
-
-# esp-tools should ONLY be used for hwacha.
-# Check for this, since many users will be attempting to use this with gemmini
-if [ $TOOLCHAIN_TYPE == "esp-tools" ]; then
-    while true; do
-        printf '\033[2J'
-        read -p "WARNING: You are trying to install the esp-tools toolchain."$'\n'"This should ONLY be used for Hwacha development."$'\n'"Gemmini should be used with riscv-tools."$'\n'"Type \"y\" to continue if this is intended, or \"n\" if not: " validate
-        case "$validate" in
-            y | Y)
-                echo "Installing esp-tools."
-                break
-                ;;
-            n | N)
-                error "Rerun with riscv-tools"
-                exit 3
-                ;;
-            *)
-                error "Invalid response. Please type \"y\" or \"n\""
-                ;;
-        esac
-    done
-fi
-
 
 #######################################
 ###### BEGIN STEP-BY-STEP SETUP #######
@@ -271,7 +247,8 @@ if run_step "6"; then
             echo $CYDIR
             source sourceme-manager.sh --skip-ssh-setup
             pushd sim
-            make sbt SBT_COMMAND="project {file:$CYDIR}firechip; compile" TARGET_PROJECT=firesim
+            make target-classpath
+            make firesim-main-classpath
             popd
         )
         exit_if_last_command_failed

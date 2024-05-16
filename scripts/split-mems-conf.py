@@ -70,7 +70,10 @@ if __name__ == "__main__":
     imhj_data = json.load(imhj)
 
     dut_root = bfs_find_root(imhj_data, args.dut_module_name)
-    dut_submodules = bfs_collect_submodules(dut_root)
+    if dut_root:
+      dut_submodules = bfs_collect_submodules(dut_root)
+    else:
+      dut_submodules = set()
 
     model_root = bfs_find_root(imhj_data, args.model_module_name)
     model_submodules = bfs_collect_submodules(model_root)

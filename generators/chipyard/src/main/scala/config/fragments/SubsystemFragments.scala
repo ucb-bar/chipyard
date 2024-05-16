@@ -18,10 +18,6 @@ class WithSystemBusWidth(bitWidth: Int) extends Config((site, here, up) => {
   case SystemBusKey => up(SystemBusKey, site).copy(beatBytes=bitWidth/8)
 })
 
-class WithDTSTimebase(freqMHz: BigInt) extends Config((site, here, up) => {
-  case DTSTimebase => freqMHz
-})
-
 // Adds buffers on the interior of the inclusive LLC, to improve PD
 class WithInclusiveCacheInteriorBuffer(buffer: InclusiveCachePortParameters = InclusiveCachePortParameters.full) extends Config((site, here, up) => {
   case InclusiveCacheKey => up(InclusiveCacheKey).copy(bufInnerInterior=buffer, bufOuterInterior=buffer)
