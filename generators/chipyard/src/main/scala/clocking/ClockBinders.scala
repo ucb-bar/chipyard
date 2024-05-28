@@ -72,7 +72,7 @@ class WithPLLSelectorDividerClockGenerator(enable: Boolean = true) extends Overr
     }
   }
 })
- 
+
 // This passes all clocks through to the TestHarness
 class WithPassthroughClockGenerator extends OverrideLazyIOBinder({
   (system: HasChipyardPRCI) => {
@@ -102,38 +102,28 @@ class WithPassthroughClockGenerator extends OverrideLazyIOBinder({
   }
 })
 
-// Broadcasts a single clock IO to all clock domains
-class WithSingleClockBroadcastClockGenerator extends OverrideLazyIOBinder({
+// Broadcasts a single clock IO to all clock domains. Ignores all requested frequencies
+class WithSingleClockBroadcastClockGenerator(freqMHz: Int = 100) extends OverrideLazyIOBinder({
   (system: HasChipyardPRCI) => {
     implicit val p = GetSystemParameters(system)
-    val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
-    system.connectImplicitClockSinkNode(implicitClockSinkNode)
-    InModuleBody {
-      val implicit_clock = implicitClockSinkNode.in.head._1.clock
-      val implicit_reset = implicitClockSinkNode.in.head._1.reset
-      system.asInstanceOf[BaseSubsystem].module match { case l: LazyModuleImp => {
-        l.clock := implicit_clock
-        l.reset := implicit_reset
-      }}
-    }
 
-    val clockGroupsAggregateNode = ClockGroupAggregateNode("single_clock")
+    val clockGroupsAggregator = LazyModule(new ClockGroupAggregator("single_clock"))
     val clockGroupsSourceNode = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
-    system.allClockGroupsNode :*= clockGroupsAggregateNode := clockGroupsSourceNode
+    system.chiptopClockGroupsNode :*= clockGroupsAggregator.node := clockGroupsSourceNode
 
     InModuleBody {
-      val clock_wire = Wire(Input(new ClockWithFreq(100)))
+      val clock_wire = Wire(Input(Clock()))
       val reset_wire = Wire(Input(AsyncReset()))
       val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
       val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(reset_wire, "reset", p(IOCellKey))
 
       clockGroupsSourceNode.out.foreach { case (bundle, edge) =>
         bundle.member.data.foreach { b =>
-          b.clock := clock_io.clock
+          b.clock := clock_io
           b.reset := reset_io
         }
       }
-      (Seq(clock_io, reset_io), clockIOCell ++ resetIOCell)
+      (Seq(ClockPort(() => clock_io, freqMHz), ResetPort(() => reset_io)), clockIOCell ++ resetIOCell)
     }
   }
 })
