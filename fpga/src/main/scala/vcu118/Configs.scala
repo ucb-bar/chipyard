@@ -54,11 +54,11 @@ class WithVCU118Tweaks extends Config(
   new WithUART ++
   new WithSPISDCard ++
   new WithDDRMem ++
-  new WithJTAG ++
   // other configuration
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
+  new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1)
 )
@@ -69,10 +69,40 @@ class RocketVCU118Config extends Config(
 )
 // DOC include end: AbstractVCU118 and Rocket
 
+class WithVCU118BareMetalTweaks extends Config(
+  // clocking
+  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
+  new chipyard.clocking.WithPassthroughClockGenerator ++
+  new chipyard.config.WithMemoryBusFrequency(100) ++
+  new chipyard.config.WithSystemBusFrequency(100) ++
+  new chipyard.config.WithControlBusFrequency(100) ++
+  new chipyard.config.WithPeripheryBusFrequency(100) ++
+  new chipyard.config.WithControlBusFrequency(100) ++
+  new WithFPGAFrequency(100) ++ // default 100MHz freq
+
+  // harness binders
+  new WithUART ++
+  new WithSPISDCard ++
+  new WithDDRMem ++
+
+  // other configuration
+  new WithDefaultPeripherals ++
+  new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
+  new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
+  new chipyard.config.WithNoDebug ++ // remove debug module
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(1)
+)
+
+class RocketVCU118BareMetalConfig extends Config(
+  new WithVCU118BareMetalTweaks ++
+  new chipyard.RocketConfig
+)
+
 class BoomVCU118Config extends Config(
   new WithFPGAFrequency(50) ++
   new WithVCU118Tweaks ++
-  new chipyard.MegaBoomV3Config
+  new chipyard.MegaBoomConfig
 )
 
 class WithFPGAFrequency(fMHz: Double) extends Config(
