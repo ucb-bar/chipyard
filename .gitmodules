@@ -142,4 +142,6 @@
 [submodule "tools/midas-targetutils"]
 	path = tools/midas-targetutils
 	url = https://github.com/firesim/midas-targetutils.git
-
+[submodule "generators/rerocc"]
+	path = generators/rerocc
+	url = https://github.com/ucb-bar/rerocc.git

@@ -48,3 +48,22 @@ class AES256ECBRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.WithSystemBusWidth(256) ++
   new chipyard.config.AbstractConfig)
+
+class ReRoCCTestConfig extends Config(
+  new rerocc.WithReRoCC ++
+  new chipyard.config.WithCharacterCountRoCC ++                // rerocc tile4 is charcnt
+  new chipyard.config.WithAccumulatorRoCC ++                   // rerocc tile3 is accum
+  new chipyard.config.WithAccumulatorRoCC ++                   // rerocc tile2 is accum
+  new chipyard.config.WithAccumulatorRoCC ++                   // rerocc tile1 is accum
+  new chipyard.config.WithAccumulatorRoCC ++                   // rerocc tile0 is accum
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class ReRoCCManyGemminiConfig extends Config(
+  new rerocc.WithReRoCC ++
+  new gemmini.LeanGemminiConfig ++                              // rerocc tile3 is gemmini
+  new gemmini.LeanGemminiConfig ++                              // rerocc tile2 is gemmini
+  new gemmini.LeanGemminiConfig ++                              // rerocc tile1 is gemmini
+  new gemmini.LeanGemminiConfig ++                              // rerocc tile0 is gemmini
+  new freechips.rocketchip.subsystem.WithNBigCores(4) ++        // 4 rocket cores
+  new chipyard.config.AbstractConfig)
