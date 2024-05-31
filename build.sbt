@@ -241,6 +241,12 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
 lazy val radiance = (project in file("generators/radiance"))
   .dependsOn(rocketchip, gemmini)
   .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(libraryDependencies ++= Seq(
+      "edu.berkeley.cs" %% "chiseltest" % chiselTestVersion,
+      "org.scalatest" %% "scalatest" % "3.2.+" % "test",
+      "junit" % "junit" % "4.13" % "test",
+      "org.scalacheck" %% "scalacheck" % "1.14.3" % "test",
+  ))
   .settings(commonSettings)
 
 lazy val gemmini = freshProject("gemmini", file("generators/gemmini"))
