@@ -50,15 +50,19 @@ class WithVCU118UARTTSI extends HarnessBinder({
       ("AW25" , IOPin(harnessIO.rxd)),
       ("BB21", IOPin(harnessIO.txd)))
     packagePinsWithPackageIOs foreach { case (pin, io) => {
-    rawModule.xdc.addPackagePin(io, pin)
-    rawModule.xdc.addIOStandard(io, "LVCMOS18")
-    rawModule.xdc.addIOB(io)
-    // TODO add LEDs in for the TSI connection on the VCU118
-    // rawModule.other_leds(1) := port.io.dropped
-    // rawModule.other_leds(9) := port.io.tsi2tl_state(0)
-    // rawModule.other_leds(10) := port.io.tsi2tl_state(1)
-    // rawModule.other_leds(11) := port.io.tsi2tl_state(2)
-    // rawModule.other_leds(12) := port.io.tsi2tl_state(3)
+      rawModule.xdc.addPackagePin(io, pin)
+      rawModule.xdc.addIOStandard(io, "LVCMOS18")
+      rawModule.xdc.addIOB(io)
+    } }
+
+    rawModule.all_leds(0) := port.io.dropped
+    rawModule.all_leds(1) := port.io.dropped
+    rawModule.all_leds(2) := port.io.dropped
+    rawModule.all_leds(3) := port.io.dropped
+    rawModule.all_leds(4) := port.io.tsi2tl_state(0)
+    rawModule.all_leds(5) := port.io.tsi2tl_state(1)
+    rawModule.all_leds(6) := port.io.tsi2tl_state(2)
+    rawModule.all_leds(7) := port.io.tsi2tl_state(3)
   }
 })
 
