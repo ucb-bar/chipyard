@@ -33,19 +33,6 @@ different directory from Chisel (Scala) sources.
                 vsrc/
                     YourFile.v
 
-In addition to the steps outlined in the previous section on adding a
-project to the ``build.sbt`` at the top level, it is also necessary to
-add any projects that contain Verilog IP as dependencies to the
-``tapeout`` project. This ensures that the Verilog sources are visible
-to the downstream FIRRTL passes that provide utilities for integrating
-Verilog files into the build process, which are part of the
-``tapeout`` package in ``barstools/tapeout``.
-
-.. code-block:: scala
-
-    lazy val tapeout = conditionalDependsOn(project in file("./tools/barstools/tapeout/"))
-      .dependsOn(chisel_testers, example, yourproject)
-      .settings(commonSettings)
 
 For this concrete GCD example, we will be using a ``GCDMMIOBlackBox``
 Verilog module that is defined in the ``chipyard`` project. The Scala
@@ -99,10 +86,16 @@ Instantiating the BlackBox and Defining MMIO
 
 Next, we must instantiate the blackbox. In order to take advantage of
 diplomatic memory mapping on the system bus, we still have to
-integrate the peripheral at the Chisel level by mixing
-peripheral-specific traits into a ``TLRegisterRouter``. The ``params``
-member and ``HasRegMap`` base trait should look familiar from the
-previous memory-mapped GCD device example.
+integrate the peripheral at the Chisel level by instantiating a LazyModule wrapper
+that instantiates a TileLink RegisterNode.
+
+.. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
+    :language: scala
+    :start-after: DOC include start: GCD router
+    :end-before: DOC include end: GCD router
+
+Within the LazyModule, the ``regmap`` function can be called to attach wires and
+registers to the MMIO port.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala

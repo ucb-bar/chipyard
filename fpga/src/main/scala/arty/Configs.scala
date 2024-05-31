@@ -5,7 +5,6 @@ import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.devices.tilelink._
-import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase}
 import freechips.rocketchip.system._
 import freechips.rocketchip.tile._
 
@@ -25,7 +24,6 @@ class WithArtyTweaks extends Config(
 
   new chipyard.harness.WithHarnessBinderClockFreqMHz(32) ++
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
-  new chipyard.config.WithDTSTimebase(32000) ++
   new chipyard.config.WithSystemBusFrequency(32) ++
   new chipyard.config.WithFrontBusFrequency(32) ++
   new chipyard.config.WithControlBusFrequency(32) ++

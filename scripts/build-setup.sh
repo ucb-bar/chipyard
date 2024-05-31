@@ -12,11 +12,10 @@ source $CYDIR/scripts/utils.sh
 common_setup
 
 usage() {
-    echo "Usage: ${0} [OPTIONS] [riscv-tools | esp-tools]"
+    echo "Usage: ${0} [OPTIONS] [riscv-tools]"
     echo ""
     echo "Installation Types"
     echo "  riscv-tools: if set, builds the riscv toolchain (this is also the default)"
-    echo "  esp-tools: if set, builds esp-tools toolchain used for the hwacha vector accelerator"
     echo ""
     echo "Helper script to fully initialize repository that wraps other scripts."
     echo "By default it initializes/installs things in the following order:"
@@ -39,6 +38,7 @@ usage() {
     echo "  --verbose -v            : Verbose printout"
     echo "  --use-unpinned-deps -ud : Use unpinned conda environment"
     echo "  --use-lean-conda        : Install a leaner version of the repository (Smaller conda env, no FireSim, no FireMarshal)"
+    echo "  --build-circt           : Builds CIRCT from source, instead of downloading the precompiled binary"
 
     echo "  --skip -s N             : Skip step N in the list above. Use multiple times to skip multiple steps ('-s N -s M ...')."
     echo "  --skip-conda            : Skip Conda initialization (step 1)"
@@ -60,6 +60,7 @@ VERBOSE_FLAG=""
 USE_UNPINNED_DEPS=false
 USE_LEAN_CONDA=false
 SKIP_LIST=()
+BUILD_CIRCT=false
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
@@ -67,7 +68,7 @@ do
     case $1 in
         -h | --help )
             usage 3 ;;
-        riscv-tools | esp-tools)
+        riscv-tools )
             TOOLCHAIN_TYPE=$1 ;;
         --verbose | -v)
             VERBOSE_FLAG=$1
@@ -75,6 +76,8 @@ do
         --use-lean-conda)
             USE_LEAN_CONDA=true
             SKIP_LIST+=(4 6 7 8 9) ;;
+        --build-circt)
+            BUILD_CIRCT=true ;;
         -ud | --use-unpinned-deps )
             USE_UNPINNED_DEPS=true ;;
         --skip | -s)
@@ -114,29 +117,6 @@ run_step() {
 }
 
 {
-
-# esp-tools should ONLY be used for hwacha.
-# Check for this, since many users will be attempting to use this with gemmini
-if [ $TOOLCHAIN_TYPE == "esp-tools" ]; then
-    while true; do
-        printf '\033[2J'
-        read -p "WARNING: You are trying to install the esp-tools toolchain."$'\n'"This should ONLY be used for Hwacha development."$'\n'"Gemmini should be used with riscv-tools."$'\n'"Type \"y\" to continue if this is intended, or \"n\" if not: " validate
-        case "$validate" in
-            y | Y)
-                echo "Installing esp-tools."
-                break
-                ;;
-            n | N)
-                error "Rerun with riscv-tools"
-                exit 3
-                ;;
-            *)
-                error "Invalid response. Please type \"y\" or \"n\""
-                ;;
-        esac
-    done
-fi
-
 
 #######################################
 ###### BEGIN STEP-BY-STEP SETUP #######
@@ -181,7 +161,7 @@ if run_step "1"; then
 
     # use conda-lock to create env
     conda-lock install --conda $(which conda) -p $CYDIR/.conda-env $LOCKFILE &&
-    source $CYDIR/.conda-env/etc/profile.d/conda.sh &&
+    source $(conda info --base)/etc/profile.d/conda.sh &&
     conda activate $CYDIR/.conda-env
     exit_if_last_command_failed
 
@@ -267,7 +247,8 @@ if run_step "6"; then
             echo $CYDIR
             source sourceme-manager.sh --skip-ssh-setup
             pushd sim
-            make sbt SBT_COMMAND="project {file:$CYDIR}firechip; compile" TARGET_PROJECT=firesim
+            make target-classpath
+            make firesim-main-classpath
             popd
         )
         exit_if_last_command_failed
@@ -294,6 +275,7 @@ if run_step "8"; then
 fi
 
 if run_step "10"; then
+    begin_step "10" "Installing CIRCT"
     # install circt into conda
     if run_step "1"; then
         PREFIX=$CONDA_PREFIX/$TOOLCHAIN_TYPE
@@ -305,20 +287,27 @@ if run_step "10"; then
         PREFIX=$RISCV
     fi
 
-    git submodule update --init $CYDIR/tools/install-circt &&
-    $CYDIR/tools/install-circt/bin/download-release-or-nightly-circt.sh \
-        -f circt-full-shared-linux-x64.tar.gz \
-        -i $PREFIX \
-        -v version-file \
-        -x $CYDIR/conda-reqs/circt.json \
-        -g null
+    if [ "$BUILD_CIRCT" = true ] ; then
+	echo "Building CIRCT from source, and installing to $PREFIX"
+	$CYDIR/scripts/build-circt-from-source.sh --prefix $PREFIX
+    else
+	echo "Downloading CIRCT from nightly build"
+
+	git submodule update --init $CYDIR/tools/install-circt &&
+	    $CYDIR/tools/install-circt/bin/download-release-or-nightly-circt.sh \
+		-f circt-full-static-linux-x64.tar.gz \
+		-i $PREFIX \
+		-v version-file \
+		-x $CYDIR/conda-reqs/circt.json \
+		-g null
+    fi
     exit_if_last_command_failed
 fi
 
 
 # do misc. cleanup for a "clean" git status
 if run_step "11"; then
-    begin_step "10" "Cleaning up repository"
+    begin_step "11" "Cleaning up repository"
     $CYDIR/scripts/repo-clean.sh
     exit_if_last_command_failed
 fi

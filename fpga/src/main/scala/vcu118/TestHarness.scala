@@ -1,7 +1,6 @@
 package chipyard.fpga.vcu118
 
 import chisel3._
-import chisel3.experimental.{IO}
 
 import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp, BundleBridgeSource}
 import org.chipsalliance.cde.config.{Parameters}
@@ -84,6 +83,9 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
     sourceId = IdRange(0, 1 << dp(ExtTLMem).get.master.idBits)
   )))))
   ddrNode := TLWidthWidget(dp(ExtTLMem).get.master.beatBytes) := ddrClient
+
+  /*** JTAG ***/
+  val jtagPlacedOverlay = dp(JTAGDebugOverlayKey).head.place(JTAGDebugDesignInput())
 
   // module implementation
   override lazy val module = new VCU118FPGATestHarnessImp(this)

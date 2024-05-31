@@ -20,9 +20,6 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.amba.axi4._
 
-import boom.common.{BoomTile}
-
-
 import testchipip.serdes.{CanHavePeripheryTLSerial, SerialTLKey}
 
 trait CanHaveHTIF { this: BaseSubsystem =>
@@ -83,7 +80,8 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
 {
   def coreMonitorBundles = totalTiles.values.map {
     case r: RocketTile => r.module.core.rocketImpl.coreMonitorBundle
-    case b: BoomTile => b.module.core.coreMonitorBundle
+    case b: boom.v3.common.BoomTile => b.module.core.coreMonitorBundle
+    case b: boom.v4.common.BoomTile => b.module.core.coreMonitorBundle
   }.toList
 
   // No-tile configs have to be handled specially.
@@ -123,6 +121,6 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
 }
 
 class ChipyardSubsystemModuleImp[+L <: ChipyardSubsystem](_outer: L) extends BaseSubsystemModuleImp(_outer)
-    with HasHierarchicalElementsRootContextModuleImp
-{
+    with HasHierarchicalElementsRootContextModuleImp {
+  override lazy val outer = _outer
 }

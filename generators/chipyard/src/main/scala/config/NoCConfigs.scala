@@ -240,7 +240,7 @@ class SbusMeshNoCConfig extends Config(
         "Core 9 " -> 13,
         "Core 10 " -> 14,
         "Core 11 " -> 15,
-        "serial-tl" -> 0),
+        "serial_tl" -> 0),
       outNodeMapping = ListMap(
         "system[0]" -> 5,
         "system[1]" -> 6,
@@ -251,17 +251,42 @@ class SbusMeshNoCConfig extends Config(
       topology        = Mesh2D(4, 4),
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(3) { UserVirtualChannelParams(3) }, unifiedBuffer = false),
       routerParams    = (i) => UserRouterParams(combineRCVA=true, combineSAST=true),
-      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DDimensionOrderedRouting(), 3, 1)),
+      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DDimensionOrderedRouting(), 3, 1),
+    ),
     beNoCParams = NoCParams(
       topology        = Mesh2D(4, 4),
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(2) { UserVirtualChannelParams(3) }, unifiedBuffer = false),
       routerParams    = (i) => UserRouterParams(combineRCVA=true, combineSAST=true),
-      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DDimensionOrderedRouting(), 2, 1)),
+      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DDimensionOrderedRouting(), 2, 1),
+    ),
     beDivision = 4
-  )) ++
+  ), inlineNoC = true) ++
   new freechips.rocketchip.subsystem.WithNBigCores(12) ++
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig
 )
 
+class QuadRocketSbusRingNoCConfig extends Config(
+  new constellation.soc.WithSbusNoC(constellation.protocol.SimpleTLNoCParams(
+    constellation.protocol.DiplomaticNetworkNodeMapping(
+      inNodeMapping = ListMap(
+        "Core 0 " -> 0,
+        "Core 1 " -> 1,
+        "Core 2 " -> 2,
+        "Core 3 " -> 3,
+        "serial_tl" -> 4),
+      outNodeMapping = ListMap(
+        "system[0]" -> 5,
+        "system[1]" -> 6,
+        "system[2]" -> 7,
+        "system[3]" -> 8,
+        "pbus" -> 4)), // TSI is on the pbus, so serial-tl and pbus should be on the same node
+    nocParams = NoCParams(
+      topology        = UnidirectionalTorus1D(9),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(10) { UserVirtualChannelParams(4) }),
+      routingRelation = NonblockingVirtualSubnetworksRouting(UnidirectionalTorus1DDatelineRouting(), 5, 2))
+  )) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(4) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
+  new chipyard.config.AbstractConfig)

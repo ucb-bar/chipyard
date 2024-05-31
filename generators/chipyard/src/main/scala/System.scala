@@ -38,7 +38,7 @@ class ChipyardSystem(implicit p: Parameters) extends ChipyardSubsystem
 /**
  * Base top module implementation with periphery devices and ports, and a BOOM + Rocket subsystem
  */
-class ChipyardSystemModule[+L <: ChipyardSystem](_outer: L) extends ChipyardSubsystemModuleImp(_outer)
+class ChipyardSystemModule(_outer: ChipyardSystem) extends ChipyardSubsystemModuleImp(_outer)
   with HasRTCModuleImp
   with HasExtInterruptsModuleImp
   with DontTouch
@@ -60,6 +60,7 @@ trait CanHaveMasterTLMemPort { this: BaseSubsystem =>
   private val portName = "tl_mem"
   private val device = new MemoryDevice
   private val idBits = memPortParamsOpt.map(_.master.idBits).getOrElse(1)
+  private val mbus = tlBusWrapperLocationMap.lift(MBUS).getOrElse(locateTLBusWrapper(SBUS))
 
   val memTLNode = TLManagerNode(memPortParamsOpt.map({ case MemoryPortParams(memPortParams, nMemoryChannels, _) =>
     Seq.tabulate(nMemoryChannels) { channel =>
@@ -76,15 +77,16 @@ trait CanHaveMasterTLMemPort { this: BaseSubsystem =>
          supportsPutFull    = TransferSizes(1, mbus.blockBytes),
          supportsPutPartial = TransferSizes(1, mbus.blockBytes))),
          beatBytes = memPortParams.beatBytes)
-   }
- }).toList.flatten)
+    }
+  }).toList.flatten)
 
- mbus.coupleTo(s"memory_controller_port_named_$portName") {
-   (memTLNode
-     :*= TLBuffer()
-     :*= TLSourceShrinker(1 << idBits)
-     :*= TLWidthWidget(mbus.beatBytes)
-     :*= _)
+  // disable inwards monitors from node since the class with this trait (i.e. DigitalTop)
+  // doesn't provide an implicit clock to those monitors
+  mbus.coupleTo(s"memory_controller_port_named_$portName") {
+    (DisableMonitors { implicit p => memTLNode :*= TLBuffer() }
+      :*= TLSourceShrinker(1 << idBits)
+      :*= TLWidthWidget(mbus.beatBytes)
+      :*= _)
   }
 
   val mem_tl = InModuleBody { memTLNode.makeIOs() }

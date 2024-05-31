@@ -46,13 +46,21 @@ case $1 in
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
         run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.10000.loadarch
         ;;
-    chipyard-boom)
+    chipyard-boomv3)
+        run_bmark
+        ;;
+    chipyard-boomv4)
         run_bmark
         ;;
     chipyard-shuttle)
         run_bmark ${mapping[$1]}
         ;;
-    chipyard-dmiboom)
+    chipyard-dmiboomv3)
+        # Test checkpoint-restore
+        $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
+        run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.10000.loadarch
+        ;;
+    chipyard-dmiboomv4)
         # Test checkpoint-restore
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
         run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.10000.loadarch
@@ -69,9 +77,6 @@ case $1 in
     rocketchip)
         run_bmark
         ;;
-    chipyard-hwacha)
-        make run-rv64uv-p-asm-tests -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS
-        ;;
     chipyard-gemmini)
         GEMMINI_SOFTWARE_DIR=$LOCAL_SIM_DIR/../../generators/gemmini/software/gemmini-rocc-tests
         rm -rf $GEMMINI_SOFTWARE_DIR/riscv-tests
@@ -79,10 +84,6 @@ case $1 in
         run_binary BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/aligned-baremetal
         run_binary BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/raw_hazard-baremetal
         run_binary BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal
-        ;;
-    chipyard-sha3)
-        (cd $LOCAL_CHIPYARD_DIR/generators/sha3/software && ./build.sh)
-        run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/sha3/software/tests/bare/sha3-rocc.riscv
         ;;
     chipyard-mempress)
         (cd $LOCAL_CHIPYARD_DIR/generators/mempress/software/src && make)
@@ -122,10 +123,21 @@ case $1 in
         make -C $LOCAL_CHIPYARD_DIR/tests
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/symmetric.riscv LOADMEM=1
         ;;
+    chipyard-llcchiplet)
+        make -C $LOCAL_CHIPYARD_DIR/tests
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv LOADMEM=1
+        ;;
+    chipyard-rerocc)
+        make -C $LOCAL_CHIPYARD_DIR/generators/rerocc/tests
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/rerocc/tests/rerocc.riscv LOADMEM=1
+        ;;
     tracegen)
         run_tracegen
         ;;
-    tracegen-boom)
+    tracegen-boomv3)
+        run_tracegen
+        ;;
+    tracegen-boomv4)
         run_tracegen
         ;;
     chipyard-cva6)

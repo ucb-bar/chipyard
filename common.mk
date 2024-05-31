@@ -16,10 +16,8 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_LDFLAGS         = additional LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES         = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
-"   ENABLE_CUSTOM_FIRRTL_PASS = if set, enable custom firrtl passes (SFC lowers to LowFIRRTL & MFC converts to Verilog)" \
 "   ENABLE_YOSYS_FLOW         = if set, add compilation flags to enable the vlsi flow for yosys(tutorial flow)" \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
-"   EXTRA_BASE_FIRRTL_OPTIONS = additional options to pass to the Scala FIRRTL compiler" \
 "   MFC_BASE_LOWERING_OPTIONS = override lowering options to pass to the MLIR FIRRTL compiler" \
 "   ASPECTS                   = comma separated list of Chisel aspect flows to run (e.x. chipyard.upf.ChipTopUPFAspect)"
 
@@ -88,12 +86,12 @@ CHECK_SUBMODULES_COMMAND = echo "Checking all submodules in generators/ are init
 
 SCALA_EXT = scala
 VLOG_EXT = sv v
-CHIPYARD_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim fpga/fpga-shells fpga/src)
+CHIPYARD_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim/src sims/firesim/sim/firesim-lib sims/firesim/sim/midas fpga/fpga-shells fpga/src tools/stage tools/stage-chisel3)
 CHIPYARD_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(CHIPYARD_SOURCE_DIRS),$(SCALA_EXT))
 CHIPYARD_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(CHIPYARD_SOURCE_DIRS),$(VLOG_EXT))
-BARSTOOLS_SOURCE_DIRS = $(addprefix $(base_dir)/,tools/barstools)
-BARSTOOLS_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(BARSTOOLS_SOURCE_DIRS),$(SCALA_EXT))
-BARSTOOLS_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(BARSTOOLS_SOURCE_DIRS),$(VLOG_EXT))
+TAPEOUT_SOURCE_DIRS = $(addprefix $(base_dir)/,tools/tapeout)
+TAPEOUT_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(TAPEOUT_SOURCE_DIRS),$(SCALA_EXT))
+TAPEOUT_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(TAPEOUT_SOURCE_DIRS),$(VLOG_EXT))
 # This assumes no SBT meta-build sources
 SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools)
 SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
@@ -121,13 +119,13 @@ $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip
 #########################################################################################
 # compile scala jars
 #########################################################################################
-$(CHIPYARD_CLASSPATH_TARGETS) &: $(CHIPYARD_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(CHIPYARD_VLOG_SOURCES)
+$(GENERATOR_CLASSPATH) &: $(CHIPYARD_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(CHIPYARD_VLOG_SOURCES)
 	$(CHECK_SUBMODULES_COMMAND)
 	mkdir -p $(dir $@)
-	$(call run_sbt_assembly,$(SBT_PROJECT),$(CHIPYARD_CLASSPATH))
+	$(call run_sbt_assembly,$(SBT_PROJECT),$(GENERATOR_CLASSPATH))
 
 # order only dependency between sbt runs needed to avoid concurrent sbt runs
-$(TAPEOUT_CLASSPATH_TARGETS) &: $(BARSTOOLS_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(BARSTOOLS_VLOG_SOURCES) | $(CHIPYARD_CLASSPATH_TARGETS)
+$(TAPEOUT_CLASSPATH) &: $(TAPEOUT_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(TAPEOUT_VLOG_SOURCES) | $(GENERATOR_CLASSPATH)
 	mkdir -p $(dir $@)
 	$(call run_sbt_assembly,tapeout,$(TAPEOUT_CLASSPATH))
 
@@ -135,9 +133,9 @@ $(TAPEOUT_CLASSPATH_TARGETS) &: $(BARSTOOLS_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEP
 # verilog generation pipeline
 #########################################################################################
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-$(FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(CHIPYARD_CLASSPATH_TARGETS) $(EXTRA_GENERATOR_REQS)
+$(FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(GENERATOR_CLASSPATH) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
-	(set -o pipefail && $(call run_jar_scala_main,$(CHIPYARD_CLASSPATH),$(GENERATOR_PACKAGE).Generator,\
+	(set -o pipefail && $(call run_jar_scala_main,$(GENERATOR_CLASSPATH),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
 		--name $(long_name) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
@@ -161,20 +159,11 @@ define mfc_extra_anno_contents
 	}
 ]
 endef
-define sfc_extra_low_transforms_anno_contents
-[
-	{
-		"class": "firrtl.stage.RunFirrtlTransformAnnotation",
-		"transform": "barstools.tapeout.transforms.ExtraLowTransforms"
-	}
-]
-endef
 export mfc_extra_anno_contents
 export sfc_extra_low_transforms_anno_contents
-$(EXTRA_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) &: $(ANNO_FILE)
+$(FINAL_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) &: $(ANNO_FILE)
 	echo "$$mfc_extra_anno_contents" > $(MFC_EXTRA_ANNO_FILE)
-	echo "$$sfc_extra_low_transforms_anno_contents" > $(SFC_EXTRA_ANNO_FILE)
-	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(EXTRA_ANNO_FILE)
+	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
 
 .PHONY: firrtl
 firrtl: $(FIRRTL_FILE) $(FINAL_ANNO_FILE)
@@ -192,30 +181,9 @@ SFC_MFC_TARGETS = \
 	$(MFC_BB_MODS_FILELIST) \
 	$(GEN_COLLATERAL_DIR)
 
-SFC_REPL_SEQ_MEM = --infer-rw --repl-seq-mem -c:$(MODEL):-o:$(SFC_SMEMS_CONF)
-MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,locationInfoStyle=wrapInAtSquareBracket
+MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,disallowPortDeclSharing,locationInfoStyle=wrapInAtSquareBracket
 
 # DOC include start: FirrtlCompiler
-# There are two possible cases for this step. In the first case, SFC
-# compiles Chisel to CHIRRTL, and MFC compiles CHIRRTL to Verilog. Otherwise,
-# when custom FIRRTL transforms are included or if a Fixed type is used within
-# the dut, SFC compiles Chisel to LowFIRRTL and MFC compiles it to Verilog.
-# Users can indicate to the Makefile of custom FIRRTL transforms by setting the
-# "ENABLE_CUSTOM_FIRRTL_PASS" variable.
-#
-# hack: lower to low firrtl if Fixed types are found
-# hack: when using dontTouch, io.cpu annotations are not removed by SFC,
-# hence we remove them manually by using jq before passing them to firtool
-
-$(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) &: $(FIRRTL_FILE)
-ifeq (,$(ENABLE_CUSTOM_FIRRTL_PASS))
-	echo $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), low, none) > $(SFC_LEVEL)
-	echo "$(EXTRA_BASE_FIRRTL_OPTIONS)" $(if $(shell grep "Fixed<" $(FIRRTL_FILE)), "$(SFC_REPL_SEQ_MEM)",) > $(EXTRA_FIRRTL_OPTIONS)
-else
-	echo low > $(SFC_LEVEL)
-	echo "$(EXTRA_BASE_FIRRTL_OPTIONS)" "$(SFC_REPL_SEQ_MEM)" > $(EXTRA_FIRRTL_OPTIONS)
-endif
-
 $(MFC_LOWERING_OPTIONS):
 	mkdir -p $(dir $@)
 ifeq (,$(ENABLE_YOSYS_FLOW))
@@ -224,29 +192,8 @@ else
 	echo "$(MFC_BASE_LOWERING_OPTIONS),disallowPackedArrays" > $@
 endif
 
-$(FINAL_ANNO_FILE): $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) $(SFC_LEVEL)
-	if [ $(shell cat $(SFC_LEVEL)) = low ]; then jq -s '[.[][]]' $(EXTRA_ANNO_FILE) $(SFC_EXTRA_ANNO_FILE) > $@; fi
-	if [ $(shell cat $(SFC_LEVEL)) = none ]; then cat $(EXTRA_ANNO_FILE) > $@; fi
-	touch $@
-
-$(SFC_MFC_TARGETS) &: private TMP_DIR := $(shell mktemp -d -t cy-XXXXXXXX)
-$(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(SFC_LEVEL) $(EXTRA_FIRRTL_OPTIONS) $(MFC_LOWERING_OPTIONS)
+$(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
-	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.tapeout.transforms.GenerateModelStageMain,\
-		--no-dedup \
-		--output-file $(SFC_FIRRTL_BASENAME) \
-		--output-annotation-file $(SFC_ANNO_FILE) \
-		--target-dir $(GEN_COLLATERAL_DIR) \
-		--input-file $(FIRRTL_FILE) \
-		--annotation-file $(FINAL_ANNO_FILE) \
-		--log-level $(FIRRTL_LOGLEVEL) \
-		--allow-unrecognized-annotations \
-		-X $(shell cat $(SFC_LEVEL)) \
-		$(shell cat $(EXTRA_FIRRTL_OPTIONS)))
-	-mv $(SFC_FIRRTL_BASENAME).lo.fir $(SFC_FIRRTL_FILE) 2> /dev/null # Optionally change file type when SFC generates LowFIRRTL
-	@if [ $(shell cat $(SFC_LEVEL)) = low ]; then cat $(SFC_ANNO_FILE) | jq 'del(.[] | select(.target | test("io.cpu"))?)' > $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json; fi
-	@if [ $(shell cat $(SFC_LEVEL)) = low ]; then cat $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json | jq 'del(.[] | select(.class | test("SRAMAnnotation"))?)' > $(TMP_DIR)/unnec-anno-deleted2.sfc.anno.json; fi
-	@if [ $(shell cat $(SFC_LEVEL)) = low ]; then cat $(TMP_DIR)/unnec-anno-deleted2.sfc.anno.json > $(SFC_ANNO_FILE) && rm $(TMP_DIR)/unnec-anno-deleted.sfc.anno.json && rm $(TMP_DIR)/unnec-anno-deleted2.sfc.anno.json; fi
 	firtool \
 		--format=fir \
 		--export-module-hierarchy \
@@ -258,11 +205,10 @@ $(SFC_MFC_TARGETS) &: $(TAPEOUT_CLASSPATH_TARGETS) $(FIRRTL_FILE) $(FINAL_ANNO_F
 		--lowering-options=$(shell cat $(MFC_LOWERING_OPTIONS)) \
 		--repl-seq-mem \
 		--repl-seq-mem-file=$(MFC_SMEMS_CONF) \
-		--annotation-file=$(SFC_ANNO_FILE) \
+		--annotation-file=$(FINAL_ANNO_FILE) \
 		--split-verilog \
 		-o $(GEN_COLLATERAL_DIR) \
-		$(SFC_FIRRTL_FILE)
-	-mv $(SFC_SMEMS_CONF) $(MFC_SMEMS_CONF) 2> /dev/null
+		$(FIRRTL_FILE)
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 	touch $(MFC_BB_MODS_FILELIST) # if there are no BB's then the file might not be generated, instead always generate it
 # DOC include end: FirrtlCompiler
@@ -296,20 +242,27 @@ $(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JS
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 TOP_MACROCOMPILER_MODE ?= --mode synflops
-$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH_TARGETS) $(TOP_SMEMS_CONF)
-	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
+$(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH) $(TOP_SMEMS_CONF)
+	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),tapeout.macros.MacroCompiler,-n $(TOP_SMEMS_CONF) -v $(TOP_SMEMS_FILE) -f $(TOP_SMEMS_FIR) $(TOP_MACROCOMPILER_MODE))
+	touch $(TOP_SMEMS_FILE) $(TOP_SMEMS_FIR)
 
 MODEL_MACROCOMPILER_MODE = --mode synflops
-$(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH_TARGETS) $(MODEL_SMEMS_CONF) | $(TOP_SMEMS_FILE)
-	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),barstools.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
+$(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR) &: $(TAPEOUT_CLASSPATH) $(MODEL_SMEMS_CONF)
+	$(call run_jar_scala_main,$(TAPEOUT_CLASSPATH),tapeout.macros.MacroCompiler, -n $(MODEL_SMEMS_CONF) -v $(MODEL_SMEMS_FILE) -f $(MODEL_SMEMS_FIR) $(MODEL_MACROCOMPILER_MODE))
+	touch $(MODEL_SMEMS_FILE) $(MODEL_SMEMS_FIR)
 
 ########################################################################################
 # remove duplicate files and headers in list of simulation file inputs
 # note: {MODEL,TOP}_BB_MODS_FILELIST is added as a req. so that the files get generated,
 #       however it is really unneeded since ALL_MODS_FILELIST includes all BB files
 ########################################################################################
-$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE) $(BB_MODS_FILELIST)
-	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' > $@
+$(sim_common_files): $(sim_files) $(ALL_MODS_FILELIST) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE) $(BB_MODS_FILELIST) $(EXT_FILELISTS)
+ifneq (,$(EXT_FILELISTS))
+	cat $(EXT_FILELISTS) > $@
+else
+	rm -f $@
+endif
+	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' >> $@
 	echo "$(TOP_SMEMS_FILE)" >> $@
 	echo "$(MODEL_SMEMS_FILE)" >> $@
 
@@ -369,14 +322,27 @@ run-binary: check-binary $(BINARY).run
 run-binaries: check-binaries $(addsuffix .run,$(BINARIES))
 
 %.run: %.check-exists $(SIM_PREREQ) | $(output_dir)
-	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(call get_common_sim_flags,$*) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $* </dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) \
+		$(PERMISSIVE_ON) \
+		$(call get_common_sim_flags,$*) \
+		$(VERBOSE_FLAGS) \
+		$(PERMISSIVE_OFF) \
+		$* \
+		$(BINARY_ARGS) \
+		</dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
 
 # run simulator as fast as possible (no insn disassembly)
 run-binary-fast: check-binary $(BINARY).run.fast
 run-binaries-fast: check-binaries $(addsuffix .run.fast,$(BINARIES))
 
 %.run.fast: %.check-exists $(SIM_PREREQ) | $(output_dir)
-	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(call get_common_sim_flags,$*) $(PERMISSIVE_OFF) $* </dev/null | tee $(call get_sim_out_name,$*).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) \
+		$(PERMISSIVE_ON) \
+		$(call get_common_sim_flags,$*) \
+		$(PERMISSIVE_OFF) \
+		$* \
+		$(BINARY_ARGS) \
+		</dev/null | tee $(call get_sim_out_name,$*).log)
 
 # run simulator with as much debug info as possible
 run-binary-debug: check-binary $(BINARY).run.debug
@@ -384,7 +350,15 @@ run-binaries-debug: check-binaries $(addsuffix .run.debug,$(BINARIES))
 
 %.run.debug: %.check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
 	if [ "$*" != "none" ]; then riscv64-unknown-elf-objdump -D -S $* > $(call get_sim_out_name,$*).dump ; fi
-	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) $(PERMISSIVE_ON) $(call get_common_sim_flags,$*) $(VERBOSE_FLAGS) $(call get_waveform_flag,$(call get_sim_out_name,$*)) $(PERMISSIVE_OFF) $* </dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) \
+		$(PERMISSIVE_ON) \
+		$(call get_common_sim_flags,$*) \
+		$(VERBOSE_FLAGS) \
+		$(call get_waveform_flag,$(call get_sim_out_name,$*)) \
+		$(PERMISSIVE_OFF) \
+		$* \
+		$(BINARY_ARGS) \
+		</dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 

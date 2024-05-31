@@ -15,7 +15,7 @@ import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
 import freechips.rocketchip.util.{ResetCatchAndSync}
 import sifive.blocks.devices.uart._
 
-import testchipip.serdes.{ExternalSyncSerialIO}
+import testchipip.serdes.{ExternalSyncPhitIO}
 import testchipip.tsi.{SerialRAM}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 
@@ -26,7 +26,7 @@ import firesim.configs.MemModelKey
 import tracegen.{TraceGenSystemModuleImp}
 import cva6.CVA6Tile
 
-import barstools.iocell.chisel._
+import chipyard.iocell._
 import chipyard.iobinders._
 import chipyard._
 import chipyard.harness._
@@ -69,7 +69,7 @@ class WithFireSimIOCellModels extends Config((site, here, up) => {
 class WithTSIBridgeAndHarnessRAMOverSerialTL extends HarnessBinder({
   case (th: FireSim, port: SerialTLPort, chipId: Int) => {
     port.io match {
-      case io: ExternalSyncSerialIO => {
+      case io: ExternalSyncPhitIO => {
         io.clock_in := th.harnessBinderClock
         val ram = Module(LazyModule(new SerialRAM(port.serdesser, port.params)(port.serdesser.p)).module)
         ram.io.ser.in <> io.out
