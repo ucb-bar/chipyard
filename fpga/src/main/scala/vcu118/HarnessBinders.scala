@@ -6,8 +6,11 @@ import chisel3.experimental.{BaseModule}
 import freechips.rocketchip.util.{HeterogeneousBag}
 import freechips.rocketchip.tilelink.{TLBundle}
 
-import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp, UARTPortIO}
+import sifive.fpgashells.shell._
+import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp, UARTPortIO, UARTParams}
 import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
+
+import freechips.rocketchip.diplomacy.{LazyRawModuleImp}
 
 import chipyard._
 import chipyard.harness._
@@ -34,5 +37,29 @@ class WithDDRMem extends HarnessBinder({
     val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
     bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
     ddrClientBundle <> port.io
+  }
+})
+
+//Bare Metal Extension
+
+class WithVCU118UARTTSI extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: UARTTSIPort, chipId: Int) => {
+    val rawModule = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[VCU118FPGATestHarness]
+    val harnessIO = IO(new UARTPortIO(port.io.uartParams)).suggestName("uart_tsi")
+    harnessIO <> port.io.uart
+    val packagePinsWithPackageIOs = Seq(
+      ("AW25" , IOPin(harnessIO.rxd)),
+      ("BB21", IOPin(harnessIO.txd)))
+    packagePinsWithPackageIOs foreach { case (pin, io) => {
+      rawModule.xdc.addPackagePin(io, pin)
+      rawModule.xdc.addIOStandard(io, "LVCMOS18")
+      rawModule.xdc.addIOB(io)
+    } }
+    // TODO add LEDs in for the TSI connection on the VCU118
+    // rawModule.other_leds(1) := port.io.dropped
+    // rawModule.other_leds(9) := port.io.tsi2tl_state(0)
+    // rawModule.other_leds(10) := port.io.tsi2tl_state(1)
+    // rawModule.other_leds(11) := port.io.tsi2tl_state(2)
+    // rawModule.other_leds(12) := port.io.tsi2tl_state(3)
   }
 })
