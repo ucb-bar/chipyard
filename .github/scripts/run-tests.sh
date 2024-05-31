@@ -127,6 +127,10 @@ case $1 in
         make -C $LOCAL_CHIPYARD_DIR/tests
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv LOADMEM=1
         ;;
+    chipyard-rerocc)
+        make -C $LOCAL_CHIPYARD_DIR/generators/rerocc/tests
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/rerocc/tests/rerocc.riscv LOADMEM=1
+        ;;
     tracegen)
         run_tracegen
         ;;

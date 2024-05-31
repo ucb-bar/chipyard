@@ -37,7 +37,8 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesHierarchicalElement
 
   // Set up clock domain
   private val tlbus = locateTLBusWrapper(prciParams.slaveWhere)
-  val prci_ctrl_domain = tlbus.generateSynchronousDomain.suggestName("chipyard_prcictrl_domain")
+  val prci_ctrl_domain = tlbus.generateSynchronousDomain("ChipyardPRCICtrl")
+    .suggestName("chipyard_prcictrl_domain")
 
   val prci_ctrl_bus = Option.when(prciParams.generatePRCIXBar) { prci_ctrl_domain { TLXbar() } }
   prci_ctrl_bus.foreach(xbar => tlbus.coupleTo("prci_ctrl") { (xbar
