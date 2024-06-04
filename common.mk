@@ -323,7 +323,7 @@ get_common_sim_flags = $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(call get_l
 
 # run normal binary with hardware-logged insn dissassembly
 run-binary: check-binary $(BINARY).run
-run-binaries: check-binaries $(addsuffix .run,$(BINARIES))
+run-binaries: check-binaries $(addsuffix .run,$(wildcard $(BINARIES)))
 
 %.run: %.check-exists $(SIM_PREREQ) | $(output_dir)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) \
@@ -337,7 +337,7 @@ run-binaries: check-binaries $(addsuffix .run,$(BINARIES))
 
 # run simulator as fast as possible (no insn disassembly)
 run-binary-fast: check-binary $(BINARY).run.fast
-run-binaries-fast: check-binaries $(addsuffix .run.fast,$(BINARIES))
+run-binaries-fast: check-binaries $(addsuffix .run.fast,$(wildcard $(BINARIES)))
 
 %.run.fast: %.check-exists $(SIM_PREREQ) | $(output_dir)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) \
@@ -350,7 +350,7 @@ run-binaries-fast: check-binaries $(addsuffix .run.fast,$(BINARIES))
 
 # run simulator with as much debug info as possible
 run-binary-debug: check-binary $(BINARY).run.debug
-run-binaries-debug: check-binaries $(addsuffix .run.debug,$(BINARIES))
+run-binaries-debug: check-binaries $(addsuffix .run.debug,$(wildcard $(BINARIES)))
 
 %.run.debug: %.check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
 	if [ "$*" != "none" ]; then riscv64-unknown-elf-objdump -D -S $* > $(call get_sim_out_name,$*).dump ; fi
