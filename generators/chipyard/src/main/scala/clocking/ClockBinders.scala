@@ -27,9 +27,9 @@ class WithPLLSelectorDividerClockGenerator(enable: Boolean = true) extends Overr
     val clockSelector = system.prci_ctrl_domain { LazyModule(new TLClockSelector(baseAddress + 0x30000, tlbus.beatBytes, enable=enable)) }
     val pllCtrl       = system.prci_ctrl_domain { LazyModule(new FakePLLCtrl    (baseAddress + 0x40000, tlbus.beatBytes)) }
 
-    clockDivider.tlNode  := system.prci_ctrl_domain { TLFragmenter(tlbus.beatBytes, tlbus.blockBytes) := system.prci_ctrl_bus.get }
-    clockSelector.tlNode := system.prci_ctrl_domain { TLFragmenter(tlbus.beatBytes, tlbus.blockBytes) := system.prci_ctrl_bus.get }
-    pllCtrl.tlNode       := system.prci_ctrl_domain { TLFragmenter(tlbus.beatBytes, tlbus.blockBytes) := system.prci_ctrl_bus.get }
+    clockDivider.tlNode  := system.prci_ctrl_domain { TLFragmenter(tlbus, Some("ClockDivider")) := system.prci_ctrl_bus.get }
+    clockSelector.tlNode := system.prci_ctrl_domain { TLFragmenter(tlbus, Some("ClockSelector")) := system.prci_ctrl_bus.get }
+    pllCtrl.tlNode       := system.prci_ctrl_domain { TLFragmenter(tlbus, Some("PLLCtrl")) := system.prci_ctrl_bus.get }
 
     system.chiptopClockGroupsNode := clockDivider.clockNode := clockSelector.clockNode
 
