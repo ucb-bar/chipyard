@@ -99,22 +99,42 @@ class LargeSparseDenseEinsteinRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class SpDenseMVEinsteinRocketConfig extends Config(
-  new einstein.SpDenseMVEinsteinConfig(size = 2) ++
+  new einstein.SpDenseMVEinsteinConfig(size = 2, isFloat = false) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class SmallSpDenseMVEinsteinRocketConfig extends Config(
-  new einstein.SpDenseMVEinsteinConfig(size = 4) ++
+  new einstein.SpDenseMVEinsteinConfig(size = 4, isFloat = false) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class MidSpDenseMVEinsteinRocketConfig extends Config(
-  new einstein.SpDenseMVEinsteinConfig(size = 8) ++
+  new einstein.SpDenseMVEinsteinConfig(size = 8, isFloat = false) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class LargeSpDenseMVEinsteinRocketConfig extends Config(
-  new einstein.SpDenseMVEinsteinConfig(size = 16) ++
+  new einstein.SpDenseMVEinsteinConfig(size = 16, isFloat = false) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class SpDenseMVFloatEinsteinRocketConfig extends Config(
+  new einstein.SpDenseMVEinsteinConfig(size = 2, isFloat = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class SmallSpDenseMVFloatEinsteinRocketConfig extends Config(
+  new einstein.SpDenseMVEinsteinConfig(size = 4, isFloat = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class MidSpDenseMVFloatEinsteinRocketConfig extends Config(
+  new einstein.SpDenseMVEinsteinConfig(size = 8, isFloat = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class LargeSpDenseMVFloatEinsteinRocketConfig extends Config(
+  new einstein.SpDenseMVEinsteinConfig(size = 16, isFloat = true) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
@@ -171,4 +191,74 @@ class LargeOuterSpaceMergerEinsteinRocketConfig extends Config(
 class SCNNEinsteinRocketConfig extends Config(
   new einstein.SCNNEinsteinConfig() ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class ExpensiveSpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = false, throughput = 4, nLevels = 2, check_result = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class CheapSpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = true, throughput = 4, nLevels = 2, check_result = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class TinyExpensiveSpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = false, throughput = 16, nLevels = 1, check_result = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class TinyCheapSpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = true, throughput = 16, nLevels = 1, check_result = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class SmallExpensiveSpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = false, throughput = 16, nLevels = 4, check_result = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class SmallCheapSpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = true, throughput = 16, nLevels = 4, check_result = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class MidExpensiveSpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = false, throughput = 16, nLevels = 5, check_result = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class MidCheapSpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = true, throughput = 16, nLevels = 5, check_result = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class LargeExpensiveSpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = false, throughput = 16, nLevels = 6, check_result = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new chipyard.config.AbstractConfig)
+
+class LargeCheapSpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = true, throughput = 16, nLevels = 6, check_result = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new chipyard.config.AbstractConfig)
+
+class LargeExpensiveDummySpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = false, throughput = 16, nLevels = 6, check_result = false) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new chipyard.config.AbstractConfig)
+
+class LargeCheapDummySpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = true, throughput = 16, nLevels = 6, check_result = false) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new chipyard.config.AbstractConfig)
+
+class LargerCheapDummySpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = true, throughput = 32, nLevels = 6, check_result = false) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new chipyard.config.AbstractConfig)
