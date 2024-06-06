@@ -14,7 +14,7 @@ import freechips.rocketchip.tilelink._
 import freechips.rocketchip.interrupts._
 import freechips.rocketchip.util._
 import freechips.rocketchip.tile._
-import freechips.rocketchip.prci.ClockSinkParameters
+import freechips.rocketchip.prci._
 
 case class SpikeCoreParams() extends CoreParams {
   val useVM = true

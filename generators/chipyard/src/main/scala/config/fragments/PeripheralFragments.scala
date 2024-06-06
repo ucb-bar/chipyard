@@ -7,7 +7,7 @@ import chisel3.util.{log2Up}
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.devices.tilelink.{BootROMLocated, PLICKey, CLINTKey}
 import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI, JtagDTMKey, JtagDTMConfig}
-import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
+import freechips.rocketchip.prci.{AsynchronousCrossing}
 import chipyard.stage.phases.TargetDirKey
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile.{XLen}

@@ -1,7 +1,6 @@
 package chipyard
 
 import org.chipsalliance.cde.config.{Config}
-import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 import freechips.rocketchip.subsystem.{MBUS}
 
 // ---------------------------------------------------------
