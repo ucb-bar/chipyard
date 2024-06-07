@@ -93,7 +93,7 @@ TAPEOUT_SOURCE_DIRS = $(addprefix $(base_dir)/,tools/tapeout)
 TAPEOUT_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(TAPEOUT_SOURCE_DIRS),$(SCALA_EXT))
 TAPEOUT_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(TAPEOUT_SOURCE_DIRS),$(VLOG_EXT))
 # This assumes no SBT meta-build sources
-SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools)
+SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators tools)
 SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
 
 #########################################################################################
