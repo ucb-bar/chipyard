@@ -39,7 +39,7 @@ VCS_NONCC_OPTS = \
 	-j36 \
 	-notice \
 	-line \
-	+lint=all,noVCDE,noONGS,noUI,noPCTIO-L,noPCTI-L \
+	+lint=all,noVCDE,noONGS,noUI,noPCTIO-L,noPCTI-L,noNS \
 	-error=PCWM-L \
 	-error=noZMMCM \
 	-timescale=1ns/10ps \
