@@ -1,6 +1,7 @@
 import sys
 
-PRINT_BUF = 0x4000 / 4
+# PRINT_BUF = 0x4000 / 4
+PRINT_BUF = 0x10000 / 4
 
 def parse_log_file(log_file_path):
     target_string = ''  # Initialize the string we'll build from hex values
@@ -24,7 +25,7 @@ def parse_log_file(log_file_path):
 
                 # print(rs1_data_last_element)
                 for rs1, rs2, byteen in zip(rs1_data_elts, rs2_data_elts, byteen_elts):
-                    if '0x3fc0' in rs1:
+                    if int(rs1, 16) >> 18 == 0xff0:
                         offset = (int(rs1, 16) - PRINT_BUF) % 65536
                         if offset < 0 or offset >= 1024:
                             continue
@@ -89,7 +90,7 @@ def main():
         sys.exit(1)
 
     log_file_path = sys.argv[1]
-    if log_file_path[-4:] == "log":
+    if log_file_path[-4:] == ".log":
         print(parse_log_file(log_file_path))
     else:
         print(parse_out_file(log_file_path))
