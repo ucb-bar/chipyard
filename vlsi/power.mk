@@ -3,8 +3,11 @@ POWER_RTL_CONF = $(OBJ_DIR)/power-rtl-inputs.yml
 POWER_SYN_CONF = $(OBJ_DIR)/power-syn-inputs.yml
 POWER_PAR_CONF = $(OBJ_DIR)/power-par-inputs.yml
 POWER_PAR_HIER_CONF = $(OBJ_DIR)/power-par-$(VLSI_TOP)-inputs.yml
+REUSE_DB = no
 
 .PHONY: $(POWER_CONF) $(POWER_RTL_CONF) $(POWER_SYN_CONF) $(POWER_PAR_CONF) $(POWER_PAR_HIER_CONF)
+
+include radiance.mk
 
 $(POWER_CONF): $(VLSI_RTL) check-binary
 	mkdir -p $(dir $@)
@@ -21,19 +24,30 @@ else
 endif
 	echo "  ]" >> $@
 endif
+ifneq ($(START_TIME), )
+	echo "  start_times: ['$(START_TIME)']" >> $@
+else
 	echo "  start_times: ['0ns']" >> $@
+endif
+ifneq ($(END_TIME), )
+	echo "  end_times: [" >> $@
+	echo "    '$(END_TIME)'" >> $@
+	echo "  ]" >> $@
+else
 	echo "  end_times: [" >> $@
 	echo "    '`bc <<< $(TIMEOUT_CYCLES)*$(CLOCK_PERIOD)`ns'" >> $@
 	echo "  ]" >> $@
+endif
 
 $(POWER_RTL_CONF): $(VLSI_RTL)
 	echo "vlsi.core.power_tool: hammer.power.joules" > $@
 	echo "power.inputs:" >> $@
 	echo "  level: rtl" >> $@
+	echo "  reuse_db: $(REUSE_DB)" >> $@
 	echo "  input_files:" >> $@
-	for x in $$(cat $(VLSI_RTL)); do \
+	for x in $$(cat $(build_dir)/syn.f); do \
 		echo '    - "'$$x'"' >> $@; \
-	done
+	done # for x in $$(cat $(VLSI_RTL)); do \
 
 $(POWER_SYN_CONF): $(VLSI_RTL)
 	echo "vlsi.core.power_tool: hammer.power.joules" > $@

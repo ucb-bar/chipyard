@@ -4,13 +4,16 @@ SIM_TIMING_CONF = $(OBJ_DIR)/sim-timing-inputs.yml
 
 .PHONY: $(SIM_CONF) $(SIM_DEBUG_CONF) $(SIM_TIMING_CONF)
 
+include radiance.mk
+
 $(SIM_CONF): $(sim_common_files) check-binary
 	mkdir -p $(dir $@)
 	echo "sim.inputs:" > $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  tb_name: ''" >> $@  # don't specify -top
 	echo "  input_files:" >> $@
-	for x in $$(cat $(MODEL_MODS_FILELIST) | sort -u) $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
+	# plusarg_reader is bugged, TODO perhaps raise the issue again in chipyard #1388 and #1442
+	for x in $$(cat $(MODEL_MODS_FILELIST) | grep -v cpp | sort -u) $(GEN_COLLATERAL_DIR)/plusarg_reader.v $(GEN_COLLATERAL_DIR)/GenericDeserializer.sv $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  input_files_meta: 'append'" >> $@
