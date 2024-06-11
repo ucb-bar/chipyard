@@ -30,7 +30,7 @@ dependencies:
     - bison
     - flex
     - expat
-    - python>=3.9
+    - python>=3.9,<3.11
     - bc
     - unzip
     - patch
