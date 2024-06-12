@@ -218,6 +218,7 @@ $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILEL
 		--model-hier-json $(MFC_MODEL_HRCHY_JSON) \
 		--top-hier-json $(MFC_TOP_HRCHY_JSON) \
 		--in-all-filelist $(MFC_FILELIST) \
+		--in-bb-filelist $(MFC_BB_MODS_FILELIST) \
 		--dut $(TOP) \
 		--model $(MODEL) \
 		--target-dir $(GEN_COLLATERAL_DIR) \
