@@ -210,10 +210,6 @@ EXT_INCDIRS ?=
 BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img bootrom.radiance.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
 
-# custom *.bin argument files needed for Radiance
-ARGSROM_FILES   ?= args.bin op_a.bin op_b.bin
-ARGSROM_TARGETS ?= $(addprefix $(base_dir)/sims/, $(ARGSROM_FILES))
-
 # files that contain lists of files needed for VCS or Verilator simulation
 SIM_FILE_REQS =
 sim_files              ?= $(build_dir)/sim_files.f
