@@ -169,7 +169,8 @@ SFC_MFC_TARGETS = \
 	$(MFC_MODEL_SMEMS_JSON) \
 	$(MFC_FILELIST) \
 	$(MFC_BB_MODS_FILELIST) \
-	$(GEN_COLLATERAL_DIR)
+	$(GEN_COLLATERAL_DIR) \
+	$(FIRTOOL_LOG_FILE)
 
 MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,disallowPortDeclSharing,locationInfoStyle=wrapInAtSquareBracket
 
@@ -184,7 +185,7 @@ endif
 
 $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
-	firtool \
+	(set -o pipefail && firtool \
 		--format=fir \
 		--export-module-hierarchy \
 		--verify-each=true \
@@ -198,7 +199,7 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 		--annotation-file=$(FINAL_ANNO_FILE) \
 		--split-verilog \
 		-o $(GEN_COLLATERAL_DIR) \
-		$(FIRRTL_FILE)
+		$(FIRRTL_FILE) |& tee $(FIRTOOL_LOG_FILE))
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 	touch $(MFC_BB_MODS_FILELIST) # if there are no BB's then the file might not be generated, instead always generate it
 # DOC include end: FirrtlCompiler
