@@ -59,13 +59,25 @@ class RadianceClusterConfig extends Config(
   new radiance.subsystem.WithRadianceCluster(0) ++
   new RadianceBaseConfig)
 
-class Radiance16KClusterConfig extends Config(
+class RadianceClusterSmem16KConfig extends Config(
   new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 4, tileSize = 4) ++
   new radiance.subsystem.WithRadianceCores(2, location = InCluster(0), useVxCache = false) ++
   new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 16 << 10, numBanks = 4, numWords = 8, serializeUnaligned = false) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 8)++
   new radiance.subsystem.WithRadianceCluster(0) ++
+  new RadianceBaseConfig)
+
+class RadianceTwoClustersSmem16KConfig extends Config(
+  new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 4, tileSize = 4) ++
+  new radiance.subsystem.WithRadianceCores(2, location = InCluster(0), useVxCache = false) ++
+  new radiance.subsystem.WithRadianceGemmini(location = InCluster(1), dim = 8, accSizeInKB = 4, tileSize = 4) ++
+  new radiance.subsystem.WithRadianceCores(2, location = InCluster(1), useVxCache = false) ++
+  new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 16 << 10, numBanks = 4, numWords = 8, serializeUnaligned = false) ++
+  new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
+  new radiance.subsystem.WithVortexL1Banks(nBanks = 8)++
+  new radiance.subsystem.WithRadianceCluster(0) ++
+  new radiance.subsystem.WithRadianceCluster(1) ++
   new RadianceBaseConfig)
 
 class RadianceClusterConfig0 extends Config(
