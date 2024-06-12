@@ -96,16 +96,6 @@ TAPEOUT_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(TAPEOUT_SOURCE_DIRS
 SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators tools)
 SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
 
-#########################################################################################
-# SBT Server Setup (start server / rebuild proj. defs. if SBT_SOURCES change)
-#########################################################################################
-$(SBT_THIN_CLIENT_TIMESTAMP): $(SBT_SOURCES)
-ifneq (,$(wildcard $(SBT_THIN_CLIENT_TIMESTAMP)))
-	cd $(base_dir) && $(SBT) "reload"
-	touch $@
-else
-	cd $(base_dir) && $(SBT) "exit"
-endif
 
 #########################################################################################
 # copy over bootrom files
@@ -179,7 +169,8 @@ SFC_MFC_TARGETS = \
 	$(MFC_MODEL_SMEMS_JSON) \
 	$(MFC_FILELIST) \
 	$(MFC_BB_MODS_FILELIST) \
-	$(GEN_COLLATERAL_DIR)
+	$(GEN_COLLATERAL_DIR) \
+	$(FIRTOOL_LOG_FILE)
 
 MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,disallowPortDeclSharing,locationInfoStyle=wrapInAtSquareBracket
 
@@ -194,7 +185,7 @@ endif
 
 $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
-	firtool \
+	(set -o pipefail && firtool \
 		--format=fir \
 		--export-module-hierarchy \
 		--verify-each=true \
@@ -208,7 +199,7 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 		--annotation-file=$(FINAL_ANNO_FILE) \
 		--split-verilog \
 		-o $(GEN_COLLATERAL_DIR) \
-		$(FIRRTL_FILE)
+		$(FIRRTL_FILE) |& tee $(FIRTOOL_LOG_FILE))
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 	touch $(MFC_BB_MODS_FILELIST) # if there are no BB's then the file might not be generated, instead always generate it
 # DOC include end: FirrtlCompiler
