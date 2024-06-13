@@ -70,24 +70,29 @@ def process(in_fname, out_fname, inc_dirs=None):
         out_fname (str): output file name
         inc_dirs (list): list of directories to search for includes
     """
+    replaced_includes = set()
     with open(in_fname, "r", encoding="utf-8") as in_file:
         with open(out_fname, "w", encoding="utf-8") as out_file:
             # for each include found, search through all dirs
             # and replace if found, error if not
             for num, line in enumerate(in_file, 1):
                 match = re.match(r"^ *`include +\"(.*)\"", line)
-                if match and match.group(1) != "uvm_macros.svh":
-                    print_info(
-                        f"Replacing includes for {match.group(1)}"
-                        f" at line {num}"
-                    )
-                    # search for include and replace
-                    inc_file_name = find_include(match.group(1), inc_dirs)
-                    with open(inc_file_name, "r", encoding="utf-8") as inc_file:
-                        out_file.writelines(inc_file)
-
-                else:
+                if not match or match.group(1) == "uvm_macros.svh":
+                    # copy the line as is
                     out_file.write(line)
+                    continue
+                if match.group(1) in replaced_includes:
+                    print_info("Skipping duplicate include")
+                    continue
+
+                print_info(
+                    f"Replacing includes for {match.group(1)}" f" at line {num}"
+                )
+                # search for include and replace
+                inc_file_name = find_include(match.group(1), inc_dirs)
+                with open(inc_file_name, "r", encoding="utf-8") as inc_file:
+                    out_file.writelines(inc_file)
+                replaced_includes.add(match.group(1))
 
 
 def main():
