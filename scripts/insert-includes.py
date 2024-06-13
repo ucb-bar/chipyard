@@ -65,7 +65,6 @@ def process_helper(in_fname, out_f, inc_dirs, replaced_includes):
     """
     Helper function to DFS through include files and replace includes.
     """
-    print(f"DFS state: {replaced_includes}")
     include_regex = re.compile(r"^ *`include +\"(.*)\"")
     # slurp the input file.
     # this avoids having a bunch of fds open during recursion
