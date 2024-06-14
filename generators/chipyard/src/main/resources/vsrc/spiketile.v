@@ -19,6 +19,7 @@ import "DPI-C" function void spike_tile(input int hartid,
                                         input longint  ipc,
                                         input longint  cycle,
                                         output longint insns_retired,
+                                        input bit      has_rocc,
 
                                         input bit      debug,
                                         input bit      mtip,
@@ -102,7 +103,16 @@ import "DPI-C" function void spike_tile(input int hartid,
 
                                         output bit     tcm_d_valid,
                                         input bit      tcm_d_ready,
-                                        output longint tcm_d_data
+                                        output longint tcm_d_data,
+
+                                        input bit      rocc_request_ready,
+                                        output bit     rocc_request_valid,
+                                        output longint rocc_request_insn,
+                                        output longint rocc_request_rs1,
+                                        output longint rocc_request_rs2,
+                                        input bit      rocc_response_valid,
+                                        input longint  rocc_response_rd,
+                                        input longint  rocc_response_result
                                         );
 
 
@@ -128,6 +138,7 @@ module SpikeBlackBox #(
                                              input [63:0]  ipc,
                                              input [63:0]  cycle,
                                              output [63:0] insns_retired,
+                                             input        has_rocc,
 
                                              input         debug,
                                              input         mtip,
@@ -211,11 +222,24 @@ module SpikeBlackBox #(
 
                                              output        tcm_d_valid,
                                              input         tcm_d_ready,
-                                             output [63:0] tcm_d_data
+                                             output [63:0] tcm_d_data,
+
+
+                                             input         rocc_request_ready,
+                                             output        rocc_request_valid,
+                                             output [63:0] rocc_request_insn,
+                                             output [63:0] rocc_request_rs1,
+                                             output [63:0] rocc_request_rs2,
+
+                                             input         rocc_response_valid,
+                                             input [63:0]  rocc_response_rd,
+                                             input [63:0]  rocc_response_result
  );
 
    longint                                                 __insns_retired;
    reg [63:0]                                              __insns_retired_reg;
+
+   wire                                                     __has_rocc;
 
    wire                                                    __icache_a_ready;
    bit                                                     __icache_a_valid;
@@ -290,7 +314,19 @@ module SpikeBlackBox #(
    reg                                                     __tcm_d_valid_reg;
    reg [63:0]                                              __tcm_d_data_reg;
 
+   wire                                                    __rocc_request_ready;
+   bit                                                     __rocc_request_valid;
+   longint                                                 __rocc_request_insn;
+   longint                                                 __rocc_request_rs1;
+   longint                                                 __rocc_request_rs2;
+   reg                                                     __rocc_request_valid_reg;
+   reg [63:0]                                              __rocc_request_insn_reg;
+   reg [63:0]                                              __rocc_request_rs1_reg;
+   reg [63:0]                                              __rocc_request_rs2_reg;
 
+   wire                                                    __rocc_response_valid;
+   longint                                                 __rocc_response_rd;
+   longint                                                 __rocc_response_result;
 
    always @(posedge clock) begin
       if (reset) begin
@@ -359,6 +395,7 @@ module SpikeBlackBox #(
          __tcm_d_valid_reg <= 1'b0;
          __tcm_d_data = 64'h0;
          __tcm_d_data_reg <= 64'h0;
+
          spike_tile_reset(HARTID);
       end else begin
          spike_tile(HARTID, ISA, PMPREGIONS,
@@ -367,6 +404,7 @@ module SpikeBlackBox #(
                     ICACHE_SOURCEIDS, DCACHE_SOURCEIDS,
                     TCM_BASE, TCM_SIZE,
                     reset_vector, ipc, cycle, __insns_retired,
+                    __has_rocc,
                     debug, mtip, msip, meip, seip,
 
                     __icache_a_ready, __icache_a_valid, __icache_a_address, __icache_a_sourceid,
@@ -391,7 +429,10 @@ module SpikeBlackBox #(
                     mmio_d_valid, mmio_d_data,
 
                     tcm_a_valid, tcm_a_address, tcm_a_data, tcm_a_mask, tcm_a_opcode, tcm_a_size,
-                    __tcm_d_valid, __tcm_d_ready, __tcm_d_data
+                    __tcm_d_valid, __tcm_d_ready, __tcm_d_data,
+
+                    __rocc_request_ready, __rocc_request_valid, __rocc_request_insn, __rocc_request_rs1, __rocc_request_rs2, 
+                    __rocc_response_valid, rocc_response_rd, __rocc_response_result
                     );
          __insns_retired_reg <= __insns_retired;
 
@@ -429,6 +470,11 @@ module SpikeBlackBox #(
 
          __tcm_d_valid_reg <= __tcm_d_valid;
          __tcm_d_data_reg <= __tcm_d_data;
+
+         __rocc_request_valid_reg <= __rocc_request_valid;
+         __rocc_request_insn_reg <= __rocc_request_insn;
+         __rocc_request_rs1_reg <= __rocc_request_rs1;
+         __rocc_request_rs2_reg <= __rocc_request_rs2;
 
       end
    end // always @ (posedge clock)
@@ -472,5 +518,15 @@ module SpikeBlackBox #(
    assign tcm_d_valid = __tcm_d_valid_reg;
    assign tcm_d_data = __tcm_d_data_reg;
    assign __tcm_d_ready = tcm_d_ready;
+
+   assign __has_rocc = has_rocc;
+   assign rocc_request_valid = __rocc_request_valid_reg;
+   assign rocc_request_insn = __rocc_request_insn_reg;
+   assign rocc_request_rs1 = __rocc_request_rs1_reg;
+   assign rocc_request_rs2 = __rocc_request_rs2_reg;
+   assign __rocc_request_ready = rocc_request_ready;
+   assign __rocc_response_valid = rocc_response_valid;
+   assign __rocc_response_rd = rocc_response_rd;
+   assign __rocc_response_result = rocc_response_result;
 
 endmodule;
