@@ -151,3 +151,6 @@
 [submodule "generators/lpddr-generator"]
 	path = generators/lpddr-generator
 	url = https://github.com/kenhoberkeley/lpddr-generator.git
+[submodule "generators/tilelink-tester"]
+	path = tools/tilelink-tester
+	url = git@github.com:schwarz-em/tilelink-tester.git
