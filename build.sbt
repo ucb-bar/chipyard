@@ -95,6 +95,7 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
 
 lazy val chisel6Settings = Seq(
   libraryDependencies ++= Seq("org.chipsalliance" %% "chisel" % "6.0.0"),
+  libraryDependencies ++= Seq("edu.berkeley.cs" %% "firrtl2" % "6.0.0"),
   addCompilerPlugin("org.chipsalliance" % "chisel-plugin" % "6.0.0" cross CrossVersion.full)
 )
 lazy val chisel3Settings = Seq(

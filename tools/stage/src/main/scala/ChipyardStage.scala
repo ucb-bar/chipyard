@@ -55,17 +55,52 @@ class ChipyardStage extends ChiselStage {
         Dependency[firrtl.stage.phases.Checks]
       )
     )
-    pm.transform(annotations)
+    val anno_seq = pm.transform(annotations)
+
+    val run_firrtl2 = annotations.collectFirst({
+      case chipyard.stage.EnableFirrtl2PassAnnotation(e) => e
+    }).getOrElse("false")
+
+    if (run_firrtl2 == "true") {
+      Firrtl2Passes.run(anno_seq)
+    }
+
+    anno_seq
   }
-  // override val targets: Seq[PhaseDependency] = Seq(
-  //   Dependency[chipyard.stage.phases.Checks],
-  //   Dependency[chipyard.stage.phases.TransformAnnotations],
-  //   Dependency[chipyard.stage.phases.PreElaboration],
-  //   Dependency[ChipyardChiselStage],
-  //   Dependency[chipyard.stage.phases.GenerateFirrtlAnnos],
-  //   Dependency[chipyard.stage.phases.AddDefaultTests],
-  //   Dependency[chipyard.stage.phases.GenerateTestSuiteMakefrags],
-  //   Dependency[chipyard.stage.phases.GenerateArtefacts],
-  // )
+
   override final def invalidates(a: Phase): Boolean = false
+}
+
+class ExampleFirrtl2Pass extends firrtl2.Transform {
+  def onStmt(s: firrtl2.ir.Statement): firrtl2.ir.Statement = {
+    println(s"${s}")
+    s
+  }
+
+  def onModule(m: firrtl2.ir.DefModule): firrtl2.ir.DefModule = {
+    m.mapStmt(onStmt)
+  }
+
+  def printCircuit(c: firrtl2.ir.Circuit): Unit = {
+    c.modules.map(onModule)
+  }
+
+  override def execute(state: firrtl2.CircuitState): firrtl2.CircuitState = {
+    println("Executing firrtl2 pass")
+    val c = state.circuit
+    printCircuit(c)
+    state
+  }
+}
+
+object Firrtl2Passes {
+  def run(annotations: AnnotationSeq): Unit = {
+    println("Running Firrtl2 Passes")
+    val circuitState: firrtl2.CircuitState = ChiselBridge.annosToState(annotations)
+    val passes = Seq(
+      new ExampleFirrtl2Pass
+    )
+    passes.foldLeft(circuitState)((c, p) => p.execute(c))
+
+  }
 }

@@ -5,18 +5,22 @@ package chipyard.stage
 class ChipyardOptions private[stage] (
                                          val topModule:         Option[Class[_ <: Any]] = None,
                                          val configNames:       Option[Seq[String]] = None,
-                                         val outputBaseName:    Option[String] = None) {
+                                         val outputBaseName:    Option[String] = None,
+                                         val enableFirrtl2:     Option[String] = None,
+                                         ) {
 
   private[stage] def copy(
                            topModule:         Option[Class[_ <: Any]] = topModule,
                            configNames:       Option[Seq[String]] = configNames,
                            outputBaseName:    Option[String] = outputBaseName,
+                           enableFirrtl2:     Option[String] = enableFirrtl2,
                          ): ChipyardOptions = {
 
     new ChipyardOptions(
       topModule=topModule,
       configNames=configNames,
       outputBaseName=outputBaseName,
+      enableFirrtl2=enableFirrtl2,
     )
   }
 

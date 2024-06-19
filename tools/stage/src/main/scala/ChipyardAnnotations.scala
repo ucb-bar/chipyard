@@ -64,3 +64,15 @@ private[stage] object OutputBaseNameAnnotation extends HasShellOptions {
     )
   )
 }
+
+case class EnableFirrtl2PassAnnotation(enable: String) extends NoTargetAnnotation with ChipyardOption
+private[stage] object EnableFirrtl2PassAnnotation extends HasShellOptions {
+  override val options = Seq(
+    new ShellOption[String](
+      longOption = "enable-firrtl2-pass",
+      toAnnotationSeq = a => Seq(EnableFirrtl2PassAnnotation(a)),
+      helpText = "<option to run custom firrtl2 passes>",
+      shortOption = Some("efp")
+    )
+  )
+}

@@ -17,6 +17,7 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_SOURCES         = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
 "   ENABLE_YOSYS_FLOW         = if set, add compilation flags to enable the vlsi flow for yosys(tutorial flow)" \
+"   ENABLE_FIRRTL2_PASS       = if set, run custom FIRRTL2 passes" \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
 "   MFC_BASE_LOWERING_OPTIONS = override lowering options to pass to the MLIR FIRRTL compiler" \
 "   ASPECTS                   = comma separated list of Chisel aspect flows to run (e.x. chipyard.upf.ChipTopUPFAspect)"
@@ -26,6 +27,7 @@ EXTRA_SIM_CXXFLAGS   ?=
 EXTRA_SIM_LDFLAGS    ?=
 EXTRA_SIM_SOURCES    ?=
 EXTRA_SIM_REQS       ?=
+ENABLE_FIRRTL2_PASS  ?= "false"
 
 ifneq ($(ASPECTS), )
 	comma = ,
@@ -129,6 +131,7 @@ $(FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(GENERATOR_CLASSPATH) $(EXTRA
 		--target-dir $(build_dir) \
 		--name $(long_name) \
 		--top-module $(MODEL_PACKAGE).$(MODEL) \
+		--enable-firrtl2-pass $(ENABLE_FIRRTL2_PASS) \
 		--legacy-configs $(CONFIG_PACKAGE):$(CONFIG) \
 		$(ASPECT_ARGS) \
 		$(EXTRA_CHISEL_OPTIONS)) | tee $(CHISEL_LOG_FILE))
