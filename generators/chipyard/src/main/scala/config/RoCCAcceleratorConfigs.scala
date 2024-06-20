@@ -67,3 +67,9 @@ class ReRoCCManyGemminiConfig extends Config(
   new gemmini.LeanGemminiConfig ++                              // rerocc tile0 is gemmini
   new freechips.rocketchip.subsystem.WithNBigCores(4) ++        // 4 rocket cores
   new chipyard.config.AbstractConfig)
+
+class ZstdCompressorRocketConfig extends Config(
+  new compressacc.WithZstdCompressor ++
+  new chipyard.config.WithSystemBusWidth(256) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
