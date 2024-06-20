@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser(description="")
 parser.add_argument("--model-hier-json", type=str, required=True, help="Path to hierarchy JSON emitted by firtool. Must include DUT as a module.")
 parser.add_argument("--top-hier-json", type=str, required=True, help="Path to hierarchy JSON emitted by firtool. Must include DUT as a module.")
 parser.add_argument('--in-all-filelist', type=str, required=True, help='Path to input filelist that has all modules (relative paths).')
+parser.add_argument('--in-bb-filelist', type=str, required=True, help='Path to input blackbox filelist')
 parser.add_argument("--dut", type=str, required=True, help="Name of the DUT module.")
 parser.add_argument("--model", type=str, required=True, help="Name of the Model module.")
 parser.add_argument('--out-dut-filelist', type=str, required=True, help='Path to output filelist including all modules under the DUT.')
@@ -57,8 +58,8 @@ def get_modules_in_verilog_file(file):
         module_names.append(words[1].replace("(", "").replace(")", "").replace(";", ""))
   return module_names
 
-def get_modules_in_filelist(verilog_module_filename, cc_filelist):
-  with open(args.in_all_filelist) as fl:
+def get_modules_in_filelist(filelist, verilog_module_filename, cc_filelist):
+  with open(filelist) as fl:
     lines = fl.readlines()
     for line in lines:
       path = line.strip()
@@ -186,7 +187,8 @@ def uniquify_modules_under_model(modules_under_model, common_modules, verilog_mo
 def main():
   verilog_module_filename = dict()
   cc_filelist = list()
-  get_modules_in_filelist(verilog_module_filename, cc_filelist)
+  get_modules_in_filelist(args.in_all_filelist, verilog_module_filename, cc_filelist)
+  get_modules_in_filelist(args.in_bb_filelist , verilog_module_filename, cc_filelist)
 
   modules_under_model = get_modules_under_hier(args.model_hier_json, args.dut)
   modules_under_top   = get_modules_under_hier(args.top_hier_json)

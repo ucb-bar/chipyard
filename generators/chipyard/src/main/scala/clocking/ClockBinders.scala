@@ -72,7 +72,7 @@ class WithPLLSelectorDividerClockGenerator(enable: Boolean = true) extends Overr
     }
   }
 })
- 
+
 // This passes all clocks through to the TestHarness
 class WithPassthroughClockGenerator extends OverrideLazyIOBinder({
   (system: HasChipyardPRCI) => {
@@ -98,6 +98,32 @@ class WithPassthroughClockGenerator extends OverrideLazyIOBinder({
         ClockPort(() => clock_io, freq)
       }.toSeq
       ((clock_ios :+ ResetPort(() => reset_io)), Nil)
+    }
+  }
+})
+
+// Broadcasts a single clock IO to all clock domains. Ignores all requested frequencies
+class WithSingleClockBroadcastClockGenerator(freqMHz: Int = 100) extends OverrideLazyIOBinder({
+  (system: HasChipyardPRCI) => {
+    implicit val p = GetSystemParameters(system)
+
+    val clockGroupsAggregator = LazyModule(new ClockGroupAggregator("single_clock"))
+    val clockGroupsSourceNode = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
+    system.chiptopClockGroupsNode :*= clockGroupsAggregator.node := clockGroupsSourceNode
+
+    InModuleBody {
+      val clock_wire = Wire(Input(Clock()))
+      val reset_wire = Wire(Input(AsyncReset()))
+      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
+      val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(reset_wire, "reset", p(IOCellKey))
+
+      clockGroupsSourceNode.out.foreach { case (bundle, edge) =>
+        bundle.member.data.foreach { b =>
+          b.clock := clock_io
+          b.reset := reset_io
+        }
+      }
+      (Seq(ClockPort(() => clock_io, freqMHz), ResetPort(() => reset_io)), clockIOCell ++ resetIOCell)
     }
   }
 })

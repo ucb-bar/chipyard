@@ -1,7 +1,7 @@
 # Override configurations in ../example-sky130.yml and example-designs
 
 # Specify clock signals
-# Rocket/RocketTile names clock signal "clock" instead of "clock_uncore_clock"
+# Rocket/RocketTile names clock signal "clock" instead of "clock_uncore"
 vlsi.inputs.clocks: [
   {name: "clock", period: "30ns", uncertainty: "3ns"}
 ]
@@ -22,7 +22,7 @@ vlsi.inputs.placement_constraints:
       bottom: 10
 
   # Place SRAM memory instances
-    # data cache
+  # data cache
   - path: "RocketTile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_0"
     type: hardmacro
     x: 50
@@ -47,3 +47,4 @@ vlsi.inputs.placement_constraints:
     x: 50
     y: 2100
     orientation: r90
+

@@ -1,7 +1,7 @@
 # Override configurations in ../example-sky130.yml and example-designs
 
 # Specify clock signals
-# Rocket/RocketTile names clock signal "clock" instead of "clock_uncore_clock"
+# Rocket/RocketTile names clock signal "clock" instead of "clock_uncore"
 vlsi.inputs.clocks: [
   {name: "clock", period: "5ns", uncertainty: "1ns"}
 ]

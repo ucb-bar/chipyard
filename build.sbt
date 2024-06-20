@@ -206,7 +206,8 @@ lazy val chipyard = (project in file("generators/chipyard"))
   .dependsOn(testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
     dsptools, rocket_dsp_utils,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
-    constellation, mempress, barf, shuttle, caliptra_aes, firrtl2_bridge)
+    constellation, mempress, barf, shuttle, caliptra_aes, rerocc,
+    firrtl2_bridge)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(
     libraryDependencies ++= Seq(
@@ -283,6 +284,11 @@ lazy val nvdla = (project in file("generators/nvdla"))
 
 lazy val caliptra_aes = (project in file("generators/caliptra-aes-acc"))
   .dependsOn(rocketchip, rocc_acc_utils, testchipip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+lazy val rerocc = (project in file("generators/rerocc"))
+  .dependsOn(rocketchip, constellation, boom)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -364,6 +370,6 @@ lazy val fpga_shells = (project in file("./fpga/fpga-shells"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val fpga_platforms = (project in file("./fpga"))
+lazy val chipyard_fpga = (project in file("./fpga"))
   .dependsOn(chipyard, fpga_shells)
   .settings(commonSettings)
