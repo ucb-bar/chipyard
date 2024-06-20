@@ -123,7 +123,7 @@ $(TAPEOUT_CLASSPATH) &: $(TAPEOUT_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(TAPEO
 # verilog generation pipeline
 #########################################################################################
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-$(FIRRTL_FILE) $(SFC_FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(CHIPYARD_CLASSPATH_TARGETS) $(EXTRA_GENERATOR_REQS)
+$(FIRRTL_FILE) $(SFC_FIRRTL_FILE) $(ANNO_FILE) $(CHISEL_LOG_FILE) &: $(GENERATOR_CLASSPATH) $(EXTRA_GENERATOR_REQS)
 	mkdir -p $(build_dir)
 	(set -o pipefail && $(call run_jar_scala_main,$(GENERATOR_CLASSPATH),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
