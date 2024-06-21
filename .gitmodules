@@ -147,4 +147,4 @@
 	url = https://github.com/ucb-bar/rerocc.git
 [submodule "generators/compress-acc"]
 	path = generators/compress-acc
-	url = git@github.com:ucb-bar/compress-acc.git
+	url = https://github.com:ucb-bar/compress-acc.git
