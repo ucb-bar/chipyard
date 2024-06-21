@@ -89,6 +89,10 @@ case $1 in
         (cd $LOCAL_CHIPYARD_DIR/generators/mempress/software/src && make)
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/mempress/software/src/mempress-rocc.riscv
         ;;
+    chipyard-compressacc)
+        (cd $LOCAL_CHIPYARD_DIR/generators/compress-acc/software-zstd/compress && ./build-hcb-single-file.sh)
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/compress-acc/software-zstd/compress/009987_cl0_ws12.riscv
+        ;;
     chipyard-manymmioaccels)
 	make -C $LOCAL_CHIPYARD_DIR/tests
 
