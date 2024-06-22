@@ -70,6 +70,5 @@ class ReRoCCManyGemminiConfig extends Config(
 
 class ZstdCompressorRocketConfig extends Config(
   new compressacc.WithZstdCompressor ++
-  new chipyard.config.WithSystemBusWidth(256) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
