@@ -64,17 +64,37 @@ class EinsteinRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class SmallEinsteinRocketConfig extends Config(
-  new einstein.LargeDenseEinsteinConfig(size=4) ++
+  new einstein.LargeDenseEinsteinConfig(size=4, dataflow="is") ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class MidEinsteinRocketConfig extends Config(
-  new einstein.LargeDenseEinsteinConfig(size=8) ++
+  new einstein.LargeDenseEinsteinConfig(size=8, dataflow="is") ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class LargeEinsteinRocketConfig extends Config(
-  new einstein.LargeDenseEinsteinConfig(size=16) ++
+  new einstein.LargeDenseEinsteinConfig(size=16, dataflow="is") ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class WSEinsteinRocketConfig extends Config(
+  new einstein.DenseEinsteinConfig("ws") ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class SmallWSEinsteinRocketConfig extends Config(
+  new einstein.LargeDenseEinsteinConfig(size=4, dataflow="ws") ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class MidWSEinsteinRocketConfig extends Config(
+  new einstein.LargeDenseEinsteinConfig(size=8, dataflow="ws") ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class LargeWSEinsteinRocketConfig extends Config(
+  new einstein.LargeDenseEinsteinConfig(size=16, dataflow="ws") ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
@@ -200,6 +220,16 @@ class ExpensiveSpArchMergerEinsteinRocketConfig extends Config(
 
 class CheapSpArchMergerEinsteinRocketConfig extends Config(
   new einstein.SpArchMergerEinsteinConfig(isCheap = true, throughput = 4, nLevels = 2, check_result = true) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class ExpensiveDummySpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = false, throughput = 4, nLevels = 2, check_result = false) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class CheapDummySpArchMergerEinsteinRocketConfig extends Config(
+  new einstein.SpArchMergerEinsteinConfig(isCheap = true, throughput = 4, nLevels = 2, check_result = false) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
