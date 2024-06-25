@@ -12,7 +12,8 @@ import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.{BootROMLocated, BootROMParams}
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
-import freechips.rocketchip.diplomacy.{LazyModule, AsynchronousCrossing}
+import freechips.rocketchip.diplomacy.{LazyModule}
+import freechips.rocketchip.prci.{AsynchronousCrossing}
 import testchipip.iceblk.{BlockDeviceKey, BlockDeviceConfig}
 import testchipip.cosim.{TracePortKey, TracePortParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
