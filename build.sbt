@@ -98,8 +98,8 @@ lazy val chisel6Settings = Seq(
   addCompilerPlugin("org.chipsalliance" % "chisel-plugin" % "6.0.0" cross CrossVersion.full)
 )
 lazy val chisel3Settings = Seq(
-  libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % "3.6.0"),
-  addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % "3.6.0" cross CrossVersion.full)
+  libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % "3.6.1"),
+  addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % "3.6.1" cross CrossVersion.full)
 )
 
 lazy val chiselSettings = (if (chisel6) chisel6Settings else chisel3Settings) ++ Seq(
