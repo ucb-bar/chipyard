@@ -7,8 +7,6 @@ import testchipip.soc.{OBUS}
 
 // A simple config demonstrating how to set up a basic chip in Chipyard
 class ChipLikeRocketConfig extends Config(
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-
   //==================================
   // Set up TestHarness
   //==================================
